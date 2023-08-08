@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { forwardRef, useState } from 'react';
 
 import { CarouselInput, CarouselSlide } from '@strapi/design-system';
 import PropTypes from 'prop-types';
@@ -12,111 +12,120 @@ import { CarouselAsset } from './CarouselAsset';
 import { CarouselAssetActions } from './CarouselAssetActions';
 import { EmptyStateAsset } from './EmptyStateAsset';
 
-export const CarouselAssets = ({
-  assets,
-  disabled,
-  error,
-  hint,
-  label,
-  labelAction,
-  onAddAsset,
-  onDeleteAsset,
-  onDeleteAssetFromMediaLibrary,
-  onDropAsset,
-  onEditAsset,
-  onNext,
-  onPrevious,
-  required,
-  selectedAssetIndex,
-  trackedLocation,
-}) => {
-  const { formatMessage } = useIntl();
-  const [isEditingAsset, setIsEditingAsset] = useState(false);
+export const CarouselAssets = forwardRef(
+  (
+    {
+      assets,
+      disabled,
+      error,
+      hint,
+      label,
+      labelAction,
+      onAddAsset,
+      onDeleteAsset,
+      onDeleteAssetFromMediaLibrary,
+      onDropAsset,
+      onEditAsset,
+      onNext,
+      onPrevious,
+      required,
+      selectedAssetIndex,
+      trackedLocation,
+    },
+    forwardedRef
+  ) => {
+    const { formatMessage } = useIntl();
+    const [isEditingAsset, setIsEditingAsset] = useState(false);
 
-  const currentAsset = assets[selectedAssetIndex];
+    const currentAsset = assets[selectedAssetIndex];
 
-  return (
-    <>
-      <CarouselInput
-        label={label}
-        labelAction={labelAction}
-        secondaryLabel={currentAsset?.name}
-        selectedSlide={selectedAssetIndex}
-        previousLabel={formatMessage({
-          id: getTrad('mediaLibraryInput.actions.previousSlide'),
-          defaultMessage: 'Previous slide',
-        })}
-        nextLabel={formatMessage({
-          id: getTrad('mediaLibraryInput.actions.nextSlide'),
-          defaultMessage: 'Next slide',
-        })}
-        onNext={onNext}
-        onPrevious={onPrevious}
-        hint={hint}
-        error={error}
-        required={required}
-        actions={
-          currentAsset ? (
-            <CarouselAssetActions
-              asset={currentAsset}
-              onDeleteAsset={disabled ? undefined : onDeleteAsset}
-              onAddAsset={disabled ? undefined : onAddAsset}
-              onEditAsset={onEditAsset ? () => setIsEditingAsset(true) : undefined}
-            />
-          ) : undefined
-        }
-      >
-        {assets.length === 0 ? (
-          <CarouselSlide
-            label={formatMessage(
-              { id: getTrad('mediaLibraryInput.slideCount'), defaultMessage: '{n} of {m} slides' },
-              { n: 1, m: 1 }
-            )}
-          >
-            <EmptyStateAsset disabled={disabled} onClick={onAddAsset} onDropAsset={onDropAsset} />
-          </CarouselSlide>
-        ) : (
-          assets.map((asset, index) => (
+    return (
+      <>
+        <CarouselInput
+          ref={forwardedRef}
+          label={label}
+          labelAction={labelAction}
+          secondaryLabel={currentAsset?.name}
+          selectedSlide={selectedAssetIndex}
+          previousLabel={formatMessage({
+            id: getTrad('mediaLibraryInput.actions.previousSlide'),
+            defaultMessage: 'Previous slide',
+          })}
+          nextLabel={formatMessage({
+            id: getTrad('mediaLibraryInput.actions.nextSlide'),
+            defaultMessage: 'Next slide',
+          })}
+          onNext={onNext}
+          onPrevious={onPrevious}
+          hint={hint}
+          error={error}
+          required={required}
+          actions={
+            currentAsset ? (
+              <CarouselAssetActions
+                asset={currentAsset}
+                onDeleteAsset={disabled ? undefined : onDeleteAsset}
+                onAddAsset={disabled ? undefined : onAddAsset}
+                onEditAsset={onEditAsset ? () => setIsEditingAsset(true) : undefined}
+              />
+            ) : undefined
+          }
+        >
+          {assets.length === 0 ? (
             <CarouselSlide
-              key={asset.id}
               label={formatMessage(
                 {
                   id: getTrad('mediaLibraryInput.slideCount'),
                   defaultMessage: '{n} of {m} slides',
                 },
-                { n: index + 1, m: assets.length }
+                { n: 1, m: 1 }
               )}
             >
-              <CarouselAsset asset={asset} />
+              <EmptyStateAsset disabled={disabled} onClick={onAddAsset} onDropAsset={onDropAsset} />
             </CarouselSlide>
-          ))
+          ) : (
+            assets.map((asset, index) => (
+              <CarouselSlide
+                key={asset.id}
+                label={formatMessage(
+                  {
+                    id: getTrad('mediaLibraryInput.slideCount'),
+                    defaultMessage: '{n} of {m} slides',
+                  },
+                  { n: index + 1, m: assets.length }
+                )}
+              >
+                <CarouselAsset asset={asset} />
+              </CarouselSlide>
+            ))
+          )}
+        </CarouselInput>
+
+        {isEditingAsset && (
+          <EditAssetDialog
+            onClose={(editedAsset) => {
+              setIsEditingAsset(false);
+
+              // The asset has been deleted
+              if (editedAsset === null) {
+                onDeleteAssetFromMediaLibrary();
+              }
+
+              if (editedAsset) {
+                onEditAsset(editedAsset);
+              }
+            }}
+            asset={currentAsset}
+            canUpdate
+            canCopyLink
+            canDownload
+            trackedLocation={trackedLocation}
+          />
         )}
-      </CarouselInput>
-
-      {isEditingAsset && (
-        <EditAssetDialog
-          onClose={(editedAsset) => {
-            setIsEditingAsset(false);
-
-            // The asset has been deleted
-            if (editedAsset === null) {
-              onDeleteAssetFromMediaLibrary();
-            }
-
-            if (editedAsset) {
-              onEditAsset(editedAsset);
-            }
-          }}
-          asset={currentAsset}
-          canUpdate
-          canCopyLink
-          canDownload
-          trackedLocation={trackedLocation}
-        />
-      )}
-    </>
-  );
-};
+      </>
+    );
+  }
+);
 
 CarouselAssets.defaultProps = {
   disabled: false,
