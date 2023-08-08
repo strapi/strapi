@@ -251,9 +251,7 @@ export function ReviewWorkflowsCreateView() {
   ]);
 
   React.useEffect(() => {
-    const filteredRoles = roles.filter((role) => role.code !== 'strapi-super-admin');
-
-    if (!isLoading && filteredRoles.length === 0) {
+    if (!isLoading && roles.length === 0) {
       toggleNotification({
         blockTransition: true,
         type: 'warning',

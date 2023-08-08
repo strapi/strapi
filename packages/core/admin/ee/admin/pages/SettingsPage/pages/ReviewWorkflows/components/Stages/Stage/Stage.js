@@ -359,16 +359,15 @@ export function Stage({
                     })}
                     onChange={(values) => {
                       // Because the select components expects strings for values, but
-                      // the yup schema validates numbers are sent to the API, we have
-                      // to coerce the string value back to a number
-                      const nextValues = values.map((value) => ({
+                      // the yup schema validates we are sending full permission objects to the API,
+                      // we must coerce the string value back to an object
+                      const permissions = values.map((value) => ({
                         role: parseInt(value, 10),
                         action: 'admin::review-workflows.stage.transition',
                       }));
 
-                      permissionsHelper.setValue(nextValues);
-
-                      dispatch(updateStage(id, { permissions: nextValues }));
+                      permissionsHelper.setValue(permissions);
+                      dispatch(updateStage(id, { permissions }));
                     }}
                     placeholder={formatMessage({
                       id: 'Settings.review-workflows.stage.permissions.placeholder',
@@ -381,11 +380,11 @@ export function Stage({
                   >
                     {[
                       {
-                        value: null,
                         label: formatMessage({
                           id: 'Settings.review-workflows.stage.permissions.allRoles.label',
                           defaultMessage: 'All roles',
                         }),
+
                         children: filteredRoles.map((role) => ({
                           value: `${role.id}`,
                           label: role.name,
