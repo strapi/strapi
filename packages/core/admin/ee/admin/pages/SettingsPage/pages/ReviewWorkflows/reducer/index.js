@@ -82,7 +82,7 @@ export function reducer(state = initialState, action) {
       }
 
       case ACTION_RESET_WORKFLOW: {
-        draft.clientState.currentWorkflow.data = initialState.clientState.currentWorkflow.data;
+        draft.clientState = initialState.clientState;
         draft.serverState = initialState.serverState;
         break;
       }
