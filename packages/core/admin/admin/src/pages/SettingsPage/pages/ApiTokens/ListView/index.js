@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-import { Button, ContentLayout, HeaderLayout, Main } from '@strapi/design-system';
+import { ContentLayout, HeaderLayout, Main } from '@strapi/design-system';
 import {
   LinkButton,
   NoContent,
@@ -114,9 +114,10 @@ const ApiTokenListView = () => {
     }
   );
 
-  const shouldDisplayDynamicTable = canRead && apiTokens;
-  const shouldDisplayNoContent = canRead && !apiTokens && !canCreate;
-  const shouldDisplayNoContentWithCreationButton = canRead && !apiTokens && canCreate;
+  const hasApiTokens = apiTokens && apiTokens.length > 0;
+  const shouldDisplayDynamicTable = canRead && hasApiTokens;
+  const shouldDisplayNoContent = canRead && !hasApiTokens && !canCreate;
+  const shouldDisplayNoContentWithCreationButton = canRead && !hasApiTokens && canCreate;
 
   return (
     <Main aria-busy={isLoading}>
@@ -169,12 +170,12 @@ const ApiTokenListView = () => {
               defaultMessage: 'Add your first API Token',
             }}
             action={
-              <Button variant="secondary" startIcon={<Plus />}>
+              <LinkButton variant="secondary" startIcon={<Plus />} to="/settings/api-tokens/create">
                 {formatMessage({
                   id: 'Settings.apiTokens.addNewToken',
                   defaultMessage: 'Add new API Token',
                 })}
-              </Button>
+              </LinkButton>
             }
           />
         )}
