@@ -12,6 +12,7 @@ const {
   WORKFLOW_MODEL_UID,
   ENTITY_STAGE_ATTRIBUTE,
 } = require('../../../../packages/core/admin/ee/server/constants/workflows');
+const { create } = require('lodash');
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -33,6 +34,18 @@ const model = {
   },
 };
 
+const baseWorkflow = {
+  contentTypes: [productUID],
+  stages: [{ name: 'Stage 1' }, { name: 'Stage 2' }],
+};
+
+const getStageTransitionPermissions = (roleIds) => {
+  return roleIds.map((roleId) => ({
+    action: 'admin::review-workflows.stage.transition',
+    role: roleId,
+  }));
+};
+
 describeOnCondition(edition === 'EE')('Review workflows', () => {
   const builder = createTestBuilder();
 
@@ -46,7 +59,12 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     const req = await rq.post('/admin/review-workflows/workflows?populate=*', {
       body: { data: { name, ...data } },
     });
-    return req.body.data;
+
+    const status = req.statusCode;
+    const error = req.body.error;
+    const workflow = req.body.data;
+
+    return { workflow, status, error };
   };
 
   const updateWorkflow = async (id, data) => {
@@ -54,16 +72,21 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       body: { data },
     });
 
-    return req.body.data;
+    const status = req.statusCode;
+    const error = req.body.error;
+    const workflow = req.body.data;
+
+    return { workflow, status, error };
   };
 
   const deleteWorkflow = async (id) => {
-    return rq.delete(`/admin/review-workflows/workflows/${id}`);
-  };
+    const req = await rq.delete(`/admin/review-workflows/workflows/${id}`);
 
-  const getWorkflow = async (id) => {
-    const { body } = await rq.get(`/admin/review-workflows/workflows/${id}?populate=*`);
-    return body.data;
+    const status = req.statusCode;
+    const error = req.body.error;
+    const workflow = req.body.data;
+
+    return { workflow, status, error };
   };
 
   beforeAll(async () => {
@@ -72,11 +95,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    workflow = await createWorkflow({
-      name: 'test-workflow',
-      contentTypes: [productUID],
-      stages: [{ name: 'Stage 1' }, { name: 'Stage 2' }],
-    });
+    workflow = await createWorkflow(baseWorkflow);
 
     // Get default roles
     const { body } = await rq.get('/admin/roles');
@@ -90,27 +109,147 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
   describe('Assign workflow permissions', () => {
     // Create stage with permissions
-    test('Update stage with new permissions', async () => {
-      workflow = await updateWorkflow(workflow.id, {
+    test('Can assign new stage permissions', async () => {
+      const { workflow } = await createWorkflow({
+        ...baseWorkflow,
+        stages: [
+          {
+            ...baseWorkflow.stages[0],
+            permissions: getStageTransitionPermissions([roles[0].id, roles[1].id]),
+          },
+          baseWorkflow.stages[1],
+        ],
+      });
+
+      expect(workflow.stages[0].permissions).toHaveLength(2);
+    });
+
+    // Can unassign a role
+    test('Can remove stage permissions', async () => {
+      // Create workflow with permissions to transition to role 0 and 1
+      const { workflow } = await createWorkflow({
+        ...baseWorkflow,
+        stages: [
+          {
+            ...baseWorkflow.stages[0],
+            permissions: getStageTransitionPermissions([roles[0].id, roles[1].id]),
+          },
+          baseWorkflow.stages[1],
+        ],
+      });
+
+      // Update workflow to remove role 1
+      const { workflow: updatedWorkflow } = await updateWorkflow(workflow.id, {
         stages: [
           {
             ...workflow.stages[0],
-            permissions: [
-              {
-                action: 'admin::review-workflows.stage.transition',
-                role: roles[0].id,
-              },
-              {
-                action: 'admin::review-workflows.stage.transition',
-                role: roles[1].id,
-              },
-            ],
+            permissions: getStageTransitionPermissions([roles[0].id]),
           },
           workflow.stages[1],
         ],
       });
 
-      expect(workflow.stages[0].permissions).toHaveLength(2);
+      // Validate that permissions have been removed from database
+      const deletedPermission = await strapi.query('admin::permission').findOne({
+        where: {
+          id: workflow.stages[0].permissions[1].id,
+        },
+      });
+
+      expect(updatedWorkflow.stages[0].permissions).toHaveLength(1);
+      expect(deletedPermission).toBeNull();
+    });
+
+    test('Deleting stage removes permissions', async () => {
+      const { workflow } = await createWorkflow({
+        ...baseWorkflow,
+        stages: [
+          {
+            ...baseWorkflow.stages[0],
+            permissions: getStageTransitionPermissions([roles[0].id, roles[1].id]),
+          },
+          baseWorkflow.stages[1],
+        ],
+      });
+
+      const { workflow: updatedWorkflow } = await updateWorkflow(workflow.id, {
+        ...workflow,
+        stages: [workflow.stages[1]],
+      });
+
+      // Deleted stage permissions should be removed from database
+      const permissions = await strapi.query('admin::permission').findMany({
+        where: {
+          id: { $in: workflow.stages[0].permissions.map((p) => p.id) },
+        },
+      });
+
+      expect(permissions).toHaveLength(0);
+    });
+
+    test('Deleting workflow removes permissions', async () => {
+      const { workflow } = await createWorkflow({
+        ...baseWorkflow,
+        stages: [
+          {
+            ...baseWorkflow.stages[0],
+            permissions: getStageTransitionPermissions([roles[0].id, roles[1].id]),
+          },
+        ],
+      });
+
+      await deleteWorkflow(workflow.id);
+
+      // Deleted workflow permissions should be removed from database
+      const permissions = await strapi.query('admin::permission').findMany({
+        where: {
+          id: { $in: workflow.stages[0].permissions.map((p) => p.id) },
+        },
+      });
+
+      expect(permissions).toHaveLength(0);
+    });
+
+    test('Fails when using invalid action', async () => {
+      const { status, error } = await createWorkflow({
+        ...baseWorkflow,
+        stages: [
+          {
+            ...baseWorkflow.stages[0],
+            permissions: [{ action: 'invalid-action', role: roles[0].id }],
+          },
+        ],
+      });
+
+      expect(status).toBe(400);
+      expect(error.name).toBe('ValidationError');
+    });
+
+    // TODO
+    test.skip('Can send permissions as undefined to apply partial update', async () => {
+      // Creates workflow with permissions
+      const { workflow } = await createWorkflow({
+        ...baseWorkflow,
+        stages: [
+          {
+            ...baseWorkflow.stages[0],
+            permissions: [{ action: 'invalid-action', role: roles[0].id }],
+          },
+        ],
+      });
+
+      const { workflow: updatedWorkflow } = await updateWorkflow(workflow.id, {
+        ...workflow,
+        stages: [
+          {
+            ...workflow.stages[0],
+            permissions: undefined,
+          },
+        ],
+      });
+
+      // Permissions should be kept
+      expect(updatedWorkflow.stages[0].permissions).toHaveLength(1);
     });
   });
 });

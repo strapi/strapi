@@ -82,7 +82,6 @@ module.exports = ({ strapi }) => {
       const stageId = destStage.id;
 
       // TODO: Do not delete permissions if they are not changed
-      // Delete old permissions
       await this.deleteStagePermissions([srcStage]);
 
       if (destStage.permissions) {
@@ -125,7 +124,7 @@ module.exports = ({ strapi }) => {
 
     async deleteStagePermissions(stages) {
       // TODO: Find another way to do this for when we use the "to" parameter.
-      const permissions = stages.map((s) => s.permissions).flat();
+      const permissions = stages.map((s) => s.permissions || []).flat();
       await stagePermissionsService.unregister(permissions || []);
     },
 
