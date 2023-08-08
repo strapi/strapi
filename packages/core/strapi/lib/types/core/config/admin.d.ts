@@ -1,3 +1,5 @@
+import type { ConfigFunction } from './shared.d.ts';
+
 export type ApiTokenProp = {
   salt: string;
 };
@@ -35,7 +37,7 @@ export type TransferProp = {
   token: TransferTokenProp;
 };
 
-export type Admin = {
+export type AdminConfiguration = {
   // required
   apiToken: ApiTokenProp;
   transfer: TransferProp;
@@ -46,3 +48,6 @@ export type Admin = {
   forgotPassword?: ForgotPasswordProp;
   rateLimit?: RateLimitProp;
 };
+
+// TODO: can this just be an object rather than a function?
+export type Admin = ConfigFunction<AdminConfiguration>;

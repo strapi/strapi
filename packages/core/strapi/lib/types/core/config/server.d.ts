@@ -1,3 +1,5 @@
+import type { ConfigFunction } from './shared.d.ts';
+
 export type AppProp = {
   keys: string[];
 };
@@ -15,7 +17,7 @@ export type WebhooksProp = {
   populateRelations?: boolean;
 };
 
-export type Server = {
+export type ServerConfiguration = {
   // required
   host: string;
   post: number;
@@ -31,3 +33,6 @@ export type Server = {
   dirs?: DirsProp;
   webhooks?: WebhooksProp;
 };
+
+// TODO: can this just be an object rather than a function?
+export type Server = ConfigFunction<ServerConfiguration>;
