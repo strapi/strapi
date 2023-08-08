@@ -1,6 +1,6 @@
 'use strict';
 
-const { isNil, isNull } = require('lodash/fp');
+const { isNil } = require('lodash/fp');
 const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 const { WORKFLOW_UPDATE_STAGE } = require('../../constants/webhookEvents');
 const { getService } = require('../../utils');
@@ -56,7 +56,7 @@ const decorator = (service) => ({
   async update(uid, entityId, opts = {}) {
     // Prevents the stage from being set to null
     const data = { ...opts.data };
-    if (isNull(data[ENTITY_STAGE_ATTRIBUTE])) {
+    if (isNil(data[ENTITY_STAGE_ATTRIBUTE])) {
       delete data[ENTITY_STAGE_ATTRIBUTE];
       return service.update.call(this, uid, entityId, { ...opts, data });
     }
@@ -66,7 +66,8 @@ const decorator = (service) => ({
     const updatedEntity = await service.update.call(this, uid, entityId, { ...opts, data });
     const updatedStage = updatedEntity[ENTITY_STAGE_ATTRIBUTE];
 
-    if (previousStage?.id && updatedStage?.id && previousStage.id !== updatedStage.id) {
+    // Stage might be null if field is not populated
+    if (updatedStage && previousStage?.id && previousStage.id !== updatedStage.id) {
       const model = strapi.getModel(uid);
 
       strapi.eventHub.emit(WORKFLOW_UPDATE_STAGE, {

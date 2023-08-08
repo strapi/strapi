@@ -13,4 +13,5 @@ module.exports = {
   'review-workflows-validation': require('./review-workflows/validation'),
   'review-workflows-decorator': require('./review-workflows/entity-service-decorator'),
   'review-workflows-metrics': require('./review-workflows/metrics'),
+  'review-workflows-weekly-metrics': require('./review-workflows/metrics/weekly-metrics'),
 };

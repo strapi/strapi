@@ -13,7 +13,7 @@
     "@strapi/strapi": "latest",
     "@strapi/plugin-users-permissions": "latest",
     "@strapi/plugin-i18n": "latest",
-    "better-sqlite3": "7.4.6"
+    "better-sqlite3": "8.5.0"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",

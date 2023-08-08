@@ -20,6 +20,7 @@ const processFilters = ({ strapi }, filters = {}) => {
 module.exports = ({ strapi }) => {
   const workflowsContentTypes = workflowsContentTypesFactory({ strapi });
   const workflowsValidationService = getService('review-workflows-validation', { strapi });
+  const metrics = getService('review-workflows-metrics', { strapi });
 
   return {
     /**
@@ -70,6 +71,8 @@ module.exports = ({ strapi }) => {
           });
         }
 
+        metrics.sendDidCreateWorkflow();
+
         // Create Workflow
         return strapi.entityService.create(WORKFLOW_MODEL_UID, createOpts);
       });
@@ -112,6 +115,8 @@ module.exports = ({ strapi }) => {
             stageId: updatedStageIds ? updatedStageIds[0] : workflow.stages[0].id,
           });
         }
+
+        metrics.sendDidEditWorkflow();
 
         // Update Workflow
         return strapi.entityService.update(WORKFLOW_MODEL_UID, workflow.id, updateOpts);

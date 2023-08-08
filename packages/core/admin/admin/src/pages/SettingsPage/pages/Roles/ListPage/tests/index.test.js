@@ -7,18 +7,17 @@
 import React from 'react';
 
 import { fixtures } from '@strapi/admin-test-utils';
-import { darkTheme, lightTheme } from '@strapi/design-system';
-import { TrackingProvider, useRBAC } from '@strapi/helper-plugin';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { useRBAC } from '@strapi/helper-plugin';
 import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
 import { createStore } from 'redux';
 
-import Theme from '../../../../../../components/Theme';
-import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
-import { useRolesList } from '../../../../../../hooks';
+import { useAdminRoles } from '../../../../../../hooks/useAdminRoles';
 import ListPage from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -30,42 +29,43 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-jest.mock('../../../../../../hooks', () => ({
-  ...jest.requireActual('../../../../../../hooks'),
-  useRolesList: jest.fn(),
-}));
+jest.mock('../../../../../../hooks/useAdminRoles');
 
 const setup = (props) =>
   render(<ListPage {...props} />, {
     wrapper({ children }) {
       const history = createMemoryHistory();
+      const client = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+          },
+        },
+      });
 
       return (
-        <Provider
-          store={createStore((state) => state, {
-            admin_app: { permissions: fixtures.permissions.app },
-          })}
-        >
-          <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
-            <TrackingProvider>
-              <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-                <Theme>
-                  <Router history={history}>{children}</Router>
-                </Theme>
-              </ThemeToggleProvider>
-            </TrackingProvider>
-          </IntlProvider>
-        </Provider>
+        <QueryClientProvider client={client}>
+          <Provider
+            store={createStore((state) => state, {
+              admin_app: { permissions: fixtures.permissions.app },
+            })}
+          >
+            <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
+              <ThemeProvider theme={lightTheme}>
+                <Router history={history}>{children}</Router>
+              </ThemeProvider>
+            </IntlProvider>
+          </Provider>
+        </QueryClientProvider>
       );
     },
   });
 
 describe('<ListPage />', () => {
   it('renders and matches the snapshot', () => {
-    useRolesList.mockImplementationOnce(() => ({
+    useAdminRoles.mockImplementationOnce(() => ({
       roles: [],
       isLoading: true,
-      getData: jest.fn(),
     }));
 
     const { getByText } = setup();
@@ -74,7 +74,7 @@ describe('<ListPage />', () => {
   });
 
   it('should show a list of roles', () => {
-    useRolesList.mockImplementationOnce(() => ({
+    useAdminRoles.mockImplementationOnce(() => ({
       roles: [
         {
           code: 'strapi-super-admin',
@@ -87,7 +87,6 @@ describe('<ListPage />', () => {
         },
       ],
       isLoading: false,
-      getData: jest.fn(),
     }));
 
     useRBAC.mockImplementationOnce(() => ({
