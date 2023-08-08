@@ -111,7 +111,7 @@ export function ReviewWorkflowsEditView() {
         workflow: {
           ...workflow,
 
-          // compare permissions of stages and only submit the ones which have
+          // compare permissions of stages and only submit them if at least one has
           // changed; this enables partial updates e.g. for users who don't have
           // permissions to see roles
           stages: workflow.stages.map((stage) => {
