@@ -18,6 +18,7 @@
     "@strapi/strapi": "4.12.1",
     "lodash": "4.17.21",
     "mysql": "2.18.1",
+    "mysql2": "3.6.0",
     "passport-google-oauth2": "0.2.0",
     "pg": "8.11.1",
     "react": "^18.2.0",
