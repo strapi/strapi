@@ -7,13 +7,13 @@ tags:
 
 ## What does it do
 
-The NPS survey is shown to users to get its feedback about Strapi. It is based on a rating scale from 0 to 10, and we also invite users to provide additional comments.
+The NPS survey is shown to users to get their feedback about Strapi. It is based on a rating scale from 0 to 10, and we also invite users to provide additional comments.
 
-## When we show the survey?
+## When do we show the survey?
 
-Before check all the logic, please note that we only present the NPS survey to admin users who have selected the "Keep me updated" checkbox during registration. Additionally, please be aware that the survey is displayed only 5 minutes after a user opens the page.
+The NPS survey is only displayed to admin users who have selected the "Keep me updated" checkbox during registration. The survey is displayed after 5 minutes of activity. 
 
-We follow this logic to show the survey:
+The survey is shown to eligible users based on the following rules:
 
 - If a user responds to the survey, the survey will be presented again within 90 days.
 - If a user does not respond to the survey the first time after their last response, the survey will be presented again after 7 days.
