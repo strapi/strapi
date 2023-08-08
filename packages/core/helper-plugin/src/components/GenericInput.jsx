@@ -249,7 +249,11 @@ const GenericInput = ({
           name={name}
           onChange={(date) => {
             onChange({
-              target: { name, value: formatISO(date, { representation: 'date' }), type },
+              target: {
+                name,
+                value: date ? formatISO(date, { representation: 'date' }) : null,
+                type,
+              },
             });
           }}
           onClear={() => onChange({ target: { name, value: null, type } })}
