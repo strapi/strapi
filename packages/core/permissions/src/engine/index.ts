@@ -94,11 +94,17 @@ const newEngine = (params: EngineParams): Engine => {
 
     await state.hooks['before-evaluate.permission'].call(createBeforeEvaluateContext(permission));
 
-    const { action: actionName, subject, properties, conditions = [], actionParameters = {} } = permission;
+    const {
+      action: actionName,
+      subject,
+      properties,
+      conditions = [],
+      actionParameters = {},
+    } = permission;
 
     let action = actionName;
 
-    if (Object.keys(actionParameters).length > 0) {
+    if (actionParameters && Object.keys(actionParameters).length > 0) {
       action = `${actionName}?${qs.stringify(actionParameters)}`;
     }
 
