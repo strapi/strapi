@@ -49,16 +49,25 @@ const handlers = [
           {
             id: 1,
             name: 'Entry 1',
+            metadata: {
+              sample: 'meta',
+            },
             publishedAt: null,
           },
           {
             id: 2,
             name: 'Entry 2',
+            metadata: {
+              sample: 'meta',
+            },
             publishedAt: null,
           },
           {
             id: 3,
             name: 'Entry 3',
+            metadata: {
+              sample: 'meta',
+            },
             publishedAt: null,
           },
         ],
@@ -100,6 +109,7 @@ const store = createStore(rootReducer, {
       attributes: {
         id: { type: 'integer' },
         name: { type: 'string', required: true },
+        metadata: { type: 'json', required: true },
       },
     },
     components: [],
@@ -250,14 +260,20 @@ describe('Bulk publish selected entries modal', () => {
               {
                 id: 1,
                 name: 'Entry 1',
+                metadata: {
+                  sample: 'meta',
+                },
               },
               {
                 id: 2,
                 name: 'Entry 2',
+                metadata: {
+                  sample: 'meta',
+                },
               },
               {
                 id: 3,
-                name: '',
+                name: 'Entry 3',
               },
             ],
           })
@@ -305,14 +321,20 @@ describe('Bulk publish selected entries modal', () => {
               {
                 id: 1,
                 name: 'Entry 1',
+                metadata: {
+                  sample: 'meta',
+                },
               },
               {
                 id: 2,
                 name: 'Entry 2',
+                metadata: {
+                  sample: 'meta',
+                },
               },
               {
                 id: 3,
-                name: '',
+                name: 'Entry 3',
               },
             ],
           })
@@ -356,14 +378,27 @@ describe('Bulk publish selected entries modal', () => {
                 id: 1,
                 name: 'Entry 1',
                 publishedAt: '2023-08-03T08:14:08.324Z',
+                metadata: {
+                  sample: 'meta',
+                },
               },
               {
                 id: 2,
                 name: 'Entry 2',
+                metadata: {
+                  sample: 'meta',
+                },
               },
               {
                 id: 3,
                 name: '',
+                metadata: {
+                  sample: 'meta',
+                },
+              },
+              {
+                id: 4,
+                name: 'Entry 4',
               },
             ],
           })
@@ -372,7 +407,7 @@ describe('Bulk publish selected entries modal', () => {
     );
 
     const { queryByText } = render(
-      <Table.Root defaultSelectedEntries={[1, 2, 3]} colCount={4}>
+      <Table.Root defaultSelectedEntries={[1, 2, 3, 4]} colCount={4}>
         <SelectedEntriesModal onToggle={jest.fn()} />
       </Table.Root>
     );
@@ -392,9 +427,9 @@ describe('Bulk publish selected entries modal', () => {
 
     expect(countReadyToBePublished).toHaveTextContent('1 entry ready to publish');
     // Should show a message with the entries with errors to fix
-    const countWithErrors = await screen.findByText('entry waiting for action', {
+    const countWithErrors = await screen.findByText('entries waiting for action', {
       exact: false,
     });
-    expect(countWithErrors).toHaveTextContent('1 entry waiting for action');
+    expect(countWithErrors).toHaveTextContent('2 entries waiting for action');
   });
 });
