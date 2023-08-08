@@ -229,11 +229,17 @@ const createYupSchemaAttribute = (type, validations, options) => {
       })
       .nullable()
       .test('required', errorsTrads.required, (value) => {
-        if (validations.required && (!value || !value.length)) {
-          return false;
+        if (!validations.required) return true;
+
+        if (typeof value === "string" && value.length) {
+          return true;
         }
 
-        return true;
+        if (typeof value === "object" && value !== null) {
+          return true;
+        }
+
+        return false;
       });
   }
 
