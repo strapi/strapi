@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-color-picker",
-  "version": "4.11.7",
+  "version": "4.12.1",
   "description": "Strapi maintained Custom Fields",
   "strapi": {
     "name": "color-picker",
@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@strapi/design-system": "1.8.2",
-    "@strapi/helper-plugin": "4.11.7",
+    "@strapi/helper-plugin": "4.12.1",
     "@strapi/icons": "1.8.2",
     "prop-types": "^15.8.1",
     "react-colorful": "5.6.1",
@@ -18,7 +18,6 @@
   },
   "devDependencies": {
     "@testing-library/react": "14.0.0",
-    "@types/styled-components": "5.1.26",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "5.3.4",

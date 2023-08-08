@@ -575,7 +575,7 @@ function ListView({
                         {/* Bulk action row checkbox */}
                         <Body.CheckboxDataCell rowId={rowData.id} index={index} />
                         {/* Field data */}
-                        {tableHeaders.map(({ key, name, ...rest }) => {
+                        {tableHeaders.map(({ key, name, cellFormatter, ...rest }) => {
                           if (hasDraftAndPublish && name === 'publishedAt') {
                             return (
                               <Td key={key}>
@@ -619,6 +619,12 @@ function ListView({
                                   <Typography textColor="neutral800">-</Typography>
                                 )}
                               </Td>
+                            );
+                          }
+
+                          if (typeof cellFormatter === 'function') {
+                            return (
+                              <Td key={key}>{cellFormatter(rowData, { key, name, ...rest })}</Td>
                             );
                           }
 

@@ -22,13 +22,13 @@ module.exports = {
   moduleNameMapper,
   /* Tells jest to ignore duplicated manual mock files, such as index.js */
   modulePathIgnorePatterns: ['.*__mocks__.*'],
-  testPathIgnorePatterns: ['node_modules/', '__tests__', 'dist/'],
+  testPathIgnorePatterns: ['node_modules/', '__tests__'],
   globalSetup: '@strapi/admin-test-utils/global-setup',
   setupFiles: ['@strapi/admin-test-utils/environment'],
   setupFilesAfterEnv: ['@strapi/admin-test-utils/after-env'],
   testEnvironment: 'jsdom',
   transform: {
-    '^.+\\.(j|t)s(x)?$': [
+    '^.+\\.js(x)?$': [
       '@swc/jest',
       {
         env: {
@@ -43,6 +43,32 @@ module.exports = {
           },
           // this should match the minimum supported node.js version
           target: 'es2020',
+        },
+      },
+    ],
+    '\\.ts$': [
+      '@swc/jest',
+      {
+        jsc: {
+          parser: {
+            syntax: 'typescript',
+          },
+        },
+      },
+    ],
+    '\\.tsx$': [
+      '@swc/jest',
+      {
+        jsc: {
+          parser: {
+            syntax: 'typescript',
+            tsx: true,
+          },
+          transform: {
+            react: {
+              runtime: 'automatic',
+            },
+          },
         },
       },
     ],
