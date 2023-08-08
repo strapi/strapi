@@ -1,5 +1,6 @@
 import type { Database } from '@strapi/database';
 import type { Shared, Common } from '@strapi/strapi';
+import { WebhookStore } from "../../services/webhookStore";
 
 // TODO move custom fields types to a separate file
 interface CustomFieldServerOptions {
@@ -49,6 +50,8 @@ export interface Strapi {
    * Getter for the Strapi admin container
    */
   readonly admin: any;
+
+  readonly webhookStore: WebhookStore;
 
   /**
    * Getter for the Strapi auth container
