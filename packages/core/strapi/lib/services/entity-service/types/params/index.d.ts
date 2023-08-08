@@ -15,7 +15,7 @@ import type * as Attribute from './attributes';
 export type Pick<
   TSchemaUID extends Common.UID.Schema,
   TKind extends Kind
-> = Utils.Expression.MatchAllIntersect<
+> = Utils.Expression.MatchAll<
   [
     // Sort
     [HasMember<TKind, 'sort'>, { sort?: Sort.Any<TSchemaUID> }],
