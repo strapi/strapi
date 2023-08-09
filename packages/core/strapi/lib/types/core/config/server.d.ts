@@ -1,4 +1,4 @@
-import type { ConfigFunction } from './shared.d.ts';
+import type { ConfigExport } from './shared.d.ts';
 
 export type AppProp = {
   keys: string[];
@@ -34,5 +34,4 @@ export type ServerConfiguration = {
   webhooks?: WebhooksProp;
 };
 
-// TODO: can this just be an object rather than a function?
-export type Server = ConfigFunction<ServerConfiguration>;
+export type Server = ConfigExport<ServerConfiguration>;

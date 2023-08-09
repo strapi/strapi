@@ -1,2 +1,7 @@
-// TODO: can this be async?
-type ConfigFunction<TConfigObject> = ({ env }) => TConfigObject;
+type ConfigFunction<TConfigObject = UnknownConfigObject> = ({ env }) => TConfigObject;
+
+type UnknownConfigObject = Record<string, unknown>;
+
+type ConfigExport<TConfigObject = UnknownConfigObject> =
+  | ConfigFunction<TConfigObject>
+  | TConfigObject;

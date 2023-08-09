@@ -1,4 +1,4 @@
-import type { ConfigFunction } from './shared.d.ts';
+import type { ConfigExport } from './shared.d.ts';
 
 export type ApiTokenProp = {
   salt: string;
@@ -50,4 +50,4 @@ export type AdminConfiguration = {
 };
 
 // TODO: can this just be an object rather than a function?
-export type Admin = ConfigFunction<AdminConfiguration>;
+export type Admin = ConfigExport<AdminConfiguration>;
