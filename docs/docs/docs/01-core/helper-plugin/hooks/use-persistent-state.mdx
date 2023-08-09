@@ -14,7 +14,7 @@ Provides a easily usable hook to store data on the local storage.
 import { usePersistentState } from '@strapi/helper-plugin';
 
 const MyComponent = () => {
-  const [navbarOpened, setNavbarOpened] = usePersistentState(true);
+  const [navbarOpened, setNavbarOpened] = usePersistentState('navbar-open', true);
 
   return <nav>{navbarOpened ? <div>My menu!</div> : null}</nav>;
 };
