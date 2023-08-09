@@ -68,6 +68,7 @@ const EditPage = ({ canUpdate }) => {
   const {
     users: [user],
     isLoading: isLoadingAdminUsers,
+    refetch,
   } = useAdminUsers(
     { id },
     {
@@ -117,6 +118,7 @@ const EditPage = ({ canUpdate }) => {
         setUserDisplayName(userDisplayName);
       }
       actions.setValues(pick(body, fieldsToPick));
+      await refetch();
     } catch (err) {
       // FIXME when API errors are ready
       const errors = formatAPIErrors(err.response.data);
