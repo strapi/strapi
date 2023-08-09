@@ -25,9 +25,9 @@
     "lint": "run -T eslint ."
   },
   "dependencies": {
-    "@strapi/design-system": "1.8.2",
+    "@strapi/design-system": "1.9.0",
     "@strapi/helper-plugin": "4.12.1",
-    "@strapi/icons": "1.8.2",
+    "@strapi/icons": "1.9.0",
     "@strapi/provider-upload-local": "4.12.1",
     "@strapi/utils": "4.12.1",
     "axios": "1.4.0",
