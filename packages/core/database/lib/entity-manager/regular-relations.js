@@ -248,7 +248,8 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
         const joinTableName = addSchema(joinTable.name);
 
         // raw query as knex doesn't allow updating from a subquery
-        await db.connection
+        await db
+          .getConnection()
           .raw(
             `UPDATE ?? as a
             SET ?? = b.src_order
@@ -300,7 +301,8 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
         const joinTableName = addSchema(joinTable.name);
 
         // raw query as knex doesn't allow updating from a subquery
-        await db.connection
+        await db
+          .getConnection()
           .raw(
             `UPDATE ?? as a
             SET ?? = b.inv_order
