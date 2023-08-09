@@ -2,6 +2,7 @@ import { produce } from 'immer';
 
 import {
   ACTION_ADD_STAGE,
+  ACTION_CLONE_STAGE,
   ACTION_DELETE_STAGE,
   ACTION_RESET_WORKFLOW,
   ACTION_SET_CONTENT_TYPES,
@@ -10,6 +11,7 @@ import {
   ACTION_SET_WORKFLOW,
   ACTION_SET_WORKFLOWS,
   ACTION_UPDATE_STAGE,
+  ACTION_UPDATE_STAGES,
   ACTION_UPDATE_STAGE_POSITION,
   ACTION_UPDATE_WORKFLOW,
   STAGE_COLOR_DEFAULT,
@@ -118,6 +120,22 @@ export function reducer(state = initialState, action) {
         break;
       }
 
+      case ACTION_CLONE_STAGE: {
+        const { currentWorkflow } = state.clientState;
+        const { id } = payload;
+
+        const sourceStageIndex = currentWorkflow.data.stages.findIndex((stage) => stage.id === id);
+        const sourceStage = currentWorkflow.data.stages[sourceStageIndex];
+
+        draft.clientState.currentWorkflow.data.stages.splice(sourceStageIndex + 1, 0, {
+          ...sourceStage,
+          id: undefined,
+          __temp_key__: getMaxTempKey(draft.clientState.currentWorkflow.data.stages),
+        });
+
+        break;
+      }
+
       case ACTION_UPDATE_STAGE: {
         const { currentWorkflow } = state.clientState;
         const { stageId, ...modified } = payload;
@@ -129,6 +147,19 @@ export function reducer(state = initialState, action) {
                 ...modified,
               }
             : stage
+        );
+
+        break;
+      }
+
+      case ACTION_UPDATE_STAGES: {
+        const { currentWorkflow } = state.clientState;
+
+        draft.clientState.currentWorkflow.data.stages = currentWorkflow.data.stages.map(
+          (stage) => ({
+            ...stage,
+            ...payload,
+          })
         );
 
         break;

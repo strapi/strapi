@@ -16,7 +16,7 @@ const EditViewLayoutManager = ({ layout, ...rest }) => {
   const dispatch = useDispatch();
   const [{ query }] = useQueryParams();
   const { runHookWaterfall } = useStrapiApp();
-  const permissions = useSyncRbac(query, rest.slug, 'editView');
+  const { permissions, isValid: isValidPermissions } = useSyncRbac(query, rest.slug, 'editView');
 
   useEffect(() => {
     // Allow the plugins to extend the edit view layout
@@ -29,7 +29,7 @@ const EditViewLayoutManager = ({ layout, ...rest }) => {
     };
   }, [layout, dispatch, query, runHookWaterfall]);
 
-  if (!currentLayout || !permissions) {
+  if (!currentLayout || !isValidPermissions) {
     return <LoadingIndicatorPage />;
   }
 
