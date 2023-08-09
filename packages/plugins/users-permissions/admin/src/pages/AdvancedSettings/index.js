@@ -1,7 +1,19 @@
-import React, { useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { useIntl } from 'react-intl';
-import { Formik } from 'formik';
+import React from 'react';
+
+import {
+  Box,
+  Button,
+  ContentLayout,
+  Flex,
+  Grid,
+  GridItem,
+  HeaderLayout,
+  Main,
+  Option,
+  Select,
+  Typography,
+  useNotifyAT,
+} from '@strapi/design-system';
 import {
   CheckPagePermissions,
   Form,
@@ -13,29 +25,20 @@ import {
   useOverlayBlocker,
   useRBAC,
 } from '@strapi/helper-plugin';
-import {
-  useNotifyAT,
-  Main,
-  HeaderLayout,
-  ContentLayout,
-  Button,
-  Box,
-  Flex,
-  Select,
-  Option,
-  Typography,
-  Grid,
-  GridItem,
-} from '@strapi/design-system';
 import { Check } from '@strapi/icons';
-import pluginPermissions from '../../permissions';
+import { Formik } from 'formik';
+import { useIntl } from 'react-intl';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
+
+import { PERMISSIONS } from '../../constants';
 import { getTrad } from '../../utils';
+
+import { fetchData, putAdvancedSettings } from './utils/api';
 import layout from './utils/layout';
 import schema from './utils/schema';
-import { fetchData, putAdvancedSettings } from './utils/api';
 
 const ProtectedAdvancedSettingsPage = () => (
-  <CheckPagePermissions permissions={pluginPermissions.readAdvancedSettings}>
+  <CheckPagePermissions permissions={PERMISSIONS.readAdvancedSettings}>
     <AdvancedSettingsPage />
   </CheckPagePermissions>
 );
@@ -48,14 +51,10 @@ const AdvancedSettingsPage = () => {
   const queryClient = useQueryClient();
   useFocusWhenNavigate();
 
-  const updatePermissions = useMemo(
-    () => ({ update: pluginPermissions.updateAdvancedSettings }),
-    []
-  );
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate },
-  } = useRBAC(updatePermissions);
+  } = useRBAC({ update: PERMISSIONS.updateAdvancedSettings });
 
   const { status: isLoadingData, data } = useQuery('advanced', () => fetchData(), {
     onSuccess() {
@@ -143,7 +142,7 @@ const AdvancedSettingsPage = () => {
         validationSchema={schema}
         enableReinitialize
       >
-        {({ errors, values, handleChange, isSubmitting }) => {
+        {({ errors, values, handleChange, isSubmitting, dirty }) => {
           return (
             <Form>
               <HeaderLayout
@@ -155,7 +154,7 @@ const AdvancedSettingsPage = () => {
                   <Button
                     loading={isSubmitting}
                     type="submit"
-                    disabled={!canUpdate}
+                    disabled={canUpdate ? !dirty : !canUpdate}
                     startIcon={<Check />}
                     size="S"
                   >

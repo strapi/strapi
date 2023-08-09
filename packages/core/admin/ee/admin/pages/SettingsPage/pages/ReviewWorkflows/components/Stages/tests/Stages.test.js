@@ -1,19 +1,19 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { fireEvent, render } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
-import { Provider } from 'react-redux';
-import { FormikProvider, useFormik } from 'formik';
 import userEvent from '@testing-library/user-event';
+import { FormikProvider, useFormik } from 'formik';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { IntlProvider } from 'react-intl';
+import { Provider } from 'react-redux';
 
 import configureStore from '../../../../../../../../../admin/src/core/store/configureStore';
-import { Stages } from '../Stages';
-import { reducer } from '../../../reducer';
-import { ACTION_SET_WORKFLOWS, STAGE_COLOR_DEFAULT } from '../../../constants';
 import * as actions from '../../../actions';
+import { ACTION_SET_WORKFLOW, STAGE_COLOR_DEFAULT } from '../../../constants';
+import { reducer } from '../../../reducer';
+import { Stages } from '../Stages';
 
 // without mocking actions as ESM it is impossible to spy on named exports
 jest.mock('../../../actions', () => ({
@@ -45,7 +45,7 @@ const WORKFLOWS_FIXTURE = [
 const ComponentFixture = (props) => {
   const store = configureStore([], [reducer]);
 
-  store.dispatch({ type: ACTION_SET_WORKFLOWS, payload: { workflows: WORKFLOWS_FIXTURE } });
+  store.dispatch({ type: ACTION_SET_WORKFLOW, payload: { workflows: WORKFLOWS_FIXTURE } });
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -121,5 +121,11 @@ describe('Admin | Settings | Review Workflow | Stages', () => {
     expect(spy).toBeCalledWith(2, {
       name: 'New name',
     });
+  });
+
+  it('should not render the "add stage" button if canUpdate = false', () => {
+    const { queryByText } = setup({ canUpdate: false });
+
+    expect(queryByText('Add new stage')).not.toBeInTheDocument();
   });
 });

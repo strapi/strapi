@@ -1,24 +1,24 @@
 import * as React from 'react';
-import PropTypes from 'prop-types';
 
-import { useFormikContext } from 'formik';
-import { useIntl } from 'react-intl';
-import styled from 'styled-components';
 import {
-  FieldLabel,
-  Flex,
-  Typography,
   BaseCheckbox,
   Checkbox,
+  FieldLabel,
+  Flex,
   Loader,
   RawTable as Table,
-  RawTh as Th,
-  RawTd as Td,
-  RawTr as Tr,
-  RawThead as Thead,
   RawTbody as Tbody,
+  RawTd as Td,
+  RawTh as Th,
+  RawThead as Thead,
+  RawTr as Tr,
+  Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
+import { useFormikContext } from 'formik';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 import { useContentTypes } from '../../../../../../../hooks/useContentTypes';
 
@@ -54,8 +54,10 @@ const StyledTable = styled(Table)`
   }
 
   tbody tr td:first-child {
-    // Add padding to the start of the first column to avoid the checkbox appearing
-    // too close to the edge of the table
+    /**
+     * Add padding to the start of the first column to avoid the checkbox appearing
+     * too close to the edge of the table
+     */
     padding-inline-start: ${({ theme }) => theme.spaces[2]};
   }
 `;
@@ -306,7 +308,7 @@ const EventRow = ({ disabledEvents, name, events, inputValue, handleSelect, hand
           </Td>
         );
       })}
-      {events.length < targetColumns && <Td colSpan={`${targetColumns - events.length}`} />}
+      {events.length < targetColumns && <Td colSpan={targetColumns - events.length} />}
     </Tr>
   );
 };

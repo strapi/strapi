@@ -1,13 +1,16 @@
 import React from 'react';
-import { render, waitFor, screen } from '@testing-library/react';
+
+import { darkTheme, lightTheme } from '@strapi/design-system';
+import { render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { lightTheme, darkTheme } from '@strapi/design-system';
+
+import Theme from '../../../components/Theme';
+import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
 import ProfilePage from '../index';
+
 import server from './utils/server';
 import serverLockedSSO from './utils/serverLockedSSO';
-import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
-import Theme from '../../../components/Theme';
 
 jest.mock('../../../components/LocalesProvider/useLocalesProvider');
 
@@ -23,6 +26,7 @@ const setup = (props) =>
   render(<ProfilePage {...props} />, {
     wrapper({ children }) {
       window.strapi.isEE = true;
+      window.strapi.features.isEnabled = () => true;
       const client = new QueryClient({
         defaultOptions: {
           queries: {
@@ -105,7 +109,7 @@ describe('ADMIN | Pages | Profile page | with SSO lock', () => {
   });
 
   afterAll(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     serverLockedSSO.close();
   });
 

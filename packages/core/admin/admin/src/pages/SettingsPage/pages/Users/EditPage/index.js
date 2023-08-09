@@ -1,43 +1,46 @@
 import React from 'react';
-import { useRouteMatch, useHistory } from 'react-router-dom';
-import { useIntl } from 'react-intl';
-import PropTypes from 'prop-types';
-import pick from 'lodash/pick';
-import get from 'lodash/get';
-import omit from 'lodash/omit';
+
 import {
+  Box,
+  Button,
+  ContentLayout,
+  Flex,
+  Grid,
+  GridItem,
+  HeaderLayout,
+  Main,
+  Typography,
+} from '@strapi/design-system';
+import {
+  auth,
   Form,
   GenericInput,
+  Link,
+  LoadingIndicatorPage,
   SettingsPageTitle,
-  auth,
   useAppInfo,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
-  LoadingIndicatorPage,
-  Link,
 } from '@strapi/helper-plugin';
-import { Formik } from 'formik';
-import {
-  Box,
-  Button,
-  Grid,
-  GridItem,
-  HeaderLayout,
-  ContentLayout,
-  Typography,
-  Main,
-  Flex,
-} from '@strapi/design-system';
 import { ArrowLeft, Check } from '@strapi/icons';
-import MagicLink from 'ee_else_ce/pages/SettingsPage/pages/Users/components/MagicLink';
+import { Formik } from 'formik';
+import get from 'lodash/get';
+import omit from 'lodash/omit';
+import pick from 'lodash/pick';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import { useHistory, useRouteMatch } from 'react-router-dom';
 
+import { useAdminUsers } from '../../../../../hooks/useAdminUsers';
+import { useEnterprise } from '../../../../../hooks/useEnterprise';
 import { formatAPIErrors, getFullName } from '../../../../../utils';
+import { MagicLinkCE } from '../components/MagicLink';
+import SelectRoles from '../components/SelectRoles';
+import { editValidation } from '../utils/validations/users';
+
 import { putUser } from './utils/api';
 import layout from './utils/layout';
-import { editValidation } from '../utils/validations/users';
-import SelectRoles from '../components/SelectRoles';
-import { useAdminUsers } from '../../../../../hooks/useAdminUsers';
 
 const fieldsToPick = ['email', 'firstname', 'lastname', 'username', 'isActive', 'roles'];
 
@@ -50,11 +53,21 @@ const EditPage = ({ canUpdate }) => {
   const { setUserDisplayName } = useAppInfo();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
+  const MagicLink = useEnterprise(
+    MagicLinkCE,
+    async () =>
+      (
+        await import(
+          '../../../../../../../ee/admin/pages/SettingsPage/pages/Users/components/MagicLink'
+        )
+      ).MagicLinkEE
+  );
+
   useFocusWhenNavigate();
 
   const {
     users: [user],
-    isLoading,
+    isLoading: isLoadingAdminUsers,
   } = useAdminUsers(
     { id },
     {
@@ -123,6 +136,8 @@ const EditPage = ({ canUpdate }) => {
     unlockApp();
   };
 
+  const isLoading = isLoadingAdminUsers || !MagicLink;
+
   const headerLabel = isLoading
     ? { id: 'app.containers.Users.EditPage.header.label-loading', defaultMessage: 'Edit user' }
     : { id: 'app.containers.Users.EditPage.header.label', defaultMessage: 'Edit {name}' };
@@ -181,13 +196,13 @@ const EditPage = ({ canUpdate }) => {
         validateOnChange={false}
         validationSchema={editValidation}
       >
-        {({ errors, values, handleChange, isSubmitting }) => {
+        {({ errors, values, handleChange, isSubmitting, dirty }) => {
           return (
             <Form>
               <HeaderLayout
                 primaryAction={
                   <Button
-                    disabled={isSubmitting || !canUpdate}
+                    disabled={isSubmitting || !canUpdate ? true : !dirty}
                     startIcon={<Check />}
                     loading={isSubmitting}
                     type="submit"

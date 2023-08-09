@@ -1,12 +1,14 @@
 import React, { useRef } from 'react';
+
+import { Box, Divider, Flex, Typography } from '@strapi/design-system';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { Box, Divider, Flex, Typography } from '@strapi/design-system';
 
-import { getTrad } from '../../../utils';
-import getUnits from './utils/getUnits';
 import { getFullName } from '../../../../utils';
+import { getTrad } from '../../../utils';
+
+import getUnits from './utils/getUnits';
 
 const Title = () => {
   const { formatMessage } = useIntl();
@@ -122,7 +124,7 @@ Root.propTypes = {
   children: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.node), PropTypes.node]).isRequired,
 };
 
-export default {
+export const Information = {
   Root,
   Title,
   Body,

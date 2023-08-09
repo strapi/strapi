@@ -1,11 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import PropTypes from 'prop-types';
-import { ChevronDown, ChevronUp } from '@strapi/icons';
+
 import { BaseCheckbox, Box, Flex } from '@strapi/design-system';
+import { ChevronDown, ChevronUp } from '@strapi/icons';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
+
 import { usePermissionsDataManager } from '../../../../../../../../hooks';
 import ConditionsButton from '../../ConditionsButton';
 import ConditionsModal from '../../ConditionsModal';
@@ -13,8 +15,9 @@ import HiddenAction from '../../HiddenAction';
 import { cellWidth, rowHeight } from '../../Permissions/utils/constants';
 import RowLabelWithCheckbox from '../../RowLabelWithCheckbox';
 import { getCheckboxState } from '../../utils';
-import generateCheckboxesActions from './utils/generateCheckboxesActions';
 import activeStyle from '../utils/activeStyle';
+
+import generateCheckboxesActions from './utils/generateCheckboxesActions';
 
 const activeRowStyle = (theme, isActive) => `
   ${Wrapper} {

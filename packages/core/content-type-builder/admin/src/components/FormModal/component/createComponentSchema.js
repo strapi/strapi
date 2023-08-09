@@ -1,9 +1,9 @@
-import * as yup from 'yup';
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
+import * as yup from 'yup';
 
 import getTrad from '../../../utils/getTrad';
-import { createComponentUid } from '../utils/createUid';
 import { CATEGORY_NAME_REGEX } from '../category';
+import { createComponentUid } from '../utils/createUid';
 
 const createComponentSchema = (usedComponentNames, reservedNames, category) => {
   const shape = {

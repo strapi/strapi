@@ -317,14 +317,6 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   cursor: pointer;
 }
 
-.c29 canvas,
-.c29 video {
-  display: block;
-  pointer-events: none;
-  max-width: 100%;
-  max-height: 10.25rem;
-}
-
 .c35 svg {
   font-size: 3rem;
 }
@@ -332,6 +324,14 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
 .c34 {
   border-radius: 4px 4px 0 0;
   background: linear-gradient(180deg,#ffffff 0%,#f6f6f9 121.48%);
+}
+
+.c29 canvas,
+.c29 video {
+  display: block;
+  pointer-events: none;
+  max-width: 100%;
+  max-height: 10.25rem;
 }
 
 @media (max-width:68.75rem) {
@@ -387,7 +387,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                 alt="strapi-cover_1fabc982ce.png"
                 aria-hidden="true"
                 class="c14"
-                src="http://localhost:1337/uploads/thumbnail_strapi_cover_1fabc982ce_5b43615ed5.png"
+                src="http://localhost:1337/uploads/thumbnail_strapi_cover_1fabc982ce_5b43615ed5.png?2021-09-14T07:32:50.816Z"
               />
             </div>
           </div>

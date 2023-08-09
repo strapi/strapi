@@ -1,36 +1,34 @@
 /* eslint-disable react/jsx-no-constructed-context-values */
-import React, { useCallback, useEffect, useMemo, useRef, useReducer } from 'react';
-import isEmpty from 'lodash/isEmpty';
-import cloneDeep from 'lodash/cloneDeep';
-import get from 'lodash/get';
-import isEqual from 'lodash/isEqual';
-import set from 'lodash/set';
-import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
-import { Prompt, Redirect } from 'react-router-dom';
-import { flushSync } from 'react-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 
 import { Main } from '@strapi/design-system';
 import {
-  LoadingIndicatorPage,
   ContentManagerEditViewDataManagerContext,
+  getAPIInnerErrors,
+  getYupInnerErrors,
+  LoadingIndicatorPage,
   useNotification,
   useOverlayBlocker,
   useTracking,
-  getYupInnerErrors,
-  getAPIInnerErrors,
 } from '@strapi/helper-plugin';
+import cloneDeep from 'lodash/cloneDeep';
+import get from 'lodash/get';
+import isEmpty from 'lodash/isEmpty';
+import isEqual from 'lodash/isEqual';
+import set from 'lodash/set';
+import PropTypes from 'prop-types';
+import { flushSync } from 'react-dom';
+import { useIntl } from 'react-intl';
+import { useDispatch, useSelector } from 'react-redux';
+import { Prompt, Redirect } from 'react-router-dom';
 
-import { createYupSchema, getTrad } from '../../utils';
-
+import { usePrev } from '../../hooks';
+import { clearSetModifiedDataOnly } from '../../sharedReducers/crudReducer/actions';
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
+import { createYupSchema, getTrad } from '../../utils';
 
 import reducer, { initialState } from './reducer';
 import { cleanData } from './utils';
-
-import { clearSetModifiedDataOnly } from '../../sharedReducers/crudReducer/actions';
-import { usePrev } from '../../hooks';
 
 const EditViewDataManagerProvider = ({
   allLayoutData,
@@ -243,14 +241,18 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  const relationLoad = useCallback(({ target: { initialDataPath, modifiedDataPath, value } }) => {
-    dispatch({
-      type: 'LOAD_RELATION',
-      modifiedDataPath,
-      initialDataPath,
-      value,
-    });
-  }, []);
+  const relationLoad = useCallback(
+    ({ target: { initialDataPath, modifiedDataPath, value, modifiedDataOnly } }) => {
+      dispatch({
+        type: 'LOAD_RELATION',
+        modifiedDataPath,
+        initialDataPath,
+        value,
+        modifiedDataOnly,
+      });
+    },
+    []
+  );
 
   const addRepeatableComponentToField = dispatchAddComponent('ADD_REPEATABLE_COMPONENT_TO_FIELD');
 

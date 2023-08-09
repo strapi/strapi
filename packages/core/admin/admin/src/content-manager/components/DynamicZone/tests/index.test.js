@@ -1,11 +1,12 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { render as renderRTL } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { IntlProvider } from 'react-intl';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { IntlProvider } from 'react-intl';
 
 import { DynamicZone } from '../index';
 
@@ -39,6 +40,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 jest.mock('../../../hooks', () => ({
   ...jest.requireActual('../../../hooks'),
   useContentTypeLayout: jest.fn().mockReturnValue({
+    components: {},
     getComponentLayout: jest.fn().mockImplementation((componentUid) => layoutData[componentUid]),
   }),
 }));
@@ -52,7 +54,7 @@ jest.mock('../../FieldComponent', () => () => "I'm a field component");
 
 describe('DynamicZone', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   const defaultProps = {

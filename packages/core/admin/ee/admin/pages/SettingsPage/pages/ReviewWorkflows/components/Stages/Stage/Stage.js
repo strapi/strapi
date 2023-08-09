@@ -1,34 +1,32 @@
 import * as React from 'react';
-import PropTypes from 'prop-types';
-import { useField } from 'formik';
-import { useIntl } from 'react-intl';
-import { useDispatch } from 'react-redux';
+
 import {
   Accordion,
-  AccordionToggle,
   AccordionContent,
+  AccordionToggle,
   Box,
-  Field,
-  FieldLabel,
-  FieldError,
   Flex,
   Grid,
   GridItem,
   IconButton,
+  SingleSelect,
+  SingleSelectOption,
   TextInput,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { ReactSelect, useTracking } from '@strapi/helper-plugin';
+import { useTracking } from '@strapi/helper-plugin';
 import { Drag, Trash } from '@strapi/icons';
+import { useField } from 'formik';
+import PropTypes from 'prop-types';
 import { getEmptyImage } from 'react-dnd-html5-backend';
+import { useIntl } from 'react-intl';
+import { useDispatch } from 'react-redux';
 
-import { deleteStage, updateStagePosition, updateStage } from '../../../actions';
-import { getAvailableStageColors } from '../../../utils/colors';
-import { OptionColor } from './components/OptionColor';
-import { SingleValueColor } from './components/SingleValueColor';
 import { useDragAndDrop } from '../../../../../../../../../admin/src/content-manager/hooks';
 import { composeRefs } from '../../../../../../../../../admin/src/content-manager/utils';
+import { deleteStage, updateStage, updateStagePosition } from '../../../actions';
 import { DRAG_DROP_TYPES } from '../../../constants';
+import { getAvailableStageColors, getStageColorByHex } from '../../../utils/colors';
 
 const AVAILABLE_COLORS = getAvailableStageColors();
 
@@ -52,6 +50,7 @@ export function Stage({
   index,
   canDelete,
   canReorder,
+  canUpdate,
   isOpen: isOpenDefault = false,
   stagesCount,
 }) {
@@ -143,8 +142,8 @@ export function Stage({
   const { trackUsage } = useTracking();
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = React.useState(isOpenDefault);
-  const [nameField, nameMeta] = useField(`stages.${index}.name`);
-  const [colorField, colorMeta] = useField(`stages.${index}.color`);
+  const [nameField, nameMeta, nameHelper] = useField(`stages.${index}.name`);
+  const [colorField, colorMeta, colorHelper] = useField(`stages.${index}.color`);
   const [{ handlerId, isDragging, handleKeyDown }, stageRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop(canReorder, {
       index,
@@ -171,13 +170,12 @@ export function Stage({
     ),
     color: hex,
   }));
-  // TODO: the .toUpperCase() conversion can be removed once the hex code is normalized in
-  // the admin API
-  const colorValue = colorOptions.find(({ value }) => value === colorField.value.toUpperCase());
 
   React.useEffect(() => {
     dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
   }, [dragPreviewRef, index]);
+
+  const { themeColorName } = getStageColorByHex(colorField.value) ?? {};
 
   return (
     <Box ref={composedRef}>
@@ -198,43 +196,49 @@ export function Stage({
           }}
           expanded={isOpen}
           shadow="tableShadow"
+          error={nameMeta.error ?? colorMeta?.error ?? false}
+          hasErrorMessage={false}
         >
           <AccordionToggle
             title={nameField.value}
             togglePosition="left"
             action={
-              <Flex>
-                {canDelete && (
-                  <IconButton
-                    background="transparent"
-                    icon={<Trash />}
-                    label={formatMessage({
-                      id: 'Settings.review-workflows.stage.delete',
-                      defaultMessage: 'Delete stage',
-                    })}
-                    noBorder
-                    onClick={() => dispatch(deleteStage(id))}
-                  />
-                )}
+              (canDelete || canUpdate) && (
+                <Flex>
+                  {canDelete && (
+                    <IconButton
+                      background="transparent"
+                      icon={<Trash />}
+                      label={formatMessage({
+                        id: 'Settings.review-workflows.stage.delete',
+                        defaultMessage: 'Delete stage',
+                      })}
+                      noBorder
+                      onClick={() => dispatch(deleteStage(id))}
+                    />
+                  )}
 
-                <IconButton
-                  background="transparent"
-                  forwardedAs="div"
-                  role="button"
-                  noBorder
-                  tabIndex={0}
-                  data-handler-id={handlerId}
-                  ref={dragRef}
-                  label={formatMessage({
-                    id: 'Settings.review-workflows.stage.drag',
-                    defaultMessage: 'Drag',
-                  })}
-                  onClick={(e) => e.stopPropagation()}
-                  onKeyDown={handleKeyDown}
-                >
-                  <Drag />
-                </IconButton>
-              </Flex>
+                  {canUpdate && (
+                    <IconButton
+                      background="transparent"
+                      forwardedAs="div"
+                      role="button"
+                      noBorder
+                      tabIndex={0}
+                      data-handler-id={handlerId}
+                      ref={dragRef}
+                      label={formatMessage({
+                        id: 'Settings.review-workflows.stage.drag',
+                        defaultMessage: 'Drag',
+                      })}
+                      onClick={(e) => e.stopPropagation()}
+                      onKeyDown={handleKeyDown}
+                    >
+                      <Drag />
+                    </IconButton>
+                  )}
+                </Flex>
+              )
             }
           />
           <AccordionContent padding={6} background="neutral0" hasRadius>
@@ -243,13 +247,14 @@ export function Stage({
                 <TextInput
                   {...nameField}
                   id={nameField.name}
+                  disabled={!canUpdate}
                   label={formatMessage({
                     id: 'Settings.review-workflows.stage.name.label',
                     defaultMessage: 'Stage name',
                   })}
                   error={nameMeta.error ?? false}
                   onChange={(event) => {
-                    nameField.onChange(event);
+                    nameHelper.setValue(event.target.value);
                     dispatch(updateStage(id, { name: event.target.value }));
                   }}
                   required
@@ -257,48 +262,58 @@ export function Stage({
               </GridItem>
 
               <GridItem col={6}>
-                <Field
+                <SingleSelect
+                  disabled={!canUpdate}
                   error={colorMeta?.error ?? false}
-                  name={colorField.name}
                   id={colorField.name}
                   required
-                >
-                  <Flex direction="column" gap={1} alignItems="stretch">
-                    <FieldLabel>
-                      {formatMessage({
-                        id: 'content-manager.reviewWorkflows.stage.color',
-                        defaultMessage: 'Color',
-                      })}
-                    </FieldLabel>
-
-                    <ReactSelect
-                      components={{ Option: OptionColor, SingleValue: SingleValueColor }}
-                      error={colorMeta?.error}
-                      inputId={colorField.name}
-                      name={colorField.name}
-                      options={colorOptions}
-                      onChange={({ value }) => {
-                        colorField.onChange({ target: { value } });
-                        dispatch(updateStage(id, { color: value }));
-                      }}
-                      // If no color was found in all the valid theme colors it means a user
-                      // has set a custom value e.g. through the content API. In that case we
-                      // display the custom color and a "Custom" label.
-                      value={
-                        colorValue ?? {
-                          value: colorField.value,
-                          label: formatMessage({
-                            id: 'Settings.review-workflows.stage.color.name.custom',
-                            defaultMessage: 'Custom',
-                          }),
-                          color: colorField.value,
-                        }
-                      }
+                  label={formatMessage({
+                    id: 'content-manager.reviewWorkflows.stage.color',
+                    defaultMessage: 'Color',
+                  })}
+                  onChange={(value) => {
+                    colorHelper.setValue(value);
+                    dispatch(updateStage(id, { color: value }));
+                  }}
+                  value={colorField.value.toUpperCase()}
+                  startIcon={
+                    <Flex
+                      as="span"
+                      height={2}
+                      background={colorField.value}
+                      borderColor={themeColorName === 'neutral0' ? 'neutral150' : 'transparent'}
+                      hasRadius
+                      shrink={0}
+                      width={2}
                     />
+                  }
+                >
+                  {colorOptions.map(({ value, label, color }) => {
+                    const { themeColorName } = getStageColorByHex(color);
 
-                    <FieldError />
-                  </Flex>
-                </Field>
+                    return (
+                      <SingleSelectOption
+                        value={value}
+                        key={value}
+                        startIcon={
+                          <Flex
+                            as="span"
+                            height={2}
+                            background={color}
+                            borderColor={
+                              themeColorName === 'neutral0' ? 'neutral150' : 'transparent'
+                            }
+                            hasRadius
+                            shrink={0}
+                            width={2}
+                          />
+                        }
+                      >
+                        {label}
+                      </SingleSelectOption>
+                    );
+                  })}
+                </SingleSelect>
               </GridItem>
             </Grid>
           </AccordionContent>
@@ -313,5 +328,6 @@ Stage.propTypes = PropTypes.shape({
   color: PropTypes.string.isRequired,
   canDelete: PropTypes.bool.isRequired,
   canReorder: PropTypes.bool.isRequired,
+  canUpdate: PropTypes.bool.isRequired,
   stagesCount: PropTypes.number.isRequired,
 }).isRequired;

@@ -1,9 +1,10 @@
 import React from 'react';
-import { useIntl } from 'react-intl';
-import { ContentBox, useNotification, useTracking, useClipboard } from '@strapi/helper-plugin';
+
 import { IconButton } from '@strapi/design-system';
+import { ContentBox, useClipboard, useNotification, useTracking } from '@strapi/helper-plugin';
 import { Duplicate, Key } from '@strapi/icons';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 
 const TokenBox = ({ token, tokenType }) => {
   const { formatMessage } = useIntl();
@@ -16,7 +17,7 @@ const TokenBox = ({ token, tokenType }) => {
     const didCopy = await copy(token);
 
     if (didCopy) {
-      trackUsage.current('didCopyTokenKey', {
+      trackUsage('didCopyTokenKey', {
         tokenType,
       });
       toggleNotification({

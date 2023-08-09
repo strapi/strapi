@@ -1,27 +1,29 @@
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
-import { lightTheme, darkTheme } from '@strapi/design-system';
+
+import { darkTheme, lightTheme } from '@strapi/design-system';
+import invariant from 'invariant';
+import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
-import isFunction from 'lodash/isFunction';
-import invariant from 'invariant';
 import { Helmet } from 'react-helmet';
-import { basename, createHook } from './core/utils';
-import configureStore from './core/store/configureStore';
-import { customFields, Plugin } from './core/apis';
-import App from './pages/App';
+import { BrowserRouter } from 'react-router-dom';
+
 import Logo from './assets/images/logo-strapi-2022.svg';
+import localStorageKey from './components/LanguageProvider/utils/localStorageKey';
 import Providers from './components/Providers';
-import languageNativeNames from './translations/languageNativeNames';
+import { customFields, Plugin } from './core/apis';
+import configureStore from './core/store/configureStore';
+import { basename, createHook } from './core/utils';
 import {
   INJECT_COLUMN_IN_TABLE,
   MUTATE_COLLECTION_TYPES_LINKS,
   MUTATE_EDIT_VIEW_LAYOUT,
   MUTATE_SINGLE_TYPES_LINKS,
 } from './exposedHooks';
-import injectionZones from './injectionZones';
 import favicon from './favicon.png';
-import localStorageKey from './components/LanguageProvider/utils/localStorageKey';
+import injectionZones from './injectionZones';
+import App from './pages/App';
+import languageNativeNames from './translations/languageNativeNames';
 
 class StrapiApp {
   constructor({ adminConfig, appPlugins, library, middlewares, reducers }) {

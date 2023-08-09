@@ -1,22 +1,22 @@
 'use strict';
 
-jest.mock('../../../generators/schemas/imports', () => ({ addImport: jest.fn() }));
+jest.mock('../../../generators/common/imports', () => ({ addImport: jest.fn() }));
 
 const consoleWarnMock = jest.spyOn(console, 'warn').mockImplementation();
 
 const ts = require('typescript');
 
-const attributeToPropertySignature = require('../../../generators/schemas/attributes');
+const attributeToPropertySignature = require('../../../generators/common/models/attributes');
 const {
   getAttributeType,
   getAttributeModifiers,
-} = require('../../../generators/schemas/attributes');
-const { addImport } = require('../../../generators/schemas/imports');
+} = require('../../../generators/common/models/attributes');
+const { addImport } = require('../../../generators/common/imports');
 
 // TODO: emit definition (to a string) & also check snapshots based on that. It would allow checking both the structure & the output.
 describe('Attributes', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('Attribute to Property Signature', () => {
@@ -48,7 +48,7 @@ describe('Attributes', () => {
 
       expect(prop.type.types).toHaveLength(1);
       expect(prop.type.types[0].kind).toBe(ts.SyntaxKind.TypeReference);
-      expect(prop.type.types[0].typeName.escapedText).toBe('StringAttribute');
+      expect(prop.type.types[0].typeName.escapedText).toBe('Attribute.String');
       expect(prop.type.types[0].typeArguments).toBeUndefined();
     });
 
@@ -60,7 +60,7 @@ describe('Attributes', () => {
 
       expect(prop.type.types).toHaveLength(1);
       expect(prop.type.types[0].kind).toBe(ts.SyntaxKind.TypeReference);
-      expect(prop.type.types[0].typeName.escapedText).toBe('ComponentAttribute');
+      expect(prop.type.types[0].typeName.escapedText).toBe('Attribute.Component');
       expect(prop.type.types[0].typeArguments).toHaveLength(1);
       expect(prop.type.types[0].typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
       expect(prop.type.types[0].typeArguments[0].text).toBe('default.comp');
@@ -82,14 +82,14 @@ describe('Attributes', () => {
       const [attributeType, requiredOptionType] = prop.type.types;
 
       expect(attributeType.kind).toBe(ts.SyntaxKind.TypeReference);
-      expect(attributeType.typeName.escapedText).toBe('EnumerationAttribute');
+      expect(attributeType.typeName.escapedText).toBe('Attribute.Enumeration');
       expect(attributeType.typeArguments).toHaveLength(1);
       expect(attributeType.typeArguments[0].kind).toBe(ts.SyntaxKind.TupleType);
       expect(attributeType.typeArguments[0].elements[0].text).toBe('a');
       expect(attributeType.typeArguments[0].elements[1].text).toBe('b');
 
       expect(requiredOptionType.kind).toBe(ts.SyntaxKind.TypeReference);
-      expect(requiredOptionType.typeName.escapedText).toBe('DefaultTo');
+      expect(requiredOptionType.typeName.escapedText).toBe('Attribute.DefaultTo');
       expect(requiredOptionType.typeArguments).toHaveLength(1);
       expect(requiredOptionType.typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
       expect(requiredOptionType.typeArguments[0].text).toBe('b');
@@ -108,22 +108,22 @@ describe('Attributes', () => {
     });
 
     test.each([
-      ['string', 'StringAttribute'],
-      ['text', 'TextAttribute'],
-      ['richtext', 'RichTextAttribute'],
-      ['password', 'PasswordAttribute'],
-      ['email', 'EmailAttribute'],
-      ['date', 'DateAttribute'],
-      ['time', 'TimeAttribute'],
-      ['datetime', 'DateTimeAttribute'],
-      ['timestamp', 'TimestampAttribute'],
-      ['integer', 'IntegerAttribute'],
-      ['biginteger', 'BigIntegerAttribute'],
-      ['float', 'FloatAttribute'],
-      ['decimal', 'DecimalAttribute'],
-      ['boolean', 'BooleanAttribute'],
-      ['json', 'JSONAttribute'],
-      ['media', 'MediaAttribute'],
+      ['string', 'Attribute.String'],
+      ['text', 'Attribute.Text'],
+      ['richtext', 'Attribute.RichText'],
+      ['password', 'Attribute.Password'],
+      ['email', 'Attribute.Email'],
+      ['date', 'Attribute.Date'],
+      ['time', 'Attribute.Time'],
+      ['datetime', 'Attribute.DateTime'],
+      ['timestamp', 'Attribute.Timestamp'],
+      ['integer', 'Attribute.Integer'],
+      ['biginteger', 'Attribute.BigInteger'],
+      ['float', 'Attribute.Float'],
+      ['decimal', 'Attribute.Decimal'],
+      ['boolean', 'Attribute.Boolean'],
+      ['json', 'Attribute.JSON'],
+      ['media', 'Attribute.Media'],
     ])('Basic %p attribute should map to a %p type', (type, expectedType) => {
       const typeNode = getAttributeType('foo', { type });
 
@@ -134,7 +134,7 @@ describe('Attributes', () => {
       expect(typeNode.typeArguments).toBeUndefined();
 
       expect(consoleWarnMock).not.toHaveBeenCalled();
-      expect(addImport).toHaveBeenCalledWith(expectedType);
+      expect(addImport).toHaveBeenCalledWith('Attribute');
     });
 
     describe('Complex types (with generic type parameters)', () => {
@@ -145,7 +145,7 @@ describe('Attributes', () => {
         expect(typeNode.typeName.escapedText).toBe(typeName);
 
         expect(consoleWarnMock).not.toHaveBeenCalled();
-        expect(addImport).toHaveBeenCalledWith(typeName);
+        expect(addImport).toHaveBeenCalledWith('Attribute');
       };
 
       describe('Enumeration', () => {
@@ -153,7 +153,7 @@ describe('Attributes', () => {
           const attribute = { type: 'enumeration', enum: ['a', 'b', 'c'] };
           const typeNode = getAttributeType('foo', attribute);
 
-          defaultAssertions(typeNode, 'EnumerationAttribute');
+          defaultAssertions(typeNode, 'Attribute.Enumeration');
 
           expect(typeNode.typeArguments).toHaveLength(1);
           expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.TupleType);
@@ -174,7 +174,7 @@ describe('Attributes', () => {
           const attribute = { type: 'uid' };
           const typeNode = getAttributeType('foo', attribute);
 
-          defaultAssertions(typeNode, 'UIDAttribute');
+          defaultAssertions(typeNode, 'Attribute.UID');
 
           expect(typeNode.typeArguments).toBeUndefined();
         });
@@ -183,7 +183,7 @@ describe('Attributes', () => {
           const attribute = { type: 'uid', targetField: 'bar' };
           const typeNode = getAttributeType('foo', attribute, 'api::bar.bar');
 
-          defaultAssertions(typeNode, 'UIDAttribute');
+          defaultAssertions(typeNode, 'Attribute.UID');
 
           expect(typeNode.typeArguments).not.toBeUndefined();
           expect(typeNode.typeArguments).toHaveLength(2);
@@ -199,7 +199,7 @@ describe('Attributes', () => {
           const attribute = { type: 'uid', options: { separator: '_' } };
           const typeNode = getAttributeType('foo', attribute);
 
-          defaultAssertions(typeNode, 'UIDAttribute');
+          defaultAssertions(typeNode, 'Attribute.UID');
 
           expect(typeNode.typeArguments).toHaveLength(3);
 
@@ -224,7 +224,7 @@ describe('Attributes', () => {
           const attribute = { type: 'uid', options: { separator: '_' }, targetField: 'bar' };
           const typeNode = getAttributeType('foo', attribute, 'api::bar.bar');
 
-          defaultAssertions(typeNode, 'UIDAttribute');
+          defaultAssertions(typeNode, 'Attribute.UID');
 
           expect(typeNode.typeArguments).toHaveLength(3);
 
@@ -254,7 +254,7 @@ describe('Attributes', () => {
           const attribute = { type: 'relation', relation: 'oneToOne', target: 'api::bar.bar' };
           const typeNode = getAttributeType('foo', attribute, 'api::foo.foo');
 
-          defaultAssertions(typeNode, 'RelationAttribute');
+          defaultAssertions(typeNode, 'Attribute.Relation');
 
           expect(typeNode.typeArguments).toHaveLength(3);
 
@@ -272,7 +272,7 @@ describe('Attributes', () => {
           const attribute = { type: 'relation', relation: 'morphMany' };
           const typeNode = getAttributeType('foo', attribute, 'api::foo.foo');
 
-          defaultAssertions(typeNode, 'RelationAttribute');
+          defaultAssertions(typeNode, 'Attribute.Relation');
 
           expect(typeNode.typeArguments).toHaveLength(2);
 
@@ -289,7 +289,7 @@ describe('Attributes', () => {
           const attribute = { type: 'component', component: 'default.comp', repeatable: true };
           const typeNode = getAttributeType('foo', attribute);
 
-          defaultAssertions(typeNode, 'ComponentAttribute');
+          defaultAssertions(typeNode, 'Attribute.Component');
 
           expect(typeNode.typeArguments).toHaveLength(2);
 
@@ -303,7 +303,7 @@ describe('Attributes', () => {
           const attribute = { type: 'component', component: 'default.comp' };
           const typeNode = getAttributeType('foo', attribute);
 
-          defaultAssertions(typeNode, 'ComponentAttribute');
+          defaultAssertions(typeNode, 'Attribute.Component');
 
           expect(typeNode.typeArguments).toHaveLength(1);
 
@@ -317,7 +317,7 @@ describe('Attributes', () => {
           const attribute = { type: 'dynamiczone', components: ['default.comp1', 'default.comp2'] };
           const typeNode = getAttributeType('foo', attribute);
 
-          defaultAssertions(typeNode, 'DynamicZoneAttribute');
+          defaultAssertions(typeNode, 'Attribute.DynamicZone');
 
           expect(typeNode.typeArguments).toHaveLength(1);
 
@@ -359,7 +359,7 @@ describe('Attributes', () => {
 
           expect(modifiers).toHaveLength(1);
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('RequiredAttribute');
+          expect(modifiers[0].typeName.escapedText).toBe('Attribute.Required');
         });
       });
 
@@ -384,7 +384,7 @@ describe('Attributes', () => {
 
           expect(modifiers).toHaveLength(1);
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('PrivateAttribute');
+          expect(modifiers[0].typeName.escapedText).toBe('Attribute.Private');
         });
       });
 
@@ -409,7 +409,7 @@ describe('Attributes', () => {
 
           expect(modifiers).toHaveLength(1);
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('UniqueAttribute');
+          expect(modifiers[0].typeName.escapedText).toBe('Attribute.Unique');
         });
       });
 
@@ -434,7 +434,7 @@ describe('Attributes', () => {
 
           expect(modifiers).toHaveLength(1);
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('ConfigurableAttribute');
+          expect(modifiers[0].typeName.escapedText).toBe('Attribute.Configurable');
         });
       });
 
@@ -455,7 +455,7 @@ describe('Attributes', () => {
 
           expect(modifiers).toHaveLength(1);
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('CustomField');
+          expect(modifiers[0].typeName.escapedText).toBe('Attribute.CustomField');
           expect(modifiers[0].typeArguments).toHaveLength(1);
           expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
           expect(modifiers[0].typeArguments[0].text).toBe('plugin::color-picker.color');
@@ -473,7 +473,7 @@ describe('Attributes', () => {
 
           expect(modifiers).toHaveLength(1);
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('CustomField');
+          expect(modifiers[0].typeName.escapedText).toBe('Attribute.CustomField');
           expect(modifiers[0].typeArguments).toHaveLength(2);
           expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
           expect(modifiers[0].typeArguments[0].text).toBe('plugin::color-picker.color');
@@ -507,7 +507,7 @@ describe('Attributes', () => {
 
           expect(modifiers).toHaveLength(1);
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('SetPluginOptions');
+          expect(modifiers[0].typeName.escapedText).toBe('Attribute.SetPluginOptions');
           expect(modifiers[0].typeArguments).toHaveLength(1);
           expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.TypeLiteral);
           expect(modifiers[0].typeArguments[0].members).toHaveLength(1);
@@ -546,7 +546,7 @@ describe('Attributes', () => {
           expect(modifiers).toHaveLength(1);
 
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('SetMinMax');
+          expect(modifiers[0].typeName.escapedText).toBe('Attribute.SetMinMax');
 
           expect(modifiers[0].typeArguments).toHaveLength(1);
           expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.TypeLiteral);
@@ -570,7 +570,7 @@ describe('Attributes', () => {
           expect(modifiers).toHaveLength(1);
 
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('SetMinMax');
+          expect(modifiers[0].typeName.escapedText).toBe('Attribute.SetMinMax');
 
           expect(modifiers[0].typeArguments).toHaveLength(1);
           expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.TypeLiteral);
@@ -594,7 +594,7 @@ describe('Attributes', () => {
           expect(modifiers).toHaveLength(1);
 
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('SetMinMax');
+          expect(modifiers[0].typeName.escapedText).toBe('Attribute.SetMinMax');
 
           expect(modifiers[0].typeArguments).toHaveLength(1);
           expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.TypeLiteral);
@@ -636,7 +636,7 @@ describe('Attributes', () => {
           expect(modifiers).toHaveLength(1);
 
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('SetMinMaxLength');
+          expect(modifiers[0].typeName.escapedText).toBe('Attribute.SetMinMaxLength');
 
           expect(modifiers[0].typeArguments).toHaveLength(1);
           expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.TypeLiteral);
@@ -660,7 +660,7 @@ describe('Attributes', () => {
           expect(modifiers).toHaveLength(1);
 
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('SetMinMaxLength');
+          expect(modifiers[0].typeName.escapedText).toBe('Attribute.SetMinMaxLength');
 
           expect(modifiers[0].typeArguments).toHaveLength(1);
           expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.TypeLiteral);
@@ -684,7 +684,7 @@ describe('Attributes', () => {
           expect(modifiers).toHaveLength(1);
 
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('SetMinMaxLength');
+          expect(modifiers[0].typeName.escapedText).toBe('Attribute.SetMinMaxLength');
 
           expect(modifiers[0].typeArguments).toHaveLength(1);
           expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.TypeLiteral);
@@ -726,7 +726,7 @@ describe('Attributes', () => {
           expect(modifiers).toHaveLength(1);
 
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('DefaultTo');
+          expect(modifiers[0].typeName.escapedText).toBe('Attribute.DefaultTo');
 
           expect(modifiers[0].typeArguments).toHaveLength(1);
           expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.TrueKeyword);
@@ -739,7 +739,7 @@ describe('Attributes', () => {
           expect(modifiers).toHaveLength(1);
 
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('DefaultTo');
+          expect(modifiers[0].typeName.escapedText).toBe('Attribute.DefaultTo');
 
           expect(modifiers[0].typeArguments).toHaveLength(1);
           expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.TypeLiteral);

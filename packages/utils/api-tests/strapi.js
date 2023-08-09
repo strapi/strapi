@@ -15,18 +15,20 @@ const superAdminCredentials = {
 
 const superAdminLoginInfo = _.pick(superAdminCredentials, ['email', 'password']);
 
-const TEST_APP_URL = path.resolve(__dirname, '../../../testApp');
-
 const createStrapiInstance = async ({
   ensureSuperAdmin = true,
   logLevel = 'error',
   bypassAuth = true,
+  bootstrap,
 } = {}) => {
   // read .env file as it could have been updated
   dotenv.config({ path: process.env.ENV_PATH });
+
+  const baseDir = path.dirname(process.env.ENV_PATH);
+
   const options = {
-    appDir: TEST_APP_URL,
-    distDir: TEST_APP_URL,
+    appDir: baseDir,
+    distDir: baseDir,
   };
   const instance = strapi(options);
 
@@ -39,6 +41,17 @@ const createStrapiInstance = async ({
       verify() {},
     });
   }
+
+  if (bootstrap) {
+    const modules = instance.container.get('modules');
+    const originalBootstrap = modules.bootstrap;
+    // decorate modules bootstrap
+    modules.bootstrap = async () => {
+      await originalBootstrap();
+      await bootstrap({ strapi: instance });
+    };
+  }
+
   await instance.load();
 
   instance.log.level = logLevel;

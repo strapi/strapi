@@ -1,8 +1,10 @@
 import React from 'react';
+
+import { darkTheme, lightTheme } from '@strapi/design-system';
+import { useGuidedTour } from '@strapi/helper-plugin';
 import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { useGuidedTour } from '@strapi/helper-plugin';
-import { lightTheme, darkTheme } from '@strapi/design-system';
+
 import Theme from '../../../Theme';
 import ThemeToggleProvider from '../../../ThemeToggleProvider';
 import GuidedTourModal from '../index';
@@ -91,7 +93,6 @@ describe('<GuidedTourModal />', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
-        line-height: 0;
         color: #ffffff;
       }
 

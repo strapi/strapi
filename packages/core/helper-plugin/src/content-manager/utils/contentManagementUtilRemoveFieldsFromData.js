@@ -1,6 +1,6 @@
 import get from 'lodash/get';
 
-import { getType, getOtherInfos } from './getAttributeInfos';
+import { getOtherInfos, getType } from './getAttributeInfos';
 
 const defaultFields = ['createdBy', 'updatedBy', 'publishedAt', 'id', '_id'];
 
@@ -66,4 +66,4 @@ const contentManagementUtilRemoveFieldsFromData = (
   return recursiveCleanData(data, contentTypeSchema);
 };
 
-export default contentManagementUtilRemoveFieldsFromData;
+export { contentManagementUtilRemoveFieldsFromData };

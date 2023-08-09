@@ -1,12 +1,11 @@
 import React from 'react';
-import { stringify } from 'qs';
-import { IntlProvider } from 'react-intl';
-import { QueryClientProvider, QueryClient } from 'react-query';
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
 
-import { NotificationsProvider, useNotification, useFetchClient } from '@strapi/helper-plugin';
-import { ThemeProvider, lightTheme, useNotifyAT } from '@strapi/design-system';
+import { lightTheme, ThemeProvider, useNotifyAT } from '@strapi/design-system';
+import { NotificationsProvider, useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
 
 import { useAssets } from '../useAssets';
 
@@ -82,25 +81,19 @@ describe('useAssets', () => {
       filters: {
         $and: [
           {
-            folder: {
-              id: {
-                $null: true,
-              },
+            folderPath: {
+              $eq: '/',
             },
           },
         ],
       },
     };
 
-    await waitFor(() =>
-      expect(get).toBeCalledWith(
-        `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
-      )
-    );
+    await waitFor(() => expect(get).toBeCalledWith(`/upload/files`, { params: expected }));
   });
 
   test('fetches data from the right URL if a query was set', async () => {
-    const { result } = await setup({ query: { folder: 1 } });
+    const { result } = await setup({ query: { folderPath: '/1/2' } });
 
     await waitFor(() => result.current.isSuccess);
     const { get } = useFetchClient();
@@ -109,24 +102,20 @@ describe('useAssets', () => {
       filters: {
         $and: [
           {
-            folder: {
-              id: 1,
+            folderPath: {
+              $eq: '/1/2',
             },
           },
         ],
       },
     };
 
-    await waitFor(() =>
-      expect(get).toBeCalledWith(
-        `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
-      )
-    );
+    await waitFor(() => expect(get).toBeCalledWith(`/upload/files`, { params: expected }));
   });
 
   test('allows to merge filter query params using filters.$and', async () => {
     const { result } = await setup({
-      query: { folder: 5, filters: { $and: [{ something: 'true' }] } },
+      query: { folderPath: '/1/2', filters: { $and: [{ something: 'true' }] } },
     });
 
     await waitFor(() => result.current.isSuccess);
@@ -136,27 +125,23 @@ describe('useAssets', () => {
       filters: {
         $and: [
           {
-            something: true,
+            something: 'true',
           },
           {
-            folder: {
-              id: 5,
+            folderPath: {
+              $eq: '/1/2',
             },
           },
         ],
       },
     };
 
-    await waitFor(() =>
-      expect(get).toBeCalledWith(
-        `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
-      )
-    );
+    await waitFor(() => expect(get).toBeCalledWith(`/upload/files`, { params: expected }));
   });
 
-  test('does not use folder filter in params if _q', async () => {
+  test('does not use folderPath filter in params if _q', async () => {
     const { result } = await setup({
-      query: { folder: 5, _q: 'something', filters: { $and: [{ something: 'true' }] } },
+      query: { folderPath: '/1/2', _q: 'something', filters: { $and: [{ something: 'true' }] } },
     });
 
     await waitFor(() => result.current.isSuccess);
@@ -166,24 +151,20 @@ describe('useAssets', () => {
       filters: {
         $and: [
           {
-            something: true,
+            something: 'true',
           },
         ],
       },
       _q: 'something',
     };
 
-    await waitFor(() =>
-      expect(get).toBeCalledWith(
-        `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
-      )
-    );
+    await waitFor(() => expect(get).toBeCalledWith(`/upload/files`, { params: expected }));
   });
 
   test('correctly encodes the search query _q', async () => {
     const _q = 'something&else';
     const { result } = await setup({
-      query: { folder: 5, _q, filters: { $and: [{ something: 'true' }] } },
+      query: { folderPath: '/1/2', _q, filters: { $and: [{ something: 'true' }] } },
     });
 
     await waitFor(() => result.current.isSuccess);
@@ -193,18 +174,14 @@ describe('useAssets', () => {
       filters: {
         $and: [
           {
-            something: true,
+            something: 'true',
           },
         ],
       },
       _q: encodeURIComponent(_q),
     };
 
-    await waitFor(() =>
-      expect(get).toBeCalledWith(
-        `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
-      )
-    );
+    await waitFor(() => expect(get).toBeCalledWith(`/upload/files`, { params: expected }));
   });
 
   test('it does not fetch, if skipWhen is set', async () => {

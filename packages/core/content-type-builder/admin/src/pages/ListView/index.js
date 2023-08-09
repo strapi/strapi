@@ -1,19 +1,22 @@
 import React from 'react';
-import { useTracking, Link } from '@strapi/helper-plugin';
-import { Plus, ArrowLeft, Check, Pencil } from '@strapi/icons';
-import { Button, Flex, Box, ContentLayout, HeaderLayout } from '@strapi/design-system';
+
+import { Box, Button, ContentLayout, Flex, HeaderLayout } from '@strapi/design-system';
+import { Link, useTracking } from '@strapi/helper-plugin';
+import { ArrowLeft, Check, Pencil, Plus } from '@strapi/icons';
 import get from 'lodash/get';
 import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { Prompt, useRouteMatch } from 'react-router-dom';
+
 import List from '../../components/List';
 import ListRow from '../../components/ListRow';
 import useDataManager from '../../hooks/useDataManager';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';
 import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
 import getTrad from '../../utils/getTrad';
+
 import LinkToCMSettingsView from './LinkToCMSettingsView';
 
 /* eslint-disable indent */
@@ -106,7 +109,9 @@ const ListView = () => {
   return (
     <>
       <Prompt
-        message={formatMessage({ id: getTrad('prompt.unsaved') })}
+        message={(location) =>
+          location.hash === '#back' ? false : formatMessage({ id: getTrad('prompt.unsaved') })
+        }
         when={hasModelBeenModified}
       />
       <HeaderLayout

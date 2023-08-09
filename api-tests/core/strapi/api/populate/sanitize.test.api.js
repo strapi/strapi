@@ -10,6 +10,7 @@ const { createContentAPIRequest, createAuthRequest } = require('api-tests/reques
 const builder = createTestBuilder();
 
 let strapi;
+let file;
 let rq;
 
 const schemas = {
@@ -23,15 +24,63 @@ const schemas = {
         cover: { type: 'media' },
       },
     },
+    b: {
+      kind: 'collectionType',
+      displayName: 'b',
+      singularName: 'b',
+      pluralName: 'bs',
+      attributes: {
+        name: { type: 'string' },
+        number: { type: 'integer' },
+        restricted: { type: 'string', private: true },
+        password: { type: 'password' },
+        relA: { type: 'relation', relation: 'oneToOne', target: 'api::a.a' },
+        cp: { type: 'component', repeatable: false, component: 'default.cp-a' },
+        dz: { type: 'dynamiczone', components: ['default.cp-a', 'default.cp-b'] },
+        img: { type: 'media', multiple: false },
+      },
+    },
+  },
+  components: {
+    cpA: {
+      displayName: 'cp-a',
+      attributes: {
+        name: {
+          type: 'string',
+        },
+      },
+    },
+    cpB: {
+      displayName: 'cp-b',
+      attributes: {
+        title: {
+          type: 'string',
+        },
+      },
+    },
   },
 };
 
-const getFixtures = (file) => {
-  return [
-    {
-      cover: file.id,
-    },
-  ];
+const fixtures = {
+  a: (file) => [{ cover: file.id }],
+  b:
+    (file) =>
+    ({ a }) =>
+      [
+        {
+          name: 'one',
+          number: 1,
+          restricted: 'restricted',
+          password: 'password',
+          relA: a[0].id,
+          cp: { name: 'cp_one' },
+          dz: [
+            { __component: 'default.cp-a', name: 'cp_two' },
+            { __component: 'default.cp-b', title: 'cp_three' },
+          ],
+          img: file.id,
+        },
+      ],
 };
 
 const uploadFile = async () => {
@@ -53,11 +102,14 @@ const uploadFile = async () => {
 
 describe('Sanitize populated entries', () => {
   beforeAll(async () => {
-    const file = await uploadFile();
+    file = await uploadFile();
 
     await builder
+      .addComponent(schemas.components.cpA)
+      .addComponent(schemas.components.cpB)
       .addContentTypes(Object.values(schemas.contentTypes))
-      .addFixtures(schemas.contentTypes.a.singularName, getFixtures(file))
+      .addFixtures(schemas.contentTypes.a.singularName, fixtures.a(file))
+      .addFixtures(schemas.contentTypes.b.singularName, fixtures.b(file))
       .build();
 
     strapi = await createStrapiInstance();
@@ -85,6 +137,44 @@ describe('Sanitize populated entries', () => {
       expect(body.data[0].attributes.cover).toBeDefined();
       expect(body.data[0].attributes.cover.data.attributes.createdBy).toBeUndefined();
       expect(body.data[0].attributes.cover.data.attributes.updatedBy).toBeUndefined();
+    });
+
+    test("Media's relations (from related) can be populated without restricted attributes", async () => {
+      const { status, body } = await rq.get(`/upload/files/${file.id}`, {
+        qs: { populate: { related: { populate: '*' } } },
+      });
+
+      expect(status).toBe(200);
+      expect(body.related).toBeDefined();
+      expect(Array.isArray(body.related)).toBeTruthy();
+      expect(body.related).toHaveLength(2);
+
+      const [a, b] = body.related;
+
+      expect(a.__type).toBe('api::a.a');
+      expect(b.__type).toBe('api::b.b');
+
+      expect(b).not.toHaveProperty('restricted');
+      expect(b).not.toHaveProperty('password');
+    });
+  });
+
+  describe('Wildcard Populate', () => {
+    test('Wildcard populate is transformed to an exhaustive list of populatable fields', async () => {
+      const findManyMock = jest.spyOn(strapi.entityService, 'findMany');
+
+      const { status } = await rq.get(`/${schemas.contentTypes.b.pluralName}`, {
+        qs: { fields: ['id'], populate: '*' },
+      });
+
+      expect(status).toBe(200);
+      // Make sure the wildcard populate is transformed to an exhaustive list
+      expect(findManyMock).toHaveBeenCalledWith(
+        'api::b.b',
+        expect.objectContaining({
+          populate: expect.objectContaining({ relA: true, cp: true, dz: true, img: true }),
+        })
+      );
     });
   });
 });

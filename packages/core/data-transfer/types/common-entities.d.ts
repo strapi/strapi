@@ -1,6 +1,5 @@
-import type { GetAttributesValues, RelationsType } from '@strapi/strapi';
-import type { SchemaUID } from '@strapi/strapi/lib/types/utils';
 import type { Readable } from 'stream';
+import type { Attribute, Common } from '@strapi/strapi';
 
 export interface IMetadata {
   strapi?: {
@@ -14,7 +13,7 @@ export interface IMetadata {
  * Common TransferEngine format to represent a Strapi entity
  * @template T The schema UID this entity represents
  */
-export interface IEntity<T extends SchemaUID | string = SchemaUID> {
+export interface IEntity<T extends Common.UID.ContentType = Common.UID.ContentType> {
   /**
    * UID of the parent type (content-type, component, etc...)
    */
@@ -29,7 +28,7 @@ export interface IEntity<T extends SchemaUID | string = SchemaUID> {
   /**
    * The entity data (attributes value)
    */
-  data: GetAttributesValues<T>;
+  data: Attribute.GetValues<T>;
 }
 
 /**
@@ -50,7 +49,7 @@ interface IDefaultLink {
   /**
    * The relation type
    */
-  relation: RelationsType;
+  relation: Attribute.RelationKind.Any;
 
   /**
    * Left side of the link
@@ -130,11 +129,32 @@ export interface IConfiguration<T = unknown> {
   value: T;
 }
 
+interface IFile {
+  name: string;
+  alternativeText?: string;
+  caption?: string;
+  width?: number;
+  height?: number;
+  formats?: Record<string, IFile>;
+  hash: string;
+  ext?: string;
+  mime: string;
+  size: number;
+  url: string;
+  previewUrl?: string;
+  path?: string;
+  provider?: string;
+  provider_metadata?: Record<string, unknown>;
+  type?: string;
+  mainHash?: string;
+}
 export interface IAsset {
   filename: string;
   filepath: string;
   stream: Readable;
   stats: IAssetStats;
+  buffer?: Buffer;
+  metadata?: IFile;
 }
 
 export interface IAssetStats {

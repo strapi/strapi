@@ -384,6 +384,20 @@ describe('Relations', () => {
 
       expect(foundTag2.articles.count).toBe(0);
     });
+
+    test('Bulk delete of unknown or already deleted entries should succeed', async () => {
+      const res = await rq({
+        url: '/content-manager/collection-types/api::article.article/actions/bulkDelete',
+        method: 'POST',
+        body: {
+          ids: [9999999],
+        },
+      });
+
+      expect(res.body).toEqual({
+        count: 0,
+      });
+    });
   });
 
   describe('Test manyWay articlesWithTags and tags', () => {

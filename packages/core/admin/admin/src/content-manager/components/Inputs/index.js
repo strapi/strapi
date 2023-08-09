@@ -1,16 +1,18 @@
 import React, { memo, useMemo } from 'react';
-import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
+
+import { GenericInput, NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
 import get from 'lodash/get';
+import isEqual from 'lodash/isEqual';
 import omit from 'lodash/omit';
 import take from 'lodash/take';
-import isEqual from 'lodash/isEqual';
-import { GenericInput, NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+
 import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
-import Wysiwyg from '../Wysiwyg';
 import InputUID from '../InputUID';
 import { RelationInputDataManager } from '../RelationInputDataManager';
+import Wysiwyg from '../Wysiwyg';
 
 import { connect, generateOptions, getInputType, select, VALIDATIONS_TO_OMIT } from './utils';
 
@@ -73,20 +75,9 @@ function Inputs({
     return foundAttributeType === 'dynamiczone';
   }, [currentContentTypeLayout, fieldName]);
 
-  const inputType = useMemo(() => {
-    return getInputType(type);
-  }, [type]);
+  const inputType = getInputType(type);
 
-  const inputValue = useMemo(() => {
-    // Fix for input file multipe
-    if (type === 'media' && !value) {
-      return [];
-    }
-
-    return value;
-  }, [type, value]);
-
-  const step = getStep(type);
+  const inputValue = type === 'media' && !value ? [] : value;
 
   const isUserAllowedToEditField = useMemo(() => {
     const joinedName = fieldName.join('.');
@@ -156,36 +147,6 @@ function Inputs({
   );
 
   const { label, description, placeholder, visible } = metadatas;
-
-  /**
-   * It decides whether using the default `step` accoding to its `inputType` or the one
-   * obtained from `metadatas`.
-   *
-   * The `metadatas.step` is returned when the `inputValue` is divisible by it or when the
-   * `inputValue` is empty, otherwise the default `step` is returned.
-   */
-  const inputStep = useMemo(() => {
-    if (!metadatas.step || (inputType !== 'datetime' && inputType !== 'time')) {
-      return step;
-    }
-
-    if (!inputValue) {
-      return metadatas.step;
-    }
-
-    let minutes;
-
-    /**
-     * Wtf is this?
-     */
-    if (inputType === 'datetime') {
-      minutes = parseInt(inputValue.substr(14, 2), 10);
-    } else if (inputType === 'time') {
-      minutes = parseInt(inputValue.slice(-2), 10);
-    }
-
-    return minutes % metadatas.step === 0 ? metadatas.step : step;
-  }, [inputType, inputValue, metadatas.step, step]);
 
   if (visible === false) {
     return null;
@@ -269,7 +230,7 @@ function Inputs({
       options={options}
       placeholder={placeholder ? { id: placeholder, defaultMessage: placeholder } : null}
       required={fieldSchema.required || false}
-      step={inputStep}
+      step={getStep(type)}
       type={customFieldUid || inputType}
       // validations={validations}
       value={inputValue}
@@ -315,9 +276,6 @@ const getStep = (type) => {
     case 'float':
     case 'decimal':
       return 0.01;
-    case 'time':
-    case 'datetime':
-      return 15;
     default:
       return 1;
   }

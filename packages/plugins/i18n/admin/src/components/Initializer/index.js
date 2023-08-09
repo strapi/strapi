@@ -5,9 +5,11 @@
  */
 
 import { useEffect, useRef } from 'react';
+
 import PropTypes from 'prop-types';
-import pluginId from '../../pluginId';
+
 import useLocales from '../../hooks/useLocales';
+import pluginId from '../../pluginId';
 
 const Initializer = ({ setPlugin }) => {
   const { isLoading, locales } = useLocales();

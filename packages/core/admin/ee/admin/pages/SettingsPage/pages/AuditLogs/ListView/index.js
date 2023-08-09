@@ -1,41 +1,44 @@
 import React from 'react';
-import { useIntl } from 'react-intl';
+
 import {
-  SettingsPageTitle,
-  DynamicTable,
-  useRBAC,
-  useFocusWhenNavigate,
-  useQueryParams,
-  AnErrorOccurred,
-} from '@strapi/helper-plugin';
-import {
-  Box,
-  HeaderLayout,
-  ContentLayout,
   ActionLayout,
+  Box,
+  ContentLayout,
+  HeaderLayout,
   Layout,
   Main,
 } from '@strapi/design-system';
-import adminPermissions from '../../../../../../../admin/src/permissions';
-import TableRows from './TableRows';
-import tableHeaders from './utils/tableHeaders';
-import PaginationFooter from './PaginationFooter';
-import Modal from './Modal';
-import Filters from '../../../../../../../admin/src/pages/SettingsPage/components/Filters';
-import getDisplayedFilters from './utils/getDisplayedFilters';
-import useAuditLogsData from './hooks/useAuditLogsData';
+import {
+  AnErrorOccurred,
+  DynamicTable,
+  SettingsPageTitle,
+  useFocusWhenNavigate,
+  useQueryParams,
+  useRBAC,
+} from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
+import { useSelector } from 'react-redux';
 
-const auditLogsPermissions = {
-  ...adminPermissions.settings.auditLogs,
-  readUsers: adminPermissions.settings.users.read,
-};
+import { selectAdminPermissions } from '../../../../../../../admin/src/pages/App/selectors';
+import Filters from '../../../../../../../admin/src/pages/SettingsPage/components/Filters';
+
+import useAuditLogsData from './hooks/useAuditLogsData';
+import Modal from './Modal';
+import PaginationFooter from './PaginationFooter';
+import TableRows from './TableRows';
+import getDisplayedFilters from './utils/getDisplayedFilters';
+import tableHeaders from './utils/tableHeaders';
 
 const ListView = () => {
   const { formatMessage } = useIntl();
+  const permissions = useSelector(selectAdminPermissions);
 
   const {
     allowedActions: { canRead: canReadAuditLogs, canReadUsers },
-  } = useRBAC(auditLogsPermissions);
+  } = useRBAC({
+    ...permissions.settings.auditLogs,
+    readUsers: permissions.settings.users.read,
+  });
 
   const [{ query }, setQuery] = useQueryParams();
   const { auditLogs, users, isLoading, hasError } = useAuditLogsData({

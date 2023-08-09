@@ -1,27 +1,29 @@
 import React, { useRef, useState } from 'react';
-import styled from 'styled-components';
-import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
-import { NavLink as RouterNavLink, useLocation, useHistory } from 'react-router-dom';
-import { Divider, FocusTrap, Box, Typography, Flex } from '@strapi/design-system';
+
+import { Box, Divider, Flex, FocusTrap, Typography } from '@strapi/design-system';
 import {
   MainNav,
   NavBrand,
-  NavSections,
-  NavLink,
-  NavSection,
-  NavUser,
   NavCondense,
   NavFooter,
+  NavLink,
+  NavSection,
+  NavSections,
+  NavUser,
 } from '@strapi/design-system/v2';
-import { Write, Exit } from '@strapi/icons';
 import {
   auth,
-  usePersistentState,
-  useAppInfo,
-  useTracking,
   getFetchClient,
+  useAppInfo,
+  usePersistentState,
+  useTracking,
 } from '@strapi/helper-plugin';
+import { Exit, Write } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import { NavLink as RouterNavLink, useHistory, useLocation } from 'react-router-dom';
+import styled from 'styled-components';
+
 import { useConfigurations } from '../../hooks';
 
 const LinkUserWrapper = styled(Box)`
@@ -212,7 +214,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
                     })}
                   </Typography>
                 </LinkUser>
-                <LinkUser tabIndex={0} onClick={handleLogout} logout="logout" to="/auth/login">
+                <LinkUser tabIndex={0} onClick={handleLogout} to="/auth/login">
                   <Typography textColor="danger600">
                     {formatMessage({
                       id: 'app.components.LeftMenu.logout',

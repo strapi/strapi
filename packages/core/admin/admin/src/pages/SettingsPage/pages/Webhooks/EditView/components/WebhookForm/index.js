@@ -1,24 +1,27 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import { Field, FormikProvider, useFormik } from 'formik';
-import { useIntl } from 'react-intl';
-import { Form, Link } from '@strapi/helper-plugin';
-import { ArrowLeft, Check, Play as Publish } from '@strapi/icons';
+
 import {
+  Box,
+  Button,
+  ContentLayout,
+  Flex,
   Grid,
   GridItem,
-  Button,
-  Flex,
-  TextInput,
   HeaderLayout,
-  ContentLayout,
-  Box,
+  TextInput,
 } from '@strapi/design-system';
+import { Form, Link } from '@strapi/helper-plugin';
+import { ArrowLeft, Check, Play as Publish } from '@strapi/icons';
+import { Field, FormikProvider, useFormik } from 'formik';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 
-import EventTable from 'ee_else_ce/pages/SettingsPage/pages/Webhooks/EditView/components/EventTable';
-import { makeWebhookValidationSchema } from './utils/makeWebhookValidationSchema';
+import { useEnterprise } from '../../../../../../../hooks/useEnterprise';
+import { EventTableCE } from '../EventTable';
 import HeadersInput from '../HeadersInput';
 import TriggerContainer from '../TriggerContainer';
+
+import { makeWebhookValidationSchema } from './utils/makeWebhookValidationSchema';
 
 const WebhookForm = ({
   handleSubmit,
@@ -30,6 +33,15 @@ const WebhookForm = ({
 }) => {
   const { formatMessage } = useIntl();
   const [showTriggerResponse, setShowTriggerResponse] = useState(false);
+  const EventTable = useEnterprise(
+    EventTableCE,
+    async () =>
+      (
+        await import(
+          '../../../../../../../../../ee/admin/pages/SettingsPage/pages/Webhooks/EditView/components/EventTable'
+        )
+      ).EventTableEE
+  );
 
   /**
    * Map the headers into a form that can be used within the formik form
@@ -51,11 +63,21 @@ const WebhookForm = ({
       headers: mapHeaders(data?.headers || {}),
       events: data?.events || [],
     },
-    onSubmit: handleSubmit,
+    onSubmit(values, { resetForm, setSubmitting }) {
+      handleSubmit(values);
+
+      resetForm({ values });
+      setSubmitting(false);
+    },
     validationSchema: makeWebhookValidationSchema({ formatMessage }),
     validateOnChange: false,
     validateOnBlur: false,
   });
+
+  // block rendering until the EE component is fully loaded
+  if (!EventTable) {
+    return null;
+  }
 
   return (
     <FormikProvider value={formik}>

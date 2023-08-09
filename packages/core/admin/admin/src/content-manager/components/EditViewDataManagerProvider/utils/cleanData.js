@@ -1,6 +1,7 @@
 import get from 'lodash/get';
 import isArray from 'lodash/isArray';
 import isObject from 'lodash/isObject';
+
 import { getInitialDataPathUsingTempKeys } from '../../../utils/paths';
 
 /* eslint-disable indent */
@@ -90,7 +91,7 @@ const cleanData = ({ browserState, serverState }, currentSchema, componentsSchem
           /**
            * Because of how repeatable components work when you dig into them the server
            * will have no object to compare too therefore no relation array will be setup
-           * because the component has not been initialised, therefore we can safely assume
+           * because the component has not been initialized, therefore we can safely assume
            * it needs to be added and provide a default empty array.
            */
           let actualOldValue = get(rootServerState, trueInitialDataPath, []);

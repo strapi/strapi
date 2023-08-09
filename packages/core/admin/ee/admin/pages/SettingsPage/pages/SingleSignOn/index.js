@@ -1,93 +1,80 @@
-import React, { useEffect } from 'react';
+import * as React from 'react';
+
 import {
-  CheckPagePermissions,
-  SettingsPageTitle,
-  useRBAC,
-  LoadingIndicatorPage,
-  useFocusWhenNavigate,
-} from '@strapi/helper-plugin';
-import { Check } from '@strapi/icons';
-import {
-  ContentLayout,
-  HeaderLayout,
-  Layout,
   Button,
-  Main,
-  Typography,
-  ToggleInput,
-  Select,
-  Option,
+  ContentLayout,
+  Flex,
   Grid,
   GridItem,
-  Flex,
+  HeaderLayout,
+  Layout,
+  Main,
   MultiSelect,
   MultiSelectOption,
+  Option,
+  Select,
+  ToggleInput,
+  Typography,
 } from '@strapi/design-system';
-import { useIntl } from 'react-intl';
+import {
+  CheckPagePermissions,
+  LoadingIndicatorPage,
+  SettingsPageTitle,
+  useFocusWhenNavigate,
+  useRBAC,
+} from '@strapi/helper-plugin';
+import { Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
-import { getRequestUrl } from '../../../../../../admin/src/utils';
-import { useRolesList, useSettingsForm } from '../../../../../../admin/src/hooks';
-import adminPermissions from '../../../../../../admin/src/permissions';
+import { useIntl } from 'react-intl';
+import { useSelector } from 'react-redux';
+
+import { useSettingsForm } from '../../../../../../admin/src/hooks';
+import { useAdminRoles } from '../../../../../../admin/src/hooks/useAdminRoles';
+import { selectAdminPermissions } from '../../../../../../admin/src/pages/App/selectors';
+
 import schema from './utils/schema';
 
-const ssoPermissions = {
-  ...adminPermissions.settings.sso,
-  readRoles: adminPermissions.settings.roles.read,
-};
-
 export const SingleSignOn = () => {
+  useFocusWhenNavigate();
+
   const { formatMessage } = useIntl();
+  const permissions = useSelector(selectAdminPermissions);
 
   const {
-    isLoading: isLoadingForPermissions,
+    isLoading: isLoadingPermissions,
     allowedActions: { canUpdate, canReadRoles },
-  } = useRBAC(ssoPermissions);
+  } = useRBAC({
+    ...permissions.settings.sso,
+    readRoles: permissions.settings.roles.read,
+  });
 
   const [
-    { formErrors, initialData, isLoading, modifiedData, showHeaderButtonLoader },
-    // eslint-disable-next-line no-unused-vars
-    dispatch,
+    { formErrors, initialData, isLoading: isLoadingForm, modifiedData, showHeaderButtonLoader },
+    ,
     { handleChange, handleSubmit },
-  ] = useSettingsForm(getRequestUrl('providers/options'), schema, () => {}, [
+  ] = useSettingsForm('/admin/providers/options', schema, () => {}, [
     'autoRegister',
     'defaultRole',
     'ssoLockedRoles',
   ]);
-  const { roles } = useRolesList(canReadRoles);
 
-  useFocusWhenNavigate();
+  const { roles, isLoading: isLoadingRoles } = useAdminRoles(undefined, {
+    enabled: canReadRoles,
+  });
 
-  const showLoader = isLoadingForPermissions || isLoading;
-
-  useEffect(() => {
-    if (formErrors.defaultRole) {
-      const selector = `[name="defaultRole"]`;
-
-      document.querySelector(selector).focus();
-    }
-  }, [formErrors]);
-
-  const isHeaderButtonDisabled = isEqual(initialData, modifiedData);
+  const isLoading = isLoadingPermissions || isLoadingRoles || isLoadingForm;
+  // TODO: focus() first error field, but it looks like that requires refactoring from useSettingsForm to Formik
 
   return (
     <Layout>
       <SettingsPageTitle name="SSO" />
       <Main tabIndex={-1}>
-        <form
-          onSubmit={(e) => {
-            if (isHeaderButtonDisabled) {
-              e.preventDefault();
-
-              return;
-            }
-            handleSubmit(e);
-          }}
-        >
+        <form onSubmit={handleSubmit}>
           <HeaderLayout
             primaryAction={
               <Button
                 data-testid="save-button"
-                disabled={isHeaderButtonDisabled}
+                disabled={isEqual(initialData, modifiedData)}
                 loading={showHeaderButtonLoader}
                 startIcon={<Check />}
                 type="submit"
@@ -106,7 +93,7 @@ export const SingleSignOn = () => {
             })}
           />
           <ContentLayout>
-            {showLoader ? (
+            {isLoading ? (
               <LoadingIndicatorPage />
             ) : (
               <Flex
@@ -244,10 +231,14 @@ export const SingleSignOn = () => {
   );
 };
 
-const ProtectedSSO = () => (
-  <CheckPagePermissions permissions={ssoPermissions.main}>
-    <SingleSignOn />
-  </CheckPagePermissions>
-);
+const ProtectedSSO = () => {
+  const permissions = useSelector(selectAdminPermissions);
+
+  return (
+    <CheckPagePermissions permissions={permissions.settings.sso.main}>
+      <SingleSignOn />
+    </CheckPagePermissions>
+  );
+};
 
 export default ProtectedSSO;

@@ -1,7 +1,7 @@
-import { useReducer, useEffect } from 'react';
+import { useEffect, useReducer } from 'react';
+
 import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 
-import { getRequestUrl } from '../../../../admin/src/utils';
 import reducer, { initialState } from './reducer';
 
 const useAuthProviders = ({ ssoEnabled }) => {
@@ -21,7 +21,7 @@ const useAuthProviders = ({ ssoEnabled }) => {
           return;
         }
 
-        const { data } = await get(getRequestUrl('providers'));
+        const { data } = await get('/admin/providers');
 
         dispatch({
           type: 'GET_DATA_SUCCEEDED',

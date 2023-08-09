@@ -1,18 +1,20 @@
 import React from 'react';
+
+import { Box, Divider, Flex, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { Box, Flex, Divider, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+
+import UnauthenticatedLayout from '../../../../../../admin/src/layouts/UnauthenticatedLayout';
 import BaseLogin from '../../../../../../admin/src/pages/AuthPage/components/Login/BaseLogin';
 import { useAuthProviders } from '../../../../hooks';
-import UnauthenticatedLayout from '../../../../../../admin/src/layouts/UnauthenticatedLayout';
 import SSOProviders from '../Providers/SSOProviders';
 
 const DividerFull = styled(Divider)`
   flex: 1;
 `;
 
-const Login = (loginProps) => {
+export const LoginEE = (loginProps) => {
   const ssoEnabled = window.strapi.features.isEnabled(window.strapi.features.SSO);
   const { isLoading, data: providers } = useAuthProviders({ ssoEnabled });
   const { formatMessage } = useIntl();
@@ -47,17 +49,15 @@ const Login = (loginProps) => {
   );
 };
 
-Login.defaultProps = {
+LoginEE.defaultProps = {
   onSubmit: (e) => e.preventDefault(),
   requestError: null,
 };
 
-Login.propTypes = {
+LoginEE.propTypes = {
   formErrors: PropTypes.object.isRequired,
   modifiedData: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func,
   requestError: PropTypes.object,
 };
-
-export default Login;

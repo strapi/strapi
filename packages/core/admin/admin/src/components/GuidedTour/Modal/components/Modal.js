@@ -1,10 +1,11 @@
 import React from 'react';
-import styled from 'styled-components';
+
+import { Box, Button, Flex, FocusTrap, IconButton, Portal } from '@strapi/design-system';
+import { pxToRem } from '@strapi/helper-plugin';
+import { Cross } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { pxToRem } from '@strapi/helper-plugin';
-import { Portal, FocusTrap, Flex, Box, IconButton, Button } from '@strapi/design-system';
-import { Cross } from '@strapi/icons';
+import styled from 'styled-components';
 
 const ModalWrapper = styled(Flex)`
   position: fixed;

@@ -1,6 +1,6 @@
-const webpack = require('webpack');
-const { ESBuildMinifyPlugin } = require('esbuild-loader');
 const browserslistToEsbuild = require('browserslist-to-esbuild');
+const { ESBuildMinifyPlugin } = require('esbuild-loader');
+const webpack = require('webpack');
 
 const packageJson = require('./package.json');
 
@@ -28,11 +28,11 @@ const baseConfig = {
   module: {
     rules: [
       {
-        test: /\.m?jsx?$/,
+        test: /\.[jtm]sx?$/,
         use: {
           loader: require.resolve('esbuild-loader'),
           options: {
-            loader: 'jsx',
+            loader: 'tsx',
             target: browserslistToEsbuild(),
           },
         },
@@ -47,6 +47,9 @@ const baseConfig = {
         },
       },
     ],
+  },
+  resolve: {
+    extensions: ['.ts', '.js', '.tsx', '.jsx'],
   },
   plugins: [
     new webpack.EnvironmentPlugin({

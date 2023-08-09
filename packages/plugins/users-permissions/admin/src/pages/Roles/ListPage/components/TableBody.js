@@ -1,8 +1,9 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { IconButton, Typography, Flex, Tbody, Tr, Td } from '@strapi/design-system';
-import { Pencil, Trash } from '@strapi/icons';
+
+import { Flex, IconButton, Tbody, Td, Tr, Typography } from '@strapi/design-system';
 import { CheckPermissions, onRowClick, stopPropagation } from '@strapi/helper-plugin';
+import { Pencil, Trash } from '@strapi/icons';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 
@@ -37,10 +38,10 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
           </Td>
           <Td width="30%">
             <Typography>
-              {`${role.nb_users} ${formatMessage({
-                id: 'global.users',
-                defaultMessage: 'users',
-              }).toLowerCase()}`}
+              {formatMessage(
+                { id: 'Roles.RoleRow.user-count', defaultMessage: '{number, plural, =0 {# user} one {# user} other {# users}}' },
+                { number: role.nb_users }
+              )}
             </Typography>
           </Td>
           <Td>

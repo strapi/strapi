@@ -1,38 +1,35 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
+
 import {
-  ModalLayout,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  Grid,
-  GridItem,
-  Breadcrumbs,
-  Crumb,
   Box,
   Button,
   Flex,
+  Grid,
+  GridItem,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  ModalLayout,
   Typography,
 } from '@strapi/design-system';
-import { Formik } from 'formik';
+import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
 import {
   Form,
   GenericInput,
+  useFetchClient,
   useNotification,
   useOverlayBlocker,
-  useFetchClient,
 } from '@strapi/helper-plugin';
+import { Formik } from 'formik';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 
-import formDataModel from 'ee_else_ce/pages/SettingsPage/pages/Users/ListPage/ModalForm/utils/formDataModel';
-import roleSettingsForm from 'ee_else_ce/pages/SettingsPage/pages/Users/ListPage/ModalForm/utils/roleSettingsForm';
-import MagicLink from 'ee_else_ce/pages/SettingsPage/pages/Users/components/MagicLink';
-
+import { useEnterprise } from '../../../../../../hooks/useEnterprise';
+import { MagicLinkCE } from '../../components/MagicLink';
 import SelectRoles from '../../components/SelectRoles';
-import layout from './utils/layout';
-import schema from './utils/schema';
-import stepper from './utils/stepper';
+
+import { FORM_LAYOUT, FORM_SCHEMA, FORM_INITIAL_VALUES, ROLE_LAYOUT, STEPPER } from './constants';
 
 const ModalForm = ({ onSuccess, onToggle }) => {
   const [currentStep, setStep] = useState('create');
@@ -42,6 +39,50 @@ const ModalForm = ({ onSuccess, onToggle }) => {
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { post } = useFetchClient();
+  const roleLayout = useEnterprise(
+    ROLE_LAYOUT,
+    async () =>
+      (
+        await import(
+          '../../../../../../../../ee/admin/pages/SettingsPage/pages/Users/ListPage/ModalForm/constants'
+        )
+      ).ROLE_LAYOUT,
+    {
+      combine(ceRoles, eeRoles) {
+        return [...ceRoles, eeRoles];
+      },
+
+      defaultValue: [],
+    }
+  );
+  const initialValues = useEnterprise(
+    FORM_INITIAL_VALUES,
+    async () =>
+      (
+        await import(
+          '../../../../../../../../ee/admin/pages/SettingsPage/pages/Users/ListPage/ModalForm/constants'
+        )
+      ).FORM_INITIAL_VALUES,
+    {
+      combine(ceValues, eeValues) {
+        return {
+          ...ceValues,
+          ...eeValues,
+        };
+      },
+
+      defaultValue: FORM_INITIAL_VALUES,
+    }
+  );
+  const MagicLink = useEnterprise(
+    MagicLinkCE,
+    async () =>
+      (
+        await import(
+          '../../../../../../../../ee/admin/pages/SettingsPage/pages/Users/components/MagicLink'
+        )
+      ).MagicLinkEE
+  );
   const postMutation = useMutation(
     (body) => {
       return post('/admin/users', body);
@@ -98,7 +139,7 @@ const ModalForm = ({ onSuccess, onToggle }) => {
     }
   };
 
-  const { buttonSubmitLabel, isDisabled, next } = stepper[currentStep];
+  const { buttonSubmitLabel, isDisabled, next } = STEPPER[currentStep];
   const endActions =
     currentStep === 'create' ? (
       <Button type="submit" loading={isSubmitting}>
@@ -110,17 +151,26 @@ const ModalForm = ({ onSuccess, onToggle }) => {
       </Button>
     );
 
+  // block rendering until the EE component is fully loaded
+  if (!MagicLink) {
+    return null;
+  }
+
   return (
     <ModalLayout onClose={onToggle} labelledBy="title">
       <ModalHeader>
+        {/**
+         * TODO: this is not semantically correct and should be amended.
+         */}
         <Breadcrumbs label={headerTitle}>
-          <Crumb>{headerTitle}</Crumb>
+          <Crumb isCurrent>{headerTitle}</Crumb>
         </Breadcrumbs>
       </ModalHeader>
       <Formik
-        initialValues={formDataModel}
+        enableReinitialize
+        initialValues={initialValues}
         onSubmit={handleSubmit}
-        validationSchema={schema}
+        validationSchema={FORM_SCHEMA}
         validateOnChange={false}
       >
         {({ errors, handleChange, values }) => {
@@ -139,7 +189,7 @@ const ModalForm = ({ onSuccess, onToggle }) => {
                     <Box paddingTop={4}>
                       <Flex direction="column" alignItems="stretch" gap={1}>
                         <Grid gap={5}>
-                          {layout.map((row) => {
+                          {FORM_LAYOUT.map((row) => {
                             return row.map((input) => {
                               return (
                                 <GridItem key={input.name} {...input.size}>
@@ -175,7 +225,7 @@ const ModalForm = ({ onSuccess, onToggle }) => {
                             value={values.roles}
                           />
                         </GridItem>
-                        {roleSettingsForm.map((row) => {
+                        {roleLayout.map((row) => {
                           return row.map((input) => {
                             return (
                               <GridItem key={input.name} {...input.size}>

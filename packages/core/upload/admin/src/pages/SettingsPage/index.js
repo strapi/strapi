@@ -1,34 +1,37 @@
 import React, { useEffect, useReducer, useRef } from 'react';
-import { Helmet } from 'react-helmet';
-import { useIntl } from 'react-intl';
+
+import {
+  Box,
+  Button,
+  ContentLayout,
+  Flex,
+  Grid,
+  GridItem,
+  HeaderLayout,
+  Layout,
+  Main,
+  ToggleInput,
+  Typography,
+} from '@strapi/design-system';
 import {
   CheckPagePermissions,
   LoadingIndicatorPage,
+  useFetchClient,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
-  useFetchClient,
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import {
-  Box,
-  Flex,
-  ToggleInput,
-  Typography,
-  Button,
-  Main,
-  Grid,
-  GridItem,
-  ContentLayout,
-  HeaderLayout,
-  Layout,
-} from '@strapi/design-system';
 import axios from 'axios';
 import isEqual from 'lodash/isEqual';
-import { getRequestUrl, getTrad } from '../../utils';
+import { Helmet } from 'react-helmet';
+import { useIntl } from 'react-intl';
+
+import { PERMISSIONS } from '../../constants';
+import { getTrad } from '../../utils';
+
 import init from './init';
 import reducer, { initialState } from './reducer';
-import pluginPermissions from '../../permissions';
 
 export const SettingsPage = () => {
   const { formatMessage } = useIntl();
@@ -53,7 +56,7 @@ export const SettingsPage = () => {
       try {
         const {
           data: { data },
-        } = await get(getRequestUrl('settings'), {
+        } = await get('/upload/settings', {
           cancelToken: source.token,
         });
 
@@ -91,7 +94,7 @@ export const SettingsPage = () => {
     dispatch({ type: 'ON_SUBMIT' });
 
     try {
-      await put(getRequestUrl('settings'), modifiedData);
+      await put('/upload/settings', modifiedData);
 
       dispatch({
         type: 'SUBMIT_SUCCEEDED',
@@ -272,7 +275,7 @@ export const SettingsPage = () => {
 };
 
 const ProtectedSettingsPage = () => (
-  <CheckPagePermissions permissions={pluginPermissions.settings}>
+  <CheckPagePermissions permissions={PERMISSIONS.settings}>
     <SettingsPage />
   </CheckPagePermissions>
 );

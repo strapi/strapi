@@ -5,9 +5,11 @@
  */
 
 import React from 'react';
+
+import { Box, Flex, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Box, Flex, Typography } from '@strapi/design-system';
+
 import useFormModalNavigation from '../../../hooks/useFormModalNavigation';
 import getTrad from '../../../utils/getTrad';
 import AttributeIcon from '../../AttributeIcon';

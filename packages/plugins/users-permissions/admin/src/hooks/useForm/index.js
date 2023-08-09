@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react';
-import { useRBAC, useFetchClient, useNotification } from '@strapi/helper-plugin';
-import { getRequestURL } from '../../utils';
+
+import { useFetchClient, useNotification, useRBAC } from '@strapi/helper-plugin';
+
 import reducer, { initialState } from './reducer';
 
 const useUserForm = (endPoint, permissions) => {
@@ -18,7 +19,7 @@ const useUserForm = (endPoint, permissions) => {
           type: 'GET_DATA',
         });
 
-        const { data } = await get(getRequestURL(endPoint));
+        const { data } = await get(`/users-permissions/${endPoint}`);
 
         dispatch({
           type: 'GET_DATA_SUCCEEDED',

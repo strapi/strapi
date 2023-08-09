@@ -2,7 +2,8 @@
 // in order to have a unique identifier for the DnD
 
 import get from 'lodash/get';
-import { getType, getOtherInfos } from './getAttributeInfos';
+
+import { getOtherInfos, getType } from './getAttributeInfos';
 
 const formatContentTypeData = (data, ct, composSchema) => {
   const recursiveFormatData = (data, schema) => {
@@ -64,4 +65,4 @@ const formatContentTypeData = (data, ct, composSchema) => {
   return recursiveFormatData(data, ct);
 };
 
-export default formatContentTypeData;
+export { formatContentTypeData };

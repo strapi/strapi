@@ -1,7 +1,8 @@
 import * as React from 'react';
+
+import { Box } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useDragLayer } from 'react-dnd';
-import { Box } from '@strapi/design-system';
 
 function getStyle(initialOffset, currentOffset, mouseOffset) {
   if (!initialOffset || !currentOffset) {

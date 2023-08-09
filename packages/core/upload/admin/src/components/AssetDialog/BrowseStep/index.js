@@ -1,42 +1,43 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
 
-import { usePersistentState } from '@strapi/helper-plugin';
 import {
-  Button,
-  Flex,
-  Box,
-  Divider,
   BaseCheckbox,
+  Box,
+  Button,
+  Divider,
+  Flex,
   GridItem,
-  Typography,
   IconButton,
+  Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { Pencil, Plus, Grid, List } from '@strapi/icons';
+import { usePersistentState } from '@strapi/helper-plugin';
+import { Grid, List, Pencil, Plus } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 import {
-  FolderDefinition,
   AssetDefinition,
-  viewOptions,
+  FolderDefinition,
   localStorageKeys,
+  viewOptions,
 } from '../../../constants';
-import getTrad from '../../../utils/getTrad';
+import { useFolder } from '../../../hooks/useFolder';
 import { getBreadcrumbDataCM, toSingularTypes } from '../../../utils';
 import getAllowedFiles from '../../../utils/getAllowedFiles';
+import getTrad from '../../../utils/getTrad';
 import { AssetGridList } from '../../AssetGridList';
-import { TableList } from '../../TableList';
-import { FolderGridList } from '../../FolderGridList';
-import { EmptyAssets } from '../../EmptyAssets';
 import { Breadcrumbs } from '../../Breadcrumbs';
-import SortPicker from '../../SortPicker';
-import { useFolder } from '../../../hooks/useFolder';
+import { EmptyAssets } from '../../EmptyAssets';
 import { FolderCard, FolderCardBody, FolderCardBodyAction } from '../../FolderCard';
+import { FolderGridList } from '../../FolderGridList';
+import SortPicker from '../../SortPicker';
+import { TableList } from '../../TableList';
+
 import { Filters } from './Filters';
-import PaginationFooter from './PaginationFooter';
 import PageSize from './PageSize';
+import PaginationFooter from './PaginationFooter';
 import SearchAsset from './SearchAsset';
 import { isSelectable } from './utils/isSelectable';
 
@@ -96,9 +97,11 @@ export const BrowseStep = ({
 
   const allAllowedAsset = getAllowedFiles(allowedTypes, assets);
   const areAllAssetSelected =
+    allAllowedAsset.length > 0 &&
+    selectedAssets.length > 0 &&
     allAllowedAsset.every(
       (asset) => selectedAssets.findIndex((currAsset) => currAsset.id === asset.id) !== -1
-    ) && selectedAssets.length > 0;
+    );
   const hasSomeAssetSelected = allAllowedAsset.some(
     (asset) => selectedAssets.findIndex((currAsset) => currAsset.id === asset.id) !== -1
   );
@@ -141,7 +144,7 @@ export const BrowseStep = ({
                     />
                   </Flex>
                 )}
-                {isGridView && <SortPicker onChangeSort={onChangeSort} />}
+                {isGridView && <SortPicker onChangeSort={onChangeSort} value={queryObject?.sort} />}
                 <Filters
                   appliedFilters={queryObject?.filters?.$and}
                   onChangeFilters={onChangeFilters}
@@ -270,7 +273,7 @@ export const BrowseStep = ({
                     <FolderCard
                       ariaLabel={folder.name}
                       id={`folder-${folder.id}`}
-                      onClick={() => handleClickFolderCard(folder.id)}
+                      onClick={() => handleClickFolderCard(folder.id, folder.path)}
                       cardActions={
                         onEditFolder && (
                           <IconButton
@@ -285,11 +288,13 @@ export const BrowseStep = ({
                       }
                     >
                       <FolderCardBody>
-                        <FolderCardBodyAction onClick={() => handleClickFolderCard(folder.id)}>
+                        <FolderCardBodyAction
+                          onClick={() => handleClickFolderCard(folder.id, folder.path)}
+                        >
                           <Flex as="h2" direction="column" alignItems="start" maxWidth="100%">
                             <TypographyMaxWidth fontWeight="semiBold" ellipsis>
                               {folder.name}
-                              {/* VisuallyHidden dash here allows to separate folder title and count informations 
+                              {/* VisuallyHidden dash here allows to separate folder title and count informations
                               for voice reading structure purpose */}
                               <VisuallyHidden>-</VisuallyHidden>
                             </TypographyMaxWidth>

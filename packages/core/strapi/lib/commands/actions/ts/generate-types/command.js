@@ -10,12 +10,12 @@ module.exports = ({ command }) => {
   command
     .command('ts:generate-types')
     .description(`Generate TypeScript typings for your schemas`)
+    .option('--verbose', `[DEPRECATED] The verbose option has been replaced by debug`, false)
+    .option('-d, --debug', `Run the generation with debug messages`, false)
+    .option('-s, --silent', `Run the generation silently, without any output`, false)
     .option(
       '-o, --out-dir <outDir>',
-      'Specify a relative directory in which the schemas definitions will be generated'
+      'Specify a relative root directory in which the definitions will be generated. Changing this value might break types exposed by Strapi that relies on generated types.'
     )
-    .option('-f, --file <file>', 'Specify a filename to store the schemas definitions')
-    .option('--verbose', `Display more information about the types generation`, false)
-    .option('-s, --silent', `Run the generation silently, without any output`, false)
     .action(getLocalScript('ts/generate-types'));
 };

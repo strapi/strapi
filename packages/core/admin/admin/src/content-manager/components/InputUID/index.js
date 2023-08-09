@@ -1,19 +1,20 @@
-import React, { useEffect, useState, useRef } from 'react';
-import PropTypes from 'prop-types';
+import React, { useEffect, useRef, useState } from 'react';
+
+import { Flex, TextInput, Typography } from '@strapi/design-system';
 import {
+  useAPIErrorHandler,
   useCMEditViewDataManager,
   useFetchClient,
   useNotification,
-  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
+import { CheckCircle, ExclamationMarkCircle, Loader, Refresh } from '@strapi/icons';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Flex, TextInput, Typography } from '@strapi/design-system';
-import { Refresh, CheckCircle, ExclamationMarkCircle, Loader } from '@strapi/icons';
 
-import { getRequestUrl } from '../../utils';
 import useDebounce from '../../../hooks/useDebounce';
+
+import { FieldActionWrapper, LoadingWrapper, TextValidation } from './endActionStyle';
 import UID_REGEX from './regex';
-import { FieldActionWrapper, TextValidation, LoadingWrapper } from './endActionStyle';
 
 const InputUID = ({
   attribute,
@@ -65,7 +66,7 @@ const InputUID = ({
     try {
       const {
         data: { data },
-      } = await post(getRequestUrl('uid/generate'), {
+      } = await post('/content-manager/uid/generate', {
         contentTypeUID,
         field: name,
         data: modifiedData,
@@ -90,7 +91,7 @@ const InputUID = ({
     setIsLoading(true);
 
     try {
-      const { data } = await post(getRequestUrl('uid/check-availability'), {
+      const { data } = await post('/content-manager/uid/check-availability', {
         contentTypeUID,
         field: name,
         value: value ? value.trim() : '',

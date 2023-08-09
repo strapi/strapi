@@ -1,10 +1,12 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { TrackingProvider, useGuidedTour } from '@strapi/helper-plugin';
 import { render, screen } from '@testing-library/react';
-import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
-import { useGuidedTour, TrackingProvider } from '@strapi/helper-plugin';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { Router } from 'react-router-dom';
+
 import GuidedTourHomepage from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -81,7 +83,6 @@ describe('GuidedTour Homepage', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
-        line-height: 0;
         color: #ffffff;
       }
 

@@ -3,6 +3,7 @@ import { cloneDeep } from 'lodash/fp';
 import { Readable, Writable } from 'stream-chain';
 import type { Schema } from '@strapi/strapi';
 import { createTransferEngine, TRANSFER_STAGES } from '..';
+
 import type {
   IAsset,
   IConfiguration,
@@ -19,6 +20,27 @@ import {
 } from '../../__tests__/test-utils';
 
 const getMockSourceStream = (data: Iterable<unknown>) => Readable.from(data);
+
+const defaultLinksData: Array<ILink> = [
+  {
+    kind: 'relation.basic',
+    relation: 'oneToOne',
+    left: { type: 'api::foo.foo', ref: 1, field: 'foo' },
+    right: { type: 'api::bar.bar', ref: 2, field: 'bar' },
+  },
+  {
+    kind: 'relation.basic',
+    relation: 'oneToMany',
+    left: { type: 'api::foo.foo', ref: 1, field: 'foos' },
+    right: { type: 'api::bar.bar', ref: 2, field: 'bar' },
+  },
+  {
+    kind: 'relation.basic',
+    relation: 'oneToMany',
+    left: { type: 'basic.foo', field: 'foo', ref: 1 },
+    right: { type: 'api::foo.foo', ref: 1 },
+  },
+];
 
 const schemas = {
   'admin::permission': {
@@ -143,33 +165,80 @@ const schemas = {
     uid: 'api::homepage.homepage',
     globalId: 'Homepage',
   },
+  'api::bar.bar': {
+    kind: 'collectionType',
+    collectionName: 'bars',
+    modelType: 'contentType',
+    info: {
+      singularName: 'bar',
+      pluralName: 'bars',
+      displayName: 'bar',
+      description: '',
+    },
+    options: {
+      draftAndPublish: true,
+    },
+    pluginOptions: {},
+    attributes: {
+      bar: {
+        type: 'integer',
+      },
+      foo: {
+        displayName: 'foo',
+        type: 'component',
+        repeatable: false,
+        component: 'basic.foo',
+      },
+    },
+  },
+  'api::foo.foo': {
+    kind: 'collectionType',
+    collectionName: 'foos',
+    modelType: 'contentType',
+    info: {
+      singularName: 'foo',
+      pluralName: 'foos',
+      displayName: 'foo',
+    },
+    options: {
+      draftAndPublish: true,
+    },
+    pluginOptions: {},
+    attributes: {
+      foo: {
+        type: 'string',
+      },
+    },
+  },
+  'basic.foo': {
+    collectionName: 'components_basic_foos',
+    info: { displayName: 'Good Basic' },
+    options: {},
+    attributes: {
+      foo: { type: 'relation', relation: 'oneToOne', target: 'api::foo.foo' },
+    },
+    modelType: 'component',
+    modelName: 'foo-basic',
+    uid: 'basic.foo',
+    globalId: 'ComponentBasicFoo',
+  },
 };
 
+type Entity = IEntity<
+  'api::foo.foo' | 'api::bar.bar' | 'admin::permission' | 'api::homepage.homepage'
+>;
+
 const getEntitiesMockSourceStream = (
-  data: Iterable<IEntity<'foo' | 'bar' | 'admin::permission' | 'api::homepage.homepage'>> = [
-    { id: 1, type: 'foo', data: { foo: 'bar' } },
-    { id: 2, type: 'bar', data: { bar: 'foo' } },
+  data: Array<Entity> = [
+    { id: 1, type: 'api::foo.foo', data: { foo: 'bar' } },
+    { id: 2, type: 'api::bar.bar', data: { bar: 'foo' } },
     { id: 1, type: 'admin::permission', data: { foo: 'bar' } },
     { id: 2, type: 'api::homepage.homepage', data: { bar: 'foo' } },
   ]
 ) => getMockSourceStream(data);
 
-const getLinksMockSourceStream = (
-  data: Iterable<ILink> = [
-    {
-      kind: 'relation.basic',
-      relation: 'oneToOne',
-      left: { type: 'foo', ref: 1, field: 'foo' },
-      right: { type: 'bar', ref: 2, field: 'bar' },
-    },
-    {
-      kind: 'relation.basic',
-      relation: 'oneToMany',
-      left: { type: 'foo', ref: 1, field: 'foos' },
-      right: { type: 'bar', ref: 2, field: 'bar' },
-    },
-  ]
-) => getMockSourceStream(data);
+const getLinksMockSourceStream = (data: Array<ILink> = defaultLinksData) =>
+  getMockSourceStream(data);
 
 const getAssetsMockSourceStream = (
   data: Iterable<IAsset> = [
@@ -196,7 +265,7 @@ const getConfigurationMockSourceStream = (
 ) => getMockSourceStream(data);
 
 const getSchemasMockSourceStream = (
-  data: Iterable<Schema> = [
+  data: Array<Schema.Schema> = [
     {
       info: { displayName: 'foo' },
       modelType: 'contentType',
@@ -224,10 +293,13 @@ const getSchemasMockSourceStream = (
   ]
 ) => getMockSourceStream(data);
 
-const getMockDestinationStream = () => {
+const getMockDestinationStream = (listener?) => {
   const stream = new Writable({
     objectMode: true,
     write(chunk, encoding, callback) {
+      if (listener) {
+        listener(chunk);
+      }
       callback();
     },
   });
@@ -245,10 +317,10 @@ const metadata = {
 
 const createSource = (streamData?: {
   assets?: IAsset[];
-  entities?: IEntity[];
+  entities?: Entity[];
   links?: ILink[];
   configuration?: IConfiguration[];
-  schemas?: Schema[];
+  schemas?: Schema.Schema[];
 }): ISourceProvider => {
   return {
     type: 'source',
@@ -275,7 +347,9 @@ const createSource = (streamData?: {
   };
 };
 
-const createDestination = (): IDestinationProvider => {
+const createDestination = (
+  overrideOptions?: Partial<IDestinationProvider>
+): IDestinationProvider => {
   return {
     type: 'destination',
     name: 'completeDestination',
@@ -284,12 +358,12 @@ const createDestination = (): IDestinationProvider => {
 
     bootstrap: jest.fn(),
     close: jest.fn(),
-
     createEntitiesWriteStream: jest.fn().mockResolvedValue(getMockDestinationStream()),
     createLinksWriteStream: jest.fn().mockResolvedValue(getMockDestinationStream()),
     createAssetsWriteStream: jest.fn().mockResolvedValue(getMockDestinationStream()),
     createConfigurationWriteStream: jest.fn().mockResolvedValue(getMockDestinationStream()),
     createSchemasWriteStream: jest.fn().mockResolvedValue(getMockDestinationStream()),
+    ...overrideOptions,
   };
 };
 
@@ -316,8 +390,8 @@ describe('Transfer engine', () => {
     exclude: [],
   } as unknown as ITransferEngineOptions;
 
-  let completeSource;
-  let completeDestination;
+  let completeSource: ISourceProvider;
+  let completeDestination: IDestinationProvider;
 
   beforeEach(() => {
     jest.restoreAllMocks();
@@ -440,7 +514,7 @@ describe('Transfer engine', () => {
 
       // Two values are emitted by default for each stage
       // TODO: this is no longer true, we should be checking the sum of the various mocked streams
-      const itemPerStage = 2;
+      const itemPerStage = 3;
 
       expect(calls).toEqual((sourceStages.length - providerStages.length) * itemPerStage);
     });
@@ -496,6 +570,24 @@ describe('Transfer engine', () => {
       await engine.transfer();
 
       expect(calls).toEqual(3); // 3 deleted stages above
+    });
+
+    test('relations inside components are transferred', async () => {
+      const processedLinks: ILink[] = [];
+
+      completeDestination = createDestination({
+        createLinksWriteStream: jest.fn().mockResolvedValue(
+          getMockDestinationStream((chunk: ILink) => {
+            processedLinks.push(chunk);
+          })
+        ),
+      });
+      const engine = createTransferEngine(completeSource, completeDestination, defaultOptions);
+
+      await engine.transferLinks();
+
+      expect(completeDestination.createLinksWriteStream).toHaveBeenCalled();
+      expect(processedLinks).toStrictEqual(defaultLinksData);
     });
   });
 
