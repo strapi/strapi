@@ -42,6 +42,7 @@ export type AdminConfiguration = {
   apiToken: ApiTokenProp;
   transfer: TransferProp;
   auth: AuthProp;
+
   // optional
   auditLogs?: AuditLogsProp;
   url?: string;
@@ -49,5 +50,4 @@ export type AdminConfiguration = {
   rateLimit?: RateLimitProp;
 };
 
-// TODO: can this just be an object rather than a function?
 export type Admin = ConfigExport<AdminConfiguration>;
