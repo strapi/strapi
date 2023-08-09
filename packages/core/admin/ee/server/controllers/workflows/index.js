@@ -30,6 +30,8 @@ function getWorkflowsPermissionChecker({ strapi }, userAbility) {
  */
 function formatWorkflowToAdmin(workflow) {
   if (!workflow) return;
+  if (!workflow.stages) return workflow;
+
   // Transform permissions roles to be the id string instead of an object
   const transformPermissions = map(update('role', property('id')));
   const transformStages = map(update('permissions', transformPermissions));
