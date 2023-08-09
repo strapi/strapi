@@ -13,4 +13,4 @@ export default ({ env }) =>
         salt: env('TRANSFER_TOKEN_SALT', 'example-salt'),
       },
     },
-  } satisfies Config.Admin);
+  } satisfies Config.Admin as Config.Admin);
