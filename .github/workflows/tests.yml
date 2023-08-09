@@ -195,6 +195,8 @@ jobs:
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
+        env:
+          DATABASE_SCHEMA: myschema
 
   api_ce_mysql:
     if: needs.changes.outputs.backend == 'true'
@@ -332,6 +334,8 @@ jobs:
         with:
           dbOptions: '--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
           runEE: true
+        env:
+          DATABASE_SCHEMA: myschema
 
   api_ee_mysql:
     runs-on: ubuntu-latest
