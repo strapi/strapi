@@ -20,7 +20,7 @@ export type WebhooksProp = {
 export type ServerConfiguration = {
   // required
   host: string;
-  post: number;
+  port: number;
   app: AppProp;
 
   // optional
