@@ -1,3 +1,3 @@
 export interface EntityServicePluginParams {
-  [key: keyof any]: object;
+  [key: keyof any]: {};
 }
