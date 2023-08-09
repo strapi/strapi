@@ -91,7 +91,11 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {},
       isCreatingEntry: true,
-      layout: { uid: 'api::articles:articles' },
+      layout: {
+        options: {
+          reviewWorkflows: false,
+        },
+      },
     });
 
     const { getByText } = setup();
@@ -103,7 +107,11 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
   it('renders neither stage nor assignee select inputs, if no nothing is returned for an entity', () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {},
-      layout: { uid: 'api::articles:articles' },
+      layout: {
+        options: {
+          reviewWorkflows: false,
+        },
+      },
     });
 
     const { queryByRole } = setup();
@@ -127,7 +135,12 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
           lastname: 'Lastname',
         },
       },
-      layout: { uid: 'api::articles:articles' },
+      layout: {
+        uid: 'api::articles:articles',
+        options: {
+          reviewWorkflows: true,
+        },
+      },
     });
 
     const { queryAllByRole } = setup();
