@@ -31,32 +31,6 @@ function setup(props) {
   };
 }
 
-function setupNumber(props) {
-  return setup({
-    type: 'number',
-    name: 'number',
-    placeholder: {
-      id: 'placeholder.test',
-      defaultMessage: 'Default placeholder',
-    },
-    hint: 'Hint message',
-    required: true,
-    ...props,
-  });
-}
-
-function setupDatetimePicker(props) {
-  return setup({
-    type: 'datetime',
-    name: 'datetime-picker',
-    intlLabel: {
-      id: 'label.test',
-      defaultMessage: 'datetime picker',
-    },
-    onClear: jest.fn(),
-    ...props,
-  });
-}
 /**
  * We extend the timeout of these tests because the DS
  * DateTimePicker has a slow rendering issue at the moment.
@@ -66,6 +40,20 @@ jest.setTimeout(50000);
 
 describe('GenericInput', () => {
   describe('number', () => {
+    const setupNumber = (props) => {
+      return setup({
+        type: 'number',
+        name: 'number',
+        placeholder: {
+          id: 'placeholder.test',
+          defaultMessage: 'Default placeholder',
+        },
+        hint: 'Hint message',
+        required: true,
+        ...props,
+      });
+    };
+
     test('renders and matches the snapshot', () => {
       const { container } = setupNumber();
       expect(container).toMatchSnapshot();
@@ -145,7 +133,51 @@ describe('GenericInput', () => {
     });
   });
 
+  describe('date', () => {
+    const setupDateField = (props) => {
+      return setup({
+        type: 'date',
+        name: 'date',
+        intlLabel: {
+          id: 'label.test',
+          defaultMessage: 'date',
+        },
+        onClear: jest.fn(),
+        ...props,
+      });
+    };
+
+    it('should allow the user to clear the field', async () => {
+      const onChange = jest.fn();
+
+      const { getByRole, user } = setupDateField({
+        value: new Date(),
+        onChange,
+      });
+
+      await user.click(getByRole('button', { name: 'Clear' }));
+
+      expect(getByRole('combobox', { name: 'date' })).toHaveValue('');
+      expect(onChange).toHaveBeenCalledWith({
+        target: { name: 'date', type: 'date', value: null },
+      });
+    });
+  });
+
   describe('datetime', () => {
+    const setupDatetimePicker = (props) => {
+      return setup({
+        type: 'datetime',
+        name: 'datetime-picker',
+        intlLabel: {
+          id: 'label.test',
+          defaultMessage: 'datetime picker',
+        },
+        onClear: jest.fn(),
+        ...props,
+      });
+    };
+
     test('renders the datetime picker with the correct value for date and time', async () => {
       const { getByRole, user } = setupDatetimePicker();
 
