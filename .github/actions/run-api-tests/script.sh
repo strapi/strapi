@@ -7,6 +7,7 @@ fi
 
 export ENV_PATH="$(pwd)/test-apps/api/.env"
 export JWT_SECRET="aSecret"
+export DATABASE_SCHEMA="myschema"
 
 opts=($DB_OPTIONS)
 
