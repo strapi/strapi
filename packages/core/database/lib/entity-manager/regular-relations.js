@@ -222,8 +222,10 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
   const updateOrderColumn = async () => {
     if (!hasOrderColumn(attribute) || !id) return;
 
+    const joinTableName = addSchema(joinTable.name);
+
     const select = db
-      .connection(joinTable.name)
+      .connection(joinTableName)
       .select('id')
       .rowNumber('src_order', orderColumnName, joinColumn.name)
       .where(joinColumn.name, id)
@@ -245,11 +247,8 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
         break;
 
       default: {
-        const joinTableName = addSchema(joinTable.name);
-
         // raw query as knex doesn't allow updating from a subquery
-        await db
-          .getConnection()
+        await db.connection
           .raw(
             `UPDATE ?? as a
             SET ?? = b.src_order
@@ -276,8 +275,11 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
   */
   const updateInverseOrderColumn = async () => {
     if (!hasInverseOrderColumn(attribute) || isEmpty(inverseRelIds)) return;
+
+    const joinTableName = addSchema(joinTable.name);
+
     const select = db
-      .connection(joinTable.name)
+      .connection(joinTableName)
       .select('id')
       .rowNumber('inv_order', inverseOrderColumnName, inverseJoinColumn.name)
       .where(inverseJoinColumn.name, 'in', inverseRelIds)
@@ -298,11 +300,8 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
         break;
 
       default: {
-        const joinTableName = addSchema(joinTable.name);
-
         // raw query as knex doesn't allow updating from a subquery
-        await db
-          .getConnection()
+        await db.connection
           .raw(
             `UPDATE ?? as a
             SET ?? = b.inv_order
