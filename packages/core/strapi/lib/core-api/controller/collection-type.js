@@ -32,9 +32,9 @@ const createCollectionTypeController = ({ contentType }) => {
      */
     async findOne(ctx) {
       const { id } = ctx.params;
-      const { query } = ctx;
+      const sanitizedQuery = await this.validateQuery(ctx);
 
-      const entity = await strapi.service(uid).findOne(id, query);
+      const entity = await strapi.service(uid).findOne(id, sanitizedQuery);
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
       return this.transformResponse(sanitizedEntity);
@@ -46,7 +46,7 @@ const createCollectionTypeController = ({ contentType }) => {
      * @return {Object}
      */
     async create(ctx) {
-      const { query } = ctx.request;
+      const sanitizedQuery = await this.validateQuery(ctx);
 
       const { data, files } = parseBody(ctx);
 
@@ -58,7 +58,7 @@ const createCollectionTypeController = ({ contentType }) => {
 
       const entity = await strapi
         .service(uid)
-        .create({ ...query, data: sanitizedInputData, files });
+        .create({ ...sanitizedQuery, data: sanitizedInputData, files });
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
       return this.transformResponse(sanitizedEntity);
@@ -71,7 +71,7 @@ const createCollectionTypeController = ({ contentType }) => {
      */
     async update(ctx) {
       const { id } = ctx.params;
-      const { query } = ctx.request;
+      const sanitizedQuery = await this.validateParams(ctx);
 
       const { data, files } = parseBody(ctx);
 
@@ -83,7 +83,7 @@ const createCollectionTypeController = ({ contentType }) => {
 
       const entity = await strapi
         .service(uid)
-        .update(id, { ...query, data: sanitizedInputData, files });
+        .update(id, { ...sanitizedQuery, data: sanitizedInputData, files });
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
       return this.transformResponse(sanitizedEntity);
@@ -96,9 +96,9 @@ const createCollectionTypeController = ({ contentType }) => {
      */
     async delete(ctx) {
       const { id } = ctx.params;
-      const { query } = ctx;
+      const sanitizedQuery = await this.validateParams(ctx);
 
-      const entity = await strapi.service(uid).delete(id, query);
+      const entity = await strapi.service(uid).delete(id, sanitizedQuery);
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
       return this.transformResponse(sanitizedEntity);
