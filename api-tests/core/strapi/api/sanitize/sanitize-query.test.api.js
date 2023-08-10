@@ -129,40 +129,30 @@ describe('Core API - Sanitize', () => {
 
     describe('object notation', () => {
       describe('ID', () => {
-        it('Successfully filters on invalid ID', async () => {
+        it('works on non-existing ID', async () => {
           const res = await rq.get('/api/documents', { qs: { filters: { id: 999 } } });
 
           checkAPIResultLength(res, 0);
         });
 
-        it('Successfully filters invalid attributes', async () => {
-          const document = data.document[2];
-          const filters = {
-            ID: document.id, // invalid casing on key 'id'
-            notAnAttribute: '', // doesn't exist on schema
-            t0: { createdBy: { id: { $lt: '1' } } }, // join table name
-            t1: { createdBy: { id: { $lt: '1' } } }, // join table name
-            t0: { updatedBy: { id: { $lt: '1' } } }, // join table name
-            t1: { updatedBy: { id: { $lt: '1' } } }, // join table name
-            $fakeOp: false,
-            id: { $STARTSWITH: '123' }, // wrong casing for operator
-          };
-
-          const res = await rq.get('/api/documents', { qs: { filters } });
-
-          // Should not return a 500 error from notAnAttribute or $fakeOp
-          expect(res.status).toEqual(200);
-
-          // Should receive all documents because createdBy was filtered out
-          checkAPIResultLength(res, documentsLength());
-        });
-
-        it('Successfully filters on valid ID', async () => {
+        it('works on existing ID', async () => {
           const document = data.document[2];
           const res = await rq.get('/api/documents', { qs: { filters: { id: document.id } } });
 
           checkAPIResultLength(res, 1);
           expect(res.body.data[0]).toHaveProperty('id', document.id);
+        });
+
+        it.each([
+          ['invalid attribute', { notAnAttribute: '' }],
+          ['join table', { t0: { createdBy: { id: { $lt: '1' } } } }],
+          ['invalid operator', { $fakeOp: false }],
+          ['invalid operator case', { id: { $STARTSWITH: '123' } }],
+          ['invalid attribute case', { ID: 1 }],
+        ])('Returns 400 status on %s : %s', async (label, filters) => {
+          const res = await rq.get('/api/documents', { qs: { filters } });
+
+          expect(res.status).toEqual(400);
         });
       });
 
@@ -191,10 +181,10 @@ describe('Core API - Sanitize', () => {
               { name_private: { $in: ['Private Document A', 'Private Document C'] } },
             ],
             ['Implicit $in', { name_private: ['Private Document A', 'Private Document C'] }],
-          ])('Ignore the filters (%s)', async (_s, filters) => {
+          ])('Throw on filters (%s)', async (_s, filters) => {
             const res = await rq.get('/api/documents', { qs: { filters } });
 
-            checkAPIResultLength(res, documentsLength());
+            expect(res.status).toEqual(400);
           });
         });
       });
@@ -205,10 +195,10 @@ describe('Core API - Sanitize', () => {
             ['$endsWith', { password: { $endsWith: 'B' } }, documentsLength],
             ['$not > $endsWith', { $not: { password: { $endsWith: 'B' } } }, documentsLength],
             ['$contains', { password: { $contains: 'Document' } }, documentsLength],
-          ])('Ignore filters: %s', async (_s, filters, expectedLength) => {
+          ])('Throw on filters: %s', async (_s, filters, expectedLength) => {
             const res = await rq.get('/api/documents', { qs: { filters } });
 
-            checkAPIResultLength(res, expectedLength);
+            expect(res.status).toEqual(400);
           });
         });
       });
@@ -240,10 +230,10 @@ describe('Core API - Sanitize', () => {
                 { relations: { name_private: { $contains: 'Relation' } } },
                 documentsLength,
               ],
-            ])('Ignore filters: %s', async (_s, filters, expectedlength) => {
+            ])('Throw on filters: %s', async (_s, filters, expectedlength) => {
               const res = await rq.get('/api/documents', { qs: { filters } });
 
-              checkAPIResultLength(res, expectedlength);
+              expect(res.status).toEqual(400);
             });
           });
 
@@ -261,10 +251,10 @@ describe('Core API - Sanitize', () => {
                   { relations: { password: { $contains: 'Document' } } },
                   documentsLength,
                 ],
-              ])('Ignore filters: %s', async (_s, filters, expectedLength) => {
+              ])('Throw on filters: %s', async (_s, filters, expectedLength) => {
                 const res = await rq.get('/api/documents', { qs: { filters } });
 
-                checkAPIResultLength(res, expectedLength);
+                expect(res.status).toEqual(400);
               });
             });
           });
@@ -298,10 +288,10 @@ describe('Core API - Sanitize', () => {
                 { componentA: { name_private: { $contains: 'Component' } } },
                 documentsLength,
               ],
-            ])('Ignore filters: %s', async (_s, filters, expectedlength) => {
+            ])('Throw on filters: %s', async (_s, filters, expectedlength) => {
               const res = await rq.get('/api/documents', { qs: { filters } });
 
-              checkAPIResultLength(res, expectedlength);
+              expect(res.status).toEqual(400);
             });
           });
 
@@ -319,55 +309,52 @@ describe('Core API - Sanitize', () => {
                   { componentA: { password: { $contains: 'Component' } } },
                   documentsLength,
                 ],
-              ])('Ignore filters: %s', async (_s, filters, expectedLength) => {
+              ])('Error on filters: %s', async (_s, filters, expectedLength) => {
                 const res = await rq.get('/api/documents', { qs: { filters } });
 
-                checkAPIResultLength(res, expectedLength);
+                expect(res.status).toEqual(400);
               });
             });
           });
         });
       });
 
-      describe('Custom (scalar + scalar(private) + password)', () => {
+      describe('Custom (scalar)', () => {
         it.each([
           [
-            '$endsWith',
+            'name $contains works',
             {
-              name: { $endsWith: 'B OO' },
-              name_private: { $endsWith: 'B' },
-              password: { $endsWith: 'B' },
+              name: { $contains: 'B OO' },
             },
             1,
           ],
           [
-            '$not > $endsWith',
+            'error with private',
             {
               $not: {
-                name: { $endsWith: 'B OO' },
-                name_private: { $endsWith: 'B' },
-                password: { $endsWith: 'B' },
+                name: { $contains: 'B OO' },
+                name_private: { $contains: 'B' },
               },
             },
-            2,
+            null,
           ],
           [
-            '$contains',
+            'error with password',
             {
               name: { $contains: 'B' },
-              name_private: { $contains: 'B' },
               password: { $contains: 'B' },
             },
-            1,
+            null,
           ],
-        ])(
-          'Only applies filters on the right attributes: %s',
-          async (_s, filters, expectedLength) => {
-            const res = await rq.get('/api/documents', { qs: { filters } });
+        ])('%s', async (_s, filters, expectedLength) => {
+          const res = await rq.get('/api/documents', { qs: { filters } });
 
+          if (expectedLength) {
             checkAPIResultLength(res, expectedLength);
+          } else {
+            expect(res.status).toEqual(400);
           }
-        );
+        });
       });
     });
   });
@@ -423,10 +410,10 @@ describe('Core API - Sanitize', () => {
           it.each([
             ['name_private (asc)', { name_private: 'asc' }, defaultDocumentsOrder],
             ['name_private (desc)', { name_private: 'desc' }, defaultDocumentsOrder],
-          ])('Ignore sort: %s', async (_s, sort, order) => {
+          ])('Error with sort: %s', async (_s, sort, order) => {
             const res = await rq.get('/api/documents', { qs: { sort } });
 
-            checkAPIResultOrder(res, order);
+            expect(res.status).toEqual(400);
           });
         });
       });
@@ -436,10 +423,10 @@ describe('Core API - Sanitize', () => {
           it.each([
             ['password (asc)', { password: 'asc' }, defaultDocumentsOrder],
             ['password (desc)', { password: 'desc' }, defaultDocumentsOrder],
-          ])('Ignore sort: %s', async (_s, sort, order) => {
+          ])('Error with sort: %s', async (_s, sort, order) => {
             const res = await rq.get('/api/documents', { qs: { sort } });
 
-            checkAPIResultOrder(res, order);
+            expect(res.status).toEqual(400);
           });
         });
       });
@@ -470,10 +457,10 @@ describe('Core API - Sanitize', () => {
                 { relations: { name_private: 'desc' } },
                 defaultDocumentsOrder,
               ],
-            ])('Ignore sort: %s', async (_s, sort, order) => {
+            ])('Error with sort: %s', async (_s, sort, order) => {
               const res = await rq.get('/api/documents', { qs: { sort } });
 
-              checkAPIResultOrder(res, order);
+              expect(res.status).toEqual(400);
             });
           });
         });
@@ -483,10 +470,10 @@ describe('Core API - Sanitize', () => {
         it.each([
           ['password (asc) + name (asc)', { password: 'asc', name: 'asc' }, [2, 3, 1]],
           ['name_private (desc) + name (desc)', { name_private: 'desc', name: 'desc' }, [1, 3, 2]],
-        ])('Ignore sort: %s', async (_s, sort, order) => {
+        ])('Error on sort: %s', async (_s, sort, order) => {
           const res = await rq.get('/api/documents', { qs: { sort } });
 
-          checkAPIResultOrder(res, order);
+          expect(res.status).toEqual(400);
         });
       });
     });
@@ -533,10 +520,10 @@ describe('Core API - Sanitize', () => {
             ['name_private', 'name_private', defaultDocumentsOrder],
             ['name_private (asc)', 'name_private:asc', defaultDocumentsOrder],
             ['name_private (desc)', 'name_private:desc', defaultDocumentsOrder],
-          ])('Ignore sort: %s', async (_s, sort, order) => {
+          ])('Error with sort: %s', async (_s, sort, order) => {
             const res = await rq.get('/api/documents', { qs: { sort } });
 
-            checkAPIResultOrder(res, order);
+            expect(res.status).toEqual(400);
           });
         });
       });
@@ -547,10 +534,10 @@ describe('Core API - Sanitize', () => {
             ['password', 'password', defaultDocumentsOrder],
             ['password (asc)', 'password:asc', defaultDocumentsOrder],
             ['password (desc)', 'password:desc', defaultDocumentsOrder],
-          ])('Ignore sort: %s', async (_s, sort, order) => {
+          ])('Error with sort: %s', async (_s, sort, order) => {
             const res = await rq.get('/api/documents', { qs: { sort } });
 
-            checkAPIResultOrder(res, order);
+            expect(res.status).toEqual(400);
           });
         });
       });
@@ -559,10 +546,10 @@ describe('Core API - Sanitize', () => {
         it.each([
           ['password (asc) + name (asc)', 'password:asc,name:asc', [2, 3, 1]],
           ['name_private (desc) + name (desc)', 'name_private:desc,name:desc', [1, 3, 2]],
-        ])('Ignore sort: %s', async (_s, sort, order) => {
+        ])('Error with sort: %s', async (_s, sort, order) => {
           const res = await rq.get('/api/documents', { qs: { sort } });
 
-          checkAPIResultOrder(res, order);
+          expect(res.status).toEqual(400);
         });
       });
     });
@@ -600,10 +587,10 @@ describe('Core API - Sanitize', () => {
           it.each([
             ['name_private (asc)', [{ name_private: 'asc' }], defaultDocumentsOrder],
             ['name_private (desc)', [{ name_private: 'desc' }], defaultDocumentsOrder],
-          ])('Ignore sort: %s', async (_s, sort, order) => {
+          ])('Error on sort: %s', async (_s, sort, order) => {
             const res = await rq.get('/api/documents', { qs: { sort } });
 
-            checkAPIResultOrder(res, order);
+            expect(res.status).toEqual(400);
           });
         });
       });
@@ -613,10 +600,10 @@ describe('Core API - Sanitize', () => {
           it.each([
             ['password (asc)', [{ password: 'asc' }], defaultDocumentsOrder],
             ['password (desc)', [{ password: 'desc' }], defaultDocumentsOrder],
-          ])('Ignore sort: %s', async (_s, sort, order) => {
+          ])('Error on sort: %s', async (_s, sort, order) => {
             const res = await rq.get('/api/documents', { qs: { sort } });
 
-            checkAPIResultOrder(res, order);
+            expect(res.status).toEqual(400);
           });
         });
       });
@@ -635,10 +622,10 @@ describe('Core API - Sanitize', () => {
           ],
           ['password (asc) + name (asc)', [{ password: 'asc' }, { name: 'asc' }], [2, 3, 1]],
           ['password (desc) + name (desc)', [{ password: 'desc' }, { name: 'desc' }], [1, 3, 2]],
-        ])('Ignore sort: %s', async (_s, sort, order) => {
+        ])('Error on sort: %s', async (_s, sort, order) => {
           const res = await rq.get('/api/documents', { qs: { sort } });
 
-          checkAPIResultOrder(res, order);
+          expect(res.status).toEqual(400);
         });
       });
     });
@@ -685,10 +672,10 @@ describe('Core API - Sanitize', () => {
             ['name_private (asc)', ['name_private'], defaultDocumentsOrder],
             ['name_private (asc)', ['name_private:asc'], defaultDocumentsOrder],
             ['name_private (desc)', ['name_private:desc'], defaultDocumentsOrder],
-          ])('Ignore sort: %s', async (_s, sort, order) => {
+          ])('Error on sort: %s', async (_s, sort, order) => {
             const res = await rq.get('/api/documents', { qs: { sort } });
 
-            checkAPIResultOrder(res, order);
+            expect(res.status).toEqual(400);
           });
         });
       });
@@ -699,10 +686,10 @@ describe('Core API - Sanitize', () => {
             ['password (asc)', ['password'], defaultDocumentsOrder],
             ['password (asc)', ['password:asc'], defaultDocumentsOrder],
             ['password (desc)', ['password:desc'], defaultDocumentsOrder],
-          ])('Ignore sort: %s', async (_s, sort, order) => {
+          ])('Error on sort: %s', async (_s, sort, order) => {
             const res = await rq.get('/api/documents', { qs: { sort } });
 
-            checkAPIResultOrder(res, order);
+            expect(res.status).toEqual(400);
           });
         });
       });
@@ -722,10 +709,10 @@ describe('Core API - Sanitize', () => {
             ['password:desc', 'name:desc', 'private_name'],
             [1, 3, 2],
           ],
-        ])('Ignore sort: %s', async (_s, sort, order) => {
+        ])('Error on sort: %s', async (_s, sort, order) => {
           const res = await rq.get('/api/documents', { qs: { sort } });
 
-          checkAPIResultOrder(res, order);
+          expect(res.status).toEqual(400);
         });
       });
     });
@@ -760,20 +747,20 @@ describe('Core API - Sanitize', () => {
         });
 
         describe('Private modifier', () => {
-          it('Ignore the fields parameter: name_private', async () => {
+          it('Error with fields parameter: name_private', async () => {
             const res = await rq.get('/api/documents', { qs: { fields: 'name_private' } });
 
-            checkAPIResultFields(res, allDocumentFields);
+            expect(res.status).toEqual(400);
           });
         });
       });
 
       describe('Password', () => {
         describe('Basic (no modifiers)', () => {
-          it('Ignore the fields parameter (password)', async () => {
+          it('Error with fields parameter (password)', async () => {
             const res = await rq.get('/api/documents', { qs: { fields: 'password' } });
 
-            checkAPIResultFields(res, allDocumentFields);
+            expect(res.status).toEqual(400);
           });
         });
       });
@@ -798,20 +785,20 @@ describe('Core API - Sanitize', () => {
         });
 
         describe('Private modifier', () => {
-          it(`Don't select any fields if only one invalid field: [name_private]`, async () => {
+          it(`Error if any field invalid: [name_private]`, async () => {
             const res = await rq.get('/api/documents', { qs: { fields: ['name_private'] } });
 
-            checkAPIResultFields(res, []);
+            expect(res.status).toEqual(400);
           });
         });
       });
 
       describe('Password', () => {
         describe('Basic (no modifiers)', () => {
-          it(`Don't select any fields if only one invalid field: [password]`, async () => {
+          it(`Error if any field invalid: [password]`, async () => {
             const res = await rq.get('/api/documents', { qs: { fields: ['password'] } });
 
-            checkAPIResultFields(res, []);
+            expect(res.status).toEqual(400);
           });
         });
       });
@@ -831,22 +818,14 @@ describe('Core API - Sanitize', () => {
           checkAPIResultFields(res, allDocumentFields);
         });
 
-        it('Select all fields when using the wildcard (*) symbol along with another selection: [name, password]', async () => {
+        it('Error if any fields inalid: [*, name, password]', async () => {
           const res = await rq.get('/api/documents', { qs: { fields: ['*', 'name', 'password'] } });
 
-          checkAPIResultFields(res, allDocumentFields);
+          expect(res.status).toEqual(400);
         });
 
         it('Select only requested fields: [name, misc]', async () => {
           const res = await rq.get('/api/documents', { qs: { fields: ['name', 'misc'] } });
-
-          checkAPIResultFields(res, ['name', 'misc']);
-        });
-
-        it('Select only requested (valid) fields: [name, misc] and ignore invalid ones [password, name_private]', async () => {
-          const res = await rq.get('/api/documents', {
-            qs: { fields: ['name', 'misc', 'password', 'name_private'] },
-          });
 
           checkAPIResultFields(res, ['name', 'misc']);
         });
@@ -892,7 +871,7 @@ describe('Core API - Sanitize', () => {
         });
 
         describe('Non-Searchable modifier', () => {
-          it('Ignore search on non-searchable atttributes: No Search', async () => {
+          it('Do not search on non-searchable atttributes: No Search', async () => {
             const res = await rq.get('/api/documents', { qs: { _q: 'No Search' } });
 
             checkAPIResultLength(res, 0);
@@ -902,7 +881,7 @@ describe('Core API - Sanitize', () => {
 
       describe('Password', () => {
         describe('Basic (no modifiers)', () => {
-          it('Ignore search on password atttributes: Password', async () => {
+          it('Do not search on password atttributes: Password', async () => {
             const res = await rq.get('/api/documents', { qs: { _q: 'Password' } });
 
             checkAPIResultLength(res, 0);
@@ -972,7 +951,7 @@ describe('Core API - Sanitize', () => {
           }
         );
 
-        it(`Doesn't populate the dynamic zone on empty populate fragment definition`, async () => {
+        it(`Error with dynamic zone on empty populate fragment definition`, async () => {
           const res = await rq.get('/api/documents', { qs: { populate: { dz: { on: {} } } } });
 
           checkAPIResultValidity(res);
