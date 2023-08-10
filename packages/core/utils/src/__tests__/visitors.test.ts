@@ -1,4 +1,4 @@
-import * as visitors from '../sanitize/visitors';
+import * as visitors from '../traverse/visitors';
 import * as contentTypeUtils from '../content-types';
 
 const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypeUtils.constants;
@@ -30,7 +30,7 @@ describe('Sanitize visitors util', () => {
                 singularName: 'test',
                 pluralName: 'tests',
               },
-              options: { populateCreatorFields: true },
+              options: { populateCreatorFields: true, draftAndPublish: false },
               attributes: {},
             },
             value: {},
@@ -63,7 +63,7 @@ describe('Sanitize visitors util', () => {
                 singularName: 'test',
                 pluralName: 'tests',
               },
-              options: { populateCreatorFields: false },
+              options: { populateCreatorFields: false, draftAndPublish: false },
               attributes: {},
             },
             value: {},
