@@ -55,7 +55,12 @@ const getAttributes = (data) => get(data, ['attributes'], {});
 const createYupSchema = (
   model,
   { components },
-  options = { isCreatingEntry: true, isDraft: true, isFromComponent: false }
+  options = {
+    isCreatingEntry: true,
+    isDraft: true,
+    isFromComponent: false,
+    formatJsonBeforeValidate: false,
+  }
 ) => {
   const attributes = getAttributes(model);
 
@@ -214,6 +219,7 @@ const createYupSchemaAttribute = (type, validations, options) => {
   if (type === 'json') {
     schema = yup
       .mixed(errorsTrads.json)
+      .transform((value) => (options.formatJsonBeforeValidate ? JSON.stringify(value) : value))
       .test('isJSON', errorsTrads.json, (value) => {
         if (!value || !value.length) {
           return true;
