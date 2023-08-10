@@ -10,10 +10,15 @@ const createCollectionTypeController = require('./collection-type');
 
 const getAuthFromKoaContext = getOr({}, 'state.auth');
 
-const createController = ({ contentType }) => {
+const createController = ({ contentType, isCustom }) => {
   const ctx = { contentType };
 
   const proto = {
+
+    isCustom() {
+      return isCustom
+    },
+    
     transformResponse(data, meta) {
       return transformResponse(data, meta, { contentType });
     },

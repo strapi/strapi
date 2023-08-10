@@ -248,6 +248,7 @@ class Strapi {
     // Emit started event.
     // do not await to avoid slower startup
     // This event is anonymous
+
     this.telemetry.send('didStartServer', {
       groupProperties: {
         database: strapi.config.get('database.connection.client'),
@@ -256,6 +257,7 @@ class Strapi {
         numberOfComponents: _.size(this.components),
         numberOfDynamicZones: getNumberOfDynamicZones(),
         environment: strapi.config.environment,
+        customizedControllers: Object.entries(strapi.controllers).filter(item => item[0].startsWith("api::") && item[1].isCustom() ).length
         // TODO: to add back
         // providers: this.config.installedProviders,
       },

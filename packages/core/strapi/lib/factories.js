@@ -1,6 +1,6 @@
 'use strict';
 
-const { pipe, omit, pick } = require('lodash/fp');
+const { pipe, omit, pick, isEmpty } = require('lodash/fp');
 
 const { createController } = require('./core-api/controller');
 const { createService } = require('./core-api/service');
@@ -10,6 +10,7 @@ const createCoreController = (uid, cfg = {}) => {
   return ({ strapi }) => {
     const baseController = createController({
       contentType: strapi.contentType(uid),
+      isCustom: !isEmpty(cfg)
     });
 
     const userCtrl = typeof cfg === 'function' ? cfg({ strapi }) : cfg;
