@@ -181,7 +181,7 @@ describe('Core API - Sanitize', () => {
               { name_private: { $in: ['Private Document A', 'Private Document C'] } },
             ],
             ['Implicit $in', { name_private: ['Private Document A', 'Private Document C'] }],
-          ])('Throw on filters (%s)', async (_s, filters) => {
+          ])('Returns 400 status on invalid filters (%s)', async (_s, filters) => {
             const res = await rq.get('/api/documents', { qs: { filters } });
 
             expect(res.status).toEqual(400);
@@ -195,7 +195,7 @@ describe('Core API - Sanitize', () => {
             ['$endsWith', { password: { $endsWith: 'B' } }, documentsLength],
             ['$not > $endsWith', { $not: { password: { $endsWith: 'B' } } }, documentsLength],
             ['$contains', { password: { $contains: 'Document' } }, documentsLength],
-          ])('Throw on filters: %s', async (_s, filters, expectedLength) => {
+          ])('Returns 400 status on invalid filters: %s', async (_s, filters, expectedLength) => {
             const res = await rq.get('/api/documents', { qs: { filters } });
 
             expect(res.status).toEqual(400);
@@ -230,7 +230,7 @@ describe('Core API - Sanitize', () => {
                 { relations: { name_private: { $contains: 'Relation' } } },
                 documentsLength,
               ],
-            ])('Throw on filters: %s', async (_s, filters, expectedlength) => {
+            ])('Returns 400 status on invalid filters: %s', async (_s, filters, expectedlength) => {
               const res = await rq.get('/api/documents', { qs: { filters } });
 
               expect(res.status).toEqual(400);
@@ -251,11 +251,14 @@ describe('Core API - Sanitize', () => {
                   { relations: { password: { $contains: 'Document' } } },
                   documentsLength,
                 ],
-              ])('Throw on filters: %s', async (_s, filters, expectedLength) => {
-                const res = await rq.get('/api/documents', { qs: { filters } });
+              ])(
+                'Returns 400 status on inalid filters: %s',
+                async (_s, filters, expectedLength) => {
+                  const res = await rq.get('/api/documents', { qs: { filters } });
 
-                expect(res.status).toEqual(400);
-              });
+                  expect(res.status).toEqual(400);
+                }
+              );
             });
           });
         });
@@ -288,7 +291,7 @@ describe('Core API - Sanitize', () => {
                 { componentA: { name_private: { $contains: 'Component' } } },
                 documentsLength,
               ],
-            ])('Throw on filters: %s', async (_s, filters, expectedlength) => {
+            ])('Returns 400 status on invalid filters: %s', async (_s, filters, expectedlength) => {
               const res = await rq.get('/api/documents', { qs: { filters } });
 
               expect(res.status).toEqual(400);
