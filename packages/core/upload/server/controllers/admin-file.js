@@ -25,7 +25,7 @@ module.exports = {
     }
 
     const pmQuery = pm.addPermissionsQueryTo(merge(defaultQuery, ctx.query));
-    const query = await pm.sanitizeQuery(pmQuery);
+    const query = await pm.validateQuery(pmQuery);
 
     const { results: files, pagination } = await getService('upload').findPage(query);
 

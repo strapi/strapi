@@ -12,6 +12,8 @@ export interface Base {
   sanitizeOutput<TData>(data: TData, ctx: ExtendableContext): Promise<TData>;
   sanitizeInput<TData>(data: TData, ctx: ExtendableContext): Promise<TData>;
   sanitizeQuery<TData>(data: TData, ctx: ExtendableContext): Promise<TData>;
+  validateQuery<TData>(data: TData, ctx: ExtendableContext): Promise<TData>;
+  validateInput<TData>(data: TData, ctx: ExtendableContext): Promise<TData>;
 }
 
 /**

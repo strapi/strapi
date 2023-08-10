@@ -6,7 +6,7 @@ const { getService } = require('../utils');
 const { FILE_MODEL_UID } = require('../constants');
 const validateUploadBody = require('./validation/content-api/upload');
 
-const { sanitize } = utils;
+const { sanitize, validate } = utils;
 const { ValidationError } = utils.errors;
 
 const sanitizeOutput = (data, ctx) => {
@@ -15,16 +15,16 @@ const sanitizeOutput = (data, ctx) => {
 
   return sanitize.contentAPI.output(data, schema, { auth });
 };
-const sanitizeQuery = (data, ctx) => {
+const validateQuery = (data, ctx) => {
   const schema = strapi.getModel(FILE_MODEL_UID);
   const { auth } = ctx.state;
 
-  return sanitize.contentAPI.query(data, schema, { auth });
+  return validate.contentAPI.query(data, schema, { auth });
 };
 
 module.exports = {
   async find(ctx) {
-    const sanitizedParams = await sanitizeQuery(ctx.query, ctx);
+    const sanitizedParams = await validateQuery(ctx.query, ctx);
 
     const files = await getService('upload').findMany(sanitizedParams);
 
@@ -36,7 +36,7 @@ module.exports = {
       params: { id },
     } = ctx;
 
-    const sanitizedParams = await sanitizeQuery(ctx.query, ctx);
+    const sanitizedParams = await validateQuery(ctx.query, ctx);
     const file = await getService('upload').findOne(id, sanitizedParams.populate);
 
     if (!file) {

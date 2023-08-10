@@ -1,5 +1,5 @@
 import * as contentTypeUtils from '../../content-types';
-import type { Visitor } from '../../traverse/factory';
+import type { Visitor } from '../factory';
 
 const ACTIONS_TO_VERIFY = ['find'];
 const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypeUtils.constants;

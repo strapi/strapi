@@ -4,11 +4,12 @@ import { isArray, cloneDeep } from 'lodash/fp';
 import { getNonWritableAttributes } from '../content-types';
 import { pipeAsync } from '../async';
 
-import * as visitors from './visitors';
+import * as visitors from '../traverse/visitors';
 import * as sanitizers from './sanitizers';
 import traverseEntity, { Data } from '../traverse-entity';
 
-import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from '../traverse';
+import * as traversals from './traversals';
+import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from './traversals';
 import { Model } from '../types';
 
 export interface Options {
@@ -156,4 +157,5 @@ export default {
   contentAPI,
   sanitizers,
   visitors,
+  traversals,
 };

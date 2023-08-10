@@ -5,7 +5,7 @@ const { omit, isNil } = require('lodash/fp');
 
 const utils = require('@strapi/utils');
 
-const { sanitize } = utils;
+const { sanitize, validate } = utils;
 const { NotFoundError } = utils.errors;
 
 module.exports = ({ strapi }) => {
@@ -53,7 +53,7 @@ module.exports = ({ strapi }) => {
           .get('content-api')
           .buildMutationsResolvers({ contentType });
 
-        const sanitizedQuery = await sanitize.contentAPI.query(
+        const sanitizedQuery = await validate.contentAPI.query(
           omit(['data', 'files'], transformedArgs),
           contentType,
           {
@@ -91,7 +91,7 @@ module.exports = ({ strapi }) => {
           .get('content-api')
           .buildMutationsResolvers({ contentType });
 
-        const sanitizedQuery = await sanitize.contentAPI.query(transformedArgs, contentType, {
+        const sanitizedQuery = await validate.contentAPI.query(transformedArgs, contentType, {
           auth: ctx?.state?.auth,
         });
 

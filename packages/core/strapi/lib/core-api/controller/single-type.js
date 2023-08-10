@@ -18,7 +18,7 @@ const createSingleTypeController = ({ contentType }) => {
      * @return {Object|Array}
      */
     async find(ctx) {
-      const sanitizedQuery = await this.sanitizeQuery(ctx);
+      const sanitizedQuery = await this.validateQuery(ctx);
       const entity = await strapi.service(uid).find(sanitizedQuery);
 
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);

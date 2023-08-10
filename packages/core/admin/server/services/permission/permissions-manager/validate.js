@@ -13,23 +13,17 @@ const {
   prop,
   uniq,
   intersection,
-  pick,
   getOr,
   isObject,
   cloneDeep,
 } = require('lodash/fp');
 
-const { contentTypes, traverseEntity, sanitize, pipeAsync } = require('@strapi/utils');
-const { removePassword } = require('@strapi/utils').sanitize.visitors;
+const { contentTypes, traverseEntity, validate, pipeAsync } = require('@strapi/utils');
+const { removePassword } = require('@strapi/utils').validate.visitors;
 const { ADMIN_USER_ALLOWED_FIELDS } = require('../../../domain/user');
 
-const {
-  constants,
-  isScalarAttribute,
-  getNonVisibleAttributes,
-  getNonWritableAttributes,
-  getWritableAttributes,
-} = contentTypes;
+const { constants, isScalarAttribute, getNonVisibleAttributes, getWritableAttributes } =
+  contentTypes;
 const {
   ID_ATTRIBUTE,
   CREATED_AT_ATTRIBUTE,
@@ -45,18 +39,17 @@ const STATIC_FIELDS = [ID_ATTRIBUTE];
 module.exports = ({ action, ability, model }) => {
   const schema = strapi.getModel(model);
 
-  const { sanitizePasswords } = sanitize.sanitizers;
-  const { allowedFields } = sanitize.visitors;
+  const { allowedFields } = validate.visitors;
   const { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate, traverseQueryFields } =
-    sanitize.traversals;
+    validate.traversals;
 
-  const createSanitizeQuery = (options = {}) => {
+  const createValidateQuery = (options = {}) => {
     const { fields } = options;
 
     // TODO: sanitize relations to admin users in all sanitizers
     const permittedFields = fields.shouldIncludeAll ? null : getQueryFields(fields.permitted);
 
-    const sanitizeFilters = pipeAsync(
+    const validateFilters = pipeAsync(
       traverseQueryFilters(allowedFields(permittedFields), { schema }),
       traverseQueryFilters(omitDisallowedAdminUserFields, { schema }),
       traverseQueryFilters(removePassword, { schema }),
@@ -70,7 +63,7 @@ module.exports = ({ action, ability, model }) => {
       )
     );
 
-    const sanitizeSort = pipeAsync(
+    const validateSort = pipeAsync(
       traverseQuerySort(allowedFields(permittedFields), { schema }),
       traverseQuerySort(omitDisallowedAdminUserFields, { schema }),
       traverseQuerySort(removePassword, { schema }),
@@ -84,58 +77,41 @@ module.exports = ({ action, ability, model }) => {
       )
     );
 
-    const sanitizePopulate = pipeAsync(
+    const validatePopulate = pipeAsync(
       traverseQueryPopulate(allowedFields(permittedFields), { schema }),
       traverseQueryPopulate(omitDisallowedAdminUserFields, { schema }),
       traverseQueryPopulate(removePassword, { schema })
     );
 
-    const sanitizeFields = pipeAsync(
+    const validateFields = pipeAsync(
       traverseQueryFields(allowedFields(permittedFields), { schema }),
       traverseQueryFields(removePassword, { schema })
     );
 
     return async (query) => {
-      const sanitizedQuery = cloneDeep(query);
+      const validatedQuery = cloneDeep(query);
 
       if (query.filters) {
-        Object.assign(sanitizedQuery, { filters: await sanitizeFilters(query.filters) });
+        Object.assign(validatedQuery, { filters: await validateFilters(query.filters) });
       }
 
       if (query.sort) {
-        Object.assign(sanitizedQuery, { sort: await sanitizeSort(query.sort) });
+        Object.assign(validatedQuery, { sort: await validateSort(query.sort) });
       }
 
       if (query.populate) {
-        Object.assign(sanitizedQuery, { populate: await sanitizePopulate(query.populate) });
+        Object.assign(validatedQuery, { populate: await validatePopulate(query.populate) });
       }
 
       if (query.fields) {
-        Object.assign(sanitizedQuery, { fields: await sanitizeFields(query.fields) });
+        Object.assign(validatedQuery, { fields: await validateFields(query.fields) });
       }
 
-      return sanitizedQuery;
+      return validatedQuery;
     };
   };
 
-  const createSanitizeOutput = (options = {}) => {
-    const { fields } = options;
-
-    const permittedFields = fields.shouldIncludeAll ? null : getOutputFields(fields.permitted);
-
-    return pipeAsync(
-      // Remove fields hidden from the admin
-      traverseEntity(omitHiddenFields, { schema }),
-      // Remove unallowed fields from admin::user relations
-      traverseEntity(pickAllowedAdminUserFields, { schema }),
-      // Remove not allowed fields (RBAC)
-      traverseEntity(allowedFields(permittedFields), { schema }),
-      // Remove all fields of type 'password'
-      sanitizePasswords(schema)
-    );
-  };
-
-  const createSanitizeInput = (options = {}) => {
+  const createValidateInput = (options = {}) => {
     const { fields } = options;
 
     const permittedFields = fields.shouldIncludeAll ? null : getInputFields(fields.permitted);
@@ -150,10 +126,10 @@ module.exports = ({ action, ability, model }) => {
     );
   };
 
-  const wrapSanitize = (createSanitizeFunction) => {
-    const wrappedSanitize = async (data, options = {}) => {
+  const wrapValidate = (createSanitizeFunction) => {
+    const wrappedValidate = async (data, options = {}) => {
       if (isArray(data)) {
-        return Promise.all(data.map((entity) => wrappedSanitize(entity, options)));
+        return Promise.all(data.map((entity) => wrappedValidate(entity, options)));
       }
 
       const { subject, action: actionOverride } = getDefaultOptions(data, options);
@@ -182,7 +158,7 @@ module.exports = ({ action, ability, model }) => {
       return sanitizeFunction(data);
     };
 
-    return wrappedSanitize;
+    return wrappedValidate;
   };
 
   const getDefaultOptions = (data, options) => {
@@ -202,21 +178,6 @@ module.exports = ({ action, ability, model }) => {
 
     if (isHidden) {
       remove(key);
-    }
-  };
-
-  /**
-   * Visitor used to only select needed fields from the admin users entities & avoid leaking sensitive information
-   */
-  const pickAllowedAdminUserFields = ({ attribute, key, value }, { set }) => {
-    const pickAllowedFields = pick(ADMIN_USER_ALLOWED_FIELDS);
-
-    if (attribute.type === 'relation' && attribute.target === 'admin::user' && value) {
-      if (Array.isArray(value)) {
-        set(key, value.map(pickAllowedFields));
-      } else {
-        set(key, pickAllowedFields(value));
-      }
     }
   };
 
@@ -243,21 +204,6 @@ module.exports = ({ action, ability, model }) => {
     ]);
   };
 
-  const getOutputFields = (fields = []) => {
-    const nonWritableAttributes = getNonWritableAttributes(schema);
-    const nonVisibleAttributes = getNonVisibleAttributes(schema);
-
-    return uniq([
-      ...fields,
-      ...STATIC_FIELDS,
-      ...COMPONENT_FIELDS,
-      ...nonWritableAttributes,
-      ...nonVisibleAttributes,
-      CREATED_AT_ATTRIBUTE,
-      UPDATED_AT_ATTRIBUTE,
-    ]);
-  };
-
   const getQueryFields = (fields = []) => {
     return uniq([
       ...fields,
@@ -270,9 +216,7 @@ module.exports = ({ action, ability, model }) => {
   };
 
   return {
-    sanitizeOutput: wrapSanitize(createSanitizeOutput),
-    sanitizeInput: wrapSanitize(createSanitizeInput),
-    sanitizeQuery: wrapSanitize(createSanitizeQuery),
-    validateQuery: wrapSanitize(createSanitizeQuery),
+    validateQuery: wrapValidate(createValidateQuery),
+    validateInput: wrapValidate(createValidateInput),
   };
 };

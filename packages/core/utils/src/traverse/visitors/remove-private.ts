@@ -1,5 +1,5 @@
 import { isPrivateAttribute } from '../../content-types';
-import type { Visitor } from '../../traverse/factory';
+import type { Visitor } from '../factory';
 
 const visitor: Visitor = ({ schema, key, attribute }, { remove }) => {
   if (!attribute) {

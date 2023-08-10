@@ -1,7 +1,7 @@
 'use strict';
 
 const { pick } = require('lodash/fp');
-const { sanitize } = require('@strapi/utils');
+const { validate } = require('@strapi/utils');
 
 const pickCreateArgs = pick(['params', 'data', 'files']);
 
@@ -25,7 +25,7 @@ module.exports = ({ strapi }) => ({
 
       async delete(parent, args, ctx) {
         const { id, ...rest } = args;
-        const sanitizedQuery = sanitize.contentAPI.query(rest, contentType, {
+        const sanitizedQuery = validate.contentAPI.query(rest, contentType, {
           auth: ctx?.state?.auth,
         });
         return strapi.entityService.delete(uid, id, sanitizedQuery);

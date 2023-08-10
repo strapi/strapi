@@ -4,7 +4,7 @@ const { get } = require('lodash/fp');
 
 const utils = require('@strapi/utils');
 
-const { sanitize, pipeAsync } = utils;
+const { sanitize, validate, pipeAsync } = utils;
 const { ApplicationError } = utils.errors;
 
 module.exports = ({ strapi }) => {
@@ -41,7 +41,7 @@ module.exports = ({ strapi }) => {
           usePagination: true,
         });
 
-        const sanitizedQuery = await sanitize.contentAPI.query(transformedArgs, targetContentType, {
+        const sanitizedQuery = await validate.contentAPI.query(transformedArgs, targetContentType, {
           auth,
         });
 

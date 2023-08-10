@@ -1,6 +1,7 @@
 import { curry, isArray, isString, eq, trim, constant } from 'lodash/fp';
 
-import traverseFactory from './factory';
+import traverseFactory from '../../traverse/factory';
+import { ValidationError } from '../../errors';
 
 const isStringArray = (value: unknown): value is string[] =>
   isArray(value) && value.every(isString);
@@ -19,7 +20,7 @@ const fields = traverseFactory()
     transform: trim,
 
     remove(key, data) {
-      return data === key ? undefined : data;
+      throw new ValidationError(`Invalid parameter ${key}`);
     },
 
     set(_key, _value, data) {

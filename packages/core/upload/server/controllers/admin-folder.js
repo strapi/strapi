@@ -16,7 +16,7 @@ module.exports = {
       model: FOLDER_MODEL_UID,
     });
 
-    const query = await permissionsManager.sanitizeQuery(ctx.query);
+    const query = await permissionsManager.validateQuery(ctx.query);
     const { results } = await strapi.entityService.findWithRelationCountsPage(FOLDER_MODEL_UID, {
       ...defaultsDeep(
         {
@@ -49,7 +49,7 @@ module.exports = {
       model: FOLDER_MODEL_UID,
     });
 
-    const query = await permissionsManager.sanitizeQuery(ctx.query);
+    const query = await permissionsManager.validateQuery(ctx.query);
     const results = await strapi.entityService.findWithRelationCounts(FOLDER_MODEL_UID, {
       ...defaultsDeep(
         {
