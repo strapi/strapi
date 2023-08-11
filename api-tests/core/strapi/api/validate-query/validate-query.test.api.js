@@ -99,7 +99,7 @@ function sortByID(collection, order) {
   throw new Error(`Invalid sort order provided. Expected "asc" or "desc" but got ${order}`);
 }
 
-describe('Core API - Sanitize', () => {
+describe('Core API - Validate', () => {
   const documentsLength = () => fixturesLength('document');
 
   beforeAll(async () => {

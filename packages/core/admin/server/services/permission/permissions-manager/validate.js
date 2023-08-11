@@ -18,7 +18,8 @@ const {
 } = require('lodash/fp');
 
 const { contentTypes, traverseEntity, traverse, validate, pipeAsync } = require('@strapi/utils');
-const { removePassword } = require('@strapi/utils').validate.visitors;
+const { throwPassword } = require('@strapi/utils').validate.visitors;
+const { ValidationError } = require('@strapi/utils');
 const { ADMIN_USER_ALLOWED_FIELDS } = require('../../../domain/user');
 
 const { constants, isScalarAttribute, getNonVisibleAttributes, getWritableAttributes } =
@@ -38,7 +39,7 @@ const STATIC_FIELDS = [ID_ATTRIBUTE];
 module.exports = ({ action, ability, model }) => {
   const schema = strapi.getModel(model);
 
-  const { allowedFields } = validate.visitors;
+  const { throwDisallowedFields } = validate.visitors;
   const { traverseQueryFilters, traverseQuerySort, traverseQueryFields } = traverse.traversals;
 
   const createValidateQuery = (options = {}) => {
@@ -48,13 +49,13 @@ module.exports = ({ action, ability, model }) => {
     const permittedFields = fields.shouldIncludeAll ? null : getQueryFields(fields.permitted);
 
     const validateFilters = pipeAsync(
-      traverseQueryFilters(allowedFields(permittedFields), { schema }),
-      traverseQueryFilters(omitDisallowedAdminUserFields, { schema }),
-      traverseQueryFilters(removePassword, { schema }),
+      traverseQueryFilters(throwDisallowedFields(permittedFields), { schema }),
+      traverseQueryFilters(throwDisallowedAdminUserFields, { schema }),
+      traverseQueryFilters(throwPassword, { schema }),
       traverseQueryFilters(
-        ({ key, value }, { remove }) => {
+        ({ key, value }) => {
           if (isObject(value) && isEmpty(value)) {
-            remove(key);
+            throw new ValidationError(`Invalid key ${key}`);
           }
         },
         { schema }
@@ -62,13 +63,13 @@ module.exports = ({ action, ability, model }) => {
     );
 
     const validateSort = pipeAsync(
-      traverseQuerySort(allowedFields(permittedFields), { schema }),
-      traverseQuerySort(omitDisallowedAdminUserFields, { schema }),
-      traverseQuerySort(removePassword, { schema }),
+      traverseQuerySort(throwDisallowedFields(permittedFields), { schema }),
+      traverseQuerySort(throwDisallowedAdminUserFields, { schema }),
+      traverseQuerySort(throwPassword, { schema }),
       traverseQuerySort(
-        ({ key, attribute, value }, { remove }) => {
+        ({ key, attribute, value }) => {
           if (!isScalarAttribute(attribute) && isEmpty(value)) {
-            remove(key);
+            throw new ValidationError(`Invalid key ${key}`);
           }
         },
         { schema }
@@ -82,8 +83,8 @@ module.exports = ({ action, ability, model }) => {
     // );
 
     const validateFields = pipeAsync(
-      traverseQueryFields(allowedFields(permittedFields), { schema }),
-      traverseQueryFields(removePassword, { schema })
+      traverseQueryFields(throwDisallowedFields(permittedFields), { schema }),
+      traverseQueryFields(throwPassword, { schema })
     );
 
     return async (query) => {
@@ -110,15 +111,15 @@ module.exports = ({ action, ability, model }) => {
 
     return pipeAsync(
       // Remove fields hidden from the admin
-      traverseEntity(omitHiddenFields, { schema }),
+      traverseEntity(throwHiddenFields, { schema }),
       // Remove not allowed fields (RBAC)
-      traverseEntity(allowedFields(permittedFields), { schema }),
+      traverseEntity(throwDisallowedFields(permittedFields), { schema }),
       // Remove roles from createdBy & updateBy fields
       omitCreatorRoles
     );
   };
 
-  const wrapValidate = (createSanitizeFunction) => {
+  const wrapValidate = (createValidateFunction) => {
     const wrappedValidate = async (data, options = {}) => {
       if (isArray(data)) {
         return Promise.all(data.map((entity) => wrappedValidate(entity, options)));
@@ -136,7 +137,7 @@ module.exports = ({ action, ability, model }) => {
       );
       const shouldIncludeAllFields = isEmpty(permittedFields) && !hasAtLeastOneRegistered;
 
-      const sanitizeOptions = {
+      const validateOptions = {
         ...options,
         fields: {
           shouldIncludeAll: shouldIncludeAllFields,
@@ -145,7 +146,7 @@ module.exports = ({ action, ability, model }) => {
         },
       };
 
-      const sanitizeFunction = createSanitizeFunction(sanitizeOptions);
+      const sanitizeFunction = createValidateFunction(validateOptions);
 
       return sanitizeFunction(data);
     };
@@ -165,20 +166,20 @@ module.exports = ({ action, ability, model }) => {
   /**
    * Visitor used to remove hidden fields from the admin API responses
    */
-  const omitHiddenFields = ({ key, schema }, { remove }) => {
+  const throwHiddenFields = ({ key, schema }) => {
     const isHidden = getOr(false, ['config', 'attributes', key, 'hidden'], schema);
 
     if (isHidden) {
-      remove(key);
+      throw new ValidationError(`Invalid key ${key}`);
     }
   };
 
   /**
    * Visitor used to omit disallowed fields from the admin users entities & avoid leaking sensitive information
    */
-  const omitDisallowedAdminUserFields = ({ key, attribute, schema }, { remove }) => {
+  const throwDisallowedAdminUserFields = ({ key, attribute, schema }) => {
     if (schema.uid === 'admin::user' && attribute && !ADMIN_USER_ALLOWED_FIELDS.includes(key)) {
-      remove(key);
+      throw new ValidationError(`Invalid key ${key}`);
     }
   };
 
