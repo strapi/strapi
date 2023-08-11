@@ -8,12 +8,10 @@ import * as visitors from './visitors';
 import * as sanitizers from './sanitizers';
 import traverseEntity, { Data } from '../traverse-entity';
 
-import {
-  traverseQueryFilters,
-  traverseQuerySort,
-  traverseQueryPopulate,
-} from '../traverse/traversals';
+import traversals from '../traverse/traversals';
 import { Model } from '../types';
+
+const { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } = traversals;
 
 export interface Options {
   auth?: unknown;
