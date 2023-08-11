@@ -10,11 +10,12 @@ import { throwPassword, throwPrivate, throwDynamicZones, throwMorphToRelations }
 import { isOperator } from '../operators';
 
 import type { Model } from '../types';
+import { ValidationError } from '../errors';
 
 const { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate, traverseQueryFields } =
   traversals;
 
-const sanitizePasswords = (schema: Model) => async (entity: Data) => {
+const throwPasswords = (schema: Model) => async (entity: Data) => {
   return traverseEntity(throwPassword, { schema }, entity);
 };
 
@@ -33,11 +34,11 @@ const defaultSanitizeFilters = curry((schema: Model, filters: unknown) => {
   return pipeAsync(
     // Remove keys that are not attributes or valid operators
     traverseQueryFilters(
-      ({ key, attribute }, { remove }) => {
+      ({ key, attribute }) => {
         const isAttribute = !!attribute;
 
         if (!isAttribute && !isOperator(key) && key !== 'id') {
-          remove(key);
+          throw new ValidationError(`invalid key ${key}`);
         }
       },
       { schema }
@@ -52,9 +53,9 @@ const defaultSanitizeFilters = curry((schema: Model, filters: unknown) => {
     traverseQueryFilters(throwPrivate, { schema }),
     // Remove empty objects
     traverseQueryFilters(
-      ({ key, value }, { remove }) => {
+      ({ key, value }) => {
         if (isObject(value) && isEmpty(value)) {
-          remove(key);
+          throw new ValidationError(`invalid key ${key}`);
         }
       },
       { schema }
@@ -66,7 +67,7 @@ const defaultSanitizeSort = curry((schema: Model, sort: unknown) => {
   return pipeAsync(
     // Remove non attribute keys
     traverseQuerySort(
-      ({ key, attribute }, { remove }) => {
+      ({ key, attribute }) => {
         // ID is not an attribute per se, so we need to make
         // an extra check to ensure we're not removing it
         if (key === 'id') {
@@ -74,7 +75,7 @@ const defaultSanitizeSort = curry((schema: Model, sort: unknown) => {
         }
 
         if (!attribute) {
-          remove(key);
+          throw new ValidationError(`invalid key ${key}`);
         }
       },
       { schema }
@@ -89,9 +90,9 @@ const defaultSanitizeSort = curry((schema: Model, sort: unknown) => {
     traverseQuerySort(throwPassword, { schema }),
     // Remove keys for empty non-scalar values
     traverseQuerySort(
-      ({ key, attribute, value }, { remove }) => {
+      ({ key, attribute, value }) => {
         if (!isScalarAttribute(attribute) && isEmpty(value)) {
-          remove(key);
+          throw new ValidationError(`invalid key ${key}`);
         }
       },
       { schema }
@@ -103,9 +104,9 @@ const defaultSanitizeFields = curry((schema: Model, fields: unknown) => {
   return pipeAsync(
     // Only keep scalar attributes
     traverseQueryFields(
-      ({ key, attribute }, { remove }) => {
+      ({ key, attribute }) => {
         if (isNil(attribute) || !isScalarAttribute(attribute)) {
-          remove(key);
+          throw new ValidationError(`invalid key ${key}`);
         }
       },
       { schema }
@@ -147,7 +148,7 @@ const defaultSanitizePopulate = curry((schema: Model, populate: unknown) => {
 });
 
 export {
-  sanitizePasswords,
+  throwPasswords,
   defaultSanitizeOutput,
   defaultSanitizeFilters,
   defaultSanitizeSort,
