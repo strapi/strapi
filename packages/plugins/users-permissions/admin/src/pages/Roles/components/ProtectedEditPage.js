@@ -2,14 +2,11 @@ import React from 'react';
 
 import { CheckPagePermissions } from '@strapi/helper-plugin';
 
-import { PERMISSIONS } from '../../constants';
+import { PERMISSIONS } from '../../../constants';
+import { EditPage } from '../pages/EditPage';
 
-import { EditPage } from './EditPage';
-
-const ProtectedRolesEditPage = () => (
+export const ProtectedRolesEditPage = () => (
   <CheckPagePermissions permissions={PERMISSIONS.updateRole}>
     <EditPage />
   </CheckPagePermissions>
 );
-
-export default ProtectedRolesEditPage;

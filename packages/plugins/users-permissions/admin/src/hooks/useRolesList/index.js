@@ -3,11 +3,10 @@ import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 
-import pluginId from '../../pluginId';
-
 import init from './init';
 import reducer, { initialState } from './reducer';
 
+// TODO: refactor to use react-query or useAdminRoles()
 const useRolesList = (shouldFetchData = true) => {
   const [{ roles, isLoading }, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, shouldFetchData)
@@ -25,7 +24,7 @@ const useRolesList = (shouldFetchData = true) => {
 
       const {
         data: { roles },
-      } = await fetchClient.get(`/${pluginId}/roles`);
+      } = await fetchClient.get(`/users-permissions/roles`);
 
       dispatch({
         type: 'GET_DATA_SUCCEEDED',

@@ -8,7 +8,6 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter, Switch, Route } from 'react-router-dom';
 
-import pluginId from '../../../pluginId';
 import { CreatePage } from '../CreatePage';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -17,7 +16,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 
 const render = () => ({
-  ...renderRTL(<Route path={`/settings/${pluginId}/roles/new`} component={CreatePage} />, {
+  ...renderRTL(<Route path="/settings/users-permissions/roles/new" component={CreatePage} />, {
     wrapper({ children }) {
       const client = new QueryClient({
         defaultOptions: {
@@ -32,7 +31,7 @@ const render = () => ({
           <ThemeProvider theme={lightTheme}>
             <QueryClientProvider client={client}>
               <NotificationsProvider>
-                <MemoryRouter initialEntries={[`/settings/${pluginId}/roles/new`]}>
+                <MemoryRouter initialEntries={[`/settings/users-permissions/roles/new`]}>
                   <Switch>{children}</Switch>
                 </MemoryRouter>
               </NotificationsProvider>

@@ -2,10 +2,9 @@ import { useCallback, useEffect, useReducer, useRef } from 'react';
 
 import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 
-import pluginId from '../../pluginId';
-
 import reducer, { initialState } from './reducer';
 
+// TODO: Refactor to use react-query
 const useFetchRole = (id) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const toggleNotification = useNotification();
@@ -32,7 +31,7 @@ const useFetchRole = (id) => {
     try {
       const {
         data: { role },
-      } = await get(`/${pluginId}/roles/${roleId}`);
+      } = await get(`/users-permissions/roles/${roleId}`);
 
       // Prevent updating state on an unmounted component
       if (isMounted.current) {

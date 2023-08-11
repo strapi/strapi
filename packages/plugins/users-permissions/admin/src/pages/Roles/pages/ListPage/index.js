@@ -36,9 +36,8 @@ import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 import { useHistory } from 'react-router-dom';
 
-import { PERMISSIONS } from '../../../constants';
-import pluginId from '../../../pluginId';
-import { getTrad } from '../../../utils';
+import { PERMISSIONS } from '../../../../constants';
+import { getTrad } from '../../../../utils';
 
 import TableBody from './components/TableBody';
 import { deleteData, fetchData } from './utils/api';
@@ -91,7 +90,7 @@ const RoleListPage = () => {
 
   const handleNewRoleClick = () => {
     trackUsage('willCreateRole');
-    push(`/settings/${pluginId}/roles/new`);
+    push(`/settings/users-permissions/roles/new`);
   };
 
   const handleShowConfirmDelete = () => {

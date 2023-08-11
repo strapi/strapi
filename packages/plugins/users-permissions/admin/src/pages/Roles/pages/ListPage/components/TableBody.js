@@ -7,8 +7,6 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 
-import pluginId from '../../../../pluginId';
-
 const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDelete }) => {
   const { formatMessage } = useIntl();
   const { push } = useHistory();
@@ -23,7 +21,7 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
   };
 
   const handleClickEdit = (id) => {
-    push(`/settings/${pluginId}/roles/${id}`);
+    push(`/settings/users-permissions/roles/${id}`);
   };
 
   return (
@@ -39,7 +37,10 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
           <Td width="30%">
             <Typography>
               {formatMessage(
-                { id: 'Roles.RoleRow.user-count', defaultMessage: '{number, plural, =0 {# user} one {# user} other {# users}}' },
+                {
+                  id: 'Roles.RoleRow.user-count',
+                  defaultMessage: '{number, plural, =0 {# user} one {# user} other {# users}}',
+                },
                 { number: role.nb_users }
               )}
             </Typography>

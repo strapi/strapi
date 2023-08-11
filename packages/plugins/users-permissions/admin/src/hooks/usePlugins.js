@@ -3,7 +3,6 @@ import { useEffect } from 'react';
 import { useNotification, useFetchClient, useAPIErrorHandler } from '@strapi/helper-plugin';
 import { useQueries } from 'react-query';
 
-import pluginId from '../pluginId';
 import { cleanPermissions, getTrad } from '../utils';
 
 export const usePlugins = () => {
@@ -21,17 +20,17 @@ export const usePlugins = () => {
     { data: routes, isLoading: isLoadingRoutes, error: routesError, refetch: refetchRoutes },
   ] = useQueries([
     {
-      queryKey: [pluginId, 'permissions'],
+      queryKey: ['users-permissions', 'permissions'],
       async queryFn() {
-        const res = await get(`/${pluginId}/permissions`);
+        const res = await get(`/users-permissions/permissions`);
 
         return res.data.permissions;
       },
     },
     {
-      queryKey: [pluginId, 'routes'],
+      queryKey: ['users-permissions', 'routes'],
       async queryFn() {
-        const res = await get(`/${pluginId}/routes`);
+        const res = await get(`/users-permissions/routes`);
 
         return res.data.routes;
       },

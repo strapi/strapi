@@ -1,79 +1,75 @@
 import * as React from 'react';
 
 import {
-  Button,
   ContentLayout,
-  Flex,
-  Grid,
-  GridItem,
   HeaderLayout,
   Main,
-  Textarea,
+  Button,
+  Flex,
   TextInput,
+  Textarea,
   Typography,
+  GridItem,
+  Grid,
 } from '@strapi/design-system';
 import {
-  Form,
-  SettingsPageTitle,
   useFetchClient,
-  useNotification,
   useOverlayBlocker,
-  useTracking,
+  SettingsPageTitle,
+  LoadingIndicatorPage,
+  Form,
+  useFormatAPIError,
+  useNotification,
+  Link,
 } from '@strapi/helper-plugin';
-import { Check } from '@strapi/icons';
+import { ArrowLeft, Check } from '@strapi/icons';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
-import { useHistory } from 'react-router-dom';
+import { useRouteMatch } from 'react-router-dom';
 
-import UsersPermissions from '../../components/UsersPermissions';
-import { usePlugins } from '../../hooks';
-import getTrad from '../../utils/getTrad';
+import UsersPermissions from '../../../components/UsersPermissions';
+import { usePlugins, useFetchRole } from '../../../hooks';
+import getTrad from '../../../utils/getTrad';
+import { createRoleSchema } from '../constants';
 
-import { createRoleSchema } from './constants';
-
-export const CreatePage = () => {
+export const EditPage = () => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
-  const { goBack } = useHistory();
   const { lockApp, unlockApp } = useOverlayBlocker();
-  const { isLoading: isLoadingPlugins, permissions, routes } = usePlugins();
-  const { trackUsage } = useTracking();
+  const {
+    params: { id },
+  } = useRouteMatch(`/settings/users-permissions/roles/:id`);
+  const { isLoading: isLoadingPlugins, routes } = usePlugins();
+  const { role, onSubmitSucceeded, isLoading: isLoadingRole } = useFetchRole(id);
   const permissionsRef = React.useRef();
-  const { post } = useFetchClient();
-  const mutation = useMutation((body) => post(`/users-permissions/roles`, body), {
-    onError() {
+  const { put } = useFetchClient();
+  const { formatAPIError } = useFormatAPIError();
+  const mutation = useMutation((body) => put(`/users-permissions/roles/${id}`, body), {
+    onError(error) {
       toggleNotification({
         type: 'warning',
-        message: {
-          id: 'notification.error',
-          defaultMessage: 'An error occurred',
-        },
+        message: formatAPIError(error),
       });
     },
 
-    onSuccess() {
-      trackUsage('didCreateRole');
-
+    onSuccess(data) {
       toggleNotification({
         type: 'success',
         message: {
           id: getTrad('Settings.roles.created'),
-          defaultMessage: 'Role created',
+          defaultMessage: 'Role edited',
         },
       });
 
-      // Forcing redirecting since we don't have the id in the response
-      goBack();
+      onSubmitSucceeded({ name: data.name, description: data.description });
     },
   });
 
-  const handleCreateRoleSubmit = async (data) => {
+  const handleEditRoleSubmit = async (data) => {
+    // Set loading state
     lockApp();
 
-    // TODO: refactor. Child -> parent component communication is evil;
-    // We should either move the provider one level up or move the state
-    // straight into redux.
     const permissions = permissionsRef.current.getPermissions();
 
     await mutation.mutate({ ...data, ...permissions, users: [] });
@@ -81,14 +77,18 @@ export const CreatePage = () => {
     unlockApp();
   };
 
+  if (isLoadingRole) {
+    return <LoadingIndicatorPage />;
+  }
+
   return (
     <Main>
-      {/* TODO: This needs to be translated */}
+      {/* TODO: this needs to be translated */}
       <SettingsPageTitle name="Roles" />
       <Formik
         enableReinitialize
-        initialValues={{ name: '', description: '' }}
-        onSubmit={handleCreateRoleSubmit}
+        initialValues={{ name: role.name, description: role.description }}
+        onSubmit={handleEditRoleSubmit}
         validationSchema={createRoleSchema}
       >
         {({ handleSubmit, values, handleChange, errors }) => (
@@ -96,7 +96,12 @@ export const CreatePage = () => {
             <HeaderLayout
               primaryAction={
                 !isLoadingPlugins && (
-                  <Button type="submit" loading={mutation.isLoading} startIcon={<Check />}>
+                  <Button
+                    disabled={role.code === 'strapi-super-admin'}
+                    type="submit"
+                    loading={mutation.isLoading}
+                    startIcon={<Check />}
+                  >
                     {formatMessage({
                       id: 'global.save',
                       defaultMessage: 'Save',
@@ -104,14 +109,16 @@ export const CreatePage = () => {
                   </Button>
                 )
               }
-              title={formatMessage({
-                id: 'Settings.roles.create.title',
-                defaultMessage: 'Create a role',
-              })}
-              subtitle={formatMessage({
-                id: 'Settings.roles.create.description',
-                defaultMessage: 'Define the rights given to the role',
-              })}
+              title={role.name}
+              subtitle={role.description}
+              navigationAction={
+                <Link startIcon={<ArrowLeft />} to="/settings/users-permissions/roles">
+                  {formatMessage({
+                    id: 'global.back',
+                    defaultMessage: 'Back',
+                  })}
+                </Link>
+              }
             />
             <ContentLayout>
               <Flex
@@ -126,7 +133,7 @@ export const CreatePage = () => {
                 paddingRight={7}
                 shadow="filterShadow"
               >
-                <Flex direction="column" alignItems="stretch">
+                <Flex direction="column" alignItems="stretch" gap={4}>
                   <Typography variant="delta" as="h2">
                     {formatMessage({
                       id: getTrad('EditPage.form.roles'),
@@ -165,7 +172,7 @@ export const CreatePage = () => {
                 {!isLoadingPlugins && (
                   <UsersPermissions
                     ref={permissionsRef}
-                    permissions={permissions}
+                    permissions={role.permissions}
                     routes={routes}
                   />
                 )}

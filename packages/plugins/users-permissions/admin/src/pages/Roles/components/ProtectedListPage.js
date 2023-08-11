@@ -2,16 +2,13 @@ import React from 'react';
 
 import { CheckPagePermissions } from '@strapi/helper-plugin';
 
-import { PERMISSIONS } from '../../constants';
+import { PERMISSIONS } from '../../../constants';
+import RolesListPage from '../pages/ListPage';
 
-import RolesListPage from './ListPage';
-
-const ProtectedRolesListPage = () => {
+export const ProtectedRolesListPage = () => {
   return (
     <CheckPagePermissions permissions={PERMISSIONS.accessRoles}>
       <RolesListPage />
     </CheckPagePermissions>
   );
 };
-
-export default ProtectedRolesListPage;
