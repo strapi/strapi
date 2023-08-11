@@ -27,7 +27,7 @@ const sanitizeQuery = (data, ctx) => {
   const schema = strapi.getModel(FILE_MODEL_UID);
   const { auth } = ctx.state;
 
-  return validate.contentAPI.query(data, schema, { auth });
+  return sanitize.contentAPI.query(data, schema, { auth });
 };
 
 module.exports = {
