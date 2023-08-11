@@ -15,6 +15,7 @@ const DEFAULT_PERMISSIONS = [
   { action: 'plugin::users-permissions.auth.callback', roleType: 'public' },
   { action: 'plugin::users-permissions.auth.connect', roleType: 'public' },
   { action: 'plugin::users-permissions.auth.forgotPassword', roleType: 'public' },
+  { action: 'plugin::users-permissions.auth.multiFactorAuthentication', roleType: 'public' },
   { action: 'plugin::users-permissions.auth.resetPassword', roleType: 'public' },
   { action: 'plugin::users-permissions.auth.register', roleType: 'public' },
   { action: 'plugin::users-permissions.auth.emailConfirmation', roleType: 'public' },

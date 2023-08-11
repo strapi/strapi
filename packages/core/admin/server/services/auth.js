@@ -88,6 +88,17 @@ const forgotPassword = async ({ email } = {}) => {
 };
 
 /**
+ * Validate 6 digit secret two-factor that was sent to the email
+ * @param {Object} param params
+ * @param {string} param.code secret 6 digit code
+ */
+const multiFactorAuthentication = async ({ code } = {}) => {
+  // TODO
+  // validate that the 6 digit authentication code is correct
+};
+
+
+/**
  * Reset a user password
  * @param {Object} param params
  * @param {string} param.resetPasswordToken token generated to request a password reset
@@ -113,5 +124,6 @@ module.exports = {
   validatePassword,
   hashPassword,
   forgotPassword,
+  multiFactorAuthentication,
   resetPassword,
 };

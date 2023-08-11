@@ -27,6 +27,12 @@ const forgotPasswordSchema = yup
   })
   .noUnknown();
 
+const multiFactorAuthenticationSchema = yup
+  .object({
+    code: yup.number.min(6).max(6).integer().required(),
+  })
+  .noUnknown();
+
 const resetPasswordSchema = yup
   .object({
     password: yup.string().required(),
@@ -52,6 +58,7 @@ module.exports = {
   validateSendEmailConfirmationBody: validateYupSchema(sendEmailConfirmationSchema),
   validateEmailConfirmationBody: validateYupSchema(validateEmailConfirmationSchema),
   validateForgotPasswordBody: validateYupSchema(forgotPasswordSchema),
+  validateMultiFactorAuthenticationBody: validateYupSchema(multiFactorAuthenticationSchema),
   validateResetPasswordBody: validateYupSchema(resetPasswordSchema),
   validateChangePasswordBody: validateYupSchema(changePasswordSchema),
 };

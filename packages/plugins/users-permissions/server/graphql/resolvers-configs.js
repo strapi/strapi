@@ -21,6 +21,7 @@ module.exports = ({ strapi }) => {
     'Mutation.login': { auth: false },
     'Mutation.register': { auth: false },
     'Mutation.forgotPassword': { auth: false },
+    'Mutation.multiFactorAuthentication': { auth: false},
     'Mutation.resetPassword': { auth: false },
     'Mutation.emailConfirmation': { auth: false },
     'Mutation.changePassword': {

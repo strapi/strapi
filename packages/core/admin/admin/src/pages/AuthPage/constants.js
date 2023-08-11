@@ -3,6 +3,7 @@ import * as yup from 'yup';
 
 import ForgotPassword from './components/ForgotPassword';
 import ForgotPasswordSuccess from './components/ForgotPasswordSuccess';
+import MultiFactorAuthentication from './components/MultiFactorAuthentication';
 import Oops from './components/Oops';
 import Register from './components/Register';
 import ResetPassword from './components/ResetPassword';
@@ -37,6 +38,16 @@ export const FORMS = {
       email: yup.string().email(translatedErrors.email).required(translatedErrors.required),
       password: yup.string().required(translatedErrors.required),
       rememberMe: yup.bool().nullable(),
+    }),
+    inputsPrefix: '',
+  },
+  'multi-factor-authentication': {
+    Component: MultiFactorAuthentication,
+    endPoint: 'multi-factor-authentication',
+    fieldsToDisable: [],
+    fieldsToOmit: [],
+    schema: yup.object().shape({
+      email: yup.string().email(translatedErrors.email).required(translatedErrors.required),
     }),
     inputsPrefix: '',
   },

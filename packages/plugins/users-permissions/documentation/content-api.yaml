@@ -164,6 +164,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /auth/multi-factor-authentication:
+    post:
+      tags:
+        - Users-Permissions - Auth
+      summary: Validate two factor code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: number
+            example:
+              code: 123456
+      responses:
+        200:
+          description: Returns ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: string
+                    enum: [ true ]
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /auth/reset-password:
     post:
       tags:

@@ -542,4 +542,21 @@ describe('Admin Auth End to End', () => {
       expect(nonExistentRes.body).toStrictEqual({});
     });
   });
+
+  describe('POST /multi-factor-authentication', () => {
+    test('Fails on incorrect authentication code', async () => {
+      global.strapi.admin.services.auth.multiFactorAuthentication = jest.fn(() => {});
+
+      const res = await rq({
+        url: '/admin/multi-factor-authentication',
+        method: 'POST',
+        body: {
+          code: '123456', // TODO Fix this test case to always fail
+        },
+      });
+
+      expect(res.statusCode).toBe(403);
+      expect(res.body).toStrictEqual({});
+    });
+  });
 });

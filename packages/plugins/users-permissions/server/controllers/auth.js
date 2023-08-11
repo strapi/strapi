@@ -16,6 +16,7 @@ const {
   validateRegisterBody,
   validateSendEmailConfirmationBody,
   validateForgotPasswordBody,
+  validateMultiFactorAuthenticationBody,
   validateResetPasswordBody,
   validateEmailConfirmationBody,
   validateChangePasswordBody,
@@ -262,6 +263,13 @@ module.exports = {
     await strapi.plugin('email').service('email').send(emailToSend);
 
     ctx.send({ ok: true });
+  },
+
+  async multiFactorAuthentication(ctx) {
+    const { code } = await validateMultiFactorAuthenticationBody(ctx.request.body);
+    // TODO
+    // Validate two factor code
+    // Redirect to admin dashboard
   },
 
   async register(ctx) {

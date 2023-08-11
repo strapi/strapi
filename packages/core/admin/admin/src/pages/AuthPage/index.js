@@ -100,6 +100,10 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       await forgotPasswordRequest(body, requestURL, { setSubmitting, setErrors });
     }
 
+    if (authType === 'multi-factor-authentication') {
+      await multiFactorAuthenticationRequest(body, requestURL, { setSubmitting, setErrors });
+    }
+
     if (authType === 'reset-password') {
       await resetPasswordRequest(body, requestURL, { setSubmitting, setErrors });
     }
@@ -110,6 +114,20 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       await post(requestURL, body, { cancelToken: source.token });
 
       push('/auth/forgot-password-success');
+    } catch (err) {
+      console.error(err);
+
+      setErrors({ errorMessage: 'notification.error' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const multiFactorAuthenticationRequest = async (body, requestURL, { setSubmitting, setErrors }) => {
+    try {
+      await post(requestURL, body, { cancelToken: source.token });
+
+      push('/auth/multi-factor-authentication-success');
     } catch (err) {
       console.error(err);
 
