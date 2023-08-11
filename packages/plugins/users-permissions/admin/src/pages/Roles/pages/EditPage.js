@@ -13,23 +13,22 @@ import {
   Grid,
 } from '@strapi/design-system';
 import {
-  useFetchClient,
   useOverlayBlocker,
   SettingsPageTitle,
   LoadingIndicatorPage,
   Form,
   useAPIErrorHandler,
+  useFetchClient,
   useNotification,
   Link,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
-import { useMutation } from 'react-query';
+import { useQuery, useMutation } from 'react-query';
 import { useRouteMatch } from 'react-router-dom';
 
 import UsersPermissions from '../../../components/UsersPermissions';
-import { useFetchRole } from '../../../hooks/useFetchRole';
 import { usePlugins } from '../../../hooks/usePlugins';
 import getTrad from '../../../utils/getTrad';
 import { createRoleSchema } from '../constants';
@@ -41,8 +40,21 @@ export const EditPage = () => {
   const {
     params: { id },
   } = useRouteMatch(`/settings/users-permissions/roles/:id`);
+  const { get } = useFetchClient();
   const { isLoading: isLoadingPlugins, routes } = usePlugins();
-  const { role, onSubmitSucceeded, isLoading: isLoadingRole } = useFetchRole(id);
+  const {
+    data: role,
+    isLoading: isLoadingRole,
+    refetch: refetchRole,
+  } = useQuery(['users-permissions', 'role', id], async () => {
+    // TODO: why doesn't this endpoint follow the admin API conventions?
+    const {
+      data: { role },
+    } = await get(`/users-permissions/roles/${id}`);
+
+    return role;
+  });
+
   const permissionsRef = React.useRef();
   const { put } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
@@ -54,7 +66,7 @@ export const EditPage = () => {
       });
     },
 
-    onSuccess(data) {
+    async onSuccess() {
       toggleNotification({
         type: 'success',
         message: {
@@ -63,7 +75,7 @@ export const EditPage = () => {
         },
       });
 
-      onSubmitSucceeded({ name: data.name, description: data.description });
+      await refetchRole();
     },
   });
 

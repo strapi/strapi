@@ -22,17 +22,21 @@ export const usePlugins = () => {
     {
       queryKey: ['users-permissions', 'permissions'],
       async queryFn() {
-        const res = await get(`/users-permissions/permissions`);
+        const {
+          data: { permissions },
+        } = await get(`/users-permissions/permissions`);
 
-        return res.data.permissions;
+        return permissions;
       },
     },
     {
       queryKey: ['users-permissions', 'routes'],
       async queryFn() {
-        const res = await get(`/users-permissions/routes`);
+        const {
+          data: { routes },
+        } = await get(`/users-permissions/routes`);
 
-        return res.data.routes;
+        return routes;
       },
     },
   ]);
@@ -62,8 +66,12 @@ export const usePlugins = () => {
   const isLoading = isLoadingPermissions || isLoadingRoutes;
 
   return {
+    // TODO: these return values need to be memoized, otherwise
+    // they will create infinite rendering loops when used as
+    // effect dependencies
     permissions: permissions ? cleanPermissions(permissions) : {},
     routes: routes ?? {},
+
     getData: refetchQueries,
     isLoading,
   };
