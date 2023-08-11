@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-upload-aws-s3",
-  "version": "4.12.1",
+  "version": "4.12.4",
   "description": "AWS S3 provider for strapi upload",
   "keywords": [
     "upload",
@@ -50,8 +50,8 @@
   },
   "devDependencies": {
     "@types/jest": "29.5.2",
-    "eslint-config-custom": "4.12.1",
-    "tsconfig": "4.12.1"
+    "eslint-config-custom": "4.12.4",
+    "tsconfig": "4.12.4"
   },
   "engines": {
     "node": ">=16.0.0 <=20.x.x",
