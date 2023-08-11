@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useNotification, useFetchClient, useAPIErrorHandler } from '@strapi/helper-plugin';
 import { useQueries } from 'react-query';
 
-import { cleanPermissions, getTrad } from '../utils';
+import { cleanPermissions, getTrad } from '../../../utils';
 
 export const usePlugins = () => {
   const toggleNotification = useNotification();

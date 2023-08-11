@@ -29,9 +29,9 @@ import { useQuery, useMutation } from 'react-query';
 import { useRouteMatch } from 'react-router-dom';
 
 import UsersPermissions from '../../../components/UsersPermissions';
-import { usePlugins } from '../../../hooks/usePlugins';
 import getTrad from '../../../utils/getTrad';
 import { createRoleSchema } from '../constants';
+import { usePlugins } from '../hooks/usePlugins';
 
 export const EditPage = () => {
   const { formatMessage } = useIntl();
