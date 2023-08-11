@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import * as React from 'react';
 
 import {
   ContentLayout,
@@ -13,7 +13,6 @@ import {
   Thead,
   Tr,
   Typography,
-  useNotifyAT,
   VisuallyHidden,
 } from '@strapi/design-system';
 import {
@@ -22,6 +21,8 @@ import {
   onRowClick,
   SettingsPageTitle,
   stopPropagation,
+  useAPIErrorHandler,
+  useFetchClient,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
@@ -38,75 +39,68 @@ import FormModal from '../../components/FormModal';
 import { PERMISSIONS } from '../../constants';
 import { getTrad } from '../../utils';
 
-import { fetchData, putProvider } from './utils/api';
 import createProvidersArray from './utils/createProvidersArray';
 import forms from './utils/forms';
 
 export const ProvidersPage = () => {
   const { formatMessage } = useIntl();
-  useFocusWhenNavigate();
-  const { notifyStatus } = useNotifyAT();
   const queryClient = useQueryClient();
   const { trackUsage } = useTracking();
-  const trackUsageRef = useRef(trackUsage);
-  const [isOpen, setIsOpen] = useState(false);
-  const [isSubmiting, setIsSubmiting] = useState(false);
-  const [providerToEditName, setProviderToEditName] = useState(null);
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [providerToEditName, setProviderToEditName] = React.useState(null);
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
+  const { get, put } = useFetchClient();
+  const { formatAPIError } = useAPIErrorHandler();
+
+  useFocusWhenNavigate();
 
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate },
   } = useRBAC({ update: PERMISSIONS.updateProviders });
 
-  const {
-    isLoading: isLoadingForData,
-    data: modifiedData,
-    isFetching,
-  } = useQuery('get-providers', () => fetchData(toggleNotification), {
-    onSuccess() {
-      notifyStatus(
-        formatMessage({
-          id: getTrad('Providers.data.loaded'),
-          defaultMessage: 'Providers have been loaded',
-        })
-      );
-    },
-    initialData: {},
-  });
+  const { isLoading: isLoadingData, data } = useQuery(
+    ['users-permissions', 'get-providers'],
+    async () => {
+      const { data } = await get('/users-permissions/providers');
 
-  const isLoading = isLoadingForData || isFetching;
+      return data;
+    }
+  );
 
-  const submitMutation = useMutation(putProvider, {
+  const isLoading = isLoadingData;
+
+  const submitMutation = useMutation((body) => put('/users-permissions/providers', body), {
     async onSuccess() {
-      await queryClient.invalidateQueries('get-providers');
+      await queryClient.invalidateQueries(['users-permissions', 'providers']);
+
       toggleNotification({
         type: 'info',
         message: { id: getTrad('notification.success.submit') },
       });
 
-      trackUsageRef.current('didEditAuthenticationProvider');
-      setIsSubmiting(false);
+      trackUsage('didEditAuthenticationProvider');
+
       handleToggleModal();
       unlockApp();
     },
-    onError() {
+    onError(error) {
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error' },
+        message: formatAPIError(error),
       });
+
       unlockApp();
-      setIsSubmiting(false);
     },
     refetchActive: false,
   });
 
-  const providers = useMemo(() => createProvidersArray(modifiedData), [modifiedData]);
+  const providers = React.useMemo(() => createProvidersArray(data), [data]);
 
   const rowCount = providers.length;
 
-  const isProviderWithSubdomain = useMemo(() => {
+  const isProviderWithSubdomain = React.useMemo(() => {
     if (!providerToEditName) {
       return false;
     }
@@ -121,7 +115,7 @@ export const ProvidersPage = () => {
     defaultMessage: 'Providers',
   });
 
-  const layoutToRender = useMemo(() => {
+  const layoutToRender = React.useMemo(() => {
     if (providerToEditName === 'email') {
       return forms.email;
     }
@@ -145,15 +139,11 @@ export const ProvidersPage = () => {
   };
 
   const handleSubmit = async (values) => {
-    setIsSubmiting(true);
-
     lockApp();
 
-    trackUsageRef.current('willEditAuthenticationProvider');
+    trackUsage('willEditAuthenticationProvider');
 
-    const body = { ...modifiedData, [providerToEditName]: values };
-
-    submitMutation.mutate({ providers: body });
+    submitMutation.mutate({ providers: { ...data, [providerToEditName]: values } });
   };
 
   return (
@@ -243,9 +233,9 @@ export const ProvidersPage = () => {
         )}
       </Main>
       <FormModal
-        initialData={modifiedData[providerToEditName]}
+        initialData={data[providerToEditName]}
         isOpen={isOpen}
-        isSubmiting={isSubmiting}
+        isSubmiting={submitMutation.isLoading}
         layout={layoutToRender}
         headerBreadcrumbs={[
           formatMessage({
