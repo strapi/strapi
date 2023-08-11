@@ -64,7 +64,11 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
         try {
           const {
             data: { data },
-          } = await get(`/admin/registration-info?registrationToken=${registrationToken}`);
+          } = await get(`/admin/registration-info`, {
+            params: {
+              registrationToken,
+            },
+          });
 
           if (data) {
             setUserInfo(data);
@@ -94,6 +98,10 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
 
       if (!['password', 'confirmPassword'].includes(key) && typeof value === 'string') {
         normalizedvalue = normalizedvalue.trim();
+
+        if (key === 'lastname') {
+          normalizedvalue = normalizedvalue || null;
+        }
       }
 
       acc[key] = normalizedvalue;

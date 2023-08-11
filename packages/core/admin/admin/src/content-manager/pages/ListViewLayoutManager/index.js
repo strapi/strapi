@@ -14,7 +14,7 @@ const ListViewLayout = ({ layout, ...props }) => {
   const dispatch = useDispatch();
   const { replace } = useHistory();
   const [{ query, rawQuery }] = useQueryParams();
-  const permissions = useSyncRbac(query, props.slug, 'listView');
+  const { permissions, isValid: isValidPermissions } = useSyncRbac(query, props.slug, 'listView');
   const redirectionLink = useFindRedirectionLink(props.slug);
 
   useEffect(() => {
@@ -33,7 +33,7 @@ const ListViewLayout = ({ layout, ...props }) => {
     };
   }, [dispatch]);
 
-  if (!permissions) {
+  if (!isValidPermissions) {
     return null;
   }
 

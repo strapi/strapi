@@ -310,5 +310,4 @@ const permissions = [
   },
 ];
 
-export default testData;
-export { permissions };
+export { permissions, testData };

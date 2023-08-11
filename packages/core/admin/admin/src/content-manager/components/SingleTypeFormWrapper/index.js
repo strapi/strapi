@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState, useMemo } from 'react';
 
 import {
   formatContentTypeData,
@@ -16,7 +16,7 @@ import { useQueryClient } from 'react-query';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
-import buildQueryString from '../../pages/ListView/utils/buildQueryString';
+import { buildValidGetParams } from '../../pages/ListView/utils';
 import {
   getData,
   getDataSucceeded,
@@ -29,8 +29,6 @@ import {
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
 import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
 
-import { getRequestUrl } from './utils';
-
 // This container is used to handle the CRUD
 const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   const queryClient = useQueryClient();
@@ -40,7 +38,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   const trackUsageRef = useRef(trackUsage);
   const [isCreatingEntry, setIsCreatingEntry] = useState(true);
   const [{ query, rawQuery }] = useQueryParams();
-  const searchToSend = buildQueryString(query);
+  const params = useMemo(() => buildValidGetParams(query), [query]);
   const toggleNotification = useNotification();
   const dispatch = useDispatch();
   const { formatAPIError } = useAPIErrorHandler(getTrad);
@@ -110,8 +108,9 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       setIsCreatingEntry(true);
 
       try {
-        const { data } = await fetchClient.get(getRequestUrl(`${slug}${searchToSend}`), {
+        const { data } = await fetchClient.get(`/content-manager/single-types/${slug}`, {
           cancelToken: source.token,
+          params,
         });
 
         dispatch(getDataSucceeded(cleanReceivedData(data)));
@@ -143,16 +142,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
     fetchData(source);
 
     return () => source.cancel('Operation canceled by the user.');
-  }, [
-    fetchClient,
-    cleanReceivedData,
-    push,
-    slug,
-    dispatch,
-    searchToSend,
-    rawQuery,
-    toggleNotification,
-  ]);
+  }, [fetchClient, cleanReceivedData, push, slug, dispatch, params, rawQuery, toggleNotification]);
 
   const displayErrors = useCallback(
     (err) => {
@@ -166,7 +156,9 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       try {
         trackUsageRef.current('willDeleteEntry', trackerProperty);
 
-        const { data } = await del(getRequestUrl(`${slug}${searchToSend}`));
+        const { data } = await del(`/content-manager/single-types/${slug}`, {
+          params,
+        });
 
         toggleNotification({
           type: 'success',
@@ -187,17 +179,17 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         return Promise.reject(err);
       }
     },
-    [del, slug, displayErrors, toggleNotification, searchToSend, dispatch, rawQuery]
+    [del, slug, params, toggleNotification, dispatch, rawQuery, displayErrors]
   );
 
   const onPost = useCallback(
     async (body, trackerProperty) => {
-      const endPoint = getRequestUrl(`${slug}${rawQuery}`);
+      const endPoint = `/content-manager/single-types/${slug}`;
 
       try {
         dispatch(setStatus('submit-pending'));
 
-        const { data } = await put(endPoint, body);
+        const { data } = await put(endPoint, body, { params: query });
 
         trackUsageRef.current('didCreateEntry', trackerProperty);
         toggleNotification({
@@ -232,7 +224,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       displayErrors,
       slug,
       dispatch,
-      rawQuery,
+      query,
       toggleNotification,
       setCurrentStep,
       queryClient,
@@ -243,7 +235,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
     try {
       trackUsageRef.current('willCheckDraftRelations');
 
-      const endPoint = getRequestUrl(`${slug}/actions/numberOfDraftRelations`);
+      const endPoint = `/content-manager/single-types/${slug}/actions/countDraftRelations`;
       dispatch(setStatus('draft-relation-check-pending'));
 
       const numberOfDraftRelations = await fetchClient.get(endPoint);
@@ -263,11 +255,17 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   const onPublish = useCallback(async () => {
     try {
       trackUsageRef.current('willPublishEntry');
-      const endPoint = getRequestUrl(`${slug}/actions/publish${searchToSend}`);
+      const endPoint = `/content-manager/single-types/${slug}/actions/publish`;
 
       dispatch(setStatus('publish-pending'));
 
-      const { data } = await post(endPoint);
+      const { data } = await post(
+        endPoint,
+        {},
+        {
+          params,
+        }
+      );
 
       trackUsageRef.current('didPublishEntry');
       toggleNotification({
@@ -287,18 +285,18 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
       return Promise.reject(err);
     }
-  }, [post, cleanReceivedData, displayErrors, slug, searchToSend, dispatch, toggleNotification]);
+  }, [slug, dispatch, post, params, toggleNotification, cleanReceivedData, displayErrors]);
 
   const onPut = useCallback(
     async (body, trackerProperty) => {
-      const endPoint = getRequestUrl(`${slug}${rawQuery}`);
+      const endPoint = `/content-manager/single-types/${slug}`;
 
       try {
         trackUsageRef.current('willEditEntry', trackerProperty);
 
         dispatch(setStatus('submit-pending'));
 
-        const { data } = await put(endPoint, body);
+        const { data } = await put(endPoint, body, { params: query });
 
         toggleNotification({
           type: 'success',
@@ -325,28 +323,25 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         return Promise.reject(err);
       }
     },
-    [
-      put,
-      cleanReceivedData,
-      displayErrors,
-      slug,
-      dispatch,
-      rawQuery,
-      toggleNotification,
-      queryClient,
-    ]
+    [put, cleanReceivedData, displayErrors, slug, dispatch, query, toggleNotification, queryClient]
   );
 
   // The publish and unpublish method could be refactored but let's leave the duplication for now
   const onUnpublish = useCallback(async () => {
-    const endPoint = getRequestUrl(`${slug}/actions/unpublish${searchToSend}`);
+    const endPoint = `/content-manager/single-types/${slug}/actions/unpublish`;
 
     dispatch(setStatus('unpublish-pending'));
 
     try {
       trackUsageRef.current('willUnpublishEntry');
 
-      const { data } = await post(endPoint);
+      const { data } = await post(
+        endPoint,
+        {},
+        {
+          params,
+        }
+      );
 
       trackUsageRef.current('didUnpublishEntry');
       toggleNotification({
@@ -361,7 +356,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       dispatch(setStatus('resolved'));
       displayErrors(err);
     }
-  }, [post, cleanReceivedData, toggleNotification, displayErrors, slug, dispatch, searchToSend]);
+  }, [slug, dispatch, post, params, toggleNotification, cleanReceivedData, displayErrors]);
 
   return children({
     componentsDataStructure,

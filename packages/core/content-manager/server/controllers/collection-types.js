@@ -197,7 +197,7 @@ module.exports = {
       );
     }
 
-    this.clone(ctx);
+    await this.clone(ctx);
   },
 
   async delete(ctx) {
@@ -245,6 +245,8 @@ module.exports = {
     const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
+      .populateDeep(Infinity)
+      .countRelations()
       .build();
 
     const entity = await entityManager.findOne(id, model, { populate });
@@ -284,6 +286,8 @@ module.exports = {
     const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
+      .populateDeep(Infinity)
+      .countRelations()
       .build();
 
     const entityPromises = ids.map((id) => entityManager.findOne(id, model, { populate }));
@@ -406,7 +410,7 @@ module.exports = {
     ctx.body = { count };
   },
 
-  async getNumberOfDraftRelations(ctx) {
+  async countDraftRelations(ctx) {
     const { userAbility } = ctx.state;
     const { model, id } = ctx.params;
 
@@ -432,7 +436,31 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const number = await entityManager.getNumberOfDraftRelations(id, model);
+    const number = await entityManager.countDraftRelations(id, model);
+
+    return {
+      data: number,
+    };
+  },
+  async countManyEntriesDraftRelations(ctx) {
+    const { userAbility } = ctx.state;
+    const ids = ctx.request.query.ids;
+    const { model } = ctx.params;
+
+    const entityManager = getService('entity-manager');
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
+
+    if (permissionChecker.cannot.read()) {
+      return ctx.forbidden();
+    }
+
+    const entities = await entityManager.find(ids, model);
+
+    if (!entities) {
+      return ctx.notFound();
+    }
+
+    const number = await entityManager.countManyEntriesDraftRelations(ids, model);
 
     return {
       data: number,

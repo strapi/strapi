@@ -63,11 +63,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-jest.mock('ee_else_ce/hooks/useLicenseLimitNotification', () => ({
-  __esModule: true,
-  default: jest.fn(),
-}));
-
 const setup = (props) =>
   render(() => <ListPage {...props} />, {
     wrapper({ children }) {
@@ -107,10 +102,6 @@ const setup = (props) =>
 describe('ADMIN | Pages | USERS | ListPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  afterAll(() => {
-    jest.resetAllMocks();
   });
 
   it('should show a list of users', async () => {

@@ -1,7 +1,8 @@
-import React from 'react';
+import * as React from 'react';
 
+import { fixtures } from '@strapi/admin-test-utils';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { useCMEditViewDataManager } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager, RBACContext } from '@strapi/helper-plugin';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
@@ -9,9 +10,10 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 
+import { useReviewWorkflows } from '../../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows';
 import { InformationBoxEE } from '../InformationBoxEE';
 
-const STAGE_ATTRIBUTE_NAME = 'strapi_reviewWorkflows_stage';
+const STAGE_ATTRIBUTE_NAME = 'strapi_stage';
 const STAGE_FIXTURE = {
   id: 1,
   color: '#4945FF',
@@ -65,13 +67,27 @@ const ComponentFixture = (props) => <InformationBoxEE {...props} />;
 const setup = (props) => ({
   ...render(<ComponentFixture {...props} />, {
     wrapper({ children }) {
-      const store = createStore((state = {}) => state, {});
+      const store = createStore((state = {}) => state, {
+        admin_app: {
+          permissions: fixtures.permissions.app,
+        },
+      });
+
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const rbacContextValue = React.useMemo(
+        () => ({
+          allPermissions: fixtures.permissions.allPermissions,
+        }),
+        []
+      );
 
       return (
         <Provider store={store}>
           <QueryClientProvider client={queryClient}>
             <IntlProvider locale="en" defaultLocale="en">
-              <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
+              <ThemeProvider theme={lightTheme}>
+                <RBACContext.Provider value={rbacContextValue}>{children}</RBACContext.Provider>
+              </ThemeProvider>
             </IntlProvider>
           </QueryClientProvider>
         </Provider>
@@ -86,7 +102,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {},
       isCreatingEntry: true,
-      layout: { uid: 'api::articles:articles' },
+      layout: { uid: 'api::articles:articles', options: { reviewWorkflows: true } },
     });
 
     const { getByText } = setup();
@@ -95,10 +111,22 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
     expect(getByText('Last update')).toBeInTheDocument();
   });
 
+  it('filters workflows based on the model uid', () => {
+    useCMEditViewDataManager.mockReturnValue({
+      initialData: {},
+      isCreatingEntry: true,
+      layout: { uid: 'api::articles:articles', options: { reviewWorkflows: true } },
+    });
+
+    expect(useReviewWorkflows).toHaveBeenCalledWith({
+      filters: { contentTypes: 'api::articles:articles' },
+    });
+  });
+
   it('renders no select input, if no workflow stage is assigned to the entity', () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {},
-      layout: { uid: 'api::articles:articles' },
+      layout: { uid: 'api::articles:articles', options: { reviewWorkflows: false } },
     });
 
     const { queryByRole } = setup();
@@ -106,27 +134,13 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
     expect(queryByRole('combobox')).not.toBeInTheDocument();
   });
 
-  it('renders an error, if no workflow stage is assigned to the entity', () => {
-    useCMEditViewDataManager.mockReturnValue({
-      initialData: {
-        [STAGE_ATTRIBUTE_NAME]: null,
-      },
-      layout: { uid: 'api::articles:articles' },
-    });
-
-    const { getByText, queryByRole } = setup();
-
-    expect(getByText(/select a stage/i)).toBeInTheDocument();
-    expect(queryByRole('combobox')).toBeInTheDocument();
-  });
-
-  it('does not render the select input, if the entity is created', () => {
+  it('does not render the select input, if the entity is being created', () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {
         [STAGE_ATTRIBUTE_NAME]: STAGE_FIXTURE,
       },
       isCreatingEntry: true,
-      layout: { uid: 'api::articles:articles' },
+      layout: { uid: 'api::articles:articles', options: { reviewWorkflows: true } },
     });
 
     const { queryByRole } = setup();
@@ -141,7 +155,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
         [STAGE_ATTRIBUTE_NAME]: STAGE_FIXTURE,
       },
       isCreatingEntry: false,
-      layout: { uid: 'api::articles:articles' },
+      layout: { uid: 'api::articles:articles', options: { reviewWorkflows: true } },
     });
 
     const { queryByRole } = setup();
@@ -156,7 +170,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
         [STAGE_ATTRIBUTE_NAME]: STAGE_FIXTURE,
       },
       isCreatingEntry: false,
-      layout: { uid: 'api::articles:articles' },
+      layout: { uid: 'api::articles:articles', options: { reviewWorkflows: true } },
     });
 
     const { getByRole, getByText, user } = setup();

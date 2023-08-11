@@ -30,13 +30,8 @@ async function build({ appDir, buildDestDir, env, forceBuild, optimize, options,
   const entry = path.resolve(cacheDir, 'admin', 'src');
   const dest = path.resolve(buildDestDir, 'build');
 
-  // Roots for the @strapi/babel-plugin-switch-ee-ce
-  const roots = {
-    eeRoot: path.resolve(cacheDir, 'ee', 'admin'),
-    ceRoot: path.resolve(cacheDir, 'admin', 'src'),
-  };
-
   const pluginsPath = Object.keys(plugins).map((pluginName) => plugins[pluginName].pathToPlugin);
+  const enforceSourceMaps = process.env.STRAPI_ENFORCE_SOURCEMAPS === 'true' ?? false;
 
   // Either use the tsconfig file from the generated app or the one inside the .cache folder
   // so we can develop plugins in TS while being in a JS app
@@ -48,12 +43,12 @@ async function build({ appDir, buildDestDir, env, forceBuild, optimize, options,
     appDir,
     cacheDir,
     dest,
+    enforceSourceMaps,
     entry,
     env,
     optimize,
     options,
     pluginsPath,
-    roots,
     tsConfigFilePath,
   });
 
@@ -105,12 +100,6 @@ async function watchAdmin({ appDir, browser, buildDestDir, host, options, plugin
   const dest = path.join(buildDestDir, 'build');
   const env = 'development';
 
-  // Roots for the @strapi/babel-plugin-switch-ee-ce
-  const roots = {
-    eeRoot: path.resolve(cacheDir, 'ee', 'admin'),
-    ceRoot: path.resolve(cacheDir, 'admin', 'src'),
-  };
-
   const pluginsPath = Object.keys(plugins).map((pluginName) => plugins[pluginName].pathToPlugin);
 
   // Either use the tsconfig file from the generated app or the one inside the .cache folder
@@ -127,7 +116,6 @@ async function watchAdmin({ appDir, browser, buildDestDir, host, options, plugin
     env,
     options,
     pluginsPath,
-    roots,
     devServer: {
       port,
       client: {

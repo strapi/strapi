@@ -40,7 +40,6 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
-  line-height: 0;
   color: #ffffff;
 }
 
@@ -599,7 +598,6 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
-  line-height: 0;
   color: #ffffff;
 }
 

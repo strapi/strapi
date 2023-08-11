@@ -41,6 +41,7 @@ export const AssetCard = ({ asset, isSelected, onSelect, onEdit, onRemove, size,
         height={asset.height}
         thumbnail={prefixFileUrlWithBackendUrl(asset?.formats?.thumbnail?.url || asset.url)}
         width={asset.width}
+        updatedAt={asset.updatedAt}
       />
     );
   }

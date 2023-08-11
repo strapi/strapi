@@ -2,22 +2,39 @@ import React from 'react';
 
 import { Flex, GridItem, Icon, Tooltip, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { pxToRem } from '@strapi/helper-plugin';
+import { pxToRem, useRBAC } from '@strapi/helper-plugin';
 import { ExclamationMarkCircle, ExternalLink } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import { useSelector } from 'react-redux';
 
-import { useLicenseLimits } from '../../../../../../hooks';
+import { selectAdminPermissions } from '../../../../../../../../admin/src/pages/App/selectors';
+import { useLicenseLimits } from '../../../../../../hooks/useLicenseLimits';
 
 const BILLING_STRAPI_CLOUD_URL = 'https://cloud.strapi.io/profile/billing';
 const BILLING_SELF_HOSTED_URL = 'https://strapi.io/billing/request-seats';
 
-const AdminSeatInfo = () => {
+export const AdminSeatInfoEE = () => {
   const { formatMessage } = useIntl();
-  const { license } = useLicenseLimits();
-  const { licenseLimitStatus, enforcementUserCount, permittedSeats, isHostedOnStrapiCloud } =
-    license?.data ?? {};
+  const permissions = useSelector(selectAdminPermissions);
+  const {
+    isLoading: isRBACLoading,
+    allowedActions: { canRead, canCreate, canUpdate, canDelete },
+  } = useRBAC(permissions.settings.users);
+  const {
+    license: { licenseLimitStatus, enforcementUserCount, permittedSeats, isHostedOnStrapiCloud },
+    isError,
+    isLoading: isLicenseLoading,
+  } = useLicenseLimits({
+    // TODO: this creates a waterfall which we should avoid to render earlier, but for that
+    // we will have to move away from data-fetching hooks to query functions.
+    // Short-term we could at least implement a loader, for the user to have visual feedback
+    // in case the requests take a while
+    enabled: !isRBACLoading && canRead && canCreate && canUpdate && canDelete,
+  });
 
-  if (!permittedSeats) {
+  const isLoading = isRBACLoading || isLicenseLoading;
+
+  if (isError || isLoading || !permittedSeats) {
     return null;
   }
 
@@ -86,5 +103,3 @@ const AdminSeatInfo = () => {
     </GridItem>
   );
 };
-
-export default AdminSeatInfo;
