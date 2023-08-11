@@ -1,7 +1,6 @@
 import { curry, isObject, isEmpty, isArray, isNil, cloneDeep, omit } from 'lodash/fp';
 
-import traverseFactory from '../../traverse/factory';
-import { ValidationError } from '../../errors';
+import traverseFactory from '../factory';
 
 const isObj = (value: unknown): value is Record<string, unknown> => isObject(value);
 
@@ -36,7 +35,7 @@ const filters = traverseFactory()
     transform: cloneDeep,
 
     remove(key, data) {
-      throw new ValidationError(`Invalid parameter ${key}`);
+      return omit(key, data);
     },
 
     set(key, value, data) {

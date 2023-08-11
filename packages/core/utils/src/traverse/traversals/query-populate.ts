@@ -13,7 +13,7 @@ import {
   omit,
 } from 'lodash/fp';
 
-import traverseFactory from '../../traverse/factory';
+import traverseFactory from '../factory';
 import { Attribute } from '../../types';
 import { isMorphToRelationalAttribute } from '../../content-types';
 

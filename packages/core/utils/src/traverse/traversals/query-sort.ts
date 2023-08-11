@@ -13,7 +13,7 @@ import {
   cloneDeep,
 } from 'lodash/fp';
 
-import traverseFactory from '../../traverse/factory';
+import traverseFactory from '../factory';
 
 const ORDERS = { asc: 'asc', desc: 'desc' };
 const ORDER_VALUES = Object.values(ORDERS);

@@ -15,10 +15,9 @@ const {
   intersection,
   getOr,
   isObject,
-  cloneDeep,
 } = require('lodash/fp');
 
-const { contentTypes, traverseEntity, validate, pipeAsync } = require('@strapi/utils');
+const { contentTypes, traverseEntity, traverse, validate, pipeAsync } = require('@strapi/utils');
 const { removePassword } = require('@strapi/utils').validate.visitors;
 const { ADMIN_USER_ALLOWED_FIELDS } = require('../../../domain/user');
 
@@ -40,13 +39,12 @@ module.exports = ({ action, ability, model }) => {
   const schema = strapi.getModel(model);
 
   const { allowedFields } = validate.visitors;
-  const { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate, traverseQueryFields } =
-    validate.traversals;
+  const { traverseQueryFilters, traverseQuerySort, traverseQueryFields } = traverse.traversals;
 
   const createValidateQuery = (options = {}) => {
     const { fields } = options;
 
-    // TODO: sanitize relations to admin users in all sanitizers
+    // TODO: validate relations to admin users in all validators
     const permittedFields = fields.shouldIncludeAll ? null : getQueryFields(fields.permitted);
 
     const validateFilters = pipeAsync(
@@ -77,11 +75,11 @@ module.exports = ({ action, ability, model }) => {
       )
     );
 
-    const validatePopulate = pipeAsync(
-      traverseQueryPopulate(allowedFields(permittedFields), { schema }),
-      traverseQueryPopulate(omitDisallowedAdminUserFields, { schema }),
-      traverseQueryPopulate(removePassword, { schema })
-    );
+    // const validatePopulate = pipeAsync(
+    //   traverseQueryPopulate(allowedFields(permittedFields), { schema }),
+    //   traverseQueryPopulate(omitDisallowedAdminUserFields, { schema }),
+    //   traverseQueryPopulate(removePassword, { schema })
+    // );
 
     const validateFields = pipeAsync(
       traverseQueryFields(allowedFields(permittedFields), { schema }),
@@ -89,25 +87,19 @@ module.exports = ({ action, ability, model }) => {
     );
 
     return async (query) => {
-      const validatedQuery = cloneDeep(query);
-
       if (query.filters) {
-        Object.assign(validatedQuery, { filters: await validateFilters(query.filters) });
+        await validateFilters(query.filters);
       }
 
       if (query.sort) {
-        Object.assign(validatedQuery, { sort: await validateSort(query.sort) });
-      }
-
-      if (query.populate) {
-        Object.assign(validatedQuery, { populate: await validatePopulate(query.populate) });
+        await validateSort(query.sort);
       }
 
       if (query.fields) {
-        Object.assign(validatedQuery, { fields: await validateFields(query.fields) });
+        await validateFields(query.fields);
       }
 
-      return validatedQuery;
+      return true;
     };
   };
 

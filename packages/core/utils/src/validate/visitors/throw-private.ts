@@ -1,7 +1,8 @@
 import { isPrivateAttribute } from '../../content-types';
-import type { Visitor } from '../factory';
+import { ValidationError } from '../../errors';
+import type { Visitor } from '../../traverse/factory';
 
-const visitor: Visitor = ({ schema, key, attribute }, { remove }) => {
+const visitor: Visitor = ({ schema, key, attribute }) => {
   if (!attribute) {
     return;
   }
@@ -9,7 +10,7 @@ const visitor: Visitor = ({ schema, key, attribute }, { remove }) => {
   const isPrivate = attribute.private === true || isPrivateAttribute(schema, key);
 
   if (isPrivate) {
-    remove(key);
+    throw new ValidationError(`Invalid parameter ${key}`);
   }
 };
 

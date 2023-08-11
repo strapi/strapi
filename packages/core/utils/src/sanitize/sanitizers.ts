@@ -9,14 +9,14 @@ import {
   traverseQuerySort,
   traverseQueryPopulate,
   traverseQueryFields,
-} from './traversals';
+} from '../traverse/traversals';
 
 import {
   removePassword,
   removePrivate,
   removeDynamicZones,
   removeMorphToRelations,
-} from '../traverse/visitors';
+} from './visitors';
 import { isOperator } from '../operators';
 
 import type { Model } from '../types';

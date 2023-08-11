@@ -9,27 +9,22 @@ import {
   traverseQuerySort,
   traverseQueryPopulate,
   traverseQueryFields,
-} from './traversals';
+} from '../traverse/traversals';
 
-import {
-  removePassword,
-  removePrivate,
-  removeDynamicZones,
-  removeMorphToRelations,
-} from '../traverse/visitors';
+import { throwPassword, throwPrivate, throwDynamicZones, throwMorphToRelations } from './visitors';
 import { isOperator } from '../operators';
 
 import type { Model } from '../types';
 
 const sanitizePasswords = (schema: Model) => async (entity: Data) => {
-  return traverseEntity(removePassword, { schema }, entity);
+  return traverseEntity(throwPassword, { schema }, entity);
 };
 
 const defaultSanitizeOutput = async (schema: Model, entity: Data) => {
   return traverseEntity(
     (...args) => {
-      removePassword(...args);
-      removePrivate(...args);
+      throwPassword(...args);
+      throwPrivate(...args);
     },
     { schema },
     entity
@@ -50,13 +45,13 @@ const defaultSanitizeFilters = curry((schema: Model, filters: unknown) => {
       { schema }
     ),
     // Remove dynamic zones from filters
-    traverseQueryFilters(removeDynamicZones, { schema }),
+    traverseQueryFilters(throwDynamicZones, { schema }),
     // Remove morpTo relations from filters
-    traverseQueryFilters(removeMorphToRelations, { schema }),
+    traverseQueryFilters(throwMorphToRelations, { schema }),
     // Remove passwords from filters
-    traverseQueryFilters(removePassword, { schema }),
+    traverseQueryFilters(throwPassword, { schema }),
     // Remove private from filters
-    traverseQueryFilters(removePrivate, { schema }),
+    traverseQueryFilters(throwPrivate, { schema }),
     // Remove empty objects
     traverseQueryFilters(
       ({ key, value }, { remove }) => {
@@ -87,13 +82,13 @@ const defaultSanitizeSort = curry((schema: Model, sort: unknown) => {
       { schema }
     ),
     // Remove dynamic zones from sort
-    traverseQuerySort(removeDynamicZones, { schema }),
+    traverseQuerySort(throwDynamicZones, { schema }),
     // Remove morpTo relations from sort
-    traverseQuerySort(removeMorphToRelations, { schema }),
+    traverseQuerySort(throwMorphToRelations, { schema }),
     // Remove private from sort
-    traverseQuerySort(removePrivate, { schema }),
+    traverseQuerySort(throwPrivate, { schema }),
     // Remove passwords from filters
-    traverseQuerySort(removePassword, { schema }),
+    traverseQuerySort(throwPassword, { schema }),
     // Remove keys for empty non-scalar values
     traverseQuerySort(
       ({ key, attribute, value }, { remove }) => {
@@ -118,9 +113,9 @@ const defaultSanitizeFields = curry((schema: Model, fields: unknown) => {
       { schema }
     ),
     // Remove private fields
-    traverseQueryFields(removePrivate, { schema }),
+    traverseQueryFields(throwPrivate, { schema }),
     // Remove password fields
-    traverseQueryFields(removePassword, { schema }),
+    traverseQueryFields(throwPassword, { schema }),
     // Remove nil values from fields array
     (value) => (isArray(value) ? value.filter((field) => !isNil(field)) : value)
   )(fields);
@@ -149,7 +144,7 @@ const defaultSanitizePopulate = curry((schema: Model, populate: unknown) => {
       { schema }
     ),
     // Remove private fields
-    traverseQueryPopulate(removePrivate, { schema })
+    traverseQueryPopulate(throwPrivate, { schema })
   )(populate);
 });
 

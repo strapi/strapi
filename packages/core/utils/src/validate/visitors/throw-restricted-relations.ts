@@ -1,5 +1,6 @@
 import * as contentTypeUtils from '../../content-types';
-import type { Visitor } from '../factory';
+import { ValidationError } from '../../errors';
+import type { Visitor } from '../../traverse/factory';
 
 const ACTIONS_TO_VERIFY = ['find'];
 const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypeUtils.constants;
@@ -7,7 +8,7 @@ const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypeUtils.constant
 type MorphArray = Array<{ __type: string }>;
 
 export default (auth: unknown): Visitor =>
-  async ({ data, key, attribute, schema }, { remove, set }) => {
+  async ({ data, key, attribute, schema }, { set }) => {
     if (!attribute) {
       return;
     }
@@ -32,7 +33,7 @@ export default (auth: unknown): Visitor =>
 
       // If the new value is empty, remove the relation completely
       if (newMorphValue.length === 0) {
-        remove(key);
+        throw new ValidationError(`Invalid parameter ${key}`);
       } else {
         set(key, newMorphValue);
       }
@@ -45,7 +46,7 @@ export default (auth: unknown): Visitor =>
 
       // If the authenticated user don't have access to any of the scopes, then remove the field
       if (!isAllowed) {
-        remove(key);
+        throw new ValidationError(`Invalid parameter ${key}`);
       }
     };
 

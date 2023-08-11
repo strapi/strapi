@@ -1,8 +1,9 @@
 import { isArray, isNil, toPath } from 'lodash/fp';
-import type { Visitor } from '../factory';
+import type { Visitor } from '../../traverse/factory';
+import { ValidationError } from '../../errors';
 
 export default (allowedFields: string[] | null = null): Visitor =>
-  ({ key, path: { attribute: path } }, { remove }) => {
+  ({ key, path: { attribute: path } }) => {
     // All fields are allowed
     if (allowedFields === null) {
       return;
@@ -66,7 +67,7 @@ export default (allowedFields: string[] | null = null): Visitor =>
     }
 
     // Remove otherwise
-    remove(key);
+    throw new ValidationError(`Invalid parameter ${key}`);
   };
 
 /**

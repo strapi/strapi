@@ -19,7 +19,7 @@ const {
   cloneDeep,
 } = require('lodash/fp');
 
-const { contentTypes, traverseEntity, sanitize, pipeAsync } = require('@strapi/utils');
+const { contentTypes, traverseEntity, traverse, sanitize, pipeAsync } = require('@strapi/utils');
 const { removePassword } = require('@strapi/utils').sanitize.visitors;
 const { ADMIN_USER_ALLOWED_FIELDS } = require('../../../domain/user');
 
@@ -48,7 +48,7 @@ module.exports = ({ action, ability, model }) => {
   const { sanitizePasswords } = sanitize.sanitizers;
   const { allowedFields } = sanitize.visitors;
   const { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate, traverseQueryFields } =
-    sanitize.traversals;
+    traverse.traversals;
 
   const createSanitizeQuery = (options = {}) => {
     const { fields } = options;
@@ -273,6 +273,5 @@ module.exports = ({ action, ability, model }) => {
     sanitizeOutput: wrapSanitize(createSanitizeOutput),
     sanitizeInput: wrapSanitize(createSanitizeInput),
     sanitizeQuery: wrapSanitize(createSanitizeQuery),
-    validateQuery: wrapSanitize(createSanitizeQuery),
   };
 };

@@ -1,15 +1,18 @@
 import { CurriedFunction1 } from 'lodash';
-import { isArray, cloneDeep } from 'lodash/fp';
+import { isArray } from 'lodash/fp';
 
 import { getNonWritableAttributes } from '../content-types';
 import { pipeAsync } from '../async';
 
-import * as visitors from '../traverse/visitors';
+import * as visitors from './visitors';
 import * as validators from './validators';
 import traverseEntity, { Data } from '../traverse-entity';
 
-import * as traversals from './traversals';
-import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from './traversals';
+import {
+  traverseQueryFilters,
+  traverseQuerySort,
+  traverseQueryPopulate,
+} from '../traverse/traversals';
 
 import { Model } from '../types';
 
@@ -21,33 +24,34 @@ interface Validator {
   (schema: Model): CurriedFunction1<Data, Promise<Data>>;
 }
 export interface ValidateFunc {
-  (data: unknown, schema: Model, options?: Options): Promise<unknown>;
+  (data: unknown, schema: Model, options?: Options): Promise<void>;
 }
 
 const createContentAPIValidators = () => {
-  const validateInput: ValidateFunc = (data: unknown, schema: Model, { auth } = {}) => {
+  const validateInput: ValidateFunc = async (data: unknown, schema: Model, { auth } = {}) => {
     if (isArray(data)) {
-      return Promise.all(data.map((entry) => validateInput(entry, schema, { auth })));
+      await Promise.all(data.map((entry) => validateInput(entry, schema, { auth })));
+      return;
     }
 
     const nonWritableAttributes = getNonWritableAttributes(schema);
 
     const transforms = [
       // Remove non writable attributes
-      traverseEntity(visitors.restrictedFields(nonWritableAttributes), { schema }),
+      traverseEntity(visitors.throwRestrictedFields(nonWritableAttributes), { schema }),
     ];
 
     if (auth) {
       // Remove restricted relations
-      transforms.push(traverseEntity(visitors.removeRestrictedRelations(auth), { schema }));
+      transforms.push(traverseEntity(visitors.throwRestrictedRelations(auth), { schema }));
     }
 
-    // Apply sanitizers from registry if exists
+    // Apply validators from registry if exists
     strapi.validators
       .get('content-api.input')
       .forEach((validator: Validator) => transforms.push(validator(schema)));
 
-    return pipeAsync(...transforms)(data as Data);
+    pipeAsync(...transforms)(data as Data);
   };
 
   const validateQuery = async (
@@ -55,48 +59,43 @@ const createContentAPIValidators = () => {
     schema: Model,
     { auth }: Options = {}
   ) => {
-    const { filters, sort, fields, populate } = query;
-
-    const validatedQuery = cloneDeep(query);
+    const { filters, sort, fields } = query;
 
     if (filters) {
-      Object.assign(validatedQuery, { filters: await validateFilters(filters, schema, { auth }) });
+      await validateFilters(filters, schema, { auth });
     }
 
     if (sort) {
-      Object.assign(validatedQuery, { sort: await validateSort(sort, schema, { auth }) });
+      await validateSort(sort, schema, { auth });
     }
 
     if (fields) {
-      Object.assign(validatedQuery, { fields: await validateFields(fields, schema) });
+      await validateFields(fields, schema);
     }
 
-    if (populate) {
-      Object.assign(validatedQuery, { populate: await validatePopulate(populate, schema) });
-    }
-
-    return validatedQuery;
+    // TODO: validate populate
   };
 
-  const validateFilters: ValidateFunc = (filters, schema: Model, { auth } = {}) => {
+  const validateFilters: ValidateFunc = async (filters, schema: Model, { auth } = {}) => {
     if (isArray(filters)) {
-      return Promise.all(filters.map((filter) => validateFilters(filter, schema, { auth })));
+      await Promise.all(filters.map((filter) => validateFilters(filter, schema, { auth })));
+      return;
     }
 
     const transforms = [validators.defaultSanitizeFilters(schema)];
 
     if (auth) {
-      transforms.push(traverseQueryFilters(visitors.removeRestrictedRelations(auth), { schema }));
+      transforms.push(traverseQueryFilters(visitors.throwRestrictedRelations(auth), { schema }));
     }
 
     return pipeAsync(...transforms)(filters);
   };
 
-  const validateSort: ValidateFunc = (sort, schema: Model, { auth } = {}) => {
+  const validateSort: ValidateFunc = async (sort, schema: Model, { auth } = {}) => {
     const transforms = [validators.defaultSanitizeSort(schema)];
 
     if (auth) {
-      transforms.push(traverseQuerySort(visitors.removeRestrictedRelations(auth), { schema }));
+      transforms.push(traverseQuerySort(visitors.throwRestrictedRelations(auth), { schema }));
     }
 
     return pipeAsync(...transforms)(sort);
@@ -108,11 +107,11 @@ const createContentAPIValidators = () => {
     return pipeAsync(...transforms)(fields);
   };
 
-  const validatePopulate: ValidateFunc = (populate, schema: Model, { auth } = {}) => {
+  const validatePopulate: ValidateFunc = async (populate, schema: Model, { auth } = {}) => {
     const transforms = [validators.defaultSanitizePopulate(schema)];
 
     if (auth) {
-      transforms.push(traverseQueryPopulate(visitors.removeRestrictedRelations(auth), { schema }));
+      transforms.push(traverseQueryPopulate(visitors.throwRestrictedRelations(auth), { schema }));
     }
 
     return pipeAsync(...transforms)(populate);
@@ -134,5 +133,4 @@ export default {
   contentAPI,
   validators,
   visitors,
-  traversals,
 };

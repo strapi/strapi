@@ -19,7 +19,9 @@ const createCollectionTypeController = ({ contentType }) => {
      * @return {Object|Array}
      */
     async find(ctx) {
-      const sanitizedQuery = await this.validateQuery(ctx);
+      await this.validateQuery(ctx);
+      const sanitizedQuery = await this.sanitizeQuery(ctx);
+
       const { results, pagination } = await strapi.service(uid).find(sanitizedQuery);
       const sanitizedResults = await this.sanitizeOutput(results, ctx);
       return this.transformResponse(sanitizedResults, { pagination });
@@ -32,7 +34,8 @@ const createCollectionTypeController = ({ contentType }) => {
      */
     async findOne(ctx) {
       const { id } = ctx.params;
-      const sanitizedQuery = await this.validateQuery(ctx);
+      await this.validateQuery(ctx);
+      const sanitizedQuery = await this.sanitizeQuery(ctx);
 
       const entity = await strapi.service(uid).findOne(id, sanitizedQuery);
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
@@ -46,7 +49,8 @@ const createCollectionTypeController = ({ contentType }) => {
      * @return {Object}
      */
     async create(ctx) {
-      const sanitizedQuery = await this.validateQuery(ctx);
+      await this.validateQuery(ctx);
+      const sanitizedQuery = await this.sanitizeQuery(ctx);
 
       const { data, files } = parseBody(ctx);
 
@@ -71,7 +75,8 @@ const createCollectionTypeController = ({ contentType }) => {
      */
     async update(ctx) {
       const { id } = ctx.params;
-      const sanitizedQuery = await this.validateParams(ctx);
+      await this.validateQuery(ctx);
+      const sanitizedQuery = await this.sanitizeQuery(ctx);
 
       const { data, files } = parseBody(ctx);
 
@@ -96,7 +101,8 @@ const createCollectionTypeController = ({ contentType }) => {
      */
     async delete(ctx) {
       const { id } = ctx.params;
-      const sanitizedQuery = await this.validateParams(ctx);
+      await this.validateQuery(ctx);
+      const sanitizedQuery = await this.sanitizeQuery(ctx);
 
       const entity = await strapi.service(uid).delete(id, sanitizedQuery);
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);

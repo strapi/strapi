@@ -1,4 +1,4 @@
-import * as visitors from '../traverse/visitors';
+import * as visitors from '../sanitize/visitors';
 import * as contentTypeUtils from '../content-types';
 
 const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypeUtils.constants;
