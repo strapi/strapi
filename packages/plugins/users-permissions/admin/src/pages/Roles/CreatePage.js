@@ -1,7 +1,6 @@
-import React, { useRef, useState } from 'react';
+import * as React from 'react';
 
 import {
-  Box,
   Button,
   ContentLayout,
   Flex,
@@ -24,47 +23,26 @@ import {
 import { Check } from '@strapi/icons';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
+import { useMutation } from 'react-query';
 import { useHistory } from 'react-router-dom';
 
 import UsersPermissions from '../../components/UsersPermissions';
 import { usePlugins } from '../../hooks';
-import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';
 
 import { createRoleSchema } from './constants';
 
-const CreatePage = () => {
+export const CreatePage = () => {
   const { formatMessage } = useIntl();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const toggleNotification = useNotification();
   const { goBack } = useHistory();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { isLoading: isLoadingPlugins, permissions, routes } = usePlugins();
   const { trackUsage } = useTracking();
-  const permissionsRef = useRef();
+  const permissionsRef = React.useRef();
   const { post } = useFetchClient();
-
-  const handleCreateRoleSubmit = async (data) => {
-    // Set loading state
-    lockApp();
-    setIsSubmitting(true);
-    try {
-      const permissions = permissionsRef.current.getPermissions();
-      // Update role in Strapi
-      await post(`/${pluginId}/roles`, { ...data, ...permissions, users: [] });
-      // Notify success
-      trackUsage('didCreateRole');
-      toggleNotification({
-        type: 'success',
-        message: {
-          id: getTrad('Settings.roles.created'),
-          defaultMessage: 'Role created',
-        },
-      });
-      // Forcing redirecting since we don't have the id in the response
-      goBack();
-    } catch (err) {
-      console.error(err);
+  const mutation = useMutation((body) => post(`/users-permissions/roles`, body), {
+    onError() {
       toggleNotification({
         type: 'warning',
         message: {
@@ -72,14 +50,40 @@ const CreatePage = () => {
           defaultMessage: 'An error occurred',
         },
       });
-    }
-    // Unset loading state
-    setIsSubmitting(false);
+    },
+
+    onSuccess() {
+      trackUsage('didCreateRole');
+
+      toggleNotification({
+        type: 'success',
+        message: {
+          id: getTrad('Settings.roles.created'),
+          defaultMessage: 'Role created',
+        },
+      });
+
+      // Forcing redirecting since we don't have the id in the response
+      goBack();
+    },
+  });
+
+  const handleCreateRoleSubmit = async (data) => {
+    lockApp();
+
+    // TODO: refactor. Child -> parent component communication is evil;
+    // We should either move the provider one level up or move the state
+    // straight into redux.
+    const permissions = permissionsRef.current.getPermissions();
+
+    await mutation.mutate({ ...data, ...permissions, users: [] });
+
     unlockApp();
   };
 
   return (
     <Main>
+      {/* TODO: This needs to be translated */}
       <SettingsPageTitle name="Roles" />
       <Formik
         enableReinitialize
@@ -92,7 +96,7 @@ const CreatePage = () => {
             <HeaderLayout
               primaryAction={
                 !isLoadingPlugins && (
-                  <Button type="submit" loading={isSubmitting} startIcon={<Check />}>
+                  <Button type="submit" loading={mutation.isLoading} startIcon={<Check />}>
                     {formatMessage({
                       id: 'global.save',
                       defaultMessage: 'Save',
@@ -110,62 +114,54 @@ const CreatePage = () => {
               })}
             />
             <ContentLayout>
-              <Flex direction="column" alignItems="stretch" gap={7}>
-                <Box
-                  background="neutral0"
-                  hasRadius
-                  shadow="filterShadow"
-                  paddingTop={6}
-                  paddingBottom={6}
-                  paddingLeft={7}
-                  paddingRight={7}
-                >
-                  <Flex direction="column" alignItems="stretch" gap={4}>
-                    <Typography variant="delta" as="h2">
-                      {formatMessage({
-                        id: getTrad('EditPage.form.roles'),
-                        defaultMessage: 'Role details',
-                      })}
-                    </Typography>
-                    <Grid gap={4}>
-                      <GridItem col={6}>
-                        <TextInput
-                          name="name"
-                          value={values.name || ''}
-                          onChange={handleChange}
-                          label={formatMessage({
-                            id: 'global.name',
-                            defaultMessage: 'Name',
-                          })}
-                          error={
-                            errors.name
-                              ? formatMessage({ id: errors.name, defaultMessage: 'Invalid value' })
-                              : null
-                          }
-                        />
-                      </GridItem>
-                      <GridItem col={6}>
-                        <Textarea
-                          id="description"
-                          value={values.description || ''}
-                          onChange={handleChange}
-                          label={formatMessage({
-                            id: 'global.description',
-                            defaultMessage: 'Description',
-                          })}
-                          error={
-                            errors.description
-                              ? formatMessage({
-                                  id: errors.description,
-                                  defaultMessage: 'Invalid value',
-                                })
-                              : null
-                          }
-                        />
-                      </GridItem>
-                    </Grid>
-                  </Flex>
-                </Box>
+              <Flex
+                background="neutral0"
+                direction="column"
+                alignItems="stretch"
+                gap={7}
+                hasRadius
+                paddingTop={6}
+                paddingBottom={6}
+                paddingLeft={7}
+                paddingRight={7}
+                shadow="filterShadow"
+              >
+                <Flex direction="column" alignItems="stretch">
+                  <Typography variant="delta" as="h2">
+                    {formatMessage({
+                      id: getTrad('EditPage.form.roles'),
+                      defaultMessage: 'Role details',
+                    })}
+                  </Typography>
+
+                  <Grid gap={4}>
+                    <GridItem col={6}>
+                      <TextInput
+                        name="name"
+                        value={values.name || ''}
+                        onChange={handleChange}
+                        label={formatMessage({
+                          id: 'global.name',
+                          defaultMessage: 'Name',
+                        })}
+                        error={errors?.name ?? false}
+                      />
+                    </GridItem>
+                    <GridItem col={6}>
+                      <Textarea
+                        id="description"
+                        value={values.description || ''}
+                        onChange={handleChange}
+                        label={formatMessage({
+                          id: 'global.description',
+                          defaultMessage: 'Description',
+                        })}
+                        error={errors?.description ?? false}
+                      />
+                    </GridItem>
+                  </Grid>
+                </Flex>
+
                 {!isLoadingPlugins && (
                   <UsersPermissions
                     ref={permissionsRef}
@@ -181,5 +177,3 @@ const CreatePage = () => {
     </Main>
   );
 };
-
-export default CreatePage;

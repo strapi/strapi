@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import * as React from 'react';
 
 import {
   ContentLayout,
@@ -6,7 +6,6 @@ import {
   Main,
   Button,
   Flex,
-  Box,
   TextInput,
   Textarea,
   Typography,
@@ -19,63 +18,63 @@ import {
   SettingsPageTitle,
   LoadingIndicatorPage,
   Form,
+  useFormatAPIError,
   useNotification,
   Link,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
+import { useMutation } from 'react-query';
 import { useRouteMatch } from 'react-router-dom';
 
 import UsersPermissions from '../../components/UsersPermissions';
 import { usePlugins, useFetchRole } from '../../hooks';
-import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';
 
 import { createRoleSchema } from './constants';
 
-const EditPage = () => {
+export const EditPage = () => {
   const { formatMessage } = useIntl();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const {
     params: { id },
-  } = useRouteMatch(`/settings/${pluginId}/roles/:id`);
+  } = useRouteMatch(`/settings/users-permissions/roles/:id`);
   const { isLoading: isLoadingPlugins, routes } = usePlugins();
   const { role, onSubmitSucceeded, isLoading: isLoadingRole } = useFetchRole(id);
-  const permissionsRef = useRef();
+  const permissionsRef = React.useRef();
   const { put } = useFetchClient();
+  const { formatAPIError } = useFormatAPIError();
+  const mutation = useMutation((body) => put(`/users-permissions/roles/${id}`, body), {
+    onError(error) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(error),
+      });
+    },
+
+    onSuccess(data) {
+      toggleNotification({
+        type: 'success',
+        message: {
+          id: getTrad('Settings.roles.created'),
+          defaultMessage: 'Role edited',
+        },
+      });
+
+      onSubmitSucceeded({ name: data.name, description: data.description });
+    },
+  });
 
   const handleEditRoleSubmit = async (data) => {
     // Set loading state
     lockApp();
-    setIsSubmitting(true);
-    try {
-      const permissions = permissionsRef.current.getPermissions();
-      // Update role in Strapi
-      await put(`/${pluginId}/roles/${id}`, { ...data, ...permissions, users: [] });
-      // Notify success
-      onSubmitSucceeded({ name: data.name, description: data.description });
-      toggleNotification({
-        type: 'success',
-        message: {
-          id: getTrad('Settings.roles.edited'),
-          defaultMessage: 'Role edited',
-        },
-      });
-    } catch (err) {
-      console.error(err);
-      toggleNotification({
-        type: 'warning',
-        message: {
-          id: 'notification.error',
-          defaultMessage: 'An error occurred',
-        },
-      });
-    }
-    // Unset loading state
-    setIsSubmitting(false);
+
+    const permissions = permissionsRef.current.getPermissions();
+
+    await mutation.mutate({ ...data, ...permissions, users: [] });
+
     unlockApp();
   };
 
@@ -85,6 +84,7 @@ const EditPage = () => {
 
   return (
     <Main>
+      {/* TODO: this needs to be translated */}
       <SettingsPageTitle name="Roles" />
       <Formik
         enableReinitialize
@@ -100,7 +100,7 @@ const EditPage = () => {
                   <Button
                     disabled={role.code === 'strapi-super-admin'}
                     type="submit"
-                    loading={isSubmitting}
+                    loading={mutation.isLoading}
                     startIcon={<Check />}
                   >
                     {formatMessage({
@@ -122,62 +122,54 @@ const EditPage = () => {
               }
             />
             <ContentLayout>
-              <Flex direction="column" alignItems="stretch" gap={7}>
-                <Box
-                  background="neutral0"
-                  hasRadius
-                  shadow="filterShadow"
-                  paddingTop={6}
-                  paddingBottom={6}
-                  paddingLeft={7}
-                  paddingRight={7}
-                >
-                  <Flex direction="column" alignItems="stretch" gap={4}>
-                    <Typography variant="delta" as="h2">
-                      {formatMessage({
-                        id: getTrad('EditPage.form.roles'),
-                        defaultMessage: 'Role details',
-                      })}
-                    </Typography>
-                    <Grid gap={4}>
-                      <GridItem col={6}>
-                        <TextInput
-                          name="name"
-                          value={values.name || ''}
-                          onChange={handleChange}
-                          label={formatMessage({
-                            id: 'global.name',
-                            defaultMessage: 'Name',
-                          })}
-                          error={
-                            errors.name
-                              ? formatMessage({ id: errors.name, defaultMessage: 'Invalid value' })
-                              : null
-                          }
-                        />
-                      </GridItem>
-                      <GridItem col={6}>
-                        <Textarea
-                          id="description"
-                          value={values.description || ''}
-                          onChange={handleChange}
-                          label={formatMessage({
-                            id: 'global.description',
-                            defaultMessage: 'Description',
-                          })}
-                          error={
-                            errors.description
-                              ? formatMessage({
-                                  id: errors.description,
-                                  defaultMessage: 'Invalid value',
-                                })
-                              : null
-                          }
-                        />
-                      </GridItem>
-                    </Grid>
-                  </Flex>
-                </Box>
+              <Flex
+                background="neutral0"
+                direction="column"
+                alignItems="stretch"
+                gap={7}
+                hasRadius
+                paddingTop={6}
+                paddingBottom={6}
+                paddingLeft={7}
+                paddingRight={7}
+                shadow="filterShadow"
+              >
+                <Flex direction="column" alignItems="stretch" gap={4}>
+                  <Typography variant="delta" as="h2">
+                    {formatMessage({
+                      id: getTrad('EditPage.form.roles'),
+                      defaultMessage: 'Role details',
+                    })}
+                  </Typography>
+
+                  <Grid gap={4}>
+                    <GridItem col={6}>
+                      <TextInput
+                        name="name"
+                        value={values.name || ''}
+                        onChange={handleChange}
+                        label={formatMessage({
+                          id: 'global.name',
+                          defaultMessage: 'Name',
+                        })}
+                        error={errors?.name ?? false}
+                      />
+                    </GridItem>
+                    <GridItem col={6}>
+                      <Textarea
+                        id="description"
+                        value={values.description || ''}
+                        onChange={handleChange}
+                        label={formatMessage({
+                          id: 'global.description',
+                          defaultMessage: 'Description',
+                        })}
+                        error={errors?.description ?? false}
+                      />
+                    </GridItem>
+                  </Grid>
+                </Flex>
+
                 {!isLoadingPlugins && (
                   <UsersPermissions
                     ref={permissionsRef}
@@ -193,5 +185,3 @@ const EditPage = () => {
     </Main>
   );
 };
-
-export default EditPage;

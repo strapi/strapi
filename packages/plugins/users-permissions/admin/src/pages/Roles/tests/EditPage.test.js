@@ -14,7 +14,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter, Switch, Route } from 'react-router-dom';
 
 import pluginId from '../../../pluginId';
-import RolesEditPage from '../EditPage';
+import { EditPage } from '../EditPage';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -22,7 +22,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 
 const render = () => ({
-  ...renderRTL(<Route path={`/settings/${pluginId}/roles/:id`} component={RolesEditPage} />, {
+  ...renderRTL(<Route path={`/settings/${pluginId}/roles/:id`} component={EditPage} />, {
     wrapper({ children }) {
       const client = new QueryClient({
         defaultOptions: {

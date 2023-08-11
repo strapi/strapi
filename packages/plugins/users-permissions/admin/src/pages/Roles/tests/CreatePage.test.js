@@ -9,7 +9,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter, Switch, Route } from 'react-router-dom';
 
 import pluginId from '../../../pluginId';
-import RolesCreatePage from '../CreatePage';
+import { CreatePage } from '../CreatePage';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -17,7 +17,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 
 const render = () => ({
-  ...renderRTL(<Route path={`/settings/${pluginId}/roles/new`} component={RolesCreatePage} />, {
+  ...renderRTL(<Route path={`/settings/${pluginId}/roles/new`} component={CreatePage} />, {
     wrapper({ children }) {
       const client = new QueryClient({
         defaultOptions: {
