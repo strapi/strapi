@@ -19,7 +19,7 @@ const {
   cloneDeep,
 } = require('lodash/fp');
 
-const { contentTypes, traverseEntity, traverse, sanitize, pipeAsync } = require('@strapi/utils');
+const { contentTypes, traverseEntity, sanitize, pipeAsync, traverse } = require('@strapi/utils');
 const { removePassword } = require('@strapi/utils').sanitize.visitors;
 const { ADMIN_USER_ALLOWED_FIELDS } = require('../../../domain/user');
 
@@ -45,7 +45,6 @@ const STATIC_FIELDS = [ID_ATTRIBUTE];
 module.exports = ({ action, ability, model }) => {
   const schema = strapi.getModel(model);
 
-  const { sanitizePasswords } = sanitize.sanitizers;
   const { allowedFields } = sanitize.visitors;
   const { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate, traverseQueryFields } =
     traverse.traversals;
@@ -131,7 +130,7 @@ module.exports = ({ action, ability, model }) => {
       // Remove not allowed fields (RBAC)
       traverseEntity(allowedFields(permittedFields), { schema }),
       // Remove all fields of type 'password'
-      sanitizePasswords(schema)
+      sanitize.sanitizers.sanitizePasswords(schema)
     );
   };
 

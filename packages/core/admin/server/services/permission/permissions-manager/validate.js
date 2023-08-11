@@ -17,9 +17,16 @@ const {
   isObject,
 } = require('lodash/fp');
 
-const { contentTypes, traverseEntity, traverse, validate, pipeAsync } = require('@strapi/utils');
-const { throwPassword } = require('@strapi/utils').validate.visitors;
-const { ValidationError } = require('@strapi/utils');
+const {
+  contentTypes,
+  traverseEntity,
+  traverse,
+  validate,
+  pipeAsync,
+  ValidationError,
+} = require('@strapi/utils');
+
+const { throwPassword, throwDisallowedFields } = validate.visitors;
 const { ADMIN_USER_ALLOWED_FIELDS } = require('../../../domain/user');
 
 const { constants, isScalarAttribute, getNonVisibleAttributes, getWritableAttributes } =
@@ -39,7 +46,6 @@ const STATIC_FIELDS = [ID_ATTRIBUTE];
 module.exports = ({ action, ability, model }) => {
   const schema = strapi.getModel(model);
 
-  const { throwDisallowedFields } = validate.visitors;
   const { traverseQueryFilters, traverseQuerySort, traverseQueryFields } = traverse.traversals;
 
   const createValidateQuery = (options = {}) => {
