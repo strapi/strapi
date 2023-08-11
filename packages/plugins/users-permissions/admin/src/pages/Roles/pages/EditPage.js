@@ -18,7 +18,7 @@ import {
   SettingsPageTitle,
   LoadingIndicatorPage,
   Form,
-  useFormatAPIError,
+  useAPIErrorHandler,
   useNotification,
   Link,
 } from '@strapi/helper-plugin';
@@ -29,7 +29,8 @@ import { useMutation } from 'react-query';
 import { useRouteMatch } from 'react-router-dom';
 
 import UsersPermissions from '../../../components/UsersPermissions';
-import { usePlugins, useFetchRole } from '../../../hooks';
+import { useFetchRole } from '../../../hooks/useFetchRole';
+import { usePlugins } from '../../../hooks/usePlugins';
 import getTrad from '../../../utils/getTrad';
 import { createRoleSchema } from '../constants';
 
@@ -44,7 +45,7 @@ export const EditPage = () => {
   const { role, onSubmitSucceeded, isLoading: isLoadingRole } = useFetchRole(id);
   const permissionsRef = React.useRef();
   const { put } = useFetchClient();
-  const { formatAPIError } = useFormatAPIError();
+  const { formatAPIError } = useAPIErrorHandler();
   const mutation = useMutation((body) => put(`/users-permissions/roles/${id}`, body), {
     onError(error) {
       toggleNotification({

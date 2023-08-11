@@ -27,7 +27,7 @@ import { useMutation } from 'react-query';
 import { useHistory } from 'react-router-dom';
 
 import UsersPermissions from '../../../components/UsersPermissions';
-import { usePlugins } from '../../../hooks';
+import { usePlugins } from '../../../hooks/usePlugins';
 import getTrad from '../../../utils/getTrad';
 import { createRoleSchema } from '../constants';
 

@@ -5,7 +5,7 @@ import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import reducer, { initialState } from './reducer';
 
 // TODO: Refactor to use react-query
-const useFetchRole = (id) => {
+export const useFetchRole = (id) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const toggleNotification = useNotification();
   const isMounted = useRef(null);
@@ -62,5 +62,3 @@ const useFetchRole = (id) => {
 
   return { ...state, onSubmitSucceeded: handleSubmitSucceeded };
 };
-
-export default useFetchRole;
