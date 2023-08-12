@@ -69,6 +69,12 @@ module.exports = {
       inversedBy: 'users',
       configurable: false,
     },
+    multiFactorAuthenticationToken: {
+      type: 'number',
+      configurable: false,
+      private: true,
+      searchable: false,
+    }
   },
 
   config: schemaConfig, // TODO: to move to content-manager options
