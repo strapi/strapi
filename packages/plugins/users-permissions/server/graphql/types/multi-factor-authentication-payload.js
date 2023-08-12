@@ -1,8 +1,8 @@
 'use strict';
 
 module.exports = ({ nexus }) => {
-  return nexus.inputObjectType({
-    name: 'UsersPermissionsMultiFactorAuthenticationInput',
+  return nexus.objectType({
+    name: 'UsersPermissionsMultiFactorAuthenticationPayload',
 
     definition(t) {
       t.nonNull.boolean('ok');

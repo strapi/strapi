@@ -9,6 +9,7 @@ const {
   validateAdminRegistrationInput,
   validateRegistrationInfoQuery,
   validateForgotPasswordInput,
+  validateMultiFactorAuthenticationInput,
   validateResetPasswordInput,
   validateRenewTokenInput,
 } = require('../validation/authentication');
@@ -147,6 +148,16 @@ module.exports = {
     getService('auth').forgotPassword(input);
 
     ctx.status = 204;
+  },
+
+  async multiFactorAuthentication(ctx) {
+    const input = ctx.request.body;
+
+    await validateMultiFactorAuthenticationInput(input);
+
+    getService('auth').multiFactorAuthentication(input);
+
+    ctx.status = 200;
   },
 
   async resetPassword(ctx) {

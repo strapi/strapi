@@ -8,7 +8,7 @@ module.exports = ({ nexus, strapi }) => {
   const { nonNull } = nexus;
 
   return {
-    type: 'UsersPermissionsMultiFactorAuthenticationInput',
+    type: 'UsersPermissionsMultiFactorAuthenticationPayload',
 
     args: {
       code: nonNull('String'),

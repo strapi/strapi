@@ -29,7 +29,7 @@ const forgotPasswordSchema = yup
 
 const multiFactorAuthenticationSchema = yup
   .object({
-    code: yup.number.min(6).max(6).integer().required(),
+    code: yup.number().min(6).max(6).integer().required(),
   })
   .noUnknown();
 

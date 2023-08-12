@@ -6,6 +6,7 @@ const typesFactories = [
   require('./register-input'),
   require('./login-input'),
   require('./password-payload'),
+  require('./multi-factor-authentication-payload'),
   require('./login-payload'),
   require('./create-role-payload'),
   require('./update-role-payload'),
