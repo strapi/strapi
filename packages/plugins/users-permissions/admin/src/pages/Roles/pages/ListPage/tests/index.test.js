@@ -76,7 +76,7 @@ describe('Roles – ListPage', () => {
 
     expect(getByRole('heading', { name: 'Roles' })).toBeInTheDocument();
     expect(getByText('List of roles')).toBeInTheDocument();
-    expect(getByRole('button', { name: 'Add new role' })).toBeInTheDocument();
+    expect(getByRole('link', { name: 'Add new role' })).toBeInTheDocument();
     expect(getByRole('button', { name: 'Search' })).toBeInTheDocument();
 
     await waitForElementToBeRemoved(() => queryByText('Loading content.'));
@@ -89,7 +89,7 @@ describe('Roles – ListPage', () => {
   it('should direct me to the new user page when I press the add a new role button', async () => {
     const { getByRole } = render();
 
-    await userEvent.click(getByRole('button', { name: 'Add new role' }));
+    await userEvent.click(getByRole('link', { name: 'Add new role' }));
 
     expect(testLocation.pathname).toBe('/settings/users-permissions/roles/new');
   });
@@ -99,7 +99,7 @@ describe('Roles – ListPage', () => {
 
     await waitForElementToBeRemoved(() => queryByText('Loading content.'));
 
-    await userEvent.click(getByRole('button', { name: 'Edit Authenticated', hidden: true }));
+    await userEvent.click(getByRole('link', { name: 'Edit Authenticated', hidden: true }));
 
     expect(testLocation.pathname).toBe('/settings/users-permissions/roles/1');
   });

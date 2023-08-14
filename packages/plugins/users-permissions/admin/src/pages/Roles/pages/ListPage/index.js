@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 
 import {
   ActionLayout,
-  Button,
   ContentLayout,
   HeaderLayout,
   Layout,
@@ -20,6 +19,7 @@ import {
   CheckPermissions,
   ConfirmDialog,
   EmptyStateLayout,
+  LinkButton,
   LoadingIndicatorPage,
   NoPermissions,
   SearchURLQuery,
@@ -35,7 +35,6 @@ import {
 import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
-import { useHistory } from 'react-router-dom';
 
 import { PERMISSIONS } from '../../../../constants';
 import { getTrad } from '../../../../utils';
@@ -46,7 +45,6 @@ import { deleteData, fetchData } from './utils/api';
 export const RolesListPage = () => {
   const { trackUsage } = useTracking();
   const { formatMessage, locale } = useIntl();
-  const { push } = useHistory();
   const toggleNotification = useNotification();
   const { notifyStatus } = useNotifyAT();
   const [{ query }] = useQueryParams();
@@ -88,11 +86,6 @@ export const RolesListPage = () => {
   });
 
   const isLoading = isLoadingForData || isFetching;
-
-  const handleNewRoleClick = () => {
-    trackUsage('willCreateRole');
-    push(`/settings/users-permissions/roles/new`);
-  };
 
   const handleShowConfirmDelete = () => {
     setShowConfirmDelete(!showConfirmDelete);
@@ -153,12 +146,17 @@ export const RolesListPage = () => {
           })}
           primaryAction={
             <CheckPermissions permissions={PERMISSIONS.createRole}>
-              <Button onClick={handleNewRoleClick} startIcon={<Plus />} size="S">
+              <LinkButton
+                to="/settings/users-permissions/roles/new"
+                onClick={() => trackUsage('willCreateRole')}
+                startIcon={<Plus />}
+                size="S"
+              >
                 {formatMessage({
                   id: getTrad('List.button.roles'),
                   defaultMessage: 'Add new role',
                 })}
-              </Button>
+              </LinkButton>
             </CheckPermissions>
           }
         />
