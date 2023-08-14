@@ -143,7 +143,8 @@ export const CreatePage = () => {
                           id: 'global.name',
                           defaultMessage: 'Name',
                         })}
-                        error={errors?.name ?? false}
+                        error={errors?.name ? formatMessage({ id: errors.name }) : false}
+                        required
                       />
                     </GridItem>
                     <GridItem col={6}>
@@ -155,7 +156,10 @@ export const CreatePage = () => {
                           id: 'global.description',
                           defaultMessage: 'Description',
                         })}
-                        error={errors?.description ?? false}
+                        error={
+                          errors?.description ? formatMessage({ id: errors.description }) : false
+                        }
+                        required
                       />
                     </GridItem>
                   </Grid>

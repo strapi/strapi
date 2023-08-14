@@ -1,8 +1,7 @@
-'use strict';
+import { rest } from 'msw';
+import { setupServer } from 'msw/node';
 
-const { setupServer } = require('msw/node');
-const { rest } = require('msw');
-const pluginId = require('../admin/src/pluginId').default;
+import pluginId from '../pluginId';
 
 const handlers = [
   // Mock get role route
@@ -186,6 +185,10 @@ const handlers = [
 
 const server = setupServer(...handlers);
 
-module.exports = {
-  server,
-};
+beforeAll(() => {
+  server.listen();
+});
+
+afterAll(() => {
+  server.close();
+});

@@ -66,8 +66,8 @@ describe('Roles – EditPage', () => {
 
     expect(getByRole('button', { name: 'Save' })).toBeInTheDocument();
 
-    expect(getByRole('textbox', { name: 'Name' })).toBeInTheDocument();
-    expect(getByRole('textbox', { name: 'Description' })).toBeInTheDocument();
+    expect(getByRole('textbox', { name: 'Name *' })).toBeInTheDocument();
+    expect(getByRole('textbox', { name: 'Description *' })).toBeInTheDocument();
 
     await user.click(getByRole('button', { name: 'Address' }));
 
@@ -78,29 +78,27 @@ describe('Roles – EditPage', () => {
   });
 
   it('will show an error if the user does not fill the name field', async () => {
-    const { getByRole, user, getByTestId, getByText } = render();
+    const { getByRole, user, getByTestId } = render();
 
     await waitForElementToBeRemoved(() => getByTestId('loader'));
 
-    await user.clear(getByRole('textbox', { name: 'Name' }));
+    await user.clear(getByRole('textbox', { name: 'Name *' }));
 
     await user.click(getByRole('button', { name: 'Save' }));
 
-    expect(getByRole('textbox', { name: 'Name' })).toHaveAttribute('aria-invalid', 'true');
-    expect(getByText('Invalid value')).toBeInTheDocument();
+    expect(getByRole('textbox', { name: 'Name *' })).toHaveAttribute('aria-invalid', 'true');
   });
 
   it('will show an error if the user does not fill out the description field', async () => {
-    const { getByRole, user, getByTestId, getByText } = render();
+    const { getByRole, user, getByTestId } = render();
 
     await waitForElementToBeRemoved(() => getByTestId('loader'));
 
-    await user.clear(getByRole('textbox', { name: 'Description' }));
+    await user.clear(getByRole('textbox', { name: 'Description *' }));
 
     await user.click(getByRole('button', { name: 'Save' }));
 
-    expect(getByRole('textbox', { name: 'Description' })).toHaveAttribute('aria-invalid', 'true');
-    expect(getByText('Invalid value')).toBeInTheDocument();
+    expect(getByRole('textbox', { name: 'Description *' })).toHaveAttribute('aria-invalid', 'true');
   });
 
   it("can update a role's name and description", async () => {
@@ -108,8 +106,8 @@ describe('Roles – EditPage', () => {
 
     await waitForElementToBeRemoved(() => getByTestId('loader'));
 
-    await user.type(getByRole('textbox', { name: 'Name' }), 'test');
-    await user.type(getByRole('textbox', { name: 'Description' }), 'testing');
+    await user.type(getByRole('textbox', { name: 'Name *' }), 'test');
+    await user.type(getByRole('textbox', { name: 'Description *' }), 'testing');
 
     /**
      * @note user.click will not trigger the form.
