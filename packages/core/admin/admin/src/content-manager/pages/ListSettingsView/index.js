@@ -1,4 +1,4 @@
-import React, { useContext, useReducer, useState } from 'react';
+import * as React from 'react';
 
 import {
   Button,
@@ -9,13 +9,7 @@ import {
   Layout,
   Main,
 } from '@strapi/design-system';
-import {
-  ConfirmDialog,
-  Link,
-  useFetchClient,
-  useNotification,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { Link, useFetchClient, useNotification, useTracking } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
@@ -34,16 +28,14 @@ import { SortDisplayedFields } from './components/SortDisplayedFields';
 import { EXCLUDED_SORT_ATTRIBUTE_TYPES } from './constants';
 import reducer, { initialState } from './reducer';
 
-const ListSettingsView = ({ layout, slug }) => {
+export const ListSettingsView = ({ layout, slug }) => {
   const { put } = useFetchClient();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const pluginsQueryParams = usePluginsQueryParams();
   const toggleNotification = useNotification();
-  const { refetchData } = useContext(ModelsContext);
-  const [showWarningSubmit, setWarningSubmit] = useState(false);
-  const toggleWarningSubmit = () => setWarningSubmit((prevState) => !prevState);
-  const [{ fieldToEdit, fieldForm, initialData, modifiedData }, dispatch] = useReducer(
+  const { refetchData } = React.useContext(ModelsContext);
+  const [{ fieldToEdit, fieldForm, initialData, modifiedData }, dispatch] = React.useReducer(
     reducer,
     initialState,
     () => ({
@@ -101,16 +93,6 @@ const ListSettingsView = ({ layout, slug }) => {
     }
   );
 
-  const handleConfirm = async () => {
-    const { layouts, settings, metadatas } = modifiedData;
-
-    mutate({
-      layouts,
-      settings,
-      metadatas,
-    });
-  };
-
   const handleAddField = (item) => {
     dispatch({
       type: 'ADD_FIELD',
@@ -134,9 +116,17 @@ const ListSettingsView = ({ layout, slug }) => {
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    toggleWarningSubmit();
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    const { layouts, settings, metadatas } = modifiedData;
+
+    mutate({
+      layouts,
+      settings,
+      metadatas,
+    });
+
     trackUsage('willSaveContentTypeLayout');
   };
 
@@ -253,19 +243,6 @@ const ListSettingsView = ({ layout, slug }) => {
               />
             </Flex>
           </ContentLayout>
-
-          <ConfirmDialog
-            bodyText={{
-              id: getTrad('popUpWarning.warning.updateAllSettings'),
-              defaultMessage: 'This will modify all your settings',
-            }}
-            iconRightButton={<Check />}
-            isConfirmButtonLoading={isSubmittingForm}
-            isOpen={showWarningSubmit}
-            onToggleDialog={toggleWarningSubmit}
-            onConfirm={handleConfirm}
-            variantRightButton="success-light"
-          />
         </form>
 
         {isModalFormOpen && (
@@ -305,5 +282,3 @@ ListSettingsView.propTypes = {
   }).isRequired,
   slug: PropTypes.string.isRequired,
 };
-
-export default ListSettingsView;
