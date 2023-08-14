@@ -52,6 +52,7 @@ export const UserListPageCE = () => {
     isLoading,
     refetch: refetchAdminUsers,
   } = useAdminUsers(qs.parse(search, { ignoreQueryPrefix: true }), {
+    cacheTime: 0,
     enabled: canRead,
   });
   const CreateAction = useEnterprise(
