@@ -13,7 +13,7 @@ import {
   FieldInput,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { auth, useNotification } from '@strapi/helper-plugin';
+import { auth, useNotification, useAppInfo } from '@strapi/helper-plugin';
 import { Cross } from '@strapi/icons';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
@@ -127,6 +127,7 @@ const NpsSurvey = () => {
   const { npsSurveySettings, setNpsSurveySettings } = useNpsSurveySettings();
   const [isFeedbackResponse, setIsFeedbackResponse] = React.useState(false);
   const toggleNotification = useNotification();
+  const { autoReload, strapiVersion, communityEdition } = useAppInfo();
 
   const { mutate, isLoading } = useMutation(
     async (form) => {
@@ -195,7 +196,14 @@ const NpsSurvey = () => {
 
   const handleSubmitResponse = ({ npsSurveyRating: rating, npsSurveyFeedback: comment }) => {
     const { email } = auth.getUserInfo();
-    mutate({ email, rating, comment });
+    mutate({
+      email,
+      rating,
+      comment,
+      environment: autoReload ? 'development' : 'production',
+      version: strapiVersion,
+      license: communityEdition ? 'community' : 'enterprise',
+    });
   };
 
   const handleDismiss = () => {
