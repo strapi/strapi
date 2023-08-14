@@ -3,7 +3,11 @@
 const { mapAsync } = require('@strapi/utils');
 const { getService } = require('../../../utils');
 const { validateUpdateStageOnEntity } = require('../../../validation/review-workflows');
-const { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE } = require('../../../constants/workflows');
+const {
+  STAGE_MODEL_UID,
+  ENTITY_STAGE_ATTRIBUTE,
+  STAGE_TRANSITION_UID,
+} = require('../../../constants/workflows');
 
 /**
  *
@@ -97,7 +101,7 @@ module.exports = {
 
     // Validate if entity stage can be updated
     const canTransition = stagePermissions.can(
-      'admin::review-workflows.stage.transition',
+      STAGE_TRANSITION_UID,
       entity[ENTITY_STAGE_ATTRIBUTE]?.id
     );
 

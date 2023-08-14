@@ -4,6 +4,7 @@
 
 const { yup, validateYupSchema } = require('@strapi/utils');
 const { hasStageAttribute } = require('../utils/review-workflows');
+const { STAGE_TRANSITION_UID } = require('../constants/workflows');
 
 const stageObject = yup.object().shape({
   id: yup.number().integer().min(1),
@@ -12,7 +13,7 @@ const stageObject = yup.object().shape({
   permissions: yup.array().of(
     yup.object().shape({
       role: yup.number().integer().min(1).required(),
-      action: yup.string().oneOf(['admin::review-workflows.stage.transition']).required(),
+      action: yup.string().oneOf([STAGE_TRANSITION_UID]).required(),
       actionParameters: yup.object().shape({
         from: yup.number().integer().min(1).required(),
         to: yup.number().integer().min(1),

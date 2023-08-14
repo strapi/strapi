@@ -4,6 +4,7 @@
 module.exports = {
   WORKFLOW_MODEL_UID: 'admin::workflow',
   STAGE_MODEL_UID: 'admin::workflow-stage',
+  STAGE_TRANSITION_UID: 'admin::review-workflows.stage.transition',
   STAGE_DEFAULT_COLOR: '#4945FF',
   ENTITY_STAGE_ATTRIBUTE: 'strapi_stage',
   MAX_WORKFLOWS: 200,
@@ -20,12 +21,12 @@ module.exports = {
     stages: {
       populate: {
         permissions: {
-          fields: ["action", "actionParameters"],
+          fields: ['action', 'actionParameters'],
           populate: {
-            role: { fields: ["id", "name"] },
-          }
-        }
-      }
-    }
+            role: { fields: ['id', 'name'] },
+          },
+        },
+      },
+    },
   },
 };

@@ -6,9 +6,9 @@ const {
   errors: { ApplicationError },
 } = require('@strapi/utils');
 const { getService } = require('../../utils');
+const { STAGE_TRANSITION_UID } = require('../../constants/workflows');
 
-// TODO: This should use constants
-const validActions = ['admin::review-workflows.stage.transition'];
+const validActions = [STAGE_TRANSITION_UID];
 
 module.exports = ({ strapi }) => {
   const roleService = getService('role');
