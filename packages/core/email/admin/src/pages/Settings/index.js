@@ -55,33 +55,39 @@ const SettingsPage = () => {
     return config;
   });
 
-  const mutation = useMutation((body) => post('/email/test', body), {
-    onError() {
-      toggleNotification({
-        type: 'warning',
-        message: formatMessage(
-          {
-            id: 'email.Settings.email.plugin.notification.test.error',
-            defaultMessage: 'Failed to send a test mail to {to}',
-          },
-          { to: testAddress }
-        ),
-      });
-    },
+  const mutation = useMutation(
+    (body) => post('/email/test', body),
+    {
+      onError() {
+        toggleNotification({
+          type: 'warning',
+          message: formatMessage(
+            {
+              id: 'email.Settings.email.plugin.notification.test.error',
+              defaultMessage: 'Failed to send a test mail to {to}',
+            },
+            { to: testAddress }
+          ),
+        });
+      },
 
-    onSuccess() {
-      toggleNotification({
-        type: 'success',
-        message: formatMessage(
-          {
-            id: 'email.Settings.email.plugin.notification.test.success',
-            defaultMessage: 'Email test succeeded, check the {to} mailbox',
-          },
-          { to: testAddress }
-        ),
-      });
+      onSuccess() {
+        toggleNotification({
+          type: 'success',
+          message: formatMessage(
+            {
+              id: 'email.Settings.email.plugin.notification.test.success',
+              defaultMessage: 'Email test succeeded, check the {to} mailbox',
+            },
+            { to: testAddress }
+          ),
+        });
+      },
     },
-  });
+    {
+      retry: false,
+    }
+  );
 
   useFocusWhenNavigate();
 
@@ -138,7 +144,7 @@ const SettingsPage = () => {
       />
 
       <ContentLayout>
-        {isLoading || mutation.isLoading ? (
+        {isLoading ? (
           <LoadingIndicatorPage />
         ) : (
           <form onSubmit={handleSubmit}>
@@ -171,7 +177,7 @@ const SettingsPage = () => {
                           file: './config/plugins.js',
                           link: (
                             <DocumentationLink
-                              href="https://docs.strapi.io/dev-docs/plugins/email"
+                              href="https://docs.strapi.io/developer-docs/latest/plugins/email.html"
                               target="_blank"
                               rel="noopener noreferrer"
                             >
@@ -199,6 +205,7 @@ const SettingsPage = () => {
                           defaultMessage: "ex: Strapi No-Reply '<'no-reply@strapi.io'>'",
                         })}
                         disabled
+                        onChange={() => {}}
                         value={data.settings.defaultFrom}
                       />
                     </GridItem>
@@ -215,6 +222,7 @@ const SettingsPage = () => {
                           defaultMessage: `ex: Strapi '<'example@strapi.io'>'`,
                         })}
                         disabled
+                        onChange={() => {}}
                         value={data.settings.defaultReplyTo}
                       />
                     </GridItem>
@@ -227,6 +235,7 @@ const SettingsPage = () => {
                           defaultMessage: 'Email provider',
                         })}
                         disabled
+                        onChange={() => {}}
                         value={data.provider}
                       >
                         <Option value={data.provider}>{data.provider}</Option>
@@ -236,8 +245,11 @@ const SettingsPage = () => {
                 </Flex>
               </Box>
 
-              <Box
+              <Flex
+                alignItems="stretch"
                 background="neutral0"
+                direction="column"
+                gap={4}
                 hasRadius
                 shadow="filterShadow"
                 paddingTop={6}
@@ -245,54 +257,52 @@ const SettingsPage = () => {
                 paddingLeft={7}
                 paddingRight={7}
               >
-                <Flex direction="column" alignItems="stretch" gap={4}>
-                  <Typography variant="delta" as="h2">
-                    {formatMessage({
-                      id: 'email.Settings.email.plugin.title.test',
-                      defaultMessage: 'Test email delivery',
-                    })}
-                  </Typography>
+                <Typography variant="delta" as="h2">
+                  {formatMessage({
+                    id: 'email.Settings.email.plugin.title.test',
+                    defaultMessage: 'Test email delivery',
+                  })}
+                </Typography>
 
-                  <Grid gap={5} alignItems="end">
-                    <GridItem col={6} s={12}>
-                      <TextInput
-                        id="test-address-input"
-                        name="test-address"
-                        onChange={handleChange}
-                        label={formatMessage({
-                          id: 'email.Settings.email.plugin.label.testAddress',
-                          defaultMessage: 'Recipient email',
-                        })}
-                        value={testAddress}
-                        error={
-                          formErrors.email?.id &&
-                          formatMessage({
-                            id: `email.${formErrors.email?.id}`,
-                            defaultMessage: 'This is an invalid email',
-                          })
-                        }
-                        placeholder={formatMessage({
-                          id: 'email.Settings.email.plugin.placeholder.testAddress',
-                          defaultMessage: 'ex: developer@example.com',
-                        })}
-                      />
-                    </GridItem>
-                    <GridItem col={7} s={12}>
-                      <Button
-                        loading={mutation.isLoading}
-                        disabled={!isTestAddressValid}
-                        type="submit"
-                        startIcon={<Envelop />}
-                      >
-                        {formatMessage({
-                          id: 'email.Settings.email.plugin.button.test-email',
-                          defaultMessage: 'Send test email',
-                        })}
-                      </Button>
-                    </GridItem>
-                  </Grid>
-                </Flex>
-              </Box>
+                <Grid gap={5} alignItems="end">
+                  <GridItem col={6} s={12}>
+                    <TextInput
+                      id="test-address-input"
+                      name="test-address"
+                      onChange={handleChange}
+                      label={formatMessage({
+                        id: 'email.Settings.email.plugin.label.testAddress',
+                        defaultMessage: 'Recipient email',
+                      })}
+                      value={testAddress}
+                      error={
+                        formErrors.email?.id &&
+                        formatMessage({
+                          id: `email.${formErrors.email?.id}`,
+                          defaultMessage: 'This is an invalid email',
+                        })
+                      }
+                      placeholder={formatMessage({
+                        id: 'email.Settings.email.plugin.placeholder.testAddress',
+                        defaultMessage: 'ex: developer@example.com',
+                      })}
+                    />
+                  </GridItem>
+                  <GridItem col={7} s={12}>
+                    <Button
+                      loading={mutation.isLoading}
+                      disabled={!isTestAddressValid}
+                      type="submit"
+                      startIcon={<Envelop />}
+                    >
+                      {formatMessage({
+                        id: 'email.Settings.email.plugin.button.test-email',
+                        defaultMessage: 'Send test email',
+                      })}
+                    </Button>
+                  </GridItem>
+                </Grid>
+              </Flex>
             </Flex>
           </form>
         )}
