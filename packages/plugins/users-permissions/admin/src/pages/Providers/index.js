@@ -22,6 +22,7 @@ import {
   SettingsPageTitle,
   stopPropagation,
   useAPIErrorHandler,
+  useCollator,
   useFetchClient,
   useFocusWhenNavigate,
   useNotification,
@@ -30,7 +31,6 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Pencil } from '@strapi/icons';
-import has from 'lodash/has';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
@@ -39,11 +39,10 @@ import FormModal from '../../components/FormModal';
 import { PERMISSIONS } from '../../constants';
 import { getTrad } from '../../utils';
 
-import createProvidersArray from './utils/createProvidersArray';
 import forms from './utils/forms';
 
 export const ProvidersPage = () => {
-  const { formatMessage } = useIntl();
+  const { formatMessage, locale } = useIntl();
   const queryClient = useQueryClient();
   const { trackUsage } = useTracking();
   const [isOpen, setIsOpen] = React.useState(false);
@@ -52,11 +51,14 @@ export const ProvidersPage = () => {
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { get, put } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
+  const formatter = useCollator(locale, {
+    sensitivity: 'base',
+  });
 
   useFocusWhenNavigate();
 
   const {
-    isLoading: isLoadingForPermissions,
+    isLoading: isLoadingPermissions,
     allowedActions: { canUpdate },
   } = useRBAC({ update: PERMISSIONS.updateProviders });
 
@@ -66,17 +68,18 @@ export const ProvidersPage = () => {
       const { data } = await get('/users-permissions/providers');
 
       return data;
+    },
+    {
+      initialData: {},
     }
   );
-
-  const isLoading = isLoadingData;
 
   const submitMutation = useMutation((body) => put('/users-permissions/providers', body), {
     async onSuccess() {
       await queryClient.invalidateQueries(['users-permissions', 'providers']);
 
       toggleNotification({
-        type: 'info',
+        type: 'success',
         message: { id: getTrad('notification.success.submit') },
       });
 
@@ -96,9 +99,22 @@ export const ProvidersPage = () => {
     refetchActive: false,
   });
 
-  const providers = React.useMemo(() => createProvidersArray(data), [data]);
+  const providers = Object.entries(data)
+    .reduce((acc, [name, provider]) => {
+      const { icon, enabled, subdomain } = provider;
 
-  const rowCount = providers.length;
+      acc.push({
+        name,
+        icon: icon === 'envelope' ? ['fas', 'envelope'] : ['fab', icon],
+        enabled,
+        subdomain,
+      });
+
+      return acc;
+    }, [])
+    .sort((a, b) => formatter.compare(a.name, b.name));
+
+  const isLoading = isLoadingData || isLoadingPermissions;
 
   const isProviderWithSubdomain = React.useMemo(() => {
     if (!providerToEditName) {
@@ -107,13 +123,8 @@ export const ProvidersPage = () => {
 
     const providerToEdit = providers.find((obj) => obj.name === providerToEditName);
 
-    return has(providerToEdit, 'subdomain');
+    return !!providerToEdit?.subdomain;
   }, [providers, providerToEditName]);
-
-  const pageTitle = formatMessage({
-    id: getTrad('HeaderNav.link.providers'),
-    defaultMessage: 'Providers',
-  });
 
   const layoutToRender = React.useMemo(() => {
     if (providerToEditName === 'email') {
@@ -148,7 +159,12 @@ export const ProvidersPage = () => {
 
   return (
     <Layout>
-      <SettingsPageTitle name={pageTitle} />
+      <SettingsPageTitle
+        name={formatMessage({
+          id: getTrad('HeaderNav.link.providers'),
+          defaultMessage: 'Providers',
+        })}
+      />
       <Main>
         <HeaderLayout
           title={formatMessage({
@@ -156,11 +172,11 @@ export const ProvidersPage = () => {
             defaultMessage: 'Providers',
           })}
         />
-        {isLoading || isLoadingForPermissions ? (
+        {isLoading ? (
           <LoadingIndicatorPage />
         ) : (
           <ContentLayout>
-            <Table colCount={3} rowCount={rowCount + 1}>
+            <Table colCount={3} rowCount={providers.length + 1}>
               <Thead>
                 <Tr>
                   <Th>
