@@ -7,8 +7,6 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import getTrad from '../../../utils/getTrad';
-
 const DocumentationLink = styled.a`
   color: ${({ theme }) => theme.colors.primary600};
 `;
@@ -21,14 +19,14 @@ const Configuration = ({ config }) => {
       <Flex direction="column" alignItems="stretch" gap={1}>
         <Typography variant="delta" as="h2">
           {formatMessage({
-            id: getTrad('Settings.email.plugin.title.config'),
+            id: 'email.Settings.email.plugin.title.config',
             defaultMessage: 'Configuration',
           })}
         </Typography>
         <Typography>
           {formatMessage(
             {
-              id: getTrad('Settings.email.plugin.text.configuration'),
+              id: 'email.Settings.email.plugin.text.configuration',
               defaultMessage:
                 'The plugin is configured through the {file} file, checkout this {link} for the documentation.',
             },
@@ -41,7 +39,7 @@ const Configuration = ({ config }) => {
                   rel="noopener noreferrer"
                 >
                   {formatMessage({
-                    id: getTrad('link'),
+                    id: 'email.link',
                     defaultMessage: 'Link',
                   })}
                 </DocumentationLink>
@@ -55,11 +53,11 @@ const Configuration = ({ config }) => {
           <TextInput
             name="shipper-email"
             label={formatMessage({
-              id: getTrad('Settings.email.plugin.label.defaultFrom'),
+              id: 'email.Settings.email.plugin.label.defaultFrom',
               defaultMessage: 'Default sender email',
             })}
             placeholder={formatMessage({
-              id: getTrad('Settings.email.plugin.placeholder.defaultFrom'),
+              id: 'email.Settings.email.plugin.placeholder.defaultFrom',
               defaultMessage: "ex: Strapi No-Reply '<'no-reply@strapi.io'>'",
             })}
             disabled
@@ -71,11 +69,11 @@ const Configuration = ({ config }) => {
           <TextInput
             name="response-email"
             label={formatMessage({
-              id: getTrad('Settings.email.plugin.label.defaultReplyTo'),
+              id: 'email.Settings.email.plugin.label.defaultReplyTo',
               defaultMessage: 'Default response email',
             })}
             placeholder={formatMessage({
-              id: getTrad('Settings.email.plugin.placeholder.defaultReplyTo'),
+              id: 'email.Settings.email.plugin.placeholder.defaultReplyTo',
               defaultMessage: `ex: Strapi '<'example@strapi.io'>'`,
             })}
             disabled
@@ -87,7 +85,7 @@ const Configuration = ({ config }) => {
           <Select
             name="email-provider"
             label={formatMessage({
-              id: getTrad('Settings.email.plugin.label.provider'),
+              id: 'email.Settings.email.plugin.label.provider',
               defaultMessage: 'Email provider',
             })}
             disabled

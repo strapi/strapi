@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import * as React from 'react';
 
 import {
   Box,
@@ -7,29 +7,34 @@ import {
   Flex,
   Grid,
   GridItem,
+  HeaderLayout,
   Main,
+  Option,
+  Select,
   TextInput,
   Typography,
-  useNotifyAT,
 } from '@strapi/design-system';
 import {
   CheckPagePermissions,
   getYupInnerErrors,
   LoadingIndicatorPage,
+  SettingsPageTitle,
+  useFetchClient,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
 } from '@strapi/helper-plugin';
 import { Envelop } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import { useQuery, useMutation } from 'react-query';
+import styled from 'styled-components';
 
 import { PERMISSIONS } from '../../constants';
-import getTrad from '../../utils/getTrad';
 import schema from '../../utils/schema';
 
-import Configuration from './components/Configuration';
-import EmailHeader from './components/EmailHeader';
-import { fetchEmailSettings, postEmailTest } from './utils/api';
+const DocumentationLink = styled.a`
+  color: ${({ theme }) => theme.colors.primary600};
+`;
 
 const ProtectedSettingsPage = () => (
   <CheckPagePermissions permissions={PERMISSIONS.settings}>
@@ -41,59 +46,50 @@ const SettingsPage = () => {
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const { lockApp, unlockApp } = useOverlayBlocker();
-  const { notifyStatus } = useNotifyAT();
-  useFocusWhenNavigate();
+  const { get, post } = useFetchClient();
+  const { data, isLoading } = useQuery(['email', 'settings'], async () => {
+    const {
+      data: { config },
+    } = await get('/email/settings');
 
-  const [formErrors, setFormErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [testAddress, setTestAddress] = useState('');
-  const [isTestAddressValid, setIsTestAddressValid] = useState(false);
-  const [config, setConfig] = useState({
-    provider: '',
-    settings: { defaultFrom: '', defaultReplyTo: '', testAddress: '' },
+    return config;
   });
 
-  useEffect(() => {
-    setIsLoading(true);
+  const mutation = useMutation((body) => post('/email/test', body), {
+    onError() {
+      toggleNotification({
+        type: 'warning',
+        message: formatMessage(
+          {
+            id: 'email.Settings.email.plugin.notification.test.error',
+            defaultMessage: 'Failed to send a test mail to {to}',
+          },
+          { to: testAddress }
+        ),
+      });
+    },
 
-    fetchEmailSettings()
-      .then((config) => {
-        notifyStatus(
-          formatMessage({
-            id: getTrad('Settings.email.plugin.notification.data.loaded'),
-            defaultMessage: 'Email settings data has been loaded',
-          })
-        );
+    onSuccess() {
+      toggleNotification({
+        type: 'success',
+        message: formatMessage(
+          {
+            id: 'email.Settings.email.plugin.notification.test.success',
+            defaultMessage: 'Email test succeeded, check the {to} mailbox',
+          },
+          { to: testAddress }
+        ),
+      });
+    },
+  });
 
-        setConfig(config);
+  useFocusWhenNavigate();
 
-        const testAddressFound = config?.settings?.testAddress;
+  const [formErrors, setFormErrors] = React.useState({});
+  const [testAddress, setTestAddress] = React.useState('');
+  const [isTestAddressValid, setIsTestAddressValid] = React.useState(false);
 
-        if (testAddressFound) {
-          setTestAddress(testAddressFound);
-        }
-      })
-      .catch(() =>
-        toggleNotification({
-          type: 'warning',
-          message: formatMessage({
-            id: getTrad('Settings.email.plugin.notification.config.error'),
-            defaultMessage: 'Failed to retrieve the email config',
-          }),
-        })
-      )
-      .finally(() => setIsLoading(false));
-  }, [formatMessage, toggleNotification, notifyStatus]);
-
-  useEffect(() => {
-    if (formErrors.email) {
-      const input = document.querySelector('#test-address-input');
-      input.focus();
-    }
-  }, [formErrors]);
-
-  useEffect(() => {
+  React.useEffect(() => {
     schema
       .validate({ email: testAddress }, { abortEarly: false })
       .then(() => setIsTestAddressValid(true))
@@ -109,130 +105,197 @@ const SettingsPage = () => {
 
     try {
       await schema.validate({ email: testAddress }, { abortEarly: false });
-
-      setIsSubmitting(true);
-      lockApp();
-
-      postEmailTest({ to: testAddress })
-        .then(() => {
-          toggleNotification({
-            type: 'success',
-            message: formatMessage(
-              {
-                id: getTrad('Settings.email.plugin.notification.test.success'),
-                defaultMessage: 'Email test succeeded, check the {to} mailbox',
-              },
-              { to: testAddress }
-            ),
-          });
-        })
-        .catch(() => {
-          toggleNotification({
-            type: 'warning',
-            message: formatMessage(
-              {
-                id: getTrad('Settings.email.plugin.notification.test.error'),
-                defaultMessage: 'Failed to send a test mail to {to}',
-              },
-              { to: testAddress }
-            ),
-          });
-        })
-        .finally(() => {
-          setIsSubmitting(false);
-          unlockApp();
-        });
     } catch (error) {
       setFormErrors(getYupInnerErrors(error));
     }
+
+    lockApp();
+
+    mutation.mutate({ to: testAddress });
+
+    unlockApp();
   };
 
-  if (isLoading) {
-    return (
-      <Main labelledBy="title" aria-busy="true">
-        <EmailHeader />
-        <ContentLayout>
-          <LoadingIndicatorPage />
-        </ContentLayout>
-      </Main>
-    );
-  }
-
   return (
-    <Main labelledBy="title" aria-busy={isSubmitting}>
-      <EmailHeader />
+    <Main labelledBy="title" aria-busy={isLoading || mutation.isLoading}>
+      <SettingsPageTitle
+        name={formatMessage({
+          id: 'email.Settings.email.plugin.title',
+          defaultMessage: 'Configuration',
+        })}
+      />
+
+      <HeaderLayout
+        id="title"
+        title={formatMessage({
+          id: 'email.Settings.email.plugin.title',
+          defaultMessage: 'Configuration',
+        })}
+        subtitle={formatMessage({
+          id: 'email.Settings.email.plugin.subTitle',
+          defaultMessage: 'Test the settings for the Email plugin',
+        })}
+      />
+
       <ContentLayout>
-        <form onSubmit={handleSubmit}>
-          <Flex direction="column" alignItems="stretch" gap={7}>
-            <Box
-              background="neutral0"
-              hasRadius
-              shadow="filterShadow"
-              paddingTop={6}
-              paddingBottom={6}
-              paddingLeft={7}
-              paddingRight={7}
-            >
-              <Configuration config={config} />
-            </Box>
-            <Box
-              background="neutral0"
-              hasRadius
-              shadow="filterShadow"
-              paddingTop={6}
-              paddingBottom={6}
-              paddingLeft={7}
-              paddingRight={7}
-            >
-              <Flex direction="column" alignItems="stretch" gap={4}>
-                <Typography variant="delta" as="h2">
-                  {formatMessage({
-                    id: getTrad('Settings.email.plugin.title.test'),
-                    defaultMessage: 'Test email delivery',
-                  })}
-                </Typography>
-                <Grid gap={5} alignItems="end">
-                  <GridItem col={6} s={12}>
-                    <TextInput
-                      id="test-address-input"
-                      name="test-address"
-                      onChange={handleChange}
-                      label={formatMessage({
-                        id: getTrad('Settings.email.plugin.label.testAddress'),
-                        defaultMessage: 'Recipient email',
-                      })}
-                      value={testAddress}
-                      error={
-                        formErrors.email?.id &&
-                        formatMessage({
-                          id: getTrad(`${formErrors.email?.id}`),
-                          defaultMessage: 'This is an invalid email',
-                        })
-                      }
-                      placeholder={formatMessage({
-                        id: getTrad('Settings.email.plugin.placeholder.testAddress'),
-                        defaultMessage: 'ex: developer@example.com',
-                      })}
-                    />
-                  </GridItem>
-                  <GridItem col={7} s={12}>
-                    <Button
-                      loading={isSubmitting}
-                      disabled={!isTestAddressValid}
-                      type="submit"
-                      startIcon={<Envelop />}
-                    >
+        {isLoading || mutation.isLoading ? (
+          <LoadingIndicatorPage />
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <Flex direction="column" alignItems="stretch" gap={7}>
+              <Box
+                background="neutral0"
+                hasRadius
+                shadow="filterShadow"
+                paddingTop={6}
+                paddingBottom={6}
+                paddingLeft={7}
+                paddingRight={7}
+              >
+                <Flex direction="column" alignItems="stretch" gap={4}>
+                  <Flex direction="column" alignItems="stretch" gap={1}>
+                    <Typography variant="delta" as="h2">
                       {formatMessage({
-                        id: getTrad('Settings.email.plugin.button.test-email'),
-                        defaultMessage: 'Send test email',
+                        id: 'email.Settings.email.plugin.title.config',
+                        defaultMessage: 'Configuration',
                       })}
-                    </Button>
-                  </GridItem>
-                </Grid>
-              </Flex>
-            </Box>
-          </Flex>
-        </form>
+                    </Typography>
+                    <Typography>
+                      {formatMessage(
+                        {
+                          id: 'email.Settings.email.plugin.text.configuration',
+                          defaultMessage:
+                            'The plugin is configured through the {file} file, checkout this {link} for the documentation.',
+                        },
+                        {
+                          file: './config/plugins.js',
+                          link: (
+                            <DocumentationLink
+                              href="https://docs.strapi.io/dev-docs/plugins/email"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {formatMessage({
+                                id: 'email.link',
+                                defaultMessage: 'Link',
+                              })}
+                            </DocumentationLink>
+                          ),
+                        }
+                      )}
+                    </Typography>
+                  </Flex>
+
+                  <Grid gap={5}>
+                    <GridItem col={6} s={12}>
+                      <TextInput
+                        name="shipper-email"
+                        label={formatMessage({
+                          id: 'email.Settings.email.plugin.label.defaultFrom',
+                          defaultMessage: 'Default sender email',
+                        })}
+                        placeholder={formatMessage({
+                          id: 'email.Settings.email.plugin.placeholder.defaultFrom',
+                          defaultMessage: "ex: Strapi No-Reply '<'no-reply@strapi.io'>'",
+                        })}
+                        disabled
+                        value={data.settings.defaultFrom}
+                      />
+                    </GridItem>
+
+                    <GridItem col={6} s={12}>
+                      <TextInput
+                        name="response-email"
+                        label={formatMessage({
+                          id: 'email.Settings.email.plugin.label.defaultReplyTo',
+                          defaultMessage: 'Default response email',
+                        })}
+                        placeholder={formatMessage({
+                          id: 'email.Settings.email.plugin.placeholder.defaultReplyTo',
+                          defaultMessage: `ex: Strapi '<'example@strapi.io'>'`,
+                        })}
+                        disabled
+                        value={data.settings.defaultReplyTo}
+                      />
+                    </GridItem>
+
+                    <GridItem col={6} s={12}>
+                      <Select
+                        name="email-provider"
+                        label={formatMessage({
+                          id: 'email.Settings.email.plugin.label.provider',
+                          defaultMessage: 'Email provider',
+                        })}
+                        disabled
+                        value={data.provider}
+                      >
+                        <Option value={data.provider}>{data.provider}</Option>
+                      </Select>
+                    </GridItem>
+                  </Grid>
+                </Flex>
+              </Box>
+
+              <Box
+                background="neutral0"
+                hasRadius
+                shadow="filterShadow"
+                paddingTop={6}
+                paddingBottom={6}
+                paddingLeft={7}
+                paddingRight={7}
+              >
+                <Flex direction="column" alignItems="stretch" gap={4}>
+                  <Typography variant="delta" as="h2">
+                    {formatMessage({
+                      id: 'email.Settings.email.plugin.title.test',
+                      defaultMessage: 'Test email delivery',
+                    })}
+                  </Typography>
+
+                  <Grid gap={5} alignItems="end">
+                    <GridItem col={6} s={12}>
+                      <TextInput
+                        id="test-address-input"
+                        name="test-address"
+                        onChange={handleChange}
+                        label={formatMessage({
+                          id: 'email.Settings.email.plugin.label.testAddress',
+                          defaultMessage: 'Recipient email',
+                        })}
+                        value={testAddress}
+                        error={
+                          formErrors.email?.id &&
+                          formatMessage({
+                            id: `email.${formErrors.email?.id}`,
+                            defaultMessage: 'This is an invalid email',
+                          })
+                        }
+                        placeholder={formatMessage({
+                          id: 'email.Settings.email.plugin.placeholder.testAddress',
+                          defaultMessage: 'ex: developer@example.com',
+                        })}
+                      />
+                    </GridItem>
+                    <GridItem col={7} s={12}>
+                      <Button
+                        loading={mutation.isLoading}
+                        disabled={!isTestAddressValid}
+                        type="submit"
+                        startIcon={<Envelop />}
+                      >
+                        {formatMessage({
+                          id: 'email.Settings.email.plugin.button.test-email',
+                          defaultMessage: 'Send test email',
+                        })}
+                      </Button>
+                    </GridItem>
+                  </Grid>
+                </Flex>
+              </Box>
+            </Flex>
+          </form>
+        )}
       </ContentLayout>
     </Main>
   );
