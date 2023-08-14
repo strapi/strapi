@@ -9,7 +9,7 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter, Route } from 'react-router-dom';
 
-import RoleListPage from '../index';
+import { RolesListPage } from '../index';
 
 jest.mock('@strapi/design-system', () => ({
   ...jest.requireActual('@strapi/design-system'),
@@ -30,7 +30,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 let testLocation;
 
 const render = () => ({
-  ...renderRTL(<RoleListPage />, {
+  ...renderRTL(<RolesListPage />, {
     wrapper({ children }) {
       const client = new QueryClient({
         defaultOptions: {

@@ -13,6 +13,7 @@ import {
   Typography,
 } from '@strapi/design-system';
 import {
+  CheckPagePermissions,
   Form,
   SettingsPageTitle,
   useFetchClient,
@@ -27,6 +28,7 @@ import { useMutation } from 'react-query';
 import { useHistory } from 'react-router-dom';
 
 import UsersPermissions from '../../../components/UsersPermissions';
+import { PERMISSIONS } from '../../../constants';
 import getTrad from '../../../utils/getTrad';
 import { createRoleSchema } from '../constants';
 import { usePlugins } from '../hooks/usePlugins';
@@ -180,3 +182,9 @@ export const CreatePage = () => {
     </Main>
   );
 };
+
+export const ProtectedRolesCreatePage = () => (
+  <CheckPagePermissions permissions={PERMISSIONS.createRole}>
+    <CreatePage />
+  </CheckPagePermissions>
+);

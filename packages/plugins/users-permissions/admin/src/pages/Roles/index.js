@@ -5,9 +5,9 @@ import { Route, Switch } from 'react-router-dom';
 
 import { PERMISSIONS } from '../../constants';
 
-import { ProtectedRolesCreatePage } from './components/ProtectedCreatePage';
-import { ProtectedRolesEditPage } from './components/ProtectedEditPage';
-import { ProtectedRolesListPage } from './components/ProtectedListPage';
+import { ProtectedRolesCreatePage } from './pages/CreatePage';
+import { ProtectedRolesEditPage } from './pages/EditPage';
+import { ProtectedRolesListPage } from './pages/ListPage';
 
 const Roles = () => {
   return (

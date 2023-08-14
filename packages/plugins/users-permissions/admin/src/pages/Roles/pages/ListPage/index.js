@@ -16,6 +16,7 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import {
+  CheckPagePermissions,
   CheckPermissions,
   ConfirmDialog,
   EmptyStateLayout,
@@ -42,7 +43,7 @@ import { getTrad } from '../../../../utils';
 import TableBody from './components/TableBody';
 import { deleteData, fetchData } from './utils/api';
 
-const RoleListPage = () => {
+export const RolesListPage = () => {
   const { trackUsage } = useTracking();
   const { formatMessage, locale } = useIntl();
   const { push } = useHistory();
@@ -234,4 +235,10 @@ const RoleListPage = () => {
   );
 };
 
-export default RoleListPage;
+export const ProtectedRolesListPage = () => {
+  return (
+    <CheckPagePermissions permissions={PERMISSIONS.accessRoles}>
+      <RolesListPage />
+    </CheckPagePermissions>
+  );
+};

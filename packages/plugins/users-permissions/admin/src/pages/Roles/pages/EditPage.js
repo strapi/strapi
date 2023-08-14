@@ -13,6 +13,7 @@ import {
   Grid,
 } from '@strapi/design-system';
 import {
+  CheckPagePermissions,
   useOverlayBlocker,
   SettingsPageTitle,
   LoadingIndicatorPage,
@@ -29,6 +30,7 @@ import { useQuery, useMutation } from 'react-query';
 import { useRouteMatch } from 'react-router-dom';
 
 import UsersPermissions from '../../../components/UsersPermissions';
+import { PERMISSIONS } from '../../../constants';
 import getTrad from '../../../utils/getTrad';
 import { createRoleSchema } from '../constants';
 import { usePlugins } from '../hooks/usePlugins';
@@ -201,3 +203,9 @@ export const EditPage = () => {
     </Main>
   );
 };
+
+export const ProtectedRolesEditPage = () => (
+  <CheckPagePermissions permissions={PERMISSIONS.updateRole}>
+    <EditPage />
+  </CheckPagePermissions>
+);
