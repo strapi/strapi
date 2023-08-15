@@ -2,6 +2,7 @@
 
 const { cloneDeep } = require('lodash/fp');
 const { mapAsync } = require('@strapi/utils');
+const strapi = require('@strapi/strapi');
 const { FOLDER_MODEL_UID, FILE_MODEL_UID } = require('../constants');
 const { getService } = require('../utils');
 

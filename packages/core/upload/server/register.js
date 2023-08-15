@@ -5,6 +5,7 @@ const {
   file: { kbytesToBytes, bytesToHumanReadable },
 } = require('@strapi/utils');
 const _ = require('lodash');
+const strapi = require('@strapi/strapi');
 const registerUploadMiddleware = require('./middlewares/upload');
 const spec = require('../documentation/content-api.json');
 
@@ -12,7 +13,7 @@ const spec = require('../documentation/content-api.json');
  * Register upload plugin
  * @param {{ strapi: import('@strapi/strapi').Strapi }}
  */
-module.exports = async ({ strapi }) => {
+module.exports = async () => {
   strapi.plugin('upload').provider = createProvider(strapi.config.get('plugin.upload', {}));
 
   await registerUploadMiddleware({ strapi });

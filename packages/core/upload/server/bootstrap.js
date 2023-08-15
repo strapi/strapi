@@ -1,9 +1,10 @@
 'use strict';
 
+const strapi = require('@strapi/strapi');
 const { getService } = require('./utils');
 const { ALLOWED_SORT_STRINGS, ALLOWED_WEBHOOK_EVENTS } = require('./constants');
 
-module.exports = async ({ strapi }) => {
+module.exports = async () => {
   const defaultConfig = {
     settings: {
       sizeOptimization: true,

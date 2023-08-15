@@ -576,7 +576,7 @@ let singleton;
 
 const initializer = (options) => {
   singleton = new Strapi(options);
-  global.strapi = singleton;
+  global.strapi = singleton; // TODO remove this line when we are no longer using global.strapi anywhere in the codebase
 
   return singleton;
 };
@@ -599,6 +599,6 @@ module.exports = new Proxy(initializer, {
       throw new Error('Strapi is not initialized');
     }
 
-    return Reflect.get(singleton, prop, singleton);
+    return Reflect.get(singleton, prop);
   },
 });

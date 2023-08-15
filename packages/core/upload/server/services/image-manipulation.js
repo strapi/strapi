@@ -10,6 +10,7 @@ const sharp = require('sharp');
 const {
   file: { bytesToKbytes, writableDiscardStream },
 } = require('@strapi/utils');
+const strapi = require('@strapi/strapi');
 const { getService } = require('../utils');
 
 const FORMATS_TO_RESIZE = ['jpeg', 'png', 'webp', 'tiff', 'gif'];

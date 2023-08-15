@@ -4,6 +4,8 @@ const path = require('path');
 const os = require('os');
 const mime = require('mime-types');
 const fse = require('fs-extra');
+const strapi = require('@strapi/strapi');
+
 const {
   file: { getStreamSize },
 } = require('@strapi/utils');
@@ -19,7 +21,7 @@ const FILE_INFO_INPUT_TYPE_NAME = 'FileInfoInput';
 /**
  * @param {{ strapi: import('@strapi/strapi').Strapi }}
  */
-module.exports = ({ strapi }) => {
+module.exports = () => {
   const { service: getGraphQLService, config: graphQLConfig } = strapi.plugin('graphql');
   const { service: getUploadService } = strapi.plugin('upload');
 
