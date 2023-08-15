@@ -20,16 +20,24 @@ import createRoute from '../../utils/createRoute';
 import { SET_APP_RUNTIME_STATUS } from '../App/constants';
 
 const CM = React.lazy(() =>
-  import(/* webpackChunkName: "content-manager" */ '../../content-manager/pages/App')
+  import(/* webpackChunkName: "content-manager" */ '../../content-manager/pages/App').then(
+    (module) => ({ default: module.ContentManger })
+  )
 );
 const GuidedTourModal = React.lazy(() =>
   import(/* webpackChunkName: "Admin_GuidedTourModal" */ '../../components/GuidedTour/Modal').then(
     (module) => ({ default: module.GuidedTourModal })
   )
 );
-const HomePage = React.lazy(() => import(/* webpackChunkName: "Admin_homePage" */ '../HomePage'));
+const HomePage = React.lazy(() =>
+  import(/* webpackChunkName: "Admin_homePage" */ '../HomePage').then((module) => ({
+    default: module.HomePage,
+  }))
+);
 const InstalledPluginsPage = React.lazy(() =>
-  import(/* webpackChunkName: "Admin_pluginsPage" */ '../InstalledPluginsPage')
+  import(/* webpackChunkName: "Admin_pluginsPage" */ '../InstalledPluginsPage').then((module) => ({
+    default: module.PluginsPage,
+  }))
 );
 const MarketplacePage = React.lazy(() =>
   import(/* webpackChunkName: "Admin_marketplace" */ '../MarketplacePage')
@@ -40,7 +48,9 @@ const Onboarding = React.lazy(() =>
   }))
 );
 const ProfilePage = React.lazy(() =>
-  import(/* webpackChunkName: "Admin_profilePage" */ '../ProfilePage')
+  import(/* webpackChunkName: "Admin_profilePage" */ '../ProfilePage').then((module) => ({
+    default: module.ProfilePage,
+  }))
 );
 const SettingsPage = React.lazy(() =>
   import(/* webpackChunkName: "Admin_settingsPage" */ '../SettingsPage').then((module) => ({

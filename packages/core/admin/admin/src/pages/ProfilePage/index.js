@@ -35,7 +35,7 @@ import Preferences from './components/Preferences';
 import UserInfo from './components/UserInfo';
 import schema from './utils/schema';
 
-const ProfilePage = () => {
+export const ProfilePage = () => {
   const { changeLocale, localeNames } = useLocalesProvider();
   const { setUserDisplayName } = useAppInfo();
   const queryClient = useQueryClient();
@@ -231,5 +231,3 @@ const ProfilePage = () => {
     </Main>
   );
 };
-
-export default ProfilePage;
