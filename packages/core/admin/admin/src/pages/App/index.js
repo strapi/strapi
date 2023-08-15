@@ -52,6 +52,12 @@ const NotFoundPage = React.lazy(() =>
   }))
 );
 
+const InternalErrorPage = React.lazy(() =>
+  import(/* webpackChunkName: "Admin_InternalErrorPage" */ '../InternalErrorPage').then(
+    (module) => ({ default: module.InternalErrorPage })
+  )
+);
+
 export function App() {
   const { updateProjectSettings } = useConfigurations();
   const { formatMessage } = useIntl();
@@ -235,6 +241,8 @@ export function App() {
           />
           <PrivateRoute path="/usecase" component={UseCasePage} />
           <PrivateRoute path="/" component={AuthenticatedApp} />
+          <Route path="/404" component={NotFoundPage} />
+          <Route path="/500" component={InternalErrorPage} />
           <Route path="" component={NotFoundPage} />
         </Switch>
       </TrackingProvider>

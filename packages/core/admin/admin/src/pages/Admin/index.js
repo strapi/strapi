@@ -34,16 +34,6 @@ const InstalledPluginsPage = React.lazy(() =>
 const MarketplacePage = React.lazy(() =>
   import(/* webpackChunkName: "Admin_marketplace" */ '../MarketplacePage')
 );
-const NotFoundPage = React.lazy(() =>
-  import(/* webpackChunkName: "Admin_NotFoundPage" */ '../NotFoundPage').then((module) => ({
-    default: module.NotFoundPage,
-  }))
-);
-const InternalErrorPage = React.lazy(() =>
-  import(/* webpackChunkName: "Admin_InternalErrorPage" */ '../InternalErrorPage').then(
-    (module) => ({ default: module.InternalErrorPage })
-  )
-);
 const Onboarding = React.lazy(() =>
   import(/* webpackChunkName: "Admin_Onboarding" */ './Onboarding').then((module) => ({
     default: module.Onboarding,
@@ -101,14 +91,8 @@ export const Admin = () => {
               {routes}
               <Route path="/settings/:settingId" component={SettingsPage} />
               <Route path="/settings" component={SettingsPage} exact />
-              <Route path="/marketplace">
-                <MarketplacePage />
-              </Route>
-              <Route path="/list-plugins" exact>
-                <InstalledPluginsPage />
-              </Route>
-              <Route path="/404" component={NotFoundPage} />
-              <Route path="/500" component={InternalErrorPage} />
+              <Route path="/marketplace" component={MarketplacePage} />
+              <Route path="/list-plugins" component={InstalledPluginsPage} exact />
             </Switch>
           </React.Suspense>
         </Box>
