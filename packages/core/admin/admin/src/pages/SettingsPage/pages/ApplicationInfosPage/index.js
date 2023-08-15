@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import * as React from 'react';
 
 import {
   Button,
@@ -14,8 +14,11 @@ import {
   Typography,
 } from '@strapi/design-system';
 import {
+  prefixFileUrlWithBackendUrl,
   SettingsPageTitle,
+  useAPIErrorHandler,
   useAppInfo,
+  useFetchClient,
   useFocusWhenNavigate,
   useNotification,
   useRBAC,
@@ -23,7 +26,7 @@ import {
 } from '@strapi/helper-plugin';
 import { Check, ExternalLink } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { useMutation, useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
 
 import { useConfigurations } from '../../../../hooks';
@@ -31,18 +34,20 @@ import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../App/selectors';
 
 import CustomizationInfos from './components/CustomizationInfos';
-import { fetchProjectSettings, postProjectSettings } from './utils/api';
 import getFormData from './utils/getFormData';
 
 const AdminSeatInfoCE = () => null;
 
 const ApplicationInfosPage = () => {
-  const inputsRef = useRef();
+  const inputsRef = React.useRef();
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-  const queryClient = useQueryClient();
-  useFocusWhenNavigate();
+  const { get, post } = useFetchClient();
+  const { updateProjectSettings } = useConfigurations();
+  const permissions = useSelector(selectAdminPermissions);
+  const { formatAPIError } = useAPIErrorHandler();
+
   const {
     communityEdition,
     latestStrapiReleaseTag,
@@ -50,8 +55,7 @@ const ApplicationInfosPage = () => {
     shouldUpdateStrapi,
     strapiVersion,
   } = useAppInfo();
-  const { updateProjectSettings } = useConfigurations();
-  const permissions = useSelector(selectAdminPermissions);
+
   const AdminSeatInfo = useEnterprise(
     AdminSeatInfoCE,
     async () =>
@@ -65,38 +69,68 @@ const ApplicationInfosPage = () => {
   const {
     allowedActions: { canRead, canUpdate },
   } = useRBAC(permissions.settings['project-settings']);
-  const canSubmit = canRead && canUpdate;
 
-  const { data, isLoading } = useQuery('project-settings', fetchProjectSettings, {
-    enabled: canRead,
-  });
+  useFocusWhenNavigate();
 
-  const submitMutation = useMutation((body) => postProjectSettings(body), {
-    async onSuccess({ menuLogo, authLogo }) {
-      await queryClient.invalidateQueries('project-settings', { refetchActive: true });
-      updateProjectSettings({ menuLogo: menuLogo?.url, authLogo: authLogo?.url });
+  const { data, isLoading } = useQuery(
+    ['project-settings'],
+    async () => {
+      const { data } = await get('/admin/project-settings');
+
+      return data;
     },
-  });
+    {
+      cacheTime: 0,
+      enabled: canRead,
+      select(data) {
+        return {
+          ...data,
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+          authLogo: data.authLogo
+            ? {
+                ...data.authLogo,
+                url: prefixFileUrlWithBackendUrl(data.authLogo.url),
+              }
+            : data.authLogo,
 
-    if (!canUpdate) return;
+          menuLogo: data.menuLogo
+            ? {
+                ...data.menuLogo,
+                url: prefixFileUrlWithBackendUrl(data.menuLogo.url),
+              }
+            : data.menuLogo,
+        };
+      },
+    }
+  );
 
-    const inputValues = inputsRef.current.getValues();
-    const formData = getFormData(inputValues);
+  const submitMutation = useMutation(
+    (body) =>
+      post('/admin/project-settings', body, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }),
+    {
+      onError(error) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(error),
+        });
+      },
 
-    submitMutation.mutate(formData, {
-      onSuccess() {
-        const { menuLogo, authLogo } = inputValues;
+      async onSuccess(data) {
+        const { menuLogo, authLogo } = data;
 
-        if (menuLogo.rawFile) {
+        updateProjectSettings({ menuLogo: menuLogo?.url, authLogo: authLogo?.url });
+
+        if (menuLogo?.rawFile) {
           trackUsage('didChangeLogo', {
             logo: 'menu',
           });
         }
 
-        if (authLogo.rawFile) {
+        if (authLogo?.rawFile) {
           trackUsage('didChangeLogo', {
             logo: 'auth',
           });
@@ -107,13 +141,13 @@ const ApplicationInfosPage = () => {
           message: formatMessage({ id: 'app', defaultMessage: 'Saved' }),
         });
       },
-      onError() {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error', defaultMessage: 'An error occurred' },
-        });
-      },
-    });
+    }
+  );
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    submitMutation.mutate(getFormData(inputsRef.current.getValues()));
   };
 
   // block rendering until the EE component is fully loaded
@@ -145,7 +179,7 @@ const ApplicationInfosPage = () => {
                 defaultMessage: 'Administration panel’s global information',
               })}
               primaryAction={
-                canSubmit && (
+                canUpdate && (
                   <Button type="submit" startIcon={<Check />}>
                     {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
                   </Button>
