@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { TextEncoder } from 'util';
 
-import hashAdminUserEmail, { utils } from '../uniqueAdminHash';
+import { hashAdminUserEmail, utils } from '../uniqueAdminHash';
 
 const testHashValue = '8544bf5b5389959462912699664f03ed664a4b6d24f03b13bdbc362efc147873';
 

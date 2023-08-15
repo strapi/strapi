@@ -10,7 +10,7 @@ export const utils = {
   },
 };
 
-export default async function hashAdminUserEmail(payload) {
+export async function hashAdminUserEmail(payload) {
   if (!payload) {
     return null;
   }
