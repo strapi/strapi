@@ -3,8 +3,7 @@ import { useEffect } from 'react';
 import { useNotification, useFetchClient, useAPIErrorHandler } from '@strapi/helper-plugin';
 import { useQueries } from 'react-query';
 
-import pluginId from '../pluginId';
-import { cleanPermissions, getTrad } from '../utils';
+import { cleanPermissions, getTrad } from '../../../utils';
 
 export const usePlugins = () => {
   const toggleNotification = useNotification();
@@ -21,19 +20,23 @@ export const usePlugins = () => {
     { data: routes, isLoading: isLoadingRoutes, error: routesError, refetch: refetchRoutes },
   ] = useQueries([
     {
-      queryKey: [pluginId, 'permissions'],
+      queryKey: ['users-permissions', 'permissions'],
       async queryFn() {
-        const res = await get(`/${pluginId}/permissions`);
+        const {
+          data: { permissions },
+        } = await get(`/users-permissions/permissions`);
 
-        return res.data.permissions;
+        return permissions;
       },
     },
     {
-      queryKey: [pluginId, 'routes'],
+      queryKey: ['users-permissions', 'routes'],
       async queryFn() {
-        const res = await get(`/${pluginId}/routes`);
+        const {
+          data: { routes },
+        } = await get(`/users-permissions/routes`);
 
-        return res.data.routes;
+        return routes;
       },
     },
   ]);
@@ -63,8 +66,12 @@ export const usePlugins = () => {
   const isLoading = isLoadingPermissions || isLoadingRoutes;
 
   return {
+    // TODO: these return values need to be memoized, otherwise
+    // they will create infinite rendering loops when used as
+    // effect dependencies
     permissions: permissions ? cleanPermissions(permissions) : {},
     routes: routes ?? {},
+
     getData: refetchQueries,
     isLoading,
   };

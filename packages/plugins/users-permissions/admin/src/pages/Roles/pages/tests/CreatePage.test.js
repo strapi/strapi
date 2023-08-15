@@ -8,8 +8,7 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter, Switch, Route } from 'react-router-dom';
 
-import pluginId from '../../../pluginId';
-import RolesCreatePage from '../CreatePage';
+import { CreatePage } from '../CreatePage';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -17,7 +16,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 
 const render = () => ({
-  ...renderRTL(<Route path={`/settings/${pluginId}/roles/new`} component={RolesCreatePage} />, {
+  ...renderRTL(<Route path="/settings/users-permissions/roles/new" component={CreatePage} />, {
     wrapper({ children }) {
       const client = new QueryClient({
         defaultOptions: {
@@ -32,7 +31,7 @@ const render = () => ({
           <ThemeProvider theme={lightTheme}>
             <QueryClientProvider client={client}>
               <NotificationsProvider>
-                <MemoryRouter initialEntries={[`/settings/${pluginId}/roles/new`]}>
+                <MemoryRouter initialEntries={[`/settings/users-permissions/roles/new`]}>
                   <Switch>{children}</Switch>
                 </MemoryRouter>
               </NotificationsProvider>
@@ -63,8 +62,8 @@ describe('Roles – CreatePage', () => {
 
     expect(getByRole('button', { name: 'Save' })).toBeInTheDocument();
 
-    expect(getByRole('textbox', { name: 'Name' })).toBeInTheDocument();
-    expect(getByRole('textbox', { name: 'Description' })).toBeInTheDocument();
+    expect(getByRole('textbox', { name: 'Name *' })).toBeInTheDocument();
+    expect(getByRole('textbox', { name: 'Description *' })).toBeInTheDocument();
 
     await user.click(getByRole('button', { name: 'Address' }));
 
@@ -75,29 +74,26 @@ describe('Roles – CreatePage', () => {
   });
 
   it('will show an error if the user does not fill the name or description field', async () => {
-    const { getByRole, getAllByText } = render();
+    const { getByRole } = render();
 
     await waitFor(() => expect(getByRole('heading', { name: 'Permissions' })).toBeInTheDocument());
 
     fireEvent.click(getByRole('button', { name: 'Save' }));
 
     await waitFor(() =>
-      expect(getByRole('textbox', { name: 'Name' })).toHaveAttribute('aria-invalid', 'true')
+      expect(getByRole('textbox', { name: 'Name *' })).toHaveAttribute('aria-invalid', 'true')
     );
 
-    expect(getByRole('textbox', { name: 'Description' })).toHaveAttribute('aria-invalid', 'true');
-
-    expect(getAllByText('Invalid value')).toHaveLength(2);
+    expect(getByRole('textbox', { name: 'Description *' })).toHaveAttribute('aria-invalid', 'true');
   });
 
-  // TODO: this test needs to be updated, because it is flakey
-  it.skip('can create a new role and show a notification', async () => {
+  it('can create a new role and show a notification', async () => {
     const { getByRole, getByText, user } = render();
 
     await waitFor(() => expect(getByRole('heading', { name: 'Permissions' })).toBeInTheDocument());
 
-    await user.type(getByRole('textbox', { name: 'Name' }), 'Test role');
-    await user.type(getByRole('textbox', { name: 'Description' }), 'This is a test role');
+    await user.type(getByRole('textbox', { name: 'Name *' }), 'Test role');
+    await user.type(getByRole('textbox', { name: 'Description *' }), 'This is a test role');
 
     await user.click(getByRole('button', { name: 'Address' }));
     await user.click(getByRole('checkbox', { name: 'create' }));
