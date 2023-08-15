@@ -73,6 +73,23 @@ const layout = [
   },
   {
     intlLabel: {
+      id: getTrad('EditForm.inputToggle.label.multi-factor-authentication'),
+      defaultMessage: 'Enable multi-factor authentication',
+    },
+    description: {
+      id: getTrad('EditForm.inputToggle.description.multi-factor-authentication'),
+      defaultMessage:
+          'When enabled (ON), users will receive 6 digit code to their email for two step verification.',
+    },
+    name: 'multi_factor_authentication',
+    type: 'bool',
+    size: {
+      col: 12,
+      xs: 12,
+    },
+  },
+  {
+    intlLabel: {
       id: getTrad('EditForm.inputToggle.label.email-confirmation-redirection'),
       defaultMessage: 'Redirection url',
     },

@@ -90,6 +90,7 @@ const initAdvancedOptions = async (pluginStore) => {
       email_confirmation: false,
       email_reset_password: null,
       email_confirmation_redirection: null,
+      multi_factor_authentication: false,
       default_role: 'authenticated',
     };
 

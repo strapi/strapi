@@ -42,6 +42,9 @@ module.exports = {
         const sanitizedUser = getService('user').sanitizeUser(user);
 
         // TODO LK: Check if the MFA is turned on
+        // const advanced = await strapi.store({ type: 'plugin', name: 'users-permissions', key: 'advanced' }).get();
+        // if (advanced.multi_factor_authentication)
+
         if (true) {
           // Generate 6 digit code
           const verificationCode = getService('token').createVerificationToken();

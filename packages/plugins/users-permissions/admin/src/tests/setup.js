@@ -177,6 +177,7 @@ const handlers = [
           email_confirmation_redirection: '',
           email_reset_password: 'https://cat-bounce.com/',
           unique_email: false,
+          multi_factor_authentication: false
         },
       })
     );
