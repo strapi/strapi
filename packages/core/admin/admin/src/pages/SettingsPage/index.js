@@ -31,16 +31,14 @@ export function SettingsPage() {
   );
 
   const adminRoutes = routes
-    .map(({ to, Component, exact }) => createRoute(Component, to, exact))
     .filter(
       (route, index, refArray) => refArray.findIndex((obj) => obj.key === route.key) === index
-    );
+    )
+    .map(({ to, Component, exact }) => createRoute(Component, to, exact));
 
-  const pluginsRoutes = Object.values(settings).flatMap((section) => {
-    const { links } = section;
-
-    return links.map((link) => createRoute(link.Component, link.to, link.exact || false));
-  });
+  const pluginsRoutes = Object.values(settings).flatMap((section) =>
+    section.links.map((link) => createRoute(link.Component, link.to, link.exact || false))
+  );
 
   // Since the useSettingsMenu hook can make API calls in order to check the links permissions
   // We need to add a loading state to prevent redirecting the user while permissions are being checked
