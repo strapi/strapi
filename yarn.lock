@@ -7312,6 +7312,7 @@ __metadata:
     react: ^18.2.0
     react-dom: ^18.2.0
     react-intl: 6.4.1
+    react-query: 3.39.3
     react-router-dom: 5.3.4
     styled-components: 5.3.3
     yup: 0.32.9

@@ -2335,6 +2335,18 @@ exports[`ISO locales getIsoLocales 1`] = `
     "name": "Vai (Vai, Liberia) (vai-Vaii-LR)",
   },
   {
+    "code": "val",
+    "name": "Valencian (val)",
+  },
+  {
+    "code": "val-ES",
+    "name": "Valencian (Spain) (val-ES)",
+  },
+  {
+    "code": "ca-ES-valencia",
+    "name": "Valencian (Spain Catalan) (ca-ES-valencia)",
+  },
+  {
     "code": "vi",
     "name": "Vietnamese (vi)",
   },
