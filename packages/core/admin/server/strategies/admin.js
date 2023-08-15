@@ -37,7 +37,7 @@ const authenticate = async (ctx) => {
   // ctx.state.userAbility, and remove the assign below
   ctx.state.userAbility = userAbility;
   ctx.state.user = user;
-
+  console.log("core.admin.server.strategies.admin.js - authenticate")
   return {
     authenticated: true,
     credentials: user,

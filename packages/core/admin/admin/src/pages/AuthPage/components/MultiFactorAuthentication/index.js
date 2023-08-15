@@ -35,7 +35,7 @@ const MultiFactorAuthentication = ({ onSubmit, schema }) => {
                   <Box paddingTop={6} paddingBottom={7}>
                     <Typography as="h1" variant="alpha">
                       {formatMessage({
-                        id: 'Auth.form.button.multi-factor-authentication',
+                        id: 'app.containers.AuthPage.MultiFactorAuthentication.title',
                         defaultMessage: 'Two Factor Authentication',
                       })}
                     </Typography>
@@ -70,7 +70,7 @@ const MultiFactorAuthentication = ({ onSubmit, schema }) => {
                     label={formatMessage({ id: 'Auth.form.code.label', defaultMessage: 'Code' })}
                     placeholder={formatMessage({
                       id: 'Auth.form.code.placeholder',
-                      defaultMessage: '',
+                      defaultMessage: 'Enter your 6 digit code from email',
                     })}
                     name="code"
                     required
@@ -98,7 +98,7 @@ MultiFactorAuthentication.defaultProps = {
 MultiFactorAuthentication.propTypes = {
   onSubmit: PropTypes.func,
   schema: PropTypes.shape({
-    type: PropTypes.string.isRequired,
+    type: PropTypes.number.isRequired,
   }).isRequired,
 };
 

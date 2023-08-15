@@ -17,6 +17,7 @@ const {
 module.exports = {
   login: compose([
     (ctx, next) => {
+      console.log("start of login compose")
       return passport.authenticate('local', { session: false }, (err, user, info) => {
         if (err) {
           strapi.eventHub.emit('admin.auth.error', { error: err, provider: 'local' });
@@ -40,18 +41,32 @@ module.exports = {
         ctx.state.user = user;
 
         const sanitizedUser = getService('user').sanitizeUser(user);
-        strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider: 'local' });
 
+        // Generate 6 digit code
+        const verificationCode = Math.floor(100000 + Math.random() * 900000);
+
+        // Store the verification code in the user's session or database for later verification
+        // TODO store in the user object?
+        ctx.state.verificationCode = verificationCode;
+        console.log("verification code generated: ", verificationCode)
+
+        // Redirect the user to the multi-factor-authentication form
+        // ctx.redirect('/admin/auth/multi-factor-authentication');
+
+        strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider: 'local' });
+        console.log("core.admin.server.controllers.authentication.js - Login Form")
         return next();
       })(ctx, next);
     },
     (ctx) => {
+      console.log("this is the code: ", ctx.state.verificationCode)
       const { user } = ctx.state;
 
       ctx.body = {
         data: {
           token: getService('token').createJwtToken(user),
-          user: getService('user').sanitizeUser(ctx.state.user), // TODO: fetch more detailed info
+          user: getService('user').sanitizeUser(ctx.state.user), // TODO: fetch more detailed info,
+          code: ctx.state.verificationCode
         },
       };
     },
@@ -151,6 +166,8 @@ module.exports = {
   },
 
   async multiFactorAuthentication(ctx) {
+    console.log("is this even called???")
+    console.log("code: ", ctx.state.verificationCode)
     const input = ctx.request.body;
 
     await validateMultiFactorAuthenticationInput(input);

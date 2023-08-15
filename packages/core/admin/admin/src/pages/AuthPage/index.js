@@ -89,6 +89,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     const requestURL = `/admin/${endPoint}`;
 
     if (authType === 'login') {
+      console.log("authType === login")
       await loginRequest(e, requestURL, { setSubmitting, setErrors });
     }
 
@@ -101,6 +102,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     }
 
     if (authType === 'multi-factor-authentication') {
+      console.log("authType === multi-factor-authentication")
       await multiFactorAuthenticationRequest(body, requestURL, { setSubmitting, setErrors });
     }
 
@@ -125,9 +127,13 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
 
   const multiFactorAuthenticationRequest = async (body, requestURL, { setSubmitting, setErrors }) => {
     try {
-      await post(requestURL, body, { cancelToken: source.token });
+      console.log("multiFactorAuthenticationRequest MADE")
+      console.log(requestURL)
+      console.log(body)
 
-      push('/auth/multi-factor-authentication-success');
+      // await post(requestURL, body, { cancelToken: source.token });
+      //
+      // redirectToPreviousLocation();
     } catch (err) {
       console.error(err);
 
@@ -138,12 +144,16 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   };
 
   const loginRequest = async (body, requestURL, { setSubmitting, setErrors }) => {
+    console.log("inside login request")
+    console.log("requestURL: ", requestURL)
     try {
+      console.log("-- inside try block")
       const {
         data: {
           data: { token, user },
         },
       } = await post(requestURL, omit(body, fieldsToOmit), { cancelToken: source.token });
+      console.log("-- after async function")
 
       if (user.preferedLanguage) {
         changeLocale(user.preferedLanguage);
@@ -151,8 +161,10 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
 
       auth.setToken(token, body.rememberMe);
       auth.setUserInfo(user, body.rememberMe);
+      // push('/auth/oops');
+      push("/auth/multi-factor-authentication")
 
-      redirectToPreviousLocation();
+      // redirectToPreviousLocation();
     } catch (err) {
       if (err.response) {
         const errorMessage = get(
@@ -275,16 +287,21 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     }
   };
 
+  console.log("auth.getToken(): ", auth.getToken() )
+
+
   // Redirect the user to the login page if
   // the endpoint does not exist or
-  // there is already an admin user oo
-  // the user is already logged in
-  if (!forms[authType] || (hasAdmin && authType === 'register-admin') || auth.getToken()) {
+  // there is already an admin user
+  console.log("authType: ", authType)
+  if (!forms[authType] || (hasAdmin && authType === 'register-admin') || (auth.getToken() && authType!=='multi-factor-authentication')) {
+    console.log("AuthPage/index.js - redirecting to /")
     return <Redirect to="/" />;
   }
 
   // Redirect the user to the register-admin if it is the first user
   if (!hasAdmin && authType !== 'register-admin') {
+    console.log("AuthPage/index.js - redirecting to /auth/register-admin")
     return (
       <Redirect
         to={{
