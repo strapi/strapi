@@ -70,6 +70,7 @@ export function App() {
     }
   );
 
+  // Load authentication routes for CE and EE (SSO)
   const authRoutes = useEnterprise(
     AUTH_ROUTES_CE,
     async () => (await import('../../../../ee/admin/pages/App/constants')).AUTH_ROUTES_EE,
@@ -78,6 +79,7 @@ export function App() {
     }
   );
 
+  // TODO: this should be moved to redux
   const [{ hasAdmin, uuid }, setState] = React.useState({
     hasAdmin: false,
     uuid: undefined,
@@ -165,9 +167,10 @@ export function App() {
     }
   }, [initData, isLoadingInit, updateProjectSettings]);
 
-  // we can't use useTracking here, because `App` is not wrapped in the tracking provider
-  // context. This shouldn't use `useFetchClient`, because it does not talk to the admin
-  // API
+  // We can't use useTracking here, because `App` is not wrapped in the tracking provider
+  // context, which we can't do because the context values contain data that can only be
+  // accessed when a user is logged in.
+  // This should not use `useFetchClient`, because it does not communicate to the admin API.
   React.useEffect(() => {
     async function trackInitEvent() {
       await fetch('https://analytics.strapi.io/api/v2/track', {
@@ -211,8 +214,8 @@ export function App() {
       <SkipToContent>{formatMessage({ id: 'skipToContent' })}</SkipToContent>
       <TrackingProvider value={trackingContext}>
         <Switch>
-          {authRoutes.map(({ to, Component, exact }) => (
-            <Route key={to} path={to} component={Component} exact={exact} />
+          {authRoutes.map(({ path, Component }) => (
+            <Route key={path} path={path} component={Component} exact />
           ))}
 
           <Route

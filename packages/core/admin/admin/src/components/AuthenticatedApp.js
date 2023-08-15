@@ -36,8 +36,9 @@ export const AuthenticatedApp = () => {
   const userInfo = auth.getUserInfo();
   const { get } = useFetchClient();
   // TODO: replace with getDisplayName()
-  const userName = userInfo?.userName ?? getFullName(userInfo.firstname, userInfo.lastname);
-  const [userDisplayName, setUserDisplayName] = React.useState(userName);
+  const [userDisplayName, setUserDisplayName] = React.useState(
+    userInfo?.userName ?? getFullName(userInfo.firstname, userInfo.lastname)
+  );
   const [userId, setUserId] = React.useState(null);
   const { showReleaseNotification } = useConfigurations();
   const { plugins: appPlugins = {} } = useStrapiApp();
@@ -120,6 +121,7 @@ export const AuthenticatedApp = () => {
     },
   ]);
 
+  // Display the guided tour conditionally for super admins in development mode
   React.useEffect(() => {
     if (userRoles) {
       const isUserSuperAdmin = userRoles.find(({ code }) => code === 'strapi-super-admin');
@@ -130,18 +132,17 @@ export const AuthenticatedApp = () => {
     }
   }, [userRoles, appInfos, setGuidedTourVisibility]);
 
+  // Create a hash of the users email adress and use it as ID for tracking
   React.useEffect(() => {
-    const generateUserId = async () => {
+    const generateUserId = async (userInfo) => {
       const userId = await hashAdminUserEmail(userInfo);
       setUserId(userId);
     };
 
-    generateUserId();
+    if (userInfo) {
+      generateUserId(userInfo);
+    }
   }, [userInfo]);
-
-  const hasApluginNotReady = Object.keys(plugins).some(
-    (plugin) => plugins[plugin].isReady === false
-  );
 
   /**
    *
@@ -166,7 +167,15 @@ export const AuthenticatedApp = () => {
    *
    */
 
-  if (isLoadingAppInfos || isLoadingPermissions || hasApluginNotReady) {
+  const hasApluginNotReady = Object.values(plugins).some((plugin) => plugin.isReady === false);
+
+  if (
+    !userDisplayName ||
+    !userId ||
+    isLoadingAppInfos ||
+    isLoadingPermissions ||
+    hasApluginNotReady
+  ) {
     const initializers = Object.keys(plugins).reduce((acc, current) => {
       const InitializerComponent = plugins[current].initializer;
 
@@ -205,6 +214,9 @@ export const AuthenticatedApp = () => {
       {...appInfos}
       userId={userId}
       latestStrapiReleaseTag={tagName}
+      // TODO: setUserDisplayName should not exist and be removed, as it is only used
+      // to update the displayName immediately, in case a user updates their profile.
+      // This information should be derived from the state.
       setUserDisplayName={setUserDisplayName}
       shouldUpdateStrapi={checkLatestStrapiVersion(strapiVersion, tagName)}
       userDisplayName={userDisplayName}
