@@ -24,7 +24,7 @@ import PrivateRoute from '../../components/PrivateRoute';
 import { ADMIN_PERMISSIONS_CE } from '../../constants';
 import useConfigurations from '../../hooks/useConfigurations';
 import { useEnterprise } from '../../hooks/useEnterprise';
-import createRoute from '../../utils/createRoute';
+import { createRoute } from '../../utils/createRoute';
 
 import { ROUTES_CE, SET_ADMIN_PERMISSIONS } from './constants';
 
@@ -202,10 +202,10 @@ export function App() {
   }, [telemetryProperties, uuid]);
 
   const authRoutes = routes
-    .map(({ to, Component, exact }) => createRoute(Component, to, exact))
     .filter(
       (route, index, refArray) => refArray.findIndex((obj) => obj.key === route.key) === index
-    );
+    )
+    .map(({ to, Component, exact }) => createRoute(Component, to, exact));
 
   const trackingContext = React.useMemo(
     () => ({

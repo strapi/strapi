@@ -16,7 +16,7 @@ import { Route, Switch } from 'react-router-dom';
 import LeftMenu from '../../components/LeftMenu';
 import useConfigurations from '../../hooks/useConfigurations';
 import useMenu from '../../hooks/useMenu';
-import createRoute from '../../utils/createRoute';
+import { createRoute } from '../../utils/createRoute';
 import { SET_APP_RUNTIME_STATUS } from '../App/constants';
 
 const CM = React.lazy(() =>

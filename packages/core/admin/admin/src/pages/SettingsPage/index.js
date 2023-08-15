@@ -8,8 +8,7 @@ import { Redirect, Route, Switch, useParams } from 'react-router-dom';
 
 import { useSettingsMenu } from '../../hooks';
 import { useEnterprise } from '../../hooks/useEnterprise';
-// eslint-disable-next-line
-import { createRoute, makeUniqueRoutes } from '../../utils';
+import { createRoute } from '../../utils/createRoute';
 
 import SettingsNav from './components/SettingsNav';
 import { ROUTES_CE } from './constants';
@@ -31,12 +30,11 @@ export function SettingsPage() {
     }
   );
 
-  // Creates the admin routes
-  const adminRoutes = React.useMemo(() => {
-    return makeUniqueRoutes(
-      routes.map(({ to, Component, exact }) => createRoute(Component, to, exact))
+  const adminRoutes = routes
+    .map(({ to, Component, exact }) => createRoute(Component, to, exact))
+    .filter(
+      (route, index, refArray) => refArray.findIndex((obj) => obj.key === route.key) === index
     );
-  }, [routes]);
 
   const pluginsRoutes = Object.values(settings).flatMap((section) => {
     const { links } = section;
