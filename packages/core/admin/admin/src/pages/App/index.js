@@ -214,8 +214,8 @@ export function App() {
       <SkipToContent>{formatMessage({ id: 'skipToContent' })}</SkipToContent>
       <TrackingProvider value={trackingContext}>
         <Switch>
-          {authRoutes.map(({ path, Component }) => (
-            <Route key={path} path={path} component={Component} exact />
+          {authRoutes.map(({ path, component }) => (
+            <Route key={path} path={path} component={component} exact />
           ))}
 
           <Route
