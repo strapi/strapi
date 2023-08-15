@@ -16,7 +16,7 @@ import { useConfigurations } from '../hooks';
 import getFullName from '../utils/getFullName';
 import { hashAdminUserEmail } from '../utils/uniqueAdminHash';
 
-import PluginsInitializer from './PluginsInitializer';
+import { PluginsInitializer } from './PluginsInitializer';
 import RBACProvider from './RBACProvider';
 
 const strapiVersion = packageJSON.version;
