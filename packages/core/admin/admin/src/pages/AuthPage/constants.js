@@ -47,7 +47,7 @@ export const FORMS = {
     fieldsToDisable: [],
     fieldsToOmit: [],
     schema: yup.object().shape({
-      code: yup.number().min(6).max(6).integer().required(),
+      code: yup.number().integer().required(),
     }),
     inputsPrefix: '',
   },

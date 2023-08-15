@@ -61,7 +61,7 @@ const MultiFactorAuthentication = ({ onSubmit, schema }) => {
                       errors.code
                         ? formatMessage({
                           id: errors.code,
-                          defaultMessage: 'This code is invalid.',
+                          defaultMessage: errors.code,
                         })
                         : ''
                     }

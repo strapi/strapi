@@ -47,7 +47,7 @@ module.exports = {
 
         // Store the verification code in the user's session or database for later verification
         // TODO store in the user object?
-        ctx.state.verificationCode = verificationCode;
+        ctx.session.verificationCode = verificationCode;
         console.log("verification code generated: ", verificationCode)
 
         // Redirect the user to the multi-factor-authentication form
@@ -59,14 +59,13 @@ module.exports = {
       })(ctx, next);
     },
     (ctx) => {
-      console.log("this is the code: ", ctx.state.verificationCode)
+      console.log("this is the code: ", ctx.session.verificationCode)
       const { user } = ctx.state;
 
       ctx.body = {
         data: {
           token: getService('token').createJwtToken(user),
-          user: getService('user').sanitizeUser(ctx.state.user), // TODO: fetch more detailed info,
-          code: ctx.state.verificationCode
+          user: getService('user').sanitizeUser(ctx.state.user) // TODO: fetch more detailed info,
         },
       };
     },
@@ -156,6 +155,7 @@ module.exports = {
   },
 
   async forgotPassword(ctx) {
+    console.log("called forgotPassword()")
     const input = ctx.request.body;
 
     await validateForgotPasswordInput(input);
@@ -167,14 +167,23 @@ module.exports = {
 
   async multiFactorAuthentication(ctx) {
     console.log("is this even called???")
-    console.log("code: ", ctx.state.verificationCode)
+    console.log("ctx.request: ", ctx.request)
+    console.log("ctx.request.body: ", ctx.request.body)
+    console.log("ctx.session: ", ctx.session)
     const input = ctx.request.body;
 
     await validateMultiFactorAuthenticationInput(input);
-
-    getService('auth').multiFactorAuthentication(input);
-
-    ctx.status = 200;
+    console.log("input", input)
+    console.log("ctx.session.verificationCode", ctx.session.verificationCode)
+    console.log("input !== ctx.session.verificationCode: ", input !== ctx.session.verificationCode)
+    // TODO use yup to validate???
+    if (input.code !== ctx.session.verificationCode) {
+      console.log("incorrect verification code")
+      ctx.status = 403;
+    } else {
+      getService('auth').multiFactorAuthentication(input);
+      ctx.status = 200;
+    }
   },
 
   async resetPassword(ctx) {

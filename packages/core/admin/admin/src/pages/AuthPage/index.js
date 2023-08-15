@@ -127,13 +127,12 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
 
   const multiFactorAuthenticationRequest = async (body, requestURL, { setSubmitting, setErrors }) => {
     try {
-      console.log("multiFactorAuthenticationRequest MADE")
-      console.log(requestURL)
+      console.log("multiFactorAuthenticationRequest")
+      // body = {code: ######}
       console.log(body)
-
-      // await post(requestURL, body, { cancelToken: source.token });
-      //
-      // redirectToPreviousLocation();
+      const { data } = await post(requestURL, body, { cancelToken: source.token });
+      console.log("success? ", data)
+      redirectToPreviousLocation();
     } catch (err) {
       console.error(err);
 
@@ -150,7 +149,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       console.log("-- inside try block")
       const {
         data: {
-          data: { token, user },
+          data: { token, user, code },
         },
       } = await post(requestURL, omit(body, fieldsToOmit), { cancelToken: source.token });
       console.log("-- after async function")
@@ -161,10 +160,8 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
 
       auth.setToken(token, body.rememberMe);
       auth.setUserInfo(user, body.rememberMe);
-      // push('/auth/oops');
-      push("/auth/multi-factor-authentication")
-
-      // redirectToPreviousLocation();
+      console.log("==========================CODE====================: ", code)
+      push('/auth/multi-factor-authentication', { data: code })
     } catch (err) {
       if (err.response) {
         const errorMessage = get(
