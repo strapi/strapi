@@ -35,10 +35,14 @@ const MarketplacePage = React.lazy(() =>
   import(/* webpackChunkName: "Admin_marketplace" */ '../MarketplacePage')
 );
 const NotFoundPage = React.lazy(() =>
-  import(/* webpackChunkName: "Admin_NotFoundPage" */ '../NotFoundPage')
+  import(/* webpackChunkName: "Admin_NotFoundPage" */ '../NotFoundPage').then((module) => ({
+    default: module.NotFoundPage,
+  }))
 );
 const InternalErrorPage = React.lazy(() =>
-  import(/* webpackChunkName: "Admin_InternalErrorPage" */ '../InternalErrorPage')
+  import(/* webpackChunkName: "Admin_InternalErrorPage" */ '../InternalErrorPage').then(
+    (module) => ({ default: module.InternalErrorPage })
+  )
 );
 const Onboarding = React.lazy(() =>
   import(/* webpackChunkName: "Admin_Onboarding" */ './Onboarding').then((module) => ({

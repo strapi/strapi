@@ -4,15 +4,16 @@
  * This is the page we show when the user gets a 500 error
  *
  */
-import React from 'react';
+import * as React from 'react';
 
 import { ContentLayout, EmptyStateLayout, HeaderLayout, Main } from '@strapi/design-system';
 import { LinkButton, useFocusWhenNavigate } from '@strapi/helper-plugin';
 import { ArrowRight, EmptyPictures } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-const InternalErrorPage = () => {
+export const InternalErrorPage = () => {
   const { formatMessage } = useIntl();
+
   useFocusWhenNavigate();
 
   return (
@@ -46,5 +47,3 @@ const InternalErrorPage = () => {
     </Main>
   );
 };
-
-export default InternalErrorPage;

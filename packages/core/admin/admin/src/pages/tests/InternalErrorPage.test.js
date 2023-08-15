@@ -5,10 +5,10 @@ import { render as renderRTL } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 
-import { NotFoundPage } from '../NotFoundPage';
+import { InternalErrorPage } from '../InternalErrorPage';
 
 const render = (props) =>
-  renderRTL(<NotFoundPage {...props} />, {
+  renderRTL(<InternalErrorPage {...props} />, {
     wrapper({ children }) {
       return (
         <ThemeProvider theme={lightTheme}>
@@ -20,14 +20,12 @@ const render = (props) =>
     },
   });
 
-describe('NotFoundPage', () => {
+describe('InternalErrorPage', () => {
   it('renders', () => {
     const { getByRole, getByText } = render();
 
     expect(getByRole('heading', { name: /page not found/i })).toBeInTheDocument();
-    expect(
-      getByText("Oops! We can't seem to find the page you're looging for...")
-    ).toBeInTheDocument();
+    expect(getByText(/an error occured/i)).toBeInTheDocument();
     expect(getByText(/back to homepage/i)).toBeInTheDocument();
   });
 });
