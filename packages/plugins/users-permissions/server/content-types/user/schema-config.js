@@ -10,9 +10,6 @@ module.exports = {
     },
     provider: {
       hidden: true,
-    },
-    multiFactorAuthenticationToken: {
-      hidden: true
     }
   },
 };

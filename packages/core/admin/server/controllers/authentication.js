@@ -41,16 +41,18 @@ module.exports = {
 
         const sanitizedUser = getService('user').sanitizeUser(user);
 
-        // Generate 6 digit code
-        const verificationCode = Math.floor(100000 + Math.random() * 900000);
-        console.log("Verification code generated: ", verificationCode)
+        // TODO LK: Check if the MFA is turned on
+        if (true) {
+          // Generate 6 digit code
+          const verificationCode = getService('token').createVerificationToken();
+          getService('auth').sendMultiFactorAuthenticationEmail({
+            user: sanitizedUser,
+            code: verificationCode
+          });
 
-        // Store the verification code in the user's session or database for later verification
-        // TODO store in the user object?
-        ctx.session.verificationCode = verificationCode;
-
-        // Redirect the user to the multi-factor-authentication form
-        // ctx.redirect('/admin/auth/multi-factor-authentication');
+          // Store the verification code in the user's session for later verification
+          ctx.session.verificationCode = verificationCode;
+        }
 
         strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider: 'local' });
         return next();
@@ -166,9 +168,8 @@ module.exports = {
 
     await validateMultiFactorAuthenticationInput(input);
     if (input.code !== ctx.session.verificationCode) {
-      ctx.status = 403; // Incorrect verification code
+      ctx.status = 403; // Throw forbidden error: incorrect verification code
     } else {
-      getService('auth').multiFactorAuthentication(input);
       ctx.status = 200;
     }
   },

@@ -61,10 +61,20 @@ For security reasons, prefer storing the secret in an environment variable and r
   }
 };
 
+/**
+ * Create a random 6 digit verification code used for multi-factor authentication
+ * @returns {number}
+ */
+const createVerificationToken = () => {
+  return  Math.floor(100000 + Math.random() * 900000);
+};
+
+
 module.exports = {
   createToken,
   createJwtToken,
   getTokenOptions,
   decodeJwtToken,
   checkSecretIsDefined,
+  createVerificationToken,
 };

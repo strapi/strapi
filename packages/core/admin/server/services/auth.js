@@ -87,16 +87,6 @@ const forgotPassword = async ({ email } = {}) => {
     });
 };
 
-/**
- * Validate 6 digit secret two-factor that was sent to the email
- * @param {Object} param params
- * @param {string} param.code secret 6 digit code
- */
-const multiFactorAuthentication = async ({ code } = {}) => {
-  // TODO
-  // validate that the 6 digit authentication code is correct
-};
-
 
 /**
  * Reset a user password
@@ -119,11 +109,41 @@ const resetPassword = async ({ resetPasswordToken, password } = {}) => {
   });
 };
 
+/**
+ * Send 6 digit secret code to the user email
+ * @param {Object} param params
+ * @param {Object} param.user user that requested the MFA
+ * @param {string} param.code secret 6-digit code
+ */
+const sendMultiFactorAuthenticationEmail = async ({ user, code } = {}) => {
+    console.log(strapi.config.get('admin.forgotPassword.from'))
+    strapi
+      .plugin('email')
+      .service('email')
+      .sendTemplatedEmail(
+          {
+            to: user.email,
+            from: strapi.config.get('admin.forgotPassword.from'),
+            replyTo: strapi.config.get('admin.forgotPassword.replyTo'),
+          },
+          strapi.config.get('admin.multiFactorAuthentication.emailTemplate'),
+          {
+            code,
+            user: _.pick(user, ['email', 'firstname', 'lastname', 'username']),
+          }
+      )
+      .catch((err) => {
+        // log error server side but do not disclose it to the user to avoid leaking informations
+        strapi.log.error(err);
+      });
+};
+
+
 module.exports = {
   checkCredentials,
   validatePassword,
   hashPassword,
   forgotPassword,
-  multiFactorAuthentication,
   resetPassword,
+  sendMultiFactorAuthenticationEmail,
 };

@@ -68,12 +68,6 @@ module.exports = {
       target: 'plugin::users-permissions.role',
       inversedBy: 'users',
       configurable: false,
-    },
-    multiFactorAuthenticationToken: {
-      type: 'number',
-      configurable: false,
-      private: true,
-      searchable: false,
     }
   },
 
