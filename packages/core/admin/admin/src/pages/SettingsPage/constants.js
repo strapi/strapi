@@ -1,167 +1,102 @@
-export const ROUTES_CE = [
-  {
-    async Component() {
-      const component = await import(
-        /* webpackChunkName: "admin-roles-list" */ './pages/Roles/ProtectedListPage'
-      );
+import * as React from 'react';
 
-      return component;
-    },
-    to: '/settings/roles',
-    exact: true,
+export const SETTINGS_ROUTES_CE = [
+  {
+    component: React.lazy(() =>
+      import(/* webpackChunkName: "admin-roles-list" */ './pages/Roles/ProtectedListPage')
+    ),
+    path: '/settings/roles',
   },
   {
-    async Component() {
-      const component = await import(
-        /* webpackChunkName: "admin-edit-roles-page" */ './pages/Roles/CreatePage'
-      );
-
-      return component;
-    },
-    to: '/settings/roles/duplicate/:id',
-    exact: true,
+    component: React.lazy(() =>
+      import(/* webpackChunkName: "admin-edit-roles-page" */ './pages/Roles/CreatePage')
+    ),
+    path: '/settings/roles/duplicate/:id',
   },
   {
-    async Component() {
-      const component = await import(
-        /* webpackChunkName: "admin-edit-roles-page" */ './pages/Roles/CreatePage'
-      );
-
-      return component;
-    },
-    to: '/settings/roles/new',
-    exact: true,
+    component: React.lazy(() =>
+      import(/* webpackChunkName: "admin-edit-roles-page" */ './pages/Roles/CreatePage')
+    ),
+    path: '/settings/roles/new',
   },
   {
-    async Component() {
-      const component = await import(
-        /* webpackChunkName: "admin-edit-roles-page" */ './pages/Roles/ProtectedEditPage'
-      );
-
-      return component;
-    },
-    to: '/settings/roles/:id',
-    exact: true,
+    component: React.lazy(() =>
+      import(/* webpackChunkName: "admin-edit-roles-page" */ './pages/Roles/ProtectedEditPage')
+    ),
+    path: '/settings/roles/:id',
   },
   {
-    async Component() {
-      const component = await import(
-        /* webpackChunkName: "admin-users" */ './pages/Users/ProtectedListPage'
-      );
-
-      return component;
-    },
-    to: '/settings/users',
-    exact: true,
+    component: React.lazy(() =>
+      import(/* webpackChunkName: "admin-users" */ './pages/Users/ProtectedListPage')
+    ),
+    path: '/settings/users',
   },
   {
-    async Component() {
-      const component = await import(
-        /* webpackChunkName: "admin-edit-users" */ './pages/Users/ProtectedEditPage'
-      );
-
-      return component;
-    },
-    to: '/settings/users/:id',
-    exact: true,
+    component: React.lazy(() =>
+      import(/* webpackChunkName: "admin-edit-users" */ './pages/Users/ProtectedEditPage')
+    ),
+    path: '/settings/users/:id',
   },
   {
-    async Component() {
-      const component = await import(
-        /* webpackChunkName: "webhook-edit-page" */ './pages/Webhooks/ProtectedCreateView'
-      );
-
-      return component;
-    },
-    to: '/settings/webhooks/create',
-    exact: true,
+    component: React.lazy(() =>
+      import(/* webpackChunkName: "webhook-edit-page" */ './pages/Webhooks/ProtectedCreateView')
+    ),
+    path: '/settings/webhooks/create',
   },
   {
-    async Component() {
-      const component = await import(
-        /* webpackChunkName: "webhook-edit-page" */ './pages/Webhooks/ProtectedEditView'
-      );
-
-      return component;
-    },
-    to: '/settings/webhooks/:id',
-    exact: true,
+    component: React.lazy(() =>
+      import(/* webpackChunkName: "webhook-edit-page" */ './pages/Webhooks/ProtectedEditView')
+    ),
+    path: '/settings/webhooks/:id',
   },
   {
-    async Component() {
-      const component = await import(
-        /* webpackChunkName: "webhook-list-page" */ './pages/Webhooks/ProtectedListView'
-      );
-
-      return component;
-    },
-    to: '/settings/webhooks',
-    exact: true,
+    component: React.lazy(() =>
+      import(/* webpackChunkName: "webhook-list-page" */ './pages/Webhooks/ProtectedListView')
+    ),
+    path: '/settings/webhooks',
   },
   {
-    async Component() {
-      const component = await import(
-        /* webpackChunkName: "api-tokens-list-page" */ './pages/ApiTokens/ProtectedListView'
-      );
-
-      return component;
-    },
-    to: '/settings/api-tokens',
-    exact: true,
+    component: React.lazy(() =>
+      import(/* webpackChunkName: "api-tokens-list-page" */ './pages/ApiTokens/ProtectedListView')
+    ),
+    path: '/settings/api-tokens',
   },
   {
-    async Component() {
-      const component = await import(
+    component: React.lazy(() =>
+      import(
         /* webpackChunkName: "api-tokens-create-page" */ './pages/ApiTokens/ProtectedCreateView'
-      );
-
-      return component;
-    },
-    to: '/settings/api-tokens/create',
-    exact: true,
+      )
+    ),
+    path: '/settings/api-tokens/create',
   },
   {
-    async Component() {
-      const component = await import(
-        /* webpackChunkName: "api-tokens-edit-page" */ './pages/ApiTokens/ProtectedEditView'
-      );
-
-      return component;
-    },
-    to: '/settings/api-tokens/:id',
-    exact: true,
+    component: React.lazy(() =>
+      import(/* webpackChunkName: "api-tokens-edit-page" */ './pages/ApiTokens/ProtectedEditView')
+    ),
+    path: '/settings/api-tokens/:id',
   },
   {
-    async Component() {
-      const component = await import(
+    component: React.lazy(() =>
+      import(
         /* webpackChunkName: "transfer-tokens-create-page" */ './pages/TransferTokens/ProtectedCreateView'
-      );
-
-      return component;
-    },
-    to: '/settings/transfer-tokens/create',
-    exact: true,
+      )
+    ),
+    path: '/settings/transfer-tokens/create',
   },
   {
-    async Component() {
-      const component = await import(
+    component: React.lazy(() =>
+      import(
         /* webpackChunkName: "transfer-tokens-list-page" */ './pages/TransferTokens/ProtectedListView'
-      );
-
-      return component;
-    },
-    to: '/settings/transfer-tokens',
-    exact: true,
+      )
+    ),
+    path: '/settings/transfer-tokens',
   },
   {
-    async Component() {
-      const component = await import(
+    component: React.lazy(() =>
+      import(
         /* webpackChunkName: "transfer-tokens-edit-page" */ './pages/TransferTokens/ProtectedEditView'
-      );
-
-      return component;
-    },
-    to: '/settings/transfer-tokens/:id',
-    exact: true,
+      )
+    ),
+    path: '/settings/transfer-tokens/:id',
   },
 ];

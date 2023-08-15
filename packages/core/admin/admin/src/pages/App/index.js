@@ -220,10 +220,7 @@ export function App() {
             render={(routerProps) => (
               <AuthPage
                 {...routerProps}
-                setHasAdmin={(hasAdmin) => {
-                  // TODO: this should be a flag in redux
-                  React.setState((prev) => ({ ...prev, hasAdmin }));
-                }}
+                setHasAdmin={(hasAdmin) => setState((prev) => ({ ...prev, hasAdmin }))}
                 hasAdmin={hasAdmin}
               />
             )}

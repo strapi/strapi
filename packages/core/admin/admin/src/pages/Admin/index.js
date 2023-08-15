@@ -78,6 +78,17 @@ export const Admin = () => {
 
   const routes = menu
     .filter((link) => link.Component)
+
+    /**
+     * `Component` is an async function, which is passed as property of the
+     * addMenuLink() API during the plugin registration step.
+     *
+     * Because of that we can't just render <Route component={Component} />,
+     * but have to await the function.
+     *
+     * This isn't a good React pattern and should be reconsidered.
+     */
+
     .map(({ to, Component, exact }) => createRoute(Component, to, exact));
 
   if (isLoading) {
