@@ -30,11 +30,7 @@ export function SettingsPage() {
     }
   );
 
-  const adminRoutes = routes
-    .filter(
-      (route, index, refArray) => refArray.findIndex((obj) => obj.key === route.key) === index
-    )
-    .map(({ to, Component, exact }) => createRoute(Component, to, exact));
+  const adminRoutes = routes.map(({ to, Component, exact }) => createRoute(Component, to, exact));
 
   const pluginsRoutes = Object.values(settings).flatMap((section) =>
     section.links.map((link) => createRoute(link.Component, link.to, link.exact || false))

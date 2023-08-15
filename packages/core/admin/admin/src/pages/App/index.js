@@ -201,11 +201,7 @@ export function App() {
     }
   }, [telemetryProperties, uuid]);
 
-  const authRoutes = routes
-    .filter(
-      (route, index, refArray) => refArray.findIndex((obj) => obj.key === route.key) === index
-    )
-    .map(({ to, Component, exact }) => createRoute(Component, to, exact));
+  const authRoutes = routes.map(({ to, Component, exact }) => createRoute(Component, to, exact));
 
   const trackingContext = React.useMemo(
     () => ({
