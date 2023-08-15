@@ -71,6 +71,8 @@ const EditPage = ({ canUpdate }) => {
   } = useAdminUsers(
     { id },
     {
+      cacheTime: 0,
+
       onError(error) {
         const { status } = error.response;
 

@@ -66,4 +66,4 @@ const contentManagementUtilRemoveFieldsFromData = (
   return recursiveCleanData(data, contentTypeSchema);
 };
 
-export default contentManagementUtilRemoveFieldsFromData;
+export { contentManagementUtilRemoveFieldsFromData };

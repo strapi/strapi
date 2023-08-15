@@ -17,7 +17,7 @@ import { useHistory } from 'react-router-dom';
 
 import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
 import { useInjectReducer } from '../../../../../../../../admin/src/hooks/useInjectReducer';
-import { useLicenseLimits } from '../../../../../../hooks';
+import { useLicenseLimits } from '../../../../../../hooks/useLicenseLimits';
 import { addStage, resetWorkflow } from '../../actions';
 import * as Layout from '../../components/Layout';
 import * as LimitsModal from '../../components/LimitsModal';

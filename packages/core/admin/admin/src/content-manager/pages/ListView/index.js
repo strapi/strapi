@@ -180,6 +180,22 @@ function ListView({
           data: { results, pagination: paginationResult },
         } = await fetchClient.get(endPoint, options);
 
+        // If user enters a page number that doesn't exist, redirect him to the last page
+        if (paginationResult.page > paginationResult.pageCount && paginationResult.pageCount > 0) {
+          const query = {
+            ...params,
+            page: paginationResult.pageCount,
+          };
+
+          push({
+            pathname,
+            state: { from: pathname },
+            search: stringify(query),
+          });
+
+          return;
+        }
+
         notifyStatus(
           formatMessage(
             {
@@ -219,7 +235,17 @@ function ListView({
         });
       }
     },
-    [formatMessage, getData, getDataSucceeded, notifyStatus, push, toggleNotification, fetchClient]
+    [
+      formatMessage,
+      getData,
+      getDataSucceeded,
+      notifyStatus,
+      push,
+      toggleNotification,
+      fetchClient,
+      params,
+      pathname,
+    ]
   );
 
   const handleConfirmDeleteAllData = React.useCallback(
@@ -575,7 +601,7 @@ function ListView({
                         {/* Bulk action row checkbox */}
                         <Body.CheckboxDataCell rowId={rowData.id} index={index} />
                         {/* Field data */}
-                        {tableHeaders.map(({ key, name, ...rest }) => {
+                        {tableHeaders.map(({ key, name, cellFormatter, ...rest }) => {
                           if (hasDraftAndPublish && name === 'publishedAt') {
                             return (
                               <Td key={key}>
@@ -619,6 +645,12 @@ function ListView({
                                   <Typography textColor="neutral800">-</Typography>
                                 )}
                               </Td>
+                            );
+                          }
+
+                          if (typeof cellFormatter === 'function') {
+                            return (
+                              <Td key={key}>{cellFormatter(rowData, { key, name, ...rest })}</Td>
                             );
                           }
 

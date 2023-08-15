@@ -1,7 +1,12 @@
 {
   "name": "@strapi/typescript-utils",
-  "version": "4.12.0",
+  "version": "4.12.4",
   "description": "Typescript support for Strapi",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git",
+    "directory": "packages/utils/typescript"
+  },
   "keywords": [
     "strapi",
     "generators"
