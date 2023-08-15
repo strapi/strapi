@@ -8,7 +8,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 
-import { useLicenseLimits } from '..';
+import { useLicenseLimits } from '../useLicenseLimits';
 
 const server = setupServer(
   ...[

@@ -19,7 +19,10 @@ export function useLicenseLimits({ enabled } = { enabled: true }) {
     }
   );
 
-  const license = data ?? {};
+  // this needs memoization, because a default value of `{}`
+  // would lead to infinite rendering loops, when used as
+  // effect dependency
+  const license = React.useMemo(() => data ?? {}, [data]);
 
   const getFeature = React.useCallback(
     (name) => {
