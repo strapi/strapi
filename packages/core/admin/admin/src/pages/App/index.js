@@ -1,9 +1,3 @@
-/**
- *
- * App.js
- *
- */
-
 import * as React from 'react';
 
 import { SkipToContent } from '@strapi/design-system';
@@ -24,9 +18,8 @@ import PrivateRoute from '../../components/PrivateRoute';
 import { ADMIN_PERMISSIONS_CE } from '../../constants';
 import useConfigurations from '../../hooks/useConfigurations';
 import { useEnterprise } from '../../hooks/useEnterprise';
-import { createRoute } from '../../utils/createRoute';
 
-import { ROUTES_CE, SET_ADMIN_PERMISSIONS } from './constants';
+import { AUTH_ROUTES_CE, SET_ADMIN_PERMISSIONS } from './constants';
 
 const AuthPage = React.lazy(() =>
   import(/* webpackChunkName: "Admin-AuthPage" */ '../AuthPage').then((module) => ({
@@ -77,9 +70,9 @@ export function App() {
     }
   );
 
-  const routes = useEnterprise(
-    ROUTES_CE,
-    async () => (await import('../../../../ee/admin/pages/App/constants')).ROUTES_EE,
+  const authRoutes = useEnterprise(
+    AUTH_ROUTES_CE,
+    async () => (await import('../../../../ee/admin/pages/App/constants')).AUTH_ROUTES_EE,
     {
       defaultValue: [],
     }
@@ -201,8 +194,6 @@ export function App() {
     }
   }, [telemetryProperties, uuid]);
 
-  const authRoutes = routes.map(({ to, Component, exact }) => createRoute(Component, to, exact));
-
   const trackingContext = React.useMemo(
     () => ({
       uuid,
@@ -220,7 +211,10 @@ export function App() {
       <SkipToContent>{formatMessage({ id: 'skipToContent' })}</SkipToContent>
       <TrackingProvider value={trackingContext}>
         <Switch>
-          {authRoutes}
+          {authRoutes.map(({ to, Component, exact }) => (
+            <Route key={to} path={to} component={Component} exact={exact} />
+          ))}
+
           <Route
             path="/auth/:authType"
             render={(routerProps) => (
