@@ -6,7 +6,7 @@ import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 
-import NotFoundPage from '../index';
+import { NotFoundPage } from '../index';
 
 const history = createMemoryHistory();
 

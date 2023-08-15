@@ -69,7 +69,7 @@ const TypographyCenter = styled(Typography)`
   text-align: center;
 `;
 
-const UseCasePage = () => {
+export const UseCasePage = () => {
   const toggleNotification = useNotification();
   const { push, location } = useHistory();
   const { formatMessage } = useIntl();
@@ -171,5 +171,3 @@ const UseCasePage = () => {
     </UnauthenticatedLayout>
   );
 };
-
-export default UseCasePage;

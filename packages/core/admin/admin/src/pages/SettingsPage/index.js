@@ -8,8 +8,8 @@ import { Redirect, Route, Switch, useParams } from 'react-router-dom';
 
 import { useSettingsMenu } from '../../hooks';
 import { useEnterprise } from '../../hooks/useEnterprise';
-import createRoute from '../../utils/createRoute';
-import makeUniqueRoutes from '../../utils/makeUniqueRoutes';
+// eslint-disable-next-line
+import { createRoute, makeUniqueRoutes } from '../../utils';
 
 import SettingsNav from './components/SettingsNav';
 import { ROUTES_CE } from './constants';

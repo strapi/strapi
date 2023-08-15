@@ -18,7 +18,7 @@ import { FORMS } from './constants';
 import init from './init';
 import { initialState, reducer } from './reducer';
 
-const AuthPage = ({ hasAdmin, setHasAdmin }) => {
+export const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   const {
     push,
     location: { search },
@@ -315,5 +315,3 @@ AuthPage.propTypes = {
   hasAdmin: PropTypes.bool,
   setHasAdmin: PropTypes.func.isRequired,
 };
-
-export default AuthPage;

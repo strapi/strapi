@@ -7,7 +7,7 @@ import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 
-import UseCasePage from '../index';
+import { UseCasePage } from '../index';
 
 jest.mock('../../../components/LocalesProvider/useLocalesProvider', () => () => ({
   changeLocale() {},

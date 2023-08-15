@@ -27,7 +27,7 @@ import checkLatestStrapiVersion from './utils/checkLatestStrapiVersion';
 
 const strapiVersion = packageJSON.version;
 
-const AuthenticatedApp = () => {
+export const AuthenticatedApp = () => {
   const { setGuidedTourVisibility } = useGuidedTour();
   const toggleNotification = useNotification();
   const userInfo = auth.getUserInfo();
