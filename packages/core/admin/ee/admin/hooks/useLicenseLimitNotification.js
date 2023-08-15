@@ -10,14 +10,14 @@ import isNil from 'lodash/isNil';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 
-import { useLicenseLimits } from '../useLicenseLimits';
+import { useLicenseLimits } from './useLicenseLimits';
 
 const STORAGE_KEY_PREFIX = 'strapi-notification-seat-limit';
 
 const BILLING_STRAPI_CLOUD_URL = 'https://cloud.strapi.io/profile/billing';
 const BILLING_SELF_HOSTED_URL = 'https://strapi.io/billing/request-seats';
 
-const useLicenseLimitNotification = () => {
+export const useLicenseLimitNotification = () => {
   const { formatMessage } = useIntl();
   let { license, isError, isLoading } = useLicenseLimits();
   const toggleNotification = useNotification();
@@ -97,5 +97,3 @@ const useLicenseLimitNotification = () => {
     isError,
   ]);
 };
-
-export default useLicenseLimitNotification;
