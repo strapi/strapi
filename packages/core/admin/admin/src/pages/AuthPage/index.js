@@ -11,7 +11,7 @@ import { Redirect, useHistory, useRouteMatch } from 'react-router-dom';
 import persistStateToLocaleStorage from '../../components/GuidedTour/utils/persistStateToLocaleStorage';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
 import { useEnterprise } from '../../hooks/useEnterprise';
-import formatAPIErrors from '../../utils/formatAPIErrors';
+import { formatAPIErrors } from '../../utils/formatAPIErrors';
 
 import { LoginCE } from './components/Login';
 import { FORMS } from './constants';

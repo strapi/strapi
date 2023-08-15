@@ -28,7 +28,7 @@ import { useMutation, useQuery, useQueryClient } from 'react-query';
 
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
 import { useThemeToggle } from '../../hooks';
-import { getFullName } from '../../utils';
+import { getFullName } from '../../utils/getFullName';
 
 import Password from './components/Password';
 import Preferences from './components/Preferences';

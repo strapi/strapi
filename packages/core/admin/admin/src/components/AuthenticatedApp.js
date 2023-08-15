@@ -15,7 +15,7 @@ import { valid, lt } from 'semver';
 import packageJSON from '../../../package.json';
 import { useConfigurations } from '../hooks';
 import { Admin } from '../pages/Admin';
-import getFullName from '../utils/getFullName';
+import { getFullName } from '../utils/getFullName';
 import { hashAdminUserEmail } from '../utils/uniqueAdminHash';
 
 import RBACProvider from './RBACProvider';
