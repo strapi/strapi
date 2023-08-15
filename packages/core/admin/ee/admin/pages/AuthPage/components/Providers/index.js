@@ -22,7 +22,7 @@ const DividerFull = styled(Divider)`
 const Providers = () => {
   const { push } = useHistory();
   const { formatMessage } = useIntl();
-  const { isLoading, data: providers } = useAuthProviders({
+  const { isLoading, providers } = useAuthProviders({
     enabled: window.strapi.features.isEnabled(window.strapi.features.SSO),
   });
 
