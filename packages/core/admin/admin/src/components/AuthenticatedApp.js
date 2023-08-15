@@ -44,7 +44,7 @@ export const AuthenticatedApp = () => {
   const [plugins, setPlugins] = React.useState(appPlugins);
   const [
     { data: appInfos, isLoading: isLoadingAppInfos },
-    { data: tagName, isLoading: isLoadingRelease },
+    { data: tagName },
     { data: permissions, isLoading: isLoadingPermissions, refetch },
     { data: userRoles },
   ] = useQueries([
@@ -92,6 +92,7 @@ export const AuthenticatedApp = () => {
           });
         }
       },
+      retry: false,
     },
     {
       queryKey: ['users', 'me', 'permissions'],
@@ -165,7 +166,7 @@ export const AuthenticatedApp = () => {
    *
    */
 
-  if (isLoadingRelease || isLoadingAppInfos || isLoadingPermissions || hasApluginNotReady) {
+  if (isLoadingAppInfos || isLoadingPermissions || hasApluginNotReady) {
     const initializers = Object.keys(plugins).reduce((acc, current) => {
       const InitializerComponent = plugins[current].initializer;
 
