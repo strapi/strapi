@@ -109,7 +109,6 @@ export const Admin = () => {
               </Route>
               <Route path="/404" component={NotFoundPage} />
               <Route path="/500" component={InternalErrorPage} />
-              <Route path="" component={NotFoundPage} />
             </Switch>
           </React.Suspense>
         </Box>
