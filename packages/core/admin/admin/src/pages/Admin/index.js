@@ -6,6 +6,7 @@
 
 import * as React from 'react';
 
+import { Box, Flex } from '@strapi/design-system';
 import { LoadingIndicatorPage, useStrapiApp, useTracking } from '@strapi/helper-plugin';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -15,7 +16,6 @@ import { Route, Switch } from 'react-router-dom';
 import LeftMenu from '../../components/LeftMenu';
 import useConfigurations from '../../hooks/useConfigurations';
 import useMenu from '../../hooks/useMenu';
-import AppLayout from '../../layouts/AppLayout';
 import createRoute from '../../utils/createRoute';
 import { SET_APP_RUNTIME_STATUS } from '../App/constants';
 
@@ -82,33 +82,33 @@ export const Admin = () => {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <AppLayout
-        sideNav={
-          <LeftMenu
-            generalSectionLinks={generalSectionLinks}
-            pluginsSectionLinks={pluginsSectionLinks}
-          />
-        }
-      >
-        <React.Suspense fallback={<LoadingIndicatorPage />}>
-          <Switch>
-            <Route path="/" component={HomePage} exact />
-            <Route path="/me" component={ProfilePage} exact />
-            <Route path="/content-manager" component={CM} />
-            {routes}
-            <Route path="/settings/:settingId" component={SettingsPage} />
-            <Route path="/settings" component={SettingsPage} exact />
-            <Route path="/marketplace">
-              <MarketplacePage />
-            </Route>
-            <Route path="/list-plugins" exact>
-              <InstalledPluginsPage />
-            </Route>
-            <Route path="/404" component={NotFoundPage} />
-            <Route path="/500" component={InternalErrorPage} />
-            <Route path="" component={NotFoundPage} />
-          </Switch>
-        </React.Suspense>
+      <Flex alignItems="stretch">
+        <LeftMenu
+          generalSectionLinks={generalSectionLinks}
+          pluginsSectionLinks={pluginsSectionLinks}
+        />
+
+        <Box flex="1">
+          <React.Suspense fallback={<LoadingIndicatorPage />}>
+            <Switch>
+              <Route path="/" component={HomePage} exact />
+              <Route path="/me" component={ProfilePage} exact />
+              <Route path="/content-manager" component={CM} />
+              {routes}
+              <Route path="/settings/:settingId" component={SettingsPage} />
+              <Route path="/settings" component={SettingsPage} exact />
+              <Route path="/marketplace">
+                <MarketplacePage />
+              </Route>
+              <Route path="/list-plugins" exact>
+                <InstalledPluginsPage />
+              </Route>
+              <Route path="/404" component={NotFoundPage} />
+              <Route path="/500" component={InternalErrorPage} />
+              <Route path="" component={NotFoundPage} />
+            </Switch>
+          </React.Suspense>
+        </Box>
 
         {/* TODO: we should move the logic to determine whether the guided tour is displayed
             or not out of the component, to make the code-splitting more effective
@@ -116,7 +116,7 @@ export const Admin = () => {
         <GuidedTourModal />
 
         {showTutorials && <Onboarding />}
-      </AppLayout>
+      </Flex>
     </DndProvider>
   );
 };
