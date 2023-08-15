@@ -9,7 +9,6 @@ import {
   useNotification,
   useStrapiApp,
 } from '@strapi/helper-plugin';
-import produce from 'immer';
 import { useQueries } from 'react-query';
 import { valid, lt } from 'semver';
 
@@ -22,27 +21,6 @@ import { hashAdminUserEmail } from '../utils/uniqueAdminHash';
 import RBACProvider from './RBACProvider';
 
 const strapiVersion = packageJSON.version;
-
-const initialState = {
-  plugins: null,
-};
-
-const reducer = (state = initialState, action) =>
-  /* eslint-disable-next-line consistent-return */
-  produce(state, (draftState) => {
-    switch (action.type) {
-      case 'SET_PLUGIN_READY': {
-        if (!draftState.plugins?.[action.pluginId]) {
-          draftState.plugins[action.pluginId] = {};
-        }
-
-        draftState.plugins[action.pluginId].isReady = true;
-        break;
-      }
-      default:
-        return draftState;
-    }
-  });
 
 const checkLatestStrapiVersion = (currentPackageVersion, latestPublishedVersion) => {
   if (!valid(currentPackageVersion) || !valid(latestPublishedVersion)) {
@@ -62,13 +40,8 @@ export const AuthenticatedApp = () => {
   const [userDisplayName, setUserDisplayName] = React.useState(userName);
   const [userId, setUserId] = React.useState(null);
   const { showReleaseNotification } = useConfigurations();
-  const { plugins: appPlugins } = useStrapiApp();
-  const [{ plugins }, dispatch] = React.useReducer(reducer, initialState, () => ({
-    plugins: appPlugins,
-  }));
-  const setPlugin = React.useRef((pluginId) => {
-    dispatch({ type: 'SET_PLUGIN_READY', pluginId });
-  });
+  const { plugins: appPlugins = {} } = useStrapiApp();
+  const [plugins, setPlugins] = React.useState(appPlugins);
   const [
     { data: appInfos, isLoading: isLoadingAppInfos },
     { data: tagName, isLoading: isLoadingRelease },
@@ -199,7 +172,20 @@ export const AuthenticatedApp = () => {
       if (InitializerComponent) {
         const key = plugins[current].pluginId;
 
-        acc.push(<InitializerComponent key={key} setPlugin={setPlugin.current} />);
+        acc.push(
+          <InitializerComponent
+            key={key}
+            setPlugin={(pluginId) => {
+              setPlugins((prev) => ({
+                ...prev,
+                [pluginId]: {
+                  ...prev[pluginId],
+                  isReady: true,
+                },
+              }));
+            }}
+          />
+        );
       }
 
       return acc;
