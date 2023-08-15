@@ -62,7 +62,6 @@ const createAuthentication = () => {
 
           acc.push(strategy);
         }
-        console.log("core.strapi.lib.services.auth.index.js - async authenticate()")
         return acc;
       }, []);
 

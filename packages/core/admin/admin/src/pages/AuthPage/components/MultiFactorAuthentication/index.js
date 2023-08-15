@@ -49,7 +49,7 @@ const MultiFactorAuthentication = ({ onSubmit, schema }) => {
                     >
                       {formatMessage({
                         id: errors.errorMessage,
-                        defaultMessage: 'An error occurred',
+                        defaultMessage: errors.errorMessage,
                       })}
                     </Typography>
                   )}

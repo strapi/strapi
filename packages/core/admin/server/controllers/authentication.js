@@ -17,7 +17,6 @@ const {
 module.exports = {
   login: compose([
     (ctx, next) => {
-      console.log("start of login compose")
       return passport.authenticate('local', { session: false }, (err, user, info) => {
         if (err) {
           strapi.eventHub.emit('admin.auth.error', { error: err, provider: 'local' });
@@ -44,22 +43,20 @@ module.exports = {
 
         // Generate 6 digit code
         const verificationCode = Math.floor(100000 + Math.random() * 900000);
+        console.log("Verification code generated: ", verificationCode)
 
         // Store the verification code in the user's session or database for later verification
         // TODO store in the user object?
         ctx.session.verificationCode = verificationCode;
-        console.log("verification code generated: ", verificationCode)
 
         // Redirect the user to the multi-factor-authentication form
         // ctx.redirect('/admin/auth/multi-factor-authentication');
 
         strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider: 'local' });
-        console.log("core.admin.server.controllers.authentication.js - Login Form")
         return next();
       })(ctx, next);
     },
     (ctx) => {
-      console.log("this is the code: ", ctx.session.verificationCode)
       const { user } = ctx.state;
 
       ctx.body = {
@@ -155,7 +152,6 @@ module.exports = {
   },
 
   async forgotPassword(ctx) {
-    console.log("called forgotPassword()")
     const input = ctx.request.body;
 
     await validateForgotPasswordInput(input);
@@ -166,20 +162,11 @@ module.exports = {
   },
 
   async multiFactorAuthentication(ctx) {
-    console.log("is this even called???")
-    console.log("ctx.request: ", ctx.request)
-    console.log("ctx.request.body: ", ctx.request.body)
-    console.log("ctx.session: ", ctx.session)
     const input = ctx.request.body;
 
     await validateMultiFactorAuthenticationInput(input);
-    console.log("input", input)
-    console.log("ctx.session.verificationCode", ctx.session.verificationCode)
-    console.log("input !== ctx.session.verificationCode: ", input !== ctx.session.verificationCode)
-    // TODO use yup to validate???
     if (input.code !== ctx.session.verificationCode) {
-      console.log("incorrect verification code")
-      ctx.status = 403;
+      ctx.status = 403; // Incorrect verification code
     } else {
       getService('auth').multiFactorAuthentication(input);
       ctx.status = 200;

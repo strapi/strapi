@@ -46,9 +46,15 @@ export const FORMS = {
     endPoint: 'multi-factor-authentication',
     fieldsToDisable: [],
     fieldsToOmit: [],
-    schema: yup.object().shape({
-      code: yup.number().integer().required(),
-    }),
+    schema: yup
+        .object({
+          code: yup.number()
+              .integer()
+              .min(100000, 'The code must be at least 6 digits')
+              .max(999999, 'The code cannot be more than 6 digits')
+              .required()
+        })
+        .noUnknown(),
     inputsPrefix: '',
   },
   oops: {

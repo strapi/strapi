@@ -17,7 +17,6 @@ const createLocalStrategy = (strapi, middleware) => {
           if (middleware) {
             return middleware([error, user, message], done);
           }
-          console.log("services.passport.local-strategy.js - services.auth.checkCredentials().then(() => done!)")
           return done(error, user, message);
         })
         .catch((error) => done(error));
