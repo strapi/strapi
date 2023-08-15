@@ -10,39 +10,57 @@ const imageFilePath = path.join(__dirname, './image.png');
 
 const tmpWorkingDirectory = path.join(__dirname, './tmp');
 
-function mockUploadProvider(uploadFunc, props) {
-  const { responsiveDimensions = false } = props || {};
+function mockStrapiConfig(uploadFunc, props = {}) {
+  const { responsiveDimensions = false } = props;
 
-  const defaultConfig = {
-    plugin: {
-      upload: {
-        breakpoints: {
-          large: 1000,
-          medium: 750,
-        },
-      },
-    },
-  };
-
-  global.strapi = {
+  return {
     config: {
-      get: (path, defaultValue) => _.get(defaultConfig, path, defaultValue),
+      get: (path, defaultValue) =>
+        _.get(
+          {
+            plugin: {
+              upload: {
+                breakpoints: {
+                  large: 1000,
+                  medium: 750,
+                },
+              },
+            },
+          },
+          path,
+          defaultValue
+        ),
     },
     plugins: {
       upload: {
-        services: {
-          provider: {
-            upload: uploadFunc,
-          },
-          upload: {
-            getSettings: () => ({ responsiveDimensions }),
-          },
-          'image-manipulation': require('../../image-manipulation')(),
+        service(name) {
+          if (name === 'upload') {
+            return {
+              getSettings: () => ({ responsiveDimensions }),
+            };
+          }
+          if (name === 'image-manipulation') {
+            return require('../../image-manipulation')();
+          }
+          if (name === 'provider') {
+            return {
+              upload: uploadFunc,
+            };
+          }
+
+          return {};
         },
       },
     },
+    plugin(name) {
+      return this.plugins[name];
+    },
   };
 }
+
+jest.mock('@strapi/strapi', () => {
+  return jest.fn().mockImplementation(() => mockStrapiConfig);
+});
 
 const getFileData = (filePath) => ({
   alternativeText: 'image.png',
@@ -59,6 +77,8 @@ const getFileData = (filePath) => ({
 });
 
 describe('Upload image', () => {
+  let strapi;
+
   beforeAll(async () => {
     // Create tmp directory if it does not exist
     await fse.mkdir(tmpWorkingDirectory);
@@ -69,10 +89,15 @@ describe('Upload image', () => {
     await fse.remove(tmpWorkingDirectory);
   });
 
+  beforeEach(() => {
+    strapi = require('@strapi/strapi');
+  });
+
   test('Upload with thubmnail', async () => {
     const fileData = getFileData(imageFilePath);
+
     const upload = jest.fn();
-    mockUploadProvider(upload);
+    Object.assign(strapi, mockStrapiConfig(upload));
 
     await uploadService.uploadImage(fileData);
     expect(upload).toHaveBeenCalledTimes(2);
@@ -80,11 +105,11 @@ describe('Upload image', () => {
 
   test('Upload with responsive formats', async () => {
     const fileData = getFileData(imageFilePath);
+
     const upload = jest.fn();
-    mockUploadProvider(upload, { responsiveDimensions: true });
+    Object.assign(strapi, mockStrapiConfig(upload, { responsiveDimensions: true }));
 
     await uploadService.uploadImage(fileData);
-    // 1 for the original image, 1 for thumbnail, 2 for the responsive formats
     expect(upload).toHaveBeenCalledTimes(4);
   });
 });

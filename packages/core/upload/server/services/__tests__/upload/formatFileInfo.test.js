@@ -2,21 +2,27 @@
 
 const uploadService = require('../../upload')({});
 
-describe('Upload service', () => {
-  beforeAll(() => {
-    global.strapi = {
-      plugins: {
-        upload: {
-          services: {
-            file: {
-              getFolderPath: () => '/a-folder-path',
-            },
-          },
+jest.mock('@strapi/strapi', () => {
+  const strapiMock = {
+    plugins: {
+      upload: {
+        service() {
+          return {
+            getFolderPath: () => '/a-folder-path',
+          };
         },
       },
-    };
+    },
+    plugin(name) {
+      return this.plugins[name];
+    },
+  };
+  return new Proxy(strapiMock, {
+    get: (target, prop) => target[prop],
   });
+});
 
+describe('Upload service', () => {
   describe('formatFileInfo', () => {
     test('Generates hash', async () => {
       const fileData = {

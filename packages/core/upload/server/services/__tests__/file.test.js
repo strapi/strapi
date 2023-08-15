@@ -4,16 +4,37 @@ const { getFolderPath, deleteByIds } = require('../file');
 
 const folderPath = '/1';
 
+const removeMock = jest.fn();
+jest.mock('@strapi/strapi', () => {
+  const strapiMock = {
+    entityService: {
+      findOne: jest.fn(() => ({ path: folderPath })),
+    },
+    plugins: {
+      upload: {
+        service() {
+          return {
+            remove: removeMock,
+          };
+        },
+      },
+    },
+    plugin(name) {
+      return this.plugins[name];
+    },
+    db: {
+      query: () => ({
+        findMany: jest.fn(() => [{ id: 1 }, { id: 2 }]),
+      }),
+    },
+  };
+  return new Proxy(strapiMock, {
+    get: (target, prop) => target[prop],
+  });
+});
+
 describe('file', () => {
   describe('getFolderPath', () => {
-    beforeAll(() => {
-      global.strapi = {
-        entityService: {
-          findOne: jest.fn(() => ({ path: folderPath })),
-        },
-      };
-    });
-
     test.each([
       [[1, 'myFile.txt'], folderPath],
       [[undefined, 'myFile.txt'], '/'],
@@ -27,31 +48,13 @@ describe('file', () => {
 
   describe('deleteByIds', () => {
     test('Delete 2 files', async () => {
-      const remove = jest.fn();
-
-      global.strapi = {
-        plugins: {
-          upload: {
-            services: {
-              upload: {
-                remove,
-              },
-            },
-          },
-        },
-        db: {
-          query: () => ({
-            findMany: jest.fn(() => [{ id: 1 }, { id: 2 }]),
-          }),
-        },
-      };
-
       const res = await deleteByIds([1, 2]);
 
       expect(res).toMatchObject([{ id: 1 }, { id: 2 }]);
-      expect(remove).toHaveBeenCalledTimes(2);
-      expect(remove).toHaveBeenNthCalledWith(1, { id: 1 });
-      expect(remove).toHaveBeenCalledTimes(2, { id: 2 });
+
+      expect(removeMock).toHaveBeenCalledTimes(2);
+      expect(removeMock).toHaveBeenNthCalledWith(1, { id: 1 });
+      expect(removeMock).toHaveBeenCalledTimes(2, { id: 2 });
     });
   });
 });

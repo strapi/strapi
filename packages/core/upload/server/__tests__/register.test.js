@@ -20,9 +20,31 @@ const exampleMiddlewaresConfig = [
   },
 ];
 
+jest.mock('@strapi/strapi', () => {
+  return new Proxy(
+    {
+      dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
+      plugins: { upload: {} },
+      plugin(name) {
+        return this.plugins[name];
+      },
+      server: { app: { on: jest.fn() }, routes: jest.fn() },
+      admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
+      config: {
+        get: jest.fn().mockReturnValue({ provider: 'local' }),
+        set: jest.fn(),
+      },
+    },
+    {
+      get: (target, prop) => target[prop],
+    }
+  );
+});
+
 jest.mock('@strapi/provider-upload-local', () => ({
   init() {
-    global.strapi.config.set('middlewares', exampleMiddlewaresConfig);
+    const strapi = require('@strapi/strapi');
+    strapi.config.set('middlewares', exampleMiddlewaresConfig);
 
     return {
       uploadStream: jest.fn(),
@@ -33,41 +55,21 @@ jest.mock('@strapi/provider-upload-local', () => ({
 }));
 
 describe('Upload plugin register function', () => {
+  let strapi;
+
+  beforeEach(() => {
+    strapi = require('@strapi/strapi');
+  });
+
   test('The upload plugin registers the /upload route', async () => {
-    const registerRoute = jest.fn();
+    await bootstrap();
 
-    global.strapi = {
-      dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
-      plugins: { upload: {} },
-      server: { app: { on: jest.fn() }, routes: registerRoute },
-      admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
-      config: {
-        get: jest.fn().mockReturnValueOnce({ provider: 'local' }),
-        set: jest.fn(),
-      },
-    };
-
-    await bootstrap({ strapi });
-
-    expect(registerRoute).toHaveBeenCalledTimes(1);
+    expect(strapi.server.routes).toHaveBeenCalledTimes(1);
   });
 
   test('Strapi config can programatically be extended by providers', async () => {
-    const setConfig = jest.fn();
+    await bootstrap();
 
-    global.strapi = {
-      dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
-      plugins: { upload: {} },
-      server: { app: { on: jest.fn() }, routes: jest.fn() },
-      admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
-      config: {
-        get: jest.fn().mockReturnValueOnce({ provider: 'local' }),
-        set: setConfig,
-      },
-    };
-
-    await bootstrap({ strapi });
-
-    expect(setConfig).toHaveBeenCalledWith('middlewares', exampleMiddlewaresConfig);
+    expect(strapi.config.set).toHaveBeenCalledWith('middlewares', exampleMiddlewaresConfig);
   });
 });
