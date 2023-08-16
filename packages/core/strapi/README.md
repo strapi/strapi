@@ -1,16 +1,18 @@
 <p align="center">
-  <picture width="318px">
-    <source
-      srcset="https://strapi.io/assets/strapi-logo-dark.svg"
-      media="(prefers-color-scheme: dark)"
-      width="318px"
-    />
-    <img
-      src="https://strapi.io/assets/strapi-logo-light.svg"
-      alt="Strapi logo"
-      width="318px"
-    />
-  </picture>
+  <a href="https://strapi.io">
+    <picture width="318px">
+      <source
+        srcset="https://strapi.io/assets/strapi-logo-dark.svg"
+        media="(prefers-color-scheme: dark)"
+        width="318px"
+      />
+      <img
+        src="https://strapi.io/assets/strapi-logo-light.svg"
+        alt="Strapi logo"
+        width="318px"
+      />
+    </picture>
+  </a>
 </p>
 
 <h3 align="center">API creation made simple, secure and fast.</h3>
