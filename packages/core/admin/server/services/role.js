@@ -24,7 +24,7 @@ const ACTIONS = {
 
 const sanitizeRole = omit(['users', 'permissions']);
 
-const COMPARABLE_FIELDS = ['conditions', 'properties', 'subject', 'action'];
+const COMPARABLE_FIELDS = ['conditions', 'properties', 'subject', 'action', 'actionParameters'];
 const pickComparableFields = pick(COMPARABLE_FIELDS);
 
 const jsonClean = (data) => JSON.parse(JSON.stringify(data));
@@ -368,16 +368,19 @@ const assignPermissions = async (roleId, permissions = []) => {
   return permissionsToReturn;
 };
 
+
 const addPermissions = async (roleId, permissions) => {
   const { conditionProvider, createMany } = getService('permission');
   const { sanitizeConditions } = permissionDomain;
 
   const permissionsWithRole = permissions
     .map(set('role', roleId))
-    .map(sanitizeConditions(conditionProvider));
+    .map(sanitizeConditions(conditionProvider))
+    .map(permissionDomain.create);
 
   return createMany(permissionsWithRole);
 };
+
 
 const isContentTypeAction = (action) => action.section === CONTENT_TYPE_SECTION;
 

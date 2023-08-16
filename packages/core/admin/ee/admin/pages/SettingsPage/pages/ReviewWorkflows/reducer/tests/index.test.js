@@ -133,6 +133,9 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
 
     expect(reducer(state, action)).toStrictEqual(
       expect.objectContaining({
+        serverState: expect.objectContaining({
+          workflow: WORKFLOW_FIXTURE,
+        }),
         clientState: expect.objectContaining({
           currentWorkflow: expect.objectContaining({
             data: expect.objectContaining({

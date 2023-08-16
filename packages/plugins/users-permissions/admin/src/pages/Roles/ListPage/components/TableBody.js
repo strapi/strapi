@@ -39,7 +39,10 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
           <Td width="30%">
             <Typography>
               {formatMessage(
-                { id: 'Roles.RoleRow.user-count', defaultMessage: '{number, plural, =0 {# user} one {# user} other {# users}}' },
+                {
+                  id: 'Roles.RoleRow.user-count',
+                  defaultMessage: '{number, plural, =0 {# user} one {# user} other {# users}}',
+                },
                 { number: role.nb_users }
               )}
             </Typography>

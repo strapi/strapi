@@ -4,11 +4,22 @@
 
 const { yup, validateYupSchema } = require('@strapi/utils');
 const { hasStageAttribute } = require('../utils/review-workflows');
+const { STAGE_TRANSITION_UID } = require('../constants/workflows');
 
 const stageObject = yup.object().shape({
   id: yup.number().integer().min(1),
   name: yup.string().max(255).required(),
   color: yup.string().matches(/^#(?:[0-9a-fA-F]{3}){1,2}$/i), // hex color
+  permissions: yup.array().of(
+    yup.object().shape({
+      role: yup.number().integer().min(1).required(),
+      action: yup.string().oneOf([STAGE_TRANSITION_UID]).required(),
+      actionParameters: yup.object().shape({
+        from: yup.number().integer().min(1).required(),
+        to: yup.number().integer().min(1),
+      }),
+    })
+  ),
 });
 
 const validateUpdateStageOnEntity = yup

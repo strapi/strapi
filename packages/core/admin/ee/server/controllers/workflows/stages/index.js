@@ -3,7 +3,11 @@
 const { mapAsync } = require('@strapi/utils');
 const { getService } = require('../../../utils');
 const { validateUpdateStageOnEntity } = require('../../../validation/review-workflows');
-const { STAGE_MODEL_UID } = require('../../../constants/workflows');
+const {
+  STAGE_MODEL_UID,
+  ENTITY_STAGE_ATTRIBUTE,
+  STAGE_TRANSITION_UID,
+} = require('../../../constants/workflows');
 
 /**
  *
@@ -75,17 +79,35 @@ module.exports = {
    */
   async updateEntity(ctx) {
     const stagesService = getService('stages');
+    const stagePermissions = getService('stage-permissions');
     const workflowService = getService('workflows');
 
-    const { model_uid: modelUID, id: entityIdString } = ctx.params;
+    const { model_uid: modelUID, id } = ctx.params;
     const { body } = ctx.request;
-
-    const entityId = Number(entityIdString);
 
     const { sanitizeOutput } = strapi
       .plugin('content-manager')
       .service('permission-checker')
       .create({ userAbility: ctx.state.userAbility, model: modelUID });
+
+    // Load entity
+    const entity = await strapi.entityService.findOne(modelUID, Number(id), {
+      populate: [ENTITY_STAGE_ATTRIBUTE],
+    });
+
+    if (!entity) {
+      ctx.throw(404, 'Entity not found');
+    }
+
+    // Validate if entity stage can be updated
+    const canTransition = stagePermissions.can(
+      STAGE_TRANSITION_UID,
+      entity[ENTITY_STAGE_ATTRIBUTE]?.id
+    );
+
+    if (!canTransition) {
+      ctx.throw(403, 'Forbidden stage transition');
+    }
 
     const { id: stageId } = await validateUpdateStageOnEntity(
       { id: Number(body?.data?.id) },
@@ -95,8 +117,8 @@ module.exports = {
     const workflow = await workflowService.assertContentTypeBelongsToWorkflow(modelUID);
     workflowService.assertStageBelongsToWorkflow(stageId, workflow);
 
-    const entity = await stagesService.updateEntity({ id: entityId, modelUID }, stageId);
+    const updatedEntity = await stagesService.updateEntity({ id: entity.id, modelUID }, stageId);
 
-    ctx.body = { data: await sanitizeOutput(entity) };
+    ctx.body = { data: await sanitizeOutput(updatedEntity) };
   },
 };
