@@ -45,7 +45,7 @@
     "tsconfig": "4.12.4"
   },
   "peerDependencies": {
-    "@strapi/strapi": "^4.9.0"
+    "@strapi/strapi": "^4.12.4"
   },
   "engines": {
     "node": ">=16.0.0 <=20.x.x",
