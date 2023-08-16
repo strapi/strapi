@@ -101,6 +101,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     }
 
     if (authType === 'multi-factor-authentication') {
+      console.log("MFA =============================== packages/core/admin/admin/src/pages/AuthPage/index.js handleSubmit()",  Date.now())
       await multiFactorAuthenticationRequest(body, requestURL, { setSubmitting, setErrors });
     }
 
@@ -124,6 +125,8 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   };
 
   const multiFactorAuthenticationRequest = async (body, requestURL, { setSubmitting, setErrors }) => {
+    console.log("MFA =============================== packages/core/admin/admin/src/pages/AuthPage/index.js multiFactorAuthenticationRequest()",  Date.now())
+
     try {
       await post(requestURL, body, { cancelToken: source.token });
       redirectToPreviousLocation();
@@ -152,7 +155,14 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
 
       auth.setToken(token, body.rememberMe);
       auth.setUserInfo(user, body.rememberMe);
-      push('/auth/multi-factor-authentication', { data: code })
+      // const advanced = await strapi.store({type: 'plugin', name: 'users-permissions', key: 'advanced'}).get();
+
+      if (true) {
+        console.log("MFA =============================== packages/core/admin/admin/src/pages/AuthPage/index.js loginRequest()",  Date.now())
+        push('/auth/multi-factor-authentication', { data: code })
+      } else {
+        redirectToPreviousLocation()
+      }
     } catch (err) {
       if (err.response) {
         const errorMessage = get(

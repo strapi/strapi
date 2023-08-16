@@ -16,10 +16,11 @@ const {
 
 module.exports = {
   login: compose([
-    (ctx, next) => {
-      return passport.authenticate('local', { session: false }, (err, user, info) => {
+    async (ctx, next) => {
+      const advanced = await strapi.store({type: 'plugin', name: 'users-permissions', key: 'advanced'}).get();
+      return passport.authenticate('local', {session: false}, (err, user, info) => {
         if (err) {
-          strapi.eventHub.emit('admin.auth.error', { error: err, provider: 'local' });
+          strapi.eventHub.emit('admin.auth.error', {error: err, provider: 'local'});
           // if this is a recognized error, allow it to bubble up to user
           if (err.details?.code === 'LOGIN_NOT_ALLOWED') {
             throw err;
@@ -40,12 +41,10 @@ module.exports = {
         ctx.state.user = user;
 
         const sanitizedUser = getService('user').sanitizeUser(user);
+        console.log("MFA =============================== packages/core/admin/server/controllers/authentication.js login()",  Date.now())
 
-        // TODO LK: Check if the MFA is turned on
-        // const advanced = await strapi.store({ type: 'plugin', name: 'users-permissions', key: 'advanced' }).get();
-        // if (advanced.multi_factor_authentication)
-
-        if (true) {
+        // Multi factor authentication setting check
+        if (advanced.multi_factor_authentication) {
           // Generate 6 digit code
           const verificationCode = getService('token').createVerificationToken();
           getService('auth').sendMultiFactorAuthenticationEmail({
@@ -57,7 +56,7 @@ module.exports = {
           ctx.session.verificationCode = verificationCode;
         }
 
-        strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider: 'local' });
+        strapi.eventHub.emit('admin.auth.success', {user: sanitizedUser, provider: 'local'});
         return next();
       })(ctx, next);
     },
@@ -167,11 +166,13 @@ module.exports = {
   },
 
   async multiFactorAuthentication(ctx) {
-    const input = ctx.request.body;
+    console.log("MFA =============================== packages/core/admin/server/controllers/authentication.js multiFactorAuthentication()",  Date.now())
 
+    const input = ctx.request.body;
     await validateMultiFactorAuthenticationInput(input);
     if (input.code !== ctx.session.verificationCode) {
-      ctx.status = 403; // Throw forbidden error: incorrect verification code
+      // Throw forbidden error if verification code is incorrect
+      ctx.status = 403;
     } else {
       ctx.status = 200;
     }

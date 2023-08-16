@@ -265,15 +265,6 @@ module.exports = {
     ctx.send({ ok: true });
   },
 
-  async multiFactorAuthentication(ctx) {
-    // TODO LK implement or remove
-    console.log("Does this ever get called???")
-    const { code } = await validateMultiFactorAuthenticationBody(ctx.request.body);
-    // TODO
-    // Validate two factor code
-    // Redirect to admin dashboard
-  },
-
   async register(ctx) {
     const pluginStore = await strapi.store({ type: 'plugin', name: 'users-permissions' });
 

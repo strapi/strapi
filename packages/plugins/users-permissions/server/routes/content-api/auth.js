@@ -47,15 +47,6 @@ module.exports = [
   },
   {
     method: 'POST',
-    path: '/auth/multi-factor-authentication',
-    handler: 'auth.multiFactorAuthentication',
-    config: {
-      middlewares: ['plugin::users-permissions.rateLimit'],
-      prefix: '',
-    },
-  },
-  {
-    method: 'POST',
     path: '/auth/reset-password',
     handler: 'auth.resetPassword',
     config: {
