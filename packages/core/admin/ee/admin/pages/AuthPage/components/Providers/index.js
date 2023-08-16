@@ -11,7 +11,7 @@ import UnauthenticatedLayout, {
   Column,
   LayoutContent,
 } from '../../../../../../admin/src/layouts/UnauthenticatedLayout';
-import { useAuthProviders } from '../../../../hooks';
+import { useAuthProviders } from '../../../../hooks/useAuthProviders';
 
 import SSOProviders from './SSOProviders';
 
@@ -20,17 +20,20 @@ const DividerFull = styled(Divider)`
 `;
 
 const Providers = () => {
-  const ssoEnabled = window.strapi.features.isEnabled(window.strapi.features.SSO);
-
   const { push } = useHistory();
   const { formatMessage } = useIntl();
-  const { isLoading, data: providers } = useAuthProviders({ ssoEnabled });
+  const { isLoading, providers } = useAuthProviders({
+    enabled: window.strapi.features.isEnabled(window.strapi.features.SSO),
+  });
 
   const handleClick = () => {
     push('/auth/login');
   };
 
-  if (!ssoEnabled || (!isLoading && providers.length === 0)) {
+  if (
+    !window.strapi.features.isEnabled(window.strapi.features.SSO) ||
+    (!isLoading && providers.length === 0)
+  ) {
     return <Redirect to="/auth/login" />;
   }
 

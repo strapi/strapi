@@ -34,6 +34,7 @@
     "lodash": "4.17.21",
     "prop-types": "^15.8.1",
     "react-intl": "6.4.1",
+    "react-query": "3.39.3",
     "yup": "0.32.9"
   },
   "devDependencies": {
