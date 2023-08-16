@@ -33,7 +33,8 @@
     }
   ],
   "scripts": {
-    "build": "run -T tsc -p server/tsconfig.json --outDir ./dist/server",
+    "build": "strapi plugin:build",
+    "build:back": "run -T tsc -p server/tsconfig.json --outDir ./dist/server",
     "watch": "run -T tsc -w --preserveWatchOutput",
     "clean": "run -T rimraf ./dist",
     "prepublishOnly": "yarn clean && yarn build",
@@ -56,6 +57,7 @@
     "react-intl": "6.4.1"
   },
   "devDependencies": {
+    "@strapi/strapi": "4.12.4",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
     "@types/styled-components": "5.1.26",
