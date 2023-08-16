@@ -83,12 +83,6 @@ const fixtures = {
   ],
 };
 
-const pagination = {
-  page: 1,
-  pageSize: 25,
-  pageCount: 1,
-};
-
 describe('Validation - private params', () => {
   const builder = createTestBuilder();
 
@@ -108,6 +102,11 @@ describe('Validation - private params', () => {
         transformToRESTResource(value)
       )
     );
+  });
+
+  afterAll(async () => {
+    await strapi.destroy();
+    await builder.cleanup();
   });
 
   test('Error when filters has createdBy user email', async () => {
