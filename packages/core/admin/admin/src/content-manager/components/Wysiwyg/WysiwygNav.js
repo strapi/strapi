@@ -64,22 +64,16 @@ const WysiwygNav = ({
           </Select>
 
           <MainButtons>
-            <CustomIconButton disabled id="Bold" label="Bold" name="Bold" icon={<Bold />} />
-            <CustomIconButton disabled id="Italic" label="Italic" name="Italic" icon={<Italic />} />
-            <CustomIconButton
-              disabled
-              id="Underline"
-              label="Underline"
-              name="Underline"
-              icon={<Underline />}
-            />
+            <CustomIconButton disabled label="Bold" name="Bold" icon={<Bold />} />
+            <CustomIconButton disabled label="Italic" name="Italic" icon={<Italic />} />
+            <CustomIconButton disabled label="Underline" name="Underline" icon={<Underline />} />
           </MainButtons>
 
-          <MoreButton disabled id="more" label="More" icon={<More />} />
+          <MoreButton disabled label="More" icon={<More />} />
         </StyledFlex>
 
         {!isExpandMode && (
-          <Button onClick={onTogglePreviewMode} variant="tertiary" id="preview">
+          <Button onClick={onTogglePreviewMode} variant="tertiary">
             {formatMessage({
               id: 'components.Wysiwyg.ToggleMode.markdown-mode',
               defaultMessage: 'Markdown mode',
@@ -110,21 +104,18 @@ const WysiwygNav = ({
         <MainButtons>
           <CustomIconButton
             onClick={() => onActionClick('Bold', editorRef)}
-            id="Bold"
             label="Bold"
             name="Bold"
             icon={<Bold />}
           />
           <CustomIconButton
             onClick={() => onActionClick('Italic', editorRef)}
-            id="Italic"
             label="Italic"
             name="Italic"
             icon={<Italic />}
           />
           <CustomIconButton
             onClick={() => onActionClick('Underline', editorRef)}
-            id="Underline"
             label="Underline"
             name="Underline"
             icon={<Underline />}
@@ -134,37 +125,27 @@ const WysiwygNav = ({
         <MoreButton
           ref={buttonMoreRef}
           onClick={handleTogglePopover}
-          id="more"
           label="More"
           icon={<More />}
         />
         {visiblePopover && (
-          <Popover
-            onDismiss={handleTogglePopover}
-            centered
-            source={buttonMoreRef}
-            spacing={4}
-            id="popover"
-          >
+          <Popover onDismiss={handleTogglePopover} centered source={buttonMoreRef} spacing={4}>
             <Flex>
               <IconButtonGroupMargin>
                 <CustomIconButton
                   onClick={() => onActionClick('Strikethrough', editorRef, handleTogglePopover)}
-                  id="Strikethrough"
                   label="Strikethrough"
                   name="Strikethrough"
                   icon={<StrikeThrough />}
                 />
                 <CustomIconButton
                   onClick={() => onActionClick('BulletList', editorRef, handleTogglePopover)}
-                  id="BulletList"
                   label="BulletList"
                   name="BulletList"
                   icon={<BulletList />}
                 />
                 <CustomIconButton
                   onClick={() => onActionClick('NumberList', editorRef, handleTogglePopover)}
-                  id="NumberList"
                   label="NumberList"
                   name="NumberList"
                   icon={<NumberList />}
@@ -173,7 +154,6 @@ const WysiwygNav = ({
               <IconButtonGroup>
                 <CustomIconButton
                   onClick={() => onActionClick('Code', editorRef, handleTogglePopover)}
-                  id="Code"
                   label="Code"
                   name="Code"
                   icon={<Code />}
@@ -183,14 +163,12 @@ const WysiwygNav = ({
                     handleTogglePopover();
                     onToggleMediaLib();
                   }}
-                  id="Image"
                   label="Image"
                   name="Image"
                   icon={<Image />}
                 />
                 <CustomLinkIconButton
                   onClick={() => onActionClick('Link', editorRef, handleTogglePopover)}
-                  id="Link"
                   label="Link"
                   name="Link"
                   // eslint-disable-next-line jsx-a11y/anchor-is-valid
@@ -198,7 +176,6 @@ const WysiwygNav = ({
                 />
                 <CustomIconButton
                   onClick={() => onActionClick('Quote', editorRef, handleTogglePopover)}
-                  id="Quote"
                   label="Quote"
                   name="Quote"
                   icon={<Quote />}
@@ -210,7 +187,7 @@ const WysiwygNav = ({
       </StyledFlex>
 
       {onTogglePreviewMode && (
-        <Button onClick={onTogglePreviewMode} variant="tertiary" id="preview">
+        <Button onClick={onTogglePreviewMode} variant="tertiary">
           {formatMessage({
             id: 'components.Wysiwyg.ToggleMode.preview-mode',
             defaultMessage: 'Preview mode',

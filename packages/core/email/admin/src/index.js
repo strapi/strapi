@@ -7,30 +7,24 @@
 
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
 
-import pluginPkg from '../../package.json';
-
 import { PERMISSIONS } from './constants';
-import pluginId from './pluginId';
-import getTrad from './utils/getTrad';
-
-const name = pluginPkg.strapi.name;
 
 export default {
   register(app) {
     // Create the email settings section
     app.createSettingSection(
       {
-        id: pluginId,
-        intlLabel: { id: getTrad('SettingsNav.section-label'), defaultMessage: 'Email Plugin' },
+        id: 'email',
+        intlLabel: { id: 'email.SettingsNav.section-label', defaultMessage: 'Email Plugin' },
       },
       [
         {
           intlLabel: {
-            id: getTrad('Settings.email.plugin.title'),
+            id: 'email.Settings.email.plugin.title',
             defaultMessage: 'Settings',
           },
           id: 'settings',
-          to: `/settings/${pluginId}`,
+          to: `/settings/email`,
           async Component() {
             const component = await import(
               /* webpackChunkName: "email-settings-page" */ './pages/Settings'
@@ -43,8 +37,8 @@ export default {
       ]
     );
     app.registerPlugin({
-      id: pluginId,
-      name,
+      id: 'email',
+      name: 'email',
     });
   },
   bootstrap() {},
@@ -56,7 +50,7 @@ export default {
         )
           .then(({ default: data }) => {
             return {
-              data: prefixPluginTranslations(data, pluginId),
+              data: prefixPluginTranslations(data, 'email'),
               locale,
             };
           })

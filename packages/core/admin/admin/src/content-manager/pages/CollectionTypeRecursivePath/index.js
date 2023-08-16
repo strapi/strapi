@@ -12,7 +12,7 @@ import { useFetchContentTypeLayout } from '../../hooks';
 import { formatLayoutToApi } from '../../utils';
 import EditSettingsView from '../EditSettingsView';
 import EditViewLayoutManager from '../EditViewLayoutManager';
-import ListSettingsView from '../ListSettingsView';
+import { ListSettingsView } from '../ListSettingsView';
 import ListViewLayout from '../ListViewLayoutManager';
 
 import ErrorFallback from './components/ErrorFallback';
