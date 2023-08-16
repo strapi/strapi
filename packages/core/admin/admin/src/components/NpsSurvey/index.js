@@ -127,7 +127,7 @@ const NpsSurvey = () => {
   const { npsSurveySettings, setNpsSurveySettings } = useNpsSurveySettings();
   const [isFeedbackResponse, setIsFeedbackResponse] = React.useState(false);
   const toggleNotification = useNotification();
-  const { autoReload, strapiVersion, communityEdition } = useAppInfo();
+  const { currentEnvironment, strapiVersion } = useAppInfo();
 
   const { mutate, isLoading } = useMutation(
     async (form) => {
@@ -200,9 +200,9 @@ const NpsSurvey = () => {
       email,
       rating,
       comment,
-      environment: autoReload ? 'development' : 'production',
+      environment: currentEnvironment,
       version: strapiVersion,
-      license: communityEdition ? 'community' : 'enterprise',
+      license: window.strapi.projectType,
     });
   };
 
