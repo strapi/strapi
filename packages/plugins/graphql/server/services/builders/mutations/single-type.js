@@ -53,6 +53,9 @@ module.exports = ({ strapi }) => {
           .get('content-api')
           .buildMutationsResolvers({ contentType });
 
+        await validate.contentAPI.query(omit(['data', 'files'], transformedArgs), contentType, {
+          auth,
+        });
         const sanitizedQuery = await validate.contentAPI.query(
           omit(['data', 'files'], transformedArgs),
           contentType,
@@ -91,7 +94,10 @@ module.exports = ({ strapi }) => {
           .get('content-api')
           .buildMutationsResolvers({ contentType });
 
-        const sanitizedQuery = await validate.contentAPI.query(transformedArgs, contentType, {
+        await validate.contentAPI.query(transformedArgs, contentType, {
+          auth: ctx?.state?.auth,
+        });
+        const sanitizedQuery = await sanitize.contentAPI.query(transformedArgs, contentType, {
           auth: ctx?.state?.auth,
         });
 

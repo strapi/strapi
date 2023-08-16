@@ -41,7 +41,10 @@ module.exports = ({ strapi }) => {
           usePagination: true,
         });
 
-        const sanitizedQuery = await validate.contentAPI.query(transformedArgs, targetContentType, {
+        await validate.contentAPI.query(transformedArgs, targetContentType, {
+          auth,
+        });
+        const sanitizedQuery = await sanitize.contentAPI.query(transformedArgs, targetContentType, {
           auth,
         });
 

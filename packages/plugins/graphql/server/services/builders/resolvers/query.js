@@ -1,7 +1,7 @@
 'use strict';
 
 const { omit } = require('lodash/fp');
-const { validate } = require('@strapi/utils');
+const { sanitize, validate } = require('@strapi/utils');
 
 module.exports = ({ strapi }) => ({
   buildQueriesResolvers({ contentType }) {
@@ -9,7 +9,10 @@ module.exports = ({ strapi }) => ({
 
     return {
       async find(parent, args, ctx) {
-        const sanitizedQuery = await validate.contentAPI.query(args, contentType, {
+        await validate.contentAPI.query(args, contentType, {
+          auth: ctx?.state?.auth,
+        });
+        const sanitizedQuery = await sanitize.contentAPI.query(args, contentType, {
           auth: ctx?.state?.auth,
         });
 
@@ -17,7 +20,10 @@ module.exports = ({ strapi }) => ({
       },
 
       async findOne(parent, args, ctx) {
-        const sanitizedQuery = await validate.contentAPI.query(args, contentType, {
+        await validate.contentAPI.query(args, contentType, {
+          auth: ctx?.state?.auth,
+        });
+        const sanitizedQuery = await sanitize.contentAPI.query(args, contentType, {
           auth: ctx?.state?.auth,
         });
 
