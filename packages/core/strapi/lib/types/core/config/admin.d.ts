@@ -29,7 +29,7 @@ export type RateLimitProp = {
   delayAfter?: number;
   timeWait?: number;
   prefixKey?: number;
-  whietlist?: string;
+  whitelist?: string;
   store?: string;
 };
 
