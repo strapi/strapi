@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://strapi.io">
-    <picture width="318px">
+    <picture>
       <source
         srcset="https://strapi.io/assets/strapi-logo-dark.svg"
         media="(prefers-color-scheme: dark)"
