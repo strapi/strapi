@@ -4,7 +4,7 @@ export const SETTINGS_ROUTES_EE = [
   ...(window.strapi.features.isEnabled(window.strapi.features.AUDIT_LOGS)
     ? [
         {
-          component: React.lazy(() =>
+          Component: React.lazy(() =>
             import(
               /* webpackChunkName: "audit-logs-settings-page" */ './pages/AuditLogs/ProtectedListPage'
             )
@@ -17,7 +17,7 @@ export const SETTINGS_ROUTES_EE = [
   ...(window.strapi.features.isEnabled(window.strapi.features.REVIEW_WORKFLOWS)
     ? [
         {
-          component: React.lazy(() =>
+          Component: React.lazy(() =>
             import(
               /* webpackChunkName: "review-workflows-settings-list-view" */ './pages/ReviewWorkflows/pages/ListView'
             )
@@ -26,7 +26,7 @@ export const SETTINGS_ROUTES_EE = [
         },
 
         {
-          component: React.lazy(() =>
+          Component: React.lazy(() =>
             import(
               /* webpackChunkName: "review-workflows-settings-create-view" */ './pages/ReviewWorkflows/pages/CreateView'
             )
@@ -35,7 +35,7 @@ export const SETTINGS_ROUTES_EE = [
         },
 
         {
-          component: React.lazy(() =>
+          Component: React.lazy(() =>
             import(
               /* webpackChunkName: "review-workflows-settings-edit-view" */ './pages/ReviewWorkflows/pages/EditView'
             )
@@ -48,7 +48,7 @@ export const SETTINGS_ROUTES_EE = [
   ...(window.strapi.features.isEnabled(window.strapi.features.SSO)
     ? [
         {
-          component: React.lazy(() =>
+          Component: React.lazy(() =>
             import(/* webpackChunkName: "sso-settings-page" */ './pages/SingleSignOn')
           ),
           path: '/settings/single-sign-on',

@@ -111,7 +111,8 @@ Providers.propTypes = {
         defaultMessage: PropTypes.string.isRequired,
       }).isRequired,
       permissions: PropTypes.array,
-      Component: PropTypes.func,
+      // React.lazy loadable
+      Component: PropTypes.object,
     })
   ).isRequired,
   menuLogo: PropTypes.oneOfType([PropTypes.string, PropTypes.any]).isRequired,
