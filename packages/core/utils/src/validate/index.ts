@@ -57,6 +57,9 @@ const createContentAPIValidators = () => {
     schema: Model,
     { auth }: Options = {}
   ) => {
+    if (!schema) {
+      throw new Error('Missing schema in validateQuery');
+    }
     const { filters, sort, fields } = query;
 
     if (filters) {
@@ -75,6 +78,9 @@ const createContentAPIValidators = () => {
   };
 
   const validateFilters: ValidateFunc = async (filters, schema: Model, { auth } = {}) => {
+    if (!schema) {
+      throw new Error('Missing schema in validateFilters');
+    }
     if (isArray(filters)) {
       await Promise.all(filters.map((filter) => validateFilters(filter, schema, { auth })));
       return;
@@ -90,6 +96,9 @@ const createContentAPIValidators = () => {
   };
 
   const validateSort: ValidateFunc = async (sort, schema: Model, { auth } = {}) => {
+    if (!schema) {
+      throw new Error('Missing schema in validateSort');
+    }
     const transforms = [validators.defaultValidateSort(schema)];
 
     if (auth) {
