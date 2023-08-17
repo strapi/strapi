@@ -1,15 +1,4 @@
-/**
- *
- * SettingsPage
- *
- */
-
-// NOTE TO PLUGINS DEVELOPERS:
-// If you modify this file you also need to update the documentation accordingly
-// Here's the file: strapi/docs/3.0.0-beta.x/plugin-development/frontend-settings-api.md
-// IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
-
-import React, { memo, useMemo } from 'react';
+import * as React from 'react';
 
 import { Layout } from '@strapi/design-system';
 import { LoadingIndicatorPage, useStrapiApp } from '@strapi/helper-plugin';
@@ -19,21 +8,21 @@ import { Redirect, Route, Switch, useParams } from 'react-router-dom';
 
 import { useSettingsMenu } from '../../hooks';
 import { useEnterprise } from '../../hooks/useEnterprise';
-import { createRoute, makeUniqueRoutes } from '../../utils';
+import { createRoute } from '../../utils/createRoute';
 
 import SettingsNav from './components/SettingsNav';
-import { ROUTES_CE } from './constants';
+import { SETTINGS_ROUTES_CE } from './constants';
 import ApplicationInfosPage from './pages/ApplicationInfosPage';
-import { createSectionsRoutes } from './utils';
 
-function SettingsPage() {
+export function SettingsPage() {
   const { settingId } = useParams();
   const { settings } = useStrapiApp();
   const { formatMessage } = useIntl();
   const { isLoading, menu } = useSettingsMenu();
   const routes = useEnterprise(
-    ROUTES_CE,
-    async () => (await import('../../../../ee/admin/pages/SettingsPage/constants')).ROUTES_EE,
+    SETTINGS_ROUTES_CE,
+    async () =>
+      (await import('../../../../ee/admin/pages/SettingsPage/constants')).SETTINGS_ROUTES_EE,
     {
       combine(ceRoutes, eeRoutes) {
         return [...ceRoutes, ...eeRoutes];
@@ -42,14 +31,19 @@ function SettingsPage() {
     }
   );
 
-  // Creates the admin routes
-  const adminRoutes = useMemo(() => {
-    return makeUniqueRoutes(
-      routes.map(({ to, Component, exact }) => createRoute(Component, to, exact))
-    );
-  }, [routes]);
+  /**
+   * `Component` is an async function, which is passed as property of the
+   * addSettingsLink() API during the plugin bootstrap step.
+   *
+   * Because of that we can't just render <Route component={Component} />,
+   * but have to await the function.
+   *
+   * This isn't a good React pattern and should be reconsidered.
+   */
 
-  const pluginsRoutes = createSectionsRoutes(settings);
+  const pluginSettingsRoutes = Object.values(settings).flatMap((section) =>
+    section.links.map((link) => createRoute(link.Component, link.to, link.exact || false))
+  );
 
   // Since the useSettingsMenu hook can make API calls in order to check the links permissions
   // We need to add a loading state to prevent redirecting the user while permissions are being checked
@@ -61,23 +55,24 @@ function SettingsPage() {
     return <Redirect to="/settings/application-infos" />;
   }
 
-  const settingTitle = formatMessage({
-    id: 'global.settings',
-    defaultMessage: 'Settings',
-  });
-
   return (
     <Layout sideNav={<SettingsNav menu={menu} />}>
-      <Helmet title={settingTitle} />
+      <Helmet
+        title={formatMessage({
+          id: 'global.settings',
+          defaultMessage: 'Settings',
+        })}
+      />
 
       <Switch>
         <Route path="/settings/application-infos" component={ApplicationInfosPage} exact />
-        {adminRoutes}
-        {pluginsRoutes}
+
+        {routes.map(({ path, component }) => (
+          <Route key={path} path={path} component={component} exact />
+        ))}
+
+        {pluginSettingsRoutes}
       </Switch>
     </Layout>
   );
 }
-
-export default memo(SettingsPage);
-export { SettingsPage };

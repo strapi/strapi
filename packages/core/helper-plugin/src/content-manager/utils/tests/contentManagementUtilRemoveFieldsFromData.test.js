@@ -1,6 +1,6 @@
-import contentManagementUtilRemoveFieldsFromData from '../contentManagementUtilRemoveFieldsFromData';
+import { contentManagementUtilRemoveFieldsFromData } from '../contentManagementUtilRemoveFieldsFromData';
 
-import testData from './testData';
+import { testData } from './testData';
 
 describe('STRAPI_HELPER_PLUGIN | utils', () => {
   describe('contentManagementUtilRemoveFieldsFromData', () => {

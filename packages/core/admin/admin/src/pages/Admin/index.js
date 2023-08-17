@@ -4,80 +4,92 @@
  *
  */
 
-import React, { lazy, Suspense, useEffect, useMemo } from 'react';
+import * as React from 'react';
 
+import { Box, Flex } from '@strapi/design-system';
 import { LoadingIndicatorPage, useStrapiApp, useTracking } from '@strapi/helper-plugin';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 
-import GuidedTourModal from '../../components/GuidedTour/Modal';
 import LeftMenu from '../../components/LeftMenu';
-import { useConfigurations, useMenu } from '../../hooks';
-import AppLayout from '../../layouts/AppLayout';
-import { createRoute } from '../../utils';
+import useConfigurations from '../../hooks/useConfigurations';
+import useMenu from '../../hooks/useMenu';
+import { createRoute } from '../../utils/createRoute';
 import { SET_APP_RUNTIME_STATUS } from '../App/constants';
 
-import Onboarding from './Onboarding';
-
-const CM = lazy(() =>
-  import(/* webpackChunkName: "content-manager" */ '../../content-manager/pages/App')
+const CM = React.lazy(() =>
+  import(/* webpackChunkName: "content-manager" */ '../../content-manager/pages/App').then(
+    (module) => ({ default: module.ContentManger })
+  )
 );
-const HomePage = lazy(() => import(/* webpackChunkName: "Admin_homePage" */ '../HomePage'));
-const InstalledPluginsPage = lazy(() =>
-  import(/* webpackChunkName: "Admin_pluginsPage" */ '../InstalledPluginsPage')
+const GuidedTourModal = React.lazy(() =>
+  import(/* webpackChunkName: "Admin_GuidedTourModal" */ '../../components/GuidedTour/Modal').then(
+    (module) => ({ default: module.GuidedTourModal })
+  )
 );
-const MarketplacePage = lazy(() =>
+const HomePage = React.lazy(() =>
+  import(/* webpackChunkName: "Admin_homePage" */ '../HomePage').then((module) => ({
+    default: module.HomePage,
+  }))
+);
+const InstalledPluginsPage = React.lazy(() =>
+  import(/* webpackChunkName: "Admin_pluginsPage" */ '../InstalledPluginsPage').then((module) => ({
+    default: module.PluginsPage,
+  }))
+);
+const MarketplacePage = React.lazy(() =>
   import(/* webpackChunkName: "Admin_marketplace" */ '../MarketplacePage')
 );
-const NotFoundPage = lazy(() =>
-  import(/* webpackChunkName: "Admin_NotFoundPage" */ '../NotFoundPage')
+const Onboarding = React.lazy(() =>
+  import(/* webpackChunkName: "Admin_Onboarding" */ './Onboarding').then((module) => ({
+    default: module.Onboarding,
+  }))
 );
-const InternalErrorPage = lazy(() =>
-  import(/* webpackChunkName: "Admin_InternalErrorPage" */ '../InternalErrorPage')
+const ProfilePage = React.lazy(() =>
+  import(/* webpackChunkName: "Admin_profilePage" */ '../ProfilePage').then((module) => ({
+    default: module.ProfilePage,
+  }))
+);
+const SettingsPage = React.lazy(() =>
+  import(/* webpackChunkName: "Admin_settingsPage" */ '../SettingsPage').then((module) => ({
+    default: module.SettingsPage,
+  }))
 );
 
-const ProfilePage = lazy(() =>
-  import(/* webpackChunkName: "Admin_profilePage" */ '../ProfilePage')
-);
-const SettingsPage = lazy(() =>
-  import(/* webpackChunkName: "Admin_settingsPage" */ '../SettingsPage')
-);
-
-// Simple hook easier for testing
-/**
- * TODO: remove this, it's bad.
- */
-const useTrackUsage = () => {
+export const Admin = () => {
+  const { isLoading, generalSectionLinks, pluginsSectionLinks } = useMenu();
+  const { menu } = useStrapiApp();
+  const { showTutorials } = useConfigurations();
   const { trackUsage } = useTracking();
   const dispatch = useDispatch();
   const appStatus = useSelector((state) => state.admin_app.status);
 
-  useEffect(() => {
+  React.useEffect(() => {
     // Make sure the event is only send once after accessing the admin panel
     // and not at runtime for example when regenerating the permissions with the ctb
     // or with i18n
     if (appStatus === 'init') {
       trackUsage('didAccessAuthenticatedAdministration');
-
       dispatch({ type: SET_APP_RUNTIME_STATUS });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appStatus]);
-};
+  }, [appStatus, dispatch, trackUsage]);
 
-const Admin = () => {
-  useTrackUsage();
-  const { isLoading, generalSectionLinks, pluginsSectionLinks } = useMenu();
-  const { menu } = useStrapiApp();
-  const { showTutorials } = useConfigurations();
+  const routes = menu
+    .filter((link) => link.Component)
 
-  const routes = useMemo(() => {
-    return menu
-      .filter((link) => link.Component)
-      .map(({ to, Component, exact }) => createRoute(Component, to, exact));
-  }, [menu]);
+    /**
+     * `Component` is an async function, which is passed as property of the
+     * addMenuLink() API during the plugin registration step.
+     *
+     * Because of that we can't just render <Route component={Component} />,
+     * but have to await the function.
+     *
+     * This isn't a good React pattern and should be reconsidered.
+     */
+
+    .map(({ to, Component, exact }) => createRoute(Component, to, exact));
 
   if (isLoading) {
     return <LoadingIndicatorPage />;
@@ -85,40 +97,34 @@ const Admin = () => {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <AppLayout
-        sideNav={
-          <LeftMenu
-            generalSectionLinks={generalSectionLinks}
-            pluginsSectionLinks={pluginsSectionLinks}
-          />
-        }
-      >
-        <Suspense fallback={<LoadingIndicatorPage />}>
-          <Switch>
-            <Route path="/" component={HomePage} exact />
-            <Route path="/me" component={ProfilePage} exact />
-            <Route path="/content-manager" component={CM} />
-            {routes}
-            <Route path="/settings/:settingId" component={SettingsPage} />
-            <Route path="/settings" component={SettingsPage} exact />
-            <Route path="/marketplace">
-              <MarketplacePage />
-            </Route>
-            <Route path="/list-plugins" exact>
-              <InstalledPluginsPage />
-            </Route>
-            <Route path="/404" component={NotFoundPage} />
-            <Route path="/500" component={InternalErrorPage} />
-            <Route path="" component={NotFoundPage} />
-          </Switch>
-        </Suspense>
+      <Flex alignItems="stretch">
+        <LeftMenu
+          generalSectionLinks={generalSectionLinks}
+          pluginsSectionLinks={pluginsSectionLinks}
+        />
+
+        <Box flex="1">
+          <React.Suspense fallback={<LoadingIndicatorPage />}>
+            <Switch>
+              <Route path="/" component={HomePage} exact />
+              <Route path="/me" component={ProfilePage} exact />
+              <Route path="/content-manager" component={CM} />
+              {routes}
+              <Route path="/settings/:settingId" component={SettingsPage} />
+              <Route path="/settings" component={SettingsPage} exact />
+              <Route path="/marketplace" component={MarketplacePage} />
+              <Route path="/list-plugins" component={InstalledPluginsPage} exact />
+            </Switch>
+          </React.Suspense>
+        </Box>
+
+        {/* TODO: we should move the logic to determine whether the guided tour is displayed
+            or not out of the component, to make the code-splitting more effective
+        */}
         <GuidedTourModal />
 
         {showTutorials && <Onboarding />}
-      </AppLayout>
+      </Flex>
     </DndProvider>
   );
 };
-
-export default Admin;
-export { useTrackUsage };

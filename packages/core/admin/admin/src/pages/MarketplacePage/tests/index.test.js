@@ -175,7 +175,6 @@ describe('Marketplace page - layout', () => {
         id: 'admin.pages.MarketPlacePage.production',
         defaultMessage: 'Manage plugins from the development environment',
       },
-      blockTransition: true,
     });
     expect(toggleNotification).toHaveBeenCalledTimes(1);
     // Should not show install buttons
