@@ -19,7 +19,7 @@ import { useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 
-import { formatAPIErrors } from '../../../../../utils';
+import { formatAPIErrors } from '../../../../../utils/formatAPIErrors';
 import { selectAdminPermissions } from '../../../../App/selectors';
 import { TRANSFER_TOKEN_TYPE } from '../../../components/Tokens/constants';
 import FormHead from '../../../components/Tokens/FormHead';

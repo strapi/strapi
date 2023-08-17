@@ -7,8 +7,8 @@ import { selectAdminPermissions } from '../../pages/App/selectors';
 import { useEnterprise } from '../useEnterprise';
 
 import { LINKS_CE } from './constants';
-import formatLinks from './utils/formatLinks';
-import sortLinks from './utils/sortLinks';
+import { formatLinks } from './utils/formatLinks';
+import { sortLinks } from './utils/sortLinks';
 
 const useSettingsMenu = () => {
   const [{ isLoading, menu }, setData] = useState({

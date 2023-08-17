@@ -1,7 +1,7 @@
 /**
- * InternalErrorPage
+ * NotFoundPage
  *
- * This is the page we show when the user gets a 500 error
+ * This is the page we show when the user visits a url that doesn't have a route
  *
  */
 import React from 'react';
@@ -11,7 +11,7 @@ import { LinkButton, useFocusWhenNavigate } from '@strapi/helper-plugin';
 import { ArrowRight, EmptyPictures } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-const InternalErrorPage = () => {
+export const NotFoundPage = () => {
   const { formatMessage } = useIntl();
   useFocusWhenNavigate();
 
@@ -35,8 +35,8 @@ const InternalErrorPage = () => {
             </LinkButton>
           }
           content={formatMessage({
-            id: 'notification.error',
-            defaultMessage: 'An error occured',
+            id: 'app.page.not.found',
+            defaultMessage: "Oops! We can't seem to find the page you're looging for...",
           })}
           hasRadius
           icon={<EmptyPictures width="10rem" />}
@@ -46,5 +46,3 @@ const InternalErrorPage = () => {
     </Main>
   );
 };
-
-export default InternalErrorPage;

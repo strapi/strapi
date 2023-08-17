@@ -1,4 +1,4 @@
-import sortLinks from '../sortLinks';
+import { sortLinks } from '../sortLinks';
 
 describe('ADMIN | utils | sortLinks', () => {
   it('should return an empty array', () => {
