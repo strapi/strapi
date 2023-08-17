@@ -7,9 +7,16 @@ const { isListable, hasEditableAttribute, hasRelationAttribute } = require('./at
 const DEFAULT_LIST_LENGTH = 4;
 const MAX_ROW_SIZE = 12;
 
-const isAllowedFieldSize = (type, size) => {
+const isAllowedFieldSize = (type, size, customFieldUid = null) => {
   const { getFieldSize } = getService('field-sizes');
-  const fieldSize = getFieldSize(type);
+  let fieldSize = getFieldSize(type);
+
+  if (customFieldUid) {
+    const customField = strapi.container.get('custom-fields').get(customFieldUid);
+    if (customField.inputSize) {
+      fieldSize = customField.inputSize;
+    }
+  }
 
   // Check if field was locked to another size
   if (!fieldSize.isResizable && size !== fieldSize.default) {
@@ -81,7 +88,13 @@ function syncLayouts(configuration, schema) {
       /* if the type of a field was changed (ex: string -> json) or a new field was added in the schema
          and the new type doesn't allow the size of the previous type, append the field at the end of layouts
       */
-      if (!isAllowedFieldSize(schema.attributes[el.name].type, el.size)) {
+      if (
+        !isAllowedFieldSize(
+          schema.attributes[el.name].type,
+          el.size,
+          schema.attributes[el.name].customField
+        )
+      ) {
         elementsToReAppend.push(el.name);
         continue;
       }
