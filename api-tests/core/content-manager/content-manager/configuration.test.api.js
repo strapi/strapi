@@ -157,7 +157,7 @@ describe('Content Manager - Configuration', () => {
     expect(body.data.contentType.layouts.list).toStrictEqual(['id', 'title', 'author']);
   });
 
-  test('Update list non visible attribute as default sort', async () => {
+  test('Set non visible attribute as default sort', async () => {
     // Get current config
     const { body } = await rq({
       url: '/content-manager/content-types/api::article.article/configuration',
@@ -175,5 +175,25 @@ describe('Content Manager - Configuration', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body.data.contentType.settings.defaultSortBy).toBe('nonVisible');
+  });
+
+  test('Set relational attribute as default sort', async () => {
+    // Get current config
+    const { body } = await rq({
+      url: '/content-manager/content-types/api::article.article/configuration',
+      method: 'GET',
+    });
+
+    // set default sort
+    const configuration = set('contentType.settings.defaultSortBy', 'author[username]', body.data);
+
+    const res = await rq({
+      url: '/content-manager/content-types/api::article.article/configuration',
+      method: 'PUT',
+      body: { settings: configuration.contentType.settings },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.contentType.settings.defaultSortBy).toBe('author[username]');
   });
 });

@@ -1,9 +1,12 @@
 'use strict';
 
 const _ = require('lodash');
+const { intersection } = require('lodash/fp');
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 
-const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
+const { getNonVisibleAttributes, getWritableAttributes } = contentTypesUtils;
+const { PUBLISHED_AT_ATTRIBUTE, CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } =
+  contentTypesUtils.constants;
 
 const NON_SORTABLES = ['component', 'json', 'media', 'richtext', 'dynamiczone'];
 const SORTABLE_RELATIONS = ['oneToOne', 'manyToOne'];
@@ -151,6 +154,30 @@ const findFirstStringAttribute = (schema) => {
 
 const getDefaultMainField = (schema) => findFirstStringAttribute(schema) || 'id';
 
+/**
+ * Returns list of all sortable attributes for a given content type schema
+ * TODO V5: Refactor non visible fields to be a part of content-manager schema so we can use isSortable instead
+ * @param {*} schema
+ * @returns
+ */
+const getSortableAttributes = (schema) => {
+  const validAttributes = Object.keys(schema.attributes).filter((key) => isListable(schema, key));
+
+  const model = strapi.getModel(schema.uid);
+  const nonVisibleWritableAttributes = intersection(
+    getNonVisibleAttributes(model),
+    getWritableAttributes(model)
+  );
+
+  return [
+    'id',
+    ...validAttributes,
+    ...nonVisibleWritableAttributes,
+    CREATED_BY_ATTRIBUTE,
+    UPDATED_BY_ATTRIBUTE,
+  ];
+};
+
 module.exports = {
   isSortable,
   isVisible,
@@ -160,4 +187,5 @@ module.exports = {
   hasEditableAttribute,
   hasRelationAttribute,
   getDefaultMainField,
+  getSortableAttributes,
 };
