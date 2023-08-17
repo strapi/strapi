@@ -12,25 +12,13 @@ import { isOperator } from '../operators';
 import type { Model } from '../types';
 import { ValidationError } from '../errors';
 
-const { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate, traverseQueryFields } =
-  traversals;
+const { traverseQueryFilters, traverseQuerySort, traverseQueryFields } = traversals;
 
 const throwPasswords = (schema: Model) => async (entity: Data) => {
   return traverseEntity(throwPassword, { schema }, entity);
 };
 
-const defaultSanitizeOutput = async (schema: Model, entity: Data) => {
-  return traverseEntity(
-    (...args) => {
-      throwPassword(...args);
-      throwPrivate(...args);
-    },
-    { schema },
-    entity
-  );
-};
-
-const defaultSanitizeFilters = curry((schema: Model, filters: unknown) => {
+const defaultValidateFilters = curry((schema: Model, filters: unknown) => {
   return pipeAsync(
     // Remove keys that are not attributes or valid operators
     traverseQueryFilters(
@@ -63,7 +51,7 @@ const defaultSanitizeFilters = curry((schema: Model, filters: unknown) => {
   )(filters);
 });
 
-const defaultSanitizeSort = curry((schema: Model, sort: unknown) => {
+const defaultValidateSort = curry((schema: Model, sort: unknown) => {
   return pipeAsync(
     // Remove non attribute keys
     traverseQuerySort(
@@ -100,11 +88,14 @@ const defaultSanitizeSort = curry((schema: Model, sort: unknown) => {
   )(sort);
 });
 
-const defaultSanitizeFields = curry((schema: Model, fields: unknown) => {
+const defaultValidateFields = curry((schema: Model, fields: unknown) => {
   return pipeAsync(
     // Only keep scalar attributes
     traverseQueryFields(
       ({ key, attribute }) => {
+        if (key === 'id') {
+          return;
+        }
         if (isNil(attribute) || !isScalarAttribute(attribute)) {
           throw new ValidationError(`invalid key ${key}`);
         }
@@ -114,44 +105,8 @@ const defaultSanitizeFields = curry((schema: Model, fields: unknown) => {
     // Remove private fields
     traverseQueryFields(throwPrivate, { schema }),
     // Remove password fields
-    traverseQueryFields(throwPassword, { schema }),
-    // Remove nil values from fields array
-    (value) => (isArray(value) ? value.filter((field) => !isNil(field)) : value)
+    traverseQueryFields(throwPassword, { schema })
   )(fields);
 });
 
-const defaultSanitizePopulate = curry((schema: Model, populate: unknown) => {
-  return pipeAsync(
-    traverseQueryPopulate(
-      async ({ key, value, schema, attribute }, { set }) => {
-        if (attribute) {
-          return;
-        }
-
-        if (key === 'sort') {
-          set(key, await defaultSanitizeSort(schema, value));
-        }
-
-        if (key === 'filters') {
-          set(key, await defaultSanitizeFilters(schema, value));
-        }
-
-        if (key === 'fields') {
-          set(key, await defaultSanitizeFields(schema, value));
-        }
-      },
-      { schema }
-    ),
-    // Remove private fields
-    traverseQueryPopulate(throwPrivate, { schema })
-  )(populate);
-});
-
-export {
-  throwPasswords,
-  defaultSanitizeOutput,
-  defaultSanitizeFilters,
-  defaultSanitizeSort,
-  defaultSanitizeFields,
-  defaultSanitizePopulate,
-};
+export { throwPasswords, defaultValidateFilters, defaultValidateSort, defaultValidateFields };

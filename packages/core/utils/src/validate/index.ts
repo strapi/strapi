@@ -12,7 +12,7 @@ import traversals from '../traverse/traversals';
 
 import { Model } from '../types';
 
-const { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } = traversals;
+const { traverseQueryFilters, traverseQuerySort } = traversals;
 
 export interface Options {
   auth?: unknown;
@@ -80,7 +80,7 @@ const createContentAPIValidators = () => {
       return;
     }
 
-    const transforms = [validators.defaultSanitizeFilters(schema)];
+    const transforms = [validators.defaultValidateFilters(schema)];
 
     if (auth) {
       transforms.push(traverseQueryFilters(visitors.throwRestrictedRelations(auth), { schema }));
@@ -90,7 +90,7 @@ const createContentAPIValidators = () => {
   };
 
   const validateSort: ValidateFunc = async (sort, schema: Model, { auth } = {}) => {
-    const transforms = [validators.defaultSanitizeSort(schema)];
+    const transforms = [validators.defaultValidateSort(schema)];
 
     if (auth) {
       transforms.push(traverseQuerySort(visitors.throwRestrictedRelations(auth), { schema }));
@@ -100,19 +100,9 @@ const createContentAPIValidators = () => {
   };
 
   const validateFields: ValidateFunc = (fields, schema: Model) => {
-    const transforms = [validators.defaultSanitizeFields(schema)];
+    const transforms = [validators.defaultValidateFields(schema)];
 
     return pipeAsync(...transforms)(fields);
-  };
-
-  const validatePopulate: ValidateFunc = async (populate, schema: Model, { auth } = {}) => {
-    const transforms = [validators.defaultSanitizePopulate(schema)];
-
-    if (auth) {
-      transforms.push(traverseQueryPopulate(visitors.throwRestrictedRelations(auth), { schema }));
-    }
-
-    return pipeAsync(...transforms)(populate);
   };
 
   return {
@@ -121,7 +111,6 @@ const createContentAPIValidators = () => {
     filters: validateFilters,
     sort: validateSort,
     fields: validateFields,
-    populate: validatePopulate,
   };
 };
 

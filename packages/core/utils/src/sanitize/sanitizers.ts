@@ -41,7 +41,13 @@ const defaultSanitizeFilters = curry((schema: Model, filters: unknown) => {
       ({ key, attribute }, { remove }) => {
         const isAttribute = !!attribute;
 
-        if (!isAttribute && !isOperator(key) && key !== 'id') {
+        // ID is not an attribute per se, so we need to make
+        // an extra check to ensure we're not checking it
+        if (key === 'id') {
+          return;
+        }
+
+        if (!isAttribute && !isOperator(key)) {
           remove(key);
         }
       },
@@ -73,7 +79,7 @@ const defaultSanitizeSort = curry((schema: Model, sort: unknown) => {
     traverseQuerySort(
       ({ key, attribute }, { remove }) => {
         // ID is not an attribute per se, so we need to make
-        // an extra check to ensure we're not removing it
+        // an extra check to ensure we're not checking it
         if (key === 'id') {
           return;
         }
@@ -109,6 +115,11 @@ const defaultSanitizeFields = curry((schema: Model, fields: unknown) => {
     // Only keep scalar attributes
     traverseQueryFields(
       ({ key, attribute }, { remove }) => {
+        // ID is not an attribute per se, so we need to make
+        // an extra check to ensure we're not checking it
+        if (key === 'id') {
+          return;
+        }
         if (isNil(attribute) || !isScalarAttribute(attribute)) {
           remove(key);
         }
