@@ -1,28 +1,28 @@
 import type { ConfigExport } from './shared.d.ts';
 
-export type ApiTokenProp = {
+export interface ApiTokenProp {
   salt: string;
-};
+}
 
-export type AuthProp = {
+export interface AuthProp {
   secret: string;
-};
+}
 
-export type TransferTokenProp = {
+export interface TransferTokenProp {
   salt: string;
-};
+}
 
-export type AuditLogsProp = {
+export interface AuditLogsProp {
   retentionDays?: number;
-};
+}
 
-export type ForgotPasswordProp = {
+export interface ForgotPasswordProp {
   emailTemplate?: string;
   from?: string;
   replyTo?: string;
-};
+}
 
-export type RateLimitProp = {
+export interface RateLimitProp {
   enabled?: boolean;
   interval?: number;
   max?: number;
@@ -31,13 +31,13 @@ export type RateLimitProp = {
   prefixKey?: number;
   whitelist?: string;
   store?: string;
-};
+}
 
-export type TransferProp = {
+export interface TransferProp {
   token: TransferTokenProp;
-};
+}
 
-export type AdminConfiguration = {
+export interface AdminConfiguration {
   // required
   apiToken: ApiTokenProp;
   transfer: TransferProp;
@@ -48,6 +48,6 @@ export type AdminConfiguration = {
   url?: string;
   forgotPassword?: ForgotPasswordProp;
   rateLimit?: RateLimitProp;
-};
+}
 
 export type Admin = ConfigExport<AdminConfiguration>;

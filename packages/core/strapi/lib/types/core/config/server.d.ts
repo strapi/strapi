@@ -1,23 +1,23 @@
 import type { ConfigExport } from './shared.d.ts';
 
-export type AppProp = {
+export interface AppProp {
   keys: string[];
-};
+}
 
-export type CronProp = {
+export interface CronProp {
   enabled?: boolean;
   tasks?: object; // TODO: does strapi crash if cron is enabled but tasks is empty?
-};
+}
 
-export type DirsProp = {
+export interface DirsProp {
   public?: string;
-};
+}
 
-export type WebhooksProp = {
+export interface WebhooksProp {
   populateRelations?: boolean;
-};
+}
 
-export type ServerConfiguration = {
+export interface ServerConfiguration {
   // required
   host: string;
   port: number;
@@ -32,6 +32,6 @@ export type ServerConfiguration = {
   cron?: CronProp;
   dirs?: DirsProp;
   webhooks?: WebhooksProp;
-};
+}
 
 export type Server = ConfigExport<ServerConfiguration>;
