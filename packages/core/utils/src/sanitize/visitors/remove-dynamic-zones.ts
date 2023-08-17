@@ -1,5 +1,5 @@
 import { isDynamicZoneAttribute } from '../../content-types';
-import { Visitor } from '../../traverse/factory';
+import type { Visitor } from '../../traverse/factory';
 
 const visitor: Visitor = ({ key, attribute }, { remove }) => {
   if (isDynamicZoneAttribute(attribute)) {

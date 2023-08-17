@@ -9,21 +9,21 @@ const validateUploadBody = require('./validation/content-api/upload');
 const { sanitize, validate } = utils;
 const { ValidationError } = utils.errors;
 
-const sanitizeOutput = (data, ctx) => {
+const sanitizeOutput = async (data, ctx) => {
   const schema = strapi.getModel(FILE_MODEL_UID);
   const { auth } = ctx.state;
 
   return sanitize.contentAPI.output(data, schema, { auth });
 };
 
-const validateQuery = (data, ctx) => {
+const validateQuery = async (data, ctx) => {
   const schema = strapi.getModel(FILE_MODEL_UID);
   const { auth } = ctx.state;
 
   return validate.contentAPI.query(data, schema, { auth });
 };
 
-const sanitizeQuery = (data, ctx) => {
+const sanitizeQuery = async (data, ctx) => {
   const schema = strapi.getModel(FILE_MODEL_UID);
   const { auth } = ctx.state;
 
