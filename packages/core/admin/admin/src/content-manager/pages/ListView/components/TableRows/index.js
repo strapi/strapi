@@ -23,7 +23,7 @@ import { useIntl } from 'react-intl';
 import { Link, useHistory } from 'react-router-dom';
 
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
-import { getFullName } from '../../../../../utils';
+import { getFullName } from '../../../../../utils/getFullName';
 import { usePluginsQueryParams } from '../../../../hooks';
 import { getTrad } from '../../../../utils';
 import CellContent from '../CellContent';

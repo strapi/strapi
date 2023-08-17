@@ -70,7 +70,6 @@ const MarketPlacePage = () => {
           id: 'admin.pages.MarketPlacePage.production',
           defaultMessage: 'Manage plugins from the development environment',
         },
-        blockTransition: true,
       });
     }
   }, [toggleNotification, isInDevelopmentMode]);
