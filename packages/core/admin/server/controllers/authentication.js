@@ -59,13 +59,15 @@ module.exports = {
         return next();
       })(ctx);
     },
-    (ctx) => {
-      const { user } = ctx.state;
+    async (ctx) => {
+      const advanced = await strapi.store({type: 'plugin', name: 'users-permissions', key: 'advanced'}).get();
+      const {user} = ctx.state;
 
       ctx.body = {
         data: {
           token: getService('token').createJwtToken(user),
           user: getService('user').sanitizeUser(user), // TODO: fetch more detailed info,
+          mfa: advanced.multi_factor_authentication
         },
       };
       ctx.session.rememberMe = ctx.request?.body?.rememberMe

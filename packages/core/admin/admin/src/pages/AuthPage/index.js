@@ -147,7 +147,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     try {
       const {
         data: {
-          data: { token, user },
+          data: { token, user, mfa },
         },
       } = await post(requestURL, omit(body, fieldsToOmit), { cancelToken: source.token });
 
@@ -157,8 +157,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
 
       auth.setUserInfo(user, body.rememberMe);
 
-      // TODO LK read if mfa is turned on from the advanced settings
-      if (true) {
+      if (mfa) {
         push('/auth/multi-factor-authentication')
       } else {
         auth.setToken(token, body.rememberMe);
