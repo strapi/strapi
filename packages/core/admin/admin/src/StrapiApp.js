@@ -22,7 +22,7 @@ import {
 } from './exposedHooks';
 import favicon from './favicon.png';
 import injectionZones from './injectionZones';
-import App from './pages/App';
+import { App } from './pages/App';
 import languageNativeNames from './translations/languageNativeNames';
 
 class StrapiApp {

@@ -6,7 +6,7 @@ import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 
-import Onboarding from '../index';
+import { Onboarding } from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
