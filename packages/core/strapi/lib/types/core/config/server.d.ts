@@ -4,7 +4,7 @@ export interface AppProp {
 
 export interface CronProp {
   enabled?: boolean;
-  tasks?: object; // TODO: does strapi crash if cron is enabled but tasks is empty?
+  tasks?: object;
 }
 
 export interface DirsProp {
