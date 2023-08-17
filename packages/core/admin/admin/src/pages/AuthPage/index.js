@@ -101,7 +101,6 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     }
 
     if (authType === 'multi-factor-authentication') {
-      console.log("MFA =============================== packages/core/admin/admin/src/pages/AuthPage/index.js handleSubmit()",  Date.now())
       await multiFactorAuthenticationRequest(body, requestURL, { setSubmitting, setErrors });
     }
 
@@ -125,10 +124,13 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   };
 
   const multiFactorAuthenticationRequest = async (body, requestURL, { setSubmitting, setErrors }) => {
-    console.log("MFA =============================== packages/core/admin/admin/src/pages/AuthPage/index.js multiFactorAuthenticationRequest()",  Date.now())
-
     try {
-      await post(requestURL, body, { cancelToken: source.token });
+      const {
+        data: {
+          data: { token, rememberMe },
+        },
+      } = await post(requestURL, body, { cancelToken: source.token });
+      auth.setToken(token, rememberMe);
       redirectToPreviousLocation();
     } catch (err) {
       if (err?.response?.status === 403) {
@@ -145,7 +147,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     try {
       const {
         data: {
-          data: { token, user, code },
+          data: { token, user },
         },
       } = await post(requestURL, omit(body, fieldsToOmit), { cancelToken: source.token });
 
@@ -153,14 +155,13 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         changeLocale(user.preferedLanguage);
       }
 
-      auth.setToken(token, body.rememberMe);
       auth.setUserInfo(user, body.rememberMe);
-      // const advanced = await strapi.store({type: 'plugin', name: 'users-permissions', key: 'advanced'}).get();
 
+      // TODO LK read if mfa is turned on from the advanced settings
       if (true) {
-        console.log("MFA =============================== packages/core/admin/admin/src/pages/AuthPage/index.js loginRequest()",  Date.now())
-        push('/auth/multi-factor-authentication', { data: code })
+        push('/auth/multi-factor-authentication')
       } else {
+        auth.setToken(token, body.rememberMe);
         redirectToPreviousLocation()
       }
     } catch (err) {

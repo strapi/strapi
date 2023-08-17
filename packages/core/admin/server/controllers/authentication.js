@@ -41,8 +41,6 @@ module.exports = {
         ctx.state.user = user;
 
         const sanitizedUser = getService('user').sanitizeUser(user);
-        console.log("MFA =============================== packages/core/admin/server/controllers/authentication.js login()",  Date.now())
-
         // Multi factor authentication setting check
         if (advanced.multi_factor_authentication) {
           // Generate 6 digit code
@@ -52,13 +50,14 @@ module.exports = {
             code: verificationCode
           });
 
-          // Store the verification code in the user's session for later verification
+          // Store the verification code and user information in the session for verification later
           ctx.session.verificationCode = verificationCode;
+          ctx.session.user = user;
+        } else {
+          strapi.eventHub.emit('admin.auth.success', {user: sanitizedUser, provider: 'local'});
         }
-
-        strapi.eventHub.emit('admin.auth.success', {user: sanitizedUser, provider: 'local'});
         return next();
-      })(ctx, next);
+      })(ctx);
     },
     (ctx) => {
       const { user } = ctx.state;
@@ -66,9 +65,10 @@ module.exports = {
       ctx.body = {
         data: {
           token: getService('token').createJwtToken(user),
-          user: getService('user').sanitizeUser(ctx.state.user) // TODO: fetch more detailed info,
+          user: getService('user').sanitizeUser(user), // TODO: fetch more detailed info,
         },
       };
+      ctx.session.rememberMe = ctx.request?.body?.rememberMe
     },
   ]),
 
@@ -166,15 +166,20 @@ module.exports = {
   },
 
   async multiFactorAuthentication(ctx) {
-    console.log("MFA =============================== packages/core/admin/server/controllers/authentication.js multiFactorAuthentication()",  Date.now())
-
     const input = ctx.request.body;
     await validateMultiFactorAuthenticationInput(input);
     if (input.code !== ctx.session.verificationCode) {
       // Throw forbidden error if verification code is incorrect
       ctx.status = 403;
     } else {
+      // Set token if valid
       ctx.status = 200;
+      ctx.body = {
+        data: {
+          token: getService('token').createJwtToken(ctx.session.user),
+          rememberMe: ctx.session.rememberMe
+        },
+      };
     }
   },
 
