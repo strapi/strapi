@@ -75,7 +75,7 @@ const TextLink = styled(TypographyLineHeight)`
   }
 `;
 
-const Onboarding = () => {
+export const Onboarding = () => {
   const triggerRef = useRef();
   const [isOpen, setIsOpen] = useState(false);
   const { formatMessage } = useIntl();
@@ -222,5 +222,3 @@ const Onboarding = () => {
     </Box>
   );
 };
-
-export default Onboarding;

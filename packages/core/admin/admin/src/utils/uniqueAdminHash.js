@@ -10,13 +10,6 @@ export const utils = {
   },
 };
 
-export default async function hashAdminUserEmail(payload) {
-  if (!payload) {
-    return null;
-  }
-  try {
-    return await utils.digestMessage(payload.email);
-  } catch (error) {
-    return null;
-  }
+export async function hashAdminUserEmail(payload) {
+  return utils.digestMessage(payload.email);
 }
