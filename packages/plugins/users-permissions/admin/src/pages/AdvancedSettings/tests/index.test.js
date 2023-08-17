@@ -1054,6 +1054,66 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                     </div>
                   </div>
                   <div
+                   class="c31"
+                  >
+                    <div
+                      class="c32"
+                    >
+                      <div
+                        class="c18"
+                      >
+                        <div
+                          class="c4"
+                        >
+                          <label
+                            class="c5 c19 c20"
+                            for=":rc:"
+                          >
+                            Enable multi-factor authentication
+                          </label>
+                        </div>
+                        <div
+                          class="c33 c34 c35"
+                          wrap="wrap"
+                        >
+                          <div
+                            class="c36 c37 c38"
+                          >
+                            <span
+                              class="c5 c39"
+                            >
+                              False
+                            </span>
+                          </div>
+                          <div
+                            class="c40 c37 c38"
+                          >
+                            <span
+                              class="c5 c41"
+                            >
+                              True
+                            </span>
+                          </div>
+                          <input
+                            aria-describedby=":rc:-hint :rc:-error"
+                            aria-disabled="false"
+                            aria-required="false"
+                            class="c42"
+                            id=":rc:"
+                            name="multi_factor_authentication"
+                            type="checkbox"
+                          />
+                        </div>
+                        <p
+                          class="c5 c30"
+                          id=":rc:-hint"
+                        >
+                          When enabled (ON), users will receive 6 digit code to their email for two step verification.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div
                     class="c31"
                   >
                     <div
