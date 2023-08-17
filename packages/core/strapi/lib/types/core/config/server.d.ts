@@ -1,5 +1,3 @@
-import type { ConfigExport } from './shared.d.ts';
-
 export interface AppProp {
   keys: string[];
 }
@@ -17,7 +15,7 @@ export interface WebhooksProp {
   populateRelations?: boolean;
 }
 
-export interface ServerConfiguration {
+export interface Server {
   // required
   host: string;
   port: number;
@@ -33,5 +31,3 @@ export interface ServerConfiguration {
   dirs?: DirsProp;
   webhooks?: WebhooksProp;
 }
-
-export type Server = ConfigExport<ServerConfiguration>;

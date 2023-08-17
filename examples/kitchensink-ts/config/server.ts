@@ -1,6 +1,4 @@
-import { Config } from '@strapi/strapi';
-
-const serverConfig: Config.Server = ({ env }) => ({
+const serverConfig = ({ env }) => ({
   host: env('HOST', '0.0.0.0'),
   port: env.int('PORT', 1337),
   app: {

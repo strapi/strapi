@@ -37,7 +37,7 @@ export interface TransferProp {
   token: TransferTokenProp;
 }
 
-export interface AdminConfiguration {
+export interface Admin {
   // required
   apiToken: ApiTokenProp;
   transfer: TransferProp;
@@ -49,5 +49,3 @@ export interface AdminConfiguration {
   forgotPassword?: ForgotPasswordProp;
   rateLimit?: RateLimitProp;
 }
-
-export type Admin = ConfigExport<AdminConfiguration>;
