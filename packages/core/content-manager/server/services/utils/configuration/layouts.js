@@ -7,16 +7,9 @@ const { isListable, hasEditableAttribute, hasRelationAttribute } = require('./at
 const DEFAULT_LIST_LENGTH = 4;
 const MAX_ROW_SIZE = 12;
 
-const isAllowedFieldSize = (type, size, customFieldUid = null) => {
+const isAllowedFieldSize = (type, size) => {
   const { getFieldSize } = getService('field-sizes');
-  let fieldSize = getFieldSize(type);
-
-  if (customFieldUid) {
-    const customField = strapi.container.get('custom-fields').get(customFieldUid);
-    if (customField.inputSize) {
-      fieldSize = customField.inputSize;
-    }
-  }
+  const fieldSize = getFieldSize(type);
 
   // Check if field was locked to another size
   if (!fieldSize.isResizable && size !== fieldSize.default) {
@@ -28,17 +21,11 @@ const isAllowedFieldSize = (type, size, customFieldUid = null) => {
 };
 
 const getDefaultFieldSize = (attribute) => {
-  // Check if it's a custom field with a custom size
-  if (attribute.customField) {
-    const customField = strapi.container.get('custom-fields').get(attribute.customField);
-    if (customField.inputSize) {
-      return customField.inputSize.default;
-    }
-  }
+  const { hasFieldSize, getFieldSize } = getService('field-sizes');
 
-  // Get the default size for the field type
-  const { getFieldSize } = getService('field-sizes');
-  return getFieldSize(attribute.type).default;
+  // Check if it's a custom field with a custom size and get the default size for the field type
+  return getFieldSize(hasFieldSize(attribute.customField) ? attribute.customField : attribute.type)
+    .default;
 };
 
 async function createDefaultLayouts(schema) {
@@ -85,16 +72,17 @@ function syncLayouts(configuration, schema) {
     for (const el of row) {
       if (!hasEditableAttribute(schema, el.name)) continue;
 
+      // Check if the field is a custom field with a custom size.
+      // If so, use the custom size instead of the type size
+      const { hasFieldSize } = getService('field-sizes');
+      const fieldType = hasFieldSize(schema.attributes[el.name].customField)
+        ? schema.attributes[el.name].customField
+        : schema.attributes[el.name].type;
+
       /* if the type of a field was changed (ex: string -> json) or a new field was added in the schema
          and the new type doesn't allow the size of the previous type, append the field at the end of layouts
       */
-      if (
-        !isAllowedFieldSize(
-          schema.attributes[el.name].type,
-          el.size,
-          schema.attributes[el.name].customField
-        )
-      ) {
+      if (!isAllowedFieldSize(fieldType, el.size)) {
         elementsToReAppend.push(el.name);
         continue;
       }
