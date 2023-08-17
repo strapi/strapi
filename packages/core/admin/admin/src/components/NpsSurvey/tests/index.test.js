@@ -20,6 +20,13 @@ jest.mock('@strapi/helper-plugin', () => ({
     })),
   },
   useNotification: jest.fn().mockImplementation(() => toggleNotification),
+  useAppInfo: jest
+    .fn()
+    .mockImplementation(() => ({
+      autoReload: true,
+      strapiVersion: 'test',
+      communityEdition: false,
+    })),
 }));
 
 const handlers = [
