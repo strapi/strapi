@@ -121,4 +121,36 @@ module.exports = {
 
     ctx.body = { data: await sanitizeOutput(updatedEntity) };
   },
+
+  async listAvailableStages(ctx) {
+    const stagePermissions = getService('stage-permissions');
+    const workflowService = getService('workflows');
+
+    const { model_uid: modelUID, id } = ctx.params;
+
+    // Load entity
+    const entity = await strapi.entityService.findOne(modelUID, Number(id), {
+      populate: [ENTITY_STAGE_ATTRIBUTE],
+    });
+
+    if (!entity) {
+      ctx.throw(404, 'Entity not found');
+    }
+
+    const entityStageId = entity[ENTITY_STAGE_ATTRIBUTE]?.id;
+    const canTransition = stagePermissions.can(STAGE_TRANSITION_UID, entityStageId);
+
+    const { stages: workflowStages } = await workflowService.getAssignedWorkflow(modelUID, {
+      populate: 'stages',
+    });
+    const data = !canTransition ? [] : workflowStages.filter((stage) => stage.id !== entityStageId);
+
+    ctx.body = {
+      data,
+      meta: {
+        stageCount: data.length,
+        // workflowCount: 2, // TODO is this applicable, there can only be 1 workflow
+      },
+    };
+  },
 };
