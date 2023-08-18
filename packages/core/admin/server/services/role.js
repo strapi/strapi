@@ -1,11 +1,22 @@
 'use strict';
 
 const _ = require('lodash');
-const { set, omit, pick, prop, isArray, differenceWith, differenceBy } = require('lodash/fp');
+const {
+  set,
+  omit,
+  pick,
+  prop,
+  isArray,
+  differenceWith,
+  differenceBy,
+  flow,
+  map,
+} = require('lodash/fp');
 const deepEqual = require('fast-deep-equal');
 const {
   generateTimestampCode,
   stringIncludes,
+  mapAsync,
   hooks: { createAsyncSeriesWaterfallHook },
 } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
@@ -316,6 +327,78 @@ const displayWarningIfNoSuperAdmin = async () => {
 };
 
 /**
+ * Partially update a role permissions in database.
+ * Permissions will use the format of:
+ * {
+ *  connect: [permission1, permission2],
+ *  disconnect: [permission3, permission4]
+ * }
+ *
+ * @param {*} roleId
+ * @param {*} permissions
+ */
+const partialAssignPermissions = async (roleId, permissions = {}) => {
+  const superAdmin = await getService('role').getSuperAdmin();
+  const isSuperAdmin = superAdmin && superAdmin.id === roleId;
+  const permissionsWithRole = flow(
+    map(set('role', roleId)), // Assign role
+    map(permissionDomain.create) // Map permission to domain
+  );
+
+  const connect = permissionsWithRole(permissions.connect) || [];
+  const disconnect = permissionsWithRole(permissions.disconnect) || [];
+
+  await validatePermissionsExist(connect);
+
+  const permissionsToCreate = connect.filter((permission) => !permission.id);
+  const permissionsToUpdate = connect.filter((permission) => permission.id);
+  const permissionsToDelete = disconnect;
+
+  const existingPermissions = await getService('permission').findMany({
+    where: { role: { id: roleId } },
+    populate: ['role'],
+  });
+
+  // Find permissions that do not exist in db
+  const invalidUpdatePermissions = differenceBy('id', permissionsToUpdate, existingPermissions);
+  const invalidDeletePermissions = differenceBy('id', permissionsToDelete, existingPermissions);
+
+  if (invalidUpdatePermissions.length !== 0) {
+    throw new ApplicationError('Some permissions to update do not exist');
+  }
+
+  if (invalidDeletePermissions.length !== 0) {
+    throw new ApplicationError('Some permissions to delete do not exist');
+  }
+
+  // Array of final permissions to return
+  const permissionsToReturn = differenceBy('id', existingPermissions, [
+    ...permissionsToDelete,
+    ...permissionsToUpdate,
+  ]);
+
+  if (permissionsToDelete.length > 0) {
+    await getService('permission').deleteByIds(permissionsToDelete.map(prop('id')));
+  }
+
+  if (permissionsToCreate.length > 0) {
+    const newPermissions = await addPermissions(roleId, permissionsToCreate);
+    permissionsToReturn.push(...newPermissions);
+  }
+
+  if (permissionsToUpdate.length > 0) {
+    const updatedPermissions = await updatePermissions(roleId, permissionsToUpdate);
+    permissionsToReturn.push(...updatedPermissions);
+  }
+
+  if (!isSuperAdmin && (connect.length || disconnect.length)) {
+    await getService('metrics').sendDidUpdateRolePermissions();
+  }
+
+  return permissionsToReturn;
+};
+
+/**
  * Assign permissions to a role
  * @param {string|int} roleId - role ID
  * @param {Array<Permission{action,subject,fields,conditions}>} permissions - permissions to assign to the role
@@ -368,7 +451,6 @@ const assignPermissions = async (roleId, permissions = []) => {
   return permissionsToReturn;
 };
 
-
 const addPermissions = async (roleId, permissions) => {
   const { conditionProvider, createMany } = getService('permission');
   const { sanitizeConditions } = permissionDomain;
@@ -381,6 +463,21 @@ const addPermissions = async (roleId, permissions) => {
   return createMany(permissionsWithRole);
 };
 
+const updatePermissions = async (roleId, permissions) => {
+  // TODO: Update many
+  const { conditionProvider, update } = getService('permission');
+  const { sanitizeConditions } = permissionDomain;
+
+  const permissionsWithRole = permissions
+    .map(set('role', roleId))
+    .map(sanitizeConditions(conditionProvider))
+    .map(permissionDomain.create);
+
+  return mapAsync(permissionsWithRole, (permission) => {
+    const { id, ...attributes } = permission;
+    return update({ id }, attributes);
+  });
+};
 
 const isContentTypeAction = (action) => action.section === CONTENT_TYPE_SECTION;
 
@@ -457,6 +554,7 @@ module.exports = {
   displayWarningIfNoSuperAdmin,
   addPermissions,
   hasSuperAdminRole,
+  updatePermissions: partialAssignPermissions,
   assignPermissions,
   resetSuperAdminPermissions,
   checkRolesIdForDeletion,

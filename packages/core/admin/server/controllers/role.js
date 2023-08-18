@@ -146,7 +146,7 @@ module.exports = {
       return ctx.notFound('role.notFound');
     }
 
-    const permissions = await roleService.assignPermissions(role.id, input.permissions);
+    const permissions = await roleService.updatePermissions(role.id, input.permissions);
 
     const sanitizedPermissions = permissions.map(permissionService.sanitizePermission);
 

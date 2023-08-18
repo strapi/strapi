@@ -182,6 +182,7 @@ const cleanPermissionsInDatabase = async () => {
 
 module.exports = {
   createMany,
+  update,
   findMany,
   deleteByRolesIds,
   deleteByIds,
