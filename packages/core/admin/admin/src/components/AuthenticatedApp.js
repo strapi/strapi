@@ -17,8 +17,8 @@ import { useConfigurations } from '../hooks';
 import { Admin } from '../pages/Admin';
 import { getFullName } from '../utils/getFullName';
 import { hashAdminUserEmail } from '../utils/uniqueAdminHash';
-import NpsSurvey from './NpsSurvey';
 
+import NpsSurvey from './NpsSurvey';
 import RBACProvider from './RBACProvider';
 
 const strapiVersion = packageJSON.version;
