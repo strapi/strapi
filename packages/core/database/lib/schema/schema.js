@@ -9,9 +9,10 @@ const createColumn = (name, attribute) => {
     name,
     type,
     args,
-    defaultTo: null,
-    notNullable: false,
+    defaultTo: attribute.default || null,
+    notNullable: attribute.required || false,
     unsigned: false,
+    unique: attribute.unique || false,
     ...opts,
     ...(attribute.column || {}),
   };
@@ -131,7 +132,7 @@ const getColumnType = (attribute) => {
       };
     }
     case 'json': {
-      return { type: 'jsonb' };
+      return { type: 'jsonb', defaultTo: attribute.default ? JSON.stringify(attribute.default) : null };
     }
     case 'integer': {
       return { type: 'integer' };
@@ -174,7 +175,10 @@ const getColumnType = (attribute) => {
       };
     }
     case 'boolean': {
-      return { type: 'boolean' };
+      return { 
+        type: 'boolean', 
+        defaultTo: typeof attribute.default === 'boolean' ? attribute.default : null
+      };
     }
     default: {
       throw new Error(`Unknown type ${attribute.type}`);
