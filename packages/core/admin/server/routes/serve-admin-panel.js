@@ -29,7 +29,7 @@ const registerAdminPanelRoute = ({ strapi }) => {
   strapi.server.routes([
     {
       method: 'GET',
-      path: concatenatePaths(strapi.config.admin.path, '/:path*'),
+      path: `${strapi.config.admin.path}/:path*`,
       handler: [
         serveAdminMiddleware,
         serveStatic(buildDir, {
@@ -56,7 +56,7 @@ const serveStatic = (filesDir, koaStaticOptions = {}) => {
 
   return async (ctx, next) => {
     const prev = ctx.path;
-    const newPath = basename(ctx.path) || '/';
+    const newPath = basename(ctx.path);
 
     ctx.path = newPath;
     await serve(ctx, async () => {
@@ -66,16 +66,6 @@ const serveStatic = (filesDir, koaStaticOptions = {}) => {
     });
     ctx.path = prev;
   };
-};
-
-const concatenatePaths = (...paths) => {
-  const trimmedPaths = paths.map((path) => path.trim());
-  const joinedPath = trimmedPaths
-    .join('/')
-    .split('/')
-    .filter((part) => part !== '')
-    .join('/');
-  return `/${joinedPath}`;
 };
 
 module.exports = registerAdminPanelRoute;
