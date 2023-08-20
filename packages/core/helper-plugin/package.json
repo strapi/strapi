@@ -59,7 +59,7 @@
   "devDependencies": {
     "@rollup/plugin-node-resolve": "15.1.0",
     "@storybook/addon-actions": "7.2.2",
-    "@storybook/addon-essentials": "7.2.2",
+    "@storybook/addon-essentials": "7.3.2",
     "@storybook/addon-links": "7.2.2",
     "@storybook/addon-mdx-gfm": "7.2.2",
     "@storybook/builder-vite": "7.2.2",
