@@ -61,7 +61,7 @@
     "@storybook/addon-actions": "7.2.2",
     "@storybook/addon-essentials": "7.2.2",
     "@storybook/addon-links": "7.2.2",
-    "@storybook/addon-mdx-gfm": "7.2.2",
+    "@storybook/addon-mdx-gfm": "7.3.2",
     "@storybook/builder-vite": "7.2.2",
     "@storybook/react-vite": "7.2.2",
     "@strapi/design-system": "1.9.0",
