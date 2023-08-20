@@ -1,14 +1,12 @@
-import React from 'react';
-
-import { Flex, Typography } from '@strapi/design-system';
+import { Flex, FlexProps, Typography } from '@strapi/design-system';
 import styled from 'styled-components';
 
 export interface ContextBoxProps {
   title?: string;
   subtitle?: string;
-  icon?: React.JSX.Element;
+  icon?: FlexProps['children'];
   iconBackground?: string;
-  endAction?: React.JSX.Element;
+  endAction?: FlexProps['children'];
   titleEllipsis?: boolean;
 }
 const IconWrapper = styled(Flex)`
