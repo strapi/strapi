@@ -6,7 +6,8 @@ import * as React from 'react';
  *
  * @type {<T extends (...args: any[]) => any>(callback: T | undefined) => T}
  */
-export const useCallbackRef = (callback) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const useCallbackRef = <T extends (...args: any[]) => any>(callback: T | undefined): T => {
   const callbackRef = React.useRef(callback);
 
   React.useEffect(() => {
@@ -14,10 +15,5 @@ export const useCallbackRef = (callback) => {
   });
 
   // https://github.com/facebook/react/issues/19240
-  return React.useMemo(
-    () =>
-      (...args) =>
-        callbackRef.current?.(...args),
-    []
-  );
+  return React.useMemo(() => ((...args) => callbackRef.current?.(...args)) as T, []);
 };
