@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@juggle/resize-observer": "3.4.0",
-    "@testing-library/jest-dom": "5.16.5",
+    "@testing-library/jest-dom": "5.17.0",
     "jest-styled-components": "7.1.1",
     "whatwg-fetch": "3.6.2"
   },
