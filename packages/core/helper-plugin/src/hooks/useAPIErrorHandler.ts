@@ -54,9 +54,7 @@ function formatAxiosError(
   return formatMessage({
     id: getPrefixedId(message, intlMessagePrefixCallback),
     defaultMessage: message,
-    values: {
-      code,
-    },
+    values: { code },
   });
 }
 
