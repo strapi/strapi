@@ -5543,6 +5543,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@radix-ui/react-separator@npm:1.0.3":
+  version: 1.0.3
+  resolution: "@radix-ui/react-separator@npm:1.0.3"
+  dependencies:
+    "@babel/runtime": ^7.13.10
+    "@radix-ui/react-primitive": 1.0.3
+  peerDependencies:
+    "@types/react": "*"
+    "@types/react-dom": "*"
+    react: ^16.8 || ^17.0 || ^18.0
+    react-dom: ^16.8 || ^17.0 || ^18.0
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    "@types/react-dom":
+      optional: true
+  checksum: 42f8c95e404de2ce9387040d78049808a48d423cd4c3bad8cca92c4b0bcbdcb3566b5b52a920d4e939a74b51188697f20a012221f0e630fc7f56de64096c15d2
+  languageName: node
+  linkType: hard
+
 "@radix-ui/react-slot@npm:1.0.2, @radix-ui/react-slot@npm:^1.0.2":
   version: 1.0.2
   resolution: "@radix-ui/react-slot@npm:1.0.2"
@@ -5556,6 +5576,80 @@ __metadata:
     "@types/react":
       optional: true
   checksum: edf5edf435ff594bea7e198bf16d46caf81b6fb559493acad4fa8c308218896136acb16f9b7238c788fd13e94a904f2fd0b6d834e530e4cae94522cdb8f77ce9
+  languageName: node
+  linkType: hard
+
+"@radix-ui/react-toggle-group@npm:1.0.4":
+  version: 1.0.4
+  resolution: "@radix-ui/react-toggle-group@npm:1.0.4"
+  dependencies:
+    "@babel/runtime": ^7.13.10
+    "@radix-ui/primitive": 1.0.1
+    "@radix-ui/react-context": 1.0.1
+    "@radix-ui/react-direction": 1.0.1
+    "@radix-ui/react-primitive": 1.0.3
+    "@radix-ui/react-roving-focus": 1.0.4
+    "@radix-ui/react-toggle": 1.0.3
+    "@radix-ui/react-use-controllable-state": 1.0.1
+  peerDependencies:
+    "@types/react": "*"
+    "@types/react-dom": "*"
+    react: ^16.8 || ^17.0 || ^18.0
+    react-dom: ^16.8 || ^17.0 || ^18.0
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    "@types/react-dom":
+      optional: true
+  checksum: b6c11fbbc3ca857ff68c0fa31f293c0d0111bcc8aa0cde2566214c090907530bfcb3b862f81585c2b02d8989b5c7971acff4d5c07c429870d80bd5602e30d376
+  languageName: node
+  linkType: hard
+
+"@radix-ui/react-toggle@npm:1.0.3":
+  version: 1.0.3
+  resolution: "@radix-ui/react-toggle@npm:1.0.3"
+  dependencies:
+    "@babel/runtime": ^7.13.10
+    "@radix-ui/primitive": 1.0.1
+    "@radix-ui/react-primitive": 1.0.3
+    "@radix-ui/react-use-controllable-state": 1.0.1
+  peerDependencies:
+    "@types/react": "*"
+    "@types/react-dom": "*"
+    react: ^16.8 || ^17.0 || ^18.0
+    react-dom: ^16.8 || ^17.0 || ^18.0
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    "@types/react-dom":
+      optional: true
+  checksum: ed5407f48254f20cda542017774f259d0b2c0007ea4bd7287d10d751016dbf269cb13d1142591432c269c3ab768cde2f1ba0344743027d36bbec10af909f19de
+  languageName: node
+  linkType: hard
+
+"@radix-ui/react-toolbar@npm:^1.0.4":
+  version: 1.0.4
+  resolution: "@radix-ui/react-toolbar@npm:1.0.4"
+  dependencies:
+    "@babel/runtime": ^7.13.10
+    "@radix-ui/primitive": 1.0.1
+    "@radix-ui/react-context": 1.0.1
+    "@radix-ui/react-direction": 1.0.1
+    "@radix-ui/react-primitive": 1.0.3
+    "@radix-ui/react-roving-focus": 1.0.4
+    "@radix-ui/react-separator": 1.0.3
+    "@radix-ui/react-toggle-group": 1.0.4
+  peerDependencies:
+    "@types/react": "*"
+    "@types/react-dom": "*"
+    react: ^16.8 || ^17.0 || ^18.0
+    react-dom: ^16.8 || ^17.0 || ^18.0
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    "@types/react-dom":
+      optional: true
+  checksum: 7ebee1f8add6510108979433c5b38627e2de9d48ef2172ca15274b9edbbc106ff43bcd47ff733b03ed2215b92e7af364ff82c79e5a1728374847e2b1e315552c
   languageName: node
   linkType: hard
 
@@ -5984,6 +6078,38 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@storybook/addon-actions@npm:7.3.2":
+  version: 7.3.2
+  resolution: "@storybook/addon-actions@npm:7.3.2"
+  dependencies:
+    "@storybook/client-logger": 7.3.2
+    "@storybook/components": 7.3.2
+    "@storybook/core-events": 7.3.2
+    "@storybook/global": ^5.0.0
+    "@storybook/manager-api": 7.3.2
+    "@storybook/preview-api": 7.3.2
+    "@storybook/theming": 7.3.2
+    "@storybook/types": 7.3.2
+    dequal: ^2.0.2
+    lodash: ^4.17.21
+    polished: ^4.2.2
+    prop-types: ^15.7.2
+    react-inspector: ^6.0.0
+    telejson: ^7.0.3
+    ts-dedent: ^2.0.0
+    uuid: ^9.0.0
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+  peerDependenciesMeta:
+    react:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: af7588ac3f32cf93b846c2304f480f9082e796515b41798fe5cdfda3be1b1bee6fbe399c6cc51bf106c3d4b0dd5f0901feffd7777396ae034d556ba3c8329a0d
+  languageName: node
+  linkType: hard
+
 "@storybook/addon-backgrounds@npm:7.2.2":
   version: 7.2.2
   resolution: "@storybook/addon-backgrounds@npm:7.2.2"
@@ -6346,6 +6472,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@storybook/channels@npm:7.3.2":
+  version: 7.3.2
+  resolution: "@storybook/channels@npm:7.3.2"
+  dependencies:
+    "@storybook/client-logger": 7.3.2
+    "@storybook/core-events": 7.3.2
+    "@storybook/global": ^5.0.0
+    qs: ^6.10.0
+    telejson: ^7.0.3
+    tiny-invariant: ^1.3.1
+  checksum: a32a204d36f1b778f9d23329846c48f3f8a77db4afa40cf6829185a2e21a7bf65150c7fe33309febda4f5fbc78f5ed36f751519ccdcd9f0f92a32fdbba03390e
+  languageName: node
+  linkType: hard
+
 "@storybook/cli@npm:7.2.2":
   version: 7.2.2
   resolution: "@storybook/cli@npm:7.2.2"
@@ -6406,6 +6546,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@storybook/client-logger@npm:7.3.2":
+  version: 7.3.2
+  resolution: "@storybook/client-logger@npm:7.3.2"
+  dependencies:
+    "@storybook/global": ^5.0.0
+  checksum: bf52aa9567d3b849976553bafc70da9d55fb2abdbea2e51487e8c8d597d12ba84c0fa952b9225d5c9be489b6bed99eb9250d93682fc66547acf2ff28df17b2e7
+  languageName: node
+  linkType: hard
+
 "@storybook/codemod@npm:7.2.2":
   version: 7.2.2
   resolution: "@storybook/codemod@npm:7.2.2"
@@ -6446,6 +6595,28 @@ __metadata:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
     react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
   checksum: 17d304feaed2729bb139c64ffec646fae7862db4abfc65889c0edf10fe34364e7595635fa5ef3256678c52221c8fe824b8232279ee14d3e19afb2591c90e1215
+  languageName: node
+  linkType: hard
+
+"@storybook/components@npm:7.3.2":
+  version: 7.3.2
+  resolution: "@storybook/components@npm:7.3.2"
+  dependencies:
+    "@radix-ui/react-select": ^1.2.2
+    "@radix-ui/react-toolbar": ^1.0.4
+    "@storybook/client-logger": 7.3.2
+    "@storybook/csf": ^0.1.0
+    "@storybook/global": ^5.0.0
+    "@storybook/icons": ^1.1.6
+    "@storybook/theming": 7.3.2
+    "@storybook/types": 7.3.2
+    memoizerific: ^1.11.3
+    use-resize-observer: ^9.1.0
+    util-deprecate: ^1.0.2
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: cbb501ee896a7bde88e8136589bc38ab2af534a4325ac64db64c5424cc2efc32cfc5e9f5756c17c2ee3a10d49f1b5268dbdca179e503f18d9021f4700e8dcb35
   languageName: node
   linkType: hard
 
@@ -6493,6 +6664,13 @@ __metadata:
   version: 7.2.2
   resolution: "@storybook/core-events@npm:7.2.2"
   checksum: 3847060fcf351b0640a719b153a8f94ac42749c13c18f7db1997396229ced1215c68b838cd09204f58d72e3089c31a6541d0b156b0eba09d4ce558a342bb5654
+  languageName: node
+  linkType: hard
+
+"@storybook/core-events@npm:7.3.2":
+  version: 7.3.2
+  resolution: "@storybook/core-events@npm:7.3.2"
+  checksum: 86c809250fc3ad05e3254fc86d163339108569749ffee47496a2717bf1a9052304975007e8c05075415361cda0e0c530cc1f2ae6d4fa682d9573240ebfd1d170
   languageName: node
   linkType: hard
 
@@ -6619,7 +6797,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/icons@npm:^1.1.0":
+"@storybook/icons@npm:^1.1.0, @storybook/icons@npm:^1.1.6":
   version: 1.1.6
   resolution: "@storybook/icons@npm:1.1.6"
   peerDependencies:
@@ -6652,6 +6830,32 @@ __metadata:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
     react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
   checksum: d0d4264b2df0bb6a49e3f7c079bcbb23e1ad987690acd94061579fa68d856d33a044abd6823be55fe812ee78c81921647ce45e53ded67d80df6e6018bc16a035
+  languageName: node
+  linkType: hard
+
+"@storybook/manager-api@npm:7.3.2":
+  version: 7.3.2
+  resolution: "@storybook/manager-api@npm:7.3.2"
+  dependencies:
+    "@storybook/channels": 7.3.2
+    "@storybook/client-logger": 7.3.2
+    "@storybook/core-events": 7.3.2
+    "@storybook/csf": ^0.1.0
+    "@storybook/global": ^5.0.0
+    "@storybook/router": 7.3.2
+    "@storybook/theming": 7.3.2
+    "@storybook/types": 7.3.2
+    dequal: ^2.0.2
+    lodash: ^4.17.21
+    memoizerific: ^1.11.3
+    semver: ^7.3.7
+    store2: ^2.14.2
+    telejson: ^7.0.3
+    ts-dedent: ^2.0.0
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: 6b733fe83739288ac74d600d45f5e10f36a359f98b9f0a3574753173e1824f7f7e45407e7e73d476bbf66e40a8246e74bb7cf64eb332a85f8b49f2c9b59d8459
   languageName: node
   linkType: hard
 
@@ -6702,6 +6906,28 @@ __metadata:
     ts-dedent: ^2.0.0
     util-deprecate: ^1.0.2
   checksum: 9c8616696aec9d6d4f1631b6f1088071f4121dd0e9407f9789fd65eb4cb6c8e1d31d36a1f395844798be85f22264832803d3908ab0b1dd59ceab5317abf2236b
+  languageName: node
+  linkType: hard
+
+"@storybook/preview-api@npm:7.3.2":
+  version: 7.3.2
+  resolution: "@storybook/preview-api@npm:7.3.2"
+  dependencies:
+    "@storybook/channels": 7.3.2
+    "@storybook/client-logger": 7.3.2
+    "@storybook/core-events": 7.3.2
+    "@storybook/csf": ^0.1.0
+    "@storybook/global": ^5.0.0
+    "@storybook/types": 7.3.2
+    "@types/qs": ^6.9.5
+    dequal: ^2.0.2
+    lodash: ^4.17.21
+    memoizerific: ^1.11.3
+    qs: ^6.10.0
+    synchronous-promise: ^2.0.15
+    ts-dedent: ^2.0.0
+    util-deprecate: ^1.0.2
+  checksum: 3fbf417685a2eb8e952d24361997c32530a161225f1f7b131c726b7517bd3e57fdfbc117e0b62591674465bb82a66086b0cee0d3acda66f4d2b431f4a4846931
   languageName: node
   linkType: hard
 
@@ -6792,6 +7018,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@storybook/router@npm:7.3.2":
+  version: 7.3.2
+  resolution: "@storybook/router@npm:7.3.2"
+  dependencies:
+    "@storybook/client-logger": 7.3.2
+    memoizerific: ^1.11.3
+    qs: ^6.10.0
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: 9a67a2f30f47deec1ff4588ce9d3c16cdab4084bdc6523edc54700c89a44023e0c6e17da5e0524f73109f8697cc5e728400b086342c58f14df8e01dfad58f1a2
+  languageName: node
+  linkType: hard
+
 "@storybook/telemetry@npm:7.2.2":
   version: 7.2.2
   resolution: "@storybook/telemetry@npm:7.2.2"
@@ -6823,6 +7063,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@storybook/theming@npm:7.3.2":
+  version: 7.3.2
+  resolution: "@storybook/theming@npm:7.3.2"
+  dependencies:
+    "@emotion/use-insertion-effect-with-fallbacks": ^1.0.0
+    "@storybook/client-logger": 7.3.2
+    "@storybook/global": ^5.0.0
+    memoizerific: ^1.11.3
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: aab7d83213ac3df7062fd39e33587311c972bfa3879a32dbc2f4dfa899c7b716ffa6c81496c18032bc8b4f0961cc50de0b0486aacf0e512aaec295cb635d8d4d
+  languageName: node
+  linkType: hard
+
 "@storybook/types@npm:7.2.2":
   version: 7.2.2
   resolution: "@storybook/types@npm:7.2.2"
@@ -6832,6 +7087,18 @@ __metadata:
     "@types/express": ^4.7.0
     file-system-cache: 2.3.0
   checksum: e42b88d583dd8fabe45e94aee33e8801c329d89e55545c970c5845e638e85d6f21e141e0593352b59215c37a53bace05030b7a060f2784c68892e5511bf7d927
+  languageName: node
+  linkType: hard
+
+"@storybook/types@npm:7.3.2":
+  version: 7.3.2
+  resolution: "@storybook/types@npm:7.3.2"
+  dependencies:
+    "@storybook/channels": 7.3.2
+    "@types/babel__core": ^7.0.0
+    "@types/express": ^4.7.0
+    file-system-cache: 2.3.0
+  checksum: 5986ca2780c6049c08f65cda0dc2b1f063476d0a5ad337a96d641bb91131e7d4a600dcf87b25aedba747f8beb66ac0805562c46e73dc0d20222be4fc4b02309c
   languageName: node
   linkType: hard
 
@@ -7100,7 +7367,7 @@ __metadata:
   resolution: "@strapi/helper-plugin@workspace:packages/core/helper-plugin"
   dependencies:
     "@rollup/plugin-node-resolve": 15.1.0
-    "@storybook/addon-actions": 7.2.2
+    "@storybook/addon-actions": 7.3.2
     "@storybook/addon-essentials": 7.2.2
     "@storybook/addon-links": 7.2.2
     "@storybook/addon-mdx-gfm": 7.2.2
