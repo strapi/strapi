@@ -1,5 +1,5 @@
 import { AxiosError } from 'axios';
-import { useIntl } from 'react-intl';
+import { useIntl, type IntlFormatters, MessageDescriptor } from 'react-intl';
 
 import { getPrefixedId } from '../utils/getPrefixedId';
 import { normalizeAPIError } from '../utils/normalizeAPIError';
@@ -11,12 +11,11 @@ import { normalizeAPIError } from '../utils/normalizeAPIError';
  * @param {function} - Error message prefix function (usually getTrad())
  * @return {{ formatAPIError }} - Object containing an formatting function
  */
-
-export function useAPIErrorHandler(intlMessagePrefixCallback) {
+export function useAPIErrorHandler(intlMessagePrefixCallback?: (prefix?: string) => string) {
   const { formatMessage } = useIntl();
 
   return {
-    formatAPIError(error) {
+    formatAPIError(error: unknown) {
       // Try to normalize the passed error first. This will fail for e.g. network
       // errors which are thrown by Axios directly.
       try {
@@ -26,13 +25,30 @@ export function useAPIErrorHandler(intlMessagePrefixCallback) {
           return formatAxiosError(error, { intlMessagePrefixCallback, formatMessage });
         }
 
-        throw new Error('formatAPIError: Unknown error:', error);
+        throw new Error(`formatAPIError: Unknown error: ${error}`);
       }
     },
   };
 }
 
-function formatAxiosError(error, { intlMessagePrefixCallback, formatMessage }) {
+type ExtendedFormatMessageFn = (
+  // Overriding `descriptor` prop
+  descriptor: MessageDescriptor & {
+    values?: Record<string, unknown>;
+  },
+  ...baseParams: Partial<Parameters<IntlFormatters['formatMessage']>>
+) => string;
+
+function formatAxiosError(
+  error: AxiosError,
+  {
+    intlMessagePrefixCallback,
+    formatMessage,
+  }: {
+    intlMessagePrefixCallback?: (prefix?: string) => string;
+    formatMessage: ExtendedFormatMessageFn;
+  }
+): string {
   const { code, message } = error;
 
   return formatMessage({
@@ -52,8 +68,16 @@ function formatAxiosError(error, { intlMessagePrefixCallback, formatMessage }) {
  * @param {{ formatMessage: Function, intlMessagePrefixCallback: Function }} - Object containing a formatMessage (from react-intl) callback and an intlMessagePrefixCallback (usually getTrad()
  * @return {string} Stringified response error
  */
-
-function formatAPIError(error, { formatMessage, intlMessagePrefixCallback }) {
+function formatAPIError(
+  error: unknown,
+  {
+    intlMessagePrefixCallback,
+    formatMessage,
+  }: {
+    intlMessagePrefixCallback?: (prefix?: string) => string;
+    formatMessage: ExtendedFormatMessageFn;
+  }
+): string {
   if (!formatMessage) {
     throw new Error('The formatMessage callback is a mandatory argument.');
   }
@@ -67,7 +91,9 @@ function formatAPIError(error, { formatMessage, intlMessagePrefixCallback }) {
   // stringify multiple errors
   if (normalizedError?.errors) {
     return normalizedError.errors
-      .map(({ id, defaultMessage, values }) => formatMessage({ id, defaultMessage }, values))
+      .map(({ id, defaultMessage, values }: ReturnType<typeof normalizeAPIError>) =>
+        formatMessage({ id, defaultMessage }, values)
+      )
       .join('\n');
   }
 
