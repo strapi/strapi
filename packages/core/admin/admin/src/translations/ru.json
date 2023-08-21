@@ -140,7 +140,7 @@
 	"Settings.application.node-version": "Версия Node",
 	"Settings.application.strapi-version": "Версия Strapi",
 	"Settings.application.strapiVersion": "Версия Strapi",
-	"Settings.application.title": "Приложение",
+	"Settings.application.title": "Обзор",
 	"Settings.error": "Ошибка",
 	"Settings.global": "Глобальные Настройки",
 	"Settings.permissions": "Панель администратора",
