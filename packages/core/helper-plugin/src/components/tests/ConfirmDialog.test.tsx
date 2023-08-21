@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
@@ -78,6 +76,36 @@ describe('ConfirmDialog', () => {
     );
 
     render(AppCustom);
+
+    await waitFor(() => {
+      expect(screen.getByText('Are you sure you want to unpublish it?')).toBeInTheDocument();
+    });
+  });
+
+  it('renders Body component part and matches text', async () => {
+    render(
+      <ThemeProvider theme={lightTheme}>
+        <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
+          <ConfirmDialog.Body>Are you sure you want to unpublish it? </ConfirmDialog.Body>
+        </IntlProvider>
+      </ThemeProvider>
+    );
+    await waitFor(() => {
+      expect(screen.getByText('Are you sure you want to unpublish it?')).toBeInTheDocument();
+    });
+  });
+
+  it('renders Root component part and matches text', async () => {
+    render(
+      <ThemeProvider theme={lightTheme}>
+        <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
+          <ConfirmDialog.Root isOpen onToggleDialog={jest.fn()} onConfirm={jest.fn()}>
+            {' '}
+            Are you sure you want to unpublish it?
+          </ConfirmDialog.Root>
+        </IntlProvider>
+      </ThemeProvider>
+    );
 
     await waitFor(() => {
       expect(screen.getByText('Are you sure you want to unpublish it?')).toBeInTheDocument();
