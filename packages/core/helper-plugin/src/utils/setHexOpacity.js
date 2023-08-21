@@ -1,4 +1,4 @@
-const setHexOpacity = (hex: string, alpha: number): string =>
+const setHexOpacity = (hex, alpha) =>
   `${hex}${Math.floor(alpha * 255)
     .toString(16)
     .padStart(2)}`;
