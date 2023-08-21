@@ -5,9 +5,18 @@ const { getService } = require('../utils');
 const validators = require('./common-validators');
 
 const updatePermissions = yup.object().shape({
-  // TODO: Add id
-  connect: yup.array().of(validators.permission),
-  disconnect: yup.array().of(yup.object().shape({ id: yup.strapiID().required() })),
+  permissions: yup
+    .object()
+    .shape({
+      connect: yup.array().of(
+        yup.object().shape({
+          id: yup.strapiID(), // If id is not provided, it will be generated
+          ...validators.permission.fields,
+        })
+      ),
+      disconnect: yup.array().of(yup.object().shape({ id: yup.strapiID().required() })),
+    })
+    .required(),
 });
 
 const checkPermissionsSchema = yup.object().shape({
@@ -22,8 +31,6 @@ const checkPermissionsSchema = yup.object().shape({
       .noUnknown()
   ),
 });
-
-// validatePermissionsExist
 
 const checkPermissionsExist = function (permissions) {
   const existingActions = getService('permission').actionProvider.values();

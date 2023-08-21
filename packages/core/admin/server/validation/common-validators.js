@@ -103,6 +103,7 @@ const permission = yup
 
         return !!getActionFromProvider(actionId);
       }),
+    actionParameters: yup.object().nullable(),
     subject: yup
       .string()
       .nullable()

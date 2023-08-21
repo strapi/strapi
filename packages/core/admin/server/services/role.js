@@ -337,7 +337,7 @@ const displayWarningIfNoSuperAdmin = async () => {
  * @param {*} roleId
  * @param {*} permissions
  */
-const partialAssignPermissions = async (roleId, permissions = {}) => {
+const partialPermissionUpdate = async (roleId, permissions = {}) => {
   const superAdmin = await getService('role').getSuperAdmin();
   const isSuperAdmin = superAdmin && superAdmin.id === roleId;
   const permissionsWithRole = flow(
@@ -554,7 +554,7 @@ module.exports = {
   displayWarningIfNoSuperAdmin,
   addPermissions,
   hasSuperAdminRole,
-  updatePermissions: partialAssignPermissions,
+  partialPermissionUpdate,
   assignPermissions,
   resetSuperAdminPermissions,
   checkRolesIdForDeletion,

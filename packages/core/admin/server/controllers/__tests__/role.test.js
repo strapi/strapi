@@ -95,6 +95,7 @@ describe('Role controller', () => {
             },
             role: {
               findOne,
+              partialPermissionUpdate: jest.fn(() => []),
             },
           },
         },
@@ -116,7 +117,7 @@ describe('Role controller', () => {
       const ctx = createContext({
         params: { id: 1 },
         body: {
-          permissions: [{}],
+          permissions: { connect: [{}] },
         },
       });
       global.strapi = {
@@ -138,14 +139,16 @@ describe('Role controller', () => {
         await roleController.updatePermissions(ctx);
       } catch (e) {
         expect(e instanceof ApplicationError).toBe(true);
-        expect(e.message).toEqual('permissions[0].action is a required field');
+        expect(e.message).toEqual('permissions.connect[0].action is a required field');
       }
     });
 
     test('Assign permissions if input is valid', async () => {
       const roleID = 1;
       const findOneRole = jest.fn(() => Promise.resolve({ id: roleID }));
-      const assignPermissions = jest.fn((roleID, permissions) => Promise.resolve(permissions));
+      const partialPermissionUpdate = jest.fn((roleID, permissions) =>
+        Promise.resolve(permissions.connect || [])
+      );
       const inputPermissions = [
         {
           action: 'test',
@@ -158,7 +161,7 @@ describe('Role controller', () => {
       const ctx = createContext({
         params: { id: roleID },
         body: {
-          permissions: inputPermissions,
+          permissions: { connect: inputPermissions },
         },
       });
 
@@ -166,7 +169,7 @@ describe('Role controller', () => {
         admin: {
           services: {
             role: {
-              assignPermissions,
+              partialPermissionUpdate,
               findOne: findOneRole,
               getSuperAdmin: jest.fn(() => undefined),
             },
@@ -191,7 +194,7 @@ describe('Role controller', () => {
       await roleController.updatePermissions(ctx);
 
       expect(findOneRole).toHaveBeenCalledWith({ id: roleID });
-      expect(assignPermissions).toHaveBeenCalledWith(roleID, inputPermissions);
+      expect(partialPermissionUpdate).toHaveBeenCalledWith(roleID, { connect: inputPermissions });
 
       expect(ctx.body).toEqual({
         data: inputPermissions,
