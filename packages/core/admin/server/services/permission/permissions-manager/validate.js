@@ -41,7 +41,12 @@ const {
 } = constants;
 
 const COMPONENT_FIELDS = ['__component'];
+
 const STATIC_FIELDS = [ID_ATTRIBUTE];
+
+const throwInvalidParam = ({ key }) => {
+  throw new ValidationError(`Invalid param ${key}`);
+};
 
 module.exports = ({ action, ability, model }) => {
   const schema = strapi.getModel(model);
@@ -61,7 +66,7 @@ module.exports = ({ action, ability, model }) => {
       traverseQueryFilters(
         ({ key, value }) => {
           if (isObject(value) && isEmpty(value)) {
-            throw new ValidationError(`Invalid key ${key}`);
+            throwInvalidParam({ key });
           }
         },
         { schema }
@@ -75,7 +80,7 @@ module.exports = ({ action, ability, model }) => {
       traverseQuerySort(
         ({ key, attribute, value }) => {
           if (!isScalarAttribute(attribute) && isEmpty(value)) {
-            throw new ValidationError(`Invalid key ${key}`);
+            throwInvalidParam({ key });
           }
         },
         { schema }
@@ -170,7 +175,7 @@ module.exports = ({ action, ability, model }) => {
     const isHidden = getOr(false, ['config', 'attributes', key, 'hidden'], schema);
 
     if (isHidden) {
-      throw new ValidationError(`Invalid key ${key}`);
+      throwInvalidParam({ key });
     }
   };
 
@@ -179,7 +184,7 @@ module.exports = ({ action, ability, model }) => {
    */
   const throwDisallowedAdminUserFields = ({ key, attribute, schema }) => {
     if (schema.uid === 'admin::user' && attribute && !ADMIN_USER_ALLOWED_FIELDS.includes(key)) {
-      throw new ValidationError(`Invalid key ${key}`);
+      throwInvalidParam({ key });
     }
   };
 
