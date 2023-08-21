@@ -39,6 +39,11 @@ updates:
           - 'markdown-it'
           - 'markdown-it-*'
 
+      storybook:
+        patterns:
+          - 'storybook'
+          - '@storybook/*'
+
       testing-library:
         patterns:
           - '@testing-library/*'
