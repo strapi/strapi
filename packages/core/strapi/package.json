@@ -132,7 +132,8 @@
     "qs": "6.11.1",
     "resolve-cwd": "3.0.0",
     "semver": "7.5.4",
-    "statuses": "2.0.1"
+    "statuses": "2.0.1",
+    "ts-zen": "0.1.2"
   },
   "devDependencies": {
     "supertest": "6.3.3",
