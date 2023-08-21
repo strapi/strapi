@@ -102,7 +102,7 @@
 	"Settings.application.customization.auth-logo.carousel-hint": "Заменить логотип на страницах аутентификации",
 	"Settings.application.customization.carousel-hint": "Изменить логотип панели администратора (максимальный размер: {dimension}x{dimension}, максимальный размер файла: {size}KB)",
 	"Settings.application.customization.carousel-slide.label": "Слайд с логотипом",
-	"Settings.application.customization.carousel.auth-logo.title": "Логотип на странице авторизации",
+	"Settings.application.customization.carousel.auth-logo.title": "Логотип авторизации",
 	"Settings.application.customization.carousel.change-action": "Изменить логотип",
 	"Settings.application.customization.carousel.menu-logo.title": "Логотип в меню",
 	"Settings.application.customization.carousel.reset-action": "Сброс логотипа",
