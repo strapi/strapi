@@ -136,7 +136,7 @@
   },
   "devDependencies": {
     "supertest": "6.3.3",
-    "ts-zen": "0.1.4",
+    "ts-zen": "0.1.5",
     "typescript": "5.1.3"
   },
   "engines": {

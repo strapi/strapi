@@ -91,13 +91,14 @@ describe('Utils.String', () => {
   });
 
   test('split', () => {
-    // TODO: Replace with .isTuple matcher when available
-    assertType('SplitEmptyStringBySpace').equals('[]');
-    assertType('SplitEmptyStringByEmptyString').equals('[]');
-    assertType('SplitEmptyStringByString').equals('[]');
-    assertType('SplitBySpace').equals('["Hello", "World,", "How", "are", "you?"]');
-    assertType('SplitByEmptyString').equals('["H", "e", "l", "l", "o"]');
+    assertType('SplitEmptyStringBySpace').isTuple([]);
+    assertType('SplitEmptyStringByEmptyString').isTuple([]);
+    assertType('SplitEmptyStringByString').isTuple([]);
+    assertType('SplitBySpace').isTuple(
+      ['Hello', 'World,', 'How', 'are', 'you?'].map(t.stringLiteral)
+    );
+    assertType('SplitByEmptyString').isTuple(['H', 'e', 'l', 'l', 'o'].map(t.stringLiteral));
     // This will use any string character as a delimiter, thus removing 1/2 characters
-    assertType('SplitByString').equals('["H", "l", "o"]');
+    assertType('SplitByString').isTuple(['H', 'l', 'o'].map(t.stringLiteral));
   });
 });
