@@ -457,8 +457,36 @@ describe('Transfer engine', () => {
 
     test.each<
       // (givenStages, mustBeCalled, mustNotBeCalled)
-      [TransferFilterPreset[], (keyof IDestinationProvider)[], (keyof IDestinationProvider)[]]
+      [
+        TransferFilterPreset[] | undefined,
+        (keyof IDestinationProvider)[],
+        (keyof IDestinationProvider)[]
+      ]
     >([
+      [
+        undefined,
+        [
+          'bootstrap',
+          'createSchemasWriteStream',
+          'createLinksWriteStream',
+          'createEntitiesWriteStream',
+          'createConfigurationWriteStream',
+          'createAssetsWriteStream',
+        ],
+        [],
+      ],
+      [
+        [],
+        [
+          'bootstrap',
+          'createSchemasWriteStream',
+          'createLinksWriteStream',
+          'createEntitiesWriteStream',
+          'createConfigurationWriteStream',
+          'createAssetsWriteStream',
+        ],
+        [],
+      ],
       [
         ['files'],
         [
