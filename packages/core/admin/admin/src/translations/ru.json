@@ -152,7 +152,7 @@
 	"Settings.permissions.auditLogs.component.update": "Обновил компонент",
 	"Settings.permissions.auditLogs.content-type.create": "Создал тип контента",
 	"Settings.permissions.auditLogs.content-type.delete": "Удалить тип контента",
-	"Settings.permissions.auditLogs.content-type.update": "Обновил тип контента",
+	"Settings.permissions.auditLogs.content-type.update": "Обновить тип контента",
 	"Settings.permissions.auditLogs.date": "Дата",
 	"Settings.permissions.auditLogs.details": "Детали лога",
 	"Settings.permissions.auditLogs.entry.create": "Создать {model, select, undefined {} other { ({model})}}",
