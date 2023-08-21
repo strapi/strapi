@@ -122,6 +122,15 @@ module.exports = {
     ctx.body = { data: await sanitizeOutput(updatedEntity) };
   },
 
+  /**
+   * List all the stages that are available for a user to transition an entity to.
+   * If the user has permission to change the current stage of the entity every other stage in the workflow is returned
+   * @async
+   * @param {*} ctx
+   * @param {string} ctx.params.model_uid - The model UID of the entity.
+   * @param {string} ctx.params.id - The ID of the entity.
+   * @throws {ApplicationError} If review workflows is not activated on the specified model UID.
+   */
   async listAvailableStages(ctx) {
     const stagePermissions = getService('stage-permissions');
     const workflowService = getService('workflows');
@@ -140,16 +149,29 @@ module.exports = {
     const entityStageId = entity[ENTITY_STAGE_ATTRIBUTE]?.id;
     const canTransition = stagePermissions.can(STAGE_TRANSITION_UID, entityStageId);
 
+    const workflowCount = await workflowService.count();
+    if (!canTransition) {
+      ctx.body = {
+        data: [],
+        meta: {
+          stageCount: 0,
+          workflowCount,
+        },
+      };
+
+      return;
+    }
+
     const { stages: workflowStages } = await workflowService.getAssignedWorkflow(modelUID, {
       populate: 'stages',
     });
-    const data = !canTransition ? [] : workflowStages.filter((stage) => stage.id !== entityStageId);
 
+    const data = workflowStages.filter((stage) => stage.id !== entityStageId);
     ctx.body = {
       data,
       meta: {
         stageCount: data.length,
-        // workflowCount: 2, // TODO is this applicable, there can only be 1 workflow
+        workflowCount,
       },
     };
   },
