@@ -88,11 +88,6 @@ const createUserAndReq = async (userName, permissions) => {
   return rq;
 };
 
-// Create role?
-//  - Without permissions to read users
-//  - With permissions to read users
-//  - With permissions to read a specific model mainField
-//  - Without permissions to read a specific model mainField
 describe('Relations', () => {
   const builder = createTestBuilder();
 
