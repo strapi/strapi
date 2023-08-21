@@ -1,13 +1,13 @@
 import React from 'react';
 
-import { IconButton } from '@strapi/design-system';
+import { IconButton, IconButtonProps } from '@strapi/design-system';
 import { Minus } from '@strapi/icons';
-import styled from 'styled-components';
+import styled, { DefaultTheme } from 'styled-components';
 
 import { pxToRem } from '../utils/pxToRem';
 
 const StyledIconButton = styled(IconButton)(
-  ({ theme }) => `
+  ({ theme }: { theme: DefaultTheme }) => `
   border-radius: ${pxToRem(30)};
   width: ${pxToRem(20)};
   height: ${pxToRem(20)};
@@ -23,6 +23,8 @@ const StyledIconButton = styled(IconButton)(
 `
 );
 
-const RemoveRoundedButton = (props) => <StyledIconButton icon={<Minus />} {...props} />;
+const RemoveRoundedButton = (props: IconButtonProps) => (
+  <StyledIconButton icon={<Minus />} {...props} />
+);
 
 export { RemoveRoundedButton };
