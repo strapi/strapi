@@ -149,7 +149,7 @@
 	"Settings.permissions.auditLogs.admin.logout": "Выход администратора",
 	"Settings.permissions.auditLogs.component.create": "Создать компонент",
 	"Settings.permissions.auditLogs.component.delete": "Удалить компонент",
-	"Settings.permissions.auditLogs.component.update": "Обновил компонент",
+	"Settings.permissions.auditLogs.component.update": "Обновить компонент",
 	"Settings.permissions.auditLogs.content-type.create": "Создал тип контента",
 	"Settings.permissions.auditLogs.content-type.delete": "Удалить тип контента",
 	"Settings.permissions.auditLogs.content-type.update": "Обновить тип контента",
