@@ -4,6 +4,6 @@
  * @param {string} firstname
  * @param {string} lastname
  */
-export default (firstname, lastname = '') => {
+export const getFullName = (firstname, lastname = '') => {
   return [firstname, lastname].filter((str) => str).join(' ');
 };
