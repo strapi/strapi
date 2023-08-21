@@ -64,6 +64,7 @@
     "@storybook/addon-mdx-gfm": "7.4.0",
     "@storybook/builder-vite": "7.4.0",
     "@storybook/react-vite": "7.4.0",
+    "@strapi/admin-test-utils": "4.13.2",
     "@strapi/design-system": "1.9.0",
     "@strapi/icons": "1.9.0",
     "@testing-library/react": "14.0.0",

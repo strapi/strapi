@@ -53,6 +53,8 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
       - name: Run build:ts
         run: yarn nx run-many --target=build:ts --nx-ignore-cycles --skip-nx-cache
+      - name: Run build
+        run: yarn nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
       - name: Run lint
         run: yarn nx affected --target=lint --parallel --nx-ignore-cycles
 
@@ -70,7 +72,7 @@ jobs:
       - uses: nrwl/nx-set-shas@v3
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-      - name: Run build:ts for admin-test-utils
+      - name: Run build:ts for admin-test-utils & helper-plugin
         run: yarn build --projects=@strapi/admin-test-utils,@strapi/helper-plugin --skip-nx-cache
       - name: Run test
         run: yarn nx affected --target=test:ts:front --nx-ignore-cycles

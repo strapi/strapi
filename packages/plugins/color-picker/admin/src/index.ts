@@ -25,7 +25,7 @@ export default {
         Input: async () =>
           import(
             /* webpackChunkName: "color-picker-input-component" */ './components/ColorPickerInput'
-          ).then((module) => module.ColorPickerInput),
+          ).then((module) => ({ default: module.ColorPickerInput })),
       },
       options: {
         advanced: [

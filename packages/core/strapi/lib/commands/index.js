@@ -20,6 +20,7 @@ const strapiCommands = {
   install: require('./actions/install/command'),
   'middlewares/list': require('./actions/middlewares/list/command'),
   new: require('./actions/new/command'),
+  'plugin/build': require('./actions/plugin/build/command'),
   'policies/list': require('./actions/policies/list/command'),
   report: require('./actions/report/command'),
   'routes/list': require('./actions/routes/list/command'),

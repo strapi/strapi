@@ -3,7 +3,7 @@ module.exports = {
   extends: ['@strapi/eslint-config/front/typescript'],
   overrides: [
     {
-      files: ['**/*.test.ts', '**/*.test.tsx', '**/__mocks__/**/*'],
+      files: ['**/*.test.[j|t]s', '**/*.test.[j|t]sx', '**/__mocks__/**/*'],
       env: {
         jest: true,
       },

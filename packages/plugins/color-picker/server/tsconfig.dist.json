@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["./src"],
+  "exclude": [
+    "./src/**/__fixtures__",
+    "./src/**/__mocks__",
+    "./src/**/tests",
+    "./src/**/*.test.ts"
+  ],
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist/server"
+  }
+}
