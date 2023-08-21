@@ -171,6 +171,27 @@ export const extendExpectForDataTransferTests = () => {
         message: () => 'Expected source provider not to have all stages called',
       };
     },
+    toHaveDestinationStageCalledTimes(
+      provider: IDestinationProvider,
+      stages: (keyof IDestinationProvider)[],
+      times = 1
+    ) {
+      try {
+        stages.forEach((stage) => {
+          expect(provider[stage as string].mock.results.length).toEqual(times);
+        });
+        return {
+          pass: true,
+          message: () => 'Expected destination provider not to have all stages called',
+        };
+      } catch (e) {
+        return {
+          pass: false,
+          message: () =>
+            `Expected destination provider to have stages ${stages} called ${times} times`,
+        };
+      }
+    },
     toHaveDestinationStagesCalledTimes(provider: IDestinationProvider, times: number) {
       const missing = destinationStages.filter((stage) => {
         if (provider[stage]) {

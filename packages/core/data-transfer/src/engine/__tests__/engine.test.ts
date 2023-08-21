@@ -12,6 +12,7 @@ import type {
   ILink,
   ISourceProvider,
   ITransferEngineOptions,
+  TransferFilterPreset,
 } from '../../../types';
 import {
   extendExpectForDataTransferTests,
@@ -453,6 +454,63 @@ describe('Transfer engine', () => {
       expect(completeSource).toHaveSourceStagesCalledTimes(1);
       expect(completeDestination).toHaveDestinationStagesCalledTimes(1);
     });
+
+    test.each<
+      // (givenStages, mustBeCalled, mustNotBeCalled)
+      [TransferFilterPreset[], (keyof IDestinationProvider)[], (keyof IDestinationProvider)[]]
+    >([
+      [
+        ['files'],
+        [
+          'bootstrap',
+          'createSchemasWriteStream',
+          'createLinksWriteStream',
+          'createEntitiesWriteStream',
+          'createConfigurationWriteStream',
+        ],
+        ['createAssetsWriteStream'],
+      ],
+      [
+        ['content'],
+        [
+          'bootstrap',
+          'createSchemasWriteStream',
+          'createAssetsWriteStream',
+          'createConfigurationWriteStream',
+        ],
+        ['createLinksWriteStream', 'createEntitiesWriteStream'],
+      ],
+      [
+        ['content', 'config'],
+        ['bootstrap', 'createSchemasWriteStream', 'createAssetsWriteStream'],
+        ['createLinksWriteStream', 'createEntitiesWriteStream', 'createConfigurationWriteStream'],
+      ],
+      [
+        ['content', 'config', 'files'],
+        ['bootstrap', 'createSchemasWriteStream'],
+        [
+          'createAssetsWriteStream',
+          'createLinksWriteStream',
+          'createEntitiesWriteStream',
+          'createConfigurationWriteStream',
+        ],
+      ],
+    ])(
+      'excludes correct stages with exclude %s',
+      async (excludeStages, mustBeCalled, mustNotBeCalled) => {
+        const engine = createTransferEngine(completeSource, completeDestination, {
+          ...defaultOptions,
+          exclude: excludeStages,
+        });
+
+        expect(completeSource).toHaveSourceStagesCalledTimes(0);
+        expect(completeDestination).toHaveDestinationStagesCalledTimes(0);
+        await engine.transfer();
+
+        expect(completeDestination).toHaveDestinationStageCalledTimes(mustBeCalled, 1);
+        expect(completeDestination).toHaveDestinationStageCalledTimes(mustNotBeCalled, 0);
+      }
+    );
 
     test('returns provider results', async () => {
       const source = {
