@@ -120,7 +120,7 @@ module.exports = ({ action, ability, model }) => {
       traverseEntity(throwHiddenFields, { schema }),
       // Remove not allowed fields (RBAC)
       traverseEntity(throwDisallowedFields(permittedFields), { schema }),
-      // Remove roles from createdBy & updateBy fields
+      // Remove roles from createdBy & updatedBy fields
       omitCreatorRoles
     );
   };
