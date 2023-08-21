@@ -99,7 +99,7 @@
 	"Settings.apiTokens.regenerate": "Перегенерировать",
 	"Settings.apiTokens.title": "API-токены",
 	"Settings.application.customization": "Персонализация",
-	"Settings.application.customization.auth-logo.carousel-hint": "Замените логотип на странице авторизации",
+	"Settings.application.customization.auth-logo.carousel-hint": "Заменить логотип на страницах аутентификации",
 	"Settings.application.customization.carousel-hint": "Изменить логотип панели администратора (максимальный размер: {dimension}x{dimension}, максимальный размер файла: {size}KB)",
 	"Settings.application.customization.carousel-slide.label": "Слайд с логотипом",
 	"Settings.application.customization.carousel.auth-logo.title": "Логотип на странице авторизации",
