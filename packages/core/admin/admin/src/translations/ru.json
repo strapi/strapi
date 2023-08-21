@@ -223,7 +223,7 @@
 	"Settings.profile.form.section.profile.page.title": "Страница профиля",
 	"Settings.review-workflows.page.delete.confirm.body": "Все записи, назначенные удаленным этапам, будут перемещены на предыдущий этап. Вы уверены, что хотите сохранить?",
 	"Settings.review-workflows.page.isLoading": "Рабочие процессы загружаются",
-	"Settings.review-workflows.page.subtitle": "{count, plural, =0 {# этапов} one {# этап} other {# этапа}}",
+	"Settings.review-workflows.page.subtitle": "{count, plural, one {# этап} other {# этапа}}",
 	"Settings.review-workflows.page.title": "Просмотр рабочих процессов",
 	"Settings.review-workflows.stage.name.label": "Имя этапа",
 	"Settings.roles.create.description": "Определите права, предоставленные ролью",
