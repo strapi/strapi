@@ -369,6 +369,40 @@ const getAssetsBackupHandler = (engine, { force, action }) => {
   };
 };
 
+const shouldSkipStage = (opts, dataKind) => {
+  if (opts.exclude?.includes(dataKind)) {
+    return true;
+  }
+  if (opts.only) {
+    return opts.only.includes(dataKind);
+  }
+
+  return false;
+};
+
+const parseRestoreFromOptions = (opts) => {
+  const entitiesOptions = {
+    exclude: DEFAULT_IGNORED_CONTENT_TYPES,
+    include: undefined,
+  };
+
+  // if content is not included, send an empty array for include
+  if ((opts.only && !opts.only.includes('content')) || opts.exclude?.includes('content')) {
+    entitiesOptions.include = [];
+  }
+
+  const restoreConfig = {
+    entities: entitiesOptions,
+    assets: !shouldSkipStage(opts, 'files'),
+    configuration: {
+      webhooks: !shouldSkipStage(opts, 'config'),
+      coreStore: !shouldSkipStage(opts, 'config'),
+    },
+  };
+
+  return restoreConfig;
+};
+
 module.exports = {
   loadersFactory,
   buildTransferTable,
@@ -386,4 +420,6 @@ module.exports = {
   setSignalHandler,
   getDiffHandler,
   getAssetsBackupHandler,
+  shouldSkipStage,
+  parseRestoreFromOptions,
 };
