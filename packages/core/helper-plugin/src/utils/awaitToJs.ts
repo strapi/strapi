@@ -1,4 +1,4 @@
-const to = (promise, errorExt) => {
+const to = (promise: Promise<unknown>, errorExt: object) => {
   return promise
     .then(function (data) {
       return [null, data];
