@@ -74,7 +74,6 @@ export const TransferGroupPresets: TransferGroupFilter = {
   },
   files: {
     assets: true,
-    links: true,
   },
   config: {
     configuration: true,
