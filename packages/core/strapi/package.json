@@ -132,11 +132,11 @@
     "qs": "6.11.1",
     "resolve-cwd": "3.0.0",
     "semver": "7.5.4",
-    "statuses": "2.0.1",
-    "ts-zen": "0.1.3"
+    "statuses": "2.0.1"
   },
   "devDependencies": {
     "supertest": "6.3.3",
+    "ts-zen": "0.1.4",
     "typescript": "5.1.3"
   },
   "engines": {

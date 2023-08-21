@@ -40,27 +40,25 @@ describe('Utils.String', () => {
   });
 
   test('Includes', () => {
-    const asTemplatedString = (str) => `\`$\{string}${str}$\{string}\``;
+    const template = (str) => [t.string(), String(str), t.string()];
 
-    // TODO: Replace with isStringTemplate matcher when available
-    assertType('IncludesNumber').equals(asTemplatedString(42));
-    assertType('IncludesString').equals(asTemplatedString('foo'));
-    assertType('IncludesBoolean').equals(
-      `${asTemplatedString(false)} | ${asTemplatedString(true)}`
-    );
-    assertType('IncludesBooleanLiteral').equals(asTemplatedString(true));
+    assertType('IncludesNumber').isTemplateLiteral(template(42));
+    assertType('IncludesString').isTemplateLiteral(template('foo'));
+    assertType('IncludesBoolean').isUnion([
+      t.templateLiteral(template(true)),
+      t.templateLiteral(template(false)),
+    ]);
+    assertType('IncludesBooleanLiteral').isTemplateLiteral(template(true));
   });
 
   test('NonEmpty', () => {
-    // TODO: Replace with isNever matcher when available
-    assertType('NonEmptyOnEmptyString').equals('never');
+    assertType('NonEmptyOnEmptyString').isNever();
     assertType('NonEmptyOnNonEmptyString').isStringLiteral('Hello World');
   });
 
   test('Prefix', () => {
     assertType('PrefixEmptyString').isStringLiteral('Hello');
-    // TODO: Replace with isStringTemplate matcher when available
-    assertType('PrefixString').equals('`Hello ${string}`');
+    assertType('PrefixString').isTemplateLiteral(['Hello ', t.string()]);
     assertType('PrefixLiteralString').isStringLiteral('Hello World');
     assertType('PrefixLiteralStringUnion').isUnion([
       t.stringLiteral('Hello World'),
@@ -75,8 +73,7 @@ describe('Utils.String', () => {
 
   test('Suffix', () => {
     assertType('SuffixEmptyString').isStringLiteral('Hello');
-    // TODO: Replace with isStringTemplate matcher when available
-    assertType('SuffixString').equals('`${string}.`');
+    assertType('SuffixString').isTemplateLiteral([t.string(), '.']);
     assertType('SuffixLiteralString').isStringLiteral('Hello World');
     assertType('SuffixLiteralStringUnion').isUnion([
       t.stringLiteral('Hello World'),
@@ -89,9 +86,8 @@ describe('Utils.String', () => {
     ]);
   });
 
-  test.skip('Literal', () => {
-    // TODO: Remove .skip when t.bigint() is fixed
-    assertType('Literal').isUnion([t.string(), t.number(), t.bigint(), t.boolean()]);
+  test('Literal', () => {
+    assertType('Literal').isUnion([t.string(), t.number(), t.bigInt(), t.booleanLiteral()]);
   });
 
   test('split', () => {
