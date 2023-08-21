@@ -853,7 +853,7 @@
 	"content-manager.success.record.publishing": "Публикация...",
 	"content-manager.success.record.save": "Сохранено",
 	"content-manager.success.record.unpublish": "Не опубликовано",
-	"content-manager.utils.data-loaded": "{number, plural, =0 {записей} one {запись} other {записей}} успешно загружено",
+	"content-manager.utils.data-loaded": "{number, plural, =1 {записей} one {запись} other {записей}} успешно загружено",
 	"dark": "Тёмная",
 	"form.button.continue": "Продолжить",
 	"form.button.done": "Выполнено",
