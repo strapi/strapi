@@ -128,7 +128,7 @@
 	"Settings.application.customization.modal.upload.from-url.input-label": "URL",
 	"Settings.application.customization.modal.upload.next": "Далее",
 	"Settings.application.customization.size-details": "Максимальное разрешение: {dimension}×{dimension}, максимальный размер файла: {size}KB",
-	"Settings.application.description": "Посмотреть детали вашего проекта",
+	"Settings.application.description": "Глобальная информация панели администратора",
 	"Settings.application.edition-title": "Текущий план",
 	"Settings.application.ee-or-ce": "{communityEdition, select, true {Community Edition} other {Enterprise Edition}}",
 	"Settings.application.ee.admin-seats.add-seats": "{isHostedOnStrapiCloud, select, true {Добавить места} other {Обратитесь в отдел продаж}}",
