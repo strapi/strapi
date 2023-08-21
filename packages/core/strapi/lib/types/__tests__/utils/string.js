@@ -90,7 +90,7 @@ describe('Utils.String', () => {
     assertType('Literal').isUnion([t.string(), t.number(), t.bigInt(), t.booleanLiteral()]);
   });
 
-  test('split', () => {
+  test('Split', () => {
     assertType('SplitEmptyStringBySpace').isTuple([]);
     assertType('SplitEmptyStringByEmptyString').isTuple([]);
     assertType('SplitEmptyStringByString').isTuple([]);
