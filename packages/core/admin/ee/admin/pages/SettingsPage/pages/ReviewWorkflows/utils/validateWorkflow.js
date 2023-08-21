@@ -78,7 +78,7 @@ export async function validateWorkflow({ values, formatMessage }) {
             )
             .strict()
             .min(
-              1,
+              0,
               formatMessage({
                 id: 'Settings.review-workflows.validation.stage.permissions',
                 defaultMessage: 'Must be either an array or undefined',
