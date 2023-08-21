@@ -7,10 +7,10 @@
  * This gives you an opportunity to set up your data model,
  * run jobs, or perform some special logic.
  */
-const strapi = require('@strapi/strapi');
 const crypto = require('crypto');
 const _ = require('lodash');
 const urljoin = require('url-join');
+const strapi = require('@strapi/strapi');
 const { getService } = require('../utils');
 const getGrantConfig = require('./grant-config');
 
