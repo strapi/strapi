@@ -82,12 +82,6 @@ module.exports = ({ action, ability, model }) => {
       )
     );
 
-    // const validatePopulate = pipeAsync(
-    //   traverseQueryPopulate(allowedFields(permittedFields), { schema }),
-    //   traverseQueryPopulate(omitDisallowedAdminUserFields, { schema }),
-    //   traverseQueryPopulate(removePassword, { schema })
-    // );
-
     const validateFields = pipeAsync(
       traverseQueryFields(throwDisallowedFields(permittedFields), { schema }),
       traverseQueryFields(throwPassword, { schema })
