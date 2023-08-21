@@ -9,7 +9,7 @@ describe('Validate visitors util', () => {
     const auth = {};
     const data = {};
     const creatorKeys = [CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE];
-    const rrrFunction = visitors.throwRestrictedRelations(auth);
+    const throwRestrictedRelationsFn = visitors.throwRestrictedRelations(auth);
     const attribute = {
       type: 'relation',
       relation: 'oneToOne',
@@ -20,7 +20,7 @@ describe('Validate visitors util', () => {
       const remove = jest.fn();
       const set = jest.fn();
       const promises = creatorKeys.map(async (key) => {
-        await rrrFunction(
+        await throwRestrictedRelationsFn(
           {
             data,
             key,
@@ -51,7 +51,7 @@ describe('Validate visitors util', () => {
       const set = jest.fn();
       expect(async () => {
         const promises = creatorKeys.map(async (key) => {
-          await rrrFunction(
+          await throwRestrictedRelationsFn(
             {
               data,
               key,
