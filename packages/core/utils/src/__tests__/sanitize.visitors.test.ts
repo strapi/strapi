@@ -8,7 +8,7 @@ describe('Sanitize visitors util', () => {
     const auth = {};
     const data = {};
     const creatorKeys = [CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE];
-    const rrrFunction = visitors.removeRestrictedRelations(auth);
+    const removeRestrictedRelationsFn = visitors.removeRestrictedRelations(auth);
     const attribute = {
       type: 'relation',
       relation: 'oneToOne',
@@ -19,7 +19,7 @@ describe('Sanitize visitors util', () => {
       const remove = jest.fn();
       const set = jest.fn();
       const promises = creatorKeys.map(async (key) => {
-        await rrrFunction(
+        await removeRestrictedRelationsFn(
           {
             data,
             key,
@@ -52,7 +52,7 @@ describe('Sanitize visitors util', () => {
       const remove = jest.fn();
       const set = jest.fn();
       const promises = creatorKeys.map(async (key) => {
-        await rrrFunction(
+        await removeRestrictedRelationsFn(
           {
             data,
             key,
