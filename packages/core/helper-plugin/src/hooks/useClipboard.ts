@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
 export const useClipboard = () => {
-  const copy = useCallback(async (value) => {
+  const copy = useCallback(async (value: string | number) => {
     try {
       // only strings and numbers casted to strings can be copied to clipboard
       if (typeof value !== 'string' && typeof value !== 'number') {
