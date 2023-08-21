@@ -457,14 +457,11 @@ describe('Transfer engine', () => {
 
     test.each<
       // (givenStages, mustBeCalled, mustNotBeCalled)
-      [
-        TransferFilterPreset[] | undefined,
-        (keyof IDestinationProvider)[],
-        (keyof IDestinationProvider)[]
-      ]
+      [TransferFilterPreset[], (keyof IDestinationProvider)[], (keyof IDestinationProvider)[]]
     >([
       [
-        undefined,
+        // javascript could send undefined
+        undefined as unknown as TransferFilterPreset[],
         [
           'bootstrap',
           'createSchemasWriteStream',
@@ -524,11 +521,95 @@ describe('Transfer engine', () => {
         ],
       ],
     ])(
-      'excludes correct stages with exclude %s',
+      `'exclude' options includes correct stages with %s`,
       async (excludeStages, mustBeCalled, mustNotBeCalled) => {
         const engine = createTransferEngine(completeSource, completeDestination, {
           ...defaultOptions,
           exclude: excludeStages,
+        });
+
+        expect(completeSource).toHaveSourceStagesCalledTimes(0);
+        expect(completeDestination).toHaveDestinationStagesCalledTimes(0);
+        await engine.transfer();
+
+        expect(completeDestination).toHaveDestinationStageCalledTimes(mustBeCalled, 1);
+        expect(completeDestination).toHaveDestinationStageCalledTimes(mustNotBeCalled, 0);
+      }
+    );
+
+    test.each<
+      // (givenStages, mustBeCalled, mustNotBeCalled)
+      [TransferFilterPreset[], (keyof IDestinationProvider)[], (keyof IDestinationProvider)[]]
+    >([
+      [
+        // javascript could send undefined
+        undefined as unknown as TransferFilterPreset[],
+        [
+          'bootstrap',
+          'createSchemasWriteStream',
+          'createLinksWriteStream',
+          'createEntitiesWriteStream',
+          'createConfigurationWriteStream',
+          'createAssetsWriteStream',
+        ],
+        [],
+      ],
+      [
+        [],
+        [
+          'bootstrap',
+          'createSchemasWriteStream',
+          'createLinksWriteStream',
+          'createEntitiesWriteStream',
+          'createConfigurationWriteStream',
+          'createAssetsWriteStream',
+        ],
+        [],
+      ],
+      [
+        ['files'],
+        ['bootstrap', 'createSchemasWriteStream', 'createAssetsWriteStream'],
+        ['createLinksWriteStream', 'createEntitiesWriteStream', 'createConfigurationWriteStream'],
+      ],
+      [
+        ['content'],
+        [
+          'bootstrap',
+          'createSchemasWriteStream',
+          'createLinksWriteStream',
+          'createEntitiesWriteStream',
+        ],
+        ['createAssetsWriteStream', 'createConfigurationWriteStream'],
+      ],
+      [
+        ['content', 'config'],
+        [
+          'bootstrap',
+          'createSchemasWriteStream',
+          'createLinksWriteStream',
+          'createEntitiesWriteStream',
+          'createConfigurationWriteStream',
+        ],
+        ['createAssetsWriteStream'],
+      ],
+      [
+        ['content', 'config', 'files'],
+        [
+          'bootstrap',
+          'createSchemasWriteStream',
+          'createLinksWriteStream',
+          'createEntitiesWriteStream',
+          'createConfigurationWriteStream',
+          'createAssetsWriteStream',
+        ],
+        [],
+      ],
+    ])(
+      `'only' option includes correct stages with %s`,
+      async (onlyStages, mustBeCalled, mustNotBeCalled) => {
+        const engine = createTransferEngine(completeSource, completeDestination, {
+          ...defaultOptions,
+          only: onlyStages,
         });
 
         expect(completeSource).toHaveSourceStagesCalledTimes(0);
