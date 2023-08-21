@@ -137,7 +137,7 @@ describe('Relations', () => {
     );
     user = await createEntry('plugin::users-permissions.user', {
       username: 'Alice',
-      email: 'test@strapi.io',
+      email: 'test-relations@strapi.io',
       password: '1234-never-gonna-hack-you-up',
       role: 1,
     });
