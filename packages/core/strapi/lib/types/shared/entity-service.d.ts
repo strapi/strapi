@@ -1,3 +1,1 @@
-export interface EntityServicePluginParams {
-  [key: keyof any]: object;
-}
+export interface EntityServicePluginParams {}
