@@ -424,7 +424,7 @@ describe('Transfer engine', () => {
       const engine = createTransferEngine(minimalSource, minimalDestination, defaultOptions);
       expect(engine).toBeValidTransferEngine();
       await engine.transfer();
-      expect(minimalSource).toHaveSourceStagesCalledTimes(1);
+      expect(minimalSource).toHaveAllSourceStagesCalledTimes(1);
     });
 
     test('bootstraps all providers with a bootstrap', async () => {
@@ -440,19 +440,19 @@ describe('Transfer engine', () => {
       expect(engine).toBeValidTransferEngine();
       await engine.transfer();
 
-      expect(minimalSource).toHaveSourceStagesCalledTimes(1);
+      expect(minimalSource).toHaveAllSourceStagesCalledTimes(1);
     });
   });
 
   describe('transfer', () => {
     test('calls all provider stages', async () => {
       const engine = createTransferEngine(completeSource, completeDestination, defaultOptions);
-      expect(completeSource).toHaveSourceStagesCalledTimes(0);
-      expect(completeDestination).toHaveDestinationStagesCalledTimes(0);
+      expect(completeSource).toHaveAllSourceStagesCalledTimes(0);
+      expect(completeDestination).toHaveAllDestinationStagesCalledTimes(0);
       await engine.transfer();
 
-      expect(completeSource).toHaveSourceStagesCalledTimes(1);
-      expect(completeDestination).toHaveDestinationStagesCalledTimes(1);
+      expect(completeSource).toHaveAllSourceStagesCalledTimes(1);
+      expect(completeDestination).toHaveAllDestinationStagesCalledTimes(1);
     });
 
     test.each<
@@ -528,12 +528,10 @@ describe('Transfer engine', () => {
           exclude: excludeStages,
         });
 
-        expect(completeSource).toHaveSourceStagesCalledTimes(0);
-        expect(completeDestination).toHaveDestinationStagesCalledTimes(0);
         await engine.transfer();
 
-        expect(completeDestination).toHaveDestinationStageCalledTimes(mustBeCalled, 1);
-        expect(completeDestination).toHaveDestinationStageCalledTimes(mustNotBeCalled, 0);
+        expect(completeDestination).toHaveDestinationStagesCalledTimes(mustBeCalled, 1);
+        expect(completeDestination).toHaveDestinationStagesCalledTimes(mustNotBeCalled, 0);
       }
     );
 
@@ -612,12 +610,10 @@ describe('Transfer engine', () => {
           only: onlyStages,
         });
 
-        expect(completeSource).toHaveSourceStagesCalledTimes(0);
-        expect(completeDestination).toHaveDestinationStagesCalledTimes(0);
         await engine.transfer();
 
-        expect(completeDestination).toHaveDestinationStageCalledTimes(mustBeCalled, 1);
-        expect(completeDestination).toHaveDestinationStageCalledTimes(mustNotBeCalled, 0);
+        expect(completeDestination).toHaveDestinationStagesCalledTimes(mustBeCalled, 1);
+        expect(completeDestination).toHaveDestinationStagesCalledTimes(mustNotBeCalled, 0);
       }
     );
 
