@@ -79,7 +79,7 @@
 	"Roles.RoleRow.user-count": "{number, plural, =0 {# пользователей} one {# пользователь} other {# пользователей}}",
 	"Roles.components.List.empty.withSearch": "Нет роли, соответствующей поиску ({search})...",
 	"Settings.PageTitle": "Настройки — {name}",
-	"Settings.apiTokens.ListView.headers.createdAt": "Создан",
+	"Settings.apiTokens.ListView.headers.createdAt": "Cоздан в",
 	"Settings.apiTokens.ListView.headers.description": "Описание",
 	"Settings.apiTokens.ListView.headers.lastUsedAt": "Последнее использование",
 	"Settings.apiTokens.ListView.headers.name": "Название",
