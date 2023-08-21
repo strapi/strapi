@@ -2,12 +2,12 @@ import React from 'react';
 
 import { IconButton, IconButtonProps } from '@strapi/design-system';
 import { Minus } from '@strapi/icons';
-import styled, { DefaultTheme } from 'styled-components';
+import styled from 'styled-components';
 
 import { pxToRem } from '../utils/pxToRem';
 
 const StyledIconButton = styled(IconButton)(
-  ({ theme }: { theme: DefaultTheme }) => `
+  ({ theme }) => `
   border-radius: ${pxToRem(30)};
   width: ${pxToRem(20)};
   height: ${pxToRem(20)};
