@@ -18,8 +18,6 @@ const addFiltersClause = (params, filtersClause) => {
   }
 };
 
-const MAIN_FIELD_READ_ALLOWED_MODELS = ['plugin::users-permissions.role'];
-
 const sanitizeMainField = (model, mainField, userAbility) => {
   const permissionChecker = getService('permission-checker').create({
     userAbility,
@@ -30,11 +28,19 @@ const sanitizeMainField = (model, mainField, userAbility) => {
     return 'id';
   }
 
-  if (MAIN_FIELD_READ_ALLOWED_MODELS.includes(model.uid)) {
-    return mainField;
-  }
-
   if (permissionChecker.cannot.read(null, mainField)) {
+    // Allow reading role name if user can read the user model
+    if (model.uid === 'plugin::users-permissions.role') {
+      const userPermissionChecker = getService('permission-checker').create({
+        userAbility,
+        model: 'plugin::users-permissions.user',
+      });
+
+      if (userPermissionChecker.can.read()) {
+        return 'name';
+      }
+    }
+
     return 'id';
   }
 
