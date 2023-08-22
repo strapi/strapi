@@ -2,10 +2,24 @@ import React from 'react';
 
 import { EmptyStateLayout } from '@strapi/design-system';
 import { ExclamationMarkCircle } from '@strapi/icons';
-import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
+import { PrimitiveType, useIntl } from 'react-intl';
 
-const AnErrorOccurred = ({ content, ...rest }) => {
+export type AnErrorOccurredProps = {
+  content?: {
+    id: string;
+    defaultMessage: string;
+    values?: Record<string, PrimitiveType>;
+  };
+};
+
+const AnErrorOccurred: React.FC<AnErrorOccurredProps> = ({
+  content = {
+    id: 'anErrorOccurred',
+    defaultMessage: 'Woops! Something went wrong. Please, try again.',
+    values: {},
+  },
+  ...rest
+}) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -18,22 +32,6 @@ const AnErrorOccurred = ({ content, ...rest }) => {
       {...rest}
     />
   );
-};
-
-AnErrorOccurred.defaultProps = {
-  content: {
-    id: 'anErrorOccurred',
-    defaultMessage: 'Woops! Something went wrong. Please, try again.',
-    values: {},
-  },
-};
-
-AnErrorOccurred.propTypes = {
-  content: PropTypes.shape({
-    id: PropTypes.string,
-    defaultMessage: PropTypes.string,
-    values: PropTypes.object,
-  }),
 };
 
 export { AnErrorOccurred };
