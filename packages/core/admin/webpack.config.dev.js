@@ -67,7 +67,7 @@ module.exports = () => {
 
     plugins: [
       ...config.plugins,
-      analyzeBundle && new BundleAnalyzerPlugin(),
+      analyzeBundle === 'true' && new BundleAnalyzerPlugin(),
       analyzeDuplicateDependencies === 'true' && new DuplicateReporterPlugin(),
     ],
 
