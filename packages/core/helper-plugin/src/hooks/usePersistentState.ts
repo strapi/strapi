@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
-const usePersistentState = (key, defaultValue) => {
-  const [value, setValue] = useState(() => {
+const usePersistentState = <T>(key: string, defaultValue: T) => {
+  const [value, setValue] = useState<T>(() => {
     const stickyValue = window.localStorage.getItem(key);
 
     if (stickyValue !== null) {
@@ -20,7 +20,7 @@ const usePersistentState = (key, defaultValue) => {
     window.localStorage.setItem(key, JSON.stringify(value));
   }, [key, value]);
 
-  return [value, setValue];
+  return [value, setValue] as const;
 };
 
 export { usePersistentState };
