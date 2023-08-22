@@ -56,7 +56,7 @@ module.exports = ({ strapi }) => {
         await validate.contentAPI.query(omit(['data', 'files'], transformedArgs), contentType, {
           auth,
         });
-        const sanitizedQuery = await validate.contentAPI.query(
+        const sanitizedQuery = await sanitize.contentAPI.query(
           omit(['data', 'files'], transformedArgs),
           contentType,
           {
