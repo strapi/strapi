@@ -15,10 +15,16 @@ import { throwInvalidParam } from './utils';
 const { traverseQueryFilters, traverseQuerySort, traverseQueryFields } = traversals;
 
 const throwPasswords = (schema: Model) => async (entity: Data) => {
+  if (!schema) {
+    throw new Error('Missing schema in throwPasswords');
+  }
   return traverseEntity(throwPassword, { schema }, entity);
 };
 
 const defaultValidateFilters = curry((schema: Model, filters: unknown) => {
+  if (!schema) {
+    throw new Error('Missing schema in defaultValidateFilters');
+  }
   return pipeAsync(
     // keys that are not attributes or valid operators
     traverseQueryFilters(
@@ -52,6 +58,9 @@ const defaultValidateFilters = curry((schema: Model, filters: unknown) => {
 });
 
 const defaultValidateSort = curry((schema: Model, sort: unknown) => {
+  if (!schema) {
+    throw new Error('Missing schema in defaultValidateSort');
+  }
   return pipeAsync(
     // non attribute keys
     traverseQuerySort(
@@ -89,6 +98,9 @@ const defaultValidateSort = curry((schema: Model, sort: unknown) => {
 });
 
 const defaultValidateFields = curry((schema: Model, fields: unknown) => {
+  if (!schema) {
+    throw new Error('Missing schema in defaultValidateFields');
+  }
   return pipeAsync(
     // Only allow scalar attributes
     traverseQueryFields(

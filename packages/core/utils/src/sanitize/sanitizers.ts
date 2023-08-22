@@ -20,10 +20,16 @@ const { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate, traverse
   traversals;
 
 const sanitizePasswords = (schema: Model) => async (entity: Data) => {
+  if (!schema) {
+    throw new Error('Missing schema in sanitizePasswords');
+  }
   return traverseEntity(removePassword, { schema }, entity);
 };
 
 const defaultSanitizeOutput = async (schema: Model, entity: Data) => {
+  if (!schema) {
+    throw new Error('Missing schema in defaultSanitizeOutput');
+  }
   return traverseEntity(
     (...args) => {
       removePassword(...args);
@@ -35,6 +41,9 @@ const defaultSanitizeOutput = async (schema: Model, entity: Data) => {
 };
 
 const defaultSanitizeFilters = curry((schema: Model, filters: unknown) => {
+  if (!schema) {
+    throw new Error('Missing schema in defaultSanitizeFilters');
+  }
   return pipeAsync(
     // Remove keys that are not attributes or valid operators
     traverseQueryFilters(
@@ -74,6 +83,9 @@ const defaultSanitizeFilters = curry((schema: Model, filters: unknown) => {
 });
 
 const defaultSanitizeSort = curry((schema: Model, sort: unknown) => {
+  if (!schema) {
+    throw new Error('Missing schema in defaultSanitizeSort');
+  }
   return pipeAsync(
     // Remove non attribute keys
     traverseQuerySort(
@@ -111,6 +123,9 @@ const defaultSanitizeSort = curry((schema: Model, sort: unknown) => {
 });
 
 const defaultSanitizeFields = curry((schema: Model, fields: unknown) => {
+  if (!schema) {
+    throw new Error('Missing schema in defaultSanitizeFields');
+  }
   return pipeAsync(
     // Only keep scalar attributes
     traverseQueryFields(
@@ -136,6 +151,9 @@ const defaultSanitizeFields = curry((schema: Model, fields: unknown) => {
 });
 
 const defaultSanitizePopulate = curry((schema: Model, populate: unknown) => {
+  if (!schema) {
+    throw new Error('Missing schema in defaultSanitizePopulate');
+  }
   return pipeAsync(
     traverseQueryPopulate(
       async ({ key, value, schema, attribute }, { set }) => {
