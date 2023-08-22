@@ -1,114 +1,96 @@
+import React from 'react';
+
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render as renderRTL, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 
-import { ConfirmDialog } from '../ConfirmDialog';
-
-const App = (
-  <ThemeProvider theme={lightTheme}>
-    <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
-      <ConfirmDialog isOpen onConfirm={jest.fn()} onToggleDialog={jest.fn()} />
-    </IntlProvider>
-  </ThemeProvider>
-);
+import { ConfirmDialog, ConfirmDialogProps } from '../ConfirmDialog';
 
 describe('ConfirmDialog', () => {
-  it('renders and matches the snapshot', async () => {
-    const {
-      container: { firstChild },
-    } = render(App);
-
-    expect(firstChild).toMatchInlineSnapshot(`
-      .c0 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
+  const render = (props?: Partial<ConfirmDialogProps>) => ({
+    ...renderRTL(
+      <ConfirmDialog
+        isOpen
+        onConfirm={jest.fn()}
+        onToggleDialog={jest.fn()}
+        bodyText={{
+          id: 'app.components',
+          defaultMessage: 'Are you sure you want to unpublish it?',
+        }}
+        title={{ id: 'app.components.ConfirmDialog.title', defaultMessage: 'Confirmation' }}
+        rightButtonText={{ id: 'global.save', defaultMessage: 'Save' }}
+        {...props}
+      />,
+      {
+        wrapper: ({ children }: { children: React.JSX.Element }) => (
+          <ThemeProvider theme={lightTheme}>
+            <IntlProvider locale="en" messages={{}} defaultLocale="en">
+              {children}
+            </IntlProvider>
+          </ThemeProvider>
+        ),
       }
-
-      <div
-        class="c0"
-      >
-        <p
-          aria-live="polite"
-          aria-relevant="all"
-          id="live-region-log"
-          role="log"
-        />
-        <p
-          aria-live="polite"
-          aria-relevant="all"
-          id="live-region-status"
-          role="status"
-        />
-        <p
-          aria-live="assertive"
-          aria-relevant="all"
-          id="live-region-alert"
-          role="alert"
-        />
-      </div>
-    `);
+    ),
+    user: userEvent.setup(),
   });
 
-  it('renders and matches the snapshot', async () => {
-    const AppCustom = (
-      <ThemeProvider theme={lightTheme}>
-        <IntlProvider locale="en" messages={{}} textComponent="span">
-          <ConfirmDialog
-            bodyText={{
-              id: 'app.components',
-              defaultMessage: 'Are you sure you want to unpublish it?',
-            }}
-            isOpen
-            onConfirm={jest.fn()}
-            onToggleDialog={jest.fn()}
-            title={{ id: 'app.components.ConfirmDialog.title', defaultMessage: 'Confirmation' }}
-            rightButtonText={{ id: 'global.save', defaultMessage: 'Save' }}
-          />
-        </IntlProvider>
-      </ThemeProvider>
-    );
-
-    render(AppCustom);
+  it('renders with given props and displays open dialog', async () => {
+    render();
 
     await waitFor(() => {
       expect(screen.getByText('Are you sure you want to unpublish it?')).toBeInTheDocument();
     });
+
+    expect(screen.getByText('Confirmation')).toBeInTheDocument();
+
+    expect(screen.getByText('Save')).toBeInTheDocument();
   });
 
-  it('renders Body component part and matches text', async () => {
-    render(
-      <ThemeProvider theme={lightTheme}>
-        <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
-          <ConfirmDialog.Body>Are you sure you want to unpublish it? </ConfirmDialog.Body>
-        </IntlProvider>
-      </ThemeProvider>
-    );
+  it('verifies dialog is hidden when isOpen is false', () => {
+    render({ isOpen: false });
+
+    expect(screen.queryByText('Confirmation')).not.toBeInTheDocument();
+  });
+
+  it('triggers onConfirm when "Save" button is clicked', async () => {
+    const onConfirm = jest.fn();
+    const { user } = render({ onConfirm });
+
     await waitFor(() => {
       expect(screen.getByText('Are you sure you want to unpublish it?')).toBeInTheDocument();
     });
+
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(onConfirm).toBeCalled();
   });
 
-  it('renders Root component part and matches text', async () => {
-    render(
-      <ThemeProvider theme={lightTheme}>
-        <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
-          <ConfirmDialog.Root isOpen onToggleDialog={jest.fn()} onConfirm={jest.fn()}>
-            {' '}
-            Are you sure you want to unpublish it?
-          </ConfirmDialog.Root>
-        </IntlProvider>
-      </ThemeProvider>
+  it('triggers onToggleDialog when "Cancel" button is clicked', async () => {
+    const onToggleDialog = jest.fn();
+    const { user } = render({ onToggleDialog });
+
+    await waitFor(() => {
+      expect(screen.getByText('Are you sure you want to unpublish it?')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    expect(onToggleDialog).toBeCalled();
+  });
+
+  it('renders component parts and matches text', async () => {
+    const { rerender } = render();
+    rerender(
+      <ConfirmDialog.Root isOpen onToggleDialog={jest.fn()} onConfirm={jest.fn()}>
+        <ConfirmDialog.Body>Are you sure you want to unpublish it?</ConfirmDialog.Body>
+      </ConfirmDialog.Root>
     );
 
     await waitFor(() => {
       expect(screen.getByText('Are you sure you want to unpublish it?')).toBeInTheDocument();
     });
+
+    expect(screen.getByText('Confirm')).toBeInTheDocument();
   });
 });
