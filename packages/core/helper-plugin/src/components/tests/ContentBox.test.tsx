@@ -1,4 +1,5 @@
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { lightTheme, ThemeProvider, Icon } from '@strapi/design-system';
+import { GlassesSquare, ExternalLink } from '@strapi/icons';
 import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
@@ -10,114 +11,35 @@ const App = (
       <ContentBox
         title="Code example"
         subtitle="Learn by testing real project developed by the community"
+        icon={<GlassesSquare data-testid="icon" />}
+        iconBackground="alternative100"
+        endAction={
+          <Icon
+            data-testid="end-action-icon"
+            as={ExternalLink}
+            color="neutral600"
+            width={3}
+            height={3}
+            marginLeft={2}
+          />
+        }
+        titleEllipsis={false}
       />
     </IntlProvider>
   </ThemeProvider>
 );
 
 describe('ContentBox', () => {
-  it('renders and matches the snapshot', async () => {
-    const {
-      container: { firstChild },
-    } = render(App);
+  it('renders with all provided props', async () => {
+    render(App);
 
-    expect(firstChild).toMatchInlineSnapshot(`
-      .c5 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 500;
-        color: #32324d;
-      }
-
-      .c7 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #666687;
-      }
-
-      .c0 {
-        background: #ffffff;
-        padding: 24px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c2 {
-        padding: 12px;
-        border-radius: 4px;
-      }
-
-      .c1 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c4 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        gap: 4px;
-      }
-
-      .c3 {
-        margin-right: 24px;
-      }
-
-      .c3 svg {
-        width: 2rem;
-        height: 2rem;
-      }
-
-      .c6 {
-        word-break: break-all;
-      }
-
-      <div
-        class="c0 c1"
-      >
-        <div
-          class="c2 c1 c3"
-        />
-        <div
-          class="c4"
-        >
-          <div
-            class="c1"
-          >
-            <span
-              class="c5 c6"
-            >
-              Code example
-            </span>
-          </div>
-          <span
-            class="c7"
-          >
-            Learn by testing real project developed by the community
-          </span>
-        </div>
-      </div>
-    `);
-
+    expect(screen.getByText('Code example')).toBeInTheDocument();
     expect(
       screen.getByText('Learn by testing real project developed by the community')
     ).toBeInTheDocument();
+
+    expect(screen.getByTestId('icon')).toBeInTheDocument();
+    expect(screen.getByTestId('icon').parentElement).toHaveStyle('background: rgb(246, 236, 252)');
+    expect(screen.getByTestId('end-action-icon')).toBeInTheDocument();
   });
 });
