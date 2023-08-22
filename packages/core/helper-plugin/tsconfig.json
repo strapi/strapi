@@ -1,0 +1,11 @@
+{
+  "extends": "tsconfig/client.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@tests/*": ["./tests/*"]
+    }
+  },
+  "include": ["src", "tests", "jest.config.front.js", "webpack.config.js"],
+  "exclude": ["node_modules"]
+}

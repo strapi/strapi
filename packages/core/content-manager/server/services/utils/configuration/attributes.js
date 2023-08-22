@@ -89,6 +89,10 @@ const isVisible = (schema, name) => {
     return false;
   }
 
+  if (isCreatorField(schema, name)) {
+    return false;
+  }
+
   return true;
 };
 
@@ -107,6 +111,21 @@ const isTimestamp = (schema, name) => {
   }
 
   if (timestamps.includes(name)) {
+    return true;
+  }
+};
+
+const isCreatorField = (schema, name) => {
+  if (!_.has(schema.attributes, name)) {
+    return false;
+  }
+
+  const creatorFields = contentTypesUtils.getCreatorFields(schema);
+  if (!creatorFields || !Array.isArray(creatorFields)) {
+    return false;
+  }
+
+  if (creatorFields.includes(name)) {
     return true;
   }
 };

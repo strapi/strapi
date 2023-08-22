@@ -1,5 +1,5 @@
-import { chain } from 'stream-chain';
 import { Readable } from 'stream';
+import { chain } from 'stream-chain';
 import { set } from 'lodash/fp';
 
 import type { IConfiguration } from '../../../../types';
