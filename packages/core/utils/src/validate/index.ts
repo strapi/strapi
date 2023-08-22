@@ -109,6 +109,9 @@ const createContentAPIValidators = () => {
   };
 
   const validateFields: ValidateFunc = (fields, schema: Model) => {
+    if (!schema) {
+      throw new Error('Missing schema in validateFields');
+    }
     const transforms = [validators.defaultValidateFields(schema)];
 
     return pipeAsync(...transforms)(fields);
