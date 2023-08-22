@@ -1,14 +1,15 @@
 import { useEffect } from 'react';
 
-interface UseFocusWhenNavigateProps<T> {
+type DependencyList = ReadonlyArray<unknown>;
+interface UseFocusWhenNavigateProps {
   selector?: string;
-  dependencies?: T[];
+  dependencies?: DependencyList;
 }
 
-const useFocusWhenNavigate = <T>({
+const useFocusWhenNavigate = ({
   selector = 'main',
   dependencies = [],
-}: UseFocusWhenNavigateProps<T>) => {
+}: UseFocusWhenNavigateProps) => {
   useEffect(() => {
     const mainElement = document.querySelector(selector);
 
