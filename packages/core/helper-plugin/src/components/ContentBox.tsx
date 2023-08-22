@@ -5,7 +5,7 @@ export interface ContextBoxProps {
   title?: string;
   subtitle?: string;
   icon?: FlexProps['children'];
-  iconBackground?: string;
+  iconBackground?: FlexProps['background'];
   endAction?: FlexProps['children'];
   titleEllipsis?: boolean;
 }
