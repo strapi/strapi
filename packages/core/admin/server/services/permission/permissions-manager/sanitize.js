@@ -45,7 +45,7 @@ const STATIC_FIELDS = [ID_ATTRIBUTE];
 module.exports = ({ action, ability, model }) => {
   const schema = strapi.getModel(model);
 
-  const { allowedFields } = sanitize.visitors;
+  const { removeDisallowedFields } = sanitize.visitors;
   const { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate, traverseQueryFields } =
     traverse.traversals;
 
@@ -56,7 +56,7 @@ module.exports = ({ action, ability, model }) => {
     const permittedFields = fields.shouldIncludeAll ? null : getQueryFields(fields.permitted);
 
     const sanitizeFilters = pipeAsync(
-      traverseQueryFilters(allowedFields(permittedFields), { schema }),
+      traverseQueryFilters(removeDisallowedFields(permittedFields), { schema }),
       traverseQueryFilters(omitDisallowedAdminUserFields, { schema }),
       traverseQueryFilters(removePassword, { schema }),
       traverseQueryFilters(
@@ -70,7 +70,7 @@ module.exports = ({ action, ability, model }) => {
     );
 
     const sanitizeSort = pipeAsync(
-      traverseQuerySort(allowedFields(permittedFields), { schema }),
+      traverseQuerySort(removeDisallowedFields(permittedFields), { schema }),
       traverseQuerySort(omitDisallowedAdminUserFields, { schema }),
       traverseQuerySort(removePassword, { schema }),
       traverseQuerySort(
@@ -84,13 +84,13 @@ module.exports = ({ action, ability, model }) => {
     );
 
     const sanitizePopulate = pipeAsync(
-      traverseQueryPopulate(allowedFields(permittedFields), { schema }),
+      traverseQueryPopulate(removeDisallowedFields(permittedFields), { schema }),
       traverseQueryPopulate(omitDisallowedAdminUserFields, { schema }),
       traverseQueryPopulate(removePassword, { schema })
     );
 
     const sanitizeFields = pipeAsync(
-      traverseQueryFields(allowedFields(permittedFields), { schema }),
+      traverseQueryFields(removeDisallowedFields(permittedFields), { schema }),
       traverseQueryFields(removePassword, { schema })
     );
 
@@ -128,7 +128,7 @@ module.exports = ({ action, ability, model }) => {
       // Remove unallowed fields from admin::user relations
       traverseEntity(pickAllowedAdminUserFields, { schema }),
       // Remove not allowed fields (RBAC)
-      traverseEntity(allowedFields(permittedFields), { schema }),
+      traverseEntity(removeDisallowedFields(permittedFields), { schema }),
       // Remove all fields of type 'password'
       sanitize.sanitizers.sanitizePasswords(schema)
     );
@@ -143,7 +143,7 @@ module.exports = ({ action, ability, model }) => {
       // Remove fields hidden from the admin
       traverseEntity(omitHiddenFields, { schema }),
       // Remove not allowed fields (RBAC)
-      traverseEntity(allowedFields(permittedFields), { schema }),
+      traverseEntity(removeDisallowedFields(permittedFields), { schema }),
       // Remove roles from createdBy & updateBy fields
       omitCreatorRoles
     );
