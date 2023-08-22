@@ -45,7 +45,7 @@ const COMPONENT_FIELDS = ['__component'];
 const STATIC_FIELDS = [ID_ATTRIBUTE];
 
 const throwInvalidParam = ({ key }) => {
-  throw new ValidationError(`Invalid param ${key}`);
+  throw new ValidationError(`Invalid parameter ${key}`);
 };
 
 module.exports = ({ action, ability, model }) => {

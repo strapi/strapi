@@ -1,5 +1,5 @@
 import * as contentTypeUtils from '../../content-types';
-import { ValidationError } from '../../errors';
+import { throwInvalidParam } from '../utils';
 import type { Visitor } from '../../traverse/factory';
 
 const ACTIONS_TO_VERIFY = ['find'];
@@ -31,9 +31,9 @@ export default (auth: unknown): Visitor =>
         }
       }
 
-      // If the new value is empty, remove the relation completely
+      // If the new value is empty
       if (newMorphValue.length === 0) {
-        throw new ValidationError(`Invalid parameter ${key}`);
+        throwInvalidParam({ key });
       } else {
         set(key, newMorphValue);
       }
@@ -44,9 +44,9 @@ export default (auth: unknown): Visitor =>
 
       const isAllowed = await hasAccessToSomeScopes(scopes, auth);
 
-      // If the authenticated user don't have access to any of the scopes, then remove the field
+      // If the authenticated user don't have access to any of the scopes
       if (!isAllowed) {
-        throw new ValidationError(`Invalid parameter ${key}`);
+        throwInvalidParam({ key });
       }
     };
 

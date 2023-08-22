@@ -1,12 +1,12 @@
 import { isArray } from 'lodash/fp';
 import type { Visitor } from '../../traverse/factory';
-import { ValidationError } from '../../errors';
+import { throwInvalidParam } from '../utils';
 
 export default (restrictedFields: string[] | null = null): Visitor =>
   ({ key, path: { attribute: path } }) => {
-    // Remove all fields
+    // all fields
     if (restrictedFields === null) {
-      throw new ValidationError(`Invalid parameter ${key}`);
+      throwInvalidParam({ key });
     }
 
     // Ignore invalid formats
@@ -14,16 +14,16 @@ export default (restrictedFields: string[] | null = null): Visitor =>
       return;
     }
 
-    // Remove if an exact match was found
+    // if an exact match was found
     if (restrictedFields.includes(path as string)) {
-      throw new ValidationError(`Invalid parameter ${key}`);
+      throwInvalidParam({ key });
     }
 
-    // Remove nested matches
+    // nested matches
     const isRestrictedNested = restrictedFields.some((allowedPath) =>
       path?.toString().startsWith(`${allowedPath}.`)
     );
     if (isRestrictedNested) {
-      throw new ValidationError(`Invalid parameter ${key}`);
+      throwInvalidParam({ key });
     }
   };

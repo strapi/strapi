@@ -1,9 +1,9 @@
-import { ValidationError } from '../../errors';
+import { throwInvalidParam } from '../utils';
 import type { Visitor } from '../../traverse/factory';
 
 const visitor: Visitor = ({ key, attribute }) => {
   if (attribute?.type === 'password') {
-    throw new ValidationError(`Invalid parameter ${key}`);
+    throwInvalidParam({ key });
   }
 };
 

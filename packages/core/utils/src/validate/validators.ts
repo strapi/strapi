@@ -10,7 +10,7 @@ import { throwPassword, throwPrivate, throwDynamicZones, throwMorphToRelations }
 import { isOperator } from '../operators';
 
 import type { Model } from '../types';
-import { ValidationError } from '../errors';
+import { throwInvalidParam } from './utils';
 
 const { traverseQueryFilters, traverseQuerySort, traverseQueryFields } = traversals;
 
@@ -20,30 +20,30 @@ const throwPasswords = (schema: Model) => async (entity: Data) => {
 
 const defaultValidateFilters = curry((schema: Model, filters: unknown) => {
   return pipeAsync(
-    // Remove keys that are not attributes or valid operators
+    // keys that are not attributes or valid operators
     traverseQueryFilters(
       ({ key, attribute }) => {
         const isAttribute = !!attribute;
 
         if (!isAttribute && !isOperator(key) && key !== 'id') {
-          throw new ValidationError(`invalid key ${key}`);
+          throwInvalidParam({ key });
         }
       },
       { schema }
     ),
-    // Remove dynamic zones from filters
+    // dynamic zones from filters
     traverseQueryFilters(throwDynamicZones, { schema }),
-    // Remove morpTo relations from filters
+    //  morpTo relations from filters
     traverseQueryFilters(throwMorphToRelations, { schema }),
-    // Remove passwords from filters
+    // passwords from filters
     traverseQueryFilters(throwPassword, { schema }),
-    // Remove private from filters
+    // private from filters
     traverseQueryFilters(throwPrivate, { schema }),
-    // Remove empty objects
+    // empty objects
     traverseQueryFilters(
       ({ key, value }) => {
         if (isObject(value) && isEmpty(value)) {
-          throw new ValidationError(`invalid key ${key}`);
+          throwInvalidParam({ key });
         }
       },
       { schema }
@@ -53,7 +53,7 @@ const defaultValidateFilters = curry((schema: Model, filters: unknown) => {
 
 const defaultValidateSort = curry((schema: Model, sort: unknown) => {
   return pipeAsync(
-    // Remove non attribute keys
+    // non attribute keys
     traverseQuerySort(
       ({ key, attribute }) => {
         // ID is not an attribute per se, so we need to make
@@ -63,24 +63,24 @@ const defaultValidateSort = curry((schema: Model, sort: unknown) => {
         }
 
         if (!attribute) {
-          throw new ValidationError(`invalid key ${key}`);
+          throwInvalidParam({ key });
         }
       },
       { schema }
     ),
-    // Remove dynamic zones from sort
+    // dynamic zones from sort
     traverseQuerySort(throwDynamicZones, { schema }),
-    // Remove morpTo relations from sort
+    // morpTo relations from sort
     traverseQuerySort(throwMorphToRelations, { schema }),
-    // Remove private from sort
+    // private from sort
     traverseQuerySort(throwPrivate, { schema }),
-    // Remove passwords from filters
+    // passwords from filters
     traverseQuerySort(throwPassword, { schema }),
-    // Remove keys for empty non-scalar values
+    // keys for empty non-scalar values
     traverseQuerySort(
       ({ key, attribute, value }) => {
         if (!isScalarAttribute(attribute) && isEmpty(value)) {
-          throw new ValidationError(`invalid key ${key}`);
+          throwInvalidParam({ key });
         }
       },
       { schema }
@@ -90,21 +90,21 @@ const defaultValidateSort = curry((schema: Model, sort: unknown) => {
 
 const defaultValidateFields = curry((schema: Model, fields: unknown) => {
   return pipeAsync(
-    // Only keep scalar attributes
+    // Only allow scalar attributes
     traverseQueryFields(
       ({ key, attribute }) => {
         if (key === 'id') {
           return;
         }
         if (isNil(attribute) || !isScalarAttribute(attribute)) {
-          throw new ValidationError(`invalid key ${key}`);
+          throwInvalidParam({ key });
         }
       },
       { schema }
     ),
-    // Remove private fields
+    // private fields
     traverseQueryFields(throwPrivate, { schema }),
-    // Remove password fields
+    // password fields
     traverseQueryFields(throwPassword, { schema })
   )(fields);
 });

@@ -39,12 +39,12 @@ const createContentAPIValidators = () => {
     const nonWritableAttributes = getNonWritableAttributes(schema);
 
     const transforms = [
-      // Remove non writable attributes
+      // non writable attributes
       traverseEntity(visitors.throwRestrictedFields(nonWritableAttributes), { schema }),
     ];
 
     if (auth) {
-      // Remove restricted relations
+      // restricted relations
       transforms.push(traverseEntity(visitors.throwRestrictedRelations(auth), { schema }));
     }
 
