@@ -27,6 +27,10 @@ export interface ValidateFunc {
 
 const createContentAPIValidators = () => {
   const validateInput: ValidateFunc = async (data: unknown, schema: Model, { auth } = {}) => {
+    if (!schema) {
+      throw new Error('Missing schema in validateInput');
+    }
+
     if (isArray(data)) {
       await Promise.all(data.map((entry) => validateInput(entry, schema, { auth })));
       return;
