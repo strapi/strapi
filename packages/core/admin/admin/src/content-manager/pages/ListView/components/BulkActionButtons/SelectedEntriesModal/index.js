@@ -473,7 +473,7 @@ const SelectedEntriesModal = ({ onToggle }) => {
         const schema = createYupSchema(
           contentType,
           { components },
-          { isDraft: false, disabledIsJSONTest: true }
+          { isDraft: false, isJSONTestDisabled: true }
         );
         const validationErrors = {};
         const rows = data.results.map((entry) => {
