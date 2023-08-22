@@ -17,8 +17,7 @@ import {
 import { ExclamationMarkCircle, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-export interface RootProps extends Partial<FooterProps> {
-  children: BoxProps['children'];
+export interface RootProps extends Partial<FooterProps>, Pick<BoxProps, 'children'> {
   isOpen: boolean;
   title?: {
     id: string;
