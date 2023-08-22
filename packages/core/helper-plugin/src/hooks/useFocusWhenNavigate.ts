@@ -9,7 +9,7 @@ interface UseFocusWhenNavigateProps {
 const useFocusWhenNavigate = ({
   selector = 'main',
   dependencies = [],
-}: UseFocusWhenNavigateProps) => {
+}: UseFocusWhenNavigateProps = {}) => {
   useEffect(() => {
     const mainElement = document.querySelector(selector);
 
