@@ -68,6 +68,7 @@ export { useClipboard } from './hooks/useClipboard';
 export { useCollator } from './hooks/useCollator';
 export { useFetchClient } from './hooks/useFetchClient';
 export { useFilter } from './hooks/useFilter';
+export { useFocusInputField } from './hooks/useFocusInputField';
 export { useFocusWhenNavigate } from './hooks/useFocusWhenNavigate';
 export { useLockScroll } from './hooks/useLockScroll';
 export { usePersistentState } from './hooks/usePersistentState';
