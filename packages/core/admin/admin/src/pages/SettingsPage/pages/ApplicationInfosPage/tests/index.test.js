@@ -56,20 +56,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   useAppInfo: jest.fn(() => ({ shouldUpdateStrapi: false, latestStrapiReleaseTag: 'v3.6.8' })),
   useNotification: jest.fn(() => jest.fn()),
   useRBAC: jest.fn(() => ({ allowedActions: { canRead: true, canUpdate: true } })),
-  useFetchClient: jest.fn().mockReturnValue({
-    get: jest.fn().mockResolvedValue({
-      data: {
-        menuLogo: {
-          ext: 'png',
-          height: 256,
-          name: 'image.png',
-          size: 27.4,
-          url: 'uploads/image_fe95c5abb9.png',
-          width: 246,
-        },
-      },
-    }),
-  }),
 }));
 
 jest.mock('../../../../../hooks', () => ({

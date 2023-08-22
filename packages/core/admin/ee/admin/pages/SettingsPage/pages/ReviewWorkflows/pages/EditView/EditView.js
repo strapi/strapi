@@ -19,7 +19,7 @@ import { useParams } from 'react-router-dom';
 import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
 import { useInjectReducer } from '../../../../../../../../admin/src/hooks/useInjectReducer';
 import { selectAdminPermissions } from '../../../../../../../../admin/src/pages/App/selectors';
-import { useLicenseLimits } from '../../../../../../hooks';
+import { useLicenseLimits } from '../../../../../../hooks/useLicenseLimits';
 import { resetWorkflow, setWorkflow } from '../../actions';
 import * as Layout from '../../components/Layout';
 import * as LimitsModal from '../../components/LimitsModal';

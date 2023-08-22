@@ -1,40 +1,9 @@
 'use strict';
 
-const { join, resolve, relative } = require('path');
-const { promisify } = require('util');
-
-// eslint-disable-next-line import/no-extraneous-dependencies
-const glob = promisify(require('glob').glob);
+const { join } = require('path');
 const fs = require('fs-extra');
-const { getCorePluginsPath, createPluginsFile } = require('./create-plugins-file');
-
-/**
- * Retrieve all plugins that are inside the plugins folder
- * @returns Object the plugins
- */
-const getPluginsPackages = async () => {
-  const pathToPackages = resolve(__dirname, '..', '..', '..', 'plugins', '*');
-  const pluginsPackageDirs = await glob(pathToPackages);
-
-  return pluginsPackageDirs
-    .filter((pluginDir) => {
-      return fs.existsSync(join(pluginDir, 'admin', 'src', 'index.js'));
-    })
-    .reduce((acc, current) => {
-      const depName = current.replace(/\\/g, '/').split('/').slice(-1)[0];
-
-      const adminEntryPoint = join(__dirname, '..', 'admin', 'src');
-
-      const pathToPlugin = join(relative(adminEntryPoint, current), 'admin', 'src').replace(
-        /\\/g,
-        '/'
-      );
-
-      acc[depName] = pathToPlugin;
-
-      return acc;
-    }, {});
-};
+const { getPlugins } = require('../utils/get-plugins');
+const { createPluginsJs } = require('../utils/create-cache-dir');
 
 /**
  * Write the plugins.js file or copy the plugins-dev.js file if it exists
@@ -49,11 +18,9 @@ const createFile = async () => {
     return;
   }
 
-  const corePlugins = getCorePluginsPath();
-  const plugins = await getPluginsPackages();
-  const allPlugins = { ...corePlugins, ...plugins };
+  const plugins = getPlugins();
 
-  return createPluginsFile(allPlugins);
+  return createPluginsJs(plugins, join(__dirname, '..'));
 };
 
 createFile()

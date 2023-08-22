@@ -1,4 +1,4 @@
-import createRoute from '../createRoute';
+import { createRoute } from '../createRoute';
 
 describe('ADMIN | CONTAINER | SettingsPage | utils | createRoute', () => {
   it('should return a <Route /> with the correctProps', () => {
