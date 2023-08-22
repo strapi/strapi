@@ -4,21 +4,18 @@
 
 import { useCollator } from './useCollator';
 
-/**
- * @typedef {Object} Filter
- * @property {(string: string, substring: string) => boolean} startsWith – Returns whether a string starts with a given substring.
- * @property {(string: string, substring: string) => boolean} endsWith – Returns whether a string ends with a given substring.
- * @property {(string: string, substring: string) => boolean} includes – Returns whether a string contains a given substring.
- */
+interface Filter {
+  startsWith(string: string, substring: string): boolean; // Returns whether a string starts with a given substring.
+  endsWith(string: string, substring: string): boolean; // Returns whether a string ends with a given substring.
+  includes(string: string, substring: string): boolean; // Returns whether a string contains a given substring.
+}
 
 /**
  * Provides localized string search functionality that is useful for filtering or matching items
  * in a list. Options can be provided to adjust the sensitivity to case, diacritics, and other parameters.
- *
- * @type {(locale: string, options?: Intl.CollatorOptions) => Filter}
  */
-export function useFilter(locale, options) {
-  let collator = useCollator(locale, {
+export function useFilter(locale: string, options?: Intl.CollatorOptions): Filter {
+  const collator = useCollator(locale, {
     usage: 'search',
     ...options,
   });
@@ -54,9 +51,9 @@ export function useFilter(locale, options) {
       substring = substring.normalize('NFC');
 
       let scan = 0;
-      let sliceLen = substring.length;
+      const sliceLen = substring.length;
       for (; scan + sliceLen <= string.length; scan++) {
-        let slice = string.slice(scan, scan + sliceLen);
+        const slice = string.slice(scan, scan + sliceLen);
 
         if (collator.compare(substring, slice) === 0) {
           return true;
