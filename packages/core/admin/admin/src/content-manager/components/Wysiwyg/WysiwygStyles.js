@@ -40,13 +40,6 @@ export const IconButtonGroupMargin = styled(IconButtonGroup)`
   margin-right: ${({ theme }) => `${theme.spaces[2]}`};
 `;
 
-// EDITOR && PREVIEW
-
-export const EditorAndPreviewWrapper = styled.div`
-  position: relative;
-  height: calc(100% - 48px);
-`;
-
 // FOOTER
 export const ExpandButton = styled(BaseButton)`
   background-color: transparent;

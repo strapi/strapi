@@ -13,8 +13,8 @@ import {
   Icon,
   JSONInput,
   NumberInput,
-  Option,
-  Select,
+  SingleSelect,
+  SingleSelectOption,
   Textarea,
   TextInput,
   TimePicker,
@@ -26,6 +26,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { useFieldHint } from '../hooks/useFieldHint';
+import { useFocusInputField } from '../hooks/useFocusInputField';
 import { pxToRem } from '../utils/pxToRem';
 
 const GenericInput = ({
@@ -55,7 +56,9 @@ const GenericInput = ({
     fieldSchema: attribute,
     type: attribute?.type || type,
   });
+
   const [showPassword, setShowPassword] = useState(false);
+  const fieldRef = useFocusInputField(name);
 
   const CustomInput = customInputs ? customInputs[type] : null;
 
@@ -100,6 +103,7 @@ const GenericInput = ({
     return (
       <CustomInput
         {...rest}
+        ref={fieldRef}
         attribute={attribute}
         description={description}
         hint={hint}
@@ -136,6 +140,7 @@ const GenericInput = ({
     case 'json': {
       return (
         <JSONInput
+          ref={fieldRef}
           label={label}
           labelAction={labelAction}
           value={value}
@@ -154,23 +159,9 @@ const GenericInput = ({
       );
     }
     case 'bool': {
-      const clearProps = {
-        clearLabel:
-          isNullable &&
-          formatMessage({
-            id: 'app.components.ToggleCheckbox.clear-label',
-            defaultMessage: 'Clear',
-          }),
-
-        onClear:
-          isNullable &&
-          (() => {
-            onChange({ target: { name, value: null } });
-          }),
-      };
-
       return (
         <ToggleInput
+          ref={fieldRef}
           checked={defaultValue === null ? null : defaultValue || false}
           disabled={disabled}
           hint={hint}
@@ -190,13 +181,23 @@ const GenericInput = ({
             onChange({ target: { name, value: e.target.checked } });
           }}
           required={required}
-          {...clearProps}
+          onClear={() => {
+            onChange({ target: { name, value: null } });
+          }}
+          clearLabel={
+            isNullable &&
+            formatMessage({
+              id: 'app.components.ToggleCheckbox.clear-label',
+              defaultMessage: 'Clear',
+            })
+          }
         />
       );
     }
     case 'checkbox': {
       return (
         <Checkbox
+          ref={fieldRef}
           disabled={disabled}
           error={errorMessage}
           hint={hint}
@@ -215,6 +216,7 @@ const GenericInput = ({
     case 'datetime': {
       return (
         <DateTimePicker
+          ref={fieldRef}
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
           disabled={disabled}
           error={errorMessage}
@@ -239,6 +241,7 @@ const GenericInput = ({
     case 'date': {
       return (
         <DatePicker
+          ref={fieldRef}
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
           disabled={disabled}
           error={errorMessage}
@@ -267,6 +270,7 @@ const GenericInput = ({
     case 'number': {
       return (
         <NumberInput
+          ref={fieldRef}
           disabled={disabled}
           error={errorMessage}
           label={label}
@@ -285,6 +289,7 @@ const GenericInput = ({
     case 'email': {
       return (
         <TextInput
+          ref={fieldRef}
           autoComplete={autoComplete}
           disabled={disabled}
           error={errorMessage}
@@ -306,6 +311,7 @@ const GenericInput = ({
     case 'string': {
       return (
         <TextInput
+          ref={fieldRef}
           autoComplete={autoComplete}
           disabled={disabled}
           error={errorMessage}
@@ -325,6 +331,7 @@ const GenericInput = ({
     case 'password': {
       return (
         <TextInput
+          ref={fieldRef}
           autoComplete={autoComplete}
           disabled={disabled}
           error={errorMessage}
@@ -366,7 +373,8 @@ const GenericInput = ({
     }
     case 'select': {
       return (
-        <Select
+        <SingleSelect
+          ref={fieldRef}
           disabled={disabled}
           error={errorMessage}
           label={label}
@@ -381,17 +389,18 @@ const GenericInput = ({
         >
           {options.map(({ metadatas: { intlLabel, disabled, hidden }, key, value }) => {
             return (
-              <Option key={key} value={value} disabled={disabled} hidden={hidden}>
+              <SingleSelectOption key={key} value={value} disabled={disabled} hidden={hidden}>
                 {formatMessage(intlLabel)}
-              </Option>
+              </SingleSelectOption>
             );
           })}
-        </Select>
+        </SingleSelect>
       );
     }
     case 'textarea': {
       return (
         <Textarea
+          ref={fieldRef}
           disabled={disabled}
           error={errorMessage}
           label={label}
@@ -419,6 +428,7 @@ const GenericInput = ({
 
       return (
         <TimePicker
+          ref={fieldRef}
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
           disabled={disabled}
           error={errorMessage}
@@ -440,14 +450,23 @@ const GenericInput = ({
       );
     }
     default: {
+      /**
+       * If there's no component for the given type, we return a disabled text input
+       * showing a "Not supported" title to illustrate the issue.
+       */
       return (
-        <NotSupported
-          name={name}
+        <TextInput
+          disabled
+          error={error}
           label={label}
           labelAction={labelAction}
+          id={name}
           hint={hint}
-          error={errorMessage}
+          name={name}
+          placeholder="Not supported"
           required={required}
+          type="text"
+          value=""
         />
       );
     }
@@ -519,40 +538,6 @@ GenericInput.propTypes = {
   step: PropTypes.number,
   type: PropTypes.string.isRequired,
   value: PropTypes.any,
-};
-
-const NotSupported = ({ hint, label, labelAction, error, name, required }) => {
-  return (
-    <TextInput
-      disabled
-      error={error}
-      label={label}
-      labelAction={labelAction}
-      id={name}
-      hint={hint}
-      name={name}
-      placeholder="Not supported"
-      required={required}
-      type="text"
-      value=""
-    />
-  );
-};
-
-NotSupported.defaultProps = {
-  hint: null,
-  error: undefined,
-  labelAction: undefined,
-  required: false,
-};
-
-NotSupported.propTypes = {
-  error: PropTypes.string,
-  hint: PropTypes.string,
-  label: PropTypes.string.isRequired,
-  labelAction: PropTypes.element,
-  name: PropTypes.string.isRequired,
-  required: PropTypes.bool,
 };
 
 export { GenericInput };

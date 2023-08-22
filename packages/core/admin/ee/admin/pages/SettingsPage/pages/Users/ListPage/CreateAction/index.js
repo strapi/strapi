@@ -6,7 +6,7 @@ import isNil from 'lodash/isNil';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { useLicenseLimits } from '../../../../../../hooks';
+import { useLicenseLimits } from '../../../../../../hooks/useLicenseLimits';
 
 export const CreateActionEE = ({ onClick }) => {
   const { formatMessage } = useIntl();

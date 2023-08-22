@@ -142,5 +142,22 @@ module.exports = {
         ],
       },
     },
+    {
+      method: 'PUT',
+      path: '/content-manager/(collection|single)-types/:model_uid/:id/assignee',
+      handler: 'assignees.updateEntity',
+      config: {
+        middlewares: [enableFeatureMiddleware('review-workflows')],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['admin::users.read', 'admin::review-workflows.read'],
+            },
+          },
+        ],
+      },
+    },
   ],
 };

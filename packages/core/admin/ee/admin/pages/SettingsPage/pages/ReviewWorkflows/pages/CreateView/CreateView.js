@@ -18,7 +18,7 @@ import { useHistory } from 'react-router-dom';
 import { useAdminRoles } from '../../../../../../../../admin/src/hooks/useAdminRoles';
 import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
 import { useInjectReducer } from '../../../../../../../../admin/src/hooks/useInjectReducer';
-import { useLicenseLimits } from '../../../../../../hooks';
+import { useLicenseLimits } from '../../../../../../hooks/useLicenseLimits';
 import {
   addStage,
   resetWorkflow,

@@ -1,6 +1,6 @@
 module.exports = {
   root: true,
-  extends: ['custom/front/typescript'],
+  extends: ['custom/front/typescript', 'plugin:storybook/recommended'],
   parserOptions: {
     project: ['./tsconfig.eslint.json'],
   },

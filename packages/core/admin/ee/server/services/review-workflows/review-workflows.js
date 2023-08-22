@@ -8,6 +8,8 @@ const defaultStages = require('../../constants/default-stages.json');
 const defaultWorkflow = require('../../constants/default-workflow.json');
 const {
   ENTITY_STAGE_ATTRIBUTE,
+  ENTITY_ASSIGNEE_ATTRIBUTE,
+  STAGE_MODEL_UID,
   MAX_WORKFLOWS,
   MAX_STAGES_PER_WORKFLOW,
 } = require('../../constants/workflows');
@@ -52,19 +54,26 @@ function extendReviewWorkflowContentTypes({ strapi }) {
       );
       return contentType;
     };
-    const setStageAttribute = set(`attributes.${ENTITY_STAGE_ATTRIBUTE}`, {
-      writable: true,
-      private: false,
-      configurable: false,
-      visible: false,
-      useJoinTable: true, // We want a join table to persist data when downgrading to CE
-      type: 'relation',
-      relation: 'oneToOne',
-      target: 'admin::workflow-stage',
-    });
+
+    const setRelation = (path, target) =>
+      set(path, {
+        writable: true,
+        private: false,
+        configurable: false,
+        visible: false,
+        useJoinTable: true, // We want a join table to persist data when downgrading to CE
+        type: 'relation',
+        relation: 'oneToOne',
+        target,
+      });
+
+    const setReviewWorkflowAttributes = pipe([
+      setRelation(`attributes.${ENTITY_STAGE_ATTRIBUTE}`, STAGE_MODEL_UID),
+      setRelation(`attributes.${ENTITY_ASSIGNEE_ATTRIBUTE}`, 'admin::user'),
+    ]);
 
     const extendContentTypeIfCompatible = cond([
-      [assertContentTypeCompatibility, setStageAttribute],
+      [assertContentTypeCompatibility, setReviewWorkflowAttributes],
       [stubTrue, incompatibleContentTypeAlert],
     ]);
     strapi.container.get('content-types').extend(contentTypeUID, extendContentTypeIfCompatible);
