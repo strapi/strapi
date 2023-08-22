@@ -11,10 +11,10 @@ const useFocusWhenNavigate = ({
   dependencies = [],
 }: UseFocusWhenNavigateProps = {}) => {
   useEffect(() => {
-    const mainElement = document.querySelector(selector);
+    const mainElement: HTMLElement | null = document.querySelector(selector);
 
     if (mainElement) {
-      (mainElement as HTMLElement).focus();
+      mainElement.focus();
       window.scrollTo({ top: 0 });
     } else {
       console.warn(
