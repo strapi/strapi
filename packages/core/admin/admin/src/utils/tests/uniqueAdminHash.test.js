@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { TextEncoder } from 'util';
 
-import hashAdminUserEmail, { utils } from '../uniqueAdminHash';
+import { hashAdminUserEmail, utils } from '../uniqueAdminHash';
 
 const testHashValue = '8544bf5b5389959462912699664f03ed664a4b6d24f03b13bdbc362efc147873';
 
@@ -13,12 +13,6 @@ describe('Creating admin user email hash in admin', () => {
     Object.defineProperty(global.self, 'TextEncoder', {
       value: undefined,
     });
-  });
-
-  it('should return empty string if no payload provided', async () => {
-    const testHash = await hashAdminUserEmail();
-
-    expect(testHash).toBe(null);
   });
 
   it('should return hash using crypto subtle', async () => {

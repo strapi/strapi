@@ -3,5 +3,5 @@
 module.exports = {
   preset: '../../../jest-preset.front.js',
   displayName: 'Users & Permissions plugin',
-  setupFilesAfterEnv: ['./tests/setup.js'],
+  setupFilesAfterEnv: ['./admin/src/tests/setup.js'],
 };

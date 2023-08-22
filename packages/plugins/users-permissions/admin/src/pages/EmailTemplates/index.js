@@ -1,10 +1,12 @@
-import React, { useRef, useState } from 'react';
+import * as React from 'react';
 
 import { ContentLayout, HeaderLayout, Main, useNotifyAT } from '@strapi/design-system';
 import {
   CheckPagePermissions,
   LoadingIndicatorPage,
   SettingsPageTitle,
+  useAPIErrorHandler,
+  useFetchClient,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
@@ -19,7 +21,6 @@ import { getTrad } from '../../utils';
 
 import EmailForm from './components/EmailForm';
 import EmailTable from './components/EmailTable';
-import { fetchData, putEmailTemplate } from './utils/api';
 
 const ProtectedEmailTemplatesPage = () => (
   <CheckPagePermissions permissions={PERMISSIONS.readEmailTemplates}>
@@ -33,36 +34,46 @@ const EmailTemplatesPage = () => {
   const { notifyStatus } = useNotifyAT();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
-  const trackUsageRef = useRef(trackUsage);
   const queryClient = useQueryClient();
+  const { get, put } = useFetchClient();
+  const { formatAPIError } = useAPIErrorHandler();
+
   useFocusWhenNavigate();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [templateToEdit, setTemplateToEdit] = useState(null);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [templateToEdit, setTemplateToEdit] = React.useState(null);
 
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate },
   } = useRBAC({ update: PERMISSIONS.updateEmailTemplates });
 
-  const { status: isLoadingData, data } = useQuery('email-templates', () => fetchData(), {
-    onSuccess() {
-      notifyStatus(
-        formatMessage({
-          id: getTrad('Email.template.data.loaded'),
-          defaultMessage: 'Email templates has been loaded',
-        })
-      );
-    },
-    onError() {
-      toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
-      });
-    },
-  });
+  const { isLoading: isLoadingData, data } = useQuery(
+    ['users-permissions', 'email-templates'],
+    async () => {
+      const { data } = await get('/users-permissions/email-templates');
 
-  const isLoading = isLoadingForPermissions || isLoadingData !== 'success';
+      return data;
+    },
+    {
+      onSuccess() {
+        notifyStatus(
+          formatMessage({
+            id: getTrad('Email.template.data.loaded'),
+            defaultMessage: 'Email templates has been loaded',
+          })
+        );
+      },
+      onError(error) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(error),
+        });
+      },
+    }
+  );
+
+  const isLoading = isLoadingForPermissions || isLoadingData;
 
   const handleToggle = () => {
     setIsModalOpen((prev) => !prev);
@@ -73,34 +84,38 @@ const EmailTemplatesPage = () => {
     handleToggle();
   };
 
-  const submitMutation = useMutation((body) => putEmailTemplate({ 'email-templates': body }), {
-    async onSuccess() {
-      await queryClient.invalidateQueries('email-templates');
+  const submitMutation = useMutation(
+    (body) => put('/users-permissions/email-templates', { 'email-templates': body }),
+    {
+      async onSuccess() {
+        await queryClient.invalidateQueries(['users-permissions', 'email-templates']);
 
-      toggleNotification({
-        type: 'success',
-        message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
-      });
+        toggleNotification({
+          type: 'success',
+          message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
+        });
 
-      trackUsageRef.current('didEditEmailTemplates');
+        trackUsage('didEditEmailTemplates');
 
-      unlockApp();
-      handleToggle();
-    },
-    onError() {
-      toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
-      });
-      unlockApp();
-    },
-    refetchActive: true,
-  });
-  const { isLoading: isSubmittingForm } = submitMutation;
+        unlockApp();
+        handleToggle();
+      },
+      onError(error) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(error),
+        });
+
+        unlockApp();
+      },
+      refetchActive: true,
+    }
+  );
 
   const handleSubmit = (body) => {
     lockApp();
-    trackUsageRef.current('willEditEmailTemplates');
+
+    trackUsage('willEditEmailTemplates');
 
     const editedTemplates = { ...data, [templateToEdit]: body };
     submitMutation.mutate(editedTemplates);
@@ -129,7 +144,7 @@ const EmailTemplatesPage = () => {
   }
 
   return (
-    <Main aria-busy={isSubmittingForm}>
+    <Main aria-busy={submitMutation.isLoading}>
       <SettingsPageTitle
         name={formatMessage({
           id: getTrad('HeaderNav.link.emailTemplates'),
