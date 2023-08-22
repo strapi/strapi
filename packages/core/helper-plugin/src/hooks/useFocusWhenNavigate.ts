@@ -1,11 +1,19 @@
 import { useEffect } from 'react';
 
-const useFocusWhenNavigate = (selector = 'main', dependencies = []) => {
+interface UseFocusWhenNavigateProps<T> {
+  selector?: string;
+  dependencies?: T[];
+}
+
+const useFocusWhenNavigate = <T>({
+  selector = 'main',
+  dependencies = [],
+}: UseFocusWhenNavigateProps<T>) => {
   useEffect(() => {
     const mainElement = document.querySelector(selector);
 
     if (mainElement) {
-      mainElement.focus();
+      (mainElement as HTMLElement).focus();
       window.scrollTo({ top: 0 });
     } else {
       console.warn(
