@@ -19,7 +19,6 @@ describe('ConfirmDialog', () => {
           defaultMessage: 'Are you sure you want to unpublish it?',
         }}
         title={{ id: 'app.components.ConfirmDialog.title', defaultMessage: 'Confirmation' }}
-        rightButtonText={{ id: 'global.save', defaultMessage: 'Save' }}
         {...props}
       />,
       {
@@ -44,7 +43,7 @@ describe('ConfirmDialog', () => {
 
     expect(screen.getByText('Confirmation')).toBeInTheDocument();
 
-    expect(screen.getByText('Save')).toBeInTheDocument();
+    expect(screen.getByText('Confirm')).toBeInTheDocument();
   });
 
   it('verifies dialog is hidden when isOpen is false', () => {
@@ -53,11 +52,11 @@ describe('ConfirmDialog', () => {
     expect(screen.queryByText('Confirmation')).not.toBeInTheDocument();
   });
 
-  it('triggers onConfirm when "Save" button is clicked', async () => {
+  it('triggers onConfirm when confirm button is clicked', async () => {
     const onConfirm = jest.fn();
     const { user } = render({ onConfirm });
 
-    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.click(screen.getByRole('button', { name: 'Confirm' }));
 
     expect(onConfirm).toBeCalled();
   });
@@ -80,7 +79,9 @@ describe('ConfirmDialog', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Confirm')).toBeInTheDocument();
+      expect(screen.getByText('Are you sure you want to unpublish it?')).toBeInTheDocument();
     });
+    expect(screen.getByText('Confirmation')).toBeInTheDocument();
+    expect(screen.getByText('Confirm')).toBeInTheDocument();
   });
 });
