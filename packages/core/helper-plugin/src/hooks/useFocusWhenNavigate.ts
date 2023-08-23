@@ -1,6 +1,4 @@
-import { useEffect } from 'react';
-
-type DependencyList = ReadonlyArray<unknown>;
+import { DependencyList, useEffect } from 'react';
 interface UseFocusWhenNavigateProps {
   selector?: string;
   dependencies?: DependencyList;
