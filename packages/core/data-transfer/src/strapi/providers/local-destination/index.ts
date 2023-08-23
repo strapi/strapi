@@ -58,6 +58,21 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     this.transaction = utils.transaction.createTransaction(this.strapi);
   }
 
+  #areAssetsIncluded = () => {
+    return this.options.restore?.assets;
+  };
+
+  #isContentTypeIncluded = (type: string) => {
+    const notIncluded =
+      this.options.restore?.entities?.include &&
+      !this.options.restore?.entities?.include?.includes(type);
+    const excluded =
+      this.options.restore?.entities?.exclude &&
+      this.options.restore?.entities.exclude.includes(type);
+
+    return !excluded && !notIncluded;
+  };
+
   async close(): Promise<void> {
     const { autoDestroy } = this.options;
     this.transaction?.end();
@@ -76,15 +91,39 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
         validStrategies: VALID_CONFLICT_STRATEGIES,
       });
     }
+
+    // require restore options when using restore
+    if (this.options.strategy === 'restore' && !this.options.restore) {
+      throw new ProviderValidationError('Missing restore options');
+    }
+
+    if (
+      strapi.config.get('plugin.upload').provider !== 'local' &&
+      this.#areAssetsIncluded() &&
+      !this.#isContentTypeIncluded('plugin::upload.file')
+    ) {
+      // uploading to a non-local file provider without included entities is useless because we don't have the links, so don't allow it
+      throw new ProviderValidationError(
+        'When using a non-local upload provider, files may not be transferred without also transferring content.'
+      );
+    }
   }
 
   async #deleteFromRestoreOptions() {
     assertValidStrapi(this.strapi);
+    if (!this.options.restore) {
+      throw new ProviderValidationError('Missing restore options');
+    }
     return restore.deleteRecords(this.strapi, this.options.restore);
   }
 
   async #deleteAllAssets(trx?: Knex.Transaction) {
     assertValidStrapi(this.strapi);
+
+    // if we're not restoring files, don't touch the files
+    if (!this.options.restore?.assets) {
+      return;
+    }
 
     const stream: Readable = strapi.db
       // Create a query builder instance (default type is 'select')
@@ -119,11 +158,8 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     await this.transaction?.attach(async (trx) => {
       try {
         if (this.options.strategy === 'restore') {
-          if (this.options.restore?.assets) {
-            // Note: when other strategies are added, they will need to add their own backup logic
-            await this.#handleAssetsBackup();
-            await this.#deleteAllAssets(trx);
-          }
+          await this.#handleAssetsBackup();
+          await this.#deleteAllAssets(trx);
           // TODO: do we need to add trx?
           await this.#deleteFromRestoreOptions();
         }
@@ -185,6 +221,11 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   async #handleAssetsBackup() {
     assertValidStrapi(this.strapi, 'Not able to create the assets backup');
 
+    // if we're not restoring assets, don't back them up because they won't be touched
+    if (!this.#areAssetsIncluded()) {
+      return;
+    }
+
     if (strapi.config.get('plugin.upload').provider === 'local') {
       const assetsDirectory = path.join(this.strapi.dirs.static.public, 'uploads');
       const backupDirectory = path.join(
@@ -219,6 +260,11 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   async #removeAssetsBackup() {
+    // if we're not restoring assets, don't back them up because they won't be touched
+    if (!this.#areAssetsIncluded()) {
+      return;
+    }
+
     // TODO: this should catch all thrown errors and bubble it up to engine so it can be reported as a non-fatal diagnostic message telling the user they may need to manually delete assets
     if (strapi.config.get('plugin.upload').provider === 'local') {
       assertValidStrapi(this.strapi);
@@ -234,19 +280,22 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   async createAssetsWriteStream(): Promise<Writable> {
     assertValidStrapi(this.strapi, 'Not able to stream Assets');
 
+    if (!this.#areAssetsIncluded()) {
+      throw new ProviderTransferError('Attempting to transfer assets when they are not included');
+    }
+
     const removeAssetsBackup = this.#removeAssetsBackup.bind(this);
     const strapi = this.strapi;
     const transaction = this.transaction;
     const backupDirectory = this.uploadsBackupDirectoryName;
-    const restoreAssets = this.options?.restore?.assets;
+
+    const restoreMediaEntitiesContent = this.#isContentTypeIncluded('plugin::upload.file');
 
     return new Writable({
       objectMode: true,
       async final(next) {
-        if (restoreAssets) {
-          // Delete the backup folder
-          removeAssetsBackup();
-        }
+        // Delete the backup folder
+        removeAssetsBackup();
         next();
       },
       async write(chunk: IAsset, _encoding, callback) {
@@ -285,6 +334,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
               });
             return;
           }
+
           const uploadData = {
             ...chunk.metadata,
             stream: Readable.from(chunk.stream),
@@ -295,6 +345,11 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
           try {
             await strapi.plugin('upload').provider.uploadStream(uploadData);
+
+            // if we're not supposed to transfer the associated entities, stop here
+            if (!restoreMediaEntitiesContent) {
+              return callback();
+            }
 
             // Files formats are stored within the parent file entity
             if (uploadData?.type) {

@@ -21,7 +21,7 @@ interface IDeleteResults {
   aggregate: { [uid: string]: { count: number } };
 }
 
-export const deleteRecords = async (strapi: Strapi.Strapi, options?: IRestoreOptions) => {
+export const deleteRecords = async (strapi: Strapi.Strapi, options: IRestoreOptions) => {
   const entities = await deleteEntitiesRecords(strapi, options);
   const configuration = await deleteConfigurationRecords(strapi, options);
 
@@ -43,12 +43,14 @@ const deleteEntitiesRecords = async (
   const contentTypesToClear = contentTypes.filter((contentType) => {
     let keep = true;
 
+    // include means "only include these types" so if it's not in here, it's not being included
     if (entities?.include) {
       keep = entities.include.includes(contentType.uid);
     }
 
-    if (entities?.exclude) {
-      keep = !entities.exclude.includes(contentType.uid);
+    // if something is excluded, remove it. But lack of being excluded doesn't mean it's kept
+    if (entities?.exclude && entities.exclude.includes(contentType.uid)) {
+      keep = false;
     }
 
     if (entities?.filters) {

@@ -374,12 +374,13 @@ const shouldSkipStage = (opts, dataKind) => {
     return true;
   }
   if (opts.only) {
-    return opts.only.includes(dataKind);
+    return !opts.only.includes(dataKind);
   }
 
   return false;
 };
 
+// Based on exclude/only from options, create the restore object to match
 const parseRestoreFromOptions = (opts) => {
   const entitiesOptions = {
     exclude: DEFAULT_IGNORED_CONTENT_TYPES,
