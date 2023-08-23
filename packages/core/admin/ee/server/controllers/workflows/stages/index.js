@@ -149,30 +149,31 @@ module.exports = {
     const entityStageId = entity[ENTITY_STAGE_ATTRIBUTE]?.id;
     const canTransition = stagePermissions.can(STAGE_TRANSITION_UID, entityStageId);
 
-    const workflowCount = await workflowService.count();
+    const [workflowCount, { stages: workflowStages }] = await Promise.all([
+      workflowService.count(),
+      workflowService.getAssignedWorkflow(modelUID, {
+        populate: 'stages',
+      }),
+    ]);
+
+    const meta = {
+      stageCount: workflowStages.length,
+      workflowCount,
+    };
+
     if (!canTransition) {
       ctx.body = {
         data: [],
-        meta: {
-          stageCount: 0,
-          workflowCount,
-        },
+        meta,
       };
 
       return;
     }
 
-    const { stages: workflowStages } = await workflowService.getAssignedWorkflow(modelUID, {
-      populate: 'stages',
-    });
-
     const data = workflowStages.filter((stage) => stage.id !== entityStageId);
     ctx.body = {
       data,
-      meta: {
-        stageCount: data.length,
-        workflowCount,
-      },
+      meta,
     };
   },
 };
