@@ -40,7 +40,7 @@ export = {
         });
       },
 
-      findOne(id: string | number) {
+      findOne(id: `${number}` | number) {
         return strapi.entityService.findOne('admin::audit-log', id, {
           populate: ['user'],
           fields: ['action', 'date', 'payload'],
