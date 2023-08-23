@@ -1,10 +1,8 @@
 /**
  * Async await wrapper for easy error handling
  *
- * @deprecated
- * @param {Promise<unknown>} promise - Promise or Async Function.
- * @param {object} errorExt - Custom error message extended onto the error from the given promise.
- * @return {Promise<unknown[] | any[]>}
+ *
+ * @deprecated This function will be removed in the next major release. Use async / await with try / catch instead.
  */
 const to = (promise: Promise<unknown>, errorExt: object) => {
   return promise
