@@ -27,7 +27,7 @@ export interface ILocalStrapiDestinationProviderOptions {
   getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>; // return an initialized instance of Strapi
 
   autoDestroy?: boolean; // shut down the instance returned by getStrapi() at the end of the transfer
-  restore?: restore.IRestoreOptions; // erase all data in strapi database before transfer
+  restore?: restore.IRestoreOptions; // erase data in strapi database before transfer; required if strategy is 'restore'
   strategy: 'restore'; // conflict management strategy; only the restore strategy is available at this time
 }
 
