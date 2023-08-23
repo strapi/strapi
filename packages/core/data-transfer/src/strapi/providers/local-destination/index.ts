@@ -129,7 +129,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     assertValidStrapi(this.strapi);
 
     // if we're not restoring files, don't touch the files
-    if (!this.options.restore?.assets) {
+    if (!this.#areAssetsIncluded()) {
       return;
     }
 
