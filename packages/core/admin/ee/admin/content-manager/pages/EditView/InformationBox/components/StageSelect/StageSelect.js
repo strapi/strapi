@@ -114,7 +114,8 @@ export function StageSelect() {
          */
       } else if (
         limits?.[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME] &&
-        parseInt(limits[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME], 10) < workflow.stages.length
+        parseInt(limits[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME], 10) <
+          workflow.stages.length
       ) {
         setShowLimitModal('stage');
       } else {

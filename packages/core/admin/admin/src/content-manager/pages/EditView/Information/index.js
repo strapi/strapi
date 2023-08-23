@@ -5,8 +5,7 @@ import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import getTrad from '../../../utils/getTrad';
-import getDisplayName from '../../../utils/getDisplayName';
+import { getTrad, getDisplayName } from '../../../utils';
 
 import getUnits from './utils/getUnits';
 

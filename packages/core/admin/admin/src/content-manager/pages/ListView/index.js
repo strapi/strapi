@@ -840,6 +840,17 @@ function ListView({
                             );
                           }
 
+                          if (['createdBy', 'updatedBy'].includes(name.split('.')[0])) {
+                            // Display the users full name
+                            return (
+                              <Td key={key}>
+                                <Typography textColor="neutral800">
+                                  {getDisplayName(rowData[name.split('.')[0]], formatMessage)}
+                                </Typography>
+                              </Td>
+                            );
+                          }
+
                           if (typeof cellFormatter === 'function') {
                             return (
                               <Td key={key}>{cellFormatter(rowData, { key, name, ...rest })}</Td>
