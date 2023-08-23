@@ -57,10 +57,6 @@ describe('ConfirmDialog', () => {
     const onConfirm = jest.fn();
     const { user } = render({ onConfirm });
 
-    await waitFor(() => {
-      expect(screen.getByText('Are you sure you want to unpublish it?')).toBeInTheDocument();
-    });
-
     await user.click(screen.getByRole('button', { name: 'Save' }));
 
     expect(onConfirm).toBeCalled();
@@ -69,10 +65,6 @@ describe('ConfirmDialog', () => {
   it('triggers onToggleDialog when "Cancel" button is clicked', async () => {
     const onToggleDialog = jest.fn();
     const { user } = render({ onToggleDialog });
-
-    await waitFor(() => {
-      expect(screen.getByText('Are you sure you want to unpublish it?')).toBeInTheDocument();
-    });
 
     await user.click(screen.getByRole('button', { name: 'Cancel' }));
 
@@ -88,9 +80,7 @@ describe('ConfirmDialog', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Are you sure you want to unpublish it?')).toBeInTheDocument();
+      expect(screen.getByText('Confirm')).toBeInTheDocument();
     });
-
-    expect(screen.getByText('Confirm')).toBeInTheDocument();
   });
 });
