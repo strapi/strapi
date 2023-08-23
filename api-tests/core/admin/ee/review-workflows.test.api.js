@@ -634,7 +634,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       expect(res.status).toBe(403);
     });
 
-    test('It should return forbidden for a user who does not have permissions to read review workflows', async () => {
+    test('It should return an empty list when a user does not have the permission to transition the current stage', async () => {
       const permission = {
         action: 'admin::review-workflows.read',
         fields: null,
