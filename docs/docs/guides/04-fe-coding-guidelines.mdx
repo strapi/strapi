@@ -87,8 +87,9 @@ under a generic file name such as `strings.ts` which would include all the `stri
 With components and hooks, to improve code discoverability, opt for this pattern instead:
 
 ```shell
-useContentManager/
-├─ index.ts
+hooks/
+├─ tests/
+│  ├─ useContentManager.test.ts
 ├─ useContentManager.ts
 ```
 
@@ -218,6 +219,14 @@ lifecycle.
 We're using `react-query` version 3, see the specific docs – https://tanstack.com/query/v3/docs/react/overview
 :::
 
+There are a few guidelines to keep in mind when writing your query-keys
+
+- Use the URL fragments from the called URL e.g `/admin/content-manger/:id/stages -> ['content-manager', id, 'stages']` with the exception of `admin`
+- All ee calls should be prefixed with ee, to be able to invalidate it all at once
+- All dynamic variables need to be part of the dependency array
+
+You can read more on query-keys for `react-query` [here](https://tanstack.com/query/v3/docs/react/guides/query-keys).
+
 #### Example
 
 ```jsx
@@ -328,10 +337,10 @@ const App = () => {
   const [someState, setSomeState] = useState('some state');
   return (
     <>
-      <Header
-        logo={<Logo someState={someState} />}
-        settings={<Settings onStateChange={setSomeState} />}
-      />
+      <Header>
+        <Logo someState={someState} />
+        <Settings onStateChange={setSomeState} />
+      </Header>
       <LeftNav>
         <SomeLink someState={someState} />
         <SomeOtherLink someState={someState} />
@@ -563,34 +572,3 @@ When submitting an FE related PR ensure you've done the following:
 - Get the relevant reviewers – engineers in your squad is a good start, but if you're working in a
   space of the codebase you're not as familiar with e.g. `entity-service` consider getting engineers
   who have more experience in the space.
-
-### Contributor Documentation
-
-:::caution
-No single squad “owns” the contributor documentation, it's a collective effort.
-:::
-
-The contributor docs are not “user” docs, they're related directly to the codebase for both internal
-and external engineers written with that in mind they explain technical concepts but also hold
-documentation for hooks, utils etc.
-
-#### Structure
-
-Currently the documentation is split into four sections:
-
-- Guides
-- Docs
-- API
-- RFCs
-
-The `Docs` section is organised to model the monorepo only to the package level e.g. `core > admin`
-past that point, they're organic and re-organise as we continue to grow the documentation. The `API`
-section at time of writing is light and only discusses the `Strapi` class. Moving forward, we'd like
-to include all the `admin` API endpoints and their return values.
-
-#### When should you add content?
-
-Content should be added typically when you add any new feature – especially enterprise e.g.
-`Review Workflows` and also when you add new code other engineers may find another use for e.g. a
-new hook. There's no guidelines on what to add vs what not to add, as defined above we add a variety
-of material to help onboard contributers.
