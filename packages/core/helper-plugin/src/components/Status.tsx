@@ -1,9 +1,11 @@
 import React from 'react';
-
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-const Bullet = styled.div`
+type BulletProps = {
+  backgroundColor: 'alternative600' | 'danger600' | 'neutral600' | 'primary600' | 'secondary600' | 'success600' | 'warning600';
+}
+
+const Bullet = styled.div<BulletProps>`
   margin-right: ${({ theme }) => theme.spaces[3]};
   width: ${6 / 16}rem;
   height: ${6 / 16}rem;
@@ -11,26 +13,14 @@ const Bullet = styled.div`
   background: ${({ theme, backgroundColor }) => theme.colors[backgroundColor]};
 `;
 
-const Status = ({ variant }) => {
-  const backgroundColor = `${variant}600`;
+type StatusProps = {
+  variant: 'alternative' | 'danger' | 'neutral' | 'primary' | 'secondary' | 'success' | 'warning';
+};
+
+const Status: React.FC<StatusProps> = ({ variant = 'primary' }) => {
+  const backgroundColor: BulletProps["backgroundColor"] = `${variant}600`;
 
   return <Bullet backgroundColor={backgroundColor} />;
-};
-
-Status.defaultProps = {
-  variant: 'primary',
-};
-
-Status.propTypes = {
-  variant: PropTypes.oneOf([
-    'alternative',
-    'danger',
-    'neutral',
-    'primary',
-    'secondary',
-    'success',
-    'warning',
-  ]),
 };
 
 export { Status };
