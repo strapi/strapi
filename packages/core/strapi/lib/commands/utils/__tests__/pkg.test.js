@@ -6,7 +6,7 @@ const path = require('path');
 const {
   loadPkg,
   validatePkg,
-  parseExportsOrdering,
+  validateExportsOrdering,
   parseExports,
   getExportExtensionMap,
 } = require('../pkg');
@@ -173,7 +173,7 @@ describe('pkg', () => {
     });
   });
 
-  describe('parseExportsOrdering', () => {
+  describe('validateExportsOrdering', () => {
     it('should throw if there are no exports at all and log that error', async () => {
       const pkg = {
         name: 'testing',
@@ -181,7 +181,7 @@ describe('pkg', () => {
       };
 
       await expect(
-        parseExportsOrdering({ pkg, logger: loggerMock })
+        validateExportsOrdering({ pkg, logger: loggerMock })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"'package.json' must contain a 'main' and 'module' property"`
       );
@@ -194,7 +194,7 @@ describe('pkg', () => {
         main: './index.js',
       };
 
-      const validatedPkg = await parseExportsOrdering({ pkg, logger: loggerMock });
+      const validatedPkg = await validateExportsOrdering({ pkg, logger: loggerMock });
 
       expect(validatedPkg).toMatchInlineSnapshot(`
         {
@@ -220,7 +220,7 @@ describe('pkg', () => {
         },
       };
 
-      const validatedPkg = await parseExportsOrdering({ pkg, logger: loggerMock });
+      const validatedPkg = await validateExportsOrdering({ pkg, logger: loggerMock });
 
       expect(validatedPkg).toMatchInlineSnapshot(`
         {
@@ -252,7 +252,7 @@ describe('pkg', () => {
       };
 
       await expect(
-        parseExportsOrdering({ pkg, logger: loggerMock })
+        validateExportsOrdering({ pkg, logger: loggerMock })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"exports["./admin"]: the 'types' property should be the first property"`
       );
@@ -270,7 +270,7 @@ describe('pkg', () => {
         },
       };
 
-      await parseExportsOrdering({ pkg, logger: loggerMock });
+      await validateExportsOrdering({ pkg, logger: loggerMock });
 
       expect(loggerMock.warn.mock.calls[0]).toMatchInlineSnapshot(`
         [
@@ -291,7 +291,7 @@ describe('pkg', () => {
         },
       };
 
-      await parseExportsOrdering({ pkg, logger: loggerMock });
+      await validateExportsOrdering({ pkg, logger: loggerMock });
 
       expect(loggerMock.warn.mock.calls[0]).toMatchInlineSnapshot(`
         [

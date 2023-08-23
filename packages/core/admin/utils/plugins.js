@@ -193,7 +193,6 @@ export default plugins;
   return asyncFs.writeFile(path.resolve(dest, 'admin', 'src', 'plugins.js'), content);
 }
 
-const NODE_MODULES = 'node_modules';
 /**
  * @param {string[]} pluginsPath – an array of paths to the plugins from the user's directory
  * @returns {RegExp} a regex that will exclude _all_ node_modules except for the plugins in the pluginsPath array.
@@ -207,7 +206,7 @@ const createPluginsExcludePath = (pluginsPath = []) => {
     return /node_modules/;
   }
 
-  return new RegExp(`${NODE_MODULES}/(?!(${pluginsPath.join('|')}))`);
+  return new RegExp(`node_modules/(?!(${pluginsPath.join('|')}))`);
 };
 
 module.exports = {

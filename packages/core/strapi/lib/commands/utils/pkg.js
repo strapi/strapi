@@ -152,7 +152,7 @@ const validatePkg = async ({ pkg }) => {
  *
  * @type {(args: { pkg: object, logger: import('./logger').Logger }) => Promise<PackageJson>}
  */
-const parseExportsOrdering = async ({ pkg, logger }) => {
+const validateExportsOrdering = async ({ pkg, logger }) => {
   if (pkg.exports) {
     const exports = Object.entries(pkg.exports);
 
@@ -414,7 +414,7 @@ const parseExports = ({ extMap, pkg }) => {
 module.exports = {
   loadPkg,
   validatePkg,
-  parseExportsOrdering,
+  validateExportsOrdering,
   getExportExtensionMap,
   parseExports,
 };

@@ -9,7 +9,7 @@ const { notifyExperimentalCommand } = require('../../../utils/helpers');
 const {
   loadPkg,
   validatePkg,
-  parseExportsOrdering,
+  validateExportsOrdering,
   getExportExtensionMap,
 } = require('../../../utils/pkg');
 const { createBuildContext, createBuildTasks } = require('../../../builders/packages');
@@ -56,7 +56,7 @@ module.exports = async ({ yes, debug }) => {
      * Validate the exports of the package incl. the order of the
      * exports within the exports map if applicable
      */
-    const packageJson = await parseExportsOrdering({ pkg: validatedPkg, logger }).catch((err) => {
+    const packageJson = await validateExportsOrdering({ pkg: validatedPkg, logger }).catch((err) => {
       packageJsonLoader.fail();
       logger.error(err.message);
       process.exit(1);
