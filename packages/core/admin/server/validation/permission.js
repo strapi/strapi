@@ -4,21 +4,6 @@ const { yup, validateYupSchema } = require('@strapi/utils');
 const { getService } = require('../utils');
 const validators = require('./common-validators');
 
-const updatePermissions = yup.object().shape({
-  permissions: yup
-    .object()
-    .shape({
-      connect: yup.array().of(
-        yup.object().shape({
-          id: yup.strapiID(), // If id is not provided, it will be generated
-          ...validators.permission.fields,
-        })
-      ),
-      disconnect: yup.array().of(yup.object().shape({ id: yup.strapiID().required() })),
-    })
-    .required(),
-});
-
 const checkPermissionsSchema = yup.object().shape({
   permissions: yup.array().of(
     yup
@@ -61,9 +46,8 @@ const actionsExistSchema = yup
   .test('actions-exist', '', checkPermissionsExist);
 
 // exports
-
 module.exports = {
-  validatedUpdatePermissionsInput: validateYupSchema(updatePermissions),
+  validatedUpdatePermissionsInput: validateYupSchema(validators.updatePermissions),
   validatePermissionsExist: validateYupSchema(actionsExistSchema),
   validateCheckPermissionsInput: validateYupSchema(checkPermissionsSchema),
 };
