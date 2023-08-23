@@ -62,6 +62,17 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       throw new ProviderInitializationError('Could not access local strapi');
     }
 
+    // uploading to a non-local file provider without included entities is useless (and potentially problematic) because we don't have the links, so don't allow it
+    if (
+      this.strapi.config.get('plugin.upload').provider !== 'local' &&
+      this.#areAssetsIncluded() &&
+      !this.#isContentTypeIncluded('plugin::upload.file')
+    ) {
+      throw new ProviderValidationError(
+        'When using a non-local upload provider, files may not be transferred without also transferring content.'
+      );
+    }
+
     this.transaction = utils.transaction.createTransaction(this.strapi);
   }
 
@@ -103,17 +114,6 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     // require restore options when using restore
     if (this.options.strategy === 'restore' && !this.options.restore) {
       throw new ProviderValidationError('Missing restore options');
-    }
-
-    if (
-      this.strapi?.config.get('plugin.upload').provider !== 'local' &&
-      this.#areAssetsIncluded() &&
-      !this.#isContentTypeIncluded('plugin::upload.file')
-    ) {
-      // uploading to a non-local file provider without included entities is useless because we don't have the links, so don't allow it
-      throw new ProviderValidationError(
-        'When using a non-local upload provider, files may not be transferred without also transferring content.'
-      );
     }
   }
 
@@ -168,7 +168,6 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
         if (this.options.strategy === 'restore') {
           await this.#handleAssetsBackup();
           await this.#deleteAllAssets(trx);
-          // TODO: do we need to add trx?
           await this.#deleteFromRestoreOptions();
         }
       } catch (error) {
@@ -178,7 +177,8 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   getMetadata(): IMetadata {
-    const strapiVersion = this.strapi?.config.get('info.strapi');
+    assertValidStrapi(this.strapi, 'Not able to get Schemas');
+    const strapiVersion = this.strapi.config.get('info.strapi');
     const createdAt = new Date().toISOString();
 
     return {
@@ -192,8 +192,8 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   getSchemas() {
     assertValidStrapi(this.strapi, 'Not able to get Schemas');
     const schemas = {
-      ...this.strapi?.contentTypes,
-      ...this.strapi?.components,
+      ...this.strapi.contentTypes,
+      ...this.strapi.components,
     };
 
     return utils.schema.mapSchemasValues(schemas);
@@ -268,13 +268,14 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   async #removeAssetsBackup() {
+    assertValidStrapi(this.strapi, 'Not able to remove Assets');
     // if we're not restoring assets, don't back them up because they won't be touched
     if (!this.#areAssetsIncluded()) {
       return;
     }
 
     // TODO: this should catch all thrown errors and bubble it up to engine so it can be reported as a non-fatal diagnostic message telling the user they may need to manually delete assets
-    if (this.strapi?.config.get('plugin.upload').provider === 'local') {
+    if (this.strapi.config.get('plugin.upload').provider === 'local') {
       assertValidStrapi(this.strapi);
       const backupDirectory = path.join(
         this.strapi.dirs.static.public,
