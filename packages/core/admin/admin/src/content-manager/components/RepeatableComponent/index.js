@@ -1,8 +1,8 @@
 /* eslint-disable import/no-cycle */
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 
 import { Box, Flex, TextButton, VisuallyHidden } from '@strapi/design-system';
-import { useCMEditViewDataManager, useNotification } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager, useNotification, useQuery } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
 import get from 'lodash/get';
 import PropTypes from 'prop-types';
@@ -49,6 +49,36 @@ const RepeatableComponent = ({
     () => getComponentLayout(componentUid),
     [componentUid, getComponentLayout]
   );
+
+  const search = useQuery();
+
+  /**
+   * Get the temp key of the component that has the field that is currently focussed
+   * as defined by the `field` query param. We can then force this specific component
+   * to be in it's "open" state.
+   */
+  const componentTmpKeyWithFocussedField = useMemo(() => {
+    if (search.has('field')) {
+      const field = search.get('field');
+
+      const [, path] = field.split(`${name}.`);
+
+      if (get(componentValue, path, undefined) !== undefined) {
+        const subpaths = path.split('.');
+
+        return get(componentValue, subpaths[0], undefined)?.__temp_key__;
+      }
+    }
+
+    // eslint-disable-next-line consistent-return
+    return undefined;
+  }, [componentValue, search, name]);
+
+  useEffect(() => {
+    if (typeof componentTmpKeyWithFocussedField === 'number') {
+      setCollapseToOpen(componentTmpKeyWithFocussedField);
+    }
+  }, [componentTmpKeyWithFocussedField]);
 
   const nextTempKey = useMemo(() => getMaxTempKey(componentValue || []) + 1, [componentValue]);
 
