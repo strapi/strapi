@@ -72,7 +72,7 @@ describe('Role CRUD End to End', () => {
       data.editorRole = res.body.data.find((r) => r.code === 'strapi-editor');
     });
 
-    test('Author has admin::is-creator condition for every permission', async () => {
+    test('Author have admin::is-creator condition for every permission', async () => {
       const res = await rq({
         url: `/admin/roles/${data.authorRole.id}/permissions`,
         method: 'GET',
@@ -117,20 +117,14 @@ describe('Role CRUD End to End', () => {
     ];
 
     test('Conditions of editors and author can be modified', async () => {
-      let oldPermRes = await rq({
-        url: `/admin/roles/${data.editorRole.id}/permissions`,
-        method: 'GET',
-      });
-
       let res = await rq({
         url: `/admin/roles/${data.editorRole.id}/permissions`,
         method: 'PUT',
-        body: { permissions: { connect: newPermissions } },
+        body: { permissions: newPermissions },
       });
 
       expect(res.statusCode).toBe(200);
-      // Old permissions should be kept
-      expect(res.body.data).toHaveLength(oldPermRes.body.data.length + 2);
+      expect(res.body.data).toHaveLength(2);
       expect(res.body).toEqual({
         data: expect.arrayContaining([
           expect.objectContaining({
@@ -148,20 +142,14 @@ describe('Role CRUD End to End', () => {
         ]),
       });
 
-      oldPermRes = await rq({
-        url: `/admin/roles/${data.authorRole.id}/permissions`,
-        method: 'GET',
-      });
-
       res = await rq({
         url: `/admin/roles/${data.authorRole.id}/permissions`,
         method: 'PUT',
-        body: { permissions: { connect: newPermissions } },
+        body: { permissions: newPermissions },
       });
 
       expect(res.statusCode).toBe(200);
-      // Old permissions should be kept
-      expect(res.body.data).toHaveLength(oldPermRes.body.data.length + 2);
+      expect(res.body.data).toHaveLength(2);
       expect(res.body).toEqual({
         data: expect.arrayContaining([
           expect.objectContaining({
@@ -602,24 +590,22 @@ describe('Role CRUD End to End', () => {
       });
     });
 
-    test('connect new permissions on role', async () => {
+    test('assign permissions on role', async () => {
       const res = await rq({
         url: `/admin/roles/${data.rolesWithoutUsers[0].id}/permissions`,
         method: 'PUT',
         body: {
-          permissions: {
-            connect: [
-              {
-                action: 'plugin::users-permissions.roles.update',
-              },
-              {
-                action: 'plugin::content-manager.explorer.create',
-                subject: 'plugin::users-permissions.user',
-                properties: { fields: ['username'], locales: [] },
-                conditions: ['admin::is-creator'],
-              },
-            ],
-          },
+          permissions: [
+            {
+              action: 'plugin::users-permissions.roles.update',
+            },
+            {
+              action: 'plugin::content-manager.explorer.create',
+              subject: 'plugin::users-permissions.user',
+              properties: { fields: ['username'], locales: [] },
+              conditions: ['admin::is-creator'],
+            },
+          ],
         },
       });
 
@@ -641,47 +627,11 @@ describe('Role CRUD End to End', () => {
       });
     });
 
-    test('connect existing permissions on role', async () => {
-      const newPermissions = await rq({
-        url: `/admin/roles/${data.rolesWithoutUsers[0].id}/permissions`,
-        method: 'GET',
-      })
-        .then((res) => res.body.data)
-        .then((permissions) =>
-          // Update permissions of content-manager.explorer.create to have empty fields
-          permissions.map((p) => {
-            if (p.action === 'plugin::content-manager.explorer.create') {
-              return {
-                ...p,
-                properties: { ...p.properties, fields: [] },
-              };
-            }
-            return p;
-          })
-        );
-
-      const res = await rq({
-        url: `/admin/roles/${data.rolesWithoutUsers[0].id}/permissions`,
-        method: 'PUT',
-
-        body: {
-          permissions: {
-            connect: newPermissions,
-          },
-        },
-      });
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body.data).toEqual(expect.arrayContaining(newPermissions));
-    });
-
-    test('connect permissions on role with an unknown condition', async () => {
-      const oldPermissionsId = await rq({
-        url: `/admin/roles/${data.rolesWithoutUsers[0].id}/permissions`,
-        method: 'GET',
-      }).then((res) => res.body.data.map((p) => p.id));
-
+    test('assign permissions on role with an unknown condition', async () => {
       const permissions = [
+        {
+          action: 'plugin::users-permissions.roles.update',
+        },
         {
           action: 'plugin::content-manager.explorer.create',
           subject: 'plugin::users-permissions.user',
@@ -689,125 +639,55 @@ describe('Role CRUD End to End', () => {
           conditions: ['admin::is-creator'],
         },
       ];
-
       const res = await rq({
         url: `/admin/roles/${data.rolesWithoutUsers[0].id}/permissions`,
         method: 'PUT',
         body: {
-          permissions: {
-            connect: [
-              {
-                ...permissions[0],
-                conditions: [...permissions[0].conditions, 'unknown-condition'],
-              },
-            ],
-            disconnect: oldPermissionsId.map((id) => ({ id })),
-          },
+          permissions: [
+            permissions[0],
+            {
+              ...permissions[1],
+              conditions: [...permissions[1].conditions, 'unknown-condition'],
+            },
+          ],
         },
       });
 
       expect(res.statusCode).toBe(200);
       expect(res.body.data).toHaveLength(1);
-      expect(res.body.data[0]).toMatchObject(permissions[0]);
+      expect(res.body.data[0]).toMatchObject(permissions[1]);
     });
 
-    describe('connect non valid permissions on role', () => {
-      test("can't connect permissions on role with invalid id", async () => {
-        const res = await rq({
-          url: `/admin/roles/${data.rolesWithoutUsers[0].id}/permissions`,
-          method: 'PUT',
-          body: {
-            permissions: {
-              connect: [
-                {
-                  id: 99999999,
-                  action: 'plugin::users-permissions.roles.update',
-                },
-              ],
+    test("can't assign non-existing permissions on role", async () => {
+      const res = await rq({
+        url: `/admin/roles/${data.rolesWithoutUsers[0].id}/permissions`,
+        method: 'PUT',
+        body: {
+          permissions: [
+            {
+              action: 'non.existing.action',
             },
-          },
-        });
-
-        expect(res.statusCode).toBe(400);
-        expect(res.body).toMatchObject({
-          data: null,
-          error: {
-            details: {},
-            message: 'Some permissions to update do not exist',
-            name: 'ApplicationError',
-            status: 400,
-          },
-        });
+          ],
+        },
       });
 
-      test("can't connect content manager permission without subject", async () => {
-        const res = await rq({
-          url: `/admin/roles/${data.rolesWithoutUsers[0].id}/permissions`,
-          method: 'PUT',
-          body: {
-            permissions: {
-              connect: [
-                {
-                  action: 'plugin::content-manager.explorer.create',
-                },
-              ],
-            },
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          details: {
+            errors: [
+              {
+                message: 'action is not an existing permission action',
+                name: 'ValidationError',
+                path: ['permissions', '0', 'action'],
+              },
+            ],
           },
-        });
-
-        expect(res.statusCode).toBe(400);
-        expect(res.body).toMatchObject({
-          data: null,
-          error: {
-            details: {
-              errors: [
-                {
-                  message: 'Invalid subject submitted',
-                  name: 'ValidationError',
-                  path: ['permissions', 'connect', '0', 'subject'],
-                },
-              ],
-            },
-            message: 'Invalid subject submitted',
-            name: 'ValidationError',
-            status: 400,
-          },
-        });
-      });
-
-      test("can't connect non-existing permissions on role", async () => {
-        const res = await rq({
-          url: `/admin/roles/${data.rolesWithoutUsers[0].id}/permissions`,
-          method: 'PUT',
-          body: {
-            permissions: {
-              connect: [
-                {
-                  action: 'non.existing.action',
-                },
-              ],
-            },
-          },
-        });
-
-        expect(res.statusCode).toBe(400);
-        expect(res.body).toMatchObject({
-          data: null,
-          error: {
-            details: {
-              errors: [
-                {
-                  message: 'action is not an existing permission action',
-                  name: 'ValidationError',
-                  path: ['permissions', 'connect', '0', 'action'],
-                },
-              ],
-            },
-            message: 'action is not an existing permission action',
-            name: 'ValidationError',
-            status: 400,
-          },
-        });
+          message: 'action is not an existing permission action',
+          name: 'ValidationError',
+          status: 400,
+        },
       });
     });
 
@@ -834,44 +714,6 @@ describe('Role CRUD End to End', () => {
           expect(permission.fields).toEqual(expect.arrayContaining([expect.any(String)]));
         }
       });
-    });
-
-    test('disconnect permissions on role', async () => {
-      // Connect some first, and disconnect all ids afterwards
-      const oldPermissions = await rq({
-        url: `/admin/roles/${data.rolesWithoutUsers[0].id}/permissions`,
-        method: 'PUT',
-        body: {
-          permissions: {
-            connect: [
-              {
-                action: 'plugin::users-permissions.roles.update',
-              },
-              {
-                action: 'plugin::content-manager.explorer.create',
-                subject: 'plugin::users-permissions.user',
-                properties: { fields: ['username'], locales: [] },
-                conditions: ['admin::is-creator'],
-              },
-            ],
-          },
-        },
-      }).then((res) => res.body.data);
-
-      const res = await rq({
-        url: `/admin/roles/${data.rolesWithoutUsers[0].id}/permissions`,
-        method: 'PUT',
-        body: {
-          permissions: {
-            // Disconnect all but the last one
-            disconnect: oldPermissions.slice(0, -1).map((p) => ({ id: p.id })),
-          },
-        },
-      });
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body.data).toHaveLength(1);
-      expect(res.body.data[0]).toMatchObject(oldPermissions[oldPermissions.length - 1]);
     });
   });
 });
