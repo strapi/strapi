@@ -58,6 +58,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     this.transaction = utils.transaction.createTransaction(this.strapi);
   }
 
+  // TODO: either move this to restore strategy, or restore strategy should given access to these instead of repeating the logic possibly in a different way
   #areAssetsIncluded = () => {
     return this.options.restore?.assets;
   };
@@ -295,7 +296,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       objectMode: true,
       async final(next) {
         // Delete the backup folder
-        removeAssetsBackup();
+        await removeAssetsBackup();
         next();
       },
       async write(chunk: IAsset, _encoding, callback) {
