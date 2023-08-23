@@ -256,7 +256,9 @@ describe('ADMIN | pages | SettingsPage', () => {
               isDisplayed: true,
               permissions: [],
               to: '/settings/internationalization',
-              Component: () => ({ default: () => <div>i18n settings</div> }),
+              Component() {
+                return <div>i18n settings</div>;
+              },
             },
           ],
         },
@@ -270,7 +272,9 @@ describe('ADMIN | pages | SettingsPage', () => {
               isDisplayed: true,
               permissions: [],
               to: '/settings/email-settings',
-              Component: () => ({ default: () => <div>email settings</div> }),
+              Component() {
+                return <div>i18n settings</div>;
+              },
             },
           ],
         },
@@ -292,7 +296,9 @@ describe('ADMIN | pages | SettingsPage', () => {
             isDisplayed: true,
             permissions: [],
             to: '/settings/internationalization',
-            Component: () => ({ default: () => <div>i18n settings</div> }),
+            Component() {
+              return <div>i18n settings</div>;
+            },
           },
         ],
       },
@@ -306,7 +312,9 @@ describe('ADMIN | pages | SettingsPage', () => {
             isDisplayed: true,
             permissions: [],
             to: '/settings/email-settings',
-            Component: () => ({ default: () => <div>email settings</div> }),
+            Component() {
+              return <div>email settings</div>;
+            },
           },
         ],
       },
