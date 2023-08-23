@@ -11,7 +11,7 @@ The NPS survey is shown to users to get their feedback about Strapi. It is based
 
 ## When do we show the survey?
 
-The NPS survey is only displayed to admin users who have selected the "Keep me updated" checkbox during registration. The survey is displayed after 5 minutes of activity. 
+The NPS survey is only displayed to admin users who have selected the "Keep me updated" checkbox during registration. The survey is displayed after 5 minutes of activity.
 
 The survey is shown to eligible users based on the following rules:
 

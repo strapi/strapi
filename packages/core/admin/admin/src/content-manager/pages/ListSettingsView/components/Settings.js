@@ -17,7 +17,12 @@ import { useIntl } from 'react-intl';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { getTrad } from '../../../utils';
 
-export const Settings = ({ contentTypeOptions, modifiedData, onChange, sortOptions: sortOptionsCE }) => {
+export const Settings = ({
+  contentTypeOptions,
+  modifiedData,
+  onChange,
+  sortOptions: sortOptionsCE,
+}) => {
   const { formatMessage, locale } = useIntl();
   const formatter = useCollator(locale, {
     sensitivity: 'base',
