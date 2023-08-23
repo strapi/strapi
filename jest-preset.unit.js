@@ -3,8 +3,8 @@
 module.exports = {
   setupFilesAfterEnv: [__dirname + '/test/setup/unit.setup.js'],
   modulePathIgnorePatterns: ['.cache', 'dist'],
-  testPathIgnorePatterns: ['.testdata.js', '.test.utils.js'],
-  testMatch: ['**/__tests__/**(!definitions)/*.{js,ts,jsx,tsx}'],
+  testPathIgnorePatterns: ['.testdata.js', '.test.utils.js', '.d.ts'],
+  testMatch: ['**/__tests__/**/*.{js,ts,jsx,tsx}'],
   transform: {
     '^.+\\.(t|j)sx?$': ['@swc/jest'],
   },
