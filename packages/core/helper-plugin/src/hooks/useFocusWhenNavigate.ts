@@ -1,4 +1,4 @@
-import { DependencyList, useEffect } from 'react';
+import React, { DependencyList } from 'react';
 interface UseFocusWhenNavigateProps {
   selector?: string;
   dependencies?: DependencyList;
@@ -8,7 +8,7 @@ const useFocusWhenNavigate = ({
   selector = 'main',
   dependencies = [],
 }: UseFocusWhenNavigateProps = {}) => {
-  useEffect(() => {
+  React.useEffect(() => {
     const mainElement: HTMLElement | null = document.querySelector(selector);
 
     if (mainElement) {
