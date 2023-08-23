@@ -1,10 +1,7 @@
 /**
  * Set an opacity to a hex value.
  *
- * @param {string} hex - Hex value
- * @example '#12100E'
- * @param {number} alpha - Alpha opacity value
- * @example 0.2
+ * @deprecated This function will be removed in the next major release. Use the native CSS opacity property instead.
  */
 const setHexOpacity = (hex: string, alpha: number) =>
   `${hex}${Math.floor(alpha * 255)
