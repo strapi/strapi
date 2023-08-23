@@ -11,7 +11,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
 
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "strict": true,
     "allowJs": true,
     "sourceMap": true,

@@ -11,14 +11,14 @@ import { Redirect, useHistory, useRouteMatch } from 'react-router-dom';
 import persistStateToLocaleStorage from '../../components/GuidedTour/utils/persistStateToLocaleStorage';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
 import { useEnterprise } from '../../hooks/useEnterprise';
-import formatAPIErrors from '../../utils/formatAPIErrors';
+import { formatAPIErrors } from '../../utils/formatAPIErrors';
 
 import { LoginCE } from './components/Login';
 import { FORMS } from './constants';
 import init from './init';
 import { initialState, reducer } from './reducer';
 
-const AuthPage = ({ hasAdmin, setHasAdmin }) => {
+export const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   const {
     push,
     location: { search },
@@ -315,5 +315,3 @@ AuthPage.propTypes = {
   hasAdmin: PropTypes.bool,
   setHasAdmin: PropTypes.func.isRequired,
 };
-
-export default AuthPage;
