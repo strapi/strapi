@@ -7,7 +7,7 @@ import styled from 'styled-components';
 
 import UnauthenticatedLayout from '../../../../../../admin/src/layouts/UnauthenticatedLayout';
 import BaseLogin from '../../../../../../admin/src/pages/AuthPage/components/Login/BaseLogin';
-import { useAuthProviders } from '../../../../hooks';
+import { useAuthProviders } from '../../../../hooks/useAuthProviders';
 import SSOProviders from '../Providers/SSOProviders';
 
 const DividerFull = styled(Divider)`
@@ -15,11 +15,15 @@ const DividerFull = styled(Divider)`
 `;
 
 export const LoginEE = (loginProps) => {
-  const ssoEnabled = window.strapi.features.isEnabled(window.strapi.features.SSO);
-  const { isLoading, data: providers } = useAuthProviders({ ssoEnabled });
   const { formatMessage } = useIntl();
+  const { isLoading, providers } = useAuthProviders({
+    enabled: window.strapi.features.isEnabled(window.strapi.features.SSO),
+  });
 
-  if (!ssoEnabled || (!isLoading && providers.length === 0)) {
+  if (
+    !window.strapi.features.isEnabled(window.strapi.features.SSO) ||
+    (!isLoading && providers.length === 0)
+  ) {
     return (
       <UnauthenticatedLayout>
         <BaseLogin {...loginProps} />

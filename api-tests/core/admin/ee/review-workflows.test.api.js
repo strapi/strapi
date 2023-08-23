@@ -12,6 +12,7 @@ const {
   STAGE_MODEL_UID,
   WORKFLOW_MODEL_UID,
   ENTITY_STAGE_ATTRIBUTE,
+  ENTITY_ASSIGNEE_ATTRIBUTE,
 } = require('../../../../packages/core/admin/ee/server/constants/workflows');
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
@@ -118,7 +119,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       where: { id: testWorkflow.id },
       data: {
         uid: 'workflow',
-        stages: [defaultStage.id, secondStage.id],
+        stages: { set: [defaultStage.id, secondStage.id] },
       },
     });
     defaultStage = await strapi.query(STAGE_MODEL_UID).update({
@@ -128,11 +129,6 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     secondStage = await strapi.query(STAGE_MODEL_UID).update({
       where: { id: secondStage.id },
       data: { name: 'Stage 2' },
-    });
-
-    await updateContentType(productUID, {
-      components: [],
-      contentType: model,
     });
   });
 
@@ -502,6 +498,78 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         expect(stagesRes.body.error.name).toEqual('ValidationError');
         expect(stagesRes.body.error.message).toBeDefined();
       }
+    });
+  });
+
+  describe('Update assignee on an entity', () => {
+    describe('Review Workflow is enabled', () => {
+      beforeAll(async () => {
+        // Assign Product to workflow so workflow is active on this CT
+        await requests.admin.put(
+          `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
+          { body: { data: { contentTypes: [productUID] } } }
+        );
+      });
+
+      test('Should update the assignee on an entity', async () => {
+        const entry = await createEntry(productUID, { name: 'Product' });
+        const user = requests.admin.getLoggedUser();
+        const response = await requests.admin({
+          method: 'PUT',
+          url: `/admin/content-manager/collection-types/${productUID}/${entry.id}/assignee`,
+          body: {
+            data: { id: user.id },
+          },
+        });
+        expect(response.status).toEqual(200);
+        const assignee = response.body.data[ENTITY_ASSIGNEE_ATTRIBUTE];
+        expect(assignee.id).toEqual(user.id);
+        expect(assignee).not.toHaveProperty('password');
+      });
+
+      test('Should throw an error if user does not exist', async () => {
+        const entry = await createEntry(productUID, { name: 'Product' });
+
+        const response = await requests.admin({
+          method: 'PUT',
+          url: `/admin/content-manager/collection-types/${productUID}/${entry.id}/assignee`,
+          body: {
+            data: { id: 1234 },
+          },
+        });
+
+        expect(response.status).toEqual(400);
+        expect(response.body.error).toBeDefined();
+        expect(response.body.error.name).toEqual('ApplicationError');
+        expect(response.body.error.message).toEqual('Selected user does not exist');
+      });
+    });
+
+    describe('Review Workflow is disabled', () => {
+      beforeAll(async () => {
+        // Unassign Product to workflow so workflow is inactive on this CT
+        await requests.admin.put(
+          `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
+          { body: { data: { contentTypes: [] } } }
+        );
+      });
+
+      test('Should not update the entity', async () => {
+        const entry = await createEntry(productUID, { name: 'Product' });
+        const user = requests.admin.getLoggedUser();
+
+        const response = await requests.admin({
+          method: 'PUT',
+          url: `/admin/content-manager/collection-types/${productUID}/${entry.id}/assignee`,
+          body: {
+            data: { id: user.id },
+          },
+        });
+
+        expect(response.status).toEqual(400);
+        expect(response.body.error).toBeDefined();
+        expect(response.body.error.name).toBe('ApplicationError');
+      });
     });
   });
 

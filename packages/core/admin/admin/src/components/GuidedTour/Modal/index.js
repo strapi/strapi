@@ -9,7 +9,7 @@ import Modal from './components/Modal';
 import StepperModal from './components/Stepper';
 import reducer, { initialState } from './reducer';
 
-const GuidedTourModal = () => {
+export const GuidedTourModal = () => {
   const {
     currentStep,
     guidedTourState,
@@ -90,5 +90,3 @@ const GuidedTourModal = () => {
 
   return null;
 };
-
-export default GuidedTourModal;

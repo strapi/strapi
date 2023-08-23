@@ -222,16 +222,19 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
   const updateOrderColumn = async () => {
     if (!hasOrderColumn(attribute) || !id) return;
 
-    const select = db
-      .connection(joinTable.name)
-      .select('id')
-      .rowNumber('src_order', orderColumnName, joinColumn.name)
-      .where(joinColumn.name, id)
-      .toSQL();
+    const selectRowsToOrder = (joinTableName) =>
+      db
+        .connection(joinTableName)
+        .select('id')
+        .rowNumber('src_order', orderColumnName, joinColumn.name)
+        .where(joinColumn.name, id)
+        .toSQL();
 
     switch (strapi.db.dialect.client) {
-      case 'mysql':
+      case 'mysql': {
         // Here it's MariaDB and MySQL 8
+        const select = selectRowsToOrder(joinTable.name);
+
         await db
           .getConnection()
           .raw(
@@ -243,9 +246,10 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
           .transacting(trx);
 
         break;
-
+      }
       default: {
         const joinTableName = addSchema(joinTable.name);
+        const select = selectRowsToOrder(joinTableName);
 
         // raw query as knex doesn't allow updating from a subquery
         await db.connection
@@ -275,16 +279,20 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
   */
   const updateInverseOrderColumn = async () => {
     if (!hasInverseOrderColumn(attribute) || isEmpty(inverseRelIds)) return;
-    const select = db
-      .connection(joinTable.name)
-      .select('id')
-      .rowNumber('inv_order', inverseOrderColumnName, inverseJoinColumn.name)
-      .where(inverseJoinColumn.name, 'in', inverseRelIds)
-      .toSQL();
+
+    const selectRowsToOrder = (joinTableName) =>
+      db
+        .connection(joinTableName)
+        .select('id')
+        .rowNumber('inv_order', inverseOrderColumnName, inverseJoinColumn.name)
+        .where(inverseJoinColumn.name, 'in', inverseRelIds)
+        .toSQL();
 
     switch (strapi.db.dialect.client) {
-      case 'mysql':
+      case 'mysql': {
         // Here it's MariaDB and MySQL 8
+        const select = selectRowsToOrder(joinTable.name);
+
         await db
           .getConnection()
           .raw(
@@ -295,9 +303,10 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
           )
           .transacting(trx);
         break;
-
+      }
       default: {
         const joinTableName = addSchema(joinTable.name);
+        const select = selectRowsToOrder(joinTableName);
 
         // raw query as knex doesn't allow updating from a subquery
         await db.connection

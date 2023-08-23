@@ -1,4 +1,4 @@
-import formatLinks from '../formatLinks';
+import { formatLinks } from '../formatLinks';
 
 describe('ADMIN | hooks | useSettingsMenu | utils | formatLinks', () => {
   it('should add the isDisplayed key to all sections links', () => {

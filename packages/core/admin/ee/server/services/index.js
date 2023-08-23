@@ -9,6 +9,7 @@ module.exports = {
   workflows: require('./review-workflows/workflows'),
   stages: require('./review-workflows/stages'),
   'stage-permissions': require('./review-workflows/stage-permissions'),
+  assignees: require('./review-workflows/assignees'),
   'review-workflows': require('./review-workflows/review-workflows'),
   'review-workflows-validation': require('./review-workflows/validation'),
   'review-workflows-decorator': require('./review-workflows/entity-service-decorator'),

@@ -8,7 +8,7 @@ import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 
 import { useContentTypes } from '../../../hooks/useContentTypes';
-import HomePage from '../index';
+import { HomePage } from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
