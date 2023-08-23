@@ -792,6 +792,9 @@ class TransferEngine<
 
   async transferSchemas(): Promise<void> {
     const stage: TransferStage = 'schemas';
+    if (this.shouldSkipStage(stage)) {
+      return;
+    }
 
     const source = await this.sourceProvider.createSchemasReadStream?.();
     const destination = await this.destinationProvider.createSchemasWriteStream?.();
@@ -806,6 +809,9 @@ class TransferEngine<
 
   async transferEntities(): Promise<void> {
     const stage: TransferStage = 'entities';
+    if (this.shouldSkipStage(stage)) {
+      return;
+    }
 
     const source = await this.sourceProvider.createEntitiesReadStream?.();
     const destination = await this.destinationProvider.createEntitiesWriteStream?.();
@@ -849,6 +855,9 @@ class TransferEngine<
 
   async transferLinks(): Promise<void> {
     const stage: TransferStage = 'links';
+    if (this.shouldSkipStage(stage)) {
+      return;
+    }
 
     const source = await this.sourceProvider.createLinksReadStream?.();
     const destination = await this.destinationProvider.createLinksWriteStream?.();
@@ -902,6 +911,9 @@ class TransferEngine<
 
   async transferConfiguration(): Promise<void> {
     const stage: TransferStage = 'configuration';
+    if (this.shouldSkipStage(stage)) {
+      return;
+    }
 
     const source = await this.sourceProvider.createConfigurationReadStream?.();
     const destination = await this.destinationProvider.createConfigurationWriteStream?.();
