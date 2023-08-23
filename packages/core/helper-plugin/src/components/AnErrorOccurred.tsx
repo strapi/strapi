@@ -1,25 +1,19 @@
-import React from 'react';
-
 import { EmptyStateLayout } from '@strapi/design-system';
 import { ExclamationMarkCircle } from '@strapi/icons';
-import { PrimitiveType, useIntl } from 'react-intl';
+import { MessageDescriptor, PrimitiveType, useIntl } from 'react-intl';
 
 export type AnErrorOccurredProps = {
-  content?: {
-    id: string;
-    defaultMessage: string;
-    values?: Record<string, PrimitiveType>;
-  };
+  content?: MessageDescriptor & { values?: Record<string, PrimitiveType> };
 };
 
-const AnErrorOccurred: React.FC<AnErrorOccurredProps> = ({
+const AnErrorOccurred = ({
   content = {
     id: 'anErrorOccurred',
     defaultMessage: 'Woops! Something went wrong. Please, try again.',
     values: {},
   },
   ...rest
-}) => {
+}: AnErrorOccurredProps) => {
   const { formatMessage } = useIntl();
 
   return (
