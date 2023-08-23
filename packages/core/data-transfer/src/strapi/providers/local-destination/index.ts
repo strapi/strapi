@@ -78,7 +78,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     }
   }
 
-  async #deleteAll() {
+  async #deleteFromRestoreOptions() {
     assertValidStrapi(this.strapi);
     return restore.deleteRecords(this.strapi, this.options.restore);
   }
@@ -117,11 +117,15 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     }
 
     await this.transaction?.attach(async (trx) => {
-      await this.#handleAssetsBackup();
       try {
         if (this.options.strategy === 'restore') {
-          await this.#deleteAllAssets(trx);
-          await this.#deleteAll();
+          if (this.options.restore?.assets) {
+            // Note: when other strategies are added, they will need to add their own backup logic
+            await this.#handleAssetsBackup();
+            await this.#deleteAllAssets(trx);
+          }
+          // TODO: do we need to add trx?
+          await this.#deleteFromRestoreOptions();
         }
       } catch (error) {
         throw new Error(`restore failed ${error}`);
@@ -215,6 +219,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   async #removeAssetsBackup() {
+    // TODO: this should catch all thrown errors and bubble it up to engine so it can be reported as a non-fatal diagnostic message telling the user they may need to manually delete assets
     if (strapi.config.get('plugin.upload').provider === 'local') {
       assertValidStrapi(this.strapi);
       const backupDirectory = path.join(
@@ -233,11 +238,15 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     const strapi = this.strapi;
     const transaction = this.transaction;
     const backupDirectory = this.uploadsBackupDirectoryName;
+    const restoreAssets = this.options?.restore?.assets;
+
     return new Writable({
       objectMode: true,
       async final(next) {
-        // Deletes the backup folder
-        removeAssetsBackup();
+        if (restoreAssets) {
+          // Delete the backup folder
+          removeAssetsBackup();
+        }
         next();
       },
       async write(chunk: IAsset, _encoding, callback) {

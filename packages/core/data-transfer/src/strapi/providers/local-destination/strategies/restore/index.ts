@@ -22,7 +22,7 @@ interface IDeleteResults {
 }
 
 export const deleteRecords = async (strapi: Strapi.Strapi, options?: IRestoreOptions) => {
-  const entities = await deleteEntitiesRecord(strapi, options);
+  const entities = await deleteEntitiesRecords(strapi, options);
   const configuration = await deleteConfigurationRecords(strapi, options);
 
   return {
@@ -32,7 +32,7 @@ export const deleteRecords = async (strapi: Strapi.Strapi, options?: IRestoreOpt
   };
 };
 
-const deleteEntitiesRecord = async (
+const deleteEntitiesRecords = async (
   strapi: Strapi.Strapi,
   options: IRestoreOptions = {}
 ): Promise<IDeleteResults> => {
