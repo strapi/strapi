@@ -87,7 +87,7 @@ describe('packages', () => {
       expect(ctx.distPath).toMatchInlineSnapshot(`"/dist"`);
     });
 
-    it('should return a valid target list', async () => {
+    it('should return a valid targets map', async () => {
       const ctx = await createBuildContext({
         cwd: '/',
         extMap,
@@ -95,19 +95,27 @@ describe('packages', () => {
         pkg,
       });
 
-      expect(ctx.target).toMatchInlineSnapshot(`
-        [
-          "chrome114",
-          "edge113",
-          "firefox102",
-          "ios14",
-          "node16.0",
-          "safari14",
-        ]
+      expect(ctx.targets).toMatchInlineSnapshot(`
+        {
+          "*": [
+            "chrome114",
+            "edge113",
+            "firefox102",
+            "ios14",
+            "node16.0",
+            "safari14",
+          ],
+          "node": [
+            "node16.0",
+          ],
+          "web": [
+            "esnext",
+          ],
+        }
       `);
     });
 
-    it('parse the browserslist property in the pkg.json if available', async () => {
+    it('parse the browserslist property in the pkg.json if available and set as the universal target in the targets map', async () => {
       const ctx = await createBuildContext({
         cwd: '/',
         extMap,
@@ -118,7 +126,7 @@ describe('packages', () => {
         },
       });
 
-      expect(ctx.target).toMatchInlineSnapshot(`
+      expect(ctx.targets['*']).toMatchInlineSnapshot(`
         [
           "node18.5",
         ]
@@ -190,6 +198,7 @@ describe('packages', () => {
             ],
             "format": "cjs",
             "output": "./dist/index.js",
+            "runtime": "*",
             "type": "build:js",
           },
           {
@@ -201,6 +210,7 @@ describe('packages', () => {
             ],
             "format": "es",
             "output": "./dist/index.mjs",
+            "runtime": "*",
             "type": "build:js",
           },
         ]

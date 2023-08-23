@@ -14,6 +14,13 @@ const { parseExports } = require('../utils/pkg');
  */
 
 /**
+ * @typedef {Object} Targets
+ * @property {string[]} node
+ * @property {string[]} web
+ * @property {string[]} *
+ */
+
+/**
  * @typedef {Object} BuildContext
  * @property {string} cwd
  * @property {import('../utils/pkg').Export[]} exports
@@ -21,7 +28,7 @@ const { parseExports } = require('../utils/pkg');
  * @property {import('../utils/pkg').ExtMap} extMap
  * @property {import('../utils/logger').Logger} logger
  * @property {import('../utils/pkg').PackageJson} pkg
- * @property {string} target
+ * @property {Targets} targets
  */
 
 const DEFAULT_BROWSERS_LIST_CONFIG = [
@@ -40,7 +47,11 @@ const DEFAULT_BROWSERS_LIST_CONFIG = [
  * @type {(args: BuildContextArgs) => Promise<BuildContext>}
  */
 const createBuildContext = async ({ cwd, extMap, logger, pkg }) => {
-  const target = browserslistToEsbuild(pkg.browserslist ?? DEFAULT_BROWSERS_LIST_CONFIG);
+  const targets = {
+    '*': browserslistToEsbuild(pkg.browserslist ?? DEFAULT_BROWSERS_LIST_CONFIG),
+    node: browserslistToEsbuild(['node 16.0.0']),
+    web: ['esnext'],
+  };
 
   const exports = parseExports({ extMap, pkg }).reduce((acc, x) => {
     const { _path: exportPath, ...exportEntry } = x;
@@ -78,7 +89,7 @@ const createBuildContext = async ({ cwd, extMap, logger, pkg }) => {
     exports,
     external,
     distPath,
-    target,
+    targets,
     extMap,
   };
 };
@@ -158,7 +169,7 @@ const createBuildTasks = async (ctx) => {
    */
   const viteTasks = {};
 
-  const createViteTask = (format, { output, ...restEntry }) => {
+  const createViteTask = (format, runtime, { output, ...restEntry }) => {
     const buildId = `${format}:${output}`;
 
     if (viteTasks[buildId]) {
@@ -174,6 +185,7 @@ const createBuildTasks = async (ctx) => {
         type: 'build:js',
         format,
         output,
+        runtime,
         entries: [restEntry],
       };
     }
@@ -196,11 +208,21 @@ const createBuildTasks = async (ctx) => {
       });
     }
 
+    /**
+     * @type {keyof Target}
+     */
+    // eslint-disable-next-line no-nested-ternary
+    const runtime = exp._path.includes('strapi-admin')
+      ? 'web'
+      : exp._path.includes('strapi-server')
+      ? 'node'
+      : '*';
+
     if (exp.require) {
       /**
        * register CJS task
        */
-      createViteTask('cjs', {
+      createViteTask('cjs', runtime, {
         path: exp._path,
         entry: exp.source,
         output: exp.require,
@@ -211,7 +233,7 @@ const createBuildTasks = async (ctx) => {
       /**
        * register ESM task
        */
-      createViteTask('es', {
+      createViteTask('es', runtime, {
         path: exp._path,
         entry: exp.source,
         output: exp.import,

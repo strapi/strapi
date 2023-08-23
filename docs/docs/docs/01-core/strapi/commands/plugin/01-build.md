@@ -82,13 +82,17 @@ The command sequence can be visualised as follows:
 - Pass the build task to a specific task handler e.g. `vite` or `tsc`
 - Finish
 
-## Overriding settings
+## Transpilation target
 
-Most settings are currently hard coded into the command since we do not support a configuration file at present, however some options can be overwritten by adding values to the `package.json`.
+There are three different runtimes available for plugins:
 
-### Browserslist
+- `node` which equates to a `node16` target
+- `web` which equates to a `esnext` target
+- `*` (universal) which equates to `["last 3 major versions", "Firefox ESR", "last 2 Opera versions", "not dead", "node 16.0.0"]`
 
-By adding the `browserslist` key to your `package.json` you can overwrite the default value (seen below):
+The `node` and `web` targets are specifically used for the export maps with they keys `./strapi-server` and `./strapi-admin` respectively.
+Any other export map values will be transpiled to the universal target. The universal target can be overwritten by adding the `browserslist`
+key to your `package.json` (seen below):
 
 ```json
 {

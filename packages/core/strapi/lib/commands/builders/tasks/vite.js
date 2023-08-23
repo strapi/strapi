@@ -12,8 +12,8 @@ const chalk = require('chalk');
  * @type {(ctx: import('../packages').BuildContext, task: ViteTask) => import('vite').UserConfig}
  */
 const resolveViteConfig = (ctx, task) => {
-  const { cwd, distPath, target, external, extMap, pkg } = ctx;
-  const { entries, format, output } = task;
+  const { cwd, distPath, targets, external, extMap, pkg } = ctx;
+  const { entries, format, output, runtime } = task;
   const outputExt = extMap[pkg.type || 'commonjs'][format];
   const outDir = path.relative(cwd, distPath);
 
@@ -38,7 +38,7 @@ const resolveViteConfig = (ctx, task) => {
        * The task runner will clear this for us
        */
       emptyOutDir: false,
-      target,
+      target: targets[runtime],
       outDir,
       lib: {
         entry: entries.map((e) => e.entry),
@@ -91,6 +91,7 @@ const resolveViteConfig = (ctx, task) => {
  * @property {ViteTaskEntry[]} entries
  * @property {string} format
  * @property {string} output
+ * @property {keyof import('../packages').Target} runtime
  */
 
 /**
@@ -99,7 +100,10 @@ const resolveViteConfig = (ctx, task) => {
 const viteTask = {
   _spinner: null,
   print(ctx, task) {
-    const targetLines = ['   target:', ...ctx.target.map((t) => chalk.cyan(`    - ${t}`))];
+    const targetLines = [
+      '   target:',
+      ...ctx.targets[task.runtime].map((t) => chalk.cyan(`    - ${t}`)),
+    ];
     const entries = [
       '   entries:',
       ...task.entries.map((entry) =>
