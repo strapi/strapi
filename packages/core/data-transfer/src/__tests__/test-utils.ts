@@ -29,7 +29,7 @@ export const getStrapiFactory =
   >(
     properties?: T
   ) =>
-  (additionalProperties?: T) => {
+  (additionalProperties?: Partial<T>) => {
     return { ...properties, ...additionalProperties } as Strapi.Strapi;
   };
 
