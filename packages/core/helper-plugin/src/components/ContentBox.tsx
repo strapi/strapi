@@ -1,9 +1,14 @@
-import React from 'react';
-
-import { Flex, Typography } from '@strapi/design-system';
-import PropTypes from 'prop-types';
+import { Flex, FlexProps, Typography } from '@strapi/design-system';
 import styled from 'styled-components';
 
+export interface ContentBoxProps {
+  title?: string;
+  subtitle?: string;
+  icon?: FlexProps['children'];
+  iconBackground?: FlexProps['background'];
+  endAction?: FlexProps['children'];
+  titleEllipsis?: boolean;
+}
 const IconWrapper = styled(Flex)`
   margin-right: ${({ theme }) => theme.spaces[6]};
 
@@ -17,8 +22,15 @@ const TypographyWordBreak = styled(Typography)`
   word-break: break-all;
 `;
 
-const ContentBox = ({ title, subtitle, icon, iconBackground, endAction, titleEllipsis }) => {
-  if (title.length > 70 && titleEllipsis) {
+const ContentBox = ({
+  title,
+  subtitle,
+  icon,
+  iconBackground,
+  endAction,
+  titleEllipsis = false,
+}: ContentBoxProps) => {
+  if (title && title.length > 70 && titleEllipsis) {
     title = `${title.substring(0, 70)}...`;
   }
 
@@ -38,24 +50,6 @@ const ContentBox = ({ title, subtitle, icon, iconBackground, endAction, titleEll
       </Flex>
     </Flex>
   );
-};
-
-ContentBox.defaultProps = {
-  titleEllipsis: false,
-  title: undefined,
-  subtitle: undefined,
-  icon: undefined,
-  iconBackground: undefined,
-  endAction: undefined,
-};
-
-ContentBox.propTypes = {
-  titleEllipsis: PropTypes.bool,
-  title: PropTypes.string,
-  subtitle: PropTypes.string,
-  icon: PropTypes.node,
-  iconBackground: PropTypes.string,
-  endAction: PropTypes.node,
 };
 
 export { ContentBox };
