@@ -1,7 +1,7 @@
 const ERROR_PREFIX = 'apiError.';
 
 /**
- * Prefix message with with 'apiError.'
+ * Prefix message with 'apiError.'
  */
 export function getPrefixedId(message: string, callback?: (prefixedMessage: string) => string) {
   const prefixedMessage = `${ERROR_PREFIX}${message}`;
