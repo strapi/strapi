@@ -1,21 +1,23 @@
-import React from 'react';
+/* eslint-disable check-file/filename-naming-convention */ // this is disabled because the file name is correct however, we do use JSX in this file.
+import * as React from 'react';
 
 import { act, renderHook } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
-import { useFieldHint } from '../useFieldHint';
+import { useFieldHint, UseFieldHintProps } from '../useFieldHint';
 
 const messages = { 'message.id': 'response' };
 const knownDescription = { id: 'message.id', defaultMessage: '' };
 
 // eslint-disable-next-line react/prop-types
-export const IntlWrapper = ({ children }) => (
+export const IntlWrapper = ({ children }: { children: React.JSX.Element }) => (
   <IntlProvider locale="en" messages={messages} textComponent="span">
     {children}
   </IntlProvider>
 );
 
-function setup(args) {
+// @TODO: Remove export any type when setup is typed
+function setup(args: UseFieldHintProps): any {
   return new Promise((resolve) => {
     act(() => {
       resolve(renderHook(() => useFieldHint(args), { wrapper: IntlWrapper }));
