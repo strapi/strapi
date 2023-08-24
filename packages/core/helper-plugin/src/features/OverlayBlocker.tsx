@@ -21,13 +21,17 @@ import styled from 'styled-components';
  * @preserve
  * @type {React.Context<OverlayBlockerContextValue>}
  */
-const OverlayBlockerContext = React.createContext();
+const OverlayBlockerContext = React.createContext({});
 
 /* -------------------------------------------------------------------------------------------------
  * Provider
  * -----------------------------------------------------------------------------------------------*/
 
-const OverlayBlockerProvider = ({ children }) => {
+interface OverlayBlockerProviderProps {
+  children: React.ReactNode;
+}
+
+const OverlayBlockerProvider = ({ children }: OverlayBlockerProviderProps) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const lockApp = React.useCallback(() => {
