@@ -53,9 +53,13 @@ module.exports = ({ strapi }) => {
           .get('content-api')
           .buildMutationsResolvers({ contentType });
 
+        // For single types, the validation and sanitization of args is done here instead of being
+        // delegated to the query builders since we're calling the entity service directly
+
         await validate.contentAPI.query(omit(['data', 'files'], transformedArgs), contentType, {
           auth,
         });
+
         const sanitizedQuery = await sanitize.contentAPI.query(
           omit(['data', 'files'], transformedArgs),
           contentType,
