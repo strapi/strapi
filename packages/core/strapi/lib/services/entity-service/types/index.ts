@@ -25,7 +25,7 @@ export interface EntityService {
   emitEvent<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
     event: string,
-    entity: Entity<TContentTypeUID>
+    entity: Entity<TContentTypeUID, never>
   ): Promise<void>;
 
   findMany<
@@ -49,7 +49,7 @@ export interface EntityService {
       [Common.UID.IsCollectionType<TContentTypeUID>, Promise<Entity<TContentTypeUID, TParams>[]>],
       [Common.UID.IsSingleType<TContentTypeUID>, Promise<Entity<TContentTypeUID, TParams> | null>]
     ],
-    Promise<(Entity<TContentTypeUID, TParams> | null) | Entity<TContentTypeUID, TParams>[]>
+    Promise<(Entity<TContentTypeUID, TParams> | null) & Entity<TContentTypeUID, TParams>[]>
   >;
 
   findOne<
@@ -61,16 +61,22 @@ export interface EntityService {
     params?: TParams
   ): Promise<Entity<TContentTypeUID, TParams> | null>;
 
-  delete<TContentTypeUID extends Common.UID.ContentType>(
+  delete<
+    TContentTypeUID extends Common.UID.ContentType,
+    TParams extends Params.Pick<TContentTypeUID, 'fields' | 'populate'>
+  >(
     uid: TContentTypeUID,
     entityId: Params.Attribute.ID,
-    params?: Params.Pick<TContentTypeUID, 'fields' | 'populate'>
-  ): Promise<Entity<TContentTypeUID> | null>;
+    params?: TParams
+  ): Promise<Entity<TContentTypeUID, TParams> | null>;
 
-  create<TContentTypeUID extends Common.UID.ContentType>(
+  create<
+    TContentTypeUID extends Common.UID.ContentType,
+    TParams extends Params.Pick<TContentTypeUID, 'data' | 'files' | 'fields' | 'populate'>
+  >(
     uid: TContentTypeUID,
-    params?: Params.Pick<TContentTypeUID, 'data' | 'files' | 'fields' | 'populate'>
-  ): Promise<Entity<TContentTypeUID>>;
+    params?: TParams
+  ): Promise<Entity<TContentTypeUID, TParams>>;
 
   update<
     TContentTypeUID extends Common.UID.ContentType,
@@ -169,21 +175,21 @@ export interface EntityService {
     TField extends Attribute.GetPopulatableKeys<TContentTypeUID>
   >(
     uid: TContentTypeUID,
-    entity: Entity<TContentTypeUID>,
+    entity: Entity<TContentTypeUID, never>,
     field: Utils.Guard.Never<TField, string>,
     params?: GetPopulatableFieldParams<TContentTypeUID, TField>
-  ): Promise<Entity<TContentTypeUID> | Entity<TContentTypeUID>[]>;
+  ): Promise<Entity<TContentTypeUID, never> | Entity<TContentTypeUID, never>[]>;
 
   loadPages<
     TContentTypeUID extends Common.UID.ContentType,
     TField extends Attribute.GetPopulatableKeys<TContentTypeUID>
   >(
     uid: TContentTypeUID,
-    entity: Entity<TContentTypeUID>,
+    entity: Entity<TContentTypeUID, never>,
     field: Utils.Guard.Never<TField, string>,
     params?: GetPopulatableFieldParams<TContentTypeUID, TField>,
     pagination?: Params.Pagination.Any
-  ): Promise<PaginatedResult<TContentTypeUID>>;
+  ): Promise<PaginatedResult<TContentTypeUID, never>>;
 }
 
 type GetPopulatableFieldParams<

@@ -8,8 +8,14 @@ export type Entity<
 > = Utils.Object.DeepPartial<
   GetValues<
     TSchemaUID,
-    As<ExtractFields<TSchemaUID, TParams['fields']>, Attribute.GetNonPopulatableKeys<TSchemaUID>>,
-    As<ExtractPopulate<TSchemaUID, TParams['populate']>, Attribute.GetPopulatableKeys<TSchemaUID>>
+    ExtractFields<
+      TSchemaUID,
+      Utils.As<TParams['fields'], EntityService.Params.Fields.Any<TSchemaUID>>
+    >,
+    ExtractPopulate<
+      TSchemaUID,
+      Utils.As<TParams['populate'], EntityService.Params.Populate.Any<TSchemaUID>>
+    >
   >
 >;
 
@@ -42,7 +48,8 @@ export type GetValues<
             Utils.Expression.Extends<TPopulate, Attribute.GetPopulatableKeys<TSchemaUID>>,
             GetOwnValues<TSchemaUID, Attribute.GetNonPopulatableKeys<TSchemaUID> | TPopulate>
           ]
-        ]
+        ],
+        GetOwnValues<TSchemaUID, Attribute.GetNonPopulatableKeys<TSchemaUID>>
       >
     ],
     [
@@ -76,14 +83,6 @@ type GetValue<TAttribute extends Attribute.Attribute> = Utils.Expression.If<
   >
 >;
 
-/**
- * attributes values => <uid, fields>
- */
-
-// transform fields (string | string[]) & populate (object, string, string[]) -> string union (keys)
-
-type As<T, P> = T extends P ? T : never;
-
 type ExtractFields<
   TSchemaUID extends Common.UID.Schema,
   TFields extends EntityService.Params.Fields.Any<TSchemaUID>
@@ -94,7 +93,7 @@ type ExtractFields<
       Utils.Expression.Extends<TFields, EntityService.Params.Fields.StringNotation<TSchemaUID>>,
       ParseStringFields<
         TSchemaUID,
-        As<TFields, EntityService.Params.Fields.StringNotation<TSchemaUID>>
+        Utils.As<TFields, EntityService.Params.Fields.StringNotation<TSchemaUID>>
       >
     ],
     // string array
@@ -102,8 +101,10 @@ type ExtractFields<
       Utils.Expression.Extends<TFields, EntityService.Params.Fields.ArrayNotation<TSchemaUID>>,
       ParseStringFields<
         TSchemaUID,
-        As<
-          Utils.Array.Values<As<TFields, EntityService.Params.Fields.ArrayNotation<TSchemaUID>>>,
+        Utils.As<
+          Utils.Array.Values<
+            Utils.As<TFields, EntityService.Params.Fields.ArrayNotation<TSchemaUID>>
+          >,
           EntityService.Params.Fields.StringNotation<TSchemaUID>
         >
       >
@@ -128,7 +129,7 @@ type ParseStringFields<
     [
       // what aobut * in comma separated list
       Utils.Expression.Extends<TFields, `${string},${string}`>,
-      Utils.Array.Values<Utils.String.Split<As<TFields, string>, ','>>
+      Utils.Array.Values<Utils.String.Split<Utils.As<TFields, string>, ','>>
     ]
   ]
 >;
@@ -142,27 +143,27 @@ type ExtractPopulate<
       Utils.Expression.Extends<TPopulate, EntityService.Params.Populate.StringNotation<TSchemaUID>>,
       ParseStringPopulate<
         TSchemaUID,
-        As<TPopulate, EntityService.Params.Populate.StringNotation<TSchemaUID>>
+        Utils.As<TPopulate, EntityService.Params.Populate.StringNotation<TSchemaUID>>
       >
     ],
     [
       Utils.Expression.Extends<TPopulate, EntityService.Params.Populate.ArrayNotation<TSchemaUID>>,
       ParseStringPopulate<
         TSchemaUID,
-        As<
+        Utils.As<
           Utils.Array.Values<
-            As<TPopulate, EntityService.Params.Populate.ArrayNotation<TSchemaUID>>
+            Utils.As<TPopulate, EntityService.Params.Populate.ArrayNotation<TSchemaUID>>
           >,
           EntityService.Params.Populate.StringNotation<TSchemaUID>
         >
       >
     ],
-    [Utils.Expression.Extends<Object, TPopulate>, never],
+    [Utils.Expression.Extends<null, TPopulate>, never],
     [
       Utils.Expression.Extends<TPopulate, EntityService.Params.Populate.ObjectNotation<TSchemaUID>>,
       ParseStringPopulate<
         TSchemaUID,
-        As<keyof TPopulate, EntityService.Params.Populate.StringNotation<TSchemaUID>>
+        Utils.As<keyof TPopulate, EntityService.Params.Populate.StringNotation<TSchemaUID>>
       >
     ]
   ],
@@ -182,7 +183,7 @@ type ParseStringPopulate<
     [
       // what aobut * in comma separated list
       Utils.Expression.Extends<TPopulate, `${string},${string}`>,
-      Utils.Array.Values<Utils.String.Split<As<TPopulate, string>, ','>>
+      Utils.Array.Values<Utils.String.Split<Utils.As<TPopulate, string>, ','>>
     ],
     [
       Utils.Expression.Extends<TPopulate, EntityService.Params.Populate.StringNotation<TSchemaUID>>,
