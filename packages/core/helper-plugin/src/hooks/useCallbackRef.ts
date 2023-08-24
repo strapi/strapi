@@ -3,8 +3,6 @@ import * as React from 'react';
 /**
  * A custom hook that converts a callback to a ref to avoid triggering re-renders when passed as a
  * prop or avoid re-executing effects when passed as a dependency
- *
- * @type {<T extends (...args: any[]) => any>(callback: T | undefined) => T}
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const useCallbackRef = <T extends (...args: any[]) => any>(callback: T | undefined): T => {
