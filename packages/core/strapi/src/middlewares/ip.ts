@@ -1,6 +1,6 @@
 import koaIp from 'koa-ip';
-import type { MiddlewareFactory } from './types';
+import type { Common } from '../types';
 
 export type Config = koaIp.KoaIPOptions;
 
-export const ip: MiddlewareFactory<Config> = (config) => koaIp(config);
+export const ip: Common.MiddlewareFactory<Config> = (config) => koaIp(config);

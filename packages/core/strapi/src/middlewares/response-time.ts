@@ -1,6 +1,6 @@
-import type { MiddlewareFactory } from './types';
+import type { Common } from '../types';
 
-export const responseTime: MiddlewareFactory = () => {
+export const responseTime: Common.MiddlewareFactory = () => {
   return async (ctx, next) => {
     const start = Date.now();
 

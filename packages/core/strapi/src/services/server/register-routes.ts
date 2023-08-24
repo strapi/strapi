@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import { Strapi } from '../../Strapi';
-import { Common } from '../../types';
+import type { Strapi } from '../../Strapi';
+import type { Common } from '../../types';
 
 const createRouteScopeGenerator = (namespace: string) => (route: Common.Route) => {
   const prefix = namespace.endsWith('::') ? namespace : `${namespace}.`;

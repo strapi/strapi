@@ -8323,7 +8323,7 @@ __metadata:
     "@strapi/utils": 4.12.1
     "@types/configstore": 6.0.0
     "@types/delegates": 1.0.0
-    "@types/koa": 2.13.8
+    "@types/koa": "*"
     "@types/koa-compress": 4.0.3
     "@types/koa-session": 6.4.1
     "@types/koa-static": 4.0.2
@@ -9275,22 +9275,6 @@ __metadata:
     "@types/koa-compose": "*"
     "@types/node": "*"
   checksum: e3b634d934b79ce8f394bf4130511596081f9c073dbfb4309aa32e4c421c47049a002b65111f8d9687eabec55d5a27b1b9ae0699afa83894cb7032c3536bfa17
-  languageName: node
-  linkType: hard
-
-"@types/koa@npm:2.13.8":
-  version: 2.13.8
-  resolution: "@types/koa@npm:2.13.8"
-  dependencies:
-    "@types/accepts": "*"
-    "@types/content-disposition": "*"
-    "@types/cookies": "*"
-    "@types/http-assert": "*"
-    "@types/http-errors": "*"
-    "@types/keygrip": "*"
-    "@types/koa-compose": "*"
-    "@types/node": "*"
-  checksum: 76a2a6d219c65f242a43efca42970d864701c58319c346a91dd8c3b4df2021786fd0d600a88dfb098358c9085f9f4a2dfe62563641441cf21e11e2bfe04f4fdf
   languageName: node
   linkType: hard
 

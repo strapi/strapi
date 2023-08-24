@@ -1,35 +1,35 @@
-import { getOr } from 'lodash/fp';
-
+import { prop } from 'lodash/fp';
+import type Koa from 'koa';
 import { contentTypes, sanitize } from '@strapi/utils';
-import type { Schema } from '@strapi/strapi';
+import type { Schema } from '../../types';
 
 import { transformResponse } from './transform';
 import createSingleTypeController from './single-type';
 import createCollectionTypeController from './collection-type';
 
-const getAuthFromKoaContext = getOr({}, 'state.auth');
+const getAuthFromKoaContext = (ctx: Koa.Context) => prop('state.auth', ctx) ?? {};
 
 export const createController = ({ contentType }: { contentType: Schema.ContentType }) => {
   const ctx = { contentType };
 
   const proto = {
-    transformResponse(data, meta) {
+    transformResponse(data: unknown, meta: unknown) {
       return transformResponse(data, meta, { contentType });
     },
 
-    async sanitizeOutput(data, ctx) {
+    async sanitizeOutput(data: unknown, ctx: Koa.Context) {
       const auth = getAuthFromKoaContext(ctx);
 
       return sanitize.contentAPI.output(data, contentType, { auth });
     },
 
-    sanitizeInput(data, ctx) {
+    sanitizeInput(data: unknown, ctx: Koa.Context) {
       const auth = getAuthFromKoaContext(ctx);
 
       return sanitize.contentAPI.input(data, contentType, { auth });
     },
 
-    sanitizeQuery(ctx) {
+    sanitizeQuery(ctx: Koa.Context) {
       const auth = getAuthFromKoaContext(ctx);
 
       return sanitize.contentAPI.query(ctx.query, contentType, { auth });

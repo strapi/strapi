@@ -2,6 +2,7 @@ import { Knex } from 'knex';
 import { LifecycleProvider } from './lifecycles';
 import { MigrationProvider } from './migrations';
 import { SchemaProvider } from './schema';
+export * as errors from './errors';
 
 type ID = number | string;
 
@@ -115,7 +116,7 @@ interface EntityManager {
   ): Promise<T[SK]>;
 }
 
-interface QueryFromContentType<T extends keyof AllTypes> {
+export interface QueryFromContentType<T extends keyof AllTypes> {
   findOne(params: FindParams<AllTypes[T]>): Promise<any>;
   findMany(params: FindParams<AllTypes[T]>): Promise<any[]>;
   findWithCount(params: FindParams<AllTypes[T]>): Promise<[any[], number]>;
@@ -164,6 +165,13 @@ export interface Database {
   queryBuilder: any;
   metadata: any;
   connection: Knex;
+  dialect: {
+    client: string;
+  };
+
+  destroy(): Promise<void>;
+
+  getSchemaConnection: () => Knex.SchemaBuilder;
 
   query: <T extends keyof AllTypes>(uid: T) => QueryFromContentType<T>;
   transaction(

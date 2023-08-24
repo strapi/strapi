@@ -8,7 +8,7 @@ import * as utils from '../../utils';
 import { serveStatic } from './serve-static';
 
 import type { Strapi } from '../../Strapi';
-import type { Middleware } from '../types';
+import type { Common } from '../../types';
 
 type Config = koaStatic.Options;
 
@@ -17,13 +17,16 @@ const defaults = {
   defaultIndex: true,
 };
 
-export const publicStatic = (config: Config, { strapi }: { strapi: Strapi }) => {
+export const publicStatic: Common.MiddlewareFactory = (
+  config: Config,
+  { strapi }: { strapi: Strapi }
+) => {
   const { defaultIndex, maxAge } = defaultsDeep(defaults, config);
 
   if (defaultIndex === true) {
     const index = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
 
-    const serveIndexPage: Middleware = async (ctx, next) => {
+    const serveIndexPage: Common.MiddlewareHandler = async (ctx, next) => {
       // defer rendering of strapi index page
       await next();
 

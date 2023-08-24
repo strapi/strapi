@@ -1,6 +1,6 @@
 import type Koa from 'koa';
 
-export type MiddlewareFactory<T = unknown> = (
+export type MiddlewareFactory<T = any> = (
   config: T,
   ctx: { strapi: Strapi }
 ) => MiddlewareHandler | void;

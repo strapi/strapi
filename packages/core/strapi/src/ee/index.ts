@@ -1,7 +1,9 @@
 import { pick, isEqual } from 'lodash/fp';
+import type { Logger } from '@strapi/logger';
 
 import { readLicense, verifyLicense, fetchLicense, LicenseCheckError } from './license';
 import { shiftCronExpression } from '../utils/cron';
+import type { Strapi } from '../Strapi';
 
 const ONE_MINUTE = 1000 * 60;
 
@@ -14,7 +16,7 @@ interface EE {
     seats?: number;
     type?: string;
   };
-  logger?: Console;
+  logger?: Logger;
 }
 
 const ee: EE = {
@@ -55,7 +57,7 @@ let initialized = false;
 /**
  * Optimistically enable EE if the format of the license is valid, only run once.
  */
-const init = (licenseDir: string, logger?: Console) => {
+const init = (licenseDir: string, logger?: Logger) => {
   if (initialized) {
     return;
   }
@@ -75,7 +77,11 @@ const init = (licenseDir: string, logger?: Console) => {
       enable();
     }
   } catch (error) {
-    disable(error.message);
+    if (error instanceof Error) {
+      disable(error.message);
+    } else {
+      disable('Invalid license.');
+    }
   }
 };
 
@@ -84,25 +90,29 @@ const init = (licenseDir: string, logger?: Console) => {
  *
  * Store the result in database to avoid unecessary requests, and will fallback to that in case of a network failure.
  */
-const onlineUpdate = async ({ strapi }) => {
-  const { get, commit, rollback } = await strapi.db.transaction();
+const onlineUpdate = async ({ strapi }: { strapi: Strapi }) => {
+  const { get, commit, rollback } = (await strapi.db?.transaction()) as any;
   const transaction = get();
 
   try {
     const storedInfo = await strapi.db
-      .queryBuilder('strapi::core-store')
+      ?.queryBuilder('strapi::core-store')
       .where({ key: 'ee_information' })
       .select('value')
       .first()
       .transacting(transaction)
       .forUpdate()
       .execute()
-      .then((result) => (result ? JSON.parse(result.value) : result));
+      .then((result: any) => (result ? JSON.parse(result.value) : result));
 
     const shouldContactRegistry = (storedInfo?.lastCheckAt ?? 0) < Date.now() - ONE_MINUTE;
-    const result = { lastCheckAt: Date.now() };
+    const result: {
+      license?: string | null;
+      error?: string;
+      lastCheckAt?: number;
+    } = { lastCheckAt: Date.now() };
 
-    const fallback = (error) => {
+    const fallback = (error: Error) => {
       if (error instanceof LicenseCheckError && error.shouldFallback && storedInfo?.license) {
         ee.logger?.warn(
           `${error.message} The last stored one will be used as a potential fallback.`
@@ -113,6 +123,10 @@ const onlineUpdate = async ({ strapi }) => {
       result.error = error.message;
       disable(error.message);
     };
+
+    if (!ee?.licenseInfo?.licenseKey) {
+      throw new Error('Missing license key.');
+    }
 
     const license = shouldContactRegistry
       ? await fetchLicense({ strapi }, ee.licenseInfo.licenseKey, strapi.config.get('uuid')).catch(
@@ -139,7 +153,11 @@ const onlineUpdate = async ({ strapi }) => {
           strapi.eventHub.emit('ee.update');
         }
       } catch (error) {
-        disable(error.message);
+        if (error instanceof Error) {
+          disable(error.message);
+        } else {
+          disable('Invalid license.');
+        }
       }
     } else if (!shouldContactRegistry) {
       disable(storedInfo.error);
@@ -147,7 +165,7 @@ const onlineUpdate = async ({ strapi }) => {
 
     if (shouldContactRegistry) {
       result.license = license ?? null;
-      const query = strapi.db.queryBuilder('strapi::core-store').transacting(transaction);
+      const query = strapi.db?.queryBuilder('strapi::core-store').transacting(transaction);
 
       if (!storedInfo) {
         query.insert({ key: 'ee_information', value: JSON.stringify(result) });
@@ -166,6 +184,10 @@ const onlineUpdate = async ({ strapi }) => {
 };
 
 const validateInfo = () => {
+  if (typeof ee.licenseInfo.expireAt === 'undefined') {
+    throw new Error('Missing license key.');
+  }
+
   const expirationTime = new Date(ee.licenseInfo.expireAt).getTime();
 
   if (expirationTime < new Date().getTime()) {
@@ -175,7 +197,7 @@ const validateInfo = () => {
   enable();
 };
 
-const checkLicense = async ({ strapi }) => {
+const checkLicense = async ({ strapi }: { strapi: Strapi }) => {
   const shouldStayOffline =
     ee.licenseInfo.type === 'gold' &&
     // This env variable support is temporarily used to ease the migration between online vs offline
@@ -201,7 +223,7 @@ const list = () => {
   );
 };
 
-const get = (featureName) => list().find((feature) => feature.name === featureName);
+const get = (featureName: string) => list().find((feature) => feature.name === featureName);
 
 export default Object.freeze({
   init,
@@ -218,6 +240,6 @@ export default Object.freeze({
   features: Object.freeze({
     list,
     get,
-    isEnabled: (featureName) => get(featureName) !== undefined,
+    isEnabled: (featureName: string) => get(featureName) !== undefined,
   }),
 });

@@ -1,25 +1,26 @@
-'use strict';
+import _ from 'lodash';
+import delegate from 'delegates';
+import { errors as databaseErrors } from '@strapi/database';
+import {
+  contentTypes as contentTypesUtils,
+  sanitize,
+  errors,
+  relations as relationUtils,
+  convertQueryParams,
+} from '@strapi/utils';
 
-const _ = require('lodash');
-const delegate = require('delegates');
-const { InvalidTimeError, InvalidDateError, InvalidDateTimeError, InvalidRelationError } =
-  require('@strapi/database').errors;
-const { contentTypes: contentTypesUtils, sanitize } = require('@strapi/utils');
-const { ValidationError } = require('@strapi/utils').errors;
-const { isAnyToMany } = require('@strapi/utils').relations;
-const { transformParamsToQuery } = require('@strapi/utils').convertQueryParams;
-const uploadFiles = require('../utils/upload-files');
+import uploadFiles from '../utils/upload-files';
 
-const {
+import {
   omitComponentData,
   getComponents,
   createComponents,
   updateComponents,
   deleteComponents,
   cloneComponents,
-} = require('./components');
-const { pickSelectionParams } = require('./params');
-const { applyTransforms } = require('./attributes');
+} from './components';
+import { pickSelectionParams } from './params';
+import { applyTransforms } from './attributes';
 
 const transformLoadParamsToQuery = (uid, field, params = {}, pagination = {}) => {
   return {
@@ -29,10 +30,10 @@ const transformLoadParamsToQuery = (uid, field, params = {}, pagination = {}) =>
 };
 
 const databaseErrorsToTransform = [
-  InvalidTimeError,
-  InvalidDateTimeError,
-  InvalidDateError,
-  InvalidRelationError,
+  databaseErrors.InvalidTimeError,
+  databaseErrors.InvalidDateTimeError,
+  databaseErrors.InvalidDateError,
+  databaseErrors.InvalidRelationError,
 ];
 
 const creationPipeline = (data, context) => {
@@ -381,7 +382,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
   },
 });
 
-module.exports = (ctx) => {
+export default (ctx) => {
   Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
     ctx.strapi.webhookStore.addAllowedEvent(key, value);
   });

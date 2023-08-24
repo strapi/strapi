@@ -1,6 +1,6 @@
 import koaCors from '@koa/cors';
 
-import type { MiddlewareFactory } from './types';
+import type { Common } from '../types';
 
 export type Config = {
   enabled?: boolean;
@@ -22,7 +22,7 @@ const defaults: Config = {
   keepHeadersOnError: false,
 };
 
-export const cors: MiddlewareFactory<Config> = (config) => {
+export const cors: Common.MiddlewareFactory<Config> = (config) => {
   const { origin, expose, maxAge, credentials, methods, headers, keepHeadersOnError } = {
     ...defaults,
     ...config,
@@ -48,7 +48,7 @@ export const cors: MiddlewareFactory<Config> = (config) => {
 
       const whitelist = Array.isArray(originList) ? originList : originList.split(/\s*,\s*/);
 
-      const requestOrigin = ctx.accept.headers.origin;
+      const requestOrigin = ctx.headers.origin ?? '';
       if (whitelist.includes('*')) {
         return credentials ? requestOrigin : '*';
       }

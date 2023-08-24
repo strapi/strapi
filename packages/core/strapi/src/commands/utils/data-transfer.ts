@@ -4,14 +4,14 @@ import { Option } from 'commander';
 import { engine } from '@strapi/data-transfer';
 
 import { configs, createLogger } from '@strapi/logger';
+import { errors } from '@strapi/utils';
 import ora from 'ora';
-import { TransferEngineInitializationError } from '@strapi/data-transfer/dist/engine/errors';
 import { merge } from 'lodash/fp';
 import { readableBytes, exitWith } from './helpers';
 import strapi from '../../index';
 import { getParseListWithChoices, parseInteger, confirmMessage } from './commander';
 
-const exitMessageText = (process, error = false) => {
+const exitMessageText = (process: string[], error = false) => {
   const processCapitalized = process[0].toUpperCase() + process.slice(1);
 
   if (!error) {
@@ -23,7 +23,7 @@ const exitMessageText = (process, error = false) => {
   return chalk.bold(chalk.red(`${processCapitalized} process failed.`));
 };
 
-const pad = (n) => {
+const pad = (n: number) => {
   return (n < 10 ? '0' : '') + String(n);
 };
 
@@ -117,18 +117,19 @@ const setSignalHandler = async (handler, signals = ['SIGINT', 'SIGTERM', 'SIGQUI
   });
 };
 
-const createStrapiInstance = async (opts = {}) => {
+const createStrapiInstance = async (opts: { logLevel?: string } = {}) => {
   try {
     const appContext = await strapi.compile();
     const app = strapi({ ...opts, ...appContext });
 
     app.log.level = opts.logLevel || 'error';
     return await app.load();
-  } catch (err) {
-    if (err.code === 'ECONNREFUSED') {
+  } catch (error) {
+    if (error instanceof Error && 'code' in error && error.code === 'ECONNREFUSED') {
       throw new Error('Process failed. Check the database connection with your Strapi project.');
     }
-    throw err;
+
+    throw error;
   }
 };
 

@@ -42,6 +42,10 @@ export interface Model {
 }
 
 declare module 'koa' {
+  interface Request extends Koa.BaseRequest {
+    route: RouteInfo;
+  }
+
   interface ExtendableContext {
     ok: (response?: string | object) => Koa.Context;
     created: (response?: string | object) => Koa.Context;
@@ -62,15 +66,4 @@ export interface RouteInfo {
   action: string;
   verb: string;
   plugin: string;
-}
-
-export interface Request extends Koa.Request {
-  body: {
-    data?: string;
-  };
-  route: RouteInfo;
-}
-
-export interface Context extends Koa.ExtendableContext {
-  request: Request;
 }

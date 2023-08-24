@@ -1,19 +1,17 @@
 import type { Strapi } from './Strapi';
 
-export type Resolver = (container: { strapi: Strapi }, args: unknown) => unknown | unknown;
-
 export const createContainer = (strapi: Strapi) => {
-  const registered = new Map<string, Resolver>();
+  const registered = new Map<string, unknown>();
   const resolved = new Map();
 
   return {
-    register<T extends Resolver, U extends string>(name: U, resolver: T) {
+    register<T, U extends string>(name: U, resolver: T) {
       if (registered.has(name)) {
         throw new Error(`Cannot register already registered service ${name}`);
       }
 
       registered.set(name, resolver);
-      return this as typeof this & { [key in U]: T };
+      return this;
     },
 
     get(name: string, args?: unknown) {

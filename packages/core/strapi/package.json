@@ -140,7 +140,7 @@
   "devDependencies": {
     "@types/configstore": "6.0.0",
     "@types/delegates": "1.0.0",
-    "@types/koa": "2.13.8",
+    "@types/koa": "*",
     "@types/koa-compress": "4.0.3",
     "@types/koa-session": "6.4.1",
     "@types/koa-static": "4.0.2",

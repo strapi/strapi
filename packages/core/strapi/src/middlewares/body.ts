@@ -3,8 +3,7 @@ import { defaultsDeep } from 'lodash/fp';
 import body from 'koa-body';
 import mime from 'mime-types';
 import type Koa from 'koa';
-
-import type { MiddlewareFactory } from './types';
+import type { Common } from '../types';
 
 export type Config = body.IKoaBodyOptions;
 
@@ -23,7 +22,7 @@ function getFiles(ctx: Koa.Context) {
   return ctx?.request?.files?.files;
 }
 
-const bodyMiddleware: MiddlewareFactory<Config> = (config, { strapi }) => {
+const bodyMiddleware: Common.MiddlewareFactory<Config> = (config, { strapi }) => {
   const bodyConfig: Config = defaultsDeep(defaults, config);
 
   let gqlEndpoint: string | undefined;

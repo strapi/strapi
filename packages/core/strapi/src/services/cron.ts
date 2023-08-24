@@ -1,5 +1,6 @@
 import { Job } from 'node-schedule';
 import { isFunction } from 'lodash/fp';
+import type { Strapi } from '../Strapi';
 
 interface JobSpec {
   job: Job;
@@ -7,10 +8,12 @@ interface JobSpec {
   name: string | null;
 }
 
+type TaskFn = ({ strapi }: { strapi: Strapi }, ...args: unknown[]) => Promise<unknown>;
+
 type Task =
-  | (() => Promise<void>)
+  | TaskFn
   | {
-      task: () => Promise<void>;
+      task: TaskFn;
       options: string;
     };
 
@@ -27,7 +30,7 @@ const createCronService = () => {
       for (const taskExpression of Object.keys(tasks)) {
         const taskValue = tasks[taskExpression];
 
-        let fn: (...args: unknown[]) => void;
+        let fn: TaskFn;
         let options: string | number | Date;
         let taskName: string | null;
         if (isFunction(taskValue)) {

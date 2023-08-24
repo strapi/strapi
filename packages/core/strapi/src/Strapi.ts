@@ -15,7 +15,7 @@ import { createContainer } from './container';
 import createStrapiFs from './services/fs';
 import createEventHub from './services/event-hub';
 import { createServer } from './services/server';
-import createWebhookRunner from './services/webhook-runner';
+import createWebhookRunner, { WebhookRunner } from './services/webhook-runner';
 import { webhookModel, createWebhookStore } from './services/webhook-store';
 import { createCoreStore, coreStoreModel } from './services/core-store';
 import createEntityService from './services/entity-service';
@@ -115,6 +115,9 @@ const reloader = (strapi: Strapi) => {
 };
 
 /** @implements {import('@strapi/strapi').Strapi} */
+
+type LoadedStrapi = Required<Strapi>;
+
 class Strapi {
   server: ReturnType<typeof createServer>;
 
@@ -130,13 +133,13 @@ class Strapi {
 
   cron: ReturnType<typeof createCronService>;
 
-  webhookRunner: ReturnType<typeof createWebhookRunner>;
+  webhookRunner?: WebhookRunner;
 
-  webhookStore: ReturnType<typeof createWebhookStore>;
+  webhookStore?: ReturnType<typeof createWebhookStore>;
 
-  store: ReturnType<typeof createCoreStore>;
+  store?: ReturnType<typeof createCoreStore>;
 
-  entityValidator: typeof entityValidator;
+  entityValidator?: typeof entityValidator;
 
   entityService?: ReturnType<typeof createEntityService>;
 
@@ -177,19 +180,19 @@ class Strapi {
 
     // Register every Strapi registry in the container
     this.container.register('config', createConfigProvider(appConfig));
-    this.container.register('content-types', contentTypesRegistry(this));
+    this.container.register('content-types', contentTypesRegistry());
     this.container.register('services', servicesRegistry(this));
-    this.container.register('policies', policiesRegistry(this));
-    this.container.register('middlewares', middlewaresRegistry(this));
-    this.container.register('hooks', hooksRegistry(this));
+    this.container.register('policies', policiesRegistry());
+    this.container.register('middlewares', middlewaresRegistry());
+    this.container.register('hooks', hooksRegistry());
     this.container.register('controllers', controllersRegistry(this));
     this.container.register('modules', modulesRegistry(this));
     this.container.register('plugins', pluginsRegistry(this));
     this.container.register('custom-fields', customFieldsRegistry(this));
     this.container.register('apis', apisRegistry(this));
-    this.container.register('auth', createAuth(this));
+    this.container.register('auth', createAuth());
     this.container.register('content-api', createContentAPI(this));
-    this.container.register('sanitizers', sanitizersRegistry(this));
+    this.container.register('sanitizers', sanitizersRegistry());
     this.components = {};
 
     // Create a mapping of every useful directory (for the app, dist and static directories)
@@ -319,6 +322,8 @@ class Strapi {
   }
 
   async destroy() {
+    this.assertIsLoaded();
+
     await this.server.destroy();
     await this.runLifecyclesFunctions(LIFECYCLES.DESTROY);
 
@@ -333,6 +338,8 @@ class Strapi {
 
     process.removeAllListeners();
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     delete global.strapi;
   }
 
@@ -342,19 +349,19 @@ class Strapi {
     // This event is anonymous
     this.telemetry.send('didStartServer', {
       groupProperties: {
-        database: strapi.config.get('database.connection.client'),
-        plugins: Object.keys(strapi.plugins),
+        database: this.config.get('database.connection.client'),
+        plugins: Object.keys(this.plugins),
         numberOfAllContentTypes: _.size(this.contentTypes), // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
         numberOfComponents: _.size(this.components),
         numberOfDynamicZones: getNumberOfDynamicZones(),
-        environment: strapi.config.environment,
+        environment: this.config.environment,
         // TODO: to add back
         // providers: this.config.installedProviders,
       },
     });
   }
 
-  async openAdmin({ isInitialized }) {
+  async openAdmin({ isInitialized }: { isInitialized: boolean }) {
     const shouldOpenAdmin =
       this.config.get('environment') === 'development' &&
       this.config.get('admin.autoOpen', true) !== false;
@@ -382,12 +389,8 @@ class Strapi {
    * Add behaviors to the server
    */
   async listen() {
-    return new Promise((resolve, reject) => {
-      const onListen = async (error) => {
-        if (error) {
-          return reject(error);
-        }
-
+    return new Promise<void>((resolve, reject) => {
+      const onListen = async () => {
         try {
           await this.postListen();
 
@@ -512,8 +515,8 @@ class Strapi {
     const contentTypes = [
       coreStoreModel,
       webhookModel,
-      ...Object.values(strapi.contentTypes),
-      ...Object.values(strapi.components),
+      ...Object.values(this.contentTypes),
+      ...Object.values(this.components),
     ];
 
     this.db = await Database.init({
@@ -532,7 +535,7 @@ class Strapi {
       entityValidator: this.entityValidator,
     });
 
-    if (strapi.config.get('server.cron.enabled', true)) {
+    if (this.config.get('server.cron.enabled', true)) {
       const cronTasks = this.config.get('server.cron.tasks', {});
       this.cron.add(cronTasks);
     }
@@ -550,7 +553,7 @@ class Strapi {
 
     await this.hook('strapi::content-types.beforeSync').call({
       oldContentTypes,
-      contentTypes: strapi.contentTypes,
+      contentTypes: this.contentTypes,
     });
 
     await this.db.schema.sync();
@@ -561,14 +564,14 @@ class Strapi {
 
     await this.hook('strapi::content-types.afterSync').call({
       oldContentTypes,
-      contentTypes: strapi.contentTypes,
+      contentTypes: this.contentTypes,
     });
 
     await this.store.set({
       type: 'strapi',
       name: 'content_types',
       key: 'schema',
-      value: strapi.contentTypes,
+      value: this.contentTypes,
     });
 
     await this.startWebhooks();
@@ -591,26 +594,32 @@ class Strapi {
 
     this.isLoaded = true;
 
-    return this;
+    return this as this & Required<Strapi>;
   }
 
   async startWebhooks() {
+    this.assertIsLoaded();
+
     const webhooks = await this.webhookStore.findWebhooks();
-    webhooks.forEach((webhook) => this.webhookRunner.add(webhook));
+    for (const webhook of webhooks) {
+      this.webhookRunner.add(webhook);
+    }
   }
 
   async runLifecyclesFunctions(lifecycleName: 'register' | 'bootstrap' | 'destroy') {
+    this.assertIsLoaded();
+
     // plugins
     await this.container.get('modules')[lifecycleName]();
 
     // admin
-    const adminLifecycleFunction = this.admin && this.admin[lifecycleName];
+    const adminLifecycleFunction = this.admin[lifecycleName];
     if (isFunction(adminLifecycleFunction)) {
       await adminLifecycleFunction({ strapi: this });
     }
 
     // user
-    const userLifecycleFunction = this.app && this.app[lifecycleName];
+    const userLifecycleFunction = this.app[lifecycleName];
     if (isFunction(userLifecycleFunction)) {
       await userLifecycleFunction({ strapi: this });
     }
@@ -620,11 +629,18 @@ class Strapi {
     return this.contentTypes[uid] || this.components[uid];
   }
 
+  assertIsLoaded(): asserts this is LoadedStrapi {
+    if (!this.isLoaded) {
+      throw new Error('Strapi is not loaded');
+    }
+  }
+
   /**
    * Binds queries with a specific model
    * @param {string} uid
    */
   query(uid: Common.UID.ContentType | Common.UID.Component) {
+    this.assertIsLoaded();
     return this.db.query(uid);
   }
 }
