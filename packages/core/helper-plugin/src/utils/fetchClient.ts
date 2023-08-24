@@ -24,7 +24,7 @@ const fetchClient = (): AxiosInstance => {
     (error) => Promise.reject(error)
   );
 
-  // Add a response interceptor, let pass the response, and if error is 401, clear the app storage and reload the page
+  // Add a response interceptor to return the response or handle the error
   instance.interceptors.response.use(
     (response) => response,
     (error) => {
