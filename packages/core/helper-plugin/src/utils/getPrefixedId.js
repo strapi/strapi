@@ -1,14 +1,6 @@
 const ERROR_PREFIX = 'apiError.';
 
-/**
- * Prefix message with with 'apiError.'
- *
- * @export
- * @param {string} message
- * @param {(prefixedMessage: string) => string} [callback]
- * @return {string}
- */
-export function getPrefixedId(message: string, callback?: (prefixedMessage: string) => string) {
+export function getPrefixedId(message, callback) {
   const prefixedMessage = `${ERROR_PREFIX}${message}`;
 
   // if a prefix function has been passed in it is used to
