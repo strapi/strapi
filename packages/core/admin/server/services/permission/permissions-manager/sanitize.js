@@ -73,7 +73,7 @@ module.exports = ({ action, ability, model }) => {
     const sanitizeSort = pipeAsync(
       traverseQuerySort(removeDisallowedFields(permittedFields), { schema }),
       traverseQuerySort(omitDisallowedAdminUserFields, { schema }),
-      traverse.traverseQuerySort(omitHiddenFields, { schema }),
+      traverseQuerySort(omitHiddenFields, { schema }),
       traverseQuerySort(removePassword, { schema }),
       traverseQuerySort(
         ({ key, attribute, value }, { remove }) => {
