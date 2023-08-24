@@ -58,6 +58,7 @@ module.exports = ({ action, ability, model }) => {
     const sanitizeFilters = pipeAsync(
       traverseQueryFilters(removeDisallowedFields(permittedFields), { schema }),
       traverseQueryFilters(omitDisallowedAdminUserFields, { schema }),
+      traverseQueryFilters(omitHiddenFields, { schema }),
       traverseQueryFilters(removePassword, { schema }),
       traverseQueryFilters(
         ({ key, value }, { remove }) => {
@@ -72,6 +73,7 @@ module.exports = ({ action, ability, model }) => {
     const sanitizeSort = pipeAsync(
       traverseQuerySort(removeDisallowedFields(permittedFields), { schema }),
       traverseQuerySort(omitDisallowedAdminUserFields, { schema }),
+      traverseQuerySort(omitHiddenFields, { schema }),
       traverseQuerySort(removePassword, { schema }),
       traverseQuerySort(
         ({ key, attribute, value }, { remove }) => {
@@ -86,11 +88,13 @@ module.exports = ({ action, ability, model }) => {
     const sanitizePopulate = pipeAsync(
       traverseQueryPopulate(removeDisallowedFields(permittedFields), { schema }),
       traverseQueryPopulate(omitDisallowedAdminUserFields, { schema }),
+      traverseQueryPopulate(omitHiddenFields, { schema }),
       traverseQueryPopulate(removePassword, { schema })
     );
 
     const sanitizeFields = pipeAsync(
       traverseQueryFields(removeDisallowedFields(permittedFields), { schema }),
+      traverseQueryFields(omitHiddenFields, { schema }),
       traverseQueryFields(removePassword, { schema })
     );
 
@@ -258,13 +262,21 @@ module.exports = ({ action, ability, model }) => {
   };
 
   const getQueryFields = (fields = []) => {
+    const nonVisibleAttributes = getNonVisibleAttributes(schema);
+    const writableAttributes = getWritableAttributes(schema);
+
+    const nonVisibleWritableAttributes = intersection(nonVisibleAttributes, writableAttributes);
+
     return uniq([
       ...fields,
       ...STATIC_FIELDS,
       ...COMPONENT_FIELDS,
+      ...nonVisibleWritableAttributes,
       CREATED_AT_ATTRIBUTE,
       UPDATED_AT_ATTRIBUTE,
       PUBLISHED_AT_ATTRIBUTE,
+      CREATED_BY_ATTRIBUTE,
+      UPDATED_BY_ATTRIBUTE,
     ]);
   };
 
