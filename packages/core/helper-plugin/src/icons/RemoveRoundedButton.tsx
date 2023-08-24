@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { IconButton } from '@strapi/design-system';
+import { IconButton, IconButtonProps } from '@strapi/design-system';
 import { Minus } from '@strapi/icons';
 import styled from 'styled-components';
 
@@ -23,6 +23,8 @@ const StyledIconButton = styled(IconButton)(
 `
 );
 
-const RemoveRoundedButton = (props) => <StyledIconButton icon={<Minus />} {...props} />;
+const RemoveRoundedButton = (props: IconButtonProps) => (
+  <StyledIconButton icon={<Minus />} {...props} />
+);
 
 export { RemoveRoundedButton };
