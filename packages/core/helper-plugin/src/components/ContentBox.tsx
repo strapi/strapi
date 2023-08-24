@@ -1,7 +1,7 @@
 import { Flex, FlexProps, Typography } from '@strapi/design-system';
 import styled from 'styled-components';
 
-export interface ContextBoxProps {
+export interface ContentBoxProps {
   title?: string;
   subtitle?: string;
   icon?: FlexProps['children'];
@@ -29,7 +29,7 @@ const ContentBox = ({
   iconBackground,
   endAction,
   titleEllipsis = false,
-}: ContextBoxProps) => {
+}: ContentBoxProps) => {
   if (title && title.length > 70 && titleEllipsis) {
     title = `${title.substring(0, 70)}...`;
   }
