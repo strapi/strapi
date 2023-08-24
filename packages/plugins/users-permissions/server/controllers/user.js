@@ -15,14 +15,14 @@ const { sanitize } = utils;
 const { ApplicationError, ValidationError, NotFoundError } = utils.errors;
 
 const sanitizeOutput = async (user, ctx) => {
-  const schema = strapi.contentType('plugin::users-permissions.user');
+  const schema = strapi.getModel('plugin::users-permissions.user');
   const { auth } = ctx.state;
 
   return sanitize.contentAPI.output(user, schema, { auth });
 };
 
 const sanitizeQuery = async (query, ctx) => {
-  const schema = strapi.contentType('plugin::users-permissions.user');
+  const schema = strapi.getModel('plugin::users-permissions.user');
   const { auth } = ctx.state;
 
   return sanitize.contentAPI.query(query, schema, { auth });

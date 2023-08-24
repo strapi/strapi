@@ -10,13 +10,13 @@ const { sanitize } = utils;
 const { ValidationError } = utils.errors;
 
 const sanitizeOutput = (data, ctx) => {
-  const schema = strapi.contentType(FILE_MODEL_UID);
+  const schema = strapi.getModel(FILE_MODEL_UID);
   const { auth } = ctx.state;
 
   return sanitize.contentAPI.output(data, schema, { auth });
 };
 const sanitizeQuery = (data, ctx) => {
-  const schema = strapi.contentType(FILE_MODEL_UID);
+  const schema = strapi.getModel(FILE_MODEL_UID);
   const { auth } = ctx.state;
 
   return sanitize.contentAPI.query(data, schema, { auth });
