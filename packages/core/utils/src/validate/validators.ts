@@ -29,9 +29,15 @@ const defaultValidateFilters = curry((schema: Model, filters: unknown) => {
     // keys that are not attributes or valid operators
     traverseQueryFilters(
       ({ key, attribute }) => {
+        // ID is not an attribute per se, so we need to make
+        // an extra check to ensure we're not removing it
+        if (key === 'id') {
+          return;
+        }
+
         const isAttribute = !!attribute;
 
-        if (!isAttribute && !isOperator(key) && key !== 'id') {
+        if (!isAttribute && !isOperator(key)) {
           throwInvalidParam({ key });
         }
       },
@@ -61,6 +67,7 @@ const defaultValidateSort = curry((schema: Model, sort: unknown) => {
   if (!schema) {
     throw new Error('Missing schema in defaultValidateSort');
   }
+
   return pipeAsync(
     // non attribute keys
     traverseQuerySort(
@@ -88,6 +95,12 @@ const defaultValidateSort = curry((schema: Model, sort: unknown) => {
     // keys for empty non-scalar values
     traverseQuerySort(
       ({ key, attribute, value }) => {
+        // ID is not an attribute per se, so we need to make
+        // an extra check to ensure we're not removing it
+        if (key === 'id') {
+          return;
+        }
+
         if (!isScalarAttribute(attribute) && isEmpty(value)) {
           throwInvalidParam({ key });
         }
@@ -108,6 +121,7 @@ const defaultValidateFields = curry((schema: Model, fields: unknown) => {
         if (key === 'id') {
           return;
         }
+
         if (isNil(attribute) || !isScalarAttribute(attribute)) {
           throwInvalidParam({ key });
         }

@@ -1,4 +1,4 @@
-import { isArray } from 'lodash/fp';
+import { isArray, isString } from 'lodash/fp';
 import type { Visitor } from '../../traverse/factory';
 import { throwInvalidParam } from '../utils';
 

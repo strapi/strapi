@@ -20,22 +20,13 @@ export default (auth: unknown): Visitor =>
     }
 
     const handleMorphRelation = async () => {
-      const newMorphValue: Record<string, unknown>[] = [];
-
       for (const element of (data as Record<string, MorphArray>)[key]) {
         const scopes = ACTIONS_TO_VERIFY.map((action) => `${element.__type}.${action}`);
         const isAllowed = await hasAccessToSomeScopes(scopes, auth);
 
-        if (isAllowed) {
-          newMorphValue.push(element);
+        if (!isAllowed) {
+          throwInvalidParam({ key });
         }
-      }
-
-      // If the new value is empty
-      if (newMorphValue.length === 0) {
-        throwInvalidParam({ key });
-      } else {
-        set(key, newMorphValue);
       }
     };
 

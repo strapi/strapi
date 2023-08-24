@@ -113,6 +113,12 @@ const defaultSanitizeSort = curry((schema: Model, sort: unknown) => {
     // Remove keys for empty non-scalar values
     traverseQuerySort(
       ({ key, attribute, value }, { remove }) => {
+        // ID is not an attribute per se, so we need to make
+        // an extra check to ensure we're not removing it
+        if (key === 'id') {
+          return;
+        }
+
         if (!isScalarAttribute(attribute) && isEmpty(value)) {
           remove(key);
         }
@@ -135,6 +141,7 @@ const defaultSanitizeFields = curry((schema: Model, fields: unknown) => {
         if (key === 'id') {
           return;
         }
+
         if (isNil(attribute) || !isScalarAttribute(attribute)) {
           remove(key);
         }

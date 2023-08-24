@@ -1,4 +1,4 @@
-import { isArray, isNil, toPath } from 'lodash/fp';
+import { isArray, isNil, isString, toPath } from 'lodash/fp';
 import type { Visitor } from '../../traverse/factory';
 
 export default (allowedFields: string[] | null = null): Visitor =>
@@ -8,9 +8,11 @@ export default (allowedFields: string[] | null = null): Visitor =>
       return;
     }
 
-    // Ignore invalid formats
-    if (!isArray(allowedFields)) {
-      return;
+    // Throw on invalid formats
+    if (!(isArray(allowedFields) && allowedFields.every(isString))) {
+      throw new TypeError(
+        `Expected array of strings for allowedFields but got "${typeof allowedFields}"`
+      );
     }
 
     if (isNil(path)) {
