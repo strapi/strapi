@@ -2,21 +2,23 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { useQueries } from 'react-query';
 
-import { useRBACProvider } from '../features/RBAC';
+import { useRBACProvider, Permission } from '../features/RBAC';
 
 import { useFetchClient } from './useFetchClient';
 
-/**
- * @typedef {Object} Permission
- * @property {string} action
- * @property {string} subject
- * @property {string[]} conditions
- */
+type DefaultAllowedActions = {
+  name: string;
+  hasPermission: boolean;
+}[];
 
-/**
- * @type {(permissionsToCheck: Record<string, Permission[]>, passedPermissions?: Permission[]) => { allowedActions: Record<string, boolean>, isLoading: boolean, setIsLoading: () => void }}
- */
-export const useRBAC = (permissionsToCheck, passedPermissions) => {
+interface AllowedAction {
+  [key: string]: boolean;
+}
+
+export const useRBAC = (
+  permissionsToCheck: Record<string, Permission[]>,
+  passedPermissions?: Permission[]
+): { allowedActions: Record<string, boolean>; isLoading: boolean; setIsLoading: () => void } => {
   const [internalIsLoading, setInternalIsLoading] = useState(false);
   /**
    * This is the default value we return until the queryResults[i].data
@@ -106,14 +108,14 @@ export const useRBAC = (permissionsToCheck, passedPermissions) => {
    * until all the checks were complete.
    */
   const allowedActions = (
-    data.some((res) => res === undefined) ? defaultAllowedActions : data
+    data.some((res) => res === undefined) ? defaultAllowedActions : (data as DefaultAllowedActions)
   ).reduce((acc, { name, hasPermission }) => {
     acc[`can${capitalize(name)}`] = hasPermission;
 
     return acc;
-  }, {});
+  }, {} as AllowedAction);
 
   return { allowedActions, isLoading, setIsLoading };
 };
 
-const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);

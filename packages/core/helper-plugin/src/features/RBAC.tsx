@@ -1,36 +1,25 @@
 import * as React from 'react';
 
-/**
- * @preserve
- * @typedef {Object} Permission
- * @property {string} action
- * @property {unknown[]} conditions
- * @property {number} id
- * @property {Record<string, unknown>} properties
- * @property {string} subject
- */
+interface Permission {
+  action: string;
+  conditions: unknown[];
+  id: number;
+  properties: Record<string, unknown>;
+  subject: string;
+}
 
-/**
- * @preserve
- * @typedef {import('react-query').QueryObserverBaseResult<Permission[]>['refetch']} RefetchPermissionsFn
- */
+type RefetchPermissionsFn = import('react-query').QueryObserverBaseResult<Permission[]>['refetch'];
 
 /* -------------------------------------------------------------------------------------------------
  * Context
  * -----------------------------------------------------------------------------------------------*/
 
-/**
- * @preserve
- * @typedef {Object} RBACContextValue
- * @property {Permission[]} allPermissions – The permissions of the current user.
- * @property {RefetchPermissionsFn} refetchPermissions
- */
+type RBACContextValue = {
+  allPermissions: Permission[]; // The permissions of the current user.
+  refetchPermissions: RefetchPermissionsFn;
+};
 
-/**
- * @preserve
- * @type {React.Context<RBACContextValue>}
- */
-const RBACContext = React.createContext();
+const RBACContext: React.Context<RBACContextValue> = React.createContext({} as RBACContextValue);
 
 /**
  * @deprecated Use RBACContext instead.
@@ -49,12 +38,8 @@ const RBACProviderContext = RBACContext;
  * Hook
  * -----------------------------------------------------------------------------------------------*/
 
-/**
- * @preserve
- * @returns {RBACContextValue}
- */
 const useRBAC = () => React.useContext(RBACContext);
 
 const useRBACProvider = useRBAC;
 
-export { RBACContext, RBACProviderContext, useRBACProvider };
+export { RBACContext, RBACProviderContext, useRBACProvider, Permission };
