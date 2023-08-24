@@ -116,6 +116,7 @@ window.URL.createObjectURL = jest
 
 document.createRange = () => {
   const range = new Range();
+  // @ts-expect-error we don't need to implement all the methods
   range.getClientRects = jest.fn(() => ({
     item: () => null,
     length: 0,

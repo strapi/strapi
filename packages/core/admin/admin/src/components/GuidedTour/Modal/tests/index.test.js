@@ -7,7 +7,7 @@ import { IntlProvider } from 'react-intl';
 
 import Theme from '../../../Theme';
 import ThemeToggleProvider from '../../../ThemeToggleProvider';
-import GuidedTourModal from '../index';
+import { GuidedTourModal } from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),

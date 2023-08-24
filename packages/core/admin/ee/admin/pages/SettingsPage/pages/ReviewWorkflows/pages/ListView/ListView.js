@@ -35,7 +35,7 @@ import styled from 'styled-components';
 
 import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
 import { selectAdminPermissions } from '../../../../../../../../admin/src/pages/App/selectors';
-import { useLicenseLimits } from '../../../../../../hooks';
+import { useLicenseLimits } from '../../../../../../hooks/useLicenseLimits';
 import * as Layout from '../../components/Layout';
 import * as LimitsModal from '../../components/LimitsModal';
 import { CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME } from '../../constants';
