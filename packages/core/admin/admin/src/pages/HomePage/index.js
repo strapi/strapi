@@ -89,7 +89,7 @@ export const HomePageCE = () => {
   );
 };
 
-function HomePageSwitch() {
+export function HomePage() {
   const HomePage = useEnterprise(
     HomePageCE,
     // eslint-disable-next-line import/no-cycle
@@ -103,5 +103,3 @@ function HomePageSwitch() {
 
   return <HomePage />;
 }
-
-export default HomePageSwitch;

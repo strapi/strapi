@@ -61,7 +61,7 @@ function renderDraglayerItem({ type, item }) {
   }
 }
 
-const App = () => {
+export const ContentManger = () => {
   const contentTypeMatch = useRouteMatch(`/content-manager/:kind/:uid`);
   const { status, collectionTypeLinks, singleTypeLinks, models, refetchData } =
     useContentManagerInitData();
@@ -123,6 +123,10 @@ const App = () => {
 
   return (
     <Layout sideNav={<LeftMenu />}>
+      <Helmet
+        title={formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Content Manager' })}
+      />
+
       <DragLayer renderItem={renderDraglayerItem} />
       <ModelsContext.Provider value={{ refetchData }}>
         <Switch>
@@ -149,18 +153,3 @@ const App = () => {
     </Layout>
   );
 };
-
-export { App };
-
-export default function () {
-  const { formatMessage } = useIntl();
-
-  return (
-    <>
-      <Helmet
-        title={formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Content Manager' })}
-      />
-      <App />
-    </>
-  );
-}

@@ -4,13 +4,15 @@ export type True = true;
 export type False = false;
 export type BooleanValue = True | False;
 
-export type IsNever<TValue> = [TValue] extends [never] ? True : False;
+export type IsNever<TValue> = StrictEqual<TValue, never>;
 
 export type IsNotNever<TValue> = Not<IsNever<TValue>>;
 
 export type IsTrue<TValue> = [TValue] extends [True] ? True : False;
 
 export type IsFalse<TValue> = [TValue] extends [False] ? True : False;
+
+export type StrictEqual<TValue, TMatch> = And<Extends<TValue, TMatch>, Extends<TMatch, TValue>>;
 
 export type Extends<TLeft, TRight> = [TLeft] extends [TRight] ? True : False;
 
@@ -37,17 +39,29 @@ export type MatchFirst<TTests extends Test[], TDefault = never> = TTests extends
     : never
   : never;
 
-export type MatchAll<TTests extends Test[], TDefault = never> = TTests extends [
+export type MatchAllUnion<TTests extends Test[], TDefault = never> = TTests extends [
   infer THead extends Test,
   ...infer TTail extends Test[]
 ]
   ? THead extends Test<infer TExpression, infer TValue>
     ? Utils.Guard.Never<
-        If<TExpression, TValue> | If<Utils.Array.IsNotEmpty<TTail>, MatchAll<TTail, TDefault>>,
+        If<TExpression, TValue> | If<Utils.Array.IsNotEmpty<TTail>, MatchAllUnion<TTail, TDefault>>,
         TDefault
       >
     : never
   : never;
+
+export type MatchAllIntersect<TTests extends Test[], TDefault = unknown> = TTests extends [
+  infer THead extends Test,
+  ...infer TTail extends Test[]
+]
+  ? THead extends Test<infer TExpression, infer TValue>
+    ? // Actual test case evaluation
+      If<TExpression, TValue, TDefault> &
+        // Recursion / End of recursion
+        If<Utils.Array.IsNotEmpty<TTail>, MatchAllIntersect<TTail, TDefault>, TDefault>
+    : TDefault
+  : TDefault;
 
 export type Test<TExpression extends BooleanValue = BooleanValue, TValue = unknown> = [
   TExpression,
@@ -68,11 +82,10 @@ export type Every<TExpressions extends BooleanValue[]> = TExpressions extends [
   ? If<Utils.Array.IsNotEmpty<TTail>, And<THead, Every<TTail>>, And<THead, True>>
   : never;
 
-export type And<TLeft extends BooleanValue, TRight extends BooleanValue> = Extends<
-  Extends<TLeft, True> | Extends<TRight, True>,
-  True
+export type And<TLeft extends BooleanValue, TRight extends BooleanValue> = IsTrue<
+  IsTrue<TLeft> | IsTrue<TRight>
 >;
 
 export type Or<TLeft extends BooleanValue, TRight extends BooleanValue> = Not<
-  Extends<Extends<TLeft, True> | Extends<TRight, True>, False>
+  IsFalse<IsTrue<TLeft> | IsTrue<TRight>>
 >;

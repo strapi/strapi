@@ -56,20 +56,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   useAppInfo: jest.fn(() => ({ shouldUpdateStrapi: false, latestStrapiReleaseTag: 'v3.6.8' })),
   useNotification: jest.fn(() => jest.fn()),
   useRBAC: jest.fn(() => ({ allowedActions: { canRead: true, canUpdate: true } })),
-  useFetchClient: jest.fn().mockReturnValue({
-    get: jest.fn().mockResolvedValue({
-      data: {
-        menuLogo: {
-          ext: 'png',
-          height: 256,
-          name: 'image.png',
-          size: 27.4,
-          url: 'uploads/image_fe95c5abb9.png',
-          width: 246,
-        },
-      },
-    }),
-  }),
 }));
 
 jest.mock('../../../../../hooks', () => ({
@@ -127,9 +113,9 @@ describe('Application page', () => {
   afterAll(() => server.close());
 
   it('should not display link upgrade version if not necessary', async () => {
-    const { queryByText } = setup();
+    const { queryByText, getByTestId } = setup();
 
-    await waitForElementToBeRemoved(() => queryByText('Loading'));
+    await waitForElementToBeRemoved(() => getByTestId('loader'));
 
     expect(queryByText('Upgrade your admin panel')).not.toBeInTheDocument();
   });
@@ -141,18 +127,18 @@ describe('Application page', () => {
       strapiVersion: '4.0.0',
     });
 
-    const { getByText, queryByText } = setup();
+    const { getByText, getByTestId } = setup();
 
-    await waitForElementToBeRemoved(() => queryByText('Loading'));
+    await waitForElementToBeRemoved(() => getByTestId('loader'));
 
     expect(getByText('v4.0.0')).toBeInTheDocument();
     expect(getByText('Upgrade your admin panel')).toBeInTheDocument();
   });
 
   it('should render logo input if read permissions', async () => {
-    const { queryByText } = setup();
+    const { queryByText, getByTestId } = setup();
 
-    await waitForElementToBeRemoved(() => queryByText('Loading'));
+    await waitForElementToBeRemoved(() => getByTestId('loader'));
 
     expect(queryByText('Menu logo')).toBeInTheDocument();
   });
@@ -167,9 +153,9 @@ describe('Application page', () => {
   });
 
   it('should render save button if update permissions', async () => {
-    const { queryByText } = setup();
+    const { queryByText, getByTestId } = setup();
 
-    await waitForElementToBeRemoved(() => queryByText('Loading'));
+    await waitForElementToBeRemoved(() => getByTestId('loader'));
 
     expect(queryByText('Save')).toBeInTheDocument();
   });
@@ -177,9 +163,9 @@ describe('Application page', () => {
   it('should not render save button if no update permissions', async () => {
     useRBAC.mockReturnValue({ allowedActions: { canRead: true, canUpdate: false } });
 
-    const { queryByText } = setup();
+    const { queryByText, getByTestId } = setup();
 
-    await waitForElementToBeRemoved(() => queryByText('Loading'));
+    await waitForElementToBeRemoved(() => getByTestId('loader'));
 
     expect(queryByText('Save')).not.toBeInTheDocument();
   });
@@ -187,9 +173,9 @@ describe('Application page', () => {
   it('should update project settings on save', async () => {
     useRBAC.mockReturnValue({ allowedActions: { canRead: true, canUpdate: true } });
 
-    const { getByRole, queryByText } = setup();
+    const { getByRole, getByTestId } = setup();
 
-    await waitForElementToBeRemoved(() => queryByText('Loading'));
+    await waitForElementToBeRemoved(() => getByTestId('loader'));
 
     fireEvent.click(getByRole('button', { name: 'Save' }));
 
