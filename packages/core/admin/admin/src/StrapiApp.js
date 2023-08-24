@@ -2,55 +2,73 @@ import * as React from 'react';
 
 import { darkTheme, lightTheme } from '@strapi/design-system';
 import invariant from 'invariant';
-import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
-import pick from 'lodash/pick';
 import { Helmet } from 'react-helmet';
 import { BrowserRouter } from 'react-router-dom';
 
-import Logo from './assets/images/logo-strapi-2022.svg';
-import localStorageKey from './components/LanguageProvider/utils/localStorageKey';
-import Providers from './components/Providers';
+import faviconSrc from './assets/favicon.png';
+import logoSrc from './assets/images/logo-strapi-2022.svg';
+import { Providers } from './components/Providers';
+import { APP_REDUCERS, INJECTION_ZONES, LANGUAGE_MAP, LOCALE_LOCALSTORAGE_KEY } from './constants';
 import { customFields, Plugin } from './core/apis';
-import configureStore from './core/store/configureStore';
-import { basename, createHook } from './core/utils';
+import { configureStore } from './core/store/configureStore';
+import { createHook } from './core/utils';
 import {
   INJECT_COLUMN_IN_TABLE,
   MUTATE_COLLECTION_TYPES_LINKS,
   MUTATE_EDIT_VIEW_LAYOUT,
   MUTATE_SINGLE_TYPES_LINKS,
 } from './exposedHooks';
-import favicon from './favicon.png';
-import injectionZones from './injectionZones';
 import { App } from './pages/App';
-import languageNativeNames from './translations/languageNativeNames';
 
-class StrapiApp {
-  constructor({ adminConfig, appPlugins, library, middlewares, reducers }) {
-    this.customConfigurations = adminConfig.config;
-    this.customBootstrapConfiguration = adminConfig.bootstrap;
-    this.configurations = {
-      authLogo: Logo,
-      head: { favicon },
-      locales: ['en'],
-      menuLogo: Logo,
-      notifications: { releases: true },
-      themes: { light: lightTheme, dark: darkTheme },
-      translations: {},
-      tutorials: true,
+export class StrapiApp {
+  constructor({ configuration, corePlugins = {} } = {}) {
+    this.customBootstrap = configuration?.bootstrap;
+    this.configuration = {
+      // TODO: we should unify the internal and configuration path
+      authLogo: configuration?.config?.auth?.logo ?? logoSrc,
+      head: { favicon: configuration?.config?.head?.favicon ?? faviconSrc },
+      locales: [
+        'en',
+        ...(configuration?.config?.locales ?? []).filter((locale) => locale !== 'en'),
+      ],
+      // TODO: we should unify the internal and configuration path
+      menuLogo: configuration?.config?.menu?.logo ?? logoSrc,
+      notifications: { releases: configuration?.config?.notifications?.releases ?? true },
+      themes: {
+        light: lightTheme,
+        dark: darkTheme,
+      },
+      translations: configuration?.config?.translations ?? {},
+      tutorials: configuration?.config?.tutorials ?? true,
     };
-    this.appPlugins = appPlugins || {};
-    this.library = library;
-    this.middlewares = middlewares;
+
+    // legacy way of overwriting themes
+    if (
+      configuration?.config?.theme &&
+      !configuration.config.theme?.dark &&
+      !configuration.config.theme?.light
+    ) {
+      console.warn(
+        `[deprecated] In future versions, Strapi will stop supporting this theme customization syntax. The theme configuration accepts a light and a dark key to customize each theme separately. See https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#theme-extension.`
+      );
+
+      merge(this.configuration.themes.light, configuration.theme);
+    } else {
+      merge(this.configuration.themes.light, configuration?.config.theme?.light ?? {});
+      merge(this.configuration.themes.dark, configuration?.config?.theme?.dark ?? {});
+    }
+
+    this.corePlugins = corePlugins;
     this.plugins = {};
-    this.reducers = reducers;
+    this.components = {};
+    this.fields = {};
+    this.middlewares = [];
+    this.reducers = APP_REDUCERS;
     this.translations = {};
     this.hooksDict = {};
-    this.admin = {
-      injectionZones,
-    };
+    this.injectionZones = INJECTION_ZONES;
     this.customFields = customFields;
-
     this.menu = [];
     this.settings = {
       global: {
@@ -64,40 +82,39 @@ class StrapiApp {
     };
   }
 
-  addComponents = (components) => {
-    if (Array.isArray(components)) {
-      components.map((compo) => this.library.components.add(compo));
-    } else {
-      this.library.components.add(components);
+  addComponents = (defaultComponents) => {
+    let components = defaultComponents;
+
+    if (!Array.isArray(components)) {
+      components = [defaultComponents];
     }
+
+    components.forEach((component) => {
+      const { name, Component } = component;
+
+      invariant(Component, 'A Component must be provided');
+      invariant(name, 'A name must be provided');
+      invariant(this.components[name] === undefined, 'A similar field already exists');
+
+      this.components[name] = Component;
+    });
   };
 
-  addCorePluginMenuLink = (link) => {
-    const stringifiedLink = JSON.stringify(link);
+  addFields = (defaultFields) => {
+    let fields = defaultFields;
 
-    invariant(link.to, `link.to should be defined for ${stringifiedLink}`);
-    invariant(
-      typeof link.to === 'string',
-      `Expected link.to to be a string instead received ${typeof link.to}`
-    );
-    invariant(
-      ['/plugins/content-type-builder', '/plugins/upload'].includes(link.to),
-      'This method is not available for your plugin'
-    );
-    invariant(
-      link.intlLabel?.id && link.intlLabel?.defaultMessage,
-      `link.intlLabel.id & link.intlLabel.defaultMessage for ${stringifiedLink}`
-    );
-
-    this.menu.push(link);
-  };
-
-  addFields = (fields) => {
-    if (Array.isArray(fields)) {
-      fields.map((field) => this.library.fields.add(field));
-    } else {
-      this.library.fields.add(fields);
+    if (!Array.isArray(fields)) {
+      fields = [fields];
     }
+
+    fields.forEach((field) => {
+      const { type, Component } = field;
+
+      invariant(Component, 'A Component must be provided');
+      invariant(type, 'A type must be provided');
+
+      this.fields[type] = Component;
+    });
   };
 
   addMenuLink = (link) => {
@@ -142,13 +159,13 @@ class StrapiApp {
 
   addMiddlewares = (middlewares) => {
     middlewares.forEach((middleware) => {
-      this.middlewares.add(middleware);
+      this.middlewares.push(middleware);
     });
   };
 
   addReducers = (reducers) => {
-    Object.keys(reducers).forEach((reducerName) => {
-      this.reducers.add(reducerName, reducers[reducerName]);
+    Object.entries(reducers).forEach(([name, reducerFn]) => {
+      this.reducers[name] = reducerFn;
     });
   };
 
@@ -196,12 +213,11 @@ class StrapiApp {
     });
   };
 
-  async bootstrap() {
-    Object.keys(this.appPlugins).forEach((plugin) => {
-      const bootstrap = this.appPlugins[plugin].bootstrap;
-
-      if (bootstrap) {
-        bootstrap({
+  bootstrap() {
+    // Call bootstrap callback of each core plugin
+    Object.values(this.corePlugins).forEach((plugin) => {
+      if (plugin.bootstrap) {
+        plugin.bootstrap({
           addSettingsLink: this.addSettingsLink,
           addSettingsLinks: this.addSettingsLinks,
           getPlugin: this.getPlugin,
@@ -212,8 +228,11 @@ class StrapiApp {
       }
     });
 
-    if (isFunction(this.customBootstrapConfiguration)) {
-      this.customBootstrapConfiguration({
+    // Call a custom bootstrap function that might be defined
+    // as part of an admin panel customization.
+    // See https://docs.strapi.io/dev-docs/admin-panel-customization
+    if (typeof this.customBootstrap === 'function') {
+      this.customBootstrap({
         addComponents: this.addComponents,
         addFields: this.addFields,
         addMenuLink: this.addMenuLink,
@@ -227,62 +246,6 @@ class StrapiApp {
       });
     }
   }
-
-  bootstrapAdmin = async () => {
-    await this.createCustomConfigurations();
-
-    this.createHook(INJECT_COLUMN_IN_TABLE);
-    this.createHook(MUTATE_COLLECTION_TYPES_LINKS);
-    this.createHook(MUTATE_SINGLE_TYPES_LINKS);
-    this.createHook(MUTATE_EDIT_VIEW_LAYOUT);
-
-    return Promise.resolve();
-  };
-
-  createCustomConfigurations = async () => {
-    if (this.customConfigurations?.locales) {
-      this.configurations.locales = [
-        'en',
-        ...(this.customConfigurations.locales?.filter((loc) => loc !== 'en') || []),
-      ];
-    }
-
-    if (this.customConfigurations?.auth?.logo) {
-      this.configurations.authLogo = this.customConfigurations.auth.logo;
-    }
-
-    if (this.customConfigurations?.menu?.logo) {
-      this.configurations.menuLogo = this.customConfigurations.menu.logo;
-    }
-
-    if (this.customConfigurations?.head?.favicon) {
-      this.configurations.head.favicon = this.customConfigurations.head.favicon;
-    }
-
-    if (this.customConfigurations?.theme) {
-      const darkTheme = this.customConfigurations.theme.dark;
-      const lightTheme = this.customConfigurations.theme.light;
-
-      if (!darkTheme && !lightTheme) {
-        console.warn(
-          `[deprecated] In future versions, Strapi will stop supporting this theme customization syntax. The theme configuration accepts a light and a dark key to customize each theme separately. See https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#theme-extension.`
-        );
-        merge(this.configurations.themes.light, this.customConfigurations.theme);
-      }
-
-      if (lightTheme) merge(this.configurations.themes.light, lightTheme);
-
-      if (darkTheme) merge(this.configurations.themes.dark, darkTheme);
-    }
-
-    if (this.customConfigurations?.notifications?.releases !== undefined) {
-      this.configurations.notifications.releases = this.customConfigurations.notifications.releases;
-    }
-
-    if (this.customConfigurations?.tutorials !== undefined) {
-      this.configurations.tutorials = this.customConfigurations.tutorials;
-    }
-  };
 
   createHook = (name) => {
     this.hooksDict[name] = createHook();
@@ -305,15 +268,9 @@ class StrapiApp {
     });
   };
 
-  createStore = () => {
-    const store = configureStore(this.middlewares.middlewares, this.reducers.reducers);
-
-    return store;
-  };
-
   getAdminInjectedComponents = (moduleName, containerName, blockName) => {
     try {
-      return this.admin.injectionZones[moduleName][containerName][blockName] || [];
+      return this.injectionZones[moduleName][containerName][blockName] || [];
     } catch (err) {
       console.error('Cannot get injected component', err);
 
@@ -325,49 +282,58 @@ class StrapiApp {
     return this.plugins[pluginId];
   };
 
-  async initialize() {
-    Object.keys(this.appPlugins).forEach((plugin) => {
-      this.appPlugins[plugin].register(this);
+  register() {
+    this.createHook(INJECT_COLUMN_IN_TABLE);
+    this.createHook(MUTATE_COLLECTION_TYPES_LINKS);
+    this.createHook(MUTATE_SINGLE_TYPES_LINKS);
+    this.createHook(MUTATE_EDIT_VIEW_LAYOUT);
+
+    // Call `.register()` callback of each plugin
+    Object.values(this.corePlugins).forEach((plugin) => {
+      if (plugin.register) {
+        // TODO: we should limit what methods from StrapiApp are available
+        // in .register() like we do for .bootstrap() instead of exposing the
+        // whole instance. If we feel adventurous we could do that in v4 - if
+        // not v5 is a good moment to clean this up.
+        plugin.register(this);
+      }
     });
   }
 
   injectContentManagerComponent = (containerName, blockName, component) => {
     invariant(
-      this.admin.injectionZones.contentManager[containerName]?.[blockName],
+      this.injectionZones.contentManager[containerName]?.[blockName],
       `The ${containerName} ${blockName} zone is not defined in the content manager`
     );
     invariant(component, 'A Component must be provided');
 
-    this.admin.injectionZones.contentManager[containerName][blockName].push(component);
+    this.injectionZones.contentManager[containerName][blockName].push(component);
   };
 
   injectAdminComponent = (containerName, blockName, component) => {
     invariant(
-      this.admin.injectionZones.admin[containerName]?.[blockName],
+      this.injectionZones.admin[containerName]?.[blockName],
       `The ${containerName} ${blockName} zone is not defined in the admin`
     );
     invariant(component, 'A Component must be provided');
 
-    this.admin.injectionZones.admin[containerName][blockName].push(component);
+    this.injectionZones.admin[containerName][blockName].push(component);
   };
 
   /**
    * Load the admin translations
    * @returns {Object} The imported admin translations
    */
-  async loadAdminTrads() {
-    const arrayOfPromises = this.configurations.locales.map((locale) => {
-      return import(/* webpackChunkName: "[request]" */ `./translations/${locale}.json`)
-        .then(({ default: data }) => {
-          return { data, locale };
-        })
-        .catch(() => {
-          return { data: null, locale };
-        });
-    });
-    const adminLocales = await Promise.all(arrayOfPromises);
-
-    const translations = adminLocales.reduce((acc, current) => {
+  async loadAdminTranslations() {
+    const translations = (
+      await Promise.all(
+        this.configuration.locales.map((locale) =>
+          import(/* webpackChunkName: "[request]" */ `./translations/${locale}.json`).then(
+            ({ default: data }) => ({ data, locale })
+          )
+        )
+      )
+    ).reduce((acc, current) => {
       if (current.data) {
         acc[current.locale] = current.data;
       }
@@ -384,23 +350,15 @@ class StrapiApp {
    *
    */
   async loadTrads() {
-    const adminTranslations = await this.loadAdminTrads();
+    const adminTranslations = await this.loadAdminTranslations();
+    const pluginTranslations = (await Promise.all(Object.entries(this.plugins)))
+      .map((plugin) =>
+        plugin.registerTrads ? plugin.registerTrads({ locales: this.configuration.locales }) : null
+      )
+      .filter(Boolean);
 
-    const arrayOfPromises = Object.keys(this.appPlugins)
-      .map((plugin) => {
-        const registerTrads = this.appPlugins[plugin].registerTrads;
-
-        if (registerTrads) {
-          return registerTrads({ locales: this.configurations.locales });
-        }
-
-        return null;
-      })
-      .filter((a) => a);
-
-    const pluginsTrads = await Promise.all(arrayOfPromises);
-    const mergedTrads = pluginsTrads.reduce((acc, currentPluginTrads) => {
-      const pluginTrads = currentPluginTrads.reduce((acc1, current) => {
+    const mergedTranslations = pluginTranslations.reduce((acc, translations) => {
+      const pluginTrads = translations.reduce((acc1, current) => {
         acc1[current.locale] = current.data;
 
         return acc1;
@@ -413,19 +371,17 @@ class StrapiApp {
       return acc;
     }, {});
 
-    const translations = this.configurations.locales.reduce((acc, current) => {
+    this.configuration.translations = this.configuration.locales.reduce((acc, current) => {
       acc[current] = {
         ...adminTranslations[current],
-        ...(mergedTrads[current] || {}),
-        ...this.customConfigurations?.translations?.[current],
+        ...(mergedTranslations[current] || {}),
+        ...this.config?.translations?.[current],
       };
 
       return acc;
     }, {});
 
-    this.configurations.translations = translations;
-
-    return Promise.resolve();
+    return null;
   }
 
   registerHook = (name, fn) => {
@@ -454,36 +410,36 @@ class StrapiApp {
   runHookParallel = (name) => this.hooksDict[name].runParallel();
 
   render() {
-    const store = this.createStore();
-    const localeNames = pick(languageNativeNames, this.configurations.locales || []);
-
-    const {
-      components: { components },
-      fields: { fields },
-    } = this.library;
+    const store = configureStore(this.middlewares, this.reducers);
 
     return (
       <Providers
-        authLogo={this.configurations.authLogo}
-        components={components}
-        fields={fields}
+        authLogo={this.configuration.authLogo}
+        components={this.components}
+        fields={this.fields}
         customFields={this.customFields}
-        localeNames={localeNames}
+        localeNames={(this.configuration.locales ?? []).reduce((acc, locale) => {
+          if (LANGUAGE_MAP[locale]) {
+            acc[locale] = LANGUAGE_MAP[locale];
+          }
+
+          return acc;
+        }, {})}
         getAdminInjectedComponents={this.getAdminInjectedComponents}
         getPlugin={this.getPlugin}
-        messages={this.configurations.translations}
+        messages={this.configuration.translations}
         menu={this.menu}
-        menuLogo={this.configurations.menuLogo}
+        menuLogo={this.configuration.menuLogo}
         plugins={this.plugins}
         runHookParallel={this.runHookParallel}
         runHookWaterfall={(name, initialValue, async = false) => {
           return this.runHookWaterfall(name, initialValue, async, store);
         }}
         runHookSeries={this.runHookSeries}
-        themes={this.configurations.themes}
+        themes={this.configuration.themes}
         settings={this.settings}
-        showTutorials={this.configurations.tutorials}
-        showReleaseNotification={this.configurations.notifications.releases}
+        showTutorials={this.configuration.tutorials}
+        showReleaseNotification={this.configuration.notifications.releases}
         store={store}
       >
         <>
@@ -492,12 +448,12 @@ class StrapiApp {
               {
                 rel: 'icon',
                 type: 'image/png',
-                href: this.configurations.head.favicon,
+                href: this.configuration.head.favicon,
               },
             ]}
-            htmlAttributes={{ lang: localStorage.getItem(localStorageKey) || 'en' }}
+            htmlAttributes={{ lang: localStorage.getItem(LOCALE_LOCALSTORAGE_KEY) || 'en' }}
           />
-          <BrowserRouter basename={basename}>
+          <BrowserRouter basename={process.env.ADMIN_PATH.replace(window.location.origin, '')}>
             <App store={store} />
           </BrowserRouter>
         </>
@@ -505,6 +461,3 @@ class StrapiApp {
     );
   }
 }
-
-export default ({ adminConfig = {}, appPlugins, library, middlewares, reducers }) =>
-  new StrapiApp({ adminConfig, appPlugins, library, middlewares, reducers });

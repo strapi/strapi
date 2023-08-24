@@ -12,18 +12,18 @@ import defaultsDeep from 'lodash/defaultsDeep';
 import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
 
+import { LOCALE_LOCALSTORAGE_KEY } from '../../constants';
 import LocalesProvider from '../LocalesProvider';
 
 import init from './init';
 import reducer, { initialState } from './reducer';
-import localStorageKey from './utils/localStorageKey';
 
 const LanguageProvider = ({ children, localeNames, messages }) => {
   const [{ locale }, dispatch] = useReducer(reducer, initialState, () => init(localeNames));
 
   useEffect(() => {
     // Set user language in local storage.
-    window.localStorage.setItem(localStorageKey, locale);
+    window.localStorage.setItem(LOCALE_LOCALSTORAGE_KEY, locale);
     document.documentElement.setAttribute('lang', locale);
   }, [locale]);
 

@@ -1,6 +1,7 @@
 const config = {
   locales: ['fr'],
 };
+
 const bootstrap = () => {};
 
 export default {

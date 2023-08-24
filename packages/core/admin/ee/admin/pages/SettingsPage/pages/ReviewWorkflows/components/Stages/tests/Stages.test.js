@@ -9,7 +9,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IntlProvider } from 'react-intl';
 import { Provider } from 'react-redux';
 
-import configureStore from '../../../../../../../../../admin/src/core/store/configureStore';
+import { configureStore } from '../../../../../../../../../admin/src/core/store/configureStore';
 import * as actions from '../../../actions';
 import { ACTION_SET_WORKFLOW, STAGE_COLOR_DEFAULT } from '../../../constants';
 import { reducer } from '../../../reducer';

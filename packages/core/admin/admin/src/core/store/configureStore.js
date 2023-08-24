@@ -1,6 +1,6 @@
 import { applyMiddleware, combineReducers, compose, createStore } from 'redux';
 
-const configureStore = (appMiddlewares, appReducers) => {
+export const configureStore = (appMiddlewares, appReducers) => {
   let composeEnhancers = compose;
 
   const middlewares = [];
@@ -43,5 +43,3 @@ const createReducer = (appReducers, asyncReducers) => {
     ...asyncReducers,
   });
 };
-
-export default configureStore;

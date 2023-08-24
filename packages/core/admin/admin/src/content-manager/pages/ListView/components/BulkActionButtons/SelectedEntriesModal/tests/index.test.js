@@ -20,7 +20,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { combineReducers, createStore } from 'redux';
 
 import SelectedEntriesModal from '..';
-import reducers from '../../../../../../../reducers';
+import { APP_REDUCERS } from '../../../../../../../constants';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -89,7 +89,7 @@ const handlers = [
 
 const server = setupServer(...handlers);
 
-const rootReducer = combineReducers(reducers);
+const rootReducer = combineReducers(APP_REDUCERS);
 const store = createStore(rootReducer, {
   'content-manager_listView': {
     contentType: {

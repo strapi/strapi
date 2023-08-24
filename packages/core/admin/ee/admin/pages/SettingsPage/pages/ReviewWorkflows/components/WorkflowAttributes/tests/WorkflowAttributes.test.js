@@ -9,7 +9,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IntlProvider } from 'react-intl';
 import { Provider } from 'react-redux';
 
-import configureStore from '../../../../../../../../../admin/src/core/store/configureStore';
+import { configureStore } from '../../../../../../../../../admin/src/core/store/configureStore';
 import { reducer } from '../../../reducer';
 import { WorkflowAttributes } from '../WorkflowAttributes';
 

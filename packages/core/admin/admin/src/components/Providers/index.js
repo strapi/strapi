@@ -27,7 +27,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const Providers = ({
+export const Providers = ({
   authLogo,
   children,
   components,
@@ -153,5 +153,3 @@ Providers.propTypes = {
     custom: PropTypes.object,
   }).isRequired,
 };
-
-export default Providers;

@@ -12,7 +12,7 @@ import { MemoryRouter } from 'react-router-dom/cjs/react-router-dom.min';
 import { combineReducers, createStore } from 'redux';
 
 import { ConfirmBulkActionDialog, ConfirmDialogPublishAll } from '..';
-import reducers from '../../../../../../../reducers';
+import { APP_REDUCERS } from '../../../../../../../constants';
 
 jest.mock('../../../../../../../shared/hooks', () => ({
   ...jest.requireActual('../../../../../../../shared/hooks'),
@@ -49,7 +49,7 @@ const handlers = [
 
 const server = setupServer(...handlers);
 
-const rootReducer = combineReducers(reducers);
+const rootReducer = combineReducers(APP_REDUCERS);
 const store = createStore(rootReducer, {
   'content-manager_listView': {
     data: [

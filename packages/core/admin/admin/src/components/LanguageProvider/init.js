@@ -1,7 +1,7 @@
-import localStorageKey from './utils/localStorageKey';
+import { LOCALE_LOCALSTORAGE_KEY } from '../../constants';
 
 const init = (localeNames) => {
-  const languageFromLocaleStorage = window.localStorage.getItem(localStorageKey);
+  const languageFromLocaleStorage = window.localStorage.getItem(LOCALE_LOCALSTORAGE_KEY);
   const appLanguage = localeNames[languageFromLocaleStorage] ? languageFromLocaleStorage : 'en';
 
   return {

@@ -10,7 +10,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { combineReducers, createStore } from 'redux';
 
 import BulkActionButtons from '..';
-import reducers from '../../../../../../reducers';
+import { APP_REDUCERS } from '../../../../../../constants';
 
 const toggleNotification = jest.fn();
 
@@ -34,7 +34,7 @@ jest.mock('../SelectedEntriesModal', () => () => <div>SelectedEntriesModal</div>
 
 const user = userEvent.setup();
 
-const rootReducer = combineReducers(reducers);
+const rootReducer = combineReducers(APP_REDUCERS);
 const store = createStore(rootReducer, {
   'content-manager_listView': {
     data: [

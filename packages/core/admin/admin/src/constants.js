@@ -1,3 +1,11 @@
+import rbacProviderReducer from './components/RBACProvider/reducer';
+import rbacManagerReducer from './content-manager/hooks/useSyncRbac/reducer';
+import cmAppReducer from './content-manager/pages/App/reducer';
+import editViewLayoutManagerReducer from './content-manager/pages/EditViewLayoutManager/reducer';
+import listViewReducer from './content-manager/pages/ListView/reducer';
+import editViewCrudReducer from './content-manager/sharedReducers/crudReducer/reducer';
+import appReducer from './pages/App/reducer';
+
 export const ADMIN_PERMISSIONS_CE = {
   contentManager: {
     main: [],
@@ -88,3 +96,80 @@ export const ADMIN_PERMISSIONS_CE = {
     },
   },
 };
+
+export const LANGUAGE_MAP = {
+  ar: 'العربية',
+  ca: 'Català',
+  cs: 'Čeština',
+  de: 'Deutsch',
+  dk: 'Dansk',
+  en: 'English',
+  es: 'Español',
+  eu: 'Euskara',
+  fr: 'Français',
+  gu: 'Gujarati',
+  he: 'עברית',
+  hu: 'Magyar',
+  id: 'Indonesian',
+  it: 'Italiano',
+  ja: '日本語',
+  ko: '한국어',
+  ml: 'Malayalam',
+  ms: 'Melayu',
+  nl: 'Nederlands',
+  no: 'Norwegian',
+  pl: 'Polski',
+  'pt-BR': 'Português (Brasil)',
+  pt: 'Português (Portugal)',
+  ru: 'Русский',
+  sk: 'Slovenčina',
+  sv: 'Swedish',
+  th: 'ไทย',
+  tr: 'Türkçe',
+  uk: 'Українська',
+  vi: 'Tiếng Việt',
+  'zh-Hans': '中文 (简体)',
+  zh: '中文 (繁體)',
+  sa: 'संस्कृत',
+  hi: 'हिन्दी',
+};
+
+const contentManagerReducers = {
+  'content-manager_app': cmAppReducer,
+  'content-manager_listView': listViewReducer,
+  'content-manager_rbacManager': rbacManagerReducer,
+  'content-manager_editViewLayoutManager': editViewLayoutManagerReducer,
+  'content-manager_editViewCrudReducer': editViewCrudReducer,
+};
+
+export const APP_REDUCERS = {
+  admin_app: appReducer,
+  rbacProvider: rbacProviderReducer,
+  ...contentManagerReducers,
+};
+
+/**
+ * Admin injection zones:
+ * Available zones: Content Manager listView & editView
+ * @constant
+ * @type {Object}
+ */
+export const INJECTION_ZONES = {
+  admin: {
+    // Temporary injection zone, support for the react-tour plugin in foodadvisor
+    tutorials: {
+      links: [],
+    },
+  },
+  contentManager: {
+    editView: { informations: [], 'right-links': [] },
+    listView: {
+      actions: [],
+      deleteModalAdditionalInfos: [],
+      publishModalAdditionalInfos: [],
+      unpublishModalAdditionalInfos: [],
+    },
+  },
+};
+
+export const LOCALE_LOCALSTORAGE_KEY = 'strapi-admin-language';
