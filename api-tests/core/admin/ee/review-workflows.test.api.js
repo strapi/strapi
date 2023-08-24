@@ -6,7 +6,7 @@ const { mapAsync } = require('@strapi/utils');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest, createRequest } = require('api-tests/request');
 const { createTestBuilder } = require('api-tests/builder');
-const { describeOnCondition } = require('api-tests/utils');
+const { describeOnCondition, createUtils } = require('api-tests/utils');
 
 const {
   STAGE_MODEL_UID,
@@ -576,7 +576,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   describe('Update a stage on an entity', () => {
     describe('Review Workflow is enabled', () => {
       beforeAll(async () => {
-        // Update workflow to unassign content type
+        // Update workflow to assign content type
         await requests.admin.put(
           `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
           { body: { data: { contentTypes: [productUID] } } }
@@ -642,9 +642,83 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
   });
 
+  describe('Listing available stages for transition', () => {
+    const endpoint = (id) => `/admin/content-manager/collection-types/${productUID}/${id}/stages`;
+
+    let utils;
+    let entry;
+    let restrictedRequest;
+    let restrictedRole;
+
+    beforeAll(async () => {
+      // Update workflow to assign content type
+      await requests.admin.put(`/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`, {
+        body: { data: { contentTypes: [productUID] } },
+      });
+
+      entry = await createEntry(productUID, { name: 'Product' });
+
+      const restrictedUser = {
+        email: 'restricted@user.io',
+        password: 'Restricted123',
+      };
+
+      utils = createUtils(strapi);
+      const role = await utils.createRole({
+        name: 'restricted-role',
+        description: '',
+      });
+
+      await utils.createUserIfNotExists({
+        ...restrictedUser,
+        roles: [role.id],
+      });
+
+      restrictedRole = role;
+      restrictedRequest = await createAuthRequest({ strapi, userInfo: restrictedUser });
+    });
+
+    test("It shouldn't be available for public", async () => {
+      const res = await requests.public.get(endpoint(entry.id));
+
+      if (hasRW) {
+        expect(res.status).toBe(401);
+      } else {
+        expect(res.status).toBe(404);
+        expect(res.body.data).toBeUndefined();
+      }
+    });
+
+    test('It should return available stages for an admin user', async () => {
+      const res = await requests.admin.get(endpoint(entry.id));
+
+      expect(res.body.data).toHaveLength(1);
+      expect(res.body.data[0]).toMatchObject(secondStage);
+    });
+
+    test('It should return forbidden for a user who does not have permissions to read review workflows', async () => {
+      const res = await restrictedRequest.get(endpoint(entry.id));
+
+      expect(res.status).toBe(403);
+    });
+
+    test('It should return an empty list when a user does not have the permission to transition the current stage', async () => {
+      const permission = {
+        action: 'admin::review-workflows.read',
+        fields: null,
+        conditions: [],
+      };
+      await utils.assignPermissionsToRole(restrictedRole.id, [permission]);
+
+      const res = await restrictedRequest.get(endpoint(entry.id));
+
+      expect(res.body.data).toHaveLength(0);
+    });
+  });
+
   describe('Deleting a stage when content already exists', () => {
     beforeAll(async () => {
-      // Update workflow to unassign content type
+      // Update workflow to assign content type
       await requests.admin.put(`/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`, {
         body: { data: { contentTypes: [productUID] } },
       });
