@@ -39,17 +39,29 @@ export type MatchFirst<TTests extends Test[], TDefault = never> = TTests extends
     : never
   : never;
 
-export type MatchAll<TTests extends Test[], TDefault = never> = TTests extends [
+export type MatchAllUnion<TTests extends Test[], TDefault = never> = TTests extends [
   infer THead extends Test,
   ...infer TTail extends Test[]
 ]
   ? THead extends Test<infer TExpression, infer TValue>
     ? Utils.Guard.Never<
-        If<TExpression, TValue> | If<Utils.Array.IsNotEmpty<TTail>, MatchAll<TTail, TDefault>>,
+        If<TExpression, TValue> | If<Utils.Array.IsNotEmpty<TTail>, MatchAllUnion<TTail, TDefault>>,
         TDefault
       >
     : never
   : never;
+
+export type MatchAllIntersect<TTests extends Test[], TDefault = unknown> = TTests extends [
+  infer THead extends Test,
+  ...infer TTail extends Test[]
+]
+  ? THead extends Test<infer TExpression, infer TValue>
+    ? // Actual test case evaluation
+      If<TExpression, TValue, TDefault> &
+        // Recursion / End of recursion
+        If<Utils.Array.IsNotEmpty<TTail>, MatchAllIntersect<TTail, TDefault>, TDefault>
+    : TDefault
+  : TDefault;
 
 export type Test<TExpression extends BooleanValue = BooleanValue, TValue = unknown> = [
   TExpression,
