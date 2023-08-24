@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { forwardRef, useRef, useState } from 'react';
 
 import {
   BaseButton,
@@ -19,6 +19,7 @@ import { HexColorPicker } from 'react-colorful';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
+import { useComposedRefs } from '../../../hooks/useComposeRefs';
 import getTrad from '../../../utils/getTrad';
 
 const ColorPreview = styled.div`
@@ -74,112 +75,119 @@ const ColorPickerPopover = styled(Popover)`
   min-height: 270px;
 `;
 
-const ColorPickerInput = ({
-  attribute,
-  description,
-  disabled,
-  error,
-  intlLabel,
-  labelAction,
-  name,
-  onChange,
-  required,
-  value,
-}) => {
-  const [showColorPicker, setShowColorPicker] = useState(false);
-  const colorPickerButtonRef = useRef();
-  const { formatMessage } = useIntl();
-  const color = value || '#000000';
-  const styleUppercase = { textTransform: 'uppercase' };
+const ColorPickerInput = forwardRef(
+  (
+    {
+      attribute,
+      description,
+      disabled,
+      error,
+      intlLabel,
+      labelAction,
+      name,
+      onChange,
+      required,
+      value,
+    },
+    forwardedRef
+  ) => {
+    const [showColorPicker, setShowColorPicker] = useState(false);
+    const colorPickerButtonRef = useRef();
+    const { formatMessage } = useIntl();
+    const color = value || '#000000';
+    const styleUppercase = { textTransform: 'uppercase' };
 
-  const handleBlur = (e) => {
-    e.preventDefault();
+    const handleBlur = (e) => {
+      e.preventDefault();
 
-    if (!e.currentTarget.contains(e.relatedTarget)) {
-      setShowColorPicker(false);
-    }
-  };
+      if (!e.currentTarget.contains(e.relatedTarget)) {
+        setShowColorPicker(false);
+      }
+    };
 
-  return (
-    <Field
-      name={name}
-      id={name}
-      // GenericInput calls formatMessage and returns a string for the error
-      error={error}
-      hint={description && formatMessage(description)}
-      required={required}
-    >
-      <Flex direction="column" alignItems="stretch" gap={1}>
-        <FieldLabel action={labelAction}>{formatMessage(intlLabel)}</FieldLabel>
-        <ColorPickerToggle
-          ref={colorPickerButtonRef}
-          aria-label={formatMessage({
-            id: getTrad('color-picker.toggle.aria-label'),
-            defaultMessage: 'Color picker toggle',
-          })}
-          aria-controls="color-picker-value"
-          aria-haspopup="dialog"
-          aria-expanded={showColorPicker}
-          aria-disabled={disabled}
-          disabled={disabled}
-          onClick={() => setShowColorPicker(!showColorPicker)}
-        >
-          <Flex>
-            <ColorPreview color={color} />
-            <Typography
-              style={styleUppercase}
-              textColor={value ? null : 'neutral600'}
-              variant="omega"
-            >
-              {color}
-            </Typography>
-          </Flex>
-          <CarretDown aria-hidden />
-        </ColorPickerToggle>
-        {showColorPicker && (
-          <ColorPickerPopover
-            onBlur={handleBlur}
-            role="dialog"
-            source={colorPickerButtonRef}
-            spacing={4}
+    const composedRefs = useComposedRefs(forwardedRef, colorPickerButtonRef);
+
+    return (
+      <Field
+        name={name}
+        id={name}
+        // GenericInput calls formatMessage and returns a string for the error
+        error={error}
+        hint={description && formatMessage(description)}
+        required={required}
+      >
+        <Flex direction="column" alignItems="stretch" gap={1}>
+          <FieldLabel action={labelAction}>{formatMessage(intlLabel)}</FieldLabel>
+          <ColorPickerToggle
+            ref={composedRefs}
+            aria-label={formatMessage({
+              id: getTrad('color-picker.toggle.aria-label'),
+              defaultMessage: 'Color picker toggle',
+            })}
+            aria-controls="color-picker-value"
+            aria-haspopup="dialog"
+            aria-expanded={showColorPicker}
+            aria-disabled={disabled}
+            disabled={disabled}
+            onClick={() => setShowColorPicker(!showColorPicker)}
           >
-            <FocusTrap onEscape={() => setShowColorPicker(false)}>
-              <ColorPicker
-                color={color}
-                onChange={(hexValue) =>
-                  onChange({ target: { name, value: hexValue, type: attribute.type } })
-                }
-              />
-              <Flex paddingTop={3} paddingLeft={4} justifyContent="flex-end">
-                <Box paddingRight={2}>
-                  <Typography variant="omega" as="label" textColor="neutral600">
-                    {formatMessage({
-                      id: getTrad('color-picker.input.format'),
-                      defaultMessage: 'HEX',
-                    })}
-                  </Typography>
-                </Box>
-                <FieldInput
-                  id="color-picker-value"
-                  aria-label={formatMessage({
-                    id: getTrad('color-picker.input.aria-label'),
-                    defaultMessage: 'Color picker input',
-                  })}
-                  style={styleUppercase}
-                  value={value}
-                  placeholder="#000000"
-                  onChange={onChange}
+            <Flex>
+              <ColorPreview color={color} />
+              <Typography
+                style={styleUppercase}
+                textColor={value ? null : 'neutral600'}
+                variant="omega"
+              >
+                {color}
+              </Typography>
+            </Flex>
+            <CarretDown aria-hidden />
+          </ColorPickerToggle>
+          {showColorPicker && (
+            <ColorPickerPopover
+              onBlur={handleBlur}
+              role="dialog"
+              source={colorPickerButtonRef}
+              spacing={4}
+            >
+              <FocusTrap onEscape={() => setShowColorPicker(false)}>
+                <ColorPicker
+                  color={color}
+                  onChange={(hexValue) =>
+                    onChange({ target: { name, value: hexValue, type: attribute.type } })
+                  }
                 />
-              </Flex>
-            </FocusTrap>
-          </ColorPickerPopover>
-        )}
-        <FieldHint />
-        <FieldError />
-      </Flex>
-    </Field>
-  );
-};
+                <Flex paddingTop={3} paddingLeft={4} justifyContent="flex-end">
+                  <Box paddingRight={2}>
+                    <Typography variant="omega" as="label" textColor="neutral600">
+                      {formatMessage({
+                        id: getTrad('color-picker.input.format'),
+                        defaultMessage: 'HEX',
+                      })}
+                    </Typography>
+                  </Box>
+                  <FieldInput
+                    id="color-picker-value"
+                    aria-label={formatMessage({
+                      id: getTrad('color-picker.input.aria-label'),
+                      defaultMessage: 'Color picker input',
+                    })}
+                    style={styleUppercase}
+                    value={value}
+                    placeholder="#000000"
+                    onChange={onChange}
+                  />
+                </Flex>
+              </FocusTrap>
+            </ColorPickerPopover>
+          )}
+          <FieldHint />
+          <FieldError />
+        </Flex>
+      </Field>
+    );
+  }
+);
 
 ColorPickerInput.defaultProps = {
   description: null,

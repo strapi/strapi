@@ -16,7 +16,6 @@ import { Route, Switch } from 'react-router-dom';
 import LeftMenu from '../../components/LeftMenu';
 import useConfigurations from '../../hooks/useConfigurations';
 import useMenu from '../../hooks/useMenu';
-import { createRoute } from '../../utils/createRoute';
 import { SET_APP_RUNTIME_STATUS } from '../App/constants';
 
 const CM = React.lazy(() =>
@@ -76,25 +75,6 @@ export const Admin = () => {
     }
   }, [appStatus, dispatch, trackUsage]);
 
-  const routes = menu
-    .filter((link) => link.Component)
-
-    /**
-     * `Component` is an async function, which is passed as property of the
-     * addMenuLink() API during the plugin registration step.
-     *
-     * Because of that we can't just render <Route component={Component} />,
-     * but have to await the function.
-     *
-     * This isn't a good React pattern and should be reconsidered.
-     */
-
-    .map(({ to, Component, exact }) => createRoute(Component, to, exact));
-
-  if (isLoading) {
-    return <LoadingIndicatorPage />;
-  }
-
   return (
     <DndProvider backend={HTML5Backend}>
       <Flex alignItems="stretch">
@@ -104,18 +84,31 @@ export const Admin = () => {
         />
 
         <Box flex="1">
-          <React.Suspense fallback={<LoadingIndicatorPage />}>
+          {isLoading ? (
+            <LoadingIndicatorPage />
+          ) : (
             <Switch>
               <Route path="/" component={HomePage} exact />
               <Route path="/me" component={ProfilePage} exact />
               <Route path="/content-manager" component={CM} />
-              {routes}
+              {menu.map(({ to, Component, exact }) => (
+                <Route
+                  render={() => (
+                    <React.Suspense fallback={<LoadingIndicatorPage />}>
+                      <Component />
+                    </React.Suspense>
+                  )}
+                  key={to}
+                  path={to}
+                  exact={exact || false}
+                />
+              ))}
               <Route path="/settings/:settingId" component={SettingsPage} />
               <Route path="/settings" component={SettingsPage} exact />
               <Route path="/marketplace" component={MarketplacePage} />
               <Route path="/list-plugins" component={InstalledPluginsPage} exact />
             </Switch>
-          </React.Suspense>
+          )}
         </Box>
 
         {/* TODO: we should move the logic to determine whether the guided tour is displayed

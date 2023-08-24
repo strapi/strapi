@@ -1,13 +1,14 @@
 import React from 'react';
 
 import { DesignSystemProvider } from '@strapi/design-system';
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
+import { MemoryRouter } from 'react-router-dom';
 
 import { GenericInput } from '../GenericInput';
 
-function setup(props) {
+function renderField(props, { initialEntries } = {}) {
   return {
     ...render(
       <GenericInput
@@ -22,7 +23,9 @@ function setup(props) {
       {
         wrapper: ({ children }) => (
           <IntlProvider locale="en" messages={{}}>
-            <DesignSystemProvider locale="en-GB">{children}</DesignSystemProvider>
+            <DesignSystemProvider locale="en-GB">
+              <MemoryRouter initialEntries={initialEntries}>{children}</MemoryRouter>
+            </DesignSystemProvider>
           </IntlProvider>
         ),
       }
@@ -40,8 +43,8 @@ jest.setTimeout(50000);
 
 describe('GenericInput', () => {
   describe('number', () => {
-    const setupNumber = (props) => {
-      return setup({
+    const renderNumber = (props) => {
+      return renderField({
         type: 'number',
         name: 'number',
         placeholder: {
@@ -54,66 +57,61 @@ describe('GenericInput', () => {
       });
     };
 
-    test('renders and matches the snapshot', () => {
-      const { container } = setupNumber();
-      expect(container).toMatchSnapshot();
-    });
-
     test('renders an error message', () => {
-      const { getByText } = setupNumber({ error: 'Error message' });
+      const { getByText } = renderNumber({ error: 'Error message' });
       expect(getByText('Error message')).toBeInTheDocument();
     });
 
     test('renders a number (int) value', () => {
-      const { getByRole } = setupNumber({ value: 1 });
+      const { getByRole } = renderNumber({ value: 1 });
       expect(getByRole('textbox')).toHaveValue('1');
     });
 
     test('renders a number (float) value', () => {
-      const { getByRole } = setupNumber({ value: 1.3333 });
+      const { getByRole } = renderNumber({ value: 1.3333 });
       expect(getByRole('textbox')).toHaveValue('1.3333');
     });
 
     test('does not call onChange callback on first render', () => {
       const spy = jest.fn();
-      setupNumber({ value: null, onChange: spy });
+      renderNumber({ value: null, onChange: spy });
       expect(spy).not.toHaveBeenCalled();
     });
 
-    test('does not call onChange callback if the value does not change', () => {
+    test('does not call onChange callback if the value does not change', async () => {
       const spy = jest.fn();
-      const { getByRole } = setupNumber({ value: 23, onChange: spy });
+      const { getByRole, user } = renderNumber({ value: 23, onChange: spy });
 
-      fireEvent.change(getByRole('textbox'), { target: { value: 23 } });
+      await user.type(getByRole('textbox'), '23');
 
       expect(spy).not.toHaveBeenCalledWith();
     });
 
-    test('does call onChange callback with number (int) value', () => {
+    test('does call onChange callback with number (int) value', async () => {
       const spy = jest.fn();
-      const { getByRole } = setupNumber({ value: null, onChange: spy });
+      const { user, getByRole } = renderNumber({ value: null, onChange: spy });
 
-      fireEvent.change(getByRole('textbox'), { target: { value: '23' } });
+      await user.type(getByRole('textbox'), '23');
 
       expect(spy).toHaveBeenCalledWith({ target: { name: 'number', type: 'number', value: 23 } });
     });
 
-    test('does call onChange callback with number (float) value', () => {
+    test('does call onChange callback with number (float) value', async () => {
       const spy = jest.fn();
-      const { getByRole } = setupNumber({ value: null, onChange: spy });
+      const { getByRole, user } = renderNumber({ value: null, onChange: spy });
 
-      fireEvent.change(getByRole('textbox'), { target: { value: '1.3333' } });
+      await user.type(getByRole('textbox'), '1.3333');
 
       expect(spy).toHaveBeenCalledWith({
         target: { name: 'number', type: 'number', value: 1.3333 },
       });
     });
 
-    test('does call onChange callback with number (0) value', () => {
+    test('does call onChange callback with number (0) value', async () => {
       const spy = jest.fn();
-      const { getByRole } = setupNumber({ value: null, onChange: spy });
+      const { getByRole, user } = renderNumber({ value: null, onChange: spy });
 
-      fireEvent.change(getByRole('textbox'), { target: { value: '0' } });
+      await user.type(getByRole('textbox'), '0');
 
       expect(spy).toHaveBeenCalledWith({
         target: { name: 'number', type: 'number', value: 0 },
@@ -123,7 +121,7 @@ describe('GenericInput', () => {
 
   describe('json', () => {
     test('renders and matches the snapshot', () => {
-      const { container } = setup({
+      const { container } = renderField({
         type: 'json',
         name: 'json',
         value: null,
@@ -134,8 +132,8 @@ describe('GenericInput', () => {
   });
 
   describe('date', () => {
-    const setupDateField = (props) => {
-      return setup({
+    const renderDate = (props) => {
+      return renderField({
         type: 'date',
         name: 'date',
         intlLabel: {
@@ -150,7 +148,7 @@ describe('GenericInput', () => {
     it('should allow the user to clear the field', async () => {
       const onChange = jest.fn();
 
-      const { getByRole, user } = setupDateField({
+      const { getByRole, user } = renderDate({
         value: new Date(),
         onChange,
       });
@@ -165,8 +163,8 @@ describe('GenericInput', () => {
   });
 
   describe('datetime', () => {
-    const setupDatetimePicker = (props) => {
-      return setup({
+    const renderDateTime = (props) => {
+      return renderField({
         type: 'datetime',
         name: 'datetime-picker',
         intlLabel: {
@@ -179,7 +177,7 @@ describe('GenericInput', () => {
     };
 
     test('renders the datetime picker with the correct value for date and time', async () => {
-      const { getByRole, user } = setupDatetimePicker();
+      const { getByRole, user } = renderDateTime();
 
       await user.click(getByRole('combobox', { name: 'Choose date' }));
       await user.click(getByRole('gridcell', { name: /15/ }));
@@ -191,8 +189,7 @@ describe('GenericInput', () => {
     });
 
     test('simulate clicking on the Clear button in the date and check if the date and time are empty', async () => {
-      const user = userEvent.setup();
-      const { getByRole } = setupDatetimePicker();
+      const { getByRole, user } = renderDateTime();
 
       await user.click(getByRole('combobox', { name: 'Choose date' }));
       await user.click(getByRole('gridcell', { name: /15/ }));
@@ -207,7 +204,7 @@ describe('GenericInput', () => {
     test('calls onChange callback with textarea value', async () => {
       const onChange = jest.fn();
 
-      const { getByRole, user } = setup({
+      const { getByRole, user } = renderField({
         type: 'textarea',
         name: 'textarea',
         onChange,
@@ -229,6 +226,37 @@ describe('GenericInput', () => {
       expect(onChange).toHaveBeenNthCalledWith(4, {
         target: { name: 'textarea', type: 'textarea', value: 't' },
       });
+    });
+  });
+
+  describe('auto-focussing', () => {
+    test.each([
+      'bool',
+      'checkbox',
+      'date',
+      'datetime',
+      'email',
+      'number',
+      'password',
+      'select',
+      'text',
+      'textarea',
+      'time',
+    ])('auto-focuses on %s', (type) => {
+      const { getByLabelText } = renderField(
+        { type, name: 'test' },
+        { initialEntries: [{ pathname: '/', search: `field=test` }] }
+      );
+
+      /**
+       * datetime renders two fields, and it should focus the date field.
+       */
+
+      if (type === 'datetime') {
+        expect(getByLabelText('Choose date')).toHaveFocus();
+      } else {
+        expect(getByLabelText('Default label')).toHaveFocus();
+      }
     });
   });
 });

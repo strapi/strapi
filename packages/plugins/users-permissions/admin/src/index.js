@@ -32,13 +32,8 @@ export default {
           },
           id: 'roles',
           to: `/settings/users-permissions/roles`,
-          async Component() {
-            const component = await import(
-              /* webpackChunkName: "users-roles-settings-page" */ './pages/Roles'
-            );
-
-            return component;
-          },
+          Component: () =>
+            import(/* webpackChunkName: "users-roles-settings-page" */ './pages/Roles'),
           permissions: PERMISSIONS.accessRoles,
         },
         {
@@ -48,13 +43,8 @@ export default {
           },
           id: 'providers',
           to: `/settings/users-permissions/providers`,
-          async Component() {
-            const component = await import(
-              /* webpackChunkName: "users-providers-settings-page" */ './pages/Providers'
-            );
-
-            return component;
-          },
+          Component: () =>
+            import(/* webpackChunkName: "users-providers-settings-page" */ './pages/Providers'),
           permissions: PERMISSIONS.readProviders,
         },
         {
@@ -64,13 +54,8 @@ export default {
           },
           id: 'email-templates',
           to: `/settings/users-permissions/email-templates`,
-          async Component() {
-            const component = await import(
-              /* webpackChunkName: "users-email-settings-page" */ './pages/EmailTemplates'
-            );
-
-            return component;
-          },
+          Component: () =>
+            import(/* webpackChunkName: "users-email-settings-page" */ './pages/EmailTemplates'),
           permissions: PERMISSIONS.readEmailTemplates,
         },
         {
@@ -80,13 +65,10 @@ export default {
           },
           id: 'advanced-settings',
           to: `/settings/users-permissions/advanced-settings`,
-          async Component() {
-            const component = await import(
+          Component: () =>
+            import(
               /* webpackChunkName: "users-advanced-settings-page" */ './pages/AdvancedSettings'
-            );
-
-            return component;
-          },
+            ),
           permissions: PERMISSIONS.readAdvancedSettings,
         },
       ]
