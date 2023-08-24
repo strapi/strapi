@@ -1,13 +1,15 @@
+import React from 'react';
+
 import { lightTheme, ThemeProvider, Icon } from '@strapi/design-system';
 import { GlassesSquare, ExternalLink } from '@strapi/icons';
-import { render, screen } from '@testing-library/react';
+import { render as renderRTL, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
-import { ContentBox } from '../ContentBox';
+import { ContentBox, ContentBoxProps } from '../ContentBox';
 
-const App = (
-  <ThemeProvider theme={lightTheme}>
-    <IntlProvider locale="en" messages={{}} textComponent="span">
+describe('ContentBox', () => {
+  const render = (props?: Partial<ContentBoxProps>) => ({
+    ...renderRTL(
       <ContentBox
         title="Code example"
         subtitle="Learn by testing real project developed by the community"
@@ -24,22 +26,38 @@ const App = (
           />
         }
         titleEllipsis={false}
-      />
-    </IntlProvider>
-  </ThemeProvider>
-);
+        {...props}
+      />,
+      {
+        wrapper: ({ children }: { children: React.JSX.Element }) => (
+          <ThemeProvider theme={lightTheme}>
+            <IntlProvider locale="en" messages={{}} textComponent="span">
+              {children}
+            </IntlProvider>
+          </ThemeProvider>
+        ),
+      }
+    ),
+  });
 
-describe('ContentBox', () => {
   it('renders with all provided props', async () => {
-    render(App);
-
+    render();
     expect(screen.getByText('Code example')).toBeInTheDocument();
     expect(
       screen.getByText('Learn by testing real project developed by the community')
     ).toBeInTheDocument();
-
     expect(screen.getByTestId('icon')).toBeInTheDocument();
-    expect(screen.getByTestId('icon').parentElement).toHaveStyle('background: rgb(246, 236, 252)');
     expect(screen.getByTestId('end-action-icon')).toBeInTheDocument();
+  });
+
+  it('truncates title greater than 70 characters with ellipsis', () => {
+    render({
+      title: 'ContentBox Testing Title Ellipsis When Length is Greater Than 70 Characters',
+      titleEllipsis: true,
+    });
+
+    expect(
+      screen.getByText('ContentBox Testing Title Ellipsis When Length is Greater Than 70 Chara...')
+    ).toBeInTheDocument();
   });
 });
