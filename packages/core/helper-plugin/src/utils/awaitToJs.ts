@@ -4,7 +4,7 @@
  *
  * @deprecated This function will be removed in the next major release. Use async / await with try / catch instead.
  */
-const to = (promise: Promise<unknown>, errorExt: object) => {
+const to = (promise: Promise<unknown>, errorExt?: object) => {
   return promise
     .then(function (data) {
       return [null, data];
