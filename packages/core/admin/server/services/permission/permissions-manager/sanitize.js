@@ -73,7 +73,6 @@ module.exports = ({ action, ability, model }) => {
       traverse.traverseQuerySort(omitDisallowedAdminUserFields, { schema }),
       traverse.traverseQuerySort(omitHiddenFields, { schema }),
       traverse.traverseQuerySort(removePassword, { schema }),
-      traverse.traverseQueryFilters(omitHiddenFields, { schema }),
       traverse.traverseQuerySort(
         ({ key, attribute, value }, { remove }) => {
           if (!isScalarAttribute(attribute) && isEmpty(value)) {
