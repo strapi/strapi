@@ -1,7 +1,7 @@
-import React, { DependencyList } from 'react';
+import * as React from 'react';
 interface UseFocusWhenNavigateProps {
   selector?: string;
-  dependencies?: DependencyList;
+  dependencies?: React.DependencyList;
 }
 
 const useFocusWhenNavigate = ({
