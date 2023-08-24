@@ -18,10 +18,12 @@ const throwPasswords = (schema: Model) => async (entity: Data) => {
   if (!schema) {
     throw new Error('Missing schema in throwPasswords');
   }
+
   return traverseEntity(throwPassword, { schema }, entity);
 };
 
 const defaultValidateFilters = curry((schema: Model, filters: unknown) => {
+  // TODO: schema checks should check that it is a validate schema with yup
   if (!schema) {
     throw new Error('Missing schema in defaultValidateFilters');
   }
@@ -45,7 +47,7 @@ const defaultValidateFilters = curry((schema: Model, filters: unknown) => {
     ),
     // dynamic zones from filters
     traverseQueryFilters(throwDynamicZones, { schema }),
-    //  morpTo relations from filters
+    // morphTo relations from filters; because you can't have deep filtering on morph relations
     traverseQueryFilters(throwMorphToRelations, { schema }),
     // passwords from filters
     traverseQueryFilters(throwPassword, { schema }),
@@ -86,7 +88,7 @@ const defaultValidateSort = curry((schema: Model, sort: unknown) => {
     ),
     // dynamic zones from sort
     traverseQuerySort(throwDynamicZones, { schema }),
-    // morpTo relations from sort
+    // morphTo relations from sort
     traverseQuerySort(throwMorphToRelations, { schema }),
     // private from sort
     traverseQuerySort(throwPrivate, { schema }),
@@ -118,6 +120,8 @@ const defaultValidateFields = curry((schema: Model, fields: unknown) => {
     // Only allow scalar attributes
     traverseQueryFields(
       ({ key, attribute }) => {
+        // ID is not an attribute per se, so we need to make
+        // an extra check to ensure we're not removing it
         if (key === 'id') {
           return;
         }

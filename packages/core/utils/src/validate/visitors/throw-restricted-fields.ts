@@ -9,9 +9,11 @@ export default (restrictedFields: string[] | null = null): Visitor =>
       throwInvalidParam({ key });
     }
 
-    // Ignore invalid formats
-    if (!isArray(restrictedFields)) {
-      return;
+    // Throw on invalid formats
+    if (!(isArray(restrictedFields) && restrictedFields.every(isString))) {
+      throw new TypeError(
+        `Expected array of strings for restrictedFields but got "${typeof restrictedFields}"`
+      );
     }
 
     // if an exact match was found
