@@ -61,13 +61,7 @@ export default {
       id: 'internationalization',
       to: '/settings/internationalization',
 
-      async Component() {
-        const component = await import(
-          /* webpackChunkName: "i18n-settings-page" */ './pages/SettingsPage'
-        );
-
-        return component;
-      },
+      Component: () => import(/* webpackChunkName: "i18n-settings-page" */ './pages/SettingsPage'),
       permissions: PERMISSIONS.accessMain,
     });
 
