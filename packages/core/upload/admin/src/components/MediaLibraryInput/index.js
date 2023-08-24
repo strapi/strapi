@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { forwardRef, useEffect, useState } from 'react';
 
 import { useNotification } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
@@ -19,209 +19,215 @@ const STEPS = {
   FolderCreate: 'FolderCreate',
 };
 
-export const MediaLibraryInput = ({
-  attribute: { allowedTypes },
-  intlLabel,
-  description,
-  disabled,
-  error,
-  labelAction,
-  multiple,
-  name,
-  onChange,
-  value,
-  required,
-}) => {
-  const fieldAllowedTypes = allowedTypes || ['files', 'images', 'videos', 'audios'];
-  const [uploadedFiles, setUploadedFiles] = useState([]);
-  const [step, setStep] = useState(undefined);
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [droppedAssets, setDroppedAssets] = useState();
-  const [folderId, setFolderId] = useState(null);
-  const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+export const MediaLibraryInput = forwardRef(
+  (
+    {
+      attribute: { allowedTypes },
+      intlLabel,
+      description,
+      disabled,
+      error,
+      labelAction,
+      multiple,
+      name,
+      onChange,
+      value,
+      required,
+    },
+    forwardedRef
+  ) => {
+    const fieldAllowedTypes = allowedTypes || ['files', 'images', 'videos', 'audios'];
+    const [uploadedFiles, setUploadedFiles] = useState([]);
+    const [step, setStep] = useState(undefined);
+    const [selectedIndex, setSelectedIndex] = useState(0);
+    const [droppedAssets, setDroppedAssets] = useState();
+    const [folderId, setFolderId] = useState(null);
+    const { formatMessage } = useIntl();
+    const toggleNotification = useNotification();
 
-  useEffect(() => {
-    // Clear the uploaded files on close
-    if (step === undefined) {
-      setUploadedFiles([]);
-    }
-  }, [step]);
+    useEffect(() => {
+      // Clear the uploaded files on close
+      if (step === undefined) {
+        setUploadedFiles([]);
+      }
+    }, [step]);
 
-  const selectedAssets = Array.isArray(value) ? value : [value];
+    const selectedAssets = Array.isArray(value) ? value : [value];
 
-  const handleValidation = (nextSelectedAssets) => {
-    onChange({
-      target: { name, value: multiple ? nextSelectedAssets : nextSelectedAssets[0] },
-    });
-    setStep(undefined);
-  };
-
-  const handleDeleteAssetFromMediaLibrary = () => {
-    let nextValue;
-
-    if (multiple) {
-      const nextSelectedAssets = selectedAssets.filter(
-        (_, assetIndex) => assetIndex !== selectedIndex
-      );
-      nextValue = nextSelectedAssets.length > 0 ? nextSelectedAssets : null;
-    } else {
-      nextValue = null;
-    }
-
-    onChange({
-      target: { name, value: nextValue },
-    });
-
-    setSelectedIndex(0);
-  };
-
-  const handleDeleteAsset = (asset) => {
-    let nextValue;
-
-    if (multiple) {
-      const nextSelectedAssets = selectedAssets.filter((prevAsset) => prevAsset.id !== asset.id);
-
-      nextValue = nextSelectedAssets.length > 0 ? nextSelectedAssets : null;
-    } else {
-      nextValue = null;
-    }
-
-    onChange({
-      target: { name, value: nextValue },
-    });
-
-    setSelectedIndex(0);
-  };
-
-  const handleAssetEdit = (asset) => {
-    const nextSelectedAssets = selectedAssets.map((prevAsset) =>
-      prevAsset.id === asset.id ? asset : prevAsset
-    );
-
-    onChange({
-      target: { name, value: multiple ? nextSelectedAssets : nextSelectedAssets[0] },
-    });
-  };
-
-  const validateAssetsTypes = (assets, callback) => {
-    const allowedAssets = getAllowedFiles(fieldAllowedTypes, assets);
-
-    if (allowedAssets.length > 0) {
-      callback(allowedAssets);
-    } else {
-      toggleNotification({
-        type: 'warning',
-        timeout: 4000,
-        message: {
-          id: getTrad('input.notification.not-supported'),
-          defaultMessage: `You can't upload this type of file.`,
-          values: {
-            fileTypes: fieldAllowedTypes.join(','),
-          },
-        },
+    const handleValidation = (nextSelectedAssets) => {
+      onChange({
+        target: { name, value: multiple ? nextSelectedAssets : nextSelectedAssets[0] },
       });
+      setStep(undefined);
+    };
+
+    const handleDeleteAssetFromMediaLibrary = () => {
+      let nextValue;
+
+      if (multiple) {
+        const nextSelectedAssets = selectedAssets.filter(
+          (_, assetIndex) => assetIndex !== selectedIndex
+        );
+        nextValue = nextSelectedAssets.length > 0 ? nextSelectedAssets : null;
+      } else {
+        nextValue = null;
+      }
+
+      onChange({
+        target: { name, value: nextValue },
+      });
+
+      setSelectedIndex(0);
+    };
+
+    const handleDeleteAsset = (asset) => {
+      let nextValue;
+
+      if (multiple) {
+        const nextSelectedAssets = selectedAssets.filter((prevAsset) => prevAsset.id !== asset.id);
+
+        nextValue = nextSelectedAssets.length > 0 ? nextSelectedAssets : null;
+      } else {
+        nextValue = null;
+      }
+
+      onChange({
+        target: { name, value: nextValue },
+      });
+
+      setSelectedIndex(0);
+    };
+
+    const handleAssetEdit = (asset) => {
+      const nextSelectedAssets = selectedAssets.map((prevAsset) =>
+        prevAsset.id === asset.id ? asset : prevAsset
+      );
+
+      onChange({
+        target: { name, value: multiple ? nextSelectedAssets : nextSelectedAssets[0] },
+      });
+    };
+
+    const validateAssetsTypes = (assets, callback) => {
+      const allowedAssets = getAllowedFiles(fieldAllowedTypes, assets);
+
+      if (allowedAssets.length > 0) {
+        callback(allowedAssets);
+      } else {
+        toggleNotification({
+          type: 'warning',
+          timeout: 4000,
+          message: {
+            id: getTrad('input.notification.not-supported'),
+            defaultMessage: `You can't upload this type of file.`,
+            values: {
+              fileTypes: fieldAllowedTypes.join(','),
+            },
+          },
+        });
+      }
+    };
+
+    const handleAssetDrop = (assets) => {
+      validateAssetsTypes(assets, (allowedAssets) => {
+        setDroppedAssets(allowedAssets);
+        setStep(STEPS.AssetUpload);
+      });
+    };
+
+    let label = intlLabel.id ? formatMessage(intlLabel) : '';
+
+    if (multiple && selectedAssets.length > 0) {
+      label = `${label} (${selectedIndex + 1} / ${selectedAssets.length})`;
     }
-  };
 
-  const handleAssetDrop = (assets) => {
-    validateAssetsTypes(assets, (allowedAssets) => {
-      setDroppedAssets(allowedAssets);
-      setStep(STEPS.AssetUpload);
-    });
-  };
+    const handleNext = () => {
+      setSelectedIndex((current) => (current < selectedAssets.length - 1 ? current + 1 : 0));
+    };
 
-  let label = intlLabel.id ? formatMessage(intlLabel) : '';
+    const handlePrevious = () => {
+      setSelectedIndex((current) => (current > 0 ? current - 1 : selectedAssets.length - 1));
+    };
 
-  if (multiple && selectedAssets.length > 0) {
-    label = `${label} (${selectedIndex + 1} / ${selectedAssets.length})`;
-  }
+    const handleFilesUploadSucceeded = (uploadedFiles) => {
+      setUploadedFiles((prev) => [...prev, ...uploadedFiles]);
+    };
 
-  const handleNext = () => {
-    setSelectedIndex((current) => (current < selectedAssets.length - 1 ? current + 1 : 0));
-  };
+    const hint = description
+      ? formatMessage(
+          { id: description.id, defaultMessage: description.defaultMessage },
+          { ...description.values }
+        )
+      : '';
 
-  const handlePrevious = () => {
-    setSelectedIndex((current) => (current > 0 ? current - 1 : selectedAssets.length - 1));
-  };
+    let initiallySelectedAssets = selectedAssets;
 
-  const handleFilesUploadSucceeded = (uploadedFiles) => {
-    setUploadedFiles((prev) => [...prev, ...uploadedFiles]);
-  };
+    if (uploadedFiles.length > 0) {
+      const allowedUploadedFiles = getAllowedFiles(fieldAllowedTypes, uploadedFiles);
 
-  const hint = description
-    ? formatMessage(
-        { id: description.id, defaultMessage: description.defaultMessage },
-        { ...description.values }
-      )
-    : '';
+      initiallySelectedAssets = multiple
+        ? [...allowedUploadedFiles, ...selectedAssets]
+        : [allowedUploadedFiles[0]];
+    }
 
-  let initiallySelectedAssets = selectedAssets;
-
-  if (uploadedFiles.length > 0) {
-    const allowedUploadedFiles = getAllowedFiles(fieldAllowedTypes, uploadedFiles);
-
-    initiallySelectedAssets = multiple
-      ? [...allowedUploadedFiles, ...selectedAssets]
-      : [allowedUploadedFiles[0]];
-  }
-
-  return (
-    <>
-      <CarouselAssets
-        assets={selectedAssets}
-        disabled={disabled}
-        label={label}
-        labelAction={labelAction}
-        onDeleteAsset={handleDeleteAsset}
-        onDeleteAssetFromMediaLibrary={handleDeleteAssetFromMediaLibrary}
-        onAddAsset={() => setStep(STEPS.AssetSelect)}
-        onDropAsset={handleAssetDrop}
-        onEditAsset={handleAssetEdit}
-        onNext={handleNext}
-        onPrevious={handlePrevious}
-        error={error}
-        hint={hint}
-        required={required}
-        selectedAssetIndex={selectedIndex}
-        trackedLocation="content-manager"
-      />
-
-      {step === STEPS.AssetSelect && (
-        <AssetDialog
-          allowedTypes={fieldAllowedTypes}
-          initiallySelectedAssets={initiallySelectedAssets}
-          folderId={folderId}
-          onClose={() => {
-            setStep(undefined);
-            setFolderId(null);
-          }}
-          onValidate={handleValidation}
-          multiple={multiple}
-          onAddAsset={() => setStep(STEPS.AssetUpload)}
-          onAddFolder={() => setStep(STEPS.FolderCreate)}
-          onChangeFolder={(folder) => setFolderId(folder)}
+    return (
+      <>
+        <CarouselAssets
+          ref={forwardedRef}
+          assets={selectedAssets}
+          disabled={disabled}
+          label={label}
+          labelAction={labelAction}
+          onDeleteAsset={handleDeleteAsset}
+          onDeleteAssetFromMediaLibrary={handleDeleteAssetFromMediaLibrary}
+          onAddAsset={() => setStep(STEPS.AssetSelect)}
+          onDropAsset={handleAssetDrop}
+          onEditAsset={handleAssetEdit}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+          error={error}
+          hint={hint}
+          required={required}
+          selectedAssetIndex={selectedIndex}
           trackedLocation="content-manager"
         />
-      )}
 
-      {step === STEPS.AssetUpload && (
-        <UploadAssetDialog
-          onClose={() => setStep(STEPS.AssetSelect)}
-          initialAssetsToAdd={droppedAssets}
-          addUploadedFiles={handleFilesUploadSucceeded}
-          trackedLocation="content-manager"
-          folderId={folderId}
-          validateAssetsTypes={validateAssetsTypes}
-        />
-      )}
+        {step === STEPS.AssetSelect && (
+          <AssetDialog
+            allowedTypes={fieldAllowedTypes}
+            initiallySelectedAssets={initiallySelectedAssets}
+            folderId={folderId}
+            onClose={() => {
+              setStep(undefined);
+              setFolderId(null);
+            }}
+            onValidate={handleValidation}
+            multiple={multiple}
+            onAddAsset={() => setStep(STEPS.AssetUpload)}
+            onAddFolder={() => setStep(STEPS.FolderCreate)}
+            onChangeFolder={(folder) => setFolderId(folder)}
+            trackedLocation="content-manager"
+          />
+        )}
 
-      {step === STEPS.FolderCreate && (
-        <EditFolderDialog onClose={() => setStep(STEPS.AssetSelect)} parentFolderId={folderId} />
-      )}
-    </>
-  );
-};
+        {step === STEPS.AssetUpload && (
+          <UploadAssetDialog
+            onClose={() => setStep(STEPS.AssetSelect)}
+            initialAssetsToAdd={droppedAssets}
+            addUploadedFiles={handleFilesUploadSucceeded}
+            trackedLocation="content-manager"
+            folderId={folderId}
+            validateAssetsTypes={validateAssetsTypes}
+          />
+        )}
+
+        {step === STEPS.FolderCreate && (
+          <EditFolderDialog onClose={() => setStep(STEPS.AssetSelect)} parentFolderId={folderId} />
+        )}
+      </>
+    );
+  }
+);
 
 MediaLibraryInput.defaultProps = {
   attribute: { allowedTypes: ['videos', 'files', 'images', 'audios'] },

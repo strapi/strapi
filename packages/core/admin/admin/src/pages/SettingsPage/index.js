@@ -8,7 +8,6 @@ import { Redirect, Route, Switch, useParams } from 'react-router-dom';
 
 import { useSettingsMenu } from '../../hooks';
 import { useEnterprise } from '../../hooks/useEnterprise';
-import { createRoute } from '../../utils/createRoute';
 
 import SettingsNav from './components/SettingsNav';
 import { SETTINGS_ROUTES_CE } from './constants';
@@ -31,26 +30,6 @@ export function SettingsPage() {
     }
   );
 
-  /**
-   * `Component` is an async function, which is passed as property of the
-   * addSettingsLink() API during the plugin bootstrap step.
-   *
-   * Because of that we can't just render <Route component={Component} />,
-   * but have to await the function.
-   *
-   * This isn't a good React pattern and should be reconsidered.
-   */
-
-  const pluginSettingsRoutes = Object.values(settings).flatMap((section) =>
-    section.links.map((link) => createRoute(link.Component, link.to, link.exact || false))
-  );
-
-  // Since the useSettingsMenu hook can make API calls in order to check the links permissions
-  // We need to add a loading state to prevent redirecting the user while permissions are being checked
-  if (isLoading) {
-    return <LoadingIndicatorPage />;
-  }
-
   if (!settingId) {
     return <Redirect to="/settings/application-infos" />;
   }
@@ -64,15 +43,49 @@ export function SettingsPage() {
         })}
       />
 
-      <Switch>
-        <Route path="/settings/application-infos" component={ApplicationInfosPage} exact />
+      {isLoading ? (
+        <LoadingIndicatorPage />
+      ) : (
+        <Switch>
+          <Route
+            path="/settings/application-infos"
+            render={() => (
+              <React.Suspense fallback={<LoadingIndicatorPage />}>
+                <ApplicationInfosPage />
+              </React.Suspense>
+            )}
+            exact
+          />
 
-        {routes.map(({ path, component }) => (
-          <Route key={path} path={path} component={component} exact />
-        ))}
+          {routes.map(({ path, Component }) => (
+            <Route
+              key={path}
+              path={path}
+              render={() => (
+                <React.Suspense fallback={<LoadingIndicatorPage />}>
+                  <Component />
+                </React.Suspense>
+              )}
+              exact
+            />
+          ))}
 
-        {pluginSettingsRoutes}
-      </Switch>
+          {Object.values(settings).flatMap((section) =>
+            section.links.map(({ Component, to, exact }) => (
+              <Route
+                render={() => (
+                  <React.Suspense fallback={<LoadingIndicatorPage />}>
+                    <Component />
+                  </React.Suspense>
+                )}
+                key={to}
+                path={to}
+                exact={exact || false}
+              />
+            ))
+          )}
+        </Switch>
+      )}
     </Layout>
   );
 }
