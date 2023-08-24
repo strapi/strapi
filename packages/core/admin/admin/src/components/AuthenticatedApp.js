@@ -18,6 +18,7 @@ import { Admin } from '../pages/Admin';
 import { getFullName } from '../utils/getFullName';
 import { hashAdminUserEmail } from '../utils/uniqueAdminHash';
 
+import NpsSurvey from './NpsSurvey';
 import RBACProvider from './RBACProvider';
 
 const strapiVersion = packageJSON.version;
@@ -222,6 +223,7 @@ export const AuthenticatedApp = () => {
       userDisplayName={userDisplayName}
     >
       <RBACProvider permissions={permissions} refetchPermissions={refetch}>
+        <NpsSurvey />
         <Admin />
       </RBACProvider>
     </AppInfoProvider>

@@ -7,6 +7,7 @@ import userEvent from '@testing-library/user-event';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IntlProvider } from 'react-intl';
+import { MemoryRouter } from 'react-router-dom';
 
 import RepeatableComponent from '../index';
 
@@ -70,17 +71,22 @@ describe('RepeatableComponents', () => {
     componentUid: 'test',
   };
 
-  const TestComponent = (props) => (
-    <ThemeProvider theme={lightTheme}>
-      <IntlProvider locale="en" messages={{}} defaultLocale="en">
-        <DndProvider backend={HTML5Backend}>
-          <RepeatableComponent {...defaultProps} {...props} />
-        </DndProvider>
-      </IntlProvider>
-    </ThemeProvider>
-  );
+  const TestComponent = (props) => <RepeatableComponent {...defaultProps} {...props} />;
 
-  const setup = (props) => render(<TestComponent {...props} />);
+  const setup = (props) =>
+    render(<TestComponent {...props} />, {
+      wrapper({ children }) {
+        return (
+          <ThemeProvider theme={lightTheme}>
+            <IntlProvider locale="en" messages={{}} defaultLocale="en">
+              <DndProvider backend={HTML5Backend}>
+                <MemoryRouter>{children}</MemoryRouter>
+              </DndProvider>
+            </IntlProvider>
+          </ThemeProvider>
+        );
+      },
+    });
 
   describe('rendering', () => {
     it('should render the component initializer when there are no components to render', () => {
