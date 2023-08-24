@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import { getFileExtension } from '../getFileExtension';
 
 describe('HELPER PLUGIN | utils | getFileExtension', () => {
