@@ -1,44 +1,9 @@
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import qs from 'qs';
 
 import { auth } from './auth';
 
-/**
- * TODO: review this file, we export a lot
- * of internals and it's not entirely clear why...
- */
-
-export const reqInterceptor = async (config) => {
-  config.headers = {
-    Authorization: `Bearer ${auth.getToken()}`,
-  };
-
-  return config;
-};
-
-export const reqErrorInterceptor = (error) => {
-  return Promise.reject(error);
-};
-
-export const resInterceptor = (response) => response;
-
-export const resErrorInterceptor = (error) => {
-  // whatever you want to do with the error
-  if (error?.response?.status === 401) {
-    auth.clearAppStorage();
-    window.location.reload();
-  }
-
-  throw error;
-};
-
-export const addInterceptors = (instance) => {
-  instance.interceptors.request.use(reqInterceptor, reqErrorInterceptor);
-
-  instance.interceptors.response.use(resInterceptor, resErrorInterceptor);
-};
-
-export const fetchClient = () => {
+const fetchClient = (): AxiosInstance => {
   const instance = axios.create({
     headers: {
       Accept: 'application/json',
@@ -48,7 +13,29 @@ export const fetchClient = () => {
       return qs.stringify(params, { encode: false });
     },
   });
-  addInterceptors(instance);
+
+  // Add a request interceptor to add authorization token to headers, rejects errors
+  instance.interceptors.request.use(
+    async (config) => {
+      config.headers.Authorization = `Bearer ${auth.getToken()}`;
+
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+
+  // Add a response interceptor, let pass the response, and if error is 401, clear the app storage and reload the page
+  instance.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error?.response?.status === 401) {
+        auth.clearAppStorage();
+        window.location.reload();
+      }
+
+      throw error;
+    }
+  );
 
   return instance;
 };
