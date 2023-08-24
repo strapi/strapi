@@ -1,23 +1,28 @@
 import React, { useEffect, useRef } from 'react';
 
-import { Form as FormikForm, useFormikContext } from 'formik';
+import { Form as FormikForm, FormikFormProps, useFormikContext } from 'formik';
 
-const Form = (props) => {
-  const formRef = useRef(null);
+export type FormProps = Omit<FormikFormProps, 'noValidate'>;
+
+/**
+ * @deprecated Use Formik form directly instead.
+ */
+const Form = ({ ...props }: FormProps) => {
+  const formRef = useRef<HTMLFormElement>(null!);
   const { isSubmitting, isValidating, errors, touched } = useFormikContext();
 
   useEffect(() => {
     if (isSubmitting && !isValidating) {
       const errorsInForm = formRef.current.querySelectorAll('[data-strapi-field-error]');
 
-      if (errorsInForm.length > 0) {
+      if (errorsInForm && errorsInForm.length > 0) {
         const firstError = errorsInForm[0];
         const describingId = firstError.getAttribute('id');
         const formElementInError = formRef.current.querySelector(
           `[aria-describedby="${describingId}"]`
         );
 
-        if (formElementInError) {
+        if (formElementInError && formElementInError instanceof HTMLElement) {
           formElementInError.focus();
         }
       }
