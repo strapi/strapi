@@ -12,46 +12,14 @@ import merge from 'lodash/merge';
 import { useIntl } from 'react-intl';
 import { useQueries } from 'react-query';
 import { useDispatch } from 'react-redux';
-import { Route, Switch } from 'react-router-dom';
 
-import PrivateRoute from '../../components/PrivateRoute';
 import { ADMIN_PERMISSIONS_CE } from '../../constants';
 import useConfigurations from '../../hooks/useConfigurations';
 import { useEnterprise } from '../../hooks/useEnterprise';
 
-import { AUTH_ROUTES_CE, SET_ADMIN_PERMISSIONS } from './constants';
+import { SET_ADMIN_PERMISSIONS } from './constants';
 
-const AuthPage = React.lazy(() =>
-  import(/* webpackChunkName: "Admin-AuthPage" */ '../AuthPage').then((module) => ({
-    default: module.AuthPage,
-  }))
-);
-
-const AuthenticatedApp = React.lazy(() =>
-  import(/* webpackChunkName: "Admin-AuthenticatedApp" */ '../../components/AuthenticatedApp').then(
-    (module) => ({ default: module.AuthenticatedApp })
-  )
-);
-
-const UseCasePage = React.lazy(() =>
-  import(/* webpackChunkName: "Admin-UseCasePage" */ '../UseCasePage').then((module) => ({
-    default: module.UseCasePage,
-  }))
-);
-
-const NotFoundPage = React.lazy(() =>
-  import(/* webpackChunkName: "Admin_NotFoundPage" */ '../NotFoundPage').then((module) => ({
-    default: module.NotFoundPage,
-  }))
-);
-
-const InternalErrorPage = React.lazy(() =>
-  import(/* webpackChunkName: "Admin_InternalErrorPage" */ '../InternalErrorPage').then(
-    (module) => ({ default: module.InternalErrorPage })
-  )
-);
-
-export function App() {
+export function App({ children }) {
   const { updateProjectSettings } = useConfigurations();
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
@@ -70,18 +38,8 @@ export function App() {
     }
   );
 
-  // Load authentication routes for CE and EE (SSO)
-  const authRoutes = useEnterprise(
-    AUTH_ROUTES_CE,
-    async () => (await import('../../../../ee/admin/pages/App/constants')).AUTH_ROUTES_EE,
-    {
-      defaultValue: [],
-    }
-  );
-
   // TODO: this should be moved to redux
-  const [{ hasAdmin, uuid }, setState] = React.useState({
-    hasAdmin: false,
+  const [{ uuid }, setState] = React.useState({
     uuid: undefined,
   });
 
@@ -210,32 +168,9 @@ export function App() {
   }
 
   return (
-    <React.Suspense fallback={<LoadingIndicatorPage />}>
+    <TrackingProvider value={trackingContext}>
       <SkipToContent>{formatMessage({ id: 'skipToContent' })}</SkipToContent>
-      <TrackingProvider value={trackingContext}>
-        <Switch>
-          {authRoutes.map(({ path, component }) => (
-            <Route key={path} path={path} component={component} exact />
-          ))}
-
-          <Route
-            path="/auth/:authType"
-            render={(routerProps) => (
-              <AuthPage
-                {...routerProps}
-                setHasAdmin={(hasAdmin) => setState((prev) => ({ ...prev, hasAdmin }))}
-                hasAdmin={hasAdmin}
-              />
-            )}
-            exact
-          />
-          <PrivateRoute path="/usecase" component={UseCasePage} />
-          <PrivateRoute path="/" component={AuthenticatedApp} />
-          <Route path="/404" component={NotFoundPage} />
-          <Route path="/500" component={InternalErrorPage} />
-          <Route path="" component={NotFoundPage} />
-        </Switch>
-      </TrackingProvider>
-    </React.Suspense>
+      {children}
+    </TrackingProvider>
   );
 }

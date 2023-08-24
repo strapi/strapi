@@ -1,10 +1,11 @@
 import * as React from 'react';
 
 import { darkTheme, lightTheme } from '@strapi/design-system';
+import { auth, LoadingIndicatorPage } from '@strapi/helper-plugin';
 import invariant from 'invariant';
 import merge from 'lodash/merge';
 import { Helmet } from 'react-helmet';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 
 import faviconSrc from './assets/favicon.png';
 import logoSrc from './assets/images/logo-strapi-2022.svg';
@@ -20,6 +21,36 @@ import {
   MUTATE_SINGLE_TYPES_LINKS,
 } from './exposedHooks';
 import { App } from './pages/App';
+
+const AuthPage = React.lazy(() =>
+  import(/* webpackChunkName: "Admin-AuthPage" */ './pages/AuthPage').then((module) => ({
+    default: module.AuthPage,
+  }))
+);
+
+const AuthenticatedApp = React.lazy(() =>
+  import(/* webpackChunkName: "Admin-AuthenticatedApp" */ './components/AuthenticatedApp').then(
+    (module) => ({ default: module.AuthenticatedApp })
+  )
+);
+
+const UseCasePage = React.lazy(() =>
+  import(/* webpackChunkName: "Admin-UseCasePage" */ './pages/UseCasePage').then((module) => ({
+    default: module.UseCasePage,
+  }))
+);
+
+const NotFoundPage = React.lazy(() =>
+  import(/* webpackChunkName: "Admin_NotFoundPage" */ './pages/NotFoundPage').then((module) => ({
+    default: module.NotFoundPage,
+  }))
+);
+
+const InternalErrorPage = React.lazy(() =>
+  import(/* webpackChunkName: "Admin_InternalErrorPage" */ './pages/InternalErrorPage').then(
+    (module) => ({ default: module.InternalErrorPage })
+  )
+);
 
 export class StrapiApp {
   constructor({ configuration, corePlugins = {} } = {}) {
@@ -70,6 +101,67 @@ export class StrapiApp {
     this.injectionZones = INJECTION_ZONES;
     this.customFields = customFields;
     this.menu = [];
+    this.routes = [
+      {
+        path: '/usecase',
+        render: (props) =>
+          auth.getToken() !== null ? (
+            <AuthenticatedApp {...props} />
+          ) : (
+            <Redirect
+              to={{
+                pathname: '/auth/login',
+                search:
+                  pathname !== '/' && `?redirectTo=${encodeURIComponent(`${pathname}${search}`)}`,
+              }}
+            />
+          ),
+      },
+
+      {
+        path: '/usecase',
+        render: (props) =>
+          auth.getToken() !== null ? (
+            <UseCasePage {...props} />
+          ) : (
+            <Redirect
+              to={{
+                pathname: '/auth/login',
+                search:
+                  pathname !== '/' && `?redirectTo=${encodeURIComponent(`${pathname}${search}`)}`,
+              }}
+            />
+          ),
+      },
+
+      {
+        path: '/auth/:authType',
+        render: (props) => <AuthPage {...props} />,
+        exact: true,
+      },
+
+      // ...(window.isEE ? {
+      //   path: '/auth/login/:authResponse',
+      //   component: React.lazy(() =>
+      //     import('../AuthResponse').then((module) => ({ default: module.AuthResponse }))
+      //   ),
+      // } : {}),
+
+      {
+        path: '/404',
+        component: NotFoundPage,
+      },
+
+      {
+        path: '/500',
+        component: InternalErrorPage,
+      },
+
+      {
+        path: '',
+        component: NotFoundPage,
+      },
+    ];
     this.settings = {
       global: {
         id: 'global',
@@ -453,9 +545,18 @@ export class StrapiApp {
             ]}
             htmlAttributes={{ lang: localStorage.getItem(LOCALE_LOCALSTORAGE_KEY) || 'en' }}
           />
-          <BrowserRouter basename={process.env.ADMIN_PATH.replace(window.location.origin, '')}>
-            <App store={store} />
-          </BrowserRouter>
+
+          <App>
+            <React.Suspense fallback={<LoadingIndicatorPage />}>
+              <BrowserRouter basename={process.env.ADMIN_PATH.replace(window.location.origin, '')}>
+                <Switch>
+                  {this.routes.map((route) => (
+                    <Route {...route} />
+                  ))}
+                </Switch>
+              </BrowserRouter>
+            </React.Suspense>
+          </App>
         </>
       </Providers>
     );
