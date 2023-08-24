@@ -1,35 +1,43 @@
-import { getOr } from 'lodash/fp';
-
-import { contentTypes, sanitize } from '@strapi/utils';
-import type { Schema } from '@strapi/strapi';
+import { prop } from 'lodash/fp';
+import type Koa from 'koa';
+import { contentTypes as contentTypeUtils, sanitize } from '@strapi/utils';
+import type { CoreApi, Schema } from '../../types';
 
 import { transformResponse } from './transform';
 import createSingleTypeController from './single-type';
 import createCollectionTypeController from './collection-type';
 
-const getAuthFromKoaContext = getOr({}, 'state.auth');
+const isSingleType = (contentType: Schema.ContentType): contentType is Schema.SingleType =>
+  contentTypeUtils.isSingleType(contentType);
 
-export const createController = ({ contentType }: { contentType: Schema.ContentType }) => {
-  const ctx = { contentType };
+const getAuthFromKoaContext = (ctx: Koa.Context) => prop('state.auth', ctx) ?? {};
 
-  const proto = {
-    transformResponse(data, meta) {
+function createController<T extends Schema.SingleType | Schema.CollectionType>(opts: {
+  contentType: T;
+}): T extends Schema.SingleType ? CoreApi.Controller.SingleType : CoreApi.Controller.CollectionType;
+function createController({
+  contentType,
+}: {
+  contentType: Schema.SingleType | Schema.CollectionType;
+}) {
+  const proto: CoreApi.Controller.Base = {
+    transformResponse(data: unknown, meta?: unknown) {
       return transformResponse(data, meta, { contentType });
     },
 
-    async sanitizeOutput(data, ctx) {
+    async sanitizeOutput(data: unknown, ctx: Koa.Context) {
       const auth = getAuthFromKoaContext(ctx);
 
       return sanitize.contentAPI.output(data, contentType, { auth });
     },
 
-    sanitizeInput(data, ctx) {
+    sanitizeInput(data: unknown, ctx: Koa.Context) {
       const auth = getAuthFromKoaContext(ctx);
 
       return sanitize.contentAPI.input(data, contentType, { auth });
     },
 
-    sanitizeQuery(ctx) {
+    sanitizeQuery(ctx: Koa.Context) {
       const auth = getAuthFromKoaContext(ctx);
 
       return sanitize.contentAPI.query(ctx.query, contentType, { auth });
@@ -38,11 +46,13 @@ export const createController = ({ contentType }: { contentType: Schema.ContentT
 
   let ctrl;
 
-  if (contentTypes.isSingleType(contentType)) {
-    ctrl = createSingleTypeController(ctx);
+  if (isSingleType(contentType)) {
+    ctrl = createSingleTypeController({ contentType });
   } else {
-    ctrl = createCollectionTypeController(ctx);
+    ctrl = createCollectionTypeController({ contentType });
   }
 
   return Object.assign(Object.create(proto), ctrl);
-};
+}
+
+export { createController };

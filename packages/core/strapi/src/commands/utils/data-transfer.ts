@@ -1,17 +1,21 @@
 import chalk from 'chalk';
 import Table from 'cli-table3';
-import { Option } from 'commander';
+import { Command, Option } from 'commander';
 import { engine } from '@strapi/data-transfer';
 
 import { configs, createLogger } from '@strapi/logger';
+import { errors } from '@strapi/utils';
 import ora from 'ora';
-import { TransferEngineInitializationError } from '@strapi/data-transfer/dist/engine/errors';
 import { merge } from 'lodash/fp';
 import { readableBytes, exitWith } from './helpers';
 import strapi from '../../index';
 import { getParseListWithChoices, parseInteger, confirmMessage } from './commander';
 
-const exitMessageText = (process, error = false) => {
+const {
+  errors: { TransferEngineInitializationError },
+} = engine;
+
+const exitMessageText = (process: string, error = false) => {
   const processCapitalized = process[0].toUpperCase() + process.slice(1);
 
   if (!error) {
@@ -23,7 +27,7 @@ const exitMessageText = (process, error = false) => {
   return chalk.bold(chalk.red(`${processCapitalized} process failed.`));
 };
 
-const pad = (n) => {
+const pad = (n: number) => {
   return (n < 10 ? '0' : '') + String(n);
 };
 
@@ -97,7 +101,13 @@ const DEFAULT_IGNORED_CONTENT_TYPES = [
   'admin::audit-log',
 ];
 
-const abortTransfer = async ({ engine, strapi }) => {
+const abortTransfer = async ({
+  engine,
+  strapi,
+}: {
+  engine: engine.ITransferEngine;
+  strapi: Strapi.Strapi;
+}) => {
   try {
     await engine.abortTransfer();
     await strapi.destroy();
@@ -117,18 +127,19 @@ const setSignalHandler = async (handler, signals = ['SIGINT', 'SIGTERM', 'SIGQUI
   });
 };
 
-const createStrapiInstance = async (opts = {}) => {
+const createStrapiInstance = async (opts: { logLevel?: string } = {}) => {
   try {
     const appContext = await strapi.compile();
     const app = strapi({ ...opts, ...appContext });
 
     app.log.level = opts.logLevel || 'error';
     return await app.load();
-  } catch (err) {
-    if (err.code === 'ECONNREFUSED') {
+  } catch (error) {
+    if (error instanceof Error && 'code' in error && error.code === 'ECONNREFUSED') {
       throw new Error('Process failed. Check the database connection with your Strapi project.');
     }
-    throw err;
+
+    throw error;
   }
 };
 
@@ -151,13 +162,13 @@ const onlyOption = new Option(
   `Include only these types of data (plus schemas). Available types: ${transferDataTypes.join(',')}`
 ).argParser(getParseListWithChoices(transferDataTypes, 'Invalid options for "only"'));
 
-const validateExcludeOnly = (command) => {
+const validateExcludeOnly = (command: Command) => {
   const { exclude, only } = command.opts();
   if (!only || !exclude) {
     return;
   }
 
-  const choicesInBoth = only.filter((n) => {
+  const choicesInBoth = only.filter((n: string) => {
     return exclude.indexOf(n) !== -1;
   });
   if (choicesInBoth.length > 0) {
@@ -174,10 +185,10 @@ const errorColors = {
   fatal: chalk.red,
   error: chalk.red,
   silly: chalk.yellow,
-};
+} as const;
 
 const formatDiagnostic =
-  (operation) =>
+  (operation: string): Parameters<engine.ITransferEngine['diagnostics']['onDiagnostic']>[0] =>
   ({ details, kind }) => {
     const logger = createLogger(
       configs.createOutputFileConfiguration(`${operation}_error_log_${Date.now()}.log`)
@@ -248,11 +259,8 @@ const loadersFactory = (defaultLoaders = {}) => {
 
 /**
  * Get the telemetry data to be sent for a didDEITSProcess* event from an initialized transfer engine object
- *
- * @param {import('@strapi/data-transfer/types').ITransferEngine} engine Initialized transfer engine
- * @returns {object} Telemetry properties object
  */
-const getTransferTelemetryPayload = (engine) => {
+const getTransferTelemetryPayload = (engine: engine.ITransferEngine) => {
   return {
     eventProperties: {
       source: engine?.sourceProvider?.name,
@@ -264,7 +272,7 @@ const getTransferTelemetryPayload = (engine) => {
 /**
  * Get a transfer engine schema diff handler that confirms with the user before bypassing a schema check
  */
-const getDiffHandler = (engine, { force, action }) => {
+const getDiffHandler = (engine: engine.ITransferEngine, { force, action }) => {
   return async (context, next) => {
     // if we abort here, we need to actually exit the process because of conflict with inquirer prompt
     setSignalHandler(async () => {
@@ -334,7 +342,7 @@ const getDiffHandler = (engine, { force, action }) => {
   };
 };
 
-const getAssetsBackupHandler = (engine, { force, action }) => {
+const getAssetsBackupHandler = (engine: engine.ITransferEngine, { force, action }) => {
   return async (context, next) => {
     // if we abort here, we need to actually exit the process because of conflict with inquirer prompt
     setSignalHandler(async () => {

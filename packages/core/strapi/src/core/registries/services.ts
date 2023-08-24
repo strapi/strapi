@@ -4,8 +4,8 @@ import type { Strapi } from '../../Strapi';
 import type { Common } from '../../types';
 
 export type ServiceFactory = (params: { strapi: Strapi }) => Common.Service | Common.Service;
-export type ServiceFactoryMap = Record<Common.UID.Service, ServiceFactory>;
-export type ServiceMap = Record<Common.UID.Service, Common.Service>;
+export type ServiceFactoryMap = Record<string, ServiceFactory>;
+export type ServiceMap = Record<string, Common.Service>;
 export type ServiceExtendFn = (service: Common.Service) => Common.Service;
 
 const servicesRegistry = (strapi: Strapi) => {
@@ -47,7 +47,7 @@ const servicesRegistry = (strapi: Strapi) => {
         Object.defineProperty(map, uid, {
           enumerable: true,
           get: () => {
-            return this.get(uid);
+            return this.get(uid as Common.UID.Service);
           },
         });
       }
@@ -58,7 +58,7 @@ const servicesRegistry = (strapi: Strapi) => {
     /**
      * Registers a service
      */
-    set(uid: Common.UID.Service, service: ServiceFactory) {
+    set(uid: string, service: ServiceFactory) {
       services[uid] = service;
       delete instantiatedServices[uid];
       return this;

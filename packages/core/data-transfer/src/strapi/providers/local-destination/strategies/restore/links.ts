@@ -5,7 +5,7 @@ import { createLinkQuery } from '../../../../queries/link';
 
 export const createLinksWriteStream = (
   mapID: (uid: string, id: number) => number | undefined,
-  strapi: Strapi.Strapi,
+  strapi: Strapi.Loaded,
   transaction?: Transaction
 ) => {
   return new Writable({

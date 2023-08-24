@@ -58,11 +58,11 @@ function getFileStats(filepath: string, isLocal = false): Promise<{ size: number
 /**
  * Generate and consume assets streams in order to stream each file individually
  */
-export const createAssetsStream = (strapi: Strapi.Strapi): Duplex => {
+export const createAssetsStream = (strapi: Strapi.Loaded): Duplex => {
   const generator: () => AsyncGenerator<IAsset, void> = async function* () {
     const stream: Readable = strapi.db
       // Create a query builder instance (default type is 'select')
-      .queryBuilder('plugin::upload.file')
+      ?.queryBuilder('plugin::upload.file')
       // Fetch all columns
       .select('*')
       // Get a readable stream

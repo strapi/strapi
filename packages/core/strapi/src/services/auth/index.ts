@@ -68,7 +68,7 @@ const createAuthentication = (): Authentication => {
         return next();
       }
 
-      const routeStrategies = strategies[route.info.type];
+      const routeStrategies = route.info.type ? strategies[route.info.type] : [];
       const configStrategies = (config?.strategies ?? routeStrategies ?? []) as Array<
         string | Strategy
       >;

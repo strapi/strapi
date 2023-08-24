@@ -13,6 +13,8 @@ const transformRoutePrefixFor = (pluginName: string) => (route: Common.Route) =>
   };
 };
 
+const filterContentAPI = (route: Common.Route) => route.info.type === 'content-api';
+
 /**
  * Create a content API container that holds logic, tools and utils. (eg: permissions, ...)
  */
@@ -27,7 +29,7 @@ const createContentAPI = (strapi: Strapi) => {
         }
 
         return route;
-      }).filter((route) => route.info.type === 'content-api');
+      }).filter(filterContentAPI);
 
       if (routes.length === 0) {
         return;
@@ -43,13 +45,13 @@ const createContentAPI = (strapi: Strapi) => {
     _.forEach(strapi.plugins, (plugin, pluginName) => {
       const transformPrefix = transformRoutePrefixFor(pluginName);
 
-      const routes = _.flatMap(plugin.routes, (route) => {
-        if ('routes' in route) {
-          return route.routes.map(transformPrefix);
-        }
+      if (Array.isArray(plugin.routes)) {
+        return plugin.routes.map(transformPrefix).filter(filterContentAPI);
+      }
 
-        return route.map(transformPrefix);
-      }).filter((route) => route.info.type === 'content-api');
+      const routes = _.flatMap(plugin.routes, (route) => route.routes.map(transformPrefix)).filter(
+        filterContentAPI
+      );
 
       if (routes.length === 0) {
         return;

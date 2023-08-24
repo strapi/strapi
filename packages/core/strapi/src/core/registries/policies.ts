@@ -4,7 +4,7 @@ import { addNamespace, hasNamespace } from '../utils';
 import type { Common } from '../../types';
 
 type PolicyExtendFn = (policy: Common.Policy) => Common.Policy;
-type PolicyMap = Record<Common.UID.Policy, Common.Policy>;
+type PolicyMap = Record<string, Common.Policy>;
 
 // TODO: move instantiation part here instead of in the policy utils
 const policiesRegistry = () => {
@@ -35,7 +35,7 @@ const policiesRegistry = () => {
     /**
      * Registers a policy
      */
-    set(uid: Common.UID.Policy, policy: Common.Policy) {
+    set(uid: string, policy: Common.Policy) {
       policies[uid] = policy;
       return this;
     },

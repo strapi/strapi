@@ -1,3 +1,4 @@
+import { toString } from 'lodash/fp';
 import type { Database } from '@strapi/database';
 
 const coreStoreModel = {
@@ -22,7 +23,7 @@ const coreStoreModel = {
   },
 };
 
-type Params = {
+type SetParams = {
   key: string;
   value: unknown;
   type?: string;
@@ -31,15 +32,25 @@ type Params = {
   tag?: string;
 };
 
+type GetParams = {
+  key: string;
+  type?: string;
+  environment?: string;
+  name?: string;
+  tag?: string;
+};
+
+type Params = SetParams & GetParams;
+
 interface CoreStore {
   (defaultParams: Params): {
-    get(params: Partial<Params>): Promise<unknown>;
-    set(params: Partial<Params>): Promise<void>;
-    delete(params: Partial<Params>): Promise<void>;
+    get(params: Partial<GetParams>): Promise<unknown>;
+    set(params: Partial<SetParams>): Promise<void>;
+    delete(params: Partial<GetParams>): Promise<void>;
   };
-  get(params: Params): Promise<unknown>;
-  set(params: Params): Promise<void>;
-  delete(params: Params): Promise<void>;
+  get(params: GetParams): Promise<unknown>;
+  set(params: SetParams): Promise<void>;
+  delete(params: GetParams): Promise<void>;
 }
 
 const createCoreStore = ({ db }: { db: Database }) => {
@@ -118,7 +129,7 @@ const createCoreStore = ({ db }: { db: Database }) => {
       return db.query('strapi::core-store').update({
         where: { id: data.id },
         data: {
-          value: JSON.stringify(value) || value.toString(),
+          value: JSON.stringify(value) || toString(value),
           type: typeof value,
         },
       });
@@ -127,7 +138,7 @@ const createCoreStore = ({ db }: { db: Database }) => {
     return db.query('strapi::core-store').create({
       data: {
         ...where,
-        value: JSON.stringify(value) || value.toString(),
+        value: JSON.stringify(value) || toString(value),
         type: typeof value,
       },
     });

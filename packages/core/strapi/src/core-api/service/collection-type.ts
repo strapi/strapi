@@ -26,7 +26,7 @@ const setPublishedAt = (data: Record<string, unknown>) => {
 const createCollectionTypeService = ({
   contentType,
 }: {
-  contentType: Schema.ContentType;
+  contentType: Schema.CollectionType;
 }): CoreApi.Service.CollectionType => {
   const { uid } = contentType;
 

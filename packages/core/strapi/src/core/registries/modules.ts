@@ -1,9 +1,8 @@
 import { pickBy, has } from 'lodash/fp';
-import { createModule } from '../domain/module';
+import { createModule, RawModule, Module } from '../domain/module';
 
 import type { Strapi } from '../../Strapi';
 
-type Module = ReturnType<typeof createModule>;
 type ModuleMap = { [namespace: string]: Module };
 
 const modulesRegistry = (strapi: Strapi) => {
@@ -16,7 +15,7 @@ const modulesRegistry = (strapi: Strapi) => {
     getAll(prefix = '') {
       return pickBy<ModuleMap>((mod, namespace) => namespace.startsWith(prefix))(modules);
     },
-    add(namespace: string, rawModule: Module) {
+    add(namespace: string, rawModule: RawModule) {
       if (has(namespace, modules)) {
         throw new Error(`Module ${namespace} has already been registered.`);
       }

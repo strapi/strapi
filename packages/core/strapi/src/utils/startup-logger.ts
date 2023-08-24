@@ -25,7 +25,7 @@ export default (app: Strapi) => {
         [chalk.blue('Process PID'), process.pid],
         [chalk.blue('Version'), `${app.config.info.strapi} (node ${process.version})`],
         [chalk.blue('Edition'), app.EE ? 'Enterprise' : 'Community'],
-        [chalk.blue('Database'), app.db.dialect.client]
+        [chalk.blue('Database'), app.db?.dialect.client]
       );
 
       console.log(infoTable.toString());

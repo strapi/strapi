@@ -1,6 +1,6 @@
-import type { MiddlewareFactory } from './types';
+import type { Common } from '../types';
 
-export const logger: MiddlewareFactory = (_, { strapi }) => {
+export const logger: Common.MiddlewareFactory = (_, { strapi }) => {
   return async (ctx, next) => {
     const start = Date.now();
     await next();

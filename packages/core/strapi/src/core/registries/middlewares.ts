@@ -45,7 +45,7 @@ const middlewaresRegistry = () => {
     add(namespace: string, rawMiddlewares: Record<string, Common.Middleware> = {}) {
       for (const middlewareName of Object.keys(rawMiddlewares)) {
         const middleware = rawMiddlewares[middlewareName];
-        const uid = addNamespace(middlewareName, namespace);
+        const uid = addNamespace(middlewareName, namespace) as Common.UID.Middleware;
 
         if (has(uid, middlewares)) {
           throw new Error(`Middleware ${uid} has already been registered.`);

@@ -455,7 +455,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
     this.provider = createLocalStrapiDestinationProvider({
       ...params.options,
       autoDestroy: false,
-      getStrapi: () => strapi,
+      getStrapi: () => strapi as Strapi.Loaded,
     });
 
     return { transferID: this.transferID };

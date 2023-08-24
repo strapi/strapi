@@ -147,7 +147,7 @@ export default async (opts: CmdOptions) => {
 /**
  * It creates a local strapi destination provider
  */
-const createSourceProvider = (strapi: Strapi) => {
+const createSourceProvider = (strapi: Strapi.Loaded) => {
   return createLocalStrapiSourceProvider({
     async getStrapi() {
       return strapi;

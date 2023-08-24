@@ -41,7 +41,7 @@ const command: StrapiCommand = ({ command }) => {
       'preAction',
       ifOptions(
         (opts) => !(opts.from || opts.to) || (opts.from && opts.to),
-        () =>
+        async () =>
           exitWith(
             1,
             'Exactly one remote source (from) or destination (to) option must be provided'

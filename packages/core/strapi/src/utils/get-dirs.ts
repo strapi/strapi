@@ -1,12 +1,16 @@
 import { join, resolve } from 'path';
-import type { Strapi } from '../types';
+import type { Strapi } from '../Strapi';
+import type { StrapiDirectories } from '../types';
 
 export type Options = {
   app: string;
   dist: string;
 };
 
-const getDirs = ({ app: appDir, dist: distDir }: Options, { strapi }: { strapi: Strapi }) => ({
+const getDirs = (
+  { app: appDir, dist: distDir }: Options,
+  { strapi }: { strapi: Strapi }
+): StrapiDirectories => ({
   dist: {
     root: distDir,
     src: join(distDir, 'src'),

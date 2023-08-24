@@ -8,28 +8,63 @@ export interface Config {
 export interface Attribute {
   type: string;
   writable?: boolean;
+  visible?: boolean;
   relation?: string;
-  [key: string]: unknown;
+  private?: boolean;
+  [key: string]: any;
 }
 
 export interface RelationalAttribute extends Attribute {
+  type: 'relation';
   relation: string;
-  target: string;
+  target?: string;
 }
 export interface ComponentAttribute extends Attribute {
+  type: 'component';
   component: string;
   repeatable?: boolean;
 }
 export interface DynamicZoneAttribute extends Attribute {
+  type: 'dynamiczone';
   components: string[];
 }
+
+export interface ScalarAttribute extends Attribute {
+  type:
+    | 'string'
+    | 'text'
+    | 'richtext'
+    | 'integer'
+    | 'biginteger'
+    | 'float'
+    | 'decimal'
+    | 'date'
+    | 'time'
+    | 'datetime'
+    | 'timestamp'
+    | 'enumeration'
+    | 'boolean'
+    | 'json'
+    | 'uid'
+    | 'password'
+    | 'email'
+    | 'media';
+}
+
+export type AnyAttribute =
+  | ScalarAttribute
+  | RelationalAttribute
+  | ComponentAttribute
+  | DynamicZoneAttribute;
 
 export type Kind = 'singleType' | 'collectionType';
 
 export interface Model {
-  uid?: string;
+  modelType: 'contentType';
+  uid: string;
   kind: Kind;
   info: {
+    displayName: string;
     singularName: string;
     pluralName: string;
   };
@@ -38,10 +73,14 @@ export interface Model {
     draftAndPublish?: boolean;
   };
   privateAttributes?: string[];
-  attributes: Record<string, Attribute>;
+  attributes: Record<string, AnyAttribute>;
 }
 
 declare module 'koa' {
+  interface Request extends Koa.BaseRequest {
+    route: RouteInfo;
+  }
+
   interface ExtendableContext {
     ok: (response?: string | object) => Koa.Context;
     created: (response?: string | object) => Koa.Context;
@@ -62,15 +101,4 @@ export interface RouteInfo {
   action: string;
   verb: string;
   plugin: string;
-}
-
-export interface Request extends Koa.Request {
-  body: {
-    data?: string;
-  };
-  route: RouteInfo;
-}
-
-export interface Context extends Koa.ExtendableContext {
-  request: Request;
 }

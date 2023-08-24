@@ -1,19 +1,26 @@
 import { isObject } from 'lodash/fp';
 import { errors } from '@strapi/utils';
+import type Koa from 'koa';
 
 import { parseBody } from './transform';
+import type { Schema, CoreApi, Utils, Common } from '../../types';
+
+interface Options {
+  contentType: Schema.SingleType;
+}
 
 /**
  * Returns a single type controller to handle default core-api actions
  */
-const createSingleTypeController = ({ contentType }) => {
-  const { uid } = contentType;
+const createSingleTypeController = ({
+  contentType,
+}: Options): Utils.PartialWithThis<CoreApi.Controller.SingleType> => {
+  const uid = contentType.uid as Common.UID.Service;
 
   return {
     /**
      * Retrieve single type content
      *
-     * @return {Object|Array}
      */
     async find(ctx) {
       const sanitizedQuery = await this.sanitizeQuery(ctx);
@@ -31,17 +38,20 @@ const createSingleTypeController = ({ contentType }) => {
      */
     async update(ctx) {
       const { query } = ctx.request;
-      const { data, files } = parseBody(ctx);
+      const body = parseBody(ctx);
 
-      if (!isObject(data)) {
+      if (!isObject(body.data)) {
         throw new errors.ValidationError('Missing "data" payload in the request body');
       }
 
-      const sanitizedInputData = await this.sanitizeInput(data, ctx);
+      const sanitizedInputData = await this.sanitizeInput(body.data, ctx);
 
-      const entity = await strapi
-        .service(uid)
-        .createOrUpdate({ ...query, data: sanitizedInputData, files });
+      const entity = await strapi.service(uid).createOrUpdate({
+        ...query,
+        data: sanitizedInputData,
+        files: 'files' in body ? body.files : undefined,
+      });
+
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
       return this.transformResponse(sanitizedEntity);

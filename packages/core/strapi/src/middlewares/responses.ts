@@ -1,11 +1,11 @@
 import { isFunction } from 'lodash/fp';
-import type { MiddlewareFactory, Middleware } from './types';
+import type { Common } from '../types';
 
 export interface Config {
-  handlers?: Record<number, Middleware>;
+  handlers?: Record<number, Common.MiddlewareHandler>;
 }
 
-export const responses: MiddlewareFactory<Config> = (config = {}) => {
+export const responses: Common.MiddlewareFactory<Config> = (config = {}) => {
   return async (ctx, next) => {
     await next();
 

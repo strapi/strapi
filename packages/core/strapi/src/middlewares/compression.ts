@@ -1,6 +1,6 @@
 import compress from 'koa-compress';
-import { MiddlewareFactory } from './types';
+import type { Common } from '../types';
 
 export type Config = compress.CompressOptions;
 
-export const compression: MiddlewareFactory<Config> = (config) => compress(config);
+export const compression: Common.MiddlewareFactory<Config> = (config) => compress(config);

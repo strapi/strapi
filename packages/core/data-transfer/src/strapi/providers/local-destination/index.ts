@@ -20,7 +20,7 @@ export const VALID_CONFLICT_STRATEGIES = ['restore'];
 export const DEFAULT_CONFLICT_STRATEGY = 'restore';
 
 export interface ILocalStrapiDestinationProviderOptions {
-  getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>; // return an initialized instance of Strapi
+  getStrapi(): Strapi.Loaded | Promise<Strapi.Loaded>; // return an initialized instance of Strapi
 
   autoDestroy?: boolean; // shut down the instance returned by getStrapi() at the end of the transfer
   restore?: restore.IRestoreOptions; // erase all data in strapi database before transfer
@@ -34,7 +34,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   options: ILocalStrapiDestinationProviderOptions;
 
-  strapi?: Strapi.Strapi;
+  strapi?: Strapi.Loaded;
 
   transaction?: Transaction;
 
@@ -86,7 +86,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   async #deleteAllAssets(trx?: Knex.Transaction) {
     assertValidStrapi(this.strapi);
 
-    const stream: Readable = strapi.db
+    const stream: Readable = this.strapi.db
       // Create a query builder instance (default type is 'select')
       .queryBuilder('plugin::upload.file')
       // Fetch all columns

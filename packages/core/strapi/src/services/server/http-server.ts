@@ -3,7 +3,7 @@ import type { Socket } from 'net';
 import Koa from 'koa';
 import type { Strapi } from '../../Strapi';
 
-interface Server extends http.Server {
+export interface Server extends http.Server {
   destroy: () => Promise<void>;
 }
 

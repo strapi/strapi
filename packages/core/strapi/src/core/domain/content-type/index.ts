@@ -19,7 +19,7 @@ const {
   UPDATED_BY_ATTRIBUTE,
 } = contentTypesUtils.constants;
 
-const createContentType = (uid: Common.UID.ContentType, definition: ContentTypeDefinition) => {
+const createContentType = (uid: string, definition: ContentTypeDefinition) => {
   try {
     validateContentTypeDefinition(definition);
   } catch (e) {

@@ -56,11 +56,11 @@
     "@strapi/strapi": "4.11.5"
   },
   "devDependencies": {
-    "@tsconfig/node16": "1.0.3",
     "@types/fs-extra": "9.0.13",
     "@types/jest": "29.5.2",
     "@types/koa": "*",
     "@types/lodash": "^4.14.191",
+    "@types/node": "18",
     "@types/semver": "7.5.0",
     "@types/stream-chain": "2.0.1",
     "@types/stream-json": "1.7.3",

@@ -44,5 +44,5 @@ export default async function loadFiles<T extends object>(
     _.merge(root, _.setWith({}, propPath, mod, Object));
   }
 
-  return root;
+  return root as T;
 }

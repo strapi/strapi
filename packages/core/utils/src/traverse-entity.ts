@@ -1,5 +1,5 @@
 import { clone, isObject, isArray, isNil, curry } from 'lodash/fp';
-import type { Attribute, Model } from './types';
+import type { AnyAttribute, Model } from './types';
 import { isRelationalAttribute, isMediaAttribute } from './content-types';
 
 export type VisitorUtils = ReturnType<typeof createVisitorUtils>;
@@ -9,7 +9,7 @@ export interface VisitorOptions {
   schema: Model;
   key: string;
   value: Data | Data[];
-  attribute: Attribute;
+  attribute: AnyAttribute;
   path: Path;
 }
 

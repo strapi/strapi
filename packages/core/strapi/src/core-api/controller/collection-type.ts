@@ -1,20 +1,26 @@
 import { isObject } from 'lodash/fp';
 import { errors } from '@strapi/utils';
+import type Koa from 'koa';
 
 import { parseBody } from './transform';
+import type { CoreApi, Schema, Utils, Common } from '../../types';
+
+interface Options {
+  contentType: Schema.CollectionType;
+}
 
 /**
  *
  * Returns a collection type controller to handle default core-api actions
  */
-const createCollectionTypeController = ({ contentType }) => {
-  const { uid } = contentType;
+const createCollectionTypeController = ({
+  contentType,
+}: Options): Utils.PartialWithThis<CoreApi.Controller.CollectionType> => {
+  const uid = contentType.uid as Common.UID.Service;
 
   return {
     /**
      * Retrieve records.
-     *
-     * @return {Object|Array}
      */
     async find(ctx) {
       const sanitizedQuery = await this.sanitizeQuery(ctx);
@@ -46,17 +52,19 @@ const createCollectionTypeController = ({ contentType }) => {
     async create(ctx) {
       const { query } = ctx.request;
 
-      const { data, files } = parseBody(ctx);
+      const body = parseBody(ctx);
 
-      if (!isObject(data)) {
+      if (!isObject(body.data)) {
         throw new errors.ValidationError('Missing "data" payload in the request body');
       }
 
-      const sanitizedInputData = await this.sanitizeInput(data, ctx);
+      const sanitizedInputData = await this.sanitizeInput(body.data, ctx);
 
-      const entity = await strapi
-        .service(uid)
-        .create({ ...query, data: sanitizedInputData, files });
+      const entity = await strapi.service(uid).create({
+        ...query,
+        data: sanitizedInputData,
+        files: 'files' in body ? body.files : undefined,
+      });
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
       return this.transformResponse(sanitizedEntity);
@@ -67,21 +75,23 @@ const createCollectionTypeController = ({ contentType }) => {
      *
      * @return {Object}
      */
-    async update(ctx) {
+    async update(ctx: Koa.Context) {
       const { id } = ctx.params;
       const { query } = ctx.request;
 
-      const { data, files } = parseBody(ctx);
+      const body = parseBody(ctx);
 
-      if (!isObject(data)) {
+      if (!isObject(body.data)) {
         throw new errors.ValidationError('Missing "data" payload in the request body');
       }
 
-      const sanitizedInputData = await this.sanitizeInput(data, ctx);
+      const sanitizedInputData = await this.sanitizeInput(body.data, ctx);
 
-      const entity = await strapi
-        .service(uid)
-        .update(id, { ...query, data: sanitizedInputData, files });
+      const entity = await strapi.service(uid).update(id, {
+        ...query,
+        data: sanitizedInputData,
+        files: 'files' in body ? body.files : undefined,
+      });
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
       return this.transformResponse(sanitizedEntity);

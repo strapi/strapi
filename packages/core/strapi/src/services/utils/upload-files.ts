@@ -1,12 +1,12 @@
 import _ from 'lodash';
-import { Common, CoreApi } from '../../types';
+import { Attribute, Common, Schema } from '../../types';
 
 /**
  * Upload files and link them to an entity
  */
 export default async (
   uid: Common.UID.ContentType | Common.UID.Component,
-  entity: CoreApi.Service.Entity,
+  entity: Record<string, unknown>,
   files: { [key: string]: unknown }
 ) => {
   const modelDef = strapi.getModel(uid);
@@ -23,13 +23,16 @@ export default async (
     }
 
     const currentPath = [];
-    let tmpModel = modelDef;
+    let tmpModel: Schema.ContentType | Schema.Component = modelDef;
     let modelUID = uid;
 
     for (let i = 0; i < path.length; i += 1) {
-      if (!tmpModel) return {};
+      if (!tmpModel) {
+        return {};
+      }
+
       const part = path[i];
-      const attr = tmpModel.attributes[part];
+      const attr: Attribute.Any = tmpModel.attributes[part];
 
       currentPath.push(part);
 
@@ -44,14 +47,20 @@ export default async (
         modelUID = attr.component;
         tmpModel = strapi.components[attr.component];
       } else if (attr.type === 'dynamiczone') {
+        const x = modelUID;
+
         const entryIdx = path[i + 1]; // get component index
         const value = _.get(entity, [...currentPath, entryIdx]);
 
         if (!value) return {};
 
         modelUID = value.__component; // get component type
-        tmpModel = strapi.components[modelUID];
+        tmpModel = strapi.components[modelUID as Common.UID.Component];
       } else if (attr.type === 'relation') {
+        if (!('target' in attr)) {
+          return {};
+        }
+
         modelUID = attr.target;
         tmpModel = strapi.getModel(modelUID);
       } else {

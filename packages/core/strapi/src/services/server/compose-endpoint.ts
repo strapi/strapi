@@ -70,7 +70,7 @@ export default (strapi: Strapi) => {
   const authenticate = createAuthenticateMiddleware(strapi);
   const authorize = createAuthorizeMiddleware(strapi);
 
-  return (route: Required<Common.Route>, { router }: { router: Router }) => {
+  return (route: Common.Route, { router }: { router: Router }) => {
     try {
       const method = getMethod(route);
       const path = getPath(route);
@@ -115,7 +115,7 @@ const getController = (name: string, { pluginName, apiName }: Common.RouteInfo, 
   }
 
   if (!ctrl) {
-    return strapi.controller(name);
+    return strapi.controller(name as Common.UID.Controller);
   }
 
   return ctrl;
@@ -128,7 +128,7 @@ const extractHandlerParts = (name: string) => {
   return { controllerName, actionName };
 };
 
-const getAction = (route: Required<Common.Route>, strapi: Strapi) => {
+const getAction = (route: Common.Route, strapi: Strapi) => {
   const { handler, info } = route;
   const { pluginName, apiName, type } = info ?? {};
 

@@ -11,11 +11,13 @@ const readPackageJSON = async (path: string) => {
 
     return { uuid, packageObj };
   } catch (err) {
-    console.error(`${chalk.red('Error')}: ${err.message}`);
+    if (err instanceof Error) {
+      console.error(`${chalk.red('Error')}: ${err.message}`);
+    }
   }
 };
 
-const writePackageJSON = async (path: string, file: string, spacing: string) => {
+const writePackageJSON = async (path: string, file: string, spacing: number) => {
   try {
     await fse.writeJson(path, file, { spaces: spacing });
     return true;
@@ -26,7 +28,7 @@ const writePackageJSON = async (path: string, file: string, spacing: string) => 
   }
 };
 
-const sendEvent = async (uuid) => {
+const sendEvent = async (uuid: string) => {
   try {
     const event = 'didOptOutTelemetry';
 
@@ -56,7 +58,7 @@ export default async function optOutTelemetry() {
     process.exit(0);
   }
 
-  const { uuid, packageObj } = await readPackageJSON(packageJSONPath);
+  const { uuid, packageObj } = (await readPackageJSON(packageJSONPath)) ?? {};
 
   if ((packageObj.strapi && packageObj.strapi.telemetryDisabled) || !uuid) {
     console.log(`${chalk.yellow('Warning:')} telemetry is already disabled`);

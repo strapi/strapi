@@ -45,7 +45,7 @@ const middlewareConfigSchema = yup.array().of(
         .noUnknown();
     }
 
-    return yup.test(() => false);
+    return yup.mixed().test(() => false);
   }) as any // FIXME: yup v1
 );
 

@@ -13,23 +13,42 @@ interface LifecyclesState {
   destroy?: boolean;
 }
 
-interface RawModule {
+export interface RawModule {
   config?: Record<string, unknown>;
-  routes?: unknown[];
-  controllers?: Record<Common.UID.Controller, Common.Controller>;
-  services?: Record<Common.UID.Service, Common.Service>;
-  contentTypes?: Record<Common.UID.ContentType, Schema.ContentType>;
-  policies?: Record<Common.UID.Policy, Common.Policy>;
-  middlewares?: Record<Common.UID.Middleware, Common.Middleware>;
+  routes?: Common.Module['routes'];
+  controllers?: Common.Module['controllers'];
+  services?: Common.Module['services'];
+  contentTypes?: Common.Module['contentTypes'];
+  policies?: Common.Module['policies'];
+  middlewares?: Common.Module['middlewares'];
   bootstrap?: (params: { strapi: Strapi }) => Promise<void>;
   register?: (params: { strapi: Strapi }) => Promise<void>;
   destroy?: (params: { strapi: Strapi }) => Promise<void>;
 }
 
+export interface Module {
+  bootstrap: () => Promise<void>;
+  register: () => Promise<void>;
+  destroy: () => Promise<void>;
+  load: () => void;
+  routes: Common.Module['routes'];
+  config: (path: string, defaultValue?: unknown) => unknown;
+  contentType: (ctName: Common.UID.ContentType) => Schema.ContentType;
+  contentTypes: Record<string, Schema.ContentType>;
+  service: (serviceName: Common.UID.Service) => Common.Service;
+  services: Record<string, Common.Service>;
+  policy: (policyName: Common.UID.Policy) => Common.Policy;
+  policies: Record<string, Common.Policy>;
+  middleware: (middlewareName: Common.UID.Middleware) => Common.Middleware;
+  middlewares: Record<string, Common.Middleware>;
+  controller: (controllerName: Common.UID.Controller) => Common.Controller;
+  controllers: Record<string, Common.Controller>;
+}
+
 const uidToPath = (uid: string) => uid.replace('::', '.');
 
 // Removes the namespace from a map with keys prefixed with a namespace
-const removeNamespacedKeys = (map: Record<string, unknown>, namespace: string) => {
+const removeNamespacedKeys = <T extends Record<string, unknown>>(map: T, namespace: string) => {
   return _.mapKeys(map, (value, key) => removeNamespace(key, namespace));
 };
 
@@ -43,7 +62,7 @@ const defaultModule = {
   middlewares: {},
 };
 
-export const createModule = (namespace: string, rawModule: RawModule, strapi: Strapi) => {
+export const createModule = (namespace: string, rawModule: RawModule, strapi: Strapi): Module => {
   _.defaults(rawModule, defaultModule);
 
   try {
@@ -86,7 +105,7 @@ export const createModule = (namespace: string, rawModule: RawModule, strapi: St
       strapi.container.get('config').set(uidToPath(namespace), rawModule.config);
     },
     get routes() {
-      return rawModule.routes;
+      return rawModule.routes ?? {};
     },
     config(path: string, defaultValue: unknown) {
       return strapi.container.get('config').get(`${uidToPath(namespace)}.${path}`, defaultValue);

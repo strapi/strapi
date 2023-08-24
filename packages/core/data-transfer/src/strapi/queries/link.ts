@@ -4,7 +4,7 @@ import { ILink } from '../../../types';
 
 // TODO: Remove any types when we'll have types for DB metadata
 
-export const createLinkQuery = (strapi: Strapi.Strapi, trx?: Knex.Transaction) => {
+export const createLinkQuery = (strapi: Strapi.Loaded, trx?: Knex.Transaction) => {
   const query = () => {
     const { connection } = strapi.db;
 

@@ -1,7 +1,5 @@
-import type { Lifecycles } from '../types';
-
-export const LIFECYCLES: Lifecycles = {
+export const LIFECYCLES = {
   REGISTER: 'register',
   BOOTSTRAP: 'bootstrap',
   DESTROY: 'destroy',
-};
+} as const;

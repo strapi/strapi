@@ -31,6 +31,8 @@ const resolveRouteMiddlewares = (route: Common.Route, strapi: Strapi) => {
   return middlewares.map(({ handler }) => handler);
 };
 
+const dummyMiddleware: Common.MiddlewareHandler = (_, next) => next();
+
 /**
  * Initialize every configured middlewares
  */
@@ -48,7 +50,7 @@ const resolveMiddlewares = (
 ) => {
   const middlewares: {
     name: string | null;
-    handler: Common.MiddlewareHandler | void;
+    handler: Common.MiddlewareHandler;
   }[] = [];
 
   for (const item of config) {
@@ -70,7 +72,7 @@ const resolveMiddlewares = (
 
       middlewares.push({
         name: item,
-        handler: instantiateMiddleware(middlewareFactory, item, {}, strapi),
+        handler: instantiateMiddleware(middlewareFactory, item, {}, strapi) ?? dummyMiddleware,
       });
 
       continue;
@@ -83,7 +85,8 @@ const resolveMiddlewares = (
         const middlewareFactory = strapi.middleware(name);
         middlewares.push({
           name,
-          handler: instantiateMiddleware(middlewareFactory, name, config, strapi),
+          handler:
+            instantiateMiddleware(middlewareFactory, name, config, strapi) ?? dummyMiddleware,
         });
 
         continue;
@@ -93,7 +96,9 @@ const resolveMiddlewares = (
         const resolvedMiddlewareFactory = resolveCustomMiddleware(resolve, strapi);
         middlewares.push({
           name: resolve,
-          handler: instantiateMiddleware(resolvedMiddlewareFactory, resolve, config, strapi),
+          handler:
+            instantiateMiddleware(resolvedMiddlewareFactory, resolve, config, strapi) ??
+            dummyMiddleware,
         });
 
         continue;
@@ -106,13 +111,6 @@ const resolveMiddlewares = (
       'Middleware config must either be a string or an object {name?: string, resolve?: string, config: any}.'
     );
   }
-
-  middlewares.forEach((middleware) => {
-    // NOTE: we replace null middlewares by a dumb one to avoid having to filter later on
-    if (isNil(middleware.handler)) {
-      middleware.handler = (_, next) => next();
-    }
-  });
 
   return middlewares;
 };

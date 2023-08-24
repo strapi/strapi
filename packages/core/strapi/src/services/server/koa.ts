@@ -10,6 +10,7 @@ declare module 'koa' {
     send: (data: any, status?: number) => void;
     created: (data: any) => void;
     deleted: (data: any) => void;
+    _explicitStatus: boolean;
     [key: string]: (message: string, details?: unknown) => void;
   }
 }

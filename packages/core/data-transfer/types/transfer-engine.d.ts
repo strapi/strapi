@@ -82,6 +82,11 @@ export interface ITransferEngine<
   bootstrap(): Promise<void>;
 
   /**
+   * Abort the transfer process
+   */
+  abortTransfer(): Promise<void>;
+
+  /**
    * Engine init step. Must be called after the providers bootstrap.
    */
   init(): Promise<void>;

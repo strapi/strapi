@@ -6,7 +6,7 @@ import { IConfiguration, Transaction } from '../../../../../../types';
 
 const omitInvalidCreationAttributes = omit(['id']);
 
-const restoreCoreStore = async <T extends { value: unknown }>(strapi: Strapi.Strapi, values: T) => {
+const restoreCoreStore = async <T extends { value: unknown }>(strapi: Strapi.Loaded, values: T) => {
   const data = omitInvalidCreationAttributes(values);
   return strapi.db.query('strapi::core-store').create({
     data: {
@@ -16,12 +16,12 @@ const restoreCoreStore = async <T extends { value: unknown }>(strapi: Strapi.Str
   });
 };
 
-const restoreWebhooks = async <T extends { value: unknown }>(strapi: Strapi.Strapi, values: T) => {
+const restoreWebhooks = async <T extends { value: unknown }>(strapi: Strapi.Loaded, values: T) => {
   const data = omitInvalidCreationAttributes(values);
   return strapi.db.query('webhook').create({ data });
 };
 
-export const restoreConfigs = async (strapi: Strapi.Strapi, config: IConfiguration) => {
+export const restoreConfigs = async (strapi: Strapi.Loaded, config: IConfiguration) => {
   if (config.type === 'core-store') {
     return restoreCoreStore(strapi, config.value as { value: unknown });
   }
@@ -32,7 +32,7 @@ export const restoreConfigs = async (strapi: Strapi.Strapi, config: IConfigurati
 };
 
 export const createConfigurationWriteStream = async (
-  strapi: Strapi.Strapi,
+  strapi: Strapi.Loaded,
   transaction?: Transaction
 ) => {
   return new Writable({

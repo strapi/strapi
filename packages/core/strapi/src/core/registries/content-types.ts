@@ -4,7 +4,7 @@ import { addNamespace, hasNamespace } from '../utils';
 
 import type { Common, Schema } from '../../types';
 
-type ContentTypesInput = Record<Common.UID.ContentType, ContentTypeDefinition>;
+type ContentTypesInput = Record<string, ContentTypeDefinition>;
 type ContentTypeExtendFn = (contentType: Schema.ContentType) => Schema.ContentType;
 
 const validateKeySameToSingularName = (contentTypes: ContentTypesInput) => {
@@ -20,7 +20,7 @@ const validateKeySameToSingularName = (contentTypes: ContentTypesInput) => {
 };
 
 const contentTypesRegistry = () => {
-  const contentTypes: Record<Common.UID.ContentType, Schema.ContentType> = {};
+  const contentTypes: Record<string, Schema.ContentType> = {};
 
   return {
     /**

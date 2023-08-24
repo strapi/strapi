@@ -1,6 +1,6 @@
 import qs, { IParseOptions } from 'qs';
 import type Koa from 'koa';
-
+import type { Common } from '../types';
 import type { Strapi } from '../Strapi';
 
 type Config = IParseOptions;
@@ -44,8 +44,9 @@ const addQsParser = (app: Koa, settings: Config) => {
   return app;
 };
 
-export const query = (config: Partial<Config>, { strapi }: { strapi: Strapi }) => {
+export const query: Common.MiddlewareFactory = (
+  config: Partial<Config>,
+  { strapi }: { strapi: Strapi }
+) => {
   addQsParser(strapi.server.app, { ...defaults, ...config });
-
-  return null;
 };

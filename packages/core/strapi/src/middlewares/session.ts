@@ -1,6 +1,6 @@
 import { isEmpty, isArray } from 'lodash/fp';
 import koaSession from 'koa-session';
-import type { MiddlewareFactory } from './types';
+import type { Common } from '../types';
 
 const defaultConfig = {
   key: 'koa.sess',
@@ -15,7 +15,10 @@ const defaultConfig = {
   sameSite: undefined,
 };
 
-export const session: MiddlewareFactory<Partial<koaSession.opts>> = (userConfig, { strapi }) => {
+export const session: Common.MiddlewareFactory<Partial<koaSession.opts>> = (
+  userConfig,
+  { strapi }
+) => {
   const { keys } = strapi.server.app;
   if (!isArray(keys) || isEmpty(keys) || keys.some(isEmpty)) {
     throw new Error(

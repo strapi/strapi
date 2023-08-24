@@ -45,7 +45,7 @@ const controllersRegistry = (strapi: Strapi) => {
       const filteredControllers = pickBy((_, uid) => hasNamespace(uid, namespace))(controllers);
 
       const map = {};
-      for (const uid of Object.keys(filteredControllers)) {
+      for (const uid of Object.keys(filteredControllers) as Common.UID.Controller[]) {
         Object.defineProperty(map, uid, {
           enumerable: true,
           get: () => {
@@ -70,13 +70,14 @@ const controllersRegistry = (strapi: Strapi) => {
      * Registers a map of controllers for a specific namespace
      */
     add(namespace: string, newControllers: ControllerFactoryMap) {
-      for (const controllerName of Object.keys(newControllers)) {
+      for (const controllerName of Object.keys(newControllers) as Common.UID.Controller[]) {
         const controller = newControllers[controllerName];
-        const uid = addNamespace(controllerName, namespace);
+        const uid = addNamespace(controllerName, namespace) as Common.UID.Controller;
 
         if (has(uid, controllers)) {
           throw new Error(`Controller ${uid} has already been registered.`);
         }
+
         controllers[uid] = controller;
       }
 

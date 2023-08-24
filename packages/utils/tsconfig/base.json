@@ -3,8 +3,8 @@
   "extends": "@tsconfig/node16/tsconfig.json",
   "compilerOptions": {
     "declaration": true,
-    "sourceMap": true,
     "esModuleInterop": true,
+    "sourceMap": true,
     "resolveJsonModule": true
   }
 }

@@ -5,7 +5,7 @@ import { yup } from '@strapi/utils';
 
 import createEndpointComposer from './compose-endpoint';
 import type { Strapi } from '../../Strapi';
-import type { Common } from '../../types';
+import type { Common, Utils } from '../../types';
 
 const policyOrMiddlewareSchema = yup.lazy((value) => {
   if (typeof value === 'string') {
@@ -61,7 +61,7 @@ const routeSchema = yup.object({
     .notRequired(),
 });
 
-const validateRouteConfig = (routeConfig: Common.Route) => {
+const validateRouteConfig = (routeConfig: Common.RouteInput) => {
   try {
     return routeSchema.validateSync(routeConfig, {
       strict: true,
@@ -80,16 +80,21 @@ const createRouteManager = (strapi: Strapi, opts: { type?: string } = {}) => {
 
   const composeEndpoint = createEndpointComposer(strapi);
 
-  const createRoute = (route: Common.Route, router: Router) => {
+  const createRoute = (route: Common.RouteInput, router: Router) => {
     validateRouteConfig(route);
 
     // NOTE: the router type is used to tag controller actions and for authentication / authorization so we need to pass this info down to the route level
-    _.set(route, 'info.type', type || 'admin');
+    const routeWithInfo = Object.assign(route, {
+      info: {
+        ...(route.info ?? {}),
+        type: type || 'api',
+      },
+    });
 
-    composeEndpoint(route, { router });
+    composeEndpoint(routeWithInfo, { router });
   };
 
-  const addRoutes = (routes: Common.Router | Common.Route[], router: Router) => {
+  const addRoutes = (routes: Common.Router | Common.RouteInput[], router: Router) => {
     if (Array.isArray(routes)) {
       routes.forEach((route) => createRoute(route, router));
     } else if (routes.routes) {

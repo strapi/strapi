@@ -5,26 +5,24 @@ import { createService } from './core-api/service';
 import { createRoutes } from './core-api/routes';
 
 import type { Strapi } from './Strapi';
-import type { Common, CoreApi } from './types';
+import { Common, CoreApi, Utils } from './types';
 
-type WithStrapiCallback<T> = <S extends { strapi: Strapi }>(params: S) => T;
+type WithStrapiCallback<T> = T | (<S extends { strapi: Strapi }>(params: S) => T);
 
 const createCoreController = <
   TUID extends Common.UID.ContentType,
-  TUserController extends Partial<CoreApi.Controller.Extendable<TUID>>,
-  TController extends Required<TUserController & CoreApi.Controller.ContentType<TUID>>
+  TController extends CoreApi.Controller.Extendable<TUID>
 >(
   uid: TUID,
-  cfg?: WithStrapiCallback<TUserController> | TUserController
-): WithStrapiCallback<TController> => {
-  return ({ strapi }: { strapi: Strapi }) => {
-    const baseController = createController({
-      contentType: strapi.contentType(uid),
-    });
+  cfg?: WithStrapiCallback<Utils.PartialWithThis<CoreApi.Controller.Extendable<TUID> & TController>>
+) => {
+  return ({ strapi }: { strapi: Strapi }): TController & CoreApi.Controller.ContentType<TUID> => {
+    const contentType = strapi.contentType(uid);
+    const baseController = createController({ contentType });
 
-    const userCtrl = typeof cfg === 'function' ? cfg({ strapi }) : cfg ?? {};
+    const userCtrl = typeof cfg === 'function' ? cfg({ strapi }) : cfg ?? ({} as any);
 
-    for (const methodName of Object.keys(baseController)) {
+    for (const methodName of Object.keys(baseController) as Array<keyof typeof baseController>) {
       if (userCtrl[methodName] === undefined) {
         userCtrl[methodName] = baseController[methodName];
       }
@@ -35,23 +33,20 @@ const createCoreController = <
   };
 };
 
-export type CreateCoreService = <
-  T extends Common.UID.ContentType,
-  S extends Partial<CoreApi.Service.Extendable<T>>
+function createCoreService<
+  TUID extends Common.UID.ContentType,
+  TService extends CoreApi.Service.Extendable<TUID>
 >(
-  uid: T,
-  config?: WithStrapiCallback<S> | S
-) => () => Required<S & CoreApi.Service.ContentType<T>>;
+  uid: TUID,
+  cfg?: WithStrapiCallback<Utils.PartialWithThis<CoreApi.Service.Extendable<TUID> & TService>>
+) {
+  return ({ strapi }: { strapi: Strapi }): TService & CoreApi.Service.ContentType<TUID> => {
+    const contentType = strapi.contentType(uid);
+    const baseService = createService({ contentType });
 
-const createCoreService: CreateCoreService = (uid: string, cfg = {}) => {
-  return ({ strapi }: { strapi: Strapi }) => {
-    const baseService = createService({
-      contentType: strapi.contentType(uid),
-    });
+    const userService = typeof cfg === 'function' ? cfg({ strapi }) : cfg ?? ({} as any);
 
-    const userService = typeof cfg === 'function' ? cfg({ strapi }) : cfg;
-
-    for (const methodName of Object.keys(baseService)) {
+    for (const methodName of Object.keys(baseService) as Array<keyof typeof baseService>) {
       if (userService[methodName] === undefined) {
         userService[methodName] = baseService[methodName];
       }
@@ -60,14 +55,12 @@ const createCoreService: CreateCoreService = (uid: string, cfg = {}) => {
     Object.setPrototypeOf(userService, baseService);
     return userService;
   };
-};
+}
 
-export type CreateCoreRouter = <T extends Common.UID.ContentType>(
+function createCoreRouter<T extends Common.UID.ContentType>(
   uid: T,
   cfg?: CoreApi.Router.RouterConfig<T>
-) => CoreApi.Router.Router;
-
-const createCoreRouter: CreateCoreRouter = (uid, cfg) => {
+): CoreApi.Router.Router {
   const { prefix, config = {}, only, except, type = 'content-api' } = cfg ?? {};
   let routes: CoreApi.Router.Route[];
 
@@ -79,8 +72,9 @@ const createCoreRouter: CreateCoreRouter = (uid, cfg) => {
         const contentType = strapi.contentType(uid);
 
         const defaultRoutes = createRoutes({ contentType });
+        const keys = Object.keys(defaultRoutes) as Array<keyof typeof defaultRoutes>;
 
-        Object.keys(defaultRoutes).forEach((routeName) => {
+        keys.forEach((routeName) => {
           const defaultRoute = defaultRoutes[routeName];
 
           Object.assign(defaultRoute.config, config[routeName] || {});
@@ -97,6 +91,6 @@ const createCoreRouter: CreateCoreRouter = (uid, cfg) => {
       return routes;
     },
   };
-};
+}
 
 export { createCoreController, createCoreService, createCoreRouter };

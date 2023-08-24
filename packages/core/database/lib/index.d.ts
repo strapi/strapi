@@ -2,6 +2,7 @@ import { Knex } from 'knex';
 import { LifecycleProvider } from './lifecycles';
 import { MigrationProvider } from './migrations';
 import { SchemaProvider } from './schema';
+export * as errors from './errors';
 
 type ID = number | string;
 
@@ -71,7 +72,7 @@ interface CreateManyParams<T> {
   data: T[keyof T][];
 }
 
-interface Pagination {
+export interface Pagination {
   page: number;
   pageSize: number;
   pageCount: number;
@@ -115,20 +116,20 @@ interface EntityManager {
   ): Promise<T[SK]>;
 }
 
-interface QueryFromContentType<T extends keyof AllTypes> {
-  findOne(params: FindParams<AllTypes[T]>): Promise<any>;
-  findMany(params: FindParams<AllTypes[T]>): Promise<any[]>;
-  findWithCount(params: FindParams<AllTypes[T]>): Promise<[any[], number]>;
-  findPage(params: FindParams<AllTypes[T]>): Promise<{ results: any[]; pagination: Pagination }>;
+export interface QueryFromContentType<T extends keyof AllTypes> {
+  findOne(params?: any): Promise<any>;
+  findMany(params?: any): Promise<any[]>;
+  findWithCount(params?: any): Promise<[any[], number]>;
+  findPage(params?: any): Promise<{ results: any[]; pagination: Pagination }>;
 
-  create(params: CreateParams<AllTypes[T]>): Promise<any>;
-  createMany(params: CreateManyParams<AllTypes[T]>): Promise<{ count: number; ids: ID[] }>;
+  create(params?: any): Promise<any>;
+  createMany(params?: any): Promise<{ count: number; ids: ID[] }>;
 
-  update(params: any): Promise<any>;
-  updateMany(params: any): Promise<{ count: number }>;
+  update(params?: any): Promise<any>;
+  updateMany(params?: any): Promise<{ count: number }>;
 
-  delete(params: any): Promise<any>;
-  deleteMany(params: any): Promise<{ count: number }>;
+  delete(params?: any): Promise<any>;
+  deleteMany(params?: any): Promise<{ count: number }>;
 
   count(params?: any): Promise<number>;
 
@@ -137,11 +138,16 @@ interface QueryFromContentType<T extends keyof AllTypes> {
   deleteRelations(id: ID): Promise<any>;
 
   populate<S extends AllTypes[T]>(entity: S, populate: PopulateParams): Promise<S>;
-
+  clone<S extends AllTypes[T]>(cloneId: ID, params?: Params<S>): Promise<S>;
   load<S extends AllTypes[T], K extends keyof S>(
     entity: S,
-    field: K,
-    populate: PopulateParams
+    field: K | K[],
+    populate?: PopulateParams
+  ): Promise<S[K]>;
+  loadPages<S extends AllTypes[T], K extends keyof S>(
+    entity: S,
+    field: K | K[],
+    populate?: PopulateParams
   ): Promise<S[K]>;
 }
 
@@ -164,6 +170,13 @@ export interface Database {
   queryBuilder: any;
   metadata: any;
   connection: Knex;
+  dialect: {
+    client: string;
+  };
+
+  destroy(): Promise<void>;
+
+  getSchemaConnection: () => Knex.SchemaBuilder;
 
   query: <T extends keyof AllTypes>(uid: T) => QueryFromContentType<T>;
   transaction(
@@ -177,6 +190,7 @@ export interface Database {
   ):
     | Promise<unknown>
     | { get: () => Knex.Transaction; rollback: () => Promise<void>; commit: () => Promise<void> };
+  inTransaction: () => boolean;
 }
 export class Database implements Database {
   static transformContentTypes(contentTypes: any[]): ModelConfig[];

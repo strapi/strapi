@@ -187,6 +187,8 @@ class WebhookRunner {
 /**
  * Expose a factory function instead of the class
  */
-export default function createWebhookRunner(opts: ConstructorParameters) {
+export default function createWebhookRunner(opts: ConstructorParameters): WebhookRunner {
   return new WebhookRunner(opts);
 }
+
+export type { WebhookRunner };

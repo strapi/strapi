@@ -9,7 +9,10 @@ import registerApplicationMiddlewares from './register-middlewares';
 import createKoaApp from './koa';
 import requestCtx from '../request-context';
 
-const healthCheck = async (ctx) => {
+import type { Strapi } from '../../Strapi';
+import type { Common } from '../../types';
+
+const healthCheck: Common.MiddlewareHandler = async (ctx) => {
   ctx.set('strapi', 'You are so French!');
   ctx.status = 204;
 };
@@ -22,11 +25,8 @@ const healthCheck = async (ctx) => {
  */
 
 /**
- *
- * @param {Strapi} strapi
- * @returns {Server}
  */
-const createServer = (strapi) => {
+const createServer = (strapi: Strapi) => {
   const app = createKoaApp({
     proxy: strapi.config.get('server.proxy'),
     keys: strapi.config.get('server.app.keys'),
@@ -45,6 +45,8 @@ const createServer = (strapi) => {
     admin: createAdminAPI(strapi),
   };
 
+  type APIs = typeof apis;
+
   // init health check
   router.all('/_health', healthCheck);
 
@@ -57,17 +59,17 @@ const createServer = (strapi) => {
     router,
     httpServer,
 
-    api(name) {
+    api(name: keyof APIs) {
       return apis[name];
     },
 
-    use(...args) {
+    use(...args: Parameters<typeof app.use>) {
       app.use(...args);
       return this;
     },
 
-    routes(routes) {
-      if (routes.type) {
+    routes(routes: Common.Router | Omit<Common.Route, 'info'>[]) {
+      if (!Array.isArray(routes) && routes.type) {
         const api = apis[routes.type];
         if (!api) {
           throw new Error(`API ${routes.type} not found. Possible APIs are ${Object.keys(apis)}`);
@@ -108,7 +110,7 @@ const createServer = (strapi) => {
       return allRoutes;
     },
 
-    listen(...args) {
+    listen(...args: any[]) {
       if (!state.mounted) {
         this.mount();
       }

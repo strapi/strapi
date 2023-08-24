@@ -48,7 +48,7 @@ export default async function loadComponents(strapi: Strapi) {
         );
       }
 
-      const uid = `${category}.${key}`;
+      const uid: Common.UID.Component = `${category}.${key}`;
 
       acc[uid] = Object.assign(schema, {
         __schema__: _.cloneDeep(schema),

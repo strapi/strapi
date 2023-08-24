@@ -10,7 +10,7 @@ import * as utils from '../../../utils';
 import { assertValidStrapi } from '../../../utils/providers';
 
 export interface ILocalStrapiSourceProviderOptions {
-  getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>; // return an initialized instance of Strapi
+  getStrapi(): Strapi.Loaded | Promise<Strapi.Loaded>; // return an initialized instance of Strapi
 
   autoDestroy?: boolean; // shut down the instance returned by getStrapi() at the end of the transfer
 }
@@ -26,7 +26,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
 
   options: ILocalStrapiSourceProviderOptions;
 
-  strapi?: Strapi.Strapi;
+  strapi?: Strapi.Loaded;
 
   constructor(options: ILocalStrapiSourceProviderOptions) {
     this.options = options;
@@ -78,7 +78,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
   createConfigurationReadStream(): Readable {
     assertValidStrapi(this.strapi, 'Not able to stream configuration');
 
-    return createConfigurationStream(strapi);
+    return createConfigurationStream(this.strapi);
   }
 
   getSchemas() {

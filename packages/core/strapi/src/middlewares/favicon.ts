@@ -1,15 +1,7 @@
 import { existsSync } from 'fs';
 import { resolve } from 'path';
 import koaFavicon from 'koa-favicon';
-import type Koa from 'koa';
-import type { MiddlewareFactory } from './types';
-
-declare module 'koa-favicon' {
-  export default function favicon(
-    path: string,
-    options?: { maxAge?: number; mime?: string }
-  ): Koa.Middleware;
-}
+import type { Common } from '../types';
 
 export type Config = NonNullable<Parameters<typeof koaFavicon>[1]>;
 
@@ -18,7 +10,7 @@ const defaults = {
   maxAge: 86400000,
 };
 
-export const favicon: MiddlewareFactory<Config> = (config, { strapi }) => {
+export const favicon: Common.MiddlewareFactory<Config> = (config, { strapi }) => {
   const { maxAge, path: faviconDefaultPath } = { ...defaults, ...config };
   const { root: appRoot } = strapi.dirs.app;
   let faviconPath = faviconDefaultPath;

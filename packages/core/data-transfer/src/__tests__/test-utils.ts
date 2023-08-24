@@ -24,13 +24,13 @@ export const collect = <T = unknown>(stream: Readable): Promise<T[]> => {
 export const getStrapiFactory =
   <
     T extends {
-      [key in keyof Partial<Strapi.Strapi>]: unknown;
+      [key in keyof Partial<Strapi.Loaded>]: unknown;
     }
   >(
     properties?: T
   ) =>
   (additionalProperties?: T) => {
-    return { ...properties, ...additionalProperties } as Strapi.Strapi;
+    return { ...properties, ...additionalProperties } as Strapi.Loaded;
   };
 
 /**
@@ -105,7 +105,7 @@ export const destinationStages = [
 /**
  * Update the global store with the given strapi value
  */
-export const setGlobalStrapi = (strapi: Strapi.Strapi): void => {
+export const setGlobalStrapi = (strapi: Strapi.Loaded): void => {
   (global as unknown as Global).strapi = strapi;
 };
 
