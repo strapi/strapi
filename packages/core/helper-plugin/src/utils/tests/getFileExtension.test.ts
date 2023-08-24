@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { getFileExtension } from '../getFileExtension';
 
 describe('HELPER PLUGIN | utils | getFileExtension', () => {
@@ -5,6 +6,7 @@ describe('HELPER PLUGIN | utils | getFileExtension', () => {
     const ext = null;
     const expected = null;
 
+    // @ts-expect-error ext should be a string so will throw error that ext is null.
     expect(getFileExtension(ext)).toEqual(expected);
   });
 
