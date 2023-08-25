@@ -1,4 +1,4 @@
-import { Context, ReactNode, createContext, useContext, useMemo } from 'react';
+import { ReactNode, createContext, useContext, useMemo } from 'react';
 
 type EmptyObject = Record<string, never>;
 
@@ -9,7 +9,7 @@ type AppInfoContextValue = {
   dependencies?: Record<string, string>;
   latestStrapiReleaseTag?: string;
   nodeVersion?: string;
-  // projectId?: string;
+  projectId?: string;
   setUserDisplayName: (name: string) => void;
   shouldUpdateStrapi: boolean;
   strapiVersion?: string;
@@ -22,7 +22,7 @@ type AppInfoContextValue = {
  * Context
  * -----------------------------------------------------------------------------------------------*/
 
-const AppInfoContext: Context<AppInfoContextValue | EmptyObject> = createContext({});
+const AppInfoContext = createContext<AppInfoContextValue | EmptyObject>({});
 
 /* -------------------------------------------------------------------------------------------------
  * Provider
@@ -38,7 +38,7 @@ const AppInfoProvider = ({
   dependencies,
   latestStrapiReleaseTag,
   nodeVersion,
-  // projectId,
+  projectId,
   setUserDisplayName,
   shouldUpdateStrapi,
   strapiVersion,
@@ -54,7 +54,7 @@ const AppInfoProvider = ({
       dependencies,
       latestStrapiReleaseTag,
       nodeVersion,
-      // projectId,
+      projectId,
       setUserDisplayName,
       shouldUpdateStrapi,
       strapiVersion,
@@ -69,7 +69,7 @@ const AppInfoProvider = ({
       dependencies,
       latestStrapiReleaseTag,
       nodeVersion,
-      // projectId,
+      projectId,
       setUserDisplayName,
       shouldUpdateStrapi,
       strapiVersion,
@@ -86,7 +86,7 @@ const AppInfoProvider = ({
  * Hook
  * -----------------------------------------------------------------------------------------------*/
 
-const useAppInfo: () => AppInfoContextValue | EmptyObject = () => useContext(AppInfoContext);
+const useAppInfo = () => useContext(AppInfoContext);
 
 /**
  * TODO: rename these to remove the plural in next major version
