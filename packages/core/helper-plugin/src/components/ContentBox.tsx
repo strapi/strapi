@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { Flex, FlexProps, Typography } from '@strapi/design-system';
 import styled from 'styled-components';
 
