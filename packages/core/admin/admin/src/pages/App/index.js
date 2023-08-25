@@ -3,12 +3,12 @@ import * as React from 'react';
 import { SkipToContent } from '@strapi/design-system';
 import {
   auth,
-  LoadingIndicatorPage,
   prefixFileUrlWithBackendUrl,
   TrackingProvider,
   useFetchClient,
 } from '@strapi/helper-plugin';
 import merge from 'lodash/merge';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useQueries } from 'react-query';
 import { useDispatch } from 'react-redux';
@@ -50,7 +50,7 @@ export function App({ children }) {
 
   const [
     { data: token, error: errorRenewToken },
-    { data: initData, isLoading: isLoadingInit },
+    { data: initData },
     { data: telemetryProperties },
   ] = useQueries([
     {
@@ -66,6 +66,7 @@ export function App({ children }) {
       },
 
       enabled: !!auth.getToken(),
+      suspense: true,
     },
 
     {
@@ -77,6 +78,7 @@ export function App({ children }) {
 
         return data;
       },
+      suspense: true,
     },
 
     {
@@ -110,7 +112,7 @@ export function App({ children }) {
   // Store the fetched project settings (e.g. logos)
   // TODO: this should be moved to redux
   React.useEffect(() => {
-    if (!isLoadingInit && initData) {
+    if (initData) {
       updateProjectSettings({
         menuLogo: prefixFileUrlWithBackendUrl(initData.menuLogo),
         authLogo: prefixFileUrlWithBackendUrl(initData.authLogo),
@@ -123,7 +125,7 @@ export function App({ children }) {
         uuid: initData.uuid,
       }));
     }
-  }, [initData, isLoadingInit, updateProjectSettings]);
+  }, [initData, updateProjectSettings]);
 
   // We can't use useTracking here, because `App` is not wrapped in the tracking provider
   // context, which we can't do because the context values contain data that can only be
@@ -163,10 +165,6 @@ export function App({ children }) {
     [uuid, telemetryProperties]
   );
 
-  if (isLoadingInit) {
-    return <LoadingIndicatorPage />;
-  }
-
   return (
     <TrackingProvider value={trackingContext}>
       <SkipToContent>{formatMessage({ id: 'skipToContent' })}</SkipToContent>
@@ -174,3 +172,7 @@ export function App({ children }) {
     </TrackingProvider>
   );
 }
+
+App.propTypes = {
+  children: PropTypes.node.isRequired,
+};

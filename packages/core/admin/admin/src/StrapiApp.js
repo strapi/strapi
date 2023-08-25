@@ -1,14 +1,15 @@
 import * as React from 'react';
 
 import { darkTheme, lightTheme } from '@strapi/design-system';
-import { auth, LoadingIndicatorPage } from '@strapi/helper-plugin';
+import { LoadingIndicatorPage } from '@strapi/helper-plugin';
 import invariant from 'invariant';
 import merge from 'lodash/merge';
 import { Helmet } from 'react-helmet';
-import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
 
 import faviconSrc from './assets/favicon.png';
 import logoSrc from './assets/images/logo-strapi-2022.svg';
+import { PrivateRoute } from './components/PrivateRoute';
 import { Providers } from './components/Providers';
 import { APP_REDUCERS, INJECTION_ZONES, LANGUAGE_MAP, LOCALE_LOCALSTORAGE_KEY } from './constants';
 import { customFields, Plugin } from './core/apis';
@@ -104,34 +105,12 @@ export class StrapiApp {
     this.routes = [
       {
         path: '/usecase',
-        render: (props) =>
-          auth.getToken() !== null ? (
-            <AuthenticatedApp {...props} />
-          ) : (
-            <Redirect
-              to={{
-                pathname: '/auth/login',
-                search:
-                  pathname !== '/' && `?redirectTo=${encodeURIComponent(`${pathname}${search}`)}`,
-              }}
-            />
-          ),
+        render: (props) => <PrivateRoute component={AuthenticatedApp} {...props} />,
       },
 
       {
         path: '/usecase',
-        render: (props) =>
-          auth.getToken() !== null ? (
-            <UseCasePage {...props} />
-          ) : (
-            <Redirect
-              to={{
-                pathname: '/auth/login',
-                search:
-                  pathname !== '/' && `?redirectTo=${encodeURIComponent(`${pathname}${search}`)}`,
-              }}
-            />
-          ),
+        render: (props) => <PrivateRoute component={UseCasePage} {...props} />,
       },
 
       {
@@ -140,13 +119,16 @@ export class StrapiApp {
         exact: true,
       },
 
-      // ...(window.isEE ? {
-      //   path: '/auth/login/:authResponse',
-      //   component: React.lazy(() =>
-      //     import('../AuthResponse').then((module) => ({ default: module.AuthResponse }))
-      //   ),
-      // } : {}),
-
+      window.isEE
+        ? {
+            path: '/auth/login/:authResponse',
+            component: React.lazy(() =>
+              import('../../ee/admin/pages/AuthResponse').then((module) => ({
+                default: module.AuthResponse,
+              }))
+            ),
+          }
+        : {},
       {
         path: '/404',
         component: NotFoundPage,
@@ -546,17 +528,17 @@ export class StrapiApp {
             htmlAttributes={{ lang: localStorage.getItem(LOCALE_LOCALSTORAGE_KEY) || 'en' }}
           />
 
-          <App>
-            <React.Suspense fallback={<LoadingIndicatorPage />}>
+          <React.Suspense fallback={<LoadingIndicatorPage />}>
+            <App>
               <BrowserRouter basename={process.env.ADMIN_PATH.replace(window.location.origin, '')}>
                 <Switch>
                   {this.routes.map((route) => (
-                    <Route {...route} />
+                    <Route key={route.path} {...route} />
                   ))}
                 </Switch>
               </BrowserRouter>
-            </React.Suspense>
-          </App>
+            </App>
+          </React.Suspense>
         </>
       </Providers>
     );
