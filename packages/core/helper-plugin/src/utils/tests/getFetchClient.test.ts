@@ -29,17 +29,17 @@ describe('HELPER-PLUGIN | utils | getFetchClient', () => {
 
   it('should contain the URL passed when we try to reach an unknown API with a full URL', async () => {
     server.use(
-      rest.get('https://notInternalUrl.com', (req, res, ctx) => {
+      rest.get('https://notinternalurl.com', (req, res, ctx) => {
         return res(ctx.status(200));
       })
     );
 
     const response = getFetchClient();
     try {
-      await response.get('https://notInternalUrl.com');
+      await response.get('https://notinternalurl.com');
     } catch (err) {
       const url = (err as AxiosError).config?.url;
-      expect(url).toBe('https://notInternalUrl.com');
+      expect(url).toBe('https://notinternalurl.com');
     }
 
     server.restoreHandlers();

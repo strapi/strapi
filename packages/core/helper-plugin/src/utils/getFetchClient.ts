@@ -2,8 +2,7 @@ import { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 import { instance } from './fetchClient';
 
-const addPrependingSlash = (url: string) =>
-  typeof url === 'string' && url.charAt(0) !== '/' ? `/${url}` : url;
+const addPrependingSlash = (url: string) => (url.charAt(0) !== '/' ? `/${url}` : url);
 
 // This regular expression matches a string that starts with either "http://" or "https://" or any other protocol name in lower case letters, followed by "://" and ends with anything else
 const hasProtocol = (url: string) => new RegExp('^(?:[a-z+]+:)?//', 'i').test(url);
@@ -19,7 +18,7 @@ type FetchClient = {
 };
 
 const getFetchClient = (defaultOptions: AxiosRequestConfig = {}): FetchClient => {
-  instance.defaults.baseURL = (window as any).strapi.backendURL;
+  instance.defaults.baseURL = window.strapi.backendURL;
   return {
     get: (url, config) =>
       instance.get(normalizeUrl(url), {
