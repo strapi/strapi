@@ -82,6 +82,8 @@ module.exports = ({ strapi }) => {
       const stageId = destStage.id;
 
       if (destStage.permissions) {
+        await this.deleteStagePermissions([srcStage]);
+
         const permissions = await mapAsync(destStage.permissions, (permission) =>
           stagePermissionsService.register(permission.role, permission.action, stageId)
         );
