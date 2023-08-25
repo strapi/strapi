@@ -46,6 +46,7 @@ const loaders = require('./core/loaders');
 const { destroyOnSignal } = require('./utils/signals');
 const getNumberOfDynamicZones = require('./services/utils/dynamic-zones');
 const sanitizersRegistry = require('./core/registries/sanitizers');
+const validatorsRegistry = require('./core/registries/validators');
 const convertCustomFieldType = require('./utils/convert-custom-field-type');
 
 // TODO: move somewhere else
@@ -99,6 +100,7 @@ class Strapi {
     this.container.register('auth', createAuth(this));
     this.container.register('content-api', createContentAPI(this));
     this.container.register('sanitizers', sanitizersRegistry(this));
+    this.container.register('validators', validatorsRegistry(this));
 
     // Create a mapping of every useful directory (for the app, dist and static directories)
     this.dirs = utils.getDirs(rootDirs, { strapi: this });
@@ -210,6 +212,10 @@ class Strapi {
 
   get sanitizers() {
     return this.container.get('sanitizers');
+  }
+
+  get validators() {
+    return this.container.get('validators');
   }
 
   async start() {
@@ -370,6 +376,10 @@ class Strapi {
     await loaders.loadSanitizers(this);
   }
 
+  async loadValidators() {
+    await loaders.loadValidators(this);
+  }
+
   registerInternalHooks() {
     this.container.get('hooks').set('strapi::content-types.beforeSync', createAsyncParallelHook());
     this.container.get('hooks').set('strapi::content-types.afterSync', createAsyncParallelHook());
@@ -382,6 +392,7 @@ class Strapi {
     await Promise.all([
       this.loadApp(),
       this.loadSanitizers(),
+      this.loadValidators(),
       this.loadPlugins(),
       this.loadAdmin(),
       this.loadAPIs(),
