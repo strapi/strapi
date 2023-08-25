@@ -47,7 +47,7 @@ module.exports = ({ action, ability, model }) => {
 
   const { removeDisallowedFields } = sanitize.visitors;
   const { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate, traverseQueryFields } =
-    traverse.traversals;
+    traverse;
 
   const createSanitizeQuery = (options = {}) => {
     const { fields } = options;

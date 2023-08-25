@@ -4,7 +4,12 @@ import { pipeAsync } from '../async';
 import traverseEntity, { Data } from '../traverse-entity';
 import { isScalarAttribute } from '../content-types';
 
-import traversals from '../traverse/traversals';
+import {
+  traverseQueryFilters,
+  traverseQuerySort,
+  traverseQueryPopulate,
+  traverseQueryFields,
+} from '../traverse';
 
 import {
   removePassword,
@@ -15,9 +20,6 @@ import {
 import { isOperator } from '../operators';
 
 import type { Model } from '../types';
-
-const { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate, traverseQueryFields } =
-  traversals;
 
 const sanitizePasswords = (schema: Model) => async (entity: Data) => {
   if (!schema) {

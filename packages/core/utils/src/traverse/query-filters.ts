@@ -1,6 +1,6 @@
 import { curry, isObject, isEmpty, isArray, isNil, cloneDeep, omit } from 'lodash/fp';
 
-import traverseFactory from '../factory';
+import traverseFactory from './factory';
 
 const isObj = (value: unknown): value is Record<string, unknown> => isObject(value);
 

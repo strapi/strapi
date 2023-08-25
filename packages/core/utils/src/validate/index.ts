@@ -8,11 +8,9 @@ import * as visitors from './visitors';
 import * as validators from './validators';
 import traverseEntity, { Data } from '../traverse-entity';
 
-import traversals from '../traverse/traversals';
+import { traverseQueryFilters, traverseQuerySort } from '../traverse';
 
 import { Model } from '../types';
-
-const { traverseQueryFilters, traverseQuerySort } = traversals;
 
 export interface Options {
   auth?: unknown;

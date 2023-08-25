@@ -4,15 +4,13 @@ import { pipeAsync } from '../async';
 import traverseEntity, { Data } from '../traverse-entity';
 import { isScalarAttribute } from '../content-types';
 
-import traversals from '../traverse/traversals';
+import { traverseQueryFilters, traverseQuerySort, traverseQueryFields } from '../traverse';
 
 import { throwPassword, throwPrivate, throwDynamicZones, throwMorphToRelations } from './visitors';
 import { isOperator } from '../operators';
 
 import type { Model } from '../types';
 import { throwInvalidParam } from './utils';
-
-const { traverseQueryFilters, traverseQuerySort, traverseQueryFields } = traversals;
 
 const throwPasswords = (schema: Model) => async (entity: Data) => {
   if (!schema) {

@@ -223,7 +223,7 @@ const getDeepPopulateDraftCount = (uid) => {
 const getQueryPopulate = async (uid, query) => {
   let populateQuery = {};
 
-  await strapiUtils.traverse.traversals.traverseQueryFilters(
+  await strapiUtils.traverse.traverseQueryFilters(
     /**
      *
      * @param {Object} param0

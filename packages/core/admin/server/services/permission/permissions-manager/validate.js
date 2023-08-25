@@ -51,7 +51,7 @@ const throwInvalidParam = ({ key }) => {
 module.exports = ({ action, ability, model }) => {
   const schema = strapi.getModel(model);
 
-  const { traverseQueryFilters, traverseQuerySort, traverseQueryFields } = traverse.traversals;
+  const { traverseQueryFilters, traverseQuerySort, traverseQueryFields } = traverse;
 
   const createValidateQuery = (options = {}) => {
     const { fields } = options;
