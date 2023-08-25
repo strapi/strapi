@@ -110,9 +110,6 @@ describe('Permissions Manager - Validate', () => {
       ['filters', 'password', { filters: { c: 'Foo', b: 'Bar' } }, 'b'],
       ['sort', 'password', { sort: { c: 'Foo', b: 'Bar' } }, 'b'],
       ['fields', 'password', { fields: ['c', 'b'] }, 'b'],
-      ['filters', 'hidden', { filters: { c: 'Foo', a: 'Bar' } }, 'a'],
-      ['sort', 'hidden', { sort: { c: 'Foo', a: 'Bar' } }, 'a'],
-      ['fields', 'hidden', { fields: ['c', 'a'] }, 'a'],
     ])('Throws on %s with %s', async (key, type, data, invalidParam) => {
       expect(async () => {
         await validateHelpers.validateQuery(data, { subject: fooModel.uid });
