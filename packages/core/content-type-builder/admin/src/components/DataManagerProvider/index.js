@@ -69,6 +69,7 @@ const DataManagerProvider = ({
   reservedNames,
 }) => {
   const dispatch = useDispatch();
+  const [refetch, setRefetch] = React.useState(false);
   const toggleNotification = useNotification();
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
   const { setCurrentStep } = useGuidedTour();
@@ -99,54 +100,53 @@ const DataManagerProvider = ({
     ? get(contentTypeMatch, 'params.uid', null)
     : get(componentMatch, 'params.componentUid', null);
 
-  const getDataRef = useRef();
   const endPoint = isInContentTypeView ? 'content-types' : 'components';
 
-  getDataRef.current = async () => {
-    try {
-      const [
-        {
-          data: { data: componentsArray },
-        },
-        {
-          data: { data: contentTypesArray },
-        },
-        { data: reservedNames },
-      ] = await Promise.all(
-        ['components', 'content-types', 'reserved-names'].map((endPoint) => {
-          return fetchClient.get(`/${pluginId}/${endPoint}`);
-        })
-      );
-
-      const components = createDataObject(componentsArray);
-      const formattedComponents = formatSchemas(components);
-      const contentTypes = createDataObject(contentTypesArray);
-      const formattedContentTypes = formatSchemas(contentTypes);
-
-      dispatch({
-        type: GET_DATA_SUCCEEDED,
-        components: formattedComponents,
-        contentTypes: formattedContentTypes,
-        reservedNames,
-      });
-    } catch (err) {
-      console.error({ err });
-      toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
-      });
-    }
-  };
-
   useEffect(() => {
-    getDataRef.current();
+    async function fetchData() {
+      try {
+        const [
+          {
+            data: { data: componentsArray },
+          },
+          {
+            data: { data: contentTypesArray },
+          },
+          { data: reservedNames },
+        ] = await Promise.all(
+          ['components', 'content-types', 'reserved-names'].map((endPoint) => {
+            return fetchClient.get(`/${pluginId}/${endPoint}`);
+          })
+        );
+
+        const components = createDataObject(componentsArray);
+        const formattedComponents = formatSchemas(components);
+        const contentTypes = createDataObject(contentTypesArray);
+        const formattedContentTypes = formatSchemas(contentTypes);
+
+        dispatch({
+          type: GET_DATA_SUCCEEDED,
+          components: formattedComponents,
+          contentTypes: formattedContentTypes,
+          reservedNames,
+        });
+      } catch (err) {
+        console.error({ err });
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
+      }
+    }
+
+    fetchData();
 
     return () => {
       // Reload the plugin so the cycle is new again
       dispatch({ type: RELOAD_PLUGIN });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [refetch]);
 
   useEffect(() => {
     // We need to set the modifiedData after the data has been retrieved
@@ -281,6 +281,7 @@ const DataManagerProvider = ({
         await unlockAppWithAutoreload();
 
         await updatePermissions();
+        await setRefetch(!refetch);
       }
     } catch (err) {
       console.error({ err });
@@ -332,6 +333,7 @@ const DataManagerProvider = ({
 
         // Refetch the permissions
         await updatePermissions();
+        await setRefetch(!refetch);
       }
     } catch (err) {
       console.error({ err });
@@ -364,6 +366,7 @@ const DataManagerProvider = ({
       await unlockAppWithAutoreload();
 
       await updatePermissions();
+      await setRefetch(!refetch);
     } catch (err) {
       console.error({ err });
       toggleNotification({
@@ -547,6 +550,7 @@ const DataManagerProvider = ({
 
       // Update the app's permissions
       await updatePermissions();
+      await setRefetch(!refetch);
     } catch (err) {
       if (!isInContentTypeView) {
         trackUsage('didNotSaveComponent');
