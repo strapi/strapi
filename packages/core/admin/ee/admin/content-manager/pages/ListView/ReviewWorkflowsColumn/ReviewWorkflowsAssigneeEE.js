@@ -14,7 +14,6 @@ export function ReviewWorkflowsAssigneeEE({ user }) {
 
 ReviewWorkflowsAssigneeEE.propTypes = {
   user: PropTypes.shape({
-    id: PropTypes.number,
     firstname: PropTypes.string,
     lastname: PropTypes.string,
     username: PropTypes.string,
