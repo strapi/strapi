@@ -1,10 +1,8 @@
 export const PREFIX = '[@strapi/helper-plugin]:';
 
-export const once: <TFunc extends (...args: any) => any>(fn: TFunc) => (...args: any[]) => void = <
-  TFunc extends (...args: any[]) => any
->(
-  fn: TFunc
-): ((...args: any[]) => void) => {
+type AnyFunction = (...args: any[]) => any;
+
+export const once = (fn: AnyFunction): AnyFunction => {
   const func = fn;
   let called = false;
 
