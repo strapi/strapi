@@ -1,8 +1,8 @@
-import { EmptyStateLayout } from '@strapi/design-system';
+import { EmptyStateLayout, EmptyStateLayoutProps } from '@strapi/design-system';
 import { ExclamationMarkCircle } from '@strapi/icons';
 import { MessageDescriptor, PrimitiveType, useIntl } from 'react-intl';
 
-export type AnErrorOccurredProps = {
+export type AnErrorOccurredProps = Omit<EmptyStateLayoutProps, 'content' | 'icon'> & {
   content?: MessageDescriptor & { values?: Record<string, PrimitiveType> };
 };
 
@@ -18,12 +18,12 @@ const AnErrorOccurred = ({
 
   return (
     <EmptyStateLayout
+      {...rest}
       icon={<ExclamationMarkCircle width="10rem" />}
       content={formatMessage(
         { id: content.id, defaultMessage: content.defaultMessage },
         content.values
       )}
-      {...rest}
     />
   );
 };
