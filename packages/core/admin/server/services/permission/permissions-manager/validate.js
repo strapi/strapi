@@ -51,8 +51,6 @@ const throwInvalidParam = ({ key }) => {
 module.exports = ({ action, ability, model }) => {
   const schema = strapi.getModel(model);
 
-  const { traverseQueryFilters, traverseQuerySort, traverseQueryFields } = traverse;
-
   const createValidateQuery = (options = {}) => {
     const { fields } = options;
 
@@ -60,10 +58,10 @@ module.exports = ({ action, ability, model }) => {
     const permittedFields = fields.shouldIncludeAll ? null : getQueryFields(fields.permitted);
 
     const validateFilters = pipeAsync(
-      traverseQueryFilters(throwDisallowedFields(permittedFields), { schema }),
-      traverseQueryFilters(throwDisallowedAdminUserFields, { schema }),
-      traverseQueryFilters(throwPassword, { schema }),
-      traverseQueryFilters(
+      traverse.traverseQueryFilters(throwDisallowedFields(permittedFields), { schema }),
+      traverse.traverseQueryFilters(throwDisallowedAdminUserFields, { schema }),
+      traverse.traverseQueryFilters(throwPassword, { schema }),
+      traverse.traverseQueryFilters(
         ({ key, value }) => {
           if (isObject(value) && isEmpty(value)) {
             throwInvalidParam({ key });
@@ -74,10 +72,10 @@ module.exports = ({ action, ability, model }) => {
     );
 
     const validateSort = pipeAsync(
-      traverseQuerySort(throwDisallowedFields(permittedFields), { schema }),
-      traverseQuerySort(throwDisallowedAdminUserFields, { schema }),
-      traverseQuerySort(throwPassword, { schema }),
-      traverseQuerySort(
+      traverse.traverseQuerySort(throwDisallowedFields(permittedFields), { schema }),
+      traverse.traverseQuerySort(throwDisallowedAdminUserFields, { schema }),
+      traverse.traverseQuerySort(throwPassword, { schema }),
+      traverse.traverseQuerySort(
         ({ key, attribute, value }) => {
           if (!isScalarAttribute(attribute) && isEmpty(value)) {
             throwInvalidParam({ key });
@@ -88,8 +86,8 @@ module.exports = ({ action, ability, model }) => {
     );
 
     const validateFields = pipeAsync(
-      traverseQueryFields(throwDisallowedFields(permittedFields), { schema }),
-      traverseQueryFields(throwPassword, { schema })
+      traverse.traverseQueryFields(throwDisallowedFields(permittedFields), { schema }),
+      traverse.traverseQueryFields(throwPassword, { schema })
     );
 
     return async (query) => {
