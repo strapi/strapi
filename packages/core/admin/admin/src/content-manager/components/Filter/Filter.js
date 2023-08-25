@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React from 'react';
 
 import { Button } from '@strapi/design-system';
 import { FilterListURLQuery, FilterPopoverURLQuery, useTracking } from '@strapi/helper-plugin';
@@ -7,9 +7,9 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 export const Filter = ({ displayedFilters }) => {
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = React.useState(false);
   const { formatMessage } = useIntl();
-  const buttonRef = useRef();
+  const buttonRef = React.useRef();
   const { trackUsage } = useTracking();
 
   const handleToggle = () => {
@@ -24,7 +24,7 @@ export const Filter = ({ displayedFilters }) => {
       <Button
         variant="tertiary"
         ref={buttonRef}
-        startIcon={<Filter />}
+        startIcon={<FilterIcon />}
         onClick={handleToggle}
         size="S"
       >

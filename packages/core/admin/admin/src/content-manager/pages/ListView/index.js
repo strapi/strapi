@@ -95,7 +95,6 @@ function ListView({
   const fetchPermissionsRef = React.useRef(refetchPermissions);
   const { notifyStatus } = useNotifyAT();
   const { formatAPIError } = useAPIErrorHandler(getTrad);
-  const permissions = useSelector(selectAdminPermissions);
   const allowedAttributes = useAllowedAttributes(contentType, slug);
   const [{ query }] = useQueryParams();
   const { pathname } = useLocation();
