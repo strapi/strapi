@@ -1,6 +1,6 @@
 {
   "name": "@strapi/generate-new",
-  "version": "4.12.5",
+  "version": "4.12.7",
   "description": "Generate a new Strapi application.",
   "keywords": [
     "generate",
