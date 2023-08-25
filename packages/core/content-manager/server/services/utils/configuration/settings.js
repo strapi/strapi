@@ -1,7 +1,9 @@
 'use strict';
 
-const { isEmpty, pick, pipe, propOr } = require('lodash/fp');
-const { isSortable, getDefaultMainField } = require('./attributes');
+const { isEmpty, pick, pipe, propOr, isEqual } = require('lodash/fp');
+const { traverse } = require('@strapi/utils');
+const qs = require('qs');
+const { isSortable, getDefaultMainField, getSortableAttributes } = require('./attributes');
 
 /** General settings */
 const DEFAULT_SETTINGS = {
@@ -23,7 +25,29 @@ const settingsFields = [
 
 const getModelSettings = pipe([propOr({}, 'config.settings'), pick(settingsFields)]);
 
+async function isValidDefaultSort(schema, value) {
+  const parsedValue = qs.parse(value);
+
+  const omitNonSortableAttributes = ({ schema, key }, { remove }) => {
+    const sortableAttributes = getSortableAttributes(schema);
+    if (!sortableAttributes.includes(key)) {
+      remove(key);
+    }
+  };
+
+  const sanitizedValue = await traverse.traverseQuerySort(
+    omitNonSortableAttributes,
+    { schema },
+    parsedValue
+  );
+
+  // If any of the keys has been removed, the sort attribute is not valid
+  return isEqual(parsedValue, sanitizedValue);
+}
+
 module.exports = {
+  isValidDefaultSort,
+
   async createDefaultSettings(schema) {
     const defaultField = getDefaultMainField(schema);
 
@@ -46,7 +70,9 @@ module.exports = {
     return {
       ...configuration.settings,
       mainField: isSortable(schema, mainField) ? mainField : defaultField,
-      defaultSortBy: isSortable(schema, defaultSortBy) ? defaultSortBy : defaultField,
+      defaultSortBy: (await isValidDefaultSort(schema, defaultSortBy))
+        ? defaultSortBy
+        : defaultField,
     };
   },
 };

@@ -1,4 +1,4 @@
-import { isArray } from 'lodash/fp';
+import { isArray, isString } from 'lodash/fp';
 import type { Visitor } from '../../traverse/factory';
 
 export default (restrictedFields: string[] | null = null): Visitor =>
@@ -9,9 +9,11 @@ export default (restrictedFields: string[] | null = null): Visitor =>
       return;
     }
 
-    // Ignore invalid formats
-    if (!isArray(restrictedFields)) {
-      return;
+    // Throw on invalid formats
+    if (!(isArray(restrictedFields) && restrictedFields.every(isString))) {
+      throw new TypeError(
+        `Expected array of strings for restrictedFields but got "${typeof restrictedFields}"`
+      );
     }
 
     // Remove if an exact match was found
