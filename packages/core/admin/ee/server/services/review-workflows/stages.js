@@ -78,10 +78,8 @@ module.exports = ({ strapi }) => {
     },
 
     async update(srcStage, destStage) {
-      let stagePermissions = [];
+      let stagePermissions = srcStage?.permissions ?? [];
       const stageId = destStage.id;
-
-      await this.deleteStagePermissions([srcStage]);
 
       if (destStage.permissions) {
         const permissions = await mapAsync(destStage.permissions, (permission) =>
@@ -153,12 +151,8 @@ module.exports = ({ strapi }) => {
         // Update the workflow stages
         await mapAsync(updated, (destStage) => {
           const srcStage = srcStages.find((s) => s.id === destStage.id);
-          return this.update(srcStage, {
-            ...destStage,
-            // If the destination stage has no permissions property do not overwrite
-            // the permissions and use the source stage permissions instead
-            permissions: destStage?.permissions ?? srcStage.permissions,
-          });
+
+          return this.update(srcStage, destStage);
         });
 
         // Delete the stages that are not in the new stages list
