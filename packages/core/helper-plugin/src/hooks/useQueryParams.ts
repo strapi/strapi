@@ -13,7 +13,7 @@ const useQueryParams = <T extends Record<string, JSON>>(initialParams?: T) => {
     const searchQuery = search.substring(1);
 
     if (!search) {
-      return initialParams || {};
+      return initialParams;
     }
 
     return parse(searchQuery);
@@ -23,9 +23,11 @@ const useQueryParams = <T extends Record<string, JSON>>(initialParams?: T) => {
     (nextParams: T, method: 'push' | 'remove' = 'push') => {
       let nextQuery = { ...query };
 
-      if (method === 'remove' && Object.keys(nextQuery).length !== 0) {
+      if (method === 'remove') {
         Object.keys(nextParams).forEach((key) => {
-          delete nextQuery[key];
+          if (nextQuery.hasOwnProperty(key)) {
+            delete (nextQuery as T)[key];
+          }
         });
       } else {
         nextQuery = { ...query, ...nextParams };

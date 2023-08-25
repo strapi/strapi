@@ -18,7 +18,7 @@ describe('useQueryParams', () => {
   it('should set the query params using setQuery method', () => {
     const { result } = renderHook(() => useQueryParams());
     const [{ query }, setQuery] = result.current;
-    expect(query).toStrictEqual({}); // no initial params
+    expect(query).toBe(undefined); // no initial params
 
     act(() => {
       setQuery({ page: 1 });
