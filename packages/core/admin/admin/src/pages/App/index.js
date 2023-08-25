@@ -189,6 +189,8 @@ export function App() {
         },
 
         method: 'POST',
+      }).catch(() => {
+        // noop
       });
     }
 
