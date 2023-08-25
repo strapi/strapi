@@ -2,11 +2,11 @@ import React, { useRef, useState } from 'react';
 
 import { Button } from '@strapi/design-system';
 import { FilterListURLQuery, FilterPopoverURLQuery, useTracking } from '@strapi/helper-plugin';
-import { Filter } from '@strapi/icons';
+import { Filter as FilterIcon } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-const Filters = ({ displayedFilters }) => {
+export const Filter = ({ displayedFilters }) => {
   const [isVisible, setIsVisible] = useState(false);
   const { formatMessage } = useIntl();
   const buttonRef = useRef();
@@ -43,7 +43,7 @@ const Filters = ({ displayedFilters }) => {
   );
 };
 
-Filters.propTypes = {
+Filter.propTypes = {
   displayedFilters: PropTypes.arrayOf(
     PropTypes.shape({
       name: PropTypes.string.isRequired,
@@ -52,5 +52,3 @@ Filters.propTypes = {
     })
   ).isRequired,
 };
-
-export default Filters;
