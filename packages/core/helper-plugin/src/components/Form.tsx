@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import { Form as FormikForm, useFormikContext } from 'formik';
 
 /**
- * @deprecated Use Formik form directly instead.
+ * @deprecated Use Formik Form directly instead.
  */
 const Form = ({ ...props }) => {
   const formRef = useRef<HTMLFormElement>(null!);
