@@ -70,7 +70,7 @@ describe('Permissions Manager - Validate', () => {
       },
       db: {
         metadata: {
-          get(uid) {
+          get() {
             return {
               columnToAttribute: fooModel.config.attributes,
             };
