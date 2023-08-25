@@ -41,23 +41,23 @@ const deleteEntitiesRecords = async (
   const contentTypes = Object.values<Schema.ContentType>(strapi.contentTypes);
 
   const contentTypesToClear = contentTypes.filter((contentType) => {
-    let keep = true;
+    let removeThisContentType = true;
 
     // include means "only include these types" so if it's not in here, it's not being included
     if (entities?.include) {
-      keep = entities.include.includes(contentType.uid);
+      removeThisContentType = entities.include.includes(contentType.uid);
     }
 
     // if something is excluded, remove it. But lack of being excluded doesn't mean it's kept
     if (entities?.exclude && entities.exclude.includes(contentType.uid)) {
-      keep = false;
+      removeThisContentType = false;
     }
 
     if (entities?.filters) {
-      keep = entities.filters.every((filter) => filter(contentType));
+      removeThisContentType = entities.filters.every((filter) => filter(contentType));
     }
 
-    return keep;
+    return removeThisContentType;
   });
 
   const [results, updateResults] = useResults(
