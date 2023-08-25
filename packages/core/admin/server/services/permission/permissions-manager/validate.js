@@ -23,7 +23,7 @@ const {
   traverse,
   validate,
   pipeAsync,
-  ValidationError,
+  errors: { ValidationError },
 } = require('@strapi/utils');
 
 const { throwPassword, throwDisallowedFields } = validate.visitors;
@@ -60,6 +60,7 @@ module.exports = ({ action, ability, model }) => {
     const validateFilters = pipeAsync(
       traverse.traverseQueryFilters(throwDisallowedFields(permittedFields), { schema }),
       traverse.traverseQueryFilters(throwDisallowedAdminUserFields, { schema }),
+      traverse.traverseQueryFilters(throwHiddenFields, { schema }),
       traverse.traverseQueryFilters(throwPassword, { schema }),
       traverse.traverseQueryFilters(
         ({ key, value }) => {
@@ -74,6 +75,7 @@ module.exports = ({ action, ability, model }) => {
     const validateSort = pipeAsync(
       traverse.traverseQuerySort(throwDisallowedFields(permittedFields), { schema }),
       traverse.traverseQuerySort(throwDisallowedAdminUserFields, { schema }),
+      traverse.traverseQuerySort(throwHiddenFields, { schema }),
       traverse.traverseQuerySort(throwPassword, { schema }),
       traverse.traverseQuerySort(
         ({ key, attribute, value }) => {
@@ -87,6 +89,7 @@ module.exports = ({ action, ability, model }) => {
 
     const validateFields = pipeAsync(
       traverse.traverseQueryFields(throwDisallowedFields(permittedFields), { schema }),
+      traverse.traverseQueryFields(throwHiddenFields, { schema }),
       traverse.traverseQueryFields(throwPassword, { schema })
     );
 
@@ -149,9 +152,9 @@ module.exports = ({ action, ability, model }) => {
         },
       };
 
-      const sanitizeFunction = createValidateFunction(validateOptions);
+      const validateFunction = createValidateFunction(validateOptions);
 
-      return sanitizeFunction(data);
+      return validateFunction(data);
     };
 
     return wrappedValidate;
