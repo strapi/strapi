@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import { Form as FormikForm, useFormikContext } from 'formik';
 
 const Form = ({ ...props }) => {
-  const formRef = useRef<HTMLFormElement>(null);
+  const formRef = useRef<HTMLFormElement>(null!);
   const { isSubmitting, isValidating, errors, touched } = useFormikContext();
 
   useEffect(() => {
