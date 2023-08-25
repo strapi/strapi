@@ -83,13 +83,7 @@ const fixtures = {
   ],
 };
 
-const pagination = {
-  page: 1,
-  pageSize: 25,
-  pageCount: 1,
-};
-
-describe('Sanitization - Filter private params', () => {
+describe('Validation - private params', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
@@ -109,7 +103,13 @@ describe('Sanitization - Filter private params', () => {
       )
     );
   });
-  test('Filter by createdBy user email', async () => {
+
+  afterAll(async () => {
+    await strapi.destroy();
+    await builder.cleanup();
+  });
+
+  test('Error when filters has createdBy user email', async () => {
     const res = await rq({
       method: 'GET',
       url: '/collectors',
@@ -124,10 +124,6 @@ describe('Sanitization - Filter private params', () => {
       },
     });
 
-    // The filter should be completely ignored, so we should get all the collectors
-    expect(res.body.meta.pagination).toMatchObject({
-      ...pagination,
-      total: 3,
-    });
+    expect(res.statusCode).toBe(400);
   });
 });
