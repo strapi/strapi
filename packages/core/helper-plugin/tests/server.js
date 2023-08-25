@@ -23,5 +23,8 @@ export const server = setupServer(
         })
       );
     }),
+    rest.get('/test-fetch-client', (req, res, ctx) => {
+      return res(ctx.status(200));
+    }),
   ]
 );
