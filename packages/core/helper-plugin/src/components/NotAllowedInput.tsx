@@ -1,33 +1,34 @@
-/**
- *
- * NotAllowedInput
- *
- */
-
 import React from 'react';
 
-import { TextInput } from '@strapi/design-system';
+import { TextInput, TextInputProps } from '@strapi/design-system';
 import { EyeStriked } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-const StyledIcon = styled(EyeStriked)`
-  > path {
-    fill: ${({ theme }) => theme.colors.neutral600};
-  }
-`;
+import { TranslationMessage } from '../types';
 
-const NotAllowedInput = ({ description, intlLabel, labelAction, error, name }) => {
+interface NotAllowedInputProps extends Pick<TextInputProps, 'labelAction' | 'name'> {
+  description?: TranslationMessage;
+  error?: string;
+  intlLabel: TranslationMessage;
+}
+
+const NotAllowedInput = ({
+  description,
+  error,
+  intlLabel,
+  labelAction,
+  name,
+}: NotAllowedInputProps) => {
   const { formatMessage } = useIntl();
-  const label = intlLabel.id
+  const label = intlLabel?.id
     ? formatMessage(
         { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
         { ...intlLabel.values }
       )
     : name;
 
-  const hint = description
+  const hint = description?.id
     ? formatMessage(
         { id: description.id, defaultMessage: description.defaultMessage },
         { ...description.values }
@@ -58,26 +59,10 @@ const NotAllowedInput = ({ description, intlLabel, labelAction, error, name }) =
   );
 };
 
-NotAllowedInput.defaultProps = {
-  description: null,
-  error: '',
-  labelAction: undefined,
-};
-
-NotAllowedInput.propTypes = {
-  description: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }),
-  error: PropTypes.string,
-  intlLabel: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }).isRequired,
-  labelAction: PropTypes.element,
-  name: PropTypes.string.isRequired,
-};
+const StyledIcon = styled(EyeStriked)`
+  & > path {
+    fill: ${({ theme }) => theme.colors.neutral600};
+  }
+`;
 
 export { NotAllowedInput };
