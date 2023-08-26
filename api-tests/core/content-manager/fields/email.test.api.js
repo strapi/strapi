@@ -45,7 +45,7 @@ describe('Test type email', () => {
     });
   });
 
-  test('Should Throw on invalid email', async () => {
+  test('Should return 400 status on invalid email', async () => {
     const res = await rq.post('/content-manager/collection-types/api::withemail.withemail', {
       body: {
         field: 'invalidemail',

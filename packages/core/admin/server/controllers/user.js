@@ -52,6 +52,8 @@ module.exports = {
       ability: ctx.state.userAbility,
       model: 'admin::user',
     });
+
+    await permissionsManager.validateQuery(ctx.query);
     const sanitizedQuery = await permissionsManager.sanitizeQuery(ctx.query);
 
     const { results, pagination } = await userService.findPage(sanitizedQuery);

@@ -188,6 +188,7 @@ describe('User Controller', () => {
       const createPermissionsManager = jest.fn(() => ({
         ability: state.userAbility,
         sanitizeQuery: (query) => query,
+        validateQuery() {},
       }));
 
       global.strapi = {
@@ -230,6 +231,7 @@ describe('User Controller', () => {
       const createPermissionsManager = jest.fn(() => ({
         ability: state.userAbility,
         sanitizeQuery: (query) => query,
+        validateQuery() {},
       }));
 
       global.strapi = {

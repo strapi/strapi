@@ -151,13 +151,6 @@ jobs:
       - name: Run E2E tests
         run: yarn test:e2e --setup --concurrency=1 --project=${{ matrix.project }}
 
-      - uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30
-
   api_ce_pg:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest

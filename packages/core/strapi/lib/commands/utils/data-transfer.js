@@ -291,7 +291,8 @@ const getDiffHandler = (engine, { force, action }) => {
         if (
           uid === 'admin::workflow' ||
           uid === 'admin::workflow-stage' ||
-          endPath?.startsWith('strapi_stage')
+          endPath?.startsWith('strapi_stage') ||
+          endPath?.startsWith('strapi_assignee')
         ) {
           workflowsStatus = diff.kind;
         }
