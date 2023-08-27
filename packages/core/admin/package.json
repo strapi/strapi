@@ -50,7 +50,7 @@
     "@strapi/provider-audit-logs-local": "4.12.7",
     "@strapi/typescript-utils": "4.12.7",
     "@strapi/utils": "4.12.7",
-    "axios": "1.4.0",
+    "axios": "1.5.0",
     "bcryptjs": "2.4.3",
     "browserslist": "^4.17.3",
     "browserslist-to-esbuild": "1.2.0",
