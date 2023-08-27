@@ -7516,7 +7516,7 @@ __metadata:
     "@testing-library/user-event": 14.4.3
     axios: 1.5.0
     byte-size: 7.0.1
-    cropperjs: 1.5.12
+    cropperjs: 1.6.0
     date-fns: 2.30.0
     formik: 2.4.0
     fs-extra: 10.0.0
@@ -13041,10 +13041,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cropperjs@npm:1.5.12":
-  version: 1.5.12
-  resolution: "cropperjs@npm:1.5.12"
-  checksum: 8dcbceb3659ad72d421038abf7f9d08ca13a061dc6c643497efc043033e22b17411b5558db29a841cb4f0a3b7943a20e6a3d9fecf3901185b7cd027f8097442b
+"cropperjs@npm:1.6.0":
+  version: 1.6.0
+  resolution: "cropperjs@npm:1.6.0"
+  checksum: 643d1e939335ea7426746f03b43ca05848867b095930ea6c84b141ffbe1962b7d5e20e5e5807f19879b95936255ca1fc8823553ffb115e84dca6578876da8b11
   languageName: node
   linkType: hard
 
