@@ -1,28 +1,24 @@
 /* eslint-disable check-file/filename-naming-convention */ // this is disabled because the file name is correct however, we do use JSX in this file.
 import * as React from 'react';
 
-import { act, renderHook } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
-import { useFieldHint, UseFieldHintProps } from '../useFieldHint';
+import { useFieldHint } from '../useFieldHint';
+
+import type { UseFieldHintProps } from '../useFieldHint';
 
 const messages = { 'message.id': 'response' };
 const knownDescription = { id: 'message.id', defaultMessage: '' };
 
-// eslint-disable-next-line react/prop-types
-export const IntlWrapper = ({ children }: { children: React.JSX.Element }) => (
+const IntlWrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en" messages={messages} textComponent="span">
     {children}
   </IntlProvider>
 );
 
-// @TODO: Remove export any type when setup is typed
-function setup(args: UseFieldHintProps): any {
-  return new Promise((resolve) => {
-    act(() => {
-      resolve(renderHook(() => useFieldHint(args), { wrapper: IntlWrapper }));
-    });
-  });
+function setup(args: UseFieldHintProps) {
+  return renderHook(() => useFieldHint(args), { wrapper: IntlWrapper });
 }
 
 describe('useFieldHint', () => {
@@ -53,10 +49,12 @@ describe('useFieldHint', () => {
         fieldSchema,
       });
 
-      expect(result.current.hint.length).toEqual(3);
+      const HintElement = result.current.hint as (string | React.JSX.Element)[];
 
-      expect(result.current.hint[0]).toEqual(`min. ${minimum} character`);
-      expect(result.current.hint[2]).toEqual('');
+      expect(HintElement.length).toEqual(3);
+
+      expect(HintElement[0]).toEqual(`min. ${minimum} character`);
+      expect(HintElement[2]).toEqual('');
     });
 
     test('generates a maximum limit', async () => {
@@ -67,10 +65,12 @@ describe('useFieldHint', () => {
         fieldSchema,
       });
 
-      expect(result.current.hint.length).toEqual(3);
+      const HintElement = result.current.hint as (string | React.JSX.Element)[];
 
-      expect(result.current.hint[0]).toEqual(`max. ${maximum} characters`);
-      expect(result.current.hint[2]).toEqual('');
+      expect(HintElement.length).toEqual(3);
+
+      expect(HintElement[0]).toEqual(`max. ${maximum} characters`);
+      expect(HintElement[2]).toEqual('');
     });
 
     test('generates a minimum/maximum limits', async () => {
@@ -82,10 +82,12 @@ describe('useFieldHint', () => {
         fieldSchema,
       });
 
-      expect(result.current.hint.length).toEqual(3);
+      const HintElement = result.current.hint as (string | React.JSX.Element)[];
 
-      expect(result.current.hint).toContain(`min. ${minimum} / max. ${maximum} characters`);
-      expect(result.current.hint[2]).toEqual('');
+      expect(HintElement.length).toEqual(3);
+
+      expect(HintElement).toContain(`min. ${minimum} / max. ${maximum} characters`);
+      expect(HintElement[2]).toEqual('');
     });
   });
 
@@ -105,9 +107,11 @@ describe('useFieldHint', () => {
       fieldSchema,
     });
 
-    expect(result.current.hint.length).toEqual(3);
+    const HintElement = result.current.hint as (string | React.JSX.Element)[];
 
-    expect(result.current.hint[0]).toEqual(`min. ${minimum} / max. ${maximum} characters`);
-    expect(result.current.hint[2]).toEqual('response');
+    expect(HintElement.length).toEqual(3);
+
+    expect(HintElement[0]).toEqual(`min. ${minimum} / max. ${maximum} characters`);
+    expect(HintElement[2]).toEqual('response');
   });
 });
