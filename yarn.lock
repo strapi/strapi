@@ -7760,7 +7760,7 @@ __metadata:
     semver: 7.5.4
     statuses: 2.0.1
     supertest: 6.3.3
-    ts-zen: "git://github.com/strapi/ts-zen#main"
+    ts-zen: "https://github.com/strapi/ts-zen#main"
     typescript: 5.1.3
   bin:
     strapi: ./bin/strapi.js
@@ -29195,7 +29195,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-zen@git://github.com/strapi/ts-zen#main":
+"ts-zen@https://github.com/strapi/ts-zen#main":
   version: 0.1.5
   resolution: "ts-zen@https://github.com/strapi/ts-zen.git#commit=41af3f8c6422de048bf9976ae551566b2c2b590a"
   peerDependencies:
