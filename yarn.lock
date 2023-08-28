@@ -6963,7 +6963,7 @@ __metadata:
     "@testing-library/dom": 9.2.0
     "@testing-library/react": 14.0.0
     "@testing-library/user-event": 14.4.3
-    axios: 1.4.0
+    axios: 1.5.0
     bcryptjs: 2.4.3
     browserslist: ^4.17.3
     browserslist-to-esbuild: 1.2.0
@@ -7209,7 +7209,7 @@ __metadata:
     "@types/react-dom": 18.2.7
     "@types/react-router-dom": 5.3.3
     "@types/styled-components": 5.1.26
-    axios: 1.4.0
+    axios: 1.5.0
     browserslist-to-esbuild: 1.2.0
     cross-env: ^7.0.3
     date-fns: 2.30.0
@@ -7522,7 +7522,7 @@ __metadata:
     "@testing-library/dom": 9.2.0
     "@testing-library/react": 14.0.0
     "@testing-library/user-event": 14.4.3
-    axios: 1.4.0
+    axios: 1.5.0
     byte-size: 7.0.1
     cropperjs: 1.5.12
     date-fns: 2.30.0
@@ -10792,14 +10792,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:1.4.0":
-  version: 1.4.0
-  resolution: "axios@npm:1.4.0"
+"axios@npm:1.5.0":
+  version: 1.5.0
+  resolution: "axios@npm:1.5.0"
   dependencies:
     follow-redirects: ^1.15.0
     form-data: ^4.0.0
     proxy-from-env: ^1.1.0
-  checksum: 7fb6a4313bae7f45e89d62c70a800913c303df653f19eafec88e56cea2e3821066b8409bc68be1930ecca80e861c52aa787659df0ffec6ad4d451c7816b9386b
+  checksum: e7405a5dbbea97760d0e6cd58fecba311b0401ddb4a8efbc4108f5537da9b3f278bde566deb777935a960beec4fa18e7b8353881f2f465e4f2c0e949fead35be
   languageName: node
   linkType: hard
 
