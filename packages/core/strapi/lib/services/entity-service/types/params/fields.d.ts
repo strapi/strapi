@@ -43,12 +43,15 @@ export type StringNotation<TSchemaUID extends Common.UID.Schema> =
  * @example
  * type A = ['title']; // ✅
  * type B = ['title', 'description']; // ✅
- * type C = ['id,title']; // ✅
- * type D = ['*']; // ✅
- * type E = ['populatableField']; // ❌
- * type F = ['<random_string>']; // ❌
+ * type C = ['id']; // ✅
+ * type E = ['*']; // ❌
+ * type F = ['populatableField']; // ❌
+ * type G = ['<random_string>']; // ❌
  */
-export type ArrayNotation<TSchemaUID extends Common.UID.Schema> = Any<TSchemaUID>[];
+export type ArrayNotation<TSchemaUID extends Common.UID.Schema> = Exclude<
+  StringNotation<TSchemaUID>,
+  WildcardNotation
+>[];
 
 /**
  * Represents any notation for a sort (string, array, object)
@@ -60,7 +63,7 @@ export type ArrayNotation<TSchemaUID extends Common.UID.Schema> = Any<TSchemaUID
  * type D = 'title,description'; // ✅
  * type E = ['title', 'description']; // ✅
  * type F = [id, 'title,description']; // ✅
- * type G = ['*']; // ✅
+ * type G = ['*']; // ❌
  * type H = ['populatableField']; // ❌
  * type I = ['<random_string>']; // ❌
  * type J = 'populatableField'; // ❌

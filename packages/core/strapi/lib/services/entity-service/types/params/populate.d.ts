@@ -35,8 +35,12 @@ export type StringNotation<TSchemaUID extends Common.UID.Schema> =
  * type B = ['image', 'component']; // ✅
  * type C = ['populatableField']; // ✅
  * type D = ['<random_string>']; // ❌
+ * type E = ['*']; // ❌
  */
-export type ArrayNotation<TSchemaUID extends Common.UID.Schema> = StringNotation<TSchemaUID>[];
+export type ArrayNotation<TSchemaUID extends Common.UID.Schema> = Exclude<
+  StringNotation<TSchemaUID>,
+  WildcardNotation
+>[];
 
 type GetPopulatableKeysWithTarget<TSchemaUID extends Common.UID.Schema> = Extract<
   Attribute.GetPopulatableKeys<TSchemaUID>,
