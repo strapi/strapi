@@ -12,22 +12,29 @@ export * from './plugin';
 type WrapAction = Omit<keyof EntityService, 'wrapParams' | 'wrapResult' | 'emitEvent'>;
 
 export interface EntityService {
-  wrapParams<TContentTypeUID extends Common.UID.ContentType, TParams extends object>(
+  wrapParams<
+    TResult = unknown,
+    TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType,
+    TParams extends object = object
+  >(
     params?: TParams,
     options?: { uid: TContentTypeUID; action: WrapAction }
-  ): Promise<unknown> | unknown;
+  ): Promise<TResult> | TResult;
 
-  wrapResult<TContentTypeUID extends Common.UID.ContentType>(
+  wrapResult<
+    TResult = unknown,
+    TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType
+  >(
     result: unknown,
     options?: { uid: TContentTypeUID; action: WrapAction }
-  ): Promise<unknown> | unknown;
+  ): Promise<TResult> | TResult;
 
   emitEvent<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
     event: string,
     entity: Entity<TContentTypeUID, never>
   ): Promise<void>;
-
+  // TODO: Split in 2 different signatures for both single types & collection types
   findMany<
     TContentTypeUID extends Common.UID.ContentType,
     TParams extends Params.Pick<
@@ -80,7 +87,7 @@ export interface EntityService {
 
   update<
     TContentTypeUID extends Common.UID.ContentType,
-    TParams extends Params.Pick<TContentTypeUID, 'data' | 'files' | 'fields' | 'populate'>
+    TParams extends Params.Pick<TContentTypeUID, 'data:partial' | 'files' | 'fields' | 'populate'>
   >(
     uid: TContentTypeUID,
     entityId: Params.Attribute.ID,
