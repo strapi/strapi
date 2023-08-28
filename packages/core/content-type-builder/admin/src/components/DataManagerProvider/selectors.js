@@ -18,10 +18,8 @@ const dataManagerProviderDomain = () => (state) =>
  * Default selector used by dataManagerProvider
  */
 
-const makeSelectDataManagerProvider = () =>
-  createSelector(dataManagerProviderDomain(), (substate) => {
-    return substate;
-  });
+export const selectDataManagerProvider = createSelector(dataManagerProviderDomain(), (substate) => {
+  return substate;
+});
 
-export default makeSelectDataManagerProvider;
 export { dataManagerProviderDomain };

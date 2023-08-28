@@ -17,7 +17,6 @@ const initialState = {
   modifiedData: {},
   reservedNames: {},
   isLoading: true,
-  isLoadingForDataToBeSet: true,
 };
 
 const ONE_SIDE_RELATIONS = ['oneWay', 'manyWay'];
@@ -616,7 +615,6 @@ const reducer = (state = initialState, action) =>
         break;
       }
       case actions.SET_MODIFIED_DATA: {
-        draftState.isLoadingForDataToBeSet = false;
         draftState.initialData = action.schemaToSet;
         draftState.modifiedData = action.schemaToSet;
 

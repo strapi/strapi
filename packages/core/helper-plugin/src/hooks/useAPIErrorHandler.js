@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { AxiosError } from 'axios';
 import { useIntl } from 'react-intl';
 
@@ -15,21 +17,24 @@ import { normalizeAPIError } from '../utils/normalizeAPIError';
 export function useAPIErrorHandler(intlMessagePrefixCallback) {
   const { formatMessage } = useIntl();
 
-  return {
-    formatAPIError(error) {
-      // Try to normalize the passed error first. This will fail for e.g. network
-      // errors which are thrown by Axios directly.
-      try {
-        return formatAPIError(error, { intlMessagePrefixCallback, formatMessage });
-      } catch (_) {
-        if (error instanceof AxiosError) {
-          return formatAxiosError(error, { intlMessagePrefixCallback, formatMessage });
-        }
+  return React.useMemo(
+    () => ({
+      formatAPIError(error) {
+        // Try to normalize the passed error first. This will fail for e.g. network
+        // errors which are thrown by Axios directly.
+        try {
+          return formatAPIError(error, { intlMessagePrefixCallback, formatMessage });
+        } catch (_) {
+          if (error instanceof AxiosError) {
+            return formatAxiosError(error, { intlMessagePrefixCallback, formatMessage });
+          }
 
-        throw new Error('formatAPIError: Unknown error:', error);
-      }
-    },
-  };
+          throw new Error('formatAPIError: Unknown error:', error);
+        }
+      },
+    }),
+    [formatMessage, intlMessagePrefixCallback]
+  );
 }
 
 function formatAxiosError(error, { intlMessagePrefixCallback, formatMessage }) {
