@@ -32,7 +32,13 @@ export const ViewSettingsMenu = ({ slug, layout }) => {
         onClick={handleToggle}
       />
       {isVisible && (
-        <Popover placement="bottom-end" source={cogButtonRef} onDismiss={handleToggle} padding={2}>
+        <Popover
+          placement="bottom-end"
+          source={cogButtonRef}
+          onDismiss={handleToggle}
+          spacing={4}
+          padding={3}
+        >
           <Flex alignItems="stretch" direction="column" gap={3}>
             <CheckPermissions
               permissions={permissions.contentManager.collectionTypesConfigurations}
