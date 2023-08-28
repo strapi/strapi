@@ -43,6 +43,7 @@ export type Pick<
     [HasMember<TKind, 'plugin'>, EntityService.GetPluginParams<TSchemaUID>],
     // Data
     [HasMember<TKind, 'data'>, { data?: Data.Input<TSchemaUID> }],
+    [HasMember<TKind, 'data:partial'>, { data?: Partial<Data.Input<TSchemaUID>> }],
     // Files
     [HasMember<TKind, 'files'>, { files?: unknown }], // TODO
     // Search

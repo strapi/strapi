@@ -35,6 +35,7 @@ export interface EntityService {
     entity: Entity<TContentTypeUID>
   ): Promise<void>;
 
+  // TODO: Split in 2 different signatures for both single types & collection types
   findMany<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
     params?: Params.Pick<
@@ -70,13 +71,13 @@ export interface EntityService {
 
   create<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
-    params?: Params.Pick<TContentTypeUID, 'data' | 'files' | 'fields' | 'populate'>
+    params: Params.Pick<TContentTypeUID, 'data' | 'files' | 'fields' | 'populate'>
   ): Promise<Entity<TContentTypeUID>>;
 
   update<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
     entityId: Params.Attribute.ID,
-    params?: Params.Pick<TContentTypeUID, 'data' | 'files' | 'fields' | 'populate'>
+    params?: Params.Pick<TContentTypeUID, 'data:partial' | 'files' | 'fields' | 'populate'>
   ): Promise<Entity<TContentTypeUID> | null>;
 
   findPage<TContentTypeUID extends Common.UID.ContentType>(
