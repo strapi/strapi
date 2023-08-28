@@ -7,7 +7,7 @@ import type { FormatXMLElementFn } from 'intl-messageformat';
 
 type MessageFormatPrimitiveValue = string | number | boolean | null | undefined;
 interface MessageProps {
-  message: string | MessageDescriptor;
+  message: MessageDescriptor;
   values?: Record<
     string,
     MessageFormatPrimitiveValue | React.ReactElement | FormatXMLElementFn<string, string>
