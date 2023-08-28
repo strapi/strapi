@@ -6,26 +6,32 @@ import { IntlProvider } from 'react-intl';
 
 import { ReviewWorkflowsAssigneeEE } from '..';
 
-const ComponentFixture = (props) => (
-  <ThemeProvider theme={lightTheme}>
-    <IntlProvider locale="en" messages={{}}>
-      <ReviewWorkflowsAssigneeEE {...props} />
-    </IntlProvider>
-  </ThemeProvider>
-);
+const USER_FIXTURE = { firstname: 'Kai', lastname: 'Doe' };
 
-const setup = (props) => render(<ComponentFixture {...props} />);
-
-describe('DynamicTable | ReviewWorkflowsAssignee', () => {
-  test('will use displayname over first and last name', () => {
-    const displayname = 'Display Name';
-    const { getByText } = setup({ displayname });
-
-    expect(getByText(displayname)).toBeInTheDocument();
+const setup = ({ user, ...props } = { user: USER_FIXTURE }) =>
+  render(<ReviewWorkflowsAssigneeEE user={user} {...props} />, {
+    wrapper({ children }) {
+      return (
+        <ThemeProvider theme={lightTheme}>
+          <IntlProvider locale="en" messages={{}}>
+            {children}
+          </IntlProvider>
+        </ThemeProvider>
+      );
+    },
   });
+
+describe('Content Manager | List View | ReviewWorkflowsAssignee', () => {
   test('render assignee name', () => {
-    const { getByText } = setup({ firstname: 'Kai', lastname: 'Doe' });
+    const { getByText } = setup();
 
     expect(getByText('Kai Doe')).toBeInTheDocument();
+  });
+
+  test('will use username over first and last name', () => {
+    const username = 'Display Name';
+    const { getByText } = setup({ user: { ...USER_FIXTURE, username } });
+
+    expect(getByText(username)).toBeInTheDocument();
   });
 });

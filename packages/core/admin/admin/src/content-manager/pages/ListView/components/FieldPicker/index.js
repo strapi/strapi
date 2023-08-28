@@ -1,81 +1,93 @@
 import React from 'react';
 
-import { Select, Option, Box } from '@strapi/design-system';
-import { useTracking } from '@strapi/helper-plugin';
+import { Flex, BaseCheckbox, TextButton, Typography } from '@strapi/design-system';
+import { useCollator, useTracking } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useDispatch, useSelector } from 'react-redux';
+import styled from 'styled-components';
 
-import { getTrad, checkIfAttributeIsDisplayable } from '../../../../utils';
-import { onChangeListHeaders } from '../../actions';
+import { checkIfAttributeIsDisplayable } from '../../../../utils';
+import { onChangeListHeaders, onResetListHeaders } from '../../actions';
 import { selectDisplayedHeaders } from '../../selectors';
+
+const ChackboxWrapper = styled(Flex)`
+  :hover {
+    background-color: ${(props) => props.theme.colors.primary100};
+  }
+`;
 
 export const FieldPicker = ({ layout }) => {
   const dispatch = useDispatch();
   const displayedHeaders = useSelector(selectDisplayedHeaders);
   const { trackUsage } = useTracking();
-  const { formatMessage } = useIntl();
-
-  const allAllowedHeaders = getAllAllowedHeaders(layout.contentType.attributes).map((attrName) => {
-    const metadatas = layout.contentType.metadatas[attrName].list;
-
-    return {
-      name: attrName,
-      intlLabel: { id: metadatas.label, defaultMessage: metadatas.label },
-    };
+  const { formatMessage, locale } = useIntl();
+  const formatter = useCollator(locale, {
+    sensitivity: 'base',
   });
 
-  const values = displayedHeaders.map(({ name }) => name);
+  const columns = Object.keys(layout.contentType.attributes)
+    .filter((name) => checkIfAttributeIsDisplayable(layout.contentType.attributes[name]))
+    .map((name) => ({
+      name,
+      label: layout.contentType.metadatas[name].list.label,
+    }))
+    .sort((a, b) => formatter.compare(a.label, b.label));
 
-  const handleChange = (updatedValues) => {
+  const displayedHeaderKeys = displayedHeaders.map(({ name }) => name);
+
+  const handleChange = (name) => {
     trackUsage('didChangeDisplayedFields');
+    dispatch(onChangeListHeaders({ name, value: displayedHeaderKeys.includes(name) }));
+  };
 
-    // removing a header
-    if (updatedValues.length < values.length) {
-      const removedHeader = values.filter((value) => {
-        return updatedValues.indexOf(value) === -1;
-      });
-
-      dispatch(onChangeListHeaders({ name: removedHeader[0], value: true }));
-    } else {
-      const addedHeader = updatedValues.filter((value) => {
-        return values.indexOf(value) === -1;
-      });
-
-      dispatch(onChangeListHeaders({ name: addedHeader[0], value: false }));
-    }
+  const handleReset = () => {
+    dispatch(onResetListHeaders());
   };
 
   return (
-    <Box paddingTop={1} paddingBottom={1}>
-      <Select
-        aria-label="change displayed fields"
-        value={values}
-        onChange={handleChange}
-        customizeContent={(values) =>
-          formatMessage(
-            {
-              id: getTrad('select.currently.selected'),
-              defaultMessage: '{count} currently selected',
-            },
-            { count: values.length }
-          )
-        }
-        multi
-        size="S"
-      >
-        {allAllowedHeaders.map((header) => {
+    <Flex as="fieldset" direction="column" alignItems="stretch" gap={3}>
+      <Flex justifyContent="space-between">
+        <Typography as="legend" variant="pi" fontWeight="bold">
+          {formatMessage({
+            id: 'containers.ListPage.displayedFields',
+            defaultMessage: 'Displayed fields',
+          })}
+        </Typography>
+
+        <TextButton onClick={handleReset}>
+          {formatMessage({
+            id: 'app.components.Button.reset',
+            defaultMessage: 'Reset',
+          })}
+        </TextButton>
+      </Flex>
+
+      <Flex direction="column" alignItems="stretch">
+        {columns.map((header) => {
+          const isActive = displayedHeaderKeys.includes(header.name);
+
           return (
-            <Option key={header.name} value={header.name}>
-              {formatMessage({
-                id: header.intlLabel.id || header.name,
-                defaultMessage: header.intlLabel.defaultMessage || header.name,
-              })}
-            </Option>
+            <ChackboxWrapper
+              wrap="wrap"
+              gap={2}
+              as="label"
+              background={isActive ? 'primary100' : 'transparent'}
+              hasRadius
+              padding={2}
+              key={header.name}
+            >
+              <BaseCheckbox
+                onChange={() => handleChange(header.name)}
+                value={isActive}
+                name={header.name}
+              />
+              <Typography fontSize={1}>{header.label}</Typography>
+            </ChackboxWrapper>
           );
         })}
-      </Select>
-    </Box>
+      </Flex>
+    </Flex>
   );
 };
 
@@ -91,18 +103,4 @@ FieldPicker.propTypes = {
       settings: PropTypes.object.isRequired,
     }).isRequired,
   }).isRequired,
-};
-
-const getAllAllowedHeaders = (attributes) => {
-  const allowedAttributes = Object.keys(attributes).reduce((acc, current) => {
-    const attribute = attributes[current];
-
-    if (checkIfAttributeIsDisplayable(attribute)) {
-      acc.push(current);
-    }
-
-    return acc;
-  }, []);
-
-  return allowedAttributes.sort();
 };
