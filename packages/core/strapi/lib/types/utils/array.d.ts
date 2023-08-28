@@ -8,15 +8,6 @@ export type Values<TCollection extends Array<unknown>> = TCollection extends Arr
   : never;
 
 /**
- * Extract the first array value
- **/
-export type FirstValue<TCollection extends Array<unknown>> = TCollection extends [
-  infer TValues,
-  ...any[]
-]
-  ? TValues
-  : never;
-/**
  * Checks if the size of the given collection equals 0
  */
 export type IsEmpty<TCollection extends Array<unknown>> = Utils.Expression.Extends<

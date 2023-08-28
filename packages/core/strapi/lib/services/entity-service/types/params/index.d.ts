@@ -70,6 +70,7 @@ export type Kind =
   | 'publicationState'
   | 'plugin'
   | 'data'
+  | 'data:partial'
   | 'files'
   | '_q';
 

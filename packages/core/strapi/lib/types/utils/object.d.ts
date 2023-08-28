@@ -19,7 +19,7 @@ export type KeysBy<TValue, TTest> = {
  *
  * @example
  * type X = KeysExcept<{ foo: 'bar', bar: 'foo', foobar: 2 }, string>
- * // 'foo' | 'bar'
+ * // foobar
  *
  * type Base = { x: 'foo' | 'bar' };
  * type Obj = { foo: { x: 'foo' }, bar: { x: 'bar' }, other: { x: '42' } };

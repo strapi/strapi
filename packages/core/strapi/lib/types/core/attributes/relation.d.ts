@@ -1,32 +1,28 @@
 import type { Attribute, Common, Utils } from '@strapi/strapi';
 
 export type Relation<
-  TOrigin extends Common.UID.Schema = Common.UID.Schema,
+  // TODO: TOrigin was originally needed to infer precise attribute literal types by doing a reverse lookup
+  // on TTarget -> TOrigin relations. Due to errors because of Attribute.Any [relation] very generic
+  // representation, type mismatches were encountered and mappedBy/inversedBy are now regular strings.
+  // It is kept to allow for future iterations without breaking the current type API
+  _TOrigin extends Common.UID.Schema = Common.UID.Schema,
   TRelationKind extends RelationKind.Any = RelationKind.Any,
   TTarget extends Common.UID.Schema = never
 > = Attribute.OfType<'relation'> &
   // Properties
-  Utils.Guard.Never<
-    RelationProperties<TOrigin, TRelationKind, TTarget>,
-    AllRelationProperties<TOrigin, TTarget>
-  > &
+  Utils.Guard.Never<RelationProperties<TRelationKind, TTarget>, AllRelationProperties<TTarget>> &
   // Options
   Attribute.ConfigurableOption &
   Attribute.PrivateOption;
 
 export type RelationProperties<
-  TOrigin extends Common.UID.Schema,
   TRelationKind extends RelationKind.Any,
   TTarget extends Common.UID.Schema
 > = Utils.Expression.MatchFirst<
   [
     [
       Utils.Expression.Extends<TRelationKind, RelationKind.BiDirectional>,
-      BiDirectionalProperties<
-        TOrigin,
-        Utils.Cast<TRelationKind, RelationKind.BiDirectional>,
-        TTarget
-      >
+      BiDirectionalProperties<Utils.Cast<TRelationKind, RelationKind.BiDirectional>, TTarget>
     ],
     [
       Utils.Expression.Extends<TRelationKind, RelationKind.XWay>,
@@ -43,26 +39,19 @@ export type RelationProperties<
   ]
 >;
 
-export type AllRelationProperties<
-  TOrigin extends Common.UID.Schema,
-  TTarget extends Common.UID.Schema
-> =
-  | BiDirectionalProperties<TOrigin, RelationKind.BiDirectional, TTarget>
+export type AllRelationProperties<TTarget extends Common.UID.Schema> =
+  | BiDirectionalProperties<RelationKind.BiDirectional, TTarget>
   | XWayProperties<RelationKind.XWay, TTarget>
   | MorphReferenceProperties<RelationKind.MorphReference, TTarget>
   | MorphOwnerProperties<RelationKind.MorphOwner>;
 
 type BiDirectionalProperties<
-  TOrigin extends Common.UID.Schema,
   TRelationKind extends RelationKind.BiDirectional,
   TTarget extends Common.UID.Schema
 > = {
   relation: TRelationKind;
   target: TTarget;
-} & Utils.XOR<
-  { inversedBy?: RelationsKeysFromTo<TTarget, TOrigin> },
-  { mappedBy?: RelationsKeysFromTo<TTarget, TOrigin> }
->;
+} & Utils.XOR<{ inversedBy?: string }, { mappedBy?: string }>;
 
 type XWayProperties<TRelationKind extends RelationKind.XWay, TTarget extends Common.UID.Schema> = {
   relation: TRelationKind;
