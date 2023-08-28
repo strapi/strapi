@@ -10,11 +10,11 @@ export type Entity<
     TSchemaUID,
     ExtractFields<
       TSchemaUID,
-      Utils.As<TParams['fields'], EntityService.Params.Fields.Any<TSchemaUID>>
+      Utils.Cast<TParams['fields'], EntityService.Params.Fields.Any<TSchemaUID>>
     >,
     ExtractPopulate<
       TSchemaUID,
-      Utils.As<TParams['populate'], EntityService.Params.Populate.Any<TSchemaUID>>
+      Utils.Cast<TParams['populate'], EntityService.Params.Populate.Any<TSchemaUID>>
     >
   >
 >;
@@ -93,7 +93,7 @@ type ExtractFields<
       Utils.Expression.Extends<TFields, EntityService.Params.Fields.StringNotation<TSchemaUID>>,
       ParseStringFields<
         TSchemaUID,
-        Utils.As<TFields, EntityService.Params.Fields.StringNotation<TSchemaUID>>
+        Utils.Cast<TFields, EntityService.Params.Fields.StringNotation<TSchemaUID>>
       >
     ],
     // string array
@@ -101,9 +101,9 @@ type ExtractFields<
       Utils.Expression.Extends<TFields, EntityService.Params.Fields.ArrayNotation<TSchemaUID>>,
       ParseStringFields<
         TSchemaUID,
-        Utils.As<
+        Utils.Cast<
           Utils.Array.Values<
-            Utils.As<TFields, EntityService.Params.Fields.ArrayNotation<TSchemaUID>>
+            Utils.Cast<TFields, EntityService.Params.Fields.ArrayNotation<TSchemaUID>>
           >,
           EntityService.Params.Fields.StringNotation<TSchemaUID>
         >
@@ -129,7 +129,7 @@ type ParseStringFields<
     [
       // what aobut * in comma separated list
       Utils.Expression.Extends<TFields, `${string},${string}`>,
-      Utils.Array.Values<Utils.String.Split<Utils.As<TFields, string>, ','>>
+      Utils.Array.Values<Utils.String.Split<Utils.Cast<TFields, string>, ','>>
     ]
   ]
 >;
@@ -143,27 +143,27 @@ type ExtractPopulate<
       Utils.Expression.Extends<TPopulate, EntityService.Params.Populate.StringNotation<TSchemaUID>>,
       ParseStringPopulate<
         TSchemaUID,
-        Utils.As<TPopulate, EntityService.Params.Populate.StringNotation<TSchemaUID>>
+        Utils.Cast<TPopulate, EntityService.Params.Populate.StringNotation<TSchemaUID>>
       >
     ],
     [
       Utils.Expression.Extends<TPopulate, EntityService.Params.Populate.ArrayNotation<TSchemaUID>>,
       ParseStringPopulate<
         TSchemaUID,
-        Utils.As<
+        Utils.Cast<
           Utils.Array.Values<
-            Utils.As<TPopulate, EntityService.Params.Populate.ArrayNotation<TSchemaUID>>
+            Utils.Cast<TPopulate, EntityService.Params.Populate.ArrayNotation<TSchemaUID>>
           >,
           EntityService.Params.Populate.StringNotation<TSchemaUID>
         >
       >
     ],
-    [Utils.Expression.Extends<null, TPopulate>, never],
+    [Utils.Expression.Extends<TPopulate, null>, never],
     [
       Utils.Expression.Extends<TPopulate, EntityService.Params.Populate.ObjectNotation<TSchemaUID>>,
       ParseStringPopulate<
         TSchemaUID,
-        Utils.As<keyof TPopulate, EntityService.Params.Populate.StringNotation<TSchemaUID>>
+        Utils.Cast<keyof TPopulate, EntityService.Params.Populate.StringNotation<TSchemaUID>>
       >
     ]
   ],
@@ -183,7 +183,7 @@ type ParseStringPopulate<
     [
       // what aobut * in comma separated list
       Utils.Expression.Extends<TPopulate, `${string},${string}`>,
-      Utils.Array.Values<Utils.String.Split<Utils.As<TPopulate, string>, ','>>
+      Utils.Array.Values<Utils.String.Split<Utils.Cast<TPopulate, string>, ','>>
     ],
     [
       Utils.Expression.Extends<TPopulate, EntityService.Params.Populate.StringNotation<TSchemaUID>>,
@@ -195,14 +195,22 @@ type ParseStringPopulate<
 type GetOwnValues<
   TSchemaUID extends Common.UID.Schema,
   TKey extends Attribute.GetKeys<TSchemaUID> = Attribute.GetKeys<TSchemaUID>
-> = { id: string } & {
-  // Handle required attributes
-  [key in Attribute.GetRequiredKeys<TSchemaUID> as key extends TKey ? key : never]-?: GetValue<
-    Attribute.Get<TSchemaUID, key>
-  >;
-} & {
-  // Handle optional attributes
-  [key in Attribute.GetOptionalKeys<TSchemaUID> as key extends TKey ? key : never]?: GetValue<
-    Attribute.Get<TSchemaUID, key>
-  >;
-};
+> = Utils.Expression.MatchFirst<
+  [
+    [
+      Utils.Expression.Extends<Attribute.GetAll<TSchemaUID>, never>,
+      { [x: string]: any } & { id: string }
+    ]
+  ],
+  { id: string } & {
+    // Handle required attributes
+    [key in Attribute.GetRequiredKeys<TSchemaUID> as key extends TKey ? key : never]-?: GetValue<
+      Attribute.Get<TSchemaUID, key>
+    >;
+  } & {
+    // Handle optional attributes
+    [key in Attribute.GetOptionalKeys<TSchemaUID> as key extends TKey ? key : never]?: GetValue<
+      Attribute.Get<TSchemaUID, key>
+    >;
+  }
+>;
