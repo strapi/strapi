@@ -257,7 +257,8 @@ class Strapi {
         numberOfComponents: _.size(this.components),
         numberOfDynamicZones: getNumberOfDynamicZones(),
         environment: strapi.config.environment,
-        customizedControllers: Object.entries(strapi.controllers).filter(item => item[0].startsWith("api::") && item[1].isCustom() ).length
+        customizedControllers: Object.entries(strapi.controllers).filter(item => item[0].startsWith("api::") && item[1].isCustom() ).length,
+        customFields: strapi.container.get('custom-fields').getAll()
         // TODO: to add back
         // providers: this.config.installedProviders,
       },
