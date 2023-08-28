@@ -6,6 +6,7 @@ describe('useClipboard', () => {
   it('should return false if the value passed to the function is not a string or number', async () => {
     const { result } = renderHook(() => useClipboard());
 
+    // @ts-expect-error testing invalid, empty input to the hook
     expect(await result.current.copy({})).toBe(false);
   });
 
