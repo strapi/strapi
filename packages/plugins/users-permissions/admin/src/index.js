@@ -9,7 +9,6 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 
 import { PERMISSIONS } from './constants';
-import pluginId from './pluginId';
 import getTrad from './utils/getTrad';
 
 const name = pluginPkg.strapi.name;
@@ -19,7 +18,7 @@ export default {
     // Create the plugin's settings section
     app.createSettingSection(
       {
-        id: pluginId,
+        id: 'users-permissions',
         intlLabel: {
           id: getTrad('Settings.section-label'),
           defaultMessage: 'Users & Permissions plugin',
@@ -32,14 +31,9 @@ export default {
             defaultMessage: 'Roles',
           },
           id: 'roles',
-          to: `/settings/${pluginId}/roles`,
-          async Component() {
-            const component = await import(
-              /* webpackChunkName: "users-roles-settings-page" */ './pages/Roles'
-            );
-
-            return component;
-          },
+          to: `/settings/users-permissions/roles`,
+          Component: () =>
+            import(/* webpackChunkName: "users-roles-settings-page" */ './pages/Roles'),
           permissions: PERMISSIONS.accessRoles,
         },
         {
@@ -48,14 +42,9 @@ export default {
             defaultMessage: 'Providers',
           },
           id: 'providers',
-          to: `/settings/${pluginId}/providers`,
-          async Component() {
-            const component = await import(
-              /* webpackChunkName: "users-providers-settings-page" */ './pages/Providers'
-            );
-
-            return component;
-          },
+          to: `/settings/users-permissions/providers`,
+          Component: () =>
+            import(/* webpackChunkName: "users-providers-settings-page" */ './pages/Providers'),
           permissions: PERMISSIONS.readProviders,
         },
         {
@@ -64,14 +53,9 @@ export default {
             defaultMessage: 'Email templates',
           },
           id: 'email-templates',
-          to: `/settings/${pluginId}/email-templates`,
-          async Component() {
-            const component = await import(
-              /* webpackChunkName: "users-email-settings-page" */ './pages/EmailTemplates'
-            );
-
-            return component;
-          },
+          to: `/settings/users-permissions/email-templates`,
+          Component: () =>
+            import(/* webpackChunkName: "users-email-settings-page" */ './pages/EmailTemplates'),
           permissions: PERMISSIONS.readEmailTemplates,
         },
         {
@@ -80,21 +64,18 @@ export default {
             defaultMessage: 'Advanced Settings',
           },
           id: 'advanced-settings',
-          to: `/settings/${pluginId}/advanced-settings`,
-          async Component() {
-            const component = await import(
+          to: `/settings/users-permissions/advanced-settings`,
+          Component: () =>
+            import(
               /* webpackChunkName: "users-advanced-settings-page" */ './pages/AdvancedSettings'
-            );
-
-            return component;
-          },
+            ),
           permissions: PERMISSIONS.readAdvancedSettings,
         },
       ]
     );
 
     app.registerPlugin({
-      id: pluginId,
+      id: 'users-permissions',
       name,
     });
   },
@@ -107,7 +88,7 @@ export default {
         )
           .then(({ default: data }) => {
             return {
-              data: prefixPluginTranslations(data, pluginId),
+              data: prefixPluginTranslations(data, 'users-permissions'),
               locale,
             };
           })

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-import { Button, ContentLayout, HeaderLayout, Main } from '@strapi/design-system';
+import { ContentLayout, HeaderLayout, Main } from '@strapi/design-system';
 import {
   LinkButton,
   NoContent,
@@ -136,9 +136,10 @@ const TransferTokenListView = () => {
     }
   );
 
-  const shouldDisplayDynamicTable = canRead && transferTokens;
-  const shouldDisplayNoContent = canRead && !transferTokens && !canCreate;
-  const shouldDisplayNoContentWithCreationButton = canRead && !transferTokens && canCreate;
+  const hasTransferTokens = transferTokens && transferTokens?.length > 0;
+  const shouldDisplayDynamicTable = canRead && hasTransferTokens;
+  const shouldDisplayNoContent = canRead && !hasTransferTokens && !canCreate;
+  const shouldDisplayNoContentWithCreationButton = canRead && !hasTransferTokens && canCreate;
 
   return (
     <Main aria-busy={isLoading}>
@@ -194,12 +195,16 @@ const TransferTokenListView = () => {
               defaultMessage: 'Add your first Transfer Token',
             }}
             action={
-              <Button variant="secondary" startIcon={<Plus />}>
+              <LinkButton
+                variant="secondary"
+                startIcon={<Plus />}
+                to="/settings/transfer-tokens/create"
+              >
                 {formatMessage({
                   id: 'Settings.transferTokens.addNewToken',
                   defaultMessage: 'Add new Transfer Token',
                 })}
-              </Button>
+              </LinkButton>
             }
           />
         )}

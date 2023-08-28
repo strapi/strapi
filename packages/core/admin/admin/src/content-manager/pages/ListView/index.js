@@ -17,6 +17,7 @@ import {
   lightTheme,
 } from '@strapi/design-system';
 import {
+  findMatchingPermissions,
   NoPermissions,
   CheckPermissions,
   SearchURLQuery,
@@ -28,6 +29,7 @@ import {
   useTracking,
   Link,
   useAPIErrorHandler,
+  useCollator,
   useStrapiApp,
   Table,
   PaginationURLQuery,
@@ -46,11 +48,14 @@ import { bindActionCreators, compose } from 'redux';
 import styled from 'styled-components';
 
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
+import { useAdminUsers } from '../../../hooks/useAdminUsers';
 import { useEnterprise } from '../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../pages/App/selectors';
 import { InjectionZone } from '../../../shared/components';
-import AttributeFilter from '../../components/AttributeFilter';
-import { getTrad } from '../../utils';
+import { Filter } from '../../components/Filter';
+import { AdminUsersFilter } from '../../components/Filter/CustomInputs/AdminUsersFilter';
+import { useAllowedAttributes } from '../../hooks/useAllowedAttributes';
+import { getTrad, getDisplayName } from '../../utils';
 
 import { getData, getDataSucceeded, onChangeListHeaders, onResetListHeaders } from './actions';
 import { Body } from './components/Body';
@@ -70,6 +75,9 @@ const ConfigureLayoutBox = styled(Box)`
 
 const REVIEW_WORKFLOW_COLUMNS_CE = null;
 const REVIEW_WORKFLOW_COLUMNS_CELL_CE = () => null;
+const REVIEW_WORKFLOW_FILTER_CE = [];
+const CREATOR_ATTRIBUTES = ['createdBy', 'updatedBy'];
+const USER_FILTER_ATTRIBUTES = [...CREATOR_ATTRIBUTES, 'strapi_assignee'];
 
 function ListView({
   canCreate,
@@ -95,23 +103,107 @@ function ListView({
   const [isConfirmDeleteRowOpen, setIsConfirmDeleteRowOpen] = React.useState(false);
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
-  const { refetchPermissions } = useRBACProvider();
+  const { allPermissions, refetchPermissions } = useRBACProvider();
   const trackUsageRef = React.useRef(trackUsage);
   const fetchPermissionsRef = React.useRef(refetchPermissions);
   const { notifyStatus } = useNotifyAT();
   const { formatAPIError } = useAPIErrorHandler(getTrad);
   const permissions = useSelector(selectAdminPermissions);
+  const allowedAttributes = useAllowedAttributes(contentType, slug);
+  const [{ query }] = useQueryParams();
+  const { pathname } = useLocation();
+  const { push } = useHistory();
+  const { formatMessage, locale } = useIntl();
+  const fetchClient = useFetchClient();
+  const formatter = useCollator(locale, {
+    sensitivity: 'base',
+  });
+
+  const selectedUserIds =
+    query?.filters?.$and?.reduce((acc, filter) => {
+      const [key, value] = Object.entries(filter)[0];
+      const id = value.id?.$eq || value.id?.$ne;
+
+      // TODO: strapi_assignee should not be in here and rather defined
+      // in the ee directory.
+      if (USER_FILTER_ATTRIBUTES.includes(key) && !acc.includes(id)) {
+        acc.push(id);
+      }
+
+      return acc;
+    }, []) ?? [];
+
+  const { users, isLoading: isLoadingAdminUsers } = useAdminUsers(
+    { filter: { id: { in: selectedUserIds } } },
+    {
+      // fetch the list of admin users only if the filter contains users and the
+      // current user has permissions to display users
+      enabled:
+        selectedUserIds.length > 0 &&
+        findMatchingPermissions(allPermissions, [
+          {
+            action: 'admin::users.read',
+            subject: null,
+          },
+        ]).length > 0,
+    }
+  );
 
   useFocusWhenNavigate();
 
-  const [{ query }] = useQueryParams();
   const params = React.useMemo(() => buildValidGetParams(query), [query]);
   const pluginsQueryParams = stringify({ plugins: query.plugins }, { encode: false });
 
-  const { pathname } = useLocation();
-  const { push } = useHistory();
-  const { formatMessage } = useIntl();
-  const fetchClient = useFetchClient();
+  const displayedAttributeFilters = allowedAttributes.map((name) => {
+    const attribute = contentType.attributes[name];
+    const { type, enum: options } = attribute;
+
+    const trackedEvent = {
+      name: 'didFilterEntries',
+      properties: { useRelation: type === 'relation' },
+    };
+
+    const { mainField, label } = metadatas[name].list;
+
+    const filter = {
+      name,
+      metadatas: { label: formatMessage({ id: label, defaultMessage: label }) },
+      fieldSchema: { type, options, mainField },
+      trackedEvent,
+    };
+
+    if (attribute.type === 'relation' && attribute.target === 'admin::user') {
+      filter.metadatas = {
+        ...filter.metadatas,
+        customOperators: [
+          {
+            intlLabel: {
+              id: 'components.FilterOptions.FILTER_TYPES.$eq',
+              defaultMessage: 'is',
+            },
+            value: '$eq',
+          },
+          {
+            intlLabel: {
+              id: 'components.FilterOptions.FILTER_TYPES.$ne',
+              defaultMessage: 'is not',
+            },
+            value: '$ne',
+          },
+        ],
+        customInput: AdminUsersFilter,
+        options: users.map((user) => ({
+          label: getDisplayName(user, formatMessage),
+          customValue: user.id.toString(),
+        })),
+      };
+      filter.fieldSchema.mainField = {
+        name: 'id',
+      };
+    }
+
+    return filter;
+  });
 
   const hasDraftAndPublish = options?.draftAndPublish ?? false;
   const hasReviewWorkflows = options?.reviewWorkflows ?? false;
@@ -128,13 +220,79 @@ function ListView({
       enabled: !!options?.reviewWorkflows,
     }
   );
-  const ReviewWorkflowsStage = useEnterprise(
+  const ReviewWorkflowsColumns = useEnterprise(
     REVIEW_WORKFLOW_COLUMNS_CELL_CE,
-    async () =>
-      (await import('../../../../../ee/admin/content-manager/pages/ListView/ReviewWorkflowsColumn'))
-        .ReviewWorkflowsStageEE,
+    async () => {
+      const { ReviewWorkflowsStageEE, ReviewWorkflowsAssigneeEE } = await import(
+        '../../../../../ee/admin/content-manager/pages/ListView/ReviewWorkflowsColumn'
+      );
+
+      return { ReviewWorkflowsStageEE, ReviewWorkflowsAssigneeEE };
+    },
     {
       enabled: hasReviewWorkflows,
+    }
+  );
+
+  const reviewWorkflowFilter = useEnterprise(
+    REVIEW_WORKFLOW_FILTER_CE,
+    async () =>
+      (
+        await import(
+          '../../../../../ee/admin/content-manager/components/Filter/CustomInputs/ReviewWorkflows/constants'
+        )
+      ).REVIEW_WORKFLOW_FILTERS,
+    {
+      combine(ceFilters, eeFilters) {
+        return [
+          ...ceFilters,
+          ...eeFilters
+            .filter((eeFilter) => {
+              // do not display the filter at all, if the current user does
+              // not have permissions to read admin users
+              if (eeFilter.name === 'strapi_assignee') {
+                return (
+                  findMatchingPermissions(allPermissions, [
+                    {
+                      action: 'admin::users.read',
+                      subject: null,
+                    },
+                  ]).length > 0
+                );
+              }
+
+              return true;
+            })
+            .map((eeFilter) => ({
+              ...eeFilter,
+              metadatas: {
+                ...eeFilter.metadatas,
+                // the stage filter needs the current content-type uid to fetch
+                // the list of stages that can be assigned to this content-type
+                ...(eeFilter.name === 'strapi_stage' ? { uid: contentType.uid } : {}),
+
+                // translate the filter label
+                label: formatMessage(eeFilter.metadatas.label),
+
+                // `options` allows the filter-tag to render the displayname
+                // of a user over a plain id
+                options:
+                  eeFilter.name === 'strapi_assignee' &&
+                  users.map((user) => ({
+                    label: getDisplayName(user, formatMessage),
+                    customValue: user.id.toString(),
+                  })),
+              },
+            })),
+        ];
+      },
+
+      defaultValue: [],
+
+      // we have to wait for admin users to be fully loaded, because otherwise
+      // combine is called to early and does not contain the latest state of
+      // the users array
+      enabled: hasReviewWorkflows && !isLoadingAdminUsers,
     }
   );
 
@@ -180,6 +338,22 @@ function ListView({
           data: { results, pagination: paginationResult },
         } = await fetchClient.get(endPoint, options);
 
+        // If user enters a page number that doesn't exist, redirect him to the last page
+        if (paginationResult.page > paginationResult.pageCount && paginationResult.pageCount > 0) {
+          const query = {
+            ...params,
+            page: paginationResult.pageCount,
+          };
+
+          push({
+            pathname,
+            state: { from: pathname },
+            search: stringify(query),
+          });
+
+          return;
+        }
+
         notifyStatus(
           formatMessage(
             {
@@ -219,7 +393,17 @@ function ListView({
         });
       }
     },
-    [formatMessage, getData, getDataSucceeded, notifyStatus, push, toggleNotification, fetchClient]
+    [
+      formatMessage,
+      getData,
+      getDataSucceeded,
+      notifyStatus,
+      push,
+      toggleNotification,
+      fetchClient,
+      params,
+      pathname,
+    ]
   );
 
   const handleConfirmDeleteAllData = React.useCallback(
@@ -355,13 +539,15 @@ function ListView({
 
     if (reviewWorkflowColumns) {
       // Make sure the column header label is translated
-      if (typeof reviewWorkflowColumns.metadatas.label !== 'string') {
-        reviewWorkflowColumns.metadatas.label = formatMessage(
-          reviewWorkflowColumns.metadatas.label
-        );
-      }
+      reviewWorkflowColumns.map((column) => {
+        if (typeof column.metadatas.label !== 'string') {
+          column.metadatas.label = formatMessage(column.metadatas.label);
+        }
 
-      formattedHeaders.push(reviewWorkflowColumns);
+        return column;
+      });
+
+      formattedHeaders.push(...reviewWorkflowColumns);
     }
 
     return formattedHeaders;
@@ -455,7 +641,7 @@ function ListView({
   };
 
   // Block rendering until the review stage component is fully loaded in EE
-  if (!ReviewWorkflowsStage) {
+  if (!ReviewWorkflowsColumns) {
     return null;
   }
 
@@ -518,8 +704,12 @@ function ListView({
                   trackedEvent="didSearch"
                 />
               )}
-              {isFilterable && (
-                <AttributeFilter contentType={contentType} slug={slug} metadatas={metadatas} />
+              {isFilterable && !isLoadingAdminUsers && (
+                <Filter
+                  displayedFilters={[...displayedAttributeFilters, ...reviewWorkflowFilter].sort(
+                    (a, b) => formatter.compare(a.metadatas.label, b.metadatas.label)
+                  )}
+                />
               )}
             </>
           }
@@ -605,19 +795,58 @@ function ListView({
                             );
                           }
 
-                          if (hasReviewWorkflows && name === 'strapi_stage') {
+                          if (hasReviewWorkflows) {
+                            if (name === 'strapi_stage') {
+                              return (
+                                <Td key={key}>
+                                  {rowData.strapi_stage ? (
+                                    <ReviewWorkflowsColumns.ReviewWorkflowsStageEE
+                                      color={
+                                        rowData.strapi_stage.color ?? lightTheme.colors.primary600
+                                      }
+                                      name={rowData.strapi_stage.name}
+                                    />
+                                  ) : (
+                                    <Typography textColor="neutral800">-</Typography>
+                                  )}
+                                </Td>
+                              );
+                            }
+                            if (name === 'strapi_assignee') {
+                              return (
+                                <Td key={key}>
+                                  {rowData.strapi_assignee ? (
+                                    <ReviewWorkflowsColumns.ReviewWorkflowsAssigneeEE
+                                      firstname={rowData.strapi_assignee.firstname}
+                                      lastname={rowData?.strapi_assignee?.lastname}
+                                      displayname={rowData?.strapi_assignee?.username}
+                                    />
+                                  ) : (
+                                    <Typography textColor="neutral800">-</Typography>
+                                  )}
+                                </Td>
+                              );
+                            }
+                          }
+
+                          if (['createdBy', 'updatedBy'].includes(name.split('.')[0])) {
+                            // Display the users full name
                             return (
                               <Td key={key}>
-                                {rowData.strapi_stage ? (
-                                  <ReviewWorkflowsStage
-                                    color={
-                                      rowData.strapi_stage.color ?? lightTheme.colors.primary600
-                                    }
-                                    name={rowData.strapi_stage.name}
-                                  />
-                                ) : (
-                                  <Typography textColor="neutral800">-</Typography>
-                                )}
+                                <Typography textColor="neutral800">
+                                  {getDisplayName(rowData[name.split('.')[0]], formatMessage)}
+                                </Typography>
+                              </Td>
+                            );
+                          }
+
+                          if (['createdBy', 'updatedBy'].includes(name.split('.')[0])) {
+                            // Display the users full name
+                            return (
+                              <Td key={key}>
+                                <Typography textColor="neutral800">
+                                  {getDisplayName(rowData[name.split('.')[0]], formatMessage)}
+                                </Typography>
                               </Td>
                             );
                           }

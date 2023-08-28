@@ -1,9 +1,17 @@
 <p align="center">
-  <a href="https://strapi.io/#gh-light-mode-only">
-    <img src="https://strapi.io/assets/strapi-logo-dark.svg" width="318px" alt="Strapi logo" />
-  </a>
-  <a href="https://strapi.io/#gh-dark-mode-only">
-    <img src="https://strapi.io/assets/strapi-logo-light.svg" width="318px" alt="Strapi logo" />
+  <a href="https://strapi.io">
+    <picture>
+      <source
+        srcset="https://strapi.io/assets/strapi-logo-dark.svg"
+        media="(prefers-color-scheme: dark)"
+        width="318px"
+      />
+      <img
+        src="https://strapi.io/assets/strapi-logo-light.svg"
+        alt="Strapi logo"
+        width="318px"
+      />
+    </picture>
   </a>
 </p>
 

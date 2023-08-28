@@ -24,6 +24,10 @@ const sendDidEditWorkflow = async () => {
   strapi.telemetry.send('didEditWorkflow', {});
 };
 
+const sendDidEditAssignee = async (fromId, toId) => {
+  strapi.telemetry.send('didEditAssignee', { from: fromId, to: toId });
+};
+
 const sendDidSendReviewWorkflowPropertiesOnceAWeek = async (
   numberOfActiveWorkflows,
   avgStagesCount,
@@ -48,4 +52,5 @@ module.exports = {
   sendDidCreateWorkflow,
   sendDidEditWorkflow,
   sendDidSendReviewWorkflowPropertiesOnceAWeek,
+  sendDidEditAssignee,
 };
