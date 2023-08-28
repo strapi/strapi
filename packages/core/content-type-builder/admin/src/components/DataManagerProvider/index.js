@@ -184,6 +184,7 @@ const DataManagerProvider = ({ children }) => {
     {
       async onSuccess() {
         await refetch();
+        unlockAppWithAutoreload();
       },
 
       onError(error) {
@@ -200,6 +201,7 @@ const DataManagerProvider = ({ children }) => {
     {
       async onSuccess() {
         await refetch();
+        unlockAppWithAutoreload();
       },
 
       onError(error) {
@@ -258,6 +260,8 @@ const DataManagerProvider = ({ children }) => {
 
         // Update the app's permissions
         await updatePermissions();
+
+        unlockAppWithAutoreload();
       },
     }
   );
@@ -268,6 +272,7 @@ const DataManagerProvider = ({ children }) => {
     {
       async onSuccess() {
         await refetch();
+        unlockAppWithAutoreload();
       },
 
       onError(error) {

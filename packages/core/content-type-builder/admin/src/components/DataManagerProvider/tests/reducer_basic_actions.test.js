@@ -659,14 +659,12 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         ...initialState,
         modifiedData: null,
         initialData: null,
-        isLoadingForDataToBeSet: true,
       };
 
       const expected = {
         ...initialState,
         modifiedData: schemaToSet,
         initialData: schemaToSet,
-        isLoadingForDataToBeSet: false,
       };
 
       expect(
@@ -701,7 +699,6 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         contentTypes: { ok: false },
         initialData: schemaToSet,
         modifiedData: schemaToSet,
-        isLoadingForDataToBeSet: false,
       };
 
       expect(
