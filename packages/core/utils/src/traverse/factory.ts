@@ -73,7 +73,7 @@ interface CommonHandler<AttributeType = Attribute> {
   handler(ctx: Context<AttributeType>, opts: Pick<TransformUtils, 'set' | 'recurse'>): void;
 }
 
-interface TransformUtils {
+export interface TransformUtils {
   remove(key: string): void;
   set(key: string, valeu: unknown): void;
   recurse: Traverse;
