@@ -294,7 +294,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     }
 
     const removeAssetsBackup = this.#removeAssetsBackup.bind(this);
-    const thisStrapi = this.strapi;
+    const strapi = this.strapi;
     const transaction = this.transaction;
     const backupDirectory = this.uploadsBackupDirectoryName;
 
@@ -312,7 +312,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
           // TODO: Remove this logic in V5
           if (!chunk.metadata) {
             // If metadata does not exist is because it is an old backup file
-            const assetsDirectory = path.join(thisStrapi.dirs.static.public, 'uploads');
+            const assetsDirectory = path.join(strapi.dirs.static.public, 'uploads');
             const entryPath = path.join(assetsDirectory, chunk.filename);
             const writableStream = fse.createWriteStream(entryPath);
             chunk.stream
@@ -350,10 +350,10 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
             buffer: chunk?.buffer,
           };
 
-          const provider = thisStrapi.config.get('plugin.upload').provider;
+          const provider = strapi.config.get('plugin.upload').provider;
 
           try {
-            await thisStrapi.plugin('upload').provider.uploadStream(uploadData);
+            await strapi.plugin('upload').provider.uploadStream(uploadData);
 
             // if we're not supposed to transfer the associated entities, stop here
             if (!restoreMediaEntitiesContent) {
@@ -362,14 +362,14 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
             // Files formats are stored within the parent file entity
             if (uploadData?.type) {
-              const entry: IFile = await thisStrapi.db.query('plugin::upload.file').findOne({
+              const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
                 where: { hash: uploadData.mainHash },
               });
               const specificFormat = entry?.formats?.[uploadData.type];
               if (specificFormat) {
                 specificFormat.url = uploadData.url;
               }
-              await thisStrapi.db.query('plugin::upload.file').update({
+              await strapi.db.query('plugin::upload.file').update({
                 where: { hash: uploadData.mainHash },
                 data: {
                   formats: entry.formats,
@@ -378,11 +378,11 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
               });
               return callback();
             }
-            const entry: IFile = await thisStrapi.db.query('plugin::upload.file').findOne({
+            const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
               where: { hash: uploadData.hash },
             });
             entry.url = uploadData.url;
-            await thisStrapi.db.query('plugin::upload.file').update({
+            await strapi.db.query('plugin::upload.file').update({
               where: { hash: uploadData.hash },
               data: {
                 url: entry.url,
