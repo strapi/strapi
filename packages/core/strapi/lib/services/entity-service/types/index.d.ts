@@ -12,10 +12,14 @@ export * from './plugin';
 type WrapAction = Omit<keyof EntityService, 'wrapParams' | 'wrapResult' | 'emitEvent'>;
 
 export interface EntityService {
-  wrapParams<TContentTypeUID extends Common.UID.ContentType, TParams extends object>(
+  wrapParams<
+    TResult = unknown,
+    TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType,
+    TParams extends object = object
+  >(
     params?: TParams,
     options?: { uid: TContentTypeUID; action: WrapAction }
-  ): Promise<unknown> | unknown;
+  ): Promise<TResult> | TResult;
 
   wrapResult<TContentTypeUID extends Common.UID.ContentType>(
     result: unknown,
