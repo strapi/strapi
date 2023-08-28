@@ -21,10 +21,13 @@ export interface EntityService {
     options?: { uid: TContentTypeUID; action: WrapAction }
   ): Promise<TResult> | TResult;
 
-  wrapResult<TContentTypeUID extends Common.UID.ContentType>(
+  wrapResult<
+    TResult = unknown,
+    TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType
+  >(
     result: unknown,
     options?: { uid: TContentTypeUID; action: WrapAction }
-  ): Promise<unknown> | unknown;
+  ): Promise<TResult> | TResult;
 
   emitEvent<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
