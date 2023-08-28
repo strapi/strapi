@@ -207,7 +207,7 @@ const RelationInput = ({
 
   return (
     <Flex gap={3} justifyContent="space-between" alignItems="end" wrap="wrap">
-      <Flex direction="column" alignItems="stretch" basis={size <= 6 ? '100%' : '70%'} gap={2}>
+      <Flex direction="column" alignItems="stretch" basis="100%" gap={2}>
         <Combobox
           ref={fieldRef}
           autocomplete="list"
