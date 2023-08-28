@@ -25,3 +25,4 @@ export type XOR<TLeft, TRight> = TLeft | TRight extends object
   : TLeft | TRight;
 
 export type As<TValue, TType> = TValue extends TType ? TValue : TType;
+export type Cast<TValue, TType> = TValue extends TType ? TValue : never;

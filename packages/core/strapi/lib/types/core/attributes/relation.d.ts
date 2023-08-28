@@ -1,59 +1,94 @@
 import type { Attribute, Common, Utils } from '@strapi/strapi';
 
 export type Relation<
-  // TODO: TOrigin was originally needed to infer precise attribute literal types by doing a reverse lookup
-  // on TTarget -> TOrigin relations. Due to errors because of Attribute.Any [relation] very generic
-  // representation, type mismatches were encountered and mappedBy/inversedBy are now regular strings.
-  // It is kept to allow for future iterations without breaking the current type API
   TOrigin extends Common.UID.Schema = Common.UID.Schema,
   TRelationKind extends RelationKind.Any = RelationKind.Any,
   TTarget extends Common.UID.Schema = never
 > = Attribute.OfType<'relation'> &
   // Properties
-  RelationProperties<TOrigin, TRelationKind, TTarget> &
+  Utils.Guard.Never<
+    RelationProperties<TOrigin, TRelationKind, TTarget>,
+    AllRelationProperties<TOrigin, TTarget>
+  > &
   // Options
   Attribute.ConfigurableOption &
   Attribute.PrivateOption;
 
 export type RelationProperties<
-  _TOrigin extends Common.UID.Schema,
+  TOrigin extends Common.UID.Schema,
   TRelationKind extends RelationKind.Any,
   TTarget extends Common.UID.Schema
 > = Utils.Expression.MatchFirst<
   [
     [
       Utils.Expression.Extends<TRelationKind, RelationKind.BiDirectional>,
-      {
-        relation: TRelationKind;
-        target: TTarget;
-      } & Utils.XOR<{ inversedBy?: string }, { mappedBy?: string }>
+      BiDirectionalProperties<
+        TOrigin,
+        Utils.Cast<TRelationKind, RelationKind.BiDirectional>,
+        TTarget
+      >
     ],
     [
       Utils.Expression.Extends<TRelationKind, RelationKind.XWay>,
-      {
-        relation: TRelationKind;
-        target: TTarget;
-      }
+      XWayProperties<Utils.Cast<TRelationKind, RelationKind.XWay>, TTarget>
     ],
     [
       Utils.Expression.Extends<TRelationKind, RelationKind.MorphReference>,
-      {
-        relation: TRelationKind;
-        target: TTarget;
-        morphBy?: Utils.Guard.Never<
-          Attribute.GetKeysByType<TTarget, 'relation', { relation: RelationKind.MorphOwner }>,
-          string
-        >;
-      }
+      MorphReferenceProperties<Utils.Cast<TRelationKind, RelationKind.MorphReference>, TTarget>
     ],
-    [Utils.Expression.Extends<TRelationKind, RelationKind.MorphOwner>, { relation: TRelationKind }]
+    [
+      Utils.Expression.Extends<TRelationKind, RelationKind.MorphOwner>,
+      MorphOwnerProperties<Utils.Cast<TRelationKind, RelationKind.MorphOwner>>
+    ]
   ]
 >;
+
+export type AllRelationProperties<
+  TOrigin extends Common.UID.Schema,
+  TTarget extends Common.UID.Schema
+> =
+  | BiDirectionalProperties<TOrigin, RelationKind.BiDirectional, TTarget>
+  | XWayProperties<RelationKind.XWay, TTarget>
+  | MorphReferenceProperties<RelationKind.MorphReference, TTarget>
+  | MorphOwnerProperties<RelationKind.MorphOwner>;
+
+type BiDirectionalProperties<
+  TOrigin extends Common.UID.Schema,
+  TRelationKind extends RelationKind.BiDirectional,
+  TTarget extends Common.UID.Schema
+> = {
+  relation: TRelationKind;
+  target: TTarget;
+} & Utils.XOR<
+  { inversedBy?: RelationsKeysFromTo<TTarget, TOrigin> },
+  { mappedBy?: RelationsKeysFromTo<TTarget, TOrigin> }
+>;
+
+type XWayProperties<TRelationKind extends RelationKind.XWay, TTarget extends Common.UID.Schema> = {
+  relation: TRelationKind;
+  target: TTarget;
+};
+
+type MorphReferenceProperties<
+  TRelationKind extends RelationKind.MorphReference,
+  TTarget extends Common.UID.Schema
+> = {
+  relation: TRelationKind;
+  target: TTarget;
+  morphBy?: Utils.Guard.Never<
+    Attribute.GetKeysByType<TTarget, 'relation', { relation: RelationKind.MorphOwner }>,
+    string
+  >;
+};
+
+type MorphOwnerProperties<TRelationKind extends RelationKind.MorphOwner> = {
+  relation: TRelationKind;
+};
 
 export type RelationsKeysFromTo<
   TTarget extends Common.UID.Schema,
   TOrigin extends Common.UID.Schema
-> = keyof PickRelationsFromTo<TTarget, TOrigin>;
+> = Utils.Guard.Never<keyof PickRelationsFromTo<TTarget, TOrigin>, string>;
 
 export type PickRelationsFromTo<
   TTarget extends Common.UID.Schema,
