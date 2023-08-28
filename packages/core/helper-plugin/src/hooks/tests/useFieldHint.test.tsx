@@ -24,7 +24,7 @@ function setup(args: UseFieldHintProps) {
 describe('useFieldHint', () => {
   describe('descriptions', () => {
     test('generates a known description', async () => {
-      const { result } = await setup({
+      const { result } = setup({
         description: knownDescription,
       });
 
@@ -32,7 +32,7 @@ describe('useFieldHint', () => {
     });
 
     test('fails to generate an unknown description', async () => {
-      const { result } = await setup({
+      const { result } = setup({
         description: {},
       });
 
@@ -45,7 +45,7 @@ describe('useFieldHint', () => {
       const minimum = 1;
       const fieldSchema = { min: minimum };
 
-      const { result } = await setup({
+      const { result } = setup({
         fieldSchema,
       });
 
@@ -61,7 +61,7 @@ describe('useFieldHint', () => {
       const maximum = 5;
       const fieldSchema = { max: maximum };
 
-      const { result } = await setup({
+      const { result } = setup({
         fieldSchema,
       });
 
@@ -78,7 +78,7 @@ describe('useFieldHint', () => {
       const maximum = 5;
       const fieldSchema = { minLength: minimum, maxLength: maximum };
 
-      const { result } = await setup({
+      const { result } = setup({
         fieldSchema,
       });
 
@@ -92,7 +92,7 @@ describe('useFieldHint', () => {
   });
 
   test('returns an empty string when there is no description or minimum and maximum limits', async () => {
-    const { result } = await setup({});
+    const { result } = setup({});
 
     expect(result.current.hint).toEqual('');
   });
@@ -102,7 +102,7 @@ describe('useFieldHint', () => {
     const maximum = 5;
     const fieldSchema = { minLength: minimum, maxLength: maximum };
 
-    const { result } = await setup({
+    const { result } = setup({
       description: knownDescription,
       fieldSchema,
     });
