@@ -1,9 +1,7 @@
 import * as React from 'react';
 
 import {
-  IconButton,
   Main,
-  Box,
   ActionLayout,
   Button,
   ContentLayout,
@@ -19,7 +17,6 @@ import {
 import {
   findMatchingPermissions,
   NoPermissions,
-  CheckPermissions,
   SearchURLQuery,
   useFetchClient,
   useFocusWhenNavigate,
@@ -35,7 +32,7 @@ import {
   PaginationURLQuery,
   PageSizeURLQuery,
 } from '@strapi/helper-plugin';
-import { ArrowLeft, Cog, Plus } from '@strapi/icons';
+import { ArrowLeft, Plus } from '@strapi/icons';
 import axios, { AxiosError } from 'axios';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
@@ -45,12 +42,10 @@ import { useMutation } from 'react-query';
 import { connect, useSelector } from 'react-redux';
 import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
 import { bindActionCreators, compose } from 'redux';
-import styled from 'styled-components';
 
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
 import { useAdminUsers } from '../../../hooks/useAdminUsers';
 import { useEnterprise } from '../../../hooks/useEnterprise';
-import { selectAdminPermissions } from '../../../pages/App/selectors';
 import { InjectionZone } from '../../../shared/components';
 import { Filter } from '../../components/Filter';
 import { AdminUsersFilter } from '../../components/Filter/CustomInputs/AdminUsersFilter';
@@ -61,17 +56,9 @@ import { getData, getDataSucceeded, onChangeListHeaders, onResetListHeaders } fr
 import { Body } from './components/Body';
 import BulkActionButtons from './components/BulkActionButtons';
 import CellContent from './components/CellContent';
-import { FieldPicker } from './components/FieldPicker';
+import { ViewSettingsMenu } from './components/ViewSettingsMenu';
 import makeSelectListView, { selectDisplayedHeaders } from './selectors';
 import { buildValidGetParams } from './utils';
-
-const ConfigureLayoutBox = styled(Box)`
-  svg {
-    path {
-      fill: ${({ theme }) => theme.colors.neutral900};
-    }
-  }
-`;
 
 const REVIEW_WORKFLOW_COLUMNS_CE = null;
 const REVIEW_WORKFLOW_COLUMNS_CELL_CE = () => null;
@@ -108,7 +95,6 @@ function ListView({
   const fetchPermissionsRef = React.useRef(refetchPermissions);
   const { notifyStatus } = useNotifyAT();
   const { formatAPIError } = useAPIErrorHandler(getTrad);
-  const permissions = useSelector(selectAdminPermissions);
   const allowedAttributes = useAllowedAttributes(contentType, slug);
   const [{ query }] = useQueryParams();
   const { pathname } = useLocation();
@@ -668,25 +654,7 @@ function ListView({
           endActions={
             <>
               <InjectionZone area="contentManager.listView.actions" />
-              <FieldPicker layout={layout} />
-              <CheckPermissions
-                permissions={permissions.contentManager.collectionTypesConfigurations}
-              >
-                <ConfigureLayoutBox paddingTop={1} paddingBottom={1}>
-                  <IconButton
-                    onClick={() => {
-                      trackUsage('willEditListLayout');
-                    }}
-                    forwardedAs={ReactRouterLink}
-                    to={{ pathname: `${slug}/configurations/list`, search: pluginsQueryParams }}
-                    icon={<Cog />}
-                    label={formatMessage({
-                      id: 'app.links.configure-view',
-                      defaultMessage: 'Configure the view',
-                    })}
-                  />
-                </ConfigureLayoutBox>
-              </CheckPermissions>
+              <ViewSettingsMenu slug={slug} layout={layout} />
             </>
           }
           startActions={
