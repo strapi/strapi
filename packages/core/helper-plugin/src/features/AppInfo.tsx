@@ -1,4 +1,4 @@
-import { ReactNode, createContext, useContext, useMemo } from 'react';
+import * as React from 'react';
 
 type EmptyObject = Record<string, never>;
 
@@ -22,13 +22,13 @@ type AppInfoContextValue = {
  * Context
  * -----------------------------------------------------------------------------------------------*/
 
-const AppInfoContext = createContext<AppInfoContextValue | EmptyObject>({});
+const AppInfoContext = React.createContext<AppInfoContextValue | EmptyObject>({});
 
 /* -------------------------------------------------------------------------------------------------
  * Provider
  * -----------------------------------------------------------------------------------------------*/
 
-type AppInfoProviderProps = AppInfoContextValue & { children: ReactNode };
+type AppInfoProviderProps = AppInfoContextValue & { children: React.ReactNode };
 
 const AppInfoProvider = ({
   children,
@@ -46,7 +46,7 @@ const AppInfoProvider = ({
   userDisplayName,
   userId,
 }: AppInfoProviderProps) => {
-  const contextValue: AppInfoContextValue = useMemo(
+  const contextValue: AppInfoContextValue = React.useMemo(
     () => ({
       autoReload,
       communityEdition,
@@ -86,7 +86,7 @@ const AppInfoProvider = ({
  * Hook
  * -----------------------------------------------------------------------------------------------*/
 
-const useAppInfo = () => useContext(AppInfoContext);
+const useAppInfo = () => React.useContext(AppInfoContext);
 
 /**
  * TODO: rename these to remove the plural in next major version
