@@ -619,7 +619,7 @@
   "components.PageFooter.select": "Entries per page",
   "components.ProductionBlocker.description": "For safety purposes we have to disable this plugin in other environments.",
   "components.ProductionBlocker.header": "This plugin is only available in development.",
-  "components.Search.placeholder": "Search...",
+  "components.ViewSettings.tooltip": "View settings",
   "components.TableHeader.sort": "Sort on {label}",
   "components.Wysiwyg.ToggleMode.markdown-mode": "Markdown mode",
   "components.Wysiwyg.ToggleMode.preview-mode": "Preview mode",
