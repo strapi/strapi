@@ -1,6 +1,6 @@
 import { prefixPluginTranslations } from '../prefixPluginTranslations';
 
-describe('HELPER_PLUGIN | utils | prefixPluginTranslations', () => {
+describe('prefixPluginTranslations', () => {
   it('should prefix plugin translations keys with plugin ID', () => {
     const trad = {
       key1: 'Value 1',
