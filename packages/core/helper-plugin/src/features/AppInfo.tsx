@@ -1,43 +1,34 @@
 import * as React from 'react';
 
-import PropTypes from 'prop-types';
+type EmptyObject = Record<string, never>;
+
+type AppInfoContextValue = {
+  autoReload?: boolean;
+  communityEdition?: boolean;
+  currentEnvironment?: string;
+  dependencies?: Record<string, string>;
+  latestStrapiReleaseTag?: string;
+  nodeVersion?: string;
+  projectId?: string;
+  setUserDisplayName: (name: string) => void;
+  shouldUpdateStrapi: boolean;
+  strapiVersion?: string;
+  useYarn?: boolean;
+  userDisplayName: string;
+  userId?: string;
+};
 
 /* -------------------------------------------------------------------------------------------------
  * Context
  * -----------------------------------------------------------------------------------------------*/
 
-/**
- * TODO: review this type, do we need to it all?
- */
-
-/**
- * @preserve
- * @typedef {Object} AppInfoContextValue
- * @property {boolean | undefined} autoReload
- * @property {boolean | undefined} communityEdition
- * @property {string | undefined} currentEnvironment
- * @property {Record<string, string>} dependencies
- * @property {string | null} latestStrapiReleaseTag
- * @property {string | undefined} nodeVersion
- * @property {string | undefined} projectId
- * @property {(name: string) => void} setUserDisplayName
- * @property {boolean} shouldUpdateStrapi
- * @property {string | undefined} strapiVersion
- * @property {boolean | undefined} useYarn
- * @property {string} userDisplayName
- * @property {string | null} userId
- *
- */
-
-/**
- * @preserve
- * @type {React.Context<AppInfoContextValue>}
- */
-const AppInfoContext = React.createContext();
+const AppInfoContext = React.createContext<AppInfoContextValue | EmptyObject>({});
 
 /* -------------------------------------------------------------------------------------------------
  * Provider
  * -----------------------------------------------------------------------------------------------*/
+
+type AppInfoProviderProps = AppInfoContextValue & { children: React.ReactNode };
 
 const AppInfoProvider = ({
   children,
@@ -54,11 +45,8 @@ const AppInfoProvider = ({
   useYarn,
   userDisplayName,
   userId,
-}) => {
-  /**
-   * @type {AppInfoContextValue}
-   */
-  const contextValue = React.useMemo(
+}: AppInfoProviderProps) => {
+  const contextValue: AppInfoContextValue = React.useMemo(
     () => ({
       autoReload,
       communityEdition,
@@ -94,44 +82,10 @@ const AppInfoProvider = ({
   return <AppInfoContext.Provider value={contextValue}>{children}</AppInfoContext.Provider>;
 };
 
-AppInfoProvider.defaultProps = {
-  autoReload: undefined,
-  communityEdition: undefined,
-  currentEnvironment: undefined,
-  dependencies: undefined,
-  latestStrapiReleaseTag: undefined,
-  nodeVersion: undefined,
-  projectId: undefined,
-  strapiVersion: undefined,
-  useYarn: undefined,
-  userId: null,
-};
-
-AppInfoProvider.propTypes = {
-  children: PropTypes.node.isRequired,
-  autoReload: PropTypes.bool,
-  communityEdition: PropTypes.bool,
-  currentEnvironment: PropTypes.string,
-  dependencies: PropTypes.object,
-  latestStrapiReleaseTag: PropTypes.string,
-  nodeVersion: PropTypes.string,
-  projectId: PropTypes.string,
-  setUserDisplayName: PropTypes.func.isRequired,
-  shouldUpdateStrapi: PropTypes.bool.isRequired,
-  strapiVersion: PropTypes.string,
-  useYarn: PropTypes.bool,
-  userDisplayName: PropTypes.string.isRequired,
-  userId: PropTypes.string,
-};
-
 /* -------------------------------------------------------------------------------------------------
  * Hook
  * -----------------------------------------------------------------------------------------------*/
 
-/**
- * @preserve
- * @returns {AppInfoContextValue}
- */
 const useAppInfo = () => React.useContext(AppInfoContext);
 
 /**
