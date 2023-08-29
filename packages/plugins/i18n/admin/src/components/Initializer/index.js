@@ -12,16 +12,16 @@ import useLocales from '../../hooks/useLocales';
 import pluginId from '../../pluginId';
 
 const Initializer = ({ setPlugin }) => {
-  const { isLoading, locales } = useLocales();
+  const { isLoading, locales, error } = useLocales();
   const ref = useRef();
 
   ref.current = setPlugin;
 
   useEffect(() => {
-    if (!isLoading && locales.length > 0) {
+    if ((!isLoading && locales?.length > 0) || error) {
       ref.current(pluginId);
     }
-  }, [isLoading, locales]);
+  }, [isLoading, locales, error]);
 
   return null;
 };
