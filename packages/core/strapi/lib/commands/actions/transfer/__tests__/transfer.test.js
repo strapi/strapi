@@ -3,39 +3,36 @@
 const { expectExit } = require('../../../__tests__/commands.test.utils');
 
 describe('Transfer', () => {
-  // command utils
-  const mockUtils = {
-    getTransferTelemetryPayload: jest.fn().mockReturnValue({}),
-    loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
-    formatDiagnostic: jest.fn(),
-    createStrapiInstance() {
-      return {
-        telemetry: {
-          send: jest.fn(),
-        },
-      };
-    },
-    getDefaultExportName: jest.fn(() => 'default'),
-    buildTransferTable: jest.fn(() => {
-      return {
-        toString() {
-          return 'table';
-        },
-      };
-    }),
-    exitMessageText: jest.fn(),
-    getDiffHandler: jest.fn(),
-    getAssetsBackupHandler: jest.fn(),
-    setSignalHandler: jest.fn(),
-  };
-  jest.mock(
-    '../../../utils/data-transfer.js',
-    () => {
-      return mockUtils;
-    },
-    { virtual: true }
-  );
+  // mock command utils
+  jest.mock('../../../utils/data-transfer.js', () => {
+    return {
+      ...jest.requireActual('../../../utils/data-transfer.js'),
+      getTransferTelemetryPayload: jest.fn().mockReturnValue({}),
+      loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
+      formatDiagnostic: jest.fn(),
+      createStrapiInstance() {
+        return {
+          telemetry: {
+            send: jest.fn(),
+          },
+        };
+      },
+      getDefaultExportName: jest.fn(() => 'default'),
+      buildTransferTable: jest.fn(() => {
+        return {
+          toString() {
+            return 'table';
+          },
+        };
+      }),
+      exitMessageText: jest.fn(),
+      getDiffHandler: jest.fn(),
+      getAssetsBackupHandler: jest.fn(),
+      setSignalHandler: jest.fn(),
+    };
+  });
 
+  // mock data transfer
   const mockDataTransfer = {
     strapi: {
       providers: {
@@ -75,7 +72,6 @@ describe('Transfer', () => {
       },
     },
   };
-
   jest.mock('@strapi/data-transfer', () => mockDataTransfer);
 
   const transferAction = require('../action');
