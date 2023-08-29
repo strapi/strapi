@@ -65,7 +65,7 @@ export function AssigneeSelect() {
           type: 'success',
           message: {
             id: 'content-manager.reviewWorkflows.assignee.notification.saved',
-            defaultMessage: 'Success: Assignee updated',
+            defaultMessage: 'Assignee updated',
           },
         });
       },
