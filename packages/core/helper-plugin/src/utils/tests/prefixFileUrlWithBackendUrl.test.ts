@@ -15,9 +15,9 @@ describe('HELPER_PLUGIN | utils | prefixFileUrlWithBackendUrl', () => {
     expect(prefixFileUrlWithBackendUrl(data)).toEqual(expected);
   });
 
-  it('should return the data if the url is not a string', () => {
-    const data = null;
-    const expected = null;
+  it('should return the `undefined` if the url is not a provided', () => {
+    const data = undefined;
+    const expected = undefined;
 
     expect(prefixFileUrlWithBackendUrl(data)).toEqual(expected);
   });
