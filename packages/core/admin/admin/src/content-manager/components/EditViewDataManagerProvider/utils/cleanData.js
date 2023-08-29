@@ -101,8 +101,8 @@ const cleanData = ({ browserState, serverState }, currentSchema, componentsSchem
            *  connectedRelations are the items that are in the browserState
            * array but not in the serverState
            */
-          const connectedRelations = value.reduce((acc, relation, currentIndex, array) => {
-            const relationOnServer = actualOldValue.find(
+          const connectedRelations = Object.keys(value).reduce((acc, relation, currentIndex, array) => {
+            const relationOnServer = Object.keys(actualOldValue).find(
               (oldRelation) => oldRelation.id === relation.id
             );
 
@@ -121,8 +121,8 @@ const cleanData = ({ browserState, serverState }, currentSchema, componentsSchem
            * disconnectedRelations are the items that are in the serverState but
            * are no longer in the browserState
            */
-          const disconnectedRelations = actualOldValue.reduce((acc, relation) => {
-            if (!value.find((newRelation) => newRelation.id === relation.id)) {
+          const disconnectedRelations = Object.keys(actualOldValue).reduce((acc, relation) => {
+            if (!Object.keys(value).find((newRelation) => newRelation.id === relation.id)) {
               return [...acc, { id: relation.id }];
             }
 
