@@ -11,14 +11,12 @@ import type { UseFieldHintProps } from '../useFieldHint';
 const messages = { 'message.id': 'response' };
 const knownDescription = { id: 'message.id', defaultMessage: '' };
 
-const IntlWrapper = ({ children }: { children: React.ReactNode }) => (
-  <IntlProvider locale="en" messages={messages} textComponent="span">
-    {children}
-  </IntlProvider>
-);
-
 function setup(args: UseFieldHintProps) {
-  return renderHook(() => useFieldHint(args), { wrapper: IntlWrapper });
+  return renderHook(() => useFieldHint(args), { wrapper:({ children }) => (
+    <IntlProvider locale="en" messages={messages} textComponent="span">
+      {children}
+    </IntlProvider>
+  )});
 }
 
 describe('useFieldHint', () => {
