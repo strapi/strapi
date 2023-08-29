@@ -35,7 +35,6 @@ import useFormModalNavigation from '../../hooks/useFormModalNavigation';
 import pluginId from '../../pluginId';
 import { getTrad, isAllowedContentTypesForRelations } from '../../utils';
 import findAttribute from '../../utils/findAttribute';
-// New compos
 import AllowedTypesSelect from '../AllowedTypesSelect';
 import AttributeOptions from '../AttributeOptions';
 import BooleanDefaultValueSelect from '../BooleanDefaultValueSelect';
@@ -75,9 +74,6 @@ import forms from './forms';
 import makeSelectFormModal from './selectors';
 import { canEditContentType, getAttributesToDisplay, getFormInputNames } from './utils';
 import { createComponentUid, createUid } from './utils/createUid';
-
-/* eslint-disable indent */
-/* eslint-disable react/no-array-index-key */
 
 const FormModal = () => {
   const {
