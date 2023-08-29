@@ -9,11 +9,11 @@ import {
   HeaderLayout,
   Layout,
   Link,
+  Loader,
   Main,
   Typography,
 } from '@strapi/design-system';
 import {
-  LoadingIndicatorPage,
   prefixFileUrlWithBackendUrl,
   SettingsPageTitle,
   useAPIErrorHandler,
@@ -161,7 +161,12 @@ const ApplicationInfosPage = () => {
       <SettingsPageTitle name="Application" />
       <Main>
         {isLoading ? (
-          <LoadingIndicatorPage data-testid="loader" />
+          <Loader>
+            {formatMessage({
+              id: 'Settings.application.isLoading',
+              defaultMessage: 'Loading',
+            })}
+          </Loader>
         ) : (
           <form onSubmit={handleSubmit}>
             <HeaderLayout
