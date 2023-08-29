@@ -173,23 +173,28 @@ export function App() {
   // This should not use `useFetchClient`, because it does not communicate to the admin API.
   React.useEffect(() => {
     async function trackInitEvent() {
-      await fetch('https://analytics.strapi.io/api/v2/track', {
-        body: JSON.stringify({
-          event: 'didInitializeAdministration',
-          // This event is anonymous
-          userId: '',
-          eventPropeties: {},
-          userProperties: {},
-          groupProperties: { ...telemetryProperties, projectId: uuid },
-        }),
+      try {
+        await fetch('https://analytics.strapi.io/api/v2/track', {
+          body: JSON.stringify({
+            event: 'didInitializeAdministration',
+            // This event is anonymous
+            userId: '',
+            eventPropeties: {},
+            userProperties: {},
+            groupProperties: { ...telemetryProperties, projectId: uuid },
+          }),
 
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Strapi-Event': 'didInitializeAdministration',
-        },
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Strapi-Event': 'didInitializeAdministration',
+          },
 
-        method: 'POST',
-      });
+          method: 'POST',
+        });
+      } catch (error) {
+        // Fetch promises are rejected in case of a network error, which e.g. happens if the
+        // analytics endpoint is blocked by ad-blockers.
+      }
     }
 
     if (uuid) {

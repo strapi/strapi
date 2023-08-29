@@ -136,8 +136,12 @@ export const AuthenticatedApp = () => {
   // Create a hash of the users email adress and use it as ID for tracking
   React.useEffect(() => {
     const generateUserId = async (userInfo) => {
-      const userId = await hashAdminUserEmail(userInfo);
-      setUserId(userId);
+      try {
+        const userId = await hashAdminUserEmail(userInfo);
+        setUserId(userId);
+      } catch (error) {
+        console.error('Generating user id failed', error);
+      }
     };
 
     if (userInfo) {
@@ -170,13 +174,7 @@ export const AuthenticatedApp = () => {
 
   const hasApluginNotReady = Object.values(plugins).some((plugin) => plugin.isReady === false);
 
-  if (
-    !userDisplayName ||
-    !userId ||
-    isLoadingAppInfos ||
-    isLoadingPermissions ||
-    hasApluginNotReady
-  ) {
+  if (isLoadingAppInfos || isLoadingPermissions || hasApluginNotReady) {
     const initializers = Object.keys(plugins).reduce((acc, current) => {
       const InitializerComponent = plugins[current].initializer;
 
