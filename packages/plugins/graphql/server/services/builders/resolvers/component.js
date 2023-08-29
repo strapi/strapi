@@ -1,6 +1,6 @@
 'use strict';
 
-const { sanitize } = require('@strapi/utils');
+const { sanitize, validate } = require('@strapi/utils');
 
 module.exports = ({ strapi }) => ({
   buildComponentResolver({ contentTypeUID, attributeName }) {
@@ -13,6 +13,9 @@ module.exports = ({ strapi }) => ({
       const component = strapi.getModel(componentName);
 
       const transformedArgs = transformArgs(args, { contentType: component, usePagination: true });
+      await validate.contentAPI.query(transformedArgs, contentType, {
+        auth: ctx?.state?.auth,
+      });
       const sanitizedQuery = await sanitize.contentAPI.query(transformedArgs, contentType, {
         auth: ctx?.state?.auth,
       });

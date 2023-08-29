@@ -66,6 +66,11 @@ export interface Strapi {
   readonly sanitizers: any;
 
   /**
+   * Getter for the Strapi validators container
+   */
+  readonly validators: any;
+
+  /**
    * Getter for the Strapi services container
    *
    * It returns all the registered services

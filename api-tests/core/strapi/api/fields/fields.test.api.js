@@ -123,19 +123,19 @@ describe('Field selection API', () => {
         expect(body.data).toEqual(getProductDataFields(['name']));
       });
 
-      test('Non existing fields are ignored', async () => {
-        const { body } = await getProductAPI('fakeField');
-        expect(body.data).toEqual(getProductDataFields([]));
+      test('Non existing fields throw error', async () => {
+        const { statusCode } = await getProductAPI('fakeField');
+        expect(statusCode).toEqual(400);
       });
 
-      test('Private fields are ignored', async () => {
-        const { body } = await getProductAPI('privateField');
-        expect(body.data).toEqual(getProductDataFields([]));
+      test('Private fields throw error', async () => {
+        const { statusCode } = await getProductAPI('privateField');
+        expect(statusCode).toEqual(400);
       });
 
-      test('Password fields are ignored', async () => {
-        const { body } = await getProductAPI('password');
-        expect(body.data).toEqual(getProductDataFields([]));
+      test('Password fields throw error', async () => {
+        const { statusCode } = await getProductAPI('password');
+        expect(statusCode).toEqual(400);
       });
     });
 
