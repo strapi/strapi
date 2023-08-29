@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 import { fixtures } from '@strapi/admin-test-utils';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
