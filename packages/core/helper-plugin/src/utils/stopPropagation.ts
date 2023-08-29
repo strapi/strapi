@@ -14,6 +14,9 @@ type OnRowClickProps = {
   condition?: boolean;
 };
 
+/**
+ * @deprecated Set the onClick prop directly
+ */
 export const onRowClick = ({ fn, condition = true }: OnRowClickProps) => {
   if (condition) {
     return {

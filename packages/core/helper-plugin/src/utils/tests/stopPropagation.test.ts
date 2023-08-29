@@ -7,7 +7,7 @@ import { stopPropagation, onRowClick, StopPropagation } from '../stopPropagation
 describe('HELPER-PLUGIN | utils | stopPropagation', () => {
   it('should stop propagation when clicked', () => {
     const eventMock = { stopPropagation: jest.fn() };
-    stopPropagation.onClick(eventMock);
+    stopPropagation.onClick(eventMock as unknown as React.MouseEvent);
     expect(eventMock.stopPropagation).toHaveBeenCalledTimes(1);
   });
 
@@ -29,7 +29,7 @@ describe('HELPER-PLUGIN | utils | stopPropagation', () => {
 
   describe('StopPropagation component', () => {
     it('should render a div with stopPropagation properties', () => {
-      render(<StopPropagation />);
+      render(React.createElement(StopPropagation));
       const divElement = screen.getByRole('button', { hidden: true });
       expect(divElement).toBeInTheDocument();
       expect(divElement).toHaveAttribute('role', 'button');
