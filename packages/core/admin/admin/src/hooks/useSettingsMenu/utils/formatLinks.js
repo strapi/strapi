@@ -1,4 +1,4 @@
-export const formatLinks = (menu) => {
+const formatLinks = (menu) => {
   return menu.map((menuSection) => {
     const formattedLinks = menuSection.links.map((link) => ({
       ...link,
@@ -8,3 +8,5 @@ export const formatLinks = (menu) => {
     return { ...menuSection, links: formattedLinks };
   });
 };
+
+export default formatLinks;
