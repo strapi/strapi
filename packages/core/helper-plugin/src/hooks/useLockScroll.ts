@@ -1,7 +1,11 @@
-import { useEffect } from 'react';
+import * as React from 'react';
 
-const useLockScroll = (lockScroll) => {
-  useEffect(() => {
+interface LockScrollProps {
+  lockScroll: boolean;
+}
+
+const useLockScroll = ({ lockScroll }: LockScrollProps) => {
+  React.useEffect(() => {
     if (lockScroll) {
       document.body.classList.add('lock-body-scroll');
     }
