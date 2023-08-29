@@ -12,11 +12,13 @@ const messages = { 'message.id': 'response' };
 const knownDescription = { id: 'message.id', defaultMessage: '' };
 
 function setup(args: UseFieldHintProps) {
-  return renderHook(() => useFieldHint(args), { wrapper:({ children }) => (
-    <IntlProvider locale="en" messages={messages} textComponent="span">
-      {children}
-    </IntlProvider>
-  )});
+  return renderHook(() => useFieldHint(args), {
+    wrapper: ({ children }) => (
+      <IntlProvider locale="en" messages={messages} textComponent="span">
+        {children}
+      </IntlProvider>
+    ),
+  });
 }
 
 describe('useFieldHint', () => {
