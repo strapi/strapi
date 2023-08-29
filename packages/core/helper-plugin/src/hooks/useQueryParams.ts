@@ -1,9 +1,13 @@
 import { useCallback, useMemo } from 'react';
 
-import { parse, stringify } from 'qs';
+import { parse, ParsedQs, stringify } from 'qs';
 import { useHistory, useLocation } from 'react-router-dom';
 
-const useQueryParams = (initialParams) => {
+type JSON = string | number | boolean | null | { [key: string]: JSON } | Array<JSON>;
+
+type Params = Record<string, JSON>;
+
+const useQueryParams = (initialParams?: Params) => {
   const { search } = useLocation();
   const { push } = useHistory();
 
@@ -18,12 +22,14 @@ const useQueryParams = (initialParams) => {
   }, [search, initialParams]);
 
   const setQuery = useCallback(
-    (nextParams, method = 'push') => {
+    (nextParams: Params, method: 'push' | 'remove' = 'push') => {
       let nextQuery = { ...query };
 
       if (method === 'remove') {
         Object.keys(nextParams).forEach((key) => {
-          delete nextQuery[key];
+          if (Object.prototype.hasOwnProperty.call(nextQuery, key)) {
+            delete (nextQuery as ParsedQs | Params)[key];
+          }
         });
       } else {
         nextQuery = { ...query, ...nextParams };
@@ -34,7 +40,7 @@ const useQueryParams = (initialParams) => {
     [push, query]
   );
 
-  return [{ query, rawQuery: search }, setQuery];
+  return [{ query, rawQuery: search }, setQuery] as const;
 };
 
 export { useQueryParams };
