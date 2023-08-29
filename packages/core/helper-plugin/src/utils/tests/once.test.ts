@@ -22,10 +22,8 @@ describe('HELPER_PLUGIN | utils | once', () => {
   });
 
   it('should throw TypeError if not given a function', () => {
-    const wrappedFn = once('not a function' as any);
-
     expect(() => {
-      wrappedFn();
+      once('not a function' as any);
     }).toThrowError(new TypeError(`${PREFIX} once requires a function parameter`));
   });
 });
