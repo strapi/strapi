@@ -3,7 +3,7 @@
 const { dirname, join, resolve } = require('path');
 const { statSync, existsSync } = require('fs');
 const _ = require('lodash');
-const { get, has, pick, pickBy, defaultsDeep, map, prop, pipe } = require('lodash/fp');
+const { get, pickBy, defaultsDeep, map, prop, pipe } = require('lodash/fp');
 const { isKebabCase } = require('@strapi/utils');
 const getUserPluginsConfig = require('./get-user-plugins-config');
 
@@ -21,31 +21,58 @@ const validatePluginName = (pluginName) => {
   }
 };
 
+/**
+ * @typedef {Object} PluginInstallDeclaration
+ * @property {boolean} enabled
+ * @property {string=} resolve
+ * @property {boolean=} isModule - whether the plugin is a node module or a local plugin
+ */
+
+/**
+ * @typedef {Object} DetailedDeclaration
+ * @property {boolean} enabled
+ * @property {string=} pathToPlugin
+ */
+
+/**
+ * @type {(declaration: PluginInstallDeclaration | boolean) => DetailedDeclaration}
+ */
 const toDetailedDeclaration = (declaration) => {
   if (typeof declaration === 'boolean') {
     return { enabled: declaration };
   }
 
-  const detailedDeclaration = pick(['enabled'], declaration);
-  if (has('resolve', declaration)) {
+  const detailedDeclaration = {
+    enabled: declaration.enabled,
+  };
+
+  if (declaration?.resolve) {
     let pathToPlugin = '';
 
-    try {
-      pathToPlugin = dirname(require.resolve(declaration.resolve));
-    } catch (e) {
-      pathToPlugin = resolve(strapi.dirs.app.root, declaration.resolve);
+    if (declaration.isModule) {
+      /**
+       * we only want the node_module here, not the package.json
+       */
+      pathToPlugin = join(declaration.resolve, '..');
+    } else {
+      try {
+        pathToPlugin = dirname(require.resolve(declaration.resolve));
+      } catch (e) {
+        pathToPlugin = resolve(strapi.dirs.app.root, declaration.resolve);
 
-      if (!existsSync(pathToPlugin) || !statSync(pathToPlugin).isDirectory()) {
-        throw new Error(`${declaration.resolve} couldn't be resolved`);
+        if (!existsSync(pathToPlugin) || !statSync(pathToPlugin).isDirectory()) {
+          throw new Error(`${declaration.resolve} couldn't be resolved`);
+        }
       }
     }
 
     detailedDeclaration.pathToPlugin = pathToPlugin;
   }
+
   return detailedDeclaration;
 };
 
-const getEnabledPlugins = async (strapi) => {
+const getEnabledPlugins = async (strapi, { client } = { client: false }) => {
   const internalPlugins = {};
   for (const dep of INTERNAL_PLUGINS) {
     const packagePath = join(dep, 'package.json');
@@ -53,7 +80,7 @@ const getEnabledPlugins = async (strapi) => {
 
     validatePluginName(packageInfo.strapi.name);
     internalPlugins[packageInfo.strapi.name] = {
-      ...toDetailedDeclaration({ enabled: true, resolve: packagePath }),
+      ...toDetailedDeclaration({ enabled: true, resolve: packagePath, isModule: client }),
       info: packageInfo.strapi,
     };
   }
@@ -73,7 +100,7 @@ const getEnabledPlugins = async (strapi) => {
     if (isStrapiPlugin(packageInfo)) {
       validatePluginName(packageInfo.strapi.name);
       installedPlugins[packageInfo.strapi.name] = {
-        ...toDetailedDeclaration({ enabled: true, resolve: packagePath }),
+        ...toDetailedDeclaration({ enabled: true, resolve: packagePath, isModule: client }),
         info: {
           ...packageInfo.strapi,
           packageName: packageInfo.name,

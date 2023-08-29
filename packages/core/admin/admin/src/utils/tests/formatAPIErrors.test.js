@@ -1,4 +1,4 @@
-import formatAPIErrors from '../formatAPIErrors';
+import { formatAPIErrors } from '../formatAPIErrors';
 
 describe('ADMIN | utils | formatAPIErrors', () => {
   it('should return an empty object', () => {

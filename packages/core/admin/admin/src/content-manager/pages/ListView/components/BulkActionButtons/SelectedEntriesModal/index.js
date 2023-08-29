@@ -32,7 +32,7 @@ import { useSelector } from 'react-redux';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
-import formatAPIError from '../../../../../../utils/formatAPIErrors';
+import { formatAPIErrors } from '../../../../../../utils/formatAPIErrors';
 import { getTrad, createYupSchema } from '../../../../../utils';
 import { listViewDomain } from '../../../selectors';
 import { Body } from '../../Body';
@@ -301,7 +301,7 @@ const SelectedEntriesModalContent = ({
       onError(error) {
         toggleNotification({
           type: 'warning',
-          message: formatAPIError(error),
+          message: formatAPIErrors(error),
         });
       },
     }
