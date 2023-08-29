@@ -1,9 +1,6 @@
 export const PREFIX = '[@strapi/helper-plugin]:';
 
-/**
- * @type {<TFunc extends (...args: any) => any>(fn: TFunc) => (...args: any[]) => void}
- */
-export const once = (fn) => {
+export const once = <T extends unknown[], R>(fn: (...args: T) => R) => {
   const func = fn;
   let called = false;
 
@@ -11,7 +8,7 @@ export const once = (fn) => {
     throw new TypeError(`${PREFIX} once requires a function parameter`);
   }
 
-  return (...args) => {
+  return (...args: T) => {
     if (!called) {
       func(...args);
       called = true;
