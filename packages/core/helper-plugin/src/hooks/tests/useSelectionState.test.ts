@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 
-import { useSelectionState } from '../useSelectionState';
+import { InitialValue, useSelectionState } from '../useSelectionState';
 
 const FIXTURE = [
   {
@@ -14,8 +14,8 @@ const FIXTURE = [
   },
 ];
 
-function setup(...args) {
-  return renderHook(() => useSelectionState(...args));
+function setup(keys: string[], initialValue: InitialValue[]) {
+  return renderHook(() => useSelectionState(keys, initialValue));
 }
 
 describe('useSelectionState', () => {
@@ -60,14 +60,20 @@ describe('useSelectionState', () => {
     expect(result.current[0]).toStrictEqual(FIXTURE);
   });
 
-  test('selectOne - reset', async () => {
-    const { result } = setup(['id'], []);
+  test('selectOne deselect', async () => {
+    const { result } = setup(['id'], FIXTURE);
 
     act(() => {
-      result.current[1].selectOne(null);
+      result.current[1].selectOne(FIXTURE[0]);
     });
 
-    expect(result.current[0]).toStrictEqual([null]);
+    expect(result.current[0]).toStrictEqual([FIXTURE[1]]);
+
+    act(() => {
+      result.current[1].selectOne(FIXTURE[1]);
+    });
+
+    expect(result.current[0]).toStrictEqual([]);
   });
 
   test('selectAll', () => {
@@ -104,10 +110,6 @@ describe('useSelectionState', () => {
     const { result } = setup(['id'], []);
 
     act(() => {
-      result.current[1].selectOne(null);
-    });
-
-    act(() => {
       result.current[1].selectOnly(FIXTURE[0]);
     });
 
@@ -116,10 +118,6 @@ describe('useSelectionState', () => {
 
   test('selectOnly - multiple keys', () => {
     const { result } = setup(['id', 'name'], []);
-
-    act(() => {
-      result.current[1].selectOne(null);
-    });
 
     act(() => {
       result.current[1].selectOnly(FIXTURE[0]);
