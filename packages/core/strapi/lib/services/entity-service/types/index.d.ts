@@ -177,6 +177,10 @@ export interface EntityService {
     params?: Params.Pick<TContentTypeUID, 'filters' | '_q'>
   ): Promise<number>;
 
+  /**
+   * TODO: Considering making this API public include providing a valid return type
+   * @internal
+   */
   load<
     TContentTypeUID extends Common.UID.ContentType,
     TField extends Attribute.GetPopulatableKeys<TContentTypeUID>
@@ -185,8 +189,12 @@ export interface EntityService {
     entity: PartialEntity<TContentTypeUID>,
     field: Utils.Guard.Never<TField, string>,
     params?: GetPopulatableFieldParams<TContentTypeUID, TField>
-  ): Promise<Result<TContentTypeUID> | Result<TContentTypeUID>[]>; // TODO: need to target the field content type instead
+  ): Promise<any>;
 
+  /**
+   * TODO: Considering making this API public include providing a valid return type
+   * @internal
+   */
   loadPages<
     TContentTypeUID extends Common.UID.ContentType,
     TField extends Attribute.GetPopulatableKeys<TContentTypeUID>
@@ -196,7 +204,7 @@ export interface EntityService {
     field: Utils.Guard.Never<TField, string>,
     params?: GetPopulatableFieldParams<TContentTypeUID, TField>,
     pagination?: Params.Pagination.Any
-  ): Promise<PaginatedResult<TContentTypeUID>>; // TODO: need to target the field content type instead
+  ): Promise<any>;
 }
 
 type GetPopulatableFieldParams<
