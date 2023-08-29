@@ -23,9 +23,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
-      - name: 'Lockfile analysis'
-        uses: ./.github/actions/security/lockfile
+      - uses: ./.github/actions/security/lockfile
         with:
-          allowedHosts:
-            - 'https://registry.yarnpkg.com'
-            - 'https://github.com/strapi'
+          allowedHosts: 'yarn github.com'
