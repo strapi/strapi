@@ -98,7 +98,7 @@ export type GetValueByKey<
 export type GetValues<
   TSchemaUID extends Common.UID.Schema,
   TKey extends GetKeys<TSchemaUID> = GetKeys<TSchemaUID>
-> = {
+> = { id: number | `${number}` } & {
   // Handle required attributes
   [key in GetRequiredKeys<TSchemaUID> as key extends TKey ? key : never]-?: GetValueByKey<
     TSchemaUID,

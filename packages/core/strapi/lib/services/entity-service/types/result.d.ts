@@ -2,9 +2,7 @@ import type { Attribute, Common, EntityService, Utils } from '@strapi/strapi';
 
 type Pagination = { page: number; pageSize: number; pageCount: number; total: number };
 
-type IDProperty = { id: EntityService.Params.Attribute.ID };
-
-type AnyEntity = IDProperty & { [key: string]: any };
+type AnyEntity = { id: EntityService.Params.Attribute.ID } & { [key: string]: any };
 
 export type Result<
   TSchemaUID extends Common.UID.Schema,
@@ -66,35 +64,9 @@ export type GetValues<
 > = Utils.Expression.If<
   Common.AreSchemaRegistriesExtended,
   Utils.Guard.Never<TFields | TPopulate, Attribute.GetKeys<TSchemaUID>> extends infer TKeys
-    ? IDProperty & {
-        // Handle required attributes
-        [key in Attribute.GetRequiredKeys<TSchemaUID> as key extends TKeys
-          ? key
-          : never]-?: GetValue<Attribute.Get<TSchemaUID, key>>;
-      } & {
-        // Handle optional attributes
-        [key in Attribute.GetOptionalKeys<TSchemaUID> as key extends TKeys
-          ? key
-          : never]?: GetValue<Attribute.Get<TSchemaUID, key>>;
-      }
+    ? Attribute.GetValues<TSchemaUID, TKeys>
     : never,
   AnyEntity
->;
-
-type GetValue<TAttribute extends Attribute.Attribute> = Utils.Expression.If<
-  Utils.Expression.IsNotNever<TAttribute>,
-  // GetValue overrides
-  Utils.Expression.MatchFirst<
-    [
-      // Relation, media and components needs an id property
-      [
-        Utils.Expression.Extends<TAttribute, Attribute.OfType<'relation' | 'component' | 'media'>>,
-        IDProperty & Attribute.GetValue<TAttribute>
-      ]
-    ],
-    // Default GetValue fallback
-    Attribute.GetValue<TAttribute>
-  >
 >;
 
 type ExtractFields<
@@ -193,10 +165,8 @@ type ExtractPopulate<
       Utils.Expression.Extends<TPopulate, EntityService.Params.Populate.ObjectNotation<TSchemaUID>>,
       ParseStringPopulate<
         TSchemaUID,
-        Utils.Cast<
-          keyof Utils.Object.KeysExcept<TPopulate, false>,
-          EntityService.Params.Populate.StringNotation<TSchemaUID>
-        >
+        // TODO: Handle relations set to false in object notation
+        Utils.Cast<keyof TPopulate, EntityService.Params.Populate.StringNotation<TSchemaUID>>
       >
     ]
   ]
