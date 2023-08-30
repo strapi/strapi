@@ -237,9 +237,10 @@ const reducer = (state, action) =>
         const findAllRelationsAndReplaceWithEmptyArray = findAllAndReplace(
           components,
           (value, { path }) => {
+						const fieldName = path[path.length - 1]
             // We don't replace creator fields because we already return them without need to populate them separately
             const isCreatorField =
-              path[path.length - 1] === 'createdBy' || path[path.length - 1] === 'updatedBy';
+              fieldName === 'createdBy' || fieldName === 'updatedBy';
 
             return value.type === 'relation' && !isCreatorField;
           },
