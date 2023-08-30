@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 
-import { InitialValue, useSelectionState } from '../useSelectionState';
+import { TValues, useSelectionState } from '../useSelectionState';
 
 const FIXTURE = [
   {
@@ -14,7 +14,7 @@ const FIXTURE = [
   },
 ];
 
-function setup(keys: string[], initialValue: InitialValue[]) {
+function setup(keys: string[], initialValue: TValues[]) {
   return renderHook(() => useSelectionState(keys, initialValue));
 }
 

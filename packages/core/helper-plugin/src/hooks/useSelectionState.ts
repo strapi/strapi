@@ -2,12 +2,15 @@ import { useState } from 'react';
 
 type JSON = string | number | boolean | null | { [key: string]: JSON } | Array<JSON>;
 
-export type InitialValue = Record<string, JSON>;
+export type TValues = Record<string, JSON>;
 
-export const useSelectionState = (keys: string[], initialValue: InitialValue[]) => {
+export const useSelectionState = <TValues extends object>(
+  keys: (keyof TValues)[],
+  initialValue: TValues[]
+) => {
   const [selections, setSelections] = useState(initialValue);
 
-  const selectOne = (selection: InitialValue) => {
+  const selectOne = (selection: TValues) => {
     const index = selections.findIndex((currentSelection) =>
       keys.every((key) => currentSelection[key] === selection[key])
     );
@@ -22,7 +25,7 @@ export const useSelectionState = (keys: string[], initialValue: InitialValue[]) 
     }
   };
 
-  const selectAll = (nextSelections: InitialValue[]) => {
+  const selectAll = (nextSelections: TValues[]) => {
     if (selections.length > 0) {
       setSelections([]);
     } else {
@@ -30,7 +33,7 @@ export const useSelectionState = (keys: string[], initialValue: InitialValue[]) 
     }
   };
 
-  const selectOnly = (nextSelection: InitialValue) => {
+  const selectOnly = (nextSelection: TValues) => {
     if (selections.indexOf(nextSelection) > -1) {
       setSelections([]);
     } else {
@@ -38,7 +41,7 @@ export const useSelectionState = (keys: string[], initialValue: InitialValue[]) 
     }
   };
 
-  const selectMultiple = (nextSelections: InitialValue[]) => {
+  const selectMultiple = (nextSelections: TValues[]) => {
     setSelections((currSelections) => [
       // already selected items
       ...currSelections,
@@ -52,7 +55,7 @@ export const useSelectionState = (keys: string[], initialValue: InitialValue[]) 
     ]);
   };
 
-  const deselectMultiple = (nextSelections: InitialValue[]) => {
+  const deselectMultiple = (nextSelections: TValues[]) => {
     setSelections((currSelections) => [
       // filter out items in currSelections that are in nextSelections
       ...currSelections.filter(
