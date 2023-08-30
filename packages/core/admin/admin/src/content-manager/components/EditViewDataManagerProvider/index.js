@@ -88,6 +88,7 @@ const EditViewDataManagerProvider = ({
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const trackUsageRef = useRef(trackUsage);
+  const hasModelBeenModified = !isEqual(modifiedData, initialData);
 
   const shouldRedirectToHomepageWhenEditingEntry = useMemo(() => {
     if (isLoadingForData) {
@@ -191,6 +192,21 @@ const EditViewDataManagerProvider = ({
     reduxDispatch,
     previousInitialValues,
   ]);
+
+  useEffect(() => {
+    const onBeforeUnload = (e) => {
+      if (hasModelBeenModified) {
+        e.preventDefault();
+        e.returnValue = formatMessage({ id: 'global.prompt.unsaved' });
+      }
+    };
+
+    window.addEventListener("beforeunload", onBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", onBeforeUnload);
+    };
+  }, [formatMessage, hasModelBeenModified]);
 
   const dispatchAddComponent = useCallback(
     (type) =>
@@ -663,7 +679,7 @@ const EditViewDataManagerProvider = ({
         <>
           {!isSaving ? (
             <Prompt
-              when={!isEqual(modifiedData, initialData)}
+              when={hasModelBeenModified}
               message={formatMessage({ id: 'global.prompt.unsaved' })}
             />
           ) : null}
