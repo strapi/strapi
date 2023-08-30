@@ -29,6 +29,11 @@ const cleanData = ({ browserState, serverState }, currentSchema, componentsSchem
    */
   const recursiveCleanData = (browserState, serverState, schema, pathToParent) => {
     return Object.keys(browserState).reduce((acc, current) => {
+      // Creator attributes can be safely ignored because they are handle on the backend
+      if (current === 'createdBy' || current === 'updatedBy') {
+        return acc;
+      }
+
       const path = pathToParent ? `${pathToParent}.${current}` : current;
       const attrType = getType(schema, current);
 

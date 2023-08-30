@@ -236,17 +236,14 @@ const reducer = (state, action) =>
 
         const findAllRelationsAndReplaceWithEmptyArray = findAllAndReplace(
           components,
-          (value) => {
-            return value.type === 'relation';
-          },
           (value, { path }) => {
-            const relationFieldName = path[path.length - 1];
+            // We don't replace creator fields because we already return them without need to populate them separately
+            const isCreatorField =
+              path[path.length - 1] === 'createdBy' || path[path.length - 1] === 'updatedBy';
 
-            // When editing, we don't want to fetch the relations with creator fields because we already have it
-            if (value && (relationFieldName === 'createdBy' || relationFieldName === 'updatedBy')) {
-              return value;
-            }
-
+            return value.type === 'relation' && !isCreatorField;
+          },
+          (_, { path }) => {
             if (state.modifiedData?.id === data.id && get(state.modifiedData, path)) {
               return get(state.modifiedData, path);
             }
