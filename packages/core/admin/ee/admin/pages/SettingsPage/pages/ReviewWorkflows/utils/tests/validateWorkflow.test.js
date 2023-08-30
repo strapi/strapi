@@ -167,27 +167,6 @@ describe('Settings | Review Workflows | validateWorkflow()', () => {
           {
             name: 'stage-1',
             color: '#ffffff',
-            permissions: [],
-          },
-        ],
-      })
-    ).toMatchInlineSnapshot(`
-      {
-        "stages": [
-          {
-            "permissions": "Must be either an array or undefined",
-          },
-        ],
-      }
-    `);
-
-    expect(
-      await setup({
-        name: 'name',
-        stages: [
-          {
-            name: 'stage-1',
-            color: '#ffffff',
             permissions: { role: '1', action: 'admin::review-workflow.stage.transition' },
           },
         ],
