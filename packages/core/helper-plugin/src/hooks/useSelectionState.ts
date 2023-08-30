@@ -1,11 +1,7 @@
 import { useState } from 'react';
 
-type JSON = string | number | boolean | null | { [key: string]: JSON } | Array<JSON>;
-
-export type TValues = Record<string, JSON>;
-
 export const useSelectionState = <TValues extends object>(
-  keys: (keyof TValues)[],
+  keys: Array<keyof TValues>,
   initialValue: TValues[]
 ) => {
   const [selections, setSelections] = useState(initialValue);
