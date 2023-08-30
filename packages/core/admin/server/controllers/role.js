@@ -55,6 +55,8 @@ module.exports = {
       ability: ctx.state.userAbility,
       model: 'admin::role',
     });
+
+    await permissionsManager.validateQuery(query);
     const sanitizedQuery = await permissionsManager.sanitizeQuery(query);
 
     const roles = await getService('role').findAllWithUsersCount(sanitizedQuery);

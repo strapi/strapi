@@ -9,7 +9,7 @@ import { selectAdminPermissions } from '../App/selectors';
 
 import Plugins from './Plugins';
 
-export const PluginsPage = () => {
+const InstalledPluginsPage = () => {
   const { formatMessage } = useIntl();
   const permissions = useSelector(selectAdminPermissions);
 
@@ -25,3 +25,5 @@ export const PluginsPage = () => {
     </CheckPagePermissions>
   );
 };
+
+export default InstalledPluginsPage;

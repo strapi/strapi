@@ -97,4 +97,21 @@ describe('Permissions Manager - Sanitize', () => {
       expect(result).toEqual({ c: 'Bar' });
     });
   });
+
+  describe('Sanitize Query', () => {
+    it('Removes hidden fields on filters, sort, populate and fields', async () => {
+      const data = {
+        filters: { a: 'Foo', c: 'Bar' },
+        sort: { a: 'asc', c: 'desc' },
+        populate: { a: true, c: true },
+        fields: ['a', 'c'],
+      };
+      const result = await sanitizeHelpers.sanitizeQuery(data, { subject: fooModel.uid });
+
+      expect(result.filters).toEqual({ c: 'Bar' });
+      expect(result.sort).toEqual({ c: 'desc' });
+      expect(result.populate).toEqual({ c: true });
+      expect(result.fields).toEqual([undefined, 'c']);
+    });
+  });
 });
