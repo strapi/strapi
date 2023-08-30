@@ -11,7 +11,6 @@ const migrateDeletedCTInWorkflows = require('./migrations/review-workflows-delet
 const createAuditLogsService = require('./services/audit-logs');
 const reviewWorkflowsMiddlewares = require('./middlewares/review-workflows');
 const { getService } = require('./utils');
-const migrateWorkflowsFilterUsersContentType = require('./migrations/review-workflows-filter-user-content-type');
 
 module.exports = async ({ strapi }) => {
   const auditLogsIsEnabled = strapi.config.get('admin.auditLogs.enabled', true);
@@ -29,8 +28,7 @@ module.exports = async ({ strapi }) => {
       .register(migrateReviewWorkflowStagesColor)
       .register(migrateReviewWorkflowName)
       .register(migrateWorkflowsContentTypes)
-      .register(migrateDeletedCTInWorkflows)
-      .register(migrateWorkflowsFilterUsersContentType);
+      .register(migrateDeletedCTInWorkflows);
     const reviewWorkflowService = getService('review-workflows');
 
     reviewWorkflowsMiddlewares.contentTypeMiddleware(strapi);
