@@ -45,7 +45,7 @@ module.exports = {
   },
 
   /**
-   * Returns every roles
+   * Returns every role
    * @param {KoaContext} ctx - koa context
    */
   async findAll(ctx) {

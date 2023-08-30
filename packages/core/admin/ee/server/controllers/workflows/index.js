@@ -16,11 +16,11 @@ const { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } = require('../../constants/workf
  * @param userAbility
  * @return { PermissionChecker }
  */
-function getWorkflowsPermissionChecker({ strapi }, userAbility) {
+function getPermissionChecker({ strapi }, userAbility, uid = WORKFLOW_MODEL_UID) {
   return strapi
     .plugin('content-manager')
     .service('permission-checker')
-    .create({ userAbility, model: WORKFLOW_MODEL_UID });
+    .create({ userAbility, model: uid });
 }
 
 /**
@@ -45,7 +45,7 @@ module.exports = {
    */
   async create(ctx) {
     const { body, query } = ctx.request;
-    const { sanitizeCreateInput, sanitizeOutput, sanitizedQuery } = getWorkflowsPermissionChecker(
+    const { sanitizeCreateInput, sanitizeOutput, sanitizedQuery } = getPermissionChecker(
       { strapi },
       ctx.state.userAbility
     );
@@ -74,7 +74,7 @@ module.exports = {
     const { id } = ctx.params;
     const { body, query } = ctx.request;
     const workflowService = getService('workflows');
-    const { sanitizeUpdateInput, sanitizeOutput, sanitizedQuery } = getWorkflowsPermissionChecker(
+    const { sanitizeUpdateInput, sanitizeOutput, sanitizedQuery } = getPermissionChecker(
       { strapi },
       ctx.state.userAbility
     );
@@ -113,7 +113,7 @@ module.exports = {
     const { id } = ctx.params;
     const { query } = ctx.request;
     const workflowService = getService('workflows');
-    const { sanitizeOutput, sanitizedQuery } = getWorkflowsPermissionChecker(
+    const { sanitizeOutput, sanitizedQuery } = getPermissionChecker(
       { strapi },
       ctx.state.userAbility
     );
@@ -134,13 +134,41 @@ module.exports = {
   },
 
   /**
+   * Determine whether the user has the permission to read the content types
+   * @param userAbility
+   * @param {array} workflows
+   * @returns {boolean}
+   */
+  checkWorkflowContentTypesPermissions(userAbility, workflows) {
+    const uniqueContentTypes = new Set();
+
+    for (const workflow of workflows) {
+      const { contentTypes = [] } = workflow;
+
+      for (const contentType of contentTypes) {
+        uniqueContentTypes.add(contentType);
+      }
+    }
+
+    for (const contentType of uniqueContentTypes) {
+      const modelPermissionChecker = getPermissionChecker({ strapi }, userAbility, contentType);
+
+      if (modelPermissionChecker.cannot.read()) {
+        return false;
+      }
+    }
+
+    return true;
+  },
+
+  /**
    * List all workflows
    * @param {import('koa').BaseContext} ctx - koa context
    */
   async find(ctx) {
     const { query } = ctx.request;
     const workflowService = getService('workflows');
-    const { sanitizeOutput, sanitizedQuery } = getWorkflowsPermissionChecker(
+    const { sanitizeOutput, sanitizedQuery } = getPermissionChecker(
       { strapi },
       ctx.state.userAbility
     );
@@ -150,6 +178,10 @@ module.exports = {
       workflowService.find({ populate, filters, sort }).then(map(formatWorkflowToAdmin)),
       workflowService.count(),
     ]);
+
+    if (!this.checkWorkflowContentTypesPermissions(ctx.state.userAbility, workflows)) {
+      return ctx.forbidden();
+    }
 
     ctx.body = {
       data: await mapAsync(workflows, sanitizeOutput),
@@ -167,7 +199,7 @@ module.exports = {
   async findById(ctx) {
     const { id } = ctx.params;
     const { query } = ctx.request;
-    const { sanitizeOutput, sanitizedQuery } = getWorkflowsPermissionChecker(
+    const { sanitizeOutput, sanitizedQuery } = getPermissionChecker(
       { strapi },
       ctx.state.userAbility
     );
@@ -179,6 +211,10 @@ module.exports = {
       workflowService.findById(id, { populate }).then(formatWorkflowToAdmin),
       workflowService.count(),
     ]);
+
+    if (!this.checkWorkflowContentTypesPermissions(ctx.state.userAbility, [workflow])) {
+      return ctx.forbidden();
+    }
 
     ctx.body = {
       data: await sanitizeOutput(workflow),
