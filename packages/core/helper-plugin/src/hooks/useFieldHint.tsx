@@ -3,23 +3,27 @@ import React from 'react';
 
 import { useIntl } from 'react-intl';
 
+import type { MessageDescriptor, PrimitiveType } from 'react-intl';
+
+type FieldSchema = {
+  minLength?: number | string;
+  maxLength?: number | string;
+  max?: number | string;
+  min?: number | string;
+};
+export interface UseFieldHintProps {
+  description?: MessageDescriptor & { values?: Record<string, PrimitiveType> };
+  fieldSchema?: FieldSchema;
+  type?: string;
+}
+
 /**
  * @description
  * A hook for generating the hint for a field
- * @type {
- * ({ description: { id: string, defaultMessage: string },
- *    type: string,
- *    fieldSchema: { minLength?: number|string; maxLength?: number|string; max?: number|string; min?: number|string }
- * })
- * => { hint: ''|Array }
- * }
  */
-const useFieldHint = ({ description, fieldSchema, type }) => {
+const useFieldHint = ({ description, fieldSchema, type }: UseFieldHintProps) => {
   const { formatMessage } = useIntl();
 
-  /**
-   * @returns {String}
-   */
   const buildDescription = () =>
     description?.id
       ? formatMessage(
@@ -28,9 +32,6 @@ const useFieldHint = ({ description, fieldSchema, type }) => {
         )
       : '';
 
-  /**
-   * @returns {''|Array}
-   */
   const buildHint = () => {
     const { maximum, minimum } = getMinMax(fieldSchema);
     const units = getFieldUnits({
@@ -73,12 +74,16 @@ const useFieldHint = ({ description, fieldSchema, type }) => {
   return { hint: buildHint() };
 };
 
-/**
- * @type { ({ type?: string; minimum?: number; maximum: number; } ) => {
- * message?: {id: string, defaultMessage: string}; values?: {maxValue: number} } }
- */
-const getFieldUnits = ({ type, minimum, maximum }) => {
-  if (['biginteger', 'integer', 'number'].includes(type)) {
+const getFieldUnits = ({
+  type,
+  minimum,
+  maximum,
+}: {
+  type?: string;
+  minimum?: number;
+  maximum?: number;
+}) => {
+  if (type && ['biginteger', 'integer', 'number'].includes(type)) {
     return {};
   }
   const maxValue = Math.max(minimum || 0, maximum || 0);
@@ -94,13 +99,7 @@ const getFieldUnits = ({ type, minimum, maximum }) => {
   };
 };
 
-/**
- * Get the minimum and maximum limits for an input
- * @type {
- * (fieldSchema: { minLength?: number|string; maxLength?: number|string; max?: number|string; min?: number|string } )
- * => { maximum: number; minimum: number } }
- */
-const getMinMax = (fieldSchema) => {
+const getMinMax = (fieldSchema?: FieldSchema) => {
   if (!fieldSchema) {
     return { maximum: undefined, minimum: undefined };
   }
@@ -110,8 +109,8 @@ const getMinMax = (fieldSchema) => {
   let minimum;
   let maximum;
 
-  const parsedMin = parseInt(min, 10);
-  const parsedMinLength = parseInt(minLength, 10);
+  const parsedMin = Number(min);
+  const parsedMinLength = Number(minLength);
 
   if (!Number.isNaN(parsedMin)) {
     minimum = parsedMin;
@@ -119,8 +118,8 @@ const getMinMax = (fieldSchema) => {
     minimum = parsedMinLength;
   }
 
-  const parsedMax = parseInt(max, 10);
-  const parsedMaxLength = parseInt(maxLength, 10);
+  const parsedMax = Number(max);
+  const parsedMaxLength = Number(maxLength);
 
   if (!Number.isNaN(parsedMax)) {
     maximum = parsedMax;
