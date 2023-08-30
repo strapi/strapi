@@ -323,6 +323,13 @@ const displayWarningIfNoSuperAdmin = async () => {
 const assignPermissions = async (roleId, permissions = []) => {
   await validatePermissionsExist(permissions);
 
+  // Internal actions are not handled by the role service, so any permission
+  // with an internal action is filtered out
+  const internalActions = getService('permission')
+    .actionProvider.values()
+    .filter((action) => action.section === 'internal')
+    .map((action) => action.actionId);
+
   const superAdmin = await getService('role').getSuperAdmin();
   const isSuperAdmin = superAdmin && superAdmin.id === roleId;
   const assignRole = set('role', roleId);
@@ -342,13 +349,13 @@ const assignPermissions = async (roleId, permissions = []) => {
     arePermissionsEqual,
     permissionsWithRole,
     existingPermissions
-  );
+  ).filter((permission) => !internalActions.includes(permission.action));
 
   const permissionsToDelete = differenceWith(
     arePermissionsEqual,
     existingPermissions,
     permissionsWithRole
-  );
+  ).filter((permission) => !internalActions.includes(permission.action));
 
   const permissionsToReturn = differenceBy('id', permissionsToDelete, existingPermissions);
 
@@ -368,7 +375,6 @@ const assignPermissions = async (roleId, permissions = []) => {
   return permissionsToReturn;
 };
 
-
 const addPermissions = async (roleId, permissions) => {
   const { conditionProvider, createMany } = getService('permission');
   const { sanitizeConditions } = permissionDomain;
@@ -380,7 +386,6 @@ const addPermissions = async (roleId, permissions) => {
 
   return createMany(permissionsWithRole);
 };
-
 
 const isContentTypeAction = (action) => action.section === CONTENT_TYPE_SECTION;
 
