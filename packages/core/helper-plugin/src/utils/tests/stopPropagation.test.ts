@@ -4,7 +4,7 @@ import { screen, render } from '@testing-library/react';
 
 import { stopPropagation, onRowClick, StopPropagation } from '../stopPropagation';
 
-describe('HELPER-PLUGIN | utils | stopPropagation', () => {
+describe('stopPropagation', () => {
   it('should stop propagation when clicked', () => {
     const eventMock = { stopPropagation: jest.fn() };
     stopPropagation.onClick(eventMock as unknown as React.MouseEvent);
