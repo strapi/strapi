@@ -6,7 +6,7 @@ export type IsEnabled<TSchemaUID extends Common.UID.Schema> = Utils.Expression.M
   [
     [
       Common.UID.IsContentType<TSchemaUID>,
-      Utils.Expression.IsTrue<Common.Schemas[TSchemaUID]['options']['draftAndPublish']>
+      Utils.Expression.IsTrue<NonNullable<Common.Schemas[TSchemaUID]['options']>['draftAndPublish']>
     ],
     [
       // Here, we're manually excluding potential overlap between Component and ContentTypes' UIDs and thus preventing false positives
@@ -33,6 +33,7 @@ export type For<TSchemaUID extends Common.UID.Schema> = IsEnabled<TSchemaUID> ex
       // Then add the publicationState param
       { publicationState?: Kind },
       // Else, don't do anything
-      {}
+      unknown
     >
   : never;
+

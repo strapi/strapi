@@ -1,5 +1,6 @@
 import type { Attribute, Common, Utils } from '../../../types';
 import type { PartialEntity, Entity, Result, PaginatedResult } from './result';
+import type { UploadFile } from '../../utils/upload-files';
 
 import type * as Params from './params';
 
@@ -12,8 +13,10 @@ export * from './plugin';
 type WrapAction = Omit<keyof EntityService, 'wrapParams' | 'wrapResult' | 'emitEvent'>;
 
 export interface EntityService {
+  uploadFiles: UploadFile;
+
   wrapParams<
-    TResult = unknown,
+    TResult extends object = object,
     TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType,
     TParams extends object = object
   >(
@@ -22,7 +25,7 @@ export interface EntityService {
   ): Promise<TResult> | TResult;
 
   wrapResult<
-    TResult = unknown,
+    TResult = any,
     TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType
   >(
     result: unknown,
@@ -51,12 +54,14 @@ export interface EntityService {
   >(
     uid: TContentTypeUID,
     params?: TParams
-  ): Utils.Expression.MatchFirst<
-    [
-      [Common.UID.IsCollectionType<TContentTypeUID>, Promise<Result<TContentTypeUID, TParams>[]>],
-      [Common.UID.IsSingleType<TContentTypeUID>, Promise<Result<TContentTypeUID, TParams> | null>]
-    ],
-    Promise<(Result<TContentTypeUID, TParams> | null) | Result<TContentTypeUID, TParams>[]>
+  ): Promise<
+    Utils.Expression.MatchFirst<
+      [
+        [Common.UID.IsCollectionType<TContentTypeUID>, Result<TContentTypeUID, TParams>[]],
+        [Common.UID.IsSingleType<TContentTypeUID>, Result<TContentTypeUID, TParams> | null]
+      ],
+      (Result<TContentTypeUID, TParams> | null) | Result<TContentTypeUID, TParams>[]
+    >
   >;
 
   findOne<
@@ -134,7 +139,7 @@ export interface EntityService {
    * @deprecated
    */
   findWithRelationCounts<
-    TContentTypeUID extends Common.UID.Schema,
+    TContentTypeUID extends Common.UID.ContentType,
     TParams extends Params.Pick<
       TContentTypeUID,
       | 'fields'
@@ -155,7 +160,7 @@ export interface EntityService {
    * @deprecated
    */
   findWithRelationCountsPage<
-    TContentTypeUID extends Common.UID.Schema,
+    TContentTypeUID extends Common.UID.ContentType,
     TParams extends Params.Pick<
       TContentTypeUID,
       | 'fields'

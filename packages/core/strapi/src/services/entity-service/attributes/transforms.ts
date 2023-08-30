@@ -4,10 +4,10 @@ import bcrypt from 'bcryptjs';
 import type { Attribute } from '../../../types';
 
 type Transforms = {
-  [key in Attribute.Kind]?: (
-    value: Attribute.GetValue<Attribute.Attribute<key>>,
-    context: { attribute: Attribute.Attribute<key>; attributeName: string }
-  ) => unknown;
+  [TKind in Attribute.Kind]?: (
+    value: Attribute.GetValue<Attribute.Attribute<TKind>>,
+    context: { attribute: Attribute.Attribute<TKind>; attributeName: string }
+  ) => Attribute.GetValue<Attribute.Attribute<TKind>>;
 };
 
 const transforms: Transforms = {
@@ -22,6 +22,6 @@ const transforms: Transforms = {
 
     return bcrypt.hashSync(value, rounds);
   },
-} as const;
+};
 
 export default transforms;

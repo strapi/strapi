@@ -38,8 +38,6 @@ type Context = {
   contentType: Schema.ContentType;
 };
 
-type Entity = {};
-
 const transformLoadParamsToQuery = (
   uid: string,
   field: string,
@@ -89,19 +87,22 @@ const createDefaultImplementation = ({
   eventHub: EventHub;
   entityValidator: EntityValidator;
 }): types.EntityService => ({
+  /**
+   * Upload files utility
+   */
   uploadFiles,
 
-  async wrapParams(options) {
+  async wrapParams(options: any) {
     return options;
   },
 
-  async wrapResult(result) {
+  async wrapResult(result: any) {
     return result;
   },
 
-  async emitEvent(uid: Common.UID.Schema, event: string, entity: Entity) {
+  async emitEvent(uid, event: string, entity) {
     // Ignore audit log events to prevent infinite loops
-    if (uid === 'admin::audit-log') {
+    if (uid === ('admin::audit-log' as Common.UID.ContentType)) {
       return;
     }
 
@@ -115,7 +116,7 @@ const createDefaultImplementation = ({
     });
   },
 
-  async findMany(uid: Common.UID.Schema, opts) {
+  async findMany(uid, opts) {
     const { kind } = strapi.getModel(uid);
 
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'findMany' });
@@ -131,7 +132,7 @@ const createDefaultImplementation = ({
     return this.wrapResult(entities, { uid, action: 'findMany' });
   },
 
-  async findPage(uid: Common.UID.Schema, opts) {
+  async findPage(uid, opts) {
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'findPage' });
 
     const query = transformParamsToQuery(uid, wrappedParams);
@@ -183,8 +184,14 @@ const createDefaultImplementation = ({
   },
 
   async create(uid, opts) {
-    const wrappedParams = await this.wrapParams(opts, { uid, action: 'create' });
+    const wrappedParams = await this.wrapParams<
+      types.Params.Pick<Common.UID.ContentType, 'files' | 'data' | 'fields' | 'populate'>
+    >(opts, { uid, action: 'create' });
     const { data, files } = wrappedParams;
+
+    if (!data) {
+      throw new Error('cannot create');
+    }
 
     const model = strapi.getModel(uid);
 
@@ -192,7 +199,9 @@ const createDefaultImplementation = ({
     const validData = await entityValidator.validateEntityCreation(model, data, { isDraft });
 
     // select / populate
-    const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
+    const x = pickSelectionParams(wrappedParams);
+
+    const query = transformParamsToQuery(uid, x);
 
     // TODO: wrap into transaction
     const componentData = await createComponents(uid, validData);
@@ -353,7 +362,7 @@ const createDefaultImplementation = ({
     return entity;
   },
   // FIXME: used only for the CM to be removed
-  async deleteMany(uid: Common.UID.Schema, opts) {
+  async deleteMany(uid, opts) {
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'delete' });
 
     // select / populate
@@ -383,7 +392,7 @@ const createDefaultImplementation = ({
     return deletedEntities;
   },
 
-  async load(uid: Common.UID.Schema, entity, field, params = {}) {
+  async load(uid, entity, field, params = {}) {
     if (!_.isString(field)) {
       throw new Error(`Invalid load. Expected "${field}" to be a string`);
     }
@@ -395,7 +404,7 @@ const createDefaultImplementation = ({
     return this.wrapResult(loadedEntity, { uid, field, action: 'load' });
   },
 
-  async loadPages(uid: Common.UID.Schema, entity: Entity, field, params = {}, pagination = {}) {
+  async loadPages(uid, entity: Entity, field, params = {}, pagination = {}) {
     if (!_.isString(field)) {
       throw new Error(`Invalid load. Expected "${field}" to be a string`);
     }

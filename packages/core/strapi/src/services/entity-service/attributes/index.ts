@@ -1,5 +1,6 @@
 import transforms from './transforms';
-import type { Schema } from '../../../types';
+import type { Common, Schema } from '../../../types';
+import { Data } from '../types/params';
 
 const applyTransforms = (
   data: Record<string, unknown>,
@@ -9,9 +10,9 @@ const applyTransforms = (
 ) => {
   const { contentType } = context;
 
-  const entries = Object.entries(data);
+  for (const attributeName of Object.keys(data)) {
+    const value = data[attributeName];
 
-  for (const [attributeName, value] of entries) {
     const attribute = contentType.attributes[attributeName];
 
     if (!attribute) {

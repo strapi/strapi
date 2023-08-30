@@ -1,14 +1,16 @@
 import _ from 'lodash';
-import { Attribute, Common, Schema } from '../../types';
+import type { Attribute, Common, Schema } from '../../types';
+
+export type UploadFile = (
+  uid: Common.UID.Schema,
+  entity: Record<string, unknown>,
+  files: Record<string, unknown>
+) => Promise<void>;
 
 /**
  * Upload files and link them to an entity
  */
-export default async (
-  uid: Common.UID.ContentType | Common.UID.Component,
-  entity: Record<string, unknown>,
-  files: { [key: string]: unknown }
-) => {
+const uploadFile: UploadFile = async (uid, entity, files) => {
   const modelDef = strapi.getModel(uid);
 
   if (!_.has(strapi.plugins, 'upload')) {
@@ -85,3 +87,5 @@ export default async (
 
   await Promise.all(Object.keys(files).map((key) => doUpload(key, files[key])));
 };
+
+export default uploadFile;

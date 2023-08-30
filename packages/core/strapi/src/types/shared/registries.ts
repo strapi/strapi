@@ -1,4 +1,4 @@
-import { Common, Schema, UID } from '..';
+import type { Common, Schema, UID } from '..';
 
 /**
  * Shared service registry
@@ -35,17 +35,6 @@ export interface Middlewares {
  */
 export interface ContentTypes {
   [key: UID.ContentType]: Schema.ContentType;
-  // 'admin::coucou': {
-  //   modelType: 'contentType';
-  //   kind: 'collectionType';
-  //   uid: 'admin::coucou';
-  //   attributes: Schema.CollectionType['attributes'];
-  //   info: {
-  //     displayName: 'coucou';
-  //     singularName: 'coucou';
-  //     pluralName: 'coucous';
-  //   };
-  // };
 }
 
 /**

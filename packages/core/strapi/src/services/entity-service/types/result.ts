@@ -60,11 +60,14 @@ export type PaginatedResult<
  */
 export type GetValues<
   TSchemaUID extends Common.UID.Schema,
-  TFields extends Attribute.GetKeys<TSchemaUID>,
-  TPopulate extends Attribute.GetKeys<TSchemaUID>
+  TFields extends Attribute.GetKeys<TSchemaUID> = Attribute.GetNonPopulatableKeys<TSchemaUID>,
+  TPopulate extends Attribute.GetKeys<TSchemaUID> = Attribute.GetPopulatableKeys<TSchemaUID>
 > = Utils.Expression.If<
   Common.AreSchemaRegistriesExtended,
-  Utils.Guard.Never<TFields | TPopulate, Attribute.GetKeys<TSchemaUID>> extends infer TKeys
+  Utils.Guard.Never<
+    TFields | TPopulate,
+    Attribute.GetKeys<TSchemaUID>
+  > extends infer TKeys extends Attribute.GetKeys<TSchemaUID>
     ? Attribute.GetValues<TSchemaUID, TKeys>
     : never,
   AnyEntity
@@ -72,14 +75,17 @@ export type GetValues<
 
 type ExtractFields<
   TSchemaUID extends Common.UID.Schema,
-  TFields extends Params.Fields.Any<TSchemaUID>
+  TFields extends Params.Fields.Any<TSchemaUID> | undefined
 > = Utils.Expression.MatchFirst<
   [
     // No fields provided
     [
       Utils.Expression.Or<
         Utils.Expression.StrictEqual<TFields, Params.Fields.Any<TSchemaUID>>,
-        Utils.Expression.IsNever<TFields>
+        Utils.Expression.Or<
+          Utils.Expression.IsNever<TFields>,
+          Utils.Expression.StrictEqual<TFields, undefined>
+        >
       >,
       never
     ],
@@ -121,7 +127,7 @@ type ParseStringFields<
 
 type ExtractPopulate<
   TSchemaUID extends Common.UID.Schema,
-  TPopulate extends Params.Populate.Any<TSchemaUID>
+  TPopulate extends Params.Populate.Any<TSchemaUID> | undefined
 > = Utils.Expression.MatchFirst<
   [
     // No populate provided
@@ -166,7 +172,7 @@ type ExtractPopulate<
 type ParsePopulateDotNotation<
   TSchemaUID extends Common.UID.Schema,
   TPopulate extends Params.Populate.StringNotation<TSchemaUID>
-> = Utils.String.Split<Utils.Cast<TPopulate, string>, '.'>[0];
+> = Utils.Cast<Utils.String.Split<Utils.Cast<TPopulate, string>, '.'>[0], Attribute.GetPopulatableKeys<TSchemaUID>>;
 
 type ParseStringPopulate<
   TSchemaUID extends Common.UID.Schema,
