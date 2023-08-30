@@ -1,9 +1,12 @@
 import { useState } from 'react';
 
-export const useSelectionState = (keys, initialValue) => {
+export const useSelectionState = <TValues extends object>(
+  keys: Array<keyof TValues>,
+  initialValue: TValues[]
+) => {
   const [selections, setSelections] = useState(initialValue);
 
-  const selectOne = (selection) => {
+  const selectOne = (selection: TValues) => {
     const index = selections.findIndex((currentSelection) =>
       keys.every((key) => currentSelection[key] === selection[key])
     );
@@ -18,7 +21,7 @@ export const useSelectionState = (keys, initialValue) => {
     }
   };
 
-  const selectAll = (nextSelections) => {
+  const selectAll = (nextSelections: TValues[]) => {
     if (selections.length > 0) {
       setSelections([]);
     } else {
@@ -26,7 +29,7 @@ export const useSelectionState = (keys, initialValue) => {
     }
   };
 
-  const selectOnly = (nextSelection) => {
+  const selectOnly = (nextSelection: TValues) => {
     if (selections.indexOf(nextSelection) > -1) {
       setSelections([]);
     } else {
@@ -34,7 +37,7 @@ export const useSelectionState = (keys, initialValue) => {
     }
   };
 
-  const selectMultiple = (nextSelections) => {
+  const selectMultiple = (nextSelections: TValues[]) => {
     setSelections((currSelections) => [
       // already selected items
       ...currSelections,
@@ -48,7 +51,7 @@ export const useSelectionState = (keys, initialValue) => {
     ]);
   };
 
-  const deselectMultiple = (nextSelections) => {
+  const deselectMultiple = (nextSelections: TValues[]) => {
     setSelections((currSelections) => [
       // filter out items in currSelections that are in nextSelections
       ...currSelections.filter(
@@ -63,5 +66,5 @@ export const useSelectionState = (keys, initialValue) => {
   return [
     selections,
     { selectOne, selectAll, selectOnly, selectMultiple, deselectMultiple, setSelections },
-  ];
+  ] as const;
 };
