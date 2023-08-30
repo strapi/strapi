@@ -98,6 +98,8 @@ export function WorkflowAttributes({
                       defaultMessage: 'Collection Types',
                     }),
                     children: collectionTypes
+                      // Filter plugin::users-permissions.user content type
+                      .filter(({ uid }) => uid !== 'plugin::users-permissions.user')
                       .sort((a, b) => formatter.compare(a.info.displayName, b.info.displayName))
                       .map((contentType) => ({
                         label: contentType.info.displayName,

@@ -1,11 +1,13 @@
 'use strict';
 
-const { getOr, keys, pickBy, pipe, has, clamp } = require('lodash/fp');
+const { getOr, keys, pickBy, pipe, has, clamp, filter } = require('lodash/fp');
 const {
   ENTITY_STAGE_ATTRIBUTE,
   MAX_WORKFLOWS,
   MAX_STAGES_PER_WORKFLOW,
 } = require('../constants/workflows');
+
+const RW_EXCLUDED_CONTENT_TYPES = ['plugin::users-permissions.user'];
 
 const getVisibleContentTypesUID = pipe([
   // Pick only content-types visible in the content-manager and option is not false
@@ -16,6 +18,7 @@ const getVisibleContentTypesUID = pipe([
   ),
   // Get UIDs
   keys,
+  filter((uid) => !RW_EXCLUDED_CONTENT_TYPES.includes(uid)),
 ]);
 
 const hasStageAttribute = has(['attributes', ENTITY_STAGE_ATTRIBUTE]);

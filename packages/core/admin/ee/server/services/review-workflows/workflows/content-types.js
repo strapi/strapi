@@ -45,7 +45,7 @@ module.exports = ({ strapi }) => {
             await stagesService.updateEntitiesStage(uid, { toStageId: stageId });
             // Transfer content types from the previous workflow(s)
             await mapAsync(srcWorkflows, (srcWorkflow) =>
-              this.transferContentTypes(srcWorkflow, uid)
+              this.removeContentTypeFromWorkflow(srcWorkflow, uid)
             );
           }
           await updateContentTypeConfig(uid, true);
@@ -56,7 +56,7 @@ module.exports = ({ strapi }) => {
             toStageId: stageId,
           });
         },
-        // transferContentTypes can cause race conditions if called in parallel when updating the same workflow
+        // removeContentTypeFromWorkflow can cause race conditions if called in parallel when updating the same workflow
         { concurrency: 1 }
       );
 
@@ -71,13 +71,23 @@ module.exports = ({ strapi }) => {
      * @param {Workflow} srcWorkflow - The workflow to transfer from
      * @param {string} uid - The content type uid
      */
-    async transferContentTypes(srcWorkflow, uid) {
+    async removeContentTypeFromWorkflow(srcWorkflow, uid) {
       // Update assignedContentTypes of the previous workflow
       await strapi.entityService.update(WORKFLOW_MODEL_UID, srcWorkflow.id, {
         data: {
           contentTypes: srcWorkflow.contentTypes.filter((contentType) => contentType !== uid),
         },
       });
+    },
+
+    /**
+     * Removes all configurations related to a content type assigned on a workflow
+     * @param {*} srcWorkflow
+     * @param {*} uid
+     */
+    async unassignContentType(srcWorkflow, uid) {
+      await this.removeContentTypeFromWorkflow(srcWorkflow, uid);
+      await updateContentTypeConfig(uid, false);
     },
   };
 };
