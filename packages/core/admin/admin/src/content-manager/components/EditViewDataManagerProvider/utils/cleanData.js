@@ -2,6 +2,7 @@ import get from 'lodash/get';
 import isArray from 'lodash/isArray';
 import isObject from 'lodash/isObject';
 
+import { CREATOR_FIELDS } from '../../../constants/attributes';
 import { getInitialDataPathUsingTempKeys } from '../../../utils/paths';
 
 /* eslint-disable indent */
@@ -30,7 +31,7 @@ const cleanData = ({ browserState, serverState }, currentSchema, componentsSchem
   const recursiveCleanData = (browserState, serverState, schema, pathToParent) => {
     return Object.keys(browserState).reduce((acc, current) => {
       // Creator attributes can be safely ignored because they are handle on the backend
-      if (current === 'createdBy' || current === 'updatedBy') {
+      if (CREATOR_FIELDS.includes(current)) {
         return acc;
       }
 
