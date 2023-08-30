@@ -157,7 +157,6 @@ For security reasons, prefer storing the secret in an environment variable and r
   // TODO v5: Remove this block of code and default allowedFields to empty array
   if (!isArray(strapi.config.get('plugin.users-permissions.register.allowedFields'))) {
     const modifications = userSchemaAdditions();
-
     if (modifications.length > 0) {
       // if there is a potential vulnerability, show a warning
       strapi.log.warn(
