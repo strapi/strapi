@@ -113,7 +113,8 @@ const userSchemaAdditions = () => {
     'updatedBy',
     'updatedAt',
     'publishedAt',
-    'strapi_reviewWorkflows_stage',
+    'strapi_stage',
+    'strapi_assignee',
   ];
 
   return currentSchema.filter((key) => !(ignoreDiffs.includes(key) || defaultSchema.includes(key)));
@@ -155,12 +156,7 @@ For security reasons, prefer storing the secret in an environment variable and r
 
   // TODO v5: Remove this block of code and default allowedFields to empty array
   if (!isArray(strapi.config.get('plugin.users-permissions.register.allowedFields'))) {
-    // TODO: make review workflows fields dynamic, so they columns do not exist by default in db
-    const IGNORED_MODIFICATIONS = ['strapi_stage', 'strapi_assignee'];
-
-    const modifications = userSchemaAdditions().filter(
-      (field) => !IGNORED_MODIFICATIONS.includes(field)
-    );
+    const modifications = userSchemaAdditions();
 
     if (modifications.length > 0) {
       // if there is a potential vulnerability, show a warning
