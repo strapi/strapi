@@ -78,5 +78,5 @@ export type Any =
   | Attribute.String
   | Attribute.Text
   | Attribute.Time
-  | Attribute.Timestamp;
-  // | Attribute.UID<Common.UID.Schema | undefined>;
+  | Attribute.Timestamp
+  | Attribute.UID<Common.UID.Schema>;

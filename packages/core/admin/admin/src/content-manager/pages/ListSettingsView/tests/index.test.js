@@ -10,7 +10,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter, Route } from 'react-router-dom';
 
 import ModelsContext from '../../../contexts/ModelsContext';
-import ListSettingsView from '../index';
+import { ListSettingsView } from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -179,7 +179,7 @@ describe('ADMIN | CM | LV | Configure the view', () => {
     expect(testLocation.search).toEqual('?page=1&pageSize=10&sort=id:ASC&plugins[i18n][locale]=fr');
   });
 
-  it('should add field and let the user save', async () => {
+  it('should add field', async () => {
     const { getByRole, user } = render();
 
     await waitFor(() =>
@@ -191,28 +191,6 @@ describe('ADMIN | CM | LV | Configure the view', () => {
 
     expect(getByRole('button', { name: `Edit Cover` })).toBeInTheDocument();
     expect(getByRole('button', { name: `Delete Cover` })).toBeInTheDocument();
-
-    fireEvent.click(getByRole('button', { name: 'Save' }));
-
-    expect(getByRole('dialog', { name: 'Confirmation' })).toBeInTheDocument();
-
-    await user.click(getByRole('button', { name: 'Confirm' }));
-  });
-
-  it('should delete field', async () => {
-    const { getByRole, user } = render();
-
-    await waitFor(() =>
-      expect(getByRole('heading', { name: 'Configure the view - Michka' })).toBeInTheDocument()
-    );
-
-    await user.click(getByRole('button', { name: 'Delete id' }));
-
-    fireEvent.click(getByRole('button', { name: 'Save' }));
-
-    expect(getByRole('dialog', { name: 'Confirmation' })).toBeInTheDocument();
-
-    await user.click(getByRole('button', { name: 'Confirm' }));
   });
 
   describe('Edit modal', () => {

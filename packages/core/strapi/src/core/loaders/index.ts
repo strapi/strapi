@@ -6,6 +6,7 @@ import loadPolicies from './policies';
 import loadPlugins from './plugins';
 import loadAdmin from './admin';
 import loadSanitizers from './sanitizers';
+import loadValidators from './validators';
 
 export default {
   loadSrcIndex,
@@ -16,4 +17,5 @@ export default {
   loadPlugins,
   loadAdmin,
   loadSanitizers,
+  loadValidators,
 };

@@ -36,6 +36,7 @@ import * as hooks from './hooks';
 import providerFactory from './provider-factory';
 import * as pagination from './pagination';
 import sanitize from './sanitize';
+import validate from './validate';
 import traverseEntity from './traverse-entity';
 import { pipeAsync, mapAsync, reduceAsync, forEachAsync } from './async';
 import convertQueryParams from './convert-query-params';
@@ -99,6 +100,7 @@ const utils = {
   providerFactory,
   pagination,
   sanitize,
+  validate,
   traverseEntity,
   pipeAsync,
   mapAsync,

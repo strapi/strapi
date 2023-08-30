@@ -87,7 +87,7 @@ const command: StrapiCommand = ({ command }) => {
     .hook(
       'preAction',
       getCommanderConfirmMessage(
-        'The import will delete all assets and data in your database. Are you sure you want to proceed?',
+        'The import will delete your existing data! Are you sure you want to proceed?',
         { failMessage: 'Import process aborted' }
       )
     )

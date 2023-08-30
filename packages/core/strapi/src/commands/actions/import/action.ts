@@ -13,6 +13,7 @@ import {
   getTransferTelemetryPayload,
   setSignalHandler,
   getDiffHandler,
+  parseRestoreFromOptions,
 } from '../../utils/data-transfer';
 import { exitWith } from '../../utils/helpers';
 
@@ -71,10 +72,9 @@ export default async (opts: CmdOptions) => {
     },
     autoDestroy: false,
     strategy: opts.conflictStrategy || DEFAULT_CONFLICT_STRATEGY,
-    restore: {
-      entities: { exclude: DEFAULT_IGNORED_CONTENT_TYPES },
-    },
+    restore: parseRestoreFromOptions(opts),
   };
+
   const destination = createLocalStrapiDestinationProvider(destinationOptions);
 
   /**

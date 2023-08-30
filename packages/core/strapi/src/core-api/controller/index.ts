@@ -1,6 +1,6 @@
 import { prop } from 'lodash/fp';
 import type Koa from 'koa';
-import { contentTypes as contentTypeUtils, sanitize } from '@strapi/utils';
+import { contentTypes as contentTypeUtils, sanitize, validate } from '@strapi/utils';
 import type { CoreApi, Schema } from '../../types';
 
 import { transformResponse } from './transform';
@@ -21,26 +21,38 @@ function createController({
   contentType: Schema.SingleType | Schema.CollectionType;
 }) {
   const proto: CoreApi.Controller.Base = {
-    transformResponse(data: unknown, meta?: unknown) {
+    transformResponse(data, meta) {
       return transformResponse(data, meta, { contentType });
     },
 
-    async sanitizeOutput(data: unknown, ctx: Koa.Context) {
+    async sanitizeOutput(data, ctx) {
       const auth = getAuthFromKoaContext(ctx);
 
       return sanitize.contentAPI.output(data, contentType, { auth });
     },
 
-    sanitizeInput(data: unknown, ctx: Koa.Context) {
+    sanitizeInput(data, ctx) {
       const auth = getAuthFromKoaContext(ctx);
 
       return sanitize.contentAPI.input(data, contentType, { auth });
     },
 
-    sanitizeQuery(ctx: Koa.Context) {
+    sanitizeQuery(ctx) {
       const auth = getAuthFromKoaContext(ctx);
 
       return sanitize.contentAPI.query(ctx.query, contentType, { auth });
+    },
+
+    async validateQuery(ctx) {
+      const auth = getAuthFromKoaContext(ctx);
+
+      return validate.contentAPI.query(ctx.query, contentType, { auth });
+    },
+
+    async validateInput(data, ctx) {
+      const auth = getAuthFromKoaContext(ctx);
+
+      return validate.contentAPI.input(data, contentType, { auth });
     },
   };
 

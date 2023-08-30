@@ -9,6 +9,16 @@ import { Common, CoreApi, Utils } from './types';
 
 type WithStrapiCallback<T> = T | (<S extends { strapi: Strapi }>(params: S) => T);
 
+// Content type is proxied to allow for dynamic content type updates
+const getContentTypeProxy = (strapi: Strapi, uid: Common.UID.ContentType) => {
+  return new Proxy(strapi.contentType(uid), {
+    get(target, prop) {
+      const contentType = strapi.contentType(uid);
+      return contentType[prop];
+    },
+  });
+};
+
 const createCoreController = <
   TUID extends Common.UID.ContentType,
   TController extends CoreApi.Controller.Extendable<TUID>
@@ -93,4 +103,4 @@ function createCoreRouter<T extends Common.UID.ContentType>(
   };
 }
 
-export { createCoreController, createCoreService, createCoreRouter };
+export { createCoreController, createCoreService, createCoreRouter, getContentTypeProxy };

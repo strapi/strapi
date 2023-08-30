@@ -47,6 +47,7 @@ import loaders from './core/loaders';
 import { destroyOnSignal } from './utils/signals';
 import getNumberOfDynamicZones from './services/utils/dynamic-zones';
 import sanitizersRegistry from './core/registries/sanitizers';
+import validatorsRegistry from './core/registries/validators';
 import convertCustomFieldType from './utils/convert-custom-field-type';
 
 // TODO: move somewhere else
@@ -190,7 +191,8 @@ class Strapi {
       .register('apis', apisRegistry(this))
       .register('auth', createAuth())
       .register('content-api', createContentAPI(this))
-      .register('sanitizers', sanitizersRegistry());
+      .register('sanitizers', sanitizersRegistry())
+      .register('validators', validatorsRegistry());
 
     this.components = {};
 
@@ -304,6 +306,10 @@ class Strapi {
 
   get sanitizers() {
     return this.container.get('sanitizers');
+  }
+
+  get validators() {
+    return this.container.get('validators');
   }
 
   async start() {
@@ -464,6 +470,10 @@ class Strapi {
     await loaders.loadSanitizers(this);
   }
 
+  async loadValidators() {
+    await loaders.loadValidators(this);
+  }
+
   registerInternalHooks() {
     this.container
       .get('hooks')
@@ -481,6 +491,7 @@ class Strapi {
     await Promise.all([
       this.loadApp(),
       this.loadSanitizers(),
+      this.loadValidators(),
       this.loadPlugins(),
       this.loadAdmin(),
       this.loadAPIs(),

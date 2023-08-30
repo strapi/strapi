@@ -2,7 +2,7 @@
 import { dirname, join, resolve } from 'path';
 import { statSync, existsSync } from 'fs';
 import _ from 'lodash';
-import { get, has, pick, pickBy, defaultsDeep, map, prop, pipe } from 'lodash/fp';
+import { get, pickBy, defaultsDeep, map, prop, pipe } from 'lodash/fp';
 import { isKebabCase } from '@strapi/utils';
 import { getUserPluginsConfig } from './get-user-plugins-config';
 
@@ -24,6 +24,7 @@ interface PluginInfo {
 interface PluginDeclaration {
   enabled: boolean;
   resolve: string;
+  isModule: boolean;
 }
 
 const INTERNAL_PLUGINS = [
@@ -46,30 +47,37 @@ const toDetailedDeclaration = (declaration: boolean | PluginDeclaration) => {
     return { enabled: declaration };
   }
 
-  const detailedDeclaration: { enabled: boolean; pathToPlugin?: string } = pick(
-    ['enabled'],
-    declaration
-  );
+  const detailedDeclaration: { enabled: boolean; pathToPlugin?: string } = {
+    enabled: declaration.enabled,
+  };
 
-  if (has('resolve', declaration)) {
+  if (declaration?.resolve) {
     let pathToPlugin = '';
 
-    try {
-      pathToPlugin = dirname(require.resolve(declaration.resolve));
-    } catch (e) {
-      pathToPlugin = resolve(strapi.dirs.app.root, declaration.resolve);
+    if (declaration.isModule) {
+      /**
+       * we only want the node_module here, not the package.json
+       */
+      pathToPlugin = join(declaration.resolve, '..');
+    } else {
+      try {
+        pathToPlugin = dirname(require.resolve(declaration.resolve));
+      } catch (e) {
+        pathToPlugin = resolve(strapi.dirs.app.root, declaration.resolve);
 
-      if (!existsSync(pathToPlugin) || !statSync(pathToPlugin).isDirectory()) {
-        throw new Error(`${declaration.resolve} couldn't be resolved`);
+        if (!existsSync(pathToPlugin) || !statSync(pathToPlugin).isDirectory()) {
+          throw new Error(`${declaration.resolve} couldn't be resolved`);
+        }
       }
     }
 
     detailedDeclaration.pathToPlugin = pathToPlugin;
   }
+
   return detailedDeclaration;
 };
 
-export const getEnabledPlugins = async (strapi: Strapi) => {
+export const getEnabledPlugins = async (strapi: Strapi, { client } = { client: false }) => {
   const internalPlugins: PluginMetas = {};
   for (const dep of INTERNAL_PLUGINS) {
     const packagePath = join(dep, 'package.json');
@@ -77,7 +85,7 @@ export const getEnabledPlugins = async (strapi: Strapi) => {
 
     validatePluginName(packageInfo.strapi.name);
     internalPlugins[packageInfo.strapi.name] = {
-      ...toDetailedDeclaration({ enabled: true, resolve: packagePath }),
+      ...toDetailedDeclaration({ enabled: true, resolve: packagePath, isModule: client }),
       info: packageInfo.strapi,
     };
   }
@@ -97,7 +105,7 @@ export const getEnabledPlugins = async (strapi: Strapi) => {
     if (isStrapiPlugin(packageInfo)) {
       validatePluginName(packageInfo.strapi.name);
       installedPlugins[packageInfo.strapi.name] = {
-        ...toDetailedDeclaration({ enabled: true, resolve: packagePath }),
+        ...toDetailedDeclaration({ enabled: true, resolve: packagePath, isModule: client }),
         info: {
           ...packageInfo.strapi,
           packageName: packageInfo.name,

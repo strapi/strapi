@@ -292,7 +292,8 @@ const getDiffHandler = (engine: engine.ITransferEngine, { force, action }) => {
         if (
           uid === 'admin::workflow' ||
           uid === 'admin::workflow-stage' ||
-          endPath?.startsWith('strapi_stage')
+          endPath?.startsWith('strapi_stage') ||
+          endPath?.startsWith('strapi_assignee')
         ) {
           workflowsStatus = diff.kind;
         }
@@ -370,6 +371,41 @@ const getAssetsBackupHandler = (engine: engine.ITransferEngine, { force, action 
   };
 };
 
+const shouldSkipStage = (opts, dataKind) => {
+  if (opts.exclude?.includes(dataKind)) {
+    return true;
+  }
+  if (opts.only) {
+    return !opts.only.includes(dataKind);
+  }
+
+  return false;
+};
+
+// Based on exclude/only from options, create the restore object to match
+const parseRestoreFromOptions = (opts) => {
+  const entitiesOptions = {
+    exclude: DEFAULT_IGNORED_CONTENT_TYPES,
+    include: undefined,
+  };
+
+  // if content is not included, send an empty array for include
+  if ((opts.only && !opts.only.includes('content')) || opts.exclude?.includes('content')) {
+    entitiesOptions.include = [];
+  }
+
+  const restoreConfig = {
+    entities: entitiesOptions,
+    assets: !shouldSkipStage(opts, 'files'),
+    configuration: {
+      webhooks: !shouldSkipStage(opts, 'config'),
+      coreStore: !shouldSkipStage(opts, 'config'),
+    },
+  };
+
+  return restoreConfig;
+};
+
 export {
   loadersFactory,
   buildTransferTable,
@@ -387,4 +423,6 @@ export {
   setSignalHandler,
   getDiffHandler,
   getAssetsBackupHandler,
+  shouldSkipStage,
+  parseRestoreFromOptions,
 };

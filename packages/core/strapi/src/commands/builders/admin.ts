@@ -25,7 +25,7 @@ export default async ({ buildDestDir, forceBuild = true, optimization, srcDir }:
     serveAdminPanel: false,
   });
 
-  const plugins = await getEnabledPlugins(strapiInstance);
+  const plugins = await getEnabledPlugins(strapiInstance, { client: true });
 
   const env = strapiInstance.config.get('environment');
   const { serverUrl, adminPath } = getConfigUrls(strapiInstance.config, true);

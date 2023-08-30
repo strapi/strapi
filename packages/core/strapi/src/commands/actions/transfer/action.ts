@@ -14,6 +14,7 @@ import {
   setSignalHandler,
   getDiffHandler,
   getAssetsBackupHandler,
+  parseRestoreFromOptions,
 } from '../../utils/data-transfer';
 import { exitWith } from '../../utils/helpers';
 
@@ -85,9 +86,7 @@ export default async (opts: CmdOptions) => {
     destination = createLocalStrapiDestinationProvider({
       getStrapi: () => strapi,
       strategy: 'restore',
-      restore: {
-        entities: { exclude: DEFAULT_IGNORED_CONTENT_TYPES },
-      },
+      restore: parseRestoreFromOptions(opts),
     });
   }
   // if URL provided, set up a remote destination provider
@@ -103,9 +102,7 @@ export default async (opts: CmdOptions) => {
         token: opts.toToken,
       },
       strategy: 'restore',
-      restore: {
-        entities: { exclude: DEFAULT_IGNORED_CONTENT_TYPES },
-      },
+      restore: parseRestoreFromOptions(opts),
     });
   }
 

@@ -1,6 +1,5 @@
 import { isObject } from 'lodash/fp';
 import { errors } from '@strapi/utils';
-import type Koa from 'koa';
 
 import { parseBody } from './transform';
 import type { Schema, CoreApi, Utils, Common } from '../../types';
@@ -23,7 +22,9 @@ const createSingleTypeController = ({
      *
      */
     async find(ctx) {
+      await this.validateQuery(ctx);
       const sanitizedQuery = await this.sanitizeQuery(ctx);
+
       const entity = await strapi.service(uid).find(sanitizedQuery);
 
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);

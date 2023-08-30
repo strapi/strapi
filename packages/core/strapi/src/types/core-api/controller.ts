@@ -11,7 +11,10 @@ export interface Base {
   transformResponse<TData>(data: TData, meta?: object): unknown;
   sanitizeOutput<TData>(data: TData, ctx: Context): Promise<unknown>;
   sanitizeInput<TData>(data: TData, ctx: Context): Promise<unknown>;
-  sanitizeQuery(ctx: Context): Promise<unknown>;
+  sanitizeQuery<TData extends object>(ctx: Context): Promise<TData>;
+
+  validateInput<TData>(data: TData, ctx: Context): Promise<TData>;
+  validateQuery<TData>(ctx: Context): Promise<TData>;
 }
 
 /**
