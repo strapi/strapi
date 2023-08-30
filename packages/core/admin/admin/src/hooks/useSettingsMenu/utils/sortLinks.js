@@ -1,3 +1,5 @@
 import sortBy from 'lodash/sortBy';
 
-export const sortLinks = (links) => sortBy(links, (link) => link.id);
+const sortLinks = (links) => sortBy(links, (link) => link.id);
+
+export default sortLinks;

@@ -1,4 +1,4 @@
-export const formatAPIErrors = ({ data }) => {
+const formatAPIError = ({ data }) => {
   try {
     return Object.keys(data).reduce((acc, current) => {
       const errorMessage = data[current][0];
@@ -13,3 +13,5 @@ export const formatAPIErrors = ({ data }) => {
     return {};
   }
 };
+
+export default formatAPIError;

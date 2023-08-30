@@ -66,8 +66,16 @@ const validateWorkflowUpdateSchema = yup.object().shape({
   contentTypes: validateContentTypes,
 });
 
+const validateUpdateAssigneeOnEntity = yup
+  .object()
+  .shape({
+    id: yup.number().integer().min(1).nullable(),
+  })
+  .required();
+
 module.exports = {
   validateWorkflowCreate: validateYupSchema(validateWorkflowCreateSchema),
   validateUpdateStageOnEntity: validateYupSchema(validateUpdateStageOnEntity),
+  validateUpdateAssigneeOnEntity: validateYupSchema(validateUpdateAssigneeOnEntity),
   validateWorkflowUpdate: validateYupSchema(validateWorkflowUpdateSchema),
 };
