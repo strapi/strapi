@@ -83,8 +83,7 @@ StrapiAppProvider.propTypes = {
         defaultMessage: PropTypes.string.isRequired,
       }).isRequired,
       permissions: PropTypes.array,
-      // React.lazy loadable
-      Component: PropTypes.object,
+      Component: PropTypes.func,
     })
   ).isRequired,
   plugins: PropTypes.object.isRequired,

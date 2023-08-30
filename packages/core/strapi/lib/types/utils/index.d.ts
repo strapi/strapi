@@ -17,3 +17,11 @@ export * as Expression from './expression';
  * // 'foo'
  */
 export type Get<TValue, TKey extends keyof TValue> = TValue[TKey];
+
+export type Without<TLeft, TRight> = { [key in Exclude<keyof TLeft, keyof TRight>]?: never };
+
+export type XOR<TLeft, TRight> = TLeft | TRight extends object
+  ? (Without<TLeft, TRight> & TRight) | (Without<TRight, TLeft> & TLeft)
+  : TLeft | TRight;
+
+export type Cast<TValue, TType> = TValue extends TType ? TValue : never;

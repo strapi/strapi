@@ -8,9 +8,11 @@ import { Redirect, Route, Switch, useParams } from 'react-router-dom';
 
 import { useSettingsMenu } from '../../hooks';
 import { useEnterprise } from '../../hooks/useEnterprise';
+import createRoute from '../../utils/createRoute';
+import makeUniqueRoutes from '../../utils/makeUniqueRoutes';
 
 import SettingsNav from './components/SettingsNav';
-import { SETTINGS_ROUTES_CE } from './constants';
+import { ROUTES_CE } from './constants';
 import ApplicationInfosPage from './pages/ApplicationInfosPage';
 
 export function SettingsPage() {
@@ -19,9 +21,8 @@ export function SettingsPage() {
   const { formatMessage } = useIntl();
   const { isLoading, menu } = useSettingsMenu();
   const routes = useEnterprise(
-    SETTINGS_ROUTES_CE,
-    async () =>
-      (await import('../../../../ee/admin/pages/SettingsPage/constants')).SETTINGS_ROUTES_EE,
+    ROUTES_CE,
+    async () => (await import('../../../../ee/admin/pages/SettingsPage/constants')).ROUTES_EE,
     {
       combine(ceRoutes, eeRoutes) {
         return [...ceRoutes, ...eeRoutes];
@@ -29,6 +30,25 @@ export function SettingsPage() {
       defaultValue: [],
     }
   );
+
+  // Creates the admin routes
+  const adminRoutes = React.useMemo(() => {
+    return makeUniqueRoutes(
+      routes.map(({ to, Component, exact }) => createRoute(Component, to, exact))
+    );
+  }, [routes]);
+
+  const pluginsRoutes = Object.values(settings).flatMap((section) => {
+    const { links } = section;
+
+    return links.map((link) => createRoute(link.Component, link.to, link.exact || false));
+  });
+
+  // Since the useSettingsMenu hook can make API calls in order to check the links permissions
+  // We need to add a loading state to prevent redirecting the user while permissions are being checked
+  if (isLoading) {
+    return <LoadingIndicatorPage />;
+  }
 
   if (!settingId) {
     return <Redirect to="/settings/application-infos" />;
@@ -43,49 +63,11 @@ export function SettingsPage() {
         })}
       />
 
-      {isLoading ? (
-        <LoadingIndicatorPage />
-      ) : (
-        <Switch>
-          <Route
-            path="/settings/application-infos"
-            render={() => (
-              <React.Suspense fallback={<LoadingIndicatorPage />}>
-                <ApplicationInfosPage />
-              </React.Suspense>
-            )}
-            exact
-          />
-
-          {routes.map(({ path, Component }) => (
-            <Route
-              key={path}
-              path={path}
-              render={() => (
-                <React.Suspense fallback={<LoadingIndicatorPage />}>
-                  <Component />
-                </React.Suspense>
-              )}
-              exact
-            />
-          ))}
-
-          {Object.values(settings).flatMap((section) =>
-            section.links.map(({ Component, to, exact }) => (
-              <Route
-                render={() => (
-                  <React.Suspense fallback={<LoadingIndicatorPage />}>
-                    <Component />
-                  </React.Suspense>
-                )}
-                key={to}
-                path={to}
-                exact={exact || false}
-              />
-            ))
-          )}
-        </Switch>
-      )}
+      <Switch>
+        <Route path="/settings/application-infos" component={ApplicationInfosPage} exact />
+        {adminRoutes}
+        {pluginsRoutes}
+      </Switch>
     </Layout>
   );
 }
