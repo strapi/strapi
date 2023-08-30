@@ -1,7 +1,7 @@
 import path from 'path';
 import _ from 'lodash';
 import { isFunction } from 'lodash/fp';
-import { createLogger } from '@strapi/logger';
+import { Logger, createLogger } from '@strapi/logger';
 import { Database } from '@strapi/database';
 import { hooks } from '@strapi/utils';
 
@@ -13,14 +13,14 @@ import compile from './compile';
 import * as utils from './utils';
 import { createContainer, Container } from './container';
 import createStrapiFs from './services/fs';
-import createEventHub from './services/event-hub';
+import createEventHub, { EventHub } from './services/event-hub';
 import { createServer } from './services/server';
 import createWebhookRunner, { WebhookRunner } from './services/webhook-runner';
 import { webhookModel, createWebhookStore } from './services/webhook-store';
 import { createCoreStore, coreStoreModel } from './services/core-store';
-import createEntityService from './services/entity-service';
+import createEntityService, { EntityService } from './services/entity-service';
 import createCronService from './services/cron';
-import entityValidator from './services/entity-validator';
+import entityValidator, { EntityValidator } from './services/entity-validator';
 import createTelemetry from './services/metrics';
 import requestContext from './services/request-context';
 import createAuth from './services/auth';
@@ -124,11 +124,11 @@ class Strapi {
 
   container: Container;
 
-  log: ReturnType<typeof createLogger>;
+  log: Logger;
 
   fs: ReturnType<typeof createStrapiFs>;
 
-  eventHub: ReturnType<typeof createEventHub>;
+  eventHub: EventHub;
 
   startupLogger: ReturnType<typeof createStartupLogger>;
 
@@ -140,9 +140,9 @@ class Strapi {
 
   store?: ReturnType<typeof createCoreStore>;
 
-  entityValidator?: typeof entityValidator;
+  entityValidator?: EntityValidator;
 
-  entityService?: any;
+  entityService?: EntityService;
 
   telemetry: ReturnType<typeof createTelemetry>;
 

@@ -34,22 +34,18 @@ export type Schema = Registry.Keys<
   UID.ContentType | UID.Component<ComponentCategory>
 >;
 
-export type IsCollectionType<TContentTypeUID extends ContentType> = Utils.Expression.Extends<
-  Shared.ContentTypes[TContentTypeUID],
-  SchemaNamespace.CollectionType
->;
+export type IsCollectionType<TSchemaUID extends Schema> = TSchemaUID extends CollectionType
+  ? Utils.Expression.Extends<Shared.ContentTypes[TSchemaUID], SchemaNamespace.CollectionType>
+  : Utils.Expression.False;
 
-export type IsSingleType<TContentTypeUID extends ContentType> = Utils.Expression.Extends<
-  Shared.ContentTypes[TContentTypeUID],
-  SchemaNamespace.SingleType
->;
+export type IsSingleType<TSchemaUID extends Schema> = TSchemaUID extends SingleType
+  ? Utils.Expression.Extends<Shared.ContentTypes[TSchemaUID], SchemaNamespace.SingleType>
+  : Utils.Expression.False;
 
-export type IsComponent<TComponentUID extends Component> = Utils.Expression.Extends<
-  Shared.Components[TComponentUID],
-  SchemaNamespace.Component
->;
+export type IsComponent<TSchemaUID extends Schema> = TSchemaUID extends Component
+  ? Utils.Expression.Extends<Shared.Components[TSchemaUID], SchemaNamespace.Component>
+  : Utils.Expression.False;
 
-export type IsContentType<TContentTypeUID extends ContentType> = Utils.Expression.Or<
-  IsCollectionType<TContentTypeUID>,
-  IsSingleType<TContentTypeUID>
->;
+export type IsContentType<TSchemaUID extends Schema> = TSchemaUID extends ContentType
+  ? Utils.Expression.Or<IsCollectionType<TSchemaUID>, IsSingleType<TSchemaUID>>
+  : Utils.Expression.False;

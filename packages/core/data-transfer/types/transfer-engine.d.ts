@@ -87,6 +87,11 @@ export interface ITransferEngine<
   abortTransfer(): Promise<void>;
 
   /**
+   * Run the integrity check which will make sure it's possible
+   */
+  reportWarning(message: string, origin?: string): void;
+
+  /**
    * Engine init step. Must be called after the providers bootstrap.
    */
   init(): Promise<void>;

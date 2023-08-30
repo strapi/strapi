@@ -33,8 +33,6 @@ interface CmdOptions {
   decrypt?: boolean;
   key?: string;
   conflictStrategy?: 'restore';
-  versionStrategy?: EngineOptions['versionStrategy'];
-  schemaStrategy?: EngineOptions['schemaStrategy'];
   force?: boolean;
   only?: (keyof dataTransfer.engine.TransferGroupFilter)[];
   exclude?: (keyof dataTransfer.engine.TransferGroupFilter)[];
@@ -66,23 +64,12 @@ export default async (opts: CmdOptions) => {
    */
   const strapiInstance = await createStrapiInstance();
 
-  const destinationOptions = {
-    async getStrapi() {
-      return strapiInstance;
-    },
-    autoDestroy: false,
-    strategy: opts.conflictStrategy || DEFAULT_CONFLICT_STRATEGY,
-    restore: parseRestoreFromOptions(opts),
-  };
-
-  const destination = createLocalStrapiDestinationProvider(destinationOptions);
-
   /**
    * Configure and run the transfer engine
    */
   const engineOptions: EngineOptions = {
-    versionStrategy: opts.versionStrategy || DEFAULT_VERSION_STRATEGY,
-    schemaStrategy: opts.schemaStrategy || DEFAULT_SCHEMA_STRATEGY,
+    versionStrategy: DEFAULT_VERSION_STRATEGY,
+    schemaStrategy: DEFAULT_SCHEMA_STRATEGY,
     exclude: opts.exclude ?? [],
     only: opts.only ?? [],
     throttle: opts.throttle ?? 0,
@@ -104,6 +91,17 @@ export default async (opts: CmdOptions) => {
       ],
     },
   };
+
+  const destinationOptions = {
+    async getStrapi() {
+      return strapiInstance;
+    },
+    autoDestroy: false,
+    strategy: opts.conflictStrategy || DEFAULT_CONFLICT_STRATEGY,
+    restore: parseRestoreFromOptions(engineOptions),
+  };
+
+  const destination = createLocalStrapiDestinationProvider(destinationOptions);
 
   const engine = createTransferEngine(source, destination, engineOptions);
 
@@ -135,16 +133,16 @@ export default async (opts: CmdOptions) => {
     );
   });
 
-  let results: Awaited<ReturnType<typeof engine.transfer>>;
+  let results: dataTransfer.engine.ITransferResults<typeof source, typeof destination>;
   try {
     // Abort transfer if user interrupts process
-    setSignalHandler(() => abortTransfer({ engine, strapi }));
+    setSignalHandler(() => abortTransfer({ engine, strapi: strapi as Strapi.Loaded }));
 
     results = await engine.transfer();
 
     try {
       const table = buildTransferTable(results.engine);
-      console.log(table.toString());
+      console.log(table?.toString());
     } catch (e) {
       console.error('There was an error displaying the results of the transfer.');
     }

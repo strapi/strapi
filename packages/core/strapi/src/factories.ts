@@ -103,4 +103,4 @@ function createCoreRouter<T extends Common.UID.ContentType>(
   };
 }
 
-export { createCoreController, createCoreService, createCoreRouter, getContentTypeProxy };
+export { createCoreController, createCoreService, createCoreRouter };

@@ -154,6 +154,7 @@
     "@types/statuses": "2.0.1",
     "eslint-config-custom": "4.12.7",
     "supertest": "6.3.3",
+    "ts-zen": "https://github.com/strapi/ts-zen#41af3f8c6422de048bf9976ae551566b2c2b590a",
     "tsconfig": "4.12.7"
   },
   "engines": {

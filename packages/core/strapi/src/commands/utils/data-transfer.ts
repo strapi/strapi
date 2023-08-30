@@ -1,14 +1,14 @@
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import { Command, Option } from 'commander';
-import { engine } from '@strapi/data-transfer';
+import { engine, strapi as strapiDataTransfer } from '@strapi/data-transfer';
 
 import { configs, createLogger } from '@strapi/logger';
 import { errors } from '@strapi/utils';
 import ora from 'ora';
 import { merge } from 'lodash/fp';
 import { readableBytes, exitWith } from './helpers';
-import strapi from '../../index';
+import strapiFactory from '../../index';
 import { getParseListWithChoices, parseInteger, confirmMessage } from './commander';
 
 const {
@@ -48,7 +48,16 @@ const getDefaultExportName = () => {
   return `export_${yyyymmddHHMMSS()}`;
 };
 
-const buildTransferTable = (resultData) => {
+type ResultData = engine.ITransferResults<
+  engine.ISourceProvider,
+  engine.IDestinationProvider
+>['engine'];
+
+const buildTransferTable = (resultData: ResultData) => {
+  if (!resultData) {
+    return;
+  }
+
   // Build pretty table
   const table = new Table({
     head: ['Type', 'Count', 'Size'].map((text) => chalk.bold.blue(text)),
@@ -56,11 +65,15 @@ const buildTransferTable = (resultData) => {
 
   let totalBytes = 0;
   let totalItems = 0;
-  Object.keys(resultData).forEach((key) => {
-    const item = resultData[key];
+  (Object.keys(resultData) as engine.TransferStage[]).forEach((stage) => {
+    const item = resultData[stage];
+
+    if (!item) {
+      return;
+    }
 
     table.push([
-      { hAlign: 'left', content: chalk.bold(key) },
+      { hAlign: 'left', content: chalk.bold(stage) },
       { hAlign: 'right', content: item.count },
       { hAlign: 'right', content: `${readableBytes(item.bytes, 1, 11)} ` },
     ]);
@@ -68,9 +81,13 @@ const buildTransferTable = (resultData) => {
     totalItems += item.count;
 
     if (item.aggregates) {
-      Object.keys(item.aggregates)
+      (Object.keys(item.aggregates) as (keyof typeof item.aggregates)[])
         .sort()
         .forEach((subkey) => {
+          if (!item.aggregates) {
+            return;
+          }
+
           const subitem = item.aggregates[subkey];
 
           table.push([
@@ -105,8 +122,8 @@ const abortTransfer = async ({
   engine,
   strapi,
 }: {
-  engine: engine.ITransferEngine;
-  strapi: Strapi.Strapi;
+  engine: engine.TransferEngine;
+  strapi: Strapi.Loaded;
 }) => {
   try {
     await engine.abortTransfer();
@@ -118,7 +135,10 @@ const abortTransfer = async ({
   return true;
 };
 
-const setSignalHandler = async (handler, signals = ['SIGINT', 'SIGTERM', 'SIGQUIT']) => {
+const setSignalHandler = async (
+  handler: (...args: unknown[]) => void,
+  signals = ['SIGINT', 'SIGTERM', 'SIGQUIT']
+) => {
   signals.forEach((signal) => {
     // We specifically remove ALL listeners because we have to clear the one added in Strapi bootstrap that has a process.exit
     // TODO: Ideally Strapi bootstrap would not add that listener, and then this could be more flexible and add/remove only what it needs to
@@ -129,8 +149,8 @@ const setSignalHandler = async (handler, signals = ['SIGINT', 'SIGTERM', 'SIGQUI
 
 const createStrapiInstance = async (opts: { logLevel?: string } = {}) => {
   try {
-    const appContext = await strapi.compile();
-    const app = strapi({ ...opts, ...appContext });
+    const appContext = await strapiFactory.compile();
+    const app = strapiFactory({ ...opts, ...appContext });
 
     app.log.level = opts.logLevel || 'error';
     return await app.load();
@@ -188,7 +208,7 @@ const errorColors = {
 } as const;
 
 const formatDiagnostic =
-  (operation: string): Parameters<engine.ITransferEngine['diagnostics']['onDiagnostic']>[0] =>
+  (operation: string): Parameters<engine.TransferEngine['diagnostics']['onDiagnostic']>[0] =>
   ({ details, kind }) => {
     const logger = createLogger(
       configs.createOutputFileConfiguration(`${operation}_error_log_${Date.now()}.log`)
@@ -219,12 +239,26 @@ const formatDiagnostic =
     }
   };
 
-const loadersFactory = (defaultLoaders = {}) => {
+type Loaders = {
+  [key in engine.TransferStage]: ora.Ora;
+};
+
+type Data = {
+  [key in engine.TransferStage]?: {
+    startTime?: number;
+    endTime?: number;
+    bytes?: number;
+    count?: number;
+  };
+};
+
+const loadersFactory = (defaultLoaders: Loaders = {} as Loaders) => {
   const loaders = defaultLoaders;
-  const updateLoader = (stage, data) => {
+  const updateLoader = (stage: engine.TransferStage, data: Data) => {
     if (!(stage in loaders)) {
       createLoader(stage);
     }
+
     const stageData = data[stage];
     const elapsedTime = stageData?.startTime
       ? (stageData?.endTime || Date.now()) - stageData.startTime
@@ -241,12 +275,12 @@ const loadersFactory = (defaultLoaders = {}) => {
     return loaders[stage];
   };
 
-  const createLoader = (stage) => {
+  const createLoader = (stage: engine.TransferStage) => {
     Object.assign(loaders, { [stage]: ora() });
     return loaders[stage];
   };
 
-  const getLoader = (stage) => {
+  const getLoader = (stage: engine.TransferStage) => {
     return loaders[stage];
   };
 
@@ -260,7 +294,7 @@ const loadersFactory = (defaultLoaders = {}) => {
 /**
  * Get the telemetry data to be sent for a didDEITSProcess* event from an initialized transfer engine object
  */
-const getTransferTelemetryPayload = (engine: engine.ITransferEngine) => {
+const getTransferTelemetryPayload = (engine: engine.TransferEngine) => {
   return {
     eventProperties: {
       source: engine?.sourceProvider?.name,
@@ -272,11 +306,23 @@ const getTransferTelemetryPayload = (engine: engine.ITransferEngine) => {
 /**
  * Get a transfer engine schema diff handler that confirms with the user before bypassing a schema check
  */
-const getDiffHandler = (engine: engine.ITransferEngine, { force, action }) => {
-  return async (context, next) => {
+const getDiffHandler = (
+  engine: engine.TransferEngine,
+  {
+    force,
+    action,
+  }: {
+    force?: boolean;
+    action: string;
+  }
+) => {
+  return async (
+    context: engine.SchemaDiffHandlerContext,
+    next: (ctx: engine.SchemaDiffHandlerContext) => void
+  ) => {
     // if we abort here, we need to actually exit the process because of conflict with inquirer prompt
     setSignalHandler(async () => {
-      await abortTransfer({ engine, strapi });
+      await abortTransfer({ engine, strapi: strapi as Strapi.Loaded });
       exitWith(1, exitMessageText(action, true));
     });
 
@@ -333,7 +379,7 @@ const getDiffHandler = (engine: engine.ITransferEngine, { force, action }) => {
     );
 
     // reset handler back to normal
-    setSignalHandler(() => abortTransfer({ engine, strapi }));
+    setSignalHandler(() => abortTransfer({ engine, strapi: strapi as Strapi.Loaded }));
 
     if (confirmed) {
       context.ignoredDiffs = merge(context.diffs, context.ignoredDiffs);
@@ -343,11 +389,23 @@ const getDiffHandler = (engine: engine.ITransferEngine, { force, action }) => {
   };
 };
 
-const getAssetsBackupHandler = (engine: engine.ITransferEngine, { force, action }) => {
-  return async (context, next) => {
+const getAssetsBackupHandler = (
+  engine: engine.TransferEngine,
+  {
+    force,
+    action,
+  }: {
+    force?: boolean;
+    action: string;
+  }
+) => {
+  return async (
+    context: engine.ErrorHandlerContext,
+    next: (ctx: engine.ErrorHandlerContext) => void
+  ) => {
     // if we abort here, we need to actually exit the process because of conflict with inquirer prompt
     setSignalHandler(async () => {
-      await abortTransfer({ engine, strapi });
+      await abortTransfer({ engine, strapi: strapi as Strapi.Loaded });
       exitWith(1, exitMessageText(action, true));
     });
 
@@ -366,12 +424,15 @@ const getAssetsBackupHandler = (engine: engine.ITransferEngine, { force, action 
     }
 
     // reset handler back to normal
-    setSignalHandler(() => abortTransfer({ engine, strapi }));
+    setSignalHandler(() => abortTransfer({ engine, strapi: strapi as Strapi.Loaded }));
     return next(context);
   };
 };
 
-const shouldSkipStage = (opts, dataKind) => {
+const shouldSkipStage = (
+  opts: Partial<engine.ITransferEngineOptions>,
+  dataKind: engine.TransferFilterPreset
+) => {
   if (opts.exclude?.includes(dataKind)) {
     return true;
   }
@@ -382,9 +443,13 @@ const shouldSkipStage = (opts, dataKind) => {
   return false;
 };
 
+type RestoreConfig = NonNullable<
+  strapiDataTransfer.providers.ILocalStrapiDestinationProviderOptions['restore']
+>;
+
 // Based on exclude/only from options, create the restore object to match
-const parseRestoreFromOptions = (opts) => {
-  const entitiesOptions = {
+const parseRestoreFromOptions = (opts: Partial<engine.ITransferEngineOptions>) => {
+  const entitiesOptions: RestoreConfig['entities'] = {
     exclude: DEFAULT_IGNORED_CONTENT_TYPES,
     include: undefined,
   };
@@ -394,14 +459,15 @@ const parseRestoreFromOptions = (opts) => {
     entitiesOptions.include = [];
   }
 
-  const restoreConfig = {
-    entities: entitiesOptions,
-    assets: !shouldSkipStage(opts, 'files'),
-    configuration: {
-      webhooks: !shouldSkipStage(opts, 'config'),
-      coreStore: !shouldSkipStage(opts, 'config'),
-    },
-  };
+  const restoreConfig: strapiDataTransfer.providers.ILocalStrapiDestinationProviderOptions['restore'] =
+    {
+      entities: entitiesOptions,
+      assets: !shouldSkipStage(opts, 'files'),
+      configuration: {
+        webhook: !shouldSkipStage(opts, 'config'),
+        coreStore: !shouldSkipStage(opts, 'config'),
+      },
+    };
 
   return restoreConfig;
 };

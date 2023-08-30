@@ -62,17 +62,6 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       throw new ProviderInitializationError('Could not access local strapi');
     }
 
-    // uploading to a non-local file provider without included entities is useless (and potentially problematic) because we don't have the links, so don't allow it
-    if (
-      this.strapi.config.get('plugin.upload').provider !== 'local' &&
-      this.#areAssetsIncluded() &&
-      !this.#isContentTypeIncluded('plugin::upload.file')
-    ) {
-      throw new ProviderValidationError(
-        'When using a non-local upload provider, files may not be transferred without also transferring content.'
-      );
-    }
-
     this.transaction = utils.transaction.createTransaction(this.strapi);
   }
 

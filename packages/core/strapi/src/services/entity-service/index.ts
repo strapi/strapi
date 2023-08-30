@@ -26,6 +26,12 @@ import { applyTransforms } from './attributes';
 import type { Common, Schema } from '../../types';
 import type { Strapi } from '../../Strapi';
 
+import * as types from './types';
+import { EventHub } from '../event-hub';
+import { EntityValidator } from '../entity-validator';
+
+export * from './types';
+
 const { transformParamsToQuery } = convertQueryParams;
 
 type Context = {
@@ -80,16 +86,16 @@ const createDefaultImplementation = ({
 }: {
   strapi: Strapi;
   db: Database;
-  eventHub: any;
-  entityValidator: any;
-}) => ({
+  eventHub: EventHub;
+  entityValidator: EntityValidator;
+}): types.EntityService => ({
   uploadFiles,
 
-  async wrapParams(options: any = {}, opts?: { uid: string; action: string }) {
+  async wrapParams(options) {
     return options;
   },
 
-  async wrapResult(result: any, opts?: { uid: string; action: string }) {
+  async wrapResult(result) {
     return result;
   },
 
@@ -138,7 +144,7 @@ const createDefaultImplementation = ({
   },
 
   // TODO: streamline the logic based on the populate option
-  async findWithRelationCountsPage(uid: Common.UID.Schema, opts) {
+  async findWithRelationCountsPage(uid, opts) {
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'findWithRelationCounts' });
 
     const query = transformParamsToQuery(uid, wrappedParams);
@@ -150,7 +156,7 @@ const createDefaultImplementation = ({
     };
   },
 
-  async findWithRelationCounts(uid: Common.UID.Schema, opts) {
+  async findWithRelationCounts(uid, opts) {
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'findWithRelationCounts' });
 
     const query = transformParamsToQuery(uid, wrappedParams);
@@ -159,7 +165,7 @@ const createDefaultImplementation = ({
     return this.wrapResult(entities, { uid, action: 'findWithRelationCounts' });
   },
 
-  async findOne(uid: Common.UID.Schema, entityId, opts) {
+  async findOne(uid, entityId, opts) {
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'findOne' });
 
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
@@ -168,7 +174,7 @@ const createDefaultImplementation = ({
     return this.wrapResult(entity, { uid, action: 'findOne' });
   },
 
-  async count(uid: Common.UID.Schema, opts) {
+  async count(uid, opts) {
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'count' });
 
     const query = transformParamsToQuery(uid, wrappedParams);
@@ -176,7 +182,7 @@ const createDefaultImplementation = ({
     return db.query(uid).count(query);
   },
 
-  async create(uid: Common.UID.Schema, opts) {
+  async create(uid, opts) {
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'create' });
     const { data, files } = wrappedParams;
 
@@ -202,6 +208,7 @@ const createDefaultImplementation = ({
       data: entityData,
     });
 
+    // TODO: do all of this in a transaction to avoid a race condition where entity is created then deleted before we do findOne again
     // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
     if (files && Object.keys(files).length > 0) {
       await this.uploadFiles(uid, Object.assign(entityData, entity), files);
@@ -216,7 +223,7 @@ const createDefaultImplementation = ({
     return entity;
   },
 
-  async update(uid: Common.UID.Schema, entityId, opts) {
+  async update(uid, entityId, opts) {
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'update' });
     const { data, files } = wrappedParams;
 
@@ -270,7 +277,7 @@ const createDefaultImplementation = ({
     return entity;
   },
 
-  async delete(uid: Common.UID.Schema, entityId, opts) {
+  async delete(uid, entityId, opts) {
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'delete' });
 
     // select / populate
@@ -298,7 +305,7 @@ const createDefaultImplementation = ({
     return entityToDelete;
   },
 
-  async clone(uid: Common.UID.Schema, cloneId, opts) {
+  async clone(uid, cloneId, opts) {
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'clone' });
     const { data, files } = wrappedParams;
 
@@ -411,7 +418,7 @@ const createDefaultImplementation = ({
   },
 });
 
-export default (ctx) => {
+export default (ctx): types.EntityService => {
   Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
     ctx.strapi.webhookStore.addAllowedEvent(key, value);
   });

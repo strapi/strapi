@@ -38,13 +38,13 @@ const createCollectionTypeService = ({
 
       const paginationInfo = getPaginationInfo(fetchParams);
 
-      const results = await strapi.entityService.findMany(uid, {
+      const results = await strapi.entityService?.findMany(uid, {
         ...fetchParams,
         ...convertPagedToStartLimit(paginationInfo),
       });
 
       if (shouldCount(fetchParams)) {
-        const count = await strapi.entityService.count(uid, { ...fetchParams, ...paginationInfo });
+        const count = await strapi.entityService?.count(uid, { ...fetchParams, ...paginationInfo });
 
         return {
           results,
@@ -59,7 +59,7 @@ const createCollectionTypeService = ({
     },
 
     findOne(entityId, params = {}) {
-      return strapi.entityService.findOne(uid, entityId, this.getFetchParams(params));
+      return strapi.entityService?.findOne(uid, entityId, this.getFetchParams(params));
     },
 
     create(params = { data: {} }) {
@@ -69,17 +69,17 @@ const createCollectionTypeService = ({
         setPublishedAt(data);
       }
 
-      return strapi.entityService.create(uid, { ...params, data });
+      return strapi.entityService?.create(uid, { ...params, data });
     },
 
     update(entityId, params = { data: {} }) {
       const { data } = params;
 
-      return strapi.entityService.update(uid, entityId, { ...params, data });
+      return strapi.entityService?.update(uid, entityId, { ...params, data });
     },
 
     delete(entityId, params = {}) {
-      return strapi.entityService.delete(uid, entityId, params);
+      return strapi.entityService?.delete(uid, entityId, params);
     },
   };
 };

@@ -29,9 +29,42 @@ export type GetAll<TSchemaUID extends Common.UID.Schema> = Utils.Get<
   'attributes'
 >;
 
+export type GetTarget<TSchemaUID extends Common.UID.Schema, TKey extends GetKeys<TSchemaUID>> = Get<
+  TSchemaUID,
+  TKey
+> extends infer TAttribute extends Attribute.Attribute
+  ?
+      | Attribute.GetRelationTarget<TAttribute>
+      | Attribute.GetComponentTarget<TAttribute>
+      | Attribute.GetMediaTarget<TAttribute>
+  : never;
+
+export type GetMorphTargets<
+  TSchemaUID extends Common.UID.Schema,
+  TKey extends GetKeys<TSchemaUID>
+> = Get<TSchemaUID, TKey> extends infer TAttribute extends Attribute.Attribute
+  ? Attribute.GetDynamicZoneTargets<TAttribute>
+  : never;
+
 export type GetKeys<TSchemaUID extends Common.UID.Schema> = keyof GetAll<TSchemaUID>;
 
-export type GetValue<TAttribute extends Attribute.Attribute> =
+export type GetNonPopulatableKeys<TSchemaUID extends Common.UID.Schema> = GetKeysByType<
+  TSchemaUID,
+  Attribute.NonPopulatableKind
+>;
+
+export type GetPopulatableKeys<TSchemaUID extends Common.UID.Schema> = GetKeysByType<
+  TSchemaUID,
+  Attribute.PopulatableKind
+>;
+
+export type GetKeysWithTarget<TSchemaUID extends Common.UID.Schema> = keyof {
+  [key in GetKeys<TSchemaUID> as GetTarget<TSchemaUID, key> extends never ? never : key]: never;
+} extends infer TKey extends GetKeys<TSchemaUID>
+  ? TKey
+  : never;
+
+export type GetValue<TAttribute extends Attribute.Attribute, TGuard = unknown> = Utils.Guard.Never<
   | Attribute.GetBigIntegerValue<TAttribute>
   | Attribute.GetBooleanValue<TAttribute>
   | Attribute.GetComponentValue<TAttribute>
@@ -52,7 +85,9 @@ export type GetValue<TAttribute extends Attribute.Attribute> =
   | Attribute.GetDateValue<TAttribute>
   | Attribute.GetDateTimeValue<TAttribute>
   | Attribute.GetTimeValue<TAttribute>
-  | Attribute.GetTimestampValue<TAttribute>;
+  | Attribute.GetTimestampValue<TAttribute>,
+  TGuard
+>;
 
 export type GetValueByKey<
   TSchemaUID extends Common.UID.Schema,
@@ -64,7 +99,7 @@ export type GetValueByKey<
 export type GetValues<
   TSchemaUID extends Common.UID.Schema,
   TKey extends GetKeys<TSchemaUID> = GetKeys<TSchemaUID>
-> = {
+> = { id: number | `${number}` } & {
   // Handle required attributes
   [key in GetRequiredKeys<TSchemaUID> as key extends TKey ? key : never]-?: GetValueByKey<
     TSchemaUID,
@@ -80,10 +115,30 @@ export type GetValues<
 
 export type GetRequiredKeys<TSchemaUID extends Common.UID.Schema> = Utils.Object.KeysBy<
   GetAll<TSchemaUID>,
-  { required: true }
+  Attribute.Required
 >;
 
-export type GetOptionalKeys<TSchemaUID extends Common.UID.Schema> = keyof Omit<
+export type GetOptionalKeys<TSchemaUID extends Common.UID.Schema> = Utils.Object.KeysExcept<
   GetAll<TSchemaUID>,
-  GetRequiredKeys<TSchemaUID>
+  Attribute.Required
 >;
+
+export type HasTarget<
+  TSchemaUID extends Common.UID.Schema,
+  TField extends Attribute.GetKeys<TSchemaUID>
+> = GetTarget<TSchemaUID, TField> extends infer TTarget
+  ? Utils.Expression.And<
+      Utils.Expression.IsNotNever<TTarget>,
+      Utils.Expression.Extends<TTarget, Common.UID.Schema>
+    >
+  : Utils.Expression.False;
+
+export type HasMorphTargets<
+  TSchemaUID extends Common.UID.Schema,
+  TField extends Attribute.GetKeys<TSchemaUID>
+> = GetMorphTargets<TSchemaUID, TField> extends infer TMaybeTargets
+  ? Utils.Expression.And<
+      Utils.Expression.IsNotNever<TMaybeTargets>,
+      Utils.Expression.Extends<TMaybeTargets, Common.UID.Schema>
+    >
+  : Utils.Expression.False;

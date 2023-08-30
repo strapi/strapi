@@ -17,7 +17,6 @@ import {
   setSignalHandler,
 } from '../../utils/data-transfer';
 import { exitWith } from '../../utils/helpers';
-import type { Strapi } from '../../../Strapi';
 
 const {
   file: {
@@ -111,7 +110,7 @@ export default async (opts: CmdOptions) => {
     await strapi.telemetry.send('didDEITSProcessStart', getTransferTelemetryPayload(engine));
   });
 
-  let results: Awaited<ReturnType<typeof engine.transfer>>;
+  let results: dataTransfer.engine.ITransferResults<typeof source, typeof destination>;
   let outFile: string;
   try {
     // Abort transfer if user interrupts process
@@ -131,7 +130,7 @@ export default async (opts: CmdOptions) => {
 
     try {
       const table = buildTransferTable(results.engine);
-      console.log(table.toString());
+      console.log(table?.toString());
     } catch (e) {
       console.error('There was an error displaying the results of the transfer.');
     }

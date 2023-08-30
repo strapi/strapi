@@ -10,7 +10,7 @@ export type Timestamp = Attribute.OfType<'timestamp'> &
   Attribute.WritableOption &
   Attribute.VisibleOption;
 
-export type TimestampValue = string;
+export type TimestampValue = globalThis.Date | number | string;
 
 export type GetTimestampValue<T extends Attribute.Attribute> = T extends Timestamp
   ? TimestampValue

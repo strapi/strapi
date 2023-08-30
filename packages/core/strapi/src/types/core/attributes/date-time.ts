@@ -10,7 +10,8 @@ export type DateTime = Attribute.OfType<'datetime'> &
   Attribute.WritableOption &
   Attribute.VisibleOption;
 
-export type DateTimeValue = string;
+// TODO: Use string templates for date formats
+export type DateTimeValue = globalThis.Date | string;
 
 export type GetDateTimeValue<T extends Attribute.Attribute> = T extends DateTime
   ? DateTimeValue

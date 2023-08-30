@@ -24,8 +24,8 @@ type ID = { id: string | number };
 
 type RelationSource = string | number | ID;
 
-interface ValidatorMeta {
-  attr: Attribute.Any;
+interface ValidatorMeta<TAttribute = Attribute.Any> {
+  attr: TAttribute;
   updatedAttribute: { name: string; value: unknown };
 }
 
@@ -46,6 +46,8 @@ interface ModelValidatorMetas {
   entity?: Entity;
 }
 
+const isInteger = (value: unknown): value is number => Number.isInteger(value);
+
 const addMinMax = <
   T extends {
     min(value: number): T;
@@ -53,17 +55,18 @@ const addMinMax = <
   }
 >(
   validator: T,
-  { attr, updatedAttribute }: ValidatorMeta
+  { attr, updatedAttribute }: ValidatorMeta<Attribute.Any & Attribute.MinMaxOption<string | number>>
 ): T => {
   let nextValidator: T = validator;
 
   if (
-    Number.isInteger(attr.min) &&
-    (attr.required || (Array.isArray(updatedAttribute.value) && updatedAttribute.value.length > 0))
+    isInteger(attr.min) &&
+    (('required' in attr && attr.required) ||
+      (Array.isArray(updatedAttribute.value) && updatedAttribute.value.length > 0))
   ) {
     nextValidator = nextValidator.min(attr.min);
   }
-  if (Number.isInteger(attr.max)) {
+  if (isInteger(attr.max)) {
     nextValidator = nextValidator.max(attr.max);
   }
   return nextValidator;
@@ -72,7 +75,7 @@ const addMinMax = <
 const addRequiredValidation = (createOrUpdate: CreateOrUpdate) => {
   return <T extends strapiUtils.yup.AnySchema>(
     validator: T,
-    { attr: { required } }: ValidatorMeta
+    { attr: { required } }: ValidatorMeta<Partial<Attribute.Any & Attribute.RequiredOption>>
   ): T => {
     let nextValidator = validator;
     if (required) {
@@ -89,7 +92,10 @@ const addRequiredValidation = (createOrUpdate: CreateOrUpdate) => {
 };
 
 const addDefault = (createOrUpdate: CreateOrUpdate) => {
-  return (validator: strapiUtils.yup.BaseSchema, { attr }: ValidatorMeta) => {
+  return (
+    validator: strapiUtils.yup.BaseSchema,
+    { attr }: ValidatorMeta<Attribute.Any & Attribute.DefaultOption<unknown>>
+  ) => {
     let nextValidator = validator;
 
     if (createOrUpdate === 'creation') {
@@ -114,13 +120,16 @@ const preventCast = (validator: strapiUtils.yup.AnySchema) =>
 
 const createComponentValidator =
   (createOrUpdate: CreateOrUpdate) =>
-  ({ attr, updatedAttribute }: ValidatorMeta, { isDraft }: ValidatorContext) => {
+  (
+    { attr, updatedAttribute }: ValidatorMeta<Attribute.Component<Common.UID.Component, boolean>>,
+    { isDraft }: ValidatorContext
+  ) => {
     const model = strapi.getModel(attr.component);
     if (!model) {
       throw new Error('Validation failed: Model not found');
     }
 
-    if (prop('repeatable', attr) === true) {
+    if (attr?.repeatable) {
       // FIXME: yup v1
 
       let validator = yup
@@ -187,7 +196,10 @@ const createDzValidator =
 
 const createRelationValidator =
   (createOrUpdate: CreateOrUpdate) =>
-  ({ attr, updatedAttribute }: ValidatorMeta, { isDraft }: ValidatorContext) => {
+  (
+    { attr, updatedAttribute }: ValidatorMeta<Attribute.Relation>,
+    { isDraft }: ValidatorContext
+  ) => {
     let validator;
 
     if (Array.isArray(updatedAttribute.value)) {
@@ -226,7 +238,7 @@ const createScalarAttributeValidator =
 const createAttributeValidator =
   (createOrUpdate: CreateOrUpdate) =>
   (metas: AttributeValidatorMetas, options: ValidatorContext) => {
-    let validator: strapiUtils.yup.BaseSchema;
+    let validator: strapiUtils.yup.BaseSchema = yup.mixed();
 
     if (isMediaAttribute(metas.attr)) {
       validator = yup.mixed();
@@ -234,11 +246,20 @@ const createAttributeValidator =
       validator = createScalarAttributeValidator(createOrUpdate)(metas, options);
     } else {
       if (metas.attr.type === 'component') {
-        validator = createComponentValidator(createOrUpdate)(metas, options);
+        validator = createComponentValidator(createOrUpdate)(
+          { attr: metas.attr, updatedAttribute: metas.updatedAttribute },
+          options
+        );
       } else if (metas.attr.type === 'dynamiczone') {
         validator = createDzValidator(createOrUpdate)(metas, options);
-      } else {
-        validator = createRelationValidator(createOrUpdate)(metas, options);
+      } else if (metas.attr.type === 'relation') {
+        validator = createRelationValidator(createOrUpdate)(
+          {
+            attr: metas.attr,
+            updatedAttribute: metas.updatedAttribute,
+          },
+          options
+        );
       }
 
       validator = preventCast(validator);
@@ -346,14 +367,16 @@ const buildRelationsStore = ({
       case 'relation':
       case 'media': {
         if (
-          'relation' in attribute &&
+          attribute.type === 'relation' &&
           (attribute.relation === 'morphToMany' || attribute.relation === 'morphToOne')
         ) {
           // TODO: handle polymorphic relations
           break;
         }
 
-        const target = attribute.type === 'media' ? 'plugin::upload.file' : attribute.target;
+        const target =
+          // eslint-disable-next-line no-nested-ternary
+          attribute.type === 'media' ? 'plugin::upload.file' : attribute.target;
         // As there are multiple formats supported for associating relations
         // with an entity, the value here can be an: array, object or number.
         let source: RelationSource[];
@@ -461,7 +484,22 @@ const checkRelationsExist = async (relationsStore: Record<string, ID[]> = {}) =>
   return Promise.all(promises);
 };
 
-export default {
+export interface EntityValidator {
+  validateEntityCreation: (
+    model: Schema.ContentType,
+    data: Record<string, unknown>,
+    options?: { isDraft?: boolean }
+  ) => Promise<Record<string, unknown>>;
+  validateEntityUpdate: (
+    model: Schema.ContentType,
+    data: Record<string, unknown>,
+    options?: { isDraft?: boolean }
+  ) => Promise<Record<string, unknown>>;
+}
+
+const entityValidator: EntityValidator = {
   validateEntityCreation: createValidateEntity('creation'),
   validateEntityUpdate: createValidateEntity('update'),
 };
+
+export default entityValidator;

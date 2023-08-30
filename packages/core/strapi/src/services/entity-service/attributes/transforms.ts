@@ -1,13 +1,17 @@
 import { getOr, toNumber, isString, isBuffer } from 'lodash/fp';
 import bcrypt from 'bcryptjs';
-import { Attribute } from '../../../types';
 
-interface Transforms {
-  [key: string]: (value: any, context: { attribute: Attribute.Any; attributeName: string }) => any;
-}
+import type { Attribute } from '../../../types';
+
+type Transforms = {
+  [key in Attribute.Kind]?: (
+    value: Attribute.GetValue<Attribute.Attribute<key>>,
+    context: { attribute: Attribute.Attribute<key>; attributeName: string }
+  ) => unknown;
+};
 
 const transforms: Transforms = {
-  password(value: string, context: { attribute: Attribute.Password; attributeName: string }) {
+  password(value, context) {
     const { attribute } = context;
 
     if (!isString(value) && !isBuffer(value)) {

@@ -28,7 +28,7 @@ const createSingleTypeService = ({
      * Returns singleType content
      */
     find(params = {}) {
-      return strapi.entityService.findMany(uid, this.getFetchParams(params));
+      return strapi.entityService?.findMany(uid, this.getFetchParams(params));
     },
 
     /**
@@ -48,10 +48,10 @@ const createSingleTypeService = ({
         if (hasDraftAndPublish(contentType)) {
           setPublishedAt(data);
         }
-        return strapi.entityService.create(uid, { ...params, data });
+        return strapi.entityService?.create(uid, { ...params, data });
       }
 
-      return strapi.entityService.update(uid, entity.id, { ...params, data });
+      return strapi.entityService?.update(uid, entity.id, { ...params, data });
     },
 
     /**
@@ -64,7 +64,7 @@ const createSingleTypeService = ({
 
       if (!entity) return;
 
-      return strapi.entityService.delete(uid, entity.id);
+      return strapi.entityService?.delete(uid, entity.id);
     },
   };
 };
