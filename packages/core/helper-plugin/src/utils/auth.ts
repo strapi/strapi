@@ -1,0 +1,196 @@
+// TODO @soupette we need to refactor this file
+
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+
+const TOKEN_KEY = 'jwtToken';
+const USER_INFO = 'userInfo';
+const CURRENT_STEP = 'GUIDED_TOUR_CURRENT_STEP';
+const COMPLETED_STEPS = 'GUIDED_TOUR_COMPLETED_STEPS';
+const SKIPPED = 'GUIDED_TOUR_SKIPPED';
+const THEME_KEY = 'STRAPI_THEME'; // Also used in packages/core/admin/admin/src/components/ThemeToggleProvider/index.js
+const UPLOAD_MODAL_VIEW = 'STRAPI_UPLOAD_MODAL_VIEW';
+const UPLOAD_VIEW = 'STRAPI_UPLOAD_LIBRARY_VIEW';
+
+interface UserInfo {
+  email: string;
+  firstname: string;
+  lastname?: string;
+  username?: string;
+  preferedLanguage?: string;
+  id: number;
+  isActive?: boolean;
+  blocked: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface StorageItems {
+  userInfo: UserInfo;
+  jwtToken: string;
+  STRAPI_THEME: 'light' | 'dark';
+  GUIDED_TOUR_CURRENT_STEP: string | null;
+  GUIDED_TOUR_COMPLETED_STEPS: string[] | null;
+  GUIDED_TOUR_SKIPPED: boolean | null;
+  STRAPI_UPDATE_NOTIF: boolean | null;
+  STRAPI_UPLOAD_MODAL_VIEW: 0 | 1 | null; // grid or list view
+  STRAPI_UPLOAD_LIBRARY_VIEW: 0 | 1 | null; // grid or list view
+  // FIXME: No idea what this is or what its value is
+  videos: string | null;
+  // FIXME: No idea what this is or what its value is
+  onboarding: string | null;
+}
+
+type StorageItemValues = StorageItems[keyof StorageItems];
+
+const parse = JSON.parse;
+const stringify = JSON.stringify;
+
+const auth = {
+  clear(key: keyof StorageItems) {
+    if (localStorage && localStorage.getItem(key)) {
+      return localStorage.removeItem(key);
+    }
+
+    if (sessionStorage && sessionStorage.getItem(key)) {
+      return sessionStorage.removeItem(key);
+    }
+
+    return null;
+  },
+
+  clearAppStorage() {
+    if (localStorage) {
+      const videos = auth.get('videos');
+      const onboarding = auth.get('onboarding');
+      const strapiUpdateNotification = auth.get('STRAPI_UPDATE_NOTIF');
+
+      const localeLang = localStorage.getItem('strapi-admin-language');
+      const guidedTourCurrentStep = auth.get(CURRENT_STEP);
+      const guidedTourState = auth.get(COMPLETED_STEPS);
+      const guidedTourSkipped = auth.get(SKIPPED);
+      const applicationTheme = auth.get(THEME_KEY);
+      const uploadMediaLibraryView = auth.get(UPLOAD_VIEW);
+      const uploadMediaLibraryModalView = auth.get(UPLOAD_MODAL_VIEW);
+
+      localStorage.clear();
+
+      localStorage.setItem('videos', stringify(videos));
+      localStorage.setItem(CURRENT_STEP, stringify(guidedTourCurrentStep));
+      localStorage.setItem(COMPLETED_STEPS, stringify(guidedTourState));
+      localStorage.setItem(SKIPPED, stringify(guidedTourSkipped));
+      localStorage.setItem('STRAPI_UPDATE_NOTIF', stringify(strapiUpdateNotification));
+
+      if (onboarding) {
+        localStorage.setItem('onboarding', onboarding);
+      }
+
+      if (localeLang) {
+        localStorage.setItem('strapi-admin-language', localeLang);
+      }
+
+      if (applicationTheme) {
+        localStorage.setItem(THEME_KEY, applicationTheme);
+      }
+
+      if (!isNil(uploadMediaLibraryView)) {
+        localStorage.setItem(UPLOAD_VIEW, stringify(uploadMediaLibraryView));
+      }
+
+      if (!isNil(uploadMediaLibraryModalView)) {
+        localStorage.setItem(UPLOAD_MODAL_VIEW, stringify(uploadMediaLibraryModalView));
+      }
+    }
+
+    if (sessionStorage) {
+      sessionStorage.clear();
+    }
+  },
+
+  get<T extends keyof StorageItems>(key: T): StorageItems[T] | null {
+    const localStorageItem = localStorage && localStorage.getItem(key);
+    if (localStorageItem) {
+      return parse(localStorageItem);
+    }
+
+    const sessionStorageItem = sessionStorage && sessionStorage.getItem(key);
+    if (sessionStorageItem) {
+      return parse(sessionStorageItem);
+    }
+
+    return null;
+  },
+
+  set(value: StorageItemValues, key: keyof StorageItems, isLocalStorage: boolean) {
+    if (isEmpty(value)) {
+      return null;
+    }
+
+    if (isLocalStorage && localStorage) {
+      return localStorage.setItem(key, stringify(value));
+    }
+
+    if (sessionStorage) {
+      return sessionStorage.setItem(key, stringify(value));
+    }
+
+    return null;
+  },
+
+  /**
+   * @deprecated use auth.clear("jwtToken") instead
+   */
+  clearToken(tokenKey: 'jwtToken' = TOKEN_KEY) {
+    void auth.clear(tokenKey);
+  },
+
+  /**
+   * @deprecated use auth.clear("userInfo") instead
+   */
+  clearUserInfo(userInfoKey: 'userInfo' = USER_INFO) {
+    return auth.clear(userInfoKey);
+  },
+
+  /**
+   * @deprecated use auth.get("jwtToken") instead
+   */
+  getToken(tokenKey: 'jwtToken' = TOKEN_KEY) {
+    return auth.get(tokenKey);
+  },
+
+  /**
+   * @deprecated use auth.get("userInfo") instead
+   */
+  getUserInfo(userInfoKey: 'userInfo' = USER_INFO) {
+    return auth.get(userInfoKey);
+  },
+
+  /**
+   * @depreacted use auth.set(value, "jwtToken", true | false) instead
+   */
+  setToken(
+    value: StorageItemValues = '',
+    isLocalStorage = false,
+    tokenKey: 'jwtToken' = TOKEN_KEY
+  ) {
+    void auth.set(value, tokenKey, isLocalStorage);
+  },
+
+  /**
+   * @depreacted use auth.set(value, "userInfo", true | false) instead
+   */
+  setUserInfo(value: StorageItemValues, isLocalStorage = false, userInfo: 'userInfo' = USER_INFO) {
+    void auth.set(value, userInfo, isLocalStorage);
+  },
+
+  /**
+   * @depreacted use auth.set(value, "userInfo", true | false) instead
+   */
+  updateToken(value: StorageItemValues = '') {
+    const isLocalStorage: boolean = localStorage && Boolean(localStorage.getItem(TOKEN_KEY));
+
+    void auth.setToken(value, isLocalStorage);
+  },
+};
+
+export { auth };
