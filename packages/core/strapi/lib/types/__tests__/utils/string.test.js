@@ -18,10 +18,17 @@ describe('Utils.String', () => {
   });
 
   test('Dict', () => {
-    // TODO: Replace with isMappedType matcher when available
-    type('NumberDict').equals('{ [x: string]: number; }');
-    type('StringDict').equals('{ [x: string]: string; }');
-    type('BooleanDict').equals('{ [x: string]: boolean; }');
+    type('NumberDict').isAnonymousObject({
+      indexes: [{ keyType: t.string(), type: t.number() }],
+    });
+
+    type('StringDict').isAnonymousObject({
+      indexes: [{ keyType: t.string(), type: t.string() }],
+    });
+
+    type('BooleanDict').isAnonymousObject({
+      indexes: [{ keyType: t.string(), type: t.boolean() }],
+    });
   });
 
   test('EndsWith', () => {
