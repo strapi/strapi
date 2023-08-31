@@ -40,7 +40,7 @@ const restrictedUser = {
 };
 
 const restrictedRole = {
-  name: 'restricted-configure-view-role',
+  name: 'restricted-role',
   description: '',
 };
 

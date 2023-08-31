@@ -25,7 +25,7 @@ const restrictedUser = {
 };
 
 const restrictedRole = {
-  name: 'restricted-provider-options-role',
+  name: 'restricted-role',
   description: '',
 };
 
