@@ -16,6 +16,9 @@ type WrappedAxiosInstance = {
   [K in (typeof pickedMethods)[number]]: AxiosInstance[K];
 };
 
+/**
+ * @deprecated Use the useFetchClient() hook instead, which is exported from the helper-plugin: { useFetchClient } from "@strapi/helper-plugin"
+ */
 function wrapAxiosInstance(instance: AxiosInstance): WrappedAxiosInstance {
   const isDevelopmentEnv = process.env.NODE_ENV === 'development';
 
