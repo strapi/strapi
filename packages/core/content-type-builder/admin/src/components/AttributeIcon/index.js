@@ -19,6 +19,7 @@ import {
   SingleType,
   Text,
   Uid,
+  Blocks,
 } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
@@ -53,6 +54,7 @@ const iconByTypes = {
   time: Date,
   timestamp: Date,
   uid: Uid,
+  blocks: Blocks,
 };
 
 const IconBox = styled(Box)`

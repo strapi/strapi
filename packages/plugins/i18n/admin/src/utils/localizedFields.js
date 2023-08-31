@@ -15,6 +15,7 @@ const LOCALIZED_FIELDS = [
   'number',
   'password',
   'richtext',
+  'blocks',
   'string',
   'text',
   'time',

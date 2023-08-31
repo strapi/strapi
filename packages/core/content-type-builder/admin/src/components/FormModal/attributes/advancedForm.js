@@ -330,6 +330,20 @@ const advancedForm = {
       ],
     };
   },
+  blocks() {
+    return {
+      sections: [
+        { sectionTitle: null, items: [options.default] },
+        {
+          sectionTitle: {
+            id: 'global.settings',
+            defaultMessage: 'Settings',
+          },
+          items: [options.required, options.maxLength, options.private, options.minLength],
+        },
+      ],
+    };
+  },
   text() {
     return {
       sections: [
