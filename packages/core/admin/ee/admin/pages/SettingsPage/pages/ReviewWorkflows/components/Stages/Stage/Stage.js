@@ -234,7 +234,7 @@ export function Stage({
           }}
           expanded={isOpen}
           shadow="tableShadow"
-          error={nameMeta.error ?? colorMeta?.error ?? false}
+          error={nameMeta.error ?? colorMeta?.error ?? permissionsMeta?.error ?? false}
           hasErrorMessage={false}
         >
           <AccordionToggle

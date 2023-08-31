@@ -115,16 +115,21 @@ export function ReviewWorkflowsEditView() {
           // changed; this enables partial updates e.g. for users who don't have
           // permissions to see roles
           stages: workflow.stages.map((stage) => {
-            const hasUpdatedPermissions =
-              stage?.permissions?.length > 0
-                ? stage.permissions.some(
-                    ({ role }) =>
-                      !serverState.workflow.stages.find(
-                        (stage) =>
-                          !!(stage.permissions ?? []).find((permission) => permission.role === role)
-                      )
-                  )
-                : false;
+            let hasUpdatedPermissions = true;
+            const serverStage = serverState.workflow.stages.find(
+              (serverStage) => serverStage.id === stage?.id
+            );
+
+            if (serverStage) {
+              hasUpdatedPermissions =
+                serverStage.permissions?.length !== stage.permission?.length ||
+                !serverStage.permissions.every(
+                  (serverPermission) =>
+                    !!stage.permissions.find(
+                      (permission) => permission.role === serverPermission.role
+                    )
+                );
+            }
 
             return {
               ...stage,
