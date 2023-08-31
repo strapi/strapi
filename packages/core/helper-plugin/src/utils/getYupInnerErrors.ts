@@ -1,4 +1,4 @@
-import type { TranslationMessage } from '../types/types';
+import type { TranslationMessage } from '../../types';
 import type { ValidationError } from 'yup';
 
 const extractValuesFromYupError = (

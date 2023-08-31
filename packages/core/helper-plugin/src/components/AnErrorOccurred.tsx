@@ -4,7 +4,7 @@ import { EmptyStateLayout, EmptyStateLayoutProps } from '@strapi/design-system';
 import { ExclamationMarkCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import type { TranslationMessage } from '../types/types';
+import type { TranslationMessage } from '../../types';
 
 export type AnErrorOccurredProps = Omit<EmptyStateLayoutProps, 'content' | 'icon'> & {
   content?: TranslationMessage;
