@@ -17,31 +17,54 @@ type WrappedAxiosInstance = {
 };
 
 function wrapAxiosInstance(instance: AxiosInstance): WrappedAxiosInstance {
-  if (process.env.NODE_ENV !== 'development') return instance;
+  const isDevelopmentEnv = process.env.NODE_ENV === 'development';
 
-  const methodWrapper = <M extends keyof AxiosInstance>(
-    method: AxiosInstance[M],
-    args: Parameters<AxiosInstance[M]>
-  ): ReturnType<AxiosInstance[M]> => {
+  const warn = () => {
+    // Only log deprecation warnings in development
+    if (!isDevelopmentEnv) return;
+
     console.warn(
       'Deprecation warning: Usage of "axiosInstance" utility is deprecated and will be removed in the next major release. Instead, use the useFetchClient() hook, which is exported from the helper-plugin: { useFetchClient } from "@strapi/helper-plugin"'
     );
-
-    return method(...args);
   };
 
   const wrapper: WrappedAxiosInstance = {
-    request: (...args: Parameters<AxiosInstance['request']>) =>
-      methodWrapper(instance.request, args),
-    get: (...args: Parameters<AxiosInstance['get']>) => methodWrapper(instance.get, args),
-    head: (...args: Parameters<AxiosInstance['head']>) => methodWrapper(instance.head, args),
-    delete: (...args: Parameters<AxiosInstance['delete']>) => methodWrapper(instance.delete, args),
-    options: (...args: Parameters<AxiosInstance['options']>) =>
-      methodWrapper(instance.options, args),
-    post: (...args: Parameters<AxiosInstance['post']>) => methodWrapper(instance.post, args),
-    put: (...args: Parameters<AxiosInstance['put']>) => methodWrapper(instance.put, args),
-    patch: (...args: Parameters<AxiosInstance['patch']>) => methodWrapper(instance.patch, args),
-    getUri: (...args: Parameters<AxiosInstance['getUri']>) => methodWrapper(instance.getUri, args),
+    request: (...args) => {
+      warn();
+      return instance.request(...args);
+    },
+    get: (...args) => {
+      warn();
+      return instance.get(...args);
+    },
+    head: (...args) => {
+      warn();
+      return instance.head(...args);
+    },
+    delete: (...args) => {
+      warn();
+      return instance.delete(...args);
+    },
+    options: (...args) => {
+      warn();
+      return instance.options(...args);
+    },
+    post: (...args) => {
+      warn();
+      return instance.post(...args);
+    },
+    put: (...args) => {
+      warn();
+      return instance.put(...args);
+    },
+    patch: (...args) => {
+      warn();
+      return instance.patch(...args);
+    },
+    getUri: (...args) => {
+      warn();
+      return instance.getUri(...args);
+    },
   };
 
   return wrapper;
