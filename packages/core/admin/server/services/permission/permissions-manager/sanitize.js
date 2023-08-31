@@ -159,7 +159,7 @@ module.exports = ({ action, ability, model }) => {
 
       const { subject, action: actionOverride } = getDefaultOptions(data, options);
 
-      const permittedFields = permittedFieldsOf(ability, actionOverride, subject, {
+      const permittedFields = permittedFieldsOf(ability, actionOverride, detectSubjectType(subject), {
         fieldsFrom: (rule) => rule.fields || [],
       });
 
