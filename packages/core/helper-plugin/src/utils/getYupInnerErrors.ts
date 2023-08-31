@@ -1,9 +1,9 @@
-import type { TranslationMessage } from 'src/types/shared';
+import type { TranslationMessage } from '../types/types';
 import type { ValidationError } from 'yup';
 
 const extractValuesFromYupError = (
-  errorType: string | undefined,
-  errorParams: Record<string, any> | undefined
+  errorType?: string | undefined,
+  errorParams?: Record<string, any> | undefined
 ) => {
   if (!errorType || !errorParams) {
     return {};
@@ -15,7 +15,7 @@ const extractValuesFromYupError = (
 };
 
 const getYupInnerErrors = (error: ValidationError) =>
-  (error?.inner || []).reduce((acc, currentError) => {
+  (error?.inner || []).reduce<Record<string, TranslationMessage>>((acc, currentError) => {
     if (currentError.path) {
       acc[currentError.path.split('[').join('.').split(']').join('')] = {
         id: currentError.message,
@@ -25,6 +25,6 @@ const getYupInnerErrors = (error: ValidationError) =>
     }
 
     return acc;
-  }, {} as Record<string, TranslationMessage>);
+  }, {});
 
 export { getYupInnerErrors };

@@ -4,7 +4,7 @@ import { EmptyStateLayout, EmptyStateLayoutProps } from '@strapi/design-system';
 import { EmptyDocuments } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import type { TranslationMessage } from 'src/types/shared';
+import type { TranslationMessage } from '../types/types';
 
 export type NoContentProps = Omit<EmptyStateLayoutProps, 'content' | 'icon'> & {
   content?: TranslationMessage;
