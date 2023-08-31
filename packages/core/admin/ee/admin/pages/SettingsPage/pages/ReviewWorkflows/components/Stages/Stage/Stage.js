@@ -234,7 +234,7 @@ export function Stage({
           }}
           expanded={isOpen}
           shadow="tableShadow"
-          error={nameMeta.error ?? colorMeta?.error ?? false}
+          error={nameMeta.error ?? colorMeta?.error ?? permissionsMeta?.error ?? false}
           hasErrorMessage={false}
         >
           <AccordionToggle
@@ -244,7 +244,7 @@ export function Stage({
               (canDelete || canUpdate) && (
                 <Flex>
                   <Menu.Root>
-                    <Menu.Trigger size="S" endIcon={undefined} paddingLeft={2} paddingRight={2}>
+                    <Menu.Trigger size="S" endIcon={null} paddingLeft={2} paddingRight={2}>
                       <More aria-hidden focusable={false} />
                       <VisuallyHidden as="span">
                         {formatMessage({

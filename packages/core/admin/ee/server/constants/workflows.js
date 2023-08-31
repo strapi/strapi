@@ -7,6 +7,7 @@ module.exports = {
   STAGE_TRANSITION_UID: 'admin::review-workflows.stage.transition',
   STAGE_DEFAULT_COLOR: '#4945FF',
   ENTITY_STAGE_ATTRIBUTE: 'strapi_stage',
+  ENTITY_ASSIGNEE_ATTRIBUTE: 'strapi_assignee',
   MAX_WORKFLOWS: 200,
   MAX_STAGES_PER_WORKFLOW: 200,
   ERRORS: {

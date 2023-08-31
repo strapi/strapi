@@ -105,7 +105,7 @@ module.exports = ({ command }) => {
           }
 
           await getCommanderConfirmMessage(
-            'The transfer will delete all the remote Strapi assets and its database. Are you sure you want to proceed?',
+            'The transfer will delete existing data from the remote Strapi! Are you sure you want to proceed?',
             { failMessage: 'Transfer process aborted' }
           )(thisCommand);
         }

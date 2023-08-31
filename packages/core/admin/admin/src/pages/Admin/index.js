@@ -42,7 +42,9 @@ const ProfilePage = lazy(() =>
   import(/* webpackChunkName: "Admin_profilePage" */ '../ProfilePage')
 );
 const SettingsPage = lazy(() =>
-  import(/* webpackChunkName: "Admin_settingsPage" */ '../SettingsPage')
+  import(/* webpackChunkName: "Admin_settingsPage" */ '../SettingsPage').then((module) => ({
+    default: module.SettingsPage,
+  }))
 );
 
 // Simple hook easier for testing

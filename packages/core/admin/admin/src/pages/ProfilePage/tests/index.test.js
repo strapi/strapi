@@ -4,6 +4,7 @@ import { darkTheme, lightTheme } from '@strapi/design-system';
 import { render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { MemoryRouter } from 'react-router-dom';
 
 import Theme from '../../../components/Theme';
 import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
@@ -39,7 +40,9 @@ const setup = (props) =>
         <QueryClientProvider client={client}>
           <IntlProvider messages={{}} textComponent="span" locale="en">
             <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-              <Theme>{children}</Theme>
+              <MemoryRouter>
+                <Theme>{children}</Theme>
+              </MemoryRouter>
             </ThemeToggleProvider>
           </IntlProvider>
         </QueryClientProvider>
