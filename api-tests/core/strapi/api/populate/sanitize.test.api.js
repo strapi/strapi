@@ -6,12 +6,15 @@ const path = require('path');
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createContentAPIRequest, createAuthRequest } = require('api-tests/request');
+const { createUtils } = require('api-tests/utils');
 
 const builder = createTestBuilder();
 
 let strapi;
 let file;
 let rq;
+let adminUser;
+let utils;
 
 const schemas = {
   contentTypes: {
@@ -114,9 +117,23 @@ describe('Sanitize populated entries', () => {
 
     strapi = await createStrapiInstance();
     rq = createContentAPIRequest({ strapi });
+
+    utils = createUtils(strapi);
+
+    const userInfo = {
+      email: 'test@strapi.io',
+      firstname: 'test',
+      lastname: 'strapi',
+      registrationToken: 'foobar',
+      password: 'test1234',
+      roles: [await utils.getSuperAdminRole()],
+    };
+
+    adminUser = await utils.createUser(userInfo);
   });
 
   afterAll(async () => {
+    await utils.deleteUserById(adminUser.id);
     await strapi.destroy();
     await builder.cleanup();
   });
@@ -160,10 +177,29 @@ describe('Sanitize populated entries', () => {
   });
 
   describe('Wildcard Populate', () => {
+    beforeAll(async () => {
+      const adminRq = await createAuthRequest({ strapi });
+
+      await adminRq.put('/admin/review-workflows/workflows/1', {
+        body: {
+          data: {
+            id: 1,
+            name: 'Default',
+            contentTypes: ['api::b.b'],
+          },
+        },
+      });
+
+      const contentId = 1;
+      await adminRq.put(`/admin/content-manager/collection-types/api::b.b/${contentId}/assignee`, {
+        body: { data: { id: adminUser.id } },
+      });
+    });
+
     test('Wildcard populate is transformed to an exhaustive list of populatable fields', async () => {
       const findManyMock = jest.spyOn(strapi.entityService, 'findMany');
 
-      const { status } = await rq.get(`/${schemas.contentTypes.b.pluralName}`, {
+      const { status, body } = await rq.get(`/${schemas.contentTypes.b.pluralName}`, {
         qs: { fields: ['id'], populate: '*' },
       });
 
@@ -175,6 +211,24 @@ describe('Sanitize populated entries', () => {
           populate: expect.objectContaining({ relA: true, cp: true, dz: true, img: true }),
         })
       );
+
+      const privateUserFields = [
+        'password',
+        'email',
+        'resetPasswordToken',
+        'registrationToken',
+        'isActive',
+        'roles',
+        'blocked',
+      ];
+
+      // Assert that every assignee returned is sanitized correctly
+      body.data.forEach((item) => {
+        expect(item.attributes).toHaveProperty('strapi_assignee');
+        privateUserFields.forEach((field) => {
+          expect(item.attributes['strapi_assignee']).not.toHaveProperty(field);
+        });
+      });
     });
   });
 });
