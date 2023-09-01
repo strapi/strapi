@@ -2,10 +2,12 @@ import React from 'react';
 
 import { EmptyStateLayout, EmptyStateLayoutProps } from '@strapi/design-system';
 import { EmptyDocuments } from '@strapi/icons';
-import { MessageDescriptor, PrimitiveType, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
+
+import type { TranslationMessage } from '../../types';
 
 export type NoContentProps = Omit<EmptyStateLayoutProps, 'content' | 'icon'> & {
-  content?: MessageDescriptor & { values?: Record<string, PrimitiveType> };
+  content?: TranslationMessage;
 };
 
 const NoContent = ({
