@@ -27,19 +27,18 @@ const sendUpdateProjectInformation = async () => {
   strapi.telemetry.send('didUpdateProjectInformation', {
     groupProperties: { numberOfActiveAdminUsers, numberOfAdminUsers },
   });
-}
+};
 
 const startCron = (strapi) => {
   strapi.cron.add({
-    '0 0 0 * * *': () => sendUpdateProjectInformation()
-  })
-}
-
+    '0 0 0 * * *': () => sendUpdateProjectInformation(),
+  });
+};
 
 module.exports = {
   sendDidInviteUser,
   sendDidUpdateRolePermissions,
   sendDidChangeInterfaceLanguage,
   sendUpdateProjectInformation,
-  startCron
+  startCron,
 };
