@@ -42,8 +42,4 @@ describe('getDisplayName', () => {
       )
     ).toEqual('john@doe.com');
   });
-
-  it('should return a dash if user is null', () => {
-    expect(getDisplayName(null, mockFormatMessage)).toEqual('-');
-  });
 });

@@ -800,7 +800,9 @@ function ListView({
                             return (
                               <Td key={key}>
                                 <Typography textColor="neutral800">
-                                  {getDisplayName(rowData[name.split('.')[0]], formatMessage)}
+                                  {rowData[name.split('.')[0]]
+                                    ? getDisplayName(rowData[name.split('.')[0]], formatMessage)
+                                    : '-'}
                                 </Typography>
                               </Td>
                             );
@@ -811,7 +813,9 @@ function ListView({
                             return (
                               <Td key={key}>
                                 <Typography textColor="neutral800">
-                                  {getDisplayName(rowData[name.split('.')[0]], formatMessage)}
+                                  {rowData[name.split('.')[0]]
+                                    ? getDisplayName(rowData[name.split('.')[0]], formatMessage)
+                                    : '-'}
                                 </Typography>
                               </Td>
                             );

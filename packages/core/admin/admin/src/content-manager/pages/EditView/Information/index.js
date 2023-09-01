@@ -58,7 +58,7 @@ const Body = () => {
   const getFieldInfo = (atField, byField) => {
     const user = initialData[byField] ?? {};
 
-    const displayName = getDisplayName(user, formatMessage);
+    const displayName = user ? getDisplayName(user, formatMessage) : '-';
     const timestamp = initialData[atField] ? new Date(initialData[atField]).getTime() : Date.now();
     const elapsed = timestamp - currentTime.current;
     const { unit, value } = getUnits(-elapsed);
