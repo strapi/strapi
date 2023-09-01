@@ -1,6 +1,6 @@
 import { Utils } from '../..';
 
-type Client = 'mysql' | 'postgres' | 'sqlite';
+type ClientKind = 'mysql' | 'postgres' | 'sqlite';
 
 type SSLConfig = {
   rejectUnauthorized?: boolean;
@@ -24,7 +24,7 @@ type PoolConfig = {
   afterCreate?: (conn: any, done: (err?: Error, conn?: any) => void) => void;
 };
 
-type Connection<TClient extends Client> = {
+type Connection<TClient extends ClientKind> = {
   database: string;
   user: string;
   password: string;
@@ -35,18 +35,19 @@ type Connection<TClient extends Client> = {
   timezone?: string;
 } & { [key: string]: unknown } & Utils.Expression.MatchFirst<
     [[Utils.Expression.StrictEqual<TClient, 'postgres'>, { schema?: string }]],
-    {}
+    unknown
   >;
 
 type SqliteConnection = {
   filename: string;
 } & { [key: string]: unknown };
 
-export interface DBConfig<TClient extends Client> {
+export interface DBConfig<TClient extends ClientKind> {
   connection: {
     client: TClient;
-    connection: Utils.Expression.MatchFirst<
-      [[Utils.Expression.StrictEqual<TClient, 'sqlite'>, SqliteConnection]],
+    connection: Utils.Expression.If<
+      Utils.Expression.StrictEqual<TClient, 'sqlite'>,
+      SqliteConnection,
       Connection<TClient>
     >;
     debug?: boolean;
@@ -54,7 +55,7 @@ export interface DBConfig<TClient extends Client> {
     acquireConnectionTimeout?: number;
   } & { [key: string]: unknown } & Utils.Expression.MatchFirst<
       [[Utils.Expression.StrictEqual<TClient, 'sqlite'>, { useNullAsDefault?: boolean }]],
-      {}
+      unknown
     >;
   settings?: {
     forceMigration?: boolean;
