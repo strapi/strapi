@@ -2,6 +2,13 @@ import { Utils } from '../..';
 
 type ClientKind = 'mysql' | 'postgres' | 'sqlite';
 
+type IfClientIs<
+  TClient extends ClientKind,
+  TClientKind extends ClientKind,
+  TOnTrue,
+  TOnFalse
+> = Utils.Expression.If<Utils.Expression.StrictEqual<TClient, TClientKind>, TOnTrue, TOnFalse>;
+
 type SSLConfig = {
   rejectUnauthorized?: boolean;
   key?: string;
@@ -33,10 +40,7 @@ type Connection<TClient extends ClientKind> = {
   ssl?: SSLConfig | boolean;
   connectionString?: string;
   timezone?: string;
-} & { [key: string]: unknown } & Utils.Expression.MatchFirst<
-    [[Utils.Expression.StrictEqual<TClient, 'postgres'>, { schema?: string }]],
-    unknown
-  >;
+} & { [key: string]: unknown } & IfClientIs<TClient, 'postgres', { schema?: string }, unkown>;
 
 type SqliteConnection = {
   filename: string;
@@ -45,16 +49,14 @@ type SqliteConnection = {
 export interface DBConfig<TClient extends ClientKind> {
   connection: {
     client: TClient;
-    connection: Utils.Expression.If<
-      Utils.Expression.StrictEqual<TClient, 'sqlite'>,
-      SqliteConnection,
-      Connection<TClient>
-    >;
+    connection: IfClientIs<TClient, 'sqlite', SqliteConnection, Connection<TClient>>;
     debug?: boolean;
     pool?: PoolConfig;
     acquireConnectionTimeout?: number;
-  } & { [key: string]: unknown } & Utils.Expression.MatchFirst<
-      [[Utils.Expression.StrictEqual<TClient, 'sqlite'>, { useNullAsDefault?: boolean }]],
+  } & { [key: string]: unknown } & IfClientIs<
+      TClient,
+      'sqlite',
+      { useNullAsDefault?: boolean },
       unknown
     >;
   settings?: {
