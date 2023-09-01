@@ -2,25 +2,26 @@ import startsWith from 'lodash/startsWith';
 
 import { auth } from './auth';
 import { once } from './once';
+
 /**
  * Parses the JSON returned by a network request
- *
- * @param  {object} response A response from a network request
- *
- * @return {object}          The parsed JSON from the request
  */
-function parseJSON(response) {
-  return response.json ? response.json() : response;
+async function parseJSON<ResponseType>(response: Response | ResponseType): Promise<ResponseType> {
+  if (response instanceof Response) {
+    return response.json();
+  }
+
+  return response;
+}
+
+interface CustomError extends Error {
+  response?: Response & { payload?: unknown };
 }
 
 /**
  * Checks if a network request came back fine, and throws an error if not
- *
- * @param  {object} response   A response from a network request
- *
- * @return {object|undefined} Returns either the response, or throws an error
  */
-function checkStatus(response, checkToken = true) {
+async function checkStatus(response: Response, checkToken = true): Promise<Response> {
   if ((response.status >= 200 && response.status < 300) || response.status === 0) {
     return response;
   }
@@ -35,26 +36,20 @@ function checkStatus(response, checkToken = true) {
 
   return parseJSON(response)
     .then((responseFormatted) => {
-      const error = new Error(response.statusText);
+      const error: CustomError = new Error(response.statusText);
       error.response = response;
       error.response.payload = responseFormatted;
       throw error;
     })
     .catch(() => {
-      const error = new Error(response.statusText);
+      const error: CustomError = new Error(response.statusText);
       error.response = response;
 
       throw error;
     });
 }
 
-/**
- * Format query params
- *
- * @param params
- * @returns {string}
- */
-function formatQueryParams(params) {
+function formatQueryParams(params: Record<string, string>): string {
   return Object.keys(params)
     .map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
     .join('&');
@@ -62,17 +57,15 @@ function formatQueryParams(params) {
 
 /**
  * Server restart watcher
- * @param response
- * @returns {object} the response data
  */
-function serverRestartWatcher(response) {
+async function serverRestartWatcher<ResponseType>(response: ResponseType): Promise<ResponseType> {
   return new Promise((resolve) => {
     fetch(`${window.strapi.backendURL}/_health`, {
       method: 'HEAD',
       mode: 'no-cors',
+      keepalive: false,
       headers: {
         'Content-Type': 'application/json',
-        'Keep-Alive': false,
       },
     })
       .then((res) => {
@@ -92,29 +85,25 @@ function serverRestartWatcher(response) {
 
 const warnOnce = once(console.warn);
 
+interface RequestOptions extends RequestInit {
+  params?: Record<string, string>;
+}
+
 /**
  * Requests a URL, returning a promise
  *
  * @deprecated use `useFetchClient` instead.
- *
- * @param  {string} url       The URL we want to request
- * @param  {object} [options] The options we want to pass to "fetch"
- *
- * @return {object}           The response data
  */
-export function request(...args) {
-  let [url, options = {}, shouldWatchServerRestart, stringify = true, ...rest] = args;
-  let noAuth;
-
+export async function request<ResponseType = unknown>(
+  url: string,
+  options = {} as RequestOptions,
+  shouldWatchServerRestart?: boolean,
+  stringify = true,
+  { noAuth }: { noAuth?: boolean } = { noAuth: false }
+): Promise<ResponseType> {
   warnOnce(
     'The `request` function is deprecated and will be removed in the next major version. Please use `useFetchClient` instead.'
   );
-
-  try {
-    [{ noAuth }] = rest;
-  } catch (err) {
-    noAuth = false;
-  }
 
   // Set headers
   if (!options.headers) {
@@ -152,10 +141,10 @@ export function request(...args) {
 
   return fetch(url, options)
     .then(checkStatus)
-    .then(parseJSON)
+    .then(parseJSON<ResponseType>)
     .then((response) => {
       if (shouldWatchServerRestart) {
-        return serverRestartWatcher(response);
+        return serverRestartWatcher<ResponseType>(response);
       }
 
       return response;
