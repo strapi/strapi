@@ -6,9 +6,15 @@
  * @property {string} username
  * @property {string} email
  *
- * @type {(user: AdminUserNamesAttributes, formatMessage: import('react-intl').formatMessage) => string}
+ * @type {(user: AdminUserNamesAttributes | null, formatMessage: import('react-intl').formatMessage) => string}
  */
-const getDisplayName = ({ firstname, lastname, username, email }, formatMessage) => {
+const getDisplayName = (user, formatMessage) => {
+  if (!user) {
+    return '-';
+  }
+
+  const { firstname, lastname, username, email } = user;
+
   if (username) {
     return username;
   }
