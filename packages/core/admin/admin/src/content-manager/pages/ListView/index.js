@@ -797,19 +797,8 @@ function ListView({
 
                           if (['createdBy', 'updatedBy'].includes(name.split('.')[0])) {
                             // Display the users full name
-                            return (
-                              <Td key={key}>
-                                <Typography textColor="neutral800">
-                                  {rowData[name.split('.')[0]]
-                                    ? getDisplayName(rowData[name.split('.')[0]], formatMessage)
-                                    : '-'}
-                                </Typography>
-                              </Td>
-                            );
-                          }
-
-                          if (['createdBy', 'updatedBy'].includes(name.split('.')[0])) {
-                            // Display the users full name
+                            // Some entries doesn't have a user assigned as creator/updater (ex: entries created through content API)
+                            // In this case, we display a dash
                             return (
                               <Td key={key}>
                                 <Typography textColor="neutral800">
