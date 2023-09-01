@@ -24,7 +24,13 @@ export default {
         defaultMessage: 'Documentation',
       },
       permissions: PERMISSIONS.main,
-      Component: () => import(/* webpackChunkName: "documentation-page" */ './pages/PluginPage'),
+      async Component() {
+        const component = await import(
+          /* webpackChunkName: "documentation-page" */ './pages/PluginPage'
+        );
+
+        return component;
+      },
     });
 
     app.registerPlugin({
@@ -40,8 +46,13 @@ export default {
       },
       id: 'documentation',
       to: `/settings/${pluginId}`,
-      Component: () =>
-        import(/* webpackChunkName: "documentation-settings" */ './pages/SettingsPage'),
+      async Component() {
+        const component = await import(
+          /* webpackChunkName: "documentation-settings" */ './pages/SettingsPage'
+        );
+
+        return component;
+      },
       permissions: PERMISSIONS.main,
     });
   },
