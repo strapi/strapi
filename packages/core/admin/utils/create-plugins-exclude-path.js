@@ -1,5 +1,7 @@
 'use strict';
 
+const path = require('path');
+
 const NODE_MODULES = 'node_modules';
 /**
  * @param {string[]} pluginsPath – an array of paths to the plugins from the user's directory
@@ -14,7 +16,7 @@ const createPluginsExcludePath = (pluginsPath = []) => {
     return /node_modules/;
   }
 
-  return new RegExp(`${NODE_MODULES}/(?!(${pluginsPath.join('|')}))`);
+  return new RegExp(`${path.resolve(__dirname, NODE_MODULES)}/(?!(${pluginsPath.join('|')}))`);
 };
 
 module.exports = { createPluginsExcludePath };
