@@ -2,7 +2,6 @@
 import * as React from 'react';
 
 import { Box } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { createPortal } from 'react-dom';
 import styled from 'styled-components';
 
@@ -10,24 +9,22 @@ import styled from 'styled-components';
  * Context
  * -----------------------------------------------------------------------------------------------*/
 
-/**
- * @preserve
- * @typedef {Object} OverlayBlockerContextValue
- * @property {() => void} lockApp
- * @property {() => void} unlockApp
- */
+interface OverlayBlockerContextValue {
+  lockApp?: () => void;
+  unlockApp?: () => void;
+}
 
-/**
- * @preserve
- * @type {React.Context<OverlayBlockerContextValue>}
- */
-const OverlayBlockerContext = React.createContext();
+const OverlayBlockerContext = React.createContext<OverlayBlockerContextValue>({});
 
 /* -------------------------------------------------------------------------------------------------
  * Provider
  * -----------------------------------------------------------------------------------------------*/
 
-const OverlayBlockerProvider = ({ children }) => {
+interface OverlayBlockerProviderProps {
+  children: React.ReactNode;
+}
+
+const OverlayBlockerProvider = ({ children }: OverlayBlockerProviderProps) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const lockApp = React.useCallback(() => {
@@ -50,10 +47,6 @@ const OverlayBlockerProvider = ({ children }) => {
   );
 };
 
-OverlayBlockerProvider.propTypes = {
-  children: PropTypes.node.isRequired,
-};
-
 const Overlay = styled(Box)`
   position: fixed;
   top: 0;
@@ -68,10 +61,6 @@ const Overlay = styled(Box)`
  * Hook
  * -----------------------------------------------------------------------------------------------*/
 
-/**
- * @preserve
- * @returns {OverlayBlockerContextValue}
- */
 const useOverlayBlocker = () => React.useContext(OverlayBlockerContext);
 
 export { OverlayBlockerContext, OverlayBlockerProvider, useOverlayBlocker };
