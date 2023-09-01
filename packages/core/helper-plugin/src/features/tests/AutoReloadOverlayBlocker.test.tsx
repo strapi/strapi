@@ -30,9 +30,9 @@ describe('AutoReloadOverlayBlocker', () => {
 
     act(() => {
       result.current.lockAppWithAutoreload();
-    })
+    });
 
-    expect(screen.getByText(/Waiting for restart/)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Waiting for restart/ })).toBeInTheDocument();
   });
 
   it('should unlock the app', async () => {
@@ -42,12 +42,12 @@ describe('AutoReloadOverlayBlocker', () => {
 
     act(() => {
       result.current.lockAppWithAutoreload();
-    })
-    expect(screen.getByText(/Waiting for restart/)).toBeInTheDocument();
+    });
+    expect(screen.getByRole('heading', { name: /Waiting for restart/ })).toBeInTheDocument();
     act(() => {
       result.current.unlockAppWithAutoreload();
-    })
-    expect(screen.queryByText(/Waiting for restart/)).not.toBeInTheDocument();
+    });
+    expect(screen.queryByRole('heading', { name: /Waiting for restart/ })).not.toBeInTheDocument();
   });
 
   it('should show failed message after 30s', async () => {
@@ -57,12 +57,14 @@ describe('AutoReloadOverlayBlocker', () => {
 
     act(() => {
       result.current.lockAppWithAutoreload();
-    })
+    });
 
-    expect(screen.getByText(/Waiting for restart/)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Waiting for restart/ })).toBeInTheDocument();
 
     act(() => jest.advanceTimersByTime(MAX_ELAPSED_TIME));
 
-    expect(screen.getByText(/The restart is taking longer than expected/)).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /The restart is taking longer than expected/ })
+    ).toBeInTheDocument();
   });
 });

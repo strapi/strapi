@@ -28,16 +28,14 @@ export interface AutoReloadOverlayBlockerConfig {
  * Context
  * -----------------------------------------------------------------------------------------------*/
 
-type EmptyObject = Record<string, never>;
-
 export interface AutoReloadOverlayBlockerContextValue {
-  lockAppWithAutoreload: (config?: AutoReloadOverlayBlockerConfig) => void;
-  unlockAppWithAutoreload: () => void;
+  lockAppWithAutoreload?: (config?: AutoReloadOverlayBlockerConfig) => void;
+  unlockAppWithAutoreload?: () => void;
 }
 
-const AutoReloadOverlayBlockerContext = React.createContext<
-  AutoReloadOverlayBlockerContextValue | EmptyObject
->({});
+const AutoReloadOverlayBlockerContext = React.createContext<AutoReloadOverlayBlockerContextValue>(
+  {}
+);
 
 /* -------------------------------------------------------------------------------------------------
  * Provider
@@ -51,17 +49,17 @@ const MAX_ELAPSED_TIME = 30 * 1000;
 
 const AutoReloadOverlayBlockerProvider = ({ children }: AutoReloadOverlayBlockerProviderProps) => {
   const [isOpen, setIsOpen] = React.useState(false);
-  const [config, setConfig] = React.useState<AutoReloadOverlayBlockerConfig | undefined>(undefined);
+  const [config, setConfig] = React.useState<AutoReloadOverlayBlockerConfig>({});
   const [failed, setFailed] = React.useState(false);
 
-  const lockAppWithAutoreload = React.useCallback((config?: AutoReloadOverlayBlockerConfig) => {
+  const lockAppWithAutoreload = React.useCallback((config: AutoReloadOverlayBlockerConfig = {}) => {
     setIsOpen(true);
     setConfig(config);
   }, []);
 
   const unlockAppWithAutoreload = React.useCallback(() => {
     setIsOpen(false);
-    setConfig(undefined);
+    setConfig({});
   }, []);
 
   // eslint-disable-next-line consistent-return
@@ -104,7 +102,7 @@ const AutoReloadOverlayBlockerProvider = ({ children }: AutoReloadOverlayBlocker
     };
   }
 
-  const autoReloadValue: AutoReloadOverlayBlockerContextValue = React.useMemo(
+  const autoReloadValue = React.useMemo(
     () => ({
       lockAppWithAutoreload,
       unlockAppWithAutoreload,
