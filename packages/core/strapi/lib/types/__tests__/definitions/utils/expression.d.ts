@@ -1,0 +1,168 @@
+import type { Utils } from '@strapi/strapi';
+import { Array } from '../../../../services/entity-service/types/params/filters/operators';
+
+// IsNever
+type IsNeverGivenNever = Utils.Expression.IsNever<never>;
+type IsNeverNotGivenNever = Utils.Expression.IsNever<string>;
+type IsNeverGivenUnknown = Utils.Expression.IsNever<unknown>;
+
+// IsNotNever
+type IsNotNeverGivenNever = Utils.Expression.IsNotNever<never>;
+type IsNotNeverGivenUnknown = Utils.Expression.IsNotNever<unknown>;
+type IsNotNeverGivenString = Utils.Expression.IsNotNever<string>;
+type IsNotNeverGivenStringLiteral = Utils.Expression.IsNotNever<'test'>;
+
+// IsTrue
+type IsTrueGivenTrue = Utils.Expression.IsTrue<true>;
+type IsTrueGivenFalse = Utils.Expression.IsTrue<false>;
+type IsTrueGivenBoolean = Utils.Expression.IsTrue<boolean>;
+type IsTrueGivenNonBoolean = Utils.Expression.IsTrue<number>;
+type IsTrueGivenNonBooleanLiteral = Utils.Expression.IsTrue<10>;
+type IsTrueGivenOne = Utils.Expression.IsTrue<1>;
+type IsTrueGivenZero = Utils.Expression.IsTrue<0>;
+
+// IsFalse
+type IsFalseGivenTrue = Utils.Expression.IsFalse<true>;
+type IsFalseGivenFalse = Utils.Expression.IsFalse<false>;
+type IsFalseGivenBoolean = Utils.Expression.IsFalse<boolean>;
+type IsFalseGivenNonBoolean = Utils.Expression.IsFalse<number>;
+type IsFalseGivenNonBooleanLiteral = Utils.Expression.IsFalse<10>;
+type IsFalseGivenOne = Utils.Expression.IsFalse<1>;
+type IsFalseGivenZero = Utils.Expression.IsFalse<0>;
+
+// Strict Equal
+type IsStrictEqualGivenNever = Utils.Expression.StrictEqual<never, never>;
+type IsStrictEqualGivenNeverAndUnknown = Utils.Expression.StrictEqual<never, unknown>;
+type IsStrictEqualGivenEqualLiterals = Utils.Expression.StrictEqual<1, 1>;
+type IsStrictEqualGivenEqualTypes = Utils.Expression.StrictEqual<boolean, boolean>;
+type IsStrictEqualGivenDifferentLiterals = Utils.Expression.StrictEqual<1, 2>;
+type IsStrictEqualGivenDifferentTypes = Utils.Expression.StrictEqual<boolean, string>;
+
+// Extends
+type StringExtendsString = Utils.Expression.Extends<string, string>;
+type StringLiteralExtendsString = Utils.Expression.Extends<'text', string>;
+type StringExtendsStringLiteral = Utils.Expression.Extends<string, 'text'>;
+type StringExtendsNumber = Utils.Expression.Extends<string, number>;
+type StringLiteralExtendsNumber = Utils.Expression.Extends<'text', number>;
+type StringExtendsNumberLiteral = Utils.Expression.Extends<string, 10>;
+type NumberExtendsNumber = Utils.Expression.Extends<number, number>;
+type NumberLiteralExtendsNumber = Utils.Expression.Extends<10, number>;
+type NumberExtendsNumberLiteral = Utils.Expression.Extends<number, 10>;
+type NumberExtendsString = Utils.Expression.Extends<number, string>;
+type NumberLiteralExtendsString = Utils.Expression.Extends<10, string>;
+type NumberExtendsStringLiteral = Utils.Expression.Extends<number, 'text'>;
+type ObjectExtendsObject = Utils.Expression.Extends<{}, {}>;
+type ObjectLiteralExtendsObject = Utils.Expression.Extends<{ test: 1 }, object>;
+type ObjectExtendsObjectLiteral = Utils.Expression.Extends<object, { test: 1 }>;
+type ObjectExtendsNumber = Utils.Expression.Extends<object, number>;
+type ObjectExtendsAny = Utils.Expression.Extends<object, any>;
+type ObjectExtendsUnknown = Utils.Expression.Extends<object, unknown>;
+type ObjectExtendsNever = Utils.Expression.Extends<object, never>;
+type ArrayExtendsArray = Utils.Expression.Extends<Array<string>, Array<string>>;
+type TupleExtendsArray = Utils.Expression.Extends<[string], Array<string>>;
+type StringArrayExtendsArray = Utils.Expression.Extends<string[], Array<string>>;
+
+// NotExtends
+type StringNotExtendsString = Utils.Expression.DoesNotExtends<string, string>;
+type StringLiteralNotExtendsString = Utils.Expression.DoesNotExtends<'text', string>;
+type StringNotExtendsStringLiteral = Utils.Expression.DoesNotExtends<string, 'text'>;
+type StringNotExtendsNumber = Utils.Expression.DoesNotExtends<string, number>;
+type StringLiteralNotExtendsNumber = Utils.Expression.DoesNotExtends<'text', number>;
+type StringNotExtendsNumberLiteral = Utils.Expression.DoesNotExtends<string, 10>;
+type NumberNotExtendsNumber = Utils.Expression.DoesNotExtends<number, number>;
+type NumberLiteralNotExtendsNumber = Utils.Expression.DoesNotExtends<10, number>;
+type NumberNotExtendsNumberLiteral = Utils.Expression.DoesNotExtends<number, 10>;
+type NumberNotExtendsString = Utils.Expression.DoesNotExtends<number, string>;
+type NumberLiteralNotExtendsString = Utils.Expression.DoesNotExtends<10, string>;
+type NumberNotExtendsStringLiteral = Utils.Expression.DoesNotExtends<number, 'text'>;
+type ObjectNotExtendsObject = Utils.Expression.DoesNotExtends<{}, {}>;
+type ObjectLiteralNotExtendsObject = Utils.Expression.DoesNotExtends<{ test: 1 }, object>;
+type ObjectNotExtendsObjectLiteral = Utils.Expression.DoesNotExtends<object, { test: 1 }>;
+type ObjectNotExtendsNumber = Utils.Expression.DoesNotExtends<object, number>;
+type ObjectNotExtendsAny = Utils.Expression.DoesNotExtends<object, any>;
+type ObjectNotExtendsUnknown = Utils.Expression.DoesNotExtends<object, unknown>;
+type ObjectNotExtendsNever = Utils.Expression.DoesNotExtends<object, never>;
+type ArrayNotExtendsArray = Utils.Expression.DoesNotExtends<Array<string>, Array<string>>;
+type TupleNotExtendsArray = Utils.Expression.DoesNotExtends<[string], Array<string>>;
+type StringArrayNotExtendsArray = Utils.Expression.DoesNotExtends<string[], Array<string>>;
+
+export {
+  // IsNever
+  IsNeverGivenNever,
+  IsNeverNotGivenNever,
+  IsNeverGivenUnknown,
+  // IsNotNever
+  IsNotNeverGivenNever,
+  IsNotNeverGivenUnknown,
+  IsNotNeverGivenString,
+  IsNotNeverGivenStringLiteral,
+  // Is Strict Equal
+  IsStrictEqualGivenNever,
+  IsStrictEqualGivenNeverAndUnknown,
+  IsStrictEqualGivenEqualLiterals,
+  IsStrictEqualGivenEqualTypes,
+  IsStrictEqualGivenDifferentLiterals,
+  IsStrictEqualGivenDifferentTypes,
+  // IsTrue
+  IsTrueGivenTrue,
+  IsTrueGivenFalse,
+  IsTrueGivenBoolean,
+  IsTrueGivenNonBoolean,
+  IsTrueGivenNonBooleanLiteral,
+  IsTrueGivenOne,
+  IsTrueGivenZero,
+  // IsFalse
+  IsFalseGivenTrue,
+  IsFalseGivenFalse,
+  IsFalseGivenBoolean,
+  IsFalseGivenNonBoolean,
+  IsFalseGivenNonBooleanLiteral,
+  IsFalseGivenOne,
+  IsFalseGivenZero,
+  // Extends
+  StringExtendsString,
+  StringLiteralExtendsString,
+  StringExtendsStringLiteral,
+  StringExtendsNumber,
+  StringLiteralExtendsNumber,
+  StringExtendsNumberLiteral,
+  NumberExtendsNumber,
+  NumberLiteralExtendsNumber,
+  NumberExtendsNumberLiteral,
+  NumberExtendsString,
+  NumberLiteralExtendsString,
+  NumberExtendsStringLiteral,
+  ObjectExtendsObject,
+  ObjectLiteralExtendsObject,
+  ObjectExtendsObjectLiteral,
+  ObjectExtendsNumber,
+  ObjectExtendsAny,
+  ObjectExtendsUnknown,
+  ObjectExtendsNever,
+  ArrayExtendsArray,
+  TupleExtendsArray,
+  StringArrayExtendsArray,
+  // NotExtends
+  StringNotExtendsString,
+  StringLiteralNotExtendsString,
+  StringNotExtendsStringLiteral,
+  StringNotExtendsNumber,
+  StringLiteralNotExtendsNumber,
+  StringNotExtendsNumberLiteral,
+  NumberNotExtendsNumber,
+  NumberLiteralNotExtendsNumber,
+  NumberNotExtendsNumberLiteral,
+  NumberNotExtendsString,
+  NumberLiteralNotExtendsString,
+  NumberNotExtendsStringLiteral,
+  ObjectNotExtendsObject,
+  ObjectLiteralNotExtendsObject,
+  ObjectNotExtendsObjectLiteral,
+  ObjectNotExtendsNumber,
+  ObjectNotExtendsAny,
+  ObjectNotExtendsUnknown,
+  ObjectNotExtendsNever,
+  ArrayNotExtendsArray,
+  TupleNotExtendsArray,
+  StringArrayNotExtendsArray,
+};
