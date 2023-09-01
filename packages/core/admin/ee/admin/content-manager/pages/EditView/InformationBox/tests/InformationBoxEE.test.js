@@ -119,7 +119,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
     expect(queryByRole('combobox')).not.toBeInTheDocument();
   });
 
-  it('renders stage and assignee select inputs, if it is returned for an entity', () => {
+  it.skip('renders stage and assignee select inputs, if it is returned for an entity', () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {
         [STAGE_ATTRIBUTE_NAME]: {

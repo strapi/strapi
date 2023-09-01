@@ -1,3 +1,9 @@
+// NOTE TO PLUGINS DEVELOPERS:
+// If you modify this file by adding new options to the plugin entry point
+// Here's the file: strapi/docs/3.0.0-beta.x/plugin-development/frontend-field-api.md
+// Here's the file: strapi/docs/3.0.0-beta.x/guides/registering-a-field-in-admin.md
+// Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
+// IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
 
 import pluginPkg from '../../package.json';
@@ -21,7 +27,11 @@ export default {
         defaultMessage: 'Media Library',
       },
       permissions: PERMISSIONS.main,
-      Component: () => import(/* webpackChunkName: "upload" */ './pages/App'),
+      async Component() {
+        const component = await import(/* webpackChunkName: "upload" */ './pages/App');
+
+        return component;
+      },
     });
 
     app.addFields({ type: 'media', Component: MediaLibraryInput });
@@ -40,7 +50,13 @@ export default {
         defaultMessage: 'Media Library',
       },
       to: '/settings/media-library',
-      Component: () => import(/* webpackChunkName: "upload-settings" */ './pages/SettingsPage'),
+      async Component() {
+        const component = await import(
+          /* webpackChunkName: "upload-settings" */ './pages/SettingsPage'
+        );
+
+        return component;
+      },
       permissions: PERMISSIONS.settings,
     });
   },
