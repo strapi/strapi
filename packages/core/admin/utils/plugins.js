@@ -61,7 +61,7 @@ const getPlugins = (pluginsAllowlist) => {
        * this will remove any of our packages that are
        * not actually plugins for the application
        */
-      if (!strapi) {
+      if (!strapi || strapi.kind !== 'plugin') {
         return null;
       }
 

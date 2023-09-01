@@ -25,28 +25,6 @@ interface CustomFieldServerOptions {
     default: 4 | 6 | 8 | 12;
     isResizable: boolean;
   };
-
-  icon?: React.ComponentType;
-
-  /**
-   * TODO: this should be MessageDescriptor from react-intl
-   */
-  intlLabel?: object;
-
-  /**
-   * TODO: this should be MessageDescriptor from react-intl
-   */
-  intlDescription?: object;
-
-  /**
-   * TODO: this needs typing better, the dynamic imports are tricky to type.
-   */
-  components?: object;
-
-  /**
-   * TODO: this needs typing better.
-   */
-  options?: object;
 }
 
 interface CustomFields {

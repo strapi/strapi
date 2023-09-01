@@ -73,7 +73,7 @@ const resolveViteConfig = (ctx, task) => {
      * and since this is isolated to the Strapi CLI, we can make
      * some assumptions and add some weight until we move it outside.
      */
-    plugins: [react()],
+    plugins: runtime === 'node' ? [] : [react()],
   };
 
   return config;
@@ -91,7 +91,7 @@ const resolveViteConfig = (ctx, task) => {
  * @property {ViteTaskEntry[]} entries
  * @property {string} format
  * @property {string} output
- * @property {keyof import('../packages').Target} runtime
+ * @property {keyof import('../packages').Targets} runtime
  */
 
 /**
@@ -120,15 +120,22 @@ const viteTask = {
     ctx.logger.log([`  format: ${task.format}`, ...targetLines, ...entries].join('\n'));
   },
   async run(ctx, task) {
-    const config = resolveViteConfig(ctx, task);
-    ctx.logger.debug('Vite config: \n', config);
-    await build(config);
+    try {
+      const config = resolveViteConfig(ctx, task);
+      ctx.logger.debug('Vite config: \n', config);
+      await build(config);
+      await this.success(ctx, task);
+    } catch (err) {
+      this.fail(ctx, task, err);
+    }
   },
   async success() {
     this._spinner.succeed('Built javascript files');
   },
-  async fail() {
+  async fail(ctx, task, err) {
     this._spinner.fail('Failed to build javascript files');
+
+    throw err;
   },
 };
 

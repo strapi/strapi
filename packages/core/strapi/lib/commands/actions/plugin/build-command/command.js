@@ -12,5 +12,5 @@ module.exports = ({ command }) => {
     .description('Bundle your strapi plugin for publishing.')
     .option('-y, --yes', 'Skip all confirmation prompts', false)
     .option('-d, --debug', 'Enable debugging mode with verbose logs', false)
-    .action(getLocalScript('plugin/build'));
+    .action(getLocalScript('plugin/build-command'));
 };

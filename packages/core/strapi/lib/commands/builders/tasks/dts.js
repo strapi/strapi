@@ -138,53 +138,61 @@ const dtsTask = {
     ctx.logger.log([...entries].join('\n'));
   },
   async run(ctx, task) {
-    await Promise.all(
-      task.entries.map(async (entry) => {
-        const config = await loadTsConfig({
-          /**
-           * TODO: this will not scale and assumes all project sourcePaths are `src/index.ts`
-           * so we can go back to the "root" of the project...
-           */
-          cwd: path.join(ctx.cwd, entry.sourcePath, '..', '..'),
-          path: 'tsconfig.dist.json',
-        }).catch((err) => {
-          if (err instanceof TSConfigNotFoundError) {
-            return undefined;
+    try {
+      await Promise.all(
+        task.entries.map(async (entry) => {
+          const config = await loadTsConfig({
+            /**
+             * TODO: this will not scale and assumes all project sourcePaths are `src/index.ts`
+             * so we can go back to the "root" of the project...
+             */
+            cwd: path.join(ctx.cwd, entry.sourcePath, '..', '..'),
+            path: 'tsconfig.dist.json',
+          }).catch((err) => {
+            if (err instanceof TSConfigNotFoundError) {
+              return undefined;
+            }
+
+            throw err;
+          });
+
+          if (config) {
+            ctx.logger.debug(`TS config for '${entry.sourcePath}': \n`, config);
+          } else {
+            ctx.logger.warn(
+              `You've added a types entry but no tsconfig.json was found for ${entry.targetPath}. Skipping...`
+            );
+
+            return;
           }
 
-          throw err;
-        });
+          const { outDir } = config.raw.compilerOptions;
 
-        if (config) {
-          ctx.logger.debug(`TS config for '${entry.sourcePath}': \n`, config);
-        } else {
-          ctx.logger.warn(
-            `You've added a types entry but no tsconfig.json was found for ${entry.targetPath}. Skipping...`
-          );
+          if (!outDir) {
+            throw new Error("tsconfig.json is missing 'compilerOptions.outDir'");
+          }
 
-          return;
-        }
+          await buildTypes({
+            cwd: ctx.cwd,
+            logger: ctx.logger,
+            outDir: path.relative(ctx.cwd, outDir),
+            tsconfig: config,
+          });
+        })
+      );
 
-        const { outDir } = config.raw.compilerOptions;
-
-        if (!outDir) {
-          throw new Error("tsconfig.json is missing 'compilerOptions.outDir'");
-        }
-
-        await buildTypes({
-          cwd: ctx.cwd,
-          logger: ctx.logger,
-          outDir: path.relative(ctx.cwd, outDir),
-          tsconfig: config,
-        });
-      })
-    );
+      await this.success(ctx, task);
+    } catch (err) {
+      this.fail(ctx, task, err);
+    }
   },
   async success() {
     this._spinner.succeed('Built type files');
   },
-  async fail() {
+  async fail(ctx, task, err) {
     this._spinner.fail('Failed to build type files');
+
+    throw err;
   },
 };
 

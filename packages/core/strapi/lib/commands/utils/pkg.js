@@ -1,8 +1,8 @@
 'use strict';
 
 const fs = require('fs/promises');
+const path = require('path');
 const chalk = require('chalk');
-const pkgUp = require('pkg-up');
 const yup = require('yup');
 
 /**
@@ -70,19 +70,20 @@ const packageJsonSchema = yup.object({
 
 /**
  * @description being a task to load the package.json starting from the current working directory
- * using `pkg-up` and `fs` to read the file. If no package.json is found, the process will throw
- * with an appropriate error message.
+ * using a shallow find for the package.json  and `fs` to read the file. If no package.json is found,
+ * the process will throw with an appropriate error message.
  *
  * @type {(args: { cwd: string, logger: import('./logger').Logger }) => Promise<object>}
  */
 const loadPkg = async ({ cwd, logger }) => {
-  const pkgPath = await pkgUp({ cwd });
+  const directory = path.resolve(cwd);
 
-  if (!pkgPath) {
+  const pkgPath = path.join(directory, 'package.json');
+
+  const buffer = await fs.readFile(pkgPath).catch((err) => {
+    logger.debug(err);
     throw new Error('Could not find a package.json in the current directory');
-  }
-
-  const buffer = await fs.readFile(pkgPath);
+  });
 
   const pkg = JSON.parse(buffer.toString());
 

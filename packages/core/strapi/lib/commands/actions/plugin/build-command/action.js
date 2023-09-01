@@ -56,11 +56,13 @@ module.exports = async ({ yes, debug }) => {
      * Validate the exports of the package incl. the order of the
      * exports within the exports map if applicable
      */
-    const packageJson = await validateExportsOrdering({ pkg: validatedPkg, logger }).catch((err) => {
-      packageJsonLoader.fail();
-      logger.error(err.message);
-      process.exit(1);
-    });
+    const packageJson = await validateExportsOrdering({ pkg: validatedPkg, logger }).catch(
+      (err) => {
+        packageJsonLoader.fail();
+        logger.error(err.message);
+        process.exit(1);
+      }
+    );
 
     packageJsonLoader.succeed('Verified package.json');
 
@@ -110,18 +112,13 @@ module.exports = async ({ yes, debug }) => {
       const handler = buildTaskHandlers[task.type];
       handler.print(ctx, task);
 
-      try {
-        const result = await handler.run(ctx, task);
-        handler.success(ctx, task, result);
-      } catch (err) {
-        handler.fail(ctx, task, err);
-
+      await handler.run(ctx, task).catch((err) => {
         if (err instanceof Error) {
           logger.error(err.message);
         }
 
         process.exit(1);
-      }
+      });
     }
   } catch (err) {
     logger.error(

@@ -8105,7 +8105,6 @@ __metadata:
     open: 8.4.0
     ora: 5.4.1
     package-json: 7.0.0
-    pkg-up: 3.1.0
     qs: 6.11.1
     resolve-cwd: 3.0.0
     semver: 7.5.4
@@ -25254,15 +25253,6 @@ __metadata:
   dependencies:
     find-up: ^5.0.0
   checksum: b167bb8dac7bbf22b1d5e30ec223e6b064b84b63010c9d49384619a36734caf95ed23ad23d4f9bd975e8e8082b60a83395f43a89bb192df53a7c25a38ecb57d9
-  languageName: node
-  linkType: hard
-
-"pkg-up@npm:3.1.0":
-  version: 3.1.0
-  resolution: "pkg-up@npm:3.1.0"
-  dependencies:
-    find-up: ^3.0.0
-  checksum: 5bac346b7c7c903613c057ae3ab722f320716199d753f4a7d053d38f2b5955460f3e6ab73b4762c62fd3e947f58e04f1343e92089e7bb6091c90877406fcd8c8
   languageName: node
   linkType: hard
 
