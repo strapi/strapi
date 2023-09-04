@@ -107,13 +107,17 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
         regex: yup.string().test(isValidRegExpPattern),
       };
     }
-    case 'richtext':
-    case 'blocks': {
+    case 'richtext': {
       return {
         default: yup.string(),
         required: validators.required,
         minLength: validators.minLength,
         maxLength: validators.maxLength,
+      };
+    }
+    case 'blocks': {
+      return {
+        required: validators.required,
       };
     }
     case 'json': {
