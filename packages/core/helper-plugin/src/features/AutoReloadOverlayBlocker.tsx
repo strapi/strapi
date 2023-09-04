@@ -3,9 +3,8 @@ import * as React from 'react';
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import { Clock, Refresh } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { createPortal } from 'react-dom';
-import { useIntl } from 'react-intl';
+import { MessageDescriptor, useIntl } from 'react-intl';
 import styled, { keyframes } from 'styled-components';
 
 import { pxToRem } from '../utils/pxToRem';
@@ -19,55 +18,48 @@ import { pxToRem } from '../utils/pxToRem';
  * because it's easier to diagnose and we're not using a million refs because we don't
  * understand what's going on.
  */
-
-/**
- * @preserve
- * @typedef {Object} AutoReloadOverlayBlockerConfig
- * @property {string | undefined} title
- * @property {string | undefined} description
- * @property {'reload' | 'time' | undefined} icon
- */
+export interface AutoReloadOverlayBlockerConfig {
+  title?: string;
+  description?: string;
+  icon?: 'reload' | 'time';
+}
 
 /* -------------------------------------------------------------------------------------------------
  * Context
  * -----------------------------------------------------------------------------------------------*/
 
-/**
- * @preserve
- * @typedef {Object} AutoReloadOverlayBlockerContextValue
- * @property {(config: AutoReloadOverlayBlockerConfig) => void} lockAppWithAutoreload
- * @property {() => void} unlockAppWithAutoreload
- */
+export interface AutoReloadOverlayBlockerContextValue {
+  lockAppWithAutoreload?: (config?: AutoReloadOverlayBlockerConfig) => void;
+  unlockAppWithAutoreload?: () => void;
+}
 
-/**
- * @preserve
- * @type {React.Context<AutoReloadOverlayBlockerContextValue>}
- */
-
-const AutoReloadOverlayBlockerContext = React.createContext();
+const AutoReloadOverlayBlockerContext = React.createContext<AutoReloadOverlayBlockerContextValue>(
+  {}
+);
 
 /* -------------------------------------------------------------------------------------------------
  * Provider
  * -----------------------------------------------------------------------------------------------*/
 
+export interface AutoReloadOverlayBlockerProviderProps {
+  children: React.ReactNode;
+}
+
 const MAX_ELAPSED_TIME = 30 * 1000;
 
-const AutoReloadOverlayBlockerProvider = ({ children }) => {
+const AutoReloadOverlayBlockerProvider = ({ children }: AutoReloadOverlayBlockerProviderProps) => {
   const [isOpen, setIsOpen] = React.useState(false);
-  /**
-   * @type {[AutoReloadOverlayBlockerConfig, React.Dispatch<React.SetStateAction<AutoReloadOverlayBlockerConfig>>]}
-   */
-  const [config, setConfig] = React.useState(undefined);
+  const [config, setConfig] = React.useState<AutoReloadOverlayBlockerConfig>({});
   const [failed, setFailed] = React.useState(false);
 
-  const lockAppWithAutoreload = React.useCallback((config = undefined) => {
+  const lockAppWithAutoreload = React.useCallback((config: AutoReloadOverlayBlockerConfig = {}) => {
     setIsOpen(true);
     setConfig(config);
   }, []);
 
   const unlockAppWithAutoreload = React.useCallback(() => {
     setIsOpen(false);
-    setConfig(undefined);
+    setConfig({});
   }, []);
 
   // eslint-disable-next-line consistent-return
@@ -131,11 +123,14 @@ const AutoReloadOverlayBlockerProvider = ({ children }) => {
   );
 };
 
-AutoReloadOverlayBlockerProvider.propTypes = {
-  children: PropTypes.element.isRequired,
-};
+interface BlockerProps {
+  displayedIcon: string;
+  description: MessageDescriptor;
+  isOpen: boolean;
+  title: MessageDescriptor;
+}
 
-const Blocker = ({ displayedIcon = 'reload', description, title, isOpen }) => {
+const Blocker = ({ displayedIcon, description, title, isOpen }: BlockerProps) => {
   const { formatMessage } = useIntl();
 
   // eslint-disable-next-line no-undef
@@ -173,13 +168,6 @@ const Blocker = ({ displayedIcon = 'reload', description, title, isOpen }) => {
         globalThis.document.body
       )
     : null;
-};
-
-Blocker.propTypes = {
-  displayedIcon: PropTypes.string.isRequired,
-  description: PropTypes.object.isRequired,
-  isOpen: PropTypes.bool.isRequired,
-  title: PropTypes.object.isRequired,
 };
 
 const rotation = keyframes`
@@ -234,11 +222,6 @@ const IconBox = styled(Box)`
 /* -------------------------------------------------------------------------------------------------
  * Hook
  * -----------------------------------------------------------------------------------------------*/
-
-/**
- * @preserve
- * @returns {AutoReloadOverlayBlockerContextValue}
- */
 
 const useAutoReloadOverlayBlocker = () => React.useContext(AutoReloadOverlayBlockerContext);
 
