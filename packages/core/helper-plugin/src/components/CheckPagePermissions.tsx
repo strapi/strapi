@@ -1,23 +1,30 @@
-import { useEffect, useRef, useState } from 'react';
+import * as React from 'react';
 
-import PropTypes from 'prop-types';
+import { Redirect } from 'react-router-dom';
 
 import { useNotification } from '../features/Notifications';
 import { useRBACProvider } from '../features/RBAC';
 import { hasPermissions } from '../utils/hasPermissions';
 
-// NOTE: this component is very similar to the CheckPagePermissions
-// except that it does not handle redirections nor loading state
+import { LoadingIndicatorPage } from './LoadingIndicatorPage';
 
-const CheckPermissions = ({ permissions, children }) => {
-  const { allPermissions } = useRBACProvider();
-  const toggleNotification = useNotification();
-  const [state, setState] = useState({ isLoading: true, canAccess: false });
-  const isMounted = useRef(true);
+import type { Permission } from '../../types';
+
+export interface CheckPagePermissions {
+  children: React.ReactNode;
+  permissions?: Permission[];
+}
+
+const CheckPagePermissions = ({ permissions = [], children }: CheckPagePermissions) => {
   const abortController = new AbortController();
   const { signal } = abortController;
+  const { allPermissions } = useRBACProvider();
+  const toggleNotification = useNotification();
 
-  useEffect(() => {
+  const [state, setState] = React.useState({ isLoading: true, canAccess: false });
+  const isMounted = React.useRef(true);
+
+  React.useEffect(() => {
     const checkPermission = async () => {
       try {
         setState({ isLoading: true, canAccess: false });
@@ -30,12 +37,13 @@ const CheckPermissions = ({ permissions, children }) => {
       } catch (err) {
         if (isMounted.current) {
           console.error(err);
+
           toggleNotification({
             type: 'warning',
             message: { id: 'notification.error' },
           });
 
-          setState({ isLoading: false });
+          setState({ isLoading: false, canAccess: false });
         }
       }
     };
@@ -45,33 +53,25 @@ const CheckPermissions = ({ permissions, children }) => {
     return () => {
       abortController.abort();
     };
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [permissions]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     return () => {
       isMounted.current = false;
     };
   }, []);
 
   if (state.isLoading) {
-    return null;
+    return <LoadingIndicatorPage />;
   }
 
   if (!state.canAccess) {
-    return null;
+    return <Redirect to="/" />;
   }
 
   return children;
 };
 
-CheckPermissions.defaultProps = {
-  permissions: [],
-};
-
-CheckPermissions.propTypes = {
-  children: PropTypes.node.isRequired,
-  permissions: PropTypes.array,
-};
-
-export { CheckPermissions };
+export { CheckPagePermissions };
