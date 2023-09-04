@@ -3,7 +3,7 @@ import { Event, Action } from '../';
 type SubscriberFn = (event: Event) => Promise<void> | void;
 
 type SubscriberMap = {
-  models?: string[],
+  models?: string[];
 } & {
   [k in Action]?: SubscriberFn;
 };
