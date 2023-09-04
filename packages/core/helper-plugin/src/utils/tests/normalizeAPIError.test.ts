@@ -1,48 +1,74 @@
-import { normalizeAPIError } from '../normalizeAPIError';
+import { AxiosError, AxiosHeaders } from 'axios';
 
-const API_VALIDATION_ERROR_FIXTURE = {
-  response: {
+import { normalizeAPIError, ResponseError } from '../normalizeAPIError';
+
+const API_VALIDATION_ERROR_FIXTURE = new AxiosError<ResponseError>(
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  {
     data: {
+      data: null,
       error: {
         name: 'ValidationError',
+        message: 'errors',
+        status: 400,
         details: {
           errors: [
             {
               path: ['field', '0', 'name'],
               message: 'Field contains errors',
+              name: 'ValidationError',
             },
 
             {
               path: ['field'],
               message: 'Field must be unique',
+              name: 'ValidationError',
             },
           ],
         },
       },
     },
-  },
-};
+    status: 422,
+    statusText: 'Validation',
+    headers: {},
+    config: { headers: new AxiosHeaders() },
+  }
+);
 
-const API_APPLICATION_ERROR_FIXTURE = {
-  response: {
+const API_APPLICATION_ERROR_FIXTURE = new AxiosError<ResponseError>(
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  {
     data: {
+      data: null,
       error: {
         name: 'ApplicationError',
         message: 'Application crashed',
+        status: 400,
+        details: {},
       },
     },
-  },
-};
+    status: 400,
+    statusText: 'Bad Request',
+    headers: {},
+    config: { headers: new AxiosHeaders() },
+  }
+);
 
 describe('normalizeAPIError', () => {
   test('Handle ValidationError', () => {
     expect(normalizeAPIError(API_VALIDATION_ERROR_FIXTURE)).toStrictEqual({
       name: 'ValidationError',
-      message: null,
+      message: 'errors',
       errors: [
         {
-          defaultMessage: 'Field contains errors',
           id: 'apiError.Field contains errors',
+          defaultMessage: 'Field contains errors',
           name: 'ValidationError',
           values: {
             path: 'field.0.name',
@@ -50,8 +76,8 @@ describe('normalizeAPIError', () => {
         },
 
         {
-          defaultMessage: 'Field must be unique',
           id: 'apiError.Field must be unique',
+          defaultMessage: 'Field must be unique',
           name: 'ValidationError',
           values: {
             path: 'field',
@@ -62,11 +88,11 @@ describe('normalizeAPIError', () => {
   });
 
   test('Handle ValidationError with custom prefix function', () => {
-    const prefixFunction = (id) => `custom.${id}`;
+    const prefixFunction = (id: string) => `custom.${id}`;
 
     expect(normalizeAPIError(API_VALIDATION_ERROR_FIXTURE, prefixFunction)).toStrictEqual({
       name: 'ValidationError',
-      message: null,
+      message: 'errors',
       errors: [
         {
           name: 'ValidationError',
@@ -94,22 +120,18 @@ describe('normalizeAPIError', () => {
       name: 'ApplicationError',
       defaultMessage: 'Application crashed',
       id: 'apiError.Application crashed',
-      values: {
-        path: undefined,
-      },
+      values: {},
     });
   });
 
   test('Handle ApplicationError with custom prefix function', () => {
-    const prefixFunction = (id) => `custom.${id}`;
+    const prefixFunction = (id: string) => `custom.${id}`;
 
     expect(normalizeAPIError(API_APPLICATION_ERROR_FIXTURE, prefixFunction)).toStrictEqual({
       name: 'ApplicationError',
       defaultMessage: 'Application crashed',
       id: 'custom.apiError.Application crashed',
-      values: {
-        path: undefined,
-      },
+      values: {},
     });
   });
 });
