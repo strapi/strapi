@@ -1,11 +1,11 @@
 import * as React from 'react';
 
-import { DesignSystemProvider } from '@strapi/design-system';
+import { DesignSystemProvider, DateTimePickerProps } from '@strapi/design-system';
 import { render as renderRTL } from '@testing-library/react';
 
 import { DateTimePicker } from '../DateTimePicker';
 
-const render = (props) =>
+const render = (props: DateTimePickerProps) =>
   renderRTL(<DateTimePicker label="Date time picker" {...props} />, {
     wrapper: ({ children }) => (
       <DesignSystemProvider locale="en-GB">{children}</DesignSystemProvider>

@@ -1,10 +1,14 @@
-import React, { useEffect } from 'react';
+import * as React from 'react';
 
-import { DateTimePicker } from '@strapi/design-system';
+import { DateTimePicker, DateTimePickerProps } from '@strapi/design-system';
 
 // TODO: remove DateTimePicker component from the helper-plugin in V5
-const DateTimePickerLegacy = (props) => {
-  useEffect(() => {
+
+/**
+ * @deprecated Use the DateTimePicker from the Design System instead.
+ */
+const DateTimePickerLegacy = (props: DateTimePickerProps) => {
+  React.useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
       console.warn(
         `
