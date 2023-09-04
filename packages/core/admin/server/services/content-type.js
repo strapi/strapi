@@ -183,14 +183,7 @@ const cleanPermissionFields = (permissions, { nestingLevel } = {}) => {
       nestingLevel,
     });
 
-    const requiredFields = getNestedFields(strapi.contentTypes[subject], {
-      components: strapi.components,
-      requiredOnly: true,
-      nestingLevel,
-      existingFields: fields,
-    });
-
-    const badNestedFields = uniq([...intersection(fields, possibleFields), ...requiredFields]);
+    const badNestedFields = uniq([...intersection(fields, possibleFields)]);
 
     const newFields = badNestedFields.filter(
       (field) => !badNestedFields.some(startsWith(`${field}.`))
