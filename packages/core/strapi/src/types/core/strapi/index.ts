@@ -1,8 +1,5 @@
-import type { Database } from '@strapi/database';
-import type { Shared, Common } from '@strapi/strapi';
-
 // TODO: move custom fields types to a separate file
-interface CustomFieldServerOptions {
+export interface CustomFieldServerOptions {
   /**
    * The name of the custom field
    */
@@ -43,7 +40,7 @@ interface CustomFieldServerOptions {
   };
 }
 
-interface CustomFields {
+export interface CustomFields {
   register: (customFields: CustomFieldServerOptions[] | CustomFieldServerOptions) => void;
 }
 

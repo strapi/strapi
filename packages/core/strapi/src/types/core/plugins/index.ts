@@ -1,4 +1,4 @@
-import type { Common, Shared, Utils } from '@strapi/strapi';
+import type { Common, Shared, Utils } from '../..';
 
 export type IsEnabled<
   TName extends keyof any,

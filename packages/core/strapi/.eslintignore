@@ -3,4 +3,3 @@ node_modules/
 jest.config.js
 dist/
 index.d.ts
-scripts/
