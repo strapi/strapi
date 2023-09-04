@@ -1,5 +1,5 @@
 import type { Database } from '@strapi/database';
-import type { Shared, Common } from '@strapi/strapi';
+import type { Comomn, EntityService, Shared } from '@strapi/strapi';
 
 // TODO move custom fields types to a separate file
 interface CustomFieldServerOptions {
@@ -417,7 +417,7 @@ export interface Strapi {
   /**
    * Entity Service instance
    */
-  entityService: any;
+  entityService: EntityService.EntityService;
 }
 
 export interface Lifecycles {

@@ -86,7 +86,7 @@ module.exports = async (opts) => {
     exclude: opts.exclude,
     only: opts.only,
     throttle: opts.throttle,
-    rules: {
+    transforms: {
       links: [
         {
           filter(link) {

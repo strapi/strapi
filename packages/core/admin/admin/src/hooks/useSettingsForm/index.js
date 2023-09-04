@@ -1,14 +1,9 @@
 import { useEffect, useReducer } from 'react';
 
-import {
-  getYupInnerErrors,
-  useFetchClient,
-  useNotification,
-  useOverlayBlocker,
-} from '@strapi/helper-plugin';
+import { useFetchClient, useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
 import omit from 'lodash/omit';
 
-import { formatAPIErrors } from '../../utils/formatAPIErrors';
+import { checkFormValidity, formatAPIErrors } from '../../utils';
 
 import init from './init';
 import { initialState, reducer } from './reducer';
@@ -81,13 +76,7 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    let errors = null;
-
-    try {
-      await schema.validate(modifiedData, { abortEarly: false });
-    } catch (err) {
-      errors = getYupInnerErrors(err);
-    }
+    const errors = await checkFormValidity(modifiedData, schema);
 
     dispatch({
       type: 'SET_ERRORS',
