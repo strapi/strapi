@@ -1,48 +1,34 @@
 import * as React from 'react';
 
-import PropTypes from 'prop-types';
-
 /* -------------------------------------------------------------------------------------------------
  * Context
  * -----------------------------------------------------------------------------------------------*/
 
-/**
- * @preserve
- * @typedef {Object} LibraryContextValue
- * @property {Record<string, React.ComponentType>} fields
- * @property {Record<string, React.ComponentType>} components
- */
+export interface LibraryContextValue {
+  fields?: Record<string, React.ComponentType>;
+  components?: Record<string, React.ComponentType>;
+}
 
-/**
- * @preserve
- * @type {React.Context<LibraryContextValue>} LibraryContext
- */
-const LibraryContext = React.createContext();
+const LibraryContext = React.createContext<LibraryContextValue>({});
 
 /* -------------------------------------------------------------------------------------------------
  * Provider
  * -----------------------------------------------------------------------------------------------*/
 
-const LibraryProvider = ({ children, fields, components }) => {
+interface LibraryProviderProps extends LibraryContextValue {
+  children: React.ReactNode;
+}
+
+const LibraryProvider = ({ children, fields, components }: LibraryProviderProps) => {
   const value = React.useMemo(() => ({ fields, components }), [fields, components]);
 
   return <LibraryContext.Provider value={value}>{children}</LibraryContext.Provider>;
-};
-
-LibraryProvider.propTypes = {
-  children: PropTypes.node.isRequired,
-  components: PropTypes.object.isRequired,
-  fields: PropTypes.object.isRequired,
 };
 
 /* -------------------------------------------------------------------------------------------------
  * Hook
  * -----------------------------------------------------------------------------------------------*/
 
-/**
- * @preserve
- * @returns {LibraryContextValue}
- */
 const useLibrary = () => React.useContext(LibraryContext);
 
 export { LibraryContext, LibraryProvider, useLibrary };
