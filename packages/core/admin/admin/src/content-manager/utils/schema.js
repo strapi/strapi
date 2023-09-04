@@ -207,7 +207,11 @@ const createYupSchema = (
 const createYupSchemaAttribute = (type, validations, options) => {
   let schema = yup.mixed();
 
-  if (['string', 'uid', 'text', 'richtext', 'email', 'password', 'enumeration'].includes(type)) {
+  if (
+    ['string', 'uid', 'text', 'richtext', 'blocks', 'email', 'password', 'enumeration'].includes(
+      type
+    )
+  ) {
     schema = yup.string();
   }
 
