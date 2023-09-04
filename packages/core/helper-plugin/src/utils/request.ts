@@ -96,7 +96,7 @@ interface RequestOptions extends RequestInit {
  */
 export async function request<ResponseType = unknown>(
   url: string,
-  options = {} as RequestOptions,
+  options: RequestOptions = {},
   shouldWatchServerRestart?: boolean,
   stringify = true,
   { noAuth }: { noAuth?: boolean } = { noAuth: false }
