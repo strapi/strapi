@@ -7,7 +7,8 @@ export type GetKeysByType<
   TCondition = never
 > = Utils.Object.KeysBy<
   GetAll<TSchemaUID>,
-  Attribute.OfType<TKind> & Utils.Guard.Never<TCondition, unknown>
+  Attribute.OfType<TKind> & Utils.Guard.Never<TCondition, unknown>,
+  string
 >;
 
 export type GetByType<
@@ -46,7 +47,7 @@ export type GetMorphTargets<
   ? Attribute.GetDynamicZoneTargets<TAttribute>
   : never;
 
-export type GetKeys<TSchemaUID extends Common.UID.Schema> = keyof GetAll<TSchemaUID>;
+export type GetKeys<TSchemaUID extends Common.UID.Schema> = keyof GetAll<TSchemaUID> & string;
 
 export type GetNonPopulatableKeys<TSchemaUID extends Common.UID.Schema> = GetKeysByType<
   TSchemaUID,
@@ -115,12 +116,14 @@ export type GetValues<
 
 export type GetRequiredKeys<TSchemaUID extends Common.UID.Schema> = Utils.Object.KeysBy<
   GetAll<TSchemaUID>,
-  Attribute.Required
+  Attribute.Required,
+  string
 >;
 
 export type GetOptionalKeys<TSchemaUID extends Common.UID.Schema> = Utils.Object.KeysExcept<
   GetAll<TSchemaUID>,
-  Attribute.Required
+  Attribute.Required,
+  string
 >;
 
 export type HasTarget<

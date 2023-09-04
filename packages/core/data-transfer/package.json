@@ -41,7 +41,6 @@
   ],
   "dependencies": {
     "@strapi/logger": "4.12.7",
-    "@strapi/strapi": "4.12.7",
     "chalk": "4.1.2",
     "fs-extra": "10.0.0",
     "lodash": "4.17.21",

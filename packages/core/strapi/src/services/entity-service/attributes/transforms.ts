@@ -1,26 +1,30 @@
-import { getOr, toNumber, isString, isBuffer } from 'lodash/fp';
+import { getOr, toNumber, isString } from 'lodash/fp';
 import bcrypt from 'bcryptjs';
 
 import type { Attribute } from '../../../types';
 
 type Transforms = {
   [TKind in Attribute.Kind]?: (
-    value: Attribute.GetValue<Attribute.Attribute<TKind>>,
-    context: { attribute: Attribute.Attribute<TKind>; attributeName: string }
-  ) => Attribute.GetValue<Attribute.Attribute<TKind>>;
+    value: unknown,
+    context: { attribute: Attribute.Any; attributeName: string }
+  ) => any;
 };
 
 const transforms: Transforms = {
   password(value, context) {
     const { attribute } = context;
 
-    if (!isString(value) && !isBuffer(value)) {
+    if (attribute.type !== 'password') {
+      throw new Error('Invalid attribute type');
+    }
+
+    if (!isString(value) && !(value instanceof Buffer)) {
       return value;
     }
 
     const rounds = toNumber(getOr(10, 'encryption.rounds', attribute));
 
-    return bcrypt.hashSync(value, rounds);
+    return bcrypt.hashSync(value.toString(), rounds);
   },
 };
 

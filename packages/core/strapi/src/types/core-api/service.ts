@@ -1,7 +1,7 @@
 import type { Common, Utils } from '..';
 
 // TODO Use actual entities instead of regular object
-type Entity = { id: string | number } & unknown;
+type Entity = { id: string | number } & Record<string, unknown>;
 
 type PaginatedEntiies = {
   results: Entity[];
@@ -41,13 +41,13 @@ export type Generic = {
  */
 export interface CollectionType extends Base {
   find(params: object): Promise<PaginatedEntiies>;
-  findOne(entityId: string, params: object): Promise<Entity> | Entity;
-  create(params: { data: Data; [key: string]: unknown }): Promise<Entity> | Entity;
+  findOne(entityId: number | `${number}`, params: object): Promise<Entity | null>;
+  create(params: { data: Data; [key: string]: unknown }): Promise<Entity>;
   update(
-    entityId: string,
+    entityId: number | `${number}`,
     params: { data: Data; [key: string]: unknown }
   ): Promise<Entity> | Entity;
-  delete(entityId: string, params: object): Promise<Entity> | Entity;
+  delete(entityId: number | `${number}`, params: object): Promise<Entity> | Entity;
 }
 
 /**

@@ -1,6 +1,13 @@
 import type * as Koa from 'koa';
 import type {} from 'koa-body';
 
+type ID = number | `${number}`;
+
+export type Data = {
+  id?: ID;
+  [key: string]: string | number | ID | boolean | null | undefined | Date | Data | Data[];
+};
+
 export interface Config {
   get<T = unknown>(key: string, defaultVal?: T): T;
 }

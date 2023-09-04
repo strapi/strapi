@@ -146,7 +146,9 @@ const isMediaAttribute = (attribute: Attribute) => attribute?.type === 'media';
 const isRelationalAttribute = (attribute: Attribute): attribute is RelationalAttribute =>
   attribute?.type === 'relation';
 
-const isComponentAttribute = (attribute: Attribute): attribute is ComponentAttribute =>
+const isComponentAttribute = (
+  attribute: Attribute
+): attribute is ComponentAttribute | DynamicZoneAttribute =>
   ['component', 'dynamiczone'].includes(attribute?.type);
 
 const isDynamicZoneAttribute = (attribute: Attribute): attribute is DynamicZoneAttribute =>

@@ -1,4 +1,4 @@
-import type { Utils } from '@strapi/strapi';
+import type { Utils } from '..';
 
 /**
  * Alias for any literal type (useful for template string parameters)

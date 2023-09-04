@@ -139,12 +139,12 @@ export interface QueryFromContentType<T extends keyof AllTypes> {
 
   populate<S extends AllTypes[T]>(entity: S, populate: PopulateParams): Promise<S>;
   clone<S extends AllTypes[T]>(cloneId: ID, params?: Params<S>): Promise<S>;
-  load<S extends AllTypes[T], K extends keyof S>(
+  load<S extends AllTypes[T], K extends string>(
     entity: S,
     field: K | K[],
     populate?: PopulateParams
   ): Promise<S[K]>;
-  loadPages<S extends AllTypes[T], K extends keyof S>(
+  loadPages<S extends AllTypes[T], K extends string>(
     entity: S,
     field: K | K[],
     populate?: PopulateParams

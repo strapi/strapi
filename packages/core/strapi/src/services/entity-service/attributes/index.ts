@@ -1,16 +1,18 @@
 import transforms from './transforms';
-import type { Common, Schema } from '../../../types';
+import type { Common, Shared } from '../../../types';
 import { Data } from '../types/params';
 
-const applyTransforms = (
-  data: Record<string, unknown>,
+const applyTransforms = <TUID extends Common.UID.ContentType>(
+  data: Data.Input<TUID>,
   context: {
-    contentType: Schema.ContentType;
+    contentType: Shared.ContentTypes[TUID];
   }
 ) => {
   const { contentType } = context;
 
-  for (const attributeName of Object.keys(data)) {
+  const attributeNames = Object.keys(data) as Array<keyof typeof data & string>;
+
+  for (const attributeName of attributeNames) {
     const value = data[attributeName];
 
     const attribute = contentType.attributes[attributeName];

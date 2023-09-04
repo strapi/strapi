@@ -10,9 +10,9 @@
  * type X = KeysBy<Obj, Base>
  * // 'foo' | 'bar'
  */
-export type KeysBy<TValue, TTest> = {
-  [key in keyof TValue]: TValue[key] extends TTest ? key : never;
-}[keyof TValue];
+export type KeysBy<TValue, TTest, TExtract extends keyof any = keyof any> = {
+  [key in keyof TValue & TExtract]: TValue[key] extends TTest ? key : never;
+}[keyof TValue & TExtract];
 
 /**
  * Retrieve object's (`TValue`) keys if they don't extend the given `TTest` type.
@@ -26,9 +26,9 @@ export type KeysBy<TValue, TTest> = {
  * type X = KeysBy<Obj, Base>
  * // 'other'
  */
-export type KeysExcept<TValue, TTest> = {
-  [key in keyof TValue]: TValue[key] extends TTest ? never : key;
-}[keyof TValue];
+export type KeysExcept<TValue, TTest, TExtract extends keyof any = keyof any> = {
+  [key in keyof TValue & TExtract]: TValue[key] extends TTest ? never : key;
+}[keyof TValue & TExtract];
 
 /**
  * Retrieve object's (`TValue`) properties if their value extends the given `TTest` type.

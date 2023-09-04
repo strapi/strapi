@@ -2,13 +2,32 @@ import _ from 'lodash';
 import { has, prop, omit, toString, pipe, assign } from 'lodash/fp';
 
 import { contentTypes as contentTypesUtils, mapAsync, errors } from '@strapi/utils';
-import type { Common, Schema } from '../../types';
+import type { Attribute, Common, Shared, Utils } from '../../types';
+import * as Types from './types';
 
-type Data = Record<string, unknown>;
+type LoadedComponents<TUID extends Common.UID.Schema> = Attribute.GetValues<
+  TUID,
+  Attribute.GetKeysByType<TUID, 'component' | 'dynamiczone'>
+>;
+
+type ComponentValue = Attribute.GetValue<
+  Attribute.Component<Common.UID.Component, false> | Attribute.Component<Common.UID.Component, true>
+>;
+
+type ComponentBody = {
+  [key: string]: Attribute.GetValue<
+    | Attribute.Component<Common.UID.Component, false>
+    | Attribute.Component<Common.UID.Component, true>
+    | Attribute.DynamicZone
+  >;
+};
 
 const isDialectMySQL = () => strapi.db?.dialect.client === 'mysql';
 
-const omitComponentData = (contentType: Schema.ContentType, data: Data) => {
+const omitComponentData = <TUID extends Common.UID.ContentType>(
+  contentType: Shared.ContentTypes[TUID],
+  data: Types.Params.Data.Input<TUID>
+) => {
   const { attributes } = contentType;
   const componentAttributes = Object.keys(attributes).filter((attributeName) =>
     contentTypesUtils.isComponentAttribute(attributes[attributeName])
@@ -18,12 +37,20 @@ const omitComponentData = (contentType: Schema.ContentType, data: Data) => {
 };
 
 // NOTE: we could generalize the logic to allow CRUD of relation directly in the DB layer
-const createComponents = async (uid: Common.UID.Schema, data: Data) => {
+const createComponents = async <
+  TUID extends Common.UID.Schema,
+  TData extends Types.Params.Data.Input<TUID>
+>(
+  uid: TUID,
+  data: TData
+) => {
   const { attributes = {} } = strapi.getModel(uid);
 
-  const componentBody: Data = {};
+  const componentBody: ComponentBody = {};
 
-  for (const attributeName of Object.keys(attributes) as (keyof Schema.Attributes)[]) {
+  const attributeNames = Object.keys(attributes);
+
+  for (const attributeName of attributeNames) {
     const attribute = attributes[attributeName];
 
     if (!has(attributeName, data) || !contentTypesUtils.isComponentAttribute(attribute)) {
@@ -33,7 +60,7 @@ const createComponents = async (uid: Common.UID.Schema, data: Data) => {
     if (attribute.type === 'component') {
       const { component: componentUID, repeatable = false } = attribute;
 
-      const componentValue = data[attributeName];
+      const componentValue = data[attributeName as keyof TData];
 
       if (componentValue === null) {
         continue;
@@ -45,11 +72,11 @@ const createComponents = async (uid: Common.UID.Schema, data: Data) => {
         }
 
         // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-        const components = await mapAsync(
+        const components = (await mapAsync(
           componentValue,
-          (value: Data) => createComponent(componentUID, value),
+          (value: any) => createComponent(componentUID, value),
           { concurrency: isDialectMySQL() && !strapi.db?.inTransaction() ? 1 : Infinity }
-        );
+        )) as Attribute.GetValue<Attribute.Component<Common.UID.Component, true>>;
 
         componentBody[attributeName] = components.map(({ id }) => {
           return {
@@ -61,7 +88,10 @@ const createComponents = async (uid: Common.UID.Schema, data: Data) => {
           };
         });
       } else {
-        const component = await createComponent(componentUID, componentValue);
+        const component = await createComponent(
+          componentUID,
+          componentValue as Types.Params.Data.Input<Common.UID.Component>
+        );
         componentBody[attributeName] = {
           id: component.id,
           __pivot: {
@@ -75,13 +105,17 @@ const createComponents = async (uid: Common.UID.Schema, data: Data) => {
     }
 
     if (attribute.type === 'dynamiczone') {
-      const dynamiczoneValues = data[attributeName];
+      const dynamiczoneValues = data[
+        attributeName as keyof TData
+      ] as Types.Params.Attribute.GetValue<Attribute.DynamicZone>;
 
       if (!Array.isArray(dynamiczoneValues)) {
         throw new Error('Expected an array to create repeatable component');
       }
 
-      const createDynamicZoneComponents = async (value) => {
+      const createDynamicZoneComponents = async (
+        value: Utils.Array.Values<typeof dynamiczoneValues>
+      ) => {
         const { id } = await createComponent(value.__component, value);
         return {
           id,
@@ -96,7 +130,7 @@ const createComponents = async (uid: Common.UID.Schema, data: Data) => {
       componentBody[attributeName] = await mapAsync(
         dynamiczoneValues,
         createDynamicZoneComponents,
-        { concurrency: isDialectMySQL() && !strapi.db.inTransaction() ? 1 : Infinity }
+        { concurrency: isDialectMySQL() && !strapi.db?.inTransaction() ? 1 : Infinity }
       );
 
       continue;
@@ -106,26 +140,34 @@ const createComponents = async (uid: Common.UID.Schema, data: Data) => {
   return componentBody;
 };
 
-/**
- * @param {str} uid
- * @param {object} entity
- * @return {Promise<{uid: string, entity: object}>}
- */
-const getComponents = async (uid: Common.UID.ContentType, entity: Data) => {
+const getComponents = async <TUID extends Common.UID.Schema>(
+  uid: TUID,
+  entity: { id: Types.Params.Attribute.ID }
+): Promise<LoadedComponents<TUID>> => {
   const componentAttributes = contentTypesUtils.getComponentAttributes(strapi.getModel(uid));
 
-  if (_.isEmpty(componentAttributes)) return {};
-  return strapi.query(uid).load(entity, componentAttributes);
+  if (_.isEmpty(componentAttributes)) {
+    return {} as LoadedComponents<TUID>;
+  }
+
+  return strapi.query(uid).load(entity, componentAttributes) as Promise<LoadedComponents<TUID>>;
 };
 
 /*
   delete old components
   create or update
 */
-const updateComponents = async (uid: Common.UID.Schema, entityToUpdate: Data, data: Data) => {
+const updateComponents = async <
+  TUID extends Common.UID.Schema,
+  TData extends Partial<Types.Params.Data.Input<TUID>>
+>(
+  uid: TUID,
+  entityToUpdate: { id: Types.Params.Attribute.ID },
+  data: TData
+) => {
   const { attributes = {} } = strapi.getModel(uid);
 
-  const componentBody: Data = {};
+  const componentBody: ComponentBody = {};
 
   for (const attributeName of Object.keys(attributes)) {
     const attribute = attributes[attributeName];
@@ -137,7 +179,9 @@ const updateComponents = async (uid: Common.UID.Schema, entityToUpdate: Data, da
     if (attribute.type === 'component') {
       const { component: componentUID, repeatable = false } = attribute;
 
-      const componentValue = data[attributeName];
+      const componentValue = data[
+        attributeName as keyof TData
+      ] as Attribute.GetValue<Attribute.Component>;
 
       await deleteOldComponents(uid, componentUID, entityToUpdate, attributeName, componentValue);
 
@@ -147,11 +191,11 @@ const updateComponents = async (uid: Common.UID.Schema, entityToUpdate: Data, da
         }
 
         // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-        const components = await mapAsync(
+        const components = (await mapAsync(
           componentValue,
-          (value: Data) => updateOrCreateComponent(componentUID, value),
+          (value: any) => updateOrCreateComponent(componentUID, value),
           { concurrency: isDialectMySQL() && !strapi.db?.inTransaction() ? 1 : Infinity }
-        );
+        )) as Attribute.GetValue<Attribute.Component<Common.UID.Component, true>>;
 
         componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }) => {
           return {
@@ -177,7 +221,9 @@ const updateComponents = async (uid: Common.UID.Schema, entityToUpdate: Data, da
     }
 
     if (attribute.type === 'dynamiczone') {
-      const dynamiczoneValues = data[attributeName];
+      const dynamiczoneValues = data[
+        attributeName as keyof TData
+      ] as Attribute.GetValue<Attribute.DynamicZone>;
 
       await deleteOldDZComponents(uid, entityToUpdate, attributeName, dynamiczoneValues);
 
@@ -188,7 +234,7 @@ const updateComponents = async (uid: Common.UID.Schema, entityToUpdate: Data, da
       // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
       componentBody[attributeName] = await mapAsync(
         dynamiczoneValues,
-        async (value: Data) => {
+        async (value: any) => {
           const { id } = await updateOrCreateComponent(value.__component, value);
 
           return {
@@ -209,18 +255,31 @@ const updateComponents = async (uid: Common.UID.Schema, entityToUpdate: Data, da
   return componentBody;
 };
 
-const deleteOldComponents = async (
-  uid: Common.UID.ContentType,
+const pickStringifiedId = ({
+  id,
+}: {
+  id: Types.Params.Attribute.ID;
+}): Types.Params.Attribute.ID & string => {
+  if (typeof id === 'string') {
+    return id;
+  }
+
+  return `${id}`;
+};
+
+const deleteOldComponents = async <TUID extends Common.UID.Schema>(
+  uid: TUID,
   componentUID: Common.UID.Component,
-  entityToUpdate: Data,
+  entityToUpdate: { id: Types.Params.Attribute.ID },
   attributeName: string,
-  componentValue: Data
+  componentValue: Attribute.GetValue<Attribute.Component>
 ) => {
-  const previousValue = await strapi.query(uid).load(entityToUpdate, attributeName);
+  const previousValue = (await strapi
+    .query(uid)
+    .load(entityToUpdate, attributeName)) as ComponentValue;
 
-  const idsToKeep = _.castArray(componentValue).filter(has('id')).map(prop('id')).map(toString);
-
-  const allIds = _.castArray(previousValue).filter(has('id')).map(prop('id')).map(toString);
+  const idsToKeep = _.castArray(componentValue).filter(has('id')).map(pickStringifiedId);
+  const allIds = _.castArray(previousValue).filter(has('id')).map(pickStringifiedId);
 
   idsToKeep.forEach((id) => {
     if (!allIds.includes(id)) {
@@ -239,26 +298,28 @@ const deleteOldComponents = async (
   }
 };
 
-const deleteOldDZComponents = async (
-  uid: Common.UID.ContentType,
-  entityToUpdate: Data,
+const deleteOldDZComponents = async <TUID extends Common.UID.Schema>(
+  uid: TUID,
+  entityToUpdate: { id: Types.Params.Attribute.ID },
   attributeName: string,
-  dynamiczoneValues: Data[]
+  dynamiczoneValues: Attribute.GetValue<Attribute.DynamicZone>
 ) => {
-  const previousValue = await strapi.query(uid).load(entityToUpdate, attributeName);
+  const previousValue = (await strapi
+    .query(uid)
+    .load(entityToUpdate, attributeName)) as Attribute.GetValue<Attribute.DynamicZone>;
 
   const idsToKeep = _.castArray(dynamiczoneValues)
     .filter(has('id'))
-    .map(({ id, __component }) => ({
-      id: toString(id),
-      __component,
+    .map((v) => ({
+      id: pickStringifiedId(v),
+      __component: v.__component,
     }));
 
   const allIds = _.castArray(previousValue)
     .filter(has('id'))
-    .map(({ id, __component }) => ({
-      id: toString(id),
-      __component,
+    .map((v) => ({
+      id: pickStringifiedId(v),
+      __component: v.__component,
     }));
 
   idsToKeep.forEach(({ id, __component }) => {
@@ -266,10 +327,13 @@ const deleteOldDZComponents = async (
       const err = new Error(
         `Some of the provided components in ${attributeName} are not related to the entity`
       );
-      err.status = 400;
+
+      Object.assign(err, { status: 400 });
       throw err;
     }
   });
+
+  type IdsToDelete = Attribute.GetValue<Attribute.DynamicZone>;
 
   const idsToDelete = allIds.reduce((acc, { id, __component }) => {
     if (!idsToKeep.find((el) => el.id === id && el.__component === __component)) {
@@ -277,7 +341,7 @@ const deleteOldDZComponents = async (
     }
 
     return acc;
-  }, []);
+  }, [] as IdsToDelete);
 
   if (idsToDelete.length > 0) {
     for (const idToDelete of idsToDelete) {
@@ -287,14 +351,19 @@ const deleteOldDZComponents = async (
   }
 };
 
-const deleteComponents = async (
-  uid: Common.UID.Schema,
-  entityToDelete: Data,
+const deleteComponents = async <
+  TUID extends Common.UID.Schema,
+  TEntity extends Attribute.GetValues<TUID>
+>(
+  uid: TUID,
+  entityToDelete: TEntity,
   { loadComponents = true } = {}
 ) => {
   const { attributes = {} } = strapi.getModel(uid);
 
-  for (const attributeName of Object.keys(attributes)) {
+  const attributeNames = Object.keys(attributes);
+
+  for (const attributeName of attributeNames) {
     const attribute = attributes[attributeName];
 
     if (attribute.type === 'component' || attribute.type === 'dynamiczone') {
@@ -302,7 +371,7 @@ const deleteComponents = async (
       if (loadComponents) {
         value = await strapi.query(uid).load(entityToDelete, attributeName);
       } else {
-        value = entityToDelete[attributeName];
+        value = entityToDelete[attributeName as keyof TEntity];
       }
 
       if (!value) {
@@ -312,16 +381,20 @@ const deleteComponents = async (
       if (attribute.type === 'component') {
         const { component: componentUID } = attribute;
         // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-        await mapAsync(_.castArray(value), (subValue) => deleteComponent(componentUID, subValue), {
-          concurrency: isDialectMySQL() && !strapi.db.inTransaction() ? 1 : Infinity,
-        });
+        await mapAsync(
+          _.castArray(value),
+          (subValue: any) => deleteComponent(componentUID, subValue),
+          {
+            concurrency: isDialectMySQL() && !strapi.db?.inTransaction() ? 1 : Infinity,
+          }
+        );
       } else {
         // delete dynamic zone components
         // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
         await mapAsync(
           _.castArray(value),
-          (subValue) => deleteComponent(subValue.__component, subValue),
-          { concurrency: isDialectMySQL() && !strapi.db.inTransaction() ? 1 : Infinity }
+          (subValue: any) => deleteComponent(subValue.__component, subValue),
+          { concurrency: isDialectMySQL() && !strapi.db?.inTransaction() ? 1 : Infinity }
         );
       }
 
@@ -330,10 +403,14 @@ const deleteComponents = async (
   }
 };
 
-const cloneComponents = async (uid: Common.UID.Schema, entityToClone: Data, data: Data) => {
+const cloneComponents = async <TUID extends Common.UID.Schema>(
+  uid: TUID,
+  entityToClone: { id: Types.Params.Attribute.ID },
+  data: Types.Params.Data.Input<TUID>
+) => {
   const { attributes = {} } = strapi.getModel(uid);
 
-  const componentBody: Data = {};
+  const componentBody: ComponentBody = {};
   const componentData = await getComponents(uid, entityToClone);
 
   for (const attributeName of Object.keys(attributes)) {
@@ -347,9 +424,11 @@ const cloneComponents = async (uid: Common.UID.Schema, entityToClone: Data, data
     if (attribute.type === 'component') {
       const { component: componentUID, repeatable = false } = attribute;
 
-      const componentValue = has(attributeName, data)
-        ? data[attributeName]
-        : componentData[attributeName];
+      const componentValue = (
+        attributeName in data
+          ? data[attributeName as keyof typeof data]
+          : componentData[attributeName as keyof typeof componentData]
+      ) as ComponentValue;
 
       if (componentValue === null) {
         continue;
@@ -361,11 +440,11 @@ const cloneComponents = async (uid: Common.UID.Schema, entityToClone: Data, data
         }
 
         // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-        const components = await mapAsync(
+        const components = (await mapAsync(
           componentValue,
-          (value) => cloneComponent(componentUID, value),
+          (value: any) => cloneComponent(componentUID, value),
           { concurrency: isDialectMySQL() ? 1 : Infinity }
-        );
+        )) as Attribute.GetValue<Attribute.Component<Common.UID.Component, true>>;
 
         componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }) => {
           return {
@@ -392,8 +471,8 @@ const cloneComponents = async (uid: Common.UID.Schema, entityToClone: Data, data
 
     if (attribute.type === 'dynamiczone') {
       const dynamiczoneValues = has(attributeName, data)
-        ? data[attributeName]
-        : componentData[attributeName];
+        ? data[attributeName as keyof typeof data]
+        : componentData[attributeName as keyof typeof componentData];
 
       if (!Array.isArray(dynamiczoneValues)) {
         throw new Error('Expected an array to create repeatable component');
@@ -401,7 +480,7 @@ const cloneComponents = async (uid: Common.UID.Schema, entityToClone: Data, data
       // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
       componentBody[attributeName] = await mapAsync(
         dynamiczoneValues,
-        async (value) => {
+        async (value: any) => {
           const { id } = await cloneComponent(value.__component, value);
           return {
             id,
@@ -424,7 +503,10 @@ const cloneComponents = async (uid: Common.UID.Schema, entityToClone: Data, data
 ************************** */
 
 // components can have nested compos so this must be recursive
-const createComponent = async (uid: Common.UID.Schema, data: Data) => {
+const createComponent = async <TUID extends Common.UID.Component>(
+  uid: TUID,
+  data: Types.Params.Data.Input<TUID>
+) => {
   const model = strapi.getModel(uid);
 
   const componentData = await createComponents(uid, data);
@@ -441,7 +523,11 @@ const createComponent = async (uid: Common.UID.Schema, data: Data) => {
 };
 
 // components can have nested compos so this must be recursive
-const updateComponent = async (uid: Common.UID.Schema, componentToUpdate: Data, data: Data) => {
+const updateComponent = async <TUID extends Common.UID.Component>(
+  uid: TUID,
+  componentToUpdate: { id: Types.Params.Attribute.ID },
+  data: Types.Params.Data.Input<TUID>
+) => {
   const model = strapi.getModel(uid);
 
   const componentData = await updateComponents(uid, componentToUpdate, data);
@@ -454,13 +540,16 @@ const updateComponent = async (uid: Common.UID.Schema, componentToUpdate: Data, 
   });
 };
 
-const updateOrCreateComponent = (componentUID: Common.UID.Component, value: Data) => {
+const updateOrCreateComponent = <TUID extends Common.UID.Component>(
+  componentUID: TUID,
+  value: Types.Params.Data.Input<TUID>
+) => {
   if (value === null) {
     return null;
   }
 
   // update
-  if (has('id', value)) {
+  if ('id' in value && typeof value.id !== 'undefined') {
     // TODO: verify the compo is associated with the entity
     return updateComponent(componentUID, { id: value.id }, value);
   }
@@ -469,15 +558,21 @@ const updateOrCreateComponent = (componentUID: Common.UID.Component, value: Data
   return createComponent(componentUID, value);
 };
 
-const deleteComponent = async (uid: Common.UID.Schema, componentToDelete: Data) => {
+const deleteComponent = async <TUID extends Common.UID.Component>(
+  uid: TUID,
+  componentToDelete: Attribute.GetValues<TUID>
+) => {
   await deleteComponents(uid, componentToDelete);
   await strapi.query(uid).delete({ where: { id: componentToDelete.id } });
 };
 
-const cloneComponent = async (uid: Common.UID.Schema, data: Data) => {
+const cloneComponent = async <TUID extends Common.UID.Component>(
+  uid: TUID,
+  data: Types.Params.Data.Input<TUID>
+) => {
   const model = strapi.getModel(uid);
 
-  if (!has('id', data)) {
+  if (!('id' in data) || typeof data.id === 'undefined') {
     return createComponent(uid, data);
   }
 

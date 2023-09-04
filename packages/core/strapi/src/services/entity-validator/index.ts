@@ -7,7 +7,8 @@ import { uniqBy, castArray, isNil, isArray, mergeWith } from 'lodash';
 import { has, assoc, prop, isObject, isEmpty } from 'lodash/fp';
 import strapiUtils from '@strapi/utils';
 import * as validators from './validators';
-import { Common, Schema, Attribute, UID } from '../../types';
+import { Common, Schema, Attribute, UID, Shared } from '../../types';
+import * as Types from '../entity-service/types';
 
 type CreateOrUpdate = 'creation' | 'update';
 
@@ -292,14 +293,13 @@ const createModelValidator =
     return yup.object().shape(schema);
   };
 
-const createValidateEntity =
-  (createOrUpdate: CreateOrUpdate) =>
-  async (
-    model: Schema.ContentType,
-    data: Record<string, unknown>,
-    { isDraft = false }: { isDraft?: boolean } = {},
+const createValidateEntity = (createOrUpdate: CreateOrUpdate) => {
+  return async <TUID extends Common.UID.ContentType, TData extends Types.Params.Data.Input<TUID>>(
+    model: Shared.ContentTypes[TUID],
+    data: TData | Partial<TData>,
+    options?: { isDraft?: boolean },
     entity?: Entity
-  ) => {
+  ): Promise<TData> => {
     if (!isObject(data)) {
       const { displayName } = model.info;
 
@@ -314,7 +314,7 @@ const createValidateEntity =
         data,
         entity,
       },
-      { isDraft }
+      { isDraft: options?.isDraft ?? false }
     )
       .test('relations-test', 'check that all relations exist', async function (data) {
         try {
@@ -334,6 +334,7 @@ const createValidateEntity =
       abortEarly: false,
     })(data);
   };
+};
 
 /**
  * Builds an object containing all the media and relations being associated with an entity
@@ -485,16 +486,17 @@ const checkRelationsExist = async (relationsStore: Record<string, ID[]> = {}) =>
 };
 
 export interface EntityValidator {
-  validateEntityCreation: (
-    model: Schema.ContentType,
-    data: Record<string, unknown>,
+  validateEntityCreation: <TUID extends Common.UID.ContentType>(
+    model: Shared.ContentTypes[TUID],
+    data: Types.Params.Data.Input<TUID>,
     options?: { isDraft?: boolean }
-  ) => Promise<Record<string, unknown>>;
-  validateEntityUpdate: (
-    model: Schema.ContentType,
-    data: Record<string, unknown>,
-    options?: { isDraft?: boolean }
-  ) => Promise<Record<string, unknown>>;
+  ) => Promise<Types.Params.Data.Input<TUID>>;
+  validateEntityUpdate: <TUID extends Common.UID.ContentType>(
+    model: Shared.ContentTypes[TUID],
+    data: Partial<Types.Params.Data.Input<TUID>>,
+    options?: { isDraft?: boolean },
+    entity?: Entity
+  ) => Promise<Types.Params.Data.Input<TUID>>;
 }
 
 const entityValidator: EntityValidator = {

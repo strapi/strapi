@@ -1,6 +1,6 @@
 'use strict';
 
-const { features } = require('@strapi/strapi/lib/utils/ee');
+const { features } = require('@strapi/strapi/dist/utils/ee');
 const { register } = require('@strapi/provider-audit-logs-local');
 const { scheduleJob } = require('node-schedule');
 const createAuditLogsService = require('../audit-logs');
@@ -12,7 +12,7 @@ jest.mock('../../utils', () => ({
   getService: jest.fn().mockReturnValue({}),
 }));
 
-jest.mock('@strapi/strapi/lib/utils/ee', () => ({
+jest.mock('@strapi/strapi/dist/utils/ee', () => ({
   features: {
     isEnabled: jest.fn(),
     get: jest.fn(),

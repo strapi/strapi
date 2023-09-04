@@ -1,7 +1,7 @@
 import { propOr } from 'lodash/fp';
 import { errors, contentTypes as contentTypeUtils } from '@strapi/utils';
 import { getFetchParams } from './get-fetch-params';
-import type { CoreApi, Schema } from '../../types';
+import type { CoreApi, Schema, Common } from '../../types';
 
 const {
   hasDraftAndPublish,
@@ -22,13 +22,16 @@ const createSingleTypeService = ({
 }): CoreApi.Service.SingleType => {
   const { uid } = contentType;
 
-  return {
+  return <any>{
     getFetchParams,
     /**
      * Returns singleType content
      */
     find(params = {}) {
-      return strapi.entityService?.findMany(uid, this.getFetchParams(params));
+      return (
+        strapi.entityService?.findMany(uid as Common.UID.SingleType, this.getFetchParams(params)) ??
+        null
+      );
     },
 
     /**

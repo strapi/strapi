@@ -27,8 +27,7 @@ const createCoreController = <
   cfg?: WithStrapiCallback<Utils.PartialWithThis<CoreApi.Controller.Extendable<TUID> & TController>>
 ) => {
   return ({ strapi }: { strapi: Strapi }): TController & CoreApi.Controller.ContentType<TUID> => {
-    const contentType = strapi.contentType(uid);
-    const baseController = createController({ contentType });
+    const baseController = createController({ contentType: getContentTypeProxy(strapi, uid) });
 
     const userCtrl = typeof cfg === 'function' ? cfg({ strapi }) : cfg ?? ({} as any);
 
@@ -51,8 +50,7 @@ function createCoreService<
   cfg?: WithStrapiCallback<Utils.PartialWithThis<CoreApi.Service.Extendable<TUID> & TService>>
 ) {
   return ({ strapi }: { strapi: Strapi }): TService & CoreApi.Service.ContentType<TUID> => {
-    const contentType = strapi.contentType(uid);
-    const baseService = createService({ contentType });
+    const baseService = createService({ contentType: getContentTypeProxy(strapi, uid) });
 
     const userService = typeof cfg === 'function' ? cfg({ strapi }) : cfg ?? ({} as any);
 

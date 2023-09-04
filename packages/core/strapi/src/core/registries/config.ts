@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 import _, { PropertyName } from 'lodash';
 
 type Config = Record<string, unknown>;

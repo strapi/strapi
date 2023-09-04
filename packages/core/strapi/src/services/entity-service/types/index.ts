@@ -29,7 +29,7 @@ export interface EntityService {
     TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType
   >(
     result: unknown,
-    options?: { uid: TContentTypeUID; action: WrapAction }
+    options?: { uid: TContentTypeUID; action: WrapAction; [key: string]: unknown }
   ): Promise<TResult> | TResult;
 
   emitEvent<TContentTypeUID extends Common.UID.ContentType>(

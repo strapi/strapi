@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-namespace */
 import type { Attribute, Common } from '..';
 import type { Utils } from '../..';

@@ -40,7 +40,7 @@
     "lint": "run -T eslint ."
   },
   "dependencies": {
-    "@casl/ability": "^5.4.3",
+    "@casl/ability": "6.5.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",
     "@strapi/data-transfer": "4.12.7",
     "@strapi/design-system": "1.9.0",

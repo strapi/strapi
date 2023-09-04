@@ -2452,7 +2452,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@casl/ability@npm:5.4.4, @casl/ability@npm:^5.4.3":
+"@casl/ability@npm:5.4.4":
   version: 5.4.4
   resolution: "@casl/ability@npm:5.4.4"
   dependencies:
@@ -6950,7 +6950,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/admin@workspace:packages/core/admin"
   dependencies:
-    "@casl/ability": ^5.4.3
+    "@casl/ability": 5.4.4
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.10
     "@strapi/data-transfer": 4.12.7
     "@strapi/design-system": 1.9.0

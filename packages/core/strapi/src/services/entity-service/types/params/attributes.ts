@@ -5,7 +5,8 @@ export type FilterableKind = Exclude<Attribute.Kind, NonFilterableKind>;
 
 export type GetNonFilterableKeys<TSchemaUID extends Common.UID.Schema> = Utils.Object.KeysBy<
   Attribute.GetAll<TSchemaUID>,
-  Attribute.OfType<NonFilterableKind>
+  Attribute.OfType<NonFilterableKind>,
+  string
 >;
 
 export type GetScalarKeys<TSchemaUID extends Common.UID.Schema> = Exclude<
@@ -61,7 +62,9 @@ export type ScalarValues = GetValue<
 /**
  * Attribute.GetValues override with extended values
  */
-export type GetValues<TSchemaUID extends Common.UID.Schema> = OmitRelationWithoutTarget<
+export type GetValues<TSchemaUID extends Common.UID.Schema> = {
+  id?: ID;
+} & OmitRelationWithoutTarget<
   TSchemaUID,
   {
     [TKey in Attribute.GetOptionalKeys<TSchemaUID>]?: GetValue<Attribute.Get<TSchemaUID, TKey>>;

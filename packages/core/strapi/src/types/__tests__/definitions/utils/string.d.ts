@@ -1,4 +1,4 @@
-import type { Utils } from '@strapi/strapi';
+import type { Utils } from '../../..';
 
 // TODO: Implement tests for errors (constraints, etc...)
 

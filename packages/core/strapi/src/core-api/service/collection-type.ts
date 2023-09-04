@@ -30,7 +30,7 @@ const createCollectionTypeService = ({
 }): CoreApi.Service.CollectionType => {
   const { uid } = contentType;
 
-  return {
+  return <any>{
     getFetchParams,
 
     async find(params = {}) {
@@ -46,6 +46,10 @@ const createCollectionTypeService = ({
       if (shouldCount(fetchParams)) {
         const count = await strapi.entityService?.count(uid, { ...fetchParams, ...paginationInfo });
 
+        if (typeof count !== 'number') {
+          throw new Error('Count should be a number');
+        }
+
         return {
           results,
           pagination: transformPaginationResponse(paginationInfo, count),
@@ -58,7 +62,7 @@ const createCollectionTypeService = ({
       };
     },
 
-    findOne(entityId, params = {}) {
+    findOne(entityId: number | `${number}`, params = {}) {
       return strapi.entityService?.findOne(uid, entityId, this.getFetchParams(params));
     },
 
@@ -72,13 +76,13 @@ const createCollectionTypeService = ({
       return strapi.entityService?.create(uid, { ...params, data });
     },
 
-    update(entityId, params = { data: {} }) {
+    update(entityId: number | `${number}`, params = { data: {} }) {
       const { data } = params;
 
       return strapi.entityService?.update(uid, entityId, { ...params, data });
     },
 
-    delete(entityId, params = {}) {
+    delete(entityId: number | `${number}`, params = {}) {
       return strapi.entityService?.delete(uid, entityId, params);
     },
   };
