@@ -2,7 +2,7 @@
  * Strapi custom scalar types
  */
 
-import { Attribute, Common } from '@strapi/strapi';
+import type { Attribute, Common } from '@strapi/strapi';
 
 /**
  * Setters for the attributes options
@@ -58,17 +58,20 @@ export type Any =
   | Attribute.JSON
   | Attribute.Media<Attribute.MediaKind | undefined, boolean>
   | Attribute.Password
-  | (
-      | Attribute.Relation<
-          Common.UID.Schema,
-          Attribute.RelationKind.BiDirectional,
-          Common.UID.Schema
-        >
-      | Attribute.Relation<Common.UID.Schema, Attribute.RelationKind.UniDirectional>
-    )
+  | Attribute.Relation<Common.UID.Schema, Attribute.RelationKind.Any, Common.UID.Schema>
   | Attribute.RichText
   | Attribute.String
   | Attribute.Text
   | Attribute.Time
   | Attribute.Timestamp
   | Attribute.UID<Common.UID.Schema>;
+
+export type PopulatableKind = Extract<
+  Attribute.Kind,
+  'relation' | 'component' | 'dynamiczone' | 'media'
+>;
+
+export type NonPopulatableKind = Exclude<
+  Attribute.Kind,
+  'relation' | 'component' | 'dynamiczone' | 'media'
+>;

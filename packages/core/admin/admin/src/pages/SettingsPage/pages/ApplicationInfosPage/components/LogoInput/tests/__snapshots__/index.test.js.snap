@@ -419,7 +419,8 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   color: #666687;
 }
 
-.c51[aria-disabled='true'] svg > g,.c51[aria-disabled='true'] svg path {
+.c51[aria-disabled='true'] svg > g,
+.c51[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -432,7 +433,8 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   color: #666687;
 }
 
-.c51[aria-disabled='true']:active svg > g,.c51[aria-disabled='true']:active svg path {
+.c51[aria-disabled='true']:active svg > g,
+.c51[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -471,7 +473,8 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   color: #666687;
 }
 
-.c55[aria-disabled='true'] svg > g,.c55[aria-disabled='true'] svg path {
+.c55[aria-disabled='true'] svg > g,
+.c55[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -484,7 +487,8 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   color: #666687;
 }
 
-.c55[aria-disabled='true']:active svg > g,.c55[aria-disabled='true']:active svg path {
+.c55[aria-disabled='true']:active svg > g,
+.c55[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -1321,7 +1325,8 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   color: #666687;
 }
 
-.c47[aria-disabled='true'] svg > g,.c47[aria-disabled='true'] svg path {
+.c47[aria-disabled='true'] svg > g,
+.c47[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -1334,7 +1339,8 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   color: #666687;
 }
 
-.c47[aria-disabled='true']:active svg > g,.c47[aria-disabled='true']:active svg path {
+.c47[aria-disabled='true']:active svg > g,
+.c47[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -1373,7 +1379,8 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   color: #666687;
 }
 
-.c46[aria-disabled='true'] svg > g,.c46[aria-disabled='true'] svg path {
+.c46[aria-disabled='true'] svg > g,
+.c46[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -1386,7 +1393,8 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   color: #666687;
 }
 
-.c46[aria-disabled='true']:active svg > g,.c46[aria-disabled='true']:active svg path {
+.c46[aria-disabled='true']:active svg > g,
+.c46[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
