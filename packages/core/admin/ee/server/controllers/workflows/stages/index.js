@@ -137,6 +137,16 @@ module.exports = {
 
     const { model_uid: modelUID, id } = ctx.params;
 
+    if (
+      strapi
+        .plugin('content-manager')
+        .service('permission-checker')
+        .create({ userAbility: ctx.state.userAbility, model: modelUID })
+        .cannot.read()
+    ) {
+      return ctx.forbidden();
+    }
+
     // Load entity
     const entity = await strapi.entityService.findOne(modelUID, Number(id), {
       populate: [ENTITY_STAGE_ATTRIBUTE],
