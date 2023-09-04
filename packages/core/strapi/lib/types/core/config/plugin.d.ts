@@ -1,4 +1,4 @@
-export interface PluginConfigs {
+export interface Plugins {
   [key: string]:
     | {
         enabled: boolean;
