@@ -53,7 +53,7 @@
     "ws": "8.13.0"
   },
   "peerDependencies": {
-    "@strapi/strapi": "^4.12.4"
+    "@strapi/strapi": "^4.13.1"
   },
   "devDependencies": {
     "@tsconfig/node16": "1.0.3",

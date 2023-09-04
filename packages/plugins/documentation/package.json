@@ -48,7 +48,7 @@
     "yup": "0.32.9"
   },
   "peerDependencies": {
-    "@strapi/strapi": "^4.12.4",
+    "@strapi/strapi": "^4.13.1",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "5.3.4",
