@@ -84,7 +84,8 @@ const cleanSchemaAttributes = (
         attributesCopy[prop] = { type: 'string', pattern: '^\\d*$', example: '123456789' };
         break;
       }
-      case 'json': {
+      case 'json':
+      case 'blocks': {
         attributesCopy[prop] = {};
         break;
       }

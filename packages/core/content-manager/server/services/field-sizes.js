@@ -23,6 +23,7 @@ const fieldSizes = {
   component: needsFullSize,
   json: needsFullSize,
   richtext: needsFullSize,
+  blocks: needsFullSize,
   // Small and resizable
   checkbox: smallSize,
   boolean: smallSize,
