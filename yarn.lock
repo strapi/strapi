@@ -44,9 +44,9 @@ __metadata:
   linkType: hard
 
 "@adobe/css-tools@npm:^4.0.1":
-  version: 4.0.1
-  resolution: "@adobe/css-tools@npm:4.0.1"
-  checksum: 80226e2229024c21da9ffa6b5cd4a34b931f071e06f45aba4777ade071d7a6c94605cf73b13718b0c4b34e8b124c65c607b82eaa53a326d3eb73d9682a04a593
+  version: 4.3.1
+  resolution: "@adobe/css-tools@npm:4.3.1"
+  checksum: ad43456379ff391132aff687ece190cb23ea69395e23c9b96690eeabe2468da89a4aaf266e4f8b6eaab53db3d1064107ce0f63c3a974e864f4a04affc768da3f
   languageName: node
   linkType: hard
 
@@ -7000,7 +7000,7 @@ __metadata:
     markdown-it-sub: ^1.0.0
     markdown-it-sup: 1.0.0
     mini-css-extract-plugin: 2.7.2
-    msw: 1.2.1
+    msw: 1.3.0
     node-schedule: 2.1.0
     p-map: 4.0.0
     passport-local: 1.0.0
@@ -7211,7 +7211,7 @@ __metadata:
     formik: 2.4.0
     immer: 9.0.19
     lodash: 4.17.21
-    msw: 1.2.1
+    msw: 1.3.0
     prop-types: ^15.8.1
     qs: 6.11.1
     react: ^18.2.0
@@ -7363,7 +7363,7 @@ __metadata:
     immer: 9.0.19
     koa-static: ^5.0.0
     lodash: 4.17.21
-    msw: 1.2.1
+    msw: 1.3.0
     path-to-regexp: 6.2.1
     react: ^18.2.0
     react-dom: ^18.2.0
@@ -7395,7 +7395,7 @@ __metadata:
     "@strapi/utils": 4.13.1
     "@testing-library/react": 14.0.0
     lodash: 4.17.21
-    msw: 1.2.1
+    msw: 1.3.0
     prop-types: ^15.8.1
     react: ^18.2.0
     react-dom: ^18.2.0
@@ -7422,7 +7422,7 @@ __metadata:
     "@strapi/helper-plugin": 4.13.1
     "@strapi/icons": 1.9.0
     "@strapi/utils": 4.13.1
-    apollo-server-core: 3.12.0
+    apollo-server-core: 3.12.1
     apollo-server-koa: 3.10.0
     cross-env: ^7.0.3
     glob: 7.2.3
@@ -7461,7 +7461,7 @@ __metadata:
     formik: 2.4.0
     immer: 9.0.19
     lodash: 4.17.21
-    msw: 1.2.1
+    msw: 1.3.0
     prop-types: ^15.8.1
     qs: 6.11.1
     react: ^18.2.0
@@ -7516,7 +7516,7 @@ __metadata:
     "@testing-library/user-event": 14.4.3
     axios: 1.5.0
     byte-size: 7.0.1
-    cropperjs: 1.5.12
+    cropperjs: 1.6.0
     date-fns: 2.30.0
     formik: 2.4.0
     fs-extra: 10.0.0
@@ -7525,7 +7525,7 @@ __metadata:
     koa-static: 5.0.0
     lodash: 4.17.21
     mime-types: 2.1.35
-    msw: 1.2.1
+    msw: 1.3.0
     prop-types: ^15.8.1
     qs: 6.11.1
     react: ^18.2.0
@@ -7568,7 +7568,7 @@ __metadata:
     koa: 2.13.4
     koa2-ratelimit: ^1.1.2
     lodash: 4.17.21
-    msw: 1.2.1
+    msw: 1.3.0
     prop-types: ^15.8.1
     purest: 4.0.2
     react: ^18.2.0
@@ -9066,6 +9066,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/set-cookie-parser@npm:^2.4.3":
+  version: 2.4.3
+  resolution: "@types/set-cookie-parser@npm:2.4.3"
+  dependencies:
+    "@types/node": "*"
+  checksum: 8c0ded364c5a53598dc58f6c668d6fdbefa3bb78fcb1181202b92f4d8495ca33b4317f54ac0fe42824278e789d730ee5cbd2f7f864466e708589ff4eab2bf457
+  languageName: node
+  linkType: hard
+
 "@types/sockjs@npm:^0.3.33":
   version: 0.3.33
   resolution: "@types/sockjs@npm:0.3.33"
@@ -10163,9 +10172,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"apollo-server-core@npm:3.12.0":
-  version: 3.12.0
-  resolution: "apollo-server-core@npm:3.12.0"
+"apollo-server-core@npm:3.12.1":
+  version: 3.12.1
+  resolution: "apollo-server-core@npm:3.12.1"
   dependencies:
     "@apollo/utils.keyvaluecache": ^1.0.1
     "@apollo/utils.logger": ^1.0.0
@@ -10192,7 +10201,7 @@ __metadata:
     whatwg-mimetype: ^3.0.0
   peerDependencies:
     graphql: ^15.3.0 || ^16.0.0
-  checksum: b7a37a78901d38a330c9df8fe870da3dcf512f43ab60fdf9ab0ba37be03977db5d4b72eabf51a830d2a9dcfb2974d7bfbc5aa8719e3afac113c8bd7222740b8f
+  checksum: 666444a0ea36f91db4cf67cb82f5501caea53f48ef6a68f6350c4ee6d4f86aed1d1a2b74f352657de8eee54a762604734032918653287d68ac32d8a90ce79674
   languageName: node
   linkType: hard
 
@@ -11835,16 +11844,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chalk@npm:4.1.1":
-  version: 4.1.1
-  resolution: "chalk@npm:4.1.1"
-  dependencies:
-    ansi-styles: ^4.1.0
-    supports-color: ^7.1.0
-  checksum: 036e973e665ba1a32c975e291d5f3d549bceeb7b1b983320d4598fb75d70fe20c5db5d62971ec0fe76cdbce83985a00ee42372416abfc3a5584465005a7855ed
-  languageName: node
-  linkType: hard
-
 "chalk@npm:4.1.2, chalk@npm:^4.0.0, chalk@npm:^4.0.2, chalk@npm:^4.1.0, chalk@npm:^4.1.1, chalk@npm:^4.1.2":
   version: 4.1.2
   resolution: "chalk@npm:4.1.2"
@@ -13042,10 +13041,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cropperjs@npm:1.5.12":
-  version: 1.5.12
-  resolution: "cropperjs@npm:1.5.12"
-  checksum: 8dcbceb3659ad72d421038abf7f9d08ca13a061dc6c643497efc043033e22b17411b5558db29a841cb4f0a3b7943a20e6a3d9fecf3901185b7cd027f8097442b
+"cropperjs@npm:1.6.0":
+  version: 1.6.0
+  resolution: "cropperjs@npm:1.6.0"
+  checksum: 643d1e939335ea7426746f03b43ca05848867b095930ea6c84b141ffbe1962b7d5e20e5e5807f19879b95936255ca1fc8823553ffb115e84dca6578876da8b11
   languageName: node
   linkType: hard
 
@@ -17371,10 +17370,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"headers-polyfill@npm:^3.1.0, headers-polyfill@npm:^3.1.2":
+"headers-polyfill@npm:^3.1.0":
   version: 3.1.2
   resolution: "headers-polyfill@npm:3.1.2"
   checksum: 510ca9637ef652404dbd432e680418f8d418ba18094ef2f64c3d8de955ebf6e68d553c7f0aeaa5fc937d130b139c1e2d7c2066cd4cf0f740a4627924eaaee9db
+  languageName: node
+  linkType: hard
+
+"headers-polyfill@npm:^3.2.0":
+  version: 3.2.1
+  resolution: "headers-polyfill@npm:3.2.1"
+  dependencies:
+    "@types/set-cookie-parser": ^2.4.3
+    set-cookie-parser: ^2.6.0
+  checksum: e66d56ce34821909ce28e51356650233912b2205d00b8494c9c57b4a30d4f07d558afb5f7f6f7fedc9b9c14caf25c9e06afaf8fa60585c36801e17417f901c6b
   languageName: node
   linkType: hard
 
@@ -22521,20 +22530,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"msw@npm:1.2.1":
-  version: 1.2.1
-  resolution: "msw@npm:1.2.1"
+"msw@npm:1.3.0":
+  version: 1.3.0
+  resolution: "msw@npm:1.3.0"
   dependencies:
     "@mswjs/cookies": ^0.2.2
     "@mswjs/interceptors": ^0.17.5
     "@open-draft/until": ^1.0.3
     "@types/cookie": ^0.4.1
     "@types/js-levenshtein": ^1.1.1
-    chalk: 4.1.1
+    chalk: ^4.1.1
     chokidar: ^3.4.2
     cookie: ^0.4.2
     graphql: ^15.0.0 || ^16.0.0
-    headers-polyfill: ^3.1.2
+    headers-polyfill: ^3.2.0
     inquirer: ^8.2.0
     is-node-process: ^1.2.0
     js-levenshtein: ^1.1.6
@@ -22545,13 +22554,13 @@ __metadata:
     type-fest: ^2.19.0
     yargs: ^17.3.1
   peerDependencies:
-    typescript: ">= 4.4.x <= 5.0.x"
+    typescript: ">= 4.4.x <= 5.2.x"
   peerDependenciesMeta:
     typescript:
       optional: true
   bin:
     msw: cli/index.js
-  checksum: 97b9c5ffc81b4380dd24ff40ac52ca02f406c88f86d8209ba991da19aad0bcfc37e807794aa1b9bf29f89cd86fd31e492bf4418c5ff02559b4f80d6ce4fb417b
+  checksum: 5ec31d58b0b8841906427738b3f20efd93c45673022f1f8f2221e2880bf76d8ce85902a4f2656727bdcd6d3124d06bb61ff7827a3f9b218ceba6a09d3f6508be
   languageName: node
   linkType: hard
 
@@ -27270,6 +27279,13 @@ __metadata:
   version: 2.5.1
   resolution: "set-cookie-parser@npm:2.5.1"
   checksum: b99c37f976e68ae6eb7c758bf2bbce1e60bb54e3eccedaa25f2da45b77b9cab58d90674cf9edd7aead6fbeac6308f2eb48713320a47ca120d0e838d0194513b6
+  languageName: node
+  linkType: hard
+
+"set-cookie-parser@npm:^2.6.0":
+  version: 2.6.0
+  resolution: "set-cookie-parser@npm:2.6.0"
+  checksum: bf11ebc594c53d84588f1b4c04f1b8ce14e0498b1c011b3d76b5c6d5aac481bbc3f7c5260ec4ce99bdc1d9aed19f9fc315e73166a36ca74d0f12349a73f6bdc9
   languageName: node
   linkType: hard
 
