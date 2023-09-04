@@ -16,7 +16,7 @@ module.exports = async ({ browser }) => {
     serveAdminPanel: false,
   });
 
-  const plugins = await getEnabledPlugins(strapiInstance);
+  const plugins = await getEnabledPlugins(strapiInstance, { client: true });
 
   const { adminPath } = getConfigUrls(strapiInstance.config, true);
 

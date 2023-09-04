@@ -240,7 +240,8 @@ describe('NotFoundPage', () => {
         color: #666687;
       }
 
-      .c16[aria-disabled='true'] svg > g,.c16[aria-disabled='true'] svg path {
+      .c16[aria-disabled='true'] svg > g,
+      .c16[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -253,7 +254,8 @@ describe('NotFoundPage', () => {
         color: #666687;
       }
 
-      .c16[aria-disabled='true']:active svg > g,.c16[aria-disabled='true']:active svg path {
+      .c16[aria-disabled='true']:active svg > g,
+      .c16[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 

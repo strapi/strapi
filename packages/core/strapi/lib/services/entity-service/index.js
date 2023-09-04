@@ -172,6 +172,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       data: entityData,
     });
 
+    // TODO: do all of this in a transaction to avoid a race condition where entity is created then deleted before we do findOne again
     // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
     if (files && Object.keys(files).length > 0) {
       await this.uploadFiles(uid, Object.assign(entityData, entity), files);
