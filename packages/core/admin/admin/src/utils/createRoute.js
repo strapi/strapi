@@ -29,11 +29,7 @@ const LazyCompo = ({ loadComponent }) => {
   return <LoadingIndicatorPage />;
 };
 
-LazyCompo.propTypes = {
-  loadComponent: PropTypes.func.isRequired,
-};
-
-export const createRoute = (Component, to, exact) => {
+const createRoute = (Component, to, exact) => {
   return (
     <Route
       render={() => <LazyCompo loadComponent={Component} />}
@@ -43,3 +39,9 @@ export const createRoute = (Component, to, exact) => {
     />
   );
 };
+
+LazyCompo.propTypes = {
+  loadComponent: PropTypes.func.isRequired,
+};
+
+export default createRoute;

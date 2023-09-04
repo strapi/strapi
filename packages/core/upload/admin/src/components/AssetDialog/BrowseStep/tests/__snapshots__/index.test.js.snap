@@ -500,7 +500,8 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   color: #666687;
 }
 
-.c19[aria-disabled='true'] svg > g,.c19[aria-disabled='true'] svg path {
+.c19[aria-disabled='true'] svg > g,
+.c19[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -513,7 +514,8 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   color: #666687;
 }
 
-.c19[aria-disabled='true']:active svg > g,.c19[aria-disabled='true']:active svg path {
+.c19[aria-disabled='true']:active svg > g,
+.c19[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
