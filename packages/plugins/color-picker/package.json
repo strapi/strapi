@@ -48,7 +48,7 @@
     "displayName": "Color Picker"
   },
   "scripts": {
-    "build": "NODE_ENV=production strapi plugin:build --yes",
+    "build": "NODE_ENV=production strapi plugin:build --force",
     "watch": "run -T tsc -w --preserveWatchOutput",
     "clean": "run -T rimraf ./dist",
     "prepublishOnly": "yarn clean && yarn build",

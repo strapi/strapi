@@ -1,5 +1,6 @@
 'use strict';
 
+const { forceOption } = require('../../../utils/commander');
 const { getLocalScript } = require('../../../utils/helpers');
 
 /**
@@ -10,7 +11,7 @@ module.exports = ({ command }) => {
   command
     .command('plugin:build')
     .description('Bundle your strapi plugin for publishing.')
-    .option('-y, --yes', 'Skip all confirmation prompts', false)
+    .addOption(forceOption)
     .option('-d, --debug', 'Enable debugging mode with verbose logs', false)
     .action(getLocalScript('plugin/build-command'));
 };

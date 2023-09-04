@@ -166,18 +166,18 @@ const getLocalScript =
  * @description Notify users this is an experimental command and get them to approve first
  * this can be opted out by passing `yes` as a property of the args object.
  *
- * @type {(args?: { yes?: boolean }) => Promise<void>}
+ * @type {(args?: { force?: boolean }) => Promise<void>}
  *
  * @example
  * ```ts
  * const { notifyExperimentalCommand } = require('../utils/helpers');
  *
- * const myCommand = async ({ yes }) => {
- *  await notifyExperimentalCommand({ yes });
+ * const myCommand = async ({ force }) => {
+ *  await notifyExperimentalCommand({ force });
  * }
  * ```
  */
-const notifyExperimentalCommand = async ({ yes } = {}) => {
+const notifyExperimentalCommand = async ({ force } = {}) => {
   console.log(
     boxen(
       `The ${chalk.bold(
@@ -194,7 +194,7 @@ const notifyExperimentalCommand = async ({ yes } = {}) => {
     )
   );
 
-  if (!yes) {
+  if (!force) {
     const { confirmed } = await prompt({
       type: 'confirm',
       name: 'confirmed',

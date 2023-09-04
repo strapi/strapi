@@ -141,7 +141,7 @@ const confirmMessage = async (message, { force } = {}) => {
 };
 
 const forceOption = new Option(
-  '--force',
+  '-f --force',
   `Automatically answer "yes" to all prompts, including potentially destructive requests, and run non-interactively.`
 );
 

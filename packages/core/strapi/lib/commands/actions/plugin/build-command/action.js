@@ -18,17 +18,17 @@ const { buildTaskHandlers } = require('../../../builders/tasks');
 /**
  *
  * @param {object} args
- * @param {boolean} args.yes
+ * @param {boolean} args.force
  * @param {boolean} args.debug
  */
-module.exports = async ({ yes, debug }) => {
+module.exports = async ({ force, debug }) => {
   const logger = createLogger({ debug, timestamp: false });
   try {
     /**
      * Notify users this is an experimental command and get them to approve first
      * this can be opted out by setting the argument --yes
      */
-    await notifyExperimentalCommand({ yes });
+    await notifyExperimentalCommand({ force });
 
     const cwd = process.cwd();
 
