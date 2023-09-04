@@ -90,8 +90,8 @@
     "webpack-cli": "^5.1.0"
   },
   "peerDependencies": {
-    "@strapi/design-system": "^1.9.0",
-    "@strapi/icons": "^1.9.0",
+    "@strapi/design-system": "1.9.0",
+    "@strapi/icons": "1.9.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^5.3.4",
