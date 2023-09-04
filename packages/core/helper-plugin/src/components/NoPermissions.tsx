@@ -1,11 +1,12 @@
 import React from 'react';
 
-import { EmptyStateLayout } from '@strapi/design-system';
+import { EmptyStateLayout, EmptyStateLayoutProps } from '@strapi/design-system';
 import { EmptyPermissions } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-const NoPermissions = ({ action }) => {
+export type NoPermissionsProps = Pick<EmptyStateLayoutProps, 'action'>;
+
+const NoPermissions = ({ action }: NoPermissionsProps) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -18,14 +19,6 @@ const NoPermissions = ({ action }) => {
       action={action}
     />
   );
-};
-
-NoPermissions.defaultProps = {
-  action: undefined,
-};
-
-NoPermissions.propTypes = {
-  action: PropTypes.node,
 };
 
 export { NoPermissions };
