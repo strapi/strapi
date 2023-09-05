@@ -227,6 +227,8 @@ const integerValidator = (
   addMinIntegerValidator(schema, metas);
   addMaxIntegerValidator(schema, metas);
   addUniqueValidator(schema, metas);
+
+  return schema;
 };
 
 const floatValidator = (metas: ValidatorMetas<Attribute.Decimal | Attribute.Float>) => {
@@ -234,11 +236,15 @@ const floatValidator = (metas: ValidatorMetas<Attribute.Decimal | Attribute.Floa
   addMinFloatValidator(schema, metas);
   addMaxFloatValidator(schema, metas);
   addUniqueValidator(schema, metas);
+
+  return schema;
 };
 
 const bigintegerValidator = (metas: ValidatorMetas<Attribute.BigInteger>) => {
   const schema = yup.mixed();
   addUniqueValidator(schema, metas);
+
+  return schema;
 };
 
 const datesValidator = (
@@ -246,6 +252,8 @@ const datesValidator = (
 ) => {
   const schema = yup.date();
   addUniqueValidator(schema, metas);
+
+  return schema;
 };
 
 export default {

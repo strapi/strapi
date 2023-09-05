@@ -1,10 +1,7 @@
-'use strict';
+import strapiUtils, { errors } from '@strapi/utils';
 
-const strapiUtils = require('@strapi/utils');
-const {
-  errors: { YupValidationError },
-} = require('@strapi/utils');
-const validators = require('../validators');
+import validators from '../validators';
+import type { Schema } from '../../../types';
 
 describe('Time validator', () => {
   describe('unique', () => {
@@ -14,19 +11,26 @@ describe('Time validator', () => {
       db: {
         query: jest.fn(() => ({
           findOne: fakeFindOne,
-        })),
-      },
-    };
+        })) as any,
+      } as any,
+    } as any;
 
     afterEach(() => {
       jest.clearAllMocks();
       fakeFindOne.mockReset();
     });
 
-    const fakeModel = {
-      kind: 'contentType',
+    const fakeModel: Schema.ContentType = {
+      modelType: 'contentType',
+      kind: 'collectionType',
       modelName: 'test-model',
-      uid: 'test-uid',
+      globalId: 'test-model',
+      uid: 'api::test.test-uid',
+      info: {
+        displayName: 'Test model',
+        singularName: 'test-model',
+        pluralName: 'test-models',
+      },
       options: {},
       attributes: {
         attrTimestampUnique: { type: 'timestamp', unique: true },
@@ -37,18 +41,15 @@ describe('Time validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.timestamp(
-          {
-            attr: { type: 'timestamp' },
-            model: fakeModel,
-            updatedAttribute: {
-              name: 'attrTimestampUnique',
-              value: '1638140400',
-            },
-            entity: null,
+        validators.timestamp({
+          attr: { type: 'timestamp' },
+          model: fakeModel,
+          updatedAttribute: {
+            name: 'attrTimestampUnique',
+            value: '1638140400',
           },
-          { isDraft: false }
-        )
+          entity: null,
+        })
       );
 
       await validator('1638140400');
@@ -61,18 +62,15 @@ describe('Time validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         validators
-          .timestamp(
-            {
-              attr: { type: 'timestamp', unique: true },
-              model: fakeModel,
-              updatedAttribute: {
-                name: 'attrTimestampUnique',
-                value: null,
-              },
-              entity: null,
+          .timestamp({
+            attr: { type: 'timestamp', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrTimestampUnique',
+              value: null,
             },
-            { isDraft: false }
-          )
+            entity: null,
+          })
           .nullable()
       );
 
@@ -84,18 +82,15 @@ describe('Time validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.timestamp(
-          {
-            attr: { type: 'timestamp', unique: true },
-            model: fakeModel,
-            updatedAttribute: {
-              name: 'attrTimestampUnique',
-              value: '1638140400',
-            },
-            entity: null,
+        validators.timestamp({
+          attr: { type: 'timestamp', unique: true },
+          model: fakeModel,
+          updatedAttribute: {
+            name: 'attrTimestampUnique',
+            value: '1638140400',
           },
-          { isDraft: false }
-        )
+          entity: null,
+        })
       );
 
       expect(await validator('1638140400')).toBe('1638140400');
@@ -106,24 +101,21 @@ describe('Time validator', () => {
       fakeFindOne.mockResolvedValueOnce({ attrTimestampUnique: '1638140400' });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.timestamp(
-          {
-            attr: { type: 'timestamp', unique: true },
-            model: fakeModel,
-            updatedAttribute: {
-              name: 'attrTimestampUnique',
-              value: '1638140400',
-            },
-            entity: null,
+        validators.timestamp({
+          attr: { type: 'timestamp', unique: true },
+          model: fakeModel,
+          updatedAttribute: {
+            name: 'attrTimestampUnique',
+            value: '1638140400',
           },
-          { isDraft: false }
-        )
+          entity: null,
+        })
       );
 
       try {
         await validator('1638140400');
       } catch (err) {
-        expect(err).toBeInstanceOf(YupValidationError);
+        expect(err).toBeInstanceOf(errors.YupValidationError);
       }
     });
 
@@ -131,18 +123,15 @@ describe('Time validator', () => {
       fakeFindOne.mockResolvedValueOnce({ attrTimestampUnique: '1638140400' });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.timestamp(
-          {
-            attr: { type: 'timestamp', unique: true },
-            model: fakeModel,
-            updatedAttribute: {
-              name: 'attrTimestampUnique',
-              value: '1638140400',
-            },
-            entity: { id: 1, attrTimestampUnique: '1638140400' },
+        validators.timestamp({
+          attr: { type: 'timestamp', unique: true },
+          model: fakeModel,
+          updatedAttribute: {
+            name: 'attrTimestampUnique',
+            value: '1638140400',
           },
-          { isDraft: false }
-        )
+          entity: { id: 1, attrTimestampUnique: '1638140400' },
+        })
       );
 
       expect(await validator('1638140400')).toBe('1638140400');
@@ -152,18 +141,15 @@ describe('Time validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.timestamp(
-          {
-            attr: { type: 'timestamp', unique: true },
-            model: fakeModel,
-            updatedAttribute: {
-              name: 'attrTimestampUnique',
-              value: '1638140400',
-            },
-            entity: null,
+        validators.timestamp({
+          attr: { type: 'timestamp', unique: true },
+          model: fakeModel,
+          updatedAttribute: {
+            name: 'attrTimestampUnique',
+            value: '1638140400',
           },
-          { isDraft: false }
-        )
+          entity: null,
+        })
       );
 
       await validator('1638140400');
@@ -178,18 +164,15 @@ describe('Time validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.timestamp(
-          {
-            attr: { type: 'timestamp', unique: true },
-            model: fakeModel,
-            updatedAttribute: {
-              name: 'attrTimestampUnique',
-              value: '1638140400',
-            },
-            entity: { id: 1, attrTimestampUnique: '1000000000' },
+        validators.timestamp({
+          attr: { type: 'timestamp', unique: true },
+          model: fakeModel,
+          updatedAttribute: {
+            name: 'attrTimestampUnique',
+            value: '1638140400',
           },
-          { isDraft: false }
-        )
+          entity: { id: 1, attrTimestampUnique: '1000000000' },
+        })
       );
 
       await validator('1638140400');
