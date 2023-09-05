@@ -1,9 +1,7 @@
-'use strict';
+import { get } from 'lodash/fp';
+import metrics from '../index';
 
 jest.mock('node-fetch', () => jest.fn(() => Promise.resolve()));
-
-const { get } = require('lodash/fp');
-const metrics = require('../index');
 
 const fetch = jest.fn(() => Promise.resolve());
 
@@ -37,7 +35,7 @@ describe('metrics', () => {
         get: jest.fn(() => ({})),
       },
       fetch,
-    });
+    } as any);
 
     metricsInstance.register();
 
@@ -72,7 +70,7 @@ describe('metrics', () => {
         get: jest.fn(() => ({})),
       },
       fetch,
-    });
+    } as any);
 
     metricsInstance.register();
 
@@ -105,21 +103,24 @@ describe('metrics', () => {
         get: jest.fn(() => ({})),
       },
       fetch,
-    });
+    } as any);
 
     send('someEvent');
 
     expect(fetch).toHaveBeenCalled();
-    expect(fetch.mock.calls[0][0]).toBe('https://analytics.strapi.io/api/v2/track');
-    expect(fetch.mock.calls[0][1].method).toBe('POST');
-    expect(JSON.parse(fetch.mock.calls[0][1].body)).toMatchObject({
+
+    const callParameters = fetch.mock.calls[0] as any[];
+    expect(callParameters[0]).toBe('https://analytics.strapi.io/api/v2/track');
+
+    expect(callParameters[1].method).toBe('POST');
+    expect(JSON.parse(callParameters[1].body)).toMatchObject({
       event: 'someEvent',
       groupProperties: {
         projectType: 'Community',
         projectId: 'test',
       },
     });
-    expect(fetch.mock.calls[0][1].headers).toMatchObject({
+    expect(callParameters[1].headers).toMatchObject({
       'Content-Type': 'application/json',
       'X-Strapi-Event': 'someEvent',
     });
@@ -152,7 +153,7 @@ describe('metrics', () => {
         get: jest.fn(() => ({})),
       },
       fetch,
-    });
+    } as any);
 
     send('someEvent');
 

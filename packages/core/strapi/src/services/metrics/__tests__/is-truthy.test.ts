@@ -1,6 +1,4 @@
-'use strict';
-
-const isTruthyEnvVar = require('../is-truthy');
+import isTruthyEnvVar from '../is-truthy';
 
 describe('isTruthyEnvVar', () => {
   test('Handles boolean strings', () => {

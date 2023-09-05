@@ -1,8 +1,6 @@
-'use strict';
-
-const crypto = require('crypto');
-const { generateAdminUserHash } = require('../admin-user-hash');
-const createContext = require('../../../../../../../test/helpers/create-context');
+import crypto from 'crypto';
+import { generateAdminUserHash } from '../admin-user-hash';
+import createContext from '../../../../../../../test/helpers/create-context';
 
 describe('user email hash', () => {
   test('should create a hash from admin user email', () => {
@@ -22,7 +20,7 @@ describe('user email hash', () => {
 
     const hash = crypto.createHash('sha256').update('testemail@strapi.io').digest('hex');
 
-    const userId = generateAdminUserHash(strapi);
+    const userId = generateAdminUserHash(strapi as any);
     expect(userId).toBe(hash);
   });
 
@@ -35,7 +33,7 @@ describe('user email hash', () => {
       },
     };
 
-    const userId = generateAdminUserHash(strapi);
+    const userId = generateAdminUserHash(strapi as any);
     expect(userId).toBe('');
   });
 });

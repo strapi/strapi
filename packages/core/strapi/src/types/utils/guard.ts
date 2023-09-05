@@ -1,4 +1,4 @@
-import type { Utils } from '@strapi/strapi';
+import type { Utils } from '..';
 
 /**
  * Assign a default value `TDefault` to `TValue` if `TValue` is of type `never`

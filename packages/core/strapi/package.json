@@ -143,6 +143,7 @@
     "@types/bcryptjs": "2.4.3",
     "@types/configstore": "5.0.1",
     "@types/delegates": "1.0.0",
+    "@types/jest": "29.5.2",
     "@types/koa": "*",
     "@types/koa-compress": "4.0.3",
     "@types/koa-session": "6.4.1",
