@@ -34,6 +34,17 @@ jest.mock('@strapi/helper-plugin', () => ({
   useNotification: jest.fn(() => {
     return toggleNotification;
   }),
+  useQueryParams: jest.fn(() => [
+    {
+      query: {
+        plugins: {
+          i18n: {
+            locale: 'en',
+          },
+        },
+      },
+    },
+  ]),
 }));
 
 const handlers = [

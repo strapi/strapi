@@ -31,6 +31,11 @@ jest.mock('@strapi/helper-plugin', () => ({
     {
       query: {
         sort: 'name:DESC',
+        plugins: {
+          i18n: {
+            locale: 'en',
+          },
+        },
       },
     },
   ]),

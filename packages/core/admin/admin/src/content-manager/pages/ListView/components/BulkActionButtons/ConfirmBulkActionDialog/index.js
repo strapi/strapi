@@ -6,6 +6,7 @@ import {
   useFetchClient,
   useNotification,
   useAPIErrorHandler,
+  useQueryParams,
 } from '@strapi/helper-plugin';
 import { Check, ExclamationMarkCircle } from '@strapi/icons';
 import PropTypes from 'prop-types';
@@ -82,6 +83,15 @@ const ConfirmDialogPublishAll = ({ isOpen, onToggleDialog, isConfirmButtonLoadin
   const {
     contentType: { uid: slug },
   } = useSelector(listViewDomain());
+  const [
+    {
+      query: {
+        plugins: {
+          i18n: { locale },
+        },
+      },
+    },
+  ] = useQueryParams();
 
   const {
     data: countDraftRelations,
@@ -97,6 +107,7 @@ const ConfirmDialogPublishAll = ({ isOpen, onToggleDialog, isConfirmButtonLoadin
         {
           params: {
             ids: selectedEntries,
+            locale,
           },
         }
       );
