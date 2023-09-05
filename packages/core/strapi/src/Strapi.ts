@@ -49,6 +49,7 @@ import getNumberOfDynamicZones from './services/utils/dynamic-zones';
 import sanitizersRegistry from './core/registries/sanitizers';
 import validatorsRegistry from './core/registries/validators';
 import convertCustomFieldType from './utils/convert-custom-field-type';
+import * as componentsService from './services/entity-service/components';
 
 // TODO: move somewhere else
 import * as draftAndPublishSync from './migrations/draft-publish';
@@ -144,6 +145,8 @@ class Strapi {
 
   entityService?: EntityService;
 
+  componentsService: typeof componentsService;
+
   telemetry: ReturnType<typeof createTelemetry>;
 
   requestContext: typeof requestContext;
@@ -216,6 +219,7 @@ class Strapi {
     this.requestContext = requestContext;
     this.customFields = createCustomFields(this);
     this.fetch = createStrapiFetch(this);
+    this.componentsService = componentsService;
 
     createUpdateNotifier(this).notify();
 

@@ -1,8 +1,8 @@
-import type { Attribute, Schema } from '@strapi/strapi';
+import type { Attribute, Common, Schema } from '@strapi/strapi';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import * as componentsService from '@strapi/strapi/lib/services/entity-service/components';
+
 import { assign, isArray, isEmpty, isObject, map, omit, size } from 'lodash/fp';
 
 const sanitizeComponentLikeAttributes = <T extends Schema.ContentType>(
@@ -25,18 +25,27 @@ const createEntityQuery = (strapi: Strapi.Loaded): any => {
     async assignToEntity(uid: string, data: any) {
       const model = strapi.getModel(uid);
 
-      const entityComponents = await componentsService.createComponents(uid, data);
+      const entityComponents = await strapi.componentsService.createComponents(
+        uid as Common.UID.Schema,
+        data
+      );
       const dataWithoutComponents = sanitizeComponentLikeAttributes(model, data);
 
       return assign(entityComponents, dataWithoutComponents);
     },
 
     async get<T extends object>(uid: string, entity: T) {
-      return componentsService.getComponents(uid, entity);
+      return strapi.componentsService.getComponents(uid as Common.UID.Schema, entity as any);
     },
 
     delete<T extends object>(uid: string, componentsToDelete: T) {
-      return componentsService.deleteComponents(uid, componentsToDelete, { loadComponents: false });
+      return strapi.componentsService.deleteComponents(
+        uid as Common.UID.Schema,
+        componentsToDelete as any,
+        {
+          loadComponents: false,
+        }
+      );
     },
   };
 

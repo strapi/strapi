@@ -3,6 +3,6 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": ["src", "admin.d.ts"],
+  "include": ["src"],
   "exclude": ["node_modules"]
 }

@@ -353,7 +353,7 @@ const buildRelationsStore = <TUID extends Common.UID.ContentType | Common.UID.Co
     return {};
   }
 
-  const currentModel: Common.Schemas[TUID] = strapi.getModel(uid);
+  const currentModel = strapi.getModel(uid);
 
   return Object.keys(currentModel.attributes).reduce((result, attributeName: string) => {
     const attribute = currentModel.attributes[attributeName];
