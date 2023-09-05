@@ -319,15 +319,17 @@ describe('admin:create command', () => {
       const firstname = 'John';
       const lastname = 'Doe';
 
-      const mockInquiry = jest.spyOn(inquirer, 'prompt').mockResolvedValue(async () => ({
+      const mockInquiry = jest.spyOn(inquirer, 'prompt').mockReturnValue({
         email,
         password,
         firstname,
         lastname,
         confirm: true,
-      }));
+      } as any);
 
-      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
+        throw new Error('exit');
+      });
       const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
       await createAdminCommand().catch((err) => {
