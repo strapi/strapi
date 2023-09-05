@@ -1814,7 +1814,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/plugin-transform-react-jsx-self@npm:^7.18.6":
+"@babel/plugin-transform-react-jsx-self@npm:^7.18.6, @babel/plugin-transform-react-jsx-self@npm:^7.22.5":
   version: 7.22.5
   resolution: "@babel/plugin-transform-react-jsx-self@npm:7.22.5"
   dependencies:
@@ -1825,7 +1825,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/plugin-transform-react-jsx-source@npm:^7.19.6":
+"@babel/plugin-transform-react-jsx-source@npm:^7.19.6, @babel/plugin-transform-react-jsx-source@npm:^7.22.5":
   version: 7.22.5
   resolution: "@babel/plugin-transform-react-jsx-source@npm:7.22.5"
   dependencies:
@@ -6922,7 +6922,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/admin-test-utils@workspace:*, @strapi/admin-test-utils@workspace:packages/admin-test-utils":
+"@strapi/admin-test-utils@4.13.2, @strapi/admin-test-utils@workspace:*, @strapi/admin-test-utils@workspace:packages/admin-test-utils":
   version: 0.0.0-use.local
   resolution: "@strapi/admin-test-utils@workspace:packages/admin-test-utils"
   dependencies:
@@ -7193,6 +7193,7 @@ __metadata:
     "@storybook/addon-mdx-gfm": 7.4.0
     "@storybook/builder-vite": 7.4.0
     "@storybook/react-vite": 7.4.0
+    "@strapi/admin-test-utils": 4.13.2
     "@strapi/design-system": 1.9.0
     "@strapi/icons": 1.9.0
     "@testing-library/react": 14.0.0
@@ -7279,7 +7280,10 @@ __metadata:
     "@strapi/design-system": 1.9.0
     "@strapi/helper-plugin": 4.13.2
     "@strapi/icons": 1.9.0
+    "@strapi/strapi": 4.13.2
     "@testing-library/react": 14.0.0
+    "@testing-library/user-event": 14.4.3
+    "@types/styled-components": 5.1.26
     prop-types: ^15.8.1
     react: ^18.2.0
     react-colorful: 5.6.1
@@ -7287,6 +7291,7 @@ __metadata:
     react-intl: 6.4.1
     react-router-dom: 5.3.4
     styled-components: 5.3.3
+    typescript: 5.1.3
   peerDependencies:
     "@strapi/strapi": ^4.4.0
     react: ^17.0.0 || ^18.0.0
@@ -7712,8 +7717,10 @@ __metadata:
     "@strapi/plugin-upload": 4.13.2
     "@strapi/typescript-utils": 4.13.2
     "@strapi/utils": 4.13.2
+    "@vitejs/plugin-react": 4.0.4
     bcryptjs: 2.4.3
     boxen: 5.1.2
+    browserslist-to-esbuild: 1.2.0
     chalk: 4.1.2
     chokidar: 3.5.3
     ci-info: 3.8.0
@@ -7754,6 +7761,8 @@ __metadata:
     supertest: 6.3.3
     ts-zen: "https://github.com/strapi/ts-zen#41af3f8c6422de048bf9976ae551566b2c2b590a"
     typescript: 5.1.3
+    vite: 4.4.9
+    yup: 0.32.9
   bin:
     strapi: ./bin/strapi.js
   languageName: unknown
@@ -9437,6 +9446,20 @@ __metadata:
   bin:
     ncc: dist/ncc/cli.js
   checksum: dcb8db089b07a8fad64c24eef25be6bc2db7ba30582a03236e3a6d332c8653d93a45aba7fe0e01b6d64f3c5b54d23467539ac3664c113f54a9e59341ded79bf9
+  languageName: node
+  linkType: hard
+
+"@vitejs/plugin-react@npm:4.0.4":
+  version: 4.0.4
+  resolution: "@vitejs/plugin-react@npm:4.0.4"
+  dependencies:
+    "@babel/core": ^7.22.9
+    "@babel/plugin-transform-react-jsx-self": ^7.22.5
+    "@babel/plugin-transform-react-jsx-source": ^7.22.5
+    react-refresh: ^0.14.0
+  peerDependencies:
+    vite: ^4.2.0
+  checksum: ec25400dc7c5fce914122d1f57de0fbaff9216addb8cd6187308ad2c7a3d3b73ea3a6f2dd0a8c7ec5e90e56b37046fe90d3e0ec285a9446e73695cb174377f84
   languageName: node
   linkType: hard
 
@@ -11806,17 +11829,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"caniuse-lite@npm:^1.0.30001400":
-  version: 1.0.30001449
-  resolution: "caniuse-lite@npm:1.0.30001449"
-  checksum: f1b395f0a5495c1931c53f58441e0db79b8b0f8ef72bb6d241d13c49b05827630efe6793d540610e0a014d8fdda330dd42f981c82951bd4bdcf635480e1a0102
-  languageName: node
-  linkType: hard
-
-"caniuse-lite@npm:^1.0.30001517":
-  version: 1.0.30001519
-  resolution: "caniuse-lite@npm:1.0.30001519"
-  checksum: 66085133ede05d947e30b62fed2cbae18e5767afda8b0de38840883e1cfe5846bf1568ddbafd31647544e59112355abedaf9c867ac34541bfc20d69e7a19d94c
+"caniuse-lite@npm:^1.0.30001400, caniuse-lite@npm:^1.0.30001517":
+  version: 1.0.30001522
+  resolution: "caniuse-lite@npm:1.0.30001522"
+  checksum: 56e3551c02ae595085114073cf242f7d9d54d32255c80893ca9098a44f44fc6eef353936f234f31c7f4cb894dd2b6c9c4626e30649ee29e04d70aa127eeefeb0
   languageName: node
   linkType: hard
 
