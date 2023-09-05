@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { has, prop, omit, toString, pipe, assign } from 'lodash/fp';
+import { has, omit, pipe, assign } from 'lodash/fp';
 
 import { contentTypes as contentTypesUtils, mapAsync, errors } from '@strapi/utils';
 import type { Attribute, Common, Shared, Utils } from '../../types';

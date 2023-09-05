@@ -4,9 +4,9 @@ import { expectExit } from '../../../__tests__/commands.test.utils';
 
 describe('Transfer', () => {
   // mock command utils
-  jest.mock('../../../utils/data-transfer.js', () => {
+  jest.mock('../../../utils/data-transfer', () => {
     return {
-      ...jest.requireActual('../../../utils/data-transfer.js'),
+      ...jest.requireActual('../../../utils/data-transfer'),
       getTransferTelemetryPayload: jest.fn().mockReturnValue({}),
       loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
       formatDiagnostic: jest.fn(),

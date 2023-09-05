@@ -1,4 +1,6 @@
-const expectExit = async (code, fn) => {
+import type { Utils } from '../../types';
+
+const expectExit = async (code: number, fn: Utils.Function.Any) => {
   const exit = jest.spyOn(process, 'exit').mockImplementation((number) => {
     throw new Error(`process.exit: ${number}`);
   });

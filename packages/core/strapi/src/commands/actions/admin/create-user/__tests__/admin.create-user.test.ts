@@ -2,7 +2,7 @@ import inquirer from 'inquirer';
 import createAdminCommand from '../action';
 
 const roleId = 1;
-const load = jest.fn(() => mock);
+const load = jest.fn(() => mock) as any;
 
 const create = jest.fn();
 const getSuperAdmin = jest.fn(() => Promise.resolve({ id: roleId }));

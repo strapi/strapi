@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
 import resetAdminPasswordCommand from '../action';
 
-const load = jest.fn(() => mock);
+const load = jest.fn(() => mock) as any;
 const resetPasswordByEmail = jest.fn();
 const admin = {
   services: {

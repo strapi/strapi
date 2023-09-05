@@ -53,7 +53,7 @@ import convertCustomFieldType from './utils/convert-custom-field-type';
 // TODO: move somewhere else
 import * as draftAndPublishSync from './migrations/draft-publish';
 
-import type { Common, Schema, Shared } from './types';
+import type { Common, Shared } from './types';
 
 /**
  * Resolve the working directories based on the instance options.
@@ -635,11 +635,7 @@ class Strapi {
     }
   }
 
-  getModel(uid: Common.UID.ContentType): Schema.ContentType;
-  getModel(uid: Common.UID.Component): Schema.Component;
-  getModel(
-    uid: Common.UID.Component | Common.UID.ContentType
-  ): Schema.Component | Schema.ContentType {
+  getModel(uid: string) {
     return (
       this.contentTypes[uid as Common.UID.ContentType] ||
       this.components[uid as Common.UID.Component]

@@ -1,8 +1,4 @@
-declare module 'koa-favicon' {
-  import type Koa from 'koa';
-
-  export default function favicon(
-    path: string,
-    options?: { maxAge?: number; mime?: string }
-  ): Koa.Middleware;
-}
+import koaFavicon from 'koa-favicon';
+import type { Common } from '../types';
+export type Config = NonNullable<Parameters<typeof koaFavicon>[1]>;
+export declare const favicon: Common.MiddlewareFactory<Config>;

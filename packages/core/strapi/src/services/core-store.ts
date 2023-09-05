@@ -43,7 +43,7 @@ type GetParams = {
 type Params = SetParams & GetParams;
 
 interface CoreStore {
-  (defaultParams: Params): {
+  (defaultParams: Partial<Params>): {
     get(params: Partial<GetParams>): Promise<unknown>;
     set(params: Partial<SetParams>): Promise<void>;
     delete(params: Partial<GetParams>): Promise<void>;
@@ -61,7 +61,7 @@ const createCoreStore = ({ db }: { db: Database }) => {
     };
   };
 
-  const store: CoreStore = function (defaultParams: Params) {
+  const store: CoreStore = function (defaultParams: Partial<Params>) {
     return {
       get: (params: Params) => store.get(mergeParams(defaultParams, params)),
       set: (params: Params) => store.set(mergeParams(defaultParams, params)),
