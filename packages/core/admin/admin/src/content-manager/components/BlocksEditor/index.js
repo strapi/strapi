@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Flex, Typography } from '@strapi/design-system';
+import { Box, Flex, Typography, InputWrapper, Divider } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -8,12 +8,20 @@ import { createEditor } from 'slate';
 import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
+import Toolbar from './Toolbar';
+
 const TypographyAsterisk = styled(Typography)`
   line-height: 0;
 `;
 
+const EditorDivider = styled(Divider)`
+  background: ${({ theme }) => theme.colors.neutral200};
+`;
+
 const style = {
   fontSize: pxToRem(14),
+  // The outline style is set on the wrapper with :focus-within
+  outline: 'none',
 };
 
 const initialValue = [
@@ -59,7 +67,18 @@ const BlocksEditor = React.forwardRef(({ intlLabel, name, readOnly, required, er
         </Flex>
 
         <Slate editor={editor} initialValue={initialValue}>
-          <Editable readOnly={readOnly} style={style} />
+          <InputWrapper direction="column" alignItems="flex-start">
+            <Toolbar.Root>
+              <Toolbar.Section>
+                <div>item</div>
+              </Toolbar.Section>
+              <Toolbar.Section>
+                <div>item</div>
+              </Toolbar.Section>
+            </Toolbar.Root>
+            <EditorDivider width="100%" />
+            <Editable readOnly={readOnly} style={style} />
+          </InputWrapper>
         </Slate>
       </Flex>
       {error && (
