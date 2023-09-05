@@ -68,14 +68,7 @@ const BlocksEditor = React.forwardRef(({ intlLabel, name, readOnly, required, er
 
         <Slate editor={editor} initialValue={initialValue}>
           <InputWrapper direction="column" alignItems="flex-start">
-            <Toolbar.Root>
-              <Toolbar.Section>
-                <div>item</div>
-              </Toolbar.Section>
-              <Toolbar.Section>
-                <div>item</div>
-              </Toolbar.Section>
-            </Toolbar.Root>
+            <Toolbar />
             <EditorDivider width="100%" />
             <Editable readOnly={readOnly} style={style} />
           </InputWrapper>
