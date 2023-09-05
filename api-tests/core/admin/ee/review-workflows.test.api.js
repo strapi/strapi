@@ -648,7 +648,13 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     let utils;
     let entry;
     let restrictedRequest;
+    let restrictedUser;
     let restrictedRole;
+
+    const deleteFixtures = async () => {
+      await utils.deleteUserById(restrictedUser.id);
+      await utils.deleteRolesById([restrictedRole.id]);
+    };
 
     beforeAll(async () => {
       // Update workflow to assign content type
@@ -658,24 +664,28 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
       entry = await createEntry(productUID, { name: 'Product' });
 
-      const restrictedUser = {
-        email: 'restricted@user.io',
-        password: 'Restricted123',
-      };
-
       utils = createUtils(strapi);
       const role = await utils.createRole({
         name: 'restricted-role',
         description: '',
       });
+      restrictedRole = role;
 
-      await utils.createUserIfNotExists({
-        ...restrictedUser,
+      const restrictedUserInfo = {
+        email: 'restricted@user.io',
+        password: 'Restricted123',
+      };
+
+      restrictedUser = await utils.createUserIfNotExists({
+        ...restrictedUserInfo,
         roles: [role.id],
       });
 
-      restrictedRole = role;
-      restrictedRequest = await createAuthRequest({ strapi, userInfo: restrictedUser });
+      restrictedRequest = await createAuthRequest({ strapi, userInfo: restrictedUserInfo });
+    });
+
+    afterAll(async () => {
+      await deleteFixtures();
     });
 
     test("It shouldn't be available for public", async () => {

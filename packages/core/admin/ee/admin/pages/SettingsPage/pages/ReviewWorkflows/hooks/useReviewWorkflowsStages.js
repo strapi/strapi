@@ -9,7 +9,7 @@ export function useReviewWorkflowsStages({ id, layout } = {}, queryOptions = {})
 
   const { get } = useFetchClient();
 
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, refetch } = useQuery(
     ['content-manager', slug, layout.uid, id, 'stages'],
     async () => {
       const { data } = await get(`/admin/content-manager/${slug}/${uid}/${id}/stages`);
@@ -31,5 +31,6 @@ export function useReviewWorkflowsStages({ id, layout } = {}, queryOptions = {})
     meta,
     stages,
     isLoading,
+    refetch,
   };
 }

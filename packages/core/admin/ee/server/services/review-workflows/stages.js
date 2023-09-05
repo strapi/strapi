@@ -78,12 +78,12 @@ module.exports = ({ strapi }) => {
     },
 
     async update(srcStage, destStage) {
-      let stagePermissions = [];
+      let stagePermissions = srcStage?.permissions ?? [];
       const stageId = destStage.id;
 
-      await this.deleteStagePermissions([srcStage]);
-
       if (destStage.permissions) {
+        await this.deleteStagePermissions([srcStage]);
+
         const permissions = await mapAsync(destStage.permissions, (permission) =>
           stagePermissionsService.register(permission.role, permission.action, stageId)
         );
@@ -153,6 +153,7 @@ module.exports = ({ strapi }) => {
         // Update the workflow stages
         await mapAsync(updated, (destStage) => {
           const srcStage = srcStages.find((s) => s.id === destStage.id);
+
           return this.update(srcStage, destStage);
         });
 
