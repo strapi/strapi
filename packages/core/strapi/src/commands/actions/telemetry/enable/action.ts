@@ -1,37 +1,51 @@
-'use strict';
+import { resolve } from 'path';
+import { randomUUID } from 'crypto';
+import fse from 'fs-extra';
+import chalk from 'chalk';
+import fetch from 'node-fetch';
+import machineID from '../../../../utils/machine-id';
 
-const { resolve } = require('path');
-const { randomUUID } = require('crypto');
-const fse = require('fs-extra');
-const chalk = require('chalk');
-const fetch = require('node-fetch');
-const machineID = require('../../../../utils/machine-id');
+type PackageJson = {
+  strapi?: {
+    uuid?: string;
+    telemetryDisabled?: boolean;
+  };
+};
 
-const readPackageJSON = async (path) => {
+const readPackageJSON = async (path: string) => {
   try {
     const packageObj = await fse.readJson(path);
     return packageObj;
   } catch (err) {
-    console.error(`${chalk.red('Error')}: ${err.message}`);
+    if (err instanceof Error) {
+      console.error(`${chalk.red('Error')}: ${err.message}`);
+    } else {
+      throw err;
+    }
   }
 };
 
-const writePackageJSON = async (path, file, spacing) => {
+const writePackageJSON = async (path: string, file: object, spacing: number) => {
   try {
     await fse.writeJson(path, file, { spaces: spacing });
     return true;
   } catch (err) {
-    console.error(`${chalk.red('Error')}: ${err.message}`);
-    console.log(
-      `${chalk.yellow(
-        'Warning'
-      )}: There has been an error, please set "telemetryDisabled": false in the "strapi" object of your package.json manually.`
-    );
-    return false;
+    if (err instanceof Error) {
+      console.error(`${chalk.red('Error')}: ${err.message}`);
+      console.log(
+        `${chalk.yellow(
+          'Warning'
+        )}: There has been an error, please set "telemetryDisabled": false in the "strapi" object of your package.json manually.`
+      );
+
+      return false;
+    }
+
+    throw err;
   }
 };
 
-const generateNewPackageJSON = (packageObj) => {
+const generateNewPackageJSON = (packageObj: PackageJson) => {
   if (!packageObj.strapi) {
     return {
       ...packageObj,
@@ -51,7 +65,7 @@ const generateNewPackageJSON = (packageObj) => {
   };
 };
 
-const sendEvent = async (uuid) => {
+const sendEvent = async (uuid: string) => {
   try {
     const event = 'didOptInTelemetry';
 
@@ -72,7 +86,7 @@ const sendEvent = async (uuid) => {
   }
 };
 
-module.exports = async function optInTelemetry() {
+async function optInTelemetry() {
   const packageJSONPath = resolve(process.cwd(), 'package.json');
   const exists = await fse.pathExists(packageJSONPath);
 
@@ -101,4 +115,6 @@ module.exports = async function optInTelemetry() {
   await sendEvent(updatedPackageJSON.strapi.uuid);
   console.log(`${chalk.green('Successfully opted into and enabled Strapi telemetry')}`);
   process.exit(0);
-};
+}
+
+export default optInTelemetry;

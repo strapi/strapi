@@ -17,7 +17,7 @@ const readPackageJSON = async (path: string) => {
   }
 };
 
-const writePackageJSON = async (path: string, file: string, spacing: number) => {
+const writePackageJSON = async (path: string, file: object, spacing: number) => {
   try {
     await fse.writeJson(path, file, { spaces: spacing });
     return true;
