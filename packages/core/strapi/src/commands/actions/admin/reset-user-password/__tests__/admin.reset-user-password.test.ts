@@ -16,7 +16,7 @@ const mock = {
   admin,
 };
 
-jest.mock('@strapi/strapi', () => {
+jest.mock('../../../../../index', () => {
   const impl = jest.fn(() => mock);
 
   Object.assign(impl, {
@@ -36,9 +36,7 @@ describe('admin:reset-password command', () => {
     const email = 'email@email.fr';
     const password = 'testPasword1234';
 
-    const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
-      throw new Error('exit');
-    });
+    const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
     const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
 
     await resetAdminPasswordCommand({ email, password });
@@ -133,9 +131,7 @@ describe('admin:reset-password command', () => {
         confirm: true,
       });
 
-      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
-        throw new Error('exit');
-      });
+      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
       const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
 
       await resetAdminPasswordCommand();

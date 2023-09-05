@@ -25,7 +25,7 @@ const mock = {
   admin,
 };
 
-jest.mock('@strapi/strapi', () => {
+jest.mock('../../../../../index', () => {
   const impl: any = jest.fn(() => mock);
 
   impl.compile = jest.fn();
@@ -46,9 +46,7 @@ describe('admin:create command', () => {
     const firstname = 'John';
     const lastname = 'Doe';
 
-    const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
-      throw new Error('exit');
-    });
+    const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
     const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
 
     await createAdminCommand({ email, password, firstname, lastname });
@@ -166,9 +164,7 @@ describe('admin:create command', () => {
         confirm: true,
       });
 
-      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
-        throw new Error('exit');
-      });
+      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
       const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
 
       await createAdminCommand();
@@ -191,9 +187,7 @@ describe('admin:create command', () => {
       const firstname = 'John';
       const lastname = 'Doe';
 
-      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
-        throw new Error('exit');
-      });
+      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
       const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
       const mockInquiry = jest.spyOn(inquirer, 'prompt').mockResolvedValue({
         email,
@@ -225,9 +219,7 @@ describe('admin:create command', () => {
       const firstname = 'John';
       const lastname = 'Doe';
 
-      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
-        throw new Error('exit');
-      });
+      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
       const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
       const mockInquiry = jest.spyOn(inquirer, 'prompt').mockResolvedValue({
         email,
@@ -335,9 +327,7 @@ describe('admin:create command', () => {
         confirm: true,
       }));
 
-      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
-        throw new Error('exit');
-      });
+      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
       const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
       await createAdminCommand().catch((err) => {
