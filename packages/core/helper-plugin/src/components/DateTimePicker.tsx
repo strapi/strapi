@@ -12,13 +12,11 @@ const warnOnce = once(console.warn)
  * @deprecated Use the DateTimePicker from the Design System instead.
  */
 const DateTimePickerLegacy = (props: DateTimePickerProps) => {
-  once(() => {
-    console.warn(
-      `
+  warnOnce(
+    `
       Deprecation warning: Usage of "DateTimePicker" component from the helper-plugin is deprecated and will be removed in the next major release. Instead, use the DateTimePicker from the Design System: import { DateTimePicker } from '@strapi/design-system';"
-      `
-    );
-  });
+    `
+  );
 
   return <DateTimePicker {...props} />;
 };
