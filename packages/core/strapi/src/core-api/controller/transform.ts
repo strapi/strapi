@@ -39,15 +39,15 @@ const parseBody = (ctx: Koa.Context) => {
 
 const transformResponse = (
   resource: any,
-  meta: unknown,
-  { contentType }: { contentType: Schema.ContentType | Schema.Component }
+  meta: unknown = {},
+  opts: { contentType?: Schema.ContentType | Schema.Component } = {}
 ) => {
   if (isNil(resource)) {
     return resource;
   }
 
   return {
-    data: transformEntry(resource, contentType),
+    data: transformEntry(resource, opts?.contentType),
     meta,
   };
 };
@@ -76,11 +76,11 @@ function transformComponent(
 
 function transformEntry<T extends Entry | Entry[] | null>(
   entry: T,
-  type: Schema.ContentType | Schema.Component
+  type?: Schema.ContentType | Schema.Component
 ): T extends Entry[] ? TransformedEntry[] : T extends Entry ? TransformedEntry : null;
 function transformEntry(
   entry: Entry | Entry[] | null,
-  type: Schema.ContentType | Schema.Component
+  type?: Schema.ContentType | Schema.Component
 ): TransformedEntry | TransformedEntry[] | null {
   if (isNil(entry)) {
     return entry;
@@ -103,6 +103,7 @@ function transformEntry(
     const attribute = type && type.attributes[key];
 
     if (
+      attribute &&
       contentTypeUtils.isRelationalAttribute(attribute) &&
       isEntry(property) &&
       'target' in attribute

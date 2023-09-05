@@ -1,3 +1,4 @@
+import type { Schema } from '../../../types';
 import * as transforms from '../transform';
 
 describe('Transforms', () => {
@@ -35,11 +36,22 @@ describe('Transforms', () => {
   });
 
   test('Handles relations single value', () => {
-    const contentType = {
+    const contentType: Schema.ContentType = {
+      globalId: 'test',
+      kind: 'collectionType',
+      modelName: 'test',
+      modelType: 'contentType',
+      uid: 'api::test.test',
+      info: {
+        displayName: 'test',
+        pluralName: 'tests',
+        singularName: 'test',
+      },
       attributes: {
         relation: {
           type: 'relation',
-          target: 'xxx',
+          relation: 'oneToOne',
+          target: 'api::relation.relation',
         },
       },
     };
@@ -48,7 +60,7 @@ describe('Transforms', () => {
       contentType() {
         return undefined;
       },
-    };
+    } as any;
 
     expect(
       transforms.transformResponse(
@@ -76,11 +88,22 @@ describe('Transforms', () => {
   });
 
   test('Handles relations array value', () => {
-    const contentType = {
+    const contentType: Schema.ContentType = {
+      globalId: 'test',
+      kind: 'collectionType',
+      modelName: 'test',
+      modelType: 'contentType',
+      uid: 'api::test.test',
+      info: {
+        displayName: 'test',
+        pluralName: 'tests',
+        singularName: 'test',
+      },
       attributes: {
         relation: {
           type: 'relation',
-          target: 'xxx',
+          relation: 'oneToOne',
+          target: 'api::relation.relation',
         },
       },
     };
@@ -89,7 +112,7 @@ describe('Transforms', () => {
       contentType() {
         return undefined;
       },
-    };
+    } as any;
 
     expect(
       transforms.transformResponse(
@@ -119,11 +142,22 @@ describe('Transforms', () => {
   });
 
   test('Handles relations recursively', () => {
-    const contentType = {
+    const contentType: Schema.ContentType = {
+      globalId: 'test',
+      kind: 'collectionType',
+      modelName: 'test',
+      modelType: 'contentType',
+      uid: 'api::test.test',
+      info: {
+        displayName: 'test',
+        pluralName: 'tests',
+        singularName: 'test',
+      },
       attributes: {
         relation: {
           type: 'relation',
-          target: 'xxx',
+          relation: 'oneToOne',
+          target: 'api::relation.relation',
         },
       },
     };
@@ -139,7 +173,7 @@ describe('Transforms', () => {
           },
         };
       },
-    };
+    } as any;
 
     expect(
       transforms.transformResponse(
@@ -181,7 +215,17 @@ describe('Transforms', () => {
   });
 
   test('Handles media like relations', () => {
-    const contentType = {
+    const contentType: Schema.ContentType = {
+      globalId: 'test',
+      kind: 'collectionType',
+      modelName: 'test',
+      modelType: 'contentType',
+      uid: 'api::test.test',
+      info: {
+        displayName: 'test',
+        pluralName: 'tests',
+        singularName: 'test',
+      },
       attributes: {
         media: {
           type: 'media',
@@ -193,7 +237,7 @@ describe('Transforms', () => {
       contentType() {
         return undefined;
       },
-    };
+    } as any;
 
     expect(
       transforms.transformResponse(
