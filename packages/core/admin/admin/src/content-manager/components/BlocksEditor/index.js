@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Flex, Typography } from '@strapi/design-system';
+import { Box, Flex, Typography } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -23,7 +23,7 @@ const initialValue = [
   },
 ];
 
-const BlocksEditor = React.forwardRef(({ intlLabel, name, readOnly, required }, ref) => {
+const BlocksEditor = React.forwardRef(({ intlLabel, name, readOnly, required, error }, ref) => {
   const { formatMessage } = useIntl();
   const [editor] = React.useState(() => withReact(createEditor()));
 
@@ -36,6 +36,7 @@ const BlocksEditor = React.forwardRef(({ intlLabel, name, readOnly, required }, 
 
   /** Editable is not able to hold the ref, https://github.com/ianstormtaylor/slate/issues/4082
    *  so with "useImperativeHandle" we can use ReactEditor methods to expose to the parent above
+   *  also not passing forwarded ref here, gives console warning.
    */
   React.useImperativeHandle(
     ref,
@@ -48,24 +49,34 @@ const BlocksEditor = React.forwardRef(({ intlLabel, name, readOnly, required }, 
   );
 
   return (
-    <Flex direction="column" alignItems="stretch" gap={1}>
-      <Flex gap={1}>
-        <Typography variant="pi" fontWeight="bold" textColor="neutral800">
-          {label}
-          {required && <TypographyAsterisk textColor="danger600">*</TypographyAsterisk>}
-        </Typography>
-      </Flex>
+    <>
+      <Flex direction="column" alignItems="stretch" gap={1}>
+        <Flex gap={1}>
+          <Typography variant="pi" fontWeight="bold" textColor="neutral800">
+            {label}
+            {required && <TypographyAsterisk textColor="danger600">*</TypographyAsterisk>}
+          </Typography>
+        </Flex>
 
-      <Slate editor={editor} initialValue={initialValue}>
-        <Editable readOnly={readOnly} style={style} />
-      </Slate>
-    </Flex>
+        <Slate editor={editor} initialValue={initialValue}>
+          <Editable readOnly={readOnly} style={style} />
+        </Slate>
+      </Flex>
+      {error && (
+        <Box paddingTop={1}>
+          <Typography variant="pi" textColor="danger600" data-strapi-field-error>
+            {error}
+          </Typography>
+        </Box>
+      )}
+    </>
   );
 });
 
 BlocksEditor.defaultProps = {
   required: false,
   readOnly: false,
+  error: '',
 };
 
 BlocksEditor.propTypes = {
@@ -77,6 +88,7 @@ BlocksEditor.propTypes = {
   name: PropTypes.string.isRequired,
   required: PropTypes.bool,
   readOnly: PropTypes.bool,
+  error: PropTypes.string,
 };
 
 export default BlocksEditor;
