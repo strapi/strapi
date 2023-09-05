@@ -1,5 +1,8 @@
 {
   "extends": "tsconfig/base.json",
-  "include": ["src"],
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["src", "admin.d.ts"],
   "exclude": ["node_modules"]
 }
