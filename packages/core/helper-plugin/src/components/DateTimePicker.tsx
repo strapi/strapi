@@ -4,10 +4,9 @@ import { DateTimePicker, DateTimePickerProps } from '@strapi/design-system';
 
 import { once } from '../utils/once';
 
-const warnOnce = once(console.warn)
+const warnOnce = once(console.warn);
 
 // TODO: remove DateTimePicker component from the helper-plugin in V5
-
 /**
  * @deprecated Use the DateTimePicker from the Design System instead.
  */
