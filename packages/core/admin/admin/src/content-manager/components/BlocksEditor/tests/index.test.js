@@ -25,14 +25,14 @@ const setup = (props) =>
   );
 
 describe('BlocksEditor', () => {
-  it('should render blocks without error', async () => {
+  it('should render blocks without error', () => {
     setup();
 
     expect(screen.getByText('blocks type')).toBeInTheDocument();
     expect(screen.getByText(/A line of text in a paragraph./));
   });
 
-  it('should render blocks with error', async () => {
+  it('should render blocks with error', () => {
     setup({ error: 'field is required' });
 
     expect(screen.getByText(/field is required/));
