@@ -35,7 +35,7 @@ export function StageSelect() {
   const { formatMessage } = useIntl();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
-  const { meta, stages, isLoading } = useReviewWorkflowsStages(
+  const { meta, stages, isLoading, refetch } = useReviewWorkflowsStages(
     { id: initialData.id, layout: contentType },
     {
       enabled: !!initialData?.id,
@@ -66,6 +66,8 @@ export function StageSelect() {
         { target: { name: STAGE_ATTRIBUTE_NAME, value: createdEntity[STAGE_ATTRIBUTE_NAME] } },
         true
       );
+
+      await refetch();
 
       return createdEntity;
     },
