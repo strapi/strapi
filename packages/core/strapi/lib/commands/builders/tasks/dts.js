@@ -147,7 +147,7 @@ const dtsTask = {
              * so we can go back to the "root" of the project...
              */
             cwd: path.join(ctx.cwd, entry.sourcePath, '..', '..'),
-            path: 'tsconfig.dist.json',
+            path: 'tsconfig.build.json',
           }).catch((err) => {
             if (err instanceof TSConfigNotFoundError) {
               return undefined;
