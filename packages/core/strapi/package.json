@@ -73,9 +73,9 @@
     "index.d.ts"
   ],
   "scripts": {
-    "build": "run -T tsc",
+    "build": "run -T tsc -p tsconfig.build.json",
     "build:ts": "run build",
-    "watch": "run -T tsc -w --preserveWatchOutput",
+    "watch": "run -T tsc -p tsconfig.build.json -w --preserveWatchOutput",
     "clean": "run -T rimraf ./dist",
     "prepublishOnly": "yarn clean && yarn build",
     "postinstall": "node ./dist/utils/postinstall.js",

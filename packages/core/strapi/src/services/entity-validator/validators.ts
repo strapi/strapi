@@ -9,8 +9,7 @@ interface ValidatorMetas<TAttribute extends Attribute.Any> {
   attr: TAttribute;
   model: Schema.ContentType;
   updatedAttribute: { name: string; value: unknown };
-  entity: Record<string, unknown>;
-  isDraft: boolean;
+  entity: Record<string, unknown> | null;
 }
 
 interface ValidatorOptions {
@@ -139,17 +138,7 @@ const addStringRegexValidator = (
  */
 const addUniqueValidator = <T extends strapiUtils.yup.AnySchema>(
   validator: T,
-  {
-    attr,
-    model,
-    updatedAttribute,
-    entity,
-  }: {
-    attr: Attribute.Any & Attribute.UniqueOption;
-    model: Schema.ContentType;
-    updatedAttribute: { name: string; value: unknown };
-    entity: Record<string, unknown>;
-  }
+  { attr, model, updatedAttribute, entity }: ValidatorMetas<Attribute.Any & Attribute.UniqueOption>
 ): T => {
   if (attr.type !== 'uid' && !attr.unique) {
     return validator;

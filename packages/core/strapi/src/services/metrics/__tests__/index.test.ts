@@ -14,7 +14,7 @@ describe('metrics', () => {
 
     const metricsInstance = metrics({
       config: {
-        get(path) {
+        get(path: string | string[]) {
           return get(path, this);
         },
         uuid: 'test',
@@ -49,7 +49,7 @@ describe('metrics', () => {
 
     const metricsInstance = metrics({
       config: {
-        get(path) {
+        get(path: string | string[]) {
           return get(path, this);
         },
         uuid: false,
@@ -82,7 +82,7 @@ describe('metrics', () => {
   test('Send payload with meta', () => {
     const { send } = metrics({
       config: {
-        get(path) {
+        get(path: string | string[]) {
           return get(path, this);
         },
         uuid: 'test',
@@ -131,7 +131,7 @@ describe('metrics', () => {
   test('Does not send payload when disabled', () => {
     const { send } = metrics({
       config: {
-        get(path) {
+        get(path: string | string[]) {
           return get(path, this);
         },
         uuid: false,

@@ -1,5 +1,4 @@
 import type { Attribute, Common } from '..';
-import type { Utils } from '../..';
 
 export interface UIDOptions {
   separator?: string;
@@ -13,8 +12,8 @@ export interface UIDProperties<
   TTargetAttribute extends string = string,
   TOptions extends UIDOptions = UIDOptions
 > {
-  targetField: TTargetAttribute;
-  options: UIDOptions & TOptions;
+  targetField?: TTargetAttribute;
+  options?: UIDOptions & TOptions;
 }
 
 export type UID<

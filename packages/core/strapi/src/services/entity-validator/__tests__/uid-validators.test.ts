@@ -1,10 +1,7 @@
-'use strict';
+import strapiUtils, { errors } from '@strapi/utils';
 
-const strapiUtils = require('@strapi/utils');
-const {
-  errors: { YupValidationError },
-} = require('@strapi/utils');
-const validators = require('../validators');
+import validators from '../validators';
+import type { Schema } from '../../../types';
 
 describe('UID validator', () => {
   const fakeFindOne = jest.fn();
@@ -13,19 +10,26 @@ describe('UID validator', () => {
     db: {
       query: jest.fn(() => ({
         findOne: fakeFindOne,
-      })),
-    },
-  };
+      })) as any,
+    } as any,
+  } as any;
 
   afterEach(() => {
     jest.clearAllMocks();
     fakeFindOne.mockReset();
   });
 
-  const fakeModel = {
-    kind: 'contentType',
+  const fakeModel: Schema.ContentType = {
+    modelType: 'contentType',
+    kind: 'collectionType',
+    globalId: 'test-model',
     modelName: 'test-model',
-    uid: 'test-uid',
+    uid: 'api::test.test-uid',
+    info: {
+      displayName: 'Test model',
+      singularName: 'test-model',
+      pluralName: 'test-models',
+    },
     options: {},
     attributes: {
       attrUidUnique: { type: 'uid' },
@@ -39,7 +43,7 @@ describe('UID validator', () => {
       const validator = strapiUtils.validateYupSchema(
         validators.uid(
           {
-            attr: { type: 'uid', unique: true },
+            attr: { type: 'uid' },
             model: fakeModel,
             updatedAttribute: { name: 'attrUidUnique', value: 'non-unique-uid' },
             entity: null,
@@ -58,7 +62,7 @@ describe('UID validator', () => {
         validators
           .uid(
             {
-              attr: { type: 'uid', unique: true },
+              attr: { type: 'uid' },
               model: fakeModel,
               updatedAttribute: { name: 'attrUidUnique', value: null },
               entity: null,
@@ -102,7 +106,7 @@ describe('UID validator', () => {
       const validator = strapiUtils.validateYupSchema(
         validators.uid(
           {
-            attr: { type: 'uid', unique: true },
+            attr: { type: 'uid' },
             model: fakeModel,
             updatedAttribute: { name: 'attrUidUnique', value: 'unique-uid' },
             entity: null,
@@ -114,7 +118,7 @@ describe('UID validator', () => {
       try {
         await validator('unique-uid');
       } catch (err) {
-        expect(err).toBeInstanceOf(YupValidationError);
+        expect(err).toBeInstanceOf(errors.YupValidationError);
       }
     });
 
@@ -124,7 +128,7 @@ describe('UID validator', () => {
       const validator = strapiUtils.validateYupSchema(
         validators.uid(
           {
-            attr: { type: 'uid', unique: true },
+            attr: { type: 'uid' },
             model: fakeModel,
             updatedAttribute: { name: 'attrUidUnique', value: 'unchanged-unique-uid' },
             entity: { id: 1, attrUidUnique: 'unchanged-unique-uid' },
@@ -142,7 +146,7 @@ describe('UID validator', () => {
       const validator = strapiUtils.validateYupSchema(
         validators.uid(
           {
-            attr: { type: 'uid', unique: true },
+            attr: { type: 'uid' },
             model: fakeModel,
             updatedAttribute: { name: 'attrUidUnique', value: 'unique-uid' },
             entity: null,
@@ -165,7 +169,7 @@ describe('UID validator', () => {
       const validator = strapiUtils.validateYupSchema(
         validators.uid(
           {
-            attr: { type: 'uid', unique: true },
+            attr: { type: 'uid' },
             model: fakeModel,
             updatedAttribute: { name: 'attrUidUnique', value: 'unique-uid' },
             entity: { id: 1, attrUidUnique: 'other-uid' },
@@ -191,7 +195,7 @@ describe('UID validator', () => {
       const validator = strapiUtils.validateYupSchema(
         validators.uid(
           {
-            attr: { type: 'uid', unique: true },
+            attr: { type: 'uid' },
             model: fakeModel,
             updatedAttribute: { name: 'attrUidUnique', value: 'non-unique-uid' },
             entity: null,
@@ -203,7 +207,7 @@ describe('UID validator', () => {
       try {
         await validator('wrongly\\formated||UID');
       } catch (err) {
-        expect(err).toBeInstanceOf(YupValidationError);
+        expect(err).toBeInstanceOf(errors.YupValidationError);
       }
     });
 
@@ -213,7 +217,7 @@ describe('UID validator', () => {
       const validator = strapiUtils.validateYupSchema(
         validators.uid(
           {
-            attr: { type: 'uid', unique: true },
+            attr: { type: 'uid' },
             model: fakeModel,
             updatedAttribute: { name: 'attrUidUnique', value: 'non-unique-uid' },
             entity: null,

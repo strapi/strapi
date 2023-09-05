@@ -12,7 +12,7 @@ describe('Metrics middleware', () => {
           method: 'GET',
           url: '/uploads/image.png',
         },
-      },
+      } as any,
       jest.fn()
     );
 
@@ -30,7 +30,7 @@ describe('Metrics middleware', () => {
           method,
           url: '/some-api',
         },
-      },
+      } as any,
       jest.fn()
     );
 
@@ -48,7 +48,7 @@ describe('Metrics middleware', () => {
             method: 'GET',
             url: '/some-api',
           },
-        },
+        } as any,
         jest.fn()
       );
     }
