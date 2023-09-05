@@ -1,9 +1,25 @@
 import strapiUtils, { errors } from '@strapi/utils';
-
 import validators from '../validators';
 import type { Schema } from '../../../types';
 
-describe('Time validator', () => {
+describe('BigInteger validator', () => {
+  const fakeModel: Schema.ContentType = {
+    modelType: 'contentType',
+    kind: 'collectionType',
+    modelName: 'test-model',
+    globalId: 'test-model',
+    uid: 'api::test.test-uid',
+    info: {
+      displayName: 'Test model',
+      singularName: 'test-model',
+      pluralName: 'test-models',
+    },
+    options: {},
+    attributes: {
+      attrBigIntegerUnique: { type: 'biginteger', unique: true },
+    },
+  };
+
   describe('unique', () => {
     const fakeFindOne = jest.fn();
 
@@ -18,53 +34,36 @@ describe('Time validator', () => {
       fakeFindOne.mockReset();
     });
 
-    const fakeModel: Schema.ContentType = {
-      modelType: 'contentType',
-      kind: 'collectionType',
-      modelName: 'test-model',
-      globalId: 'test-model',
-      uid: 'api::test.test-uid',
-      info: {
-        displayName: 'Test model',
-        singularName: 'test-model',
-        pluralName: 'test-models',
-      },
-      options: {},
-      attributes: {
-        attrTimestampUnique: { type: 'timestamp', unique: true },
-      },
-    };
-
-    test('it does not validates the unique constraint if the attribute is not set as unique', async () => {
+    test('it does not validate the unique constraint if the attribute is not set as unique', async () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.timestamp({
-          attr: { type: 'timestamp' },
+        validators.biginteger({
+          attr: { type: 'biginteger' },
           model: fakeModel,
           updatedAttribute: {
-            name: 'attrTimestampUnique',
-            value: '1638140400',
+            name: 'attrBigIntegerUnique',
+            value: 1,
           },
           entity: null,
         })
       );
 
-      await validator('1638140400');
+      await validator(1);
 
       expect(fakeFindOne).not.toHaveBeenCalled();
     });
 
-    test('it does not validates the unique constraint if the attribute value is `null`', async () => {
+    test('it does not validate the unique constraint if the attribute value is `null`', async () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
         validators
-          .timestamp({
-            attr: { type: 'timestamp', unique: true },
+          .biginteger({
+            attr: { type: 'biginteger', unique: true },
             model: fakeModel,
             updatedAttribute: {
-              name: 'attrTimestampUnique',
+              name: 'attrBigIntegerUnique',
               value: null,
             },
             entity: null,
@@ -73,6 +72,7 @@ describe('Time validator', () => {
       );
 
       await validator(null);
+
       expect(fakeFindOne).not.toHaveBeenCalled();
     });
 
@@ -80,81 +80,81 @@ describe('Time validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.timestamp({
-          attr: { type: 'timestamp', unique: true },
+        validators.biginteger({
+          attr: { type: 'biginteger', unique: true },
           model: fakeModel,
           updatedAttribute: {
-            name: 'attrTimestampUnique',
-            value: '1638140400',
+            name: 'attrBigIntegerUnique',
+            value: 1,
           },
           entity: null,
         })
       );
 
-      expect(await validator('1638140400')).toBe('1638140400');
+      expect(await validator(1)).toBe(1);
     });
 
     test('it fails the validation of the unique constraint if the database contains a record with the same attribute value', async () => {
       expect.assertions(1);
-      fakeFindOne.mockResolvedValueOnce({ attrTimestampUnique: '1638140400' });
+      fakeFindOne.mockResolvedValueOnce({ attrBigIntegerUnique: 2 });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.timestamp({
-          attr: { type: 'timestamp', unique: true },
+        validators.biginteger({
+          attr: { type: 'biginteger', unique: true },
           model: fakeModel,
           updatedAttribute: {
-            name: 'attrTimestampUnique',
-            value: '1638140400',
+            name: 'attrBigIntegerUnique',
+            value: 2,
           },
           entity: null,
         })
       );
 
       try {
-        await validator('1638140400');
+        await validator(2);
       } catch (err) {
         expect(err).toBeInstanceOf(errors.YupValidationError);
       }
     });
 
     test('it validates the unique constraint if the attribute data has not changed even if there is a record in the database with the same attribute value', async () => {
-      fakeFindOne.mockResolvedValueOnce({ attrTimestampUnique: '1638140400' });
+      fakeFindOne.mockResolvedValueOnce({ attrBigIntegerUnique: 3 });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.timestamp({
-          attr: { type: 'timestamp', unique: true },
+        validators.biginteger({
+          attr: { type: 'biginteger', unique: true },
           model: fakeModel,
           updatedAttribute: {
-            name: 'attrTimestampUnique',
-            value: '1638140400',
+            name: 'attrBigIntegerUnique',
+            value: 3,
           },
-          entity: { id: 1, attrTimestampUnique: '1638140400' },
+          entity: { id: 1, attrBigIntegerUnique: 3 },
         })
       );
 
-      expect(await validator('1638140400')).toBe('1638140400');
+      expect(await validator(3)).toBe(3);
     });
 
     test('it checks the database for records with the same value for the checked attribute', async () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.timestamp({
-          attr: { type: 'timestamp', unique: true },
+        validators.biginteger({
+          attr: { type: 'biginteger', unique: true },
           model: fakeModel,
           updatedAttribute: {
-            name: 'attrTimestampUnique',
-            value: '1638140400',
+            name: 'attrBigIntegerUnique',
+            value: 4,
           },
           entity: null,
         })
       );
 
-      await validator('1638140400');
+      await validator(4);
 
       expect(fakeFindOne).toHaveBeenCalledWith({
         select: ['id'],
-        where: { attrTimestampUnique: '1638140400' },
+        where: { attrBigIntegerUnique: 4 },
       });
     });
 
@@ -162,22 +162,22 @@ describe('Time validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.timestamp({
-          attr: { type: 'timestamp', unique: true },
+        validators.biginteger({
+          attr: { type: 'biginteger', unique: true },
           model: fakeModel,
           updatedAttribute: {
-            name: 'attrTimestampUnique',
-            value: '1638140400',
+            name: 'attrBigIntegerUnique',
+            value: 5,
           },
-          entity: { id: 1, attrTimestampUnique: '1000000000' },
+          entity: { id: 1, attrBigIntegerUnique: 42 },
         })
       );
 
-      await validator('1638140400');
+      await validator(5);
 
       expect(fakeFindOne).toHaveBeenCalledWith({
         select: ['id'],
-        where: { $and: [{ attrTimestampUnique: '1638140400' }, { $not: { id: 1 } }] },
+        where: { $and: [{ attrBigIntegerUnique: 5 }, { $not: { id: 1 } }] },
       });
     });
   });

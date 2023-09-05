@@ -4,11 +4,11 @@
  */
 
 import { uniqBy, castArray, isNil, isArray, mergeWith } from 'lodash';
-import { has, assoc, prop, isObject, isEmpty } from 'lodash/fp';
+import { has, prop, isObject, isEmpty } from 'lodash/fp';
 import strapiUtils from '@strapi/utils';
-import * as validators from './validators';
+import validators from './validators';
 import { Common, Schema, Attribute, UID, Shared } from '../../types';
-import * as Types from '../entity-service/types';
+import type * as Types from '../entity-service/types';
 
 type CreateOrUpdate = 'creation' | 'update';
 
@@ -27,7 +27,7 @@ type RelationSource = string | number | ID;
 
 interface ValidatorMeta<TAttribute = Attribute.Any> {
   attr: TAttribute;
-  updatedAttribute: { name: string; value: unknown };
+  updatedAttribute: { name: string; value: any };
 }
 
 interface ValidatorContext {
@@ -79,6 +79,7 @@ const addRequiredValidation = (createOrUpdate: CreateOrUpdate) => {
     { attr: { required } }: ValidatorMeta<Partial<Attribute.Any & Attribute.RequiredOption>>
   ): T => {
     let nextValidator = validator;
+
     if (required) {
       if (createOrUpdate === 'creation') {
         nextValidator = nextValidator.notNil();
@@ -152,9 +153,10 @@ const createComponentValidator =
     }
 
     // FIXME: v4 was broken
-    let validator = yup.lazy((item) =>
-      createModelValidator(createOrUpdate)({ model, data: item }, { isDraft })
-    ) as any;
+    let validator = createModelValidator(createOrUpdate)(
+      { model, data: updatedAttribute.value },
+      { isDraft }
+    );
 
     validator = addRequiredValidation(createOrUpdate)(validator, {
       attr: { required: !isDraft && attr.required },
@@ -239,7 +241,7 @@ const createScalarAttributeValidator =
 const createAttributeValidator =
   (createOrUpdate: CreateOrUpdate) =>
   (metas: AttributeValidatorMetas, options: ValidatorContext) => {
-    let validator: strapiUtils.yup.BaseSchema = yup.mixed();
+    let validator = yup.mixed();
 
     if (isMediaAttribute(metas.attr)) {
       validator = yup.mixed();
@@ -277,17 +279,18 @@ const createModelValidator =
     const writableAttributes = model ? getWritableAttributes(model) : [];
 
     const schema = writableAttributes.reduce((validators, attributeName) => {
-      const validator = createAttributeValidator(createOrUpdate)(
-        {
-          attr: model.attributes[attributeName],
-          updatedAttribute: { name: attributeName, value: prop(attributeName, data) },
-          model,
-          entity,
-        },
-        options
-      );
+      const metas = {
+        attr: model.attributes[attributeName],
+        updatedAttribute: { name: attributeName, value: prop(attributeName, data) },
+        model,
+        entity,
+      };
 
-      return assoc(attributeName, validator)(validators);
+      const validator = createAttributeValidator(createOrUpdate)(metas, options);
+
+      validators[attributeName] = validator;
+
+      return validators;
     }, {} as Record<string, strapiUtils.yup.BaseSchema>);
 
     return yup.object().shape(schema);
@@ -384,9 +387,13 @@ const buildRelationsStore = ({
         if (Array.isArray(value)) {
           source = value;
         } else if (isObject(value)) {
-          source = castArray(
-            ('connect' in value && value.connect) ?? ('set' in value && value.set) ?? []
-          ) as RelationSource[];
+          if ('connect' in value && !isNil(value.connect)) {
+            source = value.connect as RelationSource[];
+          } else if ('set' in value && !isNil(value.set)) {
+            source = value.set as RelationSource[];
+          } else {
+            source = [];
+          }
         } else {
           source = castArray(value as RelationSource);
         }

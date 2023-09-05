@@ -1,51 +1,49 @@
-'use strict';
-
-const strapiUtils = require('@strapi/utils');
-const {
-  errors: { YupValidationError },
-} = require('@strapi/utils');
-const validators = require('../validators');
+import strapiUtils, { errors } from '@strapi/utils';
+import validators from '../validators';
+import type { Schema } from '../../../types';
 
 describe('Date validator', () => {
+  const fakeModel: Schema.ContentType = {
+    modelType: 'contentType',
+    kind: 'collectionType',
+    modelName: 'test-model',
+    globalId: 'test-model',
+    uid: 'api::test.test-uid',
+    info: {
+      displayName: 'Test model',
+      singularName: 'test-model',
+      pluralName: 'test-models',
+    },
+    options: {},
+    attributes: {
+      attrDateUnique: { type: 'date', unique: true },
+    },
+  };
+
   describe('unique', () => {
     const fakeFindOne = jest.fn();
 
     global.strapi = {
-      db: {
-        query: jest.fn(() => ({
-          findOne: fakeFindOne,
-        })),
-      },
-    };
+      query: jest.fn(() => ({
+        findOne: fakeFindOne,
+      })),
+    } as any;
 
     afterEach(() => {
       jest.clearAllMocks();
       fakeFindOne.mockReset();
     });
 
-    const fakeModel = {
-      kind: 'contentType',
-      modelName: 'test-model',
-      uid: 'test-uid',
-      options: {},
-      attributes: {
-        attrDateUnique: { type: 'date', unique: true },
-      },
-    };
-
     test('it does not validates the unique constraint if the attribute is not set as unique', async () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.date(
-          {
-            attr: { type: 'date' },
-            model: fakeModel,
-            updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
-            entity: null,
-          },
-          { isDraft: false }
-        )
+        validators.date({
+          attr: { type: 'date' },
+          model: fakeModel,
+          updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
+          entity: null,
+        })
       );
 
       await validator('2021-11-29');
@@ -58,15 +56,12 @@ describe('Date validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         validators
-          .date(
-            {
-              attr: { type: 'date', unique: true },
-              model: fakeModel,
-              updatedAttribute: { name: 'attrDateUnique', value: null },
-              entity: null,
-            },
-            { isDraft: false }
-          )
+          .date({
+            attr: { type: 'date', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrDateUnique', value: null },
+            entity: null,
+          })
           .nullable()
       );
 
@@ -78,15 +73,12 @@ describe('Date validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.date(
-          {
-            attr: { type: 'date', unique: true },
-            model: fakeModel,
-            updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
-            entity: null,
-          },
-          { isDraft: false }
-        )
+        validators.date({
+          attr: { type: 'date', unique: true },
+          model: fakeModel,
+          updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
+          entity: null,
+        })
       );
 
       expect(await validator('2021-11-29')).toBe('2021-11-29');
@@ -97,21 +89,18 @@ describe('Date validator', () => {
       fakeFindOne.mockResolvedValueOnce({ attrDateUnique: '2021-11-29' });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.date(
-          {
-            attr: { type: 'date', unique: true },
-            model: fakeModel,
-            updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
-            entity: null,
-          },
-          { isDraft: false }
-        )
+        validators.date({
+          attr: { type: 'date', unique: true },
+          model: fakeModel,
+          updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
+          entity: null,
+        })
       );
 
       try {
         await validator('2021-11-29');
       } catch (err) {
-        expect(err).toBeInstanceOf(YupValidationError);
+        expect(err).toBeInstanceOf(errors.YupValidationError);
       }
     });
 
@@ -119,15 +108,12 @@ describe('Date validator', () => {
       fakeFindOne.mockResolvedValueOnce({ attrDateUnique: '2021-11-29' });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.date(
-          {
-            attr: { type: 'date', unique: true },
-            model: fakeModel,
-            updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
-            entity: { id: 1, attrDateUnique: '2021-11-29' },
-          },
-          { isDraft: false }
-        )
+        validators.date({
+          attr: { type: 'date', unique: true },
+          model: fakeModel,
+          updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
+          entity: { id: 1, attrDateUnique: '2021-11-29' },
+        })
       );
 
       expect(await validator('2021-11-29')).toBe('2021-11-29');
@@ -137,15 +123,12 @@ describe('Date validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.date(
-          {
-            attr: { type: 'date', unique: true },
-            model: fakeModel,
-            updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
-            entity: null,
-          },
-          { isDraft: false }
-        )
+        validators.date({
+          attr: { type: 'date', unique: true },
+          model: fakeModel,
+          updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
+          entity: null,
+        })
       );
 
       await validator('2021-11-29');
@@ -160,15 +143,12 @@ describe('Date validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.date(
-          {
-            attr: { type: 'date', unique: true },
-            model: fakeModel,
-            updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
-            entity: { id: 1, attrDateUnique: '2021-12-15' },
-          },
-          { isDraft: false }
-        )
+        validators.date({
+          attr: { type: 'date', unique: true },
+          model: fakeModel,
+          updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
+          entity: { id: 1, attrDateUnique: '2021-12-15' },
+        })
       );
 
       await validator('2021-11-29');

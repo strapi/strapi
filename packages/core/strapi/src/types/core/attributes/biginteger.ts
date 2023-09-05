@@ -8,7 +8,8 @@ export type BigInteger = Attribute.OfType<'biginteger'> &
   Attribute.PrivateOption &
   Attribute.RequiredOption &
   Attribute.WritableOption &
-  Attribute.VisibleOption;
+  Attribute.VisibleOption &
+  Attribute.UniqueOption;
 
 export type BigIntegerValue = string;
 

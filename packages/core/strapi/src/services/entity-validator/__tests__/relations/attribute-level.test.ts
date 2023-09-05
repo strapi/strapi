@@ -1,38 +1,36 @@
-'use strict';
+import { errors } from '@strapi/utils';
 
-const { ValidationError } = require('@strapi/utils').errors;
-
-const entityValidator = require('../..');
-const { models, existentIDs, nonExistentIds } = require('./utils/relations.testdata');
+import entityValidator from '../..';
+import { models, existentIDs, nonExistentIds } from './utils/relations.testdata';
+import type * as Types from '../../../entity-service/types';
+import type { Common } from '../../../../types';
 
 /**
  * Test that relations can be successfully validated and non existent relations
  * can be detected at the Attribute level.
  */
 describe('Entity validator | Relations | Attribute', () => {
-  const strapi = {
+  global.strapi = {
     components: {
       'basic.dev-compo': {},
     },
-    db: {
-      query() {
-        return {
-          count: ({
-            where: {
-              id: { $in },
-            },
-          }) => existentIDs.filter((value) => $in.includes(value)).length,
-        };
-      },
+    query() {
+      return {
+        count: ({
+          where: {
+            id: { $in },
+          },
+        }: any) => existentIDs.filter((value) => $in.includes(value)).length,
+      };
     },
     errors: {
       badRequest: jest.fn(),
     },
-    getModel: (uid) => models.get(uid),
-  };
+    getModel: (uid: string) => models.get(uid),
+  } as any;
 
   describe('Success', () => {
-    const testData = [
+    const testData: Array<[string, Types.Params.Data.Input<Common.UID.ContentType>]> = [
       [
         'Connect',
         {
@@ -71,8 +69,8 @@ describe('Entity validator | Relations | Attribute', () => {
         },
       ],
     ];
+
     test.each(testData)('%s', async (__, input = {}) => {
-      global.strapi = strapi;
       const res = entityValidator.validateEntityCreation(models.get('api::dev.dev'), input, {
         isDraft: true,
       });
@@ -81,10 +79,10 @@ describe('Entity validator | Relations | Attribute', () => {
   });
 
   describe('Error', () => {
-    const expectError = new ValidationError(
+    const expectError = new errors.ValidationError(
       `2 relation(s) of type api::category.category associated with this entity do not exist`
     );
-    const testData = [
+    const testData: Array<[string, Types.Params.Data.Input<Common.UID.ContentType>]> = [
       [
         'Connect',
         {
@@ -113,7 +111,6 @@ describe('Entity validator | Relations | Attribute', () => {
     ];
 
     test.each(testData)('%s', async (__, input = {}) => {
-      global.strapi = strapi;
       const res = entityValidator.validateEntityCreation(models.get('api::dev.dev'), input, {
         isDraft: true,
       });

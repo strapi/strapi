@@ -8,7 +8,8 @@ export type Integer = Attribute.OfType<'integer'> &
   Attribute.PrivateOption &
   Attribute.RequiredOption &
   Attribute.WritableOption &
-  Attribute.VisibleOption;
+  Attribute.VisibleOption &
+  Attribute.UniqueOption;
 
 export type IntegerValue = number;
 

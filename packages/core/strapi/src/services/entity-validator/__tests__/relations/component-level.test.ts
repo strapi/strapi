@@ -1,35 +1,33 @@
-'use strict';
+import { errors } from '@strapi/utils';
 
-const { ValidationError } = require('@strapi/utils').errors;
-
-const entityValidator = require('../..');
-const { models, nonExistentIds, existentIDs } = require('./utils/relations.testdata');
+import entityValidator from '../..';
+import { models, existentIDs, nonExistentIds } from './utils/relations.testdata';
 
 /**
  * Test that relations can be successfully validated and non existent relations
  * can be detected at the Component level.
  */
 describe('Entity validator | Relations | Component Level', () => {
-  const strapi = {
+  global.strapi = {
     components: {
       'basic.dev-compo': {},
     },
-    db: {
-      query() {
-        return {
-          count: ({
-            where: {
-              id: { $in },
-            },
-          }) => existentIDs.filter((value) => $in.includes(value)).length,
-        };
-      },
+
+    query() {
+      return {
+        count: ({
+          where: {
+            id: { $in },
+          },
+        }: any) => existentIDs.filter((value) => $in.includes(value)).length,
+      };
     },
+
     errors: {
       badRequest: jest.fn(),
     },
-    getModel: (uid) => models.get(uid),
-  };
+    getModel: (uid: string) => models.get(uid),
+  } as any;
 
   describe('Single Component', () => {
     describe('Success', () => {
@@ -82,7 +80,6 @@ describe('Entity validator | Relations | Component Level', () => {
       ];
 
       test.each(testData)('%s', async (__, input = {}) => {
-        global.strapi = strapi;
         const res = entityValidator.validateEntityCreation(models.get('api::dev.dev'), input, {
           isDraft: true,
         });
@@ -91,7 +88,7 @@ describe('Entity validator | Relations | Component Level', () => {
     });
 
     describe('Error', () => {
-      const expectedError = new ValidationError(
+      const expectedError = new errors.ValidationError(
         `1 relation(s) of type api::category.category associated with this entity do not exist`
       );
       const testData = [
@@ -218,7 +215,7 @@ describe('Entity validator | Relations | Component Level', () => {
     });
 
     describe('Error', () => {
-      const expectedError = new ValidationError(
+      const expectedError = new errors.ValidationError(
         `4 relation(s) of type api::category.category associated with this entity do not exist`
       );
       const testData = [
@@ -264,7 +261,6 @@ describe('Entity validator | Relations | Component Level', () => {
       ];
 
       test.each(testData)('%s', async (__, input = {}) => {
-        global.strapi = strapi;
         const res = entityValidator.validateEntityCreation(models.get('api::dev.dev'), input, {
           isDraft: true,
         });

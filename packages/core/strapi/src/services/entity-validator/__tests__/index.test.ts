@@ -1,18 +1,31 @@
-'use strict';
-
-const entityValidator = require('..');
+import entityValidator from '..';
+import type { Schema } from '../../../types';
 
 describe('Entity validator', () => {
-  const modelBase = { uid: 'api::test.test' };
+  const modelBase: Schema.ContentType = {
+    modelType: 'contentType',
+    uid: 'api::test.test',
+    kind: 'collectionType',
+    modelName: 'test',
+    globalId: 'test',
+    info: {
+      displayName: 'Test',
+      singularName: 'test',
+      pluralName: 'tests',
+    },
+    options: {},
+    attributes: {},
+  };
+
   describe('Published input', () => {
     describe('General Errors', () => {
-      let model;
+      let model: Schema.ContentType;
       global.strapi = {
         errors: {
           badRequest: jest.fn(),
         },
         getModel: () => model,
-      };
+      } as any;
 
       it('Throws a badRequest error on invalid input', async () => {
         model = {
@@ -144,6 +157,7 @@ describe('Entity validator', () => {
           ...modelBase,
           attributes: {
             uuid: {
+              // @ts-ignore
               type: 'uuid',
             },
           },
@@ -167,9 +181,9 @@ describe('Entity validator', () => {
             badRequest: jest.fn(),
           },
           getModel: () => model,
-        };
+        } as any;
 
-        const model = {
+        const model: Schema.ContentType = {
           ...modelBase,
           attributes: {
             title: {
@@ -203,7 +217,7 @@ describe('Entity validator', () => {
       });
 
       test('Throws on max length not respected', async () => {
-        const model = {
+        const model: Schema.ContentType = {
           ...modelBase,
           attributes: {
             title: {
@@ -237,7 +251,7 @@ describe('Entity validator', () => {
       });
 
       test('Allows empty strings even when required', async () => {
-        const model = {
+        const model: Schema.ContentType = {
           ...modelBase,
           attributes: {
             title: {
@@ -256,7 +270,7 @@ describe('Entity validator', () => {
       });
 
       test('Assign default values', async () => {
-        const model = {
+        const model: Schema.ContentType = {
           ...modelBase,
           attributes: {
             title: {
@@ -274,7 +288,7 @@ describe('Entity validator', () => {
               default: '2020-04-01T04:00:00.000Z',
             },
             testJSON: {
-              type: 'date',
+              type: 'json',
               required: true,
               default: {
                 foo: 1,
@@ -296,7 +310,7 @@ describe('Entity validator', () => {
       });
 
       test("Don't assign default value if empty string", async () => {
-        const model = {
+        const model: Schema.ContentType = {
           ...modelBase,
           attributes: {
             title: {
@@ -332,9 +346,9 @@ describe('Entity validator', () => {
             badRequest: jest.fn(),
           },
           getModel: () => model,
-        };
+        } as any;
 
-        const model = {
+        const model: Schema.ContentType = {
           ...modelBase,
           attributes: {
             title: {
@@ -367,7 +381,7 @@ describe('Entity validator', () => {
       });
 
       it('Returns data on valid input', async () => {
-        const model = {
+        const model: Schema.ContentType = {
           ...modelBase,
           attributes: {
             title: {
@@ -385,7 +399,7 @@ describe('Entity validator', () => {
       });
 
       it('Returns casted data when possible', async () => {
-        const model = {
+        const model: Schema.ContentType = {
           ...modelBase,
           attributes: {
             title: {
@@ -409,7 +423,7 @@ describe('Entity validator', () => {
       });
 
       test('Does not throws on required not respected', async () => {
-        const model = {
+        const model: Schema.ContentType = {
           ...modelBase,
           attributes: {
             title: {
@@ -433,10 +447,11 @@ describe('Entity validator', () => {
       });
 
       it('Supports custom field types', async () => {
-        const model = {
+        const model: Schema.ContentType = {
           ...modelBase,
           attributes: {
             uuid: {
+              // @ts-ignore
               type: 'uuid',
             },
           },
@@ -455,7 +470,7 @@ describe('Entity validator', () => {
 
     describe('String validator', () => {
       test('Does not throws on min length not respected', async () => {
-        const model = {
+        const model: Schema.ContentType = {
           ...modelBase,
           attributes: {
             title: {
@@ -470,7 +485,7 @@ describe('Entity validator', () => {
             badRequest: jest.fn(),
           },
           getModel: () => model,
-        };
+        } as any;
 
         const input = { title: 'tooSmall' };
 
@@ -481,7 +496,7 @@ describe('Entity validator', () => {
       });
 
       test('Throws on max length not respected', async () => {
-        const model = {
+        const model: Schema.ContentType = {
           ...modelBase,
           attributes: {
             title: {
@@ -515,7 +530,7 @@ describe('Entity validator', () => {
       });
 
       test('Allows empty strings even when required', async () => {
-        const model = {
+        const model: Schema.ContentType = {
           ...modelBase,
           attributes: {
             title: {
@@ -533,7 +548,7 @@ describe('Entity validator', () => {
       });
 
       test('Assign default values', async () => {
-        const model = {
+        const model: Schema.ContentType = {
           ...modelBase,
           attributes: {
             title: {
@@ -551,7 +566,7 @@ describe('Entity validator', () => {
               default: '2020-04-01T04:00:00.000Z',
             },
             testJSON: {
-              type: 'date',
+              type: 'json',
               required: true,
               default: {
                 foo: 1,
@@ -575,7 +590,7 @@ describe('Entity validator', () => {
       });
 
       test("Don't assign default value if empty string", async () => {
-        const model = {
+        const model: Schema.ContentType = {
           ...modelBase,
           attributes: {
             title: {

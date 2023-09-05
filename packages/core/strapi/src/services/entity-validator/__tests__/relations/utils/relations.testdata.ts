@@ -1,6 +1,5 @@
-'use strict';
+export const models = new Map();
 
-const models = new Map();
 models.set('api::dev.dev', {
   kind: 'collectionType',
   collectionName: 'devs',
@@ -146,8 +145,5 @@ models.set('plugin::upload.file', {
   globalId: 'UploadFile',
 });
 
-module.exports = {
-  models,
-  existentIDs: [1, 2, 3, 4, 5, 6],
-  nonExistentIds: [10, 11, 12, 13, 14, 15, 16],
-};
+export const existentIDs = [1, 2, 3, 4, 5, 6];
+export const nonExistentIds = [10, 11, 12, 13, 14, 15, 16];

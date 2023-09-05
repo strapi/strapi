@@ -6,7 +6,8 @@ export type JSON = Attribute.OfType<'json'> &
   Attribute.RequiredOption &
   Attribute.PrivateOption &
   Attribute.WritableOption &
-  Attribute.VisibleOption;
+  Attribute.VisibleOption &
+  Attribute.DefaultOption<JsonValue>;
 
 export type JsonValue<T extends object = object> = T;
 

@@ -1,38 +1,33 @@
-'use strict';
+import { errors } from '@strapi/utils';
 
-const { ValidationError } = require('@strapi/utils').errors;
-
-const entityValidator = require('../..');
-const { models, existentIDs, nonExistentIds } = require('./utils/relations.testdata');
+import entityValidator from '../..';
+import { models, existentIDs, nonExistentIds } from './utils/relations.testdata';
 
 /**
  * Test that relations can be successfully validated and non existent relations
  * can be detected at the Media level.
  */
 describe('Entity validator | Relations | Media', () => {
-  const strapi = {
+  global.strapi = {
     components: {
       'basic.dev-compo': {},
     },
-    db: {
-      query() {
-        return {
-          count: ({
-            where: {
-              id: { $in },
-            },
-          }) => existentIDs.filter((value) => $in.includes(value)).length,
-        };
-      },
+    query() {
+      return {
+        count: ({
+          where: {
+            id: { $in },
+          },
+        }: any) => existentIDs.filter((value) => $in.includes(value)).length,
+      };
     },
     errors: {
       badRequest: jest.fn(),
     },
-    getModel: (uid) => models.get(uid),
-  };
+    getModel: (uid: string) => models.get(uid),
+  } as any;
 
   it('Success', async () => {
-    global.strapi = strapi;
     const input = {
       media: [
         {
@@ -49,8 +44,7 @@ describe('Entity validator | Relations | Media', () => {
   });
 
   it('Error', async () => {
-    global.strapi = strapi;
-    const expectedError = new ValidationError(
+    const expectedError = new errors.ValidationError(
       `1 relation(s) of type plugin::upload.file associated with this entity do not exist`
     );
     const input = {

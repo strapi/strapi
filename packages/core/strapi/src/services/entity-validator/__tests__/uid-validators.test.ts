@@ -9,7 +9,7 @@ describe('UID validator', () => {
   global.strapi = {
     query: jest.fn(() => ({
       findOne: fakeFindOne,
-    })) as any,
+    })),
   } as any;
 
   afterEach(() => {
