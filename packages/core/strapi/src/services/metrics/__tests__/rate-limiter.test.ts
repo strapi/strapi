@@ -1,6 +1,4 @@
-'use strict';
-
-const wrapWithRateLimiter = require('../rate-limiter');
+import wrapWithRateLimiter from '../rate-limiter';
 
 describe('Telemetry daily RateLimiter', () => {
   test('Passes event and payload to sender', async () => {
@@ -9,7 +7,7 @@ describe('Telemetry daily RateLimiter', () => {
     const send = wrapWithRateLimiter(sender, { limitedEvents: ['testEvent'] });
 
     const payload = { key: 'value' };
-    await send('notRestricted', payload);
+    await send('notRestricted', payload as any);
 
     expect(sender).toHaveBeenCalledWith('notRestricted', payload);
   });

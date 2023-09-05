@@ -1,6 +1,4 @@
-'use strict';
-
-const createMiddleware = require('../middleware');
+import createMiddleware from '../middleware';
 
 describe('Metrics middleware', () => {
   test('Ignores request with extension in them', async () => {
