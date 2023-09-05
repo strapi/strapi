@@ -9,7 +9,7 @@ export type Enumeration<TValues extends string[] = []> = Attribute.OfType<'enume
   EnumerationProperties<TValues> &
   // Options
   Attribute.ConfigurableOption &
-  Attribute.DefaultOption<TValues> &
+  Attribute.DefaultOption<TValues[number]> &
   Attribute.PrivateOption &
   Attribute.RequiredOption &
   Attribute.WritableOption &

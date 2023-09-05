@@ -1,15 +1,18 @@
-'use strict';
+import { EventEmitter } from 'events';
+import { errors } from '@strapi/utils';
+import createEntityService from '..';
+import entityValidator from '../../entity-validator';
+import createEventHub from '../../event-hub';
+import type { Schema, Utils } from '../../../types';
+import uploadFiles from '../../utils/upload-files';
 
 jest.mock('bcryptjs', () => ({ hashSync: () => 'secret-password' }));
-
-const { EventEmitter } = require('events');
-const { ValidationError } = require('@strapi/utils').errors;
-const createEntityService = require('..');
-const entityValidator = require('../../entity-validator');
 
 jest.mock('../../utils/upload-files', () => jest.fn(() => Promise.resolve()));
 
 describe('Entity service', () => {
+  const eventHub = createEventHub();
+
   global.strapi = {
     getModel: jest.fn(() => ({})),
     config: {
@@ -22,27 +25,28 @@ describe('Entity service', () => {
       allowedEvents: new Map([['ENTRY_CREATE', 'entry.create']]),
       addAllowedEvent: jest.fn(),
     },
-  };
+  } as any;
 
   describe('Decorator', () => {
-    test.each(['create', 'update', 'findMany', 'findOne', 'delete', 'count', 'findPage'])(
+    test.each(['create', 'update', 'findMany', 'findOne', 'delete', 'count', 'findPage'] as const)(
       'Can decorate',
       async (method) => {
         const instance = createEntityService({
           strapi: global.strapi,
-          db: {},
-          eventHub: new EventEmitter(),
+          db: {} as any,
+          eventHub,
+          entityValidator,
         });
 
         const methodFn = jest.fn();
-        const decorator = () => ({
-          [method]: methodFn,
-        });
 
-        instance.decorate(decorator);
+        instance.decorate((old) => ({
+          ...old,
+          [method]: methodFn,
+        }));
 
         const args = [{}, {}];
-        await instance[method](...args);
+        await (instance[method] as Utils.Function.Any)(...args);
         expect(methodFn).toHaveBeenCalled();
       }
     );
@@ -61,28 +65,30 @@ describe('Entity service', () => {
 
       const fakeDB = {
         query: jest.fn(() => fakeQuery),
-        transaction: (cb) => cb(),
+        transaction: (cb: Utils.Function.Any) => cb(),
       };
 
       const fakeStrapi = {
         ...global.strapi,
+        query: fakeQuery,
         getModel: jest.fn(() => {
           return { kind: 'singleType' };
         }),
       };
 
       const instance = createEntityService({
-        strapi: fakeStrapi,
-        db: fakeDB,
-        eventHub: new EventEmitter(),
+        strapi: fakeStrapi as any,
+        db: fakeDB as any,
+        eventHub,
+        entityValidator,
       });
 
-      const result = await instance.findMany('test-model');
+      const result = await instance.findMany('api::test.test-model');
 
       expect(fakeStrapi.getModel).toHaveBeenCalledTimes(1);
-      expect(fakeStrapi.getModel).toHaveBeenCalledWith('test-model');
+      expect(fakeStrapi.getModel).toHaveBeenCalledWith('api::test.test-model');
 
-      expect(fakeDB.query).toHaveBeenCalledWith('test-model');
+      expect(fakeDB.query).toHaveBeenCalledWith('api::test.test-model');
       expect(fakeQuery.findOne).toHaveBeenCalledWith({});
       expect(result).toEqual(data);
     });
@@ -97,11 +103,14 @@ describe('Entity service', () => {
       })),
       findOne: jest.fn(),
     };
-    const fakeModels = {};
+    const fakeModels: Record<string, Schema.ContentType | Schema.Component> = {};
 
     beforeAll(() => {
-      global.strapi.getModel.mockImplementation((modelName) => fakeModels[modelName]);
-      global.strapi.query.mockImplementation(() => fakeQuery);
+      jest
+        .mocked(global.strapi.getModel)
+        .mockImplementation((modelName: string) => fakeModels[modelName] as any);
+
+      jest.mocked(global.strapi.query).mockImplementation(() => fakeQuery as any);
     });
 
     beforeEach(() => {
@@ -109,16 +118,16 @@ describe('Entity service', () => {
     });
 
     afterAll(() => {
-      global.strapi.getModel.mockImplementation(() => ({}));
+      jest.mocked(global.strapi.getModel).mockImplementation(() => ({} as any));
     });
 
     describe('assign default values', () => {
-      let instance;
+      let instance: any;
       const entityUID = 'api::entity.entity';
       const relationUID = 'api::relation.relation';
 
       beforeAll(() => {
-        const fakeEntities = {
+        const fakeEntities: Record<string, Record<string, unknown>> = {
           [relationUID]: {
             1: {
               id: 1,
@@ -138,9 +147,16 @@ describe('Entity service', () => {
         };
 
         fakeModels[entityUID] = {
+          modelType: 'contentType',
           uid: entityUID,
-          kind: 'contentType',
+          kind: 'collectionType',
           modelName: 'test-model',
+          globalId: 'test-model',
+          info: {
+            singularName: 'entity',
+            pluralName: 'entities',
+            displayName: 'ENTITY',
+          },
           options: {},
           attributes: {
             attrStringDefaultRequired: {
@@ -173,9 +189,17 @@ describe('Entity service', () => {
             },
           },
         };
+
         fakeModels[relationUID] = {
           uid: relationUID,
-          kind: 'contentType',
+          modelType: 'contentType',
+          globalId: 'relation',
+          info: {
+            displayName: 'RELATION',
+            singularName: 'relation',
+            pluralName: 'relations',
+          },
+          kind: 'collectionType',
           modelName: 'relation',
           attributes: {
             Name: {
@@ -185,32 +209,43 @@ describe('Entity service', () => {
             },
           },
         };
-        const fakeQuery = (uid) => ({
-          create: jest.fn(({ data }) => data),
-          count: jest.fn(({ where }) => {
-            return where.id.$in.filter((id) => Boolean(fakeEntities[uid][id])).length;
-          }),
-        });
+        const fakeQuery = (uid: string) =>
+          ({
+            create: jest.fn(({ data }) => data),
+            count: jest.fn(({ where }) => {
+              return where.id.$in.filter((id: string) => Boolean(fakeEntities[uid][id])).length;
+            }),
+          } as any);
 
         const fakeDB = {
-          transaction: (cb) => cb(),
+          transaction: (cb: Utils.Function.Any) => cb(),
           query: jest.fn((uid) => fakeQuery(uid)),
-        };
+        } as any;
 
-        global.strapi.db = fakeDB;
+        global.strapi = {
+          ...global.strapi,
+          db: fakeDB,
+          query: jest.fn((uid) => fakeQuery(uid)),
+        } as any;
 
         instance = createEntityService({
           strapi: global.strapi,
           db: fakeDB,
-          eventHub: new EventEmitter(),
+          eventHub,
           entityValidator,
         });
       });
+
       afterAll(() => {
-        global.strapi.db = {
+        global.strapi = {
+          ...global.strapi,
+          db: {
+            query: jest.fn(() => fakeQuery),
+          },
           query: jest.fn(() => fakeQuery),
-        };
+        } as any;
       });
+
       test('should create record with all default attributes', async () => {
         const data = {};
 
@@ -315,7 +350,7 @@ describe('Entity service', () => {
 
         const res = instance.create(entityUID, { data });
         await expect(res).rejects.toThrowError(
-          new ValidationError(
+          new errors.ValidationError(
             `1 relation(s) of type api::relation.relation associated with this entity do not exist`
           )
         );
@@ -323,19 +358,24 @@ describe('Entity service', () => {
     });
 
     describe('with files', () => {
-      let instance;
+      let instance: any;
+
       beforeAll(() => {
-        fakeModels['test-model'] = {
-          uid: 'test-model',
+        fakeModels['api::test.test-model'] = {
+          uid: 'api::test.test-model',
           kind: 'collectionType',
           collectionName: 'test-model',
+          info: {
+            displayName: 'test-model',
+            singularName: 'test-model',
+            pluralName: 'test-models',
+          },
           options: {},
           attributes: {
             name: {
               type: 'string',
             },
             activity: {
-              displayName: 'activity',
               type: 'component',
               repeatable: true,
               component: 'basic.activity',
@@ -343,12 +383,11 @@ describe('Entity service', () => {
           },
           modelType: 'contentType',
           modelName: 'test-model',
+          globalId: 'test-model',
         };
+
         fakeModels['basic.activity'] = {
           collectionName: 'components_basic_activities',
-          info: {
-            displayName: 'activity',
-          },
           options: {},
           attributes: {
             docs: {
@@ -375,6 +414,7 @@ describe('Entity service', () => {
           getModel: jest.fn((modelName) => fakeModels[modelName]),
           query: jest.fn(() => fakeQuery),
           db: {
+            ...fakeDB,
             dialect: {
               client: 'sqlite',
             },
@@ -384,17 +424,17 @@ describe('Entity service', () => {
         global.strapi = {
           ...global.strapi,
           ...fakeStrapi,
-        };
+        } as any;
 
         instance = createEntityService({
           strapi: global.strapi,
           db: fakeDB,
-          eventHub: new EventEmitter(),
+          eventHub,
           entityValidator,
-        });
+        } as any);
       });
-      test('should create record with attached files', async () => {
-        const uploadFiles = require('../../utils/upload-files');
+
+      test.only('should create record with attached files', async () => {
         const data = {
           name: 'demoEvent',
           activity: [{ name: 'Powering the Aviation of the Future' }],
@@ -411,13 +451,13 @@ describe('Entity service', () => {
 
         fakeQuery.findOne.mockResolvedValue({ id: 1, ...data });
 
-        await instance.create('test-model', { data, files });
+        await instance.create('api::test.test-model', { data, files });
 
         expect(global.strapi.getModel).toBeCalled();
         expect(uploadFiles).toBeCalled();
         expect(uploadFiles).toBeCalledTimes(1);
         expect(uploadFiles).toBeCalledWith(
-          'test-model',
+          'api::test.test-model',
           {
             id: 1,
             name: 'demoEvent',
@@ -439,12 +479,12 @@ describe('Entity service', () => {
 
   describe('Update', () => {
     describe('assign default values', () => {
-      let instance;
+      let instance: any;
 
       const entityUID = 'api::entity.entity';
       const relationUID = 'api::relation.relation';
 
-      const fakeEntities = {
+      const fakeEntities: Record<string, Record<string, any>> = {
         [entityUID]: {
           0: {
             id: 0,
@@ -471,10 +511,12 @@ describe('Entity service', () => {
           },
         },
       };
-      const fakeModels = {
+      const fakeModels: Record<string, Schema.ContentType> = {
         [entityUID]: {
           kind: 'collectionType',
           modelName: 'entity',
+          globalId: 'entity',
+          modelType: 'contentType',
           collectionName: 'entity',
           uid: entityUID,
           options: {},
@@ -496,8 +538,16 @@ describe('Entity service', () => {
           },
         },
         [relationUID]: {
-          kind: 'contentType',
+          kind: 'collectionType',
+          globalId: 'entity',
+          modelType: 'contentType',
           modelName: 'relation',
+          uid: relationUID,
+          info: {
+            singularName: 'relation',
+            pluralName: 'relations',
+            displayName: 'RELATION',
+          },
           attributes: {
             Name: {
               type: 'string',
@@ -509,11 +559,11 @@ describe('Entity service', () => {
       };
 
       beforeAll(() => {
-        const fakeQuery = (key) => ({
+        const fakeQuery = (key: string) => ({
           findOne: jest.fn(({ where }) => fakeEntities[key][where.id]),
           count: jest.fn(({ where }) => {
             let ret = 0;
-            where.id.$in.forEach((id) => {
+            where.id.$in.forEach((id: string) => {
               const entity = fakeEntities[key][id];
               if (!entity) return;
               ret += 1;
@@ -534,18 +584,19 @@ describe('Entity service', () => {
 
         global.strapi = {
           ...global.strapi,
-          getModel: jest.fn((uid) => {
+          getModel: jest.fn((uid: string) => {
             return fakeModels[uid];
           }),
+          query: jest.fn((key) => fakeQuery(key)),
           db: fakeDB,
-        };
+        } as any;
 
         instance = createEntityService({
           strapi: global.strapi,
           db: fakeDB,
           eventHub: new EventEmitter(),
           entityValidator,
-        });
+        } as any);
       });
 
       test(`should fail if the entity doesn't exist`, async () => {
@@ -587,7 +638,7 @@ describe('Entity service', () => {
 
         const res = instance.update(entityUID, 0, { data });
         await expect(res).rejects.toThrowError(
-          new ValidationError(
+          new errors.ValidationError(
             `1 relation(s) of type api::relation.relation associated with this entity do not exist`
           )
         );

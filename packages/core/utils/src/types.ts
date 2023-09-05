@@ -67,10 +67,10 @@ export type AnyAttribute =
 export type Kind = 'singleType' | 'collectionType';
 
 export interface Model {
-  modelType: 'contentType';
+  modelType: 'contentType' | 'component';
   uid: string;
-  kind: Kind;
-  info: {
+  kind?: Kind;
+  info?: {
     displayName: string;
     singularName: string;
     pluralName: string;

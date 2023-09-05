@@ -195,8 +195,8 @@ const isTypedAttribute = (attribute: Attribute, type: string) => {
  */
 const getContentTypeRoutePrefix = (contentType: Model) => {
   return isSingleType(contentType)
-    ? _.kebabCase(contentType.info.singularName)
-    : _.kebabCase(contentType.info.pluralName);
+    ? _.kebabCase(contentType.info?.singularName)
+    : _.kebabCase(contentType.info?.pluralName);
 };
 
 export {

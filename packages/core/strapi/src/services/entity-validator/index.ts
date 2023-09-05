@@ -7,7 +7,7 @@ import { uniqBy, castArray, isNil, isArray, mergeWith } from 'lodash';
 import { has, prop, isObject, isEmpty } from 'lodash/fp';
 import strapiUtils from '@strapi/utils';
 import validators from './validators';
-import { Common, Schema, Attribute, UID, Shared } from '../../types';
+import { Common, Schema, Attribute, Shared } from '../../types';
 import type * as Types from '../entity-service/types';
 
 type CreateOrUpdate = 'creation' | 'update';
@@ -37,12 +37,12 @@ interface ValidatorContext {
 interface AttributeValidatorMetas {
   attr: Attribute.Any;
   updatedAttribute: { name: string; value: unknown };
-  model: Schema.ContentType;
+  model: Schema.ContentType | Schema.Component;
   entity?: Entity;
 }
 
 interface ModelValidatorMetas {
-  model: Schema.ContentType;
+  model: Schema.ContentType | Schema.Component;
   data: Record<string, unknown>;
   entity?: Entity;
 }
@@ -299,7 +299,7 @@ const createModelValidator =
 const createValidateEntity = (createOrUpdate: CreateOrUpdate) => {
   return async <TUID extends Common.UID.ContentType, TData extends Types.Params.Data.Input<TUID>>(
     model: Shared.ContentTypes[TUID],
-    data: TData | Partial<TData>,
+    data: TData | Partial<TData> | undefined,
     options?: { isDraft?: boolean },
     entity?: Entity
   ): Promise<TData> => {
@@ -312,11 +312,7 @@ const createValidateEntity = (createOrUpdate: CreateOrUpdate) => {
     }
 
     const validator = createModelValidator(createOrUpdate)(
-      {
-        model,
-        data,
-        entity,
-      },
+      { model, data, entity },
       { isDraft: options?.isDraft ?? false }
     )
       .test('relations-test', 'check that all relations exist', async function (data) {
@@ -342,11 +338,11 @@ const createValidateEntity = (createOrUpdate: CreateOrUpdate) => {
 /**
  * Builds an object containing all the media and relations being associated with an entity
  */
-const buildRelationsStore = ({
+const buildRelationsStore = <TUID extends Common.UID.ContentType | Common.UID.Component>({
   uid,
   data,
 }: {
-  uid: Common.UID.ContentType | Common.UID.Component;
+  uid: TUID;
   data: Record<string, unknown> | null;
 }): Record<string, ID[]> => {
   if (!uid) {
@@ -357,7 +353,7 @@ const buildRelationsStore = ({
     return {};
   }
 
-  const currentModel: Schema.ContentType = strapi.getModel(uid);
+  const currentModel: Common.Schemas[TUID] = strapi.getModel(uid);
 
   return Object.keys(currentModel.attributes).reduce((result, attributeName: string) => {
     const attribute = currentModel.attributes[attributeName];
@@ -470,7 +466,7 @@ const checkRelationsExist = async (relationsStore: Record<string, ID[]> = {}) =>
   for (const [key, value] of Object.entries(relationsStore)) {
     const evaluate = async () => {
       const uniqueValues = uniqBy(value, `id`);
-      const count = await strapi.query(key as UID.ContentType).count({
+      const count = await strapi.query(key as Common.UID.Schema).count({
         where: {
           id: {
             $in: uniqueValues.map((v) => v.id),
@@ -500,7 +496,7 @@ export interface EntityValidator {
   ) => Promise<Types.Params.Data.Input<TUID>>;
   validateEntityUpdate: <TUID extends Common.UID.ContentType>(
     model: Shared.ContentTypes[TUID],
-    data: Partial<Types.Params.Data.Input<TUID>>,
+    data: Partial<Types.Params.Data.Input<TUID>> | undefined,
     options?: { isDraft?: boolean },
     entity?: Entity
   ) => Promise<Types.Params.Data.Input<TUID>>;

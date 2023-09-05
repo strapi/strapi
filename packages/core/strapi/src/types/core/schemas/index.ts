@@ -141,4 +141,8 @@ export interface SingleType extends ContentType {
  */
 export interface Component extends Schema {
   modelType: 'component';
+
+  uid: Common.UID.Component;
+
+  category: string;
 }

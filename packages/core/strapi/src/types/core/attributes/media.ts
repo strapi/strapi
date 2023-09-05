@@ -8,7 +8,7 @@ export interface MediaProperties<
   TKind extends MediaKind | undefined = undefined,
   TMultiple extends Utils.Expression.BooleanValue = Utils.Expression.False
 > {
-  allowedTypes?: TKind;
+  allowedTypes?: TKind | TKind[];
   multiple?: TMultiple;
 }
 

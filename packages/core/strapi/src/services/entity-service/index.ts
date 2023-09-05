@@ -34,6 +34,14 @@ export * from './types';
 
 const { transformParamsToQuery } = convertQueryParams;
 
+type Decoratable<T> = T & {
+  decorate(
+    decorator: (old: Types.EntityService) => Types.EntityService & {
+      [key: string]: unknown;
+    }
+  ): void;
+};
+
 type Context = {
   contentType: Schema.ContentType;
 };
@@ -89,11 +97,11 @@ const createDefaultImplementation = ({
    */
   uploadFiles,
 
-  async wrapParams(options: any) {
+  async wrapParams(options: any = {}) {
     return options;
   },
 
-  async wrapResult(result: any) {
+  async wrapResult(result: any = {}) {
     return result;
   },
 
@@ -236,10 +244,6 @@ const createDefaultImplementation = ({
       action: 'update',
     });
     const { data, files } = wrappedParams;
-
-    if (!data) {
-      throw new Error('cannot update');
-    }
 
     const model = strapi.getModel(uid);
 
@@ -455,7 +459,7 @@ export default (ctx: {
   db: Database;
   eventHub: EventHub;
   entityValidator: EntityValidator;
-}): Types.EntityService => {
+}): Decoratable<Types.EntityService> => {
   Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
     ctx.strapi.webhookStore?.addAllowedEvent(key, value);
   });
@@ -507,5 +511,5 @@ export default (ctx: {
     return newService;
   });
 
-  return service as unknown as Types.EntityService;
+  return service as unknown as Decoratable<Types.EntityService>;
 };
