@@ -2,31 +2,29 @@ import { AxiosError } from 'axios';
 
 import { getPrefixedId } from './getPrefixedId';
 
-export interface FormattedError {
-  path: string[];
-  message: string;
-  name: string;
+import type { errors } from '@strapi/utils';
+
+interface NormalizeErrorOptions {
+  name?: string;
+  intlMessagePrefixCallback?: (id: string) => string;
 }
 
-export interface Error {
-  name: string;
-  message: string;
-  status: number;
-  details: {
-    errors?: FormattedError[];
-  };
-}
-
-export interface ResponseError {
-  data: unknown;
-  error: Error;
-}
-
-type PrefixFn = (id: string) => string;
+type ApiError =
+  | errors.ApplicationError
+  | errors.ForbiddenError
+  | errors.NotFoundError
+  | errors.NotImplementedError
+  | errors.PaginationError
+  | errors.PayloadTooLargeError
+  | errors.PolicyError
+  | errors.RateLimitError
+  | errors.UnauthorizedError
+  | errors.ValidationError
+  | errors.YupValidationError;
 
 function normalizeError(
-  error: FormattedError | Error,
-  { name, intlMessagePrefixCallback }: { name?: string; intlMessagePrefixCallback?: PrefixFn }
+  error: ApiError | errors.YupFormattedError,
+  { name, intlMessagePrefixCallback }: NormalizeErrorOptions
 ) {
   const { message } = error;
 
@@ -44,19 +42,22 @@ function normalizeError(
   return normalizedError;
 }
 
+const validateErrorIsYupValidationError = (err: ApiError): err is errors.YupValidationError =>
+  typeof err.details === 'object' && err.details !== null && 'errors' in err.details;
+
 export function normalizeAPIError(
-  apiError: AxiosError<ResponseError>,
-  intlMessagePrefixCallback?: PrefixFn
+  apiError: AxiosError<{ error: ApiError }>,
+  intlMessagePrefixCallback?: NormalizeErrorOptions['intlMessagePrefixCallback']
 ) {
   const error = apiError.response?.data.error;
 
   if (error) {
     // some errors carry multiple errors (such as ValidationError)
-    if (error?.details?.errors) {
+    if (validateErrorIsYupValidationError(error)) {
       return {
         name: error.name,
         message: error?.message || null,
-        errors: error.details.errors.map((err: FormattedError) =>
+        errors: error.details.errors.map((err) =>
           normalizeError(err, { name: error.name, intlMessagePrefixCallback })
         ),
       };
