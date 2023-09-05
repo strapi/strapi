@@ -1,32 +1,33 @@
-'use strict';
-
-const strapiUtils = require('@strapi/utils');
-const {
-  errors: { YupValidationError },
-} = require('@strapi/utils');
-const validators = require('../validators');
+import strapiUtils, { errors } from '@strapi/utils';
+import validators from '../validators';
+import type { Schema } from '../../../types';
 
 describe('Time validator', () => {
   describe('unique', () => {
     const fakeFindOne = jest.fn();
 
     global.strapi = {
-      db: {
-        query: jest.fn(() => ({
-          findOne: fakeFindOne,
-        })),
-      },
-    };
+      query: jest.fn(() => ({
+        findOne: fakeFindOne,
+      })) as any,
+    } as any;
 
     afterEach(() => {
       jest.clearAllMocks();
       fakeFindOne.mockReset();
     });
 
-    const fakeModel = {
-      kind: 'contentType',
+    const fakeModel: Schema.ContentType = {
+      modelType: 'contentType',
+      kind: 'collectionType',
       modelName: 'test-model',
-      uid: 'test-uid',
+      globalId: 'test-model',
+      uid: 'api::test.test-uid',
+      info: {
+        displayName: 'Test model',
+        singularName: 'test-model',
+        pluralName: 'test-models',
+      },
       options: {},
       attributes: {
         attrTimeUnique: { type: 'time', unique: true },
@@ -37,15 +38,12 @@ describe('Time validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.time(
-          {
-            attr: { type: 'time' },
-            model: fakeModel,
-            updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
-            entity: null,
-          },
-          { isDraft: false }
-        )
+        validators.time({
+          attr: { type: 'time' },
+          model: fakeModel,
+          updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
+          entity: null,
+        })
       );
 
       await validator('00:00:00.000Z');
@@ -58,15 +56,12 @@ describe('Time validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         validators
-          .time(
-            {
-              attr: { type: 'time', unique: true },
-              model: fakeModel,
-              updatedAttribute: { name: 'attrTimeUnique', value: null },
-              entity: { id: 1, attrTimeUnique: '00:00:00.000Z' },
-            },
-            { isDraft: false }
-          )
+          .time({
+            attr: { type: 'time', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrTimeUnique', value: null },
+            entity: { id: 1, attrTimeUnique: '00:00:00.000Z' },
+          })
           .nullable()
       );
 
@@ -78,15 +73,12 @@ describe('Time validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.time(
-          {
-            attr: { type: 'time', unique: true },
-            model: fakeModel,
-            updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
-            entity: null,
-          },
-          { isDraft: false }
-        )
+        validators.time({
+          attr: { type: 'time', unique: true },
+          model: fakeModel,
+          updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
+          entity: null,
+        })
       );
 
       expect(await validator('00:00:00.000Z')).toBe('00:00:00.000Z');
@@ -97,21 +89,18 @@ describe('Time validator', () => {
       fakeFindOne.mockResolvedValueOnce({ attrTimeUnique: '00:00:00.000Z' });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.time(
-          {
-            attr: { type: 'time', unique: true },
-            model: fakeModel,
-            updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
-            entity: null,
-          },
-          { isDraft: false }
-        )
+        validators.time({
+          attr: { type: 'time', unique: true },
+          model: fakeModel,
+          updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
+          entity: null,
+        })
       );
 
       try {
         await validator('00:00:00.000Z');
       } catch (err) {
-        expect(err).toBeInstanceOf(YupValidationError);
+        expect(err).toBeInstanceOf(errors.YupValidationError);
       }
     });
 
@@ -119,15 +108,12 @@ describe('Time validator', () => {
       fakeFindOne.mockResolvedValueOnce({ attrTimeUnique: '00:00:00.000Z' });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.time(
-          {
-            attr: { type: 'time', unique: true },
-            model: fakeModel,
-            updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
-            entity: { id: 1, attrTimeUnique: '00:00:00.000Z' },
-          },
-          { isDraft: false }
-        )
+        validators.time({
+          attr: { type: 'time', unique: true },
+          model: fakeModel,
+          updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
+          entity: { id: 1, attrTimeUnique: '00:00:00.000Z' },
+        })
       );
 
       expect(await validator('00:00:00.000Z')).toBe('00:00:00.000Z');
@@ -137,15 +123,12 @@ describe('Time validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.time(
-          {
-            attr: { type: 'time', unique: true },
-            model: fakeModel,
-            updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
-            entity: null,
-          },
-          { isDraft: false }
-        )
+        validators.time({
+          attr: { type: 'time', unique: true },
+          model: fakeModel,
+          updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
+          entity: null,
+        })
       );
 
       await validator('00:00:00.000Z');
@@ -160,15 +143,12 @@ describe('Time validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.time(
-          {
-            attr: { type: 'time', unique: true },
-            model: fakeModel,
-            updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
-            entity: { id: 1, attrTimeUnique: '01:00:00.000Z' },
-          },
-          { isDraft: false }
-        )
+        validators.time({
+          attr: { type: 'time', unique: true },
+          model: fakeModel,
+          updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
+          entity: { id: 1, attrTimeUnique: '01:00:00.000Z' },
+        })
       );
 
       await validator('00:00:00.000Z');

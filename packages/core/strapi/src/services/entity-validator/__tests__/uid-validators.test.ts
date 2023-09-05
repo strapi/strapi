@@ -7,11 +7,9 @@ describe('UID validator', () => {
   const fakeFindOne = jest.fn();
 
   global.strapi = {
-    db: {
-      query: jest.fn(() => ({
-        findOne: fakeFindOne,
-      })) as any,
-    } as any,
+    query: jest.fn(() => ({
+      findOne: fakeFindOne,
+    })) as any,
   } as any;
 
   afterEach(() => {
@@ -53,6 +51,7 @@ describe('UID validator', () => {
       );
 
       expect(await validator('non-unique-uid')).toBe('non-unique-uid');
+      expect(fakeFindOne).toHaveBeenCalled();
     });
 
     test('it does not validates the unique constraint if the attribute value is `null`', async () => {

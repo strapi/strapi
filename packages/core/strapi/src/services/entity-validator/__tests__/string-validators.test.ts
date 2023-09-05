@@ -1,37 +1,38 @@
-'use strict';
-
-const strapiUtils = require('@strapi/utils');
-const {
-  errors: { YupValidationError },
-} = require('@strapi/utils');
-const validators = require('../validators');
+import strapiUtils, { errors } from '@strapi/utils';
+import validators from '../validators';
+import type { Schema } from '../../../types';
 
 describe('String validator', () => {
+  const fakeModel: Schema.ContentType = {
+    modelType: 'contentType',
+    kind: 'collectionType',
+    modelName: 'test-model',
+    globalId: 'test-model',
+    uid: 'api::test.test-uid',
+    info: {
+      displayName: 'Test model',
+      singularName: 'test-model',
+      pluralName: 'test-models',
+    },
+    options: {},
+    attributes: {
+      attrStringUnique: { type: 'string', unique: true },
+    },
+  };
+
   describe('unique', () => {
     const fakeFindOne = jest.fn();
 
     global.strapi = {
-      db: {
-        query: jest.fn(() => ({
-          findOne: fakeFindOne,
-        })),
-      },
-    };
+      query: jest.fn(() => ({
+        findOne: fakeFindOne,
+      })) as any,
+    } as any;
 
     afterEach(() => {
       jest.clearAllMocks();
       fakeFindOne.mockReset();
     });
-
-    const fakeModel = {
-      kind: 'contentType',
-      modelName: 'test-model',
-      uid: 'test-uid',
-      options: {},
-      attributes: {
-        attrStringUnique: { type: 'string', unique: true },
-      },
-    };
 
     test('it does not validates the unique constraint if the attribute is not set as unique', async () => {
       fakeFindOne.mockResolvedValueOnce(null);
@@ -124,7 +125,7 @@ describe('String validator', () => {
       try {
         await validator('unique-test-data');
       } catch (err) {
-        expect(err).toBeInstanceOf(YupValidationError);
+        expect(err).toBeInstanceOf(errors.YupValidationError);
       }
     });
 
@@ -203,24 +204,17 @@ describe('String validator', () => {
   });
 
   describe('minLength', () => {
-    test('it does not validates the minLength constraint if the attribute minLength is not an integer', async () => {
-      const validator = strapiUtils.validateYupSchema(
-        validators.string(
-          {
-            attr: { type: 'string', minLength: '123' },
-          },
-          { isDraft: false }
-        )
-      );
-
-      expect(await validator('a')).toBe('a');
-    });
-
     test('it does not validates the minLength constraint if it is a draft', async () => {
       const validator = strapiUtils.validateYupSchema(
         validators.string(
           {
             attr: { type: 'string', minLength: 3 },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrStringUnique',
+              value: 'test-data',
+            },
+            entity: { id: 1, attrStringUnique: 'other-data' },
           },
           { isDraft: true }
         )
@@ -236,6 +230,12 @@ describe('String validator', () => {
         validators.string(
           {
             attr: { type: 'string', minLength: 3 },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrStringUnique',
+              value: 'test-data',
+            },
+            entity: { id: 1, attrStringUnique: 'other-data' },
           },
           { isDraft: false }
         )
@@ -244,7 +244,7 @@ describe('String validator', () => {
       try {
         await validator('a');
       } catch (err) {
-        expect(err).toBeInstanceOf(YupValidationError);
+        expect(err).toBeInstanceOf(errors.YupValidationError);
       }
     });
 
@@ -253,6 +253,12 @@ describe('String validator', () => {
         validators.string(
           {
             attr: { type: 'string', minLength: 3 },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrStringUnique',
+              value: 'test-data',
+            },
+            entity: { id: 1, attrStringUnique: 'other-data' },
           },
           { isDraft: false }
         )
@@ -269,7 +275,13 @@ describe('String validator', () => {
       const validator = strapiUtils.validateYupSchema(
         validators.string(
           {
-            attr: { type: 'string', maxLength: '123' },
+            attr: { type: 'string', maxLength: 123 },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrStringUnique',
+              value: 'test-data',
+            },
+            entity: { id: 1, attrStringUnique: 'other-data' },
           },
           { isDraft: false }
         )
@@ -285,6 +297,12 @@ describe('String validator', () => {
         validators.string(
           {
             attr: { type: 'string', maxLength: 3 },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrStringUnique',
+              value: 'test-data',
+            },
+            entity: { id: 1, attrStringUnique: 'other-data' },
           },
           { isDraft: false }
         )
@@ -293,7 +311,7 @@ describe('String validator', () => {
       try {
         await validator('this string is too long');
       } catch (err) {
-        expect(err).toBeInstanceOf(YupValidationError);
+        expect(err).toBeInstanceOf(errors.YupValidationError);
       }
     });
 
@@ -302,6 +320,12 @@ describe('String validator', () => {
         validators.string(
           {
             attr: { type: 'string', maxLength: 3 },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrStringUnique',
+              value: 'test-data',
+            },
+            entity: { id: 1, attrStringUnique: 'other-data' },
           },
           { isDraft: false }
         )
@@ -318,7 +342,13 @@ describe('String validator', () => {
       const validator = strapiUtils.validateYupSchema(
         validators.string(
           {
-            attr: { type: 'string', required: true, regex: '^\\w+$' },
+            attr: { type: 'string', required: true, regex: /^\w+$/ },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrStringUnique',
+              value: 'test-data',
+            },
+            entity: { id: 1, attrStringUnique: 'other-data' },
           },
           { isDraft: false }
         )
@@ -327,7 +357,7 @@ describe('String validator', () => {
       try {
         await validator('');
       } catch (err) {
-        expect(err).toBeInstanceOf(YupValidationError);
+        expect(err).toBeInstanceOf(errors.YupValidationError);
       }
     });
 
@@ -335,7 +365,13 @@ describe('String validator', () => {
       const validator = strapiUtils.validateYupSchema(
         validators.string(
           {
-            attr: { type: 'string', required: true, regex: '^\\w+$' },
+            attr: { type: 'string', required: true, regex: /^\w+$/ },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrStringUnique',
+              value: 'test-data',
+            },
+            entity: { id: 1, attrStringUnique: 'other-data' },
           },
           { isDraft: false }
         )
@@ -348,7 +384,13 @@ describe('String validator', () => {
       const validator = strapiUtils.validateYupSchema(
         validators.string(
           {
-            attr: { type: 'string', required: false, regex: '^\\w+$' },
+            attr: { type: 'string', required: false, regex: /^\w+$/ },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrStringUnique',
+              value: 'test-data',
+            },
+            entity: { id: 1, attrStringUnique: 'other-data' },
           },
           { isDraft: false }
         )
@@ -361,7 +403,13 @@ describe('String validator', () => {
       const validator = strapiUtils.validateYupSchema(
         validators.string(
           {
-            attr: { type: 'string', required: false, regex: '^\\w+$' },
+            attr: { type: 'string', required: false, regex: /^\w+$/ },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrStringUnique',
+              value: 'test-data',
+            },
+            entity: { id: 1, attrStringUnique: 'other-data' },
           },
           { isDraft: false }
         )

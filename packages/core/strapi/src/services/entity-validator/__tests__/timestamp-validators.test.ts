@@ -8,11 +8,9 @@ describe('Time validator', () => {
     const fakeFindOne = jest.fn();
 
     global.strapi = {
-      db: {
-        query: jest.fn(() => ({
-          findOne: fakeFindOne,
-        })) as any,
-      } as any,
+      query: jest.fn(() => ({
+        findOne: fakeFindOne,
+      })) as any,
     } as any;
 
     afterEach(() => {

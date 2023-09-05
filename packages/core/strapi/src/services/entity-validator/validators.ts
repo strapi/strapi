@@ -67,11 +67,11 @@ const addMaxLengthValidator = (
  * @returns {NumberSchema}
  */
 const addMinIntegerValidator = (
-  validator: strapiUtils.yup.NumberSchema | strapiUtils.yup.ArraySchema,
+  validator: strapiUtils.yup.NumberSchema,
   {
     attr,
   }: {
-    attr: Attribute.Integer | Attribute.BigInteger | Attribute.Component | Attribute.DynamicZone;
+    attr: Attribute.Integer | Attribute.BigInteger;
   }
 ) => (_.isNumber(attr.min) ? validator.min(_.toInteger(attr.min)) : validator);
 
@@ -79,11 +79,11 @@ const addMinIntegerValidator = (
  * Adds max integer validator
  */
 const addMaxIntegerValidator = (
-  validator: strapiUtils.yup.NumberSchema | strapiUtils.yup.ArraySchema,
+  validator: strapiUtils.yup.NumberSchema,
   {
     attr,
   }: {
-    attr: Attribute.Integer | Attribute.BigInteger | Attribute.Component | Attribute.DynamicZone;
+    attr: Attribute.Integer | Attribute.BigInteger;
   }
 ) => (_.isNumber(attr.max) ? validator.max(_.toInteger(attr.max)) : validator);
 
@@ -189,26 +189,25 @@ const stringValidator = (
   >,
   options: ValidatorOptions
 ) => {
-  const schema = yup.string().transform((val, originalVal) => originalVal);
+  let schema = yup.string().transform((val, originalVal) => originalVal);
 
-  addMinLengthValidator(schema, metas, options);
-  addMaxLengthValidator(schema, metas);
-  addStringRegexValidator(schema, metas);
-  addUniqueValidator(schema, metas);
+  schema = addMinLengthValidator(schema, metas, options);
+  schema = addMaxLengthValidator(schema, metas);
+  schema = addStringRegexValidator(schema, metas);
+  schema = addUniqueValidator(schema, metas);
 
   return schema;
 };
 
 const emailValidator = (metas: ValidatorMetas<Attribute.Email>, options: ValidatorOptions) => {
   const schema = stringValidator(metas, options);
-  schema.email().min(1, '${path} cannot be empty');
+  return schema.email().min(1, '${path} cannot be empty');
 };
 
 const uidValidator = (metas: ValidatorMetas<Attribute.UID>, options: ValidatorOptions) => {
   const schema = stringValidator(metas, options);
 
-  schema.matches(/^[A-Za-z0-9-_.~]*$/);
-  return schema;
+  return schema.matches(/^[A-Za-z0-9-_.~]*$/);
 };
 
 const enumerationValidator = ({ attr }: { attr: Attribute.Enumeration }) => {
@@ -217,43 +216,35 @@ const enumerationValidator = ({ attr }: { attr: Attribute.Enumeration }) => {
     .oneOf((Array.isArray(attr.enum) ? attr.enum : [attr.enum]).concat(null as any));
 };
 
-const integerValidator = (
-  metas: ValidatorMetas<
-    Attribute.Integer | Attribute.BigInteger | Attribute.Component | Attribute.DynamicZone
-  >
-) => {
-  const schema = yup.number().integer();
+const integerValidator = (metas: ValidatorMetas<Attribute.Integer | Attribute.BigInteger>) => {
+  let schema = yup.number().integer();
 
-  addMinIntegerValidator(schema, metas);
-  addMaxIntegerValidator(schema, metas);
-  addUniqueValidator(schema, metas);
+  schema = addMinIntegerValidator(schema, metas);
+  schema = addMaxIntegerValidator(schema, metas);
+  schema = addUniqueValidator(schema, metas);
 
   return schema;
 };
 
 const floatValidator = (metas: ValidatorMetas<Attribute.Decimal | Attribute.Float>) => {
-  const schema = yup.number();
-  addMinFloatValidator(schema, metas);
-  addMaxFloatValidator(schema, metas);
-  addUniqueValidator(schema, metas);
+  let schema = yup.number();
+  schema = addMinFloatValidator(schema, metas);
+  schema = addMaxFloatValidator(schema, metas);
+  schema = addUniqueValidator(schema, metas);
 
   return schema;
 };
 
 const bigintegerValidator = (metas: ValidatorMetas<Attribute.BigInteger>) => {
   const schema = yup.mixed();
-  addUniqueValidator(schema, metas);
-
-  return schema;
+  return addUniqueValidator(schema, metas);
 };
 
 const datesValidator = (
   metas: ValidatorMetas<Attribute.Date | Attribute.DateTime | Attribute.Time | Attribute.Timestamp>
 ) => {
-  const schema = yup.date();
-  addUniqueValidator(schema, metas);
-
-  return schema;
+  const schema = yup.mixed();
+  return addUniqueValidator(schema, metas);
 };
 
 export default {
