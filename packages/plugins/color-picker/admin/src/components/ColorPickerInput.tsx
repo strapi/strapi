@@ -1,4 +1,4 @@
-import React, { forwardRef, useRef, useState } from 'react';
+import * as React from 'react';
 
 import {
   BaseButton,
@@ -14,13 +14,12 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { CarretDown } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { HexColorPicker } from 'react-colorful';
-import { useIntl } from 'react-intl';
+import { useIntl, MessageDescriptor } from 'react-intl';
 import styled from 'styled-components';
 
-import { useComposedRefs } from '../../../hooks/useComposeRefs';
-import getTrad from '../../../utils/getTrad';
+import { useComposedRefs } from '../hooks/useComposeRefs';
+import { getTrad } from '../utils/getTrad';
 
 const ColorPreview = styled.div`
   border-radius: 50%;
@@ -75,29 +74,49 @@ const ColorPickerPopover = styled(Popover)`
   min-height: 270px;
 `;
 
-const ColorPickerInput = forwardRef(
+/**
+ * TODO: A lot of these props should extend `FieldProps`
+ */
+interface ColorPickerInputProps {
+  intlLabel: MessageDescriptor;
+  /**
+   * TODO: this should be extended from `FieldInputProps['onChange']
+   * but that conflicts with it's secondary usage in `HexColorPicker`
+   */
+  onChange: (event: { target: { name: string; value: string; type: string } }) => void;
+  attribute: { type: string; [key: string]: unknown };
+  name: string;
+  description?: MessageDescriptor;
+  disabled?: boolean;
+  error?: string;
+  labelAction?: React.ReactNode;
+  required?: boolean;
+  value?: string;
+}
+
+export const ColorPickerInput = React.forwardRef<HTMLDivElement, ColorPickerInputProps>(
   (
     {
       attribute,
       description,
-      disabled,
+      disabled = false,
       error,
       intlLabel,
       labelAction,
       name,
       onChange,
-      required,
-      value,
+      required = false,
+      value = '',
     },
     forwardedRef
   ) => {
-    const [showColorPicker, setShowColorPicker] = useState(false);
-    const colorPickerButtonRef = useRef();
+    const [showColorPicker, setShowColorPicker] = React.useState(false);
+    const colorPickerButtonRef = React.useRef();
     const { formatMessage } = useIntl();
     const color = value || '#000000';
     const styleUppercase = { textTransform: 'uppercase' };
 
-    const handleBlur = (e) => {
+    const handleBlur: React.FocusEventHandler<HTMLDivElement> = (e) => {
       e.preventDefault();
 
       if (!e.currentTarget.contains(e.relatedTarget)) {
@@ -188,27 +207,3 @@ const ColorPickerInput = forwardRef(
     );
   }
 );
-
-ColorPickerInput.defaultProps = {
-  description: null,
-  disabled: false,
-  error: null,
-  labelAction: null,
-  required: false,
-  value: '',
-};
-
-ColorPickerInput.propTypes = {
-  intlLabel: PropTypes.object.isRequired,
-  onChange: PropTypes.func.isRequired,
-  attribute: PropTypes.object.isRequired,
-  name: PropTypes.string.isRequired,
-  description: PropTypes.object,
-  disabled: PropTypes.bool,
-  error: PropTypes.string,
-  labelAction: PropTypes.object,
-  required: PropTypes.bool,
-  value: PropTypes.string,
-};
-
-export default ColorPickerInput;
