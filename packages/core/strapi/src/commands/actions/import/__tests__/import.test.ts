@@ -1,44 +1,10 @@
-import * as dataTransfer from '@strapi/data-transfer';
+import * as mockDataTransfer from '@strapi/data-transfer';
 import { expectExit } from '../../../__tests__/commands.test.utils';
 import importAction from '../action';
 
-const {
-  strapi: {
-    providers: { DEFAULT_CONFLICT_STRATEGY },
-  },
-  engine: { DEFAULT_SCHEMA_STRATEGY, DEFAULT_VERSION_STRATEGY },
-} = dataTransfer;
-
-const createTransferEngine = jest.fn(() => {
+jest.mock('../../../utils/data-transfer', () => {
   return {
-    transfer: jest.fn(() => {
-      return {
-        engine: {},
-      };
-    }),
-    progress: {
-      on: jest.fn(),
-      stream: {
-        on: jest.fn(),
-      },
-    },
-    sourceProvider: { name: 'testFileSource', type: 'source', getMetadata: jest.fn() },
-    destinationProvider: {
-      name: 'testStrapiDest',
-      type: 'destination',
-      getMetadata: jest.fn(),
-    },
-    diagnostics: {
-      on: jest.fn().mockReturnThis(),
-      onDiagnostic: jest.fn().mockReturnThis(),
-    },
-    onSchemaDiff: jest.fn(),
-  };
-});
-
-jest.mock('../../../utils/data-transfer.js', () => {
-  return {
-    ...jest.requireActual('../../../utils/data-transfer.js'),
+    ...jest.requireActual('../../../utils/data-transfer'),
     getTransferTelemetryPayload: jest.fn().mockReturnValue({}),
     loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
     formatDiagnostic: jest.fn(),
@@ -61,31 +27,60 @@ jest.mock('../../../utils/data-transfer.js', () => {
   };
 });
 
-// mock @strapi/data-transfer
-const mockDataTransfer = {
-  file: {
-    providers: {
-      createLocalFileSourceProvider: jest
-        .fn()
-        .mockReturnValue({ name: 'testFileSource', type: 'source', getMetadata: jest.fn() }),
+jest.mock('@strapi/data-transfer', () => {
+  const actual = jest.requireActual('@strapi/data-transfer');
+
+  const createTransferEngine = jest.fn(() => {
+    return {
+      transfer: jest.fn(() => {
+        return {
+          engine: {},
+        };
+      }),
+      progress: {
+        on: jest.fn(),
+        stream: {
+          on: jest.fn(),
+        },
+      },
+      sourceProvider: { name: 'testFileSource', type: 'source', getMetadata: jest.fn() },
+      destinationProvider: {
+        name: 'testStrapiDest',
+        type: 'destination',
+        getMetadata: jest.fn(),
+      },
+      diagnostics: {
+        on: jest.fn().mockReturnThis(),
+        onDiagnostic: jest.fn().mockReturnThis(),
+      },
+      onSchemaDiff: jest.fn(),
+    };
+  });
+
+  return {
+    file: {
+      providers: {
+        createLocalFileSourceProvider: jest
+          .fn()
+          .mockReturnValue({ name: 'testFileSource', type: 'source', getMetadata: jest.fn() }),
+      },
     },
-  },
-  strapi: {
-    providers: {
-      DEFAULT_CONFLICT_STRATEGY,
-      createLocalStrapiDestinationProvider: jest
-        .fn()
-        .mockReturnValue({ name: 'testStrapiDest', type: 'destination', getMetadata: jest.fn() }),
+    strapi: {
+      providers: {
+        DEFAULT_CONFLICT_STRATEGY: actual.strapi.providers.DEFAULT_CONFLICT_STRATEGY,
+        createLocalStrapiDestinationProvider: jest
+          .fn()
+          .mockReturnValue({ name: 'testStrapiDest', type: 'destination', getMetadata: jest.fn() }),
+      },
     },
-  },
-  engine: {
-    ...jest.requireActual('@strapi/data-transfer').engine,
-    DEFAULT_SCHEMA_STRATEGY,
-    DEFAULT_VERSION_STRATEGY,
-    createTransferEngine,
-  },
-};
-jest.mock('@strapi/data-transfer', () => mockDataTransfer);
+    engine: {
+      ...jest.requireActual('@strapi/data-transfer').engine,
+      DEFAULT_SCHEMA_STRATEGY: actual.engine.DEFAULT_SCHEMA_STRATEGY,
+      DEFAULT_VERSION_STRATEGY: actual.engine.DEFAULT_VERSION_STRATEGY,
+      createTransferEngine,
+    },
+  };
+});
 
 describe('Import', () => {
   // mock command utils
@@ -116,7 +111,11 @@ describe('Import', () => {
     // strapi options
     expect(
       mockDataTransfer.strapi.providers.createLocalStrapiDestinationProvider
-    ).toHaveBeenCalledWith(expect.objectContaining({ strategy: DEFAULT_CONFLICT_STRATEGY }));
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({
+        strategy: mockDataTransfer.strapi.providers.DEFAULT_CONFLICT_STRATEGY,
+      })
+    );
 
     // file options
     expect(mockDataTransfer.file.providers.createLocalFileSourceProvider).toHaveBeenCalledWith(
@@ -132,8 +131,8 @@ describe('Import', () => {
       expect.objectContaining({ name: 'testFileSource' }),
       expect.objectContaining({ name: 'testStrapiDest' }),
       expect.objectContaining({
-        schemaStrategy: DEFAULT_SCHEMA_STRATEGY,
-        versionStrategy: DEFAULT_VERSION_STRATEGY,
+        schemaStrategy: mockDataTransfer.engine.DEFAULT_SCHEMA_STRATEGY,
+        versionStrategy: mockDataTransfer.engine.DEFAULT_VERSION_STRATEGY,
       })
     );
   });

@@ -1,10 +1,41 @@
 import * as mockDataTransfer from '@strapi/data-transfer';
 import { expectExit } from '../../../__tests__/commands.test.utils';
 import exportAction from '../action';
+import * as mockUtils from '../../../utils/data-transfer';
 
 jest.mock('fs-extra', () => ({
   pathExists: jest.fn(() => Promise.resolve(true)),
 }));
+const defaultFileName = 'defaultFilename';
+jest.mock(
+  '../../../utils/data-transfer',
+  () => {
+    return {
+      getTransferTelemetryPayload: jest.fn().mockReturnValue({}),
+      loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
+      formatDiagnostic: jest.fn(),
+      createStrapiInstance() {
+        return {
+          telemetry: {
+            send: jest.fn(),
+          },
+        };
+      },
+      getDefaultExportName: jest.fn(() => defaultFileName),
+      buildTransferTable: jest.fn(() => {
+        return {
+          toString() {
+            return 'table';
+          },
+        };
+      }),
+      exitMessageText: jest.fn(),
+      getDiffHandler: jest.fn(),
+      setSignalHandler: jest.fn(),
+    };
+  },
+  { virtual: true }
+);
 
 jest.mock('@strapi/data-transfer', () => {
   return {
@@ -52,39 +83,7 @@ jest.mock('@strapi/data-transfer', () => {
 });
 
 describe('Export', () => {
-  const defaultFileName = 'defaultFilename';
-
   // command utils
-  const mockUtils = {
-    getTransferTelemetryPayload: jest.fn().mockReturnValue({}),
-    loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
-    formatDiagnostic: jest.fn(),
-    createStrapiInstance() {
-      return {
-        telemetry: {
-          send: jest.fn(),
-        },
-      };
-    },
-    getDefaultExportName: jest.fn(() => defaultFileName),
-    buildTransferTable: jest.fn(() => {
-      return {
-        toString() {
-          return 'table';
-        },
-      };
-    }),
-    exitMessageText: jest.fn(),
-    getDiffHandler: jest.fn(),
-    setSignalHandler: jest.fn(),
-  };
-  jest.mock(
-    '../../../utils/data-transfer.js',
-    () => {
-      return mockUtils;
-    },
-    { virtual: true }
-  );
 
   // console spies
   jest.spyOn(console, 'log').mockImplementation(() => {});

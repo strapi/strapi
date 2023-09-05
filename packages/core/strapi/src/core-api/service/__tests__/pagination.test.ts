@@ -249,7 +249,7 @@ describe('Pagination service', () => {
         });
       });
 
-      test.only('Uses -1 as limit', () => {
+      test('Uses -1 as limit', () => {
         const pagination = { limit: -1 };
         const paginationInfo = getPaginationInfo({ pagination });
 

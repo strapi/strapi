@@ -434,7 +434,7 @@ describe('Entity service', () => {
         } as any);
       });
 
-      test.only('should create record with attached files', async () => {
+      test('should create record with attached files', async () => {
         const data = {
           name: 'demoEvent',
           activity: [{ name: 'Powering the Aviation of the Future' }],
