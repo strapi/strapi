@@ -339,7 +339,7 @@ const advancedForm = {
             id: 'global.settings',
             defaultMessage: 'Settings',
           },
-          items: [options.required, options.maxLength, options.private, options.minLength],
+          items: [options.required, options.private],
         },
       ],
     };

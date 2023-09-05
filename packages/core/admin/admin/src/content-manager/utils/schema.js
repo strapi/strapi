@@ -211,6 +211,32 @@ const createYupSchemaAttribute = (type, validations, options) => {
     schema = yup.string();
   }
 
+  if (type === 'blocks') {
+    schema = yup
+      .mixed(errorsTrads.json)
+      .test('isJSONObject', errorsTrads.json, (value) => {
+        try {
+          const parsedValue = JSON.parse(value);
+
+          if (typeof parsedValue === 'object' && parsedValue !== null) {
+            return true;
+          }
+        } catch (err) {
+          return false;
+        }
+
+        return false;
+      })
+      .nullable()
+      .test('required', errorsTrads.required, (value) => {
+        if (validations.required && (!value || !value.length)) {
+          return false;
+        }
+
+        return true;
+      });
+  }
+
   if (type === 'json') {
     schema = yup
       .mixed(errorsTrads.json)
