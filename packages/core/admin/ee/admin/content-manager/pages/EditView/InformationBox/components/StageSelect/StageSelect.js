@@ -17,7 +17,7 @@ import {
   useNotification,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { useMutation, useQueryClient } from 'react-query';
+import { useMutation } from 'react-query';
 
 import { useLicenseLimits } from '../../../../../../hooks/useLicenseLimits';
 import * as LimitsModal from '../../../../../../pages/SettingsPage/pages/ReviewWorkflows/components/LimitsModal';
@@ -32,11 +32,10 @@ import { STAGE_ATTRIBUTE_NAME } from '../../constants';
 export function StageSelect() {
   const { initialData, layout: contentType, isSingleType, onChange } = useCMEditViewDataManager();
   const { put } = useFetchClient();
-  const queryClient = useQueryClient();
   const { formatMessage } = useIntl();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
-  const { meta, stages, isLoading } = useReviewWorkflowsStages(
+  const { meta, stages, isLoading, refetch } = useReviewWorkflowsStages(
     { id: initialData.id, layout: contentType },
     {
       enabled: !!initialData?.id,
@@ -68,7 +67,7 @@ export function StageSelect() {
         true
       );
 
-      queryClient.invalidateQueries(['content-manager', typeSlug, uid, entityId, 'stages']);
+      await refetch();
 
       return createdEntity;
     },
