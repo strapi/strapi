@@ -1,5 +1,5 @@
 import path from 'path';
-import { isArray, isNil } from 'lodash/fp';
+import { isArray } from 'lodash/fp';
 import { importDefault } from '@strapi/utils';
 import { Common } from '../../types';
 import type { Strapi } from '../../Strapi';

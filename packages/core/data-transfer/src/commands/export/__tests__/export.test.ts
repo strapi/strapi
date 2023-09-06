@@ -1,7 +1,7 @@
 import exportAction from '../action';
 import * as mockUtils from '../../data-transfer';
-import * as mockDataTransfer from '../../..';
 import { expectExit } from '../../__tests__/commands.test.utils';
+import * as fileDatatransfer from '../../../file';
 
 jest.mock('fs-extra', () => ({
   pathExists: jest.fn(() => Promise.resolve(true)),
@@ -37,47 +37,75 @@ jest.mock(
   { virtual: true }
 );
 
-jest.mock('../../..', () => {
+jest.mock('../../../engine', () => {
+  const actual = jest.requireActual('../../../engine');
+
   return {
-    file: {
-      providers: {
-        createLocalFileDestinationProvider: jest.fn().mockReturnValue({ name: 'testDest' }),
-      },
-    },
-    strapi: {
-      providers: {
-        createLocalStrapiSourceProvider: jest.fn().mockReturnValue({ name: 'testSource' }),
-      },
-    },
-    engine: {
-      ...jest.requireActual('../../..').engine,
-      errors: {},
-      createTransferEngine() {
-        return {
-          transfer: jest.fn(() => {
-            return {
-              engine: {},
-              destination: {
-                file: {
-                  path: 'path',
-                },
+    ...actual,
+    createTransferEngine: jest.fn(() => {
+      return {
+        transfer: jest.fn(() => {
+          return {
+            engine: {},
+            destination: {
+              file: {
+                path: 'path',
               },
-            };
-          }),
-          progress: {
-            on: jest.fn(),
-            stream: {
-              on: jest.fn(),
             },
+          };
+        }),
+        progress: {
+          on: jest.fn(),
+          stream: {
+            on: jest.fn(),
           },
-          sourceProvider: { name: 'testSource' },
-          destinationProvider: { name: 'testDestination' },
-          diagnostics: {
-            on: jest.fn().mockReturnThis(),
-            onDiagnostic: jest.fn().mockReturnThis(),
-          },
-        };
-      },
+        },
+        sourceProvider: { name: 'testFileSource', type: 'source', getMetadata: jest.fn() },
+        destinationProvider: {
+          name: 'testStrapiDest',
+          type: 'destination',
+          getMetadata: jest.fn(),
+        },
+        diagnostics: {
+          on: jest.fn().mockReturnThis(),
+          onDiagnostic: jest.fn().mockReturnThis(),
+        },
+        onSchemaDiff: jest.fn(),
+        addErrorHandler: jest.fn(),
+      };
+    }),
+  };
+});
+
+jest.mock('../../../file', () => {
+  const actual = jest.requireActual('../../../file');
+
+  return {
+    ...actual,
+    providers: {
+      ...actual.providers,
+      createLocalFileSourceProvider: jest
+        .fn()
+        .mockReturnValue({ name: 'testFileSource', type: 'source', getMetadata: jest.fn() }),
+      createLocalFileDestinationProvider: jest.fn().mockReturnValue({
+        name: 'testFileDestination',
+        type: 'destination',
+        getMetadata: jest.fn(),
+      }),
+    },
+  };
+});
+
+jest.mock('../../../strapi', () => {
+  const actual = jest.requireActual('../../../strapi');
+
+  return {
+    ...actual,
+    providers: {
+      ...actual.providers,
+      createLocalStrapiDestinationProvider: jest
+        .fn()
+        .mockReturnValue({ name: 'testStrapiDest', type: 'destination', getMetadata: jest.fn() }),
     },
   };
 });
@@ -103,7 +131,7 @@ describe('Export', () => {
     });
 
     expect(console.error).not.toHaveBeenCalled();
-    expect(mockDataTransfer.file.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
+    expect(fileDatatransfer.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         file: { path: filename },
       })
@@ -117,7 +145,7 @@ describe('Export', () => {
     });
 
     expect(mockUtils.getDefaultExportName).toHaveBeenCalledTimes(1);
-    expect(mockDataTransfer.file.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
+    expect(fileDatatransfer.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         file: { path: defaultFileName },
       })
@@ -130,7 +158,7 @@ describe('Export', () => {
       await exportAction({ encrypt });
     });
 
-    expect(mockDataTransfer.file.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
+    expect(fileDatatransfer.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         encryption: { enabled: encrypt },
       })
@@ -144,7 +172,7 @@ describe('Export', () => {
       await exportAction({ encrypt, key });
     });
 
-    expect(mockDataTransfer.file.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
+    expect(fileDatatransfer.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         encryption: { enabled: encrypt, key },
       })
@@ -156,7 +184,7 @@ describe('Export', () => {
       await exportAction({ compress: false });
     });
 
-    expect(mockDataTransfer.file.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
+    expect(fileDatatransfer.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         compression: { enabled: false },
       })
@@ -164,7 +192,7 @@ describe('Export', () => {
     await expectExit(0, async () => {
       await exportAction({ compress: true });
     });
-    expect(mockDataTransfer.file.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
+    expect(fileDatatransfer.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         compression: { enabled: true },
       })

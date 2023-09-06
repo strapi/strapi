@@ -31,45 +31,44 @@ jest.mock('../../data-transfer', () => {
 });
 
 // mock data transfer
-
-jest.mock('../../..', () => {
+jest.mock('../../../engine', () => {
+  const acutal = jest.requireActual('../../../engine');
   return {
-    strapi: {
-      providers: {
-        createLocalStrapiSourceProvider: jest.fn().mockReturnValue({ name: 'testLocalSource' }),
-        createLocalStrapiDestinationProvider: jest
-          .fn()
-          .mockReturnValue({ name: 'testLocalDestination' }),
-        createRemoteStrapiDestinationProvider: jest
-          .fn()
-          .mockReturnValue({ name: 'testRemoteDest' }),
-      },
-    },
-    engine: {
-      ...jest.requireActual('../../..').engine,
-      createTransferEngine() {
-        return {
-          transfer: jest.fn(() => {
-            return {
-              engine: {},
-            };
-          }),
-          progress: {
+    ...acutal,
+    createTransferEngine() {
+      return {
+        transfer: jest.fn(() => {
+          return {
+            engine: {},
+          };
+        }),
+        progress: {
+          on: jest.fn(),
+          stream: {
             on: jest.fn(),
-            stream: {
-              on: jest.fn(),
-            },
           },
-          sourceProvider: { name: 'testSource' },
-          destinationProvider: { name: 'testDestination' },
-          diagnostics: {
-            on: jest.fn().mockReturnThis(),
-            onDiagnostic: jest.fn().mockReturnThis(),
-          },
-          onSchemaDiff: jest.fn(),
-          addErrorHandler: jest.fn(),
-        };
-      },
+        },
+        sourceProvider: { name: 'testSource' },
+        destinationProvider: { name: 'testDestination' },
+        diagnostics: {
+          on: jest.fn().mockReturnThis(),
+          onDiagnostic: jest.fn().mockReturnThis(),
+        },
+        onSchemaDiff: jest.fn(),
+        addErrorHandler: jest.fn(),
+      };
+    },
+  };
+});
+
+jest.mock('../../../strapi', () => {
+  const actual = jest.requireActual('../../../strapi');
+  return {
+    ...actual,
+    providers: {
+      createLocalStrapiSourceProvider: jest.fn().mockReturnValue({ name: 'testLocalSource' }),
+      createLocalStrapiDestinationProvider: jest.fn().mockReturnValue({ name: 'testLocalDest' }),
+      createRemoteStrapiDestinationProvider: jest.fn().mockReturnValue({ name: 'testRemoteDest' }),
     },
   };
 });

@@ -28,5 +28,5 @@ export const middlewares: Record<string, Common.MiddlewareFactory> = {
   responses,
   security,
   session,
-  publicStatic,
+  public: publicStatic,
 };

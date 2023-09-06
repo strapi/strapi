@@ -1,6 +1,8 @@
 import importAction from '../action';
-import * as mockDataTransfer from '../../..';
 import { expectExit } from '../../__tests__/commands.test.utils';
+import * as engineDatatransfer from '../../../engine';
+import * as strapiDatatransfer from '../../../strapi';
+import * as fileDatatransfer from '../../../file';
 
 jest.mock('../../data-transfer', () => {
   return {
@@ -27,57 +29,64 @@ jest.mock('../../data-transfer', () => {
   };
 });
 
-jest.mock('../../..', () => {
-  const actual = jest.requireActual('../../..');
-
-  const createTransferEngine = jest.fn(() => {
-    return {
-      transfer: jest.fn(() => {
-        return {
-          engine: {},
-        };
-      }),
-      progress: {
-        on: jest.fn(),
-        stream: {
-          on: jest.fn(),
-        },
-      },
-      sourceProvider: { name: 'testFileSource', type: 'source', getMetadata: jest.fn() },
-      destinationProvider: {
-        name: 'testStrapiDest',
-        type: 'destination',
-        getMetadata: jest.fn(),
-      },
-      diagnostics: {
-        on: jest.fn().mockReturnThis(),
-        onDiagnostic: jest.fn().mockReturnThis(),
-      },
-      onSchemaDiff: jest.fn(),
-    };
-  });
+jest.mock('../../../engine', () => {
+  const actual = jest.requireActual('../../../engine');
 
   return {
-    file: {
-      providers: {
-        createLocalFileSourceProvider: jest
-          .fn()
-          .mockReturnValue({ name: 'testFileSource', type: 'source', getMetadata: jest.fn() }),
-      },
+    ...actual,
+    createTransferEngine: jest.fn(() => {
+      return {
+        transfer: jest.fn(() => {
+          return {
+            engine: {},
+          };
+        }),
+        progress: {
+          on: jest.fn(),
+          stream: {
+            on: jest.fn(),
+          },
+        },
+        sourceProvider: { name: 'testFileSource', type: 'source', getMetadata: jest.fn() },
+        destinationProvider: {
+          name: 'testStrapiDest',
+          type: 'destination',
+          getMetadata: jest.fn(),
+        },
+        diagnostics: {
+          on: jest.fn().mockReturnThis(),
+          onDiagnostic: jest.fn().mockReturnThis(),
+        },
+        onSchemaDiff: jest.fn(),
+      };
+    }),
+  };
+});
+
+jest.mock('../../../file', () => {
+  const actual = jest.requireActual('../../../file');
+
+  return {
+    ...actual,
+    providers: {
+      ...actual.providers,
+      createLocalFileSourceProvider: jest
+        .fn()
+        .mockReturnValue({ name: 'testFileSource', type: 'source', getMetadata: jest.fn() }),
     },
-    strapi: {
-      providers: {
-        DEFAULT_CONFLICT_STRATEGY: actual.strapi.providers.DEFAULT_CONFLICT_STRATEGY,
-        createLocalStrapiDestinationProvider: jest
-          .fn()
-          .mockReturnValue({ name: 'testStrapiDest', type: 'destination', getMetadata: jest.fn() }),
-      },
-    },
-    engine: {
-      ...jest.requireActual('@strapi/data-transfer').engine,
-      DEFAULT_SCHEMA_STRATEGY: actual.engine.DEFAULT_SCHEMA_STRATEGY,
-      DEFAULT_VERSION_STRATEGY: actual.engine.DEFAULT_VERSION_STRATEGY,
-      createTransferEngine,
+  };
+});
+
+jest.mock('../../../strapi', () => {
+  const actual = jest.requireActual('../../../strapi');
+
+  return {
+    ...actual,
+    providers: {
+      ...actual.providers,
+      createLocalStrapiDestinationProvider: jest
+        .fn()
+        .mockReturnValue({ name: 'testStrapiDest', type: 'destination', getMetadata: jest.fn() }),
     },
   };
 });
@@ -109,16 +118,14 @@ describe('Import', () => {
     });
 
     // strapi options
-    expect(
-      mockDataTransfer.strapi.providers.createLocalStrapiDestinationProvider
-    ).toHaveBeenCalledWith(
+    expect(strapiDatatransfer.providers.createLocalStrapiDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
-        strategy: mockDataTransfer.strapi.providers.DEFAULT_CONFLICT_STRATEGY,
+        strategy: strapiDatatransfer.providers.DEFAULT_CONFLICT_STRATEGY,
       })
     );
 
     // file options
-    expect(mockDataTransfer.file.providers.createLocalFileSourceProvider).toHaveBeenCalledWith(
+    expect(fileDatatransfer.providers.createLocalFileSourceProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         file: { path: 'test.tar.gz.enc' },
         encryption: { enabled: options.decrypt },
@@ -127,12 +134,12 @@ describe('Import', () => {
     );
 
     // engine options
-    expect(mockDataTransfer.engine.createTransferEngine).toHaveBeenCalledWith(
+    expect(engineDatatransfer.createTransferEngine).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'testFileSource' }),
       expect.objectContaining({ name: 'testStrapiDest' }),
       expect.objectContaining({
-        schemaStrategy: mockDataTransfer.engine.DEFAULT_SCHEMA_STRATEGY,
-        versionStrategy: mockDataTransfer.engine.DEFAULT_VERSION_STRATEGY,
+        schemaStrategy: engineDatatransfer.DEFAULT_SCHEMA_STRATEGY,
+        versionStrategy: engineDatatransfer.DEFAULT_VERSION_STRATEGY,
       })
     );
   });

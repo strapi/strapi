@@ -73,13 +73,14 @@
     "index.js"
   ],
   "scripts": {
-    "build": "run -T tsc -p tsconfig.build.json",
+    "build": "run -T tsc -p tsconfig.build.json && run copy-files",
     "build:ts": "run build",
     "watch": "run -T tsc -p tsconfig.build.json -w --preserveWatchOutput",
     "clean": "run -T rimraf ./dist",
     "prepublishOnly": "yarn clean && yarn build",
     "postinstall": "node ./dist/utils/postinstall.js",
     "test:unit": "run -T jest",
+    "copy-files": "copyfiles -u 1 -a 'src/**/*.html' 'src/**/*.png'  dist",
     "test:unit:watch": "run -T jest --watch",
     "lint": "run -T eslint ."
   },
@@ -107,6 +108,7 @@
     "cli-table3": "0.6.2",
     "commander": "8.3.0",
     "configstore": "5.0.1",
+    "copyfiles": "2.4.1",
     "debug": "4.3.4",
     "delegates": "1.0.0",
     "dotenv": "14.2.0",

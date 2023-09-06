@@ -328,15 +328,13 @@ class Strapi {
   }
 
   async destroy() {
-    this.assertIsLoaded();
-
     await this.server.destroy();
     await this.runLifecyclesFunctions(LIFECYCLES.DESTROY);
 
     this.eventHub.destroy();
 
     if (_.has(this, 'db')) {
-      await this.db.destroy();
+      await this.db!.destroy();
     }
 
     this.telemetry.destroy();
@@ -643,19 +641,12 @@ class Strapi {
     );
   }
 
-  assertIsLoaded(): asserts this is LoadedStrapi {
-    if (!this.isLoaded) {
-      throw new Error('Strapi is not loaded');
-    }
-  }
-
   /**
    * Binds queries with a specific model
    * @param {string} uid
    */
   query(uid: Common.UID.Schema) {
-    this.assertIsLoaded();
-    return this.db.query(uid);
+    return this.db!.query(uid);
   }
 }
 

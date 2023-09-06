@@ -4,7 +4,7 @@ const _ = require('lodash');
 const roleService = require('../role');
 const { SUPER_ADMIN_CODE } = require('../constants');
 const { create: createPermission, toPermission } = require('../../domain/permission');
-const createEventHub = require('../../../../strapi/dist/services/event-hub');
+const createEventHub = require('../../../../strapi/dist/services/event-hub').default;
 
 describe('Role', () => {
   describe('create', () => {
