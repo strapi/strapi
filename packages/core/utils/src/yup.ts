@@ -8,6 +8,9 @@ import printValue from './print-value';
 
 export * from 'yup';
 
+// @ts-ignore
+export const strapiID = (): InstanceType<typeof StrapiIDSchema> => new StrapiIDSchema();
+
 const isNotNilTest = (value: unknown) => !_.isNil(value);
 
 const isNotNullTest = (value: unknown) => !_.isNull(value);
@@ -98,9 +101,6 @@ export class StrapiIDSchema extends yup.MixedSchema {
     return typeof value === 'string' || (isNumber(value) && isInteger(value) && value >= 0);
   }
 }
-
-// @ts-ignore
-export const strapiID = (): InstanceType<typeof StrapiIDSchema> => new StrapiIDSchema();
 
 declare module 'yup' {
   const strapiID: () => InstanceType<typeof StrapiIDSchema>;

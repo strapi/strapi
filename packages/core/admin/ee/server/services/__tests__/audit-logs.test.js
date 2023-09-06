@@ -4,7 +4,7 @@ const { features } = require('@strapi/strapi/dist/utils/ee');
 const { register } = require('@strapi/provider-audit-logs-local');
 const { scheduleJob } = require('node-schedule');
 const createAuditLogsService = require('../audit-logs');
-const createEventHub = require('../../../../../strapi/lib/services/event-hub');
+const createEventHub = require('../../../../../strapi/dist/services/event-hub').default;
 
 jest.mock('../../../../server/register');
 

@@ -8,12 +8,12 @@ import { merge } from 'lodash/fp';
 
 import { readableBytes, exitWith } from './helpers';
 import { getParseListWithChoices, parseInteger, confirmMessage } from './commander';
-import * as engine from '../engine';
+import * as engineDatatransfer from '../engine';
 import * as strapiDataTransfer from '../strapi';
 
 const {
   errors: { TransferEngineInitializationError },
-} = engine;
+} = engineDatatransfer;
 
 const exitMessageText = (process: string, error = false) => {
   const processCapitalized = process[0].toUpperCase() + process.slice(1);
@@ -48,9 +48,9 @@ const getDefaultExportName = () => {
   return `export_${yyyymmddHHMMSS()}`;
 };
 
-type ResultData = engine.ITransferResults<
-  engine.ISourceProvider,
-  engine.IDestinationProvider
+type ResultData = engineDatatransfer.ITransferResults<
+  engineDatatransfer.ISourceProvider,
+  engineDatatransfer.IDestinationProvider
 >['engine'];
 
 const buildTransferTable = (resultData: ResultData) => {
@@ -65,7 +65,7 @@ const buildTransferTable = (resultData: ResultData) => {
 
   let totalBytes = 0;
   let totalItems = 0;
-  (Object.keys(resultData) as engine.TransferStage[]).forEach((stage) => {
+  (Object.keys(resultData) as engineDatatransfer.TransferStage[]).forEach((stage) => {
     const item = resultData[stage];
 
     if (!item) {
@@ -122,7 +122,7 @@ const abortTransfer = async ({
   engine,
   strapi,
 }: {
-  engine: engine.TransferEngine;
+  engine: engineDatatransfer.TransferEngine;
   strapi: LoadedStrapi;
 }) => {
   try {
@@ -163,7 +163,7 @@ const createStrapiInstance = async (opts: { logLevel?: string } = {}) => {
   }
 };
 
-const transferDataTypes = Object.keys(engine.TransferGroupPresets);
+const transferDataTypes = Object.keys(engineDatatransfer.TransferGroupPresets);
 
 const throttleOption = new Option(
   '--throttle <delay after each entity>',
@@ -208,7 +208,9 @@ const errorColors = {
 } as const;
 
 const formatDiagnostic =
-  (operation: string): Parameters<engine.TransferEngine['diagnostics']['onDiagnostic']>[0] =>
+  (
+    operation: string
+  ): Parameters<engineDatatransfer.TransferEngine['diagnostics']['onDiagnostic']>[0] =>
   ({ details, kind }) => {
     const logger = createLogger(
       configs.createOutputFileConfiguration(`${operation}_error_log_${Date.now()}.log`)
@@ -240,11 +242,11 @@ const formatDiagnostic =
   };
 
 type Loaders = {
-  [key in engine.TransferStage]: ora.Ora;
+  [key in engineDatatransfer.TransferStage]: ora.Ora;
 };
 
 type Data = {
-  [key in engine.TransferStage]?: {
+  [key in engineDatatransfer.TransferStage]?: {
     startTime?: number;
     endTime?: number;
     bytes?: number;
@@ -254,7 +256,7 @@ type Data = {
 
 const loadersFactory = (defaultLoaders: Loaders = {} as Loaders) => {
   const loaders = defaultLoaders;
-  const updateLoader = (stage: engine.TransferStage, data: Data) => {
+  const updateLoader = (stage: engineDatatransfer.TransferStage, data: Data) => {
     if (!(stage in loaders)) {
       createLoader(stage);
     }
@@ -275,12 +277,12 @@ const loadersFactory = (defaultLoaders: Loaders = {} as Loaders) => {
     return loaders[stage];
   };
 
-  const createLoader = (stage: engine.TransferStage) => {
+  const createLoader = (stage: engineDatatransfer.TransferStage) => {
     Object.assign(loaders, { [stage]: ora() });
     return loaders[stage];
   };
 
-  const getLoader = (stage: engine.TransferStage) => {
+  const getLoader = (stage: engineDatatransfer.TransferStage) => {
     return loaders[stage];
   };
 
@@ -294,7 +296,7 @@ const loadersFactory = (defaultLoaders: Loaders = {} as Loaders) => {
 /**
  * Get the telemetry data to be sent for a didDEITSProcess* event from an initialized transfer engine object
  */
-const getTransferTelemetryPayload = (engine: engine.TransferEngine) => {
+const getTransferTelemetryPayload = (engine: engineDatatransfer.TransferEngine) => {
   return {
     eventProperties: {
       source: engine?.sourceProvider?.name,
@@ -307,7 +309,7 @@ const getTransferTelemetryPayload = (engine: engine.TransferEngine) => {
  * Get a transfer engine schema diff handler that confirms with the user before bypassing a schema check
  */
 const getDiffHandler = (
-  engine: engine.TransferEngine,
+  engine: engineDatatransfer.TransferEngine,
   {
     force,
     action,
@@ -317,8 +319,8 @@ const getDiffHandler = (
   }
 ) => {
   return async (
-    context: engine.SchemaDiffHandlerContext,
-    next: (ctx: engine.SchemaDiffHandlerContext) => void
+    context: engineDatatransfer.SchemaDiffHandlerContext,
+    next: (ctx: engineDatatransfer.SchemaDiffHandlerContext) => void
   ) => {
     // if we abort here, we need to actually exit the process because of conflict with inquirer prompt
     setSignalHandler(async () => {
@@ -390,7 +392,7 @@ const getDiffHandler = (
 };
 
 const getAssetsBackupHandler = (
-  engine: engine.TransferEngine,
+  engine: engineDatatransfer.TransferEngine,
   {
     force,
     action,
@@ -400,8 +402,8 @@ const getAssetsBackupHandler = (
   }
 ) => {
   return async (
-    context: engine.ErrorHandlerContext,
-    next: (ctx: engine.ErrorHandlerContext) => void
+    context: engineDatatransfer.ErrorHandlerContext,
+    next: (ctx: engineDatatransfer.ErrorHandlerContext) => void
   ) => {
     // if we abort here, we need to actually exit the process because of conflict with inquirer prompt
     setSignalHandler(async () => {
@@ -430,8 +432,8 @@ const getAssetsBackupHandler = (
 };
 
 const shouldSkipStage = (
-  opts: Partial<engine.ITransferEngineOptions>,
-  dataKind: engine.TransferFilterPreset
+  opts: Partial<engineDatatransfer.ITransferEngineOptions>,
+  dataKind: engineDatatransfer.TransferFilterPreset
 ) => {
   if (opts.exclude?.includes(dataKind)) {
     return true;
@@ -448,7 +450,7 @@ type RestoreConfig = NonNullable<
 >;
 
 // Based on exclude/only from options, create the restore object to match
-const parseRestoreFromOptions = (opts: Partial<engine.ITransferEngineOptions>) => {
+const parseRestoreFromOptions = (opts: Partial<engineDatatransfer.ITransferEngineOptions>) => {
   const entitiesOptions: RestoreConfig['entities'] = {
     exclude: DEFAULT_IGNORED_CONTENT_TYPES,
     include: undefined,
