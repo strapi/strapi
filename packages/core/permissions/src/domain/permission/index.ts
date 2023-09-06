@@ -4,11 +4,6 @@ const PERMISSION_FIELDS = ['action', 'subject', 'properties', 'conditions'] as c
 
 const sanitizePermissionFields = _.pick(PERMISSION_FIELDS);
 
-export interface ParametrizedAction {
-  name: string;
-  params: Record<string, unknown>;
-}
-
 export interface Permission {
   action: string;
   actionParameters?: Record<string, unknown>;

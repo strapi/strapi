@@ -3,7 +3,6 @@ import qs from 'qs';
 import { AbilityBuilder, Ability, Subject } from '@casl/ability';
 import { pick, isNil, isObject } from 'lodash/fp';
 
-
 export interface ParametrizedAction {
   name: string;
   params: Record<string, unknown>;
@@ -60,7 +59,7 @@ export const caslAbilityBuilder = (): CustomAbilityBuilder => {
       const { action, subject, properties = {}, condition } = permission;
       const { fields } = properties;
 
-      const caslAction = (typeof action === "string") ? action : buildParametrizedAction(action);
+      const caslAction = typeof action === 'string' ? action : buildParametrizedAction(action);
 
       return can(
         caslAction,
@@ -80,7 +79,7 @@ export const caslAbilityBuilder = (): CustomAbilityBuilder => {
       function decorateCan(originalCan: Ability['can']) {
         return function (...args: Parameters<Ability['can']>) {
           const [action, ...rest] = args;
-          const caslAction = (typeof action === "string") ? action : buildParametrizedAction(action);
+          const caslAction = typeof action === 'string' ? action : buildParametrizedAction(action);
 
           // Call the original `can` method
           return originalCan.apply(ability, [caslAction, ...rest]);
@@ -89,7 +88,6 @@ export const caslAbilityBuilder = (): CustomAbilityBuilder => {
 
       ability.can = decorateCan(ability.can);
       return ability;
-
     },
 
     ...rest,
