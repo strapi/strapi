@@ -7073,7 +7073,7 @@ __metadata:
     typescript: 5.1.3
     ws: 8.13.0
   peerDependencies:
-    "@strapi/strapi": 4.12.4
+    "@strapi/strapi": ^4.12.4
   languageName: unknown
   linkType: soft
 
