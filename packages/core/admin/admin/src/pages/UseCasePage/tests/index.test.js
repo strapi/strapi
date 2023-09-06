@@ -437,7 +437,8 @@ describe('Admin | UseCasePage', () => {
         color: #666687;
       }
 
-      .c30[aria-disabled='true'] svg > g,.c30[aria-disabled='true'] svg path {
+      .c30[aria-disabled='true'] svg > g,
+      .c30[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -450,7 +451,8 @@ describe('Admin | UseCasePage', () => {
         color: #666687;
       }
 
-      .c30[aria-disabled='true']:active svg > g,.c30[aria-disabled='true']:active svg path {
+      .c30[aria-disabled='true']:active svg > g,
+      .c30[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 

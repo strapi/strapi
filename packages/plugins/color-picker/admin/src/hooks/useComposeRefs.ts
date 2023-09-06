@@ -1,14 +1,16 @@
 import * as React from 'react';
 
+type PossibleRef<T> = React.Ref<T> | undefined;
+
 /**
  * Set a given ref to a given value
  * This utility takes care of different types of refs: callback refs and RefObject(s)
  */
-function setRef(ref, value) {
+function setRef<T>(ref: PossibleRef<T>, value: T) {
   if (typeof ref === 'function') {
     ref(value);
   } else if (ref !== null && ref !== undefined) {
-    ref.current = value;
+    (ref as React.MutableRefObject<T>).current = value;
   }
 }
 
@@ -16,8 +18,8 @@ function setRef(ref, value) {
  * A utility to compose multiple refs together
  * Accepts callback refs and RefObject(s)
  */
-function composeRefs(...refs) {
-  return (node) => refs.forEach((ref) => setRef(ref, node));
+function composeRefs<T>(...refs: PossibleRef<T>[]) {
+  return (node: T) => refs.forEach((ref) => setRef(ref, node));
 }
 
 /**
@@ -40,7 +42,7 @@ function composeRefs(...refs) {
  * }
  * ```
  */
-function useComposedRefs(...refs) {
+function useComposedRefs<T>(...refs: PossibleRef<T>[]) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   return React.useCallback(composeRefs(...refs), refs);
 }

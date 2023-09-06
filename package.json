@@ -57,6 +57,8 @@
     "test:front:ce": "cross-env IS_EE=false run test:front",
     "test:front:watch:ce": "cross-env IS_EE=false run test:front --watch",
     "test:front:update:ce": "yarn test:front:ce -u",
+    "test:ts": "yarn test:ts:front",
+    "test:ts:front": "nx run-many --target=test:ts:front --nx-ignore-cycles",
     "test:unit:all": "nx run-many --target=test:unit --nx-ignore-cycles",
     "test:unit": "jest --config jest.config.js",
     "test:unit:watch": "run test:unit --watch",
