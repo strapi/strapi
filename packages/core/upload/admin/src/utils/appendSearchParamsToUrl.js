@@ -6,35 +6,30 @@
  * @returns {String} A string representing the URL with the search params appended
  */
 const appendSearchParamsToUrl = ({ url, params }) => {
-  if (
-    url === undefined ||
-    params === undefined ||
-    typeof params !== 'object' ||
-    Object.entries(params).length === 0
-  ) {
+  if (url === undefined || params === undefined || typeof params !== 'object') {
     return url;
   }
 
-  const placeholderUrl = 'https://placeholder.com';
-  let didUsePlaceholderUrl = false;
-  let urlObj;
-  try {
-    urlObj = new URL(url);
-  } catch (e) {
-    urlObj = new URL(`${placeholderUrl}${url}`);
-    didUsePlaceholderUrl = true;
+  const filteredParams = Object.fromEntries(
+    Object.entries(params).filter((entry) => entry[1] !== undefined)
+  );
+
+  if (Object.entries(filteredParams).length === 0) return url;
+
+  if (url.startsWith('/')) {
+    // relative url
+    const searchParams = new URLSearchParams(filteredParams).toString();
+
+    return `${url}${url.includes('?') ? '&' : '?'}${searchParams}`;
   }
 
-  const urlParams = urlObj.searchParams;
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined) {
-      urlParams.append(key, value);
-    }
+  // absolute url
+  const urlObj = new URL(url);
+  Object.entries(filteredParams).forEach(([key, value]) => {
+    urlObj.searchParams.append(key, value);
   });
 
-  const result = urlObj.toString();
-
-  return didUsePlaceholderUrl ? result.replace(placeholderUrl, '') : result;
+  return urlObj.toString();
 };
 
 export { appendSearchParamsToUrl };
