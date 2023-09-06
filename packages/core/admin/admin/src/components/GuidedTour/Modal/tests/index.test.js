@@ -114,8 +114,6 @@ describe('<GuidedTourModal />', () => {
         border-radius: 4px;
         border-color: #dcdce4;
         border: 1px solid #dcdce4;
-        width: 2rem;
-        height: 2rem;
         cursor: pointer;
       }
 
@@ -449,19 +447,22 @@ describe('<GuidedTourModal />', () => {
         fill: #32324d;
       }
 
-      .c9 svg > g,
+      .c9 {
+        border-color: #dcdce4;
+        height: 2rem;
+        width: 2rem;
+      }
+
+      .c9 svg g,
       .c9 svg path {
         fill: #8e8ea9;
       }
 
-      .c9:hover svg > g,
-      .c9:hover svg path {
+      .c9:hover svg g,
+      .c9:focus svg g,
+      .c9:hover svg path,
+      .c9:focus svg path {
         fill: #666687;
-      }
-
-      .c9:active svg > g,
-      .c9:active svg path {
-        fill: #a5a5ba;
       }
 
       .c9[aria-disabled='true'] svg path {
