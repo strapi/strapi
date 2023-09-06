@@ -1,12 +1,9 @@
 import path from 'path';
-import { fromFile, t } from 'ts-zen';
+import { fromFile, t, AssertTypeSelector } from 'ts-zen';
 
 const STRING_UTILS_DTS_PATH = path.join(__dirname, '..', 'definitions', 'utils', 'string.d.ts');
 
-/**
- * @type {import('ts-zen').AssertTypeSelector}
- */
-let assertType: any;
+let assertType: AssertTypeSelector;
 
 describe('Utils.String', () => {
   beforeAll(() => {
