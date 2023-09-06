@@ -1,5 +1,3 @@
-// TODO @soupette we need to refactor this file
-
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
@@ -35,10 +33,8 @@ interface StorageItems {
   STRAPI_UPDATE_NOTIF: boolean | null;
   STRAPI_UPLOAD_MODAL_VIEW: 0 | 1 | null; // grid or list view
   STRAPI_UPLOAD_LIBRARY_VIEW: 0 | 1 | null; // grid or list view
-  // FIXME: No idea what this is or what its value is
-  videos: string | null;
-  // FIXME: No idea what this is or what its value is
-  onboarding: string | null;
+  videos: unknown;
+  onboarding: unknown;
 }
 
 type StorageItemValues = StorageItems[keyof StorageItems];
@@ -82,7 +78,7 @@ const auth = {
       localStorage.setItem('STRAPI_UPDATE_NOTIF', stringify(strapiUpdateNotification));
 
       if (onboarding) {
-        localStorage.setItem('onboarding', onboarding);
+        localStorage.setItem('onboarding', stringify(onboarding));
       }
 
       if (localeLang) {
@@ -107,15 +103,27 @@ const auth = {
     }
   },
 
-  get<T extends keyof StorageItems>(key: T): StorageItems[T] | null {
-    const localStorageItem = localStorage && localStorage.getItem(key);
+  get<T extends keyof StorageItems>(key: T): StorageItems[T] | string | null {
+    const localStorageItem = localStorage.getItem(key);
     if (localStorageItem) {
-      return parse(localStorageItem);
+      try {
+        const parsedItem = parse(localStorageItem);
+        return parsedItem;
+      } catch (error) {
+        // Failed to parse return the string value
+        return localStorageItem;
+      }
     }
 
-    const sessionStorageItem = sessionStorage && sessionStorage.getItem(key);
+    const sessionStorageItem = sessionStorage.getItem(key);
     if (sessionStorageItem) {
-      return parse(sessionStorageItem);
+      try {
+        const parsedItem = parse(sessionStorageItem);
+        return parsedItem;
+      } catch (error) {
+        // Failed to parse return the string value
+        return sessionStorageItem;
+      }
     }
 
     return null;
