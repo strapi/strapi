@@ -11,7 +11,7 @@ interface CustomFieldServerOptions {
   /**
    * The name of the plugin creating the custom field
    */
-  plugin?: string;
+  pluginId?: string;
 
   /**
    * The existing Strapi data type the custom field uses

@@ -13,7 +13,7 @@ const browserslistToEsbuild = require('browserslist-to-esbuild');
 
 const alias = require('./webpack.alias');
 const getClientEnvironment = require('./env');
-const { createPluginsExcludePath } = require('./utils/create-plugins-exclude-path');
+const { createPluginsExcludePath } = require('./utils/plugins');
 
 module.exports = ({
   dest,
@@ -85,7 +85,7 @@ module.exports = ({
     module: {
       rules: [
         {
-          test: /\.tsx?$/,
+          test: /\.(ts|tsx)$/,
           loader: require.resolve('esbuild-loader'),
           exclude: excludeRegex,
           options: {

@@ -124,7 +124,9 @@ export function reducer(state = initialState, action) {
         const { currentWorkflow } = state.clientState;
         const { id } = payload;
 
-        const sourceStageIndex = currentWorkflow.data.stages.findIndex((stage) => stage.id === id);
+        const sourceStageIndex = currentWorkflow.data.stages.findIndex(
+          (stage) => (stage?.id ?? stage?.__temp_key__) === id
+        );
         const sourceStage = currentWorkflow.data.stages[sourceStageIndex];
 
         draft.clientState.currentWorkflow.data.stages.splice(sourceStageIndex + 1, 0, {
