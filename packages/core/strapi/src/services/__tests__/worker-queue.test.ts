@@ -8,7 +8,7 @@ describe('WorkerQueue', () => {
     const q = new WorkerQueue({
       logger: console.log.bind(console),
       concurrency: 1,
-    });
+    } as any);
     q.subscribe(fn);
 
     q.enqueue(input);
@@ -28,7 +28,7 @@ describe('WorkerQueue', () => {
     const q = new WorkerQueue({
       logger: console.log.bind(console),
       concurrency: 1,
-    });
+    } as any);
     q.subscribe(fn);
 
     q.enqueue(input);
