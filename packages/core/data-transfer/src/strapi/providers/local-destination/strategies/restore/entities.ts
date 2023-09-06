@@ -1,5 +1,5 @@
 import { Writable } from 'stream';
-import type { Common, Schema } from '@strapi/strapi';
+import type { LoadedStrapi, Common, Schema } from '@strapi/strapi';
 
 import { get, last } from 'lodash/fp';
 
@@ -9,7 +9,7 @@ import { json } from '../../../../../utils';
 import * as queries from '../../../../queries';
 
 interface IEntitiesRestoreStreamOptions {
-  strapi: Strapi.Loaded;
+  strapi: LoadedStrapi;
   updateMappingTable<TSchemaUID extends Common.UID.Schema>(
     type: TSchemaUID,
     oldID: number,

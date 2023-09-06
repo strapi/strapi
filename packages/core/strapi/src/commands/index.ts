@@ -10,10 +10,10 @@ import consoleCommand from './actions/console/command';
 import listContentTypes from './actions/content-types/list/command';
 import listControllers from './actions/controllers/list/command';
 import developCommand from './actions/develop/command';
-import exportCommand from './actions/export/command';
+// import exportCommand from './actions/export/command';
 import generateCommand from './actions/generate/command';
 import listHooks from './actions/hooks/list/command';
-import importCommand from './actions/import/command';
+// import importCommand from './actions/import/command';
 import installCommand from './actions/install/command';
 import listMiddlewares from './actions/middlewares/list/command';
 import newCommand from './actions/new/command';
@@ -25,7 +25,7 @@ import startCommand from './actions/start/command';
 import disableTelemetry from './actions/telemetry/disable/command';
 import enableTelemetry from './actions/telemetry/enable/command';
 import generateTemplates from './actions/templates/generate/command';
-import transferCommand from './actions/transfer/command';
+// import transferCommand from './actions/transfer/command';
 import generateTsTypes from './actions/ts/generate-types/command';
 import uninstallCommand from './actions/uninstall/command';
 import versionCommand from './actions/version/command';
@@ -42,10 +42,8 @@ const strapiCommands = {
   listContentTypes,
   listControllers,
   developCommand,
-  exportCommand,
   generateCommand,
   listHooks,
-  importCommand,
   installCommand,
   listMiddlewares,
   newCommand,
@@ -57,7 +55,6 @@ const strapiCommands = {
   disableTelemetry,
   enableTelemetry,
   generateTemplates,
-  transferCommand,
   generateTsTypes,
   uninstallCommand,
   versionCommand,
@@ -65,6 +62,15 @@ const strapiCommands = {
 } as const;
 
 const buildStrapiCommand = (argv: string[], command = new Command()) => {
+  try {
+    // NOTE: this is a hack to allow loading dts commands without make dts a dependency of strapi and thus avoiding circular dependencies
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const dtsCommands = require(require.resolve('@strapi/data-transfer')).commands;
+    Object.assign(strapiCommands, dtsCommands);
+  } catch (e) {
+    // noop
+  }
+
   // Initial program setup
   command.storeOptionsAsProperties(false).allowUnknownOption(true);
 

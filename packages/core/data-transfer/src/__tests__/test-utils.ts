@@ -1,4 +1,5 @@
 import { Readable } from 'stream';
+import type { LoadedStrapi } from '@strapi/strapi';
 import type { ITransferEngine, ISourceProvider, IDestinationProvider } from '../../types';
 
 /**
@@ -24,13 +25,13 @@ export const collect = <T = unknown>(stream: Readable): Promise<T[]> => {
 export const getStrapiFactory =
   <
     T extends {
-      [key in keyof Partial<Strapi.Loaded>]: unknown;
+      [key in keyof Partial<LoadedStrapi>]: unknown;
     }
   >(
     properties?: T
   ) =>
   (additionalProperties?: Partial<T>) => {
-    return { ...properties, ...additionalProperties } as Strapi.Loaded;
+    return { ...properties, ...additionalProperties } as LoadedStrapi;
   };
 
 /**
@@ -105,7 +106,7 @@ export const destinationStages = [
 /**
  * Update the global store with the given strapi value
  */
-export const setGlobalStrapi = (strapi: Strapi.Loaded): void => {
+export const setGlobalStrapi = (strapi: LoadedStrapi): void => {
   (global as unknown as Global).strapi = strapi;
 };
 

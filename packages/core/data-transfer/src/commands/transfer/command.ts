@@ -1,19 +1,14 @@
 import inquirer from 'inquirer';
-import { Option } from 'commander';
-import { getCommanderConfirmMessage, forceOption, parseURL } from '../../utils/commander';
-import { getLocalScript, exitWith, assertUrlHasProtocol, ifOptions } from '../../utils/helpers';
-import {
-  excludeOption,
-  onlyOption,
-  throttleOption,
-  validateExcludeOnly,
-} from '../../utils/data-transfer';
-import type { StrapiCommand } from '../../types';
+import { Command, Option } from 'commander';
+import { getCommanderConfirmMessage, forceOption, parseURL } from '../commander';
+import { exitWith, assertUrlHasProtocol, ifOptions } from '../helpers';
+import { excludeOption, onlyOption, throttleOption, validateExcludeOnly } from '../data-transfer';
+import action from './action';
 
 /**
  * `$ strapi transfer`
  */
-const command: StrapiCommand = ({ command }) => {
+const command = ({ command }: { command: Command }) => {
   command
     .command('transfer')
     .description('Transfer data from one source to another')
@@ -104,7 +99,7 @@ const command: StrapiCommand = ({ command }) => {
         }
       )
     )
-    .action(getLocalScript('transfer'));
+    .action(action);
 };
 
 export default command;

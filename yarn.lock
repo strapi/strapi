@@ -7055,6 +7055,7 @@ __metadata:
   resolution: "@strapi/data-transfer@workspace:packages/core/data-transfer"
   dependencies:
     "@strapi/logger": 4.12.7
+    "@strapi/utils": 4.12.7
     "@types/fs-extra": 9.0.13
     "@types/jest": 29.5.2
     "@types/koa": "*"
@@ -7067,10 +7068,15 @@ __metadata:
     "@types/tar-stream": 2.2.2
     "@types/ws": ^8.5.4
     chalk: 4.1.2
+    cli-table3: 0.6.2
+    commander: 8.3.0
     fs-extra: 10.0.0
+    inquirer: 8.2.5
     knex: 2.5.0
     koa: 2.13.4
     lodash: 4.17.21
+    ora: 5.4.1
+    resolve-cwd: 3.0.0
     rimraf: 3.0.2
     semver: 7.5.4
     stream-chain: 2.2.5
@@ -7080,7 +7086,7 @@ __metadata:
     typescript: 5.1.3
     ws: 8.13.0
   peerDependencies:
-    "@strapi/strapi": 4.12.4
+    "@strapi/strapi": 4.12.7
   languageName: unknown
   linkType: soft
 

@@ -1,11 +1,12 @@
 import { Writable } from 'stream';
+import type { LoadedStrapi } from '@strapi/strapi';
 import { ProviderTransferError } from '../../../../../errors/providers';
 import { ILink, Transaction } from '../../../../../../types';
 import { createLinkQuery } from '../../../../queries/link';
 
 export const createLinksWriteStream = (
   mapID: (uid: string, id: number) => number | undefined,
-  strapi: Strapi.Loaded,
+  strapi: LoadedStrapi,
   transaction?: Transaction
 ) => {
   return new Writable({

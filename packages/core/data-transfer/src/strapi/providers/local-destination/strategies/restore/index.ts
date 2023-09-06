@@ -1,4 +1,4 @@
-import type { Schema } from '@strapi/strapi';
+import type { LoadedStrapi, Schema } from '@strapi/strapi';
 import { ProviderTransferError } from '../../../../../errors/providers';
 import * as queries from '../../../../queries';
 
@@ -21,7 +21,7 @@ interface IDeleteResults {
   aggregate: { [uid: string]: { count: number } };
 }
 
-export const deleteRecords = async (strapi: Strapi.Loaded, options: IRestoreOptions) => {
+export const deleteRecords = async (strapi: LoadedStrapi, options: IRestoreOptions) => {
   const entities = await deleteEntitiesRecords(strapi, options);
   const configuration = await deleteConfigurationRecords(strapi, options);
 
@@ -33,7 +33,7 @@ export const deleteRecords = async (strapi: Strapi.Loaded, options: IRestoreOpti
 };
 
 const deleteEntitiesRecords = async (
-  strapi: Strapi.Loaded,
+  strapi: LoadedStrapi,
   options: IRestoreOptions = {}
 ): Promise<IDeleteResults> => {
   const { entities } = options;
@@ -80,7 +80,7 @@ const deleteEntitiesRecords = async (
 };
 
 const deleteConfigurationRecords = async (
-  strapi: Strapi.Loaded,
+  strapi: LoadedStrapi,
   options: IRestoreOptions = {}
 ): Promise<IDeleteResults> => {
   const { coreStore = true, webhook = true } = options?.configuration ?? {};

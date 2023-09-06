@@ -1,8 +1,7 @@
-import * as dataTransfer from '@strapi/data-transfer';
-
 import { isObject, isString, isFinite, toNumber } from 'lodash/fp';
 import fs from 'fs-extra';
 import chalk from 'chalk';
+import type { LoadedStrapi } from '@strapi/strapi';
 
 import {
   getDefaultExportName,
@@ -15,18 +14,18 @@ import {
   abortTransfer,
   getTransferTelemetryPayload,
   setSignalHandler,
-} from '../../utils/data-transfer';
-import { exitWith } from '../../utils/helpers';
+} from '../data-transfer';
+import { exitWith } from '../helpers';
+import { TransferGroupFilter, createTransferEngine, ITransferResults, errors } from '../../engine';
+import * as strapiDatatransfer from '../../strapi';
+import * as file from '../../file';
 
 const {
-  file: {
-    providers: { createLocalFileDestinationProvider },
-  },
-  strapi: {
-    providers: { createLocalStrapiSourceProvider },
-  },
-  engine: { createTransferEngine },
-} = dataTransfer;
+  providers: { createLocalFileDestinationProvider },
+} = file;
+const {
+  providers: { createLocalStrapiSourceProvider },
+} = strapiDatatransfer;
 
 const BYTES_IN_MB = 1024 * 1024;
 
@@ -35,8 +34,8 @@ interface CmdOptions {
   encrypt?: boolean;
   key?: string;
   compress?: boolean;
-  only?: (keyof dataTransfer.engine.TransferGroupFilter)[];
-  exclude?: (keyof dataTransfer.engine.TransferGroupFilter)[];
+  only?: (keyof TransferGroupFilter)[];
+  exclude?: (keyof TransferGroupFilter)[];
   throttle?: number;
   maxSizeJsonl?: number;
 }
@@ -110,7 +109,7 @@ export default async (opts: CmdOptions) => {
     await strapi.telemetry.send('didDEITSProcessStart', getTransferTelemetryPayload(engine));
   });
 
-  let results: dataTransfer.engine.ITransferResults<typeof source, typeof destination>;
+  let results: ITransferResults<typeof source, typeof destination>;
   let outFile: string;
   try {
     // Abort transfer if user interrupts process
@@ -120,9 +119,7 @@ export default async (opts: CmdOptions) => {
     outFile = results.destination?.file?.path ?? '';
     const outFileExists = await fs.pathExists(outFile);
     if (!outFileExists) {
-      throw new dataTransfer.engine.errors.TransferEngineTransferError(
-        `Export file not created "${outFile}"`
-      );
+      throw new errors.TransferEngineTransferError(`Export file not created "${outFile}"`);
     }
 
     // Note: we need to await telemetry or else the process ends before it is sent
@@ -146,7 +143,7 @@ export default async (opts: CmdOptions) => {
 /**
  * It creates a local strapi destination provider
  */
-const createSourceProvider = (strapi: Strapi.Loaded) => {
+const createSourceProvider = (strapi: LoadedStrapi) => {
   return createLocalStrapiSourceProvider({
     async getStrapi() {
       return strapi;

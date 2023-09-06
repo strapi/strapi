@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import { Writable, PassThrough } from 'stream';
+import type { LoadedStrapi } from '@strapi/strapi';
 
 import type { TransferFlow, Step } from '../flows';
 import type { TransferStage, IAsset, Protocol } from '../../../../types';
@@ -455,7 +456,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
     this.provider = createLocalStrapiDestinationProvider({
       ...params.options,
       autoDestroy: false,
-      getStrapi: () => strapi as Strapi.Loaded,
+      getStrapi: () => strapi as LoadedStrapi,
     });
 
     return { transferID: this.transferID };

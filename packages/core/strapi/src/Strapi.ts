@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-namespace */
+/* eslint-disable vars-on-top */
+/* eslint-disable no-var */
 import path from 'path';
 import _ from 'lodash';
 import { isFunction } from 'lodash/fp';
@@ -49,7 +52,6 @@ import getNumberOfDynamicZones from './services/utils/dynamic-zones';
 import sanitizersRegistry from './core/registries/sanitizers';
 import validatorsRegistry from './core/registries/validators';
 import convertCustomFieldType from './utils/convert-custom-field-type';
-import * as componentsService from './services/entity-service/components';
 
 // TODO: move somewhere else
 import * as draftAndPublishSync from './migrations/draft-publish';
@@ -116,8 +118,6 @@ const reloader = (strapi: Strapi) => {
   return reload;
 };
 
-/** @implements {import('@strapi/strapi').Strapi} */
-
 export type LoadedStrapi = Required<Strapi>;
 
 class Strapi {
@@ -144,8 +144,6 @@ class Strapi {
   entityValidator?: EntityValidator;
 
   entityService?: EntityService;
-
-  componentsService: typeof componentsService;
 
   telemetry: ReturnType<typeof createTelemetry>;
 
@@ -219,7 +217,6 @@ class Strapi {
     this.requestContext = requestContext;
     this.customFields = createCustomFields(this);
     this.fetch = createStrapiFetch(this);
-    this.componentsService = componentsService;
 
     createUpdateNotifier(this).notify();
 
@@ -612,22 +609,22 @@ class Strapi {
   }
 
   async startWebhooks() {
-    this.assertIsLoaded();
+    const webhooks = await this.webhookStore?.findWebhooks();
+    if (!webhooks) {
+      return;
+    }
 
-    const webhooks = await this.webhookStore.findWebhooks();
     for (const webhook of webhooks) {
-      this.webhookRunner.add(webhook);
+      this.webhookRunner?.add(webhook);
     }
   }
 
   async runLifecyclesFunctions(lifecycleName: 'register' | 'bootstrap' | 'destroy') {
-    this.assertIsLoaded();
-
     // plugins
     await this.container.get('modules')[lifecycleName]();
 
     // admin
-    const adminLifecycleFunction = this.admin[lifecycleName];
+    const adminLifecycleFunction = this.admin?.[lifecycleName];
     if (isFunction(adminLifecycleFunction)) {
       await adminLifecycleFunction({ strapi: this });
     }
@@ -677,12 +674,11 @@ interface Init {
 
 const initFn = (options: StrapiOptions = {}) => {
   const strapi = new Strapi(options);
-  global.strapi = strapi;
+  global.strapi = strapi as any;
   return strapi;
 };
 
 const init: Init = Object.assign(initFn, { factories, compile });
 
 export default init;
-
 export { Strapi };

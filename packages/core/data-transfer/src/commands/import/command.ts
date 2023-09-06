@@ -1,20 +1,15 @@
 import path from 'path';
-import { Option } from 'commander';
+import { Command, Option } from 'commander';
 import inquirer from 'inquirer';
-import {
-  excludeOption,
-  onlyOption,
-  throttleOption,
-  validateExcludeOnly,
-} from '../../utils/data-transfer';
-import { getCommanderConfirmMessage, forceOption } from '../../utils/commander';
-import { getLocalScript, exitWith } from '../../utils/helpers';
-import type { StrapiCommand } from '../../types';
+import { excludeOption, onlyOption, throttleOption, validateExcludeOnly } from '../data-transfer';
+import { getCommanderConfirmMessage, forceOption } from '../commander';
+import { exitWith } from '../helpers';
+import action from './action';
 
 /**
  * `$ strapi import`
  */
-const command: StrapiCommand = ({ command }) => {
+const command = ({ command }: { command: Command }) => {
   command
     .command('import')
     .description('Import data from file to Strapi')
@@ -91,7 +86,7 @@ const command: StrapiCommand = ({ command }) => {
         { failMessage: 'Import process aborted' }
       )
     )
-    .action(getLocalScript('import'));
+    .action(action);
 };
 
 export default command;

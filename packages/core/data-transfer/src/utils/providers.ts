@@ -1,9 +1,11 @@
+import type { LoadedStrapi } from '@strapi/strapi';
+
 import { ProviderInitializationError } from '../errors/providers';
 
 export type ValidStrapiAssertion = (
   strapi: unknown,
   msg?: string
-) => asserts strapi is Strapi.Loaded;
+) => asserts strapi is LoadedStrapi;
 
 export const assertValidStrapi: ValidStrapiAssertion = (strapi?: unknown, msg = '') => {
   if (!strapi) {

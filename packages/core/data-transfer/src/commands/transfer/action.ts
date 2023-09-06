@@ -1,6 +1,6 @@
-import * as dataTransfer from '@strapi/data-transfer';
-
 import { isObject } from 'lodash/fp';
+import * as engine from '../../engine';
+import * as strapiDatatransfer from '../../strapi';
 
 import {
   buildTransferTable,
@@ -15,28 +15,26 @@ import {
   getDiffHandler,
   getAssetsBackupHandler,
   parseRestoreFromOptions,
-} from '../../utils/data-transfer';
-import { exitWith } from '../../utils/helpers';
+} from '../data-transfer';
+import { exitWith } from '../helpers';
 
+const { createTransferEngine } = engine;
 const {
-  engine: { createTransferEngine },
-  strapi: {
-    providers: {
-      createRemoteStrapiDestinationProvider,
-      createLocalStrapiSourceProvider,
-      createLocalStrapiDestinationProvider,
-      createRemoteStrapiSourceProvider,
-    },
+  providers: {
+    createRemoteStrapiDestinationProvider,
+    createLocalStrapiSourceProvider,
+    createLocalStrapiDestinationProvider,
+    createRemoteStrapiSourceProvider,
   },
-} = dataTransfer;
+} = strapiDatatransfer;
 
 interface CmdOptions {
   from?: URL;
   fromToken: string;
   to: URL;
   toToken: string;
-  only?: (keyof dataTransfer.engine.TransferGroupFilter)[];
-  exclude?: (keyof dataTransfer.engine.TransferGroupFilter)[];
+  only?: (keyof engine.TransferGroupFilter)[];
+  exclude?: (keyof engine.TransferGroupFilter)[];
   throttle?: number;
   force?: boolean;
 }

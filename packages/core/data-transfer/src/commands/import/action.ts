@@ -1,5 +1,4 @@
-import * as dataTransfer from '@strapi/data-transfer';
-
+import type { LoadedStrapi } from '@strapi/strapi';
 import { isObject } from 'lodash/fp';
 
 import {
@@ -14,18 +13,21 @@ import {
   setSignalHandler,
   getDiffHandler,
   parseRestoreFromOptions,
-} from '../../utils/data-transfer';
-import { exitWith } from '../../utils/helpers';
+} from '../data-transfer';
+import { exitWith } from '../helpers';
+import * as engine from '../../engine';
+import * as strapiDatatransfer from '../../strapi';
+import * as file from '../../file';
 
 const {
-  file: {
-    providers: { createLocalFileSourceProvider },
-  },
-  strapi: {
-    providers: { createLocalStrapiDestinationProvider, DEFAULT_CONFLICT_STRATEGY },
-  },
-  engine: { createTransferEngine, DEFAULT_VERSION_STRATEGY, DEFAULT_SCHEMA_STRATEGY },
-} = dataTransfer;
+  providers: { createLocalFileSourceProvider },
+} = file;
+
+const {
+  providers: { createLocalStrapiDestinationProvider, DEFAULT_CONFLICT_STRATEGY },
+} = strapiDatatransfer;
+
+const { createTransferEngine, DEFAULT_VERSION_STRATEGY, DEFAULT_SCHEMA_STRATEGY } = engine;
 
 interface CmdOptions {
   file?: string;
@@ -34,8 +36,8 @@ interface CmdOptions {
   key?: string;
   conflictStrategy?: 'restore';
   force?: boolean;
-  only?: (keyof dataTransfer.engine.TransferGroupFilter)[];
-  exclude?: (keyof dataTransfer.engine.TransferGroupFilter)[];
+  only?: (keyof engine.TransferGroupFilter)[];
+  exclude?: (keyof engine.TransferGroupFilter)[];
   throttle?: number;
 }
 
@@ -133,10 +135,10 @@ export default async (opts: CmdOptions) => {
     );
   });
 
-  let results: dataTransfer.engine.ITransferResults<typeof source, typeof destination>;
+  let results: engine.ITransferResults<typeof source, typeof destination>;
   try {
     // Abort transfer if user interrupts process
-    setSignalHandler(() => abortTransfer({ engine, strapi: strapi as Strapi.Loaded }));
+    setSignalHandler(() => abortTransfer({ engine, strapi: strapi as LoadedStrapi }));
 
     results = await engine.transfer();
 
@@ -170,7 +172,7 @@ const getLocalFileSourceOptions = (opts: {
   decrypt?: boolean;
   key?: string;
 }) => {
-  const options: dataTransfer.file.providers.ILocalFileSourceProviderOptions = {
+  const options: file.providers.ILocalFileSourceProviderOptions = {
     file: { path: opts.file ?? '' },
     compression: { enabled: !!opts.decompress },
     encryption: { enabled: !!opts.decrypt, key: opts.key },

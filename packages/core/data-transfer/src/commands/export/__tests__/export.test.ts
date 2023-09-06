@@ -1,14 +1,14 @@
-import * as mockDataTransfer from '@strapi/data-transfer';
-import { expectExit } from '../../../__tests__/commands.test.utils';
 import exportAction from '../action';
-import * as mockUtils from '../../../utils/data-transfer';
+import * as mockUtils from '../../data-transfer';
+import * as mockDataTransfer from '../../..';
+import { expectExit } from '../../__tests__/commands.test.utils';
 
 jest.mock('fs-extra', () => ({
   pathExists: jest.fn(() => Promise.resolve(true)),
 }));
 const defaultFileName = 'defaultFilename';
 jest.mock(
-  '../../../utils/data-transfer',
+  '../../data-transfer',
   () => {
     return {
       getTransferTelemetryPayload: jest.fn().mockReturnValue({}),
@@ -37,7 +37,7 @@ jest.mock(
   { virtual: true }
 );
 
-jest.mock('@strapi/data-transfer', () => {
+jest.mock('../../..', () => {
   return {
     file: {
       providers: {
@@ -50,7 +50,7 @@ jest.mock('@strapi/data-transfer', () => {
       },
     },
     engine: {
-      ...jest.requireActual('@strapi/data-transfer').engine,
+      ...jest.requireActual('../../..').engine,
       errors: {},
       createTransferEngine() {
         return {

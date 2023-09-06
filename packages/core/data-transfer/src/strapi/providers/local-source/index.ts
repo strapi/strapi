@@ -1,5 +1,6 @@
 import { Readable } from 'stream';
 import { chain } from 'stream-chain';
+import type { LoadedStrapi } from '@strapi/strapi';
 
 import type { IMetadata, ISourceProvider, ProviderType } from '../../../../types';
 import { createEntitiesStream, createEntitiesTransformStream } from './entities';
@@ -10,7 +11,7 @@ import * as utils from '../../../utils';
 import { assertValidStrapi } from '../../../utils/providers';
 
 export interface ILocalStrapiSourceProviderOptions {
-  getStrapi(): Strapi.Loaded | Promise<Strapi.Loaded>; // return an initialized instance of Strapi
+  getStrapi(): LoadedStrapi | Promise<LoadedStrapi>; // return an initialized instance of Strapi
 
   autoDestroy?: boolean; // shut down the instance returned by getStrapi() at the end of the transfer
 }
@@ -26,7 +27,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
 
   options: ILocalStrapiSourceProviderOptions;
 
-  strapi?: Strapi.Loaded;
+  strapi?: LoadedStrapi;
 
   constructor(options: ILocalStrapiSourceProviderOptions) {
     this.options = options;

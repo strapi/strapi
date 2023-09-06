@@ -64,13 +64,13 @@
       "url": "https://strapi.io"
     }
   ],
-  "main": "./dist/index.js",
-  "types": "./index.d.ts",
+  "main": "./index.js",
+  "types": "./dist/index.d.ts",
   "bin": "./bin/strapi.js",
   "files": [
     "./dist",
     "./bin",
-    "index.d.ts"
+    "index.js"
   ],
   "scripts": {
     "build": "run -T tsc -p tsconfig.build.json",

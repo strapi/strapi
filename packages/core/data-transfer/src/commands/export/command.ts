@@ -1,18 +1,12 @@
-import { Option } from 'commander';
-import {
-  excludeOption,
-  onlyOption,
-  throttleOption,
-  validateExcludeOnly,
-} from '../../utils/data-transfer';
-import { promptEncryptionKey } from '../../utils/commander';
-import { getLocalScript } from '../../utils/helpers';
-import type { StrapiCommand } from '../../types';
+import { Command, Option } from 'commander';
+import { excludeOption, onlyOption, throttleOption, validateExcludeOnly } from '../data-transfer';
+import { promptEncryptionKey } from '../commander';
+import action from './action';
 
 /**
  * `$ strapi export`
  */
-const command: StrapiCommand = ({ command }) => {
+const command = ({ command }: { command: Command }) => {
   command
     .command('export')
     .description('Export data from Strapi to file')
@@ -39,7 +33,7 @@ const command: StrapiCommand = ({ command }) => {
     .addOption(throttleOption)
     .hook('preAction', validateExcludeOnly)
     .hook('preAction', promptEncryptionKey)
-    .action(getLocalScript('export'));
+    .action(action);
 };
 
 export default command;

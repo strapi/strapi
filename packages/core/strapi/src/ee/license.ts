@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { join } from 'path';
+import { join, resolve } from 'path';
 import crypto from 'crypto';
 
 import machineId from '../utils/machine-id';
@@ -24,7 +24,7 @@ const DEFAULT_FEATURES = {
   ],
 };
 
-const publicKey = fs.readFileSync(join(__dirname, 'resources/key.pub'));
+const publicKey = fs.readFileSync(resolve(__dirname, '../../resources/key.pub'));
 
 class LicenseCheckError extends Error {
   shouldFallback = false;

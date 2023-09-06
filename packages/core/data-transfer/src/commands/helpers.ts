@@ -140,10 +140,8 @@ const getLocalScript =
       process.exit(1);
     }
 
-    const script = require(cmdPath).default;
-
-    Promise.resolve()
-      .then(() => {
+    import(cmdPath)
+      .then((script) => {
         return script(...args);
       })
       .catch((error) => {

@@ -100,7 +100,7 @@ export class StrapiIDSchema extends yup.MixedSchema {
 }
 
 // @ts-ignore
-yup.strapiID = (): InstanceType<typeof StrapiIDSchema> => new StrapiIDSchema();
+export const strapiID = (): InstanceType<typeof StrapiIDSchema> => new StrapiIDSchema();
 
 declare module 'yup' {
   const strapiID: () => InstanceType<typeof StrapiIDSchema>;

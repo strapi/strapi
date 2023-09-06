@@ -1,10 +1,10 @@
-import * as mockDataTransfer from '@strapi/data-transfer';
-import { expectExit } from '../../../__tests__/commands.test.utils';
 import transferAction from '../action';
+import { expectExit } from '../../__tests__/commands.test.utils';
+import * as mockDataTransfer from '../../..';
 
-jest.mock('../../../utils/data-transfer', () => {
+jest.mock('../../data-transfer', () => {
   return {
-    ...jest.requireActual('../../../utils/data-transfer'),
+    ...jest.requireActual('../../data-transfer'),
     getTransferTelemetryPayload: jest.fn().mockReturnValue({}),
     loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
     formatDiagnostic: jest.fn(),
@@ -32,7 +32,7 @@ jest.mock('../../../utils/data-transfer', () => {
 
 // mock data transfer
 
-jest.mock('@strapi/data-transfer', () => {
+jest.mock('../../..', () => {
   return {
     strapi: {
       providers: {
@@ -46,7 +46,7 @@ jest.mock('@strapi/data-transfer', () => {
       },
     },
     engine: {
-      ...jest.requireActual('@strapi/data-transfer').engine,
+      ...jest.requireActual('../../..').engine,
       createTransferEngine() {
         return {
           transfer: jest.fn(() => {

@@ -1,9 +1,6 @@
-import type { Attribute, Common, Schema } from '@strapi/strapi';
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-
 import { assign, isArray, isEmpty, isObject, map, omit, size } from 'lodash/fp';
+import type { LoadedStrapi, Attribute, Common, Schema } from '@strapi/strapi';
+import * as componentsService from '../../utils/components';
 
 const sanitizeComponentLikeAttributes = <T extends Schema.ContentType>(
   model: T,
@@ -20,12 +17,12 @@ const sanitizeComponentLikeAttributes = <T extends Schema.ContentType>(
 
 const omitInvalidCreationAttributes = omit(['id']);
 
-const createEntityQuery = (strapi: Strapi.Loaded): any => {
+const createEntityQuery = (strapi: LoadedStrapi): any => {
   const components = {
     async assignToEntity(uid: string, data: any) {
       const model = strapi.getModel(uid);
 
-      const entityComponents = await strapi.componentsService.createComponents(
+      const entityComponents = await componentsService.createComponents(
         uid as Common.UID.Schema,
         data
       );
@@ -35,11 +32,11 @@ const createEntityQuery = (strapi: Strapi.Loaded): any => {
     },
 
     async get<T extends object>(uid: string, entity: T) {
-      return strapi.componentsService.getComponents(uid as Common.UID.Schema, entity as any);
+      return componentsService.getComponents(uid as Common.UID.Schema, entity as any);
     },
 
     delete<T extends object>(uid: string, componentsToDelete: T) {
-      return strapi.componentsService.deleteComponents(
+      return componentsService.deleteComponents(
         uid as Common.UID.Schema,
         componentsToDelete as any,
         {
