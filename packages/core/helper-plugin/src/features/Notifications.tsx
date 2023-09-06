@@ -1,11 +1,11 @@
 import * as React from 'react';
 
-import { Alert, Flex } from '@strapi/design-system';
+import { Alert, AlertVariant, Flex } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
+import { MessageDescriptor, useIntl } from 'react-intl';
 
 import { useCallbackRef } from '../hooks/useCallbackRef';
+import { TranslationMessage } from '../types';
 
 /**
  * TODO: realistically a lot of this logic is isolated to the `core/admin` package.
@@ -17,51 +17,53 @@ import { useCallbackRef } from '../hooks/useCallbackRef';
  * understand what's going on.
  */
 
-/**
- * @preserve
- * @typedef {Object} NotificationLink
- * @property {string | import('react-intl').MessageDescriptor} label
- * @property {string | undefined} target
- * @property {string} url
- */
+export interface NotificationLink {
+  label: string | MessageDescriptor;
+  target?: string;
+  url: string;
+}
 
-/**
- * @preserve
- * @typedef {Object} NotificationConfig
- * @property {boolean | undefined} blockTransition
- * @property {NotificationLink} link
- * @property {string | import('react-intl').MessageDescriptor | undefined} message
- * @property {() => void | undefined} onClose
- * @property {number | undefined} timeout
- * @property {string | import('react-intl').MessageDescriptor | undefined} title
- * @property {"info" | "warning" | "softWarning" | "success" | undefined} type
- */
+export interface NotificationConfig {
+  blockTransition?: boolean;
+  link?: NotificationLink;
+  message?: string | TranslationMessage;
+  onClose?: () => void;
+  timeout?: number;
+  title?: string | TranslationMessage;
+  type?: 'info' | 'warning' | 'softWarning' | 'success';
+}
 
 /* -------------------------------------------------------------------------------------------------
  * Context
  * -----------------------------------------------------------------------------------------------*/
 
-/**
- * @preserve
- * @typedef {Object} NotificationsContextValue
- * @property {(config: NotificationConfig) => void} toggleNotification – Toggles a notification, wrapped in `useCallback` for a stable identity.
- */
+export interface NotificationsContextValue {
+  /**
+   * Toggles a notification, wrapped in `useCallback` for a stable identity.
+   */
+  toggleNotification: (config: NotificationConfig) => void;
+}
 
-/**
- * @type {React.Context<NotificationsContextValue>}
- */
-const NotificationsContext = React.createContext();
+const NotificationsContext = React.createContext<NotificationsContextValue | null>(null);
 
 /* -------------------------------------------------------------------------------------------------
  * Provider
  * -----------------------------------------------------------------------------------------------*/
 
-const NotificationsProvider = ({ children }) => {
+export interface NotificationsProviderProps {
+  children: React.ReactNode;
+}
+export interface Notification extends NotificationConfig {
+  id: number;
+}
+
+const NotificationsProvider = ({ children }: NotificationsProviderProps) => {
   const notificationIdRef = React.useRef(0);
-  const [notifications, setNotifications] = React.useState([]);
+
+  const [notifications, setNotifications] = React.useState<Notification[]>([]);
 
   const toggleNotification = React.useCallback(
-    ({ type, message, link, timeout, blockTransition, onClose, title }) => {
+    ({ type, message, link, timeout, blockTransition, onClose, title }: NotificationConfig) => {
       setNotifications((s) => [
         ...s,
         {
@@ -79,7 +81,7 @@ const NotificationsProvider = ({ children }) => {
     []
   );
 
-  const clearNotification = React.useCallback((id) => {
+  const clearNotification = React.useCallback((id: number) => {
     setNotifications((s) => s.filter((n) => n.id !== id));
   }, []);
 
@@ -113,21 +115,24 @@ const NotificationsProvider = ({ children }) => {
   );
 };
 
-NotificationsProvider.propTypes = {
-  children: PropTypes.node.isRequired,
-};
+export interface NotificationProps extends Notification {
+  clearNotification: (id: number) => void;
+}
 
 const Notification = ({
-  id,
   clearNotification,
-  message,
+  blockTransition = false,
+  id,
   link,
-  type,
+  message = {
+    id: 'notification.success.saved',
+    defaultMessage: 'Saved',
+  },
   onClose,
-  timeout,
-  blockTransition,
-  title,
-}) => {
+  timeout = 2500,
+  title = 'success',
+  type,
+}: NotificationProps) => {
   const { formatMessage } = useIntl();
 
   /**
@@ -155,8 +160,8 @@ const Notification = ({
     }
   }, [blockTransition, handleClose, timeout]);
 
-  let variant;
-  let alertTitle;
+  let variant: AlertVariant;
+  let alertTitle: string;
 
   if (type === 'info') {
     variant = 'default';
@@ -192,10 +197,10 @@ const Notification = ({
         ? title
         : formatMessage(
             {
-              id: title?.id || title,
-              defaultMessage: title?.defaultMessage || title?.id || title,
+              id: title.id,
+              defaultMessage: title.defaultMessage ?? title.id,
             },
-            title?.values
+            title.values
           );
   }
 
@@ -205,8 +210,11 @@ const Notification = ({
         link ? (
           <Link href={link.url} isExternal>
             {formatMessage({
-              id: link.label?.id || link.label,
-              defaultMessage: link.label?.defaultMessage || link.label?.id || link.label,
+              id: typeof link.label === 'object' ? link.label.id : link.label,
+              defaultMessage:
+                typeof link.label === 'object'
+                  ? link.label.defaultMessage ?? link.label.id
+                  : link.label,
             })}
           </Link>
         ) : undefined
@@ -221,63 +229,14 @@ const Notification = ({
     >
       {formatMessage(
         {
-          id: message?.id || message,
-          defaultMessage: message?.defaultMessage || message?.id || message,
+          id: typeof message === 'object' ? message.id : message,
+          defaultMessage:
+            typeof message === 'object' ? message.defaultMessage ?? message.id : message,
         },
-        message?.values
+        typeof message === 'object' ? message.values : undefined
       )}
     </Alert>
   );
-};
-
-Notification.defaultProps = {
-  blockTransition: false,
-  link: undefined,
-  onClose: undefined,
-  message: {
-    id: 'notification.success.saved',
-    defaultMessage: 'Saved',
-  },
-  timeout: 2500,
-  title: undefined,
-  type: 'success',
-};
-
-Notification.propTypes = {
-  id: PropTypes.number.isRequired,
-  clearNotification: PropTypes.func.isRequired,
-  message: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      defaultMessage: PropTypes.string,
-      values: PropTypes.object,
-    }),
-  ]),
-  link: PropTypes.shape({
-    target: PropTypes.string,
-    url: PropTypes.string.isRequired,
-    label: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        defaultMessage: PropTypes.string,
-        values: PropTypes.object,
-      }),
-    ]).isRequired,
-  }),
-  type: PropTypes.string,
-  onClose: PropTypes.func,
-  timeout: PropTypes.number,
-  blockTransition: PropTypes.bool,
-  title: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      defaultMessage: PropTypes.string,
-      values: PropTypes.object,
-    }),
-  ]),
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -290,8 +249,6 @@ Notification.propTypes = {
  * system. The callbacks are wrapped in `useCallback` for a stable
  * identity.
  *
- * @returns {NotificationsContextValue}
- *
  * @example
  * ```tsx
  * import { useNotification } from '@strapi/helper-plugin';
@@ -301,6 +258,6 @@ Notification.propTypes = {
  *
  *  return <button onClick={() => toggleNotification({ message: 'Hello world!' })}>Click me</button>;
  */
-const useNotification = () => React.useContext(NotificationsContext).toggleNotification;
+const useNotification = () => React.useContext(NotificationsContext)?.toggleNotification;
 
 export { NotificationsContext, NotificationsProvider, useNotification };
