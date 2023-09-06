@@ -706,15 +706,16 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       expect(res.body.data[0]).toMatchObject(secondStage);
     });
 
-    test('It should return forbidden for a user who does not have permissions to read review workflows', async () => {
+    test('It should be forbidden when the user cannot read the content type', async () => {
       const res = await restrictedRequest.get(endpoint(entry.id));
 
-      expect(res.status).toBe(403);
+      expect(res.status).toEqual(403);
     });
 
     test('It should return an empty list when a user does not have the permission to transition the current stage', async () => {
       const permission = {
-        action: 'admin::review-workflows.read',
+        action: 'plugin::content-manager.explorer.read',
+        subject: productUID,
         fields: null,
         conditions: [],
       };
