@@ -75,16 +75,6 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     return body;
   };
 
-  const updateContentType = async (uid, data) => {
-    const result = await requests.admin({
-      method: 'PUT',
-      url: `/content-type-builder/content-types/${uid}`,
-      body: data,
-    });
-
-    expect(result.statusCode).toBe(201);
-  };
-
   beforeAll(async () => {
     await builder.addContentTypes([model]).build();
     // eslint-disable-next-line node/no-extraneous-require
@@ -521,7 +511,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
             data: { id: user.id },
           },
         });
-        expect(response.status).toEqual(200);
+        expect(response.status).toBe(200);
         const assignee = response.body.data[ENTITY_ASSIGNEE_ATTRIBUTE];
         expect(assignee.id).toEqual(user.id);
         expect(assignee).not.toHaveProperty('password');
@@ -538,7 +528,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
           },
         });
 
-        expect(response.status).toEqual(400);
+        expect(response.status).toBe(400);
         expect(response.body.error).toBeDefined();
         expect(response.body.error.name).toEqual('ApplicationError');
         expect(response.body.error.message).toEqual('Selected user does not exist');
@@ -566,7 +556,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
           },
         });
 
-        expect(response.status).toEqual(400);
+        expect(response.status).toBe(400);
         expect(response.body.error).toBeDefined();
         expect(response.body.error.name).toBe('ApplicationError');
       });
@@ -594,7 +584,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
           },
         });
 
-        expect(response.status).toEqual(200);
+        expect(response.status).toBe(200);
         expect(response.body.data[ENTITY_STAGE_ATTRIBUTE]).toEqual(
           expect.objectContaining({ id: secondStage.id })
         );
@@ -610,7 +600,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
           },
         });
 
-        expect(response.status).toEqual(400);
+        expect(response.status).toBe(400);
         expect(response.body.error).toBeDefined();
         expect(response.body.error.name).toEqual('ApplicationError');
         expect(response.body.error.message).toEqual('Stage does not belong to workflow "workflow"');
@@ -635,7 +625,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
           },
         });
 
-        expect(response.status).toEqual(400);
+        expect(response.status).toBe(400);
         expect(response.body.error).toBeDefined();
         expect(response.body.error.name).toBe('ApplicationError');
       });
@@ -709,7 +699,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     test('It should be forbidden when the user cannot read the content type', async () => {
       const res = await restrictedRequest.get(endpoint(entry.id));
 
-      expect(res.status).toEqual(403);
+      expect(res.status).toBe(403);
     });
 
     test('It should return an empty list when a user does not have the permission to transition the current stage', async () => {
