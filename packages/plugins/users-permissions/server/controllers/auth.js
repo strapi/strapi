@@ -100,6 +100,10 @@ module.exports = {
     try {
       const user = await getService('providers').connect(provider, ctx.query);
 
+      if (user.blocked === true) {
+        throw new ApplicationError('Your account is blocked!');
+      }
+
       return ctx.send({
         jwt: getService('jwt').issue({ id: user.id }),
         user: await sanitizeUser(user, ctx),
