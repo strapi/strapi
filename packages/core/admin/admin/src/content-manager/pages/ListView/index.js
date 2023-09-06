@@ -1,21 +1,22 @@
 import * as React from 'react';
 
 import {
-  IconButton,
   Main,
-  Box,
   ActionLayout,
   Button,
   ContentLayout,
   HeaderLayout,
   useNotifyAT,
   Flex,
+  Td,
+  Tr,
   Typography,
   Status,
+  lightTheme,
 } from '@strapi/design-system';
 import {
+  findMatchingPermissions,
   NoPermissions,
-  CheckPermissions,
   SearchURLQuery,
   useFetchClient,
   useFocusWhenNavigate,
@@ -25,15 +26,14 @@ import {
   useTracking,
   Link,
   useAPIErrorHandler,
-  getYupInnerErrors,
+  useCollator,
   useStrapiApp,
-  DynamicTable,
+  Table,
   PaginationURLQuery,
   PageSizeURLQuery,
 } from '@strapi/helper-plugin';
-import { ArrowLeft, Cog, Plus } from '@strapi/icons';
-import axios from 'axios';
-import getReviewWorkflowsColumn from 'ee_else_ce/content-manager/components/DynamicTable/CellContent/ReviewWorkflowsStage/getTableColumn';
+import { ArrowLeft, Plus } from '@strapi/icons';
+import axios, { AxiosError } from 'axios';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
 import { stringify } from 'qs';
@@ -42,30 +42,29 @@ import { useMutation } from 'react-query';
 import { connect, useSelector } from 'react-redux';
 import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
 import { bindActionCreators, compose } from 'redux';
-import styled from 'styled-components';
 
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
-import { selectAdminPermissions } from '../../../pages/App/selectors';
+import { useAdminUsers } from '../../../hooks/useAdminUsers';
+import { useEnterprise } from '../../../hooks/useEnterprise';
 import { InjectionZone } from '../../../shared/components';
-import AttributeFilter from '../../components/AttributeFilter';
-import BulkActionsBar from '../../components/DynamicTable/BulkActionsBar';
-import { createYupSchema, getRequestUrl, getTrad } from '../../utils';
+import { Filter } from '../../components/Filter';
+import { AdminUsersFilter } from '../../components/Filter/CustomInputs/AdminUsersFilter';
+import { CREATOR_FIELDS } from '../../constants/attributes';
+import { useAllowedAttributes } from '../../hooks/useAllowedAttributes';
+import { getTrad, getDisplayName } from '../../utils';
 
 import { getData, getDataSucceeded, onChangeListHeaders, onResetListHeaders } from './actions';
-import { ConfirmDialogDelete } from './components/ConfirmDialogDelete';
-import { ConfirmDialogDeleteAll } from './components/ConfirmDialogDeleteAll';
-import { FieldPicker } from './components/FieldPicker';
-import { TableRows } from './components/TableRows';
+import { Body } from './components/Body';
+import BulkActionButtons from './components/BulkActionButtons';
+import CellContent from './components/CellContent';
+import { ViewSettingsMenu } from './components/ViewSettingsMenu';
 import makeSelectListView, { selectDisplayedHeaders } from './selectors';
-import { buildQueryString } from './utils';
+import { buildValidGetParams } from './utils';
 
-const ConfigureLayoutBox = styled(Box)`
-  svg {
-    path {
-      fill: ${({ theme }) => theme.colors.neutral900};
-    }
-  }
-`;
+const REVIEW_WORKFLOW_COLUMNS_CE = null;
+const REVIEW_WORKFLOW_COLUMNS_CELL_CE = () => null;
+const REVIEW_WORKFLOW_FILTER_CE = [];
+const USER_FILTER_ATTRIBUTES = [...CREATOR_FIELDS, 'strapi_assignee'];
 
 function ListView({
   canCreate,
@@ -88,49 +87,203 @@ function ListView({
     metadatas,
     settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
   } = contentType;
-
+  const [isConfirmDeleteRowOpen, setIsConfirmDeleteRowOpen] = React.useState(false);
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
-  const { refetchPermissions } = useRBACProvider();
+  const { allPermissions, refetchPermissions } = useRBACProvider();
   const trackUsageRef = React.useRef(trackUsage);
   const fetchPermissionsRef = React.useRef(refetchPermissions);
   const { notifyStatus } = useNotifyAT();
   const { formatAPIError } = useAPIErrorHandler(getTrad);
-  const permissions = useSelector(selectAdminPermissions);
+  const allowedAttributes = useAllowedAttributes(contentType, slug);
+  const [{ query }] = useQueryParams();
+  const { pathname } = useLocation();
+  const { push } = useHistory();
+  const { formatMessage, locale } = useIntl();
+  const fetchClient = useFetchClient();
+  const formatter = useCollator(locale, {
+    sensitivity: 'base',
+  });
+
+  const selectedUserIds =
+    query?.filters?.$and?.reduce((acc, filter) => {
+      const [key, value] = Object.entries(filter)[0];
+      const id = value.id?.$eq || value.id?.$ne;
+
+      // TODO: strapi_assignee should not be in here and rather defined
+      // in the ee directory.
+      if (USER_FILTER_ATTRIBUTES.includes(key) && !acc.includes(id)) {
+        acc.push(id);
+      }
+
+      return acc;
+    }, []) ?? [];
+
+  const { users, isLoading: isLoadingAdminUsers } = useAdminUsers(
+    { filter: { id: { in: selectedUserIds } } },
+    {
+      // fetch the list of admin users only if the filter contains users and the
+      // current user has permissions to display users
+      enabled:
+        selectedUserIds.length > 0 &&
+        findMatchingPermissions(allPermissions, [
+          {
+            action: 'admin::users.read',
+            subject: null,
+          },
+        ]).length > 0,
+    }
+  );
 
   useFocusWhenNavigate();
 
-  const [{ query }] = useQueryParams();
-  const params = buildQueryString(query);
+  const params = React.useMemo(() => buildValidGetParams(query), [query]);
   const pluginsQueryParams = stringify({ plugins: query.plugins }, { encode: false });
 
-  const { pathname } = useLocation();
-  const { push } = useHistory();
-  const { formatMessage } = useIntl();
-  const hasDraftAndPublish = options?.draftAndPublish || false;
-  const fetchClient = useFetchClient();
-  const { post, del } = fetchClient;
+  const displayedAttributeFilters = allowedAttributes.map((name) => {
+    const attribute = contentType.attributes[name];
+    const { type, enum: options } = attribute;
 
-  const bulkPublishMutation = useMutation(
-    (data) =>
-      post(`/content-manager/collection-types/${contentType.uid}/actions/bulkPublish`, data),
+    const trackedEvent = {
+      name: 'didFilterEntries',
+      properties: { useRelation: type === 'relation' },
+    };
+
+    const { mainField, label } = metadatas[name].list;
+
+    const filter = {
+      name,
+      metadatas: { label: formatMessage({ id: label, defaultMessage: label }) },
+      fieldSchema: { type, options, mainField },
+      trackedEvent,
+    };
+
+    if (attribute.type === 'relation' && attribute.target === 'admin::user') {
+      filter.metadatas = {
+        ...filter.metadatas,
+        customOperators: [
+          {
+            intlLabel: {
+              id: 'components.FilterOptions.FILTER_TYPES.$eq',
+              defaultMessage: 'is',
+            },
+            value: '$eq',
+          },
+          {
+            intlLabel: {
+              id: 'components.FilterOptions.FILTER_TYPES.$ne',
+              defaultMessage: 'is not',
+            },
+            value: '$ne',
+          },
+        ],
+        customInput: AdminUsersFilter,
+        options: users.map((user) => ({
+          label: getDisplayName(user, formatMessage),
+          customValue: user.id.toString(),
+        })),
+      };
+      filter.fieldSchema.mainField = {
+        name: 'id',
+      };
+    }
+
+    return filter;
+  });
+
+  const hasDraftAndPublish = options?.draftAndPublish ?? false;
+  const hasReviewWorkflows = options?.reviewWorkflows ?? false;
+
+  const reviewWorkflowColumns = useEnterprise(
+    REVIEW_WORKFLOW_COLUMNS_CE,
+    async () =>
+      (
+        await import(
+          '../../../../../ee/admin/content-manager/pages/ListView/ReviewWorkflowsColumn/constants'
+        )
+      ).REVIEW_WORKFLOW_COLUMNS_EE,
     {
-      onSuccess() {
-        toggleNotification({
-          type: 'success',
-          message: { id: 'content-manager.success.record.publish', defaultMessage: 'Published' },
-        });
-
-        fetchData(`/content-manager/collection-types/${slug}${params}`);
-      },
-      onError(error) {
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(error),
-        });
-      },
+      enabled: !!options?.reviewWorkflows,
     }
   );
+  const ReviewWorkflowsColumns = useEnterprise(
+    REVIEW_WORKFLOW_COLUMNS_CELL_CE,
+    async () => {
+      const { ReviewWorkflowsStageEE, ReviewWorkflowsAssigneeEE } = await import(
+        '../../../../../ee/admin/content-manager/pages/ListView/ReviewWorkflowsColumn'
+      );
+
+      return { ReviewWorkflowsStageEE, ReviewWorkflowsAssigneeEE };
+    },
+    {
+      enabled: hasReviewWorkflows,
+    }
+  );
+
+  const reviewWorkflowFilter = useEnterprise(
+    REVIEW_WORKFLOW_FILTER_CE,
+    async () =>
+      (
+        await import(
+          '../../../../../ee/admin/content-manager/components/Filter/CustomInputs/ReviewWorkflows/constants'
+        )
+      ).REVIEW_WORKFLOW_FILTERS,
+    {
+      combine(ceFilters, eeFilters) {
+        return [
+          ...ceFilters,
+          ...eeFilters
+            .filter((eeFilter) => {
+              // do not display the filter at all, if the current user does
+              // not have permissions to read admin users
+              if (eeFilter.name === 'strapi_assignee') {
+                return (
+                  findMatchingPermissions(allPermissions, [
+                    {
+                      action: 'admin::users.read',
+                      subject: null,
+                    },
+                  ]).length > 0
+                );
+              }
+
+              return true;
+            })
+            .map((eeFilter) => ({
+              ...eeFilter,
+              metadatas: {
+                ...eeFilter.metadatas,
+                // the stage filter needs the current content-type uid to fetch
+                // the list of stages that can be assigned to this content-type
+                ...(eeFilter.name === 'strapi_stage' ? { uid: contentType.uid } : {}),
+
+                // translate the filter label
+                label: formatMessage(eeFilter.metadatas.label),
+
+                // `options` allows the filter-tag to render the displayname
+                // of a user over a plain id
+                options:
+                  eeFilter.name === 'strapi_assignee' &&
+                  users.map((user) => ({
+                    label: getDisplayName(user, formatMessage),
+                    customValue: user.id.toString(),
+                  })),
+              },
+            })),
+        ];
+      },
+
+      defaultValue: [],
+
+      // we have to wait for admin users to be fully loaded, because otherwise
+      // combine is called to early and does not contain the latest state of
+      // the users array
+      enabled: hasReviewWorkflows && !isLoadingAdminUsers,
+    }
+  );
+
+  const { post, del } = fetchClient;
+
   const bulkUnpublishMutation = useMutation(
     (data) =>
       post(`/content-manager/collection-types/${contentType.uid}/actions/bulkUnpublish`, data),
@@ -144,7 +297,7 @@ function ListView({
           },
         });
 
-        fetchData(`/content-manager/collection-types/${slug}${params}`);
+        fetchData(`/content-manager/collection-types/${slug}`, { params });
       },
       onError(error) {
         toggleNotification({
@@ -159,19 +312,33 @@ function ListView({
   // Using a ref to avoid requests being fired multiple times on slug on change
   // We need it because the hook as mulitple dependencies so it may run before the permissions have checked
   const requestUrlRef = React.useRef('');
-
   /**
    * TODO: re-write all of this, it's a mess.
    */
   const fetchData = React.useCallback(
-    async (endPoint, source) => {
+    async (endPoint, options) => {
       getData();
 
       try {
-        const opts = source ? { cancelToken: source.token } : null;
         const {
           data: { results, pagination: paginationResult },
-        } = await fetchClient.get(endPoint, opts);
+        } = await fetchClient.get(endPoint, options);
+
+        // If user enters a page number that doesn't exist, redirect him to the last page
+        if (paginationResult.page > paginationResult.pageCount && paginationResult.pageCount > 0) {
+          const query = {
+            ...params,
+            page: paginationResult.pageCount,
+          };
+
+          push({
+            pathname,
+            state: { from: pathname },
+            search: stringify(query),
+          });
+
+          return;
+        }
 
         notifyStatus(
           formatMessage(
@@ -212,18 +379,28 @@ function ListView({
         });
       }
     },
-    [formatMessage, getData, getDataSucceeded, notifyStatus, push, toggleNotification, fetchClient]
+    [
+      formatMessage,
+      getData,
+      getDataSucceeded,
+      notifyStatus,
+      push,
+      toggleNotification,
+      fetchClient,
+      params,
+      pathname,
+    ]
   );
 
   const handleConfirmDeleteAllData = React.useCallback(
     async (ids) => {
       try {
-        await post(getRequestUrl(`collection-types/${slug}/actions/bulkDelete`), {
+        await post(`/content-manager/collection-types/${slug}/actions/bulkDelete`, {
           ids,
         });
 
-        const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
-        fetchData(requestUrl);
+        fetchData(`/content-manager/collection-types/${slug}`, { params });
+
         trackUsageRef.current('didBulkDeleteEntries');
       } catch (err) {
         toggleNotification({
@@ -232,16 +409,16 @@ function ListView({
         });
       }
     },
-    [fetchData, params, slug, toggleNotification, formatAPIError, post]
+    [slug, toggleNotification, formatAPIError, post, fetchData, params]
   );
 
   const handleConfirmDeleteData = React.useCallback(
     async (idToDelete) => {
       try {
-        await del(getRequestUrl(`collection-types/${slug}/${idToDelete}`));
+        await del(`/content-manager/collection-types/${slug}/${idToDelete}`);
 
-        const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
-        fetchData(requestUrl);
+        const requestUrl = `/content-manager/collection-types/${slug}`;
+        fetchData(requestUrl, { params });
 
         toggleNotification({
           type: 'success',
@@ -254,68 +431,8 @@ function ListView({
         });
       }
     },
-    [slug, params, fetchData, toggleNotification, formatAPIError, del]
+    [slug, toggleNotification, formatAPIError, del, fetchData, params]
   );
-
-  /**
-   * @param {number[]} selectedEntries - Array of ids to publish
-   * @returns {{validIds: number[], errors: Object.<number, string>}} - Returns an object with the valid ids and the errors
-   */
-  const validateEntriesToPublish = async (selectedEntries) => {
-    const validations = { validIds: [], errors: {} };
-    // Create the validation schema based on the contentType
-    const schema = createYupSchema(
-      contentType,
-      { components: layout.components },
-      { isDraft: false }
-    );
-    // Get the selected entries
-    const entries = data.filter((entry) => {
-      return selectedEntries.includes(entry.id);
-    });
-    // Validate each entry and map the unresolved promises
-    const validationPromises = entries.map((entry) =>
-      schema.validate(entry, { abortEarly: false })
-    );
-    // Resolve all the promises in one go
-    const resolvedPromises = await Promise.allSettled(validationPromises);
-    // Set the validations
-    resolvedPromises.forEach((promise) => {
-      if (promise.status === 'rejected') {
-        const entityId = promise.reason.value.id;
-        validations.errors[entityId] = getYupInnerErrors(promise.reason);
-      }
-
-      if (promise.status === 'fulfilled') {
-        validations.validIds.push(promise.value.id);
-      }
-    });
-
-    return validations;
-  };
-
-  const handleConfirmPublishAllData = async (selectedEntries) => {
-    const validations = await validateEntriesToPublish(selectedEntries);
-
-    if (Object.values(validations.errors).length) {
-      toggleNotification({
-        type: 'warning',
-        title: {
-          id: 'content-manager.listView.validation.errors.title',
-          defaultMessage: 'Action required',
-        },
-        message: {
-          id: 'content-manager.listView.validation.errors.message',
-          defaultMessage:
-            'Please make sure all fields are valid before publishing (required field, min/max character limit, etc.)',
-        },
-      });
-
-      throw new Error('Validation error');
-    }
-
-    return bulkPublishMutation.mutateAsync({ ids: selectedEntries });
-  };
 
   const handleConfirmUnpublishAllData = (selectedEntries) => {
     return bulkUnpublishMutation.mutateAsync({ ids: selectedEntries });
@@ -326,10 +443,10 @@ function ListView({
     const source = CancelToken.source();
 
     const shouldSendRequest = canRead;
-    const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
+    const requestUrl = `/content-manager/collection-types/${slug}`;
 
     if (shouldSendRequest && requestUrl.includes(requestUrlRef.current)) {
-      fetchData(requestUrl, source);
+      fetchData(requestUrl, { cancelToken: source.token, params });
     }
 
     return () => {
@@ -388,24 +505,8 @@ function ListView({
       };
     });
 
-    if (!hasDraftAndPublish) {
-      return formattedHeaders;
-    }
-
-    // this should not exist. Ideally we would use registerHook() similar to what has been done
-    // in the i18n plugin. In order to do that review-workflows should have been a plugin. In
-    // a future iteration we need to find a better pattern.
-
-    // In CE this will return null - in EE a column definition including the custom formatting component.
-    const reviewWorkflowColumn = getReviewWorkflowsColumn(layout);
-
-    if (reviewWorkflowColumn) {
-      formattedHeaders.push(reviewWorkflowColumn);
-    }
-
-    return [
-      ...formattedHeaders,
-      {
+    if (hasDraftAndPublish) {
+      formattedHeaders.push({
         key: '__published_at_temp_key__',
         name: 'publishedAt',
         fieldSchema: {
@@ -419,25 +520,31 @@ function ListView({
           searchable: false,
           sortable: true,
         },
-        // eslint-disable-next-line react/no-unstable-nested-components
-        cellFormatter(cellData) {
-          const isPublished = cellData.publishedAt;
-          const variant = isPublished ? 'success' : 'secondary';
+      });
+    }
 
-          return (
-            <Status width="min-content" showBullet={false} variant={variant} size="S">
-              <Typography fontWeight="bold" textColor={`${variant}700`}>
-                {formatMessage({
-                  id: getTrad(`containers.List.${isPublished ? 'published' : 'draft'}`),
-                  defaultMessage: isPublished ? 'Published' : 'Draft',
-                })}
-              </Typography>
-            </Status>
-          );
-        },
-      },
-    ];
-  }, [runHookWaterfall, displayedHeaders, layout, hasDraftAndPublish, formatMessage]);
+    if (reviewWorkflowColumns) {
+      // Make sure the column header label is translated
+      reviewWorkflowColumns.map((column) => {
+        if (typeof column.metadatas.label !== 'string') {
+          column.metadatas.label = formatMessage(column.metadatas.label);
+        }
+
+        return column;
+      });
+
+      formattedHeaders.push(...reviewWorkflowColumns);
+    }
+
+    return formattedHeaders;
+  }, [
+    runHookWaterfall,
+    displayedHeaders,
+    layout,
+    reviewWorkflowColumns,
+    hasDraftAndPublish,
+    formatMessage,
+  ]);
 
   const subtitle = canRead
     ? formatMessage(
@@ -473,6 +580,57 @@ function ListView({
       </Button>
     ) : null;
 
+  /**
+   *
+   * @param {string} id
+   * @returns void
+   */
+  const handleRowClick = (id) => () => {
+    trackUsage('willEditEntryFromList');
+    push({
+      pathname: `${pathname}/${id}`,
+      state: { from: pathname },
+      search: pluginsQueryParams,
+    });
+  };
+
+  const handleCloneClick = (id) => async () => {
+    try {
+      const { data } = await post(
+        `/content-manager/collection-types/${contentType.uid}/auto-clone/${id}?${pluginsQueryParams}`
+      );
+
+      if ('id' in data) {
+        push({
+          pathname: `${pathname}/${data.id}`,
+          state: { from: pathname },
+          search: pluginsQueryParams,
+        });
+      }
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        push({
+          pathname: `${pathname}/create/clone/${id}`,
+          state: { from: pathname, error: formatAPIError(err) },
+          search: pluginsQueryParams,
+        });
+      }
+    }
+  };
+
+  // Add 1 column for the checkbox and 1 for the actions
+  const colCount = tableHeaders.length + 2;
+
+  // We have this function to refetch data when selected entries modal is closed
+  const refetchData = () => {
+    fetchData(`/content-manager/collection-types/${slug}`, { params });
+  };
+
+  // Block rendering until the review stage component is fully loaded in EE
+  if (!ReviewWorkflowsColumns) {
+    return null;
+  }
+
   return (
     <Main aria-busy={isLoading}>
       <HeaderLayout
@@ -496,25 +654,7 @@ function ListView({
           endActions={
             <>
               <InjectionZone area="contentManager.listView.actions" />
-              <FieldPicker layout={layout} />
-              <CheckPermissions
-                permissions={permissions.contentManager.collectionTypesConfigurations}
-              >
-                <ConfigureLayoutBox paddingTop={1} paddingBottom={1}>
-                  <IconButton
-                    onClick={() => {
-                      trackUsage('willEditListLayout');
-                    }}
-                    forwardedAs={ReactRouterLink}
-                    to={{ pathname: `${slug}/configurations/list`, search: pluginsQueryParams }}
-                    icon={<Cog />}
-                    label={formatMessage({
-                      id: 'app.links.configure-view',
-                      defaultMessage: 'Configure the view',
-                    })}
-                  />
-                </ConfigureLayoutBox>
-              </CheckPermissions>
+              <ViewSettingsMenu slug={slug} layout={layout} />
             </>
           }
           startActions={
@@ -532,8 +672,12 @@ function ListView({
                   trackedEvent="didSearch"
                 />
               )}
-              {isFilterable && (
-                <AttributeFilter contentType={contentType} slug={slug} metadatas={metadatas} />
+              {isFilterable && !isLoadingAdminUsers && (
+                <Filter
+                  displayedFilters={[...displayedAttributeFilters, ...reviewWorkflowFilter].sort(
+                    (a, b) => formatter.compare(a.metadatas.label, b.metadatas.label)
+                  )}
+                />
               )}
             </>
           }
@@ -542,50 +686,165 @@ function ListView({
       <ContentLayout>
         {canRead ? (
           <Flex gap={4} direction="column" alignItems="stretch">
-            <DynamicTable
-              canCreate={canCreate}
-              canDelete={canDelete}
-              canPublish={canPublish}
-              contentTypeName={headerLayoutTitle}
-              onConfirmDelete={handleConfirmDeleteData}
-              onConfirmDeleteAll={handleConfirmDeleteAllData}
-              onConfirmPublishAll={handleConfirmPublishAllData}
-              onConfirmUnpublishAll={handleConfirmUnpublishAllData}
-              isBulkable={isBulkable}
-              isLoading={isLoading}
-              // FIXME: remove the layout props drilling
-              layout={layout}
-              rows={data}
-              components={{ ConfirmDialogDelete, ConfirmDialogDeleteAll }}
-              contentType={headerLayoutTitle}
-              action={getCreateAction({ variant: 'secondary' })}
-              headers={tableHeaders}
-              onOpenDeleteAllModalTrackedEvent="willBulkDeleteEntries"
-              withBulkActions
-              withMainAction={canDelete && isBulkable}
-              renderBulkActionsBar={({ selectedEntries, clearSelectedEntries }) => (
-                <BulkActionsBar
+            <Table.Root rows={data} isLoading={isLoading} colCount={colCount}>
+              <Table.ActionBar>
+                <BulkActionButtons
                   showPublish={canPublish && hasDraftAndPublish}
                   showDelete={canDelete}
                   onConfirmDeleteAll={handleConfirmDeleteAllData}
-                  onConfirmPublishAll={handleConfirmPublishAllData}
                   onConfirmUnpublishAll={handleConfirmUnpublishAllData}
-                  selectedEntries={selectedEntries}
-                  clearSelectedEntries={clearSelectedEntries}
+                  refetchData={refetchData}
                 />
-              )}
-              bulkAction
-            >
-              <TableRows
-                canCreate={canCreate}
-                canDelete={canDelete}
-                contentType={contentType}
-                headers={tableHeaders}
-                rows={data}
-                withBulkActions
-                withMainAction={canDelete && isBulkable}
-              />
-            </DynamicTable>
+              </Table.ActionBar>
+              <Table.Content>
+                <Table.Head>
+                  {/* Bulk action select all checkbox */}
+                  <Table.HeaderCheckboxCell />
+                  {/* Dynamic headers based on fields */}
+                  {tableHeaders.map(({ fieldSchema, key, name, metadatas }) => (
+                    <Table.HeaderCell
+                      key={key}
+                      name={name}
+                      fieldSchemaType={fieldSchema.type}
+                      relationFieldName={metadatas.mainField?.name}
+                      isSortable={metadatas.sortable}
+                      label={metadatas.label}
+                    />
+                  ))}
+                  {/* Visually hidden header for actions */}
+                  <Table.HeaderHiddenActionsCell />
+                </Table.Head>
+                {/* Loading content */}
+                <Table.LoadingBody />
+                {/* Empty content */}
+                <Table.EmptyBody
+                  contentType={headerLayoutTitle}
+                  aciton={getCreateAction({ variant: 'secondary' })}
+                />
+                {/* Content */}
+                <Body.Root
+                  onConfirmDelete={handleConfirmDeleteData}
+                  isConfirmDeleteRowOpen={isConfirmDeleteRowOpen}
+                  setIsConfirmDeleteRowOpen={setIsConfirmDeleteRowOpen}
+                >
+                  {data.map((rowData, index) => {
+                    return (
+                      <Tr cursor="pointer" key={data.id} onClick={handleRowClick(rowData.id)}>
+                        {/* Bulk action row checkbox */}
+                        <Body.CheckboxDataCell rowId={rowData.id} index={index} />
+                        {/* Field data */}
+                        {tableHeaders.map(({ key, name, cellFormatter, ...rest }) => {
+                          if (hasDraftAndPublish && name === 'publishedAt') {
+                            return (
+                              <Td key={key}>
+                                <Status
+                                  width="min-content"
+                                  showBullet={false}
+                                  variant={rowData.publishedAt ? 'success' : 'secondary'}
+                                  size="S"
+                                >
+                                  <Typography
+                                    fontWeight="bold"
+                                    textColor={`${
+                                      rowData.publishedAt ? 'success' : 'secondary'
+                                    }700`}
+                                  >
+                                    {formatMessage({
+                                      id: getTrad(
+                                        `containers.List.${
+                                          rowData.publishedAt ? 'published' : 'draft'
+                                        }`
+                                      ),
+                                      defaultMessage: rowData.publishedAt ? 'Published' : 'Draft',
+                                    })}
+                                  </Typography>
+                                </Status>
+                              </Td>
+                            );
+                          }
+
+                          if (hasReviewWorkflows) {
+                            if (name === 'strapi_stage') {
+                              return (
+                                <Td key={key}>
+                                  {rowData.strapi_stage ? (
+                                    <ReviewWorkflowsColumns.ReviewWorkflowsStageEE
+                                      color={
+                                        rowData.strapi_stage.color ?? lightTheme.colors.primary600
+                                      }
+                                      name={rowData.strapi_stage.name}
+                                    />
+                                  ) : (
+                                    <Typography textColor="neutral800">-</Typography>
+                                  )}
+                                </Td>
+                              );
+                            }
+                            if (name === 'strapi_assignee') {
+                              return (
+                                <Td key={key}>
+                                  {rowData.strapi_assignee ? (
+                                    <ReviewWorkflowsColumns.ReviewWorkflowsAssigneeEE
+                                      user={rowData.strapi_assignee}
+                                    />
+                                  ) : (
+                                    <Typography textColor="neutral800">-</Typography>
+                                  )}
+                                </Td>
+                              );
+                            }
+                          }
+
+                          if (['createdBy', 'updatedBy'].includes(name.split('.')[0])) {
+                            // Display the users full name
+                            // Some entries doesn't have a user assigned as creator/updater (ex: entries created through content API)
+                            // In this case, we display a dash
+                            return (
+                              <Td key={key}>
+                                <Typography textColor="neutral800">
+                                  {rowData[name.split('.')[0]]
+                                    ? getDisplayName(rowData[name.split('.')[0]], formatMessage)
+                                    : '-'}
+                                </Typography>
+                              </Td>
+                            );
+                          }
+
+                          if (typeof cellFormatter === 'function') {
+                            return (
+                              <Td key={key}>{cellFormatter(rowData, { key, name, ...rest })}</Td>
+                            );
+                          }
+
+                          return (
+                            <Td key={key}>
+                              <CellContent
+                                content={rowData[name.split('.')[0]]}
+                                name={name}
+                                contentType={layout.contentType}
+                                {...rest}
+                                rowId={rowData.id}
+                              />
+                            </Td>
+                          );
+                        })}
+                        {/* Actions: edit, duplicate, delete */}
+                        {(canDelete || canPublish) && isBulkable && (
+                          <Body.EntityActionsDataCell
+                            rowId={rowData.id}
+                            index={index}
+                            setIsConfirmDeleteRowOpen={setIsConfirmDeleteRowOpen}
+                            canCreate={canCreate}
+                            canDelete={canDelete}
+                            handleCloneClick={handleCloneClick}
+                          />
+                        )}
+                      </Tr>
+                    );
+                  })}
+                </Body.Root>
+              </Table.Content>
+            </Table.Root>
             <Flex alignItems="flex-end" justifyContent="space-between">
               <PageSizeURLQuery trackedEvent="willChangeNumberOfEntriesPerPage" />
               <PaginationURLQuery pagination={{ pageCount: pagination?.pageCount || 1 }} />

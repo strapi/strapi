@@ -50,6 +50,7 @@ export function Stage({
   index,
   canDelete,
   canReorder,
+  canUpdate,
   isOpen: isOpenDefault = false,
   stagesCount,
 }) {
@@ -141,8 +142,8 @@ export function Stage({
   const { trackUsage } = useTracking();
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = React.useState(isOpenDefault);
-  const [nameField, nameMeta] = useField(`stages.${index}.name`);
-  const [colorField, colorMeta] = useField(`stages.${index}.color`);
+  const [nameField, nameMeta, nameHelper] = useField(`stages.${index}.name`);
+  const [colorField, colorMeta, colorHelper] = useField(`stages.${index}.color`);
   const [{ handlerId, isDragging, handleKeyDown }, stageRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop(canReorder, {
       index,
@@ -174,7 +175,7 @@ export function Stage({
     dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
   }, [dragPreviewRef, index]);
 
-  const { themeColorName } = colorField.value ? getStageColorByHex(colorField.value) : {};
+  const { themeColorName } = getStageColorByHex(colorField.value) ?? {};
 
   return (
     <Box ref={composedRef}>
@@ -195,43 +196,49 @@ export function Stage({
           }}
           expanded={isOpen}
           shadow="tableShadow"
+          error={nameMeta.error ?? colorMeta?.error ?? false}
+          hasErrorMessage={false}
         >
           <AccordionToggle
             title={nameField.value}
             togglePosition="left"
             action={
-              <Flex>
-                {canDelete && (
-                  <IconButton
-                    background="transparent"
-                    icon={<Trash />}
-                    label={formatMessage({
-                      id: 'Settings.review-workflows.stage.delete',
-                      defaultMessage: 'Delete stage',
-                    })}
-                    noBorder
-                    onClick={() => dispatch(deleteStage(id))}
-                  />
-                )}
+              (canDelete || canUpdate) && (
+                <Flex>
+                  {canDelete && (
+                    <IconButton
+                      background="transparent"
+                      icon={<Trash />}
+                      label={formatMessage({
+                        id: 'Settings.review-workflows.stage.delete',
+                        defaultMessage: 'Delete stage',
+                      })}
+                      noBorder
+                      onClick={() => dispatch(deleteStage(id))}
+                    />
+                  )}
 
-                <IconButton
-                  background="transparent"
-                  forwardedAs="div"
-                  role="button"
-                  noBorder
-                  tabIndex={0}
-                  data-handler-id={handlerId}
-                  ref={dragRef}
-                  label={formatMessage({
-                    id: 'Settings.review-workflows.stage.drag',
-                    defaultMessage: 'Drag',
-                  })}
-                  onClick={(e) => e.stopPropagation()}
-                  onKeyDown={handleKeyDown}
-                >
-                  <Drag />
-                </IconButton>
-              </Flex>
+                  {canUpdate && (
+                    <IconButton
+                      background="transparent"
+                      forwardedAs="div"
+                      role="button"
+                      noBorder
+                      tabIndex={0}
+                      data-handler-id={handlerId}
+                      ref={dragRef}
+                      label={formatMessage({
+                        id: 'Settings.review-workflows.stage.drag',
+                        defaultMessage: 'Drag',
+                      })}
+                      onClick={(e) => e.stopPropagation()}
+                      onKeyDown={handleKeyDown}
+                    >
+                      <Drag />
+                    </IconButton>
+                  )}
+                </Flex>
+              )
             }
           />
           <AccordionContent padding={6} background="neutral0" hasRadius>
@@ -240,13 +247,14 @@ export function Stage({
                 <TextInput
                   {...nameField}
                   id={nameField.name}
+                  disabled={!canUpdate}
                   label={formatMessage({
                     id: 'Settings.review-workflows.stage.name.label',
                     defaultMessage: 'Stage name',
                   })}
                   error={nameMeta.error ?? false}
                   onChange={(event) => {
-                    nameField.onChange(event);
+                    nameHelper.setValue(event.target.value);
                     dispatch(updateStage(id, { name: event.target.value }));
                   }}
                   required
@@ -255,6 +263,7 @@ export function Stage({
 
               <GridItem col={6}>
                 <SingleSelect
+                  disabled={!canUpdate}
                   error={colorMeta?.error ?? false}
                   id={colorField.name}
                   required
@@ -263,7 +272,7 @@ export function Stage({
                     defaultMessage: 'Color',
                   })}
                   onChange={(value) => {
-                    colorField.onChange({ target: { value } });
+                    colorHelper.setValue(value);
                     dispatch(updateStage(id, { color: value }));
                   }}
                   value={colorField.value.toUpperCase()}
@@ -319,5 +328,6 @@ Stage.propTypes = PropTypes.shape({
   color: PropTypes.string.isRequired,
   canDelete: PropTypes.bool.isRequired,
   canReorder: PropTypes.bool.isRequired,
+  canUpdate: PropTypes.bool.isRequired,
   stagesCount: PropTypes.number.isRequired,
 }).isRequired;

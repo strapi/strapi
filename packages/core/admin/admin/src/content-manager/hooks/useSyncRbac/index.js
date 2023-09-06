@@ -6,9 +6,10 @@ import { resetPermissions, setPermissions } from './actions';
 import { selectCollectionTypePermissions, selectPermissions } from './selectors';
 
 const useSyncRbac = (query, collectionTypeUID, containerName = 'listView') => {
+  const dispatch = useDispatch();
+
   const collectionTypesRelatedPermissions = useSelector(selectCollectionTypePermissions);
   const permissions = useSelector(selectPermissions);
-  const dispatch = useDispatch();
 
   const relatedPermissions = collectionTypesRelatedPermissions[collectionTypeUID];
 
@@ -24,7 +25,14 @@ const useSyncRbac = (query, collectionTypeUID, containerName = 'listView') => {
     return () => {};
   }, [relatedPermissions, dispatch, query, containerName]);
 
-  return permissions;
+  // Check if the permissions are related to the current collectionTypeUID
+  const isPermissionMismatch =
+    permissions?.some((permission) => permission.subject !== collectionTypeUID) ?? true;
+
+  return {
+    isValid: permissions && !isPermissionMismatch,
+    permissions,
+  };
 };
 
 export default useSyncRbac;

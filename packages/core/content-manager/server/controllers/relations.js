@@ -1,6 +1,6 @@
 'use strict';
 
-const { prop, isEmpty, uniq } = require('lodash/fp');
+const { prop, isEmpty, uniq, flow } = require('lodash/fp');
 const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
 const { isAnyToMany } = require('@strapi/utils').relations;
 const { PUBLISHED_AT_ATTRIBUTE } = require('@strapi/utils').contentTypes.constants;
@@ -16,6 +16,35 @@ const addFiltersClause = (params, filtersClause) => {
   } else {
     params.filters.$and = [filtersClause];
   }
+};
+
+const sanitizeMainField = (model, mainField, userAbility) => {
+  const permissionChecker = getService('permission-checker').create({
+    userAbility,
+    model: model.uid,
+  });
+
+  if (!isListable(model, mainField)) {
+    return 'id';
+  }
+
+  if (permissionChecker.cannot.read(null, mainField)) {
+    // Allow reading role name if user can read the user model
+    if (model.uid === 'plugin::users-permissions.role') {
+      const userPermissionChecker = getService('permission-checker').create({
+        userAbility,
+        model: 'plugin::users-permissions.user',
+      });
+
+      if (userPermissionChecker.can.read()) {
+        return 'name';
+      }
+    }
+
+    return 'id';
+  }
+
+  return mainField;
 };
 
 module.exports = {
@@ -86,10 +115,11 @@ module.exports = {
       ? await getService('components').findConfiguration(modelSchema)
       : await getService('content-types').findConfiguration(modelSchema);
 
-    let mainField = prop(`metadatas.${targetField}.edit.mainField`, modelConfig) || 'id';
-    if (!isListable(targetedModel, mainField)) {
-      mainField = 'id';
-    }
+    const mainField = flow(
+      prop(`metadatas.${targetField}.edit.mainField`),
+      (mainField) => mainField || 'id',
+      (mainField) => sanitizeMainField(targetedModel, mainField, userAbility)
+    )(modelConfig);
 
     const fieldsToSelect = uniq(['id', mainField]);
     if (hasDraftAndPublish(targetedModel)) {
@@ -195,10 +225,11 @@ module.exports = {
       ? await getService('components').findConfiguration(modelSchema)
       : await getService('content-types').findConfiguration(modelSchema);
 
-    let mainField = prop(`metadatas.${targetField}.edit.mainField`, modelConfig) || 'id';
-    if (!isListable(targetedModel, mainField)) {
-      mainField = 'id';
-    }
+    const mainField = flow(
+      prop(`metadatas.${targetField}.edit.mainField`),
+      (mainField) => mainField || 'id',
+      (mainField) => sanitizeMainField(targetedModel, mainField, userAbility)
+    )(modelConfig);
 
     const fieldsToSelect = uniq(['id', mainField]);
     if (hasDraftAndPublish(targetedModel)) {

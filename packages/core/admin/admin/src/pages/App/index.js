@@ -31,21 +31,24 @@ import NotFoundPage from '../NotFoundPage';
 import UseCasePage from '../UseCasePage';
 
 import { ROUTES_CE, SET_ADMIN_PERMISSIONS } from './constants';
-import { getUID } from './utils';
 
 const AuthenticatedApp = lazy(() =>
   import(/* webpackChunkName: "Admin-authenticatedApp" */ '../../components/AuthenticatedApp')
 );
 
 function App() {
-  const adminPermissions = useEnterprise(ADMIN_PERMISSIONS_CE, async () => (await import('../../../../ee/admin/constants')).ADMIN_PERMISSIONS_EE, {
-    combine(cePermissions, eePermissions) {
-      // the `settings` NS e.g. are deep nested objects, that need a deep merge
-      return merge({}, cePermissions, eePermissions);
-    },
+  const adminPermissions = useEnterprise(
+    ADMIN_PERMISSIONS_CE,
+    async () => (await import('../../../../ee/admin/constants')).ADMIN_PERMISSIONS_EE,
+    {
+      combine(cePermissions, eePermissions) {
+        // the `settings` NS e.g. are deep nested objects, that need a deep merge
+        return merge({}, cePermissions, eePermissions);
+      },
 
-    defaultValue: ADMIN_PERMISSIONS_CE,
-  })
+      defaultValue: ADMIN_PERMISSIONS_CE,
+    }
+  );
   const routes = useEnterprise(
     ROUTES_CE,
     async () => (await import('../../../../ee/admin/pages/App/constants')).ROUTES_EE,
@@ -113,8 +116,6 @@ function App() {
           authLogo: prefixFileUrlWithBackendUrl(authLogo),
         });
 
-        const deviceId = await getUID();
-
         if (uuid) {
           const {
             data: { data: properties },
@@ -127,19 +128,23 @@ function App() {
 
           try {
             const event = 'didInitializeAdministration';
-            await post('https://analytics.strapi.io/api/v2/track', {
-              // This event is anonymous
-              event,
-              userId: '',
-              deviceId,
-              eventPropeties: {},
-              userProperties: { environment: appInfo.currentEnvironment },
-              groupProperties: { ...properties, projectId: uuid },
-            }, {
-              headers: {
-                'X-Strapi-Event': event,
+            await post(
+              'https://analytics.strapi.io/api/v2/track',
+              {
+                // This event is anonymous
+                event,
+                userId: '',
+                deviceId,
+                eventPropeties: {},
+                userProperties: { environment: appInfo.currentEnvironment },
+                groupProperties: { ...properties, projectId: uuid },
+              },
+              {
+                headers: {
+                  'X-Strapi-Event': event,
+                },
               }
-            });
+            );
           } catch (e) {
             // Silent.
           }

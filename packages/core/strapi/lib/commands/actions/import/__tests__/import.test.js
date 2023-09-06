@@ -37,6 +37,33 @@ const createTransferEngine = jest.fn(() => {
 });
 
 describe('Import', () => {
+  // mock command utils
+  jest.mock('../../../utils/data-transfer.js', () => {
+    return {
+      ...jest.requireActual('../../../utils/data-transfer.js'),
+      getTransferTelemetryPayload: jest.fn().mockReturnValue({}),
+      loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
+      formatDiagnostic: jest.fn(),
+      createStrapiInstance: jest.fn().mockReturnValue({
+        telemetry: {
+          send: jest.fn(),
+        },
+        destroy: jest.fn(),
+      }),
+      buildTransferTable: jest.fn(() => {
+        return {
+          toString() {
+            return 'table';
+          },
+        };
+      }),
+      exitMessageText: jest.fn(),
+      getDiffHandler: jest.fn(),
+      setSignalHandler: jest.fn(),
+    };
+  });
+
+  // mock @strapi/data-transfer
   const mockDataTransfer = {
     file: {
       providers: {
@@ -60,38 +87,7 @@ describe('Import', () => {
       createTransferEngine,
     },
   };
-
   jest.mock('@strapi/data-transfer', () => mockDataTransfer);
-
-  // command utils
-  const mockUtils = {
-    getTransferTelemetryPayload: jest.fn().mockReturnValue({}),
-    loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
-    formatDiagnostic: jest.fn(),
-    createStrapiInstance: jest.fn().mockReturnValue({
-      telemetry: {
-        send: jest.fn(),
-      },
-      destroy: jest.fn(),
-    }),
-    buildTransferTable: jest.fn(() => {
-      return {
-        toString() {
-          return 'table';
-        },
-      };
-    }),
-    exitMessageText: jest.fn(),
-    getDiffHandler: jest.fn(),
-    setSignalHandler: jest.fn(),
-  };
-  jest.mock(
-    '../../../utils/data-transfer.js',
-    () => {
-      return mockUtils;
-    },
-    { virtual: true }
-  );
 
   // console spies
   jest.spyOn(console, 'log').mockImplementation(() => {});

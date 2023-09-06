@@ -1,4 +1,4 @@
-import { Readable, PassThrough } from 'stream';
+import { Readable, Transform } from 'stream';
 import type { IEntity } from '../../../../../types';
 
 import {
@@ -128,7 +128,7 @@ describe('Local Strapi Source Provider - Entities Streaming', () => {
       const entitiesStream = Readable.from(entities);
       const transformStream = createEntitiesTransformStream();
 
-      expect(transformStream).toBeInstanceOf(PassThrough);
+      expect(transformStream).toBeInstanceOf(Transform);
 
       // Connect the data source to the transformation stream
       const pipeline = entitiesStream.pipe(transformStream);

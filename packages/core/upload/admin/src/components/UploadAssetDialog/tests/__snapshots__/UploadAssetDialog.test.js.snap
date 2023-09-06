@@ -47,7 +47,6 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
-  line-height: 0;
   color: #ffffff;
 }
 
@@ -277,7 +276,8 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   color: #666687;
 }
 
-.c35[aria-disabled='true'] svg > g,.c35[aria-disabled='true'] svg path {
+.c35[aria-disabled='true'] svg > g,
+.c35[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -290,7 +290,8 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   color: #666687;
 }
 
-.c35[aria-disabled='true']:active svg > g,.c35[aria-disabled='true']:active svg path {
+.c35[aria-disabled='true']:active svg > g,
+.c35[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -329,7 +330,8 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   color: #666687;
 }
 
-.c38[aria-disabled='true'] svg > g,.c38[aria-disabled='true'] svg path {
+.c38[aria-disabled='true'] svg > g,
+.c38[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -342,7 +344,8 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   color: #666687;
 }
 
-.c38[aria-disabled='true']:active svg > g,.c38[aria-disabled='true']:active svg path {
+.c38[aria-disabled='true']:active svg > g,
+.c38[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -729,7 +732,6 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
-  line-height: 0;
   color: #ffffff;
 }
 
@@ -961,7 +963,8 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   color: #666687;
 }
 
-.c36[aria-disabled='true'] svg > g,.c36[aria-disabled='true'] svg path {
+.c36[aria-disabled='true'] svg > g,
+.c36[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -974,7 +977,8 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   color: #666687;
 }
 
-.c36[aria-disabled='true']:active svg > g,.c36[aria-disabled='true']:active svg path {
+.c36[aria-disabled='true']:active svg > g,
+.c36[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -1013,7 +1017,8 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   color: #666687;
 }
 
-.c34[aria-disabled='true'] svg > g,.c34[aria-disabled='true'] svg path {
+.c34[aria-disabled='true'] svg > g,
+.c34[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -1026,7 +1031,8 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   color: #666687;
 }
 
-.c34[aria-disabled='true']:active svg > g,.c34[aria-disabled='true']:active svg path {
+.c34[aria-disabled='true']:active svg > g,
+.c34[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 

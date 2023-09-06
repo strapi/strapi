@@ -214,7 +214,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
                     })}
                   </Typography>
                 </LinkUser>
-                <LinkUser tabIndex={0} onClick={handleLogout} logout="logout" to="/auth/login">
+                <LinkUser tabIndex={0} onClick={handleLogout} to="/auth/login">
                   <Typography textColor="danger600">
                     {formatMessage({
                       id: 'app.components.LeftMenu.logout',

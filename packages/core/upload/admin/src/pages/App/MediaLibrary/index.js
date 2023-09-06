@@ -250,7 +250,9 @@ export const MediaLibrary = () => {
                   />
                 </BoxWithHeight>
               )}
-              {canRead && isGridView && <SortPicker onChangeSort={handleChangeSort} />}
+              {canRead && isGridView && (
+                <SortPicker value={query?.sort} onChangeSort={handleChangeSort} />
+              )}
               {canRead && <Filters />}
             </>
           }
@@ -330,7 +332,9 @@ export const MediaLibrary = () => {
               folderCount={folderCount}
               indeterminate={indeterminateBulkSelect}
               onChangeSort={handleChangeSort}
-              onChangeFolder={(folderID) => push(getFolderURL(pathname, query, folderID))}
+              onChangeFolder={(folderID, folderPath) =>
+                push(getFolderURL(pathname, query, { folder: folderID, folderPath }))
+              }
               onEditAsset={setAssetToEdit}
               onEditFolder={handleEditFolder}
               onSelectOne={selectOne}

@@ -10,14 +10,41 @@ import {
   ToggleInput,
   Typography,
 } from '@strapi/design-system';
+import { useCollator } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
+import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { getTrad } from '../../../utils';
 
-const Settings = ({ modifiedData, onChange, sortOptions }) => {
-  const { formatMessage } = useIntl();
-  const { settings, metadatas } = modifiedData;
+export const Settings = ({
+  contentTypeOptions,
+  modifiedData,
+  onChange,
+  sortOptions: sortOptionsCE,
+}) => {
+  const { formatMessage, locale } = useIntl();
+  const formatter = useCollator(locale, {
+    sensitivity: 'base',
+  });
+  const sortOptions = useEnterprise(
+    sortOptionsCE,
+    async () =>
+      (await import('../../../../../../ee/admin/content-manager/pages/ListSettingsView/constants'))
+        .REVIEW_WORKFLOW_STAGE_SORT_OPTION_NAME,
+    {
+      combine(ceOptions, eeOption) {
+        return [...ceOptions, { ...eeOption, label: formatMessage(eeOption.label) }];
+      },
+
+      defaultValue: sortOptionsCE,
+
+      enabled: !!contentTypeOptions?.reviewWorkflows,
+    }
+  );
+
+  const sortOptionsSorted = sortOptions.sort((a, b) => formatter.compare(a.label, b.label));
+  const { settings } = modifiedData;
 
   return (
     <Flex direction="column" alignItems="stretch" gap={4}>
@@ -129,9 +156,9 @@ const Settings = ({ modifiedData, onChange, sortOptions }) => {
             name="settings.defaultSortBy"
             value={modifiedData.settings.defaultSortBy || ''}
           >
-            {sortOptions.map((sortBy) => (
-              <Option key={sortBy} value={sortBy}>
-                {metadatas[sortBy].list.label || sortBy}
+            {sortOptionsSorted.map(({ value, label }) => (
+              <Option key={value} value={value}>
+                {label}
               </Option>
             ))}
           </Select>
@@ -164,9 +191,13 @@ Settings.defaultProps = {
 };
 
 Settings.propTypes = {
+  contentTypeOptions: PropTypes.object.isRequired,
   modifiedData: PropTypes.object,
   onChange: PropTypes.func.isRequired,
-  sortOptions: PropTypes.array,
+  sortOptions: PropTypes.arrayOf(
+    PropTypes.shape({
+      value: PropTypes.string,
+      label: PropTypes.string,
+    }).isRequired
+  ),
 };
-
-export default Settings;

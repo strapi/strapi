@@ -17,7 +17,6 @@ exports[`BulkMoveButton renders 1`] = `
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
-  line-height: 0;
   color: #ffffff;
 }
 
@@ -116,7 +115,8 @@ exports[`BulkMoveButton renders 1`] = `
   color: #666687;
 }
 
-.c3[aria-disabled='true'] svg > g,.c3[aria-disabled='true'] svg path {
+.c3[aria-disabled='true'] svg > g,
+.c3[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -129,7 +129,8 @@ exports[`BulkMoveButton renders 1`] = `
   color: #666687;
 }
 
-.c3[aria-disabled='true']:active svg > g,.c3[aria-disabled='true']:active svg path {
+.c3[aria-disabled='true']:active svg > g,
+.c3[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 

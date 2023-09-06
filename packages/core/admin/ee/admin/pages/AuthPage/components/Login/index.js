@@ -7,19 +7,23 @@ import styled from 'styled-components';
 
 import UnauthenticatedLayout from '../../../../../../admin/src/layouts/UnauthenticatedLayout';
 import BaseLogin from '../../../../../../admin/src/pages/AuthPage/components/Login/BaseLogin';
-import { useAuthProviders } from '../../../../hooks';
+import { useAuthProviders } from '../../../../hooks/useAuthProviders';
 import SSOProviders from '../Providers/SSOProviders';
 
 const DividerFull = styled(Divider)`
   flex: 1;
 `;
 
-const Login = (loginProps) => {
-  const ssoEnabled = window.strapi.features.isEnabled(window.strapi.features.SSO);
-  const { isLoading, data: providers } = useAuthProviders({ ssoEnabled });
+export const LoginEE = (loginProps) => {
   const { formatMessage } = useIntl();
+  const { isLoading, providers } = useAuthProviders({
+    enabled: window.strapi.features.isEnabled(window.strapi.features.SSO),
+  });
 
-  if (!ssoEnabled || (!isLoading && providers.length === 0)) {
+  if (
+    !window.strapi.features.isEnabled(window.strapi.features.SSO) ||
+    (!isLoading && providers.length === 0)
+  ) {
     return (
       <UnauthenticatedLayout>
         <BaseLogin {...loginProps} />
@@ -49,17 +53,15 @@ const Login = (loginProps) => {
   );
 };
 
-Login.defaultProps = {
+LoginEE.defaultProps = {
   onSubmit: (e) => e.preventDefault(),
   requestError: null,
 };
 
-Login.propTypes = {
+LoginEE.propTypes = {
   formErrors: PropTypes.object.isRequired,
   modifiedData: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func,
   requestError: PropTypes.object,
 };
-
-export default Login;

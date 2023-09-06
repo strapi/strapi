@@ -7,6 +7,57 @@ module.exports = {
   routes: [
     // Review workflow
     {
+      method: 'POST',
+      path: '/review-workflows/workflows',
+      handler: 'workflows.create',
+      config: {
+        middlewares: [enableFeatureMiddleware('review-workflows')],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['admin::review-workflows.create'],
+            },
+          },
+        ],
+      },
+    },
+    {
+      method: 'PUT',
+      path: '/review-workflows/workflows/:id',
+      handler: 'workflows.update',
+      config: {
+        middlewares: [enableFeatureMiddleware('review-workflows')],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['admin::review-workflows.update'],
+            },
+          },
+        ],
+      },
+    },
+    {
+      method: 'DELETE',
+      path: '/review-workflows/workflows/:id',
+      handler: 'workflows.delete',
+      config: {
+        middlewares: [enableFeatureMiddleware('review-workflows')],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['admin::review-workflows.delete'],
+            },
+          },
+        ],
+      },
+    },
+    {
       method: 'GET',
       path: '/review-workflows/workflows',
       handler: 'workflows.find',
@@ -58,23 +109,6 @@ module.exports = {
       },
     },
     {
-      method: 'PUT',
-      path: '/review-workflows/workflows/:workflow_id/stages',
-      handler: 'stages.replace',
-      config: {
-        middlewares: [enableFeatureMiddleware('review-workflows')],
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'admin::hasPermissions',
-            config: {
-              actions: ['admin::review-workflows.read'],
-            },
-          },
-        ],
-      },
-    },
-    {
       method: 'GET',
       path: '/review-workflows/workflows/:workflow_id/stages/:id',
       handler: 'stages.findById',
@@ -102,7 +136,24 @@ module.exports = {
           {
             name: 'admin::hasPermissions',
             config: {
-              actions: ['admin::review-workflows.read'],
+              actions: ['admin::review-workflows.update'],
+            },
+          },
+        ],
+      },
+    },
+    {
+      method: 'PUT',
+      path: '/content-manager/(collection|single)-types/:model_uid/:id/assignee',
+      handler: 'assignees.updateEntity',
+      config: {
+        middlewares: [enableFeatureMiddleware('review-workflows')],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['admin::users.read', 'admin::review-workflows.read'],
             },
           },
         ],

@@ -49,7 +49,7 @@ describe('useLazyComponents', () => {
     expect(result.current.lazyComponentStore['plugin::test.test']).toBeDefined();
   });
 
-  test('assuming the store has been initialised before hand, other hooks called should be able to access the global cache', async () => {
+  test('assuming the store has been initialized before hand, other hooks called should be able to access the global cache', async () => {
     const { result: initialResult } = renderHook(() => useLazyComponents(['plugin::test.test']));
 
     await waitFor(() =>
@@ -72,7 +72,7 @@ describe('useLazyComponents', () => {
     expect(result.current.lazyComponentStore).toEqual({});
   });
 
-  test('assuming the store has been initialised before hand, other hooks called should be able to modify the global cache and access it', async () => {
+  test('assuming the store has been initialized before hand, other hooks called should be able to modify the global cache and access it', async () => {
     const { result: initialResult } = renderHook(() => useLazyComponents(['plugin::test.color']));
 
     await waitFor(() =>

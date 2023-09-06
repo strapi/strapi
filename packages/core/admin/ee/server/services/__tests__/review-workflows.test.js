@@ -1,7 +1,7 @@
 'use strict';
 
 const reviewWorkflowsServiceFactory = require('../review-workflows/review-workflows');
-const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
+const { ENTITY_STAGE_ATTRIBUTE, ENTITY_ASSIGNEE_ATTRIBUTE } = require('../../constants/workflows');
 
 const workflowMock = {
   id: 1,
@@ -36,22 +36,41 @@ const queryMock = {
 
 const contentTypesMock = {
   test1: {
-    options: {
-      reviewWorkflows: false,
-    },
+    options: {},
     attributes: {},
+    pluginOptions: {
+      'content-manager': {
+        visible: false,
+      },
+    },
+    collectionName: 'test1',
   },
   test2: {
-    options: {
-      reviewWorkflows: true,
-    },
     attributes: {},
+    collectionName: 'test2',
   },
 };
 
+const contentTypesContainer = {
+  get: jest.fn((uid) => contentTypesMock[uid]),
+  extend: jest.fn((uid, callback) => callback(contentTypesMock[uid])),
+};
+
 const containerMock = {
-  get: jest.fn().mockReturnThis(),
-  extend: jest.fn(),
+  get: jest.fn((container) => {
+    switch (container) {
+      case 'content-types':
+        return contentTypesContainer;
+      default:
+        return null;
+    }
+  }),
+};
+
+const reviewWorkflowsValidationMock = {
+  register: jest.fn(),
+  validateWorkflowCount: jest.fn().mockResolvedValue(true),
+  validateWorkflowStages: jest.fn(),
 };
 
 const hookMock = jest.fn().mockReturnValue({ register: jest.fn() });
@@ -67,6 +86,8 @@ const strapiMock = {
         return stagesServiceMock;
       case 'admin::workflows':
         return workflowsServiceMock;
+      case 'admin::review-workflows-validation':
+        return reviewWorkflowsValidationMock;
       default:
         return null;
     }
@@ -90,7 +111,6 @@ describe('Review workflows service', () => {
       expect(workflowsServiceMock.count).toBeCalled();
       expect(stagesServiceMock.count).toBeCalled();
 
-      expect(stagesServiceMock.createMany).toBeCalled();
       expect(workflowsServiceMock.create).toBeCalled();
     });
     test('With a workflow in DB', async () => {
@@ -115,19 +135,25 @@ describe('Review workflows service', () => {
     });
   });
   describe('register', () => {
-    test('Content types with review workflows options should have a new attribute', async () => {
+    test('Content types with review workflows options should have new attributes for assignee and stage relations', async () => {
       await reviewWorkflowsService.register();
-      expect(containerMock.extend).toHaveBeenCalledTimes(1);
-      expect(containerMock.extend).not.toHaveBeenCalledWith('test1', expect.any(Function));
-      expect(containerMock.extend).toHaveBeenCalledWith('test2', expect.any(Function));
+      expect(contentTypesContainer.extend).toHaveBeenCalledTimes(1);
+      expect(contentTypesContainer.extend).not.toHaveBeenCalledWith('test1', expect.any(Function));
+      expect(contentTypesContainer.extend).toHaveBeenCalledWith('test2', expect.any(Function));
 
-      const extendFunc = containerMock.extend.mock.calls[0][1];
+      const extendFunc = contentTypesContainer.extend.mock.calls[0][1];
 
-      expect(extendFunc({})).toEqual({
+      expect(extendFunc({ collectionName: 'toto' })).toEqual({
+        collectionName: 'toto',
         attributes: {
           [ENTITY_STAGE_ATTRIBUTE]: expect.objectContaining({
             relation: 'oneToOne',
             target: 'admin::workflow-stage',
+            type: 'relation',
+          }),
+          [ENTITY_ASSIGNEE_ATTRIBUTE]: expect.objectContaining({
+            relation: 'oneToOne',
+            target: 'admin::user',
             type: 'relation',
           }),
         },

@@ -12,6 +12,7 @@ import {
   VisuallyHidden,
   Combobox,
 } from '@strapi/design-system';
+import { useFocusInputField } from '@strapi/helper-plugin';
 import { Cross, Refresh } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { FixedSizeList as List } from 'react-window';
@@ -85,6 +86,8 @@ const RelationInput = ({
 
   const listRef = useRef();
   const outerListRef = useRef();
+
+  const fieldRef = useFocusInputField(name);
 
   const { data } = searchResults;
 
@@ -206,6 +209,7 @@ const RelationInput = ({
     <Flex gap={3} justifyContent="space-between" alignItems="end" wrap="wrap">
       <Flex direction="column" alignItems="stretch" basis={size <= 6 ? '100%' : '70%'} gap={2}>
         <Combobox
+          ref={fieldRef}
           autocomplete="list"
           error={error}
           name={name}
@@ -373,7 +377,7 @@ RelationInput.propTypes = {
 };
 
 /**
- * This is in a seperate component to enforce passing all the props the component requires to react-window
+ * This is in a separate component to enforce passing all the props the component requires to react-window
  * to ensure drag & drop correctly works.
  */
 const ListItem = ({ data, index, style }) => {
