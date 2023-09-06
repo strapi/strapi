@@ -1,17 +1,30 @@
 /* eslint-disable check-file/filename-naming-convention */
 
-import { renderHook, act } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
-import { Router } from 'react-router-dom';
+import React from 'react';
+
+import { renderHook, act } from '@tests/utils';
+import { Route, useLocation } from 'react-router-dom';
 
 import { useQueryParams } from '../useQueryParams';
 
-const history = createMemoryHistory();
-
 describe('useQueryParams', () => {
   it('should set and remove the query params using setQuery method', () => {
+    let testLocation: ReturnType<typeof useLocation> = null!;
+
     const { result } = renderHook(({ initialParams }) => useQueryParams(initialParams), {
-      wrapper: ({ children }) => <Router history={history}>{children}</Router>,
+      wrapper: ({ children }) => (
+        <>
+          {children}
+          <Route
+            path="*"
+            render={({ location }) => {
+              testLocation = location;
+
+              return null;
+            }}
+          />
+        </>
+      ),
       initialProps: { initialParams: { page: 1, type: 'plugins' } },
     });
 
@@ -21,14 +34,15 @@ describe('useQueryParams', () => {
     act(() => {
       setQuery({ type: 'plugins' }, 'remove');
     });
-    const searchParams = new URLSearchParams(history.location.search);
+
+    const searchParams = new URLSearchParams(testLocation.search);
     expect(searchParams.has('type')).toBe(false);
     expect(searchParams.has('page')).toBe(true);
 
     act(() => {
       setQuery({ filters: { type: 'audio' }, page: 1 });
     });
-    const updatedSearchParams = new URLSearchParams(history.location.search);
+    const updatedSearchParams = new URLSearchParams(testLocation.search);
     expect(updatedSearchParams.get('page')).toEqual('1');
     expect(updatedSearchParams.get('filters[type]')).toEqual('audio');
   });
