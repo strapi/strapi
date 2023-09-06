@@ -121,7 +121,7 @@
     "sift": "16.0.1",
     "style-loader": "3.3.1",
     "styled-components": "5.3.3",
-    "typescript": "5.1.3",
+    "typescript": "5.2.2",
     "webpack": "^5.88.1",
     "webpack-cli": "^5.1.0",
     "webpack-dev-server": "^4.15.0",

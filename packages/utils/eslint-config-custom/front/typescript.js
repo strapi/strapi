@@ -3,7 +3,7 @@ module.exports = {
   extends: ['@strapi/eslint-config/front/typescript'],
   overrides: [
     {
-      files: ['**/*.test.js', '**/*.test.jsx', '**/__mocks__/**/*'],
+      files: ['**/*.test.[j|t]s', '**/*.test.[j|t]sx', '**/__mocks__/**/*'],
       env: {
         jest: true,
       },
@@ -23,6 +23,7 @@ module.exports = {
      * we can remove this rule back to the recommended setting.
      */
     'import/no-named-as-default-member': 'off',
+    'import/no-extraneous-dependencies': 'error',
     'no-restricted-imports': [
       'error',
       {
@@ -73,5 +74,6 @@ module.exports = {
         message: 'Use window.strapi instead.',
       },
     ],
+    'react/display-name': 'off',
   },
 };

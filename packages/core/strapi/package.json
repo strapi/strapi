@@ -94,8 +94,10 @@
     "@strapi/plugin-upload": "4.13.3",
     "@strapi/typescript-utils": "4.13.3",
     "@strapi/utils": "4.13.3",
+    "@vitejs/plugin-react": "4.0.4",
     "bcryptjs": "2.4.3",
     "boxen": "5.1.2",
+    "browserslist-to-esbuild": "1.2.0",
     "chalk": "4.1.2",
     "chokidar": "3.5.3",
     "ci-info": "3.8.0",
@@ -132,12 +134,15 @@
     "qs": "6.11.1",
     "resolve-cwd": "3.0.0",
     "semver": "7.5.4",
-    "statuses": "2.0.1"
+    "statuses": "2.0.1",
+    "typescript": "5.2.2",
+    "vite": "4.4.9",
+    "yup": "0.32.9"
   },
   "devDependencies": {
     "supertest": "6.3.3",
     "ts-zen": "https://github.com/strapi/ts-zen#41af3f8c6422de048bf9976ae551566b2c2b590a",
-    "typescript": "5.1.3"
+    "typescript": "5.2.2"
   },
   "engines": {
     "node": ">=16.0.0 <=20.x.x",
