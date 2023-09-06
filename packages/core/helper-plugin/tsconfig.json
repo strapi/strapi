@@ -2,6 +2,7 @@
   "extends": "tsconfig/client.json",
   "compilerOptions": {
     "baseUrl": ".",
+    "moduleResolution": "Node16",
     "paths": {
       "@tests/*": ["./tests/*"]
     }

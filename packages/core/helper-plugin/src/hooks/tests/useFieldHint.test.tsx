@@ -1,7 +1,7 @@
 /* eslint-disable check-file/filename-naming-convention */ // this is disabled because the file name is correct however, we do use JSX in this file.
 import * as React from 'react';
 
-import { renderHook } from '@testing-library/react';
+import { renderHook } from '@tests/utils';
 import { IntlProvider } from 'react-intl';
 
 import { useFieldHint } from '../useFieldHint';

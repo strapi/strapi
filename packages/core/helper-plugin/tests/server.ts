@@ -1,7 +1,7 @@
 import { rest } from 'msw';
-import { setupServer } from 'msw/node';
+import { setupServer, SetupServer } from 'msw/node';
 
-export const server = setupServer(
+export const server: SetupServer = setupServer(
   ...[
     rest.post('/admin/permissions/check', async (req, res, ctx) => {
       return res(
