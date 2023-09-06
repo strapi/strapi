@@ -44,6 +44,14 @@ const server = setupServer(
         ],
       })
     )
+  ),
+
+  rest.get('*/license-limit-information', (req, res, ctx) =>
+    res(
+      ctx.json({
+        data: {},
+      })
+    )
   )
 );
 
@@ -92,7 +100,7 @@ describe('EE | Content Manager | EditView | InformationBox | StageSelect', () =>
     server.close();
   });
 
-  it('renders an enabled select input, if the entity is edited', () => {
+  it('renders an enabled select input, if the entity is edited', async () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {
         [STAGE_ATTRIBUTE_NAME]: null,
@@ -102,9 +110,8 @@ describe('EE | Content Manager | EditView | InformationBox | StageSelect', () =>
     });
 
     const { queryByRole } = setup();
-    const select = queryByRole('combobox');
 
-    expect(select).toBeInTheDocument();
+    await waitFor(() => expect(queryByRole('combobox')).toBeInTheDocument());
   });
 
   it('renders a select input, if a workflow stage is assigned to the entity', async () => {
@@ -120,12 +127,10 @@ describe('EE | Content Manager | EditView | InformationBox | StageSelect', () =>
 
     await waitFor(() => expect(queryByTestId('loader')).not.toBeInTheDocument());
 
-    const select = queryByRole('combobox');
+    await waitFor(() => expect(getByText('Stage 1')).toBeInTheDocument());
 
-    expect(getByText('Stage 1')).toBeInTheDocument();
+    await user.click(queryByRole('combobox'));
 
-    await user.click(select);
-
-    expect(getByText('Stage 2')).toBeInTheDocument();
+    await waitFor(() => expect(getByText('Stage 2')).toBeInTheDocument());
   });
 });

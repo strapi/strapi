@@ -1,8 +1,24 @@
+<<<<<<< HEAD:packages/core/strapi/src/commands/utils/helpers.ts
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { yellow, red, green } from 'chalk';
 import { has, isString, isArray } from 'lodash/fp';
 import resolveCwd from 'resolve-cwd';
 import type { Command } from 'commander';
+=======
+'use strict';
+
+/**
+ * Helper functions for the Strapi CLI
+ */
+
+const { yellow, red, green } = require('chalk');
+const { isString, isArray } = require('lodash/fp');
+const resolveCwd = require('resolve-cwd');
+const { has } = require('lodash/fp');
+const { prompt } = require('inquirer');
+const boxen = require('boxen');
+const chalk = require('chalk');
+>>>>>>> main:packages/core/strapi/lib/commands/utils/helpers.js
 
 const bytesPerKb = 1024;
 const sizes = ['B ', 'KB', 'MB', 'GB', 'TB', 'PB'];
@@ -117,8 +133,16 @@ const assertCwdContainsStrapiProject = (name: string) => {
 
   try {
     const pkgJSON = require(`${process.cwd()}/package.json`);
+<<<<<<< HEAD:packages/core/strapi/src/commands/utils/helpers.ts
     if (!has('dependencies.@strapi/strapi', pkgJSON)) {
       logErrorAndExit();
+=======
+    if (
+      !has('dependencies.@strapi/strapi', pkgJSON) &&
+      !has('devDependencies.@strapi/strapi', pkgJSON)
+    ) {
+      logErrorAndExit(name);
+>>>>>>> main:packages/core/strapi/lib/commands/utils/helpers.js
     }
   } catch (err) {
     logErrorAndExit();
@@ -152,11 +176,61 @@ const getLocalScript =
       });
   };
 
+<<<<<<< HEAD:packages/core/strapi/src/commands/utils/helpers.ts
 export {
+=======
+/**
+ * @description Notify users this is an experimental command and get them to approve first
+ * this can be opted out by passing `yes` as a property of the args object.
+ *
+ * @type {(args?: { force?: boolean }) => Promise<void>}
+ *
+ * @example
+ * ```ts
+ * const { notifyExperimentalCommand } = require('../utils/helpers');
+ *
+ * const myCommand = async ({ force }) => {
+ *  await notifyExperimentalCommand({ force });
+ * }
+ * ```
+ */
+const notifyExperimentalCommand = async ({ force } = {}) => {
+  console.log(
+    boxen(
+      `The ${chalk.bold(
+        chalk.underline('plugin:build')
+      )} command is considered experimental, use at your own risk.`,
+      {
+        title: 'Warning',
+        padding: 1,
+        margin: 1,
+        align: 'center',
+        borderColor: 'yellow',
+        borderStyle: 'bold',
+      }
+    )
+  );
+
+  if (!force) {
+    const { confirmed } = await prompt({
+      type: 'confirm',
+      name: 'confirmed',
+      message: 'Do you want to continue?',
+    });
+
+    if (!confirmed) {
+      process.exit(0);
+    }
+  }
+};
+
+module.exports = {
+>>>>>>> main:packages/core/strapi/lib/commands/utils/helpers.js
   exitWith,
   assertUrlHasProtocol,
   ifOptions,
   readableBytes,
   getLocalScript,
   assertCwdContainsStrapiProject,
+  notifyExperimentalCommand,
 };

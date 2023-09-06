@@ -1,6 +1,6 @@
 {
   "name": "@strapi/data-transfer",
-  "version": "4.12.7",
+  "version": "4.13.3",
   "description": "Data transfer capabilities for Strapi",
   "keywords": [
     "strapi",
@@ -40,8 +40,9 @@
     "./dist"
   ],
   "dependencies": {
-    "@strapi/logger": "4.12.7",
-    "@strapi/utils": "4.12.7",
+    "@strapi/logger": "4.13.3",
+    "@strapi/strapi": "4.13.3",
+    "@strapi/utils": "4.13.3",
     "chalk": "4.1.2",
     "cli-table3": "0.6.2",
     "commander": "8.3.0",
@@ -58,7 +59,7 @@
     "ws": "8.13.0"
   },
   "peerDependencies": {
-    "@strapi/strapi": "4.12.7"
+    "@strapi/strapi": "^4.13.3"
   },
   "devDependencies": {
     "@types/fs-extra": "9.0.13",
@@ -75,7 +76,7 @@
     "knex": "2.5.0",
     "koa": "2.13.4",
     "rimraf": "3.0.2",
-    "typescript": "5.1.3"
+    "typescript": "5.2.2"
   },
   "engines": {
     "node": ">=16.0.0 <=20.x.x",

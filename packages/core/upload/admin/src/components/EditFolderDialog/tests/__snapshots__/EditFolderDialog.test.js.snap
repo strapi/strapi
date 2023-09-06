@@ -245,7 +245,8 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c30[aria-disabled='true'] svg > g,.c30[aria-disabled='true'] svg path {
+.c30[aria-disabled='true'] svg > g,
+.c30[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -258,7 +259,8 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c30[aria-disabled='true']:active svg > g,.c30[aria-disabled='true']:active svg path {
+.c30[aria-disabled='true']:active svg > g,
+.c30[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -297,7 +299,8 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c32[aria-disabled='true'] svg > g,.c32[aria-disabled='true'] svg path {
+.c32[aria-disabled='true'] svg > g,
+.c32[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -310,7 +313,8 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c32[aria-disabled='true']:active svg > g,.c32[aria-disabled='true']:active svg path {
+.c32[aria-disabled='true']:active svg > g,
+.c32[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
