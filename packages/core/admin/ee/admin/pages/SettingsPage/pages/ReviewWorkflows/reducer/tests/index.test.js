@@ -180,7 +180,7 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
     );
   });
 
-  test('ACTION_CLONE_STAGE', () => {
+  test('ACTION_CLONE_STAGE - existing stages', () => {
     const action = {
       type: ACTION_CLONE_STAGE,
       payload: { id: 1 },
@@ -212,6 +212,54 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
 
                 expect.objectContaining({
                   id: 2,
+                }),
+              ],
+            }),
+          }),
+        }),
+      })
+    );
+  });
+
+  test('ACTION_CLONE_STAGE - stages that haven not been saved yet', () => {
+    const action = {
+      type: ACTION_CLONE_STAGE,
+      payload: { id: 4 },
+    };
+
+    state = {
+      status: expect.any(String),
+      serverState: expect.any(Object),
+      clientState: {
+        currentWorkflow: {
+          data: {
+            ...WORKFLOW_FIXTURE,
+            stages: [
+              ...WORKFLOW_FIXTURE.stages,
+              {
+                __temp_key__: 4,
+                color: '#4945FF',
+                name: 'stage-temp',
+              },
+            ],
+          },
+        },
+      },
+    };
+
+    expect(reducer(state, action)).toStrictEqual(
+      expect.objectContaining({
+        clientState: expect.objectContaining({
+          currentWorkflow: expect.objectContaining({
+            data: expect.objectContaining({
+              stages: [
+                expect.any(Object),
+                expect.any(Object),
+                expect.objectContaining({
+                  name: 'stage-temp',
+                }),
+                expect.objectContaining({
+                  name: 'stage-temp',
                 }),
               ],
             }),
