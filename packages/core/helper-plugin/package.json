@@ -47,6 +47,7 @@
     "axios": "1.5.0",
     "date-fns": "2.30.0",
     "formik": "2.4.0",
+    "history": "^4.9.0",
     "immer": "9.0.19",
     "lodash": "4.17.21",
     "prop-types": "^15.8.1",
@@ -54,7 +55,8 @@
     "react-helmet": "^6.1.0",
     "react-intl": "6.4.1",
     "react-query": "3.39.3",
-    "react-select": "5.7.0"
+    "react-select": "5.7.0",
+    "yup": "0.32.9"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "15.2.0",

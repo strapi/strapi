@@ -7210,6 +7210,7 @@ __metadata:
     eslint-config-custom: 4.13.2
     eslint-plugin-storybook: 0.6.13
     formik: 2.4.0
+    history: ^4.9.0
     immer: 9.0.19
     lodash: 4.17.21
     msw: 1.3.0
@@ -7229,6 +7230,7 @@ __metadata:
     vite: 4.4.9
     webpack: ^5.88.1
     webpack-cli: ^5.1.0
+    yup: 0.32.9
   peerDependencies:
     "@strapi/design-system": 1.9.0
     "@strapi/icons": 1.9.0
