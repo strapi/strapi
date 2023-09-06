@@ -4,10 +4,10 @@ import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
-import Toolbar from '..';
+import { BlocksToolbar } from '..';
 
 const setup = () =>
-  render(<Toolbar />, {
+  render(<BlocksToolbar />, {
     wrapper: ({ children }) => (
       <ThemeProvider theme={lightTheme}>
         <IntlProvider messages={{}} locale="en">

@@ -5627,7 +5627,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@radix-ui/react-toolbar@npm:^1.0.4":
+"@radix-ui/react-toolbar@npm:1.0.4, @radix-ui/react-toolbar@npm:^1.0.4":
   version: 1.0.4
   resolution: "@radix-ui/react-toolbar@npm:1.0.4"
   dependencies:
@@ -6952,6 +6952,7 @@ __metadata:
   dependencies:
     "@casl/ability": ^5.4.3
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.10
+    "@radix-ui/react-toolbar": 1.0.4
     "@strapi/data-transfer": 4.12.7
     "@strapi/design-system": 1.9.0
     "@strapi/helper-plugin": 4.12.7

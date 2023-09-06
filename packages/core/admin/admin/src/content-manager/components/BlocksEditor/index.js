@@ -8,7 +8,7 @@ import { createEditor } from 'slate';
 import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
-import Toolbar from './Toolbar';
+import { BlocksToolbar } from './Toolbar';
 
 const TypographyAsterisk = styled(Typography)`
   line-height: 0;
@@ -68,7 +68,7 @@ const BlocksEditor = React.forwardRef(({ intlLabel, name, readOnly, required, er
 
         <Slate editor={editor} initialValue={initialValue}>
           <InputWrapper direction="column" alignItems="flex-start">
-            <Toolbar />
+            <BlocksToolbar />
             <EditorDivider width="100%" />
             <Editable readOnly={readOnly} style={style} />
           </InputWrapper>

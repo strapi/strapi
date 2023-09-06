@@ -42,6 +42,7 @@
   "dependencies": {
     "@casl/ability": "^5.4.3",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",
+    "@radix-ui/react-toolbar": "1.0.4",
     "@strapi/data-transfer": "4.12.7",
     "@strapi/design-system": "1.9.0",
     "@strapi/helper-plugin": "4.12.7",

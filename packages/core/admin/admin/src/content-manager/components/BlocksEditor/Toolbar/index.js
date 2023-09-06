@@ -1,47 +1,36 @@
 import * as React from 'react';
 
+import * as Toolbar from '@radix-ui/react-toolbar';
 import { Flex } from '@strapi/design-system';
-import PropTypes from 'prop-types';
+import { pxToRem } from '@strapi/helper-plugin';
 import styled from 'styled-components';
 
-const Root = ({ children }) => {
-  return (
-    <Flex paddingTop={2} paddingBottom={2} gap={2} paddingLeft={2} paddingRight={2} role="toolbar">
-      {children}
-    </Flex>
-  );
-};
-
-Root.propTypes = {
-  children: PropTypes.node.isRequired,
-};
-
-const SectionWrapper = styled(Flex)`
-  &:not(:last-child) {
-    padding-right: ${({ theme }) => theme.spaces[2]};
-    border-right: 1px solid ${({ theme }) => theme.colors.neutral200};
-  }
+const Separator = styled(Toolbar.Separator)`
+  background: ${({ theme }) => theme.colors.neutral150};
+  width: 1px;
+  height: ${pxToRem(24)};
 `;
 
-const Section = ({ children }) => {
-  return <SectionWrapper gap={1}>{children}</SectionWrapper>;
-};
-
-Section.propTypes = {
-  children: PropTypes.node.isRequired,
-};
-
-const Toolbar = () => {
+const BlocksToolbar = () => {
   return (
-    <Root>
-      <Section>
-        <div>item</div>
-      </Section>
-      <Section>
-        <div>item</div>
-      </Section>
-    </Root>
+    <Toolbar.Root asChild>
+      <Flex gap={1} padding={2}>
+        <Toolbar.ToggleGroup type="multiple" asChild>
+          <Flex gap={1}>
+            <Toolbar.ToggleItem value="test">test</Toolbar.ToggleItem>
+            <Toolbar.ToggleItem value="test2">test</Toolbar.ToggleItem>
+          </Flex>
+        </Toolbar.ToggleGroup>
+        <Separator />
+        <Toolbar.ToggleGroup type="multiple" asChild>
+          <Flex gap={1}>
+            <Toolbar.ToggleItem value="test">test</Toolbar.ToggleItem>
+            <Toolbar.ToggleItem value="test2">test</Toolbar.ToggleItem>
+          </Flex>
+        </Toolbar.ToggleGroup>
+      </Flex>
+    </Toolbar.Root>
   );
 };
 
-export default Toolbar;
+export { BlocksToolbar };
