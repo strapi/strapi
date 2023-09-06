@@ -10,6 +10,8 @@ describe('Stages', () => {
   const numberOfStages = 4;
   const entityStageId = 1;
 
+  const readMock = jest.fn(() => false);
+
   global.strapi = {
     admin: {
       services: {
@@ -28,6 +30,27 @@ describe('Stages', () => {
         },
       },
     },
+    plugins: {
+      'content-manager': {
+        services: {
+          'permission-checker': {
+            create() {
+              return {
+                cannot: {
+                  read: readMock,
+                },
+              };
+            },
+          },
+        },
+        service(name) {
+          return this.services[name];
+        },
+      },
+    },
+    plugin(name) {
+      return this.plugins[name];
+    },
     entityService: {
       findOne: jest.fn((_, id) => {
         if (id === nonExistantEntityId) {
@@ -44,9 +67,16 @@ describe('Stages', () => {
 
   const modelUID = 'UID';
 
+  const baseCtx = {
+    state: {
+      userAbility: {},
+    },
+  };
+
   describe('listAvailableStages', () => {
     test('non existant entity', async () => {
       const ctx = {
+        ...baseCtx,
         params: {
           model_uid: modelUID,
           id: nonExistantEntityId,
@@ -73,6 +103,48 @@ describe('Stages', () => {
       global.strapi.admin.services['stage-permissions'].can.mockReturnValueOnce(false);
 
       const ctx = {
+        ...baseCtx,
+        params: {
+          model_uid: modelUID,
+          id: entityId,
+        },
+      };
+
+      await stages.listAvailableStages(ctx);
+
+      expect(ctx.body.data.length).toBe(0);
+    });
+
+    test('cannot read', async () => {
+      readMock.mockReturnValueOnce(true);
+
+      const ctx = {
+        ...baseCtx,
+        params: {
+          model_uid: modelUID,
+          id: entityId,
+        },
+        forbidden() {
+          const error = new Error();
+          error.status = 403;
+          throw error;
+        },
+      };
+
+      let error;
+      try {
+        await stages.listAvailableStages(ctx);
+      } catch (e) {
+        error = e;
+      }
+      expect(error.status).toBe(403);
+    });
+
+    test('cannot transition', async () => {
+      global.strapi.admin.services['stage-permissions'].can.mockReturnValueOnce(false);
+
+      const ctx = {
+        ...baseCtx,
         params: {
           model_uid: modelUID,
           id: entityId,
@@ -86,6 +158,7 @@ describe('Stages', () => {
 
     test('can transition', async () => {
       const ctx = {
+        ...baseCtx,
         params: {
           model_uid: modelUID,
           id: entityId,

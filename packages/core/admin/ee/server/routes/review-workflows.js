@@ -148,15 +148,7 @@ module.exports = {
       handler: 'stages.listAvailableStages',
       config: {
         middlewares: [enableFeatureMiddleware('review-workflows')],
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'admin::hasPermissions',
-            config: {
-              actions: ['admin::review-workflows.read'],
-            },
-          },
-        ],
+        policies: ['admin::isAuthenticatedAdmin'],
       },
     },
     {
