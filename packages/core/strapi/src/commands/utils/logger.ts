@@ -1,26 +1,22 @@
-'use strict';
+import chalk from 'chalk';
 
-const chalk = require('chalk');
+export interface LoggerOptions {
+  silent?: boolean;
+  debug?: boolean;
+  timestamp?: boolean;
+}
 
-/**
- * @typedef {{ silent?: boolean; debug?: boolean; timestamp?: boolean; }} LoggerOptions
- */
+export interface Logger {
+  warnings: number;
+  errors: number;
+  debug: (...args: unknown[]) => void;
+  info: (...args: unknown[]) => void;
+  warn: (...args: unknown[]) => void;
+  error: (...args: unknown[]) => void;
+  log: (...args: unknown[]) => void;
+}
 
-/**
- * @typedef {object} Logger
- * @property {number} warnings
- * @property {number} errors
- * @property {(...args: any[]) => void} debug
- * @property {(...args: any[]) => void} info
- * @property {(...args: any[]) => void} warn
- * @property {(...args: any[]) => void} error
- * @property {(...args: any[]) => void} log
- */
-
-/**
- * @type {(options: LoggerOptions) => Logger}
- */
-const createLogger = (options = {}) => {
+const createLogger = (options: LoggerOptions = {}): Logger => {
   const { silent = false, debug = false, timestamp = true } = options;
 
   const state = { errors: 0, warning: 0 };
@@ -92,6 +88,4 @@ const createLogger = (options = {}) => {
   };
 };
 
-module.exports = {
-  createLogger,
-};
+export { createLogger };

@@ -1,13 +1,11 @@
-'use strict';
-
-const { forceOption } = require('../../../utils/commander');
-const { getLocalScript } = require('../../../utils/helpers');
+import { forceOption } from '../../../utils/commander';
+import { getLocalScript } from '../../../utils/helpers';
+import type { StrapiCommand } from '../../../types';
 
 /**
  * `$ strapi plugin:build`
- * @param {import('../../../../types/core/commands').AddCommandOptions} options
  */
-module.exports = ({ command }) => {
+const command: StrapiCommand = ({ command }) => {
   command
     .command('plugin:build')
     .description('Bundle your strapi plugin for publishing.')
@@ -15,3 +13,5 @@ module.exports = ({ command }) => {
     .option('-d, --debug', 'Enable debugging mode with verbose logs', false)
     .action(getLocalScript('plugin/build-command'));
 };
+
+export default command;

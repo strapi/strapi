@@ -1,27 +1,24 @@
-'use strict';
-
-const fs = require('fs/promises');
-const boxen = require('boxen');
-const chalk = require('chalk');
-const ora = require('ora');
-const { createLogger } = require('../../../utils/logger');
-const { notifyExperimentalCommand } = require('../../../utils/helpers');
-const {
+import fs from 'fs/promises';
+import boxen from 'boxen';
+import chalk from 'chalk';
+import ora from 'ora';
+import { createLogger } from '../../../utils/logger';
+import { notifyExperimentalCommand } from '../../../utils/helpers';
+import {
   loadPkg,
   validatePkg,
   validateExportsOrdering,
   getExportExtensionMap,
-} = require('../../../utils/pkg');
-const { createBuildContext, createBuildTasks } = require('../../../builders/packages');
-const { buildTaskHandlers } = require('../../../builders/tasks');
+} from '../../../utils/pkg';
+import { createBuildContext, createBuildTasks } from '../../../builders/packages';
+import { buildTaskHandlers } from '../../../builders/tasks';
 
-/**
- *
- * @param {object} args
- * @param {boolean} args.force
- * @param {boolean} args.debug
- */
-module.exports = async ({ force, debug }) => {
+interface ActionOptions {
+  force?: boolean;
+  debug?: boolean;
+}
+
+export default async ({ force, debug }: ActionOptions) => {
   const logger = createLogger({ debug, timestamp: false });
   try {
     /**
@@ -106,13 +103,10 @@ module.exports = async ({ force, debug }) => {
     }
 
     for (const task of buildTasks) {
-      /**
-       * @type {import('../../../builders/tasks').TaskHandler<any>}
-       */
-      const handler = buildTaskHandlers[task.type];
+      const handler = buildTaskHandlers(task);
       handler.print(ctx, task);
 
-      await handler.run(ctx, task).catch((err) => {
+      await handler.run(ctx, task).catch((err: NodeJS.ErrnoException) => {
         if (err instanceof Error) {
           logger.error(err.message);
         }
@@ -124,14 +118,16 @@ module.exports = async ({ force, debug }) => {
     logger.error(
       'There seems to be an unexpected error, try again with --debug for more information \n'
     );
-    console.log(
-      chalk.red(
-        boxen(err.stack, {
-          padding: 1,
-          align: 'left',
-        })
-      )
-    );
+    if (err instanceof Error && err.stack) {
+      console.log(
+        chalk.red(
+          boxen(err.stack, {
+            padding: 1,
+            align: 'left',
+          })
+        )
+      );
+    }
     process.exit(1);
   }
 };

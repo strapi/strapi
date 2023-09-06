@@ -1,10 +1,15 @@
 {
   "$schema": "http://json.schemastore.org/tsconfig",
-  "extends": "./base.json",
   "compilerOptions": {
-    "module": "ESNext",
     "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "target": "es2015",
     "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
     "noEmit": true
   }
 }

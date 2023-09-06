@@ -1,25 +1,14 @@
-<<<<<<< HEAD:packages/core/strapi/src/commands/utils/helpers.ts
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { yellow, red, green } from 'chalk';
+import chalk, { yellow, red, green } from 'chalk';
 import { has, isString, isArray } from 'lodash/fp';
 import resolveCwd from 'resolve-cwd';
+import { prompt } from 'inquirer';
+import boxen from 'boxen';
 import type { Command } from 'commander';
-=======
-'use strict';
 
 /**
  * Helper functions for the Strapi CLI
  */
-
-const { yellow, red, green } = require('chalk');
-const { isString, isArray } = require('lodash/fp');
-const resolveCwd = require('resolve-cwd');
-const { has } = require('lodash/fp');
-const { prompt } = require('inquirer');
-const boxen = require('boxen');
-const chalk = require('chalk');
->>>>>>> main:packages/core/strapi/lib/commands/utils/helpers.js
-
 const bytesPerKb = 1024;
 const sizes = ['B ', 'KB', 'MB', 'GB', 'TB', 'PB'];
 
@@ -133,16 +122,11 @@ const assertCwdContainsStrapiProject = (name: string) => {
 
   try {
     const pkgJSON = require(`${process.cwd()}/package.json`);
-<<<<<<< HEAD:packages/core/strapi/src/commands/utils/helpers.ts
-    if (!has('dependencies.@strapi/strapi', pkgJSON)) {
-      logErrorAndExit();
-=======
     if (
       !has('dependencies.@strapi/strapi', pkgJSON) &&
       !has('devDependencies.@strapi/strapi', pkgJSON)
     ) {
-      logErrorAndExit(name);
->>>>>>> main:packages/core/strapi/lib/commands/utils/helpers.js
+      logErrorAndExit();
     }
   } catch (err) {
     logErrorAndExit();
@@ -176,9 +160,6 @@ const getLocalScript =
       });
   };
 
-<<<<<<< HEAD:packages/core/strapi/src/commands/utils/helpers.ts
-export {
-=======
 /**
  * @description Notify users this is an experimental command and get them to approve first
  * this can be opted out by passing `yes` as a property of the args object.
@@ -194,7 +175,7 @@ export {
  * }
  * ```
  */
-const notifyExperimentalCommand = async ({ force } = {}) => {
+const notifyExperimentalCommand = async ({ force }: { force?: boolean } = {}) => {
   console.log(
     boxen(
       `The ${chalk.bold(
@@ -224,8 +205,7 @@ const notifyExperimentalCommand = async ({ force } = {}) => {
   }
 };
 
-module.exports = {
->>>>>>> main:packages/core/strapi/lib/commands/utils/helpers.js
+export {
   exitWith,
   assertUrlHasProtocol,
   ifOptions,

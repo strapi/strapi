@@ -1,17 +1,18 @@
-'use strict';
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+import path from 'path';
+// @ts-ignore
+import { build, createLogger, InlineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import ora from 'ora';
+import chalk from 'chalk';
 
-const path = require('path');
-const { build, createLogger } = require('vite');
-const react = require('@vitejs/plugin-react');
-const ora = require('ora');
-const chalk = require('chalk');
+import type { TaskHandler } from '.';
+import type { BuildContext, BuildTask, Target } from '../packages';
 
 /**
  * @internal
- *
- * @type {(ctx: import('../packages').BuildContext, task: ViteTask) => import('vite').UserConfig}
  */
-const resolveViteConfig = (ctx, task) => {
+const resolveViteConfig = (ctx: BuildContext, task: ViteTask): InlineConfig => {
   const { cwd, distPath, targets, external, extMap, pkg } = ctx;
   const { entries, format, output, runtime } = task;
   const outputExt = extMap[pkg.type || 'commonjs'][format];
@@ -22,10 +23,7 @@ const resolveViteConfig = (ctx, task) => {
   customLogger.warnOnce = (msg) => ctx.logger.warn(msg);
   customLogger.error = (msg) => ctx.logger.error(msg);
 
-  /**
-   * @type {import('vite').InlineConfig}
-   */
-  const config = {
+  const config: InlineConfig = {
     configFile: false,
     root: cwd,
     mode: 'production',
@@ -79,25 +77,20 @@ const resolveViteConfig = (ctx, task) => {
   return config;
 };
 
-/**
- * @typedef {Object} ViteTaskEntry
- * @property {string} path
- * @property {string} entry
- */
+interface ViteTaskEntry {
+  path: string;
+  entry: string;
+}
 
-/**
- * @typedef {Object} ViteTask
- * @property {"build:js"} type
- * @property {ViteTaskEntry[]} entries
- * @property {string} format
- * @property {string} output
- * @property {keyof import('../packages').Targets} runtime
- */
+export interface ViteTask extends BuildTask {
+  type: 'build:js';
+  entries: ViteTaskEntry[];
+  format: 'cjs' | 'es';
+  output: string;
+  runtime: Target;
+}
 
-/**
- * @type {import('./index').TaskHandler<ViteTask>}
- */
-const viteTask = {
+const viteTask: TaskHandler<ViteTask> = {
   _spinner: null,
   print(ctx, task) {
     const targetLines = [
@@ -130,15 +123,13 @@ const viteTask = {
     }
   },
   async success() {
-    this._spinner.succeed('Built javascript files');
+    this._spinner?.succeed('Built javascript files');
   },
   async fail(ctx, task, err) {
-    this._spinner.fail('Failed to build javascript files');
+    this._spinner?.fail('Failed to build javascript files');
 
     throw err;
   },
 };
 
-module.exports = {
-  viteTask,
-};
+export { viteTask };

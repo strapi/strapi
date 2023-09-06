@@ -1,35 +1,40 @@
-'use strict';
+import path from 'path';
+import browserslistToEsbuild from 'browserslist-to-esbuild';
+import { parseExports, PackageJson, ExtMap, Export } from '../utils/pkg';
+import type { Logger } from '../utils/logger';
+import type { ViteTask } from './tasks/vite';
+import type { DtsTask } from './tasks/dts';
 
-const path = require('path');
-const browserslistToEsbuild = require('browserslist-to-esbuild');
+interface BuildContextArgs {
+  cwd: string;
+  extMap: ExtMap;
+  logger: Logger;
+  pkg: PackageJson;
+}
 
-const { parseExports } = require('../utils/pkg');
+export type Target = 'node' | 'web' | '*';
 
-/**
- * @typedef {Object} BuildContextArgs
- * @property {string} cwd
- * @property {import('../utils/pkg').ExtMap} extMap
- * @property {import('../utils/logger').Logger} logger
- * @property {import('../utils/pkg').PackageJson} pkg
- */
+export type Targets = {
+  [target in Target]: string[];
+};
 
-/**
- * @typedef {Object} Targets
- * @property {string[]} node
- * @property {string[]} web
- * @property {string[]} *
- */
+export interface BuildContext {
+  cwd: string;
+  exports: Record<string, Export>;
+  external: string[];
+  extMap: ExtMap;
+  logger: Logger;
+  pkg: PackageJson;
+  targets: Targets;
+  distPath: string;
+}
 
-/**
- * @typedef {Object} BuildContext
- * @property {string} cwd
- * @property {import('../utils/pkg').Export[]} exports
- * @property {string[]} external
- * @property {import('../utils/pkg').ExtMap} extMap
- * @property {import('../utils/logger').Logger} logger
- * @property {import('../utils/pkg').PackageJson} pkg
- * @property {Targets} targets
- */
+export interface BuildTask {
+  type: 'build:js' | 'build:dts';
+  entries: unknown[];
+  format?: 'cjs' | 'es';
+  [key: string]: unknown;
+}
 
 const DEFAULT_BROWSERS_LIST_CONFIG = [
   'last 3 major versions',
@@ -43,30 +48,33 @@ const DEFAULT_BROWSERS_LIST_CONFIG = [
  * @description Create a build context for the pipeline we're creating,
  * this is shared among tasks so they all use the same settings for core pieces
  * such as a target, distPath, externals etc.
- *
- * @type {(args: BuildContextArgs) => Promise<BuildContext>}
  */
-const createBuildContext = async ({ cwd, extMap, logger, pkg }) => {
+const createBuildContext = async ({
+  cwd,
+  extMap,
+  logger,
+  pkg,
+}: BuildContextArgs): Promise<BuildContext> => {
   const targets = {
     '*': browserslistToEsbuild(pkg.browserslist ?? DEFAULT_BROWSERS_LIST_CONFIG),
     node: browserslistToEsbuild(['node 16.0.0']),
     web: ['esnext'],
   };
 
-  const exports = parseExports({ extMap, pkg }).reduce((acc, x) => {
+  const exportsArray = parseExports({ extMap, pkg }).reduce((acc, x) => {
     const { _path: exportPath, ...exportEntry } = x;
 
     return { ...acc, [exportPath]: exportEntry };
-  }, {});
+  }, {} as Record<string, Export>);
 
   const external = [
     ...(pkg.dependencies ? Object.keys(pkg.dependencies) : []),
     ...(pkg.peerDependencies ? Object.keys(pkg.peerDependencies) : []),
   ];
 
-  const outputPaths = Object.values(exports)
+  const outputPaths = Object.values(exportsArray)
     .flatMap((exportEntry) => {
-      return [exportEntry.import, exportEntry.require].filter(Boolean);
+      return [exportEntry.import, exportEntry.require].filter((v): v is string => Boolean(v));
     })
     .map((p) => path.resolve(cwd, p));
 
@@ -86,7 +94,7 @@ const createBuildContext = async ({ cwd, extMap, logger, pkg }) => {
     logger,
     cwd,
     pkg,
-    exports,
+    exports: exportsArray,
     external,
     distPath,
     targets,
@@ -94,17 +102,11 @@ const createBuildContext = async ({ cwd, extMap, logger, pkg }) => {
   };
 };
 
-/**
- * @type {(containerPath: string, itemPath: string) => boolean}
- */
-const pathContains = (containerPath, itemPath) => {
+const pathContains = (containerPath: string, itemPath: string): boolean => {
   return !path.relative(containerPath, itemPath).startsWith('..');
 };
 
-/**
- * @type {(filePaths: string[]) => string | undefined}
- */
-const findCommonDirPath = (filePaths) => {
+const findCommonDirPath = (filePaths: string[]) => {
   /**
    * @type {string | undefined}
    */
@@ -138,38 +140,36 @@ const findCommonDirPath = (filePaths) => {
   return commonPath;
 };
 
-/**
- * @typedef {import('./tasks/vite').ViteTask | import('./tasks/dts').DtsTask} BuildTask
- */
+type Task = ViteTask | DtsTask;
 
 /**
  * @description Create the build tasks for the pipeline, this
  * comes from the exports map we've created in the build context.
  * But handles each export line uniquely with space to add more
  * as the standard develops.
- *
- * @type {(args: BuildContext) => Promise<BuildTask[]>}
  */
-const createBuildTasks = async (ctx) => {
-  /**
-   * @type {BuildTask[]}
-   */
-  const tasks = [];
+const createBuildTasks = async (ctx: BuildContext): Promise<Task[]> => {
+  const tasks: Task[] = [];
 
-  /**
-   * @type {import('./tasks/dts').DtsTask}
-   */
-  const dtsTask = {
+  const dtsTask: DtsTask = {
     type: 'build:dts',
     entries: [],
   };
 
-  /**
-   * @type {Record<string, import('./tasks/vite').ViteTask>}
-   */
-  const viteTasks = {};
+  const viteTasks: Record<string, ViteTask> = {};
 
-  const createViteTask = (format, runtime, { output, ...restEntry }) => {
+  const createViteTask = (
+    format: 'cjs' | 'es',
+    runtime: Target,
+    {
+      output,
+      ...restEntry
+    }: {
+      output: string;
+      path: string;
+      entry: string;
+    }
+  ) => {
     const buildId = `${format}:${output}`;
 
     if (viteTasks[buildId]) {
@@ -208,11 +208,8 @@ const createBuildTasks = async (ctx) => {
       });
     }
 
-    /**
-     * @type {keyof Target}
-     */
     // eslint-disable-next-line no-nested-ternary
-    const runtime = exp._path.includes('strapi-admin')
+    const runtime: Target = exp._path.includes('strapi-admin')
       ? 'web'
       : exp._path.includes('strapi-server')
       ? 'node'
@@ -224,7 +221,7 @@ const createBuildTasks = async (ctx) => {
        */
       createViteTask('cjs', runtime, {
         path: exp._path,
-        entry: exp.source,
+        entry: exp.source ?? 'src/index.ts',
         output: exp.require,
       });
     }
@@ -235,7 +232,7 @@ const createBuildTasks = async (ctx) => {
        */
       createViteTask('es', runtime, {
         path: exp._path,
-        entry: exp.source,
+        entry: exp.source ?? 'src/index.ts',
         output: exp.import,
       });
     }
@@ -246,7 +243,4 @@ const createBuildTasks = async (ctx) => {
   return tasks;
 };
 
-module.exports = {
-  createBuildContext,
-  createBuildTasks,
-};
+export { createBuildContext, createBuildTasks };

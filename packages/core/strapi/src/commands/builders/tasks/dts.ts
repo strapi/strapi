@@ -1,18 +1,33 @@
-'use strict';
+import path from 'path';
+import chalk from 'chalk';
+import ora from 'ora';
+import ts from 'typescript';
+import type { Logger } from '../../utils/logger';
+import type { TaskHandler } from '.';
+import type { BuildTask } from '../packages';
 
-const path = require('path');
-const chalk = require('chalk');
-const ora = require('ora');
-const ts = require('typescript');
+interface LoadTsConfigOptions {
+  cwd: string;
+  path: string;
+}
+
+class TSConfigNotFoundError extends Error {
+  // eslint-disable-next-line no-useless-constructor
+  // constructor(message, options) {
+  //   super(message, options);
+  // }
+
+  get code() {
+    return 'TS_CONFIG_NOT_FOUND';
+  }
+}
 
 /**
  * @description Load a tsconfig.json file and return the parsed config
  *
  * @internal
- *
- * @type {(args: { cwd: string; path: string }) => Promise<ts.ParsedCommandLine>)}
  */
-const loadTsConfig = async ({ cwd, path }) => {
+const loadTsConfig = async ({ cwd, path }: LoadTsConfigOptions) => {
   const configPath = ts.findConfigFile(cwd, ts.sys.fileExists, path);
 
   if (!configPath) {
@@ -24,25 +39,19 @@ const loadTsConfig = async ({ cwd, path }) => {
   return ts.parseJsonConfigFileContent(configFile.config, ts.sys, cwd);
 };
 
-class TSConfigNotFoundError extends Error {
-  // eslint-disable-next-line no-useless-constructor
-  constructor(message, options) {
-    super(message, options);
-  }
-
-  get code() {
-    return 'TS_CONFIG_NOT_FOUND';
-  }
+interface BuildTypesOptions {
+  cwd: string;
+  logger: Logger;
+  outDir: string;
+  tsconfig: ts.ParsedCommandLine;
 }
 
 /**
  * @description
  *
  * @internal
- *
- * @type {(args: { cwd: string; logger: import('../../utils/logger').Logger; outDir: string; tsconfig: ts.ParsedCommandLine }) => Promise<void>}
  */
-const buildTypes = ({ cwd, logger, outDir, tsconfig }) => {
+const buildTypes = ({ cwd, logger, outDir, tsconfig }: BuildTypesOptions) => {
   const compilerOptions = {
     ...tsconfig.options,
     declaration: true,
@@ -102,23 +111,19 @@ const buildTypes = ({ cwd, logger, outDir, tsconfig }) => {
   }
 };
 
-/**
- * @typedef {Object} DtsTaskEntry
- * @property {string} exportPath
- * @property {string} sourcePath
- * @property {string} targetPath
- */
+export interface DtsTaskEntry {
+  importId: string;
+  exportPath: string;
+  sourcePath?: string;
+  targetPath: string;
+}
 
-/**
- * @typedef {Object} DtsTask
- * @property {"build:dts"} type
- * @property {DtsTaskEntry[]} entries
- */
+export interface DtsTask extends BuildTask {
+  type: 'build:dts';
+  entries: DtsTaskEntry[];
+}
 
-/**
- * @type {import('./index').TaskHandler<DtsTask>}
- */
-const dtsTask = {
+const dtsTask: TaskHandler<DtsTask> = {
   _spinner: null,
   print(ctx, task) {
     const entries = [
@@ -146,7 +151,7 @@ const dtsTask = {
              * TODO: this will not scale and assumes all project sourcePaths are `src/index.ts`
              * so we can go back to the "root" of the project...
              */
-            cwd: path.join(ctx.cwd, entry.sourcePath, '..', '..'),
+            cwd: path.join(ctx.cwd, entry.sourcePath ?? 'src/index.ts', '..', '..'),
             path: 'tsconfig.build.json',
           }).catch((err) => {
             if (err instanceof TSConfigNotFoundError) {
@@ -187,13 +192,13 @@ const dtsTask = {
     }
   },
   async success() {
-    this._spinner.succeed('Built type files');
+    this._spinner?.succeed('Built type files');
   },
   async fail(ctx, task, err) {
-    this._spinner.fail('Failed to build type files');
+    this._spinner?.fail('Failed to build type files');
 
     throw err;
   },
 };
 
-module.exports = { dtsTask };
+export { dtsTask };
