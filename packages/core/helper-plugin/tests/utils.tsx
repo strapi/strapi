@@ -1,19 +1,33 @@
+/* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
 import { fixtures } from '@strapi/admin-test-utils';
 import { DesignSystemProvider } from '@strapi/design-system';
-import { renderHook as renderHookRTL, render as renderRTL, waitFor } from '@testing-library/react';
+import {
+  renderHook as renderHookRTL,
+  render as renderRTL,
+  waitFor,
+  RenderOptions as RTLRenderOptions,
+  RenderResult,
+  act,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, MemoryRouterProps } from 'react-router-dom';
 
-import { RBACContext } from '../src/index';
+// @ts-expect-error this will be removed once we've converted RBAC to TypeScript.
+import { RBACContext } from '../src/features/RBAC';
 
 import { server } from './server';
 
-const Providers = ({ children, initialEntries }) => {
+interface ProvidersProps {
+  children: React.ReactNode;
+  initialEntries?: MemoryRouterProps['initialEntries'];
+}
+
+const Providers = ({ children, initialEntries }: ProvidersProps) => {
   const rbacContextValue = React.useMemo(
     () => ({
       allPermissions: fixtures.permissions.allPermissions,
@@ -27,7 +41,7 @@ const Providers = ({ children, initialEntries }) => {
         retry: false,
         // no more errors on the console for tests
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        error() {},
+        onError() {},
       },
     },
   });
@@ -56,19 +70,18 @@ Providers.propTypes = {
 };
 
 // eslint-disable-next-line react/jsx-no-useless-fragment
-const fallbackWrapper = ({ children }) => <>{children}</>;
+const fallbackWrapper = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 
-/**
- * @typedef {object} RenderOptions
- * @property {import('@testing-library/react').RenderOptions | undefined} renderOptions
- * @property {Parameters<typeof userEvent.setup>[0] | undefined} userEventOptions
- * @property {Array<string | { pathname?: string; search?: string; hash?: string; }>} initialEntries
- */
+export interface RenderOptions {
+  renderOptions?: RTLRenderOptions;
+  userEventOptions?: Parameters<typeof userEvent.setup>[0];
+  initialEntries?: MemoryRouterProps['initialEntries'];
+}
 
-/**
- * @type {(ui: React.ReactElement, options?: RenderOptions) => import('@testing-library/react').RenderResult & { user: typeof userEvent }}
- */
-const render = (ui, { renderOptions, userEventOptions, initialEntries } = {}) => {
+const render = (
+  ui: React.ReactElement,
+  { renderOptions, userEventOptions, initialEntries }: RenderOptions = {}
+): RenderResult & { user: ReturnType<typeof userEvent.setup> } => {
   const { wrapper: Wrapper = fallbackWrapper, ...restOptions } = renderOptions ?? {};
 
   return {
@@ -84,7 +97,7 @@ const render = (ui, { renderOptions, userEventOptions, initialEntries } = {}) =>
   };
 };
 
-const renderHook = (hook, options) => {
+const renderHook: typeof renderHookRTL = (hook, options) => {
   const { wrapper: Wrapper = fallbackWrapper, ...restOptions } = options ?? {};
 
   return renderHookRTL(hook, {
@@ -97,4 +110,4 @@ const renderHook = (hook, options) => {
   });
 };
 
-export { render, renderHook, waitFor, server };
+export { render, renderHook, waitFor, server, act };

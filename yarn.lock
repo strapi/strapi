@@ -7229,6 +7229,7 @@ __metadata:
     vite: 4.4.9
     webpack: ^5.88.1
     webpack-cli: ^5.1.0
+    yup: 0.32.9
   peerDependencies:
     "@strapi/design-system": 1.9.0
     "@strapi/icons": 1.9.0

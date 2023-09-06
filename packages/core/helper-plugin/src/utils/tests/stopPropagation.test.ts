@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { screen, render } from '@testing-library/react';
+import { render } from '@tests/utils';
 
 import { stopPropagation, onRowClick, StopPropagation } from '../stopPropagation';
 
@@ -29,8 +29,8 @@ describe('stopPropagation', () => {
 
   describe('StopPropagation component', () => {
     it('should render a div with stopPropagation properties', () => {
-      render(React.createElement(StopPropagation));
-      const divElement = screen.getByRole('button', { hidden: true });
+      const { getByRole } = render(React.createElement(StopPropagation));
+      const divElement = getByRole('button', { hidden: true });
       expect(divElement).toBeInTheDocument();
       expect(divElement).toHaveAttribute('role', 'button');
       expect(divElement).toHaveAttribute('aria-hidden', 'true');
