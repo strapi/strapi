@@ -14,7 +14,6 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { useTracking } from '../features/Tracking';
@@ -22,7 +21,29 @@ import { useQueryParams } from '../hooks/useQueryParams';
 import { SortIcon } from '../icons/SortIcon';
 
 import { ConfirmDialog } from './ConfirmDialog';
-import { EmptyBodyTable } from './EmptyBodyTable';
+import { EmptyBodyTable, EmptyBodyTableProps } from './EmptyBodyTable';
+
+interface TableProps {
+  action?: EmptyBodyTableProps['action'];
+  children?: React.ReactNode;
+  contentType: string;
+  components?: {
+    ConfirmDialogDeleteAll?: React.ElementType;
+    ConfirmDialogDelete?: React.ElementType;
+  };
+  footer: TableCompo['footer'];
+  headers?: TableHead['headers'];
+  isLoading?: boolean;
+  onConfirmDeleteAll?: (ids: Array<string | number>) => Promise<void>;
+  onConfirmDelete?: (id: string | number) => Promise<void>;
+  rows?: Array<unknown>;
+  withBulkActions?: boolean;
+  withMainAction?: boolean;
+  renderBulkActionsBar?: (props: {
+    selectedEntries: Array<string | number>;
+    clearSelectedEntries: () => void;
+  }) => React.ReactNode;
+}
 
 /**
  * @deprecated
@@ -35,18 +56,17 @@ const Table = ({
   contentType,
   components,
   footer,
-  headers,
-  isLoading,
+  headers = [],
+  isLoading = false,
   onConfirmDeleteAll,
   onConfirmDelete,
-  onOpenDeleteAllModalTrackedEvent,
-  rows,
-  withBulkActions,
-  withMainAction,
+  rows = [],
+  withBulkActions = false,
+  withMainAction = false,
   renderBulkActionsBar,
   ...rest
-}) => {
-  const [selectedEntries, setSelectedEntries] = useState([]);
+}: TableProps) => {
+  const [selectedEntries, setSelectedEntries] = useState<Array<number | string>>([]);
   const [showConfirmDeleteAll, setShowConfirmDeleteAll] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
@@ -69,7 +89,7 @@ const Table = ({
   const handleConfirmDeleteAll = async () => {
     try {
       setIsConfirmButtonLoading(true);
-      await onConfirmDeleteAll(selectedEntries);
+      await onConfirmDeleteAll?.(selectedEntries);
       handleToggleConfirmDeleteAll();
       setSelectedEntries([]);
       setIsConfirmButtonLoading(false);
@@ -83,7 +103,7 @@ const Table = ({
     try {
       setIsConfirmButtonLoading(true);
       // await onConfirmDeleteAll(entriesToDelete);
-      await onConfirmDelete(selectedEntries[0]);
+      await onConfirmDelete?.(selectedEntries[0]);
       handleToggleConfirmDelete();
       setIsConfirmButtonLoading(false);
     } catch (err) {
@@ -94,15 +114,15 @@ const Table = ({
 
   const handleSelectAll = () => {
     if (!areAllEntriesSelected) {
-      setSelectedEntries(rows.map((row) => row.id));
+      setSelectedEntries(rows.map((row) => (row as { id: number }).id));
     } else {
       setSelectedEntries([]);
     }
   };
 
   const handleToggleConfirmDeleteAll = () => {
-    if (!showConfirmDeleteAll && onOpenDeleteAllModalTrackedEvent) {
-      trackUsage(onOpenDeleteAllModalTrackedEvent);
+    if (!showConfirmDeleteAll) {
+      trackUsage('willBulkDeleteEntries');
     }
 
     setShowConfirmDeleteAll((prev) => !prev);
@@ -115,13 +135,13 @@ const Table = ({
     setShowConfirmDelete((prev) => !prev);
   };
 
-  const handleClickDelete = (id) => {
+  const handleClickDelete = (id: number) => {
     setSelectedEntries([id]);
 
     handleToggleConfirmDelete();
   };
 
-  const handleSelectRow = ({ name, value }) => {
+  const handleSelectRow = ({ name, value }: { name: string; value: unknown }) => {
     setSelectedEntries((prev) => {
       if (value) {
         return prev.concat(name);
@@ -188,7 +208,7 @@ const Table = ({
           />
         ) : (
           Children.toArray(children).map((child) =>
-            cloneElement(child, {
+            cloneElement(child as React.ReactElement<any>, {
               entriesToDelete: selectedEntries,
               onClickDelete: handleClickDelete,
               onSelectRow: handleSelectRow,
@@ -217,69 +237,41 @@ const Table = ({
   );
 };
 
-Table.defaultProps = {
-  action: undefined,
-  children: undefined,
-  components: {
-    ConfirmDialogDeleteAll: undefined,
-    ConfirmDialogDelete: undefined,
-  },
-  footer: undefined,
-  headers: [],
-  isLoading: false,
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  onConfirmDeleteAll() {},
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  onConfirmDelete() {},
-  onOpenDeleteAllModalTrackedEvent: undefined,
-  rows: [],
-  withBulkActions: false,
-  withMainAction: false,
-  renderBulkActionsBar: undefined,
-};
+interface Header {
+  fieldSchema?: {
+    type: string;
+  };
+  name: string;
+  metadatas: {
+    sortable: boolean;
+    label: string;
+    mainField?: {
+      name: string;
+    };
+  };
+}
 
-Table.propTypes = {
-  action: PropTypes.node,
-  children: PropTypes.node,
-  contentType: PropTypes.string.isRequired,
-  components: PropTypes.shape({
-    ConfirmDialogDelete: PropTypes.oneOfType([PropTypes.func, PropTypes.element]),
-    ConfirmDialogDeleteAll: PropTypes.oneOfType([PropTypes.func, PropTypes.element]),
-  }),
-  footer: PropTypes.node,
-  headers: PropTypes.arrayOf(
-    PropTypes.shape({
-      cellFormatter: PropTypes.func,
-      key: PropTypes.string.isRequired,
-      metadatas: PropTypes.shape({
-        label: PropTypes.string.isRequired,
-        sortable: PropTypes.bool,
-      }).isRequired,
-      name: PropTypes.string.isRequired,
-    })
-  ),
-  isLoading: PropTypes.bool,
-  onConfirmDeleteAll: PropTypes.func,
-  onConfirmDelete: PropTypes.func,
-  onOpenDeleteAllModalTrackedEvent: PropTypes.string,
-  rows: PropTypes.array,
-  withBulkActions: PropTypes.bool,
-  withMainAction: PropTypes.bool,
-  renderBulkActionsBar: PropTypes.func,
-};
+export interface TableHead {
+  areAllEntriesSelected?: boolean;
+  entriesToDelete?: Array<string | number>;
+  headers?: Array<Header>;
+  onSelectAll: BaseCheckbox['onChange'];
+  withMainAction?: boolean;
+  withBulkActions?: boolean;
+}
 
 const TableHead = ({
-  areAllEntriesSelected,
-  entriesToDelete,
-  headers,
+  areAllEntriesSelected = false,
+  entriesToDelete = [],
+  headers = [],
   onSelectAll,
   withMainAction,
   withBulkActions,
-}) => {
+}: TableHead) => {
   const { formatMessage } = useIntl();
   const [{ query }, setQuery] = useQueryParams();
   const sort = query?.sort || '';
-  const [sortBy, sortOrder] = sort.split(':');
+  const [sortBy, sortOrder] = (sort as string).split(':');
   const isIndeterminate = !areAllEntriesSelected && entriesToDelete.length > 0;
 
   return (
@@ -373,23 +365,6 @@ const TableHead = ({
       </Tr>
     </Thead>
   );
-};
-
-TableHead.defaultProps = {
-  areAllEntriesSelected: false,
-  entriesToDelete: [],
-  headers: [],
-  withBulkActions: false,
-  withMainAction: false,
-};
-
-TableHead.propTypes = {
-  areAllEntriesSelected: PropTypes.bool,
-  entriesToDelete: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),
-  headers: PropTypes.array,
-  onSelectAll: PropTypes.func.isRequired,
-  withBulkActions: PropTypes.bool,
-  withMainAction: PropTypes.bool,
 };
 
 export { Table as DynamicTable };

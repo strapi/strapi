@@ -1,11 +1,15 @@
 import React from 'react';
 
 import { Box, Flex, Loader, Tbody, Td, Tr } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 
-import { EmptyStateLayout } from './EmptyStateLayout';
+import { EmptyStateLayout, EmptyStateLayoutProps } from './EmptyStateLayout';
 
-const EmptyBodyTable = ({ colSpan, isLoading, ...rest }) => {
+export interface EmptyBodyTableProps extends Omit<EmptyStateLayoutProps, 'hasRadius' | 'shadow'> {
+  colSpan: Td['colSpan'];
+  isLoading?: boolean;
+}
+
+const EmptyBodyTable = ({ colSpan, isLoading = false, ...rest }: EmptyBodyTableProps) => {
   if (isLoading) {
     return (
       <Tbody>
@@ -31,26 +35,6 @@ const EmptyBodyTable = ({ colSpan, isLoading, ...rest }) => {
       </Tr>
     </Tbody>
   );
-};
-
-EmptyBodyTable.defaultProps = {
-  action: undefined,
-  colSpan: 1,
-  content: undefined,
-  icon: undefined,
-  isLoading: false,
-};
-
-EmptyBodyTable.propTypes = {
-  action: PropTypes.any,
-  colSpan: PropTypes.number,
-  content: PropTypes.shape({
-    id: PropTypes.string,
-    defaultMessage: PropTypes.string,
-    values: PropTypes.object,
-  }),
-  icon: PropTypes.oneOf(['document', 'media', 'permissions']),
-  isLoading: PropTypes.bool,
 };
 
 export { EmptyBodyTable };
