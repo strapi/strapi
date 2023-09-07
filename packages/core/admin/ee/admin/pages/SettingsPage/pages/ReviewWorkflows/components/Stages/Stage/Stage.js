@@ -51,6 +51,23 @@ const NestedOption = styled(MultiSelectOption)`
   padding-left: ${({ theme }) => theme.spaces[7]};
 `;
 
+// Grow the size of the permission Select
+const PermissionWrapper = styled(Flex)`
+  > * {
+    flex-grow: 1;
+  }
+`;
+
+// Make sure the apply to all stages button doesn't collapse, when the Select
+// contains more tags than it can fit into one line
+const ApplyToAllStages = styled(Button)`
+  flex-shrink: 0;
+`;
+
+const DeleteMenuItem = styled(MenuItem)`
+  color: ${({ theme }) => theme.colors.danger600};
+`;
+
 const AVAILABLE_COLORS = getAvailableStageColors();
 
 function StageDropPreview() {
@@ -256,7 +273,7 @@ export function Stage({
                     {/* z-index needs to be as big as the one defined for the wrapper in Stages, otherwise the menu
                      * disappears behind the accordion
                      */}
-                    <Menu.Content zIndex={2}>
+                    <Menu.Content popoverPlacement="bottom-end" zIndex={2}>
                       <Menu.SubRoot>
                         {canUpdate && (
                           <MenuItem onClick={() => dispatch(cloneStage(id))}>
@@ -268,12 +285,12 @@ export function Stage({
                         )}
 
                         {canDelete && (
-                          <MenuItem onClick={() => dispatch(deleteStage(id))}>
+                          <DeleteMenuItem onClick={() => dispatch(deleteStage(id))}>
                             {formatMessage({
                               id: 'Settings.review-workflows.stage.delete',
                               defaultMessage: 'Delete',
                             })}
-                          </MenuItem>
+                          </DeleteMenuItem>
                         )}
                       </Menu.SubRoot>
                     </Menu.Content>
@@ -392,78 +409,80 @@ export function Stage({
                   />
                 ) : (
                   <Flex alignItems="flex-end" gap={3}>
-                    <MultiSelect
-                      {...permissionsField}
-                      disabled={!canUpdate}
-                      error={permissionsMeta.error ?? false}
-                      id={permissionsField.name}
-                      label={formatMessage({
-                        id: 'Settings.review-workflows.stage.permissions.label',
-                        defaultMessage: 'Roles that can change this stage',
-                      })}
-                      onChange={(values) => {
-                        // Because the select components expects strings for values, but
-                        // the yup schema validates we are sending full permission objects to the API,
-                        // we must coerce the string value back to an object
-                        const permissions = values.map((value) => ({
-                          role: parseInt(value, 10),
-                          action: 'admin::review-workflows.stage.transition',
-                        }));
+                    <PermissionWrapper grow={1}>
+                      <MultiSelect
+                        {...permissionsField}
+                        disabled={!canUpdate}
+                        error={permissionsMeta.error ?? false}
+                        id={permissionsField.name}
+                        label={formatMessage({
+                          id: 'Settings.review-workflows.stage.permissions.label',
+                          defaultMessage: 'Roles that can change this stage',
+                        })}
+                        onChange={(values) => {
+                          // Because the select components expects strings for values, but
+                          // the yup schema validates we are sending full permission objects to the API,
+                          // we must coerce the string value back to an object
+                          const permissions = values.map((value) => ({
+                            role: parseInt(value, 10),
+                            action: 'admin::review-workflows.stage.transition',
+                          }));
 
-                        permissionsHelper.setValue(permissions);
-                        dispatch(updateStage(id, { permissions }));
-                      }}
-                      placeholder={formatMessage({
-                        id: 'Settings.review-workflows.stage.permissions.placeholder',
-                        defaultMessage: 'Select a role',
-                      })}
-                      required
-                      // The Select component expects strings for values
-                      value={(permissionsField.value ?? []).map(
-                        (permission) => `${permission.role}`
-                      )}
-                      withTags
-                    >
-                      {[
-                        {
-                          label: formatMessage({
-                            id: 'Settings.review-workflows.stage.permissions.allRoles.label',
-                            defaultMessage: 'All roles',
-                          }),
+                          permissionsHelper.setValue(permissions);
+                          dispatch(updateStage(id, { permissions }));
+                        }}
+                        placeholder={formatMessage({
+                          id: 'Settings.review-workflows.stage.permissions.placeholder',
+                          defaultMessage: 'Select a role',
+                        })}
+                        required
+                        // The Select component expects strings for values
+                        value={(permissionsField.value ?? []).map(
+                          (permission) => `${permission.role}`
+                        )}
+                        withTags
+                      >
+                        {[
+                          {
+                            label: formatMessage({
+                              id: 'Settings.review-workflows.stage.permissions.allRoles.label',
+                              defaultMessage: 'All roles',
+                            }),
 
-                          children: filteredRoles.map((role) => ({
-                            value: `${role.id}`,
-                            label: role.name,
-                          })),
-                        },
-                      ].map((role) => {
-                        if ('children' in role) {
+                            children: filteredRoles.map((role) => ({
+                              value: `${role.id}`,
+                              label: role.name,
+                            })),
+                          },
+                        ].map((role) => {
+                          if ('children' in role) {
+                            return (
+                              <MultiSelectGroup
+                                key={role.label}
+                                label={role.label}
+                                values={role.children.map((child) => child.value)}
+                              >
+                                {role.children.map((role) => {
+                                  return (
+                                    <NestedOption key={role.value} value={role.value}>
+                                      {role.label}
+                                    </NestedOption>
+                                  );
+                                })}
+                              </MultiSelectGroup>
+                            );
+                          }
+
                           return (
-                            <MultiSelectGroup
-                              key={role.label}
-                              label={role.label}
-                              values={role.children.map((child) => child.value)}
-                            >
-                              {role.children.map((role) => {
-                                return (
-                                  <NestedOption key={role.value} value={role.value}>
-                                    {role.label}
-                                  </NestedOption>
-                                );
-                              })}
-                            </MultiSelectGroup>
+                            <MultiSelectOption key={role.value} value={role.value}>
+                              {role.label}
+                            </MultiSelectOption>
                           );
-                        }
+                        })}
+                      </MultiSelect>
+                    </PermissionWrapper>
 
-                        return (
-                          <MultiSelectOption key={role.value} value={role.value}>
-                            {role.label}
-                          </MultiSelectOption>
-                        );
-                      })}
-                    </MultiSelect>
-
-                    <Button
+                    <ApplyToAllStages
                       disabled={!canUpdate}
                       size="L"
                       type="button"
@@ -474,7 +493,7 @@ export function Stage({
                         id: 'Settings.review-workflows.stage.permissions.apply.label',
                         defaultMessage: 'Apply to all stages',
                       })}
-                    </Button>
+                    </ApplyToAllStages>
                   </Flex>
                 )}
               </GridItem>
