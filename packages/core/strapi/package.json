@@ -70,6 +70,7 @@
   "files": [
     "./dist",
     "./bin",
+    "./scripts",
     "index.js"
   ],
   "scripts": {
@@ -78,7 +79,7 @@
     "watch": "run -T tsc -p tsconfig.build.json -w --preserveWatchOutput",
     "clean": "run -T rimraf ./dist",
     "prepublishOnly": "yarn clean && yarn build",
-    "postinstall": "node ./dist/utils/postinstall.js",
+    "postinstall": "node ./scripts/postinstall.js",
     "test:unit": "run -T jest",
     "copy-files": "copyfiles -u 1 -a 'src/**/*.html' 'src/**/*.png'  dist",
     "test:unit:watch": "run -T jest --watch",

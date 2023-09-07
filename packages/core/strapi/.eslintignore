@@ -4,4 +4,5 @@ jest.config.js
 dist/
 index.d.ts
 index.js
-bin
+bin/
+scripts/
