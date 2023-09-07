@@ -198,7 +198,10 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         body: {
           data: {
             name: 'createdWorkflow',
-            stages: [{ name: 'Stage 1' }, { name: 'Stage 2' }],
+            stages: [
+              { name: 'Stage 1', color: '#343434' },
+              { name: 'Stage 2', color: '#141414' },
+            ],
           },
         },
       });
@@ -207,7 +210,10 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         expect(res.status).toBe(200);
         expect(res.body.data).toMatchObject({
           name: 'createdWorkflow',
-          stages: [{ name: 'Stage 1' }, { name: 'Stage 2' }],
+          stages: [
+            { name: 'Stage 1', color: '#343434' },
+            { name: 'Stage 2', color: '#141414' },
+          ],
         });
       } else {
         expect(res.status).toBe(404);
