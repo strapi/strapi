@@ -1,10 +1,8 @@
 import { join, extname, basename } from 'path';
 import fse from 'fs-extra';
 import { importDefault } from '@strapi/utils';
+import type { Strapi, Common } from '@strapi/typings';
 import { middlewares as internalMiddlewares } from '../../middlewares';
-
-import type { Strapi } from '@strapi/typings';
-import { Common } from '../../types';
 
 // TODO:: allow folders with index.js inside for bigger policies
 export default async function loadMiddlewares(strapi: Strapi) {

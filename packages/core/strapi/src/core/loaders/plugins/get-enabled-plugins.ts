@@ -4,9 +4,9 @@ import { statSync, existsSync } from 'fs';
 import _ from 'lodash';
 import { get, pickBy, defaultsDeep, map, prop, pipe } from 'lodash/fp';
 import { isKebabCase } from '@strapi/utils';
+import type { Strapi } from '@strapi/typings';
 import { getUserPluginsConfig } from './get-user-plugins-config';
 
-import type { Strapi } from '@strapi/typings';
 
 interface PluginMeta {
   enabled: boolean;

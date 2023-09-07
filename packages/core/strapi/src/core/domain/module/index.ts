@@ -1,11 +1,9 @@
 import _ from 'lodash';
 import { yup } from '@strapi/utils';
+import type { Strapi, Common, Schema } from '@strapi/typings';
 
 import { removeNamespace } from '../../utils';
 import { validateModule } from './validation';
-
-import type { Strapi } from '@strapi/typings';
-import { Common, Schema } from '../../../types';
 
 interface LifecyclesState {
   bootstrap?: boolean;

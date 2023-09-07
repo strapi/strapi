@@ -2,13 +2,11 @@ import { join } from 'path';
 import fse from 'fs-extra';
 import { defaultsDeep, defaults, getOr, get } from 'lodash/fp';
 import { env } from '@strapi/utils';
+import type { Strapi, Common, Schema } from '@strapi/typings';
 import { loadFile } from '../../app-configuration/load-config-file';
 import loadFiles from '../../../load/load-files';
 import { getEnabledPlugins } from './get-enabled-plugins';
 import { getUserPluginsConfig } from './get-user-plugins-config';
-
-import type { Strapi } from '@strapi/typings';
-import type { Common, Schema } from '../../../types';
 
 type LoadedPlugin = {
   config: {
