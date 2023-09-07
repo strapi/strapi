@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import instantiatePermissionsUtilities from './permissions';
 import { Common } from '../../types';
-import type { Strapi } from '../../Strapi';
+import type { Strapi } from '@strapi/typings';
 
 const transformRoutePrefixFor = (pluginName: string) => (route: Common.Route) => {
   const prefix = route.config && route.config.prefix;

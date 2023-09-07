@@ -1,9 +1,9 @@
 import { EventEmitter } from 'events';
 import { errors } from '@strapi/utils';
+import type { Schema, Utils } from '@strapi/typings';
 import createEntityService from '..';
 import entityValidator from '../../entity-validator';
 import createEventHub from '../../event-hub';
-import type { Schema, Utils } from '../../../types';
 import uploadFiles from '../../utils/upload-files';
 
 jest.mock('bcryptjs', () => ({ hashSync: () => 'secret-password' }));

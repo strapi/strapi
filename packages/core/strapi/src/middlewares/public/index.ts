@@ -7,7 +7,7 @@ import koaStatic from 'koa-static';
 import * as utils from '../../utils';
 import { serveStatic } from './serve-static';
 
-import type { Strapi } from '../../Strapi';
+import type { Strapi } from '@strapi/typings';
 import type { Common } from '../../types';
 
 type Config = koaStatic.Options;

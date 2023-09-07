@@ -1,5 +1,5 @@
 import type { ExtendableContext, Middleware as KoaMiddleware } from 'koa';
-import type { Strapi } from '../../Strapi';
+import type { Strapi } from '@strapi/typings';
 import type { Common, Utils } from '..';
 
 export type MiddlewareFactory = (config: any, ctx: { strapi: Strapi }) => Middleware | null;

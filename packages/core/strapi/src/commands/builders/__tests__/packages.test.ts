@@ -1,7 +1,6 @@
-'use strict';
-
-const { getExportExtensionMap } = require('../../utils/pkg');
-const { createBuildContext, createBuildTasks } = require('../packages');
+import type { Logger } from '../../utils/logger';
+import { PackageJson, getExportExtensionMap } from '../../utils/pkg';
+import { BuildContext, createBuildContext, createBuildTasks } from '../packages';
 
 describe('packages', () => {
   const loggerMock = {
@@ -9,7 +8,7 @@ describe('packages', () => {
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  };
+  } as unknown as Logger;
 
   const extMap = getExportExtensionMap();
 
@@ -36,7 +35,7 @@ describe('packages', () => {
     peerDependencies: {
       'styled-components': '^5.3.1',
     },
-  };
+  } as unknown as PackageJson;
 
   describe('createBuildContext', () => {
     it('should return a valid exports list', async () => {
@@ -162,7 +161,7 @@ describe('packages', () => {
   });
 
   describe('createBuildTasks', () => {
-    let ctx;
+    let ctx: BuildContext;
 
     beforeAll(async () => {
       ctx = await createBuildContext({

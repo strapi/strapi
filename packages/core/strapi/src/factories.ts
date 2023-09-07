@@ -1,11 +1,9 @@
 import { pipe, omit, pick } from 'lodash/fp';
+import type { Strapi, Common, CoreApi, Utils } from '@strapi/typings';
 
 import { createController } from './core-api/controller';
 import { createService } from './core-api/service';
 import { createRoutes } from './core-api/routes';
-
-import type { Strapi } from './Strapi';
-import { Common, CoreApi, Utils } from './types';
 
 type WithStrapiCallback<T> = T | (<S extends { strapi: Strapi }>(params: S) => T);
 
@@ -14,7 +12,9 @@ const getContentTypeProxy = (strapi: Strapi, uid: Common.UID.ContentType) => {
   return new Proxy(strapi.contentType(uid), {
     get(target, prop) {
       const contentType = strapi.contentType(uid);
-      return contentType[prop];
+      if (prop in contentType) {
+        return contentType[prop as keyof typeof contentType];
+      }
     },
   });
 };

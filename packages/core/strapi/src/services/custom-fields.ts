@@ -1,4 +1,4 @@
-import type { Strapi } from '../Strapi';
+import type { Strapi } from '@strapi/typings';
 import { CustomFields } from '../types';
 
 const createCustomFields = (strapi: Strapi): CustomFields => {

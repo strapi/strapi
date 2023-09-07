@@ -4,7 +4,7 @@ import { has } from 'lodash/fp';
 import { yup } from '@strapi/utils';
 
 import createEndpointComposer from './compose-endpoint';
-import type { Strapi } from '../../Strapi';
+import type { Strapi } from '@strapi/typings';
 import type { Common, Utils } from '../../types';
 
 const policyOrMiddlewareSchema = yup.lazy((value) => {

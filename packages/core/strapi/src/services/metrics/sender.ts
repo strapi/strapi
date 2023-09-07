@@ -7,7 +7,7 @@ import tsUtils from '@strapi/typescript-utils';
 import { env } from '@strapi/utils';
 import machineID from '../../utils/machine-id';
 import { generateAdminUserHash } from './admin-user-hash';
-import type { Strapi } from '../../Strapi';
+import type { Strapi } from '@strapi/typings';
 
 export interface Payload {
   eventProperties?: Record<string, unknown>;

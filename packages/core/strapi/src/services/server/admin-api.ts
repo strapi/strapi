@@ -1,5 +1,5 @@
 import { createAPI } from './api';
-import type { Strapi } from '../../Strapi';
+import type { Strapi } from '@strapi/typings';
 
 const createAdminAPI = (strapi: Strapi) => {
   const opts = {

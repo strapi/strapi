@@ -1,5 +1,5 @@
 import type { Common, Schema } from '..';
-import type { Strapi } from '../../../Strapi';
+import type { Strapi } from '@strapi/typings';
 
 export interface Module {
   bootstrap: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;

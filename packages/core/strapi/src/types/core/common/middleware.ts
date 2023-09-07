@@ -1,5 +1,5 @@
 import type Koa from 'koa';
-import type { Strapi } from '../../../Strapi';
+import type { Strapi } from '@strapi/typings';
 
 export type MiddlewareFactory<T = any> = (
   config: T,

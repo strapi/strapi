@@ -1,8 +1,8 @@
 import type { Context, Next } from 'koa';
 
-export type ControllerHandler<TResponse = unknown> = (
-  context: Context,
-  next: Next
-) => Promise<TResponse | void> | TResponse | void;
+export interface ControllerHandler<TResponse = unknown> {
+  (context: Context, next: Next): Promise<TResponse | void> | TResponse | void;
+  [symbol: symbol]: any;
+}
 
 export type Controller = Record<string, ControllerHandler>;

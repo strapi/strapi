@@ -1,4 +1,4 @@
-import type { Strapi } from '../Strapi';
+import type { Strapi } from '@strapi/typings';
 
 export const destroyOnSignal = (strapi: Strapi) => {
   let signalReceived = false;

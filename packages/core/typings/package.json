@@ -42,17 +42,20 @@
   "dependencies": {
     "@koa/cors": "3.4.3",
     "@koa/router": "10.1.1",
-    "@strapi/data-transfer": "4.13.3",
+    "@strapi/database": "4.13.3",
     "@strapi/logger": "4.13.3",
     "@strapi/permissions": "4.13.3",
     "@strapi/utils": "4.13.3",
+    "commander": "8.3.0",
     "https-proxy-agent": "5.0.1",
     "koa": "2.13.4",
-    "node-fetch": "2.7.0"
+    "node-fetch": "2.7.0",
+    "node-schedule": "2.1.0"
   },
   "devDependencies": {
     "@types/koa": "*",
     "@types/koa__router": "12.0.0",
+    "@types/node-schedule": "2.1.0",
     "eslint-config-custom": "4.13.3",
     "tsconfig": "4.13.3",
     "typescript": "5.2.2"

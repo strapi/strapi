@@ -3,7 +3,7 @@ import type { Logger } from '@strapi/logger';
 
 import { readLicense, verifyLicense, fetchLicense, LicenseCheckError } from './license';
 import { shiftCronExpression } from '../utils/cron';
-import type { Strapi } from '../Strapi';
+import type { Strapi } from '@strapi/typings';
 
 const ONE_MINUTE = 1000 * 60;
 

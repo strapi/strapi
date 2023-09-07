@@ -6,7 +6,7 @@ import { get, pickBy, defaultsDeep, map, prop, pipe } from 'lodash/fp';
 import { isKebabCase } from '@strapi/utils';
 import { getUserPluginsConfig } from './get-user-plugins-config';
 
-import type { Strapi } from '../../../Strapi';
+import type { Strapi } from '@strapi/typings';
 
 interface PluginMeta {
   enabled: boolean;

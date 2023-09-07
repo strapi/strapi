@@ -7,7 +7,7 @@ import loadFiles from '../../../load/load-files';
 import { getEnabledPlugins } from './get-enabled-plugins';
 import { getUserPluginsConfig } from './get-user-plugins-config';
 
-import type { Strapi } from '../../../Strapi';
+import type { Strapi } from '@strapi/typings';
 import type { Common, Schema } from '../../../types';
 
 type LoadedPlugin = {

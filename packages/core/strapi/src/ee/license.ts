@@ -3,7 +3,7 @@ import { join, resolve } from 'path';
 import crypto from 'crypto';
 
 import machineId from '../utils/machine-id';
-import type { Strapi } from '../Strapi';
+import type { Strapi } from '@strapi/typings';
 
 interface LicenseInfo {
   type: 'bronze' | 'silver' | 'gold';

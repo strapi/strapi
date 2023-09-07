@@ -1,5 +1,5 @@
 import { has } from 'lodash/fp';
-import type { Strapi } from '../../Strapi';
+import type { Strapi } from '@strapi/typings';
 
 const apisRegistry = (strapi: Strapi) => {
   const apis: Record<string, unknown> = {};

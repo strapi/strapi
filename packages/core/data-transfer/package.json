@@ -41,6 +41,7 @@
   ],
   "dependencies": {
     "@strapi/logger": "4.13.3",
+    "@strapi/strapi": "4.13.3",
     "@strapi/typings": "4.13.3",
     "@strapi/utils": "4.13.3",
     "chalk": "4.1.2",

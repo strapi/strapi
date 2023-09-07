@@ -9,7 +9,7 @@ import wrapWithRateLimit from './rate-limiter';
 import createSender from './sender';
 import createMiddleware from './middleware';
 import isTruthy from './is-truthy';
-import type { Strapi } from '../../Strapi';
+import type { Strapi } from '@strapi/typings';
 
 const LIMITED_EVENTS = [
   'didSaveMediaWithAlternativeText',

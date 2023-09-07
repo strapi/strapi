@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { isKebabCase, importDefault } from '@strapi/utils';
 import { isEmpty } from 'lodash/fp';
 
-import type { Strapi } from '../../Strapi';
+import type { Strapi } from '@strapi/typings';
 import type { Common, Schema } from '../../types';
 
 interface API {

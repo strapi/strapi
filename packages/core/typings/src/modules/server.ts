@@ -8,8 +8,8 @@ export interface HTTPServer extends http.Server {
 }
 
 export interface API {
-  listRoutes(): Router.Middleware[];
-  use: Router['use'];
+  listRoutes(): Router.Layer[];
+  use(fn: Router.Middleware): API;
   routes(routes: Common.Router | Omit<Common.Route, 'info'>[]): this;
   mount(router: Router): this;
 }
@@ -20,12 +20,12 @@ export interface Server {
   httpServer: HTTPServer;
   api(name: 'content-api'): API;
   api(name: 'admin'): API;
-  use: Koa['use'];
+  use(...args: Parameters<Koa['use']>): Server;
   routes(routes: Common.Router | Omit<Common.Route, 'info'>[]): this;
   mount(): this;
   initRouting(): this;
   initMiddlewares(): Promise<this>;
-  listRoutes(): Router.Middleware[];
+  listRoutes(): Router.Layer[];
   listen: HTTPServer['listen'];
   destroy(): Promise<void>;
 }

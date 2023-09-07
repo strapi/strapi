@@ -1,6 +1,6 @@
 import { pickBy, has } from 'lodash/fp';
+import type { Strapi } from '@strapi/typings';
 import { addNamespace, hasNamespace } from '../utils';
-import type { Strapi } from '../../Strapi';
 import { Common } from '../../types';
 
 export type ControllerFactory =

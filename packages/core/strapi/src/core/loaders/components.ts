@@ -3,7 +3,7 @@ import _ from 'lodash';
 import { pathExists } from 'fs-extra';
 import loadFiles from '../../load/load-files';
 
-import type { Strapi } from '../../Strapi';
+import type { Strapi } from '@strapi/typings';
 import { Common, Schema } from '../../types';
 
 type LoadedComponent = {

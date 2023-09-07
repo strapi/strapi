@@ -4,7 +4,7 @@ import { yup } from '@strapi/utils';
 import { removeNamespace } from '../../utils';
 import { validateModule } from './validation';
 
-import type { Strapi } from '../../../Strapi';
+import type { Strapi } from '@strapi/typings';
 import { Common, Schema } from '../../../types';
 
 interface LifecyclesState {

@@ -1,6 +1,6 @@
 import { has, isPlainObject } from 'lodash/fp';
 
-import type { Strapi } from '../../Strapi';
+import type { Strapi } from '@strapi/typings';
 import type { CustomFieldServerOptions } from '../../types';
 
 const ALLOWED_TYPES = [

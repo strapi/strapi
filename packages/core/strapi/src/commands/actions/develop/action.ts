@@ -10,7 +10,7 @@ import tsUtils from '@strapi/typescript-utils';
 import loadConfiguration from '../../../core/app-configuration';
 import strapi from '../../../index';
 import { buildTypeScript, buildAdmin } from '../../builders';
-import type { Strapi } from '../../../Strapi';
+import type { Strapi } from '@strapi/typings';
 
 interface CmdOptions {
   build?: boolean;

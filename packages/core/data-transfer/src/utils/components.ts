@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { has, omit, pipe, assign } from 'lodash/fp';
 
 import { contentTypes as contentTypesUtils, mapAsync, errors } from '@strapi/utils';
-import type { Attribute, Common, Shared, Utils, EntityService as Types } from '@strapi/typings';
+import type { Attribute, Common, Schema, Utils, EntityService } from '@strapi/typings';
 
 type LoadedComponents<TUID extends Common.UID.Schema> = Attribute.GetValues<
   TUID,
@@ -23,22 +23,30 @@ type ComponentBody = {
 
 const isDialectMySQL = () => strapi.db?.dialect.client === 'mysql';
 
-const omitComponentData = <TUID extends Common.UID.ContentType>(
-  contentType: Shared.ContentTypes[TUID],
-  data: Types.Params.Data.Input<TUID>
-) => {
+function omitComponentData(
+  contentType: Schema.ContentType,
+  data: EntityService.Params.Data.Input<Schema.ContentType['uid']>
+): Partial<EntityService.Params.Data.Input<Schema.ContentType['uid']>>;
+function omitComponentData(
+  contentType: Schema.Component,
+  data: EntityService.Params.Data.Input<Schema.Component['uid']>
+): Partial<EntityService.Params.Data.Input<Schema.Component['uid']>>;
+function omitComponentData(
+  contentType: Schema.ContentType | Schema.Component,
+  data: EntityService.Params.Data.Input<Schema.ContentType['uid'] | Schema.Component['uid']>
+): Partial<EntityService.Params.Data.Input<Schema.ContentType['uid'] | Schema.Component['uid']>> {
   const { attributes } = contentType;
   const componentAttributes = Object.keys(attributes).filter((attributeName) =>
     contentTypesUtils.isComponentAttribute(attributes[attributeName])
   );
 
   return omit(componentAttributes, data);
-};
+}
 
 // NOTE: we could generalize the logic to allow CRUD of relation directly in the DB layer
 const createComponents = async <
   TUID extends Common.UID.Schema,
-  TData extends Types.Params.Data.Input<TUID>
+  TData extends EntityService.Params.Data.Input<TUID>
 >(
   uid: TUID,
   data: TData
@@ -89,7 +97,7 @@ const createComponents = async <
       } else {
         const component = await createComponent(
           componentUID,
-          componentValue as Types.Params.Data.Input<Common.UID.Component>
+          componentValue as EntityService.Params.Data.Input<Common.UID.Component>
         );
         componentBody[attributeName] = {
           id: component.id,
@@ -106,7 +114,7 @@ const createComponents = async <
     if (attribute.type === 'dynamiczone') {
       const dynamiczoneValues = data[
         attributeName as keyof TData
-      ] as Types.Params.Attribute.GetValue<Attribute.DynamicZone>;
+      ] as EntityService.Params.Attribute.GetValue<Attribute.DynamicZone>;
 
       if (!Array.isArray(dynamiczoneValues)) {
         throw new Error('Expected an array to create repeatable component');
@@ -141,7 +149,7 @@ const createComponents = async <
 
 const getComponents = async <TUID extends Common.UID.Schema>(
   uid: TUID,
-  entity: { id: Types.Params.Attribute.ID }
+  entity: { id: EntityService.Params.Attribute.ID }
 ): Promise<LoadedComponents<TUID>> => {
   const componentAttributes = contentTypesUtils.getComponentAttributes(strapi.getModel(uid));
 
@@ -158,10 +166,10 @@ const getComponents = async <TUID extends Common.UID.Schema>(
 */
 const updateComponents = async <
   TUID extends Common.UID.Schema,
-  TData extends Partial<Types.Params.Data.Input<TUID>>
+  TData extends Partial<EntityService.Params.Data.Input<TUID>>
 >(
   uid: TUID,
-  entityToUpdate: { id: Types.Params.Attribute.ID },
+  entityToUpdate: { id: EntityService.Params.Attribute.ID },
   data: TData
 ) => {
   const { attributes = {} } = strapi.getModel(uid);
@@ -257,8 +265,8 @@ const updateComponents = async <
 const pickStringifiedId = ({
   id,
 }: {
-  id: Types.Params.Attribute.ID;
-}): Types.Params.Attribute.ID & string => {
+  id: EntityService.Params.Attribute.ID;
+}): EntityService.Params.Attribute.ID & string => {
   if (typeof id === 'string') {
     return id;
   }
@@ -269,7 +277,7 @@ const pickStringifiedId = ({
 const deleteOldComponents = async <TUID extends Common.UID.Schema>(
   uid: TUID,
   componentUID: Common.UID.Component,
-  entityToUpdate: { id: Types.Params.Attribute.ID },
+  entityToUpdate: { id: EntityService.Params.Attribute.ID },
   attributeName: string,
   componentValue: Attribute.GetValue<Attribute.Component>
 ) => {
@@ -299,7 +307,7 @@ const deleteOldComponents = async <TUID extends Common.UID.Schema>(
 
 const deleteOldDZComponents = async <TUID extends Common.UID.Schema>(
   uid: TUID,
-  entityToUpdate: { id: Types.Params.Attribute.ID },
+  entityToUpdate: { id: EntityService.Params.Attribute.ID },
   attributeName: string,
   dynamiczoneValues: Attribute.GetValue<Attribute.DynamicZone>
 ) => {
@@ -404,8 +412,8 @@ const deleteComponents = async <
 
 const cloneComponents = async <TUID extends Common.UID.Schema>(
   uid: TUID,
-  entityToClone: { id: Types.Params.Attribute.ID },
-  data: Types.Params.Data.Input<TUID>
+  entityToClone: { id: EntityService.Params.Attribute.ID },
+  data: EntityService.Params.Data.Input<TUID>
 ) => {
   const { attributes = {} } = strapi.getModel(uid);
 
@@ -504,7 +512,7 @@ const cloneComponents = async <TUID extends Common.UID.Schema>(
 // components can have nested compos so this must be recursive
 const createComponent = async <TUID extends Common.UID.Component>(
   uid: TUID,
-  data: Types.Params.Data.Input<TUID>
+  data: EntityService.Params.Data.Input<TUID>
 ) => {
   const model = strapi.getModel(uid);
 
@@ -524,8 +532,8 @@ const createComponent = async <TUID extends Common.UID.Component>(
 // components can have nested compos so this must be recursive
 const updateComponent = async <TUID extends Common.UID.Component>(
   uid: TUID,
-  componentToUpdate: { id: Types.Params.Attribute.ID },
-  data: Types.Params.Data.Input<TUID>
+  componentToUpdate: { id: EntityService.Params.Attribute.ID },
+  data: EntityService.Params.Data.Input<TUID>
 ) => {
   const model = strapi.getModel(uid);
 
@@ -541,7 +549,7 @@ const updateComponent = async <TUID extends Common.UID.Component>(
 
 const updateOrCreateComponent = <TUID extends Common.UID.Component>(
   componentUID: TUID,
-  value: Types.Params.Data.Input<TUID>
+  value: EntityService.Params.Data.Input<TUID>
 ) => {
   if (value === null) {
     return null;
@@ -567,7 +575,7 @@ const deleteComponent = async <TUID extends Common.UID.Component>(
 
 const cloneComponent = async <TUID extends Common.UID.Component>(
   uid: TUID,
-  data: Types.Params.Data.Input<TUID>
+  data: EntityService.Params.Data.Input<TUID>
 ) => {
   const model = strapi.getModel(uid);
 

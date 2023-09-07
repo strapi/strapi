@@ -2,7 +2,7 @@ import { assign, isArray, isEmpty, isObject, map, omit, size } from 'lodash/fp';
 import type { LoadedStrapi, Attribute, Common, Schema } from '@strapi/typings';
 import * as componentsService from '../../utils/components';
 
-const sanitizeComponentLikeAttributes = <T extends Schema.ContentType>(
+const sanitizeComponentLikeAttributes = <T extends Schema.ContentType | Schema.Component>(
   model: T,
   data: Attribute.GetValues<T['uid']>
 ) => {
@@ -19,7 +19,7 @@ const omitInvalidCreationAttributes = omit(['id']);
 
 const createEntityQuery = (strapi: LoadedStrapi): any => {
   const components = {
-    async assignToEntity(uid: string, data: any) {
+    async assignToEntity(uid: Common.UID.Schema, data: any) {
       const model = strapi.getModel(uid);
 
       const entityComponents = await componentsService.createComponents(
@@ -46,7 +46,7 @@ const createEntityQuery = (strapi: LoadedStrapi): any => {
     },
   };
 
-  const query = (uid: string) => {
+  const query = (uid: Common.UID.Schema) => {
     const create = async <T extends { data: U }, U extends object>(params: T) => {
       const dataWithComponents = await components.assignToEntity(uid, params.data);
       const sanitizedData = omitInvalidCreationAttributes(dataWithComponents);
@@ -84,7 +84,7 @@ const createEntityQuery = (strapi: LoadedStrapi): any => {
     };
 
     const getDeepPopulateComponentLikeQuery = (
-      contentType: Schema.ContentType,
+      contentType: Schema.ContentType | Schema.Component,
       params = { select: '*' }
     ) => {
       const { attributes } = contentType;

@@ -1,5 +1,5 @@
 import { ExtendableContext } from 'koa';
-import type { Strapi } from '../../../Strapi';
+import type { Strapi } from '@strapi/typings';
 
 export type PolicyContext = Omit<ExtendableContext, 'is'> & {
   type: string;

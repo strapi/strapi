@@ -1,7 +1,7 @@
 import qs, { IParseOptions } from 'qs';
 import type Koa from 'koa';
 import type { Common } from '../types';
-import type { Strapi } from '../Strapi';
+import type { Strapi } from '@strapi/typings';
 
 type Config = IParseOptions;
 
