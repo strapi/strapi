@@ -2,6 +2,7 @@ import { AxiosError } from 'axios';
 
 import { getPrefixedId } from './getPrefixedId';
 
+import type { ApiError } from '../types';
 import type { errors } from '@strapi/utils';
 
 interface NormalizeErrorOptions {
@@ -9,23 +10,17 @@ interface NormalizeErrorOptions {
   intlMessagePrefixCallback?: (id: string) => string;
 }
 
-type ApiError =
-  | errors.ApplicationError
-  | errors.ForbiddenError
-  | errors.NotFoundError
-  | errors.NotImplementedError
-  | errors.PaginationError
-  | errors.PayloadTooLargeError
-  | errors.PolicyError
-  | errors.RateLimitError
-  | errors.UnauthorizedError
-  | errors.ValidationError
-  | errors.YupValidationError;
+interface NormalizeErrorReturn {
+  id: string;
+  defaultMessage: string;
+  name?: string;
+  values: Record<'path', string> | Record<string, never>;
+}
 
 function normalizeError(
   error: ApiError | errors.YupFormattedError,
   { name, intlMessagePrefixCallback }: NormalizeErrorOptions
-) {
+): NormalizeErrorReturn {
   const { message } = error;
 
   const normalizedError = {
