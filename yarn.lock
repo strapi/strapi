@@ -7781,7 +7781,7 @@ __metadata:
     semver: 7.5.4
     statuses: 2.0.1
     supertest: 6.3.3
-    ts-zen: "https://github.com/strapi/ts-zen#41af3f8c6422de048bf9976ae551566b2c2b590a"
+    ts-zen: "https://github.com/strapi/ts-zen#66e02232f5997674cc7032ea3ee59d9864863732"
     tsconfig: 4.13.3
     typescript: 5.2.2
     vite: 4.4.9
@@ -29389,13 +29389,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-zen@https://github.com/strapi/ts-zen#41af3f8c6422de048bf9976ae551566b2c2b590a":
-  version: 0.1.5
-  resolution: "ts-zen@https://github.com/strapi/ts-zen.git#commit=41af3f8c6422de048bf9976ae551566b2c2b590a"
+"ts-zen@https://github.com/strapi/ts-zen#66e02232f5997674cc7032ea3ee59d9864863732":
+  version: 0.1.7
+  resolution: "ts-zen@https://github.com/strapi/ts-zen.git#commit=66e02232f5997674cc7032ea3ee59d9864863732"
   peerDependencies:
     jest: ^29.6.x
     typescript: ^5.1.x
-  checksum: 475edd0974bef184dde2259bc13587a57fb8f4022f005986c4213daf68828daf16944e609e9aeefef7d83b4f3476d2e26f7daa14ec83feb0dbd1f0c0f4894be3
+  checksum: 22c034cc8a1cd1f7c19983ff15fabca4983aa32df30a5025d5cc11f8cd4df65d5406ea9d9c5c3668d6c7e35f13dd5cc6a59f0340e1ccc6a83d3dc9646e3643c7
   languageName: node
   linkType: hard
 
