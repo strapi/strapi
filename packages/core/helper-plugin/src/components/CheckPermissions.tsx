@@ -4,7 +4,7 @@ import { useNotification } from '../features/Notifications';
 import { useRBACProvider } from '../features/RBAC';
 import { hasPermissions } from '../utils/hasPermissions';
 
-import type { Permission } from '../../types';
+import type { Permission } from '@strapi/permissions';
 
 // NOTE: this component is very similar to the CheckPagePermissions
 // except that it does not handle redirections nor loading state
@@ -35,7 +35,7 @@ const CheckPermissions = ({ permissions = [], children }: CheckPagePermissions) 
       } catch (err) {
         if (isMounted.current) {
           console.error(err);
-          toggleNotification({
+          toggleNotification?.({
             type: 'warning',
             message: { id: 'notification.error' },
           });

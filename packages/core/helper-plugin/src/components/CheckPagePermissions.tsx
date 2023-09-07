@@ -8,7 +8,7 @@ import { hasPermissions } from '../utils/hasPermissions';
 
 import { LoadingIndicatorPage } from './LoadingIndicatorPage';
 
-import type { Permission } from '../../types';
+import type { Permission } from '@strapi/permissions';
 
 export interface CheckPagePermissions {
   children: React.ReactNode;
@@ -38,7 +38,7 @@ const CheckPagePermissions = ({ permissions = [], children }: CheckPagePermissio
         if (isMounted.current) {
           console.error(err);
 
-          toggleNotification({
+          toggleNotification?.({
             type: 'warning',
             message: { id: 'notification.error' },
           });
