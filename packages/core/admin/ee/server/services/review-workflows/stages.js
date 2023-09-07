@@ -10,7 +10,7 @@ const { map, pick, isEqual } = require('lodash/fp');
 const { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE, ERRORS } = require('../../constants/workflows');
 const { getService } = require('../../utils');
 
-const sanitizedStageFields = ['id', 'name', 'workflow'];
+const sanitizedStageFields = ['id', 'name', 'workflow', 'color'];
 const sanitizeStageFields = pick(sanitizedStageFields);
 
 module.exports = ({ strapi }) => {
