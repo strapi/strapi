@@ -1,7 +1,6 @@
 import { has } from 'lodash/fp';
 
-import type { Strapi } from '@strapi/typings';
-import type { Common } from '../../types';
+import type { Strapi, Common } from '@strapi/typings';
 
 type PluginMap = Record<string, Common.Plugin>;
 

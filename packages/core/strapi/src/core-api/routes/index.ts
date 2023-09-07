@@ -1,6 +1,5 @@
 import { contentTypes as contentTypeUtils } from '@strapi/utils';
-
-import type { Schema } from '../../types';
+import type { Schema } from '@strapi/typings';
 
 export const createRoutes = ({ contentType }: { contentType: Schema.ContentType }) => {
   if (contentTypeUtils.isSingleType(contentType)) {

@@ -1,9 +1,8 @@
 import { contentTypes as contentTypeUtils } from '@strapi/utils';
+import type { CoreApi, Schema } from '@strapi/typings';
 
 import createSingleTypeService from './single-type';
 import createCollectionTypeService from './collection-type';
-
-import type { CoreApi, Schema } from '../../types';
 
 const isSingleType = (contentType: Schema.ContentType): contentType is Schema.SingleType =>
   contentTypeUtils.isSingleType(contentType);

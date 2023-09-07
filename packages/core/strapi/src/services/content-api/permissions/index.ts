@@ -63,7 +63,7 @@ export default (strapi: Strapi) => {
      * Check if a controller's action is bound to the
      * content-api by looking at a potential __type__ symbol
      */
-    const isContentApi = (action: Common.ControllerHandler) => {
+    const isContentApi = (action: Common.ControllerHandler & { [s: symbol]: any }) => {
       if (!_.has(action, typeSymbol)) {
         return false;
       }

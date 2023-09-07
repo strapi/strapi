@@ -1,9 +1,8 @@
 import { errors } from '@strapi/utils';
+import type { Common, EntityService } from '@strapi/typings';
 
 import entityValidator from '../..';
 import { models, existentIDs, nonExistentIds } from './utils/relations.testdata';
-import type * as Types from '../../../entity-service/types';
-import type { Common } from '../../../../types';
 
 /**
  * Test that relations can be successfully validated and non existent relations
@@ -30,7 +29,7 @@ describe('Entity validator | Relations | Attribute', () => {
   } as any;
 
   describe('Success', () => {
-    const testData: Array<[string, Types.Params.Data.Input<Common.UID.ContentType>]> = [
+    const testData: Array<[string, EntityService.Params.Data.Input<Common.UID.ContentType>]> = [
       [
         'Connect',
         {
@@ -82,7 +81,7 @@ describe('Entity validator | Relations | Attribute', () => {
     const expectError = new errors.ValidationError(
       `2 relation(s) of type api::category.category associated with this entity do not exist`
     );
-    const testData: Array<[string, Types.Params.Data.Input<Common.UID.ContentType>]> = [
+    const testData: Array<[string, EntityService.Params.Data.Input<Common.UID.ContentType>]> = [
       [
         'Connect',
         {

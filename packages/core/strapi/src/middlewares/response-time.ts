@@ -1,4 +1,4 @@
-import type { Common } from '../types';
+import type { Common } from '@strapi/typings';
 
 export const responseTime: Common.MiddlewareFactory = () => {
   return async (ctx, next) => {

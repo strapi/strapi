@@ -1,7 +1,6 @@
 import { pickBy, has } from 'lodash/fp';
-import type { Strapi } from '@strapi/typings';
+import type { Strapi, Common } from '@strapi/typings';
 import { addNamespace, hasNamespace } from '../utils';
-import type { Common } from '../../types';
 
 export type ServiceFactory = (params: { strapi: Strapi }) => Common.Service | Common.Service;
 export type ServiceFactoryMap = Record<string, ServiceFactory>;

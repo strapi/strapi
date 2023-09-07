@@ -17,7 +17,7 @@ import type { TelemetryService } from './modules/metrics';
 import type { RequestContext } from './modules/request-context';
 
 import type { Common, Shared, Schema, StrapiDirectories } from './types';
-import type { CustomFields } from './modules/custom-fields';
+import type * as CustomFields from './modules/custom-fields';
 import type { Fetch } from './modules/fetch';
 import type { AuthenticationService } from './modules/auth';
 import type { ContentApi } from './modules/content-api';
@@ -99,7 +99,7 @@ export interface Strapi {
   entityService?: EntityService.EntityService;
   telemetry: TelemetryService;
   requestContext: RequestContext;
-  customFields: CustomFields;
+  customFields: CustomFields.CustomFields;
   fetch: Fetch;
   dirs: StrapiDirectories;
   admin?: Common.Module;

@@ -1,7 +1,7 @@
 import strapiUtils, { errors } from '@strapi/utils';
+import type { Schema } from '@strapi/typings';
 
 import validators from '../validators';
-import type { Schema } from '../../../types';
 
 describe('Time validator', () => {
   describe('unique', () => {

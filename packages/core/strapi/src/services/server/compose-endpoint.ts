@@ -144,9 +144,9 @@ const getAction = (route: Common.Route, strapi: Strapi) => {
   }
 
   if (Symbol.for('__type__') in controller[actionName]) {
-    controller[actionName][Symbol.for('__type__')].push(type);
+    (controller[actionName] as any)[Symbol.for('__type__')].push(type);
   } else {
-    controller[actionName][Symbol.for('__type__')] = [type];
+    (controller[actionName] as any)[Symbol.for('__type__')] = [type];
   }
 
   return controller[actionName].bind(controller);

@@ -1,5 +1,5 @@
 import { policy as policyUtils, errors } from '@strapi/utils';
-import { Common } from '../../types';
+import { Common } from '@strapi/typings';
 
 const resolvePolicies = (route: Common.Route) => {
   const policiesConfig = route?.config?.policies ?? [];

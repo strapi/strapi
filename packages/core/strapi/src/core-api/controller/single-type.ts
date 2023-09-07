@@ -1,8 +1,8 @@
 import { isObject } from 'lodash/fp';
 import { errors } from '@strapi/utils';
+import type { Schema, CoreApi, Utils, Common } from '@strapi/typings';
 
 import { parseBody } from './transform';
-import type { Schema, CoreApi, Utils, Common } from '../../types';
 
 interface Options {
   contentType: Schema.SingleType;

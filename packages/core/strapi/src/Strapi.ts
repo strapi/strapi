@@ -169,7 +169,7 @@ class Strapi implements StrapiI {
 
   requestContext: RequestContext;
 
-  customFields: CustomFields;
+  customFields: CustomFields.CustomFields;
 
   fetch: Fetch;
 

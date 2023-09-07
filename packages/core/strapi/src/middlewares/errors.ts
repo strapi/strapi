@@ -1,7 +1,7 @@
 import { errors } from '@strapi/utils';
+import type { Common } from '@strapi/typings';
 
 import { formatApplicationError, formatHttpError, formatInternalError } from '../services/errors';
-import { Common } from '../types';
 
 const errorMiddleware: Common.MiddlewareFactory = (/* _, { strapi } */) => {
   return async (ctx, next) => {
