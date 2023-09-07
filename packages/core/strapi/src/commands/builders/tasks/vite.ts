@@ -39,7 +39,7 @@ const resolveViteConfig = (ctx: BuildContext, task: ViteTask): InlineConfig => {
       target: targets[runtime],
       outDir,
       lib: {
-        entry: entries.map((e) => e.entry),
+        entry: entries.map((e) => e.entry).filter((v): v is string => Boolean(v)),
         formats: [format],
         /**
          * this enforces the file name to match what the output we've
@@ -79,7 +79,7 @@ const resolveViteConfig = (ctx: BuildContext, task: ViteTask): InlineConfig => {
 
 interface ViteTaskEntry {
   path: string;
-  entry: string;
+  entry?: string;
 }
 
 export interface ViteTask extends BuildTask {

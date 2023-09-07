@@ -151,7 +151,7 @@ const dtsTask: TaskHandler<DtsTask> = {
              * TODO: this will not scale and assumes all project sourcePaths are `src/index.ts`
              * so we can go back to the "root" of the project...
              */
-            cwd: path.join(ctx.cwd, entry.sourcePath ?? 'src/index.ts', '..', '..'),
+            cwd: path.join(ctx.cwd, entry.sourcePath!, '..', '..'),
             path: 'tsconfig.build.json',
           }).catch((err) => {
             if (err instanceof TSConfigNotFoundError) {
