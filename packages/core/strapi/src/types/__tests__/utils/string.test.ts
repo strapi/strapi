@@ -5,7 +5,7 @@ const STRING_UTILS_DTS_PATH = path.join(__dirname, '..', 'definitions', 'utils',
 
 let assertType: AssertTypeSelector;
 
-describe.skip('Utils.String', () => {
+describe('Utils.String', () => {
   beforeAll(() => {
     assertType = fromFile(STRING_UTILS_DTS_PATH, {
       compilerOptions: { strict: true },
