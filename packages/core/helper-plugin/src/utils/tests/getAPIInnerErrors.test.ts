@@ -1,38 +1,64 @@
+import { AxiosError, AxiosHeaders } from 'axios';
+
 import { getAPIInnerErrors } from '../getAPIInnerErrors';
 
-const API_VALIDATION_ERROR_FIXTURE = {
-  response: {
+import type { ApiError } from '../types';
+
+const API_VALIDATION_ERROR_FIXTURE = new AxiosError<{ error: ApiError }>(
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  {
     data: {
       error: {
         name: 'ValidationError',
+        message: 'errors',
+        status: 400,
         details: {
           errors: [
             {
               path: ['field', '0', 'name'],
               message: 'Field contains errors',
+              name: 'ValidationError',
             },
 
             {
               path: ['field'],
               message: 'Field must be unique',
+              name: 'ValidationError',
             },
           ],
         },
       },
     },
-  },
-};
+    status: 422,
+    statusText: 'Validation',
+    headers: {},
+    config: { headers: new AxiosHeaders() },
+  }
+);
 
-const API_APPLICATION_ERROR_FIXTURE = {
-  response: {
+const API_APPLICATION_ERROR_FIXTURE = new AxiosError<{ error: ApiError }>(
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  {
     data: {
       error: {
         name: 'ApplicationError',
-        message: 'Error message',
+        message: 'Application crashed',
+        status: 400,
+        details: {},
       },
     },
-  },
-};
+    status: 400,
+    statusText: 'Bad Request',
+    headers: {},
+    config: { headers: new AxiosHeaders() },
+  }
+);
 
 describe('getAPIInnerError', () => {
   test('handles ValidationError errors', () => {
@@ -51,6 +77,6 @@ describe('getAPIInnerError', () => {
   test('handles ApplicationError errors', () => {
     expect(
       getAPIInnerErrors(API_APPLICATION_ERROR_FIXTURE, { getTrad: (translation) => translation })
-    ).toBe('Error message');
+    ).toBe('Application crashed');
   });
 });
