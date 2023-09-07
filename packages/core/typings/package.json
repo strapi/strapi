@@ -37,7 +37,9 @@
     "watch": "run -T tsc -p tsconfig.build.json -w --preserveWatchOutput",
     "clean": "run -T rimraf ./dist",
     "prepublishOnly": "yarn clean && yarn build",
-    "lint": "run -T eslint ."
+    "lint": "run -T eslint .",
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch"
   },
   "dependencies": {
     "@koa/cors": "3.4.3",
@@ -53,6 +55,7 @@
     "node-schedule": "2.1.0"
   },
   "devDependencies": {
+    "@types/jest": "29.5.2",
     "@types/koa": "*",
     "@types/koa__router": "12.0.0",
     "@types/node-schedule": "2.1.0",

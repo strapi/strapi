@@ -1,9 +1,9 @@
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
-import { ContentType } from '../types/core/schemas';
+import { Schema } from '@strapi/typings';
 
 interface Input {
-  oldContentTypes: Record<string, ContentType>;
-  contentTypes: Record<string, ContentType>;
+  oldContentTypes: Record<string, Schema.ContentType>;
+  contentTypes: Record<string, Schema.ContentType>;
 }
 
 const enableDraftAndPublish = async ({ oldContentTypes, contentTypes }: Input) => {
