@@ -74,6 +74,7 @@ interface EventWithoutProperties {
     | 'didPluginLearnMode'
     | 'didSaveComponent'
     | 'didSaveContentType'
+    | 'didSearch'
     | 'didSkipGuidetour'
     | 'didSubmitPlugin'
     | 'didSubmitProvider'
