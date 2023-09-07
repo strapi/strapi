@@ -5,14 +5,15 @@ const path = require('path');
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
-const { createContentAPIRequest, createAuthRequest } = require('api-tests/request');
+const { createAuthRequest, createRequest } = require('api-tests/request');
 const { createUtils } = require('api-tests/utils');
 
 const builder = createTestBuilder();
 
 let strapi;
 let file;
-let rq;
+let contentAPIRequest;
+let adminRequest;
 let adminUser;
 let utils;
 
@@ -103,6 +104,23 @@ const uploadFile = async () => {
   return res.body[0];
 };
 
+/**
+ * Create a full access token to authenticate the content API with
+ */
+const getFullAccessToken = async () => {
+  const res = await adminRequest.post('/admin/api-tokens', {
+    body: {
+      lifespan: null,
+      description: '',
+      type: 'full-access',
+      name: 'Full Access',
+      permissions: null,
+    },
+  });
+
+  return res.body.data.accessKey;
+};
+
 describe('Sanitize populated entries', () => {
   beforeAll(async () => {
     file = await uploadFile();
@@ -115,15 +133,21 @@ describe('Sanitize populated entries', () => {
       .addFixtures(schemas.contentTypes.b.singularName, fixtures.b(file))
       .build();
 
-    strapi = await createStrapiInstance();
-    rq = createContentAPIRequest({ strapi });
+    strapi = await createStrapiInstance({ bypassAuth: false });
+
+    adminRequest = await createAuthRequest({ strapi });
+
+    contentAPIRequest = createRequest({ strapi })
+      .setURLPrefix('/api')
+      .setToken(await getFullAccessToken());
 
     utils = createUtils(strapi);
 
     const userInfo = {
       email: 'test@strapi.io',
-      firstname: 'test',
-      lastname: 'strapi',
+      firstname: 'admin',
+      lastname: 'user',
+      username: 'test',
       registrationToken: 'foobar',
       password: 'test1234',
       roles: [await utils.getSuperAdminRole()],
@@ -140,15 +164,18 @@ describe('Sanitize populated entries', () => {
 
   describe('Populate simple media', () => {
     test('Media can be populated without restricted attributes', async () => {
-      const { status, body } = await rq.get(`/${schemas.contentTypes.a.pluralName}`, {
-        qs: {
-          populate: {
-            cover: {
-              populate: '*',
+      const { status, body } = await contentAPIRequest.get(
+        `/${schemas.contentTypes.a.pluralName}`,
+        {
+          qs: {
+            populate: {
+              cover: {
+                populate: '*',
+              },
             },
           },
-        },
-      });
+        }
+      );
 
       expect(status).toBe(200);
       expect(body.data[0].attributes.cover).toBeDefined();
@@ -157,7 +184,7 @@ describe('Sanitize populated entries', () => {
     });
 
     test("Media's relations (from related) can be populated without restricted attributes", async () => {
-      const { status, body } = await rq.get(`/upload/files/${file.id}`, {
+      const { status, body } = await contentAPIRequest.get(`/upload/files/${file.id}`, {
         qs: { populate: { related: { populate: '*' } } },
       });
 
@@ -177,29 +204,10 @@ describe('Sanitize populated entries', () => {
   });
 
   describe('Wildcard Populate', () => {
-    beforeAll(async () => {
-      const adminRq = await createAuthRequest({ strapi });
-
-      await adminRq.put('/admin/review-workflows/workflows/1', {
-        body: {
-          data: {
-            id: 1,
-            name: 'Default',
-            contentTypes: ['api::b.b'],
-          },
-        },
-      });
-
-      const contentId = 1;
-      await adminRq.put(`/admin/content-manager/collection-types/api::b.b/${contentId}/assignee`, {
-        body: { data: { id: adminUser.id } },
-      });
-    });
-
     test('Wildcard populate is transformed to an exhaustive list of populatable fields', async () => {
       const findManyMock = jest.spyOn(strapi.entityService, 'findMany');
 
-      const { status, body } = await rq.get(`/${schemas.contentTypes.b.pluralName}`, {
+      const { status } = await contentAPIRequest.get(`/${schemas.contentTypes.b.pluralName}`, {
         qs: { fields: ['id'], populate: '*' },
       });
 
@@ -211,6 +219,39 @@ describe('Sanitize populated entries', () => {
           populate: expect.objectContaining({ relA: true, cp: true, dz: true, img: true }),
         })
       );
+    });
+  });
+
+  describe('Correctly sanitize private fields of assignees', () => {
+    beforeAll(async () => {
+      // Assign the content type b to a review workflow
+      await adminRequest.put('/admin/review-workflows/workflows/1', {
+        body: {
+          data: {
+            id: 1,
+            name: 'Default',
+            contentTypes: ['api::b.b'],
+          },
+        },
+      });
+
+      // Assign the admin user to entry 1 of content type b
+      await adminRequest.put(`/admin/content-manager/collection-types/api::b.b/1/assignee`, {
+        body: { data: { id: adminUser.id } },
+      });
+    });
+
+    test('Correctly sanitizes private fields of assignees', async () => {
+      const assigneeAttribute = 'strapi_assignee';
+
+      const { status, body } = await contentAPIRequest.get(
+        `/${schemas.contentTypes.b.pluralName}`,
+        {
+          qs: { populate: assigneeAttribute },
+        }
+      );
+
+      expect(status).toBe(200);
 
       const privateUserFields = [
         'password',
@@ -224,9 +265,9 @@ describe('Sanitize populated entries', () => {
 
       // Assert that every assignee returned is sanitized correctly
       body.data.forEach((item) => {
-        expect(item.attributes).toHaveProperty('strapi_assignee');
+        expect(item.attributes).toHaveProperty(assigneeAttribute);
         privateUserFields.forEach((field) => {
-          expect(item.attributes['strapi_assignee']).not.toHaveProperty(field);
+          expect(item.attributes[assigneeAttribute]).not.toHaveProperty(field);
         });
       });
     });
