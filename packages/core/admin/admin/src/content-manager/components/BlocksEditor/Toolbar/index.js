@@ -5,6 +5,8 @@ import { Flex, Icon } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Bold, Italic, Underline, StrikeThrough } from '@strapi/icons';
 import PropTypes from 'prop-types';
+import { Editor } from 'slate';
+import { useSlate } from 'slate-react';
 import styled from 'styled-components';
 
 const Separator = styled(Toolbar.Separator)`
@@ -13,19 +15,56 @@ const Separator = styled(Toolbar.Separator)`
   height: ${pxToRem(24)};
 `;
 
-const Modifier = ({ isOn, icon }) => {
+/**
+ *
+ * @param {import('slate').BaseEditor} editor
+ * @param {string} name - name of the modifier
+ */
+const isModifierActive = (editor, name) => {
+  const modifiers = Editor.marks(editor);
+
+  return modifiers ? modifiers[name] === true : false;
+};
+
+/**
+ *
+ * @param {import('slate').BaseEditor} editor
+ * @param {string} name - name of the modifier
+ */
+const toggleModifier = (editor, name) => {
+  const isActive = isModifierActive(editor, name);
+
+  if (isActive) {
+    Editor.removeMark(editor, name);
+  } else {
+    Editor.addMark(editor, name, true);
+  }
+};
+
+const ModifierButton = ({ icon, name }) => {
+  const editor = useSlate();
+  const isActive = isModifierActive(editor, name);
+
   return (
-    <Toolbar.ToggleItem value="test" data-state={isOn ? 'on' : 'off'} asChild>
-      <Flex background={isOn ? 'primary100' : ''} padding={2} as="button" hasRadius>
-        <Icon width={4} as={icon} color={isOn ? 'primary600' : 'neutral600'} />
+    <Toolbar.ToggleItem value="test" data-state={isActive ? 'on' : 'off'} asChild>
+      <Flex
+        background={isActive ? 'primary100' : ''}
+        padding={2}
+        as="button"
+        hasRadius
+        onClick={() => {
+          toggleModifier(editor, name);
+        }}
+      >
+        <Icon width={4} as={icon} color={isActive ? 'primary600' : 'neutral600'} />
       </Flex>
     </Toolbar.ToggleItem>
   );
 };
 
-Modifier.propTypes = {
+ModifierButton.propTypes = {
   icon: PropTypes.elementType.isRequired,
-  isOn: PropTypes.bool.isRequired,
+  name: PropTypes.string.isRequired,
 };
 
 const BlocksToolbar = () => {
@@ -34,10 +73,10 @@ const BlocksToolbar = () => {
       <Flex gap={1} padding={2}>
         <Toolbar.ToggleGroup type="multiple" asChild>
           <Flex gap={1}>
-            <Modifier isOn icon={Bold} />
-            <Modifier isOn={false} icon={Italic} />
-            <Modifier isOn={false} icon={Underline} />
-            <Modifier isOn={false} icon={StrikeThrough} />
+            <ModifierButton name="bold" icon={Bold} />
+            <ModifierButton name="italic" icon={Italic} />
+            <ModifierButton name="underline" icon={Underline} />
+            <ModifierButton name="strikethrough" icon={StrikeThrough} />
           </Flex>
         </Toolbar.ToggleGroup>
         <Separator />
