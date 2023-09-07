@@ -1,4 +1,4 @@
-import { Utils } from '@strapi/strapi';
+import type { Utils } from '@strapi/strapi';
 
 // Never Guard
 type NeverGuardGetsNeverWithDefaultFallback = Utils.Guard.Never<never>;
