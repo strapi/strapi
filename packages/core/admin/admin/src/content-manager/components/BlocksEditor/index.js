@@ -27,10 +27,7 @@ const style = {
 const initialValue = [
   {
     type: 'paragraph',
-    children: [
-      { text: 'A line of text in a paragraph.' },
-      { text: 'Some of it bold!', bold: true },
-    ],
+    children: [{ text: 'A line of text in a paragraph.' }],
   },
 ];
 

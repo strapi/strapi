@@ -42,10 +42,11 @@ const toggleModifier = (editor, name) => {
   }
 };
 
-const ModifierButton = ({ icon, name, label, editor }) => {
+const ModifierButton = ({ icon, name, label }) => {
+  const editor = useSlate();
   const isActive = isModifierActive(editor, name);
-  const { formatMessage } = useIntl();
 
+  const { formatMessage } = useIntl();
   const labelMessage = formatMessage(label);
 
   return (
@@ -75,7 +76,6 @@ ModifierButton.propTypes = {
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
   }).isRequired,
-  editor: PropTypes.object.isRequired,
 };
 
 const modifiers = [
@@ -102,8 +102,6 @@ const modifiers = [
 ];
 
 const BlocksToolbar = () => {
-  const editor = useSlate();
-
   return (
     <Toolbar.Root asChild>
       <Flex gap={1} padding={2}>
@@ -115,7 +113,6 @@ const BlocksToolbar = () => {
                 label={modifier.label}
                 name={modifier.name}
                 icon={modifier.icon}
-                editor={editor}
               />
             ))}
           </Flex>
