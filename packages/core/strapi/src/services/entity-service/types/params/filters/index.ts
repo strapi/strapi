@@ -2,7 +2,7 @@ import type { Attribute, Common, Utils } from '../../../../../types';
 
 import type * as Operator from './operators';
 import type * as AttributeUtils from '../attributes';
-import type * as Params from '../index';
+import type * as Params from '..';
 
 export { Operator };
 
