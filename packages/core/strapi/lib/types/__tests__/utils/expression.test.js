@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('path');
+const { t } = require('ts-zen');
 
 const { createTypeSelector } = require('../test.utils');
 
@@ -56,6 +57,10 @@ describe('Utils.Expression', () => {
     type('IsStrictEqualGivenEqualTypes').isBooleanLiteral(true);
     type('IsStrictEqualGivenDifferentLiterals').isBooleanLiteral(false);
     type('IsStrictEqualGivenDifferentTypes').isBooleanLiteral(false);
+    type('IsStrictEqualGivenStringAndStringLiteral').isBooleanLiteral(false);
+    type('IsStrictEqualGivenStringLiteralAndString').isBooleanLiteral(false);
+    type('IsStrictEqualGivenNumberAndNumberLiteral').isBooleanLiteral(false);
+    type('IsStrictEqualGivenNumberLiteralAndNumber').isBooleanLiteral(false);
   });
 
   test('Extends', () => {
@@ -112,5 +117,48 @@ describe('Utils.Expression', () => {
     type('ArrayNotExtendsArray').isBooleanLiteral(false);
     type('TupleNotExtendsArray').isBooleanLiteral(false);
     type('StringArrayNotExtendsArray').isBooleanLiteral(false);
+  });
+
+  test('If', () => {
+    type('IfTrue').isBooleanLiteral(true);
+    type('IfFalse').isBooleanLiteral(false);
+    type('IfBoolean').isBooleanLiteral(false);
+    type('IfNumber').isBooleanLiteral(false);
+    type('IfString').isBooleanLiteral(false);
+    type('IfObject').isBooleanLiteral(false);
+    type('IfUnknown').isBooleanLiteral(false);
+    type('IfAny').isBooleanLiteral(true);
+    type('IfNever').isBooleanLiteral(true);
+    type('IfStringLiteral').isBooleanLiteral(false);
+    type('IfTuple').isBooleanLiteral(false);
+    type('IfArray').isBooleanLiteral(false);
+    type('IfStringArray').isBooleanLiteral(false);
+    type('IfTupleArray').isBooleanLiteral(false);
+    type('IfUnion').isBooleanLiteral(false);
+    type('IfIntersection').isBooleanLiteral(true);
+    type('IfFunction').isBooleanLiteral(false);
+    type('IfClass').isBooleanLiteral(false);
+    type('IfVoid').isBooleanLiteral(false);
+    type('IfNull').isBooleanLiteral(false);
+    type('IfUndefined').isBooleanLiteral(false);
+    type('IfWithStringReturnType').isStringLiteral('test');
+    type('IfWithNumberReturnType').isNumberLiteral(1);
+    type('IfWithBooleanReturnType').isBooleanLiteral(true);
+    type('IfWithObjectReturnType').isAnonymousObject({
+      properties: { foo: t.numberLiteral(1) },
+    });
+    type('IfWithTupleReturnType').isTuple([
+      t.numberLiteral(1),
+      t.numberLiteral(2),
+      t.numberLiteral(3),
+    ]);
+    type('IfWithArrayReturnType').isArray(t.string());
+    type('IfWithUnionReturnType').isUnion([t.string(), t.number()]);
+    type('IfWithVoidReturnType').isVoid();
+    type('IfWithNullReturnType').isNull();
+    type('IfWithUndefinedReturnType').isUndefined();
+    type('IfWithNeverReturnType').isNever();
+    type('IfWithUnknownReturnType').isUnknown();
+    type('IfWithAnyReturnType').isAny();
   });
 });

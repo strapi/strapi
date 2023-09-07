@@ -1,4 +1,4 @@
-import { Utils } from '@strapi/strapi';
+import type { Utils } from '@strapi/strapi';
 
 type Obj = {
   foo: 'bar';
@@ -12,7 +12,13 @@ type Obj = {
 type StringValues = Utils.Array.Values<['foo', 'bar', 'baz']>;
 type NumberValues = Utils.Array.Values<[1, 2, 3]>;
 type BoolValues = Utils.Array.Values<[true, false, true]>;
+type TrueBoolLiteralValues = Utils.Array.Values<[true, true, true]>;
+type FalseBoolLiteralValues = Utils.Array.Values<[false, false, false]>;
 type ObjectValues = Utils.Array.Values<[Obj, { prop1: true; prop2: false }]>;
+type MixedValues = Utils.Array.Values<[Obj, 1, 'foo', true]>;
+type ContainsNever = Utils.Array.Values<[never, Obj, 1, 'foo', true]>;
+
+// TODO move this to tuple utils
 
 // Is Empty
 
@@ -28,7 +34,11 @@ export {
   StringValues,
   NumberValues,
   BoolValues,
+  TrueBoolLiteralValues,
+  FalseBoolLiteralValues,
   ObjectValues,
+  MixedValues,
+  ContainsNever,
   IsEmptyWithEmptyTuple,
   IsEmptyWithNotEmptyTuple,
   IsNotEmptyWithNotEmptyTuple,

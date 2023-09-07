@@ -25,12 +25,37 @@ describe('Utils.Array', () => {
     ]);
   });
 
+  test('Mixed Values', () => {
+    const expectedResultType = [
+      t.anonymousObject({
+        properties: {
+          foo: t.stringLiteral('bar'),
+          baz: t.booleanLiteral(false),
+          prop: t.anonymousObject({
+            properties: {
+              foo: t.stringLiteral('bar'),
+              bar: t.stringLiteral('foo'),
+            },
+          }),
+        },
+      }),
+      t.numberLiteral(1),
+      t.stringLiteral('foo'),
+      t.booleanLiteral(true),
+    ];
+    type('MixedValues').isUnion(expectedResultType);
+    // The result type should not contain the type 'never'
+    type('ContainsNever').isUnion(expectedResultType);
+  });
+
   test('Number Values', () => {
     type('NumberValues').isUnion([t.numberLiteral(1), t.numberLiteral(2), t.numberLiteral(3)]);
   });
 
   test('Bool Values', () => {
     type('BoolValues').isBoolean();
+    type('TrueBoolLiteralValues').isBooleanLiteral(true);
+    type('FalseBoolLiteralValues').isBooleanLiteral(false);
   });
 
   test('Object Values', () => {

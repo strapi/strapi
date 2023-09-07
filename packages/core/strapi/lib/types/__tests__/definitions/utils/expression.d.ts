@@ -1,5 +1,4 @@
 import type { Utils } from '@strapi/strapi';
-import { Array } from '../../../../services/entity-service/types/params/filters/operators';
 
 // IsNever
 type IsNeverGivenNever = Utils.Expression.IsNever<never>;
@@ -37,6 +36,10 @@ type IsStrictEqualGivenEqualLiterals = Utils.Expression.StrictEqual<1, 1>;
 type IsStrictEqualGivenEqualTypes = Utils.Expression.StrictEqual<boolean, boolean>;
 type IsStrictEqualGivenDifferentLiterals = Utils.Expression.StrictEqual<1, 2>;
 type IsStrictEqualGivenDifferentTypes = Utils.Expression.StrictEqual<boolean, string>;
+type IsStrictEqualGivenStringAndStringLiteral = Utils.Expression.StrictEqual<string, 'hello'>;
+type IsStrictEqualGivenStringLiteralAndString = Utils.Expression.StrictEqual<'hello', string>;
+type IsStrictEqualGivenNumberAndNumberLiteral = Utils.Expression.StrictEqual<number, 1>;
+type IsStrictEqualGivenNumberLiteralAndNumber = Utils.Expression.StrictEqual<1, number>;
 
 // Extends
 type StringExtendsString = Utils.Expression.Extends<string, string>;
@@ -86,6 +89,45 @@ type ArrayNotExtendsArray = Utils.Expression.DoesNotExtends<Array<string>, Array
 type TupleNotExtendsArray = Utils.Expression.DoesNotExtends<[string], Array<string>>;
 type StringArrayNotExtendsArray = Utils.Expression.DoesNotExtends<string[], Array<string>>;
 
+// If
+type IfTrue = Utils.Expression.If<true, true, false>;
+type IfFalse = Utils.Expression.If<false, true, false>;
+type IfBoolean = Utils.Expression.If<boolean, true, false>;
+type IfNumber = Utils.Expression.If<number, true, false>;
+type IfString = Utils.Expression.If<string, true, false>;
+type IfObject = Utils.Expression.If<object, true, false>;
+type IfUnknown = Utils.Expression.If<unknown, true, false>;
+type IfAny = Utils.Expression.If<any, true, false>;
+type IfNever = Utils.Expression.If<never, true, false>;
+type IfStringLiteral = Utils.Expression.If<'test', true, false>;
+type IfNumberLiteral = Utils.Expression.If<10, true, false>;
+type IfObjectLiteral = Utils.Expression.If<{ test: 1 }, true, false>;
+type IfTuple = Utils.Expression.If<[1, 2, 3], true, false>;
+type IfArray = Utils.Expression.If<Array<string>, true, false>;
+type IfStringArray = Utils.Expression.If<string[], true, false>;
+type IfTupleArray = Utils.Expression.If<[string, number], true, false>;
+type IfUnion = Utils.Expression.If<string | number, true, false>;
+type IfIntersection = Utils.Expression.If<string & number, true, false>;
+type IfFunction = Utils.Expression.If<() => void, true, false>;
+type IfClass = Utils.Expression.If<new () => void, true, false>;
+type IfVoid = Utils.Expression.If<void, true, false>;
+type IfNull = Utils.Expression.If<null, true, false>;
+type IfUndefined = Utils.Expression.If<undefined, true, false>;
+type IfWithStringReturnType = Utils.Expression.If<true, 'test', 'test2'>;
+type IfWithNumberReturnType = Utils.Expression.If<true, 1, 2>;
+type IfWithBooleanReturnType = Utils.Expression.If<true, true, false>;
+type IfWithObjectReturnType = Utils.Expression.If<true, { foo: 1 }, { bar: 'bar' }>;
+type IfWithTupleReturnType = Utils.Expression.If<true, [1, 2, 3], [4, 5, 6]>;
+// TODO Check this type
+type IfWithArrayReturnType = Utils.Expression.If<true, Array<string>, Array<number>>;
+type IfWithUnionReturnType = Utils.Expression.If<true, string | number, string & number>;
+type IfWithVoidReturnType = Utils.Expression.If<true, void, number>;
+type IfWithNullReturnType = Utils.Expression.If<true, null, number>;
+type IfWithUndefinedReturnType = Utils.Expression.If<true, undefined, number>;
+type IfWithNeverReturnType = Utils.Expression.If<true, never, number>;
+type IfWithUnknownReturnType = Utils.Expression.If<true, unknown, number>;
+type IfWithAnyReturnType = Utils.Expression.If<true, any, number>;
+
 export {
   // IsNever
   IsNeverGivenNever,
@@ -103,6 +145,10 @@ export {
   IsStrictEqualGivenEqualTypes,
   IsStrictEqualGivenDifferentLiterals,
   IsStrictEqualGivenDifferentTypes,
+  IsStrictEqualGivenStringLiteralAndString,
+  IsStrictEqualGivenStringAndStringLiteral,
+  IsStrictEqualGivenNumberAndNumberLiteral,
+  IsStrictEqualGivenNumberLiteralAndNumber,
   // IsTrue
   IsTrueGivenTrue,
   IsTrueGivenFalse,
@@ -165,4 +211,41 @@ export {
   ArrayNotExtendsArray,
   TupleNotExtendsArray,
   StringArrayNotExtendsArray,
+  // If
+  IfTrue,
+  IfFalse,
+  IfBoolean,
+  IfNumber,
+  IfString,
+  IfObject,
+  IfUnknown,
+  IfAny,
+  IfNever,
+  IfStringLiteral,
+  IfNumberLiteral,
+  IfObjectLiteral,
+  IfTuple,
+  IfArray,
+  IfStringArray,
+  IfTupleArray,
+  IfUnion,
+  IfIntersection,
+  IfFunction,
+  IfClass,
+  IfVoid,
+  IfNull,
+  IfUndefined,
+  IfWithStringReturnType,
+  IfWithNumberReturnType,
+  IfWithBooleanReturnType,
+  IfWithObjectReturnType,
+  IfWithTupleReturnType,
+  IfWithArrayReturnType,
+  IfWithUnionReturnType,
+  IfWithVoidReturnType,
+  IfWithNullReturnType,
+  IfWithUndefinedReturnType,
+  IfWithNeverReturnType,
+  IfWithUnknownReturnType,
+  IfWithAnyReturnType,
 };
