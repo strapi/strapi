@@ -1,14 +1,16 @@
+/* eslint-disable react/prop-types */
 import * as React from 'react';
 
-import { Box, Flex, Typography, InputWrapper, Divider } from '@strapi/design-system';
-import { pxToRem } from '@strapi/helper-plugin';
+import { Box, Flex, Typography, InputWrapper, Divider, Link } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { createEditor } from 'slate';
 import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
+import { blocksData } from './tempSchema';
 import { BlocksToolbar } from './Toolbar';
+import Wrapper from './Wrapper';
 
 const TypographyAsterisk = styled(Typography)`
   line-height: 0;
@@ -19,17 +21,95 @@ const EditorDivider = styled(Divider)`
 `;
 
 const style = {
-  fontSize: pxToRem(14),
   // The outline style is set on the wrapper with :focus-within
   outline: 'none',
 };
 
-const initialValue = [
-  {
-    type: 'paragraph',
-    children: [{ text: 'A line of text in a paragraph.' }],
-  },
-];
+const Image = ({ attributes, children, element }) => {
+  const { url, alternativeText, width, height } = element.image;
+
+  return (
+    <div {...attributes}>
+      {children}
+      <Box>
+        <img src={url} alt={alternativeText} width={width} height={height} />
+      </Box>
+    </div>
+  );
+};
+
+const Element = (props) => {
+  const { attributes, element, children } = props;
+
+  if (element.type === 'heading')
+    switch (element.level) {
+      case 1:
+        return <h1 {...attributes}>{children}</h1>;
+      case 2:
+        return <h2 {...attributes}>{children}</h2>;
+      case 3:
+        return <h3 {...attributes}>{children}</h3>;
+      case 4:
+        return <h4 {...attributes}>{children}</h4>;
+      case 5:
+        return <h5 {...attributes}>{children}</h5>;
+      case 6:
+        return <h6 {...attributes}>{children}</h6>;
+      default: // do nothing
+        return null;
+    }
+  else
+    switch (element.type) {
+      case 'link':
+        return (
+          <Link href={element.url} {...attributes}>
+            {children}
+          </Link>
+        );
+      case 'code':
+        return (
+          <pre {...attributes}>
+            <code>{children}</code>
+          </pre>
+        );
+      case 'quote':
+        return <blockquote {...attributes}>{children}</blockquote>;
+      case 'list':
+        if (element.format === 'ordered') return <ol {...attributes}>{children}</ol>;
+
+        return <ul {...attributes}>{children}</ul>;
+      case 'list-item':
+        return <li {...attributes}>{children}</li>;
+      case 'image':
+        return <Image {...props} />;
+      default:
+        return <p {...attributes}>{children}</p>;
+    }
+};
+
+const Leaf = ({ attributes, children, leaf }) => {
+  if (leaf.bold) {
+    children = <strong>{children}</strong>;
+  }
+
+  if (leaf.italic) {
+    children = <em>{children}</em>;
+  }
+
+  if (leaf.underline) {
+    children = <u>{children}</u>;
+  }
+
+  if (leaf.strikethrough) {
+    children = <del>{children}</del>;
+  }
+
+  if (leaf.code) {
+    children = <code>{children}</code>;
+  }
+
+  return <span {...attributes}>{children}</span>;
+};
 
 const BlocksEditor = React.forwardRef(({ intlLabel, name, readOnly, required, error }, ref) => {
   const { formatMessage } = useIntl();
@@ -56,6 +136,14 @@ const BlocksEditor = React.forwardRef(({ intlLabel, name, readOnly, required, er
     [editor]
   );
 
+  const renderLeaf = React.useCallback((props) => {
+    return <Leaf {...props} />;
+  }, []);
+
+  const renderElement = React.useCallback((props) => {
+    return <Element {...props} />;
+  }, []);
+
   return (
     <>
       <Flex direction="column" alignItems="stretch" gap={1}>
@@ -66,11 +154,18 @@ const BlocksEditor = React.forwardRef(({ intlLabel, name, readOnly, required, er
           </Typography>
         </Flex>
 
-        <Slate editor={editor} initialValue={initialValue}>
+        <Slate editor={editor} initialValue={blocksData}>
           <InputWrapper direction="column" alignItems="flex-start">
             <BlocksToolbar />
             <EditorDivider width="100%" />
-            <Editable readOnly={readOnly} style={style} />
+            <Wrapper>
+              <Editable
+                readOnly={readOnly}
+                style={style}
+                renderElement={renderElement}
+                renderLeaf={renderLeaf}
+              />
+            </Wrapper>
           </InputWrapper>
         </Slate>
       </Flex>
