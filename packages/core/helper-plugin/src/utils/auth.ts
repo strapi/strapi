@@ -12,7 +12,7 @@ const UPLOAD_VIEW = 'STRAPI_UPLOAD_LIBRARY_VIEW';
 
 interface UserInfo {
   email: string;
-  firstname: string;
+  firstname?: string;
   lastname?: string;
   username?: string;
   preferedLanguage?: string;
@@ -44,11 +44,11 @@ const stringify = JSON.stringify;
 
 const auth = {
   clear(key: keyof StorageItems) {
-    if (localStorage && localStorage.getItem(key)) {
+    if (localStorage.getItem(key)) {
       return localStorage.removeItem(key);
     }
 
-    if (sessionStorage && sessionStorage.getItem(key)) {
+    if (sessionStorage.getItem(key)) {
       return sessionStorage.removeItem(key);
     }
 
@@ -98,9 +98,7 @@ const auth = {
       }
     }
 
-    if (sessionStorage) {
-      sessionStorage.clear();
-    }
+    sessionStorage.clear();
   },
 
   get<T extends keyof StorageItems>(key: T): StorageItems[T] | string | null {
@@ -134,15 +132,11 @@ const auth = {
       return null;
     }
 
-    if (isLocalStorage && localStorage) {
+    if (isLocalStorage) {
       return localStorage.setItem(key, stringify(value));
     }
 
-    if (sessionStorage) {
-      return sessionStorage.setItem(key, stringify(value));
-    }
-
-    return null;
+    return sessionStorage.setItem(key, stringify(value));
   },
 
   /**
@@ -195,7 +189,7 @@ const auth = {
    * @depreacted use auth.set(value, "userInfo", true | false) instead
    */
   updateToken(value: StorageItemValues = '') {
-    const isLocalStorage: boolean = localStorage && Boolean(localStorage.getItem(TOKEN_KEY));
+    const isLocalStorage = Boolean(localStorage.getItem(TOKEN_KEY));
 
     void auth.setToken(value, isLocalStorage);
   },
