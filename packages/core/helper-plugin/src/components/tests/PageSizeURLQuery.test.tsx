@@ -4,7 +4,7 @@
  *
  */
 
-import React from 'react';
+import * as React from 'react';
 
 import { render } from '@tests/utils';
 import { Route } from 'react-router-dom';
@@ -60,7 +60,7 @@ describe('PageSizeURLQuery', () => {
 
   describe('interaction', () => {
     it('should change the value when the user selects a new value', async () => {
-      let testLocation = null;
+      let testLocation: { search?: string } = {};
 
       const { getByRole, user } = render(<PageSizeURLQuery />, {
         renderOptions: {
@@ -88,7 +88,7 @@ describe('PageSizeURLQuery', () => {
 
       expect(getByRole('combobox')).toHaveTextContent('20');
 
-      const searchParams = new URLSearchParams(testLocation.search);
+      const searchParams = new URLSearchParams(testLocation?.search);
 
       expect(searchParams.has('pageSize')).toBe(true);
       expect(searchParams.get('pageSize')).toBe('20');
@@ -107,7 +107,7 @@ describe('PageSizeURLQuery', () => {
     });
 
     it('should call trackUsage with trackedEvent props when submit', async () => {
-      const { getByRole, user } = render(<PageSizeURLQuery trackedEvent="test" />);
+      const { getByRole, user } = render(<PageSizeURLQuery trackedEvent="didCreateRole" />);
 
       await user.click(getByRole('combobox'));
 
