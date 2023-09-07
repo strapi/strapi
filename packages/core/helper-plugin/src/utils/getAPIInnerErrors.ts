@@ -14,6 +14,7 @@ interface GetAPIInnerErrorsOptions {
  * Returns a normalized error message
  *
  * @deprecated
+ * @preserve
  */
 export function getAPIInnerErrors(
   error: AxiosError<{ error: ApiError }>,
