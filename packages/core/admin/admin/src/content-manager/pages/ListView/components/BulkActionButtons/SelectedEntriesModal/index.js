@@ -445,12 +445,7 @@ const SelectedEntriesModal = ({ onToggle }) => {
   // We want to keep the selected entries order same as the list view
   const [
     {
-      query: {
-        sort,
-        plugins: {
-          i18n: { locale },
-        },
-      },
+      query: { sort, plugins },
     },
   ] = useQueryParams();
 
@@ -463,7 +458,7 @@ const SelectedEntriesModal = ({ onToggle }) => {
         $in: entriesToFetch,
       },
     },
-    locale,
+    locale: plugins?.i18n?.locale,
   };
 
   const { get } = useFetchClient();

@@ -83,15 +83,7 @@ const ConfirmDialogPublishAll = ({ isOpen, onToggleDialog, isConfirmButtonLoadin
   const {
     contentType: { uid: slug },
   } = useSelector(listViewDomain());
-  const [
-    {
-      query: {
-        plugins: {
-          i18n: { locale },
-        },
-      },
-    },
-  ] = useQueryParams();
+  const [{ query }] = useQueryParams();
 
   const {
     data: countDraftRelations,
@@ -107,7 +99,7 @@ const ConfirmDialogPublishAll = ({ isOpen, onToggleDialog, isConfirmButtonLoadin
         {
           params: {
             ids: selectedEntries,
-            locale,
+            locale: query?.plugins?.i18n?.locale,
           },
         }
       );

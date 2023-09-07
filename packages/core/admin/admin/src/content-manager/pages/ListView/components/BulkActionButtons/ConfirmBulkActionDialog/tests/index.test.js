@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { Table } from '@strapi/helper-plugin';
+import { Table, useQueryParams } from '@strapi/helper-plugin';
 import { render as renderRTL, screen, waitFor, within } from '@testing-library/react';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
@@ -225,5 +225,36 @@ describe('ConfirmDialogPublishAll', () => {
       })
     );
     expect(await screen.getByRole('alert')).toBeInTheDocument();
+  });
+
+  it('should show the warning message with 2 draft relations and 2 entries even if the locale param is not passed', async () => {
+    useQueryParams.mockImplementation(() => [
+      {
+        query: {
+          page: 1,
+          pageSize: 10,
+          sort: 'name:ASC',
+        },
+      },
+    ]);
+
+    server.use(
+      rest.get('*/countManyEntriesDraftRelations', (req, res, ctx) => {
+        return res.once(
+          ctx.status(200),
+          ctx.json({
+            data: 2,
+          })
+        );
+      })
+    );
+
+    render();
+
+    await waitFor(() => {
+      const publishDialog = screen.getByRole('dialog');
+      expect(publishDialog).toBeInTheDocument();
+      within(publishDialog).getByText(/2 relations out of 2 entries are/i);
+    });
   });
 });

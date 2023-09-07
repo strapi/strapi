@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { Table } from '@strapi/helper-plugin';
+import { Table, useQueryParams } from '@strapi/helper-plugin';
 import {
   render as renderRTL,
   screen,
@@ -149,6 +149,32 @@ describe('Bulk publish selected entries modal', () => {
   });
 
   it('renders the selected items in the modal', async () => {
+    const { queryByText } = render(
+      <Table.Root defaultSelectedEntries={[1, 2, 3]} colCount={4}>
+        <SelectedEntriesModal onToggle={jest.fn()} />
+      </Table.Root>
+    );
+
+    await waitForElementToBeRemoved(() => queryByText('Loading content'));
+
+    expect(screen.getByText(/publish entries/i)).toBeInTheDocument();
+
+    // Nested table should render the selected items from the parent table
+    expect(screen.queryByText('Entry 1')).toBeInTheDocument();
+    expect(screen.queryByText('Entry 4')).not.toBeInTheDocument();
+  });
+
+  it('renders the selected items in the modal even if the locale param is not passed', async () => {
+    useQueryParams.mockImplementation(() => [
+      {
+        query: {
+          page: 1,
+          pageSize: 10,
+          sort: 'name:DESC',
+        },
+      },
+    ]);
+
     const { queryByText } = render(
       <Table.Root defaultSelectedEntries={[1, 2, 3]} colCount={4}>
         <SelectedEntriesModal onToggle={jest.fn()} />
