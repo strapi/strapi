@@ -7047,7 +7047,7 @@ __metadata:
   resolution: "@strapi/data-transfer@workspace:packages/core/data-transfer"
   dependencies:
     "@strapi/logger": 4.13.3
-    "@strapi/strapi": 4.13.3
+    "@strapi/typings": 4.13.3
     "@strapi/utils": 4.13.3
     "@types/fs-extra": 9.0.13
     "@types/jest": 29.5.2
@@ -7078,8 +7078,6 @@ __metadata:
     tar-stream: 2.2.0
     typescript: 5.2.2
     ws: 8.13.0
-  peerDependencies:
-    "@strapi/strapi": ^4.13.3
   languageName: unknown
   linkType: soft
 
@@ -7800,6 +7798,27 @@ __metadata:
     fs-extra: 10.0.0
     lodash: 4.17.21
     prettier: 2.8.4
+    typescript: 5.2.2
+  languageName: unknown
+  linkType: soft
+
+"@strapi/typings@4.13.3, @strapi/typings@workspace:packages/core/typings":
+  version: 0.0.0-use.local
+  resolution: "@strapi/typings@workspace:packages/core/typings"
+  dependencies:
+    "@koa/cors": 3.4.3
+    "@koa/router": 10.1.1
+    "@strapi/data-transfer": 4.13.3
+    "@strapi/logger": 4.13.3
+    "@strapi/permissions": 4.13.3
+    "@strapi/utils": 4.13.3
+    "@types/koa": "*"
+    "@types/koa__router": 12.0.0
+    eslint-config-custom: 4.13.3
+    https-proxy-agent: 5.0.1
+    koa: 2.13.4
+    node-fetch: 2.7.0
+    tsconfig: 4.13.3
     typescript: 5.2.2
   languageName: unknown
   linkType: soft

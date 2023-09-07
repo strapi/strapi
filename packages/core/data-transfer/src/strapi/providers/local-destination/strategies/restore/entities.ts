@@ -1,5 +1,5 @@
 import { Writable } from 'stream';
-import type { LoadedStrapi, Common, Schema } from '@strapi/strapi';
+import type { LoadedStrapi, Common, Schema } from '@strapi/typings';
 
 import { get, last } from 'lodash/fp';
 
