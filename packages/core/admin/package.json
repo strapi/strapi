@@ -152,6 +152,11 @@
           "./build"
         ]
       }
-    }
+    },
+    "implicitDependencies": [
+      "!@strapi/data-transfer",
+      "!@strapi/strapi",
+      "!@strapi/provider-audit-logs-local"
+    ]
   }
 }
