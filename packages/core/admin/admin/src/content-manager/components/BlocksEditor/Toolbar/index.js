@@ -1,10 +1,11 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
-import { Flex, Icon } from '@strapi/design-system';
+import { Flex, Icon, Tooltip } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Bold, Italic, Underline, StrikeThrough } from '@strapi/icons';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 import { Editor } from 'slate';
 import { useSlate } from 'slate-react';
 import styled from 'styled-components';
@@ -41,23 +42,29 @@ const toggleModifier = (editor, name) => {
   }
 };
 
-const ModifierButton = ({ icon, name }) => {
+const ModifierButton = ({ icon, name, label }) => {
   const editor = useSlate();
   const isActive = isModifierActive(editor, name);
+  const { formatMessage } = useIntl();
+
+  const labelMessage = formatMessage(label);
 
   return (
     <Toolbar.ToggleItem value="test" data-state={isActive ? 'on' : 'off'} asChild>
-      <Flex
-        background={isActive ? 'primary100' : ''}
-        padding={2}
-        as="button"
-        hasRadius
-        onClick={() => {
-          toggleModifier(editor, name);
-        }}
-      >
-        <Icon width={4} as={icon} color={isActive ? 'primary600' : 'neutral600'} />
-      </Flex>
+      <Tooltip description={labelMessage}>
+        <Flex
+          background={isActive ? 'primary100' : ''}
+          padding={2}
+          as="button"
+          hasRadius
+          onClick={() => {
+            toggleModifier(editor, name);
+          }}
+          aria-label={labelMessage}
+        >
+          <Icon width={4} as={icon} color={isActive ? 'primary600' : 'neutral600'} />
+        </Flex>
+      </Tooltip>
     </Toolbar.ToggleItem>
   );
 };
@@ -65,7 +72,34 @@ const ModifierButton = ({ icon, name }) => {
 ModifierButton.propTypes = {
   icon: PropTypes.elementType.isRequired,
   name: PropTypes.string.isRequired,
+  label: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+  }).isRequired,
 };
+
+const modifiers = [
+  {
+    name: 'bold',
+    icon: Bold,
+    label: { id: 'components.Blocks.modifiers.bold', defaultMessage: 'Bold' },
+  },
+  {
+    name: 'italic',
+    icon: Italic,
+    label: { id: 'components.Blocks.modifiers.italic', defaultMessage: 'Italic' },
+  },
+  {
+    name: 'underline',
+    icon: Underline,
+    label: { id: 'components.Blocks.modifiers.underline', defaultMessage: 'Underline' },
+  },
+  {
+    name: 'strikethrough',
+    icon: StrikeThrough,
+    label: { id: 'components.Blocks.modifiers.strikethrough', defaultMessage: 'Strikethrough' },
+  },
+];
 
 const BlocksToolbar = () => {
   return (
@@ -73,10 +107,14 @@ const BlocksToolbar = () => {
       <Flex gap={1} padding={2}>
         <Toolbar.ToggleGroup type="multiple" asChild>
           <Flex gap={1}>
-            <ModifierButton name="bold" icon={Bold} />
-            <ModifierButton name="italic" icon={Italic} />
-            <ModifierButton name="underline" icon={Underline} />
-            <ModifierButton name="strikethrough" icon={StrikeThrough} />
+            {modifiers.map((modifier) => (
+              <ModifierButton
+                key={modifier.name}
+                label={modifier.label}
+                name={modifier.name}
+                icon={modifier.icon}
+              />
+            ))}
           </Flex>
         </Toolbar.ToggleGroup>
         <Separator />
