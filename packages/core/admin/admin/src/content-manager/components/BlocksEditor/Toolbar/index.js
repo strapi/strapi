@@ -3,7 +3,7 @@ import * as React from 'react';
 import * as Toolbar from '@radix-ui/react-toolbar';
 import { Flex, Icon, Tooltip } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
-import { Bold, Italic, Underline, StrikeThrough } from '@strapi/icons';
+import { Bold, Italic, Underline, StrikeThrough, Code } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Editor } from 'slate';
@@ -96,6 +96,11 @@ const modifiers = [
     name: 'strikethrough',
     icon: StrikeThrough,
     label: { id: 'components.Blocks.modifiers.strikethrough', defaultMessage: 'Strikethrough' },
+  },
+  {
+    name: 'code',
+    icon: Code,
+    label: { id: 'components.Blocks.modifiers.code', defaultMessage: 'Code' },
   },
 ];
 

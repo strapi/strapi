@@ -625,6 +625,7 @@
   "components.Blocks.modifiers.italic": "Italic",
   "components.Blocks.modifiers.underline": "Underline",
   "components.Blocks.modifiers.strikethrough": "Strikethrough",
+  "components.Blocks.modifiers.code": "Code",
   "components.Wysiwyg.ToggleMode.markdown-mode": "Markdown mode",
   "components.Wysiwyg.ToggleMode.preview-mode": "Preview mode",
   "components.Wysiwyg.collapse": "Collapse",
