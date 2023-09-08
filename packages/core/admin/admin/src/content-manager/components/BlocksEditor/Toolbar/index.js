@@ -16,35 +16,31 @@ const Separator = styled(Toolbar.Separator)`
   height: ${pxToRem(24)};
 `;
 
-/**
- *
- * @param {import('slate').BaseEditor} editor
- * @param {string} name - name of the modifier
- */
-const isModifierActive = (editor, name) => {
-  const modifiers = Editor.marks(editor);
-
-  return modifiers ? modifiers[name] === true : false;
-};
-
-/**
- *
- * @param {import('slate').BaseEditor} editor
- * @param {string} name - name of the modifier
- */
-const toggleModifier = (editor, name) => {
-  const isActive = isModifierActive(editor, name);
-
-  if (isActive) {
-    Editor.removeMark(editor, name);
-  } else {
-    Editor.addMark(editor, name, true);
-  }
-};
-
 const ModifierButton = ({ icon, name, label }) => {
   const editor = useSlate();
-  const isActive = isModifierActive(editor, name);
+
+  /**
+   * @param {string} name - name of the modifier
+   */
+  const isModifierActive = (name) => {
+    const modifiers = Editor.marks(editor);
+
+    return modifiers ? modifiers[name] === true : false;
+  };
+
+  /**
+   * @param {string} name - name of the modifier
+   */
+  const toggleModifier = (name) => {
+    const isActive = isModifierActive(name);
+
+    if (isActive) {
+      Editor.removeMark(editor, name);
+    } else {
+      Editor.addMark(editor, name, true);
+    }
+  };
+  const isActive = isModifierActive(name);
 
   const { formatMessage } = useIntl();
   const labelMessage = formatMessage(label);
@@ -59,7 +55,7 @@ const ModifierButton = ({ icon, name, label }) => {
           hasRadius
           onMouseDown={(e) => {
             e.preventDefault();
-            toggleModifier(editor, name);
+            toggleModifier(name);
           }}
           aria-label={labelMessage}
         >
