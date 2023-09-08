@@ -74,14 +74,21 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     return body;
   };
 
-  const updateContentType = async (uid, data) => {
-    const result = await requests.admin({
-      method: 'PUT',
-      url: `/content-type-builder/content-types/${uid}`,
-      body: data,
+  /**
+   * Create a full access token to authenticate the content API with
+   */
+  const getFullAccessToken = async () => {
+    const res = await requests.admin.post('/admin/api-tokens', {
+      body: {
+        lifespan: null,
+        description: '',
+        type: 'full-access',
+        name: 'Full Access',
+        permissions: null,
+      },
     });
 
-    expect(result.statusCode).toBe(201);
+    return res.body.data.accessKey;
   };
 
   beforeAll(async () => {
@@ -89,9 +96,9 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     // eslint-disable-next-line node/no-extraneous-require
     hasRW = require('@strapi/strapi/lib/utils/ee').features.isEnabled('review-workflows');
 
-    strapi = await createStrapiInstance();
-    requests.public = createRequest({ strapi });
+    strapi = await createStrapiInstance({ bypassAuth: false });
     requests.admin = await createAuthRequest({ strapi });
+    requests.public = createRequest({ strapi }).setToken(await getFullAccessToken());
 
     defaultStage = await strapi.query(STAGE_MODEL_UID).create({
       data: { name: 'Stage' },
@@ -509,6 +516,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       test('Should update the assignee on an entity', async () => {
         const entry = await createEntry(productUID, { name: 'Product' });
         const user = requests.admin.getLoggedUser();
+
         const response = await requests.admin({
           method: 'PUT',
           url: `/admin/content-manager/collection-types/${productUID}/${entry.id}/assignee`,
@@ -537,6 +545,34 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         expect(response.body.error).toBeDefined();
         expect(response.body.error.name).toEqual('ApplicationError');
         expect(response.body.error.message).toEqual('Selected user does not exist');
+      });
+
+      test('Correctly sanitize private fields of assignees in the content API', async () => {
+        const assigneeAttribute = 'strapi_assignee';
+
+        const { status, body } = await requests.public.get(`/api/${model.pluralName}`, {
+          qs: { populate: assigneeAttribute },
+        });
+
+        expect(status).toBe(200);
+
+        const privateUserFields = [
+          'password',
+          'email',
+          'resetPasswordToken',
+          'registrationToken',
+          'isActive',
+          'roles',
+          'blocked',
+        ];
+
+        // Assert that every assignee returned is sanitized correctly
+        body.data.forEach((item) => {
+          expect(item.attributes).toHaveProperty(assigneeAttribute);
+          privateUserFields.forEach((field) => {
+            expect(item.attributes[assigneeAttribute]).not.toHaveProperty(field);
+          });
+        });
       });
     });
 

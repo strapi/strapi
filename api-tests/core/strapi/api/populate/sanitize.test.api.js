@@ -5,17 +5,13 @@ const path = require('path');
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
-const { createAuthRequest, createRequest } = require('api-tests/request');
-const { createUtils } = require('api-tests/utils');
+const { createContentAPIRequest, createAuthRequest } = require('api-tests/request');
 
 const builder = createTestBuilder();
 
 let strapi;
 let file;
 let contentAPIRequest;
-let adminRequest;
-let adminUser;
-let utils;
 
 const schemas = {
   contentTypes: {
@@ -89,9 +85,9 @@ const fixtures = {
 
 const uploadFile = async () => {
   const strapi = await createStrapiInstance();
-  const rq = await createAuthRequest({ strapi });
+  const request = await createAuthRequest({ strapi });
 
-  const res = await rq({
+  const res = await request({
     method: 'POST',
     url: '/upload',
     formData: {
@@ -102,23 +98,6 @@ const uploadFile = async () => {
   await strapi.destroy();
 
   return res.body[0];
-};
-
-/**
- * Create a full access token to authenticate the content API with
- */
-const getFullAccessToken = async () => {
-  const res = await adminRequest.post('/admin/api-tokens', {
-    body: {
-      lifespan: null,
-      description: '',
-      type: 'full-access',
-      name: 'Full Access',
-      permissions: null,
-    },
-  });
-
-  return res.body.data.accessKey;
 };
 
 describe('Sanitize populated entries', () => {
@@ -133,31 +112,11 @@ describe('Sanitize populated entries', () => {
       .addFixtures(schemas.contentTypes.b.singularName, fixtures.b(file))
       .build();
 
-    strapi = await createStrapiInstance({ bypassAuth: false });
-
-    adminRequest = await createAuthRequest({ strapi });
-
-    contentAPIRequest = createRequest({ strapi })
-      .setURLPrefix('/api')
-      .setToken(await getFullAccessToken());
-
-    utils = createUtils(strapi);
-
-    const userInfo = {
-      email: 'test@strapi.io',
-      firstname: 'admin',
-      lastname: 'user',
-      username: 'test',
-      registrationToken: 'foobar',
-      password: 'test1234',
-      roles: [await utils.getSuperAdminRole()],
-    };
-
-    adminUser = await utils.createUser(userInfo);
+    strapi = await createStrapiInstance();
+    contentAPIRequest = createContentAPIRequest({ strapi });
   });
 
   afterAll(async () => {
-    await utils.deleteUserById(adminUser.id);
     await strapi.destroy();
     await builder.cleanup();
   });
@@ -219,57 +178,6 @@ describe('Sanitize populated entries', () => {
           populate: expect.objectContaining({ relA: true, cp: true, dz: true, img: true }),
         })
       );
-    });
-  });
-
-  describe('Correctly sanitize private fields of assignees', () => {
-    beforeAll(async () => {
-      // Assign the content type b to a review workflow
-      await adminRequest.put('/admin/review-workflows/workflows/1', {
-        body: {
-          data: {
-            id: 1,
-            name: 'Default',
-            contentTypes: ['api::b.b'],
-          },
-        },
-      });
-
-      // Assign the admin user to entry 1 of content type b
-      await adminRequest.put(`/admin/content-manager/collection-types/api::b.b/1/assignee`, {
-        body: { data: { id: adminUser.id } },
-      });
-    });
-
-    test('Correctly sanitizes private fields of assignees', async () => {
-      const assigneeAttribute = 'strapi_assignee';
-
-      const { status, body } = await contentAPIRequest.get(
-        `/${schemas.contentTypes.b.pluralName}`,
-        {
-          qs: { populate: assigneeAttribute },
-        }
-      );
-
-      expect(status).toBe(200);
-
-      const privateUserFields = [
-        'password',
-        'email',
-        'resetPasswordToken',
-        'registrationToken',
-        'isActive',
-        'roles',
-        'blocked',
-      ];
-
-      // Assert that every assignee returned is sanitized correctly
-      body.data.forEach((item) => {
-        expect(item.attributes).toHaveProperty(assigneeAttribute);
-        privateUserFields.forEach((field) => {
-          expect(item.attributes[assigneeAttribute]).not.toHaveProperty(field);
-        });
-      });
     });
   });
 });
