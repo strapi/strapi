@@ -1,8 +1,22 @@
 import React from 'react';
-
 import { intervalToDuration, isPast } from 'date-fns';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+
+const Intervals = ['years', 'months', 'days', 'hours', 'minutes', 'seconds'] as const;
+
+type IntervalUnit = typeof Intervals[number];
+
+interface CustomInterval {
+  unit: IntervalUnit;
+  text: string;
+  threshold: number;
+}
+
+
+interface RelativeTimeProps {
+  timestamp: Date;
+  customIntervals?: CustomInterval[];
+}
 
 /**
  * Displays the relative time between a given timestamp and the current time.
@@ -18,7 +32,7 @@ import { useIntl } from 'react-intl';
  *  ]}
  * ```
  */
-const RelativeTime = ({ timestamp, customIntervals }) => {
+const RelativeTime = ({ timestamp, customIntervals = [] }: RelativeTimeProps) => {
   const { formatRelativeTime, formatDate, formatTime } = useIntl();
 
   const interval = intervalToDuration({
@@ -26,14 +40,15 @@ const RelativeTime = ({ timestamp, customIntervals }) => {
     end: Date.now(),
   });
 
-  const unit = ['years', 'months', 'days', 'hours', 'minutes', 'seconds'].find((intervalUnit) => {
-    return interval[intervalUnit] > 0 && Object.keys(interval).includes(intervalUnit);
-  });
+  const unit: IntervalUnit = Array.from(Intervals).find((intervalUnit) => {
+        return interval[intervalUnit]! > 0 && Object.keys(interval).includes(intervalUnit);
+    })!;
 
-  const relativeTime = isPast(timestamp) ? -interval[unit] : interval[unit];
+    const relativeTime: number = isPast(timestamp) ? -interval[unit]! : interval[unit]!;
+  
 
   // Display custom text if interval is less than the threshold
-  const customInterval = customIntervals.find((custom) => interval[custom.unit] < custom.threshold);
+  const customInterval = customIntervals.find((custom) => interval[custom.unit]! < custom.threshold);
 
   const displayText = customInterval
     ? customInterval.text
@@ -47,21 +62,6 @@ const RelativeTime = ({ timestamp, customIntervals }) => {
       {displayText}
     </time>
   );
-};
-
-RelativeTime.propTypes = {
-  timestamp: PropTypes.instanceOf(Date).isRequired,
-  customIntervals: PropTypes.arrayOf(
-    PropTypes.shape({
-      unit: PropTypes.oneOf(['years', 'months', 'days', 'hours', 'minutes', 'seconds']).isRequired,
-      text: PropTypes.string.isRequired,
-      threshold: PropTypes.number.isRequired,
-    })
-  ),
-};
-
-RelativeTime.defaultProps = {
-  customIntervals: [],
 };
 
 export { RelativeTime };
