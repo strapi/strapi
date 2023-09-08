@@ -102,5 +102,18 @@ describe('appendSearchParamsToUrl', () => {
         `"https://appending-search-params.com/uploads/image.jpg?param1=example1&param2=example2"`
       );
     });
+
+    test("if there's no window.strapi.backendURL, it uses window.location.href", () => {
+      const oldBackendURL = window.strapi.backendURL;
+      window.strapi.backendURL = undefined;
+
+      expect(
+        appendSearchParamsToUrl({ url, params: { updatedAt: updateTime } })
+      ).toMatchInlineSnapshot(
+        `"http://localhost:1337/uploads/image.jpg?updatedAt=2023-07-19T03%3A00%3A00.000Z"`
+      );
+
+      window.strapi.backendURL = oldBackendURL;
+    });
   });
 });
