@@ -1,3 +1,10 @@
+/**
+ * useFormattedMessage for react-intl formatMessage
+ *
+ *
+ * @deprecated This function will be removed in the next major release. Use directly react-intl hook instead.
+ */
+
 import isObject from 'lodash/isObject';
 import { useIntl, MessageDescriptor } from 'react-intl';
 
