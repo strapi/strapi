@@ -24,14 +24,26 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useQueryParams } from '../hooks/useQueryParams';
 
 type PaginationURLQueryProps = {
-  boundaryCount?: number
+  /**
+   * Number of always visible pages at the beginning and end.
+   * @default 1
+   */
+  boundaryCount?: number;
   pagination: {
-    pageCount: number
-  }
-  siblingCount?: number
-}
+    pageCount: number;
+  };
+  /**
+   * Number of always visible pages before and after the current page.
+   * @default 1
+   */
+  siblingCount?: number;
+};
 
-export const PaginationURLQuery = ({ pagination: { pageCount }, boundaryCount = 1, siblingCount = 1 }: PaginationURLQueryProps) => {
+export const PaginationURLQuery = ({
+  pagination: { pageCount },
+  boundaryCount = 1,
+  siblingCount = 1,
+}: PaginationURLQueryProps) => {
   const [{ query }] = useQueryParams();
   const activePage = parseInt(String(query?.page || '1'), 10);
   const { pathname } = useLocation();
