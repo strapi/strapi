@@ -7312,6 +7312,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@strapi/pack-up@workspace:packages/utils/pack-up":
+  version: 0.0.0-use.local
+  resolution: "@strapi/pack-up@workspace:packages/utils/pack-up"
+  dependencies:
+    "@vitejs/plugin-react": 4.0.4
+    boxen: 5.1.2
+    chalk: 4.1.2
+    commander: 8.3.0
+    ora: 5.4.1
+    typescript: 5.2.2
+    vite: 4.4.9
+  bin:
+    pkg-utils: ./bin/pack-up.js
+  languageName: unknown
+  linkType: soft
+
 "@strapi/permissions@4.13.6, @strapi/permissions@workspace:packages/core/permissions":
   version: 0.0.0-use.local
   resolution: "@strapi/permissions@workspace:packages/core/permissions"
