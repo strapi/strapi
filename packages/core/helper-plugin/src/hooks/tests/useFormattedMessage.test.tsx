@@ -1,23 +1,22 @@
+/* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { renderHook } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
+import { IntlProvider, MessageDescriptor } from 'react-intl';
 
 import { useFormattedMessage } from '../useFormattedMessage';
 
-const setup = (...args) =>
-  renderHook(() => useFormattedMessage(...args), {
+const setup = (args: MessageDescriptor | string) => {
+  return renderHook(() => useFormattedMessage(args), {
     wrapper({ children }) {
       return (
-        <ThemeProvider theme={lightTheme}>
-          <IntlProvider locale="en" messages={{}} defaultLocale="en">
-            {children}
-          </IntlProvider>
-        </ThemeProvider>
+        <IntlProvider locale="en" messages={{}} defaultLocale="en">
+          {children}
+        </IntlProvider>
       );
     },
   });
+};
 
 describe('useFormatedMessage', () => {
   it('should return message when passed object with only id', () => {
