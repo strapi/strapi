@@ -503,6 +503,7 @@ export function Stage({
       )}
 
       <ConfirmDialog.Root
+        iconRightButton={null}
         isOpen={isApplyAllConfirmationOpen}
         onToggleDialog={() => setIsApplyAllConfirmationOpen(false)}
         onConfirm={() => {
@@ -516,6 +517,7 @@ export function Stage({
             }),
           });
         }}
+        variantRightButton="primary"
       >
         <ConfirmDialog.Body>
           <Typography textAlign="center" variant="omega">
