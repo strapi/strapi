@@ -38,7 +38,7 @@ const Image = ({ attributes, children, element }) => {
   );
 };
 
-const Element = (props) => {
+const renderElement = (props) => {
   const { attributes, element, children } = props;
 
   if (element.type === 'heading')
@@ -87,7 +87,7 @@ const Element = (props) => {
     }
 };
 
-const Leaf = ({ attributes, children, leaf }) => {
+const renderLeaf = ({ attributes, children, leaf }) => {
   if (leaf.bold) {
     children = <strong>{children}</strong>;
   }
@@ -135,14 +135,6 @@ const BlocksEditor = React.forwardRef(({ intlLabel, name, readOnly, required, er
     }),
     [editor]
   );
-
-  const renderLeaf = React.useCallback((props) => {
-    return <Leaf {...props} />;
-  }, []);
-
-  const renderElement = React.useCallback((props) => {
-    return <Element {...props} />;
-  }, []);
 
   return (
     <>
