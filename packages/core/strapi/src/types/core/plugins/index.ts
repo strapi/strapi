@@ -1,5 +1,6 @@
 import type { Common, Shared, Utils } from '../..';
 
+// TODO: this might need to move somewhere else (or else our additions need to move somewhere else)
 export type IsEnabled<
   TName extends keyof any,
   TSchemaUID extends Common.UID.Schema
@@ -14,3 +15,10 @@ export type IsEnabled<
       >
     : false
   : false;
+
+export * from './server-config';
+// export * as Lifecycle from './lifecycle';
+// export * as Controller from './controller';
+// export * as ContentType from './content-type';
+
+export * from './routes';
