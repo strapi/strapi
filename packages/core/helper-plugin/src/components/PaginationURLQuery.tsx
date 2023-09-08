@@ -17,25 +17,32 @@
 import React from 'react';
 
 import { Dots, NextLink, PageLink, Pagination, PreviousLink } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { NavLink, useLocation } from 'react-router-dom';
 
 import { useQueryParams } from '../hooks/useQueryParams';
 
-export const PaginationURLQuery = ({ pagination: { pageCount }, boundaryCount, siblingCount }) => {
+type PaginationURLQueryProps = {
+  boundaryCount?: number
+  pagination: {
+    pageCount: number
+  }
+  siblingCount?: number
+}
+
+export const PaginationURLQuery = ({ pagination: { pageCount }, boundaryCount = 1, siblingCount = 1 }: PaginationURLQueryProps) => {
   const [{ query }] = useQueryParams();
-  const activePage = parseInt(query?.page || '1', 10);
+  const activePage = parseInt(String(query?.page || '1'), 10);
   const { pathname } = useLocation();
   const { formatMessage } = useIntl();
-  const makeSearch = (page) => stringify({ ...query, page }, { encode: false });
+  const makeSearch = (page: number) => stringify({ ...query, page }, { encode: false });
 
   const nextSearch = makeSearch(activePage + (pageCount > 1 ? 1 : 0));
 
   const previousSearch = makeSearch(activePage - 1);
 
-  const range = (start, end) => {
+  const range = (start: number, end: number) => {
     const length = end - start + 1;
 
     return Array.from({ length }, (_, i) => start + i);
@@ -126,23 +133,4 @@ export const PaginationURLQuery = ({ pagination: { pageCount }, boundaryCount, s
       </NextLink>
     </Pagination>
   );
-};
-
-PaginationURLQuery.defaultProps = {
-  boundaryCount: 1,
-  siblingCount: 1,
-};
-
-PaginationURLQuery.propTypes = {
-  /**
-   * Number of always visible pages at the beginning and end.
-   * @default 1
-   */
-  boundaryCount: PropTypes.number,
-  pagination: PropTypes.shape({ pageCount: PropTypes.number.isRequired }).isRequired,
-  /**
-   * Number of always visible pages before and after the current page.
-   * @default 1
-   */
-  siblingCount: PropTypes.number,
 };
