@@ -29,12 +29,31 @@ describe('BlocksEditor', () => {
     setup();
 
     expect(screen.getByText('blocks type')).toBeInTheDocument();
-    expect(screen.getByText(/A line of text in a paragraph./));
   });
 
   it('should render blocks with error', () => {
     setup({ error: 'field is required' });
 
     expect(screen.getByText(/field is required/));
+  });
+
+  it('should render blocks with data', () => {
+    const { container } = setup();
+
+    const strongElement = container.querySelector('strong');
+    expect(strongElement.textContent).toBe('This is bold text');
+
+    const StrikethroughElement = container.querySelector('del');
+    expect(StrikethroughElement.textContent).toBe('This is deleted text');
+
+    const linkElement = screen.getByRole('link', { name: /click me/ });
+    expect(linkElement).toHaveAttribute('href', 'https://example.com');
+
+    const italicElement = screen.getByText('click me').closest('em');
+    expect(italicElement).toBeInTheDocument();
+
+    expect(screen.getByRole('heading', { level: 2 })).toBeInTheDocument();
+
+    expect(screen.getByRole('img')).toBeInTheDocument();
   });
 });

@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import * as React from 'react';
 
-import { Box, Flex, Typography, InputWrapper, Divider, Link } from '@strapi/design-system';
+import { Box, Flex, Typography, InputWrapper, Divider } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { createEditor } from 'slate';
@@ -31,7 +31,7 @@ const Image = ({ attributes, children, element }) => {
   return (
     <div {...attributes}>
       {children}
-      <Box>
+      <Box contentEditable={false}>
         <img src={url} alt={alternativeText} width={width} height={height} />
       </Box>
     </div>
@@ -62,9 +62,9 @@ const Element = (props) => {
     switch (element.type) {
       case 'link':
         return (
-          <Link href={element.url} {...attributes}>
+          <a href={element.url} {...attributes}>
             {children}
-          </Link>
+          </a>
         );
       case 'code':
         return (
