@@ -16,9 +16,9 @@ export interface SearchURLQueryProps {
 
 const SearchURLQuery = ({
   label,
-  placeholder = undefined,
-  trackedEvent = null,
-  trackedEventDetails = undefined,
+  placeholder,
+  trackedEvent,
+  trackedEventDetails,
 }: SearchURLQueryProps) => {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const iconButtonRef = React.useRef<HTMLButtonElement>(null);
