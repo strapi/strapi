@@ -5,9 +5,9 @@ import isDocker from 'is-docker';
 import ciEnv from 'ci-info';
 import tsUtils from '@strapi/typescript-utils';
 import { env } from '@strapi/utils';
+import type { Strapi } from '@strapi/typings';
 import machineID from '../../utils/machine-id';
 import { generateAdminUserHash } from './admin-user-hash';
-import type { Strapi } from '../../Strapi';
 
 export interface Payload {
   eventProperties?: Record<string, unknown>;

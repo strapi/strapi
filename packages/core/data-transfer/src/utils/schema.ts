@@ -1,4 +1,4 @@
-import type { Schema, Utils } from '@strapi/strapi';
+import type { Schema, Utils } from '@strapi/typings';
 import { mapValues, pick } from 'lodash/fp';
 
 /**

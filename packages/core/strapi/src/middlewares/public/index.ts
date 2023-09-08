@@ -4,11 +4,9 @@ import stream from 'stream';
 import _ from 'lodash';
 import { defaultsDeep } from 'lodash/fp';
 import koaStatic from 'koa-static';
+import type { Strapi, Common } from '@strapi/typings';
 import * as utils from '../../utils';
 import { serveStatic } from './serve-static';
-
-import type { Strapi } from '../../Strapi';
-import type { Common } from '../../types';
 
 type Config = koaStatic.Options;
 

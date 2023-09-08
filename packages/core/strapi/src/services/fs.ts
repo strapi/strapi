@@ -1,7 +1,7 @@
 import path from 'path';
 import fse from 'fs-extra';
 
-import type { Strapi } from '../Strapi';
+import type { Strapi } from '@strapi/typings';
 
 interface StrapiFS {
   writeAppFile(optPath: string | string[], data: string): Promise<void>;

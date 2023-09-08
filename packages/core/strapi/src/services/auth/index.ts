@@ -2,8 +2,8 @@ import assert from 'assert/strict';
 import { has } from 'lodash/fp';
 
 import { errors } from '@strapi/utils';
+import type { Common } from '@strapi/typings';
 import type { ParameterizedContext } from 'koa';
-import type { Common } from '../../types';
 
 interface AuthenticationResponse {
   authenticated?: boolean;

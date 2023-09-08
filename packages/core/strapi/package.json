@@ -100,6 +100,7 @@
     "@strapi/plugin-email": "4.13.3",
     "@strapi/plugin-upload": "4.13.3",
     "@strapi/typescript-utils": "4.13.3",
+    "@strapi/typings": "4.13.3",
     "@strapi/utils": "4.13.3",
     "@vitejs/plugin-react": "4.0.4",
     "bcryptjs": "2.4.3",

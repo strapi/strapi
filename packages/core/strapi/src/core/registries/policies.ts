@@ -1,7 +1,6 @@
 import { pickBy, has } from 'lodash/fp';
+import type { Common } from '@strapi/typings';
 import { addNamespace, hasNamespace } from '../utils';
-
-import type { Common } from '../../types';
 
 type PolicyExtendFn = (policy: Common.Policy) => Common.Policy;
 type PolicyMap = Record<string, Common.Policy>;

@@ -1,5 +1,5 @@
+import type { Schema } from '@strapi/typings';
 import entityValidator from '..';
-import type { Schema } from '../../../types';
 
 describe('Entity validator', () => {
   const modelBase: Schema.ContentType = {

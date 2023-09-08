@@ -1,5 +1,5 @@
 import { Writable } from 'stream';
-import type { LoadedStrapi, Common, Schema } from '@strapi/strapi';
+import type { LoadedStrapi, Common, Schema } from '@strapi/typings';
 
 import { get, last } from 'lodash/fp';
 
@@ -31,7 +31,10 @@ const createEntitiesWriteStream = (options: IEntitiesRestoreStreamOptions) => {
         const { create, getDeepPopulateComponentLikeQuery } = query(type);
         const contentType = strapi.getModel(type);
 
-        let cType: Schema.ContentType | ((...opts: any[]) => Schema.ContentType) = contentType;
+        let cType:
+          | Schema.ContentType
+          | Schema.Component
+          | ((...opts: any[]) => Schema.ContentType | Schema.Component) = contentType;
 
         /**
          * Resolve the component UID of an entity's attribute based

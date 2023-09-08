@@ -7,6 +7,28 @@ import { isFunction } from 'lodash/fp';
 import { Logger, createLogger } from '@strapi/logger';
 import { Database } from '@strapi/database';
 import { hooks } from '@strapi/utils';
+import type {
+  Strapi as StrapiI,
+  Server,
+  Container,
+  EntityService,
+  EventHub,
+  StartupLogger,
+  CronService,
+  WebhookStore,
+  CoreStore,
+  TelemetryService,
+  RequestContext,
+  CustomFields,
+  Fetch,
+  StrapiFS,
+  StrapiDirectories,
+  Reloader,
+  EntityValidator,
+  Common,
+  Shared,
+  Schema,
+} from '@strapi/typings';
 
 import loadConfiguration from './core/app-configuration';
 
@@ -14,16 +36,16 @@ import * as factories from './factories';
 import compile from './compile';
 
 import * as utils from './utils';
-import { createContainer, Container } from './container';
+import { createContainer } from './container';
 import createStrapiFs from './services/fs';
-import createEventHub, { EventHub } from './services/event-hub';
+import createEventHub from './services/event-hub';
 import { createServer } from './services/server';
 import createWebhookRunner, { WebhookRunner } from './services/webhook-runner';
 import { webhookModel, createWebhookStore } from './services/webhook-store';
 import { createCoreStore, coreStoreModel } from './services/core-store';
-import createEntityService, { EntityService } from './services/entity-service';
+import createEntityService from './services/entity-service';
 import createCronService from './services/cron';
-import entityValidator, { EntityValidator } from './services/entity-validator';
+import entityValidator from './services/entity-validator';
 import createTelemetry from './services/metrics';
 import requestContext from './services/request-context';
 import createAuth from './services/auth';
@@ -55,8 +77,6 @@ import convertCustomFieldType from './utils/convert-custom-field-type';
 
 // TODO: move somewhere else
 import * as draftAndPublishSync from './migrations/draft-publish';
-
-import type { Common, Shared } from './types';
 
 /**
  * Resolve the working directories based on the instance options.
@@ -120,40 +140,40 @@ const reloader = (strapi: Strapi) => {
 
 export type LoadedStrapi = Required<Strapi>;
 
-class Strapi {
-  server: ReturnType<typeof createServer>;
+class Strapi implements StrapiI {
+  server: Server;
 
   container: Container;
 
   log: Logger;
 
-  fs: ReturnType<typeof createStrapiFs>;
+  fs: StrapiFS;
 
   eventHub: EventHub;
 
-  startupLogger: ReturnType<typeof createStartupLogger>;
+  startupLogger: StartupLogger;
 
-  cron: ReturnType<typeof createCronService>;
+  cron: CronService;
 
   webhookRunner?: WebhookRunner;
 
-  webhookStore?: ReturnType<typeof createWebhookStore>;
+  webhookStore?: WebhookStore;
 
-  store?: ReturnType<typeof createCoreStore>;
+  store?: CoreStore;
 
   entityValidator?: EntityValidator;
 
-  entityService?: EntityService;
+  entityService?: EntityService.EntityService;
 
-  telemetry: ReturnType<typeof createTelemetry>;
+  telemetry: TelemetryService;
 
-  requestContext: typeof requestContext;
+  requestContext: RequestContext;
 
-  customFields: ReturnType<typeof createCustomFields>;
+  customFields: CustomFields.CustomFields;
 
-  fetch: ReturnType<typeof createStrapiFetch>;
+  fetch: Fetch;
 
-  dirs: ReturnType<typeof utils.getDirs>;
+  dirs: StrapiDirectories;
 
   admin?: Common.Module;
 
@@ -167,7 +187,7 @@ class Strapi {
 
   components: Shared.Components;
 
-  reload: ReturnType<typeof reloader>;
+  reload: Reloader;
 
   constructor(opts: StrapiOptions = {}) {
     destroyOnSignal(this);
@@ -603,7 +623,7 @@ class Strapi {
 
     this.isLoaded = true;
 
-    return this as this & Required<Strapi>;
+    return this as this & Required<StrapiI>;
   }
 
   async startWebhooks() {
@@ -634,11 +654,18 @@ class Strapi {
     }
   }
 
-  getModel(uid: string) {
-    return (
-      this.contentTypes[uid as Common.UID.ContentType] ||
-      this.components[uid as Common.UID.Component]
-    );
+  getModel(uid: Common.UID.ContentType): Schema.ContentType;
+  getModel(uid: Common.UID.Component): Schema.Component;
+  getModel<TUID extends Common.UID.Schema>(uid: TUID): Schema.ContentType | Schema.Component {
+    if (uid in this.contentTypes) {
+      return this.contentTypes[uid as Common.UID.ContentType];
+    }
+
+    if (uid in this.components) {
+      return this.components[uid as Common.UID.Component];
+    }
+
+    throw new Error('Model not found');
   }
 
   /**
@@ -672,4 +699,3 @@ const initFn = (options: StrapiOptions = {}) => {
 const init: Init = Object.assign(initFn, { factories, compile });
 
 export default init;
-export { Strapi };

@@ -1,6 +1,6 @@
 import { isEmpty, isNil } from 'lodash/fp';
 
-import type { Strapi } from '../Strapi';
+import type { Strapi } from '@strapi/typings';
 
 /**
  * Test if the strapi application is considered as initialized (1st user has been created)

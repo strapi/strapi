@@ -6,9 +6,8 @@
 import { uniqBy, castArray, isNil, isArray, mergeWith } from 'lodash';
 import { has, prop, isObject, isEmpty } from 'lodash/fp';
 import strapiUtils from '@strapi/utils';
+import { EntityValidator, Common, Schema, Attribute, Shared, EntityService } from '@strapi/typings';
 import validators from './validators';
-import { Common, Schema, Attribute, Shared } from '../../types';
-import type * as Types from '../entity-service/types';
 
 type CreateOrUpdate = 'creation' | 'update';
 
@@ -17,7 +16,7 @@ const { isMediaAttribute, isScalarAttribute, getWritableAttributes } = strapiUti
 const { ValidationError } = strapiUtils.errors;
 
 type Entity = {
-  id: string | number;
+  id: ID;
   [key: string]: unknown;
 } | null;
 
@@ -297,7 +296,10 @@ const createModelValidator =
   };
 
 const createValidateEntity = (createOrUpdate: CreateOrUpdate) => {
-  return async <TUID extends Common.UID.ContentType, TData extends Types.Params.Data.Input<TUID>>(
+  return async <
+    TUID extends Common.UID.ContentType,
+    TData extends EntityService.Params.Data.Input<TUID>
+  >(
     model: Shared.ContentTypes[TUID],
     data: TData | Partial<TData> | undefined,
     options?: { isDraft?: boolean },
@@ -487,20 +489,6 @@ const checkRelationsExist = async (relationsStore: Record<string, ID[]> = {}) =>
 
   return Promise.all(promises);
 };
-
-export interface EntityValidator {
-  validateEntityCreation: <TUID extends Common.UID.ContentType>(
-    model: Shared.ContentTypes[TUID],
-    data: Types.Params.Data.Input<TUID>,
-    options?: { isDraft?: boolean }
-  ) => Promise<Types.Params.Data.Input<TUID>>;
-  validateEntityUpdate: <TUID extends Common.UID.ContentType>(
-    model: Shared.ContentTypes[TUID],
-    data: Partial<Types.Params.Data.Input<TUID>> | undefined,
-    options?: { isDraft?: boolean },
-    entity?: Entity
-  ) => Promise<Types.Params.Data.Input<TUID>>;
-}
 
 const entityValidator: EntityValidator = {
   validateEntityCreation: createValidateEntity('creation'),

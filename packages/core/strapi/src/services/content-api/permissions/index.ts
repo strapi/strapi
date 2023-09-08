@@ -1,8 +1,7 @@
 import _ from 'lodash';
+import type { Strapi, Common } from '@strapi/typings';
 import { createActionProvider, createConditionProvider } from './providers';
 import createPermissionEngine from './engine';
-import type { Strapi } from '../../../Strapi';
-import type { Common } from '../../../types';
 
 const typeSymbol = Symbol.for('__type__');
 
@@ -63,12 +62,8 @@ export default (strapi: Strapi) => {
     /**
      * Check if a controller's action is bound to the
      * content-api by looking at a potential __type__ symbol
-     *
-     * @param {object} action
-     *
-     * @return {boolean}
      */
-    const isContentApi = (action: Action) => {
+    const isContentApi = (action: Common.ControllerHandler & { [s: symbol]: any }) => {
       if (!_.has(action, typeSymbol)) {
         return false;
       }
@@ -78,13 +73,11 @@ export default (strapi: Strapi) => {
 
     /**
      * Register actions from a specific API source into the result tree
-     *
-     * @param {{ [apiName]: { controllers: { [controller]: object } }}} apis The API container
-     * @param {string} source The prefix to use in front the API name
-     *
-     * @return {void}
      */
-    const registerAPIsActions = (apis: Record<string, Common.Plugin>, source: 'api' | 'plugin') => {
+    const registerAPIsActions = (
+      apis: Record<string, Common.Plugin | Common.Module>,
+      source: 'api' | 'plugin'
+    ) => {
       _.forEach(apis, (api, apiName) => {
         const controllers = _.reduce(
           api.controllers,

@@ -1,4 +1,4 @@
-import type { Strapi } from '@strapi/strapi';
+import type { Strapi } from '@strapi/typings';
 import auditLogContentType from './content-types/audit-log';
 
 interface Event {

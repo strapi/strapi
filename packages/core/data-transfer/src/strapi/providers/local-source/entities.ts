@@ -1,5 +1,5 @@
 import { Readable, Transform } from 'stream';
-import type { LoadedStrapi, Schema } from '@strapi/strapi';
+import type { LoadedStrapi, Schema } from '@strapi/typings';
 
 import * as shared from '../../queries';
 import { IEntity } from '../../../../types';

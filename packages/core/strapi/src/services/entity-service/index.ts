@@ -9,6 +9,16 @@ import {
   convertQueryParams,
 } from '@strapi/utils';
 import type { Database } from '@strapi/database';
+import type {
+  Strapi,
+  EntityService,
+  EntityValidator,
+  EventHub,
+  Common,
+  Schema,
+  Shared,
+  Utils,
+} from '@strapi/typings';
 
 import uploadFiles from '../utils/upload-files';
 
@@ -23,20 +33,12 @@ import {
 
 import { pickSelectionParams } from './params';
 import { applyTransforms } from './attributes';
-import type { Common, Schema, Shared, Utils } from '../../types';
-import type { Strapi } from '../../Strapi';
-
-import * as Types from './types';
-import { EventHub } from '../event-hub';
-import { EntityValidator } from '../entity-validator';
-
-export * from './types';
 
 const { transformParamsToQuery } = convertQueryParams;
 
 type Decoratable<T> = T & {
   decorate(
-    decorator: (old: Types.EntityService) => Types.EntityService & {
+    decorator: (old: EntityService.EntityService) => EntityService.EntityService & {
       [key: string]: unknown;
     }
   ): void;
@@ -91,7 +93,7 @@ const createDefaultImplementation = ({
   db: Database;
   eventHub: EventHub;
   entityValidator: EntityValidator;
-}): Types.EntityService => ({
+}): EntityService.EntityService => ({
   /**
    * Upload files utility
    */
@@ -190,7 +192,7 @@ const createDefaultImplementation = ({
 
   async create<
     TUID extends Common.UID.ContentType,
-    TParams extends Types.Params.Pick<TUID, 'data' | 'files' | 'fields' | 'populate'>
+    TParams extends EntityService.Params.Pick<TUID, 'data' | 'files' | 'fields' | 'populate'>
   >(uid: TUID, params?: TParams) {
     const wrappedParams = await this.wrapParams<TParams>(params, { uid, action: 'create' });
     const { data, files } = wrappedParams;
@@ -238,7 +240,7 @@ const createDefaultImplementation = ({
 
   async update(uid, entityId, opts) {
     const wrappedParams = await this.wrapParams<
-      Types.Params.Pick<typeof uid, 'data:partial' | 'files' | 'fields' | 'populate'>
+      EntityService.Params.Pick<typeof uid, 'data:partial' | 'files' | 'fields' | 'populate'>
     >(opts, {
       uid,
       action: 'update',
@@ -270,9 +272,7 @@ const createDefaultImplementation = ({
     const componentData = await updateComponents(uid, entityToUpdate, validData);
     const entityData = updatePipeline(
       Object.assign(omitComponentData(model, validData), componentData),
-      {
-        contentType: model,
-      }
+      { contentType: model }
     );
 
     let entity = await db.query(uid).update({
@@ -325,7 +325,7 @@ const createDefaultImplementation = ({
 
   async clone(uid, cloneId, opts) {
     const wrappedParams = await this.wrapParams<
-      Types.Params.Pick<typeof uid, 'data' | 'files' | 'fields' | 'populate'>
+      EntityService.Params.Pick<typeof uid, 'data' | 'files' | 'fields' | 'populate'>
     >(opts, { uid, action: 'clone' });
     const { data, files } = wrappedParams;
 
@@ -459,7 +459,7 @@ export default (ctx: {
   db: Database;
   eventHub: EventHub;
   entityValidator: EntityValidator;
-}): Decoratable<Types.EntityService> => {
+}): Decoratable<EntityService.EntityService> => {
   Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
     ctx.strapi.webhookStore?.addAllowedEvent(key, value);
   });
@@ -484,11 +484,11 @@ export default (ctx: {
   Object.keys(service.implementation).forEach((key) => delegator.method(key));
 
   // wrap methods to handle Database Errors
-  service.decorate((oldService: Types.EntityService) => {
+  service.decorate((oldService: EntityService.EntityService) => {
     const newService = _.mapValues(
       oldService,
-      (method, methodName: keyof Types.EntityService) =>
-        async function (this: Types.EntityService, ...args: []) {
+      (method, methodName: keyof EntityService.EntityService) =>
+        async function (this: EntityService.EntityService, ...args: []) {
           try {
             return await (oldService[methodName] as Utils.Function.AnyPromise).call(this, ...args);
           } catch (error) {
@@ -511,5 +511,5 @@ export default (ctx: {
     return newService;
   });
 
-  return service as unknown as Decoratable<Types.EntityService>;
+  return service as unknown as Decoratable<EntityService.EntityService>;
 };

@@ -1,6 +1,6 @@
 import { isEmpty, isArray } from 'lodash/fp';
 import koaSession from 'koa-session';
-import type { Common } from '../types';
+import type { Common } from '@strapi/typings';
 
 const defaultConfig = {
   key: 'koa.sess',

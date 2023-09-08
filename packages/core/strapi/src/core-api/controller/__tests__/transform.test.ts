@@ -1,4 +1,4 @@
-import type { Schema } from '../../../types';
+import type { Schema } from '@strapi/typings';
 import * as transforms from '../transform';
 
 describe('Transforms', () => {

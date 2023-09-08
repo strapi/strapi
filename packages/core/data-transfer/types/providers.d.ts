@@ -1,5 +1,5 @@
 import type { Readable, Writable } from 'stream';
-import type { Schema, Utils } from '@strapi/strapi';
+import type { Schema, Utils } from '@strapi/typings';
 import type {
   IDestinationProviderTransferResults,
   IProviderTransferResults,

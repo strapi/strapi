@@ -1,9 +1,9 @@
 import fs from 'fs';
 import { join, resolve } from 'path';
 import crypto from 'crypto';
+import type { Strapi } from '@strapi/typings';
 
 import machineId from '../utils/machine-id';
-import type { Strapi } from '../Strapi';
 
 interface LicenseInfo {
   type: 'bronze' | 'silver' | 'gold';

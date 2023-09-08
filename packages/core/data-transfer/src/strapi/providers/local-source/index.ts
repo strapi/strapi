@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
 import { chain } from 'stream-chain';
-import type { LoadedStrapi } from '@strapi/strapi';
+import type { LoadedStrapi } from '@strapi/typings';
 
 import type { IMetadata, ISourceProvider, ProviderType } from '../../../../types';
 import { createEntitiesStream, createEntitiesTransformStream } from './entities';
@@ -47,7 +47,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
   }
 
   getMetadata(): IMetadata {
-    const strapiVersion = strapi.config.get('info.strapi');
+    const strapiVersion = strapi.config.get<string>('info.strapi');
     const createdAt = new Date().toISOString();
 
     return {

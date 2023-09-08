@@ -1,7 +1,6 @@
 import { pickBy, has } from 'lodash/fp';
+import type { Strapi } from '@strapi/typings';
 import { createModule, RawModule, Module } from '../domain/module';
-
-import type { Strapi } from '../../Strapi';
 
 type ModuleMap = { [namespace: string]: Module };
 

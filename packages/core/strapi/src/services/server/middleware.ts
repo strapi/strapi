@@ -1,8 +1,7 @@
 import path from 'path';
 import { isArray } from 'lodash/fp';
 import { importDefault } from '@strapi/utils';
-import { Common } from '../../types';
-import type { Strapi } from '../../Strapi';
+import type { Strapi, Common } from '@strapi/typings';
 
 const instantiateMiddleware = (
   middlewareFactory: Common.MiddlewareFactory,

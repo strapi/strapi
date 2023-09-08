@@ -1,5 +1,5 @@
 import { map, values, sumBy, pipe, flatMap } from 'lodash/fp';
-import { Schema } from '../../types';
+import { Schema } from '@strapi/typings';
 
 const getNumberOfDynamicZones = () => {
   return pipe(

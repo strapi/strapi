@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import type { Strapi } from '../../Strapi';
+import type { Strapi } from '@strapi/typings';
 
 /**
  * Generate an admin user hash

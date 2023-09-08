@@ -1,12 +1,11 @@
-import { has, toLower, castArray, trim, prop, isNil } from 'lodash/fp';
+import { toLower, castArray, trim, prop, isNil } from 'lodash/fp';
+import type { Strapi, Common } from '@strapi/typings';
 import { errors } from '@strapi/utils';
 import Router from '@koa/router';
 
 import compose from 'koa-compose';
 import { resolveRouteMiddlewares } from './middleware';
 import { resolvePolicies } from './policy';
-import type { Strapi } from '../../Strapi';
-import type { Common } from '../../types';
 
 const getMethod = (route: Common.Route) => {
   return trim(toLower(route.method)) as Lowercase<Common.Route['method']>;
@@ -144,10 +143,10 @@ const getAction = (route: Common.Route, strapi: Strapi) => {
     throw new Error(`Handler not found "${handler}"`);
   }
 
-  if (has(Symbol.for('__type__'), controller[actionName])) {
-    controller[actionName][Symbol.for('__type__')].push(type);
+  if (Symbol.for('__type__') in controller[actionName]) {
+    (controller[actionName] as any)[Symbol.for('__type__')].push(type);
   } else {
-    controller[actionName][Symbol.for('__type__')] = [type];
+    (controller[actionName] as any)[Symbol.for('__type__')] = [type];
   }
 
   return controller[actionName].bind(controller);

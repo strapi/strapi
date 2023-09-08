@@ -1,10 +1,4 @@
-import type { Strapi } from './Strapi';
-
-export interface Container {
-  register<T, U extends string>(name: U, resolver: T): Container;
-  get<T = any>(name: string, args?: unknown): T;
-  extend(): Container;
-}
+import type { Strapi, Container } from '@strapi/typings';
 
 export const createContainer = (strapi: Strapi): Container => {
   const registered = new Map<string, unknown>();
