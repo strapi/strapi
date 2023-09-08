@@ -2,10 +2,9 @@ import Router from '@koa/router';
 import _ from 'lodash';
 import { has } from 'lodash/fp';
 import { yup } from '@strapi/utils';
+import type { Strapi, Common } from '@strapi/typings';
 
 import createEndpointComposer from './compose-endpoint';
-import type { Strapi } from '../../Strapi';
-import type { Common, Utils } from '../../types';
 
 const policyOrMiddlewareSchema = yup.lazy((value) => {
   if (typeof value === 'string') {

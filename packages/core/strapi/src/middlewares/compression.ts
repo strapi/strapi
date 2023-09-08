@@ -1,5 +1,5 @@
 import compress from 'koa-compress';
-import type { Common } from '../types';
+import type { Common } from '@strapi/typings';
 
 export type Config = compress.CompressOptions;
 

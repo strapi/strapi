@@ -2,7 +2,7 @@ import { Writable, Readable } from 'stream';
 import path from 'path';
 import * as fse from 'fs-extra';
 import type { Knex } from 'knex';
-import type { LoadedStrapi } from '@strapi/strapi';
+import type { LoadedStrapi } from '@strapi/typings';
 import type {
   IAsset,
   IDestinationProvider,
@@ -168,7 +168,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   getMetadata(): IMetadata {
     assertValidStrapi(this.strapi, 'Not able to get Schemas');
-    const strapiVersion = this.strapi.config.get('info.strapi');
+    const strapiVersion = this.strapi.config.get<string>('info.strapi');
     const createdAt = new Date().toISOString();
 
     return {
@@ -224,7 +224,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       return;
     }
 
-    if (this.strapi.config.get('plugin.upload').provider === 'local') {
+    if (this.strapi.config.get<{ provider: string }>('plugin.upload').provider === 'local') {
       const assetsDirectory = path.join(this.strapi.dirs.static.public, 'uploads');
       const backupDirectory = path.join(
         this.strapi.dirs.static.public,
@@ -265,7 +265,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     }
 
     // TODO: this should catch all thrown errors and bubble it up to engine so it can be reported as a non-fatal diagnostic message telling the user they may need to manually delete assets
-    if (this.strapi.config.get('plugin.upload').provider === 'local') {
+    if (this.strapi.config.get<{ provider: string }>('plugin.upload').provider === 'local') {
       assertValidStrapi(this.strapi);
       const backupDirectory = path.join(
         this.strapi.dirs.static.public,
@@ -340,7 +340,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
             buffer: chunk?.buffer,
           };
 
-          const provider = strapi.config.get('plugin.upload').provider;
+          const provider = strapi.config.get<{ provider: string }>('plugin.upload').provider;
 
           try {
             await strapi.plugin('upload').provider.uploadStream(uploadData);

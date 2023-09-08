@@ -1,4 +1,4 @@
-import type { Utils } from '@strapi/strapi';
+import type { Utils } from '@strapi/typings';
 
 const expectExit = async (code: number, fn: Utils.Function.Any) => {
   const exit = jest.spyOn(process, 'exit').mockImplementation((number) => {

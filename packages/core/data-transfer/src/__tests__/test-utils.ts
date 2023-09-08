@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import type { LoadedStrapi } from '@strapi/strapi';
+import type { LoadedStrapi } from '@strapi/typings';
 import type { ITransferEngine, ISourceProvider, IDestinationProvider } from '../../types';
 
 /**

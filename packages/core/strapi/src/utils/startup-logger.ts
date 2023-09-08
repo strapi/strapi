@@ -3,7 +3,7 @@ import CLITable from 'cli-table3';
 import _ from 'lodash/fp';
 import { getAbsoluteAdminUrl, getAbsoluteServerUrl } from '@strapi/utils';
 
-import type { Strapi } from '../Strapi';
+import type { Strapi } from '@strapi/typings';
 
 export default (app: Strapi) => {
   return {

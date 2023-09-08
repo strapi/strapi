@@ -1,6 +1,5 @@
 import { join, resolve } from 'path';
-import type { Strapi } from '../Strapi';
-import type { StrapiDirectories } from '../types';
+import type { Strapi, StrapiDirectories } from '@strapi/typings';
 
 export type Options = {
   app: string;

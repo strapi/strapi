@@ -1,9 +1,9 @@
 import { pick, isEqual } from 'lodash/fp';
 import type { Logger } from '@strapi/logger';
+import type { Strapi } from '@strapi/typings';
 
 import { readLicense, verifyLicense, fetchLicense, LicenseCheckError } from './license';
 import { shiftCronExpression } from '../utils/cron';
-import type { Strapi } from '../Strapi';
 
 const ONE_MINUTE = 1000 * 60;
 

@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-import { yellow, red, green } from 'chalk';
-import { has, isString, isArray } from 'lodash/fp';
-import resolveCwd from 'resolve-cwd';
+import { red, green } from 'chalk';
+import { isString, isArray } from 'lodash/fp';
 import type { Command } from 'commander';
 
 const bytesPerKb = 1024;
@@ -105,56 +103,4 @@ const ifOptions = (
   };
 };
 
-const assertCwdContainsStrapiProject = (name: string) => {
-  const logErrorAndExit = () => {
-    console.log(
-      `You need to run ${yellow(
-        `strapi ${name}`
-      )} in a Strapi project. Make sure you are in the right directory.`
-    );
-    process.exit(1);
-  };
-
-  try {
-    const pkgJSON = require(`${process.cwd()}/package.json`);
-    if (!has('dependencies.@strapi/strapi', pkgJSON)) {
-      logErrorAndExit();
-    }
-  } catch (err) {
-    logErrorAndExit();
-  }
-};
-
-const getLocalScript =
-  (name: string) =>
-  (...args: unknown[]) => {
-    assertCwdContainsStrapiProject(name);
-
-    const cmdPath = resolveCwd.silent(`@strapi/strapi/dist/commands/actions/${name}/action`);
-    if (!cmdPath) {
-      console.log(
-        `Error loading the local ${yellow(
-          name
-        )} command. Strapi might not be installed in your "node_modules". You may need to run "yarn install".`
-      );
-      process.exit(1);
-    }
-
-    import(cmdPath)
-      .then((script) => {
-        return script(...args);
-      })
-      .catch((error) => {
-        console.error(error);
-        process.exit(1);
-      });
-  };
-
-export {
-  exitWith,
-  assertUrlHasProtocol,
-  ifOptions,
-  readableBytes,
-  getLocalScript,
-  assertCwdContainsStrapiProject,
-};
+export { exitWith, assertUrlHasProtocol, ifOptions, readableBytes };

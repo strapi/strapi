@@ -1,6 +1,6 @@
 import koaCors from '@koa/cors';
 
-import type { Common } from '../types';
+import type { Common } from '@strapi/typings';
 
 export type Config = {
   enabled?: boolean;

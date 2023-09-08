@@ -3,9 +3,7 @@ import fse, { existsSync } from 'fs-extra';
 import _ from 'lodash';
 import { isKebabCase, importDefault } from '@strapi/utils';
 import { isEmpty } from 'lodash/fp';
-
-import type { Strapi } from '../../Strapi';
-import type { Common, Schema } from '../../types';
+import type { Strapi, Common, Schema } from '@strapi/typings';
 
 interface API {
   bootstrap: () => void | Promise<void>;

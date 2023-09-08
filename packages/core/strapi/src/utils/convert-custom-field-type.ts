@@ -1,4 +1,4 @@
-import type { Strapi } from '../Strapi';
+import type { Strapi } from '@strapi/typings';
 
 type InputAttributes = {
   [key: string]: {

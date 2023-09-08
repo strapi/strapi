@@ -1,8 +1,7 @@
 import Router from '@koa/router';
+import type { Strapi, Common } from '@strapi/typings';
 
 import { createRouteManager } from './routing';
-import type { Strapi } from '../../Strapi';
-import type { Common } from '../../types';
 
 interface Options {
   prefix?: string;

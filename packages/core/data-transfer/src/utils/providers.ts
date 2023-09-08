@@ -1,4 +1,4 @@
-import type { LoadedStrapi } from '@strapi/strapi';
+import type { LoadedStrapi } from '@strapi/typings';
 
 import { ProviderInitializationError } from '../errors/providers';
 

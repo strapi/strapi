@@ -1,9 +1,9 @@
 import open from 'open';
 import { getAbsoluteAdminUrl } from '@strapi/utils';
 
-import type { Strapi } from '../Strapi';
+import type { ConfigProvider } from '@strapi/typings';
 
-async function openBrowser(config: Strapi['config']) {
+async function openBrowser(config: ConfigProvider) {
   const url = getAbsoluteAdminUrl(config);
 
   return open(url);

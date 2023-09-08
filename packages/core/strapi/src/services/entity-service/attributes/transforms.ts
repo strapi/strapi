@@ -1,7 +1,6 @@
 import { getOr, toNumber, isString } from 'lodash/fp';
+import type { Attribute } from '@strapi/typings';
 import bcrypt from 'bcryptjs';
-
-import type { Attribute } from '../../../types';
 
 type Transforms = {
   [TKind in Attribute.Kind]?: (

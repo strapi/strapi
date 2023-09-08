@@ -1,4 +1,4 @@
-import type { LoadedStrapi, Schema } from '@strapi/strapi';
+import type { LoadedStrapi, Schema } from '@strapi/typings';
 import { ProviderTransferError } from '../../../../../errors/providers';
 import * as queries from '../../../../queries';
 

@@ -1,4 +1,4 @@
-import { Schema } from '../../../types';
+import { Schema } from '@strapi/typings';
 import { createService } from '../index';
 
 describe('Default Service', () => {

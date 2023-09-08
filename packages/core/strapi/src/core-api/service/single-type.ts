@@ -1,7 +1,7 @@
 import { propOr } from 'lodash/fp';
+import type { CoreApi, Schema, Common } from '@strapi/typings';
 import { errors, contentTypes as contentTypeUtils } from '@strapi/utils';
 import { getFetchParams } from './get-fetch-params';
-import type { CoreApi, Schema, Common } from '../../types';
 
 const {
   hasDraftAndPublish,

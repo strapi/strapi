@@ -1,13 +1,14 @@
+import type { ConfigProvider } from '@strapi/typings';
 import _, { PropertyName } from 'lodash';
 
 type Config = Record<string, unknown>;
 
-export default (initialConfig = {}) => {
+export default (initialConfig = {}): ConfigProvider => {
   const _config: Config = { ...initialConfig }; // not deep clone because it would break some config
 
   return {
     ..._config, // TODO: to remove
-    get(path: PropertyName, defaultValue: unknown) {
+    get(path: PropertyName, defaultValue?: unknown) {
       return _.get(_config, path, defaultValue);
     },
     set(path: PropertyName, val: unknown) {

@@ -167,7 +167,7 @@ const createBuildTasks = async (ctx: BuildContext): Promise<Task[]> => {
     }: {
       output: string;
       path: string;
-      entry: string;
+      entry?: string;
     }
   ) => {
     const buildId = `${format}:${output}`;
@@ -221,7 +221,7 @@ const createBuildTasks = async (ctx: BuildContext): Promise<Task[]> => {
        */
       createViteTask('cjs', runtime, {
         path: exp._path,
-        entry: exp.source ?? 'src/index.ts',
+        entry: exp.source,
         output: exp.require,
       });
     }
@@ -232,7 +232,7 @@ const createBuildTasks = async (ctx: BuildContext): Promise<Task[]> => {
        */
       createViteTask('es', runtime, {
         path: exp._path,
-        entry: exp.source ?? 'src/index.ts',
+        entry: exp.source,
         output: exp.import,
       });
     }

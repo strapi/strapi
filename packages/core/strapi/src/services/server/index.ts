@@ -1,4 +1,5 @@
 import Router from '@koa/router';
+import type { Strapi, Common, Server } from '@strapi/typings';
 
 import { createHTTPServer } from './http-server';
 import { createRouteManager } from './routing';
@@ -9,24 +10,12 @@ import registerApplicationMiddlewares from './register-middlewares';
 import createKoaApp from './koa';
 import requestCtx from '../request-context';
 
-import type { Strapi } from '../../Strapi';
-import type { Common } from '../../types';
-
 const healthCheck: Common.MiddlewareHandler = async (ctx) => {
   ctx.set('strapi', 'You are so French!');
   ctx.status = 204;
 };
 
-/**
- * @typedef Server
- *
- * @property {Koa} app
- * @property {http.Server} app
- */
-
-/**
- */
-const createServer = (strapi: Strapi) => {
+const createServer = (strapi: Strapi): Server => {
   const app = createKoaApp({
     proxy: strapi.config.get('server.proxy'),
     keys: strapi.config.get('server.app.keys'),
@@ -45,8 +34,6 @@ const createServer = (strapi: Strapi) => {
     admin: createAdminAPI(strapi),
   };
 
-  type APIs = typeof apis;
-
   // init health check
   router.all('/_health', healthCheck);
 
@@ -59,11 +46,11 @@ const createServer = (strapi: Strapi) => {
     router,
     httpServer,
 
-    api(name: keyof APIs) {
+    api(name) {
       return apis[name];
     },
 
-    use(...args: Parameters<typeof app.use>) {
+    use(...args) {
       app.use(...args);
       return this;
     },

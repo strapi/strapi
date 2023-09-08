@@ -3,7 +3,7 @@ import { defaultsDeep } from 'lodash/fp';
 import body from 'koa-body';
 import mime from 'mime-types';
 import type Koa from 'koa';
-import type { Common } from '../types';
+import type { Common } from '@strapi/typings';
 
 export type Config = body.IKoaBodyOptions;
 

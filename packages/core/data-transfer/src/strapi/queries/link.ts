@@ -1,6 +1,6 @@
 import type { Knex } from 'knex';
 import { clone, isNil } from 'lodash/fp';
-import type { LoadedStrapi } from '@strapi/strapi';
+import type { LoadedStrapi } from '@strapi/typings';
 
 import { ILink } from '../../../types';
 

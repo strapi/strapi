@@ -1,6 +1,6 @@
 import { Job } from 'node-schedule';
 import { isFunction } from 'lodash/fp';
-import type { Strapi } from '../Strapi';
+import type { Strapi } from '@strapi/typings';
 
 interface JobSpec {
   job: Job;

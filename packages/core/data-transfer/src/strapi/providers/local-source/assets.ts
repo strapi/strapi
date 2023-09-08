@@ -2,7 +2,7 @@ import { join } from 'path';
 import https from 'https';
 import { Duplex, PassThrough, Readable } from 'stream';
 import { stat, createReadStream, ReadStream } from 'fs-extra';
-import type { LoadedStrapi } from '@strapi/strapi';
+import type { LoadedStrapi } from '@strapi/typings';
 
 import type { IAsset } from '../../../../types';
 

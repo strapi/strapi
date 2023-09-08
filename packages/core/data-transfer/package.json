@@ -42,6 +42,7 @@
   "dependencies": {
     "@strapi/logger": "4.13.3",
     "@strapi/strapi": "4.13.3",
+    "@strapi/typings": "4.13.3",
     "@strapi/utils": "4.13.3",
     "chalk": "4.1.2",
     "cli-table3": "0.6.2",
@@ -57,9 +58,6 @@
     "tar": "6.1.13",
     "tar-stream": "2.2.0",
     "ws": "8.13.0"
-  },
-  "peerDependencies": {
-    "@strapi/strapi": "^4.13.3"
   },
   "devDependencies": {
     "@types/fs-extra": "9.0.13",

@@ -1,7 +1,6 @@
 import { has, isPlainObject } from 'lodash/fp';
 
-import type { Strapi } from '../../Strapi';
-import type { CustomFieldServerOptions } from '../../types';
+import type { Strapi, CustomFields } from '@strapi/typings';
 
 const ALLOWED_TYPES = [
   'biginteger',
@@ -37,7 +36,9 @@ const customFieldsRegistry = (strapi: Strapi) => {
 
       return registeredCustomField;
     },
-    add(customField: CustomFieldServerOptions | CustomFieldServerOptions[]) {
+    add(
+      customField: CustomFields.CustomFieldServerOptions | CustomFields.CustomFieldServerOptions[]
+    ) {
       const customFieldList = Array.isArray(customField) ? customField : [customField];
 
       for (const cf of customFieldList) {

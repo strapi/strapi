@@ -1,5 +1,6 @@
 import { propOr } from 'lodash/fp';
 import { contentTypes } from '@strapi/utils';
+import type { CoreApi, Schema } from '@strapi/typings';
 
 import {
   getPaginationInfo,
@@ -8,7 +9,6 @@ import {
   transformPaginationResponse,
 } from './pagination';
 import { getFetchParams } from './get-fetch-params';
-import type { CoreApi, Schema } from '../../types';
 
 const {
   hasDraftAndPublish,
