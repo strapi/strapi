@@ -699,4 +699,3 @@ const initFn = (options: StrapiOptions = {}) => {
 const init: Init = Object.assign(initFn, { factories, compile });
 
 export default init;
-export { Strapi };

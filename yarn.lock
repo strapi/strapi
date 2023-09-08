@@ -7602,10 +7602,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-audit-logs-local@workspace:packages/providers/audit-logs-local"
   dependencies:
+    "@strapi/typings": 4.13.3
     eslint-config-custom: 4.13.3
     tsconfig: 4.13.3
-  peerDependencies:
-    "@strapi/strapi": ^4.9.0
   languageName: unknown
   linkType: soft
 
