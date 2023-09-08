@@ -1,11 +1,7 @@
 import isObject from 'lodash/isObject';
 import { useIntl, MessageDescriptor } from 'react-intl';
 
-interface MessageProps {
-  message: MessageDescriptor;
-}
-
-const useFormattedMessage = ({ message }: MessageProps) => {
+const useFormattedMessage = (message: MessageDescriptor | string) => {
   const { formatMessage } = useIntl();
 
   if (isObject(message) && message.id) {
