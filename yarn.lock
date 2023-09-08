@@ -7780,7 +7780,6 @@ __metadata:
     semver: 7.5.4
     statuses: 2.0.1
     supertest: 6.3.3
-    ts-zen: "https://github.com/strapi/ts-zen#66e02232f5997674cc7032ea3ee59d9864863732"
     tsconfig: 4.13.3
     typescript: 5.2.2
     vite: 4.4.9
@@ -7823,6 +7822,7 @@ __metadata:
     koa: 2.13.4
     node-fetch: 2.7.0
     node-schedule: 2.1.0
+    ts-zen: "https://github.com/strapi/ts-zen#66e02232f5997674cc7032ea3ee59d9864863732"
     tsconfig: 4.13.3
     typescript: 5.2.2
   languageName: unknown
