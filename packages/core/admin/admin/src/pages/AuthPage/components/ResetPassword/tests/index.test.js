@@ -392,7 +392,8 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         color: #666687;
       }
 
-      .c41[aria-disabled='true'] svg > g,.c41[aria-disabled='true'] svg path {
+      .c41[aria-disabled='true'] svg > g,
+      .c41[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -405,7 +406,8 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         color: #666687;
       }
 
-      .c41[aria-disabled='true']:active svg > g,.c41[aria-disabled='true']:active svg path {
+      .c41[aria-disabled='true']:active svg > g,
+      .c41[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 

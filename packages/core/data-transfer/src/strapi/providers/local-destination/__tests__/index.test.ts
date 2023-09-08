@@ -19,7 +19,11 @@ jest.mock('../strategies/restore', () => {
 
 const strapiCommonProperties = {
   config: {
-    get: jest.fn().mockReturnValue({ provider: 'aws-s3' }),
+    get(service) {
+      if (service === 'plugin.upload') {
+        return { provider: 'local' };
+      }
+    },
   },
   dirs: {
     static: {
@@ -44,6 +48,11 @@ describe('Local Strapi Source Destination', () => {
           ...strapiCommonProperties,
         }),
         strategy: 'restore',
+        restore: {
+          entities: {
+            exclude: [],
+          },
+        },
       });
 
       expect(provider.strapi).not.toBeDefined();
@@ -56,6 +65,11 @@ describe('Local Strapi Source Destination', () => {
           ...strapiCommonProperties,
         }),
         strategy: 'restore',
+        restore: {
+          entities: {
+            exclude: [],
+          },
+        },
       });
       await provider.bootstrap();
 
@@ -71,6 +85,11 @@ describe('Local Strapi Source Destination', () => {
           ...strapiCommonProperties,
         }),
         strategy: 'restore',
+        restore: {
+          entities: {
+            exclude: [],
+          },
+        },
       });
       await restoreProvider.bootstrap();
       expect(restoreProvider.strapi).toBeDefined();
@@ -89,7 +108,9 @@ describe('Local Strapi Source Destination', () => {
       ).rejects.toThrow();
     });
 
-    test('Should delete all entities if it is a restore', async () => {
+    test.todo('Should not delete entities that are not included');
+
+    test('Should delete all entities if it is a restore with only exclude property', async () => {
       const entities = [
         {
           entity: { id: 1, title: 'My first foo' },
@@ -161,6 +182,11 @@ describe('Local Strapi Source Destination', () => {
       const provider = createLocalStrapiDestinationProvider({
         getStrapi: () => strapi,
         strategy: 'restore',
+        restore: {
+          entities: {
+            exclude: [],
+          },
+        },
       });
       const deleteAllSpy = jest.spyOn(restoreApi, 'deleteRecords');
       await provider.bootstrap();

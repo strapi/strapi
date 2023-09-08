@@ -1,18 +1,20 @@
 import * as React from 'react';
 
-import { Field, FieldLabel, FieldError, Flex, Loader } from '@strapi/design-system';
+import { Combobox, ComboboxOption, Field, Flex, Loader, Typography } from '@strapi/design-system';
 import {
-  // eslint-disable-next-line no-restricted-imports
-  ReactSelect,
   useCMEditViewDataManager,
   useAPIErrorHandler,
   useFetchClient,
   useNotification,
+  useRBAC,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
+import { useSelector } from 'react-redux';
 
+import { getDisplayName } from '../../../../../../../../admin/src/content-manager/utils';
 import { useAdminUsers } from '../../../../../../../../admin/src/hooks/useAdminUsers';
+import { selectAdminPermissions } from '../../../../../../../../admin/src/pages/App/selectors';
 import { ASSIGNEE_ATTRIBUTE_NAME } from '../../constants';
 
 export function AssigneeSelect() {
@@ -22,18 +24,29 @@ export function AssigneeSelect() {
     isSingleType,
     onChange,
   } = useCMEditViewDataManager();
+  const permissions = useSelector(selectAdminPermissions);
   const { formatMessage } = useIntl();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
   const { put } = useFetchClient();
-  const { users, isLoading, isError } = useAdminUsers();
+  const {
+    allowedActions: { canReadUsers },
+  } = useRBAC({
+    readUsers: permissions.settings.users.read,
+  });
+  const { users, isLoading, isError } = useAdminUsers(
+    {},
+    {
+      enabled: canReadUsers,
+    }
+  );
 
   const currentAssignee = initialData?.[ASSIGNEE_ATTRIBUTE_NAME] ?? null;
 
   const handleChange = async ({ value: assigneeId }) => {
     mutation.mutate({
       entityId: initialData.id,
-      assigneeId,
+      assigneeId: parseInt(assigneeId, 10),
       uid,
     });
   };
@@ -65,84 +78,69 @@ export function AssigneeSelect() {
           type: 'success',
           message: {
             id: 'content-manager.reviewWorkflows.assignee.notification.saved',
-            defaultMessage: 'Success: Assignee updated',
+            defaultMessage: 'Assignee updated',
           },
         });
       },
     }
   );
 
-  const formattedError =
-    (isError &&
-      formatMessage({
-        id: 'content-manager.reviewWorkflows.assignee.error',
-        defaultMessage: 'An error occurred while fetching users',
-      })) ||
-    (mutation.error && formatAPIError(mutation.error));
-
   return (
-    <Field error={formattedError} name={ASSIGNEE_ATTRIBUTE_NAME} id={ASSIGNEE_ATTRIBUTE_NAME}>
+    <Field name={ASSIGNEE_ATTRIBUTE_NAME} id={ASSIGNEE_ATTRIBUTE_NAME}>
       <Flex direction="column" gap={2} alignItems="stretch">
-        <FieldLabel>
-          {formatMessage({
+        <Combobox
+          clearLabel={formatMessage({
+            id: 'content-manager.reviewWorkflows.assignee.clear',
+            defaultMessage: 'Clear assignee',
+          })}
+          error={
+            (isError &&
+              canReadUsers &&
+              formatMessage({
+                id: 'content-manager.reviewWorkflows.assignee.error',
+                defaultMessage: 'An error occurred while fetching users',
+              })) ||
+            (mutation.error && formatAPIError(mutation.error))
+          }
+          disabled={!isLoading && users.length === 0}
+          name={ASSIGNEE_ATTRIBUTE_NAME}
+          id={ASSIGNEE_ATTRIBUTE_NAME}
+          value={currentAssignee ? currentAssignee.id : null}
+          onChange={(value) => handleChange({ value })}
+          onClear={() => handleChange({ value: null })}
+          placeholder={formatMessage({
+            id: 'content-manager.reviewWorkflows.assignee.placeholder',
+            defaultMessage: 'Select …',
+          })}
+          label={formatMessage({
             id: 'content-manager.reviewWorkflows.assignee.label',
             defaultMessage: 'Assignee',
           })}
-        </FieldLabel>
+          // eslint-disable-next-line react/no-unstable-nested-components
+          customizeContent={() => (
+            <Flex as="span" justifyContent="space-between" alignItems="center" width="100%">
+              <Typography textColor="neutral800" ellipsis>
+                {currentAssignee ? getDisplayName(currentAssignee, formatMessage) : null}
+              </Typography>
 
-        <ReactSelect
-          components={{
-            LoadingIndicator: () => <Loader data-testid="loader" small />,
-          }}
-          disabled={isError}
-          error={formattedError}
-          inputId={ASSIGNEE_ATTRIBUTE_NAME}
-          isLoading={isLoading || mutation.isLoading}
-          isSearchable
-          isClearable
-          name={ASSIGNEE_ATTRIBUTE_NAME}
-          onChange={(selectedOption, triggeredAction) => {
-            if (triggeredAction.action === 'clear') {
-              handleChange({ value: null });
-
-              return;
-            }
-
-            handleChange({ value: selectedOption.value });
-          }}
-          options={users.map(({ id, firstname, lastname }) => ({
-            value: id,
-            label: formatMessage(
-              {
-                id: 'content-manager.reviewWorkflows.assignee.name',
-                defaultMessage: '{firstname} {lastname}',
-              },
-              {
-                firstname,
-                lastname,
-              }
-            ),
-          }))}
-          value={
-            currentAssignee
-              ? {
-                  value: currentAssignee.id,
-                  label: formatMessage(
-                    {
-                      id: 'content-manager.reviewWorkflows.assignee.name',
-                      defaultMessage: '{firstname} {lastname}',
-                    },
-                    {
-                      firstname: currentAssignee.firstname,
-                      lastname: currentAssignee.lastname,
-                    }
-                  ),
-                }
-              : null
-          }
-        />
-
-        <FieldError />
+              {isLoading || mutation.isLoading ? (
+                <Loader small style={{ display: 'flex' }} />
+              ) : null}
+            </Flex>
+          )}
+        >
+          {users.map((user) => {
+            return (
+              <ComboboxOption
+                key={user.id}
+                value={user.id}
+                textValue={getDisplayName(user, formatMessage)}
+              >
+                {getDisplayName(user, formatMessage)}
+              </ComboboxOption>
+            );
+          })}
+        </Combobox>
       </Flex>
     </Field>
   );

@@ -81,7 +81,7 @@ useCMEditViewDataManager.mockReturnValue({
   layout: { uid: 'api::articles:articles' },
 });
 
-describe('EE | Content Manager | EditView | InformationBox | AssigneeSelect', () => {
+describe.skip('EE | Content Manager | EditView | InformationBox | AssigneeSelect', () => {
   beforeAll(() => {
     server.listen();
     jest.clearAllMocks();

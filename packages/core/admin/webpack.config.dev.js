@@ -5,7 +5,7 @@
 const path = require('path');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { DuplicateReporterPlugin } = require('duplicate-dependencies-webpack-plugin');
-const { getPlugins } = require('./utils/get-plugins');
+const { getPlugins } = require('./utils/plugins');
 const webpackConfig = require('./webpack.config');
 
 module.exports = () => {
@@ -58,7 +58,7 @@ module.exports = () => {
          * as opposed to the compiled version of the code. This is useful for a better local DX.
          */
         ...plugins.reduce((acc, plugin) => {
-          acc[`${plugin.name}/strapi-admin`] = path.join(plugin.directory, 'admin', 'src');
+          acc[`${plugin.pathToPlugin}/strapi-admin`] = path.join(plugin.directory, 'admin', 'src');
 
           return acc;
         }, {}),
