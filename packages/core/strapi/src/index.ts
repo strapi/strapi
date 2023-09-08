@@ -1,4 +1,3 @@
-import '@strapi/typings';
 import strapiFactory from './Strapi';
 
 export type * from '@strapi/typings';
