@@ -75,6 +75,7 @@ ModifierButton.propTypes = {
   }).isRequired,
 };
 
+// TODO: extract a store of modifiers that rules both the toolbar and the leaf renderers
 const modifiers = [
   {
     name: 'bold',
