@@ -1,17 +1,17 @@
 import React from 'react';
+
 import { intervalToDuration, isPast } from 'date-fns';
 import { useIntl } from 'react-intl';
 
 const Intervals = ['years', 'months', 'days', 'hours', 'minutes', 'seconds'] as const;
 
-type IntervalUnit = typeof Intervals[number];
+type IntervalUnit = (typeof Intervals)[number];
 
 interface CustomInterval {
   unit: IntervalUnit;
   text: string;
   threshold: number;
 }
-
 
 interface RelativeTimeProps {
   timestamp: Date;
@@ -41,14 +41,15 @@ const RelativeTime = ({ timestamp, customIntervals = [] }: RelativeTimeProps) =>
   });
 
   const unit: IntervalUnit = Array.from(Intervals).find((intervalUnit) => {
-        return interval[intervalUnit]! > 0 && Object.keys(interval).includes(intervalUnit);
-    })!;
+    return interval[intervalUnit]! > 0 && Object.keys(interval).includes(intervalUnit);
+  })!;
 
-    const relativeTime: number = isPast(timestamp) ? -interval[unit]! : interval[unit]!;
-  
+  const relativeTime: number = isPast(timestamp) ? -interval[unit]! : interval[unit]!;
 
   // Display custom text if interval is less than the threshold
-  const customInterval = customIntervals.find((custom) => interval[custom.unit]! < custom.threshold);
+  const customInterval = customIntervals.find(
+    (custom) => interval[custom.unit]! < custom.threshold
+  );
 
   const displayText = customInterval
     ? customInterval.text
