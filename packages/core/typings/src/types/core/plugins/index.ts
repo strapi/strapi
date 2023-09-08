@@ -18,7 +18,7 @@ export type IsEnabled<
 
 export * from './server-config';
 export * from './lifecycle';
-// export * as Controller from './controller';
+export * from './controller';
 // export * as ContentType from './content-type';
 
 export * from './routes';
