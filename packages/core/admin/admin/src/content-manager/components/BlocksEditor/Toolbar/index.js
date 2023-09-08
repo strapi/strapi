@@ -57,7 +57,8 @@ const ModifierButton = ({ icon, name, label }) => {
           padding={2}
           as="button"
           hasRadius
-          onClick={() => {
+          onMouseDown={(e) => {
+            e.preventDefault();
             toggleModifier(editor, name);
           }}
           aria-label={labelMessage}
