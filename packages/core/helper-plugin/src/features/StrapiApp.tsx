@@ -1,11 +1,8 @@
 import * as React from 'react';
 
-import { TranslationMessage } from 'types';
+import { TranslationMessage } from '../types';
 
-interface Permission {
-  action: string;
-  subject: string | null;
-}
+import type { Permission } from '@strapi/permissions';
 
 interface MenuItem {
   to: string;
@@ -19,10 +16,15 @@ interface MenuItem {
  * Context
  * -----------------------------------------------------------------------------------------------*/
 
+// TODO: this should come from `core/admin/src/core/apis/Plugins`
 interface Plugin {
   apis: Record<string, unknown>;
   injectionZones: Record<string, unknown>;
-  initializer: ({ setPlugin }: { setPlugin: (pluginId: string) => void }) => null | null;
+  initializer: ({ setPlugin }: { setPlugin: (pluginId: string) => void }) => null;
+  getInjectedComponents: (
+    containerName: string,
+    blockName: string
+  ) => Array<{ name: string; Component: React.ComponentType }>;
   isReady: boolean;
   name: string;
   pluginId: string;
@@ -33,7 +35,7 @@ interface StrapiAppSettingLink {
   to: string;
   intlLabel: TranslationMessage;
   Component: React.ComponentType;
-  permissions: Permission[] | [];
+  permissions: Permission[];
 }
 
 interface StrapiAppSetting {
@@ -42,25 +44,14 @@ interface StrapiAppSetting {
   links: StrapiAppSettingLink[];
 }
 
-interface RunHookSeries {
-  (hookName: string, asynchronous: true): Promise<unknown>;
-  (hookName: string, asynchronous: false | undefined): unknown;
-}
+type RunHookSeries = (hookName: string, async?: boolean) => unknown | Promise<unknown>;
 
-interface RunHookWaterfall {
-  <InitialValue, Store>(
-    hookName: string,
-    initialValue: InitialValue,
-    asynchronous: false | undefined,
-    store: Store
-  ): unknown;
-  <InitialValue, Store>(
-    hookName: string,
-    initialValue: InitialValue,
-    asynchronous: true,
-    store: Store
-  ): Promise<unknown>;
-}
+type RunHookWaterfall = <InitialValue, Store>(
+  hookName: string,
+  initialValue: InitialValue,
+  asynchronous: false | undefined,
+  store: Store
+) => unknown | Promise<unknown>;
 
 interface StrapiAppContextValue {
   menu: MenuItem[];
@@ -76,10 +67,11 @@ const StrapiAppContext = React.createContext<StrapiAppContextValue>({
   getPlugin: () => undefined,
   menu: [],
   plugins: {},
+  settings: {},
+  // These functions are required but should not resolve to undefined as they do here
   runHookParallel: () => Promise.resolve(),
   runHookWaterfall: () => Promise.resolve(),
   runHookSeries: () => Promise.resolve(),
-  settings: {},
 });
 
 /* -------------------------------------------------------------------------------------------------
