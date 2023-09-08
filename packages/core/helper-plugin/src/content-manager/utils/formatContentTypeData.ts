@@ -5,9 +5,21 @@ import get from 'lodash/get';
 
 import { getOtherInfos, getType } from './getAttributeInfos';
 
-const formatContentTypeData = (data, ct, composSchema) => {
-  const recursiveFormatData = (data, schema) => {
-    return Object.keys(data).reduce((acc, current) => {
+interface ComponentSchema {
+  [key: string]: any;
+}
+
+interface DataObject {
+  [key: string]: any;
+}
+
+const formatContentTypeData = (
+  data: DataObject,
+  ct: ComponentSchema,
+  composSchema: Record<string, ComponentSchema>
+): DataObject => {
+  const recursiveFormatData = (data: DataObject, schema: ComponentSchema) => {
+    return Object.keys(data).reduce((acc: DataObject, current: string) => {
       const type = getType(schema, current);
       const value = get(data, current);
       const compoUid = getOtherInfos(schema, [current, 'component']);
@@ -26,7 +38,7 @@ const formatContentTypeData = (data, ct, composSchema) => {
       }
 
       if (type === 'dynamiczone') {
-        acc[current] = value.map((componentValue) => {
+        acc[current] = value.map((componentValue: DataObject) => {
           const formattedData = recursiveFormatData(
             componentValue,
             composSchema[componentValue.__component]
@@ -39,10 +51,10 @@ const formatContentTypeData = (data, ct, composSchema) => {
       }
 
       if (type === 'component') {
-        let formattedValue;
+        let formattedValue: any;
 
         if (isRepeatable) {
-          formattedValue = value.map((obj, i) => {
+          formattedValue = value.map((obj: DataObject, i: number) => {
             const newObj = { ...obj, __temp_key__: i };
 
             return recursiveFormatData(newObj, composSchema[compoUid]);
