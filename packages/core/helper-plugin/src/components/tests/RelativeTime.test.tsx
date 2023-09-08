@@ -1,3 +1,4 @@
+// TODO: Needs to be reworked with proper typescript implementation. Current typescript port works but should only be used as a temporary patch
 import React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
@@ -17,7 +18,7 @@ const App = (
 // TO BE REMOVED: we have added this mock to prevent errors in the snapshots caused by the Unicode space character
 // before AM/PM in the dates, after the introduction of node 18.13
 jest.mock('react-intl', () => ({
-  ...jest.requireActual('react-intl'),
+  ...jest.requireActual('react-intl') as any,
   useIntl: jest.fn(() => ({
     formatDate: jest.fn(() => '10/1/2015'),
     formatTime: jest.fn(() => '7:55 AM'),
@@ -25,9 +26,11 @@ jest.mock('react-intl', () => ({
   })),
 }));
 
+const mockedUseIntl = useIntl as jest.Mocked<any>;
+
 describe('RelativeTime', () => {
   beforeEach(() => {
-    jest.spyOn(Date, 'now').mockImplementation(() => new Date('2015-10-01 08:00:00'));
+    jest.spyOn(Date, 'now').mockImplementation(() => new Date('2015-10-01 08:00:00') as unknown as number);
   });
 
   afterAll(() => {
@@ -50,12 +53,12 @@ describe('RelativeTime', () => {
   });
 
   it('can display the relative time for a future date', () => {
-    useIntl.mockReturnValueOnce({
+    mockedUseIntl.mockReturnValueOnce({
       formatDate: jest.fn(() => '10/1/2015'),
       formatTime: jest.fn(() => '7:50 AM'),
       formatRelativeTime: jest.fn(() => 'in 5 minutes'),
     });
-    jest.spyOn(Date, 'now').mockImplementation(() => new Date('2015-10-01 07:50:00'));
+    jest.spyOn(Date, 'now').mockImplementation(() => new Date('2015-10-01 07:50:00') as unknown as number);
 
     render(App);
 
@@ -63,12 +66,12 @@ describe('RelativeTime', () => {
   });
 
   it('can display the relative time for a past date', () => {
-    useIntl.mockReturnValueOnce({
+    mockedUseIntl.mockReturnValueOnce({
       formatDate: jest.fn(() => '10/1/2015'),
       formatTime: jest.fn(() => '8:00 AM'),
       formatRelativeTime: jest.fn(() => '5 minutes ago'),
     });
-    jest.spyOn(Date, 'now').mockImplementation(() => new Date('2015-10-01 08:00:00'));
+    jest.spyOn(Date, 'now').mockImplementation(() => new Date('2015-10-01 08:00:00') as unknown as number);
 
     render(App);
 
