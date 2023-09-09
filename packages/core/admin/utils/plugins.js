@@ -206,7 +206,7 @@ const createPluginsExcludePath = (pluginsPath = []) => {
     return /node_modules/;
   }
 
-  return new RegExp(`node_modules/(?!(${pluginsPath.join('|')}))`);
+  return new RegExp(`node_modules/(?!.pnpm)(?!(${pluginsPath.join('|')}))`);
 };
 
 module.exports = {
