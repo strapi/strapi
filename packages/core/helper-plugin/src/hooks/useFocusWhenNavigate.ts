@@ -1,5 +1,5 @@
 import * as React from 'react';
-export interface UseFocusWhenNavigateProps {
+interface UseFocusWhenNavigateProps {
   selector?: string;
   dependencies?: React.DependencyList;
 }
