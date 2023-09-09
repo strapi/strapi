@@ -1,10 +1,13 @@
-import React from 'react';
+import * as React from 'react';
 
-import PropTypes from 'prop-types';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 
-const SettingsPageTitle = ({ name }) => {
+interface SettingsPageTitleProps {
+  name: string;
+}
+
+const SettingsPageTitle = ({ name }: SettingsPageTitleProps) => {
   const { formatMessage } = useIntl();
   const text = formatMessage(
     { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -12,10 +15,6 @@ const SettingsPageTitle = ({ name }) => {
   );
 
   return <Helmet title={text} />;
-};
-
-SettingsPageTitle.propTypes = {
-  name: PropTypes.string.isRequired,
 };
 
 export { SettingsPageTitle };
