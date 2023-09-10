@@ -8,18 +8,16 @@ const Wrapper = styled(Flex)`
 `;
 
 interface LoadingIndicatorPageProps {
-  'data-testid'?: string;
   children?: string;
 }
 
 const LoadingIndicatorPage = (
-  { 'data-testid': dataTestId, children }: LoadingIndicatorPageProps = {
-    'data-testid': 'loader',
+  { children }: LoadingIndicatorPageProps = {
     children: 'Loading content.',
   }
 ) => {
   return (
-    <Wrapper justifyContent="space-around" data-testid={dataTestId}>
+    <Wrapper justifyContent="space-around">
       <Loader>{children}</Loader>
     </Wrapper>
   );
