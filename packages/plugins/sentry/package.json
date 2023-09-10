@@ -29,7 +29,7 @@
     "@sentry/node": "6.19.7",
     "@strapi/design-system": "1.9.0",
     "@strapi/helper-plugin": "4.13.3",
-    "@strapi/icons": "1.9.0"
+    "@strapi/icons": "1.10.1"
   },
   "devDependencies": {
     "react": "^18.2.0",
