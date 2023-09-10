@@ -43,7 +43,7 @@
     "@casl/ability": "^5.4.3",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",
     "@strapi/data-transfer": "4.13.3",
-    "@strapi/design-system": "1.9.0",
+    "@strapi/design-system": "1.10.1",
     "@strapi/helper-plugin": "4.13.3",
     "@strapi/icons": "1.9.0",
     "@strapi/permissions": "4.13.3",

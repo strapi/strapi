@@ -65,7 +65,7 @@
     "@storybook/builder-vite": "7.4.0",
     "@storybook/react-vite": "7.4.0",
     "@strapi/admin-test-utils": "4.13.3",
-    "@strapi/design-system": "1.9.0",
+    "@strapi/design-system": "1.10.1",
     "@strapi/icons": "1.9.0",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
@@ -91,7 +91,7 @@
     "webpack-cli": "^5.1.0"
   },
   "peerDependencies": {
-    "@strapi/design-system": "1.9.0",
+    "@strapi/design-system": "1.10.1",
     "@strapi/icons": "1.9.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",

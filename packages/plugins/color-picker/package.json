@@ -63,7 +63,7 @@
     "lint:front": "run -T eslint ./admin -c ./admin/.eslintrc.js"
   },
   "dependencies": {
-    "@strapi/design-system": "1.9.0",
+    "@strapi/design-system": "1.10.1",
     "@strapi/helper-plugin": "4.13.3",
     "@strapi/icons": "1.9.0",
     "prop-types": "^15.8.1",
