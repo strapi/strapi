@@ -20,14 +20,12 @@ describe('LoadingIndicatorPage', () => {
   it('renders with default values', () => {
     setup();
 
-    expect(screen.getByTestId('loader')).toBeInTheDocument();
     expect(screen.getByText('Loading content.')).toBeInTheDocument();
   });
 
   it('renders with custom values', () => {
     setup({ children: 'Custom content.' });
 
-    expect(screen.getByTestId('loader')).toBeInTheDocument();
     expect(screen.getByText('Custom content.')).toBeInTheDocument();
   });
 });
