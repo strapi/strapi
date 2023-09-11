@@ -71,7 +71,7 @@
     "./dist",
     "./bin",
     "./scripts",
-    "./resources/",
+    "./resources",
     "index.js"
   ],
   "scripts": {
