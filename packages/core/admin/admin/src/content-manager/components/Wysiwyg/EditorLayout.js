@@ -62,8 +62,8 @@ export const EditorLayout = ({ children, isExpandMode, error, previewContent, on
               hasRadius
               shadow="popupShadow"
               overflow="hidden"
-              width="70%"
-              height="70%"
+              width="90%"
+              height="90%"
               onClick={(e) => e.stopPropagation()}
             >
               <Flex height="100%" alignItems="flex-start">

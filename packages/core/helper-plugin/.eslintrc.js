@@ -4,6 +4,16 @@ module.exports = {
   parserOptions: {
     project: ['./tsconfig.eslint.json'],
   },
+  rules: {
+    'import/no-unresolved': [
+      'error',
+      {
+        // Eslint does not detect the package.json exports field
+        // and reports broken imports for the following imports
+        ignore: ['@strapi/design-system/v2'],
+      },
+    ],
+  },
   settings: {
     'import/resolver': {
       typescript: {

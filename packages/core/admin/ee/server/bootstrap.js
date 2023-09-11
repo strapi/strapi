@@ -7,7 +7,7 @@ const { getService } = require('../../server/utils');
 const actions = require('./config/admin-actions');
 const { persistTablesWithPrefix } = require('./utils/persisted-tables');
 
-module.exports = async () => {
+module.exports = async (args) => {
   const { actionProvider } = getService('permission');
 
   if (features.isEnabled('sso')) {
@@ -37,5 +37,5 @@ module.exports = async () => {
 
   await getService('seat-enforcement').seatEnforcementWorkflow();
 
-  await executeCEBootstrap();
+  await executeCEBootstrap(args);
 };

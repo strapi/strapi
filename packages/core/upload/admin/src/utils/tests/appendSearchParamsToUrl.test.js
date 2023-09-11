@@ -1,38 +1,119 @@
 import { appendSearchParamsToUrl } from '..';
 
 describe('appendSearchParamsToUrl', () => {
-  const urlString = 'https://example.com/';
   const updateTime = '2023-07-19T03:00:00.000Z';
 
   test('returns undefined for undefined url string', () => {
     expect(appendSearchParamsToUrl({})).toBeUndefined();
-    expect(appendSearchParamsToUrl({ url: undefined, params: { updatedAt: updateTime }})).toBeUndefined();
+    expect(
+      appendSearchParamsToUrl({ url: undefined, params: { updatedAt: updateTime } })
+    ).toBeUndefined();
   });
 
-  test('returns original string with no update time', () => {
-    expect(appendSearchParamsToUrl({ url: urlString, params: undefined })).toEqual(urlString);
-    expect(appendSearchParamsToUrl({ url: urlString, params: 'notAnObject' })).toEqual(urlString);
-    expect(appendSearchParamsToUrl({ url: urlString, params: { updatedAt: undefined } })).toEqual(urlString);
+  describe('absoluteURL', () => {
+    const url = 'https://example.com/';
+
+    test('returns original string with no update time', () => {
+      expect(appendSearchParamsToUrl({ url, params: undefined })).toMatchInlineSnapshot(
+        `"https://example.com/"`
+      );
+      expect(appendSearchParamsToUrl({ url, params: 'notAnObject' })).toMatchInlineSnapshot(
+        `"https://example.com/"`
+      );
+      expect(
+        appendSearchParamsToUrl({ url, params: { updatedAt: undefined } })
+      ).toMatchInlineSnapshot(`"https://example.com/"`);
+    });
+
+    test('appends update time to string with no search params', () => {
+      expect(
+        appendSearchParamsToUrl({ url, params: { updatedAt: updateTime } })
+      ).toMatchInlineSnapshot(`"https://example.com/?updatedAt=2023-07-19T03%3A00%3A00.000Z"`);
+    });
+
+    test('appends update time to string with search params', () => {
+      expect(
+        appendSearchParamsToUrl({ url: `${url}?query=test`, params: { updatedAt: updateTime } })
+      ).toMatchInlineSnapshot(
+        `"https://example.com/?query=test&updatedAt=2023-07-19T03%3A00%3A00.000Z"`
+      );
+    });
+
+    test('appends multiple search params', () => {
+      expect(
+        appendSearchParamsToUrl({ url, params: { param1: 'example1', param2: 'example2' } })
+      ).toMatchInlineSnapshot(`"https://example.com/?param1=example1&param2=example2"`);
+    });
   });
 
-  test('appends update time to string with no search params', () => {
-    const expected = `${urlString}?updatedAt=${updateTime.replaceAll(':', '%3A')}`;
+  describe('relativeURL', () => {
+    let originalBackendURL;
 
-    expect(appendSearchParamsToUrl({ url: urlString, params: { updatedAt: updateTime } })).toEqual(expected);
-  });
+    beforeAll(() => {
+      /**
+       * internally, we append whatever URL you pass to appendSearchParamsToUrl
+       * with the backendURL from the strapi window object, here we overwrite it
+       * just so it's clear what the expected output is.
+       */
+      originalBackendURL = window.strapi.backendURL;
+      window.strapi.backendURL = 'https://appending-search-params.com';
+    });
 
-  test('appends update time to string with search params', () => {
-    const urlWithQuery = `${urlString}?query=test`;
-    const expected = `${urlWithQuery}&updatedAt=${updateTime.replaceAll(':', '%3A')}`;
+    afterAll(() => {
+      if (originalBackendURL) {
+        window.strapi.backendURL = originalBackendURL;
+      }
+    });
 
-    expect(appendSearchParamsToUrl({ url: urlWithQuery, params: { updatedAt: updateTime } })).toEqual(expected);
-  });
+    const url = '/uploads/image.jpg';
 
-  test('appends multiple search params', () => {
-    const param1 = 'example1';
-    const param2 = 'example2';
-    const expected = `${urlString}?param1=${param1}&param2=${param2}`;
+    test('returns original string with no update time', () => {
+      expect(appendSearchParamsToUrl({ url, params: undefined })).toMatchInlineSnapshot(
+        `"/uploads/image.jpg"`
+      );
+      expect(appendSearchParamsToUrl({ url, params: 'notAnObject' })).toMatchInlineSnapshot(
+        `"/uploads/image.jpg"`
+      );
+      expect(
+        appendSearchParamsToUrl({ url, params: { updatedAt: undefined } })
+      ).toMatchInlineSnapshot(`"https://appending-search-params.com/uploads/image.jpg"`);
+    });
 
-    expect(appendSearchParamsToUrl({ url: urlString, params: { param1, param2 } })).toEqual(expected);
+    test('appends update time to string with no search params', () => {
+      expect(
+        appendSearchParamsToUrl({ url, params: { updatedAt: updateTime } })
+      ).toMatchInlineSnapshot(
+        `"https://appending-search-params.com/uploads/image.jpg?updatedAt=2023-07-19T03%3A00%3A00.000Z"`
+      );
+    });
+
+    test('appends update time to string with search params', () => {
+      expect(
+        appendSearchParamsToUrl({ url: `${url}?query=test`, params: { updatedAt: updateTime } })
+      ).toMatchInlineSnapshot(
+        `"https://appending-search-params.com/uploads/image.jpg?query=test&updatedAt=2023-07-19T03%3A00%3A00.000Z"`
+      );
+    });
+
+    test('appends multiple search params', () => {
+      expect(
+        appendSearchParamsToUrl({ url, params: { param1: 'example1', param2: 'example2' } })
+      ).toMatchInlineSnapshot(
+        `"https://appending-search-params.com/uploads/image.jpg?param1=example1&param2=example2"`
+      );
+    });
+
+    test("if there's no window.strapi.backendURL, it uses window.location.origin", () => {
+      const oldBackendURL = window.strapi.backendURL;
+      window.strapi.backendURL = undefined;
+
+      expect(
+        appendSearchParamsToUrl({ url, params: { updatedAt: updateTime } })
+      ).toMatchInlineSnapshot(
+        `"http://localhost:1337/uploads/image.jpg?updatedAt=2023-07-19T03%3A00%3A00.000Z"`
+      );
+
+      window.strapi.backendURL = oldBackendURL;
+    });
   });
 });
