@@ -1,48 +1,39 @@
-// TODO: Needs to be reworked with proper typescript implementation. Current typescript port works but should only be used as a temporary patch
 import React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { render, screen } from '@testing-library/react';
-import { IntlProvider, useIntl } from 'react-intl';
+import { render as renderRTL, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { IntlProvider } from 'react-intl';
 
-import { RelativeTime } from '../RelativeTime';
+import { RelativeTime, RelativeTimeProps } from '../RelativeTime';
 
-const App = (
-  <ThemeProvider theme={lightTheme}>
-    <IntlProvider locale="en" messages={{}} textComponent="span">
-      <RelativeTime timestamp={new Date('2015-10-01 07:55:00')} />
-    </IntlProvider>
-  </ThemeProvider>
-);
-
-// TO BE REMOVED: we have added this mock to prevent errors in the snapshots caused by the Unicode space character
-// before AM/PM in the dates, after the introduction of node 18.13
-jest.mock('react-intl', () => ({
-  ...(jest.requireActual('react-intl') as any),
-  useIntl: jest.fn(() => ({
-    formatDate: jest.fn(() => '10/1/2015'),
-    formatTime: jest.fn(() => '7:55 AM'),
-    formatRelativeTime: jest.fn(() => '5 minutes ago'),
-  })),
-}));
-
-const mockedUseIntl = useIntl as jest.Mocked<any>;
-
-describe('RelativeTime', () => {
+describe('ConfirmDialog', () => {
   beforeEach(() => {
     jest
       .spyOn(Date, 'now')
       .mockImplementation(() => new Date('2015-10-01 08:00:00') as unknown as number);
   });
-
   afterAll(() => {
     jest.clearAllMocks();
+  });
+
+  const render = (props?: Partial<RelativeTimeProps>) => ({
+    ...renderRTL(<RelativeTime timestamp={new Date('2015-10-01 07:55:00')} {...props} />, {
+      wrapper: ({ children }: { children: React.JSX.Element }) => (
+        <ThemeProvider theme={lightTheme}>
+          <IntlProvider locale="en" messages={{}} textComponent="span">
+            {children}
+          </IntlProvider>
+        </ThemeProvider>
+      ),
+    }),
+    user: userEvent.setup(),
   });
 
   it('renders and matches the snapshot', () => {
     const {
       container: { firstChild },
-    } = render(App);
+    } = render();
 
     expect(firstChild).toMatchInlineSnapshot(`
       <time
@@ -55,31 +46,21 @@ describe('RelativeTime', () => {
   });
 
   it('can display the relative time for a future date', () => {
-    mockedUseIntl.mockReturnValueOnce({
-      formatDate: jest.fn(() => '10/1/2015'),
-      formatTime: jest.fn(() => '7:50 AM'),
-      formatRelativeTime: jest.fn(() => 'in 5 minutes'),
-    });
     jest
       .spyOn(Date, 'now')
       .mockImplementation(() => new Date('2015-10-01 07:50:00') as unknown as number);
 
-    render(App);
+    render();
 
     expect(screen.getByText('in 5 minutes')).toBeInTheDocument();
   });
 
   it('can display the relative time for a past date', () => {
-    mockedUseIntl.mockReturnValueOnce({
-      formatDate: jest.fn(() => '10/1/2015'),
-      formatTime: jest.fn(() => '8:00 AM'),
-      formatRelativeTime: jest.fn(() => '5 minutes ago'),
-    });
     jest
       .spyOn(Date, 'now')
       .mockImplementation(() => new Date('2015-10-01 08:00:00') as unknown as number);
 
-    render(App);
+    render();
 
     expect(screen.getByText('5 minutes ago')).toBeInTheDocument();
   });

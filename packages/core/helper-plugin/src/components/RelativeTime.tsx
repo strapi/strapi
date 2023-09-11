@@ -13,7 +13,7 @@ interface CustomInterval {
   threshold: number;
 }
 
-interface RelativeTimeProps {
+export interface RelativeTimeProps {
   timestamp: Date;
   customIntervals?: CustomInterval[];
 }
