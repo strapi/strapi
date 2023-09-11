@@ -25,7 +25,7 @@ const SearchURLQuery = ({
 
   const [{ query }, setQuery] = useQueryParams();
 
-  const [value, setValue] = React.useState((query?._q as string) || '');
+  const [value, setValue] = React.useState(query?._q || '');
   const [isOpen, setIsOpen] = React.useState(!!value);
 
   const { formatMessage } = useIntl();
@@ -47,7 +47,8 @@ const SearchURLQuery = ({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (value) {
+    // Ensure value is a string
+    if (value && typeof value === 'string') {
       if (trackedEvent) {
         trackUsage(trackedEvent, trackedEventDetails);
       }
@@ -64,7 +65,7 @@ const SearchURLQuery = ({
         <Searchbar
           ref={inputRef}
           name="search"
-          onChange={({ target: { value } }) => setValue(value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value)}
           value={value}
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
           onClear={handleClear}
