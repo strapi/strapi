@@ -103,9 +103,9 @@ describe('appendSearchParamsToUrl', () => {
       );
     });
 
-    test("if there's no window.strapi.backendURL, it uses window.location.origin", () => {
+    test.each([undefined, ''])("if there's no window.strapi.backendURL, it uses window.location.origin", (backendUrl) => {
       const oldBackendURL = window.strapi.backendURL;
-      window.strapi.backendURL = undefined;
+      window.strapi.backendURL = backendUrl;
 
       expect(
         appendSearchParamsToUrl({ url, params: { updatedAt: updateTime } })
