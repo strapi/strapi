@@ -5,14 +5,14 @@ const { t } = require('ts-zen');
 
 const { createTypeSelector } = require('../test.utils');
 
-const DEFINITIONS_PATH = path.join('params', 'attributes.d.ts');
+const DEFINITIONS_PATH = path.join('params', 'attributes.test-d.ts');
 
 /**
- * @type {import('ts-zen').AssertTypeSelector<typeof import('../definitions/params/attributes')>}
+ * @type {import('ts-zen').AssertTypeSelector<typeof import('../definitions/params/attributes.test-d')>}
  */
 let type;
 
-describe('Entity Service', () => {
+describe('EntityService.Params.Attribute', () => {
   beforeAll(() => {
     type = createTypeSelector(DEFINITIONS_PATH);
   });
@@ -47,4 +47,27 @@ describe('Entity Service', () => {
       t.stringLiteral('component'),
     ]);
   });
+  test('GetScalarKeysResolves resolves to valid types', () => {
+    type('GetScalarKeysResolves').isUnion([
+      t.stringLiteral('bar'),
+      t.stringLiteral('createdAt'),
+      t.stringLiteral('updatedAt'),
+      t.stringLiteral('publishedAt'),
+    ]);
+  });
+
+  test('GetNestedKeysResolves resolves to valid types', () => {
+    type('GetNestedKeysResolves').isUnion([
+      t.stringLiteral('bars'),
+      t.stringLiteral('repeatable'),
+      t.stringLiteral('createdBy'),
+      t.stringLiteral('updatedBy'),
+    ]);
+  });
+
+  test.todo('OmitRelationWithoutTargetResolves');
+
+  test.todo('NonFilterableKeysResolves');
+
+  test.todo('GetValuesResolves');
 });
