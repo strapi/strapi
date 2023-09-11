@@ -6,15 +6,15 @@
  * @returns {String} A string representing the URL with the search params appended
  */
 const appendSearchParamsToUrl = ({ url, params }) => {
-  if (url === undefined || params === undefined || typeof params !== 'object' || Object.entries(params).length === 0) {
+  if (url === undefined || typeof params !== 'object') {
     return url;
   }
 
-  const urlObj = new URL(url);
-  const urlParams = urlObj.searchParams;
+  const urlObj = new URL(url, window.strapi.backendURL ?? window.location.origin);
+
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined) {
-      urlParams.append(key, value);
+      urlObj.searchParams.append(key, value);
     }
   });
 
