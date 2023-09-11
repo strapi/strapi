@@ -15,13 +15,13 @@ jobs:
   check-pr-status:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/check-pr-status
 
   security-lockfile-analysis:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
       - uses: ./.github/actions/security/lockfile
         with:

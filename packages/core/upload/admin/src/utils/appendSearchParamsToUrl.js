@@ -10,7 +10,7 @@ const appendSearchParamsToUrl = ({ url, params }) => {
     return url;
   }
 
-  const urlObj = new URL(url, window.strapi.backendURL);
+  const urlObj = new URL(url, window.strapi.backendURL ?? window.location.origin);
 
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined) {
