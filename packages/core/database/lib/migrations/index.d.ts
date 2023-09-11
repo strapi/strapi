@@ -6,4 +6,6 @@ export interface MigrationProvider {
   down(): Promise<void>;
 }
 
-export function createMigrationsProvider(db: Database): MigrationProvider;
+export async function createMigrationsProvider(db: Database): MigrationProvider;
+
+export async function findMigrationsDir(root: string): string;

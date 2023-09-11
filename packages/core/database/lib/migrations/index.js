@@ -33,8 +33,14 @@ const migrationResolver = ({ name, path, context }) => {
   };
 };
 
-const createUmzugProvider = (db) => {
-  const migrationDir = path.join(strapi.dirs.app.root, 'database/migrations');
+async function findMigrationsDir(root) {
+  let s = path.join(root, 'database/migrations');
+  console.info(`Found database migrations at ${s}`);
+  return s;
+}
+
+const createUmzugProvider = async (db) => {
+  const migrationDir = await findMigrationsDir(strapi.dirs.app.root);
 
   fse.ensureDirSync(migrationDir);
 
@@ -54,8 +60,8 @@ const createUmzugProvider = (db) => {
  * Creates migrations provider
  * @type {import('.').createMigrationsProvider}
  */
-const createMigrationsProvider = (db) => {
-  const migrations = createUmzugProvider(db);
+const createMigrationsProvider = async (db) => {
+  const migrations = await createUmzugProvider(db);
 
   return {
     async shouldRun() {
@@ -72,4 +78,4 @@ const createMigrationsProvider = (db) => {
   };
 };
 
-module.exports = { createMigrationsProvider };
+module.exports = { createMigrationsProvider, findMigrationsDir };

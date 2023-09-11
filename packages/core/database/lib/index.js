@@ -15,7 +15,7 @@ const { transformContentTypes } = require('./utils/content-types');
 const { validateDatabase } = require('./validations');
 
 class Database {
-  constructor(config) {
+  async constructor(config) {
     this.metadata = createMetadata(config.models);
 
     this.config = {
@@ -33,11 +33,11 @@ class Database {
 
     this.connection = createConnection(this.config.connection);
 
-    this.dialect.initialize();
+    await this.dialect.initialize();
 
     this.schema = createSchemaProvider(this);
 
-    this.migrations = createMigrationsProvider(this);
+    this.migrations = await createMigrationsProvider(this);
     this.lifecycles = createLifecyclesProvider(this);
 
     this.entityManager = createEntityManager(this);
@@ -118,7 +118,7 @@ class Database {
 // TODO: move into strapi
 Database.transformContentTypes = transformContentTypes;
 Database.init = async (config) => {
-  const db = new Database(config);
+  const db = await new Database(config);
   await validateDatabase(db);
   return db;
 };
