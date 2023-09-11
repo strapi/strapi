@@ -8,16 +8,16 @@ const Wrapper = styled(Flex)`
 `;
 
 interface LoadingIndicatorPageProps {
-  children?: string;
+  children?: React.ReactNode;
+  'data-testid'?: string;
 }
 
-const LoadingIndicatorPage = (
-  { children }: LoadingIndicatorPageProps = {
-    children: 'Loading content.',
-  }
-) => {
+const LoadingIndicatorPage = ({
+  children = 'Loading content.',
+  'data-testid': dataTestId = 'loader',
+}: LoadingIndicatorPageProps) => {
   return (
-    <Wrapper justifyContent="space-around">
+    <Wrapper justifyContent="space-around" data-testid={dataTestId}>
       <Loader>{children}</Loader>
     </Wrapper>
   );

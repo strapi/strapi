@@ -6,26 +6,26 @@ import { IntlProvider } from 'react-intl';
 
 import { LoadingIndicatorPage } from '../LoadingIndicatorPage';
 
-const setup = (props = {}) => {
+const setup = (children: React.ReactNode) => {
   return render(
     <IntlProvider locale="en" defaultLocale="en">
-      <ThemeProvider theme={lightTheme}>
-        <LoadingIndicatorPage {...props} />
-      </ThemeProvider>
+      <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
     </IntlProvider>
   );
 };
 
 describe('LoadingIndicatorPage', () => {
   it('renders with default values', () => {
-    setup();
+    setup(<LoadingIndicatorPage />);
 
+    expect(screen.getByTestId('loader')).toBeInTheDocument();
     expect(screen.getByText('Loading content.')).toBeInTheDocument();
   });
 
   it('renders with custom values', () => {
-    setup({ children: 'Custom content.' });
+    setup(<LoadingIndicatorPage data-testid="custom-loader">Custom content.</LoadingIndicatorPage>);
 
+    expect(screen.getByTestId('custom-loader')).toBeInTheDocument();
     expect(screen.getByText('Custom content.')).toBeInTheDocument();
   });
 });
