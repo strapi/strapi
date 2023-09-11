@@ -1,36 +1,25 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { render as renderRTL, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { IntlProvider } from 'react-intl';
+import { render as renderRTL } from '@tests/utils';
 
-import { RelativeTime, RelativeTimeProps } from '../RelativeTime';
+import { RelativeTime } from '../RelativeTime';
 
-describe('ConfirmDialog', () => {
-  beforeEach(() => {
-    jest
-      .spyOn(Date, 'now')
-      .mockImplementation(() => new Date('2015-10-01 08:00:00') as unknown as number);
-  });
+export function setDateNow(now: number): jest.Spied<typeof Date.now> {
+  return jest.spyOn(Date, 'now').mockReturnValue(now);
+}
+let spiedDateNow: jest.Spied<typeof Date.now> | undefined = undefined;
+
+describe('RelativeTime', () => {
   afterAll(() => {
-    jest.clearAllMocks();
+    spiedDateNow?.mockReset();
   });
 
-  const render = (props?: Partial<RelativeTimeProps>) => ({
-    ...renderRTL(<RelativeTime timestamp={new Date('2015-10-01 07:55:00')} {...props} />, {
-      wrapper: ({ children }: { children: React.JSX.Element }) => (
-        <ThemeProvider theme={lightTheme}>
-          <IntlProvider locale="en" messages={{}} textComponent="span">
-            {children}
-          </IntlProvider>
-        </ThemeProvider>
-      ),
-    }),
-    user: userEvent.setup(),
+  const render = () => ({
+    ...renderRTL(<RelativeTime timestamp={new Date('2015-10-01 07:55:00')} />),
   });
 
   it('renders and matches the snapshot', () => {
+    spiedDateNow = setDateNow(1443686400000); // 2015-10-01 08:00:00
     const {
       container: { firstChild },
     } = render();
@@ -46,22 +35,16 @@ describe('ConfirmDialog', () => {
   });
 
   it('can display the relative time for a future date', () => {
-    jest
-      .spyOn(Date, 'now')
-      .mockImplementation(() => new Date('2015-10-01 07:50:00') as unknown as number);
+    spiedDateNow = setDateNow(1443685800000); // 2015-10-01 07:50:00
+    const { getByText } = render();
 
-    render();
-
-    expect(screen.getByText('in 5 minutes')).toBeInTheDocument();
+    expect(getByText('in 5 minutes')).toBeInTheDocument();
   });
 
   it('can display the relative time for a past date', () => {
-    jest
-      .spyOn(Date, 'now')
-      .mockImplementation(() => new Date('2015-10-01 08:00:00') as unknown as number);
+    spiedDateNow = setDateNow(1443686400000); // 2015-10-01 08:00:00
+    const { getByText } = render();
 
-    render();
-
-    expect(screen.getByText('5 minutes ago')).toBeInTheDocument();
+    expect(getByText('5 minutes ago')).toBeInTheDocument();
   });
 });
