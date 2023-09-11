@@ -20,13 +20,15 @@ describe('<NotAllowedInput />', () => {
   it('renders and matches the snapshot', () => {
     const {
       container: { firstChild },
-    } = render(
-      <ThemeProvider theme={lightTheme}>
-        <IntlProvider locale="en" messages={messages} defaultLocale="en">
-          <NotAllowedInput name="test" intlLabel={{ id: 'test', defaultMessage: 'test' }} />
-        </IntlProvider>
-      </ThemeProvider>
-    );
+    } = render(<NotAllowedInput name="test" intlLabel={{ id: 'test', defaultMessage: 'test' }} />, {
+      wrapper: ({ children }) => (
+        <ThemeProvider theme={lightTheme}>
+          <IntlProvider locale="en" messages={messages} defaultLocale="en">
+            <>{children}</>
+          </IntlProvider>
+        </ThemeProvider>
+      ),
+    });
 
     expect(firstChild).toMatchInlineSnapshot(`
       .c1 {
