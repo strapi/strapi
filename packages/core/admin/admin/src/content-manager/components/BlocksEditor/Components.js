@@ -1,45 +1,45 @@
 import { Typography } from '@strapi/design-system';
 import styled, { css } from 'styled-components';
 
-export const H1 = styled(Typography).attrs({ as: 'h1' })`
+const H1 = styled(Typography).attrs({ as: 'h1' })`
   font-size: ${42 / 16}rem;
   line-height: ${({ theme }) => theme.lineHeights[1]};
 `;
 
-export const H2 = styled(Typography).attrs({ as: 'h2' })`
+const H2 = styled(Typography).attrs({ as: 'h2' })`
   font-size: ${35 / 16}rem;
   line-height: ${({ theme }) => theme.lineHeights[1]};
 `;
 
-export const H3 = styled(Typography).attrs({ as: 'h3' })`
+const H3 = styled(Typography).attrs({ as: 'h3' })`
   font-size: ${29 / 16}rem;
   line-height: ${({ theme }) => theme.lineHeights[1]};
 `;
 
-export const H4 = styled(Typography).attrs({ as: 'h4' })`
+const H4 = styled(Typography).attrs({ as: 'h4' })`
   font-size: ${24 / 16}rem;
   line-height: ${({ theme }) => theme.lineHeights[1]};
 `;
 
-export const H5 = styled(Typography).attrs({ as: 'h5' })`
+const H5 = styled(Typography).attrs({ as: 'h5' })`
   font-size: ${20 / 16}rem;
   line-height: ${({ theme }) => theme.lineHeights[1]};
 `;
 
-export const H6 = styled(Typography).attrs({ as: 'h6' })`
+const H6 = styled(Typography).attrs({ as: 'h6' })`
   font-size: 1rem;
   line-height: ${({ theme }) => theme.lineHeights[1]};
 `;
 
-export const Italic = styled(Typography)`
+const Italic = styled(Typography)`
   font-style: italic;
 `;
 
-export const Img = styled.img`
+const Img = styled.img`
   max-width: 100%;
 `;
 
-export const InlineCode = styled.code`
+const InlineCode = styled.code`
   background-color: ${({ theme }) => theme.colors.neutral150};
   border-radius: ${({ theme }) => theme.borderRadius};
   padding: ${({ theme }) => `0 ${theme.spaces[2]}`};
@@ -47,7 +47,7 @@ export const InlineCode = styled.code`
     monospace;
 `;
 
-export const CodeBlock = styled.pre`
+const CodeBlock = styled.pre`
   border-radius: ${({ theme }) => theme.borderRadius};
   background-color: #32324d; // since the color is same between the themes
   max-width: 100%;
@@ -62,7 +62,7 @@ export const CodeBlock = styled.pre`
   }
 `;
 
-export const Blockquote = styled.blockquote`
+const Blockquote = styled.blockquote`
   margin: ${({ theme }) => `${theme.spaces[6]} 0`};
   font-weight: ${({ theme }) => theme.fontWeights.regular};
   border-left: ${({ theme }) => `${theme.spaces[1]} solid ${theme.colors.neutral150}`};
@@ -84,12 +84,28 @@ const listStyle = css`
   }
 `;
 
-export const Orderedlist = styled.ol`
+const Orderedlist = styled.ol`
   list-style-type: decimal;
   ${listStyle}
 `;
 
-export const Unorderedlist = styled.ul`
+const Unorderedlist = styled.ul`
   list-style-type: disc;
   ${listStyle}
 `;
+
+export {
+  H1,
+  H2,
+  H3,
+  H4,
+  H5,
+  H6,
+  Italic,
+  Img,
+  InlineCode,
+  CodeBlock,
+  Blockquote,
+  Orderedlist,
+  Unorderedlist,
+};
