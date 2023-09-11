@@ -1,16 +1,30 @@
 /* eslint-disable react/prop-types */
 import * as React from 'react';
 
-import { Box, Flex, Typography, InputWrapper, Divider } from '@strapi/design-system';
+import { Box, Flex, Typography, InputWrapper, Divider, BaseLink } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { createEditor } from 'slate';
 import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 
+import {
+  H1,
+  H2,
+  H3,
+  H4,
+  H5,
+  H6,
+  Img,
+  Italic,
+  CodeBlock,
+  InlineCode,
+  Blockquote,
+  Orderedlist,
+  Unorderedlist,
+} from './Components';
 import { blocksData } from './tempSchema';
 import { BlocksToolbar } from './Toolbar';
-import Wrapper from './Wrapper';
 
 const TypographyAsterisk = styled(Typography)`
   line-height: 0;
@@ -20,92 +34,122 @@ const EditorDivider = styled(Divider)`
   background: ${({ theme }) => theme.colors.neutral200};
 `;
 
-const style = {
+const Wrapper = styled(Box)`
+  width: 100%;
+  max-height: 512px;
+  overflow: auto;
+  padding: ${({ theme }) => `${theme.spaces[3]} ${theme.spaces[4]}`};
+  font-size: ${14 / 16}rem;
+  background-color: ${({ theme }) => theme.colors.neutral0};
+  color: ${({ theme }) => theme.colors.neutral800};
+  line-height: ${({ theme }) => theme.lineHeights[6]};
+  border-radius: ${({ theme }) => theme.borderRadius};
+`;
+
+const getEditorStyle = (theme) => ({
   // The outline style is set on the wrapper with :focus-within
   outline: 'none',
-};
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spaces[2],
+});
 
 const Image = ({ attributes, children, element }) => {
   const { url, alternativeText, width, height } = element.image;
 
   return (
-    <div {...attributes}>
+    <Box {...attributes}>
       {children}
       <Box contentEditable={false}>
-        <img src={url} alt={alternativeText} width={width} height={height} />
+        <Img src={url} alt={alternativeText} width={width} height={height} />
       </Box>
-    </div>
+    </Box>
   );
+};
+
+const Heading = ({ attributes, children, element }) => {
+  switch (element.level) {
+    case 1:
+      return <H1 {...attributes}>{children}</H1>;
+    case 2:
+      return <H2 {...attributes}>{children}</H2>;
+    case 3:
+      return <H3 {...attributes}>{children}</H3>;
+    case 4:
+      return <H4 {...attributes}>{children}</H4>;
+    case 5:
+      return <H5 {...attributes}>{children}</H5>;
+    case 6:
+      return <H6 {...attributes}>{children}</H6>;
+    default: // do nothing
+      return null;
+  }
+};
+
+const List = ({ attributes, children, element }) => {
+  if (element.format === 'ordered') return <Orderedlist {...attributes}>{children}</Orderedlist>;
+
+  return <Unorderedlist {...attributes}>{children}</Unorderedlist>;
 };
 
 const renderElement = (props) => {
   const { attributes, element, children } = props;
 
-  if (element.type === 'heading')
-    switch (element.level) {
-      case 1:
-        return <h1 {...attributes}>{children}</h1>;
-      case 2:
-        return <h2 {...attributes}>{children}</h2>;
-      case 3:
-        return <h3 {...attributes}>{children}</h3>;
-      case 4:
-        return <h4 {...attributes}>{children}</h4>;
-      case 5:
-        return <h5 {...attributes}>{children}</h5>;
-      case 6:
-        return <h6 {...attributes}>{children}</h6>;
-      default: // do nothing
-        return null;
-    }
-  else
-    switch (element.type) {
-      case 'link':
-        return (
-          <a href={element.url} {...attributes}>
-            {children}
-          </a>
-        );
-      case 'code':
-        return (
-          <pre {...attributes}>
-            <code>{children}</code>
-          </pre>
-        );
-      case 'quote':
-        return <blockquote {...attributes}>{children}</blockquote>;
-      case 'list':
-        if (element.format === 'ordered') return <ol {...attributes}>{children}</ol>;
-
-        return <ul {...attributes}>{children}</ul>;
-      case 'list-item':
-        return <li {...attributes}>{children}</li>;
-      case 'image':
-        return <Image {...props} />;
-      default:
-        return <p {...attributes}>{children}</p>;
-    }
+  switch (element.type) {
+    case 'heading':
+      return <Heading {...props} />;
+    case 'link':
+      return (
+        <BaseLink href={element.url} {...attributes}>
+          {children}
+        </BaseLink>
+      );
+    case 'code':
+      return (
+        <CodeBlock {...attributes}>
+          <code>{children}</code>
+        </CodeBlock>
+      );
+    case 'quote':
+      return <Blockquote {...attributes}>{children}</Blockquote>;
+    case 'list':
+      return <List {...props} />;
+    case 'list-item':
+      return (
+        <Typography as="li" {...attributes}>
+          {children}
+        </Typography>
+      );
+    case 'image':
+      return <Image {...props} />;
+    default:
+      return (
+        <Typography as="p" variant="omega" {...attributes}>
+          {children}
+        </Typography>
+      );
+  }
 };
 
 const renderLeaf = ({ attributes, children, leaf }) => {
   if (leaf.bold) {
-    children = <strong>{children}</strong>;
+    children = <Typography fontWeight="bold">{children}</Typography>;
   }
 
   if (leaf.italic) {
-    children = <em>{children}</em>;
+    children = <Italic>{children}</Italic>;
   }
 
   if (leaf.underline) {
-    children = <u>{children}</u>;
+    children = <Typography textDecoration="underline">{children}</Typography>;
   }
 
   if (leaf.strikethrough) {
-    children = <del>{children}</del>;
+    children = <Typography textDecoration="line-through">{children}</Typography>;
   }
 
   if (leaf.code) {
-    children = <code>{children}</code>;
+    children = <InlineCode>{children}</InlineCode>;
   }
 
   return <span {...attributes}>{children}</span>;
@@ -113,6 +157,7 @@ const renderLeaf = ({ attributes, children, leaf }) => {
 
 const BlocksEditor = React.forwardRef(({ intlLabel, name, readOnly, required, error }, ref) => {
   const { formatMessage } = useIntl();
+  const theme = useTheme();
   const [editor] = React.useState(() => withReact(createEditor()));
 
   const label = intlLabel.id
@@ -153,7 +198,7 @@ const BlocksEditor = React.forwardRef(({ intlLabel, name, readOnly, required, er
             <Wrapper>
               <Editable
                 readOnly={readOnly}
-                style={style}
+                style={getEditorStyle(theme)}
                 renderElement={renderElement}
                 renderLeaf={renderLeaf}
               />

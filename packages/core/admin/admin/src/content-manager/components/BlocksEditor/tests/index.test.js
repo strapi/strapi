@@ -38,19 +38,22 @@ describe('BlocksEditor', () => {
   });
 
   it('should render blocks with data', () => {
-    const { container } = setup();
+    setup();
 
-    const strongElement = container.querySelector('strong');
-    expect(strongElement.textContent).toBe('This is bold text');
+    expect(screen.getByText('This is bold text').parentElement).toHaveStyle({
+      'font-weight': 600,
+    });
 
-    const StrikethroughElement = container.querySelector('del');
-    expect(StrikethroughElement.textContent).toBe('This is deleted text');
+    expect(screen.getByText('This is deleted text').parentElement).toHaveStyle({
+      'text-decoration': 'line-through',
+    });
+
+    expect(screen.getByText('click me').parentElement).toHaveStyle({
+      'font-style': 'italic',
+    });
 
     const linkElement = screen.getByRole('link', { name: /click me/ });
     expect(linkElement).toHaveAttribute('href', 'https://example.com');
-
-    const italicElement = screen.getByText('click me').closest('em');
-    expect(italicElement).toBeInTheDocument();
 
     expect(screen.getByRole('heading', { level: 2 })).toBeInTheDocument();
 
