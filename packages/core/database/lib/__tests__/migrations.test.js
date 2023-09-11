@@ -35,7 +35,18 @@ describe('ts project', () => {
     beforeEach(async () => {
         fs.removeSync(projectDir);
         fs.ensureDirSync(projectDir);
-        fs.ensureFileSync(`${projectDir}/tsconfig.json`);
+        fs.writeFileSync(`${projectDir}/index.ts`,"export const hello = 'world';")
+        fs.writeFileSync(`${projectDir}/tsconfig.json`,
+            // language=JSON
+            `{
+              "compilerOptions": {
+                "outDir": "dist",
+                "rootDir": "."
+              },
+              "include": [
+                "./"
+              ]
+            }`)
         global.strapi = {
             dirs: {
                 app: {

@@ -3,6 +3,7 @@
 const path = require('path');
 const fse = require('fs-extra');
 const { Umzug } = require('umzug');
+const { resolveOutDir } = require('@strapi/typescript-utils');
 
 const createStorage = require('./storage');
 
@@ -34,7 +35,7 @@ const migrationResolver = ({ name, path, context }) => {
 };
 
 async function findMigrationsDir(root) {
-  let s = path.join(root, 'database/migrations');
+  let s = path.join(await resolveOutDir(root) || root, 'database/migrations');
   console.info(`Found database migrations at ${s}`);
   return s;
 }
