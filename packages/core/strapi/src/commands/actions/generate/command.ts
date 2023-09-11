@@ -1,4 +1,3 @@
-import { runCLI } from '@strapi/generators';
 import { assertCwdContainsStrapiProject } from '../../utils/helpers';
 import type { StrapiCommand } from '../../types';
 
@@ -12,7 +11,9 @@ const commands: StrapiCommand = ({ command, argv }) => {
     .action(() => {
       assertCwdContainsStrapiProject('generate');
       argv.splice(2, 1);
-      runCLI();
+
+      // NOTE: this needs ot be lazy loaded in order for plop to work correctly
+      import('@strapi/generators').then((gen) => gen.runCLI());
     });
 };
 

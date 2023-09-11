@@ -26,9 +26,11 @@
       "url": "https://strapi.io"
     }
   ],
+  "main": "index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "./dist"
+    "./dist",
+    "index.js"
   ],
   "scripts": {
     "build": "run -T tsc -p tsconfig.build.json",
