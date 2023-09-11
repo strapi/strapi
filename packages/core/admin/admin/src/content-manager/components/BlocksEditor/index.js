@@ -39,7 +39,7 @@ const Wrapper = styled(Box)`
   max-height: 512px;
   overflow: auto;
   padding: ${({ theme }) => `${theme.spaces[3]} ${theme.spaces[4]}`};
-  font-size: ${14 / 16}rem;
+  font-size: ${({ theme }) => theme.fontSizes[2]}
   background-color: ${({ theme }) => theme.colors.neutral0};
   color: ${({ theme }) => theme.colors.neutral800};
   line-height: ${({ theme }) => theme.lineHeights[6]};

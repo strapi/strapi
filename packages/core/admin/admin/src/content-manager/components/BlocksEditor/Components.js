@@ -64,9 +64,8 @@ export const CodeBlock = styled.pre`
 
 export const Blockquote = styled.blockquote`
   margin: ${({ theme }) => `${theme.spaces[6]} 0`};
-  font-size: ${14 / 16}rem;
   font-weight: ${({ theme }) => theme.fontWeights.regular};
-  border-left: 4px solid ${({ theme }) => theme.colors.neutral150};
+  border-left: ${({ theme }) => `${theme.spaces[1]} solid ${theme.colors.neutral150}`};
   font-style: italic;
   padding: ${({ theme }) => theme.spaces[2]} ${({ theme }) => theme.spaces[5]};
 `;
