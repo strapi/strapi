@@ -3,9 +3,9 @@ import React from 'react';
 import { intervalToDuration, isPast } from 'date-fns';
 import { useIntl } from 'react-intl';
 
-const Intervals = ['years', 'months', 'days', 'hours', 'minutes', 'seconds'] as const;
+const intervals = ['years', 'months', 'days', 'hours', 'minutes', 'seconds'] as const;
 
-type IntervalUnit = (typeof Intervals)[number];
+type IntervalUnit = (typeof intervals)[number];
 
 interface CustomInterval {
   unit: IntervalUnit;
@@ -40,7 +40,7 @@ const RelativeTime = ({ timestamp, customIntervals = [] }: RelativeTimeProps) =>
     end: Date.now(),
   });
 
-  const unit: IntervalUnit = Array.from(Intervals).find((intervalUnit) => {
+  const unit: IntervalUnit = intervals.find((intervalUnit) => {
     return interval[intervalUnit]! > 0 && Object.keys(interval).includes(intervalUnit);
   })!;
 
