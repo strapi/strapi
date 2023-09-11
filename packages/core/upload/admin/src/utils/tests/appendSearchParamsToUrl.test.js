@@ -103,7 +103,7 @@ describe('appendSearchParamsToUrl', () => {
       );
     });
 
-    test("if there's no window.strapi.backendURL, it uses window.location.href", () => {
+    test("if there's no window.strapi.backendURL, it uses window.location.origin", () => {
       const oldBackendURL = window.strapi.backendURL;
       window.strapi.backendURL = undefined;
 
