@@ -1,3 +1,5 @@
+import { Permission } from '@strapi/permissions';
+
 import {
   hasPermissions,
   findMatchingPermissions,
@@ -5,7 +7,7 @@ import {
   shouldCheckPermissions,
 } from '../hasPermissions';
 
-const hasPermissionsTestData = {
+const hasPermissionsTestData: Record<string, Record<string, Permission[]>> = {
   userPermissions: {
     user1: [
       // Admin marketplace
@@ -99,7 +101,6 @@ const hasPermissionsTestData = {
         action: 'plugin::content-type-builder.read',
         subject: null,
         properties: {},
-        conditions: null,
       },
 
       // Documentation plugin
@@ -107,19 +108,16 @@ const hasPermissionsTestData = {
         action: 'plugin::documentation.read',
         subject: null,
         properties: {},
-        conditions: null,
       },
       {
         action: 'plugin::documentation.settings.update',
         subject: null,
         properties: {},
-        conditions: null,
       },
       {
         action: 'plugin::documentation.settings.regenerate',
         subject: null,
         properties: {},
-        conditions: null,
       },
 
       // Upload plugin
@@ -127,31 +125,26 @@ const hasPermissionsTestData = {
         action: 'plugin::upload.read',
         subject: null,
         properties: {},
-        conditions: null,
       },
       {
         action: 'plugin::upload.assets.create',
         subject: null,
         properties: {},
-        conditions: null,
       },
       {
         action: 'plugin::upload.assets.update',
         subject: null,
         properties: {},
-        conditions: null,
       },
       {
         action: 'plugin::upload.assets.dowload',
         subject: null,
         properties: {},
-        conditions: null,
       },
       {
         action: 'plugin::upload.assets.copy-link',
         subject: null,
         properties: {},
-        conditions: null,
       },
 
       // Users-permissions
@@ -159,61 +152,51 @@ const hasPermissionsTestData = {
         action: 'plugin::users-permissions.roles.create',
         subject: null,
         properties: {},
-        conditions: null,
       },
       {
         action: 'plugin::users-permissions.roles.read',
         subject: null,
         properties: {},
-        conditions: null,
       },
       {
         action: 'plugin::users-permissions.roles.update',
         subject: null,
         properties: {},
-        conditions: null,
       },
       {
         action: 'plugin::users-permissions.roles.delete',
         subject: null,
         properties: {},
-        conditions: null,
       },
       {
         action: 'plugin::users-permissions.email-templates.read',
         subject: null,
         properties: {},
-        conditions: null,
       },
       {
         action: 'plugin::users-permissions.email-templates.update',
         subject: null,
         properties: {},
-        conditions: null,
       },
       {
         action: 'plugin::users-permissions.providers.read',
         subject: null,
         properties: {},
-        conditions: null,
       },
       {
         action: 'plugin::users-permissions.providers.update',
         subject: null,
         properties: {},
-        conditions: null,
       },
       {
         action: 'plugin::users-permissions.advanced-settings.read',
         subject: null,
         properties: {},
-        conditions: null,
       },
       {
         action: 'plugin::users-permissions.advanced-settings.update',
         subject: null,
         properties: {},
-        conditions: null,
       },
     ],
     user2: [
@@ -425,7 +408,7 @@ const hasPermissionsTestData = {
   },
 };
 
-describe('STRAPI-HELPER_PLUGIN | utils ', () => {
+describe('hasPermissions', () => {
   describe('findMatchingPermissions', () => {
     it('should return an empty array if both arguments are empty', () => {
       expect(findMatchingPermissions([], [])).toHaveLength(0);
@@ -457,7 +440,7 @@ describe('STRAPI-HELPER_PLUGIN | utils ', () => {
 
   describe('formatPermissionsForRequest', () => {
     it('should create an array of object containing only the action, subject & fields keys', () => {
-      const data = [
+      const data: Permission[] = [
         {
           action: 'admin::marketplace.read',
           subject: null,
@@ -472,17 +455,28 @@ describe('STRAPI-HELPER_PLUGIN | utils ', () => {
           properties: {},
           conditions: ['customCondition'],
         },
-      ];
-      const expected = [
         {
-          action: 'admin::marketplace.read',
-        },
-        {
-          action: 'admin::webhooks.delete',
+          action: 'a',
+          subject: 'b',
+          properties: {},
+          conditions: ['customCondition'],
         },
       ];
 
-      expect(formatPermissionsForRequest(data)).toEqual(expected);
+      expect(formatPermissionsForRequest(data)).toMatchInlineSnapshot(`
+        [
+          {
+            "action": "admin::marketplace.read",
+          },
+          {
+            "action": "admin::webhooks.delete",
+          },
+          {
+            "action": "a",
+            "subject": "b",
+          },
+        ]
+      `);
     });
   });
 
@@ -553,7 +547,6 @@ describe('STRAPI-HELPER_PLUGIN | utils ', () => {
           action: 'admin::webhooks.create',
           subject: null,
           properties: {},
-          conditions: null,
         },
       ];
 
