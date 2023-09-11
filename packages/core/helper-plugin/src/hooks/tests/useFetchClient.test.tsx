@@ -1,3 +1,4 @@
+// eslint-disable-next-line check-file/filename-naming-convention
 import * as React from 'react';
 
 import { render, renderHook, waitFor } from '@tests/utils';

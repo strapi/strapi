@@ -8,7 +8,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { getFetchClient } from '../utils/getFetchClient';
 
 const useFetchClient = () => {
-  const controller = useRef(null);
+  const controller = useRef<AbortController | null>(null);
 
   if (controller.current === null) {
     controller.current = new AbortController();
@@ -16,14 +16,14 @@ const useFetchClient = () => {
 
   useEffect(() => {
     return () => {
-      controller.current.abort();
+      controller.current!.abort();
     };
   }, []);
 
   return useMemo(
     () =>
       getFetchClient({
-        signal: controller.current.signal,
+        signal: controller.current!.signal,
       }),
     []
   );
