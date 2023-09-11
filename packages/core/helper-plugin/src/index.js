@@ -1,5 +1,3 @@
-import { getOtherInfos, getType } from './content-manager/utils/getAttributeInfos';
-
 /* -------------------------------------------------------------------------------------------------
  * Components
  * -----------------------------------------------------------------------------------------------*/
@@ -38,10 +36,11 @@ export { Status } from './components/Status';
  * Content Manager
  * -----------------------------------------------------------------------------------------------*/
 
-export { ContentManagerEditViewDataManagerContext } from './content-manager/contexts/ContentManagerEditViewDataManagerContext';
-export { useCMEditViewDataManager } from './content-manager/hooks/useCMEditViewDataManager';
-export { getType };
-export { getOtherInfos };
+export {
+  useCMEditViewDataManager,
+  ContentManagerEditViewDataManagerContext,
+} from './content-manager/CMEditViewDataManager';
+export { getOtherInfos, getType } from './content-manager/utils/getAttributeInfos';
 
 /* -------------------------------------------------------------------------------------------------
  * Features

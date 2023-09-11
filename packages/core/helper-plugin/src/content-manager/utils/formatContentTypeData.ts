@@ -5,8 +5,23 @@ import get from 'lodash/get';
 
 import { getOtherInfos, getType } from './getAttributeInfos';
 
-const formatContentTypeData = (data, ct, composSchema) => {
-  const recursiveFormatData = (data, schema) => {
+import type { Schema } from '@strapi/strapi';
+
+const formatContentTypeData = <
+  TSchema extends Schema.ContentType,
+  TData extends Record<keyof TSchema['attributes'], unknown>
+>(
+  data: TData,
+  ct: TSchema,
+  composSchema: Record<string, Schema.Component>
+) => {
+  const recursiveFormatData = <
+    TSchemum extends Schema.Schema,
+    TDatum extends { [P in keyof TSchemum['attributes']]: unknown }
+  >(
+    data: TDatum,
+    schema: TSchemum
+  ) => {
     return Object.keys(data).reduce((acc, current) => {
       const type = getType(schema, current);
       const value = get(data, current);
@@ -25,7 +40,7 @@ const formatContentTypeData = (data, ct, composSchema) => {
         return acc;
       }
 
-      if (type === 'dynamiczone') {
+      if (type === 'dynamiczone' && Array.isArray(value)) {
         acc[current] = value.map((componentValue) => {
           const formattedData = recursiveFormatData(
             componentValue,
@@ -41,7 +56,7 @@ const formatContentTypeData = (data, ct, composSchema) => {
       if (type === 'component') {
         let formattedValue;
 
-        if (isRepeatable) {
+        if (isRepeatable && Array.isArray(value)) {
           formattedValue = value.map((obj, i) => {
             const newObj = { ...obj, __temp_key__: i };
 
@@ -59,7 +74,7 @@ const formatContentTypeData = (data, ct, composSchema) => {
       acc[current] = value;
 
       return acc;
-    }, {});
+    }, {} as Record<string, unknown>);
   };
 
   return recursiveFormatData(data, ct);
