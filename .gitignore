@@ -1,7 +1,6 @@
 ############################
 # OS X
 ############################
-examples/
 .DS_Store
 .AppleDouble
 .LSOverride
