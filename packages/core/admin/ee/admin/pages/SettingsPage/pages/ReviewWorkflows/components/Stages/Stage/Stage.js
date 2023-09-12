@@ -5,7 +5,6 @@ import {
   AccordionContent,
   AccordionToggle,
   Box,
-  Button,
   Flex,
   Grid,
   GridItem,
@@ -26,7 +25,7 @@ import {
   NotAllowedInput,
   useTracking,
 } from '@strapi/helper-plugin';
-import { Drag, More } from '@strapi/icons';
+import { Duplicate, Drag, More } from '@strapi/icons';
 import { useField } from 'formik';
 import PropTypes from 'prop-types';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -56,12 +55,6 @@ const PermissionWrapper = styled(Flex)`
   > * {
     flex-grow: 1;
   }
-`;
-
-// Make sure the apply to all stages button doesn't collapse, when the Select
-// contains more tags than it can fit into one line
-const ApplyToAllStages = styled(Button)`
-  flex-shrink: 0;
 `;
 
 const DeleteMenuItem = styled(MenuItem)`
@@ -482,18 +475,17 @@ export function Stage({
                       </MultiSelect>
                     </PermissionWrapper>
 
-                    <ApplyToAllStages
+                    <IconButton
                       disabled={!canUpdate}
-                      size="L"
-                      type="button"
-                      variant="secondary"
-                      onClick={() => handleApplyPermissionsToAllStages(permissionsField.value)}
-                    >
-                      {formatMessage({
+                      icon={<Duplicate />}
+                      label={formatMessage({
                         id: 'Settings.review-workflows.stage.permissions.apply.label',
                         defaultMessage: 'Apply to all stages',
                       })}
-                    </ApplyToAllStages>
+                      size="L"
+                      variant="secondary"
+                      onClick={() => handleApplyPermissionsToAllStages(permissionsField.value)}
+                    />
                   </Flex>
                 )}
               </GridItem>
