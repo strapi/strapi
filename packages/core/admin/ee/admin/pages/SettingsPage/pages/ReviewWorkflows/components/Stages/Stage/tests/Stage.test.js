@@ -272,7 +272,7 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
       'data-disabled'
     );
 
-    expect(getByRole('button', { name: /apply to all stages/i })).toHaveAttribute('disabled');
+    expect(getByRole('button', { name: /apply to all stages/i })).toHaveAttribute('aria-disabled');
   });
 
   it('should render a list of all available roles (except super admins)', async () => {
