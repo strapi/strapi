@@ -56,6 +56,12 @@ describe('CONTENT MANAGER | EditView | Header', () => {
     } = render(makeApp());
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c4 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #4945ff;
+      }
+
       .c8 {
         font-weight: 600;
         font-size: 2rem;
@@ -88,7 +94,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         padding-bottom: 8px;
       }
 
-      .c5 {
+      .c6 {
         min-width: 0;
       }
 
@@ -103,7 +109,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         cursor: pointer;
       }
 
-      .c4 {
+      .c5 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -121,7 +127,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         justify-content: space-between;
       }
 
-      .c6 {
+      .c7 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -213,11 +219,12 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         background: #eaeaef;
       }
 
-      .c12[aria-disabled='true'] .c7 {
+      .c12[aria-disabled='true'] .c3 {
         color: #666687;
       }
 
-      .c12[aria-disabled='true'] svg > g,.c12[aria-disabled='true'] svg path {
+      .c12[aria-disabled='true'] svg > g,
+      .c12[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -226,11 +233,12 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         background: #eaeaef;
       }
 
-      .c12[aria-disabled='true']:active .c7 {
+      .c12[aria-disabled='true']:active .c3 {
         color: #666687;
       }
 
-      .c12[aria-disabled='true']:active svg > g,.c12[aria-disabled='true']:active svg path {
+      .c12[aria-disabled='true']:active svg > g,
+      .c12[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -247,12 +255,6 @@ describe('CONTENT MANAGER | EditView | Header', () => {
       .c12 svg > g,
       .c12 svg path {
         fill: #ffffff;
-      }
-
-      .c3 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #4945ff;
       }
 
       .c2 {
@@ -345,20 +347,20 @@ describe('CONTENT MANAGER | EditView | Header', () => {
                 />
               </svg>
               <span
-                class="c3"
+                class="c3 c4"
               >
                 Back
               </span>
             </a>
           </div>
           <div
-            class="c4"
+            class="c5"
           >
             <div
-              class="c5 c6"
+              class="c6 c7"
             >
               <h1
-                class="c7 c8"
+                class="c3 c8"
               >
                 Create an entry
               </h1>
@@ -373,7 +375,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
                 type="submit"
               >
                 <span
-                  class="c7 c13"
+                  class="c3 c13"
                 >
                   Save
                 </span>
@@ -381,7 +383,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
             </div>
           </div>
           <p
-            class="c7 c14"
+            class="c3 c14"
           >
             API ID  : restaurant
           </p>

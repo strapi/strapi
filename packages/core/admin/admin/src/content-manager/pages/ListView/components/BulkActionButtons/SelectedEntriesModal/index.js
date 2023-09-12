@@ -32,7 +32,7 @@ import { useSelector } from 'react-redux';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { formatAPIErrors } from '../../../../../../utils/formatAPIErrors';
+import formatAPIError from '../../../../../../utils/formatAPIErrors';
 import { getTrad, createYupSchema } from '../../../../../utils';
 import { listViewDomain } from '../../../selectors';
 import { Body } from '../../Body';
@@ -301,7 +301,7 @@ const SelectedEntriesModalContent = ({
       onError(error) {
         toggleNotification({
           type: 'warning',
-          message: formatAPIErrors(error),
+          message: formatAPIError(error),
         });
       },
     }
@@ -445,7 +445,7 @@ const SelectedEntriesModal = ({ onToggle }) => {
   // We want to keep the selected entries order same as the list view
   const [
     {
-      query: { sort },
+      query: { sort, plugins },
     },
   ] = useQueryParams();
 
@@ -458,6 +458,7 @@ const SelectedEntriesModal = ({ onToggle }) => {
         $in: entriesToFetch,
       },
     },
+    locale: plugins?.i18n?.locale,
   };
 
   const { get } = useFetchClient();
@@ -470,7 +471,11 @@ const SelectedEntriesModal = ({ onToggle }) => {
       });
 
       if (data.results) {
-        const schema = createYupSchema(contentType, { components }, { isDraft: false });
+        const schema = createYupSchema(
+          contentType,
+          { components },
+          { isDraft: false, isJSONTestDisabled: true }
+        );
         const validationErrors = {};
         const rows = data.results.map((entry) => {
           try {

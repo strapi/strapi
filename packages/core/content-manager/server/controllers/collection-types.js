@@ -445,6 +445,7 @@ module.exports = {
   async countManyEntriesDraftRelations(ctx) {
     const { userAbility } = ctx.state;
     const ids = ctx.request.query.ids;
+    const locale = ctx.request.query.locale;
     const { model } = ctx.params;
 
     const entityManager = getService('entity-manager');
@@ -454,13 +455,13 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entities = await entityManager.find(ids, model);
+    const entities = await entityManager.find({ ids, locale }, model);
 
     if (!entities) {
       return ctx.notFound();
     }
 
-    const number = await entityManager.countManyEntriesDraftRelations(ids, model);
+    const number = await entityManager.countManyEntriesDraftRelations(ids, model, locale);
 
     return {
       data: number,

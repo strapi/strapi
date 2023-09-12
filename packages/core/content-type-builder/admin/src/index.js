@@ -22,7 +22,13 @@ export default {
         defaultMessage: 'Content Types Builder',
       },
       permissions: PERMISSIONS.main,
-      Component: () => import(/* webpackChunkName: "content-type-builder" */ './pages/App'),
+      async Component() {
+        const component = await import(
+          /* webpackChunkName: "content-type-builder" */ './pages/App'
+        );
+
+        return component;
+      },
     });
 
     app.registerPlugin({

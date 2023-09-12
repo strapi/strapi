@@ -6,10 +6,20 @@ const { createController } = require('./core-api/controller');
 const { createService } = require('./core-api/service');
 const { createRoutes } = require('./core-api/routes');
 
+// Content type is proxied to allow for dynamic content type updates
+const getContentTypeProxy = (strapi, uid) => {
+  return new Proxy(strapi.contentType(uid), {
+    get(target, prop) {
+      const contentType = strapi.contentType(uid);
+      return contentType[prop];
+    },
+  });
+};
+
 const createCoreController = (uid, cfg = {}) => {
   return ({ strapi }) => {
     const baseController = createController({
-      contentType: strapi.contentType(uid),
+      contentType: getContentTypeProxy(strapi, uid),
     });
 
     const userCtrl = typeof cfg === 'function' ? cfg({ strapi }) : cfg;
@@ -28,7 +38,7 @@ const createCoreController = (uid, cfg = {}) => {
 const createCoreService = (uid, cfg = {}) => {
   return ({ strapi }) => {
     const baseService = createService({
-      contentType: strapi.contentType(uid),
+      contentType: getContentTypeProxy(strapi, uid),
     });
 
     const userService = typeof cfg === 'function' ? cfg({ strapi }) : cfg;

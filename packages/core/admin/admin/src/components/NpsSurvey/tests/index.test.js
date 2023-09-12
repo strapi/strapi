@@ -89,6 +89,16 @@ describe('NPS survey', () => {
     expect(screen.getByText(/extremely likely/i)).toBeInTheDocument();
   });
 
+  it("renders survey if settings don't exist", () => {
+    localStorageMock.getItem.mockReturnValueOnce(null);
+    setup();
+    act(() => jest.runAllTimers());
+    expect(screen.getByLabelText('0')).toBeInTheDocument();
+    expect(screen.getByLabelText('10')).toBeInTheDocument();
+    expect(screen.getByText(/not at all likely/i)).toBeInTheDocument();
+    expect(screen.getByText(/extremely likely/i)).toBeInTheDocument();
+  });
+
   it('does not render survey if disabled', () => {
     localStorageMock.getItem.mockReturnValueOnce({ enabled: false });
     setup();

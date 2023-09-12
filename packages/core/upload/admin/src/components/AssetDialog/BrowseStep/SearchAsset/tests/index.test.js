@@ -45,8 +45,6 @@ describe('<SearchURLQuery />', () => {
         border-radius: 4px;
         border-color: #dcdce4;
         border: 1px solid #dcdce4;
-        width: 2rem;
-        height: 2rem;
         cursor: pointer;
       }
 
@@ -117,19 +115,22 @@ describe('<SearchURLQuery />', () => {
         border: 2px solid #4945ff;
       }
 
-      .c3 svg > g,
+      .c3 {
+        border-color: #dcdce4;
+        height: 2rem;
+        width: 2rem;
+      }
+
+      .c3 svg g,
       .c3 svg path {
         fill: #8e8ea9;
       }
 
-      .c3:hover svg > g,
-      .c3:hover svg path {
+      .c3:hover svg g,
+      .c3:focus svg g,
+      .c3:hover svg path,
+      .c3:focus svg path {
         fill: #666687;
-      }
-
-      .c3:active svg > g,
-      .c3:active svg path {
-        fill: #a5a5ba;
       }
 
       .c3[aria-disabled='true'] svg path {

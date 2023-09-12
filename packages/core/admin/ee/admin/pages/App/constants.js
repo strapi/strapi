@@ -1,10 +1,9 @@
-import * as React from 'react';
+import { AuthResponse } from '../AuthResponse';
 
-export const AUTH_ROUTES_EE = [
+export const ROUTES_EE = [
   {
-    component: React.lazy(() =>
-      import('../AuthResponse').then((module) => ({ default: module.AuthResponse }))
-    ),
-    path: '/auth/login/:authResponse',
+    Component: () => ({ default: AuthResponse }),
+    to: '/auth/login/:authResponse',
+    exact: true,
   },
 ];
