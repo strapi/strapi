@@ -1,7 +1,7 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { Knex } from 'knex';
 
-export type Callback = () => Promise<void> | void;
+export type Callback = (...args: unknown[]) => Promise<unknown> | unknown;
 
 export interface Store {
   trx: Knex.Transaction | null;

@@ -8,7 +8,7 @@ import { createMigrationsProvider } from './migrations';
 import { createLifecyclesProvider } from './lifecycles';
 import { createConnection } from './connection';
 import * as errors from './errors';
-import { transactionCtx } from './transaction-context';
+import { Callback, transactionCtx } from './transaction-context';
 
 // TODO: move back into strapi
 import { transformContentTypes } from './utils/content-types';
@@ -86,9 +86,11 @@ class Database {
     return !!transactionCtx.get();
   }
 
-  async transaction(cb?: unknown) {
+  async transaction(cb?: Callback) {
     const notNestedTransaction = !transactionCtx.get();
-    const trx = notNestedTransaction ? await this.connection.transaction() : transactionCtx.get();
+    const trx = notNestedTransaction
+      ? await this.connection.transaction()
+      : (transactionCtx.get() as Knex.Transaction);
 
     async function commit() {
       if (notNestedTransaction) {

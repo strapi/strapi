@@ -1,7 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 import knex, { Knex } from 'knex';
-import { errors } from '@strapi/utils';
 
 import SqliteClient from 'knex/lib/dialects/sqlite3/index';
 
@@ -24,7 +23,7 @@ const trySqlitePackage = (packageName: ClientKey): ClientKey | false => {
     require.resolve(packageName);
     return packageName;
   } catch (error) {
-    if (errors.isError(error) && error.code === 'MODULE_NOT_FOUND') {
+    if (error instanceof Error && 'code' in error && error.code === 'MODULE_NOT_FOUND') {
       return false;
     }
     throw error;

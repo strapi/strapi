@@ -4,10 +4,6 @@ import yup from 'yup';
 import { HttpError } from 'http-errors';
 import { formatYupErrors } from './format-yup-error';
 
-export function isError(error: unknown): error is NodeJS.ErrnoException {
-  return error instanceof Error;
-}
-
 /* ApplicationError */
 
 class ApplicationError extends Error {
