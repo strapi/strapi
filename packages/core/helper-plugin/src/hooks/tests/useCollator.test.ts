@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react';
+import { renderHook } from '@tests/utils';
 
 import { useCollator } from '../useCollator';
 
@@ -16,6 +16,7 @@ describe('useCollator', () => {
   });
 
   it('should return me a new Intl.Collator if I pass a new locale or options object', () => {
+    // @ts-expect-error – intiial props are not being inferred correctly
     const { result, rerender } = renderHook(({ locale, options }) => useCollator(locale, options), {
       initialProps: {
         locale: 'en',

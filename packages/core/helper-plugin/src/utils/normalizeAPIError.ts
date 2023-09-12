@@ -5,7 +5,7 @@ import { getPrefixedId } from './getPrefixedId';
 import type { ApiError } from '../types';
 import type { errors } from '@strapi/utils';
 
-interface NormalizeErrorOptions {
+export interface NormalizeErrorOptions {
   name?: string;
   intlMessagePrefixCallback?: (id: string) => string;
 }
@@ -43,7 +43,10 @@ const validateErrorIsYupValidationError = (err: ApiError): err is errors.YupVali
 export function normalizeAPIError(
   apiError: AxiosError<{ error: ApiError }>,
   intlMessagePrefixCallback?: NormalizeErrorOptions['intlMessagePrefixCallback']
-) {
+):
+  | NormalizeErrorReturn
+  | { name: string; message: string | null; errors: NormalizeErrorReturn[] }
+  | null {
   const error = apiError.response?.data.error;
 
   if (error) {
