@@ -1,4 +1,4 @@
-import type { Shared, Schema as SchemaNamespace, Common, Registry, UID, Utils } from '../..';
+import type { Shared, Schema as SchemaNamespace, Common, Registry, UID, Utils } from '../../..';
 
 export type Service = Registry.Keys<Shared.Services, UID.Service>;
 
