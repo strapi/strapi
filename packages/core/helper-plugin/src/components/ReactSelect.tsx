@@ -2,14 +2,29 @@ import React from 'react';
 
 import { Box } from '@strapi/design-system';
 import { Cross, CarretDown } from '@strapi/icons';
-import PropTypes from 'prop-types';
-import Select, { components } from 'react-select';
-import styled, { useTheme } from 'styled-components';
+import Select, {
+  ClearIndicatorProps,
+  StylesConfig,
+  components,
+  Props as RSProps,
+  DropdownIndicatorProps,
+} from 'react-select';
+import styled, { useTheme, DefaultTheme } from 'styled-components';
 
-const ReactSelect = ({ components, styles, error, ariaErrorMessage, ...props }) => {
+export interface ReactSelectProps extends RSProps {
+  error?: string;
+  ariaErrorMessage?: string;
+}
+
+const ReactSelect = ({
+  components,
+  styles,
+  error,
+  ariaErrorMessage,
+  ...props
+}: ReactSelectProps) => {
   const theme = useTheme();
   const customStyles = getSelectStyles(theme, error);
-
   return (
     <Select
       menuPosition="fixed"
@@ -28,20 +43,6 @@ const ReactSelect = ({ components, styles, error, ariaErrorMessage, ...props }) 
   );
 };
 
-ReactSelect.defaultProps = {
-  ariaErrorMessage: undefined,
-  components: undefined,
-  error: undefined,
-  styles: undefined,
-};
-
-ReactSelect.propTypes = {
-  ariaErrorMessage: PropTypes.string,
-  components: PropTypes.object,
-  error: PropTypes.string,
-  styles: PropTypes.object,
-};
-
 const IconBox = styled(Box)`
   background: transparent;
   border: none;
@@ -58,9 +59,8 @@ const IconBox = styled(Box)`
   }
 `;
 
-const ClearIndicator = (props) => {
+const ClearIndicator = (props: ClearIndicatorProps) => {
   const Component = components.ClearIndicator;
-
   return (
     <Component {...props}>
       <IconBox as="button" type="button">
@@ -80,19 +80,16 @@ const CarretBox = styled(IconBox)`
   }
 `;
 
-/**
- * These props come from `react-select`.
- */
-// eslint-disable-next-line react/prop-types
-const DropdownIndicator = ({ innerRef, innerProps }) => {
+const DropdownIndicator = ({ innerProps }: DropdownIndicatorProps) => {
   return (
-    <CarretBox ref={innerRef} paddingRight={3} {...innerProps}>
+    // @ts-expect-error – issue with the ref attached to `innerProps`
+    <CarretBox paddingRight={3} {...innerProps}>
       <CarretDown />
     </CarretBox>
   );
 };
 
-const getSelectStyles = (theme, error) => {
+const getSelectStyles = (theme: DefaultTheme, error: string | undefined): StylesConfig => {
   return {
     clearIndicator: (base) => ({ ...base, padding: 0, paddingRight: theme.spaces[3] }),
     container: (base) => ({
@@ -124,10 +121,10 @@ const getSelectStyles = (theme, error) => {
         outline: 0,
         backgroundColor,
         borderRadius: theme.borderRadius,
-        boxShadow: boxShadowColor ? `${boxShadowColor} 0px 0px 0px 2px` : 0,
+        boxShadow: boxShadowColor ? `${boxShadowColor} 0px 0px 0px 2px` : '',
       };
     },
-    indicatorContainer: (base) => ({ ...base, padding: 0, paddingRight: theme.spaces[3] }),
+    indicatorsContainer: (base) => ({ ...base, padding: 0, paddingRight: theme.spaces[3] }),
     input: (base) => ({
       ...base,
       margin: 0,
