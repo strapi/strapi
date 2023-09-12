@@ -1,7 +1,8 @@
 import React from 'react';
 
+import { fixtures } from '@strapi/admin-test-utils';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { useCMEditViewDataManager } from '@strapi/helper-plugin';
+import { RBACContext, useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { rest } from 'msw';
@@ -29,7 +30,7 @@ const server = setupServer(
             {
               id: 2,
               firstname: 'Firstname 2',
-              lastname: 'Lastname 2',
+              username: 'jumbojosh',
             },
           ],
         },
@@ -51,7 +52,11 @@ const setup = (props) => {
     user: userEvent.setup(),
     ...render(<AssigneeSelect {...props} />, {
       wrapper({ children }) {
-        const store = createStore((state = {}) => state, {});
+        const store = createStore((state = {}) => state, {
+          admin_app: {
+            permissions: fixtures.permissions.app,
+          },
+        });
         const queryClient = new QueryClient({
           defaultOptions: {
             queries: {
@@ -61,13 +66,28 @@ const setup = (props) => {
         });
 
         return (
-          <Provider store={store}>
-            <QueryClientProvider client={queryClient}>
-              <IntlProvider locale="en" defaultLocale="en">
-                <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
-              </IntlProvider>
-            </QueryClientProvider>
-          </Provider>
+          <RBACContext.Provider
+            value={{
+              allPermissions: [
+                ...fixtures.permissions.allPermissions,
+                {
+                  id: 314,
+                  action: 'admin::users.read',
+                  subject: null,
+                  properties: {},
+                  conditions: [],
+                },
+              ],
+            }}
+          >
+            <Provider store={store}>
+              <QueryClientProvider client={queryClient}>
+                <IntlProvider locale="en" defaultLocale="en">
+                  <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
+                </IntlProvider>
+              </QueryClientProvider>
+            </Provider>
+          </RBACContext.Provider>
         );
       },
     }),
@@ -81,7 +101,7 @@ useCMEditViewDataManager.mockReturnValue({
   layout: { uid: 'api::articles:articles' },
 });
 
-describe.skip('EE | Content Manager | EditView | InformationBox | AssigneeSelect', () => {
+describe('EE | Content Manager | EditView | InformationBox | AssigneeSelect', () => {
   beforeAll(() => {
     server.listen();
     jest.clearAllMocks();
@@ -92,14 +112,13 @@ describe.skip('EE | Content Manager | EditView | InformationBox | AssigneeSelect
   });
 
   it('renders a select with users, none is selected', async () => {
-    const { queryByRole, getByText, queryByText, user } = setup();
-    const select = queryByRole('combobox');
+    const { getByRole, getByText, queryByText, user } = setup();
 
-    expect(queryByText('Firstname 1 Lastname 1')).not.toBeInTheDocument();
+    await waitFor(() => expect(queryByText('Firstname 1 Lastname 1')).not.toBeInTheDocument());
 
-    await user.click(select);
+    await user.click(getByRole('combobox'));
 
-    expect(getByText('Firstname 1 Lastname 1')).toBeInTheDocument();
+    await waitFor(() => expect(getByText('Firstname 1 Lastname 1')).toBeInTheDocument());
   });
 
   it('renders a select with users, first user is selected', async () => {
@@ -114,9 +133,38 @@ describe.skip('EE | Content Manager | EditView | InformationBox | AssigneeSelect
       layout: { uid: 'api::articles:articles' },
     });
 
-    const { getByText } = setup();
+    const { queryByRole } = setup();
 
-    expect(getByText('Firstname 1 Lastname 1')).toBeInTheDocument();
+    await waitFor(() => expect(queryByRole('combobox')).toHaveValue('Firstname 1 Lastname 1'));
+  });
+
+  it('renders a disabled select when there are no users to select', async () => {
+    useCMEditViewDataManager.mockReturnValue({
+      initialData: {
+        [ASSIGNEE_ATTRIBUTE_NAME]: {
+          id: 1,
+          firstname: 'Firstname 1',
+          lastname: 'Lastname 1',
+        },
+      },
+      layout: { uid: 'api::articles:articles' },
+    });
+
+    server.use(
+      rest.get('*/users', (req, res, ctx) => {
+        return res.once(
+          ctx.json({
+            data: {
+              results: [],
+            },
+          })
+        );
+      })
+    );
+
+    const { queryByRole } = setup();
+
+    await waitFor(() => expect(queryByRole('combobox')).toHaveAttribute('aria-disabled', 'true'));
   });
 
   it('renders an error message, when fetching user fails', async () => {
@@ -139,33 +187,51 @@ describe.skip('EE | Content Manager | EditView | InformationBox | AssigneeSelect
       })
     );
 
-    const { getByText, queryByTestId } = setup();
+    const { getByText } = setup();
 
-    await waitFor(() => expect(queryByTestId('loader')).not.toBeInTheDocument());
-
-    expect(getByText('An error occurred while fetching users')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(getByText('An error occurred while fetching users')).toBeInTheDocument()
+    );
 
     console.error = origConsoleError;
   });
 
-  it('renders a loading state when running the mutation', async () => {
-    const { getByTestId, queryByTestId } = setup();
-
-    expect(getByTestId('loader')).toBeInTheDocument();
-
-    await waitFor(() => expect(queryByTestId('loader')).not.toBeInTheDocument());
-  });
-
-  it('renders an error message, when the mutation fails', async () => {
+  it('renders an error message, when the assignee update fails', async () => {
     const origConsoleError = console.error;
+
+    useCMEditViewDataManager.mockReturnValue({
+      initialData: {
+        id: 1,
+        [ASSIGNEE_ATTRIBUTE_NAME]: null,
+      },
+      layout: { uid: 'api::articles:articles' },
+    });
 
     console.error = jest.fn();
 
-    const { queryByTestId } = setup();
+    server.use(
+      rest.put('*/content-manager/collection-types/:uid/:entityId/assignee', (req, res, ctx) => {
+        return res.once(
+          ctx.status(500),
+          ctx.json({
+            data: {
+              error: {
+                message: 'Server side error message',
+              },
+            },
+          })
+        );
+      })
+    );
 
-    await waitFor(() => expect(queryByTestId('loader')).not.toBeInTheDocument());
+    const { getByRole, getByText, user } = setup();
 
-    // TODO
+    await user.click(getByRole('combobox'));
+    await user.click(getByText('Firstname 1 Lastname 1'));
+
+    await waitFor(() =>
+      expect(getByText('Request failed with status code 500')).toBeInTheDocument()
+    );
 
     console.error = origConsoleError;
   });
