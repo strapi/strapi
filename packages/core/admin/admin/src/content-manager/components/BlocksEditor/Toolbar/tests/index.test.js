@@ -3,6 +3,7 @@ import * as React from 'react';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { before } from 'lodash';
 import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
 import { createEditor, Transforms } from 'slate';
@@ -45,6 +46,10 @@ const setup = () =>
   });
 
 describe('BlocksEditor toolbar', () => {
+  beforeEach(() => {
+    baseEditor.children = initialValue;
+  });
+
   it('should render the toolbar', () => {
     setup();
 
@@ -101,5 +106,41 @@ describe('BlocksEditor toolbar', () => {
     // The bold and italic buttons should have the inactive state
     expect(boldButton).toHaveAttribute('data-state', 'off');
     expect(italicButton).toHaveAttribute('data-state', 'off');
+  });
+
+  it('toggles the list on a selection', async () => {
+    setup();
+
+    const unorderedListButton = screen.getByLabelText(/unordered list/i);
+    const orderedListButton = screen.getByLabelText(/^ordered list/i);
+
+    Transforms.setSelection(baseEditor, {
+      anchor: { path: [0, 0], offset: 2 },
+    });
+
+    await user.click(unorderedListButton);
+    expect(unorderedListButton).toHaveAttribute('data-state', 'on');
+    expect(orderedListButton).toHaveAttribute('data-state', 'off');
+
+    await user.click(orderedListButton);
+    expect(unorderedListButton).toHaveAttribute('data-state', 'off');
+    expect(orderedListButton).toHaveAttribute('data-state', 'on');
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                text: 'A line of text in a paragraph.',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
   });
 });

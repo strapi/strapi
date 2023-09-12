@@ -128,7 +128,7 @@ const modifiers = [
   },
 ];
 
-const ListButton = ({ icon, name, label }) => {
+const ListButton = ({ icon, format, label }) => {
   const editor = useSlate();
 
   const isListActive = () => {
@@ -139,7 +139,11 @@ const ListButton = ({ icon, name, label }) => {
     const [match] = Array.from(
       Editor.nodes(editor, {
         at: Editor.unhangRange(editor, selection),
-        match: (node) => !Editor.isEditor(node) && Element.isElement(node) && node.type === name,
+        match: (node) =>
+          !Editor.isEditor(node) &&
+          Element.isElement(node) &&
+          node.type === 'list' &&
+          node.format === format,
       })
     );
 
@@ -150,8 +154,11 @@ const ListButton = ({ icon, name, label }) => {
     const isActive = isListActive();
 
     Transforms.unwrapNodes(editor, {
-      match: (n) =>
-        !Editor.isEditor(n) && Element.isElement(n) && ['ordered', 'unordered'].includes(n.type),
+      match: (node) =>
+        !Editor.isEditor(node) &&
+        Element.isElement(node) &&
+        node.type === 'list' &&
+        ['ordered', 'unordered'].includes(node.format),
       split: true,
     });
 
@@ -160,17 +167,17 @@ const ListButton = ({ icon, name, label }) => {
     });
 
     if (!isActive) {
-      const block = { type: name, children: [] };
+      const block = { type: 'list', format, children: [] };
       Transforms.wrapNodes(editor, block);
     }
   };
 
-  const isActive = isListActive(name);
+  const isActive = isListActive();
 
   return (
     <ToolbarButton
       icon={icon}
-      name={name}
+      name={format}
       label={label}
       isActive={isActive}
       handleClick={() => toggleList(name)}
@@ -180,7 +187,7 @@ const ListButton = ({ icon, name, label }) => {
 
 ListButton.propTypes = {
   icon: PropTypes.elementType.isRequired,
-  name: PropTypes.string.isRequired,
+  format: PropTypes.string.isRequired,
   label: PropTypes.shape({
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
@@ -211,7 +218,7 @@ const BlocksToolbar = () => {
                 id: 'components.Blocks.blocks.unorderedList',
                 defaultMessage: 'Unordered list',
               }}
-              name="unordered"
+              format="unordered"
               icon={BulletList}
             />
             <ListButton
@@ -219,7 +226,7 @@ const BlocksToolbar = () => {
                 id: 'components.Blocks.blocks.orderedList',
                 defaultMessage: 'Ordered list',
               }}
-              name="ordered"
+              format="ordered"
               icon={NumberList}
             />
           </Flex>
