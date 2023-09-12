@@ -17,3 +17,19 @@ export type ApiError =
   | errors.UnauthorizedError
   | errors.ValidationError
   | errors.YupValidationError;
+
+export type InputType =
+  | 'json'
+  | 'bool'
+  | 'checkbox'
+  | 'datetime'
+  | 'date'
+  | 'number'
+  | 'email'
+  | 'timestamp'
+  | 'text'
+  | 'string'
+  | 'password'
+  | 'select'
+  | 'textarea'
+  | 'time';

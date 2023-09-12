@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { MessageDescriptor } from 'react-intl';
+import { InputType } from 'types';
 
 import type { Attribute, Schema } from '@strapi/strapi';
 
@@ -47,7 +48,7 @@ interface CMEditViewDataManagerContext {
   moveComponentUp?: (dynamicZoneName: string, currentIndex: number) => void;
   onChange?: <TAttribute extends Attribute.Any>(
     payload: {
-      target: { name: string; type?: TAttribute['type']; value: Attribute.GetValue<TAttribute> };
+      target: { name: string; type?: InputType; value: Attribute.GetValue<TAttribute> };
     },
     shouldSetInitialValue?: boolean
   ) => void;

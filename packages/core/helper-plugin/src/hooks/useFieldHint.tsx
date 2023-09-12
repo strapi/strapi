@@ -5,7 +5,7 @@ import { useIntl } from 'react-intl';
 
 import type { MessageDescriptor, PrimitiveType } from 'react-intl';
 
-type FieldSchema = {
+export type FieldSchema = {
   minLength?: number | string;
   maxLength?: number | string;
   max?: number | string;

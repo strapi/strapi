@@ -1,10 +1,11 @@
 /**
- *
- * GenericInput
- *
+ * TODO: this entire component needs to be refactored to use Attribute as a passed base
+ * to then understand the type and value types of what attribute we're rendering with
+ * what input and make the types all play nicely. At least now we have an idea of what
+ * everything is!
  */
 
-import React, { useState } from 'react';
+import * as React from 'react';
 
 import {
   Checkbox,
@@ -22,12 +23,60 @@ import {
 } from '@strapi/design-system';
 import { Eye, EyeStriked } from '@strapi/icons';
 import formatISO from 'date-fns/formatISO';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { useFieldHint } from '../hooks/useFieldHint';
+import { FieldSchema, useFieldHint } from '../hooks/useFieldHint';
 import { useFocusInputField } from '../hooks/useFocusInputField';
 import { pxToRem } from '../utils/pxToRem';
+
+import type { InputType, TranslationMessage } from '../types';
+import type { Attribute } from '@strapi/strapi';
+
+interface InputOption {
+  metadatas: {
+    intlLabel: TranslationMessage;
+    disabled: boolean;
+    hidden: boolean;
+  };
+  key: string;
+  value: string;
+}
+
+interface CustomInputProps<TAttribute extends Attribute.Any>
+  extends Omit<GenericInputProps<TAttribute>, 'customInputs'> {
+  ref?: React.Ref<HTMLElement>;
+  hint?: string | React.JSX.Element | (string | React.JSX.Element)[];
+}
+
+interface GenericInputProps<TAttribute extends Attribute.Any = Attribute.Any> {
+  attribute: TAttribute;
+  autoComplete?: string;
+  customInputs?: Record<string, React.ComponentType<CustomInputProps<TAttribute>>>;
+  description?: TranslationMessage;
+  disabled?: boolean;
+  error?: string | TranslationMessage;
+  intlLabel: TranslationMessage;
+  labelAction?: React.ReactNode;
+  name: string;
+  onChange: (
+    payload: {
+      target: {
+        name: string;
+        value: Attribute.GetValue<TAttribute>;
+        type?: InputType;
+      };
+    },
+    shouldSetInitialValue?: boolean
+  ) => void;
+  options?: InputOption[];
+  placeholder?: TranslationMessage;
+  required?: boolean;
+  step?: number;
+  type: InputType;
+  // TODO: The value depends on the input type, too complicated to handle all cases here
+  value?: Attribute.GetValue<TAttribute>;
+  isNullable?: boolean;
+}
 
 const GenericInput = ({
   autoComplete,
@@ -39,7 +88,7 @@ const GenericInput = ({
   error,
   name,
   onChange,
-  options,
+  options = [],
   placeholder,
   required,
   step,
@@ -48,16 +97,42 @@ const GenericInput = ({
   isNullable,
   attribute,
   ...rest
-}) => {
+}: GenericInputProps) => {
   const { formatMessage } = useIntl();
+
+  // TODO: Workaround to get the field hint values if they exist on the type
+  const getFieldHintValue = (attribute: Attribute.Any, key: keyof FieldSchema) => {
+    if (!attribute) return;
+
+    if (key === 'minLength' && key in attribute) {
+      return attribute[key];
+    }
+
+    if (key === 'maxLength' && key in attribute) {
+      return attribute[key];
+    }
+
+    if (key === 'max' && key in attribute) {
+      return attribute[key];
+    }
+
+    if (key === 'min' && key in attribute) {
+      return attribute[key];
+    }
+  };
 
   const { hint } = useFieldHint({
     description,
-    fieldSchema: attribute,
+    fieldSchema: {
+      minLength: getFieldHintValue(attribute, 'minLength'),
+      maxLength: getFieldHintValue(attribute, 'maxLength'),
+      max: getFieldHintValue(attribute, 'max'),
+      min: getFieldHintValue(attribute, 'min'),
+    },
     type: attribute?.type || type,
   });
 
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = React.useState(false);
   const fieldRef = useFocusInputField(name);
 
   const CustomInput = customInputs ? customInputs[type] : null;
@@ -75,18 +150,18 @@ const GenericInput = ({
   */
   const valueWithEmptyStringFallback = value ?? '';
 
-  function getErrorMessage(error) {
+  function getErrorMessage(error: string | TranslationMessage | undefined) {
     if (!error) {
       return null;
+    }
+
+    if (typeof error === 'string') {
+      return formatMessage({ id: error, defaultMessage: error });
     }
 
     const values = {
       ...error.values,
     };
-
-    if (typeof error === 'string') {
-      return formatMessage({ id: error, defaultMessage: error }, values);
-    }
 
     return formatMessage(
       {
@@ -97,7 +172,7 @@ const GenericInput = ({
     );
   }
 
-  const errorMessage = getErrorMessage(error);
+  const errorMessage = getErrorMessage(error) ?? undefined;
 
   if (CustomInput) {
     return (
@@ -110,7 +185,7 @@ const GenericInput = ({
         disabled={disabled}
         intlLabel={intlLabel}
         labelAction={labelAction}
-        error={errorMessage}
+        error={errorMessage || ''}
         name={name}
         onChange={onChange}
         options={options}
@@ -140,6 +215,7 @@ const GenericInput = ({
     case 'json': {
       return (
         <JSONInput
+          // @ts-expect-error JSONInput ref is weird but it does work
           ref={fieldRef}
           label={label}
           labelAction={labelAction}
@@ -150,8 +226,9 @@ const GenericInput = ({
           required={required}
           onChange={(json) => {
             // Default to null when the field is not required and there is no input value
-            const value = !attribute.required && !json.length ? null : json;
-            onChange({ target: { name, value } });
+            const value =
+              'required' in attribute && !attribute?.required && !json.length ? null : json;
+            onChange({ target: { name, value } }, false);
           }}
           minHeight={pxToRem(252)}
           maxHeight={pxToRem(504)}
@@ -185,11 +262,12 @@ const GenericInput = ({
             onChange({ target: { name, value: null } });
           }}
           clearLabel={
-            isNullable &&
-            formatMessage({
-              id: 'app.components.ToggleCheckbox.clear-label',
-              defaultMessage: 'Clear',
-            })
+            isNullable
+              ? formatMessage({
+                  id: 'app.components.ToggleCheckbox.clear-label',
+                  defaultMessage: 'Clear',
+                })
+              : undefined
           }
         />
       );
@@ -234,7 +312,7 @@ const GenericInput = ({
           onClear={() => onChange({ target: { name, value: null, type } })}
           placeholder={formattedPlaceholder}
           required={required}
-          value={value ? new Date(value) : undefined}
+          value={value}
         />
       );
     }
@@ -246,7 +324,6 @@ const GenericInput = ({
           disabled={disabled}
           error={errorMessage}
           label={label}
-          labelAction={labelAction}
           id={name}
           hint={hint}
           name={name}
@@ -262,8 +339,7 @@ const GenericInput = ({
           onClear={() => onChange({ target: { name, value: null, type } })}
           placeholder={formattedPlaceholder}
           required={required}
-          selectedDate={value ? new Date(value) : undefined}
-          selectedDateLabel={(formattedDate) => `Date picker, current is ${formattedDate}`}
+          selectedDate={value}
         />
       );
     }
@@ -278,7 +354,11 @@ const GenericInput = ({
           id={name}
           hint={hint}
           name={name}
-          onValueChange={(value) => onChange({ target: { name, value, type } })}
+          onValueChange={(value) => {
+            if (!value) return;
+
+            onChange({ target: { name, value, type } });
+          }}
           placeholder={formattedPlaceholder}
           required={required}
           step={step}
@@ -298,7 +378,9 @@ const GenericInput = ({
           id={name}
           hint={hint}
           name={name}
-          onChange={onChange}
+          onChange={(e) => {
+            onChange({ target: { name, value: e.target.value, type } });
+          }}
           placeholder={formattedPlaceholder}
           required={required}
           type="email"
@@ -320,7 +402,9 @@ const GenericInput = ({
           id={name}
           hint={hint}
           name={name}
-          onChange={onChange}
+          onChange={(e) => {
+            onChange({ target: { name, value: e.target.value, type } });
+          }}
           placeholder={formattedPlaceholder}
           required={required}
           type="text"
@@ -363,7 +447,9 @@ const GenericInput = ({
           id={name}
           hint={hint}
           name={name}
-          onChange={onChange}
+          onChange={(e) => {
+            onChange({ target: { name, value: e.target.value, type } });
+          }}
           placeholder={formattedPlaceholder}
           required={required}
           type={showPassword ? 'text' : 'password'}
@@ -378,11 +464,14 @@ const GenericInput = ({
           disabled={disabled}
           error={errorMessage}
           label={label}
+          // @ts-expect-error Incorrect type in the Design System, should be ReactNode
           labelAction={labelAction}
           id={name}
           hint={hint}
           name={name}
-          onChange={(value) => onChange({ target: { name, value, type: 'select' } })}
+          onChange={(value) => {
+            onChange({ target: { name, value, type: 'select' } });
+          }}
           placeholder={formattedPlaceholder}
           required={required}
           value={value}
@@ -404,6 +493,7 @@ const GenericInput = ({
           disabled={disabled}
           error={errorMessage}
           label={label}
+          // @ts-expect-error Incorrect type in the Design System, should be ReactNode
           labelAction={labelAction}
           id={name}
           hint={hint}
@@ -421,7 +511,7 @@ const GenericInput = ({
 
       // The backend send a value which has the following format: '00:45:00.000'
       // or the time picker only supports hours & minutes so we need to mutate the value
-      if (value && value.split(':').length > 2) {
+      if (typeof value === 'string' && value.split(':').length > 2) {
         const [hour, minute] = value.split(':');
         time = `${hour}:${minute}`;
       }
@@ -443,7 +533,6 @@ const GenericInput = ({
           onClear={() => {
             onChange({ target: { name, value: null, type } });
           }}
-          placeholder={formattedPlaceholder}
           required={required}
           value={time}
         />
@@ -457,7 +546,7 @@ const GenericInput = ({
       return (
         <TextInput
           disabled
-          error={error}
+          error={errorMessage}
           label={label}
           labelAction={labelAction}
           id={name}
@@ -471,73 +560,6 @@ const GenericInput = ({
       );
     }
   }
-};
-
-GenericInput.defaultProps = {
-  autoComplete: undefined,
-  customInputs: null,
-  description: null,
-  disabled: false,
-  error: '',
-  isNullable: undefined,
-  labelAction: undefined,
-  placeholder: null,
-  required: false,
-  options: [],
-  step: 1,
-  value: undefined,
-  attribute: null,
-};
-
-GenericInput.propTypes = {
-  autoComplete: PropTypes.string,
-  customInputs: PropTypes.object,
-  description: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }),
-  attribute: PropTypes.object,
-  disabled: PropTypes.bool,
-  error: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      defaultMessage: PropTypes.string,
-    }),
-  ]),
-  intlLabel: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }).isRequired,
-  isNullable: PropTypes.bool,
-  labelAction: PropTypes.element,
-  name: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-  options: PropTypes.arrayOf(
-    PropTypes.shape({
-      metadatas: PropTypes.shape({
-        intlLabel: PropTypes.shape({
-          id: PropTypes.string.isRequired,
-          defaultMessage: PropTypes.string.isRequired,
-        }).isRequired,
-        disabled: PropTypes.bool,
-        hidden: PropTypes.bool,
-      }).isRequired,
-      key: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-      value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    }).isRequired
-  ),
-  placeholder: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }),
-  required: PropTypes.bool,
-  step: PropTypes.number,
-  type: PropTypes.string.isRequired,
-  value: PropTypes.any,
 };
 
 export { GenericInput };
