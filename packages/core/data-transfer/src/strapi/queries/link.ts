@@ -198,7 +198,7 @@ export const createLinkQuery = (strapi: Strapi.Strapi, trx?: Knex.Transaction) =
       if (attribute.joinColumn) {
         const joinColumnName = attribute.joinColumn.name;
 
-        // Note: this addSchema may not be necessary, but it can't hurt
+        // Note: this addSchema may not be necessary, but is added for safety
         const qb = connection(addSchema(metadata.tableName))
           .where('id', left.ref)
           .update({ [joinColumnName]: right.ref });
