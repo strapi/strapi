@@ -1,14 +1,12 @@
 import React from 'react';
 
-import { intervalToDuration, isPast } from 'date-fns';
+import { Duration, intervalToDuration, isPast } from 'date-fns';
 import { useIntl } from 'react-intl';
 
-const intervals = ['years', 'months', 'days', 'hours', 'minutes', 'seconds'] as const;
-
-type IntervalUnit = (typeof intervals)[number];
+const intervals: Array<keyof Duration> = ['years', 'months', 'days', 'hours', 'minutes', 'seconds'];
 
 interface CustomInterval {
-  unit: IntervalUnit;
+  unit: keyof Duration;
   text: string;
   threshold: number;
 }
@@ -38,18 +36,17 @@ const RelativeTime = ({ timestamp, customIntervals = [] }: RelativeTimeProps) =>
   const interval = intervalToDuration({
     start: timestamp,
     end: Date.now(),
-  });
+    // see https://github.com/date-fns/date-fns/issues/2891 – No idea why it's all partial it returns it every time.
+  }) as Required<Duration>;
 
-  const unit: IntervalUnit = intervals.find((intervalUnit) => {
-    return interval[intervalUnit]! > 0 && Object.keys(interval).includes(intervalUnit);
+  const unit = intervals.find((intervalUnit) => {
+    return interval[intervalUnit] > 0 && Object.keys(interval).includes(intervalUnit);
   })!;
 
-  const relativeTime: number = isPast(timestamp) ? -interval[unit]! : interval[unit]!;
+  const relativeTime = isPast(timestamp) ? -interval[unit] : interval[unit];
 
   // Display custom text if interval is less than the threshold
-  const customInterval = customIntervals.find(
-    (custom) => interval[custom.unit]! < custom.threshold
-  );
+  const customInterval = customIntervals.find((custom) => interval[custom.unit] < custom.threshold);
 
   const displayText = customInterval
     ? customInterval.text
