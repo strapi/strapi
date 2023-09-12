@@ -11,10 +11,24 @@ const hasProtocol = (url: string) => new RegExp('^(?:[a-z+]+:)?//', 'i').test(ur
 const normalizeUrl = (url: string) => (hasProtocol(url) ? url : addPrependingSlash(url));
 
 type FetchClient = {
-  get: (url: string, config?: AxiosRequestConfig) => Promise<AxiosResponse>;
-  put: (url: string, data: any, config?: AxiosRequestConfig) => Promise<AxiosResponse>;
-  post: (url: string, data: any, config?: AxiosRequestConfig) => Promise<AxiosResponse>;
-  del: (url: string, config?: AxiosRequestConfig) => Promise<AxiosResponse>;
+  get: <TData = any, R = AxiosResponse<TData>, TSend = any>(
+    url: string,
+    config?: AxiosRequestConfig<TSend>
+  ) => Promise<R>;
+  put: <TData = any, R = AxiosResponse<TData>, TSend = any>(
+    url: string,
+    data?: TSend,
+    config?: AxiosRequestConfig<TSend>
+  ) => Promise<R>;
+  post: <TData = any, R = AxiosResponse<TData>, TSend = any>(
+    url: string,
+    data?: TSend,
+    config?: AxiosRequestConfig<TSend>
+  ) => Promise<R>;
+  del: <TData = any, R = AxiosResponse<TData>, TSend = any>(
+    url: string,
+    config?: AxiosRequestConfig<TSend>
+  ) => Promise<R>;
 };
 
 const getFetchClient = (defaultOptions: AxiosRequestConfig = {}): FetchClient => {
