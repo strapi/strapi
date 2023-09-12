@@ -133,17 +133,14 @@ const createCompoLinkModelMeta = (baseModelMeta: Meta): Meta => {
       {
         name: `${baseModelMeta.tableName}_field_index`,
         columns: ['field'],
-        type: null,
       },
       {
         name: `${baseModelMeta.tableName}_component_type_index`,
         columns: ['component_type'],
-        type: null,
       },
       {
         name: `${baseModelMeta.tableName}_entity_fk`,
         columns: ['entity_id'],
-        type: null,
       },
       {
         name: `${baseModelMeta.tableName}_unique`,

@@ -3,7 +3,7 @@ import type { Knex } from 'knex';
 
 import { createQueryBuilder } from '../query';
 import type { Database } from '..';
-import type { MorphJoinTable } from '../metadata/types';
+import type { MorphJoinTable, RelationalAttribute } from '../metadata/types';
 
 type Rows = { field: string; [key: string]: unknown }[];
 
@@ -22,10 +22,10 @@ const getMorphToManyRowsLinkedToMorphOne = (
   }
 ) =>
   rows.filter((row) => {
-    const relatedType = row[typeColumn.name];
+    const relatedType = row[typeColumn.name] as string;
     const field = row.field;
 
-    const targetAttribute = db.metadata.get(relatedType).attributes[field];
+    const targetAttribute = db.metadata.get(relatedType).attributes[field] as RelationalAttribute;
 
     // ensure targeted field is the right one + check if it is a morphOne
     return (

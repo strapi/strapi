@@ -40,6 +40,11 @@ export interface AttributeJoinTable {
   };
 }
 
+export interface BidirectionalAttributeJoinTable extends AttributeJoinTable {
+  orderColumnName: string;
+  inverseOrderColumnName: string;
+}
+
 export interface MorphColumn {
   typeColumn: {
     name: string;
@@ -62,7 +67,7 @@ export interface MorphJoinTable {
 
 export interface BidirectionalRelationalAttribute extends RelationalAttribute {
   inversedBy: string;
-  joinTable: AttributeJoinTable;
+  joinTable: BidirectionalAttributeJoinTable;
 }
 
 export interface RelationalAttribute extends Attribute {
@@ -106,6 +111,14 @@ export interface Model {
 }
 
 export class Metadata extends Map<string, Meta> {
+  get(key: string): Meta {
+    if (!super.has(key)) {
+      throw new Error(`Metadata for "${key}" not found`);
+    }
+
+    return super.get(key) as Meta;
+  }
+
   add(meta: Meta) {
     return this.set(meta.uid, meta);
   }

@@ -22,7 +22,7 @@ interface Settings {
 
 export interface DatabaseConfig {
   connection: Knex.Config;
-  settings?: Settings;
+  settings: Settings;
   models: any;
 }
 
@@ -51,12 +51,12 @@ class Database {
     this.metadata = createMetadata(config.models);
 
     this.config = {
+      ...config,
       settings: {
         forceMigration: true,
         runMigrations: true,
-        ...config.settings,
+        ...(config.settings ?? {}),
       },
-      ...config,
     };
 
     this.dialect = getDialect(this);
@@ -86,6 +86,11 @@ class Database {
     return !!transactionCtx.get();
   }
 
+  async transaction(): Promise<{
+    commit: () => Promise<void>;
+    rollback: () => Promise<void>;
+    get: () => Knex.Transaction;
+  }>;
   async transaction(cb?: Callback) {
     const notNestedTransaction = !transactionCtx.get();
     const trx = notNestedTransaction
@@ -127,11 +132,12 @@ class Database {
     });
   }
 
-  getSchemaName() {
+  getSchemaName(): string | undefined {
     return this.connection.client.connectionSettings.schema;
   }
 
   getConnection(): Knex;
+  getConnection(tableName?: string): Knex.QueryBuilder;
   getConnection(tableName?: string): Knex | Knex.QueryBuilder {
     const schema = this.getSchemaName();
     const connection = tableName ? this.connection(tableName) : this.connection;

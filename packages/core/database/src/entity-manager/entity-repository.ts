@@ -106,10 +106,10 @@ export const createRepository = (uid: string, db: Database) => {
     async updateRelations(id: ID, data: Data) {
       const trx = await db.transaction();
       try {
-        await db.entityManager.updateRelations(uid, id, data, { transaction: trx?.get() });
-        return await trx?.commit();
+        await db.entityManager.updateRelations(uid, id, data, { transaction: trx.get() });
+        return await trx.commit();
       } catch (e) {
-        await trx?.rollback();
+        await trx.rollback();
         throw e;
       }
     },
@@ -138,7 +138,12 @@ export const createRepository = (uid: string, db: Database) => {
       const { attributes } = db.metadata.get(uid);
       const attribute = attributes[field];
 
-      if (!attribute || attribute.type !== 'relation' || !isAnyToMany(attribute)) {
+      if (
+        !attribute ||
+        attribute.type !== 'relation' ||
+        !attribute.relation ||
+        !['oneToMany', 'manyToMany'].includes(attribute.relation)
+      ) {
         throw new Error(`Invalid load. Expected ${field} to be an anyToMany relational attribute`);
       }
 

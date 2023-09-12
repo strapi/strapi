@@ -41,7 +41,7 @@ export const createStorage = (opts: Options) => {
 
       const logs = await db.getConnection(tableName).select().from(tableName).orderBy('time');
 
-      return logs.map((log) => log.name);
+      return logs.map((log: { name: string }) => log.name);
     },
   };
 };

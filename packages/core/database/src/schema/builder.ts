@@ -69,7 +69,7 @@ export default (db: Database) => {
      * @param {*} schemaDiff
      */
     // TODO: implement force option to disable removal in DB
-    async updateSchema(schemaDiff: SchemaDiff) {
+    async updateSchema(schemaDiff: SchemaDiff['diff']) {
       const forceMigration = db.config.settings?.forceMigration;
 
       await db.dialect.startSchemaUpdate();
@@ -187,7 +187,7 @@ const createHelpers = (db: Database) => {
   const createColumn = (tableBuilder: Knex.TableBuilder, column: Column) => {
     const { type, name, args = [], defaultTo, unsigned, notNullable } = column;
 
-    const col = tableBuilder[type](name, ...args);
+    const col = (tableBuilder[type as keyof Knex.TableBuilder] as any)(name, ...args);
 
     if (unsigned === true) {
       col.unsigned();
@@ -244,7 +244,7 @@ const createHelpers = (db: Database) => {
     });
   };
 
-  const alterTable = async (schemaBuilder: Knex.SchemaBuilder, table: TableDiff) => {
+  const alterTable = async (schemaBuilder: Knex.SchemaBuilder, table: TableDiff['diff']) => {
     await schemaBuilder.alterTable(table.name, (tableBuilder) => {
       // Delete indexes / fks / columns
 
@@ -301,7 +301,7 @@ const createHelpers = (db: Database) => {
 
         if (addedColumn.type === 'increments' && !db.dialect.canAddIncrements()) {
           tableBuilder.integer(addedColumn.name).unsigned();
-          tableBuilder.primary(addedColumn.name);
+          tableBuilder.primary([addedColumn.name]);
         } else {
           createColumn(tableBuilder, addedColumn);
         }
@@ -321,10 +321,8 @@ const createHelpers = (db: Database) => {
 
   /**
    * Drops a table from a database
-   * @param {Knex.SchemaBuilder} schemaBuilder
-   * @param {Table} table
    */
-  const dropTable = (schemaBuilder, table) => {
+  const dropTable = (schemaBuilder: Knex.SchemaBuilder, table: Table) => {
     if (!db.config.settings.forceMigration) {
       return;
     }
@@ -334,10 +332,8 @@ const createHelpers = (db: Database) => {
 
   /**
    * Creates a table foreign keys constraints
-   * @param {SchemaBuilder} schemaBuilder
-   * @param {Table} table
    */
-  const createTableForeignKeys = async (schemaBuilder, table) => {
+  const createTableForeignKeys = async (schemaBuilder: Knex.SchemaBuilder, table: Table) => {
     // foreign keys
     await schemaBuilder.table(table.name, (tableBuilder) => {
       (table.foreignKeys || []).forEach((foreignKey) => createForeignKey(tableBuilder, foreignKey));
@@ -346,10 +342,8 @@ const createHelpers = (db: Database) => {
 
   /**
    * Drops a table foreign keys constraints
-   * @param {SchemaBuilder} schemaBuilder
-   * @param {Table} table
    */
-  const dropTableForeignKeys = async (schemaBuilder, table) => {
+  const dropTableForeignKeys = async (schemaBuilder: Knex.SchemaBuilder, table: Table) => {
     if (!db.config.settings.forceMigration) {
       return;
     }

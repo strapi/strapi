@@ -238,7 +238,7 @@ const cleanOrderColumns = async ({
       return;
     }
 
-    const selectRowsToOrder = (joinTableName) =>
+    const selectRowsToOrder = (joinTableName: string) =>
       db
         .connection(joinTableName)
         .select('id')
@@ -264,7 +264,7 @@ const cleanOrderColumns = async ({
         break;
       }
       default: {
-        const joinTableName = addSchema(joinTable.name);
+        const joinTableName = addSchema(db, joinTable.name);
         const select = selectRowsToOrder(joinTableName);
 
         // raw query as knex doesn't allow updating from a subquery
@@ -296,7 +296,7 @@ const cleanOrderColumns = async ({
   const updateInverseOrderColumn = async () => {
     if (!hasInverseOrderColumn(attribute) || isEmpty(inverseRelIds)) return;
 
-    const selectRowsToOrder = (joinTableName) =>
+    const selectRowsToOrder = (joinTableName: string) =>
       db
         .connection(joinTableName)
         .select('id')
@@ -321,7 +321,7 @@ const cleanOrderColumns = async ({
         break;
       }
       default: {
-        const joinTableName = addSchema(joinTable.name);
+        const joinTableName = addSchema(db, joinTable.name);
         const select = selectRowsToOrder(joinTableName);
 
         // raw query as knex doesn't allow updating from a subquery

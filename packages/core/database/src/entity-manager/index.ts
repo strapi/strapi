@@ -49,6 +49,7 @@ import {
   cloneRegularRelations,
 } from './relations/cloning/regular-relations';
 import { DatabaseError } from '../errors';
+import type { Database } from '..';
 
 const toId = (value) => value.id || value;
 const toIds = (value) => castArray(value || []).map(toId);
@@ -177,8 +178,8 @@ const processData = (metadata, data = {}, { withDefaults = false } = {}) => {
   return obj;
 };
 
-export const createEntityManager = (db) => {
-  const repoMap = {};
+export const createEntityManager = (db: Database) => {
+  const repoMap: Record<string, any> = {};
 
   return {
     async findOne(uid, params) {
@@ -1360,11 +1361,11 @@ export const createEntityManager = (db) => {
     // -> virtuals
     // -> private
 
-    createQueryBuilder(uid) {
+    createQueryBuilder(uid: string) {
       return createQueryBuilder(uid, db);
     },
 
-    getRepository(uid) {
+    getRepository(uid: string) {
       if (!repoMap[uid]) {
         repoMap[uid] = createRepository(uid, db);
       }

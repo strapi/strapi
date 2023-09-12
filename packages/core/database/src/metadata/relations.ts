@@ -272,17 +272,14 @@ const createMorphToMany = (
       {
         name: `${joinTableName}_fk`,
         columns: [joinColumnName],
-        type: null,
       },
       {
         name: `${joinTableName}_order_index`,
         columns: ['order'],
-        type: null,
       },
       {
         name: `${joinTableName}_id_column_index`,
         columns: [idColumnName],
-        type: null,
       },
     ],
     foreignKeys: [
@@ -476,12 +473,10 @@ const createJoinTable = (metadata: Metadata, { attributeName, attribute, meta }:
       {
         name: `${joinTableName}_fk`,
         columns: [joinColumnName],
-        type: null,
       },
       {
         name: `${joinTableName}_inv_fk`,
         columns: [inverseJoinColumnName],
-        type: null,
       },
       {
         name: `${joinTableName}_unique`,
@@ -532,7 +527,6 @@ const createJoinTable = (metadata: Metadata, { attributeName, attribute, meta }:
     metadataSchema.indexes.push({
       name: `${joinTableName}_order_fk`,
       columns: [orderColumnName],
-      type: null,
     });
     joinTable.orderColumnName = orderColumnName;
     joinTable.orderBy = { [orderColumnName]: 'asc' };
@@ -551,7 +545,6 @@ const createJoinTable = (metadata: Metadata, { attributeName, attribute, meta }:
     metadataSchema.indexes.push({
       name: `${joinTableName}_order_inv_fk`,
       columns: [inverseOrderColumnName],
-      type: null,
     });
 
     joinTable.inverseOrderColumnName = inverseOrderColumnName;

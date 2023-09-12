@@ -1,6 +1,4 @@
-'use strict';
-
-const createSchemaDiff = require('../diff');
+import createSchemaDiff from '../diff';
 
 let diffSchemas;
 describe('diffSchemas', () => {
@@ -11,7 +9,7 @@ describe('diffSchemas', () => {
           return true;
         },
       },
-    });
+    } as any);
 
     diffSchemas = schemaDiff.diff.bind(schemaDiff);
 
@@ -19,7 +17,7 @@ describe('diffSchemas', () => {
       store: {
         get: () => [],
       },
-    };
+    } as any;
   });
 
   test('New Table', async () => {
@@ -206,7 +204,7 @@ describe('diffSchemas', () => {
       store: {
         get: async () => [testTables[0].name, 'table2'],
       },
-    };
+    } as any;
 
     const srcSchema = {
       tables: [...testTables, coreStoreTable],

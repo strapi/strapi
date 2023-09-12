@@ -7,7 +7,9 @@ import type {
   ForeignKey,
   Column,
   IndexDiff,
+  IndexesDiff,
   ForeignKeyDiff,
+  ForeignKeysDiff,
   ColumnDiff,
   TableDiff,
   ColumnsDiff,
@@ -54,7 +56,8 @@ const helpers = {
 };
 
 export default (db: Database) => {
-  const hasChangedStatus = (diff: SchemaDiff) => diff.status === statuses.CHANGED;
+  const hasChangedStatus = (diff: { status: 'CHANGED' | 'UNCHANGED' }) =>
+    diff.status === statuses.CHANGED;
 
   /**
    * Compares two indexes info
@@ -68,7 +71,7 @@ export default (db: Database) => {
       changes.push('columns');
     }
 
-    if (_.toLower(oldIndex.type) !== _.toLower(index.type)) {
+    if (oldIndex.type && index.type && _.toLower(oldIndex.type) !== _.toLower(index.type)) {
       changes.push('type');
     }
 
@@ -102,18 +105,24 @@ export default (db: Database) => {
     }
 
     if (_.isNil(oldForeignKey.onDelete) || _.toUpper(oldForeignKey.onDelete) === 'NO ACTION') {
-      if (!_.isNil(foreignKey.onDelete) && _.toUpper(oldForeignKey.onDelete) !== 'NO ACTION') {
+      if (
+        !_.isNil(foreignKey.onDelete) &&
+        _.toUpper(oldForeignKey.onDelete ?? '') !== 'NO ACTION'
+      ) {
         changes.push('onDelete');
       }
-    } else if (_.toUpper(oldForeignKey.onDelete) !== _.toUpper(foreignKey.onDelete)) {
+    } else if (_.toUpper(oldForeignKey.onDelete) !== _.toUpper(foreignKey.onDelete ?? '')) {
       changes.push('onDelete');
     }
 
     if (_.isNil(oldForeignKey.onUpdate) || _.toUpper(oldForeignKey.onUpdate) === 'NO ACTION') {
-      if (!_.isNil(foreignKey.onUpdate) && _.toUpper(oldForeignKey.onUpdate) !== 'NO ACTION') {
+      if (
+        !_.isNil(foreignKey.onUpdate) &&
+        _.toUpper(oldForeignKey.onUpdate ?? '') !== 'NO ACTION'
+      ) {
         changes.push('onUpdate');
       }
-    } else if (_.toUpper(oldForeignKey.onUpdate) !== _.toUpper(foreignKey.onUpdate)) {
+    } else if (_.toUpper(oldForeignKey.onUpdate) !== _.toUpper(foreignKey.onUpdate ?? '')) {
       changes.push('onUpdate');
     }
 
@@ -182,23 +191,22 @@ export default (db: Database) => {
 
   const diffTableColumns = (srcTable: Table, destTable: Table): ColumnsDiff => {
     const addedColumns: Column[] = [];
-    const updatedColumns: ColumnDiff[] = [];
+    const updatedColumns: ColumnDiff['diff'][] = [];
     const unchangedColumns: Column[] = [];
     const removedColumns: Column[] = [];
 
     for (const destColumn of destTable.columns) {
-      if (!helpers.hasColumn(srcTable, destColumn.name)) {
-        addedColumns.push(destColumn);
-        continue;
-      }
-
       const srcColumn = helpers.findColumn(srcTable, destColumn.name);
-      const { status, diff } = diffColumns(srcColumn, destColumn);
+      if (srcColumn) {
+        const { status, diff } = diffColumns(srcColumn, destColumn);
 
-      if (status === statuses.CHANGED) {
-        updatedColumns.push(diff);
+        if (status === statuses.CHANGED) {
+          updatedColumns.push(diff);
+        } else {
+          unchangedColumns.push(srcColumn);
+        }
       } else {
-        unchangedColumns.push(srcColumn);
+        addedColumns.push(destColumn);
       }
     }
 
@@ -221,15 +229,15 @@ export default (db: Database) => {
     };
   };
 
-  const diffTableIndexes = (srcTable: Table, destTable: Table) => {
-    const addedIndexes = [];
-    const updatedIndexes = [];
-    const unchangedIndexes = [];
-    const removedIndexes = [];
+  const diffTableIndexes = (srcTable: Table, destTable: Table): IndexesDiff => {
+    const addedIndexes: Index[] = [];
+    const updatedIndexes: IndexDiff['diff'][] = [];
+    const unchangedIndexes: Index[] = [];
+    const removedIndexes: Index[] = [];
 
     for (const destIndex of destTable.indexes) {
-      if (helpers.hasIndex(srcTable, destIndex.name)) {
-        const srcIndex = helpers.findIndex(srcTable, destIndex.name);
+      const srcIndex = helpers.findIndex(srcTable, destIndex.name);
+      if (srcIndex) {
         const { status, diff } = diffIndexes(srcIndex, destIndex);
 
         if (status === statuses.CHANGED) {
@@ -261,11 +269,11 @@ export default (db: Database) => {
     };
   };
 
-  const diffTableForeignKeys = (srcTable: Table, destTable: Table) => {
-    const addedForeignKeys = [];
-    const updatedForeignKeys = [];
-    const unchangedForeignKeys = [];
-    const removedForeignKeys = [];
+  const diffTableForeignKeys = (srcTable: Table, destTable: Table): ForeignKeysDiff => {
+    const addedForeignKeys: ForeignKey[] = [];
+    const updatedForeignKeys: ForeignKeyDiff['diff'][] = [];
+    const unchangedForeignKeys: ForeignKey[] = [];
+    const removedForeignKeys: ForeignKey[] = [];
 
     if (!db.dialect.usesForeignKeys()) {
       return {
@@ -280,8 +288,8 @@ export default (db: Database) => {
     }
 
     for (const destForeignKey of destTable.foreignKeys) {
-      if (helpers.hasForeignKey(srcTable, destForeignKey.name)) {
-        const srcForeignKey = helpers.findForeignKey(srcTable, destForeignKey.name);
+      const srcForeignKey = helpers.findForeignKey(srcTable, destForeignKey.name);
+      if (srcForeignKey) {
         const { status, diff } = diffForeignKeys(srcForeignKey, destForeignKey);
 
         if (status === statuses.CHANGED) {
@@ -315,7 +323,7 @@ export default (db: Database) => {
     };
   };
 
-  const diffTables = (srcTable: Table, destTable: Table) => {
+  const diffTables = (srcTable: Table, destTable: Table): TableDiff => {
     const columnsDiff = diffTableColumns(srcTable, destTable);
     const indexesDiff = diffTableIndexes(srcTable, destTable);
     const foreignKeysDiff = diffTableForeignKeys(srcTable, destTable);
@@ -333,16 +341,15 @@ export default (db: Database) => {
     };
   };
 
-  const diffSchemas = async (srcSchema: Schema, destSchema: Schema) => {
-    const addedTables = [];
-    const updatedTables = [];
-    const unchangedTables = [];
+  const diffSchemas = async (srcSchema: Schema, destSchema: Schema): Promise<SchemaDiff> => {
+    const addedTables: Table[] = [];
+    const updatedTables: TableDiff['diff'][] = [];
+    const unchangedTables: Table[] = [];
     const removedTables = [];
 
     for (const destTable of destSchema.tables) {
-      if (helpers.hasTable(srcSchema, destTable.name)) {
-        const srcTable = helpers.findTable(srcSchema, destTable.name);
-
+      const srcTable = helpers.findTable(srcSchema, destTable.name);
+      if (srcTable) {
         const { status, diff } = diffTables(srcTable, destTable);
 
         if (status === statuses.CHANGED) {
@@ -371,19 +378,28 @@ export default (db: Database) => {
 
     const reservedTables = [...RESERVED_TABLE_NAMES, ...persistedTables.map(parsePersistedTable)];
 
+    type PersistedTable = {
+      name: string;
+      dependsOn?: Array<{ name: string }>;
+    };
+
     for (const srcTable of srcSchema.tables) {
       if (!helpers.hasTable(destSchema, srcTable.name) && !reservedTables.includes(srcTable.name)) {
         const dependencies = persistedTables
-          .filter((table) => {
+          .filter((table: PersistedTable) => {
             const dependsOn = table?.dependsOn;
-            if (!_.isArray(dependsOn)) return;
+
+            if (!_.isArray(dependsOn)) {
+              return;
+            }
+
             return dependsOn.some((table) => table.name === srcTable.name);
           })
-          .map((dependsOnTable) => {
+          .map((dependsOnTable: PersistedTable) => {
             return srcSchema.tables.find((srcTable) => srcTable.name === dependsOnTable.name);
           })
           // In case the table is not found, filter undefined values
-          .filter((table) => !_.isNil(table));
+          .filter((table: PersistedTable) => !_.isNil(table));
 
         removedTables.push(srcTable, ...dependencies);
       }

@@ -71,7 +71,6 @@ const createTable = (meta: Meta): Table => {
         table.indexes.push({
           name: `${table.name}_${columnName}_fk`,
           columns: [columnName],
-          type: null,
         });
       }
     } else if (types.isScalar(attribute.type)) {
