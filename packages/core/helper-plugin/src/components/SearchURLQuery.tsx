@@ -1,28 +1,39 @@
-import React, { useLayoutEffect, useRef, useState } from 'react';
+import * as React from 'react';
 
 import { Icon, IconButton, Searchbar, SearchForm } from '@strapi/design-system';
 import { Search as SearchIcon } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { useTracking } from '../features/Tracking';
+import { TrackingEvent, useTracking } from '../features/Tracking';
 import { useQueryParams } from '../hooks/useQueryParams';
 
-const SearchURLQuery = ({ label, placeholder, trackedEvent, trackedEventDetails }) => {
-  const inputRef = useRef(null);
-  const iconButtonRef = useRef(null);
+export interface SearchURLQueryProps {
+  label: string;
+  placeholder?: string;
+  trackedEvent?: TrackingEvent['name'] | null;
+  trackedEventDetails?: TrackingEvent['properties'];
+}
+
+const SearchURLQuery = ({
+  label,
+  placeholder,
+  trackedEvent,
+  trackedEventDetails,
+}: SearchURLQueryProps) => {
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const iconButtonRef = React.useRef<HTMLButtonElement>(null);
 
   const [{ query }, setQuery] = useQueryParams();
 
-  const [value, setValue] = useState(query?._q || '');
-  const [isOpen, setIsOpen] = useState(!!value);
+  const [value, setValue] = React.useState(query?._q || '');
+  const [isOpen, setIsOpen] = React.useState(!!value);
 
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
   const handleToggle = () => setIsOpen((prev) => !prev);
 
-  useLayoutEffect(() => {
+  React.useLayoutEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus();
     }
@@ -33,10 +44,11 @@ const SearchURLQuery = ({ label, placeholder, trackedEvent, trackedEventDetails 
     setQuery({ _q: '' }, 'remove');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (value) {
+    // Ensure value is a string
+    if (value && typeof value === 'string') {
       if (trackedEvent) {
         trackUsage(trackedEvent, trackedEventDetails);
       }
@@ -53,7 +65,7 @@ const SearchURLQuery = ({ label, placeholder, trackedEvent, trackedEventDetails 
         <Searchbar
           ref={inputRef}
           name="search"
-          onChange={({ target: { value } }) => setValue(value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value)}
           value={value}
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
           onClear={handleClear}
@@ -74,19 +86,6 @@ const SearchURLQuery = ({ label, placeholder, trackedEvent, trackedEventDetails 
       onClick={handleToggle}
     />
   );
-};
-
-SearchURLQuery.defaultProps = {
-  placeholder: undefined,
-  trackedEventDetails: undefined,
-  trackedEvent: null,
-};
-
-SearchURLQuery.propTypes = {
-  label: PropTypes.string.isRequired,
-  placeholder: PropTypes.string,
-  trackedEventDetails: PropTypes.object,
-  trackedEvent: PropTypes.string,
 };
 
 export { SearchURLQuery };
