@@ -4,20 +4,62 @@
  *
  */
 
-import React from 'react';
+import * as React from 'react';
 
 import { Box, Tag } from '@strapi/design-system';
 import { Cross } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { useQueryParams } from '../hooks/useQueryParams';
 
-export const FilterListURLQuery = ({ filtersSchema }) => {
-  const [{ query }, setQuery] = useQueryParams();
+export interface Attribute {
+  name: string;
+  fieldSchema: {
+    type: string;
+    mainField: {
+      name: string;
+      schema?: {
+        type: string;
+      };
+    };
+  };
+  metadatas: {
+    label: string;
+    options?: Array<{ label: string; customValue: string }>;
+    customInput?: (value: string) => string;
+  };
+}
 
-  const handleClick = (filter) => {
-    const nextFilters = query.filters.$and.filter((prevFilter) => {
+export interface Filter {
+  [key: string]: {
+    [key: string]: string | Record<string, string>;
+  };
+}
+
+export interface AttributeTagProps {
+  attribute: Attribute;
+  filter: Filter;
+  onClick: (filter: Filter) => void;
+  operator: string;
+  value: string;
+}
+
+export interface FilterListURLQueryProps {
+  filtersSchema: Attribute[];
+}
+
+export const FilterListURLQuery = ({ filtersSchema = [] }: FilterListURLQueryProps) => {
+  const [{ query }, setQuery] = useQueryParams();
+  console.log('filtersSchema', filtersSchema)
+
+  /*
+  TODO: This is a temporary fix to avoid a typescript error when I try to access the $and property. But I don't think it's right.
+  I need some comments in the PR to find a better solution.
+  */
+  const filters = query?.filters as unknown as { $and: Filter[] };
+
+  const handleClick = (filter: Filter) => {
+    const nextFilters = (filters.$and || []).filter((prevFilter: Filter) => {
       const name = Object.keys(filter)[0];
       const filterType = Object.keys(filter[name])[0];
       const value = filter[name][filterType];
@@ -29,7 +71,7 @@ export const FilterListURLQuery = ({ filtersSchema }) => {
   };
 
   return (
-    query?.filters?.$and.map((filter, i) => {
+    filters?.$and.map((filter: Filter, i: number) => {
       const attributeName = Object.keys(filter)[0];
       const attribute = filtersSchema.find(({ name }) => name === attributeName);
 
@@ -41,7 +83,7 @@ export const FilterListURLQuery = ({ filtersSchema }) => {
         const relationTargetAttribute = attribute.fieldSchema.mainField.name;
         const filterObj = filter[attributeName][relationTargetAttribute];
         const operator = Object.keys(filterObj)[0];
-        const value = filterObj[operator];
+        const value = typeof filterObj === 'object' ? filterObj[operator] : '';
 
         return (
           <AttributeTag
@@ -68,34 +110,14 @@ export const FilterListURLQuery = ({ filtersSchema }) => {
           filter={filter}
           onClick={handleClick}
           operator={operator}
-          value={value}
+          value={typeof value === 'string' ? value : ''}
         />
       );
     }) || null
   );
 };
 
-FilterListURLQuery.defaultProps = {
-  filtersSchema: [],
-};
-
-FilterListURLQuery.propTypes = {
-  filtersSchema: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      metadatas: PropTypes.shape({ label: PropTypes.string }),
-      fieldSchema: PropTypes.shape({
-        type: PropTypes.string,
-        mainField: PropTypes.shape({
-          name: PropTypes.string,
-          type: PropTypes.string,
-        }),
-      }),
-    })
-  ),
-};
-
-const AttributeTag = ({ attribute, filter, onClick, operator, value }) => {
+const AttributeTag = ({ attribute, filter, onClick, operator, value }: AttributeTagProps) => {
   const { formatMessage, formatDate, formatTime, formatNumber } = useIntl();
 
   const handleClick = () => {
@@ -119,17 +141,17 @@ const AttributeTag = ({ attribute, filter, onClick, operator, value }) => {
   if (type === 'time') {
     const [hour, minute] = value.split(':');
     const date = new Date();
-    date.setHours(hour);
-    date.setMinutes(minute);
+    date.setHours(Number(hour));
+    date.setMinutes(Number(minute));
 
     formattedValue = formatTime(date, {
-      numeric: 'auto',
-      style: 'short',
+      hour: 'numeric',
+      minute: 'numeric',
     });
   }
 
   if (['float', 'integer', 'biginteger', 'decimal'].includes(type)) {
-    formattedValue = formatNumber(value);
+    formattedValue = formatNumber(Number(value));
   }
 
   // Handle custom input
@@ -157,20 +179,4 @@ const AttributeTag = ({ attribute, filter, onClick, operator, value }) => {
       </Tag>
     </Box>
   );
-};
-
-AttributeTag.propTypes = {
-  attribute: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    fieldSchema: PropTypes.object.isRequired,
-    metadatas: PropTypes.shape({
-      label: PropTypes.string.isRequired,
-      options: PropTypes.array,
-      customInput: PropTypes.func,
-    }).isRequired,
-  }).isRequired,
-  filter: PropTypes.object.isRequired,
-  onClick: PropTypes.func.isRequired,
-  operator: PropTypes.string.isRequired,
-  value: PropTypes.string.isRequired,
 };
