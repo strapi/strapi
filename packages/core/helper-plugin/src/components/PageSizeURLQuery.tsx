@@ -9,10 +9,8 @@ import * as React from 'react';
 import { Flex, Option, SingleSelect, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { useTracking } from '../features/Tracking';
+import { useTracking, TrackingEvent } from '../features/Tracking';
 import { useQueryParams } from '../hooks/useQueryParams';
-
-import { TrackingEvent } from '../features/Tracking';
 
 export interface PageSizeURLQueryProps {
   trackedEvent?: Extract<TrackingEvent, { properties?: never }>['name'];
@@ -20,10 +18,10 @@ export interface PageSizeURLQueryProps {
   defaultValue?: string;
 }
 
-export const PageSizeURLQuery = ({ 
-  trackedEvent, 
-  options = ['10', '20', '50', '100'], 
-  defaultValue = '10'
+export const PageSizeURLQuery = ({
+  trackedEvent,
+  options = ['10', '20', '50', '100'],
+  defaultValue = '10',
 }: PageSizeURLQueryProps) => {
   const { formatMessage } = useIntl();
   const [{ query }, setQuery] = useQueryParams();

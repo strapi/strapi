@@ -7,7 +7,7 @@
 import * as React from 'react';
 
 import { render } from '@tests/utils';
-import { Route } from 'react-router-dom';
+import { Route, useLocation } from 'react-router-dom';
 
 import { PageSizeURLQuery } from '../PageSizeURLQuery';
 
@@ -60,7 +60,7 @@ describe('PageSizeURLQuery', () => {
 
   describe('interaction', () => {
     it('should change the value when the user selects a new value', async () => {
-      let testLocation: { search?: string } = {};
+      let testLocation: ReturnType<typeof useLocation> = null!;
 
       const { getByRole, user } = render(<PageSizeURLQuery />, {
         renderOptions: {
