@@ -141,6 +141,15 @@ const modifiers = [
 const ListButton = ({ icon, format, label }) => {
   const editor = useSlate();
 
+  /**
+   *
+   * @param {import('slate').Node} node
+   * @returns boolean
+   */
+  const isListNode = (node) => {
+    return !Editor.isEditor(node) && Element.isElement(node) && node.type === 'list';
+  };
+
   const isListActive = () => {
     const { selection } = editor;
 
@@ -149,11 +158,7 @@ const ListButton = ({ icon, format, label }) => {
     const [match] = Array.from(
       Editor.nodes(editor, {
         at: Editor.unhangRange(editor, selection),
-        match: (node) =>
-          !Editor.isEditor(node) &&
-          Element.isElement(node) &&
-          node.type === 'list' &&
-          node.format === format,
+        match: (node) => isListNode(node) && node.format === format,
       })
     );
 
@@ -164,11 +169,7 @@ const ListButton = ({ icon, format, label }) => {
 
   const toggleList = () => {
     Transforms.unwrapNodes(editor, {
-      match: (node) =>
-        !Editor.isEditor(node) &&
-        Element.isElement(node) &&
-        node.type === 'list' &&
-        ['ordered', 'unordered'].includes(node.format),
+      match: (node) => isListNode(node) && ['ordered', 'unordered'].includes(node.format),
       split: true,
     });
 
