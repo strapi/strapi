@@ -23,3 +23,9 @@ export type ServerFunction = () => ServerObject;
 
 // Interface for the plugin strapi-server file
 export type Server = ServerObject | ServerFunction;
+
+export * from './config';
+export * from './routes';
+export * from './content-types';
+export * from './controllers';
+export * from './lifecycle';
