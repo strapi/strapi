@@ -1,6 +1,5 @@
 import type { Common, Shared, Utils } from '../..';
 
-// TODO: this might need to move somewhere else (or else our additions need to move somewhere else)
 export type IsEnabled<
   TName extends keyof any,
   TSchemaUID extends Common.UID.Schema
