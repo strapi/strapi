@@ -37,7 +37,8 @@ export const PageSizeURLQuery = ({
       page: 1,
     });
   };
-  const pageSize = query?.pageSize || defaultValue;
+  const pageSize =
+    typeof query?.pageSize === 'string' && query.pageSize !== '' ? query.pageSize : defaultValue;
 
   return (
     <Flex gap={2}>
