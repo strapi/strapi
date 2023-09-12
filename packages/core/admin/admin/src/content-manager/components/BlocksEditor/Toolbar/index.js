@@ -33,7 +33,10 @@ const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
       <Toolbar.ToggleItem value={name} data-state={isActive ? 'on' : 'off'} asChild>
         <Flex
           background={isActive ? 'primary100' : ''}
-          padding={2}
+          alignItems="center"
+          justifyContent="center"
+          width={7}
+          height={7}
           as="button"
           hasRadius
           onMouseDown={(e) => {
@@ -42,7 +45,13 @@ const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
           }}
           aria-label={labelMessage}
         >
-          <Icon width={4} as={icon} color={isActive ? 'primary600' : 'neutral600'} />
+          <Icon
+            width={3}
+            height={3}
+            as={icon}
+            className="mycoolicon"
+            color={isActive ? 'primary600' : 'neutral600'}
+          />
         </Flex>
       </Toolbar.ToggleItem>
     </Tooltip>
