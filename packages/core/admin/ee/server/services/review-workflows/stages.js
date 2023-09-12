@@ -61,7 +61,11 @@ module.exports = ({ strapi }) => {
           stagePermissions,
           // Register each stage permission
           (permission) =>
-            stagePermissionsService.register(permission.role, permission.action, stageId)
+            stagePermissionsService.register({
+              roleId: permission.role,
+              action: permission.action,
+              fromStage: stageId,
+            })
         );
 
         // Update stage with the new permissions
@@ -85,7 +89,11 @@ module.exports = ({ strapi }) => {
         await this.deleteStagePermissions([srcStage]);
 
         const permissions = await mapAsync(destStage.permissions, (permission) =>
-          stagePermissionsService.register(permission.role, permission.action, stageId)
+          stagePermissionsService.register({
+            roleId: permission.role,
+            action: permission.action,
+            fromStage: stageId,
+          })
         );
         stagePermissions = permissions.flat().map((p) => p.id);
       }
