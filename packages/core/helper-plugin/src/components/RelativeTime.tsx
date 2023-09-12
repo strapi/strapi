@@ -1,8 +1,20 @@
 import React from 'react';
 
-import { intervalToDuration, isPast } from 'date-fns';
-import PropTypes from 'prop-types';
+import { Duration, intervalToDuration, isPast } from 'date-fns';
 import { useIntl } from 'react-intl';
+
+const intervals: Array<keyof Duration> = ['years', 'months', 'days', 'hours', 'minutes', 'seconds'];
+
+interface CustomInterval {
+  unit: keyof Duration;
+  text: string;
+  threshold: number;
+}
+
+export interface RelativeTimeProps {
+  timestamp: Date;
+  customIntervals?: CustomInterval[];
+}
 
 /**
  * Displays the relative time between a given timestamp and the current time.
@@ -18,17 +30,18 @@ import { useIntl } from 'react-intl';
  *  ]}
  * ```
  */
-const RelativeTime = ({ timestamp, customIntervals }) => {
+const RelativeTime = ({ timestamp, customIntervals = [] }: RelativeTimeProps) => {
   const { formatRelativeTime, formatDate, formatTime } = useIntl();
 
   const interval = intervalToDuration({
     start: timestamp,
     end: Date.now(),
-  });
+    // see https://github.com/date-fns/date-fns/issues/2891 – No idea why it's all partial it returns it every time.
+  }) as Required<Duration>;
 
-  const unit = ['years', 'months', 'days', 'hours', 'minutes', 'seconds'].find((intervalUnit) => {
+  const unit = intervals.find((intervalUnit) => {
     return interval[intervalUnit] > 0 && Object.keys(interval).includes(intervalUnit);
-  });
+  })!;
 
   const relativeTime = isPast(timestamp) ? -interval[unit] : interval[unit];
 
@@ -47,21 +60,6 @@ const RelativeTime = ({ timestamp, customIntervals }) => {
       {displayText}
     </time>
   );
-};
-
-RelativeTime.propTypes = {
-  timestamp: PropTypes.instanceOf(Date).isRequired,
-  customIntervals: PropTypes.arrayOf(
-    PropTypes.shape({
-      unit: PropTypes.oneOf(['years', 'months', 'days', 'hours', 'minutes', 'seconds']).isRequired,
-      text: PropTypes.string.isRequired,
-      threshold: PropTypes.number.isRequired,
-    })
-  ),
-};
-
-RelativeTime.defaultProps = {
-  customIntervals: [],
 };
 
 export { RelativeTime };
