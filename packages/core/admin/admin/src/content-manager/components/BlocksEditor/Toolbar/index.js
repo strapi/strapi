@@ -24,32 +24,7 @@ const Separator = styled(Toolbar.Separator)`
   height: ${pxToRem(24)};
 `;
 
-const ModifierButton = ({ icon, name, label }) => {
-  const editor = useSlate();
-
-  /**
-   * @param {string} name - name of the modifier
-   */
-  const isModifierActive = (name) => {
-    const modifiers = Editor.marks(editor);
-
-    return modifiers ? modifiers[name] === true : false;
-  };
-
-  /**
-   * @param {string} name - name of the modifier
-   */
-  const toggleModifier = (name) => {
-    const isActive = isModifierActive(name);
-
-    if (isActive) {
-      Editor.removeMark(editor, name);
-    } else {
-      Editor.addMark(editor, name, true);
-    }
-  };
-  const isActive = isModifierActive(name);
-
+const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
   const { formatMessage } = useIntl();
   const labelMessage = formatMessage(label);
 
@@ -63,7 +38,7 @@ const ModifierButton = ({ icon, name, label }) => {
           hasRadius
           onMouseDown={(e) => {
             e.preventDefault();
-            toggleModifier(name);
+            handleClick();
           }}
           aria-label={labelMessage}
         >
@@ -71,6 +46,47 @@ const ModifierButton = ({ icon, name, label }) => {
         </Flex>
       </Toolbar.ToggleItem>
     </Tooltip>
+  );
+};
+
+ToolbarButton.propTypes = {
+  icon: PropTypes.elementType.isRequired,
+  name: PropTypes.string.isRequired,
+  label: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+  }).isRequired,
+  isActive: PropTypes.bool.isRequired,
+  handleClick: PropTypes.func.isRequired,
+};
+
+const ModifierButton = ({ icon, name, label }) => {
+  const editor = useSlate();
+
+  const isModifierActive = () => {
+    const modifiers = Editor.marks(editor);
+
+    return modifiers ? modifiers[name] === true : false;
+  };
+
+  const toggleModifier = () => {
+    if (isModifierActive(name)) {
+      Editor.removeMark(editor, name);
+    } else {
+      Editor.addMark(editor, name, true);
+    }
+  };
+
+  const isActive = isModifierActive(name);
+
+  return (
+    <ToolbarButton
+      icon={icon}
+      name={name}
+      label={label}
+      isActive={isActive}
+      handleClick={() => toggleModifier(name)}
+    />
   );
 };
 
@@ -151,27 +167,14 @@ const ListButton = ({ icon, name, label }) => {
 
   const isActive = isListActive(name);
 
-  const { formatMessage } = useIntl();
-  const labelMessage = formatMessage(label);
-
   return (
-    <Tooltip description={labelMessage}>
-      <Toolbar.ToggleItem value={name} data-state={isActive ? 'on' : 'off'} asChild>
-        <Flex
-          background={isActive ? 'primary100' : ''}
-          padding={2}
-          as="button"
-          hasRadius
-          onMouseDown={(e) => {
-            e.preventDefault();
-            toggleList(name);
-          }}
-          aria-label={labelMessage}
-        >
-          <Icon width={4} as={icon} color={isActive ? 'primary600' : 'neutral600'} />
-        </Flex>
-      </Toolbar.ToggleItem>
-    </Tooltip>
+    <ToolbarButton
+      icon={icon}
+      name={name}
+      label={label}
+      isActive={isActive}
+      handleClick={() => toggleList(name)}
+    />
   );
 };
 
