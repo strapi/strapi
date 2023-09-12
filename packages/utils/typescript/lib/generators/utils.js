@@ -92,7 +92,7 @@ const generateSharedExtensionDefinition = (registry, definitions) => {
 
   return factory.createModuleDeclaration(
     [factory.createModifier(ts.SyntaxKind.DeclareKeyword)],
-    factory.createStringLiteral('@strapi/strapi', true),
+    factory.createStringLiteral('@strapi/typings', true),
     factory.createModuleBlock([
       factory.createModuleDeclaration(
         [factory.createModifier(ts.SyntaxKind.ExportKeyword)],

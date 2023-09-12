@@ -18,7 +18,7 @@ const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 const productUID = 'api::product.product';
 const model = {
-  draftAndPublish: true,
+  draftAndPublish: false,
   pluginOptions: {},
   singularName: 'product',
   pluralName: 'products',
@@ -555,6 +555,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         });
 
         expect(status).toBe(200);
+        expect(body.data.length).toBeGreaterThan(0);
 
         const privateUserFields = [
           'password',
@@ -646,7 +647,25 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         expect(response.body.error.name).toEqual('ApplicationError');
         expect(response.body.error.message).toEqual('Stage does not belong to workflow "workflow"');
       });
+
+      test('Should return entity stage information to the content API', async () => {
+        const stageAttribute = 'strapi_stage';
+
+        const { status, body } = await requests.public.get(`/api/${model.pluralName}`, {
+          qs: { populate: stageAttribute },
+        });
+
+        expect(status).toBe(200);
+        expect(body.data.length).toBeGreaterThan(0);
+
+        body.data.forEach((item) => {
+          expect(item.attributes).toHaveProperty(stageAttribute);
+          expect(item.attributes[stageAttribute]).not.toBeNull();
+          expect(item.attributes[stageAttribute].data.attributes).toHaveProperty('name');
+        });
+      });
     });
+
     describe('Review Workflow is disabled', () => {
       beforeAll(async () => {
         // Update workflow to unassign content type
