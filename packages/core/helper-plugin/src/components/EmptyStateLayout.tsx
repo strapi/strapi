@@ -1,6 +1,9 @@
 import React from 'react';
 
-import { EmptyStateLayout as Layout } from '@strapi/design-system';
+import {
+  EmptyStateLayout as Layout,
+  EmptyStateLayoutProps as LayoutProps,
+} from '@strapi/design-system';
 import { EmptyDocuments, EmptyPermissions, EmptyPictures } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
@@ -12,10 +15,8 @@ const icons = {
   permissions: EmptyPermissions,
 };
 
-export interface EmptyStateLayoutProps {
-  action?: Layout['action'];
-  hasRadius?: Layout['hasRadius'];
-  shadow?: Layout['shadow'];
+export interface EmptyStateLayoutProps
+  extends Pick<LayoutProps, 'action' | 'hasRadius' | 'shadow'> {
   icon?: keyof typeof icons;
   content?: TranslationMessage;
 }

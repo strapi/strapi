@@ -12,6 +12,7 @@ import {
   Tooltip,
   Tr,
   VisuallyHidden,
+  TableProps as DSTableProps,
 } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -23,20 +24,20 @@ import { SortIcon } from '../icons/SortIcon';
 import { ConfirmDialog } from './ConfirmDialog';
 import { EmptyBodyTable, EmptyBodyTableProps } from './EmptyBodyTable';
 
-interface TableProps {
-  action?: EmptyBodyTableProps['action'];
+interface TableProps<TRows extends { id: string }>
+  extends Pick<EmptyBodyTableProps, 'action'>,
+    Pick<DSTableProps, 'footer'> {
   children?: React.ReactNode;
   contentType: string;
   components?: {
     ConfirmDialogDeleteAll?: React.ElementType;
     ConfirmDialogDelete?: React.ElementType;
   };
-  footer: TableCompo['footer'];
-  headers?: TableHead['headers'];
+  headers?: TableHeadProps['headers'];
   isLoading?: boolean;
   onConfirmDeleteAll?: (ids: Array<string | number>) => Promise<void>;
   onConfirmDelete?: (id: string | number) => Promise<void>;
-  rows?: Array<unknown>;
+  rows?: Array<TRows>;
   withBulkActions?: boolean;
   withMainAction?: boolean;
   renderBulkActionsBar?: (props: {
@@ -65,7 +66,7 @@ const Table = ({
   withMainAction = false,
   renderBulkActionsBar,
   ...rest
-}: TableProps) => {
+}: TableProps<any>) => {
   const [selectedEntries, setSelectedEntries] = useState<Array<number | string>>([]);
   const [showConfirmDeleteAll, setShowConfirmDeleteAll] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
@@ -114,7 +115,7 @@ const Table = ({
 
   const handleSelectAll = () => {
     if (!areAllEntriesSelected) {
-      setSelectedEntries(rows.map((row) => (row as { id: number }).id));
+      setSelectedEntries(rows.map((row) => row.id));
     } else {
       setSelectedEntries([]);
     }
@@ -251,7 +252,7 @@ interface Header {
   };
 }
 
-export interface TableHead {
+export interface TableHeadProps {
   areAllEntriesSelected?: boolean;
   entriesToDelete?: Array<string | number>;
   headers?: Array<Header>;
@@ -267,11 +268,11 @@ const TableHead = ({
   onSelectAll,
   withMainAction,
   withBulkActions,
-}: TableHead) => {
+}: TableHeadProps) => {
   const { formatMessage } = useIntl();
   const [{ query }, setQuery] = useQueryParams();
-  const sort = query?.sort || '';
-  const [sortBy, sortOrder] = (sort as string).split(':');
+  const sort = typeof query?.sort === 'string' ? query.sort : '';
+  const [sortBy, sortOrder] = sort.split(':');
   const isIndeterminate = !areAllEntriesSelected && entriesToDelete.length > 0;
 
   return (

@@ -1,11 +1,12 @@
 import React from 'react';
 
-import { Box, Flex, Loader, Tbody, Td, Tr } from '@strapi/design-system';
+import { Box, Flex, Loader, Tbody, Td, Tr, TdProps } from '@strapi/design-system';
 
 import { EmptyStateLayout, EmptyStateLayoutProps } from './EmptyStateLayout';
 
-export interface EmptyBodyTableProps extends Omit<EmptyStateLayoutProps, 'hasRadius' | 'shadow'> {
-  colSpan: Td['colSpan'];
+export interface EmptyBodyTableProps
+  extends Omit<EmptyStateLayoutProps, 'hasRadius' | 'shadow'>,
+    Pick<TdProps, 'colSpan'> {
   isLoading?: boolean;
 }
 
