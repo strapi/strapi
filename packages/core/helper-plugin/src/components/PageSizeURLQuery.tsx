@@ -4,31 +4,41 @@
  *
  */
 
-import React from 'react';
+import * as React from 'react';
 
 import { Flex, Option, SingleSelect, Typography } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { useTracking } from '../features/Tracking';
+import { useTracking, TrackingEvent } from '../features/Tracking';
 import { useQueryParams } from '../hooks/useQueryParams';
 
-export const PageSizeURLQuery = ({ trackedEvent, options, defaultValue }) => {
+export interface PageSizeURLQueryProps {
+  trackedEvent?: Extract<TrackingEvent, { properties?: never }>['name'];
+  options?: string[];
+  defaultValue?: string;
+}
+
+export const PageSizeURLQuery = ({
+  trackedEvent,
+  options = ['10', '20', '50', '100'],
+  defaultValue = '10',
+}: PageSizeURLQueryProps) => {
   const { formatMessage } = useIntl();
   const [{ query }, setQuery] = useQueryParams();
   const { trackUsage } = useTracking();
 
-  const handleChange = (e) => {
+  const handleChange = (value: string) => {
     if (trackedEvent) {
       trackUsage(trackedEvent);
     }
 
     setQuery({
-      pageSize: e,
+      pageSize: value,
       page: 1,
     });
   };
-  const pageSize = query?.pageSize || defaultValue;
+  const pageSize =
+    typeof query?.pageSize === 'string' && query.pageSize !== '' ? query.pageSize : defaultValue;
 
   return (
     <Flex gap={2}>
@@ -55,16 +65,4 @@ export const PageSizeURLQuery = ({ trackedEvent, options, defaultValue }) => {
       </Typography>
     </Flex>
   );
-};
-
-PageSizeURLQuery.defaultProps = {
-  trackedEvent: null,
-  options: ['10', '20', '50', '100'],
-  defaultValue: '10',
-};
-
-PageSizeURLQuery.propTypes = {
-  trackedEvent: PropTypes.string,
-  options: PropTypes.arrayOf(PropTypes.string.isRequired),
-  defaultValue: PropTypes.string,
 };
