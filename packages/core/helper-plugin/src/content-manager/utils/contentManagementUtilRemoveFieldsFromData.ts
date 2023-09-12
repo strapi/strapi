@@ -2,15 +2,26 @@ import get from 'lodash/get';
 
 import { getOtherInfos, getType } from './getAttributeInfos';
 
+import type { Schema } from '@strapi/strapi';
+
 const defaultFields = ['createdBy', 'updatedBy', 'publishedAt', 'id', '_id'];
 
-const contentManagementUtilRemoveFieldsFromData = (
-  data,
-  contentTypeSchema,
-  componentSchema,
+const contentManagementUtilRemoveFieldsFromData = <
+  TSchema extends Schema.ContentType,
+  TData extends Record<keyof TSchema['attributes'], unknown>
+>(
+  data: TData,
+  contentTypeSchema: TSchema,
+  componentSchema: Record<string, Schema.Component>,
   fields = defaultFields
 ) => {
-  const recursiveCleanData = (data, schema) => {
+  const recursiveCleanData = <
+    TSchemum extends Schema.Schema,
+    TDatum extends { [P in keyof TSchemum['attributes']]: unknown }
+  >(
+    data: TDatum,
+    schema: TSchemum
+  ) => {
     return Object.keys(data).reduce((acc, current) => {
       const attrType = getType(schema, current);
       const value = get(data, current);
@@ -32,7 +43,7 @@ const contentManagementUtilRemoveFieldsFromData = (
         return acc;
       }
 
-      if (attrType === 'dynamiczone') {
+      if (attrType === 'dynamiczone' && Array.isArray(value)) {
         acc[current] = value.map((componentValue) => {
           const subCleanedData = recursiveCleanData(
             componentValue,
@@ -46,7 +57,7 @@ const contentManagementUtilRemoveFieldsFromData = (
       }
 
       if (attrType === 'component') {
-        if (isRepeatable) {
+        if (isRepeatable && Array.isArray(value)) {
           acc[current] = value.map((compoData) => {
             const subCleanedData = recursiveCleanData(compoData, componentSchema[component]);
 
@@ -60,7 +71,7 @@ const contentManagementUtilRemoveFieldsFromData = (
       }
 
       return acc;
-    }, Object.assign({}, data));
+    }, Object.assign({}, data) as Record<string, unknown>);
   };
 
   return recursiveCleanData(data, contentTypeSchema);
