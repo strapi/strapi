@@ -5,6 +5,7 @@ const _ = require('lodash/fp');
 const { DatabaseError } = require('../errors');
 const helpers = require('./helpers');
 const transactionCtx = require('../transaction-context');
+const { addSchema } = require('../utils/knex');
 
 const createQueryBuilder = (uid, db, initialState = {}) => {
   const meta = db.metadata.get(uid);
@@ -296,7 +297,7 @@ const createQueryBuilder = (uid, db, initialState = {}) => {
 
       const nestedSubQuery = db.getConnection().select('id').from(subQB.as('subQuery'));
 
-      return db.getConnection(tableName)[state.type]().whereIn('id', nestedSubQuery);
+      return db.getConnection(addSchema(tableName))[state.type]().whereIn('id', nestedSubQuery);
     },
 
     processState() {
@@ -343,7 +344,9 @@ const createQueryBuilder = (uid, db, initialState = {}) => {
         this.select('*');
       }
 
-      const aliasedTableName = this.mustUseAlias() ? `${tableName} as ${this.alias}` : tableName;
+      const aliasedTableName = this.mustUseAlias()
+        ? `${tableName} as ${this.alias}`
+        : addSchema(tableName);
 
       const qb = db.getConnection(aliasedTableName);
 
