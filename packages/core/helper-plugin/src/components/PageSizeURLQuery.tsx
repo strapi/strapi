@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 
-import { Flex, Option, SingleSelect, Typography } from '@strapi/design-system';
+import { Flex, SingleSelectOption, SingleSelect, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useTracking, TrackingEvent } from '../features/Tracking';
@@ -24,7 +24,7 @@ export const PageSizeURLQuery = ({
   defaultValue = '10',
 }: PageSizeURLQueryProps) => {
   const { formatMessage } = useIntl();
-  const [{ query }, setQuery] = useQueryParams();
+  const [{ query }, setQuery] = useQueryParams<{ pageSize: string; page: number }>();
   const { trackUsage } = useTracking();
 
   const handleChange = (value: string) => {
@@ -37,8 +37,7 @@ export const PageSizeURLQuery = ({
       page: 1,
     });
   };
-  const pageSize =
-    typeof query?.pageSize === 'string' && query.pageSize !== '' ? query.pageSize : defaultValue;
+  const pageSize = query?.pageSize !== '' ? query?.pageSize : defaultValue;
 
   return (
     <Flex gap={2}>
@@ -48,13 +47,14 @@ export const PageSizeURLQuery = ({
           id: 'components.PageFooter.select',
           defaultMessage: 'Entries per page',
         })}
+        // @ts-expect-error from the DS V2 this won't be needed because we're only returning strings.
         onChange={handleChange}
         value={pageSize}
       >
         {options.map((option) => (
-          <Option key={option} value={option}>
+          <SingleSelectOption key={option} value={option}>
             {option}
-          </Option>
+          </SingleSelectOption>
         ))}
       </SingleSelect>
       <Typography textColor="neutral600" as="span">

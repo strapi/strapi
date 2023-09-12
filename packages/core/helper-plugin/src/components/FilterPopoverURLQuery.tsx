@@ -1,33 +1,37 @@
-/**
- *
- * FilterPopoverURLQuery
- *
- */
-
-import React, { useState } from 'react';
+import * as React from 'react';
 
 import {
   Box,
   Button,
   Flex,
-  Option,
   Popover,
-  Select,
+  PopoverProps,
   DatePicker,
   DateTimePicker,
   Field,
   FieldInput,
   NumberInput,
   TimePicker,
+  SingleSelect,
+  SingleSelectOption,
 } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import formatISO from 'date-fns/formatISO';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import { useTracking } from '../features/Tracking';
 import { useQueryParams } from '../hooks/useQueryParams';
+
+import type { EntityService } from '@strapi/strapi';
+import type { DefaultFilterInputsProps, Filter, FilterData, Operator } from 'types';
+
+export interface FilterPopoverURLQueryProps extends Pick<PopoverProps, 'source'> {
+  displayedFilters: FilterData[];
+  isVisible: boolean;
+  onBlur?: () => void;
+  onToggle: () => void;
+}
 
 export const FilterPopoverURLQuery = ({
   displayedFilters,
@@ -35,14 +39,23 @@ export const FilterPopoverURLQuery = ({
   onBlur,
   onToggle,
   source,
-}) => {
-  const [{ query }, setQuery] = useQueryParams();
+}: FilterPopoverURLQueryProps) => {
+  const [{ query }, setQuery] = useQueryParams<{
+    filters: {
+      $and: Filter[];
+    };
+    page: number;
+  }>();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const defaultFieldSchema = { fieldSchema: { type: 'string' } };
-  const [modifiedData, setModifiedData] = useState({
+  const [modifiedData, setModifiedData] = React.useState<{
+    name: string;
+    filter: EntityService.Params.Filters.Operator.Where;
+    value: string | null;
+  }>({
     name: displayedFilters[0]?.name || '',
-    filter: getFilterList(displayedFilters[0] || defaultFieldSchema)[0].value,
+    filter: getFilterList((displayedFilters[0] || defaultFieldSchema).fieldSchema)[0].value,
     value: '',
   });
 
@@ -54,8 +67,11 @@ export const FilterPopoverURLQuery = ({
     return null;
   }
 
-  const handleChangeFilterField = (value) => {
+  const handleChangeFilterField = (value: string) => {
     const nextField = displayedFilters.find((f) => f.name === value);
+
+    if (!nextField) return;
+
     const {
       fieldSchema: { type, options },
     } = nextField;
@@ -65,16 +81,16 @@ export const FilterPopoverURLQuery = ({
       filterValue = 'true';
     }
 
-    if (type === 'enumeration') {
-      filterValue = options?.[0];
+    if (type === 'enumeration' && Array.isArray(options)) {
+      filterValue = options[0];
     }
 
-    const filter = getFilterList(nextField)[0].value;
+    const filter = getFilterList(nextField.fieldSchema)[0].value;
 
     setModifiedData({ name: value, filter, value: filterValue });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const hasFilter =
@@ -86,34 +102,38 @@ export const FilterPopoverURLQuery = ({
       }) !== undefined;
 
     if (modifiedData.value && !hasFilter) {
-      let filterToAdd = { [modifiedData.name]: { [modifiedData.filter]: modifiedData.value } };
-
       const foundAttribute = displayedFilters.find(({ name }) => name === modifiedData.name);
 
-      const type = foundAttribute.fieldSchema.type;
+      if (foundAttribute) {
+        if (foundAttribute.trackedEvent) {
+          trackUsage(foundAttribute.trackedEvent.name, foundAttribute.trackedEvent.properties);
+        }
 
-      if (foundAttribute.trackedEvent) {
-        trackUsage(foundAttribute.trackedEvent.name, foundAttribute.trackedEvent.properties);
-      }
+        let filterToAdd: Filter;
 
-      if (type === 'relation') {
-        filterToAdd = {
-          [modifiedData.name]: {
-            [foundAttribute.fieldSchema.mainField.name]: {
-              [modifiedData.filter]: modifiedData.value,
+        if (foundAttribute.fieldSchema.type === 'relation') {
+          filterToAdd = {
+            [modifiedData.name]: {
+              [foundAttribute.fieldSchema.mainField.name]: {
+                [modifiedData.filter]: modifiedData.value,
+              },
             },
-          },
-        };
+          } as Filter;
+        } else {
+          filterToAdd = {
+            [modifiedData.name]: { [modifiedData.filter]: modifiedData.value },
+          } as Filter;
+        }
+
+        const filters = [...(query?.filters?.$and || []), filterToAdd];
+
+        setQuery({ filters: { $and: filters }, page: 1 });
       }
-
-      const filters = [...(query?.filters?.$and || []), filterToAdd];
-
-      setQuery({ filters: { $and: filters }, page: 1 });
     }
     onToggle();
   };
 
-  const handleChangeOperator = (operator) => {
+  const handleChangeOperator = (operator: EntityService.Params.Filters.Operator.Where) => {
     if (operator === '$null' || operator === '$notNull') {
       setModifiedData((prev) => ({
         ...prev,
@@ -127,9 +147,10 @@ export const FilterPopoverURLQuery = ({
     setModifiedData((prev) => ({ ...prev, filter: operator, value: '' }));
   };
 
-  const appliedFilter = displayedFilters.find((filter) => filter.name === modifiedData.name);
+  const appliedFilter = displayedFilters.find((filter) => filter.name === modifiedData.name)!;
   const operator = modifiedData.filter;
-  const filterList = appliedFilter.metadatas.customOperators || getFilterList(appliedFilter);
+  const filterList =
+    appliedFilter.metadatas.customOperators || getFilterList(appliedFilter.fieldSchema);
   const Inputs = appliedFilter.metadatas.customInput || DefaultInputs;
 
   return (
@@ -137,48 +158,53 @@ export const FilterPopoverURLQuery = ({
       <form onSubmit={handleSubmit}>
         <Flex direction="column" alignItems="stretch" gap={1} style={{ minWidth: 184 }}>
           <SelectContainers direction="column" alignItems="stretch" gap={1}>
-            <Select
+            <SingleSelect
               label={formatMessage({
-                id: 'app.utils.select-field',
-                defaultMessage: 'Select field',
+                id: 'app.utils.SingleSelect-field',
+                defaultMessage: 'SingleSelect field',
               })}
               name="name"
               size="M"
+              // @ts-expect-error from the DS V2 this won't be needed because we're only returning strings.
               onChange={handleChangeFilterField}
               value={modifiedData.name}
             >
               {displayedFilters.map((filter) => {
                 return (
-                  <Option key={filter.name} value={filter.name}>
+                  <SingleSelectOption key={filter.name} value={filter.name}>
                     {filter.metadatas.label}
-                  </Option>
+                  </SingleSelectOption>
                 );
               })}
-            </Select>
-            <Select
+            </SingleSelect>
+            <SingleSelect
               label={formatMessage({
-                id: 'app.utils.select-filter',
-                defaultMessage: 'Select filter',
+                id: 'app.utils.SingleSelect-filter',
+                defaultMessage: 'SingleSelect filter',
               })}
               name="filter"
               size="M"
               value={modifiedData.filter}
-              onChange={handleChangeOperator}
+              onChange={(value) =>
+                // TODO: we should do an assertion function to ensure the value is a valid operator
+                handleChangeOperator(value as EntityService.Params.Filters.Operator.Where)
+              }
             >
               {filterList.map((option) => {
                 return (
-                  <Option key={option.value} value={option.value}>
+                  <SingleSelectOption key={option.value} value={option.value}>
                     {formatMessage(option.intlLabel)}
-                  </Option>
+                  </SingleSelectOption>
                 );
               })}
-            </Select>
+            </SingleSelect>
           </SelectContainers>
           {operator !== '$null' && operator !== '$notNull' && (
             <Box>
               <Inputs
-                {...appliedFilter.metadatas}
-                {...appliedFilter.fieldSchema}
+                label={appliedFilter.metadatas.label}
+                type={appliedFilter.fieldSchema.type}
+                options={appliedFilter.fieldSchema.options}
                 value={modifiedData.value}
                 onChange={(value) => setModifiedData((prev) => ({ ...prev, value }))}
               />
@@ -195,29 +221,6 @@ export const FilterPopoverURLQuery = ({
   );
 };
 
-FilterPopoverURLQuery.defaultProps = {
-  onBlur: undefined,
-};
-
-FilterPopoverURLQuery.propTypes = {
-  displayedFilters: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      metadatas: PropTypes.shape({ label: PropTypes.string }),
-      fieldSchema: PropTypes.shape({ type: PropTypes.string }),
-      // Send event to the tracker
-      trackedEvent: PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        properties: PropTypes.object,
-      }),
-    })
-  ).isRequired,
-  isVisible: PropTypes.bool.isRequired,
-  onBlur: PropTypes.func,
-  onToggle: PropTypes.func.isRequired,
-  source: PropTypes.shape({ current: PropTypes.instanceOf(Element) }).isRequired,
-};
-
 const SelectContainers = styled(Flex)`
   /* Hide the label, every input needs a label. */
   label {
@@ -232,39 +235,41 @@ const SelectContainers = styled(Flex)`
   }
 `;
 
-const DefaultInputs = ({ label, onChange, options, type, value }) => {
+const DefaultInputs = ({
+  label = '',
+  onChange,
+  options = [],
+  type,
+  value = '',
+}: DefaultFilterInputsProps) => {
   const { formatMessage } = useIntl();
 
   if (type === 'boolean') {
     return (
-      <Select
-        // FIXME: stop errors in the console
-        aria-label={label}
-        onChange={onChange}
-        value={value}
-      >
-        <Option value="true">true</Option>
-        <Option value="false">false</Option>
-      </Select>
+      <SingleSelect aria-label={label} onChange={(value) => onChange(String(value))} value={value}>
+        <SingleSelectOption value="true">true</SingleSelectOption>
+        <SingleSelectOption value="false">false</SingleSelectOption>
+      </SingleSelect>
     );
   }
 
   if (type === 'date') {
     return (
+      // @ts-expect-error – in V2 of the DS we won't pass label because this will become input only & a label breaks the design
       <DatePicker
         clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
         ariaLabel={label}
         name="datepicker"
-        onChange={(date) => onChange(formatISO(date, { representation: 'date' }))}
+        onChange={(date) => onChange(date ? formatISO(date, { representation: 'date' }) : null)}
         onClear={() => onChange(null)}
         selectedDate={value ? new Date(value) : undefined}
-        selectedDateLabel={(formattedDate) => `Date picker, current is ${formattedDate}`}
       />
     );
   }
 
   if (type === 'datetime') {
     return (
+      // @ts-expect-error – in V2 of the DS we won't pass label because this will become input only & a label breaks the design
       <DateTimePicker
         clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
         ariaLabel={label}
@@ -273,28 +278,22 @@ const DefaultInputs = ({ label, onChange, options, type, value }) => {
         onChange={(date) => onChange(date ? date.toISOString() : null)}
         onClear={() => onChange(null)}
         value={value ? new Date(value) : undefined}
-        selectedDateLabel={(formattedDate) => `Date picker, current is ${formattedDate}`}
-        selectButtonTitle={formatMessage({ id: 'selectButtonTitle', defaultMessage: 'Select' })}
       />
     );
   }
 
   if (type === 'enumeration') {
     return (
-      <Select
-        // FIXME: stop errors in the console
-        aria-label={label}
-        onChange={onChange}
-        value={value}
-      >
+      // @ts-expect-error from the DS V2 this won't be needed because we're only returning strings.
+      <SingleSelect aria-label={label} onChange={onChange} value={value}>
         {options.map((optionValue) => {
           return (
-            <Option key={optionValue} value={optionValue}>
+            <SingleSelectOption key={optionValue} value={optionValue}>
               {optionValue}
-            </Option>
+            </SingleSelectOption>
           );
         })}
-      </Select>
+      </SingleSelect>
     );
   }
 
@@ -303,7 +302,8 @@ const DefaultInputs = ({ label, onChange, options, type, value }) => {
       <NumberInput
         aria-label={label}
         name="filter-value"
-        onValueChange={onChange}
+        onValueChange={(value) => onChange(value ? String(value) : null)}
+        // @ts-expect-error – we need to refactor this component so it's a discriminated union where the attribute type dictates the value type.
         value={value || 0}
       />
     );
@@ -311,11 +311,12 @@ const DefaultInputs = ({ label, onChange, options, type, value }) => {
 
   if (type === 'time') {
     return (
+      // @ts-expect-error – in V2 of the DS we won't pass label because this will become input only & a label breaks the design
       <TimePicker
         aria-label={label}
         onClear={() => onChange('')}
-        onChange={onChange}
-        value={value}
+        onChange={(value) => onChange(value ? value : null)}
+        value={value ?? undefined}
         clearLabel="Clear the selected time picker value"
       />
     );
@@ -323,36 +324,20 @@ const DefaultInputs = ({ label, onChange, options, type, value }) => {
 
   return (
     <Field>
-      <FieldInput // FIXME: stop errors in the console
+      <FieldInput
         aria-label={formatMessage({ id: 'app.utils.filter-value', defaultMessage: 'Filter value' })}
         onChange={({ target: { value } }) => onChange(value)}
-        value={value}
+        value={value ?? undefined}
         size="M"
       />
     </Field>
   );
 };
 
-DefaultInputs.defaultProps = {
-  label: '',
-  options: [],
-  value: '',
-};
-
-DefaultInputs.propTypes = {
-  label: PropTypes.string,
-  onChange: PropTypes.func.isRequired,
-  options: PropTypes.arrayOf(PropTypes.string),
-  type: PropTypes.string.isRequired,
-  value: PropTypes.any,
-};
-
 /**
  * Depending on the selected field find the possible filters to apply
- * @param {Object} fieldSchema.type the type of the filter
- * @returns {Object[]}
  */
-const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }) => {
+const getFilterList = ({ type: fieldType, mainField }: FilterData['fieldSchema']): Operator[] => {
   const type = mainField?.schema?.type ?? fieldType;
 
   switch (type) {

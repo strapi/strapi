@@ -243,7 +243,7 @@ const HeaderCell = ({
   isSortable,
   label,
 }: HeaderCellProps) => {
-  const [{ query }, setQuery] = useQueryParams();
+  const [{ query }, setQuery] = useQueryParams<{ sort: `${string}:${'ASC' | 'DESC'}` }>();
   const sort = typeof query?.sort === 'string' ? query.sort : '';
   const [sortBy, sortOrder] = sort.split(':');
   const { formatMessage } = useIntl();
