@@ -6,6 +6,8 @@ import { createRelation, isRelationAttribute } from './relations';
 import { Metadata } from './types';
 import type { Attribute, Model, Meta, ComponentLinkMeta } from './types';
 
+export { Metadata };
+
 // TODO: check if there isn't an attribute with an id already
 /**
  * Create Metadata from models configurations
@@ -62,7 +64,7 @@ export const createMetadata = (models: Model[] = []): Metadata => {
         createAttribute(attributeName, attribute);
       } catch (error) {
         console.log(error);
-        if (errors.isError(error)) {
+        if (error instanceof Error) {
           throw new Error(
             `Error on attribute ${attributeName} in model ${meta.singularName}(${meta.uid}): ${error.message}`
           );
@@ -141,6 +143,7 @@ const createCompoLinkModelMeta = (baseModelMeta: Meta): Meta => {
       {
         name: `${baseModelMeta.tableName}_entity_fk`,
         columns: ['entity_id'],
+        type: null,
       },
       {
         name: `${baseModelMeta.tableName}_unique`,

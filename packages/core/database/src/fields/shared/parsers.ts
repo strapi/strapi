@@ -1,22 +1,35 @@
-'use strict';
+import { padCharsEnd } from 'lodash/fp';
+import * as dateFns from 'date-fns';
 
-const { isString, padCharsEnd } = require('lodash/fp');
-const dateFns = require('date-fns');
+import { InvalidDateTimeError, InvalidDateError, InvalidTimeError } from '../../errors';
 
-const { InvalidDateTimeError, InvalidDateError, InvalidTimeError } = require('../../errors');
+const isDate = (value: unknown): value is Date => {
+  return dateFns.isDate(value);
+};
 
 const DATE_REGEX = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
 const PARTIAL_DATE_REGEX = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])/g;
 const TIME_REGEX = /^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(.[0-9]{1,3})?$/;
 
-export const parseDateTimeOrTimestamp = (value: unknown) => {
-  if (dateFns.isDate(value)) return value;
+export const parseDateTimeOrTimestamp = (value: unknown): Date => {
+  if (isDate(value)) {
+    return value;
+  }
+
+  if (typeof value !== 'string') {
+    throw new InvalidDateTimeError(`Expected a string, got a ${typeof value}`);
+  }
+
   try {
     const date = dateFns.parseISO(value);
-    if (dateFns.isValid(date)) return date;
+    if (dateFns.isValid(date)) {
+      return date;
+    }
 
     const milliUnixDate = dateFns.parse(value, 'T', new Date());
-    if (dateFns.isValid(milliUnixDate)) return milliUnixDate;
+    if (dateFns.isValid(milliUnixDate)) {
+      return milliUnixDate;
+    }
 
     throw new InvalidDateTimeError(`Invalid format, expected a timestamp or an ISO date`);
   } catch (error) {
@@ -25,9 +38,11 @@ export const parseDateTimeOrTimestamp = (value: unknown) => {
 };
 
 export const parseDate = (value: unknown) => {
-  if (dateFns.isDate(value)) return dateFns.format(value, 'yyyy-MM-dd');
+  if (isDate(value)) {
+    return dateFns.format(value, 'yyyy-MM-dd');
+  }
 
-  if (!(typeof value === 'string')) {
+  if (typeof value !== 'string') {
     throw new InvalidDateError(`Expected a string, got a ${typeof value}`);
   }
 
@@ -42,6 +57,10 @@ export const parseDate = (value: unknown) => {
     );
   }
 
+  if (!extractedValue) {
+    throw new InvalidDateError(`Invalid format, expected yyyy-MM-dd`);
+  }
+
   const date = dateFns.parseISO(extractedValue);
   if (!dateFns.isValid(date)) {
     throw new InvalidDateError(`Invalid date`);
@@ -51,7 +70,9 @@ export const parseDate = (value: unknown) => {
 };
 
 export const parseTime = (value: unknown) => {
-  if (dateFns.isDate(value)) return dateFns.format(value, 'HH:mm:ss.SSS');
+  if (isDate(value)) {
+    return dateFns.format(value, 'HH:mm:ss.SSS');
+  }
 
   if (typeof value !== 'string') {
     throw new InvalidTimeError(`Expected a string, got a ${typeof value}`);

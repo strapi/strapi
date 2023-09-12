@@ -1,10 +1,11 @@
 import path from 'path';
 import fse from 'fs-extra';
+import type { Knex } from 'knex';
 
 import * as errors from '../../errors';
 import Dialect from '../dialect';
 import SqliteSchemaInspector from './schema-inspector';
-import { Database } from '../..';
+import type { Database } from '../..';
 
 const UNSUPPORTED_OPERATORS = ['$jsonSupersetOf'];
 
@@ -18,11 +19,12 @@ export default class SqliteDialect extends Dialect {
   }
 
   configure() {
-    this.db.config.connection.connection.filename = path.resolve(
-      this.db.config.connection.connection.filename
-    );
+    const connection = this.db.config.connection.connection as Knex.Sqlite3ConnectionConfig;
+    if (typeof connection !== 'string') {
+      connection.filename = path.resolve(connection.filename);
+    }
 
-    const dbDir = path.dirname(this.db.config.connection.connection.filename);
+    const dbDir = path.dirname(connection.filename);
 
     fse.ensureDirSync(dbDir);
   }

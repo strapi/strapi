@@ -185,6 +185,7 @@ export default class SqliteSchemaInspector implements SchemaInspector {
       if (!ret[fk.id]) {
         ret[fk.id] = {
           // TODO: name, //  find name
+          name: '',
           columns: [fk.from],
           referencedColumns: [fk.to],
           referencedTable: fk.table,

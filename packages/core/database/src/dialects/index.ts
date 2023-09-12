@@ -1,5 +1,8 @@
 import type { Database } from '..';
 import Dialect from './dialect';
+import PostgresClass from './postgresql';
+import MysqlClass from './mysql';
+import SqliteClass from './sqlite';
 
 /**
  * Require our dialect-specific code
@@ -7,11 +10,11 @@ import Dialect from './dialect';
 const getDialectClass = (client: string): typeof Dialect => {
   switch (client) {
     case 'postgres':
-      return require('./postgresql');
+      return PostgresClass;
     case 'mysql':
-      return require('./mysql');
+      return MysqlClass;
     case 'sqlite':
-      return require('./sqlite');
+      return SqliteClass;
     default:
       throw new Error(`Unknown dialect ${client}`);
   }
@@ -20,7 +23,7 @@ const getDialectClass = (client: string): typeof Dialect => {
 /**
  * Get the dialect of a database client
  */
-const getDialectName = (client: string) => {
+const getDialectName = (client: unknown) => {
   switch (client) {
     case 'postgres':
       return 'postgres';

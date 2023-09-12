@@ -1,4 +1,4 @@
-import type { Model } from '../schema';
+import type { Model } from '../metadata/types';
 
 export type Action =
   | 'beforeCreate'

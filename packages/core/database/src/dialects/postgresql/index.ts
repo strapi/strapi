@@ -1,5 +1,5 @@
-import { Database } from '../..';
 import * as errors from '../../errors';
+import type { Database } from '../..';
 import Dialect from '../dialect';
 import PostgresqlSchemaInspector from './schema-inspector';
 
@@ -27,7 +27,7 @@ export default class PostgresDialect extends Dialect {
     this.db.connection.client.driver.types.setTypeParser(
       this.db.connection.client.driver.types.builtins.JSONB,
       'text',
-      (v) => v
+      (v: unknown) => v
     );
     this.db.connection.client.driver.types.setTypeParser(
       this.db.connection.client.driver.types.builtins.NUMERIC,

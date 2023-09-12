@@ -11,10 +11,21 @@ export type * from './types';
 
 const debug = createDebug('strapi::database');
 
+export interface SchemaProvider {
+  builder: ReturnType<typeof createSchemaBuilder>;
+  schemaDiff: ReturnType<typeof createSchemaDiff>;
+  schemaStorage: ReturnType<typeof createSchemaStorage>;
+  sync(): Promise<void>;
+  syncSchema(): Promise<void>;
+  reset(): Promise<void>;
+  create(): Promise<void>;
+  drop(): Promise<void>;
+}
+
 /**
  * @type {import('.').default}
  */
-export const createSchemaProvider = (db: Database) => {
+export const createSchemaProvider = (db: Database): SchemaProvider => {
   const schema = metadataToSchema(db.metadata);
 
   return {

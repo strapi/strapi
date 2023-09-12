@@ -2,7 +2,7 @@ import type { Knex } from 'knex';
 
 import { Dialect, getDialect } from './dialects';
 import { createSchemaProvider } from './schema';
-import { createMetadata } from './metadata';
+import { createMetadata, Metadata } from './metadata';
 import { createEntityManager } from './entity-manager';
 import { createMigrationsProvider } from './migrations';
 import { createLifecyclesProvider } from './lifecycles';
@@ -33,7 +33,7 @@ class Database {
 
   config: DatabaseConfig;
 
-  metadata: any;
+  metadata: Metadata;
 
   schema: any;
 

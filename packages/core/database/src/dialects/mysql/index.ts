@@ -1,10 +1,11 @@
 import semver from 'semver';
+import type { Knex } from 'knex';
 
 import Dialect from '../dialect';
 import MysqlSchemaInspector from './schema-inspector';
 import MysqlDatabaseInspector from './database-inspector';
 import { MYSQL } from './constants';
-import { Database } from '../..';
+import type { Database } from '../..';
 
 import type { Information } from './database-inspector';
 
@@ -23,13 +24,18 @@ export default class MysqlDialect extends Dialect {
   }
 
   configure() {
-    this.db.config.connection.connection.supportBigNumbers = true;
+    const connection = this.db.config.connection.connection as Knex.MySqlConnectionConfig;
+
+    connection.supportBigNumbers = true;
     // Only allow bigNumberStrings option set to be true if no connection option passed
     // Otherwise bigNumberStrings option should be allowed to used from DB config
-    if (this.db.config.connection.connection.bigNumberStrings === undefined) {
-      this.db.config.connection.connection.bigNumberStrings = true;
+    if (connection.bigNumberStrings === undefined) {
+      connection.bigNumberStrings = true;
     }
-    this.db.config.connection.connection.typeCast = (field, next) => {
+    connection.typeCast = (
+      field: { type: string; string: () => string; length: number },
+      next: () => void
+    ) => {
       if (field.type === 'DECIMAL' || field.type === 'NEWDECIMAL') {
         const value = field.string();
         return value === null ? null : Number(value);
@@ -76,8 +82,9 @@ export default class MysqlDialect extends Dialect {
   }
 
   supportsWindowFunctions() {
-    const isMysqlDB = !this.info.database || this.info.database === MYSQL;
-    const isBeforeV8 = !semver.valid(this.info.version) || semver.lt(this.info.version, '8.0.0');
+    const isMysqlDB = !this.info?.database || this.info.database === MYSQL;
+    const isBeforeV8 =
+      !semver.valid(this.info?.version) || semver.lt(this.info?.version ?? '', '8.0.0');
 
     if (isMysqlDB && isBeforeV8) {
       return false;
@@ -90,7 +97,7 @@ export default class MysqlDialect extends Dialect {
     return true;
   }
 
-  transformErrors(error) {
+  transformErrors(error: Error) {
     super.transformErrors(error);
   }
 }

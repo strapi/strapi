@@ -1,9 +1,15 @@
+import { Attribute } from '@strapi/typings';
 import * as types from '../../types';
 import { getJoinTableName } from '../../metadata/relations';
 
 import type { Database } from '../..';
 
-const getLinksWithoutMappedBy = (db: Database) => {
+type Link = {
+  relation: Attribute.Relation;
+  invRelation: Attribute.Relation;
+};
+
+const getLinksWithoutMappedBy = (db: Database): Array<Link> => {
   const relationsToUpdate = {};
 
   db.metadata.forEach((contentType) => {

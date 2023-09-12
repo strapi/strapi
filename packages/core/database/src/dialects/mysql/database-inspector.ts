@@ -1,5 +1,5 @@
-import { Database } from '../..';
 import { MARIADB, MYSQL } from './constants';
+import type { Database } from '../..';
 
 export interface Information {
   database: typeof MARIADB | typeof MYSQL | null;

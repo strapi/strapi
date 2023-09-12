@@ -1,6 +1,6 @@
-import { Database } from '../..';
 import type { Column, ForeignKey, Index, Schema } from '../../schema/types';
 import type { SchemaInspector } from '../dialect';
+import type { Database } from '../..';
 
 interface RawTable {
   table_name: string;

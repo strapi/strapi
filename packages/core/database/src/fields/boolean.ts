@@ -7,7 +7,9 @@ function isStringOrNumber(value: unknown): value is string | number {
 
 export default class BooleanField extends Field {
   toDB(value: unknown) {
-    if (typeof value === 'boolean') return value;
+    if (typeof value === 'boolean') {
+      return value;
+    }
 
     if (isStringOrNumber(value) && ['true', 't', '1', 1].includes(value)) {
       return true;

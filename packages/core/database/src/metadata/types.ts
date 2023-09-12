@@ -7,7 +7,7 @@ export interface ColumnInfo {
 
 export interface Attribute {
   type: string;
-  columnName: string;
+  columnName?: string;
   column?: ColumnInfo;
   required?: boolean;
   unique?: boolean;
@@ -85,7 +85,7 @@ export interface Meta {
   indexes: Index[];
   foreignKeys?: ForeignKey[];
   lifecycles?: Record<string, unknown>;
-  columnToAttribute: Record<string, string>;
+  columnToAttribute?: Record<string, string>;
   componentLink?: Meta;
 }
 
@@ -99,7 +99,7 @@ export interface Model {
   singularName: string;
   attributes: Record<string, Attribute>;
   lifecycles: Record<string, unknown>;
-  indexes: Record<string, unknown>[];
+  indexes: Index[];
   componentLink?: Meta;
   columnToAttribute?: Record<string, string>;
   foreignKeys?: Record<string, unknown>[];
