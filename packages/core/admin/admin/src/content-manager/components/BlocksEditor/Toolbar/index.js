@@ -3,10 +3,18 @@ import * as React from 'react';
 import * as Toolbar from '@radix-ui/react-toolbar';
 import { Flex, Icon, Tooltip } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
-import { Bold, Italic, Underline, StrikeThrough, Code } from '@strapi/icons';
+import {
+  Bold,
+  Italic,
+  Underline,
+  StrikeThrough,
+  Code,
+  BulletList,
+  NumberList,
+} from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Editor } from 'slate';
+import { Editor, Element, Transforms } from 'slate';
 import { useSlate } from 'slate-react';
 import styled from 'styled-components';
 
@@ -104,6 +112,78 @@ const modifiers = [
   },
 ];
 
+const ListButton = ({ icon, name, label }) => {
+  const editor = useSlate();
+
+  const isListActive = () => {
+    const { selection } = editor;
+
+    if (!selection) return false;
+
+    const [match] = Array.from(
+      Editor.nodes(editor, {
+        at: Editor.unhangRange(editor, selection),
+        match: (node) => !Editor.isEditor(node) && Element.isElement(node) && node.type === name,
+      })
+    );
+
+    return !!match;
+  };
+
+  const toggleList = () => {
+    const isActive = isListActive();
+
+    Transforms.unwrapNodes(editor, {
+      match: (n) =>
+        !Editor.isEditor(n) && Element.isElement(n) && ['ordered', 'unordered'].includes(n.type),
+      split: true,
+    });
+
+    Transforms.setNodes(editor, {
+      type: isActive ? 'paragraph' : 'list-item',
+    });
+
+    if (!isActive) {
+      const block = { type: name, children: [] };
+      Transforms.wrapNodes(editor, block);
+    }
+  };
+
+  const isActive = isListActive(name);
+
+  const { formatMessage } = useIntl();
+  const labelMessage = formatMessage(label);
+
+  return (
+    <Tooltip description={labelMessage}>
+      <Toolbar.ToggleItem value={name} data-state={isActive ? 'on' : 'off'} asChild>
+        <Flex
+          background={isActive ? 'primary100' : ''}
+          padding={2}
+          as="button"
+          hasRadius
+          onMouseDown={(e) => {
+            e.preventDefault();
+            toggleList(name);
+          }}
+          aria-label={labelMessage}
+        >
+          <Icon width={4} as={icon} color={isActive ? 'primary600' : 'neutral600'} />
+        </Flex>
+      </Toolbar.ToggleItem>
+    </Tooltip>
+  );
+};
+
+ListButton.propTypes = {
+  icon: PropTypes.elementType.isRequired,
+  name: PropTypes.string.isRequired,
+  label: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+  }).isRequired,
+};
+
 const BlocksToolbar = () => {
   return (
     <Toolbar.Root asChild>
@@ -121,10 +201,24 @@ const BlocksToolbar = () => {
           </Flex>
         </Toolbar.ToggleGroup>
         <Separator />
-        <Toolbar.ToggleGroup type="multiple" asChild>
+        <Toolbar.ToggleGroup type="single" asChild>
           <Flex gap={1}>
-            <Toolbar.ToggleItem value="test">test</Toolbar.ToggleItem>
-            <Toolbar.ToggleItem value="test2">test</Toolbar.ToggleItem>
+            <ListButton
+              label={{
+                id: 'components.Blocks.blocks.unorderedList',
+                defaultMessage: 'Unordered list',
+              }}
+              name="unordered"
+              icon={BulletList}
+            />
+            <ListButton
+              label={{
+                id: 'components.Blocks.blocks.orderedList',
+                defaultMessage: 'Ordered list',
+              }}
+              name="ordered"
+              icon={NumberList}
+            />
           </Flex>
         </Toolbar.ToggleGroup>
       </Flex>
