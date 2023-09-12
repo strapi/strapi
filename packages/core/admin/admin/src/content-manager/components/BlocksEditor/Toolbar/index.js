@@ -50,13 +50,7 @@ const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
           }}
           aria-label={labelMessage}
         >
-          <Icon
-            width={3}
-            height={3}
-            as={icon}
-            className="mycoolicon"
-            color={isActive ? 'primary600' : 'neutral600'}
-          />
+          <Icon width={3} height={3} as={icon} color={isActive ? 'primary600' : 'neutral600'} />
         </FlexButton>
       </Toolbar.ToggleItem>
     </Tooltip>
@@ -80,18 +74,20 @@ const ModifierButton = ({ icon, name, label }) => {
   const isModifierActive = () => {
     const modifiers = Editor.marks(editor);
 
-    return modifiers ? modifiers[name] === true : false;
+    if (!modifiers) return false;
+
+    return Boolean(modifiers[name]);
   };
 
+  const isActive = isModifierActive(name);
+
   const toggleModifier = () => {
-    if (isModifierActive(name)) {
+    if (isActive) {
       Editor.removeMark(editor, name);
     } else {
       Editor.addMark(editor, name, true);
     }
   };
-
-  const isActive = isModifierActive(name);
 
   return (
     <ToolbarButton
@@ -161,12 +157,12 @@ const ListButton = ({ icon, format, label }) => {
       })
     );
 
-    return !!match;
+    return Boolean(match);
   };
 
-  const toggleList = () => {
-    const isActive = isListActive();
+  const isActive = isListActive();
 
+  const toggleList = () => {
     Transforms.unwrapNodes(editor, {
       match: (node) =>
         !Editor.isEditor(node) &&
@@ -185,8 +181,6 @@ const ListButton = ({ icon, format, label }) => {
       Transforms.wrapNodes(editor, block);
     }
   };
-
-  const isActive = isListActive();
 
   return (
     <ToolbarButton
