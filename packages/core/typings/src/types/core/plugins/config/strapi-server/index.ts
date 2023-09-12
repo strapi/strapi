@@ -3,12 +3,11 @@ import { Routes } from './routes';
 import { ContentTypes } from './content-types';
 import { Controllers } from './controllers';
 import { Register, Bootstrap, Destroy } from './lifecycle';
-import { LoadedStrapi } from '../../../../..';
 
-export interface ServerObject<TStrapi> {
-  register: Register<TStrapi>;
-  bootstrap: Bootstrap<TStrapi>;
-  destroy: Destroy<TStrapi>;
+export interface ServerObject {
+  register: Register;
+  bootstrap: Bootstrap;
+  destroy: Destroy;
   config: Config;
   routes: Routes;
   contentTypes: ContentTypes;
@@ -20,7 +19,7 @@ export interface ServerObject<TStrapi> {
   middlewares: any;
 }
 
-export type ServerFunction<TStrapi> = () => ServerObject<TStrapi>;
+export type ServerFunction = () => ServerObject;
 
 // Interface for the plugin strapi-server file
-export type Server<TStrapi = LoadedStrapi> = ServerObject<TStrapi> | ServerFunction<TStrapi>;
+export type Server = ServerObject | ServerFunction;

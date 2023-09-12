@@ -1,2 +1,2 @@
-export { Admin } from './strapi-admin';
-export { Server } from './strapi-server';
+export * from './strapi-admin';
+export * from './strapi-server';

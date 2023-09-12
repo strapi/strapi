@@ -1,9 +1,7 @@
-export type LifecycleMethod<TStrapi> = ({
-  strapi,
-}: {
-  strapi: TStrapi;
-}) => Promise<unknown> | unknown;
+import { Strapi } from '../../../../..';
 
-export type Register<TStrapi> = LifecycleMethod<TStrapi>;
-export type Bootstrap<TStrapi> = LifecycleMethod<TStrapi>;
-export type Destroy<TStrapi> = LifecycleMethod<TStrapi>;
+export type LifecycleMethod = ({ strapi }: { strapi: Strapi }) => Promise<unknown> | unknown;
+
+export type Register = LifecycleMethod;
+export type Bootstrap = LifecycleMethod;
+export type Destroy = LifecycleMethod;
