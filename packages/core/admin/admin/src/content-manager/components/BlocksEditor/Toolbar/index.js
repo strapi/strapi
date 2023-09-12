@@ -24,6 +24,12 @@ const Separator = styled(Toolbar.Separator)`
   height: ${pxToRem(24)};
 `;
 
+const FlexButton = styled(Flex).attrs({ as: 'button' })`
+  &:hover {
+    background: ${({ theme }) => theme.colors.primary100};
+  }
+`;
+
 const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
   const { formatMessage } = useIntl();
   const labelMessage = formatMessage(label);
@@ -31,13 +37,12 @@ const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
   return (
     <Tooltip description={labelMessage}>
       <Toolbar.ToggleItem value={name} data-state={isActive ? 'on' : 'off'} asChild>
-        <Flex
+        <FlexButton
           background={isActive ? 'primary100' : ''}
           alignItems="center"
           justifyContent="center"
           width={7}
           height={7}
-          as="button"
           hasRadius
           onMouseDown={(e) => {
             e.preventDefault();
@@ -52,7 +57,7 @@ const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
             className="mycoolicon"
             color={isActive ? 'primary600' : 'neutral600'}
           />
-        </Flex>
+        </FlexButton>
       </Toolbar.ToggleItem>
     </Tooltip>
   );
