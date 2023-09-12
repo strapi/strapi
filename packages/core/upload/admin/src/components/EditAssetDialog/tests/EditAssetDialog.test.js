@@ -1,12 +1,14 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { NotificationsProvider } from '@strapi/helper-plugin';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { NotificationsProvider, TrackingProvider } from '@strapi/helper-plugin';
-import { EditAssetDialog } from '../index';
+
 import en from '../../../translations/en.json';
 import { downloadFile } from '../../../utils/downloadFile';
+import { EditAssetDialog } from '../index';
 
 jest.mock('../../../hooks/useFolderStructure');
 jest.mock('../../../utils/downloadFile');
@@ -93,15 +95,13 @@ const queryClient = new QueryClient({
 const renderCompo = (props = { canUpdate: true, canCopyLink: true, canDownload: true }) =>
   render(
     <QueryClientProvider client={queryClient}>
-      <TrackingProvider>
-        <ThemeProvider theme={lightTheme}>
-          <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
-            <NotificationsProvider>
-              <EditAssetDialog asset={asset} onClose={jest.fn()} {...props} />
-            </NotificationsProvider>
-          </IntlProvider>
-        </ThemeProvider>
-      </TrackingProvider>
+      <ThemeProvider theme={lightTheme}>
+        <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
+          <NotificationsProvider>
+            <EditAssetDialog asset={asset} onClose={jest.fn()} {...props} />
+          </NotificationsProvider>
+        </IntlProvider>
+      </ThemeProvider>
     </QueryClientProvider>,
     { container: document.getElementById('app') }
   );
@@ -156,14 +156,13 @@ describe('<EditAssetDialog />', () => {
       expect(screen.getByText('Finish').parentElement).toHaveAttribute('aria-disabled', 'true');
     });
 
-    it('shows an error and sends the focus back to the name when it s not filled', async () => {
+    it('shows an error on the FileName input when its not filled', async () => {
       renderCompo();
 
       fireEvent.change(screen.getByLabelText('File name'), { target: { value: '' } });
       fireEvent.click(screen.getByText('Finish'));
 
       await waitFor(() => expect(screen.getByText('name is a required field')).toBeInTheDocument());
-      expect(screen.getByLabelText('File name')).toHaveFocus();
     });
   });
 
@@ -183,12 +182,14 @@ describe('<EditAssetDialog />', () => {
       expect(screen.queryByLabelText('Delete')).not.toBeInTheDocument();
     });
 
-    it('copies the link and shows a notification when pressing "Copy link" and the user has permission to copy', () => {
+    it('copies the link and shows a notification when pressing "Copy link" and the user has permission to copy', async () => {
       renderCompo({ canUpdate: false, canCopyLink: true, canDownload: false });
 
       fireEvent.click(screen.getByLabelText('Copy link'));
 
-      expect(screen.getByText('Link copied into the clipboard')).toBeInTheDocument();
+      await waitFor(() =>
+        expect(screen.getByText('Link copied into the clipboard')).toBeInTheDocument()
+      );
     });
 
     it('hides the copy link button when the user is not allowed to see it', () => {

@@ -1,29 +1,29 @@
-import { SchemaUID, GetArrayValues } from '../../utils';
-import { Attribute, ConfigurableOption, MinMaxOption, RequiredOption } from './base';
-import { GetAttributesValues } from './utils';
+import type { Utils, Attribute, Common } from '@strapi/strapi';
 
-export interface DynamicZoneAttributeProperties<T extends Strapi.ComponentUIDs[] = []> {
-  components: T;
+export interface DynamicZoneProperties<TComponentsUID extends Common.UID.Component[]> {
+  components: TComponentsUID;
 }
 
-export type DynamicZoneAttribute<T extends Strapi.ComponentUIDs[] = []> = Attribute<'dynamiczone'> &
-  // Properties
-  DynamicZoneAttributeProperties<T> &
-  // Options
-  ConfigurableOption &
-  MinMaxOption &
-  RequiredOption;
+export type DynamicZone<TComponentsUID extends Common.UID.Component[] = Common.UID.Component[]> =
+  Attribute.OfType<'dynamiczone'> &
+    // Properties
+    DynamicZoneProperties<TComponentsUID> &
+    // Options
+    Attribute.ConfigurableOption &
+    Attribute.MinMaxOption &
+    Attribute.RequiredOption;
 
-type DynamicZoneValue<T extends Strapi.ComponentUIDs[]> = Array<
-  GetArrayValues<T> extends infer P
-    ? P extends SchemaUID
-      ? GetAttributesValues<P> & { __component: P }
+type DynamicZoneValue<TComponentsUID extends Common.UID.Component[]> = Array<
+  // Extract tuple values to a component uid union type
+  Utils.Array.Values<TComponentsUID> extends infer TComponentUID
+    ? TComponentUID extends Common.UID.Component
+      ? Attribute.GetValues<TComponentUID> & { __component: TComponentUID }
       : never
     : never
 >;
 
-export type GetDynamicZoneAttributeValue<T extends Attribute> = T extends DynamicZoneAttribute<
-  infer U
->
-  ? DynamicZoneValue<U>
-  : never;
+export type GetDynamicZoneValue<TAttribute extends Attribute.Attribute> =
+  TAttribute extends DynamicZone<infer TComponentsUID> ? DynamicZoneValue<TComponentsUID> : never;
+
+export type GetDynamicZoneTargets<TAttribute extends Attribute.Attribute> =
+  TAttribute extends DynamicZone<infer TComponentsUID> ? Utils.Array.Values<TComponentsUID> : never;

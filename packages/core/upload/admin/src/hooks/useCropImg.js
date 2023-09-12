@@ -1,5 +1,6 @@
+import { useEffect, useRef, useState } from 'react';
+
 import Cropper from 'cropperjs';
-import { useRef, useEffect, useState } from 'react';
 
 const QUALITY = 1;
 

@@ -1,13 +1,17 @@
 import React from 'react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { render as renderTL } from '@testing-library/react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { TrackingProvider } from '@strapi/helper-plugin';
+import { render as renderTL } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
+
 import { FromComputerForm } from '../FromComputerForm';
 
-jest.mock('axios', () => ({
-  ...jest.requireActual('axios'),
-  get: jest.fn(),
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  getFetchClient: jest.fn().mockReturnValue({
+    get: jest.fn(),
+  }),
 }));
 
 describe('FromComputerForm', () => {

@@ -3,21 +3,24 @@
  *
  */
 
-import React, { memo, useMemo } from 'react';
-import { FormattedMessage } from 'react-intl';
-import styled from 'styled-components';
-import { Helmet } from 'react-helmet';
-import { useHistory } from 'react-router-dom';
+import React, { useMemo } from 'react';
+
+import { Box, Grid, GridItem, Layout, Main } from '@strapi/design-system';
 import { LoadingIndicatorPage, useGuidedTour } from '@strapi/helper-plugin';
-import { Layout, Main, Box, Grid, GridItem } from '@strapi/design-system';
-import useLicenseLimitNotification from 'ee_else_ce/hooks/useLicenseLimitNotification';
-import cornerOrnamentPath from './assets/corner-ornament.svg';
-import { useModels } from '../../hooks';
-import isGuidedTourCompleted from '../../components/GuidedTour/utils/isGuidedTourCompleted';
+import { Helmet } from 'react-helmet';
+import { FormattedMessage } from 'react-intl';
+import { useHistory } from 'react-router-dom';
+import styled from 'styled-components';
+
 import GuidedTourHomepage from '../../components/GuidedTour/Homepage';
-import SocialLinks from './SocialLinks';
-import HomeHeader from './HomeHeader';
+import isGuidedTourCompleted from '../../components/GuidedTour/utils/isGuidedTourCompleted';
+import { useContentTypes } from '../../hooks/useContentTypes';
+import { useEnterprise } from '../../hooks/useEnterprise';
+
+import cornerOrnamentPath from './assets/corner-ornament.svg';
 import ContentBlocks from './ContentBlocks';
+import HomeHeader from './HomeHeader';
+import SocialLinks from './SocialLinks';
 
 const LogoContainer = styled(Box)`
   position: absolute;
@@ -29,15 +32,12 @@ const LogoContainer = styled(Box)`
   }
 `;
 
-const HomePage = () => {
+export const HomePageCE = () => {
   // Temporary until we develop the menu API
-  const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useModels();
+  const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useContentTypes();
   const { guidedTourState, isGuidedTourVisible, isSkipped } = useGuidedTour();
-  useLicenseLimitNotification();
-
   const showGuidedTour =
     !isGuidedTourCompleted(guidedTourState) && isGuidedTourVisible && !isSkipped;
-
   const { push } = useHistory();
   const handleClick = (e) => {
     e.preventDefault();
@@ -89,4 +89,19 @@ const HomePage = () => {
   );
 };
 
-export default memo(HomePage);
+function HomePageSwitch() {
+  const HomePage = useEnterprise(
+    HomePageCE,
+    // eslint-disable-next-line import/no-cycle
+    async () => (await import('../../../../ee/admin/pages/HomePage')).HomePageEE
+  );
+
+  // block rendering until the EE component is fully loaded
+  if (!HomePage) {
+    return null;
+  }
+
+  return <HomePage />;
+}
+
+export default HomePageSwitch;

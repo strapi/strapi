@@ -20,8 +20,10 @@ https://github.com/strapi/strapi/blob/main/CONTRIBUTING.md#reporting-an-issue
 
 ### Required System information
 
-<!-- Please ensure you are using the Node LTS version (v14 or v16 or v18) -->
-<!-- Strapi v3 is not supported unless it is a critical/high security issue -->
+<!-- Please ensure you are using the Node LTS version (v16 or v18 or v20) -->
+<!-- Strapi v3 is no longer supported, please update to Strapi v4 -->
+<!-- If you are reporting a frontend bug please provide error logs after setting STRAPI_ENFORCE_SOURCEMAPS=true in your .env -->
+<!-- This environment variable makes frontend errors easier to read and trace -->
 
 - Node.js version:
 - NPM version:
@@ -29,6 +31,8 @@ https://github.com/strapi/strapi/blob/main/CONTRIBUTING.md#reporting-an-issue
 - Database:
 - Operating system:
 - Is your project Javascript or Typescript:
+
+<!-- Did you know you can run `yarn strapi report` or `npm run strapi report` to get this information easier? -->
 
 ### Describe the bug
 

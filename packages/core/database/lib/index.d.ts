@@ -3,6 +3,8 @@ import { LifecycleProvider } from './lifecycles';
 import { MigrationProvider } from './migrations';
 import { SchemaProvider } from './schema';
 
+type ID = number | string;
+
 type LogicalOperators<T> = {
   $and?: WhereParams<T>[];
   $or?: WhereParams<T>[];
@@ -12,6 +14,7 @@ type LogicalOperators<T> = {
 type AttributeOperators<T, K extends keyof T> = {
   $eq?: T[K] | Array<T[K]>;
   $ne?: T[K] | Array<T[K]>;
+  $nei?: T[K] | Array<T[K]>;
   $in?: T[K][];
   $notIn?: T[K][];
   $lt?: T[K];
@@ -84,7 +87,7 @@ interface EntityManager {
   createMany<K extends keyof AllTypes>(
     uid: K,
     params: CreateManyParams<AllTypes[K]>
-  ): Promise<{ count: number }>;
+  ): Promise<{ count: number; ids: ID[] }>;
 
   update<K extends keyof AllTypes>(uid: K, params: any): Promise<any>;
   updateMany<K extends keyof AllTypes>(uid: K, params: any): Promise<{ count: number }>;
@@ -119,7 +122,7 @@ interface QueryFromContentType<T extends keyof AllTypes> {
   findPage(params: FindParams<AllTypes[T]>): Promise<{ results: any[]; pagination: Pagination }>;
 
   create(params: CreateParams<AllTypes[T]>): Promise<any>;
-  createMany(params: CreateManyParams<AllTypes[T]>): Promise<{ count: number }>;
+  createMany(params: CreateManyParams<AllTypes[T]>): Promise<{ count: number; ids: ID[] }>;
 
   update(params: any): Promise<any>;
   updateMany(params: any): Promise<{ count: number }>;
@@ -168,6 +171,8 @@ export interface Database {
       trx: Knex.Transaction;
       rollback: () => Promise<void>;
       commit: () => Promise<void>;
+      onCommit: (cb) => void;
+      onRollback: (cb) => void;
     }) => Promise<unknown>
   ):
     | Promise<unknown>

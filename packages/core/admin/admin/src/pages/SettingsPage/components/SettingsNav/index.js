@@ -1,23 +1,25 @@
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { useIntl } from 'react-intl';
-import PropTypes from 'prop-types';
-import { useTracking } from '@strapi/helper-plugin';
+
 import {
   SubNav,
   SubNavHeader,
+  SubNavLink,
   SubNavSection,
   SubNavSections,
-  SubNavLink,
 } from '@strapi/design-system/v2';
-import { getSectionsToDisplay } from '../../utils';
+import { useTracking } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import { NavLink, useLocation } from 'react-router-dom';
 
 const SettingsNav = ({ menu }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
 
-  const filteredMenu = getSectionsToDisplay(menu);
+  const filteredMenu = menu.filter(
+    (section) => !section.links.every((link) => link.isDisplayed === false)
+  );
 
   const sections = filteredMenu.map((section) => {
     return {
@@ -48,17 +50,19 @@ const SettingsNav = ({ menu }) => {
       <SubNavSections>
         {sections.map((section) => (
           <SubNavSection key={section.id} label={formatMessage(section.intlLabel)}>
-            {section.links.map((link) => (
-              <SubNavLink
-                as={NavLink}
-                withBullet={link.hasNotification}
-                to={link.to}
-                onClick={() => handleClickOnLink(link.to)}
-                key={link.id}
-              >
-                {formatMessage(link.intlLabel)}
-              </SubNavLink>
-            ))}
+            {section.links.map((link) => {
+              return (
+                <SubNavLink
+                  as={NavLink}
+                  withBullet={link.hasNotification}
+                  to={link.to}
+                  onClick={() => handleClickOnLink(link.to)}
+                  key={link.id}
+                >
+                  {formatMessage(link.intlLabel)}
+                </SubNavLink>
+              );
+            })}
           </SubNavSection>
         ))}
       </SubNavSections>

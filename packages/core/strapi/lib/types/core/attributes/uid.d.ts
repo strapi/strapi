@@ -1,15 +1,6 @@
-import {
-  Attribute,
-  ConfigurableOption,
-  DefaultOption,
-  MinMaxLengthOption,
-  PrivateOption,
-  RequiredOption,
-} from './base';
-import { SchemaUID } from '../../utils';
-import { GetAttributesKeysByType } from './utils';
+import type { Attribute, Common, Utils } from '@strapi/strapi';
 
-export interface UIDAttributeOptions {
+export interface UIDOptions {
   separator?: string;
   lowercase?: boolean;
   decamelize?: boolean;
@@ -17,41 +8,36 @@ export interface UIDAttributeOptions {
   preserveLeadingUnderscore?: boolean;
 }
 
-export interface UIDAttributeProperties<
-  // Own Schema Reference
-  T extends SchemaUID | undefined = undefined,
-  // Target attribute
-  U extends T extends SchemaUID
-    ? GetAttributesKeysByType<T, 'string' | 'text'>
-    : undefined = undefined,
-  // UID options
-  S extends UIDAttributeOptions = UIDAttributeOptions
+export interface UIDProperties<
+  TTargetAttribute extends string = string,
+  TOptions extends UIDOptions = UIDOptions
 > {
-  targetField?: U;
-  options?: UIDAttributeOptions & S;
+  targetField: TTargetAttribute;
+  options: UIDOptions & TOptions;
 }
 
-export type UIDAttribute<
-  // Own Schema Reference
-  T extends SchemaUID | undefined = undefined,
-  // Target attribute
-  U extends T extends SchemaUID
-    ? GetAttributesKeysByType<T, 'string' | 'text'>
-    : undefined = undefined,
-  // UID options
-  S extends UIDAttributeOptions = UIDAttributeOptions
-> = Attribute<'uid'> &
+export type UID<
+  // TODO: V5:
+  // The TOrigin was used to narrow down the list of possible target attribute for a
+  // UID, but was removed due to circular dependency issues and will be removed in V5
+  _TOrigin extends Common.UID.Schema = never,
+  TTargetAttribute extends string = string,
+  TOptions extends UIDOptions = UIDOptions
+> = Attribute.OfType<'uid'> &
   // Properties
-  UIDAttributeProperties<T, U, S> &
+  UIDProperties<TTargetAttribute, TOptions> &
   // Options
-  ConfigurableOption &
-  DefaultOption<UIDValue> &
-  MinMaxLengthOption &
-  PrivateOption &
-  RequiredOption;
+  Attribute.ConfigurableOption &
+  Attribute.DefaultOption<UIDValue> &
+  Attribute.MinMaxLengthOption &
+  Attribute.PrivateOption &
+  Attribute.RequiredOption;
 
 export type UIDValue = string;
 
-export type GetUIDAttributeValue<T extends Attribute> = T extends UIDAttribute<infer _U, infer _P>
+export type GetUIDValue<TAttribute extends Attribute.Attribute> = TAttribute extends UID<
+  infer _TOrigin,
+  infer _TTargetAttribute
+>
   ? UIDValue
   : never;

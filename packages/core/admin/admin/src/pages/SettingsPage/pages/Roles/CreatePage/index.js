@@ -1,39 +1,43 @@
 import React, { useRef, useState } from 'react';
-import { format } from 'date-fns';
+
+import {
+  Box,
+  Button,
+  ContentLayout,
+  Flex,
+  Grid,
+  GridItem,
+  HeaderLayout,
+  Main,
+  Textarea,
+  TextInput,
+  Typography,
+} from '@strapi/design-system';
 import {
   CheckPagePermissions,
   Form,
+  Link,
   LoadingIndicatorPage,
   SettingsPageTitle,
   useFetchClient,
   useNotification,
   useOverlayBlocker,
   useTracking,
-  Link,
 } from '@strapi/helper-plugin';
-import {
-  Box,
-  Button,
-  ContentLayout,
-  HeaderLayout,
-  Grid,
-  GridItem,
-  Main,
-  Flex,
-  Typography,
-  TextInput,
-  Textarea,
-} from '@strapi/design-system';
 import { ArrowLeft } from '@strapi/icons';
+import { format } from 'date-fns';
 import { Formik } from 'formik';
-import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
 import { useIntl } from 'react-intl';
+import { useSelector } from 'react-redux';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
+
+import { useAdminRolePermissions } from '../../../../../hooks/useAdminRolePermissions';
+import { selectAdminPermissions } from '../../../../App/selectors';
 import Permissions from '../EditPage/components/Permissions';
-import { useFetchPermissionsLayout, useFetchRole } from '../../../../../hooks';
-import adminPermissions from '../../../../../permissions';
+import { useAdminRolePermissionLayout } from '../hooks/useAdminRolePermissionLayout';
+
 import schema from './utils/schema';
 
 const UsersRoleNumber = styled.div`
@@ -47,6 +51,7 @@ const UsersRoleNumber = styled.div`
 `;
 
 const CreatePage = () => {
+  const route = useRouteMatch('/settings/roles/duplicate/:id');
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { formatMessage } = useIntl();
@@ -54,18 +59,30 @@ const CreatePage = () => {
   const { replace } = useHistory();
   const permissionsRef = useRef();
   const { trackUsage } = useTracking();
-  const params = useRouteMatch('/settings/roles/duplicate/:id');
-  const id = get(params, 'params.id', null);
-  const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout();
-  const { permissions: rolePermissions, isLoading: isRoleLoading } = useFetchRole(id);
-
   const { post, put } = useFetchClient();
+
+  const { params } = route ?? {};
+
+  const { isLoading: isLoadingPermissionsLayout, data: permissionsLayout } =
+    useAdminRolePermissionLayout(params?.id, {
+      cacheTime: 0,
+    });
+
+  const { permissions: rolePermissions, isLoading: isLoadingRole } = useAdminRolePermissions(
+    { id: params?.id },
+    {
+      cacheTime: 0,
+
+      // only fetch permissions if a role is cloned
+      enabled: !!params?.id,
+    }
+  );
 
   const handleCreateRoleSubmit = (data) => {
     lockApp();
     setIsSubmiting(true);
 
-    if (id) {
+    if (params?.id) {
       trackUsage('willDuplicateRole');
     } else {
       trackUsage('willCreateNewRole');
@@ -75,7 +92,7 @@ const CreatePage = () => {
       .then(async ({ data: res }) => {
         const { permissionsToSend } = permissionsRef.current.getPermissions();
 
-        if (id) {
+        if (params?.id) {
           trackUsage('didDuplicateRole');
         } else {
           trackUsage('didCreateNewRole');
@@ -210,6 +227,7 @@ const CreatePage = () => {
                               defaultMessage: 'Name',
                             })}
                             onChange={handleChange}
+                            required
                             value={values.name}
                           />
                         </GridItem>
@@ -219,7 +237,7 @@ const CreatePage = () => {
                               id: 'global.description',
                               defaultMessage: 'Description',
                             })}
-                            name="description"
+                            id="description"
                             error={errors.description && formatMessage({ id: errors.description })}
                             onChange={handleChange}
                           >
@@ -229,7 +247,7 @@ const CreatePage = () => {
                       </Grid>
                     </Flex>
                   </Box>
-                  {!isLayoutLoading && !isRoleLoading ? (
+                  {!isLoadingPermissionsLayout && !isLoadingRole ? (
                     <Box shadow="filterShadow" hasRadius>
                       <Permissions
                         isFormDisabled={false}
@@ -254,8 +272,10 @@ const CreatePage = () => {
 };
 
 export default function () {
+  const permissions = useSelector(selectAdminPermissions);
+
   return (
-    <CheckPagePermissions permissions={adminPermissions.settings.roles.create}>
+    <CheckPagePermissions permissions={permissions.settings.roles.create}>
       <CreatePage />
     </CheckPagePermissions>
   );

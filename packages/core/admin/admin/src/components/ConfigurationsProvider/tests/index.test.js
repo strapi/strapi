@@ -1,7 +1,9 @@
 import React from 'react';
-import { render, fireEvent, screen } from '@testing-library/react';
-import ConfigurationsProvider from '../index';
+
+import { fireEvent, render, screen } from '@testing-library/react';
+
 import { useConfigurations } from '../../../hooks';
+import ConfigurationsProvider from '../index';
 
 describe('ConfigurationsProvider', () => {
   it('should not crash', () => {

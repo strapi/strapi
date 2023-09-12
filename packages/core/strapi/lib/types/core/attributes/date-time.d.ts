@@ -1,22 +1,16 @@
-import {
-  Attribute,
-  ConfigurableOption,
-  DefaultOption,
-  PrivateOption,
-  RequiredOption,
-  UniqueOption,
-} from './base';
+import type { Attribute } from '@strapi/strapi';
 
-export type DateTimeAttribute = Attribute<'datetime'> &
+export type DateTime = Attribute.OfType<'datetime'> &
   // Options
-  ConfigurableOption &
-  DefaultOption<DateTimeValue> &
-  PrivateOption &
-  RequiredOption &
-  UniqueOption;
+  Attribute.ConfigurableOption &
+  Attribute.DefaultOption<DateTimeValue> &
+  Attribute.PrivateOption &
+  Attribute.RequiredOption &
+  Attribute.UniqueOption;
 
-export type DateTimeValue = string;
+// TODO: Use string templates for date formats
+export type DateTimeValue = globalThis.Date | string;
 
-export type GetDateTimeAttributeValue<T extends Attribute> = T extends DateTimeAttribute
+export type GetDateTimeValue<T extends Attribute.Attribute> = T extends DateTime
   ? DateTimeValue
   : never;

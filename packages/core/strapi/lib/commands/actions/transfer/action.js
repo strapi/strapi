@@ -22,6 +22,10 @@ const {
   exitMessageText,
   abortTransfer,
   getTransferTelemetryPayload,
+  setSignalHandler,
+  getDiffHandler,
+  getAssetsBackupHandler,
+  parseRestoreFromOptions,
 } = require('../../utils/data-transfer');
 const { exitWith } = require('../../utils/helpers');
 
@@ -85,9 +89,7 @@ module.exports = async (opts) => {
     destination = createLocalStrapiDestinationProvider({
       getStrapi: () => strapi,
       strategy: 'restore',
-      restore: {
-        entities: { exclude: DEFAULT_IGNORED_CONTENT_TYPES },
-      },
+      restore: parseRestoreFromOptions(opts),
     });
   }
   // if URL provided, set up a remote destination provider
@@ -103,9 +105,7 @@ module.exports = async (opts) => {
         token: opts.toToken,
       },
       strategy: 'restore',
-      restore: {
-        entities: { exclude: DEFAULT_IGNORED_CONTENT_TYPES },
-      },
+      restore: parseRestoreFromOptions(opts),
     });
   }
 
@@ -146,6 +146,13 @@ module.exports = async (opts) => {
 
   const { updateLoader } = loadersFactory();
 
+  engine.onSchemaDiff(getDiffHandler(engine, { force: opts.force, action: 'transfer' }));
+
+  engine.addErrorHandler(
+    'ASSETS_DIRECTORY_ERR',
+    getAssetsBackupHandler(engine, { force: opts.force, action: 'transfer' })
+  );
+
   progress.on(`stage::start`, ({ stage, data }) => {
     updateLoader(stage, data).start();
   });
@@ -171,10 +178,7 @@ module.exports = async (opts) => {
   let results;
   try {
     // Abort transfer if user interrupts process
-    ['SIGTERM', 'SIGINT', 'SIGQUIT'].forEach((signal) => {
-      process.removeAllListeners(signal);
-      process.on(signal, () => abortTransfer({ engine, strapi }));
-    });
+    setSignalHandler(() => abortTransfer({ engine, strapi }));
 
     results = await engine.transfer();
   } catch (e) {

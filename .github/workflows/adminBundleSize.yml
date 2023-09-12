@@ -22,13 +22,14 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-          path: '**/node_modules'
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
 
       - uses: preactjs/compressed-size-action@v2
         with:

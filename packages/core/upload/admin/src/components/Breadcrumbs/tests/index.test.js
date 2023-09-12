@@ -1,10 +1,12 @@
 import React from 'react';
-import { render as renderTL, screen, fireEvent, waitFor } from '@testing-library/react';
-import { QueryClientProvider, QueryClient } from 'react-query';
-import { MemoryRouter } from 'react-router-dom';
-import { IntlProvider } from 'react-intl';
 
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { render as renderRTL } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { MemoryRouter } from 'react-router-dom';
+
 import { Breadcrumbs } from '../index';
 
 jest.mock('../../../hooks/useFolderStructure');
@@ -34,38 +36,41 @@ const defaultBreadcrumbs = [
   { id: 22, label: 'current folder' },
 ];
 
-const setup = (props) =>
-  renderTL(
-    <QueryClientProvider client={queryClient}>
-      <MemoryRouter>
-        <IntlProvider locale="en" messages={{}}>
-          <ThemeProvider theme={lightTheme}>
-            <Breadcrumbs breadcrumbs={defaultBreadcrumbs} label="Navigation" as="nav" {...props} />
-          </ThemeProvider>
-        </IntlProvider>
-      </MemoryRouter>
-    </QueryClientProvider>
-  );
+const setup = (props) => ({
+  user: userEvent.setup(),
+  ...renderRTL(
+    <Breadcrumbs breadcrumbs={defaultBreadcrumbs} label="Navigation" as="nav" {...props} />,
+    {
+      wrapper: ({ children }) => (
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter>
+            <IntlProvider locale="en" messages={{}}>
+              <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
+            </IntlProvider>
+          </MemoryRouter>
+        </QueryClientProvider>
+      ),
+    }
+  ),
+});
 
 describe('Media Library | Breadcrumbs', () => {
   test('should render and match snapshot', () => {
-    const { container } = setup({ currentFolderId: 22 });
+    const { container, getByText } = setup({ currentFolderId: 22 });
 
     expect(container.querySelector('nav')).toBeInTheDocument();
-    expect(screen.getByText('parent folder')).toBeInTheDocument();
-    expect(screen.getByText('current folder')).toBeInTheDocument();
-    expect(screen.getByText('Media Library')).toBeInTheDocument();
+    expect(getByText('parent folder')).toBeInTheDocument();
+    expect(getByText('current folder')).toBeInTheDocument();
+    expect(getByText('Media Library')).toBeInTheDocument();
     expect(container).toMatchSnapshot();
   });
 
   test('should store other ascendants in simple menu', async () => {
-    const { getByRole } = setup({ currentFolderId: 22 });
+    const { user, getByRole, getByText } = setup({ currentFolderId: 22 });
 
-    const simpleMenuButton = getByRole('button', { name: /get more ascendants folders/i });
-    fireEvent.mouseDown(simpleMenuButton);
+    const simpleMenuButton = getByRole('button', { name: /ascendants folders/i });
+    await user.click(simpleMenuButton);
 
-    await waitFor(() => {
-      expect(screen.getByText('second child')).toBeInTheDocument();
-    });
+    expect(getByText('second child')).toBeInTheDocument();
   });
 });

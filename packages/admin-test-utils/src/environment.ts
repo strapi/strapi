@@ -1,5 +1,5 @@
-import { ResizeObserver } from '@juggle/resize-observer';
 import { format } from 'util';
+import { ResizeObserver } from '@juggle/resize-observer';
 
 /* -------------------------------------------------------------------------------------------------
  * IntersectionObserver
@@ -35,12 +35,19 @@ const error = console.error;
 window.console = {
   ...window.console,
   error(...args: any[]) {
-    error(...args);
-
     const message = format(...args);
 
     if (/(Invalid prop|Failed prop type)/gi.test(message)) {
       throw new Error(message);
+
+      // Ignore errors thrown by styled-components. This can be removed once we upgrade
+      // to styled-components@6 and have separate props that are rendered in the DOM by
+      // the ones that aren't using the $ prefix.
+      // https://styled-components.com/docs/faqs#transient-as-and-forwardedas-props-have-been-dropped
+    } else if (/React does not recognize the .* prop on a DOM element/.test(message)) {
+      // do nothing
+    } else {
+      error(...args);
     }
   },
 };
@@ -57,6 +64,7 @@ window.strapi = {
     isEnabled: () => false,
   },
   projectType: 'Community',
+  telemetryDisabled: true,
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -115,6 +123,7 @@ window.URL.createObjectURL = jest
 
 document.createRange = () => {
   const range = new Range();
+  // @ts-expect-error we don't need to implement all the methods
   range.getClientRects = jest.fn(() => ({
     item: () => null,
     length: 0,
@@ -162,4 +171,54 @@ class LocalStorageMock {
 Object.defineProperty(window, 'localStorage', {
   writable: true,
   value: new LocalStorageMock(),
+});
+
+/* -------------------------------------------------------------------------------------------------
+ * PointerEvents
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * JSDOM doesn't implement PointerEvent so we need to mock our own implementation
+ * Default to mouse left click interaction
+ * https://github.com/radix-ui/primitives/issues/1822
+ * https://github.com/jsdom/jsdom/pull/2666
+ */
+class MockPointerEvent extends Event {
+  button: number;
+
+  ctrlKey: boolean;
+
+  pointerType: string;
+
+  constructor(
+    type: string,
+    props: EventInit & { button?: number; ctrlKey?: boolean; pointerType?: string }
+  ) {
+    super(type, props);
+    this.button = props.button || 0;
+    this.ctrlKey = props.ctrlKey || false;
+    this.pointerType = props.pointerType || 'mouse';
+  }
+}
+
+Object.defineProperty(window, 'PointerEvent', {
+  writable: true,
+  value: MockPointerEvent,
+});
+
+window.HTMLElement.prototype.scrollIntoView = jest.fn();
+window.HTMLElement.prototype.releasePointerCapture = jest.fn();
+window.HTMLElement.prototype.hasPointerCapture = jest.fn();
+
+/* -------------------------------------------------------------------------------------------------
+ * Navigator
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * Navigator is a large object so we only mock the properties we need.
+ */
+Object.assign(navigator, {
+  clipboard: {
+    writeText: jest.fn(),
+  },
 });

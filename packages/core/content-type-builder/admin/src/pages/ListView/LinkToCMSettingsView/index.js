@@ -1,10 +1,11 @@
 import React, { memo } from 'react';
-import PropTypes from 'prop-types';
-import { CheckPermissions } from '@strapi/helper-plugin';
+
 import { Button } from '@strapi/design-system';
+import { CheckPermissions } from '@strapi/helper-plugin';
 import { Layer } from '@strapi/icons';
-import { useHistory } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import { useHistory } from 'react-router-dom';
 
 const cmPermissions = {
   collectionTypesConfigurations: [

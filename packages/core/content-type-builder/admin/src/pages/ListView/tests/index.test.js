@@ -4,17 +4,19 @@
  *
  */
 
+import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import React from 'react';
-import { Router } from 'react-router-dom';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
+import { Router } from 'react-router-dom';
+
 import FormModalNavigationProvider from '../../../components/FormModalNavigationProvider';
 import pluginEn from '../../../translations/en.json';
 import getTrad from '../../../utils/getTrad';
-
 import ListView from '../index';
+
 import mockData from './mockData';
 
 jest.mock('../../../hooks/useDataManager', () => {
@@ -32,7 +34,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   // eslint-disable-next-line
   CheckPermissions: ({ children }) => <div>{children}</div>,
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
 }));
 
 const makeApp = () => {

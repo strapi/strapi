@@ -1,17 +1,20 @@
 import React, { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import PropTypes from 'prop-types';
-import { useHistory } from 'react-router-dom';
+
 import { useQueryParams } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
+import { useDispatch } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+
 import { useFindRedirectionLink, useSyncRbac } from '../../hooks';
 import { resetProps, setLayout } from '../ListView/actions';
+
 import Permissions from './Permissions';
 
 const ListViewLayout = ({ layout, ...props }) => {
   const dispatch = useDispatch();
   const { replace } = useHistory();
   const [{ query, rawQuery }] = useQueryParams();
-  const permissions = useSyncRbac(query, props.slug, 'listView');
+  const { permissions, isValid: isValidPermissions } = useSyncRbac(query, props.slug, 'listView');
   const redirectionLink = useFindRedirectionLink(props.slug);
 
   useEffect(() => {
@@ -30,7 +33,7 @@ const ListViewLayout = ({ layout, ...props }) => {
     };
   }, [dispatch]);
 
-  if (!permissions) {
+  if (!isValidPermissions) {
     return null;
   }
 

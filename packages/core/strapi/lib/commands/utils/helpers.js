@@ -8,6 +8,9 @@ const { yellow, red, green } = require('chalk');
 const { isString, isArray } = require('lodash/fp');
 const resolveCwd = require('resolve-cwd');
 const { has } = require('lodash/fp');
+const { prompt } = require('inquirer');
+const boxen = require('boxen');
+const chalk = require('chalk');
 
 const bytesPerKb = 1024;
 const sizes = ['B ', 'KB', 'MB', 'GB', 'TB', 'PB'];
@@ -121,7 +124,10 @@ const assertCwdContainsStrapiProject = (name) => {
 
   try {
     const pkgJSON = require(`${process.cwd()}/package.json`);
-    if (!has('dependencies.@strapi/strapi', pkgJSON)) {
+    if (
+      !has('dependencies.@strapi/strapi', pkgJSON) &&
+      !has('devDependencies.@strapi/strapi', pkgJSON)
+    ) {
       logErrorAndExit(name);
     }
   } catch (err) {
@@ -156,6 +162,51 @@ const getLocalScript =
       });
   };
 
+/**
+ * @description Notify users this is an experimental command and get them to approve first
+ * this can be opted out by passing `yes` as a property of the args object.
+ *
+ * @type {(args?: { force?: boolean }) => Promise<void>}
+ *
+ * @example
+ * ```ts
+ * const { notifyExperimentalCommand } = require('../utils/helpers');
+ *
+ * const myCommand = async ({ force }) => {
+ *  await notifyExperimentalCommand({ force });
+ * }
+ * ```
+ */
+const notifyExperimentalCommand = async ({ force } = {}) => {
+  console.log(
+    boxen(
+      `The ${chalk.bold(
+        chalk.underline('plugin:build')
+      )} command is considered experimental, use at your own risk.`,
+      {
+        title: 'Warning',
+        padding: 1,
+        margin: 1,
+        align: 'center',
+        borderColor: 'yellow',
+        borderStyle: 'bold',
+      }
+    )
+  );
+
+  if (!force) {
+    const { confirmed } = await prompt({
+      type: 'confirm',
+      name: 'confirmed',
+      message: 'Do you want to continue?',
+    });
+
+    if (!confirmed) {
+      process.exit(0);
+    }
+  }
+};
+
 module.exports = {
   exitWith,
   assertUrlHasProtocol,
@@ -163,4 +214,5 @@ module.exports = {
   readableBytes,
   getLocalScript,
   assertCwdContainsStrapiProject,
+  notifyExperimentalCommand,
 };

@@ -1,21 +1,25 @@
 'use strict';
 
-const { assoc, has, prop, omit } = require('lodash/fp');
+const { omit } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
 const { mapAsync } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
+const { getService } = require('../utils');
 const { getDeepPopulate, getDeepPopulateDraftCount } = require('./utils/populate');
 const { getDeepRelationsCount } = require('./utils/count');
 const { sumDraftCounts } = require('./utils/draft');
+const { isWebhooksPopulateRelationsEnabled } = require('./utils/populate');
+const {
+  ALLOWED_WEBHOOK_EVENTS: { ENTRY_PUBLISH, ENTRY_UNPUBLISH },
+} = require('../constants');
 
 const { hasDraftAndPublish } = strapiUtils.contentTypes;
-const { PUBLISHED_AT_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = strapiUtils.contentTypes.constants;
-const { ENTRY_PUBLISH, ENTRY_UNPUBLISH } = strapiUtils.webhook.webhookEvents;
+const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
 
 const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
 
-const emitEvent = async (event, entity, modelUid) => {
-  const modelDef = strapi.getModel(modelUid);
+const emitEvent = async (uid, event, entity) => {
+  const modelDef = strapi.getModel(uid);
   const sanitizedEntity = await strapiUtils.sanitize.sanitizers.defaultSanitizeOutput(
     modelDef,
     entity
@@ -27,52 +31,19 @@ const emitEvent = async (event, entity, modelUid) => {
   });
 };
 
-const findCreatorRoles = (entity) => {
-  const createdByPath = `${CREATED_BY_ATTRIBUTE}.id`;
-
-  if (has(createdByPath, entity)) {
-    const creatorId = prop(createdByPath, entity);
-    return strapi.query('admin::role').findMany({ where: { users: { id: creatorId } } });
-  }
-
-  return [];
-};
-
-const addCreatedByRolesPopulate = (populate) => {
-  return {
-    ...populate,
-    createdBy: {
-      populate: ['roles'],
-    },
-  };
-};
-
-/**
- * When webhooks.populateRelations is set to true, populated relations
- * will be passed to any webhook event. The entity-manager
- * response will not have the populated relations though.
- * For performance reasons, it is recommended to set it to false,
- *
- * TODO V5: Set to false by default.
- * TODO V5: Make webhooks always send the same entity data.
- */
-const isRelationsPopulateEnabled = () => {
-  return strapi.config.get('server.webhooks.populateRelations', true);
+const buildDeepPopulate = (uid) => {
+  // User can configure to populate relations, so downstream services can use them.
+  // They will be transformed into counts later if this is set to true.
+  return getService('populate-builder')(uid)
+    .populateDeep(Infinity)
+    .countRelationsIf(!isWebhooksPopulateRelationsEnabled(uid))
+    .build();
 };
 
 /**
  * @type {import('./entity-manager').default}
  */
 module.exports = ({ strapi }) => ({
-  async assocCreatorRoles(entity) {
-    if (!entity) {
-      return entity;
-    }
-
-    const roles = await findCreatorRoles(entity);
-    return assoc(`${CREATED_BY_ATTRIBUTE}.roles`, roles, entity);
-  },
-
   /**
    * Extend this function from other plugins to add custom mapping of entity
    * responses
@@ -102,78 +73,37 @@ module.exports = ({ strapi }) => ({
 
   async find(opts, uid) {
     const params = { ...opts, populate: getDeepPopulate(uid) };
-
     const entities = await strapi.entityService.findMany(uid, params);
-
     return this.mapEntitiesResponse(entities, uid);
   },
 
   async findPage(opts, uid) {
-    const params = { ...opts, populate: getDeepPopulate(uid, { maxLevel: 1 }) };
-
-    const entities = await strapi.entityService.findPage(uid, params);
-
+    const entities = await strapi.entityService.findPage(uid, opts);
     return this.mapEntitiesResponse(entities, uid);
   },
 
-  async findWithRelationCountsPage(opts, uid) {
-    const counterPopulate = getDeepPopulate(uid, { countMany: true, maxLevel: 1 });
-    const params = { ...opts, populate: addCreatedByRolesPopulate(counterPopulate) };
-
-    const entities = await strapi.entityService.findWithRelationCountsPage(uid, params);
-
-    return this.mapEntitiesResponse(entities, uid);
-  },
-
-  async findOneWithCreatorRolesAndCount(id, uid) {
-    const counterPopulate = getDeepPopulate(uid, { countMany: true, countOne: true });
-    const params = { populate: addCreatedByRolesPopulate(counterPopulate) };
-
+  async findOne(id, uid, opts = {}) {
     return strapi.entityService
-      .findOne(uid, id, params)
+      .findOne(uid, id, opts)
       .then((entity) => this.mapEntity(entity, uid));
-  },
-
-  async findOne(id, uid) {
-    const params = { populate: getDeepPopulate(uid) };
-
-    return strapi.entityService
-      .findOne(uid, id, params)
-      .then((entity) => this.mapEntity(entity, uid));
-  },
-
-  async findOneWithCreatorRoles(id, uid) {
-    const entity = await this.findOne(id, uid).then((entity) => this.mapEntity(entity, uid));
-
-    if (!entity) {
-      return entity;
-    }
-
-    return this.assocCreatorRoles(entity);
   },
 
   async create(body, uid) {
     const modelDef = strapi.getModel(uid);
     const publishData = { ...body };
-    const populateRelations = isRelationsPopulateEnabled(uid);
+    const populate = await buildDeepPopulate(uid);
 
     if (hasDraftAndPublish(modelDef)) {
       publishData[PUBLISHED_AT_ATTRIBUTE] = null;
     }
 
-    const params = {
-      data: publishData,
-      populate: populateRelations
-        ? getDeepPopulate(uid, {})
-        : getDeepPopulate(uid, { countMany: true, countOne: true }),
-    };
+    const params = { data: publishData, populate };
 
     const entity = await strapi.entityService
       .create(uid, params)
       .then((entity) => this.mapEntity(entity, uid));
 
-    // If relations were populated, relations count will be returned instead of the array of relations.
-    if (populateRelations) {
+    if (isWebhooksPopulateRelationsEnabled(uid)) {
       return getDeepRelationsCount(entity, uid);
     }
 
@@ -182,40 +112,48 @@ module.exports = ({ strapi }) => ({
 
   async update(entity, body, uid) {
     const publishData = omitPublishedAtField(body);
-    const populateRelations = isRelationsPopulateEnabled(uid);
-
-    const params = {
-      data: publishData,
-      populate: populateRelations
-        ? getDeepPopulate(uid, {})
-        : getDeepPopulate(uid, { countMany: true, countOne: true }),
-    };
+    const populate = await buildDeepPopulate(uid);
+    const params = { data: publishData, populate };
 
     const updatedEntity = await strapi.entityService
       .update(uid, entity.id, params)
       .then((entity) => this.mapEntity(entity, uid));
 
-    // If relations were populated, relations count will be returned instead of the array of relations.
-    if (populateRelations) {
+    if (isWebhooksPopulateRelationsEnabled(uid)) {
       return getDeepRelationsCount(updatedEntity, uid);
     }
 
     return updatedEntity;
   },
+  async clone(entity, body, uid) {
+    const modelDef = strapi.getModel(uid);
+    const populate = await buildDeepPopulate(uid);
+    const publishData = { ...body };
 
-  async delete(entity, uid) {
-    const populateRelations = isRelationsPopulateEnabled(uid);
+    if (hasDraftAndPublish(modelDef)) {
+      publishData[PUBLISHED_AT_ATTRIBUTE] = null;
+    }
 
     const params = {
-      populate: populateRelations
-        ? getDeepPopulate(uid, {})
-        : getDeepPopulate(uid, { countMany: true, countOne: true }),
+      data: publishData,
+      populate,
     };
 
-    const deletedEntity = await strapi.entityService.delete(uid, entity.id, params);
+    const clonedEntity = await strapi.entityService.clone(uid, entity.id, params);
 
     // If relations were populated, relations count will be returned instead of the array of relations.
-    if (populateRelations) {
+    if (isWebhooksPopulateRelationsEnabled(uid)) {
+      return getDeepRelationsCount(clonedEntity, uid);
+    }
+
+    return clonedEntity;
+  },
+  async delete(entity, uid) {
+    const populate = await buildDeepPopulate(uid);
+    const deletedEntity = await strapi.entityService.delete(uid, entity.id, { populate });
+
+    // If relations were populated, relations count will be returned instead of the array of relations.
+    if (isWebhooksPopulateRelationsEnabled(uid)) {
       return getDeepRelationsCount(deletedEntity, uid);
     }
 
@@ -224,12 +162,10 @@ module.exports = ({ strapi }) => ({
 
   // FIXME: handle relations
   deleteMany(opts, uid) {
-    const params = { ...opts };
-
-    return strapi.entityService.deleteMany(uid, params);
+    return strapi.entityService.deleteMany(uid, opts);
   },
 
-  async publish(entity, body = {}, uid) {
+  async publish(entity, uid, body = {}) {
     if (entity[PUBLISHED_AT_ATTRIBUTE]) {
       throw new ApplicationError('already.published');
     }
@@ -243,59 +179,117 @@ module.exports = ({ strapi }) => ({
     );
 
     const data = { ...body, [PUBLISHED_AT_ATTRIBUTE]: new Date() };
-    const populateRelations = isRelationsPopulateEnabled(uid);
+    const populate = await buildDeepPopulate(uid);
 
-    const params = {
-      data,
-      populate: populateRelations
-        ? getDeepPopulate(uid, {})
-        : getDeepPopulate(uid, { countMany: true, countOne: true }),
-    };
+    const params = { data, populate };
 
     const updatedEntity = await strapi.entityService.update(uid, entity.id, params);
 
-    await emitEvent(ENTRY_PUBLISH, updatedEntity, uid);
+    await emitEvent(uid, ENTRY_PUBLISH, updatedEntity);
 
     const mappedEntity = await this.mapEntity(updatedEntity, uid);
 
     // If relations were populated, relations count will be returned instead of the array of relations.
-    if (isRelationsPopulateEnabled(uid)) {
+    if (isWebhooksPopulateRelationsEnabled(uid)) {
       return getDeepRelationsCount(mappedEntity, uid);
     }
 
     return mappedEntity;
   },
 
-  async unpublish(entity, body = {}, uid) {
+  async publishMany(entities, uid) {
+    if (!entities.length) {
+      return null;
+    }
+
+    // Validate entities before publishing, throw if invalid
+    await Promise.all(
+      entities.map((entity) => {
+        return strapi.entityValidator.validateEntityCreation(
+          strapi.getModel(uid),
+          entity,
+          undefined,
+          entity
+        );
+      })
+    );
+
+    // Only publish entities without a published_at date
+    const entitiesToPublish = entities
+      .filter((entity) => !entity[PUBLISHED_AT_ATTRIBUTE])
+      .map((entity) => entity.id);
+
+    const filters = { id: { $in: entitiesToPublish } };
+    const data = { [PUBLISHED_AT_ATTRIBUTE]: new Date() };
+    const populate = await buildDeepPopulate(uid);
+
+    // Everything is valid, publish
+    const publishedEntitiesCount = await strapi.db.query(uid).updateMany({
+      where: filters,
+      data,
+    });
+    // Get the updated entities since updateMany only returns the count
+    const publishedEntities = await strapi.entityService.findMany(uid, { filters, populate });
+    // Emit the publish event for all updated entities
+    await Promise.all(publishedEntities.map((entity) => emitEvent(uid, ENTRY_PUBLISH, entity)));
+
+    // Return the number of published entities
+    return publishedEntitiesCount;
+  },
+
+  async unpublishMany(entities, uid) {
+    if (!entities.length) {
+      return null;
+    }
+
+    // Only unpublish entities with a published_at date
+    const entitiesToUnpublish = entities
+      .filter((entity) => entity[PUBLISHED_AT_ATTRIBUTE])
+      .map((entity) => entity.id);
+
+    const filters = { id: { $in: entitiesToUnpublish } };
+    const data = { [PUBLISHED_AT_ATTRIBUTE]: null };
+    const populate = await buildDeepPopulate(uid);
+
+    // No need to validate, unpublish
+    const unpublishedEntitiesCount = await strapi.db.query(uid).updateMany({
+      where: filters,
+      data,
+    });
+    // Get the updated entities since updateMany only returns the count
+    const unpublishedEntities = await strapi.entityService.findMany(uid, { filters, populate });
+    // Emit the unpublish event for all updated entities
+    await Promise.all(unpublishedEntities.map((entity) => emitEvent(uid, ENTRY_UNPUBLISH, entity)));
+
+    // Return the number of unpublished entities
+    return unpublishedEntitiesCount;
+  },
+
+  async unpublish(entity, uid, body = {}) {
     if (!entity[PUBLISHED_AT_ATTRIBUTE]) {
       throw new ApplicationError('already.draft');
     }
 
     const data = { ...body, [PUBLISHED_AT_ATTRIBUTE]: null };
-    const populateRelations = isRelationsPopulateEnabled(uid);
+    const populate = await buildDeepPopulate(uid);
 
-    const params = {
-      data,
-      populate: populateRelations
-        ? getDeepPopulate(uid, {})
-        : getDeepPopulate(uid, { countMany: true, countOne: true }),
-    };
+    const params = { data, populate };
 
     const updatedEntity = await strapi.entityService.update(uid, entity.id, params);
 
-    await emitEvent(ENTRY_UNPUBLISH, updatedEntity, uid);
+    await emitEvent(uid, ENTRY_UNPUBLISH, updatedEntity);
 
     const mappedEntity = await this.mapEntity(updatedEntity, uid);
 
     // If relations were populated, relations count will be returned instead of the array of relations.
-    if (isRelationsPopulateEnabled(uid)) {
+    if (isWebhooksPopulateRelationsEnabled(uid)) {
       return getDeepRelationsCount(mappedEntity, uid);
     }
 
     return mappedEntity;
   },
 
-  async getNumberOfDraftRelations(id, uid) {
+  async countDraftRelations(id, uid) {
     const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
     if (!hasRelations) {
@@ -305,5 +299,26 @@ module.exports = ({ strapi }) => ({
     const entity = await strapi.entityService.findOne(uid, id, { populate });
 
     return sumDraftCounts(entity, uid);
+  },
+
+  async countManyEntriesDraftRelations(ids, uid, locale = 'en') {
+    const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
+
+    if (!hasRelations) {
+      return 0;
+    }
+
+    const entities = await strapi.entityService.findMany(uid, {
+      populate,
+      filters: { id: { $in: ids } },
+      locale,
+    });
+
+    const totalNumberDraftRelations = entities.reduce(
+      (count, entity) => sumDraftCounts(entity, uid) + count,
+      0
+    );
+
+    return totalNumberDraftRelations;
   },
 });

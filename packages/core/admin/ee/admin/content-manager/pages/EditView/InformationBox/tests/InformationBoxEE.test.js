@@ -1,20 +1,18 @@
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+
+import { fixtures } from '@strapi/admin-test-utils';
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { RBACContext, useCMEditViewDataManager } from '@strapi/helper-plugin';
+import { render as renderRTL, waitFor } from '@testing-library/react';
+import { rest } from 'msw';
+import { setupServer } from 'msw/node';
 import { IntlProvider } from 'react-intl';
-import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { QueryClientProvider, QueryClient } from 'react-query';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 
+import { STAGE_ATTRIBUTE_NAME, ASSIGNEE_ATTRIBUTE_NAME } from '../constants';
 import { InformationBoxEE } from '../InformationBoxEE';
-
-const STAGE_ATTRIBUTE_NAME = 'strapi_reviewWorkflows_stage';
-const STAGE_FIXTURE = {
-  id: 1,
-  name: 'Stage 1',
-  worklow: 1,
-};
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -24,146 +22,143 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-jest.mock(
-  '../../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows',
-  () => ({
-    useReviewWorkflows: jest.fn(() => ({
-      workflows: {
-        isLoading: false,
+const server = setupServer(
+  rest.get('*/users', (req, res, ctx) =>
+    res(
+      ctx.json({
+        data: {
+          results: [],
+          pagination: {
+            page: 1,
+          },
+        },
+      })
+    )
+  ),
+
+  rest.get('*/review-workflows/workflows/', (req, res, ctx) =>
+    res(
+      ctx.json({
         data: [
           {
+            id: 1,
             stages: [
               {
                 id: 1,
+                color: '#4945FF',
                 name: 'Stage 1',
-              },
-
-              {
-                id: 2,
-                name: 'Stage 2',
               },
             ],
           },
         ],
-      },
-    })),
-  })
+      })
+    )
+  ),
+
+  rest.get('*/license-limit-information', (req, res, ctx) =>
+    res(
+      ctx.json({
+        data: {},
+      })
+    )
+  )
 );
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
+const render = (props) => {
+  return renderRTL(<InformationBoxEE {...props} />, {
+    wrapper({ children }) {
+      const store = createStore((state = {}) => state, {
+        admin_app: { permissions: fixtures.permissions.app },
+      });
+      const queryClient = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+          },
+        },
+      });
+
+      return (
+        <RBACContext.Provider value={{ allPermissions: fixtures.permissions.allPermissions }}>
+          <Provider store={store}>
+            <QueryClientProvider client={queryClient}>
+              <IntlProvider locale="en" defaultLocale="en">
+                <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
+              </IntlProvider>
+            </QueryClientProvider>
+          </Provider>
+        </RBACContext.Provider>
+      );
     },
-  },
-});
-
-const ComponentFixture = (props) => {
-  const store = createStore((state = {}) => state, {});
-
-  return (
-    <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <IntlProvider locale="en" defaultLocale="en">
-          <ThemeProvider theme={lightTheme}>
-            <InformationBoxEE {...props} />
-          </ThemeProvider>
-        </IntlProvider>
-      </QueryClientProvider>
-    </Provider>
-  );
-};
-
-const setup = (props) => {
-  return render(<ComponentFixture {...props} />);
+  });
 };
 
 describe('EE | Content Manager | EditView | InformationBox', () => {
-  it('renders the title and body of the Information component', () => {
+  beforeAll(() => {
+    server.listen();
+  });
+
+  afterAll(() => {
+    server.close();
+  });
+
+  it('renders the title and body of the Information component', async () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {},
       isCreatingEntry: true,
-      layout: { uid: 'api::articles:articles' },
+      layout: {
+        options: {
+          reviewWorkflows: false,
+        },
+      },
     });
 
-    const { getByText } = setup();
+    const { getByText } = render();
 
-    expect(getByText('Information')).toBeInTheDocument();
-    expect(getByText('Last update')).toBeInTheDocument();
+    await waitFor(() => expect(getByText('Information')).toBeInTheDocument());
+    await waitFor(() => expect(getByText('Last update')).toBeInTheDocument());
   });
 
-  it('renders no select input, if no workflow stage is assigned to the entity', () => {
+  it('renders neither stage nor assignee select inputs, if no nothing is returned for an entity', async () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {},
-      layout: { uid: 'api::articles:articles' },
+      layout: {
+        options: {
+          reviewWorkflows: false,
+        },
+      },
     });
 
-    const { queryByRole } = setup();
+    const { queryByRole } = render();
 
-    expect(queryByRole('combobox')).not.toBeInTheDocument();
+    await waitFor(() => expect(queryByRole('combobox')).not.toBeInTheDocument());
   });
 
-  it('renders an error, if no workflow stage is assigned to the entity', () => {
+  it('renders stage and assignee select inputs, if both are set on an entity', async () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {
-        [STAGE_ATTRIBUTE_NAME]: null,
+        [STAGE_ATTRIBUTE_NAME]: {
+          id: 1,
+          color: '#4945FF',
+          name: 'Stage 1',
+          worklow: 1,
+        },
+
+        [ASSIGNEE_ATTRIBUTE_NAME]: {
+          id: 1,
+          firstname: 'Firstname',
+        },
       },
-      layout: { uid: 'api::articles:articles' },
+      layout: {
+        uid: 'api::articles:articles',
+        options: {
+          reviewWorkflows: true,
+        },
+      },
     });
 
-    const { getByText, queryByRole } = setup();
+    const { queryAllByRole } = render();
 
-    expect(getByText(/select a stage/i)).toBeInTheDocument();
-    expect(queryByRole('combobox')).toBeInTheDocument();
-  });
-
-  it('does not render the select input, if the entity is created', () => {
-    useCMEditViewDataManager.mockReturnValue({
-      initialData: {
-        [STAGE_ATTRIBUTE_NAME]: STAGE_FIXTURE,
-      },
-      isCreatingEntry: true,
-      layout: { uid: 'api::articles:articles' },
-    });
-
-    const { queryByRole } = setup();
-    const select = queryByRole('combobox');
-
-    expect(select).not.toBeInTheDocument();
-  });
-
-  it('renders an enabled select input, if the entity is edited', () => {
-    useCMEditViewDataManager.mockReturnValue({
-      initialData: {
-        [STAGE_ATTRIBUTE_NAME]: STAGE_FIXTURE,
-      },
-      isCreatingEntry: false,
-      layout: { uid: 'api::articles:articles' },
-    });
-
-    const { queryByRole } = setup();
-    const select = queryByRole('combobox');
-
-    expect(select).toBeInTheDocument();
-  });
-
-  it('renders a select input, if a workflow stage is assigned to the entity', () => {
-    useCMEditViewDataManager.mockReturnValue({
-      initialData: {
-        [STAGE_ATTRIBUTE_NAME]: STAGE_FIXTURE,
-      },
-      isCreatingEntry: false,
-      layout: { uid: 'api::articles:articles' },
-    });
-
-    const { queryByRole, getByText } = setup();
-    const select = queryByRole('combobox');
-
-    expect(select).toBeInTheDocument();
-    expect(getByText('Stage 1')).toBeInTheDocument();
-
-    fireEvent.mouseDown(select);
-
-    expect(getByText('Stage 2')).toBeInTheDocument();
+    await waitFor(() => expect(queryAllByRole('combobox').length).toBe(2));
   });
 });

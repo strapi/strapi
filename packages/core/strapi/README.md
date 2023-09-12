@@ -1,9 +1,17 @@
 <p align="center">
-  <a href="https://strapi.io/#gh-light-mode-only">
-    <img src="https://strapi.io/assets/strapi-logo-dark.svg" width="318px" alt="Strapi logo" />
-  </a>
-  <a href="https://strapi.io/#gh-dark-mode-only">
-    <img src="https://strapi.io/assets/strapi-logo-light.svg" width="318px" alt="Strapi logo" />
+  <a href="https://strapi.io">
+    <picture>
+      <source
+        srcset="https://strapi.io/assets/strapi-logo-dark.svg"
+        media="(prefers-color-scheme: dark)"
+        width="318px"
+      />
+      <img
+        src="https://strapi.io/assets/strapi-logo-light.svg"
+        alt="Strapi logo"
+        width="318px"
+      />
+    </picture>
   </a>
 </p>
 
@@ -88,10 +96,11 @@ Complete installation requirements can be found in the documentation under <a hr
 
 Strapi only supports maintenance and LTS versions of Node.js. Please refer to the <a href="https://nodejs.org/en/about/releases/">Node.js release schedule</a> for more information. NPM versions installed by default with Node.js are supported. Generally it's recommended to use yarn over npm where possible.
 
-| Strapi Version | Recommended | Minimum |
-| -------------- | ----------- | ------- |
-| 4.3.9 and up   | 18.x        | 14.x    |
-| 4.0.x to 4.3.8 | 16.x        | 14.x    |
+| Strapi Version  | Recommended | Minimum |
+| --------------- | ----------- | ------- |
+| 4.11.0 and up   | 18.x        | 16.x    |
+| 4.3.9 to 4.10.x | 18.x        | 14.x    |
+| 4.0.x to 4.3.8  | 16.x        | 14.x    |
 
 **Database:**
 

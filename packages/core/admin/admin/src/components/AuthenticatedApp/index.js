@@ -1,18 +1,23 @@
-import React, { useState, useEffect } from 'react';
-//  TODO: DS add loader
+import React, { useEffect, useState } from 'react';
+
 import {
+  AppInfoProvider,
   auth,
   LoadingIndicatorPage,
-  AppInfoProvider,
   useGuidedTour,
   useNotification,
 } from '@strapi/helper-plugin';
-import { useQueries } from 'react-query';
 import get from 'lodash/get';
+import { useQueries } from 'react-query';
+//  TODO: DS add loader
+
 import packageJSON from '../../../../package.json';
 import { useConfigurations } from '../../hooks';
+import { getFullName, hashAdminUserEmail } from '../../utils';
+import NpsSurvey from '../NpsSurvey';
 import PluginsInitializer from '../PluginsInitializer';
 import RBACProvider from '../RBACProvider';
+
 import {
   fetchAppInfo,
   fetchCurrentUserPermissions,
@@ -20,7 +25,6 @@ import {
   fetchUserRoles,
 } from './utils/api';
 import checkLatestStrapiVersion from './utils/checkLatestStrapiVersion';
-import { getFullName, hashAdminUserEmail } from '../../utils';
 
 const strapiVersion = packageJSON.version;
 
@@ -35,7 +39,7 @@ const AuthenticatedApp = () => {
   const [
     { data: appInfos, status },
     { data: tagName, isLoading },
-    { data: permissions, status: fetchPermissionsStatus, refetch, isFetched, isFetching },
+    { data: permissions, status: fetchPermissionsStatus, refetch, isFetching },
     { data: userRoles },
   ] = useQueries([
     { queryKey: 'app-infos', queryFn: fetchAppInfo },
@@ -83,7 +87,7 @@ const AuthenticatedApp = () => {
   // We don't need to wait for the release query to be fetched before rendering the plugins
   // however, we need the appInfos and the permissions
   const shouldShowNotDependentQueriesLoader =
-    (isFetching && isFetched) || status === 'loading' || fetchPermissionsStatus === 'loading';
+    isFetching || status === 'loading' || fetchPermissionsStatus === 'loading';
 
   const shouldShowLoader = isLoading || shouldShowNotDependentQueriesLoader;
 
@@ -106,6 +110,7 @@ const AuthenticatedApp = () => {
       userDisplayName={userDisplayName}
     >
       <RBACProvider permissions={permissions} refetchPermissions={refetch}>
+        <NpsSurvey />
         <PluginsInitializer />
       </RBACProvider>
     </AppInfoProvider>

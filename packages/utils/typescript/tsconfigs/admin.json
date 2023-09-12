@@ -1,20 +1,23 @@
 {
-    "$schema": "https://json.schemastore.org/tsconfig",
-    
-    "compilerOptions": {
-        "module": "ES2020",
-        "moduleResolution": "node",
-        "lib": ["ES2020", "DOM"],
-        "target": "ES5",
+  "$schema": "https://json.schemastore.org/tsconfig",
 
-        "jsx": "react",
-        "sourceMap": true,
-        "incremental": true,
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "lib": ["dom", "dom.iterable", "esnext"],
 
-        "allowJs": true,
-        "allowSyntheticDefaultImports": true,
-        "resolveJsonModule": true,
-        "noEmit": true,
-        "skipLibCheck": true
-    }
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+
+    "noImplicitAny": false,
+    "strict": true,
+    "allowJs": true,
+    "sourceMap": true,
+    "incremental": true,
+    "skipLibCheck": true,
+
+    "jsx": "react-jsx"
+  }
 }

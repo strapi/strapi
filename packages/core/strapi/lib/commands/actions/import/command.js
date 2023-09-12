@@ -1,7 +1,7 @@
 'use strict';
 
-const { Option } = require('commander');
 const path = require('path');
+const { Option } = require('commander');
 const inquirer = require('inquirer');
 const {
   excludeOption,
@@ -9,7 +9,7 @@ const {
   throttleOption,
   validateExcludeOnly,
 } = require('../../utils/data-transfer');
-const { confirmMessage, forceOption } = require('../../utils/commander');
+const { getCommanderConfirmMessage, forceOption } = require('../../utils/commander');
 const { getLocalScript, exitWith } = require('../../utils/helpers');
 
 /**
@@ -88,8 +88,8 @@ module.exports = ({ command }) => {
     })
     .hook(
       'preAction',
-      confirmMessage(
-        'The import will delete all assets and data in your database. Are you sure you want to proceed?',
+      getCommanderConfirmMessage(
+        'The import will delete your existing data! Are you sure you want to proceed?',
         { failMessage: 'Import process aborted' }
       )
     )

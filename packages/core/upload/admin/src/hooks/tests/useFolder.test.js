@@ -1,11 +1,11 @@
 import React from 'react';
-import { IntlProvider } from 'react-intl';
-import { QueryClientProvider, QueryClient } from 'react-query';
-import { renderHook, act } from '@testing-library/react-hooks';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
 
-import { NotificationsProvider, useNotification, useFetchClient } from '@strapi/helper-plugin';
-import { useNotifyAT, ThemeProvider, lightTheme } from '@strapi/design-system';
+import { lightTheme, ThemeProvider, useNotifyAT } from '@strapi/design-system';
+import { NotificationsProvider, useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
 
 import { useFolder } from '../useFolder';
 
@@ -74,17 +74,28 @@ describe('useFolder', () => {
 
   test('fetches data from the right URL if no query param was set', async () => {
     const { get } = useFetchClient();
-    const { result, waitFor, waitForNextUpdate } = await setup(1, {});
+    const { result } = await setup(1, {});
 
     await waitFor(() => result.current.isSuccess);
-    await waitForNextUpdate();
 
-    expect(get).toBeCalledWith('/upload/folders/1?populate[parent][populate][parent]=*');
+    await waitFor(() =>
+      expect(get).toBeCalledWith('/upload/folders/1', {
+        params: {
+          populate: {
+            parent: {
+              populate: {
+                parent: '*',
+              },
+            },
+          },
+        },
+      })
+    );
   });
 
   test('it does not fetch, if enabled is set to false', async () => {
     const { get } = useFetchClient();
-    const { result, waitFor } = await setup(1, { enabled: false });
+    const { result } = await setup(1, { enabled: false });
 
     await waitFor(() => result.current.isSuccess);
 
@@ -100,7 +111,7 @@ describe('useFolder', () => {
 
     const { notifyStatus } = useNotifyAT();
     const toggleNotification = useNotification();
-    const { result, waitFor } = await setup(1, {});
+    const { result } = await setup(1, {});
 
     await waitFor(() => !result.current.isLoading);
 

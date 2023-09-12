@@ -1,36 +1,42 @@
-import { Attribute, ConfigurableOption, PrivateOption, RequiredOption } from './base';
-import { Media } from './common';
+import type { Attribute, Utils } from '@strapi/strapi';
 
-export type AllowedMediaTypes = 'images' | 'videos' | 'files' | 'audios';
+export type MediaTarget = 'plugin::upload.file';
+export type MediaKind = 'images' | 'videos' | 'files' | 'audios';
 
-export interface MediaAttributeProperties<
-  // Media Type
-  T extends AllowedMediaTypes = undefined,
-  // Multiple
-  U extends boolean = false
+export interface MediaProperties<
+  TKind extends MediaKind | undefined = undefined,
+  TMultiple extends Utils.Expression.BooleanValue = Utils.Expression.False
 > {
-  allowedTypes?: T;
-  multiple?: U;
+  allowedTypes?: TKind;
+  multiple?: TMultiple;
 }
 
-export type MediaAttribute<
-  // Media Type
-  T extends AllowedMediaTypes = undefined,
-  // Multiple
-  U extends boolean = false
-> = Attribute<'media'> &
+export type Media<
+  TKind extends MediaKind | undefined = undefined,
+  TMultiple extends Utils.Expression.BooleanValue = Utils.Expression.False
+> = Attribute.OfType<'media'> &
   // Properties
-  MediaAttributeProperties<T, U> &
+  MediaProperties<TKind, TMultiple> &
   // Options
-  ConfigurableOption &
-  RequiredOption &
-  PrivateOption;
+  Attribute.ConfigurableOption &
+  Attribute.RequiredOption &
+  Attribute.PrivateOption;
 
-export type MediaValue<T extends boolean = false> = T extends true ? Media[] : Media;
+// TODO: Introduce a real type for the media values
+export type MediaValue<TMultiple extends Utils.Expression.BooleanValue = Utils.Expression.False> =
+  Utils.Expression.If<TMultiple, any[], any>;
 
-export type GetMediaAttributeValue<T extends Attribute> = T extends MediaAttribute<
-  infer _U,
-  infer S
+export type GetMediaValue<TAttribute extends Attribute.Attribute> = TAttribute extends Media<
+  // Unused as long as the media value is any
+  infer _TKind,
+  infer TMultiple
 >
-  ? MediaValue<S>
+  ? MediaValue<TMultiple>
+  : never;
+
+export type GetMediaTarget<TAttribute extends Attribute.Attribute> = TAttribute extends Media<
+  infer _TKind,
+  infer _TMultiple
+>
+  ? MediaTarget
   : never;

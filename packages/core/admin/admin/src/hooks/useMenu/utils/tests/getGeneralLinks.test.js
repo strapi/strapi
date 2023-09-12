@@ -1,4 +1,5 @@
 import { hasPermissions } from '@strapi/helper-plugin';
+
 import getGeneralLinks from '../getGeneralLinks';
 
 jest.mock('@strapi/helper-plugin', () => ({

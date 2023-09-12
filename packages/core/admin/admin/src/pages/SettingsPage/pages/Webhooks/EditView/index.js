@@ -1,59 +1,70 @@
-/**
- *
- * EditView
- *
- */
 import * as React from 'react';
+
+import { Main } from '@strapi/design-system';
 import {
   LoadingIndicatorPage,
   SettingsPageTitle,
-  useNotification,
-  useOverlayBlocker,
+  useAPIErrorHandler,
   useFetchClient,
+  useNotification,
 } from '@strapi/helper-plugin';
-import { Main } from '@strapi/design-system';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useHistory, useRouteMatch } from 'react-router-dom';
-import { useModels } from '../../../../../hooks';
+
+import { useContentTypes } from '../../../../../hooks/useContentTypes';
+
 import WebhookForm from './components/WebhookForm';
-import cleanData from './utils/formatData';
+
+const cleanData = (data) => ({
+  ...data,
+  headers: data.headers.reduce((acc, { key, value }) => {
+    if (key !== '') {
+      acc[key] = value;
+    }
+
+    return acc;
+  }, {}),
+});
 
 const EditView = () => {
   const {
     params: { id },
   } = useRouteMatch('/settings/webhooks/:id');
-
-  const { replace } = useHistory();
-  const { lockApp, unlockApp } = useOverlayBlocker();
-  const toggleNotification = useNotification();
-  const queryClient = useQueryClient();
-  const { isLoading: isLoadingForModels, collectionTypes } = useModels();
-  const { put, get, post } = useFetchClient();
-
   const isCreating = id === 'create';
 
-  const { isLoading, data } = useQuery(
-    ['get-webhook', id],
+  const { replace } = useHistory();
+  const toggleNotification = useNotification();
+  const { formatAPIError } = useAPIErrorHandler();
+  const queryClient = useQueryClient();
+  const { isLoading: isLoadingForModels } = useContentTypes();
+  const { put, get, post } = useFetchClient();
+
+  const {
+    isLoading,
+    data: webhookData,
+    error: webhookError,
+  } = useQuery(
+    ['webhooks', id],
     async () => {
-      try {
-        const {
-          data: { data },
-        } = await get(`/admin/webhooks/${id}`);
+      const {
+        data: { data },
+      } = await get(`/admin/webhooks/${id}`);
 
-        return data;
-      } catch (err) {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error' },
-        });
-
-        return null;
-      }
+      return data;
     },
     {
       enabled: !isCreating,
     }
   );
+
+  React.useEffect(() => {
+    if (webhookError) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(webhookError),
+      });
+    }
+  }, [webhookError, toggleNotification, formatAPIError]);
 
   const {
     isLoading: isTriggering,
@@ -64,10 +75,10 @@ const EditView = () => {
 
   const triggerWebhook = () =>
     mutate(null, {
-      onError() {
+      onError(error) {
         toggleNotification({
           type: 'warning',
-          message: { id: 'notification.error' },
+          message: formatAPIError(error),
         });
       },
     });
@@ -78,7 +89,6 @@ const EditView = () => {
 
   const handleSubmit = async (data) => {
     if (isCreating) {
-      lockApp();
       createWebhookMutation.mutate(cleanData(data), {
         onSuccess({ data: result }) {
           toggleNotification({
@@ -86,47 +96,36 @@ const EditView = () => {
             message: { id: 'Settings.webhooks.created' },
           });
           replace(`/settings/webhooks/${result.data.id}`);
-          unlockApp();
         },
-        onError(e) {
+        onError(error) {
           toggleNotification({
             type: 'warning',
-            message: { id: 'notification.error' },
+            message: formatAPIError(error),
           });
-          console.log(e);
-          unlockApp();
         },
       });
-    } else {
-      lockApp();
-      updateWebhookMutation.mutate(
-        { id, body: cleanData(data) },
-        {
-          onSuccess() {
-            queryClient.invalidateQueries(['get-webhook', id]);
-            toggleNotification({
-              type: 'success',
-              message: { id: 'notification.form.success.fields' },
-            });
-            unlockApp();
-          },
-          onError(e) {
-            toggleNotification({
-              type: 'warning',
-              message: { id: 'notification.error' },
-            });
-            console.log(e);
-            unlockApp();
-          },
-        }
-      );
-    }
-  };
 
-  const isDraftAndPublishEvents = React.useMemo(
-    () => collectionTypes.some((ct) => ct.options.draftAndPublish === true),
-    [collectionTypes]
-  );
+      return;
+    }
+    updateWebhookMutation.mutate(
+      { id, body: cleanData(data) },
+      {
+        onSuccess() {
+          queryClient.invalidateQueries(['webhooks', id]);
+          toggleNotification({
+            type: 'success',
+            message: { id: 'notification.form.success.fields' },
+          });
+        },
+        onError(error) {
+          toggleNotification({
+            type: 'warning',
+            message: formatAPIError(error),
+          });
+        },
+      }
+    );
+  };
 
   if (isLoading || isLoadingForModels) {
     return <LoadingIndicatorPage />;
@@ -137,14 +136,13 @@ const EditView = () => {
       <SettingsPageTitle name="Webhooks" />
       <WebhookForm
         {...{
+          data: webhookData,
           handleSubmit,
-          data,
           triggerWebhook,
           isCreating,
           isTriggering,
           isTriggerIdle,
           triggerResponse: triggerResponse?.data.data,
-          isDraftAndPublishEvents,
         }}
       />
     </Main>

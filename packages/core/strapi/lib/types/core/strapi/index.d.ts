@@ -1,9 +1,5 @@
-import type Koa from 'koa';
-import { Database } from '@strapi/database';
-
-import type { StringMap } from './utils';
-import type { GenericController } from '../../../core-api/controller';
-import type { GenericService } from '../../../core-api/service';
+import type { Database } from '@strapi/database';
+import type { Common, EntityService, Shared } from '@strapi/strapi';
 
 // TODO move custom fields types to a separate file
 interface CustomFieldServerOptions {
@@ -15,12 +11,20 @@ interface CustomFieldServerOptions {
   /**
    * The name of the plugin creating the custom field
    */
-  plugin?: string;
+  pluginId?: string;
 
   /**
    * The existing Strapi data type the custom field uses
    */
   type: string;
+
+  /**
+   * Settings for the input size in the Admin UI
+   */
+  inputSize?: {
+    default: 4 | 6 | 8 | 12;
+    isResizable: boolean;
+  };
 }
 
 interface CustomFields {
@@ -42,6 +46,11 @@ export interface Strapi {
   readonly config: any;
 
   /**
+   * Getter for the Strapi admin container
+   */
+  readonly admin: any;
+
+  /**
    * Getter for the Strapi auth container
    */
   readonly auth: any;
@@ -57,28 +66,35 @@ export interface Strapi {
   readonly sanitizers: any;
 
   /**
+   * Getter for the Strapi validators container
+   */
+  readonly validators: any;
+
+  /**
    * Getter for the Strapi services container
    *
    * It returns all the registered services
    */
-  readonly services: StringMap<GenericService>;
+  readonly services: Shared.Services;
 
   /**
    * Find a service using its unique identifier
    */
-  service<T extends GenericService = GenericService>(uid: string): T | undefined;
+  service<TService extends Common.Service = Common.Service>(uid: string): TService | undefined;
 
   /**
    * Getter for the Strapi controllers container
    *
    * It returns all the registered controllers
    */
-  readonly controllers: StringMap<GenericController>;
+  readonly controllers: Shared.Controllers;
 
   /**
    * Find a controller using its unique identifier
    */
-  controller(uid: string): GenericController | undefined;
+  controller<TContentTypeUID extends Common.UID.Controller>(
+    uid: TContentTypeUID
+  ): Shared.Controllers[TContentTypeUID];
 
   /**
    * Getter for the Strapi content types container
@@ -401,7 +417,7 @@ export interface Strapi {
   /**
    * Entity Service instance
    */
-  entityService: any;
+  entityService: EntityService.EntityService;
 }
 
 export interface Lifecycles {

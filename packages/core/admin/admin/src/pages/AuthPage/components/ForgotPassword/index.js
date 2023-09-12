@@ -1,14 +1,16 @@
 import React from 'react';
-import { useIntl } from 'react-intl';
-import PropTypes from 'prop-types';
+
+import { Box, Button, Flex, Main, TextInput, Typography } from '@strapi/design-system';
 import { Form, Link } from '@strapi/helper-plugin';
-import { Box, Flex, Main, Button, TextInput, Typography } from '@strapi/design-system';
 import { Formik } from 'formik';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+
+import Logo from '../../../../components/UnauthenticatedLogo';
 import UnauthenticatedLayout, {
   Column,
   LayoutContent,
 } from '../../../../layouts/UnauthenticatedLayout';
-import Logo from '../../../../components/UnauthenticatedLogo';
 
 const ForgotPassword = ({ onSubmit, schema }) => {
   const { formatMessage } = useIntl();

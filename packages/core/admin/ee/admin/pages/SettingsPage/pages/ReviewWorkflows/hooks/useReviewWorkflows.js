@@ -1,35 +1,40 @@
-import { useQuery, useQueryClient } from 'react-query';
 import { useFetchClient } from '@strapi/helper-plugin';
+import { useQuery } from 'react-query';
 
-const QUERY_BASE_KEY = 'review-workflows';
-const API_BASE_URL = '/admin/review-workflows';
-
-export function useReviewWorkflows(workflowId) {
+export function useReviewWorkflows(params = {}) {
   const { get } = useFetchClient();
-  const client = useQueryClient();
-  const workflowQueryKey = [QUERY_BASE_KEY, workflowId ?? 'default'];
 
-  async function fetchWorkflows({ params = { populate: 'stages' } }) {
-    try {
-      const {
-        data: { data },
-      } = await get(`${API_BASE_URL}/workflows/${workflowId ?? ''}`, { params });
+  const { id = '', ...queryParams } = params;
+  const defaultQueryParams = {
+    populate: 'stages',
+  };
 
-      return data;
-    } catch (err) {
-      // silence
-      return null;
+  const { data, isLoading, status, refetch } = useQuery(
+    ['review-workflows', 'workflows', id],
+    async () => {
+      const res = await get(`/admin/review-workflows/workflows/${id}`, {
+        params: { ...defaultQueryParams, ...queryParams },
+      });
+
+      return res.data;
     }
-  }
+  );
 
-  async function refetchWorkflow() {
-    await client.refetchQueries(workflowQueryKey);
-  }
+  let workflows = [];
 
-  const workflows = useQuery(workflowQueryKey, fetchWorkflows);
+  if (id && data?.data) {
+    workflows = [data.data];
+  } else if (Array.isArray(data?.data)) {
+    workflows = data.data;
+  }
 
   return {
+    // meta contains e.g. the total of all workflows. we can not use
+    // the pagination object here, because the list is not paginated.
+    meta: data?.meta ?? {},
     workflows,
-    refetchWorkflow,
+    isLoading,
+    status,
+    refetch,
   };
 }

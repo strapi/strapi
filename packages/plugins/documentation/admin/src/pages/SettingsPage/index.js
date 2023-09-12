@@ -1,45 +1,53 @@
 import React, { useState } from 'react';
-import { useIntl } from 'react-intl';
-import { Formik } from 'formik';
+
 import {
-  CheckPermissions,
+  Box,
+  Button,
+  ContentLayout,
+  Flex,
+  Grid,
+  GridItem,
+  HeaderLayout,
+  Main,
+  TextInput,
+  ToggleInput,
+  Typography,
+  FieldAction,
+} from '@strapi/design-system';
+import {
   Form,
   LoadingIndicatorPage,
   useFocusWhenNavigate,
+  translatedErrors,
+  useRBAC,
 } from '@strapi/helper-plugin';
-
-// Strapi Parts
-import {
-  ContentLayout,
-  HeaderLayout,
-  Main,
-  Button,
-  Box,
-  Flex,
-  Typography,
-  ToggleInput,
-  TextInput,
-  Grid,
-  GridItem,
-} from '@strapi/design-system';
-
 // Strapi Icons
-import { Eye as Show, EyeStriked as Hide, Check } from '@strapi/icons';
+import { Check, Eye as Show, EyeStriked as Hide } from '@strapi/icons';
+import { Formik } from 'formik';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+import * as yup from 'yup';
 
-import permissions from '../../permissions';
+import { PERMISSIONS } from '../../constants';
+import { useDocumentation } from '../../hooks/useDocumentation';
 import { getTrad } from '../../utils';
-import useReactQuery from '../utils/useReactQuery';
-import FieldActionWrapper from '../../components/FieldActionWrapper';
-import schema from '../utils/schema';
+
+const schema = yup.object().shape({
+  restrictedAccess: yup.boolean(),
+  password: yup.string().when('restrictedAccess', (value, initSchema) => {
+    return value ? initSchema.required(translatedErrors.required) : initSchema;
+  }),
+});
 
 const SettingsPage = () => {
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
-  const { submitMutation, data, isLoading } = useReactQuery();
+  const { submit, data, isLoading } = useDocumentation();
   const [passwordShown, setPasswordShown] = useState(false);
+  const { allowedActions } = useRBAC(PERMISSIONS);
 
   const handleUpdateSettingsSubmit = (body) => {
-    submitMutation.mutate({
+    submit.mutate({
       prefix: data?.prefix,
       body,
     });
@@ -58,7 +66,15 @@ const SettingsPage = () => {
           onSubmit={handleUpdateSettingsSubmit}
           validationSchema={schema}
         >
-          {({ handleSubmit, values, handleChange, errors, setFieldTouched, setFieldValue }) => {
+          {({
+            handleSubmit,
+            values,
+            handleChange,
+            errors,
+            setFieldTouched,
+            setFieldValue,
+            dirty,
+          }) => {
             return (
               <Form noValidate onSubmit={handleSubmit}>
                 <HeaderLayout
@@ -71,14 +87,16 @@ const SettingsPage = () => {
                     defaultMessage: 'Configure the documentation plugin',
                   })}
                   primaryAction={
-                    <CheckPermissions permissions={permissions.update}>
-                      <Button type="submit" startIcon={<Check />}>
-                        {formatMessage({
-                          id: getTrad('pages.SettingsPage.Button.save'),
-                          defaultMessage: 'Save',
-                        })}
-                      </Button>
-                    </CheckPermissions>
+                    <Button
+                      type="submit"
+                      startIcon={<Check />}
+                      disabled={!dirty && allowedActions.canUpdate}
+                    >
+                      {formatMessage({
+                        id: getTrad('pages.SettingsPage.Button.save'),
+                        defaultMessage: 'Save',
+                      })}
+                    </Button>
                   }
                 />
                 <ContentLayout>
@@ -179,5 +197,15 @@ const SettingsPage = () => {
     </Main>
   );
 };
+
+const FieldActionWrapper = styled(FieldAction)`
+  svg {
+    height: 1rem;
+    width: 1rem;
+    path {
+      fill: ${({ theme }) => theme.colors.neutral600};
+    }
+  }
+`;
 
 export default SettingsPage;

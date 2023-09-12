@@ -1,7 +1,7 @@
 'use strict';
 
 const { objectType } = require('nexus');
-const { sanitize } = require('@strapi/utils');
+const { sanitize, validate } = require('@strapi/utils');
 
 module.exports = ({ strapi }) => {
   const { RESPONSE_COLLECTION_META_TYPE_NAME, PAGINATION_TYPE_NAME } = strapi
@@ -25,8 +25,11 @@ module.exports = ({ strapi }) => {
             const { args, resourceUID } = parent;
             const { start, limit } = args;
             const safeLimit = Math.max(limit, 1);
-
-            const sanitizedQuery = await sanitize.contentAPI.query(args, parent.contentType, {
+            const contentType = strapi.getModel(resourceUID);
+            await validate.contentAPI.query(args, contentType, {
+              auth: ctx?.state?.auth,
+            });
+            const sanitizedQuery = await sanitize.contentAPI.query(args, contentType, {
               auth: ctx?.state?.auth,
             });
             const total = await strapi.entityService.count(resourceUID, sanitizedQuery);

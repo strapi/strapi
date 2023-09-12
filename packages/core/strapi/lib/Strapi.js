@@ -46,6 +46,7 @@ const loaders = require('./core/loaders');
 const { destroyOnSignal } = require('./utils/signals');
 const getNumberOfDynamicZones = require('./services/utils/dynamic-zones');
 const sanitizersRegistry = require('./core/registries/sanitizers');
+const validatorsRegistry = require('./core/registries/validators');
 const convertCustomFieldType = require('./utils/convert-custom-field-type');
 
 // TODO: move somewhere else
@@ -99,6 +100,7 @@ class Strapi {
     this.container.register('auth', createAuth(this));
     this.container.register('content-api', createContentAPI(this));
     this.container.register('sanitizers', sanitizersRegistry(this));
+    this.container.register('validators', validatorsRegistry(this));
 
     // Create a mapping of every useful directory (for the app, dist and static directories)
     this.dirs = utils.getDirs(rootDirs, { strapi: this });
@@ -110,7 +112,7 @@ class Strapi {
     // Instantiate the Koa app & the HTTP server
     this.server = createServer(this);
 
-    // Strapi utils instanciation
+    // Strapi utils instantiation
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
     this.startupLogger = createStartupLogger(this);
@@ -212,6 +214,10 @@ class Strapi {
     return this.container.get('sanitizers');
   }
 
+  get validators() {
+    return this.container.get('validators');
+  }
+
   async start() {
     try {
       if (!this.isLoaded) {
@@ -255,6 +261,7 @@ class Strapi {
         numberOfAllContentTypes: _.size(this.contentTypes), // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
         numberOfComponents: _.size(this.components),
         numberOfDynamicZones: getNumberOfDynamicZones(),
+        environment: strapi.config.environment,
         // TODO: to add back
         // providers: this.config.installedProviders,
       },
@@ -310,6 +317,7 @@ class Strapi {
         this.server.listen(listenSocket, onListen);
       } else {
         const { host, port } = this.config.get('server');
+
         this.server.listen(port, host, onListen);
       }
     });
@@ -368,6 +376,10 @@ class Strapi {
     await loaders.loadSanitizers(this);
   }
 
+  async loadValidators() {
+    await loaders.loadValidators(this);
+  }
+
   registerInternalHooks() {
     this.container.get('hooks').set('strapi::content-types.beforeSync', createAsyncParallelHook());
     this.container.get('hooks').set('strapi::content-types.afterSync', createAsyncParallelHook());
@@ -380,6 +392,7 @@ class Strapi {
     await Promise.all([
       this.loadApp(),
       this.loadSanitizers(),
+      this.loadValidators(),
       this.loadPlugins(),
       this.loadAdmin(),
       this.loadAPIs(),

@@ -16,13 +16,13 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository == 'strapi/strapi'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup npmrc
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
       - uses: actions/setup-node@v3
         with:
           node-version: 16
       - run: yarn
-      - run: ./scripts/remove-dist-tag
+      - run: ./scripts/remove-dist-tag.sh
         env:
           DIST_TAG: ${{ github.event.inputs.dist-tag }}

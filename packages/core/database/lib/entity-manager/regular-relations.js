@@ -1,7 +1,7 @@
 'use strict';
 
-const { map, isEmpty } = require('lodash/fp');
 const { randomBytes } = require('crypto');
+const { map, isEmpty } = require('lodash/fp');
 
 const {
   isBidirectional,
@@ -206,98 +206,123 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
 
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } = joinTable;
-  const update = [];
-  const updateBinding = [];
-  const select = ['??'];
-  const selectBinding = ['id'];
-  const where = [];
-  const whereBinding = [];
 
-  if (hasOrderColumn(attribute) && id) {
-    update.push('?? = b.src_order');
-    updateBinding.push(orderColumnName);
-    select.push('ROW_NUMBER() OVER (PARTITION BY ?? ORDER BY ??) AS src_order');
-    selectBinding.push(joinColumn.name, orderColumnName);
-    where.push('?? = ?');
-    whereBinding.push(joinColumn.name, id);
-  }
+  /**
+  UPDATE :joinTable: as a,
+  (
+    SELECT
+      id,
+      ROW_NUMBER() OVER ( PARTITION BY :joinColumn: ORDER BY :orderColumn:) AS src_order,
+    FROM :joinTable:
+    WHERE :joinColumn: = :id
+  ) AS b
+  SET :orderColumn: = b.src_order
+  WHERE b.id = a.id;
+  */
+  const updateOrderColumn = async () => {
+    if (!hasOrderColumn(attribute) || !id) return;
 
-  if (hasInverseOrderColumn(attribute) && !isEmpty(inverseRelIds)) {
-    update.push('?? = b.inv_order');
-    updateBinding.push(inverseOrderColumnName);
-    select.push('ROW_NUMBER() OVER (PARTITION BY ?? ORDER BY ??) AS inv_order');
-    selectBinding.push(inverseJoinColumn.name, inverseOrderColumnName);
-    where.push(`?? IN (${inverseRelIds.map(() => '?').join(', ')})`);
-    whereBinding.push(inverseJoinColumn.name, ...inverseRelIds);
-  }
+    const selectRowsToOrder = (joinTableName) =>
+      db
+        .connection(joinTableName)
+        .select('id')
+        .rowNumber('src_order', orderColumnName, joinColumn.name)
+        .where(joinColumn.name, id)
+        .toSQL();
 
-  switch (strapi.db.dialect.client) {
-    case 'mysql':
-      // Here it's MariaDB and MySQL 8
-      await db
-        .getConnection()
-        .raw(
-          `UPDATE
-            ?? as a,
-            (
-              SELECT ${select.join(', ')}
-              FROM ??
-              WHERE ${where.join(' OR ')}
-            ) AS b
-          SET ${update.join(', ')}
-          WHERE b.id = a.id`,
-          [joinTable.name, ...selectBinding, joinTable.name, ...whereBinding, ...updateBinding]
-        )
-        .transacting(trx);
-      break;
-    /*
-      UPDATE
-        :joinTable: as a,
-        (
-          SELECT
-            id,
-            ROW_NUMBER() OVER ( PARTITION BY :joinColumn: ORDER BY :orderColumn:) AS src_order,
-            ROW_NUMBER() OVER ( PARTITION BY :inverseJoinColumn: ORDER BY :inverseOrderColumn:) AS inv_order
-          FROM :joinTable:
-          WHERE :joinColumn: = :id OR :inverseJoinColumn: IN (:inverseRelIds)
-        ) AS b
-      SET :orderColumn: = b.src_order, :inverseOrderColumn: = b.inv_order
-      WHERE b.id = a.id;
-    */
-    default: {
-      const joinTableName = addSchema(joinTable.name);
+    switch (strapi.db.dialect.client) {
+      case 'mysql': {
+        // Here it's MariaDB and MySQL 8
+        const select = selectRowsToOrder(joinTable.name);
 
-      // raw query as knex doesn't allow updating from a subquery
-      // https://github.com/knex/knex/issues/2504
-      await db.connection
-        .raw(
-          `UPDATE ?? as a
-              SET ${update.join(', ')}
-              FROM (
-                SELECT ${select.join(', ')}
-                FROM ??
-                WHERE ${where.join(' OR ')}
-              ) AS b
-              WHERE b.id = a.id`,
-          [joinTableName, ...updateBinding, ...selectBinding, joinTableName, ...whereBinding]
-        )
-        .transacting(trx);
+        await db
+          .getConnection()
+          .raw(
+            `UPDATE ?? as a, ( ${select.sql} ) AS b
+            SET ?? = b.src_order
+            WHERE b.id = a.id`,
+            [joinTable.name, ...select.bindings, orderColumnName]
+          )
+          .transacting(trx);
 
-      /*
-        UPDATE :joinTable: as a
-        SET :orderColumn: = b.src_order, :inverseOrderColumn: = b.inv_order
-        FROM (
-          SELECT
-            id,
-            ROW_NUMBER() OVER ( PARTITION BY :joinColumn: ORDER BY :orderColumn:) AS src_order,
-            ROW_NUMBER() OVER ( PARTITION BY :inverseJoinColumn: ORDER BY :inverseOrderColumn:) AS inv_order
-          FROM :joinTable:
-          WHERE :joinColumn: = :id OR :inverseJoinColumn: IN (:inverseRelIds)
-        ) AS b
-        WHERE b.id = a.id;
-      */
+        break;
+      }
+      default: {
+        const joinTableName = addSchema(joinTable.name);
+        const select = selectRowsToOrder(joinTableName);
+
+        // raw query as knex doesn't allow updating from a subquery
+        await db.connection
+          .raw(
+            `UPDATE ?? as a
+            SET ?? = b.src_order
+            FROM ( ${select.sql} ) AS b
+            WHERE b.id = a.id`,
+            [joinTableName, orderColumnName, ...select.bindings]
+          )
+          .transacting(trx);
+      }
     }
-  }
+  };
+
+  /**
+  UPDATE :joinTable: as a,
+  (
+    SELECT
+      id,
+      ROW_NUMBER() OVER ( PARTITION BY :inverseJoinColumn: ORDER BY :inverseOrderColumn:) AS inv_order
+    FROM :joinTable:
+    WHERE :inverseJoinColumn: IN (:inverseRelIds)
+  ) AS b
+  SET :inverseOrderColumn: = b.inv_order
+  WHERE b.id = a.id;
+  */
+  const updateInverseOrderColumn = async () => {
+    if (!hasInverseOrderColumn(attribute) || isEmpty(inverseRelIds)) return;
+
+    const selectRowsToOrder = (joinTableName) =>
+      db
+        .connection(joinTableName)
+        .select('id')
+        .rowNumber('inv_order', inverseOrderColumnName, inverseJoinColumn.name)
+        .where(inverseJoinColumn.name, 'in', inverseRelIds)
+        .toSQL();
+
+    switch (strapi.db.dialect.client) {
+      case 'mysql': {
+        // Here it's MariaDB and MySQL 8
+        const select = selectRowsToOrder(joinTable.name);
+
+        await db
+          .getConnection()
+          .raw(
+            `UPDATE ?? as a, ( ${select.sql} ) AS b
+            SET ?? = b.inv_order
+            WHERE b.id = a.id`,
+            [joinTable.name, ...select.bindings, inverseOrderColumnName]
+          )
+          .transacting(trx);
+        break;
+      }
+      default: {
+        const joinTableName = addSchema(joinTable.name);
+        const select = selectRowsToOrder(joinTableName);
+
+        // raw query as knex doesn't allow updating from a subquery
+        await db.connection
+          .raw(
+            `UPDATE ?? as a
+            SET ?? = b.inv_order
+            FROM ( ${select.sql} ) AS b
+            WHERE b.id = a.id`,
+            [joinTableName, inverseOrderColumnName, ...select.bindings]
+          )
+          .transacting(trx);
+      }
+    }
+  };
+
+  return Promise.all([updateOrderColumn(), updateInverseOrderColumn()]);
 };
 
 /*
@@ -379,9 +404,103 @@ const cleanOrderColumnsForOldDatabases = async ({
   }
 };
 
+/**
+ * Use this when a relation is added or removed and its inverse order column
+ * needs to be re-calculated
+ *
+ * Example: In this following table
+ *
+ *   | joinColumn      | inverseJoinColumn | order       | inverseOrder       |
+ *   | --------------- | --------          | ----------- | ------------------ |
+ *   | 1               | 1                 | 1           | 1                  |
+ *   | 2               | 1                 | 3           | 2                  |
+ *   | 2               | 2                 | 3           | 1                  |
+ *
+ * You add a new relation { joinColumn: 1, inverseJoinColumn: 2 }
+ *
+ *   | joinColumn      | inverseJoinColumn | order       | inverseOrder       |
+ *   | --------------- | --------          | ----------- | ------------------ |
+ *   | 1               | 1                 | 1           | 1                  |
+ *   | 1               | 2                 | 2           | 1                  | <- inverseOrder should be 2
+ *   | 2               | 1                 | 3           | 2                  |
+ *   | 2               | 2                 | 3           | 1                  |
+ *
+ * This function would make such update, so all inverse order columns related
+ * to the given id (1 in this example) are following a 1, 2, 3 sequence, without gap.
+ *
+ * @param {Object} params
+ * @param {string} params.id - entity id to find which inverse order column to clean
+ * @param {Object} params.attribute - attribute of the relation
+ * @param {Object} params.trx - knex transaction
+ *
+ */
+
+const cleanInverseOrderColumn = async ({ id, attribute, trx }) => {
+  const con = strapi.db.connection;
+  const { joinTable } = attribute;
+  const { joinColumn, inverseJoinColumn, inverseOrderColumnName } = joinTable;
+
+  switch (strapi.db.dialect.client) {
+    /*
+      UPDATE `:joinTableName` AS `t1`
+      JOIN (
+          SELECT
+            `inverseJoinColumn`,
+            MAX(`:inverseOrderColumnName`) AS `max_inv_order`
+          FROM `:joinTableName`
+          GROUP BY `:inverseJoinColumn`
+      ) AS `t2`
+      ON `t1`.`:inverseJoinColumn` = `t2`.`:inverseJoinColumn`
+      SET `t1`.`:inverseOrderColumnNAme` = `t2`.`max_inv_order` + 1
+      WHERE `t1`.`:joinColumnName` = :id;
+    */
+    case 'mysql': {
+      // Group by the inverse join column and get the max value of the inverse order column
+      const subQuery = con(joinTable.name)
+        .select(inverseJoinColumn.name)
+        .max(inverseOrderColumnName, { as: 'max_inv_order' })
+        .groupBy(inverseJoinColumn.name)
+        .as('t2');
+
+      //  Update ids with the new inverse order
+      await con(`${joinTable.name} as t1`)
+        .join(subQuery, `t1.${inverseJoinColumn.name}`, '=', `t2.${inverseJoinColumn.name}`)
+        .where(joinColumn.name, id)
+        .update({
+          [inverseOrderColumnName]: con.raw('t2.max_inv_order + 1'),
+        })
+        .transacting(trx);
+      break;
+    }
+    default: {
+      /*
+        UPDATE `:joinTableName` as `t1`
+        SET `:inverseOrderColumnName` = (
+          SELECT max(`:inverseOrderColumnName`) + 1
+          FROM `:joinTableName` as `t2`
+          WHERE t2.:inverseJoinColumn = t1.:inverseJoinColumn
+        )
+        WHERE `t1`.`:joinColumnName` = :id
+      */
+      // New inverse order will be the max value + 1
+      const selectMaxInverseOrder = con.raw(`max(${inverseOrderColumnName}) + 1`);
+
+      const subQuery = con(`${joinTable.name} as t2`)
+        .select(selectMaxInverseOrder)
+        .whereRaw(`t2.${inverseJoinColumn.name} = t1.${inverseJoinColumn.name}`);
+
+      await con(`${joinTable.name} as t1`)
+        .where(`t1.${joinColumn.name}`, id)
+        .update({ [inverseOrderColumnName]: subQuery })
+        .transacting(trx);
+    }
+  }
+};
+
 module.exports = {
   deletePreviousOneToAnyRelations,
   deletePreviousAnyToOneRelations,
   deleteRelations,
   cleanOrderColumns,
+  cleanInverseOrderColumn,
 };

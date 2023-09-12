@@ -1,34 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { useIntl } from 'react-intl';
-import styled from 'styled-components';
-import omit from 'lodash/omit';
-import { useHistory } from 'react-router-dom';
-import PropTypes from 'prop-types';
-import { Formik } from 'formik';
-import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+
+import {
+  Box,
+  Button,
+  Checkbox,
+  Flex,
+  Grid,
+  GridItem,
+  Main,
+  TextInput,
+  Typography,
+} from '@strapi/design-system';
 import {
   Form,
-  useQuery,
-  useNotification,
-  useTracking,
   getYupInnerErrors,
   Link,
   useAPIErrorHandler,
+  useFetchClient,
+  useNotification,
+  useQuery,
+  useTracking,
 } from '@strapi/helper-plugin';
-import {
-  Box,
-  Main,
-  Flex,
-  Button,
-  TextInput,
-  Checkbox,
-  Grid,
-  GridItem,
-  Typography,
-} from '@strapi/design-system';
-import { EyeStriked, Eye } from '@strapi/icons';
-import UnauthenticatedLayout, { LayoutContent } from '../../../../layouts/UnauthenticatedLayout';
+import { Eye, EyeStriked } from '@strapi/icons';
+import { Formik } from 'formik';
+import omit from 'lodash/omit';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import { useHistory } from 'react-router-dom';
+import styled from 'styled-components';
+
+import { useNpsSurveySettings } from '../../../../components/NpsSurvey/hooks/useNpsSurveySettings';
 import Logo from '../../../../components/UnauthenticatedLogo';
+import UnauthenticatedLayout, { LayoutContent } from '../../../../layouts/UnauthenticatedLayout';
 import FieldActionWrapper from '../FieldActionWrapper';
 
 const A = styled.a`
@@ -52,6 +55,8 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
   const { formatMessage } = useIntl();
   const query = useQuery();
   const { formatAPIError } = useAPIErrorHandler();
+  const { get } = useFetchClient();
+  const { setNpsSurveySettings } = useNpsSurveySettings();
 
   const registrationToken = query.get('registrationToken');
 
@@ -61,9 +66,11 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
         try {
           const {
             data: { data },
-          } = await axios.get(
-            `${strapi.backendURL}/admin/registration-info?registrationToken=${registrationToken}`
-          );
+          } = await get(`/admin/registration-info`, {
+            params: {
+              registrationToken,
+            },
+          });
 
           if (data) {
             setUserInfo(data);
@@ -93,6 +100,10 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
 
       if (!['password', 'confirmPassword'].includes(key) && typeof value === 'string') {
         normalizedvalue = normalizedvalue.trim();
+
+        if (key === 'lastname') {
+          normalizedvalue = normalizedvalue || null;
+        }
       }
 
       acc[key] = normalizedvalue;
@@ -134,6 +145,9 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
               } else {
                 onSubmit(normalizedData, formik);
               }
+
+              // Only enable EE survey if user accepted the newsletter
+              setNpsSurveySettings({ enabled: data.news });
             } catch (err) {
               const errors = getYupInnerErrors(err);
               setSubmitCount(submitCount + 1);
@@ -149,7 +163,7 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
             return (
               <Form noValidate>
                 <Main>
-                  <Flex direction="column" alignItems="stretch" gap={3}>
+                  <Flex direction="column" alignItems="center" gap={3}>
                     <Logo />
 
                     <Typography as="h1" variant="alpha" textAlign="center">

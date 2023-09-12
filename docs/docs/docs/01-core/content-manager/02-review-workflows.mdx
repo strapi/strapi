@@ -1,0 +1,64 @@
+---
+title: Review Workflows
+description: Guide for review workflows in the content-manager.
+tags:
+  - content-manager
+  - review-workflows
+---
+
+## Summary
+
+Review workflows are disabled for all content-types by default and have to be enabled for each of them individually. More about how to 
+[enable review-workflows for a content-type](/docs/settings/review-workflows#edit--create-view). The feature itself is visible in two places
+of the content-manager: list and edit view.
+
+### Nullish stages
+
+Entities which are not created through the admin API, content API or entity service will not have a stage assigned by default (e.g. lifecycle methods). This
+means at any place in the admin app displaying a stage, it has to be prepared to receive `null` and should not crash.
+
+### List view
+
+If the feature is enabled for a content-type a new column will show up, displaying the current stage of an entity. If no stage was assigned to an entity,
+the column is displayed as empty.
+
+The information which stage is currently assigned to an entity is send as part of the content-type response payload for each entity in the attribute `strapi_stage`.
+Please refer to the [type definitions](/settings/review-workflows) for more information.
+
+```ts
+{
+  // ... entity attributes
+  strapi_stage?: Stage | null
+}
+```
+
+`http://localhost:1337/content-manager/content-types` returns whether the feature is enabled for the content-type. `options.reviewWorkflows` is either `true`, `false` or `undefined`.
+
+**Note**: Downgrading from EE to CE won't delete the associated review workflow data and `http://localhost:1337/content-manager/content-types` still returns true. The admin app had to
+add an additional check if the feature toggle returned in `http://localhost:1337/admin/project-type` is enabled.
+
+
+### Edit view
+
+If the feature is enabled on the current content-type, the selected stage will show up in the information sidebar next to the edit view. Users
+can select any other stage of the current workflow.
+
+Stage assignments are decoupled from entities, meaning updating entity attributes won't set the selected stage at the same time. Instead the stage select
+component will trigger an atomic update on the admin API to assign/ update a stage to the current entity.
+
+Because of this decoupling, stages **can not be assigned on entity creation** and only after they have been created.
+
+The information which stage is currently assigned to an entity is send as part of the entity response payload in the attribute `strapi_stage`.
+Please refer to the [type definitions](/settings/review-workflows) for more information.
+
+```ts
+{
+  // ... entity attributes
+  strapi_stage?: Stage | null
+}
+```
+
+#### License limits
+
+If the user has exceeded the license limit (based on their license) for either the number of workflows or the number of stages of the workflow assigned
+to the entities content-type, any stage update action will trigger a license-limit overlay and abort the request.

@@ -2,7 +2,7 @@
 
 const inquirer = require('inquirer');
 const { Option } = require('commander');
-const { confirmMessage, forceOption, parseURL } = require('../../utils/commander');
+const { getCommanderConfirmMessage, forceOption, parseURL } = require('../../utils/commander');
 const {
   getLocalScript,
   exitWith,
@@ -76,7 +76,7 @@ module.exports = ({ command }) => {
             thisCommand.opts().fromToken = answers.fromToken;
           }
 
-          await confirmMessage(
+          await getCommanderConfirmMessage(
             'The transfer will delete all the local Strapi assets and its database. Are you sure you want to proceed?',
             { failMessage: 'Transfer process aborted' }
           )(thisCommand);
@@ -104,8 +104,8 @@ module.exports = ({ command }) => {
             thisCommand.opts().toToken = answers.toToken;
           }
 
-          await confirmMessage(
-            'The transfer will delete all the remote Strapi assets and its database. Are you sure you want to proceed?',
+          await getCommanderConfirmMessage(
+            'The transfer will delete existing data from the remote Strapi! Are you sure you want to proceed?',
             { failMessage: 'Transfer process aborted' }
           )(thisCommand);
         }

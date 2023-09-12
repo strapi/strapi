@@ -1,52 +1,56 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { IntlProvider } from 'react-intl';
 import { FormikProvider, useFormik } from 'formik';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { IntlProvider } from 'react-intl';
 import { Provider } from 'react-redux';
 
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-
 import configureStore from '../../../../../../../../../../admin/src/core/store/configureStore';
-import { Stage } from '../Stage';
+import { STAGE_COLOR_DEFAULT } from '../../../../constants';
 import { reducer } from '../../../../reducer';
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useTracking: jest.fn().mockReturnValue({ trackUsage: jest.fn() }),
-}));
+import { Stage } from '../Stage';
 
 const STAGES_FIXTURE = {
   id: 1,
-  name: 'stage-1',
-  index: 1,
+  index: 0,
 };
 
-const ComponentFixture = (props) => {
+const ComponentFixture = ({
+  // eslint-disable-next-line react/prop-types
+  stages = [
+    {
+      color: STAGE_COLOR_DEFAULT,
+      name: 'something',
+    },
+  ],
+  ...props
+}) => {
   const store = configureStore([], [reducer]);
 
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
-      stages: [
-        {
-          name: 'something',
-        },
-      ],
+      stages,
     },
     validateOnChange: false,
   });
 
   return (
-    <Provider store={store}>
-      <FormikProvider value={formik}>
-        <IntlProvider locale="en" messages={{}}>
-          <ThemeProvider theme={lightTheme}>
-            <Stage {...STAGES_FIXTURE} {...props} />
-          </ThemeProvider>
-        </IntlProvider>
-      </FormikProvider>
-    </Provider>
+    <DndProvider backend={HTML5Backend}>
+      <Provider store={store}>
+        <FormikProvider value={formik}>
+          <IntlProvider locale="en" messages={{}}>
+            <ThemeProvider theme={lightTheme}>
+              <Stage {...STAGES_FIXTURE} {...props} />
+            </ThemeProvider>
+          </IntlProvider>
+        </FormikProvider>
+      </Provider>
+    </DndProvider>
   );
 };
 
@@ -60,15 +64,20 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
   });
 
   it('should render a stage', async () => {
-    const { getByRole, queryByRole } = setup();
+    const { container, getByRole, queryByRole } = setup();
 
     expect(queryByRole('textbox')).not.toBeInTheDocument();
 
-    await user.click(getByRole('button'));
+    // open accordion; getByRole is not sufficient here, because the accordion
+    // does not have better identifiers
+    await user.click(container.querySelector('button[aria-expanded]'));
 
     expect(queryByRole('textbox')).toBeInTheDocument();
-    expect(getByRole('textbox').value).toBe(STAGES_FIXTURE.name);
-    expect(getByRole('textbox').getAttribute('name')).toBe('stages.1.name');
+    expect(getByRole('textbox').value).toBe('something');
+    expect(getByRole('textbox').getAttribute('name')).toBe('stages.0.name');
+
+    expect(getByRole('combobox')).toHaveTextContent('Blue');
+
     expect(
       queryByRole('button', {
         name: /delete stage/i,
@@ -82,7 +91,7 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
     expect(queryByRole('textbox')).toBeInTheDocument();
   });
 
-  it('should not render delete button if canDelete=false', async () => {
+  it('should not render the delete button if canDelete=false', async () => {
     const { queryByRole } = setup({ isOpen: true, canDelete: false });
 
     expect(
@@ -90,5 +99,39 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
         name: /delete stage/i,
       })
     ).not.toBeInTheDocument();
+  });
+
+  it('should not render delete drag button if canUpdate=false', async () => {
+    const { queryByRole } = setup({ isOpen: true, canUpdate: false });
+
+    expect(
+      queryByRole('button', {
+        name: /drag/i,
+      })
+    ).not.toBeInTheDocument();
+  });
+
+  it('should not crash on a custom color code', async () => {
+    const { getByRole } = setup({
+      isOpen: true,
+      canDelete: false,
+      stages: [
+        {
+          color: '#FF4945',
+          name: 'something',
+        },
+      ],
+    });
+
+    expect(getByRole('textbox').value).toBe('something');
+  });
+
+  it('disables all input fields, if canUpdate = false', async () => {
+    const { container, getByRole } = setup({ canUpdate: false });
+
+    await user.click(container.querySelector('button[aria-expanded]'));
+
+    expect(getByRole('textbox')).toHaveAttribute('disabled');
+    expect(getByRole('combobox')).toHaveAttribute('data-disabled');
   });
 });

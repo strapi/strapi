@@ -1,5 +1,4 @@
-import { Attribute, ComponentAttribute } from '../attributes';
-import { KeysBy, SchemaUID, StringRecord } from '../../utils';
+import type { Attribute, Utils, Common } from '@strapi/strapi';
 
 /**
  * Literal union type representing the possible natures of a content type
@@ -9,7 +8,7 @@ export type ContentTypeKind = 'singleType' | 'collectionType';
 /**
  * Literal union type representing the possible types of a model
  */
-export type SchemaModelType = 'contentType' | 'component';
+export type ModelType = 'contentType' | 'component';
 
 /**
  * Data structure that can either represent a content type or a component
@@ -18,17 +17,17 @@ export interface Schema {
   /**
    * The type of the model. Useful to discriminate content-types from component
    */
-  modelType: SchemaModelType;
+  modelType: ModelType;
 
   /**
    * Informations about schema naming and display
    */
-  info: SchemaInfo;
+  info: Info;
 
   /**
    * Map of all the attributes with their name and definition
    */
-  attributes: SchemaAttributes;
+  attributes: Attributes;
 
   /**
    * Options declared and read by the plugins
@@ -38,7 +37,7 @@ export interface Schema {
   /**
    * Options object dedicated to Strapi core features
    */
-  options?: SchemaOptions;
+  options?: Options;
 
   /**
    * Custom table name for the schema
@@ -49,7 +48,7 @@ export interface Schema {
 /**
  * Data structure containing naming and display information for a Schema
  */
-export interface SchemaInfo {
+export interface Info {
   /**
    * Default name to use in the admin panel
    */
@@ -79,15 +78,18 @@ export interface SchemaInfo {
 /**
  * Low level data structure referencing every schema attribute and its name
  */
-export interface SchemaAttributes extends StringRecord<Attribute> {}
+export interface Attributes {
+  [key: string]: Attribute.Any;
+}
 
 /**
  * Structure containing every core schema options and their associated value
  */
-export interface SchemaOptions {
+export interface Options {
   draftAndPublish?: boolean;
   populateCreatorFields?: boolean;
   comment?: string;
+  version?: string;
 }
 
 export interface PluginOptions {}
@@ -95,13 +97,13 @@ export interface PluginOptions {}
 /**
  * Schema for a content type
  */
-export interface ContentTypeSchema extends Schema {
+export interface ContentType extends Schema {
   modelType: 'contentType';
 
   /**
    * Unique identifier of the schema
    */
-  uid: SchemaUID;
+  uid: Common.UID.ContentType;
 
   /**
    * Determine the type of the content type (single-type or collection-type)
@@ -112,20 +114,20 @@ export interface ContentTypeSchema extends Schema {
 /**
  * Schema for a collection type
  */
-export interface CollectionTypeSchema extends ContentTypeSchema {
+export interface CollectionType extends ContentType {
   kind: 'collectionType';
 }
 
 /**
  * Schema for a single type
  */
-export interface SingleTypeSchema extends ContentTypeSchema {
+export interface SingleType extends ContentType {
   kind: 'singleType';
 }
 
 /**
  * Schema for a component
  */
-export interface ComponentSchema extends Schema {
+export interface Component extends Schema {
   modelType: 'component';
 }

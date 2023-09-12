@@ -27,7 +27,6 @@ describe('Date validator', () => {
       kind: 'contentType',
       modelName: 'test-model',
       uid: 'test-uid',
-      privateAttributes: [],
       options: {},
       attributes: {
         attrDateUnique: { type: 'date', unique: true },

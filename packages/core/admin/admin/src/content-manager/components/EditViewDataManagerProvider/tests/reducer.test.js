@@ -851,6 +851,78 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
 
       expect(reducer(state, action)).toEqual(expected);
     });
+
+    it('should add a component at a specific position in the array', () => {
+      const components = {
+        'blog.simple': {
+          uid: 'blog.simple',
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            name: {
+              type: 'string',
+            },
+          },
+        },
+      };
+
+      const state = {
+        ...initialState,
+        componentsDataStructure: {
+          'blog.simple': { name: 'test' },
+        },
+        initialData: {
+          name: 'name',
+          dz: [{ name: 'test', __component: 'blog.simple', id: 0 }],
+        },
+        modifiedData: {
+          name: 'name',
+          dz: [{ name: 'test', __component: 'blog.simple', id: 0 }],
+        },
+      };
+
+      const expected = {
+        ...initialState,
+        componentsDataStructure: {
+          'blog.simple': { name: 'test' },
+        },
+        initialData: {
+          name: 'name',
+          dz: [{ name: 'test', __component: 'blog.simple', id: 0 }],
+        },
+        modifiedData: {
+          name: 'name',
+          dz: [
+            { name: 'test', __component: 'blog.simple', __temp_key__: 1 },
+            { name: 'test', __component: 'blog.simple', id: 0 },
+          ],
+        },
+        modifiedDZName: 'dz',
+        shouldCheckErrors: true,
+      };
+
+      const action = {
+        type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE',
+        componentLayoutData: {
+          uid: 'blog.simple',
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            name: {
+              type: 'string',
+            },
+          },
+        },
+        allComponents: components,
+        keys: ['dz'],
+        shouldCheckErrors: true,
+        position: -1,
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
   });
 
   describe('CONNECT_RELATION', () => {
@@ -1478,6 +1550,75 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
               },
               "ok": true,
               "relation": [],
+            },
+            "publishConfirmation": {
+              "draftCount": 0,
+              "show": false,
+            },
+            "shouldCheckErrors": false,
+          }
+        `);
+      });
+
+      it('should keep the creator fields relations without replace them with arrays', () => {
+        const state = {
+          ...initialState,
+          formErrors: true,
+          initialData: {},
+          modifiedData: {},
+          modifiedDZName: true,
+          shouldCheckErrors: true,
+        };
+
+        const action = {
+          type: 'INIT_FORM',
+          initialValues: {
+            ok: true,
+            createdBy: { username: 'johnDoe' },
+            updatedBy: { username: 'johnDoe' },
+          },
+          attributes: {
+            okay: {
+              type: 'boolean',
+            },
+            createdBy: {
+              type: 'relation',
+              relation: 'manyToOne',
+              target: 'admin::user',
+              relationType: 'manyToOne',
+            },
+            updatedBy: {
+              type: 'relation',
+              relation: 'manyToOne',
+              target: 'admin::user',
+              relationType: 'manyToOne',
+            },
+          },
+        };
+
+        expect(reducer(state, action)).toMatchInlineSnapshot(`
+          {
+            "componentsDataStructure": {},
+            "contentTypeDataStructure": {},
+            "formErrors": {},
+            "initialData": {
+              "createdBy": {
+                "username": "johnDoe",
+              },
+              "ok": true,
+              "updatedBy": {
+                "username": "johnDoe",
+              },
+            },
+            "modifiedDZName": null,
+            "modifiedData": {
+              "createdBy": {
+                "username": "johnDoe",
+              },
+              "ok": true,
+              "updatedBy": {
+                "username": "johnDoe",
+              },
             },
             "publishConfirmation": {
               "draftCount": 0,

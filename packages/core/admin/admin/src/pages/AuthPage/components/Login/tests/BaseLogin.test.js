@@ -1,10 +1,12 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { Router } from 'react-router-dom';
-import { IntlProvider } from 'react-intl';
-import * as yup from 'yup';
 import { createMemoryHistory } from 'history';
+import { IntlProvider } from 'react-intl';
+import { Router } from 'react-router-dom';
+import * as yup from 'yup';
+
 import BaseLogin from '../BaseLogin';
 
 jest.mock('../../../../../hooks/useConfigurations', () => () => ({
@@ -27,6 +29,63 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
     );
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c27 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c8 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c10 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c13 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c15 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #d02b20;
+      }
+
+      .c28 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
+      .c36 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #ffffff;
+      }
+
+      .c40 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #4945ff;
+      }
+
       .c1 {
         background: #ffffff;
         padding-top: 48px;
@@ -193,57 +252,18 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         justify-content: center;
       }
 
-      .c8 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c10 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
-      }
-
-      .c13 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c15 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #d02b20;
-      }
-
-      .c28 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c36 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #ffffff;
-      }
-
       .c34 {
         position: relative;
         outline: none;
       }
 
-      .c34 svg {
+      .c34 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c34 svg > g,
-      .c34 svg path {
+      .c34 > svg > g,
+      .c34 > svg path {
         fill: #ffffff;
       }
 
@@ -349,20 +369,13 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         background-color: #8e8ea9;
       }
 
-      .c27 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
       .c35 {
         height: 2rem;
+      }
+
+      .c35 svg {
+        height: 0.75rem;
+        width: auto;
       }
 
       .c35[aria-disabled='true'] {
@@ -374,7 +387,8 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         color: #666687;
       }
 
-      .c35[aria-disabled='true'] svg > g,.c35[aria-disabled='true'] svg path {
+      .c35[aria-disabled='true'] svg > g,
+      .c35[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -387,7 +401,8 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         color: #666687;
       }
 
-      .c35[aria-disabled='true']:active svg > g,.c35[aria-disabled='true']:active svg path {
+      .c35[aria-disabled='true']:active svg > g,
+      .c35[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -419,6 +434,21 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
 
       .c16 {
         line-height: 0;
+      }
+
+      .c29 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: flex-start;
+        -webkit-box-align: flex-start;
+        -ms-flex-align: flex-start;
+        align-items: flex-start;
+      }
+
+      .c29 * {
+        cursor: pointer;
       }
 
       .c19 {
@@ -531,29 +561,8 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         padding: 0;
       }
 
-      .c29 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: flex-start;
-        -webkit-box-align: flex-start;
-        -ms-flex-align: flex-start;
-        align-items: flex-start;
-      }
-
-      .c29 * {
-        cursor: pointer;
-      }
-
       .c0:focus-visible {
         outline: none;
-      }
-
-      .c40 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #4945ff;
       }
 
       .c39 {
@@ -567,16 +576,25 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         align-items: center;
         -webkit-text-decoration: none;
         text-decoration: none;
+        gap: 8px;
         position: relative;
         outline: none;
+      }
+
+      .c39 svg {
+        font-size: 0.625rem;
       }
 
       .c39 svg path {
         fill: #4945ff;
       }
 
-      .c39 svg {
-        font-size: 0.625rem;
+      .c39:hover {
+        color: #7b79ff;
+      }
+
+      .c39:active {
+        color: #271fe0;
       }
 
       .c39:after {
@@ -609,6 +627,10 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         border: 2px solid #4945ff;
       }
 
+      .c5 {
+        height: 4.5rem;
+      }
+
       .c2 {
         margin: 0 auto;
         width: 552px;
@@ -618,10 +640,6 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
-      }
-
-      .c5 {
-        height: 4.5rem;
       }
 
       .c26 svg {
@@ -690,7 +708,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                   >
                     <label
                       class="c7 c13 c14"
-                      for="1"
+                      for=":r0:"
                     >
                       Email
                       <span
@@ -707,7 +725,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                         aria-invalid="false"
                         aria-required="true"
                         class="c19"
-                        id="1"
+                        id=":r0:"
                         name="email"
                         placeholder="kai@doe.com"
                         value=""
@@ -725,7 +743,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                   >
                     <label
                       class="c7 c13 c14"
-                      for="3"
+                      for=":r2:"
                     >
                       Password
                       <span
@@ -742,7 +760,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                         aria-invalid="false"
                         aria-required="true"
                         class="c20 c21"
-                        id="3"
+                        id=":r2:"
                         name="password"
                         type="password"
                         value=""
@@ -794,7 +812,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                       <input
                         aria-label="rememberMe"
                         class="c30"
-                        id="5"
+                        id=":r4:"
                         name="rememberMe"
                         type="checkbox"
                       />
@@ -832,7 +850,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
               href="/auth/forgot-password"
             >
               <span
-                class="c40"
+                class="c7 c40"
               >
                 Forgot your password?
               </span>
