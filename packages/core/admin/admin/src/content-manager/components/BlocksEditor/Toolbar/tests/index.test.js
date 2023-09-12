@@ -108,7 +108,7 @@ describe('BlocksEditor toolbar', () => {
     expect(italicButton).toHaveAttribute('data-state', 'off');
   });
 
-  it('toggles the list on a selection', async () => {
+  it('transforms the selection to a list and toggles the format', async () => {
     setup();
 
     const unorderedListButton = screen.getByLabelText(/unordered list/i);
