@@ -1,8 +1,7 @@
 import React from 'react';
 
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { render as renderRTL, screen, waitFor, renderHook, act } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
+import { screen } from '@testing-library/react';
+import { render, waitFor, renderHook, act } from '@tests/utils';
 
 import { Table, useTableContext } from '../Table';
 
@@ -35,75 +34,55 @@ const mockHeaders = [
       sortable: true,
     },
   },
-];
+] as const;
 
 const mockRows = [{ id: 1 }, { id: 2 }];
 
-// eslint-disable-next-line react/prop-types
-const Wrapper = ({ children }) => (
-  <ThemeProvider theme={lightTheme}>
-    <IntlProvider locale="en" messages={{}} defaultLocale="en">
-      {children}
-    </IntlProvider>
-  </ThemeProvider>
-);
-
-const render = (props) => ({
-  ...renderRTL(<Table.Root {...props} />, {
-    wrapper: Wrapper,
-  }),
-});
-
 describe('Table', () => {
   it('should render with content', () => {
-    render({
-      children: (
-        <Table.Content contentType="Test">
+    const { getByRole, queryByText } = render(
+      <Table.Root>
+        <Table.Content>
           <tbody>
             <tr>
               <td>content</td>
             </tr>
           </tbody>
         </Table.Content>
-      ),
-    });
+      </Table.Root>
+    );
 
-    expect(screen.getByRole('cell', { name: 'content' })).toBeInTheDocument();
-    expect(screen.queryByText('Loading content')).not.toBeInTheDocument();
+    expect(getByRole('cell', { name: 'content' })).toBeInTheDocument();
+    expect(queryByText('Loading content')).not.toBeInTheDocument();
   });
 
   it('should render with loading body', () => {
-    render({
-      isLoading: true,
-      children: (
+    const { getByText } = render(
+      <Table.Root isLoading>
         <Table.Content>
           <Table.LoadingBody />
         </Table.Content>
-      ),
-    });
+      </Table.Root>
+    );
 
-    expect(screen.getByText('Loading content')).toBeInTheDocument();
+    expect(getByText('Loading content')).toBeInTheDocument();
   });
 
   it('should render with empty body', () => {
-    render({
-      rows: [],
-      colCount: 1,
-      children: (
+    const { getByText } = render(
+      <Table.Root rows={[]} colCount={1}>
         <Table.Content>
           <Table.EmptyBody contentType="Test" />
         </Table.Content>
-      ),
-    });
+      </Table.Root>
+    );
 
-    expect(screen.getByText('No content found')).toBeInTheDocument();
+    expect(getByText('No content found')).toBeInTheDocument();
   });
 
   it('should render headers with checkbox and visually hidden actions', () => {
-    render({
-      rows: mockRows,
-      colCount: 1,
-      children: (
+    const { getByRole, getByText } = render(
+      <Table.Root rows={mockRows} colCount={1}>
         <Table.Content>
           <Table.Head>
             {/* Bulk action select all checkbox */}
@@ -113,7 +92,6 @@ describe('Table', () => {
                 key={key}
                 name={name}
                 fieldSchemaType={fieldSchema.type}
-                relationFieldName={metadatas.mainField?.name}
                 isSortable={metadatas.sortable}
                 label={metadatas.label}
               />
@@ -122,25 +100,23 @@ describe('Table', () => {
             <Table.HeaderHiddenActionsCell />
           </Table.Head>
         </Table.Content>
-      ),
-    });
+      </Table.Root>
+    );
 
-    expect(screen.getByRole('button', { name: 'Sort on id' })).toBeInTheDocument();
-    expect(screen.getByRole('checkbox', { name: 'Select all entries' })).toBeInTheDocument();
-    expect(screen.getByText('Actions')).toBeInTheDocument();
+    expect(getByRole('button', { name: 'Sort on id' })).toBeInTheDocument();
+    expect(getByRole('checkbox', { name: 'Select all entries' })).toBeInTheDocument();
+    expect(getByText('Actions')).toBeInTheDocument();
   });
 
   it('should render the bulk action bar with bulk delete button after updating the selectedEntries state', async () => {
     const { result } = renderHook(() => useTableContext(), {
       wrapper: ({ children }) => (
-        <Wrapper>
-          <Table.Root row={mockRows} colCount={1}>
-            <Table.ActionBar>
-              <Table.BulkDeleteButton onConfirmDeleteAll={() => jest.fn()} />
-            </Table.ActionBar>
-            {children}
-          </Table.Root>
-        </Wrapper>
+        <Table.Root rows={mockRows} colCount={1}>
+          <Table.ActionBar>
+            <Table.BulkDeleteButton onConfirmDeleteAll={jest.fn()} />
+          </Table.ActionBar>
+          {children}
+        </Table.Root>
       ),
     });
 

@@ -16,6 +16,7 @@ import {
   VisuallyHidden,
   Loader,
   Table as DSTable,
+  TableProps as DSTableProps,
 } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
@@ -25,13 +26,26 @@ import { useQueryParams } from '../hooks/useQueryParams';
 import { SortIcon } from '../icons/SortIcon';
 
 import { ConfirmDialog } from './ConfirmDialog';
-import { EmptyStateLayout } from './EmptyStateLayout';
+import { EmptyStateLayout, EmptyStateLayoutProps } from './EmptyStateLayout';
+
+import type { Attribute } from '@strapi/strapi';
 
 /* -------------------------------------------------------------------------------------------------
  * Context
  * -----------------------------------------------------------------------------------------------*/
 
-const TableContext = React.createContext(null);
+interface TableContextValue<TRow extends { id: number } = { id: number }> {
+  selectedEntries: number[];
+  setSelectedEntries: React.Dispatch<React.SetStateAction<number[]>>;
+  onSelectRow: (args: { name: number; value: boolean }) => void;
+  rows: TRow[];
+  isLoading: boolean;
+  isFetching: boolean;
+  colCount: number;
+  rowCount: number;
+}
+
+const TableContext = React.createContext<TableContextValue | null>(null);
 
 const useTableContext = () => {
   const context = React.useContext(TableContext);
@@ -47,7 +61,11 @@ const useTableContext = () => {
  * ActionBar
  * -----------------------------------------------------------------------------------------------*/
 
-const ActionBar = ({ children }) => {
+interface ActionBarProps {
+  children: React.ReactNode;
+}
+
+const ActionBar = ({ children }: ActionBarProps) => {
   const { formatMessage } = useIntl();
   const { selectedEntries } = useTableContext();
 
@@ -77,7 +95,11 @@ ActionBar.propTypes = {
  * BulkDeleteButton
  * -----------------------------------------------------------------------------------------------*/
 
-const BulkDeleteButton = ({ onConfirmDeleteAll }) => {
+interface BulkDeleteButtonProps {
+  onConfirmDeleteAll: (ids: number[]) => Promise<void>;
+}
+
+const BulkDeleteButton = ({ onConfirmDeleteAll }: BulkDeleteButtonProps) => {
   const { selectedEntries, setSelectedEntries } = useTableContext();
   const { formatMessage } = useIntl();
   const [showConfirmDeleteAll, setShowConfirmDeleteAll] = React.useState(false);
@@ -128,7 +150,11 @@ BulkDeleteButton.propTypes = {
  * Head
  * -----------------------------------------------------------------------------------------------*/
 
-const Head = ({ children }) => {
+interface HeadProps {
+  children: React.ReactNode;
+}
+
+const Head = ({ children }: HeadProps) => {
   return (
     <Thead>
       <Tr>{children}</Tr>
@@ -202,9 +228,23 @@ const HeaderHiddenActionsCell = () => {
  * HeaderCell
  * -----------------------------------------------------------------------------------------------*/
 
-const HeaderCell = ({ fieldSchemaType, name, relationFieldName, isSortable, label }) => {
+interface HeaderCellProps {
+  fieldSchemaType: Attribute.Kind;
+  name: string;
+  relationFieldName?: string;
+  isSortable?: boolean;
+  label: string;
+}
+
+const HeaderCell = ({
+  fieldSchemaType,
+  name,
+  relationFieldName,
+  isSortable,
+  label,
+}: HeaderCellProps) => {
   const [{ query }, setQuery] = useQueryParams();
-  const sort = query?.sort || '';
+  const sort = typeof query?.sort === 'string' ? query.sort : '';
   const [sortBy, sortOrder] = sort.split(':');
   const { formatMessage } = useIntl();
 
@@ -246,7 +286,7 @@ const HeaderCell = ({ fieldSchemaType, name, relationFieldName, isSortable, labe
         isSortable && (
           <IconButton
             label={sortLabel}
-            onClick={handleClickSort}
+            onClick={() => handleClickSort(true)}
             icon={<SortIcon isUp={isUp} />}
             noBorder
           />
@@ -257,7 +297,6 @@ const HeaderCell = ({ fieldSchemaType, name, relationFieldName, isSortable, labe
         <Typography
           textColor="neutral600"
           as={!isSorted && isSortable ? 'button' : 'span'}
-          label={label}
           onClick={() => handleClickSort()}
           variant="sigma"
         >
@@ -285,11 +324,24 @@ HeaderCell.propTypes = {
  * Root
  * -----------------------------------------------------------------------------------------------*/
 
-const Root = ({ children, defaultSelectedEntries, rows, colCount, isLoading, isFetching }) => {
-  const [selectedEntries, setSelectedEntries] = React.useState(defaultSelectedEntries);
+interface RootProps
+  extends Pick<TableContextValue, 'colCount' | 'rows' | 'isLoading' | 'isFetching'> {
+  children: React.ReactNode;
+  defaultSelectedEntries?: number[];
+}
+
+const Root = ({
+  children,
+  defaultSelectedEntries = [],
+  rows,
+  colCount,
+  isLoading,
+  isFetching,
+}: RootProps) => {
+  const [selectedEntries, setSelectedEntries] = React.useState<number[]>(defaultSelectedEntries);
   const rowCount = rows.length + 1;
 
-  const onSelectRow = React.useCallback(({ name, value }) => {
+  const onSelectRow = React.useCallback(({ name, value }: { name: number; value: unknown }) => {
     setSelectedEntries((prev) => {
       if (value) {
         return prev.concat(name);
@@ -345,7 +397,11 @@ Root.propTypes = {
  * EmptyBody
  * -----------------------------------------------------------------------------------------------*/
 
-const EmptyBody = ({ contentType, ...rest }) => {
+interface EmptyBodyProps extends EmptyStateLayoutProps {
+  contentType: string;
+}
+
+const EmptyBody = ({ contentType, ...rest }: EmptyBodyProps) => {
   const { rows, colCount, isLoading } = useTableContext();
   const [{ query }] = useQueryParams();
   const hasFilters = query?.filters !== undefined;
@@ -365,7 +421,7 @@ const EmptyBody = ({ contentType, ...rest }) => {
     <Tbody>
       <Tr>
         <Td colSpan={colCount}>
-          <EmptyStateLayout {...rest} content={content} hasRadius={false} shadow="" />
+          <EmptyStateLayout {...rest} content={content} hasRadius={false} shadow={undefined} />
         </Td>
       </Tr>
     </Tbody>
@@ -412,7 +468,11 @@ const LoadingBody = () => {
 /* -------------------------------------------------------------------------------------------------
  * Body
  * -----------------------------------------------------------------------------------------------*/
-const Body = ({ children }) => {
+interface BodyProps {
+  children: React.ReactNode;
+}
+
+const Body = ({ children }: BodyProps) => {
   const { rows, isLoading } = useTableContext();
 
   if (isLoading || rows.length === 0) {
@@ -430,7 +490,11 @@ Body.propTypes = {
  * Content
  * -----------------------------------------------------------------------------------------------*/
 
-const Content = ({ children, footer }) => {
+interface ContentProps extends Pick<DSTableProps, 'footer'> {
+  children: React.ReactNode;
+}
+
+const Content = ({ children, footer }: ContentProps) => {
   const { rowCount, colCount } = useTableContext();
 
   return (
