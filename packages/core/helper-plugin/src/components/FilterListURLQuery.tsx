@@ -27,10 +27,6 @@ export const FilterListURLQuery = ({ filtersSchema = [] }: FilterListURLQueryPro
     page?: number;
   }>();
 
-  /*
-  TODO: This is a temporary fix to avoid a typescript error when I try to access the $and property. But I don't think it's right.
-  I need some comments in the PR to find a better solution.
-  */
 
   const handleClick = (filter: Filter) => {
     const nextFilters = (query?.filters?.$and || []).filter((prevFilter) => {
