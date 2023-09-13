@@ -33,6 +33,10 @@ class PostgresDialect extends Dialect {
       'text',
       parseFloat
     );
+
+    if (this.db.connection.getSchemaName()) {
+      await this.db.connection.raw(`SET search_path TO \`${this.db.connection.getSchemaName()}\``);
+    }
   }
 
   usesForeignKeys() {
