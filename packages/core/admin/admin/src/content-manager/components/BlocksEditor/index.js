@@ -9,7 +9,6 @@ import { Slate, withReact, ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
 import BlocksInput from './BlocksInput';
-import { blocksData } from './tempSchema';
 import { BlocksToolbar } from './Toolbar';
 
 const TypographyAsterisk = styled(Typography)`
@@ -32,61 +31,76 @@ const Wrapper = styled(Box)`
   border-radius: ${({ theme }) => theme.borderRadius};
 `;
 
-const BlocksEditor = React.forwardRef(({ intlLabel, name, readOnly, required, error }, ref) => {
-  const { formatMessage } = useIntl();
-  const [editor] = React.useState(() => withReact(createEditor()));
+const BlocksEditor = React.forwardRef(
+  ({ intlLabel, name, readOnly, required, error, value, onChange }, ref) => {
+    const { formatMessage } = useIntl();
+    const [editor] = React.useState(() => withReact(createEditor()));
 
-  const label = intlLabel.id
-    ? formatMessage(
-        { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
-        { ...intlLabel.values }
-      )
-    : name;
+    const label = intlLabel.id
+      ? formatMessage(
+          { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
+          { ...intlLabel.values }
+        )
+      : name;
 
-  /** Editable is not able to hold the ref, https://github.com/ianstormtaylor/slate/issues/4082
-   *  so with "useImperativeHandle" we can use ReactEditor methods to expose to the parent above
-   *  also not passing forwarded ref here, gives console warning.
-   */
-  React.useImperativeHandle(
-    ref,
-    () => ({
-      focus() {
-        ReactEditor.focus(editor);
-      },
-    }),
-    [editor]
-  );
+    /** Editable is not able to hold the ref, https://github.com/ianstormtaylor/slate/issues/4082
+     *  so with "useImperativeHandle" we can use ReactEditor methods to expose to the parent above
+     *  also not passing forwarded ref here, gives console warning.
+     */
+    React.useImperativeHandle(
+      ref,
+      () => ({
+        focus() {
+          ReactEditor.focus(editor);
+        },
+      }),
+      [editor]
+    );
 
-  return (
-    <>
-      <Flex direction="column" alignItems="stretch" gap={1}>
-        <Flex gap={1}>
-          <Typography variant="pi" fontWeight="bold" textColor="neutral800">
-            {label}
-            {required && <TypographyAsterisk textColor="danger600">*</TypographyAsterisk>}
-          </Typography>
+    return (
+      <>
+        <Flex direction="column" alignItems="stretch" gap={1}>
+          <Flex gap={1}>
+            <Typography variant="pi" fontWeight="bold" textColor="neutral800">
+              {label}
+              {required && <TypographyAsterisk textColor="danger600">*</TypographyAsterisk>}
+            </Typography>
+          </Flex>
+
+          <Slate
+            editor={editor}
+            initialValue={
+              value?.blocks || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]
+            }
+            onChange={(state) => {
+              const isAstChange = editor.operations.some((op) => op.type !== 'set_selection');
+
+              if (isAstChange) {
+                const blocks = JSON.stringify({ version: '0.0.0', blocks: state });
+                onChange({ target: { name, value: blocks, type: 'blocks' } });
+              }
+            }}
+          >
+            <InputWrapper direction="column" alignItems="flex-start">
+              <BlocksToolbar />
+              <EditorDivider width="100%" />
+              <Wrapper>
+                <BlocksInput readOnly={readOnly} />
+              </Wrapper>
+            </InputWrapper>
+          </Slate>
         </Flex>
-
-        <Slate editor={editor} initialValue={blocksData}>
-          <InputWrapper direction="column" alignItems="flex-start">
-            <BlocksToolbar />
-            <EditorDivider width="100%" />
-            <Wrapper>
-              <BlocksInput readOnly={readOnly} />
-            </Wrapper>
-          </InputWrapper>
-        </Slate>
-      </Flex>
-      {error && (
-        <Box paddingTop={1}>
-          <Typography variant="pi" textColor="danger600" data-strapi-field-error>
-            {error}
-          </Typography>
-        </Box>
-      )}
-    </>
-  );
-});
+        {error && (
+          <Box paddingTop={1}>
+            <Typography variant="pi" textColor="danger600" data-strapi-field-error>
+              {error}
+            </Typography>
+          </Box>
+        )}
+      </>
+    );
+  }
+);
 
 BlocksEditor.defaultProps = {
   required: false,

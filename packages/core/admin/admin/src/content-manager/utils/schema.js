@@ -217,29 +217,16 @@ const createYupSchemaAttribute = (type, validations, options) => {
   }
 
   if (type === 'blocks') {
-    schema = yup
-      .mixed(errorsTrads.json)
-      .test('isJSONObject', errorsTrads.json, (value) => {
-        try {
-          const parsedValue = JSON.parse(value);
-
-          if (typeof parsedValue === 'object' && parsedValue !== null) {
-            return true;
-          }
-        } catch (err) {
-          return false;
-        }
-
-        return false;
-      })
-      .nullable()
-      .test('required', errorsTrads.required, (value) => {
-        if (validations.required && (!value || !value.length)) {
-          return false;
-        }
+    // TODO: Fix frontend validation for blocks, what should we check here?
+    schema = yup.mixed().test('isJSON', errorsTrads.json, (value) => {
+      try {
+        JSON.parse(value);
 
         return true;
-      });
+      } catch (err) {
+        return false;
+      }
+    });
   }
 
   if (type === 'json') {
