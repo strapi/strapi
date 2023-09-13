@@ -2,7 +2,6 @@ import fs from 'fs/promises';
 import path from 'path';
 
 import { loadPkg, validatePkg } from '../pkg';
-import { Logger } from '../logger';
 
 const loggerMock = {
   debug: jest.fn(),
@@ -131,7 +130,7 @@ describe('pkg', () => {
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"'type' in 'package.json' must be of type '[35m/(commonjs|module)/[39m' (recieved the value '[35msomething[39m')"`
+        `"type must be one of the following values: commonjs, module"`
       );
     });
 

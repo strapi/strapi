@@ -29,18 +29,87 @@ const validateExportsOrdering = async ({
         throw new Error(`exports["${expPath}"]: the 'types' property should be the first property`);
       }
 
-      if (!assertOrder('import', 'require', keys)) {
-        logger.warn(
-          `exports["${expPath}"]: the 'import' property should come before the 'require' property`
-        );
-      }
+      if (exp.node) {
+        const nodeKeys = Object.keys(exp.node);
 
-      if (!assertOrder('module', 'import', keys)) {
-        logger.warn(
-          `exports["${expPath}"]: the 'module' property should come before 'import' property`
-        );
-      }
+        if (!assertOrder('module', 'import', nodeKeys)) {
+          throw new Error(
+            `exports["${expPath}"]: the 'node.module' property should come before the 'node.import' property`
+          );
+        }
 
+        if (!assertOrder('import', 'require', nodeKeys)) {
+          logger.warn(
+            `exports["${expPath}"]: the 'node.import' property should come before the 'node.require' property`
+          );
+        }
+
+        if (!assertOrder('module', 'require', nodeKeys)) {
+          logger.warn(
+            `exports["${expPath}"]: the 'node.module' property should come before 'node.require' property`
+          );
+        }
+
+        if (exp.import && exp.node.import && !assertOrder('node', 'import', keys)) {
+          throw new Error(
+            `exports["${expPath}"]: the 'node' property should come before the 'import' property`
+          );
+        }
+
+        if (exp.module && exp.node.module && !assertOrder('node', 'module', keys)) {
+          throw new Error(
+            `exports["${expPath}"]: the 'node' property should come before the 'module' property`
+          );
+        }
+
+        /**
+         * If there's a `node.import` property but not a `node.require` we can assume `node.import`
+         * is wrapping `import` and `node.module` should be added for bundlers.
+         */
+        if (
+          exp.node.import &&
+          (!exp.node.require || exp.require === exp.node.require) &&
+          !exp.node.module
+        ) {
+          logger.warn(
+            `exports["${expPath}"]: the 'node.module' property should be added so bundlers don't unintentionally try to bundle 'node.import'. Its value should be '"module": "${exp.import}"'`
+          );
+        }
+
+        if (
+          exp.node.import &&
+          !exp.node.require &&
+          exp.node.module &&
+          exp.import &&
+          exp.node.module !== exp.import
+        ) {
+          throw new Error(
+            `exports["${expPath}"]: the 'node.module' property should match 'import'`
+          );
+        }
+
+        if (exp.require && exp.node.require && exp.require === exp.node.require) {
+          throw new Error(
+            `exports["${expPath}"]: the 'node.require' property isn't necessary as it's identical to 'require'`
+          );
+        } else if (exp.require && exp.node.require && !assertOrder('node', 'require', keys)) {
+          throw new Error(
+            `exports["${expPath}"]: the 'node' property should come before the 'require' property`
+          );
+        }
+      } else {
+        if (!assertOrder('import', 'require', keys)) {
+          logger.warn(
+            `exports["${expPath}"]: the 'import' property should come before the 'require' property`
+          );
+        }
+
+        if (!assertOrder('module', 'import', keys)) {
+          logger.warn(
+            `exports["${expPath}"]: the 'module' property should come before 'import' property`
+          );
+        }
+      }
       if (!assertLast('default', keys)) {
         throw new Error(
           `exports["${expPath}"]: the 'default' property should be the last property`
@@ -128,8 +197,6 @@ const getExportExtensionMap = (): ExtMap => {
  *
  * @description validate the `require` and `import` properties of a given exports maps from the package.json
  * returning if any errors are found.
- *
- * @type {(_exports: unknown, options: {extMap: ExtMap; pkg: PackageJson}) => string[]}
  */
 const validateExports = (
   _exports: Array<Export & { _path: string }>,
@@ -143,13 +210,13 @@ const validateExports = (
   for (const exp of _exports) {
     if (exp.require && !exp.require.endsWith(ext.cjs)) {
       errors.push(
-        `package.json with \`type: "${pkg.type}"\` - \`exports["${exp._path}"].require\` must end with "${ext.cjs}"`
+        `package.json with 'type: "${pkg.type}"' - 'exports["${exp._path}"].require' must end with "${ext.cjs}"`
       );
     }
 
     if (exp.import && !exp.import.endsWith(ext.es)) {
       errors.push(
-        `package.json with \`type: "${pkg.type}"\` - \`exports["${exp._path}"].import\` must end with "${ext.es}"`
+        `package.json with 'type: "${pkg.type}"' - 'exports["${exp._path}"].import' must end with "${ext.es}"`
       );
     }
   }
@@ -160,8 +227,20 @@ const validateExports = (
 interface Export {
   types?: string;
   source: string;
-  require?: string;
+  browser?: {
+    source: string;
+    import?: string;
+    require?: string;
+  };
+  node?: {
+    source?: string;
+    module?: string;
+    import?: string;
+    require?: string;
+  };
+  module?: string;
   import?: string;
+  require?: string;
   default: string;
 }
 

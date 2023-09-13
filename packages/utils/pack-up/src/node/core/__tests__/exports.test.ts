@@ -49,12 +49,12 @@ describe('exports', () => {
     });
 
     it('should return the package if there is an exports property with a valid structure', async () => {
-      // @ts-expect-error - issue with Yup inference
       const pkg: PackageJson = {
         name: 'testing',
         version: '0.0.0',
         exports: {
           './package.json': './package.json',
+          // @ts-expect-error - issue with Yup inference
           './admin': {
             types: './admin/index.d.ts',
             import: './admin/index.js',
@@ -87,11 +87,11 @@ describe('exports', () => {
     });
 
     it('should throw if the types property is not the first in an export object', async () => {
-      // @ts-expect-error - issue with Yup inference
       const pkg: PackageJson = {
         name: 'testing',
         version: '0.0.0',
         exports: {
+          // @ts-expect-error - issue with Yup inference
           './admin': {
             import: './admin/index.js',
             types: './admin/index.d.ts',
@@ -111,11 +111,11 @@ describe('exports', () => {
     });
 
     it('should log a warning if the require property comes before the import property in an export object', async () => {
-      // @ts-expect-error - issue with Yup inference
       const pkg: PackageJson = {
         name: 'testing',
         version: '0.0.0',
         exports: {
+          // @ts-expect-error - issue with Yup inference
           './admin': {
             types: './admin/index.d.ts',
             require: './admin/index.cjs',
@@ -190,7 +190,6 @@ describe('exports', () => {
     });
 
     it('should return a combination of the standard export fields and the export map if they both exist', () => {
-      // @ts-expect-error - issue with Yup inference
       const pkg: PackageJson = {
         name: 'testing',
         version: '0.0.0',
@@ -200,6 +199,7 @@ describe('exports', () => {
         source: './src/index.ts',
         exports: {
           './package.json': './package.json',
+          // @ts-expect-error - issue with Yup inference
           './admin': {
             types: './admin/index.d.ts',
             import: './admin/index.mjs',
@@ -234,12 +234,12 @@ describe('exports', () => {
     });
 
     it('should return just the exports map if there are no standard export fields and the export map exists', () => {
-      // @ts-expect-error - issue with Yup inference
       const pkg: PackageJson = {
         name: 'testing',
         version: '0.0.0',
         exports: {
           './package.json': './package.json',
+          // @ts-expect-error - issue with Yup inference
           './admin': {
             types: './admin/index.d.ts',
             import: './admin/index.mjs',
@@ -266,11 +266,11 @@ describe('exports', () => {
     });
 
     it('should throw an error if you try to use an exports map without supplying an export for the package.json file', () => {
-      // @ts-expect-error - issue with Yup inference
       const pkg: PackageJson = {
         name: 'testing',
         version: '0.0.0',
         exports: {
+          // @ts-expect-error - issue with Yup inference
           './admin': {
             types: './admin/index.d.ts',
             import: './admin/index.mjs',
@@ -288,12 +288,12 @@ describe('exports', () => {
     });
 
     it('should throw an error if the pkg.json type is undefined and you try to export like a module', () => {
-      // @ts-expect-error - issue with Yup inference
       const pkg: PackageJson = {
         name: 'testing',
         version: '0.0.0',
         exports: {
           './package.json': './package.json',
+          // @ts-expect-error - issue with Yup inference
           './admin': {
             types: './admin/index.d.ts',
             import: './admin/index.js',
@@ -305,20 +305,20 @@ describe('exports', () => {
       };
 
       expect(() => parseExports({ pkg, extMap })).toThrowErrorMatchingInlineSnapshot(`
-            "
-            - package.json with \`type: "undefined"\` - \`exports["./admin"].require\` must end with ".js"
-            - package.json with \`type: "undefined"\` - \`exports["./admin"].import\` must end with ".mjs""
-          `);
+        "
+        - package.json with 'type: "undefined"' - 'exports["./admin"].require' must end with ".js"
+        - package.json with 'type: "undefined"' - 'exports["./admin"].import' must end with ".mjs""
+      `);
     });
 
     it('should throw an error if the pkg.json type is commonjs and you try to export like a module', () => {
-      // @ts-expect-error - issue with Yup inference
       const pkg: PackageJson = {
         name: 'testing',
         version: '0.0.0',
         type: 'commonjs',
         exports: {
           './package.json': './package.json',
+          // @ts-expect-error - issue with Yup inference
           './admin': {
             types: './admin/index.d.ts',
             import: './admin/index.js',
@@ -330,20 +330,20 @@ describe('exports', () => {
       };
 
       expect(() => parseExports({ pkg, extMap })).toThrowErrorMatchingInlineSnapshot(`
-            "
-            - package.json with \`type: "commonjs"\` - \`exports["./admin"].require\` must end with ".js"
-            - package.json with \`type: "commonjs"\` - \`exports["./admin"].import\` must end with ".mjs""
-          `);
+        "
+        - package.json with 'type: "commonjs"' - 'exports["./admin"].require' must end with ".js"
+        - package.json with 'type: "commonjs"' - 'exports["./admin"].import' must end with ".mjs""
+      `);
     });
 
     it('should throw an error if the pkg.json type is module and you try to export like a commonjs', () => {
-      // @ts-expect-error - issue with Yup inference
       const pkg: PackageJson = {
         name: 'testing',
         version: '0.0.0',
         type: 'module',
         exports: {
           './package.json': './package.json',
+          // @ts-expect-error - issue with Yup inference
           './admin': {
             types: './admin/index.d.ts',
             import: './admin/index.mjs',
@@ -355,10 +355,10 @@ describe('exports', () => {
       };
 
       expect(() => parseExports({ pkg, extMap })).toThrowErrorMatchingInlineSnapshot(`
-            "
-            - package.json with \`type: "module"\` - \`exports["./admin"].require\` must end with ".cjs"
-            - package.json with \`type: "module"\` - \`exports["./admin"].import\` must end with ".js""
-          `);
+        "
+        - package.json with 'type: "module"' - 'exports["./admin"].require' must end with ".cjs"
+        - package.json with 'type: "module"' - 'exports["./admin"].import' must end with ".js""
+      `);
     });
   });
 });

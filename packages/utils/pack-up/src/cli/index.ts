@@ -9,13 +9,32 @@ const command = (name: string) =>
     .option('-d, --debug', 'Get more logs in debug mode', false)
     .option('-s, --silent', "Don't log anything", false);
 
-command('Build Package')
-  .alias('build')
+command('check').action(async (options) => {
+  const { check } = await import('./commands/check');
+
+  return check(options);
+});
+
+command('build')
+  .option('--sourcemap', 'produce sourcemaps', true)
+  .option('--minify', 'minify the output', false)
   .action(async (options) => {
     const { build } = await import('./commands/build');
 
     return build(options);
   });
+
+command('init').action(async (options) => {
+  const { init } = await import('./commands/init');
+
+  return init(options);
+});
+
+command('watch').action(async (options) => {
+  const { watch } = await import('./commands/watch');
+
+  return watch(options);
+});
 
 program
   .usage('<command> [options]')

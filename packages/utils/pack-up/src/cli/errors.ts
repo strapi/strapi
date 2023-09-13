@@ -10,6 +10,7 @@ export const handleError = (err: unknown) => {
   );
 
   if (err instanceof Error && err.stack) {
+    // eslint-disable-next-line no-console
     console.log(
       chalk.red(
         boxen(err.stack, {

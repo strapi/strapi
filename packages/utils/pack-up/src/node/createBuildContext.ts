@@ -1,11 +1,13 @@
 import path from 'path';
 import browserslistToEsbuild from 'browserslist-to-esbuild';
 
-import { PackageJson } from './core/pkg';
+import type { PackageJson } from './core/pkg';
 import { parseExports, ExtMap, Export } from './core/exports';
-import { Logger } from './core/logger';
+import type { Logger } from './core/logger';
+import type { Config } from './core/config';
 
 interface BuildContextArgs {
+  config: Config;
   cwd: string;
   extMap: ExtMap;
   logger: Logger;
@@ -18,7 +20,10 @@ interface Targets {
   '*': string[];
 }
 
+type Runtime = '*' | 'node' | 'web';
+
 interface BuildContext {
+  config: Config;
   cwd: string;
   distPath: string;
   exports: Record<string, Export>;
@@ -26,6 +31,7 @@ interface BuildContext {
   extMap: ExtMap;
   logger: Logger;
   pkg: PackageJson;
+  runtime?: Runtime;
   targets: Targets;
 }
 
@@ -43,6 +49,7 @@ const DEFAULT_BROWSERS_LIST_CONFIG = [
  * such as a target, distPath, externals etc.
  */
 const createBuildContext = async ({
+  config,
   cwd,
   extMap,
   logger,
@@ -60,38 +67,60 @@ const createBuildContext = async ({
     return { ...acc, [exportPath]: exportEntry };
   }, {} as Record<string, Export>);
 
-  const external = [
+  const parsedExternals = [
     ...(pkg.dependencies ? Object.keys(pkg.dependencies) : []),
     ...(pkg.peerDependencies ? Object.keys(pkg.peerDependencies) : []),
   ];
 
+  const external =
+    config && Array.isArray(config.externals)
+      ? [...parsedExternals, ...config.externals]
+      : parsedExternals;
+
   const outputPaths = Object.values(exports)
     .flatMap((exportEntry) => {
-      return [exportEntry.import, exportEntry.require].filter(Boolean);
+      return [
+        exportEntry.import,
+        exportEntry.require,
+        exportEntry.browser?.import,
+        exportEntry.browser?.require,
+        exportEntry.node?.source && exportEntry.node.import,
+        exportEntry.node?.source && exportEntry.node.require,
+      ].filter(Boolean) as string[];
     })
-    .map((p) => path.resolve(cwd, p as string));
+    .map((p) => path.resolve(cwd, p));
 
-  const distPath = findCommonDirPath(outputPaths);
+  const commonDistPath = findCommonDirPath(outputPaths);
 
-  if (distPath === cwd) {
+  if (commonDistPath === cwd) {
     throw new Error(
       'all output files must share a common parent directory which is not the root package directory'
     );
   }
+
+  if (commonDistPath && !pathContains(cwd, commonDistPath)) {
+    throw new Error('all output files must be located within the package');
+  }
+
+  const configDistPath = config?.dist ? path.resolve(cwd, config.dist) : undefined;
+
+  const distPath = configDistPath || commonDistPath;
 
   if (!distPath) {
     throw new Error("could not detect 'dist' path");
   }
 
   return {
-    logger,
+    config,
     cwd,
-    pkg,
+    distPath,
     exports,
     external,
-    distPath,
-    targets,
     extMap,
+    logger,
+    pkg,
+    runtime: config?.runtime,
+    targets,
   };
 };
 
@@ -137,4 +166,4 @@ const findCommonDirPath = (filePaths: string[]): string | undefined => {
 };
 
 export { createBuildContext };
-export type { BuildContext, Targets };
+export type { BuildContext, Targets, Runtime };

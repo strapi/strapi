@@ -6,9 +6,9 @@ export interface WatchOptions extends CommonCLIOptions {
 }
 
 export const watch = async (opts: WatchOptions) => {
-  const { silent, debug, cwd = process.cwd() } = opts;
+  const { silent, debug } = opts;
 
   const logger = createLogger({ silent, debug });
 
-  console.log('success!');
+  logger.log('success!');
 };

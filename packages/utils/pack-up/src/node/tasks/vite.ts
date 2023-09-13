@@ -12,7 +12,7 @@ import type { Extensions } from '../core/exports';
  * @internal
  */
 const resolveViteConfig = (ctx: BuildContext, task: ViteTask) => {
-  const { cwd, distPath, targets, external, extMap, pkg } = ctx;
+  const { cwd, distPath, targets, external, extMap, pkg, config: packUpConfig } = ctx;
   const { entries, format, output, runtime } = task;
   const outputExt = extMap[pkg.type || 'commonjs'][format];
   const outDir = path.relative(cwd, distPath);
@@ -30,7 +30,8 @@ const resolveViteConfig = (ctx: BuildContext, task: ViteTask) => {
     clearScreen: false,
     customLogger,
     build: {
-      sourcemap: true,
+      minify: packUpConfig?.minify ?? false,
+      sourcemap: packUpConfig?.sourcemap ?? true,
       /**
        * The task runner will clear this for us
        */
@@ -119,15 +120,14 @@ const viteTask: TaskHandler<ViteTask> = {
       await this.success(ctx, task);
     } catch (err) {
       this.fail(ctx, task, err);
+      throw err;
     }
   },
   async success() {
     this._spinner?.succeed('Built javascript files');
   },
-  async fail(ctx, task, err) {
+  async fail() {
     this._spinner?.fail('Failed to build javascript files');
-
-    throw err;
   },
 };
 

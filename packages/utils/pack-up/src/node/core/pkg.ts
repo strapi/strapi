@@ -4,9 +4,9 @@
  * the package.json.
  */
 import fs from 'fs/promises';
-import path from 'path';
 import chalk from 'chalk';
 import * as yup from 'yup';
+import pkgUp from 'pkg-up';
 
 import { Logger } from './logger';
 import type { Export } from './exports';
@@ -20,7 +20,22 @@ const packageJsonSchema = yup.object({
   version: yup.string().required(),
   type: yup.mixed().oneOf(['commonjs', 'module']).optional(),
   license: yup.string().optional(),
+  // TODO: be nice just to make this either a string or a record of strings.
   bin: yup.lazy((value) => {
+    if (typeof value === 'object') {
+      return yup.object(
+        Object.entries(value).reduce((acc, [key]) => {
+          acc[key] = yup.string().required();
+
+          return acc;
+        }, {} as Record<string, yup.SchemaOf<string>>)
+      );
+    }
+
+    return yup.string().optional();
+  }),
+  // TODO: be nice just to make this either a string or a record of strings.
+  browser: yup.lazy((value) => {
     if (typeof value === 'object') {
       return yup.object(
         Object.entries(value).reduce((acc, [key]) => {
@@ -43,10 +58,27 @@ const packageJsonSchema = yup.object({
         typeof value === 'object'
           ? Object.entries(value).reduce((acc, [key, value]) => {
               if (typeof value === 'object') {
+                // @ts-expect-error yup is not typed correctly
                 acc[key] = yup
                   .object({
                     types: yup.string().optional(),
                     source: yup.string().required(),
+                    browser: yup
+                      .object({
+                        source: yup.string().required(),
+                        import: yup.string().optional(),
+                        require: yup.string().optional(),
+                      })
+                      .optional(),
+                    node: yup
+                      .object({
+                        source: yup.string().optional(),
+                        module: yup.string().optional(),
+                        import: yup.string().optional(),
+                        require: yup.string().optional(),
+                      })
+                      .optional(),
+                    module: yup.string().optional(),
                     import: yup.string().optional(),
                     require: yup.string().optional(),
                     default: yup.string().required(),
@@ -80,14 +112,13 @@ const packageJsonSchema = yup.object({
  * the process will throw with an appropriate error message.
  */
 const loadPkg = async ({ cwd, logger }: { cwd: string; logger: Logger }): Promise<object> => {
-  const directory = path.resolve(cwd);
+  const pkgPath = await pkgUp({ cwd });
 
-  const pkgPath = path.join(directory, 'package.json');
-
-  const buffer = await fs.readFile(pkgPath).catch((err) => {
-    logger.debug(err);
+  if (!pkgPath) {
     throw new Error('Could not find a package.json in the current directory');
-  });
+  }
+
+  const buffer = await fs.readFile(pkgPath);
 
   const pkg = JSON.parse(buffer.toString());
 

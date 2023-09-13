@@ -9,13 +9,16 @@ import { getExportExtensionMap, validateExportsOrdering } from './core/exports';
 import { createBuildContext } from './createBuildContext';
 import { BuildTask, createBuildTasks } from './createBuildTasks';
 import { TaskHandler, taskHandlers } from './tasks';
+import { loadConfig } from './core/config';
 
 export interface BuildOptions extends CommonCLIOptions {
   cwd?: string;
+  minify?: boolean;
+  sourcemap?: boolean;
 }
 
 export const build = async (opts: BuildOptions) => {
-  const { silent, debug, cwd = process.cwd() } = opts;
+  const { silent, debug, cwd = process.cwd(), ...configOptions } = opts;
 
   const logger = createLogger({ silent, debug });
 
@@ -56,12 +59,18 @@ export const build = async (opts: BuildOptions) => {
    * their handlers are then ran in the order of the exports map
    * and results are logged to see gradual progress.
    */
+  const config = await loadConfig({ cwd, logger });
+
+  if (config) {
+    logger.debug('Loaded configuration: \n', config);
+  }
 
   const buildContextLoader = ora('Creating build context \n').start();
 
   const extMap = getExportExtensionMap();
 
   const ctx = await createBuildContext({
+    config: { ...config, ...configOptions },
     cwd,
     extMap,
     logger,

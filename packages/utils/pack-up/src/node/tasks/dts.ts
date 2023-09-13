@@ -181,15 +181,15 @@ const dtsTask: TaskHandler<DtsTask> = {
       await this.success(ctx, task);
     } catch (err) {
       this.fail(ctx, task, err);
+
+      throw err;
     }
   },
   async success() {
     this._spinner?.succeed('Built type files');
   },
-  async fail(ctx, task, err) {
+  async fail() {
     this._spinner?.fail('Failed to build type files');
-
-    throw err;
   },
 };
 

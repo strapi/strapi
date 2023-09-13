@@ -30,9 +30,7 @@
       "url": "https://strapi.io"
     }
   ],
-  "bin": {
-    "pkg-utils": "./bin/pack-up.js"
-  },
+  "bin": "./bin/pack-up.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -63,16 +61,18 @@
     "browserslist-to-esbuild": "1.2.0",
     "chalk": "4.1.2",
     "commander": "8.3.0",
+    "esbuild": "0.19.2",
+    "esbuild-register": "3.4.2",
     "ora": "5.4.1",
-    "read-pkg-up": "10.1.0",
+    "pkg-up": "3.1.0",
     "typescript": "5.2.2",
     "vite": "4.4.9",
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "esbuild": "0.19.2",
-    "esbuild-register": "3.4.2",
-    "eslint-config-custom": "4.13.3"
+    "@strapi/pack-up": "workspace:*",
+    "eslint-config-custom": "workspace:*",
+    "rimraf": "3.0.2"
   },
   "engines": {
     "node": ">=16.0.0 <=20.x.x",

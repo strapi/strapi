@@ -1,6 +1,6 @@
 import path from 'path';
 
-import type { BuildContext, Targets } from './createBuildContext';
+import type { BuildContext, Runtime } from './createBuildContext';
 import type { DtsTask } from './tasks/dts';
 import type { ViteTask, ViteTaskEntry } from './tasks/vite';
 import type { Extensions } from './core/exports';
@@ -25,7 +25,7 @@ const createBuildTasks = async (ctx: BuildContext): Promise<BuildTask[]> => {
 
   const createViteTask = (
     format: Extensions,
-    runtime: keyof Targets,
+    runtime: Runtime,
     { output, ...restEntry }: ViteTaskEntry & Pick<ViteTask, 'output'>
   ) => {
     const buildId = `${format}:${output}`;
@@ -66,17 +66,11 @@ const createBuildTasks = async (ctx: BuildContext): Promise<BuildTask[]> => {
       });
     }
 
-    const runtime = exp._path.includes('strapi-admin')
-      ? 'web'
-      : exp._path.includes('strapi-server')
-      ? 'node'
-      : '*';
-
     if (exp.require) {
       /**
        * register CJS task
        */
-      createViteTask('cjs', runtime, {
+      createViteTask('cjs', ctx.runtime ?? '*', {
         path: exp._path,
         entry: exp.source,
         output: exp.require,
@@ -87,15 +81,58 @@ const createBuildTasks = async (ctx: BuildContext): Promise<BuildTask[]> => {
       /**
        * register ESM task
        */
-      createViteTask('es', runtime, {
+      createViteTask('es', ctx.runtime ?? '*', {
         path: exp._path,
         entry: exp.source,
         output: exp.import,
       });
     }
+
+    if (exp.browser?.require) {
+      createViteTask('cjs', 'web', {
+        path: exp._path,
+        entry: exp.browser?.source || exp.source,
+        output: exp.browser.require,
+      });
+    }
+
+    if (exp.browser?.import) {
+      createViteTask('cjs', 'web', {
+        path: exp._path,
+        entry: exp.browser?.source || exp.source,
+        output: exp.browser.import,
+      });
+    }
   }
 
-  tasks.push(dtsTask, ...Object.values(viteTasks));
+  const bundles = ctx.config.bundles ?? [];
+
+  for (const bundle of bundles) {
+    const idx = bundles.indexOf(bundle);
+
+    if (bundle.require) {
+      createViteTask('cjs', (bundle.runtime || ctx.runtime) ?? '*', {
+        path: `bundle_cjs_${idx}`,
+        entry: bundle.source,
+        output: bundle.require,
+      });
+    }
+
+    if (bundle.import) {
+      createViteTask('es', (bundle.runtime || ctx.runtime) ?? '*', {
+        path: `bundle_esm_${idx}`,
+        entry: bundle.source,
+        output: bundle.import,
+      });
+    }
+  }
+
+  if (dtsTask.entries.length) {
+    tasks.push(dtsTask);
+  }
+  if (Object.values(viteTasks).length) {
+    tasks.push(...Object.values(viteTasks));
+  }
 
   return tasks;
 };
