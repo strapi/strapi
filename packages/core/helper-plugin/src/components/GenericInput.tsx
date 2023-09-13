@@ -355,8 +355,6 @@ const GenericInput = ({
           hint={hint}
           name={name}
           onValueChange={(value) => {
-            if (!value) return;
-
             onChange({ target: { name, value, type } });
           }}
           placeholder={formattedPlaceholder}
