@@ -5,7 +5,14 @@ export interface ColumnInfo {
   defaultTo?: unknown;
 }
 
-export interface Attribute {
+export type Attribute = ScalarAttribute | RelationalAttribute;
+
+export type RelationalAttribute =
+  | BidirectionalRelationalAttribute
+  | MorphRelationalAttribute
+  | WayRelation;
+
+export interface BasAttribute {
   type: string;
   columnName?: string;
   default?: any;
@@ -19,6 +26,28 @@ export interface Attribute {
     type: string;
     args: unknown[];
   };
+}
+
+export interface ScalarAttribute extends BasAttribute {
+  type:
+    | 'increments'
+    | 'password'
+    | 'email'
+    | 'string'
+    | 'enumeration'
+    | 'uid'
+    | 'richtext'
+    | 'text'
+    | 'json'
+    | 'integer'
+    | 'biginteger'
+    | 'float'
+    | 'decimal'
+    | 'boolean'
+    | 'date'
+    | 'time'
+    | 'datetime'
+    | 'timestamp';
 }
 
 export interface JoinColumn {
@@ -67,13 +96,8 @@ export interface MorphJoinTable {
   morphColumn: MorphColumn;
 }
 
-export interface BidirectionalRelationalAttribute extends RelationalAttribute {
-  inversedBy: string;
-  joinTable: BidirectionalAttributeJoinTable;
-}
-
-export interface RelationalAttribute extends Attribute {
-  relation: string;
+export interface BaseRelationalAttribute {
+  type: 'relation';
   target: string;
   useJoinTable?: boolean;
   joinTable?: AttributeJoinTable | MorphJoinTable;
@@ -82,6 +106,27 @@ export interface RelationalAttribute extends Attribute {
   owner?: boolean;
   morphColumn?: MorphColumn;
   joinColumn?: JoinColumn;
+  // TODO: remove this
+  component?: string;
+}
+
+export interface WayRelation extends BaseRelationalAttribute {
+  relation: 'oneWay' | 'manyWay';
+  target: string;
+}
+
+export interface BidirectionalRelationalAttribute extends BaseRelationalAttribute {
+  relation: 'oneToOne' | 'oneToMany' | 'manyToOne' | 'manyToMany';
+  inversedBy: string;
+  joinTable: BidirectionalAttributeJoinTable;
+}
+
+export interface MorphRelationalAttribute extends BaseRelationalAttribute {
+  relation: 'morphMany' | 'morphOne' | 'morphToOne' | 'morphToMany';
+  morphColumn: MorphColumn;
+  morphBy: string;
+  joinTable: MorphJoinTable;
+  target: string;
 }
 
 export interface Meta {

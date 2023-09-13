@@ -3,13 +3,13 @@ import _ from 'lodash/fp';
 import type {
   Meta,
   RelationalAttribute,
+  MorphRelationalAttribute,
   Attribute,
   Metadata,
   AttributeJoinTable,
   BidirectionalRelationalAttribute,
   MorphJoinTable,
 } from './types';
-import { isRelation } from '../types';
 
 interface JoinDetails {
   attribute: RelationalAttribute;
@@ -20,7 +20,9 @@ interface JoinDetails {
 const hasInversedBy = _.has('inversedBy');
 const hasMappedBy = _.has('mappedBy');
 
-export const isPolymorphic = (attribute: RelationalAttribute) =>
+export const isPolymorphic = (
+  attribute: RelationalAttribute
+): attribute is MorphRelationalAttribute =>
   ['morphOne', 'morphMany', 'morphToOne', 'morphToMany'].includes(attribute.relation);
 
 export const isOneToAny = (attribute: RelationalAttribute) =>
@@ -34,9 +36,6 @@ export const isAnyToOne = (attribute: RelationalAttribute) =>
 
 export const isAnyToMany = (attribute: RelationalAttribute) =>
   ['oneToMany', 'manyToMany'].includes(attribute.relation);
-
-export const isRelationAttribute = (attribute: Attribute): attribute is RelationalAttribute =>
-  isRelation(attribute.type);
 
 export const isBidirectional = (
   attribute: RelationalAttribute

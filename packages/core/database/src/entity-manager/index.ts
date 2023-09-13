@@ -38,7 +38,6 @@ import {
   isOneToAny,
   hasOrderColumn,
   hasInverseOrderColumn,
-  isRelationAttribute,
 } from '../metadata/relations';
 import {
   deletePreviousOneToAnyRelations,
@@ -73,9 +72,18 @@ type Entity = {
 
 const isObj = (value: unknown): value is object => isObject(value) && !isNil(value);
 
-const toId = (value: unknown | { id: unknown }) =>
-  isObject(value) && !isNil(value) && 'id' in value ? value.id : value;
-const toIds = (value: unknown) => castArray(value || []).map(toId);
+const toId = (value: unknown | { id: unknown }): ID => {
+  if (isObj(value) && 'id' in value && isValidId(value.id)) {
+    return value.id;
+  }
+
+  if (isValidId(value)) {
+    return value;
+  }
+
+  throw new Error(`Invalid id, expected a string or integer, got ${value}`);
+};
+const toIds = (value: unknown): ID[] => castArray(value || []).map(toId);
 
 const isValidId = (value: unknown): value is ID => isString(value) || isInteger(value);
 const isValidObjectId = (value: unknown): value is Record<string, unknown> & { id: ID } =>
@@ -158,7 +166,7 @@ const processData = (
   for (const attributeName of Object.keys(attributes)) {
     const attribute = attributes[attributeName];
 
-    if (types.isScalar(attribute.type)) {
+    if (types.isScalarAttribute(attribute)) {
       const field = createField(attribute);
 
       if (isUndefined(data[attributeName])) {
@@ -185,7 +193,7 @@ const processData = (
       obj[attributeName] = val;
     }
 
-    if (isRelationAttribute(attribute)) {
+    if (types.isRelationalAttribute(attribute)) {
       // oneToOne & manyToOne
       if (attribute.joinColumn && attribute.owner) {
         const joinColumnName = attribute.joinColumn.name;
@@ -465,7 +473,7 @@ export const createEntityManager = (db: Database) => {
       try {
         const cloneAttrs = Object.entries(metadata.attributes).reduce((acc, [attrName, attr]) => {
           // TODO: handle components in the db layer
-          if (isRelationAttribute(attr) && attr.joinTable && !attr.component) {
+          if (types.isRelationalAttribute(attr) && attr.joinTable && !attr.component) {
             acc.push(attrName);
           }
           return acc;
@@ -560,7 +568,7 @@ export const createEntityManager = (db: Database) => {
 
         const isValidLink = has(attributeName, data) && !isNil(data[attributeName]);
 
-        if (!isRelationAttribute(attribute) || !isValidLink) {
+        if (attribute.type !== 'relation' || !isValidLink) {
           continue;
         }
 
@@ -570,12 +578,17 @@ export const createEntityManager = (db: Database) => {
           const { target, morphBy } = attribute;
 
           const targetAttribute = db.metadata.get(target).attributes[morphBy];
+          if (targetAttribute.type !== 'relation') {
+            throw new Error(
+              `Expected target attribute ${target}.${morphBy} to be a relation attribute`
+            );
+          }
 
           if (targetAttribute.relation === 'morphToOne') {
             // set columns
             const { idColumn, typeColumn } = targetAttribute.morphColumn;
 
-            const relId = toId(cleanRelationData.set[0]);
+            const relId = toId(cleanRelationData.set?.[0]);
 
             await this.createQueryBuilder(target)
               .update({ [idColumn.name]: id, [typeColumn.name]: uid })
@@ -592,17 +605,18 @@ export const createEntityManager = (db: Database) => {
               continue;
             }
 
-            const rows = cleanRelationData.set.map((data, idx) => {
-              return {
-                [joinColumn.name]: data.id,
-                [idColumn.name]: id,
-                [typeColumn.name]: uid,
-                ...(joinTable.on || {}),
-                ...(data.__pivot || {}),
-                order: idx + 1,
-                field: attributeName,
-              };
-            });
+            const rows =
+              cleanRelationData.set?.map((data, idx) => {
+                return {
+                  [joinColumn.name]: data.id,
+                  [idColumn.name]: id,
+                  [typeColumn.name]: uid,
+                  ...(('on' in joinTable && joinTable.on) || {}),
+                  ...(data.__pivot || {}),
+                  order: idx + 1,
+                  field: attributeName,
+                };
+              }) ?? [];
 
             await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
           }
@@ -621,17 +635,18 @@ export const createEntityManager = (db: Database) => {
             continue;
           }
 
-          const rows = cleanRelationData.set.map((data, idx) => ({
-            [joinColumn.name]: id,
-            [idColumn.name]: data.id,
-            [typeColumn.name]: data[typeField],
-            ...(joinTable.on || {}),
-            ...(data.__pivot || {}),
-            order: idx + 1,
-          }));
+          const rows =
+            cleanRelationData.set?.map((data, idx) => ({
+              [joinColumn.name]: id,
+              [idColumn.name]: data.id,
+              [typeColumn.name]: data[typeField],
+              ...(('on' in joinTable && joinTable.on) || {}),
+              ...(data.__pivot || {}),
+              order: idx + 1,
+            })) ?? [];
 
           // delete previous relations
-          await deleteRelatedMorphOneRelationsAfterMorphToManyUpdate(rows, {
+          await deleteRelatedMorphOneRelationsAfterMorphToManyUpdate(rows as any, {
             uid,
             attributeName,
             joinTable,
@@ -690,7 +705,7 @@ export const createEntityManager = (db: Database) => {
           const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } =
             joinTable;
 
-          const relsToAdd = cleanRelationData.set || cleanRelationData.connect;
+          const relsToAdd = (cleanRelationData.set || cleanRelationData.connect) ?? [];
           const relIdsToadd = toIds(relsToAdd);
 
           if (isBidirectional(attribute) && isOneToAny(attribute)) {
@@ -708,7 +723,7 @@ export const createEntityManager = (db: Database) => {
             return {
               [joinColumn.name]: id,
               [inverseJoinColumn.name]: data.id,
-              ...(joinTable.on || {}),
+              ...(('on' in joinTable && joinTable.on) || {}),
               ...(data.__pivot || {}),
             };
           });

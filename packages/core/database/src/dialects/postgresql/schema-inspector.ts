@@ -156,8 +156,6 @@ const getIndexType = (index: RawIndex) => {
   if (index.is_unique) {
     return 'unique';
   }
-
-  return null;
 };
 
 export default class PostgresqlSchemaInspector implements SchemaInspector {
@@ -269,8 +267,9 @@ export default class PostgresqlSchemaInspector implements SchemaInspector {
         referencedTable: null,
         onUpdate: null,
         onDelete: null,
-      };
+      } as unknown as ForeignKey;
     }
+
     const constraintNames = Object.keys(ret);
     const dbSchema = this.getDatabaseSchema();
     if (constraintNames.length > 0) {

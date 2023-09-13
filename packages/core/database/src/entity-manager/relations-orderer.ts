@@ -4,7 +4,7 @@ import type { ID } from '../typings';
 
 interface Rel {
   id: ID;
-  position: { before: ID } | { after: ID } | { start: true } | { end: true };
+  position?: { before: ID } | { after: ID } | { start: true } | { end: true };
   order?: number;
   computed?: boolean;
 }

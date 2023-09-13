@@ -26,9 +26,9 @@ const deletePreviousOneToAnyRelations = async ({
   db,
   transaction: trx,
 }: {
-  id: string;
+  id: ID;
   attribute: BidirectionalRelationalAttribute;
-  relIdsToadd: string[];
+  relIdsToadd: ID[];
   db: Database;
   transaction: Knex.Transaction;
 }) => {

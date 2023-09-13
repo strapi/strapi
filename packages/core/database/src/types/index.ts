@@ -1,3 +1,5 @@
+import type { Attribute, ScalarAttribute, RelationalAttribute } from '../metadata/types';
+
 const SCALAR_TYPES = [
   'increments',
   'password',
@@ -28,3 +30,7 @@ export const isScalar = (type: string) => SCALAR_TYPES.includes(type);
 export const isComponent = (type: string) => type === 'component';
 export const isDynamicZone = (type: string) => type === 'dynamiczone';
 export const isRelation = (type: string) => type === 'relation';
+export const isScalarAttribute = (attribute: Attribute): attribute is ScalarAttribute =>
+  isScalar(attribute.type);
+export const isRelationalAttribute = (attribute: Attribute): attribute is RelationalAttribute =>
+  isRelation(attribute.type);

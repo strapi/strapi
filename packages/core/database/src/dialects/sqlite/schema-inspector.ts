@@ -162,13 +162,16 @@ export default class SqliteSchemaInspector implements SchemaInspector {
         index.name,
       ]);
 
-      const type: IndexType = index.unique ? 'unique' : null;
-
-      ret.push({
+      const indexInfo: Index = {
         columns: res.map((row) => row.name),
         name: index.name,
-        type,
-      });
+      };
+
+      if (index.unique) {
+        indexInfo.type = 'unique';
+      }
+
+      ret.push(indexInfo);
     }
 
     return ret;
