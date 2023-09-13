@@ -1,3 +1,5 @@
+import type { Utils } from '@strapi/strapi';
+
 /**
  * Alias for any literal type (useful for template string parameters)
  */
@@ -39,3 +41,19 @@ export type Prefix<TValue extends string, TPrefix extends Literal> = `${TPrefix}
  * Creates a record where every key is a string and every value is `T`
  */
 export type Dict<T> = Record<string, T>;
+
+/**
+ * Checks if a given string ends with the given literal
+ */
+export type EndsWith<TValue extends string, TSuffix extends Literal> = Utils.Expression.Extends<
+  TValue,
+  `${string}${TSuffix}`
+>;
+
+/**
+ * Checks if a given string starts with the given literal
+ */
+export type StartsWith<TValue extends string, TPrefix extends Literal> = Utils.Expression.Extends<
+  TValue,
+  `${TPrefix}${string}`
+>;

@@ -93,6 +93,12 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         color: #ffffff;
       }
 
+      .c46 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #4945ff;
+      }
+
       .c1 {
         padding-top: 24px;
         padding-right: 40px;
@@ -392,7 +398,8 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         color: #666687;
       }
 
-      .c41[aria-disabled='true'] svg > g,.c41[aria-disabled='true'] svg path {
+      .c41[aria-disabled='true'] svg > g,
+      .c41[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -405,7 +412,8 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         color: #666687;
       }
 
-      .c41[aria-disabled='true']:active svg > g,.c41[aria-disabled='true']:active svg path {
+      .c41[aria-disabled='true']:active svg > g,
+      .c41[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -561,12 +569,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
 
       .c14:focus-visible {
         outline: none;
-      }
-
-      .c46 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #4945ff;
       }
 
       .c45 {
@@ -922,7 +924,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                   href="/auth/login"
                 >
                   <span
-                    class="c46"
+                    class="c8 c46"
                   >
                     Ready to sign in?
                   </span>

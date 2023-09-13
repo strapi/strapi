@@ -113,7 +113,8 @@ const userSchemaAdditions = () => {
     'updatedBy',
     'updatedAt',
     'publishedAt',
-    'strapi_reviewWorkflows_stage',
+    'strapi_stage',
+    'strapi_assignee',
   ];
 
   return currentSchema.filter((key) => !(ignoreDiffs.includes(key) || defaultSchema.includes(key)));

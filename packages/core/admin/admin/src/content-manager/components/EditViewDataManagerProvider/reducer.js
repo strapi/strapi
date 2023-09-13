@@ -7,6 +7,7 @@ import take from 'lodash/take';
 import uniqBy from 'lodash/uniqBy';
 import unset from 'lodash/unset';
 
+import { CREATOR_FIELDS } from '../../constants/attributes';
 import { getMaxTempKey } from '../../utils';
 
 import { findAllAndReplace, moveFields } from './utils';
@@ -236,17 +237,14 @@ const reducer = (state, action) =>
 
         const findAllRelationsAndReplaceWithEmptyArray = findAllAndReplace(
           components,
-          (value) => {
-            return value.type === 'relation';
-          },
           (value, { path }) => {
-            const relationFieldName = path[path.length - 1];
+            const fieldName = path[path.length - 1];
+            // We don't replace creator fields because we already return them without need to populate them separately
+            const isCreatorField = CREATOR_FIELDS.includes(fieldName);
 
-            // When editing, we don't want to fetch the relations with creator fields because we already have it
-            if (value && (relationFieldName === 'createdBy' || relationFieldName === 'updatedBy')) {
-              return value;
-            }
-
+            return value.type === 'relation' && !isCreatorField;
+          },
+          (_, { path }) => {
             if (state.modifiedData?.id === data.id && get(state.modifiedData, path)) {
               return get(state.modifiedData, path);
             }

@@ -56,9 +56,9 @@ const Body = () => {
   const currentTime = useRef(Date.now());
 
   const getFieldInfo = (atField, byField) => {
-    const user = initialData[byField] ?? {};
-
-    const displayName = getDisplayName(user, formatMessage);
+    const displayName = initialData[byField]
+      ? getDisplayName(initialData[byField], formatMessage)
+      : '-';
     const timestamp = initialData[atField] ? new Date(initialData[atField]).getTime() : Date.now();
     const elapsed = timestamp - currentTime.current;
     const { unit, value } = getUnits(-elapsed);

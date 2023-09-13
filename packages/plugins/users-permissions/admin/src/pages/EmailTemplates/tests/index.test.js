@@ -135,8 +135,6 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         border-radius: 4px;
         border-width: 0;
         border-color: #dcdce4;
-        width: 2rem;
-        height: 2rem;
         cursor: pointer;
       }
 
@@ -243,19 +241,22 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         border: 2px solid #4945ff;
       }
 
-      .c28 svg > g,
+      .c28 {
+        border-color: #dcdce4;
+        height: 2rem;
+        width: 2rem;
+      }
+
+      .c28 svg g,
       .c28 svg path {
         fill: #8e8ea9;
       }
 
-      .c28:hover svg > g,
-      .c28:hover svg path {
+      .c28:hover svg g,
+      .c28:focus svg g,
+      .c28:hover svg path,
+      .c28:focus svg path {
         fill: #666687;
-      }
-
-      .c28:active svg > g,
-      .c28:active svg path {
-        fill: #a5a5ba;
       }
 
       .c28[aria-disabled='true'] svg path {
