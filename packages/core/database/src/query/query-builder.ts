@@ -80,7 +80,7 @@ export interface QueryBuilder {
   stream<T>({ mapResults }?: { mapResults?: boolean }): T;
 }
 
-const createQueryBuilder = (
+const createQueryBuilder = <TResult>(
   uid: string,
   db: Database,
   initialState: Partial<State> = {}

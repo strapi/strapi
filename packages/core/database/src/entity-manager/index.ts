@@ -1,3 +1,4 @@
+import type { Knex } from 'knex';
 import {
   castArray,
   compact,
@@ -12,6 +13,7 @@ import {
   isNil,
   isNull,
   isNumber,
+  isObject,
   isPlainObject,
   isString,
   isUndefined,
@@ -36,6 +38,7 @@ import {
   isOneToAny,
   hasOrderColumn,
   hasInverseOrderColumn,
+  isRelationAttribute,
 } from '../metadata/relations';
 import {
   deletePreviousOneToAnyRelations,
@@ -50,12 +53,34 @@ import {
 } from './relations/cloning/regular-relations';
 import { DatabaseError } from '../errors';
 import type { Database } from '..';
+import type { Meta } from '../metadata/types';
+import type { ID } from '../typings';
 
-const toId = (value) => value.id || value;
-const toIds = (value) => castArray(value || []).map(toId);
+type Params = {
+  where?: any;
+  filters?: any;
+  select?: any;
+  populate?: any;
+  orderBy?: any;
+  _q?: string;
+  data?: any;
+};
 
-const isValidId = (value) => isString(value) || isInteger(value);
-const toIdArray = (data) => {
+type Entity = {
+  id: ID;
+  [key: string]: any;
+};
+
+const isObj = (value: unknown): value is object => isObject(value) && !isNil(value);
+
+const toId = (value: unknown | { id: unknown }) =>
+  isObject(value) && !isNil(value) && 'id' in value ? value.id : value;
+const toIds = (value: unknown) => castArray(value || []).map(toId);
+
+const isValidId = (value: unknown): value is ID => isString(value) || isInteger(value);
+const isValidObjectId = (value: unknown): value is Record<string, unknown> & { id: ID } =>
+  isObj(value) && 'id' in value && isValidId(value.id);
+const toIdArray = (data: unknown) => {
   const array = castArray(data)
     .filter((datum) => !isNil(datum))
     .map((datum) => {
@@ -65,17 +90,39 @@ const toIdArray = (data) => {
       }
 
       // if it is an object check it has at least a valid id
-      if (!has('id', datum) || !isValidId(datum.id)) {
+      if (!isValidObjectId(datum)) {
         throw new Error(`Invalid id, expected a string or integer, got ${datum}`);
       }
 
       return datum;
     });
+
   return uniqWith(isEqual, array);
 };
 
-const toAssocs = (data) => {
-  if (isArray(data) || isString(data) || isNumber(data) || isNull(data) || data?.id) {
+type ScalarAssoc = string | number | null;
+type Assocs =
+  | ScalarAssoc
+  | { id: ScalarAssoc | Array<ScalarAssoc> }
+  | Array<ScalarAssoc>
+  | {
+      set?: Array<ScalarAssoc> | null;
+      options?: { strict?: boolean };
+      connect?: Array<{
+        id: ScalarAssoc;
+        position?: { start?: boolean; end?: boolean };
+      }> | null;
+      disconnect?: Array<ScalarAssoc> | null;
+    };
+
+const toAssocs = (data: Assocs) => {
+  if (
+    isArray(data) ||
+    isString(data) ||
+    isNumber(data) ||
+    isNull(data) ||
+    (isObj(data) && 'id' in data)
+  ) {
     return {
       set: isNull(data) ? data : toIdArray(data),
     };
@@ -99,10 +146,14 @@ const toAssocs = (data) => {
   };
 };
 
-const processData = (metadata, data = {}, { withDefaults = false } = {}) => {
+const processData = (
+  metadata: Meta,
+  data: Record<string, unknown> = {},
+  { withDefaults = false } = {}
+) => {
   const { attributes } = metadata;
 
-  const obj = {};
+  const obj: Record<string, unknown> = {};
 
   for (const attributeName of Object.keys(attributes)) {
     const attribute = attributes[attributeName];
@@ -121,7 +172,11 @@ const processData = (metadata, data = {}, { withDefaults = false } = {}) => {
         continue;
       }
 
-      if (typeof field.validate === 'function' && data[attributeName] !== null) {
+      if (
+        'validate' in field &&
+        typeof field.validate === 'function' &&
+        data[attributeName] !== null
+      ) {
         field.validate(data[attributeName]);
       }
 
@@ -130,7 +185,7 @@ const processData = (metadata, data = {}, { withDefaults = false } = {}) => {
       obj[attributeName] = val;
     }
 
-    if (types.isRelation(attribute.type)) {
+    if (isRelationAttribute(attribute)) {
       // oneToOne & manyToOne
       if (attribute.joinColumn && attribute.owner) {
         const joinColumnName = attribute.joinColumn.name;
@@ -150,7 +205,7 @@ const processData = (metadata, data = {}, { withDefaults = false } = {}) => {
       if (attribute.morphColumn && attribute.owner) {
         const { idColumn, typeColumn, typeField = '__type' } = attribute.morphColumn;
 
-        const value = data[attributeName];
+        const value = data[attributeName] as Record<string, unknown>;
 
         if (value === null) {
           Object.assign(obj, {
@@ -182,10 +237,13 @@ export const createEntityManager = (db: Database) => {
   const repoMap: Record<string, any> = {};
 
   return {
-    async findOne(uid, params) {
+    async findOne(uid: string, params: Params) {
       const states = await db.lifecycles.run('beforeFindOne', uid, { params });
 
-      const result = await this.createQueryBuilder(uid).init(params).first().execute();
+      const result = await this.createQueryBuilder(uid)
+        .init(params)
+        .first()
+        .execute<Entity | null>();
 
       await db.lifecycles.run('afterFindOne', uid, { params, result }, states);
 
@@ -193,7 +251,7 @@ export const createEntityManager = (db: Database) => {
     },
 
     // should we name it findOne because people are used to it ?
-    async findMany(uid, params) {
+    async findMany(uid: string, params: Params) {
       const states = await db.lifecycles.run('beforeFindMany', uid, { params });
 
       const result = await this.createQueryBuilder(uid).init(params).execute();
@@ -203,14 +261,14 @@ export const createEntityManager = (db: Database) => {
       return result;
     },
 
-    async count(uid, params) {
+    async count(uid: string, params: Params) {
       const states = await db.lifecycles.run('beforeCount', uid, { params });
 
       const res = await this.createQueryBuilder(uid)
         .init(pick(['_q', 'where', 'filters'], params))
         .count()
         .first()
-        .execute();
+        .execute<{ count: number }>();
 
       const result = Number(res.count);
 
@@ -219,7 +277,7 @@ export const createEntityManager = (db: Database) => {
       return result;
     },
 
-    async create(uid, params = {}) {
+    async create(uid: string, params: Params = {}) {
       const states = await db.lifecycles.run('beforeCreate', uid, { params });
 
       const metadata = db.metadata.get(uid);
@@ -231,9 +289,11 @@ export const createEntityManager = (db: Database) => {
 
       const dataToInsert = processData(metadata, data, { withDefaults: true });
 
-      const res = await this.createQueryBuilder(uid).insert(dataToInsert).execute();
+      const res = await this.createQueryBuilder(uid)
+        .insert(dataToInsert)
+        .execute<Array<ID | { id: ID }>>();
 
-      const id = res[0].id || res[0];
+      const id = isObj(res[0]) ? res[0].id : res[0];
 
       const trx = await strapi.db.transaction();
       try {
@@ -260,7 +320,7 @@ export const createEntityManager = (db: Database) => {
     },
 
     // TODO: where do we handle relation processing for many queries ?
-    async createMany(uid, params = {}) {
+    async createMany(uid: string, params: Params = {}) {
       const states = await db.lifecycles.run('beforeCreateMany', uid, { params });
 
       const metadata = db.metadata.get(uid);
@@ -278,7 +338,9 @@ export const createEntityManager = (db: Database) => {
         throw new Error('Nothing to insert');
       }
 
-      const createdEntries = await this.createQueryBuilder(uid).insert(dataToInsert).execute();
+      const createdEntries = await this.createQueryBuilder(uid)
+        .insert(dataToInsert)
+        .execute<Array<ID | { id: ID }>>();
 
       const result = {
         count: data.length,
@@ -290,7 +352,7 @@ export const createEntityManager = (db: Database) => {
       return result;
     },
 
-    async update(uid, params = {}) {
+    async update(uid: string, params: Params = {}) {
       const states = await db.lifecycles.run('beforeUpdate', uid, { params });
 
       const metadata = db.metadata.get(uid);
@@ -308,7 +370,7 @@ export const createEntityManager = (db: Database) => {
         .select('*')
         .where(where)
         .first()
-        .execute({ mapResults: false });
+        .execute<{ id: ID }>({ mapResults: false });
 
       if (!entity) {
         return null;
@@ -345,7 +407,7 @@ export const createEntityManager = (db: Database) => {
     },
 
     // TODO: where do we handle relation processing for many queries ?
-    async updateMany(uid, params = {}) {
+    async updateMany(uid: string, params: Params = {}) {
       const states = await db.lifecycles.run('beforeUpdateMany', uid, { params });
 
       const metadata = db.metadata.get(uid);
@@ -360,7 +422,7 @@ export const createEntityManager = (db: Database) => {
       const updatedRows = await this.createQueryBuilder(uid)
         .where(where)
         .update(dataToUpdate)
-        .execute();
+        .execute<number>();
 
       const result = { count: updatedRows };
 
@@ -369,7 +431,7 @@ export const createEntityManager = (db: Database) => {
       return result;
     },
 
-    async clone(uid, cloneId, params = {}) {
+    async clone(uid: string, cloneId: ID, params: Params = {}) {
       const states = await db.lifecycles.run('beforeCreate', uid, { params });
 
       const metadata = db.metadata.get(uid);
@@ -386,24 +448,28 @@ export const createEntityManager = (db: Database) => {
         // Omit unwanted properties
         omit(['id', 'created_at', 'updated_at']),
         // Merge with provided data, set attribute to null if data attribute is null
-        mergeWith(data || {}, (original, override) => (override === null ? override : original)),
+        mergeWith(data || {}, (original: unknown, override: unknown) =>
+          override === null ? override : original
+        ),
         // Process data with metadata
-        (entity) => processData(metadata, entity, { withDefaults: true })
+        (entity: Record<string, unknown>) => processData(metadata, entity, { withDefaults: true })
       )(entity);
 
-      const res = await this.createQueryBuilder(uid).insert(dataToInsert).execute();
+      const res = await this.createQueryBuilder(uid)
+        .insert(dataToInsert)
+        .execute<Array<ID | { id: ID }>>();
 
-      const id = res[0].id || res[0];
+      const id = isObj(res[0]) ? res[0].id : res[0];
 
       const trx = await strapi.db.transaction();
       try {
         const cloneAttrs = Object.entries(metadata.attributes).reduce((acc, [attrName, attr]) => {
           // TODO: handle components in the db layer
-          if (attr.type === 'relation' && attr.joinTable && !attr.component) {
+          if (isRelationAttribute(attr) && attr.joinTable && !attr.component) {
             acc.push(attrName);
           }
           return acc;
-        }, []);
+        }, [] as string[]);
 
         await this.cloneRelations(uid, id, cloneId, data, { cloneAttrs, transaction: trx.get() });
         await trx.commit();
@@ -424,7 +490,7 @@ export const createEntityManager = (db: Database) => {
       return result;
     },
 
-    async delete(uid, params = {}) {
+    async delete(uid: string, params: Params = {}) {
       const states = await db.lifecycles.run('beforeDelete', uid, { params });
 
       const { where, select, populate } = params;
@@ -464,7 +530,7 @@ export const createEntityManager = (db: Database) => {
     },
 
     // TODO: where do we handle relation processing for many queries ?
-    async deleteMany(uid, params = {}) {
+    async deleteMany(uid: string, params: Params = {}) {
       const states = await db.lifecycles.run('beforeDeleteMany', uid, { params });
 
       const { where } = params;
@@ -480,13 +546,13 @@ export const createEntityManager = (db: Database) => {
 
     /**
      * Attach relations to a new entity
-     *
-     * @param {EntityManager} em - entity manager instance
-     * @param {Metadata} metadata - model metadta
-     * @param {ID} id - entity ID
-     * @param {object} data - data received for creation
      */
-    async attachRelations(uid, id, data, { transaction: trx }) {
+    async attachRelations(
+      uid: string,
+      id: ID,
+      data: Record<string, any>,
+      { transaction: trx }: { transaction: Knex.Transaction }
+    ) {
       const { attributes } = db.metadata.get(uid);
 
       for (const attributeName of Object.keys(attributes)) {
@@ -494,7 +560,7 @@ export const createEntityManager = (db: Database) => {
 
         const isValidLink = has(attributeName, data) && !isNil(data[attributeName]);
 
-        if (attribute.type !== 'relation' || !isValidLink) {
+        if (!isRelationAttribute(attribute) || !isValidLink) {
           continue;
         }
 
@@ -704,14 +770,9 @@ export const createEntityManager = (db: Database) => {
 
     /**
      * Updates relations of an existing entity
-     *
-     * @param {EntityManager} em - entity manager instance
-     * @param {Metadata} metadata - model metadta
-     * @param {ID} id - entity ID
-     * @param {object} data - data received for creation
      */
     // TODO: check relation exists (handled by FKs except for polymorphics)
-    async updateRelations(uid, id, data, { transaction: trx }) {
+    async updateRelations(uid: string, id: ID, data, { transaction: trx }) {
       const { attributes } = db.metadata.get(uid);
 
       for (const attributeName of Object.keys(attributes)) {
@@ -1123,7 +1184,15 @@ export const createEntityManager = (db: Database) => {
      * @param {Metadata} metadata - model metadta
      * @param {ID} id - entity ID
      */
-    async deleteRelations(uid, id, { transaction: trx }) {
+    async deleteRelations(
+      uid: string,
+      id: ID,
+      {
+        transaction: trx,
+      }: {
+        transaction: Knex.Transaction;
+      }
+    ) {
       const { attributes } = db.metadata.get(uid);
 
       for (const attributeName of Object.keys(attributes)) {
@@ -1244,7 +1313,19 @@ export const createEntityManager = (db: Database) => {
      * @example cloneRelations('user', 3, 1, { cloneAttrs: ["comments"]})
      * @example cloneRelations('post', 5, 2, { cloneAttrs: ["comments", "likes"] })
      */
-    async cloneRelations(uid, targetId, sourceId, data, { cloneAttrs = [], transaction }) {
+    async cloneRelations(
+      uid: string,
+      targetId: ID,
+      sourceId: ID,
+      data: any,
+      {
+        cloneAttrs = [],
+        transaction,
+      }: {
+        cloneAttrs?: string[];
+        transaction: Knex.Transaction;
+      }
+    ) {
       const { attributes } = db.metadata.get(uid);
 
       if (!attributes) {
@@ -1300,7 +1381,7 @@ export const createEntityManager = (db: Database) => {
     },
 
     // TODO: add lifecycle events
-    async populate(uid, entity, populate) {
+    async populate(uid: string, entity: Entity, populate: Params['populate']) {
       const entry = await this.findOne(uid, {
         select: ['id'],
         where: { id: entity.id },
@@ -1311,7 +1392,7 @@ export const createEntityManager = (db: Database) => {
     },
 
     // TODO: add lifecycle events
-    async load(uid, entity, fields, params) {
+    async load(uid: string, entity: Entity, fields: string | string[], params: Params) {
       const { attributes } = db.metadata.get(uid);
 
       const fieldsArr = castArray(fields);
@@ -1329,7 +1410,7 @@ export const createEntityManager = (db: Database) => {
         populate: fieldsArr.reduce((acc, field) => {
           acc[field] = params || true;
           return acc;
-        }, {}),
+        }, {} as Record<string, unknown>),
       });
 
       if (!entry) {

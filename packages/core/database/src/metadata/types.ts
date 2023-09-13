@@ -8,6 +8,7 @@ export interface ColumnInfo {
 export interface Attribute {
   type: string;
   columnName?: string;
+  default?: any;
   column?: ColumnInfo;
   required?: boolean;
   unique?: boolean;
@@ -46,6 +47,7 @@ export interface BidirectionalAttributeJoinTable extends AttributeJoinTable {
 }
 
 export interface MorphColumn {
+  typeField?: string;
   typeColumn: {
     name: string;
   };
