@@ -10,6 +10,7 @@ const { addSchema } = require('../utils/knex');
 const createQueryBuilder = (uid, db, initialState = {}) => {
   const meta = db.metadata.get(uid);
   const { tableName } = meta;
+  const tableNameWithSchema = addSchema(tableName);
 
   const state = _.defaults(
     {
@@ -297,7 +298,7 @@ const createQueryBuilder = (uid, db, initialState = {}) => {
 
       const nestedSubQuery = db.getConnection().select('id').from(subQB.as('subQuery'));
 
-      return db.getConnection(addSchema(tableName))[state.type]().whereIn('id', nestedSubQuery);
+      return db.getConnection(tableNameWithSchema)[state.type]().whereIn('id', nestedSubQuery);
     },
 
     processState() {
@@ -345,8 +346,8 @@ const createQueryBuilder = (uid, db, initialState = {}) => {
       }
 
       const aliasedTableName = this.mustUseAlias()
-        ? `${tableName} as ${this.alias}`
-        : addSchema(tableName);
+        ? `${tableNameWithSchema} as ${this.alias}`
+        : tableNameWithSchema;
 
       const qb = db.getConnection(aliasedTableName);
 
