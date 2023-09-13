@@ -2,14 +2,12 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { useQueries } from 'react-query';
 
-import { useRBACProvider, Permission } from '../features/RBAC';
+import { useRBACProvider } from '../features/RBAC';
 
 import { useFetchClient } from './useFetchClient';
 
-type DefaultAllowedActions = Array<{
-  name: string;
-  hasPermission: boolean;
-}>;
+import type { Permission } from '@strapi/permissions';
+import type { AxiosResponse } from 'axios';
 
 type AllowedActions = Record<string, boolean>;
 
@@ -69,14 +67,18 @@ export const useRBAC = (
           try {
             const {
               data: { data },
-            } = await post<{ data: { data: DefaultAllowedActions } }>('/admin/permissions/check', {
+            } = await post<
+              { data: { data: boolean[] } },
+              AxiosResponse<{ data: { data: boolean[] } }>,
+              { permissions: Permission[] }
+            >('/admin/permissions/check', {
               permissions: matchingPermissions.map(({ action, subject }) => ({
                 action,
                 subject,
               })),
             });
 
-            return { name, hasPermission: Array.isArray(data) && data.every((v) => Boolean(v)) };
+            return { name, hasPermission: Array.isArray(data) && data.every((v) => v === true) };
           } catch (err) {
             /**
              * We don't notify the user if the request fails.
