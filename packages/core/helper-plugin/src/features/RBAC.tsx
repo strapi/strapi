@@ -1,25 +1,18 @@
 import * as React from 'react';
 
-interface Permission {
-  action: string;
-  conditions: unknown[];
-  id: number;
-  properties: Record<string, unknown>;
-  subject: string | null;
-}
-
-type RefetchPermissionsFn = import('react-query').QueryObserverBaseResult<Permission[]>['refetch'];
+import type { Permission } from '@strapi/permissions';
+import type { QueryObserverBaseResult } from 'react-query';
 
 /* -------------------------------------------------------------------------------------------------
  * Context
  * -----------------------------------------------------------------------------------------------*/
 
 type RBACContextValue = {
-  allPermissions: Permission[]; // The permissions of the current user.
-  refetchPermissions: RefetchPermissionsFn;
+  allPermissions?: Permission[]; // The permissions of the current user.
+  refetchPermissions?: QueryObserverBaseResult<Permission[]>;
 };
 
-const RBACContext: React.Context<RBACContextValue> = React.createContext({} as RBACContextValue);
+const RBACContext: React.Context<RBACContextValue> = React.createContext({});
 
 /**
  * @deprecated Use RBACContext instead.

@@ -46,6 +46,8 @@ export const useRBAC = (
           return { name, hasPermission: true };
         }
 
+        if (!userPermissions) return;
+
         const matchingPermissions = userPermissions.filter((value) => {
           const associatedPermission = permissions.find(
             (perm) => perm.action === value.action && perm.subject === value.subject
@@ -67,11 +69,14 @@ export const useRBAC = (
           try {
             const {
               data: { data },
-            } = await post('/admin/permissions/check', {
-              permissions: matchingPermissions.map(({ action, subject }) => ({ action, subject })),
+            } = await post<{ data: { data: DefaultAllowedActions } }>('/admin/permissions/check', {
+              permissions: matchingPermissions.map(({ action, subject }) => ({
+                action,
+                subject,
+              })),
             });
 
-            return { name, hasPermission: Array.isArray(data) && data.every((v) => v === true) };
+            return { name, hasPermission: Array.isArray(data) && data.every((v) => Boolean(v)) };
           } catch (err) {
             /**
              * We don't notify the user if the request fails.
@@ -106,8 +111,12 @@ export const useRBAC = (
    * until all the checks were complete.
    */
   const allowedActions = (
-    data.some((res) => res === undefined) ? defaultAllowedActions : (data as DefaultAllowedActions)
-  ).reduce((acc, { name, hasPermission }) => {
+    data.some((res) => res === undefined) ? defaultAllowedActions : data
+  ).reduce((acc, permission) => {
+    if (!permission) return acc;
+
+    const { name, hasPermission } = permission;
+
     acc[`can${capitalize(name)}`] = hasPermission;
 
     return acc;
