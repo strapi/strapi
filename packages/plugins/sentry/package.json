@@ -26,8 +26,8 @@
     "lint": "run -T eslint ."
   },
   "dependencies": {
-    "@sentry/node": "^7.60.0",
-    "@sentry/utils": "^7.60.0",
+    "@sentry/node": "7.69.0",
+    "@sentry/utils": "7.69.0",
     "@strapi/design-system": "1.10.1",
     "@strapi/helper-plugin": "4.13.5",
     "@strapi/icons": "1.10.1"
