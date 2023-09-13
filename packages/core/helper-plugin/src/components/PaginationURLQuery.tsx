@@ -44,8 +44,8 @@ export const PaginationURLQuery = ({
   boundaryCount = 1,
   siblingCount = 1,
 }: PaginationURLQueryProps) => {
-  const [{ query }] = useQueryParams();
-  const activePage = parseInt(String(query?.page || '1'), 10);
+  const [{ query }] = useQueryParams<{ page: string }>();
+  const activePage = parseInt(query?.page || '1', 10);
   const { pathname } = useLocation();
   const { formatMessage } = useIntl();
   const makeSearch = (page: number) => stringify({ ...query, page }, { encode: false });

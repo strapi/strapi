@@ -23,7 +23,7 @@ const SearchURLQuery = ({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const iconButtonRef = React.useRef<HTMLButtonElement>(null);
 
-  const [{ query }, setQuery] = useQueryParams();
+  const [{ query }, setQuery] = useQueryParams<{ _q: string; page?: number }>();
 
   const [value, setValue] = React.useState(query?._q || '');
   const [isOpen, setIsOpen] = React.useState(!!value);
@@ -48,7 +48,7 @@ const SearchURLQuery = ({
     e.preventDefault();
 
     // Ensure value is a string
-    if (value && typeof value === 'string') {
+    if (value) {
       if (trackedEvent) {
         trackUsage(trackedEvent, trackedEventDetails);
       }

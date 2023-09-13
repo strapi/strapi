@@ -19,7 +19,6 @@ import {
   TableProps as DSTableProps,
 } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { useQueryParams } from '../hooks/useQueryParams';
@@ -87,10 +86,6 @@ const ActionBar = ({ children }: ActionBarProps) => {
   );
 };
 
-ActionBar.propTypes = {
-  children: PropTypes.node.isRequired,
-};
-
 /* -------------------------------------------------------------------------------------------------
  * BulkDeleteButton
  * -----------------------------------------------------------------------------------------------*/
@@ -142,10 +137,6 @@ const BulkDeleteButton = ({ onConfirmDeleteAll }: BulkDeleteButtonProps) => {
   );
 };
 
-BulkDeleteButton.propTypes = {
-  onConfirmDeleteAll: PropTypes.func.isRequired,
-};
-
 /* -------------------------------------------------------------------------------------------------
  * Head
  * -----------------------------------------------------------------------------------------------*/
@@ -160,10 +151,6 @@ const Head = ({ children }: HeadProps) => {
       <Tr>{children}</Tr>
     </Thead>
   );
-};
-
-Head.propTypes = {
-  children: PropTypes.node.isRequired,
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -243,7 +230,7 @@ const HeaderCell = ({
   isSortable,
   label,
 }: HeaderCellProps) => {
-  const [{ query }, setQuery] = useQueryParams();
+  const [{ query }, setQuery] = useQueryParams<{ sort: `${string}:${'ASC' | 'DESC'}` }>();
   const sort = typeof query?.sort === 'string' ? query.sort : '';
   const [sortBy, sortOrder] = sort.split(':');
   const { formatMessage } = useIntl();
@@ -307,19 +294,6 @@ const HeaderCell = ({
   );
 };
 
-HeaderCell.defaultProps = {
-  isSortable: false,
-  relationFieldName: null,
-};
-
-HeaderCell.propTypes = {
-  name: PropTypes.string.isRequired,
-  fieldSchemaType: PropTypes.string.isRequired,
-  relationFieldName: PropTypes.string,
-  isSortable: PropTypes.bool,
-  label: PropTypes.string.isRequired,
-};
-
 /* -------------------------------------------------------------------------------------------------
  * Root
  * -----------------------------------------------------------------------------------------------*/
@@ -333,8 +307,8 @@ interface RootProps
 const Root = ({
   children,
   defaultSelectedEntries = [],
-  rows,
-  colCount,
+  rows = [],
+  colCount = 0,
   isLoading,
   isFetching,
 }: RootProps) => {
@@ -376,23 +350,6 @@ const Root = ({
   return <TableContext.Provider value={context}>{children}</TableContext.Provider>;
 };
 
-Root.defaultProps = {
-  rows: [],
-  defaultSelectedEntries: [],
-  isLoading: false,
-  isFetching: false,
-  colCount: 0,
-};
-
-Root.propTypes = {
-  children: PropTypes.node.isRequired,
-  rows: PropTypes.arrayOf(PropTypes.object),
-  defaultSelectedEntries: PropTypes.arrayOf(PropTypes.number),
-  colCount: PropTypes.number,
-  isLoading: PropTypes.bool,
-  isFetching: PropTypes.bool,
-};
-
 /* -------------------------------------------------------------------------------------------------
  * EmptyBody
  * -----------------------------------------------------------------------------------------------*/
@@ -426,17 +383,6 @@ const EmptyBody = ({ contentType, ...rest }: EmptyBodyProps) => {
       </Tr>
     </Tbody>
   );
-};
-
-EmptyBody.defaultProps = {
-  action: undefined,
-  icon: undefined,
-};
-
-EmptyBody.propTypes = {
-  action: PropTypes.any,
-  icon: PropTypes.oneOf(['document', 'media', 'permissions']),
-  contentType: PropTypes.string.isRequired,
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -482,10 +428,6 @@ const Body = ({ children }: BodyProps) => {
   return <Tbody>{children}</Tbody>;
 };
 
-Body.propTypes = {
-  children: PropTypes.node.isRequired,
-};
-
 /* -------------------------------------------------------------------------------------------------
  * Content
  * -----------------------------------------------------------------------------------------------*/
@@ -502,15 +444,6 @@ const Content = ({ children, footer }: ContentProps) => {
       {children}
     </DSTable>
   );
-};
-
-Content.defaultProps = {
-  footer: null,
-};
-
-Content.propTypes = {
-  footer: PropTypes.node,
-  children: PropTypes.node.isRequired,
 };
 
 const Table = {
