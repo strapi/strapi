@@ -1,9 +1,3 @@
-/**
- *
- * FilterListURLQuery
- *
- */
-
 import * as React from 'react';
 
 import { Box, Tag } from '@strapi/design-system';
@@ -12,23 +6,7 @@ import { useIntl } from 'react-intl';
 
 import { useQueryParams } from '../hooks/useQueryParams';
 
-export interface Attribute {
-  name: string;
-  fieldSchema: {
-    type: string;
-    mainField: {
-      name: string;
-      schema?: {
-        type: string;
-      };
-    };
-  };
-  metadatas: {
-    label: string;
-    options?: Array<{ label: string; customValue: string }>;
-    customInput?: (value: string) => string;
-  };
-}
+import type { FilterData } from 'types';
 
 export interface Filter {
   [key: string]: {
@@ -36,30 +14,32 @@ export interface Filter {
   };
 }
 
-export interface AttributeTagProps {
-  attribute: Attribute;
-  filter: Filter;
-  onClick: (filter: Filter) => void;
-  operator: string;
-  value: string;
-}
+export type FilterContent = FilterData<
+  {
+    customValue?: string;
+    label?: string;
+  }[]
+>;
 
 export interface FilterListURLQueryProps {
-  filtersSchema: Attribute[];
+  filtersSchema: FilterContent[];
 }
 
 export const FilterListURLQuery = ({ filtersSchema = [] }: FilterListURLQueryProps) => {
-  const [{ query }, setQuery] = useQueryParams();
-  console.log('filtersSchema', filtersSchema)
+  const [{ query }, setQuery] = useQueryParams<{
+    filters?: {
+      $and?: Filter[];
+    };
+    page?: number;
+  }>();
 
   /*
   TODO: This is a temporary fix to avoid a typescript error when I try to access the $and property. But I don't think it's right.
   I need some comments in the PR to find a better solution.
   */
-  const filters = query?.filters as unknown as { $and: Filter[] };
 
   const handleClick = (filter: Filter) => {
-    const nextFilters = (filters.$and || []).filter((prevFilter: Filter) => {
+    const nextFilters = (query?.filters?.$and || []).filter((prevFilter: Filter) => {
       const name = Object.keys(filter)[0];
       const filterType = Object.keys(filter[name])[0];
       const value = filter[name][filterType];
@@ -71,7 +51,7 @@ export const FilterListURLQuery = ({ filtersSchema = [] }: FilterListURLQueryPro
   };
 
   return (
-    filters?.$and.map((filter: Filter, i: number) => {
+    query?.filters?.$and?.map((filter: Filter, i: number) => {
       const attributeName = Object.keys(filter)[0];
       const attribute = filtersSchema.find(({ name }) => name === attributeName);
 
@@ -116,6 +96,14 @@ export const FilterListURLQuery = ({ filtersSchema = [] }: FilterListURLQueryPro
     }) || null
   );
 };
+
+interface AttributeTagProps {
+  attribute: FilterContent;
+  filter: Filter;
+  onClick: (filter: Filter) => void;
+  operator: string;
+  value: string;
+}
 
 const AttributeTag = ({ attribute, filter, onClick, operator, value }: AttributeTagProps) => {
   const { formatMessage, formatDate, formatTime, formatNumber } = useIntl();
