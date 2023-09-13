@@ -6,13 +6,7 @@ import { useIntl } from 'react-intl';
 
 import { useQueryParams } from '../hooks/useQueryParams';
 
-import type { FilterData } from 'types';
-
-export interface Filter {
-  [key: string]: {
-    [key: string]: string | Record<string, string>;
-  };
-}
+import type { FilterData, Filter } from 'types';
 
 export type FilterContent = FilterData<
   {
@@ -27,8 +21,8 @@ export interface FilterListURLQueryProps {
 
 export const FilterListURLQuery = ({ filtersSchema = [] }: FilterListURLQueryProps) => {
   const [{ query }, setQuery] = useQueryParams<{
-    filters?: {
-      $and?: Filter[];
+    filters: {
+      $and: Filter[];
     };
     page?: number;
   }>();
@@ -39,9 +33,9 @@ export const FilterListURLQuery = ({ filtersSchema = [] }: FilterListURLQueryPro
   */
 
   const handleClick = (filter: Filter) => {
-    const nextFilters = (query?.filters?.$and || []).filter((prevFilter: Filter) => {
-      const name = Object.keys(filter)[0];
-      const filterType = Object.keys(filter[name])[0];
+    const nextFilters = (query?.filters?.$and || []).filter((prevFilter) => {
+      const name = Object.keys(filter)[0] as keyof Filter;
+      const filterType = Object.keys(filter[name])[0] as keyof Filter[typeof name];
       const value = filter[name][filterType];
 
       return prevFilter[name]?.[filterType] !== value;
@@ -51,8 +45,8 @@ export const FilterListURLQuery = ({ filtersSchema = [] }: FilterListURLQueryPro
   };
 
   return (
-    query?.filters?.$and?.map((filter: Filter, i: number) => {
-      const attributeName = Object.keys(filter)[0];
+    query?.filters?.$and?.map((filter, i) => {
+      const attributeName = Object.keys(filter)[0] as keyof Filter;
       const attribute = filtersSchema.find(({ name }) => name === attributeName);
 
       if (!attribute) {
@@ -60,26 +54,30 @@ export const FilterListURLQuery = ({ filtersSchema = [] }: FilterListURLQueryPro
       }
 
       if (attribute.fieldSchema.type === 'relation') {
-        const relationTargetAttribute = attribute.fieldSchema.mainField.name;
+        const relationTargetAttribute = attribute?.fieldSchema?.mainField
+          ?.name as keyof Filter[typeof attributeName];
         const filterObj = filter[attributeName][relationTargetAttribute];
-        const operator = Object.keys(filterObj)[0];
-        const value = typeof filterObj === 'object' ? filterObj[operator] : '';
 
-        return (
-          <AttributeTag
-            // eslint-disable-next-line react/no-array-index-key
-            key={`${attributeName}-${i}`}
-            attribute={attribute}
-            filter={filter}
-            onClick={handleClick}
-            operator={operator}
-            value={value}
-          />
-        );
+        if (typeof filterObj === 'object' && filterObj !== null) {
+          const operator = Object.keys(filterObj)[0] as keyof typeof filterObj;
+          const value = filterObj[operator] ?? '';
+
+          return (
+            <AttributeTag
+              // eslint-disable-next-line react/no-array-index-key
+              key={`${attributeName}-${i}`}
+              attribute={attribute}
+              filter={filter}
+              onClick={handleClick}
+              operator={operator}
+              value={value}
+            />
+          );
+        }
       }
 
       const filterObj = filter[attributeName];
-      const operator = Object.keys(filterObj)[0];
+      const operator = Object.keys(filterObj)[0] as keyof Filter[typeof attributeName];
       const value = filterObj[operator];
 
       return (
