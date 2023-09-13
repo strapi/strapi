@@ -61,6 +61,39 @@ const DeleteMenuItem = styled(MenuItem)`
   color: ${({ theme }) => theme.colors.danger600};
 `;
 
+// Removing the font-size from the child-span aligns the
+// more icon vertically
+const ContextMenuTrigger = styled(Menu.Trigger)`
+  :hover,
+  :focus {
+    background-color: ${({ theme }) => theme.colors.neutral100};
+  }
+
+  > span {
+    font-size: 0;
+  }
+`;
+
+// As soon as either `as` or `forwardedAs` is set, the component
+// resets some styles and e.g. the `hasBorder` prop no longer works,
+// which is why this bit of CSS has been added manually ¯\_(ツ)_/¯
+const DragIconButton = styled(IconButton)`
+  align-items: center;
+  border-radius: ${({ theme }) => theme.borderRadius};
+  display: flex;
+  justify-content: center;
+
+  :hover,
+  :focus {
+    background-color: ${({ theme }) => theme.colors.neutral100};
+  }
+
+  svg {
+    height: auto;
+    width: ${({ theme }) => theme.spaces[3]}};
+  }
+`;
+
 const AVAILABLE_COLORS = getAvailableStageColors();
 
 function StageDropPreview() {
@@ -254,7 +287,7 @@ export function Stage({
               (canDelete || canUpdate) && (
                 <Flex>
                   <Menu.Root>
-                    <Menu.Trigger size="S" endIcon={null} paddingLeft={2} paddingRight={2}>
+                    <ContextMenuTrigger size="S" endIcon={null} paddingLeft={2} paddingRight={2}>
                       <More aria-hidden focusable={false} />
                       <VisuallyHidden as="span">
                         {formatMessage({
@@ -262,7 +295,7 @@ export function Stage({
                           defaultMessage: 'More actions',
                         })}
                       </VisuallyHidden>
-                    </Menu.Trigger>
+                    </ContextMenuTrigger>
                     {/* z-index needs to be as big as the one defined for the wrapper in Stages, otherwise the menu
                      * disappears behind the accordion
                      */}
@@ -290,9 +323,10 @@ export function Stage({
                   </Menu.Root>
 
                   {canUpdate && (
-                    <IconButton
+                    <DragIconButton
                       background="transparent"
                       forwardedAs="div"
+                      hasRadius
                       role="button"
                       noBorder
                       tabIndex={0}
@@ -306,7 +340,7 @@ export function Stage({
                       onKeyDown={handleKeyDown}
                     >
                       <Drag />
-                    </IconButton>
+                    </DragIconButton>
                   )}
                 </Flex>
               )
