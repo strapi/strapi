@@ -1,4 +1,4 @@
-import type { Model } from '../metadata/types';
+import type { Meta, Model } from '../metadata/types';
 
 export type Action =
   | 'beforeCreate'
@@ -34,12 +34,12 @@ export interface Params {
 
 export interface Event {
   action: Action;
-  model: Model;
+  model: Meta;
   params: Params;
   state: Record<string, unknown>;
 }
 
-type SubscriberFn = (event: Event) => Promise<void> | void;
+export type SubscriberFn = (event: Event) => Promise<void> | void;
 
 export type SubscriberMap = {
   models?: string[];

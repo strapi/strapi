@@ -86,9 +86,17 @@ const toId = (value: unknown | { id: unknown }): ID => {
 const toIds = (value: unknown): ID[] => castArray(value || []).map(toId);
 
 const isValidId = (value: unknown): value is ID => isString(value) || isInteger(value);
-const isValidObjectId = (value: unknown): value is Record<string, unknown> & { id: ID } =>
+
+const isValidObjectId = (value: unknown): value is Entity =>
   isObj(value) && 'id' in value && isValidId(value.id);
-const toIdArray = (data: unknown) => {
+
+const toIdArray = (
+  data: unknown
+): {
+  id: ID;
+  __pivot?: { [key: string]: any };
+  [key: string]: any;
+}[] => {
   const array = castArray(data)
     .filter((datum) => !isNil(datum))
     .map((datum) => {
@@ -118,7 +126,8 @@ type Assocs =
       options?: { strict?: boolean };
       connect?: Array<{
         id: ScalarAssoc;
-        position?: { start?: boolean; end?: boolean };
+        position?: { start?: boolean; end?: boolean; before?: ID; after?: ID };
+        __pivot?: any;
       }> | null;
       disconnect?: Array<ScalarAssoc> | null;
     };
@@ -149,6 +158,7 @@ const toAssocs = (data: Assocs) => {
     connect: toIdArray(data?.connect).map((elm) => ({
       id: elm.id,
       position: elm.position ? elm.position : { end: true },
+      __pivot: elm.__pivot ?? {},
     })),
     disconnect: toIdArray(data?.disconnect),
   };
@@ -195,7 +205,7 @@ const processData = (
 
     if (types.isRelationalAttribute(attribute)) {
       // oneToOne & manyToOne
-      if (attribute.joinColumn && attribute.owner) {
+      if ('joinColumn' in attribute && attribute.joinColumn && attribute.owner) {
         const joinColumnName = attribute.joinColumn.name;
 
         // allow setting to null
@@ -210,7 +220,7 @@ const processData = (
         continue;
       }
 
-      if (attribute.morphColumn && attribute.owner) {
+      if ('morphColumn' in attribute && attribute.morphColumn && attribute.owner) {
         const { idColumn, typeColumn, typeField = '__type' } = attribute.morphColumn;
 
         const value = data[attributeName] as Record<string, unknown>;
@@ -473,7 +483,12 @@ export const createEntityManager = (db: Database) => {
       try {
         const cloneAttrs = Object.entries(metadata.attributes).reduce((acc, [attrName, attr]) => {
           // TODO: handle components in the db layer
-          if (types.isRelationalAttribute(attr) && attr.joinTable && !attr.component) {
+          if (
+            types.isRelationalAttribute(attr) &&
+            'joinTable' in attr &&
+            attr.joinTable &&
+            !('component' in attr)
+          ) {
             acc.push(attrName);
           }
           return acc;
@@ -659,7 +674,7 @@ export const createEntityManager = (db: Database) => {
           continue;
         }
 
-        if (attribute.joinColumn && attribute.owner) {
+        if ('joinColumn' in attribute && attribute.joinColumn && attribute.owner) {
           const relIdsToAdd = toIds(cleanRelationData.set);
           if (
             attribute.relation === 'oneToOne' &&
@@ -677,7 +692,7 @@ export const createEntityManager = (db: Database) => {
         }
 
         // oneToOne oneToMany on the non owning side
-        if (attribute.joinColumn && !attribute.owner) {
+        if ('joinColumn' in attribute && attribute.joinColumn && !attribute.owner) {
           // need to set the column on the target
           const { target } = attribute;
 
@@ -698,7 +713,7 @@ export const createEntityManager = (db: Database) => {
             .execute();
         }
 
-        if (attribute.joinTable) {
+        if ('joinTable' in attribute && attribute.joinTable) {
           // need to set the column on the target
 
           const { joinTable } = attribute;
@@ -726,11 +741,11 @@ export const createEntityManager = (db: Database) => {
               ...(('on' in joinTable && joinTable.on) || {}),
               ...(data.__pivot || {}),
             };
-          });
+          }) as Record<string, any>[];
 
           // add order value
           if (cleanRelationData.set && hasOrderColumn(attribute)) {
-            insert.forEach((data, idx) => {
+            insert.forEach((data: Record<string, unknown>, idx) => {
               data[orderColumnName] = idx + 1;
             });
           } else if (cleanRelationData.connect && hasOrderColumn(attribute)) {
@@ -744,10 +759,10 @@ export const createEntityManager = (db: Database) => {
               .connect(relsToAdd)
               .get()
               // set the order based on the order of the ids
-              .reduce((acc, rel, idx) => ({ ...acc, [rel.id]: idx }), {});
+              .reduce((acc, rel, idx) => ({ ...acc, [rel.id]: idx }), {} as Record<ID, number>);
 
-            insert.forEach((row) => {
-              row[orderColumnName] = orderMap[row[inverseJoinColumn.name]];
+            insert.forEach((row: Record<string, unknown>) => {
+              row[orderColumnName] = orderMap[row[inverseJoinColumn.name] as number];
             });
           }
 
@@ -765,7 +780,7 @@ export const createEntityManager = (db: Database) => {
 
             const maxMap = maxResults.reduce(
               (acc, res) => Object.assign(acc, { [res[inverseJoinColumn.name]]: res.max }),
-              {}
+              {} as Record<string, number>
             );
 
             insert.forEach((rel) => {
@@ -787,7 +802,16 @@ export const createEntityManager = (db: Database) => {
      * Updates relations of an existing entity
      */
     // TODO: check relation exists (handled by FKs except for polymorphics)
-    async updateRelations(uid: string, id: ID, data, { transaction: trx }) {
+    async updateRelations(
+      uid: string,
+      id: ID,
+      data: any,
+      {
+        transaction: trx,
+      }: {
+        transaction: Knex.Transaction;
+      }
+    ) {
       const { attributes } = db.metadata.get(uid);
 
       for (const attributeName of Object.keys(attributes)) {
@@ -803,7 +827,7 @@ export const createEntityManager = (db: Database) => {
 
           const targetAttribute = db.metadata.get(target).attributes[morphBy];
 
-          if (targetAttribute.relation === 'morphToOne') {
+          if (targetAttribute.type === 'relation' && targetAttribute.relation === 'morphToOne') {
             // set columns
             const { idColumn, typeColumn } = targetAttribute.morphColumn;
 
@@ -816,14 +840,17 @@ export const createEntityManager = (db: Database) => {
               .execute();
 
             if (!isNull(cleanRelationData.set)) {
-              const relId = toIds(cleanRelationData.set[0]);
+              const relId = toIds(cleanRelationData.set?.[0]);
               await this.createQueryBuilder(target)
                 .update({ [idColumn.name]: id, [typeColumn.name]: uid })
                 .where({ id: relId })
                 .transacting(trx)
                 .execute();
             }
-          } else if (targetAttribute.relation === 'morphToMany') {
+          } else if (
+            targetAttribute.type === 'relation' &&
+            targetAttribute.relation === 'morphToMany'
+          ) {
             const { joinTable } = targetAttribute;
             const { joinColumn, morphColumn } = joinTable;
 
@@ -844,7 +871,7 @@ export const createEntityManager = (db: Database) => {
               continue;
             }
 
-            const rows = cleanRelationData.set.map((data, idx) => ({
+            const rows = cleanRelationData.set?.map((data, idx) => ({
               [joinColumn.name]: data.id,
               [idColumn.name]: id,
               [typeColumn.name]: uid,
@@ -852,7 +879,7 @@ export const createEntityManager = (db: Database) => {
               ...(data.__pivot || {}),
               order: idx + 1,
               field: attributeName,
-            }));
+            })) as Record<string, any>;
 
             await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
           }
@@ -884,14 +911,14 @@ export const createEntityManager = (db: Database) => {
             continue;
           }
 
-          const rows = cleanRelationData.set.map((data, idx) => ({
+          const rows = (cleanRelationData.set ?? []).map((data, idx) => ({
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
             [typeColumn.name]: data[typeField],
             ...(joinTable.on || {}),
             ...(data.__pivot || {}),
             order: idx + 1,
-          }));
+          })) as Record<string, any>[];
 
           // delete previous relations
           await deleteRelatedMorphOneRelationsAfterMorphToManyUpdate(rows, {
@@ -907,14 +934,14 @@ export const createEntityManager = (db: Database) => {
           continue;
         }
 
-        if (attribute.joinColumn && attribute.owner) {
+        if ('joinColumn' in attribute && attribute.joinColumn && attribute.owner) {
           // handled in the row itself
           continue;
         }
 
         // oneToOne oneToMany on the non owning side.
         // Since it is a join column no need to remove previous relations
-        if (attribute.joinColumn && !attribute.owner) {
+        if ('joinColumn' in attribute && attribute.joinColumn && !attribute.owner) {
           // need to set the column on the target
           const { target } = attribute;
 
@@ -951,15 +978,19 @@ export const createEntityManager = (db: Database) => {
             await deleteRelations({ id, attribute, db, relIdsToDelete: 'all', transaction: trx });
           } else {
             const isPartialUpdate = !has('set', cleanRelationData);
-            let relIdsToaddOrMove;
+            let relIdsToaddOrMove: ID[];
 
             if (isPartialUpdate) {
               if (isAnyToOne(attribute)) {
-                cleanRelationData.connect = cleanRelationData.connect.slice(-1);
+                cleanRelationData.connect = cleanRelationData.connect?.slice(-1);
               }
               relIdsToaddOrMove = toIds(cleanRelationData.connect);
               const relIdsToDelete = toIds(
-                differenceWith(isEqual, cleanRelationData.disconnect, cleanRelationData.connect)
+                differenceWith(
+                  isEqual,
+                  cleanRelationData.disconnect,
+                  cleanRelationData.connect ?? []
+                )
               );
 
               if (!isEmpty(relIdsToDelete)) {
@@ -971,7 +1002,8 @@ export const createEntityManager = (db: Database) => {
               }
 
               // Fetch current relations to handle ordering
-              let currentMovingRels;
+              let currentMovingRels: Record<string, ID>[] = [];
+
               if (hasOrderColumn(attribute) || hasInverseOrderColumn(attribute)) {
                 currentMovingRels = await this.createQueryBuilder(joinTable.name)
                   .select(select)
@@ -1001,7 +1033,7 @@ export const createEntityManager = (db: Database) => {
                         [joinColumn.name]: id,
                         [inverseJoinColumn.name]: {
                           $in: compact(
-                            cleanRelationData.connect.map(
+                            cleanRelationData.connect?.map(
                               (r) => r.position?.after || r.position?.before
                             )
                           ),
@@ -1020,15 +1052,15 @@ export const createEntityManager = (db: Database) => {
                   })
                   .where(joinTable.on || {})
                   .transacting(trx)
-                  .execute();
+                  .execute<Array<Record<string, any>>>();
 
                 const orderMap = relationsOrderer(
                   adjacentRelations,
                   inverseJoinColumn.name,
                   joinTable.orderColumnName,
-                  cleanRelationData.options.strict
+                  cleanRelationData.options?.strict
                 )
-                  .connect(cleanRelationData.connect)
+                  .connect(cleanRelationData.connect ?? [])
                   .getOrderMap();
 
                 insert.forEach((row) => {
@@ -1038,7 +1070,7 @@ export const createEntityManager = (db: Database) => {
 
               // add inv order value
               if (hasInverseOrderColumn(attribute)) {
-                const nonExistingRelsIds = difference(
+                const nonExistingRelsIds: ID[] = difference(
                   relIdsToaddOrMove,
                   map(inverseJoinColumn.name, currentMovingRels)
                 );
@@ -1081,7 +1113,7 @@ export const createEntityManager = (db: Database) => {
               await cleanOrderColumns({ attribute, db, id, transaction: trx });
             } else {
               if (isAnyToOne(attribute)) {
-                cleanRelationData.set = cleanRelationData.set.slice(-1);
+                cleanRelationData.set = cleanRelationData.set?.slice(-1);
               }
               // overwrite all relations
               relIdsToaddOrMove = toIds(cleanRelationData.set);
@@ -1122,12 +1154,11 @@ export const createEntityManager = (db: Database) => {
                   })
                   .where(joinTable.on || {})
                   .transacting(trx)
-                  .execute();
+                  .execute<Array<Record<string, ID>>>();
 
-                const nonExistingRelsIds = difference(
-                  relIdsToaddOrMove,
-                  map(inverseJoinColumn.name, existingRels)
-                );
+                const inverseRelsIds = map(inverseJoinColumn.name, existingRels);
+
+                const nonExistingRelsIds = difference(relIdsToaddOrMove, inverseRelsIds);
 
                 const maxResults = await db
                   .getConnection()
@@ -1144,7 +1175,7 @@ export const createEntityManager = (db: Database) => {
                   {}
                 );
 
-                insert.forEach((row) => {
+                insert.forEach((row: any) => {
                   row[inverseOrderColumnName] = (maxMap[row[inverseJoinColumn.name]] || 0) + 1;
                 });
               }
@@ -1229,7 +1260,7 @@ export const createEntityManager = (db: Database) => {
 
           const targetAttribute = db.metadata.get(target).attributes[morphBy];
 
-          if (targetAttribute.relation === 'morphToOne') {
+          if (targetAttribute.type === 'relation' && targetAttribute.relation === 'morphToOne') {
             // set columns
             const { idColumn, typeColumn } = targetAttribute.morphColumn;
 
@@ -1238,7 +1269,10 @@ export const createEntityManager = (db: Database) => {
               .where({ [idColumn.name]: id, [typeColumn.name]: uid })
               .transacting(trx)
               .execute();
-          } else if (targetAttribute.relation === 'morphToMany') {
+          } else if (
+            targetAttribute.type === 'relation' &&
+            targetAttribute.relation === 'morphToMany'
+          ) {
             const { joinTable } = targetAttribute;
             const { morphColumn } = joinTable;
 
@@ -1293,13 +1327,13 @@ export const createEntityManager = (db: Database) => {
         }
 
         // NOTE: we do not remove existing associations with the target as it should handled by unique FKs instead
-        if (attribute.joinColumn && attribute.owner) {
+        if ('joinColumn' in attribute && attribute.joinColumn && attribute.owner) {
           // nothing to do => relation already added on the table
           continue;
         }
 
         // oneToOne oneToMany on the non owning side.
-        if (attribute.joinColumn && !attribute.owner) {
+        if ('joinColumn' in attribute && attribute.joinColumn && !attribute.owner) {
           // need to set the column on the target
           const { target } = attribute;
 
@@ -1310,7 +1344,7 @@ export const createEntityManager = (db: Database) => {
             .execute();
         }
 
-        if (attribute.joinTable) {
+        if ('joinTable' in attribute && attribute.joinTable) {
           await deleteRelations({ id, attribute, db, relIdsToDelete: 'all', transaction: trx });
         }
       }
@@ -1347,7 +1381,7 @@ export const createEntityManager = (db: Database) => {
         return;
       }
 
-      await mapAsync(cloneAttrs, async (attrName) => {
+      await mapAsync(cloneAttrs, async (attrName: string) => {
         const attribute = attributes[attrName];
 
         if (attribute.type !== 'relation') {
@@ -1361,7 +1395,7 @@ export const createEntityManager = (db: Database) => {
           return;
         }
 
-        if (attribute.joinColumn) {
+        if ('joinColumn' in attribute) {
           // TODO: add support for cloning oneToMany relations on the owning side
           return;
         }
@@ -1370,7 +1404,7 @@ export const createEntityManager = (db: Database) => {
           return;
         }
 
-        let omitIds = [];
+        let omitIds: ID[] = [];
         if (has(attrName, data)) {
           const cleanRelationData = toAssocs(data[attrName]);
 

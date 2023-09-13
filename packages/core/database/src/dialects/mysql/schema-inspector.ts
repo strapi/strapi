@@ -201,11 +201,15 @@ export default class MysqlSchemaInspector implements SchemaInspector {
       }
 
       if (!ret[index.Key_name]) {
-        ret[index.Key_name] = {
+        const indexInfo: Index = {
           columns: [index.Column_name],
           name: index.Key_name,
-          type: !index.Non_unique ? 'unique' : null,
         };
+        if (!index.Non_unique) {
+          indexInfo.type = 'unique';
+        }
+
+        ret[index.Key_name] = indexInfo;
       } else {
         ret[index.Key_name].columns.push(index.Column_name);
       }
@@ -229,7 +233,7 @@ export default class MysqlSchemaInspector implements SchemaInspector {
         referencedTable: null,
         onUpdate: null,
         onDelete: null,
-      };
+      } as unknown as ForeignKey;
     }
 
     const contraintNames = Object.keys(ret);

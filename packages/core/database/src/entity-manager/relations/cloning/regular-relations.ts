@@ -1,7 +1,8 @@
 import type { Knex } from 'knex';
 
 import { cleanInverseOrderColumn } from '../../regular-relations';
-import type { BidirectionalRelationalAttribute } from '../../../metadata/types';
+import type { Relation } from '../../../metadata/types';
+import { ID } from '../../../typings';
 
 const replaceRegularRelations = async ({
   targetId,
@@ -10,10 +11,10 @@ const replaceRegularRelations = async ({
   omitIds,
   transaction: trx,
 }: {
-  targetId: string;
-  sourceId: string;
-  attribute: BidirectionalRelationalAttribute;
-  omitIds: string[];
+  targetId: ID;
+  sourceId: ID;
+  attribute: Relation.Bidirectional;
+  omitIds: ID[];
   transaction: Knex.Transaction;
 }) => {
   const { joinTable } = attribute;
@@ -38,9 +39,9 @@ const cloneRegularRelations = async ({
   attribute,
   transaction: trx,
 }: {
-  targetId: string;
-  sourceId: string;
-  attribute: BidirectionalRelationalAttribute;
+  targetId: ID;
+  sourceId: ID;
+  attribute: Relation.Bidirectional;
   transaction: Knex.Transaction;
 }) => {
   const { joinTable } = attribute;

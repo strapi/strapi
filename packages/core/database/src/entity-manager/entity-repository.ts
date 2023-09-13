@@ -1,5 +1,4 @@
 import { isString } from 'lodash/fp';
-import { isAnyToMany } from '../metadata/relations';
 import type { Database } from '..';
 import type { ID } from '../typings';
 

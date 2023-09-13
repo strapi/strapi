@@ -1,6 +1,4 @@
-'use strict';
-
-const { sortConnectArray } = require('../relations-orderer');
+import { sortConnectArray } from '../relations-orderer';
 
 describe('sortConnectArray', () => {
   test('sorts connect array', () => {

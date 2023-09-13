@@ -1,9 +1,8 @@
 import _ from 'lodash/fp';
-import { errors } from '@strapi/utils';
 
 import * as types from '../types';
-import { createRelation, isRelationAttribute } from './relations';
-import { Metadata } from './types';
+import { createRelation } from './relations';
+import { Metadata, Relation } from './types';
 import type { Attribute, Model, Meta, ComponentLinkMeta } from './types';
 
 export { Metadata };
@@ -56,7 +55,7 @@ export const createMetadata = (models: Model[] = []): Metadata => {
           continue;
         }
 
-        if (isRelationAttribute(attribute)) {
+        if (types.isRelationalAttribute(attribute)) {
           createRelation(attributeName, attribute, meta, metadata);
           continue;
         }
@@ -76,7 +75,11 @@ export const createMetadata = (models: Model[] = []): Metadata => {
   for (const meta of metadata.values()) {
     const columnToAttribute = Object.keys(meta.attributes).reduce((acc, key) => {
       const attribute = meta.attributes[key];
-      return Object.assign(acc, { [attribute.columnName || key]: key });
+      if ('columnName' in attribute) {
+        return Object.assign(acc, { [attribute.columnName || key]: key });
+      }
+
+      return acc;
     }, {});
 
     meta.columnToAttribute = columnToAttribute;
@@ -194,14 +197,14 @@ const createDynamicZone = (
       },
       pivotColumns: ['entity_id', 'component_id', 'field', 'component_type'],
     },
-  });
+  } satisfies Relation.MorphToMany);
 };
 
 const createComponent = (attributeName: string, attribute: Attribute, meta: ComponentLinkMeta) => {
   Object.assign(attribute, {
     type: 'relation',
-    relation: attribute.repeatable === true ? 'oneToMany' : 'oneToOne',
-    target: attribute.component,
+    relation: 'repeatable' in attribute && attribute.repeatable === true ? 'oneToMany' : 'oneToOne',
+    target: 'component' in attribute && attribute.component,
     joinTable: {
       name: meta.componentLink.tableName,
       joinColumn: {

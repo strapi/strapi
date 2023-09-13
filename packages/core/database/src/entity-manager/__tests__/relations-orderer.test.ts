@@ -1,6 +1,4 @@
-'use strict';
-
-const { relationsOrderer } = require('../relations-orderer');
+import { relationsOrderer } from '../relations-orderer';
 
 describe('Given I have some relations in the database', () => {
   describe('When I connect a relation at the end', () => {

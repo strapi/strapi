@@ -1,4 +1,5 @@
-import { ForeignKey, Index } from '../schema/types';
+import type { Action, SubscriberFn } from '../lifecycles';
+import type { ForeignKey, Index } from '../schema/types';
 
 export interface ColumnInfo {
   unsigned?: boolean;
@@ -8,9 +9,14 @@ export interface ColumnInfo {
 export type Attribute = ScalarAttribute | RelationalAttribute;
 
 export type RelationalAttribute =
-  | BidirectionalRelationalAttribute
-  | MorphRelationalAttribute
-  | WayRelation;
+  | Relation.OneToOne
+  | Relation.OneToMany
+  | Relation.ManyToOne
+  | Relation.ManyToMany
+  | Relation.MorphMany
+  | Relation.MorphOne
+  | Relation.MorphToOne
+  | Relation.MorphToMany;
 
 export interface BasAttribute {
   type: string;
@@ -21,7 +27,6 @@ export interface BasAttribute {
   unique?: boolean;
   component?: string;
   repeatable?: boolean;
-  relation?: string;
   columnType?: {
     type: string;
     args: unknown[];
@@ -56,13 +61,11 @@ export interface JoinColumn {
   referencedTable?: string;
 }
 
-export interface AttributeJoinTable {
+export interface BaseJoinTable {
   name: string;
   joinColumn: JoinColumn;
   orderBy?: Record<string, 'asc' | 'desc'>;
   on?: Record<string, unknown>;
-  orderColumnName?: string;
-  inverseOrderColumnName?: string;
   pivotColumns: string[];
   inverseJoinColumn: {
     name: string;
@@ -70,7 +73,106 @@ export interface AttributeJoinTable {
   };
 }
 
-export interface BidirectionalAttributeJoinTable extends AttributeJoinTable {
+export interface JoinTable extends BaseJoinTable {
+  orderColumnName?: string;
+  inverseOrderColumnName?: string;
+}
+
+export interface OrderedJoinTable extends BaseJoinTable {
+  orderColumnName: string;
+  inverseOrderColumnName: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace Relation {
+  export type Owner = {
+    inversedBy: string;
+  };
+
+  export type WithTarget = {
+    target: string;
+  };
+
+  export type Bidirectional = OneToOne | OneToMany | ManyToOne | ManyToMany;
+
+  type BaseBidirectional = {
+    type: 'relation';
+    relation: 'oneToOne' | 'oneToMany' | 'manyToOne' | 'manyToMany';
+    target: string;
+    inversedBy?: string;
+    mappedBy?: string;
+    joinTable: BidirectionalAttributeJoinTable;
+  };
+
+  export type OneToOne = BaseBidirectional & {
+    relation: 'oneToOne';
+    useJoinTable?: boolean;
+  } & (
+      | {
+          joinTable: JoinTable;
+        }
+      | {
+          joinColumn: JoinColumn;
+          owner?: boolean;
+        }
+    );
+
+  export type OneToMany = BaseBidirectional & {
+    relation: 'oneToMany';
+    joinTable: OrderedJoinTable;
+  };
+
+  export type ManyToOne = BaseBidirectional & {
+    relation: 'manyToOne';
+
+    useJoinTable?: boolean;
+  } & (
+      | {
+          joinTable: JoinTable;
+        }
+      | {
+          joinColumn: JoinColumn;
+          owner?: boolean;
+        }
+    );
+
+  export type ManyToMany = BaseBidirectional & {
+    relation: 'manyToMany';
+    joinTable: OrderedJoinTable;
+  };
+
+  export type Morph = MorphMany | MorphOne | MorphToOne | MorphToMany;
+
+  export type MorphMany = {
+    type: 'relation';
+    relation: 'morphMany';
+    target: string;
+    morphBy: string;
+    joinTable: MorphJoinTable;
+  };
+
+  export type MorphOne = {
+    type: 'relation';
+    relation: 'morphOne';
+    target: string;
+    morphBy: string;
+  };
+
+  export type MorphToOne = {
+    type: 'relation';
+    relation: 'morphToOne';
+    owner?: boolean;
+    morphColumn: MorphColumn;
+  };
+
+  export type MorphToMany = {
+    type: 'relation';
+    relation: 'morphToMany';
+    joinTable: MorphJoinTable;
+  };
+}
+
+export interface BidirectionalAttributeJoinTable extends JoinTable {
   orderColumnName: string;
   inverseOrderColumnName: string;
 }
@@ -90,8 +192,7 @@ export interface MorphJoinTable {
   name: string;
   joinColumn: JoinColumn;
   orderBy?: Record<string, 'asc' | 'desc'>;
-  orderColumnName?: string;
-  inverseOrderColumnName?: string;
+  on?: Record<string, unknown>;
   pivotColumns: string[];
   morphColumn: MorphColumn;
 }
@@ -100,7 +201,7 @@ export interface BaseRelationalAttribute {
   type: 'relation';
   target: string;
   useJoinTable?: boolean;
-  joinTable?: AttributeJoinTable | MorphJoinTable;
+  joinTable?: JoinTable | MorphJoinTable;
   morphBy?: string;
   inversedBy?: string;
   owner?: boolean;
@@ -108,17 +209,6 @@ export interface BaseRelationalAttribute {
   joinColumn?: JoinColumn;
   // TODO: remove this
   component?: string;
-}
-
-export interface WayRelation extends BaseRelationalAttribute {
-  relation: 'oneWay' | 'manyWay';
-  target: string;
-}
-
-export interface BidirectionalRelationalAttribute extends BaseRelationalAttribute {
-  relation: 'oneToOne' | 'oneToMany' | 'manyToOne' | 'manyToMany';
-  inversedBy: string;
-  joinTable: BidirectionalAttributeJoinTable;
 }
 
 export interface MorphRelationalAttribute extends BaseRelationalAttribute {
@@ -136,7 +226,7 @@ export interface Meta {
   attributes: Record<string, Attribute>;
   indexes: Index[];
   foreignKeys?: ForeignKey[];
-  lifecycles?: Record<string, unknown>;
+  lifecycles?: Record<Action, SubscriberFn>;
   columnToAttribute?: Record<string, string>;
   componentLink?: Meta;
 }

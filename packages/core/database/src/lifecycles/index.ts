@@ -44,7 +44,7 @@ export const createLifecyclesProvider = (db: Database): LifecycleProvider => {
       subscribers = [];
     },
 
-    createEvent(action, uid, properties, state) {
+    createEvent(action, uid, properties, state): Event {
       const model = db.metadata.get(uid);
 
       return {

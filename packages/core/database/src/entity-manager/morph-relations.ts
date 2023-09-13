@@ -3,9 +3,9 @@ import type { Knex } from 'knex';
 
 import { createQueryBuilder } from '../query';
 import type { Database } from '..';
-import type { MorphJoinTable, RelationalAttribute } from '../metadata/types';
+import type { MorphJoinTable, Relation } from '../metadata/types';
 
-type Rows = { field: string; [key: string]: unknown }[];
+type Rows = Record<string, unknown>[];
 
 const getMorphToManyRowsLinkedToMorphOne = (
   rows: Rows,
@@ -23,9 +23,9 @@ const getMorphToManyRowsLinkedToMorphOne = (
 ) =>
   rows.filter((row) => {
     const relatedType = row[typeColumn.name] as string;
-    const field = row.field;
+    const field = row.field as any;
 
-    const targetAttribute = db.metadata.get(relatedType).attributes[field] as RelationalAttribute;
+    const targetAttribute = db.metadata.get(relatedType).attributes[field] as Relation.MorphOne;
 
     // ensure targeted field is the right one + check if it is a morphOne
     return (

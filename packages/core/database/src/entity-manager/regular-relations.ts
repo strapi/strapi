@@ -14,7 +14,7 @@ import { createQueryBuilder } from '../query';
 import { addSchema } from '../utils/knex';
 import type { Database } from '..';
 import type { ID } from '../typings';
-import type { BidirectionalRelationalAttribute } from '../metadata/types';
+import type { Relation } from '../metadata/types';
 
 /**
  * If some relations currently exist for this oneToX relation, on the one side, this function removes them and update the inverse order if needed.
@@ -27,7 +27,7 @@ const deletePreviousOneToAnyRelations = async ({
   transaction: trx,
 }: {
   id: ID;
-  attribute: BidirectionalRelationalAttribute;
+  attribute: Relation.Bidirectional;
   relIdsToadd: ID[];
   db: Database;
   transaction: Knex.Transaction;
@@ -64,7 +64,7 @@ const deletePreviousAnyToOneRelations = async ({
   transaction: trx,
 }: {
   id: ID;
-  attribute: BidirectionalRelationalAttribute;
+  attribute: Relation.Bidirectional;
   relIdToadd: ID;
   db: Database;
   transaction: Knex.Transaction;
@@ -128,7 +128,7 @@ const deleteRelations = async ({
   transaction: trx,
 }: {
   id: ID;
-  attribute: BidirectionalRelationalAttribute;
+  attribute: Relation.Bidirectional;
   db: Database;
   relIdsToNotDelete?: ID[];
   relIdsToDelete?: ID[] | 'all';
@@ -196,13 +196,13 @@ const cleanOrderColumns = async ({
   id,
   attribute,
   db,
-  inverseRelIds,
+  inverseRelIds = [],
   transaction: trx,
 }: {
   id?: ID;
-  attribute: BidirectionalRelationalAttribute;
+  attribute: Relation.Bidirectional;
   db: Database;
-  inverseRelIds: ID[];
+  inverseRelIds?: ID[];
   transaction: Knex.Transaction;
 }) => {
   if (
@@ -353,7 +353,7 @@ const cleanOrderColumnsForOldDatabases = async ({
   transaction: trx,
 }: {
   id?: ID;
-  attribute: BidirectionalRelationalAttribute;
+  attribute: Relation.Bidirectional;
   db: Database;
   inverseRelIds: ID[];
   transaction: Knex.Transaction;
@@ -457,7 +457,7 @@ const cleanInverseOrderColumn = async ({
   trx,
 }: {
   id: ID;
-  attribute: BidirectionalRelationalAttribute;
+  attribute: Relation.Bidirectional;
   trx: Knex.Transaction;
 }) => {
   const con = strapi.db.connection;
