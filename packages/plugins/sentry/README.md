@@ -23,12 +23,12 @@ npm install @strapi/plugin-sentry
 
 ## Configuration
 
-| property       | type (default)   | description                                                                                                                                                                              |
-| -------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dsn`          | string (`null`)  | Your Sentry data source name ([see Sentry docs](https://docs.sentry.io/product/sentry-basics/dsn-explainer/)).                                                                           |
-| `tracesSampleRate`          | number (`0.1`)  | The sample rate to use for performance monitoring. Set this to `0` to disable performance monitoring. `1` means all transactions are captured, `0.1` means 10% of transactions are captured.                                                                           |
-| `sendMetadata` | boolean (`true`) | Whether the plugin should attach additional information (like OS, browser, etc.) to the events sent to Sentry.                                                                           |
-| `init`         | object (`{}`)    | A config object that is passed directly to Sentry during the `Sentry.init()`. See all available options [on Sentry's docs](https://docs.sentry.io/platforms/node/configuration/options/) |
+| property           | type (default)   | description                                                                                                                                                                                  |
+| ------------------ | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dsn`              | string (`null`)  | Your Sentry data source name ([see Sentry docs](https://docs.sentry.io/product/sentry-basics/dsn-explainer/)).                                                                               |
+| `tracesSampleRate` | number (`0.1`)   | The sample rate to use for performance monitoring. Set this to `0` to disable performance monitoring. `1` means all transactions are captured, `0.1` means 10% of transactions are captured. |
+| `sendMetadata`     | boolean (`true`) | Whether the plugin should attach additional information (like OS, browser, etc.) to the events sent to Sentry.                                                                               |
+| `init`             | object (`{}`)    | A config object that is passed directly to Sentry during the `Sentry.init()`. See all available options [on Sentry's docs](https://docs.sentry.io/platforms/node/configuration/options/)     |
 
 **Example**
 
