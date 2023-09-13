@@ -74,7 +74,7 @@ export const FilterListURLQuery = ({ filtersSchema = [] }: FilterListURLQueryPro
 
       const filterObj = filter[attributeName];
       const operator = Object.keys(filterObj)[0] as keyof Filter[typeof attributeName];
-      const value = filterObj[operator] ?? "";
+      const value = filterObj[operator] ?? '';
 
       return (
         <AttributeTag
