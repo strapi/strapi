@@ -6,17 +6,15 @@ import { useRBACProvider } from '../features/RBAC';
 
 import { useFetchClient } from './useFetchClient';
 
-/**
- * @typedef {Object} Permission
- * @property {string} action
- * @property {string} subject
- * @property {string[]} conditions
- */
+import type { Permission } from '@strapi/permissions';
+import type { AxiosResponse } from 'axios';
 
-/**
- * @type {(permissionsToCheck: Record<string, Permission[]>, passedPermissions?: Permission[]) => { allowedActions: Record<string, boolean>, isLoading: boolean, setIsLoading: () => void }}
- */
-export const useRBAC = (permissionsToCheck, passedPermissions) => {
+type AllowedActions = Record<string, boolean>;
+
+export const useRBAC = (
+  permissionsToCheck: Record<string, Permission[]>,
+  passedPermissions?: Permission[]
+): { allowedActions: AllowedActions; isLoading: boolean; setIsLoading: () => void } => {
   const [internalIsLoading, setInternalIsLoading] = useState(false);
   /**
    * This is the default value we return until the queryResults[i].data
@@ -46,6 +44,8 @@ export const useRBAC = (permissionsToCheck, passedPermissions) => {
           return { name, hasPermission: true };
         }
 
+        if (!userPermissions) return;
+
         const matchingPermissions = userPermissions.filter((value) => {
           const associatedPermission = permissions.find(
             (perm) => perm.action === value.action && perm.subject === value.subject
@@ -67,8 +67,15 @@ export const useRBAC = (permissionsToCheck, passedPermissions) => {
           try {
             const {
               data: { data },
-            } = await post('/admin/permissions/check', {
-              permissions: matchingPermissions.map(({ action, subject }) => ({ action, subject })),
+            } = await post<
+              { data: { data: boolean[] } },
+              AxiosResponse<{ data: { data: boolean[] } }>,
+              { permissions: Permission[] }
+            >('/admin/permissions/check', {
+              permissions: matchingPermissions.map(({ action, subject }) => ({
+                action,
+                subject,
+              })),
             });
 
             return { name, hasPermission: Array.isArray(data) && data.every((v) => v === true) };
@@ -107,13 +114,17 @@ export const useRBAC = (permissionsToCheck, passedPermissions) => {
    */
   const allowedActions = (
     data.some((res) => res === undefined) ? defaultAllowedActions : data
-  ).reduce((acc, { name, hasPermission }) => {
+  ).reduce((acc, permission) => {
+    if (!permission) return acc;
+
+    const { name, hasPermission } = permission;
+
     acc[`can${capitalize(name)}`] = hasPermission;
 
     return acc;
-  }, {});
+  }, {} as AllowedActions);
 
   return { allowedActions, isLoading, setIsLoading };
 };
 
-const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
