@@ -181,7 +181,9 @@ const BlockOption = ({ value, icon, label, onActive }) => {
 
   return (
     <Option value={value}>
-      <Icon as={icon} width={4} height={4} /> {formatMessage(label)}
+      <Flex gap={1}>
+        <Icon as={icon} width={4} height={4} /> {formatMessage(label)}
+      </Flex>
     </Option>
   );
 };
