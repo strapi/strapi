@@ -62,7 +62,7 @@ export interface DefaultFilterInputsProps<TOptions extends any[] = string[]> {
 
 export interface FilterData<TOptions extends any[] = string[]> {
   fieldSchema: {
-    mainField: {
+    mainField?: {
       name: string;
       schema: Attribute.Any;
     };
@@ -76,5 +76,5 @@ export interface FilterData<TOptions extends any[] = string[]> {
     label: string;
   };
   name: string;
-  trackedEvent: TrackingEvent;
+  trackedEvent?: TrackingEvent;
 }
