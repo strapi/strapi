@@ -12,16 +12,21 @@ async function migrateReviewWorkflowStagesRoles({ oldContentTypes, contentTypes 
   // then we set the permissions of every stage to be every current role in the app.
   // This ensures consistent behaviour when upgrading to a strapi version with review workflows RBAC.
   if (!hadRolePermissions && hasRolePermissions) {
+    const roleUID = 'admin::role';
+    strapi.log.info(
+      `Migrating all existing review workflow stages to have RBAC permissions for all ${roleUID}.`
+    );
+
     const stagePermissionsService = getService('stage-permissions');
 
     const stages = await strapi.query(stageUID).findMany();
-    const roles = await strapi.query('admin::role').findMany();
+    const roles = await strapi.query(roleUID).findMany();
 
     // Collect the permissions to add and group them by stage id.
     const groupedPermissions = {};
     roles
       .map((role) => role.id)
-      .forEach((id) => {
+      .forEach((roleId) => {
         stages
           .map((stage) => stage.id)
           .forEach((stageId) => {
@@ -30,7 +35,7 @@ async function migrateReviewWorkflowStagesRoles({ oldContentTypes, contentTypes 
             }
 
             groupedPermissions[stageId].push({
-              roleId: id,
+              roleId,
               fromStage: stageId,
               action: STAGE_TRANSITION_UID,
             });
@@ -38,13 +43,22 @@ async function migrateReviewWorkflowStagesRoles({ oldContentTypes, contentTypes 
       });
 
     for (const [stageId, permissions] of Object.entries(groupedPermissions)) {
+      const numericalStageId = Number(stageId);
+
+      if (Number.isNaN(numericalStageId)) {
+        strapi.log.warn(
+          `Unable to apply ${roleUID} migration for ${stageUID} with id ${stageId}. The stage does not have a numerical id.`
+        );
+        continue;
+      }
+
       // Register the permissions for this stage
       const stagePermissions = await stagePermissionsService.registerMany(permissions);
 
       // Update the stage with its new permissions
-      await strapi.entityService.update(STAGE_MODEL_UID, Number(stageId), {
+      await strapi.entityService.update(STAGE_MODEL_UID, numericalStageId, {
         data: {
-          permissions: stagePermissions.flat().map((p) => p.id),
+          permissions: stagePermissions.flat().map((permission) => permission.id),
         },
       });
     }
