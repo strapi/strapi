@@ -84,7 +84,7 @@ export const FilterListURLQuery = ({ filtersSchema = [] }: FilterListURLQueryPro
           filter={filter}
           onClick={handleClick}
           operator={operator}
-          value={typeof value === 'string' ? value : ''}
+          value={value}
         />
       );
     }) || null
