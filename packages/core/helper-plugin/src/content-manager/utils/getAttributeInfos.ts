@@ -1,8 +1,10 @@
 import get from 'lodash/get';
 
-const getType = <T extends object>(schema: T, attrName: string) =>
+import type { Schema } from '@strapi/strapi';
+
+const getType = (schema: Schema.Schema, attrName: string) =>
   get(schema, ['attributes', attrName, 'type'], '');
-const getOtherInfos = <T extends object>(schema: T, arr: string[]) =>
+const getOtherInfos = (schema: Schema.Schema, arr: string[]) =>
   get(schema, ['attributes', ...arr], '');
 
 export { getOtherInfos, getType };

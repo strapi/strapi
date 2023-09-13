@@ -2,8 +2,11 @@ import type { Attribute, Common, Utils } from '@strapi/strapi';
 
 import type * as Operator from './operators';
 import type * as AttributeUtils from '../attributes';
+import type Params from '../index';
 
 export { Operator };
+
+type IDKey = 'id';
 
 /**
  * Filter representation for nested attributes
@@ -20,11 +23,17 @@ type NestedAttributeCondition<
  */
 type AttributeCondition<
   TSchemaUID extends Common.UID.Schema,
-  TAttributeName extends Attribute.GetKeys<TSchemaUID>
-> = Utils.Expression.If<
-  Utils.Expression.IsNotNever<TAttributeName>,
-  // Get the filter attribute value for the given attribute
-  AttributeUtils.GetValue<Attribute.Get<TSchemaUID, TAttributeName>>,
+  TAttributeName extends IDKey | Attribute.GetKeys<TSchemaUID>
+> = Utils.Expression.MatchFirst<
+  [
+    // Special catch for manually added ID attributes
+    [Utils.Expression.StrictEqual<TAttributeName, IDKey>, Params.Attribute.ID],
+    [
+      Utils.Expression.IsNotNever<TAttributeName>,
+      // Get the filter attribute value for the given attribute
+      AttributeUtils.GetValue<Attribute.Get<TSchemaUID, Exclude<TAttributeName, IDKey>>>
+    ]
+  ],
   // Fallback to the list of all possible scalar attributes' value if the attribute is not valid (never)
   AttributeUtils.ScalarValues
 > extends infer TAttributeValue
@@ -64,11 +73,17 @@ export type ObjectNotation<TSchemaUID extends Common.UID.Schema> = {
           Utils.Expression.IsNotNever<TNestedKeys>
         >,
         // Strongly typed representation of the filter object tree
-        | { [TIter in TScalarKeys]?: AttributeCondition<TSchemaUID, TIter> }
-        | { [TIter in TNestedKeys]?: NestedAttributeCondition<TSchemaUID, TIter> },
+        {
+          [TIter in IDKey | TScalarKeys]?: AttributeCondition<TSchemaUID, TIter>;
+        } & {
+          [TIter in TNestedKeys]?: NestedAttributeCondition<TSchemaUID, TIter>;
+        },
         // Generic representation of the filter object tree in case we don't have access to the attributes' list
-        | { [TKey in string]?: AttributeCondition<TSchemaUID, never> }
-        | { [TKey in string]?: NestedAttributeCondition<TSchemaUID, never> }
+        {
+          [TKey in string]?:
+            | AttributeCondition<TSchemaUID, never>
+            | NestedAttributeCondition<TSchemaUID, never>;
+        }
       >
     : never);
 
