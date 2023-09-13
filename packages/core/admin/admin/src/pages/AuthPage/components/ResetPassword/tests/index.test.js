@@ -93,6 +93,12 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         color: #ffffff;
       }
 
+      .c46 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #4945ff;
+      }
+
       .c1 {
         padding-top: 24px;
         padding-right: 40px;
@@ -565,12 +571,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         outline: none;
       }
 
-      .c46 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #4945ff;
-      }
-
       .c45 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
@@ -924,7 +924,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                   href="/auth/login"
                 >
                   <span
-                    class="c46"
+                    class="c8 c46"
                   >
                     Ready to sign in?
                   </span>

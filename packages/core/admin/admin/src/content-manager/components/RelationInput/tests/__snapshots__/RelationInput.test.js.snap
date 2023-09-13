@@ -99,8 +99,6 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   border-radius: 4px;
   border-width: 0;
   border-color: #dcdce4;
-  width: 2rem;
-  height: 2rem;
   cursor: pointer;
 }
 
@@ -471,19 +469,22 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   font-weight: bold;
 }
 
-.c27 svg > g,
+.c27 {
+  border-color: #dcdce4;
+  height: 2rem;
+  width: 2rem;
+}
+
+.c27 svg g,
 .c27 svg path {
   fill: #8e8ea9;
 }
 
-.c27:hover svg > g,
-.c27:hover svg path {
+.c27:hover svg g,
+.c27:focus svg g,
+.c27:hover svg path,
+.c27:focus svg path {
   fill: #666687;
-}
-
-.c27:active svg > g,
-.c27:active svg path {
-  fill: #a5a5ba;
 }
 
 .c27[aria-disabled='true'] svg path {
