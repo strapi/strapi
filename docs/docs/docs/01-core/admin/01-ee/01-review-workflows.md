@@ -113,6 +113,10 @@ This route updates the stages associated with a specific workflow identified by 
 
 This route updates the stage of a specific entity identified by the id parameter and belonging to a specific collection identified by the model_uid parameter. The new stage value is passed in the request body.
 
+#### GET `/content-manager/(collection|single)-types/:model_uid/:id/stages`
+
+Returns a list of stages that a user has permission to transition into (based on the permission settings of a stage).
+
 ### Services
 
 The Review Workflow feature of the Enterprise Edition includes several services to manipulate workflows and stages. Here is a list of those services:
