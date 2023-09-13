@@ -14,12 +14,12 @@ import { useIntl } from 'react-intl';
 import { useQueryParams } from '../hooks/useQueryParams';
 
 export const FilterListURLQuery = ({ filtersSchema }) => {
-  const [{ query }, setQuery] = useQueryParams<{}>();
+  const [{ query }, setQuery] = useQueryParams();
 
   const handleClick = (filter) => {
     const nextFilters = query.filters.$and.filter((prevFilter) => {
-      const [name] = Object.keys(filter);
-      const [filterType] = Object.keys(filter[name]);
+      const name = Object.keys(filter)[0];
+      const filterType = Object.keys(filter[name])[0];
       const value = filter[name][filterType];
 
       return prevFilter[name]?.[filterType] !== value;

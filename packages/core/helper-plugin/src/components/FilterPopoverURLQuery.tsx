@@ -160,8 +160,8 @@ export const FilterPopoverURLQuery = ({
           <SelectContainers direction="column" alignItems="stretch" gap={1}>
             <SingleSelect
               label={formatMessage({
-                id: 'app.utils.SingleSelect-field',
-                defaultMessage: 'SingleSelect field',
+                id: 'app.utils.select-field',
+                defaultMessage: 'Select field',
               })}
               name="name"
               size="M"
@@ -179,8 +179,8 @@ export const FilterPopoverURLQuery = ({
             </SingleSelect>
             <SingleSelect
               label={formatMessage({
-                id: 'app.utils.SingleSelect-filter',
-                defaultMessage: 'SingleSelect filter',
+                id: 'app.utils.select-filter',
+                defaultMessage: 'Select filter',
               })}
               name="filter"
               size="M"
