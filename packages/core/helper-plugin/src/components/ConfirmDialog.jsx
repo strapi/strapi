@@ -55,7 +55,6 @@ export const Root = ({
 
 Root.defaultProps = {
   iconBody: <ExclamationMarkCircle />,
-  iconRightButton: <Trash />,
   isConfirmButtonLoading: false,
   leftButtonText: {
     id: 'app.components.Button.cancel',
@@ -152,8 +151,12 @@ const Footer = ({
   );
 };
 
+Footer.defaultProps = {
+  iconRightButton: <Trash />,
+};
+
 Footer.propTypes = {
-  iconRightButton: PropTypes.node.isRequired,
+  iconRightButton: PropTypes.node,
   isConfirmButtonLoading: PropTypes.bool.isRequired,
   onConfirm: PropTypes.func.isRequired,
   onToggleDialog: PropTypes.func.isRequired,
