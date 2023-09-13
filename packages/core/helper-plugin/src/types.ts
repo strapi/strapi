@@ -52,15 +52,15 @@ export interface Operator {
   intlLabel: MessageDescriptor;
 }
 
-export interface DefaultFilterInputsProps {
+export interface DefaultFilterInputsProps<TOptions extends any[] = string[]> {
   label?: string;
   onChange: (value: string | null) => void;
-  options?: string[];
+  options?: TOptions;
   type: Attribute.Kind;
   value?: string | null;
 }
 
-export interface FilterData {
+export interface FilterData<TOptions extends any[] = string[]> {
   fieldSchema: {
     mainField: {
       name: string;
@@ -71,7 +71,8 @@ export interface FilterData {
   };
   metadatas: {
     customOperators?: Operator[];
-    customInput?: React.ComponentType<DefaultFilterInputsProps>;
+    customInput?: React.ComponentType<DefaultFilterInputsProps<TOptions>>;
+    options?: TOptions;
     label: string;
   };
   name: string;

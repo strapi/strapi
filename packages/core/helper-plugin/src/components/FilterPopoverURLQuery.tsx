@@ -202,9 +202,8 @@ export const FilterPopoverURLQuery = ({
           {operator !== '$null' && operator !== '$notNull' && (
             <Box>
               <Inputs
-                label={appliedFilter.metadatas.label}
-                type={appliedFilter.fieldSchema.type}
-                options={appliedFilter.fieldSchema.options}
+                {...appliedFilter.metadatas}
+                {...appliedFilter.fieldSchema}
                 value={modifiedData.value}
                 onChange={(value) => setModifiedData((prev) => ({ ...prev, value }))}
               />

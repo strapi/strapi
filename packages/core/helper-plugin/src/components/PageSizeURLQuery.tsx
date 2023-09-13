@@ -24,7 +24,7 @@ export const PageSizeURLQuery = ({
   defaultValue = '10',
 }: PageSizeURLQueryProps) => {
   const { formatMessage } = useIntl();
-  const [{ query }, setQuery] = useQueryParams<{ pageSize: string; page: number }>();
+  const [{ query }, setQuery] = useQueryParams<{ pageSize?: string; page: number }>();
   const { trackUsage } = useTracking();
 
   const handleChange = (value: string) => {
@@ -37,7 +37,9 @@ export const PageSizeURLQuery = ({
       page: 1,
     });
   };
-  const pageSize = query?.pageSize !== '' ? query?.pageSize : defaultValue;
+
+  const pageSize: string =
+    typeof query?.pageSize === 'string' && query?.pageSize !== '' ? query.pageSize : defaultValue;
 
   return (
     <Flex gap={2}>
