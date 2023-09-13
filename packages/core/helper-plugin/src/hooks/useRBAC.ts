@@ -11,14 +11,12 @@ type DefaultAllowedActions = {
   hasPermission: boolean;
 }[];
 
-interface AllowedAction {
-  [key: string]: boolean;
-}
+type AllowedActions = Record<string, boolean>;
 
 export const useRBAC = (
   permissionsToCheck: Record<string, Permission[]>,
   passedPermissions?: Permission[]
-): { allowedActions: Record<string, boolean>; isLoading: boolean; setIsLoading: () => void } => {
+): { allowedActions: AllowedActions; isLoading: boolean; setIsLoading: () => void } => {
   const [internalIsLoading, setInternalIsLoading] = useState(false);
   /**
    * This is the default value we return until the queryResults[i].data
@@ -113,7 +111,7 @@ export const useRBAC = (
     acc[`can${capitalize(name)}`] = hasPermission;
 
     return acc;
-  }, {} as AllowedAction);
+  }, {} as AllowedActions);
 
   return { allowedActions, isLoading, setIsLoading };
 };

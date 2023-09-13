@@ -12,24 +12,36 @@ describe('useRBAC', () => {
           {
             action: 'admin::roles.create',
             subject: null,
+            conditions: [],
+            id: 1,
+            properties: {},
           },
         ],
         delete: [
           {
             action: 'admin::roles.delete',
             subject: null,
+            conditions: [],
+            id: 2,
+            properties: {},
           },
         ],
         read: [
           {
             action: 'admin::roles.read',
             subject: null,
+            conditions: [],
+            id: 3,
+            properties: {},
           },
         ],
         update: [
           {
             action: 'admin::roles.update',
             subject: null,
+            conditions: [],
+            id: 4,
+            properties: {},
           },
         ],
       })
@@ -65,6 +77,9 @@ describe('useRBAC', () => {
           {
             action: 'admin::something.create',
             subject: null,
+            conditions: [],
+            id: 1,
+            properties: {},
           },
         ],
       })
@@ -88,6 +103,9 @@ describe('useRBAC', () => {
               {
                 action: 'admin::roles.create',
                 subject: null,
+                conditions: [],
+                id: 1,
+                properties: {},
               },
             ],
           },
@@ -95,6 +113,9 @@ describe('useRBAC', () => {
             {
               action: 'admin::roles.create',
               subject: null,
+              conditions: [],
+              id: 1,
+              properties: {},
             },
           ]
         );
@@ -117,6 +138,9 @@ describe('useRBAC', () => {
               {
                 action: 'admin::something.create',
                 subject: null,
+                conditions: [],
+                id: 1,
+                properties: {},
               },
             ],
           },
@@ -124,6 +148,9 @@ describe('useRBAC', () => {
             {
               action: 'admin::roles.create',
               subject: null,
+              conditions: [],
+              id: 1,
+              properties: {},
             },
           ]
         );
@@ -155,6 +182,9 @@ describe('useRBAC', () => {
                 {
                   action: 'plugin::content-manager.explorer.update',
                   subject: 'api::about.about',
+                  id: 1,
+                  properties: {},
+                  conditions: [],
                 },
               ],
             },
@@ -162,6 +192,9 @@ describe('useRBAC', () => {
               {
                 action: 'plugin::content-manager.explorer.update',
                 subject: 'api::about.about',
+                id: 1,
+                properties: {},
+                conditions: [],
               },
             ],
           },
@@ -182,6 +215,9 @@ describe('useRBAC', () => {
             {
               action: 'plugin::content-manager.explorer.update',
               subject: 'api::term.term',
+              id: 2,
+              properties: {},
+              conditions: [],
             },
           ],
         },
@@ -189,6 +225,9 @@ describe('useRBAC', () => {
           {
             action: 'plugin::content-manager.explorer.update',
             subject: 'api::about.about',
+            id: 2,
+            properties: {},
+            conditions: [],
           },
         ],
       });
@@ -207,6 +246,9 @@ describe('useRBAC', () => {
             {
               action: 'plugin::content-manager.explorer.update',
               subject: 'api::term.term',
+              id: 3,
+              properties: {},
+              conditions: [],
             },
           ],
         },
@@ -214,6 +256,9 @@ describe('useRBAC', () => {
           {
             action: 'plugin::content-manager.explorer.update',
             subject: 'api::term.term',
+            id: 3,
+            properties: {},
+            conditions: [],
           },
         ],
       });
@@ -238,6 +283,8 @@ describe('useRBAC', () => {
                 action: 'admin::roles.create',
                 subject: null,
                 conditions: ['willPass'],
+                id: 1,
+                properties: {},
               },
             ],
           },
@@ -246,6 +293,8 @@ describe('useRBAC', () => {
               action: 'admin::roles.create',
               subject: null,
               conditions: ['willPass'],
+              id: 1,
+              properties: {},
             },
           ]
         );
@@ -273,6 +322,8 @@ describe('useRBAC', () => {
                 action: 'admin::roles.create',
                 subject: null,
                 conditions: ['willFail'],
+                id: 1,
+                properties: {},
               },
             ],
           },
@@ -281,6 +332,8 @@ describe('useRBAC', () => {
               action: 'admin::roles.create',
               subject: null,
               conditions: ['willFail'],
+              id: 1,
+              properties: {},
             },
           ]
         );
@@ -320,6 +373,8 @@ describe('useRBAC', () => {
                 action: 'admin::roles.create',
                 subject: null,
                 conditions: ['willFail'],
+                id: 1,
+                properties: {},
               },
             ],
             update: [
@@ -327,6 +382,8 @@ describe('useRBAC', () => {
                 action: 'admin::roles.update',
                 subject: null,
                 conditions: ['willPass'],
+                id: 2,
+                properties: {},
               },
             ],
           },
@@ -335,11 +392,15 @@ describe('useRBAC', () => {
               action: 'admin::roles.create',
               subject: null,
               conditions: ['willFail'],
+              id: 1,
+              properties: {},
             },
             {
               action: 'admin::roles.update',
               subject: null,
               conditions: ['willPass'],
+              id: 2,
+              properties: {},
             },
           ]
         );

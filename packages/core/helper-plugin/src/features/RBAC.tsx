@@ -5,7 +5,7 @@ interface Permission {
   conditions: unknown[];
   id: number;
   properties: Record<string, unknown>;
-  subject: string;
+  subject: string | null;
 }
 
 type RefetchPermissionsFn = import('react-query').QueryObserverBaseResult<Permission[]>['refetch'];
