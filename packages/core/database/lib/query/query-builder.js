@@ -9,8 +9,7 @@ const { addSchema } = require('../utils/knex');
 
 const createQueryBuilder = (uid, db, initialState = {}) => {
   const meta = db.metadata.get(uid);
-  const { tableName } = meta;
-  const tableNameWithSchema = addSchema(tableName);
+  const tableNameWithSchema = addSchema(meta.tableName);
 
   const state = _.defaults(
     {
