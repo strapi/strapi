@@ -6,10 +6,10 @@ import { useRBACProvider, Permission } from '../features/RBAC';
 
 import { useFetchClient } from './useFetchClient';
 
-type DefaultAllowedActions = {
+type DefaultAllowedActions = Array<{
   name: string;
   hasPermission: boolean;
-}[];
+}>;
 
 type AllowedActions = Record<string, boolean>;
 
