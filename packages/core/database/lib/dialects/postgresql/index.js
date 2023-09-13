@@ -34,6 +34,7 @@ class PostgresDialect extends Dialect {
       parseFloat
     );
 
+    // If we're using a schema, set the default path for all table names in queries to use that schema
     if (this.db.connection.getSchemaName()) {
       await this.db.connection.raw(`SET search_path TO \`${this.db.connection.getSchemaName()}\``);
     }
