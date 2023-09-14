@@ -95,7 +95,7 @@ const ModifierButton = ({ icon, name, label }) => {
       name={name}
       label={label}
       isActive={isActive}
-      handleClick={() => toggleModifier()}
+      handleClick={toggleModifier}
     />
   );
 };
