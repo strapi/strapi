@@ -45,6 +45,10 @@ const setup = () =>
   });
 
 describe('BlocksEditor toolbar', () => {
+  beforeEach(() => {
+    baseEditor.children = initialValue;
+  });
+
   it('should render the toolbar', () => {
     setup();
 
@@ -101,5 +105,41 @@ describe('BlocksEditor toolbar', () => {
     // The bold and italic buttons should have the inactive state
     expect(boldButton).toHaveAttribute('data-state', 'off');
     expect(italicButton).toHaveAttribute('data-state', 'off');
+  });
+
+  it('transforms the selection to a list and toggles the format', async () => {
+    setup();
+
+    const unorderedListButton = screen.getByLabelText(/unordered list/i);
+    const orderedListButton = screen.getByLabelText(/^ordered list/i);
+
+    Transforms.setSelection(baseEditor, {
+      anchor: { path: [0, 0], offset: 2 },
+    });
+
+    await user.click(unorderedListButton);
+    expect(unorderedListButton).toHaveAttribute('data-state', 'on');
+    expect(orderedListButton).toHaveAttribute('data-state', 'off');
+
+    await user.click(orderedListButton);
+    expect(unorderedListButton).toHaveAttribute('data-state', 'off');
+    expect(orderedListButton).toHaveAttribute('data-state', 'on');
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                text: 'A line of text in a paragraph.',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
   });
 });

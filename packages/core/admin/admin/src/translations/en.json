@@ -633,6 +633,8 @@
   "components.Blocks.blockItems.heading4": "Heading 4",
   "components.Blocks.blockItems.heading5": "Heading 5",
   "components.Blocks.blockItems.heading6": "Heading 6",
+  "components.Blocks.blocks.unorderedList": "Unordered list",
+  "components.Blocks.blocks.orderedList": "Ordered list",
   "components.Wysiwyg.ToggleMode.markdown-mode": "Markdown mode",
   "components.Wysiwyg.ToggleMode.preview-mode": "Preview mode",
   "components.Wysiwyg.collapse": "Collapse",
