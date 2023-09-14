@@ -1,9 +1,12 @@
 import _ from 'lodash/fp';
 
 import * as types from '../../../types';
+import type { Meta } from '../../../metadata/types';
+import type { QueryBuilder } from '../../query-builder';
+import type { Database } from '../../..';
 
-const getRootLevelPopulate = (meta) => {
-  const populate = {};
+const getRootLevelPopulate = (meta: Meta) => {
+  const populate: PopulateMap = {};
 
   for (const attributeName of Object.keys(meta.attributes)) {
     const attribute = meta.attributes[attributeName];
@@ -15,6 +18,20 @@ const getRootLevelPopulate = (meta) => {
   return populate;
 };
 
+type Context = {
+  qb: QueryBuilder;
+  db: Database;
+  uid: string;
+};
+
+type PopulateMap = {
+  [key: string]:
+    | true
+    | {
+        populate?: PopulateMap | true | string[];
+      };
+};
+
 /**
  * Converts and prepares the query for populate
  *
@@ -24,11 +41,11 @@ const getRootLevelPopulate = (meta) => {
  * @param {object} ctx.qb query builder instance
  * @param {string} ctx.uid model uid
  */
-const processPopulate = (populate, ctx) => {
+const processPopulate = (populate: unknown, ctx: Context) => {
   const { qb, db, uid } = ctx;
   const meta = db.metadata.get(uid);
 
-  let populateMap = {};
+  let populateMap: PopulateMap = {};
 
   if (populate === false || _.isNil(populate)) {
     return null;
@@ -42,14 +59,15 @@ const processPopulate = (populate, ctx) => {
 
       if (rest.length > 0) {
         const subPopulate = rest.join('.');
-
         if (populateMap[root]) {
-          if (populateMap[root] === true) {
+          const populateValue = populateMap[root];
+
+          if (populateValue === true) {
             populateMap[root] = {
               populate: [subPopulate],
             };
           } else {
-            populateMap[root].populate = [subPopulate].concat(populateMap[root].populate || []);
+            populateValue.populate = [subPopulate].concat(populateValue.populate ?? []);
           }
         } else {
           populateMap[root] = {
@@ -61,14 +79,14 @@ const processPopulate = (populate, ctx) => {
       }
     }
   } else {
-    populateMap = populate;
+    populateMap = populate as PopulateMap;
   }
 
   if (!_.isPlainObject(populateMap)) {
     throw new Error('Populate must be an object');
   }
 
-  const finalPopulate = {};
+  const finalPopulate: PopulateMap = {};
   for (const key of Object.keys(populateMap)) {
     const attribute = meta.attributes[key];
 
@@ -82,7 +100,7 @@ const processPopulate = (populate, ctx) => {
 
     // Make sure to query the join column value if needed,
     // so that we can apply the populate later on
-    if (attribute.joinColumn) {
+    if ('joinColumn' in attribute && attribute.joinColumn) {
       qb.addSelect(attribute.joinColumn.name);
     }
 

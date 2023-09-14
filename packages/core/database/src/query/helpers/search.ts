@@ -5,7 +5,7 @@ import * as types from '../../types';
 import { toColumnName } from './transform';
 import type { Ctx } from '../types';
 
-export const applySearch = (knex: Knex, query: string, ctx: Ctx) => {
+export const applySearch = (knex: Knex.QueryBuilder, query: string, ctx: Ctx) => {
   const { qb, uid, db } = ctx;
   const meta = db.metadata.get(uid);
 

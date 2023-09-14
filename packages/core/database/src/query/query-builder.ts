@@ -4,6 +4,8 @@ import type { Knex } from 'knex';
 import { DatabaseError } from '../errors';
 import * as helpers from './helpers';
 import { transactionCtx } from '../transaction-context';
+import type { Join } from './helpers/join';
+import type { Rec } from './helpers/transform';
 
 import type { Database } from '..';
 
@@ -13,9 +15,9 @@ interface State {
   count: string | null;
   max: string | null;
   first: boolean;
-  data: object | null;
-  where: object[];
-  joins: object[];
+  data: Record<string, unknown> | (null | Record<string, unknown>)[] | null;
+  where: Record<string, unknown>[];
+  joins: Join[];
   populate: object | null;
   limit: number | null;
   offset: number | null;
@@ -40,13 +42,13 @@ export interface QueryBuilder {
   clone(): QueryBuilder;
   select(args: string | string[]): QueryBuilder;
   addSelect(args: string | string[]): QueryBuilder;
-  insert<T extends object>(data: T): QueryBuilder;
+  insert<T extends Record<string, unknown> | Record<string, unknown>[]>(data: T): QueryBuilder;
   onConflict(args: any): QueryBuilder;
   merge(args: any): QueryBuilder;
   ignore(): QueryBuilder;
   delete(): QueryBuilder;
   ref(name: string): any;
-  update<T extends object>(data: T): QueryBuilder;
+  update<T extends Record<string, unknown>>(data: T): QueryBuilder;
   increment(column: string, amount?: number): QueryBuilder;
   decrement(column: string, amount?: number): QueryBuilder;
   count(count?: string): QueryBuilder;
@@ -66,8 +68,7 @@ export interface QueryBuilder {
   join(join: any): QueryBuilder;
   mustUseAlias(): boolean;
 
-  aliasColumn(key: string, alias?: string): string;
-  aliasColumn(key: unknown, alias?: string): unknown;
+  aliasColumn(key: any, alias?: string): any;
 
   raw: Knex.RawBuilder;
   shouldUseSubQuery(): boolean;
@@ -75,9 +76,9 @@ export interface QueryBuilder {
   processState(): void;
   shouldUseDistinct(): boolean;
   processSelect(): void;
-  getKnexQuery(): any;
+  getKnexQuery(): Knex.QueryBuilder;
   execute<T>({ mapResults }?: { mapResults?: boolean }): Promise<T>;
-  stream<T>({ mapResults }?: { mapResults?: boolean }): T;
+  stream({ mapResults }?: { mapResults?: boolean }): helpers.ReadableQuery;
 }
 
 const createQueryBuilder = <TResult>(
@@ -217,7 +218,7 @@ const createQueryBuilder = <TResult>(
       return this;
     },
 
-    where(where = {}) {
+    where(where: Record<string, unknown> = {}) {
       if (!_.isPlainObject(where)) {
         throw new Error('Where must be an object');
       }
@@ -330,7 +331,7 @@ const createQueryBuilder = <TResult>(
       const attribute = model.attributes[join.targetField];
 
       helpers.createJoin(
-        { db, qb: this },
+        { db, qb: this, uid },
         {
           alias: this.alias,
           refAlias: join.alias,
@@ -346,7 +347,7 @@ const createQueryBuilder = <TResult>(
       return ['select', 'count'].includes(state.type);
     },
 
-    aliasColumn(key, alias) {
+    aliasColumn(key: string | unknown, alias: string): string | unknown {
       if (typeof key !== 'string') {
         return key;
       }
@@ -362,9 +363,7 @@ const createQueryBuilder = <TResult>(
       return this.mustUseAlias() ? `${this.alias}.${key}` : key;
     },
 
-    raw(...args) {
-      return db.connection.raw(...args);
-    },
+    raw: db.connection.raw.bind(db.connection),
 
     shouldUseSubQuery() {
       return ['delete', 'update'].includes(state.type) && state.joins.length > 0;
@@ -375,8 +374,9 @@ const createQueryBuilder = <TResult>(
       const subQB = this.getKnexQuery();
 
       const nestedSubQuery = db.getConnection().select('id').from(subQB.as('subQuery'));
+      const connection = db.getConnection(tableName);
 
-      return db.getConnection(tableName)[state.type]().whereIn('id', nestedSubQuery);
+      return (connection[state.type] as Knex)().whereIn('id', nestedSubQuery);
     },
 
     processState() {
@@ -479,7 +479,7 @@ const createQueryBuilder = <TResult>(
           break;
         }
         case 'truncate': {
-          db.truncate();
+          qb.truncate();
           break;
         }
         default: {
@@ -554,8 +554,9 @@ const createQueryBuilder = <TResult>(
       try {
         const qb = this.getKnexQuery();
 
-        if (transactionCtx.get()) {
-          qb.transacting(transactionCtx.get());
+        const transaction = transactionCtx.get();
+        if (transaction) {
+          qb.transacting(transaction);
         }
 
         const rows = await qb;
@@ -575,7 +576,11 @@ const createQueryBuilder = <TResult>(
 
         return results;
       } catch (error) {
-        db.dialect.transformErrors(error);
+        if (error instanceof Error) {
+          db.dialect.transformErrors(error);
+        } else {
+          throw error;
+        }
       }
     },
 

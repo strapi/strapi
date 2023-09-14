@@ -77,7 +77,12 @@ type WhereCtx = Ctx & { alias?: string };
 /**
  * Process where parameter
  */
-const processWhere = (where: unknown, ctx: WhereCtx): unknown => {
+function processWhere(where: Record<string, unknown>, ctx: WhereCtx): Record<string, unknown>;
+function processWhere(where: Record<string, unknown>[], ctx: WhereCtx): Record<string, unknown>[];
+function processWhere(
+  where: Record<string, unknown> | Record<string, unknown>[],
+  ctx: WhereCtx
+): Record<string, unknown> | Record<string, unknown>[] {
   if (!isArray(where) && !isObj(where)) {
     throw new Error('Where must be an array or an object');
   }
@@ -157,7 +162,7 @@ const processWhere = (where: unknown, ctx: WhereCtx): unknown => {
   }
 
   return filters;
-};
+}
 
 type Operator =
   | '$eq'

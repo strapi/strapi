@@ -1,7 +1,7 @@
 import type { Knex } from 'knex';
 import type { Ctx } from '../types';
 
-interface Join {
+export interface Join {
   method?: 'leftJoin' | 'innerJoin';
   alias: string;
   referencedTable: string;

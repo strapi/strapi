@@ -1,6 +1,29 @@
 import _ from 'lodash/fp';
 
 import { fromRow } from '../transform';
+import type { QueryBuilder } from '../../query-builder';
+import type { Database } from '../../..';
+import type { Meta, RelationalAttribute, Relation } from '../../../metadata/types';
+
+type Context = {
+  db: Database;
+  qb: QueryBuilder;
+  uid: string;
+};
+
+type Input<T extends RelationalAttribute = RelationalAttribute> = {
+  attribute: T;
+  attributeName: string;
+  results: unknown[];
+  populateValue: Record<string, unknown>;
+  isCount: boolean;
+};
+
+type InputWithTarget<T extends RelationalAttribute = RelationalAttribute> = Input<T> & {
+  targetMeta: Meta;
+};
+
+type Row = Record<string, unknown>;
 
 /**
  * Populate oneToOne and manyToOne relation
@@ -8,13 +31,16 @@ import { fromRow } from '../transform';
  * @param {*} ctx
  * @returns
  */
-const XtoOne = async (input, ctx) => {
+const XtoOne = async (
+  input: InputWithTarget<Relation.OneToOne | Relation.ManyToOne>,
+  ctx: Context
+) => {
   const { attribute, attributeName, results, populateValue, targetMeta, isCount } = input;
   const { db, qb } = ctx;
 
-  const fromTargetRow = (rowOrRows) => fromRow(targetMeta, rowOrRows);
+  const fromTargetRow = (rowOrRows: Row | Row[]) => fromRow(targetMeta, rowOrRows);
 
-  if (attribute.joinColumn) {
+  if ('joinColumn' in attribute && attribute.joinColumn) {
     const { name: joinColumnName, referencedColumn: referencedColumnName } = attribute.joinColumn;
 
     const referencedValues = _.uniq(
@@ -45,7 +71,7 @@ const XtoOne = async (input, ctx) => {
     return;
   }
 
-  if (attribute.joinTable) {
+  if ('joinTable' in attribute && attribute.joinTable) {
     const { joinTable } = attribute;
 
     const qb = db.entityManager.createQueryBuilder(targetMeta.uid);
@@ -125,13 +151,13 @@ const XtoOne = async (input, ctx) => {
   }
 };
 
-const oneToMany = async (input, ctx) => {
+const oneToMany = async (input: InputWithTarget<Relation.OneToMany>, ctx: Context) => {
   const { attribute, attributeName, results, populateValue, targetMeta, isCount } = input;
   const { db, qb } = ctx;
 
   const fromTargetRow = (rowOrRows) => fromRow(targetMeta, rowOrRows);
 
-  if (attribute.joinColumn) {
+  if ('joinColumn' in attribute && attribute.joinColumn) {
     const { name: joinColumnName, referencedColumn: referencedColumnName } = attribute.joinColumn;
 
     const referencedValues = _.uniq(
@@ -161,7 +187,7 @@ const oneToMany = async (input, ctx) => {
     return;
   }
 
-  if (attribute.joinTable) {
+  if ('joinTable' in attribute && attribute.joinTable) {
     const { joinTable } = attribute;
 
     const qb = db.entityManager.createQueryBuilder(targetMeta.uid);
@@ -240,7 +266,7 @@ const oneToMany = async (input, ctx) => {
   }
 };
 
-const manyToMany = async (input, ctx) => {
+const manyToMany = async (input: InputWithTarget<Relation.ManyToMany>, ctx: Context) => {
   const { attribute, attributeName, results, populateValue, targetMeta, isCount } = input;
   const { db } = ctx;
 
@@ -322,7 +348,10 @@ const manyToMany = async (input, ctx) => {
   });
 };
 
-const morphX = async (input, ctx) => {
+const morphX = async (
+  input: InputWithTarget<Relation.MorphMany | Relation.MorphOne>,
+  ctx: Context
+) => {
   const { attribute, attributeName, results, populateValue, targetMeta } = input;
   const { db, uid } = ctx;
 
@@ -422,7 +451,7 @@ const morphX = async (input, ctx) => {
   }
 };
 
-const morphToMany = async (input, ctx) => {
+const morphToMany = async (input: Input<Relation.MorphToMany>, ctx: Context) => {
   const { attribute, attributeName, results, populateValue } = input;
   const { db } = ctx;
 
@@ -517,7 +546,7 @@ const morphToMany = async (input, ctx) => {
   });
 };
 
-const morphToOne = async (input, ctx) => {
+const morphToOne = async (input: Input<Relation.MorphToOne>, ctx: Context) => {
   const { attribute, attributeName, results, populateValue } = input;
   const { db } = ctx;
 
@@ -585,7 +614,7 @@ const morphToOne = async (input, ctx) => {
 };
 
 //  TODO: Omit limit & offset to avoid needing a query per result to avoid making too many queries
-const pickPopulateParams = (populate) => {
+const pickPopulateParams = (populate: Record<string, unknown>) => {
   const fieldsToPick = [
     'select',
     'count',
@@ -604,7 +633,7 @@ const pickPopulateParams = (populate) => {
   return _.pick(fieldsToPick, populate);
 };
 
-const applyPopulate = async (results, populate, ctx) => {
+const applyPopulate = async (results: unknown[], populate: Record<string, any>, ctx: Context) => {
   const { db, uid, qb } = ctx;
   const meta = db.metadata.get(uid);
 
@@ -614,41 +643,52 @@ const applyPopulate = async (results, populate, ctx) => {
 
   for (const attributeName of Object.keys(populate)) {
     const attribute = meta.attributes[attributeName];
-    const targetMeta = db.metadata.get(attribute.target);
+
+    if (attribute.type !== 'relation') {
+      throw new Error(`Invalid populate attribute ${attributeName}`);
+    }
 
     const populateValue = {
       filters: qb.state.filters,
       ...pickPopulateParams(populate[attributeName]),
     };
 
-    const isCount = populateValue.count === true;
-
-    const input = { attribute, attributeName, results, populateValue, targetMeta, isCount };
+    const isCount = 'count' in populateValue && populateValue.count === true;
 
     switch (attribute.relation) {
       case 'oneToOne':
       case 'manyToOne': {
+        const targetMeta = db.metadata.get(attribute.target);
+        const input = { attribute, attributeName, results, populateValue, targetMeta, isCount };
         await XtoOne(input, ctx);
         break;
       }
       case 'oneToMany': {
+        const targetMeta = db.metadata.get(attribute.target);
+        const input = { attribute, attributeName, results, populateValue, targetMeta, isCount };
         await oneToMany(input, ctx);
         break;
       }
       case 'manyToMany': {
+        const targetMeta = db.metadata.get(attribute.target);
+        const input = { attribute, attributeName, results, populateValue, targetMeta, isCount };
         await manyToMany(input, ctx);
         break;
       }
       case 'morphOne':
       case 'morphMany': {
+        const targetMeta = db.metadata.get(attribute.target);
+        const input = { attribute, attributeName, results, populateValue, targetMeta, isCount };
         await morphX(input, ctx);
         break;
       }
       case 'morphToMany': {
+        const input = { attribute, attributeName, results, populateValue, isCount };
         await morphToMany(input, ctx);
         break;
       }
       case 'morphToOne': {
+        const input = { attribute, attributeName, results, populateValue, isCount };
         await morphToOne(input, ctx);
         break;
       }

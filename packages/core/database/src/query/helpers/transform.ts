@@ -1,15 +1,14 @@
 import _ from 'lodash/fp';
-import type { Knex } from 'knex';
 
 import * as types from '../../types';
 import { createField } from '../../fields';
 
 import type { Meta } from '../../metadata/types';
 
-type Row = Record<string, unknown>;
-type Rec = Record<string, unknown>;
+type Row = Record<string, unknown> | null;
+export type Rec = Record<string, unknown> | null;
 
-const fromSingleRow = (meta: Meta, row: Row): Rec | null => {
+const fromSingleRow = (meta: Meta, row: Row): Rec => {
   const { attributes } = meta;
 
   if (_.isNil(row)) {
@@ -76,7 +75,11 @@ const toSingleRow = (meta: Meta, data: Rec = {}): Row => {
   return data;
 };
 
-const toRow = (meta: Meta, data: Rec = {}): Row | Row[] => {
+function toRow<T extends Rec | Rec[] | null>(
+  meta: Meta,
+  data: T
+): T extends null ? null : T extends Rec[] ? Row[] : Rec;
+function toRow(meta: Meta, data: Rec | Rec[] | null): Row | Row[] | null {
   if (_.isNil(data)) {
     return data;
   }
@@ -86,9 +89,13 @@ const toRow = (meta: Meta, data: Rec = {}): Row | Row[] => {
   }
 
   return toSingleRow(meta, data);
-};
+}
 
-const toColumnName = (meta: Meta, name: string) => {
+const toColumnName = (meta: Meta, name: null | string) => {
+  if (!name) {
+    throw new Error('Name cannot be null');
+  }
+
   const attribute = meta.attributes[name];
 
   if (!attribute) {

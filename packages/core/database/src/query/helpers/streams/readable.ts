@@ -1,39 +1,64 @@
 import { Readable } from 'stream';
 import { isFinite } from 'lodash/fp';
+import type { Knex } from 'knex';
+import type { QueryBuilder } from '../../query-builder';
+import type { Database } from '../../..';
 
 import { applyPopulate } from '../populate';
 import { fromRow } from '../transform';
+import { Meta } from '../../../metadata/types';
 
 const knexQueryDone = Symbol('knexQueryDone');
 const knexPerformingQuery = Symbol('knexPerformingQuery');
 
+interface ReadableStrapiQueryOptions {
+  qb: QueryBuilder;
+  uid: string;
+  db: Database;
+  mapResults?: boolean;
+  batchSize?: number;
+}
+
 class ReadableStrapiQuery extends Readable {
-  /**
-   * @param {object} options
-   * @param {ReturnType<typeof import('../../query-builder')>} options.qb The strapi query builder instance
-   * @param {string} options.uid The model uid
-   * @param {import('../../../index').Database} options.db The Database instance
-   * @param {boolean} [options.mapResults] The maximum number of entities to fetch per query
-   * @param {number} [options.batchSize] The maximum number of entities to fetch per query
-   */
-  constructor({ qb, db, uid, mapResults = true, batchSize = 500 }) {
+  _offset: number;
+
+  _limit: number | null;
+
+  _fetched: number;
+
+  _query: Knex.QueryBuilder;
+
+  _qb: QueryBuilder;
+
+  _db: Database;
+
+  _uid: string;
+
+  _meta: Meta;
+
+  _batchSize: number;
+
+  _mapResults: boolean;
+
+  [knexPerformingQuery]: boolean;
+
+  constructor({ qb, db, uid, mapResults = true, batchSize = 500 }: ReadableStrapiQueryOptions) {
     super({ objectMode: true, highWaterMark: batchSize });
 
     // Extract offset & limit from the query-builder's state
     const { offset, limit } = qb.state;
 
     // Original offset value
-    this._offset = isFinite(offset) ? offset : 0;
+    this._offset = isFinite(offset) ? Number(offset) : 0;
 
     // Max amount of entities to fetch, force null as undefined value
-    this._limit = isFinite(limit) ? limit : null;
+    this._limit = isFinite(limit) ? Number(limit) : null;
 
     // Total amount of entities fetched
     this._fetched = 0;
 
     /**
      * Original query
-     * @type {import('knex').Knex}
      */
     this._query = qb.getKnexQuery();
 
@@ -53,7 +78,7 @@ class ReadableStrapiQuery extends Readable {
     this[knexPerformingQuery] = false;
   }
 
-  _destroy(err, cb) {
+  _destroy(err: Error, cb: (err?: Error) => void) {
     // If the stream is destroyed while a query is being made, then wait for a
     // kQueryDone event to be emitted before actually destroying the stream
     if (this[knexPerformingQuery]) {
@@ -69,9 +94,8 @@ class ReadableStrapiQuery extends Readable {
    *  NOTE: Here "size" means the number of entities to be read from the database.
    *  Not the actual byte size, as it would means that we need to return partial entities.
    *
-   * @param {number} size
    */
-  async _read(size) {
+  async _read(size: number) {
     const query = this._query;
 
     // Remove the original offset & limit properties from the query
@@ -149,7 +173,7 @@ class ReadableStrapiQuery extends Readable {
 
     // If there is an error, destroy with the given error
     if (err) {
-      this.destroy(err);
+      this.destroy(err as Error);
       return;
     }
 
