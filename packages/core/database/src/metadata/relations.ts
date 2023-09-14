@@ -299,6 +299,7 @@ const createMorphToMany = (
         onDelete: 'CASCADE',
       },
     ],
+    columnToAttribute: {},
   });
 
   const joinTable: MorphJoinTable = {
@@ -479,6 +480,7 @@ const createJoinTable = (
         onDelete: 'CASCADE',
       },
     ],
+    columnToAttribute: {},
   };
 
   const joinTable = {

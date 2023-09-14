@@ -32,6 +32,7 @@ export const createMetadata = (models: Model[] = []): Metadata => {
       },
       lifecycles: model.lifecycles ?? ({} as Meta['lifecycles']),
       indexes: model.indexes || [],
+      columnToAttribute: {},
     });
   }
 
@@ -160,6 +161,7 @@ const createCompoLinkModelMeta = (baseModelMeta: Meta): Meta => {
         onDelete: 'CASCADE',
       },
     ],
+    columnToAttribute: {},
   };
 };
 

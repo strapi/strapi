@@ -60,7 +60,12 @@ const toSingleRow = (meta: Meta, data: Rec = {}): Row => {
   for (const key of Object.keys(data)) {
     const attribute = attributes[key];
 
-    if (!attribute || attribute.columnName === key) {
+    if (
+      !attribute ||
+      !('columnName' in attribute) ||
+      !attribute.columnName ||
+      attribute.columnName === key
+    ) {
       continue;
     }
 
@@ -90,7 +95,7 @@ const toColumnName = (meta: Meta, name: string) => {
     return name;
   }
 
-  return attribute.columnName || name;
+  return ('columnName' in attribute && attribute.columnName) || name;
 };
 
 export { toRow, fromRow, toColumnName };

@@ -46,7 +46,7 @@ export const processOrderBy = (orderBy: OrderBy, ctx: OrderByCtx): OrderByValue[
         return { column: qb.aliasColumn(columnName, alias), order: direction };
       }
 
-      if (attribute.type === 'relation') {
+      if (attribute.type === 'relation' && 'target' in attribute) {
         const subAlias = createJoin(ctx, {
           alias: alias || qb.alias,
           attributeName: key,

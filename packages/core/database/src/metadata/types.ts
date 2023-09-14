@@ -31,6 +31,7 @@ export interface BasAttribute {
     type: string;
     args: unknown[];
   };
+  searchable?: boolean;
 }
 
 export interface ScalarAttribute extends BasAttribute {
@@ -216,7 +217,7 @@ export interface Meta {
   indexes: Index[];
   foreignKeys?: ForeignKey[];
   lifecycles?: Record<Action, SubscriberFn>;
-  columnToAttribute?: Record<string, string>;
+  columnToAttribute: Record<string, string>;
   componentLink?: Meta;
 }
 

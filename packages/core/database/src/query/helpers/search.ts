@@ -15,7 +15,11 @@ export const applySearch = (knex: Knex, query: string, ctx: Ctx) => {
 
   const stringColumns = Object.keys(attributes).filter((attributeName) => {
     const attribute = attributes[attributeName];
-    return types.isString(attribute.type) && attribute.searchable !== false;
+    return (
+      types.isScalarAttribute(attribute) &&
+      types.isString(attribute.type) &&
+      attribute.searchable !== false
+    );
   });
 
   searchColumns.push(...stringColumns);
@@ -23,7 +27,11 @@ export const applySearch = (knex: Knex, query: string, ctx: Ctx) => {
   if (!_.isNaN(_.toNumber(query))) {
     const numberColumns = Object.keys(attributes).filter((attributeName) => {
       const attribute = attributes[attributeName];
-      return types.isNumber(attribute.type) && attribute.searchable !== false;
+      return (
+        types.isScalarAttribute(attribute) &&
+        types.isNumber(attribute.type) &&
+        attribute.searchable !== false
+      );
     });
 
     searchColumns.push(...numberColumns);
