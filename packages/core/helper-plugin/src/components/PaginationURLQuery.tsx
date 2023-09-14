@@ -19,7 +19,7 @@ import React from 'react';
 import { Dots, NextLink, PageLink, Pagination, PreviousLink } from '@strapi/design-system';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { NavLink, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import { useQueryParams } from '../hooks/useQueryParams';
 
@@ -112,7 +112,7 @@ export const PaginationURLQuery = ({
 
   return (
     <Pagination activePage={activePage} pageCount={pageCount}>
-      <PreviousLink as={NavLink} to={{ pathname, search: previousSearch }}>
+      <PreviousLink active={false} to={{ pathname, search: previousSearch }}>
         {formatMessage({
           id: 'components.pagination.go-to-previous',
           defaultMessage: 'Go to previous page',
@@ -122,7 +122,7 @@ export const PaginationURLQuery = ({
         if (typeof item === 'number') {
           return (
             <PageLink
-              as={NavLink}
+              active={item === activePage}
               key={item}
               number={item}
               to={{ pathname, search: makeSearch(item) }}
@@ -137,7 +137,7 @@ export const PaginationURLQuery = ({
 
         return <Dots key={item} />;
       })}
-      <NextLink as={NavLink} to={{ pathname, search: nextSearch }}>
+      <NextLink active={false} to={{ pathname, search: nextSearch }}>
         {formatMessage({
           id: 'components.pagination.go-to-next',
           defaultMessage: 'Go to next page',

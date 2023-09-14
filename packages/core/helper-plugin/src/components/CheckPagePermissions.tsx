@@ -29,7 +29,7 @@ const CheckPagePermissions = ({ permissions = [], children }: CheckPagePermissio
       try {
         setState({ isLoading: true, canAccess: false });
 
-        const canAccess = await hasPermissions(allPermissions, permissions, signal);
+        const canAccess = await hasPermissions(allPermissions || [], permissions, signal);
 
         if (isMounted.current) {
           setState({ isLoading: false, canAccess });

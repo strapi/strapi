@@ -17,7 +17,6 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter, MemoryRouterProps } from 'react-router-dom';
 
-// @ts-expect-error this will be removed once we've converted RBAC to TypeScript.
 import { RBACContext } from '../src/features/RBAC';
 
 import { server } from './server';

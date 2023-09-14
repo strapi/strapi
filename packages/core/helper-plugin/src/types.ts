@@ -61,14 +61,19 @@ export interface DefaultFilterInputsProps<TOptions extends any[] = string[]> {
 }
 
 export interface FilterData<TOptions extends any[] = string[]> {
-  fieldSchema: {
-    mainField?: {
-      name: string;
-      schema: Attribute.Any;
-    };
-    options?: string[];
-    type: Attribute.Kind;
-  };
+  fieldSchema:
+    | {
+        options?: string[];
+        type: Exclude<Attribute.Kind, 'relation'>;
+      }
+    | {
+        type: 'relation';
+        options?: string[];
+        mainField: {
+          name: string;
+          schema: Attribute.Any;
+        };
+      };
   metadatas: {
     customOperators?: Operator[];
     customInput?: React.ComponentType<DefaultFilterInputsProps<TOptions>>;
