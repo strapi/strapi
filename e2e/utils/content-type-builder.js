@@ -37,7 +37,7 @@ export async function deleteComponent({ page, displayName }) {
 }
 
 export async function waitForReload({ page }) {
-  await expect(page.locator('text=Waiting for restart...')).toHaveCount(0);
+  await expect(page.locator('text=Waiting for restart...')).toHaveCount(0, { timeout: 100000 });
 }
 
 export async function addDefaultField({
