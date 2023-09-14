@@ -56,3 +56,28 @@ export async function addDefaultField({ page, type, name, ...rest }) {
 export async function verifyFieldPresence({ page, name }) {
   await expect(page.getByText(name, { exact: true })).toBeVisible();
 }
+
+export async function createContentType({ page, type, displayName }) {
+  await page.getByRole('button', { name: `Create new ${type}` }).click();
+  await page.getByLabel('Display name').fill(displayName);
+  await page.getByRole('button', { name: 'Continue' }).click();
+}
+
+export async function deleteContentType({ page, displayName }) {
+  // Accept the confirmation dialog that is displayed when
+  // clicking delete
+  page.on('dialog', (dialog) => dialog.accept());
+
+  await page.getByRole('link', { name: displayName }).click();
+
+  // The strapi update notifier alert might be displayed in front
+  // of the edit button, which prevents the click from working
+  if (await page.getByLabel('Close').isVisible()) {
+    await page.getByLabel('Close').click();
+  }
+
+  await page.getByRole('button', { name: 'Edit' }).click();
+  await page.getByRole('button', { name: 'Delete' }).click();
+
+  await waitForReload({ page });
+}
