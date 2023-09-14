@@ -2,7 +2,7 @@ import React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { render as renderRTL, waitFor } from '@testing-library/react';
+import { act, render as renderRTL, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -299,10 +299,11 @@ describe('DynamicZone', () => {
 
       const [draggedItem] = getAllByRole('button', { name: 'Drag' });
 
-      await waitFor(() => {
+      act(() => {
         draggedItem.focus();
-        user.keyboard('[Space]');
       });
+
+      await user.keyboard('[Space]');
 
       expect(
         queryByText(
@@ -332,7 +333,9 @@ describe('DynamicZone', () => {
 
       const [draggedItem] = getAllByRole('button', { name: 'Drag' });
 
-      draggedItem.focus();
+      act(() => {
+        draggedItem.focus();
+      });
 
       await user.keyboard('[Space]');
       await user.keyboard('[ArrowDown]');
@@ -361,7 +364,9 @@ describe('DynamicZone', () => {
 
       const [draggedItem] = getAllByRole('button', { name: 'Drag' });
 
-      draggedItem.focus();
+      act(() => {
+        draggedItem.focus();
+      });
 
       await user.keyboard('[Space]');
       await user.keyboard('[ArrowDown]');
@@ -391,7 +396,9 @@ describe('DynamicZone', () => {
 
       const [draggedItem] = getAllByRole('button', { name: 'Drag' });
 
-      draggedItem.focus();
+      act(() => {
+        draggedItem.focus();
+      });
 
       await user.keyboard('[Space]');
       await user.keyboard('[Escape]');
