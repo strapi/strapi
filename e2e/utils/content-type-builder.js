@@ -40,17 +40,76 @@ export async function waitForReload({ page }) {
   await expect(page.locator('text=Waiting for restart...')).toHaveCount(0);
 }
 
-export async function addDefaultField({ page, type, name, ...rest }) {
+export async function addDefaultField({
+  page,
+  type,
+  contentTypeName,
+  addMore = false,
+  name,
+  ...rest
+}) {
   switch (type) {
     case 'Text':
       await page
         .getByRole('button', { name: 'Text Small or long text like title or description' })
         .click();
-      await page.getByLabel('Name', { exact: true }).fill(name);
+      break;
+
+    case 'Email':
+      await page.getByRole('button', { name: 'Email Email field with validations format' }).click();
+      break;
+
+    case 'RichText':
+      await page
+        .getByRole('button', { name: 'Rich text A rich text editor with formatting options' })
+        .click();
+      break;
+
+    case 'Password':
+      await page.getByRole('button', { name: 'Password Password field with encryption' }).click();
+      break;
+
+    case 'Number':
+      await page.getByRole('button', { name: 'Number Numbers (integer, float, decimal)' }).click();
+
+      // Choose number format
+      const { numberType } = rest;
+
+      await page.getByLabel('Number format').click();
+
+      switch (numberType) {
+        case 'integer':
+          await page.getByLabel('integer (ex: 10)').click();
+          break;
+
+        case 'big integer':
+          await page.getByLabel('big integer (ex: 123456789)').click();
+          break;
+
+        case 'decimal':
+          await page.getByLabel('decimal (ex: 2.22)').click();
+          break;
+
+        case 'float':
+          await page.getByLabel('float (ex: 3.33333333)').click();
+          break;
+      }
+
       break;
   }
 
-  await page.getByRole('button', { name: 'Finish' }).click();
+  await page.getByLabel('Name', { exact: true }).fill(name);
+
+  if (addMore) {
+    // the selector needs to be scoped, because there are two buttons
+    // using the label "Add another field"
+    await page
+      .getByLabel(contentTypeName, { exact: true })
+      .getByRole('button', { name: 'Add another field' })
+      .click();
+  } else {
+    await page.getByRole('button', { name: 'Finish' }).click();
+  }
 }
 
 export async function verifyFieldPresence({ page, name }) {

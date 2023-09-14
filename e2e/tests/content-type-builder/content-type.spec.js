@@ -25,8 +25,35 @@ async function main() {
         page,
       }) => {
         await createContentType({ page, type, displayName: `CT ${type}` });
-        await addDefaultField({ page, type: 'Text', name: 'textField' });
-        // TODO: add each field-type
+        await addDefaultField({
+          page,
+          type: 'Text',
+          name: 'textField',
+          addMore: true,
+          contentTypeName: `CT ${type}`,
+        });
+        await addDefaultField({
+          page,
+          type: 'Email',
+          name: 'emailField',
+          addMore: true,
+          contentTypeName: `CT ${type}`,
+        });
+        await addDefaultField({
+          page,
+          type: 'RichText',
+          name: 'richtextField',
+          addMore: true,
+          contentTypeName: `CT ${type}`,
+        });
+        await addDefaultField({
+          page,
+          type: 'Password',
+          name: 'passwordField',
+          addMore: true,
+          contentTypeName: `CT ${type}`,
+        });
+        await addDefaultField({ page, type: 'Number', name: 'numberField', numberType: 'integer' });
 
         await page.getByRole('button', { name: 'Save' }).click();
         await waitForReload({ page });
@@ -36,6 +63,11 @@ async function main() {
 
         // Verify the content-type contains the field(s)
         await verifyFieldPresence({ page, name: 'textField' });
+        await verifyFieldPresence({ page, name: 'textField' });
+        await verifyFieldPresence({ page, name: 'emailField' });
+        await verifyFieldPresence({ page, name: 'richtextField' });
+        await verifyFieldPresence({ page, name: 'passwordField' });
+        await verifyFieldPresence({ page, name: 'numberField' });
 
         // Cleanup
         await deleteContentType({ page, displayName: `CT ${type}` });
