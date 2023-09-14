@@ -44,12 +44,31 @@ const getSqlitePackageName = () => {
   );
 };
 
-const createConnection = (config) => {
+const createConnection = (config, onAfterCreate = undefined) => {
   const knexConfig = { ...config };
   if (knexConfig.client === 'sqlite') {
     const sqlitePackageName = getSqlitePackageName();
 
     knexConfig.client = clientMap[sqlitePackageName];
+  }
+
+  // initialization code to run upon opening a new connection
+  // In theory this should be required but there may be cases where it's not desired
+  if (onAfterCreate) {
+    knexConfig.pool = knexConfig.pool || {};
+    // if the user has set their own afterCreate in config, we will replace it and call it
+    const userAfterCreate = knexConfig.pool?.afterCreate;
+    knexConfig.pool.afterCreate = (conn, done) => {
+      onAfterCreate(conn, (err, conn) => {
+        if (err) {
+          return done(err, conn);
+        }
+        if (userAfterCreate) {
+          return userAfterCreate(conn, done);
+        }
+        return done(null, conn);
+      });
+    };
   }
 
   const knexInstance = knex(knexConfig);

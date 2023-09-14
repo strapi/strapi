@@ -42,27 +42,32 @@ class MysqlDialect extends Dialect {
     };
   }
 
-  async initialize() {
+  async initialize(nativeConnection) {
+    this.nativeConnection = nativeConnection;
     try {
-      await this.db.connection.raw(`set session sql_require_primary_key = 0;`);
+      await this.db.connection
+        .raw(`set session sql_require_primary_key = 0;`)
+        .connection(nativeConnection);
     } catch (err) {
       // Ignore error due to lack of session permissions
     }
 
-    this.info = await this.databaseInspector.getInformation();
+    this.info = await this.databaseInspector.getInformation(nativeConnection);
   }
 
   async startSchemaUpdate() {
     try {
-      await this.db.connection.raw(`set foreign_key_checks = 0;`);
-      await this.db.connection.raw(`set session sql_require_primary_key = 0;`);
+      await this.db.connection.raw(`set foreign_key_checks = 0;`).connection(this.nativeConnection);
+      await this.db.connection
+        .raw(`set session sql_require_primary_key = 0;`)
+        .connection(this.nativeConnection);
     } catch (err) {
       // Ignore error due to lack of session permissions
     }
   }
 
   async endSchemaUpdate() {
-    await this.db.connection.raw(`set foreign_key_checks = 1;`);
+    await this.db.connection.raw(`set foreign_key_checks = 1;`).connection(this.nativeConnection);
   }
 
   supportsUnsigned() {
