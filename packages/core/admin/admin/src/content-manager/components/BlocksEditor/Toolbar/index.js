@@ -79,7 +79,7 @@ const ModifierButton = ({ icon, name, label }) => {
     return Boolean(modifiers[name]);
   };
 
-  const isActive = isModifierActive(name);
+  const isActive = isModifierActive();
 
   const toggleModifier = () => {
     if (isActive) {
@@ -95,7 +95,7 @@ const ModifierButton = ({ icon, name, label }) => {
       name={name}
       label={label}
       isActive={isActive}
-      handleClick={() => toggleModifier(name)}
+      handleClick={() => toggleModifier()}
     />
   );
 };
@@ -189,7 +189,7 @@ const ListButton = ({ icon, format, label }) => {
       name={format}
       label={label}
       isActive={isActive}
-      handleClick={() => toggleList(name)}
+      handleClick={() => toggleList()}
     />
   );
 };
