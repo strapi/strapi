@@ -72,17 +72,11 @@ describe('ADMIN | pages | SettingsPage', () => {
     const { container } = render(App);
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c11 {
-        padding-bottom: 56px;
-      }
-
-      .c0 {
-        display: grid;
-        grid-template-columns: auto 1fr;
-      }
-
-      .c12 {
-        overflow-x: hidden;
+      .c4 {
+        font-weight: 600;
+        font-size: 1.125rem;
+        line-height: 1.22;
+        color: #32324d;
       }
 
       .c2 {
@@ -105,11 +99,8 @@ describe('ADMIN | pages | SettingsPage', () => {
         padding-bottom: 16px;
       }
 
-      .c4 {
-        font-weight: 600;
-        font-size: 1.125rem;
-        line-height: 1.22;
-        color: #32324d;
+      .c11 {
+        padding-bottom: 56px;
       }
 
       .c3 {
@@ -152,6 +143,15 @@ describe('ADMIN | pages | SettingsPage', () => {
         -ms-flex-negative: 0;
         flex-shrink: 0;
         margin: 0;
+      }
+
+      .c0 {
+        display: grid;
+        grid-template-columns: auto 1fr;
+      }
+
+      .c12 {
+        overflow-x: hidden;
       }
 
       .c1 {
@@ -256,9 +256,7 @@ describe('ADMIN | pages | SettingsPage', () => {
               isDisplayed: true,
               permissions: [],
               to: '/settings/internationalization',
-              Component() {
-                return <div>i18n settings</div>;
-              },
+              Component: () => ({ default: () => <div>i18n settings</div> }),
             },
           ],
         },
@@ -272,9 +270,7 @@ describe('ADMIN | pages | SettingsPage', () => {
               isDisplayed: true,
               permissions: [],
               to: '/settings/email-settings',
-              Component() {
-                return <div>i18n settings</div>;
-              },
+              Component: () => ({ default: () => <div>email settings</div> }),
             },
           ],
         },
@@ -296,9 +292,7 @@ describe('ADMIN | pages | SettingsPage', () => {
             isDisplayed: true,
             permissions: [],
             to: '/settings/internationalization',
-            Component() {
-              return <div>i18n settings</div>;
-            },
+            Component: () => ({ default: () => <div>i18n settings</div> }),
           },
         ],
       },
@@ -312,9 +306,7 @@ describe('ADMIN | pages | SettingsPage', () => {
             isDisplayed: true,
             permissions: [],
             to: '/settings/email-settings',
-            Component() {
-              return <div>email settings</div>;
-            },
+            Component: () => ({ default: () => <div>email settings</div> }),
           },
         ],
       },

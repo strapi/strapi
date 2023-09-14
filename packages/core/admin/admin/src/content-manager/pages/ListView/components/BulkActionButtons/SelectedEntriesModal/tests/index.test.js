@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { Table } from '@strapi/helper-plugin';
+import { Table, useQueryParams } from '@strapi/helper-plugin';
 import {
   render as renderRTL,
   screen,
@@ -31,6 +31,11 @@ jest.mock('@strapi/helper-plugin', () => ({
     {
       query: {
         sort: 'name:DESC',
+        plugins: {
+          i18n: {
+            locale: 'en',
+          },
+        },
       },
     },
   ]),
@@ -139,15 +144,37 @@ describe('Bulk publish selected entries modal', () => {
     server.listen();
   });
 
-  afterEach(() => {
-    server.resetHandlers();
-  });
-
   afterAll(() => {
     server.close();
   });
 
   it('renders the selected items in the modal', async () => {
+    const { queryByText } = render(
+      <Table.Root defaultSelectedEntries={[1, 2, 3]} colCount={4}>
+        <SelectedEntriesModal onToggle={jest.fn()} />
+      </Table.Root>
+    );
+
+    await waitForElementToBeRemoved(() => queryByText('Loading content'));
+
+    expect(screen.getByText(/publish entries/i)).toBeInTheDocument();
+
+    // Nested table should render the selected items from the parent table
+    expect(screen.queryByText('Entry 1')).toBeInTheDocument();
+    expect(screen.queryByText('Entry 4')).not.toBeInTheDocument();
+  });
+
+  it('renders the selected items in the modal even if the locale param is not passed', async () => {
+    useQueryParams.mockImplementation(() => [
+      {
+        query: {
+          page: 1,
+          pageSize: 10,
+          sort: 'name:DESC',
+        },
+      },
+    ]);
+
     const { queryByText } = render(
       <Table.Root defaultSelectedEntries={[1, 2, 3]} colCount={4}>
         <SelectedEntriesModal onToggle={jest.fn()} />
@@ -213,9 +240,11 @@ describe('Bulk publish selected entries modal', () => {
   });
 
   it('should publish valid entries after confirming and close the modal', async () => {
+    const mockOnToggle = jest.fn();
+
     const { queryByText } = render(
       <Table.Root defaultSelectedEntries={[1, 2, 3]} colCount={4}>
-        <SelectedEntriesModal onToggle={jest.fn()} />
+        <SelectedEntriesModal onToggle={mockOnToggle} />
       </Table.Root>
     );
 
@@ -235,10 +264,9 @@ describe('Bulk publish selected entries modal', () => {
 
     await waitFor(() => {
       expect(publishDialog).not.toBeInTheDocument();
-      expect(screen.queryByRole('gridcell', { name: 'Entry 1' })).not.toBeInTheDocument();
-      expect(screen.queryByRole('gridcell', { name: 'Entry 2' })).not.toBeInTheDocument();
-      expect(screen.queryByRole('gridcell', { name: 'Entry 3' })).not.toBeInTheDocument();
     });
+
+    expect(mockOnToggle).toHaveBeenCalledTimes(1);
   });
 
   it('should only keep entries with validation errors in the modal after publish', async () => {
@@ -294,6 +322,8 @@ describe('Bulk publish selected entries modal', () => {
         screen.getByRole('gridcell', { name: 'components.Input.error.validation.required' })
       ).toBeInTheDocument();
     });
+
+    server.restoreHandlers();
   });
 
   it('should show validation errors if there is an error', async () => {
@@ -344,6 +374,8 @@ describe('Bulk publish selected entries modal', () => {
     await waitFor(() => {
       expect(publishButton).toBeDisabled();
     });
+
+    server.restoreHandlers();
   });
 
   it('should show the correct messages above the table in the selected entries modal', async () => {
@@ -396,5 +428,6 @@ describe('Bulk publish selected entries modal', () => {
       exact: false,
     });
     expect(countWithErrors).toHaveTextContent('1 entry waiting for action');
+    server.restoreHandlers();
   });
 });

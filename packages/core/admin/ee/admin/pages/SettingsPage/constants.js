@@ -1,15 +1,16 @@
-import * as React from 'react';
-
-export const SETTINGS_ROUTES_EE = [
+export const ROUTES_EE = [
   ...(window.strapi.features.isEnabled(window.strapi.features.AUDIT_LOGS)
     ? [
         {
-          Component: React.lazy(() =>
-            import(
+          async Component() {
+            const component = await import(
               /* webpackChunkName: "audit-logs-settings-page" */ './pages/AuditLogs/ProtectedListPage'
-            )
-          ),
-          path: '/settings/audit-logs',
+            );
+
+            return component;
+          },
+          to: '/settings/audit-logs',
+          exact: true,
         },
       ]
     : []),
@@ -17,30 +18,39 @@ export const SETTINGS_ROUTES_EE = [
   ...(window.strapi.features.isEnabled(window.strapi.features.REVIEW_WORKFLOWS)
     ? [
         {
-          Component: React.lazy(() =>
-            import(
+          async Component() {
+            const component = await import(
               /* webpackChunkName: "review-workflows-settings-list-view" */ './pages/ReviewWorkflows/pages/ListView'
-            )
-          ),
-          path: '/settings/review-workflows',
+            );
+
+            return component;
+          },
+          to: '/settings/review-workflows',
+          exact: true,
         },
 
         {
-          Component: React.lazy(() =>
-            import(
+          async Component() {
+            const component = await import(
               /* webpackChunkName: "review-workflows-settings-create-view" */ './pages/ReviewWorkflows/pages/CreateView'
-            )
-          ),
-          path: '/settings/review-workflows/create',
+            );
+
+            return component;
+          },
+          to: '/settings/review-workflows/create',
+          exact: true,
         },
 
         {
-          Component: React.lazy(() =>
-            import(
+          async Component() {
+            const component = await import(
               /* webpackChunkName: "review-workflows-settings-edit-view" */ './pages/ReviewWorkflows/pages/EditView'
-            )
-          ),
-          path: '/settings/review-workflows/:workflowId',
+            );
+
+            return component;
+          },
+          to: '/settings/review-workflows/:workflowId',
+          exact: true,
         },
       ]
     : []),
@@ -48,10 +58,15 @@ export const SETTINGS_ROUTES_EE = [
   ...(window.strapi.features.isEnabled(window.strapi.features.SSO)
     ? [
         {
-          Component: React.lazy(() =>
-            import(/* webpackChunkName: "sso-settings-page" */ './pages/SingleSignOn')
-          ),
-          path: '/settings/single-sign-on',
+          async Component() {
+            const component = await import(
+              /* webpackChunkName: "sso-settings-page" */ './pages/SingleSignOn'
+            );
+
+            return component;
+          },
+          to: '/settings/single-sign-on',
+          exact: true,
         },
       ]
     : []),

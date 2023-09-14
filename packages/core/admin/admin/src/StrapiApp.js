@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 
 import { darkTheme, lightTheme } from '@strapi/design-system';
 import invariant from 'invariant';
@@ -22,7 +22,7 @@ import {
 } from './exposedHooks';
 import favicon from './favicon.png';
 import injectionZones from './injectionZones';
-import { App } from './pages/App';
+import App from './pages/App';
 import languageNativeNames from './translations/languageNativeNames';
 
 class StrapiApp {
@@ -114,30 +114,14 @@ class StrapiApp {
     );
     invariant(
       link.Component && typeof link.Component === 'function',
-      `link.Component must be a function returning a Promise. Please use: \`Component: () => import(path)\` instead.`
+      `link.Component should be a valid React Component`
     );
     invariant(
       link.icon && typeof link.icon === 'function',
       `link.Icon should be a valid React Component`
     );
 
-    if (
-      link.Component &&
-      typeof link.Component === 'function' &&
-      link.Component[Symbol.toStringTag] === 'AsyncFunction'
-    ) {
-      console.warn(`
-        [deprecated] addMenuLink() was called with an async Component from the plugin "${link.intlLabel.Internationalization}". This will be removed
-        in the future. Please use: \`Component: () => import(path)\` instead.
-      `);
-    }
-
-    this.menu.push({
-      ...link,
-
-      // React.lazy can be removed once we migrate to react-router@6, because the <Route /> component can handle it natively
-      Component: React.lazy(link.Component),
-    });
+    this.menu.push(link);
   };
 
   addMiddlewares = (middlewares) => {
@@ -165,26 +149,10 @@ class StrapiApp {
     invariant(link.to, `link.to should be defined for ${stringifiedLink}`);
     invariant(
       link.Component && typeof link.Component === 'function',
-      `link.Component must be a function returning a Promise. Please use: \`Component: () => import(path)\` instead.`
+      `link.Component should be a valid React Component`
     );
 
-    if (
-      link.Component &&
-      typeof link.Component === 'function' &&
-      link.Component[Symbol.toStringTag] === 'AsyncFunction'
-    ) {
-      console.warn(`
-        [deprecated] addSettingsLink() was called with an async Component from the plugin: "${link.intlLabel.Internationalization}". This will be removed
-        in the future. Please use: \`Component: () => import(path)\` instead.
-      `);
-    }
-
-    this.settings[sectionId].links.push({
-      ...link,
-
-      // React.lazy can be removed once we migrate to react-router@6, because the <Route /> component can handle it natively
-      Component: React.lazy(link.Component),
-    });
+    this.settings[sectionId].links.push(link);
   };
 
   addSettingsLinks = (sectionId, links) => {

@@ -23,6 +23,7 @@ const {
   getTransferTelemetryPayload,
   setSignalHandler,
   getDiffHandler,
+  parseRestoreFromOptions,
 } = require('../../utils/data-transfer');
 const { exitWith } = require('../../utils/helpers');
 
@@ -71,10 +72,9 @@ module.exports = async (opts) => {
     },
     autoDestroy: false,
     strategy: opts.conflictStrategy || DEFAULT_CONFLICT_STRATEGY,
-    restore: {
-      entities: { exclude: DEFAULT_IGNORED_CONTENT_TYPES },
-    },
+    restore: parseRestoreFromOptions(opts),
   };
+
   const destination = createLocalStrapiDestinationProvider(destinationOptions);
 
   /**
@@ -86,7 +86,7 @@ module.exports = async (opts) => {
     exclude: opts.exclude,
     only: opts.only,
     throttle: opts.throttle,
-    rules: {
+    transforms: {
       links: [
         {
           filter(link) {

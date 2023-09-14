@@ -177,6 +177,7 @@ export function StageSelect() {
 
                   return (
                     <SingleSelectOption
+                      key={id}
                       startIcon={
                         <Flex
                           height={2}
