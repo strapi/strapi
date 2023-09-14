@@ -137,8 +137,6 @@ const toggleBlock = (editor, format, value) => {
 
 const BlocksDropdown = () => {
   const editor = useSlate();
-  const { formatMessage } = useIntl();
-
   const [optionSelected, setOptionSelected] = React.useState(Object.keys(blockItems)[0]);
 
   /**
@@ -150,11 +148,9 @@ const BlocksDropdown = () => {
     setOptionSelected(optionKey);
   };
 
-  const SelectedValueIcon = blockItems[optionSelected].icon;
-
   return (
     <Select
-      startIcon={<SelectedValueIcon />}
+      startIcon={<Icon as={blockItems[optionSelected].icon} />}
       onChange={selectOption}
       placeholder="Select"
       value={optionSelected}
@@ -182,10 +178,11 @@ const BlockOption = ({ value, icon, label, onActive }) => {
     onActive(value);
   }
 
-  const Icon = icon;
-
   return (
-    <Option startIcon={<Icon />} value={value}>
+    <Option
+      startIcon={<Icon as={icon} color={isActive ? 'primary600' : 'neutral600'} />}
+      value={value}
+    >
       {formatMessage(label)}
     </Option>
   );
