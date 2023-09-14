@@ -25,6 +25,7 @@ async function main() {
         page,
       }) => {
         await createContentType({ page, type, displayName: `CT ${type}` });
+
         await addDefaultField({
           page,
           type: 'Text',
@@ -71,10 +72,55 @@ async function main() {
 
         // Cleanup
         await deleteContentType({ page, displayName: `CT ${type}` });
+
+        // TODO: validate content-type has been deleted
       });
 
-      // TODO
-      // test('A user should be able to customize the API ID of a field', async ({ page }) => {});
+      test('A user should be able to edit a content-type', async ({ page }) => {
+        await page.getByRole('button', { name: `Create new ${type}` }).click();
+        await page.getByLabel('Display name').fill(`${type} Article`);
+
+        // API IDs should be auto-generated based on the initial display name
+        await expect(page.getByLabel('API ID (Singular)')).toHaveValue(
+          type === 'single type' ? `single-type-article` : `collection-type-article`
+        );
+        await expect(page.getByLabel('API ID (Plural)')).toHaveValue(
+          type === 'single type' ? `single-type-articles` : `collection-type-articles`
+        );
+
+        // API IDs should change when the display name changes
+        await page.getByLabel('Display name').fill('Something');
+        await expect(page.getByLabel('API ID (Singular)')).toHaveValue('something');
+        await expect(page.getByLabel('API ID (Plural)')).toHaveValue('somethings');
+
+        await page.getByRole('button', { name: 'Continue' }).click();
+
+        await addDefaultField({
+          page,
+          type: 'Text',
+          name: 'textField',
+        });
+
+        await page.getByRole('button', { name: 'Save' }).click();
+        await waitForReload({ page });
+
+        // Edit
+        await page.getByRole('button', { name: 'Edit' }).click();
+        await page.getByLabel('Display name').fill('Something else');
+
+        // The API IDs should not change when editing a content-type
+        await expect(page.getByLabel('API ID (Singular)')).toHaveValue('something');
+        await expect(page.getByLabel('API ID (Plural)')).toHaveValue('somethings');
+
+        await page.getByRole('button', { name: 'Finish' }).click();
+        await waitForReload({ page });
+
+        // Verify the content-type has been created
+        await expect(page.getByRole('heading', { name: `Something else` })).toBeVisible();
+
+        // Cleanup
+        await deleteContentType({ page, displayName: `Something else` });
+      });
     });
   }
 }
