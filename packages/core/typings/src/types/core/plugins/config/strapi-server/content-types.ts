@@ -1,6 +1,9 @@
 import { ContentType } from '../../../schemas';
 
 export interface ContentTypes {
-  // TODO: is there anything else that can be here?
+  /**
+   * Only the schema property is used and available
+   * See loader in packages/core/strapi/src/core/loaders/plugins/index.ts
+   *  */
   [key: string]: { schema: ContentType };
 }
