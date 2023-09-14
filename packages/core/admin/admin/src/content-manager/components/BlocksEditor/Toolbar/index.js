@@ -168,15 +168,18 @@ const ListButton = ({ icon, format, label }) => {
   const isActive = isListActive();
 
   const toggleList = () => {
+    // Delete the parent list so that we're left with only the list items directly
     Transforms.unwrapNodes(editor, {
       match: (node) => isListNode(node) && ['ordered', 'unordered'].includes(node.format),
       split: true,
     });
 
+    // Change the type of the current selection
     Transforms.setNodes(editor, {
       type: isActive ? 'paragraph' : 'list-item',
     });
 
+    // If the selection is now a list item, wrap it inside a list
     if (!isActive) {
       const block = { type: 'list', format, children: [] };
       Transforms.wrapNodes(editor, block);
