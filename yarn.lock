@@ -7258,6 +7258,7 @@ __metadata:
     esbuild-loader: ^2.21.0
     eslint-config-custom: 4.13.6
     eslint-plugin-storybook: 0.6.13
+    fork-ts-checker-webpack-plugin: 7.3.0
     formik: 2.4.0
     immer: 9.0.19
     lodash: 4.17.21
@@ -7266,7 +7267,7 @@ __metadata:
     qs: 6.11.1
     react: ^18.2.0
     react-dom: ^18.2.0
-    react-helmet: ^6.1.0
+    react-helmet: 6.1.0
     react-intl: 6.4.1
     react-query: 3.39.3
     react-router-dom: 5.3.4
@@ -25720,7 +25721,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-helmet@npm:^6.1.0":
+"react-helmet@npm:6.1.0, react-helmet@npm:^6.1.0":
   version: 6.1.0
   resolution: "react-helmet@npm:6.1.0"
   dependencies:
