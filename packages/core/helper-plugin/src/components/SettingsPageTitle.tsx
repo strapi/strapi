@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-// @ts-expect-error - No types available
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 

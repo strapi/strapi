@@ -71,6 +71,7 @@
     "@testing-library/user-event": "14.4.3",
     "@types/react": "18.2.7",
     "@types/react-dom": "18.2.7",
+    "@types/react-helmet": "6.1.6",
     "@types/react-router-dom": "5.3.3",
     "@types/styled-components": "5.1.26",
     "browserslist-to-esbuild": "1.2.0",
