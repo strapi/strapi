@@ -8,6 +8,7 @@ import { createEditor } from 'slate';
 import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
 import styled, { useTheme, css } from 'styled-components';
 
+import { useModifiers } from './hooks/useModifiers';
 import { blocksData } from './tempSchema';
 import { BlocksToolbar } from './Toolbar';
 
@@ -41,20 +42,8 @@ const H6 = styled(Typography).attrs({ as: 'h6' })`
   line-height: ${({ theme }) => theme.lineHeights[1]};
 `;
 
-const Italic = styled(Typography)`
-  font-style: italic;
-`;
-
 const Img = styled.img`
   max-width: 100%;
-`;
-
-const InlineCode = styled.code`
-  background-color: ${({ theme }) => theme.colors.neutral150};
-  border-radius: ${({ theme }) => theme.borderRadius};
-  padding: ${({ theme }) => `0 ${theme.spaces[2]}`};
-  font-family: 'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas,
-    monospace;
 `;
 
 const CodeBlock = styled.pre`
@@ -208,30 +197,6 @@ const renderElement = (props) => {
   }
 };
 
-const renderLeaf = ({ attributes, children, leaf }) => {
-  if (leaf.bold) {
-    children = <Typography fontWeight="bold">{children}</Typography>;
-  }
-
-  if (leaf.italic) {
-    children = <Italic>{children}</Italic>;
-  }
-
-  if (leaf.underline) {
-    children = <Typography textDecoration="underline">{children}</Typography>;
-  }
-
-  if (leaf.strikethrough) {
-    children = <Typography textDecoration="line-through">{children}</Typography>;
-  }
-
-  if (leaf.code) {
-    children = <InlineCode>{children}</InlineCode>;
-  }
-
-  return <span {...attributes}>{children}</span>;
-};
-
 const BlocksEditor = React.forwardRef(({ intlLabel, name, readOnly, required, error }, ref) => {
   const { formatMessage } = useIntl();
   const theme = useTheme();
@@ -258,6 +223,22 @@ const BlocksEditor = React.forwardRef(({ intlLabel, name, readOnly, required, er
     [editor]
   );
 
+  const modifiers = useModifiers();
+
+  const myRenderLeaf = ({ children, attributes, leaf }) => {
+    // Recursively wrap the children for each modifier
+    // Using reduce to avoid mutating the children parameter directly
+    const wrappedChildren = modifiers.reduce((currentChildren, modifier) => {
+      if (leaf[modifier]) {
+        return modifier.renderLeaf(currentChildren);
+      }
+
+      return currentChildren;
+    }, children);
+
+    return <span {...attributes}>{wrappedChildren}</span>;
+  };
+
   return (
     <>
       <Flex direction="column" alignItems="stretch" gap={1}>
@@ -277,7 +258,7 @@ const BlocksEditor = React.forwardRef(({ intlLabel, name, readOnly, required, er
                 readOnly={readOnly}
                 style={getEditorStyle(theme)}
                 renderElement={renderElement}
-                renderLeaf={renderLeaf}
+                renderLeaf={myRenderLeaf}
               />
             </Wrapper>
           </InputWrapper>
