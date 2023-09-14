@@ -2,7 +2,6 @@ import * as types from '../types';
 
 import type { Metadata, Meta, Attribute } from '../metadata/types';
 import type { Column, Schema, Table } from './types';
-import { isRelationAttribute } from '../metadata/relations';
 
 const createColumn = (name: string, attribute: Attribute): Column => {
   const { type, args = [], ...opts } = getColumnType(attribute);
@@ -15,7 +14,7 @@ const createColumn = (name: string, attribute: Attribute): Column => {
     notNullable: false,
     unsigned: false,
     ...opts,
-    ...(attribute.column || {}),
+    ...('column' in attribute ? attribute.column ?? {} : {}),
   };
 };
 
@@ -31,8 +30,8 @@ const createTable = (meta: Meta): Table => {
     const attribute = meta.attributes[key];
 
     // if (types.isRelation(attribute.type)) {
-    if (isRelationAttribute(attribute)) {
-      if (attribute.morphColumn && attribute.owner) {
+    if (attribute.type === 'relation') {
+      if ('morphColumn' in attribute && attribute.morphColumn && attribute.owner) {
         const { idColumn, typeColumn } = attribute.morphColumn;
 
         table.columns.push(
@@ -45,7 +44,12 @@ const createTable = (meta: Meta): Table => {
         );
 
         table.columns.push(createColumn(typeColumn.name, { type: 'string' }));
-      } else if (attribute.joinColumn && attribute.owner && attribute.joinColumn.referencedTable) {
+      } else if (
+        'joinColumn' in attribute &&
+        attribute.joinColumn &&
+        attribute.owner &&
+        attribute.joinColumn.referencedTable
+      ) {
         // NOTE: we could pass uniquness for oneToOne to avoid creating more than one to one
 
         const { name: columnName, referencedColumn, referencedTable } = attribute.joinColumn;
@@ -73,7 +77,7 @@ const createTable = (meta: Meta): Table => {
           columns: [columnName],
         });
       }
-    } else if (types.isScalar(attribute.type)) {
+    } else if (types.isScalarAttribute(attribute)) {
       const column = createColumn(attribute.columnName || key, attribute);
 
       if (column.unique) {
@@ -100,7 +104,7 @@ const createTable = (meta: Meta): Table => {
 };
 
 const getColumnType = (attribute: Attribute) => {
-  if (attribute.columnType) {
+  if ('columnType' in attribute && attribute.columnType) {
     return attribute.columnType;
   }
 

@@ -107,15 +107,10 @@ export namespace Relation {
   export type OneToOne = BaseBidirectional & {
     relation: 'oneToOne';
     useJoinTable?: boolean;
-  } & (
-      | {
-          joinTable: JoinTable;
-        }
-      | {
-          joinColumn: JoinColumn;
-          owner?: boolean;
-        }
-    );
+    joinTable?: JoinTable;
+    joinColumn?: JoinColumn;
+    owner?: boolean;
+  };
 
   export type OneToMany = BaseBidirectional & {
     relation: 'oneToMany';
@@ -124,17 +119,11 @@ export namespace Relation {
 
   export type ManyToOne = BaseBidirectional & {
     relation: 'manyToOne';
-
     useJoinTable?: boolean;
-  } & (
-      | {
-          joinTable: JoinTable;
-        }
-      | {
-          joinColumn: JoinColumn;
-          owner?: boolean;
-        }
-    );
+    joinTable?: JoinTable;
+    joinColumn?: JoinColumn;
+    owner?: boolean;
+  };
 
   export type ManyToMany = BaseBidirectional & {
     relation: 'manyToMany';
@@ -240,7 +229,7 @@ export interface Model {
   tableName: string;
   singularName: string;
   attributes: Record<string, Attribute>;
-  lifecycles: Record<string, unknown>;
+  lifecycles?: Record<Action, SubscriberFn>;
   indexes: Index[];
   componentLink?: Meta;
   columnToAttribute?: Record<string, string>;

@@ -1,32 +1,33 @@
-import { Attribute } from '@strapi/typings';
-import * as types from '../../types';
 import { getJoinTableName } from '../../metadata/relations';
 
 import type { Database } from '../..';
+import type { Relation } from '../../metadata/types';
 
 type Link = {
-  relation: Attribute.Relation;
-  invRelation: Attribute.Relation;
+  relation: Relation.Bidirectional & { inversedBy: string };
+  invRelation: Relation.Bidirectional & { inversedBy: string };
 };
 
 const getLinksWithoutMappedBy = (db: Database): Array<Link> => {
-  const relationsToUpdate = {};
+  const relationsToUpdate: Record<string, Link> = {};
 
   db.metadata.forEach((contentType) => {
     const attributes = contentType.attributes;
 
     // For each relation attribute, add the joinTable name to tablesToUpdate
     Object.values(attributes).forEach((attribute) => {
-      if (!types.isRelation(attribute.type)) return;
+      if (attribute.type !== 'relation') {
+        return;
+      }
 
-      if (attribute.inversedBy) {
+      if ('inversedBy' in attribute && attribute.inversedBy) {
         const invRelation = db.metadata.get(attribute.target).attributes[attribute.inversedBy];
 
         // Both relations use inversedBy.
-        if (invRelation.inversedBy) {
+        if ('inversedBy' in invRelation && invRelation.inversedBy) {
           relationsToUpdate[attribute.joinTable.name] = {
-            relation: attribute,
-            invRelation,
+            relation: attribute as Relation.Bidirectional & { inversedBy: string },
+            invRelation: invRelation as Relation.Bidirectional & { inversedBy: string },
           };
         }
       }
@@ -36,12 +37,12 @@ const getLinksWithoutMappedBy = (db: Database): Array<Link> => {
   return Object.values(relationsToUpdate);
 };
 
-const isLinkTableEmpty = async (db, linkTableName) => {
+const isLinkTableEmpty = async (db: Database, linkTableName: string) => {
   // If the table doesn't exist, it's empty
   const exists = await db.getSchemaConnection().hasTable(linkTableName);
   if (!exists) return true;
 
-  const result = await db.getConnection().count('* as count').from(linkTableName);
+  const result = await db.getConnection().from(linkTableName).count('* as count');
   return Number(result[0].count) === 0;
 };
 

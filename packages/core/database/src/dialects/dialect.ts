@@ -45,7 +45,7 @@ export default class Dialect {
     return true;
   }
 
-  supportsOperator(): boolean {
+  supportsOperator(operator?: string): boolean {
     return true;
   }
 

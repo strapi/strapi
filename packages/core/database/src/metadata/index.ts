@@ -30,7 +30,7 @@ export const createMetadata = (models: Model[] = []): Metadata => {
         },
         ...model.attributes,
       },
-      lifecycles: model.lifecycles || {},
+      lifecycles: model.lifecycles ?? ({} as Meta['lifecycles']),
       indexes: model.indexes || [],
     });
   }
