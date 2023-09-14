@@ -166,7 +166,11 @@ export const EditPage = () => {
                           id: 'global.name',
                           defaultMessage: 'Name',
                         })}
-                        error={errors?.name ? formatMessage({ id: errors.name }) : false}
+                        error={
+                          errors?.name
+                            ? formatMessage({ id: errors.name, defaultMessage: 'Name is required' })
+                            : false
+                        }
                         required
                       />
                     </GridItem>
@@ -180,7 +184,12 @@ export const EditPage = () => {
                           defaultMessage: 'Description',
                         })}
                         error={
-                          errors?.description ? formatMessage({ id: errors.description }) : false
+                          errors?.description
+                            ? formatMessage({
+                                id: errors.description,
+                                defaultMessage: 'Description is required',
+                              })
+                            : false
                         }
                         required
                       />
