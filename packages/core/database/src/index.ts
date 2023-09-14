@@ -35,13 +35,13 @@ class Database {
 
   metadata: Metadata;
 
-  schema: any;
+  schema: ReturnType<typeof createSchemaProvider>;
 
-  migrations: any;
+  migrations: ReturnType<typeof createMigrationsProvider>;
 
-  lifecycles: any;
+  lifecycles: ReturnType<typeof createLifecyclesProvider>;
 
-  entityManager: any;
+  entityManager: ReturnType<typeof createEntityManager>;
 
   static transformContentTypes: typeof transformContentTypes;
 

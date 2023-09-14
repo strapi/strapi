@@ -5,13 +5,13 @@ import { DatabaseError } from '../errors';
 import * as helpers from './helpers';
 import { transactionCtx } from '../transaction-context';
 import type { Join } from './helpers/join';
-import type { Rec } from './helpers/transform';
 
 import type { Database } from '..';
+import { isKnexQuery } from '../utils/knex';
 
 interface State {
   type: 'select' | 'insert' | 'update' | 'delete' | 'count' | 'max' | 'truncate';
-  select: string[];
+  select: Array<string | Knex.Raw>;
   count: string | null;
   max: string | null;
   first: boolean;
@@ -40,7 +40,7 @@ export interface QueryBuilder {
   state: State;
   getAlias(): string;
   clone(): QueryBuilder;
-  select(args: string | string[]): QueryBuilder;
+  select(args: string | Array<string | Knex.Raw>): QueryBuilder;
   addSelect(args: string | string[]): QueryBuilder;
   insert<T extends Record<string, unknown> | Record<string, unknown>[]>(data: T): QueryBuilder;
   onConflict(args: any): QueryBuilder;
@@ -406,7 +406,13 @@ const createQueryBuilder = <TResult>(
     },
 
     processSelect() {
-      state.select = state.select.map((field) => helpers.toColumnName(meta, field));
+      state.select = state.select.map((field) => {
+        if (isKnexQuery(field)) {
+          return field;
+        }
+
+        return helpers.toColumnName(meta, field);
+      });
 
       if (this.shouldUseDistinct()) {
         const joinsOrderByColumns = state.joins.flatMap((join) => {
