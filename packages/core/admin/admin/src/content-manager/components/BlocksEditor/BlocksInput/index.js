@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { Editable } from 'slate-react';
 import styled, { css, useTheme } from 'styled-components';
 
-import { useModifiers } from '../hooks/useModifiers';
+import { useModifiersStore } from '../hooks/useModifiersStore';
 
 const getEditorStyle = (theme) => ({
   // The outline style is set on the wrapper with :focus-within
@@ -186,7 +186,7 @@ const baseRenderLeaf = ({ children, attributes, leaf }, modifiers) => {
 };
 
 const BlocksInput = ({ readOnly }) => {
-  const modifiers = useModifiers();
+  const modifiers = useModifiersStore();
   const theme = useTheme();
 
   const renderLeaf = React.useCallback(

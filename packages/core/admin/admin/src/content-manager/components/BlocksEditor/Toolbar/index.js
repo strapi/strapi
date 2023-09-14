@@ -10,7 +10,7 @@ import { Editor, Element, Transforms } from 'slate';
 import { useSlate } from 'slate-react';
 import styled from 'styled-components';
 
-import { useModifiers } from '../hooks/useModifiers';
+import { useModifiersStore } from '../hooks/useModifiersStore';
 
 const Separator = styled(Toolbar.Separator)`
   background: ${({ theme }) => theme.colors.neutral150};
@@ -131,7 +131,7 @@ ListButton.propTypes = {
 };
 
 const BlocksToolbar = () => {
-  const modifiers = useModifiers();
+  const modifiers = useModifiersStore();
 
   return (
     <Toolbar.Root asChild>

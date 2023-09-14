@@ -18,7 +18,7 @@ const InlineCode = styled.code`
     monospace;
 `;
 
-export function useModifiers() {
+export function useModifiersStore() {
   const editor = useSlate();
   const modifiers = Editor.marks(editor);
 
