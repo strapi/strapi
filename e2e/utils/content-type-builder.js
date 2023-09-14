@@ -26,9 +26,9 @@ export async function deleteComponent({ page, displayName }) {
 
   // The strapi update notifier alert might be displayed in front
   // of the edit button, which prevents the click from working
-  try {
+  if (await page.getByLabel('Close').isVisible()) {
     await page.getByLabel('Close').click();
-  } catch (err) {}
+  }
 
   await page.getByRole('button', { name: 'Edit' }).click();
   await page.getByRole('button', { name: 'Delete' }).click();
