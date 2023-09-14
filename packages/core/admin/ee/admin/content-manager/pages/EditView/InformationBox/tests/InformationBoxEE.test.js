@@ -1,8 +1,9 @@
 import React from 'react';
 
+import { fixtures } from '@strapi/admin-test-utils';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { render } from '@testing-library/react';
+import { RBACContext, useCMEditViewDataManager } from '@strapi/helper-plugin';
+import { render as renderRTL, waitFor } from '@testing-library/react';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 import { IntlProvider } from 'react-intl';
@@ -26,12 +27,7 @@ const server = setupServer(
     res(
       ctx.json({
         data: {
-          results: [
-            {
-              id: 1,
-            },
-          ],
-
+          results: [],
           pagination: {
             page: 1,
           },
@@ -40,23 +36,40 @@ const server = setupServer(
     )
   ),
 
-  rest.get('*/review-workflows/workflows', (req, res, ctx) =>
+  rest.get('*/review-workflows/workflows/', (req, res, ctx) =>
     res(
       ctx.json({
         data: [
           {
             id: 1,
+            stages: [
+              {
+                id: 1,
+                color: '#4945FF',
+                name: 'Stage 1',
+              },
+            ],
           },
         ],
+      })
+    )
+  ),
+
+  rest.get('*/license-limit-information', (req, res, ctx) =>
+    res(
+      ctx.json({
+        data: {},
       })
     )
   )
 );
 
-const setup = (props) => {
-  return render(<InformationBoxEE {...props} />, {
+const render = (props) => {
+  return renderRTL(<InformationBoxEE {...props} />, {
     wrapper({ children }) {
-      const store = createStore((state = {}) => state, {});
+      const store = createStore((state = {}) => state, {
+        admin_app: { permissions: fixtures.permissions.app },
+      });
       const queryClient = new QueryClient({
         defaultOptions: {
           queries: {
@@ -66,13 +79,15 @@ const setup = (props) => {
       });
 
       return (
-        <Provider store={store}>
-          <QueryClientProvider client={queryClient}>
-            <IntlProvider locale="en" defaultLocale="en">
-              <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
-            </IntlProvider>
-          </QueryClientProvider>
-        </Provider>
+        <RBACContext.Provider value={{ allPermissions: fixtures.permissions.allPermissions }}>
+          <Provider store={store}>
+            <QueryClientProvider client={queryClient}>
+              <IntlProvider locale="en" defaultLocale="en">
+                <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
+              </IntlProvider>
+            </QueryClientProvider>
+          </Provider>
+        </RBACContext.Provider>
       );
     },
   });
@@ -87,7 +102,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
     server.close();
   });
 
-  it('renders the title and body of the Information component', () => {
+  it('renders the title and body of the Information component', async () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {},
       isCreatingEntry: true,
@@ -98,13 +113,13 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
       },
     });
 
-    const { getByText } = setup();
+    const { getByText } = render();
 
-    expect(getByText('Information')).toBeInTheDocument();
-    expect(getByText('Last update')).toBeInTheDocument();
+    await waitFor(() => expect(getByText('Information')).toBeInTheDocument());
+    await waitFor(() => expect(getByText('Last update')).toBeInTheDocument());
   });
 
-  it('renders neither stage nor assignee select inputs, if no nothing is returned for an entity', () => {
+  it('renders neither stage nor assignee select inputs, if no nothing is returned for an entity', async () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {},
       layout: {
@@ -114,12 +129,12 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
       },
     });
 
-    const { queryByRole } = setup();
+    const { queryByRole } = render();
 
-    expect(queryByRole('combobox')).not.toBeInTheDocument();
+    await waitFor(() => expect(queryByRole('combobox')).not.toBeInTheDocument());
   });
 
-  it.skip('renders stage and assignee select inputs, if it is returned for an entity', () => {
+  it('renders stage and assignee select inputs, if both are set on an entity', async () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {
         [STAGE_ATTRIBUTE_NAME]: {
@@ -132,7 +147,6 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
         [ASSIGNEE_ATTRIBUTE_NAME]: {
           id: 1,
           firstname: 'Firstname',
-          lastname: 'Lastname',
         },
       },
       layout: {
@@ -143,8 +157,8 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
       },
     });
 
-    const { queryAllByRole } = setup();
+    const { queryAllByRole } = render();
 
-    expect(queryAllByRole('combobox').length).toBe(2);
+    await waitFor(() => expect(queryAllByRole('combobox').length).toBe(2));
   });
 });

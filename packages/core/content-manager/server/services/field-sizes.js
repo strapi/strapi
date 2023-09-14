@@ -53,6 +53,10 @@ const createFieldSizesService = ({ strapi }) => {
       return fieldSizes;
     },
 
+    hasFieldSize(type) {
+      return !!fieldSizes[type];
+    },
+
     getFieldSize(type) {
       if (!type) {
         throw new ApplicationError('The type is required');
