@@ -88,22 +88,22 @@ ModifierButton.propTypes = {
   }).isRequired,
 };
 
-const isBlockActive = (editor, type, level = undefined) => {
+const isBlockActive = (editor, value) => {
   const { selection } = editor;
 
   if (!selection) return false;
 
   let matchCondition;
 
-  switch (type) {
+  switch (value.type) {
     case 'paragraph':
-      matchCondition = (n) => n.type === type;
+      matchCondition = (n) => n.type === value.type;
       break;
     case 'heading':
-      matchCondition = (n) => n.type === type && n.level === level;
+      matchCondition = (n) => n.type === value.type && n.level === value?.level;
       break;
     default:
-      matchCondition = (n) => n.type === type;
+      matchCondition = (n) => n.type === value.type;
       break;
   }
 
@@ -117,16 +117,20 @@ const isBlockActive = (editor, type, level = undefined) => {
   return match.length > 0;
 };
 
-const toggleBlock = (editor, format, blockType = 'paragraph', level = undefined) => {
+const toggleBlock = (editor, format, value) => {
   Transforms.unwrapNodes(editor, {
     match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n),
     split: true,
   });
 
-  let newProperties = {
-    type: blockType,
-    level: level || undefined,
-  };
+  const { type, level } = value;
+
+  let newProperties = level
+    ? {
+        type,
+        level,
+      }
+    : { type };
 
   Transforms.setNodes(editor, newProperties);
 };
@@ -140,12 +144,7 @@ const BlocksDropdown = () => {
    * @param {string} optionKey - key of the heading selected
    */
   const selectOption = (optionKey) => {
-    toggleBlock(
-      editor,
-      blockItems[optionKey].name,
-      blockItems[optionKey].value.type,
-      blockItems[optionKey].value.level
-    );
+    toggleBlock(editor, blockItems[optionKey].name, blockItems[optionKey].value);
 
     setOptionSelected(optionKey);
   };
@@ -169,11 +168,7 @@ const BlockOption = ({ value, icon, label, onActive }) => {
   const { formatMessage } = useIntl();
   const editor = useSlate();
 
-  const isActive = isBlockActive(
-    editor,
-    blockItems[value].value.type,
-    blockItems[value].value.level
-  );
+  const isActive = isBlockActive(editor, blockItems[value].value);
 
   if (isActive) {
     onActive(value);
