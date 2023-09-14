@@ -1,32 +1,27 @@
 import React from 'react';
 
-import { fixtures } from '@strapi/admin-test-utils';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { TrackingProvider } from '@strapi/helper-plugin';
-import { render, screen, within } from '@testing-library/react';
+import { NotificationsProvider } from '@strapi/helper-plugin';
+import { render as renderRTL, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { Provider } from 'react-redux';
-import { Router } from 'react-router-dom';
-import { createStore } from 'redux';
+import { MemoryRouter, Route } from 'react-router-dom';
 
-import MarketPlacePage from '../index';
+import { MarketPlacePage } from '../index';
 
 import server from './server';
 
 // Increase the jest timeout to accommodate long running tests
 jest.setTimeout(50000);
-const toggleNotification = jest.fn();
-jest.mock('../../../hooks/useNavigatorOnLine', () => jest.fn(() => true));
+
+/**
+ * MOCKS
+ */
 jest.mock('../../../hooks/useDebounce', () => (value) => value);
+jest.mock('../../../hooks/useNavigatorOnLine', () => jest.fn(() => true));
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn(() => {
-    return toggleNotification;
-  }),
-  CheckPagePermissions: ({ children }) => children,
   useAppInfo: jest.fn(() => ({
     autoReload: true,
     dependencies: {
@@ -37,12 +32,11 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-const setup = (props) => ({
-  ...render(<MarketPlacePage {...props} />, {
+let testLocation = null;
+
+const render = (props) => ({
+  ...renderRTL(<MarketPlacePage {...props} />, {
     wrapper({ children }) {
-      const history = createMemoryHistory({
-        initialEntries: ['/?npmPackageType=provider&sort=name:asc'],
-      });
       const client = new QueryClient({
         defaultOptions: {
           queries: {
@@ -52,21 +46,25 @@ const setup = (props) => ({
       });
 
       return (
-        <Provider
-          store={createStore((state) => state, {
-            admin_app: { permissions: fixtures.permissions.app },
-          })}
-        >
-          <QueryClientProvider client={client}>
-            <TrackingProvider>
-              <IntlProvider locale="en" messages={{}} textComponent="span">
-                <ThemeProvider theme={lightTheme}>
-                  <Router history={history}>{children}</Router>
-                </ThemeProvider>
-              </IntlProvider>
-            </TrackingProvider>
-          </QueryClientProvider>
-        </Provider>
+        <QueryClientProvider client={client}>
+          <IntlProvider locale="en" messages={{}} textComponent="span">
+            <ThemeProvider theme={lightTheme}>
+              <NotificationsProvider>
+                <MemoryRouter initialEntries={['/?npmPackageType=provider&sort=name:asc']}>
+                  {children}
+                  <Route
+                    path="*"
+                    render={({ location }) => {
+                      testLocation = location;
+
+                      return null;
+                    }}
+                  />
+                </MemoryRouter>
+              </NotificationsProvider>
+            </ThemeProvider>
+          </IntlProvider>
+        </QueryClientProvider>
       );
     },
   }),
@@ -75,7 +73,7 @@ const setup = (props) => ({
 });
 
 const waitForReload = async () => {
-  await screen.findByTestId('marketplace-results');
+  await waitFor(() => expect(screen.queryByText('Loading content...')).not.toBeInTheDocument());
 };
 
 describe('Marketplace page - providers tab', () => {
@@ -88,7 +86,7 @@ describe('Marketplace page - providers tab', () => {
   afterAll(() => server.close());
 
   it('renders the providers tab', async () => {
-    const { getByText, getByRole, queryByText } = setup();
+    const { getByText, getByRole, queryByText } = render();
 
     await waitForReload();
 
@@ -106,7 +104,7 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('should return providers search results matching the query', async () => {
-    const { getByText, getByPlaceholderText, user, queryByText } = setup();
+    const { getByText, getByPlaceholderText, user, queryByText } = render();
 
     await waitForReload();
 
@@ -125,7 +123,7 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('should return empty providers search results given a bad query', async () => {
-    const { getByText, getByPlaceholderText, user } = setup();
+    const { getByText, getByPlaceholderText, user } = render();
 
     await waitForReload();
 
@@ -139,7 +137,7 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('shows the installed text for installed providers', async () => {
-    const { getByRole, user } = setup();
+    const { getByRole, user } = render();
 
     await waitForReload();
 
@@ -163,11 +161,11 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('shows providers filters popover', async () => {
-    const { getByRole, getByTestId, user } = setup();
+    const { getByRole, user } = render();
 
     await waitForReload();
 
-    const filtersButton = getByTestId('filters-button');
+    const filtersButton = getByRole('button', { name: 'Filters' });
 
     // Only show collections filters on providers
     const providersTab = getByRole('tab', { name: /providers/i });
@@ -178,42 +176,34 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('shows the collections filter options', async () => {
-    const { getByRole, getByTestId, user } = setup();
+    const { getByRole, user } = render();
 
     await waitForReload();
 
-    const filtersButton = getByTestId('filters-button');
+    const filtersButton = getByRole('button', { name: 'Filters' });
     await user.click(filtersButton);
 
     const collectionsButton = getByRole('combobox', { name: 'Collections' });
     await user.click(collectionsButton);
 
-    const mockedServerCollections = {
-      'Made by official partners': 0,
-      'Made by Strapi': 6,
-      'Made by the community': 2,
-      Verified: 6,
-    };
-
-    Object.entries(mockedServerCollections).forEach(([collectionName, count]) => {
-      const option = screen.getByTestId(`${collectionName}-${count}`);
-      expect(option).toBeVisible();
+    [
+      'Made by official partners (0)',
+      'Made by Strapi (6)',
+      'Made by the community (2)',
+      'Verified (6)',
+    ].forEach((name) => {
+      expect(getByRole('option', { name })).toBeVisible();
     });
   });
 
   it('filters a collection option', async () => {
-    const { getAllByTestId, getByRole, getByTestId, getByText, queryByText, user } = setup();
+    const { getAllByTestId, getByRole, getByText, queryByText, user } = render();
 
     await waitForReload();
 
-    const filtersButton = getByTestId('filters-button');
-    await user.click(filtersButton);
-
-    const collectionsButton = getByRole('combobox', { name: 'Collections' });
-    await user.click(collectionsButton);
-
-    const option = getByTestId('Made by Strapi-6');
-    await user.click(option);
+    await user.click(getByRole('button', { name: 'Filters' }));
+    await user.click(getByRole('combobox', { name: 'Collections' }));
+    await user.click(getByRole('option', { name: 'Made by Strapi (6)' }));
     // Close the combobox
     await user.keyboard('[Escape]');
     // Close the popover
@@ -221,8 +211,7 @@ describe('Marketplace page - providers tab', () => {
 
     await waitForReload();
 
-    const optionTag = getByRole('button', { name: 'Made by Strapi' });
-    expect(optionTag).toBeVisible();
+    expect(getByRole('button', { name: 'Made by Strapi' })).toBeVisible();
 
     const collectionCards = getAllByTestId('npm-package-card');
     expect(collectionCards.length).toEqual(2);
@@ -234,13 +223,13 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('filters multiple collection options', async () => {
-    const { getAllByTestId, getByRole, getByTestId, getByText, queryByText, user } = setup();
+    const { getAllByTestId, getByRole, getByText, queryByText, user } = render();
 
     await waitForReload();
 
-    await user.click(getByTestId('filters-button'));
+    await user.click(getByRole('button', { name: 'Filters' }));
     await user.click(getByRole('combobox', { name: 'Collections' }));
-    await user.click(getByTestId('Made by Strapi-6'));
+    await user.click(getByRole('option', { name: 'Made by Strapi (6)' }));
     // Close the combobox
     await user.keyboard('[Escape]');
     // Close the popover
@@ -248,7 +237,7 @@ describe('Marketplace page - providers tab', () => {
 
     await waitForReload();
 
-    await user.click(getByTestId('filters-button'));
+    await user.click(getByRole('button', { name: 'Filters' }));
     await user.click(getByRole('combobox', { name: `Collections` }));
     await user.click(getByRole('option', { name: `Verified (6)` }));
     // Close the combobox
@@ -268,46 +257,36 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('removes a filter option tag', async () => {
-    const { getByRole, getByTestId, user } = setup();
+    const { getByRole, user } = render();
 
     await waitForReload();
 
-    const filtersButton = getByTestId('filters-button');
-    await user.click(filtersButton);
+    await user.click(getByRole('button', { name: 'Filters' }));
+    await user.click(getByRole('combobox', { name: 'Collections' }));
 
-    const collectionsButton = getByRole('combobox', { name: 'Collections' });
-    await user.click(collectionsButton);
+    await user.click(getByRole('option', { name: 'Made by Strapi (6)' }));
 
-    const option = getByTestId('Made by Strapi-6');
-    await user.click(option);
     // Close the combobox
     await user.keyboard('[Escape]');
     // Close the popover
     await user.keyboard('[Escape]');
+
     await waitForReload();
 
-    const optionTag = getByRole('button', { name: 'Made by Strapi' });
-    expect(optionTag).toBeVisible();
+    await user.click(getByRole('button', { name: 'Made by Strapi' }));
 
-    await user.click(optionTag);
-
-    expect(optionTag).not.toBeVisible();
-    // expect(history.location.search).toBe('?npmPackageType=provider&sort=name:asc&page=1');
+    await waitForReload();
+    expect(testLocation.search).toBe('?npmPackageType=provider&sort=name:asc&page=1');
   });
 
   it('only filters in the providers tab', async () => {
-    const { getAllByTestId, getByRole, getByTestId, findAllByTestId, findByText, user } = setup();
+    const { getAllByTestId, getByRole, findAllByTestId, findByText, user } = render();
 
     await waitForReload();
 
-    const filtersButton = getByTestId('filters-button');
-    await user.click(filtersButton);
-
-    const collectionsButton = getByRole('combobox', { name: 'Collections' });
-    await user.click(collectionsButton);
-
-    const option = getByTestId('Made by Strapi-6');
-    await user.click(option);
+    await user.click(getByRole('button', { name: 'Filters' }));
+    await user.click(getByRole('combobox', { name: 'Collections' }));
+    await user.click(getByRole('option', { name: 'Made by Strapi (6)' }));
     // Close the combobox
     await user.keyboard('[Escape]');
     // Close the popover
@@ -326,7 +305,7 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('shows the correct options on sort select', async () => {
-    const { getByRole, user } = setup();
+    const { getByRole, user } = render();
 
     await waitForReload();
 
@@ -341,7 +320,7 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('changes the url on sort option select', async () => {
-    const { getByRole, user } = setup();
+    const { getByRole, user } = render();
 
     await waitForReload();
 
@@ -351,18 +330,17 @@ describe('Marketplace page - providers tab', () => {
     const newestOption = getByRole('option', { name: 'Newest' });
     await user.click(newestOption);
 
-    // expect(history.location.search).toEqual(
-    //   '?npmPackageType=provider&sort=submissionDate:desc&page=1'
-    // );
+    await waitForReload();
+
+    expect(testLocation.search).toEqual('?npmPackageType=provider&sort=submissionDate:desc&page=1');
   });
 
   it('shows github stars and weekly downloads count for each provider', async () => {
-    const { getByRole, user } = setup();
+    const { getByRole, user } = render();
 
     await waitForReload();
 
-    const providersTab = getByRole('tab', { name: /providers/i });
-    await user.click(providersTab);
+    await user.click(getByRole('tab', { name: /providers/i }));
 
     const cloudinaryCard = screen
       .getAllByTestId('npm-package-card')
@@ -380,7 +358,7 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('paginates the results', async () => {
-    const { getByText, getByLabelText, getAllByText, user } = setup();
+    const { getByText, getByLabelText, getAllByText, user } = render();
 
     await waitForReload();
 
@@ -396,16 +374,16 @@ describe('Marketplace page - providers tab', () => {
     // Can go to next page
     await user.click(getByText(/go to next page/i).closest('a'));
     await waitForReload();
-    // expect(history.location.search).toBe('?npmPackageType=provider&sort=name:asc&page=2');
+    expect(testLocation.search).toBe('?npmPackageType=provider&sort=name:asc&page=2');
 
     // Can go to previous page
     await user.click(getByText(/go to previous page/i).closest('a'));
     await waitForReload();
-    // expect(history.location.search).toBe('?npmPackageType=provider&sort=name:asc&page=1');
+    expect(testLocation.search).toBe('?npmPackageType=provider&sort=name:asc&page=1');
 
     // Can go to specific page
     await user.click(getByText(/go to page 3/i).closest('a'));
     await waitForReload();
-    // expect(history.location.search).toBe('?npmPackageType=provider&sort=name:asc&page=3');
+    expect(testLocation.search).toBe('?npmPackageType=provider&sort=name:asc&page=3');
   });
 });
