@@ -211,6 +211,8 @@ const testData = {
       },
     ],
     name: 'name',
+    createdAt: '2020-04-28T13:22:13.033Z',
+    updatedAt: '2020-04-28T13:22:13.033Z',
     notrepeatable: {
       name: 'name',
       password: 'password',
