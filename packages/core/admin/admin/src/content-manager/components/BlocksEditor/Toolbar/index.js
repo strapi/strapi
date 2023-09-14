@@ -3,20 +3,14 @@ import * as React from 'react';
 import * as Toolbar from '@radix-ui/react-toolbar';
 import { Flex, Icon, Tooltip } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
-import {
-  Bold,
-  Italic,
-  Underline,
-  StrikeThrough,
-  Code,
-  BulletList,
-  NumberList,
-} from '@strapi/icons';
+import { NumberList, BulletList } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Editor, Element, Transforms } from 'slate';
 import { useSlate } from 'slate-react';
 import styled from 'styled-components';
+
+import { useModifiers } from '../hooks/useModifiers';
 
 const Separator = styled(Toolbar.Separator)`
   background: ${({ theme }) => theme.colors.neutral150};
@@ -67,76 +61,6 @@ ToolbarButton.propTypes = {
   isActive: PropTypes.bool.isRequired,
   handleClick: PropTypes.func.isRequired,
 };
-
-const ModifierButton = ({ icon, name, label }) => {
-  const editor = useSlate();
-
-  const isModifierActive = () => {
-    const modifiers = Editor.marks(editor);
-
-    if (!modifiers) return false;
-
-    return Boolean(modifiers[name]);
-  };
-
-  const isActive = isModifierActive();
-
-  const toggleModifier = () => {
-    if (isActive) {
-      Editor.removeMark(editor, name);
-    } else {
-      Editor.addMark(editor, name, true);
-    }
-  };
-
-  return (
-    <ToolbarButton
-      icon={icon}
-      name={name}
-      label={label}
-      isActive={isActive}
-      handleClick={toggleModifier}
-    />
-  );
-};
-
-ModifierButton.propTypes = {
-  icon: PropTypes.elementType.isRequired,
-  name: PropTypes.string.isRequired,
-  label: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-  }).isRequired,
-};
-
-// TODO: extract a store of modifiers that rules both the toolbar and the leaf renderers
-const modifiers = [
-  {
-    name: 'bold',
-    icon: Bold,
-    label: { id: 'components.Blocks.modifiers.bold', defaultMessage: 'Bold' },
-  },
-  {
-    name: 'italic',
-    icon: Italic,
-    label: { id: 'components.Blocks.modifiers.italic', defaultMessage: 'Italic' },
-  },
-  {
-    name: 'underline',
-    icon: Underline,
-    label: { id: 'components.Blocks.modifiers.underline', defaultMessage: 'Underline' },
-  },
-  {
-    name: 'strikethrough',
-    icon: StrikeThrough,
-    label: { id: 'components.Blocks.modifiers.strikethrough', defaultMessage: 'Strikethrough' },
-  },
-  {
-    name: 'code',
-    icon: Code,
-    label: { id: 'components.Blocks.modifiers.code', defaultMessage: 'Code' },
-  },
-];
 
 const ListButton = ({ icon, format, label }) => {
   const editor = useSlate();
@@ -207,17 +131,21 @@ ListButton.propTypes = {
 };
 
 const BlocksToolbar = () => {
+  const modifiers = useModifiers();
+
   return (
     <Toolbar.Root asChild>
       <Flex gap={1} padding={2}>
         <Toolbar.ToggleGroup type="multiple" asChild>
           <Flex gap={1}>
             {modifiers.map((modifier) => (
-              <ModifierButton
+              <ToolbarButton
                 key={modifier.name}
-                label={modifier.label}
-                name={modifier.name}
                 icon={modifier.icon}
+                name={modifier.name}
+                label={modifier.label}
+                isActive={modifier.checkIsActive()}
+                handleClick={modifier.handleToggle}
               />
             ))}
           </Flex>
