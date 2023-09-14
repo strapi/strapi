@@ -142,4 +142,44 @@ describe('BlocksEditor toolbar', () => {
       },
     ]);
   });
+  it('transforms the selection to a heading when selected and trasform it back to text when selected again', async () => {
+    setup();
+
+    const headingsDropdown = screen.getByRole('combobox');
+
+    Transforms.setSelection(baseEditor, {
+      anchor: { path: [0, 0], offset: 2 },
+    });
+
+    await user.click(headingsDropdown);
+
+    await user.click(screen.getByRole('option', { name: 'Heading 1' }));
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'heading',
+        level: 1,
+        children: [
+          {
+            text: 'A line of text in a paragraph.',
+          },
+        ],
+      },
+    ]);
+
+    await user.click(headingsDropdown);
+
+    await user.click(screen.getByRole('option', { name: 'Text' }));
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            text: 'A line of text in a paragraph.',
+          },
+        ],
+      },
+    ]);
+  });
 });

@@ -145,20 +145,13 @@ const isBlockActive = (editor, value) => {
   return match.length > 0;
 };
 
-const toggleBlock = (editor, format, value) => {
-  Transforms.unwrapNodes(editor, {
-    match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n),
-    split: true,
-  });
-
+const toggleBlock = (editor, value) => {
   const { type, level } = value;
 
-  let newProperties = level
-    ? {
-        type,
-        level,
-      }
-    : { type };
+  let newProperties = {
+    type,
+    level: level || null,
+  };
 
   Transforms.setNodes(editor, newProperties);
 };
@@ -171,7 +164,7 @@ const BlocksDropdown = () => {
    * @param {string} optionKey - key of the heading selected
    */
   const selectOption = (optionKey) => {
-    toggleBlock(editor, blockItems[optionKey].name, blockItems[optionKey].value);
+    toggleBlock(editor, blockItems[optionKey].value);
 
     setOptionSelected(optionKey);
   };
@@ -180,7 +173,7 @@ const BlocksDropdown = () => {
     <Select
       startIcon={<Icon as={blockItems[optionSelected].icon} />}
       onChange={selectOption}
-      placeholder="Select"
+      placeholder={blockItems[optionSelected].label}
       value={optionSelected}
     >
       {Object.keys(blockItems).map((key) => (
@@ -190,19 +183,20 @@ const BlocksDropdown = () => {
           label={blockItems[key].label}
           icon={blockItems[key].icon}
           onActive={setOptionSelected}
+          optionSelected={optionSelected}
         />
       ))}
     </Select>
   );
 };
 
-const BlockOption = ({ value, icon, label, onActive }) => {
+const BlockOption = ({ value, icon, label, onActive, optionSelected }) => {
   const { formatMessage } = useIntl();
   const editor = useSlate();
 
   const isActive = isBlockActive(editor, blockItems[value].value);
 
-  if (isActive) {
+  if (isActive && value !== optionSelected) {
     onActive(value);
   }
 
@@ -224,6 +218,7 @@ BlockOption.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
   }).isRequired,
   onActive: PropTypes.func.isRequired,
+  optionSelected: PropTypes.string.isRequired,
 };
 
 // TODO: extract a store of modifiers that rules both the toolbar and the leaf renderers
