@@ -33,7 +33,7 @@ class Database {
 
     // for each new connection created in the pool...
     const onAfterCreate = (nativeConnection, done) => {
-      // run initialize for it since commands such as postgres SET and sqlite PRAGMA commands are per-connection
+      // run initialize for it since commands such as postgres SET and sqlite PRAGMA are per-connection
       this.dialect.initialize(nativeConnection).then(() => {
         return done(null, nativeConnection);
       });
