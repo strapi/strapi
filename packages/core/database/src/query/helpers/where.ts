@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { isArray, castArray, keys, isPlainObject } from 'lodash/fp';
+import type { Knex } from 'knex';
 
 import { isOperatorOfType } from '@strapi/utils';
 import * as types from '../../types';
@@ -117,11 +119,10 @@ const processWhere = (where: unknown, ctx: WhereCtx): unknown => {
       continue;
     }
 
-    if (types.isRelation(attribute.type)) {
+    if (types.isRelation(attribute.type) && 'target' in attribute) {
       // attribute
       const subAlias = createJoin(ctx, {
         alias: alias || qb.alias,
-        uid,
         attributeName: key,
         attribute,
       });
@@ -158,8 +159,33 @@ const processWhere = (where: unknown, ctx: WhereCtx): unknown => {
   return filters;
 };
 
+type Operator =
+  | '$eq'
+  | '$ne'
+  | '$nei'
+  | '$in'
+  | '$notIn'
+  | '$lt'
+  | '$lte'
+  | '$gt'
+  | '$gte'
+  | '$between'
+  | '$contains'
+  | '$notContains'
+  | '$containsi'
+  | '$notContainsi'
+  | '$startsWith'
+  | '$endsWith'
+  | '$null'
+  | '$notNull'
+  | '$not'
+  | '$eqi'
+  | '$startsWithi'
+  | '$endsWithi'
+  | '$jsonSupersetOf';
+
 // TODO: add type casting per operator at some point
-const applyOperator = (qb, column, operator, value) => {
+const applyOperator = (qb: Knex.QueryBuilder, column: any, operator: Operator, value: any) => {
   if (Array.isArray(value) && !isOperatorOfType('array', operator)) {
     return qb.where((subQB) => {
       value.forEach((subValue) =>
@@ -177,11 +203,15 @@ const applyOperator = (qb, column, operator, value) => {
     }
 
     case '$in': {
+      // @ts-ignore
+      // TODO: fix in v5
       qb.whereIn(column, isKnexQuery(value) ? value : castArray(value));
       break;
     }
 
     case '$notIn': {
+      // @ts-ignore
+      // TODO: fix in v5
       qb.whereNotIn(column, isKnexQuery(value) ? value : castArray(value));
       break;
     }
@@ -311,7 +341,11 @@ const applyOperator = (qb, column, operator, value) => {
   }
 };
 
-const applyWhereToColumn = (qb, column, columnWhere) => {
+const applyWhereToColumn = (
+  qb: Knex.QueryBuilder,
+  column: string,
+  columnWhere: Record<Operator, unknown> | Array<Record<Operator, unknown>>
+) => {
   if (!isObj(columnWhere)) {
     if (Array.isArray(columnWhere)) {
       return qb.whereIn(column, columnWhere);
@@ -320,46 +354,63 @@ const applyWhereToColumn = (qb, column, columnWhere) => {
     return qb.where(column, columnWhere);
   }
 
-  Object.keys(columnWhere).forEach((operator) => {
+  const keys = Object.keys(columnWhere) as Operator[];
+
+  keys.forEach((operator) => {
     const value = columnWhere[operator];
 
     applyOperator(qb, column, operator, value);
   });
 };
 
-const applyWhere = (qb, where) => {
+type Where =
+  | {
+      $and?: Where[];
+      $or?: Where[];
+      $not?: Where;
+      [key: string]: any;
+    }
+  | Array<Where>;
+
+const applyWhere = (qb: Knex.QueryBuilder, where: Where) => {
   if (!isArray(where) && !isObj(where)) {
     throw new Error('Where must be an array or an object');
   }
 
   if (isArray(where)) {
-    return qb.where((subQB) => where.forEach((subWhere) => applyWhere(subQB, subWhere)));
+    return qb.where((subQB: Knex.QueryBuilder) =>
+      where.forEach((subWhere) => applyWhere(subQB, subWhere))
+    );
   }
 
   Object.keys(where).forEach((key) => {
-    const value = where[key];
-
     if (key === '$and') {
-      return qb.where((subQB) => {
+      const value = where[key] ?? [];
+
+      return qb.where((subQB: Knex.QueryBuilder) => {
         value.forEach((v) => applyWhere(subQB, v));
       });
     }
 
     if (key === '$or') {
-      return qb.where((subQB) => {
+      const value = where[key] ?? [];
+
+      return qb.where((subQB: Knex.QueryBuilder) => {
         value.forEach((v) => subQB.orWhere((inner) => applyWhere(inner, v)));
       });
     }
 
     if (key === '$not') {
+      const value = where[key] ?? {};
+
       return qb.whereNot((qb) => applyWhere(qb, value));
     }
 
-    applyWhereToColumn(qb, key, value);
+    applyWhereToColumn(qb, key, where[key]);
   });
 };
 
-const fieldLowerFn = (qb) => {
+const fieldLowerFn = (qb: Knex.QueryBuilder) => {
   // Postgres requires string to be passed
   if (qb.client.config.client === 'postgres') {
     return 'LOWER(CAST(?? AS VARCHAR))';

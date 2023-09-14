@@ -1,1 +1,1 @@
-export { ReadableQuery } from './readable';
+export { default as ReadableQuery } from './readable';
