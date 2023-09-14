@@ -192,7 +192,7 @@ const ListButton = ({ icon, format, label }) => {
       name={format}
       label={label}
       isActive={isActive}
-      handleClick={() => toggleList()}
+      handleClick={toggleList}
     />
   );
 };
