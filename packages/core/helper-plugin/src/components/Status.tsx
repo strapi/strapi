@@ -1,10 +1,10 @@
 import React from 'react';
 
-import { StatusVariant, StrapiTheme as DSTheme } from '@strapi/design-system';
-import styled from 'styled-components';
+import { StatusVariant } from '@strapi/design-system';
+import styled, { DefaultTheme } from 'styled-components';
 
 type BulletProps = {
-  backgroundColor: keyof DSTheme['colors'];
+  backgroundColor: keyof DefaultTheme['colors'];
 };
 
 const Bullet = styled.div<BulletProps>`
