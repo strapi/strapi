@@ -15,7 +15,7 @@ module.exports = ({ strapi }) => {
   const permissionService = getService('permission');
 
   return {
-    async register(roleId, action, fromStage) {
+    async register({ roleId, action, fromStage }) {
       if (!validActions.includes(action)) {
         throw new ApplicationError(`Invalid action ${action}`);
       }
