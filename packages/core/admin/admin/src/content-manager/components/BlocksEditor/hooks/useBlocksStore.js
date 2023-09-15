@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { Box, Typography, BaseLink } from '@strapi/design-system';
+import PropTypes from 'prop-types';
 import styled, { css } from 'styled-components';
 
 const H1 = styled(Typography).attrs({ as: 'h1' })`
@@ -50,6 +51,14 @@ const Heading = ({ attributes, children, element }) => {
     default: // do nothing
       return null;
   }
+};
+
+Heading.propTypes = {
+  attributes: PropTypes.object.isRequired,
+  children: PropTypes.node.isRequired,
+  element: PropTypes.shape({
+    level: PropTypes.oneOf([1, 2, 3, 4, 5, 6]).isRequired,
+  }).isRequired,
 };
 
 const CodeBlock = styled.pre`
@@ -104,6 +113,14 @@ const List = ({ attributes, children, element }) => {
   return <Unorderedlist {...attributes}>{children}</Unorderedlist>;
 };
 
+List.propTypes = {
+  attributes: PropTypes.object.isRequired,
+  children: PropTypes.node.isRequired,
+  element: PropTypes.shape({
+    format: PropTypes.string.isRequired,
+  }).isRequired,
+};
+
 const Img = styled.img`
   max-width: 100%;
 `;
@@ -119,6 +136,19 @@ const Image = ({ attributes, children, element }) => {
       </Box>
     </Box>
   );
+};
+
+Image.propTypes = {
+  attributes: PropTypes.object.isRequired,
+  children: PropTypes.node.isRequired,
+  element: PropTypes.shape({
+    image: PropTypes.shape({
+      url: PropTypes.string.isRequired,
+      alternativeText: PropTypes.string,
+      width: PropTypes.number,
+      height: PropTypes.number,
+    }).isRequired,
+  }).isRequired,
 };
 
 export function useBlocksStore() {
