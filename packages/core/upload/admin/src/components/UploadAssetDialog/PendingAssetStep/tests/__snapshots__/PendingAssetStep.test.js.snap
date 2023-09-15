@@ -68,8 +68,6 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   border-radius: 4px;
   border-color: #dcdce4;
   border: 1px solid #dcdce4;
-  width: 2rem;
-  height: 2rem;
   cursor: pointer;
 }
 
@@ -417,7 +415,8 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   color: #666687;
 }
 
-.c18[aria-disabled='true'] svg > g,.c18[aria-disabled='true'] svg path {
+.c18[aria-disabled='true'] svg > g,
+.c18[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -430,7 +429,8 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   color: #666687;
 }
 
-.c18[aria-disabled='true']:active svg > g,.c18[aria-disabled='true']:active svg path {
+.c18[aria-disabled='true']:active svg > g,
+.c18[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -469,7 +469,8 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   color: #666687;
 }
 
-.c56[aria-disabled='true'] svg > g,.c56[aria-disabled='true'] svg path {
+.c56[aria-disabled='true'] svg > g,
+.c56[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -482,7 +483,8 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   color: #666687;
 }
 
-.c56[aria-disabled='true']:active svg > g,.c56[aria-disabled='true']:active svg path {
+.c56[aria-disabled='true']:active svg > g,
+.c56[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -578,19 +580,22 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   max-width: 100%;
 }
 
-.c8 svg > g,
+.c8 {
+  border-color: #dcdce4;
+  height: 2rem;
+  width: 2rem;
+}
+
+.c8 svg g,
 .c8 svg path {
   fill: #8e8ea9;
 }
 
-.c8:hover svg > g,
-.c8:hover svg path {
+.c8:hover svg g,
+.c8:focus svg g,
+.c8:hover svg path,
+.c8:focus svg path {
   fill: #666687;
-}
-
-.c8:active svg > g,
-.c8:active svg path {
-  fill: #a5a5ba;
 }
 
 .c8[aria-disabled='true'] svg path {

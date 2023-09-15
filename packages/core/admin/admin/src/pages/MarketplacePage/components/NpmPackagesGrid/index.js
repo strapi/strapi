@@ -49,7 +49,7 @@ const NpmPackagesGrid = ({
   }
 
   return (
-    <Grid gap={4} data-testid="marketplace-results">
+    <Grid gap={4}>
       {npmPackages.map((npmPackage) => (
         <GridItem col={4} s={6} xs={12} style={{ height: '100%' }} key={npmPackage.id}>
           <NpmPackageCard

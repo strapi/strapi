@@ -7,8 +7,7 @@ const { isObject } = require('lodash');
 const SpeedMeasurePlugin = require('speed-measure-webpack-plugin');
 
 const webpackConfig = require('../webpack.config');
-const { getPlugins } = require('../utils/get-plugins');
-const { createPluginsJs } = require('../utils/create-cache-dir');
+const { getPlugins, createPluginFile } = require('../utils/plugins');
 
 // Wrapper that outputs the webpack speed
 const smp = new SpeedMeasurePlugin();
@@ -30,7 +29,7 @@ const buildAdmin = async () => {
     '@strapi/plugin-users-permissions',
   ]);
 
-  await createPluginsJs(plugins, path.join(__dirname, '..'));
+  await createPluginFile(plugins, path.join(__dirname, '..'));
 
   const args = {
     entry,
