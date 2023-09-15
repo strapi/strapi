@@ -5,12 +5,14 @@ import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
 import Blocks from '../index';
+import { blocksData } from '../tempSchema';
 
 const setup = (props) =>
   render(
     <Blocks
       intlLabel={{ id: 'blocks', defaultMessage: 'blocks type' }}
       name="blocks-editor"
+      value={{ version: '0.0.0', blocks: blocksData }}
       {...props}
     />,
     {

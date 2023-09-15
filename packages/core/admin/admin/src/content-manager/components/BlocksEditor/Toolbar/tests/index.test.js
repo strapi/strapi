@@ -13,12 +13,7 @@ import { BlocksToolbar } from '..';
 const initialValue = [
   {
     type: 'paragraph',
-    children: [
-      {
-        type: 'text',
-        text: 'A line of text in a paragraph.',
-      },
-    ],
+    children: [{ type: 'text', text: 'A line of text in a paragraph.' }],
   },
 ];
 
