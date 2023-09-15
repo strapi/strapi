@@ -191,6 +191,7 @@ export function useBlocksStore() {
           value: {
             type: 'paragraph',
           },
+          matchNode: (node) => node.type === 'paragraph',
         },
       },
     },
@@ -207,6 +208,7 @@ export function useBlocksStore() {
             type: 'heading',
             level: 1,
           },
+          matchNode: (node) => node.type === 'heading' && node.level === 1,
         },
         'heading-two': {
           icon: Code, // TODO replace with the correct icon once released
@@ -218,6 +220,7 @@ export function useBlocksStore() {
             type: 'heading',
             level: 2,
           },
+          matchNode: (node) => node.type === 'heading' && node.level === 2,
         },
         'heading-three': {
           icon: Code, // TODO replace with the correct icon once released
@@ -229,6 +232,7 @@ export function useBlocksStore() {
             type: 'heading',
             level: 3,
           },
+          matchNode: (node) => node.type === 'heading' && node.level === 3,
         },
         'heading-four': {
           icon: Code, // TODO replace with the correct icon once released
@@ -240,6 +244,7 @@ export function useBlocksStore() {
             type: 'heading',
             level: 4,
           },
+          matchNode: (node) => node.type === 'heading' && node.level === 4,
         },
         'heading-five': {
           icon: Code, // TODO replace with the correct icon once released
@@ -251,6 +256,7 @@ export function useBlocksStore() {
             type: 'heading',
             level: 5,
           },
+          matchNode: (node) => node.type === 'heading' && node.level === 5,
         },
         'heading-six': {
           icon: Code, // TODO replace with the correct icon once released
@@ -262,6 +268,7 @@ export function useBlocksStore() {
             type: 'heading',
             level: 6,
           },
+          matchNode: (node) => node.type === 'heading' && node.level === 6,
         },
       },
     },

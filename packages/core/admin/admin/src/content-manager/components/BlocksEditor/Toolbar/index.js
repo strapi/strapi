@@ -104,26 +104,15 @@ ModifierButton.propTypes = {
   }).isRequired,
 };
 
-const isBlockActive = (editor, value) => {
+const isBlockActive = (editor, matchNode) => {
   const { selection } = editor;
 
   if (!selection) return false;
 
-  let matchCondition;
-
-  switch (value.type) {
-    case 'heading':
-      matchCondition = (n) => n.type === value.type && n.level === value?.level;
-      break;
-    default:
-      matchCondition = (n) => n.type === value.type;
-      break;
-  }
-
   const match = Array.from(
     Editor.nodes(editor, {
       at: Editor.unhangRange(editor, selection),
-      match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n) && matchCondition(n),
+      match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n) && matchNode(n),
     })
   );
 
@@ -187,9 +176,9 @@ const BlocksDropdown = () => {
         <BlockOption
           key={key}
           value={key}
-          data={blockItems[key].value}
           label={blockItems[key].label}
           icon={blockItems[key].icon}
+          matchNode={blockItems[key].matchNode}
           handleSelection={setBlockSelected}
           blockSelected={blockSelected}
         />
@@ -198,11 +187,11 @@ const BlocksDropdown = () => {
   );
 };
 
-const BlockOption = ({ value, icon, label, data, handleSelection, blockSelected }) => {
+const BlockOption = ({ value, icon, label, handleSelection, blockSelected, matchNode }) => {
   const { formatMessage } = useIntl();
   const editor = useSlate();
 
-  const isActive = isBlockActive(editor, data);
+  const isActive = isBlockActive(editor, matchNode);
   const isSelected = value === blockSelected;
 
   React.useEffect(() => {
@@ -228,7 +217,7 @@ BlockOption.propTypes = {
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
   }).isRequired,
-  data: PropTypes.object.isRequired,
+  matchNode: PropTypes.func.isRequired,
   handleSelection: PropTypes.func.isRequired,
   blockSelected: PropTypes.string.isRequired,
 };
