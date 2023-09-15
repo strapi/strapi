@@ -10,6 +10,7 @@ export type DynamicValue =
   | '$eq'
   | '$eqi'
   | '$ne'
+  | '$nei'
   | '$gt'
   | '$gte'
   | '$lt'
