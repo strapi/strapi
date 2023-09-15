@@ -1,6 +1,19 @@
 import * as React from 'react';
 
 import { Box, Typography, BaseLink } from '@strapi/design-system';
+import {
+  Code,
+  /**
+   * TODO: add the rest of the icons when the DS will be released
+   Paragraph,
+   HeadingOne,
+   HeadingTwo,
+   HeadingThree,
+   HeadingFour,
+   HeadingFive,
+   HeadingSix,
+   */
+} from '@strapi/icons';
 import PropTypes from 'prop-types';
 import styled, { css } from 'styled-components';
 
@@ -168,9 +181,89 @@ export function useBlocksStore() {
           {props.children}
         </Typography>
       ),
+      variants: {
+        paragraph: {
+          icon: Code,
+          label: {
+            id: 'components.Blocks.blocks.text',
+            defaultMessage: 'Text',
+          },
+          value: {
+            type: 'paragraph',
+          },
+        },
+      },
     },
     heading: {
       renderElement: (props) => <Heading {...props} />,
+      variants: {
+        'heading-one': {
+          icon: Code, // TODO replace with the correct icon once released
+          label: {
+            id: 'components.Blocks.blocks.heading1',
+            defaultMessage: 'Heading 1',
+          },
+          value: {
+            type: 'heading',
+            level: 1,
+          },
+        },
+        'heading-two': {
+          icon: Code, // TODO replace with the correct icon once released
+          label: {
+            id: 'components.Blocks.blocks.heading2',
+            defaultMessage: 'Heading 2',
+          },
+          value: {
+            type: 'heading',
+            level: 2,
+          },
+        },
+        'heading-three': {
+          icon: Code, // TODO replace with the correct icon once released
+          label: {
+            id: 'components.Blocks.blocks.heading3',
+            defaultMessage: 'Heading 3',
+          },
+          value: {
+            type: 'heading',
+            level: 3,
+          },
+        },
+        'heading-four': {
+          icon: Code, // TODO replace with the correct icon once released
+          label: {
+            id: 'components.Blocks.blocks.heading4',
+            defaultMessage: 'Heading 4',
+          },
+          value: {
+            type: 'heading',
+            level: 4,
+          },
+        },
+        'heading-five': {
+          icon: Code, // TODO replace with the correct icon once released
+          label: {
+            id: 'components.Blocks.blocks.heading5',
+            defaultMessage: 'Heading 5',
+          },
+          value: {
+            type: 'heading',
+            level: 5,
+          },
+        },
+        'heading-six': {
+          icon: Code, // TODO replace with the correct icon once released
+          label: {
+            id: 'components.Blocks.blocks.heading6',
+            defaultMessage: 'Heading 6',
+          },
+          value: {
+            type: 'heading',
+            level: 6,
+          },
+        },
+      },
     },
     link: {
       renderElement: (props) => (
@@ -178,6 +271,7 @@ export function useBlocksStore() {
           {props.children}
         </BaseLink>
       ),
+      variants: {},
     },
     code: {
       renderElement: (props) => (
@@ -185,12 +279,15 @@ export function useBlocksStore() {
           <code>{props.children}</code>
         </CodeBlock>
       ),
+      variants: {},
     },
     quote: {
       renderElement: (props) => <Blockquote {...props.attributes}>{props.children}</Blockquote>,
+      variants: {},
     },
     list: {
       renderElement: (props) => <List {...props} />,
+      variants: {},
     },
     'list-item': {
       renderElement: (props) => (
@@ -198,9 +295,11 @@ export function useBlocksStore() {
           {props.children}
         </Typography>
       ),
+      variants: {},
     },
     image: {
       renderElement: (props) => <Image {...props} />,
+      variants: {},
     },
   };
 }

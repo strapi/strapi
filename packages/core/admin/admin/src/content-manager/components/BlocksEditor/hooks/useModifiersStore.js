@@ -6,8 +6,21 @@ import { Editor } from 'slate';
 import { useSlate } from 'slate-react';
 import styled from 'styled-components';
 
+const BoldText = styled(Typography).attrs({ fontWeight: 'bold' })`
+  font-size: inherit;
+`;
+
 const ItalicText = styled(Typography)`
   font-style: italic;
+  font-size: inherit;
+`;
+
+const UnderlineText = styled(Typography).attrs({ textDecoration: 'underline' })`
+  font-size: inherit;
+`;
+
+const StrikeThroughText = styled(Typography).attrs({ textDecoration: 'line-through' })`
+  font-size: inherit;
 `;
 
 const InlineCode = styled.code`
@@ -55,7 +68,7 @@ export function useModifiersStore() {
       label: { id: 'components.Blocks.modifiers.bold', defaultMessage: 'Bold' },
       checkIsActive: () => baseCheckIsActive('bold'),
       handleToggle: () => baseHandleToggle('bold'),
-      renderLeaf: (children) => <Typography fontWeight="bold">{children}</Typography>,
+      renderLeaf: (children) => <BoldText>{children}</BoldText>,
     },
     italic: {
       icon: Italic,
@@ -69,14 +82,14 @@ export function useModifiersStore() {
       label: { id: 'components.Blocks.modifiers.underline', defaultMessage: 'Underline' },
       checkIsActive: () => baseCheckIsActive('underline'),
       handleToggle: () => baseHandleToggle('underline'),
-      renderLeaf: (children) => <Typography textDecoration="underline">{children}</Typography>,
+      renderLeaf: (children) => <UnderlineText>{children}</UnderlineText>,
     },
     strikethrough: {
       icon: StrikeThrough,
       label: { id: 'components.Blocks.modifiers.strikethrough', defaultMessage: 'Strikethrough' },
       checkIsActive: () => baseCheckIsActive('strikethrough'),
       handleToggle: () => baseHandleToggle('strikethrough'),
-      renderLeaf: (children) => <Typography textDecoration="line-through">{children}</Typography>,
+      renderLeaf: (children) => <StrikeThroughText>{children}</StrikeThroughText>,
     },
     code: {
       icon: Code,

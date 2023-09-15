@@ -1,15 +1,16 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
-import { Flex, Icon, Tooltip } from '@strapi/design-system';
+import { Flex, Icon, Tooltip, Select, Option } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
-import { NumberList, BulletList } from '@strapi/icons';
+import { BulletList, NumberList } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Editor, Element, Transforms } from 'slate';
+import { Editor, Transforms, Element as SlateElement } from 'slate';
 import { useSlate } from 'slate-react';
 import styled from 'styled-components';
 
+import { useBlocksStore } from '../hooks/useBlocksStore';
 import { useModifiersStore } from '../hooks/useModifiersStore';
 
 const Separator = styled(Toolbar.Separator)`
@@ -62,6 +63,176 @@ ToolbarButton.propTypes = {
   handleClick: PropTypes.func.isRequired,
 };
 
+const ModifierButton = ({ icon, name, label }) => {
+  const editor = useSlate();
+
+  const isModifierActive = () => {
+    const modifiers = Editor.marks(editor);
+
+    if (!modifiers) return false;
+
+    return Boolean(modifiers[name]);
+  };
+
+  const isActive = isModifierActive();
+
+  const toggleModifier = () => {
+    if (isActive) {
+      Editor.removeMark(editor, name);
+    } else {
+      Editor.addMark(editor, name, true);
+    }
+  };
+
+  return (
+    <ToolbarButton
+      icon={icon}
+      name={name}
+      label={label}
+      isActive={isActive}
+      handleClick={toggleModifier}
+    />
+  );
+};
+
+ModifierButton.propTypes = {
+  icon: PropTypes.elementType.isRequired,
+  name: PropTypes.string.isRequired,
+  label: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+  }).isRequired,
+};
+
+const isBlockActive = (editor, value) => {
+  const { selection } = editor;
+
+  if (!selection) return false;
+
+  let matchCondition;
+
+  switch (value.type) {
+    case 'heading':
+      matchCondition = (n) => n.type === value.type && n.level === value?.level;
+      break;
+    default:
+      matchCondition = (n) => n.type === value.type;
+      break;
+  }
+
+  const match = Array.from(
+    Editor.nodes(editor, {
+      at: Editor.unhangRange(editor, selection),
+      match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n) && matchCondition(n),
+    })
+  );
+
+  return match.length > 0;
+};
+
+const toggleBlock = (editor, value) => {
+  const { type, level } = value;
+
+  const newProperties = {
+    type,
+    level: level || null,
+  };
+
+  Transforms.setNodes(editor, newProperties);
+};
+
+const BlocksDropdown = () => {
+  const editor = useSlate();
+  const { formatMessage } = useIntl();
+
+  const blocks = useBlocksStore();
+  const blockItems = Object.entries(blocks).reduce((currentBlockItems, blockEntry) => {
+    const [blockName, block] = blockEntry;
+    const newBlockItems = { ...currentBlockItems };
+
+    Object.entries(block.variants).forEach((variantEntry) => {
+      const [variantName, variant] = variantEntry;
+
+      // Generate a unique key for each variant
+      const uniqueKey = `${blockName}.${variantName}`;
+      newBlockItems[uniqueKey] = variant;
+    });
+
+    return newBlockItems;
+  }, {});
+
+  const [blockSelected, setBlockSelected] = React.useState(Object.keys(blockItems)[0]);
+
+  /**
+   * @param {string} optionKey - key of the heading selected
+   */
+  const selectOption = (optionKey) => {
+    toggleBlock(editor, blockItems[optionKey].value);
+
+    setBlockSelected(optionKey);
+  };
+
+  return (
+    <Select
+      startIcon={<Icon as={blockItems[blockSelected].icon} />}
+      onChange={selectOption}
+      placeholder={blockItems[blockSelected].label}
+      value={blockSelected}
+      aria-label={formatMessage({
+        id: 'components.Blocks.blocks.selectBlock',
+        defaultMessage: 'Select a block',
+      })}
+    >
+      {Object.keys(blockItems).map((key) => (
+        <BlockOption
+          key={key}
+          value={key}
+          data={blockItems[key].value}
+          label={blockItems[key].label}
+          icon={blockItems[key].icon}
+          handleSelection={setBlockSelected}
+          blockSelected={blockSelected}
+        />
+      ))}
+    </Select>
+  );
+};
+
+const BlockOption = ({ value, icon, label, data, handleSelection, blockSelected }) => {
+  const { formatMessage } = useIntl();
+  const editor = useSlate();
+
+  const isActive = isBlockActive(editor, data);
+  const isSelected = value === blockSelected;
+
+  React.useEffect(() => {
+    if (isActive && !isSelected) {
+      handleSelection(value);
+    }
+  }, [handleSelection, isActive, isSelected, value]);
+
+  return (
+    <Option
+      startIcon={<Icon as={icon} color={isSelected ? 'primary600' : 'neutral600'} />}
+      value={value}
+    >
+      {formatMessage(label)}
+    </Option>
+  );
+};
+
+BlockOption.propTypes = {
+  icon: PropTypes.elementType.isRequired,
+  value: PropTypes.string.isRequired,
+  label: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+  }).isRequired,
+  data: PropTypes.object.isRequired,
+  handleSelection: PropTypes.func.isRequired,
+  blockSelected: PropTypes.string.isRequired,
+};
+
 const ListButton = ({ icon, format, label }) => {
   const editor = useSlate();
 
@@ -71,7 +242,7 @@ const ListButton = ({ icon, format, label }) => {
    * @returns boolean
    */
   const isListNode = (node) => {
-    return !Editor.isEditor(node) && Element.isElement(node) && node.type === 'list';
+    return !Editor.isEditor(node) && SlateElement.isElement(node) && node.type === 'list';
   };
 
   const isListActive = () => {
@@ -136,6 +307,8 @@ const BlocksToolbar = () => {
   return (
     <Toolbar.Root asChild>
       <Flex gap={1} padding={2}>
+        <BlocksDropdown />
+        <Separator />
         <Toolbar.ToggleGroup type="multiple" asChild>
           <Flex gap={1}>
             {Object.entries(modifiers).map(([name, modifier]) => (
