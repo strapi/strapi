@@ -9,7 +9,7 @@
 
 <h3 align="center">Open-source headless CMS, self-hosted or Cloud you’re in control.</h3>
 <p align="center">The leading open-source headless CMS, 100% JavaScript/TypeScript, flexible and fully customizable.</p>
-<p align="center"><a href="cloud.strapi.io/signups?source=github1">Cloud</a> · <a href="https://strapi.io/demo">Try live demo</a></p>
+<p align="center"><a href="https://cloud.strapi.io/signups?source=github1">Cloud</a> · <a href="https://strapi.io/demo">Try live demo</a></p>
 <br />
 
 <p align="center">
@@ -46,6 +46,8 @@ Strapi Community Edition is a free and open-source headless CMS enabling you to 
 - **Internationalization**. The Internationalization (i18n) plugin allows Strapi users to create, manage and distribute localized content in different languages, called "locales
 - **RBAC**. Create an unlimited number of custom roles and permissions for admin users.
 - **Typescript**. Strapi now supports Typescript for typechecking and better DX experience.
+- **Blazing Fast and Robust**. Built on top of Node.js and TypeScript, Strapi delivers reliable yet amazing performance.
+- **Front-end Agnostic**. Use any front-end framework (React, Next.js, Vue, Angular, etc.), mobile apps or even IoT.
 
 ## Getting Started
 
