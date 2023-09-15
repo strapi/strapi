@@ -152,62 +152,46 @@ Image.propTypes = {
 };
 
 export function useBlocksStore() {
-  return [
-    {
-      type: 'text',
-      renderElement: (props) => (
-        <Typography variant="omega" {...props.attributes}>
-          {props.children}
-        </Typography>
-      ),
-    },
-    {
-      type: 'paragraph',
+  return {
+    paragraph: {
       renderElement: (props) => (
         <Typography as="p" variant="omega" {...props.attributes}>
           {props.children}
         </Typography>
       ),
     },
-    {
-      type: 'heading',
+    heading: {
       renderElement: (props) => <Heading {...props} />,
     },
-    {
-      type: 'link',
+    link: {
       renderElement: (props) => (
         <BaseLink href={props.element.url} {...props.attributes}>
           {props.children}
         </BaseLink>
       ),
     },
-    {
-      type: 'code',
+    code: {
       renderElement: (props) => (
         <CodeBlock {...props.attributes}>
           <code>{props.children}</code>
         </CodeBlock>
       ),
     },
-    {
-      type: 'quote',
+    quote: {
       renderElement: (props) => <Blockquote {...props.attributes}>{props.children}</Blockquote>,
     },
-    {
-      type: 'list',
+    list: {
       renderElement: (props) => <List {...props} />,
     },
-    {
-      type: 'list-item',
+    'list-item': {
       renderElement: (props) => (
         <Typography as="li" {...props.attributes}>
           {props.children}
         </Typography>
       ),
     },
-    {
-      type: 'image',
+    image: {
       renderElement: (props) => <Image {...props} />,
     },
-  ];
+  };
 }

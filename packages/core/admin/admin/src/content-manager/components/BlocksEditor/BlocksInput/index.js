@@ -31,9 +31,7 @@ const baseRenderLeaf = (props, modifiers) => {
 };
 
 const baseRenderElement = (props, blocks) => {
-  const block = blocks.find((block) =>
-    props.element.type ? block.type === props.element.type : block.type === 'paragraph'
-  );
+  const block = blocks[props.element.type] || blocks.paragraph;
 
   return block.renderElement(props);
 };
