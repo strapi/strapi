@@ -7,6 +7,7 @@ import type {
   RelationalAttribute,
   ComponentAttribute,
   DynamicZoneAttribute,
+  WithRequired,
 } from './types';
 
 const SINGLE_TYPE = 'singleType';
@@ -193,10 +194,10 @@ const isTypedAttribute = (attribute: Attribute, type: string) => {
  * @param {object} contentType
  * @returns {string}
  */
-const getContentTypeRoutePrefix = (contentType: Model) => {
+const getContentTypeRoutePrefix = (contentType: WithRequired<Model, 'info'>) => {
   return isSingleType(contentType)
-    ? _.kebabCase(contentType.info?.singularName)
-    : _.kebabCase(contentType.info?.pluralName);
+    ? _.kebabCase(contentType.info.singularName)
+    : _.kebabCase(contentType.info.pluralName);
 };
 
 export {
