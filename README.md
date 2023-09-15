@@ -39,12 +39,14 @@
 
 Strapi Community Edition is a free and open-source headless CMS enabling you to manage any content, anywhere.
 
-- **Keep control over your data**. With Strapi, you know where your data is stored, and you keep full control at all times.
-- **Self-hosted or Cloud**. You can host and scale Strapi projects the way you want. You can save time by deploying to Strapi Cloud or deploy to the hosting platform you want: AWS, Azure, Google Cloud, DigitalOcean. 
-- **Database agnostic**. Strapi works with SQL databases. You can choose the database you prefer: PostgreSQL, MySQL, MariaDB, and SQLite.
-- **Customizable**. You can quickly build your logic by fully customizing APIs, routes, or plugins to fit your needs perfectly.
-- **Blazing Fast and Robust**. Built on top of Node.js and TypeScript, Strapi delivers reliable yet amazing performance.
-- **Front-end Agnostic**. Use any front-end framework (React, Next.js, Vue, Angular, etc.), mobile apps or even IoT.
+- **Self-hosted or Cloud**: You can host and scale Strapi projects the way you want. You can save time by deploying to Strapi - **Cloud or deploy to the hosting platform you want**: AWS, Azure, Google Cloud, DigitalOcean.
+- **Modern Admin Pane**: Elegant, entirely customizable and a fully extensible admin panel.
+- **Multi-database support**: You can choose the database you prefer: PostgreSQL, MySQL, MariaDB, and SQLite.
+- **Customizable**: You can quickly build your logic by fully customizing APIs, routes, or plugins to fit your needs perfectly.
+- **Blazing Fast and Robust**: Built on top of Node.js and TypeScript, Strapi delivers reliable and solid performance.
+- **Front-end Agnostic**: Use any front-end framework (React, Next.js, Vue, Angular, etc.), mobile apps or even IoT.
+- **Secure by default**: Reusable policies, CORS, CSP, P3P, Xframe, XSS, and more.
+- **Powerful CLI**: Scaffold projects and APIs on the fly.
 
 ## Getting Started
 
@@ -109,16 +111,13 @@ Strapi only supports maintenance and LTS versions of Node.js. Please refer to th
 
 ## Features
 
-- **Modern Admin Panel:** Elegant, entirely customizable and a fully extensible admin panel.
-- **Secure by default:** Reusable policies, CORS, CSP, P3P, Xframe, XSS, and more.
-- **Plugins Oriented:** Install the auth system, content management, custom plugins, and more, in seconds.
-- **Blazing Fast:** Built on top of Node.js, Strapi delivers amazing performance.
-- **Front-end Agnostic:** Use any front-end framework (React, Vue, Angular, etc.), mobile apps or even IoT.
-- **Powerful CLI:** Scaffold projects and APIs on the fly.
-- **SQL databases:** Works with PostgreSQL, MySQL, MariaDB, and SQLite.
-- **Internationalization**. The Internationalization (i18n) plugin allows Strapi users to create, manage and distribute localized content in different languages, called "locales
-- **RBAC**. Create an unlimited number of custom roles and permissions for admin users.
-- **Typescript**. Strapi now supports Typescript for typechecking and better DX experience.
+- **Content Types Builder**: Build the most flexible publishing experience for your content managers, by giving them the freedom to create any page on the go with [fields](https://docs.strapi.io/user-docs/content-manager/writing-content#filling-up-fields), components and [Dynamic Zones](https://docs.strapi.io/user-docs/content-manager/writing-content#dynamic-zones).
+- **Media Library**: Upload your images, videos, audio or documents to the media library. Easily find the right asset, edit and reuse it.
+- **Internationalization**: The Internationalization (i18n) plugin allows Strapi users to create, manage and distribute localized content in different languages, called "locales
+- **Role Based Access Control**: Create an unlimited number of custom roles and permissions for admin and end users.
+- **GraphQL or REST**: Consume the API using REST or GraphQL
+
+You can unlock additional features such as SSO, Audit Logs, Review Workflows in [Strapi Cloud](https://cloud.strapi.io/login?source=github1) or [Strapi Enterprise](https://strapi.io/enterprise?source=github1).
 
 **[See more on our website](https://strapi.io/overview)**.
 
