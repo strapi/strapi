@@ -5,7 +5,7 @@ import { render as renderRTL } from '@testing-library/react';
 
 import { DateTimePicker } from '../DateTimePicker';
 
-const render = (props: DateTimePickerProps) =>
+const render = (props: Partial<DateTimePickerProps>) =>
   renderRTL(<DateTimePicker label="Date time picker" {...props} />, {
     wrapper: ({ children }) => (
       <DesignSystemProvider locale="en-GB">{children}</DesignSystemProvider>

@@ -7249,6 +7249,7 @@ __metadata:
     "@testing-library/user-event": 14.4.3
     "@types/react": 18.2.7
     "@types/react-dom": 18.2.7
+    "@types/react-helmet": 6.1.6
     "@types/react-router-dom": 5.3.3
     "@types/styled-components": 5.1.26
     axios: 1.5.0
@@ -8960,6 +8961,15 @@ __metadata:
   dependencies:
     "@types/react": "*"
   checksum: 579691e4d5ec09688087568037c35edf8cfb1ab3e07f6c60029280733ee7b5c06d66df6fcc90786702c93ac8cb13bc7ff16c79ddfc75d082938fbaa36e1cdbf4
+  languageName: node
+  linkType: hard
+
+"@types/react-helmet@npm:6.1.6":
+  version: 6.1.6
+  resolution: "@types/react-helmet@npm:6.1.6"
+  dependencies:
+    "@types/react": "*"
+  checksum: 81560c56bfe854b6a43aee31360862588ac875d1177b975da5ce049ac9aa2f7c98dcde65d4397bfaa04e468f40cf3ab2975a2ef966a69d64a60493422898698d
   languageName: node
   linkType: hard
 

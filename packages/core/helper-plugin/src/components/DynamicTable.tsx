@@ -6,6 +6,7 @@ import {
   Table as TableCompo,
   Typography,
   BaseCheckbox,
+  BaseCheckboxProps,
   IconButton,
   Th,
   Thead,
@@ -256,7 +257,7 @@ export interface TableHeadProps {
   areAllEntriesSelected?: boolean;
   entriesToDelete?: Array<string | number>;
   headers?: Array<Header>;
-  onSelectAll: BaseCheckbox['onChange'];
+  onSelectAll: BaseCheckboxProps['onChange'];
   withMainAction?: boolean;
   withBulkActions?: boolean;
 }
@@ -330,7 +331,7 @@ const TableHead = ({
                   isSorted && (
                     <IconButton
                       label={sortLabel}
-                      onClick={handleClickSort}
+                      onClick={() => handleClickSort()}
                       icon={isSorted && <SortIcon isUp={isUp} />}
                       noBorder
                     />
@@ -339,9 +340,8 @@ const TableHead = ({
               >
                 <Tooltip label={isSortable ? sortLabel : label}>
                   <Typography
-                    textColor="neutral600"
                     as={!isSorted && isSortable ? 'button' : 'span'}
-                    label={label}
+                    textColor="neutral600"
                     onClick={() => handleClickSort(!isSorted)}
                     variant="sigma"
                   >

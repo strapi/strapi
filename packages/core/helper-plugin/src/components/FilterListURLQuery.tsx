@@ -39,56 +39,66 @@ export const FilterListURLQuery = ({ filtersSchema = [] }: FilterListURLQueryPro
     setQuery({ filters: { $and: nextFilters }, page: 1 });
   };
 
+  if (!query?.filters?.$and?.length) {
+    return null;
+  }
+
   return (
-    query?.filters?.$and?.map((filter, i) => {
-      const attributeName = Object.keys(filter)[0] as keyof Filter;
-      const attribute = filtersSchema.find(({ name }) => name === attributeName);
+    <>
+      {query?.filters?.$and?.map((filter, i) => {
+        const attributeName = Object.keys(filter)[0] as keyof Filter;
+        const attribute = filtersSchema.find(({ name }) => name === attributeName);
 
-      if (!attribute) {
-        return null;
-      }
+        if (!attribute) {
+          return null;
+        }
 
-      if (attribute.fieldSchema.type === 'relation') {
-        const relationTargetAttribute = attribute?.fieldSchema?.mainField
-          ?.name as keyof Filter[typeof attributeName];
-        const filterObj = filter[attributeName][relationTargetAttribute];
+        if (attribute.fieldSchema.type === 'relation') {
+          const relationTargetAttribute = attribute?.fieldSchema?.mainField
+            ?.name as keyof Filter[typeof attributeName];
+          const filterObj = filter[attributeName][relationTargetAttribute];
 
-        if (typeof filterObj === 'object' && filterObj !== null) {
+          if (typeof filterObj === 'object' && filterObj !== null) {
+            const operator = Object.keys(filterObj)[0] as keyof typeof filterObj;
+            const value = filterObj[operator] ?? '';
+
+            return (
+              <AttributeTag
+                // eslint-disable-next-line react/no-array-index-key
+                key={`${attributeName}-${i}`}
+                attribute={attribute}
+                filter={filter}
+                onClick={handleClick}
+                operator={operator}
+                value={value}
+              />
+            );
+          }
+
+          return null;
+        } else {
+          const filterObj = filter[attributeName];
           const operator = Object.keys(filterObj)[0] as keyof typeof filterObj;
-          const value = filterObj[operator] ?? '';
+          const value = filterObj[operator];
 
-          return (
-            <AttributeTag
-              // eslint-disable-next-line react/no-array-index-key
-              key={`${attributeName}-${i}`}
-              attribute={attribute}
-              filter={filter}
-              onClick={handleClick}
-              operator={operator}
-              value={value}
-            />
-          );
-        }
-      } else {
-        const filterObj = filter[attributeName];
-        const operator = Object.keys(filterObj)[0] as keyof typeof filterObj;
-        const value = filterObj[operator];
+          if (typeof value === 'string' || value === null) {
+            return (
+              <AttributeTag
+                // eslint-disable-next-line react/no-array-index-key
+                key={`${attributeName}-${i}`}
+                attribute={attribute}
+                filter={filter}
+                onClick={handleClick}
+                operator={operator}
+                value={value ?? ''}
+              />
+            );
+          }
 
-        if (typeof value === 'string' || value === null) {
-          return (
-            <AttributeTag
-              // eslint-disable-next-line react/no-array-index-key
-              key={`${attributeName}-${i}`}
-              attribute={attribute}
-              filter={filter}
-              onClick={handleClick}
-              operator={operator}
-              value={value ?? ''}
-            />
-          );
+          return null;
         }
-      }
-    }) || null
+      })}
+    </>
   );
 };
 
@@ -109,7 +119,8 @@ const AttributeTag = ({ attribute, filter, onClick, operator, value }: Attribute
 
   const { fieldSchema } = attribute;
 
-  const type = fieldSchema?.mainField?.schema?.type || fieldSchema.type;
+  const type =
+    fieldSchema.type === 'relation' ? fieldSchema?.mainField?.schema?.type : fieldSchema.type;
 
   let formattedValue = value;
 

@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { AnySchema } from 'yup';
 
-import type { TranslationMessage } from '../../types';
+import type { TranslationMessage } from 'types';
 /**
  * @TODO: Custom field types should be defined and exported from the registry:
  * packages/core/admin/admin/src/core/apis/CustomFields.js

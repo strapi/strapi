@@ -336,8 +336,12 @@ const DefaultInputs = ({
 /**
  * Depending on the selected field find the possible filters to apply
  */
-const getFilterList = ({ type: fieldType, mainField }: FilterData['fieldSchema']): Operator[] => {
-  const type = mainField?.schema?.type ?? fieldType;
+const getFilterList = (filterSchema: FilterData['fieldSchema']): Operator[] => {
+  let type = filterSchema.type;
+
+  if (filterSchema.type === 'relation') {
+    type = filterSchema.mainField.schema.type;
+  }
 
   switch (type) {
     case 'email':

@@ -11,22 +11,26 @@ describe('useQueryParams', () => {
   it('should set and remove the query params using setQuery method', () => {
     let testLocation: ReturnType<typeof useLocation> = null!;
 
-    const { result } = renderHook(({ initialParams }) => useQueryParams(initialParams), {
-      wrapper: ({ children }) => (
-        <>
-          {children}
-          <Route
-            path="*"
-            render={({ location }) => {
-              testLocation = location;
+    const { result } = renderHook(
+      ({ initialParams }) =>
+        useQueryParams<{ type?: string; filters?: object; page?: number }>(initialParams),
+      {
+        wrapper: ({ children }) => (
+          <>
+            {children}
+            <Route
+              path="*"
+              render={({ location }) => {
+                testLocation = location;
 
-              return null;
-            }}
-          />
-        </>
-      ),
-      initialProps: { initialParams: { page: 1, type: 'plugins' } },
-    });
+                return null;
+              }}
+            />
+          </>
+        ),
+        initialProps: { initialParams: { page: 1, type: 'plugins' } },
+      }
+    );
 
     const [{ query }, setQuery] = result.current;
     expect(query).toEqual({ page: 1, type: 'plugins' }); // initial params

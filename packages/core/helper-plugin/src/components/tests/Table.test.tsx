@@ -41,7 +41,7 @@ const mockRows = [{ id: 1 }, { id: 2 }];
 describe('Table', () => {
   it('should render with content', () => {
     const { getByRole, queryByText } = render(
-      <Table.Root>
+      <Table.Root rows={[]} colCount={1} isLoading={false} isFetching={false}>
         <Table.Content>
           <tbody>
             <tr>
@@ -58,7 +58,7 @@ describe('Table', () => {
 
   it('should render with loading body', () => {
     const { getByText } = render(
-      <Table.Root isLoading>
+      <Table.Root rows={[]} colCount={1} isLoading={true} isFetching={false}>
         <Table.Content>
           <Table.LoadingBody />
         </Table.Content>
@@ -70,7 +70,7 @@ describe('Table', () => {
 
   it('should render with empty body', () => {
     const { getByText } = render(
-      <Table.Root rows={[]} colCount={1}>
+      <Table.Root rows={[]} colCount={1} isLoading={false} isFetching={false}>
         <Table.Content>
           <Table.EmptyBody contentType="Test" />
         </Table.Content>
@@ -82,7 +82,7 @@ describe('Table', () => {
 
   it('should render headers with checkbox and visually hidden actions', () => {
     const { getByRole, getByText } = render(
-      <Table.Root rows={mockRows} colCount={1}>
+      <Table.Root rows={mockRows} colCount={1} isLoading={false} isFetching={false}>
         <Table.Content>
           <Table.Head>
             {/* Bulk action select all checkbox */}
@@ -111,7 +111,7 @@ describe('Table', () => {
   it('should render the bulk action bar with bulk delete button after updating the selectedEntries state', async () => {
     const { result } = renderHook(() => useTableContext(), {
       wrapper: ({ children }) => (
-        <Table.Root rows={mockRows} colCount={1}>
+        <Table.Root rows={mockRows} colCount={1} isLoading={false} isFetching={false}>
           <Table.ActionBar>
             <Table.BulkDeleteButton onConfirmDeleteAll={jest.fn()} />
           </Table.ActionBar>

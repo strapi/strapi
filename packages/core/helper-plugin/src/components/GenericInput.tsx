@@ -462,7 +462,6 @@ const GenericInput = ({
           disabled={disabled}
           error={errorMessage}
           label={label}
-          // @ts-expect-error Incorrect type in the Design System, should be ReactNode
           labelAction={labelAction}
           id={name}
           hint={hint}
@@ -491,7 +490,6 @@ const GenericInput = ({
           disabled={disabled}
           error={errorMessage}
           label={label}
-          // @ts-expect-error Incorrect type in the Design System, should be ReactNode
           labelAction={labelAction}
           id={name}
           hint={hint}
@@ -499,7 +497,6 @@ const GenericInput = ({
           onChange={(event) => onChange({ target: { name, value: event.target.value, type } })}
           required={required}
           placeholder={formattedPlaceholder}
-          type={type}
           value={valueWithEmptyStringFallback}
         />
       );

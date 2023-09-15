@@ -2,6 +2,8 @@ import { contentManagementUtilRemoveFieldsFromData } from '../contentManagementU
 
 import { testData } from './testData';
 
+import type { Schema } from '@strapi/strapi';
+
 describe('STRAPI_HELPER_PLUGIN | utils', () => {
   describe('contentManagementUtilRemoveFieldsFromData', () => {
     it('should return an empty object', () => {
@@ -34,11 +36,8 @@ describe('STRAPI_HELPER_PLUGIN | utils', () => {
 
     it('should remove all the default fields', () => {
       const { components, modifiedData, expectedNoFieldsModifiedData } = testData;
-      const contentType = {
-        apiID: 'test',
-        options: {
-          timestamps: ['createdAt', 'updatedAt'],
-        },
+      const contentType: Schema.ContentType = {
+        uid: 'api::test.test',
         attributes: {
           createdAt: { type: 'timestamp' },
           dz: { type: 'dynamiczone', components: ['compos.test-compo', 'compos.sub-compo'] },
@@ -52,6 +51,11 @@ describe('STRAPI_HELPER_PLUGIN | utils', () => {
           password: { type: 'password' },
           repeatable: { type: 'component', repeatable: true, component: 'compos.test-compo' },
           updatedAt: { type: 'timestamp' },
+        },
+        modelType: 'contentType',
+        kind: 'collectionType',
+        info: {
+          displayName: 'Test',
         },
       };
 

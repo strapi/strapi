@@ -29,7 +29,7 @@ describe('AutoReloadOverlayBlocker', () => {
     });
 
     act(() => {
-      result.current.lockAppWithAutoreload();
+      result.current.lockAppWithAutoreload?.();
     });
 
     expect(screen.getByRole('heading', { name: /Waiting for restart/ })).toBeInTheDocument();
@@ -41,11 +41,11 @@ describe('AutoReloadOverlayBlocker', () => {
     });
 
     act(() => {
-      result.current.lockAppWithAutoreload();
+      result.current.lockAppWithAutoreload?.();
     });
     expect(screen.getByRole('heading', { name: /Waiting for restart/ })).toBeInTheDocument();
     act(() => {
-      result.current.unlockAppWithAutoreload();
+      result.current.unlockAppWithAutoreload?.();
     });
     expect(screen.queryByRole('heading', { name: /Waiting for restart/ })).not.toBeInTheDocument();
   });
@@ -56,7 +56,7 @@ describe('AutoReloadOverlayBlocker', () => {
     });
 
     act(() => {
-      result.current.lockAppWithAutoreload();
+      result.current.lockAppWithAutoreload?.();
     });
 
     expect(screen.getByRole('heading', { name: /Waiting for restart/ })).toBeInTheDocument();

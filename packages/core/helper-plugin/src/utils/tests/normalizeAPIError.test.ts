@@ -2,7 +2,7 @@ import { AxiosError, AxiosHeaders } from 'axios';
 
 import { normalizeAPIError } from '../normalizeAPIError';
 
-import type { ApiError } from '../types';
+import type { ApiError } from 'types';
 
 const API_VALIDATION_ERROR_FIXTURE = new AxiosError<{ error: ApiError }>(
   undefined,
@@ -14,7 +14,6 @@ const API_VALIDATION_ERROR_FIXTURE = new AxiosError<{ error: ApiError }>(
       error: {
         name: 'ValidationError',
         message: 'errors',
-        status: 400,
         details: {
           errors: [
             {
@@ -49,7 +48,6 @@ const API_APPLICATION_ERROR_FIXTURE = new AxiosError<{ error: ApiError }>(
       error: {
         name: 'ApplicationError',
         message: 'Application crashed',
-        status: 400,
         details: {},
       },
     },

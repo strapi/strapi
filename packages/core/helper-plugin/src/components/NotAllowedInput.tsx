@@ -18,7 +18,7 @@ const NotAllowedInput = ({
   error,
   intlLabel,
   labelAction,
-  name,
+  name = '',
 }: NotAllowedInputProps) => {
   const { formatMessage } = useIntl();
   const label = intlLabel?.id
