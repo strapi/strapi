@@ -37,7 +37,15 @@ export async function deleteComponent({ page, displayName }) {
 }
 
 export async function waitForReload({ page }) {
-  await expect(page.locator('text=Waiting for restart...')).toHaveCount(0, { timeout: 500000 });
+  // the restart watcher is not very reliable and often doesn't catch the server
+  // has restarted, so this trying to reload the page after 20 seconds and try
+  // again
+  try {
+    await expect(page.locator('text=Waiting for restart...')).toHaveCount(0, { timeout: 20000 });
+  } catch (error) {
+    await page.reload();
+    await expect(page.locator('text=Waiting for restart...')).toHaveCount(0, { timeout: 20000 });
+  }
 }
 
 export async function addDefaultField({
@@ -73,7 +81,7 @@ export async function addDefaultField({
       await page.getByRole('button', { name: 'Number Numbers (integer, float, decimal)' }).click();
 
       // Choose number format
-      const { numberType } = rest;
+      const { numberType = 'integer' } = rest;
 
       await page.getByLabel('Number format').click();
 
@@ -95,6 +103,47 @@ export async function addDefaultField({
           break;
       }
 
+      break;
+
+    case 'Enumeration':
+      await page.getByRole('button', { name: 'Enumeration List of values, then pick one' }).click();
+
+      const { values } = rest;
+
+      await page.getByLabel('Values (one line per value)', { exact: true }).fill(values.join('\n'));
+      break;
+
+    case 'Date':
+      await page
+        .getByRole('button', { name: 'Date A date picker with hours, minutes and seconds' })
+        .click();
+
+      // Choose number format
+      const { dateType = 'date' } = rest;
+
+      await page.getByLabel('Type', { exact: true }).click();
+
+      switch (dateType) {
+        case 'date':
+          await page.getByLabel('date (ex: 01/01/2023)').click();
+          break;
+
+        case 'datetime':
+          await page.getByLabel('datetime (ex: 01/01/2023 00:00 AM)').click();
+          break;
+
+        case 'time':
+          await page.getByLabel('time (ex: 00:00 AM)').click();
+          break;
+      }
+      break;
+
+    case 'Boolean':
+      await page.getByRole('button', { name: 'Boolean Yes or no, 1 or 0, true or false' }).click();
+      break;
+
+    case 'JSON':
+      await page.getByRole('button', { name: 'JSON Data in JSON format' }).click();
       break;
   }
 

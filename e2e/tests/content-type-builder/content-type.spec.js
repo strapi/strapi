@@ -26,35 +26,66 @@ async function main() {
       }) => {
         await createContentType({ page, type, displayName: `CT ${type}` });
 
+        const addMoreAttrs = {
+          addMore: true,
+          contentTypeName: `CT ${type}`,
+        };
+
         await addDefaultField({
           page,
           type: 'Text',
           name: 'textField',
-          addMore: true,
-          contentTypeName: `CT ${type}`,
+          ...addMoreAttrs,
         });
         await addDefaultField({
           page,
           type: 'Email',
           name: 'emailField',
-          addMore: true,
-          contentTypeName: `CT ${type}`,
+          ...addMoreAttrs,
         });
         await addDefaultField({
           page,
           type: 'RichText',
           name: 'richtextField',
-          addMore: true,
-          contentTypeName: `CT ${type}`,
+          ...addMoreAttrs,
         });
         await addDefaultField({
           page,
           type: 'Password',
           name: 'passwordField',
-          addMore: true,
-          contentTypeName: `CT ${type}`,
+          ...addMoreAttrs,
         });
-        await addDefaultField({ page, type: 'Number', name: 'numberField', numberType: 'integer' });
+        await addDefaultField({ page, type: 'Number', name: 'numberField', ...addMoreAttrs });
+        await addDefaultField({
+          page,
+          type: 'Enumeration',
+          name: 'enumField',
+          values: ['first', 'second'],
+          ...addMoreAttrs,
+        });
+        await addDefaultField({ page, type: 'Date', name: 'dateField', ...addMoreAttrs });
+        await addDefaultField({
+          page,
+          type: 'Date',
+          name: 'datetimeField',
+          dateType: 'datetime',
+          ...addMoreAttrs,
+        });
+        await addDefaultField({
+          page,
+          type: 'Date',
+          name: 'timeField',
+          dateType: 'time',
+          ...addMoreAttrs,
+        });
+        await addDefaultField({ page, type: 'Boolean', name: 'booleanField', ...addMoreAttrs });
+        await addDefaultField({ page, type: 'JSON', name: 'JSONField' });
+
+        // relation
+        // media
+        // uid
+        // component
+        // dynamic zone
 
         await page.getByRole('button', { name: 'Save' }).click();
         await waitForReload({ page });
@@ -69,6 +100,11 @@ async function main() {
         await verifyFieldPresence({ page, name: 'richtextField' });
         await verifyFieldPresence({ page, name: 'passwordField' });
         await verifyFieldPresence({ page, name: 'numberField' });
+        await verifyFieldPresence({ page, name: 'dateField' });
+        await verifyFieldPresence({ page, name: 'datetimeField' });
+        await verifyFieldPresence({ page, name: 'timeField' });
+        await verifyFieldPresence({ page, name: 'booleanField' });
+        await verifyFieldPresence({ page, name: 'JSONField' });
 
         // Cleanup
         await deleteContentType({ page, displayName: `CT ${type}` });
