@@ -11,13 +11,16 @@ import {
   Code,
   BulletList,
   NumberList,
-  Paragraph,
-  HeadingOne,
-  HeadingTwo,
-  HeadingThree,
-  HeadingFour,
-  HeadingFive,
-  HeadingSix,
+  /**
+   * TODO: add the rest of the icons when the DS will be released
+   Paragraph,
+   HeadingOne,
+   HeadingTwo,
+   HeadingThree,
+   HeadingFour,
+   HeadingFive,
+   HeadingSix,
+   */
 } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -155,7 +158,7 @@ const toggleBlock = (editor, value) => {
 
 const BlocksDropdown = () => {
   const editor = useSlate();
-  const [optionSelected, setOptionSelected] = React.useState(Object.keys(blockItems)[0]);
+  const [blockSelected, setBlockSelected] = React.useState(Object.keys(blockItems)[0]);
 
   /**
    * @param {string} optionKey - key of the heading selected
@@ -163,15 +166,16 @@ const BlocksDropdown = () => {
   const selectOption = (optionKey) => {
     toggleBlock(editor, blockItems[optionKey].value);
 
-    setOptionSelected(optionKey);
+    setBlockSelected(optionKey);
   };
 
   return (
     <Select
-      startIcon={<Icon as={blockItems[optionSelected].icon} />}
+      startIcon={<Icon as={blockItems[blockSelected].icon} />}
       onChange={selectOption}
-      placeholder={blockItems[optionSelected].label}
-      value={optionSelected}
+      placeholder={blockItems[blockSelected].label}
+      value={blockSelected}
+      aria-label="Select a block"
     >
       {Object.keys(blockItems).map((key) => (
         <BlockOption
@@ -179,24 +183,26 @@ const BlocksDropdown = () => {
           value={key}
           label={blockItems[key].label}
           icon={blockItems[key].icon}
-          onActive={setOptionSelected}
-          optionSelected={optionSelected}
+          handleSelection={setBlockSelected}
+          blockSelected={blockSelected}
         />
       ))}
     </Select>
   );
 };
 
-const BlockOption = ({ value, icon, label, onActive, optionSelected }) => {
+const BlockOption = ({ value, icon, label, handleSelection, blockSelected }) => {
   const { formatMessage } = useIntl();
   const editor = useSlate();
 
   const isActive = isBlockActive(editor, blockItems[value].value);
-  const isSelected = value === optionSelected;
+  const isSelected = value === blockSelected;
 
-  if (isActive && !isSelected) {
-    onActive(value);
-  }
+  React.useEffect(() => {
+    if (isActive && !isSelected) {
+      handleSelection(value);
+    }
+  }, [handleSelection, isActive, isSelected, value]);
 
   return (
     <Option
@@ -215,8 +221,8 @@ BlockOption.propTypes = {
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
   }).isRequired,
-  onActive: PropTypes.func.isRequired,
-  optionSelected: PropTypes.string.isRequired,
+  handleSelection: PropTypes.func.isRequired,
+  blockSelected: PropTypes.string.isRequired,
 };
 
 // TODO: extract a store of modifiers that rules both the toolbar and the leaf renderers
@@ -251,7 +257,7 @@ const modifiers = [
 const blockItems = {
   text: {
     name: 'text',
-    icon: Paragraph,
+    icon: Code, // TODO: replace with Paragraph when the DS will be released
     label: { id: 'components.Blocks.blocks.text', defaultMessage: 'Text' },
     value: {
       type: 'paragraph',
@@ -259,7 +265,7 @@ const blockItems = {
   },
   heading1: {
     name: 'heading-one',
-    icon: HeadingOne,
+    icon: Code, // TODO: replace with HeadingOne when the DS will be released
     label: { id: 'components.Blocks.blocks.heading1', defaultMessage: 'Heading 1' },
     value: {
       type: 'heading',
@@ -268,7 +274,7 @@ const blockItems = {
   },
   heading2: {
     name: 'heading-two',
-    icon: HeadingTwo,
+    icon: Code, // TODO: replace with HeadingTwo when the DS will be released
     label: { id: 'components.Blocks.blocks.heading2', defaultMessage: 'Heading 2' },
     value: {
       type: 'heading',
@@ -277,7 +283,7 @@ const blockItems = {
   },
   heading3: {
     name: 'heading-three',
-    icon: HeadingThree,
+    icon: Code, // TODO: replace with HeadingThree when the DS will be released
     label: { id: 'components.Blocks.blocks.heading3', defaultMessage: 'Heading 3' },
     value: {
       type: 'heading',
@@ -286,7 +292,7 @@ const blockItems = {
   },
   heading4: {
     name: 'heading-four',
-    icon: HeadingFour,
+    icon: Code, // TODO: replace with HeadingFour when the DS will be released
     label: { id: 'components.Blocks.blocks.heading4', defaultMessage: 'Heading 4' },
     value: {
       type: 'heading',
@@ -295,7 +301,7 @@ const blockItems = {
   },
   heading5: {
     name: 'heading-five',
-    icon: HeadingFive,
+    icon: Code, // TODO: replace with HeadingFive when the DS will be released
     label: { id: 'components.Blocks.blocks.heading5', defaultMessage: 'Heading 5' },
     value: {
       type: 'heading',
@@ -304,7 +310,7 @@ const blockItems = {
   },
   heading6: {
     name: 'heading-six',
-    icon: HeadingSix,
+    icon: Code, // TODO: replace with HeadingSix when the DS will be released
     label: { id: 'components.Blocks.blocks.heading6', defaultMessage: 'Heading 6' },
     value: {
       type: 'heading',

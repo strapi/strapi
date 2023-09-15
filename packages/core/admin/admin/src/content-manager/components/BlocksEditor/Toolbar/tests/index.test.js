@@ -142,10 +142,12 @@ describe('BlocksEditor toolbar', () => {
       },
     ]);
   });
-  it('transforms the selection to a heading when selected and trasform it back to text when selected again', async () => {
+  it('transforms the selection to a heading when selected and trasforms it back to text when selected again', async () => {
     setup();
 
-    const headingsDropdown = screen.getByRole('combobox');
+    const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+
+    screen.debug(headingsDropdown);
 
     Transforms.setSelection(baseEditor, {
       anchor: { path: [0, 0], offset: 2 },
