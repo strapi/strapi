@@ -36,46 +36,41 @@ export function useModifiersStore() {
     }
   };
 
-  return [
-    {
-      name: 'bold',
+  return {
+    bold: {
       icon: Bold,
       label: { id: 'components.Blocks.modifiers.bold', defaultMessage: 'Bold' },
       checkIsActive: () => baseCheckIsActive('bold'),
       handleToggle: () => baseHandleToggle('bold'),
       renderLeaf: (children) => <Typography fontWeight="bold">{children}</Typography>,
     },
-    {
-      name: 'italic',
+    italic: {
       icon: Italic,
       label: { id: 'components.Blocks.modifiers.italic', defaultMessage: 'Italic' },
       checkIsActive: () => baseCheckIsActive('italic'),
       handleToggle: () => baseHandleToggle('italic'),
       renderLeaf: (children) => <ItalicText>{children}</ItalicText>,
     },
-    {
-      name: 'underline',
+    underline: {
       icon: Underline,
       label: { id: 'components.Blocks.modifiers.underline', defaultMessage: 'Underline' },
       checkIsActive: () => baseCheckIsActive('underline'),
       handleToggle: () => baseHandleToggle('underline'),
       renderLeaf: (children) => <Typography textDecoration="underline">{children}</Typography>,
     },
-    {
-      name: 'strikethrough',
+    strikethrough: {
       icon: StrikeThrough,
       label: { id: 'components.Blocks.modifiers.strikethrough', defaultMessage: 'Strikethrough' },
       checkIsActive: () => baseCheckIsActive('strikethrough'),
       handleToggle: () => baseHandleToggle('strikethrough'),
       renderLeaf: (children) => <Typography textDecoration="line-through">{children}</Typography>,
     },
-    {
-      name: 'code',
+    code: {
       icon: Code,
       label: { id: 'components.Blocks.modifiers.code', defaultMessage: 'Code' },
       checkIsActive: () => baseCheckIsActive('code'),
       handleToggle: () => baseHandleToggle('code'),
       renderLeaf: (children) => <InlineCode>{children}</InlineCode>,
     },
-  ];
+  };
 }

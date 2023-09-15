@@ -138,11 +138,11 @@ const BlocksToolbar = () => {
       <Flex gap={1} padding={2}>
         <Toolbar.ToggleGroup type="multiple" asChild>
           <Flex gap={1}>
-            {modifiers.map((modifier) => (
+            {Object.entries(modifiers).map(([name, modifier]) => (
               <ToolbarButton
-                key={modifier.name}
+                key={name}
+                name={name}
                 icon={modifier.icon}
-                name={modifier.name}
                 label={modifier.label}
                 isActive={modifier.checkIsActive()}
                 handleClick={modifier.handleToggle}

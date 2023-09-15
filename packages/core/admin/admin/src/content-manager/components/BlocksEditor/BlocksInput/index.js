@@ -17,8 +17,10 @@ const getEditorStyle = (theme) => ({
 
 const baseRenderLeaf = (props, modifiers) => {
   // Recursively wrap the children for each active modifier
-  const wrappedChildren = modifiers.reduce((currentChildren, modifier) => {
-    if (props.leaf[modifier.name]) {
+  const wrappedChildren = Object.entries(modifiers).reduce((currentChildren, modifierEntry) => {
+    const [name, modifier] = modifierEntry;
+
+    if (props.leaf[name]) {
       return modifier.renderLeaf(currentChildren);
     }
 
