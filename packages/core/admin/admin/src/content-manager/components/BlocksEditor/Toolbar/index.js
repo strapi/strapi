@@ -192,14 +192,15 @@ const BlockOption = ({ value, icon, label, onActive, optionSelected }) => {
   const editor = useSlate();
 
   const isActive = isBlockActive(editor, blockItems[value].value);
+  const isSelected = value === optionSelected;
 
-  if (isActive && value !== optionSelected) {
+  if (isActive && !isSelected) {
     onActive(value);
   }
 
   return (
     <Option
-      startIcon={<Icon as={icon} color={isActive ? 'primary600' : 'neutral600'} />}
+      startIcon={<Icon as={icon} color={isSelected ? 'primary600' : 'neutral600'} />}
       value={value}
     >
       {formatMessage(label)}
