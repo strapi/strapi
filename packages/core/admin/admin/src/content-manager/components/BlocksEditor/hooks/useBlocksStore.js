@@ -151,6 +151,15 @@ Image.propTypes = {
   }).isRequired,
 };
 
+/**
+ * Manages a store of all the available blocks.
+ *
+ * @returns {{
+ *   [key: string]: {
+ *     renderElement: (props: Object) => JSX.Element,
+ *   }
+ * }} an object containing rendering functions and metadata for different blocks, indexed by name.
+ */
 export function useBlocksStore() {
   return {
     paragraph: {

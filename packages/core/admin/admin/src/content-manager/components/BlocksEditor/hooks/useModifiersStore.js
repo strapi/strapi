@@ -18,6 +18,19 @@ const InlineCode = styled.code`
     monospace;
 `;
 
+/**
+ * Manages a store of all the available modifiers.
+ *
+ * @returns {{
+ *   [key: string]: {
+ *     icon: IconComponent,
+ *     label: {id: string, defaultMessage: string},
+ *     checkIsActive: () => boolean,
+ *     handleToggle: () => void,
+ *     renderLeaf: (children: JSX.Element) => JSX.Element,
+ *   }
+ * }} An object containing rendering functions and metadata for different text modifiers, indexed by name.
+ */
 export function useModifiersStore() {
   const editor = useSlate();
   const modifiers = Editor.marks(editor);
