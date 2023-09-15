@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
-import { Flex, Icon, Tooltip } from '@strapi/design-system';
+import { Flex, Icon, Tooltip, Select, Option } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
 import {
   Bold,
@@ -11,10 +11,20 @@ import {
   Code,
   BulletList,
   NumberList,
+  /**
+   * TODO: add the rest of the icons when the DS will be released
+   Paragraph,
+   HeadingOne,
+   HeadingTwo,
+   HeadingThree,
+   HeadingFour,
+   HeadingFive,
+   HeadingSix,
+   */
 } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Editor, Element, Transforms } from 'slate';
+import { Editor, Transforms, Element as SlateElement } from 'slate';
 import { useSlate } from 'slate-react';
 import styled from 'styled-components';
 
@@ -109,6 +119,116 @@ ModifierButton.propTypes = {
   }).isRequired,
 };
 
+const isBlockActive = (editor, value) => {
+  const { selection } = editor;
+
+  if (!selection) return false;
+
+  let matchCondition;
+
+  switch (value.type) {
+    case 'heading':
+      matchCondition = (n) => n.type === value.type && n.level === value?.level;
+      break;
+    default:
+      matchCondition = (n) => n.type === value.type;
+      break;
+  }
+
+  const match = Array.from(
+    Editor.nodes(editor, {
+      at: Editor.unhangRange(editor, selection),
+      match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n) && matchCondition(n),
+    })
+  );
+
+  return match.length > 0;
+};
+
+const toggleBlock = (editor, value) => {
+  const { type, level } = value;
+
+  const newProperties = {
+    type,
+    level: level || null,
+  };
+
+  Transforms.setNodes(editor, newProperties);
+};
+
+const BlocksDropdown = () => {
+  const editor = useSlate();
+  const { formatMessage } = useIntl();
+  const [blockSelected, setBlockSelected] = React.useState(Object.keys(blockItems)[0]);
+
+  /**
+   * @param {string} optionKey - key of the heading selected
+   */
+  const selectOption = (optionKey) => {
+    toggleBlock(editor, blockItems[optionKey].value);
+
+    setBlockSelected(optionKey);
+  };
+
+  return (
+    <Select
+      startIcon={<Icon as={blockItems[blockSelected].icon} />}
+      onChange={selectOption}
+      placeholder={blockItems[blockSelected].label}
+      value={blockSelected}
+      aria-label={formatMessage({
+        id: 'components.Blocks.blocks.selectBlock',
+        defaultMessage: 'Select a block',
+      })}
+    >
+      {Object.keys(blockItems).map((key) => (
+        <BlockOption
+          key={blockItems[key].name}
+          value={key}
+          label={blockItems[key].label}
+          icon={blockItems[key].icon}
+          handleSelection={setBlockSelected}
+          blockSelected={blockSelected}
+        />
+      ))}
+    </Select>
+  );
+};
+
+const BlockOption = ({ value, icon, label, handleSelection, blockSelected }) => {
+  const { formatMessage } = useIntl();
+  const editor = useSlate();
+
+  const isActive = isBlockActive(editor, blockItems[value].value);
+  const isSelected = value === blockSelected;
+
+  React.useEffect(() => {
+    if (isActive && !isSelected) {
+      handleSelection(value);
+    }
+  }, [handleSelection, isActive, isSelected, value]);
+
+  return (
+    <Option
+      startIcon={<Icon as={icon} color={isSelected ? 'primary600' : 'neutral600'} />}
+      value={value}
+    >
+      {formatMessage(label)}
+    </Option>
+  );
+};
+
+BlockOption.propTypes = {
+  icon: PropTypes.elementType.isRequired,
+  value: PropTypes.string.isRequired,
+  label: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+  }).isRequired,
+  handleSelection: PropTypes.func.isRequired,
+  blockSelected: PropTypes.string.isRequired,
+};
+
 // TODO: extract a store of modifiers that rules both the toolbar and the leaf renderers
 const modifiers = [
   {
@@ -138,6 +258,71 @@ const modifiers = [
   },
 ];
 
+const blockItems = {
+  text: {
+    name: 'text',
+    icon: Code, // TODO: replace with Paragraph when the DS will be released
+    label: { id: 'components.Blocks.blocks.text', defaultMessage: 'Text' },
+    value: {
+      type: 'paragraph',
+    },
+  },
+  heading1: {
+    name: 'heading-one',
+    icon: Code, // TODO: replace with HeadingOne when the DS will be released
+    label: { id: 'components.Blocks.blocks.heading1', defaultMessage: 'Heading 1' },
+    value: {
+      type: 'heading',
+      level: 1,
+    },
+  },
+  heading2: {
+    name: 'heading-two',
+    icon: Code, // TODO: replace with HeadingTwo when the DS will be released
+    label: { id: 'components.Blocks.blocks.heading2', defaultMessage: 'Heading 2' },
+    value: {
+      type: 'heading',
+      level: 2,
+    },
+  },
+  heading3: {
+    name: 'heading-three',
+    icon: Code, // TODO: replace with HeadingThree when the DS will be released
+    label: { id: 'components.Blocks.blocks.heading3', defaultMessage: 'Heading 3' },
+    value: {
+      type: 'heading',
+      level: 3,
+    },
+  },
+  heading4: {
+    name: 'heading-four',
+    icon: Code, // TODO: replace with HeadingFour when the DS will be released
+    label: { id: 'components.Blocks.blocks.heading4', defaultMessage: 'Heading 4' },
+    value: {
+      type: 'heading',
+      level: 4,
+    },
+  },
+  heading5: {
+    name: 'heading-five',
+    icon: Code, // TODO: replace with HeadingFive when the DS will be released
+    label: { id: 'components.Blocks.blocks.heading5', defaultMessage: 'Heading 5' },
+    value: {
+      type: 'heading',
+      level: 5,
+    },
+  },
+  heading6: {
+    name: 'heading-six',
+    icon: Code, // TODO: replace with HeadingSix when the DS will be released
+    label: { id: 'components.Blocks.blocks.heading6', defaultMessage: 'Heading 6' },
+    value: {
+      type: 'heading',
+      level: 6,
+    },
+  },
+};
+
 const ListButton = ({ icon, format, label }) => {
   const editor = useSlate();
 
@@ -147,7 +332,7 @@ const ListButton = ({ icon, format, label }) => {
    * @returns boolean
    */
   const isListNode = (node) => {
-    return !Editor.isEditor(node) && Element.isElement(node) && node.type === 'list';
+    return !Editor.isEditor(node) && SlateElement.isElement(node) && node.type === 'list';
   };
 
   const isListActive = () => {
@@ -210,6 +395,8 @@ const BlocksToolbar = () => {
   return (
     <Toolbar.Root asChild>
       <Flex gap={1} padding={2}>
+        <BlocksDropdown />
+        <Separator />
         <Toolbar.ToggleGroup type="multiple" asChild>
           <Flex gap={1}>
             {modifiers.map((modifier) => (
