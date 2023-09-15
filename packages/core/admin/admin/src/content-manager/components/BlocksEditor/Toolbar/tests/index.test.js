@@ -147,8 +147,6 @@ describe('BlocksEditor toolbar', () => {
 
     const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
 
-    screen.debug(headingsDropdown);
-
     Transforms.setSelection(baseEditor, {
       anchor: { path: [0, 0], offset: 2 },
     });
