@@ -177,7 +177,7 @@ const BlocksDropdown = () => {
       placeholder={blockItems[blockSelected].label}
       value={blockSelected}
       aria-label={formatMessage({
-        id: 'components.Blocks.blocks.label',
+        id: 'components.Blocks.blocks.selectBlock',
         defaultMessage: 'Select a block',
       })}
     >
