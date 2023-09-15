@@ -4,9 +4,12 @@ import { expectExit } from '../../__tests__/commands.test.utils';
 import * as fileDatatransfer from '../../../file';
 
 jest.mock('fs-extra', () => ({
+  ...jest.requireActual('fs-extra'),
   pathExists: jest.fn(() => Promise.resolve(true)),
 }));
+
 const defaultFileName = 'defaultFilename';
+
 jest.mock(
   '../../data-transfer',
   () => {
