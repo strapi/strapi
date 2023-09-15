@@ -198,7 +198,7 @@ export async function addDefaultField({
         .getByRole('button', { name: 'Component Group of fields that you can repeat or reuse' })
         .click();
 
-      const { existingComponentName, existingComponentCategory } = rest;
+      const { existingComponentName, existingComponentCategory, repeatable = false } = rest;
 
       if (existingComponentName) {
         // TODO: improve selector
@@ -214,6 +214,18 @@ export async function addDefaultField({
         await page.getByRole('button', { name: 'Select a component' }).click();
         // TODO: can we make this work using a filter without category?
         await page.getByLabel(`${existingComponentCategory} - ${existingComponentName}`).click();
+      }
+
+      if (!repeatable) {
+        await page
+          .locator('label')
+          .filter({
+            hasText:
+              'Single componentBest for grouping fields like full address, main information, et',
+          })
+          .locator('div')
+          .first()
+          .click();
       }
       break;
   }

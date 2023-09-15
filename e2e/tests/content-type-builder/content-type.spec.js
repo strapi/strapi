@@ -224,7 +224,7 @@ async function main() {
       });
 
       // TODO: this test does not yet select "repetable component"
-      test.skip('A user should be able to create a content type using a repeatable component', async ({
+      test.only('A user should be able to create a content type using a repeatable component', async ({
         page,
       }) => {
         // Create component
@@ -244,12 +244,16 @@ async function main() {
 
         // Create content-type
         await createContentType({ page, type, displayName: `CT ${type}` });
+
+        // TODO: application crashes
+
         await addDefaultField({
           page,
           type: 'Component',
           name: 'componentField',
           existingComponentName: `Component ${type}`,
           existingComponentCategory: 'new-component',
+          repeatable: true,
         });
 
         await page.getByRole('button', { name: 'Save' }).click();
