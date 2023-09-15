@@ -48,6 +48,10 @@ export const DisconnectButton = styled.button`
   }
 `;
 
+const ComboboxWrapper = styled(Box)`
+  align-self: flex-start;
+`;
+
 const RelationInput = ({
   canReorder,
   description,
@@ -206,58 +210,70 @@ const RelationInput = ({
   const ariaDescriptionId = `${name}-item-instructions`;
 
   return (
-    <Flex gap={3} justifyContent="space-between" alignItems="end" wrap="wrap">
-      <Flex direction="column" alignItems="stretch" basis={size <= 6 ? '100%' : '70%'} gap={2}>
-        <Combobox
-          ref={fieldRef}
-          autocomplete="list"
-          error={error}
-          name={name}
-          hint={description}
-          id={id}
-          required={required}
-          label={label}
-          labelAction={labelAction}
-          disabled={disabled}
-          placeholder={placeholder}
-          hasMoreItems={searchResults.hasNextPage}
-          loading={searchResults.isLoading}
-          onOpenChange={handleMenuOpen}
-          noOptionsMessage={() => noRelationsMessage}
-          loadingMessage={loadingMessage}
-          onLoadMore={() => {
-            onSearchNextPage();
-          }}
-          textValue={textValue}
-          onChange={(relationId) => {
-            if (!relationId) {
-              return;
-            }
-            onRelationConnect(options.find((opt) => opt.id === relationId));
-            updatedRelationsWith.current = 'onChange';
-          }}
-          onTextValueChange={(text) => {
-            setTextValue(text);
-          }}
-          onInputChange={(event) => {
-            onSearch(event.currentTarget.value);
-          }}
-        >
-          {options.map((opt) => {
-            return <Option key={opt.id} {...opt} />;
-          })}
-        </Combobox>
+    <Flex
+      direction="column"
+      gap={3}
+      justifyContent="space-between"
+      alignItems="stretch"
+      wrap="wrap"
+    >
+      <Flex direction="row" alignItems="end" justifyContent="end" gap={2} width="100%">
+        <ComboboxWrapper marginRight="auto" maxWidth={size <= 6 ? '100%' : '70%'} width="100%">
+          <Combobox
+            ref={fieldRef}
+            autocomplete="list"
+            error={error}
+            name={name}
+            hint={description}
+            id={id}
+            required={required}
+            label={label}
+            labelAction={labelAction}
+            disabled={disabled}
+            placeholder={placeholder}
+            hasMoreItems={searchResults.hasNextPage}
+            loading={searchResults.isLoading}
+            onOpenChange={handleMenuOpen}
+            noOptionsMessage={() => noRelationsMessage}
+            loadingMessage={loadingMessage}
+            onLoadMore={() => {
+              onSearchNextPage();
+            }}
+            textValue={textValue}
+            onChange={(relationId) => {
+              if (!relationId) {
+                return;
+              }
+              onRelationConnect(options.find((opt) => opt.id === relationId));
+              updatedRelationsWith.current = 'onChange';
+            }}
+            onTextValueChange={(text) => {
+              setTextValue(text);
+            }}
+            onInputChange={(event) => {
+              onSearch(event.currentTarget.value);
+            }}
+          >
+            {options.map((opt) => {
+              return <Option key={opt.id} {...opt} />;
+            })}
+          </Combobox>
+        </ComboboxWrapper>
+
         {shouldDisplayLoadMoreButton && (
           <TextButton
             disabled={paginatedRelations.isLoading || paginatedRelations.isFetchingNextPage}
             onClick={handleLoadMore}
             loading={paginatedRelations.isLoading || paginatedRelations.isFetchingNextPage}
             startIcon={<Refresh />}
+            // prevent the label from line-wrapping
+            shrink={0}
           >
             {labelLoadMore}
           </TextButton>
         )}
       </Flex>
+
       {relations.length > 0 && (
         <RelationList overflow={overflow}>
           <VisuallyHidden id={ariaDescriptionId}>{listAriaDescription}</VisuallyHidden>

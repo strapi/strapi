@@ -1,6 +1,6 @@
 {
   "name": "@strapi/typings",
-  "version": "4.13.4",
+  "version": "4.13.6",
   "description": "An open source headless CMS solution to create and manage your own API. It provides a powerful dashboard and features to make your life easier. Databases supported: MySQL, MariaDB, PostgreSQL, SQLite",
   "keywords": [
     "strapi"
@@ -45,10 +45,10 @@
   "dependencies": {
     "@koa/cors": "3.4.3",
     "@koa/router": "10.1.1",
-    "@strapi/database": "4.13.4",
-    "@strapi/logger": "4.13.4",
-    "@strapi/permissions": "4.13.4",
-    "@strapi/utils": "4.13.4",
+    "@strapi/database": "4.13.6",
+    "@strapi/logger": "4.13.6",
+    "@strapi/permissions": "4.13.6",
+    "@strapi/utils": "4.13.6",
     "commander": "8.3.0",
     "https-proxy-agent": "5.0.1",
     "koa": "2.13.4",
@@ -60,9 +60,9 @@
     "@types/koa": "*",
     "@types/koa__router": "12.0.0",
     "@types/node-schedule": "2.1.0",
-    "eslint-config-custom": "4.13.4",
+    "eslint-config-custom": "4.13.6",
     "ts-zen": "https://github.com/strapi/ts-zen#66e02232f5997674cc7032ea3ee59d9864863732",
-    "tsconfig": "4.13.4",
+    "tsconfig": "4.13.6",
     "typescript": "5.2.2"
   },
   "engines": {
