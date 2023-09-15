@@ -7,9 +7,9 @@
   </a>
 </p>
 
-<h3 align="center">API creation made simple, secure and fast.</h3>
-<p align="center">The most advanced open-source headless CMS to build powerful APIs with no effort.</p>
-<p align="center"><a href="https://strapi.io/cloud">Cloud</a> · <a href="https://strapi.io/demo">Try live demo</a></p>
+<h3 align="center">Open-source headless CMS, self-hosted or Cloud you’re in control.</h3>
+<p align="center">The leading open-source headless CMS, 100% JavaScript/TypeScript, flexible and fully customizable.</p>
+<p align="center"><a href="cloud.strapi.io/signups?source=github1">Cloud</a> · <a href="https://strapi.io/demo">Try live demo</a></p>
 <br />
 
 <p align="center">
@@ -37,12 +37,15 @@
 
 <br>
 
-Strapi is a free and open-source headless CMS delivering your content anywhere you need.
+Strapi Community Edition is a free and open-source headless CMS enabling you to manage any content, anywhere.
 
 - **Keep control over your data**. With Strapi, you know where your data is stored, and you keep full control at all times.
-- **Self-hosted**. You can host and scale Strapi projects the way you want. You can choose any hosting platform you want: AWS, Render, Netlify, Heroku, a VPS, or a dedicated server. You can scale as you grow, 100% independent.
+- **Self-hosted**. You can host and scale Strapi projects the way you want. You can save time by deploying to Strapi Cloud or deploy to the hosting platform you want: AWS, Azure, Google Cloud, DigitalOcean. 
 - **Database agnostic**. Strapi works with SQL databases. You can choose the database you prefer: PostgreSQL, MySQL, MariaDB, and SQLite.
 - **Customizable**. You can quickly build your logic by fully customizing APIs, routes, or plugins to fit your needs perfectly.
+- **Internationalization**. The Internationalization (i18n) plugin allows Strapi users to create, manage and distribute localized content in different languages, called "locales
+- **RBAC**. Create an unlimited number of custom roles and permissions for admin users.
+- **Typescript**. Strapi now supports Typescript for typechecking and better DX experience.
 
 ## Getting Started
 
