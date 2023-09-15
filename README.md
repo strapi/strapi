@@ -43,9 +43,6 @@ Strapi Community Edition is a free and open-source headless CMS enabling you to 
 - **Self-hosted**. You can host and scale Strapi projects the way you want. You can save time by deploying to Strapi Cloud or deploy to the hosting platform you want: AWS, Azure, Google Cloud, DigitalOcean. 
 - **Database agnostic**. Strapi works with SQL databases. You can choose the database you prefer: PostgreSQL, MySQL, MariaDB, and SQLite.
 - **Customizable**. You can quickly build your logic by fully customizing APIs, routes, or plugins to fit your needs perfectly.
-- **Internationalization**. The Internationalization (i18n) plugin allows Strapi users to create, manage and distribute localized content in different languages, called "locales
-- **RBAC**. Create an unlimited number of custom roles and permissions for admin users.
-- **Typescript**. Strapi now supports Typescript for typechecking and better DX experience.
 - **Blazing Fast and Robust**. Built on top of Node.js and TypeScript, Strapi delivers reliable yet amazing performance.
 - **Front-end Agnostic**. Use any front-end framework (React, Next.js, Vue, Angular, etc.), mobile apps or even IoT.
 
@@ -119,6 +116,9 @@ Strapi only supports maintenance and LTS versions of Node.js. Please refer to th
 - **Front-end Agnostic:** Use any front-end framework (React, Vue, Angular, etc.), mobile apps or even IoT.
 - **Powerful CLI:** Scaffold projects and APIs on the fly.
 - **SQL databases:** Works with PostgreSQL, MySQL, MariaDB, and SQLite.
+- **Internationalization**. The Internationalization (i18n) plugin allows Strapi users to create, manage and distribute localized content in different languages, called "locales
+- **RBAC**. Create an unlimited number of custom roles and permissions for admin users.
+- **Typescript**. Strapi now supports Typescript for typechecking and better DX experience.
 
 **[See more on our website](https://strapi.io/overview)**.
 
