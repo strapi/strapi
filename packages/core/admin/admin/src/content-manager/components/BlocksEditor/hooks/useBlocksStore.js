@@ -170,6 +170,14 @@ Image.propTypes = {
  * @returns {{
  *   [key: string]: {
  *     renderElement: (props: Object) => JSX.Element,
+ *     variants: {
+ *       [key: string]: {
+ *         icon: React.ComponentType,
+ *         label: {id: string, defaultMessage: string},
+ *         value: Object,
+ *         matchNode: (node: Object) => boolean,
+ *       }
+ *     }
  *   }
  * }} an object containing rendering functions and metadata for different blocks, indexed by name.
  */
