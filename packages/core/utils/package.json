@@ -54,8 +54,8 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@types/koa": "*",
-    "@types/node": "18",
+    "@types/koa": "2.13.4",
+    "@types/node": "18.11.9",
     "eslint-config-custom": "4.13.6",
     "koa": "2.13.4",
     "koa-body": "4.2.0",

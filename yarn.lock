@@ -7101,9 +7101,9 @@ __metadata:
     "@strapi/utils": 4.13.6
     "@types/fs-extra": 9.0.13
     "@types/jest": 29.5.2
-    "@types/koa": "*"
+    "@types/koa": 2.13.4
     "@types/lodash": ^4.14.191
-    "@types/node": 18
+    "@types/node": 18.11.9
     "@types/semver": 7.5.0
     "@types/stream-chain": 2.0.1
     "@types/stream-json": 1.7.3
@@ -7778,14 +7778,14 @@ __metadata:
     "@types/configstore": 5.0.1
     "@types/delegates": 1.0.0
     "@types/jest": 29.5.2
-    "@types/koa": "*"
+    "@types/koa": 2.13.4
     "@types/koa-compress": 4.0.3
     "@types/koa-session": 6.4.1
     "@types/koa-static": 4.0.2
     "@types/koa__router": 12.0.0
     "@types/lodash": ^4.14.191
     "@types/mime-types": 2.1.1
-    "@types/node": 18
+    "@types/node": 18.11.9
     "@types/node-schedule": 2.1.0
     "@types/statuses": 2.0.1
     "@vitejs/plugin-react": 4.0.4
@@ -7865,7 +7865,7 @@ __metadata:
     "@strapi/permissions": 4.13.6
     "@strapi/utils": 4.13.6
     "@types/jest": 29.5.2
-    "@types/koa": "*"
+    "@types/koa": 2.13.4
     "@types/koa__router": 12.0.0
     "@types/node-schedule": 2.1.0
     commander: 8.3.0
@@ -7917,8 +7917,8 @@ __metadata:
   resolution: "@strapi/utils@workspace:packages/core/utils"
   dependencies:
     "@sindresorhus/slugify": 1.1.0
-    "@types/koa": "*"
-    "@types/node": 18
+    "@types/koa": 2.13.4
+    "@types/node": 18.11.9
     date-fns: 2.30.0
     eslint-config-custom: 4.13.6
     http-errors: 1.8.1
@@ -8198,10 +8198,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tsconfig/node16@npm:16.1.1":
-  version: 16.1.1
-  resolution: "@tsconfig/node16@npm:16.1.1"
-  checksum: 26d83db06866083b543e73eda33585464362fd0835229b9a5b1185f0353b9b5db9ca4f66a4be53d4ec5d4c219be42b0a7582f8bcc7268f2f77b1c643375e490f
+"@tsconfig/node18@npm:18.2.2":
+  version: 18.2.2
+  resolution: "@tsconfig/node18@npm:18.2.2"
+  checksum: 1c4b04b570e33de14bf518492e077079db2dcfba738c8d40c6ff916d94c9410246f4cb56f0802d9771423862140bf714c35d4a5f6cec2446d851cf61d3f8f9df
   languageName: node
   linkType: hard
 
@@ -8827,9 +8827,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/koa@npm:*, @types/koa@npm:^2.11.6":
-  version: 2.13.5
-  resolution: "@types/koa@npm:2.13.5"
+"@types/koa@npm:2.13.4":
+  version: 2.13.4
+  resolution: "@types/koa@npm:2.13.4"
   dependencies:
     "@types/accepts": "*"
     "@types/content-disposition": "*"
@@ -8839,7 +8839,7 @@ __metadata:
     "@types/keygrip": "*"
     "@types/koa-compose": "*"
     "@types/node": "*"
-  checksum: e3b634d934b79ce8f394bf4130511596081f9c073dbfb4309aa32e4c421c47049a002b65111f8d9687eabec55d5a27b1b9ae0699afa83894cb7032c3536bfa17
+  checksum: 35a54e68944f74d6763537d55d01f8ed870d0ef816b5f27fce97a317b237540b7c249dc4a54abab44ad0afd0ce010b335122c9efb490b9589affe7929201d707
   languageName: node
   linkType: hard
 
@@ -8984,10 +8984,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:18":
-  version: 18.17.12
-  resolution: "@types/node@npm:18.17.12"
-  checksum: 79f8bcca3067a3c529f30e172df8d14f25ab9e4cd6a05ed897a924ab1dec774e8ea172ef5c4a67ffec433d423a0c81778f17db22606d574bc83871b60aab298e
+"@types/node@npm:18.11.9":
+  version: 18.11.9
+  resolution: "@types/node@npm:18.11.9"
+  checksum: cc0aae109e9b7adefc32eecb838d6fad931663bb06484b5e9cbbbf74865c721b03d16fd8d74ad90e31dbe093d956a7c2c306ba5429ba0c00f3f7505103d7a496
   languageName: node
   linkType: hard
 
@@ -29488,7 +29488,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "tsconfig@workspace:packages/utils/tsconfig"
   dependencies:
-    "@tsconfig/node16": 16.1.1
+    "@tsconfig/node18": 18.2.2
   languageName: unknown
   linkType: soft
 
