@@ -13,9 +13,11 @@ jest.mock('../../utils', () => ({
 }));
 
 jest.mock('@strapi/strapi/dist/utils/ee', () => ({
-  features: {
-    isEnabled: jest.fn(),
-    get: jest.fn(),
+  default: {
+    features: {
+      isEnabled: jest.fn(),
+      get: jest.fn(),
+    },
   },
 }));
 

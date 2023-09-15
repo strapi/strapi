@@ -656,7 +656,9 @@ class Strapi implements StrapiI {
 
   getModel(uid: Common.UID.ContentType): Schema.ContentType;
   getModel(uid: Common.UID.Component): Schema.Component;
-  getModel<TUID extends Common.UID.Schema>(uid: TUID): Schema.ContentType | Schema.Component {
+  getModel<TUID extends Common.UID.Schema>(
+    uid: TUID
+  ): Schema.ContentType | Schema.Component | undefined {
     if (uid in this.contentTypes) {
       return this.contentTypes[uid as Common.UID.ContentType];
     }
@@ -664,8 +666,6 @@ class Strapi implements StrapiI {
     if (uid in this.components) {
       return this.components[uid as Common.UID.Component];
     }
-
-    throw new Error('Model not found');
   }
 
   /**

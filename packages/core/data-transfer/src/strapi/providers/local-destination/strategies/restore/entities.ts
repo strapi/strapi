@@ -66,7 +66,11 @@ const createEntitiesWriteStream = (options: IEntitiesRestoreStreamOptions) => {
             }
           }
 
-          return typeof cType === 'object' ? cType?.uid : undefined;
+          if ('uid' in cType) {
+            return cType.uid;
+          }
+
+          return undefined;
         };
 
         try {

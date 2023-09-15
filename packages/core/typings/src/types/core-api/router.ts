@@ -45,7 +45,7 @@ export type RouterConfig<TContentTypeUID extends Common.UID.ContentType> = {
   // TODO Refactor when we have a controller registry
   only?: string[];
   except?: string[];
-  config: Utils.Expression.MatchFirst<
+  config?: Utils.Expression.MatchFirst<
     [
       Utils.Expression.Test<
         Common.UID.IsCollectionType<TContentTypeUID>,

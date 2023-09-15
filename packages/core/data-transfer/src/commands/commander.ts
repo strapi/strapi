@@ -11,10 +11,9 @@ import { exitWith } from './helpers';
 /**
  * argParser: Parse a comma-delimited string as an array
  */
-const parseList = (value: string): string[] => {
+const parseList = (value: string) => {
   try {
-    const list = value.split(',').map((item) => item.trim()); // trim shouldn't be necessary but might help catch unexpected whitespace characters
-    return list;
+    return value.split(',').map((item) => item.trim()); // trim shouldn't be necessary but might help catch unexpected whitespace characters
   } catch (e) {
     exitWith(1, `Unrecognized input: ${value}`);
   }
@@ -55,7 +54,7 @@ const parseInteger = (value: string) => {
 /**
  * argParser: Parse a string as a URL object
  */
-const parseURL = (value: string): URL => {
+const parseURL = (value: string) => {
   try {
     const url = new URL(value);
     if (!url.host) {

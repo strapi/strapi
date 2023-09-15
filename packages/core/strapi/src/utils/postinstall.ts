@@ -9,7 +9,7 @@ import machineID from './machine-id';
 try {
   if (
     process.env.npm_config_global === 'true' ||
-    JSON.parse(process.env.npm_config_argv ?? '').original.includes('global')
+    JSON.parse(process.env.npm_config_argv as any).original.includes('global')
   ) {
     const event = 'didInstallStrapi';
     fetch('https://analytics.strapi.io/api/v2/track', {

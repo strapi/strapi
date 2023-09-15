@@ -37,10 +37,6 @@ export interface Attribute<TKind extends Kind = Kind> {
    * Options defined and used by the plugins
    */
   pluginOptions?: object;
-
-  /**
-   * Options defined and used by Strapi core
-   */
   useJoinTable?: boolean;
 }
 
