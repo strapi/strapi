@@ -1,11 +1,7 @@
-import type { Context } from 'koa';
-import { Strapi } from '../../../../..';
+import { Strapi, Common } from '../../../../..';
 
-export type ControllerReturnType = {
-  [key: string]: (ctx: Context) => Promise<unknown> | unknown;
-};
-
-export type Controller = ({ strapi }: { strapi: Strapi }) => ControllerReturnType;
+// TODO Replace when we have WithStrapiCallback accessible
+export type Controller = ({ strapi }: { strapi: Strapi }) => Common.Controller;
 
 export interface Controllers {
   [key: string]: Controller;
