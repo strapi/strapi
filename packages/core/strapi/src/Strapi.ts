@@ -353,9 +353,7 @@ class Strapi implements StrapiI {
 
     this.eventHub.destroy();
 
-    if (_.has(this, 'db')) {
-      await this.db!.destroy();
-    }
+    await this.db?.destroy();
 
     this.telemetry.destroy();
     this.cron.destroy();
