@@ -158,6 +158,7 @@ const toggleBlock = (editor, value) => {
 
 const BlocksDropdown = () => {
   const editor = useSlate();
+  const { formatMessage } = useIntl();
   const [blockSelected, setBlockSelected] = React.useState(Object.keys(blockItems)[0]);
 
   /**
@@ -175,7 +176,10 @@ const BlocksDropdown = () => {
       onChange={selectOption}
       placeholder={blockItems[blockSelected].label}
       value={blockSelected}
-      aria-label="Select a block"
+      aria-label={formatMessage({
+        id: 'components.Blocks.blocks.label',
+        defaultMessage: 'Select a block',
+      })}
     >
       {Object.keys(blockItems).map((key) => (
         <BlockOption
