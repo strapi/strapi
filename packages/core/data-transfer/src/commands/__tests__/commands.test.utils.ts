@@ -1,3 +1,4 @@
+// TODO: move to a test-utils internal pkg
 import type { Utils } from '@strapi/typings';
 
 const expectExit = async (code: number, fn: Utils.Function.Any) => {

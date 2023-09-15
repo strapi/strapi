@@ -62,8 +62,8 @@ function getFileStats(filepath: string, isLocal = false): Promise<{ size: number
 export const createAssetsStream = (strapi: LoadedStrapi): Duplex => {
   const generator: () => AsyncGenerator<IAsset, void> = async function* () {
     const stream: Readable = strapi.db
+      .queryBuilder('plugin::upload.file')
       // Create a query builder instance (default type is 'select')
-      ?.queryBuilder('plugin::upload.file')
       // Fetch all columns
       .select('*')
       // Get a readable stream

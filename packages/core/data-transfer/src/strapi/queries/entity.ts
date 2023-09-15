@@ -22,10 +22,7 @@ const createEntityQuery = (strapi: LoadedStrapi): any => {
     async assignToEntity(uid: Common.UID.Schema, data: any) {
       const model = strapi.getModel(uid);
 
-      const entityComponents = await componentsService.createComponents(
-        uid as Common.UID.Schema,
-        data
-      );
+      const entityComponents = await componentsService.createComponents(uid, data);
       const dataWithoutComponents = sanitizeComponentLikeAttributes(model, data);
 
       return assign(entityComponents, dataWithoutComponents);

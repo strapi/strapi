@@ -55,7 +55,7 @@ export type RouterConfig<TContentTypeUID extends Common.UID.ContentType> = {
     ],
     Generic
   >;
-  type: RouterType;
+  type?: RouterType;
 };
 
 export type RouterType = 'admin' | 'content-api';
