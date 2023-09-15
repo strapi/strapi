@@ -25,6 +25,7 @@
     "packages/*",
     "packages/*/*",
     "examples/*",
+    "examples/getstarted/src/plugins/*",
     ".github/actions/*",
     "scripts/*"
   ],

@@ -39,26 +39,8 @@ const config: Config = defineConfig({
    * what they look like in the package.json
    */
   exports: {},
-  plugins: [
-    {
-      name: 'treat-js-files-as-jsx',
-      async transform(code, id) {
-        /**
-         * Matches all files in src/ and ee/ that end with .js
-         */
-        if (!id.match(/src\/.*\.js$/) && !id.match(/ee\/.*\.js$/)) {
-          return null;
-        }
-
-        // Use the exposed transform from vite, instead of directly
-        // transforming with esbuild
-        return transformWithEsbuild(code, id, {
-          loader: 'tsx',
-          jsx: 'automatic',
-        });
-      },
-    },
-  ],
+  // If you don't include this, it seems to think vite needs to be bundled, which isn't true.
+  externals: ['vite'],
 });
 
 export default config;

@@ -35,6 +35,7 @@
     "react-intl": "6.4.1",
     "react-router-dom": "5.3.4",
     "sqlite3": "5.1.2",
+    "strapi-plugin-workspace-plugin": "workspace:*",
     "styled-components": "5.3.3"
   },
   "engines": {
