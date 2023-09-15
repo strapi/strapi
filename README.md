@@ -39,7 +39,7 @@
 
 Strapi Community Edition is a free and open-source headless CMS enabling you to manage any content, anywhere.
 
-- **Self-hosted or Cloud**: You can host and scale Strapi projects the way you want. You can save time by deploying to Strapi - **Cloud or deploy to the hosting platform you want**: AWS, Azure, Google Cloud, DigitalOcean.
+- **Self-hosted or Cloud**: You can host and scale Strapi projects the way you want. You can save time by deploying to [Strapi Cloud](https://cloud.strapi.io/signups?source=github1) or deploy to the hosting platform you want**: AWS, Azure, Google Cloud, DigitalOcean.
 - **Modern Admin Pane**: Elegant, entirely customizable and a fully extensible admin panel.
 - **Multi-database support**: You can choose the database you prefer: PostgreSQL, MySQL, MariaDB, and SQLite.
 - **Customizable**: You can quickly build your logic by fully customizing APIs, routes, or plugins to fit your needs perfectly.
