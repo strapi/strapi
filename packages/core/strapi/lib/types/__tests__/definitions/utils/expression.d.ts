@@ -1,4 +1,5 @@
 import type { Utils } from '@strapi/strapi';
+import { MatchAllIntersect } from '../../../utils/expression';
 
 // IsNever
 type IsNeverGivenNever = Utils.Expression.IsNever<never>;
@@ -128,6 +129,72 @@ type IfWithNeverReturnType = Utils.Expression.If<true, never, number>;
 type IfWithUnknownReturnType = Utils.Expression.If<true, unknown, number>;
 type IfWithAnyReturnType = Utils.Expression.If<true, any, number>;
 
+// MatchFirst
+type MatchFirstReturnsTestSuccessful = Utils.Expression.MatchFirst<
+  [[Utils.Expression.IsTrue<Utils.Expression.True>, 'test-successful']],
+  'fail'
+>;
+type MatchFirstReturnsDefault = Utils.Expression.MatchFirst<
+  [[Utils.Expression.IsTrue<Utils.Expression.False>, 'test-successful']],
+  'default'
+>;
+type MatchFirstReturnsNeverWithEmptyTests = Utils.Expression.MatchFirst<[], 'default'>;
+type MatchFirstReturnsNeverWithNeverDefault = Utils.Expression.MatchFirst<
+  [[Utils.Expression.IsTrue<Utils.Expression.False>, 'test-successful']],
+  never
+>;
+
+// MatchAllIntersect
+type MatchAllIntersectWithOneTrueCondition = Utils.Expression.MatchAllIntersect<
+  [
+    [Utils.Expression.IsTrue<Utils.Expression.True>, { test: 1 }],
+    [Utils.Expression.IsTrue<Utils.Expression.False>, { test: 2 }]
+  ]
+>;
+type MatchAllIntersectWithAllFalseConditions = Utils.Expression.MatchAllIntersect<
+  [
+    [Utils.Expression.IsTrue<Utils.Expression.False>, { test: 1 }],
+    [Utils.Expression.IsTrue<Utils.Expression.False>, { test: 2 }]
+  ]
+>;
+
+type MatchAllIntersectWithIntersection = Utils.Expression.MatchAllIntersect<
+  [
+    [Utils.Expression.Extends<'test', string>, 'test'],
+    [Utils.Expression.Extends<'test', string>, 'test']
+  ]
+>;
+
+// Test
+type TestPasses = Utils.Expression.Test<Utils.Expression.IsTrue<Utils.Expression.True>, 'test'>;
+type TestFails = Utils.Expression.Test<Utils.Expression.IsTrue<Utils.Expression.False>, 'test'>;
+
+// And
+type AndTrue = Utils.Expression.And<
+  Utils.Expression.IsTrue<Utils.Expression.True>,
+  Utils.Expression.IsTrue<Utils.Expression.True>
+>;
+type AndFalse = Utils.Expression.And<
+  Utils.Expression.IsTrue<Utils.Expression.True>,
+  Utils.Expression.IsTrue<Utils.Expression.False>
+>;
+
+// Or
+type OrTrue = Utils.Expression.Or<
+  Utils.Expression.IsTrue<Utils.Expression.True>,
+  Utils.Expression.IsTrue<Utils.Expression.True>
+>;
+
+type OrFalse = Utils.Expression.Or<
+  Utils.Expression.IsTrue<Utils.Expression.False>,
+  Utils.Expression.IsTrue<Utils.Expression.False>
+>;
+
+type OrTrueFalse = Utils.Expression.Or<
+  Utils.Expression.IsTrue<Utils.Expression.True>,
+  Utils.Expression.IsTrue<Utils.Expression.False>
+>;
+
 export {
   // IsNever
   IsNeverGivenNever,
@@ -248,4 +315,28 @@ export {
   IfWithNeverReturnType,
   IfWithUnknownReturnType,
   IfWithAnyReturnType,
+
+  // MAtchFirst
+  MatchFirstReturnsTestSuccessful,
+  MatchFirstReturnsDefault,
+  MatchFirstReturnsNeverWithEmptyTests,
+  MatchFirstReturnsNeverWithNeverDefault,
+
+  // MatchAllIntersect
+  MatchAllIntersectWithOneTrueCondition,
+  MatchAllIntersectWithAllFalseConditions,
+  MatchAllIntersectWithIntersection,
+
+  // Test
+  TestPasses,
+  TestFails,
+
+  // And
+  AndTrue,
+  AndFalse,
+
+  // Or
+  OrTrue,
+  OrFalse,
+  OrTrueFalse,
 };

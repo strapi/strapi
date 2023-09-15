@@ -161,4 +161,37 @@ describe('Utils.Expression', () => {
     type('IfWithUnknownReturnType').isUnknown();
     type('IfWithAnyReturnType').isAny();
   });
+
+  test('MatchFirst', () => {
+    type('MatchFirstReturnsTestSuccessful').isStringLiteral('test-successful');
+    type('MatchFirstReturnsDefault').isStringLiteral('default');
+    type('MatchFirstReturnsNeverWithEmptyTests').isNever();
+    type('MatchFirstReturnsNeverWithNeverDefault').isNever();
+  });
+
+  test('MatchAllIntersect', () => {
+    type('MatchAllIntersectWithOneTrueCondition').isAnonymousObject({
+      properties: {
+        test: t.numberLiteral(1),
+      },
+    });
+    type('MatchAllIntersectWithAllFalseConditions').isUnknown();
+    type('MatchAllIntersectWithIntersection').isStringLiteral('test');
+  });
+
+  test('Test', () => {
+    type('TestPasses').isTuple([t.booleanLiteral(true), t.stringLiteral('test')]);
+    type('TestFails').isTuple([t.booleanLiteral(false), t.stringLiteral('test')]);
+  });
+
+  test('And', () => {
+    type('AndTrue').isBooleanLiteral(true);
+    type('AndFalse').isBooleanLiteral(false);
+  });
+
+  test('Or', () => {
+    type('OrTrue').isBooleanLiteral(true);
+    type('OrFalse').isBooleanLiteral(false);
+    type('OrTrueFalse').isBooleanLiteral(true);
+  });
 });
