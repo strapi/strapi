@@ -41,8 +41,21 @@ const H6 = styled(Typography).attrs({ as: 'h6' })`
   line-height: ${({ theme }) => theme.lineHeights[1]};
 `;
 
+const Bold = styled(Typography)`
+  font-size: inherit;
+`;
+
 const Italic = styled(Typography)`
   font-style: italic;
+  font-size: inherit;
+`;
+
+const Underline = styled(Typography)`
+  font-size: inherit;
+`;
+
+const StrikeThrough = styled(Typography)`
+  font-size: inherit;
 `;
 
 const Img = styled.img`
@@ -210,7 +223,7 @@ const renderElement = (props) => {
 
 const renderLeaf = ({ attributes, children, leaf }) => {
   if (leaf.bold) {
-    children = <Typography fontWeight="bold">{children}</Typography>;
+    children = <Bold fontWeight="bold">{children}</Bold>;
   }
 
   if (leaf.italic) {
@@ -218,11 +231,15 @@ const renderLeaf = ({ attributes, children, leaf }) => {
   }
 
   if (leaf.underline) {
-    children = <Typography textDecoration="underline">{children}</Typography>;
+    children = (
+      <Underline textDecoration="underline" fontSize="inherit">
+        {children}
+      </Underline>
+    );
   }
 
   if (leaf.strikethrough) {
-    children = <Typography textDecoration="line-through">{children}</Typography>;
+    children = <StrikeThrough textDecoration="line-through">{children}</StrikeThrough>;
   }
 
   if (leaf.code) {
