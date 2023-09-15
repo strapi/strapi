@@ -1,5 +1,4 @@
 import type { Common } from '../../..';
-// import { Router } from '../../../../core-api';
 
 export type ArrayNotation = Common.RouteInput[];
 
