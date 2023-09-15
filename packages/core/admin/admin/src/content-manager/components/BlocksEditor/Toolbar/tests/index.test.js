@@ -182,4 +182,44 @@ describe('BlocksEditor toolbar', () => {
       },
     ]);
   });
+
+  it('transforms the selection to a quote when selected and trasforms it back to text when selected again', async () => {
+    setup();
+
+    const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+
+    Transforms.setSelection(baseEditor, {
+      anchor: { path: [0, 0], offset: 0 },
+    });
+
+    await user.click(headingsDropdown);
+
+    await user.click(screen.getByRole('option', { name: 'Quote' }));
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'quote',
+        children: [
+          {
+            text: 'A line of text in a paragraph.',
+          },
+        ],
+      },
+    ]);
+
+    await user.click(headingsDropdown);
+
+    await user.click(screen.getByRole('option', { name: 'Text' }));
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            text: 'A line of text in a paragraph.',
+          },
+        ],
+      },
+    ]);
+  });
 });
