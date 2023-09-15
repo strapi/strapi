@@ -81,12 +81,6 @@ async function main() {
         await addDefaultField({ page, type: 'Boolean', name: 'booleanField', ...addMoreAttrs });
         await addDefaultField({ page, type: 'JSON', name: 'JSONField' });
 
-        // relation
-        // media
-        // uid
-        // component
-        // dynamic zone
-
         await page.getByRole('button', { name: 'Save' }).click();
         await waitForReload({ page });
 
@@ -110,6 +104,82 @@ async function main() {
         await deleteContentType({ page, displayName: `CT ${type}` });
 
         // TODO: validate content-type has been deleted
+      });
+
+      test('A user should be able to create a content type using relational fields', async ({
+        page,
+      }) => {
+        // Create source content-type
+        await createContentType({ page, type, displayName: `Source CT ${type}` });
+
+        await addDefaultField({
+          page,
+          type: 'Text',
+          name: 'textField',
+        });
+
+        await page.getByRole('button', { name: 'Save' }).click();
+        await waitForReload({ page });
+
+        // Create target content-type
+        await createContentType({ page, type, displayName: `Target CT ${type}` });
+
+        const addMoreAttrs = {
+          addMore: true,
+          contentTypeName: `CT ${type}`,
+        };
+
+        await addDefaultField({
+          page,
+          type: 'Relation',
+          name: 'relationField',
+          sourceContentType: `Source CT ${type}`,
+          ...addMoreAttrs,
+        });
+
+        await page.getByRole('button', { name: 'Save' }).click();
+        await waitForReload({ page });
+
+        // Verify the content-type contains the field(s)
+        await verifyFieldPresence({ page, name: 'relationField' });
+
+        // Cleanup
+        await deleteContentType({ page, displayName: `Source CT ${type}` });
+        await deleteContentType({ page, displayName: `Target CT ${type}` });
+      });
+
+      test('A user should be able to create a content type using a uid field', async ({ page }) => {
+        await createContentType({ page, type, displayName: `CT ${type}` });
+
+        // TODO: could we derive the contentTypeName from the current page?
+        const addMoreAttrs = {
+          addMore: true,
+          contentTypeName: `CT ${type}`,
+        };
+
+        await addDefaultField({
+          page,
+          type: 'Text',
+          name: 'textField',
+          ...addMoreAttrs,
+        });
+
+        await addDefaultField({
+          page,
+          type: 'UID',
+          name: 'uidField',
+          attachedField: 'textField',
+          contentTypeName: `CT ${type}`,
+        });
+
+        await page.getByRole('button', { name: 'Save' }).click();
+        await waitForReload({ page });
+
+        // Verify the content-type contains the field(s)
+        await verifyFieldPresence({ page, name: 'uidField' });
+
+        // Cleanup
+        await deleteContentType({ page, displayName: `CT ${type}` });
       });
 
       test('A user should be able to edit a content-type', async ({ page }) => {

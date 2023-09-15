@@ -56,6 +56,10 @@ export async function addDefaultField({
   name,
   ...rest
 }) {
+  // TODO: should all locators be scoped to the modal using
+  // `const modal = await page.getByLabel(contentTypeName, { exact: true })`?
+  // that would make the util more robust.
+
   switch (type) {
     case 'Text':
       await page
@@ -145,9 +149,59 @@ export async function addDefaultField({
     case 'JSON':
       await page.getByRole('button', { name: 'JSON Data in JSON format' }).click();
       break;
+
+    case 'Relation':
+      await page.getByRole('button', { name: 'Relation Refers to a Collection Type' }).click();
+
+      // Select source content-type
+      const { relationType, sourceContentType } = rest;
+
+      // TODO: why this label?
+      await page.getByRole('button', { name: 'database' }).click();
+      await page.getByRole('menuitem', { name: sourceContentType }).click();
+
+      // TODO: these buttons don't have names yet
+      switch (relationType) {
+        case 'hasAndBelongsToOne':
+          break;
+
+        case 'belongsToMany':
+          break;
+
+        case 'hasMany':
+          break;
+
+        case 'hasAndBelongsToMany':
+          break;
+
+        case 'tbd':
+          break;
+      }
+
+      break;
+
+    case 'UID':
+      await page.getByRole('button', { name: 'UID Unique identifier' }).click();
+
+      const { attachedField } = rest;
+
+      await page.getByLabel('Attached field', { exact: true }).click();
+
+      // TODO: this doesn't work, but I can't figure out why. Using `.getByLabel(attachedField)`
+      // only does not work because there are several elements on the page that matches that
+      // selector and therefore it must be scoped to the modal.
+      await page.getByLabel(contentTypeName, { exact: true }).getByLabel(attachedField).click();
   }
 
-  await page.getByLabel('Name', { exact: true }).fill(name);
+  switch (type) {
+    case 'Relation':
+      // TODO: this should not be dependent on the id
+      await page.locator('#name').fill(name);
+      break;
+
+    default:
+      await page.getByLabel('Name', { exact: true }).fill(name);
+  }
 
   if (addMore) {
     // the selector needs to be scoped, because there are two buttons
