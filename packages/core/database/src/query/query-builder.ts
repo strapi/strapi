@@ -77,11 +77,11 @@ export interface QueryBuilder {
   shouldUseDistinct(): boolean;
   processSelect(): void;
   getKnexQuery(): Knex.QueryBuilder;
-  execute<T>({ mapResults }?: { mapResults?: boolean }): Promise<T>;
-  stream({ mapResults }?: { mapResults?: boolean }): helpers.ReadableQuery;
+  execute<T>(options?: { mapResults?: boolean }): Promise<T>;
+  stream(options?: { mapResults?: boolean }): helpers.ReadableQuery;
 }
 
-const createQueryBuilder = <TResult>(
+const createQueryBuilder = (
   uid: string,
   db: Database,
   initialState: Partial<State> = {}

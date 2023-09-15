@@ -1,6 +1,6 @@
 import _ from 'lodash/fp';
 
-import { fromRow } from '../transform';
+import { Rec, fromRow } from '../transform';
 import type { QueryBuilder } from '../../query-builder';
 import type { Database } from '../../..';
 import type { Meta, RelationalAttribute, Relation } from '../../../metadata/types';
@@ -15,8 +15,11 @@ type Context = {
 type Input<T extends RelationalAttribute = RelationalAttribute> = {
   attribute: T;
   attributeName: string;
-  results: Record<string, unknown>[];
-  populateValue: Record<string, unknown>;
+  results: Row[];
+  populateValue: {
+    on?: Record<string, Record<string, unknown>>;
+  } & Record<string, unknown>;
+
   isCount: boolean;
 };
 
@@ -24,7 +27,7 @@ type InputWithTarget<T extends RelationalAttribute = RelationalAttribute> = Inpu
   targetMeta: Meta;
 };
 
-type MorphIdMap = Record<string, Record<ID, Record<string, unknown>[]>>;
+type MorphIdMap = Record<string, Record<ID, Row[]>>;
 
 type Row = Record<string, unknown>;
 
@@ -41,7 +44,12 @@ const XtoOne = async (
   const { attribute, attributeName, results, populateValue, targetMeta, isCount } = input;
   const { db, qb } = ctx;
 
-  const fromTargetRow = (rowOrRows: Row | Row[]) => fromRow(targetMeta, rowOrRows);
+  const fromTargetRow = (rowOrRows: Row | Row[] | undefined) => {
+    if (!rowOrRows) {
+      return rowOrRows;
+    }
+    return fromRow(targetMeta, rowOrRows);
+  };
 
   if ('joinColumn' in attribute && attribute.joinColumn) {
     const { name: joinColumnName, referencedColumn: referencedColumnName } = attribute.joinColumn;
@@ -63,12 +71,12 @@ const XtoOne = async (
       .init(populateValue)
       .addSelect(`${qb.alias}.${referencedColumnName}`)
       .where({ [referencedColumnName]: referencedValues })
-      .execute<Record<string, unknown>[]>({ mapResults: false });
+      .execute<Row[]>({ mapResults: false });
 
-    const map = _.groupBy<ID>(referencedColumnName)(rows);
+    const map = _.groupBy<Row[]>(referencedColumnName)(rows);
 
     results.forEach((result) => {
-      result[attributeName] = fromTargetRow(_.first(map[result[joinColumnName]]));
+      result[attributeName] = fromTargetRow(_.first(map[result[joinColumnName] as string]));
     });
 
     return;
@@ -144,12 +152,12 @@ const XtoOne = async (
       })
       .addSelect(joinColAlias)
       .where({ [joinColAlias]: referencedValues })
-      .execute({ mapResults: false });
+      .execute<Row[]>({ mapResults: false });
 
-    const map = _.groupBy(joinColumnName, rows);
+    const map = _.groupBy<Row>(joinColumnName)(rows);
 
     results.forEach((result) => {
-      result[attributeName] = fromTargetRow(_.first(map[result[referencedColumnName]]));
+      result[attributeName] = fromTargetRow(_.first(map[result[referencedColumnName] as string]));
     });
   }
 };
@@ -158,7 +166,13 @@ const oneToMany = async (input: InputWithTarget<Relation.OneToMany>, ctx: Contex
   const { attribute, attributeName, results, populateValue, targetMeta, isCount } = input;
   const { db, qb } = ctx;
 
-  const fromTargetRow = (rowOrRows) => fromRow(targetMeta, rowOrRows);
+  const fromTargetRow = (rowOrRows: Row | Row[] | undefined) => {
+    if (!rowOrRows) {
+      return rowOrRows;
+    }
+
+    return fromRow(targetMeta, rowOrRows);
+  };
 
   if ('joinColumn' in attribute && attribute.joinColumn) {
     const { name: joinColumnName, referencedColumn: referencedColumnName } = attribute.joinColumn;
@@ -179,12 +193,12 @@ const oneToMany = async (input: InputWithTarget<Relation.OneToMany>, ctx: Contex
       .init(populateValue)
       .addSelect(`${qb.alias}.${referencedColumnName}`)
       .where({ [referencedColumnName]: referencedValues })
-      .execute({ mapResults: false });
+      .execute<Row[]>({ mapResults: false });
 
-    const map = _.groupBy(referencedColumnName, rows);
+    const map = _.groupBy<Row>(referencedColumnName)(rows);
 
     results.forEach((result) => {
-      result[attributeName] = fromTargetRow(map[result[joinColumnName]] || []);
+      result[attributeName] = fromTargetRow(map[result[joinColumnName] as string] || []);
     });
 
     return;
@@ -259,12 +273,12 @@ const oneToMany = async (input: InputWithTarget<Relation.OneToMany>, ctx: Contex
       })
       .addSelect(joinColAlias)
       .where({ [joinColAlias]: referencedValues })
-      .execute({ mapResults: false });
+      .execute<Row[]>({ mapResults: false });
 
-    const map = _.groupBy(joinColumnName, rows);
+    const map = _.groupBy<Row>(joinColumnName)(rows);
 
     results.forEach((r) => {
-      r[attributeName] = fromTargetRow(map[r[referencedColumnName]] || []);
+      r[attributeName] = fromTargetRow(map[r[referencedColumnName] as string] || []);
     });
   }
 };
@@ -273,7 +287,13 @@ const manyToMany = async (input: InputWithTarget<Relation.ManyToMany>, ctx: Cont
   const { attribute, attributeName, results, populateValue, targetMeta, isCount } = input;
   const { db } = ctx;
 
-  const fromTargetRow = (rowOrRows) => fromRow(targetMeta, rowOrRows);
+  const fromTargetRow = (rowOrRows: Row | Row[] | undefined) => {
+    if (!rowOrRows) {
+      return rowOrRows;
+    }
+
+    return fromRow(targetMeta, rowOrRows);
+  };
 
   const { joinTable } = attribute;
 
@@ -342,9 +362,9 @@ const manyToMany = async (input: InputWithTarget<Relation.ManyToMany>, ctx: Cont
     })
     .addSelect(joinColAlias)
     .where({ [joinColAlias]: referencedValues })
-    .execute<Record<string, unknown>[]>({ mapResults: false });
+    .execute<Row[]>({ mapResults: false });
 
-  const map = _.groupBy(joinColumnName)(rows);
+  const map = _.groupBy<Row>(joinColumnName)(rows);
 
   results.forEach((result) => {
     result[attributeName] = fromTargetRow(map[result[referencedColumnName] as string] || []);
@@ -358,8 +378,13 @@ const morphX = async (
   const { attribute, attributeName, results, populateValue, targetMeta } = input;
   const { db, uid } = ctx;
 
-  const fromTargetRow = (rowOrRows: Record<string, unknown> | Record<string, unknown>[]) =>
-    fromRow(targetMeta, rowOrRows);
+  const fromTargetRow = (rowOrRows: Row | Row[] | undefined) => {
+    if (!rowOrRows) {
+      return rowOrRows;
+    }
+
+    return fromRow(targetMeta, rowOrRows);
+  };
 
   const { target, morphBy } = attribute;
 
@@ -385,12 +410,12 @@ const morphX = async (
       .init(populateValue)
       // .addSelect(`${qb.alias}.${idColumn.referencedColumn}`)
       .where({ [idColumn.name]: referencedValues, [typeColumn.name]: uid })
-      .execute({ mapResults: false });
+      .execute<Row>({ mapResults: false });
 
-    const map = _.groupBy(idColumn.name, rows);
+    const map = _.groupBy<Row>(idColumn.name)(rows);
 
     results.forEach((result) => {
-      const matchingRows = map[result[idColumn.referencedColumn]];
+      const matchingRows = map[result[idColumn.referencedColumn] as string];
 
       const matchingValue =
         attribute.relation === 'morphOne' ? _.first(matchingRows) : matchingRows;
@@ -440,12 +465,12 @@ const morphX = async (
         [`${alias}.${idColumn.name}`]: referencedValues,
         [`${alias}.${typeColumn.name}`]: uid,
       })
-      .execute({ mapResults: false });
+      .execute<Row[]>({ mapResults: false });
 
-    const map = _.groupBy(idColumn.name, rows);
+    const map = _.groupBy<Row>(idColumn.name)(rows);
 
     results.forEach((result) => {
-      const matchingRows = map[result[idColumn.referencedColumn]];
+      const matchingRows = map[result[idColumn.referencedColumn] as string];
 
       const matchingValue =
         attribute.relation === 'morphOne' ? _.first(matchingRows) : matchingRows;
@@ -480,11 +505,11 @@ const morphToMany = async (input: Input<Relation.MorphToMany>, ctx: Context) => 
       // If the populateValue contains an "on" property,
       // only populate the types defined in it
       ...('on' in populateValue
-        ? { [morphColumn.typeColumn.name]: Object.keys(populateValue.on) }
+        ? { [morphColumn.typeColumn.name]: Object.keys(populateValue.on ?? {}) }
         : {}),
     })
     .orderBy([joinColumn.name, 'order'])
-    .execute<Array<Record<string, unknown>>>({ mapResults: false });
+    .execute<Row[]>({ mapResults: false });
 
   const joinMap = _.groupBy(joinColumn.name, joinRows);
 
@@ -524,19 +549,24 @@ const morphToMany = async (input: Input<Relation.MorphToMany>, ctx: Context) => 
       .init(on?.[type] ?? typePopulate)
       .addSelect(`${qb.alias}.${idColumn.referencedColumn}`)
       .where({ [idColumn.referencedColumn]: ids })
-      .execute<Record<string, unknown>[]>({ mapResults: false });
+      .execute<Row[]>({ mapResults: false });
 
-    map[type] = _.groupBy<Record<string, unknown>>(idColumn.referencedColumn)(rows);
+    map[type] = _.groupBy<Row>(idColumn.referencedColumn)(rows);
   }
 
   results.forEach((result) => {
     const joinResults = joinMap[result[joinColumn.referencedColumn] as string] || [];
 
     const matchingRows = joinResults.flatMap((joinResult) => {
-      const id = joinResult[idColumn.name];
-      const type = joinResult[typeColumn.name];
+      const id = joinResult[idColumn.name] as ID;
+      const type = joinResult[typeColumn.name] as string;
 
-      const fromTargetRow = (rowOrRows) => fromRow(db.metadata.get(type), rowOrRows);
+      const fromTargetRow = (rowOrRows: Row | Row[] | undefined) => {
+        if (!rowOrRows) {
+          return rowOrRows;
+        }
+        return fromRow(db.metadata.get(type), rowOrRows);
+      };
 
       return (map[type][id] || []).map((row) => {
         return {
@@ -595,9 +625,9 @@ const morphToOne = async (input: Input<Relation.MorphToOne>, ctx: Context) => {
       .init(on?.[type] ?? typePopulate)
       .addSelect(`${qb.alias}.${idColumn.referencedColumn}`)
       .where({ [idColumn.referencedColumn]: ids })
-      .execute<Record<string, unknown>[]>({ mapResults: false });
+      .execute<Row[]>({ mapResults: false });
 
-    map[type] = _.groupBy<Record<string, unknown>>(idColumn.referencedColumn)(rows);
+    map[type] = _.groupBy<Row>(idColumn.referencedColumn)(rows);
   }
 
   results.forEach((result) => {
@@ -611,9 +641,7 @@ const morphToOne = async (input: Input<Relation.MorphToOne>, ctx: Context) => {
 
     const matchingRows = map[type][id];
 
-    const fromTargetRow = (
-      rowOrRows: Record<string, unknown> | Record<string, unknown>[] | undefined
-    ) => {
+    const fromTargetRow = (rowOrRows: Row | Row[] | undefined) => {
       if (!rowOrRows) {
         return rowOrRows;
       }
@@ -645,11 +673,7 @@ const pickPopulateParams = (populate: Record<string, unknown>) => {
   return _.pick(fieldsToPick, populate);
 };
 
-const applyPopulate = async (
-  results: Record<string, unknown>[],
-  populate: Record<string, any>,
-  ctx: Context
-) => {
+const applyPopulate = async (results: Row[], populate: Record<string, any>, ctx: Context) => {
   const { db, uid, qb } = ctx;
   const meta = db.metadata.get(uid);
 

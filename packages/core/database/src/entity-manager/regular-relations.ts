@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-namespace */
 import { randomBytes } from 'crypto';
 import { map, isEmpty } from 'lodash/fp';
 import type { Knex } from 'knex';
@@ -16,6 +17,14 @@ import type { Database } from '..';
 import type { ID } from '../typings';
 import type { Relation } from '../metadata/types';
 
+declare module 'knex' {
+  namespace Knex {
+    interface ChainableInterface {
+      transacting(trx?: Knex.Transaction): this;
+    }
+  }
+}
+
 /**
  * If some relations currently exist for this oneToX relation, on the one side, this function removes them and update the inverse order if needed.
  */
@@ -30,7 +39,7 @@ const deletePreviousOneToAnyRelations = async ({
   attribute: Relation.Bidirectional;
   relIdsToadd: ID[];
   db: Database;
-  transaction: Knex.Transaction;
+  transaction?: Knex.Transaction;
 }) => {
   if (!(isBidirectional(attribute) && isOneToAny(attribute))) {
     throw new Error(
@@ -67,7 +76,7 @@ const deletePreviousAnyToOneRelations = async ({
   attribute: Relation.Bidirectional;
   relIdToadd: ID;
   db: Database;
-  transaction: Knex.Transaction;
+  transaction?: Knex.Transaction;
 }) => {
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn } = joinTable;
@@ -132,7 +141,7 @@ const deleteRelations = async ({
   db: Database;
   relIdsToNotDelete?: ID[];
   relIdsToDelete?: ID[] | 'all';
-  transaction: Knex.Transaction;
+  transaction?: Knex.Transaction;
 }) => {
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn } = joinTable;
@@ -203,7 +212,7 @@ const cleanOrderColumns = async ({
   attribute: Relation.Bidirectional;
   db: Database;
   inverseRelIds?: ID[];
-  transaction: Knex.Transaction;
+  transaction?: Knex.Transaction;
 }) => {
   if (
     !(hasOrderColumn(attribute) && id) &&
@@ -356,7 +365,7 @@ const cleanOrderColumnsForOldDatabases = async ({
   attribute: Relation.Bidirectional;
   db: Database;
   inverseRelIds: ID[];
-  transaction: Knex.Transaction;
+  transaction?: Knex.Transaction;
 }) => {
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } = joinTable;

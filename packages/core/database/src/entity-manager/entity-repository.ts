@@ -4,6 +4,10 @@ import type { ID } from '../typings';
 
 type Params = Record<string, unknown>;
 type Data = Record<string, unknown>;
+type Entity = {
+  id: ID;
+  [key: string]: any;
+};
 
 const withDefaultPagination = (params: Params) => {
   const { page = 1, pageSize = 10, ...rest } = params;
@@ -121,15 +125,15 @@ export const createRepository = (uid: string, db: Database) => {
       return db.entityManager.cloneRelations(uid, targetId, sourceId, params);
     },
 
-    populate(entity: Data, populate: unknown) {
+    populate(entity: Entity, populate: unknown) {
       return db.entityManager.populate(uid, entity, populate);
     },
 
-    load(entity: Data, fields: string[], params: Params) {
+    load(entity: Entity, fields: string[], params: Params) {
       return db.entityManager.load(uid, entity, fields, params);
     },
 
-    async loadPages(entity: Data, field: string[], params: Params) {
+    async loadPages(entity: Entity, field: string[], params: Params) {
       if (!isString(field)) {
         throw new Error(`Invalid load. Expected ${field} to be a string`);
       }

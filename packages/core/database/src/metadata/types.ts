@@ -116,6 +116,8 @@ export namespace Relation {
   export type OneToMany = BaseBidirectional & {
     relation: 'oneToMany';
     joinTable: OrderedJoinTable;
+    joinColumn?: JoinColumn;
+    owner?: boolean;
   };
 
   export type ManyToOne = BaseBidirectional & {

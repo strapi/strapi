@@ -1,4 +1,4 @@
-import type { Knex } from 'knex';
+import { Knex } from 'knex';
 
 import { cleanInverseOrderColumn } from '../../regular-relations';
 import type { Relation } from '../../../metadata/types';
@@ -15,7 +15,7 @@ const replaceRegularRelations = async ({
   sourceId: ID;
   attribute: Relation.Bidirectional;
   omitIds: ID[];
-  transaction: Knex.Transaction;
+  transaction?: Knex.Transaction;
 }) => {
   const { joinTable } = attribute;
 
@@ -42,7 +42,7 @@ const cloneRegularRelations = async ({
   targetId: ID;
   sourceId: ID;
   attribute: Relation.Bidirectional;
-  transaction: Knex.Transaction;
+  transaction?: Knex.Transaction;
 }) => {
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } = joinTable;
@@ -92,7 +92,7 @@ const cloneRegularRelations = async ({
     await cleanInverseOrderColumn({
       id: targetId,
       attribute,
-      trx,
+      trx: trx as Knex.Transaction,
     });
   }
 };

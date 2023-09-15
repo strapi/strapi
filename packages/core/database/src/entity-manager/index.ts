@@ -63,6 +63,11 @@ type Params = {
   orderBy?: any;
   _q?: string;
   data?: any;
+  page?: number;
+  pageSize?: number;
+  limit?: number;
+  offset?: number;
+  count?: boolean;
 };
 
 type Entity = {
@@ -574,9 +579,10 @@ export const createEntityManager = (db: Database) => {
       uid: string,
       id: ID,
       data: Record<string, any>,
-      { transaction: trx }: { transaction: Knex.Transaction }
+      options?: { transaction?: Knex.Transaction }
     ) {
       const { attributes } = db.metadata.get(uid);
+      const { transaction: trx } = options ?? {};
 
       for (const attributeName of Object.keys(attributes)) {
         const attribute = attributes[attributeName];
@@ -806,13 +812,10 @@ export const createEntityManager = (db: Database) => {
       uid: string,
       id: ID,
       data: any,
-      {
-        transaction: trx,
-      }: {
-        transaction: Knex.Transaction;
-      }
+      options?: { transaction?: Knex.Transaction }
     ) {
       const { attributes } = db.metadata.get(uid);
+      const { transaction: trx } = options ?? {};
 
       for (const attributeName of Object.keys(attributes)) {
         const attribute = attributes[attributeName];
@@ -1233,13 +1236,12 @@ export const createEntityManager = (db: Database) => {
     async deleteRelations(
       uid: string,
       id: ID,
-      {
-        transaction: trx,
-      }: {
-        transaction: Knex.Transaction;
+      options?: {
+        transaction?: Knex.Transaction;
       }
     ) {
       const { attributes } = db.metadata.get(uid);
+      const { transaction: trx } = options ?? {};
 
       for (const attributeName of Object.keys(attributes)) {
         const attribute = attributes[attributeName];
@@ -1367,15 +1369,13 @@ export const createEntityManager = (db: Database) => {
       targetId: ID,
       sourceId: ID,
       data: any,
-      {
-        cloneAttrs = [],
-        transaction,
-      }: {
+      options?: {
         cloneAttrs?: string[];
-        transaction: Knex.Transaction;
+        transaction?: Knex.Transaction;
       }
     ) {
       const { attributes } = db.metadata.get(uid);
+      const { cloneAttrs = [], transaction } = options ?? {};
 
       if (!attributes) {
         return;

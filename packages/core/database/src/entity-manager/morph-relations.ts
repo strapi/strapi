@@ -48,7 +48,7 @@ export const deleteRelatedMorphOneRelationsAfterMorphToManyUpdate = async (
     attributeName: string;
     joinTable: MorphJoinTable;
     db: Database;
-    transaction: Knex.Transaction;
+    transaction?: Knex.Transaction;
   }
 ) => {
   const { morphColumn } = joinTable;
