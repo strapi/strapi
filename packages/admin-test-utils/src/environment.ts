@@ -35,12 +35,19 @@ const error = console.error;
 window.console = {
   ...window.console,
   error(...args: any[]) {
-    error(...args);
-
     const message = format(...args);
 
     if (/(Invalid prop|Failed prop type)/gi.test(message)) {
       throw new Error(message);
+
+      // Ignore errors thrown by styled-components. This can be removed once we upgrade
+      // to styled-components@6 and have separate props that are rendered in the DOM by
+      // the ones that aren't using the $ prefix.
+      // https://styled-components.com/docs/faqs#transient-as-and-forwardedas-props-have-been-dropped
+    } else if (/React does not recognize the .* prop on a DOM element/.test(message)) {
+      // do nothing
+    } else {
+      error(...args);
     }
   },
 };

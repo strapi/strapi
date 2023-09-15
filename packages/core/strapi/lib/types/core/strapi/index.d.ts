@@ -1,5 +1,5 @@
 import type { Database } from '@strapi/database';
-import type { Comomn, EntityService, Shared } from '@strapi/strapi';
+import type { Common, EntityService, Shared } from '@strapi/strapi';
 
 // TODO move custom fields types to a separate file
 interface CustomFieldServerOptions {
@@ -11,7 +11,7 @@ interface CustomFieldServerOptions {
   /**
    * The name of the plugin creating the custom field
    */
-  plugin?: string;
+  pluginId?: string;
 
   /**
    * The existing Strapi data type the custom field uses

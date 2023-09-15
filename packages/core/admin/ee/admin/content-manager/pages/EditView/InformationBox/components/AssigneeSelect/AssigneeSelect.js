@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Combobox, ComboboxOption, Field, Flex, Loader, Typography } from '@strapi/design-system';
+import { Combobox, ComboboxOption, Field, Flex } from '@strapi/design-system';
 import {
   useCMEditViewDataManager,
   useAPIErrorHandler,
@@ -31,13 +31,14 @@ export function AssigneeSelect() {
   const { put } = useFetchClient();
   const {
     allowedActions: { canReadUsers },
+    isLoading: isLoadingPermissions,
   } = useRBAC({
     readUsers: permissions.settings.users.read,
   });
   const { users, isLoading, isError } = useAdminUsers(
     {},
     {
-      enabled: canReadUsers,
+      enabled: !isLoadingPermissions && canReadUsers,
     }
   );
 
@@ -102,7 +103,7 @@ export function AssigneeSelect() {
               })) ||
             (mutation.error && formatAPIError(mutation.error))
           }
-          disabled={!isLoading && users.length === 0}
+          disabled={!isLoadingPermissions && !isLoading && users.length === 0}
           name={ASSIGNEE_ATTRIBUTE_NAME}
           id={ASSIGNEE_ATTRIBUTE_NAME}
           value={currentAssignee ? currentAssignee.id : null}
@@ -116,18 +117,7 @@ export function AssigneeSelect() {
             id: 'content-manager.reviewWorkflows.assignee.label',
             defaultMessage: 'Assignee',
           })}
-          // eslint-disable-next-line react/no-unstable-nested-components
-          customizeContent={() => (
-            <Flex as="span" justifyContent="space-between" alignItems="center" width="100%">
-              <Typography textColor="neutral800" ellipsis>
-                {currentAssignee ? getDisplayName(currentAssignee, formatMessage) : null}
-              </Typography>
-
-              {isLoading || mutation.isLoading ? (
-                <Loader small style={{ display: 'flex' }} />
-              ) : null}
-            </Flex>
-          )}
+          loading={isLoading || isLoadingPermissions || mutation.isLoading}
         >
           {users.map((user) => {
             return (

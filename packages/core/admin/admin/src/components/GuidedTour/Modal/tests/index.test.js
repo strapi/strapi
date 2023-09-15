@@ -114,8 +114,6 @@ describe('<GuidedTourModal />', () => {
         border-radius: 4px;
         border-color: #dcdce4;
         border: 1px solid #dcdce4;
-        width: 2rem;
-        height: 2rem;
         cursor: pointer;
       }
 
@@ -359,7 +357,8 @@ describe('<GuidedTourModal />', () => {
         color: #666687;
       }
 
-      .c27[aria-disabled='true'] svg > g,.c27[aria-disabled='true'] svg path {
+      .c27[aria-disabled='true'] svg > g,
+      .c27[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -372,7 +371,8 @@ describe('<GuidedTourModal />', () => {
         color: #666687;
       }
 
-      .c27[aria-disabled='true']:active svg > g,.c27[aria-disabled='true']:active svg path {
+      .c27[aria-disabled='true']:active svg > g,
+      .c27[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -411,7 +411,8 @@ describe('<GuidedTourModal />', () => {
         color: #666687;
       }
 
-      .c29[aria-disabled='true'] svg > g,.c29[aria-disabled='true'] svg path {
+      .c29[aria-disabled='true'] svg > g,
+      .c29[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -424,7 +425,8 @@ describe('<GuidedTourModal />', () => {
         color: #666687;
       }
 
-      .c29[aria-disabled='true']:active svg > g,.c29[aria-disabled='true']:active svg path {
+      .c29[aria-disabled='true']:active svg > g,
+      .c29[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -445,19 +447,22 @@ describe('<GuidedTourModal />', () => {
         fill: #32324d;
       }
 
-      .c9 svg > g,
+      .c9 {
+        border-color: #dcdce4;
+        height: 2rem;
+        width: 2rem;
+      }
+
+      .c9 svg g,
       .c9 svg path {
         fill: #8e8ea9;
       }
 
-      .c9:hover svg > g,
-      .c9:hover svg path {
+      .c9:hover svg g,
+      .c9:focus svg g,
+      .c9:hover svg path,
+      .c9:focus svg path {
         fill: #666687;
-      }
-
-      .c9:active svg > g,
-      .c9:active svg path {
-        fill: #a5a5ba;
       }
 
       .c9[aria-disabled='true'] svg path {
