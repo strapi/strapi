@@ -1,5 +1,6 @@
 import type { Database } from '@strapi/database';
 import type { Common, EntityService, Shared } from '@strapi/strapi';
+import * as winston from "winston";
 
 // TODO move custom fields types to a separate file
 interface CustomFieldServerOptions {
@@ -382,7 +383,7 @@ export interface Strapi {
   /**
    * Strapi logger used to send errors, warning or information messages
    */
-  log: any;
+  log: winston.Logger;
 
   /**
    * Used to manage cron within Strapi
