@@ -231,11 +231,7 @@ const renderLeaf = ({ attributes, children, leaf }) => {
   }
 
   if (leaf.underline) {
-    children = (
-      <Underline textDecoration="underline" fontSize="inherit">
-        {children}
-      </Underline>
-    );
+    children = <Underline textDecoration="underline">{children}</Underline>;
   }
 
   if (leaf.strikethrough) {
