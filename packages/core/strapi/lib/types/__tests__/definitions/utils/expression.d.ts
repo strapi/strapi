@@ -1,5 +1,4 @@
 import type { Utils } from '@strapi/strapi';
-import { MatchAllIntersect } from '../../../utils/expression';
 
 // IsNever
 type IsNeverGivenNever = Utils.Expression.IsNever<never>;
