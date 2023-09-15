@@ -191,6 +191,31 @@ export async function addDefaultField({
       // only does not work because there are several elements on the page that matches that
       // selector and therefore it must be scoped to the modal.
       await page.getByLabel(contentTypeName, { exact: true }).getByLabel(attachedField).click();
+      break;
+
+    case 'Component':
+      await page
+        .getByRole('button', { name: 'Component Group of fields that you can repeat or reuse' })
+        .click();
+
+      const { existingComponentName, existingComponentCategory } = rest;
+
+      if (existingComponentName) {
+        // TODO: improve selector
+        await page
+          .locator('label')
+          .filter({
+            hasText:
+              'Use an existing componentReuse a component already created to keep your data con',
+          })
+          .locator('div')
+          .first()
+          .click();
+        await page.getByRole('button', { name: 'Select a component' }).click();
+        // TODO: can we make this work using a filter without category?
+        await page.getByLabel(`${existingComponentCategory} - ${existingComponentName}`).click();
+      }
+      break;
   }
 
   switch (type) {

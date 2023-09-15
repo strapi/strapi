@@ -3,7 +3,9 @@ import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
 import { login } from '../../utils/login';
 import {
   addDefaultField,
+  createComponent,
   createContentType,
+  deleteComponent,
   deleteContentType,
   verifyFieldPresence,
   waitForReload,
@@ -180,6 +182,85 @@ async function main() {
 
         // Cleanup
         await deleteContentType({ page, displayName: `CT ${type}` });
+      });
+
+      test('A user should be able to create a content type using a single component', async ({
+        page,
+      }) => {
+        // Create component
+        await createComponent({
+          page,
+          category: 'new-component',
+          displayName: `Component ${type}`,
+        });
+        await addDefaultField({
+          page,
+          type: 'Text',
+          name: 'textField',
+        });
+
+        await page.getByRole('button', { name: 'Save' }).click();
+        await waitForReload({ page });
+
+        // Create content-type
+        await createContentType({ page, type, displayName: `CT ${type}` });
+        await addDefaultField({
+          page,
+          type: 'Component',
+          name: 'componentField',
+          existingComponentName: `Component ${type}`,
+          existingComponentCategory: 'new-component',
+        });
+
+        await page.getByRole('button', { name: 'Save' }).click();
+        await waitForReload({ page });
+
+        // Verify the content-type contains the field(s)
+        await verifyFieldPresence({ page, name: 'componentField' });
+
+        // Cleanup
+        await deleteContentType({ page, displayName: `CT ${type}` });
+        await deleteComponent({ page, displayName: `Component ${type}` });
+      });
+
+      // TODO: this test does not yet select "repetable component"
+      test.skip('A user should be able to create a content type using a repeatable component', async ({
+        page,
+      }) => {
+        // Create component
+        await createComponent({
+          page,
+          category: 'new-component',
+          displayName: `Component ${type}`,
+        });
+        await addDefaultField({
+          page,
+          type: 'Text',
+          name: 'textField',
+        });
+
+        await page.getByRole('button', { name: 'Save' }).click();
+        await waitForReload({ page });
+
+        // Create content-type
+        await createContentType({ page, type, displayName: `CT ${type}` });
+        await addDefaultField({
+          page,
+          type: 'Component',
+          name: 'componentField',
+          existingComponentName: `Component ${type}`,
+          existingComponentCategory: 'new-component',
+        });
+
+        await page.getByRole('button', { name: 'Save' }).click();
+        await waitForReload({ page });
+
+        // Verify the content-type contains the field(s)
+        await verifyFieldPresence({ page, name: 'componentField' });
+
+        // Cleanup
+        await deleteContentType({ page, displayName: `CT ${type}` });
+        await deleteComponent({ page, displayName: `Component ${type}` });
       });
 
       test('A user should be able to edit a content-type', async ({ page }) => {
