@@ -124,9 +124,6 @@ const isBlockActive = (editor, value) => {
   let matchCondition;
 
   switch (value.type) {
-    case 'paragraph':
-      matchCondition = (n) => n.type === value.type;
-      break;
     case 'heading':
       matchCondition = (n) => n.type === value.type && n.level === value?.level;
       break;
@@ -148,7 +145,7 @@ const isBlockActive = (editor, value) => {
 const toggleBlock = (editor, value) => {
   const { type, level } = value;
 
-  let newProperties = {
+  const newProperties = {
     type,
     level: level || null,
   };
@@ -254,7 +251,7 @@ const blockItems = {
   text: {
     name: 'text',
     icon: Paragraph,
-    label: { id: 'components.Blocks.blockItems.text', defaultMessage: 'Text' },
+    label: { id: 'components.Blocks.blocks.text', defaultMessage: 'Text' },
     value: {
       type: 'paragraph',
     },
@@ -262,7 +259,7 @@ const blockItems = {
   heading1: {
     name: 'heading-one',
     icon: HeadingOne,
-    label: { id: 'components.Blocks.blockItems.heading1', defaultMessage: 'Heading 1' },
+    label: { id: 'components.Blocks.blocks.heading1', defaultMessage: 'Heading 1' },
     value: {
       type: 'heading',
       level: 1,
@@ -271,7 +268,7 @@ const blockItems = {
   heading2: {
     name: 'heading-two',
     icon: HeadingTwo,
-    label: { id: 'components.Blocks.blockItems.heading2', defaultMessage: 'Heading 2' },
+    label: { id: 'components.Blocks.blocks.heading2', defaultMessage: 'Heading 2' },
     value: {
       type: 'heading',
       level: 2,
@@ -280,7 +277,7 @@ const blockItems = {
   heading3: {
     name: 'heading-three',
     icon: HeadingThree,
-    label: { id: 'components.Blocks.blockItems.heading3', defaultMessage: 'Heading 3' },
+    label: { id: 'components.Blocks.blocks.heading3', defaultMessage: 'Heading 3' },
     value: {
       type: 'heading',
       level: 3,
@@ -289,7 +286,7 @@ const blockItems = {
   heading4: {
     name: 'heading-four',
     icon: HeadingFour,
-    label: { id: 'components.Blocks.blockItems.heading4', defaultMessage: 'Heading 4' },
+    label: { id: 'components.Blocks.blocks.heading4', defaultMessage: 'Heading 4' },
     value: {
       type: 'heading',
       level: 4,
@@ -298,7 +295,7 @@ const blockItems = {
   heading5: {
     name: 'heading-five',
     icon: HeadingFive,
-    label: { id: 'components.Blocks.blockItems.heading5', defaultMessage: 'Heading 5' },
+    label: { id: 'components.Blocks.blocks.heading5', defaultMessage: 'Heading 5' },
     value: {
       type: 'heading',
       level: 5,
@@ -307,7 +304,7 @@ const blockItems = {
   heading6: {
     name: 'heading-six',
     icon: HeadingSix,
-    label: { id: 'components.Blocks.blockItems.heading6', defaultMessage: 'Heading 6' },
+    label: { id: 'components.Blocks.blocks.heading6', defaultMessage: 'Heading 6' },
     value: {
       type: 'heading',
       level: 6,
