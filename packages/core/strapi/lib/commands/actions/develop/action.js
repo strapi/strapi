@@ -48,7 +48,7 @@ module.exports = async ({ build, watchAdmin, polling, browser }) => {
 
 const primaryProcess = async ({ distDir, appDir, build, isTSProject, watchAdmin, browser }) => {
   if (isTSProject) {
-    await buildTypeScript({ srcDir: appDir, distDir, watch: false });
+    await buildTypeScript({ srcDir: appDir, distDir, ignoreDiagnostics: true });
   }
 
   const config = loadConfiguration({ appDir, distDir });
@@ -84,7 +84,7 @@ const primaryProcess = async ({ distDir, appDir, build, isTSProject, watchAdmin,
     switch (message) {
       case 'reload':
         if (isTSProject) {
-          await buildTypeScript({ srcDir: appDir, distDir, watch: false });
+          await buildTypeScript({ srcDir: appDir, distDir, ignoreDiagnostics: true });
         }
 
         console.info('The server is restarting\n');
@@ -113,21 +113,16 @@ const workerProcess = async ({ appDir, distDir, watchAdmin, polling, isTSProject
     serveAdminPanel: !watchAdmin,
   }).load();
 
-  /**
-   * TypeScript automatic type generation upon dev server restart
-   * Its implementation, configuration and behavior can change in future releases
-   * @experimental
-   */
-  const shouldGenerateTypeScriptTypes = strapiInstance.config.get('typescript.autogenerate', false);
+  await tsUtils.generators.generate({
+    strapi: strapiInstance,
+    pwd: appDir,
+    rootDir: undefined,
+    logger: { silent: true, debug: false },
+    artifacts: { contentTypes: true, components: true },
+  });
 
-  if (shouldGenerateTypeScriptTypes) {
-    await tsUtils.generators.generate({
-      strapi: strapiInstance,
-      pwd: appDir,
-      rootDir: undefined,
-      logger: { silent: true, debug: false },
-      artifacts: { contentTypes: true, components: true },
-    });
+  if (isTSProject) {
+    await buildTypeScript({ srcDir: appDir, distDir, ignoreDiagnostics: false });
   }
 
   const adminWatchIgnoreFiles = strapiInstance.config.get('admin.watchIgnoreFiles', []);
