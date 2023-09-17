@@ -195,6 +195,12 @@ const floatValidator = composeValidators(
   addUniqueValidator
 );
 
+const bigIntValidator = composeValidators(
+  () => yup.string().transform((val, originalVal) => originalVal),
+  (validator) => validator.matches(/^-?\d*$/),
+  addUniqueValidator
+);
+
 module.exports = {
   string: stringValidator,
   text: stringValidator,
@@ -206,7 +212,7 @@ module.exports = {
   uid: uidValidator,
   json: () => yup.mixed(),
   integer: integerValidator,
-  biginteger: composeValidators(addUniqueValidator),
+  biginteger: bigIntValidator,
   float: floatValidator,
   decimal: floatValidator,
   date: composeValidators(addUniqueValidator),
