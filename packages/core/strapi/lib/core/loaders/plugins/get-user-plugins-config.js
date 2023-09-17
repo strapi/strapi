@@ -13,6 +13,9 @@ const loadConfigFile = require('../../app-configuration/load-config-file');
  */
 const getUserPluginsConfig = async () => {
   const globalUserConfigPath = join(strapi.dirs.dist.config, 'plugins.js');
+  // Check if the user has a `plugin.js` or `plugin.ts` file instead of the correct `plugins.js` or `plugins.ts` filename
+  const incorrectGlobalUserConfigPath =
+    join(strapi.dirs.dist.config, 'plugin.js') ?? join(strapi.dirs.dist.config, 'plugin.ts');
   const currentEnvUserConfigPath = join(
     strapi.dirs.dist.config,
     'env',
@@ -20,6 +23,12 @@ const getUserPluginsConfig = async () => {
     'plugins.js'
   );
   let config = {};
+
+  if (await fse.pathExists(incorrectGlobalUserConfigPath)) {
+    console.warn(
+      `Warning: Detected 'plugin.js' or 'plugin.ts' file in your config folder. Please rename it to 'plugins.js' or 'plugins.ts'`
+    );
+  }
 
   // assign global user config if exists
   if (await fse.pathExists(globalUserConfigPath)) {
