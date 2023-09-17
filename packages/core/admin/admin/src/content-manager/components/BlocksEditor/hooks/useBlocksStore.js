@@ -74,7 +74,7 @@ Heading.propTypes = {
   }).isRequired,
 };
 
-const CodeBlock = styled.pre`
+const CodeBlock = styled.pre.attrs({ role: 'code' })`
   border-radius: ${({ theme }) => theme.borderRadius};
   background-color: #32324d; // since the color is same between the themes
   max-width: 100%;
@@ -88,7 +88,7 @@ const CodeBlock = styled.pre`
   }
 `;
 
-const Blockquote = styled.blockquote`
+const Blockquote = styled.blockquote.attrs({ role: 'blockquote' })`
   margin: ${({ theme }) => `${theme.spaces[6]} 0`};
   font-weight: ${({ theme }) => theme.fontWeights.regular};
   border-left: ${({ theme }) => `${theme.spaces[1]} solid ${theme.colors.neutral150}`};
