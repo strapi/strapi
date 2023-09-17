@@ -54,15 +54,17 @@ describe('useBlocksStore', () => {
     });
   });
 
-  it('renders the blocks properly', () => {
+  it('renders a paragraph block properly', () => {
     const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
 
-    // Paragraph
     render(result.current.paragraph.renderElement({ children: 'Some text' }), { wrapper: Wrapper });
     const paragraph = screen.getByText('Some text');
     expect(paragraph).toBeInTheDocument();
+  });
 
-    // Heading
+  it('renders a heading block properly', () => {
+    const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
+
     render(
       result.current.heading.renderElement({
         children: 'Some heading',
@@ -75,8 +77,11 @@ describe('useBlocksStore', () => {
     );
     const heading = screen.getByRole('heading', { level: 2, name: 'Some heading' });
     expect(heading).toBeInTheDocument();
+  });
 
-    // Link
+  it('renders a link block properly', () => {
+    const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
+
     render(
       result.current.link.renderElement({
         children: 'Some link',
@@ -90,8 +95,11 @@ describe('useBlocksStore', () => {
     const link = screen.getByRole('link', 'Some link');
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', 'https://example.com');
+  });
 
-    // Code
+  it('renders a code block properly', () => {
+    const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
+
     render(
       result.current.code.renderElement({
         children: 'Some code',
@@ -103,8 +111,11 @@ describe('useBlocksStore', () => {
     );
     const code = screen.getByRole('code', 'Some code');
     expect(code).toBeInTheDocument();
+  });
 
-    // Quote
+  it('renders a quote block properly', () => {
+    const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
+
     render(
       result.current.quote.renderElement({
         children: 'Some quote',
@@ -116,21 +127,30 @@ describe('useBlocksStore', () => {
     );
     const quote = screen.getByRole('blockquote', 'Some quote');
     expect(quote).toBeInTheDocument();
+  });
 
-    // List
-    // render(
-    //   result.current.list.renderElement({
-    //     children: 'list item',
-    //     element: {
-    //       format: 'unordered',
-    //     },
-    //     attributes: {},
-    //   })
-    // );
-    // const list = screen.getByRole('list', 'list item');
-    // expect(list).toBeInTheDocument();
+  // TODO fix this test
+  it.skip('renders a list block properly', () => {
+    const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
 
-    // List item
+    render(
+      result.current.list.renderElement({
+        children: 'list item',
+        element: {
+          format: 'unordered',
+        },
+        attributes: {},
+      })
+    );
+
+    const list = screen.getByRole('list', 'list item');
+    expect(list).toBeInTheDocument();
+    expect(list.tagName).toBe('ul');
+  });
+
+  it('renders a list item block properly', () => {
+    const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
+
     render(
       result.current['list-item'].renderElement({
         children: 'list item',
@@ -142,8 +162,11 @@ describe('useBlocksStore', () => {
     );
     const listItem = screen.getByRole('listitem', 'list item');
     expect(listItem).toBeInTheDocument();
+  });
 
-    // Image
+  it('renders an image block properly', () => {
+    const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
+
     render(
       result.current.image.renderElement({
         children: '',
