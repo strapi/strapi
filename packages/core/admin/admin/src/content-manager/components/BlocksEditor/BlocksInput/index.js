@@ -32,7 +32,8 @@ const baseRenderLeaf = (props, modifiers) => {
 };
 
 const baseRenderElement = (props, blocks) => {
-  const block = blocks[props.element.type] || blocks.paragraph;
+  const blockMatch = Object.values(blocks).find((block) => block.matchNode(props.element));
+  const block = blockMatch || blocks.paragraph;
 
   return block.renderElement(props);
 };

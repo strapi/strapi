@@ -40,18 +40,150 @@ describe('useBlocksStore', () => {
 
     const storeKeys = Object.keys(result.current);
     expect(storeKeys).toContain('paragraph');
-    expect(storeKeys).toContain('heading');
+    expect(storeKeys).toContain('heading-one');
+    expect(storeKeys).toContain('heading-six');
+    expect(storeKeys).toContain('heading-three');
+    expect(storeKeys).toContain('heading-four');
+    expect(storeKeys).toContain('heading-five');
+    expect(storeKeys).toContain('heading-six');
     expect(storeKeys).toContain('link');
     expect(storeKeys).toContain('code');
     expect(storeKeys).toContain('quote');
-    expect(storeKeys).toContain('list');
+    expect(storeKeys).toContain('list-ordered');
+    expect(storeKeys).toContain('list-unordered');
     expect(storeKeys).toContain('list-item');
     expect(storeKeys).toContain('image');
 
     Object.values(result.current).forEach((block) => {
       expect(block).toHaveProperty('renderElement');
-      expect(block).toHaveProperty('variants');
+      expect(block).toHaveProperty('matchNode');
+      expect(block).toHaveProperty('isInBlocksSelector');
     });
+  });
+
+  it('should match the right node type', () => {
+    const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
+
+    const paragraphNode = { type: 'paragraph' };
+    const headingOneNode = { type: 'heading', level: 1 };
+    const headingSixNode = { type: 'heading', level: 6 };
+    const linkNode = { type: 'link' };
+    const codeNode = { type: 'code' };
+    const quoteNode = { type: 'quote' };
+    const orderedListNode = { type: 'list', format: 'ordered' };
+    const unorderedListNode = { type: 'list', format: 'unordered' };
+    const listItemNode = { type: 'list-item' };
+    const imageNode = { type: 'image' };
+
+    expect(result.current.paragraph.matchNode(paragraphNode)).toBe(true);
+    expect(result.current.paragraph.matchNode(headingOneNode)).toBe(false);
+    expect(result.current.paragraph.matchNode(headingSixNode)).toBe(false);
+    expect(result.current.paragraph.matchNode(linkNode)).toBe(false);
+    expect(result.current.paragraph.matchNode(codeNode)).toBe(false);
+    expect(result.current.paragraph.matchNode(quoteNode)).toBe(false);
+    expect(result.current.paragraph.matchNode(orderedListNode)).toBe(false);
+    expect(result.current.paragraph.matchNode(unorderedListNode)).toBe(false);
+    expect(result.current.paragraph.matchNode(listItemNode)).toBe(false);
+    expect(result.current.paragraph.matchNode(imageNode)).toBe(false);
+
+    expect(result.current['heading-one'].matchNode(paragraphNode)).toBe(false);
+    expect(result.current['heading-one'].matchNode(headingOneNode)).toBe(true);
+    expect(result.current['heading-one'].matchNode(headingSixNode)).toBe(false);
+    expect(result.current['heading-one'].matchNode(linkNode)).toBe(false);
+    expect(result.current['heading-one'].matchNode(codeNode)).toBe(false);
+    expect(result.current['heading-one'].matchNode(quoteNode)).toBe(false);
+    expect(result.current['heading-one'].matchNode(orderedListNode)).toBe(false);
+    expect(result.current['heading-one'].matchNode(unorderedListNode)).toBe(false);
+    expect(result.current['heading-one'].matchNode(listItemNode)).toBe(false);
+    expect(result.current['heading-one'].matchNode(imageNode)).toBe(false);
+
+    expect(result.current['heading-six'].matchNode(paragraphNode)).toBe(false);
+    expect(result.current['heading-six'].matchNode(headingOneNode)).toBe(false);
+    expect(result.current['heading-six'].matchNode(headingSixNode)).toBe(true);
+    expect(result.current['heading-six'].matchNode(linkNode)).toBe(false);
+    expect(result.current['heading-six'].matchNode(codeNode)).toBe(false);
+    expect(result.current['heading-six'].matchNode(quoteNode)).toBe(false);
+    expect(result.current['heading-six'].matchNode(orderedListNode)).toBe(false);
+    expect(result.current['heading-six'].matchNode(unorderedListNode)).toBe(false);
+    expect(result.current['heading-six'].matchNode(listItemNode)).toBe(false);
+    expect(result.current['heading-six'].matchNode(imageNode)).toBe(false);
+
+    expect(result.current.link.matchNode(paragraphNode)).toBe(false);
+    expect(result.current.link.matchNode(headingOneNode)).toBe(false);
+    expect(result.current.link.matchNode(headingSixNode)).toBe(false);
+    expect(result.current.link.matchNode(linkNode)).toBe(true);
+    expect(result.current.link.matchNode(codeNode)).toBe(false);
+    expect(result.current.link.matchNode(quoteNode)).toBe(false);
+    expect(result.current.link.matchNode(orderedListNode)).toBe(false);
+    expect(result.current.link.matchNode(unorderedListNode)).toBe(false);
+    expect(result.current.link.matchNode(listItemNode)).toBe(false);
+    expect(result.current.link.matchNode(imageNode)).toBe(false);
+
+    expect(result.current.code.matchNode(paragraphNode)).toBe(false);
+    expect(result.current.code.matchNode(headingOneNode)).toBe(false);
+    expect(result.current.code.matchNode(headingSixNode)).toBe(false);
+    expect(result.current.code.matchNode(linkNode)).toBe(false);
+    expect(result.current.code.matchNode(codeNode)).toBe(true);
+    expect(result.current.code.matchNode(quoteNode)).toBe(false);
+    expect(result.current.code.matchNode(orderedListNode)).toBe(false);
+    expect(result.current.code.matchNode(unorderedListNode)).toBe(false);
+    expect(result.current.code.matchNode(listItemNode)).toBe(false);
+    expect(result.current.code.matchNode(imageNode)).toBe(false);
+
+    expect(result.current.quote.matchNode(paragraphNode)).toBe(false);
+    expect(result.current.quote.matchNode(headingOneNode)).toBe(false);
+    expect(result.current.quote.matchNode(headingSixNode)).toBe(false);
+    expect(result.current.quote.matchNode(linkNode)).toBe(false);
+    expect(result.current.quote.matchNode(codeNode)).toBe(false);
+    expect(result.current.quote.matchNode(quoteNode)).toBe(true);
+    expect(result.current.quote.matchNode(orderedListNode)).toBe(false);
+    expect(result.current.quote.matchNode(unorderedListNode)).toBe(false);
+    expect(result.current.quote.matchNode(listItemNode)).toBe(false);
+    expect(result.current.quote.matchNode(imageNode)).toBe(false);
+
+    expect(result.current['list-ordered'].matchNode(paragraphNode)).toBe(false);
+    expect(result.current['list-ordered'].matchNode(headingOneNode)).toBe(false);
+    expect(result.current['list-ordered'].matchNode(headingSixNode)).toBe(false);
+    expect(result.current['list-ordered'].matchNode(linkNode)).toBe(false);
+    expect(result.current['list-ordered'].matchNode(codeNode)).toBe(false);
+    expect(result.current['list-ordered'].matchNode(quoteNode)).toBe(false);
+    expect(result.current['list-ordered'].matchNode(orderedListNode)).toBe(true);
+    expect(result.current['list-ordered'].matchNode(unorderedListNode)).toBe(false);
+    expect(result.current['list-ordered'].matchNode(listItemNode)).toBe(false);
+    expect(result.current['list-ordered'].matchNode(imageNode)).toBe(false);
+
+    expect(result.current['list-unordered'].matchNode(paragraphNode)).toBe(false);
+    expect(result.current['list-unordered'].matchNode(headingOneNode)).toBe(false);
+    expect(result.current['list-unordered'].matchNode(headingSixNode)).toBe(false);
+    expect(result.current['list-unordered'].matchNode(linkNode)).toBe(false);
+    expect(result.current['list-unordered'].matchNode(codeNode)).toBe(false);
+    expect(result.current['list-unordered'].matchNode(quoteNode)).toBe(false);
+    expect(result.current['list-unordered'].matchNode(orderedListNode)).toBe(false);
+    expect(result.current['list-unordered'].matchNode(unorderedListNode)).toBe(true);
+    expect(result.current['list-unordered'].matchNode(listItemNode)).toBe(false);
+    expect(result.current['list-unordered'].matchNode(imageNode)).toBe(false);
+
+    expect(result.current['list-item'].matchNode(paragraphNode)).toBe(false);
+    expect(result.current['list-item'].matchNode(headingOneNode)).toBe(false);
+    expect(result.current['list-item'].matchNode(headingSixNode)).toBe(false);
+    expect(result.current['list-item'].matchNode(linkNode)).toBe(false);
+    expect(result.current['list-item'].matchNode(codeNode)).toBe(false);
+    expect(result.current['list-item'].matchNode(quoteNode)).toBe(false);
+    expect(result.current['list-item'].matchNode(orderedListNode)).toBe(false);
+    expect(result.current['list-item'].matchNode(unorderedListNode)).toBe(false);
+    expect(result.current['list-item'].matchNode(listItemNode)).toBe(true);
+    expect(result.current['list-item'].matchNode(imageNode)).toBe(false);
+
+    expect(result.current.image.matchNode(paragraphNode)).toBe(false);
+    expect(result.current.image.matchNode(headingOneNode)).toBe(false);
+    expect(result.current.image.matchNode(headingSixNode)).toBe(false);
+    expect(result.current.image.matchNode(linkNode)).toBe(false);
+    expect(result.current.image.matchNode(codeNode)).toBe(false);
+    expect(result.current.image.matchNode(quoteNode)).toBe(false);
+    expect(result.current.image.matchNode(orderedListNode)).toBe(false);
+    expect(result.current.image.matchNode(unorderedListNode)).toBe(false);
+    expect(result.current.image.matchNode(listItemNode)).toBe(false);
+    expect(result.current.image.matchNode(imageNode)).toBe(true);
   });
 
   it('renders a paragraph block properly', () => {
@@ -66,7 +198,7 @@ describe('useBlocksStore', () => {
     const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
 
     render(
-      result.current.heading.renderElement({
+      result.current['heading-six'].renderElement({
         children: 'Some heading',
         element: { level: 2 },
         attributes: {},

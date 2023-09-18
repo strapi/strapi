@@ -170,14 +170,12 @@ Image.propTypes = {
  * @returns {{
  *   [key: string]: {
  *     renderElement: (props: Object) => JSX.Element,
- *     variants: {
- *       [key: string]: {
- *         icon: React.ComponentType,
- *         label: {id: string, defaultMessage: string},
- *         value: Object,
- *         matchNode: (node: Object) => boolean,
- *       }
- *     }
+ *     icon: React.ComponentType,
+ *     label: {id: string, defaultMessage: string},
+ *     value: Object,
+ *     matchNode: (node: Object) => boolean,
+ *     isInBlocksSelector: true,
+
  *   }
  * }} an object containing rendering functions and metadata for different blocks, indexed by name.
  */
@@ -189,96 +187,100 @@ export function useBlocksStore() {
           {props.children}
         </Typography>
       ),
-      variants: {
-        paragraph: {
-          icon: Code,
-          label: {
-            id: 'components.Blocks.blocks.text',
-            defaultMessage: 'Text',
-          },
-          value: {
-            type: 'paragraph',
-          },
-          matchNode: (node) => node.type === 'paragraph',
-        },
+      icon: Code,
+      label: {
+        id: 'components.Blocks.blocks.text',
+        defaultMessage: 'Text',
       },
+      value: {
+        type: 'paragraph',
+      },
+      matchNode: (node) => node.type === 'paragraph',
+      isInBlocksSelector: true,
     },
-    heading: {
+    'heading-one': {
       renderElement: (props) => <Heading {...props} />,
-      variants: {
-        'heading-one': {
-          icon: Code, // TODO replace with the correct icon once released
-          label: {
-            id: 'components.Blocks.blocks.heading1',
-            defaultMessage: 'Heading 1',
-          },
-          value: {
-            type: 'heading',
-            level: 1,
-          },
-          matchNode: (node) => node.type === 'heading' && node.level === 1,
-        },
-        'heading-two': {
-          icon: Code, // TODO replace with the correct icon once released
-          label: {
-            id: 'components.Blocks.blocks.heading2',
-            defaultMessage: 'Heading 2',
-          },
-          value: {
-            type: 'heading',
-            level: 2,
-          },
-          matchNode: (node) => node.type === 'heading' && node.level === 2,
-        },
-        'heading-three': {
-          icon: Code, // TODO replace with the correct icon once released
-          label: {
-            id: 'components.Blocks.blocks.heading3',
-            defaultMessage: 'Heading 3',
-          },
-          value: {
-            type: 'heading',
-            level: 3,
-          },
-          matchNode: (node) => node.type === 'heading' && node.level === 3,
-        },
-        'heading-four': {
-          icon: Code, // TODO replace with the correct icon once released
-          label: {
-            id: 'components.Blocks.blocks.heading4',
-            defaultMessage: 'Heading 4',
-          },
-          value: {
-            type: 'heading',
-            level: 4,
-          },
-          matchNode: (node) => node.type === 'heading' && node.level === 4,
-        },
-        'heading-five': {
-          icon: Code, // TODO replace with the correct icon once released
-          label: {
-            id: 'components.Blocks.blocks.heading5',
-            defaultMessage: 'Heading 5',
-          },
-          value: {
-            type: 'heading',
-            level: 5,
-          },
-          matchNode: (node) => node.type === 'heading' && node.level === 5,
-        },
-        'heading-six': {
-          icon: Code, // TODO replace with the correct icon once released
-          label: {
-            id: 'components.Blocks.blocks.heading6',
-            defaultMessage: 'Heading 6',
-          },
-          value: {
-            type: 'heading',
-            level: 6,
-          },
-          matchNode: (node) => node.type === 'heading' && node.level === 6,
-        },
+      icon: Code, // TODO replace with the correct icon once released
+      label: {
+        id: 'components.Blocks.blocks.heading1',
+        defaultMessage: 'Heading 1',
       },
+      value: {
+        type: 'heading',
+        level: 1,
+      },
+      matchNode: (node) => node.type === 'heading' && node.level === 1,
+      isInBlocksSelector: true,
+    },
+    'heading-two': {
+      renderElement: (props) => <Heading {...props} />,
+      icon: Code, // TODO replace with the correct icon once released
+      label: {
+        id: 'components.Blocks.blocks.heading2',
+        defaultMessage: 'Heading 2',
+      },
+      value: {
+        type: 'heading',
+        level: 2,
+      },
+      matchNode: (node) => node.type === 'heading' && node.level === 2,
+      isInBlocksSelector: true,
+    },
+    'heading-three': {
+      renderElement: (props) => <Heading {...props} />,
+      icon: Code, // TODO replace with the correct icon once released
+      label: {
+        id: 'components.Blocks.blocks.heading3',
+        defaultMessage: 'Heading 3',
+      },
+      value: {
+        type: 'heading',
+        level: 3,
+      },
+      matchNode: (node) => node.type === 'heading' && node.level === 3,
+      isInBlocksSelector: true,
+    },
+    'heading-four': {
+      renderElement: (props) => <Heading {...props} />,
+      icon: Code, // TODO replace with the correct icon once released
+      label: {
+        id: 'components.Blocks.blocks.heading4',
+        defaultMessage: 'Heading 4',
+      },
+      value: {
+        type: 'heading',
+        level: 4,
+      },
+      matchNode: (node) => node.type === 'heading' && node.level === 4,
+      isInBlocksSelector: true,
+    },
+    'heading-five': {
+      renderElement: (props) => <Heading {...props} />,
+      icon: Code, // TODO replace with the correct icon once released
+      label: {
+        id: 'components.Blocks.blocks.heading5',
+        defaultMessage: 'Heading 5',
+      },
+      value: {
+        type: 'heading',
+        level: 5,
+      },
+      matchNode: (node) => node.type === 'heading' && node.level === 5,
+      isInBlocksSelector: true,
+    },
+    'heading-six': {
+      renderElement: (props) => <Heading {...props} />,
+      icon: Code, // TODO replace with the correct icon once released
+      label: {
+        id: 'components.Blocks.blocks.heading6',
+        defaultMessage: 'Heading 6',
+      },
+      value: {
+        type: 'heading',
+        level: 6,
+      },
+      matchNode: (node) => node.type === 'heading' && node.level === 6,
+      isInBlocksSelector: true,
     },
     link: {
       renderElement: (props) => (
@@ -286,7 +288,8 @@ export function useBlocksStore() {
           {props.children}
         </BaseLink>
       ),
-      variants: {},
+      matchNode: (node) => node.type === 'link',
+      isInBlocksSelector: false,
     },
     code: {
       renderElement: (props) => (
@@ -294,20 +297,36 @@ export function useBlocksStore() {
           <code>{props.children}</code>
         </CodeBlock>
       ),
+      icon: Code,
+      label: {
+        id: 'components.Blocks.blocks.code',
+        defaultMessage: 'Code',
+      },
+      matchNode: (node) => node.type === 'code',
+      isInBlocksSelector: true,
       handleEnterKey(editor) {
         // TODO find why this creates another blockquote instead of adding a newline within the blockquote
         // TODO look up source code for this demo https://www.slatejs.org/examples/code-highlighting
         editor.insertSoftBreak();
       },
-      variants: {},
     },
     quote: {
       renderElement: (props) => <Blockquote {...props.attributes}>{props.children}</Blockquote>,
-      variants: {},
+      matchNode: (node) => node.type === 'quote',
+      // TODO add icon and label and add to blocks selector
+      isInBlocksSelector: false,
     },
-    list: {
+    'list-ordered': {
       renderElement: (props) => <List {...props} />,
-      variants: {},
+      matchNode: (node) => node.type === 'list' && node.format === 'ordered',
+      // TODO add icon and label and add to blocks selector
+      isInBlocksSelector: false,
+    },
+    'list-unordered': {
+      renderElement: (props) => <List {...props} />,
+      matchNode: (node) => node.type === 'list' && node.format === 'unordered',
+      // TODO add icon and label and add to blocks selector
+      isInBlocksSelector: false,
     },
     'list-item': {
       renderElement: (props) => (
@@ -315,11 +334,14 @@ export function useBlocksStore() {
           {props.children}
         </Typography>
       ),
-      variants: {},
+      matchNode: (node) => node.type === 'list-item',
+      isInBlocksSelector: false,
     },
     image: {
       renderElement: (props) => <Image {...props} />,
-      variants: {},
+      matchNode: (node) => node.type === 'image',
+      // TODO add icon and label and add to blocks selector
+      isInBlocksSelector: false,
     },
   };
 }
