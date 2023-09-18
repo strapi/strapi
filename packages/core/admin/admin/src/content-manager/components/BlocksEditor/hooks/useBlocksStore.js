@@ -3,8 +3,6 @@ import * as React from 'react';
 import { Box, Typography, BaseLink } from '@strapi/design-system';
 import {
   Code,
-  Quote,
-  Link,
   /**
    * TODO: add the rest of the icons when the DS will be released
    Paragraph,
