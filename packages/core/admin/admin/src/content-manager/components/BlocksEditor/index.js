@@ -75,6 +75,7 @@ const BlocksEditor = React.forwardRef(
             onChange={(state) => {
               const isAstChange = editor.operations.some((op) => op.type !== 'set_selection');
 
+              // Check for an actual change in content before triggering the onChange
               if (isAstChange) {
                 const blocks = JSON.stringify({ version: '0.0.0', blocks: state });
                 onChange({ target: { name, value: blocks, type: 'blocks' } });

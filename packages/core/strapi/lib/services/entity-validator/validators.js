@@ -3,7 +3,7 @@
 const _ = require('lodash');
 
 const { yup } = require('@strapi/utils');
-const { StrapiBlocksSchema } = require('./blocks-schema');
+const blocksValidator = require('./blocks-validator');
 
 /**
  * @type {import('yup').StringSchema} StringSchema
@@ -214,5 +214,5 @@ module.exports = {
   time: composeValidators(addUniqueValidator),
   datetime: composeValidators(addUniqueValidator),
   timestamp: composeValidators(addUniqueValidator),
-  blocks: () => StrapiBlocksSchema,
+  blocks: blocksValidator,
 };

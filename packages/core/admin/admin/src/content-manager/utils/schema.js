@@ -217,7 +217,6 @@ const createYupSchemaAttribute = (type, validations, options) => {
   }
 
   if (type === 'blocks') {
-    // TODO: Fix frontend validation for blocks, what should we check here?
     schema = yup.mixed().test('isJSON', errorsTrads.json, (value) => {
       try {
         JSON.parse(value);

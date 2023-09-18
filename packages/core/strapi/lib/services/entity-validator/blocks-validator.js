@@ -2,7 +2,7 @@
 
 const { yup } = require('@strapi/utils');
 
-const TextNodeSchema = yup.object().shape({
+const textNodeValidator = yup.object().shape({
   type: yup.string().equals(['text']).required(),
   text: yup
     .string()
@@ -16,18 +16,18 @@ const TextNodeSchema = yup.object().shape({
   code: yup.boolean(),
 });
 
-const LinkNodeSchema = yup.object().shape({
+const linkNodeValidator = yup.object().shape({
   type: yup.string().equals(['link']).required(),
   url: yup.string().url().required(),
-  children: yup.array().of(TextNodeSchema).required(),
+  children: yup.array().of(textNodeValidator).required(),
 });
 
-const InlineNodeSchema = yup.lazy((value) => {
+const inlineNodeValidator = yup.lazy((value) => {
   switch (value.type) {
     case 'text':
-      return TextNodeSchema;
+      return textNodeValidator;
     case 'link':
-      return LinkNodeSchema;
+      return linkNodeValidator;
     default:
       return yup.mixed().test('invalid-type', 'Inline node must be Text or Link', () => {
         return false;
@@ -35,60 +35,60 @@ const InlineNodeSchema = yup.lazy((value) => {
   }
 });
 
-const ParagraphNodeSchema = yup.object().shape({
+const paragraphNodeValidator = yup.object().shape({
   type: yup.string().equals(['paragraph']).required(),
   children: yup
     .array()
-    .of(InlineNodeSchema)
+    .of(inlineNodeValidator)
     .min(1, 'Paragraph node children must have at least one Text or Link node')
     .required(),
 });
 
-const HeadingNodeSchema = yup.object().shape({
+const headingNodeValidator = yup.object().shape({
   type: yup.string().equals(['heading']).required(),
   level: yup.number().oneOf([1, 2, 3, 4, 5, 6]).required(),
   children: yup
     .array()
-    .of(InlineNodeSchema)
+    .of(inlineNodeValidator)
     .min(1, 'Heading node children must have at least one Text or Link node')
     .required(),
 });
 
-const QuoteNodeSchema = yup.object().shape({
+const quoteNodeValidator = yup.object().shape({
   type: yup.string().equals(['quote']).required(),
   children: yup
     .array()
-    .of(InlineNodeSchema)
+    .of(inlineNodeValidator)
     .min(1, 'Quote node children must have at least one Text or Link node')
     .required(),
 });
 
-const CodeBlockSchema = yup.object().shape({
+const codeBlockValidator = yup.object().shape({
   type: yup.string().equals(['code']).required(),
   syntax: yup.string().nullable(),
   children: yup
     .array()
-    .of(TextNodeSchema)
+    .of(textNodeValidator)
     .min(1, 'Quote node children must have at least one Text or Link node')
     .required(),
 });
 
-const ListItemNode = yup.object().shape({
+const listItemNode = yup.object().shape({
   type: yup.string().equals(['list-item']).required(),
-  children: yup.array().of(InlineNodeSchema).required(),
+  children: yup.array().of(inlineNodeValidator).required(),
 });
 
-const ListNodeSchema = yup.object().shape({
+const listNodeValidator = yup.object().shape({
   type: yup.string().equals(['list']).required(),
   format: yup.string().equals(['ordered', 'unordered']).required(),
   children: yup
     .array()
-    .of(ListItemNode)
+    .of(listItemNode)
     .min(1, 'List node children must have at least one ListItem node')
     .required(),
 });
 
-const ImageNodeSchema = yup.object().shape({
+const imageNodeValidator = yup.object().shape({
   type: yup.string().equals(['image']).required(),
   image: yup.object().shape({
     name: yup.string().required(),
@@ -108,39 +108,36 @@ const ImageNodeSchema = yup.object().shape({
     createdAt: yup.string().required(),
     updatedAt: yup.string().required(),
   }),
-  children: yup.array().of(InlineNodeSchema).required(),
+  children: yup.array().of(inlineNodeValidator).required(),
 });
 
-const BlockNodeSchema = yup.lazy((value) => {
+const blockNodeValidator = yup.lazy((value) => {
   switch (value.type) {
     case 'paragraph':
-      return ParagraphNodeSchema;
+      return paragraphNodeValidator;
     case 'heading':
-      return HeadingNodeSchema;
+      return headingNodeValidator;
     case 'quote':
-      return QuoteNodeSchema;
+      return quoteNodeValidator;
     case 'list':
-      return ListNodeSchema;
+      return listNodeValidator;
     case 'image':
-      return ImageNodeSchema;
+      return imageNodeValidator;
     case 'code':
-      return CodeBlockSchema;
+      return codeBlockValidator;
     default:
-      return yup
-        .mixed()
-        .test(
-          'invalid-type',
-          'Block node must be Paragraph, Heading, Quote, List, or Image',
-          () => {
-            return false;
-          }
-        );
+      return yup.mixed().test('invalid-type', 'Block node is of invalid type', () => {
+        return false;
+      });
   }
 });
 
-const StrapiBlocksSchema = yup.object({
-  version: yup.string().required(),
-  blocks: yup.array().of(BlockNodeSchema).required(),
+// See: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+const semverRegex =
+  /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/gm;
+const blocksValidator = yup.object({
+  version: yup.string().matches(semverRegex, 'Invalid version').required(),
+  blocks: yup.array().of(blockNodeValidator).required(),
 });
 
-module.exports = { StrapiBlocksSchema };
+module.exports = () => blocksValidator;

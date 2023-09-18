@@ -215,15 +215,15 @@ describe('Blocks validator', () => {
         )
       );
 
-      // Fail with no children
+      // Bad children
       await expect(
         validator({ version: '0.0.0', blocks: [{ type: 'paragraph' }] })
       ).rejects.toThrow(YupValidationError);
-      // Fail with bad modifier
+      // Bad modifier
       await expect(
         validator({ version: '0.0.0', blocks: [{ type: 'paragraph', text: 'hi', break: true }] })
       ).rejects.toThrow(YupValidationError);
-      // Faile with bad url
+      // Bad url
       await expect(
         validator({
           version: '0.0.0',
@@ -549,7 +549,10 @@ describe('Blocks validator', () => {
         },
       ];
 
+      // Bad blocks
       expect(validator({ version: '0.0.0', blocks: mixed })).rejects.toThrow(YupValidationError);
+      // Bad version
+      expect(validator({ version: 'fail', blocks: mixed })).rejects.toThrow(YupValidationError);
     });
   });
 });
