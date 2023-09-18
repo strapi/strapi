@@ -10,7 +10,7 @@ module.exports = async ({ debug, silent, verbose, outDir }) => {
     process.exit(1);
   }
 
-  const appContext = await strapi.compile();
+  const appContext = await strapi.compile({ ignoreDiagnostics: true });
   const app = await strapi(appContext).register();
 
   await tsUtils.generators.generate({
@@ -25,5 +25,5 @@ module.exports = async ({ debug, silent, verbose, outDir }) => {
     artifacts: { contentTypes: true, components: true },
   });
 
-  app.destroy();
+  await app.destroy();
 };

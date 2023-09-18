@@ -3465,11 +3465,11 @@ __metadata:
   linkType: hard
 
 "@internationalized/date@npm:^3.4.0":
-  version: 3.4.0
-  resolution: "@internationalized/date@npm:3.4.0"
+  version: 3.5.0
+  resolution: "@internationalized/date@npm:3.5.0"
   dependencies:
     "@swc/helpers": ^0.5.0
-  checksum: 699cac3a7b4e6ccad027cb33e2682535af4287d6101d0d3a5267141209e9954cf779d0c148b6cb9ff92abd480b92b72315ff536328f8a0b55f5d2761774769aa
+  checksum: 621298a1686bad64212b1f2a497492dcc9d657a3789ea62a1a5ee1cb37719fa7a54944d4bb318bf22f709eccfcb6627e6d1aad9825aaa67c2150973ccca8c15d
   languageName: node
   linkType: hard
 
@@ -7247,8 +7247,9 @@ __metadata:
     "@strapi/icons": 1.10.1
     "@testing-library/react": 14.0.0
     "@testing-library/user-event": 14.4.3
-    "@types/react": 18.2.16
+    "@types/react": 18.2.7
     "@types/react-dom": 18.2.7
+    "@types/react-helmet": 6.1.6
     "@types/react-router-dom": 5.3.3
     "@types/styled-components": 5.1.26
     axios: 1.5.0
@@ -7258,6 +7259,7 @@ __metadata:
     esbuild-loader: ^2.21.0
     eslint-config-custom: 4.13.6
     eslint-plugin-storybook: 0.6.13
+    fork-ts-checker-webpack-plugin: 7.3.0
     formik: 2.4.0
     immer: 9.0.19
     lodash: 4.17.21
@@ -7266,7 +7268,7 @@ __metadata:
     qs: 6.11.1
     react: ^18.2.0
     react-dom: ^18.2.0
-    react-helmet: ^6.1.0
+    react-helmet: 6.1.0
     react-intl: 6.4.1
     react-query: 3.39.3
     react-router-dom: 5.3.4
@@ -7278,6 +7280,7 @@ __metadata:
     vite: 4.4.9
     webpack: ^5.88.1
     webpack-cli: ^5.1.0
+    yup: 0.32.9
   peerDependencies:
     "@strapi/design-system": 1.10.1
     "@strapi/icons": 1.10.1
@@ -8961,6 +8964,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-helmet@npm:6.1.6":
+  version: 6.1.6
+  resolution: "@types/react-helmet@npm:6.1.6"
+  dependencies:
+    "@types/react": "*"
+  checksum: 81560c56bfe854b6a43aee31360862588ac875d1177b975da5ce049ac9aa2f7c98dcde65d4397bfaa04e468f40cf3ab2975a2ef966a69d64a60493422898698d
+  languageName: node
+  linkType: hard
+
 "@types/react-router-dom@npm:5.3.3":
   version: 5.3.3
   resolution: "@types/react-router-dom@npm:5.3.3"
@@ -9002,14 +9014,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:18.2.16":
-  version: 18.2.16
-  resolution: "@types/react@npm:18.2.16"
+"@types/react@npm:18.2.7":
+  version: 18.2.7
+  resolution: "@types/react@npm:18.2.7"
   dependencies:
     "@types/prop-types": "*"
     "@types/scheduler": "*"
     csstype: ^3.0.2
-  checksum: 3d4fdc12509e0098e0dbb4bacdea53e8ccc6632e9df63d9f2711c77aa81ce3b2bb9c76d087f284034b25fd7245680167f4832bf6e4df960c5af2634b52adfd0c
+  checksum: caa5da4cf929766738ec789301dc6fb6624bd48dd317d851c4c9b84b1f47cd8ebe17fe01398cadaa0bc938cd4d502d67f4b9de9ff771dc132096bdc86228efba
   languageName: node
   linkType: hard
 
@@ -25719,7 +25731,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-helmet@npm:^6.1.0":
+"react-helmet@npm:6.1.0, react-helmet@npm:^6.1.0":
   version: 6.1.0
   resolution: "react-helmet@npm:6.1.0"
   dependencies:
