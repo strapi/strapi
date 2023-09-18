@@ -301,7 +301,7 @@ module.exports = ({ strapi }) => ({
     return sumDraftCounts(entity, uid);
   },
 
-  async countManyEntriesDraftRelations(ids, uid) {
+  async countManyEntriesDraftRelations(ids, uid, locale = 'en') {
     const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
     if (!hasRelations) {
@@ -311,6 +311,7 @@ module.exports = ({ strapi }) => ({
     const entities = await strapi.entityService.findMany(uid, {
       populate,
       filters: { id: { $in: ids } },
+      locale,
     });
 
     const totalNumberDraftRelations = entities.reduce(

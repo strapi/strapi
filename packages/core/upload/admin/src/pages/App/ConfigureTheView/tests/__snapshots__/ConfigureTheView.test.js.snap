@@ -13,6 +13,12 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   width: 1px;
 }
 
+.c8 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #4945ff;
+}
+
 .c12 {
   font-weight: 600;
   font-size: 2rem;
@@ -72,7 +78,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   padding-bottom: 8px;
 }
 
-.c9 {
+.c10 {
   min-width: 0;
 }
 
@@ -119,7 +125,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   flex: 1;
 }
 
-.c8 {
+.c9 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -137,7 +143,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   justify-content: space-between;
 }
 
-.c10 {
+.c11 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -278,11 +284,12 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   background: #eaeaef;
 }
 
-.c16[aria-disabled='true'] .c11 {
+.c16[aria-disabled='true'] .c7 {
   color: #666687;
 }
 
-.c16[aria-disabled='true'] svg > g,.c16[aria-disabled='true'] svg path {
+.c16[aria-disabled='true'] svg > g,
+.c16[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -291,11 +298,12 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   background: #eaeaef;
 }
 
-.c16[aria-disabled='true']:active .c11 {
+.c16[aria-disabled='true']:active .c7 {
   color: #666687;
 }
 
-.c16[aria-disabled='true']:active svg > g,.c16[aria-disabled='true']:active svg path {
+.c16[aria-disabled='true']:active svg > g,
+.c16[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -374,7 +382,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   flex-wrap: wrap;
 }
 
-.c37[data-state='checked'] .c11 {
+.c37[data-state='checked'] .c7 {
   font-weight: bold;
   color: #4945ff;
 }
@@ -401,12 +409,6 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 
 .c3:focus-visible {
   outline: none;
-}
-
-.c7 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #4945ff;
 }
 
 .c6 {
@@ -525,20 +527,20 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                     />
                   </svg>
                   <span
-                    class="c7"
+                    class="c7 c8"
                   >
                     Back
                   </span>
                 </a>
               </div>
               <div
-                class="c8"
+                class="c9"
               >
                 <div
-                  class="c9 c10"
+                  class="c10 c11"
                 >
                   <h1
-                    class="c11 c12"
+                    class="c7 c12"
                   >
                     Configure the view - Media Library
                   </h1>
@@ -567,14 +569,14 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                     </svg>
                   </div>
                   <span
-                    class="c11 c17"
+                    class="c7 c17"
                   >
                     Save
                   </span>
                 </button>
               </div>
               <p
-                class="c11 c18"
+                class="c7 c18"
               >
                 Define the view settings of the media library.
               </p>
@@ -599,7 +601,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                       class="c23"
                     >
                       <label
-                        class="c11 c24 c25"
+                        class="c7 c24 c25"
                         for=":r0:"
                       >
                         Entries per page
@@ -622,7 +624,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                           class="c29 c30"
                         >
                           <span
-                            class="c11 c31 c32"
+                            class="c7 c31 c32"
                           >
                             <span
                               class="c33"
@@ -656,7 +658,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                         </span>
                       </div>
                       <p
-                        class="c11 c35"
+                        class="c7 c35"
                         id=":r0:-hint"
                       >
                         Number of assets displayed by default in the Media Library
@@ -674,7 +676,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                       class="c23"
                     >
                       <label
-                        class="c11 c24 c25"
+                        class="c7 c24 c25"
                         for=":r4:"
                       >
                         Default sort order
@@ -697,7 +699,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                           class="c29 c30"
                         >
                           <span
-                            class="c11 c31 c32"
+                            class="c7 c31 c32"
                           >
                             <span
                               class="c33"
@@ -731,7 +733,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                         </span>
                       </div>
                       <p
-                        class="c11 c35"
+                        class="c7 c35"
                         id=":r4:-hint"
                       >
                         Note: You can override this value in the media library.

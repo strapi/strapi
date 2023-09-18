@@ -8,7 +8,13 @@ import plugins from './plugins';
 import appReducers from './reducers';
 
 window.strapi = {
-  backendURL: process.env.STRAPI_ADMIN_BACKEND_URL,
+  /**
+   * This ENV variable is passed from the strapi instance, by default no url is set
+   * in the config and therefore the instance returns you an empty string so URLs are relative.
+   *
+   * To ensure that the backendURL is always set, we use the window.location.origin as a fallback.
+   */
+  backendURL: process.env.STRAPI_ADMIN_BACKEND_URL || window.location.origin,
   isEE: false,
   telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED ?? false,
   features: {

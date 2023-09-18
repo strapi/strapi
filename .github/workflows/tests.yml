@@ -26,7 +26,7 @@ jobs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: dorny/paths-filter@v2
@@ -42,7 +42,7 @@ jobs:
       matrix:
         node: [18]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-node@v3
@@ -53,8 +53,29 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
       - name: Run build:ts
         run: yarn nx run-many --target=build:ts --nx-ignore-cycles --skip-nx-cache
+      - name: Run build
+        run: yarn nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
       - name: Run lint
         run: yarn nx affected --target=lint --parallel --nx-ignore-cycles
+
+  typescript_front:
+    name: 'typescript_front'
+    needs: [changes, lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - uses: nrwl/nx-set-shas@v3
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Run build:ts for admin-test-utils & helper-plugin
+        run: yarn build --projects=@strapi/admin-test-utils,@strapi/helper-plugin --skip-nx-cache
+      - name: Run test
+        run: yarn nx affected --target=test:ts:front --nx-ignore-cycles
 
   unit_back:
     name: 'unit_back (node: ${{ matrix.node }})'
@@ -64,7 +85,7 @@ jobs:
       matrix:
         node: [16, 18, 20]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-node@v3
@@ -80,13 +101,13 @@ jobs:
 
   unit_front:
     name: 'unit_front (node: ${{ matrix.node }})'
-    needs: [changes, lint]
+    needs: [changes, lint, typescript_front]
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node: [18]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-node@v3
@@ -102,13 +123,13 @@ jobs:
 
   build:
     name: 'build (node: ${{ matrix.node }})'
-    needs: [changes, lint, unit_front]
+    needs: [changes, lint, typescript_front, unit_front]
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node: [16, 18, 20]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
@@ -119,7 +140,7 @@ jobs:
 
   e2e:
     timeout-minutes: 60
-    needs: [changes, lint, unit_front, build]
+    needs: [changes, lint, typescript_front, unit_front, build]
     name: 'e2e (browser: ${{ matrix.project }})'
     runs-on: ubuntu-latest
     strategy:
@@ -127,7 +148,7 @@ jobs:
       matrix:
         project: ['chromium', 'webkit', 'firefox']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -179,7 +200,7 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
@@ -216,7 +237,7 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
@@ -252,7 +273,7 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
@@ -272,7 +293,7 @@ jobs:
         node: [16, 18, 20]
         sqlite_pkg: ['better-sqlite3', 'sqlite3']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
@@ -315,7 +336,7 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
@@ -355,7 +376,7 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
@@ -378,7 +399,7 @@ jobs:
         node: [16, 18, 20]
         sqlite_pkg: ['better-sqlite3', 'sqlite3']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}

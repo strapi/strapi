@@ -286,8 +286,8 @@ class LocalFileSourceProvider implements ISourceProvider {
               const content = await entry.collect();
 
               try {
-                // Parse from buffer to string to JSON
-                const parsedContent = JSON.parse(content.toString());
+                // Parse from buffer array to string to JSON
+                const parsedContent = JSON.parse(Buffer.concat(content).toString());
 
                 // Resolve the Promise with the parsed content
                 resolve(parsedContent);

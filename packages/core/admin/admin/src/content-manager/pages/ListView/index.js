@@ -49,6 +49,7 @@ import { useEnterprise } from '../../../hooks/useEnterprise';
 import { InjectionZone } from '../../../shared/components';
 import { Filter } from '../../components/Filter';
 import { AdminUsersFilter } from '../../components/Filter/CustomInputs/AdminUsersFilter';
+import { CREATOR_FIELDS } from '../../constants/attributes';
 import { useAllowedAttributes } from '../../hooks/useAllowedAttributes';
 import { getTrad, getDisplayName } from '../../utils';
 
@@ -63,8 +64,7 @@ import { buildValidGetParams } from './utils';
 const REVIEW_WORKFLOW_COLUMNS_CE = null;
 const REVIEW_WORKFLOW_COLUMNS_CELL_CE = () => null;
 const REVIEW_WORKFLOW_FILTER_CE = [];
-const CREATOR_ATTRIBUTES = ['createdBy', 'updatedBy'];
-const USER_FILTER_ATTRIBUTES = [...CREATOR_ATTRIBUTES, 'strapi_assignee'];
+const USER_FILTER_ATTRIBUTES = [...CREATOR_FIELDS, 'strapi_assignee'];
 
 function ListView({
   canCreate,
@@ -183,6 +183,7 @@ function ListView({
           customValue: user.id.toString(),
         })),
       };
+
       filter.fieldSchema.mainField = {
         name: 'id',
       };
@@ -797,21 +798,14 @@ function ListView({
 
                           if (['createdBy', 'updatedBy'].includes(name.split('.')[0])) {
                             // Display the users full name
+                            // Some entries doesn't have a user assigned as creator/updater (ex: entries created through content API)
+                            // In this case, we display a dash
                             return (
                               <Td key={key}>
                                 <Typography textColor="neutral800">
-                                  {getDisplayName(rowData[name.split('.')[0]], formatMessage)}
-                                </Typography>
-                              </Td>
-                            );
-                          }
-
-                          if (['createdBy', 'updatedBy'].includes(name.split('.')[0])) {
-                            // Display the users full name
-                            return (
-                              <Td key={key}>
-                                <Typography textColor="neutral800">
-                                  {getDisplayName(rowData[name.split('.')[0]], formatMessage)}
+                                  {rowData[name.split('.')[0]]
+                                    ? getDisplayName(rowData[name.split('.')[0]], formatMessage)
+                                    : '-'}
                                 </Typography>
                               </Td>
                             );

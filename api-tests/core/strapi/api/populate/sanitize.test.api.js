@@ -11,7 +11,7 @@ const builder = createTestBuilder();
 
 let strapi;
 let file;
-let rq;
+let contentAPIRequest;
 
 const schemas = {
   contentTypes: {
@@ -85,9 +85,9 @@ const fixtures = {
 
 const uploadFile = async () => {
   const strapi = await createStrapiInstance();
-  const rq = await createAuthRequest({ strapi });
+  const request = await createAuthRequest({ strapi });
 
-  const res = await rq({
+  const res = await request({
     method: 'POST',
     url: '/upload',
     formData: {
@@ -113,7 +113,7 @@ describe('Sanitize populated entries', () => {
       .build();
 
     strapi = await createStrapiInstance();
-    rq = createContentAPIRequest({ strapi });
+    contentAPIRequest = createContentAPIRequest({ strapi });
   });
 
   afterAll(async () => {
@@ -123,15 +123,18 @@ describe('Sanitize populated entries', () => {
 
   describe('Populate simple media', () => {
     test('Media can be populated without restricted attributes', async () => {
-      const { status, body } = await rq.get(`/${schemas.contentTypes.a.pluralName}`, {
-        qs: {
-          populate: {
-            cover: {
-              populate: '*',
+      const { status, body } = await contentAPIRequest.get(
+        `/${schemas.contentTypes.a.pluralName}`,
+        {
+          qs: {
+            populate: {
+              cover: {
+                populate: '*',
+              },
             },
           },
-        },
-      });
+        }
+      );
 
       expect(status).toBe(200);
       expect(body.data[0].attributes.cover).toBeDefined();
@@ -140,7 +143,7 @@ describe('Sanitize populated entries', () => {
     });
 
     test("Media's relations (from related) can be populated without restricted attributes", async () => {
-      const { status, body } = await rq.get(`/upload/files/${file.id}`, {
+      const { status, body } = await contentAPIRequest.get(`/upload/files/${file.id}`, {
         qs: { populate: { related: { populate: '*' } } },
       });
 
@@ -163,7 +166,7 @@ describe('Sanitize populated entries', () => {
     test('Wildcard populate is transformed to an exhaustive list of populatable fields', async () => {
       const findManyMock = jest.spyOn(strapi.entityService, 'findMany');
 
-      const { status } = await rq.get(`/${schemas.contentTypes.b.pluralName}`, {
+      const { status } = await contentAPIRequest.get(`/${schemas.contentTypes.b.pluralName}`, {
         qs: { fields: ['id'], populate: '*' },
       });
 
