@@ -55,6 +55,7 @@ describe('useBlocksStore', () => {
     expect(storeKeys).toContain('image');
 
     Object.values(result.current).forEach((block) => {
+      expect(block).toHaveProperty('value.type');
       expect(block).toHaveProperty('renderElement');
       expect(block).toHaveProperty('matchNode');
       expect(block).toHaveProperty('isInBlocksSelector');
