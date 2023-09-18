@@ -14,7 +14,7 @@ export default async ({ debug, silent, verbose, outDir }: CmdOptions) => {
     process.exit(1);
   }
 
-  const appContext = await strapi.compile();
+  const appContext = await strapi.compile({ ignoreDiagnostics: true });
   const app = await strapi(appContext).register();
 
   await tsUtils.generators.generate({
@@ -29,5 +29,5 @@ export default async ({ debug, silent, verbose, outDir }: CmdOptions) => {
     artifacts: { contentTypes: true, components: true },
   });
 
-  app.destroy();
+  await app.destroy();
 };
