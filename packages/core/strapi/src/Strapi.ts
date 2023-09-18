@@ -28,7 +28,7 @@ import type {
   Common,
   Shared,
   Schema,
-} from '@strapi/typings';
+} from '@strapi/types';
 
 import loadConfiguration from './core/app-configuration';
 

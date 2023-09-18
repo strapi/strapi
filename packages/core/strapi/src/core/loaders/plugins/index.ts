@@ -2,7 +2,7 @@ import { join } from 'path';
 import fse from 'fs-extra';
 import { defaultsDeep, defaults, getOr, get } from 'lodash/fp';
 import { env } from '@strapi/utils';
-import type { Strapi, Common, Schema } from '@strapi/typings';
+import type { Strapi, Common, Schema } from '@strapi/types';
 import { loadFile } from '../../app-configuration/load-config-file';
 import loadFiles from '../../../load/load-files';
 import { getEnabledPlugins } from './get-enabled-plugins';

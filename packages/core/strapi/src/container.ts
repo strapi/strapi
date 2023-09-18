@@ -1,4 +1,4 @@
-import type { Strapi, Container } from '@strapi/typings';
+import type { Strapi, Container } from '@strapi/types';
 
 export const createContainer = (strapi: Strapi): Container => {
   const registered = new Map<string, unknown>();

@@ -18,7 +18,7 @@ import type {
   Schema,
   Shared,
   Utils,
-} from '@strapi/typings';
+} from '@strapi/types';
 
 import uploadFiles from '../utils/upload-files';
 

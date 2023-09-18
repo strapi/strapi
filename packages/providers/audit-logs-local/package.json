@@ -41,7 +41,7 @@
     "lint": "run -T eslint ."
   },
   "devDependencies": {
-    "@strapi/typings": "4.13.6",
+    "@strapi/types": "4.13.6",
     "eslint-config-custom": "4.13.6",
     "tsconfig": "4.13.6"
   },

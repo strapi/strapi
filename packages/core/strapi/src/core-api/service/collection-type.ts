@@ -1,6 +1,6 @@
 import { propOr } from 'lodash/fp';
 import { contentTypes } from '@strapi/utils';
-import type { CoreApi, Schema } from '@strapi/typings';
+import type { CoreApi, Schema } from '@strapi/types';
 
 import {
   getPaginationInfo,

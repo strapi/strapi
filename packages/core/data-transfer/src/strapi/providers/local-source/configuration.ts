@@ -1,7 +1,7 @@
 import { Readable } from 'stream';
 import { chain } from 'stream-chain';
 import { set } from 'lodash/fp';
-import type { LoadedStrapi } from '@strapi/typings';
+import type { LoadedStrapi } from '@strapi/types';
 
 import type { IConfiguration } from '../../../../types';
 

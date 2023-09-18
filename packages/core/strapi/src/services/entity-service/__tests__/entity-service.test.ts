@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { errors } from '@strapi/utils';
-import type { Schema, Utils } from '@strapi/typings';
+import type { Schema, Utils } from '@strapi/types';
 import createEntityService from '..';
 import entityValidator from '../../entity-validator';
 import createEventHub from '../../event-hub';

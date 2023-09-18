@@ -3,7 +3,7 @@
  */
 import createDebugger from 'debug';
 import type { Logger } from '@strapi/logger';
-import type { Utils } from '@strapi/typings';
+import type { Utils } from '@strapi/types';
 
 const debug = createDebugger('strapi:worker-queue');
 

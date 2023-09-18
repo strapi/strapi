@@ -1,4 +1,4 @@
-import type { Common, Shared, EntityService } from '@strapi/typings';
+import type { Common, Shared, EntityService } from '@strapi/types';
 import transforms from './transforms';
 
 const applyTransforms = <TUID extends Common.UID.ContentType>(

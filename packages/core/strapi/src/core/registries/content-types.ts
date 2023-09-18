@@ -1,5 +1,5 @@
 import { pickBy, has } from 'lodash/fp';
-import type { Common, Schema } from '@strapi/typings';
+import type { Common, Schema } from '@strapi/types';
 import { createContentType, ContentTypeDefinition } from '../domain/content-type';
 import { addNamespace, hasNamespace } from '../utils';
 

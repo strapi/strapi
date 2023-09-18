@@ -6,7 +6,7 @@ import execa from 'execa';
 import { getOr } from 'lodash/fp';
 import { joinBy } from '@strapi/utils';
 import tsUtils from '@strapi/typescript-utils';
-import type { Strapi } from '@strapi/typings';
+import type { Strapi } from '@strapi/types';
 
 import loadConfiguration from '../../../core/app-configuration';
 import strapi from '../../../index';

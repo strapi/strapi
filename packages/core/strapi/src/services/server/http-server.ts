@@ -1,7 +1,7 @@
 import http from 'http';
 import type { Socket } from 'net';
 import Koa from 'koa';
-import type { Strapi } from '@strapi/typings';
+import type { Strapi } from '@strapi/types';
 
 export interface Server extends http.Server {
   destroy: () => Promise<void>;

@@ -1,5 +1,5 @@
 import { errors } from '@strapi/utils';
-import type { Common } from '@strapi/typings';
+import type { Common } from '@strapi/types';
 
 import { formatApplicationError, formatHttpError, formatInternalError } from '../services/errors';
 

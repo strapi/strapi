@@ -1,7 +1,7 @@
 import { prop } from 'lodash/fp';
 import type Koa from 'koa';
 import { contentTypes as contentTypeUtils, sanitize, validate } from '@strapi/utils';
-import type { CoreApi, Schema } from '@strapi/typings';
+import type { CoreApi, Schema } from '@strapi/types';
 
 import { transformResponse } from './transform';
 import createSingleTypeController from './single-type';

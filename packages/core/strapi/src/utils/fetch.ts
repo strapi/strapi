@@ -1,7 +1,7 @@
 import nodeFetch, { RequestInit, Response } from 'node-fetch';
 import { HttpsProxyAgent, HttpsProxyAgentOptions } from 'https-proxy-agent';
 
-import type { Strapi } from '@strapi/typings';
+import type { Strapi } from '@strapi/types';
 
 export interface Fetch {
   (url: string, options: RequestInit): Promise<Response>;

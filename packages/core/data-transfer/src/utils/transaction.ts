@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { randomUUID } from 'crypto';
-import type { LoadedStrapi } from '@strapi/typings';
+import type { LoadedStrapi } from '@strapi/types';
 
 import { Transaction, TransactionCallback } from '../../types/utils';
 

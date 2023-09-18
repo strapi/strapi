@@ -7097,7 +7097,7 @@ __metadata:
   dependencies:
     "@strapi/logger": 4.13.6
     "@strapi/strapi": 4.13.6
-    "@strapi/typings": 4.13.6
+    "@strapi/types": 4.13.6
     "@strapi/utils": 4.13.6
     "@types/fs-extra": 9.0.13
     "@types/jest": 29.5.2
@@ -7654,7 +7654,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-audit-logs-local@workspace:packages/providers/audit-logs-local"
   dependencies:
-    "@strapi/typings": 4.13.6
+    "@strapi/types": 4.13.6
     eslint-config-custom: 4.13.6
     tsconfig: 4.13.6
   languageName: unknown
@@ -7771,8 +7771,8 @@ __metadata:
     "@strapi/plugin-content-type-builder": 4.13.6
     "@strapi/plugin-email": 4.13.6
     "@strapi/plugin-upload": 4.13.6
+    "@strapi/types": 4.13.6
     "@strapi/typescript-utils": 4.13.6
-    "@strapi/typings": 4.13.6
     "@strapi/utils": 4.13.6
     "@types/bcryptjs": 2.4.3
     "@types/configstore": 5.0.1
@@ -7841,22 +7841,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/typescript-utils@4.13.6, @strapi/typescript-utils@workspace:packages/utils/typescript":
+"@strapi/types@4.13.6, @strapi/types@workspace:packages/core/types":
   version: 0.0.0-use.local
-  resolution: "@strapi/typescript-utils@workspace:packages/utils/typescript"
-  dependencies:
-    chalk: 4.1.2
-    cli-table3: 0.6.2
-    fs-extra: 10.0.0
-    lodash: 4.17.21
-    prettier: 2.8.4
-    typescript: 5.2.2
-  languageName: unknown
-  linkType: soft
-
-"@strapi/typings@4.13.6, @strapi/typings@workspace:packages/core/typings":
-  version: 0.0.0-use.local
-  resolution: "@strapi/typings@workspace:packages/core/typings"
+  resolution: "@strapi/types@workspace:packages/core/types"
   dependencies:
     "@koa/cors": 3.4.3
     "@koa/router": 10.1.1
@@ -7876,6 +7863,19 @@ __metadata:
     node-schedule: 2.1.0
     ts-zen: "https://github.com/strapi/ts-zen#66e02232f5997674cc7032ea3ee59d9864863732"
     tsconfig: 4.13.6
+    typescript: 5.2.2
+  languageName: unknown
+  linkType: soft
+
+"@strapi/typescript-utils@4.13.6, @strapi/typescript-utils@workspace:packages/utils/typescript":
+  version: 0.0.0-use.local
+  resolution: "@strapi/typescript-utils@workspace:packages/utils/typescript"
+  dependencies:
+    chalk: 4.1.2
+    cli-table3: 0.6.2
+    fs-extra: 10.0.0
+    lodash: 4.17.21
+    prettier: 2.8.4
     typescript: 5.2.2
   languageName: unknown
   linkType: soft

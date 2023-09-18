@@ -1,7 +1,7 @@
 {
-  "name": "@strapi/typings",
+  "name": "@strapi/types",
   "version": "4.13.6",
-  "description": "An open source headless CMS solution to create and manage your own API. It provides a powerful dashboard and features to make your life easier. Databases supported: MySQL, MariaDB, PostgreSQL, SQLite",
+  "description": "Shared typescript types for Strapi internal use",
   "keywords": [
     "strapi"
   ],

@@ -1,5 +1,5 @@
 import { pipe, omit, pick } from 'lodash/fp';
-import type { Strapi, Common, CoreApi, Utils } from '@strapi/typings';
+import type { Strapi, Common, CoreApi, Utils } from '@strapi/types';
 
 import { createController } from './core-api/controller';
 import { createService } from './core-api/service';

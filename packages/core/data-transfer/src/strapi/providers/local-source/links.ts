@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import type { LoadedStrapi } from '@strapi/typings';
+import type { LoadedStrapi } from '@strapi/types';
 
 import type { ILink } from '../../../../types';
 import { createLinkQuery } from '../../queries/link';

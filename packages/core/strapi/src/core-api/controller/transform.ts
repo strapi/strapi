@@ -1,7 +1,7 @@
 import { isNil, isPlainObject } from 'lodash/fp';
 import { contentTypes as contentTypeUtils, parseMultipartData } from '@strapi/utils';
 import type Koa from 'koa';
-import type { Common, Schema, UID } from '@strapi/typings';
+import type { Common, Schema, UID } from '@strapi/types';
 
 type TransformedEntry = {
   id: string;

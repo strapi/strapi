@@ -1,5 +1,5 @@
 import { isFunction } from 'lodash/fp';
-import type { Common } from '@strapi/typings';
+import type { Common } from '@strapi/types';
 
 export interface Config {
   handlers?: Record<number, Common.MiddlewareHandler>;

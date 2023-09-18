@@ -36,4 +36,3 @@ export type For<TSchemaUID extends Common.UID.Schema> = IsEnabled<TSchemaUID> ex
       unknown
     >
   : never;
-

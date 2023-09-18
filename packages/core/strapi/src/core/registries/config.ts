@@ -1,4 +1,4 @@
-import type { ConfigProvider } from '@strapi/typings';
+import type { ConfigProvider } from '@strapi/types';
 import _, { PropertyName } from 'lodash';
 
 type Config = Record<string, unknown>;

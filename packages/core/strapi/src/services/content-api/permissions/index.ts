@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import type { Strapi, Common } from '@strapi/typings';
+import type { Strapi, Common } from '@strapi/types';
 import { createActionProvider, createConditionProvider } from './providers';
 import createPermissionEngine from './engine';
 

@@ -2,7 +2,7 @@ import { Writable, Readable } from 'stream';
 import path from 'path';
 import * as fse from 'fs-extra';
 import type { Knex } from 'knex';
-import type { LoadedStrapi } from '@strapi/typings';
+import type { LoadedStrapi } from '@strapi/types';
 import type {
   IAsset,
   IDestinationProvider,
