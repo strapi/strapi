@@ -4,7 +4,7 @@
 
 import inquirer from 'inquirer';
 import { Command, InvalidOptionArgumentError, Option } from 'commander';
-import { bold, green, cyan } from 'chalk';
+import chalk from 'chalk';
 import { isNaN } from 'lodash/fp';
 import { exitWith } from './helpers';
 
@@ -121,7 +121,7 @@ const confirmMessage = async (message: string, { force }: { force?: boolean } = 
   // if we have a force option, respond yes
   if (force === true) {
     // attempt to mimic the inquirer prompt exactly
-    console.log(`${green('?')} ${bold(message)} ${cyan('Yes')}`);
+    console.log(`${chalk.green('?')} ${chalk.bold(message)} ${chalk.cyan('Yes')}`);
     return true;
   }
 

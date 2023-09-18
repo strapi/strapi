@@ -1,13 +1,15 @@
 import type { Ora } from 'ora';
 import { dtsTask, DtsTask } from './dts';
 import { viteTask, ViteTask } from './vite';
-import type { BuildContext, BuildTask } from '../packages';
+import type { BuildContext } from '../packages';
 
-export interface TaskHandler<Task extends BuildTask> {
-  print: (ctx: BuildContext, task: Task) => void;
-  run: (ctx: BuildContext, task: Task) => Promise<void>;
-  success: (ctx: BuildContext, task: Task) => Promise<void>;
-  fail: (ctx: BuildContext, task: Task, err: unknown) => Promise<void>;
+export type Task = ViteTask | DtsTask;
+
+export interface TaskHandler<TTask extends Task> {
+  print: (ctx: BuildContext, task: TTask) => void;
+  run: (ctx: BuildContext, task: TTask) => Promise<void>;
+  success: (ctx: BuildContext, task: TTask) => Promise<void>;
+  fail: (ctx: BuildContext, task: TTask, err: unknown) => Promise<void>;
   _spinner: Ora | null;
 }
 

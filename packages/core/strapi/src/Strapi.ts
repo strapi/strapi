@@ -360,8 +360,7 @@ class Strapi implements StrapiI {
 
     process.removeAllListeners();
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    // @ts-expect-error: Allow clean delete of global.strapi to allow re-instanciation
     delete global.strapi;
   }
 
@@ -690,7 +689,7 @@ interface Init {
 
 const initFn = (options: StrapiOptions = {}) => {
   const strapi = new Strapi(options);
-  global.strapi = strapi as any;
+  global.strapi = strapi as LoadedStrapi;
   return strapi;
 };
 

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import chalk, { yellow, red, green } from 'chalk';
+import chalk from 'chalk';
 import { has, isString, isArray } from 'lodash/fp';
 import resolveCwd from 'resolve-cwd';
 import { prompt } from 'inquirer';
@@ -43,9 +43,9 @@ const exitWith = (code: number, message?: string | string[], options: ExitWithOp
 
   const log = (message: string) => {
     if (code === 0) {
-      logger.log(green(message));
+      logger.log(chalk.green(message));
     } else {
-      logger.error(red(message));
+      logger.error(chalk.red(message));
     }
   };
 
@@ -113,7 +113,7 @@ const ifOptions = (
 const assertCwdContainsStrapiProject = (name: string) => {
   const logErrorAndExit = () => {
     console.log(
-      `You need to run ${yellow(
+      `You need to run ${chalk.yellow(
         `strapi ${name}`
       )} in a Strapi project. Make sure you are in the right directory.`
     );
@@ -141,7 +141,7 @@ const getLocalScript =
     const cmdPath = resolveCwd.silent(`@strapi/strapi/dist/commands/actions/${name}/action`);
     if (!cmdPath) {
       console.log(
-        `Error loading the local ${yellow(
+        `Error loading the local ${chalk.yellow(
           name
         )} command. Strapi might not be installed in your "node_modules". You may need to run "yarn install".`
       );
