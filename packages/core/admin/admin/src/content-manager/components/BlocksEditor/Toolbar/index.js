@@ -3,31 +3,15 @@ import * as React from 'react';
 import * as Toolbar from '@radix-ui/react-toolbar';
 import { Flex, Icon, Tooltip, Select, Option } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
-import {
-  Bold,
-  Italic,
-  Underline,
-  StrikeThrough,
-  Code,
-  BulletList,
-  NumberList,
-  Quote,
-  /**
-   * TODO: add the rest of the icons when the DS will be released
-   Paragraph,
-   HeadingOne,
-   HeadingTwo,
-   HeadingThree,
-   HeadingFour,
-   HeadingFive,
-   HeadingSix,
-   */
-} from '@strapi/icons';
+import { BulletList, NumberList } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement } from 'slate';
 import { useSlate } from 'slate-react';
 import styled from 'styled-components';
+
+import { useBlocksStore } from '../hooks/useBlocksStore';
+import { useModifiersStore } from '../hooks/useModifiersStore';
 
 const Separator = styled(Toolbar.Separator)`
   background: ${({ theme }) => theme.colors.neutral150};
@@ -120,26 +104,15 @@ ModifierButton.propTypes = {
   }).isRequired,
 };
 
-const isBlockActive = (editor, value) => {
+const isBlockActive = (editor, matchNode) => {
   const { selection } = editor;
 
   if (!selection) return false;
 
-  let matchCondition;
-
-  switch (value.type) {
-    case 'heading':
-      matchCondition = (n) => n.type === value.type && n.level === value?.level;
-      break;
-    default:
-      matchCondition = (n) => n.type === value.type;
-      break;
-  }
-
   const match = Array.from(
     Editor.nodes(editor, {
       at: Editor.unhangRange(editor, selection),
-      match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n) && matchCondition(n),
+      match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n) && matchNode(n),
     })
   );
 
@@ -160,34 +133,43 @@ const toggleBlock = (editor, value) => {
 const BlocksDropdown = () => {
   const editor = useSlate();
   const { formatMessage } = useIntl();
-  const [blockSelected, setBlockSelected] = React.useState(Object.keys(blockItems)[0]);
+
+  const blocks = useBlocksStore();
+  const blockKeysToInclude = Object.entries(blocks).reduce((currentKeys, entry) => {
+    const [key, block] = entry;
+
+    return block.isInBlocksSelector ? [...currentKeys, key] : currentKeys;
+  }, []);
+
+  const [blockSelected, setBlockSelected] = React.useState(Object.keys(blocks)[0]);
 
   /**
    * @param {string} optionKey - key of the heading selected
    */
   const selectOption = (optionKey) => {
-    toggleBlock(editor, blockItems[optionKey].value);
+    toggleBlock(editor, blocks[optionKey].value);
 
     setBlockSelected(optionKey);
   };
 
   return (
     <Select
-      startIcon={<Icon as={blockItems[blockSelected].icon} />}
+      startIcon={<Icon as={blocks[blockSelected].icon} />}
       onChange={selectOption}
-      placeholder={blockItems[blockSelected].label}
+      placeholder={blocks[blockSelected].label}
       value={blockSelected}
       aria-label={formatMessage({
         id: 'components.Blocks.blocks.selectBlock',
         defaultMessage: 'Select a block',
       })}
     >
-      {Object.keys(blockItems).map((key) => (
+      {blockKeysToInclude.map((key) => (
         <BlockOption
-          key={blockItems[key].name}
+          key={key}
           value={key}
-          label={blockItems[key].label}
-          icon={blockItems[key].icon}
+          label={blocks[key].label}
+          icon={blocks[key].icon}
+          matchNode={blocks[key].matchNode}
           handleSelection={setBlockSelected}
           blockSelected={blockSelected}
         />
@@ -196,11 +178,11 @@ const BlocksDropdown = () => {
   );
 };
 
-const BlockOption = ({ value, icon, label, handleSelection, blockSelected }) => {
+const BlockOption = ({ value, icon, label, handleSelection, blockSelected, matchNode }) => {
   const { formatMessage } = useIntl();
   const editor = useSlate();
 
-  const isActive = isBlockActive(editor, blockItems[value].value);
+  const isActive = isBlockActive(editor, matchNode);
   const isSelected = value === blockSelected;
 
   React.useEffect(() => {
@@ -226,110 +208,9 @@ BlockOption.propTypes = {
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
   }).isRequired,
+  matchNode: PropTypes.func.isRequired,
   handleSelection: PropTypes.func.isRequired,
   blockSelected: PropTypes.string.isRequired,
-};
-
-// TODO: extract a store of modifiers that rules both the toolbar and the leaf renderers
-const modifiers = [
-  {
-    name: 'bold',
-    icon: Bold,
-    label: { id: 'components.Blocks.modifiers.bold', defaultMessage: 'Bold' },
-  },
-  {
-    name: 'italic',
-    icon: Italic,
-    label: { id: 'components.Blocks.modifiers.italic', defaultMessage: 'Italic' },
-  },
-  {
-    name: 'underline',
-    icon: Underline,
-    label: { id: 'components.Blocks.modifiers.underline', defaultMessage: 'Underline' },
-  },
-  {
-    name: 'strikethrough',
-    icon: StrikeThrough,
-    label: { id: 'components.Blocks.modifiers.strikethrough', defaultMessage: 'Strikethrough' },
-  },
-  {
-    name: 'code',
-    icon: Code,
-    label: { id: 'components.Blocks.modifiers.code', defaultMessage: 'Code' },
-  },
-];
-
-const blockItems = {
-  text: {
-    name: 'text',
-    icon: Code, // TODO: replace with Paragraph when the DS will be released
-    label: { id: 'components.Blocks.blocks.text', defaultMessage: 'Text' },
-    value: {
-      type: 'paragraph',
-    },
-  },
-  heading1: {
-    name: 'heading-one',
-    icon: Code, // TODO: replace with HeadingOne when the DS will be released
-    label: { id: 'components.Blocks.blocks.heading1', defaultMessage: 'Heading 1' },
-    value: {
-      type: 'heading',
-      level: 1,
-    },
-  },
-  heading2: {
-    name: 'heading-two',
-    icon: Code, // TODO: replace with HeadingTwo when the DS will be released
-    label: { id: 'components.Blocks.blocks.heading2', defaultMessage: 'Heading 2' },
-    value: {
-      type: 'heading',
-      level: 2,
-    },
-  },
-  heading3: {
-    name: 'heading-three',
-    icon: Code, // TODO: replace with HeadingThree when the DS will be released
-    label: { id: 'components.Blocks.blocks.heading3', defaultMessage: 'Heading 3' },
-    value: {
-      type: 'heading',
-      level: 3,
-    },
-  },
-  heading4: {
-    name: 'heading-four',
-    icon: Code, // TODO: replace with HeadingFour when the DS will be released
-    label: { id: 'components.Blocks.blocks.heading4', defaultMessage: 'Heading 4' },
-    value: {
-      type: 'heading',
-      level: 4,
-    },
-  },
-  heading5: {
-    name: 'heading-five',
-    icon: Code, // TODO: replace with HeadingFive when the DS will be released
-    label: { id: 'components.Blocks.blocks.heading5', defaultMessage: 'Heading 5' },
-    value: {
-      type: 'heading',
-      level: 5,
-    },
-  },
-  heading6: {
-    name: 'heading-six',
-    icon: Code, // TODO: replace with HeadingSix when the DS will be released
-    label: { id: 'components.Blocks.blocks.heading6', defaultMessage: 'Heading 6' },
-    value: {
-      type: 'heading',
-      level: 6,
-    },
-  },
-  quote: {
-    name: 'quote',
-    icon: Quote,
-    label: { id: 'components.Blocks.blocks.quote', defaultMessage: 'Quote' },
-    value: {
-      type: 'quote',
-    },
-  },
 };
 
 const ListButton = ({ icon, format, label }) => {
@@ -401,6 +282,8 @@ ListButton.propTypes = {
 };
 
 const BlocksToolbar = () => {
+  const modifiers = useModifiersStore();
+
   return (
     <Toolbar.Root asChild>
       <Flex gap={1} padding={2}>
@@ -408,12 +291,14 @@ const BlocksToolbar = () => {
         <Separator />
         <Toolbar.ToggleGroup type="multiple" asChild>
           <Flex gap={1}>
-            {modifiers.map((modifier) => (
-              <ModifierButton
-                key={modifier.name}
-                label={modifier.label}
-                name={modifier.name}
+            {Object.entries(modifiers).map(([name, modifier]) => (
+              <ToolbarButton
+                key={name}
+                name={name}
                 icon={modifier.icon}
+                label={modifier.label}
+                isActive={modifier.checkIsActive()}
+                handleClick={modifier.handleToggle}
               />
             ))}
           </Flex>
