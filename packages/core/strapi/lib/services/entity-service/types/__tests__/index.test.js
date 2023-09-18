@@ -1,7 +1,6 @@
 'use strict';
 
 const path = require('path');
-const { t } = require('ts-zen');
 
 const { createTypeSelector } = require('./test.utils');
 
