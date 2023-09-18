@@ -26,4 +26,4 @@ jobs:
       - uses: ./.github/actions/security/lockfile
         with:
           allowedHosts: 'yarn'
-          allowedURLs: 'https://github.com/strapi/ts-zen.git#commit=41af3f8c6422de048bf9976ae551566b2c2b590a'
+          allowedURLs: 'https://github.com/strapi/ts-zen#2ffb5be3f6cdb433852c8db1dddfb330b59df5f4'
