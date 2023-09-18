@@ -196,13 +196,13 @@ const RelationInput = ({
       updatedRelationsWith.current === 'onChange' &&
       relations.length !== previewRelationsLength
     ) {
-      listRef.current.scrollToItem(relations.length, 'end');
+      listRef.current?.scrollToItem(relations.length, 'end');
       updatedRelationsWith.current = undefined;
     } else if (
       updatedRelationsWith.current === 'loadMore' &&
       relations.length !== previewRelationsLength
     ) {
-      listRef.current.scrollToItem(0, 'start');
+      listRef.current?.scrollToItem(0, 'start');
       updatedRelationsWith.current = undefined;
     }
   }, [previewRelationsLength, relations]);
