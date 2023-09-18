@@ -294,6 +294,11 @@ export function useBlocksStore() {
           <code>{props.children}</code>
         </CodeBlock>
       ),
+      handleEnterKey(editor) {
+        // TODO find why this creates another blockquote instead of adding a newline within the blockquote
+        // TODO look up source code for this demo https://www.slatejs.org/examples/code-highlighting
+        editor.insertSoftBreak();
+      },
       variants: {},
     },
     quote: {

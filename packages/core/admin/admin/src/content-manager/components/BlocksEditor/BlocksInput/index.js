@@ -1,7 +1,8 @@
 import * as React from 'react';
 
 import PropTypes from 'prop-types';
-import { Editable } from 'slate-react';
+import { Transforms } from 'slate';
+import { Editable, useSlate } from 'slate-react';
 import { useTheme } from 'styled-components';
 
 import { useBlocksStore } from '../hooks/useBlocksStore';
@@ -38,6 +39,7 @@ const baseRenderElement = (props, blocks) => {
 
 const BlocksInput = ({ readOnly }) => {
   const theme = useTheme();
+  const editor = useSlate();
 
   // Create renderLeaf function based on the modifiers store
   const modifiers = useModifiersStore();
@@ -47,12 +49,37 @@ const BlocksInput = ({ readOnly }) => {
   const blocks = useBlocksStore();
   const renderElement = React.useCallback((props) => baseRenderElement(props, blocks), [blocks]);
 
+  const handleEnter = () => {
+    const selectedNode = editor.children[editor.selection.anchor.path[0]];
+    const block = blocks[selectedNode.type];
+
+    // Check if there's an enter handler for the selected block
+    if (block.handleEnterKey) {
+      block.handleEnterKey(editor);
+    } else {
+      // If not, insert a new paragraph
+      Transforms.insertNodes(editor, {
+        type: 'paragraph',
+        children: [{ text: '' }],
+      });
+    }
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      console.log('handle enter!!!');
+      handleEnter();
+    }
+  };
+
   return (
     <Editable
       readOnly={readOnly}
       style={getEditorStyle(theme)}
       renderElement={renderElement}
       renderLeaf={renderLeaf}
+      onKeyDown={handleKeyDown}
     />
   );
 };
