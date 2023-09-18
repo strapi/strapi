@@ -59,6 +59,9 @@
     "tar-stream": "2.2.0",
     "ws": "8.13.0"
   },
+  "peerDependencies": {
+    "@strapi/strapi": "^4.13.6"
+  },
   "devDependencies": {
     "@types/fs-extra": "9.0.13",
     "@types/jest": "29.5.2",
