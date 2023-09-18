@@ -62,8 +62,7 @@ export const RelationInputDataManager = ({
     [slug, initialDataPath.join('.'), modifiedData.id, defaultParams],
     {
       relation: {
-        enabled: !!endpoints.relation || !!endpoints.relatedRelation,
-        relatedEndpoint: endpoints.relatedRelation,
+        enabled: !!endpoints.relation || !!isRelatedEntry,
         endpoint: endpoints.relation,
         pageGoal: currentLastPage,
         isRelatedEntry,
