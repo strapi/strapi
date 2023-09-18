@@ -18,7 +18,6 @@ class PostgresDialect extends Dialect {
   }
 
   async initialize(nativeConnection) {
-    this.nativeConnection = nativeConnection;
     // Don't cast DATE string to Date()
     this.db.connection.client.driver.types.setTypeParser(
       this.db.connection.client.driver.types.builtins.DATE,

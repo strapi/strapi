@@ -11,13 +11,11 @@ class MysqlDatabaseInspector {
     this.db = db;
   }
 
-  async getInformation(nativeConnection) {
+  async getInformation() {
     let database;
     let versionNumber;
     try {
-      const [results] = await this.db.connection
-        .raw(SQL_QUERIES.VERSION)
-        .connection(nativeConnection);
+      const [results] = await this.db.connection.raw(SQL_QUERIES.VERSION);
       const versionSplit = results[0].version.split('-');
       const databaseName = versionSplit[1];
       versionNumber = versionSplit[0];

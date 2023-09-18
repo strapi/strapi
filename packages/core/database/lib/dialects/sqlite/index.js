@@ -31,7 +31,6 @@ class SqliteDialect extends Dialect {
   }
 
   async initialize(nativeConnection) {
-    this.nativeConnection = nativeConnection;
     await this.db.connection.raw('pragma foreign_keys = on').connection(nativeConnection);
   }
 
@@ -62,11 +61,11 @@ class SqliteDialect extends Dialect {
   }
 
   async startSchemaUpdate() {
-    await this.db.connection.raw(`pragma foreign_keys = off`).connection(this.nativeConnection);
+    await this.db.connection.raw(`pragma foreign_keys = off`);
   }
 
   async endSchemaUpdate() {
-    await this.db.connection.raw(`pragma foreign_keys = on`).connection(this.nativeConnection);
+    await this.db.connection.raw(`pragma foreign_keys = on`);
   }
 
   transformErrors(error) {
