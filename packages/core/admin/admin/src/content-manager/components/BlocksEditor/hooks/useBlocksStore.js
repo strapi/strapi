@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Box, Typography, BaseLink } from '@strapi/design-system';
 import {
   Code,
+  Quote,
   /**
    * TODO: add the rest of the icons when the DS will be released
    Paragraph,
@@ -307,20 +308,27 @@ export function useBlocksStore() {
     },
     quote: {
       renderElement: (props) => <Blockquote {...props.attributes}>{props.children}</Blockquote>,
+      icon: Quote,
+      label: {
+        id: 'components.Blocks.blocks.quote',
+        defaultMessage: 'Quote',
+      },
+      value: {
+        type: 'quote',
+      },
       matchNode: (node) => node.type === 'quote',
-      // TODO add icon and label and add to blocks selector
-      isInBlocksSelector: false,
+      isInBlocksSelector: true,
     },
     'list-ordered': {
       renderElement: (props) => <List {...props} />,
       matchNode: (node) => node.type === 'list' && node.format === 'ordered',
-      // TODO add icon and label and add to blocks selector
+      // TODO add icon, value and label and set isInBlocksEditor to true
       isInBlocksSelector: false,
     },
     'list-unordered': {
       renderElement: (props) => <List {...props} />,
       matchNode: (node) => node.type === 'list' && node.format === 'unordered',
-      // TODO add icon and label and add to blocks selector
+      // TODO add icon, value and label and set isInBlocksEditor to true
       isInBlocksSelector: false,
     },
     'list-item': {
@@ -335,7 +343,7 @@ export function useBlocksStore() {
     image: {
       renderElement: (props) => <Image {...props} />,
       matchNode: (node) => node.type === 'image',
-      // TODO add icon and label and add to blocks selector
+      // TODO add icon, value and label and set isInBlocksEditor to true
       isInBlocksSelector: false,
     },
   };
