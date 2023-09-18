@@ -135,50 +135,41 @@ const BlocksDropdown = () => {
   const { formatMessage } = useIntl();
 
   const blocks = useBlocksStore();
-  const blockItems = Object.entries(blocks).reduce((currentBlockItems, blockEntry) => {
-    const [blockName, block] = blockEntry;
-    const newBlockItems = { ...currentBlockItems };
+  const blockKeysToInclude = Object.entries(blocks).reduce((currentKeys, entry) => {
+    const [key, block] = entry;
 
-    Object.entries(block.variants).forEach((variantEntry) => {
-      const [variantName, variant] = variantEntry;
+    return block.isInBlocksSelector ? [...currentKeys, key] : currentKeys;
+  }, []);
 
-      // Generate a unique key for each variant
-      const uniqueKey = `${blockName}.${variantName}`;
-      newBlockItems[uniqueKey] = variant;
-    });
-
-    return newBlockItems;
-  }, {});
-
-  const [blockSelected, setBlockSelected] = React.useState(Object.keys(blockItems)[0]);
+  const [blockSelected, setBlockSelected] = React.useState(Object.keys(blocks)[0]);
 
   /**
    * @param {string} optionKey - key of the heading selected
    */
   const selectOption = (optionKey) => {
-    toggleBlock(editor, blockItems[optionKey].value);
+    toggleBlock(editor, blocks[optionKey].value);
 
     setBlockSelected(optionKey);
   };
 
   return (
     <Select
-      startIcon={<Icon as={blockItems[blockSelected].icon} />}
+      startIcon={<Icon as={blocks[blockSelected].icon} />}
       onChange={selectOption}
-      placeholder={blockItems[blockSelected].label}
+      placeholder={blocks[blockSelected].label}
       value={blockSelected}
       aria-label={formatMessage({
         id: 'components.Blocks.blocks.selectBlock',
         defaultMessage: 'Select a block',
       })}
     >
-      {Object.keys(blockItems).map((key) => (
+      {blockKeysToInclude.map((key) => (
         <BlockOption
           key={key}
           value={key}
-          label={blockItems[key].label}
-          icon={blockItems[key].icon}
-          matchNode={blockItems[key].matchNode}
+          label={blocks[key].label}
+          icon={blocks[key].icon}
+          matchNode={blocks[key].matchNode}
           handleSelection={setBlockSelected}
           blockSelected={blockSelected}
         />

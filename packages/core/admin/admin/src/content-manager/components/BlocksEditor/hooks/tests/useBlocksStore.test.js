@@ -40,17 +40,24 @@ describe('useBlocksStore', () => {
 
     const storeKeys = Object.keys(result.current);
     expect(storeKeys).toContain('paragraph');
-    expect(storeKeys).toContain('heading');
+    expect(storeKeys).toContain('heading-one');
+    expect(storeKeys).toContain('heading-two');
+    expect(storeKeys).toContain('heading-three');
+    expect(storeKeys).toContain('heading-four');
+    expect(storeKeys).toContain('heading-five');
+    expect(storeKeys).toContain('heading-six');
     expect(storeKeys).toContain('link');
     expect(storeKeys).toContain('code');
     expect(storeKeys).toContain('quote');
-    expect(storeKeys).toContain('list');
+    expect(storeKeys).toContain('list-ordered');
+    expect(storeKeys).toContain('list-unordered');
     expect(storeKeys).toContain('list-item');
     expect(storeKeys).toContain('image');
 
     Object.values(result.current).forEach((block) => {
       expect(block).toHaveProperty('renderElement');
-      expect(block).toHaveProperty('variants');
+      expect(block).toHaveProperty('matchNode');
+      expect(block).toHaveProperty('isInBlocksSelector');
     });
   });
 
@@ -66,7 +73,7 @@ describe('useBlocksStore', () => {
     const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
 
     render(
-      result.current.heading.renderElement({
+      result.current['heading-two'].renderElement({
         children: 'Some heading',
         element: { level: 2 },
         attributes: {},
