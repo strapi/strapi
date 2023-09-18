@@ -31,7 +31,7 @@
 
 <p align="center">
   <a href="https://strapi.io">
-    <img src="https://github.com/PaulBratslavsky/strapi/assets/6153188/3ac94f08-1149-40ef-a5df-6322909d31b5" alt="Administration panel" />
+    <img src="https://raw.githubusercontent.com/strapi/strapi/main/public/assets/admin-demo.gif" alt="Administration panel" />
   </a>
 </p>
 
