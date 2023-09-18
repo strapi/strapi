@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { useCMEditViewDataManager } from '@strapi/helper-plugin';
+import {useCMEditViewDataManager, useQueryParams} from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import { useRouteMatch } from 'react-router-dom';
 
@@ -30,6 +30,9 @@ function useSelect({
 
   const { origin } = params ?? {};
 
+  const [{ query }] = useQueryParams();
+  const relatedEntityId = get(query, 'plugins.i18n.relatedEntityId', null);
+  const isRelatedEntry = isCreatingEntry && relatedEntityId;
   const isFieldAllowed = useMemo(() => {
     if (isUserAllowedToEditField === true) {
       return true;
@@ -64,6 +67,12 @@ function useSelect({
   }
 
   const entityId = origin || modifiedData.id;
+  const relatedRelationFetchPoint = useMemo(() => {
+    if (!isRelatedEntry || componentUid) {
+      return null;
+    }
+    return `/content-manager/relations/${slug}/${relatedEntityId}/${name.split('.').at(-1)}`;
+  }, [relatedEntityId, entityId, componentUid, slug, name])
 
   // /content-manager/relations/[model]/[id]/[field-name]
   const relationFetchEndpoint = useMemo(() => {
@@ -100,9 +109,10 @@ function useSelect({
       ...queryInfos,
       endpoints: {
         search: relationSearchEndpoint,
-        relation: relationFetchEndpoint,
+        relation: isRelatedEntry ? relatedRelationFetchPoint : relationFetchEndpoint,
       },
     },
+    isRelatedEntry,
     isCloningEntry: Boolean(origin),
     isCreatingEntry,
     isFieldAllowed,

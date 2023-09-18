@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import getValue from 'lodash/get';
 
-import { useCallbackRef, useFetchClient } from '@strapi/helper-plugin';
+import { useCallbackRef, useFetchClient, useQueryParams } from '@strapi/helper-plugin';
 import { useInfiniteQuery } from 'react-query';
 
 import { normalizeRelations } from '../../components/RelationInputDataManager/utils';
@@ -9,11 +10,57 @@ export const useRelation = (cacheKey, { relation, search }) => {
   const [searchParams, setSearchParams] = useState({});
   const [currentPage, setCurrentPage] = useState(0);
   const { get } = useFetchClient();
+
+  const [{ query }] = useQueryParams();
+  const locale = getValue(query, 'plugins.i18n.locale', 'en');
+
+  const getFormattedRelatedRelationData = (relatedRelationData) => {
+    if (relatedRelationData.data) {
+      const currentData = relatedRelationData.data.localizations.find(relation => relation.locale === locale);
+      return {
+        ...relatedRelationData,
+        data: currentData,
+      }
+    }
+    const currentLocaleResults = relatedRelationData.results.reduce((acc, result) => {
+      const data = result.localizations.find(relation => relation.locale === locale);
+      if (data) {
+        acc.push(data);
+      }
+      return acc;
+    }, []);
+    return {
+      ...relatedRelationData,
+      results: currentLocaleResults,
+      pagination: {
+        ...relatedRelationData.pagination,
+        total: 0,
+      }
+    };
+  }
   /**
    * This runs in `useInfiniteQuery` to actually fetch the data
    */
   const fetchRelations = async ({ pageParam = 1 }) => {
     try {
+      if (relation?.isRelatedEntry) {
+        /**
+         * This fetch all related entry relations
+         */
+        const { data: relatedRelationData } = await get(relation.endpoint, {
+          params: {
+            populate: {
+              localizations: true,
+            }
+          },
+        });
+        /**
+         * This formats relation data.
+         */
+        const data = getFormattedRelatedRelationData(relatedRelationData);
+        setCurrentPage(pageParam);
+        return data;
+      }
       const { data } = await get(relation?.endpoint, {
         params: {
           ...(relation.pageParams ?? {}),

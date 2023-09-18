@@ -24,6 +24,7 @@ export const RelationInputDataManager = ({
   description,
   intlLabel,
   isCreatingEntry,
+  isRelatedEntry,
   isCloningEntry,
   isFieldAllowed,
   isFieldReadable,
@@ -61,21 +62,36 @@ export const RelationInputDataManager = ({
     [slug, initialDataPath.join('.'), modifiedData.id, defaultParams],
     {
       relation: {
-        enabled: !!endpoints.relation,
+        enabled: !!endpoints.relation || !!endpoints.relatedRelation,
+        relatedEndpoint: endpoints.relatedRelation,
         endpoint: endpoints.relation,
         pageGoal: currentLastPage,
+        isRelatedEntry,
         pageParams: {
           ...defaultParams,
           pageSize: RELATIONS_TO_DISPLAY,
         },
         onLoad(value) {
-          relationLoad({
-            target: {
-              initialDataPath: ['initialData', ...initialDataPath],
-              modifiedDataPath: ['modifiedData', ...nameSplit],
-              value,
-            },
-          });
+          if (isRelatedEntry) {
+            relationLoad({
+              target: {
+                initialDataPath: ['initialData', ...initialDataPath],
+                modifiedDataPath: ['modifiedData', ...nameSplit],
+                value: [],
+              },
+            });
+            value.forEach((relation) => {
+              handleRelationConnect(relation);
+            });
+          } else {
+            relationLoad({
+              target: {
+                initialDataPath: ['initialData', ...initialDataPath],
+                modifiedDataPath: ['modifiedData', ...nameSplit],
+                value,
+              },
+            });
+          }
         },
         normalizeArguments: {
           mainFieldName: mainField.name,

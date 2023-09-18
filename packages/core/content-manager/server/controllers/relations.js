@@ -238,6 +238,7 @@ module.exports = {
 
     const queryParams = {
       fields: fieldsToSelect,
+      ...ctx.request.query,
     };
 
     if (isAnyToMany(attribute)) {
