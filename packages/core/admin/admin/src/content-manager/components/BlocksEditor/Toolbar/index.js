@@ -11,6 +11,7 @@ import {
   Code,
   BulletList,
   NumberList,
+  Quote,
   /**
    * TODO: add the rest of the icons when the DS will be released
    Paragraph,
@@ -319,6 +320,14 @@ const blockItems = {
     value: {
       type: 'heading',
       level: 6,
+    },
+  },
+  quote: {
+    name: 'quote',
+    icon: Quote,
+    label: { id: 'components.Blocks.blocks.quote', defaultMessage: 'Quote' },
+    value: {
+      type: 'quote',
     },
   },
 };

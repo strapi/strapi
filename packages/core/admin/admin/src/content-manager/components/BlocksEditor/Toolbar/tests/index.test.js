@@ -13,7 +13,12 @@ import { BlocksToolbar } from '..';
 const initialValue = [
   {
     type: 'paragraph',
-    children: [{ text: 'A line of text in a paragraph.' }],
+    children: [
+      {
+        type: 'text',
+        text: 'A line of text in a paragraph.',
+      },
+    ],
   },
 ];
 
@@ -77,14 +82,17 @@ describe('BlocksEditor toolbar', () => {
         type: 'paragraph',
         children: [
           {
+            type: 'text',
             text: 'A ',
           },
           {
+            type: 'text',
             text: 'line of text',
             bold: true,
             italic: true,
           },
           {
+            type: 'text',
             text: ' in a paragraph.',
           },
         ],
@@ -134,6 +142,7 @@ describe('BlocksEditor toolbar', () => {
             type: 'list-item',
             children: [
               {
+                type: 'text',
                 text: 'A line of text in a paragraph.',
               },
             ],
@@ -161,6 +170,7 @@ describe('BlocksEditor toolbar', () => {
         level: 1,
         children: [
           {
+            type: 'text',
             text: 'A line of text in a paragraph.',
           },
         ],
@@ -176,6 +186,49 @@ describe('BlocksEditor toolbar', () => {
         type: 'paragraph',
         children: [
           {
+            type: 'text',
+            text: 'A line of text in a paragraph.',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('transforms the selection to a quote when selected and trasforms it back to text when selected again', async () => {
+    setup();
+
+    const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+
+    Transforms.setSelection(baseEditor, {
+      anchor: { path: [0, 0], offset: 0 },
+    });
+
+    await user.click(headingsDropdown);
+
+    await user.click(screen.getByRole('option', { name: 'Quote' }));
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'quote',
+        children: [
+          {
+            type: 'text',
+            text: 'A line of text in a paragraph.',
+          },
+        ],
+      },
+    ]);
+
+    await user.click(headingsDropdown);
+
+    await user.click(screen.getByRole('option', { name: 'Text' }));
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
             text: 'A line of text in a paragraph.',
           },
         ],
