@@ -289,6 +289,9 @@ export function useBlocksStore() {
           {props.children}
         </BaseLink>
       ),
+      value: {
+        type: 'link',
+      },
       matchNode: (node) => node.type === 'link',
       isInBlocksSelector: false,
     },
@@ -302,6 +305,9 @@ export function useBlocksStore() {
       label: {
         id: 'components.Blocks.blocks.code',
         defaultMessage: 'Code',
+      },
+      value: {
+        type: 'code',
       },
       matchNode: (node) => node.type === 'code',
       isInBlocksSelector: true,
@@ -321,14 +327,22 @@ export function useBlocksStore() {
     },
     'list-ordered': {
       renderElement: (props) => <List {...props} />,
+      value: {
+        type: 'list',
+        format: 'ordered',
+      },
       matchNode: (node) => node.type === 'list' && node.format === 'ordered',
-      // TODO add icon, value and label and set isInBlocksEditor to true
+      // TODO add icon and label and set isInBlocksEditor to true
       isInBlocksSelector: false,
     },
     'list-unordered': {
       renderElement: (props) => <List {...props} />,
+      value: {
+        type: 'list',
+        format: 'unordered',
+      },
       matchNode: (node) => node.type === 'list' && node.format === 'unordered',
-      // TODO add icon, value and label and set isInBlocksEditor to true
+      // TODO add icon and label and set isInBlocksEditor to true
       isInBlocksSelector: false,
     },
     'list-item': {
@@ -337,13 +351,19 @@ export function useBlocksStore() {
           {props.children}
         </Typography>
       ),
+      value: {
+        type: 'list-item',
+      },
       matchNode: (node) => node.type === 'list-item',
       isInBlocksSelector: false,
     },
     image: {
       renderElement: (props) => <Image {...props} />,
+      value: {
+        type: 'image',
+      },
       matchNode: (node) => node.type === 'image',
-      // TODO add icon, value and label and set isInBlocksEditor to true
+      // TODO add icon and label and set isInBlocksEditor to true
       isInBlocksSelector: false,
     },
   };
