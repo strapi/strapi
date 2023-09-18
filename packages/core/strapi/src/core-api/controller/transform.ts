@@ -20,7 +20,7 @@ type Entry = {
 };
 
 function isEntry(property: unknown): property is Entry | Entry[] {
-  return isPlainObject(property) || Array.isArray(property);
+  return property === null || isPlainObject(property) || Array.isArray(property);
 }
 
 function isDZEntries(property: unknown): property is (Entry & { __component: UID.Component })[] {
@@ -102,12 +102,7 @@ function transformEntry(
     const property = properties[key];
     const attribute = type && type.attributes[key];
 
-    if (
-      attribute &&
-      contentTypeUtils.isRelationalAttribute(attribute) &&
-      isEntry(property) &&
-      'target' in attribute
-    ) {
+    if (attribute && attribute.type === 'relation' && isEntry(property) && 'target' in attribute) {
       const data = transformEntry(
         property,
         strapi.contentType(attribute.target as Common.UID.ContentType)
