@@ -118,7 +118,7 @@ BlocksEditor.propTypes = {
   readOnly: PropTypes.bool,
   error: PropTypes.string,
   onChange: PropTypes.func.isRequired,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
+  value: PropTypes.array,
 };
 
 export default BlocksEditor;
