@@ -18,7 +18,7 @@ jobs:
     outputs:
       nonDoc: ${{ steps.filter.outputs.nonDoc }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       # For pull requests it's not necessary to checkout the code

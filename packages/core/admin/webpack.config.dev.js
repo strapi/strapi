@@ -5,7 +5,7 @@
 const path = require('path');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { DuplicateReporterPlugin } = require('duplicate-dependencies-webpack-plugin');
-const getPluginsPath = require('./utils/get-plugins-path');
+const { getPlugins } = require('./utils/plugins');
 const webpackConfig = require('./webpack.config');
 
 module.exports = () => {
@@ -33,12 +33,11 @@ module.exports = () => {
 
     telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true',
   };
-  const pluginsPath = getPluginsPath();
+  const plugins = getPlugins();
 
   const args = {
     entry,
-    cacheDir: __dirname,
-    pluginsPath,
+    plugins,
     dest,
     env,
     options,
@@ -47,16 +46,30 @@ module.exports = () => {
 
   const config = webpackConfig(args);
 
-  if (analyzeBundle) {
-    config.plugins.push(new BundleAnalyzerPlugin());
-  }
-
-  if (analyzeDuplicateDependencies === 'true') {
-    config.plugins.push(new DuplicateReporterPlugin());
-  }
-
   return {
     ...config,
+
+    resolve: {
+      ...config.resolve,
+      alias: {
+        ...config.resolve.alias,
+        /**
+         * These aliases mean that we're actually looking at the source of the code
+         * as opposed to the compiled version of the code. This is useful for a better local DX.
+         */
+        ...plugins.reduce((acc, plugin) => {
+          acc[`${plugin.pathToPlugin}/strapi-admin`] = path.join(plugin.directory, 'admin', 'src');
+
+          return acc;
+        }, {}),
+      },
+    },
+
+    plugins: [
+      ...config.plugins,
+      analyzeBundle === 'true' && new BundleAnalyzerPlugin(),
+      analyzeDuplicateDependencies === 'true' && new DuplicateReporterPlugin(),
+    ],
 
     devServer: {
       port: 4000,

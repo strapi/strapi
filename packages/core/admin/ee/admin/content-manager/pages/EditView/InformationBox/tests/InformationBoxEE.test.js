@@ -1,25 +1,18 @@
-import * as React from 'react';
+import React from 'react';
 
 import { fixtures } from '@strapi/admin-test-utils';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { useCMEditViewDataManager, RBACContext } from '@strapi/helper-plugin';
-import { render } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { RBACContext, useCMEditViewDataManager } from '@strapi/helper-plugin';
+import { render as renderRTL, waitFor } from '@testing-library/react';
+import { rest } from 'msw';
+import { setupServer } from 'msw/node';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 
-import { useReviewWorkflows } from '../../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows';
+import { STAGE_ATTRIBUTE_NAME, ASSIGNEE_ATTRIBUTE_NAME } from '../constants';
 import { InformationBoxEE } from '../InformationBoxEE';
-
-const STAGE_ATTRIBUTE_NAME = 'strapi_stage';
-const STAGE_FIXTURE = {
-  id: 1,
-  color: '#4945FF',
-  name: 'Stage 1',
-  worklow: 1,
-};
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -29,157 +22,143 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-jest.mock(
-  '../../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows',
-  () => ({
-    useReviewWorkflows: jest.fn(() => ({
-      isLoading: false,
-      workflows: [
-        {
-          stages: [
-            {
-              id: 1,
-              color: '#4945FF',
-              name: 'Stage 1',
-            },
-            {
-              id: 2,
-              color: '#4945FF',
-              name: 'Stage 2',
-            },
-          ],
+const server = setupServer(
+  rest.get('*/users', (req, res, ctx) =>
+    res(
+      ctx.json({
+        data: {
+          results: [],
+          pagination: {
+            page: 1,
+          },
         },
-      ],
-    })),
-  })
+      })
+    )
+  ),
+
+  rest.get('*/review-workflows/workflows/', (req, res, ctx) =>
+    res(
+      ctx.json({
+        data: [
+          {
+            id: 1,
+            stages: [
+              {
+                id: 1,
+                color: '#4945FF',
+                name: 'Stage 1',
+              },
+            ],
+          },
+        ],
+      })
+    )
+  ),
+
+  rest.get('*/license-limit-information', (req, res, ctx) =>
+    res(
+      ctx.json({
+        data: {},
+      })
+    )
+  )
 );
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-    },
-  },
-});
-
-const ComponentFixture = (props) => <InformationBoxEE {...props} />;
-
-const setup = (props) => ({
-  ...render(<ComponentFixture {...props} />, {
+const render = (props) => {
+  return renderRTL(<InformationBoxEE {...props} />, {
     wrapper({ children }) {
       const store = createStore((state = {}) => state, {
-        admin_app: {
-          permissions: fixtures.permissions.app,
+        admin_app: { permissions: fixtures.permissions.app },
+      });
+      const queryClient = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+          },
         },
       });
 
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const rbacContextValue = React.useMemo(
-        () => ({
-          allPermissions: fixtures.permissions.allPermissions,
-        }),
-        []
-      );
-
       return (
-        <Provider store={store}>
-          <QueryClientProvider client={queryClient}>
-            <IntlProvider locale="en" defaultLocale="en">
-              <ThemeProvider theme={lightTheme}>
-                <RBACContext.Provider value={rbacContextValue}>{children}</RBACContext.Provider>
-              </ThemeProvider>
-            </IntlProvider>
-          </QueryClientProvider>
-        </Provider>
+        <RBACContext.Provider value={{ allPermissions: fixtures.permissions.allPermissions }}>
+          <Provider store={store}>
+            <QueryClientProvider client={queryClient}>
+              <IntlProvider locale="en" defaultLocale="en">
+                <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
+              </IntlProvider>
+            </QueryClientProvider>
+          </Provider>
+        </RBACContext.Provider>
       );
     },
-  }),
-  user: userEvent.setup(),
-});
+  });
+};
 
 describe('EE | Content Manager | EditView | InformationBox', () => {
-  it('renders the title and body of the Information component', () => {
+  beforeAll(() => {
+    server.listen();
+  });
+
+  afterAll(() => {
+    server.close();
+  });
+
+  it('renders the title and body of the Information component', async () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {},
       isCreatingEntry: true,
-      layout: { uid: 'api::articles:articles', options: { reviewWorkflows: true } },
+      layout: {
+        options: {
+          reviewWorkflows: false,
+        },
+      },
     });
 
-    const { getByText } = setup();
+    const { getByText } = render();
 
-    expect(getByText('Information')).toBeInTheDocument();
-    expect(getByText('Last update')).toBeInTheDocument();
+    await waitFor(() => expect(getByText('Information')).toBeInTheDocument());
+    await waitFor(() => expect(getByText('Last update')).toBeInTheDocument());
   });
 
-  it('filters workflows based on the model uid', () => {
+  it('renders neither stage nor assignee select inputs, if no nothing is returned for an entity', async () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {},
-      isCreatingEntry: true,
-      layout: { uid: 'api::articles:articles', options: { reviewWorkflows: true } },
+      layout: {
+        options: {
+          reviewWorkflows: false,
+        },
+      },
     });
 
-    expect(useReviewWorkflows).toHaveBeenCalledWith({
-      filters: { contentTypes: 'api::articles:articles' },
-    });
+    const { queryByRole } = render();
+
+    await waitFor(() => expect(queryByRole('combobox')).not.toBeInTheDocument());
   });
 
-  it('renders no select input, if no workflow stage is assigned to the entity', () => {
-    useCMEditViewDataManager.mockReturnValue({
-      initialData: {},
-      layout: { uid: 'api::articles:articles', options: { reviewWorkflows: false } },
-    });
-
-    const { queryByRole } = setup();
-
-    expect(queryByRole('combobox')).not.toBeInTheDocument();
-  });
-
-  it('does not render the select input, if the entity is being created', () => {
+  it('renders stage and assignee select inputs, if both are set on an entity', async () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {
-        [STAGE_ATTRIBUTE_NAME]: STAGE_FIXTURE,
+        [STAGE_ATTRIBUTE_NAME]: {
+          id: 1,
+          color: '#4945FF',
+          name: 'Stage 1',
+          worklow: 1,
+        },
+
+        [ASSIGNEE_ATTRIBUTE_NAME]: {
+          id: 1,
+          firstname: 'Firstname',
+        },
       },
-      isCreatingEntry: true,
-      layout: { uid: 'api::articles:articles', options: { reviewWorkflows: true } },
+      layout: {
+        uid: 'api::articles:articles',
+        options: {
+          reviewWorkflows: true,
+        },
+      },
     });
 
-    const { queryByRole } = setup();
-    const select = queryByRole('combobox');
+    const { queryAllByRole } = render();
 
-    expect(select).not.toBeInTheDocument();
-  });
-
-  it('renders an enabled select input, if the entity is edited', () => {
-    useCMEditViewDataManager.mockReturnValue({
-      initialData: {
-        [STAGE_ATTRIBUTE_NAME]: STAGE_FIXTURE,
-      },
-      isCreatingEntry: false,
-      layout: { uid: 'api::articles:articles', options: { reviewWorkflows: true } },
-    });
-
-    const { queryByRole } = setup();
-    const select = queryByRole('combobox');
-
-    expect(select).toBeInTheDocument();
-  });
-
-  it('renders a select input, if a workflow stage is assigned to the entity', async () => {
-    useCMEditViewDataManager.mockReturnValue({
-      initialData: {
-        [STAGE_ATTRIBUTE_NAME]: STAGE_FIXTURE,
-      },
-      isCreatingEntry: false,
-      layout: { uid: 'api::articles:articles', options: { reviewWorkflows: true } },
-    });
-
-    const { getByRole, getByText, user } = setup();
-
-    expect(getByRole('combobox')).toBeInTheDocument();
-    expect(getByText('Stage 1')).toBeInTheDocument();
-
-    await user.click(getByRole('combobox'));
-
-    expect(getByText('Stage 2')).toBeInTheDocument();
+    await waitFor(() => expect(queryAllByRole('combobox').length).toBe(2));
   });
 });

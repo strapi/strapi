@@ -6,6 +6,7 @@ const {
   isListable,
   hasEditableAttribute,
 } = require('../../services/utils/configuration/attributes');
+const { isValidDefaultSort } = require('../../services/utils/configuration/settings');
 /**
  * Creates the validation schema for content-type configurations
  */
@@ -33,7 +34,12 @@ const createSettingsSchema = (schema) => {
       // should be reset when the type changes
       mainField: yup.string().oneOf(validAttributes.concat('id')).default('id'),
       // should be reset when the type changes
-      defaultSortBy: yup.string().oneOf(validAttributes.concat('id')).default('id'),
+      defaultSortBy: yup
+        .string()
+        .test('is-valid-sort-attribute', '${path} is not a valid sort attribute', async (value) =>
+          isValidDefaultSort(schema, value)
+        )
+        .default('id'),
       defaultSortOrder: yup.string().oneOf(['ASC', 'DESC']).default('ASC'),
     })
     .noUnknown();
