@@ -154,8 +154,7 @@ const createStrapiInstance = async (opts: { logLevel?: string } = {}) => {
     const app = strapiFactory({ ...opts, ...appContext });
 
     app.log.level = opts.logLevel || 'error';
-    await app.load();
-    return app;
+    return await app.load();
   } catch (error) {
     if (error instanceof Error && 'code' in error && error.code === 'ECONNREFUSED') {
       throw new Error('Process failed. Check the database connection with your Strapi project.');
