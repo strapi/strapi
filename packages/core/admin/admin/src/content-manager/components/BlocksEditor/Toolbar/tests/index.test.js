@@ -44,8 +44,10 @@ Wrapper.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
+const mockHandleImageBlock = jest.fn();
+
 const setup = () =>
-  render(<BlocksToolbar />, {
+  render(<BlocksToolbar handleImageBlock={mockHandleImageBlock} />, {
     wrapper: Wrapper,
   });
 
@@ -234,5 +236,21 @@ describe('BlocksEditor toolbar', () => {
         ],
       },
     ]);
+  });
+
+  it('when image is selected, it will set modal dialog open to select the images', async () => {
+    setup();
+
+    const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+
+    Transforms.setSelection(baseEditor, {
+      anchor: { path: [0, 0], offset: 0 },
+    });
+
+    await user.click(headingsDropdown);
+
+    await user.click(screen.getByRole('option', { name: 'Image' }));
+
+    expect(mockHandleImageBlock).toHaveBeenCalledWith(true);
   });
 });

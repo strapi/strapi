@@ -130,7 +130,7 @@ const toggleBlock = (editor, value) => {
   Transforms.setNodes(editor, newProperties);
 };
 
-const BlocksDropdown = () => {
+const BlocksDropdown = ({ setMediaLibVisible }) => {
   const editor = useSlate();
   const { formatMessage } = useIntl();
 
@@ -150,6 +150,10 @@ const BlocksDropdown = () => {
     toggleBlock(editor, blocks[optionKey].value);
 
     setBlockSelected(optionKey);
+
+    if (optionKey === 'image') {
+      setMediaLibVisible(true);
+    }
   };
 
   return (
@@ -176,6 +180,10 @@ const BlocksDropdown = () => {
       ))}
     </Select>
   );
+};
+
+BlocksDropdown.propTypes = {
+  setMediaLibVisible: PropTypes.func.isRequired,
 };
 
 const BlockOption = ({ value, icon, label, handleSelection, blockSelected, matchNode }) => {
@@ -281,13 +289,13 @@ ListButton.propTypes = {
   }).isRequired,
 };
 
-const BlocksToolbar = () => {
+const BlocksToolbar = ({ handleImageBlock }) => {
   const modifiers = useModifiersStore();
 
   return (
     <Toolbar.Root asChild>
       <Flex gap={1} padding={2}>
-        <BlocksDropdown />
+        <BlocksDropdown setMediaLibVisible={handleImageBlock} />
         <Separator />
         <Toolbar.ToggleGroup type="multiple" asChild>
           <Flex gap={1}>
@@ -327,6 +335,10 @@ const BlocksToolbar = () => {
       </Flex>
     </Toolbar.Root>
   );
+};
+
+BlocksToolbar.propTypes = {
+  handleImageBlock: PropTypes.func.isRequired,
 };
 
 export { BlocksToolbar };

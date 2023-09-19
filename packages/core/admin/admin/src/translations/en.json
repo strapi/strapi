@@ -635,6 +635,7 @@
   "components.Blocks.blocks.heading5": "Heading 5",
   "components.Blocks.blocks.heading6": "Heading 6",
   "components.Blocks.blocks.quote": "Quote",
+  "components.Blocks.blocks.image": "Image",
   "components.Blocks.blocks.unorderedList": "Unordered list",
   "components.Blocks.blocks.orderedList": "Ordered list",
   "components.Wysiwyg.ToggleMode.markdown-mode": "Markdown mode",

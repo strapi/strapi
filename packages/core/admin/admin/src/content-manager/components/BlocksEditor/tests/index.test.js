@@ -6,6 +6,12 @@ import { IntlProvider } from 'react-intl';
 
 import Blocks from '../index';
 
+jest.mock('@strapi/helper-plugin', () => ({
+  useLibrary: () => ({ components: { 'media-library': jest.fn() } }),
+  prefixFileUrlWithBackendUrl: jest.fn(),
+  pxToRem: jest.fn(),
+}));
+
 const setup = (props) =>
   render(
     <Blocks
