@@ -4,16 +4,13 @@ import { Box, Typography, BaseLink } from '@strapi/design-system';
 import {
   Code,
   Quote,
-  /**
-   * TODO: add the rest of the icons when the DS will be released
-   Paragraph,
-   HeadingOne,
-   HeadingTwo,
-   HeadingThree,
-   HeadingFour,
-   HeadingFive,
-   HeadingSix,
-   */
+  Paragraph,
+  HeadingOne,
+  HeadingTwo,
+  HeadingThree,
+  HeadingFour,
+  HeadingFive,
+  HeadingSix,
 } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import styled, { css } from 'styled-components';
@@ -188,7 +185,7 @@ export function useBlocksStore() {
           {props.children}
         </Typography>
       ),
-      icon: Code,
+      icon: Paragraph,
       label: {
         id: 'components.Blocks.blocks.text',
         defaultMessage: 'Text',
@@ -201,7 +198,7 @@ export function useBlocksStore() {
     },
     'heading-one': {
       renderElement: (props) => <Heading {...props} />,
-      icon: Code, // TODO replace with the correct icon once released
+      icon: HeadingOne,
       label: {
         id: 'components.Blocks.blocks.heading1',
         defaultMessage: 'Heading 1',
@@ -215,7 +212,7 @@ export function useBlocksStore() {
     },
     'heading-two': {
       renderElement: (props) => <Heading {...props} />,
-      icon: Code, // TODO replace with the correct icon once released
+      icon: HeadingTwo,
       label: {
         id: 'components.Blocks.blocks.heading2',
         defaultMessage: 'Heading 2',
@@ -229,7 +226,7 @@ export function useBlocksStore() {
     },
     'heading-three': {
       renderElement: (props) => <Heading {...props} />,
-      icon: Code, // TODO replace with the correct icon once released
+      icon: HeadingThree,
       label: {
         id: 'components.Blocks.blocks.heading3',
         defaultMessage: 'Heading 3',
@@ -243,7 +240,7 @@ export function useBlocksStore() {
     },
     'heading-four': {
       renderElement: (props) => <Heading {...props} />,
-      icon: Code, // TODO replace with the correct icon once released
+      icon: HeadingFour,
       label: {
         id: 'components.Blocks.blocks.heading4',
         defaultMessage: 'Heading 4',
@@ -257,7 +254,7 @@ export function useBlocksStore() {
     },
     'heading-five': {
       renderElement: (props) => <Heading {...props} />,
-      icon: Code, // TODO replace with the correct icon once released
+      icon: HeadingFive,
       label: {
         id: 'components.Blocks.blocks.heading5',
         defaultMessage: 'Heading 5',
@@ -271,7 +268,7 @@ export function useBlocksStore() {
     },
     'heading-six': {
       renderElement: (props) => <Heading {...props} />,
-      icon: Code, // TODO replace with the correct icon once released
+      icon: HeadingSix,
       label: {
         id: 'components.Blocks.blocks.heading6',
         defaultMessage: 'Heading 6',
