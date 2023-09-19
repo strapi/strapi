@@ -35,6 +35,8 @@ const BlocksEditor = React.forwardRef(
   ({ intlLabel, name, readOnly, required, error, value, onChange }, ref) => {
     const { formatMessage } = useIntl();
     const [editor] = React.useState(() => withReact(createEditor()));
+    // Data received from the db is parsed whereas data being edited is a string
+    const parsedValue = typeof value === 'string' ? JSON.parse(value) : value;
 
     const label = intlLabel.id
       ? formatMessage(
@@ -66,19 +68,19 @@ const BlocksEditor = React.forwardRef(
               {required && <TypographyAsterisk textColor="danger600">*</TypographyAsterisk>}
             </Typography>
           </Flex>
-
           <Slate
             editor={editor}
             initialValue={
-              value?.blocks || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]
+              parsedValue || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]
             }
             onChange={(state) => {
               const isAstChange = editor.operations.some((op) => op.type !== 'set_selection');
 
               // Check for an actual change in content before triggering the onChange
               if (isAstChange) {
-                const blocks = JSON.stringify({ version: '0.0.0', blocks: state });
-                onChange({ target: { name, value: blocks, type: 'blocks' } });
+                onChange({
+                  target: { name, value: JSON.stringify(state), type: 'blocks' },
+                });
               }
             }}
           >
@@ -107,7 +109,7 @@ BlocksEditor.defaultProps = {
   required: false,
   readOnly: false,
   error: '',
-  value: { version: '0.0.0', blocks: [] },
+  value: null,
 };
 
 BlocksEditor.propTypes = {
@@ -120,11 +122,8 @@ BlocksEditor.propTypes = {
   required: PropTypes.bool,
   readOnly: PropTypes.bool,
   error: PropTypes.string,
-  value: PropTypes.shape({
-    version: PropTypes.string,
-    blocks: PropTypes.arrayOf(PropTypes.object),
-  }),
   onChange: PropTypes.func.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
 };
 
 export default BlocksEditor;

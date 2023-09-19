@@ -132,12 +132,6 @@ const blockNodeValidator = yup.lazy((value) => {
   }
 });
 
-// See: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
-const semverRegex =
-  /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/gm;
-const blocksValidator = yup.object({
-  version: yup.string().matches(semverRegex, 'Invalid version').required(),
-  blocks: yup.array().of(blockNodeValidator).required(),
-});
+const blocksValidator = yup.array().of(blockNodeValidator);
 
 module.exports = () => blocksValidator;

@@ -199,10 +199,7 @@ describe('Blocks validator', () => {
         )
       );
 
-      expect(await validator({ version: '0.0.0', blocks: validParagraph })).toEqual({
-        version: '0.0.0',
-        blocks: validParagraph,
-      });
+      expect(await validator(validParagraph)).toEqual(validParagraph);
     });
 
     it('Should throw an error given an invalid paragraph schema', async () => {
@@ -216,19 +213,14 @@ describe('Blocks validator', () => {
       );
 
       // Bad children
-      await expect(
-        validator({ version: '0.0.0', blocks: [{ type: 'paragraph' }] })
-      ).rejects.toThrow(YupValidationError);
+      await expect(validator([{ type: 'paragraph' }])).rejects.toThrow(YupValidationError);
       // Bad modifier
-      await expect(
-        validator({ version: '0.0.0', blocks: [{ type: 'paragraph', text: 'hi', break: true }] })
-      ).rejects.toThrow(YupValidationError);
+      await expect(validator([{ type: 'paragraph', text: 'hi', break: true }])).rejects.toThrow(
+        YupValidationError
+      );
       // Bad url
       await expect(
-        validator({
-          version: '0.0.0',
-          blocks: [{ type: 'link', url: 'kaboom', children: [{ type: 'text', text: 'fail' }] }],
-        })
+        validator([{ type: 'link', url: 'kaboom', children: [{ type: 'text', text: 'fail' }] }])
       ).rejects.toThrow(YupValidationError);
     });
   });
@@ -244,10 +236,7 @@ describe('Blocks validator', () => {
         )
       );
 
-      expect(await validator({ version: '0.0.0', blocks: validHeadings })).toEqual({
-        version: '0.0.0',
-        blocks: validHeadings,
-      });
+      expect(await validator(validHeadings)).toEqual(validHeadings);
     });
 
     it('Should throw an error given an invalid heading schema', async () => {
@@ -262,17 +251,11 @@ describe('Blocks validator', () => {
 
       // Bad level
       await expect(
-        validator({
-          version: '0.0.0',
-          blocks: [{ type: 'heading', level: 8, children: [{ type: 'text', text: 'Heading 8' }] }],
-        })
+        validator([{ type: 'heading', level: 8, children: [{ type: 'text', text: 'Heading 8' }] }])
       ).rejects.toThrow(YupValidationError);
       // Bad children
       await expect(
-        validator({
-          version: '0.0.0',
-          blocks: [{ type: 'heading', level: 1, children: [{ type: 'image', text: 'Heading 8' }] }],
-        })
+        validator([{ type: 'heading', level: 1, children: [{ type: 'image', text: 'Heading 8' }] }])
       ).rejects.toThrow(YupValidationError);
     });
   });
@@ -288,10 +271,7 @@ describe('Blocks validator', () => {
         )
       );
 
-      expect(await validator({ version: '0.0.0', blocks: validQuote })).toEqual({
-        version: '0.0.0',
-        blocks: validQuote,
-      });
+      expect(await validator(validQuote)).toEqual(validQuote);
     });
 
     it('Should throw an error given an invalid quote schema', async () => {
@@ -306,10 +286,7 @@ describe('Blocks validator', () => {
 
       // Bad children
       await expect(
-        validator({
-          version: '0.0.0',
-          blocks: [{ type: 'quote', children: [{ type: 'heading', text: 'Heading 8' }] }],
-        })
+        validator([{ type: 'quote', children: [{ type: 'heading', text: 'Heading 8' }] }])
       ).rejects.toThrow(YupValidationError);
     });
   });
@@ -325,10 +302,7 @@ describe('Blocks validator', () => {
         )
       );
 
-      expect(await validator({ version: '0.0.0', blocks: validLists })).toEqual({
-        version: '0.0.0',
-        blocks: validLists,
-      });
+      expect(await validator(validLists)).toEqual(validLists);
     });
 
     it('Should throw an error given an invalid list schema', async () => {
@@ -343,51 +317,45 @@ describe('Blocks validator', () => {
 
       // Bad format
       await expect(
-        validator({
-          version: '0.0.0',
-          blocks: [
-            {
-              type: 'list',
-              format: 'bad',
-              children: [
-                {
-                  type: 'list-item',
-                  children: [
-                    {
-                      type: 'text',
-                      text: 'First item',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        })
+        validator([
+          {
+            type: 'list',
+            format: 'bad',
+            children: [
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'First item',
+                  },
+                ],
+              },
+            ],
+          },
+        ])
       ).rejects.toThrow(YupValidationError);
 
       // Bad children
       await expect(
-        validator({
-          version: '0.0.0',
-          blocks: [
-            {
-              type: 'list',
-              format: 'ordered',
-              children: [
-                {
-                  type: 'heading',
-                  children: [
-                    {
-                      type: 'text',
-                      level: 1,
-                      children: [{ type: 'text', text: 'First item' }],
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        })
+        validator([
+          {
+            type: 'list',
+            format: 'ordered',
+            children: [
+              {
+                type: 'heading',
+                children: [
+                  {
+                    type: 'text',
+                    level: 1,
+                    children: [{ type: 'text', text: 'First item' }],
+                  },
+                ],
+              },
+            ],
+          },
+        ])
       ).rejects.toThrow(YupValidationError);
     });
   });
@@ -403,10 +371,7 @@ describe('Blocks validator', () => {
         )
       );
 
-      expect(await validator({ version: '0.0.0', blocks: validImage })).toEqual({
-        version: '0.0.0',
-        blocks: validImage,
-      });
+      expect(await validator(validImage)).toEqual(validImage);
     });
 
     it('Should throw an error given an invalid image schema', async () => {
@@ -420,19 +385,16 @@ describe('Blocks validator', () => {
       );
       // Bad image object
       await expect(
-        validator({
-          version: '0.0.0',
-          blocks: [
-            {
-              type: 'image',
-              children: [{ type: 'text', text: '' }],
-              image: {
-                name: null,
-                url: null,
-              },
+        validator([
+          {
+            type: 'image',
+            children: [{ type: 'text', text: '' }],
+            image: {
+              name: null,
+              url: null,
             },
-          ],
-        })
+          },
+        ])
       ).rejects.toThrow(YupValidationError);
     });
   });
@@ -448,15 +410,7 @@ describe('Blocks validator', () => {
         )
       );
 
-      expect(
-        await validator({
-          version: '0.0.0',
-          blocks: validCodeBlock,
-        })
-      ).toEqual({
-        version: '0.0.0',
-        blocks: validCodeBlock,
-      });
+      expect(await validator(validCodeBlock)).toEqual(validCodeBlock);
     });
 
     it('Should throw an error given an invalid code schema', async () => {
@@ -471,16 +425,13 @@ describe('Blocks validator', () => {
 
       // Bad children
       await expect(
-        validator({
-          version: '0.0.0',
-          blocks: [
-            {
-              type: 'code',
-              syntax: 'javascript',
-              children: [{ type: 'link', text: 'const test = "whatever"' }],
-            },
-          ],
-        })
+        validator([
+          {
+            type: 'code',
+            syntax: 'javascript',
+            children: [{ type: 'link', text: 'const test = "whatever"' }],
+          },
+        ])
       ).rejects.toThrow(YupValidationError);
     });
   });
@@ -502,10 +453,7 @@ describe('Blocks validator', () => {
         ...validHeadings,
         ...validLists,
       ];
-      expect(await validator({ version: '0.0.0', blocks: mixed })).toEqual({
-        version: '0.0.0',
-        blocks: mixed,
-      });
+      expect(await validator(mixed)).toEqual(mixed);
     });
 
     it('Should throw an error given mixed valid and invalid blocks', () => {
@@ -550,9 +498,9 @@ describe('Blocks validator', () => {
       ];
 
       // Bad blocks
-      expect(validator({ version: '0.0.0', blocks: mixed })).rejects.toThrow(YupValidationError);
+      expect(validator(mixed)).rejects.toThrow(YupValidationError);
       // Bad version
-      expect(validator({ version: 'fail', blocks: mixed })).rejects.toThrow(YupValidationError);
+      expect(validator(mixed)).rejects.toThrow(YupValidationError);
     });
   });
 });

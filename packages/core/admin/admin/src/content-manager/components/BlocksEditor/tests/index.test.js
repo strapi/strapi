@@ -12,7 +12,8 @@ const setup = (props) =>
     <Blocks
       intlLabel={{ id: 'blocks', defaultMessage: 'blocks type' }}
       name="blocks-editor"
-      value={{ version: '0.0.0', blocks: blocksData }}
+      value={blocksData}
+      onChange={jest.fn()}
       {...props}
     />,
     {
