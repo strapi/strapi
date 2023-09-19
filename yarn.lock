@@ -7128,6 +7128,8 @@ __metadata:
     tar-stream: 2.2.0
     typescript: 5.2.2
     ws: 8.13.0
+  peerDependencies:
+    "@strapi/strapi": ^4.13.6
   languageName: unknown
   linkType: soft
 
