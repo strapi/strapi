@@ -626,6 +626,7 @@
   "components.Blocks.modifiers.underline": "Underline",
   "components.Blocks.modifiers.strikethrough": "Strikethrough",
   "components.Blocks.modifiers.code": "Code",
+  "components.Blocks.link": "Link",
   "components.Blocks.blocks.selectBlock": "Select a block",
   "components.Blocks.blocks.text": "Text",
   "components.Blocks.blocks.heading1": "Heading 1",

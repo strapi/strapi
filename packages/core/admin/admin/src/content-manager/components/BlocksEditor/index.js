@@ -31,10 +31,20 @@ const Wrapper = styled(Box)`
   border-radius: ${({ theme }) => theme.borderRadius};
 `;
 
+const withLinks = (editor) => {
+  const { isInline } = editor;
+
+  editor.isInline = (element) => {
+    return element.type === 'link' ? true : isInline(element);
+  };
+
+  return editor;
+};
+
 const BlocksEditor = React.forwardRef(
   ({ intlLabel, name, readOnly, required, error, value, onChange }, ref) => {
     const { formatMessage } = useIntl();
-    const [editor] = React.useState(() => withReact(createEditor()));
+    const [editor] = React.useState(() => withReact(withLinks(createEditor())));
 
     const label = intlLabel.id
       ? formatMessage(

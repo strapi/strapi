@@ -1,17 +1,29 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
-import { Flex, Icon, Tooltip, Select, Option } from '@strapi/design-system';
+import {
+  Icon,
+  Tooltip,
+  Select,
+  Option,
+  Popover,
+  Field,
+  FieldLabel,
+  FieldInput,
+  Flex,
+  Button,
+} from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
-import { BulletList, NumberList } from '@strapi/icons';
+import { BulletList, NumberList, Link } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement } from 'slate';
-import { useSlate } from 'slate-react';
+import { ReactEditor, useSlate } from 'slate-react';
 import styled from 'styled-components';
 
 import { useBlocksStore } from '../hooks/useBlocksStore';
 import { useModifiersStore } from '../hooks/useModifiersStore';
+import { insertLink } from '../utils/links';
 
 const Separator = styled(Toolbar.Separator)`
   background: ${({ theme }) => theme.colors.neutral150};
@@ -25,7 +37,7 @@ const FlexButton = styled(Flex).attrs({ as: 'button' })`
   }
 `;
 
-const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
+const ToolbarButton = React.forwardRef(({ icon, name, label, isActive, handleClick }, ref) => {
   const { formatMessage } = useIntl();
   const labelMessage = formatMessage(label);
 
@@ -33,6 +45,7 @@ const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
     <Tooltip description={labelMessage}>
       <Toolbar.ToggleItem value={name} data-state={isActive ? 'on' : 'off'} asChild>
         <FlexButton
+          ref={ref}
           background={isActive ? 'primary100' : ''}
           alignItems="center"
           justifyContent="center"
@@ -50,7 +63,7 @@ const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
       </Toolbar.ToggleItem>
     </Tooltip>
   );
-};
+});
 
 ToolbarButton.propTypes = {
   icon: PropTypes.elementType.isRequired,
@@ -281,6 +294,97 @@ ListButton.propTypes = {
   }).isRequired,
 };
 
+const LinkButton = () => {
+  const [popoverOpen, setPopoverOpen] = React.useState(false);
+  const toolbarButtonRef = React.useRef(null);
+  const domNodeRef = React.useRef(null);
+  const editor = useSlate();
+  const { selection } = editor;
+
+  const isLinkActive = () => {
+    if (!selection) return false;
+
+    const [match] = Array.from(
+      Editor.nodes(editor, {
+        at: Editor.unhangRange(editor, selection),
+        match: (node) =>
+          !Editor.isEditor(node) && SlateElement.isElement(node) && node.type === 'link',
+      })
+    );
+
+    return Boolean(match);
+  };
+
+  const isActive = isLinkActive();
+
+  const saveLink = ({ target }) => {
+    const { text, url } = target.elements;
+
+    insertLink(editor, { url: url.value, text: text.value });
+
+    setPopoverOpen(false);
+  };
+
+  const toggleLinkPopover = () => {
+    // @TODO: Here we are getting the reference for the selected node
+    // this is fine for one line and not longer texts
+    // but if you select a word in a looong paragraph, we will get the reference of the whole paragraph
+    // because we are rendering all the paragraph as a single <span> element
+    const selectedNode = Editor.node(editor, selection);
+    const domElement = ReactEditor.toDOMNode(editor, selectedNode[0]);
+    domNodeRef.current = domElement;
+
+    setPopoverOpen(true);
+  };
+
+  console.log({ editor });
+
+  return (
+    <>
+      <ToolbarButton
+        ref={toolbarButtonRef}
+        icon={Link}
+        name="link"
+        label={{
+          id: 'components.Blocks.link',
+          defaultMessage: 'Link',
+        }}
+        isActive={isActive}
+        handleClick={toggleLinkPopover}
+      />
+      {popoverOpen && (
+        <Popover
+          source={domNodeRef}
+          onDismiss={() => setPopoverOpen(false)}
+          padding={4}
+          placement="right-end"
+        >
+          <Flex as="form" onSubmit={saveLink} direction="column" gap={4}>
+            <Field width="300px">
+              <FieldLabel>Text</FieldLabel>
+              <FieldInput
+                name="text"
+                placeholder="This text is the text of the link"
+                defaultValue={Editor.string(editor, selection)}
+              />
+            </Field>
+            <Field width="300px">
+              <FieldLabel>Link</FieldLabel>
+              <FieldInput name="url" placeholder="https://strapi.io" />
+            </Field>
+            <Flex justifyContent="end" width="100%" gap={2}>
+              <Button variant="tertiary" onClick={() => setPopoverOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">Save</Button>
+            </Flex>
+          </Flex>
+        </Popover>
+      )}
+    </>
+  );
+};
+
 const BlocksToolbar = () => {
   const modifiers = useModifiersStore();
 
@@ -301,6 +405,7 @@ const BlocksToolbar = () => {
                 handleClick={modifier.handleToggle}
               />
             ))}
+            <LinkButton />
           </Flex>
         </Toolbar.ToggleGroup>
         <Separator />
