@@ -118,7 +118,7 @@ const filterPluginsByAdminEntry = (plugin) => {
         pathToPlugin = pathToPlugin.split(path.sep).join(path.posix.sep);
       }
 
-      const isModuleWithFE = require.resolve(`${packageName}/strapi-admin`);
+      const isModuleWithFE = require.resolve(`${pathToPlugin}/strapi-admin`);
 
       return isModuleWithFE;
     }
