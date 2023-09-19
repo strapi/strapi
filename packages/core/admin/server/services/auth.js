@@ -116,7 +116,6 @@ const resetPassword = async ({ resetPasswordToken, password } = {}) => {
  * @param {string} param.code secret 6-digit code
  */
 const sendMultiFactorAuthenticationEmail = async ({ user, code } = {}) => {
-    console.log(strapi.config.get('admin.forgotPassword.from'))
     strapi
       .plugin('email')
       .service('email')

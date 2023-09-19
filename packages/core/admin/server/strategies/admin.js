@@ -37,6 +37,7 @@ const authenticate = async (ctx) => {
   // ctx.state.userAbility, and remove the assign below
   ctx.state.userAbility = userAbility;
   ctx.state.user = user;
+
   return {
     authenticated: true,
     credentials: user,

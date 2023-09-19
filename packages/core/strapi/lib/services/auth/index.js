@@ -62,6 +62,7 @@ const createAuthentication = () => {
 
           acc.push(strategy);
         }
+
         return acc;
       }, []);
 
