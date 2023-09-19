@@ -2,7 +2,7 @@
 
 const passport = require('koa-passport');
 const compose = require('koa-compose');
-const { ApplicationError, ValidationError } = require('@strapi/utils').errors;
+const { ApplicationError, ForbiddenError, ValidationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 const {
   validateRegistrationInput,
@@ -172,10 +172,9 @@ module.exports = {
     await validateMultiFactorAuthenticationInput(input);
     if (input.code !== ctx.session.verificationCode) {
       // Throw forbidden error if verification code is incorrect
-      ctx.status = 403;
+      throw new ForbiddenError("Verification code is incorrect");
     } else {
       // Set token if valid
-      ctx.status = 200;
       ctx.body = {
         data: {
           token: getService('token').createJwtToken(ctx.session.user),
