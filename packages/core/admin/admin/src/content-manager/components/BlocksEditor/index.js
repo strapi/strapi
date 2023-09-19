@@ -107,6 +107,7 @@ BlocksEditor.defaultProps = {
   required: false,
   readOnly: false,
   error: '',
+  value: { version: '0.0.0', blocks: [] },
 };
 
 BlocksEditor.propTypes = {
@@ -119,6 +120,11 @@ BlocksEditor.propTypes = {
   required: PropTypes.bool,
   readOnly: PropTypes.bool,
   error: PropTypes.string,
+  value: PropTypes.shape({
+    version: PropTypes.string,
+    blocks: PropTypes.arrayOf(PropTypes.object),
+  }),
+  onChange: PropTypes.func.isRequired,
 };
 
 export default BlocksEditor;
