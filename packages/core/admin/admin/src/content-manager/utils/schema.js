@@ -233,7 +233,6 @@ const createYupSchemaAttribute = (type, validations, options) => {
        * In that case, stringify it here to validate it is valid JSON, otherwise validate the incoming string.
        */
       const valueToParse = typeof value === 'string' ? value : JSON.stringify(value);
-      console.log('validating', typeof value);
 
       try {
         JSON.parse(valueToParse);
