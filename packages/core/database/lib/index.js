@@ -15,7 +15,7 @@ const { transformContentTypes } = require('./utils/content-types');
 const { validateDatabase } = require('./validations');
 
 class Database {
-  async constructor(config) {
+  constructor(config) {
     this.metadata = createMetadata(config.models);
 
     this.config = {
@@ -32,7 +32,10 @@ class Database {
     this.dialect.configure();
 
     this.connection = createConnection(this.config.connection);
+  }
 
+  /* Setup database asynchronously to avoid an async constructor. */
+  async setup() {
     await this.dialect.initialize();
 
     this.schema = createSchemaProvider(this);
@@ -118,7 +121,8 @@ class Database {
 // TODO: move into strapi
 Database.transformContentTypes = transformContentTypes;
 Database.init = async (config) => {
-  const db = await new Database(config);
+  const db = new Database(config);
+  await db.setup();
   await validateDatabase(db);
   return db;
 };
