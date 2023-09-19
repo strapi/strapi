@@ -1,5 +1,5 @@
 import { isNil, isPlainObject } from 'lodash/fp';
-import { contentTypes as contentTypeUtils, parseMultipartData } from '@strapi/utils';
+import { parseMultipartData } from '@strapi/utils';
 import type Koa from 'koa';
 import type { Common, Schema, UID } from '@strapi/types';
 

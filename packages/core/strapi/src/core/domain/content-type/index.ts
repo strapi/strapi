@@ -25,6 +25,8 @@ const createContentType = (uid: string, definition: ContentTypeDefinition) => {
     if (e instanceof yup.ValidationError) {
       throw new Error(`Content Type Definition is invalid for ${uid}'.\n${e.errors}`);
     }
+
+    throw e;
   }
 
   const { schema, actions, lifecycles } = cloneDeep(definition);
