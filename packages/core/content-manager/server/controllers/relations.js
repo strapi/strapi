@@ -139,7 +139,11 @@ module.exports = {
 
     // searching should be allowed only on mainField for permission reasons
     if (_q) {
-      addFiltersClause(queryParams, { [mainField]: { $containsi: _q } });
+      if(query._m && query._m == 'startsWith') {
+        addFiltersClause(queryParams, { [mainField]: { $startsWithi: _q } });
+      } else {
+        addFiltersClause(queryParams, { [mainField]: { $containsi: _q } });
+      }
     }
 
     if (entityId) {
