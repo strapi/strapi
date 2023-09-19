@@ -112,13 +112,10 @@ const filterPluginsByAdminEntry = (plugin) => {
     );
 
     if (!isLocalPluginWithLegacyAdminFile) {
-      let packageName = plugin.info.packageName
-      if (packageName === undefined) {
-        packageName = plugin.pathToPlugin
+      let pathToPlugin = plugin.pathToPlugin
 
-        if (process.platform === 'win32') {
-          packageName = packageName.split(path.sep).join(path.posix.sep);
-        }
+      if (process.platform === 'win32') {
+        pathToPlugin = pathToPlugin.split(path.sep).join(path.posix.sep);
       }
 
       const isModuleWithFE = require.resolve(`${packageName}/strapi-admin`);
