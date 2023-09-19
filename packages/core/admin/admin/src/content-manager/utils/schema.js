@@ -218,8 +218,25 @@ const createYupSchemaAttribute = (type, validations, options) => {
 
   if (type === 'blocks') {
     schema = yup.mixed().test('isJSON', errorsTrads.json, (value) => {
+      // Disable the test for bulk publish, it's valid when it comes from the db
+      if (options.isJSONTestDisabled) {
+        return true;
+      }
+
+      // Don't run validations on drafts
+      if (options.isDraft) {
+        return true;
+      }
+
+      /**
+       * The value is already a parsed object if the onChange event was never fired (i.e. when publishing).
+       * In that case, stringify it here to validate it is valid JSON, otherwise validate the incoming string.
+       */
+      const valueToParse = typeof value === 'string' ? value : JSON.stringify(value);
+      console.log('validating', typeof value);
+
       try {
-        JSON.parse(value);
+        JSON.parse(valueToParse);
 
         return true;
       } catch (err) {
@@ -232,6 +249,7 @@ const createYupSchemaAttribute = (type, validations, options) => {
     schema = yup
       .mixed(errorsTrads.json)
       .test('isJSON', errorsTrads.json, (value) => {
+        // Disable the test for bulk publish, it's valid when it comes from the db
         if (options.isJSONTestDisabled) {
           return true;
         }
