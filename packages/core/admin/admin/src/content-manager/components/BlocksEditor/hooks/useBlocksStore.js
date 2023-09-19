@@ -1,6 +1,17 @@
 import * as React from 'react';
 
-import { Box, Typography, BaseLink } from '@strapi/design-system';
+import {
+  Box,
+  Typography,
+  BaseLink,
+  Popover,
+  IconButton,
+  Field,
+  FieldLabel,
+  FieldInput,
+  Flex,
+  Button,
+} from '@strapi/design-system';
 import {
   Code,
   Quote,
@@ -12,10 +23,15 @@ import {
   HeadingFour,
   HeadingFive,
   HeadingSix,
+  Trash,
+  Pencil,
 } from '@strapi/icons';
 import PropTypes from 'prop-types';
-import { Editor, Path, Transforms } from 'slate';
+import { Transforms, Editor, Path } from 'slate';
+import { useSlateStatic, ReactEditor } from 'slate-react';
 import styled, { css } from 'styled-components';
+
+import { insertLink, removeLink } from '../utils/links';
 
 const H1 = styled(Typography).attrs({ as: 'h1' })`
   font-size: ${42 / 16}rem;
@@ -163,6 +179,92 @@ Image.propTypes = {
       height: PropTypes.number,
     }).isRequired,
   }).isRequired,
+};
+
+const Link = ({ url, element, children }) => {
+  const editor = useSlateStatic();
+  const { selection } = editor;
+  const [popoverOpen, setPopoverOpen] = React.useState(false);
+  const [isEditing, setIsEditing] = React.useState(false);
+  const linkRef = React.useRef(null);
+
+  const elementText = element.children.map((child) => child.text).join('');
+
+  const handleOpenEditPopover = (e) => {
+    e.preventDefault();
+
+    const [parentNode] = Editor.parent(editor, selection);
+    Transforms.select(editor, ReactEditor.findPath(editor, parentNode));
+
+    setPopoverOpen(true);
+  };
+
+  const handleSave = ({ target }) => {
+    const { text, url } = target.elements;
+
+    insertLink(editor, { url: url.value, text: text.value });
+    setIsEditing(false);
+    setPopoverOpen(false);
+  };
+
+  return (
+    <>
+      <BaseLink ref={linkRef} href={url} onClick={handleOpenEditPopover}>
+        {children}
+      </BaseLink>
+      {popoverOpen && (
+        <Popover
+          source={linkRef}
+          onDismiss={() => setPopoverOpen(false)}
+          padding={4}
+          placement="right-end"
+        >
+          {isEditing ? (
+            <Flex as="form" onSubmit={handleSave} direction="column" gap={4}>
+              <Field width="300px">
+                <FieldLabel>Text</FieldLabel>
+                <FieldInput
+                  name="text"
+                  placeholder="This text is the text of the link"
+                  defaultValue={elementText}
+                />
+              </Field>
+              <Field width="300px">
+                <FieldLabel>Link</FieldLabel>
+                <FieldInput name="url" placeholder="https://strapi.io" defaultValue={url} />
+              </Field>
+              <Flex justifyContent="end" width="100%" gap={2}>
+                <Button variant="tertiary" onClick={() => setIsEditing(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">Save</Button>
+              </Flex>
+            </Flex>
+          ) : (
+            <Flex direction="column" gap={4} alignItems="start" width="400px">
+              <Typography>{elementText}</Typography>
+              <BaseLink href={url}>{url}</BaseLink>
+              <Flex justifyContent="end" width="100%" gap={2}>
+                <IconButton
+                  icon={<Trash />}
+                  size="L"
+                  variant="danger"
+                  onClick={() => removeLink(editor)}
+                />
+                <IconButton icon={<Pencil />} size="L" onClick={() => setIsEditing(true)} />
+              </Flex>
+            </Flex>
+          )}
+        </Popover>
+      )}
+    </>
+  );
+};
+
+Link.propTypes = {
+  url: PropTypes.string.isRequired,
+  element: PropTypes.object.isRequired,
+  children: PropTypes.node.isRequired,
 };
 
 /**
@@ -356,9 +458,9 @@ export function useBlocksStore() {
     },
     link: {
       renderElement: (props) => (
-        <BaseLink href={props.element.url} {...props.attributes}>
+        <Link url={props.element.url} element={props.element} {...props.attributes}>
           {props.children}
-        </BaseLink>
+        </Link>
       ),
       value: {
         type: 'link',
