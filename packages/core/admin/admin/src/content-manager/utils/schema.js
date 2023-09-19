@@ -228,19 +228,12 @@ const createYupSchemaAttribute = (type, validations, options) => {
         return true;
       }
 
-      /**
-       * The value is already a parsed object if the onChange event was never fired (i.e. when publishing).
-       * In that case, stringify it here to validate it is valid JSON, otherwise validate the incoming string.
-       */
-      const valueToParse = typeof value === 'string' ? value : JSON.stringify(value);
-
-      try {
-        JSON.parse(valueToParse);
-
-        return true;
-      } catch (err) {
+      // The backend validates the actual schema
+      if (!Array.isArray(value)) {
         return false;
       }
+
+      return true;
     });
   }
 

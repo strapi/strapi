@@ -35,8 +35,6 @@ const BlocksEditor = React.forwardRef(
   ({ intlLabel, name, readOnly, required, error, value, onChange }, ref) => {
     const { formatMessage } = useIntl();
     const [editor] = React.useState(() => withReact(createEditor()));
-    // Data received from the db is parsed whereas data being edited is a string
-    const parsedValue = typeof value === 'string' ? JSON.parse(value) : value;
 
     const label = intlLabel.id
       ? formatMessage(
@@ -70,16 +68,13 @@ const BlocksEditor = React.forwardRef(
           </Flex>
           <Slate
             editor={editor}
-            initialValue={
-              parsedValue || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]
-            }
+            initialValue={value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]}
             onChange={(state) => {
               const isAstChange = editor.operations.some((op) => op.type !== 'set_selection');
 
-              // Check for an actual change in content before triggering the onChange
               if (isAstChange) {
                 onChange({
-                  target: { name, value: JSON.stringify(state), type: 'blocks' },
+                  target: { name, value: state, type: 'blocks' },
                 });
               }
             }}

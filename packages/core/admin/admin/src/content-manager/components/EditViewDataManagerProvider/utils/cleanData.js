@@ -47,7 +47,6 @@ const cleanData = ({ browserState, serverState }, currentSchema, componentsSchem
 
       switch (attrType) {
         case 'json':
-        case 'blocks':
           cleanedData = JSON.parse(value);
           break;
         case 'time': {
