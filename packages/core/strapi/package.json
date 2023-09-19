@@ -141,7 +141,7 @@
   },
   "devDependencies": {
     "supertest": "6.3.3",
-    "ts-zen": "https://github.com/strapi/ts-zen#2ffb5be3f6cdb433852c8db1dddfb330b59df5f4",
+    "ts-zen": "https://github.com/strapi/ts-zen#66e02232f5997674cc7032ea3ee59d9864863732",
     "typescript": "5.2.2"
   },
   "engines": {
