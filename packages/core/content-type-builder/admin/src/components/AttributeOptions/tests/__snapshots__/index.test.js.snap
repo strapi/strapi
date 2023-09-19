@@ -287,7 +287,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
               >
                 <div
                   class="c15"
-                  style="height: 100%;"
                 >
                   <div
                     class="c16"
@@ -355,7 +354,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                 </div>
                 <div
                   class="c15"
-                  style="height: 100%;"
                 >
                   <div
                     class="c25"
@@ -423,7 +421,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                 </div>
                 <div
                   class="c15"
-                  style="height: 100%;"
                 >
                   <div
                     class="c16"
@@ -493,7 +490,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                 </div>
                 <div
                   class="c15"
-                  style="height: 100%;"
                 >
                   <div
                     class="c25"
@@ -557,7 +553,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                 </div>
                 <div
                   class="c15"
-                  style="height: 100%;"
                 >
                   <div
                     class="c16"
@@ -625,7 +620,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                 </div>
                 <div
                   class="c15"
-                  style="height: 100%;"
                 >
                   <div
                     class="c25"
@@ -695,7 +689,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                 </div>
                 <div
                   class="c15"
-                  style="height: 100%;"
                 >
                   <div
                     class="c16"
@@ -761,7 +754,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                 </div>
                 <div
                   class="c15"
-                  style="height: 100%;"
                 >
                   <div
                     class="c25"
@@ -831,7 +823,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                 </div>
                 <div
                   class="c15"
-                  style="height: 100%;"
                 >
                   <div
                     class="c16"
@@ -899,7 +890,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                 </div>
                 <div
                   class="c15"
-                  style="height: 100%;"
                 >
                   <div
                     class="c25"
@@ -969,7 +959,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                 </div>
                 <div
                   class="c15"
-                  style="height: 100%;"
                 >
                   <div
                     class="c16"
@@ -1035,7 +1024,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                 </div>
                 <div
                   class="c15"
-                  style="height: 100%;"
                 >
                   <div
                     class="c25"
@@ -1103,7 +1091,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
               >
                 <div
                   class="c15"
-                  style="height: 100%;"
                 >
                   <div
                     class="c16"
@@ -1177,7 +1164,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                 </div>
                 <div
                   class="c15"
-                  style="height: 100%;"
                 >
                   <div
                     class="c25"
