@@ -2,6 +2,8 @@ import { isString } from 'lodash/fp';
 import type { Database } from '..';
 import type { ID } from '../types';
 
+export type Repository = ReturnType<typeof createRepository>;
+
 type Params = Record<string, unknown>;
 type Data = Record<string, unknown>;
 type Entity = {

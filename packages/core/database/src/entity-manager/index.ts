@@ -29,7 +29,7 @@ import { mapAsync } from '@strapi/utils';
 import * as types from '../utils/types';
 import { createField } from '../fields';
 import { createQueryBuilder } from '../query';
-import { createRepository } from './entity-repository';
+import { createRepository, Repository } from './entity-repository';
 import { deleteRelatedMorphOneRelationsAfterMorphToManyUpdate } from './morph-relations';
 import {
   isPolymorphic,
@@ -54,6 +54,8 @@ import { DatabaseError } from '../errors';
 import type { Database } from '..';
 import type { Meta } from '../metadata';
 import type { ID } from '../types';
+
+export type EntityManager = ReturnType<typeof createEntityManager>;
 
 type Params = {
   where?: any;
@@ -257,7 +259,7 @@ const processData = (
 };
 
 export const createEntityManager = (db: Database) => {
-  const repoMap: Record<string, any> = {};
+  const repoMap: Record<string, Repository> = {};
 
   return {
     async findOne(uid: string, params: Params) {
@@ -1501,10 +1503,6 @@ export const createEntityManager = (db: Database) => {
       }
 
       return repoMap[uid];
-    },
-
-    clearRepositories() {
-      repoMap.clear();
     },
   };
 };

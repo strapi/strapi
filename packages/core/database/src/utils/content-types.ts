@@ -1,9 +1,12 @@
-interface Attribute {
+import type { Model } from '../types';
+
+export interface Attribute {
   type: string;
   multiple?: boolean;
 }
 
-interface ContentType {
+export interface ContentType {
+  uid: string;
   modelName: string;
   collectionName: string;
   attributes: Record<string, Attribute>;
@@ -26,7 +29,7 @@ const transformAttribute = (attribute: Attribute) => {
 };
 
 // TODO: model logic outside DB
-export const transformContentTypes = (contentTypes: ContentType[]) => {
+export const transformContentTypes = (contentTypes: ContentType[]): Model[] => {
   return contentTypes.map((contentType) => {
     const model = {
       ...contentType,

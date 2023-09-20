@@ -1,11 +1,11 @@
 import type { Knex } from 'knex';
 
 import { Dialect, getDialect } from './dialects';
-import { createSchemaProvider } from './schema';
+import { createSchemaProvider, SchemaProvider } from './schema';
 import { createMetadata, Metadata } from './metadata';
-import { createEntityManager } from './entity-manager';
-import { createMigrationsProvider } from './migrations';
-import { createLifecyclesProvider } from './lifecycles';
+import { createEntityManager, EntityManager } from './entity-manager';
+import { createMigrationsProvider, MigrationProvider } from './migrations';
+import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
 import { createConnection } from './connection';
 import * as errors from './errors';
 import { Callback, transactionCtx } from './transaction-context';
@@ -36,17 +36,21 @@ class Database {
 
   metadata: Metadata;
 
-  schema: ReturnType<typeof createSchemaProvider>;
+  schema: SchemaProvider;
 
-  migrations: ReturnType<typeof createMigrationsProvider>;
+  migrations: MigrationProvider;
 
-  lifecycles: ReturnType<typeof createLifecyclesProvider>;
+  lifecycles: LifecycleProvider;
 
-  entityManager: ReturnType<typeof createEntityManager>;
+  entityManager: EntityManager;
 
-  static transformContentTypes: typeof transformContentTypes;
+  static transformContentTypes = transformContentTypes;
 
-  static init: (config: DatabaseConfig) => Promise<Database>;
+  static async init(config: DatabaseConfig) {
+    const db = new Database(config);
+    await validateDatabase(db);
+    return db;
+  }
 
   constructor(config: DatabaseConfig) {
     this.metadata = createMetadata(config.models);
@@ -159,13 +163,5 @@ class Database {
     await this.connection.destroy();
   }
 }
-
-// TODO: move into strapi
-Database.transformContentTypes = transformContentTypes;
-Database.init = async (config: DatabaseConfig) => {
-  const db = new Database(config);
-  await validateDatabase(db);
-  return db;
-};
 
 export { Database, errors };
