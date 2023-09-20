@@ -7475,6 +7475,7 @@ __metadata:
     boxen: 5.1.2
     browserslist-to-esbuild: 1.2.0
     chalk: 4.1.2
+    chokidar: 3.5.3
     commander: 8.3.0
     esbuild: 0.19.2
     esbuild-register: 3.4.2
@@ -7482,6 +7483,7 @@ __metadata:
     ora: 5.4.1
     pkg-up: 3.1.0
     rimraf: 3.0.2
+    rxjs: 7.8.1
     typescript: 5.2.2
     vite: 4.4.9
     yup: 0.32.9
@@ -27227,6 +27229,15 @@ __metadata:
   dependencies:
     queue-microtask: ^1.2.2
   checksum: cb4f97ad25a75ebc11a8ef4e33bb962f8af8516bb2001082ceabd8902e15b98f4b84b4f8a9b222e5d57fc3bd1379c483886ed4619367a7680dad65316993021d
+  languageName: node
+  linkType: hard
+
+"rxjs@npm:7.8.1":
+  version: 7.8.1
+  resolution: "rxjs@npm:7.8.1"
+  dependencies:
+    tslib: ^2.1.0
+  checksum: de4b53db1063e618ec2eca0f7965d9137cabe98cf6be9272efe6c86b47c17b987383df8574861bcced18ebd590764125a901d5506082be84a8b8e364bf05f119
   languageName: node
   linkType: hard
 

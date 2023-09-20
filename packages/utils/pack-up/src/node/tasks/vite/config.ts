@@ -1,18 +1,14 @@
 import react from '@vitejs/plugin-react';
-import chalk from 'chalk';
-import ora from 'ora';
 import path from 'path';
-import { InlineConfig, build, createLogger } from 'vite';
+import { InlineConfig, createLogger } from 'vite';
 
-import { BuildContext, Targets } from '../createBuildContext';
-
-import type { TaskHandler } from './index';
-import type { Extensions } from '../core/exports';
+import type { ViteBaseTask } from './types';
+import type { BuildContext } from '../../createBuildContext';
 
 /**
  * @internal
  */
-const resolveViteConfig = (ctx: BuildContext, task: ViteTask) => {
+const resolveViteConfig = (ctx: BuildContext, task: ViteBaseTask) => {
   const { cwd, distPath, targets, external, extMap, pkg, config: packUpConfig } = ctx;
   const { entries, format, output, runtime } = task;
   const outputExt = extMap[pkg.type || 'commonjs'][format];
@@ -22,6 +18,7 @@ const resolveViteConfig = (ctx: BuildContext, task: ViteTask) => {
   customLogger.warn = (msg) => ctx.logger.warn(msg);
   customLogger.warnOnce = (msg) => ctx.logger.warn(msg);
   customLogger.error = (msg) => ctx.logger.error(msg);
+  customLogger.info = () => {};
 
   const config = {
     configFile: false,
@@ -78,59 +75,4 @@ const resolveViteConfig = (ctx: BuildContext, task: ViteTask) => {
   return config;
 };
 
-interface ViteTaskEntry {
-  path: string;
-  entry: string;
-}
-
-interface ViteTask {
-  type: 'build:js';
-  entries: ViteTaskEntry[];
-  format: Extensions;
-  output: string;
-  runtime: keyof Targets;
-}
-
-const viteTask: TaskHandler<ViteTask> = {
-  _spinner: null,
-  print(ctx, task) {
-    const targetLines = [
-      '   target:',
-      ...ctx.targets[task.runtime].map((t) => chalk.cyan(`    - ${t}`)),
-    ];
-    const entries = [
-      '   entries:',
-      ...task.entries.map((entry) =>
-        [
-          `    – `,
-          chalk.green(`${path.join(ctx.pkg.name, entry.path)}: `),
-          `${chalk.cyan(entry.entry)} ${chalk.gray('→')} ${chalk.cyan(task.output)}`,
-        ].join('')
-      ),
-    ];
-
-    this._spinner = ora(`Building javascript files:\n`).start();
-
-    ctx.logger.log([`  format: ${task.format}`, ...targetLines, ...entries].join('\n'));
-  },
-  async run(ctx, task) {
-    try {
-      const config = resolveViteConfig(ctx, task);
-      ctx.logger.debug('Vite config: \n', config);
-      await build(config);
-      await this.success(ctx, task);
-    } catch (err) {
-      this.fail(ctx, task, err);
-      throw err;
-    }
-  },
-  async success() {
-    this._spinner?.succeed('Built javascript files');
-  },
-  async fail() {
-    this._spinner?.fail('Failed to build javascript files');
-  },
-};
-
-export { viteTask };
-export type { ViteTask, ViteTaskEntry };
+export { resolveViteConfig };

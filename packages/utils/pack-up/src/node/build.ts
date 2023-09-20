@@ -8,7 +8,7 @@ import { getExportExtensionMap, validateExportsOrdering } from './core/exports';
 import { createLogger } from './core/logger';
 import { loadPkg, validatePkg } from './core/pkg';
 import { createBuildContext } from './createBuildContext';
-import { BuildTask, createBuildTasks } from './createBuildTasks';
+import { BuildTask, createBuildTasks } from './createTasks';
 import { TaskHandler, taskHandlers } from './tasks';
 
 export interface BuildOptions extends CommonCLIOptions {
@@ -17,7 +17,7 @@ export interface BuildOptions extends CommonCLIOptions {
   sourcemap?: boolean;
 }
 
-export const build = async (opts: BuildOptions) => {
+export const build = async (opts: BuildOptions = {}) => {
   const { silent, debug, cwd = process.cwd(), ...configOptions } = opts;
 
   const logger = createLogger({ silent, debug });
@@ -61,10 +61,6 @@ export const build = async (opts: BuildOptions) => {
    */
   const config = await loadConfig({ cwd, logger });
 
-  if (config) {
-    logger.debug('Loaded configuration: \n', config);
-  }
-
   const buildContextLoader = ora('Creating build context \n').start();
 
   const extMap = getExportExtensionMap();
@@ -104,12 +100,21 @@ export const build = async (opts: BuildOptions) => {
 
     handler.print(ctx, task);
 
-    await handler.run(ctx, task).catch((err) => {
-      if (err instanceof Error) {
-        logger.error(err.message);
-      }
+    const $result = handler.run(ctx, task);
 
-      process.exit(1);
+    $result.subscribe({
+      next(result) {
+        handler.success(ctx, task, result);
+      },
+      error(err) {
+        handler.fail(ctx, task, err);
+
+        if (err instanceof Error) {
+          logger.error(err.message);
+        }
+
+        process.exit(1);
+      },
     });
   }
 };

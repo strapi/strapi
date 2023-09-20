@@ -50,7 +50,13 @@ const loadConfig = async ({ cwd, logger }: LoadConfigOptions): Promise<Config | 
       /**
        * handles esm or cjs exporting.
        */
-      return mod?.default || mod || undefined;
+      const config = mod?.default || mod || undefined;
+
+      if (config) {
+        logger.debug('Loaded configuration: \n', config);
+      }
+
+      return config;
     }
   }
 
@@ -89,5 +95,5 @@ const defineConfig = (configOptions: ConfigOptions): ConfigOptions => configOpti
 
 type Config = ConfigOptions;
 
-export { loadConfig, defineConfig };
+export { loadConfig, defineConfig, CONFIG_FILE_NAMES };
 export type { Config };
