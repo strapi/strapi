@@ -1,10 +1,10 @@
-import { rm, createWriteStream } from 'fs-extra';
-import tar from 'tar-stream';
 import path from 'path';
 import zlib from 'zlib';
+import { Readable, Writable } from 'stream';
+import { rm, createWriteStream } from 'fs-extra';
+import tar from 'tar-stream';
 import { stringer } from 'stream-json/jsonl/Stringer';
 import { chain } from 'stream-chain';
-import { Readable, Writable } from 'stream';
 
 import { createEncryptionCipher } from '../../../utils/encryption';
 import type {
@@ -252,13 +252,23 @@ class LocalFileDestinationProvider implements IDestinationProvider {
         // always write tar files with posix paths so we have a standard format for paths regardless of system
         const entryPath = path.posix.join('assets', 'uploads', data.filename);
 
+        const entryMetadataPath = path.posix.join('assets', 'metadata', `${data.filename}.json`);
+        const stringifiedMetadata = JSON.stringify(data.metadata);
+        archiveStream.entry(
+          {
+            name: entryMetadataPath,
+            size: stringifiedMetadata.length,
+          },
+          stringifiedMetadata
+        );
+
         const entry = archiveStream.entry({
           name: entryPath,
           size: data.stats.size,
         });
 
         if (!entry) {
-          callback(new Error(`Failed to created a tar entry for ${entryPath}`));
+          callback(new Error(`Failed to created an asset tar entry for ${entryPath}`));
           return;
         }
 

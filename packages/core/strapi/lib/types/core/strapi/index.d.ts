@@ -1,5 +1,5 @@
 import type { Database } from '@strapi/database';
-import type { Shared, Common } from '@strapi/strapi';
+import type { Common, EntityService, Shared } from '@strapi/strapi';
 
 // TODO move custom fields types to a separate file
 interface CustomFieldServerOptions {
@@ -64,6 +64,11 @@ export interface Strapi {
    * Getter for the Strapi sanitizers container
    */
   readonly sanitizers: any;
+
+  /**
+   * Getter for the Strapi validators container
+   */
+  readonly validators: any;
 
   /**
    * Getter for the Strapi services container
@@ -412,7 +417,7 @@ export interface Strapi {
   /**
    * Entity Service instance
    */
-  entityService: any;
+  entityService: EntityService.EntityService;
 }
 
 export interface Lifecycles {

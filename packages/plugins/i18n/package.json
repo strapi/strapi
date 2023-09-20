@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-i18n",
-  "version": "4.11.5",
+  "version": "4.13.7",
   "description": "This plugin enables to create, to read and to update content in different languages, both from the Admin Panel and from the API",
   "repository": {
     "type": "git",
@@ -30,10 +30,10 @@
     "lint": "run -T eslint ."
   },
   "dependencies": {
-    "@strapi/design-system": "1.8.2",
-    "@strapi/helper-plugin": "4.11.5",
-    "@strapi/icons": "1.8.2",
-    "@strapi/utils": "4.11.5",
+    "@strapi/design-system": "1.10.1",
+    "@strapi/helper-plugin": "4.13.7",
+    "@strapi/icons": "1.10.1",
+    "@strapi/utils": "4.13.7",
     "formik": "2.4.0",
     "immer": "9.0.19",
     "lodash": "4.17.21",
@@ -43,7 +43,7 @@
     "react-query": "3.39.3",
     "react-redux": "8.1.1",
     "redux": "^4.2.1",
-    "yup": "^0.32.9"
+    "yup": "0.32.9"
   },
   "peerDependencies": {
     "react": "^17.0.0 || ^18.0.0",
@@ -53,14 +53,14 @@
   },
   "devDependencies": {
     "@testing-library/react": "14.0.0",
-    "msw": "1.2.1",
+    "msw": "1.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "5.3.4",
     "styled-components": "5.3.3"
   },
   "engines": {
-    "node": ">=14.19.1 <=18.x.x",
+    "node": ">=16.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {

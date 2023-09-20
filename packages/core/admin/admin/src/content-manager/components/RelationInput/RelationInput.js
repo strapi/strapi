@@ -12,6 +12,7 @@ import {
   VisuallyHidden,
   Combobox,
 } from '@strapi/design-system';
+import { useFocusInputField } from '@strapi/helper-plugin';
 import { Cross, Refresh } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { FixedSizeList as List } from 'react-window';
@@ -45,6 +46,10 @@ export const DisconnectButton = styled.button`
   &:focus svg path {
     fill: ${({ theme, disabled }) => !disabled && theme.colors.neutral600};
   }
+`;
+
+const ComboboxWrapper = styled(Box)`
+  align-self: flex-start;
 `;
 
 const RelationInput = ({
@@ -85,6 +90,8 @@ const RelationInput = ({
 
   const listRef = useRef();
   const outerListRef = useRef();
+
+  const fieldRef = useFocusInputField(name);
 
   const { data } = searchResults;
 
@@ -189,13 +196,13 @@ const RelationInput = ({
       updatedRelationsWith.current === 'onChange' &&
       relations.length !== previewRelationsLength
     ) {
-      listRef.current.scrollToItem(relations.length, 'end');
+      listRef.current?.scrollToItem(relations.length, 'end');
       updatedRelationsWith.current = undefined;
     } else if (
       updatedRelationsWith.current === 'loadMore' &&
       relations.length !== previewRelationsLength
     ) {
-      listRef.current.scrollToItem(0, 'start');
+      listRef.current?.scrollToItem(0, 'start');
       updatedRelationsWith.current = undefined;
     }
   }, [previewRelationsLength, relations]);
@@ -203,57 +210,70 @@ const RelationInput = ({
   const ariaDescriptionId = `${name}-item-instructions`;
 
   return (
-    <Flex gap={3} justifyContent="space-between" alignItems="end" wrap="wrap">
-      <Flex direction="column" alignItems="stretch" basis={size <= 6 ? '100%' : '70%'} gap={2}>
-        <Combobox
-          autocomplete="list"
-          error={error}
-          name={name}
-          hint={description}
-          id={id}
-          required={required}
-          label={label}
-          labelAction={labelAction}
-          disabled={disabled}
-          placeholder={placeholder}
-          hasMoreItems={searchResults.hasNextPage}
-          loading={searchResults.isLoading}
-          onOpenChange={handleMenuOpen}
-          noOptionsMessage={() => noRelationsMessage}
-          loadingMessage={loadingMessage}
-          onLoadMore={() => {
-            onSearchNextPage();
-          }}
-          textValue={textValue}
-          onChange={(relationId) => {
-            if (!relationId) {
-              return;
-            }
-            onRelationConnect(options.find((opt) => opt.id === relationId));
-            updatedRelationsWith.current = 'onChange';
-          }}
-          onTextValueChange={(text) => {
-            setTextValue(text);
-          }}
-          onInputChange={(event) => {
-            onSearch(event.currentTarget.value);
-          }}
-        >
-          {options.map((opt) => {
-            return <Option key={opt.id} {...opt} />;
-          })}
-        </Combobox>
+    <Flex
+      direction="column"
+      gap={3}
+      justifyContent="space-between"
+      alignItems="stretch"
+      wrap="wrap"
+    >
+      <Flex direction="row" alignItems="end" justifyContent="end" gap={2} width="100%">
+        <ComboboxWrapper marginRight="auto" maxWidth={size <= 6 ? '100%' : '70%'} width="100%">
+          <Combobox
+            ref={fieldRef}
+            autocomplete="list"
+            error={error}
+            name={name}
+            hint={description}
+            id={id}
+            required={required}
+            label={label}
+            labelAction={labelAction}
+            disabled={disabled}
+            placeholder={placeholder}
+            hasMoreItems={searchResults.hasNextPage}
+            loading={searchResults.isLoading}
+            onOpenChange={handleMenuOpen}
+            noOptionsMessage={() => noRelationsMessage}
+            loadingMessage={loadingMessage}
+            onLoadMore={() => {
+              onSearchNextPage();
+            }}
+            textValue={textValue}
+            onChange={(relationId) => {
+              if (!relationId) {
+                return;
+              }
+              onRelationConnect(options.find((opt) => opt.id === relationId));
+              updatedRelationsWith.current = 'onChange';
+            }}
+            onTextValueChange={(text) => {
+              setTextValue(text);
+            }}
+            onInputChange={(event) => {
+              onSearch(event.currentTarget.value);
+            }}
+          >
+            {options.map((opt) => {
+              return <Option key={opt.id} {...opt} />;
+            })}
+          </Combobox>
+        </ComboboxWrapper>
+
         {shouldDisplayLoadMoreButton && (
           <TextButton
             disabled={paginatedRelations.isLoading || paginatedRelations.isFetchingNextPage}
             onClick={handleLoadMore}
             loading={paginatedRelations.isLoading || paginatedRelations.isFetchingNextPage}
             startIcon={<Refresh />}
+            // prevent the label from line-wrapping
+            shrink={0}
           >
             {labelLoadMore}
           </TextButton>
         )}
       </Flex>
+
       {relations.length > 0 && (
         <RelationList overflow={overflow}>
           <VisuallyHidden id={ariaDescriptionId}>{listAriaDescription}</VisuallyHidden>
@@ -373,7 +393,7 @@ RelationInput.propTypes = {
 };
 
 /**
- * This is in a seperate component to enforce passing all the props the component requires to react-window
+ * This is in a separate component to enforce passing all the props the component requires to react-window
  * to ensure drag & drop correctly works.
  */
 const ListItem = ({ data, index, style }) => {

@@ -17,6 +17,21 @@ jest.mock('../strategies/restore', () => {
   };
 });
 
+const strapiCommonProperties = {
+  config: {
+    get(service) {
+      if (service === 'plugin.upload') {
+        return { provider: 'local' };
+      }
+    },
+  },
+  dirs: {
+    static: {
+      public: '/assets/',
+    },
+  },
+};
+
 const transaction = jest.fn(async (cb) => {
   const trx = {};
   const rollback = jest.fn();
@@ -30,8 +45,14 @@ describe('Local Strapi Source Destination', () => {
       const provider = createLocalStrapiDestinationProvider({
         getStrapi: getStrapiFactory({
           db: { transaction },
+          ...strapiCommonProperties,
         }),
         strategy: 'restore',
+        restore: {
+          entities: {
+            exclude: [],
+          },
+        },
       });
 
       expect(provider.strapi).not.toBeDefined();
@@ -41,8 +62,14 @@ describe('Local Strapi Source Destination', () => {
       const provider = createLocalStrapiDestinationProvider({
         getStrapi: getStrapiFactory({
           db: { transaction },
+          ...strapiCommonProperties,
         }),
         strategy: 'restore',
+        restore: {
+          entities: {
+            exclude: [],
+          },
+        },
       });
       await provider.bootstrap();
 
@@ -55,8 +82,14 @@ describe('Local Strapi Source Destination', () => {
       const restoreProvider = createLocalStrapiDestinationProvider({
         getStrapi: getStrapiFactory({
           db: { transaction },
+          ...strapiCommonProperties,
         }),
         strategy: 'restore',
+        restore: {
+          entities: {
+            exclude: [],
+          },
+        },
       });
       await restoreProvider.bootstrap();
       expect(restoreProvider.strapi).toBeDefined();
@@ -75,7 +108,9 @@ describe('Local Strapi Source Destination', () => {
       ).rejects.toThrow();
     });
 
-    test('Should delete all entities if it is a restore', async () => {
+    test.todo('Should not delete entities that are not included');
+
+    test('Should delete all entities if it is a restore with only exclude property', async () => {
       const entities = [
         {
           entity: { id: 1, title: 'My first foo' },
@@ -129,7 +164,17 @@ describe('Local Strapi Source Destination', () => {
         contentTypes: getContentTypes(),
         query,
         getModel,
-        db: { query, transaction },
+        db: {
+          query,
+          transaction,
+          queryBuilder: jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnValue({
+              stream: jest.fn().mockReturnValue([]),
+              transacting: jest.fn().mockReturnThis(),
+            }),
+          }),
+        },
+        ...strapiCommonProperties,
       })();
 
       setGlobalStrapi(strapi);
@@ -137,6 +182,11 @@ describe('Local Strapi Source Destination', () => {
       const provider = createLocalStrapiDestinationProvider({
         getStrapi: () => strapi,
         strategy: 'restore',
+        restore: {
+          entities: {
+            exclude: [],
+          },
+        },
       });
       const deleteAllSpy = jest.spyOn(restoreApi, 'deleteRecords');
       await provider.bootstrap();

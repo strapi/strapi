@@ -201,7 +201,8 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   color: #666687;
 }
 
-.c21[aria-disabled='true'] svg > g,.c21[aria-disabled='true'] svg path {
+.c21[aria-disabled='true'] svg > g,
+.c21[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -214,7 +215,8 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   color: #666687;
 }
 
-.c21[aria-disabled='true']:active svg > g,.c21[aria-disabled='true']:active svg path {
+.c21[aria-disabled='true']:active svg > g,
+.c21[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -255,7 +257,8 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   color: #666687;
 }
 
-.c23[aria-disabled='true'] svg > g,.c23[aria-disabled='true'] svg path {
+.c23[aria-disabled='true'] svg > g,
+.c23[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -268,7 +271,8 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   color: #666687;
 }
 
-.c23[aria-disabled='true']:active svg > g,.c23[aria-disabled='true']:active svg path {
+.c23[aria-disabled='true']:active svg > g,
+.c23[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -379,7 +383,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
       <div>
         <div>
           <div
-            aria-labelledby=":r0:-label"
+            aria-labelledby="confirmation-label"
             aria-modal="true"
             class="c5 c6"
             role="dialog"
@@ -389,7 +393,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
             >
               <h2
                 class="c10 c11"
-                id=":r0:-label"
+                id="confirmation-label"
               >
                 Confirmation
               </h2>
@@ -398,40 +402,44 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
               class=""
             >
               <div
-                class="c12"
+                class=""
+                id="confirm-description"
               >
                 <div
-                  class="c13 c14"
+                  class="c12"
                 >
                   <div
-                    class="c8"
+                    class="c13 c14"
                   >
-                    <svg
-                      fill="none"
-                      height="1rem"
-                      viewBox="0 0 24 24"
-                      width="1rem"
-                      xmlns="http://www.w3.org/2000/svg"
+                    <div
+                      class="c8"
                     >
-                      <path
-                        d="M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12 12-5.383 12-12S18.617 0 12 0Zm1.154 18.456h-2.308V16.15h2.308v2.307Zm-.23-3.687h-1.847l-.346-9.23h2.538l-.346 9.23Z"
-                        fill="#212134"
-                      />
-                    </svg>
+                      <svg
+                        fill="none"
+                        height="1rem"
+                        viewBox="0 0 24 24"
+                        width="1rem"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12 12-5.383 12-12S18.617 0 12 0Zm1.154 18.456h-2.308V16.15h2.308v2.307Zm-.23-3.687h-1.847l-.346-9.23h2.538l-.346 9.23Z"
+                          fill="#212134"
+                        />
+                      </svg>
+                    </div>
                   </div>
-                </div>
-                <div
-                  class="c1"
-                >
                   <div
-                    class="c8"
+                    class="c1"
                   >
-                    <span
-                      class="c10 c15"
-                      id="confirm-description"
+                    <div
+                      class="c8"
                     >
-                      Are you sure you want to delete this?
-                    </span>
+                      <span
+                        class="c10 c15"
+                      >
+                        Are you sure you want to delete this?
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>

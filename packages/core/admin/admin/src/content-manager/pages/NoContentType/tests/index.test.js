@@ -32,19 +32,26 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c5 {
+      .c6 {
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
         color: #32324d;
       }
 
-      .c12 {
+      .c13 {
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
         color: #666687;
         text-align: center;
+      }
+
+      .c18 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #ffffff;
       }
 
       .c1 {
@@ -59,24 +66,35 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         min-width: 0;
       }
 
-      .c6 {
+      .c7 {
         padding-right: 56px;
         padding-left: 56px;
       }
 
-      .c7 {
+      .c8 {
         background: #ffffff;
         padding: 64px;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c9 {
+      .c10 {
         padding-bottom: 24px;
       }
 
-      .c11 {
+      .c12 {
         padding-bottom: 16px;
+      }
+
+      .c14 {
+        background: #4945ff;
+        padding-top: 8px;
+        padding-right: 16px;
+        padding-bottom: 8px;
+        padding-left: 16px;
+        border-radius: 4px;
+        border-color: #4945ff;
+        border: 1px solid #4945ff;
       }
 
       .c2 {
@@ -111,7 +129,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         flex-direction: row;
       }
 
-      .c8 {
+      .c9 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -125,33 +143,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         flex-direction: column;
       }
 
-      .c10 svg {
-        height: 5.5rem;
-      }
-
-      .c0:focus-visible {
-        outline: none;
-      }
-
-      .c13 {
-        background: #4945ff;
-        padding-top: 8px;
-        padding-right: 16px;
-        padding-bottom: 8px;
-        padding-left: 16px;
-        border-radius: 4px;
-        border-color: #4945ff;
-        border: 1px solid #4945ff;
-      }
-
-      .c19 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #ffffff;
-      }
-
-      .c14 {
+      .c15 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -166,40 +158,26 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         gap: 8px;
       }
 
-      .c17 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c15 {
+      .c16 {
         position: relative;
         outline: none;
       }
 
-      .c15 > svg {
+      .c16 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c15 > svg > g,
-      .c15 > svg path {
+      .c16 > svg > g,
+      .c16 > svg path {
         fill: #ffffff;
       }
 
-      .c15[aria-disabled='true'] {
+      .c16[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c15:after {
+      .c16:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -214,11 +192,11 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         border: 2px solid transparent;
       }
 
-      .c15:focus-visible {
+      .c16:focus-visible {
         outline: none;
       }
 
-      .c15:focus-visible:after {
+      .c16:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -229,63 +207,73 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         border: 2px solid #4945ff;
       }
 
-      .c16 {
+      .c11 svg {
+        height: 5.5rem;
+      }
+
+      .c0:focus-visible {
+        outline: none;
+      }
+
+      .c17 {
         -webkit-text-decoration: none;
         text-decoration: none;
         border: 1px solid #d9d8ff;
         background: #f0f0ff;
       }
 
-      .c16[aria-disabled='true'] {
+      .c17[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c16[aria-disabled='true'] .c18 {
+      .c17[aria-disabled='true'] .c5 {
         color: #666687;
       }
 
-      .c16[aria-disabled='true'] svg > g,.c16[aria-disabled='true'] svg path {
+      .c17[aria-disabled='true'] svg > g,
+      .c17[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c16[aria-disabled='true']:active {
+      .c17[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c16[aria-disabled='true']:active .c18 {
+      .c17[aria-disabled='true']:active .c5 {
         color: #666687;
       }
 
-      .c16[aria-disabled='true']:active svg > g,.c16[aria-disabled='true']:active svg path {
+      .c17[aria-disabled='true']:active svg > g,
+      .c17[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c16:hover {
+      .c17:hover {
         background-color: #ffffff;
       }
 
-      .c16:active {
+      .c17:active {
         background-color: #ffffff;
         border: 1px solid #4945ff;
       }
 
-      .c16:active .c18 {
+      .c17:active .c5 {
         color: #4945ff;
       }
 
-      .c16:active svg > g,
-      .c16:active svg path {
+      .c17:active svg > g,
+      .c17:active svg path {
         fill: #4945ff;
       }
 
-      .c16 .c18 {
+      .c17 .c5 {
         color: #271fe0;
       }
 
-      .c16 svg > g,
-      .c16 svg path {
+      .c17 svg > g,
+      .c17 svg path {
         fill: #271fe0;
       }
 
@@ -309,7 +297,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
                 class="c3 c4"
               >
                 <h1
-                  class="c5"
+                  class="c5 c6"
                 >
                   Content
                 </h1>
@@ -318,14 +306,14 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
           </div>
         </div>
         <div
-          class="c6"
+          class="c7"
         >
           <div
-            class="c7 c8"
+            class="c8 c9"
           >
             <div
               aria-hidden="true"
-              class="c9 c10"
+              class="c10 c11"
             >
               <svg
                 fill="none"
@@ -391,22 +379,22 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
               </svg>
             </div>
             <div
-              class="c11"
+              class="c12"
             >
               <p
-                class="c12"
+                class="c5 c13"
               >
                 You don't have any content yet, we recommend you to create your first Content-Type.
               </p>
             </div>
             <a
               aria-disabled="false"
-              class="c13 c14 c15 c16"
+              class="c14 c15 c16 c17"
               href="/plugins/content-type-builder/content-types/create-content-type"
             >
               <div
                 aria-hidden="true"
-                class="c17"
+                class="c4"
               >
                 <svg
                   fill="none"
@@ -422,7 +410,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
                 </svg>
               </div>
               <span
-                class="c18 c19"
+                class="c5 c18"
               >
                 Create your first Content-type
               </span>

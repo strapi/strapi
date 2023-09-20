@@ -535,7 +535,7 @@ paths:
                     properties:
                       publishedAt:
                         type: datetime
-  /content-manager/collection-types/{model}/{id}/actions/numberOfDraftRelations:
+  /content-manager/collection-types/{model}/{id}/actions/countDraftRelations:
     get:
       tags:
         - Collection Types content management
@@ -632,7 +632,7 @@ paths:
                       publishedAt:
                         type: datetime
                         nullable: true
-  /content-manager/single-types/{model}/actions/numberOfDraftRelations:
+  /content-manager/single-types/{model}/actions/countDraftRelations:
     get:
       tags:
         - Single Types content management

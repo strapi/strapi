@@ -1,21 +1,18 @@
-import type { Common, CoreApi, Strapi } from '@strapi/strapi';
-
-type WithStrapiCallback<T> = <S extends { strapi: Strapi }>(params: S) => T;
+import type { Common, CoreApi } from '@strapi/strapi';
 
 export declare function createCoreRouter<T extends Common.UID.ContentType>(
   uid: T,
   cfg?: CoreApi.Router.RouterConfig<T>
 ): CoreApi.Router.Router;
 
-export declare function createCoreController<
-  T extends Common.UID.ContentType,
-  S extends Partial<CoreApi.Controller.Extendable<T>>
->(
+// TODO: Find a cleaner way to expose methods for customization
+export declare function createCoreController<T extends Common.UID.ContentType>(
   uid: T,
-  config?: WithStrapiCallback<S> | S
-): () => Required<S & CoreApi.Controller.ContentType<T>>;
+  config?: any
+): () => any;
 
-export declare function createCoreService<
-  T extends Common.UID.ContentType,
-  S extends Partial<CoreApi.Service.Extendable<T>>
->(uid: T, config?: WithStrapiCallback<S> | S): () => Required<S & CoreApi.Service.ContentType<T>>;
+// TODO: Find a cleaner way to expose methods for customization
+export declare function createCoreService<T extends Common.UID.ContentType>(
+  uid: T,
+  config?: any
+): () => any;

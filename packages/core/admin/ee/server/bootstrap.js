@@ -7,7 +7,7 @@ const { getService } = require('../../server/utils');
 const actions = require('./config/admin-actions');
 const { persistTablesWithPrefix } = require('./utils/persisted-tables');
 
-module.exports = async () => {
+module.exports = async (args) => {
   const { actionProvider } = getService('permission');
 
   if (features.isEnabled('sso')) {
@@ -31,9 +31,11 @@ module.exports = async () => {
     // Decorate the entity service with review workflow logic
     const { decorator } = getService('review-workflows-decorator');
     strapi.entityService.decorate(decorator);
+
+    await getService('review-workflows-weekly-metrics').registerCron();
   }
 
   await getService('seat-enforcement').seatEnforcementWorkflow();
 
-  await executeCEBootstrap();
+  await executeCEBootstrap(args);
 };

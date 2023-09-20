@@ -23,11 +23,7 @@ import _ from 'lodash';
 import parseType from './parse-type';
 import * as contentTypesUtils from './content-types';
 import { PaginationError } from './errors';
-import {
-  isMediaAttribute,
-  isDynamicZoneAttribute,
-  isMorphToRelationalAttribute,
-} from './content-types';
+import { isDynamicZoneAttribute, isMorphToRelationalAttribute } from './content-types';
 import { Model } from './types';
 import { isOperator } from './operators';
 
@@ -39,7 +35,7 @@ export interface SortMap {
   [key: string]: SortOrder | SortMap;
 }
 
-interface SortParamsObject {
+export interface SortParamsObject {
   [key: string]: SortOrder | SortParamsObject;
 }
 type SortParams = string | string[] | SortParamsObject | SortParamsObject[];
@@ -288,7 +284,7 @@ class InvalidPopulateError extends Error {
 // NOTE: we could support foo.* or foo.bar.* etc later on
 const convertPopulateQueryParams = (
   populate: PopulateParams,
-  schema: Model,
+  schema?: Model,
   depth = 0
 ): PopulateQuery => {
   if (depth === 0 && populate === '*') {
@@ -319,7 +315,7 @@ const convertPopulateQueryParams = (
   throw new InvalidPopulateError();
 };
 
-const convertPopulateObject = (populate: PopulateAttributesParams, schema: Model) => {
+const convertPopulateObject = (populate: PopulateAttributesParams, schema?: Model) => {
   if (!schema) {
     return {};
   }
@@ -333,11 +329,9 @@ const convertPopulateObject = (populate: PopulateAttributesParams, schema: Model
       return acc;
     }
 
-    // Allow adding an 'on' strategy to populate queries for polymorphic relations, media and dynamic zones
+    // Allow adding an 'on' strategy to populate queries for morphTo relations and dynamic zones
     const isAllowedAttributeForFragmentPopulate =
-      isDynamicZoneAttribute(attribute) ||
-      isMediaAttribute(attribute) ||
-      isMorphToRelationalAttribute(attribute);
+      isDynamicZoneAttribute(attribute) || isMorphToRelationalAttribute(attribute);
 
     const hasFragmentPopulateDefined =
       typeof subPopulate === 'object' && 'on' in subPopulate && !isNil(subPopulate.on);
@@ -376,6 +370,10 @@ const convertPopulateObject = (populate: PopulateAttributesParams, schema: Model
       };
     }
 
+    if (isMorphToRelationalAttribute(attribute)) {
+      return { ...acc, [key]: convertNestedPopulate(subPopulate, undefined) };
+    }
+
     // NOTE: Retrieve the target schema UID.
     // Only handles basic relations, medias and component since it's not possible
     // to populate with options for a dynamic zone or a polymorphic relation
@@ -393,6 +391,7 @@ const convertPopulateObject = (populate: PopulateAttributesParams, schema: Model
 
     const targetSchema = strapi.getModel(targetSchemaUID);
 
+    // ignore the sub-populate for the current key if there is no schema associated
     if (!targetSchema) {
       return acc;
     }
@@ -410,7 +409,7 @@ const convertPopulateObject = (populate: PopulateAttributesParams, schema: Model
   }, {});
 };
 
-const convertNestedPopulate = (subPopulate: PopulateObjectParams, schema: Model) => {
+const convertNestedPopulate = (subPopulate: PopulateObjectParams, schema?: Model) => {
   if (_.isString(subPopulate)) {
     return parseType({ type: 'boolean', value: subPopulate, forceCast: true });
   }
@@ -510,7 +509,7 @@ const isValidSchemaAttribute = (key: string, schema?: Model) => {
   return Object.keys(schema.attributes).includes(key);
 };
 
-const convertFiltersQueryParams = (filters: FiltersParams, schema: Model): WhereQuery => {
+const convertFiltersQueryParams = (filters: FiltersParams, schema?: Model): WhereQuery => {
   // Filters need to be either an array or an object
   // Here we're only checking for 'object' type since typeof [] => object and typeof {} => object
   if (!isObject(filters)) {
@@ -523,7 +522,7 @@ const convertFiltersQueryParams = (filters: FiltersParams, schema: Model): Where
   return convertAndSanitizeFilters(filtersCopy, schema);
 };
 
-const convertAndSanitizeFilters = (filters: FiltersParams, schema: Model): WhereQuery => {
+const convertAndSanitizeFilters = (filters: FiltersParams, schema?: Model): WhereQuery => {
   if (Array.isArray(filters)) {
     return (
       filters
@@ -599,7 +598,7 @@ const convertAndSanitizeFilters = (filters: FiltersParams, schema: Model): Where
 };
 
 const convertPublicationStateParams = (
-  schema: Model,
+  schema?: Model,
   params: { publicationState?: 'live' | 'preview' } = {},
   query: Query = {}
 ) => {

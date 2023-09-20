@@ -291,7 +291,8 @@ const getDiffHandler = (engine, { force, action }) => {
         if (
           uid === 'admin::workflow' ||
           uid === 'admin::workflow-stage' ||
-          endPath?.startsWith('strapi_reviewWorkflows_')
+          endPath?.startsWith('strapi_stage') ||
+          endPath?.startsWith('strapi_assignee')
         ) {
           workflowsStatus = diff.kind;
         }
@@ -341,6 +342,69 @@ const getDiffHandler = (engine, { force, action }) => {
   };
 };
 
+const getAssetsBackupHandler = (engine, { force, action }) => {
+  return async (context, next) => {
+    // if we abort here, we need to actually exit the process because of conflict with inquirer prompt
+    setSignalHandler(async () => {
+      await abortTransfer({ engine, strapi });
+      exitWith(1, exitMessageText(action, true));
+    });
+
+    console.warn(
+      'The backup for the assets could not be created inside the public directory. Ensure Strapi has write permissions on the public directory.'
+    );
+    const confirmed = await confirmMessage(
+      'Do you want to continue without backing up your public/uploads files?',
+      {
+        force,
+      }
+    );
+
+    if (confirmed) {
+      context.ignore = true;
+    }
+
+    // reset handler back to normal
+    setSignalHandler(() => abortTransfer({ engine, strapi }));
+    return next(context);
+  };
+};
+
+const shouldSkipStage = (opts, dataKind) => {
+  if (opts.exclude?.includes(dataKind)) {
+    return true;
+  }
+  if (opts.only) {
+    return !opts.only.includes(dataKind);
+  }
+
+  return false;
+};
+
+// Based on exclude/only from options, create the restore object to match
+const parseRestoreFromOptions = (opts) => {
+  const entitiesOptions = {
+    exclude: DEFAULT_IGNORED_CONTENT_TYPES,
+    include: undefined,
+  };
+
+  // if content is not included, send an empty array for include
+  if ((opts.only && !opts.only.includes('content')) || opts.exclude?.includes('content')) {
+    entitiesOptions.include = [];
+  }
+
+  const restoreConfig = {
+    entities: entitiesOptions,
+    assets: !shouldSkipStage(opts, 'files'),
+    configuration: {
+      webhooks: !shouldSkipStage(opts, 'config'),
+      coreStore: !shouldSkipStage(opts, 'config'),
+    },
+  };
+
+  return restoreConfig;
+};
+
 module.exports = {
   loadersFactory,
   buildTransferTable,
@@ -357,4 +421,7 @@ module.exports = {
   abortTransfer,
   setSignalHandler,
   getDiffHandler,
+  getAssetsBackupHandler,
+  shouldSkipStage,
+  parseRestoreFromOptions,
 };

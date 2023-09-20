@@ -4,30 +4,30 @@ const path = require('path');
 const webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const ForkTsCheckerPlugin = require('fork-ts-checker-webpack-plugin');
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { ESBuildMinifyPlugin } = require('esbuild-loader');
 const WebpackBar = require('webpackbar');
-const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const browserslist = require('browserslist');
 const browserslistToEsbuild = require('browserslist-to-esbuild');
 
 const alias = require('./webpack.alias');
 const getClientEnvironment = require('./env');
-const createPluginsExcludePath = require('./utils/create-plugins-exclude-path');
+const { createPluginsExcludePath } = require('./utils/plugins');
 
 module.exports = ({
-  cacheDir,
   dest,
   entry,
   env,
   optimize,
-  pluginsPath,
+  plugins,
   options = {
     backend: 'http://localhost:1337',
     adminPath: '/admin/',
     features: [],
   },
   tsConfigFilePath,
+  enforceSourceMaps,
 }) => {
   const isProduction = env === 'production';
 
@@ -44,7 +44,11 @@ module.exports = ({
       ]
     : [];
 
-  const excludeRegex = createPluginsExcludePath(pluginsPath);
+  const nodeModulePluginPaths = Object.values(plugins)
+    .filter((plugin) => plugin.info?.packageName || plugin.info?.required)
+    .map((plugin) => plugin.pathToPlugin);
+
+  const excludeRegex = createPluginsExcludePath(nodeModulePluginPaths);
 
   // Ensure we use the config in this directory, even if run with a different
   // working directory
@@ -54,7 +58,7 @@ module.exports = ({
   return {
     mode: isProduction ? 'production' : 'development',
     bail: !!isProduction,
-    devtool: isProduction ? false : 'eval-source-map',
+    devtool: isProduction && !enforceSourceMaps ? false : 'source-map',
     experiments: {
       topLevelAwait: true,
     },
@@ -81,9 +85,8 @@ module.exports = ({
     module: {
       rules: [
         {
-          test: /\.tsx?$/,
+          test: /\.(ts|tsx)$/,
           loader: require.resolve('esbuild-loader'),
-          include: [cacheDir, ...pluginsPath],
           exclude: excludeRegex,
           options: {
             loader: 'tsx',
@@ -91,8 +94,8 @@ module.exports = ({
           },
         },
         {
-          test: /\.m?jsx?$/,
-          include: [cacheDir, ...pluginsPath],
+          test: /\.(js|jsx|mjs)$/,
+          exclude: excludeRegex,
           use: {
             loader: require.resolve('esbuild-loader'),
             options: {
@@ -149,10 +152,7 @@ module.exports = ({
     },
     resolve: {
       alias,
-      symlinks: false,
       extensions: ['.js', '.jsx', '.react.js', '.ts', '.tsx'],
-      mainFields: ['browser', 'module', 'jsnext:main', 'main'],
-      modules: ['node_modules', path.resolve(__dirname, 'node_modules')],
     },
     plugins: [
       new HtmlWebpackPlugin({
@@ -166,9 +166,7 @@ module.exports = ({
           configFile: tsConfigFilePath,
         },
       }),
-
       !isProduction && process.env.REACT_REFRESH !== 'false' && new ReactRefreshWebpackPlugin(),
-
       ...webpackPlugins,
     ].filter(Boolean),
   };

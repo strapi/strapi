@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-graphql",
-  "version": "4.11.5",
+  "version": "4.13.7",
   "description": "Adds GraphQL endpoint with default API methods.",
   "repository": {
     "type": "git",
@@ -26,13 +26,13 @@
   "dependencies": {
     "@graphql-tools/schema": "8.5.1",
     "@graphql-tools/utils": "^8.13.1",
-    "@strapi/design-system": "1.8.2",
-    "@strapi/helper-plugin": "4.11.5",
-    "@strapi/icons": "1.8.2",
-    "@strapi/utils": "4.11.5",
-    "apollo-server-core": "3.12.0",
+    "@strapi/design-system": "1.10.1",
+    "@strapi/helper-plugin": "4.13.7",
+    "@strapi/icons": "1.10.1",
+    "@strapi/utils": "4.13.7",
+    "apollo-server-core": "3.12.1",
     "apollo-server-koa": "3.10.0",
-    "glob": "^7.1.7",
+    "glob": "7.2.3",
     "graphql": "^15.5.1",
     "graphql-depth-limit": "^1.1.0",
     "graphql-playground-middleware-koa": "^1.6.21",
@@ -45,7 +45,7 @@
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
-    "koa": "^2.13.4",
+    "koa": "2.13.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "5.3.4",
@@ -59,7 +59,7 @@
     "styled-components": "5.3.3"
   },
   "engines": {
-    "node": ">=14.19.1 <=18.x.x",
+    "node": ">=16.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {

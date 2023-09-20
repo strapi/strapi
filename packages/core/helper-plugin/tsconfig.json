@@ -1,0 +1,15 @@
+{
+  "extends": "tsconfig/client.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "moduleResolution": "Node16",
+    "paths": {
+      // workaround because @strapi/utils does not export types correctly.
+      "*": ["src/*", "declarations/*"],
+      "@tests/*": ["./tests/*"]
+    }
+  },
+  "include": ["declarations", "src", "tests", "jest.config.front.js", "webpack.config.js"],
+  "exclude": ["node_modules"],
+  "noImplicitAny": false,
+}

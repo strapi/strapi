@@ -26,7 +26,7 @@ jobs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: dorny/paths-filter@v2
@@ -42,7 +42,7 @@ jobs:
       matrix:
         node: [18]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-node@v3
@@ -53,8 +53,29 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
       - name: Run build:ts
         run: yarn nx run-many --target=build:ts --nx-ignore-cycles --skip-nx-cache
+      - name: Run build
+        run: yarn nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
       - name: Run lint
         run: yarn nx affected --target=lint --parallel --nx-ignore-cycles
+
+  typescript_front:
+    name: 'typescript_front'
+    needs: [changes, lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - uses: nrwl/nx-set-shas@v3
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Run build:ts for admin-test-utils & helper-plugin
+        run: yarn build --projects=@strapi/admin-test-utils,@strapi/helper-plugin --skip-nx-cache
+      - name: Run test
+        run: yarn nx affected --target=test:ts:front --nx-ignore-cycles
 
   unit_back:
     name: 'unit_back (node: ${{ matrix.node }})'
@@ -62,9 +83,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [14, 16, 18]
+        node: [16, 18, 20]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-node@v3
@@ -80,13 +101,13 @@ jobs:
 
   unit_front:
     name: 'unit_front (node: ${{ matrix.node }})'
-    needs: [changes, lint]
+    needs: [changes, lint, typescript_front]
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node: [18]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-node@v3
@@ -102,13 +123,13 @@ jobs:
 
   build:
     name: 'build (node: ${{ matrix.node }})'
-    needs: [changes, lint, unit_front]
+    needs: [changes, lint, typescript_front, unit_front]
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [14, 16, 18]
+        node: [16, 18, 20]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
@@ -117,6 +138,40 @@ jobs:
       - name: Build
         run: yarn build --projects=@strapi/admin,@strapi/helper-plugin
 
+  e2e:
+    timeout-minutes: 60
+    needs: [changes, lint, typescript_front, unit_front, build]
+    name: 'e2e (browser: ${{ matrix.project }})'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ['chromium', 'webkit', 'firefox']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+
+      - name: Install Playwright Browsers
+        # we need 1.37.0 to support Firefox install...
+        run: npx playwright@1.37.0-alpha-jul-20-2023 install --with-deps
+
+      - name: Run build:ts
+        run: yarn nx run-many --target=build:ts --nx-ignore-cycles --skip-nx-cache
+
+      - name: Run build
+        run: yarn nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
+
+      - name: Run E2E tests
+        run: yarn test:e2e --setup --concurrency=1 --project=${{ matrix.project }}
+
   api_ce_pg:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
@@ -124,7 +179,7 @@ jobs:
     name: '[CE] API Integration (postgres, node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [14, 16, 18]
+        node: [16, 18, 20]
     services:
       postgres:
         # Docker Hub image
@@ -145,7 +200,7 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
@@ -162,7 +217,7 @@ jobs:
     name: '[CE] API Integration (mysql:latest, client: ${{ matrix.db_client }}, node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [14, 16, 18]
+        node: [16, 18, 20]
         db_client: ['mysql', 'mysql2']
     services:
       mysql:
@@ -182,7 +237,7 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
@@ -199,7 +254,7 @@ jobs:
     name: '[CE] API Integration (mysql:5, client: ${{ matrix.db_client }} , node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [14, 16, 18]
+        node: [16, 18, 20]
         db_client: ['mysql', 'mysql2']
     services:
       mysql:
@@ -218,7 +273,7 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
@@ -235,10 +290,10 @@ jobs:
     name: '[CE] API Integration (sqlite, client: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [14, 16, 18]
+        node: [16, 18, 20]
         sqlite_pkg: ['better-sqlite3', 'sqlite3']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
@@ -260,7 +315,7 @@ jobs:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [14, 16, 18]
+        node: [16, 18, 20]
     services:
       postgres:
         # Docker Hub image
@@ -281,7 +336,7 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
@@ -301,7 +356,7 @@ jobs:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [14, 16, 18]
+        node: [16, 18, 20]
         db_client: ['mysql', 'mysql2']
     services:
       mysql:
@@ -321,7 +376,7 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
@@ -341,10 +396,10 @@ jobs:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [14, 16, 18]
+        node: [16, 18, 20]
         sqlite_pkg: ['better-sqlite3', 'sqlite3']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}

@@ -387,7 +387,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                 alt="strapi-cover_1fabc982ce.png"
                 aria-hidden="true"
                 class="c14"
-                src="http://localhost:1337/uploads/thumbnail_strapi_cover_1fabc982ce_5b43615ed5.png"
+                src="http://localhost:1337/uploads/thumbnail_strapi_cover_1fabc982ce_5b43615ed5.png?updatedAt=2021-09-14T07%3A32%3A50.816Z"
               />
             </div>
           </div>

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin-test-utils",
-  "version": "4.11.5",
+  "version": "4.13.7",
   "private": true,
   "description": "Test utilities for the Strapi administration panel",
   "license": "MIT",
@@ -42,9 +42,9 @@
     "whatwg-fetch": "3.6.2"
   },
   "devDependencies": {
-    "eslint-config-custom": "4.11.5",
+    "eslint-config-custom": "4.13.7",
     "redux": "^4.2.1",
-    "tsconfig": "4.11.5"
+    "tsconfig": "4.13.7"
   },
   "peerDependencies": {
     "redux": "^4.2.1"
@@ -57,6 +57,6 @@
     "lint": "run -T eslint ."
   },
   "engines": {
-    "node": ">=14.19.1 <=18.x.x"
+    "node": ">=16.0.0 <=20.x.x"
   }
 }

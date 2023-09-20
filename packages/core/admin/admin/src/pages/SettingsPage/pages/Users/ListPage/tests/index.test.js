@@ -104,10 +104,6 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
     jest.clearAllMocks();
   });
 
-  afterAll(() => {
-    jest.resetAllMocks();
-  });
-
   it('should show a list of users', async () => {
     const { getByText } = setup();
 

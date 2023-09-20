@@ -1,26 +1,17 @@
-import React, { memo, useContext, useReducer, useState } from 'react';
+import * as React from 'react';
 
 import {
-  Box,
   Button,
   ContentLayout,
   Divider,
+  Flex,
   HeaderLayout,
   Layout,
   Main,
 } from '@strapi/design-system';
-import {
-  ConfirmDialog,
-  Link,
-  useFetchClient,
-  useNotification,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { Link, useFetchClient, useNotification, useTracking } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
-import get from 'lodash/get';
-import isEmpty from 'lodash/isEmpty';
 import isEqual from 'lodash/isEqual';
-import pick from 'lodash/pick';
 import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
 import { stringify } from 'qs';
@@ -31,30 +22,32 @@ import ModelsContext from '../../contexts/ModelsContext';
 import { usePluginsQueryParams } from '../../hooks';
 import { checkIfAttributeIsDisplayable, getTrad } from '../../utils';
 
-import EditFieldForm from './components/EditFieldForm';
-import Settings from './components/Settings';
-import SortDisplayedFields from './components/SortDisplayedFields';
+import { EditFieldForm } from './components/EditFieldForm';
+import { Settings } from './components/Settings';
+import { SortDisplayedFields } from './components/SortDisplayedFields';
 import { EXCLUDED_SORT_ATTRIBUTE_TYPES } from './constants';
-import init from './init';
 import reducer, { initialState } from './reducer';
 
-const ListSettingsView = ({ layout, slug }) => {
+export const ListSettingsView = ({ layout, slug }) => {
   const { put } = useFetchClient();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const pluginsQueryParams = usePluginsQueryParams();
   const toggleNotification = useNotification();
-  const { refetchData } = useContext(ModelsContext);
-
-  const [showWarningSubmit, setWarningSubmit] = useState(false);
-  const toggleWarningSubmit = () => setWarningSubmit((prevState) => !prevState);
-  const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
-    init(initialState, layout)
+  const { refetchData } = React.useContext(ModelsContext);
+  const [{ fieldToEdit, fieldForm, initialData, modifiedData }, dispatch] = React.useReducer(
+    reducer,
+    initialState,
+    () => ({
+      ...initialState,
+      initialData: layout,
+      modifiedData: layout,
+    })
   );
-  const { fieldToEdit, fieldForm, initialData, modifiedData } = reducerState;
-  const isModalFormOpen = !isEmpty(fieldForm);
 
-  const { attributes } = layout;
+  const isModalFormOpen = Object.keys(fieldForm).length !== 0;
+
+  const { attributes, options } = layout;
   const displayedFields = modifiedData.layouts.list;
 
   const goBackUrl = () => {
@@ -84,10 +77,21 @@ const ListSettingsView = ({ layout, slug }) => {
     });
   };
 
-  const handleConfirm = async () => {
-    const body = pick(modifiedData, ['layouts', 'settings', 'metadatas']);
-    submitMutation.mutate(body);
-  };
+  const { isLoading: isSubmittingForm, mutate } = useMutation(
+    (body) => put(`/content-manager/content-types/${slug}/configuration`, body),
+    {
+      onSuccess() {
+        trackUsage('didEditListSettings');
+        refetchData();
+      },
+      onError() {
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
+      },
+    }
+  );
 
   const handleAddField = (item) => {
     dispatch({
@@ -112,9 +116,17 @@ const ListSettingsView = ({ layout, slug }) => {
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    toggleWarningSubmit();
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    const { layouts, settings, metadatas } = modifiedData;
+
+    mutate({
+      layouts,
+      settings,
+      metadatas,
+    });
+
     trackUsage('willSaveContentTypeLayout');
   };
 
@@ -139,23 +151,6 @@ const ListSettingsView = ({ layout, slug }) => {
     handleCloseModal();
   };
 
-  const submitMutation = useMutation(
-    (body) => put(`/content-manager/content-types/${slug}/configuration`, body),
-    {
-      onSuccess() {
-        trackUsage('didEditListSettings');
-        refetchData();
-      },
-      onError() {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error' },
-        });
-      },
-    }
-  );
-  const { isLoading: isSubmittingForm } = submitMutation;
-
   const handleChangeEditLabel = ({ target: { name, value } }) => {
     dispatch({
       type: 'ON_CHANGE_FIELD_METAS',
@@ -174,7 +169,10 @@ const ListSettingsView = ({ layout, slug }) => {
 
   const sortOptions = Object.entries(attributes)
     .filter(([, attribute]) => !EXCLUDED_SORT_ATTRIBUTE_TYPES.includes(attribute.type))
-    .map(([name]) => name);
+    .map(([name]) => ({
+      value: name,
+      label: layout.metadatas[name].list.label,
+    }));
 
   const move = (originalIndex, atIndex) => {
     dispatch({
@@ -217,8 +215,11 @@ const ListSettingsView = ({ layout, slug }) => {
             )}
           />
           <ContentLayout>
-            <Box
+            <Flex
+              alignItems="stretch"
               background="neutral0"
+              direction="column"
+              gap={6}
               hasRadius
               shadow="tableShadow"
               paddingTop={6}
@@ -227,13 +228,14 @@ const ListSettingsView = ({ layout, slug }) => {
               paddingRight={7}
             >
               <Settings
+                contentTypeOptions={options}
                 modifiedData={modifiedData}
                 onChange={handleChange}
                 sortOptions={sortOptions}
               />
-              <Box paddingTop={6} paddingBottom={6}>
-                <Divider />
-              </Box>
+
+              <Divider />
+
               <SortDisplayedFields
                 listRemainingFields={listRemainingFields}
                 displayedFields={displayedFields}
@@ -243,21 +245,10 @@ const ListSettingsView = ({ layout, slug }) => {
                 onRemoveField={handleRemoveField}
                 metadatas={modifiedData.metadatas}
               />
-            </Box>
+            </Flex>
           </ContentLayout>
-          <ConfirmDialog
-            bodyText={{
-              id: getTrad('popUpWarning.warning.updateAllSettings'),
-              defaultMessage: 'This will modify all your settings',
-            }}
-            iconRightButton={<Check />}
-            isConfirmButtonLoading={isSubmittingForm}
-            isOpen={showWarningSubmit}
-            onToggleDialog={toggleWarningSubmit}
-            onConfirm={handleConfirm}
-            variantRightButton="success-light"
-          />
         </form>
+
         {isModalFormOpen && (
           <EditFieldForm
             attributes={attributes}
@@ -266,7 +257,7 @@ const ListSettingsView = ({ layout, slug }) => {
             onChangeEditLabel={handleChangeEditLabel}
             onCloseModal={handleCloseModal}
             onSubmit={handleSubmitFieldEdit}
-            type={get(attributes, [fieldToEdit, 'type'], 'text')}
+            type={attributes?.[fieldToEdit]?.type ?? 'text'}
           />
         )}
       </Main>
@@ -295,5 +286,3 @@ ListSettingsView.propTypes = {
   }).isRequired,
   slug: PropTypes.string.isRequired,
 };
-
-export default memo(ListSettingsView);

@@ -1,5 +1,6 @@
 const browserslistToEsbuild = require('browserslist-to-esbuild');
 const { ESBuildMinifyPlugin } = require('esbuild-loader');
+const ForkTsCheckerPlugin = require('fork-ts-checker-webpack-plugin');
 const webpack = require('webpack');
 
 const packageJson = require('./package.json');
@@ -13,7 +14,7 @@ const nodeModules = [];
 
 /** @type {Omit<import('webpack').Configuration, 'output'>} */
 const baseConfig = {
-  entry: `${__dirname}/src/index.js`,
+  entry: `${__dirname}/src/index.ts`,
   externals: nodeModules,
   mode: process.env.NODE_ENV,
   devtool: process.env.NODE_ENV === 'production' ? false : 'eval-source-map',
@@ -28,11 +29,11 @@ const baseConfig = {
   module: {
     rules: [
       {
-        test: /\.m?jsx?$/,
+        test: /\.[jtm]sx?$/,
         use: {
           loader: require.resolve('esbuild-loader'),
           options: {
-            loader: 'jsx',
+            loader: 'tsx',
             target: browserslistToEsbuild(),
           },
         },
@@ -47,6 +48,9 @@ const baseConfig = {
         },
       },
     ],
+  },
+  resolve: {
+    extensions: ['.ts', '.js', '.tsx', '.jsx'],
   },
   plugins: [
     new webpack.EnvironmentPlugin({
@@ -70,6 +74,7 @@ const config = [
     experiments: {
       outputModule: true,
     },
+    plugins: [process.env.DTS ? new ForkTsCheckerPlugin() : undefined].filter((v) => v),
   },
   {
     ...baseConfig,

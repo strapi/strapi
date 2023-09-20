@@ -1,5 +1,5 @@
-import { ResizeObserver } from '@juggle/resize-observer';
 import { format } from 'util';
+import { ResizeObserver } from '@juggle/resize-observer';
 
 /* -------------------------------------------------------------------------------------------------
  * IntersectionObserver
@@ -35,12 +35,19 @@ const error = console.error;
 window.console = {
   ...window.console,
   error(...args: any[]) {
-    error(...args);
-
     const message = format(...args);
 
     if (/(Invalid prop|Failed prop type)/gi.test(message)) {
       throw new Error(message);
+
+      // Ignore errors thrown by styled-components. This can be removed once we upgrade
+      // to styled-components@6 and have separate props that are rendered in the DOM by
+      // the ones that aren't using the $ prefix.
+      // https://styled-components.com/docs/faqs#transient-as-and-forwardedas-props-have-been-dropped
+    } else if (/React does not recognize the .* prop on a DOM element/.test(message)) {
+      // do nothing
+    } else {
+      error(...args);
     }
   },
 };
@@ -116,6 +123,7 @@ window.URL.createObjectURL = jest
 
 document.createRange = () => {
   const range = new Range();
+  // @ts-expect-error we don't need to implement all the methods
   range.getClientRects = jest.fn(() => ({
     item: () => null,
     length: 0,

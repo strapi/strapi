@@ -1,42 +1,7 @@
 {
   "name": "@strapi/plugin-color-picker",
-  "version": "4.11.5",
+  "version": "4.13.7",
   "description": "Strapi maintained Custom Fields",
-  "strapi": {
-    "name": "color-picker",
-    "description": "Color picker custom field",
-    "kind": "plugin",
-    "displayName": "Color Picker"
-  },
-  "dependencies": {
-    "@strapi/design-system": "1.8.2",
-    "@strapi/helper-plugin": "4.11.5",
-    "@strapi/icons": "1.8.2",
-    "prop-types": "^15.8.1",
-    "react-colorful": "5.6.1",
-    "react-intl": "6.4.1"
-  },
-  "devDependencies": {
-    "@testing-library/react": "14.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "5.3.4",
-    "styled-components": "5.3.3"
-  },
-  "peerDependencies": {
-    "@strapi/strapi": "^4.4.0",
-    "react": "^17.0.0 || ^18.0.0",
-    "react-dom": "^17.0.0 || ^18.0.0",
-    "react-router-dom": "5.3.4",
-    "styled-components": "5.3.3"
-  },
-  "scripts": {
-    "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
-    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
-    "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
-    "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
-    "lint": "run -T eslint ."
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/strapi/strapi.git",
@@ -55,8 +20,76 @@
       "url": "https://strapi.io"
     }
   ],
+  "exports": {
+    "./strapi-admin": {
+      "types": "./dist/admin/index.d.ts",
+      "source": "./admin/src/index.ts",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.js"
+    },
+    "./strapi-server": {
+      "types": "./dist/server/index.d.ts",
+      "source": "./server/src/index.ts",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "./dist",
+    "strapi-server.js"
+  ],
+  "strapi": {
+    "name": "color-picker",
+    "description": "Color picker custom field",
+    "kind": "plugin",
+    "displayName": "Color Picker"
+  },
+  "scripts": {
+    "build": "NODE_ENV=production strapi plugin:build --force",
+    "watch": "run -T tsc -w --preserveWatchOutput",
+    "clean": "run -T rimraf ./dist",
+    "prepublishOnly": "yarn clean && yarn build",
+    "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
+    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
+    "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
+    "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
+    "test:ts:front": "run -T tsc -p admin/tsconfig.json",
+    "lint": "yarn lint:project && yarn lint:back && yarn lint:front",
+    "lint:project": "run -T eslint . -c ./.eslintrc.js",
+    "lint:back": "run -T eslint ./server -c ./server/.eslintrc.js",
+    "lint:front": "run -T eslint ./admin -c ./admin/.eslintrc.js"
+  },
+  "dependencies": {
+    "@strapi/design-system": "1.10.1",
+    "@strapi/helper-plugin": "4.13.7",
+    "@strapi/icons": "1.10.1",
+    "prop-types": "^15.8.1",
+    "react-colorful": "5.6.1",
+    "react-intl": "6.4.1"
+  },
+  "devDependencies": {
+    "@strapi/strapi": "4.13.7",
+    "@testing-library/react": "14.0.0",
+    "@testing-library/user-event": "14.4.3",
+    "@types/styled-components": "5.1.26",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "5.3.4",
+    "styled-components": "5.3.3",
+    "typescript": "5.2.2"
+  },
+  "peerDependencies": {
+    "@strapi/strapi": "^4.4.0",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0",
+    "react-router-dom": "5.3.4",
+    "styled-components": "5.3.3"
+  },
   "engines": {
-    "node": ">=14.19.1 <=18.x.x",
+    "node": ">=16.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   }
 }

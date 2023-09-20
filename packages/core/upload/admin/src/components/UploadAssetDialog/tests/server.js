@@ -14,5 +14,5 @@ export const server = setupServer(
     res(ctx.set('Content-Type', 'video/mp4'), ctx.body())
   ),
   rest.get('*/not-working-like-cors.lutin', (req, res, ctx) => res(ctx.json({}))),
-  rest.get('*/some-where-not-existing.jpg', (req, res) => res.networkError())
+  rest.get('*/some-where-not-existing.jpg', (req, res) => res.networkError('Failed to fetch'))
 );

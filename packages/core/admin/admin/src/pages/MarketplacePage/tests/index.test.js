@@ -1,33 +1,22 @@
 import React from 'react';
 
-import { fixtures } from '@strapi/admin-test-utils';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { TrackingProvider, useAppInfo, useTracking } from '@strapi/helper-plugin';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { NotificationsProvider, useAppInfo, useTracking } from '@strapi/helper-plugin';
+import { fireEvent, render as renderRTL, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { Provider } from 'react-redux';
-import { Router } from 'react-router-dom';
-import { createStore } from 'redux';
+import { MemoryRouter } from 'react-router-dom';
 
-import useNavigatorOnLine from '../../../hooks/useNavigatorOnLine';
-import MarketPlacePage from '../index';
+import { MarketPlacePage } from '../index';
 
 import server from './server';
-
-const toggleNotification = jest.fn();
 
 jest.mock('../../../hooks/useNavigatorOnLine', () => jest.fn(() => true));
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
-  useNotification: jest.fn(() => {
-    return toggleNotification;
-  }),
-  CheckPagePermissions: ({ children }) => children,
   useAppInfo: jest.fn(() => ({
     autoReload: true,
     dependencies: {
@@ -39,10 +28,9 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-const setup = (props) => ({
-  ...render(<MarketPlacePage {...props} />, {
+const render = (props) => ({
+  ...renderRTL(<MarketPlacePage {...props} />, {
     wrapper({ children }) {
-      const history = createMemoryHistory();
       const client = new QueryClient({
         defaultOptions: {
           queries: {
@@ -52,30 +40,23 @@ const setup = (props) => ({
       });
 
       return (
-        <Provider
-          store={createStore((state) => state, {
-            admin_app: { permissions: fixtures.permissions.app },
-          })}
-        >
-          <QueryClientProvider client={client}>
-            <TrackingProvider>
-              <IntlProvider locale="en" messages={{}} textComponent="span">
-                <ThemeProvider theme={lightTheme}>
-                  <Router history={history}>{children}</Router>
-                </ThemeProvider>
-              </IntlProvider>
-            </TrackingProvider>
-          </QueryClientProvider>
-        </Provider>
+        <QueryClientProvider client={client}>
+          <IntlProvider locale="en" messages={{}} textComponent="span">
+            <ThemeProvider theme={lightTheme}>
+              <NotificationsProvider>
+                <MemoryRouter>{children}</MemoryRouter>
+              </NotificationsProvider>
+            </ThemeProvider>
+          </IntlProvider>
+        </QueryClientProvider>
       );
     },
   }),
-
   user: userEvent.setup(),
 });
 
 const waitForReload = async () => {
-  await screen.findByTestId('marketplace-results');
+  await waitFor(() => expect(screen.queryByText('Loading content...')).not.toBeInTheDocument());
 };
 
 describe('Marketplace page - layout', () => {
@@ -91,34 +72,21 @@ describe('Marketplace page - layout', () => {
     const trackUsage = jest.fn();
     useTracking.mockImplementationOnce(() => ({ trackUsage }));
 
-    const { container } = setup();
+    const { queryByText, getByRole } = render();
     await waitForReload();
-    // Check snapshot
-    expect(container.firstChild).toMatchSnapshot();
     // Calls the tracking event
     expect(trackUsage).toHaveBeenCalledWith('didGoToMarketplace');
     expect(trackUsage).toHaveBeenCalledTimes(1);
-    const offlineText = screen.queryByText('You are offline');
-    expect(offlineText).toEqual(null);
+
+    expect(queryByText('You are offline')).toEqual(null);
     // Shows the sort button
-    const sortButton = screen.getByRole('combobox', { name: /Sort by/i });
-    expect(sortButton).toBeVisible();
+    expect(getByRole('combobox', { name: /Sort by/i })).toBeVisible();
     // Shows the filters button
-    const filtersButton = screen.getByText(/Filters/i).closest('button');
-    expect(filtersButton).toBeVisible();
-  });
-
-  it('renders the offline layout', async () => {
-    useNavigatorOnLine.mockReturnValueOnce(false);
-    const { getByText } = setup();
-
-    const offlineText = getByText('You are offline');
-
-    expect(offlineText).toBeVisible();
+    expect(getByRole('button', { name: 'Filters' })).toBeVisible();
   });
 
   it('disables the button and shows compatibility tooltip message when version provided', async () => {
-    const { findByTestId, findAllByTestId } = setup();
+    const { findByTestId, findAllByTestId } = render();
 
     const alreadyInstalledCard = (await findAllByTestId('npm-package-card')).find((div) =>
       div.innerHTML.includes('Transformer')
@@ -137,7 +105,7 @@ describe('Marketplace page - layout', () => {
   });
 
   it('shows compatibility tooltip message when no version provided', async () => {
-    const { findByTestId, findAllByTestId, user } = setup();
+    const { findByTestId, findAllByTestId, user } = render();
 
     const alreadyInstalledCard = (await findAllByTestId('npm-package-card')).find((div) =>
       div.innerHTML.includes('Config Sync')
@@ -147,7 +115,7 @@ describe('Marketplace page - layout', () => {
       .getByText(/copy install command/i)
       .closest('button');
 
-    user.hover(button);
+    await user.hover(button);
     const tooltip = await findByTestId(`tooltip-Config Sync`);
 
     expect(button).not.toBeDisabled();
@@ -165,25 +133,16 @@ describe('Marketplace page - layout', () => {
       useYarn: true,
     }));
 
-    const { queryByText } = setup();
+    const { queryByText, getByText } = render();
     await waitForReload();
 
-    // Should display notification
-    expect(toggleNotification).toHaveBeenCalledWith({
-      type: 'info',
-      message: {
-        id: 'admin.pages.MarketPlacePage.production',
-        defaultMessage: 'Manage plugins from the development environment',
-      },
-      blockTransition: true,
-    });
-    expect(toggleNotification).toHaveBeenCalledTimes(1);
+    expect(getByText('Manage plugins from the development environment')).toBeVisible();
     // Should not show install buttons
     expect(queryByText(/copy install command/i)).toEqual(null);
   });
 
   it('shows only downloads count and not github stars if there are no or 0 stars and no downloads available for any package', async () => {
-    const { findByText, findAllByTestId, user } = setup();
+    const { findByText, findAllByTestId, user } = render();
 
     const providersTab = (await findByText(/providers/i)).closest('button');
     await user.click(providersTab);
