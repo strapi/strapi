@@ -381,6 +381,7 @@ const LinkButton = () => {
   const domNodeRef = React.useRef(null);
   const editor = useSlate();
   const { selection } = editor;
+  const { formatMessage } = useIntl();
 
   const isLinkActive = () => {
     if (!selection) return false;
@@ -440,22 +441,43 @@ const LinkButton = () => {
         >
           <Flex as="form" onSubmit={saveLink} direction="column" gap={4}>
             <Field width="300px">
-              <FieldLabel>Text</FieldLabel>
+              <FieldLabel>
+                {formatMessage({
+                  id: 'components.Blocks.popover.text',
+                  defaultMessage: 'Text',
+                })}
+              </FieldLabel>
               <FieldInput
                 name="text"
-                placeholder="This text is the text of the link"
+                placeholder={formatMessage({
+                  id: 'components.Blocks.popover.text.placeholder',
+                  defaultMessage: 'This text is the text of the link',
+                })}
                 defaultValue={Editor.string(editor, selection)}
               />
             </Field>
             <Field width="300px">
-              <FieldLabel>Link</FieldLabel>
+              <FieldLabel>
+                {formatMessage({
+                  id: 'components.Blocks.popover.link',
+                  defaultMessage: 'Link',
+                })}
+              </FieldLabel>
               <FieldInput name="url" placeholder="https://strapi.io" />
             </Field>
             <Flex justifyContent="end" width="100%" gap={2}>
               <Button variant="tertiary" onClick={() => setPopoverOpen(false)}>
-                Cancel
+                {formatMessage({
+                  id: 'components.Blocks.popover.cancel',
+                  defaultMessage: 'Cancel',
+                })}
               </Button>
-              <Button type="submit">Save</Button>
+              <Button type="submit">
+                {formatMessage({
+                  id: 'components.Blocks.popover.save',
+                  defaultMessage: 'Save',
+                })}
+              </Button>
             </Flex>
           </Flex>
         </Popover>
