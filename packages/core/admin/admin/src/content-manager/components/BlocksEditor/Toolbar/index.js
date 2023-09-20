@@ -127,7 +127,18 @@ const toggleBlock = (editor, value) => {
     level: level || null,
   };
 
-  Transforms.setNodes(editor, newProperties);
+  const isAboveParagraph =
+    editor.selection && Editor.above(editor, { match: (n) => n.type === 'paragraph' });
+  const isAboveHeading =
+    editor.selection && Editor.above(editor, { match: (n) => n.type === 'heading' });
+
+  if (isAboveParagraph) {
+    Transforms.setNodes(editor, newProperties, { match: (n) => n.type === 'paragraph' });
+  } else if (isAboveHeading) {
+    Transforms.setNodes(editor, newProperties, { match: (n) => n.type === 'heading' });
+  } else {
+    Transforms.setNodes(editor, newProperties);
+  }
 };
 
 const BlocksDropdown = () => {
