@@ -64,7 +64,7 @@ exports[`SelectTree renders 1`] = `
           class="css-1f43avz-a11yText-A11yText"
         />
         <div
-          class=" css-1ckpxei-control"
+          class=" css-1ioi85f-control"
         >
           <div
             class=" css-onz4xi-ValueContainer"
@@ -87,7 +87,7 @@ exports[`SelectTree renders 1`] = `
             />
           </div>
           <div
-            class=" css-1hb7zxy-IndicatorsContainer"
+            class=" css-1hm8yhz-IndicatorsContainer"
           >
             <div
               aria-hidden="true"
@@ -195,7 +195,7 @@ exports[`SelectTree renders 1`] = `
         class="css-1f43avz-a11yText-A11yText"
       />
       <div
-        class=" css-1ckpxei-control"
+        class=" css-1ioi85f-control"
       >
         <div
           class=" css-onz4xi-ValueContainer"
@@ -218,7 +218,7 @@ exports[`SelectTree renders 1`] = `
           />
         </div>
         <div
-          class=" css-1hb7zxy-IndicatorsContainer"
+          class=" css-1hm8yhz-IndicatorsContainer"
         >
           <div
             aria-hidden="true"
