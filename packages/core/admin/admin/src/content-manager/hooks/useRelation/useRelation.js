@@ -168,7 +168,7 @@ export const useRelation = (cacheKey, { relation, search }) => {
     setSearchParams({
       ...options,
       _q: term,
-      _m: 'startsWithi',
+      _filter: 'startsWithi',
     });
   };
 
