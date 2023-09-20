@@ -5,7 +5,8 @@ import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
 import Blocks from '../index';
-import { blocksData } from '../tempSchema';
+
+import { blocksData } from './mock-schema';
 
 const setup = (props) =>
   render(

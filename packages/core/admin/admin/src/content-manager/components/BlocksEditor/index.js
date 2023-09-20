@@ -57,6 +57,16 @@ const BlocksEditor = React.forwardRef(
       [editor]
     );
 
+    const handleSlateChange = (state) => {
+      const isAstChange = editor.operations.some((op) => op.type !== 'set_selection');
+
+      if (isAstChange) {
+        onChange({
+          target: { name, value: state, type: 'blocks' },
+        });
+      }
+    };
+
     return (
       <>
         <Flex direction="column" alignItems="stretch" gap={1}>
@@ -69,15 +79,7 @@ const BlocksEditor = React.forwardRef(
           <Slate
             editor={editor}
             initialValue={value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]}
-            onChange={(state) => {
-              const isAstChange = editor.operations.some((op) => op.type !== 'set_selection');
-
-              if (isAstChange) {
-                onChange({
-                  target: { name, value: state, type: 'blocks' },
-                });
-              }
-            }}
+            onChange={handleSlateChange}
           >
             <InputWrapper direction="column" alignItems="flex-start">
               <BlocksToolbar />
