@@ -6,11 +6,15 @@ import { IntlProvider } from 'react-intl';
 
 import Blocks from '../index';
 
+import { blocksData } from './mock-schema';
+
 const setup = (props) =>
   render(
     <Blocks
       intlLabel={{ id: 'blocks', defaultMessage: 'blocks type' }}
       name="blocks-editor"
+      value={blocksData}
+      onChange={jest.fn()}
       {...props}
     />,
     {
