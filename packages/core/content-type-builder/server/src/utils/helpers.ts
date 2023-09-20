@@ -1,5 +1,3 @@
-'use strict';
-
 const escapeNewlines = (content = '', placeholder = '\n') => {
   return content.replace(/[\r\n]+/g, placeholder);
 };

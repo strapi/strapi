@@ -1,7 +1,5 @@
 /* eslint-disable no-template-curly-in-string */ // yup templates need to be in this format
 
-'use strict';
-
 const { flatMap, getOr, has } = require('lodash/fp');
 const { yup, validateYupSchema } = require('@strapi/utils');
 

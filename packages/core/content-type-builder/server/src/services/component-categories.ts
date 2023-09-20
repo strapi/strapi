@@ -1,5 +1,3 @@
-'use strict';
-
 const { join } = require('path');
 
 const { nameToSlug } = require('@strapi/utils');

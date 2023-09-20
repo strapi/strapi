@@ -1,5 +1,3 @@
-'use strict';
-
 const { yup, validateYupSchema } = require('@strapi/utils');
 
 const { isValidCategoryName } = require('./common');

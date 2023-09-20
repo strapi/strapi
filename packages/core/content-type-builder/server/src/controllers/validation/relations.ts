@@ -1,5 +1,3 @@
-'use strict';
-
 const { isUndefined } = require('lodash/fp');
 const { yup } = require('@strapi/utils');
 const { typeKinds, coreUids } = require('../../services/constants');

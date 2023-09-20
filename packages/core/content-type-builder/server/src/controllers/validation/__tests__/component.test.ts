@@ -1,5 +1,3 @@
-'use strict';
-
 const componentValidation = require('../component');
 
 describe('Component validator', () => {

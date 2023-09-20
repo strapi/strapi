@@ -1,10 +1,14 @@
-'use strict';
+import components from '../services/components';
+import * as builder from '../services/builder';
+import * as contentTypes from '../services/content-types';
 
-// retrieve a local service
-const getService = (name) => {
-  return strapi.plugin('content-type-builder').service(name);
+type S = {
+  ['content-types']: typeof contentTypes;
+  components: typeof components;
+  builder: typeof builder;
 };
 
-module.exports = {
-  getService,
+// retrieve a local service
+export const getService = <T extends keyof S>(name: T): ReturnType<S[T]> => {
+  return strapi.plugin('content-type-builder').service(name);
 };

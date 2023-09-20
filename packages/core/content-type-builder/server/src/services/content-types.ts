@@ -1,18 +1,17 @@
-'use strict';
+import _ from 'lodash';
+import { getOr } from 'lodash/fp';
 
-const _ = require('lodash');
-const { getOr } = require('lodash/fp');
+import { contentTypes as contentTypesUtils } from '@strapi/utils';
+import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
+import createBuilder from './schema-builder';
+import { coreUids, pluginsUids } from './constants';
 
-const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
-const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
-const createBuilder = require('./schema-builder');
-const { coreUids, pluginsUids } = require('./constants');
 
-const isContentTypeVisible = (model) =>
+export const isContentTypeVisible = (model) =>
   getOr(true, 'pluginOptions.content-type-builder.visible', model) === true;
 
-const getRestrictRelationsTo = (contentType = {}) => {
+export const getRestrictRelationsTo = (contentType = {}) => {
   const { uid } = contentType;
   if (uid === coreUids.STRAPI_USER) {
     // TODO: replace with an obj { relation: 'x', bidirectional: true|false }
@@ -57,7 +56,7 @@ const formatContentType = (contentType) => {
   };
 };
 
-const createContentTypes = async (contentTypes) => {
+export const createContentTypes = async (contentTypes) => {
   const builder = createBuilder();
   const createdContentTypes = [];
 
@@ -78,7 +77,7 @@ const createContentTypes = async (contentTypes) => {
  * @param {Object} options
  * @param {Builder} options.defaultBuilder
  */
-const createContentType = async ({ contentType, components = [] }, options = {}) => {
+export const createContentType = async ({ contentType, components = [] }, options = {}) => {
   const builder = options.defaultBuilder || createBuilder();
   const uidMap = builder.createNewComponentUIDMap(components);
 
@@ -129,7 +128,7 @@ const createContentType = async ({ contentType, components = [] }, options = {})
  * Generate an API squeleton
  * @param {string} name
  */
-const generateAPI = ({ singularName, kind = 'collectionType', pluralName, displayName }) => {
+export const generateAPI = ({ singularName, kind = 'collectionType', pluralName, displayName }) => {
   const strapiGenerators = require('@strapi/generators');
   return strapiGenerators.generate(
     'content-type',
@@ -154,7 +153,7 @@ const generateAPI = ({ singularName, kind = 'collectionType', pluralName, displa
  * @param {Object} params.contentType Main contentType to create
  * @param {Array<Object>} params.components List of nested components to created or edit
  */
-const editContentType = async (uid, { contentType, components = [] }) => {
+export const editContentType = async (uid, { contentType, components = [] }) => {
   const builder = createBuilder();
 
   const previousSchema = builder.contentTypes.get(uid).schema;
@@ -230,7 +229,7 @@ const editContentType = async (uid, { contentType, components = [] }) => {
   return updatedContentType;
 };
 
-const deleteContentTypes = async (uids) => {
+export const deleteContentTypes = async (uids) => {
   const builder = createBuilder();
   const apiHandler = strapi.plugin('content-type-builder').service('api-handler');
 
@@ -254,7 +253,7 @@ const deleteContentTypes = async (uids) => {
  * @param {string} uid content type uid
  * @param defaultBuilder
  */
-const deleteContentType = async (uid, defaultBuilder = undefined) => {
+export const deleteContentType = async (uid, defaultBuilder = undefined) => {
   const builder = defaultBuilder || createBuilder();
   // make a backup
   const apiHandler = strapi.plugin('content-type-builder').service('api-handler');
@@ -275,12 +274,3 @@ const deleteContentType = async (uid, defaultBuilder = undefined) => {
 
   return contentType;
 };
-
-module.exports = () => ({
-  createContentType,
-  editContentType,
-  deleteContentType,
-  formatContentType,
-  createContentTypes,
-  deleteContentTypes,
-});

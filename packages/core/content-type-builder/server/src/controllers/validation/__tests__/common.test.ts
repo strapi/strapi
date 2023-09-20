@@ -1,5 +1,3 @@
-'use strict';
-
 const { yup } = require('@strapi/utils');
 const { isValidName } = require('../common');
 

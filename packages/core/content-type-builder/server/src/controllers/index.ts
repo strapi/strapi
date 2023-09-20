@@ -1,5 +1,3 @@
-'use strict';
-
 const builder = require('./builder');
 const componentCategories = require('./component-categories');
 const components = require('./components');

@@ -1,5 +1,3 @@
-'use strict';
-
 const { getService } = require('../utils');
 const validateComponentCategory = require('./validation/component-category');
 

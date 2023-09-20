@@ -1,5 +1,3 @@
-'use strict';
-
 const { join } = require('path');
 const _ = require('lodash');
 const { ApplicationError } = require('@strapi/utils').errors;

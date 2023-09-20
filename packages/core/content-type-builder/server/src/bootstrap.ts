@@ -1,5 +1,3 @@
-'use strict';
-
 module.exports = async ({ strapi }) => {
   const actions = [
     {

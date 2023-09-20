@@ -1,5 +1,3 @@
-'use strict';
-
 const { yup, startsWithANumber } = require('@strapi/utils');
 const _ = require('lodash');
 

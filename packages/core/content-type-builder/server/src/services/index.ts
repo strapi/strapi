@@ -1,5 +1,3 @@
-'use strict';
-
 const contentTypes = require('./content-types');
 const components = require('./components');
 const componentCategories = require('./component-categories');

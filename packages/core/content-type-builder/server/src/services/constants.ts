@@ -1,5 +1,3 @@
-'use strict';
-
 const CONTENT_TYPE = 'CONTENT_TYPE';
 const COMPONENT = 'COMPONENT';
 

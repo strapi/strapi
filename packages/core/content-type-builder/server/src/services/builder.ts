@@ -1,6 +1,4 @@
-'use strict';
-
-module.exports = () => ({
+export default () => ({
   getReservedNames() {
     return {
       models: ['boolean', 'date', 'date-time', 'dateTime', 'time', 'upload'],

@@ -1,16 +1,15 @@
-'use strict';
+import { UID, Schema } from '@strapi/types';
+import { get, has } from 'lodash';
 
-const _ = require('lodash');
-
-const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
-const createBuilder = require('./schema-builder');
+import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
+import createBuilder from './schema-builder';
 
 /**
  * Formats a component attributes
  * @param {string} uid - string
  * @param {Object} component - strapi component model
  */
-const formatComponent = (component) => {
+export const formatComponent = (component: Schema.Component) => {
   const { uid, modelName, connection, collectionName, info, category } = component;
 
   return {
@@ -18,9 +17,9 @@ const formatComponent = (component) => {
     category,
     apiId: modelName,
     schema: {
-      displayName: _.get(info, 'displayName'),
-      description: _.get(info, 'description', ''),
-      icon: _.get(info, 'icon'),
+      displayName: get(info, 'displayName'),
+      description: get(info, 'description', ''),
+      icon: get(info, 'icon'),
       connection,
       collectionName,
       pluginOptions: component.pluginOptions,
@@ -35,7 +34,7 @@ const formatComponent = (component) => {
  * @param {Object} params.component Main component to create
  * @param {Array<Object>} params.components List of nested components to created or edit
  */
-const createComponent = async ({ component, components = [] }) => {
+export const createComponent = async ({ component, components = [] }) => {
   const builder = createBuilder();
 
   const uidMap = builder.createNewComponentUIDMap(components);
@@ -44,7 +43,7 @@ const createComponent = async ({ component, components = [] }) => {
   const newComponent = builder.createComponent(replaceTmpUIDs(component));
 
   components.forEach((component) => {
-    if (!_.has(component, 'uid')) {
+    if (!has(component, 'uid')) {
       return builder.createComponent(replaceTmpUIDs(component));
     }
 
@@ -58,13 +57,15 @@ const createComponent = async ({ component, components = [] }) => {
   return newComponent;
 };
 
-/**
- * Edits a component and handle the nested components sent with it
- * @param {Object} params params object
- * @param {Object} params.component Main component to create
- * @param {Array<Object>} params.components List of nested components to created or edit
- */
-const editComponent = async (uid, { component, components = [] }) => {
+type ComponentToCreate = {
+  component: Schema.Component;
+  components?: Schema.Component[];
+};
+
+export const editComponent = async (
+  uid: UID.Component,
+  { component, components = [] }: ComponentToCreate
+) => {
   const builder = createBuilder();
 
   const uidMap = builder.createNewComponentUIDMap(components);
@@ -76,7 +77,7 @@ const editComponent = async (uid, { component, components = [] }) => {
   });
 
   components.forEach((component) => {
-    if (!_.has(component, 'uid')) {
+    if (!has(component, 'uid')) {
       return builder.createComponent(replaceTmpUIDs(component));
     }
 
@@ -90,7 +91,7 @@ const editComponent = async (uid, { component, components = [] }) => {
   return updatedComponent;
 };
 
-const deleteComponent = async (uid) => {
+export const deleteComponent = async (uid: UID.Component) => {
   const builder = createBuilder();
 
   const deletedComponent = builder.deleteComponent(uid);
@@ -101,11 +102,3 @@ const deleteComponent = async (uid) => {
 
   return deletedComponent;
 };
-
-module.exports = () => ({
-  createComponent,
-  editComponent,
-  deleteComponent,
-
-  formatComponent,
-});
