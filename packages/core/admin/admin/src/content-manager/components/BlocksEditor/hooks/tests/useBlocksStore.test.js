@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { render, screen, renderHook, act } from '@testing-library/react';
+import { render, screen, renderHook } from '@testing-library/react';
 import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
 import { createEditor, Editor, Transforms } from 'slate';

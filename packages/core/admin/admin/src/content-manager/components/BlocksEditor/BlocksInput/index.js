@@ -52,11 +52,11 @@ const BlocksInput = ({ readOnly }) => {
 
   const handleEnter = () => {
     const selectedNode = editor.children[editor.selection.anchor.path[0]];
-    const block = Object.values(blocks).find((block) => block.matchNode(selectedNode));
+    const selectedBlock = Object.values(blocks).find((block) => block.matchNode(selectedNode));
 
     // Check if there's an enter handler for the selected block
-    if (block.handleEnterKey) {
-      block.handleEnterKey(editor);
+    if (selectedBlock.handleEnterKey) {
+      selectedBlock.handleEnterKey(editor);
     } else {
       // If not, insert a new paragraph
       Transforms.insertNodes(editor, {
