@@ -483,13 +483,13 @@ class TransferEngine<
 
     // everything is included by default unless 'only' has been set
     let included = isEmpty(only);
-    if (only?.length > 0) {
+    if (only && only.length > 0) {
       included = only.some((transferGroup) => {
         return TransferGroupPresets[transferGroup][stage];
       });
     }
 
-    if (exclude?.length > 0) {
+    if (exclude && exclude.length > 0) {
       if (included) {
         included = !exclude.some((transferGroup) => {
           return TransferGroupPresets[transferGroup][stage];
