@@ -111,9 +111,9 @@ export default async (opts: CmdOptions) => {
   const engine = createTransferEngine(source, destination, {
     versionStrategy: 'exact',
     schemaStrategy: 'strict',
-    exclude: opts.exclude ?? [],
-    only: opts.only ?? [],
-    throttle: opts.throttle ?? 0,
+    exclude: opts.exclude,
+    only: opts.only,
+    throttle: opts.throttle,
     transforms: {
       links: [
         {
