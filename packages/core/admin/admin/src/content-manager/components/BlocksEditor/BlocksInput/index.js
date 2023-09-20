@@ -69,7 +69,6 @@ const BlocksInput = ({ readOnly }) => {
   const handleKeyDown = (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
-      console.log('handle enter!!!');
       handleEnter();
     }
   };
