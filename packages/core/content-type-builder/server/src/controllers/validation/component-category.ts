@@ -7,4 +7,4 @@ const componentCategorySchema = yup
   })
   .noUnknown();
 
-module.exports = validateYupSchema(componentCategorySchema);
+export default validateYupSchema(componentCategorySchema);

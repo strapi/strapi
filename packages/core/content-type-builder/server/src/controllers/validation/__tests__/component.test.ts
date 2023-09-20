@@ -1,3 +1,4 @@
+import { Attribute, Schema } from '@strapi/types';
 import { validateComponentInput, validateUpdateComponentInput } from '../component';
 
 const componentValidation = {
@@ -41,7 +42,7 @@ describe('Component validator', () => {
             },
           },
         },
-      };
+      } as any; // TODO TS: use yup.schemaOf
 
       expect.assertions(1);
 
@@ -64,7 +65,7 @@ describe('Component validator', () => {
             },
           },
         },
-      };
+      } as any; // TODO TS: use yup.schemaOf
 
       expect.assertions(1);
 
@@ -87,7 +88,7 @@ describe('Component validator', () => {
             },
           },
         },
-      };
+      } as any; // TODO TS: use yup.schemaOf
 
       expect.assertions(1);
 

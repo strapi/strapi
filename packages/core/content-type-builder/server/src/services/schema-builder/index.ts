@@ -12,7 +12,7 @@ const { ApplicationError } = require('@strapi/utils').errors;
  *
  * @returns {object} content type schema builder
  */
-module.exports = function createBuilder() {
+export default function createBuilder() {
   const components = Object.keys(strapi.components).map((key) => {
     const compo = strapi.components[key];
 
@@ -60,7 +60,7 @@ module.exports = function createBuilder() {
     components,
     contentTypes,
   });
-};
+}
 
 /**
  * Schema builder

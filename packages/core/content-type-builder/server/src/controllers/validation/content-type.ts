@@ -5,7 +5,7 @@ import { yup, validateYupSchema } from '@strapi/utils';
 
 import { getService } from '../../utils';
 import { modelTypes, DEFAULT_TYPES, typeKinds } from '../../services/constants';
-import createSchema from './model-schema';
+import { createSchema } from './model-schema';
 import { removeEmptyDefaults, removeDeletedUIDTargetFields } from './data-transform';
 import { nestedComponentSchema } from './component';
 

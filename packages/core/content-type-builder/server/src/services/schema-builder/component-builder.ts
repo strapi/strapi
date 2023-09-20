@@ -8,7 +8,7 @@ import createSchemaHandler from './schema-handler';
 
 const { ApplicationError } = require('@strapi/utils').errors;
 
-module.exports = function createComponentBuilder() {
+export default function createComponentBuilder() {
   return {
     /**
      * Returns a uid from a component infos
@@ -134,4 +134,4 @@ module.exports = function createComponentBuilder() {
       return this.components.get(uid).delete();
     },
   };
-};
+}

@@ -1,12 +1,13 @@
 import { isUndefined } from 'lodash/fp';
 import { yup } from '@strapi/utils';
+import { Attribute, Schema } from '@strapi/types';
 import { typeKinds, coreUids } from '../../services/constants';
-import { isValidName } from './common';
+import { CommonTestConfig, isValidName } from './common';
 
 const STRAPI_USER_RELATIONS = ['oneToOne', 'oneToMany'];
 
-const isValidRelation = (validNatures) =>
-  function (value) {
+const isValidRelation = (validNatures: string[]) =>
+  function (value: string) {
     if (this.parent.target === coreUids.STRAPI_USER) {
       if (!validNatures.includes(value) || !isUndefined(this.parent.targetAttribute)) {
         return this.createError({
@@ -24,9 +25,12 @@ const isValidRelation = (validNatures) =>
         });
   };
 
-export const getRelationValidator = (attribute, allowedRelations) => {
+export const getRelationValidator = (
+  attribute: Attribute.Relation,
+  allowedRelations: Record<string, Attribute.Relation>
+) => {
   const contentTypesUIDs = Object.keys(strapi.contentTypes)
-    .filter((key) => strapi.contentTypes[key].kind === typeKinds.COLLECTION_TYPE)
+    .filter((key) => strapi.contentTypes[key as any].kind === typeKinds.COLLECTION_TYPE)
     .filter((key) => !key.startsWith(coreUids.PREFIX) || key === coreUids.STRAPI_USER)
     .concat(['__self__', '__contentType__']);
 

@@ -1,9 +1,12 @@
-import path from 'path';
-import fse from 'fs-extra';
+import * as path from 'path';
+import * as fse from 'fs-extra';
 import _ from 'lodash';
+import { Schema } from '@strapi/types';
+
 import { isConfigurable } from '../../utils/attributes';
 
-module.exports = function createSchemaHandler(infos) {
+// TODO TS: infos should be the input of
+export default (infos: any) => {
   const { category, modelName, plugin, uid, dir, filename, schema } = infos;
 
   const initialState = {

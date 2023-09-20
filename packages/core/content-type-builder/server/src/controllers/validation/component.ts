@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { yup, validateYupSchema } from '@strapi/utils';
 
+import { Attribute } from '@strapi/types';
 import { modelTypes, DEFAULT_TYPES } from '../../services/constants';
 import { isValidCategoryName, isValidIcon } from './common';
 import { createSchema } from './model-schema';
@@ -20,7 +21,7 @@ export const componentSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
   .required()
   .noUnknown();
 
-const nestedComponentSchema = yup.array().of(
+export const nestedComponentSchema = yup.array().of(
   componentSchema
     .shape({
       uid: yup.string(),
@@ -29,7 +30,7 @@ const nestedComponentSchema = yup.array().of(
     .test({
       name: 'mustHaveUIDOrTmpUID',
       message: 'Component must have a uid or a tmpUID',
-      test(attr) {
+      test(attr: unknown) {
         if (_.has(attr, 'uid') && _.has(attr, 'tmpUID')) return false;
         if (!_.has(attr, 'uid') && !_.has(attr, 'tmpUID')) return false;
         return true;
@@ -39,7 +40,7 @@ const nestedComponentSchema = yup.array().of(
     .noUnknown()
 );
 
-const componentInputSchema = yup
+export const componentInputSchema = yup
   .object({
     component: componentSchema,
     components: nestedComponentSchema,
@@ -55,7 +56,10 @@ const updateComponentInputSchema = yup
   })
   .noUnknown();
 
-export const validateUpdateComponentInput = (data) => {
+export const validateUpdateComponentInput = (data: {
+  component?: Attribute.Component;
+  components?: Attribute.Component[];
+}) => {
   if (_.has(data, 'component')) {
     removeEmptyDefaults(data.component);
   }
