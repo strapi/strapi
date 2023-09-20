@@ -169,6 +169,8 @@
   "modelPage.attribute.relation-polymorphic": "Relation (polymorphic)",
   "modelPage.attribute.relationWith": "Relation with",
   "notification.error.dynamiczone-min.validation": "At least one component is required in a dynamic zone to be able to save a content type",
+  "notification.error.invalid-verification-code": "Invalid verification code",
+  "notification.error.internal-error": "Something went wrong!",
   "notification.info.autoreaload-disable": "Strapi is in production mode, editing content types is disabled. Please switch to development mode by starting your server with strapi develop.",
   "notification.info.creating.notSaved": "Please save your work before creating a new collection type or component",
   "plugin.description.long": "Modelize the data structure of your API. Create new fields and relations in just a minute. The files are automatically created and updated in your project.",

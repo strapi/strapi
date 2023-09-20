@@ -10,6 +10,7 @@ import { Redirect, useHistory, useRouteMatch } from 'react-router-dom';
 
 import persistStateToLocaleStorage from '../../components/GuidedTour/utils/persistStateToLocaleStorage';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
+import getTrad from '../../content-manager/utils/getTrad';
 import { useEnterprise } from '../../hooks/useEnterprise';
 import formatAPIErrors from '../../utils/formatAPIErrors';
 
@@ -134,9 +135,9 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       redirectToPreviousLocation();
     } catch (err) {
       if (err?.response?.status === 403) {
-        setErrors({ errorMessage: 'Invalid verification code' });
+        setErrors({ errorMessage: getTrad('notification.error.invalid-verification-code') });
       } else {
-        setErrors({ errorMessage: 'Something went wrong!' });
+        setErrors({ errorMessage: getTrad('notification.error.internal-error') });
       }
     } finally {
       setSubmitting(false);
