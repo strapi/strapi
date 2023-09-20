@@ -64,17 +64,25 @@
       "url": "https://strapi.io"
     }
   ],
-  "main": "./lib",
-  "types": "./lib/index.d.ts",
+  "main": "./index.js",
+  "types": "./dist/index.d.ts",
   "bin": "./bin/strapi.js",
-  "directories": {
-    "lib": "./lib",
-    "bin": "./bin",
-    "ee": "./ee"
-  },
+  "files": [
+    "./dist",
+    "./bin",
+    "./scripts",
+    "./resources",
+    "index.js"
+  ],
   "scripts": {
-    "postinstall": "node lib/utils/success.js",
+    "build": "run -T tsc -p tsconfig.build.json && run copy-files",
+    "build:ts": "run build",
+    "watch": "run -T tsc -p tsconfig.build.json -w --preserveWatchOutput",
+    "clean": "run -T rimraf ./dist",
+    "prepublishOnly": "yarn clean && yarn build",
+    "postinstall": "node ./scripts/postinstall.js",
     "test:unit": "run -T jest",
+    "copy-files": "copyfiles -u 1 -a 'src/**/*.html' 'src/**/*.png'  dist",
     "test:unit:watch": "run -T jest --watch",
     "lint": "run -T eslint ."
   },
@@ -92,6 +100,7 @@
     "@strapi/plugin-content-type-builder": "4.13.7",
     "@strapi/plugin-email": "4.13.7",
     "@strapi/plugin-upload": "4.13.7",
+    "@strapi/types": "4.13.7",
     "@strapi/typescript-utils": "4.13.7",
     "@strapi/utils": "4.13.7",
     "@vitejs/plugin-react": "4.0.4",
@@ -104,6 +113,7 @@
     "cli-table3": "0.6.2",
     "commander": "8.3.0",
     "configstore": "5.0.1",
+    "copyfiles": "2.4.1",
     "debug": "4.3.4",
     "delegates": "1.0.0",
     "dotenv": "14.2.0",
@@ -140,12 +150,33 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
+    "@types/bcryptjs": "2.4.3",
+    "@types/configstore": "5.0.1",
+    "@types/delegates": "1.0.0",
+    "@types/jest": "29.5.2",
+    "@types/koa": "2.13.4",
+    "@types/koa-compress": "4.0.3",
+    "@types/koa-session": "6.4.1",
+    "@types/koa-static": "4.0.2",
+    "@types/koa__router": "12.0.0",
+    "@types/lodash": "^4.14.191",
+    "@types/mime-types": "2.1.1",
+    "@types/node": "18.11.9",
+    "@types/node-schedule": "2.1.0",
+    "@types/statuses": "2.0.1",
+    "eslint-config-custom": "4.13.7",
     "supertest": "6.3.3",
-    "ts-zen": "https://github.com/strapi/ts-zen#41af3f8c6422de048bf9976ae551566b2c2b590a",
+    "tsconfig": "4.13.7",
     "typescript": "5.2.2"
   },
   "engines": {
     "node": ">=16.0.0 <=20.x.x",
     "npm": ">=6.0.0"
+  },
+  "nx": {
+    "implicitDependencies": [
+      "!@strapi/data-transfer",
+      "!@strapi/admin"
+    ]
   }
 }

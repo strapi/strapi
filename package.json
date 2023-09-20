@@ -129,6 +129,9 @@
     "typescript": "5.2.2",
     "yargs": "17.7.2"
   },
+  "resolutions": {
+    "@types/koa": "2.13.4"
+  },
   "engines": {
     "node": ">=16.0.0 <=20.x.x",
     "npm": ">=6.0.0"
