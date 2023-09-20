@@ -2,6 +2,7 @@ import { Knex } from 'knex';
 import { LifecycleProvider } from './lifecycles';
 import { MigrationProvider } from './migrations';
 import { SchemaProvider } from './schema';
+
 export * as errors from './errors';
 
 type ID = number | string;

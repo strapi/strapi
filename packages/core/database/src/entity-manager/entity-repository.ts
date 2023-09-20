@@ -19,7 +19,14 @@ const withDefaultPagination = (params: Params) => {
   };
 };
 
-const withOffsetLimit = (params: Params) => {
+type ParamsWithLimits = Omit<Params, 'page' | 'pageSize'> & {
+  limit: number;
+  offset: number;
+};
+
+const withOffsetLimit = (
+  params: Params
+): [ParamsWithLimits, { page: number; pageSize: number }] => {
   const { page, pageSize, ...rest } = withDefaultPagination(params);
 
   const offset = Math.max(page - 1, 0) * pageSize;
@@ -31,7 +38,7 @@ const withOffsetLimit = (params: Params) => {
     offset,
   };
 
-  return [query, { page, pageSize }] as const;
+  return [query, { page, pageSize }];
 };
 
 export const createRepository = (uid: string, db: Database) => {

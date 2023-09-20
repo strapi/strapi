@@ -99,7 +99,7 @@ export const createMetadata = (models: Model[] = []): Metadata => {
         return Object.assign(acc, { [attribute.columnName || key]: key });
       }
 
-      return acc;
+      return Object.assign(acc, { [key]: key });
     }, {});
 
     meta.columnToAttribute = columnToAttribute;

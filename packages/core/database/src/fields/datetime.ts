@@ -1,4 +1,4 @@
-import dateFns from 'date-fns';
+import * as dateFns from 'date-fns';
 
 import { parseDateTimeOrTimestamp } from './shared/parsers';
 import Field from './field';
