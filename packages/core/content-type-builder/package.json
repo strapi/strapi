@@ -43,7 +43,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "run -T tsc -p tsconfig.build.json",
+    "build": "NODE_ENV=production strapi plugin:build --force",
     "build:ts": "run build",
     "watch": "run -T tsc -p tsconfig.build.json -w --preserveWatchOutput",
     "clean": "run -T rimraf ./dist",
