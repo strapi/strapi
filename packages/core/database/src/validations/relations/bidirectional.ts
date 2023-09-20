@@ -1,7 +1,7 @@
-import { getJoinTableName } from '../../metadata/relations';
+import { getJoinTableName } from '../../metadata';
 
 import type { Database } from '../..';
-import type { Relation } from '../../metadata/types';
+import type { Relation } from '../../types';
 
 type Link = {
   relation: Relation.Bidirectional & { inversedBy: string };

@@ -2,7 +2,7 @@ import { castArray, maxBy } from 'lodash/fp';
 import _ from 'lodash';
 
 import { InvalidRelationError } from '../errors';
-import type { ID } from '../typings';
+import type { ID } from '../types';
 
 interface Link {
   id: ID;

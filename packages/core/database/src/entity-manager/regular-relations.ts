@@ -10,12 +10,11 @@ import {
   isAnyToOne,
   hasOrderColumn,
   hasInverseOrderColumn,
-} from '../metadata/relations';
+} from '../metadata';
 import { createQueryBuilder } from '../query';
 import { addSchema } from '../utils/knex';
 import type { Database } from '..';
-import type { ID } from '../typings';
-import type { Relation } from '../metadata/types';
+import type { ID, Relation } from '../types';
 
 declare module 'knex' {
   namespace Knex {

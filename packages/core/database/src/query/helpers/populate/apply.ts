@@ -1,10 +1,10 @@
 import _ from 'lodash/fp';
 
-import { Rec, fromRow } from '../transform';
+import { fromRow } from '../transform';
 import type { QueryBuilder } from '../../query-builder';
 import type { Database } from '../../..';
-import type { Meta, RelationalAttribute, Relation } from '../../../metadata/types';
-import { ID } from '../../../typings';
+import type { Meta } from '../../../metadata';
+import { ID, RelationalAttribute, Relation } from '../../../types';
 
 type Context = {
   db: Database;

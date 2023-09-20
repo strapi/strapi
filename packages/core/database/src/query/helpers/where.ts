@@ -3,14 +3,14 @@ import { isArray, castArray, keys, isPlainObject } from 'lodash/fp';
 import type { Knex } from 'knex';
 
 import { isOperatorOfType } from '@strapi/utils';
-import * as types from '../../types';
+import * as types from '../../utils/types';
 import { createField } from '../../fields';
 import { createJoin } from './join';
 import { toColumnName } from './transform';
 import { isKnexQuery } from '../../utils/knex';
 
-import type { Attribute } from '../../metadata/types';
 import type { Ctx } from '../types';
+import type { Attribute } from '../../types';
 
 const isObj = (value: unknown): value is Record<string, unknown> => isPlainObject(value);
 

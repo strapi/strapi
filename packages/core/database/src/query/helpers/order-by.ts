@@ -1,6 +1,6 @@
 import _ from 'lodash/fp';
 
-import * as types from '../../types';
+import * as types from '../../utils/types';
 import { createJoin } from './join';
 import { toColumnName } from './transform';
 

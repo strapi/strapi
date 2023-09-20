@@ -11,7 +11,7 @@ import DatetimeField from './datetime';
 import TimestampField from './timestamp';
 import BooleanField from './boolean';
 
-import type { Attribute } from '../metadata/types';
+import type { Attribute } from '../types';
 
 const typeToFieldMap: Record<string, typeof Field> = {
   increments: Field,

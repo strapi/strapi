@@ -6,7 +6,7 @@ import type { Database } from '../../..';
 
 import { applyPopulate } from '../populate';
 import { fromRow } from '../transform';
-import { Meta } from '../../../metadata/types';
+import { Meta } from '../../../metadata';
 
 const knexQueryDone = Symbol('knexQueryDone');
 const knexPerformingQuery = Symbol('knexPerformingQuery');

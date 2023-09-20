@@ -1,9 +1,9 @@
 import _ from 'lodash/fp';
 
-import * as types from '../../types';
+import * as types from '../../utils/types';
 import { createField } from '../../fields';
 
-import type { Meta } from '../../metadata/types';
+import type { Meta } from '../../metadata';
 
 type Row = Record<string, unknown> | null;
 export type Rec = Record<string, unknown> | null;

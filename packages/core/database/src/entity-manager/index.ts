@@ -26,7 +26,7 @@ import {
 } from 'lodash/fp';
 
 import { mapAsync } from '@strapi/utils';
-import * as types from '../types';
+import * as types from '../utils/types';
 import { createField } from '../fields';
 import { createQueryBuilder } from '../query';
 import { createRepository } from './entity-repository';
@@ -38,7 +38,7 @@ import {
   isOneToAny,
   hasOrderColumn,
   hasInverseOrderColumn,
-} from '../metadata/relations';
+} from '../metadata';
 import {
   deletePreviousOneToAnyRelations,
   deletePreviousAnyToOneRelations,
@@ -52,8 +52,8 @@ import {
 } from './relations/cloning/regular-relations';
 import { DatabaseError } from '../errors';
 import type { Database } from '..';
-import type { Meta } from '../metadata/types';
-import type { ID } from '../typings';
+import type { Meta } from '../metadata';
+import type { ID } from '../types';
 
 type Params = {
   where?: any;

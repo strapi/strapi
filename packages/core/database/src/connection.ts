@@ -1,11 +1,9 @@
-/* eslint-disable import/no-extraneous-dependencies */
-
 import knex, { Knex } from 'knex';
-
 import SqliteClient from 'knex/lib/dialects/sqlite3/index';
 
 class LegacySqliteClient extends SqliteClient {
   _driver() {
+    /* eslint-disable-next-line import/no-extraneous-dependencies */
     return require('sqlite3');
   }
 }

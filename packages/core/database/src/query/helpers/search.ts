@@ -1,7 +1,7 @@
 import _ from 'lodash/fp';
 import type { Knex } from 'knex';
 
-import * as types from '../../types';
+import * as types from '../../utils/types';
 import { toColumnName } from './transform';
 import type { Ctx } from '../types';
 

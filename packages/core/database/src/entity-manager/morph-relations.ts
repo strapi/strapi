@@ -3,7 +3,7 @@ import type { Knex } from 'knex';
 
 import { createQueryBuilder } from '../query';
 import type { Database } from '..';
-import type { MorphJoinTable, Relation } from '../metadata/types';
+import type { MorphJoinTable, Relation } from '../types';
 
 type Rows = Record<string, unknown>[];
 

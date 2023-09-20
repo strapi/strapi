@@ -1,11 +1,31 @@
 import _ from 'lodash/fp';
 
-import * as types from '../types';
-import { createRelation } from './relations';
-import { Metadata, Relation } from './types';
-import type { Attribute, Model, Meta, ComponentLinkMeta } from './types';
+import * as types from '../utils/types';
+import {
+  createRelation,
+  getJoinTableName,
+  isPolymorphic,
+  isBidirectional,
+  isAnyToOne,
+  isOneToAny,
+  hasOrderColumn,
+  hasInverseOrderColumn,
+  isManyToAny,
+} from './relations';
+import { Metadata, Meta, ComponentLinkMeta } from './metadata';
+import type { Attribute, Model, Relation } from '../types';
 
-export { Metadata };
+export type { Metadata, Meta };
+export {
+  getJoinTableName,
+  isPolymorphic,
+  isBidirectional,
+  isAnyToOne,
+  isOneToAny,
+  hasOrderColumn,
+  hasInverseOrderColumn,
+  isManyToAny,
+};
 
 // TODO: check if there isn't an attribute with an id already
 /**
@@ -21,17 +41,16 @@ export const createMetadata = (models: Model[] = []): Metadata => {
     }
 
     metadata.add({
-      singularName: model.singularName,
-      uid: model.uid,
-      tableName: model.tableName,
+      ...model,
       attributes: {
         id: {
           type: 'increments',
         },
         ...model.attributes,
       },
-      lifecycles: model.lifecycles ?? ({} as Meta['lifecycles']),
+      lifecycles: model.lifecycles ?? {},
       indexes: model.indexes || [],
+      foreignKeys: model.foreignKeys || [],
       columnToAttribute: {},
     });
   }
@@ -98,11 +117,13 @@ const hasComponentsOrDz = (model: Meta): model is ComponentLinkMeta => {
 
 // NOTE: we might just move the compo logic outside this layer too at some point
 const createCompoLinkModelMeta = (baseModelMeta: Meta): Meta => {
+  const name = `${baseModelMeta.tableName}_components`;
+
   return {
     // TODO: make sure there can't be any conflicts with a prefix
-    // singularName: 'compo',
-    uid: `${baseModelMeta.tableName}_components`,
-    tableName: `${baseModelMeta.tableName}_components`,
+    singularName: name,
+    uid: name,
+    tableName: name,
     attributes: {
       id: {
         type: 'increments',
@@ -161,6 +182,7 @@ const createCompoLinkModelMeta = (baseModelMeta: Meta): Meta => {
         onDelete: 'CASCADE',
       },
     ],
+    lifecycles: {},
     columnToAttribute: {},
   };
 };

@@ -1,4 +1,4 @@
-import type { Meta, Model } from '../metadata/types';
+import type { Meta } from '../metadata';
 
 export type Action =
   | 'beforeCreate'

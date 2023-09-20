@@ -1,8 +1,7 @@
 import { Knex } from 'knex';
 
 import { cleanInverseOrderColumn } from '../../regular-relations';
-import type { Relation } from '../../../metadata/types';
-import { ID } from '../../../typings';
+import type { ID, Relation } from '../../../types';
 
 const replaceRegularRelations = async ({
   targetId,

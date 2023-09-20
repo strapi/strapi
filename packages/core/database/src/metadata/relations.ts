@@ -1,6 +1,7 @@
 import _ from 'lodash/fp';
 
-import type { Meta, RelationalAttribute, Relation, Metadata, MorphJoinTable } from './types';
+import type { Meta, Metadata } from './metadata';
+import type { RelationalAttribute, Relation, MorphJoinTable } from '../types';
 
 interface JoinColumnOptions {
   attribute: (Relation.OneToOne | Relation.ManyToOne) & Relation.Owner;
@@ -245,6 +246,7 @@ const createMorphToMany = (
   const typeColumnName = `${morphColumnName}_type`;
 
   metadata.add({
+    singularName: joinTableName,
     uid: joinTableName,
     tableName: joinTableName,
     attributes: {
@@ -299,6 +301,7 @@ const createMorphToMany = (
         onDelete: 'CASCADE',
       },
     ],
+    lifecycles: {},
     columnToAttribute: {},
   });
 
@@ -429,6 +432,7 @@ const createJoinTable = (
   }
 
   const metadataSchema: Meta = {
+    singularName: joinTableName,
     uid: joinTableName,
     tableName: joinTableName,
     attributes: {
@@ -480,6 +484,7 @@ const createJoinTable = (
         onDelete: 'CASCADE',
       },
     ],
+    lifecycles: {},
     columnToAttribute: {},
   };
 

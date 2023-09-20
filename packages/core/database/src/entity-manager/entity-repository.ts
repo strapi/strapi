@@ -1,6 +1,6 @@
 import { isString } from 'lodash/fp';
 import type { Database } from '..';
-import type { ID } from '../typings';
+import type { ID } from '../types';
 
 type Params = Record<string, unknown>;
 type Data = Record<string, unknown>;

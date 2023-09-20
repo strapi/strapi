@@ -1,7 +1,7 @@
 import _ from 'lodash/fp';
 
-import * as types from '../../../types';
-import type { Meta } from '../../../metadata/types';
+import * as types from '../../../utils/types';
+import type { Meta } from '../../../metadata';
 import type { QueryBuilder } from '../../query-builder';
 import type { Database } from '../../..';
 
