@@ -361,13 +361,6 @@ export function useBlocksStore() {
       },
       matchNode: (node) => node.type === 'list-item',
       isInBlocksSelector: false,
-      handleEnterKey() {
-        // Insert a new list item in the parent list node, not in the list item
-        // Transforms.insertNodes(editor, {
-        //   type: 'list-item',
-        //   children: [{ type: 'text', text: '' }],
-        // });
-      },
     },
     image: {
       renderElement: (props) => <Image {...props} />,
