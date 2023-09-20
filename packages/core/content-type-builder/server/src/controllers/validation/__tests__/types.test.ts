@@ -1,4 +1,4 @@
-const getTypeValidator = require('../types');
+import { getTypeValidator } from '../types';
 
 describe('Type validators', () => {
   describe.each(['collectionType', 'singleType'])('mixed type', (kind) => {

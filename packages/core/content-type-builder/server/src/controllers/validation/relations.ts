@@ -1,7 +1,7 @@
-const { isUndefined } = require('lodash/fp');
-const { yup } = require('@strapi/utils');
-const { typeKinds, coreUids } = require('../../services/constants');
-const { isValidName } = require('./common');
+import { isUndefined } from 'lodash/fp';
+import { yup } from '@strapi/utils';
+import { typeKinds, coreUids } from '../../services/constants';
+import { isValidName } from './common';
 
 const STRAPI_USER_RELATIONS = ['oneToOne', 'oneToMany'];
 
@@ -24,7 +24,7 @@ const isValidRelation = (validNatures) =>
         });
   };
 
-module.exports = (attribute, allowedRelations) => {
+export const getRelationValidator = (attribute, allowedRelations) => {
   const contentTypesUIDs = Object.keys(strapi.contentTypes)
     .filter((key) => strapi.contentTypes[key].kind === typeKinds.COLLECTION_TYPE)
     .filter((key) => !key.startsWith(coreUids.PREFIX) || key === coreUids.STRAPI_USER)

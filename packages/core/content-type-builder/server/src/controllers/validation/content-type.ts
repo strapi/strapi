@@ -1,13 +1,13 @@
 /* eslint-disable no-template-curly-in-string */ // yup templates need to be in this format
 
-const { flatMap, getOr, has } = require('lodash/fp');
-const { yup, validateYupSchema } = require('@strapi/utils');
+import { flatMap, getOr, has } from 'lodash/fp';
+import { yup, validateYupSchema } from '@strapi/utils';
 
-const { getService } = require('../../utils');
-const { modelTypes, DEFAULT_TYPES, typeKinds } = require('../../services/constants');
-const createSchema = require('./model-schema');
-const { removeEmptyDefaults, removeDeletedUIDTargetFields } = require('./data-transform');
-const { nestedComponentSchema } = require('./component');
+import { getService } from '../../utils';
+import { modelTypes, DEFAULT_TYPES, typeKinds } from '../../services/constants';
+import createSchema from './model-schema';
+import { removeEmptyDefaults, removeDeletedUIDTargetFields } from './data-transform';
+import { nestedComponentSchema } from './component';
 
 /**
  * Allowed relation per type kind
@@ -88,14 +88,14 @@ const createContentTypeSchema = (data, { isEdition = false } = {}) => {
 /**
  * Validator for content type creation
  */
-const validateContentTypeInput = (data) => {
+export const validateContentTypeInput = (data) => {
   return validateYupSchema(createContentTypeSchema(data))(data);
 };
 
 /**
  * Validator for content type edition
  */
-const validateUpdateContentTypeInput = (data) => {
+export const validateUpdateContentTypeInput = (data) => {
   if (has('contentType', data)) {
     removeEmptyDefaults(data.contentType);
   }
@@ -174,8 +174,4 @@ const nameIsNotExistingCollectionName = (isEdition) => {
  */
 const kindSchema = yup.string().oneOf([typeKinds.SINGLE_TYPE, typeKinds.COLLECTION_TYPE]);
 
-module.exports = {
-  validateContentTypeInput,
-  validateUpdateContentTypeInput,
-  validateKind: validateYupSchema(kindSchema),
-};
+export const validateKind = validateYupSchema(kindSchema);

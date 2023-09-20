@@ -1,11 +1,12 @@
-const path = require('path');
-const _ = require('lodash');
-const pluralize = require('pluralize');
+import path from 'path';
+import _ from 'lodash';
+import pluralize from 'pluralize';
 
-const { nameToSlug, nameToCollectionName } = require('@strapi/utils');
+import { nameToSlug, nameToCollectionName } from '@strapi/utils';
+import { isConfigurable } from '../../utils/attributes';
+import createSchemaHandler from './schema-handler';
+
 const { ApplicationError } = require('@strapi/utils').errors;
-const { isConfigurable } = require('../../utils/attributes');
-const createSchemaHandler = require('./schema-handler');
 
 module.exports = function createComponentBuilder() {
   return {

@@ -1,12 +1,12 @@
-const _ = require('lodash');
-
-const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
-const { getService } = require('../utils');
-const {
+import _ from 'lodash';
+import { getService } from '../utils';
+import {
   validateContentTypeInput,
   validateUpdateContentTypeInput,
   validateKind,
-} = require('./validation/content-type');
+} from './validation/content-type';
+
+const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
 
 module.exports = {
   async getContentTypes(ctx) {

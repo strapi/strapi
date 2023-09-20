@@ -1,5 +1,5 @@
-const { getService } = require('../utils');
-const validateComponentCategory = require('./validation/component-category');
+import { getService } from '../utils';
+import validateComponentCategory from './validation/component-category';
 
 module.exports = {
   async editCategory(ctx) {

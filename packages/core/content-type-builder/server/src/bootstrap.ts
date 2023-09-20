@@ -1,4 +1,6 @@
-module.exports = async ({ strapi }) => {
+import type { LoadedStrapi } from '@strapi/types';
+
+export default async ({ strapi }: { strapi: LoadedStrapi }) => {
   const actions = [
     {
       section: 'plugins',

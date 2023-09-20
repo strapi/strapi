@@ -1,4 +1,9 @@
-const componentValidation = require('../component');
+import { validateComponentInput, validateUpdateComponentInput } from '../component';
+
+const componentValidation = {
+  validateComponentInput,
+  validateUpdateComponentInput,
+} as const;
 
 describe('Component validator', () => {
   global.strapi = {
@@ -17,9 +22,12 @@ describe('Component validator', () => {
         },
       },
     },
-  };
+  } as any;
 
-  describe.each(['validateComponentInput', 'validateUpdateComponentInput'])('%p', (method) => {
+  describe.each([
+    'validateComponentInput',
+    'validateUpdateComponentInput',
+  ] as (keyof typeof componentValidation)[])('%p', (method) => {
     test('can validate a regular component', async () => {
       const input = {
         components: [],
@@ -37,7 +45,7 @@ describe('Component validator', () => {
 
       expect.assertions(1);
 
-      await componentValidation[method](input).then((data) => {
+      await componentValidation[method](input).then((data: any) => {
         expect(data).toBe(input);
       });
     });

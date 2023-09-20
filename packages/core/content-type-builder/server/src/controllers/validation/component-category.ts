@@ -1,6 +1,5 @@
-const { yup, validateYupSchema } = require('@strapi/utils');
-
-const { isValidCategoryName } = require('./common');
+import { yup, validateYupSchema } from '@strapi/utils';
+import { isValidCategoryName } from './common';
 
 const componentCategorySchema = yup
   .object({

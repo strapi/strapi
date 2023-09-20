@@ -1,7 +1,7 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
-const { getService } = require('../utils');
-const { validateComponentInput, validateUpdateComponentInput } = require('./validation/component');
+import { getService } from '../utils';
+import { validateComponentInput, validateUpdateComponentInput } from './validation/component';
 
 /**
  * Components controller

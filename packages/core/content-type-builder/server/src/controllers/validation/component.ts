@@ -1,15 +1,15 @@
-const _ = require('lodash');
-const { yup, validateYupSchema } = require('@strapi/utils');
+import _ from 'lodash';
+import { yup, validateYupSchema } from '@strapi/utils';
 
-const { modelTypes, DEFAULT_TYPES } = require('../../services/constants');
-const { isValidCategoryName, isValidIcon } = require('./common');
-const createSchema = require('./model-schema');
-const { removeEmptyDefaults } = require('./data-transform');
+import { modelTypes, DEFAULT_TYPES } from '../../services/constants';
+import { isValidCategoryName, isValidIcon } from './common';
+import { createSchema } from './model-schema';
+import { removeEmptyDefaults } from './data-transform';
 
-const VALID_RELATIONS = ['oneToOne', 'oneToMany'];
-const VALID_TYPES = [...DEFAULT_TYPES, 'component', 'customField'];
+export const VALID_RELATIONS = ['oneToOne', 'oneToMany'];
+export const VALID_TYPES = [...DEFAULT_TYPES, 'component', 'customField'];
 
-const componentSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
+export const componentSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
   modelType: modelTypes.COMPONENT,
 })
   .shape({
@@ -46,7 +46,7 @@ const componentInputSchema = yup
   })
   .noUnknown();
 
-const validateComponentInput = validateYupSchema(componentInputSchema);
+export const validateComponentInput = validateYupSchema(componentInputSchema);
 
 const updateComponentInputSchema = yup
   .object({
@@ -55,7 +55,7 @@ const updateComponentInputSchema = yup
   })
   .noUnknown();
 
-const validateUpdateComponentInput = (data) => {
+export const validateUpdateComponentInput = (data) => {
   if (_.has(data, 'component')) {
     removeEmptyDefaults(data.component);
   }
@@ -69,11 +69,4 @@ const validateUpdateComponentInput = (data) => {
   }
 
   return validateYupSchema(updateComponentInputSchema)(data);
-};
-
-module.exports = {
-  validateComponentInput,
-  validateUpdateComponentInput,
-
-  nestedComponentSchema,
 };

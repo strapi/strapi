@@ -1,4 +1,5 @@
-const { removeEmptyDefaults, removeDeletedUIDTargetFields } = require('../data-transform');
+import { Schema } from '@strapi/types';
+import { removeEmptyDefaults, removeDeletedUIDTargetFields } from '../data-transform';
 
 describe('Data transform', () => {
   describe('removeEmptyDefaults', () => {
@@ -32,7 +33,7 @@ describe('Data transform', () => {
             targetField: 'random',
           },
         },
-      };
+      } as Pick<Schema.ContentType, 'attributes'> as Schema.ContentType;
 
       removeDeletedUIDTargetFields(data);
 

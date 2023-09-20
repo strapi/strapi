@@ -1,4 +1,4 @@
-const { getService } = require('../utils');
+import { getService } from '../utils';
 
 module.exports = {
   getReservedNames(ctx) {

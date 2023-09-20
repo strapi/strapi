@@ -1,13 +1,13 @@
-const { yup } = require('@strapi/utils');
-const _ = require('lodash');
+import { yup } from '@strapi/utils';
+import _ from 'lodash';
 
-const { modelTypes, FORBIDDEN_ATTRIBUTE_NAMES, typeKinds } = require('../../services/constants');
-const { getService } = require('../../utils');
-const { isValidKey, isValidCollectionName } = require('./common');
-const getTypeValidator = require('./types');
-const getRelationValidator = require('./relations');
+import { modelTypes, FORBIDDEN_ATTRIBUTE_NAMES, typeKinds } from '../../services/constants';
+import { getService } from '../../utils';
+import { isValidKey, isValidCollectionName } from './common';
+import { getTypeValidator } from './types';
+import { getRelationValidator } from './relations';
 
-const createSchema = (types, relations, { modelType } = {}) => {
+export const createSchema = (types, relations, { modelType } = {}) => {
   const shape = {
     description: yup.string(),
     draftAndPublish: yup.boolean(),
@@ -77,5 +77,3 @@ const typeOrRelationValidator = yup.object().test({
   message: 'Attribute must have either a type or a target',
   test: () => false,
 });
-
-module.exports = createSchema;

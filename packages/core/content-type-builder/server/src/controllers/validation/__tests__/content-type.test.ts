@@ -1,8 +1,8 @@
-const {
+import {
   validateKind,
   validateUpdateContentTypeInput,
   validateContentTypeInput,
-} = require('../content-type');
+} from '../content-type';
 
 describe('Content type validator', () => {
   global.strapi = {
@@ -21,7 +21,7 @@ describe('Content type validator', () => {
         },
       },
     },
-  };
+  } as any;
 
   describe('validateKind', () => {
     it('Only allows for single and collection types', async () => {
@@ -34,6 +34,7 @@ describe('Content type validator', () => {
     });
 
     it('allows undefined', async () => {
+      // @ts-expect-error test that it can handle undefined as expected, even if it's invalid typescript
       await expect(validateKind()).resolves.toBeUndefined();
     });
   });

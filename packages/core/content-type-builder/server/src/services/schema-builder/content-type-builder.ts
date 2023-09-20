@@ -1,11 +1,12 @@
-const path = require('path');
-const _ = require('lodash');
+import path from 'path';
+import _ from 'lodash';
 
-const { nameToCollectionName } = require('@strapi/utils');
+import { nameToCollectionName } from '@strapi/utils';
+import { isRelation, isConfigurable } from '../../utils/attributes';
+import { typeKinds } from '../constants';
+import createSchemaHandler from './schema-handler';
+
 const { ApplicationError } = require('@strapi/utils').errors;
-const { isRelation, isConfigurable } = require('../../utils/attributes');
-const { typeKinds } = require('../constants');
-const createSchemaHandler = require('./schema-handler');
 
 const reuseUnsetPreviousProperties = (newAttribute, oldAttribute) => {
   _.defaults(

@@ -1,7 +1,8 @@
-const { yup } = require('@strapi/utils');
-const { isValidName } = require('../common');
+import { yup } from '@strapi/utils';
+import { isValidName } from '../common';
+import type { CommonTestConfig } from '../common';
 
-function runTest(test, value) {
+function runTest(test: CommonTestConfig, value: string) {
   return () => yup.string().test(test).validateSync(value);
 }
 

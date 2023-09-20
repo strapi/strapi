@@ -1,7 +1,7 @@
-const path = require('path');
-const fse = require('fs-extra');
-const _ = require('lodash');
-const { isConfigurable } = require('../../utils/attributes');
+import path from 'path';
+import fse from 'fs-extra';
+import _ from 'lodash';
+import { isConfigurable } from '../../utils/attributes';
 
 module.exports = function createSchemaHandler(infos) {
   const { category, modelName, plugin, uid, dir, filename, schema } = infos;

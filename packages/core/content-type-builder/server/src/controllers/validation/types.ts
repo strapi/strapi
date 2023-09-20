@@ -1,9 +1,9 @@
-const _ = require('lodash');
-const { yup } = require('@strapi/utils');
+import _ from 'lodash';
+import { yup } from '@strapi/utils';
 
-const { hasComponent } = require('../../utils/attributes');
-const { modelTypes, VALID_UID_TARGETS } = require('../../services/constants');
-const {
+import { hasComponent } from '../../utils/attributes';
+import { modelTypes, VALID_UID_TARGETS } from '../../services/constants';
+import {
   validators,
   areEnumValuesUnique,
   isValidDefaultJSON,
@@ -11,7 +11,7 @@ const {
   isValidEnum,
   isValidUID,
   isValidRegExpPattern,
-} = require('./common');
+} from './common';
 
 const maxLengthIsGreaterThanOrEqualToMinLength = {
   name: 'isGreaterThanMin',
@@ -26,7 +26,7 @@ const maxLengthIsGreaterThanOrEqualToMinLength = {
   },
 };
 
-const getTypeValidator = (attribute, { types, modelType, attributes }) => {
+export const getTypeValidator = (attribute, { types, modelType, attributes }) => {
   return yup.object({
     type: yup.string().oneOf(types).required(),
     configurable: yup.boolean().nullable(),
@@ -245,5 +245,3 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
     }
   }
 };
-
-module.exports = getTypeValidator;
