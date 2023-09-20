@@ -7451,6 +7451,9 @@ __metadata:
     "@strapi/provider-email-sendmail": 4.13.6
     "@strapi/utils": 4.13.6
     "@testing-library/react": 14.0.0
+    "@types/koa": 2.13.4
+    "@types/lodash": ^4.14.191
+    koa: 2.13.4
     lodash: 4.17.21
     msw: 1.3.0
     prop-types: ^15.8.1
@@ -7462,6 +7465,7 @@ __metadata:
     styled-components: 5.3.3
     yup: 0.32.9
   peerDependencies:
+    "@strapi/strapi": 4.13.6
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: 5.3.4
