@@ -139,8 +139,8 @@ module.exports = {
 
     // searching should be allowed only on mainField for permission reasons
     if (_q) {
-      const _m = query._m ?? 'containsi';
-      addFiltersClause(queryParams, { [mainField]: { [`$${_m}`]: _q } });
+      const _filter = query._filter ?? 'containsi';
+      addFiltersClause(queryParams, { [mainField]: { [`$${_filter}`]: _q } });
     }
 
     if (entityId) {
