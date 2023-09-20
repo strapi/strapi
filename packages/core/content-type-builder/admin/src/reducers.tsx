@@ -1,5 +1,5 @@
 import dataManagerProvider from './components/DataManagerProvider/reducer';
-import formModalReducer from './components/FormModal/reducer';
+import formModalReducer from './components/FormModal/reducer.ts';
 import pluginId from './pluginId';
 
 const reducers = {
