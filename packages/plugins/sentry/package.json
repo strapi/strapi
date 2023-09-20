@@ -27,9 +27,9 @@
   },
   "dependencies": {
     "@sentry/node": "6.19.7",
-    "@strapi/design-system": "1.10.1",
+    "@strapi/design-system": "1.11.0",
     "@strapi/helper-plugin": "4.13.6",
-    "@strapi/icons": "1.10.1"
+    "@strapi/icons": "1.11.0"
   },
   "devDependencies": {
     "react": "^18.2.0",
