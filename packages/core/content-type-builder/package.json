@@ -25,8 +25,25 @@
     "strapi-server.js",
     "strapi-admin.js"
   ],
+  "exports": {
+    "./strapi-admin": {
+      "types": "./dist/admin/index.d.ts",
+      "source": "./admin/src/index.ts",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.js"
+    },
+    "./strapi-server": {
+      "types": "./dist/server/index.d.ts",
+      "source": "./server/src/index.ts",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
-    "build": "run -T tsc -p tsconfig.build.json && run copy-files",
+    "build": "run -T tsc -p tsconfig.build.json",
     "build:ts": "run build",
     "watch": "run -T tsc -p tsconfig.build.json -w --preserveWatchOutput",
     "clean": "run -T rimraf ./dist",
