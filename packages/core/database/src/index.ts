@@ -13,6 +13,7 @@ import { Callback, transactionCtx } from './transaction-context';
 // TODO: move back into strapi
 import { transformContentTypes } from './utils/content-types';
 import { validateDatabase } from './validations';
+import { Model } from './types';
 
 interface Settings {
   forceMigration?: boolean;
@@ -23,7 +24,7 @@ interface Settings {
 export interface DatabaseConfig {
   connection: Knex.Config;
   settings: Settings;
-  models: any;
+  models: Model[];
 }
 
 class Database {
