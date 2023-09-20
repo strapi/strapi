@@ -59,10 +59,7 @@ const BlocksInput = ({ readOnly }) => {
       selectedBlock.handleEnterKey(editor);
     } else {
       // If not, insert a new paragraph
-      Transforms.insertNodes(editor, {
-        type: 'paragraph',
-        children: [{ type: 'text', text: '' }],
-      });
+      blocks.paragraph.handleEnterKey(editor);
     }
   };
 

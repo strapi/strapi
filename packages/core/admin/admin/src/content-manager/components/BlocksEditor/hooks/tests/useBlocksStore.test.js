@@ -323,6 +323,55 @@ describe('useBlocksStore', () => {
     expect(image).toHaveAttribute('src', 'https://example.com/image.png');
   });
 
+  it('handles enter key on paragraph block', () => {
+    // Don't use Wrapper since we don't test any React logic or rendering
+    // Wrapper cause issues about updates not wrapped in act()
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'Line of text',
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor at the end of the paragraph
+    Transforms.select(baseEditor, {
+      anchor: Editor.end(baseEditor, []),
+      focus: Editor.end(baseEditor, []),
+    });
+
+    // Simulate the enter key
+    result.current.paragraph.handleEnterKey(baseEditor);
+
+    // Should insert a new paragraph
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'Line of text',
+          },
+        ],
+      },
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+    ]);
+  });
+
   it('handles enter key on code block', () => {
     // Don't use Wrapper since we don't test any React logic or rendering
     // Wrapper cause issues about updates not wrapped in act()

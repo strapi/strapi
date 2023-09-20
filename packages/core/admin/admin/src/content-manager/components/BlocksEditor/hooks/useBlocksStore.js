@@ -199,6 +199,12 @@ export function useBlocksStore() {
       },
       matchNode: (node) => node.type === 'paragraph',
       isInBlocksSelector: true,
+      handleEnterKey(editor) {
+        Transforms.insertNodes(editor, {
+          type: 'paragraph',
+          children: [{ type: 'text', text: '' }],
+        });
+      },
     },
     'heading-one': {
       renderElement: (props) => <Heading {...props} />,
