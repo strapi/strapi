@@ -19,14 +19,26 @@
       "url": "https://strapi.io"
     }
   ],
+  "types": "./dist/index.d.ts",
+  "files": [
+    "./dist",
+    "strapi-server.js",
+    "strapi-admin.js"
+  ],
   "scripts": {
+    "build": "run -T tsc -p tsconfig.build.json && run copy-files",
+    "build:ts": "run build",
+    "watch": "run -T tsc -p tsconfig.build.json -w --preserveWatchOutput",
+    "clean": "run -T rimraf ./dist",
+    "prepublishOnly": "yarn clean && yarn build",
+    "postinstall": "node ./scripts/postinstall.js",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
+    "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
-    "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
-    "lint": "run -T eslint ."
+    "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
