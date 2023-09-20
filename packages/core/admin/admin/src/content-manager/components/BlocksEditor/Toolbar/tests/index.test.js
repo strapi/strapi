@@ -8,7 +8,18 @@ import { IntlProvider } from 'react-intl';
 import { createEditor, Transforms } from 'slate';
 import { Slate, withReact } from 'slate-react';
 
-import { BlocksToolbar } from '..';
+import { BlocksToolbar, BlocksDropdown } from '..';
+
+const title = 'dialog component';
+
+jest.mock('@strapi/helper-plugin', () => ({
+  useLibrary: jest.fn().mockImplementation(() => ({
+    components: {
+      'media-library': () => <div>{title}</div>,
+    },
+  })),
+  pxToRem: jest.fn(),
+}));
 
 const initialValue = [
   {
@@ -44,10 +55,8 @@ Wrapper.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-const mockHandleImageBlock = jest.fn();
-
 const setup = () =>
-  render(<BlocksToolbar handleImageBlock={mockHandleImageBlock} />, {
+  render(<BlocksToolbar />, {
     wrapper: Wrapper,
   });
 
@@ -239,18 +248,20 @@ describe('BlocksEditor toolbar', () => {
   });
 
   it('when image is selected, it will set modal dialog open to select the images', async () => {
-    setup();
-
-    const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+    render(<BlocksDropdown />, {
+      wrapper: Wrapper,
+    });
 
     Transforms.setSelection(baseEditor, {
       anchor: { path: [0, 0], offset: 0 },
     });
 
+    const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+
     await user.click(headingsDropdown);
 
     await user.click(screen.getByRole('option', { name: 'Image' }));
 
-    expect(mockHandleImageBlock).toHaveBeenCalledWith(true);
+    expect(screen.getByText(title)).toBeInTheDocument();
   });
 });

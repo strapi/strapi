@@ -1,10 +1,9 @@
 import * as React from 'react';
 
 import { Box, Flex, Typography, InputWrapper, Divider } from '@strapi/design-system';
-import { prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { createEditor, Transforms } from 'slate';
+import { createEditor } from 'slate';
 import { Slate, withReact, ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
@@ -32,14 +31,9 @@ const Wrapper = styled(Box)`
   border-radius: ${({ theme }) => theme.borderRadius};
 `;
 
-const ALLOWED_MEDIA_TYPE = 'images';
-
 const BlocksEditor = React.forwardRef(({ intlLabel, name, readOnly, required, error }, ref) => {
   const { formatMessage } = useIntl();
   const [editor] = React.useState(() => withReact(createEditor()));
-  const [mediaLibVisible, setMediaLibVisible] = React.useState(false);
-  const { components } = useLibrary();
-  const MediaLibraryDialog = components['media-library'];
 
   const label = intlLabel.id
     ? formatMessage(
@@ -47,26 +41,6 @@ const BlocksEditor = React.forwardRef(({ intlLabel, name, readOnly, required, er
         { ...intlLabel.values }
       )
     : name;
-
-  const handleToggleMediaLib = () => setMediaLibVisible((prev) => !prev);
-
-  const insertImages = (images) => {
-    images.forEach((img) => {
-      const image = { type: 'image', image: img, children: [{ text: '' }] }; // required empty text node as children for void elements such as Image
-      Transforms.insertNodes(editor, image);
-    });
-  };
-
-  const handleSelectAssets = (images) => {
-    const formattedImages = images.map((image) => ({
-      ...image,
-      alternativeText: image.alternativeText || image.name,
-      url: prefixFileUrlWithBackendUrl(image.url),
-    }));
-
-    insertImages(formattedImages);
-    setMediaLibVisible(false);
-  };
 
   /** Editable is not able to hold the ref, https://github.com/ianstormtaylor/slate/issues/4082
    *  so with "useImperativeHandle" we can use ReactEditor methods to expose to the parent above
@@ -94,7 +68,7 @@ const BlocksEditor = React.forwardRef(({ intlLabel, name, readOnly, required, er
 
         <Slate editor={editor} initialValue={blocksData}>
           <InputWrapper direction="column" alignItems="flex-start">
-            <BlocksToolbar handleImageBlock={setMediaLibVisible} />
+            <BlocksToolbar />
             <EditorDivider width="100%" />
             <Wrapper>
               <BlocksInput readOnly={readOnly} />
@@ -108,13 +82,6 @@ const BlocksEditor = React.forwardRef(({ intlLabel, name, readOnly, required, er
             {error}
           </Typography>
         </Box>
-      )}
-      {mediaLibVisible && (
-        <MediaLibraryDialog
-          allowedTypes={[ALLOWED_MEDIA_TYPE]}
-          onClose={handleToggleMediaLib}
-          onSelectAssets={handleSelectAssets}
-        />
       )}
     </>
   );

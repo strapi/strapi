@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
 import { Flex, Icon, Tooltip, Select, Option } from '@strapi/design-system';
-import { pxToRem } from '@strapi/helper-plugin';
+import { pxToRem, prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
 import { BulletList, NumberList } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -130,9 +130,81 @@ const toggleBlock = (editor, value) => {
   Transforms.setNodes(editor, newProperties);
 };
 
-const BlocksDropdown = ({ setMediaLibVisible }) => {
+const ALLOWED_MEDIA_TYPE = 'images';
+
+const imageSchemaFields = [
+  'name',
+  'alternativeText',
+  'url',
+  'caption',
+  'width',
+  'height',
+  'formats',
+  'hash',
+  'ext',
+  'mime',
+  'size',
+  'previewUrl',
+  'provider',
+  'provider_metadata',
+  'createdAt',
+  'updatedAt',
+];
+
+const pick = (object, keys) => {
+  return keys.reduce((acc, key) => {
+    if (object && Object.prototype.hasOwnProperty.call(object, key)) {
+      acc[key] = object[key];
+    }
+
+    return acc;
+  }, {});
+};
+
+const ImageDialog = ({ handleClose }) => {
+  const editor = useSlate();
+  const { components } = useLibrary();
+  const MediaLibraryDialog = components['media-library'];
+
+  const insertImages = (images) => {
+    images.forEach((img) => {
+      const image = { type: 'image', image: img, children: [{ type: 'text', text: '' }] };
+      Transforms.insertNodes(editor, image);
+    });
+  };
+
+  const handleSelectAssets = (images) => {
+    const formattedImages = images.map((image) => {
+      const expectedImage = pick(image, imageSchemaFields);
+
+      return {
+        ...expectedImage,
+        alternativeText: expectedImage.alternativeText || expectedImage.name,
+        url: prefixFileUrlWithBackendUrl(image.url),
+      };
+    });
+
+    insertImages(formattedImages);
+    handleClose();
+  };
+
+  return (
+    <MediaLibraryDialog
+      allowedTypes={[ALLOWED_MEDIA_TYPE]}
+      onClose={handleClose}
+      onSelectAssets={handleSelectAssets}
+    />
+  );
+};
+
+ImageDialog.propTypes = {
+  handleClose: PropTypes.func.isRequired,
+};
+
+export const BlocksDropdown = () => {
   const editor = useSlate();
   const { formatMessage } = useIntl();
+  const [isMediaLibraryVisible, setIsMediaLibraryVisible] = React.useState(false);
 
   const blocks = useBlocksStore();
   const blockKeysToInclude = Object.entries(blocks).reduce((currentKeys, entry) => {
@@ -152,38 +224,37 @@ const BlocksDropdown = ({ setMediaLibVisible }) => {
     setBlockSelected(optionKey);
 
     if (optionKey === 'image') {
-      setMediaLibVisible(true);
+      setIsMediaLibraryVisible(true);
     }
   };
 
   return (
-    <Select
-      startIcon={<Icon as={blocks[blockSelected].icon} />}
-      onChange={selectOption}
-      placeholder={blocks[blockSelected].label}
-      value={blockSelected}
-      aria-label={formatMessage({
-        id: 'components.Blocks.blocks.selectBlock',
-        defaultMessage: 'Select a block',
-      })}
-    >
-      {blockKeysToInclude.map((key) => (
-        <BlockOption
-          key={key}
-          value={key}
-          label={blocks[key].label}
-          icon={blocks[key].icon}
-          matchNode={blocks[key].matchNode}
-          handleSelection={setBlockSelected}
-          blockSelected={blockSelected}
-        />
-      ))}
-    </Select>
+    <>
+      <Select
+        startIcon={<Icon as={blocks[blockSelected].icon} />}
+        onChange={selectOption}
+        placeholder={blocks[blockSelected].label}
+        value={blockSelected}
+        aria-label={formatMessage({
+          id: 'components.Blocks.blocks.selectBlock',
+          defaultMessage: 'Select a block',
+        })}
+      >
+        {blockKeysToInclude.map((key) => (
+          <BlockOption
+            key={key}
+            value={key}
+            label={blocks[key].label}
+            icon={blocks[key].icon}
+            matchNode={blocks[key].matchNode}
+            handleSelection={setBlockSelected}
+            blockSelected={blockSelected}
+          />
+        ))}
+      </Select>
+      {isMediaLibraryVisible && <ImageDialog handleClose={() => setIsMediaLibraryVisible(false)} />}
+    </>
   );
-};
-
-BlocksDropdown.propTypes = {
-  setMediaLibVisible: PropTypes.func.isRequired,
 };
 
 const BlockOption = ({ value, icon, label, handleSelection, blockSelected, matchNode }) => {
@@ -289,13 +360,13 @@ ListButton.propTypes = {
   }).isRequired,
 };
 
-const BlocksToolbar = ({ handleImageBlock }) => {
+const BlocksToolbar = () => {
   const modifiers = useModifiersStore();
 
   return (
     <Toolbar.Root asChild>
       <Flex gap={1} padding={2}>
-        <BlocksDropdown setMediaLibVisible={handleImageBlock} />
+        <BlocksDropdown />
         <Separator />
         <Toolbar.ToggleGroup type="multiple" asChild>
           <Flex gap={1}>
@@ -335,10 +406,6 @@ const BlocksToolbar = ({ handleImageBlock }) => {
       </Flex>
     </Toolbar.Root>
   );
-};
-
-BlocksToolbar.propTypes = {
-  handleImageBlock: PropTypes.func.isRequired,
 };
 
 export { BlocksToolbar };
