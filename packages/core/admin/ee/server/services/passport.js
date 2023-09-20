@@ -1,7 +1,7 @@
 'use strict';
 
 // eslint-disable-next-line node/no-extraneous-require
-const { features } = require('@strapi/strapi/lib/utils/ee');
+const { features } = require('@strapi/strapi/dist/utils/ee').default;
 
 const { UnauthorizedError } = require('@strapi/utils').errors;
 const createLocalStrategy = require('../../../server/services/passport/local-strategy');
