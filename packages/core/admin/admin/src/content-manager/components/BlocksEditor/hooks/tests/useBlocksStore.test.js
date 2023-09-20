@@ -1,10 +1,10 @@
 import * as React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { render, screen, renderHook } from '@testing-library/react';
+import { render, screen, renderHook, act } from '@testing-library/react';
 import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
-import { createEditor } from 'slate';
+import { createEditor, Editor, Transforms } from 'slate';
 import { Slate, withReact } from 'slate-react';
 
 import { useBlocksStore } from '../useBlocksStore';
@@ -16,8 +16,10 @@ const initialValue = [
   },
 ];
 
+const baseEditor = createEditor();
+
 const Wrapper = ({ children }) => {
-  const editor = React.useMemo(() => withReact(createEditor()), []);
+  const editor = React.useMemo(() => withReact(baseEditor), []);
 
   return (
     <ThemeProvider theme={lightTheme}>
@@ -35,6 +37,10 @@ Wrapper.propTypes = {
 };
 
 describe('useBlocksStore', () => {
+  beforeEach(() => {
+    baseEditor.children = initialValue;
+  });
+
   it('should return a store of blocks', () => {
     const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
 
@@ -315,5 +321,45 @@ describe('useBlocksStore', () => {
     const image = screen.getByRole('img', { name: 'Some image' });
     expect(image).toBeInTheDocument();
     expect(image).toHaveAttribute('src', 'https://example.com/image.png');
+  });
+
+  it('handles enter key on code block', () => {
+    // Don't use Wrapper since we don't test any React logic or rendering
+    // Wrapper cause issues about updates not wrapped in act()
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'code',
+        children: [
+          {
+            type: 'text',
+            text: 'Line of code',
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor at the end of the fast list item
+    Transforms.select(baseEditor, {
+      anchor: Editor.end(baseEditor, []),
+      focus: Editor.end(baseEditor, []),
+    });
+
+    // Simulate the enter key
+    result.current.code.handleEnterKey(baseEditor);
+
+    // Should insert a newline within the code block (shoudn't exit the code block)
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'code',
+        children: [
+          {
+            type: 'text',
+            text: 'Line of code\n',
+          },
+        ],
+      },
+    ]);
   });
 });

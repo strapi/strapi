@@ -16,6 +16,7 @@ import {
    */
 } from '@strapi/icons';
 import PropTypes from 'prop-types';
+import { Transforms } from 'slate';
 import styled, { css } from 'styled-components';
 
 const H1 = styled(Typography).attrs({ as: 'h1' })`
@@ -176,7 +177,7 @@ Image.propTypes = {
  *     value: Object,
  *     matchNode: (node: Object) => boolean,
  *     isInBlocksSelector: true,
-
+ *     handleEnterKey: (editor: import('slate').Editor) => void,
  *   }
  * }} an object containing rendering functions and metadata for different blocks, indexed by name.
  */
@@ -312,9 +313,8 @@ export function useBlocksStore() {
       matchNode: (node) => node.type === 'code',
       isInBlocksSelector: true,
       handleEnterKey(editor) {
-        // TODO find why this creates another blockquote instead of adding a newline within the blockquote
-        // TODO look up source code for this demo https://www.slatejs.org/examples/code-highlighting
-        editor.insertSoftBreak();
+        // Insert a new line within the block
+        Transforms.insertText(editor, '\n');
       },
     },
     quote: {
@@ -361,6 +361,13 @@ export function useBlocksStore() {
       },
       matchNode: (node) => node.type === 'list-item',
       isInBlocksSelector: false,
+      handleEnterKey() {
+        // Insert a new list item in the parent list node, not in the list item
+        // Transforms.insertNodes(editor, {
+        //   type: 'list-item',
+        //   children: [{ type: 'text', text: '' }],
+        // });
+      },
     },
     image: {
       renderElement: (props) => <Image {...props} />,
