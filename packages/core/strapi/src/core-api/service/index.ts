@@ -1,5 +1,5 @@
 import { contentTypes as contentTypeUtils } from '@strapi/utils';
-import type { CoreApi, Schema } from '@strapi/typings';
+import type { CoreApi, Schema } from '@strapi/types';
 
 import createSingleTypeService from './single-type';
 import createCollectionTypeService from './collection-type';

@@ -1,4 +1,4 @@
-import type { Schema } from '@strapi/typings';
+import type { Schema } from '@strapi/types';
 import entityValidator from '..';
 
 describe('Entity validator', () => {

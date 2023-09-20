@@ -1,6 +1,6 @@
 import { has, isPlainObject } from 'lodash/fp';
 
-import type { Strapi, CustomFields } from '@strapi/typings';
+import type { Strapi, CustomFields } from '@strapi/types';
 
 const ALLOWED_TYPES = [
   'biginteger',

@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import strapiUtils from '@strapi/utils';
-import type { Attribute, Schema } from '@strapi/typings';
-
+import type { Attribute, Schema } from '@strapi/types';
 
 const { yup } = strapiUtils;
 

@@ -1,7 +1,7 @@
 import { join, extname, basename } from 'path';
 import fse from 'fs-extra';
 import { importDefault } from '@strapi/utils';
-import type { Strapi, Common } from '@strapi/typings';
+import type { Strapi, Common } from '@strapi/types';
 import { middlewares as internalMiddlewares } from '../../middlewares';
 
 // TODO:: allow folders with index.js inside for bigger policies

@@ -1,5 +1,5 @@
 import strapiUtils, { errors } from '@strapi/utils';
-import type { Schema } from '@strapi/typings';
+import type { Schema } from '@strapi/types';
 import validators from '../validators';
 
 describe('Date validator', () => {

@@ -28,7 +28,7 @@ import type {
   Common,
   Shared,
   Schema,
-} from '@strapi/typings';
+} from '@strapi/types';
 
 import loadConfiguration from './core/app-configuration';
 
@@ -353,17 +353,14 @@ class Strapi implements StrapiI {
 
     this.eventHub.destroy();
 
-    if (_.has(this, 'db')) {
-      await this.db!.destroy();
-    }
+    await this.db?.destroy();
 
     this.telemetry.destroy();
     this.cron.destroy();
 
     process.removeAllListeners();
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    // @ts-expect-error: Allow clean delete of global.strapi to allow re-instanciation
     delete global.strapi;
   }
 
@@ -642,13 +639,13 @@ class Strapi implements StrapiI {
     await this.container.get('modules')[lifecycleName]();
 
     // admin
-    const adminLifecycleFunction = this.admin?.[lifecycleName];
+    const adminLifecycleFunction = this.admin && this.admin[lifecycleName];
     if (isFunction(adminLifecycleFunction)) {
       await adminLifecycleFunction({ strapi: this });
     }
 
     // user
-    const userLifecycleFunction = this.app[lifecycleName];
+    const userLifecycleFunction = this.app && this.app[lifecycleName];
     if (isFunction(userLifecycleFunction)) {
       await userLifecycleFunction({ strapi: this });
     }
@@ -656,7 +653,9 @@ class Strapi implements StrapiI {
 
   getModel(uid: Common.UID.ContentType): Schema.ContentType;
   getModel(uid: Common.UID.Component): Schema.Component;
-  getModel<TUID extends Common.UID.Schema>(uid: TUID): Schema.ContentType | Schema.Component {
+  getModel<TUID extends Common.UID.Schema>(
+    uid: TUID
+  ): Schema.ContentType | Schema.Component | undefined {
     if (uid in this.contentTypes) {
       return this.contentTypes[uid as Common.UID.ContentType];
     }
@@ -664,8 +663,6 @@ class Strapi implements StrapiI {
     if (uid in this.components) {
       return this.components[uid as Common.UID.Component];
     }
-
-    throw new Error('Model not found');
   }
 
   /**
@@ -692,7 +689,7 @@ interface Init {
 
 const initFn = (options: StrapiOptions = {}) => {
   const strapi = new Strapi(options);
-  global.strapi = strapi as any;
+  global.strapi = strapi as LoadedStrapi;
   return strapi;
 };
 

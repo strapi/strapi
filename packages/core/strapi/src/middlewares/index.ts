@@ -1,4 +1,4 @@
-import type { Common } from '@strapi/typings';
+import type { Common } from '@strapi/types';
 import { compression } from './compression';
 import { cors } from './cors';
 import { errors } from './errors';

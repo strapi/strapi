@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { join, resolve } from 'path';
 import crypto from 'crypto';
-import type { Strapi } from '@strapi/typings';
+import type { Strapi } from '@strapi/types';
 
 import machineId from '../utils/machine-id';
 

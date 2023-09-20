@@ -1,4 +1,4 @@
-import type { Common } from '@strapi/typings';
+import type { Common } from '@strapi/types';
 import type { Sender } from './sender';
 
 interface State {

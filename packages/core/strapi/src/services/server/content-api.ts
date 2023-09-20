@@ -1,4 +1,4 @@
-import type { Strapi } from '@strapi/typings';
+import type { Strapi } from '@strapi/types';
 import { createAPI } from './api';
 
 const createContentAPI = (strapi: Strapi) => {

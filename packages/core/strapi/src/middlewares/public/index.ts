@@ -4,7 +4,7 @@ import stream from 'stream';
 import _ from 'lodash';
 import { defaultsDeep } from 'lodash/fp';
 import koaStatic from 'koa-static';
-import type { Strapi, Common } from '@strapi/typings';
+import type { Strapi, Common } from '@strapi/types';
 import * as utils from '../../utils';
 import { serveStatic } from './serve-static';
 

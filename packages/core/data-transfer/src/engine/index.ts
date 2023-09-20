@@ -6,7 +6,7 @@ import { chain } from 'stream-chain';
 import { isEmpty, uniq, last, isNumber, difference, set, omit } from 'lodash/fp';
 import { diff as semverDiff } from 'semver';
 
-import type { Schema, Utils } from '@strapi/typings';
+import type { Schema, Utils } from '@strapi/types';
 import type {
   IAsset,
   IDestinationProvider,

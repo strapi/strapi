@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import type { Strapi } from '@strapi/typings';
+import type { Strapi } from '@strapi/types';
 
 export default async function loadAdmin(strapi: Strapi) {
   strapi.admin = require('@strapi/admin/strapi-server');

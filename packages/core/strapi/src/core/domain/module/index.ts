@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { yup } from '@strapi/utils';
-import type { Strapi, Common, Schema } from '@strapi/typings';
+import type { Strapi, Common, Schema } from '@strapi/types';
 
 import { removeNamespace } from '../../utils';
 import { validateModule } from './validation';

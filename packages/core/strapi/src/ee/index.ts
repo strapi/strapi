@@ -1,6 +1,6 @@
 import { pick, isEqual } from 'lodash/fp';
 import type { Logger } from '@strapi/logger';
-import type { Strapi } from '@strapi/typings';
+import type { Strapi } from '@strapi/types';
 
 import { readLicense, verifyLicense, fetchLicense, LicenseCheckError } from './license';
 import { shiftCronExpression } from '../utils/cron';

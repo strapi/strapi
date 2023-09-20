@@ -1,5 +1,5 @@
 import { pickBy, has } from 'lodash/fp';
-import type { Common } from '@strapi/typings';
+import type { Common } from '@strapi/types';
 import { addNamespace, hasNamespace } from '../utils';
 
 type MiddlewareExtendFn = (middleware: Common.Middleware) => Common.Middleware;

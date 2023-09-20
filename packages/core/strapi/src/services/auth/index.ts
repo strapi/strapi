@@ -2,7 +2,7 @@ import assert from 'assert/strict';
 import { has } from 'lodash/fp';
 
 import { errors } from '@strapi/utils';
-import type { Common } from '@strapi/typings';
+import type { Common } from '@strapi/types';
 import type { ParameterizedContext } from 'koa';
 
 interface AuthenticationResponse {

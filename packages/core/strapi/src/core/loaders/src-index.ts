@@ -2,7 +2,7 @@ import { resolve } from 'path';
 import { statSync, existsSync } from 'fs';
 import { yup, importDefault } from '@strapi/utils';
 
-import type { Strapi } from '@strapi/typings';
+import type { Strapi } from '@strapi/types';
 
 const srcSchema = yup
   .object()

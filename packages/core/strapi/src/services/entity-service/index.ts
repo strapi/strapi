@@ -18,7 +18,7 @@ import type {
   Schema,
   Shared,
   Utils,
-} from '@strapi/typings';
+} from '@strapi/types';
 
 import uploadFiles from '../utils/upload-files';
 
@@ -54,12 +54,14 @@ const transformLoadParamsToQuery = (
   params: Record<string, unknown>,
   pagination = {}
 ) => {
-  const transformedParams = transformParamsToQuery(uid, params);
+  const query = transformParamsToQuery(uid, { populate: { [field]: params } as any }) as any;
 
-  return {
-    ...(_.get(transformedParams, ['populate', field]) ?? {}),
+  const res = {
+    ...query.populate[field],
     ...pagination,
   };
+
+  return res;
 };
 
 const databaseErrorsToTransform = [
@@ -417,11 +419,7 @@ const createDefaultImplementation = ({
 
     const loadedEntity = await db
       .query(uid)
-      .load(
-        entity,
-        field,
-        transformLoadParamsToQuery(uid, field, params as Record<string, unknown>)
-      );
+      .load(entity, field, transformLoadParamsToQuery(uid, field, params ?? {}));
 
     return this.wrapResult(loadedEntity, { uid, field, action: 'load' });
   },
@@ -438,12 +436,7 @@ const createDefaultImplementation = ({
       throw new Error(`Invalid load. Expected "${field}" to be an anyToMany relational attribute`);
     }
 
-    const query = transformLoadParamsToQuery(
-      uid,
-      field,
-      params as Record<string, unknown>,
-      pagination
-    );
+    const query = transformLoadParamsToQuery(uid, field, params ?? {}, pagination);
 
     const loadedPage: any = await db.query(uid).loadPages(entity, field, query);
 

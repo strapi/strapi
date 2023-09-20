@@ -12,7 +12,7 @@ const commands: StrapiCommand = ({ command, argv }) => {
       assertCwdContainsStrapiProject('generate');
       argv.splice(2, 1);
 
-      // NOTE: this needs ot be lazy loaded in order for plop to work correctly
+      // NOTE: this needs to be lazy loaded in order for plop to work correctly
       import('@strapi/generators').then((gen) => gen.runCLI());
     });
 };

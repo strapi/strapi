@@ -1,5 +1,5 @@
 import { Writable } from 'stream';
-import type { LoadedStrapi, Common, Schema } from '@strapi/typings';
+import type { LoadedStrapi, Common, Schema } from '@strapi/types';
 
 import { get, last } from 'lodash/fp';
 
@@ -66,7 +66,11 @@ const createEntitiesWriteStream = (options: IEntitiesRestoreStreamOptions) => {
             }
           }
 
-          return typeof cType === 'object' ? cType?.uid : undefined;
+          if ('uid' in cType) {
+            return cType.uid;
+          }
+
+          return undefined;
         };
 
         try {

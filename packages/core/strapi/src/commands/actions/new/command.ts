@@ -1,4 +1,4 @@
-import { yellow } from 'chalk';
+import chalk from 'chalk';
 import type { StrapiCommand } from '../../types';
 import action from './action';
 
@@ -25,7 +25,7 @@ const command: StrapiCommand = ({ command }) => {
     .description('Create a new application')
     .hook('preAction', () => {
       console.warn(
-        yellow(
+        chalk.yellow(
           'The `strapi new` command has been deprecated in v4 and will be removed in v5. `create-strapi-app` should be used to create a new Strapi project.'
         )
       );

@@ -4,13 +4,7 @@ import chalk from 'chalk';
 import * as yup from 'yup';
 import type { Logger } from './logger';
 
-export interface PackageJson extends Omit<yup.Asserts<typeof packageJsonSchema>, 'exports'> {
-  type: Extensions;
-  exports?: {
-    [key: string]: Export | string;
-  };
-  browserslist?: string[];
-}
+export type PackageJson = yup.Asserts<typeof packageJsonSchema>;
 
 export type Extensions = 'commonjs' | 'module';
 export type ExtMap = {
@@ -45,7 +39,7 @@ export interface ExportWithMeta extends Export {
 const packageJsonSchema = yup.object({
   name: yup.string().required(),
   version: yup.string().required(),
-  type: yup.mixed().oneOf(['commonjs', 'module']),
+  type: yup.mixed().oneOf(['commonjs', 'module']) as yup.SchemaOf<Extensions>,
   license: yup.string(),
   bin: yup.lazy((value) =>
     typeof value === 'object'
@@ -94,6 +88,7 @@ const packageJsonSchema = yup.object({
   devDependencies: yup.object(),
   peerDependencies: yup.object(),
   engines: yup.object(),
+  browserslist: yup.array(yup.string().required()),
 });
 
 interface LoadPkgOptions {

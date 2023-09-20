@@ -1,4 +1,4 @@
-import type { Common } from '@strapi/typings';
+import type { Common } from '@strapi/types';
 
 export const logger: Common.MiddlewareFactory = (_, { strapi }) => {
   return async (ctx, next) => {

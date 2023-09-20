@@ -2,7 +2,7 @@ import { join, extname, basename } from 'path';
 import fse from 'fs-extra';
 import { importDefault } from '@strapi/utils';
 
-import type { Strapi, Common } from '@strapi/typings';
+import type { Strapi, Common } from '@strapi/types';
 
 // TODO:: allow folders with index.js inside for bigger policies
 export default async function loadPolicies(strapi: Strapi) {
