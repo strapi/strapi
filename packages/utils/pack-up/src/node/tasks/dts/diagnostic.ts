@@ -19,20 +19,21 @@ const printDiagnostic = (
       `${chalk.gray(`TS${diagnostic.code}:`)} ${message}`,
     ].join('');
 
-    if (diagnostic.category === ts.DiagnosticCategory.Error) {
-      logger.error(output);
-    }
-
-    if (diagnostic.category === ts.DiagnosticCategory.Warning) {
-      logger.warn(output);
-    }
-
-    if (diagnostic.category === ts.DiagnosticCategory.Message) {
-      logger.info(output);
-    }
-
-    if (diagnostic.category === ts.DiagnosticCategory.Suggestion) {
-      logger.info(output);
+    switch (diagnostic.category) {
+      case ts.DiagnosticCategory.Error:
+        logger.error(output);
+        break;
+      case ts.DiagnosticCategory.Warning:
+        logger.warn(output);
+        break;
+      case ts.DiagnosticCategory.Message:
+        logger.info(output);
+        break;
+      case ts.DiagnosticCategory.Suggestion:
+        logger.info(output);
+        break;
+      default:
+        break;
     }
   } else {
     logger.info(ts.flattenDiagnosticMessageText(diagnostic.messageText, ts.sys.newLine));

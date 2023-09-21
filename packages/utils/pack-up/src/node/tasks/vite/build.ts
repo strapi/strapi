@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import ora from 'ora';
 import path from 'path';
 import { Observable } from 'rxjs';
 import { build } from 'vite';
@@ -14,7 +13,6 @@ interface ViteBuildTask extends ViteBaseTask {
 }
 
 const viteBuildTask: TaskHandler<ViteBuildTask> = {
-  _spinner: null,
   print(ctx, task) {
     const targetLines = [
       '   target:',
@@ -31,29 +29,43 @@ const viteBuildTask: TaskHandler<ViteBuildTask> = {
       ),
     ];
 
-    this._spinner = ora(`Building javascript files:\n`).start();
-
-    ctx.logger.log([`  format: ${task.format}`, ...targetLines, ...entries].join('\n'));
+    ctx.logger.log(
+      [`Building javascript files:`, `  format: ${task.format}`, ...targetLines, ...entries].join(
+        '\n'
+      )
+    );
   },
-  run(ctx, task) {
-    return new Observable((subsciber) => {
+  run$(ctx, task) {
+    return new Observable((subscriber) => {
       const config = resolveViteConfig(ctx, task);
       ctx.logger.debug('Vite config: \n', config);
       build(config)
         .then(() => {
-          subsciber.next();
-          subsciber.complete();
+          subscriber.complete();
         })
         .catch((err) => {
-          subsciber.error(err);
+          subscriber.error(err);
         });
     });
   },
-  async success() {
-    this._spinner?.succeed('Built javascript files');
+  async success(ctx, task) {
+    const msg = [
+      `Built javascript (runtime: ${task.runtime} – target: ${task.format})`,
+      task.entries
+        .map(
+          (e) => `    ${chalk.blue(path.join(ctx.pkg.name, e.path))}: ${e.entry} -> ${task.output}`
+        )
+        .join('\n'),
+    ];
+
+    ctx.logger.success(msg.join('\n'));
   },
-  async fail() {
-    this._spinner?.fail('Failed to build javascript files');
+  async fail(ctx, task, err) {
+    if (err instanceof Error) {
+      ctx.logger.error(err.message);
+    }
+
+    process.exit(1);
   },
 };
 

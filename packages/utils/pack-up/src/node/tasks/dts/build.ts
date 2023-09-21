@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import ora from 'ora';
 import { Observable } from 'rxjs';
 import ts from 'typescript';
 
@@ -13,7 +12,6 @@ interface DtsBuildTask extends DtsBaseTask {
 }
 
 const dtsBuildTask: TaskHandler<DtsBuildTask> = {
-  _spinner: null,
   print(ctx, task) {
     const entries = [
       '   entries:',
@@ -24,14 +22,11 @@ const dtsBuildTask: TaskHandler<DtsBuildTask> = {
           `${chalk.cyan(entry.sourcePath)} ${chalk.gray('->')} ${chalk.cyan(entry.targetPath)}`,
         ].join('')
       ),
-      '',
     ];
 
-    this._spinner = ora(`Building type files:\n`).start();
-
-    ctx.logger.log([...entries].join('\n'));
+    ctx.logger.log(['Building type files:', ...entries].join('\n'));
   },
-  run(ctx, task) {
+  run$(ctx, task) {
     return new Observable((subscriber) => {
       Promise.all(
         task.entries.map(async (entry) => {
@@ -65,7 +60,6 @@ const dtsBuildTask: TaskHandler<DtsBuildTask> = {
         })
       )
         .then(() => {
-          subscriber.next();
           subscriber.complete();
         })
         .catch((err) => {
@@ -73,11 +67,25 @@ const dtsBuildTask: TaskHandler<DtsBuildTask> = {
         });
     });
   },
-  async success() {
-    this._spinner?.succeed('Built type files');
+  async success(ctx, task) {
+    const msg = [
+      `Built types, entries:`,
+      task.entries
+        .map(
+          (entry) =>
+            `    ${chalk.blue(`${entry.importId}`)}: ${entry.sourcePath} -> ${entry.targetPath}`
+        )
+        .join('\n'),
+    ];
+
+    ctx.logger.success(msg.join('\n'));
   },
-  async fail() {
-    this._spinner?.fail('Failed to build type files');
+  async fail(ctx, task, err) {
+    if (err instanceof Error) {
+      ctx.logger.error(err.message);
+    }
+
+    process.exit(1);
   },
 };
 

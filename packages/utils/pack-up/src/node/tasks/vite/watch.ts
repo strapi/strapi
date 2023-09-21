@@ -3,7 +3,6 @@ import path from 'path';
 import { Observable } from 'rxjs';
 import { build } from 'vite';
 
-
 import { resolveViteConfig } from './config';
 import { ViteBaseTask } from './types';
 
@@ -32,7 +31,6 @@ interface ViteWatchTask extends ViteBaseTask {
 }
 
 const viteWatchTask: TaskHandler<ViteWatchTask, RollupWatcherEvent> = {
-  _spinner: null,
   print(ctx, task) {
     const msg = [
       `Building Javascript (runtime: ${task.runtime} – target: ${task.format})`,
@@ -45,7 +43,7 @@ const viteWatchTask: TaskHandler<ViteWatchTask, RollupWatcherEvent> = {
 
     ctx.logger.success(msg.join('\n'));
   },
-  run(ctx, task) {
+  run$(ctx, task) {
     const config = resolveViteConfig(ctx, task);
 
     ctx.logger.debug('Vite config: \n', config);

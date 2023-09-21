@@ -9,7 +9,6 @@ import type { DtsBuildTask } from './tasks/dts/build';
 import type { DtsBaseTask } from './tasks/dts/types';
 import type { ViteBuildTask } from './tasks/vite/build';
 
-
 type BuildTask = DtsBuildTask | ViteBuildTask;
 type WatchTask = ViteWatchTask;
 

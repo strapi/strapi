@@ -7,15 +7,13 @@ import { dtsWatchTask, DtsWatchTask } from './dts/watch';
 import { viteBuildTask, ViteBuildTask } from './vite/build';
 import { RollupWatcherEvent, viteWatchTask, ViteWatchTask } from './vite/watch';
 
-import type { Ora } from 'ora';
 import type { Observable } from 'rxjs';
 
 interface TaskHandler<Task, Result = void> {
   print(ctx: BuildContext, task: Task): void;
-  run(ctx: BuildContext, task: Task): Observable<Result>;
+  run$(ctx: BuildContext, task: Task): Observable<Result>;
   success(ctx: BuildContext, task: Task, result: Result): void;
   fail(ctx: BuildContext, task: Task, err: unknown): void;
-  _spinner: Ora | null;
 }
 
 interface TaskHandlers {

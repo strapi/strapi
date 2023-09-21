@@ -100,20 +100,14 @@ export const build = async (opts: BuildOptions = {}) => {
 
     handler.print(ctx, task);
 
-    const $result = handler.run(ctx, task);
+    const result$ = handler.run$(ctx, task);
 
-    $result.subscribe({
-      next(result) {
-        handler.success(ctx, task, result);
+    result$.subscribe({
+      complete() {
+        handler.success(ctx, task);
       },
       error(err) {
         handler.fail(ctx, task, err);
-
-        if (err instanceof Error) {
-          logger.error(err.message);
-        }
-
-        process.exit(1);
       },
     });
   }

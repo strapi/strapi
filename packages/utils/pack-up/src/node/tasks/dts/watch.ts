@@ -12,7 +12,6 @@ interface DtsWatchTask extends DtsBaseTask {
 }
 
 const dtsWatchTask: TaskHandler<DtsWatchTask, ts.Diagnostic> = {
-  _spinner: null,
   print(ctx, task) {
     const msg = [
       `Building Types, entries:`,
@@ -26,7 +25,7 @@ const dtsWatchTask: TaskHandler<DtsWatchTask, ts.Diagnostic> = {
 
     ctx.logger.success(msg.join('\n'));
   },
-  run(ctx, task) {
+  run$(ctx, task) {
     let programs: Array<
       ts.WatchOfConfigFile<ts.EmitAndSemanticDiagnosticsBuilderProgram> | undefined
     > = [];

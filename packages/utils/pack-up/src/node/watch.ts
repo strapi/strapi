@@ -32,7 +32,7 @@ export const watch = async (opts: WatchOptions) => {
     path: string;
   }
 
-  const $watcher = new Observable<FileEvent>((subscriber) => {
+  const watcher$ = new Observable<FileEvent>((subscriber) => {
     const watcher = chokidar.watch(configFilePaths, {
       ignoreInitial: true,
     });
@@ -52,7 +52,7 @@ export const watch = async (opts: WatchOptions) => {
     };
   });
 
-  const $configFiles = $watcher.pipe(
+  const configFiles$ = watcher$.pipe(
     scan((files, { event, path: filePath }) => {
       if (event === 'add') {
         logger.debug('config file added', filePath);
@@ -81,7 +81,7 @@ export const watch = async (opts: WatchOptions) => {
     distinctUntilChanged()
   );
 
-  const $ctx = $configFiles.pipe(
+  const ctx$ = configFiles$.pipe(
     switchMap(async (configFiles) => {
       const files = configFiles.map((f) => path.relative(cwd, f));
 
@@ -133,15 +133,15 @@ export const watch = async (opts: WatchOptions) => {
     })
   );
 
-  $ctx.subscribe(async (ctx) => {
+  ctx$.subscribe(async (ctx) => {
     const watchTasks = await createWatchTasks(ctx);
 
     for (const task of watchTasks) {
       const handler = taskHandlers[task.type] as TaskHandler<WatchTask, unknown>;
 
-      const $result = handler.run(ctx, task);
+      const result$ = handler.run$(ctx, task);
 
-      $result.subscribe({
+      result$.subscribe({
         error(err) {
           handler.fail(ctx, task, err);
 
