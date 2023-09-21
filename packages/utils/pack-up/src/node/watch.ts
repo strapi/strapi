@@ -1,4 +1,5 @@
 import { CommonCLIOptions } from '../types';
+
 import { createLogger } from './core/logger';
 
 export interface WatchOptions extends CommonCLIOptions {

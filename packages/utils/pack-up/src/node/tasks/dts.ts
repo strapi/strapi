@@ -1,9 +1,10 @@
-import path from 'path';
 import chalk from 'chalk';
 import ora from 'ora';
+import path from 'path';
 import ts from 'typescript';
 
 import { Logger } from '../core/logger';
+
 import type { TaskHandler } from './index';
 
 /**
