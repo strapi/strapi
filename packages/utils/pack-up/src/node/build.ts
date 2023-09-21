@@ -3,13 +3,13 @@ import ora from 'ora';
 
 import { CommonCLIOptions } from '../types';
 
+import { loadConfig } from './core/config';
+import { getExportExtensionMap, validateExportsOrdering } from './core/exports';
 import { createLogger } from './core/logger';
 import { loadPkg, validatePkg } from './core/pkg';
-import { getExportExtensionMap, validateExportsOrdering } from './core/exports';
 import { createBuildContext } from './createBuildContext';
 import { BuildTask, createBuildTasks } from './createBuildTasks';
 import { TaskHandler, taskHandlers } from './tasks';
-import { loadConfig } from './core/config';
 
 export interface BuildOptions extends CommonCLIOptions {
   cwd?: string;

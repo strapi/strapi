@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
-import { randomUUID } from 'crypto';
-import path from 'path';
-import { mkdir, rm, readdir, stat as fsStat, copyFile } from 'fs/promises';
 import child_process from 'child_process';
+import { randomUUID } from 'crypto';
+import { mkdir, rm, readdir, stat as fsStat, copyFile } from 'fs/promises';
+import path from 'path';
 
 const workspace = async () => {
   const key = randomUUID();

@@ -1,10 +1,11 @@
+import react from '@vitejs/plugin-react';
+import chalk from 'chalk';
+import ora from 'ora';
 import path from 'path';
 import { InlineConfig, build, createLogger } from 'vite';
-import react from '@vitejs/plugin-react';
-import ora from 'ora';
-import chalk from 'chalk';
 
 import { BuildContext, Targets } from '../createBuildContext';
+
 import type { TaskHandler } from './index';
 import type { Extensions } from '../core/exports';
 
