@@ -298,6 +298,7 @@ const LinkButton = () => {
   const [popoverOpen, setPopoverOpen] = React.useState(false);
   const toolbarButtonRef = React.useRef(null);
   const domNodeRef = React.useRef(null);
+  const [linkNode, setLinkNode] = React.useState(null);
   const editor = useSlate();
   const { formatMessage } = useIntl();
 
@@ -329,20 +330,18 @@ const LinkButton = () => {
     // We insert an empty anchor, so we split the DOM to have a element we can use as reference for the popover
     insertLink(editor, { url: '', text: Editor.string(editor, editor.selection) });
 
-    const [, textNodePath] = Editor.node(editor, editor.selection);
-    const [parentNode] = Editor.parent(editor, textNodePath);
+    const [parentNode] = Editor.parent(editor, editor.selection.anchor.path);
 
-    /**
-     * The `ReactEditor` is a single tick behind `Editor`, as such we use a timeout
-     * before we get the DOM node, it's a single tick and imperceivable.
-     */
-    setTimeout(() => {
-      const domNode = ReactEditor.toDOMNode(editor, parentNode);
-      domNodeRef.current = domNode;
-
-      setPopoverOpen(true);
-    });
+    setLinkNode(parentNode);
+    setPopoverOpen(true);
   };
+
+  React.useEffect(() => {
+    if (linkNode) {
+      const domNode = ReactEditor.toDOMNode(editor, linkNode);
+      domNodeRef.current = domNode;
+    }
+  }, [linkNode, editor]);
 
   return (
     <>
