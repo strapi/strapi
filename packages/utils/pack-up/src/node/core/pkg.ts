@@ -13,6 +13,19 @@ import { Logger } from './logger';
 
 import type { Export } from './exports';
 
+const record = (value: unknown) =>
+  yup
+    .object(
+      typeof value === 'object' && value
+        ? Object.entries(value).reduce<Record<string, yup.SchemaOf<string>>>((acc, [key]) => {
+            acc[key] = yup.string().required();
+
+            return acc;
+          }, {})
+        : {}
+    )
+    .optional();
+
 /**
  * The schema for the package.json that we expect,
  * currently pretty loose.
@@ -20,18 +33,39 @@ import type { Export } from './exports';
 const packageJsonSchema = yup.object({
   name: yup.string().required(),
   version: yup.string().required(),
+  description: yup.string().optional(),
+  author: yup.lazy((value) => {
+    if (typeof value === 'object') {
+      return yup
+        .object({
+          name: yup.string().required(),
+          email: yup.string().optional(),
+          url: yup.string().required().optional(),
+        })
+        .optional();
+    }
+
+    return yup.string().optional();
+  }),
+  keywords: yup.array(yup.string()).optional(),
   type: yup.mixed().oneOf(['commonjs', 'module']).optional(),
   license: yup.string().optional(),
+  repository: yup
+    .object({
+      type: yup.string().required(),
+      url: yup.string().required(),
+    })
+    .optional(),
+  bugs: yup
+    .object({
+      url: yup.string().required(),
+    })
+    .optional(),
+  homepage: yup.string().optional(),
   // TODO: be nice just to make this either a string or a record of strings.
   bin: yup.lazy((value) => {
     if (typeof value === 'object') {
-      return yup.object(
-        Object.entries(value).reduce((acc, [key]) => {
-          acc[key] = yup.string().required();
-
-          return acc;
-        }, {} as Record<string, yup.SchemaOf<string>>)
-      );
+      return record(value);
     }
 
     return yup.string().optional();
@@ -39,13 +73,7 @@ const packageJsonSchema = yup.object({
   // TODO: be nice just to make this either a string or a record of strings.
   browser: yup.lazy((value) => {
     if (typeof value === 'object') {
-      return yup.object(
-        Object.entries(value).reduce((acc, [key]) => {
-          acc[key] = yup.string().required();
-
-          return acc;
-        }, {} as Record<string, yup.SchemaOf<string>>)
-      );
+      return record(value);
     }
 
     return yup.string().optional();
@@ -100,11 +128,11 @@ const packageJsonSchema = yup.object({
       .optional()
   ),
   files: yup.array(yup.string()).optional(),
-  scripts: yup.object().optional(),
-  dependencies: yup.object().optional(),
-  devDependencies: yup.object().optional(),
-  peerDependencies: yup.object().optional(),
-  engines: yup.object().optional(),
+  scripts: yup.lazy(record),
+  dependencies: yup.lazy(record),
+  devDependencies: yup.lazy(record),
+  peerDependencies: yup.lazy(record),
+  engines: yup.lazy(record),
   browserslist: yup.array(yup.string().required()).optional(),
 });
 

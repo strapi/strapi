@@ -1,46 +1,49 @@
-import { spawn, cleanup } from '../../tests/spawn';
+import { spawn } from '../../tests/spawn';
+import { cleanupWorkspaces } from '../../tests/workspaces';
 
 /**
  * This has issues running in the CI due to how yarn3 works.
  */
-describe.skip('cli', () => {
+describe('cli', () => {
   afterAll(async () => {
-    await cleanup();
+    await cleanupWorkspaces();
   });
 
   const timeout = 1000 * 50;
 
-  it(
-    'should build `cjs-js` package',
-    async () => {
-      const project = await spawn('cjs-js');
+  describe.skip('build & check', () => {
+    it(
+      'should build `cjs-js` package',
+      async () => {
+        const project = await spawn('cjs-js');
 
-      await project.install();
+        await project.install();
 
-      const { stdout } = await project.run('build');
+        const { stdout } = await project.run('build');
 
-      expect(stdout).toContain('./src/index.js → ./dist/index.mjs');
-      expect(stdout).toContain('./src/index.js → ./dist/index.js');
+        expect(stdout).toContain('./src/index.js → ./dist/index.mjs');
+        expect(stdout).toContain('./src/index.js → ./dist/index.js');
 
-      await project.remove();
-    },
-    timeout
-  );
+        await project.remove();
+      },
+      timeout
+    );
 
-  it(
-    'should build `esm-js` package',
-    async () => {
-      const project = await spawn('esm-js');
+    it(
+      'should build `esm-js` package',
+      async () => {
+        const project = await spawn('esm-js');
 
-      await project.install();
+        await project.install();
 
-      const { stdout } = await project.run('build');
+        const { stdout } = await project.run('build');
 
-      expect(stdout).toContain('./src/index.js → ./dist/index.cjs');
-      expect(stdout).toContain('./src/index.js → ./dist/index.js');
+        expect(stdout).toContain('./src/index.js → ./dist/index.cjs');
+        expect(stdout).toContain('./src/index.js → ./dist/index.js');
 
-      await project.remove();
-    },
-    timeout
-  );
+        await project.remove();
+      },
+      timeout
+    );
+  });
 });

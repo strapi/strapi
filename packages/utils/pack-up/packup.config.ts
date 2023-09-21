@@ -10,7 +10,7 @@ export default defineConfig({
       require: './dist/cli.js',
     },
   ],
-  externals: ['fs', 'path', 'child_process', 'fs/promises', 'module'],
+  externals: ['fs', 'path', 'child_process', 'fs/promises', 'module', 'os'],
   runtime: 'node',
   minify: false,
   sourcemap: true,
