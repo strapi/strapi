@@ -8,7 +8,7 @@ import { createMigrationsProvider, MigrationProvider } from './migrations';
 import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
 import { createConnection } from './connection';
 import * as errors from './errors';
-import { Callback, transactionCtx } from './transaction-context';
+import { Callback, transactionCtx, TransactionObject } from './transaction-context';
 
 // TODO: move back into strapi
 import { transformContentTypes } from './utils/content-types';
@@ -91,12 +91,11 @@ class Database {
     return !!transactionCtx.get();
   }
 
-  async transaction(): Promise<{
-    commit: () => Promise<void>;
-    rollback: () => Promise<void>;
-    get: () => Knex.Transaction;
-  }>;
-  async transaction(cb?: Callback) {
+  transaction(): Promise<TransactionObject>;
+  transaction<TCallback extends Callback>(c: TCallback): Promise<ReturnType<TCallback>>;
+  async transaction<TCallback extends Callback>(
+    cb?: TCallback
+  ): Promise<ReturnType<TCallback> | TransactionObject> {
     const notNestedTransaction = !transactionCtx.get();
     const trx = notNestedTransaction
       ? await this.connection.transaction()

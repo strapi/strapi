@@ -438,7 +438,7 @@ const createDefaultImplementation = ({
 
     const query = transformLoadParamsToQuery(uid, field, params ?? {}, pagination);
 
-    const loadedPage: any = await db.query(uid).loadPages(entity, field, query);
+    const loadedPage = await db.query(uid).loadPages(entity, field, query);
 
     return {
       ...loadedPage,
@@ -461,7 +461,7 @@ export default (ctx: {
 
   const service = {
     implementation,
-    decorate(decorator: any) {
+    decorate<T extends object>(decorator: (current: typeof implementation) => T) {
       if (typeof decorator !== 'function') {
         throw new Error(`Decorator must be a function, received ${typeof decorator}`);
       }

@@ -29,7 +29,7 @@ import { mapAsync } from '@strapi/utils';
 import * as types from '../utils/types';
 import { createField } from '../fields';
 import { createQueryBuilder } from '../query';
-import { createRepository, Repository } from './entity-repository';
+import { createRepository } from './entity-repository';
 import { deleteRelatedMorphOneRelationsAfterMorphToManyUpdate } from './morph-relations';
 import {
   isPolymorphic,
@@ -54,28 +54,9 @@ import { DatabaseError } from '../errors';
 import type { Database } from '..';
 import type { Meta } from '../metadata';
 import type { ID } from '../types';
+import { EntityManager, Repository, Entity } from './types';
 
-export type EntityManager = ReturnType<typeof createEntityManager>;
-
-type Params = {
-  where?: any;
-  filters?: any;
-  select?: any;
-  populate?: any;
-  orderBy?: any;
-  _q?: string;
-  data?: any;
-  page?: number;
-  pageSize?: number;
-  limit?: number;
-  offset?: number;
-  count?: boolean;
-};
-
-type Entity = {
-  id: ID;
-  [key: string]: any;
-};
+export * from './types';
 
 const isObj = (value: unknown): value is object => isObject(value) && !isNil(value);
 
@@ -257,12 +238,11 @@ const processData = (
 
   return obj;
 };
-
-export const createEntityManager = (db: Database) => {
+export const createEntityManager = (db: Database): EntityManager => {
   const repoMap: Record<string, Repository> = {};
 
   return {
-    async findOne(uid: string, params: Params) {
+    async findOne(uid, params) {
       const states = await db.lifecycles.run('beforeFindOne', uid, { params });
 
       const result = await this.createQueryBuilder(uid)
@@ -276,17 +256,17 @@ export const createEntityManager = (db: Database) => {
     },
 
     // should we name it findOne because people are used to it ?
-    async findMany(uid: string, params: Params) {
+    async findMany(uid, params) {
       const states = await db.lifecycles.run('beforeFindMany', uid, { params });
 
-      const result = await this.createQueryBuilder(uid).init(params).execute();
+      const result = await this.createQueryBuilder(uid).init(params).execute<any[]>();
 
       await db.lifecycles.run('afterFindMany', uid, { params, result }, states);
 
       return result;
     },
 
-    async count(uid: string, params: Params) {
+    async count(uid, params = {}) {
       const states = await db.lifecycles.run('beforeCount', uid, { params });
 
       const res = await this.createQueryBuilder(uid)
@@ -302,7 +282,7 @@ export const createEntityManager = (db: Database) => {
       return result;
     },
 
-    async create(uid: string, params: Params = {}) {
+    async create(uid, params = {}) {
       const states = await db.lifecycles.run('beforeCreate', uid, { params });
 
       const metadata = db.metadata.get(uid);
@@ -345,7 +325,7 @@ export const createEntityManager = (db: Database) => {
     },
 
     // TODO: where do we handle relation processing for many queries ?
-    async createMany(uid: string, params: Params = {}) {
+    async createMany(uid, params = {}) {
       const states = await db.lifecycles.run('beforeCreateMany', uid, { params });
 
       const metadata = db.metadata.get(uid);
@@ -377,7 +357,7 @@ export const createEntityManager = (db: Database) => {
       return result;
     },
 
-    async update(uid: string, params: Params = {}) {
+    async update(uid, params = {}) {
       const states = await db.lifecycles.run('beforeUpdate', uid, { params });
 
       const metadata = db.metadata.get(uid);
@@ -432,7 +412,7 @@ export const createEntityManager = (db: Database) => {
     },
 
     // TODO: where do we handle relation processing for many queries ?
-    async updateMany(uid: string, params: Params = {}) {
+    async updateMany(uid, params = {}) {
       const states = await db.lifecycles.run('beforeUpdateMany', uid, { params });
 
       const metadata = db.metadata.get(uid);
@@ -456,7 +436,7 @@ export const createEntityManager = (db: Database) => {
       return result;
     },
 
-    async clone(uid: string, cloneId: ID, params: Params = {}) {
+    async clone(uid, cloneId, params = {}) {
       const states = await db.lifecycles.run('beforeCreate', uid, { params });
 
       const metadata = db.metadata.get(uid);
@@ -520,7 +500,7 @@ export const createEntityManager = (db: Database) => {
       return result;
     },
 
-    async delete(uid: string, params: Params = {}) {
+    async delete(uid, params = {}) {
       const states = await db.lifecycles.run('beforeDelete', uid, { params });
 
       const { where, select, populate } = params;
@@ -560,12 +540,15 @@ export const createEntityManager = (db: Database) => {
     },
 
     // TODO: where do we handle relation processing for many queries ?
-    async deleteMany(uid: string, params: Params = {}) {
+    async deleteMany(uid, params = {}) {
       const states = await db.lifecycles.run('beforeDeleteMany', uid, { params });
 
       const { where } = params;
 
-      const deletedRows = await this.createQueryBuilder(uid).where(where).delete().execute();
+      const deletedRows = await this.createQueryBuilder(uid)
+        .where(where)
+        .delete()
+        .execute<number>();
 
       const result = { count: deletedRows };
 
@@ -577,12 +560,7 @@ export const createEntityManager = (db: Database) => {
     /**
      * Attach relations to a new entity
      */
-    async attachRelations(
-      uid: string,
-      id: ID,
-      data: Record<string, any>,
-      options?: { transaction?: Knex.Transaction }
-    ) {
+    async attachRelations(uid, id, data, options) {
       const { attributes } = db.metadata.get(uid);
       const { transaction: trx } = options ?? {};
 
@@ -810,12 +788,7 @@ export const createEntityManager = (db: Database) => {
      * Updates relations of an existing entity
      */
     // TODO: check relation exists (handled by FKs except for polymorphics)
-    async updateRelations(
-      uid: string,
-      id: ID,
-      data: any,
-      options?: { transaction?: Knex.Transaction }
-    ) {
+    async updateRelations(uid, id, data, options) {
       const { attributes } = db.metadata.get(uid);
       const { transaction: trx } = options ?? {};
 
@@ -1235,13 +1208,7 @@ export const createEntityManager = (db: Database) => {
      * @param {Metadata} metadata - model metadta
      * @param {ID} id - entity ID
      */
-    async deleteRelations(
-      uid: string,
-      id: ID,
-      options?: {
-        transaction?: Knex.Transaction;
-      }
-    ) {
+    async deleteRelations(uid, id, options) {
       const { attributes } = db.metadata.get(uid);
       const { transaction: trx } = options ?? {};
 
@@ -1366,16 +1333,7 @@ export const createEntityManager = (db: Database) => {
      * @example cloneRelations('user', 3, 1, { cloneAttrs: ["comments"]})
      * @example cloneRelations('post', 5, 2, { cloneAttrs: ["comments", "likes"] })
      */
-    async cloneRelations(
-      uid: string,
-      targetId: ID,
-      sourceId: ID,
-      data: any,
-      options?: {
-        cloneAttrs?: string[];
-        transaction?: Knex.Transaction;
-      }
-    ) {
+    async cloneRelations(uid, targetId, sourceId, data, options) {
       const { attributes } = db.metadata.get(uid);
       const { cloneAttrs = [], transaction } = options ?? {};
 
@@ -1432,7 +1390,7 @@ export const createEntityManager = (db: Database) => {
     },
 
     // TODO: add lifecycle events
-    async populate(uid: string, entity: Entity, populate: Params['populate']) {
+    async populate(uid, entity, populate) {
       const entry = await this.findOne(uid, {
         select: ['id'],
         where: { id: entity.id },
@@ -1443,7 +1401,7 @@ export const createEntityManager = (db: Database) => {
     },
 
     // TODO: add lifecycle events
-    async load(uid: string, entity: Entity, fields: string | string[], params: Params) {
+    async load(uid, entity, fields, populate) {
       const { attributes } = db.metadata.get(uid);
 
       const fieldsArr = castArray(fields);
@@ -1459,7 +1417,7 @@ export const createEntityManager = (db: Database) => {
         select: ['id'],
         where: { id: entity.id },
         populate: fieldsArr.reduce((acc, field) => {
-          acc[field] = params || true;
+          acc[field] = populate || true;
           return acc;
         }, {} as Record<string, unknown>),
       });
@@ -1493,11 +1451,11 @@ export const createEntityManager = (db: Database) => {
     // -> virtuals
     // -> private
 
-    createQueryBuilder(uid: string) {
+    createQueryBuilder(uid) {
       return createQueryBuilder(uid, db);
     },
 
-    getRepository(uid: string) {
+    getRepository(uid) {
       if (!repoMap[uid]) {
         repoMap[uid] = createRepository(uid, db);
       }

@@ -1,8 +1,13 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { Knex } from 'knex';
 
-export type Callback = (...args: unknown[]) => Promise<unknown> | unknown;
+export type Callback = (...args: any[]) => Promise<any> | any;
 
+export interface TransactionObject {
+  commit: () => Promise<void>;
+  rollback: () => Promise<void>;
+  get: () => Knex.Transaction;
+}
 export interface Store {
   trx: Knex.Transaction | null;
   commitCallbacks: Callback[];
@@ -12,8 +17,11 @@ export interface Store {
 const storage = new AsyncLocalStorage<Store>();
 
 const transactionCtx = {
-  async run(store: Knex.Transaction, cb: Callback) {
-    return storage.run({ trx: store, commitCallbacks: [], rollbackCallbacks: [] }, cb);
+  async run<TCallback extends Callback>(store: Knex.Transaction, cb: TCallback) {
+    return storage.run<ReturnType<TCallback>, void[]>(
+      { trx: store, commitCallbacks: [], rollbackCallbacks: [] },
+      cb
+    );
   },
 
   get() {

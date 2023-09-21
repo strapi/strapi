@@ -168,12 +168,12 @@ const onlineUpdate = async ({ strapi }: { strapi: Strapi }) => {
       const query = strapi.db?.queryBuilder('strapi::core-store').transacting(transaction);
 
       if (!storedInfo) {
-        query.insert({ key: 'ee_information', value: JSON.stringify(result) });
+        query?.insert({ key: 'ee_information', value: JSON.stringify(result) });
       } else {
-        query.update({ value: JSON.stringify(result) }).where({ key: 'ee_information' });
+        query?.update({ value: JSON.stringify(result) }).where({ key: 'ee_information' });
       }
 
-      await query.execute();
+      await query?.execute();
     }
 
     await commit();
