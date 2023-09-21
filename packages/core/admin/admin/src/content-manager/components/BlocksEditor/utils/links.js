@@ -8,37 +8,33 @@ const removeLink = (editor) => {
 };
 
 const insertLink = (editor, { url, text }) => {
-  const { selection } = editor;
-
   const linkElement = {
     type: 'link',
     url,
     children: [{ text }],
   };
 
-  ReactEditor.focus(editor);
-  const selectedText = Editor.string(editor, selection);
+  const selectedText = Editor.string(editor, editor.selection);
 
-  if (selection) {
-    const [parentNode] = Editor.parent(editor, selection.focus?.path);
+  if (editor.selection) {
+    const [parentNode] = Editor.parent(editor, editor.selection.focus?.path);
 
     // If we are creating a link inside another link, we remove the parent link
     if (parentNode.type === 'link') {
       removeLink(editor);
     }
 
-    if (Range.isCollapsed(selection)) {
-      Transforms.insertNodes(editor, linkElement, { select: true });
-    } else if (text !== selectedText) {
-      // If user changed the selected text, we need to remove the selection and created everything from scratch
-      // If not, we can wrap everything in a link node
+    // If user changed the selected text, we need to remove the editor.selection and created everything from scratch
+    if (Range.isCollapsed(editor.selection) || text !== selectedText) {
       Transforms.insertNodes(editor, linkElement, { select: true });
     } else {
+      // If not, we can wrap everything in a link node
       Transforms.wrapNodes(editor, { type: 'link', url }, { split: true });
     }
   } else {
     Transforms.insertNodes(editor, { type: 'paragraph', children: [linkElement] });
   }
+  ReactEditor.focus(editor);
 };
 
 export { insertLink, removeLink };

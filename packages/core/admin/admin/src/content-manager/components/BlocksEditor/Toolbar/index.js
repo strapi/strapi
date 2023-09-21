@@ -299,15 +299,14 @@ const LinkButton = () => {
   const toolbarButtonRef = React.useRef(null);
   const domNodeRef = React.useRef(null);
   const editor = useSlate();
-  const { selection } = editor;
   const { formatMessage } = useIntl();
 
   const isLinkActive = () => {
-    if (!selection) return false;
+    if (!editor.selection) return false;
 
     const [match] = Array.from(
       Editor.nodes(editor, {
-        at: Editor.unhangRange(editor, selection),
+        at: Editor.unhangRange(editor, editor.selection),
         match: (node) =>
           !Editor.isEditor(node) && SlateElement.isElement(node) && node.type === 'link',
       })
@@ -328,19 +327,22 @@ const LinkButton = () => {
 
   const toggleLinkPopover = () => {
     // We insert an empty anchor, so we split the DOM to have a element we can use as reference for the popover
-    insertLink(editor, { url: '', text: Editor.string(editor, selection) });
+    insertLink(editor, { url: '', text: Editor.string(editor, editor.selection) });
 
-    const [linkNode] = Editor.nodes(editor, {
-      match: (node) =>
-        !Editor.isEditor(node) && SlateElement.isElement(node) && node.type === 'link',
+    const [, textNodePath] = Editor.node(editor, editor.selection);
+    const [parentNode] = Editor.parent(editor, textNodePath);
+
+    /**
+     * The `ReactEditor` is a single tick behind `Editor`, as such we use a timeout
+     * before we get the DOM node, it's a single tick and imperceivable.
+     */
+    setTimeout(() => {
+      const domNode = ReactEditor.toDOMNode(editor, parentNode);
+      domNodeRef.current = domNode;
+
+      setPopoverOpen(true);
     });
-    const domElement = ReactEditor.toDOMNode(editor, linkNode[0]);
-    domNodeRef.current = domElement;
-
-    setPopoverOpen(true);
   };
-
-  console.log({ editor });
 
   return (
     <>
@@ -376,7 +378,7 @@ const LinkButton = () => {
                   id: 'components.Blocks.popover.text.placeholder',
                   defaultMessage: 'This text is the text of the link',
                 })}
-                defaultValue={Editor.string(editor, selection)}
+                defaultValue={Editor.string(editor, editor.selection)}
               />
             </Field>
             <Field width="300px">

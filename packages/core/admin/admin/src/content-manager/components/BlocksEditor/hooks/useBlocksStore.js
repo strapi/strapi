@@ -31,6 +31,7 @@ import { Transforms, Editor } from 'slate';
 import { useSlateStatic, ReactEditor } from 'slate-react';
 import styled, { css } from 'styled-components';
 
+import { composeRefs } from '../../../utils';
 import { insertLink, removeLink } from '../utils/links';
 
 const H1 = styled(Typography).attrs({ as: 'h1' })`
@@ -180,7 +181,7 @@ Image.propTypes = {
   }).isRequired,
 };
 
-const Link = ({ element, children, ...attributes }) => {
+const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRef) => {
   const { formatMessage } = useIntl();
   const editor = useSlateStatic();
   const { selection } = editor;
@@ -207,9 +208,16 @@ const Link = ({ element, children, ...attributes }) => {
     setPopoverOpen(false);
   };
 
+  const composedRefs = composeRefs(linkRef, forwardedRef);
+
   return (
     <>
-      <BaseLink {...attributes} ref={linkRef} href={element.url} onClick={handleOpenEditPopover}>
+      <BaseLink
+        {...attributes}
+        ref={composedRefs}
+        href={element.url}
+        onClick={handleOpenEditPopover}
+      >
         {children}
       </BaseLink>
       {popoverOpen && (
@@ -281,7 +289,7 @@ const Link = ({ element, children, ...attributes }) => {
       )}
     </>
   );
-};
+});
 
 Link.propTypes = {
   element: PropTypes.object.isRequired,
