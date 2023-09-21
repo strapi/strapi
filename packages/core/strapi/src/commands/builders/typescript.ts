@@ -20,11 +20,11 @@ const cleanupDistDirectory = async (distDir: string) => {
 export default async ({
   srcDir,
   distDir,
-  watch = false,
+  ignoreDiagnostics = false,
 }: {
   srcDir: string;
   distDir: string;
-  watch?: boolean;
+  ignoreDiagnostics: boolean;
 }) => {
   const isTSProject = await tsUtils.isUsingTypeScript(srcDir);
 
@@ -34,5 +34,5 @@ export default async ({
 
   await cleanupDistDirectory(distDir);
 
-  return tsUtils.compile(srcDir, { watch });
+  return tsUtils.compile(srcDir, { configOptions: { ignoreDiagnostics } });
 };

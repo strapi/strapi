@@ -1,5 +1,5 @@
 import { assign, isArray, isEmpty, isObject, map, omit, size } from 'lodash/fp';
-import type { LoadedStrapi, Attribute, Common, Schema } from '@strapi/typings';
+import type { LoadedStrapi, Attribute, Common, Schema } from '@strapi/types';
 import * as componentsService from '../../utils/components';
 
 const sanitizeComponentLikeAttributes = <T extends Schema.ContentType | Schema.Component>(
@@ -22,10 +22,7 @@ const createEntityQuery = (strapi: LoadedStrapi): any => {
     async assignToEntity(uid: Common.UID.Schema, data: any) {
       const model = strapi.getModel(uid);
 
-      const entityComponents = await componentsService.createComponents(
-        uid as Common.UID.Schema,
-        data
-      );
+      const entityComponents = await componentsService.createComponents(uid, data);
       const dataWithoutComponents = sanitizeComponentLikeAttributes(model, data);
 
       return assign(entityComponents, dataWithoutComponents);

@@ -5,7 +5,7 @@ import { configs, createLogger } from '@strapi/logger';
 import strapiFactory from '@strapi/strapi';
 import ora from 'ora';
 import { merge } from 'lodash/fp';
-import type { LoadedStrapi } from '@strapi/typings';
+import type { LoadedStrapi } from '@strapi/types';
 
 import { readableBytes, exitWith } from './helpers';
 import { getParseListWithChoices, parseInteger, confirmMessage } from './commander';

@@ -1,7 +1,7 @@
 import { isObject, isString, isFinite, toNumber } from 'lodash/fp';
 import fs from 'fs-extra';
 import chalk from 'chalk';
-import type { LoadedStrapi } from '@strapi/typings';
+import type { LoadedStrapi } from '@strapi/types';
 
 import {
   getDefaultExportName,
@@ -61,9 +61,9 @@ export default async (opts: CmdOptions) => {
   const engine = createTransferEngine(source, destination, {
     versionStrategy: 'ignore', // for an export to file, versionStrategy will always be skipped
     schemaStrategy: 'ignore', // for an export to file, schemaStrategy will always be skipped
-    exclude: opts.exclude ?? [],
-    only: opts.only ?? [],
-    throttle: opts.throttle ?? 0,
+    exclude: opts.exclude,
+    only: opts.only,
+    throttle: opts.throttle,
     transforms: {
       links: [
         {

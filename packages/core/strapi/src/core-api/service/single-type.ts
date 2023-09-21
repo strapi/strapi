@@ -1,5 +1,5 @@
 import { propOr } from 'lodash/fp';
-import type { CoreApi, Schema, Common } from '@strapi/typings';
+import type { CoreApi, Schema, Common } from '@strapi/types';
 import { errors, contentTypes as contentTypeUtils } from '@strapi/utils';
 import { getFetchParams } from './get-fetch-params';
 

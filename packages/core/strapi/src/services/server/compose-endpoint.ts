@@ -1,5 +1,5 @@
 import { toLower, castArray, trim, prop, isNil } from 'lodash/fp';
-import type { Strapi, Common } from '@strapi/typings';
+import type { Strapi, Common } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import Router from '@koa/router';
 

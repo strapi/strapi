@@ -115,7 +115,7 @@
     "lerna": "6.6.2",
     "lint-staged": "13.3.0",
     "lodash": "4.17.21",
-    "nx": "16.7.2",
+    "nx": "16.8.1",
     "plop": "2.7.6",
     "prettier": "2.8.4",
     "qs": "6.11.1",
@@ -128,6 +128,9 @@
     "ts-jest": "29.1.0",
     "typescript": "5.2.2",
     "yargs": "17.7.2"
+  },
+  "resolutions": {
+    "@types/koa": "2.13.4"
   },
   "engines": {
     "node": ">=16.0.0 <=20.x.x",

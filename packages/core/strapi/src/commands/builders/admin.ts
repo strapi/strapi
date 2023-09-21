@@ -1,4 +1,4 @@
-import { green } from 'chalk';
+import chalk from 'chalk';
 
 import strapiAdmin from '@strapi/admin';
 import { getConfigUrls } from '@strapi/utils';
@@ -30,7 +30,7 @@ export default async ({ buildDestDir, forceBuild = true, optimization, srcDir }:
   const env = strapiInstance.config.get('environment');
   const { serverUrl, adminPath } = getConfigUrls(strapiInstance.config, true);
 
-  console.log(`Building your admin UI with ${green(env)} configuration...`);
+  console.log(`Building your admin UI with ${chalk.green(env)} configuration...`);
 
   // Always remove the .cache and build folders
   await strapiAdmin.clean({ appDir: srcDir, buildDestDir });

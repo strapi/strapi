@@ -1,7 +1,6 @@
 import { yup } from '@strapi/utils';
-import type { Strapi } from '@strapi/typings';
+import type { Strapi } from '@strapi/types';
 import { resolveMiddlewares } from './middleware';
-
 
 type MiddlewareConfig = (string | { name?: string; resolve?: string; config?: unknown })[];
 

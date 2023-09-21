@@ -34,7 +34,7 @@ describe('format attributes', () => {
           },
         },
       },
-    };
+    } as any;
 
     convertCustomFieldType(global.strapi);
 

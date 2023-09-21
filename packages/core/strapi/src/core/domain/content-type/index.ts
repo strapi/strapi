@@ -1,7 +1,7 @@
 import { cloneDeep } from 'lodash/fp';
 import _ from 'lodash';
 import { yup, contentTypes as contentTypesUtils } from '@strapi/utils';
-import type { Schema } from '@strapi/typings';
+import type { Schema } from '@strapi/types';
 import { validateContentTypeDefinition } from './validator';
 
 export type ContentTypeDefinition = {
@@ -25,6 +25,8 @@ const createContentType = (uid: string, definition: ContentTypeDefinition) => {
     if (e instanceof yup.ValidationError) {
       throw new Error(`Content Type Definition is invalid for ${uid}'.\n${e.errors}`);
     }
+
+    throw e;
   }
 
   const { schema, actions, lifecycles } = cloneDeep(definition);

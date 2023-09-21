@@ -1,5 +1,5 @@
 import Router from '@koa/router';
-import type { Strapi, Common, Server } from '@strapi/typings';
+import type { Strapi, Common, Server } from '@strapi/types';
 
 import { createHTTPServer } from './http-server';
 import { createRouteManager } from './routing';

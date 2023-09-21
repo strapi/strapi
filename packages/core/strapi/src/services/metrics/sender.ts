@@ -5,7 +5,7 @@ import isDocker from 'is-docker';
 import ciEnv from 'ci-info';
 import tsUtils from '@strapi/typescript-utils';
 import { env } from '@strapi/utils';
-import type { Strapi } from '@strapi/typings';
+import type { Strapi } from '@strapi/types';
 import machineID from '../../utils/machine-id';
 import { generateAdminUserHash } from './admin-user-hash';
 

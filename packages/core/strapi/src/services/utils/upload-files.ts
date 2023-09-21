@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import type { Attribute, Common, Schema } from '@strapi/typings';
+import type { Attribute, Common, Schema } from '@strapi/types';
 
 export type UploadFile = (
   uid: Common.UID.Schema,

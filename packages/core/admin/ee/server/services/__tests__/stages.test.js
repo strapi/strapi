@@ -4,12 +4,14 @@ jest.mock('@strapi/strapi/dist/utils/ee', () => {
   const eeModule = () => true;
 
   Object.assign(eeModule, {
-    features: {
-      isEnabled() {
-        return true;
-      },
-      getEnabled() {
-        return ['review-workflows'];
+    default: {
+      features: {
+        isEnabled() {
+          return true;
+        },
+        getEnabled() {
+          return ['review-workflows'];
+        },
       },
     },
   });

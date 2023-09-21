@@ -4,17 +4,16 @@
 
 import inquirer from 'inquirer';
 import { Command, InvalidOptionArgumentError, Option } from 'commander';
-import { bold, green, cyan } from 'chalk';
+import chalk from 'chalk';
 import { isNaN } from 'lodash/fp';
 import { exitWith } from './helpers';
 
 /**
  * argParser: Parse a comma-delimited string as an array
  */
-const parseList = (value: string): string[] => {
+const parseList = (value: string) => {
   try {
-    const list = value.split(',').map((item) => item.trim()); // trim shouldn't be necessary but might help catch unexpected whitespace characters
-    return list;
+    return value.split(',').map((item) => item.trim()); // trim shouldn't be necessary but might help catch unexpected whitespace characters
   } catch (e) {
     exitWith(1, `Unrecognized input: ${value}`);
   }
@@ -55,7 +54,7 @@ const parseInteger = (value: string) => {
 /**
  * argParser: Parse a string as a URL object
  */
-const parseURL = (value: string): URL => {
+const parseURL = (value: string) => {
   try {
     const url = new URL(value);
     if (!url.host) {
@@ -122,7 +121,7 @@ const confirmMessage = async (message: string, { force }: { force?: boolean } = 
   // if we have a force option, respond yes
   if (force === true) {
     // attempt to mimic the inquirer prompt exactly
-    console.log(`${green('?')} ${bold(message)} ${cyan('Yes')}`);
+    console.log(`${chalk.green('?')} ${chalk.bold(message)} ${chalk.cyan('Yes')}`);
     return true;
   }
 

@@ -1,4 +1,4 @@
-import { red, green } from 'chalk';
+import chalk from 'chalk';
 import { isString, isArray } from 'lodash/fp';
 import type { Command } from 'commander';
 
@@ -36,9 +36,9 @@ const exitWith = (code: number, message?: string | string[], options: ExitWithOp
 
   const log = (message: string) => {
     if (code === 0) {
-      logger.log(green(message));
+      logger.log(chalk.green(message));
     } else {
-      logger.error(red(message));
+      logger.error(chalk.red(message));
     }
   };
 

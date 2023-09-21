@@ -183,6 +183,7 @@ function ListView({
           customValue: user.id.toString(),
         })),
       };
+
       filter.fieldSchema.mainField = {
         name: 'id',
       };

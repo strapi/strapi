@@ -4,6 +4,7 @@ import { parseExports, PackageJson, ExtMap, Export } from '../utils/pkg';
 import type { Logger } from '../utils/logger';
 import type { ViteTask } from './tasks/vite';
 import type { DtsTask } from './tasks/dts';
+import type { Task } from './tasks';
 
 interface BuildContextArgs {
   cwd: string;
@@ -27,13 +28,6 @@ export interface BuildContext {
   pkg: PackageJson;
   targets: Targets;
   distPath: string;
-}
-
-export interface BuildTask {
-  type: 'build:js' | 'build:dts';
-  entries: unknown[];
-  format?: 'cjs' | 'es';
-  [key: string]: unknown;
 }
 
 const DEFAULT_BROWSERS_LIST_CONFIG = [
@@ -139,8 +133,6 @@ const findCommonDirPath = (filePaths: string[]) => {
 
   return commonPath;
 };
-
-type Task = ViteTask | DtsTask;
 
 /**
  * @description Create the build tasks for the pipeline, this

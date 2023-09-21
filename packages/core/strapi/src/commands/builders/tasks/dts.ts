@@ -4,7 +4,6 @@ import ora from 'ora';
 import ts from 'typescript';
 import type { Logger } from '../../utils/logger';
 import type { TaskHandler } from '.';
-import type { BuildTask } from '../packages';
 
 interface LoadTsConfigOptions {
   cwd: string;
@@ -12,11 +11,6 @@ interface LoadTsConfigOptions {
 }
 
 class TSConfigNotFoundError extends Error {
-  // eslint-disable-next-line no-useless-constructor
-  // constructor(message, options) {
-  //   super(message, options);
-  // }
-
   get code() {
     return 'TS_CONFIG_NOT_FOUND';
   }
@@ -118,7 +112,7 @@ export interface DtsTaskEntry {
   targetPath: string;
 }
 
-export interface DtsTask extends BuildTask {
+export interface DtsTask {
   type: 'build:dts';
   entries: DtsTaskEntry[];
 }

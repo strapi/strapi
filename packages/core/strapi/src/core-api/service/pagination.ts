@@ -105,9 +105,11 @@ const getPaginationInfo = (params: { pagination?: PaginationParams }): Paginatio
 
     return {
       page: Math.max(1, toNumber(pagination.page || 1)),
-      pageSize: shouldApplyMaxLimit(pageSize, maxLimit, { isPagedPagination: true })
-        ? maxLimit ?? 1
-        : Math.max(1, pageSize),
+      pageSize:
+        typeof maxLimit === 'number' &&
+        shouldApplyMaxLimit(pageSize, maxLimit, { isPagedPagination: true })
+          ? maxLimit
+          : Math.max(1, pageSize),
     };
   }
 

@@ -4,38 +4,37 @@ import { expectExit } from '../../__tests__/commands.test.utils';
 import * as fileDatatransfer from '../../../file';
 
 jest.mock('fs-extra', () => ({
+  ...jest.requireActual('fs-extra'),
   pathExists: jest.fn(() => Promise.resolve(true)),
 }));
+
 const defaultFileName = 'defaultFilename';
-jest.mock(
-  '../../data-transfer',
-  () => {
-    return {
-      getTransferTelemetryPayload: jest.fn().mockReturnValue({}),
-      loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
-      formatDiagnostic: jest.fn(),
-      createStrapiInstance() {
-        return {
-          telemetry: {
-            send: jest.fn(),
-          },
-        };
+
+jest.mock('../../data-transfer', () => {
+  return {
+    ...jest.requireActual('../../data-transfer'),
+    getTransferTelemetryPayload: jest.fn().mockReturnValue({}),
+    loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
+    formatDiagnostic: jest.fn(),
+    createStrapiInstance: jest.fn().mockReturnValue({
+      telemetry: {
+        send: jest.fn(),
       },
-      getDefaultExportName: jest.fn(() => defaultFileName),
-      buildTransferTable: jest.fn(() => {
-        return {
-          toString() {
-            return 'table';
-          },
-        };
-      }),
-      exitMessageText: jest.fn(),
-      getDiffHandler: jest.fn(),
-      setSignalHandler: jest.fn(),
-    };
-  },
-  { virtual: true }
-);
+      destroy: jest.fn(),
+    }),
+    getDefaultExportName: jest.fn(() => defaultFileName),
+    buildTransferTable: jest.fn(() => {
+      return {
+        toString() {
+          return 'table';
+        },
+      };
+    }),
+    exitMessageText: jest.fn(),
+    getDiffHandler: jest.fn(),
+    setSignalHandler: jest.fn(),
+  };
+});
 
 jest.mock('../../../engine', () => {
   const actual = jest.requireActual('../../../engine');

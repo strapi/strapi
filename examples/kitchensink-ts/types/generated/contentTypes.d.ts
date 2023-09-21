@@ -560,7 +560,7 @@ export interface PluginUsersPermissionsUser extends Schema.CollectionType {
   };
 }
 
-declare module '@strapi/typings' {
+declare module '@strapi/types' {
   export module Shared {
     export interface ContentTypes {
       'admin::permission': AdminPermission;

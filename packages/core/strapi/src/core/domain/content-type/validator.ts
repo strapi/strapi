@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { yup, toRegressedEnumValue } from '@strapi/utils';
-import type { Schema } from '@strapi/typings';
+import type { Schema } from '@strapi/types';
 
 const LIFECYCLES = [
   'beforeCreate',

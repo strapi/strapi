@@ -1,7 +1,7 @@
 import { existsSync } from 'fs';
 import { resolve } from 'path';
 import koaFavicon from 'koa-favicon';
-import type { Common } from '@strapi/typings';
+import type { Common } from '@strapi/types';
 
 export type Config = NonNullable<Parameters<typeof koaFavicon>[1]>;
 

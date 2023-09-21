@@ -1,6 +1,6 @@
 import { getConfigUrls } from '@strapi/utils';
 import fse from 'fs-extra';
-import type { Strapi } from '@strapi/typings';
+import type { Strapi } from '@strapi/types';
 
 export default async function bootstrap({ strapi }: { strapi: Strapi }) {
   strapi.config.port = strapi.config.get('server.port') || strapi.config.port;

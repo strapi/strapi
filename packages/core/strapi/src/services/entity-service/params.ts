@@ -1,5 +1,5 @@
 import { pick } from 'lodash/fp';
-import type { Common, EntityService } from '@strapi/typings';
+import type { Common, EntityService } from '@strapi/types';
 
 const pickSelectionParams = <TUID extends Common.UID.ContentType>(
   data: unknown

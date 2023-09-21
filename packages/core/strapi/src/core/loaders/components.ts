@@ -1,7 +1,7 @@
 import { join } from 'path';
 import _ from 'lodash';
 import { pathExists } from 'fs-extra';
-import type { Strapi, Common, Schema } from '@strapi/typings';
+import type { Strapi, Common, Schema } from '@strapi/types';
 import loadFiles from '../../load/load-files';
 
 type LoadedComponent = {

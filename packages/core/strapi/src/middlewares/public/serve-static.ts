@@ -1,6 +1,6 @@
 import path from 'path';
 import koaStatic from 'koa-static';
-import type { Common } from '@strapi/typings';
+import type { Common } from '@strapi/types';
 
 // serveStatic is not supposed to be used to serve a folder that have sub-folders
 export const serveStatic = (filesDir: string, koaStaticOptions: koaStatic.Options = {}) => {

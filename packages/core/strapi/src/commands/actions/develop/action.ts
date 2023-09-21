@@ -6,7 +6,7 @@ import execa from 'execa';
 import { getOr } from 'lodash/fp';
 import { joinBy } from '@strapi/utils';
 import tsUtils from '@strapi/typescript-utils';
-import type { Strapi } from '@strapi/typings';
+import type { Strapi } from '@strapi/types';
 
 import loadConfiguration from '../../../core/app-configuration';
 import strapi from '../../../index';
@@ -67,7 +67,7 @@ const primaryProcess = async ({
   browser?: boolean;
 }) => {
   if (isTSProject) {
-    await buildTypeScript({ srcDir: appDir, distDir, watch: false });
+    await buildTypeScript({ srcDir: appDir, distDir, ignoreDiagnostics: true });
   }
 
   const config = loadConfiguration({ app: appDir, dist: distDir });
@@ -107,7 +107,7 @@ const primaryProcess = async ({
     switch (message) {
       case 'reload':
         if (isTSProject) {
-          await buildTypeScript({ srcDir: appDir, distDir, watch: false });
+          await buildTypeScript({ srcDir: appDir, distDir, ignoreDiagnostics: true });
         }
 
         console.info('The server is restarting\n');
@@ -134,6 +134,7 @@ const workerProcess = async ({
   distDir,
   watchAdmin,
   polling,
+  isTSProject,
 }: {
   appDir: string;
   distDir: string;
@@ -147,21 +148,16 @@ const workerProcess = async ({
     serveAdminPanel: !watchAdmin,
   }).load();
 
-  /**
-   * TypeScript automatic type generation upon dev server restart
-   * Its implementation, configuration and behavior can change in future releases
-   * @experimental
-   */
-  const shouldGenerateTypeScriptTypes = strapiInstance.config.get('typescript.autogenerate', false);
+  await tsUtils.generators.generate({
+    strapi: strapiInstance,
+    pwd: appDir,
+    rootDir: undefined,
+    logger: { silent: true, debug: false },
+    artifacts: { contentTypes: true, components: true },
+  });
 
-  if (shouldGenerateTypeScriptTypes) {
-    await tsUtils.generators.generate({
-      strapi: strapiInstance,
-      pwd: appDir,
-      rootDir: undefined,
-      logger: { silent: true, debug: false },
-      artifacts: { contentTypes: true, components: true },
-    });
+  if (isTSProject) {
+    await buildTypeScript({ srcDir: appDir, distDir, ignoreDiagnostics: false });
   }
 
   const adminWatchIgnoreFiles = strapiInstance.config.get('admin.watchIgnoreFiles', []);

@@ -2,7 +2,7 @@ import { join } from 'path';
 import https from 'https';
 import { Duplex, PassThrough, Readable } from 'stream';
 import { stat, createReadStream, ReadStream } from 'fs-extra';
-import type { LoadedStrapi } from '@strapi/typings';
+import type { LoadedStrapi } from '@strapi/types';
 
 import type { IAsset } from '../../../../types';
 
@@ -62,8 +62,8 @@ function getFileStats(filepath: string, isLocal = false): Promise<{ size: number
 export const createAssetsStream = (strapi: LoadedStrapi): Duplex => {
   const generator: () => AsyncGenerator<IAsset, void> = async function* () {
     const stream: Readable = strapi.db
+      .queryBuilder('plugin::upload.file')
       // Create a query builder instance (default type is 'select')
-      ?.queryBuilder('plugin::upload.file')
       // Fetch all columns
       .select('*')
       // Get a readable stream

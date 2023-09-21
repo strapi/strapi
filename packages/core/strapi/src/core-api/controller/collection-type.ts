@@ -1,6 +1,6 @@
 import { isObject } from 'lodash/fp';
 import { errors } from '@strapi/utils';
-import type { CoreApi, Schema, Utils, Common } from '@strapi/typings';
+import type { CoreApi, Schema, Utils, Common } from '@strapi/types';
 import type Koa from 'koa';
 
 import { parseBody } from './transform';

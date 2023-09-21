@@ -7,7 +7,7 @@ import ora from 'ora';
 import chalk from 'chalk';
 
 import type { TaskHandler } from '.';
-import type { BuildContext, BuildTask, Target } from '../packages';
+import type { BuildContext, Target } from '../packages';
 
 /**
  * @internal
@@ -82,7 +82,7 @@ interface ViteTaskEntry {
   entry?: string;
 }
 
-export interface ViteTask extends BuildTask {
+export interface ViteTask {
   type: 'build:js';
   entries: ViteTaskEntry[];
   format: 'cjs' | 'es';

@@ -4,7 +4,7 @@
  */
 
 import { Job, scheduleJob } from 'node-schedule';
-import type { Strapi } from '@strapi/typings';
+import type { Strapi } from '@strapi/types';
 
 import wrapWithRateLimit from './rate-limiter';
 import createSender from './sender';
