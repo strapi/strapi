@@ -408,12 +408,14 @@ const LinkButton = () => {
   };
 
   const toggleLinkPopover = () => {
-    // @TODO: Here we are getting the reference for the selected node
-    // this is fine for one line and not longer texts
-    // but if you select a word in a looong paragraph, we will get the reference of the whole paragraph
-    // because we are rendering all the paragraph as a single <span> element
-    const selectedNode = Editor.node(editor, selection);
-    const domElement = ReactEditor.toDOMNode(editor, selectedNode[0]);
+    // We insert an empty anchor, so we split the DOM to have a element we can use as reference for the popover
+    insertLink(editor, { url: '', text: Editor.string(editor, selection) });
+
+    const [linkNode] = Editor.nodes(editor, {
+      match: (node) =>
+        !Editor.isEditor(node) && SlateElement.isElement(node) && node.type === 'link',
+    });
+    const domElement = ReactEditor.toDOMNode(editor, linkNode[0]);
     domNodeRef.current = domElement;
 
     setPopoverOpen(true);

@@ -182,7 +182,7 @@ Image.propTypes = {
   }).isRequired,
 };
 
-const Link = ({ url, element, children }) => {
+const Link = ({ element, children, ...attributes }) => {
   const { formatMessage } = useIntl();
   const editor = useSlateStatic();
   const { selection } = editor;
@@ -211,7 +211,7 @@ const Link = ({ url, element, children }) => {
 
   return (
     <>
-      <BaseLink ref={linkRef} href={url} onClick={handleOpenEditPopover}>
+      <BaseLink {...attributes} ref={linkRef} href={element.url} onClick={handleOpenEditPopover}>
         {children}
       </BaseLink>
       {popoverOpen && (
@@ -220,6 +220,7 @@ const Link = ({ url, element, children }) => {
           onDismiss={() => setPopoverOpen(false)}
           padding={4}
           placement="right-end"
+          contentEditable={false}
         >
           {isEditing ? (
             <Flex as="form" onSubmit={handleSave} direction="column" gap={4}>
@@ -246,7 +247,7 @@ const Link = ({ url, element, children }) => {
                     defaultMessage: 'Link',
                   })}
                 </FieldLabel>
-                <FieldInput name="url" placeholder="https://strapi.io" defaultValue={url} />
+                <FieldInput name="url" placeholder="https://strapi.io" defaultValue={element.url} />
               </Field>
               <Flex justifyContent="end" width="100%" gap={2}>
                 <Button variant="tertiary" onClick={() => setIsEditing(false)}>
@@ -266,7 +267,7 @@ const Link = ({ url, element, children }) => {
           ) : (
             <Flex direction="column" gap={4} alignItems="start" width="400px">
               <Typography>{elementText}</Typography>
-              <BaseLink href={url}>{url}</BaseLink>
+              <BaseLink href={element.url}>{element.url}</BaseLink>
               <Flex justifyContent="end" width="100%" gap={2}>
                 <IconButton
                   icon={<Trash />}
@@ -285,7 +286,6 @@ const Link = ({ url, element, children }) => {
 };
 
 Link.propTypes = {
-  url: PropTypes.string.isRequired,
   element: PropTypes.object.isRequired,
   children: PropTypes.node.isRequired,
 };
@@ -481,7 +481,7 @@ export function useBlocksStore() {
     },
     link: {
       renderElement: (props) => (
-        <Link url={props.element.url} element={props.element} {...props.attributes}>
+        <Link element={props.element} {...props.attributes}>
           {props.children}
         </Link>
       ),

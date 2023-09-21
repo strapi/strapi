@@ -34,8 +34,7 @@ const insertLink = (editor, { url, text }) => {
       // If not, we can wrap everything in a link node
       Transforms.insertNodes(editor, linkElement, { select: true });
     } else {
-      Transforms.wrapNodes(editor, { type: 'link', url }, { mode: 'all', split: true });
-      Transforms.collapse(editor, { edge: 'end' });
+      Transforms.wrapNodes(editor, { type: 'link', url }, { split: true });
     }
   } else {
     Transforms.insertNodes(editor, { type: 'paragraph', children: [linkElement] });
