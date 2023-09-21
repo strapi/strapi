@@ -30,10 +30,10 @@
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/design-system": "1.10.1",
+    "@strapi/design-system": "1.11.0",
     "@strapi/generators": "4.13.7",
     "@strapi/helper-plugin": "4.13.7",
-    "@strapi/icons": "1.10.1",
+    "@strapi/icons": "1.11.0",
     "@strapi/utils": "4.13.7",
     "fs-extra": "10.0.0",
     "immer": "9.0.19",
