@@ -25,6 +25,8 @@ const FlexButton = styled(Flex).attrs({ as: 'button' })`
   }
 `;
 
+const TIMEOUT = 10;
+
 const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
   const { formatMessage } = useIntl();
   const labelMessage = formatMessage(label);
@@ -95,7 +97,7 @@ const toggleBlock = (editor, value) => {
   setTimeout(() => {
     Transforms.select(editor, currentSelection);
     ReactEditor.focus(editor);
-  }, 10);
+  }, TIMEOUT);
 };
 
 const BlocksDropdown = () => {
