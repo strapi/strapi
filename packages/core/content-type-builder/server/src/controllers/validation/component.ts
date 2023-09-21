@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { yup, validateYupSchema } from '@strapi/utils';
 
-import { Attribute } from '@strapi/types';
+import type { Attribute } from '@strapi/types';
 import { modelTypes, DEFAULT_TYPES } from '../../services/constants';
 import { isValidCategoryName, isValidIcon } from './common';
 import { createSchema } from './model-schema';

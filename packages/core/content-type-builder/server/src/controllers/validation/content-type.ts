@@ -3,6 +3,8 @@
 import { flatMap, getOr, has } from 'lodash/fp';
 import { yup, validateYupSchema } from '@strapi/utils';
 
+import { UID } from '@strapi/types';
+import { ContentTypes } from '@strapi/types/dist/types/shared';
 import { getService } from '../../utils';
 import { modelTypes, DEFAULT_TYPES, typeKinds } from '../../services/constants';
 import { createSchema } from './model-schema';
@@ -31,7 +33,7 @@ const VALID_RELATIONS = {
     'morphToOne',
     'morphToMany',
   ],
-};
+} as const;
 
 /**
  * Allowed types
@@ -43,7 +45,11 @@ const VALID_TYPES = [...DEFAULT_TYPES, 'uid', 'component', 'dynamiczone', 'custo
  * @param {Object} data payload
  */
 const createContentTypeSchema = (data, { isEdition = false } = {}) => {
-  const kind = getOr(typeKinds.COLLECTION_TYPE, 'contentType.kind', data);
+  const kind: keyof typeof VALID_RELATIONS = getOr(
+    typeKinds.COLLECTION_TYPE,
+    'contentType.kind',
+    data
+  );
   const contentTypeSchema = createSchema(VALID_TYPES, VALID_RELATIONS[kind] || [], {
     modelType: modelTypes.CONTENT_TYPE,
   })
@@ -129,15 +135,16 @@ const forbiddenContentTypeNameValidator = () => {
   };
 };
 
-const nameIsAvailable = (isEdition) => {
+const nameIsAvailable = (isEdition: boolean) => {
+  // TODO TS: if strapi.contentTypes (ie, ContentTypes) is an ArrayLike and is used like this, we may want to ensure it is typed so that it can be without using as
   const usedNames = flatMap((ct) => {
     return [ct.info?.singularName, ct.info?.pluralName];
-  })(strapi.contentTypes);
+  })(strapi.contentTypes as any);
 
   return {
     name: 'nameAlreadyUsed',
     message: 'contentType: name `${value}` is already being used by another content type.',
-    test(value) {
+    test(value: unknown) {
       // don't check on edition
       if (isEdition) return true;
 
@@ -149,19 +156,19 @@ const nameIsAvailable = (isEdition) => {
   };
 };
 
-const nameIsNotExistingCollectionName = (isEdition) => {
+const nameIsNotExistingCollectionName = (isEdition: boolean) => {
   const usedNames = Object.keys(strapi.contentTypes).map(
-    (key) => strapi.contentTypes[key].collectionName
+    (key) => strapi.contentTypes[key as UID.ContentType].collectionName
   );
 
   return {
     name: 'nameAlreadyUsed',
     message: 'contentType: name `${value}` is already being used by another content type.',
-    test(value) {
+    test(value: unknown) {
       // don't check on edition
       if (isEdition) return true;
 
-      if (usedNames.includes(value)) {
+      if (usedNames.includes(value as string)) {
         return false;
       }
       return true;

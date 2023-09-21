@@ -52,7 +52,7 @@ const createAttributesValidator = ({ types, modelType, relations }) => {
   });
 };
 
-const isForbiddenKey = (key) => {
+const isForbiddenKey = (key: string) => {
   return [
     ...FORBIDDEN_ATTRIBUTE_NAMES,
     ...getService('builder').getReservedNames().attributes,

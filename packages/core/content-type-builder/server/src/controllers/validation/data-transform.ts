@@ -1,4 +1,4 @@
-import { Schema } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 import _ from 'lodash';
 
 // TODO: data should be Schema.ContentType, but it has a bug that default is not a valid property

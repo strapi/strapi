@@ -1,4 +1,3 @@
-import { Attribute, Schema } from '@strapi/types';
 import { validateComponentInput, validateUpdateComponentInput } from '../component';
 
 const componentValidation = {
