@@ -49,7 +49,7 @@ const Login = ({ onSubmit, schema, children }) => {
                   </Typography>
                 </Box>
                 <Box paddingBottom={7}>
-                  <Typography variant="epsilon" textColor="neutral600" text-align="center">
+                  <Typography variant="epsilon" textColor="neutral600">
                     {formatMessage({
                       id: 'Auth.form.welcome.subtitle',
                       defaultMessage: 'Log in to your Strapi account',
