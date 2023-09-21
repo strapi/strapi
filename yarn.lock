@@ -7385,6 +7385,7 @@ __metadata:
     "@strapi/utils": 4.13.6
     "@testing-library/react": 14.0.0
     "@testing-library/react-hooks": 8.0.1
+    "@types/pluralize": 0.0.30
     fs-extra: 10.0.0
     history: ^4.9.0
     immer: 9.0.19
@@ -9028,6 +9029,13 @@ __metadata:
   version: 4.0.0
   resolution: "@types/parse-json@npm:4.0.0"
   checksum: fd6bce2b674b6efc3db4c7c3d336bd70c90838e8439de639b909ce22f3720d21344f52427f1d9e57b265fcb7f6c018699b99e5e0c208a1a4823014269a6bf35b
+  languageName: node
+  linkType: hard
+
+"@types/pluralize@npm:0.0.30":
+  version: 0.0.30
+  resolution: "@types/pluralize@npm:0.0.30"
+  checksum: 7a9a4a24aac1f74bd63e592a824ebec114486e0635a94496e92aa37fa388fac585be108d3ccfc7b2c490963679ec4900fbf394d22fa6cbf419f22cc499ab5a29
   languageName: node
   linkType: hard
 
