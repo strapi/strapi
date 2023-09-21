@@ -1,7 +1,7 @@
-import { Database } from '../index';
+import { Database, DatabaseConfig } from '../index';
 
-jest.mock('../connection', () =>
-  jest.fn(() => {
+jest.mock('../connection', () => ({
+  createConnection: jest.fn(() => {
     const trx = {
       commit: jest.fn(),
       rollback: jest.fn(),
@@ -10,8 +10,8 @@ jest.mock('../connection', () =>
       ...trx,
       transaction: jest.fn(async () => trx),
     };
-  })
-);
+  }),
+}));
 
 jest.mock('../dialects', () => ({
   getDialect: jest.fn(() => ({
@@ -24,10 +24,13 @@ jest.mock('../migrations', () => ({
   createMigrationsProvider: jest.fn(),
 }));
 
-const config = {
+const config: DatabaseConfig = {
   models: [
     {
+      uid: 'test',
+      singularName: 'test',
       tableName: 'strapi_core_store_settings',
+      attributes: {},
     },
   ],
   connection: {
@@ -40,14 +43,11 @@ const config = {
       host: 'localhost',
     },
   },
+  settings: {},
 };
 
 describe('Database', () => {
   describe('constructor', () => {
-    it('should throw an error if no config is provided', async () => {
-      expect(async () => Database.init()).rejects.toThrowError();
-    });
-
     it('it should intialize if config is provided', async () => {
       expect(() => Database.init(config)).toBeDefined();
     });
@@ -63,7 +63,7 @@ describe('Database', () => {
       const db = await Database.init(config);
       const result = await db.transaction(async () => 'test');
       expect(result).toBe('test');
-      expect(db.connection.commit).toHaveBeenCalledTimes(1);
+      expect((db.connection as any).commit).toHaveBeenCalledTimes(1);
     });
 
     it('rollback is called incase of error', async () => {
@@ -75,7 +75,7 @@ describe('Database', () => {
       } catch {
         /* ignore */
       }
-      expect(db.connection.rollback).toHaveBeenCalledTimes(1);
+      expect((db.connection as any).rollback).toHaveBeenCalledTimes(1);
     });
 
     it('should throw error', async () => {

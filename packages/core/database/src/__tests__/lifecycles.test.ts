@@ -1,4 +1,5 @@
 import { createLifecyclesProvider } from '../lifecycles';
+import type { Database } from '..';
 
 describe('LifecycleProvider', () => {
   describe('run', () => {
@@ -11,7 +12,8 @@ describe('LifecycleProvider', () => {
         metadata: {
           get: dbMetadataGetStub,
         },
-      };
+      } as any as Database;
+
       provider = createLifecyclesProvider(db);
       provider.clear();
     });
