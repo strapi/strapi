@@ -1,8 +1,9 @@
 {
   "extends": "tsconfig/base.json",
-  "compilerOptions": {
-    "noEmit": true
-  },
   "include": ["src"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "compilerOptions": {
+    "types": ["lodash"],
+    "esModuleInterop": true
+  }
 }
