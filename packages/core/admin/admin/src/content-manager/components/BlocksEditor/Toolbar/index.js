@@ -39,10 +39,7 @@ const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
           width={7}
           height={7}
           hasRadius
-          onClick={(e) => {
-            e.preventDefault();
-            handleClick();
-          }}
+          onClick={handleClick}
           aria-label={labelMessage}
         >
           <Icon width={3} height={3} as={icon} color={isActive ? 'primary600' : 'neutral600'} />
