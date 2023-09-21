@@ -10,7 +10,7 @@ import { useIntl } from 'react-intl';
 
 import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
-import InputUID from '../InputUID';
+import { InputUID } from '../InputUID';
 import { RelationInputDataManager } from '../RelationInputDataManager';
 import Wysiwyg from '../Wysiwyg';
 
