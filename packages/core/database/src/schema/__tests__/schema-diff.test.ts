@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/no-namespace */
 import createSchemaDiff from '../diff';
+import type { Schema, Table } from '..';
 
-let diffSchemas;
 describe('diffSchemas', () => {
+  let diffSchemas: ReturnType<typeof createSchemaDiff>['diff'];
+
   beforeEach(() => {
     const schemaDiff = createSchemaDiff({
       dialect: {
@@ -17,19 +20,22 @@ describe('diffSchemas', () => {
       store: {
         get: () => [],
       },
-    } as any;
+    };
   });
 
   test('New Table', async () => {
-    const testTable = {
+    const testTable: Table = {
       name: 'my_table',
+      columns: [],
+      indexes: [],
+      foreignKeys: [],
     };
 
-    const srcSchema = {
+    const srcSchema: Schema = {
       tables: [],
     };
 
-    const destSchema = {
+    const destSchema: Schema = {
       tables: [testTable],
     };
 
@@ -47,8 +53,11 @@ describe('diffSchemas', () => {
   });
 
   test('Removed Table', async () => {
-    const testTable = {
+    const testTable: Table = {
       name: 'my_table',
+      columns: [],
+      indexes: [],
+      foreignKeys: [],
     };
 
     const srcSchema = {
@@ -103,7 +112,7 @@ describe('diffSchemas', () => {
 
   describe('Changed table', () => {
     test('added column', async () => {
-      const srcSchema = {
+      const srcSchema: Schema = {
         tables: [
           {
             name: 'my_table',
@@ -114,7 +123,7 @@ describe('diffSchemas', () => {
         ],
       };
 
-      const destSchema = {
+      const destSchema: Schema = {
         tables: [
           {
             name: 'my_table',
@@ -123,6 +132,8 @@ describe('diffSchemas', () => {
             columns: [
               {
                 name: 'test_column',
+                type: 'text',
+                notNullable: true,
               },
             ],
           },
@@ -187,9 +198,15 @@ describe('diffSchemas', () => {
     const testTables = [
       {
         name: 'my_table',
+        columns: [],
+        indexes: [],
+        foreignKeys: [],
       },
       {
         name: 'my_table_1',
+        columns: [],
+        indexes: [],
+        foreignKeys: [],
       },
     ];
 
@@ -206,7 +223,7 @@ describe('diffSchemas', () => {
       },
     } as any;
 
-    const srcSchema = {
+    const srcSchema: Schema = {
       tables: [...testTables, coreStoreTable],
     };
 

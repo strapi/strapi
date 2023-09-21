@@ -14,7 +14,7 @@ export interface Column {
   name: string;
   args?: unknown[];
   defaultTo?: any;
-  notNullable: boolean | null;
+  notNullable?: boolean | null;
   unsigned?: boolean;
   unique?: boolean;
   primary?: boolean;

@@ -1,10 +1,9 @@
-import { createLifecyclesProvider } from '../lifecycles';
+import { createLifecyclesProvider, LifecycleProvider, Event, Subscriber } from '../lifecycles';
 import type { Database } from '..';
 
 describe('LifecycleProvider', () => {
   describe('run', () => {
-    /** @type {import("../lifecycles").LifecycleProvider} */
-    let provider;
+    let provider: LifecycleProvider;
     const dbMetadataGetStub = jest.fn((uid) => ({ uid, name: 'TestModel' }));
 
     beforeEach(() => {
@@ -19,16 +18,18 @@ describe('LifecycleProvider', () => {
     });
 
     it('store state', async () => {
-      const expectedState = new Date().toISOString();
-
-      const subscriber = {
-        async beforeEvent(event) {
+      const expectedState = { date: new Date().toISOString() };
+      const subscriber: Subscriber = {
+        async beforeCreate(event: Event) {
           event.state = expectedState;
         },
       };
+
       provider.subscribe(subscriber);
 
-      const stateBefore = await provider.run('beforeEvent', 'test-model', { id: 'instance-id' });
+      const stateBefore = await provider.run('beforeCreate', 'test-model', {
+        params: {},
+      });
 
       expect(stateBefore.get(subscriber)).toEqual(expectedState);
     });
@@ -38,16 +39,16 @@ describe('LifecycleProvider', () => {
       let receivedState;
 
       provider.subscribe({
-        async beforeEvent(event) {
+        async beforeCreate(event) {
           event.state.value = expectedState.value;
         },
-        async afterEvent(event) {
+        async afterCreate(event) {
           receivedState = event.state;
         },
       });
 
-      const stateBefore = await provider.run('beforeEvent', 'test-model', { id: 'instance-id' });
-      await provider.run('afterEvent', 'test-model', { id: 'instance-id' }, stateBefore);
+      const stateBefore = await provider.run('beforeCreate', 'test-model', { params: {} });
+      await provider.run('afterCreate', 'test-model', { params: {} }, stateBefore);
 
       expect(receivedState).toEqual(expectedState);
     });

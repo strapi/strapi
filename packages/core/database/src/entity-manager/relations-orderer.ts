@@ -148,7 +148,7 @@ const sortConnectArray = (connectArr: Link[], initialArr: Link[] = [], strictSor
  *                               another one that does not exist
  * @return {*}
  */
-const relationsOrderer = <T extends Record<string, ID | number>>(
+const relationsOrderer = <T extends Record<string, ID | number | null>>(
   initArr: T[],
   idColumn: keyof T,
   orderColumn: keyof T,
@@ -156,7 +156,7 @@ const relationsOrderer = <T extends Record<string, ID | number>>(
 ) => {
   const computedRelations: OrderedLink[] = castArray(initArr ?? []).map((r) => ({
     init: true,
-    id: r[idColumn],
+    id: r[idColumn] as ID,
     order: Number(r[orderColumn]) || 1,
   }));
 
