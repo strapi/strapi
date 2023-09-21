@@ -7,7 +7,7 @@ import { BulletList, NumberList } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement } from 'slate';
-import { useSlate } from 'slate-react';
+import { useSlate, ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
 import { useBlocksStore } from '../hooks/useBlocksStore';
@@ -39,7 +39,7 @@ const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
           width={7}
           height={7}
           hasRadius
-          onMouseDown={(e) => {
+          onClick={(e) => {
             e.preventDefault();
             handleClick();
           }}
@@ -63,47 +63,6 @@ ToolbarButton.propTypes = {
   handleClick: PropTypes.func.isRequired,
 };
 
-const ModifierButton = ({ icon, name, label }) => {
-  const editor = useSlate();
-
-  const isModifierActive = () => {
-    const modifiers = Editor.marks(editor);
-
-    if (!modifiers) return false;
-
-    return Boolean(modifiers[name]);
-  };
-
-  const isActive = isModifierActive();
-
-  const toggleModifier = () => {
-    if (isActive) {
-      Editor.removeMark(editor, name);
-    } else {
-      Editor.addMark(editor, name, true);
-    }
-  };
-
-  return (
-    <ToolbarButton
-      icon={icon}
-      name={name}
-      label={label}
-      isActive={isActive}
-      handleClick={toggleModifier}
-    />
-  );
-};
-
-ModifierButton.propTypes = {
-  icon: PropTypes.elementType.isRequired,
-  name: PropTypes.string.isRequired,
-  label: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-  }).isRequired,
-};
-
 const isBlockActive = (editor, matchNode) => {
   const { selection } = editor;
 
@@ -120,6 +79,9 @@ const isBlockActive = (editor, matchNode) => {
 };
 
 const toggleBlock = (editor, value) => {
+  if (editor.activeSelection) {
+    Transforms.select(editor, editor.activeSelection);
+  }
   const { type, level } = value;
 
   const newProperties = {
@@ -128,6 +90,15 @@ const toggleBlock = (editor, value) => {
   };
 
   Transforms.setNodes(editor, newProperties);
+
+  const currentSelection = editor.selection;
+  Transforms.deselect(editor);
+
+  // setTimeout is required to highlight and focus to take effect, https://github.com/ianstormtaylor/slate/issues/3412
+  setTimeout(() => {
+    Transforms.select(editor, currentSelection);
+    ReactEditor.focus(editor);
+  }, 10);
 };
 
 const BlocksDropdown = () => {

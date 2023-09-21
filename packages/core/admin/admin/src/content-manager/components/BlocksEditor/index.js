@@ -43,6 +43,10 @@ const BlocksEditor = React.forwardRef(
         )
       : name;
 
+    const handleBlur = () => {
+      editor.activeSelection = editor.selection;
+    };
+
     /** Editable is not able to hold the ref, https://github.com/ianstormtaylor/slate/issues/4082
      *  so with "useImperativeHandle" we can use ReactEditor methods to expose to the parent above
      *  also not passing forwarded ref here, gives console warning.
@@ -85,7 +89,7 @@ const BlocksEditor = React.forwardRef(
               <BlocksToolbar />
               <EditorDivider width="100%" />
               <Wrapper>
-                <BlocksInput readOnly={readOnly} />
+                <BlocksInput readOnly={readOnly} handleBlur={handleBlur} />
               </Wrapper>
             </InputWrapper>
           </Slate>

@@ -37,7 +37,7 @@ const baseRenderElement = (props, blocks) => {
   return block.renderElement(props);
 };
 
-const BlocksInput = ({ readOnly }) => {
+const BlocksInput = ({ readOnly, handleBlur }) => {
   const theme = useTheme();
 
   // Create renderLeaf function based on the modifiers store
@@ -54,12 +54,14 @@ const BlocksInput = ({ readOnly }) => {
       style={getEditorStyle(theme)}
       renderElement={renderElement}
       renderLeaf={renderLeaf}
+      onBlur={handleBlur}
     />
   );
 };
 
 BlocksInput.propTypes = {
   readOnly: PropTypes.bool.isRequired,
+  handleBlur: PropTypes.func.isRequired,
 };
 
 export default BlocksInput;

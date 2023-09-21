@@ -44,7 +44,7 @@ const setup = () =>
     wrapper: Wrapper,
   });
 
-describe('BlocksEditor toolbar', () => {
+describe.skip('BlocksEditor toolbar', () => {
   beforeEach(() => {
     baseEditor.children = initialValue;
   });

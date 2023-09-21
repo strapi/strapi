@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Typography } from '@strapi/design-system';
 import { Bold, Italic, Underline, StrikeThrough, Code } from '@strapi/icons';
 import { Editor } from 'slate';
-import { useSlate } from 'slate-react';
+import { useSlate, ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
 const BoldText = styled(Typography).attrs({ fontWeight: 'bold' })`
@@ -60,6 +60,7 @@ export function useModifiersStore() {
     } else {
       Editor.addMark(editor, name, true);
     }
+    ReactEditor.focus(editor);
   };
 
   return {
