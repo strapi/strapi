@@ -10,7 +10,8 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import { PERMISSIONS } from './constants';
 
 export default {
-  register(app) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  register(app: any) {
     // Create the email settings section
     app.createSettingSection(
       {
@@ -41,8 +42,7 @@ export default {
       name: 'email',
     });
   },
-  bootstrap() {},
-  async registerTrads({ locales }) {
+  async registerTrads({ locales }: { locales: string[] }) {
     const importedTrads = await Promise.all(
       locales.map((locale) => {
         return import(
