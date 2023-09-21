@@ -1,6 +1,6 @@
 'use strict';
 
-const { features } = require('@strapi/strapi/lib/utils/ee');
+const { features } = require('@strapi/strapi/dist/utils/ee').default;
 const executeCERegister = require('../../server/register');
 const migrateAuditLogsTable = require('./migrations/audit-logs-table');
 const migrateReviewWorkflowStagesColor = require('./migrations/review-workflows-stages-color');

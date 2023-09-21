@@ -15,9 +15,13 @@ module.exports = {
       {
         devDependencies: [
           '**/test/**/*.js',
+          '**/test/**/*.ts',
           '**/tests/**/*.js',
+          '**/tests/**/*.ts',
           '**/__tests__/**/*.js',
+          '**/__tests__/**/*.ts',
           '**/__mocks__/**/*.js',
+          '**/__mocks__/**/*.ts',
         ],
       },
     ],
