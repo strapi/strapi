@@ -1,10 +1,11 @@
-import path from 'path';
 import browserslistToEsbuild from 'browserslist-to-esbuild';
+import path from 'path';
 
-import type { PackageJson } from './core/pkg';
 import { parseExports, ExtMap, Export } from './core/exports';
-import type { Logger } from './core/logger';
+
 import type { Config } from './core/config';
+import type { Logger } from './core/logger';
+import type { PackageJson } from './core/pkg';
 
 interface BuildContextArgs {
   config: Config;

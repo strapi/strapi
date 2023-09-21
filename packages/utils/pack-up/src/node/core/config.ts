@@ -1,9 +1,11 @@
-import * as path from 'path';
-import * as fs from 'fs';
 import { register } from 'esbuild-register/dist/node';
+import * as fs from 'fs';
+import * as path from 'path';
 import pkgUp from 'pkg-up';
-import { Logger } from './logger';
+
 import { Runtime } from '../createBuildContext';
+
+import { Logger } from './logger';
 
 interface LoadConfigOptions {
   cwd: string;

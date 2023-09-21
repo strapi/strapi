@@ -1,8 +1,9 @@
 import { Ora } from 'ora';
 
-import { ViteTask, viteTask } from './vite';
-import { DtsTask, dtsTask } from './dts';
 import { BuildContext } from '../createBuildContext';
+
+import { DtsTask, dtsTask } from './dts';
+import { ViteTask, viteTask } from './vite';
 
 interface TaskHandler<Task> {
   print(ctx: BuildContext, task: Task): void;
