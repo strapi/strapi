@@ -1,9 +1,9 @@
 import path from 'path';
 
+import type { Extensions } from './core/exports';
 import type { BuildContext, Runtime } from './createBuildContext';
 import type { DtsTask } from './tasks/dts';
 import type { ViteTask, ViteTaskEntry } from './tasks/vite';
-import type { Extensions } from './core/exports';
 
 type BuildTask = DtsTask | ViteTask;
 

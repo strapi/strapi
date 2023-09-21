@@ -1,5 +1,5 @@
-import { program } from 'commander';
 import chalk from 'chalk';
+import { program } from 'commander';
 
 import { version } from '../../package.json';
 

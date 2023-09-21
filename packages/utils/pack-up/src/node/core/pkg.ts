@@ -3,12 +3,13 @@
  * this includes the specific validation of specific parts of
  * the package.json.
  */
-import fs from 'fs/promises';
 import chalk from 'chalk';
-import * as yup from 'yup';
+import fs from 'fs/promises';
 import pkgUp from 'pkg-up';
+import * as yup from 'yup';
 
 import { Logger } from './logger';
+
 import type { Export } from './exports';
 
 /**
