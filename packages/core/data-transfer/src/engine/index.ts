@@ -6,7 +6,7 @@ import { chain } from 'stream-chain';
 import { isEmpty, uniq, last, isNumber, difference, set, omit } from 'lodash/fp';
 import { diff as semverDiff } from 'semver';
 
-import type { Schema, Utils } from '@strapi/strapi';
+import type { Schema, Utils } from '@strapi/types';
 import type {
   IAsset,
   IDestinationProvider,
@@ -483,13 +483,13 @@ class TransferEngine<
 
     // everything is included by default unless 'only' has been set
     let included = isEmpty(only);
-    if (only?.length > 0) {
+    if (only && only.length > 0) {
       included = only.some((transferGroup) => {
         return TransferGroupPresets[transferGroup][stage];
       });
     }
 
-    if (exclude?.length > 0) {
+    if (exclude && exclude.length > 0) {
       if (included) {
         included = !exclude.some((transferGroup) => {
           return TransferGroupPresets[transferGroup][stage];
@@ -931,6 +931,19 @@ export const createTransferEngine = <S extends ISourceProvider, D extends IDesti
   options: ITransferEngineOptions
 ): TransferEngine<S, D> => {
   return new TransferEngine<S, D>(sourceProvider, destinationProvider, options);
+};
+
+export type {
+  TransferEngine,
+  ITransferEngine,
+  ITransferEngineOptions,
+  ISourceProvider,
+  IDestinationProvider,
+  TransferStage,
+  TransferFilterPreset,
+  ErrorHandlerContext,
+  SchemaDiffHandlerContext,
+  ITransferResults,
 };
 
 export * as errors from './errors';
