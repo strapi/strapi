@@ -4,7 +4,7 @@ import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render, screen, renderHook } from '@testing-library/react';
 import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
-import { createEditor } from 'slate';
+import { createEditor, Editor, Transforms } from 'slate';
 import { Slate, withReact } from 'slate-react';
 
 import { useBlocksStore } from '../useBlocksStore';
@@ -16,8 +16,10 @@ const initialValue = [
   },
 ];
 
+const baseEditor = createEditor();
+
 const Wrapper = ({ children }) => {
-  const editor = React.useMemo(() => withReact(createEditor()), []);
+  const editor = React.useMemo(() => withReact(baseEditor), []);
 
   return (
     <ThemeProvider theme={lightTheme}>
@@ -35,6 +37,10 @@ Wrapper.propTypes = {
 };
 
 describe('useBlocksStore', () => {
+  beforeEach(() => {
+    baseEditor.children = initialValue;
+  });
+
   it('should return a store of blocks', () => {
     const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
 
@@ -315,5 +321,238 @@ describe('useBlocksStore', () => {
     const image = screen.getByRole('img', { name: 'Some image' });
     expect(image).toBeInTheDocument();
     expect(image).toHaveAttribute('src', 'https://example.com/image.png');
+  });
+
+  it('handles enter key on paragraph block', () => {
+    // Don't use Wrapper since we don't test any React logic or rendering
+    // Wrapper cause issues about updates not wrapped in act()
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'Line of text',
+          },
+          {
+            type: 'text',
+            text: ' with modifiers too',
+            bold: true,
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor after "Line of"
+    Transforms.select(baseEditor, {
+      /**
+       * Docs about anchor and focus: https://docs.slatejs.org/v/v0.47/slate-core/range
+       * In this case they are the same because no text is selected,
+       * we're only setting the position of the cursor.
+       */
+      anchor: Editor.point(baseEditor, { path: [0, 0], offset: 7 }),
+      focus: Editor.point(baseEditor, { path: [0, 0], offset: 7 }),
+    });
+
+    // Simulate the enter key
+    result.current.paragraph.handleEnterKey(baseEditor);
+
+    // Should insert a new paragraph with the content after the cursor
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'Line of',
+          },
+        ],
+      },
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: ' text',
+          },
+          {
+            type: 'text',
+            text: ' with modifiers too',
+            bold: true,
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('handles enter key on code block', () => {
+    // Don't use Wrapper since we don't test any React logic or rendering
+    // Wrapper cause issues about updates not wrapped in act()
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'code',
+        children: [
+          {
+            type: 'text',
+            text: 'Line of code',
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor at the end of the fast list item
+    Transforms.select(baseEditor, {
+      anchor: Editor.end(baseEditor, []),
+      focus: Editor.end(baseEditor, []),
+    });
+
+    // Simulate the enter key
+    result.current.code.handleEnterKey(baseEditor);
+
+    // Should insert a newline within the code block (shoudn't exit the code block)
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'code',
+        children: [
+          {
+            type: 'text',
+            text: 'Line of code\n',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('handles enter key on a list item with text', () => {
+    // Don't use Wrapper since we don't test any React logic or rendering
+    // Wrapper cause issues about updates not wrapped in act()
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'Line of text',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor at the end of the first list item
+    Transforms.select(baseEditor, {
+      anchor: Editor.end(baseEditor, []),
+      focus: Editor.end(baseEditor, []),
+    });
+
+    // Simulate the enter key
+    result.current['list-unordered'].handleEnterKey(baseEditor);
+
+    // Should insert a new list item
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'Line of text',
+              },
+            ],
+          },
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: '',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('handles enter key on a list item without text', () => {
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'First list item',
+              },
+            ],
+          },
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: '',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor at the end of the last list item
+    Transforms.select(baseEditor, {
+      anchor: Editor.end(baseEditor, [0, 1]),
+      focus: Editor.end(baseEditor, [0, 1]),
+    });
+
+    // Simulate the enter key
+    result.current['list-unordered'].handleEnterKey(baseEditor);
+
+    // Should remove the empty list item and create a paragraph after the list
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'First list item',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+    ]);
   });
 });

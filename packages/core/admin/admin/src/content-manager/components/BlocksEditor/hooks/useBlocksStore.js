@@ -14,6 +14,7 @@ import {
   HeadingSix,
 } from '@strapi/icons';
 import PropTypes from 'prop-types';
+import { Editor, Path, Transforms } from 'slate';
 import styled, { css } from 'styled-components';
 
 const H1 = styled(Typography).attrs({ as: 'h1' })`
@@ -165,6 +166,42 @@ Image.propTypes = {
 };
 
 /**
+ * Common handler for the enter key on ordered and unordered lists
+ * @param {import('slate').Editor} editor
+ */
+const handleEnterKeyOnList = (editor) => {
+  // Check if the selected list item is empty
+  const [currentListItem, currentListItemPath] = Editor.above(editor, {
+    matchNode: (node) => node.type === 'list-item',
+  });
+  const isEmptyListItem =
+    currentListItem.children.length === 1 && currentListItem.children[0].text === '';
+
+  if (isEmptyListItem) {
+    // Delete the empty list item
+    Transforms.removeNodes(editor, { at: currentListItemPath });
+
+    // And create a new paragraph below the parent list
+    const listNodeEntry = Editor.above(editor, { match: (n) => n.type === 'list' });
+    const createdParagraphPath = Path.next(listNodeEntry[1]);
+    Transforms.insertNodes(
+      editor,
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: '' }],
+      },
+      { at: createdParagraphPath }
+    );
+
+    // Move selection to the newly created paragraph
+    Transforms.select(editor, createdParagraphPath);
+  } else {
+    // Otherwise just create a new list item by splitting the current one
+    Transforms.splitNodes(editor, { always: true });
+  }
+};
+
+/**
  * Manages a store of all the available blocks.
  *
  * @returns {{
@@ -175,7 +212,7 @@ Image.propTypes = {
  *     value: Object,
  *     matchNode: (node: Object) => boolean,
  *     isInBlocksSelector: true,
-
+ *     handleEnterKey: (editor: import('slate').Editor) => void,
  *   }
  * }} an object containing rendering functions and metadata for different blocks, indexed by name.
  */
@@ -197,6 +234,41 @@ export function useBlocksStore() {
       },
       matchNode: (node) => node.type === 'paragraph',
       isInBlocksSelector: true,
+      handleEnterKey(editor) {
+        /**
+         * Split the nodes where the cursor is. This will create a new paragraph with the content
+         * after the cursor, while retaining all the children, modifiers etc.
+         */
+        Transforms.splitNodes(editor, {
+          /**
+           * Makes sure we always create a new node,
+           * even if there's nothing to the right of the cursor in the node.
+           */
+          always: true,
+        });
+
+        /**
+         * Delete and recreate the node that was created at the right of the cursor.
+         * This is to avoid node pollution
+         * (e.g. keeping the level attribute when converting a heading to a paragraph).
+         * Select the parent of the selection because we want the full block, not the leaf.
+         * And copy its children to make sure we keep the modifiers.
+         */
+        const [createdNode] = Editor.parent(editor, editor.selection.anchor.path);
+        Transforms.removeNodes(editor, editor.selection);
+        Transforms.insertNodes(editor, {
+          type: 'paragraph',
+          children: createdNode.children,
+        });
+
+        /**
+         * The new selection will by default be at the end of the created node.
+         * Instead we manually move it to the start of the created node.
+         * Use slice(0, -1) to go 1 level higher in the tree,
+         * so we go to the start of the node and not the start of the leaf.
+         */
+        Transforms.select(editor, editor.start(editor.selection.anchor.path.slice(0, -1)));
+      },
     },
     'heading-one': {
       renderElement: (props) => <Heading {...props} />,
@@ -310,6 +382,10 @@ export function useBlocksStore() {
       },
       matchNode: (node) => node.type === 'code',
       isInBlocksSelector: true,
+      handleEnterKey(editor) {
+        // Insert a new line within the block
+        Transforms.insertText(editor, '\n');
+      },
     },
     quote: {
       renderElement: (props) => <Blockquote {...props.attributes}>{props.children}</Blockquote>,
@@ -333,6 +409,7 @@ export function useBlocksStore() {
       matchNode: (node) => node.type === 'list' && node.format === 'ordered',
       // TODO add icon and label and set isInBlocksEditor to true
       isInBlocksSelector: false,
+      handleEnterKey: handleEnterKeyOnList,
     },
     'list-unordered': {
       renderElement: (props) => <List {...props} />,
@@ -343,6 +420,7 @@ export function useBlocksStore() {
       matchNode: (node) => node.type === 'list' && node.format === 'unordered',
       // TODO add icon and label and set isInBlocksEditor to true
       isInBlocksSelector: false,
+      handleEnterKey: handleEnterKeyOnList,
     },
     'list-item': {
       renderElement: (props) => (
