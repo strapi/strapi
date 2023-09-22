@@ -40,8 +40,8 @@ type Connection<TClient extends ClientKind> = {
   ssl?: SSLConfig | boolean;
   connectionString?: string;
   timezone?: string;
-} & { [key: string]: unknown } & IfClientIs<TClient, 'postgres', { schema?: string }, unkown>;
-
+} & { [key: string]: unknown } & IfClientIs<TClient, 'postgres', { schema?: string }, unknown>;
+e;
 type SqliteConnection = {
   filename: string;
 } & { [key: string]: unknown };
