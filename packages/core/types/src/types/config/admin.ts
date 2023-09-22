@@ -1,4 +1,4 @@
-import type { ConfigExport } from './shared.d.ts';
+import type { ConfigExport } from './shared.js';
 
 export interface ApiTokenProp {
   salt: string;
