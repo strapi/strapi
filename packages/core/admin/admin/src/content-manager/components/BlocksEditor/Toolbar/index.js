@@ -175,7 +175,8 @@ const ImageDialog = ({ handleClose }) => {
 
   const handleSelectAssets = (images) => {
     const formattedImages = images.map((image) => {
-      const expectedImage = pick(image, IMAGE_SCHEMA_FIELDS); // create an object with imageSchema defined and exclude unnecessary props coming from media library config
+      // create an object with imageSchema defined and exclude unnecessary props coming from media library config
+      const expectedImage = pick(image, IMAGE_SCHEMA_FIELDS);
 
       return {
         ...expectedImage,
