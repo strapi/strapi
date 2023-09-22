@@ -1,0 +1,38 @@
+diff --git a/node_modules/@strapi/design-system/dist/NumberInput/NumberInput.js b/node_modules/@strapi/design-system/dist/NumberInput/NumberInput.js
+index 74f7fa1..62bee50 100644
+--- a/node_modules/@strapi/design-system/dist/NumberInput/NumberInput.js
++++ b/node_modules/@strapi/design-system/dist/NumberInput/NumberInput.js
+@@ -72,7 +72,9 @@ const NumberInput = React__default.default.forwardRef(({ size = 'M', startAction
+      * if the former then it'll be converted to a string.
+      */
+     const formatNumberAndSetInput = (value) => {
+-        setInputValue(String(value));
++        //Convert and round the input value to two decimal places before setting it as the new inputValue.
++        const roundedValueTwoDecimals = parseFloat(value).toFixed(2);
++        setInputValue(String(roundedValueTwoDecimals));
+     };
+     const handelInputChange = ({ target: { value } }) => {
+         if (numberParserRef.current.isValidPartialNumber(value)) {
+@@ -86,6 +88,7 @@ const NumberInput = React__default.default.forwardRef(({ size = 'M', startAction
+         }
+         const parsedValue = numberParserRef.current.parse(inputValue);
+         const newValue = isNaN(parsedValue) ? step : parsedValue + step;
++
+         formatNumberAndSetInput(numberFormaterRef.current.format(newValue));
+     };
+     const decrement = () => {
+diff --git a/node_modules/@strapi/design-system/dist/NumberInput/NumberInput.mjs b/node_modules/@strapi/design-system/dist/NumberInput/NumberInput.mjs
+index 300d673..49522e0 100644
+--- a/node_modules/@strapi/design-system/dist/NumberInput/NumberInput.mjs
++++ b/node_modules/@strapi/design-system/dist/NumberInput/NumberInput.mjs
+@@ -63,7 +63,9 @@ const NumberInput = React__default.forwardRef(({ size = 'M', startAction, name,
+      * if the former then it'll be converted to a string.
+      */
+     const formatNumberAndSetInput = (value) => {
+-        setInputValue(String(value));
++        //Convert and round the input value to two decimal places before setting it as the new inputValue.
++        const roundedValueTwoDecimals = parseFloat(value).toFixed(2);
++        setInputValue(String(roundedValueTwoDecimals));
+     };
+     const handelInputChange = ({ target: { value } }) => {
+         if (numberParserRef.current.isValidPartialNumber(value)) {

@@ -64,7 +64,8 @@
     "test:unit:watch": "run test:unit --watch",
     "test:api": "node test/scripts/run-api-tests.js",
     "test:generate-app": "yarn build:ts && node test/scripts/generate-test-app.js",
-    "doc:api": "node scripts/open-api/serve.js"
+    "doc:api": "node scripts/open-api/serve.js",
+    "postinstall": "patch-package" //to load the design-system patch in patches 
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",
