@@ -1,8 +1,8 @@
-import { Config } from './config';
-import { Routes } from './routes';
-import { ContentTypes } from './content-types';
-import { Controllers } from './controllers';
-import { Register, Bootstrap, Destroy } from './lifecycle';
+import type { Config } from './config';
+import type { Routes } from './routes';
+import type { ContentTypes } from './content-types';
+import type { Controllers } from './controllers';
+import type { Register, Bootstrap, Destroy } from './lifecycle';
 
 export interface ServerObject {
   register: Register;

@@ -1,4 +1,4 @@
-import { ContentType } from '../../../schemas';
+import type { ContentType } from '../../../schemas';
 
 export interface ContentTypes {
   /**

@@ -1,4 +1,4 @@
-import { Strapi } from '../../../../..';
+import type { Strapi } from '../../../../..';
 
 export type LifecycleMethod = ({ strapi }: { strapi: Strapi }) => Promise<unknown> | unknown;
 
