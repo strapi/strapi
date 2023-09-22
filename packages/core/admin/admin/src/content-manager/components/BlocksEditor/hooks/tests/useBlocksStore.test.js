@@ -336,27 +336,37 @@ describe('useBlocksStore', () => {
             type: 'text',
             text: 'Line of text',
           },
+          {
+            type: 'text',
+            text: ' with modifiers too',
+            bold: true,
+          },
         ],
       },
     ];
 
-    // Set the cursor at the end of the paragraph
+    // Set the cursor after "Line of"
     Transforms.select(baseEditor, {
-      anchor: Editor.end(baseEditor, []),
-      focus: Editor.end(baseEditor, []),
+      /**
+       * Docs about anchor and focus: https://docs.slatejs.org/v/v0.47/slate-core/range
+       * In this case they are the same because no text is selected,
+       * we're only setting the position of the cursor.
+       */
+      anchor: Editor.point(baseEditor, { path: [0, 0], offset: 7 }),
+      focus: Editor.point(baseEditor, { path: [0, 0], offset: 7 }),
     });
 
     // Simulate the enter key
     result.current.paragraph.handleEnterKey(baseEditor);
 
-    // Should insert a new paragraph
+    // Should insert a new paragraph with the content after the cursor
     expect(baseEditor.children).toEqual([
       {
         type: 'paragraph',
         children: [
           {
             type: 'text',
-            text: 'Line of text',
+            text: 'Line of',
           },
         ],
       },
@@ -365,7 +375,12 @@ describe('useBlocksStore', () => {
         children: [
           {
             type: 'text',
-            text: '',
+            text: ' text',
+          },
+          {
+            type: 'text',
+            text: ' with modifiers too',
+            bold: true,
           },
         ],
       },

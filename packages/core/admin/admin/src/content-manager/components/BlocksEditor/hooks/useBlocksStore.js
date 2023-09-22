@@ -13,7 +13,7 @@ import {
   HeadingSix,
 } from '@strapi/icons';
 import PropTypes from 'prop-types';
-import { Transforms } from 'slate';
+import { Editor, Transforms } from 'slate';
 import styled, { css } from 'styled-components';
 
 const H1 = styled(Typography).attrs({ as: 'h1' })`
@@ -197,10 +197,39 @@ export function useBlocksStore() {
       matchNode: (node) => node.type === 'paragraph',
       isInBlocksSelector: true,
       handleEnterKey(editor) {
+        /**
+         * Split the nodes where the cursor is. This will create a new paragraph with the content
+         * after the cursor, while retaining all the children, modifiers etc.
+         */
+        Transforms.splitNodes(editor, {
+          /**
+           * Makes sure we always create a new node,
+           * even if there's nothing to the right of the cursor in the node.
+           */
+          always: true,
+        });
+
+        /**
+         * Delete and recreate the node that was created at the right of the cursor.
+         * This is to avoid node pollution
+         * (e.g. keeping the level attribute when converting a heading to a paragraph).
+         * Select the parent of the selection because we want the full block, not the leaf.
+         * And copy its children to make sure we keep the modifiers.
+         */
+        const [createdNode] = Editor.parent(editor, editor.selection.anchor.path);
+        Transforms.removeNodes(editor, editor.selection);
         Transforms.insertNodes(editor, {
           type: 'paragraph',
-          children: [{ type: 'text', text: '' }],
+          children: createdNode.children,
         });
+
+        /**
+         * The new selection will by default be at the end of the created node.
+         * Instead we manually move it to the start of the created node.
+         * Use slice(0, -1) to go 1 level higher in the tree,
+         * so we go to the start of the node and not the start of the leaf.
+         */
+        Transforms.select(editor, editor.start(editor.selection.anchor.path.slice(0, -1)));
       },
     },
     'heading-one': {

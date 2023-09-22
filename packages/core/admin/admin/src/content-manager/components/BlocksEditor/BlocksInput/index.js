@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import PropTypes from 'prop-types';
-import { Transforms } from 'slate';
 import { Editable, useSlate } from 'slate-react';
 import { useTheme } from 'styled-components';
 
