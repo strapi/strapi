@@ -198,5 +198,12 @@ describe('DynamicComponent', () => {
     });
   });
 
-  it.todo('should handle errors in the fields');
+  it('should handle errors in the fields', async () => {
+    const { getByText } = render({
+      index: 0,
+      formErrors: { [`${defaultProps.name}.0`]: 'Error here' },
+    });
+
+    expect(getByText('The component contains error(s)')).toBeInTheDocument();
+  });
 });

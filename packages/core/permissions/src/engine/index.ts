@@ -15,13 +15,16 @@ import { Permission } from '../domain/permission';
 
 export { abilities };
 
-type Provider = ReturnType<typeof providerFactory>;
+type Provider = Omit<ReturnType<typeof providerFactory>, 'register'> & {
+  register(...args: unknown[]): Promise<Provider> | Provider;
+};
+
 type ActionProvider = Provider;
 type ConditionProvider = Provider;
 
 export interface Engine {
   hooks: PermissionEngineHooks;
-  on(hook: HookName, handler: (...args: unknown[]) => unknown): Engine;
+  on(hook: HookName, handler: (...args: any[]) => any): Engine;
   generateAbility(permissions: Permission[], options?: object): Promise<Ability>;
   createRegisterFunction(
     can: (permission: abilities.PermissionRule) => unknown,

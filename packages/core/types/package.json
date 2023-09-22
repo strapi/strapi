@@ -1,0 +1,72 @@
+{
+  "name": "@strapi/types",
+  "version": "4.13.7",
+  "description": "Shared typescript types for Strapi internal use",
+  "keywords": [
+    "strapi"
+  ],
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "main": "index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "./dist",
+    "index.js"
+  ],
+  "scripts": {
+    "build": "run -T tsc -p tsconfig.build.json",
+    "build:ts": "run build",
+    "watch": "run -T tsc -p tsconfig.build.json -w --preserveWatchOutput",
+    "clean": "run -T rimraf ./dist",
+    "prepublishOnly": "yarn clean && yarn build",
+    "lint": "run -T eslint .",
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch"
+  },
+  "dependencies": {
+    "@koa/cors": "3.4.3",
+    "@koa/router": "10.1.1",
+    "@strapi/database": "4.13.7",
+    "@strapi/logger": "4.13.7",
+    "@strapi/permissions": "4.13.7",
+    "@strapi/utils": "4.13.7",
+    "commander": "8.3.0",
+    "https-proxy-agent": "5.0.1",
+    "koa": "2.13.4",
+    "node-fetch": "2.7.0",
+    "node-schedule": "2.1.0",
+    "ts-zen": "https://github.com/strapi/ts-zen#66e02232f5997674cc7032ea3ee59d9864863732"
+  },
+  "devDependencies": {
+    "@types/jest": "29.5.2",
+    "@types/koa": "2.13.4",
+    "@types/koa__router": "12.0.0",
+    "@types/node-schedule": "2.1.0",
+    "eslint-config-custom": "4.13.7",
+    "tsconfig": "4.13.7",
+    "typescript": "5.2.2"
+  },
+  "engines": {
+    "node": ">=16.0.0 <=20.x.x",
+    "npm": ">=6.0.0"
+  }
+}

@@ -1,16 +1,13 @@
 import { curry, isEmpty, isNil, isObject } from 'lodash/fp';
 
 import { pipeAsync } from '../async';
-import traverseEntity, { Data } from '../traverse-entity';
+import traverseEntity from '../traverse-entity';
 import { isScalarAttribute } from '../content-types';
-
 import { traverseQueryFilters, traverseQuerySort, traverseQueryFields } from '../traverse';
-
 import { throwPassword, throwPrivate, throwDynamicZones, throwMorphToRelations } from './visitors';
 import { isOperator } from '../operators';
-
-import type { Model } from '../types';
 import { throwInvalidParam } from './utils';
+import type { Model, Data } from '../types';
 
 const throwPasswords = (schema: Model) => async (entity: Data) => {
   if (!schema) {
