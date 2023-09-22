@@ -1,6 +1,9 @@
+import * as ConfigImport from './config';
+
 export * as Attribute from './attributes';
 export * as Schema from './schemas';
-export * as Config from './config';
+
+export type Config = typeof ConfigImport;
 export * as Plugin from './plugins';
 export * from './strapi';
 

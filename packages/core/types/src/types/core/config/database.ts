@@ -1,4 +1,4 @@
-import { Utils } from '../..';
+import type { Utils } from '../../..';
 
 type ClientKind = 'mysql' | 'postgres' | 'sqlite';
 
@@ -41,7 +41,7 @@ type Connection<TClient extends ClientKind> = {
   connectionString?: string;
   timezone?: string;
 } & { [key: string]: unknown } & IfClientIs<TClient, 'postgres', { schema?: string }, unknown>;
-e;
+
 type SqliteConnection = {
   filename: string;
 } & { [key: string]: unknown };
