@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import * as React from 'react';
 
 import { Box, Flex, Typography, InputWrapper, Divider } from '@strapi/design-system';

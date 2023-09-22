@@ -8,7 +8,18 @@ import { IntlProvider } from 'react-intl';
 import { createEditor, Transforms } from 'slate';
 import { Slate, withReact } from 'slate-react';
 
-import { BlocksToolbar } from '..';
+import { BlocksToolbar, BlocksDropdown } from '..';
+
+const title = 'dialog component';
+
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useLibrary: jest.fn().mockImplementation(() => ({
+    components: {
+      'media-library': () => <div>{title}</div>,
+    },
+  })),
+}));
 
 const initialValue = [
   {
@@ -229,5 +240,23 @@ describe('BlocksEditor toolbar', () => {
         ],
       },
     ]);
+  });
+
+  it('when image is selected, it will set modal dialog open to select the images', async () => {
+    render(<BlocksDropdown />, {
+      wrapper: Wrapper,
+    });
+
+    Transforms.setSelection(baseEditor, {
+      anchor: { path: [0, 0], offset: 0 },
+    });
+
+    const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+
+    await user.click(headingsDropdown);
+
+    await user.click(screen.getByRole('option', { name: 'Image' }));
+
+    expect(screen.getByText(title)).toBeInTheDocument();
   });
 });
