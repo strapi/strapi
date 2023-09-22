@@ -1,10 +1,12 @@
 import type { Knex } from 'knex';
 import { clone, isNil } from 'lodash/fp';
+import type { LoadedStrapi } from '@strapi/types';
+
 import { ILink } from '../../../types';
 
 // TODO: Remove any types when we'll have types for DB metadata
 
-export const createLinkQuery = (strapi: Strapi.Strapi, trx?: Knex.Transaction) => {
+export const createLinkQuery = (strapi: LoadedStrapi, trx?: Knex.Transaction) => {
   const query = () => {
     const { connection } = strapi.db;
 

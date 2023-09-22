@@ -112,7 +112,7 @@ const filterPluginsByAdminEntry = (plugin) => {
     );
 
     if (!isLocalPluginWithLegacyAdminFile) {
-      let pathToPlugin = plugin.pathToPlugin
+      let pathToPlugin = plugin.pathToPlugin;
 
       if (process.platform === 'win32') {
         pathToPlugin = pathToPlugin.split(path.sep).join(path.posix.sep);

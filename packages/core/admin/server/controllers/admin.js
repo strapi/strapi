@@ -8,7 +8,7 @@ const { exists } = require('fs-extra');
 const { env } = require('@strapi/utils');
 const { isUsingTypeScript } = require('@strapi/typescript-utils');
 // eslint-disable-next-line node/no-extraneous-require
-const ee = require('@strapi/strapi/lib/utils/ee');
+const ee = require('@strapi/strapi/dist/utils/ee').default;
 
 const {
   validateUpdateProjectSettings,
