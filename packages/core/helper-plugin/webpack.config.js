@@ -74,7 +74,16 @@ const config = [
     experiments: {
       outputModule: true,
     },
-    plugins: [process.env.DTS ? new ForkTsCheckerPlugin() : undefined].filter((v) => v),
+    plugins: [
+      process.env.DTS
+        ? new ForkTsCheckerPlugin({
+            typescript: {
+              mode: 'write-dts',
+              configFile: 'tsconfig.build.json',
+            },
+          })
+        : undefined,
+    ].filter((v) => v),
   },
   {
     ...baseConfig,

@@ -2,5 +2,6 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": true
-  }
+  },
+  "include": ["declarations", "src", "tests", "jest.config.front.js", "webpack.config.js"]
 }
