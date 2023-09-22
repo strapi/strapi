@@ -1,5 +1,5 @@
-const path = require('path');
-const fse = require('fs-extra');
+import * as path from 'path';
+import * as fse from 'fs-extra';
 
 /**
  * Deletes the API folder of a contentType
@@ -56,7 +56,7 @@ async function rollback(uid) {
   const apiFolder = path.join(strapi.dirs.app.api, apiName);
   const backupFolder = path.join(strapi.dirs.app.api, '.backup', apiName);
 
-  const exists = await fse.exists(backupFolder);
+  const exists = await fse.access(backupFolder);
 
   if (!exists) {
     throw new Error('Cannot rollback api that was not backed up');

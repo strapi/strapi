@@ -1,12 +1,11 @@
 import _ from 'lodash';
 import { getOr } from 'lodash/fp';
-
-import { contentTypes as contentTypesUtils } from '@strapi/utils';
+import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
 import createBuilder from './schema-builder';
 import { coreUids, pluginsUids } from './constants';
 
-const { ApplicationError } = require('@strapi/utils').errors;
+const { ApplicationError } = errors;
 
 export const isContentTypeVisible = (model) =>
   getOr(true, 'pluginOptions.content-type-builder.visible', model) === true;

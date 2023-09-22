@@ -1,4 +1,4 @@
-import { UID, Schema } from '@strapi/types';
+import type { UID, Schema } from '@strapi/types';
 import { get, has } from 'lodash';
 
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';

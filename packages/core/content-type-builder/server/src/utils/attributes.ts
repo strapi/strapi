@@ -20,7 +20,7 @@ const isRelation = (attribute) => attribute.type === 'relation';
  * @param {Object} context - function context
  * @param {Object} context.component - the associated component
  */
-const formatAttributes = (model) => {
+export const formatAttributes = (model) => {
   const { getVisibleAttributes } = utils.contentTypes;
 
   // only get attributes that can be seen in the CTB
@@ -37,7 +37,7 @@ const formatAttributes = (model) => {
  * @param {Object} context - function context
  * @param {Object} context.component - the associated component
  */
-const formatAttribute = (key, attribute) => {
+export const formatAttribute = (key, attribute) => {
   const { configurable, required, autoPopulate, pluginOptions } = attribute;
 
   if (attribute.type === 'media') {
@@ -70,7 +70,7 @@ const formatAttribute = (key, attribute) => {
 };
 
 // TODO: move to schema builder
-const replaceTemporaryUIDs = (uidMap) => (schema) => {
+export const replaceTemporaryUIDs = (uidMap) => (schema) => {
   return {
     ...schema,
     attributes: Object.keys(schema.attributes).reduce((acc, key) => {

@@ -1,10 +1,14 @@
-const CONTENT_TYPE = 'CONTENT_TYPE';
-const COMPONENT = 'COMPONENT';
+export const modelTypes = {
+  CONTENT_TYPE: 'CONTENT_TYPE',
+  COMPONENT: 'COMPONENT',
+} as const;
 
-const SINGLE_TYPE = 'singleType';
-const COLLECTION_TYPE = 'collectionType';
+export const typeKinds = {
+  SINGLE_TYPE: 'singleType',
+  COLLECTION_TYPE: 'collectionType',
+} as const;
 
-const DEFAULT_TYPES = [
+export const DEFAULT_TYPES = [
   // advanced types
   'media',
 
@@ -27,33 +31,17 @@ const DEFAULT_TYPES = [
   'boolean',
 
   'relation',
-];
+] as const;
 
-const VALID_UID_TARGETS = ['string', 'text'];
+export const VALID_UID_TARGETS = ['string', 'text'] as const;
 
-const FORBIDDEN_ATTRIBUTE_NAMES = ['__component', '__contentType'];
+export const FORBIDDEN_ATTRIBUTE_NAMES = ['__component', '__contentType'] as const;
 
-const PREFIX = 'strapi::';
-const STRAPI_USER = 'admin::user';
-const UPLOAD_FILE = 'plugin::upload.file';
+export const coreUids = {
+  STRAPI_USER: 'admin::user',
+  PREFIX: 'strapi::',
+} as const;
 
-module.exports = {
-  DEFAULT_TYPES,
-  typeKinds: {
-    SINGLE_TYPE,
-    COLLECTION_TYPE,
-  },
-  modelTypes: {
-    CONTENT_TYPE,
-    COMPONENT,
-  },
-  FORBIDDEN_ATTRIBUTE_NAMES,
-  VALID_UID_TARGETS,
-  coreUids: {
-    STRAPI_USER,
-    PREFIX,
-  },
-  pluginsUids: {
-    UPLOAD_FILE,
-  },
-};
+export const pluginsUids = {
+  UPLOAD_FILE: 'plugin::upload.file',
+} as const;
