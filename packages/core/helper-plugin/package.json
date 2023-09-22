@@ -22,6 +22,7 @@
   ],
   "main": "build/helper-plugin.js",
   "module": "build/helper-plugin.esm.js",
+  "types": "build/index.d.ts",
   "exports": {
     ".": {
       "require": "./build/helper-plugin.js",

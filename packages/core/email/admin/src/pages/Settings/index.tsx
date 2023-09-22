@@ -32,23 +32,13 @@ import styled from 'styled-components';
 import { PERMISSIONS } from '../../constants';
 import { schema } from '../../utils/schema';
 
-import type { ApiResponse } from '../../../../shared/types';
+import type { EmailSettings, ConfigSettings } from '../../../../shared/types';
+
+import { ValidationError } from 'yup';
 
 const DocumentationLink = styled.a`
   color: ${({ theme }) => theme.colors.primary600};
 `;
-
-interface EmailSettings {
-  config: ConfigSettings;
-}
-
-interface ConfigSettings {
-  provider: string;
-  settings: {
-    defaultFrom: string;
-    defaultReplyTo: string;
-  };
-}
 
 interface MutationBody {
   to: string;
@@ -73,25 +63,22 @@ const SettingsPage = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [formErrors, setFormErrors] = React.useState<Record<string, any>>({});
 
-  const { data, isLoading } = useQuery<ConfigSettings, Error>(
-    ['email', 'settings'],
-    async (): Promise<ConfigSettings> => {
-      const res: ApiResponse<EmailSettings> = await get('/email/settings');
-      const {
-        data: { config },
-      } = res;
+  const { data, isLoading } = useQuery<ConfigSettings, Error>(['email', 'settings'], async () => {
+    const res = await get<EmailSettings>('/email/settings');
+    const {
+      data: { config },
+    } = res;
 
-      return config;
-    }
-  );
+    return config;
+  });
 
   const mutation = useMutation<void, Error, MutationBody>(
-    async (body: MutationBody): Promise<void> => {
+    async (body) => {
       await post('/email/test', body);
     },
     {
       onError() {
-        toggleNotification({
+        toggleNotification!({
           type: 'warning',
           message: formatMessage(
             {
@@ -103,7 +90,7 @@ const SettingsPage = () => {
         });
       },
       onSuccess() {
-        toggleNotification({
+        toggleNotification!({
           type: 'success',
           message: formatMessage(
             {
@@ -137,14 +124,18 @@ const SettingsPage = () => {
     try {
       await schema.validate({ email: testAddress }, { abortEarly: false });
     } catch (error) {
-      setFormErrors(getYupInnerErrors(error));
+      if (error instanceof ValidationError) {
+        setFormErrors(getYupInnerErrors(error));
+      } else {
+        // TODO: how to handle other errors? is this if, else the best way to do this?
+      }
     }
 
-    lockApp();
+    lockApp!();
 
     mutation.mutate({ to: testAddress });
 
-    unlockApp();
+    unlockApp!();
   };
 
   return (
@@ -287,7 +278,7 @@ const SettingsPage = () => {
                     })}
                   </Typography>
 
-                  <Grid gap={5} alignItems="end">
+                  <Grid gap={5}>
                     <GridItem col={6} s={12}>
                       <TextInput
                         id="test-address-input"

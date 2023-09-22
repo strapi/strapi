@@ -15,7 +15,10 @@ export interface CheckPagePermissions {
   permissions?: Permission[];
 }
 
-const CheckPagePermissions = ({ permissions = [], children }: CheckPagePermissions) => {
+const CheckPagePermissions: React.FC<CheckPagePermissions> = ({
+  permissions = [],
+  children,
+}: CheckPagePermissions) => {
   const abortController = new AbortController();
   const { signal } = abortController;
   const { allPermissions } = useRBACProvider();
@@ -71,7 +74,7 @@ const CheckPagePermissions = ({ permissions = [], children }: CheckPagePermissio
     return <Redirect to="/" />;
   }
 
-  return children;
+  return <>{children}</>;
 };
 
 export { CheckPagePermissions };
