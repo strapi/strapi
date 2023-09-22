@@ -4,6 +4,7 @@ import { Box, Flex, Typography, InputWrapper, Divider } from '@strapi/design-sys
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { createEditor } from 'slate';
+import { withHistory } from 'slate-history';
 import { Slate, withReact, ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
@@ -33,7 +34,7 @@ const Wrapper = styled(Box)`
 const BlocksEditor = React.forwardRef(
   ({ intlLabel, name, readOnly, required, error, value, onChange }, ref) => {
     const { formatMessage } = useIntl();
-    const [editor] = React.useState(() => withReact(createEditor()));
+    const [editor] = React.useState(() => withReact(withHistory(createEditor())));
 
     const label = intlLabel.id
       ? formatMessage(

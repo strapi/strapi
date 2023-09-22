@@ -7077,6 +7077,7 @@ __metadata:
     semver: 7.5.4
     sift: 16.0.1
     slate: 0.94.1
+    slate-history: 0.93.0
     slate-react: 0.98.3
     speed-measure-webpack-plugin: 1.5.0
     style-loader: 3.3.1
@@ -27642,6 +27643,17 @@ __metadata:
   version: 5.0.0
   resolution: "slash@npm:5.0.0"
   checksum: 1fa799ee165f7eacf0122ea4252bcf44290db402eb9d3058624ff1d421b8dfe262100dffb0b2cc23f36858666bf661476e2a4c40ebaf3e7b61107cad55a1de88
+  languageName: node
+  linkType: hard
+
+"slate-history@npm:0.93.0":
+  version: 0.93.0
+  resolution: "slate-history@npm:0.93.0"
+  dependencies:
+    is-plain-object: ^5.0.0
+  peerDependencies:
+    slate: ">=0.65.3"
+  checksum: 4ce44a9ecbccbfd3b9c023e5bc20c6e151f1064fb2a6dd42cfec72bd6f8fd29e60f533e74130bb69f4706e86802929eb6fd89eb271dda34924ab46965c36a3e2
   languageName: node
   linkType: hard
 
