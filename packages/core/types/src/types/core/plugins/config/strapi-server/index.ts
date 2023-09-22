@@ -14,10 +14,10 @@ export interface ServerObject {
   contentTypes: ContentTypes;
   controllers: Controllers;
   // TODO
-  registerTrads: any;
-  services: any;
-  policies: any;
-  middlewares: any;
+  registerTrads: unknown;
+  services: unknown;
+  policies: unknown;
+  middlewares: unknown;
 }
 
 export type ServerFunction = () => ServerObject;
