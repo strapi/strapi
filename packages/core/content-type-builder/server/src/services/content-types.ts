@@ -4,6 +4,7 @@ import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
 import createBuilder from './schema-builder';
 import { coreUids, pluginsUids } from './constants';
+import type { CreateContentTypeInput } from '../controllers/validation/content-type';
 
 const { ApplicationError } = errors;
 
@@ -76,9 +77,16 @@ export const createContentTypes = async (contentTypes) => {
  * @param {Object} options
  * @param {Builder} options.defaultBuilder
  */
-export const createContentType = async ({ contentType, components = [] }, options = {}) => {
+type CreateContentTypeOptions = {
+  defaultBuilder?: any; // TODO
+};
+
+export const createContentType = async (
+  { contentType, components }: CreateContentTypeInput,
+  options: CreateContentTypeOptions = {}
+) => {
   const builder = options.defaultBuilder || createBuilder();
-  const uidMap = builder.createNewComponentUIDMap(components);
+  const uidMap = builder.createNewComponentUIDMap(components || []);
 
   const replaceTmpUIDs = replaceTemporaryUIDs(uidMap);
 
@@ -108,7 +116,7 @@ export const createContentType = async ({ contentType, components = [] }, option
 
   // generate api skeleton
   await generateAPI({
-    displayName: contentType.displayName,
+    displayName: contentType.displayName || contentType.info.displayName,
     singularName: contentType.singularName,
     pluralName: contentType.pluralName,
     kind: contentType.kind,

@@ -2,11 +2,11 @@ import path from 'path';
 import _ from 'lodash';
 import pluralize from 'pluralize';
 
-import { nameToSlug, nameToCollectionName } from '@strapi/utils';
+import { nameToSlug, nameToCollectionName, errors } from '@strapi/utils';
 import { isConfigurable } from '../../utils/attributes';
 import createSchemaHandler from './schema-handler';
 
-const { ApplicationError } = require('@strapi/utils').errors;
+const { ApplicationError } = errors;
 
 export default function createComponentBuilder() {
   return {

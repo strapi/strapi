@@ -2,6 +2,7 @@ import {
   validateKind,
   validateUpdateContentTypeInput,
   validateContentTypeInput,
+  CreateContentTypeInput,
 } from '../content-type';
 
 describe('Content type validator', () => {
@@ -53,7 +54,7 @@ describe('Content type validator', () => {
             },
           },
         },
-      };
+      } as CreateContentTypeInput;
 
       expect.assertions(1);
 
@@ -94,19 +95,19 @@ describe('Content type validator', () => {
             },
           },
         },
-      };
+      } as CreateContentTypeInput;
 
       expect.assertions(1);
 
       await validateContentTypeInput(input).then((data) => {
-        expect(data.contentType.attributes).toBe(input.contentType.attributes);
+        expect(data.contentType.attributes).toBe(input?.contentType?.attributes);
       });
     });
   });
 
   describe('validateUpdateContentTypeInput', () => {
     test('Deletes empty defaults', async () => {
-      const data = {
+      const data: CreateContentTypeInput = {
         contentType: {
           displayName: 'test',
           singularName: 'test',

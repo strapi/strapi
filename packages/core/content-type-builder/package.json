@@ -84,6 +84,7 @@
     "@types/koa": "2.13.4",
     "@types/pluralize": "0.0.30",
     "history": "^4.9.0",
+    "koa": "2.13.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "5.3.4",

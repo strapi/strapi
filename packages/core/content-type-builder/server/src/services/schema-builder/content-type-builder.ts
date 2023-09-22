@@ -1,12 +1,12 @@
 import path from 'path';
 import _ from 'lodash';
 
-import { nameToCollectionName } from '@strapi/utils';
+import { nameToCollectionName, errors } from '@strapi/utils';
 import { isRelation, isConfigurable } from '../../utils/attributes';
 import { typeKinds } from '../constants';
 import createSchemaHandler from './schema-handler';
 
-const { ApplicationError } = require('@strapi/utils').errors;
+const { ApplicationError } = errors;
 
 const reuseUnsetPreviousProperties = (newAttribute, oldAttribute) => {
   _.defaults(
@@ -23,7 +23,7 @@ const reuseUnsetPreviousProperties = (newAttribute, oldAttribute) => {
   );
 };
 
-module.exports = function createComponentBuilder() {
+export default function createComponentBuilder() {
   return {
     setRelation({ key, uid, attribute }) {
       if (!_.has(attribute, 'target')) {
@@ -255,7 +255,7 @@ module.exports = function createComponentBuilder() {
       return this.contentTypes.get(uid).delete();
     },
   };
-};
+}
 
 /**
  * Returns a uid from a content type infos

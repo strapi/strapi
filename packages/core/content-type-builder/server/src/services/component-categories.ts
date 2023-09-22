@@ -1,15 +1,16 @@
-const { join } = require('path');
+import { join } from 'path';
+import { errors, nameToSlug } from '@strapi/utils';
 
-const { nameToSlug } = require('@strapi/utils');
-const { ApplicationError } = require('@strapi/utils').errors;
-const createBuilder = require('./schema-builder');
+import createBuilder from './schema-builder';
+
+const { ApplicationError } = errors;
 
 /**
  * Edit a category name and move components to the write folder
  * @param {string} name category name
  * @param {Object} infos new category data
  */
-const editCategory = async (name, infos) => {
+export const editCategory = async (name, infos) => {
   const newName = nameToSlug(infos.name);
 
   // don't do anything the name doesn't change
@@ -52,7 +53,7 @@ const editCategory = async (name, infos) => {
  * Deletes a category and its components
  * @param {string} name category name to delete
  */
-const deleteCategory = async (name) => {
+export const deleteCategory = async (name) => {
   if (!categoryExists(name)) {
     throw new ApplicationError('category not found');
   }
@@ -79,8 +80,3 @@ const categoryExists = (name) => {
 
   return matchingIndex > -1;
 };
-
-module.exports = () => ({
-  editCategory,
-  deleteCategory,
-});

@@ -1,11 +1,12 @@
 import { join } from 'path';
 import _ from 'lodash';
 
+import { errors } from '@strapi/utils';
 import createSchemaHandler from './schema-handler';
 import createComponentBuilder from './component-builder';
 import createContentTypeBuilder from './content-type-builder';
 
-const { ApplicationError } = require('@strapi/utils').errors;
+const { ApplicationError } = errors;
 
 /**
  * Creates a content type schema builder instance

@@ -3,13 +3,17 @@
 import { flatMap, getOr, has } from 'lodash/fp';
 import { yup, validateYupSchema } from '@strapi/utils';
 
-import { UID } from '@strapi/types';
-import { ContentTypes } from '@strapi/types/dist/types/shared';
+import type { Schema, UID } from '@strapi/types';
 import { getService } from '../../utils';
 import { modelTypes, DEFAULT_TYPES, typeKinds } from '../../services/constants';
 import { createSchema } from './model-schema';
 import { removeEmptyDefaults, removeDeletedUIDTargetFields } from './data-transform';
 import { nestedComponentSchema } from './component';
+
+export type CreateContentTypeInput = {
+  contentType?: Partial<Schema.ContentType>;
+  components?: Partial<Schema.Component>;
+};
 
 /**
  * Allowed relation per type kind
@@ -44,7 +48,7 @@ const VALID_TYPES = [...DEFAULT_TYPES, 'uid', 'component', 'dynamiczone', 'custo
  * Returns a yup schema to validate a content type payload
  * @param {Object} data payload
  */
-const createContentTypeSchema = (data, { isEdition = false } = {}) => {
+const createContentTypeSchema = (data: CreateContentTypeInput, { isEdition = false } = {}) => {
   const kind: keyof typeof VALID_RELATIONS = getOr(
     typeKinds.COLLECTION_TYPE,
     'contentType.kind',
@@ -94,16 +98,17 @@ const createContentTypeSchema = (data, { isEdition = false } = {}) => {
 /**
  * Validator for content type creation
  */
-export const validateContentTypeInput = (data) => {
+export const validateContentTypeInput = (data: CreateContentTypeInput) => {
   return validateYupSchema(createContentTypeSchema(data))(data);
 };
 
 /**
  * Validator for content type edition
  */
-export const validateUpdateContentTypeInput = (data) => {
+export const validateUpdateContentTypeInput = (data: CreateContentTypeInput) => {
   if (has('contentType', data)) {
     removeEmptyDefaults(data.contentType);
+    removeDeletedUIDTargetFields(data.contentType);
   }
 
   if (has('components', data) && Array.isArray(data.components)) {
@@ -113,8 +118,6 @@ export const validateUpdateContentTypeInput = (data) => {
       }
     });
   }
-
-  removeDeletedUIDTargetFields(data.contentType);
 
   return validateYupSchema(createContentTypeSchema(data, { isEdition: true }))(data);
 };
