@@ -1,2 +1,2 @@
-export * from './strapi-admin';
-export * from './strapi-server';
+export type * from './strapi-admin';
+export type * from './strapi-server';
