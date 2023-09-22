@@ -14,7 +14,7 @@ import {
   HeadingSix,
 } from '@strapi/icons';
 import PropTypes from 'prop-types';
-import { Editor, Transforms } from 'slate';
+import { Editor, Path, Transforms } from 'slate';
 import styled, { css } from 'styled-components';
 
 const H1 = styled(Typography).attrs({ as: 'h1' })`
@@ -163,6 +163,42 @@ Image.propTypes = {
       height: PropTypes.number,
     }).isRequired,
   }).isRequired,
+};
+
+/**
+ * Common handler for the enter key on ordered and unordered lists
+ * @param {import('slate').Editor} editor
+ */
+const handleEnterKeyOnList = (editor) => {
+  // Check if the selected list item is empty
+  const [currentListItem, currentListItemPath] = Editor.above(editor, {
+    matchNode: (node) => node.type === 'list-item',
+  });
+  const isEmptyListItem =
+    currentListItem.children.length === 1 && currentListItem.children[0].text === '';
+
+  if (isEmptyListItem) {
+    // Delete the empty list item
+    Transforms.removeNodes(editor, { at: currentListItemPath });
+
+    // And create a new paragraph below the parent list
+    const listNodeEntry = Editor.above(editor, { match: (n) => n.type === 'list' });
+    const createdParagraphPath = Path.next(listNodeEntry[1]);
+    Transforms.insertNodes(
+      editor,
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: '' }],
+      },
+      { at: createdParagraphPath }
+    );
+
+    // Move selection to the newly created paragraph
+    Transforms.select(editor, createdParagraphPath);
+  } else {
+    // Otherwise just create a new list item by splitting the current one
+    Transforms.splitNodes(editor, { always: true });
+  }
 };
 
 /**
@@ -373,6 +409,7 @@ export function useBlocksStore() {
       matchNode: (node) => node.type === 'list' && node.format === 'ordered',
       // TODO add icon and label and set isInBlocksEditor to true
       isInBlocksSelector: false,
+      handleEnterKey: handleEnterKeyOnList,
     },
     'list-unordered': {
       renderElement: (props) => <List {...props} />,
@@ -383,6 +420,7 @@ export function useBlocksStore() {
       matchNode: (node) => node.type === 'list' && node.format === 'unordered',
       // TODO add icon and label and set isInBlocksEditor to true
       isInBlocksSelector: false,
+      handleEnterKey: handleEnterKeyOnList,
     },
     'list-item': {
       renderElement: (props) => (

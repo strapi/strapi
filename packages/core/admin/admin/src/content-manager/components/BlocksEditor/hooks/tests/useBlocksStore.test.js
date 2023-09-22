@@ -426,4 +426,133 @@ describe('useBlocksStore', () => {
       },
     ]);
   });
+
+  it('handles enter key on a list item with text', () => {
+    // Don't use Wrapper since we don't test any React logic or rendering
+    // Wrapper cause issues about updates not wrapped in act()
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'Line of text',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor at the end of the first list item
+    Transforms.select(baseEditor, {
+      anchor: Editor.end(baseEditor, []),
+      focus: Editor.end(baseEditor, []),
+    });
+
+    // Simulate the enter key
+    result.current['list-unordered'].handleEnterKey(baseEditor);
+
+    // Should insert a new list item
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'Line of text',
+              },
+            ],
+          },
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: '',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('handles enter key on a list item without text', () => {
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'First list item',
+              },
+            ],
+          },
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: '',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor at the end of the last list item
+    Transforms.select(baseEditor, {
+      anchor: Editor.end(baseEditor, [0, 1]),
+      focus: Editor.end(baseEditor, [0, 1]),
+    });
+
+    // Simulate the enter key
+    result.current['list-unordered'].handleEnterKey(baseEditor);
+
+    // Should remove the empty list item and create a paragraph after the list
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'First list item',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+    ]);
+  });
 });
