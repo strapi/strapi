@@ -13,12 +13,12 @@ import { BlocksToolbar, BlocksDropdown } from '..';
 const title = 'dialog component';
 
 jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
   useLibrary: jest.fn().mockImplementation(() => ({
     components: {
       'media-library': () => <div>{title}</div>,
     },
   })),
-  pxToRem: jest.fn(),
 }));
 
 const initialValue = [

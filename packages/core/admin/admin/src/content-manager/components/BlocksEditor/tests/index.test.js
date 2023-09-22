@@ -7,8 +7,8 @@ import { IntlProvider } from 'react-intl';
 import Blocks from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
   useLibrary: () => ({ components: { 'media-library': jest.fn() } }),
-  pxToRem: jest.fn(),
 }));
 
 const setup = (props) =>

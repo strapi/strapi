@@ -132,7 +132,7 @@ const toggleBlock = (editor, value) => {
 
 const ALLOWED_MEDIA_TYPE = 'images';
 
-const imageSchemaFields = [
+const IMAGE_SCHEMA_FIELDS = [
   'name',
   'alternativeText',
   'url',
@@ -151,9 +151,9 @@ const imageSchemaFields = [
   'updatedAt',
 ];
 
-const pick = (object, keys) => {
-  return keys.reduce((acc, key) => {
-    if (object && Object.prototype.hasOwnProperty.call(object, key)) {
+const pick = (object, imageSchemaFields) => {
+  return Object.keys(object).reduce((acc, key) => {
+    if (imageSchemaFields.includes(key)) {
       acc[key] = object[key];
     }
 
@@ -175,7 +175,7 @@ const ImageDialog = ({ handleClose }) => {
 
   const handleSelectAssets = (images) => {
     const formattedImages = images.map((image) => {
-      const expectedImage = pick(image, imageSchemaFields);
+      const expectedImage = pick(image, IMAGE_SCHEMA_FIELDS); // create an object with imageSchema defined and exclude unnecessary props coming from media library config
 
       return {
         ...expectedImage,
