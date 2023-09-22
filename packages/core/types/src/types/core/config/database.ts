@@ -1,4 +1,4 @@
-import { Utils } from '../..';
+import { Utils } from '../../..';
 
 type ClientKind = 'mysql' | 'postgres' | 'sqlite';
 
