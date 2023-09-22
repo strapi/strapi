@@ -12,7 +12,7 @@ import {
   HeadingFive,
   HeadingSix,
 } from '@strapi/icons';
-import PropTypes, { node } from 'prop-types';
+import PropTypes from 'prop-types';
 import { Editor, Path, Transforms } from 'slate';
 import styled, { css } from 'styled-components';
 
