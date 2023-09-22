@@ -6,6 +6,8 @@ import { IntlProvider } from 'react-intl';
 
 import Blocks from '../index';
 
+import { blocksData } from './mock-schema';
+
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useLibrary: () => ({ components: { 'media-library': jest.fn() } }),
@@ -16,6 +18,8 @@ const setup = (props) =>
     <Blocks
       intlLabel={{ id: 'blocks', defaultMessage: 'blocks type' }}
       name="blocks-editor"
+      value={blocksData}
+      onChange={jest.fn()}
       {...props}
     />,
     {

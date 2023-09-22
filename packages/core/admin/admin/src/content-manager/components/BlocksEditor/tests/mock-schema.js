@@ -2,10 +2,10 @@ export const blocksData = [
   {
     type: 'paragraph',
     children: [
-      { text: 'This is editable ' },
-      { text: 'This is bold text', bold: true },
-      { text: 'This is deleted text', strikethrough: true },
-      { text: '<textarea>\n', code: true },
+      { type: 'text', text: 'This is editable ' },
+      { type: 'text', text: 'This is bold text', bold: true },
+      { type: 'text', text: 'This is deleted text', strikethrough: true },
+      { type: 'text', text: '<textarea>\n', code: true },
       { type: 'text', text: 'It is me', italic: true },
       { type: 'text', text: 'Joe', underline: true, strikethrough: true },
       { type: 'text', text: 'Kai Doe', underline: true },
@@ -13,6 +13,16 @@ export const blocksData = [
         type: 'link',
         url: 'https://example.com',
         children: [{ type: 'text', text: 'click me', italic: true }],
+      },
+    ],
+  },
+  {
+    type: 'code',
+    syntax: 'javascript',
+    children: [
+      {
+        type: 'text',
+        text: '<SomeComponent />',
       },
     ],
   },
@@ -49,15 +59,6 @@ export const blocksData = [
       {
         type: 'text',
         text: 'Some ancient wisdom',
-      },
-    ],
-  },
-  {
-    type: 'code',
-    children: [
-      {
-        type: 'text',
-        text: '<SomeComponent />',
       },
     ],
   },
@@ -179,12 +180,7 @@ export const blocksData = [
         children: [
           {
             type: 'text',
-            children: [
-              {
-                type: 'text',
-                text: 'Second item',
-              },
-            ],
+            text: 'Second item',
           },
         ],
       },
@@ -192,14 +188,24 @@ export const blocksData = [
   },
   {
     type: 'image',
-    children: [{ text: '' }], // for void elements this needs to be defined
+    children: [{ type: 'text', text: '' }], // for void elements this needs to be defined
     image: {
       url: 'https://via.placeholder.com/300/09f/fff.png',
-      name: 'Dummy-image.png',
+      name: 'Screenshot 2023-08-22 at 10.33.50.png',
       alternativeText: null,
       caption: null,
       width: 300,
       height: 300,
+      formats: {},
+      hash: 'Screenshot_2023_08_22_at_10_33_50_ac7d5fd5b1',
+      ext: '.png',
+      mime: 'image/png',
+      size: 17.95,
+      previewUrl: null,
+      provider: 'local',
+      provider_metadata: null,
+      createdAt: '2023-08-24T09:43:30.065Z',
+      updatedAt: '2023-08-24T09:43:30.065Z',
     },
   },
 ];

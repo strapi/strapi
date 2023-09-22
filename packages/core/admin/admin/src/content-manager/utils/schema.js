@@ -217,35 +217,31 @@ const createYupSchemaAttribute = (type, validations, options) => {
   }
 
   if (type === 'blocks') {
-    schema = yup
-      .mixed(errorsTrads.json)
-      .test('isJSONObject', errorsTrads.json, (value) => {
-        try {
-          const parsedValue = JSON.parse(value);
-
-          if (typeof parsedValue === 'object' && parsedValue !== null) {
-            return true;
-          }
-        } catch (err) {
-          return false;
-        }
-
-        return false;
-      })
-      .nullable()
-      .test('required', errorsTrads.required, (value) => {
-        if (validations.required && (!value || !value.length)) {
-          return false;
-        }
-
+    schema = yup.mixed().test('isJSON', errorsTrads.json, (value) => {
+      // Disable the test for bulk publish, it's valid when it comes from the db
+      if (options.isJSONTestDisabled) {
         return true;
-      });
+      }
+
+      // Don't run validations on drafts
+      if (options.isDraft) {
+        return true;
+      }
+
+      // The backend validates the actual schema
+      if (!Array.isArray(value)) {
+        return false;
+      }
+
+      return true;
+    });
   }
 
   if (type === 'json') {
     schema = yup
       .mixed(errorsTrads.json)
       .test('isJSON', errorsTrads.json, (value) => {
+        // Disable the test for bulk publish, it's valid when it comes from the db
         if (options.isJSONTestDisabled) {
           return true;
         }
