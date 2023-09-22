@@ -28,7 +28,7 @@ import {
 } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Transforms, Editor, Path } from 'slate';
+import { Transforms, Editor, Path, Range } from 'slate';
 import { useSlateStatic, ReactEditor } from 'slate-react';
 import styled, { css } from 'styled-components';
 
@@ -186,27 +186,34 @@ Image.propTypes = {
 const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRef) => {
   const { formatMessage } = useIntl();
   const editor = useSlateStatic();
-  const { selection } = editor;
   const [popoverOpen, setPopoverOpen] = React.useState(false);
-  const [isEditing, setIsEditing] = React.useState(false);
+  const [isEditing, setIsEditing] = React.useState(element.url === '');
   const linkRef = React.useRef(null);
 
   const elementText = element.children.map((child) => child.text).join('');
 
   const handleOpenEditPopover = (e) => {
     e.preventDefault();
-
-    const [parentNode] = Editor.parent(editor, selection);
-    Transforms.select(editor, ReactEditor.findPath(editor, parentNode));
-
     setPopoverOpen(true);
   };
 
-  const handleSave = ({ target }) => {
-    const { text, url } = target.elements;
+  const handleSave = (e) => {
+    e.stopPropagation();
+    const { text, url } = e.target.elements;
+
+    // If the selection is collapsed, we select the parent node because we want all the link to be replaced
+    if (Range.isCollapsed(editor.selection)) {
+      const [, parentPath] = Editor.parent(editor, editor.selection.focus?.path);
+      Transforms.select(editor, parentPath);
+    }
 
     insertLink(editor, { url: url.value, text: text.value });
     setIsEditing(false);
+    setPopoverOpen(false);
+  };
+
+  const handleDismiss = () => {
+    ReactEditor.focus(editor);
     setPopoverOpen(false);
   };
 
@@ -225,7 +232,7 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
       {popoverOpen && (
         <Popover
           source={linkRef}
-          onDismiss={() => setPopoverOpen(false)}
+          onDismiss={handleDismiss}
           padding={4}
           placement="right-end"
           contentEditable={false}

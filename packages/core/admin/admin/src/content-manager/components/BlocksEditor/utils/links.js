@@ -1,5 +1,4 @@
 import { Transforms, Editor, Element as SlateElement, Range } from 'slate';
-import { ReactEditor } from 'slate-react';
 
 const removeLink = (editor) => {
   Transforms.unwrapNodes(editor, {
@@ -34,7 +33,6 @@ const insertLink = (editor, { url, text }) => {
   } else {
     Transforms.insertNodes(editor, { type: 'paragraph', children: [linkElement] });
   }
-  ReactEditor.focus(editor);
 };
 
 export { insertLink, removeLink };

@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
+<<<<<<< HEAD
 import {
   Icon,
   Tooltip,
@@ -14,11 +15,14 @@ import {
   Box,
   Typography,
 } from '@strapi/design-system';
+=======
+import { Icon, Tooltip, Select, Option, Flex } from '@strapi/design-system';
+>>>>>>> 7209a381b8 (fixs on the link button)
 import { pxToRem, prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
 import { BulletList, NumberList, Link } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Editor, Transforms, Element as SlateElement } from 'slate';
+import { Editor, Transforms, Element as SlateElement, Range } from 'slate';
 import { ReactEditor, useSlate } from 'slate-react';
 import styled from 'styled-components';
 
@@ -38,33 +42,40 @@ const FlexButton = styled(Flex).attrs({ as: 'button' })`
   }
 `;
 
-const ToolbarButton = React.forwardRef(({ icon, name, label, isActive, handleClick }, ref) => {
-  const { formatMessage } = useIntl();
-  const labelMessage = formatMessage(label);
+const ToolbarButton = React.forwardRef(
+  ({ icon, name, label, isActive, handleClick, disabled }, ref) => {
+    const { formatMessage } = useIntl();
+    const labelMessage = formatMessage(label);
 
-  return (
-    <Tooltip description={labelMessage}>
-      <Toolbar.ToggleItem value={name} data-state={isActive ? 'on' : 'off'} asChild>
-        <FlexButton
-          ref={ref}
-          background={isActive ? 'primary100' : ''}
-          alignItems="center"
-          justifyContent="center"
-          width={7}
-          height={7}
-          hasRadius
-          onMouseDown={(e) => {
-            e.preventDefault();
-            handleClick();
-          }}
-          aria-label={labelMessage}
-        >
-          <Icon width={3} height={3} as={icon} color={isActive ? 'primary600' : 'neutral600'} />
-        </FlexButton>
-      </Toolbar.ToggleItem>
-    </Tooltip>
-  );
-});
+    return (
+      <Tooltip description={labelMessage}>
+        <Toolbar.ToggleItem value={name} data-state={isActive ? 'on' : 'off'} asChild>
+          <FlexButton
+            ref={ref}
+            background={isActive ? 'primary100' : ''}
+            alignItems="center"
+            justifyContent="center"
+            width={7}
+            height={7}
+            hasRadius
+            onMouseDown={(e) => {
+              e.preventDefault();
+              handleClick();
+            }}
+            aria-label={labelMessage}
+            disabled={disabled}
+          >
+            <Icon width={3} height={3} as={icon} color={isActive ? 'primary600' : 'neutral600'} />
+          </FlexButton>
+        </Toolbar.ToggleItem>
+      </Tooltip>
+    );
+  }
+);
+
+ToolbarButton.defaultProps = {
+  disabled: false,
+};
 
 ToolbarButton.propTypes = {
   icon: PropTypes.elementType.isRequired,
@@ -75,6 +86,7 @@ ToolbarButton.propTypes = {
   }).isRequired,
   isActive: PropTypes.bool.isRequired,
   handleClick: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
 };
 
 const ModifierButton = ({ icon, name, label }) => {
@@ -376,11 +388,8 @@ ListButton.propTypes = {
 };
 
 const LinkButton = () => {
-  const [popoverOpen, setPopoverOpen] = React.useState(false);
-  const toolbarButtonRef = React.useRef(null);
-  const domNodeRef = React.useRef(null);
+  const [linkNode, setLinkNode] = React.useState(null);
   const editor = useSlate();
-  const { formatMessage } = useIntl();
 
   const isLinkActive = () => {
     if (!editor.selection) return false;
@@ -398,97 +407,36 @@ const LinkButton = () => {
 
   const isActive = isLinkActive();
 
-  const saveLink = ({ target }) => {
-    const { text, url } = target.elements;
-
-    insertLink(editor, { url: url.value, text: text.value });
-
-    setPopoverOpen(false);
-  };
-
-  const toggleLinkPopover = () => {
+  const openLinkPopover = () => {
     // We insert an empty anchor, so we split the DOM to have a element we can use as reference for the popover
     insertLink(editor, { url: '', text: Editor.string(editor, editor.selection) });
 
-    const [, textNodePath] = Editor.node(editor, editor.selection);
-    const [parentNode] = Editor.parent(editor, textNodePath);
+    const [parentNode] = Editor.parent(editor, editor.selection);
 
-    /**
-     * The `ReactEditor` is a single tick behind `Editor`, as such we use a timeout
-     * before we get the DOM node, it's a single tick and imperceivable.
-     */
-    setTimeout(() => {
-      const domNode = ReactEditor.toDOMNode(editor, parentNode);
-      domNodeRef.current = domNode;
-
-      setPopoverOpen(true);
-    });
+    setLinkNode(parentNode);
   };
 
+  React.useEffect(() => {
+    if (linkNode) {
+      const domNode = ReactEditor.toDOMNode(editor, linkNode);
+      domNode.click();
+    }
+  }, [linkNode, editor]);
+
+  const textIsHighlighted = editor.selection && !Range.isCollapsed(editor.selection);
+
   return (
-    <>
-      <ToolbarButton
-        ref={toolbarButtonRef}
-        icon={Link}
-        name="link"
-        label={{
-          id: 'components.Blocks.link',
-          defaultMessage: 'Link',
-        }}
-        isActive={isActive}
-        handleClick={toggleLinkPopover}
-      />
-      {popoverOpen && (
-        <Popover
-          source={domNodeRef}
-          onDismiss={() => setPopoverOpen(false)}
-          padding={4}
-          placement="right-end"
-        >
-          <Flex as="form" onSubmit={saveLink} direction="column" gap={4}>
-            <Field width="300px">
-              <FieldLabel>
-                {formatMessage({
-                  id: 'components.Blocks.popover.text',
-                  defaultMessage: 'Text',
-                })}
-              </FieldLabel>
-              <FieldInput
-                name="text"
-                placeholder={formatMessage({
-                  id: 'components.Blocks.popover.text.placeholder',
-                  defaultMessage: 'This text is the text of the link',
-                })}
-                defaultValue={Editor.string(editor, editor.selection)}
-              />
-            </Field>
-            <Field width="300px">
-              <FieldLabel>
-                {formatMessage({
-                  id: 'components.Blocks.popover.link',
-                  defaultMessage: 'Link',
-                })}
-              </FieldLabel>
-              <FieldInput name="url" placeholder="https://strapi.io" />
-            </Field>
-            <Flex justifyContent="end" width="100%" gap={2}>
-              <Button variant="tertiary" onClick={() => setPopoverOpen(false)}>
-                {formatMessage({
-                  id: 'components.Blocks.popover.cancel',
-                  defaultMessage: 'Cancel',
-                })}
-              </Button>
-              <Button type="submit">
-                {formatMessage({
-                  id: 'components.Blocks.popover.save',
-                  defaultMessage: 'Save',
-                })}
-              </Button>
-            </Flex>
-          </Flex>
-        </Popover>
-      )}
-    </>
+    <ToolbarButton
+      disabled={!textIsHighlighted}
+      icon={Link}
+      name="link"
+      label={{
+        id: 'components.Blocks.link',
+        defaultMessage: 'Link',
+      }}
+      isActive={isActive}
+      handleClick={openLinkPopover}
+    />
   );
 };
 
