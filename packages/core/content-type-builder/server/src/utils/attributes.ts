@@ -1,8 +1,9 @@
-const _ = require('lodash');
-const utils = require('@strapi/utils');
-const { ApplicationError } = require('@strapi/utils').errors;
+import _ from 'lodash';
+import utils, { errors } from '@strapi/utils';
 
-const hasComponent = (model) => {
+const { ApplicationError } = errors;
+
+export const hasComponent = (model) => {
   const compoKeys = Object.keys(model.attributes || {}).filter((key) => {
     return model.attributes[key].type === 'component';
   });
@@ -10,9 +11,9 @@ const hasComponent = (model) => {
   return compoKeys.length > 0;
 };
 
-const isConfigurable = (attribute) => _.get(attribute, 'configurable', true);
+export const isConfigurable = (attribute) => _.get(attribute, 'configurable', true);
 
-const isRelation = (attribute) => attribute.type === 'relation';
+export const isRelation = (attribute) => attribute.type === 'relation';
 
 /**
  * Formats a component's attributes
@@ -114,13 +115,4 @@ export const replaceTemporaryUIDs = (uidMap) => (schema) => {
       return acc;
     }, {}),
   };
-};
-
-module.exports = {
-  hasComponent,
-  isRelation,
-  isConfigurable,
-  replaceTemporaryUIDs,
-  formatAttributes,
-  formatAttribute,
 };

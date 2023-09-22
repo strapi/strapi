@@ -7385,6 +7385,8 @@ __metadata:
     "@strapi/utils": 4.13.6
     "@testing-library/react": 14.0.0
     "@testing-library/react-hooks": 8.0.1
+    "@types/jest": 29.5.2
+    "@types/koa": 2.13.4
     "@types/pluralize": 0.0.30
     fs-extra: 10.0.0
     history: ^4.9.0

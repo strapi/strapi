@@ -1,4 +1,4 @@
-import components from '../services/components';
+import * as components from '../services/components';
 import * as builder from '../services/builder';
 import * as contentTypes from '../services/content-types';
 

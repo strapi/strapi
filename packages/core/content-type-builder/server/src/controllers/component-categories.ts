@@ -1,7 +1,7 @@
 import { getService } from '../utils';
 import validateComponentCategory from './validation/component-category';
 
-module.exports = {
+export default {
   async editCategory(ctx) {
     const { body } = ctx.request;
 

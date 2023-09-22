@@ -82,6 +82,8 @@
     "@strapi/types": "4.13.6",
     "@testing-library/react": "14.0.0",
     "@testing-library/react-hooks": "8.0.1",
+    "@types/jest": "29.5.2",
+    "@types/koa": "2.13.4",
     "@types/pluralize": "0.0.30",
     "history": "^4.9.0",
     "react": "^18.2.0",

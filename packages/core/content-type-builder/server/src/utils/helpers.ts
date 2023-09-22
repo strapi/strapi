@@ -1,8 +1,8 @@
-const escapeNewlines = (content = '', placeholder = '\n') => {
+export const escapeNewlines = (content = '', placeholder = '\n') => {
   return content.replace(/[\r\n]+/g, placeholder);
 };
 
-const deepTrimObject = (attribute) => {
+export const deepTrimObject = (attribute) => {
   if (Array.isArray(attribute)) {
     return attribute.map(deepTrimObject);
   }
@@ -16,14 +16,4 @@ const deepTrimObject = (attribute) => {
   }
 
   return typeof attribute === 'string' ? attribute.trim() : attribute;
-};
-
-/**
- * Converts a name to a slug
- * @param {string} name a name to convert
- */
-
-module.exports = {
-  escapeNewlines,
-  deepTrimObject,
 };

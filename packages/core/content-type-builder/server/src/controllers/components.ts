@@ -7,7 +7,7 @@ import { validateComponentInput, validateUpdateComponentInput } from './validati
  * Components controller
  */
 
-module.exports = {
+export default {
   /**
    * GET /components handler
    * Returns a list of available components

@@ -8,7 +8,7 @@ import {
 
 const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
 
-module.exports = {
+export default {
   async getContentTypes(ctx) {
     const { kind } = ctx.query;
 

@@ -1,7 +1,8 @@
+import type { Context } from 'koa';
 import { getService } from '../utils';
 
-module.exports = {
-  getReservedNames(ctx) {
+export default {
+  getReservedNames(ctx: Context) {
     ctx.body = getService('builder').getReservedNames();
   },
 };
