@@ -4,6 +4,7 @@ import { Box, Typography, BaseLink } from '@strapi/design-system';
 import {
   Code,
   Quote,
+  Picture,
   Paragraph,
   HeadingOne,
   HeadingTwo,
@@ -138,6 +139,7 @@ const Img = styled.img`
 `;
 
 const Image = ({ attributes, children, element }) => {
+  if (!element.image) return null;
   const { url, alternativeText, width, height } = element.image;
 
   return (
@@ -396,12 +398,16 @@ export function useBlocksStore() {
     },
     image: {
       renderElement: (props) => <Image {...props} />,
+      icon: Picture,
+      label: {
+        id: 'components.Blocks.blocks.image',
+        defaultMessage: 'Image',
+      },
       value: {
         type: 'image',
       },
       matchNode: (node) => node.type === 'image',
-      // TODO add icon and label and set isInBlocksEditor to true
-      isInBlocksSelector: false,
+      isInBlocksSelector: true,
     },
   };
 }
