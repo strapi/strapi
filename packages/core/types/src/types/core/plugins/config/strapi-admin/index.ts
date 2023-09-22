@@ -1,6 +1,6 @@
 // TODO
 // Interface for the plugin strapi-admin file
-export interface Admin {
+export interface AdminInput {
   register: any;
   bootstrap: any;
   registerTrads: any;
