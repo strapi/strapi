@@ -7376,7 +7376,6 @@ __metadata:
   resolution: "@strapi/plugin-content-type-builder@workspace:packages/core/content-type-builder"
   dependencies:
     "@sindresorhus/slugify": 1.1.0
-    "@strapi/admin": 4.13.6
     "@strapi/design-system": 1.10.1
     "@strapi/generators": 4.13.6
     "@strapi/helper-plugin": 4.13.6

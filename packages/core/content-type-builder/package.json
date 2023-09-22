@@ -48,7 +48,6 @@
     "watch": "run -T tsc -p tsconfig.build.json -w --preserveWatchOutput",
     "clean": "run -T rimraf ./dist",
     "prepublishOnly": "yarn clean && yarn build",
-    "postinstall": "node ./scripts/postinstall.js",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
     "lint": "run -T eslint .",
@@ -78,7 +77,6 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "4.13.6",
     "@strapi/types": "4.13.6",
     "@testing-library/react": "14.0.0",
     "@testing-library/react-hooks": "8.0.1",
