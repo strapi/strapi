@@ -6,10 +6,10 @@ import { pipeAsync } from '../async';
 
 import * as visitors from './visitors';
 import * as sanitizers from './sanitizers';
-import traverseEntity, { Data } from '../traverse-entity';
+import traverseEntity from '../traverse-entity';
 
 import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from '../traverse';
-import { Model } from '../types';
+import type { Model, Data } from '../types';
 
 export interface Options {
   auth?: unknown;

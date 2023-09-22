@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useRef, useState } from 'react';
+import * as React from 'react';
 
 import { Flex, TextInput, Typography } from '@strapi/design-system';
 import {
@@ -10,16 +10,16 @@ import {
 import { CheckCircle, ExclamationMarkCircle, Loader, Refresh } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import { useMutation, useQuery } from 'react-query';
 
 import useDebounce from '../../../hooks/useDebounce';
 
 import { FieldActionWrapper, LoadingWrapper, TextValidation } from './endActionStyle';
 import UID_REGEX from './regex';
 
-const InputUID = forwardRef(
+const InputUID = React.forwardRef(
   (
     {
-      attribute,
       contentTypeUID,
       hint,
       disabled,
@@ -34,20 +34,16 @@ const InputUID = forwardRef(
     },
     forwardedRef
   ) => {
-    const { modifiedData, initialData, layout } = useCMEditViewDataManager();
-    const [isLoading, setIsLoading] = useState(false);
-    const [availability, setAvailability] = useState(null);
+    const [availability, setAvailability] = React.useState(null);
+    const [showRegenerate, setShowRegenerate] = React.useState(false);
+    /**
+     * @type {string | null}
+     */
     const debouncedValue = useDebounce(value, 300);
-    const generateUid = useRef();
+    const { modifiedData, initialData } = useCMEditViewDataManager();
     const toggleNotification = useNotification();
     const { formatAPIError } = useAPIErrorHandler();
-    const initialValue = initialData[name];
     const { formatMessage } = useIntl();
-    const createdAtName = layout?.options?.timestamps ?? 0;
-    const isCreation = !initialData[createdAtName];
-    const debouncedTargetFieldValue = useDebounce(modifiedData[attribute.targetField], 300);
-    const [isCustomized, setIsCustomized] = useState(false);
-    const [regenerateLabel, setRegenerateLabel] = useState(null);
     const { post } = useFetchClient();
 
     const label = intlLabel.id
@@ -64,76 +60,96 @@ const InputUID = forwardRef(
         )
       : '';
 
-    generateUid.current = async (shouldSetInitialValue = false) => {
-      setIsLoading(true);
+    /**
+     * @type {import('react-query').UseQueryResult<string>}
+     */
+    const { data: defaultGeneratedUID, isLoading: isGeneratingDefaultUID } = useQuery({
+      queryKey: ['uid', { contentTypeUID, field: name, data: modifiedData }],
+      async queryFn({ queryKey }) {
+        const [, body] = queryKey;
 
-      try {
         const {
           data: { data },
-        } = await post('/content-manager/uid/generate', {
-          contentTypeUID,
-          field: name,
-          data: modifiedData,
-        });
+        } = await post('/content-manager/uid/generate', body);
 
-        onChange({ target: { name, value: data, type: 'text' } }, shouldSetInitialValue);
-        setIsLoading(false);
-      } catch (error) {
-        setIsLoading(false);
+        return data;
+      },
+      onError(err) {
         toggleNotification({
           type: 'warning',
-          message: formatAPIError(error),
+          message: formatAPIError(err),
         });
+      },
+      enabled: !value && required,
+    });
+
+    /**
+     * If the defaultGeneratedUID is available, then we set it as the value,
+     * but we also want to set it as the initialValue too.
+     */
+    React.useEffect(() => {
+      if (defaultGeneratedUID) {
+        onChange({ target: { name, value: defaultGeneratedUID, type: 'text' } }, true);
       }
-    };
+    }, [defaultGeneratedUID, name, onChange]);
 
-    const checkAvailability = async () => {
-      if (!value) {
-        return;
-      }
+    const { mutate: generateUID, isLoading: isGeneratingUID } = useMutation({
+      async mutationFn(body) {
+        const {
+          data: { data },
+        } = await post('/content-manager/uid/generate', body);
 
-      setIsLoading(true);
-
-      try {
-        const { data } = await post('/content-manager/uid/check-availability', {
-          contentTypeUID,
-          field: name,
-          value: value ? value.trim() : '',
-        });
-
-        setIsLoading(false);
-        setAvailability(data);
-      } catch (error) {
-        setIsLoading(false);
+        return data;
+      },
+      onSuccess(data) {
+        onChange({ target: { name, value: data, type: 'text' } });
+      },
+      onError(err) {
         toggleNotification({
           type: 'warning',
-          message: formatAPIError(error),
+          message: formatAPIError(err),
         });
-      }
-    };
+      },
+    });
 
-    // FIXME: we need to find a better way to autofill the input when it is required.
-    useEffect(() => {
-      if (!value && attribute.required) {
-        generateUid.current(true);
-      }
-    }, [attribute.required, generateUid, value]);
+    /**
+     * @type {import('react-query').UseQueryResult<{ isAvailable: boolean }>
+     */
+    const { data: availabilityData, isLoading: isCheckingAvailability } = useQuery({
+      queryKey: [
+        'uid',
+        { contentTypeUID, field: name, value: debouncedValue ? debouncedValue.trim() : '' },
+      ],
+      async queryFn({ queryKey }) {
+        const [, body] = queryKey;
 
-    useEffect(() => {
-      if (debouncedValue?.trim().match(UID_REGEX) && debouncedValue !== initialValue) {
-        checkAvailability();
-      }
+        const { data } = await post('/content-manager/uid/check-availability', body);
 
-      if (!debouncedValue) {
-        setAvailability(null);
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [initialValue, debouncedValue]);
+        return data;
+      },
+      enabled: Boolean(
+        debouncedValue !== initialData[name] &&
+          debouncedValue &&
+          UID_REGEX.test(debouncedValue.trim())
+      ),
+      onError(err) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(err),
+        });
+      },
+    });
 
-    useEffect(() => {
+    React.useEffect(() => {
+      /**
+       * always store the data in state because that way as seen below
+       * we can then remove the data to stop showing the label.
+       */
+      setAvailability(availabilityData);
+
       let timer;
 
-      if (availability?.isAvailable) {
+      if (availabilityData?.isAvailable) {
         timer = setTimeout(() => {
           setAvailability(null);
         }, 4000);
@@ -144,41 +160,9 @@ const InputUID = forwardRef(
           clearTimeout(timer);
         }
       };
-    }, [availability]);
+    }, [availabilityData]);
 
-    useEffect(() => {
-      if (
-        !isCustomized &&
-        isCreation &&
-        debouncedTargetFieldValue &&
-        modifiedData[attribute.targetField] &&
-        !value
-      ) {
-        generateUid.current(true);
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [debouncedTargetFieldValue, isCustomized, isCreation]);
-
-    const handleGenerateMouseEnter = () => {
-      setRegenerateLabel(
-        formatMessage({
-          id: 'content-manager.components.uid.regenerate',
-          defaultMessage: 'Regenerate',
-        })
-      );
-    };
-
-    const handleGenerateMouseLeave = () => {
-      setRegenerateLabel(null);
-    };
-
-    const handleChange = (e) => {
-      if (e.target.value && isCreation) {
-        setIsCustomized(true);
-      }
-
-      onChange(e);
-    };
+    const isLoading = isGeneratingDefaultUID || isGeneratingUID || isCheckingAvailability;
 
     return (
       <TextInput
@@ -187,7 +171,7 @@ const InputUID = forwardRef(
         error={error}
         endAction={
           <Flex position="relative" gap={1}>
-            {availability && !regenerateLabel && (
+            {availability && !showRegenerate && (
               <TextValidation
                 alignItems="center"
                 gap={1}
@@ -222,22 +206,25 @@ const InputUID = forwardRef(
 
             {!disabled && (
               <>
-                {regenerateLabel && (
+                {showRegenerate && (
                   <TextValidation alignItems="center" justifyContent="flex-end" gap={1}>
                     <Typography textColor="primary600" variant="pi">
-                      {regenerateLabel}
+                      {formatMessage({
+                        id: 'content-manager.components.uid.regenerate',
+                        defaultMessage: 'Regenerate',
+                      })}
                     </Typography>
                   </TextValidation>
                 )}
 
                 <FieldActionWrapper
-                  onClick={() => generateUid.current()}
+                  onClick={() => generateUID({ contentTypeUID, field: name, data: modifiedData })}
                   label={formatMessage({
                     id: 'content-manager.components.uid.regenerate',
                     defaultMessage: 'Regenerate',
                   })}
-                  onMouseEnter={handleGenerateMouseEnter}
-                  onMouseLeave={handleGenerateMouseLeave}
+                  onMouseEnter={() => setShowRegenerate(true)}
+                  onMouseLeave={() => setShowRegenerate(false)}
                 >
                   {isLoading ? (
                     <LoadingWrapper data-testid="loading-wrapper">
@@ -255,7 +242,7 @@ const InputUID = forwardRef(
         label={label}
         labelAction={labelAction}
         name={name}
-        onChange={handleChange}
+        onChange={onChange}
         placeholder={formattedPlaceholder}
         value={value || ''}
         required={required}
@@ -265,10 +252,6 @@ const InputUID = forwardRef(
 );
 
 InputUID.propTypes = {
-  attribute: PropTypes.shape({
-    targetField: PropTypes.string,
-    required: PropTypes.bool,
-  }).isRequired,
   contentTypeUID: PropTypes.string.isRequired,
   disabled: PropTypes.bool,
   error: PropTypes.string,
@@ -300,4 +283,4 @@ InputUID.defaultProps = {
   hint: '',
 };
 
-export default InputUID;
+export { InputUID };
