@@ -45,7 +45,7 @@
     "lint": "run -T eslint ."
   },
   "dependencies": {
-    "aws-sdk": "2.1437.0",
+    "aws-sdk": "2.1463.0",
     "lodash": "4.17.21"
   },
   "devDependencies": {
