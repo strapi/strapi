@@ -45,7 +45,7 @@
     "@strapi/data-transfer": "4.13.7",
     "@strapi/design-system": "1.10.1",
     "@strapi/helper-plugin": "4.13.7",
-    "@strapi/icons": "1.10.1",
+    "@strapi/icons": "1.11.0",
     "@strapi/permissions": "4.13.7",
     "@strapi/provider-audit-logs-local": "4.13.7",
     "@strapi/typescript-utils": "4.13.7",
