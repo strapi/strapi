@@ -70,7 +70,7 @@
     "@babel/core": "^7.20.12",
     "@babel/eslint-parser": "^7.19.1",
     "@babel/preset-react": "7.18.6",
-    "@playwright/test": "1.37.0-alpha-jul-20-2023",
+    "@playwright/test": "1.38.1",
     "@strapi/admin-test-utils": "workspace:*",
     "@strapi/eslint-config": "0.2.0",
     "@swc/cli": "0.1.62",
