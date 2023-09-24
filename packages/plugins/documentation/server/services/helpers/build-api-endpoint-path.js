@@ -6,7 +6,7 @@ const pathToRegexp = require('path-to-regexp');
 const pascalCase = require('./utils/pascal-case');
 const queryParams = require('./utils/query-params');
 const loopContentTypeNames = require('./utils/loop-content-type-names');
-const getApiResponses = require('./utils/get-api-responses');
+const {getApiResponses, getApiErrorResponses } = require('./utils/get-api-responses');
 const { hasFindMethod, isLocalizedPath } = require('./utils/routes');
 
 /**
@@ -167,6 +167,47 @@ const getAllPathsForContentType = (apiInfo) => {
 };
 
 /**
+ * @description Builds the Swagger paths object for each content type custom route
+ *
+ * @param {object} api - Information about the current api
+ * @property {string} api.name - The name of the api
+ */
+const loopCustomRoutes = (api) => {
+  const result = {};
+  const routes = api.getter === 'plugin' ? strapi.plugin(api.name).routes : strapi.api[api.name].routes;
+  for(const routeNamespace in routes) {
+    if(api.ctNames.includes(routeNamespace)) continue; // skip content types already processable by loopContentTypeNames
+    const routeInfo = routes[routeNamespace];
+    const routeInfoRoutes = (Array.isArray(routeInfo) ? routeInfo : routeInfo?.routes) || [];
+    for(const route of routeInfoRoutes) {
+      const methodVerb = route.method.toLowerCase();
+      const hasPathParams = route.path.includes('/:');
+      const pathWithPrefix = getPathWithPrefix(routeInfo.prefix, route);
+      const routePath = hasPathParams ? parsePathWithVariables(pathWithPrefix) : pathWithPrefix;
+      const responses = getApiErrorResponses();
+      const swaggerConfig = {
+        [routePath]: {
+          [methodVerb]: {
+            operationId: `${methodVerb}${routePath}`,
+            parameters: [],
+            responses,
+            tags: [_.upperFirst(api.name)],
+          }
+        }
+      };
+
+      if (hasPathParams) {
+        const pathParams = getPathParams(route.path);
+        swaggerConfig[routePath][methodVerb].parameters.push(...pathParams);
+      }
+      Object.assign(result, swaggerConfig);
+    }
+  }
+
+  return result;
+};
+
+/**
  * @description - Builds the Swagger paths object for each api
  *
  * @param {object} api - Information about the current api
@@ -180,7 +221,7 @@ const buildApiEndpointPath = (api) => {
   // A reusable loop for building paths and component schemas
   // Uses the api param to build a new set of params for each content type
   // Passes these new params to the function provided
-  return loopContentTypeNames(api, getAllPathsForContentType);
+  return Object.assign(loopContentTypeNames(api, getAllPathsForContentType), loopCustomRoutes(api));
 };
 
 module.exports = buildApiEndpointPath;

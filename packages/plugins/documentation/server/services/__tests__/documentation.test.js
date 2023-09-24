@@ -129,6 +129,17 @@ describe('Documentation plugin | Documentation service', () => {
     expect(mockFinalDoc.paths['/kitchensinks/{id}'].put.responses['200']).toEqual(expectedOne);
   });
 
+  it('generates the correct response component schema for custom routes', async () => {
+    const docService = documentation({ strapi: global.strapi });
+    await docService.generateFullDoc();
+    const lastMockCall = fse.writeJson.mock.calls[fse.writeJson.mock.calls.length - 1];
+    const mockFinalDoc = lastMockCall[1];
+    expect(mockFinalDoc.paths['/kitchensinks/{id}/wash'].post.parameters.length).toEqual(1);
+    expect(mockFinalDoc.paths['/kitchensinks/{id}/wash'].post.responses).toBeDefined();
+    expect(mockFinalDoc.paths['/kitchensinks/empty'].get.responses).toBeDefined();
+
+  });
+
   describe('Determines the plugins that need documentation', () => {
     it('generates documentation for the default plugins if the user provided nothing in the config', async () => {
       const docService = documentation({ strapi: global.strapi });
