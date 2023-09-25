@@ -8,7 +8,7 @@ const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypeUtils.constant
 type MorphArray = Array<{ __type: string }>;
 
 export default (auth: unknown): Visitor =>
-  async ({ data, key, attribute, schema }, { set }) => {
+  async ({ data, key, attribute, schema }) => {
     if (!attribute) {
       return;
     }
@@ -50,7 +50,7 @@ export default (auth: unknown): Visitor =>
     }
 
     // Creator relations
-    if (isCreatorRelation && schema.options.populateCreatorFields) {
+    if (isCreatorRelation && schema.options?.populateCreatorFields) {
       // do nothing
       return;
     }

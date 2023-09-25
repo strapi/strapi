@@ -85,7 +85,7 @@
     "core-js": "3.32.0",
     "cross-env": "7.0.3",
     "dotenv": "14.2.0",
-    "eslint": "8.49.0",
+    "eslint": "8.50.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^17.1.0",
@@ -128,6 +128,9 @@
     "ts-jest": "29.1.0",
     "typescript": "5.2.2",
     "yargs": "17.7.2"
+  },
+  "resolutions": {
+    "@types/koa": "2.13.4"
   },
   "engines": {
     "node": ">=16.0.0 <=20.x.x",
