@@ -1,29 +1,29 @@
 'use strict';
-
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
-const loadConfigDir = require('../config-loader');
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
+import loadConfigDir from '../config-loader';
 
 describe('loadConfigDir', () => {
-  let tempDir;
-  let externalTempDir;
+  let tempDir: string;
+  let externalTempDir: string;
   const testFileName = 'admin.js';
   const testLinkName = 'link.js';
-  const testFileContentObject = { admin: {
-        apiToken: {
-          salt: 'SecretSalt',
-        },
-        auth: {
-          secret: 'SecretTest',
-        },
-        transfer: {
-          token: {
-            salt: 'SecretTransferSalt',
-          },
+  const testFileContentObject = {
+    admin: {
+      apiToken: {
+        salt: 'SecretSalt',
+      },
+      auth: {
+        secret: 'SecretTest',
+      },
+      transfer: {
+        token: {
+          salt: 'SecretTransferSalt',
         },
       },
-    }
+    },
+  };
   const testFileContent = `
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });

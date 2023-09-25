@@ -11,7 +11,7 @@ export default (dir: string) => {
     .readdirSync(dir, { withFileTypes: true })
     .filter((file) => {
       const fullPath = path.join(dir, file.name);
-      let stat;
+      let stat: fs.Stats | fs.Dirent;
       try {
         stat = file.isSymbolicLink() ? fs.statSync(fullPath) : file;
       } catch (err) {
