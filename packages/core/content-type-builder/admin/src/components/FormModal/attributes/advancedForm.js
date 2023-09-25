@@ -7,6 +7,19 @@ import { componentForm } from '../component';
 import options from './attributeOptions';
 
 const advancedForm = {
+  blocks() {
+    return {
+      sections: [
+        {
+          sectionTitle: {
+            id: 'global.settings',
+            defaultMessage: 'Settings',
+          },
+          items: [options.required, options.private],
+        },
+      ],
+    };
+  },
   boolean() {
     return {
       sections: [
@@ -326,20 +339,6 @@ const advancedForm = {
             defaultMessage: 'Settings',
           },
           items: [options.required, options.maxLength, options.minLength, options.private],
-        },
-      ],
-    };
-  },
-  blocks() {
-    return {
-      sections: [
-        { sectionTitle: null, items: [options.default] },
-        {
-          sectionTitle: {
-            id: 'global.settings',
-            defaultMessage: 'Settings',
-          },
-          items: [options.required, options.private],
         },
       ],
     };
