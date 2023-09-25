@@ -85,6 +85,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
 
 .c22 {
   padding-left: 16px;
+  width: 100%;
 }
 
 .c25 {
@@ -330,7 +331,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c22"
                         >
                           <div
-                            class="c19"
+                            class="c2"
                           >
                             <span
                               class="c23"
@@ -397,7 +398,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c22"
                         >
                           <div
-                            class="c19"
+                            class="c2"
                           >
                             <span
                               class="c23"
@@ -466,7 +467,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c22"
                         >
                           <div
-                            class="c19"
+                            class="c2"
                           >
                             <span
                               class="c23"
@@ -529,7 +530,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c22"
                         >
                           <div
-                            class="c19"
+                            class="c2"
                           >
                             <span
                               class="c23"
@@ -596,7 +597,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c22"
                         >
                           <div
-                            class="c19"
+                            class="c2"
                           >
                             <span
                               class="c23"
@@ -665,7 +666,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c22"
                         >
                           <div
-                            class="c19"
+                            class="c2"
                           >
                             <span
                               class="c23"
@@ -730,7 +731,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c22"
                         >
                           <div
-                            class="c19"
+                            class="c2"
                           >
                             <span
                               class="c23"
@@ -799,7 +800,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c22"
                         >
                           <div
-                            class="c19"
+                            class="c2"
                           >
                             <span
                               class="c23"
@@ -866,7 +867,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c22"
                         >
                           <div
-                            class="c19"
+                            class="c2"
                           >
                             <span
                               class="c23"
@@ -935,7 +936,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c22"
                         >
                           <div
-                            class="c19"
+                            class="c2"
                           >
                             <span
                               class="c23"
@@ -1000,7 +1001,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c22"
                         >
                           <div
-                            class="c19"
+                            class="c2"
                           >
                             <span
                               class="c23"
@@ -1063,7 +1064,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c22"
                         >
                           <div
-                            class="c19"
+                            class="c2"
                           >
                             <span
                               class="c23"
@@ -1140,7 +1141,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c22"
                         >
                           <div
-                            class="c19"
+                            class="c2"
                           >
                             <span
                               class="c23"
@@ -1207,7 +1208,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c22"
                         >
                           <div
-                            class="c19"
+                            class="c2"
                           >
                             <span
                               class="c23"
