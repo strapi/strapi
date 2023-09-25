@@ -170,9 +170,9 @@ export interface ITransferEngineOptions {
   transforms?: TransferTransforms;
 
   // List of TransferTransformList preset options to exclude/include
-  exclude: TransferFilterPreset[];
-  only: TransferFilterPreset[];
+  exclude?: TransferFilterPreset[];
+  only?: TransferFilterPreset[];
 
   // delay after each record
-  throttle: number;
+  throttle?: number;
 }

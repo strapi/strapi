@@ -72,9 +72,9 @@ export default async (opts: CmdOptions) => {
   const engineOptions: EngineOptions = {
     versionStrategy: DEFAULT_VERSION_STRATEGY,
     schemaStrategy: DEFAULT_SCHEMA_STRATEGY,
-    exclude: opts.exclude ?? [],
-    only: opts.only ?? [],
-    throttle: opts.throttle ?? 0,
+    exclude: opts.exclude,
+    only: opts.only,
+    throttle: opts.throttle,
     transforms: {
       links: [
         {
