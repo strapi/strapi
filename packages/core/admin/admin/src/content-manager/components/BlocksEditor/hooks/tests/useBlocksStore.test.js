@@ -555,4 +555,69 @@ describe('useBlocksStore', () => {
       },
     ]);
   });
+
+  it('handles enter key on a quote', () => {
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'quote',
+        children: [
+          {
+            type: 'text',
+            text: 'Some quote',
+          },
+        ],
+      },
+    ];
+
+    // Simulate enter key press at the end of the quote
+    Transforms.select(baseEditor, {
+      anchor: Editor.end(baseEditor, []),
+      focus: Editor.end(baseEditor, []),
+    });
+    result.current.quote.handleEnterKey(baseEditor);
+
+    // Should enter a line break within the quote
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'quote',
+        children: [
+          {
+            type: 'text',
+            text: 'Some quote\n',
+          },
+        ],
+      },
+    ]);
+
+    // Simulate enter key press at the end of the quote again
+    Transforms.select(baseEditor, {
+      anchor: Editor.end(baseEditor, []),
+      focus: Editor.end(baseEditor, []),
+    });
+    result.current.quote.handleEnterKey(baseEditor);
+
+    // Should delete the line break and create a paragraph after the quote
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'quote',
+        children: [
+          {
+            type: 'text',
+            text: 'Some quote',
+          },
+        ],
+      },
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+    ]);
+  });
 });
