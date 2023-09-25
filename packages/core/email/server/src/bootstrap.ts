@@ -1,4 +1,4 @@
-import type { Strapi } from '@strapi/strapi';
+import type { Strapi } from '@strapi/types';
 import type { EmailConfig, SendOptions } from './types';
 
 interface EmailProvider {
@@ -53,5 +53,5 @@ export const bootstrap = async ({ strapi }: { strapi: Strapi }) => {
     },
   ];
 
-  await strapi.admin.services.permission.actionProvider.registerMany(actions);
+  await strapi.admin!.services.permission.actionProvider.registerMany(actions);
 };
