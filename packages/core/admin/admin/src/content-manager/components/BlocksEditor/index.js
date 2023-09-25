@@ -112,6 +112,7 @@ const BlocksEditor = React.forwardRef(
 BlocksEditor.defaultProps = {
   labelAction: null,
   required: false,
+  disabled: false,
   error: '',
   value: null,
 };
@@ -125,7 +126,7 @@ BlocksEditor.propTypes = {
   labelAction: PropTypes.element,
   name: PropTypes.string.isRequired,
   required: PropTypes.bool,
-  disabled: PropTypes.bool.isRequired,
+  disabled: PropTypes.bool,
   error: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.array,
