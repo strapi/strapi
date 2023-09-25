@@ -10,6 +10,14 @@ interface ExpectedError extends Error {
   };
 }
 
+/**
+ * request is deprecated and as such will fire a warning when rendered,
+ * we therefore mock the console so we don't pollute the test output with warnings.
+ */
+jest.mock('../../utils/once', () => ({
+  once: jest.fn(() => jest.fn()),
+}));
+
 describe('request', () => {
   it('should return the response successful requests', async () => {
     server.use(
