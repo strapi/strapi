@@ -50,6 +50,7 @@
   },
   "devDependencies": {
     "@strapi/helper-plugin": "4.13.7",
+    "@strapi/types": "4.13.7",
     "@testing-library/react": "14.0.0",
     "@types/koa": "2.13.4",
     "@types/lodash": "^4.14.191",
