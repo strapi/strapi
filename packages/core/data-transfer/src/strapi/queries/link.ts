@@ -1,12 +1,20 @@
 import type { Knex } from 'knex';
 import { clone, isNil } from 'lodash/fp';
+import type { LoadedStrapi } from '@strapi/types';
+
 import { ILink } from '../../../types';
 
 // TODO: Remove any types when we'll have types for DB metadata
 
-export const createLinkQuery = (strapi: Strapi.Strapi, trx?: Knex.Transaction) => {
+export const createLinkQuery = (strapi: LoadedStrapi, trx?: Knex.Transaction) => {
   const query = () => {
     const { connection } = strapi.db;
+
+    // TODO: Export utils from database and use the addSchema that is already written
+    const addSchema = (tableName: string) => {
+      const schemaName = connection.client.connectionSettings.schema;
+      return schemaName ? `${schemaName}.${tableName}` : tableName;
+    };
 
     async function* generateAllForAttribute(uid: string, fieldName: string): AsyncGenerator<ILink> {
       const metadata = strapi.db.metadata.get(uid);
@@ -31,7 +39,10 @@ export const createLinkQuery = (strapi: Strapi.Strapi, trx?: Knex.Transaction) =
       if (attribute.joinColumn) {
         const joinColumnName: string = attribute.joinColumn.name;
 
-        const qb = connection.queryBuilder().select('id', joinColumnName).from(metadata.tableName);
+        const qb = connection
+          .queryBuilder()
+          .select('id', joinColumnName)
+          .from(addSchema(metadata.tableName));
 
         if (trx) {
           qb.transacting(trx);
@@ -65,7 +76,7 @@ export const createLinkQuery = (strapi: Strapi.Strapi, trx?: Knex.Transaction) =
           inverseOrderColumnName,
         } = attribute.joinTable;
 
-        const qb = connection.queryBuilder().from(name);
+        const qb = connection.queryBuilder().from(addSchema(name));
 
         type Columns = {
           left: { ref: string | null; order?: string };
@@ -188,7 +199,9 @@ export const createLinkQuery = (strapi: Strapi.Strapi, trx?: Knex.Transaction) =
 
       if (attribute.joinColumn) {
         const joinColumnName = attribute.joinColumn.name;
-        const qb = connection(metadata.tableName)
+
+        // Note: this addSchema may not be necessary, but is added for safety
+        const qb = connection(addSchema(metadata.tableName))
           .where('id', left.ref)
           .update({ [joinColumnName]: right.ref });
         if (trx) {
@@ -253,7 +266,7 @@ export const createLinkQuery = (strapi: Strapi.Strapi, trx?: Knex.Transaction) =
 
         assignOrderColumns();
 
-        const qb = connection.insert(payload).into(name);
+        const qb = connection.insert(payload).into(addSchema(name));
         if (trx) {
           qb.transacting(trx);
         }

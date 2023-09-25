@@ -8,7 +8,7 @@ interface PaginationArgs {
   limit: number;
 }
 
-interface Pagination {
+export interface Pagination {
   start: number;
   limit: number;
 }

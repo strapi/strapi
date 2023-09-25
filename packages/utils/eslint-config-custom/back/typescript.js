@@ -26,6 +26,8 @@ module.exports = {
     '@typescript-eslint/comma-dangle': 'off',
     '@typescript-eslint/quotes': 'off',
     '@typescript-eslint/no-shadow': 'off',
+    '@typescript-eslint/naming-convention': 'warn',
+    '@typescript-eslint/no-empty-interface': 'warn',
   },
   overrides: [
     {
