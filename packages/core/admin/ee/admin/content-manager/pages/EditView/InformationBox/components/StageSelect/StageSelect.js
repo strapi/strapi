@@ -5,6 +5,7 @@ import {
   SingleSelectOption,
   Field,
   FieldError,
+  FieldHint,
   Flex,
   Loader,
   Typography,
@@ -24,26 +25,22 @@ import {
   CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME,
   CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME,
 } from '../../../../../../pages/SettingsPage/pages/ReviewWorkflows/constants';
-import { useReviewWorkflows } from '../../../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows';
+import { useReviewWorkflowsStages } from '../../../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflowsStages';
 import { getStageColorByHex } from '../../../../../../pages/SettingsPage/pages/ReviewWorkflows/utils/colors';
 import { STAGE_ATTRIBUTE_NAME } from '../../constants';
 
 export function StageSelect() {
-  const {
-    initialData,
-    layout: { uid },
-    isSingleType,
-    onChange,
-  } = useCMEditViewDataManager();
+  const { initialData, layout: contentType, isSingleType, onChange } = useCMEditViewDataManager();
   const { put } = useFetchClient();
   const { formatMessage } = useIntl();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
-  const {
-    meta,
-    workflows: [workflow],
-    isLoading,
-  } = useReviewWorkflows({ filters: { contentTypes: uid } });
+  const { meta, stages, isLoading, refetch } = useReviewWorkflowsStages(
+    { id: initialData.id, layout: contentType },
+    {
+      enabled: !!initialData?.id,
+    }
+  );
   const { getFeature } = useLicenseLimits();
   const [showLimitModal, setShowLimitModal] = React.useState(false);
 
@@ -69,6 +66,8 @@ export function StageSelect() {
         { target: { name: STAGE_ATTRIBUTE_NAME, value: createdEntity[STAGE_ATTRIBUTE_NAME] } },
         true
       );
+
+      await refetch();
 
       return createdEntity;
     },
@@ -114,15 +113,14 @@ export function StageSelect() {
          */
       } else if (
         limits?.[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME] &&
-        parseInt(limits[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME], 10) <
-          workflow.stages.length
+        parseInt(limits[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME], 10) < stages.length
       ) {
         setShowLimitModal('stage');
       } else {
         mutation.mutateAsync({
           entityId: initialData.id,
           stageId,
-          uid,
+          uid: contentType.uid,
         });
       }
     } catch (error) {
@@ -137,9 +135,20 @@ export function StageSelect() {
 
   return (
     <>
-      <Field name={STAGE_ATTRIBUTE_NAME} id={STAGE_ATTRIBUTE_NAME}>
+      <Field
+        hint={
+          stages.length === 0 &&
+          formatMessage({
+            id: 'content-manager.reviewWorkflows.stages.no-transition',
+            defaultMessage: 'You don’t have the permission to update this stage.',
+          })
+        }
+        name={STAGE_ATTRIBUTE_NAME}
+        id={STAGE_ATTRIBUTE_NAME}
+      >
         <Flex direction="column" gap={2} alignItems="stretch">
           <SingleSelect
+            disabled={stages.length === 0}
             error={(mutation.error && formatAPIError(mutation.error)) || null}
             name={STAGE_ATTRIBUTE_NAME}
             id={STAGE_ATTRIBUTE_NAME}
@@ -150,53 +159,56 @@ export function StageSelect() {
               defaultMessage: 'Review stage',
             })}
             startIcon={
-              <Flex
-                as="span"
-                height={2}
-                background={activeWorkflowStage?.color}
-                borderColor={themeColorName === 'neutral0' ? 'neutral150' : 'transparent'}
-                hasRadius
-                shrink={0}
-                width={2}
-                marginRight="-3px"
-              />
+              activeWorkflowStage && (
+                <Flex
+                  as="span"
+                  height={2}
+                  background={activeWorkflowStage?.color}
+                  borderColor={themeColorName === 'neutral0' ? 'neutral150' : 'transparent'}
+                  hasRadius
+                  shrink={0}
+                  width={2}
+                  marginRight="-3px"
+                />
+              )
             }
             // eslint-disable-next-line react/no-unstable-nested-components
             customizeContent={() => (
               <Flex as="span" justifyContent="space-between" alignItems="center" width="100%">
                 <Typography textColor="neutral800" ellipsis>
-                  {activeWorkflowStage?.name}
+                  {activeWorkflowStage?.name ?? ''}
                 </Typography>
-                {isLoading ? <Loader small style={{ display: 'flex' }} /> : null}
+                {isLoading ? (
+                  <Loader small style={{ display: 'flex' }} data-testid="loader" />
+                ) : null}
               </Flex>
             )}
           >
-            {workflow
-              ? workflow.stages.map(({ id, color, name }) => {
-                  const { themeColorName } = getStageColorByHex(color);
+            {stages.map(({ id, color, name }) => {
+              const { themeColorName } = getStageColorByHex(color);
 
-                  return (
-                    <SingleSelectOption
-                      key={id}
-                      startIcon={
-                        <Flex
-                          height={2}
-                          background={color}
-                          borderColor={themeColorName === 'neutral0' ? 'neutral150' : 'transparent'}
-                          hasRadius
-                          shrink={0}
-                          width={2}
-                        />
-                      }
-                      value={id}
-                      textValue={name}
-                    >
-                      {name}
-                    </SingleSelectOption>
-                  );
-                })
-              : []}
+              return (
+                <SingleSelectOption
+                  key={id}
+                  startIcon={
+                    <Flex
+                      height={2}
+                      background={color}
+                      borderColor={themeColorName === 'neutral0' ? 'neutral150' : 'transparent'}
+                      hasRadius
+                      shrink={0}
+                      width={2}
+                    />
+                  }
+                  value={id}
+                  textValue={name}
+                >
+                  {name}
+                </SingleSelectOption>
+              );
+            })}
           </SingleSelect>
+          <FieldHint />
           <FieldError />
         </Flex>
       </Field>

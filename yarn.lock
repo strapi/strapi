@@ -7501,6 +7501,7 @@ __metadata:
     "@strapi/utils": 4.13.7
     eslint-config-custom: 4.13.7
     lodash: 4.17.21
+    qs: 6.11.1
     sift: 16.0.1
     tsconfig: 4.13.7
   languageName: unknown

@@ -62,5 +62,11 @@ module.exports = {
       category: 'review workflows',
       subCategory: 'options',
     },
+    {
+      uid: 'review-workflows.stage.transition',
+      displayName: 'Change stage',
+      pluginName: 'admin',
+      section: 'internal',
+    },
   ],
 };

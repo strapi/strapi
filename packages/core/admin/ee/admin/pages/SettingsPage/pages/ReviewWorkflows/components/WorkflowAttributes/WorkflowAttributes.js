@@ -13,10 +13,11 @@ import { useCollator } from '@strapi/helper-plugin';
 import { useField } from 'formik';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { updateWorkflow } from '../../actions';
+import { selectContentTypes, selectCurrentWorkflow, selectWorkflows } from '../../selectors';
 
 const NestedOption = styled(MultiSelectOption)`
   padding-left: ${({ theme }) => theme.spaces[7]};
@@ -26,14 +27,12 @@ const ContentTypeTakeNotice = styled(Typography)`
   font-style: italic;
 `;
 
-export function WorkflowAttributes({
-  canUpdate,
-  contentTypes: { collectionTypes, singleTypes },
-  currentWorkflow,
-  workflows,
-}) {
+export function WorkflowAttributes({ canUpdate }) {
   const { formatMessage, locale } = useIntl();
   const dispatch = useDispatch();
+  const { collectionTypes, singleTypes } = useSelector(selectContentTypes);
+  const currentWorkflow = useSelector(selectCurrentWorkflow);
+  const workflows = useSelector(selectWorkflows);
   const [nameField, nameMeta, nameHelper] = useField('name');
   const [contentTypesField, contentTypesMeta, contentTypesHelper] = useField('contentTypes');
   const formatter = useCollator(locale, {
@@ -97,7 +96,7 @@ export function WorkflowAttributes({
                       id: 'Settings.review-workflows.workflow.contentTypes.collectionTypes.label',
                       defaultMessage: 'Collection Types',
                     }),
-                    children: collectionTypes
+                    children: [...collectionTypes]
                       .sort((a, b) => formatter.compare(a.info.displayName, b.info.displayName))
                       .map((contentType) => ({
                         label: contentType.info.displayName,
@@ -114,7 +113,7 @@ export function WorkflowAttributes({
                       id: 'Settings.review-workflows.workflow.contentTypes.singleTypes.label',
                       defaultMessage: 'Single Types',
                     }),
-                    children: singleTypes.map((contentType) => ({
+                    children: [...singleTypes].map((contentType) => ({
                       label: contentType.info.displayName,
                       value: contentType.uid,
                     })),
@@ -178,24 +177,10 @@ export function WorkflowAttributes({
   );
 }
 
-const ContentTypeType = PropTypes.shape({
-  uid: PropTypes.string.isRequired,
-  info: PropTypes.shape({
-    displayName: PropTypes.string.isRequired,
-  }).isRequired,
-});
-
 WorkflowAttributes.defaultProps = {
   canUpdate: true,
-  currentWorkflow: undefined,
 };
 
 WorkflowAttributes.propTypes = {
   canUpdate: PropTypes.bool,
-  contentTypes: PropTypes.shape({
-    collectionTypes: PropTypes.arrayOf(ContentTypeType).isRequired,
-    singleTypes: PropTypes.arrayOf(ContentTypeType).isRequired,
-  }).isRequired,
-  currentWorkflow: PropTypes.object,
-  workflows: PropTypes.array.isRequired,
 };

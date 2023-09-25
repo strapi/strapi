@@ -8,30 +8,11 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IntlProvider } from 'react-intl';
 import { Provider } from 'react-redux';
+import { createStore } from 'redux';
 
-import configureStore from '../../../../../../../../../admin/src/core/store/configureStore';
+import { REDUX_NAMESPACE } from '../../../constants';
 import { reducer } from '../../../reducer';
 import { WorkflowAttributes } from '../WorkflowAttributes';
-
-const CONTENT_TYPES_FIXTURE = {
-  collectionTypes: [
-    {
-      uid: 'uid1',
-      info: {
-        displayName: 'Content Type 1',
-      },
-    },
-  ],
-
-  singleTypes: [
-    {
-      uid: 'uid2',
-      info: {
-        displayName: 'Content Type 2',
-      },
-    },
-  ],
-};
 
 const WORKFLOWS_FIXTURE = [
   {
@@ -43,48 +24,63 @@ const WORKFLOWS_FIXTURE = [
 
   {
     id: 2,
-    name: 'Workflow 1',
-    contentTypes: [],
+    name: 'Default 2',
+    contentTypes: ['uid2'],
     stages: [],
   },
 ];
 
-const CURRENT_WORKFLOW_FIXTURE = {
-  ...WORKFLOWS_FIXTURE[0],
+const CONTENT_TYPES_FIXTURE = {
+  collectionTypes: [
+    {
+      uid: 'uid1',
+      info: {
+        displayName: 'Collection CT 1',
+      },
+    },
+
+    {
+      uid: 'uid2',
+      info: {
+        displayName: 'Collection CT 2',
+      },
+    },
+  ],
+  singleTypes: [
+    {
+      uid: 'single-uid1',
+      info: {
+        displayName: 'Single CT 1',
+      },
+    },
+
+    {
+      uid: 'single-uid2',
+      info: {
+        displayName: 'Single CT 2',
+      },
+    },
+  ],
 };
 
-const ComponentFixture = (props) => {
-  const store = configureStore([], [reducer]);
+const ROLES_FIXTURE = [];
 
+// eslint-disable-next-line react/prop-types
+const ComponentFixture = ({ currentWorkflow, ...props } = {}) => {
   const formik = useFormik({
     enableReinitialize: true,
-    initialValues: {
-      name: 'workflow name',
-      contentTypes: ['uid1', 'uid1'],
-    },
+    initialValues: currentWorkflow || WORKFLOWS_FIXTURE[0],
     validateOnChange: false,
   });
 
   return (
-    <DndProvider backend={HTML5Backend}>
-      <Provider store={store}>
-        <FormikProvider value={formik}>
-          <IntlProvider locale="en" messages={{}}>
-            <ThemeProvider theme={lightTheme}>
-              <WorkflowAttributes
-                contentTypes={CONTENT_TYPES_FIXTURE}
-                currentWorkflow={CURRENT_WORKFLOW_FIXTURE}
-                workflows={WORKFLOWS_FIXTURE}
-                {...props}
-              />
-            </ThemeProvider>
-          </IntlProvider>
-        </FormikProvider>
-      </Provider>
-    </DndProvider>
+    <FormikProvider value={formik}>
+      <WorkflowAttributes {...props} />
+    </FormikProvider>
   );
 };
 
+// eslint-disable-next-line no-unused-vars
 const withMarkup = (query) => (text) =>
   query((content, node) => {
     const hasText = (node) => node.textContent === text;
@@ -93,8 +89,40 @@ const withMarkup = (query) => (text) =>
     return hasText(node) && childrenDontHaveText;
   });
 
-const setup = (props) => ({
-  ...render(<ComponentFixture {...props} />),
+const setup = ({ collectionTypes, singleTypes, currentWorkflow, ...props } = {}) => ({
+  ...render(<ComponentFixture {...props} />, {
+    wrapper({ children }) {
+      const store = createStore(reducer, {
+        [REDUX_NAMESPACE]: {
+          serverState: {
+            contentTypes: {
+              collectionTypes: collectionTypes || CONTENT_TYPES_FIXTURE.collectionTypes,
+              singleTypes: singleTypes || CONTENT_TYPES_FIXTURE.singleTypes,
+            },
+            roles: ROLES_FIXTURE,
+            workflow: WORKFLOWS_FIXTURE[0],
+            workflows: WORKFLOWS_FIXTURE,
+          },
+
+          clientState: {
+            currentWorkflow: {
+              data: currentWorkflow || WORKFLOWS_FIXTURE[0],
+            },
+          },
+        },
+      });
+
+      return (
+        <DndProvider backend={HTML5Backend}>
+          <Provider store={store}>
+            <IntlProvider locale="en" messages={{}}>
+              <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
+            </IntlProvider>
+          </Provider>
+        </DndProvider>
+      );
+    },
+  }),
   user: userEvent.setup(),
 });
 
@@ -102,20 +130,18 @@ describe('Admin | Settings | Review Workflow | WorkflowAttributes', () => {
   it('should render values', async () => {
     const { getByRole, getByText, user } = setup();
 
-    const contentTypesSelect = getByRole('combobox', { name: /associated to/i });
+    await waitFor(() => expect(getByText(/workflow name/i)).toBeInTheDocument());
 
-    expect(getByRole('textbox')).toHaveValue('workflow name');
-    expect(getByText(/2 content types selected/i)).toBeInTheDocument();
-
+    expect(getByRole('textbox', { name: /workflow name \*/i })).toHaveValue('Default');
+    expect(getByText(/1 content type selected/i)).toBeInTheDocument();
     expect(getByRole('textbox')).not.toHaveAttribute('disabled');
     expect(getByRole('combobox', { name: /associated to/i })).not.toHaveAttribute('data-disabled');
 
-    await user.click(contentTypesSelect);
+    await user.click(getByRole('combobox', { name: /associated to/i }));
 
-    await waitFor(() => {
-      expect(getByRole('option', { name: /content type 1/i })).toBeInTheDocument();
-      expect(getByRole('option', { name: /content type 2/i })).toBeInTheDocument();
-    });
+    await waitFor(() =>
+      expect(getByRole('option', { name: /Collection CT 1/i })).toBeInTheDocument()
+    );
   });
 
   it('should disabled fields if canUpdate = false', async () => {
@@ -127,20 +153,9 @@ describe('Admin | Settings | Review Workflow | WorkflowAttributes', () => {
     });
   });
 
-  it('should not render a collection-type group if there are not collection-types', async () => {
+  it('should not render a collection-type group if there are no collection-types', async () => {
     const { getByRole, queryByRole, user } = setup({
-      contentTypes: {
-        collectionTypes: [],
-
-        singleTypes: [
-          {
-            uid: 'uid2',
-            info: {
-              displayName: 'Content Type 2',
-            },
-          },
-        ],
-      },
+      collectionTypes: [],
     });
 
     const contentTypesSelect = getByRole('combobox', { name: /associated to/i });
@@ -153,20 +168,9 @@ describe('Admin | Settings | Review Workflow | WorkflowAttributes', () => {
     });
   });
 
-  it('should not render a collection-type group if there are not single-types', async () => {
+  it('should not render a collection-type group if there are no single-types', async () => {
     const { getByRole, queryByRole, user } = setup({
-      contentTypes: {
-        collectionTypes: [
-          {
-            uid: 'uid2',
-            info: {
-              displayName: 'Content Type 2',
-            },
-          },
-        ],
-
-        singleTypes: [],
-      },
+      singleTypes: [],
     });
 
     const contentTypesSelect = getByRole('combobox', { name: /associated to/i });
@@ -188,23 +192,29 @@ describe('Admin | Settings | Review Workflow | WorkflowAttributes', () => {
     });
   });
 
-  it('should not render assigned content-types to the current workflow', async () => {
+  it('should not render the assigned content-types notice to the current workflow', async () => {
     const { getByRole, queryByText, user } = setup();
+
+    await waitFor(() =>
+      expect(getByRole('combobox', { name: /associated to/i })).toBeInTheDocument()
+    );
 
     const contentTypesSelect = getByRole('combobox', { name: /associated to/i });
     const queryByTextWithMarkup = withMarkup(queryByText);
 
     await user.click(contentTypesSelect);
 
-    await waitFor(() => {
-      expect(queryByTextWithMarkup('(assigned to Default workflow)')).not.toBeInTheDocument();
-    });
+    await waitFor(() =>
+      expect(queryByTextWithMarkup('(assigned to Default workflow)')).not.toBeInTheDocument()
+    );
   });
 
   it('should render assigned content-types to the other workflows', async () => {
-    const { getByRole, getByText, user } = setup({
-      currentWorkflow: { ...WORKFLOWS_FIXTURE[1] },
-    });
+    const { getByRole, getByText, user } = setup();
+
+    await waitFor(() =>
+      expect(getByRole('combobox', { name: /associated to/i })).toBeInTheDocument()
+    );
 
     const contentTypesSelect = getByRole('combobox', { name: /associated to/i });
     const getByTextWithMarkup = withMarkup(getByText);
@@ -212,11 +222,11 @@ describe('Admin | Settings | Review Workflow | WorkflowAttributes', () => {
     await user.click(contentTypesSelect);
 
     await waitFor(() => {
-      expect(getByTextWithMarkup('(assigned to Default workflow)')).toBeInTheDocument();
+      expect(getByTextWithMarkup('(assigned to Default 2 workflow)')).toBeInTheDocument();
     });
   });
 
-  it('should render assigned content-types to the other workflows, when currentWorkflow is not passed', async () => {
+  it('should render assigned content-types of other workflows, when currentWorkflow is not passed', async () => {
     const { getByRole, getByText, user } = setup({
       currentWorkflow: undefined,
     });
@@ -227,7 +237,7 @@ describe('Admin | Settings | Review Workflow | WorkflowAttributes', () => {
     await user.click(contentTypesSelect);
 
     await waitFor(() => {
-      expect(getByTextWithMarkup('(assigned to Default workflow)')).toBeInTheDocument();
+      expect(getByTextWithMarkup('(assigned to Default 2 workflow)')).toBeInTheDocument();
     });
   });
 });

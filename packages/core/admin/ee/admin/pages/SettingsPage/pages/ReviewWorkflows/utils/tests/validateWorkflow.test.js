@@ -145,4 +145,58 @@ describe('Settings | Review Workflows | validateWorkflow()', () => {
       }
     `);
   });
+
+  test('stages.permissions: array', async () => {
+    expect(
+      await setup({
+        name: 'name',
+        stages: [
+          {
+            name: 'stage-1',
+            color: '#ffffff',
+            permissions: [{ role: 1, action: 'admin::review-workflow.stage.transition' }],
+          },
+        ],
+      })
+    ).toEqual(true);
+
+    expect(
+      await setup({
+        name: 'name',
+        stages: [
+          {
+            name: 'stage-1',
+            color: '#ffffff',
+            permissions: { role: '1', action: 'admin::review-workflow.stage.transition' },
+          },
+        ],
+      })
+    ).toMatchInlineSnapshot(`
+      {
+        "stages": [
+          {
+            "permissions": "stages[0].permissions must be a \`array\` type, but the final value was: \`{
+        "role": "\\"1\\"",
+        "action": "\\"admin::review-workflow.stage.transition\\""
+      }\`.",
+          },
+        ],
+      }
+    `);
+  });
+
+  test('stages.permissions: undefined', async () => {
+    expect(
+      await setup({
+        name: 'name',
+        stages: [
+          {
+            name: 'stage-1',
+            color: '#ffffff',
+            permissions: undefined,
+          },
+        ],
+      })
+    ).toEqual(true);
+  });
 });
