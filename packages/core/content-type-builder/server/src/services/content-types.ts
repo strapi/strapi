@@ -33,7 +33,7 @@ export const getRestrictRelationsTo = (contentType = {}) => {
  * Format a contentType info to be used by the front-end
  * @param {Object} contentType
  */
-const formatContentType = (contentType) => {
+export const formatContentType = (contentType) => {
   const { uid, kind, modelName, plugin, collectionName, info } = contentType;
 
   return {
@@ -281,3 +281,12 @@ export const deleteContentType = async (uid, defaultBuilder = undefined) => {
 
   return contentType;
 };
+
+export default () => ({
+  createContentType,
+  editContentType,
+  deleteContentType,
+  formatContentType,
+  createContentTypes,
+  deleteContentTypes,
+});

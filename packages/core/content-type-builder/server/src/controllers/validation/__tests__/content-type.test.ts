@@ -121,7 +121,7 @@ describe('Content type validator', () => {
         },
         components: [
           {
-            uid: 'edit',
+            uid: 'edit.edit',
             displayName: 'test',
             icon: 'calendar',
             category: 'test',
@@ -133,7 +133,7 @@ describe('Content type validator', () => {
             },
           },
           {
-            tmpUID: 'random',
+            tmpUID: 'random.random',
             displayName: 'test2',
             icon: 'calendar',
             category: 'test',
@@ -148,7 +148,7 @@ describe('Content type validator', () => {
       };
 
       await validateUpdateContentTypeInput(data).then(() => {
-        expect(data.contentType.attributes.slug.default).toBeUndefined();
+        expect(data.contentType?.attributes?.slug.default).toBeUndefined();
         expect(data.components[0].attributes.title.default).toBeUndefined();
         expect(data.components[1].attributes.title.default).toBe('');
       });
@@ -177,7 +177,7 @@ describe('Content type validator', () => {
     });
 
     test('Can use custom keys', async () => {
-      const input = {
+      const input: CreateContentTypeInput = {
         contentType: {
           displayName: 'test',
           singularName: 'test',

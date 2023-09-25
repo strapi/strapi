@@ -1,5 +1,6 @@
-const { formatContentType } = require('../content-types')();
+import getContentTypes from '../content-types';
 
+const { formatContentType } = getContentTypes();
 describe('Content types service', () => {
   describe('format ContentType', () => {
     const contentType = {

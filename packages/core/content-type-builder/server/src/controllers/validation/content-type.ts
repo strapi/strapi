@@ -10,9 +10,10 @@ import { createSchema } from './model-schema';
 import { removeEmptyDefaults, removeDeletedUIDTargetFields } from './data-transform';
 import { nestedComponentSchema } from './component';
 
+// Input flattens some fields of the "info" into the root type
 export type CreateContentTypeInput = {
-  contentType?: Partial<Schema.ContentType>;
-  components?: Partial<Schema.Component>;
+  contentType?: Partial<Schema.ContentType> & Partial<Schema.ContentTypeInfo>;
+  components?: Array<Partial<Schema.Component> & Partial<Schema.Info> & { tmpUID?: UID.Component }>;
 };
 
 /**

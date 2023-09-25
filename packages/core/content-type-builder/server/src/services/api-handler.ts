@@ -1,11 +1,12 @@
 import * as path from 'path';
 import * as fse from 'fs-extra';
+import type { UID } from '@strapi/types';
 
 /**
  * Deletes the API folder of a contentType
  * @param {string} uid content type uid
  */
-async function clear(uid) {
+export async function clear(uid: UID.ContentType) {
   const { apiName, modelName } = strapi.contentTypes[uid];
 
   const apiFolder = path.join(strapi.dirs.app.api, apiName);
@@ -18,7 +19,7 @@ async function clear(uid) {
  * Backups the API folder of a contentType
  * @param {string} uid content type uid
  */
-async function backup(uid) {
+export async function backup(uid) {
   const { apiName } = strapi.contentTypes[uid];
 
   const apiFolder = path.join(strapi.dirs.app.api, apiName);
@@ -50,7 +51,7 @@ async function deleteBackup(uid) {
  * Rollbacks the API folder of a contentType
  * @param {string} uid content type uid
  */
-async function rollback(uid) {
+export async function rollback(uid) {
   const { apiName } = strapi.contentTypes[uid];
 
   const apiFolder = path.join(strapi.dirs.app.api, apiName);
@@ -112,9 +113,3 @@ const recursiveRemoveFiles = async (folder, deleteFn) => {
     await fse.remove(folder);
   }
 };
-
-module.exports = () => ({
-  clear,
-  backup,
-  rollback,
-});

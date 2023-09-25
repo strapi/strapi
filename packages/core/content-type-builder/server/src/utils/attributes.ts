@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import utils, { errors } from '@strapi/utils';
+import { Attribute } from '@strapi/types';
 
 const { ApplicationError } = errors;
 
@@ -38,7 +39,7 @@ export const formatAttributes = (model) => {
  * @param {Object} context - function context
  * @param {Object} context.component - the associated component
  */
-export const formatAttribute = (key, attribute) => {
+export const formatAttribute = (key: string, attribute: Attribute.Any) => {
   const { configurable, required, autoPopulate, pluginOptions } = attribute;
 
   if (attribute.type === 'media') {

@@ -1,7 +1,6 @@
 import * as path from 'path';
 import * as fse from 'fs-extra';
 import _ from 'lodash';
-import { Schema } from '@strapi/types';
 
 import { isConfigurable } from '../../utils/attributes';
 

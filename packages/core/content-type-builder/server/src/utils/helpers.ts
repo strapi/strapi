@@ -2,7 +2,7 @@ export const escapeNewlines = (content = '', placeholder = '\n') => {
   return content.replace(/[\r\n]+/g, placeholder);
 };
 
-export const deepTrimObject = (attribute) => {
+export const deepTrimObject = (attribute: any): any => {
   if (Array.isArray(attribute)) {
     return attribute.map(deepTrimObject);
   }
