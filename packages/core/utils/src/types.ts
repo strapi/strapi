@@ -1,6 +1,13 @@
 import type * as Koa from 'koa';
 import type {} from 'koa-body';
 
+type ID = number | `${number}`;
+
+export type Data = {
+  id?: ID;
+  [key: string]: string | number | ID | boolean | null | undefined | Date | Data | Data[];
+};
+
 export interface Config {
   get<T = unknown>(key: string, defaultVal?: T): T;
 }
@@ -8,40 +15,79 @@ export interface Config {
 export interface Attribute {
   type: string;
   writable?: boolean;
+  visible?: boolean;
   relation?: string;
-  [key: string]: unknown;
+  private?: boolean;
+  [key: string]: any;
 }
 
 export interface RelationalAttribute extends Attribute {
+  type: 'relation';
   relation: string;
-  target: string;
+  target?: string;
 }
 export interface ComponentAttribute extends Attribute {
+  type: 'component';
   component: string;
   repeatable?: boolean;
 }
 export interface DynamicZoneAttribute extends Attribute {
+  type: 'dynamiczone';
   components: string[];
 }
+
+export interface ScalarAttribute extends Attribute {
+  type:
+    | 'string'
+    | 'text'
+    | 'richtext'
+    | 'integer'
+    | 'biginteger'
+    | 'float'
+    | 'decimal'
+    | 'date'
+    | 'time'
+    | 'datetime'
+    | 'timestamp'
+    | 'enumeration'
+    | 'boolean'
+    | 'json'
+    | 'uid'
+    | 'password'
+    | 'email'
+    | 'media';
+}
+
+export type AnyAttribute =
+  | ScalarAttribute
+  | RelationalAttribute
+  | ComponentAttribute
+  | DynamicZoneAttribute;
 
 export type Kind = 'singleType' | 'collectionType';
 
 export interface Model {
-  uid?: string;
-  kind: Kind;
-  info: {
+  modelType: 'contentType' | 'component';
+  uid: string;
+  kind?: Kind;
+  info?: {
+    displayName: string;
     singularName: string;
     pluralName: string;
   };
-  options: {
-    populateCreatorFields: boolean;
-    draftAndPublish: boolean;
+  options?: {
+    populateCreatorFields?: boolean;
+    draftAndPublish?: boolean;
   };
   privateAttributes?: string[];
-  attributes: Record<string, Attribute>;
+  attributes: Record<string, AnyAttribute>;
 }
 
 declare module 'koa' {
+  interface Request extends Koa.BaseRequest {
+    route: RouteInfo;
+  }
+
   interface ExtendableContext {
     ok: (response?: string | object) => Koa.Context;
     created: (response?: string | object) => Koa.Context;
@@ -64,13 +110,4 @@ export interface RouteInfo {
   plugin: string;
 }
 
-export interface Request extends Koa.Request {
-  body: {
-    data?: string;
-  };
-  route: RouteInfo;
-}
-
-export interface Context extends Koa.ExtendableContext {
-  request: Request;
-}
+export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };

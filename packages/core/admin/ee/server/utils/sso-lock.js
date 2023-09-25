@@ -1,6 +1,6 @@
 'use strict';
 
-const { features } = require('@strapi/strapi/ee');
+const { features } = require('@strapi/strapi/dist/utils/ee').default;
 const { isEmpty } = require('lodash/fp');
 
 const isSsoLocked = async (user) => {
