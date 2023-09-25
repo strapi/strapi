@@ -1,4 +1,6 @@
-export interface EmailConfig {
+import type { Plugin } from '@strapi/types';
+
+export interface EmailConfig extends Record<string, unknown> {
   provider: string;
   providerOptions?: object;
   settings?: {
@@ -6,9 +8,10 @@ export interface EmailConfig {
   };
 }
 
-export interface StrapiConfig {
+type LoadedPluginConfig = Plugin.LoadedPlugin['config'];
+
+export interface StrapiConfig extends LoadedPluginConfig {
   default: EmailConfig;
-  validator: () => void;
 }
 
 export interface EmailTemplateData {
