@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
-import { Flex, Icon, Tooltip, Select, Option } from '@strapi/design-system';
+import { Flex, Icon, Tooltip, Select, Option, Box, Typography } from '@strapi/design-system';
 import { pxToRem, prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
 import { BulletList, NumberList } from '@strapi/icons';
 import PropTypes from 'prop-types';
@@ -361,12 +361,22 @@ ListButton.propTypes = {
   }).isRequired,
 };
 
+// TODO: Remove after the RTE Blocks Alpha release
+const AlphaTag = styled(Box)`
+  background-color: ${({ theme }) => theme.colors.warning100};
+  border: ${({ theme }) => `1px solid ${theme.colors.warning200}`};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  font-size: ${({ theme }) => theme.fontSizes[0]};
+  padding: ${({ theme }) => `${2 / 16}rem ${theme.spaces[1]}`};
+`;
+
 const BlocksToolbar = () => {
   const modifiers = useModifiersStore();
 
   return (
     <Toolbar.Root asChild>
-      <Flex gap={1} padding={2}>
+      {/* Remove after the RTE Blocks Alpha release (paddingRight and width) */}
+      <Flex gap={1} padding={2} paddingRight={4} width="100%">
         <BlocksDropdown />
         <Separator />
         <Toolbar.ToggleGroup type="multiple" asChild>
@@ -404,6 +414,14 @@ const BlocksToolbar = () => {
             />
           </Flex>
         </Toolbar.ToggleGroup>
+        {/* TODO: Remove after the RTE Blocks Alpha release */}
+        <Flex grow={1} justifyContent="flex-end">
+          <AlphaTag>
+            <Typography fontSize="0" textColor="warning600" fontWeight="bold">
+              ALPHA
+            </Typography>
+          </AlphaTag>
+        </Flex>
       </Flex>
     </Toolbar.Root>
   );
