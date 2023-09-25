@@ -28,7 +28,7 @@ type PoolConfig = {
   reapIntervalMillis?: number;
   createRetryIntervalMillis?: number;
   // Todo: add types for these callbacks
-  afterCreate?: (conn: any, done: (err?: Error, conn?: any) => void) => void;
+  afterCreate?: (conn: unknown, done: (err?: Error, conn?: unknown) => void) => void;
 };
 
 type Connection<TClient extends ClientKind> = {
