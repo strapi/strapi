@@ -89,7 +89,7 @@ const CodeBlock = styled.pre.attrs({ role: 'code' })`
 `;
 
 const Blockquote = styled.blockquote.attrs({ role: 'blockquote' })`
-  margin: ${({ theme }) => `${theme.spaces[6]} 0`};
+  margin: ${({ theme }) => `${theme.spaces[4]} 0`};
   font-weight: ${({ theme }) => theme.fontWeights.regular};
   border-left: ${({ theme }) => `${theme.spaces[1]} solid ${theme.colors.neutral150}`};
   font-style: italic;
@@ -391,6 +391,31 @@ export function useBlocksStore() {
       },
       matchNode: (node) => node.type === 'quote',
       isInBlocksSelector: true,
+      handleEnterKey(editor) {
+        /**
+         * To determine if we should break out of the quote node, check 2 things:
+         * 1. If the cursor is at the end of the quote node
+         * 2. If the last line of the quote node is empty
+         */
+        const [quoteNode, quoteNodePath] = Editor.above(editor, {
+          match: (n) => n.type === 'quote',
+        });
+        const isNodeEnd = Editor.isEnd(editor, editor.selection.anchor, quoteNodePath);
+        const isEmptyLine = quoteNode.children.at(-1).text.endsWith('\n');
+
+        if (isNodeEnd && isEmptyLine) {
+          // Remove the last line break
+          Transforms.delete(editor, { distance: 1, unit: 'character', reverse: true });
+          // Break out of the quote node new paragraph
+          Transforms.insertNodes(editor, {
+            type: 'paragraph',
+            children: [{ type: 'text', text: '' }],
+          });
+        } else {
+          // Otherwise insert a new line within the quote node
+          Transforms.insertText(editor, '\n');
+        }
+      },
     },
     'list-ordered': {
       renderElement: (props) => <List {...props} />,

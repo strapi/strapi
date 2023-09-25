@@ -59,6 +59,7 @@ const BlocksEditor = React.forwardRef(
 
     const handleSlateChange = (state) => {
       const isAstChange = editor.operations.some((op) => op.type !== 'set_selection');
+      console.log(editor.children);
 
       if (isAstChange) {
         onChange({
