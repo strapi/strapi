@@ -1,32 +1,40 @@
 import { join } from 'path';
-import { errors, nameToSlug } from '@strapi/utils';
-
+import { nameToSlug, errors } from '@strapi/utils';
+import type { Schema } from '@strapi/types';
 import createBuilder from './schema-builder';
 
-const { ApplicationError } = errors;
+type Infos = {
+  name: string;
+};
+
+interface WorkingComponent extends Schema.Component {
+  setUID: (uid: string) => WorkingComponent;
+  setDir: (dir: string) => WorkingComponent;
+  updateComponent: (oldUID: string, newUID: string) => void;
+}
 
 /**
  * Edit a category name and move components to the write folder
  * @param {string} name category name
  * @param {Object} infos new category data
  */
-export const editCategory = async (name, infos) => {
+export const editCategory = async (name: string, infos: Infos) => {
   const newName = nameToSlug(infos.name);
 
   // don't do anything the name doesn't change
   if (name === newName) return;
 
   if (!categoryExists(name)) {
-    throw new ApplicationError('category not found');
+    throw new errors.ApplicationError('category not found');
   }
 
   if (categoryExists(newName)) {
-    throw new ApplicationError('Name already taken');
+    throw new errors.ApplicationError('Name already taken');
   }
 
   const builder = createBuilder();
 
-  builder.components.forEach((component) => {
+  builder.components.forEach((component: WorkingComponent) => {
     const oldUID = component.uid;
     const newUID = `${newName}.${component.modelName}`;
 
@@ -35,11 +43,11 @@ export const editCategory = async (name, infos) => {
 
     component.setUID(newUID).setDir(join(strapi.dirs.app.components, newName));
 
-    builder.components.forEach((compo) => {
+    builder.components.forEach((compo: WorkingComponent) => {
       compo.updateComponent(oldUID, newUID);
     });
 
-    builder.contentTypes.forEach((ct) => {
+    builder.contentTypes.forEach((ct: WorkingComponent) => {
       ct.updateComponent(oldUID, newUID);
     });
   });
@@ -51,11 +59,10 @@ export const editCategory = async (name, infos) => {
 
 /**
  * Deletes a category and its components
- * @param {string} name category name to delete
  */
-export const deleteCategory = async (name) => {
+export const deleteCategory = async (name: string) => {
   if (!categoryExists(name)) {
-    throw new ApplicationError('category not found');
+    throw new errors.ApplicationError('category not found');
   }
 
   const builder = createBuilder();
@@ -71,9 +78,8 @@ export const deleteCategory = async (name) => {
 
 /**
  * Checks if a category exists
- * @param {string} name category name to serach for
  */
-const categoryExists = (name) => {
+const categoryExists = (name: string) => {
   const matchingIndex = Object.values(strapi.components).findIndex(
     (component) => component.category === name
   );

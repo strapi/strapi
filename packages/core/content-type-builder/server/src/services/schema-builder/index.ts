@@ -2,11 +2,41 @@ import { join } from 'path';
 import _ from 'lodash';
 
 import { errors } from '@strapi/utils';
+import type { Schema, Utils } from '@strapi/types';
 import createSchemaHandler from './schema-handler';
 import createComponentBuilder from './component-builder';
 import createContentTypeBuilder from './content-type-builder';
 
-const { ApplicationError } = errors;
+interface ComponentInput extends Schema.Component {
+  __filename__: string;
+  __schema__: Schema.Schema;
+  config: object;
+}
+
+interface Component extends Pick<Schema.Component, 'modelName' | 'uid'> {
+  category: string;
+  plugin: string;
+  filename: string;
+  dir: string;
+  schema: Schema.Schema;
+  config: object;
+}
+
+interface ContentTypeInput extends Schema.ContentType {
+  __schema__: Schema.Schema;
+  plugin: string;
+  apiName: string;
+  config: object;
+  dir: string;
+}
+
+interface ContentType extends Pick<Schema.ContentType, 'modelName' | 'uid'> {
+  filename: string;
+  dir: string;
+  schema: Schema.Schema;
+  plugin: string;
+  config: object;
+}
 
 /**
  * Creates a content type schema builder instance
@@ -15,46 +45,52 @@ const { ApplicationError } = errors;
  */
 export default function createBuilder() {
   const components = Object.keys(strapi.components).map((key) => {
-    const compo = strapi.components[key];
-
-    return {
-      category: compo.category,
-      modelName: compo.modelName,
-      plugin: compo.modelName,
-      uid: compo.uid,
-      filename: compo.__filename__,
-      dir: join(strapi.dirs.app.components, compo.category),
-      schema: compo.__schema__,
-      config: compo.config,
+    const componentInput = strapi.components[
+      key as keyof typeof strapi.components
+    ] as ComponentInput;
+    const component: Component = {
+      category: componentInput.category,
+      modelName: componentInput.modelName,
+      plugin: componentInput.modelName,
+      uid: componentInput.uid,
+      filename: componentInput.__filename__,
+      dir: join(strapi.dirs.app.components, componentInput.category),
+      schema: componentInput.__schema__,
+      config: componentInput.config,
     };
+    return component;
   });
 
   const contentTypes = Object.keys(strapi.contentTypes).map((key) => {
-    const contentType = strapi.contentTypes[key];
+    const contentTypeInput = strapi.contentTypes[
+      key as keyof typeof strapi.contentTypes
+    ] as ContentTypeInput;
 
-    const dir = contentType.plugin
+    const dir = contentTypeInput.plugin
       ? join(
           strapi.dirs.app.extensions,
-          contentType.plugin,
+          contentTypeInput.plugin,
           'content-types',
-          contentType.info.singularName
+          contentTypeInput.info.singularName
         )
       : join(
           strapi.dirs.app.api,
-          contentType.apiName,
+          contentTypeInput.apiName,
           'content-types',
-          contentType.info.singularName
+          contentTypeInput.info.singularName
         );
 
-    return {
-      modelName: contentType.modelName,
-      plugin: contentType.plugin,
-      uid: contentType.uid,
+    const contentType: ContentType = {
+      modelName: contentTypeInput.modelName,
+      plugin: contentTypeInput.plugin,
+      uid: contentTypeInput.uid,
       filename: 'schema.json',
       dir,
-      schema: contentType.__schema__,
-      config: contentType.config,
+      schema: contentTypeInput.__schema__,
+      config: contentTypeInput.config,
     };
+
+    return contentType;
   });
 
   return createSchemaBuilder({
@@ -63,19 +99,20 @@ export default function createBuilder() {
   });
 }
 
-/**
- * Schema builder
- *
- * @param {object} opts options
- * @param {object} opts.contentTypes contentTypes
- * @returns {object} schema builder
- */
-function createSchemaBuilder({ components, contentTypes }) {
+type SchemaBuilderOptions = {
+  components: Utils.String.Dict<Component>;
+  contentTypes: Utils.String.Dict<ContentType>;
+};
+
+function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions) {
   const tmpComponents = new Map();
   const tmpContentTypes = new Map();
 
   // init temporary ContentTypes
   Object.keys(contentTypes).forEach((key) => {
+    tmpContentTypes.set(contentTypes[key].uid, createSchemaHandler(contentTypes[key]));
+  });
+  Object.keys(contentTypes).forEach((key: string) => {
     tmpContentTypes.set(contentTypes[key].uid, createSchemaHandler(contentTypes[key]));
   });
 
@@ -123,7 +160,7 @@ function createSchemaBuilder({ components, contentTypes }) {
           acc[key] = attr;
 
           if (target && !this.contentTypes.has(target)) {
-            throw new ApplicationError(`target: ${target} does not exist`);
+            throw new errors.ApplicationError(`target: ${target} does not exist`);
           }
 
           if (_.isNil(targetAttribute)) {
@@ -178,7 +215,7 @@ function createSchemaBuilder({ components, contentTypes }) {
           );
           strapi.log.error(error);
 
-          throw new ApplicationError('Invalid schema edition');
+          throw new errors.ApplicationError('Invalid schema edition');
         });
     },
 

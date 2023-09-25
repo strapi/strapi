@@ -1,12 +1,22 @@
-import * as path from 'path';
-import * as fse from 'fs-extra';
+import path from 'path';
+import type { UID, Schema, Attribute } from '@strapi/types';
+import fse from 'fs-extra';
 import _ from 'lodash';
-import { Schema } from '@strapi/types';
 
 import { isConfigurable } from '../../utils/attributes';
 
-// TODO TS: infos should be the input of
-export default (infos: any) => {
+export type Infos = {
+  category?: string;
+  modelName?: string;
+  plugin?: string;
+  uid?: UID.ContentType;
+  dir: string;
+  filename: string;
+  // TODO type this
+  schema?: Schema.Schema;
+};
+
+export default function createSchemaHandler(infos: Infos) {
   const { category, modelName, plugin, uid, dir, filename, schema } = infos;
 
   const initialState = {
@@ -39,7 +49,6 @@ export default (infos: any) => {
     get plugin() {
       return initialState.plugin;
     },
-
     get category() {
       return initialState.category;
     },
@@ -56,14 +65,14 @@ export default (infos: any) => {
       return _.get(state, 'plugin') !== 'admin';
     },
 
-    setUID(val) {
+    setUID(val: UID.ContentType) {
       modified = true;
 
       state.uid = val;
       return this;
     },
 
-    setDir(val) {
+    setDir(val: string) {
       modified = true;
 
       state.dir = val;
@@ -74,7 +83,7 @@ export default (infos: any) => {
       return _.cloneDeep(state.schema);
     },
 
-    setSchema(val) {
+    setSchema(val: Schema.Schema) {
       modified = true;
 
       state.schema = _.cloneDeep(val);
@@ -82,12 +91,12 @@ export default (infos: any) => {
     },
 
     // get a particuar path inside the schema
-    get(path) {
+    get(path: string[]) {
       return _.get(state.schema, path);
     },
 
     // set a particuar path inside the schema
-    set(path, val) {
+    set(path: string[] | string, val: unknown) {
       modified = true;
 
       const value = _.defaultTo(val, _.get(state.schema, path));
@@ -97,7 +106,7 @@ export default (infos: any) => {
     },
 
     // delete a particuar path inside the schema
-    unset(path) {
+    unset(path: string[]) {
       modified = true;
 
       _.unset(state.schema, path);
@@ -110,19 +119,19 @@ export default (infos: any) => {
       return this;
     },
 
-    getAttribute(key) {
+    getAttribute(key: string) {
       return this.get(['attributes', key]);
     },
 
-    setAttribute(key, attribute) {
+    setAttribute(key: string, attribute: Attribute.Any) {
       return this.set(['attributes', key], attribute);
     },
 
-    deleteAttribute(key) {
+    deleteAttribute(key: string) {
       return this.unset(['attributes', key]);
     },
 
-    setAttributes(newAttributes) {
+    setAttributes(newAttributes: Schema.Attributes) {
       // delete old configurable attributes
       for (const key in this.schema.attributes) {
         if (isConfigurable(this.schema.attributes[key])) {
@@ -132,13 +141,13 @@ export default (infos: any) => {
 
       // set new Attributes
       for (const key of Object.keys(newAttributes)) {
-        this.setAttribute(key, newAttributes[key]);
+        this.setAttribute(key, newAttributes[key as keyof Schema.Attributes]);
       }
 
       return this;
     },
 
-    removeContentType(uid) {
+    removeContentType(uid: UID.ContentType) {
       const { attributes } = state.schema;
 
       Object.keys(attributes).forEach((key) => {
@@ -153,7 +162,7 @@ export default (infos: any) => {
     },
 
     // utils
-    removeComponent(uid) {
+    removeComponent(uid: UID.Component) {
       const { attributes } = state.schema;
 
       Object.keys(attributes).forEach((key) => {
@@ -176,7 +185,7 @@ export default (infos: any) => {
       return this;
     },
 
-    updateComponent(uid, newUID) {
+    updateComponent(uid: UID.Component, newUID: UID.Component) {
       const { attributes } = state.schema;
 
       Object.keys(attributes).forEach((key) => {
@@ -291,4 +300,4 @@ export default (infos: any) => {
       return Promise.resolve();
     },
   };
-};
+}

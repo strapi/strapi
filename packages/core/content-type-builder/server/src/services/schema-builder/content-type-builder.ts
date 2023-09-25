@@ -6,8 +6,6 @@ import { isRelation, isConfigurable } from '../../utils/attributes';
 import { typeKinds } from '../constants';
 import createSchemaHandler from './schema-handler';
 
-const { ApplicationError } = errors;
-
 const reuseUnsetPreviousProperties = (newAttribute, oldAttribute) => {
   _.defaults(
     newAttribute,

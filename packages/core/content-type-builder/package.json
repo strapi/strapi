@@ -43,6 +43,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
+    "build:legacy": "run -T tsc -p tsconfig.build.json",
     "build": "NODE_ENV=production strapi plugin:build --force",
     "build:ts": "run build",
     "watch": "run -T tsc -p tsconfig.build.json -w --preserveWatchOutput",
@@ -77,11 +78,9 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/types": "4.13.7",
+    "@strapi/types": "4.13.6",
     "@testing-library/react": "14.0.0",
     "@testing-library/react-hooks": "8.0.1",
-    "@types/jest": "29.5.2",
-    "@types/koa": "2.13.4",
     "@types/pluralize": "0.0.30",
     "history": "^4.9.0",
     "koa": "2.13.4",
