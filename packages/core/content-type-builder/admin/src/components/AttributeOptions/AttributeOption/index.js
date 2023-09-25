@@ -39,23 +39,21 @@ const AttributeOption = ({ type }) => {
     });
   };
 
-  // TODO: Remove after the RTE Blocks Alpha release
-  const alphaTagStylesWidth = type === 'blocks' && { width: '100%' };
-  const alphaTagStylesJustifyContent = type === 'blocks' && { justifyContent: 'space-between' };
-
   return (
     <OptionBoxWrapper padding={4} as="button" hasRadius type="button" onClick={handleClick}>
       <Flex>
         <AttributeIcon type={type} />
-        <Box paddingLeft={4} {...alphaTagStylesWidth}>
-          <Flex {...alphaTagStylesJustifyContent}>
+        {/* TODO: Remove after the RTE Blocks Alpha release (width) */}
+        <Box paddingLeft={4} width="100%">
+          {/* TODO: Remove after the RTE Blocks Alpha release (justifyContent) */}
+          <Flex justifyContent="space-between">
             <Typography fontWeight="bold">
               {formatMessage({ id: getTrad(`attribute.${type}`), defaultMessage: type })}
             </Typography>
             {/* Remove after the RTE Blocks Alpha release */}
             {type === 'blocks' && (
               <AlphaTag>
-                <Typography fontSize="0" textColor="warning600" fontWeight="bold">
+                <Typography textColor="warning600" variant="sigma">
                   ALPHA
                 </Typography>
               </AlphaTag>

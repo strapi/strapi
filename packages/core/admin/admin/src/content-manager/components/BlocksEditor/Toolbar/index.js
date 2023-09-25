@@ -417,7 +417,7 @@ const BlocksToolbar = () => {
         {/* TODO: Remove after the RTE Blocks Alpha release */}
         <Flex grow={1} justifyContent="flex-end">
           <AlphaTag>
-            <Typography fontSize="0" textColor="warning600" fontWeight="bold">
+            <Typography textColor="warning600" variant="sigma">
               ALPHA
             </Typography>
           </AlphaTag>
