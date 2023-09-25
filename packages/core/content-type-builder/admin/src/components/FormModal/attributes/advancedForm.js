@@ -1,6 +1,3 @@
-// import React from 'react';
-// import { FormattedMessage } from 'react-intl';
-// import isEmpty from 'lodash/isEmpty';
 import getTrad from '../../../utils/getTrad';
 import { componentForm } from '../component';
 
@@ -51,7 +48,6 @@ const advancedForm = {
                   metadatas: { intlLabel: { id: 'false', defaultMessage: 'false' } },
                 },
               ],
-              // validations: {},
             },
           ],
         },
