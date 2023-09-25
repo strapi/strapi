@@ -38,7 +38,7 @@ const Wrapper = styled(Box)`
 `;
 
 const BlocksEditor = React.forwardRef(
-  ({ intlLabel, labelAction, name, readOnly, required, error, value, onChange }, ref) => {
+  ({ intlLabel, labelAction, name, disabled, required, error, value, onChange }, ref) => {
     const { formatMessage } = useIntl();
     const [editor] = React.useState(() => withReact(withHistory(createEditor())));
 
@@ -92,7 +92,7 @@ const BlocksEditor = React.forwardRef(
               <BlocksToolbar />
               <EditorDivider width="100%" />
               <Wrapper>
-                <BlocksInput readOnly={readOnly} />
+                <BlocksInput disabled={disabled} />
               </Wrapper>
             </InputWrapper>
           </Slate>
@@ -112,7 +112,6 @@ const BlocksEditor = React.forwardRef(
 BlocksEditor.defaultProps = {
   labelAction: null,
   required: false,
-  readOnly: false,
   error: '',
   value: null,
 };
@@ -126,7 +125,7 @@ BlocksEditor.propTypes = {
   labelAction: PropTypes.element,
   name: PropTypes.string.isRequired,
   required: PropTypes.bool,
-  readOnly: PropTypes.bool,
+  disabled: PropTypes.bool.isRequired,
   error: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.array,
