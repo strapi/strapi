@@ -9,6 +9,7 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 
 import { PERMISSIONS } from './constants';
 
+// eslint-disable-next-line import/no-default-export
 export default {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register(app: any) {

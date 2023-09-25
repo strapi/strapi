@@ -28,13 +28,12 @@ import { Envelop } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useQuery, useMutation } from 'react-query';
 import styled from 'styled-components';
+import { ValidationError } from 'yup';
 
 import { PERMISSIONS } from '../../constants';
 import { schema } from '../../utils/schema';
 
 import type { EmailSettings, ConfigSettings } from '../../../../shared/types';
-
-import { ValidationError } from 'yup';
 
 const DocumentationLink = styled.a`
   color: ${({ theme }) => theme.colors.primary600};
@@ -326,4 +325,5 @@ const SettingsPage = () => {
   );
 };
 
+// eslint-disable-next-line import/no-default-export
 export default ProtectedSettingsPage;
