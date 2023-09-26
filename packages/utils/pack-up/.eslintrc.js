@@ -4,8 +4,25 @@ module.exports = {
   parserOptions: {
     project: ['./tsconfig.eslint.json'],
   },
+  overrides: [
+    {
+      files: ['./scripts/**/*', './src/cli/errors.ts', './src/cli/index.ts'],
+      rules: {
+        'no-console': ['error', { allow: ['error'] }],
+      },
+    },
+    {
+      files: ['./src/node/core/logger.ts'],
+      rules: {
+        'no-console': 'off',
+      },
+    },
+  ],
   rules: {
-    'no-console': ['error', { allow: ['warn', 'error', 'info'] }],
+    /**
+     * Force us to use the Logger instance.
+     */
+    'no-console': 'error',
     'import/extensions': 'off',
     'import/order': [
       'error',

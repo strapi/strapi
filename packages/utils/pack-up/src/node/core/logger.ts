@@ -13,6 +13,7 @@ export interface Logger {
   warn: (...args: any[]) => void;
   error: (...args: any[]) => void;
   log: (...args: any[]) => void;
+  success: (...args: any[]) => void;
 }
 
 export const createLogger = (options: LoggerOptions = {}): Logger => {
@@ -72,6 +73,14 @@ export const createLogger = (options: LoggerOptions = {}): Logger => {
       }
 
       console.error(chalk.red(`[ERROR] `), ...args);
+    },
+
+    success(...args) {
+      if (silent) {
+        return;
+      }
+
+      console.info(chalk.green(`[SUCCESS] `), ...args);
     },
   };
 };
