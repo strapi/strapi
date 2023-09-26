@@ -124,8 +124,8 @@ describe('BlocksEditor toolbar', () => {
   it('transforms the selection to a list and toggles the format', async () => {
     setup();
 
-    const unorderedListButton = screen.getByLabelText(/unordered list/i);
-    const orderedListButton = screen.getByLabelText(/^ordered list/i);
+    const unorderedListButton = screen.getByLabelText(/bulleted list/i);
+    const orderedListButton = screen.getByLabelText(/^numbered list/i);
 
     Transforms.setSelection(baseEditor, {
       anchor: { path: [0, 0], offset: 2 },

@@ -399,7 +399,7 @@ const BlocksToolbar = () => {
             <ListButton
               label={{
                 id: 'components.Blocks.blocks.unorderedList',
-                defaultMessage: 'Unordered list',
+                defaultMessage: 'Bulleted list',
               }}
               format="unordered"
               icon={BulletList}
@@ -407,7 +407,7 @@ const BlocksToolbar = () => {
             <ListButton
               label={{
                 id: 'components.Blocks.blocks.orderedList',
-                defaultMessage: 'Ordered list',
+                defaultMessage: 'Numbered list',
               }}
               format="ordered"
               icon={NumberList}
