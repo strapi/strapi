@@ -17,13 +17,13 @@ const resolveConfigPath = async ({ cwd }: { cwd: string }) => {
   }
 };
 
+/**
+ * This is the type for a parsed git config file.
+ *
+ * There's another object attached but for ease of
+ * readability we're only interested in user information.
+ */
 interface GitConfig {
-  'filter "lfs"': {
-    smudge: string;
-    process: string;
-    required: boolean;
-    clean: string;
-  };
   user: {
     name?: string;
     email?: string;

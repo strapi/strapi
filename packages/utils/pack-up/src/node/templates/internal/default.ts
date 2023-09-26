@@ -2,10 +2,15 @@ import getLatestVersion from 'get-latest-version';
 import gitUrlParse from 'git-url-parse';
 import { outdent } from 'outdent';
 
+import { isError } from '../../core/errors';
 import { parseGlobalGitConfig } from '../../core/git';
 import { PackageJson } from '../../core/pkg';
 import { definePackageFeature, definePackageOption, defineTemplate } from '../create';
 import { TemplateFile } from '../types';
+
+import { editorConfigFile } from './files/editorConfig';
+import { gitIgnoreFile } from './files/gitIgnore';
+import { prettierFile, prettierIgnoreFile } from './files/prettier';
 
 const PACKAGE_NAME_REGEXP = /^(?:@(?:[a-z0-9-*~][a-z0-9-*._~]*)\/)?[a-z0-9-~][a-z0-9-._~]*$/i;
 
@@ -25,7 +30,9 @@ const defaultTemplate = defineTemplate(async ({ logger }) => {
         type: 'text',
         message: 'git url',
         validate(v) {
-          if (!v) return true;
+          if (!v) {
+            return true;
+          }
 
           try {
             const result = gitUrlParse(v);
@@ -44,7 +51,9 @@ const defaultTemplate = defineTemplate(async ({ logger }) => {
         message: 'package name',
         initial: () => repo?.name ?? '',
         validate(v) {
-          if (!v) return 'package name is required';
+          if (!v) {
+            return 'package name is required';
+          }
 
           const match = PACKAGE_NAME_REGEXP.exec(v);
 
@@ -78,7 +87,9 @@ const defaultTemplate = defineTemplate(async ({ logger }) => {
         message: 'package license',
         initial: 'MIT',
         validate(v) {
-          if (!v) return 'license is required';
+          if (!v) {
+            return 'license is required';
+          }
 
           return true;
         },
@@ -126,6 +137,11 @@ const defaultTemplate = defineTemplate(async ({ logger }) => {
         },
         dependencies: {},
         devDependencies: {
+          /**
+           * We set * as a default version, but further down
+           * we try to resolve each package to their latest
+           * version, failing that we leave the fallback of *.
+           */
           '@strapi/pack-up': '*',
           prettier: '*',
         },
@@ -185,81 +201,25 @@ const defaultTemplate = defineTemplate(async ({ logger }) => {
 
                 devDepsToInstall.push('typescript');
 
-                // tsconfig.json
-                files.push({
-                  name: 'tsconfig.json',
-                  contents: outdent`
-                    {
-                      "include": ["src"],
-                      "exclude": ["**/*.test.ts"],
-                      compilerOptions: {
-                        "composite": false,
-                        "declaration": true,
-                        "declarationMap": true,
-                        "esModuleInterop": true,
-                        "forceConsistentCasingInFileNames": true,
-                        "inlineSources": false,
-                        "isolatedModules": true,
-                        "moduleResolution": "node",
-                        "noEmit": true,
-                        "noUnusedLocals": false,
-                        "noUnusedParameters": false,
-                        "preserveWatchOutput": true,
-                        "skipLibCheck": true,
-                        "strict": true
-                      }
-                    }
-                  `,
-                });
+                const { tsconfigBuildFile, tsconfigFile } = await import('./files/typescript');
 
-                // tsconfig.build.json
-                files.push({
-                  name: 'tsconfig.build.json',
-                  contents: outdent`
-                    {
-                      "extends": "./tsconfig",
-                      "include": ["./src"],
-                      "compilerOptions": {
-                        "rootDir": ".",
-                        "outDir": "./dist",
-                        "emitDeclarationOnly": true,
-                        "noEmit": false,
-                        "resolveJsonModule": true
-                      }
-                    }
-                  `,
-                });
-
-                // source
-                files.push({
-                  name: 'src/index.ts',
-                  contents: outdent`
-                    /**
-                     * @public
-                     */
-                    const main = () => {
-                      // silence is golden
-                    }
-
-                    export { main }
-                  `,
-                });
-              } else {
-                // source
-                files.push({
-                  name: 'src/index.js',
-                  contents: outdent`
-                    /**
-                     * @public
-                     */
-                    const main = () => {
-                      // silence is golden
-                    }
-
-                    export { main }
-                  `,
-                });
+                files.push(tsconfigFile, tsconfigBuildFile);
               }
+
+              // source
+              files.push({
+                name: isTypescript ? 'src/index.ts' : 'src/index.js',
+                contents: outdent`
+                  /**
+                   * @public
+                   */
+                  const main = () => {
+                    // silence is golden
+                  }
+
+                  export { main }
+                `,
+              });
 
               break;
             }
@@ -298,25 +258,11 @@ const defaultTemplate = defineTemplate(async ({ logger }) => {
                     },
                   ];
 
-                  // tsconfig.eslint.json
-                  files.push({
-                    name: 'tsconfig.eslint.json',
-                    contents: outdent`
-                      {
-                        "extends": "./tsconfig",
-                        "include": ["src", "*.ts", "*.js"],
-                      }
-                    `,
-                  });
-                }
+                  const { tsconfigEslintFile } = await import('./files/typescript');
 
-                // .eslintignore
-                files.push({
-                  name: '.eslintignore',
-                  contents: outdent`
-                  dist
-                  `,
-                });
+                  // tsconfig.eslint.json
+                  files.push(tsconfigEslintFile);
+                }
 
                 pkgJson.scripts = {
                   ...pkgJson.scripts,
@@ -334,13 +280,17 @@ const defaultTemplate = defineTemplate(async ({ logger }) => {
                   );
                 }
 
-                // .eslintrc
-                files.push({
-                  name: '.eslintrc',
-                  contents: outdent`
+                const { eslintIgnoreFile } = await import('./files/eslint');
+
+                files.push(
+                  {
+                    name: '.eslintrc',
+                    contents: outdent`
                     ${JSON.stringify(eslintConfig, null, 2)}
                   `,
-                });
+                  },
+                  eslintIgnoreFile
+                );
               }
 
               break;
@@ -350,35 +300,6 @@ const defaultTemplate = defineTemplate(async ({ logger }) => {
           }
         }
       }
-
-      /**
-       * PRETTIER IS INSTALLED BY DEFAULT.
-       */
-      // .prettierrc
-      files.push({
-        name: '.prettierrc',
-        contents: outdent`
-          {
-            endOfLine: 'lf'
-            tabWidth: 2,
-            printWidth: 100,
-            singleQuote: true,
-            trailingComma: 'es5',
-          }
-        `,
-      });
-
-      // .prettierignore
-      files.push({
-        name: '.prettierignore',
-        contents: outdent`
-          dist
-          coverage
-        `,
-      });
-      /**
-       * END OF PRETTIER
-       */
 
       if (repo) {
         pkgJson.repository = {
@@ -393,71 +314,13 @@ const defaultTemplate = defineTemplate(async ({ logger }) => {
 
       pkgJson.author = author.filter(Boolean).join(' ') ?? undefined;
 
-      // .editorconfig
-      files.push({
-        name: '.editorconfig',
-        contents: outdent`
-        root = true
-
-        [*]
-        indent_style = space
-        indent_size = 2
-        end_of_line = lf
-        charset = utf-8
-        trim_trailing_whitespace = true
-        insert_final_newline = true
-        
-        [{package.json,*.yml}]
-        indent_style = space
-        indent_size = 2
-        
-        [*.md]
-        trim_trailing_whitespace = false
-        `,
-      });
-
-      // .gitignore
-      files.push({
-        name: '.gitignore',
-        contents: outdent`
-        # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-        # dependencies
-        node_modules
-        .pnp
-        .pnp.js
-        
-        # testing
-        coverage
-        
-        # production
-        dist
-        
-        # misc
-        .DS_Store
-        *.pem
-        
-        # debug
-        npm-debug.log*
-        yarn-debug.log*
-        yarn-error.log*
-        
-        # local env files
-        .env
-        .env.local
-        .env.development.local
-        .env.test.local
-        .env.production.local        
-        `,
-      });
-
       try {
         pkgJson.devDependencies = await resolveLatestVerisonOfDeps([
           ...devDepsToInstall,
           ...Object.keys(pkgJson.devDependencies),
         ]);
       } catch (err) {
-        if (err instanceof Error) {
+        if (isError(err)) {
           logger.error(err.message);
         } else {
           logger.error(err);
@@ -470,6 +333,11 @@ const defaultTemplate = defineTemplate(async ({ logger }) => {
           ${JSON.stringify(pkgJson, null, 2)}
         `,
       });
+
+      /**
+       * PRETTIER IS INSTALLED BY DEFAULT.
+       */
+      files.push(prettierFile, prettierIgnoreFile, editorConfigFile, gitIgnoreFile);
 
       return files;
     },

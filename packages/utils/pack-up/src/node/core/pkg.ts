@@ -40,7 +40,7 @@ const packageJsonSchema = yup.object({
         .object({
           name: yup.string().required(),
           email: yup.string().optional(),
-          url: yup.string().required().optional(),
+          url: yup.string().optional(),
         })
         .optional();
     }

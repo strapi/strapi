@@ -1,4 +1,5 @@
 import { mkdir, writeFile } from 'fs/promises';
+import os from 'os';
 import { relative, resolve, dirname } from 'path';
 import prettier, { Config as PrettierConfig } from 'prettier';
 import prompts from 'prompts';
@@ -32,7 +33,7 @@ const createPackageFromTemplate = async (
 
   logger.info('Creating a new package at: ', relative(cwd, packagePath));
 
-  logger.debug('Loaded template:\n', template);
+  logger.debug('Loaded template:', os.EOL, template);
 
   const answers: Parameters<Template['getFiles']>[0] = [];
 
@@ -70,14 +71,14 @@ const createPackageFromTemplate = async (
       [
         'User answers: ',
         ...answers.map((ans) => `    ${ans.name}: ${JSON.stringify(ans.answer)}`),
-      ].join('\n')
+      ].join(os.EOL)
     );
   }
 
   const files = await template.getFiles(answers);
 
   logger.debug(
-    ['Files to write: ', ...files.map((f) => `    ${f.name}: ${f.contents}`)].join('\n')
+    ['Files to write: ', ...files.map((f) => `    ${f.name}: ${f.contents}`)].join(os.EOL)
   );
 
   /**
@@ -107,9 +108,9 @@ const createPackageFromTemplate = async (
         filepath: filePath,
       });
 
-      await writeFile(filePath, `${formattedContents.trim()}\n`);
+      await writeFile(filePath, `${formattedContents.trim()}${os.EOL}`);
     } catch {
-      await writeFile(filePath, `${file.contents.trim()}\n`);
+      await writeFile(filePath, `${file.contents.trim()}${os.EOL}`);
     }
 
     logger.success(`Wrote ${relative(cwd, filePath)}`);

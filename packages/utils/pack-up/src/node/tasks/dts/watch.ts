@@ -3,6 +3,8 @@ import os from 'os';
 import { Observable } from 'rxjs';
 import ts from 'typescript';
 
+import { isError } from '../../core/errors';
+
 import { printDiagnostic } from './diagnostic';
 import { DtsBaseTask } from './types';
 
@@ -99,7 +101,7 @@ const dtsWatchTask: TaskHandler<DtsWatchTask, ts.Diagnostic> = {
     printDiagnostic(diagnostic, { logger, cwd });
   },
   async fail(ctx, task, err) {
-    if (err instanceof Error) {
+    if (isError(err)) {
       ctx.logger.error(err);
     }
   },

@@ -2,6 +2,7 @@ import { resolve } from 'path';
 
 import { CommonCLIOptions } from '../types';
 
+import { isError } from './core/errors';
 import { ensurePackagePathIsViable } from './core/files';
 import { createLogger } from './core/logger';
 import { createPackageFromTemplate } from './templates/create';
@@ -47,7 +48,10 @@ export const init = async (opts: InitOptions) => {
   }
 
   await ensurePackagePathIsViable(packageRoot).catch((err) => {
-    logger.error(err.message);
+    if (isError(err)) {
+      logger.error(err.message);
+    }
+
     process.exit(1);
   });
 
