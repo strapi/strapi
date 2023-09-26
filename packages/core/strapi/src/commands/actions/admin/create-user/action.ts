@@ -34,7 +34,7 @@ interface Answers {
   confirm: boolean;
 }
 
-const promptQuestions: inquirer.QuestionCollection<Answers> = [
+const promptQuestions: inquirer.DistinctQuestion<Answers> = [
   {
     type: 'input',
     name: 'email',
