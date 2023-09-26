@@ -109,13 +109,13 @@ export const validateContentTypeInput = (data: CreateContentTypeInput) => {
 export const validateUpdateContentTypeInput = (data: CreateContentTypeInput) => {
   if (has('contentType', data)) {
     removeEmptyDefaults(data.contentType);
-    removeDeletedUIDTargetFields(data.contentType);
+    removeDeletedUIDTargetFields(data.contentType as Schema.ContentType);
   }
 
   if (has('components', data) && Array.isArray(data.components)) {
-    data.components.forEach((data) => {
-      if (has('uid', data)) {
-        removeEmptyDefaults(data);
+    data.components.forEach((comp) => {
+      if (has('uid', comp)) {
+        removeEmptyDefaults(comp as Schema.Component);
       }
     });
   }

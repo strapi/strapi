@@ -6,6 +6,7 @@ import { getService } from '../../utils';
 import { isValidKey, isValidCollectionName } from './common';
 import { getTypeValidator } from './types';
 import { getRelationValidator } from './relations';
+import { CreateContentTypeInput } from './content-type';
 
 export const createSchema = (types, relations, { modelType } = {}) => {
   const shape = {
@@ -16,7 +17,7 @@ export const createSchema = (types, relations, { modelType } = {}) => {
     collectionName: yup.string().nullable().test(isValidCollectionName),
     attributes: createAttributesValidator({ types, relations, modelType }),
     reviewWorkflows: yup.boolean(),
-  };
+  } as any;
 
   if (modelType === modelTypes.CONTENT_TYPE) {
     shape.kind = yup.string().oneOf([typeKinds.SINGLE_TYPE, typeKinds.COLLECTION_TYPE]).nullable();

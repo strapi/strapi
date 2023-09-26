@@ -1,3 +1,4 @@
+import { hasDefaultAttribute } from '../../../utils/typeguards';
 import {
   validateKind,
   validateUpdateContentTypeInput,
@@ -107,7 +108,7 @@ describe('Content type validator', () => {
 
   describe('validateUpdateContentTypeInput', () => {
     test('Deletes empty defaults', async () => {
-      const data: CreateContentTypeInput = {
+      const data = {
         contentType: {
           displayName: 'test',
           singularName: 'test',
@@ -145,17 +146,17 @@ describe('Content type validator', () => {
             },
           },
         ],
-      };
+      } as any;
 
       await validateUpdateContentTypeInput(data).then(() => {
-        expect(data.contentType?.attributes?.slug.default).toBeUndefined();
-        expect(data.components[0].attributes.title.default).toBeUndefined();
-        expect(data.components[1].attributes.title.default).toBe('');
+        expect(data.contentType.attributes.slug.default).toBeUndefined();
+        expect(data.components[0]?.attributes?.title.default).toBeUndefined();
+        expect(data.components[1]?.attributes?.title.default).toBe('');
       });
     });
 
     test('Deleted UID target fields are removed from input data', async () => {
-      const data = {
+      const data: CreateContentTypeInput = {
         contentType: {
           displayName: 'test',
           singularName: 'test',
@@ -171,11 +172,14 @@ describe('Content type validator', () => {
 
       expect.assertions(1);
 
+      expect(hasTargetField(data.contentType?.attributes?.slug)).toBe(true);
+
       await validateUpdateContentTypeInput(data).then(() => {
-        expect(data.contentType.attributes.slug.targetField).toBeUndefined();
+        expect(data.contentType?.attributes?.slug.targetField).toBeUndefined();
       });
     });
 
+    // TODO: This test seems like it can be completely removed because it's from v3
     test('Can use custom keys', async () => {
       const input: CreateContentTypeInput = {
         contentType: {
@@ -193,12 +197,12 @@ describe('Content type validator', () => {
             },
           },
         },
-      };
+      } as any;
 
       expect.assertions(1);
 
       await validateUpdateContentTypeInput(input).then((data) => {
-        expect(data.contentType.attributes).toBe(input.contentType.attributes);
+        expect(data.contentType.attributes).toBe(input.contentType?.attributes);
       });
     });
   });
