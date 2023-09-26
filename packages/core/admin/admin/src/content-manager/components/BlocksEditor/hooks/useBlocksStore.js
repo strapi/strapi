@@ -161,7 +161,7 @@ Image.propTypes = {
       alternativeText: PropTypes.string,
       width: PropTypes.number,
       height: PropTypes.number,
-    }).isRequired,
+    }),
   }).isRequired,
 };
 

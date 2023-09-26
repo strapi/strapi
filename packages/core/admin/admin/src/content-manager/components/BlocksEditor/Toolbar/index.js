@@ -202,6 +202,27 @@ ImageDialog.propTypes = {
   handleClose: PropTypes.func.isRequired,
 };
 
+const isLastBlockImageOrCode = (editor) => {
+  const { selection } = editor;
+
+  if (!selection) return false;
+
+  const [currentImageORCodeBlock] = Editor.nodes(editor, {
+    at: selection,
+    match: (n) => n.type === 'image' || n.type === 'code',
+  });
+
+  if (currentImageORCodeBlock) {
+    const [, currentNodePath] = currentImageORCodeBlock;
+
+    const isNodeAfter = Boolean(Editor.after(editor, currentNodePath));
+
+    return !isNodeAfter;
+  }
+
+  return false;
+};
+
 export const BlocksDropdown = () => {
   const editor = useSlate();
   const { formatMessage } = useIntl();
@@ -223,6 +244,18 @@ export const BlocksDropdown = () => {
     toggleBlock(editor, blocks[optionKey].value);
 
     setBlockSelected(optionKey);
+
+    if (isLastBlockImageOrCode(editor)) {
+      // insert blank line to add new blocks below code or image blocks
+      Transforms.insertNodes(
+        editor,
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: '' }],
+        },
+        { at: [editor.children.length] }
+      );
+    }
 
     if (optionKey === 'image') {
       setIsMediaLibraryVisible(true);
