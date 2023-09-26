@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import os from 'os';
 import path from 'path';
 import { Observable } from 'rxjs';
 import { build } from 'vite';
@@ -38,15 +39,15 @@ const viteWatchTask: TaskHandler<ViteWatchTask, RollupWatcherEvent> = {
         .map(
           (e) => `    ${chalk.blue(path.join(ctx.pkg.name, e.path))}: ${e.entry} -> ${task.output}`
         )
-        .join('\n'),
+        .join(os.EOL),
     ];
 
-    ctx.logger.success(msg.join('\n'));
+    ctx.logger.success(msg.join(os.EOL));
   },
   run$(ctx, task) {
     const config = resolveViteConfig(ctx, task);
 
-    ctx.logger.debug('Vite config: \n', config);
+    ctx.logger.debug(`Vite config:${os.EOL}`, config);
 
     /**
      * We need to return an observable here, but vite build

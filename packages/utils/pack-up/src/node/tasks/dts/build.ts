@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import os from 'os';
 import { Observable } from 'rxjs';
 import ts from 'typescript';
 
@@ -24,7 +25,7 @@ const dtsBuildTask: TaskHandler<DtsBuildTask> = {
       ),
     ];
 
-    ctx.logger.log(['Building type files:', ...entries].join('\n'));
+    ctx.logger.log(['Building type files:', ...entries].join(os.EOL));
   },
   run$(ctx, task) {
     return new Observable((subscriber) => {
@@ -75,10 +76,10 @@ const dtsBuildTask: TaskHandler<DtsBuildTask> = {
           (entry) =>
             `    ${chalk.blue(`${entry.importId}`)}: ${entry.sourcePath} -> ${entry.targetPath}`
         )
-        .join('\n'),
+        .join(os.EOL),
     ];
 
-    ctx.logger.success(msg.join('\n'));
+    ctx.logger.success(msg.join(os.EOL));
   },
   async fail(ctx, task, err) {
     if (err instanceof Error) {

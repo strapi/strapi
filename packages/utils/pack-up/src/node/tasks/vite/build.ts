@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import os from 'os';
 import path from 'path';
 import { Observable } from 'rxjs';
 import { build } from 'vite';
@@ -31,14 +32,14 @@ const viteBuildTask: TaskHandler<ViteBuildTask> = {
 
     ctx.logger.log(
       [`Building javascript files:`, `  format: ${task.format}`, ...targetLines, ...entries].join(
-        '\n'
+        os.EOL
       )
     );
   },
   run$(ctx, task) {
     return new Observable((subscriber) => {
       const config = resolveViteConfig(ctx, task);
-      ctx.logger.debug('Vite config: \n', config);
+      ctx.logger.debug('Vite config:', os.EOL, config);
       build(config)
         .then(() => {
           subscriber.complete();
@@ -55,10 +56,10 @@ const viteBuildTask: TaskHandler<ViteBuildTask> = {
         .map(
           (e) => `    ${chalk.blue(path.join(ctx.pkg.name, e.path))}: ${e.entry} -> ${task.output}`
         )
-        .join('\n'),
+        .join(os.EOL),
     ];
 
-    ctx.logger.success(msg.join('\n'));
+    ctx.logger.success(msg.join(os.EOL));
   },
   async fail(ctx, task, err) {
     if (err instanceof Error) {

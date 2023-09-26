@@ -1,3 +1,4 @@
+import os from 'os';
 import ts from 'typescript';
 
 import { Logger } from './logger';
@@ -32,7 +33,7 @@ const loadTsConfig = ({
 
   const parsedConfig = ts.parseJsonConfigFileContent(configFile.config, ts.sys, cwd);
 
-  logger.debug(`Loaded user TS config: \n`, parsedConfig);
+  logger.debug(`Loaded user TS config:`, os.EOL, parsedConfig);
 
   const { outDir } = parsedConfig.raw.compilerOptions;
 
@@ -49,7 +50,7 @@ const loadTsConfig = ({
     outDir,
   };
 
-  logger.debug(`Using TS config: \n`, parsedConfig);
+  logger.debug(`Using TS config:`, os.EOL, parsedConfig);
 
   return {
     config: parsedConfig,

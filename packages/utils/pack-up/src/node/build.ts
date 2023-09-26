@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import ora from 'ora';
+import os from 'os';
 
 import { CommonCLIOptions } from '../types';
 
@@ -25,7 +26,7 @@ export const build = async (opts: BuildOptions = {}) => {
   /**
    * Load the closest package.json and then verify the structure against what we expect.
    */
-  const packageJsonLoader = ora('Verifying package.json \n').start();
+  const packageJsonLoader = ora(`Verifying package.json ${os.EOL}`).start();
 
   const rawPkg = await loadPkg({ cwd, logger }).catch((err) => {
     packageJsonLoader.fail();
@@ -61,7 +62,7 @@ export const build = async (opts: BuildOptions = {}) => {
    */
   const config = await loadConfig({ cwd, logger });
 
-  const buildContextLoader = ora('Creating build context \n').start();
+  const buildContextLoader = ora(`Creating build context ${os.EOL}`).start();
 
   const extMap = getExportExtensionMap();
 
@@ -77,7 +78,7 @@ export const build = async (opts: BuildOptions = {}) => {
     process.exit(1);
   });
 
-  logger.debug('Build context: \n', ctx);
+  logger.debug(`Build context: ${os.EOL}`, ctx);
 
   const buildTasks = await createBuildTasks(ctx);
 

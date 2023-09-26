@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import os from 'os';
 import { Observable } from 'rxjs';
 import ts from 'typescript';
 
@@ -20,10 +21,10 @@ const dtsWatchTask: TaskHandler<DtsWatchTask, ts.Diagnostic> = {
           (entry) =>
             `    ${chalk.blue(`${entry.importId}`)}: ${entry.sourcePath} -> ${entry.targetPath}`
         )
-        .join('\n'),
+        .join(os.EOL),
     ];
 
-    ctx.logger.success(msg.join('\n'));
+    ctx.logger.success(msg.join(os.EOL));
   },
   run$(ctx, task) {
     let programs: Array<
