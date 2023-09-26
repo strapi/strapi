@@ -115,6 +115,11 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
         maxLength: validators.maxLength,
       };
     }
+    case 'blocks': {
+      return {
+        required: validators.required,
+      };
+    }
     case 'json': {
       return {
         default: yup.mixed().test(isValidDefaultJSON),

@@ -19,12 +19,14 @@ import {
   SingleType,
   Text,
   Uid,
+  Blocks,
 } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 const iconByTypes = {
   biginteger: Number,
+  blocks: Blocks,
   boolean: Boolean,
   collectionType: CollectionType,
   component: Component,

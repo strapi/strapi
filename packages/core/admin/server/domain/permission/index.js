@@ -35,7 +35,14 @@ const permissionFields = [
   'conditions',
   'role',
 ];
-const sanitizedPermissionFields = ['id', 'action', 'actionParameters', 'subject', 'properties', 'conditions'];
+const sanitizedPermissionFields = [
+  'id',
+  'action',
+  'actionParameters',
+  'subject',
+  'properties',
+  'conditions',
+];
 
 const sanitizePermissionFields = pick(sanitizedPermissionFields);
 

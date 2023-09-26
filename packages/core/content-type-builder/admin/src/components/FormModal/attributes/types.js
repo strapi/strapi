@@ -311,6 +311,19 @@ const types = {
 
     return yup.object(shape);
   },
+  blocks(usedAttributeNames, reservedNames) {
+    const shape = {
+      name: validators.name(usedAttributeNames, reservedNames),
+      type: validators.type(),
+      default: validators.default(),
+      unique: validators.unique(),
+      required: validators.required(),
+      maxLength: validators.maxLength(),
+      minLength: validators.minLength(),
+    };
+
+    return yup.object(shape);
+  },
   string(usedAttributeNames, reservedNames) {
     const shape = createTextShape(usedAttributeNames, reservedNames);
 

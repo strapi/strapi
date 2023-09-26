@@ -19,6 +19,7 @@ const SCALAR_TYPES = [
   'datetime',
   'timestamp',
   'boolean',
+  'blocks',
 ];
 
 const STRING_TYPES = ['string', 'text', 'uid', 'email', 'enumeration', 'richtext'];
