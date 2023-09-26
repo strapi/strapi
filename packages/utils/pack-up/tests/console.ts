@@ -1,6 +1,4 @@
 /**
- * Completely borrowed from online –> co-pilot.
- *
  * Removes the color pieces from a string, useful
  * for testing strings when you use `chalk`.
  */
