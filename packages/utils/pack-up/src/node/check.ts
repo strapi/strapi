@@ -6,7 +6,7 @@ export interface CheckOptions extends CommonCLIOptions {
   cwd?: string;
 }
 
-export const check = async (opts: CheckOptions) => {
+export const check = async (opts: CheckOptions = {}) => {
   const { silent, debug } = opts;
 
   const logger = createLogger({ silent, debug });

@@ -1,11 +1,13 @@
 import boxen from 'boxen';
 import chalk from 'chalk';
+import os from 'os';
 
 export const handleError = (err: unknown) => {
   console.error(
     chalk.red(
       `[ERROR] `,
-      'There seems to be an unexpected error, try again with --debug for more information \n'
+      'There seems to be an unexpected error, try again with --debug for more information',
+      os.EOL
     )
   );
 

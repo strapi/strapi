@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 import { program } from 'commander';
+import os from 'os';
 
 import { version } from '../../package.json';
 
@@ -41,7 +42,7 @@ program
   .on('command:*', ([invalidCmd]) => {
     console.error(
       chalk.red(
-        `[ERROR] Invalid command: ${invalidCmd}.\n See --help for a list of available commands.`
+        `[ERROR] Invalid command: ${invalidCmd}.${os.EOL} See --help for a list of available commands.`
       )
     );
 
