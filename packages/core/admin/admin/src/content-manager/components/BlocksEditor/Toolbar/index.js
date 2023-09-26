@@ -167,9 +167,8 @@ const ImageDialog = ({ handleClose }) => {
   const MediaLibraryDialog = components['media-library'];
 
   const insertImages = (images) => {
-    images.forEach((img) => {
-      const image = { type: 'image', image: img, children: [{ type: 'text', text: '' }] };
-      Transforms.insertNodes(editor, image);
+    images.forEach((image) => {
+      Transforms.setNodes(editor, { image });
     });
   };
 
