@@ -7,6 +7,7 @@ import * as fieldSizes from '../services/field-sizes';
 import * as metris from '../services/metris';
 import * as permissionChecker from '../services/permission-checker';
 import * as permission from '../services/permission';
+import * as populateBuilder from "../services/populate-builder";
 import * as uid from '../services/uid';
 
 type S = {
@@ -14,6 +15,7 @@ type S = {
   ['data-mapper']: typeof dataMapper;
   ['entity-manager']: typeof entityManager;
   ['permission-checker']: typeof permissionChecker;
+  ['populate-builder']: typeof populateBuilder;
   components: typeof components;
   configuration: typeof configuration;
   ['field-sizes']: typeof fieldSizes;
