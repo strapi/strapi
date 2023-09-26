@@ -1,5 +1,5 @@
 import { clone, isObject, isArray, isNil, curry } from 'lodash/fp';
-import type { Attribute, Model } from './types';
+import type { AnyAttribute, Model, Data } from './types';
 import { isRelationalAttribute, isMediaAttribute } from './content-types';
 
 export type VisitorUtils = ReturnType<typeof createVisitorUtils>;
@@ -8,16 +8,12 @@ export interface VisitorOptions {
   data: Record<string, unknown>;
   schema: Model;
   key: string;
-  value: Data | Data[];
-  attribute: Attribute;
+  value: Data[keyof Data];
+  attribute: AnyAttribute;
   path: Path;
 }
 
 export type Visitor = (visitorOptions: VisitorOptions, visitorUtils: VisitorUtils) => void;
-
-export interface Data {
-  [key: string]: Data | Data[];
-}
 
 export interface Path {
   raw: string | null;
@@ -131,7 +127,7 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
         }
         copy[key] = res;
       } else {
-        copy[key] = await method(visitor, newPath, value);
+        copy[key] = await method(visitor, newPath, value as Data);
       }
 
       continue;
@@ -146,7 +142,7 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
         }
         copy[key] = res;
       } else {
-        copy[key] = await traverseMediaTarget(visitor, newPath, value);
+        copy[key] = await traverseMediaTarget(visitor, newPath, value as Data);
       }
 
       continue;
@@ -162,7 +158,7 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
         }
         copy[key] = res;
       } else {
-        copy[key] = await traverseComponent(visitor, newPath, targetSchema, value);
+        copy[key] = await traverseComponent(visitor, newPath, targetSchema, value as Data);
       }
 
       continue;

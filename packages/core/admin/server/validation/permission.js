@@ -10,14 +10,12 @@ const checkPermissionsSchema = yup.object().shape({
       .object()
       .shape({
         action: yup.string().required(),
-        subject: yup.string(),
+        subject: yup.string().nullable(),
         field: yup.string(),
       })
       .noUnknown()
   ),
 });
-
-// validatePermissionsExist
 
 const checkPermissionsExist = function (permissions) {
   const existingActions = getService('permission').actionProvider.values();
@@ -48,7 +46,6 @@ const actionsExistSchema = yup
   .test('actions-exist', '', checkPermissionsExist);
 
 // exports
-
 module.exports = {
   validatedUpdatePermissionsInput: validateYupSchema(validators.updatePermissions),
   validatePermissionsExist: validateYupSchema(actionsExistSchema),

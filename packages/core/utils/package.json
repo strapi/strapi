@@ -55,6 +55,7 @@
   },
   "devDependencies": {
     "@types/koa": "2.13.4",
+    "@types/node": "18.11.9",
     "eslint-config-custom": "4.13.7",
     "koa": "2.13.4",
     "koa-body": "4.2.0",

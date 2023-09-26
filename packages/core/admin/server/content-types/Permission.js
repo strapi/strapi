@@ -29,6 +29,12 @@ module.exports = {
       configurable: false,
       required: true,
     },
+    actionParameters: {
+      type: 'json',
+      configurable: false,
+      required: false,
+      default: {},
+    },
     subject: {
       type: 'string',
       minLength: 1,

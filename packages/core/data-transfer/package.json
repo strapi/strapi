@@ -27,13 +27,13 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
-    "build:ts": "tsc",
+    "build": "run -T tsc -p tsconfig.build.json",
+    "build:ts": "run build",
     "clean": "rimraf ./dist",
     "prepublishOnly": "yarn clean && yarn build",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "tsc -w --preserveWatchOutput",
+    "watch": "tsc -p tsconfig.build.json -w --preserveWatchOutput",
     "lint": "run -T eslint ."
   },
   "files": [
@@ -42,9 +42,16 @@
   "dependencies": {
     "@strapi/logger": "4.13.7",
     "@strapi/strapi": "4.13.7",
+    "@strapi/types": "4.13.7",
+    "@strapi/utils": "4.13.7",
     "chalk": "4.1.2",
+    "cli-table3": "0.6.2",
+    "commander": "8.3.0",
     "fs-extra": "10.0.0",
+    "inquirer": "8.2.5",
     "lodash": "4.17.21",
+    "ora": "5.4.1",
+    "resolve-cwd": "3.0.0",
     "semver": "7.5.4",
     "stream-chain": "2.2.5",
     "stream-json": "1.8.0",
@@ -53,14 +60,14 @@
     "ws": "8.13.0"
   },
   "peerDependencies": {
-    "@strapi/strapi": "^4.13.3"
+    "@strapi/strapi": "^4.13.7"
   },
   "devDependencies": {
-    "@tsconfig/node16": "1.0.3",
     "@types/fs-extra": "9.0.13",
     "@types/jest": "29.5.2",
     "@types/koa": "2.13.4",
     "@types/lodash": "^4.14.191",
+    "@types/node": "18.11.9",
     "@types/semver": "7.5.0",
     "@types/stream-chain": "2.0.1",
     "@types/stream-json": "1.7.3",
