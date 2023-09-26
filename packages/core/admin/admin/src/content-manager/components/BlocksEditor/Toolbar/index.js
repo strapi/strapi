@@ -202,7 +202,7 @@ ImageDialog.propTypes = {
   handleClose: PropTypes.func.isRequired,
 };
 
-const isLastBlockImageORCode = (editor) => {
+const isLastBlockImageOrCode = (editor) => {
   const { selection } = editor;
 
   if (!selection) return false;
@@ -215,9 +215,9 @@ const isLastBlockImageORCode = (editor) => {
   if (currentImageORCodeBlock) {
     const [, currentNodePath] = currentImageORCodeBlock;
 
-    const nodeAfter = Editor.after(editor, currentNodePath);
+    const isNodeAfter = Boolean(Editor.after(editor, currentNodePath));
 
-    return !nodeAfter;
+    return !isNodeAfter;
   }
 
   return false;
@@ -245,7 +245,7 @@ export const BlocksDropdown = () => {
 
     setBlockSelected(optionKey);
 
-    if (isLastBlockImageORCode(editor)) {
+    if (isLastBlockImageOrCode(editor)) {
       // insert blank line to add new blocks below code or image blocks
       Transforms.insertNodes(
         editor,
