@@ -247,8 +247,9 @@ describe('BlocksEditor toolbar', () => {
       wrapper: Wrapper,
     });
 
-    Transforms.setSelection(baseEditor, {
+    Transforms.select(baseEditor, {
       anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
     });
 
     const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
@@ -258,6 +259,28 @@ describe('BlocksEditor toolbar', () => {
     await user.click(screen.getByRole('option', { name: 'Image' }));
 
     expect(screen.getByText(title)).toBeInTheDocument();
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'image',
+        children: [
+          {
+            type: 'text',
+            text: 'A line of text in a paragraph.',
+          },
+        ],
+      },
+      // As its the last block in the editor new empty block is added below it
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+    ]);
   });
 
   it('when code option is selected and if its the last block in the editor then new empty block should be inserted below it', async () => {
