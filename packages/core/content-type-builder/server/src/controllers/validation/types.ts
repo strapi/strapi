@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { yup } from '@strapi/utils';
 
+import type { TestContext } from 'yup';
 import { hasComponent } from '../../utils/attributes';
 import { modelTypes, VALID_UID_TARGETS } from '../../services/constants';
 import {
@@ -16,9 +17,9 @@ import {
 const maxLengthIsGreaterThanOrEqualToMinLength = {
   name: 'isGreaterThanMin',
   message: 'maxLength must be greater or equal to minLength',
-  test(value) {
+  test(this: TestContext, value: unknown) {
     const { minLength } = this.parent;
-    if (!_.isUndefined(minLength) && !_.isUndefined(value) && value < minLength) {
+    if (!_.isUndefined(minLength) && !_.isUndefined(value) && (value as number) < minLength) {
       return false;
     }
 
@@ -33,7 +34,7 @@ export const getTypeValidator = (attribute, { types, modelType, attributes }) =>
     private: yup.boolean().nullable(),
     pluginOptions: yup.object(),
     ...getTypeShape(attribute, { modelType, attributes }),
-  });
+  } as any);
 };
 
 const getTypeShape = (attribute, { modelType, attributes } = {}) => {

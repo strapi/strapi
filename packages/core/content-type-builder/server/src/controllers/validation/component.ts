@@ -60,7 +60,7 @@ export const validateUpdateComponentInput = (data: {
   component?: Attribute.Component;
   components?: Attribute.Component[];
 }) => {
-  if (_.has(data, 'component')) {
+  if (_.has(data, 'component') && data.component) {
     removeEmptyDefaults(data.component);
   }
 

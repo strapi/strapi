@@ -2,11 +2,15 @@ import path from 'path';
 import _ from 'lodash';
 
 import { nameToCollectionName, errors } from '@strapi/utils';
+import type { Attribute } from '@strapi/types';
 import { isRelation, isConfigurable } from '../../utils/attributes';
 import { typeKinds } from '../constants';
 import createSchemaHandler from './schema-handler';
+import { CreateContentTypeInput } from '../../controllers/validation/content-type';
 
-const reuseUnsetPreviousProperties = (newAttribute, oldAttribute) => {
+const { ApplicationError } = errors;
+
+const reuseUnsetPreviousProperties = (newAttribute: Attribute.Any, oldAttribute: Attribute.Any) => {
   _.defaults(
     newAttribute,
     _.omit(oldAttribute, [
@@ -67,7 +71,7 @@ export default function createComponentBuilder() {
      * @param {object} infos content type info
      * @returns {object} new content type
      */
-    createContentType(infos) {
+    createContentType(infos: CreateContentTypeInput) {
       const uid = createContentTypeUID(infos);
 
       if (this.contentTypes.has(uid)) {

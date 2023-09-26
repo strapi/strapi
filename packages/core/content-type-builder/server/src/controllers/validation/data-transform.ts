@@ -1,15 +1,20 @@
 import type { Schema } from '@strapi/types';
 import _ from 'lodash';
+import { hasDefaultAttribute } from '../../utils/typeguards';
 
 // TODO: data should be Schema.ContentType, but it has a bug that default is not a valid property
-export const removeEmptyDefaults = (data: Schema.ContentType) => {
-  if (_.has(data, 'attributes')) {
-    Object.keys(data.attributes).forEach((attribute) => {
-      if (data.attributes[attribute].default === '') {
-        data.attributes[attribute].default = undefined;
-      }
-    });
-  }
+export const removeEmptyDefaults = (
+  data: Partial<Schema.ContentType> | Partial<Schema.Component>
+) => {
+  const { attributes } = data;
+
+  Object.keys(attributes!).forEach((attributeName) => {
+    const attribute = attributes![attributeName];
+
+    if (hasDefaultAttribute(attribute) && attribute.default === '') {
+      attribute.default = undefined;
+    }
+  });
 };
 
 export const removeDeletedUIDTargetFields = (data: Schema.ContentType) => {

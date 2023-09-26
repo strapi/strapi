@@ -10,9 +10,10 @@ import { createSchema } from './model-schema';
 import { removeEmptyDefaults, removeDeletedUIDTargetFields } from './data-transform';
 import { nestedComponentSchema } from './component';
 
+// Input flattens some fields of the "info" into the root type
 export type CreateContentTypeInput = {
-  contentType?: Partial<Schema.ContentType>;
-  components?: Partial<Schema.Component>;
+  contentType?: Partial<Schema.ContentType> & Partial<Schema.ContentTypeInfo>;
+  components?: Array<Partial<Schema.Component> & Partial<Schema.Info> & { tmpUID?: UID.Component }>;
 };
 
 /**
@@ -108,13 +109,13 @@ export const validateContentTypeInput = (data: CreateContentTypeInput) => {
 export const validateUpdateContentTypeInput = (data: CreateContentTypeInput) => {
   if (has('contentType', data)) {
     removeEmptyDefaults(data.contentType);
-    removeDeletedUIDTargetFields(data.contentType);
+    removeDeletedUIDTargetFields(data.contentType as Schema.ContentType);
   }
 
   if (has('components', data) && Array.isArray(data.components)) {
-    data.components.forEach((data) => {
-      if (has('uid', data)) {
-        removeEmptyDefaults(data);
+    data.components.forEach((comp) => {
+      if (has('uid', comp)) {
+        removeEmptyDefaults(comp as Schema.Component);
       }
     });
   }

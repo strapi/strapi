@@ -1,6 +1,6 @@
-import * as components from '../services/components';
-import * as builder from '../services/builder';
-import * as contentTypes from '../services/content-types';
+import type * as components from '../services/components';
+import type builder from '../services/builder';
+import type contentTypes from '../services/content-types';
 
 type S = {
   ['content-types']: typeof contentTypes;
@@ -8,7 +8,8 @@ type S = {
   builder: typeof builder;
 };
 
-// retrieve a local service
-export const getService = <T extends keyof S>(name: T): ReturnType<S[T]> => {
+export function getService<T extends keyof S>(
+  name: T
+): S[T] extends (...args: any[]) => any ? ReturnType<S[T]> : S[T] {
   return strapi.plugin('content-type-builder').service(name);
-};
+}

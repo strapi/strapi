@@ -48,7 +48,6 @@ export const isValidCollectionName: CommonTestConfig = {
   test: (val) => val === '' || COLLECTION_NAME_REGEX.test(val as string),
 };
 
-// TODO TS: why is this one a function?
 export const isValidKey = (key: string): CommonTestConfig => ({
   name: 'isValidKey',
   message: `Attribute name '${key}' must match the following regex: ${NAME_REGEX}`,

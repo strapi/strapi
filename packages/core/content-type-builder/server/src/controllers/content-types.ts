@@ -1,4 +1,9 @@
 import _ from 'lodash';
+import type { Context } from 'koa';
+import 'koa-bodyparser';
+
+import { contentTypes } from '@strapi/utils';
+import type { UID } from '@strapi/types';
 import { getService } from '../utils';
 import {
   validateContentTypeInput,
@@ -6,10 +11,10 @@ import {
   validateKind,
 } from './validation/content-type';
 
-const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
+const { hasDraftAndPublish } = contentTypes;
 
 export default {
-  async getContentTypes(ctx) {
+  async getContentTypes(ctx: Context) {
     const { kind } = ctx.query;
 
     try {
@@ -21,15 +26,21 @@ export default {
     const contentTypeService = getService('content-types');
 
     const contentTypes = Object.keys(strapi.contentTypes)
-      .filter((uid) => !kind || _.get(strapi.contentTypes[uid], 'kind', 'collectionType') === kind)
-      .map((uid) => contentTypeService.formatContentType(strapi.contentTypes[uid]));
+      .filter(
+        (uid) =>
+          !kind ||
+          _.get(strapi.contentTypes[uid as UID.ContentType], 'kind', 'collectionType') === kind
+      )
+      .map((uid) =>
+        contentTypeService.formatContentType(strapi.contentTypes[uid as UID.ContentType])
+      );
 
     ctx.send({
       data: contentTypes,
     });
   },
 
-  getContentType(ctx) {
+  getContentType(ctx: Context) {
     const { uid } = ctx.params;
 
     const contentType = strapi.contentTypes[uid];
@@ -43,7 +54,7 @@ export default {
     ctx.send({ data: contentTypeService.formatContentType(contentType) });
   },
 
-  async createContentType(ctx) {
+  async createContentType(ctx: Context) {
     const { body } = ctx.request;
 
     try {
