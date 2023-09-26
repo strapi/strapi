@@ -188,15 +188,8 @@ const ImageDialog = ({ handleClose }) => {
     insertImages(formattedImages);
 
     if (isLastBlockType(editor, 'image')) {
-      // insert blank line to add new blocks below code or image blocks
-      Transforms.insertNodes(
-        editor,
-        {
-          type: 'paragraph',
-          children: [{ type: 'text', text: '' }],
-        },
-        { at: [editor.children.length] }
-      );
+      // insert blank line to add new blocks below image block
+      insertEmptyBlockAtLast(editor);
     }
 
     handleClose();
@@ -236,6 +229,17 @@ const isLastBlockType = (editor, type) => {
   return false;
 };
 
+const insertEmptyBlockAtLast = (editor) => {
+  Transforms.insertNodes(
+    editor,
+    {
+      type: 'paragraph',
+      children: [{ type: 'text', text: '' }],
+    },
+    { at: [editor.children.length] }
+  );
+};
+
 export const BlocksDropdown = () => {
   const editor = useSlate();
   const { formatMessage } = useIntl();
@@ -259,15 +263,8 @@ export const BlocksDropdown = () => {
     setBlockSelected(optionKey);
 
     if (isLastBlockType(editor, 'code')) {
-      // insert blank line to add new blocks below code or image blocks
-      Transforms.insertNodes(
-        editor,
-        {
-          type: 'paragraph',
-          children: [{ type: 'text', text: '' }],
-        },
-        { at: [editor.children.length] }
-      );
+      // insert blank line to add new blocks below code block
+      insertEmptyBlockAtLast(editor);
     }
 
     if (optionKey === 'image') {
