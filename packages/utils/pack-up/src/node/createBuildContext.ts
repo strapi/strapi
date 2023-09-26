@@ -2,10 +2,12 @@ import browserslistToEsbuild from 'browserslist-to-esbuild';
 import path from 'path';
 
 import { parseExports, ExtMap, Export } from './core/exports';
+import { loadTsConfig } from './core/tsconfig';
 
 import type { Config } from './core/config';
 import type { Logger } from './core/logger';
 import type { PackageJson } from './core/pkg';
+import type { ParsedCommandLine } from 'typescript';
 
 interface BuildContextArgs {
   config: Config;
@@ -34,6 +36,10 @@ interface BuildContext {
   pkg: PackageJson;
   runtime?: Runtime;
   targets: Targets;
+  ts?: {
+    config: ParsedCommandLine;
+    path: string;
+  };
 }
 
 const DEFAULT_BROWSERS_LIST_CONFIG = [
@@ -56,6 +62,12 @@ const createBuildContext = async ({
   logger,
   pkg,
 }: BuildContextArgs): Promise<BuildContext> => {
+  const tsConfig = loadTsConfig({
+    cwd,
+    path: 'tsconfig.build.json',
+    logger,
+  });
+
   const targets = {
     '*': browserslistToEsbuild(pkg.browserslist ?? DEFAULT_BROWSERS_LIST_CONFIG),
     node: browserslistToEsbuild(['node 16.0.0']),
@@ -122,6 +134,7 @@ const createBuildContext = async ({
     pkg,
     runtime: config?.runtime,
     targets,
+    ts: tsConfig,
   };
 };
 

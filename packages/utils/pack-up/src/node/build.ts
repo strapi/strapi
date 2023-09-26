@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import ora from 'ora';
+import os from 'os';
 
 import { CommonCLIOptions } from '../types';
 
@@ -8,7 +9,7 @@ import { getExportExtensionMap, validateExportsOrdering } from './core/exports';
 import { createLogger } from './core/logger';
 import { loadPkg, validatePkg } from './core/pkg';
 import { createBuildContext } from './createBuildContext';
-import { BuildTask, createBuildTasks } from './createBuildTasks';
+import { BuildTask, createBuildTasks } from './createTasks';
 import { TaskHandler, taskHandlers } from './tasks';
 
 export interface BuildOptions extends CommonCLIOptions {
@@ -17,7 +18,7 @@ export interface BuildOptions extends CommonCLIOptions {
   sourcemap?: boolean;
 }
 
-export const build = async (opts: BuildOptions) => {
+export const build = async (opts: BuildOptions = {}) => {
   const { silent, debug, cwd = process.cwd(), ...configOptions } = opts;
 
   const logger = createLogger({ silent, debug });
@@ -25,7 +26,7 @@ export const build = async (opts: BuildOptions) => {
   /**
    * Load the closest package.json and then verify the structure against what we expect.
    */
-  const packageJsonLoader = ora('Verifying package.json \n').start();
+  const packageJsonLoader = ora(`Verifying package.json ${os.EOL}`).start();
 
   const rawPkg = await loadPkg({ cwd, logger }).catch((err) => {
     packageJsonLoader.fail();
@@ -61,11 +62,7 @@ export const build = async (opts: BuildOptions) => {
    */
   const config = await loadConfig({ cwd, logger });
 
-  if (config) {
-    logger.debug('Loaded configuration: \n', config);
-  }
-
-  const buildContextLoader = ora('Creating build context \n').start();
+  const buildContextLoader = ora(`Creating build context ${os.EOL}`).start();
 
   const extMap = getExportExtensionMap();
 
@@ -81,7 +78,7 @@ export const build = async (opts: BuildOptions) => {
     process.exit(1);
   });
 
-  logger.debug('Build context: \n', ctx);
+  logger.debug(`Build context: ${os.EOL}`, ctx);
 
   const buildTasks = await createBuildTasks(ctx);
 
@@ -104,12 +101,15 @@ export const build = async (opts: BuildOptions) => {
 
     handler.print(ctx, task);
 
-    await handler.run(ctx, task).catch((err) => {
-      if (err instanceof Error) {
-        logger.error(err.message);
-      }
+    const result$ = handler.run$(ctx, task);
 
-      process.exit(1);
+    result$.subscribe({
+      complete() {
+        handler.success(ctx, task);
+      },
+      error(err) {
+        handler.fail(ctx, task, err);
+      },
     });
   }
 };

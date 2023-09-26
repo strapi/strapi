@@ -53,18 +53,21 @@
     "prepublishOnly": "yarn clean",
     "test": "test:ts && test:unit",
     "test:unit": "run -T jest",
-    "test:ts": "run -T tsc --noEmit"
+    "test:ts": "run -T tsc --noEmit",
+    "watch": "node --loader esbuild-register/loader -r esbuild-register scripts/watch"
   },
   "dependencies": {
     "@vitejs/plugin-react": "4.0.4",
     "boxen": "5.1.2",
     "browserslist-to-esbuild": "1.2.0",
     "chalk": "4.1.2",
+    "chokidar": "3.5.3",
     "commander": "8.3.0",
     "esbuild": "0.19.2",
     "esbuild-register": "3.4.2",
     "ora": "5.4.1",
     "pkg-up": "3.1.0",
+    "rxjs": "7.8.1",
     "typescript": "5.2.2",
     "vite": "4.4.9",
     "yup": "0.32.9"

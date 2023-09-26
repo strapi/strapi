@@ -1,3 +1,5 @@
+import os from 'os';
+
 import { Logger } from './logger';
 import { PackageJson } from './pkg';
 
@@ -327,7 +329,7 @@ const parseExports = ({ extMap, pkg }: { extMap: ExtMap; pkg: PackageJson }) => 
   errors.push(...validateExports(_exports, { extMap, pkg }));
 
   if (errors.length) {
-    throw new Error(`\n- ${errors.join('\n- ')}`);
+    throw new Error(`${os.EOL}- ${errors.join(`${os.EOL}- `)}`);
   }
 
   return _exports;

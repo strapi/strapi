@@ -1,5 +1,6 @@
 import { register } from 'esbuild-register/dist/node';
 import * as fs from 'fs';
+import os from 'os';
 import * as path from 'path';
 import pkgUp from 'pkg-up';
 
@@ -50,7 +51,13 @@ const loadConfig = async ({ cwd, logger }: LoadConfigOptions): Promise<Config | 
       /**
        * handles esm or cjs exporting.
        */
-      return mod?.default || mod || undefined;
+      const config = mod?.default || mod || undefined;
+
+      if (config) {
+        logger.debug('Loaded configuration:', os.EOL, config);
+      }
+
+      return config;
     }
   }
 
@@ -89,5 +96,5 @@ const defineConfig = (configOptions: ConfigOptions): ConfigOptions => configOpti
 
 type Config = ConfigOptions;
 
-export { loadConfig, defineConfig };
+export { loadConfig, defineConfig, CONFIG_FILE_NAMES };
 export type { Config };

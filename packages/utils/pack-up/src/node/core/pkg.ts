@@ -5,6 +5,7 @@
  */
 import chalk from 'chalk';
 import fs from 'fs/promises';
+import os from 'os';
 import pkgUp from 'pkg-up';
 import * as yup from 'yup';
 
@@ -123,7 +124,7 @@ const loadPkg = async ({ cwd, logger }: { cwd: string; logger: Logger }): Promis
 
   const pkg = JSON.parse(buffer.toString());
 
-  logger.debug('Loaded package.json: \n', pkg);
+  logger.debug('Loaded package.json:', os.EOL, pkg);
 
   return pkg;
 };
