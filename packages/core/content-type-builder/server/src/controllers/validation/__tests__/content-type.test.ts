@@ -1,4 +1,3 @@
-import { hasDefaultAttribute } from '../../../utils/typeguards';
 import {
   validateKind,
   validateUpdateContentTypeInput,
