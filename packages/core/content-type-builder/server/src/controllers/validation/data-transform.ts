@@ -8,12 +8,8 @@ export const removeEmptyDefaults = (
 ) => {
   const { attributes } = data;
 
-  if (!attributes) {
-    return;
-  }
-
-  Object.keys(attributes).forEach((attributeName) => {
-    const attribute = attributes[attributeName];
+  Object.keys(attributes!).forEach((attributeName) => {
+    const attribute = attributes![attributeName];
 
     if (hasDefaultAttribute(attribute) && attribute.default === '') {
       attribute.default = undefined;

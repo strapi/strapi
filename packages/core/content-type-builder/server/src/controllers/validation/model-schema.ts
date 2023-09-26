@@ -6,9 +6,19 @@ import { getService } from '../../utils';
 import { isValidKey, isValidCollectionName } from './common';
 import { getTypeValidator } from './types';
 import { getRelationValidator } from './relations';
-import { CreateContentTypeInput } from './content-type';
 
-export const createSchema = (types, relations, { modelType } = {}) => {
+type ModelTypeInput = (typeof modelTypes)[keyof typeof modelTypes];
+
+type CreateAttributesInput = {
+  types: any;
+  relations: string[];
+  modelType?: ModelTypeInput;
+};
+export const createSchema = (
+  types: any,
+  relations: string[],
+  { modelType }: { modelType?: ModelTypeInput } = {}
+) => {
   const shape = {
     description: yup.string(),
     draftAndPublish: yup.boolean(),
@@ -26,7 +36,7 @@ export const createSchema = (types, relations, { modelType } = {}) => {
   return yup.object(shape).noUnknown();
 };
 
-const createAttributesValidator = ({ types, modelType, relations }) => {
+const createAttributesValidator = ({ types, modelType, relations }: CreateAttributesInput) => {
   return yup.lazy((attributes) => {
     return yup
       .object()

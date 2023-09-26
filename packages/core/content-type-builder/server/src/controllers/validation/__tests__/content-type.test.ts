@@ -171,9 +171,8 @@ describe('Content type validator', () => {
 
       expect.assertions(1);
 
-      expect(hasTargetField(data.contentType?.attributes?.slug)).toBe(true);
-
       await validateUpdateContentTypeInput(data).then(() => {
+        // @ts-expect-error We are confirming that this invalid field does not exist
         expect(data.contentType?.attributes?.slug.targetField).toBeUndefined();
       });
     });

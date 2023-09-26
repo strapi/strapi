@@ -10,7 +10,7 @@ describe('Data transform', () => {
             default: '',
           },
         },
-      };
+      } as any;
 
       removeEmptyDefaults(data);
 
