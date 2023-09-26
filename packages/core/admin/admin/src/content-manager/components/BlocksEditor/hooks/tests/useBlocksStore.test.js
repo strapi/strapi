@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render, screen, renderHook } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
 import { createEditor, Editor, Transforms } from 'slate';
@@ -15,6 +16,8 @@ const initialValue = [
     children: [{ text: 'A line of text in a paragraph.' }],
   },
 ];
+
+const user = userEvent.setup();
 
 const baseEditor = createEditor();
 
@@ -224,7 +227,7 @@ describe('useBlocksStore', () => {
     render(
       result.current.link.renderElement({
         children: 'Some link',
-        element: { url: 'https://example.com' },
+        element: { url: 'https://example.com', children: [{ text: 'Some' }, { text: ' link' }] },
         attributes: {},
       }),
       {
@@ -234,6 +237,30 @@ describe('useBlocksStore', () => {
     const link = screen.getByRole('link', 'Some link');
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', 'https://example.com');
+  });
+
+  it('renders a popover for each link and its opened when users click the link', async () => {
+    const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
+
+    render(
+      result.current.link.renderElement({
+        children: 'Some link',
+        element: { url: 'https://example.com', children: [{ text: 'Some' }, { text: ' link' }] },
+        attributes: {},
+      }),
+      {
+        wrapper: Wrapper,
+      }
+    );
+    const link = screen.getByRole('link', 'Some link');
+
+    expect(screen.queryByLabelText(/Delete/i, { selector: 'button' })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/Edit/i, { selector: 'button' })).not.toBeInTheDocument();
+
+    await user.click(link);
+
+    expect(screen.queryByLabelText(/Delete/i, { selector: 'button' })).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Edit/i, { selector: 'button' })).toBeInTheDocument();
   });
 
   it('renders a code block properly', () => {

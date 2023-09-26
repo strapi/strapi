@@ -289,8 +289,20 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                   size="L"
                   variant="danger"
                   onClick={() => removeLink(editor)}
+                  label={formatMessage({
+                    id: 'components.Blocks.popover.delete',
+                    defaultMessage: 'Delete',
+                  })}
                 />
-                <IconButton icon={<Pencil />} size="L" onClick={() => setIsEditing(true)} />
+                <IconButton
+                  icon={<Pencil />}
+                  size="L"
+                  onClick={() => setIsEditing(true)}
+                  label={formatMessage({
+                    id: 'components.Blocks.popover.edit',
+                    defaultMessage: 'Edit',
+                  })}
+                />
               </Flex>
             </Flex>
           )}

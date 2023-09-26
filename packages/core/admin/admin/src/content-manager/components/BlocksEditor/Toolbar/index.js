@@ -1,23 +1,7 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
-<<<<<<< HEAD
-import {
-  Icon,
-  Tooltip,
-  Select,
-  Option,
-  Popover,
-  Field,
-  FieldLabel,
-  FieldInput,
-  Flex,
-  Box,
-  Typography,
-} from '@strapi/design-system';
-=======
-import { Icon, Tooltip, Select, Option, Flex } from '@strapi/design-system';
->>>>>>> 7209a381b8 (fixs on the link button)
+import { Icon, Tooltip, Select, Option, Flex, Box, Typography } from '@strapi/design-system';
 import { pxToRem, prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
 import { BulletList, NumberList, Link } from '@strapi/icons';
 import PropTypes from 'prop-types';
