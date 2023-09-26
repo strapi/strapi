@@ -1,10 +1,11 @@
 import path from 'path';
+import type { UID } from '@strapi/types';
 import _ from 'lodash';
 import pluralize from 'pluralize';
 
 import { nameToSlug, nameToCollectionName, errors } from '@strapi/utils';
 import { isConfigurable } from '../../utils/attributes';
-import createSchemaHandler from './schema-handler';
+import createSchemaHandler, { Infos } from './schema-handler';
 
 const { ApplicationError } = errors;
 
@@ -69,7 +70,7 @@ export default function createComponentBuilder() {
     /**
      * create a component in the tmpComponent map
      */
-    editComponent(infos) {
+    editComponent(infos: Infos): void {
       const { uid } = infos;
 
       if (!this.components.has(uid)) {
@@ -117,7 +118,7 @@ export default function createComponentBuilder() {
       return component;
     },
 
-    deleteComponent(uid) {
+    deleteComponent(uid: UID.Component) {
       if (!this.components.has(uid)) {
         throw new errors.ApplicationError('component.notFound');
       }

@@ -13,7 +13,7 @@ export type Infos = {
   dir: string;
   filename: string;
   // TODO type this
-  schema?: Schema.Schema;
+  schema: Schema.Schema;
 };
 
 export default function createSchemaHandler(infos: Infos) {
@@ -26,11 +26,7 @@ export default function createSchemaHandler(infos: Infos) {
     uid,
     dir,
     filename,
-    schema: schema || {
-      info: {},
-      options: {},
-      attributes: {},
-    },
+    schema,
   };
 
   const state = _.cloneDeep(initialState);

@@ -7,13 +7,13 @@ import createSchemaHandler from './schema-handler';
 import createComponentBuilder from './component-builder';
 import createContentTypeBuilder from './content-type-builder';
 
-interface ComponentInput extends Schema.Component {
+export interface ComponentInput extends Schema.Component {
   __filename__: string;
   __schema__: Schema.Schema;
   config: object;
 }
 
-interface Component extends Pick<Schema.Component, 'modelName' | 'uid'> {
+export interface Component extends Pick<Schema.Component, 'modelName' | 'uid'> {
   category: string;
   plugin: string;
   filename: string;
@@ -22,7 +22,7 @@ interface Component extends Pick<Schema.Component, 'modelName' | 'uid'> {
   config: object;
 }
 
-interface ContentTypeInput extends Schema.ContentType {
+export interface ContentTypeInput extends Schema.ContentType {
   __schema__: Schema.Schema;
   plugin: string;
   apiName: string;
@@ -30,7 +30,7 @@ interface ContentTypeInput extends Schema.ContentType {
   dir: string;
 }
 
-interface ContentType extends Pick<Schema.ContentType, 'modelName' | 'uid'> {
+export interface ContentType extends Pick<Schema.ContentType, 'modelName' | 'uid'> {
   filename: string;
   dir: string;
   schema: Schema.Schema;
