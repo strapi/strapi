@@ -34,7 +34,13 @@ interface Answers {
   confirm: boolean;
 }
 
-const promptQuestions: inquirer.DistinctQuestion<Answers> = [
+/**
+ * It's not an observable, in reality this is
+ * `ReadOnlyArray<inquirer.DistinctQuestion<Answers>>`
+ * but then the logic of the validate function needs to change.
+ */
+// eslint-disable-next-line rxjs/finnish
+const promptQuestions: inquirer.QuestionCollection<Answers> = [
   {
     type: 'input',
     name: 'email',
