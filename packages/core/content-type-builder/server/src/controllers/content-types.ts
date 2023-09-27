@@ -89,16 +89,16 @@ export default {
       setImmediate(() => strapi.reload());
 
       ctx.send({ data: { uid: contentType.uid } }, 201);
-    } catch (error) {
-      strapi.log.error(error);
+    } catch (err) {
+      strapi.log.error(err);
       await strapi.telemetry.send('didNotCreateContentType', {
-        eventProperties: { error: error.message },
+        eventProperties: { error: (err as Error).message || err },
       });
-      ctx.send({ error: error.message }, 400);
+      ctx.send({ error: (err as Error).message || 'Unknown error' }, 400);
     }
   },
 
-  async updateContentType(ctx) {
+  async updateContentType(ctx: Context) {
     const { uid } = ctx.params;
     const { body } = ctx.request;
 
@@ -127,11 +127,11 @@ export default {
       ctx.send({ data: { uid: component.uid } }, 201);
     } catch (error) {
       strapi.log.error(error);
-      ctx.send({ error: error.message }, 400);
+      ctx.send({ error: (error as Error)?.message || 'Unknown error' }, 400);
     }
   },
 
-  async deleteContentType(ctx) {
+  async deleteContentType(ctx: Context) {
     const { uid } = ctx.params;
 
     if (!_.has(strapi.contentTypes, uid)) {
@@ -150,7 +150,7 @@ export default {
       ctx.send({ data: { uid: component.uid } });
     } catch (error) {
       strapi.log.error(error);
-      ctx.send({ error: error.message }, 400);
+      ctx.send({ error: (error as Error)?.message || 'Unknown error' }, 400);
     }
   },
 };

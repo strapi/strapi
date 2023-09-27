@@ -4,9 +4,9 @@ import { hasDefaultAttribute } from '../../utils/typeguards';
 
 // TODO: data should be Schema.ContentType, but it has a bug that default is not a valid property
 export const removeEmptyDefaults = (
-  data: Partial<Schema.ContentType> | Partial<Schema.Component>
+  data: Partial<Schema.ContentType> | Partial<Schema.Component> | undefined
 ) => {
-  const { attributes } = data;
+  const { attributes } = data || {};
 
   Object.keys(attributes!).forEach((attributeName) => {
     const attribute = attributes![attributeName];

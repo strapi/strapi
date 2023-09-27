@@ -10,13 +10,14 @@ import { getRelationValidator } from './relations';
 type ModelTypeInput = (typeof modelTypes)[keyof typeof modelTypes];
 
 type CreateAttributesInput = {
-  types: any;
-  relations: string[];
+  types: ReadonlyArray<string>;
+  relations: ReadonlyArray<string>;
   modelType?: ModelTypeInput;
 };
+
 export const createSchema = (
-  types: any,
-  relations: string[],
+  types: CreateAttributesInput['types'],
+  relations: CreateAttributesInput['relations'],
   { modelType }: { modelType?: ModelTypeInput } = {}
 ) => {
   const shape = {

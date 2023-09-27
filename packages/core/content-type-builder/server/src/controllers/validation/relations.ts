@@ -1,13 +1,13 @@
 import { isUndefined } from 'lodash/fp';
 import { yup } from '@strapi/utils';
 import type { TestContext, TestFunction } from 'yup';
-import type { Attribute, Schema } from '@strapi/types';
+import type { Attribute } from '@strapi/types';
 import { typeKinds, coreUids } from '../../services/constants';
 import { isValidName } from './common';
 
 const STRAPI_USER_RELATIONS = ['oneToOne', 'oneToMany'];
 
-const isValidRelation = (validNatures: string[]): TestFunction<string | undefined> =>
+const isValidRelation = (validNatures: ReadonlyArray<string>): TestFunction<string | undefined> =>
   function (this: TestContext, value) {
     // NOTE: In case of an undefined value, delegate the check to .required()
     if (value === undefined) {
@@ -31,7 +31,10 @@ const isValidRelation = (validNatures: string[]): TestFunction<string | undefine
         });
   };
 
-export const getRelationValidator = (attribute: Attribute.Relation, allowedRelations: string[]) => {
+export const getRelationValidator = (
+  attribute: Attribute.Relation,
+  allowedRelations: ReadonlyArray<string>
+) => {
   const contentTypesUIDs = Object.keys(strapi.contentTypes)
     .filter((key) => strapi.contentTypes[key as any].kind === typeKinds.COLLECTION_TYPE)
     .filter((key) => !key.startsWith(coreUids.PREFIX) || key === coreUids.STRAPI_USER)

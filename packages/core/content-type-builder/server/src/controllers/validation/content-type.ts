@@ -3,7 +3,7 @@
 import { flatMap, getOr, has } from 'lodash/fp';
 import { yup, validateYupSchema } from '@strapi/utils';
 
-import type { Schema, UID } from '@strapi/types';
+import type { Schema, Shared, UID } from '@strapi/types';
 import { getService } from '../../utils';
 import { modelTypes, DEFAULT_TYPES, typeKinds } from '../../services/constants';
 import { createSchema } from './model-schema';
@@ -140,10 +140,10 @@ const forbiddenContentTypeNameValidator = () => {
 };
 
 const nameIsAvailable = (isEdition: boolean) => {
-  // TODO TS: if strapi.contentTypes (ie, ContentTypes) is an ArrayLike and is used like this, we may want to ensure it is typed so that it can be without using as
-  const usedNames = flatMap((ct) => {
+  // TODO TS: if strapi.contentTypes (ie, ContentTypes) works as an ArrayLike and is used like this, we may want to ensure it is typed so that it can be without using as
+  const usedNames = flatMap((ct: Schema.ContentType) => {
     return [ct.info?.singularName, ct.info?.pluralName];
-  })(strapi.contentTypes as any);
+  })(strapi.contentTypes as Shared.ContentTypes);
 
   return {
     name: 'nameAlreadyUsed',
