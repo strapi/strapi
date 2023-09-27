@@ -320,4 +320,19 @@ describe('BlocksEditor toolbar', () => {
       },
     ]);
   });
+
+  it('should disable the button when the selection is collapsed', async () => {
+    setup();
+
+    const LinkButton = screen.getByLabelText(/link/i);
+
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0], offset: 2 },
+      focus: { path: [0, 0], offset: 2 },
+    });
+
+    await user.click(LinkButton);
+
+    expect(LinkButton).toHaveAttribute('data-state', 'off');
+  });
 });

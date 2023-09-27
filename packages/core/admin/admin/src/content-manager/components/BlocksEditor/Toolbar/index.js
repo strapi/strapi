@@ -3,15 +3,16 @@ import * as React from 'react';
 import * as Toolbar from '@radix-ui/react-toolbar';
 import { Flex, Icon, Tooltip, Select, Option, Box, Typography } from '@strapi/design-system';
 import { pxToRem, prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
-import { BulletList, NumberList } from '@strapi/icons';
+import { BulletList, NumberList, Link } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Editor, Transforms, Element as SlateElement } from 'slate';
+import { Editor, Transforms, Element as SlateElement, Range, Path } from 'slate';
 import { useSlate } from 'slate-react';
 import styled from 'styled-components';
 
 import { useBlocksStore } from '../hooks/useBlocksStore';
 import { useModifiersStore } from '../hooks/useModifiersStore';
+import { insertLink } from '../utils/links';
 
 const Separator = styled(Toolbar.Separator)`
   background: ${({ theme }) => theme.colors.neutral150};
@@ -25,7 +26,7 @@ const FlexButton = styled(Flex).attrs({ as: 'button' })`
   }
 `;
 
-const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
+const ToolbarButton = ({ icon, name, label, isActive, handleClick, disabled = false }) => {
   const { formatMessage } = useIntl();
   const labelMessage = formatMessage(label);
 
@@ -33,6 +34,7 @@ const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
     <Tooltip description={labelMessage}>
       <Toolbar.ToggleItem value={name} data-state={isActive ? 'on' : 'off'} asChild>
         <FlexButton
+          disabled={disabled}
           background={isActive ? 'primary100' : ''}
           alignItems="center"
           justifyContent="center"
@@ -52,6 +54,10 @@ const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
   );
 };
 
+ToolbarButton.defaultProps = {
+  disabled: false,
+};
+
 ToolbarButton.propTypes = {
   icon: PropTypes.elementType.isRequired,
   name: PropTypes.string.isRequired,
@@ -61,6 +67,7 @@ ToolbarButton.propTypes = {
   }).isRequired,
   isActive: PropTypes.bool.isRequired,
   handleClick: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
 };
 
 const ModifierButton = ({ icon, name, label }) => {
@@ -394,6 +401,53 @@ ListButton.propTypes = {
   }).isRequired,
 };
 
+const LinkButton = () => {
+  const editor = useSlate();
+
+  const isLinkActive = () => {
+    if (!editor.selection) return false;
+
+    const [match] = Array.from(
+      Editor.nodes(editor, {
+        at: Editor.unhangRange(editor, editor.selection),
+        match: (node) =>
+          !Editor.isEditor(node) && SlateElement.isElement(node) && node.type === 'link',
+      })
+    );
+
+    return Boolean(match);
+  };
+
+  const isActive = isLinkActive();
+
+  const addLink = () => {
+    // We insert an empty anchor, so we split the DOM to have a element we can use as reference for the popover
+    insertLink(editor, { url: '', text: Editor.string(editor, editor.selection) });
+  };
+
+  const selectionIsCollapsed = editor.selection && Range.isCollapsed(editor.selection);
+  const selectionIsInSameBlock =
+    editor.selection &&
+    Path.equals(
+      Path.parent(editor.selection.focus.path),
+      Path.parent(editor.selection.anchor.path)
+    );
+
+  return (
+    <ToolbarButton
+      icon={Link}
+      name="link"
+      label={{
+        id: 'components.Blocks.link',
+        defaultMessage: 'Link',
+      }}
+      isActive={isActive}
+      handleClick={addLink}
+      disabled={selectionIsCollapsed || !selectionIsInSameBlock}
+    />
+  );
+};
+
 // TODO: Remove after the RTE Blocks Alpha release
 const AlphaTag = styled(Box)`
   background-color: ${({ theme }) => theme.colors.warning100};
@@ -424,6 +478,7 @@ const BlocksToolbar = () => {
                 handleClick={modifier.handleToggle}
               />
             ))}
+            <LinkButton />
           </Flex>
         </Toolbar.ToggleGroup>
         <Separator />
