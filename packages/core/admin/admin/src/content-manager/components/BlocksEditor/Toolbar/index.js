@@ -119,7 +119,7 @@ const isBlockActive = (editor, matchNode) => {
   return match.length > 0;
 };
 
-const toggleBlock = (editor, value) => {
+const setBlock = (editor, value) => {
   const { type, level } = value;
 
   const newProperties = {
@@ -235,15 +235,15 @@ export const BlocksDropdown = () => {
     return block.isInBlocksSelector ? [...currentKeys, key] : currentKeys;
   }, []);
 
-  const [blockSelected, setBlockSelected] = React.useState(Object.keys(blocks)[0]);
+  const [selectedOption, setSelectedOption] = React.useState(Object.keys(blocks)[0]);
 
   /**
    * @param {string} optionKey - key of the heading selected
    */
-  const selectOption = (optionKey) => {
-    toggleBlock(editor, blocks[optionKey].value);
+  const handleSelectOption = (optionKey) => {
+    setBlock(editor, blocks[optionKey].value);
 
-    setBlockSelected(optionKey);
+    setSelectedOption(optionKey);
 
     if (isLastBlockImageOrCode(editor)) {
       // insert blank line to add new blocks below code or image blocks
@@ -265,10 +265,10 @@ export const BlocksDropdown = () => {
   return (
     <>
       <Select
-        startIcon={<Icon as={blocks[blockSelected].icon} />}
-        onChange={selectOption}
-        placeholder={blocks[blockSelected].label}
-        value={blockSelected}
+        startIcon={<Icon as={blocks[selectedOption].icon} />}
+        onChange={handleSelectOption}
+        placeholder={blocks[selectedOption].label}
+        value={selectedOption}
         aria-label={formatMessage({
           id: 'components.Blocks.blocks.selectBlock',
           defaultMessage: 'Select a block',
@@ -281,8 +281,8 @@ export const BlocksDropdown = () => {
             label={blocks[key].label}
             icon={blocks[key].icon}
             matchNode={blocks[key].matchNode}
-            handleSelection={setBlockSelected}
-            blockSelected={blockSelected}
+            handleSelectOption={setSelectedOption}
+            selectedOption={selectedOption}
           />
         ))}
       </Select>
@@ -291,22 +291,24 @@ export const BlocksDropdown = () => {
   );
 };
 
-const BlockOption = ({ value, icon, label, handleSelection, blockSelected, matchNode }) => {
+const BlockOption = ({ value, icon, label, handleSelectOption, selectedOption, matchNode }) => {
   const { formatMessage } = useIntl();
   const editor = useSlate();
 
   const isActive = isBlockActive(editor, matchNode);
-  const isSelected = value === blockSelected;
+  const isSelectedOption = value === selectedOption;
 
+  // Check if the actual option is selected in the editor (if the block is active)
+  // and update the Dropdown accordingly if the active options is not the selected one
   React.useEffect(() => {
-    if (isActive && !isSelected) {
-      handleSelection(value);
+    if (isActive && !isSelectedOption) {
+      handleSelectOption(value);
     }
-  }, [handleSelection, isActive, isSelected, value]);
+  }, [handleSelectOption, isActive, isSelectedOption, value]);
 
   return (
     <Option
-      startIcon={<Icon as={icon} color={isSelected ? 'primary600' : 'neutral600'} />}
+      startIcon={<Icon as={icon} color={isSelectedOption ? 'primary600' : 'neutral600'} />}
       value={value}
     >
       {formatMessage(label)}
@@ -322,8 +324,8 @@ BlockOption.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
   }).isRequired,
   matchNode: PropTypes.func.isRequired,
-  handleSelection: PropTypes.func.isRequired,
-  blockSelected: PropTypes.string.isRequired,
+  handleSelectOption: PropTypes.func.isRequired,
+  selectedOption: PropTypes.string.isRequired,
 };
 
 const ListButton = ({ icon, format, label }) => {

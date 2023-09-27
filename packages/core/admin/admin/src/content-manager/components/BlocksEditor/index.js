@@ -20,14 +20,6 @@ const EditorDivider = styled(Divider)`
 `;
 
 const Wrapper = styled(Box)`
-  width: 100%;
-  max-height: 512px;
-  overflow: auto;
-  padding: ${({ theme }) => `${theme.spaces[3]} ${theme.spaces[4]}`};
-  font-size: ${({ theme }) => theme.fontSizes[2]};
-  background-color: ${({ theme }) => theme.colors.neutral0};
-  color: ${({ theme }) => theme.colors.neutral800};
-  line-height: ${({ theme }) => theme.lineHeights[6]};
   border-radius: ${({ theme }) => theme.borderRadius};
 `;
 
@@ -67,6 +59,8 @@ const BlocksEditor = React.forwardRef(
       }
     };
 
+    const defaultValue = value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }];
+
     return (
       <>
         <Flex direction="column" alignItems="stretch" gap={1}>
@@ -76,15 +70,23 @@ const BlocksEditor = React.forwardRef(
               {required && <TypographyAsterisk textColor="danger600">*</TypographyAsterisk>}
             </Typography>
           </Flex>
-          <Slate
-            editor={editor}
-            initialValue={value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]}
-            onChange={handleSlateChange}
-          >
+          <Slate editor={editor} initialValue={defaultValue} onChange={handleSlateChange}>
             <InputWrapper direction="column" alignItems="flex-start">
               <BlocksToolbar />
               <EditorDivider width="100%" />
-              <Wrapper>
+              <Wrapper
+                width="100%"
+                maxHeight="512px"
+                overflow="auto"
+                paddingTop={3}
+                paddingRight={4}
+                paddingDown={3}
+                paddingLeft={4}
+                fontSize={2}
+                background="neutral0"
+                color="neutral800"
+                lineHeight={6}
+              >
                 <BlocksInput readOnly={readOnly} />
               </Wrapper>
             </InputWrapper>
