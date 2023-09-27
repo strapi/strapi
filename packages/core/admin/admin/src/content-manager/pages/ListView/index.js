@@ -731,7 +731,7 @@ function ListView({
                 >
                   {data.map((rowData, index) => {
                     return (
-                      <Tr cursor="pointer" key={data.id} onClick={handleRowClick(rowData.id)}>
+                      <Tr cursor="pointer" key={rowData.id} onClick={handleRowClick(rowData.id)}>
                         {/* Bulk action row checkbox */}
                         <Td>
                           <Body.CheckboxDataCell rowId={rowData.id} index={index} />
