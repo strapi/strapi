@@ -2,6 +2,7 @@ export * from './base';
 
 export * from './biginteger';
 export * from './boolean';
+export * from './blocks';
 export * from './component';
 export * from './decimal';
 export * from './dynamic-zone';
