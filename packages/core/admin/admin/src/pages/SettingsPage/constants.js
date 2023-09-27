@@ -164,4 +164,37 @@ export const ROUTES_CE = [
     to: '/settings/transfer-tokens/:id',
     exact: true,
   },
+  {
+    async Component() {
+      const component = await import(
+        /* webpackChunkName: "transfer-tokens-edit-page" */ './pages/AuditLogs/View'
+      );
+
+      return component;
+    },
+    to: '/settings/purchase-audit-logs',
+    exact: true,
+  },
+  {
+    async Component() {
+      const component = await import(
+        /* webpackChunkName: "transfer-tokens-edit-page" */ './pages/ReviewWorkflows/View'
+      );
+
+      return component;
+    },
+    to: '/settings/purchase-review-workflows',
+    exact: true,
+  },
+  {
+    async Component() {
+      const component = await import(
+        /* webpackChunkName: "transfer-tokens-edit-page" */ './pages/SingleSignOn/View'
+      );
+
+      return component;
+    },
+    to: '/settings/purchase-single-sign-on',
+    exact: true,
+  },
 ];
