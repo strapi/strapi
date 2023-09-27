@@ -191,7 +191,7 @@ export async function addDefaultField({
       await page.getByRole('option', { name: attachedField }).click();
       break;
 
-    case 'Component':
+    case 'Component': {
       await page
         .getByRole('button', { name: 'Component Group of fields that you can repeat or reuse' })
         .click();
@@ -210,8 +210,6 @@ export async function addDefaultField({
           .first()
           .click();
 
-        await page.getByRole('button', { name: 'Select a component' }).click();
-
         await page.getByLabel('Select a component').click();
         // TODO: can we make this work using a filter without category?
         await page.getByLabel(`${existingComponentCategory} - ${existingComponentName}`).click();
@@ -229,12 +227,49 @@ export async function addDefaultField({
           .click();
       }
       break;
+    }
+
+    case 'DynamicZone': {
+      await page
+        .getByRole('button', {
+          name: 'Dynamic zone Dynamically pick component when editing content',
+        })
+        .click();
+      await page.getByLabel('Name', { exact: true }).fill(name);
+      await page.getByRole('button', { name: 'Add components to the zone' }).click();
+
+      const { existingComponentName } = rest;
+
+      if (existingComponentName) {
+        await page
+          .locator('label')
+          .filter({
+            hasText:
+              'Use an existing componentReuse a component already created to keep your data con',
+          })
+          .locator('div')
+          .first()
+          .click();
+
+        await page.getByLabel('Select the components').click();
+        await page.getByLabel(existingComponentName).click();
+
+        // Close the combobox
+        await page.keyboard.press('Escape');
+      }
+
+      break;
+    }
   }
 
   switch (type) {
     case 'Relation':
       // TODO: this should not be dependent on the id
       await page.locator('#name').fill(name);
+      break;
+
+    case 'DynamicZone':
+      // do nothing, because the name is already filled out in a previous step
       break;
 
     default:

@@ -187,7 +187,7 @@ test.describe(`Content Type Builder | Content-Type | ${type}`, () => {
     await deleteContentType();
   });
 
-  test('A user should be able to create a content type using a single component', async ({
+  test('A user should be able to create a content type using an existing single component', async ({
     page,
   }) => {
     // Create component
@@ -226,7 +226,7 @@ test.describe(`Content Type Builder | Content-Type | ${type}`, () => {
     await deleteComponent();
   });
 
-  test('A user should be able to create a content type using a repeatable component', async ({
+  test('A user should be able to create a content type using an existing repeatable component', async ({
     page,
   }) => {
     // Create component
@@ -261,6 +261,45 @@ test.describe(`Content Type Builder | Content-Type | ${type}`, () => {
 
     // Verify the content-type contains the field(s)
     await verifyFieldPresence({ page, name: 'componentField' });
+
+    // Cleanup
+    await deleteContentType();
+    await deleteComponent();
+  });
+
+  test('A user should be able to create a content-type using a dynamic zone using an existing component during content-type creation', async ({
+    page,
+  }) => {
+    // Create component
+    const deleteComponent = await createComponent({
+      page,
+      category: 'new-component',
+      displayName: `Component ${type}`,
+    });
+    await addDefaultField({
+      page,
+      type: 'Text',
+      name: 'textField',
+    });
+
+    await page.getByRole('button', { name: 'Save' }).click();
+    await waitForReload({ page });
+
+    // Create content-type
+    const deleteContentType = await createContentType({ page, type, displayName: `CT ${type}` });
+
+    await addDefaultField({
+      page,
+      type: 'DynamicZone',
+      name: 'dynamicZone',
+      existingComponentName: `Component ${type}`,
+    });
+
+    await page.getByRole('button', { name: 'Save' }).click();
+    await waitForReload({ page });
+
+    // Verify the content-type contains the field(s)
+    await verifyFieldPresence({ page, name: 'dynamicZone' });
 
     // Cleanup
     await deleteContentType();
