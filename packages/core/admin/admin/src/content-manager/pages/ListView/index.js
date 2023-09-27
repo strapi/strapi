@@ -832,14 +832,16 @@ function ListView({
                         })}
                         {/* Actions: edit, duplicate, delete */}
                         {(canDelete || canPublish) && isBulkable && (
-                          <Body.EntityActionsDataCell
-                            rowId={rowData.id}
-                            index={index}
-                            setIsConfirmDeleteRowOpen={setIsConfirmDeleteRowOpen}
-                            canCreate={canCreate}
-                            canDelete={canDelete}
-                            handleCloneClick={handleCloneClick}
-                          />
+                          <Td>
+                            <Body.EntityActionsDataCell
+                              rowId={rowData.id}
+                              index={index}
+                              setIsConfirmDeleteRowOpen={setIsConfirmDeleteRowOpen}
+                              canCreate={canCreate}
+                              canDelete={canDelete}
+                              handleCloneClick={handleCloneClick}
+                            />
+                          </Td>
                         )}
                       </Tr>
                     );

@@ -75,7 +75,6 @@ const EntityActionsDataCell = ({
   );
 
   return (
-    <Td>
       <Flex gap={1} justifyContent="end" onClick={stopPropagation}>
         <IconButton
           forwardedAs={Link}
@@ -129,7 +128,6 @@ const EntityActionsDataCell = ({
           </IconButton>
         )}
       </Flex>
-    </Td>
   );
 };
 
