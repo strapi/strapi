@@ -1,6 +1,6 @@
 'use strict';
 
-const { has, propEq, isNil, isDate, isObject } = require('lodash/fp');
+const { has, propEq, isNil, isDate, isObject, isEmpty } = require('lodash/fp');
 
 // todo[v4]: Find a way to get that dynamically
 const virtualScalarAttributes = ['id'];
@@ -54,9 +54,9 @@ module.exports = ({ strapi }) => {
 
       // If filters is a collection, then apply the transformation to every item of the list
       if (Array.isArray(filters)) {
-        return filters.map((filtersItem) =>
-          this.graphQLFiltersToStrapiQuery(filtersItem, contentType)
-        );
+        return filters
+          .map((filtersItem) => this.graphQLFiltersToStrapiQuery(filtersItem, contentType))
+          .filter((value) => value !== 'object' || !isEmpty(value));
       }
 
       const resultMap = {};
@@ -64,6 +64,18 @@ module.exports = ({ strapi }) => {
 
       const isAttribute = (attributeName) => {
         return virtualScalarAttributes.includes(attributeName) || has(attributeName, attributes);
+      };
+
+      /**
+       * when optional query params are available but not sent, they become empty objects we need to remove to make
+       * it a valid Strapi query
+       */
+      const setOrRemoveIfEmpty = (key, newValue) => {
+        if (typeof newValue === 'object' && isEmpty(newValue)) {
+          delete resultMap[key];
+        } else {
+          resultMap[key] = newValue;
+        }
       };
 
       for (const [key, value] of Object.entries(filters)) {
@@ -74,7 +86,7 @@ module.exports = ({ strapi }) => {
           // If it's a scalar attribute
           if (virtualScalarAttributes.includes(key) || isStrapiScalar(attribute)) {
             // Replace (recursively) every GraphQL scalar operator with the associated Strapi operator
-            resultMap[key] = recursivelyReplaceScalarOperators(value);
+            setOrRemoveIfEmpty(key, recursivelyReplaceScalarOperators(value));
           }
 
           // If it's a deep filter on a relation
@@ -84,7 +96,7 @@ module.exports = ({ strapi }) => {
 
             // Recursively apply the mapping to the value using the fetched model,
             // and update the value within `resultMap`
-            resultMap[key] = this.graphQLFiltersToStrapiQuery(value, relModel);
+            setOrRemoveIfEmpty(key, this.graphQLFiltersToStrapiQuery(value, relModel));
           }
 
           // If it's a deep filter on a component
@@ -94,7 +106,7 @@ module.exports = ({ strapi }) => {
 
             // Recursively apply the mapping to the value using the fetched model,
             // and update the value within `resultMap`
-            resultMap[key] = this.graphQLFiltersToStrapiQuery(value, componentModel);
+            setOrRemoveIfEmpty(key, this.graphQLFiltersToStrapiQuery(value, componentModel));
           }
         }
 
@@ -108,7 +120,10 @@ module.exports = ({ strapi }) => {
 
             // Transform the current value recursively and add it to the resultMap
             // object using the strapiOperator equivalent of the GraphQL key
-            resultMap[strapiOperator] = this.graphQLFiltersToStrapiQuery(value, contentType);
+            setOrRemoveIfEmpty(
+              strapiOperator,
+              this.graphQLFiltersToStrapiQuery(value, contentType)
+            );
           }
         }
       }

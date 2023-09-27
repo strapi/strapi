@@ -51,12 +51,6 @@ const defaultValidateFilters = curry((schema: Model, filters: unknown) => {
     // empty objects
     traverseQueryFilters(
       ({ key, value }) => {
-        // ID is not an attribute per se, so we need to make
-        // an extra check to ensure we're not removing it
-        if (key === 'id') {
-          return;
-        }
-
         if (isObject(value) && isEmpty(value)) {
           throwInvalidParam({ key });
         }
