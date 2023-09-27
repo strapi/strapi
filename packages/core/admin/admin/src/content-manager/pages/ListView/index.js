@@ -733,7 +733,9 @@ function ListView({
                     return (
                       <Tr cursor="pointer" key={data.id} onClick={handleRowClick(rowData.id)}>
                         {/* Bulk action row checkbox */}
-                        <Body.CheckboxDataCell rowId={rowData.id} index={index} />
+                        <Td>
+                          <Body.CheckboxDataCell rowId={rowData.id} index={index} />
+                        </Td>
                         {/* Field data */}
                         {tableHeaders.map(({ key, name, cellFormatter, ...rest }) => {
                           if (hasDraftAndPublish && name === 'publishedAt') {
