@@ -63,7 +63,7 @@
         }
       }
     },
-    "/upload?id={id}": {
+    "/upload/info/{id}": {
       "post": {
         "parameters": [
           {
