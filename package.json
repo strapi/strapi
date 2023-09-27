@@ -29,42 +29,47 @@
     "scripts/*"
   ],
   "scripts": {
-    "prepare": "husky install",
-    "setup": "yarn && yarn clean && yarn build",
-    "clean": "nx run-many --target=clean --nx-ignore-cycles",
-    "watch": "nx run-many --target=watch --nx-ignore-cycles",
     "build": "nx run-many --target=build --nx-ignore-cycles",
     "build:ts": "nx run-many --target=build:ts --nx-ignore-cycles",
+    "clean": "nx run-many --target=clean --nx-ignore-cycles",
+    "doc:api": "node scripts/open-api/serve.js",
+    "format": "yarn format:code && yarn format:other",
+    "format:code": "yarn prettier:code --write",
+    "format:other": "yarn prettier:other --write",
     "generate": "plop --plopfile ./packages/generators/admin/plopfile.js",
     "lint": "nx run-many --target=lint --nx-ignore-cycles && yarn lint:css && yarn lint:other",
     "lint:css": "stylelint packages/**/admin/src/**/*.js",
     "lint:fix": "nx run-many --target=lint --nx-ignore-cycles -- --fix",
     "lint:other": "npm run prettier:other -- --check",
-    "format": "yarn format:code && yarn format:other",
-    "format:code": "yarn prettier:code --write",
-    "format:other": "yarn prettier:other --write",
+    "prepare": "husky install",
     "prettier:code": "prettier --cache --cache-strategy content \"**/*.{js,ts}\"",
     "prettier:other": "prettier --cache --cache-strategy content \"**/*.{md,css,scss,yaml,yml}\"",
+    "setup": "yarn && yarn clean && yarn build",
+    "test:api": "node test/scripts/run-api-tests.js",
     "test:clean": "rimraf ./coverage",
     "test:e2e": "node test/scripts/run-e2e-tests.js",
-    "test:e2e:debug": "node test/scripts/run-e2e-tests.js --debug",
     "test:e2e:clean": "node test/scripts/run-e2e-tests.js clean",
-    "test:front:all": "cross-env IS_EE=true nx run-many --target=test:front --nx-ignore-cycles",
+    "test:e2e:debug": "node test/scripts/run-e2e-tests.js --debug",
     "test:front": "cross-env IS_EE=true jest --config jest.config.front.js",
-    "test:front:watch": "cross-env IS_EE=true run test:front --watch",
-    "test:front:update": "run test:front -u",
+    "test:front:all": "cross-env IS_EE=true nx run-many --target=test:front --nx-ignore-cycles",
     "test:front:all:ce": "cross-env IS_EE=false nx run-many --target=test:front:ce --nx-ignore-cycles",
     "test:front:ce": "cross-env IS_EE=false run test:front",
-    "test:front:watch:ce": "cross-env IS_EE=false run test:front --watch",
+    "test:front:update": "run test:front -u",
     "test:front:update:ce": "yarn test:front:ce -u",
-    "test:ts": "yarn test:ts:front",
-    "test:ts:front": "nx run-many --target=test:ts:front --nx-ignore-cycles",
-    "test:unit:all": "nx run-many --target=test:unit --nx-ignore-cycles",
-    "test:unit": "jest --config jest.config.js",
-    "test:unit:watch": "run test:unit --watch",
-    "test:api": "node test/scripts/run-api-tests.js",
+    "test:front:watch": "cross-env IS_EE=true run test:front --watch",
+    "test:front:watch:ce": "cross-env IS_EE=false run test:front --watch",
     "test:generate-app": "yarn build:ts && node test/scripts/generate-test-app.js",
-    "doc:api": "node scripts/open-api/serve.js"
+    "test:ts": "yarn test:ts:packages && yarn test:ts:front && yarn test:ts:back",
+    "test:ts:back": "nx run-many --target=test:ts:back --nx-ignore-cycles",
+    "test:ts:front": "nx run-many --target=test:ts:front --nx-ignore-cycles",
+    "test:ts:packages": "nx run-many --target=test:ts --nx-ignore-cycles",
+    "test:unit": "jest --config jest.config.js",
+    "test:unit:all": "nx run-many --target=test:unit --nx-ignore-cycles",
+    "test:unit:watch": "run test:unit --watch",
+    "watch": "nx run-many --target=watch --nx-ignore-cycles"
+  },
+  "resolutions": {
+    "@types/koa": "2.13.4"
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",
@@ -129,12 +134,9 @@
     "typescript": "5.2.2",
     "yargs": "17.7.2"
   },
-  "resolutions": {
-    "@types/koa": "2.13.4"
-  },
+  "packageManager": "yarn@3.6.1",
   "engines": {
     "node": ">=16.0.0 <=20.x.x",
     "npm": ">=6.0.0"
-  },
-  "packageManager": "yarn@3.6.1"
+  }
 }
