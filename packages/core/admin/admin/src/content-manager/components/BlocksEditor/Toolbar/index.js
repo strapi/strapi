@@ -262,6 +262,16 @@ export const BlocksDropdown = () => {
     }
   };
 
+  React.useEffect(() => {
+    const selectedBlocks = Object.keys(blocks).filter((key) => {
+      return isBlockActive(editor, blocks[key].matchNode);
+    });
+
+    if (selectedBlocks.length === 1) {
+      setBlockSelected(selectedBlocks[0]);
+    }
+  }, [blocks, editor, editor.selection]);
+
   return (
     <>
       <Select
@@ -280,8 +290,6 @@ export const BlocksDropdown = () => {
             value={key}
             label={blocks[key].label}
             icon={blocks[key].icon}
-            matchNode={blocks[key].matchNode}
-            handleSelection={setBlockSelected}
             blockSelected={blockSelected}
           />
         ))}
@@ -291,18 +299,10 @@ export const BlocksDropdown = () => {
   );
 };
 
-const BlockOption = ({ value, icon, label, handleSelection, blockSelected, matchNode }) => {
+const BlockOption = ({ value, icon, label, blockSelected }) => {
   const { formatMessage } = useIntl();
-  const editor = useSlate();
 
-  const isActive = isBlockActive(editor, matchNode);
   const isSelected = value === blockSelected;
-
-  React.useEffect(() => {
-    if (isActive && !isSelected) {
-      handleSelection(value);
-    }
-  }, [handleSelection, isActive, isSelected, value]);
 
   return (
     <Option
@@ -321,8 +321,6 @@ BlockOption.propTypes = {
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
   }).isRequired,
-  matchNode: PropTypes.func.isRequired,
-  handleSelection: PropTypes.func.isRequired,
   blockSelected: PropTypes.string.isRequired,
 };
 
