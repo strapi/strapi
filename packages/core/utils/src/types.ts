@@ -52,6 +52,7 @@ export interface ScalarAttribute extends Attribute {
     | 'enumeration'
     | 'boolean'
     | 'json'
+    | 'blocks'
     | 'uid'
     | 'password'
     | 'email'
