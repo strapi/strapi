@@ -129,8 +129,8 @@ const forbiddenContentTypeNameValidator = () => {
   return {
     name: 'forbiddenContentTypeName',
     message: `Content Type name cannot be one of ${reservedNames.join(', ')}`,
-    test(value) {
-      if (value && reservedNames.includes(value)) {
+    test(value: unknown) {
+      if (value && reservedNames.includes(value as string)) {
         return false;
       }
 
@@ -143,7 +143,7 @@ const nameIsAvailable = (isEdition: boolean) => {
   // TODO TS: if strapi.contentTypes (ie, ContentTypes) works as an ArrayLike and is used like this, we may want to ensure it is typed so that it can be without using as
   const usedNames = flatMap((ct: Schema.ContentType) => {
     return [ct.info?.singularName, ct.info?.pluralName];
-  })(strapi.contentTypes as Shared.ContentTypes);
+  })(strapi.contentTypes as any);
 
   return {
     name: 'nameAlreadyUsed',
@@ -152,7 +152,7 @@ const nameIsAvailable = (isEdition: boolean) => {
       // don't check on edition
       if (isEdition) return true;
 
-      if (usedNames.includes(value)) {
+      if (usedNames.includes(value as string)) {
         return false;
       }
       return true;
