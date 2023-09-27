@@ -96,6 +96,8 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
       - name: Run build:ts
         run: yarn nx run-many --target=build:ts --nx-ignore-cycles --skip-nx-cache
+      - name: Run build
+        run: yarn build --projects=@strapi/pack-up --skip-nx-cache
       - name: Run tests
         run: yarn nx affected --target=test:unit --nx-ignore-cycles
 
