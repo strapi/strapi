@@ -54,6 +54,7 @@ export type DefaultTo<T> = { default: T };
 export type Any =
   | Attribute.BigInteger
   | Attribute.Boolean
+  | Attribute.Blocks
   | Attribute.Component<Common.UID.Component, boolean>
   | Attribute.DateTime
   | Attribute.Date
