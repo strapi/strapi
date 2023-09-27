@@ -1,5 +1,5 @@
 // Exports from core should already be modules
-export * from './core';
-export * as CoreApi from './core-api';
-export * as Utils from './utils';
-export * as Shared from './shared';
+export type * from './core';
+export type * as CoreApi from './core-api';
+export type * as Utils from './utils';
+export type * as Shared from './shared';

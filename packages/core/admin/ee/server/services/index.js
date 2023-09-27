@@ -8,6 +8,7 @@ module.exports = {
   'seat-enforcement': require('./seat-enforcement'),
   workflows: require('./review-workflows/workflows'),
   stages: require('./review-workflows/stages'),
+  'stage-permissions': require('./review-workflows/stage-permissions'),
   assignees: require('./review-workflows/assignees'),
   'review-workflows': require('./review-workflows/review-workflows'),
   'review-workflows-validation': require('./review-workflows/validation'),

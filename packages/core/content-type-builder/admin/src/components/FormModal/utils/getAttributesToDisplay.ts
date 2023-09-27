@@ -4,6 +4,7 @@ const getAttributes = (dataTarget = '', targetUid, nestedComponents) => {
     'email',
     'richtext',
     'password',
+    'blocks',
     'number',
     'enumeration',
     'date',
