@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { Badge } from '@strapi/design-system';
 import {
   SubNav,
   SubNavHeader,
@@ -60,6 +61,11 @@ const SettingsNav = ({ menu }) => {
                   key={link.id}
                 >
                   {formatMessage(link.intlLabel)}
+                  {link?.tag && (
+                    <Badge marginLeft={1} active>
+                      EE
+                    </Badge>
+                  )}
                 </SubNavLink>
               );
             })}

@@ -21,6 +21,33 @@ export const LINKS_CE = {
       to: '/settings/transfer-tokens?sort=name:ASC',
       id: 'transfer-tokens',
     },
+    ...((!window.strapi.features.isEnabled(
+      window.strapi.features.SSO) && window.strapi.promoteEnterpriseFeatures
+    )
+      ? [
+          {
+            intlLabel: { id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' },
+            to: '/settings/purchase-single-sign-on',
+            id: 'sso',
+            tag: true,
+          },
+        ]
+      : []),
+    ...((!window.strapi.features.isEnabled(
+      window.strapi.features.REVIEW_WORKFLOWS) && window.strapi.promoteEnterpriseFeatures
+    )
+      ? [
+          {
+            intlLabel: {
+              id: 'Settings.review-workflows.page.title',
+              defaultMessage: 'Review Workflows',
+            },
+            to: '/settings/purchase-review-workflows',
+            id: 'review-workflows',
+            tag: true,
+          },
+        ]
+      : []),
   ],
 
   admin: [
@@ -35,5 +62,17 @@ export const LINKS_CE = {
       to: '/settings/users?pageSize=10&page=1&sort=firstname',
       id: 'users',
     },
+    ...((!window.strapi.features.isEnabled(
+      window.strapi.features.AUDIT_LOGS) && window.strapi.promoteEnterpriseFeatures
+    )
+      ? [
+          {
+            intlLabel: { id: 'global.auditLogs', defaultMessage: 'Audit Logs' },
+            to: '/settings/purchase-audit-logs',
+            id: 'auditLogs',
+            tag: true,
+          },
+        ]
+      : []),
   ],
 };
