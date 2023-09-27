@@ -1,6 +1,6 @@
 import type { Attribute } from '..';
 
-type BlocksAttribute = Attribute.OfType<'blocks'> &
+export type Blocks = Attribute.OfType<'blocks'> &
   // Options
   Attribute.ConfigurableOption &
   Attribute.PrivateOption &
@@ -10,8 +10,4 @@ type BlocksAttribute = Attribute.OfType<'blocks'> &
 
 export type BlocksValue<T extends object = object> = T;
 
-export type GetBlocksValue<T extends Attribute.Attribute> = T extends BlocksAttribute
-  ? BlocksValue
-  : never;
-
-export type Blocks = BlocksAttribute;
+export type GetBlocksValue<T extends Attribute.Attribute> = T extends Blocks ? BlocksValue : never;

@@ -1,3 +1,3 @@
-import type { Shared } from '../..';
+import type { ContentTypes, Components } from '../../shared';
 
-export type Schemas = Shared.ContentTypes & Shared.Components;
+export type Schemas = ContentTypes & Components;
