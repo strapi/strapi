@@ -4,6 +4,8 @@ import path from 'path';
 import { Observable } from 'rxjs';
 import { build } from 'vite';
 
+import { isError } from '../../core/errors';
+
 import { resolveViteConfig } from './config';
 import { ViteBaseTask } from './types';
 
@@ -62,7 +64,7 @@ const viteBuildTask: TaskHandler<ViteBuildTask> = {
     ctx.logger.success(msg.join(os.EOL));
   },
   async fail(ctx, task, err) {
-    if (err instanceof Error) {
+    if (isError(err)) {
       ctx.logger.error(err.message);
     }
 
