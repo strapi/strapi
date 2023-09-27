@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { useCollator, useFetchClient } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
@@ -22,16 +24,24 @@ export const useAdminRoles = (params = {}, queryOptions = {}) => {
     queryOptions
   );
 
-  let roles = [];
+  // the return value needs to be memoized, because intantiating
+  // an empty array as default value would lead to an unstable return
+  // value, which later on triggers infinite loops if used in the
+  // dependency arrays of other hooks
+  const roles = React.useMemo(() => {
+    let roles = [];
 
-  if (id && data) {
-    roles = [data.data];
-  } else if (Array.isArray(data?.data)) {
-    roles = data.data;
-  }
+    if (id && data) {
+      roles = [data.data];
+    } else if (Array.isArray(data?.data)) {
+      roles = data.data;
+    }
+
+    return [...roles].sort((a, b) => formatter.compare(a.name, b.name));
+  }, [data, id, formatter]);
 
   return {
-    roles: roles.sort((a, b) => formatter.compare(a.name, b.name)),
+    roles,
     error,
     isError,
     isLoading,

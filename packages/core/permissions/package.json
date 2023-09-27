@@ -35,9 +35,10 @@
     "lint": "run -T eslint ."
   },
   "dependencies": {
-    "@casl/ability": "5.4.4",
+    "@casl/ability": "6.5.0",
     "@strapi/utils": "4.13.7",
     "lodash": "4.17.21",
+    "qs": "6.11.1",
     "sift": "16.0.1"
   },
   "devDependencies": {

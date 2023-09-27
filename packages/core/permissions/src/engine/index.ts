@@ -1,4 +1,5 @@
 import _ from 'lodash/fp';
+import qs from 'qs';
 import { Ability } from '@casl/ability';
 import { providerFactory } from '@strapi/utils';
 
@@ -15,13 +16,16 @@ import { Permission } from '../domain/permission';
 
 export { abilities };
 
-type Provider = ReturnType<typeof providerFactory>;
+type Provider = Omit<ReturnType<typeof providerFactory>, 'register'> & {
+  register(...args: unknown[]): Promise<Provider> | Provider;
+};
+
 type ActionProvider = Provider;
 type ConditionProvider = Provider;
 
 export interface Engine {
   hooks: PermissionEngineHooks;
-  on(hook: HookName, handler: (...args: unknown[]) => unknown): Engine;
+  on(hook: HookName, handler: (...args: any[]) => any): Engine;
   generateAbility(permissions: Permission[], options?: object): Promise<Ability>;
   createRegisterFunction(
     can: (permission: abilities.PermissionRule) => unknown,
@@ -93,7 +97,19 @@ const newEngine = (params: EngineParams): Engine => {
 
     await state.hooks['before-evaluate.permission'].call(createBeforeEvaluateContext(permission));
 
-    const { action, subject, properties, conditions = [] } = permission;
+    const {
+      action: actionName,
+      subject,
+      properties,
+      conditions = [],
+      actionParameters = {},
+    } = permission;
+
+    let action = actionName;
+
+    if (actionParameters && Object.keys(actionParameters).length > 0) {
+      action = `${actionName}?${qs.stringify(actionParameters)}`;
+    }
 
     if (conditions.length === 0) {
       return register({ action, subject, properties });
