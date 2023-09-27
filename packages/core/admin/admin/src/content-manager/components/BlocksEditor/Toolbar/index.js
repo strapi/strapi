@@ -8,10 +8,18 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement } from 'slate';
 import { useSlate } from 'slate-react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { useBlocksStore } from '../hooks/useBlocksStore';
 import { useModifiersStore } from '../hooks/useModifiersStore';
+
+const ToolbarWrapper = styled(Flex)`
+  ${(props) =>
+    props.disabled &&
+    css`
+      cursor: not-allowed;
+    `}
+`;
 
 const Separator = styled(Toolbar.Separator)`
   background: ${({ theme }) => theme.colors.neutral150};
@@ -20,12 +28,26 @@ const Separator = styled(Toolbar.Separator)`
 `;
 
 const FlexButton = styled(Flex).attrs({ as: 'button' })`
-  &:hover {
-    background: ${({ theme }) => theme.colors.primary100};
+  &[aria-disabled] {
+    display: none;
+    color: red;
+    opacity: 0.3;
   }
+  ${(props) =>
+    props.disabled
+      ? css`
+          // Inherit the not-allowed cursor from ToolbarWrapper
+          cursor: inherit;
+        `
+      : css`
+          // Ignore hover effect when disabled
+          &:hover {
+            background: ${({ theme }) => theme.colors.primary100};
+          }
+        `}
 `;
 
-const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
+const ToolbarButton = ({ icon, name, label, isActive, disabled, handleClick }) => {
   const { formatMessage } = useIntl();
   const labelMessage = formatMessage(label);
 
@@ -43,6 +65,7 @@ const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
             e.preventDefault();
             handleClick();
           }}
+          disabled={disabled}
           aria-label={labelMessage}
         >
           <Icon width={3} height={3} as={icon} color={isActive ? 'primary600' : 'neutral600'} />
@@ -60,10 +83,11 @@ ToolbarButton.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
   }).isRequired,
   isActive: PropTypes.bool.isRequired,
+  disabled: PropTypes.bool.isRequired,
   handleClick: PropTypes.func.isRequired,
 };
 
-const ModifierButton = ({ icon, name, label }) => {
+const ModifierButton = ({ icon, name, label, disabled }) => {
   const editor = useSlate();
 
   const isModifierActive = () => {
@@ -90,6 +114,7 @@ const ModifierButton = ({ icon, name, label }) => {
       name={name}
       label={label}
       isActive={isActive}
+      disabled={disabled}
       handleClick={toggleModifier}
     />
   );
@@ -102,6 +127,7 @@ ModifierButton.propTypes = {
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
   }).isRequired,
+  disabled: PropTypes.bool.isRequired,
 };
 
 const isBlockActive = (editor, matchNode) => {
@@ -223,7 +249,7 @@ const isLastBlockImageOrCode = (editor) => {
   return false;
 };
 
-export const BlocksDropdown = () => {
+export const BlocksDropdown = ({ disabled }) => {
   const editor = useSlate();
   const { formatMessage } = useIntl();
   const [isMediaLibraryVisible, setIsMediaLibraryVisible] = React.useState(false);
@@ -273,6 +299,7 @@ export const BlocksDropdown = () => {
           id: 'components.Blocks.blocks.selectBlock',
           defaultMessage: 'Select a block',
         })}
+        disabled={disabled}
       >
         {blockKeysToInclude.map((key) => (
           <BlockOption
@@ -289,6 +316,10 @@ export const BlocksDropdown = () => {
       {isMediaLibraryVisible && <ImageDialog handleClose={() => setIsMediaLibraryVisible(false)} />}
     </>
   );
+};
+
+BlocksDropdown.propTypes = {
+  disabled: PropTypes.bool.isRequired,
 };
 
 const BlockOption = ({ value, icon, label, handleSelection, blockSelected, matchNode }) => {
@@ -326,7 +357,7 @@ BlockOption.propTypes = {
   blockSelected: PropTypes.string.isRequired,
 };
 
-const ListButton = ({ icon, format, label }) => {
+const ListButton = ({ icon, format, label, disabled }) => {
   const editor = useSlate();
 
   /**
@@ -380,6 +411,7 @@ const ListButton = ({ icon, format, label }) => {
       name={format}
       label={label}
       isActive={isActive}
+      disabled={disabled}
       handleClick={toggleList}
     />
   );
@@ -392,6 +424,7 @@ ListButton.propTypes = {
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
   }).isRequired,
+  disabled: PropTypes.bool.isRequired,
 };
 
 // TODO: Remove after the RTE Blocks Alpha release
@@ -403,14 +436,14 @@ const AlphaTag = styled(Box)`
   padding: ${({ theme }) => `${2 / 16}rem ${theme.spaces[1]}`};
 `;
 
-const BlocksToolbar = () => {
+const BlocksToolbar = ({ disabled }) => {
   const modifiers = useModifiersStore();
 
   return (
     <Toolbar.Root asChild>
       {/* Remove after the RTE Blocks Alpha release (paddingRight and width) */}
-      <Flex gap={1} padding={2} paddingRight={4} width="100%">
-        <BlocksDropdown />
+      <ToolbarWrapper gap={1} padding={2} paddingRight={4} width="100%" disabled={disabled}>
+        <BlocksDropdown disabled={disabled} />
         <Separator />
         <Toolbar.ToggleGroup type="multiple" asChild>
           <Flex gap={1}>
@@ -422,6 +455,7 @@ const BlocksToolbar = () => {
                 label={modifier.label}
                 isActive={modifier.checkIsActive()}
                 handleClick={modifier.handleToggle}
+                disabled={disabled}
               />
             ))}
           </Flex>
@@ -436,6 +470,7 @@ const BlocksToolbar = () => {
               }}
               format="unordered"
               icon={BulletList}
+              disabled={disabled}
             />
             <ListButton
               label={{
@@ -444,6 +479,7 @@ const BlocksToolbar = () => {
               }}
               format="ordered"
               icon={NumberList}
+              disabled={disabled}
             />
           </Flex>
         </Toolbar.ToggleGroup>
@@ -455,9 +491,13 @@ const BlocksToolbar = () => {
             </Typography>
           </AlphaTag>
         </Flex>
-      </Flex>
+      </ToolbarWrapper>
     </Toolbar.Root>
   );
+};
+
+BlocksToolbar.propTypes = {
+  disabled: PropTypes.bool.isRequired,
 };
 
 export { BlocksToolbar };

@@ -157,6 +157,7 @@ describe('BlocksEditor toolbar', () => {
       },
     ]);
   });
+
   it('transforms the selection to a heading when selected and trasforms it back to text when selected again', async () => {
     setup();
 

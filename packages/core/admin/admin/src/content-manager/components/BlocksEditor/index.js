@@ -82,7 +82,7 @@ const BlocksEditor = React.forwardRef(
             onChange={handleSlateChange}
           >
             <InputWrapper direction="column" alignItems="flex-start">
-              <BlocksToolbar />
+              <BlocksToolbar disabled={disabled} />
               <EditorDivider width="100%" />
               <Wrapper>
                 <BlocksInput disabled={disabled} />
