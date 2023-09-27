@@ -4,6 +4,8 @@ import path from 'path';
 import { Observable } from 'rxjs';
 import { build } from 'vite';
 
+import { isError } from '../../core/errors';
+
 import { resolveViteConfig } from './config';
 import { ViteBaseTask } from './types';
 
@@ -94,7 +96,7 @@ const viteWatchTask: TaskHandler<ViteWatchTask, RollupWatcherEvent> = {
     }
   },
   fail(ctx, task, err) {
-    if (err instanceof Error) {
+    if (isError(err)) {
       ctx.logger.error(err);
     }
   },

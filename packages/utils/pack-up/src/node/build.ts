@@ -5,6 +5,7 @@ import os from 'os';
 import { CommonCLIOptions } from '../types';
 
 import { loadConfig } from './core/config';
+import { isError } from './core/errors';
 import { getExportExtensionMap, validateExportsOrdering } from './core/exports';
 import { createLogger } from './core/logger';
 import { loadPkg, validatePkg } from './core/pkg';
@@ -30,7 +31,11 @@ export const build = async (opts: BuildOptions = {}) => {
 
   const rawPkg = await loadPkg({ cwd, logger }).catch((err) => {
     packageJsonLoader.fail();
-    logger.error(err.message);
+
+    if (isError(err)) {
+      logger.error(err.message);
+    }
+
     logger.debug(`Path checked – ${cwd}`);
     process.exit(1);
   });
@@ -39,7 +44,11 @@ export const build = async (opts: BuildOptions = {}) => {
     pkg: rawPkg,
   }).catch((err) => {
     packageJsonLoader.fail();
-    logger.error(err.message);
+
+    if (isError(err)) {
+      logger.error(err.message);
+    }
+
     process.exit(1);
   });
 
@@ -49,7 +58,9 @@ export const build = async (opts: BuildOptions = {}) => {
    */
   const packageJson = await validateExportsOrdering({ pkg: validatedPkg, logger }).catch((err) => {
     packageJsonLoader.fail();
-    logger.error(err.message);
+    if (isError(err)) {
+      logger.error(err.message);
+    }
     process.exit(1);
   });
 
@@ -74,7 +85,9 @@ export const build = async (opts: BuildOptions = {}) => {
     pkg: packageJson,
   }).catch((err) => {
     buildContextLoader.fail();
-    logger.error(err.message);
+    if (isError(err)) {
+      logger.error(err.message);
+    }
     process.exit(1);
   });
 

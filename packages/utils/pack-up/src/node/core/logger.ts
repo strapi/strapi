@@ -35,8 +35,7 @@ export const createLogger = (options: LoggerOptions = {}): Logger => {
         return;
       }
 
-      // eslint-disable-next-line no-console
-      console.log(chalk.cyan(`[DEBUG] `), ...args);
+      console.debug(chalk.cyan(`[DEBUG] `), ...args);
     },
 
     info(...args) {
@@ -52,7 +51,7 @@ export const createLogger = (options: LoggerOptions = {}): Logger => {
         return;
       }
 
-      console.info(...args);
+      console.log(...args);
     },
 
     warn(...args) {

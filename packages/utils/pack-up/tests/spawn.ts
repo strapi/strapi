@@ -1,21 +1,10 @@
 /* eslint-disable no-console */
 import child_process from 'child_process';
-import { randomUUID } from 'crypto';
-import { mkdir, rm, readdir, stat as fsStat, copyFile } from 'fs/promises';
+import { mkdir, readdir, stat as fsStat, copyFile } from 'fs/promises';
 import path from 'path';
 
-const workspace = async () => {
-  const key = randomUUID();
-
-  const workspacePath = path.resolve(__dirname, '__tmp__', key);
-
-  await mkdir(workspacePath, { recursive: true });
-
-  return {
-    path: workspacePath,
-    remove: () => rm(workspacePath, { recursive: true, force: true }),
-  };
-};
+import { stripColor } from './console';
+import { createWorkspace } from './workspaces';
 
 const copyDirectory = async (source: string, destination: string): Promise<void> => {
   await mkdir(destination, { recursive: true });
@@ -35,16 +24,6 @@ const copyDirectory = async (source: string, destination: string): Promise<void>
     }
   }
 };
-
-/**
- * Completely borrowed from online.
- */
-// eslint-disable-next-line no-control-regex
-const ANSI_COLOR_RE = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
-
-function stripColor(str: string) {
-  return str.replace(ANSI_COLOR_RE, '');
-}
 
 const exec = (
   command: string,
@@ -107,8 +86,8 @@ interface Project {
   run: (cmd: string) => Promise<{ stdout: string; stderr: string }>;
 }
 
-export const spawn = async (projectName: string): Promise<Project> => {
-  const { path: tmpPath, remove: tmpRemove } = await workspace();
+const spawn = async (projectName: string): Promise<Project> => {
+  const { path: tmpPath, remove: tmpRemove } = await createWorkspace();
 
   const packagePath = path.resolve(__dirname, '..', 'examples', projectName);
 
@@ -127,12 +106,4 @@ export const spawn = async (projectName: string): Promise<Project> => {
   };
 };
 
-/**
- * Remove all the tmp folder and everything in it.
- * Great for when it all goes wrong.
- */
-export const cleanup = async () => {
-  const workspacePath = path.resolve(__dirname, `__tmp__`);
-
-  return rm(workspacePath, { recursive: true, force: true });
-};
+export { spawn };
