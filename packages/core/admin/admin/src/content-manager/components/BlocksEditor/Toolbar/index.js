@@ -258,11 +258,15 @@ export const BlocksDropdown = () => {
    * @param {string} optionKey - key of the heading selected
    */
   const selectOption = (optionKey) => {
-    if (optionKey !== 'image') toggleBlock(editor, blocks[optionKey].value);
+    if (optionKey === 'image') {
+      Transforms.removeNodes(editor);
+    } else {
+      toggleBlock(editor, blocks[optionKey].value);
+    }
 
     setBlockSelected(optionKey);
 
-    if (isLastBlockType(editor, 'code')) {
+    if (optionKey === 'code' && isLastBlockType(editor, 'code')) {
       // insert blank line to add new blocks below code block
       insertEmptyBlockAtLast(editor);
     }
