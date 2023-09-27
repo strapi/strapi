@@ -172,7 +172,9 @@ const findCommonDirPath = (filePaths: string[]): string | undefined => {
         break;
       }
 
-      if (dirPath === '.') return undefined;
+      if (dirPath === '.') {
+        return undefined;
+      }
     }
   }
 

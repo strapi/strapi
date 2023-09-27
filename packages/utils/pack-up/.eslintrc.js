@@ -38,5 +38,9 @@ module.exports = {
         alphabetize: { order: 'asc', caseInsensitive: true },
       },
     ],
+    /**
+     * TODO: This should live in the base config.
+     */
+    'nonblock-statement-body-position': ['error', 'below'],
   },
 };
