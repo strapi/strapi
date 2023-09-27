@@ -352,6 +352,28 @@ test.describe(`Content Type Builder | Content-Type | ${type}`, () => {
     await deleteContentType({ page, displayName: `Something else` });
   });
 
+  test('A user should be able to delete a content-type', async ({ page }) => {
+    const deleteContentType = await createContentType({ page, type, displayName: `CT ${type}` });
+
+    await addDefaultField({
+      page,
+      type: 'Text',
+      name: 'textField',
+    });
+
+    await page.getByRole('button', { name: 'Save' }).click();
+    await waitForReload({ page });
+
+    await expect(page.getByRole('heading', { name: `CT ${type}` })).toBeVisible();
+    await expect(page.getByRole('link', { name: `CT ${type}` })).toBeVisible();
+
+    await deleteContentType();
+
+    // Verify the content-type has been deleted
+    await expect(page.getByRole('heading', { name: `CT ${type}` })).not.toBeVisible();
+    await expect(page.getByRole('link', { name: `CT ${type}` })).not.toBeVisible();
+  });
+
   test('A user should be able to edit a component', async ({ page }) => {
     // Create component
     const deleteComponent = await createComponent({
@@ -383,5 +405,31 @@ test.describe(`Content Type Builder | Content-Type | ${type}`, () => {
 
     // Cleanup
     await deleteComponent();
+  });
+
+  test('A user should be able to delete a component', async ({ page }) => {
+    // Create component
+    const deleteComponent = await createComponent({
+      page,
+      category: 'new-component',
+      displayName: `Component ${type}`,
+    });
+    await addDefaultField({
+      page,
+      type: 'Text',
+      name: 'textField',
+    });
+
+    await page.getByRole('button', { name: 'Save' }).click();
+    await waitForReload({ page });
+
+    await expect(page.getByRole('heading', { name: `Component ${type}` })).toBeVisible();
+    await expect(page.getByRole('link', { name: `Component ${type}` })).toBeVisible();
+
+    await deleteComponent();
+
+    // Verify the content-type has been deleted
+    await expect(page.getByRole('heading', { name: `Component ${type}` })).not.toBeVisible();
+    await expect(page.getByRole('link', { name: `Component ${type}` })).not.toBeVisible();
   });
 });
