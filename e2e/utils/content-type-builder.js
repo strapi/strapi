@@ -15,13 +15,11 @@ export async function createComponent({ page, existingCategory, category, displa
   }
 
   await page.getByRole('button', { name: 'Continue' }).click();
+
+  return () => deleteComponent({ page, displayName });
 }
 
 export async function deleteComponent({ page, displayName }) {
-  // Accept the confirmation dialog that is displayed when
-  // clicking delete
-  page.on('dialog', (dialog) => dialog.accept());
-
   await page.getByRole('link', { name: displayName }).click();
 
   // The strapi update notifier alert might be displayed in front
@@ -190,7 +188,7 @@ export async function addDefaultField({
       // TODO: this doesn't work, but I can't figure out why. Using `.getByLabel(attachedField)`
       // only does not work because there are several elements on the page that matches that
       // selector and therefore it must be scoped to the modal.
-      await page.getByLabel(contentTypeName, { exact: true }).getByLabel(attachedField).click();
+      await page.getByRole('option', { name: attachedField }).click();
       break;
 
     case 'Component':
@@ -211,7 +209,10 @@ export async function addDefaultField({
           .locator('div')
           .first()
           .click();
+
         await page.getByRole('button', { name: 'Select a component' }).click();
+
+        await page.getByLabel('Select a component').click();
         // TODO: can we make this work using a filter without category?
         await page.getByLabel(`${existingComponentCategory} - ${existingComponentName}`).click();
       }
@@ -260,13 +261,11 @@ export async function createContentType({ page, type, displayName }) {
   await page.getByRole('button', { name: `Create new ${type}` }).click();
   await page.getByLabel('Display name').fill(displayName);
   await page.getByRole('button', { name: 'Continue' }).click();
+
+  return () => deleteContentType({ page, displayName });
 }
 
 export async function deleteContentType({ page, displayName }) {
-  // Accept the confirmation dialog that is displayed when
-  // clicking delete
-  page.on('dialog', (dialog) => dialog.accept());
-
   await page.getByRole('link', { name: displayName }).click();
 
   // The strapi update notifier alert might be displayed in front
