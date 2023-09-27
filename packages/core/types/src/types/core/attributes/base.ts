@@ -22,7 +22,8 @@ export type Kind =
   | 'media'
   | 'relation'
   | 'component'
-  | 'dynamiczone';
+  | 'dynamiczone'
+  | 'blocks';
 
 /**
  * Most basic shape of a schema attribute

@@ -47,6 +47,7 @@ export type ScalarValues = GetValue<
   | Attribute.Enumeration<string[]>
   | Attribute.Float
   | Attribute.Integer
+  | Attribute.Blocks
   | Attribute.JSON
   // /!\  Password attributes are NOT filterable and should NOT be part of this union type.
   //      The member below has been commented on purpose to avoid adding it back without noticing.

@@ -68,6 +68,7 @@ export type GetKeysWithTarget<TSchemaUID extends Common.UID.Schema> = keyof {
 export type GetValue<TAttribute extends Attribute.Attribute, TGuard = unknown> = Utils.Guard.Never<
   | Attribute.GetBigIntegerValue<TAttribute>
   | Attribute.GetBooleanValue<TAttribute>
+  | Attribute.GetBlocksValue<TAttribute>
   | Attribute.GetComponentValue<TAttribute>
   | Attribute.GetDecimalValue<TAttribute>
   | Attribute.GetDynamicZoneValue<TAttribute>
