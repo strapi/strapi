@@ -345,10 +345,43 @@ test.describe(`Content Type Builder | Content-Type | ${type}`, () => {
     await page.getByRole('button', { name: 'Finish' }).click();
     await waitForReload({ page });
 
-    // Verify the content-type has been created
+    // Verify the content-type has been edited
     await expect(page.getByRole('heading', { name: `Something else` })).toBeVisible();
 
     // Cleanup
     await deleteContentType({ page, displayName: `Something else` });
+  });
+
+  test('A user should be able to edit a component', async ({ page }) => {
+    // Create component
+    const deleteComponent = await createComponent({
+      page,
+      category: 'new-component',
+      displayName: `Component ${type}`,
+    });
+    await addDefaultField({
+      page,
+      type: 'Text',
+      name: 'textField',
+    });
+
+    await page.getByRole('button', { name: 'Save' }).click();
+    await waitForReload({ page });
+
+    await page.getByRole('button', { name: 'Edit' }).click();
+    await page.getByLabel('Display name').fill(`Component ${type} new`);
+    await page.getByRole('button', { name: 'Finish' }).click();
+
+    // Verify the content-type has been locally edited
+    await expect(page.getByRole('heading', { name: `Component ${type} new` })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Save' }).click();
+    await waitForReload({ page });
+
+    // Verify the content-type has been edited & saved
+    await expect(page.getByRole('heading', { name: `Component ${type} new` })).toBeVisible();
+
+    // Cleanup
+    await deleteComponent();
   });
 });
