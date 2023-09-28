@@ -2,7 +2,7 @@ import path from 'path';
 import _ from 'lodash';
 
 import { nameToCollectionName, errors } from '@strapi/utils';
-import type { Attribute } from '@strapi/types';
+import type { Attribute, UID } from '@strapi/types';
 import { isRelation, isConfigurable } from '../../utils/attributes';
 import { typeKinds } from '../constants';
 import createSchemaHandler from './schema-handler';
@@ -266,10 +266,30 @@ export default function createComponentBuilder() {
  * @param {string} options.singularName content-type singularName
  * @returns {string} uid
  */
-const createContentTypeUID = ({ singularName }) => `api::${singularName}.${singularName}`;
+const createContentTypeUID = ({ singularName }: { singularName: string }): UID.ContentType =>
+  `api::${singularName}.${singularName}`;
 
-const generateRelation = ({ key, attribute, uid, targetAttribute = {} }) => {
-  const opts = {
+const generateRelation = ({
+  key,
+  attribute,
+  uid,
+  targetAttribute = {},
+}: {
+  key: string;
+  attribute: Attribute.Relation & Record<string, any>;
+  uid: UID.Any;
+  targetAttribute?: Partial<Attribute.Relation> & Record<string, any>;
+}) => {
+  const opts: {
+    type: 'relation';
+    relation?: Attribute.Relation['relation'];
+    target: UID.Any;
+    mappedBy?: string;
+    inversedBy?: string;
+    autoPopulate?: boolean;
+    private?: boolean;
+    pluginOptions?: Attribute.Relation['pluginOptions'];
+  } = {
     type: 'relation',
     target: uid,
     autoPopulate: targetAttribute.autoPopulate,

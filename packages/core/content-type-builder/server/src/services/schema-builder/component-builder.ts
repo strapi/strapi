@@ -1,17 +1,23 @@
 import path from 'path';
-import type { UID } from '@strapi/types';
+import type { Attribute, UID } from '@strapi/types';
 import _ from 'lodash';
 import pluralize from 'pluralize';
 
 import { nameToSlug, nameToCollectionName, errors } from '@strapi/utils';
 import { isConfigurable } from '../../utils/attributes';
-import createSchemaHandler, { Infos } from './schema-handler';
+import createSchemaHandler from './schema-handler';
 
 const { ApplicationError } = errors;
 
 type CreateComponentOptions = {
   category: string;
   displayName: string;
+  icon: string;
+  description: string;
+  pluginOptions: object;
+  config: object;
+  uid?: UID.Component;
+  attributes: Attribute.Any[];
 };
 
 export default function createComponentBuilder() {
@@ -70,7 +76,7 @@ export default function createComponentBuilder() {
     /**
      * create a component in the tmpComponent map
      */
-    editComponent(infos: Infos): void {
+    editComponent(infos: CreateComponentOptions): void {
       const { uid } = infos;
 
       if (!this.components.has(uid)) {

@@ -14,6 +14,17 @@ import { nestedComponentSchema } from './component';
 export type CreateContentTypeInput = {
   contentType?: Partial<Schema.ContentType> & Partial<Schema.ContentTypeInfo>;
   components?: Array<Partial<Schema.Component> & Partial<Schema.Info> & { tmpUID?: UID.Component }>;
+  singularName: Schema.ContentTypeInfo['singularName'];
+  attributes: Schema.Attributes & Record<string, any>;
+  kind: Schema.ContentTypeKind;
+  collectionName?: Schema.CollectionType['collectionName'];
+  pluralName: Schema.ContentTypeInfo['pluralName'];
+  displayName: Schema.ContentTypeInfo['displayName'];
+  description: Schema.ContentTypeInfo['description'];
+  options?: Schema.Options;
+  draftAndPublish?: Schema.Options['draftAndPublish'];
+  pluginOptions?: Schema.ContentType['pluginOptions'];
+  config?: object;
 };
 
 /**
