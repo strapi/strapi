@@ -1,9 +1,9 @@
 {
   "name": "create-strapi-app",
-  "version": "4.13.7",
+  "version": "4.14.0",
   "description": "Generate a new Strapi application.",
   "dependencies": {
-    "@strapi/generate-new": "4.13.7",
+    "@strapi/generate-new": "4.14.0",
     "commander": "8.3.0",
     "inquirer": "8.2.5"
   },
@@ -49,8 +49,8 @@
     "lint": "run -T eslint ."
   },
   "devDependencies": {
-    "eslint-config-custom": "4.13.7",
-    "tsconfig": "4.13.7"
+    "eslint-config-custom": "4.14.0",
+    "tsconfig": "4.14.0"
   },
   "engines": {
     "node": ">=16.0.0 <=20.x.x",

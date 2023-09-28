@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-upload-local",
-  "version": "4.13.7",
+  "version": "4.14.0",
   "description": "Local provider for strapi upload",
   "keywords": [
     "upload",
@@ -43,13 +43,13 @@
     "lint": "run -T eslint ."
   },
   "dependencies": {
-    "@strapi/utils": "4.13.7",
+    "@strapi/utils": "4.14.0",
     "fs-extra": "10.0.0"
   },
   "devDependencies": {
     "@types/jest": "29.5.2",
-    "eslint-config-custom": "4.13.7",
-    "tsconfig": "4.13.7"
+    "eslint-config-custom": "4.14.0",
+    "tsconfig": "4.14.0"
   },
   "engines": {
     "node": ">=16.0.0 <=20.x.x",
