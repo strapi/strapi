@@ -1,27 +1,27 @@
 import path from 'path';
+import type { UID } from '@strapi/types';
 import _ from 'lodash';
 import pluralize from 'pluralize';
 
 import { nameToSlug, nameToCollectionName, errors } from '@strapi/utils';
 import { isConfigurable } from '../../utils/attributes';
-import createSchemaHandler from './schema-handler';
+import createSchemaHandler, { Infos } from './schema-handler';
 
 const { ApplicationError } = errors;
 
+type CreateComponentOptions = {
+  category: string;
+  displayName: string;
+};
+
 export default function createComponentBuilder() {
   return {
-    /**
-     * Returns a uid from a component infos
-     * @param {Object} options options
-     * @param {string} options.category component category
-     * @param {string} options.displayName component displayName
-     */
-    createComponentUID({ category, displayName }) {
+    createComponentUID({ category, displayName }: CreateComponentOptions) {
       return `${nameToSlug(category)}.${nameToSlug(displayName)}`;
     },
 
-    createNewComponentUIDMap(components) {
-      return components.reduce((uidMap, component) => {
+    createNewComponentUIDMap(components: object[]) {
+      return components.reduce((uidMap: any, component: any) => {
         uidMap[component.tmpUID] = this.createComponentUID(component);
         return uidMap;
       }, {});
@@ -30,7 +30,7 @@ export default function createComponentBuilder() {
     /**
      * create a component in the tmpComponent map
      */
-    createComponent(infos) {
+    createComponent(infos: CreateComponentOptions) {
       const uid = this.createComponentUID(infos);
 
       if (this.components.has(uid)) {
@@ -70,11 +70,11 @@ export default function createComponentBuilder() {
     /**
      * create a component in the tmpComponent map
      */
-    editComponent(infos) {
+    editComponent(infos: Infos): void {
       const { uid } = infos;
 
       if (!this.components.has(uid)) {
-        throw new ApplicationError('component.notFound');
+        throw new errors.ApplicationError('component.notFound');
       }
 
       const component = this.components.get(uid);
@@ -85,7 +85,7 @@ export default function createComponentBuilder() {
       const newUID = `${newCategory}.${nameUID}`;
 
       if (newUID !== uid && this.components.has(newUID)) {
-        throw new ApplicationError('component.edit.alreadyExists');
+        throw new errors.ApplicationError('component.edit.alreadyExists');
       }
 
       const newDir = path.join(strapi.dirs.app.components, newCategory);
@@ -118,9 +118,9 @@ export default function createComponentBuilder() {
       return component;
     },
 
-    deleteComponent(uid) {
+    deleteComponent(uid: UID.Component) {
       if (!this.components.has(uid)) {
-        throw new ApplicationError('component.notFound');
+        throw new errors.ApplicationError('component.notFound');
       }
 
       this.components.forEach((compo) => {

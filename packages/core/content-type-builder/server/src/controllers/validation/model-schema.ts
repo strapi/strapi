@@ -7,7 +7,19 @@ import { isValidKey, isValidCollectionName } from './common';
 import { getTypeValidator } from './types';
 import { getRelationValidator } from './relations';
 
-export const createSchema = (types, relations, { modelType } = {}) => {
+type ModelTypeInput = (typeof modelTypes)[keyof typeof modelTypes];
+
+type CreateAttributesInput = {
+  types: ReadonlyArray<string>;
+  relations: ReadonlyArray<string>;
+  modelType?: ModelTypeInput;
+};
+
+export const createSchema = (
+  types: CreateAttributesInput['types'],
+  relations: CreateAttributesInput['relations'],
+  { modelType }: { modelType?: ModelTypeInput } = {}
+) => {
   const shape = {
     description: yup.string(),
     draftAndPublish: yup.boolean(),
@@ -16,7 +28,7 @@ export const createSchema = (types, relations, { modelType } = {}) => {
     collectionName: yup.string().nullable().test(isValidCollectionName),
     attributes: createAttributesValidator({ types, relations, modelType }),
     reviewWorkflows: yup.boolean(),
-  };
+  } as any;
 
   if (modelType === modelTypes.CONTENT_TYPE) {
     shape.kind = yup.string().oneOf([typeKinds.SINGLE_TYPE, typeKinds.COLLECTION_TYPE]).nullable();
@@ -25,7 +37,7 @@ export const createSchema = (types, relations, { modelType } = {}) => {
   return yup.object(shape).noUnknown();
 };
 
-const createAttributesValidator = ({ types, modelType, relations }) => {
+const createAttributesValidator = ({ types, modelType, relations }: CreateAttributesInput) => {
   return yup.lazy((attributes) => {
     return yup
       .object()

@@ -1,6 +1,9 @@
 import _ from 'lodash';
 import { yup } from '@strapi/utils';
 
+import type { TestContext } from 'yup';
+import type { Attribute, Common, Schema } from '@strapi/types';
+
 import { hasComponent } from '../../utils/attributes';
 import { modelTypes, VALID_UID_TARGETS } from '../../services/constants';
 import {
@@ -13,12 +16,18 @@ import {
   isValidRegExpPattern,
 } from './common';
 
+export type GetTypeValidatorOptions = {
+  types?: string[];
+  attributes?: Schema.Attributes;
+  modelType?: (typeof modelTypes)[keyof typeof modelTypes];
+};
+
 const maxLengthIsGreaterThanOrEqualToMinLength = {
   name: 'isGreaterThanMin',
   message: 'maxLength must be greater or equal to minLength',
-  test(value) {
+  test(this: TestContext, value: unknown) {
     const { minLength } = this.parent;
-    if (!_.isUndefined(minLength) && !_.isUndefined(value) && value < minLength) {
+    if (!_.isUndefined(minLength) && !_.isUndefined(value) && (value as number) < minLength) {
       return false;
     }
 
@@ -26,17 +35,26 @@ const maxLengthIsGreaterThanOrEqualToMinLength = {
   },
 };
 
-export const getTypeValidator = (attribute, { types, modelType, attributes }) => {
+export const getTypeValidator = (
+  attribute: Attribute.Any,
+  { types, modelType, attributes }: GetTypeValidatorOptions
+) => {
   return yup.object({
-    type: yup.string().oneOf(types).required(),
+    type: yup
+      .string()
+      .oneOf(types ?? [])
+      .required(),
     configurable: yup.boolean().nullable(),
     private: yup.boolean().nullable(),
     pluginOptions: yup.object(),
     ...getTypeShape(attribute, { modelType, attributes }),
-  });
+  } as any);
 };
 
-const getTypeShape = (attribute, { modelType, attributes } = {}) => {
+const getTypeShape = (
+  attribute: Attribute.Any,
+  { modelType, attributes }: GetTypeValidatorOptions = {}
+) => {
   switch (attribute.type) {
     /**
      * complexe types
@@ -59,8 +77,8 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
         targetField: yup
           .string()
           .oneOf(
-            Object.keys(attributes).filter((key) =>
-              VALID_UID_TARGETS.includes(_.get(attributes[key], 'type'))
+            Object.keys(attributes!).filter((key) =>
+              VALID_UID_TARGETS.includes(_.get(attributes![key] as any, 'type'))
             )
           )
           .nullable(),
@@ -111,6 +129,11 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
         required: validators.required,
         minLength: validators.minLength,
         maxLength: validators.maxLength,
+      };
+    }
+    case 'blocks': {
+      return {
+        required: validators.required,
       };
     }
     case 'json': {
@@ -208,8 +231,8 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
           .string()
           .test({
             name: 'Check max component nesting is 1 lvl',
-            test(compoUID) {
-              const targetCompo = strapi.components[compoUID];
+            test(compoUID: unknown) {
+              const targetCompo = strapi.components[compoUID as Common.UID.Component];
               if (!targetCompo) return true; // ignore this error as it will fail beforehand
 
               if (modelType === modelTypes.COMPONENT && hasComponent(targetCompo)) {

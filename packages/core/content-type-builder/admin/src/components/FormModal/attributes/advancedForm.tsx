@@ -1,12 +1,22 @@
-// import React from 'react';
-// import { FormattedMessage } from 'react-intl';
-// import isEmpty from 'lodash/isEmpty';
 import getTrad from '../../../utils/getTrad';
 import { componentForm } from '../component';
 
 import options from './attributeOptions';
 
 const advancedForm = {
+  blocks() {
+    return {
+      sections: [
+        {
+          sectionTitle: {
+            id: 'global.settings',
+            defaultMessage: 'Settings',
+          },
+          items: [options.required, options.private],
+        },
+      ],
+    };
+  },
   boolean() {
     return {
       sections: [
@@ -38,7 +48,6 @@ const advancedForm = {
                   metadatas: { intlLabel: { id: 'false', defaultMessage: 'false' } },
                 },
               ],
-              // validations: {},
             },
           ],
         },

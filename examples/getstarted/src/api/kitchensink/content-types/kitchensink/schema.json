@@ -22,6 +22,9 @@
     "rich_text": {
       "type": "richtext"
     },
+    "blocks": {
+      "type": "blocks"
+    },
     "integer": {
       "type": "integer"
     },

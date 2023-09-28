@@ -4,9 +4,9 @@ import type { UID } from '@strapi/types';
 
 /**
  * Deletes the API folder of a contentType
- * @param {string} uid content type uid
  */
 export async function clear(uid: UID.ContentType) {
+  // TODO double check if this is the correct way to get the apiName
   const { apiName, modelName } = strapi.contentTypes[uid];
 
   const apiFolder = path.join(strapi.dirs.app.api, apiName);
@@ -19,7 +19,7 @@ export async function clear(uid: UID.ContentType) {
  * Backups the API folder of a contentType
  * @param {string} uid content type uid
  */
-export async function backup(uid) {
+export async function backup(uid: UID.ContentType) {
   const { apiName } = strapi.contentTypes[uid];
 
   const apiFolder = path.join(strapi.dirs.app.api, apiName);
@@ -33,7 +33,7 @@ export async function backup(uid) {
  * Deletes an API backup folder
  * @param {string} uid content type uid
  */
-async function deleteBackup(uid) {
+async function deleteBackup(uid: UID.ContentType) {
   const { apiName } = strapi.contentTypes[uid];
 
   const backupFolder = path.join(strapi.dirs.app.api, '.backup');
@@ -51,7 +51,7 @@ async function deleteBackup(uid) {
  * Rollbacks the API folder of a contentType
  * @param {string} uid content type uid
  */
-export async function rollback(uid) {
+export async function rollback(uid: UID.ContentType) {
   const { apiName } = strapi.contentTypes[uid];
 
   const apiFolder = path.join(strapi.dirs.app.api, apiName);
@@ -70,15 +70,13 @@ export async function rollback(uid) {
 
 /**
  * Creates a delete function to clear an api folder
- * @param {string} baseName
  */
-const createDeleteApiFunction = (baseName) => {
+const createDeleteApiFunction = (baseName: string) => {
   /**
    * Delets a file in an api.
    * Will only update routes.json instead of deleting it if other routes are present
-   * @param {string} filePath file path to delete
    */
-  return async (filePath) => {
+  return async (filePath: string) => {
     const fileName = path.basename(filePath, path.extname(filePath));
 
     const isSchemaFile = filePath.endsWith(`${baseName}/schema.json`);
@@ -91,9 +89,8 @@ const createDeleteApiFunction = (baseName) => {
 /**
  * Deletes a folder recursively using a delete function
  * @param {string} folder folder to delete
- * @param {Function} deleteFn function to call with the file path to delete
  */
-const recursiveRemoveFiles = async (folder, deleteFn) => {
+const recursiveRemoveFiles = async (folder: string, deleteFn: (file: string) => unknown) => {
   const filesName = await fse.readdir(folder);
 
   for (const fileName of filesName) {

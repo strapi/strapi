@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { getOr } from 'lodash/fp';
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
+import type { Schema } from '@strapi/types';
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
 import createBuilder from './schema-builder';
 import { coreUids, pluginsUids } from './constants';
@@ -8,10 +9,10 @@ import type { CreateContentTypeInput } from '../controllers/validation/content-t
 
 const { ApplicationError } = errors;
 
-export const isContentTypeVisible = (model) =>
+export const isContentTypeVisible = (model: Schema.ContentType) =>
   getOr(true, 'pluginOptions.content-type-builder.visible', model) === true;
 
-export const getRestrictRelationsTo = (contentType = {}) => {
+export const getRestrictRelationsTo = (contentType: Schema.ContentType) => {
   const { uid } = contentType;
   if (uid === coreUids.STRAPI_USER) {
     // TODO: replace with an obj { relation: 'x', bidirectional: true|false }
@@ -33,7 +34,7 @@ export const getRestrictRelationsTo = (contentType = {}) => {
  * Format a contentType info to be used by the front-end
  * @param {Object} contentType
  */
-export const formatContentType = (contentType) => {
+const formatContentType = (contentType: Schema.ContentType) => {
   const { uid, kind, modelName, plugin, collectionName, info } = contentType;
 
   return {

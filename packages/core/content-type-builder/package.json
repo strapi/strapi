@@ -43,6 +43,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
+    "build:legacy": "run -T tsc -p tsconfig.build.json",
     "build": "NODE_ENV=production strapi plugin:build --force",
     "build:ts": "run build",
     "watch": "run -T tsc -p tsconfig.build.json -w --preserveWatchOutput",
@@ -58,10 +59,10 @@
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/design-system": "1.10.1",
+    "@strapi/design-system": "1.11.0",
     "@strapi/generators": "4.13.7",
     "@strapi/helper-plugin": "4.13.7",
-    "@strapi/icons": "1.10.1",
+    "@strapi/icons": "1.11.0",
     "@strapi/utils": "4.13.7",
     "fs-extra": "10.0.0",
     "immer": "9.0.19",
@@ -81,8 +82,6 @@
     "@strapi/types": "4.13.7",
     "@testing-library/react": "14.0.0",
     "@testing-library/react-hooks": "8.0.1",
-    "@types/jest": "29.5.2",
-    "@types/koa": "2.13.4",
     "@types/pluralize": "0.0.30",
     "history": "^4.9.0",
     "koa": "2.13.4",

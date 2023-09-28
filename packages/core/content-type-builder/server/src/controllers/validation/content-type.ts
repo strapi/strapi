@@ -3,7 +3,7 @@
 import { flatMap, getOr, has } from 'lodash/fp';
 import { yup, validateYupSchema } from '@strapi/utils';
 
-import type { Schema, UID } from '@strapi/types';
+import type { Schema, Shared, UID } from '@strapi/types';
 import { getService } from '../../utils';
 import { modelTypes, DEFAULT_TYPES, typeKinds } from '../../services/constants';
 import { createSchema } from './model-schema';
@@ -109,13 +109,13 @@ export const validateContentTypeInput = (data: CreateContentTypeInput) => {
 export const validateUpdateContentTypeInput = (data: CreateContentTypeInput) => {
   if (has('contentType', data)) {
     removeEmptyDefaults(data.contentType);
-    removeDeletedUIDTargetFields(data.contentType);
+    removeDeletedUIDTargetFields(data.contentType as Schema.ContentType);
   }
 
   if (has('components', data) && Array.isArray(data.components)) {
-    data.components.forEach((data) => {
-      if (has('uid', data)) {
-        removeEmptyDefaults(data);
+    data.components.forEach((comp) => {
+      if (has('uid', comp)) {
+        removeEmptyDefaults(comp as Schema.Component);
       }
     });
   }
@@ -129,8 +129,8 @@ const forbiddenContentTypeNameValidator = () => {
   return {
     name: 'forbiddenContentTypeName',
     message: `Content Type name cannot be one of ${reservedNames.join(', ')}`,
-    test(value) {
-      if (value && reservedNames.includes(value)) {
+    test(value: unknown) {
+      if (value && reservedNames.includes(value as string)) {
         return false;
       }
 
@@ -140,8 +140,8 @@ const forbiddenContentTypeNameValidator = () => {
 };
 
 const nameIsAvailable = (isEdition: boolean) => {
-  // TODO TS: if strapi.contentTypes (ie, ContentTypes) is an ArrayLike and is used like this, we may want to ensure it is typed so that it can be without using as
-  const usedNames = flatMap((ct) => {
+  // TODO TS: if strapi.contentTypes (ie, ContentTypes) works as an ArrayLike and is used like this, we may want to ensure it is typed so that it can be without using as
+  const usedNames = flatMap((ct: Schema.ContentType) => {
     return [ct.info?.singularName, ct.info?.pluralName];
   })(strapi.contentTypes as any);
 
@@ -152,7 +152,7 @@ const nameIsAvailable = (isEdition: boolean) => {
       // don't check on edition
       if (isEdition) return true;
 
-      if (usedNames.includes(value)) {
+      if (usedNames.includes(value as string)) {
         return false;
       }
       return true;
