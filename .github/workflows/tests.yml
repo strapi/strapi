@@ -166,8 +166,7 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
 
       - name: Install Playwright Browsers
-        # we need 1.37.0 to support Firefox install...
-        run: npx playwright@1.37.0-alpha-jul-20-2023 install --with-deps
+        run: npx playwright@1.38.1 install --with-deps
 
       - name: Run build:ts
         run: yarn nx run-many --target=build:ts --nx-ignore-cycles --skip-nx-cache
