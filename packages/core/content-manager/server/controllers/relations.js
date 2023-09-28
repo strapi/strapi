@@ -4,6 +4,7 @@ const { prop, isEmpty, uniq, flow } = require('lodash/fp');
 const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
 const { isAnyToMany } = require('@strapi/utils').relations;
 const { PUBLISHED_AT_ATTRIBUTE } = require('@strapi/utils').contentTypes.constants;
+const { isOperatorOfType } = require('@strapi/utils');
 
 const { getService } = require('../utils');
 const { validateFindAvailable, validateFindExisting } = require('./validation/relations');
@@ -139,7 +140,8 @@ module.exports = {
 
     // searching should be allowed only on mainField for permission reasons
     if (_q) {
-      addFiltersClause(queryParams, { [mainField]: { $containsi: _q } });
+      const _filter = isOperatorOfType('where', query._filter) ? query._filter : '$containsi';
+      addFiltersClause(queryParams, { [mainField]: { [_filter]: _q } });
     }
 
     if (entityId) {

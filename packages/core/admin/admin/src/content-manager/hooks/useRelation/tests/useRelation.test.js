@@ -256,7 +256,9 @@ describe('useRelation', () => {
       expect(spy).toBeCalledTimes(1);
     });
 
-    expect(spy).toBeCalledWith('/', { params: { _q: 'something', limit: 10, page: 1 } });
+    expect(spy).toBeCalledWith('/', {
+      params: { _q: 'something', _filter: '$startsWithi', limit: 10, page: 1 },
+    });
   });
 
   test('does fetch search results with a different limit', async () => {
@@ -282,6 +284,7 @@ describe('useRelation', () => {
     expect(spy).toBeCalledWith(expect.any(String), {
       params: {
         _q: 'something',
+        _filter: '$startsWithi',
         limit: 5,
         page: expect.any(Number),
       },
@@ -313,6 +316,7 @@ describe('useRelation', () => {
     expect(spy).toHaveBeenNthCalledWith(1, expect.any(String), {
       params: {
         _q: 'something',
+        _filter: '$startsWithi',
         limit: expect.any(Number),
         page: 1,
       },
@@ -320,6 +324,7 @@ describe('useRelation', () => {
     expect(spy).toHaveBeenNthCalledWith(2, expect.any(String), {
       params: {
         _q: 'something',
+        _filter: '$startsWithi',
         limit: expect.any(Number),
         page: 2,
       },
