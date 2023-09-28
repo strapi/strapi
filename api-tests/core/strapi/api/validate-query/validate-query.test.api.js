@@ -157,8 +157,8 @@ describe('Core API - Validate', () => {
 
         it.each([
           ['at root', { id: {} }],
-          ['nested known keys', { id: { $and: { $eq: {}, $contains: {} } } }],
-          ['nested unknown keys', { id: { foo: { foo: {} } } }],
+          ['nested known keys', { id: { $eq: {} } }],
+          ['complex nested known keys', { id: { $and: { $eq: {}, $contains: {} } } }],
         ])('Empty objects are accepted but sanitized out: %s : %s', async (label, filters) => {
           const res = await rq.get('/api/documents', { qs: { filters } });
 
