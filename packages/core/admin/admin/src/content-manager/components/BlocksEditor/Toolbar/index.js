@@ -13,12 +13,9 @@ import styled from 'styled-components';
 import { useBlocksStore } from '../hooks/useBlocksStore';
 import { useModifiersStore } from '../hooks/useModifiersStore';
 
-const Separator = styled(Toolbar.Separator)`
-  background: ${({ theme }) => theme.colors.neutral150};
-  width: 1px;
-  height: ${pxToRem(24)};
-`;
-
+/* -------------------------------------------------------------------------------------------------
+ * ToolbarButton
+ * -----------------------------------------------------------------------------------------------*/
 const FlexButton = styled(Flex).attrs({ as: 'button' })`
   &:hover {
     background: ${({ theme }) => theme.colors.primary100};
@@ -63,47 +60,6 @@ ToolbarButton.propTypes = {
   handleClick: PropTypes.func.isRequired,
 };
 
-const ModifierButton = ({ icon, name, label }) => {
-  const editor = useSlate();
-
-  const isModifierActive = () => {
-    const modifiers = Editor.marks(editor);
-
-    if (!modifiers) return false;
-
-    return Boolean(modifiers[name]);
-  };
-
-  const isActive = isModifierActive();
-
-  const toggleModifier = () => {
-    if (isActive) {
-      Editor.removeMark(editor, name);
-    } else {
-      Editor.addMark(editor, name, true);
-    }
-  };
-
-  return (
-    <ToolbarButton
-      icon={icon}
-      name={name}
-      label={label}
-      isActive={isActive}
-      handleClick={toggleModifier}
-    />
-  );
-};
-
-ModifierButton.propTypes = {
-  icon: PropTypes.elementType.isRequired,
-  name: PropTypes.string.isRequired,
-  label: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-  }).isRequired,
-};
-
 const ALLOWED_MEDIA_TYPE = 'images';
 
 const IMAGE_SCHEMA_FIELDS = [
@@ -135,6 +91,51 @@ const pick = (object, imageSchemaFields) => {
   }, {});
 };
 
+/**
+ * Function that detects if the block selected in the editor is of the provided type.
+ * @param {import('slate').Editor} editor
+ * @param {string} type - type of the block to check
+ * @returns boolean
+ */
+const isLastBlockType = (editor, type) => {
+  const { selection } = editor;
+
+  if (!selection) return false;
+
+  const [currentBlock] = Editor.nodes(editor, {
+    at: selection,
+    match: (n) => n.type === type,
+  });
+
+  if (currentBlock) {
+    const [, currentNodePath] = currentBlock;
+
+    const isNodeAfter = Boolean(Editor.after(editor, currentNodePath));
+
+    return !isNodeAfter;
+  }
+
+  return false;
+};
+
+/**
+ * Function that inserts an empty paragraph block after the editor selection.
+ * @param {import('slate').Editor} editor
+ */
+const insertEmptyBlockAtLast = (editor) => {
+  Transforms.insertNodes(
+    editor,
+    {
+      type: 'paragraph',
+      children: [{ type: 'text', text: '' }],
+    },
+    { at: [editor.children.length] }
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * ImageDialog
+ * -----------------------------------------------------------------------------------------------*/
 const ImageDialog = ({ handleClose }) => {
   const editor = useSlate();
   const { components } = useLibrary();
@@ -147,6 +148,10 @@ const ImageDialog = ({ handleClose }) => {
     });
   };
 
+  /**
+   * Handles the selection of an asset from the media library when you create an image block.
+   * @param {object} images - the selected images from the media library
+   */
   const handleSelectAssets = (images) => {
     const formattedImages = images.map((image) => {
       // create an object with imageSchema defined and exclude unnecessary props coming from media library config
@@ -160,6 +165,12 @@ const ImageDialog = ({ handleClose }) => {
     });
 
     insertImages(formattedImages);
+
+    if (isLastBlockType(editor, 'image')) {
+      // insert blank line to add new blocks below image block
+      insertEmptyBlockAtLast(editor);
+    }
+
     handleClose();
   };
 
@@ -176,6 +187,9 @@ ImageDialog.propTypes = {
   handleClose: PropTypes.func.isRequired,
 };
 
+/* -------------------------------------------------------------------------------------------------
+ * BlocksDropdown
+ * -----------------------------------------------------------------------------------------------*/
 export const BlocksDropdown = () => {
   const editor = useSlate();
   const { formatMessage } = useIntl();
@@ -189,30 +203,6 @@ export const BlocksDropdown = () => {
   }, []);
 
   const [selectedOption, setSelectedOption] = React.useState(Object.keys(blocks)[0]);
-
-  /**
-   * Function that detects if the the block selected is an Image or a Code block.
-   */
-  const isLastBlockImageOrCode = () => {
-    const { selection } = editor;
-
-    if (!selection) return false;
-
-    const [currentImageORCodeBlock] = Editor.nodes(editor, {
-      at: selection,
-      match: (n) => n.type === 'image' || n.type === 'code',
-    });
-
-    if (currentImageORCodeBlock) {
-      const [, currentNodePath] = currentImageORCodeBlock;
-
-      const isNodeAfter = Boolean(Editor.after(editor, currentNodePath));
-
-      return !isNodeAfter;
-    }
-
-    return false;
-  };
 
   /**
    * Manages the selection of a block options in the dropdown and changes the node inside the Slate Editor.
@@ -234,20 +224,18 @@ export const BlocksDropdown = () => {
    * @param {string} optionKey - key of the option selected
    */
   const handleSelectOption = (optionKey) => {
-    selectBlock(blocks[optionKey].value);
+    if (optionKey === 'image') {
+      // Image node created using select or existing selection node needs to be deleted before adding new image nodes
+      Transforms.removeNodes(editor);
+    } else {
+      selectBlock(blocks[optionKey].value);
+    }
 
     setSelectedOption(optionKey);
 
-    if (isLastBlockImageOrCode()) {
-      // insert blank line to add new blocks below code or image blocks
-      Transforms.insertNodes(
-        editor,
-        {
-          type: 'paragraph',
-          children: [{ type: 'text', text: '' }],
-        },
-        { at: [editor.children.length] }
-      );
+    if (optionKey === 'code' && isLastBlockType(editor, 'code')) {
+      // insert blank line to add new blocks below code block
+      insertEmptyBlockAtLast(editor);
     }
 
     if (optionKey === 'image') {
@@ -284,6 +272,9 @@ export const BlocksDropdown = () => {
   );
 };
 
+/* -------------------------------------------------------------------------------------------------
+ * BlockOption
+ * -----------------------------------------------------------------------------------------------*/
 const BlockOption = ({ value, icon, label, handleSelectOption, selectedOption, matchNode }) => {
   const { formatMessage } = useIntl();
   const editor = useSlate();
@@ -341,6 +332,9 @@ BlockOption.propTypes = {
   selectedOption: PropTypes.string.isRequired,
 };
 
+/* -------------------------------------------------------------------------------------------------
+ * ListButton
+ * -----------------------------------------------------------------------------------------------*/
 const ListButton = ({ icon, format, label }) => {
   const editor = useSlate();
 
@@ -353,6 +347,10 @@ const ListButton = ({ icon, format, label }) => {
     return !Editor.isEditor(node) && SlateElement.isElement(node) && node.type === 'list';
   };
 
+  /**
+   * Check if the editor selection is a list block.
+   * @returns boolean
+   */
   const isListActive = () => {
     const { selection } = editor;
 
@@ -370,6 +368,9 @@ const ListButton = ({ icon, format, label }) => {
 
   const isActive = isListActive();
 
+  /**
+   * Creates a list block from the current editor selection.
+   */
   const toggleList = () => {
     // Delete the parent list so that we're left with only the list items directly
     Transforms.unwrapNodes(editor, {
@@ -409,6 +410,9 @@ ListButton.propTypes = {
   }).isRequired,
 };
 
+/* -------------------------------------------------------------------------------------------------
+ * BlocksToolbar
+ * -----------------------------------------------------------------------------------------------*/
 // TODO: Remove after the RTE Blocks Alpha release
 const AlphaTag = styled(Box)`
   background-color: ${({ theme }) => theme.colors.warning100};
@@ -416,6 +420,12 @@ const AlphaTag = styled(Box)`
   border-radius: ${({ theme }) => theme.borderRadius};
   font-size: ${({ theme }) => theme.fontSizes[0]};
   padding: ${({ theme }) => `${2 / 16}rem ${theme.spaces[1]}`};
+`;
+
+const Separator = styled(Toolbar.Separator)`
+  background: ${({ theme }) => theme.colors.neutral150};
+  width: 1px;
+  height: ${pxToRem(24)};
 `;
 
 const BlocksToolbar = () => {
