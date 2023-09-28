@@ -26,6 +26,7 @@ const FlexButton = styled(Flex).attrs({ as: 'button' })`
 `;
 
 const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
+  const editor = useSlate();
   const { formatMessage } = useIntl();
   const labelMessage = formatMessage(label);
 
@@ -39,9 +40,10 @@ const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
           width={7}
           height={7}
           hasRadius
-          onMouseDown={(e) => {
-            e.preventDefault();
+          onClick={() => {
             handleClick();
+            // When a button is clicked it blurs the editor, restore the focus to the editor
+            ReactEditor.focus(editor);
           }}
           aria-label={labelMessage}
         >
