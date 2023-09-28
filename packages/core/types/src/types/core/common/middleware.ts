@@ -1,15 +1,15 @@
 import type Koa from 'koa';
-import type { Strapi } from '../../..';
+import type { Common, Strapi } from '../../..';
 
 export type MiddlewareFactory<T = any> = (
   config: T,
   ctx: { strapi: Strapi }
 ) => MiddlewareHandler | void;
 
-export type MiddlewareName = string;
+export type MiddlewareName = Common.UID.Middleware | string;
 
 export type MiddlewareConfig = {
-  name?: string;
+  name?: MiddlewareName;
   resolve?: string;
   config?: unknown;
 };

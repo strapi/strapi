@@ -41,6 +41,7 @@ type Connection<TClient extends ClientKind> = {
   connectionString?: string;
   timezone?: string;
 } & { [key: string]: unknown } & IfClientIs<TClient, 'postgres', { schema?: string }, unknown>;
+
 type SqliteConnection = {
   filename: string;
 } & { [key: string]: unknown };
