@@ -159,7 +159,8 @@ describe('Core API - Validate', () => {
           ['at root', { id: {} }],
           ['nested known keys', { id: { $eq: {} } }],
           ['complex nested known keys', { id: { $and: { $eq: {}, $contains: {} } } }],
-          ['undefined', { id: undefined }], // not sure this is a possible path, but might as well test it
+          ['non-id complex nested known keys', { name: { $and: { $eq: {}, $contains: {} } } }],
+          ['undefined', { name: undefined }], // not sure this is a possible path, but might as well test it
         ])('Empty objects are accepted but sanitized out: %s : %s', async (label, filters) => {
           const res = await rq.get('/api/documents', { qs: { filters } });
 
