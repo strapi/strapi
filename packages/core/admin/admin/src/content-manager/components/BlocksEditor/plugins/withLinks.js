@@ -1,7 +1,7 @@
-import { Path, Node, Transforms } from 'slate';
+import { Path } from 'slate';
 
 const withLinks = (editor) => {
-  const { isInline, apply, normalizeNode } = editor;
+  const { isInline, apply } = editor;
 
   editor.isInline = (element) => {
     return element.type === 'link' ? true : isInline(element);
@@ -25,22 +25,6 @@ const withLinks = (editor) => {
     }
 
     apply(operation);
-  };
-
-  // By default Slate add text nodes without type
-  // Here we ensure that all link's children are text nodes with the correct type
-  editor.normalizeNode = (entry) => {
-    const [node, path] = entry;
-
-    if (node.type === 'link') {
-      Array.from(Node.children(editor, path)).forEach(([childNode, childPath]) => {
-        if (childNode.type !== 'text') {
-          Transforms.setNodes(editor, { type: 'text' }, { at: childPath });
-        }
-      });
-    }
-
-    normalizeNode(entry);
   };
 
   return editor;

@@ -1,7 +1,7 @@
 import { yup } from '@strapi/utils';
 
 const textNodeValidator = yup.object().shape({
-  type: yup.string().equals(['text']).required(),
+  type: yup.string().equals(['text']),
   text: yup
     .string()
     .test(
@@ -27,14 +27,10 @@ const linkNodeValidator = yup.object().shape({
 // TODO: remove any with a correct Type
 const inlineNodeValidator: any = yup.lazy((value: { type: string }) => {
   switch (value.type) {
-    case 'text':
-      return textNodeValidator;
     case 'link':
       return linkNodeValidator;
     default:
-      return yup.mixed().test('invalid-type', 'Inline node must be Text or Link', () => {
-        return false;
-      });
+      return textNodeValidator;
   }
 });
 
