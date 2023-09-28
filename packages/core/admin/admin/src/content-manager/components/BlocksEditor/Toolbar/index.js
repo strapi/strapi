@@ -215,7 +215,7 @@ export const BlocksDropdown = () => {
   };
 
   /**
-   * Manages the selection of a block and changes the node inside the Slate Editor.
+   * Manages the selection of a block options in the dropdown and changes the node inside the Slate Editor.
    * @param {object} value - the value of the selected option in the BlocksDropdown select
    */
   const selectBlock = (value) => {
