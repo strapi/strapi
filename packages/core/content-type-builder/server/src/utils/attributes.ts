@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import utils, { errors } from '@strapi/utils';
-import { Attribute } from '@strapi/types';
+import type { Attribute, Schema } from '@strapi/types';
 
 const { ApplicationError } = errors;
 
-export const hasComponent = (model) => {
+export const hasComponent = (model: Schema.Schema) => {
   const compoKeys = Object.keys(model.attributes || {}).filter((key) => {
     return model.attributes[key].type === 'component';
   });
@@ -12,9 +12,9 @@ export const hasComponent = (model) => {
   return compoKeys.length > 0;
 };
 
-export const isConfigurable = (attribute) => _.get(attribute, 'configurable', true);
+export const isConfigurable = (attribute: Attribute.Any) => _.get(attribute, 'configurable', true);
 
-export const isRelation = (attribute) => attribute.type === 'relation';
+export const isRelation = (attribute: Attribute.Any) => attribute.type === 'relation';
 
 /**
  * Formats a component's attributes
@@ -22,12 +22,12 @@ export const isRelation = (attribute) => attribute.type === 'relation';
  * @param {Object} context - function context
  * @param {Object} context.component - the associated component
  */
-export const formatAttributes = (model) => {
+export const formatAttributes = (model: Schema.Component) => {
   const { getVisibleAttributes } = utils.contentTypes;
 
   // only get attributes that can be seen in the CTB
-  return getVisibleAttributes(model).reduce((acc, key) => {
-    acc[key] = formatAttribute(key, model.attributes[key], { model });
+  return getVisibleAttributes(model).reduce((acc: any, key) => {
+    acc[key] = formatAttribute(key, model.attributes[key]);
     return acc;
   }, {});
 };
@@ -39,7 +39,10 @@ export const formatAttributes = (model) => {
  * @param {Object} context - function context
  * @param {Object} context.component - the associated component
  */
-export const formatAttribute = (key: string, attribute: Attribute.Any) => {
+export const formatAttribute = (
+  key: string,
+  attribute: Attribute.Any & { autoPopulate?: boolean }
+) => {
   const { configurable, required, autoPopulate, pluginOptions } = attribute;
 
   if (attribute.type === 'media') {
@@ -72,10 +75,10 @@ export const formatAttribute = (key: string, attribute: Attribute.Any) => {
 };
 
 // TODO: move to schema builder
-export const replaceTemporaryUIDs = (uidMap) => (schema) => {
+export const replaceTemporaryUIDs = (uidMap: any) => (schema: Schema.Schema) => {
   return {
     ...schema,
-    attributes: Object.keys(schema.attributes).reduce((acc, key) => {
+    attributes: Object.keys(schema.attributes).reduce((acc: any, key) => {
       const attr = schema.attributes[key];
       if (attr.type === 'component') {
         if (_.has(uidMap, attr.component)) {
