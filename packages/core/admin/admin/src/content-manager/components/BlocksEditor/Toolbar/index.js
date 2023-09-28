@@ -51,6 +51,8 @@ const ToolbarButton = ({ icon, name, label, isActive, disabled, handleClick }) =
   const { formatMessage } = useIntl();
   const labelMessage = formatMessage(label);
 
+  const enabledColor = isActive ? 'primary600' : 'neutral600';
+
   return (
     <Tooltip description={labelMessage}>
       <Toolbar.ToggleItem value={name} data-state={isActive ? 'on' : 'off'} asChild>
@@ -68,7 +70,7 @@ const ToolbarButton = ({ icon, name, label, isActive, disabled, handleClick }) =
           disabled={disabled}
           aria-label={labelMessage}
         >
-          <Icon width={3} height={3} as={icon} color={isActive ? 'primary600' : 'neutral600'} />
+          <Icon width={3} height={3} as={icon} color={disabled ? 'neutral300' : enabledColor} />
         </FlexButton>
       </Toolbar.ToggleItem>
     </Tooltip>
