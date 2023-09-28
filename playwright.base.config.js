@@ -36,8 +36,11 @@ const createConfig = ({ port, testDir, appDir }) => ({
     /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
     actionTimeout: 0,
 
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'off',
+    /* Collect trace when a test failed on the CI. See https://playwright.dev/docs/trace-viewer
+       Until https://github.com/strapi/strapi/issues/18196 is fixed we can't enable this locally,
+       because the Strapi server restarts every time a new file (trace) is created.
+    */
+    trace: process.env.CI ? 'retain-on-failure' : 'off',
   },
 
   /* Configure projects for major browsers */

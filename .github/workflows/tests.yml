@@ -177,6 +177,13 @@ jobs:
       - name: Run E2E tests
         run: yarn test:e2e --setup --concurrency=1 --project=${{ matrix.project }}
 
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: playwright-trace
+          path: test-apps/e2e/**/test-results/**/trace.zip
+          retention-days: 1
+
   api_ce_pg:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
