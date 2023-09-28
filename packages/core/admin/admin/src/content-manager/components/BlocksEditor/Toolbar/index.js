@@ -422,7 +422,7 @@ const LinkButton = () => {
 
   const addLink = () => {
     // We insert an empty anchor, so we split the DOM to have a element we can use as reference for the popover
-    insertLink(editor, { url: '', text: Editor.string(editor, editor.selection) });
+    insertLink(editor, { url: '' });
   };
 
   const selectionIsCollapsed = editor.selection && Range.isCollapsed(editor.selection);

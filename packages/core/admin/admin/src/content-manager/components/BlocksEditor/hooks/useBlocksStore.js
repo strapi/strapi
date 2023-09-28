@@ -238,21 +238,39 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
 
   const handleSave = (e) => {
     e.stopPropagation();
-    const { text, url } = e.target.elements;
+    const data = new FormData(e.target);
 
-    // If the selection is collapsed, we select the parent node because we want all the link to be replaced
-    if (Range.isCollapsed(editor.selection)) {
-      const [, parentPath] = Editor.parent(editor, editor.selection.focus?.path);
-      Transforms.select(editor, parentPath);
+    if (data.get('url') === '') {
+      removeLink(editor);
+      setIsEditing(false);
+      setPopoverOpen(false);
+    } else {
+      // If the selection is collapsed, we select the parent node because we want all the link to be replaced
+      if (Range.isCollapsed(editor.selection)) {
+        const [, parentPath] = Editor.parent(editor, editor.selection.focus?.path);
+        Transforms.select(editor, parentPath);
+      }
+
+      editLink(editor, { url: data.get('url'), text: data.get('text') });
+      setIsEditing(false);
     }
+  };
 
-    editLink(editor, { url: url.value, text: text.value });
+  const handleCancel = () => {
     setIsEditing(false);
-    setPopoverOpen(false);
+
+    if (element.url === '') {
+      removeLink(editor);
+    }
   };
 
   const handleDismiss = () => {
     setPopoverOpen(false);
+
+    if (element.url === '') {
+      removeLink(editor);
+    }
+
     ReactEditor.focus(editor);
   };
 
@@ -269,14 +287,7 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
         {children}
       </BaseLink>
       {popoverOpen && (
-        <Popover
-          source={linkRef}
-          onDismiss={handleDismiss}
-          padding={4}
-          placement="right-end"
-          contentEditable={false}
-          onEscapeKeyDown={() => ReactEditor.focus(editor)}
-        >
+        <Popover source={linkRef} onDismiss={handleDismiss} padding={4} contentEditable={false}>
           {isEditing ? (
             <Flex as="form" onSubmit={handleSave} direction="column" gap={4}>
               <Field width="300px">
@@ -305,7 +316,7 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                 <FieldInput name="url" placeholder="https://strapi.io" defaultValue={element.url} />
               </Field>
               <Flex justifyContent="end" width="100%" gap={2}>
-                <Button variant="tertiary" onClick={() => setIsEditing(false)}>
+                <Button variant="tertiary" onClick={handleCancel}>
                   {formatMessage({
                     id: 'components.Blocks.popover.cancel',
                     defaultMessage: 'Cancel',
@@ -322,7 +333,9 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
           ) : (
             <Flex direction="column" gap={4} alignItems="start" width="400px">
               <Typography>{elementText}</Typography>
-              <BaseLink href={element.url}>{element.url}</BaseLink>
+              <BaseLink href={element.url} target="_blank">
+                {element.url}
+              </BaseLink>
               <Flex justifyContent="end" width="100%" gap={2}>
                 <IconButton
                   icon={<Trash />}
