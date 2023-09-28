@@ -87,6 +87,9 @@ module.exports = {
   json() {
     return [withAttributeNamespace('JSON')];
   },
+  blocks() {
+    return [withAttributeNamespace('Blocks')];
+  },
   media() {
     return [withAttributeNamespace('Media')];
   },
