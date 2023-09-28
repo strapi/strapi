@@ -7,7 +7,7 @@ import { BulletList, NumberList } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement } from 'slate';
-import { useSlate } from 'slate-react';
+import { ReactEditor, useSlate } from 'slate-react';
 import styled from 'styled-components';
 
 import { useBlocksStore } from '../hooks/useBlocksStore';
@@ -122,12 +122,19 @@ const isBlockActive = (editor, matchNode) => {
 const toggleBlock = (editor, value) => {
   const { type, level } = value;
 
-  const newProperties = {
-    type,
-    level: level || null,
-  };
+  // Set the initial block properties received from the useBlockStore
+  const initialProperties = type === 'heading' ? { type, level } : { type };
 
-  Transforms.setNodes(editor, newProperties);
+  if (editor.selection) {
+    // When there is a selection, update the existing block in the tree
+    Transforms.setNodes(editor, initialProperties);
+  } else {
+    // Otherwise, add a new block to the tree
+    Transforms.insertNodes(editor, { initialProperties, children: [{ type: 'text', text: '' }] });
+  }
+
+  // Return the focus to the editor, it lost it when the select was opened
+  ReactEditor.focus(editor);
 };
 
 const ALLOWED_MEDIA_TYPE = 'images';
@@ -277,6 +284,16 @@ export const BlocksDropdown = () => {
     }
   };
 
+  /**
+   * Prevent the select from focusing itself so ReactEditor.focus(editor) can focus the editor instead.
+   *
+   * The editor first loses focus to a blur event when clicking the select button. However,
+   * refocusing the editor is not enough since the select's default behavior is to refocus itself
+   * after an option is selected.
+   *
+   */
+  const preventSelectFocus = (e) => e.preventDefault();
+
   return (
     <>
       <Select
@@ -284,6 +301,7 @@ export const BlocksDropdown = () => {
         onChange={selectOption}
         placeholder={blocks[blockSelected].label}
         value={blockSelected}
+        onCloseAutoFocus={preventSelectFocus}
         aria-label={formatMessage({
           id: 'components.Blocks.blocks.selectBlock',
           defaultMessage: 'Select a block',
