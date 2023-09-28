@@ -1,45 +1,33 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 
 import useLazyComponents from '../index';
 
-const mockCustomField = {
-  name: 'color',
-  pluginId: 'mycustomfields',
-  type: 'text',
-  icon: jest.fn(),
-  intlLabel: {
-    id: 'mycustomfields.color.label',
-    defaultMessage: 'Color',
-  },
-  intlDescription: {
-    id: 'mycustomfields.color.description',
-    defaultMessage: 'Select any color',
-  },
-  components: {
-    Input: jest.fn().mockResolvedValue({ default: jest.fn() }),
-  },
-};
-
 jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
   useCustomFields: () => ({
-    get: jest.fn().mockReturnValue(mockCustomField),
+    get: jest.fn().mockReturnValue({
+      name: 'color',
+      pluginId: 'mycustomfields',
+      type: 'text',
+      icon: jest.fn(),
+      intlLabel: {
+        id: 'mycustomfields.color.label',
+        defaultMessage: 'Color',
+      },
+      intlDescription: {
+        id: 'mycustomfields.color.description',
+        defaultMessage: 'Select any color',
+      },
+      components: {
+        Input: jest.fn().mockResolvedValue({ default: jest.fn() }),
+      },
+    }),
   }),
 }));
 
 describe('useLazyComponents', () => {
-  let cleanup;
-
-  afterEach(() => {
-    if (typeof cleanup === 'function') {
-      cleanup();
-      cleanup = undefined;
-    }
-  });
-
-  it('lazy loads the components', async () => {
+  test('lazy loads the components', async () => {
     const { result } = renderHook(() => useLazyComponents(['plugin::test.test']));
-
-    cleanup = result.current.cleanup;
 
     expect(result.current.isLazyLoading).toEqual(true);
     expect(result.current.lazyComponentStore).toEqual({});
@@ -58,11 +46,13 @@ describe('useLazyComponents', () => {
 
     const { result: actualResult } = renderHook(() => useLazyComponents());
 
-    cleanup = actualResult.current.cleanup;
-
     await waitFor(() => expect(actualResult.current.isLazyLoading).toBe(false));
 
     expect(actualResult.current.lazyComponentStore['plugin::test.test']).toBeDefined();
+
+    act(() => actualResult.current.cleanup());
+
+    expect(actualResult.current.lazyComponentStore).toEqual({});
   });
 
   test('given there are no components to load it should not be loading and the store should be empty', async () => {
@@ -80,8 +70,6 @@ describe('useLazyComponents', () => {
     );
 
     const { result: actualResult } = renderHook(() => useLazyComponents(['plugin::test.hex']));
-
-    cleanup = actualResult.current.cleanup;
 
     await waitFor(() => expect(actualResult.current.isLazyLoading).toBe(false));
 

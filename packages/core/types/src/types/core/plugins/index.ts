@@ -14,3 +14,5 @@ export type IsEnabled<
       >
     : false
   : false;
+
+export * as Config from './config';

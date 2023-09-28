@@ -103,7 +103,7 @@
     "@strapi/types": "4.13.7",
     "@strapi/typescript-utils": "4.13.7",
     "@strapi/utils": "4.13.7",
-    "@vitejs/plugin-react": "4.0.4",
+    "@vitejs/plugin-react": "4.1.0",
     "bcryptjs": "2.4.3",
     "boxen": "5.1.2",
     "browserslist-to-esbuild": "1.2.0",

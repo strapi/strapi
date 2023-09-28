@@ -29,48 +29,41 @@ const client = new QueryClient({
   },
 });
 
-// eslint-disable-next-line react/prop-types
-const ComponentFixture = ({ children }) => (
-  <QueryClientProvider client={client}>{children}</QueryClientProvider>
-);
-
 const cacheKey = ['useRelation-cache-key'];
 function setup(args) {
-  return new Promise((resolve) => {
-    act(() => {
-      resolve(
-        renderHook(
-          () =>
-            useRelation(cacheKey, {
-              relation: {
-                enabled: true,
-                endpoint: '/',
-                pageParams: {
-                  limit: 10,
-                  ...(args?.relation?.pageParams ?? {}),
-                },
-                normalizeArguments: {
-                  mainFieldName: 'name',
-                  shouldAddLink: false,
-                  targetModel: 'api::tag.tag',
-                },
-                ...(args?.relation ?? {}),
-              },
+  return renderHook(
+    () =>
+      useRelation(cacheKey, {
+        relation: {
+          enabled: true,
+          endpoint: '/',
+          pageParams: {
+            limit: 10,
+            ...(args?.relation?.pageParams ?? {}),
+          },
+          normalizeArguments: {
+            mainFieldName: 'name',
+            shouldAddLink: false,
+            targetModel: 'api::tag.tag',
+          },
+          ...(args?.relation ?? {}),
+        },
 
-              search: {
-                endpoint: '/',
-                pageParams: {
-                  limit: 10,
-                  ...(args?.search?.pageParams ?? {}),
-                },
-                ...(args?.search ?? {}),
-              },
-            }),
-          { wrapper: ComponentFixture }
-        )
-      );
-    });
-  });
+        search: {
+          endpoint: '/',
+          pageParams: {
+            limit: 10,
+            ...(args?.search?.pageParams ?? {}),
+          },
+          ...(args?.search ?? {}),
+        },
+      }),
+    {
+      wrapper({ children }) {
+        return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+      },
+    }
+  );
 }
 
 describe('useRelation', () => {
@@ -80,7 +73,7 @@ describe('useRelation', () => {
 
   test('fetch relations and calls onLoadRelationsCallback', async () => {
     const onLoadMock = jest.fn();
-    await setup({
+    setup({
       relation: {
         onLoad: onLoadMock,
       },
@@ -119,7 +112,7 @@ describe('useRelation', () => {
       },
     });
 
-    const { result } = await setup({
+    const { result } = setup({
       relation: {
         onLoad: onLoadMock,
       },
@@ -131,7 +124,7 @@ describe('useRelation', () => {
   });
 
   test('fetch relations with different limit', async () => {
-    await setup({
+    setup({
       relation: { pageParams: { limit: 5 } },
     });
 
@@ -148,14 +141,14 @@ describe('useRelation', () => {
   });
 
   test('does not fetch relations if it was not enabled', async () => {
-    await setup({ relation: { enabled: false } });
+    setup({ relation: { enabled: false } });
     const { get } = useFetchClient();
 
     expect(get).not.toBeCalled();
   });
 
   test('fetch relations', async () => {
-    const { result } = await setup();
+    const { result } = setup();
 
     await waitFor(() => {
       expect(result.current.relations.isSuccess).toBe(true);
@@ -186,7 +179,7 @@ describe('useRelation', () => {
 
     const { get } = useFetchClient();
 
-    const { result } = await setup();
+    const { result } = setup();
 
     await waitFor(() => expect(result.current.relations.isLoading).toBe(false));
 
@@ -207,6 +200,8 @@ describe('useRelation', () => {
         page: 2,
       },
     });
+
+    await waitFor(() => expect(result.current.relations.isLoading).toBe(false));
   });
 
   test("does not fetch relations next page, if there isn't one", async () => {
@@ -222,7 +217,7 @@ describe('useRelation', () => {
 
     const { get } = useFetchClient();
 
-    const { result } = await setup();
+    const { result } = setup();
 
     await waitFor(() => {
       expect(get).toBeCalledTimes(1);
@@ -236,7 +231,7 @@ describe('useRelation', () => {
   });
 
   test('does not fetch search by default', async () => {
-    const { result } = await setup();
+    const { result } = setup();
 
     await waitFor(() => {
       expect(result.current.search.isLoading).toBe(false);
@@ -244,7 +239,7 @@ describe('useRelation', () => {
   });
 
   test('does fetch search results once a term was provided', async () => {
-    const { result } = await setup();
+    const { result } = setup();
 
     await waitFor(() => expect(result.current).toBeTruthy());
 
@@ -265,7 +260,7 @@ describe('useRelation', () => {
   });
 
   test('does fetch search results with a different limit', async () => {
-    const { result } = await setup({
+    const { result } = setup({
       search: { pageParams: { limit: 5 } },
     });
 
@@ -294,7 +289,7 @@ describe('useRelation', () => {
   });
 
   test('fetch search next page, if there is one', async () => {
-    const { result } = await setup();
+    const { result } = setup();
 
     const spy = jest
       .fn()
@@ -332,7 +327,7 @@ describe('useRelation', () => {
   });
 
   test("does not fetch search next page, if there isn't one", async () => {
-    const { result } = await setup();
+    const { result } = setup();
 
     const spy = jest.fn().mockResolvedValueOnce({
       data: { results: [], pagination: { page: 1, pageCount: 1 } },
