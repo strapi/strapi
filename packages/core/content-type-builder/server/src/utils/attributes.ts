@@ -18,9 +18,6 @@ export const isRelation = (attribute: Attribute.Any) => attribute.type === 'rela
 
 /**
  * Formats a component's attributes
- * @param {Object} attributes - the attributes map
- * @param {Object} context - function context
- * @param {Object} context.component - the associated component
  */
 export const formatAttributes = (model: Schema.Component) => {
   const { getVisibleAttributes } = utils.contentTypes;
@@ -33,11 +30,7 @@ export const formatAttributes = (model: Schema.Component) => {
 };
 
 /**
- * Fromats a component attribute
- * @param {string} key - the attribute key
- * @param {Object} attribute - the attribute
- * @param {Object} context - function context
- * @param {Object} context.component - the associated component
+ * Formats a component attribute
  */
 export const formatAttribute = (
   key: string,
