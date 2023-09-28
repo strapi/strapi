@@ -2,7 +2,7 @@ import { join } from 'path';
 import _ from 'lodash';
 
 import { errors } from '@strapi/utils';
-import type { Schema, Utils } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 import createSchemaHandler from './schema-handler';
 import createComponentBuilder from './component-builder';
 import createContentTypeBuilder from './content-type-builder';
@@ -100,8 +100,8 @@ export default function createBuilder() {
 }
 
 type SchemaBuilderOptions = {
-  components: Utils.String.Dict<Component>;
-  contentTypes: Utils.String.Dict<ContentType>;
+  components: Component[];
+  contentTypes: ContentType[];
 };
 
 function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions) {

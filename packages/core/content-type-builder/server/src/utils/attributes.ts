@@ -24,7 +24,7 @@ export const formatAttributes = (model: Schema.Component) => {
 
   // only get attributes that can be seen in the CTB
   return getVisibleAttributes(model).reduce((acc: any, key) => {
-    acc[key] = formatAttribute(key, model.attributes[key]);
+    acc[key] = formatAttribute(model.attributes[key]);
     return acc;
   }, {});
 };
@@ -32,10 +32,7 @@ export const formatAttributes = (model: Schema.Component) => {
 /**
  * Formats a component attribute
  */
-export const formatAttribute = (
-  key: string,
-  attribute: Attribute.Any & { autoPopulate?: boolean }
-) => {
+export const formatAttribute = (attribute: Attribute.Any & { autoPopulate?: boolean }) => {
   const { configurable, required, autoPopulate, pluginOptions } = attribute;
 
   if (attribute.type === 'media') {
