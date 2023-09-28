@@ -186,6 +186,12 @@ const ImageDialog = ({ handleClose }) => {
     });
 
     insertImages(formattedImages);
+
+    if (isLastBlockType(editor, 'image')) {
+      // insert blank line to add new blocks below image block
+      insertEmptyBlockAtLast(editor);
+    }
+
     handleClose();
   };
 
@@ -202,18 +208,18 @@ ImageDialog.propTypes = {
   handleClose: PropTypes.func.isRequired,
 };
 
-const isLastBlockImageOrCode = (editor) => {
+const isLastBlockType = (editor, type) => {
   const { selection } = editor;
 
   if (!selection) return false;
 
-  const [currentImageORCodeBlock] = Editor.nodes(editor, {
+  const [currentBlock] = Editor.nodes(editor, {
     at: selection,
-    match: (n) => n.type === 'image' || n.type === 'code',
+    match: (n) => n.type === type,
   });
 
-  if (currentImageORCodeBlock) {
-    const [, currentNodePath] = currentImageORCodeBlock;
+  if (currentBlock) {
+    const [, currentNodePath] = currentBlock;
 
     const isNodeAfter = Boolean(Editor.after(editor, currentNodePath));
 
@@ -221,6 +227,17 @@ const isLastBlockImageOrCode = (editor) => {
   }
 
   return false;
+};
+
+const insertEmptyBlockAtLast = (editor) => {
+  Transforms.insertNodes(
+    editor,
+    {
+      type: 'paragraph',
+      children: [{ type: 'text', text: '' }],
+    },
+    { at: [editor.children.length] }
+  );
 };
 
 export const BlocksDropdown = () => {
@@ -241,20 +258,18 @@ export const BlocksDropdown = () => {
    * @param {string} optionKey - key of the heading selected
    */
   const selectOption = (optionKey) => {
-    toggleBlock(editor, blocks[optionKey].value);
+    if (optionKey === 'image') {
+      // Image node created using select or existing selection node needs to be deleted before adding new image nodes
+      Transforms.removeNodes(editor);
+    } else {
+      toggleBlock(editor, blocks[optionKey].value);
+    }
 
     setBlockSelected(optionKey);
 
-    if (isLastBlockImageOrCode(editor)) {
-      // insert blank line to add new blocks below code or image blocks
-      Transforms.insertNodes(
-        editor,
-        {
-          type: 'paragraph',
-          children: [{ type: 'text', text: '' }],
-        },
-        { at: [editor.children.length] }
-      );
+    if (optionKey === 'code' && isLastBlockType(editor, 'code')) {
+      // insert blank line to add new blocks below code block
+      insertEmptyBlockAtLast(editor);
     }
 
     if (optionKey === 'image') {
