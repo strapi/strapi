@@ -154,6 +154,17 @@ describe('Core API - Validate', () => {
 
           expect(res.status).toEqual(400);
         });
+
+        it.each([
+          ['at root', { id: {} }],
+          ['nested known keys', { id: { $and: { $eq: {}, $contains: {} } } }],
+          ['nested unknown keys', { id: { foo: { foo: {} } } }],
+        ])('Empty objects are accepted but sanitized out: %s : %s', async (label, filters) => {
+          const res = await rq.get('/api/documents', { qs: { filters } });
+
+          expect(res.status).toEqual(200);
+          checkAPIResultLength(res, documentsLength());
+        });
       });
 
       describe('Scalar', () => {
