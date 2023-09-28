@@ -17,7 +17,7 @@ import {
 } from './common';
 
 export type GetTypeValidatorOptions = {
-  types?: string[];
+  types: ReadonlyArray<string>;
   attributes?: Schema.Attributes;
   modelType?: (typeof modelTypes)[keyof typeof modelTypes];
 };
@@ -42,7 +42,7 @@ export const getTypeValidator = (
   return yup.object({
     type: yup
       .string()
-      .oneOf(types ?? [])
+      .oneOf([...types])
       .required(),
     configurable: yup.boolean().nullable(),
     private: yup.boolean().nullable(),

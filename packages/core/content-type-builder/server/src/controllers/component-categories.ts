@@ -1,8 +1,9 @@
+import type { Context } from 'koa';
 import { getService } from '../utils';
 import validateComponentCategory from './validation/component-category';
 
 export default {
-  async editCategory(ctx) {
+  async editCategory(ctx: Context) {
     const { body } = ctx.request;
 
     try {
@@ -24,7 +25,7 @@ export default {
     ctx.send({ name: newName });
   },
 
-  async deleteCategory(ctx) {
+  async deleteCategory(ctx: Context) {
     const { name } = ctx.params;
 
     strapi.reload.isWatching = false;

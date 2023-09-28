@@ -1,3 +1,4 @@
+import { Schema } from '@strapi/types';
 import getContentTypes from '../content-types';
 
 const { formatContentType } = getContentTypes();
@@ -28,7 +29,7 @@ describe('Content types service', () => {
           type: 'string',
         },
       },
-    };
+    } as unknown as Schema.ContentType;
 
     it('Returns consistent schemas', () => {
       expect(formatContentType(contentType)).toMatchSnapshot();
@@ -38,6 +39,7 @@ describe('Content types service', () => {
       expect(
         formatContentType({
           ...contentType,
+          // @ts-expect-error testing invalid inputs
           kind: undefined,
         })
       ).toMatchObject({

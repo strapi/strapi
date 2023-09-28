@@ -1,5 +1,6 @@
 import _ from 'lodash';
-
+import type { Context } from 'koa';
+import type { Common } from '@strapi/types';
 import { getService } from '../utils';
 import { validateComponentInput, validateUpdateComponentInput } from './validation/component';
 
@@ -13,11 +14,11 @@ export default {
    * Returns a list of available components
    * @param {Object} ctx - koa context
    */
-  async getComponents(ctx) {
+  async getComponents(ctx: Context) {
     const componentService = getService('components');
 
     const data = Object.keys(strapi.components).map((uid) => {
-      return componentService.formatComponent(strapi.components[uid]);
+      return componentService.formatComponent(strapi.components[uid as Common.UID.Component]);
     });
 
     ctx.send({ data });
@@ -28,7 +29,7 @@ export default {
    * Returns a specific component
    * @param {Object} ctx - koa context
    */
-  async getComponent(ctx) {
+  async getComponent(ctx: Context) {
     const { uid } = ctx.params;
 
     const component = strapi.components[uid];
@@ -47,7 +48,7 @@ export default {
    * Creates a component and returns its infos
    * @param {Object} ctx - koa context
    */
-  async createComponent(ctx) {
+  async createComponent(ctx: Context) {
     const { body } = ctx.request;
 
     try {
@@ -71,7 +72,7 @@ export default {
       ctx.send({ data: { uid: component.uid } }, 201);
     } catch (error) {
       strapi.log.error(error);
-      ctx.send({ error: error.message }, 400);
+      ctx.send({ error: (error as any)?.message || 'Unknown error' }, 400);
     }
   },
 
@@ -80,7 +81,7 @@ export default {
    * Updates a component and return its infos
    * @param {Object} ctx - koa context - enhanced koa context
    */
-  async updateComponent(ctx) {
+  async updateComponent(ctx: Context) {
     const { uid } = ctx.params;
     const { body } = ctx.request;
 
@@ -99,17 +100,18 @@ export default {
 
       const componentService = getService('components');
 
-      const component = await componentService.editComponent(uid, {
+      const component = (await componentService.editComponent(uid, {
         component: body.component,
         components: body.components,
-      });
+      })) as any;
 
       setImmediate(() => strapi.reload());
 
       ctx.send({ data: { uid: component.uid } });
     } catch (error) {
       strapi.log.error(error);
-      ctx.send({ error: error.message }, 400);
+
+      ctx.send({ error: (error as any)?.message || 'Unknown error' }, 400);
     }
   },
 
@@ -118,7 +120,7 @@ export default {
    * Deletes a components and returns its old infos
    * @param {Object} ctx - koa context
    */
-  async deleteComponent(ctx) {
+  async deleteComponent(ctx: Context) {
     const { uid } = ctx.params;
 
     if (!_.has(strapi.components, uid)) {
@@ -137,7 +139,7 @@ export default {
       ctx.send({ data: { uid: component.uid } });
     } catch (error) {
       strapi.log.error(error);
-      ctx.send({ error: error.message }, 400);
+      ctx.send({ error: (error as any)?.message || 'Unknown error' }, 400);
     }
   },
 };
