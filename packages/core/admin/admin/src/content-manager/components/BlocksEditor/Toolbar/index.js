@@ -191,7 +191,7 @@ export const BlocksDropdown = () => {
   const [selectedOption, setSelectedOption] = React.useState(Object.keys(blocks)[0]);
 
   /**
-   * Function that detect if the the block selected is an Image or a Code block.
+   * Function that detects if the the block selected is an Image or a Code block.
    */
   const isLastBlockImageOrCode = () => {
     const { selection } = editor;
