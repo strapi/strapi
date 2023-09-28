@@ -124,18 +124,21 @@ const isBlockActive = (editor, matchNode) => {
 const toggleBlock = (editor, value) => {
   const { type, level } = value;
 
-  // Set the initial block properties received from the useBlockStore
-  const initialProperties = type === 'heading' ? { type, level } : { type };
+  // Set the selected block properties received from the useBlockStore
+  const blockProperties = {
+    type,
+    level: level || null,
+  };
 
   if (editor.selection) {
     // When there is a selection, update the existing block in the tree
-    Transforms.setNodes(editor, initialProperties);
+    Transforms.setNodes(editor, blockProperties);
   } else {
     // Otherwise, add a new block to the tree
-    Transforms.insertNodes(editor, { initialProperties, children: [{ type: 'text', text: '' }] });
+    Transforms.insertNodes(editor, { ...blockProperties, children: [{ type: 'text', text: '' }] });
   }
 
-  // Return the focus to the editor, it lost it when the select was opened
+  // When the select is clicked it blurs the editor, restore the focus to the editor
   ReactEditor.focus(editor);
 };
 
@@ -249,7 +252,7 @@ const insertEmptyBlockAtLast = (editor) => {
   );
 };
 
-export const BlocksDropdown = () => {
+const BlocksDropdown = () => {
   const editor = useSlate();
   const { formatMessage } = useIntl();
   const [isMediaLibraryVisible, setIsMediaLibraryVisible] = React.useState(false);
