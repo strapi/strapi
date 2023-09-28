@@ -2,7 +2,7 @@ import React from 'react';
 
 import { LoadingIndicatorPage, useRBAC } from '@strapi/helper-plugin';
 import { useSelector } from 'react-redux';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
 import { selectAdminPermissions } from '../../../../App/selectors';
 import EditPage from '../EditPage';
@@ -23,7 +23,7 @@ const ProtectedEditPage = () => {
   }
 
   if (!canRead && !canUpdate) {
-    return <Redirect to="/" />;
+    return <Navigate replace to="/" />;
   }
 
   return <EditPage />;

@@ -2,9 +2,8 @@ import React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
-import { Router } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import * as yup from 'yup';
 
 import ResetPassword from '..';
@@ -26,13 +25,12 @@ jest.mock('@strapi/helper-plugin', () => ({
 
 describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
   it('should render and match the snapshot', () => {
-    const history = createMemoryHistory();
     const { container } = render(
       <IntlProvider locale="en" messages={{}} textComponent="span">
         <ThemeProvider theme={lightTheme}>
-          <Router history={history}>
+          <MemoryRouter>
             <ResetPassword onSubmit={() => {}} schema={yup.object()} />
-          </Router>
+          </MemoryRouter>
         </ThemeProvider>
       </IntlProvider>
     );

@@ -5,7 +5,7 @@ import { CheckPermissions, onRowClick, pxToRem, stopPropagation } from '@strapi/
 import { Pencil, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 const EditLink = styled(Link)`
@@ -37,7 +37,7 @@ const EditLink = styled(Link)`
 
 const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDelete }) => {
   const { formatMessage } = useIntl();
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const [showConfirmDelete, setShowConfirmDelete] = onDelete;
 
   const checkCanDeleteRole = (role) =>
@@ -49,7 +49,7 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
   };
 
   const handleClickEdit = (id) => {
-    push(`/settings/users-permissions/roles/${id}`);
+    navigate(`/settings/users-permissions/roles/${id}`);
   };
 
   return (

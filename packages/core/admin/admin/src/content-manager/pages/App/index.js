@@ -11,7 +11,7 @@ import sortBy from 'lodash/sortBy';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
-import { Redirect, Route, Switch, useLocation, useRouteMatch } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useMatch } from 'react-router-dom';
 
 import { DragLayer } from '../../../components/DragLayer';
 import { selectAdminPermissions } from '../../../pages/App/selectors';
@@ -62,7 +62,7 @@ function renderDraglayerItem({ type, item }) {
 }
 
 const App = () => {
-  const contentTypeMatch = useRouteMatch(`/content-manager/:kind/:uid`);
+  const contentTypeMatch = useMatch(`/content-manager/:kind/:uid`);
   const { status, collectionTypeLinks, singleTypeLinks, models, refetchData } =
     useContentManagerInitData();
   const authorisedModels = sortBy([...collectionTypeLinks, ...singleTypeLinks], (model) =>
@@ -103,17 +103,18 @@ const App = () => {
     supportedModelsToDisplay.length > 0 &&
     pathname !== '/content-manager/403'
   ) {
-    return <Redirect to="/content-manager/403" />;
+    return <Navigate replace to="/content-manager/403" />;
   }
 
   // Redirect the user to the create content type page
   if (supportedModelsToDisplay.length === 0 && pathname !== '/content-manager/no-content-types') {
-    return <Redirect to="/content-manager/no-content-types" />;
+    return <Navigate replace to="/content-manager/no-content-types" />;
   }
 
   if (!contentTypeMatch && authorisedModels.length > 0) {
     return (
-      <Redirect
+      <Navigate
+        replace
         to={`${authorisedModels[0].to}${
           authorisedModels[0].search ? `?${authorisedModels[0].search}` : ''
         }`}
@@ -125,26 +126,28 @@ const App = () => {
     <Layout sideNav={<LeftMenu />}>
       <DragLayer renderItem={renderDraglayerItem} />
       <ModelsContext.Provider value={{ refetchData }}>
-        <Switch>
-          <Route path="/content-manager/components/:uid/configurations/edit">
-            <CheckPagePermissions permissions={permissions.contentManager.componentsConfigurations}>
-              <ComponentSettingsView />
-            </CheckPagePermissions>
-          </Route>
+        <Routes>
+          <Route
+            path="/content-manager/components/:uid/configurations/edit"
+            element={
+              <CheckPagePermissions
+                permissions={permissions.contentManager.componentsConfigurations}
+              >
+                <ComponentSettingsView />
+              </CheckPagePermissions>
+            }
+          />
+
           <Route
             path="/content-manager/collectionType/:slug"
-            component={CollectionTypeRecursivePath}
+            Component={CollectionTypeRecursivePath}
           />
-          <Route path="/content-manager/singleType/:slug" component={SingleTypeRecursivePath} />
+          <Route path="/content-manager/singleType/:slug" Component={SingleTypeRecursivePath} />
 
-          <Route path="/content-manager/403">
-            <NoPermissions />
-          </Route>
-          <Route path="/content-manager/no-content-types">
-            <NoContentType />
-          </Route>
-          <Route path="" component={AnErrorOccurred} />
-        </Switch>
+          <Route path="/content-manager/403" Component={NoPermissions} />
+          <Route path="/content-manager/no-content-types" Component={NoContentType} />
+          <Route path="" Component={AnErrorOccurred} />
+        </Routes>
       </ModelsContext.Provider>
     </Layout>
   );

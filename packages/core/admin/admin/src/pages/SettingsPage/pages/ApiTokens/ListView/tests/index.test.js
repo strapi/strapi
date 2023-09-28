@@ -7,7 +7,7 @@ import { render, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
-import { Route, MemoryRouter } from 'react-router-dom';
+import { Route, MemoryRouter, Routes } from 'react-router-dom';
 import { createStore } from 'redux';
 
 import Theme from '../../../../../../components/Theme';
@@ -65,40 +65,41 @@ jest.mock('react-intl', () => {
   };
 });
 
-const setup = ({ path, ...props } = {}) =>
-  render(() => <ListView {...props} />, {
-    wrapper({ children }) {
-      const client = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
-          },
-        },
-      });
-
-      return (
-        <Provider
-          store={createStore((state) => state, {
-            admin_app: { permissions: { ...fixtures.permissions.app } },
-          })}
-        >
-          <QueryClientProvider client={client}>
-            <TrackingProvider>
-              <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
-                <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-                  <Theme>
-                    <MemoryRouter initialEntries={[path || '/settings/api-tokens']}>
-                      <Route path="/settings/api-tokens">{children}</Route>
-                    </MemoryRouter>
-                  </Theme>
-                </ThemeToggleProvider>
-              </IntlProvider>
-            </TrackingProvider>
-          </QueryClientProvider>
-        </Provider>
-      );
+const setup = ({ path, ...props } = {}) => {
+  const client = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
     },
   });
+
+  const route = path || '/settings/api-tokens';
+
+  return render(
+    <Provider
+      store={createStore((state) => state, {
+        admin_app: { permissions: { ...fixtures.permissions.app } },
+      })}
+    >
+      <QueryClientProvider client={client}>
+        <TrackingProvider>
+          <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
+            <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+              <Theme>
+                <MemoryRouter initialEntries={[route]}>
+                  <Routes>
+                    <Route path={route} element={<ListView {...props} />} />
+                  </Routes>
+                </MemoryRouter>
+              </Theme>
+            </ThemeToggleProvider>
+          </IntlProvider>
+        </TrackingProvider>
+      </QueryClientProvider>
+    </Provider>
+  );
+};
 
 describe('ADMIN | Pages | API TOKENS | ListPage', () => {
   afterAll(() => {

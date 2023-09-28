@@ -29,15 +29,8 @@ const LazyCompo = ({ loadComponent }) => {
   return <LoadingIndicatorPage />;
 };
 
-const createRoute = (Component, to, exact) => {
-  return (
-    <Route
-      render={() => <LazyCompo loadComponent={Component} />}
-      key={to}
-      path={to}
-      exact={exact || false}
-    />
-  );
+const createRoute = (Component, to) => {
+  return <Route element={<LazyCompo loadComponent={Component} />} key={to} path={to} />;
 };
 
 LazyCompo.propTypes = {

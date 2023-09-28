@@ -3,9 +3,8 @@ import React from 'react';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { useStrapiApp } from '@strapi/helper-plugin';
 import { render, screen, waitFor } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
-import { Router } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 
 import { useMenu } from '../../../hooks';
 import Admin from '../index';
@@ -47,20 +46,19 @@ jest.mock('../../HomePage', () => () => {
   return <div>HomePage</div>;
 });
 
-const makeApp = (history) => (
+const makeApp = () => (
   <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
     <ThemeProvider theme={lightTheme}>
-      <Router history={history}>
+      <MemoryRouter>
         <Admin />
-      </Router>
+      </MemoryRouter>
     </ThemeProvider>
   </IntlProvider>
 );
 
 describe('<Admin />', () => {
   it('should not crash', () => {
-    const history = createMemoryHistory();
-    const App = makeApp(history);
+    const App = makeApp();
 
     const { container } = render(App);
 
@@ -90,8 +88,7 @@ describe('<Admin />', () => {
       generalSectionLinks: [],
       pluginsSectionLinks: [],
     }));
-    const history = createMemoryHistory();
-    const App = makeApp(history);
+    const App = makeApp();
 
     render(App);
 

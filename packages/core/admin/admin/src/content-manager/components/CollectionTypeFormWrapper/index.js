@@ -15,7 +15,7 @@ import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
 import { useQueryClient } from 'react-query';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { useFindRedirectionLink } from '../../hooks';
 import {
@@ -36,7 +36,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
   const toggleNotification = useNotification();
   const { setCurrentStep } = useGuidedTour();
   const { trackUsage } = useTracking();
-  const { push, replace } = useHistory();
+  const navigate = useNavigate();
   const [{ query, rawQuery }] = useQueryParams();
   const dispatch = useDispatch();
   const { componentsDataStructure, contentTypeDataStructure, data, isLoading, status } =
@@ -126,7 +126,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         const resStatus = get(err, 'response.status', null);
 
         if (resStatus === 404) {
-          push(redirectionLink);
+          navigate(redirectionLink);
 
           return;
         }
@@ -138,7 +138,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
             message: { id: getTrad('permissions.not-allowed.update') },
           });
 
-          push(redirectionLink);
+          navigate(redirectionLink);
         }
       }
     };
@@ -165,7 +165,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
   }, [
     fetchClient,
     cleanReceivedData,
-    push,
+    navigate,
     requestURL,
     dispatch,
     rawQuery,
@@ -194,7 +194,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
         trackUsageRef.current('didDeleteEntry', trackerProperty);
 
-        replace(redirectionLink);
+        navigate(redirectionLink, { replace: true });
 
         return Promise.resolve(data);
       } catch (err) {
@@ -203,7 +203,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         return Promise.reject(err);
       }
     },
-    [id, slug, toggleNotification, del, redirectionLink, replace]
+    [del, slug, id, toggleNotification, navigate, redirectionLink]
   );
 
   const onPost = useCallback(
@@ -243,7 +243,9 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         // Enable navigation and remove loaders
         dispatch(setStatus('resolved'));
 
-        replace(`/content-manager/collectionType/${slug}/${data.id}${rawQuery}`);
+        navigate(`/content-manager/collectionType/${slug}/${data.id}${rawQuery}`, {
+          replace: true,
+        });
 
         return Promise.resolve(data);
       } catch (err) {
@@ -256,17 +258,17 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
     },
     [
       origin,
-      cleanReceivedData,
-      displayErrors,
-      replace,
       slug,
       dispatch,
+      post,
       query,
       toggleNotification,
       setCurrentStep,
       queryClient,
-      post,
+      cleanReceivedData,
+      navigate,
       rawQuery,
+      displayErrors,
     ]
   );
 

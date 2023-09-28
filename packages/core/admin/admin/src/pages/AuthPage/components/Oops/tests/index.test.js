@@ -2,9 +2,8 @@ import React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
-import { Router } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 
 import Oops from '..';
 
@@ -21,13 +20,12 @@ jest.mock('../../../../../hooks/useConfigurations', () => () => ({
 
 describe('ADMIN | PAGES | AUTH | Oops', () => {
   it('should render and match the snapshot', () => {
-    const history = createMemoryHistory();
     const { container } = render(
       <IntlProvider locale="en" messages={{}} textComponent="span">
         <ThemeProvider theme={lightTheme}>
-          <Router history={history}>
+          <MemoryRouter>
             <Oops />
-          </Router>
+          </MemoryRouter>
         </ThemeProvider>
       </IntlProvider>
     );

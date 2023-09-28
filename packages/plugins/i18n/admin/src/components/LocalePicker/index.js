@@ -5,7 +5,7 @@ import { useQueryParams } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 import { useDispatch, useSelector } from 'react-redux';
-import { useRouteMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 
 import useContentTypePermissions from '../../hooks/useContentTypePermissions';
 import useHasI18n from '../../hooks/useHasI18n';
@@ -20,7 +20,7 @@ const LocalePicker = () => {
   const [{ query }, setQuery] = useQueryParams();
   const {
     params: { slug },
-  } = useRouteMatch('/content-manager/collectionType/:slug');
+  } = useMatch('/content-manager/collectionType/:slug');
   const isFieldLocalized = useHasI18n();
   const { createPermissions, readPermissions } = useContentTypePermissions(slug);
 

@@ -2,20 +2,17 @@ import React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
-import { Router } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 
 import InternalErrorPage from '../index';
-
-const history = createMemoryHistory();
 
 const App = (
   <ThemeProvider theme={lightTheme}>
     <IntlProvider locale="en" messages={{}} textComponent="span">
-      <Router history={history}>
+      <MemoryRouter>
         <InternalErrorPage />
-      </Router>
+      </MemoryRouter>
     </IntlProvider>
   </ThemeProvider>
 );

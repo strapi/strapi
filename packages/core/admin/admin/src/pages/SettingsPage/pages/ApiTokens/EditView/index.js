@@ -16,7 +16,7 @@ import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
-import { useHistory, useRouteMatch } from 'react-router-dom';
+import { useLocation, useNavigate, useMatch } from 'react-router-dom';
 
 import { ApiTokenPermissionsContextProvider } from '../../../../../contexts/ApiTokenPermissions';
 import { formatAPIErrors } from '../../../../../utils';
@@ -39,12 +39,13 @@ const ApiTokenCreateView = () => {
   const { formatMessage } = useIntl();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
-  const history = useHistory();
+  const navigate = useNavigate();
+  const location = useLocation();
   const permissions = useSelector(selectAdminPermissions);
   const [apiToken, setApiToken] = useState(
-    history.location.state?.apiToken.accessKey
+    location.state?.apiToken.accessKey
       ? {
-          ...history.location.state.apiToken,
+          ...location.state.apiToken,
         }
       : null
   );
@@ -57,7 +58,7 @@ const ApiTokenCreateView = () => {
   const [state, dispatch] = useReducer(reducer, initialState, (state) => init(state, {}));
   const {
     params: { id },
-  } = useRouteMatch('/settings/api-tokens/:id');
+  } = useMatch('/settings/api-tokens/:id');
   const { get, post, put } = useFetchClient();
 
   const isCreating = id === 'create';
@@ -186,7 +187,7 @@ const ApiTokenCreateView = () => {
           });
 
       if (isCreating) {
-        history.replace(`/settings/api-tokens/${response.id}`, { apiToken: response });
+        navigate(`/settings/api-tokens/${response.id}`, { apiToken: response, replace: true });
         setCurrentStep('apiTokens.success');
       }
       unlockApp();

@@ -30,7 +30,7 @@ import omit from 'lodash/omit';
 import pick from 'lodash/pick';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useHistory, useRouteMatch } from 'react-router-dom';
+import { useNavigate, useMatch } from 'react-router-dom';
 
 import { useAdminUsers } from '../../../../../hooks/useAdminUsers';
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
@@ -48,8 +48,8 @@ const EditPage = ({ canUpdate }) => {
   const { formatMessage } = useIntl();
   const {
     params: { id },
-  } = useRouteMatch('/settings/users/:id');
-  const { push } = useHistory();
+  } = useMatch('/settings/users/:id');
+  const navigate = useNavigate();
   const { setUserDisplayName } = useAppInfo();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
@@ -86,7 +86,7 @@ const EditPage = ({ canUpdate }) => {
             },
           });
 
-          push('/');
+          navigate('/');
         } else {
           toggleNotification({
             type: 'warning',

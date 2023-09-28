@@ -14,7 +14,7 @@ import {
 import { ArrowLeft } from '@strapi/icons';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
-import { useRouteMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 
 import { useAdminRolePermissions } from '../../../../../hooks/useAdminRolePermissions';
 import { useAdminRoles } from '../../../../../hooks/useAdminRoles';
@@ -28,7 +28,7 @@ const EditPage = () => {
   const { formatMessage } = useIntl();
   const {
     params: { id },
-  } = useRouteMatch('/settings/roles/:id');
+  } = useMatch('/settings/roles/:id');
   const { put } = useFetchClient();
   const [isSubmitting, setIsSubmiting] = useState(false);
   const permissionsRef = useRef();

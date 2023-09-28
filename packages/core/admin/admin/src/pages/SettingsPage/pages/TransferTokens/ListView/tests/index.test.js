@@ -4,11 +4,10 @@ import { fixtures } from '@strapi/admin-test-utils';
 import { darkTheme, lightTheme } from '@strapi/design-system';
 import { TrackingProvider, useRBAC } from '@strapi/helper-plugin';
 import { render, waitFor } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
-import { Route, Router } from 'react-router-dom';
+import { Routes, Route, MemoryRouter } from 'react-router-dom';
 import { createStore } from 'redux';
 
 import Theme from '../../../../../../components/Theme';
@@ -66,41 +65,42 @@ jest.mock('react-intl', () => {
   };
 });
 
-const setup = (props) =>
-  render(() => <ListView {...props} />, {
-    wrapper({ children }) {
-      const history = createMemoryHistory();
-      const client = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
-          },
-        },
-      });
-
-      return (
-        <Provider
-          store={createStore((state) => state, {
-            admin_app: { permissions: fixtures.permissions.app },
-          })}
-        >
-          <QueryClientProvider client={client}>
-            <TrackingProvider>
-              <IntlProvider defaultLocale="en" locale="en">
-                <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-                  <Theme>
-                    <Router history={history}>
-                      <Route path="/settings/transfer-tokens">{children}</Route>
-                    </Router>
-                  </Theme>
-                </ThemeToggleProvider>
-              </IntlProvider>
-            </TrackingProvider>
-          </QueryClientProvider>
-        </Provider>
-      );
+const setup = (props) => {
+  const client = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
     },
   });
+
+  const element = <ListView {...props} />;
+  const route = '/settings/transfer-tokens';
+
+  return render(
+    <Provider
+      store={createStore((state) => state, {
+        admin_app: { permissions: fixtures.permissions.app },
+      })}
+    >
+      <QueryClientProvider client={client}>
+        <TrackingProvider>
+          <IntlProvider defaultLocale="en" locale="en">
+            <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+              <Theme>
+                <MemoryRouter initialEntries={[route]}>
+                  <Routes>
+                    <Route path={route} element={element} />
+                  </Routes>
+                </MemoryRouter>
+              </Theme>
+            </ThemeToggleProvider>
+          </IntlProvider>
+        </TrackingProvider>
+      </QueryClientProvider>
+    </Provider>
+  );
+};
 
 describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
   afterAll(() => {

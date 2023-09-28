@@ -3,18 +3,18 @@ import React, { useCallback, useEffect, useRef } from 'react';
 import { auth, LoadingIndicatorPage, useFetchClient } from '@strapi/helper-plugin';
 import Cookies from 'js-cookie';
 import { useIntl } from 'react-intl';
-import { useHistory, useRouteMatch } from 'react-router-dom';
+import { useNavigate, useMatch } from 'react-router-dom';
 
 export const AuthResponse = () => {
   const {
     params: { authResponse },
-  } = useRouteMatch('/auth/login/:authResponse');
+  } = useMatch('/auth/login/:authResponse');
   const { formatMessage } = useIntl();
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const formatMessageRef = useRef(formatMessage);
 
   let redirectToOops = useCallback(() => {
-    push(
+    navigate(
       `/auth/oops?info=${encodeURIComponent(
         formatMessageRef.current({
           id: 'Auth.form.button.login.providers.error',
@@ -22,7 +22,7 @@ export const AuthResponse = () => {
         })
       )}`
     );
-  }, [push]);
+  }, [navigate]);
 
   const { get } = useFetchClient();
 
@@ -43,12 +43,12 @@ export const AuthResponse = () => {
 
         Cookies.remove('jwtToken');
 
-        push('/auth/login');
+        navigate('/auth/login');
       }
     } catch (e) {
       redirectToOops();
     }
-  }, [get, push, redirectToOops]);
+  }, [get, navigate, redirectToOops]);
 
   useEffect(() => {
     if (authResponse === 'error') {

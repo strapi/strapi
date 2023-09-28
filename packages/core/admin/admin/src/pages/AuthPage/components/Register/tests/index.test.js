@@ -4,11 +4,10 @@ import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { TrackingProvider, useNotification, useQuery } from '@strapi/helper-plugin';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createMemoryHistory } from 'history';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 import { IntlProvider } from 'react-intl';
-import { Router } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 
 import Register from '..';
 import { FORMS } from '../../../constants';
@@ -61,13 +60,11 @@ const setup = (props) => {
       />,
       {
         wrapper({ children }) {
-          const history = createMemoryHistory();
-
           return (
             <IntlProvider locale="en" messages={{}}>
               <TrackingProvider>
                 <ThemeProvider theme={lightTheme}>
-                  <Router history={history}>{children}</Router>
+                  <MemoryRouter>{children}</MemoryRouter>
                 </ThemeProvider>
               </TrackingProvider>
             </IntlProvider>

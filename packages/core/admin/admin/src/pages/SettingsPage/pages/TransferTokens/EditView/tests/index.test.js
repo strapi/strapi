@@ -3,11 +3,10 @@ import React from 'react';
 import { fixtures } from '@strapi/admin-test-utils';
 import { darkTheme, lightTheme } from '@strapi/design-system';
 import { render, waitFor } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
-import { Route, Router } from 'react-router-dom';
+import { Route, MemoryRouter, Routes } from 'react-router-dom';
 import { createStore } from 'redux';
 
 import Theme from '../../../../../../components/Theme';
@@ -67,7 +66,9 @@ const client = new QueryClient({
   },
 });
 
-const makeApp = (history) => {
+const makeApp = () => {
+  const route = '/settings/transfer-tokens/1';
+
   return (
     <Provider
       store={createStore((state) => state, {
@@ -78,11 +79,11 @@ const makeApp = (history) => {
         <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
           <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
             <Theme>
-              <Router history={history}>
-                <Route path="/settings/transfer-tokens/:id">
-                  <EditView />
-                </Route>
-              </Router>
+              <MemoryRouter initialEntries={[route]}>
+                <Routes>
+                  <Route path={route} element={<EditView />} />
+                </Routes>
+              </MemoryRouter>
             </Theme>
           </ThemeToggleProvider>
         </IntlProvider>
@@ -97,11 +98,8 @@ describe('ADMIN | Pages | TRANSFER TOKENS | EditView', () => {
   });
 
   it('renders and matches the snapshot when editing existing token', async () => {
-    const history = createMemoryHistory();
-    const App = makeApp(history);
+    const App = makeApp();
     const { getByText } = render(App);
-
-    history.push('/settings/transfer-tokens/1');
 
     await waitFor(() => expect(getByText('My super token')).toBeInTheDocument());
     await waitFor(() => expect(getByText('This describe my super token')).toBeInTheDocument());

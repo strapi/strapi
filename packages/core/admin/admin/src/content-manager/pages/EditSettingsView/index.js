@@ -29,7 +29,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 import { useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { getTrad } from '../../utils';
 import { selectFieldSizes } from '../App/selectors';
@@ -48,7 +48,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
   const [isDraggingSibling, setIsDraggingSibling] = useState(false);
   const { trackUsage } = useTracking();
   const toggleNotification = useNotification();
-  const { goBack } = useHistory();
+  const navigate = useNavigate();
   const [isModalFormOpen, setIsModalFormOpen] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const { componentLayouts, initialData, modifiedData, metaToEdit, metaForm } = reducerState;
@@ -253,7 +253,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
                 startIcon={<ArrowLeft />}
                 onClick={(e) => {
                   e.preventDefault();
-                  goBack();
+                  navigate(-1);
                 }}
                 to="/"
               >

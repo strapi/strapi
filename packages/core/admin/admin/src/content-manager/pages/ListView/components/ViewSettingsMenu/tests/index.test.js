@@ -1,11 +1,10 @@
 import React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { fireEvent, render as renderRTL, waitFor } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
+import { fireEvent, render as renderRTL } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Provider } from 'react-redux';
-import { Router } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import { combineReducers, createStore } from 'redux';
 
 import reducers from '../../../../../../reducers';
@@ -47,8 +46,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   CheckPermissions: ({ children }) => <div>{children}</div>,
 }));
 
-const history = createMemoryHistory();
-
 const render = () => ({
   ...renderRTL(<ViewSettingsMenu layout={layout} slug="api::temp.temp" />, {
     wrapper({ children }) {
@@ -66,13 +63,13 @@ const render = () => ({
       });
 
       return (
-        <Router history={history}>
+        <MemoryRouter>
           <IntlProvider messages={{}} textComponent="span" locale="en">
             <ThemeProvider theme={lightTheme}>
               <Provider store={store}>{children}</Provider>
             </ThemeProvider>
           </IntlProvider>
-        </Router>
+        </MemoryRouter>
       );
     },
   }),
@@ -119,11 +116,7 @@ describe('Content Manager | List view | ViewSettingsMenu', () => {
     });
 
     expect(configureViewLink).toBeInTheDocument();
-
-    fireEvent.click(configureViewLink);
-    await waitFor(() => {
-      expect(history.location.pathname).toBe('/api::temp.temp/configurations/list');
-    });
+    expect(configureViewLink).toHaveAttribute('href', 'api::temp.temp/configurations/list');
   });
 
   it('should show inside the Popover the title Dysplayed fields title', async () => {

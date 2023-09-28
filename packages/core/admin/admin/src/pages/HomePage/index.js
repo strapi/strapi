@@ -9,7 +9,7 @@ import { Box, Grid, GridItem, Layout, Main } from '@strapi/design-system';
 import { LoadingIndicatorPage, useGuidedTour } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import GuidedTourHomepage from '../../components/GuidedTour/Homepage';
@@ -38,11 +38,11 @@ export const HomePageCE = () => {
   const { guidedTourState, isGuidedTourVisible, isSkipped } = useGuidedTour();
   const showGuidedTour =
     !isGuidedTourCompleted(guidedTourState) && isGuidedTourVisible && !isSkipped;
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const handleClick = (e) => {
     e.preventDefault();
 
-    push('/plugins/content-type-builder/content-types/create-content-type');
+    navigate('/plugins/content-type-builder/content-types/create-content-type');
   };
 
   const hasAlreadyCreatedContentTypes = useMemo(() => {

@@ -20,7 +20,7 @@ import { Trash, Duplicate, Pencil } from '@strapi/icons';
 import { AxiosError } from 'axios';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
 import { getFullName } from '../../../../../utils';
@@ -43,7 +43,7 @@ export const TableRows = ({
   withBulkActions,
   rows,
 }) => {
-  const { push, location } = useHistory();
+  const navigate = useNavigate();
   const { pathname } = location;
   const { formatMessage } = useIntl();
   const { post } = useFetchClient();
@@ -74,7 +74,7 @@ export const TableRows = ({
     if (!withBulkActions) return;
 
     trackUsage('willEditEntryFromList');
-    push({
+    navigate({
       pathname: `${pathname}/${id}`,
       state: { from: pathname },
       search: pluginsQueryParams,
@@ -90,7 +90,7 @@ export const TableRows = ({
       );
 
       if ('id' in data) {
-        push({
+        navigate({
           pathname: `${pathname}/${data.id}`,
           state: { from: pathname },
           search: pluginsQueryParams,
@@ -98,7 +98,7 @@ export const TableRows = ({
       }
     } catch (err) {
       if (err instanceof AxiosError) {
-        push({
+        navigate({
           pathname: `${pathname}/create/clone/${id}`,
           state: { from: pathname, error: formatAPIError(err) },
           search: pluginsQueryParams,

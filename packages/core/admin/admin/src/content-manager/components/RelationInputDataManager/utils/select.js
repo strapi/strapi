@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import get from 'lodash/get';
-import { useRouteMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 
 function useSelect({
   componentUid,
@@ -26,7 +26,7 @@ function useSelect({
    * to-be-cloned entity.
    */
   const { params } =
-    useRouteMatch('/content-manager/collectionType/:collectionType/create/clone/:origin') ?? {};
+    useMatch('/content-manager/collectionType/:collectionType/create/clone/:origin') ?? {};
 
   const { origin } = params ?? {};
 

@@ -2,9 +2,8 @@ import React from 'react';
 
 import { darkTheme, lightTheme } from '@strapi/design-system';
 import { render } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
-import { Router } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 
 import Theme from '../../../../components/Theme';
 import ThemeToggleProvider from '../../../../components/ThemeToggleProvider';
@@ -20,7 +19,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
     const {
       container: { firstChild },
     } = render(
-      <Router history={createMemoryHistory()}>
+      <MemoryRouter>
         <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
           <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
             <Theme>
@@ -28,7 +27,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
             </Theme>
           </ThemeToggleProvider>
         </IntlProvider>
-      </Router>
+      </MemoryRouter>
     );
 
     expect(firstChild).toMatchInlineSnapshot(`

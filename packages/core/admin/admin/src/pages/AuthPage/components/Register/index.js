@@ -26,7 +26,7 @@ import { Formik } from 'formik';
 import omit from 'lodash/omit';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useNpsSurveySettings } from '../../../../components/NpsSurvey/hooks/useNpsSurveySettings';
@@ -46,7 +46,7 @@ const PasswordInput = styled(TextInput)`
 
 const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => {
   const toggleNotification = useNotification();
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const [passwordShown, setPasswordShown] = useState(false);
   const [confirmPasswordShown, setConfirmPasswordShown] = useState(false);
   const [submitCount, setSubmitCount] = useState(0);
@@ -85,7 +85,7 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
 
           // Redirect to the oops page in case of an invalid token
           // @alexandrebodin @JAB I am not sure it is the wanted behavior
-          push(`/auth/oops?info=${encodeURIComponent(message)}`);
+          navigate(`/auth/oops?info=${encodeURIComponent(message)}`);
         }
       };
 

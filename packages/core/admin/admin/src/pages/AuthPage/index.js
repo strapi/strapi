@@ -6,7 +6,7 @@ import camelCase from 'lodash/camelCase';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
 import PropTypes from 'prop-types';
-import { Redirect, useHistory, useRouteMatch } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate, useMatch } from 'react-router-dom';
 
 import persistStateToLocaleStorage from '../../components/GuidedTour/utils/persistStateToLocaleStorage';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
@@ -19,16 +19,14 @@ import init from './init';
 import { initialState, reducer } from './reducer';
 
 const AuthPage = ({ hasAdmin, setHasAdmin }) => {
-  const {
-    push,
-    location: { search },
-  } = useHistory();
+  const navigate = useNavigate();
+  const { search } = useLocation();
   const { changeLocale } = useLocalesProvider();
   const { setSkipped } = useGuidedTour();
   const { trackUsage } = useTracking();
   const {
     params: { authType },
-  } = useRouteMatch('/auth/:authType');
+  } = useMatch('/auth/:authType');
   const query = useQuery();
   const Login = useEnterprise(
     LoginCE,
@@ -109,7 +107,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     try {
       await post(requestURL, body, { cancelToken: source.token });
 
-      push('/auth/forgot-password-success');
+      navigate('/auth/forgot-password-success');
     } catch (err) {
       console.error(err);
 
@@ -144,7 +142,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         );
 
         if (camelCase(errorMessage).toLowerCase() === 'usernotactive') {
-          push('/auth/oops');
+          navigate('/auth/oops');
 
           dispatch({
             type: 'RESET_PROPS',
@@ -191,7 +189,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         (authType === 'register' && body.userInfo.news === true) ||
         (authType === 'register-admin' && body.news === true)
       ) {
-        push({
+        navigate({
           pathname: '/usecase',
           search: `?hasAdmin=${hasAdmin}`,
         });
@@ -228,7 +226,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       auth.setUserInfo(user, false);
 
       // Redirect to the homePage
-      push('/');
+      navigate('/');
     } catch (err) {
       if (err.response) {
         const errorMessage = get(err, ['response', 'data', 'message'], 'Something went wrong');
@@ -251,9 +249,9 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       const redirectTo = query.get('redirectTo');
       const redirectUrl = redirectTo ? decodeURIComponent(redirectTo) : '/';
 
-      push(redirectUrl);
+      navigate(redirectUrl);
     } else {
-      push('/');
+      navigate('/');
     }
   };
 
@@ -262,13 +260,14 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   // there is already an admin user oo
   // the user is already logged in
   if (!forms[authType] || (hasAdmin && authType === 'register-admin') || auth.getToken()) {
-    return <Redirect to="/" />;
+    return <Navigate replace to="/" />;
   }
 
   // Redirect the user to the register-admin if it is the first user
   if (!hasAdmin && authType !== 'register-admin') {
     return (
-      <Redirect
+      <Navigate
+        replace
         to={{
           pathname: '/auth/register-admin',
           // Forward the `?redirectTo` from /auth/login

@@ -30,7 +30,7 @@ import { Formik } from 'formik';
 import isEmpty from 'lodash/isEmpty';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
-import { useHistory, useRouteMatch } from 'react-router-dom';
+import { useNavigate, useMatch } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useAdminRolePermissions } from '../../../../../hooks/useAdminRolePermissions';
@@ -51,12 +51,12 @@ const UsersRoleNumber = styled.div`
 `;
 
 const CreatePage = () => {
-  const route = useRouteMatch('/settings/roles/duplicate/:id');
+  const route = useMatch('/settings/roles/duplicate/:id');
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { formatMessage } = useIntl();
   const [isSubmitting, setIsSubmiting] = useState(false);
-  const { replace } = useHistory();
+  const navigate = useNavigate();
   const permissionsRef = useRef();
   const { trackUsage } = useTracking();
   const { post, put } = useFetchClient();
@@ -110,7 +110,7 @@ const CreatePage = () => {
           type: 'success',
           message: { id: 'Settings.roles.created', defaultMessage: 'created' },
         });
-        replace(`/settings/roles/${res.data.id}`);
+        navigate(`/settings/roles/${res.data.id}`, { replace: true });
       })
       .catch((err) => {
         console.error(err);

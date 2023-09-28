@@ -40,7 +40,7 @@ import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 import { connect, useSelector } from 'react-redux';
-import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
+import { useNavigate, useLocation, Link as ReactRouterLink } from 'react-router-dom';
 import { bindActionCreators, compose } from 'redux';
 
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
@@ -98,7 +98,7 @@ function ListView({
   const allowedAttributes = useAllowedAttributes(contentType, slug);
   const [{ query }] = useQueryParams();
   const { pathname } = useLocation();
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const { formatMessage, locale } = useIntl();
   const fetchClient = useFetchClient();
   const formatter = useCollator(locale, {
@@ -332,7 +332,7 @@ function ListView({
             page: paginationResult.pageCount,
           };
 
-          push({
+          navigate({
             pathname,
             state: { from: pathname },
             search: stringify(query),
@@ -369,7 +369,7 @@ function ListView({
             message: { id: getTrad('permissions.not-allowed.update') },
           });
 
-          push('/');
+          navigate('/');
 
           return;
         }
@@ -381,15 +381,15 @@ function ListView({
       }
     },
     [
-      formatMessage,
       getData,
-      getDataSucceeded,
-      notifyStatus,
-      push,
-      toggleNotification,
       fetchClient,
+      notifyStatus,
+      formatMessage,
+      getDataSucceeded,
       params,
+      navigate,
       pathname,
+      toggleNotification,
     ]
   );
 
@@ -588,7 +588,7 @@ function ListView({
    */
   const handleRowClick = (id) => () => {
     trackUsage('willEditEntryFromList');
-    push({
+    navigate({
       pathname: `${pathname}/${id}`,
       state: { from: pathname },
       search: pluginsQueryParams,
@@ -602,7 +602,7 @@ function ListView({
       );
 
       if ('id' in data) {
-        push({
+        navigate({
           pathname: `${pathname}/${data.id}`,
           state: { from: pathname },
           search: pluginsQueryParams,
@@ -610,7 +610,7 @@ function ListView({
       }
     } catch (err) {
       if (err instanceof AxiosError) {
-        push({
+        navigate({
           pathname: `${pathname}/create/clone/${id}`,
           state: { from: pathname, error: formatAPIError(err) },
           search: pluginsQueryParams,

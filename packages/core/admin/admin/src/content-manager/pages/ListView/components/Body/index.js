@@ -5,7 +5,7 @@ import { useTracking, useTableContext, Table } from '@strapi/helper-plugin';
 import { Trash, Duplicate, Pencil } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import { usePluginsQueryParams } from '../../../../hooks';
 import { ConfirmDialogDelete } from '../ConfirmDialogDelete';
@@ -62,9 +62,7 @@ const EntityActionsDataCell = ({
   const { trackUsage } = useTracking();
   const { setSelectedEntries } = useTableContext();
   const pluginsQueryParams = usePluginsQueryParams();
-  const {
-    location: { pathname },
-  } = useHistory();
+  const { pathname } = useLocation();
 
   const itemLineText = formatMessage(
     {

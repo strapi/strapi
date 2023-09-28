@@ -18,7 +18,7 @@ import isEqualFastCompare from 'lodash/isEqual';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { getTrad } from '../../../utils';
@@ -44,7 +44,7 @@ const Header = ({
   publishConfirmation: { show: showPublishConfirmation, draftCount },
   onPublishPromptDismissal,
 }) => {
-  const { goBack } = useHistory();
+  const navigate = useNavigate();
   const [showWarningUnpublish, setWarningUnpublish] = useState(false);
   const { formatMessage } = useIntl();
 
@@ -151,7 +151,7 @@ const Header = ({
             // event
             onClick={(e) => {
               e.preventDefault();
-              goBack();
+              navigate(-1);
             }}
             to="/"
           >

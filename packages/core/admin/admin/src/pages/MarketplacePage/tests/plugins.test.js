@@ -6,7 +6,7 @@ import { render as renderRTL, screen, waitFor, within } from '@testing-library/r
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { MemoryRouter, Route } from 'react-router-dom';
+import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 
 import { MarketPlacePage } from '../index';
 
@@ -32,44 +32,38 @@ const waitForReload = async () => {
   await waitFor(() => expect(screen.queryByText('Loading content...')).not.toBeInTheDocument());
 };
 
-let testLocation = null;
-
-const render = (props) => ({
-  ...renderRTL(<MarketPlacePage {...props} />, {
-    wrapper({ children }) {
-      const client = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
-          },
-        },
-      });
-
-      return (
-        <QueryClientProvider client={client}>
-          <IntlProvider locale="en" messages={{}} textComponent="span">
-            <ThemeProvider theme={lightTheme}>
-              <NotificationsProvider>
-                <MemoryRouter>
-                  {children}
-                  <Route
-                    path="*"
-                    render={({ location }) => {
-                      testLocation = location;
-
-                      return null;
-                    }}
-                  />
-                </MemoryRouter>
-              </NotificationsProvider>
-            </ThemeProvider>
-          </IntlProvider>
-        </QueryClientProvider>
-      );
+const render = (props) => {
+  const router = createMemoryRouter([
+    {
+      path: '/',
+      element: <MarketPlacePage {...props} />,
     },
-  }),
-  user: userEvent.setup(),
-});
+  ]);
+
+  const client = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+
+  return {
+    ...renderRTL(
+      <QueryClientProvider client={client}>
+        <IntlProvider locale="en" messages={{}} textComponent="span">
+          <ThemeProvider theme={lightTheme}>
+            <NotificationsProvider>
+              <RouterProvider router={router} />
+            </NotificationsProvider>
+          </ThemeProvider>
+        </IntlProvider>
+      </QueryClientProvider>
+    ),
+    user: userEvent.setup(),
+    router,
+  };
+};
 
 describe('Marketplace page - plugins tab', () => {
   beforeAll(() => server.listen());
@@ -345,7 +339,7 @@ describe('Marketplace page - plugins tab', () => {
   });
 
   it('removes a filter option tag', async () => {
-    const { getByRole, user } = render();
+    const { getByRole, user, router } = render();
 
     await waitForReload();
 
@@ -359,12 +353,12 @@ describe('Marketplace page - plugins tab', () => {
 
     await waitForReload();
 
-    expect(testLocation.search).toBe('?collections[0]=Made by Strapi&page=1');
+    expect(router.state.location.search).toBe('?collections[0]=Made by Strapi&page=1');
     await user.click(getByRole('button', { name: 'Made by Strapi' }));
 
     await waitForReload();
 
-    expect(testLocation.search).toBe('?page=1');
+    expect(router.state.location.search).toBe('?page=1');
   });
 
   it('only filters in the plugins tab', async () => {
@@ -404,7 +398,7 @@ describe('Marketplace page - plugins tab', () => {
   });
 
   it('changes the url on sort option select', async () => {
-    const { getByRole, user } = render();
+    const { getByRole, user, router } = render();
 
     await waitForReload();
 
@@ -412,7 +406,7 @@ describe('Marketplace page - plugins tab', () => {
     await user.click(getByRole('option', { name: 'Newest' }));
 
     await waitForReload();
-    expect(testLocation.search).toEqual('?sort=submissionDate:desc&page=1');
+    expect(router.state.location.search).toEqual('?sort=submissionDate:desc&page=1');
   });
 
   it('shows github stars and weekly downloads count for each plugin', async () => {
@@ -437,7 +431,7 @@ describe('Marketplace page - plugins tab', () => {
   });
 
   it('paginates the results', async () => {
-    const { getByLabelText, getAllByText, getByText, user } = render();
+    const { getByLabelText, getAllByText, getByText, user, router } = render();
 
     await waitForReload();
 
@@ -451,16 +445,16 @@ describe('Marketplace page - plugins tab', () => {
     // Can go to next page
     await user.click(getByText(/go to next page/i).closest('a'));
     await waitForReload();
-    expect(testLocation.search).toBe('?page=2');
+    expect(router.state.location.search).toBe('?page=2');
 
     // Can go to previous page
     await user.click(getByText(/go to previous page/i).closest('a'));
     await waitForReload();
-    expect(testLocation.search).toBe('?page=1');
+    expect(router.state.location.search).toBe('?page=1');
 
     // Can go to specific page
     await user.click(getByText(/go to page 3/i).closest('a'));
     await waitForReload();
-    expect(testLocation.search).toBe('?page=3');
+    expect(router.state.location.search).toBe('?page=3');
   });
 });

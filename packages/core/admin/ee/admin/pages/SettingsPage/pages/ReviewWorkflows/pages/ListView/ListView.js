@@ -30,7 +30,7 @@ import { Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 import { useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
@@ -70,7 +70,7 @@ const ActionLink = styled(Link)`
 
 export function ReviewWorkflowsListView() {
   const { formatMessage } = useIntl();
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const { collectionTypes, singleTypes, isLoading: isLoadingModels } = useContentTypes();
   const { meta, workflows, isLoading, refetch } = useReviewWorkflows();
   const [workflowToDelete, setWorkflowToDelete] = React.useState(null);
@@ -248,7 +248,7 @@ export function ReviewWorkflowsListView() {
                     ) {
                       setShowLimitModal(true);
                     } else {
-                      push('/settings/review-workflows/create');
+                      navigate('/settings/review-workflows/create');
                       trackUsage('willCreateWorkflow');
                     }
                   }}
@@ -309,7 +309,7 @@ export function ReviewWorkflowsListView() {
                         return;
                       }
 
-                      push(`/settings/review-workflows/${workflow.id}`);
+                      navigate(`/settings/review-workflows/${workflow.id}`);
                     },
                   })}
                   key={`workflow-${workflow.id}`}

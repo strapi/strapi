@@ -62,20 +62,19 @@ describe('PageSizeURLQuery', () => {
     it('should change the value when the user selects a new value', async () => {
       let testLocation: ReturnType<typeof useLocation> = null!;
 
+      const SaveTestLocation = () => {
+        testLocation = useLocation();
+
+        return null;
+      };
+
       const { getByRole, user } = render(<PageSizeURLQuery />, {
         renderOptions: {
           wrapper({ children }) {
             return (
               <>
                 {children}
-                <Route
-                  path="*"
-                  render={({ location }) => {
-                    testLocation = location;
-
-                    return null;
-                  }}
-                />
+                <Route path="*" element={<SaveTestLocation />} />
               </>
             );
           },

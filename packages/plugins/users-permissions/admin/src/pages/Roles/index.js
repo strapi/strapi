@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { AnErrorOccurred, CheckPagePermissions } from '@strapi/helper-plugin';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 import { PERMISSIONS } from '../../constants';
 
@@ -12,20 +12,12 @@ import { ProtectedRolesListPage } from './pages/ListPage';
 const Roles = () => {
   return (
     <CheckPagePermissions permissions={PERMISSIONS.accessRoles}>
-      <Switch>
-        <Route
-          path="/settings/users-permissions/roles/new"
-          component={ProtectedRolesCreatePage}
-          exact
-        />
-        <Route
-          path="/settings/users-permissions/roles/:id"
-          component={ProtectedRolesEditPage}
-          exact
-        />
-        <Route path="/settings/users-permissions/roles" component={ProtectedRolesListPage} exact />
-        <Route path="" component={AnErrorOccurred} />
-      </Switch>
+      <Routes>
+        <Route path="/settings/users-permissions/roles/new" Component={ProtectedRolesCreatePage} />
+        <Route path="/settings/users-permissions/roles/:id" Component={ProtectedRolesEditPage} />
+        <Route path="/settings/users-permissions/roles" Component={ProtectedRolesListPage} exact />
+        <Route path="" Component={AnErrorOccurred} />
+      </Routes>
     </CheckPagePermissions>
   );
 };

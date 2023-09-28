@@ -4,7 +4,7 @@ import { Layout } from '@strapi/design-system';
 import { LoadingIndicatorPage, useStrapiApp } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
-import { Redirect, Route, Switch, useParams } from 'react-router-dom';
+import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 
 import { useSettingsMenu } from '../../hooks';
 import { useEnterprise } from '../../hooks/useEnterprise';
@@ -16,7 +16,7 @@ import { ROUTES_CE } from './constants';
 import ApplicationInfosPage from './pages/ApplicationInfosPage';
 
 export function SettingsPage() {
-  const { settingId } = useParams();
+  const { '*': settingId } = useParams();
   const { settings } = useStrapiApp();
   const { formatMessage } = useIntl();
   const { isLoading, menu } = useSettingsMenu();
@@ -33,15 +33,13 @@ export function SettingsPage() {
 
   // Creates the admin routes
   const adminRoutes = React.useMemo(() => {
-    return makeUniqueRoutes(
-      routes.map(({ to, Component, exact }) => createRoute(Component, to, exact))
-    );
+    return makeUniqueRoutes(routes.map(({ to, Component }) => createRoute(Component, to)));
   }, [routes]);
 
   const pluginsRoutes = Object.values(settings).flatMap((section) => {
     const { links } = section;
 
-    return links.map((link) => createRoute(link.Component, link.to, link.exact || false));
+    return links.map((link) => createRoute(link.Component, link.to));
   });
 
   // Since the useSettingsMenu hook can make API calls in order to check the links permissions
@@ -51,7 +49,7 @@ export function SettingsPage() {
   }
 
   if (!settingId) {
-    return <Redirect to="/settings/application-infos" />;
+    return <Navigate replace to="/settings/application-infos" />;
   }
 
   return (
@@ -63,11 +61,11 @@ export function SettingsPage() {
         })}
       />
 
-      <Switch>
-        <Route path="/settings/application-infos" component={ApplicationInfosPage} exact />
+      <Routes>
+        <Route path="application-infos" Component={ApplicationInfosPage} />
         {adminRoutes}
         {pluginsRoutes}
-      </Switch>
+      </Routes>
     </Layout>
   );
 }

@@ -3,9 +3,8 @@ import React from 'react';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { NotificationsProvider } from '@strapi/helper-plugin';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { Router } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 
 import LanguageProvider from '../../../../../../../../components/LanguageProvider';
 import en from '../../../../../../../../translations/en.json';
@@ -21,7 +20,7 @@ const makeApp = (component) => {
       },
     },
   });
-  const history = createMemoryHistory();
+
   const messages = { en };
   const localeNames = { en: 'English' };
 
@@ -29,9 +28,9 @@ const makeApp = (component) => {
     <QueryClientProvider client={queryClient}>
       <LanguageProvider messages={messages} localeNames={localeNames}>
         <ThemeProvider theme={lightTheme}>
-          <Router history={history}>
+          <MemoryRouter>
             <NotificationsProvider toggleNotification={() => {}}>{component}</NotificationsProvider>
-          </Router>
+          </MemoryRouter>
         </ThemeProvider>
       </LanguageProvider>
     </QueryClientProvider>

@@ -5,12 +5,11 @@ describe('ADMIN | CONTAINER | SettingsPage | utils | createRoute', () => {
     const compo = () => 'test';
 
     const {
-      props: { path, exact },
+      props: { path },
       key,
-    } = createRoute(compo, '/test', true);
+    } = createRoute(compo, '/test');
 
     expect(key).toEqual('/test');
-    expect(exact).toBeTruthy();
     expect(path).toEqual('/test');
   });
 });

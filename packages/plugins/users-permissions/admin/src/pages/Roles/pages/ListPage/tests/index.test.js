@@ -7,7 +7,7 @@ import { render as renderRTL, waitForElementToBeRemoved } from '@testing-library
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { MemoryRouter, Route } from 'react-router-dom';
+import { MemoryRouter, Route, useLocation } from 'react-router-dom';
 
 import { RolesListPage } from '../index';
 
@@ -29,6 +29,12 @@ jest.mock('@strapi/helper-plugin', () => ({
 
 let testLocation;
 
+const SaveTestLocation = () => {
+  testLocation = useLocation();
+
+  return null;
+};
+
 const render = () => ({
   ...renderRTL(<RolesListPage />, {
     wrapper({ children }) {
@@ -49,14 +55,7 @@ const render = () => ({
               </IntlProvider>
             </QueryClientProvider>
           </ThemeProvider>
-          <Route
-            path="*"
-            render={({ location }) => {
-              testLocation = location;
-
-              return null;
-            }}
-          />
+          <Route path="*" element={<SaveTestLocation />} />
         </MemoryRouter>
       );
     },

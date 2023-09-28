@@ -4,11 +4,10 @@ import { fixtures } from '@strapi/admin-test-utils';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { TrackingProvider, useRBAC } from '@strapi/helper-plugin';
 import { render, waitFor } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
-import { Route, Router } from 'react-router-dom';
+import { Routes, Route, MemoryRouter } from 'react-router-dom';
 import { createStore } from 'redux';
 
 import ListPage from '../index';
@@ -63,41 +62,37 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-const setup = (props) =>
-  render(() => <ListPage {...props} />, {
-    wrapper({ children }) {
-      const history = createMemoryHistory();
-      const client = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
-          },
-        },
-      });
-
-      return (
-        <Provider
-          store={createStore((state) => state, {
-            admin_app: { permissions: fixtures.permissions.app },
-          })}
-        >
-          <QueryClientProvider client={client}>
-            <TrackingProvider>
-              <IntlProvider defaultLocale="en" locale="en">
-                <ThemeProvider theme={lightTheme}>
-                  <Router history={history}>
-                    <Route path="/settings/user?pageSize=10&page=1&sort=firstname">
-                      {children}
-                    </Route>
-                  </Router>
-                </ThemeProvider>
-              </IntlProvider>
-            </TrackingProvider>
-          </QueryClientProvider>
-        </Provider>
-      );
+const setup = (props) => {
+  const client = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
     },
   });
+
+  return render(
+    <Provider
+      store={createStore((state) => state, {
+        admin_app: { permissions: fixtures.permissions.app },
+      })}
+    >
+      <QueryClientProvider client={client}>
+        <TrackingProvider>
+          <IntlProvider defaultLocale="en" locale="en">
+            <ThemeProvider theme={lightTheme}>
+              <MemoryRouter initialEntries={['/settings/user?pageSize=10&page=1&sort=firstname']}>
+                <Routes>
+                  <Route path="/settings/user" element={<ListPage {...props} />} />
+                </Routes>
+              </MemoryRouter>
+            </ThemeProvider>
+          </IntlProvider>
+        </TrackingProvider>
+      </QueryClientProvider>
+    </Provider>
+  );
+};
 
 describe('ADMIN | Pages | USERS | ListPage', () => {
   beforeEach(() => {

@@ -2316,7 +2316,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.10.5, @babel/runtime@npm:^7.12.0, @babel/runtime@npm:^7.12.1, @babel/runtime@npm:^7.12.13, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.13.10, @babel/runtime@npm:^7.17.8, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.20.7, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.6.2, @babel/runtime@npm:^7.7.2, @babel/runtime@npm:^7.8.7, @babel/runtime@npm:^7.9.2":
+"@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.10.5, @babel/runtime@npm:^7.12.0, @babel/runtime@npm:^7.12.1, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.13.10, @babel/runtime@npm:^7.17.8, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.20.7, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.6.2, @babel/runtime@npm:^7.7.2, @babel/runtime@npm:^7.8.7, @babel/runtime@npm:^7.9.2":
   version: 7.21.0
   resolution: "@babel/runtime@npm:7.21.0"
   dependencies:
@@ -2340,6 +2340,15 @@ __metadata:
   dependencies:
     regenerator-runtime: ^0.13.11
   checksum: 358f2779d3187f5c67ad302e8f8d435412925d0b991d133c7d4a7b1ddd5a3fda1b6f34537cb64628dfd96a27ae46df105bed3895b8d754b88cacdded8d1129dd
+  languageName: node
+  linkType: hard
+
+"@babel/runtime@npm:^7.7.6":
+  version: 7.23.1
+  resolution: "@babel/runtime@npm:7.23.1"
+  dependencies:
+    regenerator-runtime: ^0.14.0
+  checksum: 0cd0d43e6e7dc7f9152fda8c8312b08321cda2f56ef53d6c22ebdd773abdc6f5d0a69008de90aa41908d00e2c1facb24715ff121274e689305c858355ff02c70
   languageName: node
   linkType: hard
 
@@ -6030,6 +6039,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@remix-run/router@npm:1.9.0":
+  version: 1.9.0
+  resolution: "@remix-run/router@npm:1.9.0"
+  checksum: 0537b0ff29879ac85077cb4c42eaca4a295b9efd71477848984c2f2dfa5741c9b83d3106a7bb72994a51a9adfeeab3b0f5a40f2dee8be3f0750feeeca2a6d513
+  languageName: node
+  linkType: hard
+
 "@rollup/plugin-node-resolve@npm:15.2.0":
   version: 15.2.0
   resolution: "@rollup/plugin-node-resolve@npm:15.2.0"
@@ -7196,7 +7212,7 @@ __metadata:
     fs-extra: 10.0.0
     glob: 8.0.3
     highlight.js: ^10.4.1
-    history: ^4.9.0
+    history: 5.3.0
     html-loader: ^4.2.0
     html-webpack-plugin: 5.5.0
     immer: 9.0.19
@@ -7237,7 +7253,7 @@ __metadata:
     react-query: 3.39.3
     react-redux: 8.1.1
     react-refresh: 0.14.0
-    react-router-dom: 5.3.4
+    react-router-dom: 6.16.0
     react-select: 5.7.0
     react-window: 1.8.8
     redux: ^4.2.1
@@ -7451,7 +7467,7 @@ __metadata:
     react-helmet: 6.1.0
     react-intl: 6.4.1
     react-query: 3.39.3
-    react-router-dom: 5.3.4
+    react-router-dom: 6.16.0
     react-select: 5.7.0
     rimraf: 3.0.2
     storybook: 7.4.0
@@ -7466,7 +7482,7 @@ __metadata:
     "@strapi/icons": 1.11.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^5.3.4
+    react-router-dom: ^6.0.0
     styled-components: ^5.3.3
   languageName: unknown
   linkType: soft
@@ -7522,14 +7538,14 @@ __metadata:
     react-colorful: 5.6.1
     react-dom: ^18.2.0
     react-intl: 6.4.1
-    react-router-dom: 5.3.4
+    react-router-dom: 6.16.0
     styled-components: 5.3.3
     typescript: 5.2.2
   peerDependencies:
     "@strapi/strapi": ^4.4.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: 5.3.4
+    react-router-dom: ^6.0.0
     styled-components: 5.3.3
   languageName: unknown
   linkType: soft
@@ -7559,7 +7575,7 @@ __metadata:
     "@testing-library/react": 14.0.0
     "@testing-library/react-hooks": 8.0.1
     fs-extra: 10.0.0
-    history: ^4.9.0
+    history: 5.3.0
     immer: 9.0.19
     lodash: 4.17.21
     pluralize: ^8.0.0
@@ -7570,7 +7586,7 @@ __metadata:
     react-helmet: ^6.1.0
     react-intl: 6.4.1
     react-redux: 8.1.1
-    react-router-dom: 5.3.4
+    react-router-dom: 6.16.0
     redux: ^4.2.1
     reselect: 4.1.7
     styled-components: 5.3.3
@@ -7578,7 +7594,7 @@ __metadata:
   peerDependencies:
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: 5.3.4
+    react-router-dom: ^6.0.0
     styled-components: 5.3.3
   languageName: unknown
   linkType: soft
@@ -7608,7 +7624,7 @@ __metadata:
     react-helmet: ^6.1.0
     react-intl: 6.4.1
     react-query: 3.39.3
-    react-router-dom: 5.3.4
+    react-router-dom: ^6.0.0
     styled-components: 5.3.3
     swagger-ui-dist: 4.19.0
     yaml: 1.10.2
@@ -7617,7 +7633,7 @@ __metadata:
     "@strapi/strapi": ^4.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: 5.3.4
+    react-router-dom: 6.16.0
     styled-components: 5.3.3
   languageName: unknown
   linkType: soft
@@ -7639,13 +7655,13 @@ __metadata:
     react-dom: ^18.2.0
     react-intl: 6.4.1
     react-query: 3.39.3
-    react-router-dom: 5.3.4
+    react-router-dom: 6.16.0
     styled-components: 5.3.3
     yup: 0.32.9
   peerDependencies:
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: 5.3.4
+    react-router-dom: ^6.0.0
     styled-components: 5.3.3
   languageName: unknown
   linkType: soft
@@ -7676,13 +7692,13 @@ __metadata:
     pluralize: ^8.0.0
     react: ^18.2.0
     react-dom: ^18.2.0
-    react-router-dom: 5.3.4
+    react-router-dom: 6.16.0
     styled-components: 5.3.3
   peerDependencies:
     "@strapi/strapi": ^4.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: 5.3.4
+    react-router-dom: ^6.0.0
     styled-components: 5.3.3
   languageName: unknown
   linkType: soft
@@ -7707,14 +7723,14 @@ __metadata:
     react-intl: 6.4.1
     react-query: 3.39.3
     react-redux: 8.1.1
-    react-router-dom: 5.3.4
+    react-router-dom: ^6.0.0
     redux: ^4.2.1
     styled-components: 5.3.3
     yup: 0.32.9
   peerDependencies:
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: 5.3.4
+    react-router-dom: 6.16.0
     styled-components: 5.3.3
   languageName: unknown
   linkType: soft
@@ -7729,13 +7745,13 @@ __metadata:
     "@strapi/icons": 1.11.0
     react: ^18.2.0
     react-dom: ^18.2.0
-    react-router-dom: 5.3.4
+    react-router-dom: 6.16.0
     styled-components: 5.3.3
   peerDependencies:
     "@strapi/strapi": ^4.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: 5.3.4
+    react-router-dom: ^6.0.0
     styled-components: 5.3.3
   languageName: unknown
   linkType: soft
@@ -7773,7 +7789,7 @@ __metadata:
     react-intl: 6.4.1
     react-query: 3.39.3
     react-redux: 8.1.1
-    react-router-dom: 5.3.4
+    react-router-dom: 6.16.0
     react-select: 5.7.0
     sharp: 0.32.0
     styled-components: 5.3.3
@@ -7781,7 +7797,7 @@ __metadata:
   peerDependencies:
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: 5.3.4
+    react-router-dom: ^6.0.0
     styled-components: 5.3.3
   languageName: unknown
   linkType: soft
@@ -7814,14 +7830,14 @@ __metadata:
     react-intl: 6.4.1
     react-query: 3.39.3
     react-redux: 8.1.1
-    react-router-dom: 5.3.4
+    react-router-dom: 6.16.0
     styled-components: 5.3.3
     url-join: 4.0.1
     yup: 0.32.9
   peerDependencies:
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: 5.3.4
+    react-router-dom: ^6.0.0
     styled-components: 5.3.3
   languageName: unknown
   linkType: soft
@@ -17055,7 +17071,7 @@ __metadata:
     react: ^18.2.0
     react-dom: ^18.2.0
     react-intl: 6.4.1
-    react-router-dom: 5.3.4
+    react-router-dom: 6.16.0
     sqlite3: 5.1.2
     styled-components: 5.3.3
   languageName: unknown
@@ -17830,17 +17846,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"history@npm:^4.9.0":
-  version: 4.10.1
-  resolution: "history@npm:4.10.1"
+"history@npm:5.3.0":
+  version: 5.3.0
+  resolution: "history@npm:5.3.0"
   dependencies:
-    "@babel/runtime": ^7.1.2
-    loose-envify: ^1.2.0
-    resolve-pathname: ^3.0.0
-    tiny-invariant: ^1.0.2
-    tiny-warning: ^1.0.0
-    value-equal: ^1.0.1
-  checksum: addd84bc4683929bae4400419b5af132ff4e4e9b311a0d4e224579ea8e184a6b80d7f72c55927e4fa117f69076a9e47ce082d8d0b422f1a9ddac7991490ca1d0
+    "@babel/runtime": ^7.7.6
+  checksum: d73c35df49d19ac172f9547d30a21a26793e83f16a78386d99583b5bf1429cc980799fcf1827eb215d31816a6600684fba9686ce78104e23bd89ec239e7c726f
   languageName: node
   linkType: hard
 
@@ -17855,7 +17866,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hoist-non-react-statics@npm:^3.0.0, hoist-non-react-statics@npm:^3.1.0, hoist-non-react-statics@npm:^3.3.0, hoist-non-react-statics@npm:^3.3.1, hoist-non-react-statics@npm:^3.3.2":
+"hoist-non-react-statics@npm:^3.0.0, hoist-non-react-statics@npm:^3.3.0, hoist-non-react-statics@npm:^3.3.1, hoist-non-react-statics@npm:^3.3.2":
   version: 3.3.2
   resolution: "hoist-non-react-statics@npm:3.3.2"
   dependencies:
@@ -20657,7 +20668,7 @@ __metadata:
     better-sqlite3: 8.6.0
     react: ^18.2.0
     react-dom: ^18.2.0
-    react-router-dom: 5.3.4
+    react-router-dom: 6.16.0
     styled-components: 5.3.3
   languageName: unknown
   linkType: soft
@@ -20677,7 +20688,7 @@ __metadata:
     pg: 8.11.1
     react: ^18.2.0
     react-dom: ^18.2.0
-    react-router-dom: 5.3.4
+    react-router-dom: 6.16.0
     sqlite3: 5.1.2
     styled-components: 5.3.3
   languageName: unknown
@@ -21487,7 +21498,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loose-envify@npm:^1.0.0, loose-envify@npm:^1.1.0, loose-envify@npm:^1.2.0, loose-envify@npm:^1.3.1, loose-envify@npm:^1.4.0":
+"loose-envify@npm:^1.0.0, loose-envify@npm:^1.1.0, loose-envify@npm:^1.4.0":
   version: 1.4.0
   resolution: "loose-envify@npm:1.4.0"
   dependencies:
@@ -24974,15 +24985,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"path-to-regexp@npm:^1.7.0":
-  version: 1.8.0
-  resolution: "path-to-regexp@npm:1.8.0"
-  dependencies:
-    isarray: 0.0.1
-  checksum: 709f6f083c0552514ef4780cb2e7e4cf49b0cc89a97439f2b7cc69a608982b7690fb5d1720a7473a59806508fc2dae0be751ba49f495ecf89fd8fbc62abccbcd
-  languageName: node
-  linkType: hard
-
 "path-type@npm:^3.0.0":
   version: 3.0.0
   resolution: "path-type@npm:3.0.0"
@@ -26159,7 +26161,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-is@npm:^16.13.1, react-is@npm:^16.6.0, react-is@npm:^16.7.0":
+"react-is@npm:^16.13.1, react-is@npm:^16.7.0":
   version: 16.13.1
   resolution: "react-is@npm:16.13.1"
   checksum: f7a19ac3496de32ca9ae12aa030f00f14a3d45374f1ceca0af707c831b2a6098ef0d6bdae51bd437b0a306d7f01d4677fcc8de7c0d331eb47ad0f46130e53c5f
@@ -26291,39 +26293,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-dom@npm:5.3.4":
-  version: 5.3.4
-  resolution: "react-router-dom@npm:5.3.4"
+"react-router-dom@npm:6.16.0, react-router-dom@npm:^6.0.0":
+  version: 6.16.0
+  resolution: "react-router-dom@npm:6.16.0"
   dependencies:
-    "@babel/runtime": ^7.12.13
-    history: ^4.9.0
-    loose-envify: ^1.3.1
-    prop-types: ^15.6.2
-    react-router: 5.3.4
-    tiny-invariant: ^1.0.2
-    tiny-warning: ^1.0.0
+    "@remix-run/router": 1.9.0
+    react-router: 6.16.0
   peerDependencies:
-    react: ">=15"
-  checksum: b86a6f2f5222f041e38adf4e4b32c7643d6735a1a915ef25855b2db285fd059d72ba8d62e5bcd5d822b8ef9520a80453209e55077f5a90d0f72e908979b8f535
+    react: ">=16.8"
+    react-dom: ">=16.8"
+  checksum: 18b398924bb0f0d97cf2f71dab71d860b960a7a267b2f77388990c662bb6d8738bdc3042d92f713fd63d269ae9ad90df39c8e97661b6ba758bbb7386b9f20ae0
   languageName: node
   linkType: hard
 
-"react-router@npm:5.3.4":
-  version: 5.3.4
-  resolution: "react-router@npm:5.3.4"
+"react-router@npm:6.16.0":
+  version: 6.16.0
+  resolution: "react-router@npm:6.16.0"
   dependencies:
-    "@babel/runtime": ^7.12.13
-    history: ^4.9.0
-    hoist-non-react-statics: ^3.1.0
-    loose-envify: ^1.3.1
-    path-to-regexp: ^1.7.0
-    prop-types: ^15.6.2
-    react-is: ^16.6.0
-    tiny-invariant: ^1.0.2
-    tiny-warning: ^1.0.0
+    "@remix-run/router": 1.9.0
   peerDependencies:
-    react: ">=15"
-  checksum: 892d4e274a23bf4f39abc2efca54472fb646d3aed4b584020cf49654d2f50d09a2bacebe7c92b4ec7cb8925077376dfcd0664bad6442a73604397cefec9f01f9
+    react: ">=16.8"
+  checksum: b31c187e3fdcdf7294ffdad6ff834e14d012840c94d8ee8c7fbe451062a8fcb6e31e8bc7827fb1ff45445dd40fad2b8c96a7e98f0ac1c3eb1d716c257a0821c9
   languageName: node
   linkType: hard
 
@@ -27057,13 +27047,6 @@ __metadata:
     http-errors: ~1.6.2
     path-is-absolute: 1.0.1
   checksum: 1a39f569ee54dd5f8ee8576ef8671c9724bea65d9f9982fbb5352af9fb4e500e1e459c1bfb1ae3ebfd8d43a709c3a01dfa4f46cf5b831e45e2caed4f1a208300
-  languageName: node
-  linkType: hard
-
-"resolve-pathname@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "resolve-pathname@npm:3.0.0"
-  checksum: 6147241ba42c423dbe83cb067a2b4af4f60908c3af57e1ea567729cc71416c089737fe2a73e9e79e7a60f00f66c91e4b45ad0d37cd4be2d43fec44963ef14368
   languageName: node
   linkType: hard
 
@@ -29498,13 +29481,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tiny-invariant@npm:^1.0.2":
-  version: 1.2.0
-  resolution: "tiny-invariant@npm:1.2.0"
-  checksum: e09a718a7c4a499ba592cdac61f015d87427a0867ca07f50c11fd9b623f90cdba18937b515d4a5e4f43dac92370498d7bdaee0d0e7a377a61095e02c4a92eade
-  languageName: node
-  linkType: hard
-
 "tiny-invariant@npm:^1.3.1":
   version: 1.3.1
   resolution: "tiny-invariant@npm:1.3.1"
@@ -29512,7 +29488,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tiny-warning@npm:^1.0.0, tiny-warning@npm:^1.0.2, tiny-warning@npm:^1.0.3":
+"tiny-warning@npm:^1.0.2, tiny-warning@npm:^1.0.3":
   version: 1.0.3
   resolution: "tiny-warning@npm:1.0.3"
   checksum: da62c4acac565902f0624b123eed6dd3509bc9a8d30c06e017104bedcf5d35810da8ff72864400ad19c5c7806fc0a8323c68baf3e326af7cb7d969f846100d71
@@ -30695,13 +30671,6 @@ __metadata:
   dependencies:
     builtins: ^5.0.0
   checksum: 5342a994986199b3c28e53a8452a14b2bb5085727691ea7aa0d284a6606b127c371e0925ae99b3f1ef7cc7d2c9de75f52eb61a3d1cc45e39bca1e3a9444cbb4e
-  languageName: node
-  linkType: hard
-
-"value-equal@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "value-equal@npm:1.0.1"
-  checksum: bb7ae1facc76b5cf8071aeb6c13d284d023fdb370478d10a5d64508e0e6e53bb459c4bbe34258df29d82e6f561f874f0105eba38de0e61fe9edd0bdce07a77a2
   languageName: node
   linkType: hard
 

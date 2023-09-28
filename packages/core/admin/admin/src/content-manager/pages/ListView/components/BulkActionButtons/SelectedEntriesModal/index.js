@@ -29,7 +29,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import formatAPIError from '../../../../../../utils/formatAPIErrors';
@@ -123,9 +123,7 @@ const SelectedEntriesTableContent = ({
   entriesToPublish,
   validationErrors,
 }) => {
-  const {
-    location: { pathname },
-  } = useHistory();
+  const { pathname } = useLocation();
   const { formatMessage } = useIntl();
 
   // Get main field from list view layout

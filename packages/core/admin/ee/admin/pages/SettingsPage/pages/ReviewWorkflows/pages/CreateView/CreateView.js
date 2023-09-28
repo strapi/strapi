@@ -13,7 +13,7 @@ import set from 'lodash/set';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { useAdminRoles } from '../../../../../../../../admin/src/hooks/useAdminRoles';
 import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
@@ -49,7 +49,7 @@ import { validateWorkflow } from '../../utils/validateWorkflow';
 export function ReviewWorkflowsCreateView() {
   const { formatMessage } = useIntl();
   const { post } = useFetchClient();
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const { formatAPIError } = useAPIErrorHandler();
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
@@ -99,7 +99,7 @@ export function ReviewWorkflowsCreateView() {
     try {
       const workflow = await mutateAsync({ workflow: currentWorkflow });
 
-      push(`/settings/review-workflows/${workflow.id}`);
+      navigate(`/settings/review-workflows/${workflow.id}`);
 
       return workflow;
     } catch (error) {

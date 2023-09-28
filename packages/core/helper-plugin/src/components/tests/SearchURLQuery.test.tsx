@@ -6,7 +6,7 @@
 import React from 'react';
 
 import { render } from '@tests/utils';
-import { Route, RouteProps } from 'react-router-dom';
+import { Route, useLocation } from 'react-router-dom';
 
 import { SearchURLQuery } from '../SearchURLQuery';
 
@@ -33,7 +33,12 @@ describe('<SearchURLQuery />', () => {
   });
 
   it('should push value to query params', async () => {
-    let testLocation: RouteProps['location'] | null = null;
+    let testLocation: ReturnType<typeof useLocation> = null!;
+    const SaveTestLocation = () => {
+      testLocation = useLocation();
+
+      return null;
+    };
 
     const { user, getByRole } = render(<SearchURLQuery label="Search label" />, {
       renderOptions: {
@@ -41,14 +46,7 @@ describe('<SearchURLQuery />', () => {
           return (
             <>
               {children}
-              <Route
-                path="*"
-                render={({ location }) => {
-                  testLocation = location;
-
-                  return null;
-                }}
-              />
+              <Route path="*" element={<SaveTestLocation />} />
             </>
           );
         },
@@ -68,7 +66,12 @@ describe('<SearchURLQuery />', () => {
   });
 
   it('should clear value and update query params', async () => {
-    let testLocation: RouteProps['location'] | null = null;
+    let testLocation: ReturnType<typeof useLocation> = null!;
+    const SaveTestLocation = () => {
+      testLocation = useLocation();
+
+      return null;
+    };
 
     const { user, getByRole } = render(<SearchURLQuery label="Search label" />, {
       renderOptions: {
@@ -76,14 +79,7 @@ describe('<SearchURLQuery />', () => {
           return (
             <>
               {children}
-              <Route
-                path="*"
-                render={({ location }) => {
-                  testLocation = location;
-
-                  return null;
-                }}
-              />
+              <Route path="*" element={<SaveTestLocation />} />
             </>
           );
         },

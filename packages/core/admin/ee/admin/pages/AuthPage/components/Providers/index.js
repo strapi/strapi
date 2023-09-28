@@ -3,7 +3,7 @@ import React from 'react';
 import { Box, Button, Divider, Flex, Loader, Main, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { Redirect, useHistory } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import Logo from '../../../../../../admin/src/components/UnauthenticatedLogo';
@@ -20,21 +20,21 @@ const DividerFull = styled(Divider)`
 `;
 
 const Providers = () => {
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const { formatMessage } = useIntl();
   const { isLoading, providers } = useAuthProviders({
     enabled: window.strapi.features.isEnabled(window.strapi.features.SSO),
   });
 
   const handleClick = () => {
-    push('/auth/login');
+    navigate('/auth/login');
   };
 
   if (
     !window.strapi.features.isEnabled(window.strapi.features.SSO) ||
     (!isLoading && providers.length === 0)
   ) {
-    return <Redirect to="/auth/login" />;
+    return <Navigate to="/auth/login" />;
   }
 
   return (

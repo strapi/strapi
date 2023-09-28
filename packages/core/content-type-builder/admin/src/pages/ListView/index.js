@@ -8,7 +8,7 @@ import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
-import { Prompt, useRouteMatch } from 'react-router-dom';
+import { Prompt, useMatch } from 'react-router-dom';
 
 import List from '../../components/List';
 import ListRow from '../../components/ListRow';
@@ -27,7 +27,7 @@ const ListView = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
-  const match = useRouteMatch('/plugins/content-type-builder/:kind/:currentUID');
+  const match = useMatch('/plugins/content-type-builder/:kind/:currentUID');
 
   const {
     onOpenModalAddComponentsToDZ,

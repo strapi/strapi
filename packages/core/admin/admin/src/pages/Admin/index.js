@@ -10,7 +10,7 @@ import { LoadingIndicatorPage, useStrapiApp, useTracking } from '@strapi/helper-
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useDispatch, useSelector } from 'react-redux';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 import GuidedTourModal from '../../components/GuidedTour/Modal';
 import LeftMenu from '../../components/LeftMenu';
@@ -96,23 +96,19 @@ const Admin = () => {
         }
       >
         <Suspense fallback={<LoadingIndicatorPage />}>
-          <Switch>
-            <Route path="/" component={HomePage} exact />
-            <Route path="/me" component={ProfilePage} exact />
-            <Route path="/content-manager" component={CM} />
+          <Routes>
+            <Route path="/" Component={HomePage} exact />
+            <Route path="/me" Component={ProfilePage} />
+            <Route path="/content-manager" Component={CM} />
             {routes}
-            <Route path="/settings/:settingId" component={SettingsPage} />
-            <Route path="/settings" component={SettingsPage} exact />
-            <Route path="/marketplace">
-              <MarketplacePage />
-            </Route>
-            <Route path="/list-plugins" exact>
-              <InstalledPluginsPage />
-            </Route>
-            <Route path="/404" component={NotFoundPage} />
-            <Route path="/500" component={InternalErrorPage} />
-            <Route path="" component={NotFoundPage} />
-          </Switch>
+            <Route path="/settings/:settingId" Component={SettingsPage} />
+            <Route path="/settings" Component={SettingsPage} />
+            <Route path="/marketplace" Component={MarketplacePage} />
+            <Route path="/list-plugins" Component={InstalledPluginsPage} />
+            <Route path="/404" Component={NotFoundPage} />
+            <Route path="/500" Component={InternalErrorPage} />
+            <Route path="" Component={NotFoundPage} />
+          </Routes>
         </Suspense>
         <GuidedTourModal />
 

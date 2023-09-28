@@ -14,7 +14,7 @@ import {
 import { auth, pxToRem, useFetchClient, useNotification } from '@strapi/helper-plugin';
 import { parse } from 'qs';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import Logo from '../../components/UnauthenticatedLogo';
@@ -71,7 +71,8 @@ const TypographyCenter = styled(Typography)`
 
 const UseCasePage = () => {
   const toggleNotification = useNotification();
-  const { push, location } = useHistory();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { formatMessage } = useIntl();
   const [role, setRole] = useState();
   const [otherRole, setOtherRole] = useState('');
@@ -101,7 +102,7 @@ const UseCasePage = () => {
           defaultMessage: 'Project has been successfully created',
         },
       });
-      push('/');
+      navigate('/');
     } catch (err) {
       // Silent
     }

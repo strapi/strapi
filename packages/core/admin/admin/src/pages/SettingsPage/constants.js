@@ -7,8 +7,7 @@ export const ROUTES_CE = [
 
       return component;
     },
-    to: '/settings/roles',
-    exact: true,
+    to: 'roles',
   },
   {
     async Component() {
@@ -18,8 +17,7 @@ export const ROUTES_CE = [
 
       return component;
     },
-    to: '/settings/roles/duplicate/:id',
-    exact: true,
+    to: 'roles/duplicate/:id',
   },
   {
     async Component() {
@@ -29,8 +27,7 @@ export const ROUTES_CE = [
 
       return component;
     },
-    to: '/settings/roles/new',
-    exact: true,
+    to: 'roles/new',
   },
   {
     async Component() {
@@ -40,8 +37,7 @@ export const ROUTES_CE = [
 
       return component;
     },
-    to: '/settings/roles/:id',
-    exact: true,
+    to: 'roles/:id',
   },
   {
     async Component() {
@@ -51,8 +47,7 @@ export const ROUTES_CE = [
 
       return component;
     },
-    to: '/settings/users',
-    exact: true,
+    to: 'users',
   },
   {
     async Component() {
@@ -62,8 +57,7 @@ export const ROUTES_CE = [
 
       return component;
     },
-    to: '/settings/users/:id',
-    exact: true,
+    to: 'users/:id',
   },
   {
     async Component() {
@@ -73,8 +67,7 @@ export const ROUTES_CE = [
 
       return component;
     },
-    to: '/settings/webhooks/create',
-    exact: true,
+    to: 'webhooks/create',
   },
   {
     async Component() {
@@ -84,8 +77,7 @@ export const ROUTES_CE = [
 
       return component;
     },
-    to: '/settings/webhooks/:id',
-    exact: true,
+    to: 'webhooks/:id',
   },
   {
     async Component() {
@@ -95,8 +87,7 @@ export const ROUTES_CE = [
 
       return component;
     },
-    to: '/settings/webhooks',
-    exact: true,
+    to: 'webhooks',
   },
   {
     async Component() {
@@ -106,8 +97,7 @@ export const ROUTES_CE = [
 
       return component;
     },
-    to: '/settings/api-tokens',
-    exact: true,
+    to: 'api-tokens',
   },
   {
     async Component() {
@@ -117,8 +107,7 @@ export const ROUTES_CE = [
 
       return component;
     },
-    to: '/settings/api-tokens/create',
-    exact: true,
+    to: 'api-tokens/create',
   },
   {
     async Component() {
@@ -128,8 +117,7 @@ export const ROUTES_CE = [
 
       return component;
     },
-    to: '/settings/api-tokens/:id',
-    exact: true,
+    to: 'api-tokens/:id',
   },
   {
     async Component() {
@@ -139,8 +127,7 @@ export const ROUTES_CE = [
 
       return component;
     },
-    to: '/settings/transfer-tokens/create',
-    exact: true,
+    to: 'transfer-tokens/create',
   },
   {
     async Component() {
@@ -150,8 +137,7 @@ export const ROUTES_CE = [
 
       return component;
     },
-    to: '/settings/transfer-tokens',
-    exact: true,
+    to: 'transfer-tokens',
   },
   {
     async Component() {
@@ -161,7 +147,6 @@ export const ROUTES_CE = [
 
       return component;
     },
-    to: '/settings/transfer-tokens/:id',
-    exact: true,
+    to: 'transfer-tokens/:id',
   },
 ];

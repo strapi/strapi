@@ -14,7 +14,7 @@ import get from 'lodash/get';
 import PropTypes from 'prop-types';
 import { useQueryClient } from 'react-query';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { buildValidGetParams } from '../../pages/ListView/utils';
 import {
@@ -33,7 +33,7 @@ import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../
 const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   const queryClient = useQueryClient();
   const { trackUsage } = useTracking();
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const { setCurrentStep } = useGuidedTour();
   const trackUsageRef = useRef(trackUsage);
   const [isCreatingEntry, setIsCreatingEntry] = useState(true);
@@ -134,7 +134,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
             message: { id: getTrad('permissions.not-allowed.update') },
           });
 
-          push('/');
+          navigate('/');
         }
       }
     };
@@ -142,7 +142,16 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
     fetchData(source);
 
     return () => source.cancel('Operation canceled by the user.');
-  }, [fetchClient, cleanReceivedData, push, slug, dispatch, params, rawQuery, toggleNotification]);
+  }, [
+    fetchClient,
+    cleanReceivedData,
+    navigate,
+    slug,
+    dispatch,
+    params,
+    rawQuery,
+    toggleNotification,
+  ]);
 
   const displayErrors = useCallback(
     (err) => {

@@ -8,7 +8,7 @@ import { setupServer } from 'msw/node';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
-import { MemoryRouter } from 'react-router-dom/cjs/react-router-dom.min';
+import { MemoryRouter } from 'react-router-dom';
 import { combineReducers, createStore } from 'redux';
 
 import { ConfirmBulkActionDialog, ConfirmDialogPublishAll } from '..';

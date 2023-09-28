@@ -21,7 +21,7 @@ import {
 import { Exit, Write } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { NavLink as RouterNavLink, useHistory, useLocation } from 'react-router-dom';
+import { NavLink as RouterNavLink, useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useConfigurations } from '../../hooks';
@@ -65,7 +65,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { post } = getFetchClient();
 
   const initials = userDisplayName
@@ -80,7 +80,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
     await post('/admin/logout');
     auth.clearAppStorage();
     handleToggleUserLinks();
-    history.push('/auth/login');
+    navigate('/auth/login');
   };
 
   const handleBlur = (e) => {

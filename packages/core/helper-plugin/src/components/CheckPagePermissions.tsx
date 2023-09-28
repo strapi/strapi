@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
 import { useNotification } from '../features/Notifications';
 import { useRBACProvider } from '../features/RBAC';
@@ -68,7 +68,7 @@ const CheckPagePermissions = ({ permissions = [], children }: CheckPagePermissio
   }
 
   if (!state.canAccess) {
-    return <Redirect to="/" />;
+    return <Navigate to="/" />;
   }
 
   return children;

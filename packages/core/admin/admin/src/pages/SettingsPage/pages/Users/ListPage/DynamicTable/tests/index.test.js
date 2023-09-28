@@ -1,8 +1,7 @@
 // import React from 'react';
 // import { render } from '@testing-library/react';
 // import { IntlProvider } from 'react-intl';
-// import { Router } from 'react-router-dom';
-// import { createMemoryHistory } from 'history';
+// import { MemoryRouter } from 'react-router-dom';
 // import { useQueryParams } from '@strapi/helper-plugin';
 // import Theme from '../../../../../../../components/Theme';
 // import DynamicTable from '../index';
@@ -23,7 +22,7 @@
 // }) => (
 //   <IntlProvider messages={{ en: {} }} textComponent="span" locale="en">
 //     <Theme>
-//       <Router history={createMemoryHistory()}>
+//       <MemoryRouter>
 //         <DynamicTable
 //           canDelete={canDelete}
 //           canUpdate={canUpdate}
@@ -32,7 +31,7 @@
 //           withBulkActions={withBulkActions}
 //           withMainAction={withMainAction}
 //         />
-//       </Router>
+//       </MemoryRouter>
 //     </Theme>
 //   </IntlProvider>
 // );

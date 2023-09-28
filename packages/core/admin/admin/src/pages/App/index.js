@@ -19,9 +19,9 @@ import {
 import merge from 'lodash/merge';
 import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
-import PrivateRoute from '../../components/PrivateRoute';
+import RequireAuth from '../../components/RequireAuth';
 import { ADMIN_PERMISSIONS_CE } from '../../constants';
 import { useConfigurations } from '../../hooks';
 import { useEnterprise } from '../../hooks/useEnterprise';
@@ -182,19 +182,38 @@ function App() {
     <Suspense fallback={<LoadingIndicatorPage />}>
       <SkipToContent>{formatMessage({ id: 'skipToContent' })}</SkipToContent>
       <TrackingProvider value={trackingInfo}>
-        <Switch>
+        <Routes>
           {authRoutes}
           <Route
             path="/auth/:authType"
-            render={(routerProps) => (
-              <AuthPage {...routerProps} setHasAdmin={setHasAdmin} hasAdmin={hasAdmin} />
-            )}
+            element={<AuthPage setHasAdmin={setHasAdmin} hasAdmin={hasAdmin} />}
             exact
           />
-          <PrivateRoute path="/usecase" component={UseCasePage} />
-          <PrivateRoute path="/" component={AuthenticatedApp} />
-          <Route path="" component={NotFoundPage} />
-        </Switch>
+          <Route
+            path="/usecase"
+            element={
+              <RequireAuth>
+                <UseCasePage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/"
+            element={
+              <RequireAuth>
+                <AuthenticatedApp />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path=""
+            Component={
+              <RequireAuth>
+                <NotFoundPage />
+              </RequireAuth>
+            }
+          />
+        </Routes>
       </TrackingProvider>
     </Suspense>
   );

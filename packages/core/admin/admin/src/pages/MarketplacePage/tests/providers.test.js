@@ -6,7 +6,7 @@ import { render as renderRTL, screen, waitFor, within } from '@testing-library/r
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { MemoryRouter, Route } from 'react-router-dom';
+import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 
 import { MarketPlacePage } from '../index';
 
@@ -32,45 +32,36 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-let testLocation = null;
-
-const render = (props) => ({
-  ...renderRTL(<MarketPlacePage {...props} />, {
-    wrapper({ children }) {
-      const client = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
-          },
-        },
-      });
-
-      return (
-        <QueryClientProvider client={client}>
-          <IntlProvider locale="en" messages={{}} textComponent="span">
-            <ThemeProvider theme={lightTheme}>
-              <NotificationsProvider>
-                <MemoryRouter initialEntries={['/?npmPackageType=provider&sort=name:asc']}>
-                  {children}
-                  <Route
-                    path="*"
-                    render={({ location }) => {
-                      testLocation = location;
-
-                      return null;
-                    }}
-                  />
-                </MemoryRouter>
-              </NotificationsProvider>
-            </ThemeProvider>
-          </IntlProvider>
-        </QueryClientProvider>
-      );
+const render = (props) => {
+  const client = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
     },
-  }),
+  });
 
-  user: userEvent.setup(),
-});
+  const router = createMemoryRouter([{ path: '/', element: <MarketPlacePage {...props} /> }], {
+    initialEntries: ['/?npmPackageType=provider&sort=name:asc'],
+  });
+
+  return {
+    ...renderRTL(
+      <QueryClientProvider client={client}>
+        <IntlProvider locale="en" messages={{}} textComponent="span">
+          <ThemeProvider theme={lightTheme}>
+            <NotificationsProvider>
+              <RouterProvider router={router} />
+            </NotificationsProvider>
+          </ThemeProvider>
+        </IntlProvider>
+      </QueryClientProvider>
+    ),
+
+    user: userEvent.setup(),
+    router,
+  };
+};
 
 const waitForReload = async () => {
   await waitFor(() => expect(screen.queryByText('Loading content...')).not.toBeInTheDocument());
@@ -257,7 +248,7 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('removes a filter option tag', async () => {
-    const { getByRole, user } = render();
+    const { getByRole, user, router } = render();
 
     await waitForReload();
 
@@ -276,7 +267,7 @@ describe('Marketplace page - providers tab', () => {
     await user.click(getByRole('button', { name: 'Made by Strapi' }));
 
     await waitForReload();
-    expect(testLocation.search).toBe('?npmPackageType=provider&sort=name:asc&page=1');
+    expect(router.state.location.search).toBe('?npmPackageType=provider&sort=name:asc&page=1');
   });
 
   it('only filters in the providers tab', async () => {
@@ -320,7 +311,7 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('changes the url on sort option select', async () => {
-    const { getByRole, user } = render();
+    const { getByRole, user, router } = render();
 
     await waitForReload();
 
@@ -332,7 +323,9 @@ describe('Marketplace page - providers tab', () => {
 
     await waitForReload();
 
-    expect(testLocation.search).toEqual('?npmPackageType=provider&sort=submissionDate:desc&page=1');
+    expect(router.state.location.search).toEqual(
+      '?npmPackageType=provider&sort=submissionDate:desc&page=1'
+    );
   });
 
   it('shows github stars and weekly downloads count for each provider', async () => {
@@ -358,7 +351,7 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('paginates the results', async () => {
-    const { getByText, getByLabelText, getAllByText, user } = render();
+    const { getByText, getByLabelText, getAllByText, user, router } = render();
 
     await waitForReload();
 
@@ -374,16 +367,16 @@ describe('Marketplace page - providers tab', () => {
     // Can go to next page
     await user.click(getByText(/go to next page/i).closest('a'));
     await waitForReload();
-    expect(testLocation.search).toBe('?npmPackageType=provider&sort=name:asc&page=2');
+    expect(router.state.location.search).toBe('?npmPackageType=provider&sort=name:asc&page=2');
 
     // Can go to previous page
     await user.click(getByText(/go to previous page/i).closest('a'));
     await waitForReload();
-    expect(testLocation.search).toBe('?npmPackageType=provider&sort=name:asc&page=1');
+    expect(router.state.location.search).toBe('?npmPackageType=provider&sort=name:asc&page=1');
 
     // Can go to specific page
     await user.click(getByText(/go to page 3/i).closest('a'));
     await waitForReload();
-    expect(testLocation.search).toBe('?npmPackageType=provider&sort=name:asc&page=3');
+    expect(router.state.location.search).toBe('?npmPackageType=provider&sort=name:asc&page=3');
   });
 });

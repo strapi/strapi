@@ -20,7 +20,7 @@ import PropTypes from 'prop-types';
 import { flushSync } from 'react-dom';
 import { useIntl } from 'react-intl';
 import { useDispatch, useSelector } from 'react-redux';
-import { Prompt, Redirect } from 'react-router-dom';
+import { Prompt, Navigate } from 'react-router-dom';
 
 import { usePrev } from '../../hooks';
 import { clearSetModifiedDataOnly } from '../../sharedReducers/crudReducer/actions';
@@ -602,7 +602,7 @@ const EditViewDataManagerProvider = ({
 
   // Redirect the user to the previous page if he is not allowed to read/update a document
   if (shouldRedirectToHomepageWhenEditingEntry) {
-    return <Redirect to={from} />;
+    return <Navigate replace to={from} />;
   }
 
   if (!modifiedData) {

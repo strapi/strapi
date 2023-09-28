@@ -19,7 +19,7 @@ import qs from 'qs';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { selectAdminPermissions } from '../../../../App/selectors';
 import { API_TOKEN_TYPE } from '../../../components/Tokens/constants';
@@ -36,7 +36,7 @@ const ApiTokenListView = () => {
   const {
     allowedActions: { canCreate, canDelete, canUpdate, canRead },
   } = useRBAC(permissions.settings['api-tokens']);
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const { trackUsage } = useTracking();
   const { startSection } = useGuidedTour();
   const startSectionRef = React.useRef(startSection);
@@ -50,8 +50,8 @@ const ApiTokenListView = () => {
   }, []);
 
   React.useEffect(() => {
-    push({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) });
-  }, [push]);
+    navigate({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) });
+  }, [navigate]);
 
   const headers = tableHeaders.map((header) => ({
     ...header,

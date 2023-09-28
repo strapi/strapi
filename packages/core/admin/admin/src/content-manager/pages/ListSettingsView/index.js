@@ -188,7 +188,7 @@ export const ListSettingsView = ({ layout, slug }) => {
         <form onSubmit={handleSubmit}>
           <HeaderLayout
             navigationAction={
-              <Link startIcon={<ArrowLeft />} to={goBackUrl} id="go-back">
+              <Link startIcon={<ArrowLeft />} to={goBackUrl()} id="go-back">
                 {formatMessage({ id: 'global.back', defaultMessage: 'Back' })}
               </Link>
             }

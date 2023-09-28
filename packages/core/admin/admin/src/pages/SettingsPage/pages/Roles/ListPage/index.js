@@ -30,7 +30,7 @@ import {
 import { Duplicate, Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { useAdminRoles } from '../../../../../hooks/useAdminRoles';
 import { selectAdminPermissions } from '../../../../App/selectors';
@@ -44,7 +44,7 @@ const useRoleActions = ({ canCreate, canDelete, canUpdate, refetchRoles }) => {
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
   const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpenend] = useState(false);
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const [{ selectedRoles, showModalConfirmButtonLoading, roleToDelete }, dispatch] = useReducer(
     reducer,
     initialState
@@ -78,12 +78,12 @@ const useRoleActions = ({ canCreate, canDelete, canUpdate, refetchRoles }) => {
 
   const onRoleDuplicate = useCallback(
     (id) => {
-      push(`/settings/roles/duplicate/${id}`);
+      navigate(`/settings/roles/duplicate/${id}`);
     },
-    [push]
+    [navigate]
   );
 
-  const handleNewRoleClick = () => push('/settings/roles/new');
+  const handleNewRoleClick = () => navigate('/settings/roles/new');
 
   const onRoleRemove = useCallback((roleId) => {
     dispatch({
@@ -98,9 +98,9 @@ const useRoleActions = ({ canCreate, canDelete, canUpdate, refetchRoles }) => {
 
   const handleGoTo = useCallback(
     (id) => {
-      push(`/settings/roles/${id}`);
+      navigate(`/settings/roles/${id}`);
     },
-    [push]
+    [navigate]
   );
 
   const handleClickDelete = useCallback(

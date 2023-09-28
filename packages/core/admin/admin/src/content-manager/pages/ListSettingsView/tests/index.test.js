@@ -7,7 +7,7 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { MemoryRouter, Route } from 'react-router-dom';
+import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 
 import ModelsContext from '../../../contexts/ModelsContext';
 import { ListSettingsView } from '../index';
@@ -85,47 +85,50 @@ const layout = {
   uid: 'api::restaurant.restaurant',
 };
 
-let testLocation;
-
-const render = ({ initialEntries } = {}) => ({
-  ...renderRTL(
-    <ListSettingsView layout={layout} slug="api::restaurant.restaurant" updateLayout={jest.fn()} />,
-    {
-      wrapper({ children }) {
-        const client = new QueryClient({
-          defaultOptions: {
-            queries: {
-              retry: false,
-            },
-          },
-        });
-
-        return (
-          <MemoryRouter initialEntries={initialEntries}>
-            <ModelsContext.Provider value={{ refetchData: jest.fn() }}>
-              <QueryClientProvider client={client}>
-                <IntlProvider messages={{ en: {} }} textComponent="span" locale="en">
-                  <ThemeProvider theme={lightTheme}>
-                    <DndProvider backend={HTML5Backend}>{children}</DndProvider>
-                  </ThemeProvider>
-                </IntlProvider>
-              </QueryClientProvider>
-            </ModelsContext.Provider>
-            <Route
-              path="*"
-              render={({ location }) => {
-                testLocation = location;
-
-                return null;
-              }}
-            />
-          </MemoryRouter>
-        );
+const render = ({ initialEntries } = {}) => {
+  const element = (
+    <ListSettingsView layout={layout} slug="api::restaurant.restaurant" updateLayout={jest.fn()} />
+  );
+  const router = createMemoryRouter(
+    [
+      {
+        path: '/',
+        element,
       },
-    }
-  ),
-  user: userEvent.setup(),
-});
+      {
+        path: '/content-manager/collectionType/api::category.category/configurations/list',
+        element,
+      },
+    ],
+    { initialEntries }
+  );
+
+  const client = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+
+  return {
+    ...renderRTL(
+      <ModelsContext.Provider value={{ refetchData: jest.fn() }}>
+        <QueryClientProvider client={client}>
+          <IntlProvider messages={{ en: {} }} textComponent="span" locale="en">
+            <ThemeProvider theme={lightTheme}>
+              <DndProvider backend={HTML5Backend}>
+                <RouterProvider router={router} />
+              </DndProvider>
+            </ThemeProvider>
+          </IntlProvider>
+        </QueryClientProvider>
+      </ModelsContext.Provider>
+    ),
+    user: userEvent.setup(),
+    router,
+  };
+};
 
 /**
  * TODO: we should be using MSW for the network events
@@ -162,7 +165,7 @@ describe('ADMIN | CM | LV | Configure the view', () => {
   });
 
   it('should keep plugins query params when arriving on the page and going back', async () => {
-    const { getByRole, user } = render({
+    const { getByRole, user, router } = render({
       initialEntries: [
         '/content-manager/collectionType/api::category.category/configurations/list?plugins[i18n][locale]=fr',
       ],
@@ -172,11 +175,13 @@ describe('ADMIN | CM | LV | Configure the view', () => {
       expect(getByRole('heading', { name: 'Configure the view - Michka' })).toBeInTheDocument()
     );
 
-    expect(testLocation.search).toEqual('?plugins[i18n][locale]=fr');
+    expect(router.state.location.search).toEqual('?plugins[i18n][locale]=fr');
 
     await user.click(getByRole('link', { name: 'Back' }));
 
-    expect(testLocation.search).toEqual('?page=1&pageSize=10&sort=id:ASC&plugins[i18n][locale]=fr');
+    expect(router.state.location.search).toEqual(
+      '?page=1&pageSize=10&sort=id:ASC&plugins[i18n][locale]=fr'
+    );
   });
 
   it('should add field', async () => {

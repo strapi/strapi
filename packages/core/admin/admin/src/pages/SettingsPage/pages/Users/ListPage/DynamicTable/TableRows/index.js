@@ -14,7 +14,7 @@ import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import { Pencil, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { getFullName } from '../../../../../../../utils';
 
@@ -28,10 +28,9 @@ const TableRows = ({
   withBulkActions,
   rows,
 }) => {
-  const {
-    push,
-    location: { pathname },
-  } = useHistory();
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+
   const { formatMessage } = useIntl();
 
   return (
@@ -43,7 +42,7 @@ const TableRows = ({
           <Tr
             key={data.id}
             {...onRowClick({
-              fn: () => push(`${pathname}/${data.id}`),
+              fn: () => navigate(`${pathname}/${data.id}`),
               condition: withBulkActions,
             })}
           >
@@ -80,7 +79,7 @@ const TableRows = ({
               <Td>
                 <Flex justifyContent="end">
                   <IconButton
-                    onClick={() => push(`${pathname}/${data.id}`)}
+                    onClick={() => navigate(`${pathname}/${data.id}`)}
                     label={formatMessage(
                       { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
                       { target: getFullName(data.firstname, data.lastname) }

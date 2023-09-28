@@ -1,11 +1,11 @@
 import { useCallback, useMemo } from 'react';
 
 import { parse, ParsedQs, stringify } from 'qs';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const useQueryParams = <TQuery extends Record<string, unknown>>(initialParams?: TQuery) => {
   const { search } = useLocation();
-  const { push } = useHistory();
+  const navigate = useNavigate();
 
   const query = useMemo(() => {
     const searchQuery = search.substring(1);
@@ -31,9 +31,9 @@ const useQueryParams = <TQuery extends Record<string, unknown>>(initialParams?: 
         nextQuery = { ...query, ...nextParams };
       }
 
-      push({ search: stringify(nextQuery, { encode: false }) });
+      navigate({ search: stringify(nextQuery, { encode: false }) });
     },
-    [push, query]
+    [navigate, query]
   );
 
   return [{ query, rawQuery: search }, setQuery] as const;

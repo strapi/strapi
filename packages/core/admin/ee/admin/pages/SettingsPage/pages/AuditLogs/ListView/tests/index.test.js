@@ -4,11 +4,10 @@ import { fixtures } from '@strapi/admin-test-utils';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
-import { Router } from 'react-router-dom';
+import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { createStore } from 'redux';
 
 import useAuditLogsData from '../hooks/useAuditLogsData';
@@ -39,49 +38,50 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-const history = createMemoryHistory();
+const setup = (props) => {
+  const client = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
 
-const setup = (props) => ({
-  ...render(<ListView {...props} />, {
-    wrapper({ children }) {
-      const client = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
-          },
-        },
-      });
+  const router = createMemoryRouter([{ path: '/', element: <ListView {...props} /> }], {
+    initialEntries: props?.initialEntries,
+  });
 
-      return (
-        <Provider
-          store={createStore((state) => state, {
-            admin_app: {
-              permissions: {
-                ...fixtures.permissions.app,
-                settings: {
-                  ...fixtures.permissions.app.settings,
-                  auditLogs: {
-                    main: [{ action: 'admin::audit-logs.read', subject: null }],
-                    read: [{ action: 'admin::audit-logs.read', subject: null }],
-                  },
+  return {
+    ...render(
+      <Provider
+        store={createStore((state) => state, {
+          admin_app: {
+            permissions: {
+              ...fixtures.permissions.app,
+              settings: {
+                ...fixtures.permissions.app.settings,
+                auditLogs: {
+                  main: [{ action: 'admin::audit-logs.read', subject: null }],
+                  read: [{ action: 'admin::audit-logs.read', subject: null }],
                 },
               },
             },
-          })}
-        >
-          <QueryClientProvider client={client}>
-            <ThemeProvider theme={lightTheme}>
-              <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
-                <Router history={history}>{children}</Router>
-              </IntlProvider>
-            </ThemeProvider>
-          </QueryClientProvider>
-        </Provider>
-      );
-    },
-  }),
-  user: userEvent.setup(),
-});
+          },
+        })}
+      >
+        <QueryClientProvider client={client}>
+          <ThemeProvider theme={lightTheme}>
+            <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
+              <RouterProvider router={router} />
+            </IntlProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </Provider>
+    ),
+    user: userEvent.setup(),
+    router,
+  };
+};
 
 const waitForReload = async () => {
   await screen.findByText('Audit Logs', { selector: 'h1' });
@@ -94,11 +94,6 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
 
   afterAll(() => {
     jest.clearAllMocks();
-  });
-
-  afterEach(() => {
-    // Clean up history after each test
-    history.location.search = '';
   });
 
   it('should render page with right header details', () => {
@@ -198,7 +193,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
       isLoading: false,
     });
 
-    const { getAllByText, getByText, getByLabelText, user } = setup();
+    const { getAllByText, getByText, getByLabelText, user, router } = setup();
     await waitForReload();
 
     // Should have pagination section with 4 pages
@@ -212,20 +207,18 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
 
     // Can go to next page
     await user.click(getByText(/go to next page/i).closest('a'));
-    expect(history.location.search).toBe('?page=2');
+    expect(router.state.location.search).toBe('?page=2');
 
     // Can go to previous page
     await user.click(getByText(/go to previous page/i).closest('a'));
-    expect(history.location.search).toBe('?page=1');
+    expect(router.state.location.search).toBe('?page=1');
 
     // Can go to specific page
     await user.click(getByText(/go to page 3/i).closest('a'));
-    expect(history.location.search).toBe('?page=3');
+    expect(router.state.location.search).toBe('?page=3');
   });
 
   it('should show 20 elements if pageSize is 20', async () => {
-    history.location.search = '?pageSize=20';
-
     useAuditLogsData.mockReturnValue({
       auditLogs: {
         results: getBigTestPageData(20),
@@ -239,7 +232,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
       isLoading: false,
     });
 
-    const { container } = setup();
+    const { container } = setup({ initialEntries: ['/?pageSize=20'] });
 
     const rows = await waitFor(() => container.querySelector('tbody').querySelectorAll('tr'));
     expect(rows.length).toEqual(20);
@@ -276,7 +269,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
       isLoading: false,
     });
 
-    const { getByRole, getByPlaceholderText, user } = setup();
+    const { getByRole, getByPlaceholderText, user, router } = setup();
     // Open the filters popover
     const filtersButton = getByRole('button', { name: /filters/i });
     await user.click(filtersButton);
@@ -288,6 +281,6 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
     const addFilterButton = getByRole('button', { name: /add filter/i });
     fireEvent.click(addFilterButton);
 
-    expect(history.location.search).toBe('?filters[$and][0][action][$eq]=entry.create&page=1');
+    expect(router.state.location.search).toBe('?filters[$and][0][action][$eq]=entry.create&page=1');
   });
 });

@@ -11,7 +11,7 @@ import {
 } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import DeleteButton from './DeleteButton';
 import ReadButton from './ReadButton';
@@ -31,10 +31,8 @@ const Table = ({
   const [{ query }] = useQueryParams();
   const { formatMessage } = useIntl();
   const [, sortOrder] = query ? query.sort.split(':') : 'ASC';
-  const {
-    push,
-    location: { pathname },
-  } = useHistory();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
   const { trackUsage } = useTracking();
 
   const sortedTokens = tokens.sort((a, b) => {
@@ -62,7 +60,7 @@ const Table = ({
                   trackUsage('willEditTokenFromList', {
                     tokenType,
                   });
-                  push(`${pathname}/${token.id}`);
+                  navigate(`${pathname}/${token.id}`);
                 },
                 condition: canUpdate,
               })}

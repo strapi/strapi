@@ -17,7 +17,7 @@ import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
-import { useHistory, useRouteMatch } from 'react-router-dom';
+import { useLocation, useNavigate, useMatch } from 'react-router-dom';
 
 import { formatAPIErrors } from '../../../../../utils';
 import { selectAdminPermissions } from '../../../../App/selectors';
@@ -36,11 +36,12 @@ const TransferTokenCreateView = () => {
   const { formatMessage } = useIntl();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
-  const history = useHistory();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [transferToken, setTransferToken] = useState(
-    history.location.state?.transferToken.accessKey
+    location.state?.transferToken.accessKey
       ? {
-          ...history.location.state.transferToken,
+          ...location.state.transferToken,
         }
       : null
   );
@@ -53,7 +54,7 @@ const TransferTokenCreateView = () => {
   } = useRBAC(permissions.settings['transfer-tokens']);
   const {
     params: { id },
-  } = useRouteMatch('/settings/transfer-tokens/:id');
+  } = useMatch('/settings/transfer-tokens/:id');
   const { get, post, put } = useFetchClient();
 
   const isCreating = id === 'create';
@@ -131,7 +132,10 @@ const TransferTokenCreateView = () => {
       unlockApp();
 
       if (isCreating) {
-        history.replace(`/settings/transfer-tokens/${response.id}`, { transferToken: response });
+        navigate.replace(`/settings/transfer-tokens/${response.id}`, {
+          transferToken: response,
+          replace: true,
+        });
         setCurrentStep('transferTokens.success');
       }
       setTransferToken({

@@ -42,7 +42,7 @@ import { EmptyDocuments, Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import { selectAdminPermissions } from '../../../../App/selectors';
 
@@ -54,7 +54,7 @@ const ListView = () => {
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
   useFocusWhenNavigate();
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const { pathname } = useLocation();
 
   const {
@@ -152,7 +152,7 @@ const ListView = () => {
       ? setWebhooksToDelete((prev) => [...prev, id])
       : setWebhooksToDelete((prev) => prev.filter((webhookId) => webhookId !== id));
 
-  const goTo = (to) => push(`${pathname}/${to}`);
+  const goTo = (to) => navigate(`${pathname}/${to}`);
 
   const isLoading = isRBACLoading || isWebhooksLoading;
   const numberOfWebhooks = webhooks?.length ?? 0;

@@ -18,7 +18,7 @@ import qs from 'qs';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { selectAdminPermissions } from '../../../../App/selectors';
 import { TRANSFER_TOKEN_TYPE } from '../../../components/Tokens/constants';
@@ -35,7 +35,7 @@ const TransferTokenListView = () => {
   const {
     allowedActions: { canCreate, canDelete, canUpdate, canRead },
   } = useRBAC(permissions.settings['transfer-tokens']);
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const { trackUsage } = useTracking();
 
   const { startSection } = useGuidedTour();
@@ -49,8 +49,8 @@ const TransferTokenListView = () => {
   }, []);
 
   useEffect(() => {
-    push({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) });
-  }, [push]);
+    navigate({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) });
+  }, [navigate]);
 
   const headers = tableHeaders.map((header) => ({
     ...header,

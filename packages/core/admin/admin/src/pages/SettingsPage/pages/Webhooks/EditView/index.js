@@ -9,7 +9,7 @@ import {
   useNotification,
 } from '@strapi/helper-plugin';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { useHistory, useRouteMatch } from 'react-router-dom';
+import { useNavigate, useMatch } from 'react-router-dom';
 
 import { useContentTypes } from '../../../../../hooks/useContentTypes';
 
@@ -29,10 +29,10 @@ const cleanData = (data) => ({
 const EditView = () => {
   const {
     params: { id },
-  } = useRouteMatch('/settings/webhooks/:id');
+  } = useMatch('/settings/webhooks/:id');
   const isCreating = id === 'create';
 
-  const { replace } = useHistory();
+  const navigate = useNavigate();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
   const queryClient = useQueryClient();
@@ -95,7 +95,7 @@ const EditView = () => {
             type: 'success',
             message: { id: 'Settings.webhooks.created' },
           });
-          replace(`/settings/webhooks/${result.data.id}`);
+          navigate(`/settings/webhooks/${result.data.id}`, { replace: true });
         },
         onError(error) {
           toggleNotification({

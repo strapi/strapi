@@ -3,7 +3,7 @@ import React, { memo, useMemo } from 'react';
 import { CheckPagePermissions, LoadingIndicatorPage } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 import { selectAdminPermissions } from '../../../pages/App/selectors';
 import { ContentTypeLayoutContext } from '../../contexts';
@@ -46,33 +46,28 @@ const SingleTypeRecursivePath = ({
 
   return (
     <ContentTypeLayoutContext.Provider value={layout}>
-      <Switch>
-        <Route path={`${url}/configurations/edit`}>
-          <CheckPagePermissions permissions={permissions.contentManager.singleTypesConfigurations}>
-            <EditSettingsView
-              components={rawComponentsLayouts}
-              isContentTypeView
-              mainLayout={rawContentTypeLayout}
-              slug={slug}
-              updateLayout={updateLayout}
-            />
-          </CheckPagePermissions>
-        </Route>
+      <Routes>
+        <Route
+          path={`${url}/configurations/edit`}
+          element={
+            <CheckPagePermissions
+              permissions={permissions.contentManager.singleTypesConfigurations}
+            >
+              <EditSettingsView
+                components={rawComponentsLayouts}
+                isContentTypeView
+                mainLayout={rawContentTypeLayout}
+                slug={slug}
+                updateLayout={updateLayout}
+              />
+            </CheckPagePermissions>
+          }
+        />
         <Route
           path={url}
-          render={({ location: { state }, history: { goBack } }) => {
-            return (
-              <EditViewLayoutManager
-                layout={layout}
-                slug={slug}
-                isSingleType
-                state={state}
-                goBack={goBack}
-              />
-            );
-          }}
+          element={<EditViewLayoutManager layout={layout} slug={slug} isSingleType />}
         />
-      </Switch>
+      </Routes>
     </ContentTypeLayoutContext.Provider>
   );
 };

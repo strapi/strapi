@@ -2,9 +2,8 @@ import React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
-import { Router } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 
 import FormModalNavigationProvider from '../../FormModalNavigationProvider';
 import AttributeOptions from '../index';
@@ -57,12 +56,10 @@ const mockAttributes = [
 ];
 
 const makeApp = () => {
-  const history = createMemoryHistory();
-
   return (
     <IntlProvider locale="en" messages={{}} textComponent="span">
       <ThemeProvider theme={lightTheme}>
-        <Router history={history}>
+        <MemoryRouter>
           <FormModalNavigationProvider>
             <AttributeOptions
               attributes={mockAttributes}
@@ -70,7 +67,7 @@ const makeApp = () => {
               kind="collectionType"
             />
           </FormModalNavigationProvider>
-        </Router>
+        </MemoryRouter>
       </ThemeProvider>
     </IntlProvider>
   );

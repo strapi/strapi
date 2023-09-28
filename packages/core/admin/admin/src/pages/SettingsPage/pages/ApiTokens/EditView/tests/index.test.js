@@ -6,7 +6,7 @@ import { render, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
-import { Route, MemoryRouter } from 'react-router-dom';
+import { Routes, Route, MemoryRouter } from 'react-router-dom';
 import { createStore } from 'redux';
 
 import Theme from '../../../../../../components/Theme';
@@ -58,38 +58,40 @@ jest.mock('@strapi/helper-plugin', () => ({
 
 jest.spyOn(Date, 'now').mockImplementation(() => new Date('2015-10-01T08:00:00.000Z'));
 
-const setup = ({ path, ...props } = {}) =>
-  render(() => <EditView {...props} />, {
-    wrapper({ children }) {
-      const client = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
-          },
-        },
-      });
-
-      return (
-        <Provider
-          store={createStore((state) => state, {
-            admin_app: { permissions: fixtures.permissions.app },
-          })}
-        >
-          <QueryClientProvider client={client}>
-            <IntlProvider defaultLocale="en" locale="en">
-              <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-                <Theme>
-                  <MemoryRouter initialEntries={[path || '/settings/api-tokens/create']}>
-                    <Route path="/settings/api-tokens/create">{children}</Route>
-                  </MemoryRouter>
-                </Theme>
-              </ThemeToggleProvider>
-            </IntlProvider>
-          </QueryClientProvider>
-        </Provider>
-      );
+const setup = ({ path, ...props } = {}) => {
+  const client = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
     },
   });
+  const element = <EditView {...props} />;
+
+  const route = path || '/settings/api-tokens/create';
+
+  return render(
+    <Provider
+      store={createStore((state) => state, {
+        admin_app: { permissions: fixtures.permissions.app },
+      })}
+    >
+      <QueryClientProvider client={client}>
+        <IntlProvider defaultLocale="en" locale="en">
+          <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+            <Theme>
+              <MemoryRouter initialEntries={[route]}>
+                <Routes>
+                  <Route path={route} element={element} />
+                </Routes>
+              </MemoryRouter>
+            </Theme>
+          </ThemeToggleProvider>
+        </IntlProvider>
+      </QueryClientProvider>
+    </Provider>
+  );
+};
 
 describe('ADMIN | Pages | API TOKENS | EditView', () => {
   afterAll(() => {

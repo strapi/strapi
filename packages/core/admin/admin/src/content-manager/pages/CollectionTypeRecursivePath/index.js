@@ -4,7 +4,7 @@ import { CheckPagePermissions, LoadingIndicatorPage } from '@strapi/helper-plugi
 import PropTypes from 'prop-types';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useSelector } from 'react-redux';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 import { selectAdminPermissions } from '../../../pages/App/selectors';
 import { ContentTypeLayoutContext } from '../../contexts';
@@ -90,33 +90,39 @@ const CollectionTypeRecursivePath = ({
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <ContentTypeLayoutContext.Provider value={layout}>
-        <Switch>
-          <Route path={`${url}/configurations/list`}>
-            <CheckPagePermissions
-              permissions={permissions.contentManager.collectionTypesConfigurations}
-            >
-              <ListSettingsView
-                layout={rawContentTypeLayout}
-                slug={slug}
-                updateLayout={updateLayout}
-              />
-            </CheckPagePermissions>
-          </Route>
-          <Route path={`${url}/configurations/edit`}>
-            <CheckPagePermissions
-              permissions={permissions.contentManager.collectionTypesConfigurations}
-            >
-              <EditSettingsView
-                components={rawComponentsLayouts}
-                isContentTypeView
-                mainLayout={rawContentTypeLayout}
-                slug={slug}
-                updateLayout={updateLayout}
-              />
-            </CheckPagePermissions>
-          </Route>
+        <Routes>
+          <Route
+            path={`${url}/configurations/list`}
+            element={
+              <CheckPagePermissions
+                permissions={permissions.contentManager.collectionTypesConfigurations}
+              >
+                <ListSettingsView
+                  layout={rawContentTypeLayout}
+                  slug={slug}
+                  updateLayout={updateLayout}
+                />
+              </CheckPagePermissions>
+            }
+          />
+          <Route
+            path={`${url}/configurations/edit`}
+            element={
+              <CheckPagePermissions
+                permissions={permissions.contentManager.collectionTypesConfigurations}
+              >
+                <EditSettingsView
+                  components={rawComponentsLayouts}
+                  isContentTypeView
+                  mainLayout={rawContentTypeLayout}
+                  slug={slug}
+                  updateLayout={updateLayout}
+                />
+              </CheckPagePermissions>
+            }
+          />
           {routes}
-        </Switch>
+        </Routes>
       </ContentTypeLayoutContext.Provider>
     </ErrorBoundary>
   );

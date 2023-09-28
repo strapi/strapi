@@ -2,10 +2,9 @@ import React from 'react';
 
 import { darkTheme, lightTheme } from '@strapi/design-system';
 import { AppInfosContext, StrapiAppProvider, TrackingProvider } from '@strapi/helper-plugin';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createMemoryHistory } from 'history';
-import { Route, Router } from 'react-router-dom';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
 import { SettingsPage } from '..';
 import Theme from '../../../components/Theme';
@@ -28,7 +27,7 @@ jest.mock('../pages/ApplicationInfosPage', () => () => {
 
 const appInfos = { shouldUpdateStrapi: false };
 
-const makeApp = (history, settings) => (
+const makeApp = (path, settings) => (
   <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
     <TrackingProvider>
       <Theme>
@@ -42,10 +41,11 @@ const makeApp = (history, settings) => (
             runHookSeries={jest.fn()}
             menu={[]}
           >
-            <Router history={history}>
-              <Route path="/settings/:settingId" component={SettingsPage} />
-              <Route path="/settings" component={SettingsPage} />
-            </Router>
+            <MemoryRouter initialEntries={[path]}>
+              <Routes>
+                <Route path="/settings/*" element={<SettingsPage />} />
+              </Routes>
+            </MemoryRouter>
           </StrapiAppProvider>
         </AppInfosContext.Provider>
       </Theme>
@@ -55,8 +55,7 @@ const makeApp = (history, settings) => (
 
 describe('ADMIN | pages | SettingsPage', () => {
   it('should not crash', () => {
-    const history = createMemoryHistory();
-    const App = makeApp(history, {
+    const App = makeApp('/settings/application-infos', {
       global: {
         id: 'global',
         intlLabel: {
@@ -66,9 +65,6 @@ describe('ADMIN | pages | SettingsPage', () => {
         links: [],
       },
     });
-    const route = '/settings/application-infos';
-    act(() => history.push(route));
-
     const { container } = render(App);
 
     expect(container.firstChild).toMatchInlineSnapshot(`
@@ -218,8 +214,7 @@ describe('ADMIN | pages | SettingsPage', () => {
   });
 
   it('should redirect to the application-infos', async () => {
-    const history = createMemoryHistory();
-    const App = makeApp(history, {
+    const App = makeApp('/settings', {
       global: {
         id: 'global',
         intlLabel: {
@@ -229,8 +224,6 @@ describe('ADMIN | pages | SettingsPage', () => {
         links: [],
       },
     });
-    const route = '/settings';
-    act(() => history.push(route));
 
     render(App);
 
@@ -277,8 +270,7 @@ describe('ADMIN | pages | SettingsPage', () => {
       ],
     }));
 
-    const history = createMemoryHistory();
-    const App = makeApp(history, {
+    const App = makeApp('/settings/application-infos', {
       global: {
         id: 'global',
         intlLabel: {
@@ -291,7 +283,7 @@ describe('ADMIN | pages | SettingsPage', () => {
             intlLabel: { id: 'i18n.plugin.name', defaultMessage: 'Internationalization' },
             isDisplayed: true,
             permissions: [],
-            to: '/settings/internationalization',
+            to: 'internationalization',
             Component: () => ({ default: () => <div>i18n settings</div> }),
           },
         ],
@@ -305,15 +297,13 @@ describe('ADMIN | pages | SettingsPage', () => {
             intlLabel: { id: 'email', defaultMessage: 'email' },
             isDisplayed: true,
             permissions: [],
-            to: '/settings/email-settings',
+            to: 'email-settings',
             Component: () => ({ default: () => <div>email settings</div> }),
           },
         ],
       },
     });
-    const route = '/settings/application-infos';
     const user = userEvent.setup();
-    act(() => history.push(route));
 
     render(App);
 

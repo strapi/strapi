@@ -5,7 +5,7 @@ import get from 'lodash/get';
 import PropTypes from 'prop-types';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { getTrad } from '../../../utils';
 import CMEditViewCopyLocale from '../CMEditViewCopyLocale';
@@ -30,7 +30,7 @@ const CMEditViewLocalePicker = ({
 
   const currentLocale = get(query, 'plugins.i18n.locale', false);
 
-  const { push } = useHistory();
+  const navigate = useNavigate();
 
   const handleChange = (value) => {
     if (value === currentLocale) {
@@ -61,7 +61,7 @@ const CMEditViewLocalePicker = ({
     }
 
     if (status === 'did-not-create-locale') {
-      push({
+      navigate({
         pathname: `/content-manager/collectionType/${slug}/create`,
         search: stringify(defaultParams, { encode: false }),
       });
@@ -69,7 +69,7 @@ const CMEditViewLocalePicker = ({
       return;
     }
 
-    push({
+    navigate({
       pathname: `/content-manager/collectionType/${slug}/${id}`,
       search: stringify(defaultParams, { encode: false }),
     });

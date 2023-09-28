@@ -9,8 +9,7 @@ export const ROUTES_EE = [
 
             return component;
           },
-          to: '/settings/audit-logs',
-          exact: true,
+          to: 'audit-logs',
         },
       ]
     : []),
@@ -25,8 +24,7 @@ export const ROUTES_EE = [
 
             return component;
           },
-          to: '/settings/review-workflows',
-          exact: true,
+          to: 'review-workflows',
         },
 
         {
@@ -37,8 +35,7 @@ export const ROUTES_EE = [
 
             return component;
           },
-          to: '/settings/review-workflows/create',
-          exact: true,
+          to: 'review-workflows/create',
         },
 
         {
@@ -49,8 +46,7 @@ export const ROUTES_EE = [
 
             return component;
           },
-          to: '/settings/review-workflows/:workflowId',
-          exact: true,
+          to: 'review-workflows/:workflowId',
         },
       ]
     : []),
@@ -65,8 +61,7 @@ export const ROUTES_EE = [
 
             return component;
           },
-          to: '/settings/single-sign-on',
-          exact: true,
+          to: 'single-sign-on',
         },
       ]
     : []),

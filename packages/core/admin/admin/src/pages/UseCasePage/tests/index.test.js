@@ -3,9 +3,8 @@ import React from 'react';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
-import { Router } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 
 import UseCasePage from '../index';
 
@@ -31,14 +30,12 @@ jest.mock('@strapi/helper-plugin', () => ({
   },
 }));
 
-const history = createMemoryHistory();
-
 const App = (
   <IntlProvider messages={{}} textComponent="span" locale="en">
     <ThemeProvider theme={lightTheme}>
-      <Router history={history}>
+      <MemoryRouter>
         <UseCasePage />
-      </Router>
+      </MemoryRouter>
     </ThemeProvider>
   </IntlProvider>
 );

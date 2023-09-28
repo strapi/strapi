@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 const MESSAGES_MAP = {
@@ -36,9 +36,7 @@ const LinkStyled = styled(Link)`
 
 const DefaultButton = ({ tokenName, tokenId, buttonType, children }) => {
   const { formatMessage } = useIntl();
-  const {
-    location: { pathname },
-  } = useHistory();
+  const { pathname } = useLocation();
 
   return (
     <LinkStyled

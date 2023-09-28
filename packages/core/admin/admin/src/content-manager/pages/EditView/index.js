@@ -12,7 +12,7 @@ import { Layer, Pencil } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useEnterprise } from '../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../pages/App/selectors';
@@ -37,11 +37,12 @@ import { getFieldsActionMatchingPermissions } from './utils';
 const CTB_PERMISSIONS = [{ action: 'plugin::content-type-builder.read', subject: null }];
 
 /* eslint-disable  react/no-array-index-key */
-const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, userPermissions }) => {
+const EditView = ({ allowedActions, isSingleType, slug, id, origin, userPermissions }) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const permissions = useSelector(selectAdminPermissions);
   const location = useLocation();
+  const navigate = useNavigate();
   const toggleNotification = useNotification();
   const Information = useEnterprise(
     InformationBoxCE,
@@ -138,7 +139,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
             onPut={onPut}
             onUnpublish={onUnpublish}
             readActionAllowedFields={readActionAllowedFields}
-            redirectToPreviousPage={goBack}
+            redirectToPreviousPage={navigate(-1)}
             slug={slug}
             status={status}
             updateActionAllowedFields={updateActionAllowedFields}
@@ -288,7 +289,6 @@ EditView.propTypes = {
   }).isRequired,
   id: PropTypes.string,
   isSingleType: PropTypes.bool,
-  goBack: PropTypes.func.isRequired,
   origin: PropTypes.string,
   slug: PropTypes.string.isRequired,
   userPermissions: PropTypes.array,
