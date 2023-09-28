@@ -215,8 +215,8 @@ export const BlocksDropdown = () => {
   };
 
   /**
-   * Manages the selection of a block and change the node inside the Slate Editor.
-   * @param {object} value - the value of the selected block option
+   * Manages the selection of a block and changes the node inside the Slate Editor.
+   * @param {object} value - the value of the selected option in the BlocksDropdown select
    */
   const selectBlock = (value) => {
     const { type, level } = value;
@@ -289,8 +289,8 @@ const BlockOption = ({ value, icon, label, handleSelectOption, selectedOption, m
   const editor = useSlate();
 
   /**
-   * Function that detect if the Block option is the one selected in the editor.
-   * @param {function} matchNode - function that checks if the node selected in the Editor is matching the Block option type
+   * Checks if the block selected in the Editor is the one we're expecting via a matchNode function.
+   * @param {function} matchNode - predicates selection using the editor's selected node
    */
   const isBlockActive = (matchNode) => {
     const { selection } = editor;
