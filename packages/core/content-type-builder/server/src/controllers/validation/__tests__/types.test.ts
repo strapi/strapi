@@ -1,44 +1,42 @@
+import { Attribute, Schema } from '@strapi/types';
 import { getTypeValidator } from '../types';
 
 describe('Type validators', () => {
-  describe.each(['collectionType', 'singleType'])('mixed type', (kind) => {
-    test('pluginOptions can be used', () => {
-      const attributes = {
-        title: {
-          type: 'string',
-          pluginOptions: {
-            i18n: {
-              localized: false,
-            },
+  test('pluginOptions can be used', () => {
+    const attributes = {
+      title: {
+        type: 'string',
+        pluginOptions: {
+          i18n: {
+            localized: false,
           },
         },
-      };
+      },
+    } satisfies Schema.Attributes;
 
-      const validator = getTypeValidator(attributes.title, {
-        types: ['string'],
-        modelType: kind,
-        attributes,
-      });
-
-      expect(validator.isValidSync(attributes.title)).toBe(true);
+    const validator = getTypeValidator(attributes.title, {
+      types: ['string'],
+      attributes,
     });
 
-    test('can use custom keys', () => {
-      const attributes = {
-        title: {
-          type: 'string',
-          myCustomKey: true,
-        },
-      };
+    expect(validator.isValidSync(attributes.title)).toBe(true);
+  });
 
-      const validator = getTypeValidator(attributes.title, {
-        types: ['string'],
-        modelType: kind,
-        attributes,
-      });
+  test('can use custom keys', () => {
+    const attributes = {
+      title: {
+        type: 'string',
+        // @ts-expect-error - As of now, custom keys are not typed in schema attributes
+        myCustomKey: true,
+      },
+    } satisfies Schema.Attributes;
 
-      expect(validator.isValidSync(attributes.title)).toBe(true);
+    const validator = getTypeValidator(attributes.title, {
+      types: ['string'],
+      attributes,
     });
+
+    expect(validator.isValidSync(attributes.title)).toBe(true);
   });
 
   describe('Dynamiczone type validator', () => {
@@ -48,11 +46,10 @@ describe('Type validators', () => {
           type: 'dynamiczone',
           components: [],
         },
-      };
+      } satisfies Schema.Attributes;
 
       const validator = getTypeValidator(attributes.dz, {
         types: ['dynamiczone'],
-        modelType: 'collectionType',
         attributes,
       });
 
@@ -63,13 +60,12 @@ describe('Type validators', () => {
       const attributes = {
         dz: {
           type: 'dynamiczone',
-          components: ['compoA', 'compoB'],
+          components: ['default.compoA', 'default.compoB'],
         },
-      };
+      } satisfies Schema.Attributes;
 
       const validator = getTypeValidator(attributes.dz, {
         types: ['dynamiczone'],
-        modelType: 'collectionType',
         attributes,
       });
 
@@ -83,11 +79,10 @@ describe('Type validators', () => {
         slug: {
           type: 'uid',
         },
-      };
+      } satisfies Schema.Attributes;
 
       const validator = getTypeValidator(attributes.slug, {
         types: ['uid'],
-        modelType: 'collectionType',
         attributes,
       });
 
@@ -100,11 +95,10 @@ describe('Type validators', () => {
           type: 'uid',
           targetField: 'unknown',
         },
-      };
+      } satisfies Schema.Attributes;
 
       const validator = getTypeValidator(attributes.slug, {
         types: ['uid'],
-        modelType: 'collectionType',
         attributes,
       });
 
@@ -120,11 +114,10 @@ describe('Type validators', () => {
           type: 'uid',
           targetField: 'title',
         },
-      };
+      } satisfies Schema.Attributes;
 
       const validator = getTypeValidator(attributes.slug, {
         types: ['uid'],
-        modelType: 'collectionType',
         attributes,
       });
 
@@ -140,11 +133,10 @@ describe('Type validators', () => {
           type: 'uid',
           targetField: 'title',
         },
-      };
+      } satisfies Schema.Attributes;
 
       const validator = getTypeValidator(attributes.slug, {
         types: ['uid'],
-        modelType: 'collectionType',
         attributes,
       });
 
@@ -156,16 +148,16 @@ describe('Type validators', () => {
         relation: {
           type: 'relation',
           relation: 'oneToOne',
+          target: 'api::foo.foo',
         },
         slug: {
           type: 'uid',
           targetField: 'relation',
         },
-      };
+      } satisfies Schema.Attributes;
 
       const validator = getTypeValidator(attributes.slug, {
         types: ['uid'],
-        modelType: 'collectionType',
         attributes,
       });
 
@@ -188,20 +180,19 @@ describe('Type validators', () => {
       'datetime',
       'timestamp',
       'boolean',
-    ])('Target field cannot be %s', (type) => {
+    ] as const)('Target field cannot be %s', (type) => {
       const attributes = {
         title: {
           type,
-        },
+        } as Attribute.Any,
         slug: {
           type: 'uid',
           targetField: 'title',
         },
-      };
+      } satisfies Schema.Attributes;
 
       const validator = getTypeValidator(attributes.slug, {
         types: ['uid'],
-        modelType: 'collectionType',
         attributes,
       });
 
@@ -226,11 +217,10 @@ describe('Type validators', () => {
           type: 'uid',
           default: value,
         },
-      };
+      } satisfies Schema.Attributes;
 
       const validator = getTypeValidator(attributes.slug, {
         types: ['uid'],
-        modelType: 'collectionType',
         attributes,
       });
 
@@ -247,11 +237,10 @@ describe('Type validators', () => {
           targetField: 'title',
           default: 'some-value',
         },
-      };
+      } satisfies Schema.Attributes;
 
       const validator = getTypeValidator(attributes.slug, {
         types: ['uid'],
-        modelType: 'collectionType',
         attributes,
       });
 
@@ -267,11 +256,10 @@ describe('Type validators', () => {
           minLength: 120,
           maxLength: 119,
         },
-      };
+      } satisfies Schema.Attributes;
 
       const validator = getTypeValidator(attributes.slug, {
         types: ['uid'],
-        modelType: 'collectionType',
         attributes,
       });
 
@@ -287,11 +275,10 @@ describe('Type validators', () => {
           minLength: 120,
           maxLength: 120,
         },
-      };
+      } satisfies Schema.Attributes;
 
       const validator = getTypeValidator(attributes.slug, {
         types: ['uid'],
-        modelType: 'collectionType',
         attributes,
       });
 
@@ -304,11 +291,10 @@ describe('Type validators', () => {
           type: 'uid',
           maxLength: 257,
         },
-      };
+      } satisfies Schema.Attributes;
 
       const validator = getTypeValidator(attributes.slug, {
         types: ['uid'],
-        modelType: 'collectionType',
         attributes,
       });
 
@@ -318,16 +304,17 @@ describe('Type validators', () => {
 
   describe('media type', () => {
     test('Validates allowedTypes', () => {
+      // @ts-expect-error - Silence the cast as Schema.Attributes since allowedTypes expects one of 'audios',
+      //                    'files', 'images' or 'videos'. This value is tested on purpose to catch an error
       const attributes = {
         img: {
           type: 'media',
           allowedTypes: ['nonexistent'],
         },
-      };
+      } as Schema.Attributes;
 
       const validator = getTypeValidator(attributes.img, {
         types: ['media'],
-        modelType: 'collectionType',
         attributes,
       });
 
@@ -338,13 +325,13 @@ describe('Type validators', () => {
       const attributes = {
         img: {
           type: 'media',
-          allowedTypes: ['all', 'videos'],
+          // FIXME: Added an any cast as allowedTypes should have a different definition in the CTB context (allows 'all')
+          allowedTypes: ['all', 'videos'] as any,
         },
-      };
+      } satisfies Schema.Attributes;
 
       const validator = getTypeValidator(attributes.img, {
         types: ['media'],
-        modelType: 'collectionType',
         attributes,
       });
 
@@ -357,32 +344,33 @@ describe('Type validators', () => {
           type: 'media',
           allowedTypes: ['files', 'videos'],
         },
-      };
+      } satisfies Schema.Attributes;
 
       const validator = getTypeValidator(attributes.img, {
         types: ['media'],
-        modelType: 'collectionType',
         attributes,
       });
 
       expect(validator.isValidSync(attributes.img)).toBe(true);
     });
 
-    test.each(['images', 'files', 'videos'])('%s is an allowed types', (type) => {
-      const attributes = {
-        img: {
-          type: 'media',
-          allowedTypes: [type],
-        },
-      };
+    test.each(['audios', 'images', 'files', 'videos'] as const)(
+      '%s is an allowed types',
+      (type) => {
+        const attributes = {
+          img: {
+            type: 'media',
+            allowedTypes: [type],
+          },
+        } satisfies Schema.Attributes;
 
-      const validator = getTypeValidator(attributes.img, {
-        types: ['media'],
-        modelType: 'collectionType',
-        attributes,
-      });
+        const validator = getTypeValidator(attributes.img, {
+          types: ['media'],
+          attributes,
+        });
 
-      expect(validator.isValidSync(attributes.img)).toBe(true);
-    });
+        expect(validator.isValidSync(attributes.img)).toBe(true);
+      }
+    );
   });
 });
