@@ -104,32 +104,6 @@ ModifierButton.propTypes = {
   }).isRequired,
 };
 
-const isBlockActive = (editor, matchNode) => {
-  const { selection } = editor;
-
-  if (!selection) return false;
-
-  const match = Array.from(
-    Editor.nodes(editor, {
-      at: Editor.unhangRange(editor, selection),
-      match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n) && matchNode(n),
-    })
-  );
-
-  return match.length > 0;
-};
-
-const setBlock = (editor, value) => {
-  const { type, level } = value;
-
-  const newProperties = {
-    type,
-    level: level || null,
-  };
-
-  Transforms.setNodes(editor, newProperties);
-};
-
 const ALLOWED_MEDIA_TYPE = 'images';
 
 const IMAGE_SCHEMA_FIELDS = [
@@ -202,27 +176,6 @@ ImageDialog.propTypes = {
   handleClose: PropTypes.func.isRequired,
 };
 
-const isLastBlockImageOrCode = (editor) => {
-  const { selection } = editor;
-
-  if (!selection) return false;
-
-  const [currentImageORCodeBlock] = Editor.nodes(editor, {
-    at: selection,
-    match: (n) => n.type === 'image' || n.type === 'code',
-  });
-
-  if (currentImageORCodeBlock) {
-    const [, currentNodePath] = currentImageORCodeBlock;
-
-    const isNodeAfter = Boolean(Editor.after(editor, currentNodePath));
-
-    return !isNodeAfter;
-  }
-
-  return false;
-};
-
 export const BlocksDropdown = () => {
   const editor = useSlate();
   const { formatMessage } = useIntl();
@@ -238,14 +191,54 @@ export const BlocksDropdown = () => {
   const [selectedOption, setSelectedOption] = React.useState(Object.keys(blocks)[0]);
 
   /**
-   * @param {string} optionKey - key of the heading selected
+   * Function that detect if the the block selected is an Image or a Code block.
+   */
+  const isLastBlockImageOrCode = () => {
+    const { selection } = editor;
+
+    if (!selection) return false;
+
+    const [currentImageORCodeBlock] = Editor.nodes(editor, {
+      at: selection,
+      match: (n) => n.type === 'image' || n.type === 'code',
+    });
+
+    if (currentImageORCodeBlock) {
+      const [, currentNodePath] = currentImageORCodeBlock;
+
+      const isNodeAfter = Boolean(Editor.after(editor, currentNodePath));
+
+      return !isNodeAfter;
+    }
+
+    return false;
+  };
+
+  /**
+   * Manages the selection of a block and change the node inside the Slate Editor.
+   * @param {object} value - the value of the selected block option
+   */
+  const selectBlock = (value) => {
+    const { type, level } = value;
+
+    const newProperties = {
+      type,
+      level: level || null,
+    };
+
+    Transforms.setNodes(editor, newProperties);
+  };
+
+  /**
+   * Handles the selection of a block option in the Blocks Dropdown.
+   * @param {string} optionKey - key of the option selected
    */
   const handleSelectOption = (optionKey) => {
-    setBlock(editor, blocks[optionKey].value);
+    selectBlock(blocks[optionKey].value);
 
     setSelectedOption(optionKey);
 
-    if (isLastBlockImageOrCode(editor)) {
+    if (isLastBlockImageOrCode()) {
       // insert blank line to add new blocks below code or image blocks
       Transforms.insertNodes(
         editor,
@@ -295,9 +288,29 @@ const BlockOption = ({ value, icon, label, handleSelectOption, selectedOption, m
   const { formatMessage } = useIntl();
   const editor = useSlate();
 
-  const isActive = isBlockActive(editor, matchNode);
+  /**
+   * Function that detect if the Block option is the one selected in the editor.
+   * @param {function} matchNode - function that checks if the node selected in the Editor is matching the Block option type
+   */
+  const isBlockActive = (matchNode) => {
+    const { selection } = editor;
+
+    if (!selection) return false;
+
+    const match = Array.from(
+      Editor.nodes(editor, {
+        at: Editor.unhangRange(editor, selection),
+        match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n) && matchNode(n),
+      })
+    );
+
+    return match.length > 0;
+  };
+
+  const isActive = isBlockActive(matchNode);
   const isSelectedOption = value === selectedOption;
 
+  // TODO: we need to find another solution to handle multi blocks selection
   // Check if the actual option is selected in the editor (if the block is active)
   // and update the Dropdown accordingly if the active options is not the selected one
   React.useEffect(() => {
@@ -332,7 +345,7 @@ const ListButton = ({ icon, format, label }) => {
   const editor = useSlate();
 
   /**
-   *
+   * Check if the node is a list.
    * @param {import('slate').Node} node
    * @returns boolean
    */

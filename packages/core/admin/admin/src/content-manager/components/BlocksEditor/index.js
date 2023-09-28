@@ -59,7 +59,7 @@ const BlocksEditor = React.forwardRef(
       }
     };
 
-    const defaultValue = value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }];
+    const initialValue = value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }];
 
     return (
       <>
@@ -70,7 +70,7 @@ const BlocksEditor = React.forwardRef(
               {required && <TypographyAsterisk textColor="danger600">*</TypographyAsterisk>}
             </Typography>
           </Flex>
-          <Slate editor={editor} initialValue={defaultValue} onChange={handleSlateChange}>
+          <Slate editor={editor} initialValue={initialValue} onChange={handleSlateChange}>
             <InputWrapper direction="column" alignItems="flex-start">
               <BlocksToolbar />
               <EditorDivider width="100%" />
@@ -80,7 +80,7 @@ const BlocksEditor = React.forwardRef(
                 overflow="auto"
                 paddingTop={3}
                 paddingRight={4}
-                paddingDown={3}
+                paddingBottom={3}
                 paddingLeft={4}
                 fontSize={2}
                 background="neutral0"
