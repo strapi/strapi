@@ -1,11 +1,12 @@
 'use strict';
 
+const { omit } = require('lodash/fp');
 const { mapAsync } = require('@strapi/utils');
 
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest, createRequest } = require('api-tests/request');
 const { createTestBuilder } = require('api-tests/builder');
-const { describeOnCondition } = require('api-tests/utils');
+const { describeOnCondition, createUtils } = require('api-tests/utils');
 
 const {
   STAGE_MODEL_UID,
@@ -214,7 +215,10 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         body: {
           data: {
             name: 'createdWorkflow',
-            stages: [{ name: 'Stage 1' }, { name: 'Stage 2' }],
+            stages: [
+              { name: 'Stage 1', color: '#343434' },
+              { name: 'Stage 2', color: '#141414' },
+            ],
           },
         },
       });
@@ -223,7 +227,10 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         expect(res.status).toBe(200);
         expect(res.body.data).toMatchObject({
           name: 'createdWorkflow',
-          stages: [{ name: 'Stage 1' }, { name: 'Stage 2' }],
+          stages: [
+            { name: 'Stage 1', color: '#343434' },
+            { name: 'Stage 2', color: '#141414' },
+          ],
         });
       } else {
         expect(res.status).toBe(404);
@@ -443,11 +450,15 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         expect(workflowRes.status).toBe(200);
         expect(workflowRes.body.data).toBeInstanceOf(Object);
         expect(workflowRes.body.data.stages).toBeInstanceOf(Array);
-        expect(workflowRes.body.data.stages[0]).toMatchObject(stagesUpdateData[0]);
-        expect(workflowRes.body.data.stages[1]).toMatchObject(stagesUpdateData[1]);
+        expect(workflowRes.body.data.stages[0]).toMatchObject(
+          omit(['updatedAt'], stagesUpdateData[0])
+        );
+        expect(workflowRes.body.data.stages[1]).toMatchObject(
+          omit(['updatedAt'], stagesUpdateData[1])
+        );
         expect(workflowRes.body.data.stages[2]).toMatchObject({
           id: expect.any(Number),
-          ...stagesUpdateData[2],
+          ...omit(['updatedAt'], stagesUpdateData[2]),
         });
       } else {
         expect(workflowRes.status).toBe(404);
@@ -524,7 +535,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
             data: { id: user.id },
           },
         });
-        expect(response.status).toEqual(200);
+        expect(response.status).toBe(200);
         const assignee = response.body.data[ENTITY_ASSIGNEE_ATTRIBUTE];
         expect(assignee.id).toEqual(user.id);
         expect(assignee).not.toHaveProperty('password');
@@ -541,7 +552,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
           },
         });
 
-        expect(response.status).toEqual(400);
+        expect(response.status).toBe(400);
         expect(response.body.error).toBeDefined();
         expect(response.body.error.name).toEqual('ApplicationError');
         expect(response.body.error.message).toEqual('Selected user does not exist');
@@ -598,7 +609,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
           },
         });
 
-        expect(response.status).toEqual(400);
+        expect(response.status).toBe(400);
         expect(response.body.error).toBeDefined();
         expect(response.body.error.name).toBe('ApplicationError');
       });
@@ -608,7 +619,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   describe('Update a stage on an entity', () => {
     describe('Review Workflow is enabled', () => {
       beforeAll(async () => {
-        // Update workflow to unassign content type
+        // Update workflow to assign content type
         await requests.admin.put(
           `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
           { body: { data: { contentTypes: [productUID] } } }
@@ -626,7 +637,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
           },
         });
 
-        expect(response.status).toEqual(200);
+        expect(response.status).toBe(200);
         expect(response.body.data[ENTITY_STAGE_ATTRIBUTE]).toEqual(
           expect.objectContaining({ id: secondStage.id })
         );
@@ -642,7 +653,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
           },
         });
 
-        expect(response.status).toEqual(400);
+        expect(response.status).toBe(400);
         expect(response.body.error).toBeDefined();
         expect(response.body.error.name).toEqual('ApplicationError');
         expect(response.body.error.message).toEqual('Stage does not belong to workflow "workflow"');
@@ -685,16 +696,101 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
           },
         });
 
-        expect(response.status).toEqual(400);
+        expect(response.status).toBe(400);
         expect(response.body.error).toBeDefined();
         expect(response.body.error.name).toBe('ApplicationError');
       });
     });
   });
 
+  describe('Listing available stages for transition', () => {
+    const endpoint = (id) => `/admin/content-manager/collection-types/${productUID}/${id}/stages`;
+
+    let utils;
+    let entry;
+    let restrictedRequest;
+    let restrictedUser;
+    let restrictedRole;
+
+    const deleteFixtures = async () => {
+      await utils.deleteUserById(restrictedUser.id);
+      await utils.deleteRolesById([restrictedRole.id]);
+    };
+
+    beforeAll(async () => {
+      // Update workflow to assign content type
+      await requests.admin.put(`/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`, {
+        body: { data: { contentTypes: [productUID] } },
+      });
+
+      entry = await createEntry(productUID, { name: 'Product' });
+
+      utils = createUtils(strapi);
+      const role = await utils.createRole({
+        name: 'restricted-role',
+        description: '',
+      });
+      restrictedRole = role;
+
+      const restrictedUserInfo = {
+        email: 'restricted@user.io',
+        password: 'Restricted123',
+      };
+
+      restrictedUser = await utils.createUserIfNotExists({
+        ...restrictedUserInfo,
+        roles: [role.id],
+      });
+
+      restrictedRequest = await createAuthRequest({ strapi, userInfo: restrictedUserInfo });
+    });
+
+    afterAll(async () => {
+      await deleteFixtures();
+    });
+
+    test("It shouldn't be available for public", async () => {
+      const res = await requests.public.get(endpoint(entry.id));
+
+      if (hasRW) {
+        expect(res.status).toBe(401);
+      } else {
+        expect(res.status).toBe(404);
+        expect(res.body.data).toBeUndefined();
+      }
+    });
+
+    test('It should return available stages for an admin user', async () => {
+      const res = await requests.admin.get(endpoint(entry.id));
+
+      expect(res.body.data).toHaveLength(1);
+      expect(res.body.data[0]).toMatchObject(secondStage);
+    });
+
+    test('It should be forbidden when the user cannot read the content type', async () => {
+      const res = await restrictedRequest.get(endpoint(entry.id));
+
+      expect(res.status).toBe(403);
+    });
+
+    test('It should return an empty list when a user does not have the permission to transition the current stage', async () => {
+      const permission = {
+        action: 'plugin::content-manager.explorer.read',
+        subject: productUID,
+        fields: null,
+        conditions: [],
+      };
+      await utils.assignPermissionsToRole(restrictedRole.id, [permission]);
+
+      const res = await restrictedRequest.get(endpoint(entry.id));
+
+      expect(res.body.data).toHaveLength(0);
+    });
+  });
+
   describe('Deleting a stage when content already exists', () => {
     beforeAll(async () => {
-      // Update workflow to unassign content type
+      // Update workflow to assign content type
       await requests.admin.put(`/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`, {
         body: { data: { contentTypes: [productUID] } },
       });

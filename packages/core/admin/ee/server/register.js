@@ -4,6 +4,7 @@ const { features } = require('@strapi/strapi/dist/utils/ee').default;
 const executeCERegister = require('../../server/register');
 const migrateAuditLogsTable = require('./migrations/audit-logs-table');
 const migrateReviewWorkflowStagesColor = require('./migrations/review-workflows-stages-color');
+const migrateReviewWorkflowStagesRoles = require('./migrations/review-workflows-stages-roles');
 const migrateReviewWorkflowName = require('./migrations/review-workflows-workflow-name');
 const migrateWorkflowsContentTypes = require('./migrations/review-workflows-content-types');
 const migrateStageAttribute = require('./migrations/review-workflows-stage-attribute');
@@ -26,6 +27,7 @@ module.exports = async ({ strapi }) => {
     strapi
       .hook('strapi::content-types.afterSync')
       .register(migrateReviewWorkflowStagesColor)
+      .register(migrateReviewWorkflowStagesRoles)
       .register(migrateReviewWorkflowName)
       .register(migrateWorkflowsContentTypes)
       .register(migrateDeletedCTInWorkflows);
