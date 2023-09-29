@@ -37,10 +37,20 @@ const Wrapper = styled(Box)`
   border-radius: ${({ theme }) => theme.borderRadius};
 `;
 
+const withImages = (editor) => {
+  const { isVoid } = editor;
+
+  editor.isVoid = (element) => {
+    return element.type === 'image' ? true : isVoid(element);
+  };
+
+  return editor;
+};
+
 const BlocksEditor = React.forwardRef(
   ({ intlLabel, labelAction, name, readOnly, required, error, value, onChange }, ref) => {
     const { formatMessage } = useIntl();
-    const [editor] = React.useState(() => withReact(withHistory(createEditor())));
+    const [editor] = React.useState(() => withReact(withImages(withHistory(createEditor()))));
 
     const label = intlLabel.id
       ? formatMessage(
