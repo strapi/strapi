@@ -35,15 +35,19 @@ export async function deleteComponent({ page, displayName }) {
 }
 
 export async function waitForReload({ page }) {
-  const RETRIES = 5;
+  const MAX_RETRIES = 10;
+  const RETRY_TIMEOUT = 2000;
+
   let retryCount = 0;
 
-  while (retryCount < RETRIES) {
+  while (retryCount < MAX_RETRIES) {
+    await page.waitForTimeout(500);
+
     if ((await page.locator('text=Waiting for restart...').count()) === 0) {
       // the server seems no longer to be restarting
       break;
     } else {
-      await page.waitForTimeout(10000);
+      await page.waitForTimeout(RETRY_TIMEOUT);
       await page.reload();
       retryCount++;
     }
