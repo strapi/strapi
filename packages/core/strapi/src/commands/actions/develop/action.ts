@@ -232,6 +232,8 @@ function watchFileChanges({
       '**/exports/**',
       '**/dist/**',
       '**/*.d.ts',
+      '**/test-results',
+      '**/test-results/**',
       ...watchIgnoreFiles,
     ],
   });
