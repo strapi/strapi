@@ -35,15 +35,16 @@ export async function deleteComponent({ page, displayName }) {
 }
 
 export async function waitForReload({ page }) {
-  const MAX_RETRIES = 10;
-  const RETRY_TIMEOUT = 2000;
+  const MAX_RETRIES = 20;
+  const RETRY_TIMEOUT = 1000;
 
   let retryCount = 0;
 
   while (retryCount < MAX_RETRIES) {
-    await page.waitForTimeout(500);
-
-    if ((await page.locator('text=Waiting for restart...').count()) === 0) {
+    if (
+      (await await page.locator('text=Strapi Dashboard Workplace').count()) > 0 &&
+      (await page.locator('text=Waiting for restart...').count()) === 0
+    ) {
       // the server seems no longer to be restarting
       break;
     } else {
