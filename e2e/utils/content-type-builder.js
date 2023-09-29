@@ -40,11 +40,10 @@ export async function waitForReload({ page }) {
 
   let retryCount = 0;
 
+  await page.waitForTimeout(2000);
+
   while (retryCount < MAX_RETRIES) {
-    if (
-      (await await page.locator('text=Strapi Dashboard Workplace').count()) > 0 &&
-      (await page.locator('text=Waiting for restart...').count()) === 0
-    ) {
+    if ((await page.locator('text=Waiting for restart...').count()) === 0) {
       // the server seems no longer to be restarting
       break;
     } else {
