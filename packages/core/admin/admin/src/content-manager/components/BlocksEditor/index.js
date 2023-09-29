@@ -15,6 +15,12 @@ const TypographyAsterisk = styled(Typography)`
   line-height: 0;
 `;
 
+const LabelAction = styled(Box)`
+  svg path {
+    fill: ${({ theme }) => theme.colors.neutral500};
+  }
+`;
+
 const EditorDivider = styled(Divider)`
   background: ${({ theme }) => theme.colors.neutral200};
 `;
@@ -32,7 +38,7 @@ const Wrapper = styled(Box)`
 `;
 
 const BlocksEditor = React.forwardRef(
-  ({ intlLabel, name, readOnly, required, error, value, onChange }, ref) => {
+  ({ intlLabel, labelAction, name, readOnly, required, error, value, onChange }, ref) => {
     const { formatMessage } = useIntl();
     const [editor] = React.useState(() => withReact(withHistory(createEditor())));
 
@@ -75,6 +81,7 @@ const BlocksEditor = React.forwardRef(
               {label}
               {required && <TypographyAsterisk textColor="danger600">*</TypographyAsterisk>}
             </Typography>
+            {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
           </Flex>
           <Slate
             editor={editor}
@@ -103,6 +110,7 @@ const BlocksEditor = React.forwardRef(
 );
 
 BlocksEditor.defaultProps = {
+  labelAction: null,
   required: false,
   readOnly: false,
   error: '',
@@ -115,6 +123,7 @@ BlocksEditor.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }).isRequired,
+  labelAction: PropTypes.element,
   name: PropTypes.string.isRequired,
   required: PropTypes.bool,
   readOnly: PropTypes.bool,
