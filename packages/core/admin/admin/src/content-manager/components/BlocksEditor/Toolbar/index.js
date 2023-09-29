@@ -8,17 +8,15 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement } from 'slate';
 import { useSlate } from 'slate-react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 import { useBlocksStore } from '../hooks/useBlocksStore';
 import { useModifiersStore } from '../hooks/useModifiersStore';
 
 const ToolbarWrapper = styled(Flex)`
-  ${(props) =>
-    props.disabled &&
-    css`
-      cursor: not-allowed;
-    `}
+  &[aria-disabled='true'] {
+    cursor: not-allowed;
+  }
 `;
 
 const Separator = styled(Toolbar.Separator)`
@@ -28,23 +26,19 @@ const Separator = styled(Toolbar.Separator)`
 `;
 
 const FlexButton = styled(Flex).attrs({ as: 'button' })`
+  // Inherit the not-allowed cursor from ToolbarWrapper when disabled
   &[aria-disabled] {
-    display: none;
-    color: red;
-    opacity: 0.3;
+    cursor: inherit;
   }
-  ${(props) =>
-    props.disabled
-      ? css`
-          // Inherit the not-allowed cursor from ToolbarWrapper
-          cursor: inherit;
-        `
-      : css`
-          // Ignore hover effect when disabled
-          &:hover {
-            background: ${({ theme }) => theme.colors.primary100};
-          }
-        `}
+
+  &[aria-disabled='false'] {
+    cursor: pointer;
+
+    // Only apply hover styles if the button is enabled
+    &:hover {
+      background: ${({ theme }) => theme.colors.primary100};
+    }
+  }
 `;
 
 const ToolbarButton = ({ icon, name, label, isActive, disabled, handleClick }) => {
@@ -55,7 +49,18 @@ const ToolbarButton = ({ icon, name, label, isActive, disabled, handleClick }) =
 
   return (
     <Tooltip description={labelMessage}>
-      <Toolbar.ToggleItem value={name} data-state={isActive ? 'on' : 'off'} asChild>
+      <Toolbar.ToggleItem
+        value={name}
+        data-state={isActive ? 'on' : 'off'}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          handleClick();
+        }}
+        aria-disabled={disabled}
+        disabled={disabled}
+        aria-label={labelMessage}
+        asChild
+      >
         <FlexButton
           background={isActive ? 'primary100' : ''}
           alignItems="center"
@@ -63,12 +68,6 @@ const ToolbarButton = ({ icon, name, label, isActive, disabled, handleClick }) =
           width={7}
           height={7}
           hasRadius
-          onMouseDown={(e) => {
-            e.preventDefault();
-            handleClick();
-          }}
-          disabled={disabled}
-          aria-label={labelMessage}
         >
           <Icon width={3} height={3} as={icon} color={disabled ? 'neutral300' : enabledColor} />
         </FlexButton>
@@ -457,9 +456,9 @@ const BlocksToolbar = ({ disabled }) => {
   const modifiers = useModifiersStore();
 
   return (
-    <Toolbar.Root asChild>
+    <Toolbar.Root aria-disabled={disabled} asChild>
       {/* Remove after the RTE Blocks Alpha release (paddingRight and width) */}
-      <ToolbarWrapper gap={1} padding={2} paddingRight={4} width="100%" disabled={disabled}>
+      <ToolbarWrapper gap={1} padding={2} paddingRight={4} width="100%">
         <BlocksDropdown disabled={disabled} />
         <Toolbar.ToggleGroup type="multiple" asChild>
           <Flex gap={1} marginLeft={1}>
