@@ -33,7 +33,7 @@ module.exports = {
         data: {
           isEE: strapi.EE,
           features: ee.features.list(),
-          promoteEnterpriseFeatures,
+          promoteEnterpriseFeatures: strapi.EE ? false : promoteEnterpriseFeatures,
         },
       };
     } catch (err) {

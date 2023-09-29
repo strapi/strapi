@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Badge } from '@strapi/design-system';
+import { Badge, Flex } from '@strapi/design-system';
 import {
   SubNav,
   SubNavHeader,
@@ -53,20 +53,18 @@ const SettingsNav = ({ menu }) => {
           <SubNavSection key={section.id} label={formatMessage(section.intlLabel)}>
             {section.links.map((link) => {
               return (
-                <SubNavLink
-                  as={NavLink}
-                  withBullet={link.hasNotification}
-                  to={link.to}
-                  onClick={() => handleClickOnLink(link.to)}
-                  key={link.id}
-                >
-                  {formatMessage(link.intlLabel)}
-                  {link?.tag && (
-                    <Badge marginLeft={1} active>
-                      EE
-                    </Badge>
-                  )}
-                </SubNavLink>
+                <Flex gap={1}>
+                  <SubNavLink
+                    as={NavLink}
+                    withBullet={link.hasNotification}
+                    to={link.to}
+                    onClick={() => handleClickOnLink(link.to)}
+                    key={link.id}
+                  >
+                    {formatMessage(link.intlLabel)}
+                  </SubNavLink>
+                  {link?.tag && <Badge active>{link?.tag}</Badge>}
+                </Flex>
               );
             })}
           </SubNavSection>

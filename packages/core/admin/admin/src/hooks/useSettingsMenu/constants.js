@@ -21,21 +21,22 @@ export const LINKS_CE = {
       to: '/settings/transfer-tokens?sort=name:ASC',
       id: 'transfer-tokens',
     },
-    ...((!window.strapi.features.isEnabled(
-      window.strapi.features.SSO) && window.strapi.promoteEnterpriseFeatures
-    )
+    // If the Enterprise feature is not enabled and if the config doesn't disable it, we promote the Enterprise feature by displaying them in the settings menu.
+    // Disable this by adding "promoteEnterpriseFeatures: false" to your `./config/admin.js` file
+    ...(!window.strapi.features.isEnabled(window.strapi.features.SSO) &&
+    window.strapi.promoteEnterpriseFeatures
       ? [
           {
             intlLabel: { id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' },
             to: '/settings/purchase-single-sign-on',
             id: 'sso',
-            tag: true,
+            tag: "EE",
           },
         ]
       : []),
-    ...((!window.strapi.features.isEnabled(
-      window.strapi.features.REVIEW_WORKFLOWS) && window.strapi.promoteEnterpriseFeatures
-    )
+
+    ...(!window.strapi.features.isEnabled(window.strapi.features.REVIEW_WORKFLOWS) &&
+    window.strapi.promoteEnterpriseFeatures
       ? [
           {
             intlLabel: {
@@ -44,7 +45,7 @@ export const LINKS_CE = {
             },
             to: '/settings/purchase-review-workflows',
             id: 'review-workflows',
-            tag: true,
+            tag: "EE",
           },
         ]
       : []),
@@ -62,15 +63,14 @@ export const LINKS_CE = {
       to: '/settings/users?pageSize=10&page=1&sort=firstname',
       id: 'users',
     },
-    ...((!window.strapi.features.isEnabled(
-      window.strapi.features.AUDIT_LOGS) && window.strapi.promoteEnterpriseFeatures
-    )
+    ...(!window.strapi.features.isEnabled(window.strapi.features.AUDIT_LOGS) &&
+    window.strapi.promoteEnterpriseFeatures
       ? [
           {
             intlLabel: { id: 'global.auditLogs', defaultMessage: 'Audit Logs' },
             to: '/settings/purchase-audit-logs',
             id: 'auditLogs',
-            tag: true,
+            tag: "EE",
           },
         ]
       : []),
