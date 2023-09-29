@@ -40,6 +40,12 @@ module.exports = {
         inversedBy: 'stages',
         configurable: false,
       },
+      permissions: {
+        type: 'relation',
+        target: 'admin::permission',
+        relation: 'manyToMany',
+        configurable: false,
+      },
     },
   },
 };

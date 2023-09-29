@@ -50,6 +50,12 @@ attribute will be re-ordered and not created.
 
 Stages without an `id` property will be created in the database on submission. Stages that existed already, but are not submitted again will be deleted on submission.
 
+When editing a workflow and the `permissions` of a stage have not been modified by a user, they are sent as `undefined`. This special case allows users to edit a workflow without having to have
+permissions to read `roles`, because the API won't update anything in the database.
+
+Users without read permissions for roles are able to create workflows, but they will not be able to define which roles can change a stage, so that stages of that workflow can only be changed
+by the super-admin unless the roles are set.
+
 ### Edit view
 
 Displays a license-limits modal in case the user is above the license limit on page load and upon form submission.
@@ -74,10 +80,28 @@ hooks returns a partial react-query result.
 
 ```ts
 useReviewWorkflows(queryParams: object): {
-  meta: { workflowCount: int }
+  meta: { workflowCount: number }
   workflows: Workflow[],
   isLoading: boolean,
   status: string,
+  refetch: () => Promise<void>,
+}
+```
+
+#### `useReviewWorkflowsStages({ id, layout }, reactQueryOptions)`
+
+This hook allows to fetch stages for a given workflow, that a user has permissions to transition to.
+
+```ts
+type ContentTypeLayout {
+  uid: string;
+  kind: 'collectionType' | 'singleType';
+}
+
+useReviewWorkflowsStages({ id: number, layout: ContentTypeLayout }, reactQueryOptions): {
+  meta: { workflowCount: number, stagesCount: number }
+  stages: Stage[],
+  isLoading: boolean,
   refetch: () => Promise<void>,
 }
 ```
@@ -89,6 +113,7 @@ type Stage {
     id: number;
     color: string; // hex code
     name: string; // max-length: 255 characters
+    permissions: Permission[];
     createdAt: Date;
     updatedAt: Date;
 }

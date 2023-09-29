@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { useFetchClient } from '@strapi/helper-plugin';
 import { useQuery } from 'react-query';
 
@@ -20,18 +22,26 @@ export function useReviewWorkflows(params = {}) {
     }
   );
 
-  let workflows = [];
+  // the return value needs to be memoized, because intantiating
+  // an empty array as default value would lead to an unstable return
+  // value, which later on triggers infinite loops if used in the
+  // dependency arrays of other hooks
 
-  if (id && data?.data) {
-    workflows = [data.data];
-  } else if (Array.isArray(data?.data)) {
-    workflows = data.data;
-  }
+  const workflows = React.useMemo(() => {
+    if (id && data?.data) {
+      return [data.data];
+    }
+    if (Array.isArray(data?.data)) {
+      return data.data;
+    }
+
+    return [];
+  }, [data?.data, id]);
 
   return {
     // meta contains e.g. the total of all workflows. we can not use
     // the pagination object here, because the list is not paginated.
-    meta: data?.meta ?? {},
+    meta: React.useMemo(() => data?.meta ?? {}, [data?.meta]),
     workflows,
     isLoading,
     status,
