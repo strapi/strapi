@@ -45,7 +45,7 @@ module.exports = {
         target: 'admin::permission',
         relation: 'manyToMany',
         configurable: false,
-      }
+      },
     },
   },
 };

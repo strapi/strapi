@@ -130,6 +130,7 @@ const getColumnType = (attribute) => {
         args: ['longtext'],
       };
     }
+    case 'blocks':
     case 'json': {
       return { type: 'jsonb' };
     }

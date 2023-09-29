@@ -10,7 +10,7 @@ const checkPermissionsSchema = yup.object().shape({
       .object()
       .shape({
         action: yup.string().required(),
-        subject: yup.string(),
+        subject: yup.string().nullable(),
         field: yup.string(),
       })
       .noUnknown()
