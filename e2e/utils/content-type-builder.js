@@ -75,7 +75,7 @@ export async function addDefaultField({
 
     case 'RichText':
       await page
-        .getByRole('button', { name: 'Rich text A rich text editor with formatting options' })
+        .getByRole('button', { name: 'Rich text (Markdown) The classic rich text editor' })
         .click();
       break;
 
