@@ -72,6 +72,7 @@ const editLink = (editor, { url, text }) => {
     if (linkNode) {
       Transforms.setNodes(editor, { url: addProtocol(url) }, { at: linkPath });
 
+      // If link text is different, we remove the old text and insert the new one
       if (text !== '' && text !== Editor.string(editor, linkPath)) {
         const linkNodeChildrens = Array.from(Node.children(editor, linkPath, { reverse: true }));
 

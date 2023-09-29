@@ -26,7 +26,7 @@ const FlexButton = styled(Flex).attrs({ as: 'button' })`
   }
 `;
 
-const ToolbarButton = ({ icon, name, label, isActive, handleClick, disabled = false }) => {
+const ToolbarButton = ({ icon, name, label, isActive, handleClick, disabled }) => {
   const { formatMessage } = useIntl();
   const labelMessage = formatMessage(label);
 
@@ -404,21 +404,7 @@ ListButton.propTypes = {
 const LinkButton = () => {
   const editor = useSlate();
 
-  const isLinkActive = () => {
-    if (!editor.selection) return false;
-
-    const [match] = Array.from(
-      Editor.nodes(editor, {
-        at: Editor.unhangRange(editor, editor.selection),
-        match: (node) =>
-          !Editor.isEditor(node) && SlateElement.isElement(node) && node.type === 'link',
-      })
-    );
-
-    return Boolean(match);
-  };
-
-  const isActive = isLinkActive();
+  const isLinkActive = isBlockActive(editor, (node) => node.type === 'link');
 
   const addLink = () => {
     // We insert an empty anchor, so we split the DOM to have a element we can use as reference for the popover
@@ -441,7 +427,7 @@ const LinkButton = () => {
         id: 'components.Blocks.link',
         defaultMessage: 'Link',
       }}
-      isActive={isActive}
+      isActive={isLinkActive}
       handleClick={addLink}
       disabled={selectionIsCollapsed || !selectionIsInSameBlock}
     />
