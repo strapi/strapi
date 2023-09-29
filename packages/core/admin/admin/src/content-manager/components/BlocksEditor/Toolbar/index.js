@@ -104,21 +104,6 @@ ModifierButton.propTypes = {
   }).isRequired,
 };
 
-const isBlockActive = (editor, matchNode) => {
-  const { selection } = editor;
-
-  if (!selection) return false;
-
-  const match = Array.from(
-    Editor.nodes(editor, {
-      at: Editor.unhangRange(editor, selection),
-      match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n) && matchNode(n),
-    })
-  );
-
-  return match.length > 0;
-};
-
 const toggleBlock = (editor, value) => {
   const { type, level } = value;
 
@@ -223,6 +208,27 @@ const isLastBlockImageOrCode = (editor) => {
   return false;
 };
 
+/**
+ * Function that finds the corresponding block key in the blocks object based on the targetType and targetLevel (if present) provided.
+ * @param {object} blocks - blocks object
+ * @param {string} targetType - type of the target block
+ * @param {number} targetLevel - level of the target block
+ * @returns string|null - block key or null if no matching block is found
+ */
+const findBlockKeyByTypeAndLevel = (blocks, targetType, targetLevel = null) => {
+  const blockKey = Object.keys(blocks).find((key) => {
+    const block = blocks[key];
+
+    return (
+      block.value &&
+      block.value.type === targetType &&
+      (targetLevel === null || block.value.level === targetLevel)
+    );
+  });
+
+  return blockKey || null; // Return null if no matching block is found
+};
+
 export const BlocksDropdown = () => {
   const editor = useSlate();
   const { formatMessage } = useIntl();
@@ -263,14 +269,19 @@ export const BlocksDropdown = () => {
   };
 
   React.useEffect(() => {
-    const selectedBlocks = Object.keys(blocks).filter((key) => {
-      return isBlockActive(editor, blocks[key].matchNode);
-    });
+    if (editor.selection) {
+      const [anchorNode] = Editor.parent(editor, editor.selection.anchor); // Get the parent node of the anchor
 
-    if (selectedBlocks.length === 1) {
-      setBlockSelected(selectedBlocks[0]);
+      if (anchorNode) {
+        const blockKey = findBlockKeyByTypeAndLevel(blocks, anchorNode.type, anchorNode?.level);
+        console.log('blockKey', blockKey);
+
+        if (blockKey && blockKey !== blockSelected) {
+          setBlockSelected(blockKey);
+        }
+      }
     }
-  }, [blocks, editor, editor.selection]);
+  }, [editor.selection, editor, blocks, blockSelected]);
 
   return (
     <>
