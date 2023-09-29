@@ -284,7 +284,7 @@ describe('useBlocksStore', () => {
       }
     );
 
-    const list = screen.getByRole('list', 'list item');
+    const list = screen.getByRole('list');
     expect(list).toBeInTheDocument();
   });
 
