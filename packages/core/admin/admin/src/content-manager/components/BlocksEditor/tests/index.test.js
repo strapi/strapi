@@ -20,7 +20,6 @@ const setup = (props) =>
       name="blocks-editor"
       value={blocksData}
       onChange={jest.fn()}
-      disabled={false}
       {...props}
     />,
     {
