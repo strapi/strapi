@@ -42,11 +42,11 @@ export async function waitForReload({ page }) {
     if ((await page.locator('text=Waiting for restart...').count()) === 0) {
       // the server seems no longer to be restarting
       break;
+    } else {
+      await page.waitForTimeout(10000);
+      await page.reload();
+      retryCount++;
     }
-
-    await page.waitForTimeout(10000);
-    await page.reload();
-    retryCount++;
   }
 }
 
