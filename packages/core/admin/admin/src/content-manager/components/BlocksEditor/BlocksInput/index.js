@@ -37,7 +37,7 @@ const baseRenderElement = (props, blocks) => {
   return block.renderElement(props);
 };
 
-const BlocksInput = ({ readOnly }) => {
+const BlocksInput = ({ disabled }) => {
   const theme = useTheme();
   const editor = useSlate();
 
@@ -71,7 +71,7 @@ const BlocksInput = ({ readOnly }) => {
 
   return (
     <Editable
-      readOnly={readOnly}
+      readOnly={disabled}
       style={getEditorStyle(theme)}
       renderElement={renderElement}
       renderLeaf={renderLeaf}
@@ -81,7 +81,7 @@ const BlocksInput = ({ readOnly }) => {
 };
 
 BlocksInput.propTypes = {
-  readOnly: PropTypes.bool.isRequired,
+  disabled: PropTypes.bool.isRequired,
 };
 
 export default BlocksInput;
