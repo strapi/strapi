@@ -35,22 +35,16 @@ export async function deleteComponent({ page, displayName }) {
 }
 
 export async function waitForReload({ page }) {
-  const MAX_RETRIES = 20;
-  const RETRY_TIMEOUT = 1000;
+  // the restart watcher is not very reliable and often doesn't catch the server
+  // has restarted, so this trying to reload the page after 20 seconds and try
+  // again
+  try {
+    await expect(page.locator('text=Waiting for restart...')).toHaveCount(0, { timeout: 100 });
+  } catch (error) {
+    console.log('-------------> Caught reload error, reload page', error);
 
-  let retryCount = 0;
-
-  await page.waitForTimeout(2000);
-
-  while (retryCount < MAX_RETRIES) {
-    if ((await page.locator('text=Waiting for restart...').count()) === 0) {
-      // the server seems no longer to be restarting
-      break;
-    } else {
-      await page.waitForTimeout(RETRY_TIMEOUT);
-      await page.reload();
-      retryCount++;
-    }
+    await page.reload();
+    await expect(page.locator('text=Waiting for restart...')).toHaveCount(0, { timeout: 20000 });
   }
 }
 
