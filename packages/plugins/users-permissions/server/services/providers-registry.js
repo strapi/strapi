@@ -54,11 +54,15 @@ const getInitialProviders = ({ purest }) => ({
       .auth(accessToken)
       .request()
       .then(({ body }) => {
-        // Combine username and discriminator because discord username is not unique
-        const username = `${body.username}#${body.discriminator}`;
+        // Combine username and discriminator (if discriminator is exist and not equal to 0)
+        const username = body.discriminator && body.discriminator !== '0'
+        ? `${body.username}#${body.discriminator}`
+        : body.username;
+        const discord_id = body.id;
         return {
           username,
           email: body.email,
+          discord_id: discord_id,
         };
       });
   },

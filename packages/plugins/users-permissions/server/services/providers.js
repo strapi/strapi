@@ -92,6 +92,8 @@ module.exports = ({ strapi }) => {
       ...profile,
       email, // overwrite with lowercased email
       provider,
+      //Add Discord ID here so user has Discord ID added on creation.
+      discord_id,
       role: defaultRole.id,
       confirmed: true,
     };
