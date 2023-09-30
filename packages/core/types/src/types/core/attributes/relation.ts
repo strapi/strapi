@@ -9,7 +9,7 @@ export type Relation<
   // It is kept to allow for future iterations without breaking the current type API
   _TOrigin extends Common.UID.Schema = Common.UID.Schema,
   TRelationKind extends RelationKind.Any = RelationKind.Any,
-  TTarget extends Common.UID.Schema = Common.UID.Schema
+  TTarget extends Common.UID.ContentType = Common.UID.ContentType
 > = Attribute.OfType<'relation'> &
   // Properties
   Utils.Guard.Never<RelationProperties<TRelationKind, TTarget>, AllRelationProperties<TTarget>> &
@@ -22,7 +22,7 @@ export type Relation<
 
 export type RelationProperties<
   TRelationKind extends RelationKind.Any,
-  TTarget extends Common.UID.Schema
+  TTarget extends Common.UID.ContentType
 > = Utils.Expression.MatchFirst<
   [
     [
