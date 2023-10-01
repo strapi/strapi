@@ -77,6 +77,7 @@ interface GenericInputProps<TAttribute extends Attribute.Any = Attribute.Any> {
   value?: Attribute.GetValue<TAttribute>;
   isNullable?: boolean;
 }
+const MAX_DATE = new Date(2100, 0);
 
 const GenericInput = ({
   autoComplete,
@@ -303,6 +304,7 @@ const GenericInput = ({
           id={name}
           hint={hint}
           name={name}
+          maxDate={MAX_DATE}
           onChange={(date) => {
             // check if date is not null or undefined
             const formattedDate = date ? date.toISOString() : null;
@@ -327,6 +329,7 @@ const GenericInput = ({
           id={name}
           hint={hint}
           name={name}
+          maxDate={MAX_DATE}
           onChange={(date) => {
             onChange({
               target: {
