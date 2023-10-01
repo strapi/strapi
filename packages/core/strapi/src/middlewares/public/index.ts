@@ -24,50 +24,21 @@ export const publicStatic: Common.MiddlewareFactory = (
   if (defaultIndex === true) {
     const index = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
 
-    const serveIndexPage: Common.MiddlewareHandler = async (ctx, next) => {
-      // defer rendering of strapi index page
-      await next();
-
-      if (ctx.body != null || ctx.status !== 404) return;
-
-      ctx.url = 'index.html';
-      const isInitialized = await utils.isInitialized(strapi);
-      const data = {
-        serverTime: new Date().toUTCString(),
-        isInitialized,
-        ..._.pick(strapi, [
-          'config.info.version',
-          'config.info.name',
-          'config.admin.url',
-          'config.server.url',
-          'config.environment',
-          'config.serveAdminPanel',
-        ]),
-      };
-      const content = _.template(index)(data);
-      const body = new stream.Readable({
-        read() {
-          this.push(Buffer.from(content));
-          this.push(null);
-        },
-      });
-
-      // Serve static.
-      ctx.type = 'html';
-      ctx.body = body;
+    const redirectToAdmin: Common.MiddlewareHandler = async (ctx) => {
+      ctx.redirect(strapi.config.admin.url);
     };
 
     strapi.server.routes([
       {
         method: 'GET',
         path: '/',
-        handler: serveIndexPage,
+        handler: redirectToAdmin,
         config: { auth: false },
       },
       {
         method: 'GET',
         path: '/index.html',
-        handler: serveIndexPage,
+        handler: redirectToAdmin,
         config: { auth: false },
       },
       {
