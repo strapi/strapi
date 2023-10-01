@@ -30,7 +30,7 @@ const Login = ({ onSubmit, schema, children }) => {
           initialValues={{
             email: '',
             password: '',
-            rememberMe: false,
+            rememberMe: true,
           }}
           onSubmit={onSubmit}
           validationSchema={schema}
