@@ -7276,7 +7276,7 @@ __metadata:
     "@types/jest": 29.5.2
     "@types/koa": 2.13.4
     "@types/lodash": ^4.14.191
-    "@types/node": 18.11.9
+    "@types/node": 18.18.1
     "@types/semver": 7.5.0
     "@types/stream-chain": 2.0.1
     "@types/stream-json": 1.7.3
@@ -7961,7 +7961,7 @@ __metadata:
     "@types/koa__router": 12.0.0
     "@types/lodash": ^4.14.191
     "@types/mime-types": 2.1.1
-    "@types/node": 18.11.9
+    "@types/node": 18.18.1
     "@types/node-schedule": 2.1.0
     "@types/statuses": 2.0.1
     "@vitejs/plugin-react": 4.1.0
@@ -8095,7 +8095,7 @@ __metadata:
   dependencies:
     "@sindresorhus/slugify": 1.1.0
     "@types/koa": 2.13.4
-    "@types/node": 18.11.9
+    "@types/node": 18.18.1
     date-fns: 2.30.0
     eslint-config-custom: 4.14.0
     http-errors: 1.8.1
@@ -9188,10 +9188,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:18.11.9":
-  version: 18.11.9
-  resolution: "@types/node@npm:18.11.9"
-  checksum: cc0aae109e9b7adefc32eecb838d6fad931663bb06484b5e9cbbbf74865c721b03d16fd8d74ad90e31dbe093d956a7c2c306ba5429ba0c00f3f7505103d7a496
+"@types/node@npm:18.18.1":
+  version: 18.18.1
+  resolution: "@types/node@npm:18.18.1"
+  checksum: 079085afc8615b91727900628410a2077f7fff51c5c3e20c4ab2d9caae4010b035aac13dae1221155e9d6ca46084aebf68121642140527b4009eee17b716d339
   languageName: node
   linkType: hard
 
