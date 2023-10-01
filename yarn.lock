@@ -7248,7 +7248,7 @@ __metadata:
     sift: 16.0.1
     slate: 0.94.1
     slate-history: 0.93.0
-    slate-react: 0.98.3
+    slate-react: 0.99.0
     speed-measure-webpack-plugin: 1.5.0
     style-loader: 3.3.1
     styled-components: 5.3.3
@@ -27984,9 +27984,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"slate-react@npm:0.98.3":
-  version: 0.98.3
-  resolution: "slate-react@npm:0.98.3"
+"slate-react@npm:0.99.0":
+  version: 0.99.0
+  resolution: "slate-react@npm:0.99.0"
   dependencies:
     "@juggle/resize-observer": ^3.4.0
     "@types/is-hotkey": ^0.1.1
@@ -28001,7 +28001,7 @@ __metadata:
     react: ">=16.8.0"
     react-dom: ">=16.8.0"
     slate: ">=0.65.3"
-  checksum: 52c08b7d149e5b0b9bda5b77368f884a38e5ce772916da11f23e5b1af089c0e26ef223bca234e3b1c5394dfecaf8c73918ba383f0a6803df3e2da91dcd024bab
+  checksum: 36da861cc66f7222c0d8abed765b8bce69e29f745b8e296eeb71a941746109dfcfb4e059a360a553a6e8ab4803d05ea7c0d76dbb01b9dfcc6f3693c59a8a5742
   languageName: node
   linkType: hard
 
