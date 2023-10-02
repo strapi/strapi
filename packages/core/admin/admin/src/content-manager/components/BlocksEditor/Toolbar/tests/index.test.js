@@ -85,6 +85,20 @@ describe('BlocksEditor toolbar', () => {
     expect(screen.getByRole('toolbar')).toBeInTheDocument();
   });
 
+  it('check if a mixed selected content show only one option selected in the dropdown when you select only part of the content', async () => {
+    setup(mixedInitialValue);
+
+    const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+
+    // Set the selection to cover the second and third row
+    Transforms.setSelection(baseEditor, {
+      anchor: { path: [1, 0], offset: 0 },
+    });
+
+    // the dropdown should show only one option selected which is the block content in the second row
+    expect(within(headingsDropdown).getByText(/text/i)).toBeInTheDocument();
+  });
+
   it('toggles the modifier on a selection', async () => {
     setup();
 
@@ -332,20 +346,5 @@ describe('BlocksEditor toolbar', () => {
 
     // the dropdown should show only one option selected which is the block content in the first row
     expect(within(headingsDropdown).getByText(/heading 1/i)).toBeInTheDocument();
-  });
-
-  // TODO: fix this test because after the Transforms the dropdown is not updated
-  it.skip('check if a mixed selected content show only one option selected in the dropdown when you select only part of the content', async () => {
-    setup(mixedInitialValue);
-
-    const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
-
-    // Set the selection to cover the second and third row
-    Transforms.setSelection(baseEditor, {
-      anchor: { path: [1, 0], offset: 0 },
-    });
-
-    // the dropdown should show only one option selected which is the block content in the second row
-    expect(within(headingsDropdown).getByText(/text/i)).toBeInTheDocument();
   });
 });
