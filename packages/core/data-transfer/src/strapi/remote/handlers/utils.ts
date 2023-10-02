@@ -85,7 +85,7 @@ export const handleWSUpgrade = (wss: WebSocketServer, ctx: Context, callback: WS
       return;
     }
 
-    // disable server timeouts while websocket is running
+    // temporarily disable server timeouts while transfer is running
     const { httpServer } = strapi.server;
     httpServer.headersTimeout = 0;
     httpServer.requestTimeout = 0;
@@ -98,7 +98,6 @@ export const handleWSUpgrade = (wss: WebSocketServer, ctx: Context, callback: WS
   });
 
   ctx.respond = false;
-  ctx.req.setTimeout(0);
 };
 
 // Protocol related functions
@@ -107,6 +106,13 @@ export const handlerControllerFactory =
   <T extends Partial<Handler>>(implementation: (proto: Handler) => T) =>
   (options: HandlerOptions) => {
     const { verify, server: serverOptions } = options ?? {};
+
+    // store the original strapi httpServer timeouts to replace when transfer is complete
+    const { httpServer } = strapi.server;
+    const timeouts = {
+      headersTimeout: httpServer.headersTimeout,
+      requestTimeout: httpServer.requestTimeout,
+    };
 
     const wss = new WebSocket.Server({ ...serverOptions, noServer: true });
 
@@ -285,9 +291,8 @@ export const handlerControllerFactory =
         // Bind ws events to handler methods
         ws.on('close', (...args) => async () => {
           await handler.onClose(...args);
-          const { httpServer } = strapi.server;
-          httpServer.headersTimeout = 60000;
-          httpServer.requestTimeout = 60000 * 5; // TODO: set from actual defaults, not copy/paste
+          httpServer.headersTimeout = timeouts.headersTimeout;
+          httpServer.requestTimeout = timeouts.requestTimeout;
         });
         ws.on('error', (...args) => handler.onError(...args));
         ws.on('message', (...args) => handler.onMessage(...args));
