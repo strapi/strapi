@@ -67,8 +67,13 @@ const createConfig = ({ port, testDir, appDir }) => ({
     },
   ],
 
-  /* Folder for test artifacts such as screenshots, videos, traces, etc. */
-  outputDir: 'test-results/',
+  /*
+    Folder for test artifacts such as screenshots, videos, traces, etc.
+
+    Due to https://github.com/strapi/strapi/issues/18196 we can't store it
+    in a root test-results/ folder because the sever would then restart again
+  */
+  outputDir: '/tmp/test-results/',
 
   /* Run your local dev server before starting the tests */
   webServer: {
