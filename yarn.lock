@@ -7399,9 +7399,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/design-system@npm:1.12.0":
-  version: 1.12.0
-  resolution: "@strapi/design-system@npm:1.12.0"
+"@strapi/design-system@npm:1.12.0-typescript.1":
+  version: 1.12.0-typescript.1
+  resolution: "@strapi/design-system@npm:1.12.0-typescript.1"
   dependencies:
     "@codemirror/lang-json": ^6.0.1
     "@floating-ui/react-dom": ^2.0.2
@@ -7410,19 +7410,19 @@ __metadata:
     "@radix-ui/react-dismissable-layer": ^1.0.5
     "@radix-ui/react-dropdown-menu": ^2.0.6
     "@radix-ui/react-focus-scope": 1.0.4
-    "@strapi/ui-primitives": ^1.12.0
+    "@strapi/ui-primitives": 1.12.0-typescript.1
     "@uiw/react-codemirror": ^4.21.18
     aria-hidden: ^1.2.3
     compute-scroll-into-view: ^3.1.0
     prop-types: ^15.8.1
     react-remove-scroll: ^2.5.6
   peerDependencies:
-    "@strapi/icons": ^1.5.0
+    "@strapi/icons": 1.12.0-typescript.1
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^5.2.0
     styled-components: ^5.2.1
-  checksum: a98bf689307337a5fc311beb040b09acd8479941af4e5c883bec24e1c15283fdaf9d95828411d560a771360da7158240ee5d4d13d8eb640f8b3efe9f5d426c60
+  checksum: cf966142378314ff3c7853e46244f6d85ceb064e9b95dde01e305f1a970412b5c9a5db35afec891e2ffd31592d3fb6745899f11846fc9f9e43f354a6d2564431
   languageName: node
   linkType: hard
 
@@ -8145,9 +8145,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/ui-primitives@npm:^1.12.0":
-  version: 1.12.0
-  resolution: "@strapi/ui-primitives@npm:1.12.0"
+"@strapi/ui-primitives@npm:1.12.0-typescript.1":
+  version: 1.12.0-typescript.1
+  resolution: "@strapi/ui-primitives@npm:1.12.0-typescript.1"
   dependencies:
     "@radix-ui/number": ^1.0.1
     "@radix-ui/primitive": ^1.0.1
@@ -8173,7 +8173,7 @@ __metadata:
   peerDependencies:
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-  checksum: cf0af10a631da76daa0ef931a413789a3f29235b019a3827c940e707b518860612848101910415a7ea918e4c617203c3ebaddf13f44e17db393731b65b54f77c
+  checksum: 80dd3cb4286b2322e6f156ff06d51be82d59d288a291c850af3fc6b34a0c3f3d7be59f006bf11d8ab35ef24eb95af2f59d902510aca84cbdf0c39fd0df15b150
   languageName: node
   linkType: hard
 
