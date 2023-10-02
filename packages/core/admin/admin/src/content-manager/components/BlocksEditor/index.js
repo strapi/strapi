@@ -37,6 +37,14 @@ const Wrapper = styled(Box)`
   border-radius: ${({ theme }) => theme.borderRadius};
 `;
 
+/**
+ * Images are void elements. They handle the rendering of their children instead of Slate.
+ * See the Slate documentation for more information:
+ * - https://docs.slatejs.org/api/nodes/element#void-vs-not-void
+ * - https://docs.slatejs.org/api/nodes/element#rendering-void-elements
+ *
+ * @param {import('slate').Editor} editor
+ */
 const withImages = (editor) => {
   const { isVoid } = editor;
 
