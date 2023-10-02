@@ -9,9 +9,9 @@ describe('cli', () => {
     await cleanupWorkspaces();
   });
 
-  const timeout = 1000 * 50;
+  const timeout = 1000 * 120;
 
-  describe.skip('build & check', () => {
+  describe('build & check', () => {
     it(
       'should build `cjs-js` package',
       async () => {
