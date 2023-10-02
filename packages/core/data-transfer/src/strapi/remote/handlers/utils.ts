@@ -87,6 +87,7 @@ export const handleWSUpgrade = (wss: WebSocketServer, ctx: Context, callback: WS
   });
 
   ctx.respond = false;
+  ctx.req.setTimeout(0);
 };
 
 // Protocol related functions
