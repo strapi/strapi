@@ -5519,7 +5519,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@radix-ui/react-dismissable-layer@npm:1.0.5, @radix-ui/react-dismissable-layer@npm:^1.0.5":
+"@radix-ui/react-dismissable-layer@npm:1.0.5":
   version: 1.0.5
   resolution: "@radix-ui/react-dismissable-layer@npm:1.0.5"
   dependencies:
@@ -5543,7 +5543,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@radix-ui/react-dropdown-menu@npm:^2.0.6":
+"@radix-ui/react-dropdown-menu@npm:^2.0.5":
   version: 2.0.6
   resolution: "@radix-ui/react-dropdown-menu@npm:2.0.6"
   dependencies:
@@ -7448,21 +7448,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/design-system@portal:../design-system/packages/strapi-design-system::locator=strapi%40workspace%3A.":
-  version: 0.0.0-use.local
-  resolution: "@strapi/design-system@portal:../design-system/packages/strapi-design-system::locator=strapi%40workspace%3A."
+"@strapi/design-system@npm:1.11.0":
+  version: 1.11.0
+  resolution: "@strapi/design-system@npm:1.11.0"
   dependencies:
     "@codemirror/lang-json": ^6.0.1
     "@floating-ui/react-dom": ^2.0.2
     "@internationalized/date": ^3.5.0
     "@internationalized/number": ^3.2.1
-    "@radix-ui/react-dismissable-layer": ^1.0.5
-    "@radix-ui/react-dropdown-menu": ^2.0.6
-    "@radix-ui/react-focus-scope": 1.0.4
+    "@radix-ui/react-dismissable-layer": ^1.0.4
+    "@radix-ui/react-dropdown-menu": ^2.0.5
+    "@radix-ui/react-focus-scope": 1.0.3
     "@strapi/ui-primitives": ^1.11.0
-    "@uiw/react-codemirror": ^4.21.18
+    "@uiw/react-codemirror": ^4.21.13
     aria-hidden: ^1.2.3
-    compute-scroll-into-view: ^3.1.0
+    compute-scroll-into-view: ^3.0.3
     prop-types: ^15.8.1
     react-remove-scroll: ^2.5.6
   peerDependencies:
@@ -7471,8 +7471,9 @@ __metadata:
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^5.2.0
     styled-components: ^5.2.1
+  checksum: 7337b1d72db2321d6004a91637733a13a7a78cedfd97074fbc9b932a9371793871d22f60b0d47ac63ba3359be46226afc99d19ba11445930527b7e6520cc38db
   languageName: node
-  linkType: soft
+  linkType: hard
 
 "@strapi/eslint-config@npm:0.2.0":
   version: 0.0.0-use.local
@@ -10067,7 +10068,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@uiw/react-codemirror@npm:^4.21.18":
+"@uiw/react-codemirror@npm:^4.21.13":
   version: 4.21.18
   resolution: "@uiw/react-codemirror@npm:4.21.18"
   dependencies:
@@ -13318,7 +13319,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"compute-scroll-into-view@npm:^3.1.0":
+"compute-scroll-into-view@npm:^3.0.3":
   version: 3.1.0
   resolution: "compute-scroll-into-view@npm:3.1.0"
   checksum: 224549d6dd1d40342230de5c6d69cac5c3ed5c2f6a4437310f959aadc8db1d20b03da44a6e0de14d9419c6f9130ce51ec99a91b11bde55d4640f10551c89c213
