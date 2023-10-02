@@ -39,7 +39,9 @@ export async function waitForReload({ page }) {
   // has restarted, so this trying to reload the page after 20 seconds and try
   // again
   try {
-    await expect(page.locator('text=Waiting for restart...')).toHaveCount(0, { timeout: 100 });
+    await expect(page.locator('text=Waiting for restart...'))
+      .toHaveCount(0, { timeout: 100 })
+      .catch((_) => {});
   } catch (error) {
     console.log('-------------> Caught reload error, reload page', error);
 
