@@ -38,16 +38,12 @@ export async function waitForReload({ page }) {
   // the restart watcher is not very reliable and often doesn't catch the server
   // has restarted, so this trying to reload the page after 20 seconds and try
   // again
-  try {
-    await expect(page.locator('text=Waiting for restart...'))
-      .toHaveCount(0, { timeout: 100 })
-      .catch((_) => {});
-  } catch (error) {
-    console.log('-------------> Caught reload error, reload page', error);
+  await expect(page.locator('text=Waiting for restart...'))
+    .toHaveCount(0, { timeout: 20000 })
+    .catch((_) => {});
 
-    await page.reload();
-    await expect(page.locator('text=Waiting for restart...')).toHaveCount(0, { timeout: 20000 });
-  }
+  await page.reload();
+  await expect(page.locator('text=Waiting for restart...')).toHaveCount(0, { timeout: 20000 });
 }
 
 export async function addDefaultField({
