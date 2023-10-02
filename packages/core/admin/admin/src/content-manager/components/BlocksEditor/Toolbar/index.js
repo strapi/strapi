@@ -244,22 +244,18 @@ const isLastBlockType = (editor, type) => {
 /**
  * Function that finds the corresponding block key in the blocks object based on the targetType and targetLevel (if present) provided.
  * @param {object} blocks - blocks object
- * @param {string} targetType - type of the target block
- * @param {number} targetLevel - level of the target block
- * @returns string|null - block key or null if no matching block is found
+ * @param {string} type - type of the target block
+ * @param {number} level - level of the target block
+ * @returns string|undefined - block key or null if no matching block is found
  */
-const findBlockKeyByTypeAndLevel = (blocks, targetType, targetLevel = null) => {
-  const blockKey = Object.keys(blocks).find((key) => {
+const getAnchorBlockKey = (blocks, { type, level = null }) => {
+  const anchorBlockKey = Object.keys(blocks).find((key) => {
     const block = blocks[key];
 
-    return (
-      block.value &&
-      block.value.type === targetType &&
-      (targetLevel === null || block.value.level === targetLevel)
-    );
+    return block.value.type === type && (level === null || block.value.level === level);
   });
 
-  return blockKey || null; // Return null if no matching block is found
+  return anchorBlockKey;
 };
 
 const insertEmptyBlockAtLast = (editor) => {
@@ -315,7 +311,7 @@ export const BlocksDropdown = ({ disabled }) => {
       const [anchorNode] = Editor.parent(editor, editor.selection.anchor); // Get the parent node of the anchor
 
       if (anchorNode) {
-        const blockKey = findBlockKeyByTypeAndLevel(blocks, anchorNode.type, anchorNode?.level);
+        const blockKey = getAnchorBlockKey(blocks, anchorNode);
 
         if (blockKey && blockKey !== blockSelected) {
           setBlockSelected(blockKey);
