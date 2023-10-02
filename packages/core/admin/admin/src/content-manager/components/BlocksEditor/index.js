@@ -8,6 +8,8 @@ import { withHistory } from 'slate-history';
 import { Slate, withReact, ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
+import Hint from '../Hint';
+
 import BlocksInput from './BlocksInput';
 import { BlocksToolbar } from './Toolbar';
 
@@ -38,7 +40,10 @@ const Wrapper = styled(Box)`
 `;
 
 const BlocksEditor = React.forwardRef(
-  ({ intlLabel, labelAction, name, disabled, required, error, value, onChange }, ref) => {
+  (
+    { intlLabel, labelAction, name, disabled, required, error, value, onChange, placeholder, hint },
+    ref
+  ) => {
     const { formatMessage } = useIntl();
     const [editor] = React.useState(() => withReact(withHistory(createEditor())));
 
@@ -48,6 +53,10 @@ const BlocksEditor = React.forwardRef(
           { ...intlLabel.values }
         )
       : name;
+
+    const formattedPlaceholder = placeholder
+      ? formatMessage({ id: placeholder.id, defaultMessage: placeholder.defaultMessage })
+      : null;
 
     /** Editable is not able to hold the ref, https://github.com/ianstormtaylor/slate/issues/4082
      *  so with "useImperativeHandle" we can use ReactEditor methods to expose to the parent above
@@ -92,10 +101,11 @@ const BlocksEditor = React.forwardRef(
               <BlocksToolbar disabled={disabled} />
               <EditorDivider width="100%" />
               <Wrapper>
-                <BlocksInput disabled={disabled} />
+                <BlocksInput disabled={disabled} placeholder={formattedPlaceholder} />
               </Wrapper>
             </InputWrapper>
           </Slate>
+          <Hint hint={hint} name={name} error={error} />
         </Flex>
         {error && (
           <Box paddingTop={1}>
@@ -115,6 +125,8 @@ BlocksEditor.defaultProps = {
   required: false,
   error: '',
   value: null,
+  placeholder: null,
+  hint: null,
 };
 
 BlocksEditor.propTypes = {
@@ -130,6 +142,11 @@ BlocksEditor.propTypes = {
   error: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.array,
+  placeholder: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+  }),
+  hint: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
 };
 
 export default BlocksEditor;

@@ -13,12 +13,14 @@ jest.mock('@strapi/helper-plugin', () => ({
   useLibrary: () => ({ components: { 'media-library': jest.fn() } }),
 }));
 
-const setup = (props) =>
+const setup = ({ value, ...props }) =>
   render(
     <Blocks
       intlLabel={{ id: 'blocks', defaultMessage: 'blocks type' }}
       name="blocks-editor"
-      value={blocksData}
+      value={value}
+      hint="blocks description"
+      placeholder={{ id: 'blocksPlaceholder', defaultMessage: 'blocks placeholder' }}
       onChange={jest.fn()}
       {...props}
     />,
@@ -35,19 +37,20 @@ const setup = (props) =>
 
 describe('BlocksEditor', () => {
   it('should render blocks without error', () => {
-    setup();
+    setup({ value: null });
 
     expect(screen.getByText('blocks type')).toBeInTheDocument();
+    expect(screen.getByText('blocks description')).toBeInTheDocument();
   });
 
   it('should render blocks with error', () => {
-    setup({ error: 'field is required' });
+    setup({ error: 'field is required', value: blocksData });
 
     expect(screen.getByText(/field is required/));
   });
 
   it('should render blocks with data', () => {
-    setup();
+    setup({ value: blocksData });
 
     expect(screen.getByText('This is bold text').parentElement).toHaveStyle({
       'font-weight': 600,
