@@ -9,8 +9,10 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 
 import { PERMISSIONS } from './constants';
 
-// eslint-disable-next-line import/no-default-export
-export default {
+import type { Plugin } from '@strapi/types';
+
+const admin: Plugin.Config.AdminInput = {
+  // TODO typing app in strapi/types as every plugin needs it
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register(app: any) {
     // Create the email settings section
@@ -43,6 +45,8 @@ export default {
       name: 'email',
     });
   },
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  bootstrap() {},
   async registerTrads({ locales }: { locales: string[] }) {
     const importedTrads = await Promise.all(
       locales.map((locale) => {
@@ -67,3 +71,6 @@ export default {
     return Promise.resolve(importedTrads);
   },
 };
+
+// eslint-disable-next-line import/no-default-export
+export default admin;

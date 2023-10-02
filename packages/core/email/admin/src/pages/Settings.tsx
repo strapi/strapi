@@ -30,10 +30,10 @@ import { useQuery, useMutation } from 'react-query';
 import styled from 'styled-components';
 import { ValidationError } from 'yup';
 
-import { PERMISSIONS } from '../../constants';
-import { schema } from '../../utils/schema';
+import { PERMISSIONS } from '../constants';
+import { schema } from '../utils/schema';
 
-import type { EmailSettings, ConfigSettings } from '../../../../shared/types';
+import type { EmailSettings, ConfigSettings } from '../../../shared/types';
 
 const DocumentationLink = styled.a`
   color: ${({ theme }) => theme.colors.primary600};
