@@ -74,7 +74,7 @@ const CheckPagePermissions: React.FC<CheckPagePermissions> = ({
     return <Redirect to="/" />;
   }
 
-  return <>{children}</>;
+  return children;
 };
 
 export { CheckPagePermissions };
