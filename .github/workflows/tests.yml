@@ -58,8 +58,8 @@ jobs:
       - name: Run lint
         run: yarn nx affected --target=lint --parallel --nx-ignore-cycles
 
-  typescript_front:
-    name: 'typescript_front'
+  typescript:
+    name: 'typescript'
     needs: [changes, lint]
     runs-on: ubuntu-latest
     steps:
@@ -72,14 +72,20 @@ jobs:
       - uses: nrwl/nx-set-shas@v3
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-      - name: Run build:ts for admin-test-utils & helper-plugin
-        run: yarn build --projects=@strapi/admin-test-utils,@strapi/helper-plugin --skip-nx-cache
-      - name: Run test
+      - name: Run build:ts
+        run: yarn nx run-many --target=build:ts --nx-ignore-cycles --skip-nx-cache
+      - name: Run build
+        run: yarn nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
+      - name: TSC for packages
+        run: yarn nx affected --target=test:ts --nx-ignore-cycles
+      - name: TSC for back
+        run: yarn nx affected --target=test:ts:back --nx-ignore-cycles
+      - name: TSC for front
         run: yarn nx affected --target=test:ts:front --nx-ignore-cycles
 
   unit_back:
     name: 'unit_back (node: ${{ matrix.node }})'
-    needs: [changes, lint]
+    needs: [changes, lint, typescript]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -101,7 +107,7 @@ jobs:
 
   unit_front:
     name: 'unit_front (node: ${{ matrix.node }})'
-    needs: [changes, lint, typescript_front]
+    needs: [changes, lint, typescript]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -123,7 +129,7 @@ jobs:
 
   build:
     name: 'build (node: ${{ matrix.node }})'
-    needs: [changes, lint, typescript_front, unit_front]
+    needs: [changes, lint, typescript, unit_front]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -140,7 +146,7 @@ jobs:
 
   e2e:
     timeout-minutes: 60
-    needs: [changes, lint, typescript_front, unit_front, build]
+    needs: [changes, lint, typescript, unit_front, build]
     name: 'e2e (browser: ${{ matrix.project }})'
     runs-on: ubuntu-latest
     strategy:
@@ -160,8 +166,7 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
 
       - name: Install Playwright Browsers
-        # we need 1.37.0 to support Firefox install...
-        run: npx playwright@1.37.0-alpha-jul-20-2023 install --with-deps
+        run: npx playwright@1.38.1 install --with-deps
 
       - name: Run build:ts
         run: yarn nx run-many --target=build:ts --nx-ignore-cycles --skip-nx-cache
@@ -172,10 +177,17 @@ jobs:
       - name: Run E2E tests
         run: yarn test:e2e --setup --concurrency=1 --project=${{ matrix.project }}
 
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: playwright-trace
+          path: test-apps/e2e/**/test-results/**/trace.zip
+          retention-days: 1
+
   api_ce_pg:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
-    needs: [changes, lint, unit_back, unit_front]
+    needs: [changes, lint, typescript, unit_back, unit_front]
     name: '[CE] API Integration (postgres, node: ${{ matrix.node }})'
     strategy:
       matrix:
@@ -213,7 +225,7 @@ jobs:
   api_ce_mysql:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
-    needs: [changes, lint, unit_back, unit_front]
+    needs: [changes, lint, typescript, unit_back, unit_front]
     name: '[CE] API Integration (mysql:latest, client: ${{ matrix.db_client }}, node: ${{ matrix.node }})'
     strategy:
       matrix:
@@ -250,7 +262,7 @@ jobs:
   api_ce_mysql_5:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
-    needs: [changes, lint, unit_back, unit_front]
+    needs: [changes, lint, typescript, unit_back, unit_front]
     name: '[CE] API Integration (mysql:5, client: ${{ matrix.db_client }} , node: ${{ matrix.node }})'
     strategy:
       matrix:
@@ -286,7 +298,7 @@ jobs:
   api_ce_sqlite:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
-    needs: [changes, lint, unit_back, unit_front]
+    needs: [changes, lint, typescript, unit_back, unit_front]
     name: '[CE] API Integration (sqlite, client: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }})'
     strategy:
       matrix:
@@ -308,7 +320,7 @@ jobs:
   # EE
   api_ee_pg:
     runs-on: ubuntu-latest
-    needs: [changes, lint, unit_back, unit_front]
+    needs: [changes, lint, typescript, unit_back, unit_front]
     name: '[EE] API Integration (postgres, node: ${{ matrix.node }})'
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
@@ -349,7 +361,7 @@ jobs:
 
   api_ee_mysql:
     runs-on: ubuntu-latest
-    needs: [changes, lint, unit_back, unit_front]
+    needs: [changes, lint, typescript, unit_back, unit_front]
     name: '[EE] API Integration (mysql:latest, client: ${{ matrix.db_client }}, node: ${{ matrix.node }})'
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
@@ -389,7 +401,7 @@ jobs:
 
   api_ee_sqlite:
     runs-on: ubuntu-latest
-    needs: [changes, lint, unit_back, unit_front]
+    needs: [changes, lint, typescript, unit_back, unit_front]
     name: '[EE] API Integration (sqlite, client: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }})'
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:

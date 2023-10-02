@@ -142,6 +142,7 @@ describe('Permission Domain', () => {
       const permission = {
         id: 1,
         action: 'foo',
+        actionParameters: {},
         subject: 'bar',
         properties: {},
         conditions: [],
@@ -158,6 +159,7 @@ describe('Permission Domain', () => {
         {
           id: 1,
           action: 'foo',
+          actionParameters: {},
           subject: 'bar',
           properties: {},
           conditions: [],

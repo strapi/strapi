@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { useFetchClient } from '@strapi/helper-plugin';
 import { useQuery } from 'react-query';
 
@@ -20,17 +22,24 @@ export function useAdminUsers(params = {}, queryOptions = {}) {
     queryOptions
   );
 
-  let users = [];
+  // the return value needs to be memoized, because intantiating
+  // an empty array as default value would lead to an unstable return
+  // value, which later on triggers infinite loops if used in the
+  // dependency arrays of other hooks
+  const users = React.useMemo(() => {
+    if (id && data) {
+      return [data];
+    }
+    if (Array.isArray(data?.results)) {
+      return data.results;
+    }
 
-  if (id && data) {
-    users = [data];
-  } else if (Array.isArray(data?.results)) {
-    users = data.results;
-  }
+    return [];
+  }, [data, id]);
 
   return {
     users,
-    pagination: data?.pagination ?? null,
+    pagination: React.useMemo(() => data?.pagination ?? null, [data?.pagination]),
     isLoading,
     isError,
     refetch,

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/typescript-utils",
-  "version": "4.13.7",
+  "version": "4.14.0",
   "description": "Typescript support for Strapi",
   "repository": {
     "type": "git",
