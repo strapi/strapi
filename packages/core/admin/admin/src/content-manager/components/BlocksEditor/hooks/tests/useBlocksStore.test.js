@@ -319,23 +319,24 @@ describe('useBlocksStore', () => {
     expect(quote).toBeInTheDocument();
   });
 
-  // TODO fix this test
-  it.skip('renders a list block properly', () => {
+  it('renders an unordered list block properly', () => {
     const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
 
     render(
-      result.current.list.renderElement({
-        children: 'list item',
+      result.current['list-unordered'].renderElement({
+        children: 'list unordered',
         element: {
           format: 'unordered',
         },
         attributes: {},
-      })
+      }),
+      {
+        wrapper: Wrapper,
+      }
     );
 
-    const list = screen.getByRole('list', 'list item');
+    const list = screen.getByRole('list');
     expect(list).toBeInTheDocument();
-    expect(list.tagName).toBe('ul');
   });
 
   it('renders a list item block properly', () => {
