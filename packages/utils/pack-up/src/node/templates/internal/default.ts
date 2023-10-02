@@ -175,7 +175,7 @@ const defaultTemplate = defineTemplate(async ({ logger }) => {
               break;
             }
             case 'typescript': {
-              isTypescript = Boolean(answer === 'false' ? '' : answer);
+              isTypescript = Boolean(answer);
 
               pkgJson.source = isTypescript ? './src/index.ts' : './src/index.js';
 
@@ -224,7 +224,7 @@ const defaultTemplate = defineTemplate(async ({ logger }) => {
               break;
             }
             case 'eslint': {
-              if (answer === 'true') {
+              if (answer) {
                 const eslintConfig: any = {
                   root: true,
                   env: {
@@ -271,7 +271,7 @@ const defaultTemplate = defineTemplate(async ({ logger }) => {
                     : 'eslint . --ext .cjs,.js',
                 };
 
-                devDepsToInstall.push('eslint', 'eslint-plugin-prettier');
+                devDepsToInstall.push('eslint', 'eslint-config-prettier', 'eslint-plugin-prettier');
 
                 if (isTypescript) {
                   devDepsToInstall.push(

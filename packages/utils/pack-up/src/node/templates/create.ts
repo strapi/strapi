@@ -4,6 +4,7 @@ import { relative, resolve, dirname } from 'path';
 import prettier, { Config as PrettierConfig } from 'prettier';
 import prompts from 'prompts';
 
+import { isError } from '../core/errors';
 import { Logger } from '../core/logger';
 
 import { Template, TemplateFeature, TemplateOption, TemplateOrTemplateResolver } from './types';
@@ -99,7 +100,6 @@ const createPackageFromTemplate = async (
       printWidth: 100,
       singleQuote: true,
       trailingComma: 'es5',
-      plugins: ['prettier-plugin-packagejson'],
     };
 
     try {
@@ -109,7 +109,11 @@ const createPackageFromTemplate = async (
       });
 
       await writeFile(filePath, `${formattedContents.trim()}${os.EOL}`);
-    } catch {
+    } catch (err) {
+      if (isError(err)) {
+        logger.debug(err.message);
+      }
+
       await writeFile(filePath, `${file.contents.trim()}${os.EOL}`);
     }
 
