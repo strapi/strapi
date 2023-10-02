@@ -8,9 +8,9 @@ export interface EmailConfig extends Record<string, unknown> {
   };
 }
 
-type LoadedPluginConfig = Plugin.LoadedPlugin['config'];
+type PluginConfig = Plugin.Config.ServerObject['config'];
 
-export interface StrapiConfig extends LoadedPluginConfig {
+export interface StrapiConfig extends PluginConfig {
   default: EmailConfig;
 }
 

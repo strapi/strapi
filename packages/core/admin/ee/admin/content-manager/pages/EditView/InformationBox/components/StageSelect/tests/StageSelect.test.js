@@ -1,8 +1,7 @@
 import React from 'react';
 
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
@@ -11,53 +10,49 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 
-import { STAGE_ATTRIBUTE_NAME } from '../../../constants';
 import { StageSelect } from '../StageSelect';
 
-const STAGE_1_STATE_FIXTURE = {
-  id: 1,
-  color: '#4945FF',
-  name: 'Stage 1',
-  worklow: 1,
-};
-
 const server = setupServer(
-  rest.get('*/review-workflows/workflows/', (req, res, ctx) =>
-    res(
-      ctx.json({
-        data: [
-          {
-            id: 1,
-            stages: [
-              {
-                id: 1,
-                color: '#4945FF',
-                name: 'Stage 1',
-              },
-              {
-                id: 2,
-                color: '#4945FF',
-                name: 'Stage 2',
-              },
-            ],
-          },
-        ],
-      })
-    )
-  ),
+  ...[
+    rest.get('*/content-manager/:kind/:uid/:id/stages', (req, res, ctx) =>
+      res(
+        ctx.json({
+          data: [
+            {
+              id: 1,
+              color: '#4945FF',
+              name: 'Stage 1',
+            },
 
-  rest.get('*/license-limit-information', (req, res, ctx) =>
-    res(
-      ctx.json({
-        data: {},
-      })
-    )
-  )
+            {
+              id: 2,
+              color: '#4945FF',
+              name: 'Stage 2',
+            },
+          ],
+        })
+      )
+    ),
+
+    rest.get('*/license-limit-information', (req, res, ctx) => res(ctx.json({}))),
+  ]
 );
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useCMEditViewDataManager: jest.fn(),
+  useCMEditViewDataManager: jest.fn().mockReturnValue({
+    initialData: {
+      id: 1,
+      strapi_stage: {
+        id: 1,
+        color: '#4945FF',
+        name: 'Stage 1',
+      },
+    },
+    isCreatingEntry: false,
+    isSingleType: false,
+    layout: { uid: 'api::articles:articles' },
+  }),
   useNotification: jest.fn(() => ({
     toggleNotification: jest.fn(),
   })),
@@ -100,37 +95,36 @@ describe('EE | Content Manager | EditView | InformationBox | StageSelect', () =>
     server.close();
   });
 
-  it('renders an enabled select input, if the entity is edited', async () => {
-    useCMEditViewDataManager.mockReturnValue({
-      initialData: {
-        [STAGE_ATTRIBUTE_NAME]: null,
-      },
-      isCreatingEntry: false,
-      layout: { uid: 'api::articles:articles' },
-    });
-
-    const { queryByRole } = setup();
-
-    await waitFor(() => expect(queryByRole('combobox')).toBeInTheDocument());
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('renders a select input, if a workflow stage is assigned to the entity', async () => {
-    useCMEditViewDataManager.mockReturnValue({
-      initialData: {
-        [STAGE_ATTRIBUTE_NAME]: STAGE_1_STATE_FIXTURE,
-      },
-      isCreatingEntry: false,
-      layout: { uid: 'api::articles:articles' },
-    });
+    const { queryByRole, getByTestId, getByText, user } = setup();
 
-    const { queryByRole, queryByTestId, getByText, user } = setup();
-
-    await waitFor(() => expect(queryByTestId('loader')).not.toBeInTheDocument());
+    await waitForElementToBeRemoved(() => getByTestId('loader'));
 
     await waitFor(() => expect(getByText('Stage 1')).toBeInTheDocument());
 
     await user.click(queryByRole('combobox'));
 
     await waitFor(() => expect(getByText('Stage 2')).toBeInTheDocument());
+  });
+
+  it("renders the select as disabled with a hint, if there aren't any stages", async () => {
+    server.use(
+      rest.get('*/content-manager/:kind/:uid/:id/stages', (req, res, ctx) => {
+        return res.once(ctx.json({ data: [] }));
+      })
+    );
+
+    const { queryByRole, getByText, getByTestId } = setup();
+
+    await waitForElementToBeRemoved(() => getByTestId('loader'));
+
+    await waitFor(() => expect(queryByRole('combobox')).toHaveAttribute('aria-disabled', 'true'));
+    await waitFor(() =>
+      expect(getByText('You don’t have the permission to update this stage.')).toBeInTheDocument()
+    );
   });
 });

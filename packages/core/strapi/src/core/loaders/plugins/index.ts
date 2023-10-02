@@ -9,7 +9,7 @@ import { getEnabledPlugins } from './get-enabled-plugins';
 import { getUserPluginsConfig } from './get-user-plugins-config';
 
 interface Plugins {
-  [key: string]: Plugin.LoadedPlugin;
+  [key: string]: Plugin.Config.ServerObject;
 }
 
 const defaultPlugin = {

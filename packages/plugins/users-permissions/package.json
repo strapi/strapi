@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-users-permissions",
-  "version": "4.13.7",
+  "version": "4.14.0",
   "description": "Protect your API with a full-authentication process based on JWT",
   "repository": {
     "type": "git",
@@ -29,10 +29,10 @@
     "lint": "run -T eslint ."
   },
   "dependencies": {
-    "@strapi/design-system": "1.10.1",
-    "@strapi/helper-plugin": "4.13.7",
-    "@strapi/icons": "1.10.1",
-    "@strapi/utils": "4.13.7",
+    "@strapi/design-system": "1.11.0",
+    "@strapi/helper-plugin": "4.14.0",
+    "@strapi/icons": "1.11.0",
+    "@strapi/utils": "4.14.0",
     "bcryptjs": "2.4.3",
     "formik": "2.4.0",
     "grant-koa": "5.4.8",

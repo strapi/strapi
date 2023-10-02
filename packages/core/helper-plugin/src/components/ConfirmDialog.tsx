@@ -28,7 +28,7 @@ export interface RootProps extends Partial<FooterProps>, Pick<BoxProps, 'childre
 }
 export const Root = ({
   children,
-  iconRightButton = <Trash />,
+  iconRightButton,
   isConfirmButtonLoading = false,
   isOpen,
   onConfirm,
@@ -92,7 +92,7 @@ export const Body = ({ iconBody = <ExclamationMarkCircle />, children }: BodyPro
 };
 
 interface FooterProps {
-  iconRightButton: ButtonProps['startIcon'];
+  iconRightButton?: ButtonProps['startIcon'];
   isConfirmButtonLoading: boolean;
   onConfirm: ButtonProps['onClick'];
   onToggleDialog: ButtonProps['onClick'];
@@ -108,7 +108,7 @@ interface FooterProps {
 }
 
 const Footer = ({
-  iconRightButton,
+  iconRightButton = <Trash />,
   isConfirmButtonLoading,
   leftButtonText,
   onConfirm,
