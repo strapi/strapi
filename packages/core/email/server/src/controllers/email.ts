@@ -6,13 +6,6 @@ import type { EmailConfig, SendOptions } from '../types';
 
 const { ApplicationError } = errors;
 
-// Extend Koa's Context type
-declare module 'koa' {
-  interface Request {
-    body: SendOptions;
-  }
-}
-
 /**
  * Email.js controller
  *
