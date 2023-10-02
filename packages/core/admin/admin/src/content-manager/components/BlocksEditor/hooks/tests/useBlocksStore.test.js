@@ -6,7 +6,7 @@ import userEvent from '@testing-library/user-event';
 import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
 import { createEditor, Editor, Transforms } from 'slate';
-import { Slate, withReact } from 'slate-react';
+import { Slate, withReact, ReactEditor } from 'slate-react';
 
 import { withLinks } from '../../plugins/withLinks';
 import { useBlocksStore } from '../useBlocksStore';
@@ -14,13 +14,7 @@ import { useBlocksStore } from '../useBlocksStore';
 const initialValue = [
   {
     type: 'paragraph',
-    children: [
-      {
-        type: 'link',
-        url: 'https://example.com',
-        children: [{ text: 'Some link' }],
-      },
-    ],
+    children: [{ text: 'A line of text in a paragraph.' }],
   },
 ];
 
@@ -29,7 +23,7 @@ const user = userEvent.setup();
 const baseEditor = createEditor();
 
 const Wrapper = ({ children }) => {
-  const editor = React.useMemo(() => withReact(withLinks(baseEditor)), []);
+  const [editor] = React.useState(() => withReact(withLinks(baseEditor)));
 
   return (
     <ThemeProvider theme={lightTheme}>
@@ -49,6 +43,12 @@ Wrapper.propTypes = {
 describe('useBlocksStore', () => {
   beforeEach(() => {
     baseEditor.children = initialValue;
+    /**
+     * @TODO: We need to find a way to use the actual implementation
+     * This problem is also present at Toolbar tests
+     */
+    ReactEditor.findPath = jest.fn();
+    ReactEditor.focus = jest.fn();
   });
 
   it('should return a store of blocks', () => {
@@ -228,12 +228,7 @@ describe('useBlocksStore', () => {
     expect(heading).toBeInTheDocument();
   });
 
-  /**
-   * There is a problem with the ReactEditor.findPath method when creating testings with jest.
-   * It is not able to find the element in the slate editor, even if it is there.
-   * We need to research more about this problem.
-   */
-  it.skip('renders a link block properly', () => {
+  it('renders a link block properly', () => {
     const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
 
     act(() => {
@@ -268,12 +263,7 @@ describe('useBlocksStore', () => {
     expect(link).toHaveAttribute('href', 'https://example.com');
   });
 
-  /**
-   * There is a problem with the ReactEditor.findPath method when creating testings with jest.
-   * It is not able to find the element in the slate editor, even if it is there.
-   * We need to research more about this problem.
-   */
-  it.skip('renders a popover for each link and its opened when users click the link', async () => {
+  it('renders a popover for each link and its opened when users click the link', async () => {
     const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
 
     render(

@@ -1,7 +1,7 @@
-import { Path } from 'slate';
+import { Path, Transforms, Range, Point, Editor } from 'slate';
 
 const withLinks = (editor) => {
-  const { isInline, apply } = editor;
+  const { isInline, apply, insertText } = editor;
 
   // Links are inline elements, so we need to override the isInline method for slate
   editor.isInline = (element) => {
@@ -27,6 +27,32 @@ const withLinks = (editor) => {
     }
 
     apply(operation);
+  };
+
+  editor.insertText = (text) => {
+    // When selection is at the end of a link and user types a space, we want to break the link
+    if (Range.isCollapsed(editor.selection) && text === ' ') {
+      const linksInSelection = Array.from(
+        Editor.nodes(editor, { at: editor.selection, match: (node) => node.type === 'link' })
+      );
+
+      const selectionIsInLink = editor.selection && linksInSelection.length > 0;
+      const selectionIsAtEndOfLink =
+        selectionIsInLink &&
+        Point.equals(editor.selection.anchor, Editor.end(editor, linksInSelection[0][1]));
+
+      if (selectionIsAtEndOfLink) {
+        Transforms.insertNodes(
+          editor,
+          { text: ' ', type: 'text' },
+          { at: Path.next(linksInSelection[0][1]), select: true }
+        );
+
+        return;
+      }
+    }
+
+    insertText(text);
   };
 
   return editor;

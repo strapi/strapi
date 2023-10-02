@@ -6,8 +6,8 @@ import { pxToRem, prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper
 import { BulletList, NumberList, Link } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Editor, Transforms, Element as SlateElement, Range, Path } from 'slate';
-import { useSlate } from 'slate-react';
+import { Editor, Transforms, Element as SlateElement } from 'slate';
+import { useSlate, ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
 import { useBlocksStore } from '../hooks/useBlocksStore';
@@ -27,6 +27,7 @@ const FlexButton = styled(Flex).attrs({ as: 'button' })`
 `;
 
 const ToolbarButton = ({ icon, name, label, isActive, handleClick, disabled }) => {
+  const editor = useSlate();
   const { formatMessage } = useIntl();
   const labelMessage = formatMessage(label);
 
@@ -41,9 +42,9 @@ const ToolbarButton = ({ icon, name, label, isActive, handleClick, disabled }) =
           width={7}
           height={7}
           hasRadius
-          onMouseDown={(e) => {
-            e.preventDefault();
+          onClick={() => {
             handleClick();
+            ReactEditor.focus(editor);
           }}
           aria-label={labelMessage}
         >
@@ -411,14 +412,6 @@ const LinkButton = () => {
     insertLink(editor, { url: '' });
   };
 
-  const selectionIsCollapsed = editor.selection && Range.isCollapsed(editor.selection);
-  const selectionIsInSameBlock =
-    editor.selection &&
-    Path.equals(
-      Path.parent(editor.selection.focus.path),
-      Path.parent(editor.selection.anchor.path)
-    );
-
   return (
     <ToolbarButton
       icon={Link}
@@ -429,7 +422,6 @@ const LinkButton = () => {
       }}
       isActive={isLinkActive}
       handleClick={addLink}
-      disabled={selectionIsCollapsed || !selectionIsInSameBlock}
     />
   );
 };

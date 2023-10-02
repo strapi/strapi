@@ -6,7 +6,7 @@ import userEvent from '@testing-library/user-event';
 import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
 import { createEditor, Transforms } from 'slate';
-import { Slate, withReact } from 'slate-react';
+import { Slate, withReact, ReactEditor } from 'slate-react';
 
 import { BlocksToolbar, BlocksDropdown } from '..';
 
@@ -58,6 +58,7 @@ const setup = () =>
 describe('BlocksEditor toolbar', () => {
   beforeEach(() => {
     baseEditor.children = initialValue;
+    ReactEditor.focus = jest.fn();
   });
 
   it('should render the toolbar', () => {
@@ -319,20 +320,5 @@ describe('BlocksEditor toolbar', () => {
         ],
       },
     ]);
-  });
-
-  it('should disable the button when the selection is collapsed', async () => {
-    setup();
-
-    const LinkButton = screen.getByLabelText(/link/i);
-
-    Transforms.select(baseEditor, {
-      anchor: { path: [0, 0], offset: 2 },
-      focus: { path: [0, 0], offset: 2 },
-    });
-
-    await user.click(LinkButton);
-
-    expect(LinkButton).toHaveAttribute('data-state', 'off');
   });
 });

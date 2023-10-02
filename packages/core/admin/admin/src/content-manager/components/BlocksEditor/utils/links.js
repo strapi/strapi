@@ -1,4 +1,4 @@
-import { Transforms, Editor, Element as SlateElement, Node } from 'slate';
+import { Transforms, Editor, Element as SlateElement, Node, Range } from 'slate';
 
 /**
  *
@@ -34,27 +34,28 @@ const removeLink = (editor) => {
 const insertLink = (editor, { url }) => {
   if (editor.selection) {
     // We want to remove all link on the selection
-    // We use a try catch because Slate throw error when there is no link in the selection
-    try {
-      const linkNodes = Array.from(
-        Editor.nodes(editor, {
-          at: editor.selection,
-          match: (node) => node.type === 'link',
-        })
-      );
-
-      linkNodes.forEach(([, path]) => {
-        Transforms.unwrapNodes(editor, { at: path });
-      });
-    } catch {
-      // Do nothing
-    }
-
-    Transforms.wrapNodes(
-      editor,
-      { type: 'link', url: url ? addProtocol(url) : '' },
-      { split: true }
+    const linkNodes = Array.from(
+      Editor.nodes(editor, {
+        at: editor.selection,
+        match: (node) => node.type === 'link',
+      })
     );
+
+    linkNodes.forEach(([, path]) => {
+      Transforms.unwrapNodes(editor, { at: path });
+    });
+
+    if (Range.isCollapsed(editor.selection)) {
+      const link = { type: 'link', url: url ? addProtocol(url) : '', children: [{ text: url }] };
+
+      Transforms.insertNodes(editor, link);
+    } else {
+      Transforms.wrapNodes(
+        editor,
+        { type: 'link', url: url ? addProtocol(url) : '' },
+        { split: true }
+      );
+    }
   }
 };
 
