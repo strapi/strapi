@@ -13,6 +13,12 @@ import styled from 'styled-components';
 import { useBlocksStore } from '../hooks/useBlocksStore';
 import { useModifiersStore } from '../hooks/useModifiersStore';
 
+const ToolbarWrapper = styled(Flex)`
+  &[aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+`;
+
 const Separator = styled(Toolbar.Separator)`
   background: ${({ theme }) => theme.colors.neutral150};
   width: 1px;
@@ -20,18 +26,41 @@ const Separator = styled(Toolbar.Separator)`
 `;
 
 const FlexButton = styled(Flex).attrs({ as: 'button' })`
-  &:hover {
-    background: ${({ theme }) => theme.colors.primary100};
+  // Inherit the not-allowed cursor from ToolbarWrapper when disabled
+  &[aria-disabled] {
+    cursor: inherit;
+  }
+
+  &[aria-disabled='false'] {
+    cursor: pointer;
+
+    // Only apply hover styles if the button is enabled
+    &:hover {
+      background: ${({ theme }) => theme.colors.primary100};
+    }
   }
 `;
 
-const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
+const ToolbarButton = ({ icon, name, label, isActive, disabled, handleClick }) => {
   const { formatMessage } = useIntl();
   const labelMessage = formatMessage(label);
 
+  const enabledColor = isActive ? 'primary600' : 'neutral600';
+
   return (
     <Tooltip description={labelMessage}>
-      <Toolbar.ToggleItem value={name} data-state={isActive ? 'on' : 'off'} asChild>
+      <Toolbar.ToggleItem
+        value={name}
+        data-state={isActive ? 'on' : 'off'}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          handleClick();
+        }}
+        aria-disabled={disabled}
+        disabled={disabled}
+        aria-label={labelMessage}
+        asChild
+      >
         <FlexButton
           background={isActive ? 'primary100' : ''}
           alignItems="center"
@@ -39,13 +68,8 @@ const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
           width={7}
           height={7}
           hasRadius
-          onMouseDown={(e) => {
-            e.preventDefault();
-            handleClick();
-          }}
-          aria-label={labelMessage}
         >
-          <Icon width={3} height={3} as={icon} color={isActive ? 'primary600' : 'neutral600'} />
+          <Icon width={3} height={3} as={icon} color={disabled ? 'neutral300' : enabledColor} />
         </FlexButton>
       </Toolbar.ToggleItem>
     </Tooltip>
@@ -60,10 +84,11 @@ ToolbarButton.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
   }).isRequired,
   isActive: PropTypes.bool.isRequired,
+  disabled: PropTypes.bool.isRequired,
   handleClick: PropTypes.func.isRequired,
 };
 
-const ModifierButton = ({ icon, name, label }) => {
+const ModifierButton = ({ icon, name, label, disabled }) => {
   const editor = useSlate();
 
   const isModifierActive = () => {
@@ -90,6 +115,7 @@ const ModifierButton = ({ icon, name, label }) => {
       name={name}
       label={label}
       isActive={isActive}
+      disabled={disabled}
       handleClick={toggleModifier}
     />
   );
@@ -102,6 +128,7 @@ ModifierButton.propTypes = {
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
   }).isRequired,
+  disabled: PropTypes.bool.isRequired,
 };
 
 const toggleBlock = (editor, value) => {
@@ -171,6 +198,12 @@ const ImageDialog = ({ handleClose }) => {
     });
 
     insertImages(formattedImages);
+
+    if (isLastBlockType(editor, 'image')) {
+      // insert blank line to add new blocks below image block
+      insertEmptyBlockAtLast(editor);
+    }
+
     handleClose();
   };
 
@@ -187,18 +220,18 @@ ImageDialog.propTypes = {
   handleClose: PropTypes.func.isRequired,
 };
 
-const isLastBlockImageOrCode = (editor) => {
+const isLastBlockType = (editor, type) => {
   const { selection } = editor;
 
   if (!selection) return false;
 
-  const [currentImageORCodeBlock] = Editor.nodes(editor, {
+  const [currentBlock] = Editor.nodes(editor, {
     at: selection,
-    match: (n) => n.type === 'image' || n.type === 'code',
+    match: (n) => n.type === type,
   });
 
-  if (currentImageORCodeBlock) {
-    const [, currentNodePath] = currentImageORCodeBlock;
+  if (currentBlock) {
+    const [, currentNodePath] = currentBlock;
 
     const isNodeAfter = Boolean(Editor.after(editor, currentNodePath));
 
@@ -229,7 +262,18 @@ const findBlockKeyByTypeAndLevel = (blocks, targetType, targetLevel = null) => {
   return blockKey || null; // Return null if no matching block is found
 };
 
-export const BlocksDropdown = () => {
+const insertEmptyBlockAtLast = (editor) => {
+  Transforms.insertNodes(
+    editor,
+    {
+      type: 'paragraph',
+      children: [{ type: 'text', text: '' }],
+    },
+    { at: [editor.children.length] }
+  );
+};
+
+export const BlocksDropdown = ({ disabled }) => {
   const editor = useSlate();
   const { formatMessage } = useIntl();
   const [isMediaLibraryVisible, setIsMediaLibraryVisible] = React.useState(false);
@@ -247,20 +291,18 @@ export const BlocksDropdown = () => {
    * @param {string} optionKey - key of the heading selected
    */
   const selectOption = (optionKey) => {
-    toggleBlock(editor, blocks[optionKey].value);
+    if (optionKey === 'image') {
+      // Image node created using select or existing selection node needs to be deleted before adding new image nodes
+      Transforms.removeNodes(editor);
+    } else {
+      toggleBlock(editor, blocks[optionKey].value);
+    }
 
     setBlockSelected(optionKey);
 
-    if (isLastBlockImageOrCode(editor)) {
-      // insert blank line to add new blocks below code or image blocks
-      Transforms.insertNodes(
-        editor,
-        {
-          type: 'paragraph',
-          children: [{ type: 'text', text: '' }],
-        },
-        { at: [editor.children.length] }
-      );
+    if (optionKey === 'code' && isLastBlockType(editor, 'code')) {
+      // insert blank line to add new blocks below code block
+      insertEmptyBlockAtLast(editor);
     }
 
     if (optionKey === 'image') {
@@ -294,6 +336,7 @@ export const BlocksDropdown = () => {
           id: 'components.Blocks.blocks.selectBlock',
           defaultMessage: 'Select a block',
         })}
+        disabled={disabled}
       >
         {blockKeysToInclude.map((key) => (
           <BlockOption
@@ -308,6 +351,10 @@ export const BlocksDropdown = () => {
       {isMediaLibraryVisible && <ImageDialog handleClose={() => setIsMediaLibraryVisible(false)} />}
     </>
   );
+};
+
+BlocksDropdown.propTypes = {
+  disabled: PropTypes.bool.isRequired,
 };
 
 const BlockOption = ({ value, icon, label, blockSelected }) => {
@@ -335,7 +382,7 @@ BlockOption.propTypes = {
   blockSelected: PropTypes.string.isRequired,
 };
 
-const ListButton = ({ icon, format, label }) => {
+const ListButton = ({ icon, format, label, disabled }) => {
   const editor = useSlate();
 
   /**
@@ -389,6 +436,7 @@ const ListButton = ({ icon, format, label }) => {
       name={format}
       label={label}
       isActive={isActive}
+      disabled={disabled}
       handleClick={toggleList}
     />
   );
@@ -401,6 +449,7 @@ ListButton.propTypes = {
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
   }).isRequired,
+  disabled: PropTypes.bool.isRequired,
 };
 
 // TODO: Remove after the RTE Blocks Alpha release
@@ -412,17 +461,16 @@ const AlphaTag = styled(Box)`
   padding: ${({ theme }) => `${2 / 16}rem ${theme.spaces[1]}`};
 `;
 
-const BlocksToolbar = () => {
+const BlocksToolbar = ({ disabled }) => {
   const modifiers = useModifiersStore();
 
   return (
-    <Toolbar.Root asChild>
+    <Toolbar.Root aria-disabled={disabled} asChild>
       {/* Remove after the RTE Blocks Alpha release (paddingRight and width) */}
-      <Flex gap={1} padding={2} paddingRight={4} width="100%">
-        <BlocksDropdown />
-        <Separator />
+      <ToolbarWrapper gap={1} padding={2} paddingRight={4} width="100%">
+        <BlocksDropdown disabled={disabled} />
         <Toolbar.ToggleGroup type="multiple" asChild>
-          <Flex gap={1}>
+          <Flex gap={1} marginLeft={1}>
             {Object.entries(modifiers).map(([name, modifier]) => (
               <ToolbarButton
                 key={name}
@@ -431,6 +479,7 @@ const BlocksToolbar = () => {
                 label={modifier.label}
                 isActive={modifier.checkIsActive()}
                 handleClick={modifier.handleToggle}
+                disabled={disabled}
               />
             ))}
           </Flex>
@@ -445,6 +494,7 @@ const BlocksToolbar = () => {
               }}
               format="unordered"
               icon={BulletList}
+              disabled={disabled}
             />
             <ListButton
               label={{
@@ -453,6 +503,7 @@ const BlocksToolbar = () => {
               }}
               format="ordered"
               icon={NumberList}
+              disabled={disabled}
             />
           </Flex>
         </Toolbar.ToggleGroup>
@@ -464,9 +515,13 @@ const BlocksToolbar = () => {
             </Typography>
           </AlphaTag>
         </Flex>
-      </Flex>
+      </ToolbarWrapper>
     </Toolbar.Root>
   );
+};
+
+BlocksToolbar.propTypes = {
+  disabled: PropTypes.bool.isRequired,
 };
 
 export { BlocksToolbar };
