@@ -9,7 +9,7 @@ import type { Schema } from '@strapi/strapi';
 
 const formatContentTypeData = <
   TSchema extends Schema.ContentType,
-  TData extends Record<keyof TSchema['attributes'], unknown>
+  TData extends Record<keyof TSchema['attributes'], unknown>,
 >(
   data: TData,
   ct: TSchema,
@@ -17,64 +17,67 @@ const formatContentTypeData = <
 ) => {
   const recursiveFormatData = <
     TSchemum extends Schema.Schema,
-    TDatum extends { [P in keyof TSchemum['attributes']]: unknown }
+    TDatum extends { [P in keyof TSchemum['attributes']]: unknown },
   >(
     data: TDatum,
     schema: TSchemum
   ) => {
-    return Object.keys(data).reduce((acc, current) => {
-      const type = getType(schema, current);
-      const value = get(data, current);
-      const compoUid = getOtherInfos(schema, [current, 'component']);
-      const isRepeatable = getOtherInfos(schema, [current, 'repeatable']);
+    return Object.keys(data).reduce(
+      (acc, current) => {
+        const type = getType(schema, current);
+        const value = get(data, current);
+        const compoUid = getOtherInfos(schema, [current, 'component']);
+        const isRepeatable = getOtherInfos(schema, [current, 'repeatable']);
 
-      if (type === 'json' && value !== undefined) {
-        acc[current] = JSON.stringify(value, null, 2);
+        if (type === 'json' && value !== undefined) {
+          acc[current] = JSON.stringify(value, null, 2);
 
-        return acc;
-      }
+          return acc;
+        }
 
-      if (!value) {
+        if (!value) {
+          acc[current] = value;
+
+          return acc;
+        }
+
+        if (type === 'dynamiczone' && Array.isArray(value)) {
+          acc[current] = value.map((componentValue) => {
+            const formattedData = recursiveFormatData(
+              componentValue,
+              composSchema[componentValue.__component]
+            );
+
+            return formattedData;
+          });
+
+          return acc;
+        }
+
+        if (type === 'component') {
+          let formattedValue;
+
+          if (isRepeatable && Array.isArray(value)) {
+            formattedValue = value.map((obj, i) => {
+              const newObj = { ...obj, __temp_key__: i };
+
+              return recursiveFormatData(newObj, composSchema[compoUid]);
+            });
+          } else {
+            formattedValue = recursiveFormatData(value, composSchema[compoUid]);
+          }
+
+          acc[current] = formattedValue;
+
+          return acc;
+        }
+
         acc[current] = value;
 
         return acc;
-      }
-
-      if (type === 'dynamiczone' && Array.isArray(value)) {
-        acc[current] = value.map((componentValue) => {
-          const formattedData = recursiveFormatData(
-            componentValue,
-            composSchema[componentValue.__component]
-          );
-
-          return formattedData;
-        });
-
-        return acc;
-      }
-
-      if (type === 'component') {
-        let formattedValue;
-
-        if (isRepeatable && Array.isArray(value)) {
-          formattedValue = value.map((obj, i) => {
-            const newObj = { ...obj, __temp_key__: i };
-
-            return recursiveFormatData(newObj, composSchema[compoUid]);
-          });
-        } else {
-          formattedValue = recursiveFormatData(value, composSchema[compoUid]);
-        }
-
-        acc[current] = formattedValue;
-
-        return acc;
-      }
-
-      acc[current] = value;
-
-      return acc;
-    }, {} as Record<string, unknown>);
+      },
+      {} as Record<string, unknown>
+    );
   };
 
   return recursiveFormatData(data, ct);
