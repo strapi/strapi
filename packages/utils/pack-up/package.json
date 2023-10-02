@@ -46,15 +46,15 @@
     "dist"
   ],
   "scripts": {
-    "build": "node --loader esbuild-register/loader -r esbuild-register scripts/build",
-    "check": "node --loader esbuild-register/loader -r esbuild-register scripts/check",
+    "build": "node -r esbuild-register scripts/build",
+    "check": "node -r esbuild-register scripts/check",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean",
     "test": "test:ts && test:unit",
     "test:unit": "run -T jest",
     "test:ts": "run -T tsc --noEmit",
-    "watch": "node --loader esbuild-register/loader -r esbuild-register scripts/watch"
+    "watch": "node -r esbuild-register scripts/watch"
   },
   "dependencies": {
     "@vitejs/plugin-react": "4.0.4",
