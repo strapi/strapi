@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
 import Blocks from '../index';
@@ -36,11 +36,14 @@ const setup = ({ value, ...props }) =>
   );
 
 describe('BlocksEditor', () => {
-  it('should render blocks without error', () => {
+  it('should render blocks without error', async () => {
     setup({ value: null });
 
     expect(screen.getByText('blocks type')).toBeInTheDocument();
     expect(screen.getByText('blocks description')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('blocks placeholder')).toBeInTheDocument();
+    });
   });
 
   it('should render blocks with error', () => {
