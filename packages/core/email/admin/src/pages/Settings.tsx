@@ -43,7 +43,7 @@ interface MutationBody {
   to: string;
 }
 
-const ProtectedSettingsPage = () => (
+export const ProtectedSettingsPage = () => (
   <CheckPagePermissions permissions={PERMISSIONS.settings}>
     <SettingsPage />
   </CheckPagePermissions>
@@ -324,6 +324,3 @@ const SettingsPage = () => {
     </Main>
   );
 };
-
-// eslint-disable-next-line import/no-default-export
-export default ProtectedSettingsPage;

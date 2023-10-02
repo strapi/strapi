@@ -30,11 +30,11 @@ const admin: Plugin.Config.AdminInput = {
           id: 'settings',
           to: `/settings/email`,
           async Component() {
-            const component = await import(
+            const { ProtectedSettingsPage } = await import(
               /* webpackChunkName: "email-settings-page" */ './pages/Settings'
             );
 
-            return component;
+            return ProtectedSettingsPage;
           },
           permissions: PERMISSIONS.settings,
         },
