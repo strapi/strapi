@@ -235,6 +235,7 @@ export function useBlocksStore() {
       matchNode: (node) => node.type === 'paragraph',
       isInBlocksSelector: true,
       handleEnterKey(editor) {
+        const anchorPathInitialPosition = editor.selection.anchor.path;
         /**
          * Split the nodes where the cursor is. This will create a new paragraph with the content
          * after the cursor, while retaining all the children, modifiers etc.
@@ -267,7 +268,10 @@ export function useBlocksStore() {
          * Use slice(0, -1) to go 1 level higher in the tree,
          * so we go to the start of the node and not the start of the leaf.
          */
-        Transforms.select(editor, editor.start(editor.selection.anchor.path.slice(0, -1)));
+        Transforms.select(
+          editor,
+          editor.start([anchorPathInitialPosition[0] + 1, editor.selection.anchor.path[1]])
+        );
       },
     },
     'heading-one': {
