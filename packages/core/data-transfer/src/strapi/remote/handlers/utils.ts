@@ -79,6 +79,17 @@ export const handleWSUpgrade = (wss: WebSocketServer, ctx: Context, callback: WS
   assertValidHeader(ctx);
 
   wss.handleUpgrade(ctx.req, ctx.request.socket, Buffer.alloc(0), (client, request) => {
+    if (!client) {
+      // If the WebSocket upgrade failed, destroy the socket to avoid hanging
+      ctx.request.socket.destroy();
+      return;
+    }
+
+    // disable server timeouts while websocket is running
+    const { httpServer } = strapi.server;
+    httpServer.headersTimeout = 0;
+    httpServer.requestTimeout = 0;
+
     // Create a connection between the client & the server
     wss.emit('connection', client, ctx.req);
 
@@ -272,7 +283,12 @@ export const handlerControllerFactory =
         const handler: Handler = Object.assign(Object.create(prototype), implementation(prototype));
 
         // Bind ws events to handler methods
-        ws.on('close', (...args) => handler.onClose(...args));
+        ws.on('close', (...args) => async () => {
+          await handler.onClose(...args);
+          const { httpServer } = strapi.server;
+          httpServer.headersTimeout = 60000;
+          httpServer.requestTimeout = 60000 * 5; // TODO: set from actual defaults, not copy/paste
+        });
         ws.on('error', (...args) => handler.onError(...args));
         ws.on('message', (...args) => handler.onMessage(...args));
       });
