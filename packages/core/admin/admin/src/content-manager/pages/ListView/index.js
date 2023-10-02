@@ -720,7 +720,7 @@ function ListView({
                 {/* Empty content */}
                 <Table.EmptyBody
                   contentType={headerLayoutTitle}
-                  aciton={getCreateAction({ variant: 'secondary' })}
+                  action={getCreateAction({ variant: 'secondary' })}
                 />
                 {/* Content */}
                 <Body.Root
