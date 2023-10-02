@@ -1,5 +1,4 @@
 import Router from '@koa/router';
-import _ from 'lodash';
 import { has } from 'lodash/fp';
 import { yup } from '@strapi/utils';
 import type { Strapi, Common } from '@strapi/types';

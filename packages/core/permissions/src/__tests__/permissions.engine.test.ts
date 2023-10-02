@@ -334,7 +334,7 @@ describe('Permissions Engine', () => {
             {
               name: 'format.permission',
               // eslint-disable-next-line no-unused-vars
-              fn(permission) {
+              fn() {
                 return newPermissions[0];
               },
             },
