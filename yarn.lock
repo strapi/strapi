@@ -7169,11 +7169,13 @@ __metadata:
     "@strapi/icons": 1.11.0
     "@strapi/permissions": 4.14.0
     "@strapi/provider-audit-logs-local": 4.14.0
+    "@strapi/types": 4.14.0
     "@strapi/typescript-utils": 4.14.0
     "@strapi/utils": 4.14.0
     "@testing-library/dom": 9.2.0
     "@testing-library/react": 14.0.0
     "@testing-library/user-event": 14.4.3
+    "@types/lodash": ^4.14.191
     axios: 1.5.0
     bcryptjs: 2.4.3
     browserslist: ^4.22.1
@@ -7260,7 +7262,7 @@ __metadata:
     webpackbar: ^5.0.2
     yup: 0.32.9
   peerDependencies:
-    "@strapi/strapi": ^4.3.4
+    "@strapi/strapi": ^4.14.0
   languageName: unknown
   linkType: soft
 

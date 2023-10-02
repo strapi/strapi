@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 
-const admin = require('./server');
+const admin = require('./dist/server');
 
 const mergeRoutes = (a, b, key) => {
   return _.isArray(a) && _.isArray(b) && key === 'routes' ? a.concat(b) : undefined;

@@ -2,3 +2,5 @@ node_modules/
 .eslintrc.js
 build/
 admin/src/plugins.js
+index.d.ts
+dist/

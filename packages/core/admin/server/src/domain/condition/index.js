@@ -19,7 +19,7 @@ const { pipe, merge, set, pick } = require('lodash/fp');
 
 /**
  * Set of attributes used to create a new {@link Action} object
- * @typedef {Condition, { uid: string }} CreateConditionPayload
+ * typedef {Condition, { uid: string }} CreateConditionPayload
  */
 
 const DEFAULT_CATEGORY = 'default';
