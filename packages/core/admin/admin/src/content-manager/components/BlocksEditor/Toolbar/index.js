@@ -316,7 +316,6 @@ export const BlocksDropdown = ({ disabled }) => {
 
       if (anchorNode) {
         const blockKey = findBlockKeyByTypeAndLevel(blocks, anchorNode.type, anchorNode?.level);
-        console.log('blockKey', blockKey);
 
         if (blockKey && blockKey !== blockSelected) {
           setBlockSelected(blockKey);
