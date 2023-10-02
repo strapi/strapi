@@ -30,7 +30,7 @@ export interface EmailOptions {
   cc?: string;
   bcc?: string;
   replyTo?: string;
-  [key: string]: string | undefined; // for flexibility, allowing other properties if necessary
+  [key: string]: string | undefined; // to allow additional template attributes if needed
 }
 
 export interface EmailTemplate {
