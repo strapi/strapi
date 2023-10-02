@@ -32,6 +32,12 @@ class SqliteDialect extends Dialect {
 
   async initialize() {
     await this.db.connection.raw('pragma foreign_keys = on');
+
+    //Enabled WAL Mode
+    await this.db.connection.raw('pragma journal_mode = wal');
+
+    // Set synchronous to "normal" for improved performance
+    await this.db.connection.raw('pragma synchronous = normal');
   }
 
   canAlterConstraints() {
