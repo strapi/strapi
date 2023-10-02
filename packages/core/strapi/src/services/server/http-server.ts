@@ -21,12 +21,26 @@ const createHTTPServer = (strapi: Strapi, koaApp: Koa): Server => {
   };
 
   const server: http.Server = http.createServer(listener);
+  // disable the request timeout introduced by Node 18 so we can set our own on a per-request basis
+  server.headersTimeout = 0;
 
   server.on('connection', (connection) => {
     connections.add(connection);
 
     connection.on('close', () => {
       connections.delete(connection);
+    });
+  });
+
+  server.on('request', (req, res) => {
+    let timeout = 90000;
+    // if it's a websocket request, set the timeout much higher
+    if (req.headers.upgrade && req.headers.upgrade.toLowerCase() === 'websocket') {
+      timeout = 1000 * 60 * 60 * 8; // 8 hours
+    }
+
+    req.socket.setTimeout(timeout, () => {
+      req.emit('ERR_HTTP_REQUEST_TIMEOUT');
     });
   });
 
