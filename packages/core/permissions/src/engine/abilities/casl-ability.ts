@@ -1,9 +1,15 @@
 import * as sift from 'sift';
+import qs from 'qs';
 import { AbilityBuilder, Ability, Subject } from '@casl/ability';
 import { pick, isNil, isObject } from 'lodash/fp';
 
+export interface ParametrizedAction {
+  name: string;
+  params: Record<string, unknown>;
+}
+
 export interface PermissionRule {
-  action: string;
+  action: string | ParametrizedAction;
   subject?: Subject | null;
   properties?: {
     fields?: string[];
@@ -13,6 +19,7 @@ export interface PermissionRule {
 
 export interface CustomAbilityBuilder {
   can(permission: PermissionRule): ReturnType<AbilityBuilder<Ability>['can']>;
+  buildParametrizedAction: (parametrizedAction: ParametrizedAction) => string;
   build(): Ability;
 }
 
@@ -37,6 +44,10 @@ const conditionsMatcher = (conditions: unknown) => {
   return sift.createQueryTester(conditions, { operations });
 };
 
+const buildParametrizedAction = ({ name, params }: ParametrizedAction) => {
+  return `${name}?${qs.stringify(params)}`;
+};
+
 /**
  * Casl Ability Builder.
  */
@@ -48,16 +59,35 @@ export const caslAbilityBuilder = (): CustomAbilityBuilder => {
       const { action, subject, properties = {}, condition } = permission;
       const { fields } = properties;
 
+      const caslAction = typeof action === 'string' ? action : buildParametrizedAction(action);
+
       return can(
-        action,
+        caslAction,
         isNil(subject) ? 'all' : subject,
         fields,
         isObject(condition) ? condition : undefined
       );
     },
 
+    buildParametrizedAction({ name, params }: ParametrizedAction) {
+      return `${name}?${qs.stringify(params)}`;
+    },
+
     build() {
-      return build({ conditionsMatcher });
+      const ability = build({ conditionsMatcher });
+
+      function decorateCan(originalCan: Ability['can']) {
+        return function (...args: Parameters<Ability['can']>) {
+          const [action, ...rest] = args;
+          const caslAction = typeof action === 'string' ? action : buildParametrizedAction(action);
+
+          // Call the original `can` method
+          return originalCan.apply(ability, [caslAction, ...rest]);
+        };
+      }
+
+      ability.can = decorateCan(ability.can);
+      return ability;
     },
 
     ...rest,

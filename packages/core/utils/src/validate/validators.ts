@@ -47,16 +47,8 @@ const defaultValidateFilters = curry((schema: Model, filters: unknown) => {
     // passwords from filters
     traverseQueryFilters(throwPassword, { schema }),
     // private from filters
-    traverseQueryFilters(throwPrivate, { schema }),
-    // empty objects
-    traverseQueryFilters(
-      ({ key, value }) => {
-        if (isObject(value) && isEmpty(value)) {
-          throwInvalidParam({ key });
-        }
-      },
-      { schema }
-    )
+    traverseQueryFilters(throwPrivate, { schema })
+    // we allow empty objects to validate and only sanitize them out, so that users may write "lazy" queries without checking their params exist
   )(filters);
 });
 

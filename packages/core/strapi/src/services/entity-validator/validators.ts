@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import strapiUtils from '@strapi/utils';
 import type { Attribute, Schema } from '@strapi/types';
+import blocksValidator from './blocks-validator';
 
 const { yup } = strapiUtils;
 
@@ -264,4 +265,5 @@ export default {
   time: datesValidator,
   datetime: datesValidator,
   timestamp: datesValidator,
+  blocks: blocksValidator,
 };
