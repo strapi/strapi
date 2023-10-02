@@ -26,9 +26,9 @@
     "strapi-server.js"
   ],
   "scripts": {
-    "build": "rimraf build && node ./scripts/build.js",
+    "build": "run build:ts && rimraf build && node ./scripts/build.js",
     "build:ts": "run -T tsc -p server/tsconfig.json --outDir ./dist/server",
-    "watch": "run -T tsc -w --preserveWatchOutput",
+    "watch": "run build:ts -w --preserveWatchOutput",
     "clean": "run -T rimraf ./dist",
     "analyze:bundle": "ANALYZE_BUNDLE=true webpack --config webpack.config.dev.js",
     "analyze:deps": "ANALYZE_DEPS=true webpack serve --config webpack.config.dev.js --progress profile",
