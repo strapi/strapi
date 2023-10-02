@@ -7911,7 +7911,7 @@ __metadata:
   resolution: "@strapi/provider-upload-cloudinary@workspace:packages/providers/upload-cloudinary"
   dependencies:
     "@strapi/utils": 4.14.0
-    cloudinary: ^1.40.0
+    cloudinary: ^1.41.0
     eslint-config-custom: 4.14.0
     into-stream: ^5.1.0
     tsconfig: 4.14.0
@@ -12648,15 +12648,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cloudinary@npm:^1.40.0":
-  version: 1.40.0
-  resolution: "cloudinary@npm:1.40.0"
+"cloudinary@npm:^1.41.0":
+  version: 1.41.0
+  resolution: "cloudinary@npm:1.41.0"
   dependencies:
     cloudinary-core: ^2.13.0
     core-js: ^3.30.1
     lodash: ^4.17.21
     q: ^1.5.1
-  checksum: 722e1ce03a0f9450ba36f70b961642ce7bb7620c5fce69e243a812a6a59ef37e6c34a05c59c94a16c35ecebca6de7cea92e94297a9bdfa134587f6f02960e3f2
+  checksum: e404311911484322afce251f74cc2d9252d30cde4bbfa2559dc2068a81df62703f57015b2a98218b9d62d5281e1c0966e9f7a570f4ab325f75277740c3d0a4e7
   languageName: node
   linkType: hard
 
