@@ -73,7 +73,7 @@
   "devDependencies": {
     "@strapi/strapi": "4.14.0",
     "@testing-library/react": "14.0.0",
-    "@testing-library/user-event": "14.4.3",
+    "@testing-library/user-event": "14.5.1",
     "@types/styled-components": "5.1.26",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
