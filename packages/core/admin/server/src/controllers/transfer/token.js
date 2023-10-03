@@ -1,10 +1,7 @@
-'use strict';
+import { trim, has } from 'lodash/fp';
+import { errors, stringEquals } from '@strapi/utils';
 
-const { trim, has } = require('lodash/fp');
-const {
-  errors: { ApplicationError },
-  stringEquals,
-} = require('@strapi/utils');
+const { ApplicationError } = errors;
 
 const {
   token: { validateTransferTokenCreationInput, validateTransferTokenUpdateInput },
