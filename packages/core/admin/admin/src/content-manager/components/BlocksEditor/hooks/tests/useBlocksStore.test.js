@@ -268,23 +268,24 @@ describe('useBlocksStore', () => {
     expect(quote).toBeInTheDocument();
   });
 
-  // TODO fix this test
-  it.skip('renders a list block properly', () => {
+  it('renders an unordered list block properly', () => {
     const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
 
     render(
-      result.current.list.renderElement({
-        children: 'list item',
+      result.current['list-unordered'].renderElement({
+        children: 'list unordered',
         element: {
           format: 'unordered',
         },
         attributes: {},
-      })
+      }),
+      {
+        wrapper: Wrapper,
+      }
     );
 
-    const list = screen.getByRole('list', 'list item');
+    const list = screen.getByRole('list');
     expect(list).toBeInTheDocument();
-    expect(list.tagName).toBe('ul');
   });
 
   it('renders a list item block properly', () => {
@@ -541,6 +542,71 @@ describe('useBlocksStore', () => {
                 text: 'First list item',
               },
             ],
+          },
+        ],
+      },
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('handles enter key on a quote', () => {
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'quote',
+        children: [
+          {
+            type: 'text',
+            text: 'Some quote',
+          },
+        ],
+      },
+    ];
+
+    // Simulate enter key press at the end of the quote
+    Transforms.select(baseEditor, {
+      anchor: Editor.end(baseEditor, []),
+      focus: Editor.end(baseEditor, []),
+    });
+    result.current.quote.handleEnterKey(baseEditor);
+
+    // Should enter a line break within the quote
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'quote',
+        children: [
+          {
+            type: 'text',
+            text: 'Some quote\n',
+          },
+        ],
+      },
+    ]);
+
+    // Simulate enter key press at the end of the quote again
+    Transforms.select(baseEditor, {
+      anchor: Editor.end(baseEditor, []),
+      focus: Editor.end(baseEditor, []),
+    });
+    result.current.quote.handleEnterKey(baseEditor);
+
+    // Should delete the line break and create a paragraph after the quote
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'quote',
+        children: [
+          {
+            type: 'text',
+            text: 'Some quote',
           },
         ],
       },

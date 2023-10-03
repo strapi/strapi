@@ -15,6 +15,12 @@ const TypographyAsterisk = styled(Typography)`
   line-height: 0;
 `;
 
+const LabelAction = styled(Box)`
+  svg path {
+    fill: ${({ theme }) => theme.colors.neutral500};
+  }
+`;
+
 const EditorDivider = styled(Divider)`
   background: ${({ theme }) => theme.colors.neutral200};
 `;
@@ -23,10 +29,28 @@ const Wrapper = styled(Box)`
   border-radius: ${({ theme }) => theme.borderRadius};
 `;
 
+/**
+ * Images are void elements. They handle the rendering of their children instead of Slate.
+ * See the Slate documentation for more information:
+ * - https://docs.slatejs.org/api/nodes/element#void-vs-not-void
+ * - https://docs.slatejs.org/api/nodes/element#rendering-void-elements
+ *
+ * @param {import('slate').Editor} editor
+ */
+const withImages = (editor) => {
+  const { isVoid } = editor;
+
+  editor.isVoid = (element) => {
+    return element.type === 'image' ? true : isVoid(element);
+  };
+
+  return editor;
+};
+
 const BlocksEditor = React.forwardRef(
-  ({ intlLabel, name, readOnly, required, error, value, onChange }, ref) => {
+  ({ intlLabel, labelAction, name, disabled, required, error, value, onChange }, ref) => {
     const { formatMessage } = useIntl();
-    const [editor] = React.useState(() => withReact(withHistory(createEditor())));
+    const [editor] = React.useState(() => withReact(withImages(withHistory(createEditor()))));
 
     const label = intlLabel.id
       ? formatMessage(
@@ -69,10 +93,11 @@ const BlocksEditor = React.forwardRef(
               {label}
               {required && <TypographyAsterisk textColor="danger600">*</TypographyAsterisk>}
             </Typography>
+            {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
           </Flex>
           <Slate editor={editor} initialValue={initialValue} onChange={handleSlateChange}>
             <InputWrapper direction="column" alignItems="flex-start">
-              <BlocksToolbar />
+              <BlocksToolbar disabled={disabled} />
               <EditorDivider width="100%" />
               <Wrapper
                 width="100%"
@@ -87,7 +112,7 @@ const BlocksEditor = React.forwardRef(
                 color="neutral800"
                 lineHeight={6}
               >
-                <BlocksInput readOnly={readOnly} />
+                <BlocksInput disabled={disabled} />
               </Wrapper>
             </InputWrapper>
           </Slate>
@@ -105,8 +130,9 @@ const BlocksEditor = React.forwardRef(
 );
 
 BlocksEditor.defaultProps = {
+  labelAction: null,
+  disabled: false,
   required: false,
-  readOnly: false,
   error: '',
   value: null,
 };
@@ -117,9 +143,10 @@ BlocksEditor.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }).isRequired,
+  labelAction: PropTypes.element,
   name: PropTypes.string.isRequired,
   required: PropTypes.bool,
-  readOnly: PropTypes.bool,
+  disabled: PropTypes.bool,
   error: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.array,

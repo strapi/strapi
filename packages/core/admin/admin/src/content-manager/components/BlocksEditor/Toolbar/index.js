@@ -17,18 +17,41 @@ import { useModifiersStore } from '../hooks/useModifiersStore';
  * ToolbarButton
  * -----------------------------------------------------------------------------------------------*/
 const FlexButton = styled(Flex).attrs({ as: 'button' })`
-  &:hover {
-    background: ${({ theme }) => theme.colors.primary100};
+  // Inherit the not-allowed cursor from ToolbarWrapper when disabled
+  &[aria-disabled] {
+    cursor: inherit;
+  }
+
+  &[aria-disabled='false'] {
+    cursor: pointer;
+
+    // Only apply hover styles if the button is enabled
+    &:hover {
+      background: ${({ theme }) => theme.colors.primary100};
+    }
   }
 `;
 
-const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
+const ToolbarButton = ({ icon, name, label, isActive, disabled, handleClick }) => {
   const { formatMessage } = useIntl();
   const labelMessage = formatMessage(label);
 
+  const enabledColor = isActive ? 'primary600' : 'neutral600';
+
   return (
     <Tooltip description={labelMessage}>
-      <Toolbar.ToggleItem value={name} data-state={isActive ? 'on' : 'off'} asChild>
+      <Toolbar.ToggleItem
+        value={name}
+        data-state={isActive ? 'on' : 'off'}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          handleClick();
+        }}
+        aria-disabled={disabled}
+        disabled={disabled}
+        aria-label={labelMessage}
+        asChild
+      >
         <FlexButton
           background={isActive ? 'primary100' : ''}
           alignItems="center"
@@ -36,13 +59,8 @@ const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
           width={7}
           height={7}
           hasRadius
-          onMouseDown={(e) => {
-            e.preventDefault();
-            handleClick();
-          }}
-          aria-label={labelMessage}
         >
-          <Icon width={3} height={3} as={icon} color={isActive ? 'primary600' : 'neutral600'} />
+          <Icon width={3} height={3} as={icon} color={disabled ? 'neutral300' : enabledColor} />
         </FlexButton>
       </Toolbar.ToggleItem>
     </Tooltip>
@@ -57,9 +75,13 @@ ToolbarButton.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
   }).isRequired,
   isActive: PropTypes.bool.isRequired,
+  disabled: PropTypes.bool.isRequired,
   handleClick: PropTypes.func.isRequired,
 };
 
+/* -------------------------------------------------------------------------------------------------
+ * ImageDialog
+ * -----------------------------------------------------------------------------------------------*/
 const ALLOWED_MEDIA_TYPE = 'images';
 
 const IMAGE_SCHEMA_FIELDS = [
@@ -81,6 +103,12 @@ const IMAGE_SCHEMA_FIELDS = [
   'updatedAt',
 ];
 
+/**
+ * This function selects from an image object the properties listed in the image schema fields.
+ * @param {object} object - represents an image object
+ * @param {array<string>} imageSchemaFields - represents the image schema fields
+ * @returns {object} - returns an object with the properties listed in the image schema fields
+ */
 const pick = (object, imageSchemaFields) => {
   return Object.keys(object).reduce((acc, key) => {
     if (imageSchemaFields.includes(key)) {
@@ -92,10 +120,10 @@ const pick = (object, imageSchemaFields) => {
 };
 
 /**
- * Function that detects if the block selected in the editor is of the provided type.
- * @param {import('slate').Editor} editor
- * @param {string} type - type of the block to check
- * @returns boolean
+ * This function checks if the current block is the last block of a specific type.
+ * @param {import('slate').Editor} editor - the Slate Editor
+ * @param {string} type - the type of the block
+ * @returns {boolean} - returns true if the current block is the last block of a specific type
  */
 const isLastBlockType = (editor, type) => {
   const { selection } = editor;
@@ -119,8 +147,8 @@ const isLastBlockType = (editor, type) => {
 };
 
 /**
- * Function that inserts an empty paragraph block after the editor selection.
- * @param {import('slate').Editor} editor
+ * This function inserts an empty block at the bottom of the editor.
+ * @param {import('slate').Editor} editor - the Slate Editor
  */
 const insertEmptyBlockAtLast = (editor) => {
   Transforms.insertNodes(
@@ -133,14 +161,15 @@ const insertEmptyBlockAtLast = (editor) => {
   );
 };
 
-/* -------------------------------------------------------------------------------------------------
- * ImageDialog
- * -----------------------------------------------------------------------------------------------*/
 const ImageDialog = ({ handleClose }) => {
   const editor = useSlate();
   const { components } = useLibrary();
   const MediaLibraryDialog = components['media-library'];
 
+  /**
+   * This function is able to insert inside the Slate Editor the image selected.
+   * @param {array<object>} images - the selected images from the media library
+   */
   const insertImages = (images) => {
     images.forEach((img) => {
       const image = { type: 'image', image: img, children: [{ type: 'text', text: '' }] };
@@ -150,11 +179,11 @@ const ImageDialog = ({ handleClose }) => {
 
   /**
    * Handles the selection of an asset from the media library when you create an image block.
-   * @param {object} images - the selected images from the media library
+   * @param {array<object>} images - the selected images from the media library
    */
   const handleSelectAssets = (images) => {
     const formattedImages = images.map((image) => {
-      // create an object with imageSchema defined and exclude unnecessary props coming from media library config
+      // Create an object with imageSchema defined and exclude unnecessary props coming from media library config
       const expectedImage = pick(image, IMAGE_SCHEMA_FIELDS);
 
       return {
@@ -167,7 +196,7 @@ const ImageDialog = ({ handleClose }) => {
     insertImages(formattedImages);
 
     if (isLastBlockType(editor, 'image')) {
-      // insert blank line to add new blocks below image block
+      // Insert blank line to add new blocks below image block
       insertEmptyBlockAtLast(editor);
     }
 
@@ -190,7 +219,7 @@ ImageDialog.propTypes = {
 /* -------------------------------------------------------------------------------------------------
  * BlocksDropdown
  * -----------------------------------------------------------------------------------------------*/
-export const BlocksDropdown = () => {
+export const BlocksDropdown = ({ disabled }) => {
   const editor = useSlate();
   const { formatMessage } = useIntl();
   const [isMediaLibraryVisible, setIsMediaLibraryVisible] = React.useState(false);
@@ -234,7 +263,7 @@ export const BlocksDropdown = () => {
     setSelectedOption(optionKey);
 
     if (optionKey === 'code' && isLastBlockType(editor, 'code')) {
-      // insert blank line to add new blocks below code block
+      // Insert blank line to add new blocks below code block
       insertEmptyBlockAtLast(editor);
     }
 
@@ -242,6 +271,23 @@ export const BlocksDropdown = () => {
       setIsMediaLibraryVisible(true);
     }
   };
+
+  // Listen to the selection change and update the selected block in the dropdown
+  React.useEffect(() => {
+    if (editor.selection) {
+      // Get the parent node of the anchor
+      const [anchorNode] = Editor.parent(editor, editor.selection.anchor);
+      // Find the block key that matches the anchor node
+      const anchorBlockKey = Object.keys(blocks).find((blockKey) =>
+        blocks[blockKey].matchNode(anchorNode)
+      );
+
+      // Change the value selected in the dropdown if it doesn't match the anchor block key
+      if (anchorBlockKey && anchorBlockKey !== selectedOption) {
+        setSelectedOption(anchorBlockKey);
+      }
+    }
+  }, [editor.selection, editor, blocks, selectedOption]);
 
   return (
     <>
@@ -254,6 +300,7 @@ export const BlocksDropdown = () => {
           id: 'components.Blocks.blocks.selectBlock',
           defaultMessage: 'Select a block',
         })}
+        disabled={disabled}
       >
         {blockKeysToInclude.map((key) => (
           <BlockOption
@@ -261,8 +308,6 @@ export const BlocksDropdown = () => {
             value={key}
             label={blocks[key].label}
             icon={blocks[key].icon}
-            matchNode={blocks[key].matchNode}
-            handleSelectOption={setSelectedOption}
             selectedOption={selectedOption}
           />
         ))}
@@ -272,47 +317,21 @@ export const BlocksDropdown = () => {
   );
 };
 
+BlocksDropdown.propTypes = {
+  disabled: PropTypes.bool.isRequired,
+};
+
 /* -------------------------------------------------------------------------------------------------
  * BlockOption
  * -----------------------------------------------------------------------------------------------*/
-const BlockOption = ({ value, icon, label, handleSelectOption, selectedOption, matchNode }) => {
+const BlockOption = ({ value, icon, label, selectedOption }) => {
   const { formatMessage } = useIntl();
-  const editor = useSlate();
 
-  /**
-   * Checks if the block selected in the Editor is the one we're expecting via a matchNode function.
-   * @param {function} matchNode - predicates selection using the editor's selected node
-   */
-  const isBlockActive = (matchNode) => {
-    const { selection } = editor;
-
-    if (!selection) return false;
-
-    const match = Array.from(
-      Editor.nodes(editor, {
-        at: Editor.unhangRange(editor, selection),
-        match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n) && matchNode(n),
-      })
-    );
-
-    return match.length > 0;
-  };
-
-  const isActive = isBlockActive(matchNode);
-  const isSelectedOption = value === selectedOption;
-
-  // TODO: we need to find another solution to handle multi blocks selection
-  // Check if the actual option is selected in the editor (if the block is active)
-  // and update the Dropdown accordingly if the active options is not the selected one
-  React.useEffect(() => {
-    if (isActive && !isSelectedOption) {
-      handleSelectOption(value);
-    }
-  }, [handleSelectOption, isActive, isSelectedOption, value]);
+  const isSelected = value === selectedOption;
 
   return (
     <Option
-      startIcon={<Icon as={icon} color={isSelectedOption ? 'primary600' : 'neutral600'} />}
+      startIcon={<Icon as={icon} color={isSelected ? 'primary600' : 'neutral600'} />}
       value={value}
     >
       {formatMessage(label)}
@@ -327,15 +346,13 @@ BlockOption.propTypes = {
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
   }).isRequired,
-  matchNode: PropTypes.func.isRequired,
-  handleSelectOption: PropTypes.func.isRequired,
   selectedOption: PropTypes.string.isRequired,
 };
 
 /* -------------------------------------------------------------------------------------------------
  * ListButton
  * -----------------------------------------------------------------------------------------------*/
-const ListButton = ({ icon, format, label }) => {
+const ListButton = ({ icon, format, label, disabled }) => {
   const editor = useSlate();
 
   /**
@@ -396,6 +413,7 @@ const ListButton = ({ icon, format, label }) => {
       name={format}
       label={label}
       isActive={isActive}
+      disabled={disabled}
       handleClick={toggleList}
     />
   );
@@ -408,11 +426,24 @@ ListButton.propTypes = {
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
   }).isRequired,
+  disabled: PropTypes.bool.isRequired,
 };
 
 /* -------------------------------------------------------------------------------------------------
  * BlocksToolbar
  * -----------------------------------------------------------------------------------------------*/
+const Separator = styled(Toolbar.Separator)`
+  background: ${({ theme }) => theme.colors.neutral150};
+  width: 1px;
+  height: ${pxToRem(24)};
+`;
+
+const ToolbarWrapper = styled(Flex)`
+  &[aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+`;
+
 // TODO: Remove after the RTE Blocks Alpha release
 const AlphaTag = styled(Box)`
   background-color: ${({ theme }) => theme.colors.warning100};
@@ -422,23 +453,16 @@ const AlphaTag = styled(Box)`
   padding: ${({ theme }) => `${2 / 16}rem ${theme.spaces[1]}`};
 `;
 
-const Separator = styled(Toolbar.Separator)`
-  background: ${({ theme }) => theme.colors.neutral150};
-  width: 1px;
-  height: ${pxToRem(24)};
-`;
-
-const BlocksToolbar = () => {
+const BlocksToolbar = ({ disabled }) => {
   const modifiers = useModifiersStore();
 
   return (
-    <Toolbar.Root asChild>
+    <Toolbar.Root aria-disabled={disabled} asChild>
       {/* Remove after the RTE Blocks Alpha release (paddingRight and width) */}
-      <Flex gap={1} padding={2} paddingRight={4} width="100%">
-        <BlocksDropdown />
-        <Separator />
+      <ToolbarWrapper gap={1} padding={2} paddingRight={4} width="100%">
+        <BlocksDropdown disabled={disabled} />
         <Toolbar.ToggleGroup type="multiple" asChild>
-          <Flex gap={1}>
+          <Flex gap={1} marginLeft={1}>
             {Object.entries(modifiers).map(([name, modifier]) => (
               <ToolbarButton
                 key={name}
@@ -447,6 +471,7 @@ const BlocksToolbar = () => {
                 label={modifier.label}
                 isActive={modifier.checkIsActive()}
                 handleClick={modifier.handleToggle}
+                disabled={disabled}
               />
             ))}
           </Flex>
@@ -461,6 +486,7 @@ const BlocksToolbar = () => {
               }}
               format="unordered"
               icon={BulletList}
+              disabled={disabled}
             />
             <ListButton
               label={{
@@ -469,6 +495,7 @@ const BlocksToolbar = () => {
               }}
               format="ordered"
               icon={NumberList}
+              disabled={disabled}
             />
           </Flex>
         </Toolbar.ToggleGroup>
@@ -480,9 +507,13 @@ const BlocksToolbar = () => {
             </Typography>
           </AlphaTag>
         </Flex>
-      </Flex>
+      </ToolbarWrapper>
     </Toolbar.Root>
   );
+};
+
+BlocksToolbar.propTypes = {
+  disabled: PropTypes.bool.isRequired,
 };
 
 export { BlocksToolbar };

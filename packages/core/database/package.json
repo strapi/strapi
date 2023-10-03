@@ -1,6 +1,6 @@
 {
   "name": "@strapi/database",
-  "version": "4.13.7",
+  "version": "4.14.0",
   "description": "Strapi's database layer",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -33,7 +33,7 @@
     "lint": "run -T eslint ."
   },
   "dependencies": {
-    "@strapi/utils": "4.13.7",
+    "@strapi/utils": "4.14.0",
     "date-fns": "2.30.0",
     "debug": "4.3.4",
     "fs-extra": "10.0.0",
