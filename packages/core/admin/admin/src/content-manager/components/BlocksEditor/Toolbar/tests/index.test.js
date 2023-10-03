@@ -85,7 +85,7 @@ describe('BlocksEditor toolbar', () => {
     expect(screen.getByRole('toolbar')).toBeInTheDocument();
   });
 
-  it('check if a mixed selected content show only one option selected in the dropdown when you select only part of the content', async () => {
+  it('checks if a mixed selected content shows only one option selected in the dropdown when you select only part of the content', async () => {
     setup(mixedInitialValue);
 
     const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
@@ -95,7 +95,7 @@ describe('BlocksEditor toolbar', () => {
       anchor: { path: [1, 0], offset: 0 },
     });
 
-    // the dropdown should show only one option selected which is the block content in the second row
+    // The dropdown should show only one option selected which is the block content in the second row
     expect(within(headingsDropdown).getByText(/text/i)).toBeInTheDocument();
   });
 
@@ -333,7 +333,7 @@ describe('BlocksEditor toolbar', () => {
     ]);
   });
 
-  it('check if a mixed selected content show only one option selected in the dropdown', async () => {
+  it('checks if a mixed selected content shows only one option selected in the dropdown', async () => {
     setup(mixedInitialValue);
 
     const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
@@ -344,7 +344,7 @@ describe('BlocksEditor toolbar', () => {
       focus: Editor.end(baseEditor, []),
     });
 
-    // the dropdown should show only one option selected which is the block content in the first row
+    // The dropdown should show only one option selected which is the block content in the first row
     expect(within(headingsDropdown).getByText(/heading 1/i)).toBeInTheDocument();
   });
 });
