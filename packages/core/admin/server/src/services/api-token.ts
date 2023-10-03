@@ -1,9 +1,9 @@
-'use strict';
+import crypto from 'crypto';
+import { omit, difference, isNil, isEmpty, map, isArray, uniq } from 'lodash/fp';
+import { errors } from '@strapi/utils';
+import constants from './constants';
 
-const crypto = require('crypto');
-const { omit, difference, isNil, isEmpty, map, isArray, uniq } = require('lodash/fp');
-const { ValidationError, NotFoundError } = require('@strapi/utils').errors;
-const constants = require('./constants');
+const { ValidationError, NotFoundError } = errors;
 
 /**
  * @typedef {'read-only'|'full-access'|'custom'} TokenType
@@ -54,7 +54,7 @@ const POPULATE_FIELDS = ['permissions'];
  *
  * @param {ApiToken} token
  */
-const assertCustomTokenPermissionsValidity = (attributes) => {
+const assertCustomTokenPermissionsValidity = (attributes: any) => {
   // Ensure non-custom tokens doesn't have permissions
   if (attributes.type !== constants.API_TOKEN_TYPE.CUSTOM && !isEmpty(attributes.permissions)) {
     throw new ValidationError('Non-custom tokens should not reference permissions');
@@ -68,7 +68,7 @@ const assertCustomTokenPermissionsValidity = (attributes) => {
   // Permissions provided for a custom type token should be valid/registered permissions UID
   if (attributes.type === constants.API_TOKEN_TYPE.CUSTOM) {
     const validPermissions = strapi.contentAPI.permissions.providers.action.keys();
-    const invalidPermissions = difference(attributes.permissions, validPermissions);
+    const invalidPermissions = difference(attributes.permissions, validPermissions) as any;
 
     if (!isEmpty(invalidPermissions)) {
       throw new ValidationError(`Unknown permissions provided: ${invalidPermissions.join(', ')}`);
@@ -81,7 +81,7 @@ const assertCustomTokenPermissionsValidity = (attributes) => {
  *
  * @param {ApiToken} token
  */
-const assertValidLifespan = ({ lifespan }) => {
+const assertValidLifespan = ({ lifespan }: any) => {
   if (isNil(lifespan)) {
     return;
   }
@@ -101,7 +101,7 @@ const assertValidLifespan = ({ lifespan }) => {
  *
  * @returns {ApiToken}
  */
-const flattenTokenPermissions = (token) => {
+const flattenTokenPermissions = (token: any) => {
   if (!token) return token;
   return {
     ...token,
@@ -159,7 +159,7 @@ const exists = async (whereParams = {}) => {
  *
  * @returns {string}
  */
-const hash = (accessKey) => {
+const hash = (accessKey: string) => {
   return crypto
     .createHmac('sha512', strapi.config.get('admin.apiToken.salt'))
     .update(accessKey)
@@ -171,7 +171,7 @@ const hash = (accessKey) => {
  *
  * @returns { { lifespan: null | number, expiresAt: null | number } }
  */
-const getExpirationFields = (lifespan) => {
+const getExpirationFields = (lifespan: any) => {
   // it must be nil or a finite number >= 0
   const isValidNumber = Number.isFinite(lifespan) && lifespan > 0;
   if (!isValidNumber && !isNil(lifespan)) {
@@ -196,7 +196,7 @@ const getExpirationFields = (lifespan) => {
  *
  * @returns {Promise<ApiToken>}
  */
-const create = async (attributes) => {
+const create = async (attributes: any) => {
   const accessKey = crypto.randomBytes(128).toString('hex');
 
   assertCustomTokenPermissionsValidity(attributes);
@@ -249,7 +249,7 @@ const create = async (attributes) => {
  *
  * @returns {Promise<ApiToken>}
  */
-const regenerate = async (id) => {
+const regenerate = async (id: any) => {
   const accessKey = crypto.randomBytes(128).toString('hex');
 
   const apiToken = await strapi.query('admin::api-token').update({
@@ -313,7 +313,7 @@ const list = async () => {
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
-const revoke = async (id) => {
+const revoke = async (id: any) => {
   return strapi
     .query('admin::api-token')
     .delete({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: { id } });
@@ -326,7 +326,7 @@ const revoke = async (id) => {
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
-const getById = async (id) => {
+const getById = async (id: any) => {
   return getBy({ id });
 };
 
@@ -337,7 +337,7 @@ const getById = async (id) => {
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
-const getByName = async (name) => {
+const getByName = async (name: any) => {
   return getBy({ name });
 };
 
@@ -354,7 +354,7 @@ const getByName = async (name) => {
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
-const update = async (id, attributes) => {
+const update = async (id: any, attributes: any) => {
   // retrieve token without permissions
   const originalToken = await strapi.query('admin::api-token').findOne({ where: { id } });
 
@@ -434,11 +434,11 @@ const update = async (id, attributes) => {
 
   return {
     ...updatedToken,
-    permissions: permissionsFromDb ? permissionsFromDb.map((p) => p.action) : undefined,
+    permissions: permissionsFromDb ? permissionsFromDb.map((p: any) => p.action) : undefined,
   };
 };
 
-module.exports = {
+export {
   create,
   regenerate,
   exists,

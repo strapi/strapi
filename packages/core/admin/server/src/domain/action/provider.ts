@@ -12,7 +12,7 @@ import domain from './index';
  * Creates a new instance of an action provider
  * @return {Provider & ActionProviderOverride}
  */
-const createActionProvider = (options: any) => {
+const createActionProvider = (options?: any) => {
   const provider = providerFactory(options);
   const actionHooks = {
     appliesPropertyToSubject: hooks.createAsyncParallelHook(),
@@ -79,4 +79,4 @@ const createActionProvider = (options: any) => {
   };
 };
 
-module.exports = createActionProvider;
+export default createActionProvider;

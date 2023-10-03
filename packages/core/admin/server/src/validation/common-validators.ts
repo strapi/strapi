@@ -10,22 +10,22 @@ const getActionFromProvider = (actionId: string) => {
   return getService('permission').actionProvider.get(actionId);
 };
 
-const email = yup.string().email().lowercase();
+export const email = yup.string().email().lowercase();
 
-const firstname = yup.string().trim().min(1);
+export const firstname = yup.string().trim().min(1);
 
-const lastname = yup.string();
+export const lastname = yup.string();
 
-const username = yup.string().min(1);
+export const username = yup.string().min(1);
 
-const password = yup
+export const password = yup
   .string()
   .min(8)
   .matches(/[a-z]/, '${path} must contain at least one lowercase character')
   .matches(/[A-Z]/, '${path} must contain at least one uppercase character')
   .matches(/\d/, '${path} must contain at least one number');
 
-const roles = yup.array(yup.strapiID()).min(1);
+export const roles = yup.array(yup.strapiID()).min(1);
 
 const isAPluginName = yup
   .string()
@@ -35,7 +35,7 @@ const isAPluginName = yup
       : this.createError({ path: this.path, message: `${this.path} is not an existing plugin` });
   });
 
-const arrayOfConditionNames = yup
+export const arrayOfConditionNames = yup
   .array()
   .of(yup.string())
   .test('is-an-array-of-conditions', 'is not a plugin name', function (value) {
@@ -45,11 +45,9 @@ const arrayOfConditionNames = yup
       : this.createError({ path: this.path, message: `contains conditions that don't exist` });
   });
 
-// TODO: TS - type permission
-const permissionsAreEquals = (a: any, b: any) =>
+export const permissionsAreEquals = (a: any, b: any) =>
   a.action === b.action && (a.subject === b.subject || (_.isNil(a.subject) && _.isNil(b.subject)));
 
-// TODO: TS - type permission
 const checkNoDuplicatedPermissions = (permissions: unknown) =>
   !Array.isArray(permissions) ||
   permissions.every((permA, i) =>
@@ -89,7 +87,7 @@ const fieldsPropertyValidation = (action: Action) =>
       checkNilFields(action)
     );
 
-const permission = yup
+export const permission = yup
   .object()
   .shape({
     action: yup
@@ -129,7 +127,7 @@ const permission = yup
       .object()
       .test('properties-structure', 'Invalid property set at ${path}', function (properties) {
         // @ts-expect-error
-        const action = getActionFromProvider(this.options.parent.action);
+        const action = getActionFromProvider(this.options.parent.action) as any;
         const hasNoProperties = isEmpty(properties) || isNil(properties);
 
         if (!has('options.applyToProperties', action)) {
@@ -153,7 +151,7 @@ const permission = yup
         'Invalid fields property at ${path}',
         async function (properties = {}) {
           // @ts-expect-error
-          const action = getActionFromProvider(this.options.parent.action);
+          const action = getActionFromProvider(this.options.parent.action) as any;
 
           if (!action || !properties) {
             return true;
@@ -183,7 +181,7 @@ const permission = yup
   })
   .noUnknown();
 
-const updatePermissions = yup
+export const updatePermissions = yup
   .object()
   .shape({
     permissions: yup

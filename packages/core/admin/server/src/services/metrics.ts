@@ -1,6 +1,5 @@
-'use strict';
-
-const { getService } = require('../utils');
+import type { Strapi } from '@strapi/types';
+import { getService } from '../utils';
 
 const sendDidInviteUser = async () => {
   const numberOfUsers = await getService('user').count();
@@ -29,13 +28,13 @@ const sendUpdateProjectInformation = async () => {
   });
 };
 
-const startCron = (strapi) => {
+const startCron = (strapi: Strapi) => {
   strapi.cron.add({
     '0 0 0 * * *': () => sendUpdateProjectInformation(),
   });
 };
 
-module.exports = {
+export {
   sendDidInviteUser,
   sendDidUpdateRolePermissions,
   sendDidChangeInterfaceLanguage,

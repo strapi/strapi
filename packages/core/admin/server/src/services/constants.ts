@@ -1,8 +1,6 @@
-'use strict';
-
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
-module.exports = {
+const constants = {
   CONTENT_TYPE_SECTION: 'contentTypes',
   SUPER_ADMIN_CODE: 'strapi-super-admin',
   EDITOR_CODE: 'strapi-editor',
@@ -35,3 +33,5 @@ module.exports = {
     DAYS_90: 90 * DAY_IN_MS,
   },
 };
+
+export = constants;

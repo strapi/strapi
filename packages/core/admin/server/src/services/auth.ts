@@ -1,17 +1,16 @@
-'use strict';
+import bcrypt from 'bcryptjs';
+import _ from 'lodash';
+import { getAbsoluteAdminUrl, errors } from '@strapi/utils';
+import { getService } from '../utils';
 
-const bcrypt = require('bcryptjs');
-const _ = require('lodash');
-const { getAbsoluteAdminUrl } = require('@strapi/utils');
-const { ApplicationError } = require('@strapi/utils').errors;
-const { getService } = require('../utils');
+const { ApplicationError } = errors;
 
 /**
  * hashes a password
  * @param {string} password - password to hash
  * @returns {string} hashed password
  */
-const hashPassword = (password) => bcrypt.hash(password, 10);
+const hashPassword = (password: string) => bcrypt.hash(password, 10);
 
 /**
  * Validate a password
@@ -19,7 +18,7 @@ const hashPassword = (password) => bcrypt.hash(password, 10);
  * @param {string} hash
  * @returns {Promise<boolean>} is the password valid
  */
-const validatePassword = (password, hash) => bcrypt.compare(password, hash);
+const validatePassword = (password: string, hash: string) => bcrypt.compare(password, hash);
 
 /**
  * Check login credentials
@@ -27,7 +26,7 @@ const validatePassword = (password, hash) => bcrypt.compare(password, hash);
  * @param {string} options.email
  * @param {string} options.password
  */
-const checkCredentials = async ({ email, password }) => {
+const checkCredentials = async ({ email, password }: { email: string; password: string }) => {
   const user = await strapi.query('admin::user').findOne({ where: { email } });
 
   if (!user || !user.password) {
@@ -52,7 +51,7 @@ const checkCredentials = async ({ email, password }) => {
  * @param {Object} param params
  * @param {string} param.email user email for which to reset the password
  */
-const forgotPassword = async ({ email } = {}) => {
+const forgotPassword = async ({ email } = {} as { email: string }) => {
   const user = await strapi.query('admin::user').findOne({ where: { email, isActive: true } });
 
   if (!user) {
@@ -81,7 +80,7 @@ const forgotPassword = async ({ email } = {}) => {
         user: _.pick(user, ['email', 'firstname', 'lastname', 'username']),
       }
     )
-    .catch((err) => {
+    .catch((err: any) => {
       // log error server side but do not disclose it to the user to avoid leaking informations
       strapi.log.error(err);
     });
@@ -93,7 +92,9 @@ const forgotPassword = async ({ email } = {}) => {
  * @param {string} param.resetPasswordToken token generated to request a password reset
  * @param {string} param.password new user password
  */
-const resetPassword = async ({ resetPasswordToken, password } = {}) => {
+const resetPassword = async (
+  { resetPasswordToken, password } = {} as { resetPasswordToken: string; password: string }
+) => {
   const matchingUser = await strapi
     .query('admin::user')
     .findOne({ where: { resetPasswordToken, isActive: true } });
@@ -108,10 +109,4 @@ const resetPassword = async ({ resetPasswordToken, password } = {}) => {
   });
 };
 
-module.exports = {
-  checkCredentials,
-  validatePassword,
-  hashPassword,
-  forgotPassword,
-  resetPassword,
-};
+export { checkCredentials, validatePassword, hashPassword, forgotPassword, resetPassword };

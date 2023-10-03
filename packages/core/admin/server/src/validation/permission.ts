@@ -44,8 +44,12 @@ const actionsExistSchema = yup
   )
   .test('actions-exist', '', checkPermissionsExist);
 
+export const validatePermissionsExist = validateYupSchema(actionsExistSchema);
+export const validateCheckPermissionsInput = validateYupSchema(checkPermissionsSchema);
+export const validatedUpdatePermissionsInput = validateYupSchema(validators.updatePermissions);
+
 export default {
-  validatedUpdatePermissionsInput: validateYupSchema(validators.updatePermissions),
-  validatePermissionsExist: validateYupSchema(actionsExistSchema),
-  validateCheckPermissionsInput: validateYupSchema(checkPermissionsSchema),
+  validatedUpdatePermissionsInput,
+  validatePermissionsExist,
+  validateCheckPermissionsInput,
 };

@@ -1,11 +1,9 @@
-'use strict';
-
-const _ = require('lodash');
-const { uniq, startsWith, intersection } = require('lodash/fp');
-const { contentTypes: contentTypesUtils } = require('@strapi/utils');
-const { getService } = require('../utils');
-const actionDomain = require('../domain/action');
-const permissionDomain = require('../domain/permission');
+import _ from 'lodash';
+import { uniq, startsWith, intersection } from 'lodash/fp';
+import { contentTypes as contentTypesUtils } from '@strapi/utils';
+import { getService } from '../utils';
+import actionDomain from '../domain/action';
+import permissionDomain from '../domain/permission';
 
 /**
  * Creates an array of paths to the fields and nested fields, without path nodes
@@ -20,9 +18,9 @@ const permissionDomain = require('../domain/permission');
  * @param model
  */
 const getNestedFields = (
-  model,
+  model: any,
   { prefix = '', nestingLevel = 15, components = {}, requiredOnly = false, existingFields = [] }
-) => {
+): any => {
   if (nestingLevel === 0) {
     return prefix ? [prefix] : [];
   }
@@ -31,7 +29,7 @@ const getNestedFields = (
 
   return _.reduce(
     model.attributes,
-    (fields, attr, key) => {
+    (fields: any, attr: any, key: any) => {
       if (nonAuthorizableFields.includes(key)) return fields;
 
       const fieldPath = prefix ? `${prefix}.${key}` : key;
@@ -40,6 +38,7 @@ const getNestedFields = (
 
       if (attr.type === 'component') {
         if (shouldBeIncluded || insideExistingFields) {
+          // @ts-expect-error
           const compoFields = getNestedFields(components[attr.component], {
             nestingLevel: nestingLevel - 1,
             prefix: fieldPath,
@@ -78,7 +77,7 @@ const getNestedFields = (
  */
 
 const getNestedFieldsWithIntermediate = (
-  model,
+  model: any,
   { prefix = '', nestingLevel = 15, components = {} }
 ) => {
   if (nestingLevel === 0) {
@@ -89,13 +88,14 @@ const getNestedFieldsWithIntermediate = (
 
   return _.reduce(
     model.attributes,
-    (fields, attr, key) => {
+    (fields: any, attr: any, key: any) => {
       if (nonAuthorizableFields.includes(key)) return fields;
 
       const fieldPath = prefix ? `${prefix}.${key}` : key;
       fields.push(fieldPath);
 
       if (attr.type === 'component') {
+        // @ts-expect-error
         const compoFields = getNestedFieldsWithIntermediate(components[attr.component], {
           nestingLevel: nestingLevel - 1,
           prefix: fieldPath,
@@ -120,16 +120,17 @@ const getNestedFieldsWithIntermediate = (
  * @returns {Permission[]}
  */
 const getPermissionsWithNestedFields = (
-  actions,
-  { nestingLevel, restrictedSubjects = [] } = {}
+  actions: any[],
+  { nestingLevel, restrictedSubjects = [] } = {} as any
 ) => {
   return actions.reduce((permissions, action) => {
     const validSubjects = action.subjects.filter(
-      (subject) => !restrictedSubjects.includes(subject)
+      (subject: any) => !restrictedSubjects.includes(subject)
     );
 
     // Create a Permission for each subject (content-type uid) within the action
     for (const subject of validSubjects) {
+      // @ts-expect-error
       const fields = actionDomain.appliesToProperty('fields', action)
         ? getNestedFields(strapi.contentTypes[subject], {
             components: strapi.components,
@@ -157,19 +158,20 @@ const getPermissionsWithNestedFields = (
  * @param {number} options.nestingLevel level of nesting
  * @returns {Permission[]}
  */
-const cleanPermissionFields = (permissions, { nestingLevel } = {}) => {
+const cleanPermissionFields = (permissions: any, { nestingLevel } = {} as any) => {
   const { actionProvider } = getService('permission');
 
-  return permissions.map((permission) => {
+  return permissions.map((permission: any) => {
     const {
       action: actionId,
       subject,
       properties: { fields },
     } = permission;
 
-    const action = actionProvider.get(actionId);
+    const action = actionProvider.get(actionId) as any;
 
     // todo see if it's possible to check property on action + subject (async)
+    // @ts-expect-error
     if (!actionDomain.appliesToProperty('fields', action)) {
       return permissionDomain.deleteProperty('fields', permission);
     }
@@ -190,6 +192,7 @@ const cleanPermissionFields = (permissions, { nestingLevel } = {}) => {
       existingFields: fields,
     });
 
+    // @ts-expect-error
     const badNestedFields = uniq([...intersection(fields, possibleFields), ...requiredFields]);
 
     const newFields = badNestedFields.filter(
@@ -200,7 +203,7 @@ const cleanPermissionFields = (permissions, { nestingLevel } = {}) => {
   }, []);
 };
 
-module.exports = {
+export {
   getNestedFields,
   getPermissionsWithNestedFields,
   cleanPermissionFields,

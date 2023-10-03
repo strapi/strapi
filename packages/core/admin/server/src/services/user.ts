@@ -1,21 +1,19 @@
-'use strict';
+import _ from 'lodash';
+import { defaults } from 'lodash/fp';
+import { stringIncludes, errors } from '@strapi/utils';
+import { createUser, hasSuperAdminRole } from '../domain/user';
+import { password as passwordValidator } from '../validation/common-validators';
+import { getService } from '../utils';
+import { SUPER_ADMIN_CODE } from './constants';
 
-const _ = require('lodash');
-const { defaults } = require('lodash/fp');
-const { stringIncludes } = require('@strapi/utils');
-const { ValidationError } = require('@strapi/utils').errors;
-const { createUser, hasSuperAdminRole } = require('../domain/user');
-const { password: passwordValidator } = require('../validation/common-validators');
-const { getService } = require('../utils');
-const { SUPER_ADMIN_CODE } = require('./constants');
-
-const sanitizeUserRoles = (role) => _.pick(role, ['id', 'name', 'description', 'code']);
+const { ValidationError } = errors;
+const sanitizeUserRoles = (role: string) => _.pick(role, ['id', 'name', 'description', 'code']);
 
 /**
  * Remove private user fields
  * @param {Object} user - user to sanitize
  */
-const sanitizeUser = (user) => {
+const sanitizeUser = (user: any) => {
   return {
     ..._.omit(user, ['password', 'resetPasswordToken', 'registrationToken', 'roles']),
     roles: user.roles && user.roles.map(sanitizeUserRoles),
@@ -27,7 +25,7 @@ const sanitizeUser = (user) => {
  * @param attributes A partial user object
  * @returns {Promise<user>}
  */
-const create = async (attributes) => {
+const create = async (attributes: any) => {
   const userInfo = {
     registrationToken: getService('token').createToken(),
     ...attributes,
@@ -54,7 +52,7 @@ const create = async (attributes) => {
  * @param attributes A partial user object
  * @returns {Promise<user>}
  */
-const updateById = async (id, attributes) => {
+const updateById = async (id: any, attributes: any) => {
   // Check at least one super admin remains
   if (_.has(attributes, 'roles')) {
     const lastAdminUser = await isLastSuperAdminUser(id);
@@ -110,7 +108,7 @@ const updateById = async (id, attributes) => {
  * @param {string} email - user email
  * @param {string} password - new password
  */
-const resetPasswordByEmail = async (email, password) => {
+const resetPasswordByEmail = async (email: string, password: string) => {
   const user = await strapi.query('admin::user').findOne({ where: { email }, populate: ['roles'] });
 
   if (!user) {
@@ -132,7 +130,7 @@ const resetPasswordByEmail = async (email, password) => {
  * Check if a user is the last super admin
  * @param {int|string} userId user's id to look for
  */
-const isLastSuperAdminUser = async (userId) => {
+const isLastSuperAdminUser = async (userId: any) => {
   const user = await findOne(userId);
   const superAdminRole = await getService('role').getSuperAdminWithUsersCount();
 
@@ -153,7 +151,7 @@ const exists = async (attributes = {}) => {
  * @param {string} registrationToken - a user registration token
  * @returns {Promise<registrationInfo>} - Returns user email, firstname and lastname
  */
-const findRegistrationInfo = async (registrationToken) => {
+const findRegistrationInfo = async (registrationToken: string) => {
   const user = await strapi.query('admin::user').findOne({ where: { registrationToken } });
 
   if (!user) {
@@ -169,7 +167,7 @@ const findRegistrationInfo = async (registrationToken) => {
  * @param {Object} params.registrationToken registration token
  * @param {Object} params.userInfo user info
  */
-const register = async ({ registrationToken, userInfo }) => {
+const register = async ({ registrationToken, userInfo }: any) => {
   const matchingUser = await strapi.query('admin::user').findOne({ where: { registrationToken } });
 
   if (!matchingUser) {
@@ -188,7 +186,7 @@ const register = async ({ registrationToken, userInfo }) => {
 /**
  * Find one user
  */
-const findOne = async (id, populate = ['roles']) => {
+const findOne = async (id: any, populate = ['roles']) => {
   return strapi.entityService.findOne('admin::user', id, { populate });
 };
 
@@ -198,7 +196,7 @@ const findOne = async (id, populate = ['roles']) => {
  * @param {string || string[] || object} populate
  * @returns
  */
-const findOneByEmail = async (email, populate = []) => {
+const findOneByEmail = async (email: string, populate = []) => {
   return strapi.query('admin::user').findOne({
     where: { email },
     populate,
@@ -218,7 +216,7 @@ const findPage = async (query = {}) => {
  * @param id id of the user to delete
  * @returns {Promise<user>}
  */
-const deleteById = async (id) => {
+const deleteById = async (id: any) => {
   // Check at least one super admin remains
   const userToDelete = await strapi.query('admin::user').findOne({
     where: { id },
@@ -230,7 +228,7 @@ const deleteById = async (id) => {
   }
 
   if (userToDelete) {
-    if (userToDelete.roles.some((r) => r.code === SUPER_ADMIN_CODE)) {
+    if (userToDelete.roles.some((r: any) => r.code === SUPER_ADMIN_CODE)) {
       const superAdminRole = await getService('role').getSuperAdminWithUsersCount();
       if (superAdminRole.usersCount === 1) {
         throw new ValidationError('You must have at least one user with super admin role.');
@@ -251,7 +249,7 @@ const deleteById = async (id) => {
  * @param ids ids of the users to delete
  * @returns {Promise<user>}
  */
-const deleteByIds = async (ids) => {
+const deleteByIds = async (ids: any[]) => {
   // Check at least one super admin remains
   const superAdminRole = await getService('role').getSuperAdminWithUsersCount();
   const nbOfSuperAdminToDelete = await strapi.query('admin::user').count({
@@ -307,7 +305,7 @@ const count = async (where = {}) => {
 /** Assign some roles to several users
  * @returns {undefined}
  */
-const assignARoleToAll = async (roleId) => {
+const assignARoleToAll = async (roleId: any) => {
   const users = await strapi.query('admin::user').findMany({
     select: ['id'],
     where: {
@@ -345,7 +343,7 @@ const getLanguagesInUse = async () => {
   return users.map((user) => user.preferedLanguage || 'en');
 };
 
-module.exports = {
+export {
   create,
   updateById,
   exists,

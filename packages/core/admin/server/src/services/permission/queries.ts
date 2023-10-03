@@ -8,7 +8,7 @@ import permissionDomain from '../../domain/permission/index';
  * @param rolesIds ids of roles
  * @returns {Promise<array>}
  */
-const deleteByRolesIds = async (rolesIds: string[]) => {
+export const deleteByRolesIds = async (rolesIds: string[]) => {
   const permissionsToDelete = await strapi.query('admin::permission').findMany({
     select: ['id'],
     where: {
@@ -26,7 +26,7 @@ const deleteByRolesIds = async (rolesIds: string[]) => {
  * @param ids ids of permissions
  * @returns {Promise<array>}
  */
-const deleteByIds = async (ids: string[]) => {
+export const deleteByIds = async (ids: string[]) => {
   const result = [];
   for (const id of ids) {
     const queryResult = await strapi.query('admin::permission').delete({ where: { id } });
@@ -40,7 +40,7 @@ const deleteByIds = async (ids: string[]) => {
  * @param permissions
  * @returns {Promise<*[]|*>}
  */
-const createMany = async (permissions: any) => {
+export const createMany = async (permissions: any) => {
   const createdPermissions = [];
   for (const permission of permissions) {
     const newPerm = await strapi.query('admin::permission').create({ data: permission });
@@ -75,7 +75,7 @@ const update = async (params: any, attributes: any) => {
  * @param params query params to find the permissions
  * @returns {Promise<Permission[]>}
  */
-const findMany = async (params = {}) => {
+export const findMany = async (params = {}) => {
   const rawPermissions = await strapi.query('admin::permission').findMany(params);
 
   return permissionDomain.toPermission(rawPermissions);
@@ -86,7 +86,7 @@ const findMany = async (params = {}) => {
  * @param user - user
  * @returns {Promise<Permission[]>}
  */
-const findUserPermissions = async (user: any) => {
+export const findUserPermissions = async (user: any) => {
   return findMany({ where: { role: { users: { id: user.id } } } });
 };
 
@@ -97,7 +97,7 @@ const filterPermissionsToRemove = async (permissions: any) => {
 
   for (const permission of permissions) {
     const { subjects, options = {} } = actionProvider.get(permission.action) || {};
-    const { applyToProperties } = options;
+    const { applyToProperties } = options as any;
 
     const invalidProperties = await Promise.all(
       (applyToProperties || []).map(async (property: any) => {
@@ -128,7 +128,7 @@ const filterPermissionsToRemove = async (permissions: any) => {
  * Removes permissions in database that don't exist anymore
  * @returns {Promise<>}
  */
-const cleanPermissionsInDatabase = async () => {
+export const cleanPermissionsInDatabase = async () => {
   const pageSize = 200;
 
   const contentTypeService = getService('content-type');
@@ -170,6 +170,7 @@ const cleanPermissionsInDatabase = async () => {
     // Execute all the queries, update the database
     await Promise.all([
       deleteByIds(permissionsIdToRemove),
+      // @ts-ignore
       pmap(permissionsNeedingToBeUpdated, updatePromiseProvider, {
         concurrency: 100,
         stopOnError: true,
@@ -178,7 +179,7 @@ const cleanPermissionsInDatabase = async () => {
   }
 };
 
-export {
+export default {
   createMany,
   findMany,
   deleteByRolesIds,

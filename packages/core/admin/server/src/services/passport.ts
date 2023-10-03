@@ -1,27 +1,28 @@
-'use strict';
+// @ts-expect-error
+import passport from 'koa-passport';
+import { isFunction } from 'lodash/fp';
 
-const passport = require('koa-passport');
-const { isFunction } = require('lodash/fp');
-
-const createLocalStrategy = require('./passport/local-strategy');
+import createLocalStrategy from './passport/local-strategy';
 
 const authEventsMapper = {
   onConnectionSuccess: 'admin.auth.success',
   onConnectionError: 'admin.auth.error',
 };
 
-const valueIsFunctionType = ([, value]) => isFunction(value);
-const keyIsValidEventName = ([key]) => {
+const valueIsFunctionType = ([, value]: any) => isFunction(value);
+const keyIsValidEventName = ([key]: any) => {
   return Object.keys(strapi.admin.services.passport.authEventsMapper).includes(key);
 };
 
 const getPassportStrategies = () => [createLocalStrategy(strapi)];
 
 const registerAuthEvents = () => {
-  const { events = {} } = strapi.config.get('admin.auth', {});
+  const { events = {} } = strapi.config.get('admin.auth', {}) as any;
   const { authEventsMapper } = strapi.admin.services.passport;
 
-  const eventList = Object.entries(events).filter(keyIsValidEventName).filter(valueIsFunctionType);
+  const eventList = Object.entries(events)
+    .filter(keyIsValidEventName)
+    .filter(valueIsFunctionType) as any;
 
   for (const [eventName, handler] of eventList) {
     strapi.eventHub.on(authEventsMapper[eventName], handler);
@@ -31,15 +32,11 @@ const registerAuthEvents = () => {
 const init = () => {
   strapi.admin.services.passport
     .getPassportStrategies()
-    .forEach((strategy) => passport.use(strategy));
+    .forEach((strategy: any) => passport.use(strategy));
 
   registerAuthEvents();
 
   return passport.initialize();
 };
 
-module.exports = {
-  init,
-  getPassportStrategies,
-  authEventsMapper,
-};
+export { init, getPassportStrategies, authEventsMapper };

@@ -1,13 +1,12 @@
-'use strict';
-
-const crypto = require('crypto');
-const _ = require('lodash');
-const jwt = require('jsonwebtoken');
+import crypto from 'crypto';
+import _ from 'lodash';
+// @ts-expect-error
+import jwt from 'jsonwebtoken';
 
 const defaultJwtOptions = { expiresIn: '30d' };
 
 const getTokenOptions = () => {
-  const { options, secret } = strapi.config.get('admin.auth', {});
+  const { options, secret } = strapi.config.get('admin.auth', {}) as any;
 
   return {
     secret,
@@ -27,7 +26,7 @@ const createToken = () => {
  * Creates a JWT token for an administration user
  * @param {object} user - admin user
  */
-const createJwtToken = (user) => {
+const createJwtToken = (user: any) => {
   const { options, secret } = getTokenOptions();
 
   return jwt.sign({ id: user.id }, secret, options);
@@ -38,7 +37,7 @@ const createJwtToken = (user) => {
  * @param {string} token - a token to decode
  * @return {Object} decodeInfo - the decoded info
  */
-const decodeJwtToken = (token) => {
+const decodeJwtToken = (token: any) => {
   const { secret } = getTokenOptions();
 
   try {
@@ -61,10 +60,4 @@ For security reasons, prefer storing the secret in an environment variable and r
   }
 };
 
-module.exports = {
-  createToken,
-  createJwtToken,
-  getTokenOptions,
-  decodeJwtToken,
-  checkSecretIsDefined,
-};
+export { createToken, createJwtToken, getTokenOptions, decodeJwtToken, checkSecretIsDefined };

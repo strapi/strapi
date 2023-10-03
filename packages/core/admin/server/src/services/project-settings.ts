@@ -1,12 +1,10 @@
-'use strict';
-
-const fs = require('fs');
-const { pick } = require('lodash');
+import fs from 'fs';
+import { pick } from 'lodash';
 
 const PROJECT_SETTINGS_FILE_INPUTS = ['menuLogo', 'authLogo'];
 
-const parseFilesData = async (files) => {
-  const formatedFilesData = {};
+const parseFilesData = async (files: any) => {
+  const formatedFilesData = {} as any;
 
   await Promise.all(
     PROJECT_SETTINGS_FILE_INPUTS.map(async (inputName) => {
@@ -39,6 +37,7 @@ const parseFilesData = async (files) => {
       Object.assign(formatedFilesData[inputName], {
         stream: getStream(),
         tmpPath: file.path,
+        // @ts-expect-error
         provider: strapi.config.get('plugin.upload').provider,
       });
     })
@@ -51,13 +50,14 @@ const getProjectSettings = async () => {
   const store = strapi.store({ type: 'core', name: 'admin' });
 
   // Returns an object with file inputs names as key and null as value
-  const defaultProjectSettings = PROJECT_SETTINGS_FILE_INPUTS.reduce((prev, cur) => {
+  const defaultProjectSettings = PROJECT_SETTINGS_FILE_INPUTS.reduce((prev: any, cur: any) => {
     prev[cur] = null;
     return prev;
   }, {});
 
   const projectSettings = {
     ...defaultProjectSettings,
+    // @ts-expect-error
     ...(await store.get({ key: 'project-settings' })),
   };
 
@@ -84,12 +84,12 @@ const uploadFiles = async (files = {}) => {
   // Call the provider upload function for each file
   return Promise.all(
     Object.values(files)
-      .filter((file) => file.stream instanceof fs.ReadStream)
+      .filter((file: any) => file.stream instanceof fs.ReadStream)
       .map((file) => strapi.plugin('upload').provider.uploadStream(file))
   );
 };
 
-const deleteOldFiles = async ({ previousSettings, newSettings }) => {
+const deleteOldFiles = async ({ previousSettings, newSettings }: any) => {
   return Promise.all(
     PROJECT_SETTINGS_FILE_INPUTS.map(async (inputName) => {
       // Skip if the store doesn't contain project settings
@@ -111,6 +111,7 @@ const deleteOldFiles = async ({ previousSettings, newSettings }) => {
       }
 
       // Skip if the file was not uploaded with the current provider
+      // @ts-expect-error
       if (strapi.config.get('plugin.upload').provider !== previousSettings[inputName].provider) {
         return;
       }
@@ -122,9 +123,9 @@ const deleteOldFiles = async ({ previousSettings, newSettings }) => {
   );
 };
 
-const updateProjectSettings = async (newSettings) => {
+const updateProjectSettings = async (newSettings: any) => {
   const store = strapi.store({ type: 'core', name: 'admin' });
-  const previousSettings = await store.get({ key: 'project-settings' });
+  const previousSettings = (await store.get({ key: 'project-settings' })) as any;
   const files = pick(newSettings, PROJECT_SETTINGS_FILE_INPUTS);
 
   await uploadFiles(files);
@@ -166,9 +167,4 @@ const updateProjectSettings = async (newSettings) => {
   return getProjectSettings();
 };
 
-module.exports = {
-  deleteOldFiles,
-  parseFilesData,
-  getProjectSettings,
-  updateProjectSettings,
-};
+export { deleteOldFiles, parseFilesData, getProjectSettings, updateProjectSettings };

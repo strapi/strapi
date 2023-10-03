@@ -1,10 +1,9 @@
-'use strict';
+import { isNil } from 'lodash/fp';
+import { errors } from '@strapi/utils';
+import { getService } from '../utils';
+import { AUTHOR_CODE, PUBLISH_ACTION } from './constants';
 
-const { isNil } = require('lodash/fp');
-const { NotFoundError } = require('@strapi/utils').errors;
-const { getService } = require('../utils');
-const { AUTHOR_CODE, PUBLISH_ACTION } = require('./constants');
-
+const { NotFoundError } = errors;
 // TODO: move actionProvider here instead of in the permission service
 
 /**
@@ -12,7 +11,7 @@ const { AUTHOR_CODE, PUBLISH_ACTION } = require('./constants');
  * @param {string|number} roleId
  * @returns {object[]}
  */
-const getAllowedActionsForRole = async (roleId) => {
+const getAllowedActionsForRole = async (roleId: string) => {
   const { actionProvider } = getService('permission');
 
   if (!isNil(roleId)) {
@@ -23,13 +22,11 @@ const getAllowedActionsForRole = async (roleId) => {
     }
 
     if (role.code === AUTHOR_CODE) {
-      return actionProvider.values().filter(({ actionId }) => actionId !== PUBLISH_ACTION);
+      return actionProvider.values().filter(({ actionId }: any) => actionId !== PUBLISH_ACTION);
     }
   }
 
   return actionProvider.values();
 };
 
-module.exports = {
-  getAllowedActionsForRole,
-};
+export { getAllowedActionsForRole };

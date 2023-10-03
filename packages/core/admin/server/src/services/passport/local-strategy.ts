@@ -3,7 +3,7 @@ import { toLower } from 'lodash/fp';
 import { Strategy as LocalStrategy } from 'passport-local';
 import type { Strapi } from '@strapi/types';
 
-const createLocalStrategy = (strapi: Strapi, middleware: any) => {
+const createLocalStrategy = (strapi: Strapi, middleware?: any) => {
   return new LocalStrategy(
     {
       usernameField: 'email',
