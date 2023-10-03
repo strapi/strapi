@@ -289,17 +289,19 @@ export const BlocksDropdown = ({ disabled }) => {
     }
   };
 
+  // This useEffect tried to listen to the selection change and update the selected block in the dropdown
   React.useEffect(() => {
     if (editor.selection) {
-      const [anchorNode] = Editor.parent(editor, editor.selection.anchor); // Get the parent node of the anchor
+      // Get the parent node of the anchor
+      const [anchorNode] = Editor.parent(editor, editor.selection.anchor);
+      // Find the block key that matches the anchor node
       const anchorBlockKey = Object.keys(blocks).find((blockKey) =>
         blocks[blockKey].matchNode(anchorNode)
       );
 
-      if (anchorNode) {
-        if (anchorBlockKey && anchorBlockKey !== blockSelected) {
-          setBlockSelected(anchorBlockKey);
-        }
+      // change the value selected in the dropdown if it doesn't match the anchor block key
+      if (anchorBlockKey && anchorBlockKey !== blockSelected) {
+        setBlockSelected(anchorBlockKey);
       }
     }
   }, [editor.selection, editor, blocks, blockSelected]);
