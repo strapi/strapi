@@ -235,6 +235,9 @@ export function useBlocksStore() {
       matchNode: (node) => node.type === 'paragraph',
       isInBlocksSelector: true,
       handleEnterKey(editor) {
+        /**
+         * We need to keep track of the initial position of the cursor
+         */
         const anchorPathInitialPosition = editor.selection.anchor.path;
         /**
          * Split the nodes where the cursor is. This will create a new paragraph with the content
@@ -257,15 +260,33 @@ export function useBlocksStore() {
          */
         const [createdNode] = Editor.parent(editor, editor.selection.anchor.path);
         Transforms.removeNodes(editor, editor.selection);
-        Transforms.insertNodes(editor, {
-          type: 'paragraph',
-          children: createdNode.children,
-        });
 
-        Transforms.select(
+        /**
+         * Check if after the current position there is another node
+         */
+        const hasNextNode = editor.children.length - anchorPathInitialPosition[0] > 1;
+
+        /**
+         * Insert the new node at the right position. The next line after the editor selection if present or otherwise at the end of the editor.
+         */
+        Transforms.insertNodes(
           editor,
-          editor.start([anchorPathInitialPosition[0] + 1, editor.selection.anchor.path[1]])
+          {
+            type: 'paragraph',
+            children: createdNode.children,
+          },
+          {
+            at: hasNextNode ? [anchorPathInitialPosition[0] + 1] : [editor.children.length],
+          }
         );
+
+        /**
+         * The new selection will by default be at the end of the created node.
+         * Instead we manually move it to the start of the created node.
+         * Use slice(0, -1) to go 1 level higher in the tree,
+         * so we go to the start of the node and not the start of the leaf.
+         */
+        Transforms.select(editor, editor.start([anchorPathInitialPosition.slice(0, -1)[0] + 1]));
       },
     },
     'heading-one': {
