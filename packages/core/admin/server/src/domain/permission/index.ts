@@ -1,3 +1,6 @@
+import { providerFactory } from '@strapi/utils';
+import { Utils } from '@strapi/types';
+
 import {
   pipe,
   set,
@@ -13,16 +16,17 @@ import {
   merge,
 } from 'lodash/fp';
 
-/**
- * Domain representation of a Permission (RBAC)
- * @typedef {Object} Permission
- * @property {string} [id] - The unique identifier of the permission
- * @property {string} [role] - The role associated to a permission
- * @property {string} action - The human readable name of an action
- * @property {string} properties - A set of properties used to define the permission with more granularity
- * @property {string} conditions - Conditions to check when evaluating the permission
- * @property {string} subject - The subject on which the permission should applies
- */
+export type Permission = {
+  id?: string;
+  role?: string;
+  action: string;
+  actionParameters: object;
+  properties: object;
+  conditions: string[];
+  subject: string | null;
+};
+
+type Provider = ReturnType<typeof providerFactory>;
 
 export const permissionFields = [
   'id',
@@ -46,7 +50,6 @@ export const sanitizePermissionFields = pick(sanitizedPermissionFields);
 
 /**
  * Creates a permission with default values
- * @return {Permission}
  */
 const getDefaultPermission = () => ({
   actionParameters: {},
@@ -57,11 +60,11 @@ const getDefaultPermission = () => ({
 
 /**
  * Returns a new permission with the given condition
- * @param {string} condition - The condition to add
- * @param {Permission} permission - The permission on which we want to add the condition
- * @return {Permission}
+ * @param condition - The condition to add
+ * @param permission - The permission on which we want to add the condition
+ * @return
  */
-export const addCondition = curry((condition: any, permission: any) => {
+export const addCondition = curry((condition: string, permission: Permission): Permission => {
   const { conditions } = permission;
   const newConditions = Array.isArray(conditions)
     ? uniq(conditions.concat(condition))
@@ -72,75 +75,85 @@ export const addCondition = curry((condition: any, permission: any) => {
 
 /**
  * Returns a new permission without the given condition
- * @param {string} condition - The condition to remove
- * @param {Permission} permission - The permission on which we want to remove the condition
- * @return {Permission}
+ * @param condition - The condition to remove
+ * @param permission - The permission on which we want to remove the condition
  */
-export const removeCondition = curry((condition: any, permission: any) => {
+export const removeCondition = curry((condition: string, permission: Permission): Permission => {
   return set('conditions', remove(eq(condition), permission.conditions), permission);
 });
 
 /**
  * Gets a property or a part of a property from a permission.
- * @param {string} property - The property to get
- * @param {Permission} permission - The permission on which we want to access the property
- * @return {Permission}
+ * @param property - The property to get
+ * @param permission - The permission on which we want to access the property
  */
-export const getProperty = curry((property: any, permission: any) =>
-  get(`properties.${property}`, permission)
+export const getProperty = curry(
+  (property: string, permission: Permission): Permission =>
+    get(`properties.${property}`, permission)
 );
 
 /**
  * Set a value for a given property on a new permission object
- * @param {string} property - The name of the property
- * @param {any} value - The value of the property
- * @param {Permission} permission - The permission on which we want to set the property
- * @return {Permission}
+ * @param property - The name of the property
+ * @param value - The value of the property
+ * @param permission - The permission on which we want to set the property
  */
-export const setProperty = (property: any, value: any, permission: any) => {
+export const setProperty = (
+  property: string,
+  value: unknown,
+  permission: Permission
+): Permission => {
   return set(`properties.${property}`, value, permission);
 };
 
 /**
  * Returns a new permission without the given property name set
- * @param {string} property - The name of the property to delete
- * @param {Permission} permission - The permission on which we want to remove the property
+ * @param property - The name of the property to delete
+ * @param permission - The permission on which we want to remove the property
  * @return {Permission}
  */
-export const deleteProperty = (property: any, permission: any) =>
+export const deleteProperty = (property: string, permission: Permission) =>
   omit(`properties.${property}`, permission);
 
 /**
  * Creates a new {@link Permission} object from raw attributes. Set default values for certain fields
- * @param {Permission} attributes
- * @return {Permission}
+ * @param  attributes
  */
-export const create = (attributes: any) => {
-  return pipe(pick(permissionFields), merge(getDefaultPermission()))(attributes);
+export const create = (
+  attributes: Utils.Object.PartialBy<
+    Permission,
+    'actionParameters' | 'conditions' | 'properties' | 'subject'
+  >
+) => {
+  return pipe(pick(permissionFields), merge(getDefaultPermission()))(attributes) as Permission;
 };
 
 /**
  * Using the given condition provider, check and remove invalid condition from the permission's condition array.
- * @param {object} provider - The condition provider used to do the checks
- * @param {Permission} permission - The condition to sanitize
- * @return {Permission}
+ * @param provider - The condition provider used to do the checks
+ * @param permission - The condition to sanitize
  */
-export const sanitizeConditions = curry((provider: any, permission: any) => {
-  if (!isArray(permission.conditions)) {
-    return permission;
-  }
+export const sanitizeConditions = curry(
+  (provider: Provider, permission: Permission): Permission => {
+    if (!isArray(permission.conditions)) {
+      return permission;
+    }
 
-  return permission.conditions
-    .filter((condition: any) => !provider.has(condition))
-    .reduce((perm: any, condition: any) => removeCondition(condition, perm), permission);
-});
+    return permission.conditions
+      .filter((condition: string) => !provider.has(condition))
+      .reduce(
+        (perm: Permission, condition: string) => removeCondition(condition, perm),
+        permission
+      );
+  }
+);
 
 /**
  * Transform raw attributes into valid permissions using the create domain function.
- * @param {object | object[]} payload - Can either be a single object of attributes or an array of those objects.
- * @return {Permission | Permission[]}
+ * @param  payload - Can either be a single object of attributes or an array of those objects.
  */
-export const toPermission = (payload: object | object[]) =>
+export const toPermission = (payload: object | object[]): Permission =>
+  // @ts-expect-error
   isArray(payload) ? map(create, payload) : create(payload);
 
 export default {

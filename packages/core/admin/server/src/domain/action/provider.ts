@@ -1,18 +1,15 @@
 import { providerFactory, hooks } from '@strapi/utils';
 import { validateRegisterProviderAction } from '../../validation/action-provider';
-import domain from './index';
 
-/**
- * @typedef ActionProviderOverride
- * @property {function(CreateActionPayload)} register
- * @property {function(attributes CreateActionPayload[]): Promise<this>} registerMany
- */
+import domain from './index';
+import type { Action, CreateActionPayload } from './index';
+
+type Options = Parameters<typeof providerFactory>['0'];
 
 /**
  * Creates a new instance of an action provider
- * @return {Provider & ActionProviderOverride}
  */
-const createActionProvider = (options?: any) => {
+const createActionProvider = (options?: Options) => {
   const provider = providerFactory(options);
   const actionHooks = {
     appliesPropertyToSubject: hooks.createAsyncParallelHook(),
@@ -26,19 +23,19 @@ const createActionProvider = (options?: any) => {
       ...actionHooks,
     },
 
-    async register(actionAttributes: any) {
+    async register(actionAttributes: CreateActionPayload) {
       if (strapi.isLoaded) {
         throw new Error(`You can't register new actions outside of the bootstrap function.`);
       }
 
       validateRegisterProviderAction([actionAttributes]);
 
-      const action = domain.create(actionAttributes) as any;
+      const action = domain.create(actionAttributes);
 
       return provider.register(action.actionId, action);
     },
 
-    async registerMany(actionsAttributes: any) {
+    async registerMany(actionsAttributes: CreateActionPayload[]) {
       validateRegisterProviderAction(actionsAttributes);
 
       for (const attributes of actionsAttributes) {
@@ -49,8 +46,11 @@ const createActionProvider = (options?: any) => {
     },
 
     async appliesToProperty(property: string, actionId: string, subject: string) {
-      const action = provider.get(actionId) as any;
-      // @ts-expect-error
+      const action = provider.get(actionId) as Action | undefined;
+      if (!action) {
+        return false;
+      }
+
       const appliesToAction = domain.appliesToProperty(property, action);
 
       // If the property isn't valid for this action, ignore the rest of the checks

@@ -130,7 +130,6 @@ const getPermissionsWithNestedFields = (
 
     // Create a Permission for each subject (content-type uid) within the action
     for (const subject of validSubjects) {
-      // @ts-expect-error
       const fields = actionDomain.appliesToProperty('fields', action)
         ? getNestedFields(strapi.contentTypes[subject], {
             components: strapi.components,
@@ -171,7 +170,6 @@ const cleanPermissionFields = (permissions: any, { nestingLevel } = {} as any) =
     const action = actionProvider.get(actionId) as any;
 
     // todo see if it's possible to check property on action + subject (async)
-    // @ts-expect-error
     if (!actionDomain.appliesToProperty('fields', action)) {
       return permissionDomain.deleteProperty('fields', permission);
     }

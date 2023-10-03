@@ -147,6 +147,7 @@ export const cleanPermissionsInDatabase = async () => {
     const permissionsIdToRemove = map(prop('id'), permissionsToRemove);
 
     // 2. Clean permissions' fields (add required ones, remove the non-existing ones)
+    // @ts-expect-error - Make toPermission return an array if the input was an array
     const remainingPermissions = permissions.filter(
       (permission: any) => !permissionsIdToRemove.includes(permission.id)
     );

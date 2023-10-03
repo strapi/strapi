@@ -336,6 +336,7 @@ const assignPermissions = async (roleId: string, permissions = []) => {
     // Add the role attribute to every permission
     .map(assignRole)
     // Transform each permission into a Permission instance
+    // @ts-expect-error
     .map(permissionDomain.create);
 
   const existingPermissions = (await getService('permission').findMany({
@@ -380,6 +381,7 @@ const addPermissions = async (roleId: string, permissions: any) => {
 
   const permissionsWithRole = permissions
     .map(set('role', roleId))
+    // @ts-expect-error
     .map(sanitizeConditions(conditionProvider))
     .map(permissionDomain.create);
 
@@ -416,9 +418,11 @@ const resetSuperAdminPermissions = async () => {
 
     if (isArray(subjects)) {
       acc.push(
+        // @ts-expect-error
         ...subjects.map((subject) => permissionDomain.create({ action: actionId, subject }))
       );
     } else {
+      // @ts-expect-error
       acc.push(permissionDomain.create({ action: actionId }));
     }
 

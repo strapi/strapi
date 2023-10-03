@@ -1,5 +1,6 @@
 import { providerFactory } from '@strapi/utils';
 import domain from '.';
+import type { CreateConditionPayload } from '.';
 
 /**
  * @typedef ConditionProviderOverride
@@ -17,7 +18,7 @@ const createConditionProvider = () => {
   return {
     ...provider,
 
-    async register(conditionAttributes: any) {
+    async register(conditionAttributes: CreateConditionPayload) {
       if (strapi.isLoaded) {
         throw new Error(`You can't register new conditions outside of the bootstrap function.`);
       }
@@ -27,7 +28,7 @@ const createConditionProvider = () => {
       return provider.register(condition.id, condition);
     },
 
-    async registerMany(conditionsAttributes: any) {
+    async registerMany(conditionsAttributes: CreateConditionPayload[]) {
       for (const attributes of conditionsAttributes) {
         await this.register(attributes);
       }

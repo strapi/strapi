@@ -1,24 +1,22 @@
 import { pipe, merge, set, pick } from 'lodash/fp';
+import { Utils } from '@strapi/types';
 
-/**
- * The handler of a {@link Condition}
- * @typedef {(function(user: Object, options: Object): Object | boolean)} ConditionHandler
- */
-/**
- * Domain representation of a Condition (RBAC)
- * @typedef {Object} Condition
- * @property {string} id - The identifier of the condition
- * @property {string} displayName - The display name of a condition
- * @property {string} name - The name of a condition
- * @property {string} [plugin] - The plugin which provide the condition
- * @property {string} [category] - The main category of a condition
- * @property {ConditionHandler} handler - The handler of a condition
- */
+export type Condition = {
+  id: string;
+  displayName: string;
+  name: string;
+  plugin?: string;
+  category?: string;
+  /**
+   * The handler of a {@link Condition}
+   */
+  handler: (user: object, options: object) => object | boolean;
+};
 
 /**
  * Set of attributes used to create a new {@link Action} object
- * typedef {Condition, { uid: string }} CreateConditionPayload
  */
+export type CreateConditionPayload = Omit<Condition, 'id'>;
 
 const DEFAULT_CATEGORY = 'default';
 
@@ -34,20 +32,14 @@ export const getDefaultConditionAttributes = () => ({
  * Get the list of all the valid attributes of a {@link Condition}
  * @return {string[]}
  */
-export const conditionFields = ['id', 'displayName', 'handler', 'plugin', 'category'];
+export const conditionFields = ['id', 'displayName', 'handler', 'plugin', 'category'] as const;
 
 /**
  * Remove unwanted attributes from a {@link Condition}
- * @type {function(action: Condition | CreateConditionPayload): Condition}
  */
 export const sanitizeConditionAttributes = pick(conditionFields);
 
-/**
- *
- * @param condition
- * @return {string}
- */
-export const computeConditionId = (condition: any) => {
+export const computeConditionId = (condition: CreateConditionPayload) => {
   const { name, plugin } = condition;
 
   if (!plugin) {
@@ -63,22 +55,24 @@ export const computeConditionId = (condition: any) => {
 
 /**
  * Assign an id attribute to a {@link CreateConditionPayload} object
- * @param {CreateConditionPayload} attrs - Payload used to create a condition
- * @return {CreateConditionPayload}
+ * @param  attrs - Payload used to create a condition
  */
-export const assignConditionId = (attrs: any) => set('id', computeConditionId(attrs), attrs);
+export const assignConditionId = (attrs: CreateConditionPayload): Condition => {
+  const condition = set('id', computeConditionId(attrs), attrs) as CreateConditionPayload & {
+    id: string;
+  };
+  return condition;
+};
 
 /**
  * Transform the given attributes into a domain representation of a Condition
- * @type (function(CreateConditionPayload): Condition)
- * @param {CreateConditionPayload} payload - The condition payload containing the attributes needed to create a {@link Condition}
- * @return {Condition}
+ * @param payload - The condition payload containing the attributes needed to create a {@link Condition}
  */
 export const create = pipe(
   assignConditionId,
   sanitizeConditionAttributes,
   merge(getDefaultConditionAttributes())
-);
+) as (payload: CreateConditionPayload) => Condition;
 
 export default {
   assignConditionId,

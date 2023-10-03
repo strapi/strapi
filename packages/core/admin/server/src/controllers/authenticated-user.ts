@@ -44,6 +44,7 @@ export default {
     const userPermissions = await findUserPermissions(user);
 
     ctx.body = {
+      // @ts-expect-error
       data: userPermissions.map(sanitizePermission),
     };
   },

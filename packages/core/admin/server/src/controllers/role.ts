@@ -114,6 +114,7 @@ export default {
 
     const permissions = await permissionService.findMany({ where: { role: { id: role.id } } });
 
+    // @ts-expect-error
     const sanitizedPermissions = permissions.map(permissionService.sanitizePermission);
 
     ctx.body = {

@@ -61,7 +61,6 @@ const checkNilFields = (action: Action) =>
       return true;
     }
 
-    // @ts-expect-error
     return actionDomain.appliesToProperty('fields', action) || isNil(fields);
   };
 
@@ -157,7 +156,6 @@ export const permission = yup
             return true;
           }
 
-          // @ts-expect-error
           if (!actionDomain.appliesToProperty('fields', action)) {
             return true;
           }

@@ -134,6 +134,7 @@ const isLastSuperAdminUser = async (userId: any) => {
   const user = await findOne(userId);
   const superAdminRole = await getService('role').getSuperAdminWithUsersCount();
 
+  // @ts-expect-error
   return superAdminRole.usersCount === 1 && hasSuperAdminRole(user);
 };
 
