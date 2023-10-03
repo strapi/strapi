@@ -465,6 +465,7 @@ const LinkButton = () => {
       }}
       isActive={isLinkActive}
       handleClick={addLink}
+      disabled={false}
     />
   );
 };
