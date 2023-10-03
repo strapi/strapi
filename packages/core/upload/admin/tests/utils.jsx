@@ -8,6 +8,7 @@ import {
   render as renderRTL,
   waitFor,
   act,
+  fireEvent,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PropTypes from 'prop-types';
@@ -92,4 +93,4 @@ const renderHook = (hook, options) => {
   });
 };
 
-export { render, renderHook, waitFor, server, act };
+export { render, renderHook, waitFor, server, act, fireEvent };
