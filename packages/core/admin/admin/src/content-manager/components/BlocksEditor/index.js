@@ -37,6 +37,48 @@ const Wrapper = styled(Box)`
   border-radius: ${({ theme }) => theme.borderRadius};
 `;
 
+/**
+ * Keep track how how many times Slate detected a change from a user interaction in the editor
+ * VS how many times the value prop was updated, whether from within editor or from outside
+ * If these 2 values are different, it means the value prop was updated from outside
+ * In this case, change the key of the Slate editor to force a rerender, so that it picks up the new value
+ * This is needed for i18n to work properly (when switching locale or filling from another locale)
+ * because Slate is an uncontrolled component, so we can't force a value update from outside
+ */
+
+/**
+ * Forces an update of the Slate editor when the value prop changes from outside of Slate.
+ * @param {import('slate').Descendant[]} value
+ * @returns {{
+ *   key: number,
+ *   incrementSlateUpdatesCount: () => void
+ * }}
+ */
+function useResetKey(value) {
+  // Keep track how how many times Slate detected a change from a user interaction in the editor
+  const slateUpdatesCount = React.useRef(0);
+  // Keep track of how many times the value prop was updated, whether from within editor or from outside
+  const valueUpdatesCount = React.useRef(0);
+  // Use a key to force a rerender of the Slate editor when needed
+  const [key, setKey] = React.useState(0);
+
+  React.useEffect(() => {
+    valueUpdatesCount.current += 1;
+
+    // If the 2 refs are not equal, it means the value was updated from outside
+    if (valueUpdatesCount.current !== slateUpdatesCount.current) {
+      // So we change the key to force a rerender of the Slate editor,
+      // which will pick up the new value through its initialValue prop
+      setKey((previousKey) => previousKey + 1);
+
+      // Then bring the 2 refs back in sync
+      slateUpdatesCount.current = valueUpdatesCount.current;
+    }
+  }, [value]);
+
+  return { key, incrementSlateUpdatesCount: () => (slateUpdatesCount.current += 1) };
+}
+
 const BlocksEditor = React.forwardRef(
   ({ intlLabel, labelAction, name, disabled, required, error, value, onChange }, ref) => {
     const { formatMessage } = useIntl();
@@ -63,10 +105,14 @@ const BlocksEditor = React.forwardRef(
       [editor]
     );
 
+    const { key, incrementSlateUpdatesCount } = useResetKey(value);
+
     const handleSlateChange = (state) => {
       const isAstChange = editor.operations.some((op) => op.type !== 'set_selection');
 
       if (isAstChange) {
+        incrementSlateUpdatesCount();
+
         onChange({
           target: { name, value: state, type: 'blocks' },
         });
@@ -87,6 +133,7 @@ const BlocksEditor = React.forwardRef(
             editor={editor}
             initialValue={value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]}
             onChange={handleSlateChange}
+            key={key}
           >
             <InputWrapper direction="column" alignItems="flex-start">
               <BlocksToolbar disabled={disabled} />
