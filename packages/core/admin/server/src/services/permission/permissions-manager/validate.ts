@@ -1,8 +1,6 @@
-'use strict';
-
-const { subject: asSubject, detectSubjectType } = require('@casl/ability');
-const { permittedFieldsOf } = require('@casl/ability/extra');
-const {
+import { subject as asSubject, detectSubjectType } from '@casl/ability';
+import { permittedFieldsOf } from '@casl/ability/extra';
+import {
   defaults,
   omit,
   isArray,
@@ -15,19 +13,13 @@ const {
   intersection,
   getOr,
   isObject,
-} = require('lodash/fp');
+} from 'lodash/fp';
 
-const {
-  contentTypes,
-  traverseEntity,
-  traverse,
-  validate,
-  pipeAsync,
-  errors: { ValidationError },
-} = require('@strapi/utils');
+import { contentTypes, traverseEntity, traverse, validate, pipeAsync, errors } from '@strapi/utils';
+import { ADMIN_USER_ALLOWED_FIELDS } from '../../../domain/user';
 
+const { ValidationError } = errors;
 const { throwPassword, throwDisallowedFields } = validate.visitors;
-const { ADMIN_USER_ALLOWED_FIELDS } = require('../../../domain/user');
 
 const { constants, isScalarAttribute, getNonVisibleAttributes, getWritableAttributes } =
   contentTypes;
@@ -44,14 +36,14 @@ const COMPONENT_FIELDS = ['__component'];
 
 const STATIC_FIELDS = [ID_ATTRIBUTE];
 
-const throwInvalidParam = ({ key }) => {
+const throwInvalidParam = ({ key }: any) => {
   throw new ValidationError(`Invalid parameter ${key}`);
 };
 
-module.exports = ({ action, ability, model }) => {
+export default ({ action, ability, model }: any) => {
   const schema = strapi.getModel(model);
 
-  const createValidateQuery = (options = {}) => {
+  const createValidateQuery = (options = {} as any) => {
     const { fields } = options;
 
     // TODO: validate relations to admin users in all validators
@@ -90,7 +82,7 @@ module.exports = ({ action, ability, model }) => {
       traverse.traverseQueryFields(throwPassword, { schema })
     );
 
-    return async (query) => {
+    return async (query: any) => {
       if (query.filters) {
         await validateFilters(query.filters);
       }
@@ -107,7 +99,7 @@ module.exports = ({ action, ability, model }) => {
     };
   };
 
-  const createValidateInput = (options = {}) => {
+  const createValidateInput = (options = {} as any) => {
     const { fields } = options;
 
     const permittedFields = fields.shouldIncludeAll ? null : getInputFields(fields.permitted);
@@ -116,16 +108,18 @@ module.exports = ({ action, ability, model }) => {
       // Remove fields hidden from the admin
       traverseEntity(throwHiddenFields, { schema }),
       // Remove not allowed fields (RBAC)
+      // @ts-expect-error
       traverseEntity(throwDisallowedFields(permittedFields), { schema }),
       // Remove roles from createdBy & updatedBy fields
       omitCreatorRoles
     );
   };
 
-  const wrapValidate = (createValidateFunction) => {
+  const wrapValidate = (createValidateFunction: any) => {
+    // @ts-expect-error
     const wrappedValidate = async (data, options = {}) => {
       if (isArray(data)) {
-        return Promise.all(data.map((entity) => wrappedValidate(entity, options)));
+        return Promise.all(data.map((entity: any) => wrappedValidate(entity, options)));
       }
 
       const { subject, action: actionOverride } = getDefaultOptions(data, options);
@@ -157,7 +151,7 @@ module.exports = ({ action, ability, model }) => {
     return wrappedValidate;
   };
 
-  const getDefaultOptions = (data, options) => {
+  const getDefaultOptions = (data: any, options: any) => {
     return defaults({ subject: asSubject(model, data), action }, options);
   };
 
@@ -169,7 +163,7 @@ module.exports = ({ action, ability, model }) => {
   /**
    * Visitor used to remove hidden fields from the admin API responses
    */
-  const throwHiddenFields = ({ key, schema }) => {
+  const throwHiddenFields = ({ key, schema }: any) => {
     const isHidden = getOr(false, ['config', 'attributes', key, 'hidden'], schema);
 
     if (isHidden) {
@@ -180,7 +174,7 @@ module.exports = ({ action, ability, model }) => {
   /**
    * Visitor used to omit disallowed fields from the admin users entities & avoid leaking sensitive information
    */
-  const throwDisallowedAdminUserFields = ({ key, attribute, schema }) => {
+  const throwDisallowedAdminUserFields = ({ key, attribute, schema }: any) => {
     if (schema.uid === 'admin::user' && attribute && !ADMIN_USER_ALLOWED_FIELDS.includes(key)) {
       throwInvalidParam({ key });
     }

@@ -1,27 +1,26 @@
-'use strict';
+/* eslint-disable @typescript-eslint/default-param-last */
+import _ = require('lodash');
+import { cloneDeep, isPlainObject } from 'lodash/fp';
+import { subject as asSubject } from '@casl/ability';
+import createSanitizeHelpers from './sanitize';
+import createValidateHelpers from './validate';
 
-const _ = require('lodash');
-const { cloneDeep, isPlainObject } = require('lodash/fp');
-const { subject: asSubject } = require('@casl/ability');
-const createSanitizeHelpers = require('./sanitize');
-const createValidateHelpers = require('./validate');
+import { buildStrapiQuery, buildCaslQuery } from './query-builders';
 
-const { buildStrapiQuery, buildCaslQuery } = require('./query-builders');
-
-module.exports = ({ ability, action, model }) => ({
+export default ({ ability, action, model }: any) => ({
   ability,
   action,
   model,
 
-  get isAllowed() {
+  get isAllowed(): any {
     return this.ability.can(action, model);
   },
 
-  toSubject(target, subjectType = model) {
+  toSubject(target: any, subjectType = model) {
     return asSubject(subjectType, target);
   },
 
-  pickPermittedFieldsOf(data, options = {}) {
+  pickPermittedFieldsOf(data: any, options = {}) {
     return this.sanitizeInput(data, options);
   },
 
@@ -33,7 +32,7 @@ module.exports = ({ ability, action, model }) => ({
     return buildStrapiQuery(buildCaslQuery(ability, queryAction, model));
   },
 
-  addPermissionsQueryTo(query = {}, action) {
+  addPermissionsQueryTo(query = {} as any, action: any) {
     const newQuery = cloneDeep(query);
     const permissionQuery = this.getQuery(action) ?? undefined;
 

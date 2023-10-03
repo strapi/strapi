@@ -1,8 +1,6 @@
-'use strict';
-
-const { subject: asSubject, detectSubjectType } = require('@casl/ability');
-const { permittedFieldsOf } = require('@casl/ability/extra');
-const {
+import { subject as asSubject, detectSubjectType } from '@casl/ability';
+import { permittedFieldsOf } from '@casl/ability/extra';
+import {
   defaults,
   omit,
   isArray,
@@ -17,11 +15,14 @@ const {
   getOr,
   isObject,
   cloneDeep,
-} = require('lodash/fp');
+} from 'lodash/fp';
 
-const { contentTypes, traverseEntity, sanitize, pipeAsync, traverse } = require('@strapi/utils');
-const { removePassword } = require('@strapi/utils').sanitize.visitors;
-const { ADMIN_USER_ALLOWED_FIELDS } = require('../../../domain/user');
+import { contentTypes, traverseEntity, sanitize, pipeAsync, traverse } from '@strapi/utils';
+import { ADMIN_USER_ALLOWED_FIELDS } from '../../../domain/user';
+
+const {
+  visitors: { removePassword },
+} = sanitize;
 
 const {
   constants,
@@ -42,12 +43,12 @@ const {
 const COMPONENT_FIELDS = ['__component'];
 const STATIC_FIELDS = [ID_ATTRIBUTE];
 
-module.exports = ({ action, ability, model }) => {
+export default ({ action, ability, model }: any) => {
   const schema = strapi.getModel(model);
 
   const { removeDisallowedFields } = sanitize.visitors;
 
-  const createSanitizeQuery = (options = {}) => {
+  const createSanitizeQuery = (options = {} as any) => {
     const { fields } = options;
 
     // TODO: sanitize relations to admin users in all sanitizers
@@ -96,7 +97,7 @@ module.exports = ({ action, ability, model }) => {
       traverse.traverseQueryFields(removePassword, { schema })
     );
 
-    return async (query) => {
+    return async (query: any) => {
       const sanitizedQuery = cloneDeep(query);
 
       if (query.filters) {
@@ -119,7 +120,7 @@ module.exports = ({ action, ability, model }) => {
     };
   };
 
-  const createSanitizeOutput = (options = {}) => {
+  const createSanitizeOutput = (options = {} as any) => {
     const { fields } = options;
 
     const permittedFields = fields.shouldIncludeAll ? null : getOutputFields(fields.permitted);
@@ -128,6 +129,7 @@ module.exports = ({ action, ability, model }) => {
       // Remove fields hidden from the admin
       traverseEntity(omitHiddenFields, { schema }),
       // Remove unallowed fields from admin::user relations
+      // @ts-expect-error
       traverseEntity(pickAllowedAdminUserFields, { schema }),
       // Remove not allowed fields (RBAC)
       traverseEntity(removeDisallowedFields(permittedFields), { schema }),
@@ -136,7 +138,7 @@ module.exports = ({ action, ability, model }) => {
     );
   };
 
-  const createSanitizeInput = (options = {}) => {
+  const createSanitizeInput = (options = {} as any) => {
     const { fields } = options;
 
     const permittedFields = fields.shouldIncludeAll ? null : getInputFields(fields.permitted);
@@ -145,16 +147,18 @@ module.exports = ({ action, ability, model }) => {
       // Remove fields hidden from the admin
       traverseEntity(omitHiddenFields, { schema }),
       // Remove not allowed fields (RBAC)
+      // @ts-expect-error
       traverseEntity(removeDisallowedFields(permittedFields), { schema }),
       // Remove roles from createdBy & updateBy fields
       omitCreatorRoles
     );
   };
 
-  const wrapSanitize = (createSanitizeFunction) => {
-    const wrappedSanitize = async (data, options = {}) => {
+  const wrapSanitize = (createSanitizeFunction: any) => {
+    // @ts-expect-error
+    const wrappedSanitize = async (data: any, options = {} as any) => {
       if (isArray(data)) {
-        return Promise.all(data.map((entity) => wrappedSanitize(entity, options)));
+        return Promise.all(data.map((entity: any) => wrappedSanitize(entity, options)));
       }
 
       const { subject, action: actionOverride } = getDefaultOptions(data, options);
@@ -186,7 +190,7 @@ module.exports = ({ action, ability, model }) => {
     return wrappedSanitize;
   };
 
-  const getDefaultOptions = (data, options) => {
+  const getDefaultOptions = (data: any, options: any) => {
     return defaults({ subject: asSubject(model, data), action }, options);
   };
 
@@ -198,7 +202,7 @@ module.exports = ({ action, ability, model }) => {
   /**
    * Visitor used to remove hidden fields from the admin API responses
    */
-  const omitHiddenFields = ({ key, schema }, { remove }) => {
+  const omitHiddenFields = ({ key, schema }: any, { remove }: any) => {
     const isHidden = getOr(false, ['config', 'attributes', key, 'hidden'], schema);
 
     if (isHidden) {
@@ -209,7 +213,7 @@ module.exports = ({ action, ability, model }) => {
   /**
    * Visitor used to only select needed fields from the admin users entities & avoid leaking sensitive information
    */
-  const pickAllowedAdminUserFields = ({ attribute, key, value }, { set }) => {
+  const pickAllowedAdminUserFields = ({ attribute, key, value }: any, { set }: any) => {
     const pickAllowedFields = pick(ADMIN_USER_ALLOWED_FIELDS);
 
     if (attribute.type === 'relation' && attribute.target === 'admin::user' && value) {
@@ -224,7 +228,7 @@ module.exports = ({ action, ability, model }) => {
   /**
    * Visitor used to omit disallowed fields from the admin users entities & avoid leaking sensitive information
    */
-  const omitDisallowedAdminUserFields = ({ key, attribute, schema }, { remove }) => {
+  const omitDisallowedAdminUserFields = ({ key, attribute, schema }: any, { remove }: any) => {
     if (schema.uid === 'admin::user' && attribute && !ADMIN_USER_ALLOWED_FIELDS.includes(key)) {
       remove(key);
     }

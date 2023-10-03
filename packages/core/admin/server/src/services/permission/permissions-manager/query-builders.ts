@@ -1,8 +1,6 @@
-'use strict';
-
 // TODO: migration
-const _ = require('lodash');
-const { rulesToQuery } = require('@casl/ability/extra');
+import _ from 'lodash';
+import { rulesToQuery } from '@casl/ability/extra';
 
 const operatorsMap = {
   $in: '$in',
@@ -17,34 +15,35 @@ const operatorsMap = {
   $and: '$and',
   $or: '$or',
   $not: '$not',
-};
+} as const;
 
-const mapKey = (key) => {
+const mapKey = (key: keyof typeof operatorsMap) => {
   if (_.isString(key) && key.startsWith('$') && key in operatorsMap) {
     return operatorsMap[key];
   }
   return key;
 };
 
-const buildCaslQuery = (ability, action, model) => {
+const buildCaslQuery = (ability: any, action: any, model: any) => {
+  // @ts-expect-error
   return rulesToQuery(ability, action, model, (o) => o.conditions);
 };
 
-const buildStrapiQuery = (caslQuery) => {
+const buildStrapiQuery = (caslQuery: any) => {
   return unwrapDeep(caslQuery);
 };
 
-const unwrapDeep = (obj) => {
+const unwrapDeep = (obj: any): any => {
   if (!_.isPlainObject(obj) && !_.isArray(obj)) {
     return obj;
   }
   if (_.isArray(obj)) {
-    return obj.map((v) => unwrapDeep(v));
+    return obj.map((v: any) => unwrapDeep(v));
   }
 
   return _.reduce(
     obj,
-    (acc, v, k) => {
+    (acc, v, k: any) => {
       const key = mapKey(k);
 
       if (_.isPlainObject(v)) {
@@ -66,7 +65,4 @@ const unwrapDeep = (obj) => {
   );
 };
 
-module.exports = {
-  buildCaslQuery,
-  buildStrapiQuery,
-};
+export { buildCaslQuery, buildStrapiQuery };
