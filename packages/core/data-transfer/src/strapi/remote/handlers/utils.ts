@@ -333,8 +333,10 @@ export const handlerControllerFactory =
           } catch (err) {
             strapi?.log?.error('[Data transfer] Uncaught error closing connection');
             strapi?.log?.error(err);
+            cannotRespondHandler(err);
+          } finally {
+            resetTimeouts();
           }
-          resetTimeouts();
         });
         ws.on('error', async (...args) => {
           try {
@@ -342,6 +344,7 @@ export const handlerControllerFactory =
           } catch (err) {
             strapi?.log?.error('[Data transfer] Uncaught error in error handling');
             strapi?.log?.error(err);
+            cannotRespondHandler(err);
           }
         });
         ws.on('message', async (...args) => {
@@ -350,6 +353,7 @@ export const handlerControllerFactory =
           } catch (err) {
             strapi?.log?.error('[Data transfer] Uncaught error in message handling');
             strapi?.log?.error(err);
+            cannotRespondHandler(err);
           }
         });
       };
