@@ -153,15 +153,15 @@ const defaultTemplate = defineTemplate(async ({ logger }) => {
 
           switch (name) {
             case 'pkgName': {
-              pkgJson.name = answer;
+              pkgJson.name = String(answer);
               break;
             }
             case 'description': {
-              pkgJson.description = answer ?? undefined;
+              pkgJson.description = String(answer) ?? undefined;
               break;
             }
             case 'authorName': {
-              author.push(answer);
+              author.push(String(answer));
               break;
             }
             case 'authorEmail': {
@@ -171,7 +171,7 @@ const defaultTemplate = defineTemplate(async ({ logger }) => {
               break;
             }
             case 'license': {
-              pkgJson.license = answer;
+              pkgJson.license = String(answer);
               break;
             }
             case 'typescript': {
@@ -225,6 +225,7 @@ const defaultTemplate = defineTemplate(async ({ logger }) => {
             }
             case 'eslint': {
               if (answer) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const eslintConfig: any = {
                   root: true,
                   env: {
