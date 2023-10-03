@@ -130,5 +130,26 @@ export const server = setupServer(
         })
       );
     }),
+
+    rest.get('*/some/file', async (req, res, ctx) => {
+      const file = new File([new Blob(['1'.repeat(1024 * 1024 + 1)])], 'image.png', {
+        type: 'image/png',
+      });
+      const buffer = await new Response(file).arrayBuffer();
+
+      return res(ctx.set('Content-Type', 'image/png'), ctx.body(buffer));
+    }),
+
+    rest.get('/upload/settings', async (req, res, ctx) => {
+      return res(
+        ctx.json({
+          data: {
+            sizeOptimization: true,
+            responsiveDimensions: true,
+            autoOrientation: true,
+          },
+        })
+      );
+    }),
   ]
 );
