@@ -21,6 +21,41 @@ export const transformUpgradeHeader = (header = '') => {
   return header.split(',').map((s) => s.trim().toLowerCase());
 };
 
+let timeouts: Record<string, number> | undefined;
+
+// temporarily disable server timeouts while transfer is running
+const disableTimeouts = () => {
+  if (!strapi?.server?.httpServer) {
+    return;
+  }
+
+  const { httpServer } = strapi.server;
+
+  // save the original timeouts to restore after
+  if (!timeouts) {
+    timeouts = {
+      headersTimeout: httpServer.headersTimeout,
+      requestTimeout: httpServer.requestTimeout,
+    };
+  }
+
+  httpServer.headersTimeout = 0;
+  httpServer.requestTimeout = 0;
+
+  strapi.log.info('Disabling http timeouts for data transfer');
+};
+const resetTimeouts = () => {
+  if (!strapi?.server?.httpServer || !timeouts) {
+    return;
+  }
+
+  // store the original strapi httpServer timeouts to replace when transfer is complete
+  const { httpServer } = strapi.server;
+
+  strapi.log.info('Setting http timeouts to default');
+  httpServer.headersTimeout = timeouts.headersTimeout;
+  httpServer.requestTimeout = timeouts.requestTimeout;
+};
 /**
  * Make sure that the upgrade header is a valid websocket one
  */
@@ -85,10 +120,7 @@ export const handleWSUpgrade = (wss: WebSocketServer, ctx: Context, callback: WS
       return;
     }
 
-    // temporarily disable server timeouts while transfer is running
-    const { httpServer } = strapi.server;
-    httpServer.headersTimeout = 0;
-    httpServer.requestTimeout = 0;
+    disableTimeouts();
 
     // Create a connection between the client & the server
     wss.emit('connection', client, ctx.req);
@@ -106,13 +138,6 @@ export const handlerControllerFactory =
   <T extends Partial<Handler>>(implementation: (proto: Handler) => T) =>
   (options: HandlerOptions) => {
     const { verify, server: serverOptions } = options ?? {};
-
-    // store the original strapi httpServer timeouts to replace when transfer is complete
-    const { httpServer } = strapi.server;
-    const timeouts = {
-      headersTimeout: httpServer.headersTimeout,
-      requestTimeout: httpServer.requestTimeout,
-    };
 
     const wss = new WebSocket.Server({ ...serverOptions, noServer: true });
 
@@ -289,10 +314,14 @@ export const handlerControllerFactory =
         const handler: Handler = Object.assign(Object.create(prototype), implementation(prototype));
 
         // Bind ws events to handler methods
-        ws.on('close', (...args) => async () => {
-          await handler.onClose(...args);
-          httpServer.headersTimeout = timeouts.headersTimeout;
-          httpServer.requestTimeout = timeouts.requestTimeout;
+        ws.on('close', async (...args) => {
+          try {
+            await handler.onClose(...args);
+          } catch (err) {
+            strapi?.log?.error('[Data transfer] Uncaught error closing connection');
+            strapi?.log?.error(err);
+          }
+          resetTimeouts();
         });
         ws.on('error', (...args) => handler.onError(...args));
         ws.on('message', (...args) => handler.onMessage(...args));
