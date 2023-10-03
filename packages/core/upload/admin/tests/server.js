@@ -152,6 +152,31 @@ export const server = setupServer(
       );
     }),
 
+    rest.get('/upload/folder-structure', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          data: [
+            {
+              id: 1,
+              name: 'test',
+              children: [
+                {
+                  id: 3,
+                  name: '2022',
+                  children: [],
+                },
+                {
+                  id: 2,
+                  name: '2023',
+                  children: [],
+                },
+              ],
+            },
+          ],
+        })
+      );
+    }),
+
     rest.get('*/an-image.png', (req, res, ctx) =>
       res(ctx.set('Content-Type', 'image/png'), ctx.body())
     ),
