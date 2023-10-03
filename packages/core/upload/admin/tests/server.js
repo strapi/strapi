@@ -20,5 +20,14 @@ export const server = setupServer(
     rest.put('/upload/configuration', async (req, res, ctx) => {
       return res(ctx.status(200));
     }),
+    rest.get('/upload/folders/:id', async (req, res, ctx) => {
+      return res(
+        ctx.json({
+          data: {
+            id: 1,
+          },
+        })
+      );
+    }),
   ]
 );
