@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { has, omit, pipe, assign } from 'lodash/fp';
-import type { Attribute, Common, Shared, Schema, Utils, EntityService } from '@strapi/types';
+import type { Attribute, Common, Schema, Utils, EntityService } from '@strapi/types';
 import { contentTypes as contentTypesUtils, mapAsync, errors } from '@strapi/utils';
 
 type LoadedComponents<TUID extends Common.UID.Schema> = Attribute.GetValues<

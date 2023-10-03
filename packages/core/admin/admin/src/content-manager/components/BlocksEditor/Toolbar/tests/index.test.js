@@ -1,11 +1,11 @@
 import * as React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
-import { createEditor, Transforms } from 'slate';
+import { createEditor, Transforms, Editor } from 'slate';
 import { Slate, withReact } from 'slate-react';
 
 import { BlocksToolbar, BlocksDropdown } from '..';
@@ -28,17 +28,34 @@ const initialValue = [
   },
 ];
 
+const mixedInitialValue = [
+  {
+    type: 'heading',
+    level: 1,
+    children: [{ type: 'text', text: 'A heading one' }],
+  },
+  {
+    type: 'paragraph',
+    children: [{ type: 'text', text: 'A line of text in a paragraph.' }],
+  },
+  {
+    type: 'heading',
+    level: 2,
+    children: [{ type: 'text', text: 'A heading two' }],
+  },
+];
+
 const user = userEvent.setup();
 
 const baseEditor = createEditor();
 
-const Wrapper = ({ children }) => {
+const Wrapper = ({ children, initialData }) => {
   const [editor] = React.useState(() => withReact(baseEditor));
 
   return (
     <ThemeProvider theme={lightTheme}>
       <IntlProvider messages={{}} locale="en">
-        <Slate initialValue={initialValue} editor={editor}>
+        <Slate initialValue={initialData} editor={editor}>
           {children}
         </Slate>
       </IntlProvider>
@@ -48,22 +65,38 @@ const Wrapper = ({ children }) => {
 
 Wrapper.propTypes = {
   children: PropTypes.node.isRequired,
+  initialData: PropTypes.array,
 };
 
-const setup = () =>
+Wrapper.defaultProps = {
+  initialData: initialValue,
+};
+
+const setup = (data) => {
   render(<BlocksToolbar disabled={false} />, {
-    wrapper: Wrapper,
+    wrapper: ({ children }) => <Wrapper initialData={data}>{children}</Wrapper>,
   });
+};
 
 describe('BlocksEditor toolbar', () => {
-  beforeEach(() => {
-    baseEditor.children = initialValue;
-  });
-
   it('should render the toolbar', () => {
     setup();
 
     expect(screen.getByRole('toolbar')).toBeInTheDocument();
+  });
+
+  it('checks if a mixed selected content shows only one option selected in the dropdown when you select only part of the content', async () => {
+    setup(mixedInitialValue);
+
+    const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+
+    // Set the selection to cover the second and third row
+    Transforms.setSelection(baseEditor, {
+      anchor: { path: [1, 0], offset: 0 },
+    });
+
+    // The dropdown should show only one option selected which is the block content in the second row
+    expect(within(headingsDropdown).getByText(/text/i)).toBeInTheDocument();
   });
 
   it('toggles the modifier on a selection', async () => {
@@ -298,5 +331,20 @@ describe('BlocksEditor toolbar', () => {
         ],
       },
     ]);
+  });
+
+  it('checks if a mixed selected content shows only one option selected in the dropdown', async () => {
+    setup(mixedInitialValue);
+
+    const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+
+    // Set the selection to cover the entire content
+    Transforms.setSelection(baseEditor, {
+      anchor: Editor.start(baseEditor, []),
+      focus: Editor.end(baseEditor, []),
+    });
+
+    // The dropdown should show only one option selected which is the block content in the first row
+    expect(within(headingsDropdown).getByText(/heading 1/i)).toBeInTheDocument();
   });
 });

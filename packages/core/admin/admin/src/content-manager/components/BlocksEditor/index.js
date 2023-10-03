@@ -38,13 +38,22 @@ const Wrapper = styled(Box)`
 `;
 
 /**
- * Keep track how how many times Slate detected a change from a user interaction in the editor
- * VS how many times the value prop was updated, whether from within editor or from outside
- * If these 2 values are different, it means the value prop was updated from outside
- * In this case, change the key of the Slate editor to force a rerender, so that it picks up the new value
- * This is needed for i18n to work properly (when switching locale or filling from another locale)
- * because Slate is an uncontrolled component, so we can't force a value update from outside
+ * Images are void elements. They handle the rendering of their children instead of Slate.
+ * See the Slate documentation for more information:
+ * - https://docs.slatejs.org/api/nodes/element#void-vs-not-void
+ * - https://docs.slatejs.org/api/nodes/element#rendering-void-elements
+ *
+ * @param {import('slate').Editor} editor
  */
+const withImages = (editor) => {
+  const { isVoid } = editor;
+
+  editor.isVoid = (element) => {
+    return element.type === 'image' ? true : isVoid(element);
+  };
+
+  return editor;
+};
 
 /**
  * Forces an update of the Slate editor when the value prop changes from outside of Slate.
@@ -82,7 +91,7 @@ function useResetKey(value) {
 const BlocksEditor = React.forwardRef(
   ({ intlLabel, labelAction, name, disabled, required, error, value, onChange }, ref) => {
     const { formatMessage } = useIntl();
-    const [editor] = React.useState(() => withReact(withHistory(createEditor())));
+    const [editor] = React.useState(() => withReact(withImages(withHistory(createEditor()))));
 
     const label = intlLabel.id
       ? formatMessage(
