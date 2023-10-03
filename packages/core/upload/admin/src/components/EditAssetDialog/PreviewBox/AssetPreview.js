@@ -15,7 +15,7 @@ const CardAsset = styled(Flex)`
 `;
 
 export const AssetPreview = forwardRef(({ mime, url, name, ...props }, ref) => {
-  const [lang] = usePersistentState('strapi-admin-language', 'en');
+  const lang = 'en';
 
   if (mime.includes(AssetType.Image)) {
     return <img ref={ref} src={url} alt={name} {...props} />;
