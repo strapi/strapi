@@ -57,19 +57,79 @@ npm run pack-up check
 
 Run `pack-up -h` for more information on CLI usage.
 
+## Commands
+
+### `init [path]`
+
+Creates a new package at the given path, by default uses the inbuilt template sensible options for your package to choose from.
+
+- `--template [path]` – path to a custom template of type `TemplateOrTemplateResolver`.
+
+### `build`
+
+Builds your current package based on the configuration in your `package.json` and `package.config.ts` (if applicable).
+
+- `--minify` – minifies the output (default `false`).
+- `--sourcemap` – generates sourcemaps for the output (default `true`).
+
+### `check`
+
+Checks your current package to ensure it's interoperable in the real world. In short, validates the files in your dist have been produced as we expect & then `esbuild` can actually build, using your exported code.
+
+### `watch`
+
+Watches your current package for changes and rebuilds when necessary.
+
 ## Configuration
 
 `@strapi/pack-up` by default reads its configuration from your `package.json`. But sometimes you need more flexibility, to do this you can create a `package.config.ts` file in the root of your package.
 
 ```ts
 // package.config.ts
-
 import { defineConfig } from '@strapi/pack-up';
 
 export default defineConfig({
   minify: true,
   sourcemap: false,
-  // the path to the tsconfig file for distributed builds
-  tsconfig: 'tsconfig.dist.json',
+  externals: ['path', 'fs'],
 });
 ```
+
+### Options
+
+#### `bundles`
+
+- Type: `ConfigBundle[]`
+
+An array of entry points to bundle. This is useful if you want to bundle something that should not
+be exported by the package, e.g. CLI scripts or Node.js workers.
+
+#### `dist`
+
+- Type: `string`
+
+The path to the directory to which the bundled files should be written.
+
+#### `externals`
+
+- Type: `string[]`
+
+An array of modules that should not be bundled but instead be resolved at runtime, this is by default the dependencies listed in your `package.json` (excluding devDeps).
+
+#### `minify`
+
+- Type: `boolean`
+
+Whether to minify the output or not.
+
+#### `sourcemap`
+
+- Type: `boolean`
+
+Whether to generate sourcemaps for the output or not.
+
+#### `runtime`
+
+- Type: `Runtime`
+
+The transpilation target of the bundle. This is useful if you're bundling many different CLIs or Node.js workers and you want them to be transpiled for the node environment.
