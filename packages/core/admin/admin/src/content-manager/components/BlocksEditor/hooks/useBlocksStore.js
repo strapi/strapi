@@ -202,6 +202,39 @@ const handleEnterKeyOnList = (editor) => {
 };
 
 /**
+ * Common handler for the backspace event on ordered and unordered lists
+ * @param {import('slate').Editor} editor
+ * @param {Event} event
+ */
+const handleBackspaceKeyOnList = (editor, event) => {
+  const [currentListItem, currentListItemPath] = Editor.parent(editor, editor.selection.anchor);
+
+  const [currentList, currentListPath] = Editor.parent(editor, currentListItemPath);
+
+  const isListEmpty = currentList.children.length === 1 && currentListItem.children[0].text === '';
+
+  if (isListEmpty) {
+    event.preventDefault();
+    // Delete the empty list
+    Transforms.removeNodes(editor, { at: currentListPath });
+
+    if (currentListPath[0] === 0) {
+      // If the list was the only(or first) block element then insert empty paragraph as editor needs default value
+      Transforms.insertNodes(
+        editor,
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: '' }],
+        },
+        { at: currentListPath }
+      );
+
+      Transforms.select(editor, currentListPath);
+    }
+  }
+};
+
+/**
  * Manages a store of all the available blocks.
  *
  * @returns {{
@@ -213,6 +246,7 @@ const handleEnterKeyOnList = (editor) => {
  *     matchNode: (node: Object) => boolean,
  *     isInBlocksSelector: true,
  *     handleEnterKey: (editor: import('slate').Editor) => void,
+ *     handleBackspaceKey?:(editor: import('slate').Editor, event: Event) => void,
  *   }
  * }} an object containing rendering functions and metadata for different blocks, indexed by name.
  */
@@ -410,6 +444,7 @@ export function useBlocksStore() {
       // TODO add icon and label and set isInBlocksEditor to true
       isInBlocksSelector: false,
       handleEnterKey: handleEnterKeyOnList,
+      handleBackspaceKey: handleBackspaceKeyOnList,
     },
     'list-unordered': {
       renderElement: (props) => <List {...props} />,
@@ -421,6 +456,7 @@ export function useBlocksStore() {
       // TODO add icon and label and set isInBlocksEditor to true
       isInBlocksSelector: false,
       handleEnterKey: handleEnterKeyOnList,
+      handleBackspaceKey: handleBackspaceKeyOnList,
     },
     'list-item': {
       renderElement: (props) => (
