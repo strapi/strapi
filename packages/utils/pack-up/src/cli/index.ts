@@ -25,12 +25,13 @@ command('build')
     return build(options);
   });
 
-command('init [path]')
+command('init')
+  .argument('<path>', 'path to the package')
   .option('--template', 'path to a custom template')
-  .action(async (options) => {
+  .action(async (path, options) => {
     const { init } = await import('./commands/init');
 
-    return init(options);
+    return init({ path, ...options });
   });
 
 command('watch').action(async (options) => {

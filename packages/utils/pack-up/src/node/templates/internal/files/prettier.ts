@@ -6,11 +6,11 @@ const prettierFile: TemplateFile = {
   name: '.prettierrc',
   contents: outdent`
       {
-        endOfLine: 'lf'
-        tabWidth: 2,
-        printWidth: 100,
-        singleQuote: true,
-        trailingComma: 'es5',
+        "endOfLine": 'lf',
+        "tabWidth": 2,
+        "printWidth": 100,
+        "singleQuote": true,
+        "trailingComma": 'es5',
       }
     `,
 };

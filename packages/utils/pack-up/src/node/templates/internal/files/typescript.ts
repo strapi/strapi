@@ -8,7 +8,7 @@ const tsconfigFile: TemplateFile = {
       {
         "include": ["src"],
         "exclude": ["**/*.test.ts"],
-        compilerOptions: {
+        "compilerOptions": {
           "composite": false,
           "declaration": true,
           "declarationMap": true,

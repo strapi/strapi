@@ -2,7 +2,7 @@ import { stripColor } from '../../tests/console';
 import { cleanupWorkspaces, createWorkspace } from '../../tests/workspaces';
 import { init } from '../node/init';
 import { defaultTemplate } from '../node/templates/internal/default';
-import { TemplateOrTemplateResolver, TemplateResolver } from '../node/templates/types';
+import { Template, TemplateOrTemplateResolver, TemplateResolver } from '../node/templates/types';
 
 const loggerMock = {
   debug: jest.fn(),
@@ -49,11 +49,11 @@ describe('node', () => {
         },
         {
           name: 'typescript',
-          answer: 'true',
+          answer: true,
         },
         {
           name: 'eslint',
-          answer: 'true',
+          answer: true,
         },
       ]);
 
@@ -111,11 +111,11 @@ describe('node', () => {
         },
         {
           name: 'typescript',
-          answer: 'false',
+          answer: false,
         },
         {
           name: 'eslint',
-          answer: 'true',
+          answer: true,
         },
       ]);
 
@@ -170,11 +170,11 @@ describe('node', () => {
         },
         {
           name: 'typescript',
-          answer: 'true',
+          answer: true,
         },
         {
           name: 'eslint',
-          answer: 'false',
+          answer: false,
         },
       ]);
 
@@ -229,11 +229,11 @@ describe('node', () => {
         },
         {
           name: 'typescript',
-          answer: 'false',
+          answer: false,
         },
         {
           name: 'eslint',
-          answer: 'false',
+          answer: false,
         },
       ]);
 
@@ -315,7 +315,7 @@ describe('node', () => {
 
 const makeTemplateFromDefault = async (
   path: string,
-  answers: Array<{ name: string; answer: string }>
+  answers: Parameters<Template['getFiles']>['0']
 ) => {
   const template = await (defaultTemplate as TemplateResolver)({
     packagePath: path,

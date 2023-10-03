@@ -38,7 +38,9 @@ interface Template {
    * the file contents, we prettify the contents before writing
    * using a default config if there's not one in the package.
    */
-  getFiles: (answers?: Array<{ name: string; answer: string }>) => Promise<Array<TemplateFile>>;
+  getFiles: (
+    answers?: Array<{ name: string; answer: string | boolean }>
+  ) => Promise<Array<TemplateFile>>;
 }
 
 interface TemplateContext {
