@@ -93,6 +93,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   };
 
   beforeAll(async () => {
+    console.log('hello world');
     await builder.addContentTypes([model]).build();
     // eslint-disable-next-line node/no-extraneous-require
     hasRW = require('@strapi/strapi/dist/utils/ee').default.features.isEnabled('review-workflows');
