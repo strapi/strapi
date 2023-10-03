@@ -42,7 +42,7 @@ const disableTimeouts = () => {
   httpServer.headersTimeout = 0;
   httpServer.requestTimeout = 0;
 
-  strapi.log.info('Disabling http timeouts for data transfer');
+  strapi.log.info('[Data transfer] Disabling http timeouts');
 };
 const resetTimeouts = () => {
   if (!strapi?.server?.httpServer || !timeouts) {
@@ -52,7 +52,7 @@ const resetTimeouts = () => {
   // store the original strapi httpServer timeouts to replace when transfer is complete
   const { httpServer } = strapi.server;
 
-  strapi.log.info('Setting http timeouts to default');
+  strapi.log.info('[Data transfer] Restoring http timeouts');
   httpServer.headersTimeout = timeouts.headersTimeout;
   httpServer.requestTimeout = timeouts.requestTimeout;
 };
