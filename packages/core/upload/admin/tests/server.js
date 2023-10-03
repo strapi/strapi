@@ -1,5 +1,6 @@
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
+import qs from 'qs';
 
 export const server = setupServer(
   ...[
@@ -25,7 +26,107 @@ export const server = setupServer(
         ctx.json({
           data: {
             id: 1,
+            name: 'test',
+            pathId: 1,
+            path: '/1',
+            createdAt: '2023-06-26T12:48:54.054Z',
+            updatedAt: '2023-06-26T12:48:54.054Z',
+            parent: null,
+            children: {
+              count: 2,
+            },
+            files: {
+              count: 0,
+            },
           },
+        })
+      );
+    }),
+    rest.get('/upload/folders', async (req, res, ctx) => {
+      const query = qs.parse(req.url.search.slice(1));
+
+      if (query._q) {
+        return res(
+          ctx.json({
+            data: [
+              {
+                createdAt: '2023-06-26T12:48:54.054Z',
+                id: 1,
+                name: query._q,
+                pathId: 1,
+                path: '/1',
+                updatedAt: '2023-06-26T12:48:54.054Z',
+                children: {
+                  count: 2,
+                },
+                files: {
+                  count: 0,
+                },
+              },
+            ],
+          })
+        );
+      }
+
+      if (Array.isArray(query.filters?.$and)) {
+        const [{ parent }] = query.filters.$and;
+
+        if (parent.id === '1') {
+          return res(
+            ctx.json({
+              data: [
+                {
+                  createdAt: '2023-06-26T12:49:31.354Z',
+                  id: 3,
+                  name: '2022',
+                  pathId: 3,
+                  path: '/1/3',
+                  updatedAt: '2023-06-26T12:49:31.354Z',
+                  children: {
+                    count: 0,
+                  },
+                  files: {
+                    count: 3,
+                  },
+                },
+                {
+                  createdAt: '2023-06-26T12:49:08.466Z',
+                  id: 2,
+                  name: '2023',
+                  pathId: 2,
+                  path: '/1/2',
+                  updatedAt: '2023-06-26T12:49:08.466Z',
+                  children: {
+                    count: 0,
+                  },
+                  files: {
+                    count: 3,
+                  },
+                },
+              ],
+            })
+          );
+        }
+      }
+
+      return res(
+        ctx.json({
+          data: [
+            {
+              createdAt: '2023-06-26T12:48:54.054Z',
+              id: 1,
+              name: 'test',
+              pathId: 1,
+              path: '/1',
+              updatedAt: '2023-06-26T12:48:54.054Z',
+              children: {
+                count: 2,
+              },
+              files: {
+                count: 0,
+              },
+            },
+          ],
         })
       );
     }),

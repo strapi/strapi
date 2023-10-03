@@ -15,7 +15,19 @@ describe('useFolder', () => {
 
     expect(result.current.data).toMatchInlineSnapshot(`
       {
+        "children": {
+          "count": 2,
+        },
+        "createdAt": "2023-06-26T12:48:54.054Z",
+        "files": {
+          "count": 0,
+        },
         "id": 1,
+        "name": "test",
+        "parent": null,
+        "path": "/1",
+        "pathId": 1,
+        "updatedAt": "2023-06-26T12:48:54.054Z",
       }
     `);
   });
@@ -41,5 +53,6 @@ describe('useFolder', () => {
     expect(screen.getByText('Not found')).toBeInTheDocument();
 
     console.error = originalConsoleError;
+    server.restoreHandlers();
   });
 });
