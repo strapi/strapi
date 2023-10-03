@@ -146,6 +146,19 @@ export const handlerControllerFactory =
         const state: TransferState = { id: undefined };
         const messageUUIDs = new Set<string>();
 
+        const cannotRespondHandler = (err: unknown) => {
+          strapi?.log?.error(
+            '[Data transfer] Cannot send error response to client, closing connection'
+          );
+          strapi?.log?.error(err);
+          try {
+            ws.terminate();
+            ctx.req.socket.destroy();
+          } catch (err) {
+            strapi?.log?.error('[Data transfer] Failed to close socket on error');
+          }
+        };
+
         const prototype: Handler = {
           // Transfer ID
           get transferID() {
@@ -202,7 +215,7 @@ export const handlerControllerFactory =
             }
           },
 
-          respond(uuid, e, data) {
+          async respond(uuid, e, data) {
             let details = {};
             return new Promise<void>((resolve, reject) => {
               if (!uuid && !e) {
@@ -269,19 +282,19 @@ export const handlerControllerFactory =
           async executeAndRespond(uuid, fn) {
             try {
               const response = await fn();
-              this.respond(uuid, null, response);
+              await this.respond(uuid, null, response);
             } catch (e) {
               if (e instanceof Error) {
-                this.respond(uuid, e);
+                await this.respond(uuid, e).catch(cannotRespondHandler);
               } else if (typeof e === 'string') {
-                this.respond(uuid, new ProviderTransferError(e));
+                await this.respond(uuid, new ProviderTransferError(e)).catch(cannotRespondHandler);
               } else {
-                this.respond(
+                await this.respond(
                   uuid,
                   new ProviderTransferError('Unexpected error', {
                     error: e,
                   })
-                );
+                ).catch(cannotRespondHandler);
               }
             }
           },
