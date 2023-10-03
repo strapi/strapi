@@ -28,6 +28,7 @@ module.exports = {
     '@typescript-eslint/no-shadow': 'off',
     '@typescript-eslint/naming-convention': 'warn',
     '@typescript-eslint/no-empty-interface': 'warn',
+    '@typescript-eslint/no-explicit-any': 'off',
   },
   overrides: [
     {
