@@ -142,7 +142,7 @@ export const handlerControllerFactory =
     const wss = new WebSocket.Server({ ...serverOptions, noServer: true });
 
     return async (ctx: Context) => {
-      handleWSUpgrade(wss, ctx, (ws) => {
+      const cb: WSCallback = (ws) => {
         const state: TransferState = { id: undefined };
         const messageUUIDs = new Set<string>();
 
@@ -323,8 +323,29 @@ export const handlerControllerFactory =
           }
           resetTimeouts();
         });
-        ws.on('error', (...args) => handler.onError(...args));
-        ws.on('message', (...args) => handler.onMessage(...args));
-      });
+        ws.on('error', async (...args) => {
+          try {
+            await handler.onError(...args);
+          } catch (err) {
+            strapi?.log?.error('[Data transfer] Uncaught error in error handling');
+            strapi?.log?.error(err);
+          }
+        });
+        ws.on('message', async (...args) => {
+          try {
+            await handler.onMessage(...args);
+          } catch (err) {
+            strapi?.log?.error('[Data transfer] Uncaught error in message handling');
+            strapi?.log?.error(err);
+          }
+        });
+      };
+
+      try {
+        handleWSUpgrade(wss, ctx, cb);
+      } catch (err) {
+        strapi?.log?.error('[Data transfer] Error in websocket upgrade request');
+        strapi?.log?.error(err);
+      }
     };
   };
