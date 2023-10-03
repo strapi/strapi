@@ -9,6 +9,7 @@ import {
   waitFor,
   act,
   fireEvent,
+  screen,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PropTypes from 'prop-types';
@@ -93,4 +94,4 @@ const renderHook = (hook, options) => {
   });
 };
 
-export { render, renderHook, waitFor, server, act, fireEvent };
+export { render, renderHook, waitFor, server, act, fireEvent, screen };

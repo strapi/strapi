@@ -17,5 +17,8 @@ export const server = setupServer(
         })
       );
     }),
+    rest.put('/upload/configuration', async (req, res, ctx) => {
+      return res(ctx.status(200));
+    }),
   ]
 );
