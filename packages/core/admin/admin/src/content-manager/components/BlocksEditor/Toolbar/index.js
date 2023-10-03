@@ -241,23 +241,6 @@ const isLastBlockType = (editor, type) => {
   return false;
 };
 
-/**
- * Function that finds the corresponding block key in the blocks object based on the targetType and targetLevel (if present) provided.
- * @param {object} blocks - blocks object
- * @param {string} type - type of the target block
- * @param {number} level - level of the target block
- * @returns string|undefined - block key or null if no matching block is found
- */
-const getAnchorBlockKey = (blocks, { type, level = null }) => {
-  const anchorBlockKey = Object.keys(blocks).find((key) => {
-    const block = blocks[key];
-
-    return block.value.type === type && (level === null || block.value.level === level);
-  });
-
-  return anchorBlockKey;
-};
-
 const insertEmptyBlockAtLast = (editor) => {
   Transforms.insertNodes(
     editor,
@@ -309,12 +292,13 @@ export const BlocksDropdown = ({ disabled }) => {
   React.useEffect(() => {
     if (editor.selection) {
       const [anchorNode] = Editor.parent(editor, editor.selection.anchor); // Get the parent node of the anchor
+      const anchorBlockKey = Object.keys(blocks).find((blockKey) =>
+        blocks[blockKey].matchNode(anchorNode)
+      );
 
       if (anchorNode) {
-        const blockKey = getAnchorBlockKey(blocks, anchorNode);
-
-        if (blockKey && blockKey !== blockSelected) {
-          setBlockSelected(blockKey);
+        if (anchorBlockKey && anchorBlockKey !== blockSelected) {
+          setBlockSelected(anchorBlockKey);
         }
       }
     }
