@@ -1,13 +1,6 @@
 module.exports = {
   root: true,
   extends: ['custom/front/typescript', 'plugin:storybook/recommended'],
-  settings: {
-    'import/resolver': {
-      typescript: {
-        project: './tsconfig.eslint.json',
-      },
-    },
-  },
   rules: {
     'import/no-unresolved': [
       'error',
