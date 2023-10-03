@@ -5,10 +5,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-// import PropTypes from 'prop-types';
 
-import { LoadingIndicatorPage } from '@strapi/helper-plugin';
-import { verifyIfProjectIsVersionOnGit } from '../../utils/api';
+import { LoadingIndicatorPage, useFetchClient } from '@strapi/helper-plugin';
 
 import { Box, GridLayout, Flex, Typography, Link } from '@strapi/design-system';
 
@@ -46,7 +44,7 @@ const RightSideCloudContainer = styled(Box)`
 
 const LeftSideCloudContainer = styled(Box)`
   position: absolute;
-  top: 150px;
+  top: 150px;s
   left: 220px;
 
   img {
@@ -55,6 +53,9 @@ const LeftSideCloudContainer = styled(Box)`
 `;
 
 const HomePage = () => {
+  const fetchClient = useFetchClient();
+  const { get } = fetchClient;
+
   const { formatMessage } = useIntl();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -63,8 +64,8 @@ const HomePage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await verifyIfProjectIsVersionOnGit();
-        setIsVersionedOnGit(res || false);
+        const res = await get(`/cloud/verify-project-is-versioned-on-git`);
+        setIsVersionedOnGit(res?.data || false);
       } catch (error) {
         console.log(error);
       }
@@ -116,13 +117,7 @@ const HomePage = () => {
           <GithubBox isVersionedOnGit={isVersionedOnGit} />
           <CloudBox />
         </GridLayout>
-        <Box
-          padding={6}
-          borderRadius={8}
-          hasRadius
-          background="neutral0"
-          borderColor="neutral200"
-        >
+        <Box padding={6} borderRadius={8} hasRadius background="neutral0" borderColor="neutral200">
           <Box paddingBottom={2}>
             <Typography variant="delta" fontWeight="bold" textColor="neutral1000" as="p">
               {isVersionedOnGit

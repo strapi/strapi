@@ -1,12 +1,10 @@
 /*
  *
- * Github component
+ * Cloud component
  *
  */
 
 import React from 'react';
-// import PropTypes from 'prop-types';
-
 import styled from 'styled-components';
 
 import { ExternalLink } from '@strapi/icons';
@@ -28,7 +26,7 @@ const CloudBox = () => {
   const { formatMessage } = useIntl();
 
   return (
-    <Box padding={4} hasRadius key={`box-github}`}>
+    <Box padding={4} hasRadius>
       <Flex alignItems="center" direction="column" padding={11} hasRadius={true}>
         <EmptyStateIconWrapper paddingBottom={6} aria-hidden>
           <UploadIcon />

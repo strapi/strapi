@@ -27,11 +27,15 @@
     "styled-components": "^5.3.6"
   },
   "author": {
-    "name": "A Strapi developer"
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
   },
   "maintainers": [
     {
-      "name": "A Strapi developer"
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
     }
   ],
   "engines": {

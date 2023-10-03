@@ -16,17 +16,10 @@ export default {
         defaultMessage: name,
       },
       Component: async () => {
-        const component = await import(/* webpackChunkName: "[request]" */ './pages/App');
+        const component = await import(/* webpackChunkName: "strapi-cloud-plugin" */ './pages/App');
 
         return component;
       },
-      permissions: [
-        // Uncomment to set the permissions of the plugin here
-        // {
-        //   action: '', // the action name should be plugin::plugin-name.actionType
-        //   subject: null,
-        // },
-      ],
     });
     app.registerPlugin({
       id: pluginId,
