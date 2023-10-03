@@ -1,5 +1,3 @@
-'use strict';
-
 const subject = `Reset password`;
 
 const html = `<p>We heard that you lost your password. Sorry about that!</p>
@@ -18,8 +16,4 @@ But don’t worry! You can use the following link to reset your password:
 
 Thanks.`;
 
-module.exports = {
-  subject,
-  text,
-  html,
-};
+export default { subject, text, html };
