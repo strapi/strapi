@@ -262,12 +262,6 @@ export function useBlocksStore() {
           children: createdNode.children,
         });
 
-        /**
-         * The new selection will by default be at the end of the created node.
-         * Instead we manually move it to the start of the created node.
-         * Use slice(0, -1) to go 1 level higher in the tree,
-         * so we go to the start of the node and not the start of the leaf.
-         */
         Transforms.select(
           editor,
           editor.start([anchorPathInitialPosition[0] + 1, editor.selection.anchor.path[1]])
