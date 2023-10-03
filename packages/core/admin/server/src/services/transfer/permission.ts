@@ -1,7 +1,5 @@
-'use strict';
-
-const permissions = require('@strapi/permissions');
-const { providerFactory } = require('@strapi/utils');
+import permissions from '@strapi/permissions';
+import { providerFactory } from '@strapi/utils';
 
 const DEFAULT_TRANSFER_ACTIONS = ['push', 'pull'];
 
@@ -16,7 +14,4 @@ DEFAULT_TRANSFER_ACTIONS.forEach((action) => {
 
 const engine = permissions.engine.new({ providers });
 
-module.exports = {
-  engine,
-  providers,
-};
+export { engine, providers };

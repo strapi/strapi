@@ -1,15 +1,15 @@
-'use strict';
+import { contentTypes } from '@strapi/utils';
 
-const { isVisibleAttribute } = require('@strapi/utils').contentTypes;
-
-const {
+import {
   toSubjectTemplate,
   getValidOptions,
   hasProperty,
   isNotInSubjects,
   resolveContentType,
   isOfKind,
-} = require('./utils');
+} from './utils';
+
+const { isVisibleAttribute } = contentTypes;
 
 /**
  * @typedef ContentTypesSection
@@ -28,7 +28,7 @@ const {
  * @param {Action} options.action
  * @param {ActionArraySection} section
  */
-const settings = ({ action, section }) => {
+const settings = ({ action, section }: any) => {
   const { category, subCategory, displayName, actionId } = action;
 
   section.push({
@@ -46,7 +46,7 @@ const settings = ({ action, section }) => {
  * @param {Action} options.action
  * @param {ActionArraySection} section
  */
-const plugins = ({ action, section }) => {
+const plugins = ({ action, section }: any) => {
   const { pluginName, subCategory, displayName, actionId } = action;
 
   section.push({
@@ -64,7 +64,7 @@ const plugins = ({ action, section }) => {
  * @param {Action} options.action
  * @param {ContentTypesSection} section
  */
-const contentTypesBase = ({ action, section }) => {
+const contentTypesBase = ({ action, section }: any) => {
   const { displayName, actionId, subjects, options } = action;
 
   section.actions.push({
@@ -79,8 +79,8 @@ const contentTypesBase = ({ action, section }) => {
  * Initialize the subjects array of a section based on the action's subjects
  */
 const subjectsHandlerFor =
-  (kind) =>
-  ({ action, section: contentTypesSection }) => {
+  (kind: any) =>
+  ({ action, section: contentTypesSection }: any) => {
     const { subjects } = action;
 
     const newSubjects = subjects
@@ -96,7 +96,7 @@ const subjectsHandlerFor =
     contentTypesSection.subjects.push(...newSubjects);
   };
 
-const buildNode = (model, attributeName, attribute) => {
+const buildNode = (model: any, attributeName: any, attribute: any) => {
   if (!isVisibleAttribute(model, attributeName)) {
     return null;
   }
@@ -115,7 +115,7 @@ const buildNode = (model, attributeName, attribute) => {
   return node;
 };
 
-const buildDeepAttributesCollection = (model) => {
+const buildDeepAttributesCollection = (model: any): any => {
   return Object.entries(model.attributes)
     .map(([attributeName, attribute]) => buildNode(model, attributeName, attribute))
     .filter((node) => node !== null);
@@ -127,12 +127,12 @@ const buildDeepAttributesCollection = (model) => {
  * @param {Action} options.action
  * @param {ContentTypesSection} section
  */
-const fieldsProperty = ({ action, section }) => {
+const fieldsProperty = ({ action, section }: any) => {
   const { subjects } = action;
 
   section.subjects
-    .filter((subject) => subjects.includes(subject.uid))
-    .forEach((subject) => {
+    .filter((subject: any) => subjects.includes(subject.uid))
+    .forEach((subject: any) => {
       const { uid } = subject;
       const contentType = resolveContentType(uid);
 
@@ -147,10 +147,4 @@ const fieldsProperty = ({ action, section }) => {
     });
 };
 
-module.exports = {
-  plugins,
-  settings,
-  subjectsHandlerFor,
-  contentTypesBase,
-  fieldsProperty,
-};
+export { plugins, settings, subjectsHandlerFor, contentTypesBase, fieldsProperty };

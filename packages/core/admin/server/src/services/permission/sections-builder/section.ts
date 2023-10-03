@@ -1,7 +1,5 @@
-'use strict';
-
-const { eq } = require('lodash/fp');
-const { hooks } = require('@strapi/utils');
+import { eq } from 'lodash/fp';
+import { hooks } from '@strapi/utils';
 
 /**
  * @typedef SectionOptions
@@ -41,7 +39,7 @@ const createSection = ({
      * @param {Action} action
      * @return {Promise<boolean>}
      */
-    async appliesToAction(action) {
+    async appliesToAction(action: any) {
       const results = await state.hooks.matchers.call(action);
 
       return results.some(eq(true));
@@ -68,4 +66,4 @@ const createSection = ({
   };
 };
 
-module.exports = createSection;
+export default createSection;

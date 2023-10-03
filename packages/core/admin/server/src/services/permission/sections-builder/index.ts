@@ -1,14 +1,12 @@
-'use strict';
-
-const { propEq } = require('lodash/fp');
-const createSectionBuilder = require('./builder');
-const {
+import { propEq } from 'lodash/fp';
+import createSectionBuilder from './builder';
+import {
   subjectsHandlerFor,
   contentTypesBase,
   fieldsProperty,
-  plugins: pluginsHandler,
-  settings: settingsHandler,
-} = require('./handlers');
+  plugins as pluginsHandler,
+  settings as settingsHandler,
+} from './handlers';
 
 const sectionPropMatcher = propEq('section');
 
@@ -47,4 +45,4 @@ const createDefaultSectionBuilder = () => {
   return builder;
 };
 
-module.exports = createDefaultSectionBuilder;
+export default createDefaultSectionBuilder;

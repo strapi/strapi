@@ -1,8 +1,5 @@
-'use strict';
-
-const { env } = require('@strapi/utils');
-
-const { getService } = require('../../utils');
+import { env } from '@strapi/utils';
+import { getService } from '../../utils';
 
 /**
  * Returns whether the data transfer features have been disabled from the env configuration
@@ -19,7 +16,7 @@ const isDisabledFromEnv = () => {
  * @returns {boolean}
  */
 const hasValidTokenSalt = () => {
-  const salt = strapi.config.get('admin.transfer.token.salt', null);
+  const salt = strapi.config.get('admin.transfer.token.salt', null) as string | null;
 
   return typeof salt === 'string' && salt.length > 0;
 };
@@ -30,9 +27,9 @@ const hasValidTokenSalt = () => {
  * @returns {boolean}
  */
 const isDataTransferEnabled = () => {
-  const { utils } = getService('transfer');
+  const { utils } = getService('transfer') as any;
 
   return !utils.isDisabledFromEnv() && utils.hasValidTokenSalt();
 };
 
-module.exports = { isDataTransferEnabled, isDisabledFromEnv, hasValidTokenSalt };
+export { isDataTransferEnabled, isDisabledFromEnv, hasValidTokenSalt };

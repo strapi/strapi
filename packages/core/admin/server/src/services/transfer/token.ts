@@ -1,15 +1,11 @@
-'use strict';
+import crypto from 'crypto';
+import assert from 'assert';
+import { map, isArray, omit, uniq, isNil, difference, isEmpty } from 'lodash/fp';
+import { errors } from '@strapi/utils';
+import constants from '../constants';
+import { getService } from '../../utils';
 
-const crypto = require('crypto');
-const assert = require('assert');
-const { map, isArray, omit, uniq, isNil, difference, isEmpty } = require('lodash/fp');
-
-const {
-  errors: { ValidationError, NotFoundError },
-} = require('@strapi/utils');
-
-const constants = require('../constants');
-const { getService } = require('../../utils');
+const { ValidationError, NotFoundError } = errors;
 
 const TRANSFER_TOKEN_UID = 'admin::transfer-token';
 const TRANSFER_TOKEN_PERMISSION_UID = 'admin::transfer-token-permission';
@@ -77,7 +73,7 @@ const generateRandomAccessKey = () => crypto.randomBytes(128).toString('hex');
  * @param {string} accessKey
  * @return {string}
  */
-const validateAccessKey = (accessKey) => {
+const validateAccessKey = (accessKey: string) => {
   assert(typeof accessKey === 'string', 'Access key needs to be a string');
   assert(accessKey.length >= 15, 'Access key needs to have at least 15 characters');
 
@@ -96,7 +92,7 @@ const validateAccessKey = (accessKey) => {
  *
  * @returns {Promise<TransferToken>}
  */
-const create = async (attributes) => {
+const create = async (attributes: any) => {
   const accessKey =
     'accessKey' in attributes ? validateAccessKey(attributes.accessKey) : generateRandomAccessKey();
 
@@ -106,7 +102,7 @@ const create = async (attributes) => {
   assertTokenPermissionsValidity(attributes);
   assertValidLifespan(attributes);
 
-  const result = await strapi.db.transaction(async () => {
+  const result = (await strapi.db.transaction(async () => {
     const transferToken = await strapi.query(TRANSFER_TOKEN_UID).create({
       select: SELECT_FIELDS,
       populate: POPULATE_FIELDS,
@@ -136,7 +132,7 @@ const create = async (attributes) => {
     }
 
     return transferToken;
-  });
+  })) as any;
 
   return { ...result, accessKey };
 };
@@ -153,7 +149,7 @@ const create = async (attributes) => {
  *
  * @returns {Promise<Omit<TransferToken, 'accessKey'>>}
  */
-const update = async (id, attributes) => {
+const update = async (id: any, attributes: any) => {
   // retrieve token without permissions
   const originalToken = await strapi.query(TRANSFER_TOKEN_UID).findOne({ where: { id } });
 
@@ -216,7 +212,7 @@ const update = async (id, attributes) => {
 
     return {
       ...updatedToken,
-      permissions: permissionsFromDb ? permissionsFromDb.map((p) => p.action) : undefined,
+      permissions: permissionsFromDb ? permissionsFromDb.map((p: any) => p.action) : undefined,
     };
   });
 };
@@ -228,7 +224,7 @@ const update = async (id, attributes) => {
  *
  * @returns {Promise<Omit<TransferToken, 'accessKey'>>}
  */
-const revoke = async (id) => {
+const revoke = async (id: any) => {
   return strapi.db.transaction(async () =>
     strapi
       .query(TRANSFER_TOKEN_UID)
@@ -268,7 +264,7 @@ const getBy = async (whereParams = {}) => {
  *
  * @returns {Promise<Omit<TransferToken, 'accessKey'>>}
  */
-const getById = async (id) => {
+const getById = async (id: any) => {
   return getBy({ id });
 };
 
@@ -279,7 +275,7 @@ const getById = async (id) => {
  *
  * ^@returns {Promise<Omit<TransferToken, 'accessKey'>>}
  */
-const getByName = async (name) => {
+const getByName = async (name: string) => {
   return getBy({ name });
 };
 
@@ -306,7 +302,7 @@ const exists = async (whereParams = {}) => {
  *
  * @returns {Promise<TransferToken>}
  */
-const regenerate = async (id) => {
+const regenerate = async (id: any) => {
   const accessKey = crypto.randomBytes(128).toString('hex');
   const transferToken = await strapi.db.transaction(async () =>
     strapi.query(TRANSFER_TOKEN_UID).update({
@@ -333,7 +329,7 @@ const regenerate = async (id) => {
  *
  * @returns { { lifespan: null | number, expiresAt: null | number } }
  */
-const getExpirationFields = (lifespan) => {
+const getExpirationFields = (lifespan: number) => {
   // it must be nil or a finite number >= 0
   const isValidNumber = Number.isFinite(lifespan) && lifespan > 0;
   if (!isValidNumber && !isNil(lifespan)) {
@@ -353,7 +349,8 @@ const getExpirationFields = (lifespan) => {
  *
  * @returns {string}
  */
-const hash = (accessKey) => {
+const hash = (accessKey: string) => {
+  // @ts-ignore
   const { hasValidTokenSalt } = getService('transfer').utils;
 
   if (!hasValidTokenSalt()) {
@@ -370,6 +367,7 @@ const hash = (accessKey) => {
  * @returns {void}
  */
 const checkSaltIsDefined = () => {
+  // @ts-ignore
   const { hasValidTokenSalt, isDisabledFromEnv } = getService('transfer').utils;
 
   // Ignore the check if the data-transfer feature is manually disabled
@@ -393,7 +391,7 @@ For security reasons, prefer storing the secret in an environment variable and r
  *
  * @returns {TransferToken}
  */
-const flattenTokenPermissions = (token) => {
+const flattenTokenPermissions = (token: any) => {
   if (!token) return token;
 
   return {
@@ -406,10 +404,10 @@ const flattenTokenPermissions = (token) => {
  * Assert that a token's permissions are valid
  * @param {object} attributes
  */
-const assertTokenPermissionsValidity = (attributes) => {
+const assertTokenPermissionsValidity = (attributes: any) => {
   const permissionService = strapi.admin.services.transfer.permission;
   const validPermissions = permissionService.providers.action.keys();
-  const invalidPermissions = difference(attributes.permissions, validPermissions);
+  const invalidPermissions = difference(attributes.permissions, validPermissions) as any;
 
   if (!isEmpty(invalidPermissions)) {
     throw new ValidationError(`Unknown permissions provided: ${invalidPermissions.join(', ')}`);
@@ -421,7 +419,7 @@ const assertTokenPermissionsValidity = (attributes) => {
  *
  * @param {TransferToken} token
  */
-const assertValidLifespan = ({ lifespan }) => {
+const assertValidLifespan = ({ lifespan }: any) => {
   if (isNil(lifespan)) {
     return;
   }
@@ -434,7 +432,7 @@ const assertValidLifespan = ({ lifespan }) => {
   }
 };
 
-module.exports = {
+export {
   create,
   list,
   exists,

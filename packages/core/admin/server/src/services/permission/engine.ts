@@ -1,12 +1,10 @@
-'use strict';
+import { curry, isArray, isEmpty, difference } from 'lodash/fp';
+import permissions from '@strapi/permissions';
 
-const { curry, isArray, isEmpty, difference } = require('lodash/fp');
-const permissions = require('@strapi/permissions');
+import permissionDomain from '../../domain/permission/index';
+import { getService } from '../../utils';
 
-const permissionDomain = require('../../domain/permission/index');
-const { getService } = require('../../utils');
-
-module.exports = (params) => {
+export default (params: any) => {
   const { providers } = params;
 
   const engine = permissions.engine
@@ -69,8 +67,8 @@ module.exports = (params) => {
      * @param user
      * @returns {Promise<Ability>}
      */
-    async generateUserAbility(user) {
-      const permissions = await getService('permission').findUserPermissions(user);
+    async generateUserAbility(user: any) {
+      const permissions = (await getService('permission').findUserPermissions(user)) as any;
 
       return engine.generateAbility(permissions, user);
     },
@@ -78,8 +76,10 @@ module.exports = (params) => {
     /**
      * Check many permissions based on an ability
      */
-    checkMany: curry((ability, permissions) => {
-      return permissions.map(({ action, subject, field }) => ability.can(action, subject, field));
+    checkMany: curry((ability: any, permissions: any) => {
+      return permissions.map(({ action, subject, field }: any) =>
+        ability.can(action, subject, field)
+      );
     }),
   };
 };

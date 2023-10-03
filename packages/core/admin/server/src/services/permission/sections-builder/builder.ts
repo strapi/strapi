@@ -1,6 +1,4 @@
-'use strict';
-
-const createSection = require('./section');
+import createSection from './section';
 
 /**
  * Create a new section builder with its own sections registry
@@ -17,7 +15,7 @@ const createSectionBuilder = () => {
      * @param {SectionOptions} options - The options used to build a {@link Section}
      * @return {this}
      */
-    createSection(sectionName, options) {
+    createSection(sectionName: string, options: any) {
       const section = createSection(options);
 
       state.sections.set(sectionName, section);
@@ -30,7 +28,8 @@ const createSectionBuilder = () => {
      * @param {string} sectionName - The name of the section to delete
      * @return {this}
      */
-    deleteSection(sectionName) {
+    deleteSection(sectionName: string) {
+      // @ts-expect-error
       state.sections.remove(sectionName);
 
       return this;
@@ -42,7 +41,7 @@ const createSectionBuilder = () => {
      * @param {Function} handler - The handler to register
      * @return {this}
      */
-    addHandler(sectionName, handler) {
+    addHandler(sectionName: string, handler: () => unknown) {
       if (state.sections.has(sectionName)) {
         state.sections.get(sectionName).hooks.handlers.register(handler);
       }
@@ -56,7 +55,7 @@ const createSectionBuilder = () => {
      * @param {Function} matcher - The handler to register
      * @return {this}
      */
-    addMatcher(sectionName, matcher) {
+    addMatcher(sectionName: string, matcher: () => unknown) {
       if (state.sections.has(sectionName)) {
         state.sections.get(sectionName).hooks.matchers.register(matcher);
       }
@@ -69,8 +68,8 @@ const createSectionBuilder = () => {
      * @param {Array<Action>} actions - The actions used to build each section
      * @return {Promise<any>}
      */
-    async build(actions = []) {
-      const sections = {};
+    async build(actions = [] as any) {
+      const sections = {} as any;
 
       for (const [sectionName, section] of state.sections.entries()) {
         sections[sectionName] = await section.build(actions);
@@ -81,4 +80,4 @@ const createSectionBuilder = () => {
   };
 };
 
-module.exports = createSectionBuilder;
+export default createSectionBuilder;

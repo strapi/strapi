@@ -1,16 +1,14 @@
-'use strict';
-
-const { isNil, isArray, prop, xor, eq, map, differenceWith } = require('lodash/fp');
-const pmap = require('p-map');
-const { getService } = require('../../utils');
-const permissionDomain = require('../../domain/permission/index');
+import { isNil, isArray, prop, xor, eq, map, differenceWith } from 'lodash/fp';
+import pmap from 'p-map';
+import { getService } from '../../utils';
+import permissionDomain from '../../domain/permission/index';
 
 /**
  * Delete permissions of roles in database
  * @param rolesIds ids of roles
  * @returns {Promise<array>}
  */
-const deleteByRolesIds = async (rolesIds) => {
+const deleteByRolesIds = async (rolesIds: string[]) => {
   const permissionsToDelete = await strapi.query('admin::permission').findMany({
     select: ['id'],
     where: {
@@ -28,7 +26,7 @@ const deleteByRolesIds = async (rolesIds) => {
  * @param ids ids of permissions
  * @returns {Promise<array>}
  */
-const deleteByIds = async (ids) => {
+const deleteByIds = async (ids: string[]) => {
   const result = [];
   for (const id of ids) {
     const queryResult = await strapi.query('admin::permission').delete({ where: { id } });
@@ -42,7 +40,7 @@ const deleteByIds = async (ids) => {
  * @param permissions
  * @returns {Promise<*[]|*>}
  */
-const createMany = async (permissions) => {
+const createMany = async (permissions: any) => {
   const createdPermissions = [];
   for (const permission of permissions) {
     const newPerm = await strapi.query('admin::permission').create({ data: permission });
@@ -61,7 +59,7 @@ const createMany = async (permissions) => {
  * @param params
  * @param attributes
  */
-const update = async (params, attributes) => {
+const update = async (params: any, attributes: any) => {
   const updatedPermission = await strapi
     .query('admin::permission')
     .update({ where: params, data: attributes });
@@ -88,11 +86,11 @@ const findMany = async (params = {}) => {
  * @param user - user
  * @returns {Promise<Permission[]>}
  */
-const findUserPermissions = async (user) => {
+const findUserPermissions = async (user: any) => {
   return findMany({ where: { role: { users: { id: user.id } } } });
 };
 
-const filterPermissionsToRemove = async (permissions) => {
+const filterPermissionsToRemove = async (permissions: any) => {
   const { actionProvider } = getService('permission');
 
   const permissionsToRemove = [];
@@ -102,7 +100,7 @@ const filterPermissionsToRemove = async (permissions) => {
     const { applyToProperties } = options;
 
     const invalidProperties = await Promise.all(
-      (applyToProperties || []).map(async (property) => {
+      (applyToProperties || []).map(async (property: any) => {
         const applies = await actionProvider.appliesToProperty(
           property,
           permission.action,
@@ -150,7 +148,7 @@ const cleanPermissionsInDatabase = async () => {
 
     // 2. Clean permissions' fields (add required ones, remove the non-existing ones)
     const remainingPermissions = permissions.filter(
-      (permission) => !permissionsIdToRemove.includes(permission.id)
+      (permission: any) => !permissionsIdToRemove.includes(permission.id)
     );
 
     const permissionsWithCleanFields =
@@ -158,14 +156,14 @@ const cleanPermissionsInDatabase = async () => {
 
     // Update only the ones that need to be updated
     const permissionsNeedingToBeUpdated = differenceWith(
-      (a, b) => {
+      (a: any, b: any) => {
         return a.id === b.id && xor(a.properties.fields, b.properties.fields).length === 0;
       },
       permissionsWithCleanFields,
       remainingPermissions
     );
 
-    const updatePromiseProvider = (permission) => {
+    const updatePromiseProvider = (permission: any) => {
       return update({ id: permission.id }, permission);
     };
 
@@ -180,7 +178,7 @@ const cleanPermissionsInDatabase = async () => {
   }
 };
 
-module.exports = {
+export {
   createMany,
   findMany,
   deleteByRolesIds,
