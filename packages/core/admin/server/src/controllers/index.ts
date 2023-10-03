@@ -1,13 +1,13 @@
 import * as admin from './admin';
-import * as apiToken from './api-token';
-import * as authenticatedUser from './authenticated-user';
-import * as authentication from './authentication';
-import * as permission from './permission';
-import * as role from './role';
-import * as transfer from './transfer';
-import * as user from './user';
-import * as webhooks from './webhooks';
-import * as contentApi from './content-api';
+import apiToken from './api-token';
+import authenticatedUser from './authenticated-user';
+import authentication from './authentication';
+import permission from './permission';
+import role from './role';
+import transfer from './transfer';
+import user from './user';
+import webhooks from './webhooks';
+import contentApi from './content-api';
 
 export default {
   admin,

@@ -14,7 +14,7 @@ import * as transfer from './transfer';
 import * as projectSettings from './project-settings';
 
 // TODO: TS - Export services one by one as this export is cjs
-export = {
+export default {
   user,
   token,
   role,

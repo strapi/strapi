@@ -15,7 +15,6 @@ export const authenticate = async (ctx: any) => {
   }
 
   const token = parts[1];
-  // @ts-expect-error
   const { payload, isValid } = getService('token').decodeJwtToken(token);
 
   if (!isValid) {
