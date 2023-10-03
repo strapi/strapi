@@ -15,10 +15,7 @@ export interface CheckPagePermissions {
   permissions?: Permission[];
 }
 
-const CheckPagePermissions: React.FC<CheckPagePermissions> = ({
-  permissions = [],
-  children,
-}: CheckPagePermissions) => {
+const CheckPagePermissions = ({ permissions = [], children }: CheckPagePermissions) => {
   const abortController = new AbortController();
   const { signal } = abortController;
   const { allPermissions } = useRBACProvider();
