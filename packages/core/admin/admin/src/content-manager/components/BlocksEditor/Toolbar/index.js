@@ -433,10 +433,10 @@ ListButton.propTypes = {
   disabled: PropTypes.bool.isRequired,
 };
 
-// TODO: Remove after the RTE Blocks Alpha release
-const AlphaTag = styled(Box)`
-  background-color: ${({ theme }) => theme.colors.warning100};
-  border: ${({ theme }) => `1px solid ${theme.colors.warning200}`};
+// TODO: Remove after the RTE Blocks Beta release
+const BetaTag = styled(Box)`
+  background-color: ${({ theme }) => theme.colors.secondary100};
+  border: ${({ theme }) => `1px solid ${theme.colors.secondary200}`};
   border-radius: ${({ theme }) => theme.borderRadius};
   font-size: ${({ theme }) => theme.fontSizes[0]};
   padding: ${({ theme }) => `${2 / 16}rem ${theme.spaces[1]}`};
@@ -447,7 +447,7 @@ const BlocksToolbar = ({ disabled }) => {
 
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
-      {/* Remove after the RTE Blocks Alpha release (paddingRight and width) */}
+      {/* Remove after the RTE Blocks Beta release (paddingRight and width) */}
       <ToolbarWrapper gap={1} padding={2} paddingRight={4} width="100%">
         <BlocksDropdown disabled={disabled} />
         <Toolbar.ToggleGroup type="multiple" asChild>
@@ -488,13 +488,13 @@ const BlocksToolbar = ({ disabled }) => {
             />
           </Flex>
         </Toolbar.ToggleGroup>
-        {/* TODO: Remove after the RTE Blocks Alpha release */}
+        {/* TODO: Remove after the RTE Blocks Beta release */}
         <Flex grow={1} justifyContent="flex-end">
-          <AlphaTag>
-            <Typography textColor="warning600" variant="sigma">
-              ALPHA
+          <BetaTag>
+            <Typography textColor="secondary600" variant="sigma">
+              BETA
             </Typography>
-          </AlphaTag>
+          </BetaTag>
         </Flex>
       </ToolbarWrapper>
     </Toolbar.Root>
