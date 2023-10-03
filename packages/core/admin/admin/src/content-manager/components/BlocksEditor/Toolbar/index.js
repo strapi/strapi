@@ -187,7 +187,7 @@ const ImageDialog = ({ handleClose }) => {
 
   const handleSelectAssets = (images) => {
     const formattedImages = images.map((image) => {
-      // create an object with imageSchema defined and exclude unnecessary props coming from media library config
+      // Create an object with imageSchema defined and exclude unnecessary props coming from media library config
       const expectedImage = pick(image, IMAGE_SCHEMA_FIELDS);
 
       return {
@@ -200,7 +200,7 @@ const ImageDialog = ({ handleClose }) => {
     insertImages(formattedImages);
 
     if (isLastBlockType(editor, 'image')) {
-      // insert blank line to add new blocks below image block
+      // Insert blank line to add new blocks below image block
       insertEmptyBlockAtLast(editor);
     }
 
@@ -280,7 +280,7 @@ export const BlocksDropdown = ({ disabled }) => {
     setBlockSelected(optionKey);
 
     if (optionKey === 'code' && isLastBlockType(editor, 'code')) {
-      // insert blank line to add new blocks below code block
+      // Insert blank line to add new blocks below code block
       insertEmptyBlockAtLast(editor);
     }
 
@@ -289,7 +289,7 @@ export const BlocksDropdown = ({ disabled }) => {
     }
   };
 
-  // This useEffect tried to listen to the selection change and update the selected block in the dropdown
+  // Listen to the selection change and update the selected block in the dropdown
   React.useEffect(() => {
     if (editor.selection) {
       // Get the parent node of the anchor
@@ -299,7 +299,7 @@ export const BlocksDropdown = ({ disabled }) => {
         blocks[blockKey].matchNode(anchorNode)
       );
 
-      // change the value selected in the dropdown if it doesn't match the anchor block key
+      // Change the value selected in the dropdown if it doesn't match the anchor block key
       if (anchorBlockKey && anchorBlockKey !== blockSelected) {
         setBlockSelected(anchorBlockKey);
       }
