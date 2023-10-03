@@ -1,6 +1,4 @@
-'use strict';
-
-module.exports = {
+export default {
   collectionName: 'strapi_transfer_tokens',
   info: {
     name: 'Transfer Token',

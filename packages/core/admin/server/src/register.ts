@@ -1,12 +1,8 @@
-'use strict';
+import registerAdminPanelRoute from './routes/serve-admin-panel';
+import adminAuthStrategy from './strategies/admin';
+import apiTokenAuthStrategy from './strategies/api-token';
 
-const registerAdminPanelRoute = require('./routes/serve-admin-panel');
-
-const adminAuthStrategy = require('./strategies/admin');
-
-const apiTokenAuthStrategy = require('./strategies/api-token');
-
-module.exports = ({ strapi }) => {
+export default ({ strapi }: any) => {
   const passportMiddleware = strapi.admin.services.passport.init();
 
   strapi.server.api('admin').use(passportMiddleware);

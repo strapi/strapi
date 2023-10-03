@@ -1,15 +1,13 @@
-'use strict';
+import { validateCheckPermissionsInput } from '../validation/permission';
+import { getService } from '../utils';
+import { formatConditions } from './formatters';
 
-const { validateCheckPermissionsInput } = require('../validation/permission');
-const { getService } = require('../utils');
-const { formatConditions } = require('./formatters');
-
-module.exports = {
+export default {
   /**
    * Check each permissions from `request.body.permissions` and returns an array of booleans
    * @param {KoaContext} ctx - koa context
    */
-  async check(ctx) {
+  async check(ctx: any) {
     const { body: input } = ctx.request;
     const { userAbility } = ctx.state;
 
@@ -28,7 +26,7 @@ module.exports = {
    * Returns every permissions, in nested format
    * @param {KoaContext} ctx - koa context
    */
-  async getAll(ctx) {
+  async getAll(ctx: any) {
     const { sectionsBuilder, actionProvider, conditionProvider } = getService('permission');
 
     const actions = actionProvider.values();

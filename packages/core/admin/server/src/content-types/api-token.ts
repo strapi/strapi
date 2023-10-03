@@ -1,8 +1,6 @@
-'use strict';
+import constants from '../services/constants';
 
-const constants = require('../services/constants');
-
-module.exports = {
+export default {
   collectionName: 'strapi_api_tokens',
   info: {
     name: 'Api Token',

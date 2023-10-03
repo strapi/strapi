@@ -1,18 +1,15 @@
-'use strict';
-
-const {
-  stringEquals,
-  errors: { ApplicationError },
-} = require('@strapi/utils');
-const { trim, has } = require('lodash/fp');
-const { getService } = require('../utils');
-const {
+import { stringEquals, errors } from '@strapi/utils';
+import { trim, has } from 'lodash/fp';
+import { getService } from '../utils';
+import {
   validateApiTokenCreationInput,
   validateApiTokenUpdateInput,
-} = require('../validation/api-tokens');
+} from '../validation/api-tokens';
 
-module.exports = {
-  async create(ctx) {
+const { ApplicationError } = errors;
+
+export default {
+  async create(ctx: any) {
     const { body } = ctx.request;
     const apiTokenService = getService('api-token');
 
@@ -40,7 +37,7 @@ module.exports = {
     ctx.created({ data: apiToken });
   },
 
-  async regenerate(ctx) {
+  async regenerate(ctx: any) {
     const { id } = ctx.params;
     const apiTokenService = getService('api-token');
 
@@ -55,14 +52,14 @@ module.exports = {
     ctx.created({ data: accessToken });
   },
 
-  async list(ctx) {
+  async list(ctx: any) {
     const apiTokenService = getService('api-token');
     const apiTokens = await apiTokenService.list();
 
     ctx.send({ data: apiTokens });
   },
 
-  async revoke(ctx) {
+  async revoke(ctx: any) {
     const { id } = ctx.params;
     const apiTokenService = getService('api-token');
     const apiToken = await apiTokenService.revoke(id);
@@ -70,7 +67,7 @@ module.exports = {
     ctx.deleted({ data: apiToken });
   },
 
-  async get(ctx) {
+  async get(ctx: any) {
     const { id } = ctx.params;
     const apiTokenService = getService('api-token');
     const apiToken = await apiTokenService.getById(id);
@@ -83,7 +80,7 @@ module.exports = {
     ctx.send({ data: apiToken });
   },
 
-  async update(ctx) {
+  async update(ctx: any) {
     const { body } = ctx.request;
     const { id } = ctx.params;
     const apiTokenService = getService('api-token');
@@ -126,8 +123,9 @@ module.exports = {
     ctx.send({ data: apiToken });
   },
 
-  async getLayout(ctx) {
+  async getLayout(ctx: any) {
     const apiTokenService = getService('api-token');
+    // @ts-expect-error
     const layout = await apiTokenService.getApiTokenLayout();
 
     ctx.send({ data: layout });

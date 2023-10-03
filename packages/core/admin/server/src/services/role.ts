@@ -171,7 +171,7 @@ const count = async (params = {}) => {
  * @param ids
  * @returns {Promise<void>}
  */
-const checkRolesIdForDeletion = async (ids = []) => {
+const checkRolesIdForDeletion = async (ids = [] as any[]) => {
   const superAdminRole = await getSuperAdmin();
 
   if (superAdminRole && stringIncludes(ids, superAdminRole.id)) {
@@ -191,7 +191,7 @@ const checkRolesIdForDeletion = async (ids = []) => {
  * @param ids query params to find the roles
  * @returns {Promise<array>}
  */
-const deleteByIds = async (ids = []) => {
+const deleteByIds = async (ids = [] as any[]) => {
   await checkRolesIdForDeletion(ids);
 
   await getService('permission').deleteByRolesIds(ids);

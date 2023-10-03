@@ -1,50 +1,55 @@
-'use strict';
-
-const passport = require('koa-passport');
-const compose = require('koa-compose');
-const { ApplicationError, ValidationError } = require('@strapi/utils').errors;
-const { getService } = require('../utils');
-const {
+// @ts-expect-error
+import passport from 'koa-passport';
+import compose from 'koa-compose';
+import { errors } from '@strapi/utils';
+import { getService } from '../utils';
+import {
   validateRegistrationInput,
   validateAdminRegistrationInput,
   validateRegistrationInfoQuery,
   validateForgotPasswordInput,
   validateResetPasswordInput,
   validateRenewTokenInput,
-} = require('../validation/authentication');
+} from '../validation/authentication';
 
-module.exports = {
+const { ApplicationError, ValidationError } = errors;
+
+export default {
   login: compose([
-    (ctx, next) => {
-      return passport.authenticate('local', { session: false }, (err, user, info) => {
-        if (err) {
-          strapi.eventHub.emit('admin.auth.error', { error: err, provider: 'local' });
-          // if this is a recognized error, allow it to bubble up to user
-          if (err.details?.code === 'LOGIN_NOT_ALLOWED') {
-            throw err;
+    (ctx: any, next: any) => {
+      return passport.authenticate(
+        'local',
+        { session: false },
+        (err: any, user: any, info: any) => {
+          if (err) {
+            strapi.eventHub.emit('admin.auth.error', { error: err, provider: 'local' });
+            // if this is a recognized error, allow it to bubble up to user
+            if (err.details?.code === 'LOGIN_NOT_ALLOWED') {
+              throw err;
+            }
+
+            // for all other errors throw a generic error to prevent leaking info
+            return ctx.notImplemented();
           }
 
-          // for all other errors throw a generic error to prevent leaking info
-          return ctx.notImplemented();
+          if (!user) {
+            strapi.eventHub.emit('admin.auth.error', {
+              error: new Error(info.message),
+              provider: 'local',
+            });
+            throw new ApplicationError(info.message);
+          }
+
+          ctx.state.user = user;
+
+          const sanitizedUser = getService('user').sanitizeUser(user);
+          strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider: 'local' });
+
+          return next();
         }
-
-        if (!user) {
-          strapi.eventHub.emit('admin.auth.error', {
-            error: new Error(info.message),
-            provider: 'local',
-          });
-          throw new ApplicationError(info.message);
-        }
-
-        ctx.state.user = user;
-
-        const sanitizedUser = getService('user').sanitizeUser(user);
-        strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider: 'local' });
-
-        return next();
-      })(ctx, next);
+      )(ctx, next);
     },
-    (ctx) => {
+    (ctx: any) => {
       const { user } = ctx.state;
 
       ctx.body = {
@@ -56,7 +61,7 @@ module.exports = {
     },
   ]),
 
-  async renewToken(ctx) {
+  async renewToken(ctx: any) {
     await validateRenewTokenInput(ctx.request.body);
 
     const { token } = ctx.request.body;
@@ -74,7 +79,7 @@ module.exports = {
     };
   },
 
-  async registrationInfo(ctx) {
+  async registrationInfo(ctx: any) {
     await validateRegistrationInfoQuery(ctx.request.query);
 
     const { registrationToken } = ctx.request.query;
@@ -88,7 +93,7 @@ module.exports = {
     ctx.body = { data: registrationInfo };
   },
 
-  async register(ctx) {
+  async register(ctx: any) {
     const input = ctx.request.body;
 
     await validateRegistrationInput(input);
@@ -103,7 +108,7 @@ module.exports = {
     };
   },
 
-  async registerAdmin(ctx) {
+  async registerAdmin(ctx: any) {
     const input = ctx.request.body;
 
     await validateAdminRegistrationInput(input);
@@ -139,7 +144,7 @@ module.exports = {
     };
   },
 
-  async forgotPassword(ctx) {
+  async forgotPassword(ctx: any) {
     const input = ctx.request.body;
 
     await validateForgotPasswordInput(input);
@@ -149,7 +154,7 @@ module.exports = {
     ctx.status = 204;
   },
 
-  async resetPassword(ctx) {
+  async resetPassword(ctx: any) {
     const input = ctx.request.body;
 
     await validateResetPasswordInput(input);
@@ -164,7 +169,7 @@ module.exports = {
     };
   },
 
-  logout(ctx) {
+  logout(ctx: any) {
     const sanitizedUser = getService('user').sanitizeUser(ctx.state.user);
     strapi.eventHub.emit('admin.logout', { user: sanitizedUser });
     ctx.body = { data: {} };

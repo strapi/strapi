@@ -37,10 +37,14 @@ const updateProjectSettingsImagesDimensions = yup
   })
   .noUnknown();
 
+export const validateUpdateProjectSettings = validateYupSchemaSync(updateProjectSettings);
+export const validateUpdateProjectSettingsFiles = validateYupSchemaSync(updateProjectSettingsFiles);
+export const validateUpdateProjectSettingsImagesDimensions = validateYupSchemaSync(
+  updateProjectSettingsImagesDimensions
+);
+
 export default {
-  validateUpdateProjectSettings: validateYupSchemaSync(updateProjectSettings),
-  validateUpdateProjectSettingsFiles: validateYupSchemaSync(updateProjectSettingsFiles),
-  validateUpdateProjectSettingsImagesDimensions: validateYupSchemaSync(
-    updateProjectSettingsImagesDimensions
-  ),
+  validateUpdateProjectSettings,
+  validateUpdateProjectSettingsFiles,
+  validateUpdateProjectSettingsImagesDimensions,
 };

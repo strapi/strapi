@@ -1,22 +1,21 @@
 import { trim, has } from 'lodash/fp';
 import { errors, stringEquals } from '@strapi/utils';
+import { getService } from '../../utils';
+import { token } from '../../validation/transfer';
 
 const { ApplicationError } = errors;
 
-const {
-  token: { validateTransferTokenCreationInput, validateTransferTokenUpdateInput },
-} = require('../../validation/transfer');
-const { getService } = require('../../utils');
+const { validateTransferTokenCreationInput, validateTransferTokenUpdateInput } = token;
 
-module.exports = {
-  async list(ctx) {
+export default {
+  async list(ctx: any) {
     const transferService = getService('transfer');
     const transferTokens = await transferService.token.list();
 
     ctx.body = { data: transferTokens };
   },
 
-  async getById(ctx) {
+  async getById(ctx: any) {
     const { id } = ctx.params;
     const tokenService = getService('transfer').token;
 
@@ -30,7 +29,7 @@ module.exports = {
     ctx.body = { data: transferToken };
   },
 
-  async create(ctx) {
+  async create(ctx: any) {
     const { body } = ctx.request;
     const { token: tokenService } = getService('transfer');
 
@@ -58,7 +57,7 @@ module.exports = {
     ctx.created({ data: transferTokens });
   },
 
-  async update(ctx) {
+  async update(ctx: any) {
     const { body } = ctx.request;
     const { id } = ctx.params;
     const { token: tokenService } = getService('transfer');
@@ -102,7 +101,7 @@ module.exports = {
     ctx.body = { data: apiToken };
   },
 
-  async revoke(ctx) {
+  async revoke(ctx: any) {
     const { id } = ctx.params;
     const { token: tokenService } = getService('transfer');
 
@@ -111,7 +110,7 @@ module.exports = {
     ctx.deleted({ data: transferToken });
   },
 
-  async regenerate(ctx) {
+  async regenerate(ctx: any) {
     const { id } = ctx.params;
     const { token: tokenService } = getService('transfer');
 

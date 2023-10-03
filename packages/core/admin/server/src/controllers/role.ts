@@ -1,22 +1,22 @@
-'use strict';
-
-const { ApplicationError } = require('@strapi/utils').errors;
-const {
+import { errors } from '@strapi/utils';
+import {
   validateRoleUpdateInput,
   validateRoleCreateInput,
   validateRoleDeleteInput,
   validateRolesDeleteInput,
-} = require('../validation/role');
-const { validatedUpdatePermissionsInput } = require('../validation/permission');
-const { SUPER_ADMIN_CODE } = require('../services/constants');
-const { getService } = require('../utils');
+} from '../validation/role';
+import { validatedUpdatePermissionsInput } from '../validation/permission';
+import { SUPER_ADMIN_CODE } from '../services/constants';
+import { getService } from '../utils';
 
-module.exports = {
+const { ApplicationError } = errors;
+
+export default {
   /**
    * Create a new role
    * @param {KoaContext} ctx - koa context
    */
-  async create(ctx) {
+  async create(ctx: any) {
     await validateRoleCreateInput(ctx.request.body);
 
     const roleService = getService('role');
@@ -31,7 +31,7 @@ module.exports = {
    * Returns on role by id
    * @param {KoaContext} ctx - koa context
    */
-  async findOne(ctx) {
+  async findOne(ctx: any) {
     const { id } = ctx.params;
     const role = await getService('role').findOneWithUsersCount({ id });
 
@@ -48,7 +48,7 @@ module.exports = {
    * Returns every roles
    * @param {KoaContext} ctx - koa context
    */
-  async findAll(ctx) {
+  async findAll(ctx: any) {
     const { query } = ctx.request;
 
     const permissionsManager = getService('permission').createPermissionsManager({
@@ -70,7 +70,7 @@ module.exports = {
    * Updates a role by id
    * @param {KoaContext} ctx - koa context
    */
-  async update(ctx) {
+  async update(ctx: any) {
     const { id } = ctx.params;
     const { body } = ctx.request;
 
@@ -100,7 +100,7 @@ module.exports = {
    * Returns the permissions assigned to a role
    * @param {KoaContext} ctx - koa context
    */
-  async getPermissions(ctx) {
+  async getPermissions(ctx: any) {
     const { id } = ctx.params;
 
     const roleService = getService('role');
@@ -125,7 +125,7 @@ module.exports = {
    * Updates the permissions assigned to a role
    * @param {KoaContext} ctx - koa context
    */
-  async updatePermissions(ctx) {
+  async updatePermissions(ctx: any) {
     const { id } = ctx.params;
     const { body: input } = ctx.request;
 
@@ -161,7 +161,7 @@ module.exports = {
    * Delete a role
    * @param {KoaContext} ctx - koa context
    */
-  async deleteOne(ctx) {
+  async deleteOne(ctx: any) {
     const { id } = ctx.params;
 
     await validateRoleDeleteInput(id);
@@ -181,7 +181,7 @@ module.exports = {
    * delete several roles
    * @param {KoaContext} ctx - koa context
    */
-  async deleteMany(ctx) {
+  async deleteMany(ctx: any) {
     const { body } = ctx.request;
 
     await validateRolesDeleteInput(body);

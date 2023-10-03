@@ -51,9 +51,14 @@ const roleUpdateSchema = yup
   })
   .noUnknown();
 
+export const validateRoleCreateInput = validateYupSchema(roleCreateSchema);
+export const validateRoleUpdateInput = validateYupSchema(roleUpdateSchema);
+export const validateRolesDeleteInput = validateYupSchema(rolesDeleteSchema);
+export const validateRoleDeleteInput = validateYupSchema(roleDeleteSchema);
+
 export default {
-  validateRoleUpdateInput: validateYupSchema(roleUpdateSchema),
-  validateRoleCreateInput: validateYupSchema(roleCreateSchema),
-  validateRolesDeleteInput: validateYupSchema(rolesDeleteSchema),
-  validateRoleDeleteInput: validateYupSchema(roleDeleteSchema),
+  validateRoleUpdateInput,
+  validateRoleCreateInput,
+  validateRolesDeleteInput,
+  validateRoleDeleteInput,
 };

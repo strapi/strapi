@@ -1,17 +1,16 @@
-'use strict';
-
-const _ = require('lodash');
-const { ApplicationError } = require('@strapi/utils').errors;
-const {
+import _ = require('lodash');
+import { errors } from '@strapi/utils';
+import {
   validateUserCreationInput,
   validateUserUpdateInput,
   validateUsersDeleteInput,
-} = require('../validation/user');
+} from '../validation/user';
+import { getService } from '../utils';
 
-const { getService } = require('../utils');
+const { ApplicationError } = errors;
 
-module.exports = {
-  async create(ctx) {
+export default {
+  async create(ctx: any) {
     const { body } = ctx.request;
     const cleanData = { ...body, email: _.get(body, `email`, ``).toLowerCase() };
 
@@ -45,7 +44,7 @@ module.exports = {
     ctx.created({ data: userInfo });
   },
 
-  async find(ctx) {
+  async find(ctx: any) {
     const userService = getService('user');
 
     const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
@@ -66,7 +65,7 @@ module.exports = {
     };
   },
 
-  async findOne(ctx) {
+  async findOne(ctx: any) {
     const { id } = ctx.params;
 
     const user = await getService('user').findOne(id);
@@ -80,7 +79,7 @@ module.exports = {
     };
   },
 
-  async update(ctx) {
+  async update(ctx: any) {
     const { id } = ctx.params;
     const { body: input } = ctx.request;
 
@@ -108,7 +107,7 @@ module.exports = {
     };
   },
 
-  async deleteOne(ctx) {
+  async deleteOne(ctx: any) {
     const { id } = ctx.params;
 
     const deletedUser = await getService('user').deleteById(id);
@@ -126,7 +125,7 @@ module.exports = {
    * Delete several users
    * @param {KoaContext} ctx - koa context
    */
-  async deleteMany(ctx) {
+  async deleteMany(ctx: any) {
     const { body } = ctx.request;
     await validateUsersDeleteInput(body);
 

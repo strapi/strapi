@@ -1,10 +1,8 @@
-'use strict';
+import { validateProfileUpdateInput } from '../validation/user';
+import { getService } from '../utils';
 
-const { validateProfileUpdateInput } = require('../validation/user');
-const { getService } = require('../utils');
-
-module.exports = {
-  async getMe(ctx) {
+export default {
+  async getMe(ctx: any) {
     const userInfo = getService('user').sanitizeUser(ctx.state.user);
 
     ctx.body = {
@@ -12,7 +10,7 @@ module.exports = {
     };
   },
 
-  async updateMe(ctx) {
+  async updateMe(ctx: any) {
     const input = ctx.request.body;
 
     await validateProfileUpdateInput(input);
@@ -39,7 +37,7 @@ module.exports = {
     };
   },
 
-  async getOwnPermissions(ctx) {
+  async getOwnPermissions(ctx: any) {
     const { findUserPermissions, sanitizePermission } = getService('permission');
     const { user } = ctx.state;
 

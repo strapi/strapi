@@ -1,34 +1,35 @@
-'use strict';
+import path from 'path';
 
-const path = require('path');
-
-const { map, values, sumBy, pipe, flatMap, propEq } = require('lodash/fp');
-const _ = require('lodash');
-const { exists } = require('fs-extra');
-const { env } = require('@strapi/utils');
-const { isUsingTypeScript } = require('@strapi/typescript-utils');
-// eslint-disable-next-line node/no-extraneous-require
-const ee = require('@strapi/strapi/dist/utils/ee').default;
-
-const {
+import { map, values, sumBy, pipe, flatMap, propEq } from 'lodash/fp';
+import _ from 'lodash';
+import { exists } from 'fs-extra';
+import { env } from '@strapi/utils';
+import tsUtils from '@strapi/typescript-utils';
+import {
   validateUpdateProjectSettings,
   validateUpdateProjectSettingsFiles,
   validateUpdateProjectSettingsImagesDimensions,
-} = require('../validation/project-settings');
-const { getService } = require('../utils');
+} from '../validation/project-settings';
+import { getService } from '../utils';
+
+const { isUsingTypeScript } = tsUtils;
+
+// eslint-disable-next-line node/no-extraneous-require
+// const ee = require('@strapi/strapi/dist/utils/ee').default;
 
 /**
  * A set of functions called "actions" for `Admin`
  */
 
-module.exports = {
+export default {
   // TODO very temporary to check the switch ee/ce
   // When removing this we need to update the /admin/src/index.js file
   // where we set the strapi.window.isEE value
   async getProjectType() {
     // FIXME
     try {
-      return { data: { isEE: strapi.EE, features: ee.features.list() } };
+      // TODO: TS - Migrate EE to ts
+      // return { data: { isEE: strapi.EE, features: ee.features.list() } };
     } catch (err) {
       return { data: { isEE: false, features: [] } };
     }
@@ -59,7 +60,7 @@ module.exports = {
     return getService('project-settings').getProjectSettings();
   },
 
-  async updateProjectSettings(ctx) {
+  async updateProjectSettings(ctx: any) {
     const projectSettingsService = getService('project-settings');
 
     const {
@@ -75,7 +76,7 @@ module.exports = {
     return projectSettingsService.updateProjectSettings({ ...body, ...formatedFiles });
   },
 
-  async telemetryProperties(ctx) {
+  async telemetryProperties(ctx: any) {
     // If the telemetry is disabled, ignore the request and return early
     if (strapi.telemetry.isDisabled) {
       ctx.status = 204;
@@ -95,8 +96,9 @@ module.exports = {
       return pipe(
         map('attributes'),
         flatMap(values),
+        // @ts-expect-error
         sumBy(propEq('type', 'dynamiczone'))
-      )(strapi.contentTypes);
+      )(strapi.contentTypes as any);
     };
 
     return {
@@ -119,6 +121,7 @@ module.exports = {
     const projectId = strapi.config.get('uuid', null);
     const nodeVersion = process.version;
     const communityEdition = !strapi.EE;
+    // @ts-expect-error
     const useYarn = await exists(path.join(process.cwd(), 'yarn.lock'));
 
     return {
@@ -135,10 +138,10 @@ module.exports = {
     };
   },
 
-  async plugins(ctx) {
-    const enabledPlugins = strapi.config.get('enabledPlugins');
+  async plugins(ctx: any) {
+    const enabledPlugins = strapi.config.get('enabledPlugins') as any;
 
-    const plugins = Object.entries(enabledPlugins).map(([key, plugin]) => ({
+    const plugins = Object.entries(enabledPlugins).map(([key, plugin]: any) => ({
       name: plugin.info.name || key,
       displayName: plugin.info.displayName || plugin.info.name || key,
       description: plugin.info.description || '',

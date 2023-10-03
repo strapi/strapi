@@ -51,15 +51,20 @@ const usersDeleteSchema = yup
   })
   .noUnknown();
 
-export default {
-  validateUserCreationInput: validateYupSchema(userCreationSchema),
-  validateProfileUpdateInput: validateYupSchema(profileUpdateSchema),
-  validateUserUpdateInput: validateYupSchema(userUpdateSchema),
-  validateUsersDeleteInput: validateYupSchema(usersDeleteSchema),
+export const validateUserCreationInput = validateYupSchema(userCreationSchema);
+export const validateProfileUpdateInput = validateYupSchema(profileUpdateSchema);
+export const validateUserUpdateInput = validateYupSchema(userUpdateSchema);
+export const validateUsersDeleteInput = validateYupSchema(usersDeleteSchema);
+export const schemas = {
+  userCreationSchema,
+  usersDeleteSchema,
+  userUpdateSchema,
+};
 
-  schemas: {
-    userCreationSchema,
-    usersDeleteSchema,
-    userUpdateSchema,
-  },
+export default {
+  validateUserCreationInput,
+  validateProfileUpdateInput,
+  validateUserUpdateInput,
+  validateUsersDeleteInput,
+  schemas,
 };

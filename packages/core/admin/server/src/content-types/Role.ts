@@ -1,10 +1,8 @@
-'use strict';
-
 /**
  * Lifecycle callbacks for the `Role` model.
  */
 
-module.exports = {
+export default {
   collectionName: 'admin_roles',
   info: {
     name: 'Role',

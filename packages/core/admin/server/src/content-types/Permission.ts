@@ -1,10 +1,8 @@
-'use strict';
-
 /**
  * Lifecycle callbacks for the `Permission` model.
  */
 
-module.exports = {
+export default {
   collectionName: 'admin_permissions',
   info: {
     name: 'Permission',

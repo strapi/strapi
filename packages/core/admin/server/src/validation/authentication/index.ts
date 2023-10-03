@@ -1,19 +1,11 @@
-'use strict';
-
-const {
+import {
   validateRegistrationInput,
   validateAdminRegistrationInput,
   validateRegistrationInfoQuery,
-} = require('./register');
-const validateForgotPasswordInput = require('./forgot-password');
-const validateResetPasswordInput = require('./reset-password');
-const validateRenewTokenInput = require('./renew-token');
+} from './register';
 
-module.exports = {
-  validateRegistrationInput,
-  validateAdminRegistrationInput,
-  validateRegistrationInfoQuery,
-  validateForgotPasswordInput,
-  validateResetPasswordInput,
-  validateRenewTokenInput,
-};
+export { validateRegistrationInput, validateAdminRegistrationInput, validateRegistrationInfoQuery };
+
+export { default as validateForgotPasswordInput } from './forgot-password';
+export { default as validateResetPasswordInput } from './reset-password';
+export { default as validateRenewTokenInput } from './renew-token';

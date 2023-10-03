@@ -1,10 +1,8 @@
-'use strict';
-
-const { merge, map, difference, uniq } = require('lodash/fp');
-const { pipeAsync } = require('@strapi/utils');
-const { getService } = require('./utils');
-const adminActions = require('./config/admin-actions');
-const adminConditions = require('./config/admin-conditions');
+import { merge, map, difference, uniq } from 'lodash/fp';
+import { pipeAsync } from '@strapi/utils';
+import { getService } from './utils';
+import adminActions from './config/admin-actions';
+import adminConditions from './config/admin-conditions';
 
 const defaultAdminAuthSettings = {
   providers: {
@@ -58,6 +56,7 @@ const syncAPITokensPermissions = async () => {
   const validPermissions = strapi.contentAPI.permissions.providers.action.keys();
   const permissionsInDB = await pipeAsync(
     strapi.query('admin::api-token-permission').findMany,
+    // @ts-expect-error
     map('action')
   )();
 
@@ -70,7 +69,7 @@ const syncAPITokensPermissions = async () => {
   }
 };
 
-module.exports = async ({ strapi }) => {
+export default async ({ strapi }: any) => {
   await registerAdminConditions();
   await registerPermissionActions();
   registerModelHooks();

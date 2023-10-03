@@ -1,13 +1,11 @@
-'use strict';
-
-module.exports = {
-  collectionName: 'strapi_api_token_permissions',
+export default {
+  collectionName: 'strapi_transfer_token_permissions',
   info: {
-    name: 'API Token Permission',
+    name: 'Transfer Token Permission',
     description: '',
-    singularName: 'api-token-permission',
-    pluralName: 'api-token-permissions',
-    displayName: 'API Token Permission',
+    singularName: 'transfer-token-permission',
+    pluralName: 'transfer-token-permissions',
+    displayName: 'Transfer Token Permission',
   },
   options: {},
   pluginOptions: {
@@ -30,7 +28,7 @@ module.exports = {
       type: 'relation',
       relation: 'manyToOne',
       inversedBy: 'permissions',
-      target: 'admin::api-token',
+      target: 'admin::transfer-token',
     },
   },
 };

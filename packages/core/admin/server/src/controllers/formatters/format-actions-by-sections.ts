@@ -1,16 +1,14 @@
-'use strict';
-
 /**
  * Transform an array of actions to a more nested format
  * @param {Array<Action>} actions - array of actions
  * @returns {Object} "{ contentTypes, plugins, settings }"
  */
-const formatActionsBySections = (actions) =>
-  actions.reduce((result, p) => {
+const formatActionsBySections = (actions: any) =>
+  actions.reduce((result: any, p: any) => {
     const checkboxItem = {
       displayName: p.displayName,
       action: p.actionId,
-    };
+    } as any;
 
     switch (p.section) {
       case 'contentTypes': {
@@ -35,6 +33,6 @@ const formatActionsBySections = (actions) =>
     result[p.section].push(checkboxItem);
 
     return result;
-  }, {});
+  }, {} as any);
 
-module.exports = formatActionsBySections;
+export default formatActionsBySections;

@@ -24,7 +24,10 @@ const apiTokenUpdateSchema = yup
   .noUnknown()
   .strict();
 
-module.exports = {
-  validateApiTokenCreationInput: validateYupSchema(apiTokenCreationSchema),
-  validateApiTokenUpdateInput: validateYupSchema(apiTokenUpdateSchema),
+export const validateApiTokenCreationInput = validateYupSchema(apiTokenCreationSchema);
+export const validateApiTokenUpdateInput = validateYupSchema(apiTokenUpdateSchema);
+
+export default {
+  validateApiTokenCreationInput,
+  validateApiTokenUpdateInput,
 };

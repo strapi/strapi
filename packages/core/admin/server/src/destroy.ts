@@ -1,8 +1,6 @@
-'use strict';
+import { getService } from './utils';
 
-const { getService } = require('./utils');
-
-module.exports = async () => {
+export default async () => {
   const { conditionProvider, actionProvider } = getService('permission');
 
   await conditionProvider.clear();
