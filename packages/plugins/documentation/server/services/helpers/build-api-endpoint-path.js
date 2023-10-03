@@ -5,6 +5,7 @@ const pathToRegexp = require('path-to-regexp');
 
 const pascalCase = require('./utils/pascal-case');
 const queryParams = require('./utils/query-params');
+const queryGetEntityParams = require('./utils/query-get-entity-params');
 const loopContentTypeNames = require('./utils/loop-content-type-names');
 const getApiResponses = require('./utils/get-api-responses');
 const { hasFindMethod, isLocalizedPath } = require('./utils/routes');
@@ -115,6 +116,8 @@ const getPaths = ({ routeInfo, uniqueName, contentTypeInfo, kind }) => {
 
     if (isListOfEntities) {
       swaggerConfig.parameters.push(...queryParams);
+    } else if (methodVerb === 'get') {
+      swaggerConfig.parameters.push(...queryGetEntityParams);
     }
 
     if (hasPathParams) {
