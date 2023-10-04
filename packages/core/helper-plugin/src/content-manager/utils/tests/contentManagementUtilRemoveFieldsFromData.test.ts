@@ -2,7 +2,7 @@ import { contentManagementUtilRemoveFieldsFromData } from '../contentManagementU
 
 import { testData } from './testData';
 
-import type { Schema } from '@strapi/strapi';
+import type { Schema } from '@strapi/types';
 
 describe('STRAPI_HELPER_PLUGIN | utils', () => {
   describe('contentManagementUtilRemoveFieldsFromData', () => {

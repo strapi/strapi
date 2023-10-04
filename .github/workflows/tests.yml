@@ -126,7 +126,7 @@ jobs:
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Run build:ts for admin-test-utils
-        run: yarn build --projects=@strapi/admin-test-utils,@strapi/helper-plugin,@strapi/strapi --skip-nx-cache
+        run: yarn build --projects=@strapi/admin-test-utils,@strapi/helper-plugin --skip-nx-cache
       - name: Run test
         run: yarn nx affected --target=test:front --nx-ignore-cycles
 
