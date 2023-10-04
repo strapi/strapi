@@ -10,28 +10,25 @@ const { ValidationError, NotFoundError } = errors;
 const TRANSFER_TOKEN_UID = 'admin::transfer-token';
 const TRANSFER_TOKEN_PERMISSION_UID = 'admin::transfer-token-permission';
 
-/**
- * @typedef TransferToken
- *
- * @property {number|string} id
- * @property {string} name
- * @property {string} description
- * @property {string} accessKey
- * @property {number} lastUsedAt
- * @property {number} lifespan
- * @property {number} expiresAt
- * @property {(number[]|TransferTokenPermission[])} permissions
- */
+export type TransferTokenPermission = {
+  id: number | string;
+  action: string;
+  token: TransferToken | number;
+};
 
-/**
- * @typedef TransferTokenPermission
- *
- * @property {number|string} id
- * @property {string} action
- * @property {TransferToken|number} token
- */
+export type TransferToken = {
+  id: number | string;
+  name: string;
+  description: string;
+  accessKey: string;
+  lastUsedAt: number;
+  lifespan: number;
+  expiresAt: number;
+  permissions: string[] | TransferTokenPermission[];
+};
 
-/** @constant {Array<string>} */
+type SanitizedTransferToken = Omit<TransferToken, 'accessKey'>;
+
 const SELECT_FIELDS = [
   'id',
   'name',
@@ -41,18 +38,15 @@ const SELECT_FIELDS = [
   'expiresAt',
   'createdAt',
   'updatedAt',
-];
+] as const;
 
-/** @constant {Array<string>} */
-const POPULATE_FIELDS = ['permissions'];
+const POPULATE_FIELDS = ['permissions'] as const;
 
 /**
  * Return a list of all tokens and their permissions
- *
- * @returns {Promise<Omit<TransferToken, 'accessKey'>[]>}
  */
-const list = async () => {
-  const tokens = await strapi.query(TRANSFER_TOKEN_UID).findMany({
+const list = async (): Promise<SanitizedTransferToken[]> => {
+  const tokens: TransferToken[] = await strapi.query(TRANSFER_TOKEN_UID).findMany({
     select: SELECT_FIELDS,
     populate: POPULATE_FIELDS,
     orderBy: { name: 'ASC' },
@@ -64,37 +58,38 @@ const list = async () => {
 
 /**
  * Create a random token's access key
- * @returns {string}
  */
-const generateRandomAccessKey = () => crypto.randomBytes(128).toString('hex');
+const generateRandomAccessKey = (): string => crypto.randomBytes(128).toString('hex');
 
 /**
  * Validate the given access key's format and returns it if valid
- * @param {string} accessKey
- * @return {string}
  */
-const validateAccessKey = (accessKey: string) => {
+const validateAccessKey = (accessKey: string): string => {
   assert(typeof accessKey === 'string', 'Access key needs to be a string');
   assert(accessKey.length >= 15, 'Access key needs to have at least 15 characters');
 
   return accessKey;
 };
 
+export const hasAccessKey = <T extends { accessKey?: string }>(
+  attributes: T
+): attributes is T & { accessKey: string } => {
+  return 'accessKey' in attributes;
+};
+
 /**
  * Create a token and its permissions
- *
- * @param {Object} attributes
- * @param {string} attributes.name
- * @param {string} attributes.description
- * @param {number} attributes.lifespan
- * @param {string[]} attributes.permissions
- * @param {string} [attributes.accessKey]
- *
- * @returns {Promise<TransferToken>}
  */
-const create = async (attributes: any) => {
-  const accessKey =
-    'accessKey' in attributes ? validateAccessKey(attributes.accessKey) : generateRandomAccessKey();
+const create = async (attributes: {
+  name: string;
+  description: string;
+  lifespan: number;
+  permissions: string[];
+  accessKey?: string;
+}): Promise<TransferToken> => {
+  const accessKey = hasAccessKey(attributes)
+    ? validateAccessKey(attributes.accessKey)
+    : generateRandomAccessKey();
 
   // Make sure the access key isn't picked up directly from the attributes for the next steps
   delete attributes.accessKey;
@@ -121,7 +116,7 @@ const create = async (attributes: any) => {
       )
     );
 
-    const currentPermissions = await strapi.entityService.load(
+    const currentPermissions: TransferTokenPermission[] = await strapi.entityService.load(
       TRANSFER_TOKEN_UID,
       transferToken,
       'permissions'
@@ -132,24 +127,24 @@ const create = async (attributes: any) => {
     }
 
     return transferToken;
-  })) as any;
+  })) as TransferToken;
 
   return { ...result, accessKey };
 };
 
 /**
  * Update a token and its permissions
- *
- * @param {string|number} id
- * @param {Object} attributes
- * @param {string} attributes.name
- * @param {number} attributes.lastUsedAt
- * @param {string[]} attributes.permissions
- * @param {string} attributes.description
- *
- * @returns {Promise<Omit<TransferToken, 'accessKey'>>}
  */
-const update = async (id: any, attributes: any) => {
+const update = async (
+  id: string | number,
+  attributes: {
+    name: string;
+    description: string;
+    lastUsedAt: number;
+    permissions: string[];
+    lifespan: number;
+  }
+): Promise<SanitizedTransferToken> => {
   // retrieve token without permissions
   const originalToken = await strapi.query(TRANSFER_TOKEN_UID).findOne({ where: { id } });
 
@@ -204,47 +199,42 @@ const update = async (id: any, attributes: any) => {
     }
 
     // retrieve permissions
-    const permissionsFromDb = await strapi.entityService.load(
+    const permissionsFromDb = (await strapi.entityService.load(
       TRANSFER_TOKEN_UID,
       updatedToken,
       'permissions'
-    );
+    )) as TransferTokenPermission[];
 
     return {
       ...updatedToken,
-      permissions: permissionsFromDb ? permissionsFromDb.map((p: any) => p.action) : undefined,
+      permissions: permissionsFromDb ? permissionsFromDb.map((p) => p.action) : undefined,
     };
-  });
+  }) as Promise<SanitizedTransferToken>;
 };
 
 /**
  * Revoke (delete) a token
- *
- * @param {string|number} id
- *
- * @returns {Promise<Omit<TransferToken, 'accessKey'>>}
  */
-const revoke = async (id: any) => {
+const revoke = async (id: string | number): Promise<SanitizedTransferToken> => {
   return strapi.db.transaction(async () =>
     strapi
       .query(TRANSFER_TOKEN_UID)
       .delete({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: { id } })
-  );
+  ) as Promise<SanitizedTransferToken>;
 };
 
 /**
  *  Get a token
- *
- * @param {Object} whereParams
- * @param {string|number} whereParams.id
- * @param {string} whereParams.name
- * @param {number} whereParams.lastUsedAt
- * @param {string} whereParams.description
- * @param {string} whereParams.accessKey
- *
- * @returns {Promise<Omit<TransferToken, 'accessKey'> | null>}
  */
-const getBy = async (whereParams = {}) => {
+const getBy = async (
+  whereParams = {} as {
+    id?: string | number;
+    name?: string;
+    lastUsedAt?: number;
+    description?: string;
+    accessKey?: string;
+  }
+): Promise<SanitizedTransferToken | null> => {
   if (Object.keys(whereParams).length === 0) {
     return null;
   }
@@ -259,52 +249,38 @@ const getBy = async (whereParams = {}) => {
 
 /**
  * Retrieve a token by id
- *
- * @param {string|number} id
- *
- * @returns {Promise<Omit<TransferToken, 'accessKey'>>}
  */
-const getById = async (id: any) => {
+const getById = async (id: string | number): Promise<SanitizedTransferToken | null> => {
   return getBy({ id });
 };
 
 /**
  * Retrieve a token by name
- *
- * @param {string} name
- *
- * ^@returns {Promise<Omit<TransferToken, 'accessKey'>>}
  */
-const getByName = async (name: string) => {
+const getByName = async (name: string): Promise<SanitizedTransferToken | null> => {
   return getBy({ name });
 };
 
 /**
  * Check if token exists
- *
- * @param {Object} whereParams
- * @param {string|number} whereParams.id
- * @param {string} whereParams.name
- * @param {number} whereParams.lastUsedAt
- * @param {string} whereParams.description
- * @param {string} whereParams.accessKey
- *
- * @returns {Promise<boolean>}
  */
-const exists = async (whereParams = {}) => {
+const exists = async (
+  whereParams = {} as {
+    id?: string | number;
+    name?: string;
+    lastUsedAt?: number;
+    description?: string;
+    accessKey?: string;
+  }
+): Promise<boolean> => {
   const transferToken = await getBy(whereParams);
 
   return !!transferToken;
 };
 
-/**
- * @param {string|number} id
- *
- * @returns {Promise<TransferToken>}
- */
-const regenerate = async (id: any) => {
+const regenerate = async (id: string | number): Promise<TransferToken> => {
   const accessKey = crypto.randomBytes(128).toString('hex');
-  const transferToken = await strapi.db.transaction(async () =>
+  const transferToken = (await strapi.db.transaction(async () =>
     strapi.query(TRANSFER_TOKEN_UID).update({
       select: ['id', 'accessKey'],
       where: { id },
@@ -312,7 +288,7 @@ const regenerate = async (id: any) => {
         accessKey: hash(accessKey),
       },
     })
-  );
+  )) as Promise<TransferToken>;
 
   if (!transferToken) {
     throw new NotFoundError('The provided token id does not exist');
@@ -324,12 +300,9 @@ const regenerate = async (id: any) => {
   };
 };
 
-/**
- * @param {number} lifespan
- *
- * @returns { { lifespan: null | number, expiresAt: null | number } }
- */
-const getExpirationFields = (lifespan: number) => {
+const getExpirationFields = (
+  lifespan: number
+): { lifespan: null | number; expiresAt: null | number } => {
   // it must be nil or a finite number >= 0
   const isValidNumber = Number.isFinite(lifespan) && lifespan > 0;
   if (!isValidNumber && !isNil(lifespan)) {
@@ -344,13 +317,8 @@ const getExpirationFields = (lifespan: number) => {
 
 /**
  * Return a secure sha512 hash of an accessKey
- *
- * @param {string} accessKey
- *
- * @returns {string}
  */
-const hash = (accessKey: string) => {
-  // @ts-ignore
+const hash = (accessKey: string): string => {
   const { hasValidTokenSalt } = getService('transfer').utils;
 
   if (!hasValidTokenSalt()) {
@@ -363,11 +331,7 @@ const hash = (accessKey: string) => {
     .digest('hex');
 };
 
-/**
- * @returns {void}
- */
 const checkSaltIsDefined = () => {
-  // @ts-ignore
   const { hasValidTokenSalt, isDisabledFromEnv } = getService('transfer').utils;
 
   // Ignore the check if the data-transfer feature is manually disabled
@@ -386,28 +350,25 @@ For security reasons, prefer storing the secret in an environment variable and r
 
 /**
  * Flatten a token's database permissions objects to an array of strings
- *
- * @param {TransferToken} token
- *
- * @returns {TransferToken}
  */
-const flattenTokenPermissions = (token: any) => {
+const flattenTokenPermissions = (token: TransferToken): TransferToken => {
   if (!token) return token;
 
   return {
     ...token,
-    permissions: isArray(token.permissions) ? map('action', token.permissions) : token.permissions,
+    permissions: isArray(token.permissions)
+      ? map('action', token.permissions as TransferTokenPermission[])
+      : token.permissions,
   };
 };
 
 /**
  * Assert that a token's permissions are valid
- * @param {object} attributes
  */
-const assertTokenPermissionsValidity = (attributes: any) => {
+const assertTokenPermissionsValidity = (attributes: { permissions: string[] }) => {
   const permissionService = strapi.admin.services.transfer.permission;
   const validPermissions = permissionService.providers.action.keys();
-  const invalidPermissions = difference(attributes.permissions, validPermissions) as any;
+  const invalidPermissions = difference(attributes.permissions, validPermissions);
 
   if (!isEmpty(invalidPermissions)) {
     throw new ValidationError(`Unknown permissions provided: ${invalidPermissions.join(', ')}`);
@@ -416,10 +377,8 @@ const assertTokenPermissionsValidity = (attributes: any) => {
 
 /**
  * Assert that a token's lifespan is valid
- *
- * @param {TransferToken} token
  */
-const assertValidLifespan = ({ lifespan }: any) => {
+const assertValidLifespan = ({ lifespan }: { lifespan: TransferToken['lifespan'] }) => {
   if (isNil(lifespan)) {
     return;
   }
