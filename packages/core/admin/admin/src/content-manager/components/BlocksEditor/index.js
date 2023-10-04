@@ -28,7 +28,6 @@ const EditorDivider = styled(Divider)`
 
 const Wrapper = styled(Box)`
   width: 100%;
-  max-height: 512px;
   overflow: auto;
   padding: ${({ theme }) => `${theme.spaces[3]} ${theme.spaces[4]}`};
   font-size: ${({ theme }) => theme.fontSizes[2]};
@@ -109,10 +108,10 @@ const BlocksEditor = React.forwardRef(
             initialValue={value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]}
             onChange={handleSlateChange}
           >
-            <InputWrapper direction="column" alignItems="flex-start">
+            <InputWrapper direction="column" alignItems="flex-start" height="512px">
               <BlocksToolbar disabled={disabled} />
               <EditorDivider width="100%" />
-              <Wrapper>
+              <Wrapper grow={1}>
                 <BlocksInput disabled={disabled} />
               </Wrapper>
             </InputWrapper>
