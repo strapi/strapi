@@ -94,15 +94,16 @@ Heading.propTypes = {
 
 const CodeBlock = styled.pre.attrs({ role: 'code' })`
   border-radius: ${({ theme }) => theme.borderRadius};
-  background-color: #32324d; // since the color is same between the themes
+  background-color: ${({ theme }) => theme.colors.neutral100};
   max-width: 100%;
   overflow: auto;
-  padding: ${({ theme }) => theme.spaces[2]};
+  padding: ${({ theme }) => `${theme.spaces[3]} ${theme.spaces[4]}`};
   & > code {
-    color: #839496; // TODO: to confirm with design and get theme color
+    font-family: 'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas,
+      monospace;
+    color: ${({ theme }) => theme.colors.neutral800};
     overflow: auto;
     max-width: 100%;
-    padding: ${({ theme }) => theme.spaces[2]};
   }
 `;
 
