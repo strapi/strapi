@@ -22,11 +22,14 @@
   ],
   "main": "build/helper-plugin.js",
   "module": "build/helper-plugin.esm.js",
+  "types": "build/index.d.ts",
   "exports": {
     ".": {
+      "types": "./build/index.d.ts",
       "require": "./build/helper-plugin.js",
       "import": "./build/helper-plugin.esm.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "build"
@@ -40,6 +43,7 @@
     "test:front": "run -T jest --config ./jest.config.front.js",
     "test:front:cov": "run -T jest --config ./jest.config.front.js --coverage",
     "test:front:watch": "run -T jest --config ./jest.config.front.js --watchAll",
+    "test:ts": "run -T tsc --noEmit",
     "watch": "cross-env NODE_ENV=development webpack-cli -w",
     "lint": "run -T eslint . --ext .js,.jsx,.tsx,.ts"
   },
@@ -65,8 +69,8 @@
     "@storybook/builder-vite": "7.4.0",
     "@storybook/react-vite": "7.4.0",
     "@strapi/admin-test-utils": "4.14.0",
-    "@strapi/design-system": "1.11.0",
-    "@strapi/icons": "1.11.0",
+    "@strapi/design-system": "1.12.0",
+    "@strapi/icons": "1.12.0",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
     "@types/react": "18.2.7",
@@ -78,8 +82,8 @@
     "cross-env": "^7.0.3",
     "esbuild-loader": "^2.21.0",
     "eslint-config-custom": "4.14.0",
-    "eslint-plugin-storybook": "0.6.13",
-    "fork-ts-checker-webpack-plugin": "7.3.0",
+    "eslint-plugin-storybook": "0.6.14",
+    "fork-ts-checker-webpack-plugin": "8.0.0",
     "msw": "1.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -94,8 +98,8 @@
     "yup": "0.32.9"
   },
   "peerDependencies": {
-    "@strapi/design-system": "1.11.0",
-    "@strapi/icons": "1.11.0",
+    "@strapi/design-system": "1.12.0",
+    "@strapi/icons": "1.12.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^5.3.4",
