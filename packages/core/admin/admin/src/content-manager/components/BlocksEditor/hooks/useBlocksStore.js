@@ -25,6 +25,8 @@ import {
   HeadingSix,
   Trash,
   Pencil,
+  BulletList,
+  NumberList,
 } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -522,6 +524,48 @@ export function useBlocksStore() {
       matchNode: (node) => node.type === 'heading' && node.level === 6,
       isInBlocksSelector: true,
     },
+    'list-ordered': {
+      renderElement: (props) => <List {...props} />,
+      label: {
+        id: 'components.Blocks.blocks.orderedList',
+        defaultMessage: 'Numbered list',
+      },
+      value: {
+        type: 'list',
+        format: 'ordered',
+      },
+      icon: NumberList,
+      matchNode: (node) => node.type === 'list' && node.format === 'ordered',
+      isInBlocksSelector: true,
+      handleEnterKey: handleEnterKeyOnList,
+    },
+    'list-unordered': {
+      renderElement: (props) => <List {...props} />,
+      label: {
+        id: 'components.Blocks.blocks.unorderedList',
+        defaultMessage: 'Bulleted list',
+      },
+      value: {
+        type: 'list',
+        format: 'unordered',
+      },
+      icon: BulletList,
+      matchNode: (node) => node.type === 'list' && node.format === 'unordered',
+      isInBlocksSelector: true,
+      handleEnterKey: handleEnterKeyOnList,
+    },
+    'list-item': {
+      renderElement: (props) => (
+        <Typography as="li" {...props.attributes}>
+          {props.children}
+        </Typography>
+      ),
+      value: {
+        type: 'list-item',
+      },
+      matchNode: (node) => node.type === 'list-item',
+      isInBlocksSelector: false,
+    },
     link: {
       renderElement: (props) => (
         <Link element={props.element} {...props.attributes}>
@@ -534,26 +578,18 @@ export function useBlocksStore() {
       matchNode: (node) => node.type === 'link',
       isInBlocksSelector: false,
     },
-    code: {
-      renderElement: (props) => (
-        <CodeBlock {...props.attributes}>
-          <code>{props.children}</code>
-        </CodeBlock>
-      ),
-      icon: Code,
+    image: {
+      renderElement: (props) => <Image {...props} />,
+      icon: Picture,
       label: {
-        id: 'components.Blocks.blocks.code',
-        defaultMessage: 'Code',
+        id: 'components.Blocks.blocks.image',
+        defaultMessage: 'Image',
       },
       value: {
-        type: 'code',
+        type: 'image',
       },
-      matchNode: (node) => node.type === 'code',
+      matchNode: (node) => node.type === 'image',
       isInBlocksSelector: true,
-      handleEnterKey(editor) {
-        // Insert a new line within the block
-        Transforms.insertText(editor, '\n');
-      },
     },
     quote: {
       renderElement: (props) => <Blockquote {...props.attributes}>{props.children}</Blockquote>,
@@ -593,52 +629,26 @@ export function useBlocksStore() {
         }
       },
     },
-    'list-ordered': {
-      renderElement: (props) => <List {...props} />,
-      value: {
-        type: 'list',
-        format: 'ordered',
-      },
-      matchNode: (node) => node.type === 'list' && node.format === 'ordered',
-      // TODO add icon and label and set isInBlocksEditor to true
-      isInBlocksSelector: false,
-      handleEnterKey: handleEnterKeyOnList,
-    },
-    'list-unordered': {
-      renderElement: (props) => <List {...props} />,
-      value: {
-        type: 'list',
-        format: 'unordered',
-      },
-      matchNode: (node) => node.type === 'list' && node.format === 'unordered',
-      // TODO add icon and label and set isInBlocksEditor to true
-      isInBlocksSelector: false,
-      handleEnterKey: handleEnterKeyOnList,
-    },
-    'list-item': {
+    code: {
       renderElement: (props) => (
-        <Typography as="li" {...props.attributes}>
-          {props.children}
-        </Typography>
+        <CodeBlock {...props.attributes}>
+          <code>{props.children}</code>
+        </CodeBlock>
       ),
-      value: {
-        type: 'list-item',
-      },
-      matchNode: (node) => node.type === 'list-item',
-      isInBlocksSelector: false,
-    },
-    image: {
-      renderElement: (props) => <Image {...props} />,
-      icon: Picture,
+      icon: Code,
       label: {
-        id: 'components.Blocks.blocks.image',
-        defaultMessage: 'Image',
+        id: 'components.Blocks.blocks.code',
+        defaultMessage: 'Code',
       },
       value: {
-        type: 'image',
+        type: 'code',
       },
-      matchNode: (node) => node.type === 'image',
+      matchNode: (node) => node.type === 'code',
       isInBlocksSelector: true,
+      handleEnterKey(editor) {
+        // Insert a new line within the block
+        Transforms.insertText(editor, '\n');
+      },
     },
   };
 }

@@ -134,11 +134,12 @@ ModifierButton.propTypes = {
 };
 
 const toggleBlock = (editor, value) => {
-  const { type, level } = value;
+  const { type, level, format } = value;
 
   const newProperties = {
     type,
     level: level || null,
+    format: format || null,
   };
 
   Transforms.setNodes(editor, newProperties);
@@ -275,6 +276,15 @@ export const BlocksDropdown = ({ disabled }) => {
     if (optionKey === 'image') {
       // Image node created using select or existing selection node needs to be deleted before adding new image nodes
       Transforms.removeNodes(editor);
+    } else if (['list-ordered', 'list-unordered'].includes(optionKey)) {
+      // retrieve the list format
+      const listFormat = blocks[optionKey].value.format;
+
+      // check if the list is already active
+      const isActive = isListActive(editor, listFormat);
+
+      // toggle the list
+      toggleList(editor, isActive, listFormat);
     } else {
       toggleBlock(editor, blocks[optionKey].value);
     }
@@ -295,7 +305,11 @@ export const BlocksDropdown = ({ disabled }) => {
   React.useEffect(() => {
     if (editor.selection) {
       // Get the parent node of the anchor
-      const [anchorNode] = Editor.parent(editor, editor.selection.anchor);
+      // with a depth of two to retrieve also the list item parents
+      const [anchorNode] = Editor.parent(editor, editor.selection.anchor, {
+        edge: 'start',
+        depth: 2,
+      });
       // Find the block key that matches the anchor node
       const anchorBlockKey = Object.keys(blocks).find((blockKey) =>
         blocks[blockKey].matchNode(anchorNode)
@@ -365,53 +379,53 @@ BlockOption.propTypes = {
   blockSelected: PropTypes.string.isRequired,
 };
 
+/**
+ *
+ * @param {import('slate').Node} node
+ * @returns boolean
+ */
+const isListNode = (node) => {
+  return !Editor.isEditor(node) && SlateElement.isElement(node) && node.type === 'list';
+};
+
+const isListActive = (editor, format) => {
+  const { selection } = editor;
+
+  if (!selection) return false;
+
+  const [match] = Array.from(
+    Editor.nodes(editor, {
+      at: Editor.unhangRange(editor, selection),
+      match: (node) => isListNode(node) && node.format === format,
+    })
+  );
+
+  return Boolean(match);
+};
+
+const toggleList = (editor, isActive, format) => {
+  // Delete the parent list so that we're left with only the list items directly
+  Transforms.unwrapNodes(editor, {
+    match: (node) => isListNode(node) && ['ordered', 'unordered'].includes(node.format),
+    split: true,
+  });
+
+  // Change the type of the current selection
+  Transforms.setNodes(editor, {
+    type: isActive ? 'paragraph' : 'list-item',
+  });
+
+  // If the selection is now a list item, wrap it inside a list
+  if (!isActive) {
+    const block = { type: 'list', format, children: [] };
+    Transforms.wrapNodes(editor, block);
+  }
+};
+
 const ListButton = ({ icon, format, label, disabled }) => {
   const editor = useSlate();
 
-  /**
-   *
-   * @param {import('slate').Node} node
-   * @returns boolean
-   */
-  const isListNode = (node) => {
-    return !Editor.isEditor(node) && SlateElement.isElement(node) && node.type === 'list';
-  };
-
-  const isListActive = () => {
-    const { selection } = editor;
-
-    if (!selection) return false;
-
-    const [match] = Array.from(
-      Editor.nodes(editor, {
-        at: Editor.unhangRange(editor, selection),
-        match: (node) => isListNode(node) && node.format === format,
-      })
-    );
-
-    return Boolean(match);
-  };
-
-  const isActive = isListActive();
-
-  const toggleList = () => {
-    // Delete the parent list so that we're left with only the list items directly
-    Transforms.unwrapNodes(editor, {
-      match: (node) => isListNode(node) && ['ordered', 'unordered'].includes(node.format),
-      split: true,
-    });
-
-    // Change the type of the current selection
-    Transforms.setNodes(editor, {
-      type: isActive ? 'paragraph' : 'list-item',
-    });
-
-    // If the selection is now a list item, wrap it inside a list
-    if (!isActive) {
-      const block = { type: 'list', format, children: [] };
-      Transforms.wrapNodes(editor, block);
-    }
-  };
+  const isActive = isListActive(editor, format);
 
   return (
     <ToolbarButton
@@ -420,7 +434,7 @@ const ListButton = ({ icon, format, label, disabled }) => {
       label={label}
       isActive={isActive}
       disabled={disabled}
-      handleClick={toggleList}
+      handleClick={() => toggleList(editor, isActive, format)}
     />
   );
 };
