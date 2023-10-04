@@ -1,5 +1,5 @@
 import type { Database } from '../..';
-import type { Schema, Column, Index, IndexType, ForeignKey } from '../../schema/types';
+import type { Schema, Column, Index, ForeignKey } from '../../schema/types';
 import type { SchemaInspector } from '../dialect';
 
 const SQL_QUERIES = {
