@@ -1,9 +1,7 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["./src", "../shared/types.ts"],
   "exclude": ["./src/**/*.test.tsx"],
   "compilerOptions": {
-    "rootDir": "../",
     "outDir": "./dist/admin"
   }
 }

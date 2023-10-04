@@ -71,7 +71,7 @@ const CheckPagePermissions = ({ permissions = [], children }: CheckPagePermissio
     return <Redirect to="/" />;
   }
 
-  return children;
+  return <>{children}</>;
 };
 
 export { CheckPagePermissions };

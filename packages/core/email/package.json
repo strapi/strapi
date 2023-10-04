@@ -35,7 +35,6 @@
   },
   "scripts": {
     "build": "NODE_ENV=production strapi plugin:build --force",
-    "build:ts": "run build",
     "watch": "run -T tsc -w --preserveWatchOutput",
     "clean": "run -T rimraf ./dist",
     "prepublishOnly": "yarn clean && yarn build",
