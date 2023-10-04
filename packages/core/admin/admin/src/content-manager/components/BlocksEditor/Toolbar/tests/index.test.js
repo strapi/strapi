@@ -82,7 +82,7 @@ describe('BlocksEditor toolbar', () => {
   beforeEach(() => {
     baseEditor.children = initialValue;
     /**
-     * TODO: CS-253 Find a way to use the actual implementation
+     * TODO: Find a way to use the actual implementation
      * Currently the editor throws an error as if the editor argument is missing:
      * Cannot resolve a DOM node from Slate node:
      */
