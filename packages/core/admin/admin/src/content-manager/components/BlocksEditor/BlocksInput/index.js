@@ -13,6 +13,7 @@ const getEditorStyle = (theme) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spaces[2],
+  height: '100%',
 });
 
 const baseRenderLeaf = (props, modifiers) => {
@@ -62,10 +63,22 @@ const BlocksInput = ({ disabled }) => {
     }
   };
 
+  const handleBackspaceEvent = (event) => {
+    const selectedNode = editor.children[editor.selection.anchor.path[0]];
+    const selectedBlock = Object.values(blocks).find((block) => block.matchNode(selectedNode));
+
+    if (selectedBlock.handleBackspaceKey) {
+      selectedBlock.handleBackspaceKey(editor, event);
+    }
+  };
+
   const handleKeyDown = (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
       handleEnter();
+    }
+    if (event.key === 'Backspace') {
+      handleBackspaceEvent(event);
     }
   };
 

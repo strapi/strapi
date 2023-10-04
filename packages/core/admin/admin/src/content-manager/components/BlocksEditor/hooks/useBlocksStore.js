@@ -153,35 +153,34 @@ List.propTypes = {
   }).isRequired,
 };
 
-const Img = styled.img`
-  max-width: 100%;
-`;
+/**
+ * Common handler for the backspace event on ordered and unordered lists
+ * @param {import('slate').Editor} editor
+ * @param {Event} event
+ */
+const handleBackspaceKeyOnList = (editor, event) => {
+  const [currentListItem, currentListItemPath] = Editor.parent(editor, editor.selection.anchor);
+  const [currentList, currentListPath] = Editor.parent(editor, currentListItemPath);
+  const isListEmpty = currentList.children.length === 1 && currentListItem.children[0].text === '';
 
-const Image = ({ attributes, children, element }) => {
-  if (!element.image) return null;
-  const { url, alternativeText, width, height } = element.image;
+  if (isListEmpty) {
+    event.preventDefault();
+    // Delete the empty list
+    Transforms.removeNodes(editor, { at: currentListPath });
 
-  return (
-    <Box {...attributes}>
-      {children}
-      <Box contentEditable={false}>
-        <Img src={url} alt={alternativeText} width={width} height={height} />
-      </Box>
-    </Box>
-  );
-};
-
-Image.propTypes = {
-  attributes: PropTypes.object.isRequired,
-  children: PropTypes.node.isRequired,
-  element: PropTypes.shape({
-    image: PropTypes.shape({
-      url: PropTypes.string.isRequired,
-      alternativeText: PropTypes.string,
-      width: PropTypes.number,
-      height: PropTypes.number,
-    }),
-  }).isRequired,
+    if (currentListPath[0] === 0) {
+      // If the list was the only(or first) block element then insert empty paragraph as editor needs default value
+      Transforms.insertNodes(
+        editor,
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: '' }],
+        },
+        { at: currentListPath }
+      );
+      Transforms.select(editor, currentListPath);
+    }
+  }
 };
 
 /**
@@ -218,6 +217,37 @@ const handleEnterKeyOnList = (editor) => {
     // Otherwise just create a new list item by splitting the current one
     Transforms.splitNodes(editor, { always: true });
   }
+};
+
+const Img = styled.img`
+  max-width: 100%;
+`;
+
+const Image = ({ attributes, children, element }) => {
+  if (!element.image) return null;
+  const { url, alternativeText, width, height } = element.image;
+
+  return (
+    <Box {...attributes}>
+      {children}
+      <Box contentEditable={false}>
+        <Img src={url} alt={alternativeText} width={width} height={height} />
+      </Box>
+    </Box>
+  );
+};
+
+Image.propTypes = {
+  attributes: PropTypes.object.isRequired,
+  children: PropTypes.node.isRequired,
+  element: PropTypes.shape({
+    image: PropTypes.shape({
+      url: PropTypes.string.isRequired,
+      alternativeText: PropTypes.string,
+      width: PropTypes.number,
+      height: PropTypes.number,
+    }),
+  }).isRequired,
 };
 
 const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRef) => {
@@ -383,6 +413,7 @@ Link.propTypes = {
  *     matchNode: (node: Object) => boolean,
  *     isInBlocksSelector: true,
  *     handleEnterKey: (editor: import('slate').Editor) => void,
+ *     handleBackspaceKey?:(editor: import('slate').Editor, event: Event) => void,
  *   }
  * }} an object containing rendering functions and metadata for different blocks, indexed by name.
  */
@@ -538,6 +569,7 @@ export function useBlocksStore() {
       matchNode: (node) => node.type === 'list' && node.format === 'ordered',
       isInBlocksSelector: true,
       handleEnterKey: handleEnterKeyOnList,
+      handleBackspaceKey: handleBackspaceKeyOnList,
     },
     'list-unordered': {
       renderElement: (props) => <List {...props} />,
@@ -553,6 +585,7 @@ export function useBlocksStore() {
       matchNode: (node) => node.type === 'list' && node.format === 'unordered',
       isInBlocksSelector: true,
       handleEnterKey: handleEnterKeyOnList,
+      handleBackspaceKey: handleBackspaceKeyOnList,
     },
     'list-item': {
       renderElement: (props) => (

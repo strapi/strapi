@@ -8,7 +8,7 @@ import { IntlProvider } from 'react-intl';
 import { createEditor, Transforms } from 'slate';
 import { Slate, withReact, ReactEditor } from 'slate-react';
 
-import { BlocksToolbar, BlocksDropdown } from '..';
+import { BlocksDropdown, BlocksToolbar } from '..';
 
 const title = 'dialog component';
 
@@ -81,6 +81,11 @@ const setup = (data) => {
 describe('BlocksEditor toolbar', () => {
   beforeEach(() => {
     baseEditor.children = initialValue;
+    /**
+     * TODO: Find a way to use the actual implementation
+     * Currently the editor throws an error as if the editor argument is missing:
+     * Cannot resolve a DOM node from Slate node:
+     */
     ReactEditor.focus = jest.fn();
   });
 
@@ -157,6 +162,7 @@ describe('BlocksEditor toolbar', () => {
     // The bold and italic buttons should have the inactive state
     expect(boldButton).toHaveAttribute('data-state', 'off');
     expect(italicButton).toHaveAttribute('data-state', 'off');
+    expect(ReactEditor.focus).toHaveBeenCalledTimes(4);
   });
 
   it('transforms the selection to a list and toggles the format', async () => {
@@ -194,6 +200,7 @@ describe('BlocksEditor toolbar', () => {
         ],
       },
     ]);
+    expect(ReactEditor.focus).toHaveBeenCalledTimes(2);
   });
 
   it('transforms the selection to a heading when selected and trasforms it back to text when selected again', async () => {
@@ -237,6 +244,7 @@ describe('BlocksEditor toolbar', () => {
         ],
       },
     ]);
+    expect(ReactEditor.focus).toHaveBeenCalledTimes(2);
   });
 
   it('transforms the selection to an ordered list and to an unordered list when selected', async () => {
@@ -335,6 +343,7 @@ describe('BlocksEditor toolbar', () => {
         ],
       },
     ]);
+    expect(ReactEditor.focus).toHaveBeenCalledTimes(2);
   });
 
   it('when image is selected, it will set modal dialog open to select the images', async () => {
@@ -392,6 +401,7 @@ describe('BlocksEditor toolbar', () => {
         ],
       },
     ]);
+    expect(ReactEditor.focus).toHaveBeenCalledTimes(1);
   });
 
   it('checks if a mixed selected content shows only one option selected in the dropdown', async () => {
