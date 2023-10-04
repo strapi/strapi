@@ -1,6 +1,17 @@
 import * as React from 'react';
 
-import { Box, Typography, BaseLink } from '@strapi/design-system';
+import {
+  Box,
+  Typography,
+  BaseLink,
+  Popover,
+  IconButton,
+  Field,
+  FieldLabel,
+  FieldInput,
+  Flex,
+  Button,
+} from '@strapi/design-system';
 import {
   Code,
   Quote,
@@ -12,10 +23,17 @@ import {
   HeadingFour,
   HeadingFive,
   HeadingSix,
+  Trash,
+  Pencil,
 } from '@strapi/icons';
 import PropTypes from 'prop-types';
-import { Editor, Path, Transforms } from 'slate';
+import { useIntl } from 'react-intl';
+import { Editor, Path, Transforms, Range } from 'slate';
+import { useSlate, ReactEditor } from 'slate-react';
 import styled, { css } from 'styled-components';
+
+import { composeRefs } from '../../../utils';
+import { editLink, removeLink } from '../utils/links';
 
 const H1 = styled(Typography).attrs({ as: 'h1' })`
   font-size: ${42 / 16}rem;
@@ -200,6 +218,157 @@ const handleEnterKeyOnList = (editor) => {
   }
 };
 
+const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRef) => {
+  const { formatMessage } = useIntl();
+  const editor = useSlate();
+  const path = ReactEditor.findPath(editor, element);
+  const [popoverOpen, setPopoverOpen] = React.useState(
+    editor.lastInsertedLinkPath ? Path.equals(path, editor.lastInsertedLinkPath) : false
+  );
+  const [isEditing, setIsEditing] = React.useState(element.url === '');
+  const linkRef = React.useRef(null);
+
+  const elementText = element.children.map((child) => child.text).join('');
+
+  const handleOpenEditPopover = (e) => {
+    e.preventDefault();
+    setPopoverOpen(true);
+  };
+
+  const handleSave = (e) => {
+    e.stopPropagation();
+    const data = new FormData(e.target);
+
+    if (data.get('url') === '') {
+      removeLink(editor);
+      setIsEditing(false);
+      setPopoverOpen(false);
+    } else {
+      // If the selection is collapsed, we select the parent node because we want all the link to be replaced
+      if (Range.isCollapsed(editor.selection)) {
+        const [, parentPath] = Editor.parent(editor, editor.selection.focus?.path);
+        Transforms.select(editor, parentPath);
+      }
+
+      editLink(editor, { url: data.get('url'), text: data.get('text') });
+      setIsEditing(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+
+    if (element.url === '') {
+      removeLink(editor);
+    }
+  };
+
+  const handleDismiss = () => {
+    setPopoverOpen(false);
+
+    if (element.url === '') {
+      removeLink(editor);
+    }
+
+    ReactEditor.focus(editor);
+  };
+
+  const composedRefs = composeRefs(linkRef, forwardedRef);
+
+  return (
+    <>
+      <BaseLink
+        {...attributes}
+        ref={composedRefs}
+        href={element.url}
+        onClick={handleOpenEditPopover}
+      >
+        {children}
+      </BaseLink>
+      {popoverOpen && (
+        <Popover source={linkRef} onDismiss={handleDismiss} padding={4} contentEditable={false}>
+          {isEditing ? (
+            <Flex as="form" onSubmit={handleSave} direction="column" gap={4}>
+              <Field width="300px">
+                <FieldLabel>
+                  {formatMessage({
+                    id: 'components.Blocks.popover.text',
+                    defaultMessage: 'Text',
+                  })}
+                </FieldLabel>
+                <FieldInput
+                  name="text"
+                  placeholder={formatMessage({
+                    id: 'components.Blocks.popover.text.placeholder',
+                    defaultMessage: 'This text is the text of the link',
+                  })}
+                  defaultValue={elementText}
+                />
+              </Field>
+              <Field width="300px">
+                <FieldLabel>
+                  {formatMessage({
+                    id: 'components.Blocks.popover.link',
+                    defaultMessage: 'Link',
+                  })}
+                </FieldLabel>
+                <FieldInput name="url" placeholder="https://strapi.io" defaultValue={element.url} />
+              </Field>
+              <Flex justifyContent="end" width="100%" gap={2}>
+                <Button variant="tertiary" onClick={handleCancel}>
+                  {formatMessage({
+                    id: 'components.Blocks.popover.cancel',
+                    defaultMessage: 'Cancel',
+                  })}
+                </Button>
+                <Button type="submit">
+                  {formatMessage({
+                    id: 'components.Blocks.popover.save',
+                    defaultMessage: 'Save',
+                  })}
+                </Button>
+              </Flex>
+            </Flex>
+          ) : (
+            <Flex direction="column" gap={4} alignItems="start" width="400px">
+              <Typography>{elementText}</Typography>
+              <BaseLink href={element.url} target="_blank">
+                {element.url}
+              </BaseLink>
+              <Flex justifyContent="end" width="100%" gap={2}>
+                <IconButton
+                  icon={<Trash />}
+                  size="L"
+                  variant="danger"
+                  onClick={() => removeLink(editor)}
+                  label={formatMessage({
+                    id: 'components.Blocks.popover.delete',
+                    defaultMessage: 'Delete',
+                  })}
+                />
+                <IconButton
+                  icon={<Pencil />}
+                  size="L"
+                  onClick={() => setIsEditing(true)}
+                  label={formatMessage({
+                    id: 'components.Blocks.popover.edit',
+                    defaultMessage: 'Edit',
+                  })}
+                />
+              </Flex>
+            </Flex>
+          )}
+        </Popover>
+      )}
+    </>
+  );
+});
+
+Link.propTypes = {
+  element: PropTypes.object.isRequired,
+  children: PropTypes.node.isRequired,
+};
+
 /**
  * Manages a store of all the available blocks.
  *
@@ -355,9 +524,9 @@ export function useBlocksStore() {
     },
     link: {
       renderElement: (props) => (
-        <BaseLink href={props.element.url} {...props.attributes}>
+        <Link element={props.element} {...props.attributes}>
           {props.children}
-        </BaseLink>
+        </Link>
       ),
       value: {
         type: 'link',
