@@ -6,7 +6,7 @@ import userEvent from '@testing-library/user-event';
 import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
 import { createEditor, Transforms, Editor } from 'slate';
-import { Slate, withReact } from 'slate-react';
+import { Slate, withReact, ReactEditor } from 'slate-react';
 
 import { BlocksToolbar, BlocksDropdown } from '..';
 
@@ -79,6 +79,11 @@ const setup = (data) => {
 };
 
 describe('BlocksEditor toolbar', () => {
+  beforeEach(() => {
+    baseEditor.children = initialValue;
+    ReactEditor.focus = jest.fn();
+  });
+
   it('should render the toolbar', () => {
     setup();
 
