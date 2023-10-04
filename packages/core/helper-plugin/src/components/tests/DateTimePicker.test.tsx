@@ -5,6 +5,14 @@ import { render as renderRTL } from '@testing-library/react';
 
 import { DateTimePicker } from '../DateTimePicker';
 
+/**
+ * DateTimePicker is deprecated and as such will fire a warning when rendered,
+ * we therefore mock the console so we don't pollute the test output with warnings.
+ */
+jest.mock('../../utils/once', () => ({
+  once: jest.fn(() => jest.fn()),
+}));
+
 const render = (props: Partial<DateTimePickerProps>) =>
   renderRTL(<DateTimePicker label="Date time picker" {...props} />, {
     wrapper: ({ children }) => (

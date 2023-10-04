@@ -38,9 +38,9 @@ export type Suffix<TValue extends string, TSuffix extends Literal> = `${TValue}$
 export type Prefix<TValue extends string, TPrefix extends Literal> = `${TPrefix}${TValue}`;
 
 /**
- * Creates a record where every key is a string and every value is `T`
+ * Creates an indexed object where every key is a string and every value is `T`
  */
-export type Dict<T> = Record<string, T>;
+export type Dict<T> = { [key: string]: T };
 
 /**
  * Checks if a given string ends with the given literal

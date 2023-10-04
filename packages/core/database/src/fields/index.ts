@@ -32,6 +32,7 @@ const typeToFieldMap: Record<string, typeof Field> = {
   datetime: DatetimeField,
   timestamp: TimestampField,
   boolean: BooleanField,
+  blocks: JSONField,
 };
 
 export const createField = (attribute: Attribute): Field => {

@@ -131,15 +131,16 @@ module.exports = {
       handler: 'stages.updateEntity',
       config: {
         middlewares: [enableFeatureMiddleware('review-workflows')],
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'admin::hasPermissions',
-            config: {
-              actions: ['admin::review-workflows.update'],
-            },
-          },
-        ],
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/content-manager/(collection|single)-types/:model_uid/:id/stages',
+      handler: 'stages.listAvailableStages',
+      config: {
+        middlewares: [enableFeatureMiddleware('review-workflows')],
+        policies: ['admin::isAuthenticatedAdmin'],
       },
     },
     {

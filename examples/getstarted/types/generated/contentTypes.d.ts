@@ -23,6 +23,7 @@ export interface AdminPermission extends Schema.CollectionType {
       Attribute.SetMinMaxLength<{
         minLength: 1;
       }>;
+    actionParameters: Attribute.JSON & Attribute.DefaultTo<{}>;
     subject: Attribute.String &
       Attribute.SetMinMaxLength<{
         minLength: 1;
@@ -818,6 +819,7 @@ export interface ApiKitchensinkKitchensink extends Schema.CollectionType {
     short_text: Attribute.String;
     long_text: Attribute.Text;
     rich_text: Attribute.RichText;
+    blocks: Attribute.Blocks;
     integer: Attribute.Integer;
     biginteger: Attribute.BigInteger;
     decimal: Attribute.Decimal;

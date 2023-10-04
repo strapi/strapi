@@ -54,7 +54,8 @@ export interface ScalarAttribute extends BasAttribute {
     | 'date'
     | 'time'
     | 'datetime'
-    | 'timestamp';
+    | 'timestamp'
+    | 'blocks';
 }
 
 export interface JoinColumn {
