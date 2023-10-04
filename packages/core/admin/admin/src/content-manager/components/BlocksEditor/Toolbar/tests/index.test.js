@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
@@ -103,6 +103,7 @@ describe('BlocksEditor toolbar', () => {
     // Set the selection to cover the second and third row
     Transforms.setSelection(baseEditor, {
       anchor: { path: [1, 0], offset: 0 },
+      focus: { path: [2, 0], offset: 0 },
     });
 
     // The dropdown should show only one option selected which is the block content in the second row
