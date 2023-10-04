@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Badge, Flex } from '@strapi/design-system';
+import { Icon } from '@strapi/design-system';
 import {
   SubNav,
   SubNavHeader,
@@ -9,9 +9,16 @@ import {
   SubNavSections,
 } from '@strapi/design-system/v2';
 import { useTracking } from '@strapi/helper-plugin';
+import { Lock } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { NavLink, useLocation } from 'react-router-dom';
+import styled from 'styled-components';
+
+const CustomIcon = styled(Icon)`
+  right: 15px;
+  position: absolute;
+`;
 
 const SettingsNav = ({ menu }) => {
   const { formatMessage } = useIntl();
@@ -53,18 +60,22 @@ const SettingsNav = ({ menu }) => {
           <SubNavSection key={section.id} label={formatMessage(section.intlLabel)}>
             {section.links.map((link) => {
               return (
-                <Flex gap={1}>
-                  <SubNavLink
-                    as={NavLink}
-                    withBullet={link.hasNotification}
-                    to={link.to}
-                    onClick={() => handleClickOnLink(link.to)}
-                    key={link.id}
-                  >
-                    {formatMessage(link.intlLabel)}
-                  </SubNavLink>
-                  {link?.tag && <Badge active>{link?.tag}</Badge>}
-                </Flex>
+                <SubNavLink
+                  as={NavLink}
+                  withBullet={link.hasNotification}
+                  to={link.to}
+                  onClick={() => handleClickOnLink(link.to)}
+                  key={link.id}
+                >
+                  {formatMessage(link.intlLabel)}
+                  {link?.lockIcon && (
+                    <CustomIcon
+                      width={`${15 / 16}rem`}
+                      height={`${15 / 16}rem`}
+                      as={Lock}
+                    />
+                  )}
+                </SubNavLink>
               );
             })}
           </SubNavSection>

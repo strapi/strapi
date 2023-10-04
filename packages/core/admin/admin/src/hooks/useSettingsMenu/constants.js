@@ -30,7 +30,7 @@ export const LINKS_CE = {
             intlLabel: { id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' },
             to: '/settings/purchase-single-sign-on',
             id: 'sso',
-            tag: "EE",
+            lockIcon: true,
           },
         ]
       : []),
@@ -45,7 +45,7 @@ export const LINKS_CE = {
             },
             to: '/settings/purchase-review-workflows',
             id: 'review-workflows',
-            tag: "EE",
+            lockIcon: true,
           },
         ]
       : []),
@@ -70,7 +70,7 @@ export const LINKS_CE = {
             intlLabel: { id: 'global.auditLogs', defaultMessage: 'Audit Logs' },
             to: '/settings/purchase-audit-logs',
             id: 'auditLogs',
-            tag: "EE",
+            lockIcon: true,
           },
         ]
       : []),
