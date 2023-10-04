@@ -13,6 +13,7 @@ const getEditorStyle = (theme) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spaces[2],
+  height: '100%',
 });
 
 const baseRenderLeaf = (props, modifiers) => {
