@@ -1,12 +1,25 @@
 import crypto from 'crypto';
 import _ from 'lodash';
-// @ts-expect-error
 import jwt from 'jsonwebtoken';
+import type { AdminUser } from '../domain/user';
 
 const defaultJwtOptions = { expiresIn: '30d' };
 
+export type TokenOptions = {
+  expiresIn?: string;
+  [key: string]: unknown;
+};
+
+export type AdminAuthConfig = {
+  secret: string;
+  options: TokenOptions;
+};
+
 const getTokenOptions = () => {
-  const { options, secret } = strapi.config.get('admin.auth', {}) as any;
+  const { options, secret } = strapi.config.get<AdminAuthConfig>(
+    'admin.auth',
+    {} as AdminAuthConfig
+  );
 
   return {
     secret,
@@ -16,17 +29,16 @@ const getTokenOptions = () => {
 
 /**
  * Create a random token
- * @returns {string}
  */
-const createToken = () => {
+const createToken = (): string => {
   return crypto.randomBytes(20).toString('hex');
 };
 
 /**
  * Creates a JWT token for an administration user
- * @param {object} user - admin user
+ * @param user - admin user
  */
-const createJwtToken = (user: any) => {
+const createJwtToken = (user: AdminUser) => {
   const { options, secret } = getTokenOptions();
 
   return jwt.sign({ id: user.id }, secret, options);
@@ -34,10 +46,10 @@ const createJwtToken = (user: any) => {
 
 /**
  * Tries to decode a token an return its payload and if it is valid
- * @param {string} token - a token to decode
- * @return {Object} decodeInfo - the decoded info
+ * @param token - a token to decode
+ * @return decodeInfo - the decoded info
  */
-const decodeJwtToken = (token: any) => {
+const decodeJwtToken = (token: string): { payload: unknown; isValid: boolean } => {
   const { secret } = getTokenOptions();
 
   try {
@@ -48,9 +60,6 @@ const decodeJwtToken = (token: any) => {
   }
 };
 
-/**
- * @returns {void}
- */
 const checkSecretIsDefined = () => {
   if (strapi.config.serveAdminPanel && !strapi.config.get('admin.auth.secret')) {
     throw new Error(

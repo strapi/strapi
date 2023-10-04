@@ -7175,6 +7175,7 @@ __metadata:
     "@testing-library/dom": 9.2.0
     "@testing-library/react": 14.0.0
     "@testing-library/user-event": 14.4.3
+    "@types/jsonwebtoken": 9.0.3
     "@types/lodash": ^4.14.191
     axios: 1.5.0
     bcryptjs: 2.4.3
@@ -8950,6 +8951,15 @@ __metadata:
   version: 0.0.29
   resolution: "@types/json5@npm:0.0.29"
   checksum: e60b153664572116dfea673c5bda7778dbff150498f44f998e34b5886d8afc47f16799280e4b6e241c0472aef1bc36add771c569c68fc5125fc2ae519a3eb9ac
+  languageName: node
+  linkType: hard
+
+"@types/jsonwebtoken@npm:9.0.3":
+  version: 9.0.3
+  resolution: "@types/jsonwebtoken@npm:9.0.3"
+  dependencies:
+    "@types/node": "*"
+  checksum: 2debf3adb19b827a023205234ec439b7258aee6ca9273472abe360738a84f08db78c6e853172e842ec303169ec0bb2df39701ab9a13b9e7868fe284ef9136567
   languageName: node
   linkType: hard
 
