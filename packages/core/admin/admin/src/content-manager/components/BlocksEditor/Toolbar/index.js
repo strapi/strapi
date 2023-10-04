@@ -13,6 +13,12 @@ import styled from 'styled-components';
 import { useBlocksStore } from '../hooks/useBlocksStore';
 import { useModifiersStore } from '../hooks/useModifiersStore';
 
+const ToolbarWrapper = styled(Flex)`
+  &[aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+`;
+
 const Separator = styled(Toolbar.Separator)`
   background: ${({ theme }) => theme.colors.neutral150};
   width: 1px;
@@ -20,18 +26,41 @@ const Separator = styled(Toolbar.Separator)`
 `;
 
 const FlexButton = styled(Flex).attrs({ as: 'button' })`
-  &:hover {
-    background: ${({ theme }) => theme.colors.primary100};
+  // Inherit the not-allowed cursor from ToolbarWrapper when disabled
+  &[aria-disabled] {
+    cursor: inherit;
+  }
+
+  &[aria-disabled='false'] {
+    cursor: pointer;
+
+    // Only apply hover styles if the button is enabled
+    &:hover {
+      background: ${({ theme }) => theme.colors.primary100};
+    }
   }
 `;
 
-const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
+const ToolbarButton = ({ icon, name, label, isActive, disabled, handleClick }) => {
   const { formatMessage } = useIntl();
   const labelMessage = formatMessage(label);
 
+  const enabledColor = isActive ? 'primary600' : 'neutral600';
+
   return (
     <Tooltip description={labelMessage}>
-      <Toolbar.ToggleItem value={name} data-state={isActive ? 'on' : 'off'} asChild>
+      <Toolbar.ToggleItem
+        value={name}
+        data-state={isActive ? 'on' : 'off'}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          handleClick();
+        }}
+        aria-disabled={disabled}
+        disabled={disabled}
+        aria-label={labelMessage}
+        asChild
+      >
         <FlexButton
           background={isActive ? 'primary100' : ''}
           alignItems="center"
@@ -39,13 +68,8 @@ const ToolbarButton = ({ icon, name, label, isActive, handleClick }) => {
           width={7}
           height={7}
           hasRadius
-          onMouseDown={(e) => {
-            e.preventDefault();
-            handleClick();
-          }}
-          aria-label={labelMessage}
         >
-          <Icon width={3} height={3} as={icon} color={isActive ? 'primary600' : 'neutral600'} />
+          <Icon width={3} height={3} as={icon} color={disabled ? 'neutral300' : enabledColor} />
         </FlexButton>
       </Toolbar.ToggleItem>
     </Tooltip>
@@ -60,10 +84,11 @@ ToolbarButton.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
   }).isRequired,
   isActive: PropTypes.bool.isRequired,
+  disabled: PropTypes.bool.isRequired,
   handleClick: PropTypes.func.isRequired,
 };
 
-const ModifierButton = ({ icon, name, label }) => {
+const ModifierButton = ({ icon, name, label, disabled }) => {
   const editor = useSlate();
 
   const isModifierActive = () => {
@@ -90,6 +115,7 @@ const ModifierButton = ({ icon, name, label }) => {
       name={name}
       label={label}
       isActive={isActive}
+      disabled={disabled}
       handleClick={toggleModifier}
     />
   );
@@ -102,21 +128,7 @@ ModifierButton.propTypes = {
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
   }).isRequired,
-};
-
-const isBlockActive = (editor, matchNode) => {
-  const { selection } = editor;
-
-  if (!selection) return false;
-
-  const match = Array.from(
-    Editor.nodes(editor, {
-      at: Editor.unhangRange(editor, selection),
-      match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n) && matchNode(n),
-    })
-  );
-
-  return match.length > 0;
+  disabled: PropTypes.bool.isRequired,
 };
 
 const toggleBlock = (editor, value) => {
@@ -175,7 +187,7 @@ const ImageDialog = ({ handleClose }) => {
 
   const handleSelectAssets = (images) => {
     const formattedImages = images.map((image) => {
-      // create an object with imageSchema defined and exclude unnecessary props coming from media library config
+      // Create an object with imageSchema defined and exclude unnecessary props coming from media library config
       const expectedImage = pick(image, IMAGE_SCHEMA_FIELDS);
 
       return {
@@ -188,7 +200,7 @@ const ImageDialog = ({ handleClose }) => {
     insertImages(formattedImages);
 
     if (isLastBlockType(editor, 'image')) {
-      // insert blank line to add new blocks below image block
+      // Insert blank line to add new blocks below image block
       insertEmptyBlockAtLast(editor);
     }
 
@@ -240,7 +252,7 @@ const insertEmptyBlockAtLast = (editor) => {
   );
 };
 
-export const BlocksDropdown = () => {
+export const BlocksDropdown = ({ disabled }) => {
   const editor = useSlate();
   const { formatMessage } = useIntl();
   const [isMediaLibraryVisible, setIsMediaLibraryVisible] = React.useState(false);
@@ -268,7 +280,7 @@ export const BlocksDropdown = () => {
     setBlockSelected(optionKey);
 
     if (optionKey === 'code' && isLastBlockType(editor, 'code')) {
-      // insert blank line to add new blocks below code block
+      // Insert blank line to add new blocks below code block
       insertEmptyBlockAtLast(editor);
     }
 
@@ -276,6 +288,23 @@ export const BlocksDropdown = () => {
       setIsMediaLibraryVisible(true);
     }
   };
+
+  // Listen to the selection change and update the selected block in the dropdown
+  React.useEffect(() => {
+    if (editor.selection) {
+      // Get the parent node of the anchor
+      const [anchorNode] = Editor.parent(editor, editor.selection.anchor);
+      // Find the block key that matches the anchor node
+      const anchorBlockKey = Object.keys(blocks).find((blockKey) =>
+        blocks[blockKey].matchNode(anchorNode)
+      );
+
+      // Change the value selected in the dropdown if it doesn't match the anchor block key
+      if (anchorBlockKey && anchorBlockKey !== blockSelected) {
+        setBlockSelected(anchorBlockKey);
+      }
+    }
+  }, [editor.selection, editor, blocks, blockSelected]);
 
   return (
     <>
@@ -288,6 +317,7 @@ export const BlocksDropdown = () => {
           id: 'components.Blocks.blocks.selectBlock',
           defaultMessage: 'Select a block',
         })}
+        disabled={disabled}
       >
         {blockKeysToInclude.map((key) => (
           <BlockOption
@@ -295,8 +325,6 @@ export const BlocksDropdown = () => {
             value={key}
             label={blocks[key].label}
             icon={blocks[key].icon}
-            matchNode={blocks[key].matchNode}
-            handleSelection={setBlockSelected}
             blockSelected={blockSelected}
           />
         ))}
@@ -306,18 +334,14 @@ export const BlocksDropdown = () => {
   );
 };
 
-const BlockOption = ({ value, icon, label, handleSelection, blockSelected, matchNode }) => {
+BlocksDropdown.propTypes = {
+  disabled: PropTypes.bool.isRequired,
+};
+
+const BlockOption = ({ value, icon, label, blockSelected }) => {
   const { formatMessage } = useIntl();
-  const editor = useSlate();
 
-  const isActive = isBlockActive(editor, matchNode);
   const isSelected = value === blockSelected;
-
-  React.useEffect(() => {
-    if (isActive && !isSelected) {
-      handleSelection(value);
-    }
-  }, [handleSelection, isActive, isSelected, value]);
 
   return (
     <Option
@@ -336,12 +360,10 @@ BlockOption.propTypes = {
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
   }).isRequired,
-  matchNode: PropTypes.func.isRequired,
-  handleSelection: PropTypes.func.isRequired,
   blockSelected: PropTypes.string.isRequired,
 };
 
-const ListButton = ({ icon, format, label }) => {
+const ListButton = ({ icon, format, label, disabled }) => {
   const editor = useSlate();
 
   /**
@@ -395,6 +417,7 @@ const ListButton = ({ icon, format, label }) => {
       name={format}
       label={label}
       isActive={isActive}
+      disabled={disabled}
       handleClick={toggleList}
     />
   );
@@ -407,6 +430,7 @@ ListButton.propTypes = {
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
   }).isRequired,
+  disabled: PropTypes.bool.isRequired,
 };
 
 // TODO: Remove after the RTE Blocks Alpha release
@@ -418,17 +442,16 @@ const AlphaTag = styled(Box)`
   padding: ${({ theme }) => `${2 / 16}rem ${theme.spaces[1]}`};
 `;
 
-const BlocksToolbar = () => {
+const BlocksToolbar = ({ disabled }) => {
   const modifiers = useModifiersStore();
 
   return (
-    <Toolbar.Root asChild>
+    <Toolbar.Root aria-disabled={disabled} asChild>
       {/* Remove after the RTE Blocks Alpha release (paddingRight and width) */}
-      <Flex gap={1} padding={2} paddingRight={4} width="100%">
-        <BlocksDropdown />
-        <Separator />
+      <ToolbarWrapper gap={1} padding={2} paddingRight={4} width="100%">
+        <BlocksDropdown disabled={disabled} />
         <Toolbar.ToggleGroup type="multiple" asChild>
-          <Flex gap={1}>
+          <Flex gap={1} marginLeft={1}>
             {Object.entries(modifiers).map(([name, modifier]) => (
               <ToolbarButton
                 key={name}
@@ -437,6 +460,7 @@ const BlocksToolbar = () => {
                 label={modifier.label}
                 isActive={modifier.checkIsActive()}
                 handleClick={modifier.handleToggle}
+                disabled={disabled}
               />
             ))}
           </Flex>
@@ -451,6 +475,7 @@ const BlocksToolbar = () => {
               }}
               format="unordered"
               icon={BulletList}
+              disabled={disabled}
             />
             <ListButton
               label={{
@@ -459,6 +484,7 @@ const BlocksToolbar = () => {
               }}
               format="ordered"
               icon={NumberList}
+              disabled={disabled}
             />
           </Flex>
         </Toolbar.ToggleGroup>
@@ -470,9 +496,13 @@ const BlocksToolbar = () => {
             </Typography>
           </AlphaTag>
         </Flex>
-      </Flex>
+      </ToolbarWrapper>
     </Toolbar.Root>
   );
+};
+
+BlocksToolbar.propTypes = {
+  disabled: PropTypes.bool.isRequired,
 };
 
 export { BlocksToolbar };

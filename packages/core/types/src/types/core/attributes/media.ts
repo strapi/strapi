@@ -31,15 +31,13 @@ export type MediaValue<TMultiple extends Utils.Expression.BooleanValue = Utils.E
 
 export type GetMediaValue<TAttribute extends Attribute.Attribute> = TAttribute extends Media<
   // Unused as long as the media value is any
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   infer _TKind,
   infer TMultiple
 >
   ? MediaValue<TMultiple>
   : never;
 
-export type GetMediaTarget<TAttribute extends Attribute.Attribute> = TAttribute extends Media<
-  infer _TKind,
-  infer _TMultiple
->
+export type GetMediaTarget<TAttribute extends Attribute.Attribute> = TAttribute extends Media
   ? MediaTarget
   : never;

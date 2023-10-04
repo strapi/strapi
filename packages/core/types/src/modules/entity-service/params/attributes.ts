@@ -47,6 +47,7 @@ export type ScalarValues = GetValue<
   | Attribute.Enumeration<string[]>
   | Attribute.Float
   | Attribute.Integer
+  | Attribute.Blocks
   | Attribute.JSON
   // /!\  Password attributes are NOT filterable and should NOT be part of this union type.
   //      The member below has been commented on purpose to avoid adding it back without noticing.
@@ -90,6 +91,7 @@ export type GetValue<TAttribute extends Attribute.Attribute> = Utils.Expression.
       // Relation
       [
         Utils.Expression.Extends<TAttribute, Attribute.OfType<'relation'>>,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         TAttribute extends Attribute.Relation<infer _TOrigin, infer TRelationKind, infer TTarget>
           ? Utils.Expression.If<
               Utils.Expression.IsNotNever<TTarget>,

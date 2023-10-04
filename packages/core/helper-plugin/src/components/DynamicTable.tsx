@@ -67,7 +67,7 @@ const Table = ({
   withMainAction = false,
   renderBulkActionsBar,
   ...rest
-}: TableProps<any>) => {
+}: TableProps<{ id: string }>) => {
   const [selectedEntries, setSelectedEntries] = useState<Array<number | string>>([]);
   const [showConfirmDeleteAll, setShowConfirmDeleteAll] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
@@ -210,7 +210,7 @@ const Table = ({
           />
         ) : (
           Children.toArray(children).map((child) =>
-            cloneElement(child as React.ReactElement<any>, {
+            cloneElement(child as React.ReactElement, {
               entriesToDelete: selectedEntries,
               onClickDelete: handleClickDelete,
               onSelectRow: handleSelectRow,
