@@ -3,12 +3,13 @@ import pmap from 'p-map';
 import { getService } from '../../utils';
 import permissionDomain from '../../domain/permission/index';
 
+type ID = string | number;
 /**
  * Delete permissions of roles in database
  * @param rolesIds ids of roles
  * @returns {Promise<array>}
  */
-export const deleteByRolesIds = async (rolesIds: string[]) => {
+export const deleteByRolesIds = async (rolesIds: ID[]) => {
   const permissionsToDelete = await strapi.query('admin::permission').findMany({
     select: ['id'],
     where: {
@@ -26,7 +27,7 @@ export const deleteByRolesIds = async (rolesIds: string[]) => {
  * @param ids ids of permissions
  * @returns {Promise<array>}
  */
-export const deleteByIds = async (ids: string[]) => {
+export const deleteByIds = async (ids: ID[]) => {
   const result = [];
   for (const id of ids) {
     const queryResult = await strapi.query('admin::permission').delete({ where: { id } });

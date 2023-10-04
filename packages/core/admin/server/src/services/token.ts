@@ -10,6 +10,10 @@ export type TokenOptions = {
   [key: string]: unknown;
 };
 
+export type TokenPayload = {
+  id: AdminUser['id'];
+};
+
 export type AdminAuthConfig = {
   secret: string;
   options: TokenOptions;
@@ -38,7 +42,7 @@ const createToken = (): string => {
  * Creates a JWT token for an administration user
  * @param user - admin user
  */
-const createJwtToken = (user: AdminUser) => {
+const createJwtToken = (user: { id: AdminUser['id'] }) => {
   const { options, secret } = getTokenOptions();
 
   return jwt.sign({ id: user.id }, secret, options);
@@ -49,11 +53,13 @@ const createJwtToken = (user: AdminUser) => {
  * @param token - a token to decode
  * @return decodeInfo - the decoded info
  */
-const decodeJwtToken = (token: string): { payload: unknown; isValid: boolean } => {
+const decodeJwtToken = (
+  token: string
+): { payload: TokenPayload; isValid: true } | { payload: null; isValid: false } => {
   const { secret } = getTokenOptions();
 
   try {
-    const payload = jwt.verify(token, secret);
+    const payload = jwt.verify(token, secret) as TokenPayload;
     return { payload, isValid: true };
   } catch (err) {
     return { payload: null, isValid: false };

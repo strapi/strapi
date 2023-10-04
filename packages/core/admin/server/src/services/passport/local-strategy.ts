@@ -10,7 +10,7 @@ const createLocalStrategy = (strapi: Strapi, middleware?: any) => {
       passwordField: 'password',
       session: false,
     },
-    (email: any, password: any, done: any) => {
+    (email: string, password: string, done: any) => {
       return (
         // @ts-expect-error
         strapi.admin.services.auth
