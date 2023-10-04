@@ -261,7 +261,7 @@ export function useBlocksStore() {
         /**
          * Check if after the current position there is another node
          */
-        const hasNextNode = editor.children.length - anchorPathInitialPosition[0] > 1;
+        const hasNextNode = Boolean(Editor.next(editor, { at: editor.selection }));
 
         /**
          * Insert the new node at the right position. The next line after the editor selection if present or otherwise at the end of the editor.
