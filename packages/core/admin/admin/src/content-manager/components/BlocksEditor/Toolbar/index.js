@@ -3,7 +3,7 @@ import * as React from 'react';
 import * as Toolbar from '@radix-ui/react-toolbar';
 import { Flex, Icon, Tooltip, Select, Option, Box, Typography } from '@strapi/design-system';
 import { pxToRem, prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
-import { BulletList, NumberList } from '@strapi/icons';
+import { BulletList, NumberList, Link } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement } from 'slate';
@@ -12,6 +12,7 @@ import styled from 'styled-components';
 
 import { useBlocksStore } from '../hooks/useBlocksStore';
 import { useModifiersStore } from '../hooks/useModifiersStore';
+import { insertLink } from '../utils/links';
 
 const ToolbarWrapper = styled(Flex)`
   &[aria-disabled='true'] {
@@ -63,6 +64,7 @@ const ToolbarButton = ({ icon, name, label, isActive, disabled, handleClick }) =
         asChild
       >
         <FlexButton
+          disabled={disabled}
           background={isActive ? 'primary100' : ''}
           alignItems="center"
           justifyContent="center"
@@ -461,6 +463,44 @@ ListButton.propTypes = {
   disabled: PropTypes.bool.isRequired,
 };
 
+const LinkButton = () => {
+  const editor = useSlate();
+
+  const isLinkActive = () => {
+    const { selection } = editor;
+
+    if (!selection) return false;
+
+    const [match] = Array.from(
+      Editor.nodes(editor, {
+        at: Editor.unhangRange(editor, selection),
+        match: (node) => SlateElement.isElement(node) && node.type === 'link',
+      })
+    );
+
+    return Boolean(match);
+  };
+
+  const addLink = () => {
+    // We insert an empty anchor, so we split the DOM to have a element we can use as reference for the popover
+    insertLink(editor, { url: '' });
+  };
+
+  return (
+    <ToolbarButton
+      icon={Link}
+      name="link"
+      label={{
+        id: 'components.Blocks.link',
+        defaultMessage: 'Link',
+      }}
+      isActive={isLinkActive()}
+      handleClick={addLink}
+      disabled={false}
+    />
+  );
+};
+
 // TODO: Remove after the RTE Blocks Alpha release
 const AlphaTag = styled(Box)`
   background-color: ${({ theme }) => theme.colors.warning100};
@@ -491,6 +531,7 @@ const BlocksToolbar = ({ disabled }) => {
                 disabled={disabled}
               />
             ))}
+            <LinkButton />
           </Flex>
         </Toolbar.ToggleGroup>
         <Separator />
