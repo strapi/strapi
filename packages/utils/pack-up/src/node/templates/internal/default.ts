@@ -120,15 +120,15 @@ const defaultTemplate = defineTemplate(async ({ logger }) => {
         exports: {
           // @ts-expect-error yup typings are a bit weak.
           '.': {
-            types: undefined,
-            require: './dist/index.cjs',
-            import: './dist/index.js',
+            require: './dist/index.js',
+            import: './dist/index.mjs',
+            source: '',
             default: './dist/index.js',
           },
           './package.json': './package.json',
         },
-        main: './dist/index.cjs',
-        module: './dist/index.js',
+        main: './dist/index.js',
+        module: './dist/index.mjs',
         files: ['dist'],
         scripts: {
           check: 'pack-up check',
