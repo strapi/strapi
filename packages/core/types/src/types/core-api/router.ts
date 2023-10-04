@@ -41,6 +41,7 @@ export interface CollectionTypeRouterConfig extends Generic {
 }
 
 export type RouterConfig<TContentTypeUID extends Common.UID.ContentType> = {
+  type?: 'content-api' | 'admin';
   prefix?: string;
   // TODO Refactor when we have a controller registry
   only?: string[];
