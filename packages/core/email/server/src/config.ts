@@ -1,6 +1,6 @@
-'use strict';
+import type { StrapiConfig } from './types';
 
-module.exports = {
+export const config: StrapiConfig = {
   default: {
     provider: 'sendmail',
     providerOptions: {},

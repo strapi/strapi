@@ -1,18 +1,19 @@
-'use strict';
+import * as _ from 'lodash';
+import { keysDeep, template } from '@strapi/utils';
 
-const _ = require('lodash');
-const {
-  template: { createStrictInterpolationRegExp },
-  keysDeep,
-} = require('@strapi/utils');
+import type {
+  EmailConfig,
+  EmailOptions,
+  EmailTemplate,
+  EmailTemplateData,
+  SendOptions,
+} from '../types';
 
-const getProviderSettings = () => {
-  return strapi.config.get('plugin.email');
-};
+const { createStrictInterpolationRegExp } = template;
 
-const send = async (options) => {
-  return strapi.plugin('email').provider.send(options);
-};
+const getProviderSettings = (): EmailConfig => strapi.config.get('plugin.email');
+
+const send = async (options: SendOptions) => strapi.plugin('email').provider.send(options);
 
 /**
  * fill subject, text and html using lodash template
@@ -21,9 +22,14 @@ const send = async (options) => {
  * @param {object} data - data used to fill the template
  * @returns {{ subject, text, subject }}
  */
-const sendTemplatedEmail = (emailOptions = {}, emailTemplate = {}, data = {}) => {
+const sendTemplatedEmail = (
+  emailOptions: EmailOptions,
+  emailTemplate: EmailTemplate,
+  data: EmailTemplateData
+) => {
   const attributes = ['subject', 'text', 'html'];
   const missingAttributes = _.difference(attributes, Object.keys(emailTemplate));
+
   if (missingAttributes.length > 0) {
     throw new Error(
       `Following attributes are missing from your email template : ${missingAttributes.join(', ')}`
@@ -39,8 +45,6 @@ const sendTemplatedEmail = (emailOptions = {}, emailTemplate = {}, data = {}) =>
         ? Object.assign(compiled, {
             [attribute]: _.template(emailTemplate[attribute], {
               interpolate,
-              evaluate: false,
-              escape: false,
             })(data),
           })
         : compiled,
@@ -50,8 +54,10 @@ const sendTemplatedEmail = (emailOptions = {}, emailTemplate = {}, data = {}) =>
   return strapi.plugin('email').provider.send({ ...emailOptions, ...templatedAttributes });
 };
 
-module.exports = () => ({
+const emailService = () => ({
   getProviderSettings,
   send,
   sendTemplatedEmail,
 });
+
+export default emailService;

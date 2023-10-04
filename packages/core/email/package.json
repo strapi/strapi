@@ -31,6 +31,13 @@
       "require": "./dist/admin/index.js",
       "default": "./dist/admin/index.js"
     },
+    "./strapi-server": {
+      "types": "./dist/server/index.d.ts",
+      "source": "./server/src/index.ts",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
