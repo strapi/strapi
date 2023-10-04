@@ -7,4 +7,3 @@ export { default as useRegenerate } from './useRegenerate';
 export { default as useReleaseNotification } from './useReleaseNotification';
 export { default as useSettingsForm } from './useSettingsForm';
 export { default as useSettingsMenu } from './useSettingsMenu';
-export { default as useThemeToggle } from './useThemeToggle';

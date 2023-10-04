@@ -8,7 +8,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import PropTypes from 'prop-types';
 
-import { ThemeToggleContext } from '../../contexts';
+import { ThemeToggleContext } from '../../contexts/themeToggle';
 
 const THEME_KEY = 'STRAPI_THEME';
 
