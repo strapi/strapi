@@ -68,6 +68,7 @@
     "watch": "nx run-many --target=watch --nx-ignore-cycles"
   },
   "resolutions": {
+    "@strapi/design-system": "1.12.0-typescript.1",
     "@types/koa": "2.13.4"
   },
   "devDependencies": {
