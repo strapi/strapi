@@ -1,7 +1,8 @@
 import packageJSON from '../../../../../package.json';
 
 const strapiVersion = packageJSON.version;
-const fetchStrapiLatestRelease = async () => {
+
+export const fetchStrapiLatestRelease = async () => {
   try {
     const res = await fetch('https://api.github.com/repos/strapi/strapi/releases/latest');
 
@@ -16,5 +17,3 @@ const fetchStrapiLatestRelease = async () => {
     return strapiVersion;
   }
 };
-
-export default fetchStrapiLatestRelease;
