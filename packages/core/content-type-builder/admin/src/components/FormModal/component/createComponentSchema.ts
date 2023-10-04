@@ -1,11 +1,15 @@
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
 import * as yup from 'yup';
 
-import getTrad from '../../../utils/getTrad';
-import { CATEGORY_NAME_REGEX } from '../category';
+import { getTrad } from '../../../utils/getTrad';
+import { CATEGORY_NAME_REGEX } from '../category/regex';
 import { createComponentUid } from '../utils/createUid';
 
-const createComponentSchema = (usedComponentNames, reservedNames, category) => {
+export const createComponentSchema = (
+  usedComponentNames: Array<string>,
+  reservedNames: Array<string>,
+  category: string
+) => {
   const shape = {
     displayName: yup
       .string()
@@ -44,5 +48,3 @@ const createComponentSchema = (usedComponentNames, reservedNames, category) => {
 
   return yup.object(shape);
 };
-
-export default createComponentSchema;

@@ -1,10 +1,11 @@
-import getTrad from '../../../utils/getTrad';
-import { componentField, componentForm } from '../component';
+import { getTrad } from '../../../utils/getTrad';
+import { componentField } from '../component/componentField';
+import { componentForm } from '../component/form';
 
 import { nameField } from './nameField';
 
-const baseForm = {
-  component(data, step) {
+export const baseForm = {
+  component(data: { createComponent: boolean }, step: string) {
     if (step === '1') {
       const itemsToConcat =
         data.createComponent === true ? componentForm.base('componentToCreate.') : [];
@@ -394,7 +395,7 @@ const baseForm = {
       ],
     };
   },
-  uid(data, step, attributes) {
+  uid(_data: unknown, step: string, attributes: Array<{ type: string; name: string }>) {
     const options = attributes
       .filter(({ type }) => ['string', 'text'].includes(type))
       .map(({ name }) => ({
@@ -439,5 +440,3 @@ const baseForm = {
     };
   },
 };
-
-export default baseForm;

@@ -15,7 +15,7 @@ import ListRow from '../../components/ListRow';
 import useDataManager from '../../hooks/useDataManager';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';
 import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
-import getTrad from '../../utils/getTrad';
+import { getTrad } from '../../utils/getTrad';
 
 import LinkToCMSettingsView from './LinkToCMSettingsView';
 

@@ -1,6 +1,6 @@
 import nameToSlug from '../../../utils/nameToSlug';
 
-const createUid = (name) => {
+const createUid = (name: string) => {
   const modelName = nameToSlug(name);
   const uid = `api::${modelName}.${modelName}`;
 
@@ -8,7 +8,7 @@ const createUid = (name) => {
 };
 
 // From `content-type-builder/services/Components/createComponentUid`
-const createComponentUid = (name, category) => {
+const createComponentUid = (name: string, category: string) => {
   return `${nameToSlug(category)}.${nameToSlug(name)}`;
 };
 

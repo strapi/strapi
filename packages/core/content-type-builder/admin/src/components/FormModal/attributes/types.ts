@@ -3,7 +3,7 @@ import uniq from 'lodash/uniq';
 import * as yup from 'yup';
 
 import getRelationType from '../../../utils/getRelationType';
-import getTrad from '../../../utils/getTrad';
+import { getTrad } from '../../../utils/getTrad';
 import toRegressedEnumValue from '../../../utils/toRegressedEnumValue';
 
 import {
@@ -15,7 +15,7 @@ import {
   validators,
 } from './validation/common';
 
-const types = {
+export const types = {
   date(usedAttributeNames, reservedNames) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
@@ -340,5 +340,3 @@ const types = {
     return yup.object(shape);
   },
 };
-
-export default types;

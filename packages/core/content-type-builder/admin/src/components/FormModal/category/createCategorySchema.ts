@@ -3,7 +3,7 @@ import * as yup from 'yup';
 
 import CATEGORY_NAME_REGEX from './regex';
 
-const createCategorySchema = (usedCategoryNames) => {
+export const createCategorySchema = (usedCategoryNames: Array<string>) => {
   const shape = {
     name: yup
       .string()
@@ -24,5 +24,3 @@ const createCategorySchema = (usedCategoryNames) => {
 
   return yup.object(shape);
 };
-
-export default createCategorySchema;

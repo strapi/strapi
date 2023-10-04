@@ -1,16 +1,24 @@
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
 import * as yup from 'yup';
 
-import getTrad from '../../../utils/getTrad';
+import { getTrad } from '../../../utils/getTrad';
 import { createUid } from '../utils/createUid';
 
-const createContentTypeSchema = ({
+type CreateContentTypeSchemaParams = {
+  usedContentTypeNames: Array<string>;
+  reservedModels: Array<string>;
+  singularNames: Array<string>;
+  pluralNames: Array<string>;
+  collectionNames: Array<string>;
+};
+
+export const createContentTypeSchema = ({
   usedContentTypeNames = [],
   reservedModels = [],
   singularNames = [],
   pluralNames = [],
   collectionNames = [],
-}) => {
+}: CreateContentTypeSchemaParams) => {
   const shape = {
     displayName: yup
       .string()
@@ -151,5 +159,3 @@ const createContentTypeSchema = ({
 
   return yup.object(shape);
 };
-
-export default createContentTypeSchema;

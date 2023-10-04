@@ -1,6 +1,6 @@
-import getTrad from '../../../utils/getTrad';
+import { getTrad } from '../../../utils/getTrad';
 
-const attributeOptions = {
+export const attributeOptions = {
   default: {
     name: 'default',
     type: 'text',
@@ -91,5 +91,3 @@ const attributeOptions = {
     },
   },
 };
-
-export default attributeOptions;

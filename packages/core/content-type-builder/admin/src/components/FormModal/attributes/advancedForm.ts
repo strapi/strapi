@@ -1,9 +1,11 @@
-import getTrad from '../../../utils/getTrad';
-import { componentForm } from '../component';
+import { getTrad } from '../../../utils/getTrad';
+import { componentForm } from '../component/form';
 
-import options from './attributeOptions';
+import { attributeOptions } from './attributeOptions';
 
-const advancedForm = {
+type DataType = 'biginteger' | 'string' | 'integer' | 'float' | 'decimal';
+
+export const advancedForm = {
   blocks() {
     return {
       sections: [
@@ -12,7 +14,7 @@ const advancedForm = {
             id: 'global.settings',
             defaultMessage: 'Settings',
           },
-          items: [options.required, options.private],
+          items: [attributeOptions.required, attributeOptions.private],
         },
       ],
     };
@@ -56,14 +58,14 @@ const advancedForm = {
             id: 'global.settings',
             defaultMessage: 'Settings',
           },
-          items: [options.required, options.private],
+          items: [attributeOptions.required, attributeOptions.private],
         },
       ],
     };
   },
-  component({ repeatable }, step) {
+  component({ repeatable }: { repeatable: boolean }, step: string) {
     if (step === '1') {
-      return { sections: componentForm.advanced('componentToCreate') };
+      return { sections: componentForm.advanced() };
     }
 
     if (repeatable) {
@@ -74,7 +76,12 @@ const advancedForm = {
               id: 'global.settings',
               defaultMessage: 'Settings',
             },
-            items: [options.required, options.private, options.max, options.min],
+            items: [
+              attributeOptions.required,
+              attributeOptions.private,
+              attributeOptions.max,
+              attributeOptions.min,
+            ],
           },
         ],
       };
@@ -87,19 +94,19 @@ const advancedForm = {
             id: 'global.settings',
             defaultMessage: 'Settings',
           },
-          items: [options.required, options.private],
+          items: [attributeOptions.required, attributeOptions.private],
         },
       ],
     };
   },
-  date({ type }) {
+  date({ type }: { type: string }) {
     return {
       sections: [
         {
           sectionTitle: null,
           items: [
             {
-              ...options.default,
+              ...attributeOptions.default,
               type: type || 'date',
               value: null,
               withDefaultValue: false,
@@ -113,7 +120,7 @@ const advancedForm = {
             id: 'global.settings',
             defaultMessage: 'Settings',
           },
-          items: [options.required, options.unique, options.private],
+          items: [attributeOptions.required, attributeOptions.unique, attributeOptions.private],
         },
       ],
     };
@@ -126,7 +133,7 @@ const advancedForm = {
             id: 'global.settings',
             defaultMessage: 'Settings',
           },
-          items: [options.required, options.max, options.min],
+          items: [attributeOptions.required, attributeOptions.max, attributeOptions.min],
         },
       ],
     };
@@ -138,7 +145,7 @@ const advancedForm = {
           sectionTitle: null,
           items: [
             {
-              ...options.default,
+              ...attributeOptions.default,
               type: 'email',
             },
           ],
@@ -150,17 +157,17 @@ const advancedForm = {
             defaultMessage: 'Settings',
           },
           items: [
-            options.required,
-            options.unique,
-            options.maxLength,
-            options.minLength,
-            options.private,
+            attributeOptions.required,
+            attributeOptions.unique,
+            attributeOptions.maxLength,
+            attributeOptions.minLength,
+            attributeOptions.private,
           ],
         },
       ],
     };
   },
-  enumeration(data) {
+  enumeration(data: { enum: Array<string> }) {
     return {
       sections: [
         {
@@ -219,7 +226,7 @@ const advancedForm = {
             id: 'global.settings',
             defaultMessage: 'Settings',
           },
-          items: [options.required, options.private],
+          items: [attributeOptions.required, attributeOptions.private],
         },
       ],
     };
@@ -232,7 +239,7 @@ const advancedForm = {
             id: 'global.settings',
             defaultMessage: 'Settings',
           },
-          items: [options.required, options.private],
+          items: [attributeOptions.required, attributeOptions.private],
         },
       ],
     };
@@ -261,12 +268,12 @@ const advancedForm = {
             id: 'global.settings',
             defaultMessage: 'Settings',
           },
-          items: [options.required, options.private],
+          items: [attributeOptions.required, attributeOptions.private],
         },
       ],
     };
   },
-  number(data) {
+  number(data: { type: DataType }) {
     const inputStep = data.type === 'decimal' || data.type === 'float' ? 'any' : 1;
 
     return {
@@ -292,7 +299,13 @@ const advancedForm = {
             id: 'global.settings',
             defaultMessage: 'Settings',
           },
-          items: [options.required, options.unique, options.max, options.min, options.private],
+          items: [
+            attributeOptions.required,
+            attributeOptions.unique,
+            attributeOptions.max,
+            attributeOptions.min,
+            attributeOptions.private,
+          ],
         },
       ],
     };
@@ -300,14 +313,19 @@ const advancedForm = {
   password() {
     return {
       sections: [
-        { sectionTitle: null, items: [options.default] },
+        { sectionTitle: null, items: [attributeOptions.default] },
 
         {
           sectionTitle: {
             id: 'global.settings',
             defaultMessage: 'Settings',
           },
-          items: [options.required, options.maxLength, options.minLength, options.private],
+          items: [
+            attributeOptions.required,
+            attributeOptions.maxLength,
+            attributeOptions.minLength,
+            attributeOptions.private,
+          ],
         },
       ],
     };
@@ -320,7 +338,7 @@ const advancedForm = {
             id: 'global.settings',
             defaultMessage: 'Settings',
           },
-          items: [options.private],
+          items: [attributeOptions.private],
         },
       ],
     };
@@ -328,13 +346,18 @@ const advancedForm = {
   richtext() {
     return {
       sections: [
-        { sectionTitle: null, items: [options.default] },
+        { sectionTitle: null, items: [attributeOptions.default] },
         {
           sectionTitle: {
             id: 'global.settings',
             defaultMessage: 'Settings',
           },
-          items: [options.required, options.maxLength, options.minLength, options.private],
+          items: [
+            attributeOptions.required,
+            attributeOptions.maxLength,
+            attributeOptions.minLength,
+            attributeOptions.private,
+          ],
         },
       ],
     };
@@ -342,7 +365,7 @@ const advancedForm = {
   text() {
     return {
       sections: [
-        { sectionTitle: null, items: [options.default, options.regex] },
+        { sectionTitle: null, items: [attributeOptions.default, attributeOptions.regex] },
 
         {
           sectionTitle: {
@@ -350,22 +373,24 @@ const advancedForm = {
             defaultMessage: 'Settings',
           },
           items: [
-            options.required,
-            options.unique,
-            options.maxLength,
-            options.minLength,
-            options.private,
+            attributeOptions.required,
+            attributeOptions.unique,
+            attributeOptions.maxLength,
+            attributeOptions.minLength,
+            attributeOptions.private,
           ],
         },
       ],
     };
   },
-  uid(data) {
+  uid(data: { targetField: string }) {
     return {
       sections: [
         {
           sectionTitle: null,
-          items: [{ ...options.default, disabled: Boolean(data.targetField), type: 'text' }],
+          items: [
+            { ...attributeOptions.default, disabled: Boolean(data.targetField), type: 'text' },
+          ],
         },
 
         {
@@ -373,11 +398,14 @@ const advancedForm = {
             id: 'global.settings',
             defaultMessage: 'Settings',
           },
-          items: [options.required, options.maxLength, options.minLength, options.private],
+          items: [
+            attributeOptions.required,
+            attributeOptions.maxLength,
+            attributeOptions.minLength,
+            attributeOptions.private,
+          ],
         },
       ],
     };
   },
 };
-
-export default advancedForm;

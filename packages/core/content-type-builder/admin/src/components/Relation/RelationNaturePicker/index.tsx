@@ -17,7 +17,7 @@ import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
 
 import useDataManager from '../../../hooks/useDataManager';
-import getTrad from '../../../utils/getTrad';
+import { getTrad } from '../../../utils/getTrad';
 import { ON_CHANGE_RELATION_TYPE } from '../../FormModal/constants';
 
 import { IconWrapper, InfosWrapper, Wrapper } from './components';

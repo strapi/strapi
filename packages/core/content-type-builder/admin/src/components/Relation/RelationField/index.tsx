@@ -4,7 +4,7 @@ import { Box, Divider, Flex, Typography } from '@strapi/design-system';
 import { GenericInput } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 
-import getTrad from '../../../utils/getTrad';
+import { getTrad } from '../../../utils/getTrad';
 
 import RelationTargetPicker from './RelationTargetPicker';
 

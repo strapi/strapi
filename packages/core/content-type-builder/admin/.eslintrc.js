@@ -1,7 +1,16 @@
 module.exports = {
   root: true,
-  extends: ['custom/front/typescript'],
-  parserOptions: {
-    project: ['./admin/tsconfig.eslint.json'],
-  },
+  overrides: [
+    {
+      files: ['**/*.js', '**/*.jsx'],
+      extends: ['custom/front'],
+      rules: {
+        'import/extensions': 'off',
+      },
+    },
+    {
+      files: ['**/*.ts', '**/*.tsx'],
+      extends: ['custom/front/typescript'],
+    },
+  ],
 };

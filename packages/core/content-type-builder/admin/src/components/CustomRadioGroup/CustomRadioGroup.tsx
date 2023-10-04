@@ -1,12 +1,35 @@
-import React from 'react';
-
 import { Box, Flex, Typography } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { Wrapper } from './components';
+import { Wrapper } from './Styles';
 
-const CustomRadioGroup = ({ intlLabel, name, onChange, radios, value }) => {
+interface IntlLabel {
+  id: string;
+  defaultMessage: string;
+  values?: Record<string, any>;
+}
+
+interface Radio {
+  title: IntlLabel;
+  description: IntlLabel;
+  value: any;
+}
+
+interface CustomRadioGroupProps {
+  intlLabel: IntlLabel;
+  name: string;
+  onChange: (value: any) => void;
+  radios?: Radio[];
+  value?: string | boolean;
+}
+
+export const CustomRadioGroup = ({
+  intlLabel,
+  name,
+  onChange,
+  radios = [],
+  value,
+}: CustomRadioGroupProps) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -48,33 +71,3 @@ const CustomRadioGroup = ({ intlLabel, name, onChange, radios, value }) => {
     </Flex>
   );
 };
-
-CustomRadioGroup.defaultProps = {
-  radios: [],
-};
-
-CustomRadioGroup.propTypes = {
-  intlLabel: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }).isRequired,
-  name: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-  radios: PropTypes.arrayOf(
-    PropTypes.shape({
-      title: PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        defaultMessage: PropTypes.string.isRequired,
-      }),
-      description: PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        defaultMessage: PropTypes.string.isRequired,
-      }),
-      value: PropTypes.any.isRequired,
-    })
-  ),
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]).isRequired,
-};
-
-export default CustomRadioGroup;

@@ -1,5 +1,5 @@
-import getTrad from '../../../utils/getTrad';
-import { componentField, componentForm } from '../component';
+import { getTrad } from '../../../utils/getTrad';
+import { componentField, componentForm } from '../component/index.js';
 
 const form = {
   advanced: {

@@ -9,7 +9,7 @@ import { useIntl } from 'react-intl';
 
 import useDataManager from '../../hooks/useDataManager';
 import Curve from '../../icons/Curve';
-import getTrad from '../../utils/getTrad';
+import { getTrad } from '../../utils/getTrad';
 import AttributeIcon from '../AttributeIcon';
 import UpperFist from '../UpperFirst';
 

@@ -1,6 +1,6 @@
-import getTrad from '../../../utils/getTrad';
+import { getTrad } from '../../../utils/getTrad';
 
-const componentField = {
+export const componentField = {
   intlLabel: {
     id: 'global.type',
     defaultMessage: 'Type',
@@ -35,5 +35,3 @@ const componentField = {
     },
   ],
 };
-
-export default componentField;

@@ -15,7 +15,7 @@ import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
-import getTrad from '../../utils/getTrad';
+import { getTrad } from '../../utils/getTrad';
 
 import useContentTypeBuilderMenu from './useContentTypeBuilderMenu';
 

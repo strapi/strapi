@@ -12,7 +12,7 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import useFormModalNavigation from '../../../hooks/useFormModalNavigation';
-import getTrad from '../../../utils/getTrad';
+import { getTrad } from '../../../utils/getTrad';
 import AttributeIcon from '../../AttributeIcon';
 import OptionBoxWrapper from '../OptionBoxWrapper';
 

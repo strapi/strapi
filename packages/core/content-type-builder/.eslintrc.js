@@ -2,8 +2,15 @@ module.exports = {
   root: true,
   overrides: [
     {
-      files: ['**'],
-      excludedFiles: ['admin/**/*', 'server/**/*'],
+      files: ['admin/**/*'],
+      extends: ['custom/front'],
+      rules: {
+        'import/extensions': 'off',
+      },
+    },
+    {
+      files: ['**/*'],
+      excludedFiles: ['admin/**/*'],
       extends: ['custom/back'],
     },
   ],

@@ -15,7 +15,7 @@ import { useIntl } from 'react-intl';
 
 import useDataManager from '../../hooks/useDataManager';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';
-import getTrad from '../../utils/getTrad';
+import { getTrad } from '../../utils/getTrad';
 import ComponentList from '../ComponentList';
 import DynamicZoneList from '../DynamicZoneList';
 import NestedTFooter from '../NestedTFooter';

@@ -1,8 +1,8 @@
-import getTrad from '../../../utils/getTrad';
+import { getTrad } from '../../../utils/getTrad';
 import { attributesForm, attributeTypes, commonBaseForm } from '../attributes';
 import { nameField } from '../attributes/nameField';
 import { categoryForm, createCategorySchema } from '../category';
-import { componentForm, createComponentSchema } from '../component';
+import { componentForm, createComponentSchema } from '../component/index.js';
 import { contentTypeForm, createContentTypeSchema } from '../contentType';
 import { dynamiczoneForm } from '../dynamicZone';
 

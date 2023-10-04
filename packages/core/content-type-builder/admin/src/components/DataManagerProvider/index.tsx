@@ -24,7 +24,7 @@ import { compose } from 'redux';
 import DataManagerContext from '../../contexts/DataManagerContext';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';
 import pluginId from '../../pluginId';
-import getTrad from '../../utils/getTrad';
+import { getTrad } from '../../utils/getTrad';
 import makeUnique from '../../utils/makeUnique';
 import FormModal from '../FormModal';
 

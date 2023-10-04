@@ -1,6 +1,6 @@
-import getTrad from '../../../utils/getTrad';
+import { getTrad } from '../../../utils/getTrad';
 
-const componentForm = {
+export const componentForm = {
   base(prefix = '') {
     const sections = [
       {
@@ -43,10 +43,8 @@ const componentForm = {
     return sections;
   },
   advanced() {
-    const sections = [];
+    const sections: Array<unknown> = [];
 
     return sections;
   },
 };
-
-export default componentForm;

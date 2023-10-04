@@ -7,7 +7,7 @@ import { useIntl } from 'react-intl';
 import useDataManager from '../../hooks/useDataManager';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';
 import pluginId from '../../pluginId';
-import getTrad from '../../utils/getTrad';
+import { getTrad } from '../../utils/getTrad';
 
 const useContentTypeBuilderMenu = () => {
   const {

@@ -14,7 +14,7 @@ import { Router } from 'react-router-dom';
 
 import FormModalNavigationProvider from '../../../components/FormModalNavigationProvider';
 import pluginEn from '../../../translations/en.json';
-import getTrad from '../../../utils/getTrad';
+import { getTrad } from '../../../utils/getTrad';
 import ListView from '../index';
 
 import mockData from './mockData';

@@ -1,6 +1,6 @@
-import getTrad from '../../../utils/getTrad';
+import { getTrad } from '../../../utils/getTrad';
 
-const form = {
+export const form = {
   base: {
     sections: [
       {
@@ -28,5 +28,3 @@ const form = {
     ],
   },
 };
-
-export default form;

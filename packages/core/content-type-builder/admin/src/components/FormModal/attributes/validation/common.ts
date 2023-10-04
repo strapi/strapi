@@ -2,15 +2,15 @@ import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
 import toNumber from 'lodash/toNumber';
 import * as yup from 'yup';
 
-import getTrad from '../../../../utils/getTrad';
+import { getTrad } from '../../../../utils/getTrad';
 
 const NAME_REGEX = /^[A-Za-z][_0-9A-Za-z]*$/;
 
-const alreadyUsedAttributeNames = (usedNames) => {
+const alreadyUsedAttributeNames = (usedNames: Array<string>) => {
   return {
     name: 'attributeNameAlreadyUsed',
     message: errorsTrads.unique,
-    test(value) {
+    test(value: unknown) {
       if (!value) {
         return false;
       }
@@ -20,7 +20,11 @@ const alreadyUsedAttributeNames = (usedNames) => {
   };
 };
 
-const getUsedContentTypeAttributeNames = (ctShema, isEdition, attributeNameToEdit) => {
+const getUsedContentTypeAttributeNames = (
+  ctShema: any,
+  isEdition: boolean,
+  attributeNameToEdit: string
+) => {
   const attributes = ctShema?.schema?.attributes ?? {};
 
   return Object.keys(attributes).filter((attr) => {
@@ -32,11 +36,11 @@ const getUsedContentTypeAttributeNames = (ctShema, isEdition, attributeNameToEdi
   });
 };
 
-const isNameAllowed = (reservedNames) => {
+const isNameAllowed = (reservedNames: Array<string>) => {
   return {
     name: 'forbiddenAttributeName',
     message: getTrad('error.attributeName.reserved-name'),
-    test(value) {
+    test(value: string) {
       if (!value) {
         return false;
       }
@@ -75,7 +79,7 @@ const validators = {
         return schema;
       })
       .nullable(),
-  name(usedNames, reservedNames) {
+  name(usedNames: Array<string>, reservedNames: Array<string>) {
     return yup
       .string()
       .test(alreadyUsedAttributeNames(usedNames))
@@ -88,7 +92,7 @@ const validators = {
   unique: () => yup.boolean().nullable(),
 };
 
-const createTextShape = (usedAttributeNames, reservedNames) => {
+const createTextShape = (usedAttributeNames: Array<string>, reservedNames: Array<string>) => {
   const shape = {
     name: validators.name(usedAttributeNames, reservedNames),
     type: validators.type(),
@@ -103,6 +107,9 @@ const createTextShape = (usedAttributeNames, reservedNames) => {
         name: 'isValidRegExpPattern',
         message: getTrad('error.validation.regex'),
         test(value) {
+          if (!value) {
+            return false;
+          }
           return new RegExp(value) !== null;
         },
       })
@@ -115,12 +122,12 @@ const createTextShape = (usedAttributeNames, reservedNames) => {
 const isMinSuperiorThanMax = {
   name: 'isMinSuperiorThanMax',
   message: getTrad('error.validation.minSupMax'),
-  test(min) {
+  test(min: string) {
     if (!min) {
       return true;
     }
 
-    const { max } = this.parent;
+    const { max } = (this as any).parent;
 
     if (!max) {
       return true;

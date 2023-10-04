@@ -13,7 +13,15 @@ import { useIntl } from 'react-intl';
 
 import nameToSlug from '../../utils/nameToSlug';
 
-const PluralName = ({ description, error, intlLabel, modifiedData, name, onChange, value }) => {
+const PluralName = ({
+  description = null,
+  error = null,
+  intlLabel,
+  modifiedData,
+  name,
+  onChange,
+  value = null,
+}) => {
   const { formatMessage } = useIntl();
   const onChangeRef = useRef(onChange);
   const displayName = modifiedData?.displayName || '';

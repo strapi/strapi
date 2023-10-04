@@ -1,9 +1,5 @@
 {
   "extends": "tsconfig/client.json",
   "include": ["src"],
-  "exclude": ["node_modules"],
-  "compilerOptions": {
-    "types": ["lodash"],
-    "esModuleInterop": true
-  }
+  "exclude": ["node_modules"]
 }
