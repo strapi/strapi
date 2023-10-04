@@ -673,7 +673,7 @@ describe('useBlocksStore', () => {
       },
       {
         type: 'list',
-        format: 'unordered',
+        format: 'ordered',
         children: [
           {
             type: 'list-item',
@@ -695,7 +695,7 @@ describe('useBlocksStore', () => {
     });
 
     // Simulate the backspace key
-    result.current['list-unordered'].handleBackspaceKey(baseEditor, mockEvent);
+    result.current['list-ordered'].handleBackspaceKey(baseEditor, mockEvent);
 
     // Should remove the empty list item
     expect(baseEditor.children).toEqual([
