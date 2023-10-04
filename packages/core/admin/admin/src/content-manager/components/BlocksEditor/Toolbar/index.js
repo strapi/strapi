@@ -69,7 +69,7 @@ const ToolbarButton = ({ icon, name, label, isActive, disabled, handleClick }) =
           width={7}
           height={7}
           hasRadius
-          onClick={() => {
+          onMouseDown={() => {
             handleClick();
             // When a button is clicked it blurs the editor, restore the focus to the editor
             ReactEditor.focus(editor);
