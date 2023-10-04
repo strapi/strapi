@@ -14,7 +14,7 @@ import server from './server';
 
 // Increase the jest timeout to accommodate long running tests
 jest.setTimeout(50000);
-jest.mock('../../../hooks/useNavigatorOnLine', () => jest.fn(() => true));
+jest.mock('../../../hooks/useNavigatorOnLine');
 jest.mock('../../../hooks/useDebounce', () => (value) => value);
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),

@@ -26,7 +26,7 @@ import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
 import useDebounce from '../../hooks/useDebounce';
-import useNavigatorOnLine from '../../hooks/useNavigatorOnLine';
+import { useNavigatorOnline } from '../../hooks/useNavigatorOnline';
 import { selectAdminPermissions } from '../App/selectors';
 
 import MissingPluginBanner from './components/MissingPluginBanner';
@@ -47,7 +47,7 @@ const MarketPlacePage = () => {
   const debouncedSearch = useDebounce(query?.search, 500) || '';
 
   const { autoReload: isInDevelopmentMode, dependencies, useYarn, strapiVersion } = useAppInfo();
-  const isOnline = useNavigatorOnLine();
+  const isOnline = useNavigatorOnline();
 
   const npmPackageType = query?.npmPackageType || 'plugin';
 
