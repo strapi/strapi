@@ -35,6 +35,7 @@ const baseConfig = {
           options: {
             loader: 'tsx',
             target: browserslistToEsbuild(),
+            jsx: 'automatic',
           },
         },
       },
