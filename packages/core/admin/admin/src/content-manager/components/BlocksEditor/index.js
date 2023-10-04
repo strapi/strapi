@@ -9,6 +9,7 @@ import { Slate, withReact, ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
 import BlocksInput from './BlocksInput';
+import { withLinks, withStrapiSchema } from './plugins';
 import { BlocksToolbar } from './Toolbar';
 
 const TypographyAsterisk = styled(Typography)`
@@ -58,7 +59,9 @@ const withImages = (editor) => {
 const BlocksEditor = React.forwardRef(
   ({ intlLabel, labelAction, name, disabled, required, error, value, onChange }, ref) => {
     const { formatMessage } = useIntl();
-    const [editor] = React.useState(() => withReact(withImages(withHistory(createEditor()))));
+    const [editor] = React.useState(() =>
+      withReact(withStrapiSchema(withLinks(withImages(withHistory(createEditor())))))
+    );
 
     const label = intlLabel.id
       ? formatMessage(

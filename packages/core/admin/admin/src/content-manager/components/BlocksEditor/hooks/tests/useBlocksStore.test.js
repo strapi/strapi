@@ -1,12 +1,14 @@
 import * as React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { render, screen, renderHook } from '@testing-library/react';
+import { render, screen, renderHook, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
 import { createEditor, Editor, Transforms } from 'slate';
-import { Slate, withReact } from 'slate-react';
+import { Slate, withReact, ReactEditor } from 'slate-react';
 
+import { withLinks } from '../../plugins/withLinks';
 import { useBlocksStore } from '../useBlocksStore';
 
 const initialValue = [
@@ -22,11 +24,12 @@ const mockEvent = {
     value: '',
   },
 };
+const user = userEvent.setup();
 
 const baseEditor = createEditor();
 
 const Wrapper = ({ children }) => {
-  const editor = React.useMemo(() => withReact(baseEditor), []);
+  const [editor] = React.useState(() => withReact(withLinks(baseEditor)));
 
   return (
     <ThemeProvider theme={lightTheme}>
@@ -46,6 +49,12 @@ Wrapper.propTypes = {
 describe('useBlocksStore', () => {
   beforeEach(() => {
     baseEditor.children = initialValue;
+    /**
+     * @TODO: We need to find a way to use the actual implementation
+     * This problem is also present at Toolbar tests
+     */
+    ReactEditor.findPath = jest.fn();
+    ReactEditor.focus = jest.fn();
   });
 
   it('should return a store of blocks', () => {
@@ -228,10 +237,45 @@ describe('useBlocksStore', () => {
   it('renders a link block properly', () => {
     const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
 
+    act(() => {
+      baseEditor.children = [
+        {
+          type: 'paragraph',
+          children: [
+            {
+              type: 'link',
+              url: 'https://example.com',
+              children: [{ text: 'Some link' }],
+            },
+          ],
+        },
+      ];
+    });
+
+    act(() => {
+      render(
+        result.current.link.renderElement({
+          children: 'Some link',
+          element: { type: 'link', url: 'https://example.com', children: [{ text: 'Some link' }] },
+          attributes: {},
+        }),
+        {
+          wrapper: Wrapper,
+        }
+      );
+    });
+    const link = screen.getByRole('link', 'Some link');
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', 'https://example.com');
+  });
+
+  it('renders a popover for each link and its opened when users click the link', async () => {
+    const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
+
     render(
       result.current.link.renderElement({
         children: 'Some link',
-        element: { url: 'https://example.com' },
+        element: { url: 'https://example.com', children: [{ text: 'Some' }, { text: ' link' }] },
         attributes: {},
       }),
       {
@@ -239,8 +283,14 @@ describe('useBlocksStore', () => {
       }
     );
     const link = screen.getByRole('link', 'Some link');
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute('href', 'https://example.com');
+
+    expect(screen.queryByLabelText(/Delete/i, { selector: 'button' })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/Edit/i, { selector: 'button' })).not.toBeInTheDocument();
+
+    await user.click(link);
+
+    expect(screen.queryByLabelText(/Delete/i, { selector: 'button' })).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Edit/i, { selector: 'button' })).toBeInTheDocument();
   });
 
   it('renders a code block properly', () => {
