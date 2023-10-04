@@ -207,9 +207,7 @@ const handleEnterKeyOnList = (editor) => {
  */
 const handleBackspaceKeyOnList = (editor, event) => {
   const [currentListItem, currentListItemPath] = Editor.parent(editor, editor.selection.anchor);
-
   const [currentList, currentListPath] = Editor.parent(editor, currentListItemPath);
-
   const isListEmpty = currentList.children.length === 1 && currentListItem.children[0].text === '';
 
   if (isListEmpty) {
@@ -227,7 +225,6 @@ const handleBackspaceKeyOnList = (editor, event) => {
         },
         { at: currentListPath }
       );
-
       Transforms.select(editor, currentListPath);
     }
   }

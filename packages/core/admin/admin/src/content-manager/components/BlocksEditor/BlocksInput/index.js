@@ -66,7 +66,7 @@ const BlocksInput = ({ disabled }) => {
     const selectedNode = editor.children[editor.selection.anchor.path[0]];
     const selectedBlock = Object.values(blocks).find((block) => block.matchNode(selectedNode));
 
-    if (selectedBlock.value.type === 'list') {
+    if (selectedBlock.handleBackspaceKey) {
       selectedBlock.handleBackspaceKey(editor, event);
     }
   };
