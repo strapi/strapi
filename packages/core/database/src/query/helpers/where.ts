@@ -12,7 +12,7 @@ import { isKnexQuery } from '../../utils/knex';
 import type { Ctx } from '../types';
 import type { Attribute } from '../../types';
 
-const isObj = (value: unknown): value is Record<string, unknown> => isPlainObject(value);
+const isRecord = (value: unknown): value is Record<string, unknown> => isPlainObject(value);
 
 const castValue = (value: unknown, attribute: Attribute | null) => {
   if (!attribute) {
@@ -33,7 +33,7 @@ const processSingleAttributeWhere = (
   where: unknown,
   operator = '$eq'
 ) => {
-  if (!isObj(where)) {
+  if (!isRecord(where)) {
     if (isOperatorOfType('cast', operator)) {
       return castValue(where, attribute);
     }
@@ -65,7 +65,7 @@ const processAttributeWhere = (attribute: Attribute | null, where: unknown, oper
 };
 
 const processNested = (where: unknown, ctx: WhereCtx) => {
-  if (!isObj(where)) {
+  if (!isRecord(where)) {
     return where;
   }
 
@@ -83,7 +83,7 @@ function processWhere(
   where: Record<string, unknown> | Record<string, unknown>[],
   ctx: WhereCtx
 ): Record<string, unknown> | Record<string, unknown>[] {
-  if (!isArray(where) && !isObj(where)) {
+  if (!isArray(where) && !isRecord(where)) {
     throw new Error('Where must be an array or an object');
   }
 
@@ -139,7 +139,7 @@ function processWhere(
         uid: attribute.target,
       });
 
-      if (!isObj(nestedWhere) || isOperatorOfType('where', keys(nestedWhere)[0])) {
+      if (!isRecord(nestedWhere) || isOperatorOfType('where', keys(nestedWhere)[0])) {
         nestedWhere = { [qb.aliasColumn('id', subAlias)]: nestedWhere };
       }
 
@@ -351,7 +351,7 @@ const applyWhereToColumn = (
   column: string,
   columnWhere: Record<Operator, unknown> | Array<Record<Operator, unknown>>
 ) => {
-  if (!isObj(columnWhere)) {
+  if (!isRecord(columnWhere)) {
     if (Array.isArray(columnWhere)) {
       return qb.whereIn(column, columnWhere);
     }
@@ -378,7 +378,7 @@ type Where =
   | Array<Where>;
 
 const applyWhere = (qb: Knex.QueryBuilder, where: Where) => {
-  if (!isArray(where) && !isObj(where)) {
+  if (!isArray(where) && !isRecord(where)) {
     throw new Error('Where must be an array or an object');
   }
 

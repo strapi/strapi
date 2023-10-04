@@ -12,8 +12,8 @@ type Context = {
   uid: string;
 };
 
-type Input<T extends RelationalAttribute = RelationalAttribute> = {
-  attribute: T;
+type Input<TRelationAttribute extends RelationalAttribute = RelationalAttribute> = {
+  attribute: TRelationAttribute;
   attributeName: string;
   results: Row[];
   populateValue: {
@@ -23,9 +23,10 @@ type Input<T extends RelationalAttribute = RelationalAttribute> = {
   isCount: boolean;
 };
 
-type InputWithTarget<T extends RelationalAttribute = RelationalAttribute> = Input<T> & {
-  targetMeta: Meta;
-};
+type InputWithTarget<TRelationAttribute extends RelationalAttribute = RelationalAttribute> =
+  Input<TRelationAttribute> & {
+    targetMeta: Meta;
+  };
 
 type MorphIdMap = Record<string, Record<ID, Row[]>>;
 

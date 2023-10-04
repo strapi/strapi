@@ -42,13 +42,15 @@ export interface QueryBuilder {
   clone(): QueryBuilder;
   select(args: string | Array<string | Knex.Raw>): QueryBuilder;
   addSelect(args: string | string[]): QueryBuilder;
-  insert<T extends Record<string, unknown> | Record<string, unknown>[]>(data: T): QueryBuilder;
+  insert<TData extends Record<string, unknown> | Record<string, unknown>[]>(
+    data: TData
+  ): QueryBuilder;
   onConflict(args: any): QueryBuilder;
   merge(args: any): QueryBuilder;
   ignore(): QueryBuilder;
   delete(): QueryBuilder;
   ref(name: string): any;
-  update<T extends Record<string, unknown>>(data: T): QueryBuilder;
+  update<TData extends Record<string, unknown>>(data: TData): QueryBuilder;
   increment(column: string, amount?: number): QueryBuilder;
   decrement(column: string, amount?: number): QueryBuilder;
   count(count?: string): QueryBuilder;

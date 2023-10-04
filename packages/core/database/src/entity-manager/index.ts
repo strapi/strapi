@@ -57,10 +57,11 @@ import { EntityManager, Repository, Entity } from './types';
 
 export * from './types';
 
-const isObj = (value: unknown): value is object => isObject(value) && !isNil(value);
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  isObject(value) && !isNil(value);
 
 const toId = (value: unknown | { id: unknown }): ID => {
-  if (isObj(value) && 'id' in value && isValidId(value.id)) {
+  if (isRecord(value) && 'id' in value && isValidId(value.id)) {
     return value.id;
   }
 
@@ -75,7 +76,7 @@ const toIds = (value: unknown): ID[] => castArray(value || []).map(toId);
 const isValidId = (value: unknown): value is ID => isString(value) || isInteger(value);
 
 const isValidObjectId = (value: unknown): value is Entity =>
-  isObj(value) && 'id' in value && isValidId(value.id);
+  isRecord(value) && 'id' in value && isValidId(value.id);
 
 const toIdArray = (
   data: unknown
@@ -125,7 +126,7 @@ const toAssocs = (data: Assocs) => {
     isString(data) ||
     isNumber(data) ||
     isNull(data) ||
-    (isObj(data) && 'id' in data)
+    (isRecord(data) && 'id' in data)
   ) {
     return {
       set: isNull(data) ? data : toIdArray(data),
@@ -297,7 +298,7 @@ export const createEntityManager = (db: Database): EntityManager => {
         .insert(dataToInsert)
         .execute<Array<ID | { id: ID }>>();
 
-      const id = isObj(res[0]) ? res[0].id : res[0];
+      const id = isRecord(res[0]) ? res[0].id : res[0];
 
       const trx = await strapi.db.transaction();
       try {
@@ -463,7 +464,7 @@ export const createEntityManager = (db: Database): EntityManager => {
         .insert(dataToInsert)
         .execute<Array<ID | { id: ID }>>();
 
-      const id = isObj(res[0]) ? res[0].id : res[0];
+      const id = isRecord(res[0]) ? res[0].id : res[0];
 
       const trx = await strapi.db.transaction();
       try {

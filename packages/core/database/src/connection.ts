@@ -1,4 +1,5 @@
-import knex, { Knex } from 'knex';
+import knex from 'knex';
+import type { Knex } from 'knex';
 import SqliteClient from 'knex/lib/dialects/sqlite3/index';
 
 class LegacySqliteClient extends SqliteClient {

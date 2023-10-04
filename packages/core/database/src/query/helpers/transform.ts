@@ -75,10 +75,10 @@ const toSingleRow = (meta: Meta, data: Rec = {}): Row => {
   return data;
 };
 
-function toRow<T extends Rec | Rec[] | null>(
+function toRow<TData extends Rec | Rec[] | null>(
   meta: Meta,
-  data: T
-): T extends null ? null : T extends Rec[] ? Row[] : Rec;
+  data: TData
+): TData extends null ? null : TData extends Rec[] ? Row[] : Rec;
 function toRow(meta: Meta, data: Rec | Rec[] | null): Row | Row[] | null {
   if (_.isNil(data)) {
     return data;
