@@ -152,6 +152,8 @@ describe('diffSchemas', () => {
                   added: [
                     {
                       name: 'test_column',
+                      type: 'text',
+                      notNullable: true,
                     },
                   ],
                   updated: [],
