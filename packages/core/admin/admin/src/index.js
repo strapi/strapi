@@ -23,6 +23,7 @@ window.strapi = {
     REVIEW_WORKFLOWS: 'review-workflows',
   },
   projectType: 'Community',
+  isNpsEnabled: false
 };
 
 const customConfig = appCustomisations;
@@ -41,11 +42,12 @@ const run = async () => {
   try {
     const {
       data: {
-        data: { isEE, features },
+        data: { isEE, features, isNpsEnabled },
       },
     } = await get('/admin/project-type');
 
     window.strapi.isEE = isEE;
+    window.strapi.isNpsEnabled = isNpsEnabled
     window.strapi.features = {
       ...window.strapi.features,
       isEnabled: (featureName) => features.some((feature) => feature.name === featureName),

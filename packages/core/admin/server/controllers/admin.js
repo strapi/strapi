@@ -26,11 +26,12 @@ module.exports = {
   // When removing this we need to update the /admin/src/index.js file
   // where we set the strapi.window.isEE value
   async getProjectType() {
+    const isNpsEnabled = strapi.config.get('admin.isNpsEnabled', true);
     // FIXME
     try {
-      return { data: { isEE: strapi.EE, features: ee.features.list() } };
+      return { data: { isEE: strapi.EE, features: ee.features.list(), isNpsEnabled } };
     } catch (err) {
-      return { data: { isEE: false, features: [] } };
+      return { data: { isEE: false, features: [], isNpsEnabled } };
     }
   },
 

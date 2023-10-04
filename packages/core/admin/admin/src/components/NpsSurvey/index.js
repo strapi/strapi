@@ -71,18 +71,22 @@ const checkIfShouldShowSurvey = (settings) => {
   const { enabled, lastResponseDate, firstDismissalDate, lastDismissalDate } = settings;
 
   // This function goes through all the cases where we'd want to not show the survey:
-  // 1. If the survey is disabled, abort mission, don't bother checking the other settings.
-  // 2. If the user has already responded to the survey, check if enough time has passed since the last response.
-  // 3. If the user has dismissed the survey twice or more before, check if enough time has passed since the last dismissal.
-  // 4. If the user has only dismissed the survey once before, check if enough time has passed since the first dismissal.
+  // 1. If the survey is disabled by strapi, abort mission, don't bother checking the other settings.
+  // 2. If the survey is disabled by user, abort mission, don't bother checking the other settings.
+  // 3. If the user has already responded to the survey, check if enough time has passed since the last response.
+  // 4. If the user has dismissed the survey twice or more before, check if enough time has passed since the last dismissal.
+  // 5. If the user has only dismissed the survey once before, check if enough time has passed since the first dismissal.
   // If none of these cases check out, then we show the survey.
   // Note that submitting a response resets the dismissal counts.
-  // Checks 3 and 4 should not be reversed, since the first dismissal will also exist if the user has dismissed the survey twice or more before.
+  // Checks 4 and 5 should not be reversed, since the first dismissal will also exist if the user has dismissed the survey twice or more before.
 
   // For users who had created an account before the NPS feature was introduced,
   // we assume that they would have enabled the NPS feature if they had the chance.
 
   // User chose not to enable the NPS feature when signing up
+  if(window.strapi.isNpsEnabled === false){
+    return false
+  }
   if (enabled === false) {
     return false;
   }
