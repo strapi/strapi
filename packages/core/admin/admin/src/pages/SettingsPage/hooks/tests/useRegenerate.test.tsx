@@ -1,9 +1,9 @@
-import React from 'react';
+/* eslint-disable check-file/filename-naming-convention */
 
 import { renderHook } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
-import useRegenerate from '../index';
+import { useRegenerate } from '../useRegenerate';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -18,19 +18,17 @@ jest.mock('@strapi/helper-plugin', () => ({
     }),
   }),
 }));
-// eslint-disable-next-line react/prop-types
-function RegenerateWrapper({ children }) {
-  return (
-    <IntlProvider messages={{}} locale="en">
-      {children}
-    </IntlProvider>
-  );
-}
 
 describe('useRegenerate', () => {
   it('returns a function to regenerate the data and a boolean', () => {
     const { result } = renderHook(() => useRegenerate('/test', 1, (accessKey) => accessKey), {
-      wrapper: RegenerateWrapper,
+      wrapper({ children }) {
+        return (
+          <IntlProvider messages={{}} locale="en">
+            {children}
+          </IntlProvider>
+        );
+      },
     });
 
     expect(result.current).toEqual({
