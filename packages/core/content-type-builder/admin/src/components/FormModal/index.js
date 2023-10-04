@@ -1074,7 +1074,7 @@ const FormModal = () => {
                     <Flex direction="column" alignItems="stretch" gap={6}>
                       {/* TODO: Remove after the RTE Blocks Beta release */}
                       {attributeType === 'blocks' && (
-                        <BetaFeatureAlert variant="default">
+                        <BetaFeatureAlert>
                           {formatMessage({
                             id: getTrad('form.feature.beta'),
                             defaultMessage: 'This feature is in Beta.',
@@ -1094,7 +1094,7 @@ const FormModal = () => {
                     <Flex direction="column" alignItems="stretch" gap={6}>
                       {/* TODO: Remove after the RTE Blocks Beta release */}
                       {attributeType === 'blocks' && (
-                        <BetaFeatureAlert variant="warning">
+                        <BetaFeatureAlert>
                           {formatMessage({
                             id: getTrad('form.feature.beta'),
                             defaultMessage: 'This feature is in Beta.',
