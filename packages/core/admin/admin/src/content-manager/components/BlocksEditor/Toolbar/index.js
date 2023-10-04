@@ -298,7 +298,7 @@ export const BlocksDropdown = ({ disabled }) => {
       const listFormat = blocks[optionKey].value.format;
 
       // check if the list is already active
-      const isActive = isListActive(editor, listFormat);
+      const isActive = isListActive(editor, blocks[optionKey].matchNode);
 
       // toggle the list
       toggleList(editor, isActive, listFormat);
@@ -416,7 +416,7 @@ const isListNode = (node) => {
   return !Editor.isEditor(node) && SlateElement.isElement(node) && node.type === 'list';
 };
 
-const isListActive = (editor, format) => {
+const isListActive = (editor, matchNode) => {
   const { selection } = editor;
 
   if (!selection) return false;
@@ -424,7 +424,7 @@ const isListActive = (editor, format) => {
   const [match] = Array.from(
     Editor.nodes(editor, {
       at: Editor.unhangRange(editor, selection),
-      match: (node) => isListNode(node) && node.format === format,
+      match: (node) => isListNode(node) && matchNode(node),
     })
   );
 
@@ -450,10 +450,17 @@ const toggleList = (editor, isActive, format) => {
   }
 };
 
-const ListButton = ({ icon, format, label, disabled }) => {
+const ListButton = ({ block, disabled }) => {
   const editor = useSlate();
 
-  const isActive = isListActive(editor, format);
+  const {
+    icon,
+    matchNode,
+    value: { format },
+    label,
+  } = block;
+
+  const isActive = isListActive(editor, matchNode);
 
   return (
     <ToolbarButton
@@ -468,11 +475,16 @@ const ListButton = ({ icon, format, label, disabled }) => {
 };
 
 ListButton.propTypes = {
-  icon: PropTypes.elementType.isRequired,
-  format: PropTypes.string.isRequired,
-  label: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
+  block: PropTypes.shape({
+    icon: PropTypes.elementType.isRequired,
+    matchNode: PropTypes.func.isRequired,
+    value: PropTypes.shape({
+      format: PropTypes.string.isRequired,
+    }).isRequired,
+    label: PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      defaultMessage: PropTypes.string.isRequired,
+    }).isRequired,
   }).isRequired,
   disabled: PropTypes.bool.isRequired,
 };
@@ -552,18 +564,8 @@ const BlocksToolbar = ({ disabled }) => {
         <Separator />
         <Toolbar.ToggleGroup type="single" asChild>
           <Flex gap={1}>
-            <ListButton
-              label={blocks['list-unordered'].label}
-              format="unordered"
-              icon={blocks['list-unordered'].icon}
-              disabled={disabled}
-            />
-            <ListButton
-              label={blocks['list-ordered'].label}
-              format="ordered"
-              icon={blocks['list-ordered'].icon}
-              disabled={disabled}
-            />
+            <ListButton block={blocks['list-unordered']} disabled={disabled} />
+            <ListButton block={blocks['list-ordered']} disabled={disabled} />
           </Flex>
         </Toolbar.ToggleGroup>
         {/* TODO: Remove after the RTE Blocks Alpha release */}
