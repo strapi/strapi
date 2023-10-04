@@ -526,6 +526,7 @@ const AlphaTag = styled(Box)`
 
 const BlocksToolbar = ({ disabled }) => {
   const modifiers = useModifiersStore();
+  const blocks = useBlocksStore();
 
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
@@ -552,21 +553,15 @@ const BlocksToolbar = ({ disabled }) => {
         <Toolbar.ToggleGroup type="single" asChild>
           <Flex gap={1}>
             <ListButton
-              label={{
-                id: 'components.Blocks.blocks.unorderedList',
-                defaultMessage: 'Bulleted list',
-              }}
+              label={blocks['list-unordered'].label}
               format="unordered"
-              icon={BulletList}
+              icon={blocks['list-unordered'].icon}
               disabled={disabled}
             />
             <ListButton
-              label={{
-                id: 'components.Blocks.blocks.orderedList',
-                defaultMessage: 'Numbered list',
-              }}
+              label={blocks['list-ordered'].label}
               format="ordered"
-              icon={NumberList}
+              icon={blocks['list-ordered'].icon}
               disabled={disabled}
             />
           </Flex>
