@@ -13,7 +13,4 @@ interface ThemeToggleContextContextValue {
   };
 }
 
-export const ThemeToggleContext = createContext<ThemeToggleContextContextValue>({
-  currentTheme: undefined,
-  themes: undefined,
-});
+export const ThemeToggleContext = createContext<ThemeToggleContextContextValue>({});
