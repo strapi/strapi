@@ -258,14 +258,10 @@ export function useBlocksStore() {
         const [fragmentedNode] = Editor.parent(editor, editor.selection.anchor.path);
         Transforms.removeNodes(editor, editor.selection);
 
-        /**
-         * Check if after the current position there is another node
-         */
-        const hasNextNode = Boolean(Editor.next(editor, { at: editor.selection }));
+        // Check if after the current position there is another node
+        const hasNextNode = editor.children.length - anchorPathInitialPosition[0] > 1;
 
-        /**
-         * Insert the new node at the right position. The next line after the editor selection if present or otherwise at the end of the editor.
-         */
+        // Insert the new node at the right position. The next line after the editor selection if present or otherwise at the end of the editor.
         Transforms.insertNodes(
           editor,
           {
@@ -283,7 +279,7 @@ export function useBlocksStore() {
          * Use slice(0, -1) to go 1 level higher in the tree,
          * so we go to the start of the node and not the start of the leaf.
          */
-        Transforms.select(editor, editor.start([anchorPathInitialPosition.slice(0, -1)[0] + 1]));
+        Transforms.select(editor, editor.start([anchorPathInitialPosition[0] + 1]));
       },
     },
     'heading-one': {
