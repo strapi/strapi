@@ -26,4 +26,4 @@ async function run() {
   console.log(`Package names: \n ${packageNames}\n`);
 }
 
-run().catch((err) => console.error(err));
+run().catch((error) => console.error(error));
