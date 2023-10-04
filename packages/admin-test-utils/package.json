@@ -51,7 +51,6 @@
   },
   "scripts": {
     "build": "run -T tsc",
-    "build:ts": "run -T tsc",
     "watch": "run -T tsc -w --preserveWatchOutput",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint ."
