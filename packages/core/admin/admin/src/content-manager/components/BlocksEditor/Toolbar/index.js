@@ -7,7 +7,7 @@ import { BulletList, NumberList, Link } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement } from 'slate';
-import { useSlate } from 'slate-react';
+import { ReactEditor, useSlate } from 'slate-react';
 import styled from 'styled-components';
 
 import { useBlocksStore } from '../hooks/useBlocksStore';
@@ -43,6 +43,7 @@ const FlexButton = styled(Flex).attrs({ as: 'button' })`
 `;
 
 const ToolbarButton = ({ icon, name, label, isActive, disabled, handleClick }) => {
+  const editor = useSlate();
   const { formatMessage } = useIntl();
   const labelMessage = formatMessage(label);
 
@@ -70,6 +71,12 @@ const ToolbarButton = ({ icon, name, label, isActive, disabled, handleClick }) =
           width={7}
           height={7}
           hasRadius
+          onMouseDown={() => {
+            handleClick();
+            // When a button is clicked it blurs the editor, restore the focus to the editor
+            ReactEditor.focus(editor);
+          }}
+          aria-label={labelMessage}
         >
           <Icon width={3} height={3} as={icon} color={disabled ? 'neutral300' : enabledColor} />
         </FlexButton>
@@ -136,12 +143,22 @@ ModifierButton.propTypes = {
 const toggleBlock = (editor, value) => {
   const { type, level } = value;
 
-  const newProperties = {
+  // Set the selected block properties received from the useBlockStore
+  const blockProperties = {
     type,
     level: level || null,
   };
 
-  Transforms.setNodes(editor, newProperties);
+  if (editor.selection) {
+    // When there is a selection, update the existing block in the tree
+    Transforms.setNodes(editor, blockProperties);
+  } else {
+    // Otherwise, add a new block to the tree
+    Transforms.insertNodes(editor, { ...blockProperties, children: [{ type: 'text', text: '' }] });
+  }
+
+  // When the select is clicked it blurs the editor, restore the focus to the editor
+  ReactEditor.focus(editor);
 };
 
 const ALLOWED_MEDIA_TYPE = 'images';
@@ -291,6 +308,16 @@ export const BlocksDropdown = ({ disabled }) => {
     }
   };
 
+  /**
+   * Prevent the select from focusing itself so ReactEditor.focus(editor) can focus the editor instead.
+   *
+   * The editor first loses focus to a blur event when clicking the select button. However,
+   * refocusing the editor is not enough since the select's default behavior is to refocus itself
+   * after an option is selected.
+   *
+   */
+  const preventSelectFocus = (e) => e.preventDefault();
+
   // Listen to the selection change and update the selected block in the dropdown
   React.useEffect(() => {
     if (editor.selection) {
@@ -315,6 +342,7 @@ export const BlocksDropdown = ({ disabled }) => {
         onChange={selectOption}
         placeholder={blocks[blockSelected].label}
         value={blockSelected}
+        onCloseAutoFocus={preventSelectFocus}
         aria-label={formatMessage({
           id: 'components.Blocks.blocks.selectBlock',
           defaultMessage: 'Select a block',
