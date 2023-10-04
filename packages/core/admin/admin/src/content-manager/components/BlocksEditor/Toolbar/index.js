@@ -133,21 +133,6 @@ ModifierButton.propTypes = {
   disabled: PropTypes.bool.isRequired,
 };
 
-const isBlockActive = (editor, matchNode) => {
-  const { selection } = editor;
-
-  if (!selection) return false;
-
-  const match = Array.from(
-    Editor.nodes(editor, {
-      at: Editor.unhangRange(editor, selection),
-      match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n) && matchNode(n),
-    })
-  );
-
-  return match.length > 0;
-};
-
 const toggleBlock = (editor, value) => {
   const { type, level } = value;
 
@@ -204,7 +189,7 @@ const ImageDialog = ({ handleClose }) => {
 
   const handleSelectAssets = (images) => {
     const formattedImages = images.map((image) => {
-      // create an object with imageSchema defined and exclude unnecessary props coming from media library config
+      // Create an object with imageSchema defined and exclude unnecessary props coming from media library config
       const expectedImage = pick(image, IMAGE_SCHEMA_FIELDS);
 
       return {
@@ -217,7 +202,7 @@ const ImageDialog = ({ handleClose }) => {
     insertImages(formattedImages);
 
     if (isLastBlockType(editor, 'image')) {
-      // insert blank line to add new blocks below image block
+      // Insert blank line to add new blocks below image block
       insertEmptyBlockAtLast(editor);
     }
 
@@ -297,7 +282,7 @@ export const BlocksDropdown = ({ disabled }) => {
     setBlockSelected(optionKey);
 
     if (optionKey === 'code' && isLastBlockType(editor, 'code')) {
-      // insert blank line to add new blocks below code block
+      // Insert blank line to add new blocks below code block
       insertEmptyBlockAtLast(editor);
     }
 
@@ -305,6 +290,23 @@ export const BlocksDropdown = ({ disabled }) => {
       setIsMediaLibraryVisible(true);
     }
   };
+
+  // Listen to the selection change and update the selected block in the dropdown
+  React.useEffect(() => {
+    if (editor.selection) {
+      // Get the parent node of the anchor
+      const [anchorNode] = Editor.parent(editor, editor.selection.anchor);
+      // Find the block key that matches the anchor node
+      const anchorBlockKey = Object.keys(blocks).find((blockKey) =>
+        blocks[blockKey].matchNode(anchorNode)
+      );
+
+      // Change the value selected in the dropdown if it doesn't match the anchor block key
+      if (anchorBlockKey && anchorBlockKey !== blockSelected) {
+        setBlockSelected(anchorBlockKey);
+      }
+    }
+  }, [editor.selection, editor, blocks, blockSelected]);
 
   return (
     <>
@@ -325,8 +327,6 @@ export const BlocksDropdown = ({ disabled }) => {
             value={key}
             label={blocks[key].label}
             icon={blocks[key].icon}
-            matchNode={blocks[key].matchNode}
-            handleSelection={setBlockSelected}
             blockSelected={blockSelected}
           />
         ))}
@@ -340,18 +340,10 @@ BlocksDropdown.propTypes = {
   disabled: PropTypes.bool.isRequired,
 };
 
-const BlockOption = ({ value, icon, label, handleSelection, blockSelected, matchNode }) => {
+const BlockOption = ({ value, icon, label, blockSelected }) => {
   const { formatMessage } = useIntl();
-  const editor = useSlate();
 
-  const isActive = isBlockActive(editor, matchNode);
   const isSelected = value === blockSelected;
-
-  React.useEffect(() => {
-    if (isActive && !isSelected) {
-      handleSelection(value);
-    }
-  }, [handleSelection, isActive, isSelected, value]);
 
   return (
     <Option
@@ -370,8 +362,6 @@ BlockOption.propTypes = {
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
   }).isRequired,
-  matchNode: PropTypes.func.isRequired,
-  handleSelection: PropTypes.func.isRequired,
   blockSelected: PropTypes.string.isRequired,
 };
 
@@ -448,7 +438,20 @@ ListButton.propTypes = {
 const LinkButton = () => {
   const editor = useSlate();
 
-  const isLinkActive = isBlockActive(editor, (node) => node.type === 'link');
+  const isLinkActive = () => {
+    const { selection } = editor;
+
+    if (!selection) return false;
+
+    const [match] = Array.from(
+      Editor.nodes(editor, {
+        at: Editor.unhangRange(editor, selection),
+        match: (node) => SlateElement.isElement(node) && node.type === 'link',
+      })
+    );
+
+    return Boolean(match);
+  };
 
   const addLink = () => {
     // We insert an empty anchor, so we split the DOM to have a element we can use as reference for the popover
@@ -463,7 +466,7 @@ const LinkButton = () => {
         id: 'components.Blocks.link',
         defaultMessage: 'Link',
       }}
-      isActive={isLinkActive}
+      isActive={isLinkActive()}
       handleClick={addLink}
       disabled={false}
     />
