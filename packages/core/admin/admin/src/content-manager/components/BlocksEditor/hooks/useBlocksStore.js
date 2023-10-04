@@ -151,6 +151,24 @@ List.propTypes = {
   }).isRequired,
 };
 
+const replaceListWithEmptyBlock = (editor, currentListPath) => {
+  // Delete the empty list
+  Transforms.removeNodes(editor, { at: currentListPath });
+
+  if (currentListPath[0] === 0) {
+    // If the list was the only(or first) block element then insert empty paragraph as editor needs default value
+    Transforms.insertNodes(
+      editor,
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: '' }],
+      },
+      { at: currentListPath }
+    );
+    Transforms.select(editor, currentListPath);
+  }
+};
+
 /**
  * Common handler for the backspace event on ordered and unordered lists
  * @param {import('slate').Editor} editor
@@ -163,21 +181,7 @@ const handleBackspaceKeyOnList = (editor, event) => {
 
   if (isListEmpty) {
     event.preventDefault();
-    // Delete the empty list
-    Transforms.removeNodes(editor, { at: currentListPath });
-
-    if (currentListPath[0] === 0) {
-      // If the list was the only(or first) block element then insert empty paragraph as editor needs default value
-      Transforms.insertNodes(
-        editor,
-        {
-          type: 'paragraph',
-          children: [{ type: 'text', text: '' }],
-        },
-        { at: currentListPath }
-      );
-      Transforms.select(editor, currentListPath);
-    }
+    replaceListWithEmptyBlock(editor, currentListPath);
   }
 };
 
@@ -186,18 +190,21 @@ const handleBackspaceKeyOnList = (editor, event) => {
  * @param {import('slate').Editor} editor
  */
 const handleEnterKeyOnList = (editor) => {
-  // Check if the selected list item is empty
   const [currentListItem, currentListItemPath] = Editor.above(editor, {
     matchNode: (node) => node.type === 'list-item',
   });
-  const isEmptyListItem =
+  const [currentList, currentListPath] = Editor.parent(editor, currentListItemPath);
+  const isListEmpty = currentList.children.length === 1 && currentListItem.children[0].text === '';
+  const isListItemEmpty =
     currentListItem.children.length === 1 && currentListItem.children[0].text === '';
 
-  if (isEmptyListItem) {
+  if (isListEmpty) {
+    replaceListWithEmptyBlock(editor, currentListPath);
+  } else if (isListItemEmpty) {
     // Delete the empty list item
     Transforms.removeNodes(editor, { at: currentListItemPath });
 
-    // And create a new paragraph below the parent list
+    // Create a new paragraph below the parent list
     const listNodeEntry = Editor.above(editor, { match: (n) => n.type === 'list' });
     const createdParagraphPath = Path.next(listNodeEntry[1]);
     Transforms.insertNodes(
@@ -209,7 +216,7 @@ const handleEnterKeyOnList = (editor) => {
       { at: createdParagraphPath }
     );
 
-    // Move selection to the newly created paragraph
+    // Move the selection to the newly created paragraph
     Transforms.select(editor, createdParagraphPath);
   } else {
     // Otherwise just create a new list item by splitting the current one
