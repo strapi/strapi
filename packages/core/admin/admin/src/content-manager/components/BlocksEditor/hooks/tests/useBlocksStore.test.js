@@ -644,13 +644,8 @@ describe('useBlocksStore', () => {
 
     // Set the cursor after "Line of"
     Transforms.select(baseEditor, {
-      /**
-       * Docs about anchor and focus: https://docs.slatejs.org/v/v0.47/slate-core/range
-       * In this case they are the same because no text is selected,
-       * we're only setting the position of the cursor.
-       */
-      anchor: Editor.point(baseEditor, { path: [0, 0], offset: 7 }),
-      focus: Editor.point(baseEditor, { path: [0, 0], offset: 7 }),
+      anchor: { path: [0, 0], offset: 7 },
+      focus: { path: [0, 0], offset: 7 },
     });
 
     const cursorInitialPosition = baseEditor.selection.anchor.path;
@@ -665,8 +660,8 @@ describe('useBlocksStore', () => {
 
     // Set the cursor after "Line of"
     Transforms.select(baseEditor, {
-      anchor: Editor.point(baseEditor, { path: [0, 0], offset: 7 }),
-      focus: Editor.point(baseEditor, { path: [0, 0], offset: 7 }),
+      anchor: { path: [0, 0], offset: 7 },
+      focus: { path: [0, 0], offset: 7 },
     });
 
     // Simulate another the enter key

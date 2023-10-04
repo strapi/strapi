@@ -234,9 +234,7 @@ export function useBlocksStore() {
       matchNode: (node) => node.type === 'paragraph',
       isInBlocksSelector: true,
       handleEnterKey(editor) {
-        /**
-         * We need to keep track of the initial position of the cursor
-         */
+        // We need to keep track of the initial position of the cursor
         const anchorPathInitialPosition = editor.selection.anchor.path;
         /**
          * Split the nodes where the cursor is. This will create a new paragraph with the content
@@ -257,7 +255,7 @@ export function useBlocksStore() {
          * Select the parent of the selection because we want the full block, not the leaf.
          * And copy its children to make sure we keep the modifiers.
          */
-        const [createdNode] = Editor.parent(editor, editor.selection.anchor.path);
+        const [fragmentedNode] = Editor.parent(editor, editor.selection.anchor.path);
         Transforms.removeNodes(editor, editor.selection);
 
         /**
@@ -272,7 +270,7 @@ export function useBlocksStore() {
           editor,
           {
             type: 'paragraph',
-            children: createdNode.children,
+            children: fragmentedNode.children,
           },
           {
             at: hasNextNode ? [anchorPathInitialPosition[0] + 1] : [editor.children.length],
