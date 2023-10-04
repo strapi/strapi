@@ -54,7 +54,11 @@ describe('STRAPI_HELPER_PLUGIN | utils', () => {
         },
         modelType: 'contentType',
         kind: 'collectionType',
+        modelName: 'test.test',
+        globalId: 'Test.Test',
         info: {
+          singularName: 'test',
+          pluralName: 'tests',
           displayName: 'Test',
         },
       };

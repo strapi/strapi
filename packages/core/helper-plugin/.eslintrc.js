@@ -1,9 +1,6 @@
 module.exports = {
   root: true,
   extends: ['custom/front/typescript', 'plugin:storybook/recommended'],
-  parserOptions: {
-    project: ['./tsconfig.eslint.json'],
-  },
   rules: {
     'import/no-unresolved': [
       'error',
@@ -13,13 +10,6 @@ module.exports = {
         ignore: ['@strapi/design-system/v2'],
       },
     ],
-  },
-  settings: {
-    'import/resolver': {
-      typescript: {
-        project: './tsconfig.eslint.json',
-      },
-    },
   },
   overrides: [
     {

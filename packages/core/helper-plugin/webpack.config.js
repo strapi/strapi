@@ -79,7 +79,7 @@ const config = [
         ? new ForkTsCheckerPlugin({
             typescript: {
               mode: 'write-dts',
-              configFile: 'tsconfig.build.json',
+              configFile: `${__dirname}/tsconfig.build.json`,
             },
           })
         : undefined,

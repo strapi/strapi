@@ -116,6 +116,7 @@ declare module 'yup' {
     isKebabCase(message?: string): this;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ObjectSchema<TShape> {
     onlyContainsFunctions(message?: string): this;
   }
