@@ -98,6 +98,7 @@
     "@strapi/permissions": "4.14.0",
     "@strapi/plugin-content-manager": "4.14.0",
     "@strapi/plugin-content-type-builder": "4.14.0",
+    "@strapi/plugin-email": "4.14.0",
     "@strapi/plugin-upload": "4.14.0",
     "@strapi/types": "4.14.0",
     "@strapi/typescript-utils": "4.14.0",

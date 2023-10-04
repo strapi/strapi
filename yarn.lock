@@ -7710,7 +7710,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-email@workspace:packages/core/email":
+"@strapi/plugin-email@4.14.0, @strapi/plugin-email@workspace:packages/core/email":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-email@workspace:packages/core/email"
   dependencies:
@@ -8038,6 +8038,7 @@ __metadata:
     "@strapi/permissions": 4.14.0
     "@strapi/plugin-content-manager": 4.14.0
     "@strapi/plugin-content-type-builder": 4.14.0
+    "@strapi/plugin-email": 4.14.0
     "@strapi/plugin-upload": 4.14.0
     "@strapi/types": 4.14.0
     "@strapi/typescript-utils": 4.14.0
