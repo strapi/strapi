@@ -21,13 +21,20 @@
   ],
   "files": [
     "./dist",
-    "./admin",
-    "strapi-admin.js",
     "strapi-server.js"
   ],
+  "exports": {
+    "./strapi-server": {
+      "types": "./dist/server/index.d.ts",
+      "source": "./server/src/index.ts",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
-    "build": "run -T tsc -p server/tsconfig.json --outDir ./dist/server",
-    "build:ts": "run build",
+    "build": "NODE_ENV=production strapi plugin:build --force",
     "watch": "run -T tsc -w --preserveWatchOutput",
     "clean": "run -T rimraf ./dist",
     "prepublishOnly": "yarn clean && yarn build",
@@ -62,7 +69,7 @@
     "styled-components": "5.3.3"
   },
   "peerDependencies": {
-    "@strapi/strapi": "4.13.6",
+    "koa": "2.13.4",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "5.3.4",
