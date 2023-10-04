@@ -1,8 +1,6 @@
-import React from 'react';
-
 import styled from 'styled-components';
 
-import { useConfigurations } from '../../hooks';
+import { useConfigurations } from '../hooks/useConfigurations';
 
 const Img = styled.img`
   height: ${72 / 16}rem;
@@ -16,4 +14,4 @@ const Logo = () => {
   return <Img src={auth?.custom ?? auth.default} aria-hidden alt="" />;
 };
 
-export default Logo;
+export { Logo };
