@@ -33,7 +33,7 @@ import { ValidationError } from 'yup';
 import { PERMISSIONS } from '../constants';
 import { schema } from '../utils/schema';
 
-import type { EmailSettings, ConfigSettings } from '../../../shared/types';
+import type { EmailSettings } from '../../../shared/types';
 
 const DocumentationLink = styled.a`
   color: ${({ theme }) => theme.colors.primary600};
@@ -55,14 +55,14 @@ const SettingsPage = () => {
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { get, post } = useFetchClient();
 
-  const [testAddress, setTestAddress] = React.useState<string>('');
-  const [isTestAddressValid, setIsTestAddressValid] = React.useState<boolean>(false);
+  const [testAddress, setTestAddress] = React.useState('');
+  const [isTestAddressValid, setIsTestAddressValid] = React.useState(false);
 
   // TODO: I'm not sure how to type this. I think it should be Record<string, TranslationMessage> but that type is defined in the helper-plugin
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [formErrors, setFormErrors] = React.useState<Record<string, any>>({});
 
-  const { data, isLoading } = useQuery<ConfigSettings, Error>(['email', 'settings'], async () => {
+  const { data, isLoading } = useQuery(['email', 'settings'], async () => {
     const res = await get<EmailSettings>('/email/settings');
     const {
       data: { config },
@@ -125,8 +125,6 @@ const SettingsPage = () => {
     } catch (error) {
       if (error instanceof ValidationError) {
         setFormErrors(getYupInnerErrors(error));
-      } else {
-        // TODO: how to handle other errors? is this if, else the best way to do this?
       }
     }
 

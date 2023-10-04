@@ -49,6 +49,7 @@
     "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
     "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
+    "test:ts:front": "run -T tsc -p admin/tsconfig.json",
     "lint": "run -T eslint ."
   },
   "dependencies": {
