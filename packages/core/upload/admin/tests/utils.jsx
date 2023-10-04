@@ -1,33 +1,25 @@
-/* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
-// @ts-expect-error - the package is slightly broken, but will be fixed with https://github.com/strapi/strapi/pull/18233
 import { fixtures } from '@strapi/admin-test-utils';
 import { DesignSystemProvider } from '@strapi/design-system';
+import { RBACContext, NotificationsProvider } from '@strapi/helper-plugin';
 import {
   renderHook as renderHookRTL,
   render as renderRTL,
   waitFor,
-  RenderOptions as RTLRenderOptions,
-  RenderResult,
   act,
+  fireEvent,
+  screen,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { MemoryRouter, MemoryRouterProps } from 'react-router-dom';
-
-import { RBACContext } from '../src/features/RBAC';
+import { MemoryRouter } from 'react-router-dom';
 
 import { server } from './server';
 
-interface ProvidersProps {
-  children: React.ReactNode;
-  initialEntries?: MemoryRouterProps['initialEntries'];
-}
-
-const Providers = ({ children, initialEntries }: ProvidersProps) => {
+const Providers = ({ children, initialEntries }) => {
   const rbacContextValue = React.useMemo(
     () => ({
       allPermissions: fixtures.permissions.allPermissions,
@@ -40,7 +32,6 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
       queries: {
         retry: false,
         // no more errors on the console for tests
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
         onError() {},
       },
     },
@@ -52,7 +43,9 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
       <IntlProvider locale="en" textComponent="span">
         <DesignSystemProvider locale="en">
           <QueryClientProvider client={queryClient}>
-            <RBACContext.Provider value={rbacContextValue}>{children}</RBACContext.Provider>
+            <RBACContext.Provider value={rbacContextValue}>
+              <NotificationsProvider>{children}</NotificationsProvider>
+            </RBACContext.Provider>
           </QueryClientProvider>
         </DesignSystemProvider>
       </IntlProvider>
@@ -70,18 +63,9 @@ Providers.propTypes = {
 };
 
 // eslint-disable-next-line react/jsx-no-useless-fragment
-const fallbackWrapper = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+const fallbackWrapper = ({ children }) => <>{children}</>;
 
-export interface RenderOptions {
-  renderOptions?: RTLRenderOptions;
-  userEventOptions?: Parameters<typeof userEvent.setup>[0];
-  initialEntries?: MemoryRouterProps['initialEntries'];
-}
-
-const render = (
-  ui: React.ReactElement,
-  { renderOptions, userEventOptions, initialEntries }: RenderOptions = {}
-): RenderResult & { user: ReturnType<typeof userEvent.setup> } => {
+const render = (ui, { renderOptions, userEventOptions, initialEntries } = {}) => {
   const { wrapper: Wrapper = fallbackWrapper, ...restOptions } = renderOptions ?? {};
 
   return {
@@ -97,7 +81,7 @@ const render = (
   };
 };
 
-const renderHook: typeof renderHookRTL = (hook, options) => {
+const renderHook = (hook, options) => {
   const { wrapper: Wrapper = fallbackWrapper, ...restOptions } = options ?? {};
 
   return renderHookRTL(hook, {
@@ -110,4 +94,4 @@ const renderHook: typeof renderHookRTL = (hook, options) => {
   });
 };
 
-export { render, renderHook, waitFor, server, act };
+export { render, renderHook, waitFor, server, act, fireEvent, screen };
