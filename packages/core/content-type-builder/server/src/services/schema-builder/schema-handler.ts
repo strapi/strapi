@@ -1,5 +1,5 @@
 import path from 'path';
-import type { UID, Schema, Attribute } from '@strapi/types';
+import type { UID, Schema } from '@strapi/types';
 import fse from 'fs-extra';
 import _ from 'lodash';
 
@@ -86,13 +86,15 @@ export default function createSchemaHandler(infos: Infos) {
       return this;
     },
 
-    // get a particuar path inside the schema
+    // get a particular path inside the schema
     get(path: string[]) {
       return _.get(state.schema, path);
     },
 
-    // set a particuar path inside the schema
+    // set a particular path inside the schema
     set(path: string[] | string, val: unknown) {
+      if (!state.schema) return this;
+
       modified = true;
 
       const value = _.defaultTo(val, _.get(state.schema, path));
@@ -101,7 +103,7 @@ export default function createSchemaHandler(infos: Infos) {
       return this;
     },
 
-    // delete a particuar path inside the schema
+    // delete a particular path inside the schema
     unset(path: string[]) {
       modified = true;
 
@@ -119,7 +121,7 @@ export default function createSchemaHandler(infos: Infos) {
       return this.get(['attributes', key]);
     },
 
-    setAttribute(key: string, attribute: Attribute.Any) {
+    setAttribute(key: string, attribute: any) {
       return this.set(['attributes', key], attribute);
     },
 
@@ -128,6 +130,8 @@ export default function createSchemaHandler(infos: Infos) {
     },
 
     setAttributes(newAttributes: Schema.Attributes) {
+      if (!this.schema) return this;
+
       // delete old configurable attributes
       for (const key in this.schema.attributes) {
         if (isConfigurable(this.schema.attributes[key])) {
@@ -144,7 +148,9 @@ export default function createSchemaHandler(infos: Infos) {
     },
 
     removeContentType(uid: UID.ContentType) {
-      const { attributes } = state.schema;
+      if (!state.schema) return this;
+
+      const attributes = state.schema.attributes as Record<string, any>;
 
       Object.keys(attributes).forEach((key) => {
         const attribute = attributes[key];
@@ -159,7 +165,9 @@ export default function createSchemaHandler(infos: Infos) {
 
     // utils
     removeComponent(uid: UID.Component) {
-      const { attributes } = state.schema;
+      if (!state.schema) return this;
+
+      const attributes = state.schema.attributes as Record<string, any>;
 
       Object.keys(attributes).forEach((key) => {
         const attr = attributes[key];
@@ -173,7 +181,9 @@ export default function createSchemaHandler(infos: Infos) {
           Array.isArray(attr.components) &&
           attr.components.includes(uid)
         ) {
-          const updatedComponentList = attributes[key].components.filter((val) => val !== uid);
+          const updatedComponentList = attributes[key].components.filter(
+            (val: string) => val !== uid
+          );
           this.set(['attributes', key, 'components'], updatedComponentList);
         }
       });
@@ -182,7 +192,9 @@ export default function createSchemaHandler(infos: Infos) {
     },
 
     updateComponent(uid: UID.Component, newUID: UID.Component) {
-      const { attributes } = state.schema;
+      if (!state.schema) return this;
+
+      const attributes = state.schema.attributes as Record<string, any>;
 
       Object.keys(attributes).forEach((key) => {
         const attr = attributes[key];
@@ -196,7 +208,9 @@ export default function createSchemaHandler(infos: Infos) {
           Array.isArray(attr.components) &&
           attr.components.includes(uid)
         ) {
-          const updatedComponentList = attr.components.map((val) => (val === uid ? newUID : val));
+          const updatedComponentList = attr.components.map((val: string) =>
+            val === uid ? newUID : val
+          );
 
           this.set(['attributes', key, 'components'], updatedComponentList);
         }
@@ -214,7 +228,7 @@ export default function createSchemaHandler(infos: Infos) {
       const initialPath = path.join(initialState.dir, initialState.filename);
       const filePath = path.join(state.dir, state.filename);
 
-      if (deleted === true) {
+      if (deleted) {
         await fse.remove(initialPath);
 
         const list = await fse.readdir(initialState.dir);
@@ -225,19 +239,21 @@ export default function createSchemaHandler(infos: Infos) {
         return;
       }
 
-      if (modified === true) {
+      if (modified) {
+        if (!state.schema) return Promise.resolve();
+
         await fse.ensureFile(filePath);
 
         await fse.writeJSON(
           filePath,
           {
-            kind: state.schema.kind,
+            kind: (state.schema as any).kind,
             collectionName: state.schema.collectionName,
             info: state.schema.info,
             options: state.schema.options,
             pluginOptions: state.schema.pluginOptions,
             attributes: state.schema.attributes,
-            config: state.schema.config,
+            config: (state.schema as any).config,
           },
           { spaces: 2 }
         );
@@ -278,7 +294,7 @@ export default function createSchemaHandler(infos: Infos) {
         return;
       }
 
-      if (modified === true || deleted === true) {
+      if (modified || deleted) {
         await fse.ensureFile(initialPath);
         await fse.writeJSON(initialPath, initialState.schema, { spaces: 2 });
 

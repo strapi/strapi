@@ -2,70 +2,26 @@ import { join } from 'path';
 import _ from 'lodash';
 
 import { errors } from '@strapi/utils';
-import type { Schema } from '@strapi/types';
 import createSchemaHandler from './schema-handler';
 import createComponentBuilder from './component-builder';
 import createContentTypeBuilder from './content-type-builder';
 
-export interface ComponentInput extends Schema.Component {
-  __filename__: string;
-  __schema__: Schema.Schema;
-  config: object;
-}
-
-export interface Component extends Pick<Schema.Component, 'modelName' | 'uid'> {
-  category: string;
-  plugin: string;
-  filename: string;
-  dir: string;
-  schema: Schema.Schema;
-  config: object;
-}
-
-export interface ContentTypeInput extends Schema.ContentType {
-  __schema__: Schema.Schema;
-  plugin: string;
-  apiName: string;
-  config: object;
-  dir: string;
-}
-
-export interface ContentType extends Pick<Schema.ContentType, 'modelName' | 'uid'> {
-  filename: string;
-  dir: string;
-  schema: Schema.Schema;
-  plugin: string;
-  config: object;
-}
-
 /**
  * Creates a content type schema builder instance
- *
- * @returns {object} content type schema builder
  */
 export default function createBuilder() {
-  const components = Object.keys(strapi.components).map((key) => {
-    const componentInput = strapi.components[
-      key as keyof typeof strapi.components
-    ] as ComponentInput;
-    const component: Component = {
-      category: componentInput.category,
-      modelName: componentInput.modelName,
-      plugin: componentInput.modelName,
-      uid: componentInput.uid,
-      filename: componentInput.__filename__,
-      dir: join(strapi.dirs.app.components, componentInput.category),
-      schema: componentInput.__schema__,
-      config: componentInput.config,
-    };
-    return component;
-  });
+  const components = Object.values(strapi.components).map((componentInput) => ({
+    category: componentInput.category,
+    modelName: componentInput.modelName,
+    plugin: componentInput.modelName,
+    uid: componentInput.uid,
+    filename: componentInput.__filename__,
+    dir: join(strapi.dirs.app.components, componentInput.category),
+    schema: componentInput.__schema__,
+    config: componentInput.config,
+  }));
 
-  const contentTypes = Object.keys(strapi.contentTypes).map((key) => {
-    const contentTypeInput = strapi.contentTypes[
-      key as keyof typeof strapi.contentTypes
-    ] as ContentTypeInput;
-
+  const contentTypes = Object.values(strapi.contentTypes).map((contentTypeInput) => {
     const dir = contentTypeInput.plugin
       ? join(
           strapi.dirs.app.extensions,
@@ -80,7 +36,7 @@ export default function createBuilder() {
           contentTypeInput.info.singularName
         );
 
-    const contentType: ContentType = {
+    return {
       modelName: contentTypeInput.modelName,
       plugin: contentTypeInput.plugin,
       uid: contentTypeInput.uid,
@@ -89,8 +45,6 @@ export default function createBuilder() {
       schema: contentTypeInput.__schema__,
       config: contentTypeInput.config,
     };
-
-    return contentType;
   });
 
   return createSchemaBuilder({
@@ -100,8 +54,8 @@ export default function createBuilder() {
 }
 
 type SchemaBuilderOptions = {
-  components: Component[];
-  contentTypes: ContentType[];
+  components: any;
+  contentTypes: any;
 };
 
 function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions) {
@@ -112,7 +66,7 @@ function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions)
   Object.keys(contentTypes).forEach((key) => {
     tmpContentTypes.set(contentTypes[key].uid, createSchemaHandler(contentTypes[key]));
   });
-  Object.keys(contentTypes).forEach((key: string) => {
+  Object.keys(contentTypes).forEach((key) => {
     tmpContentTypes.set(contentTypes[key].uid, createSchemaHandler(contentTypes[key]));
   });
 
@@ -130,12 +84,9 @@ function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions)
     },
 
     /**
-     * Convert Attributes received from the API to the right syntaxt
-     *
-     * @param {object} attributes input attributes
-     * @returns {object} transformed attributes
+     * Convert Attributes received from the API to the right syntax
      */
-    convertAttributes(attributes) {
+    convertAttributes(attributes: any) {
       return Object.keys(attributes).reduce((acc, key) => {
         const attribute = attributes[key];
 
@@ -186,16 +137,14 @@ function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions)
         };
 
         return acc;
-      }, {});
+      }, {} as Record<string, unknown>);
     },
 
-    ...createComponentBuilder({ tmpComponents, tmpContentTypes }),
-    ...createContentTypeBuilder({ tmpComponents, tmpContentTypes }),
+    ...createComponentBuilder(),
+    ...createContentTypeBuilder(),
 
     /**
      * Write all type to files
-     *
-     * @returns {void}
      */
     writeFiles() {
       const schemas = [
@@ -221,8 +170,6 @@ function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions)
 
     /**
      * rollback all files
-     *
-     * @returns {void}
      */
     rollback() {
       return Promise.all(

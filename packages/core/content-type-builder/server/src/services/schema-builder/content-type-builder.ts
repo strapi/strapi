@@ -27,7 +27,7 @@ const reuseUnsetPreviousProperties = (newAttribute: Attribute.Any, oldAttribute:
 
 export default function createComponentBuilder() {
   return {
-    setRelation({ key, uid, attribute }) {
+    setRelation(this: any, { key, uid, attribute }: any) {
       if (!_.has(attribute, 'target')) {
         return;
       }
@@ -41,16 +41,11 @@ export default function createComponentBuilder() {
 
       targetCT.setAttribute(
         attribute.targetAttribute,
-        generateRelation({
-          key,
-          attribute,
-          uid,
-          targetAttribute,
-        })
+        generateRelation({ key, attribute, uid, targetAttribute })
       );
     },
 
-    unsetRelation(attribute) {
+    unsetRelation(this: any, attribute: any) {
       if (!_.has(attribute, 'target')) {
         return;
       }
@@ -67,11 +62,8 @@ export default function createComponentBuilder() {
 
     /**
      * Creates a content type in memory to be written to files later on
-     *
-     * @param {object} infos content type info
-     * @returns {object} new content type
      */
-    createContentType(infos: CreateContentTypeInput) {
+    createContentType(this: any, infos: CreateContentTypeInput) {
       const uid = createContentTypeUID(infos);
 
       if (this.contentTypes.has(uid)) {
@@ -136,7 +128,7 @@ export default function createComponentBuilder() {
       return contentType;
     },
 
-    editContentType(infos) {
+    editContentType(this: any, infos: any) {
       const { uid } = infos;
 
       if (!this.contentTypes.has(uid)) {
@@ -241,16 +233,16 @@ export default function createComponentBuilder() {
       return contentType;
     },
 
-    deleteContentType(uid) {
+    deleteContentType(this: any, uid: string) {
       if (!this.contentTypes.has(uid)) {
         throw new ApplicationError('contentType.notFound');
       }
 
-      this.components.forEach((compo) => {
+      this.components.forEach((compo: any) => {
         compo.removeContentType(uid);
       });
 
-      this.contentTypes.forEach((ct) => {
+      this.contentTypes.forEach((ct: any) => {
         ct.removeContentType(uid);
       });
 
@@ -269,27 +261,8 @@ export default function createComponentBuilder() {
 const createContentTypeUID = ({ singularName }: { singularName: string }): UID.ContentType =>
   `api::${singularName}.${singularName}`;
 
-const generateRelation = ({
-  key,
-  attribute,
-  uid,
-  targetAttribute = {},
-}: {
-  key: string;
-  attribute: Attribute.Relation & Record<string, any>;
-  uid: UID.Any;
-  targetAttribute?: Partial<Attribute.Relation> & Record<string, any>;
-}) => {
-  const opts: {
-    type: 'relation';
-    relation?: Attribute.Relation['relation'];
-    target: UID.Any;
-    mappedBy?: string;
-    inversedBy?: string;
-    autoPopulate?: boolean;
-    private?: boolean;
-    pluginOptions?: Attribute.Relation['pluginOptions'];
-  } = {
+const generateRelation = ({ key, attribute, uid, targetAttribute = {} }: any) => {
+  const opts: any = {
     type: 'relation',
     target: uid,
     autoPopulate: targetAttribute.autoPopulate,

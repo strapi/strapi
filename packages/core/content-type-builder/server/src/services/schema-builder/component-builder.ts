@@ -1,5 +1,5 @@
 import path from 'path';
-import type { Attribute, UID } from '@strapi/types';
+import type { UID } from '@strapi/types';
 import _ from 'lodash';
 import pluralize from 'pluralize';
 
@@ -9,20 +9,9 @@ import createSchemaHandler from './schema-handler';
 
 const { ApplicationError } = errors;
 
-type CreateComponentOptions = {
-  category: string;
-  displayName: string;
-  icon: string;
-  description: string;
-  pluginOptions: object;
-  config: object;
-  uid?: UID.Component;
-  attributes: Attribute.Any[];
-};
-
 export default function createComponentBuilder() {
   return {
-    createComponentUID({ category, displayName }: CreateComponentOptions) {
+    createComponentUID({ category, displayName }: any) {
       return `${nameToSlug(category)}.${nameToSlug(displayName)}`;
     },
 
@@ -36,7 +25,7 @@ export default function createComponentBuilder() {
     /**
      * create a component in the tmpComponent map
      */
-    createComponent(infos: CreateComponentOptions) {
+    createComponent(this: any, infos: any) {
       const uid = this.createComponentUID(infos);
 
       if (this.components.has(uid)) {
@@ -76,7 +65,7 @@ export default function createComponentBuilder() {
     /**
      * create a component in the tmpComponent map
      */
-    editComponent(infos: CreateComponentOptions): void {
+    editComponent(this: any, infos: any): void {
       const { uid } = infos;
 
       if (!this.components.has(uid)) {
@@ -112,11 +101,11 @@ export default function createComponentBuilder() {
         .setAttributes(this.convertAttributes(newAttributes));
 
       if (newUID !== uid) {
-        this.components.forEach((compo) => {
+        this.components.forEach((compo: any) => {
           compo.updateComponent(uid, newUID);
         });
 
-        this.contentTypes.forEach((ct) => {
+        this.contentTypes.forEach((ct: any) => {
           ct.updateComponent(uid, newUID);
         });
       }
@@ -124,16 +113,16 @@ export default function createComponentBuilder() {
       return component;
     },
 
-    deleteComponent(uid: UID.Component) {
+    deleteComponent(this: any, uid: UID.Component) {
       if (!this.components.has(uid)) {
         throw new errors.ApplicationError('component.notFound');
       }
 
-      this.components.forEach((compo) => {
+      this.components.forEach((compo: any) => {
         compo.removeComponent(uid);
       });
 
-      this.contentTypes.forEach((ct) => {
+      this.contentTypes.forEach((ct: any) => {
         ct.removeComponent(uid);
       });
 
