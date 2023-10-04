@@ -18,6 +18,12 @@ const initialValue = [
   },
 ];
 
+const mockEvent = {
+  preventDefault: jest.fn(),
+  target: {
+    value: '',
+  },
+};
 const user = userEvent.setup();
 
 const baseEditor = createEditor();
@@ -602,6 +608,103 @@ describe('useBlocksStore', () => {
           {
             type: 'text',
             text: '',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('handles the backspace key on a very first list with single empty list item', () => {
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: '',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor on the first list item
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0, 0], offset: 0 },
+      focus: { path: [0, 0, 0], offset: 0 },
+    });
+
+    // Simulate the backspace key
+    result.current['list-unordered'].handleBackspaceKey(baseEditor, mockEvent);
+
+    // Should remove the empty list item and replace with empty paragraph
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('handles the backspace key on a list with single empty list item', () => {
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'some text',
+          },
+        ],
+      },
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: '',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor on the first list item
+    Transforms.select(baseEditor, {
+      anchor: { path: [1, 0, 0], offset: 0 },
+      focus: { path: [1, 0, 0], offset: 0 },
+    });
+
+    // Simulate the backspace key
+    result.current['list-ordered'].handleBackspaceKey(baseEditor, mockEvent);
+
+    // Should remove the empty list item
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'some text',
           },
         ],
       },
