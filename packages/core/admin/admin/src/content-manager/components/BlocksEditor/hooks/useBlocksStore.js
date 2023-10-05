@@ -326,6 +326,7 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
         ref={composedRefs}
         href={element.url}
         onClick={handleOpenEditPopover}
+        color="primary600"
       >
         {children}
       </BaseLink>
@@ -376,7 +377,7 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
           ) : (
             <Flex direction="column" gap={4} alignItems="start" width="400px">
               <Typography>{elementText}</Typography>
-              <BaseLink href={element.url} target="_blank">
+              <BaseLink href={element.url} target="_blank" color="primary600">
                 {element.url}
               </BaseLink>
               <Flex justifyContent="end" width="100%" gap={2}>
