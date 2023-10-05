@@ -435,6 +435,8 @@ export function useBlocksStore() {
       matchNode: (node) => node.type === 'paragraph',
       isInBlocksSelector: true,
       handleEnterKey(editor) {
+        // We need to keep track of the initial position of the cursor
+        const anchorPathInitialPosition = editor.selection.anchor.path;
         /**
          * Split the nodes where the cursor is. This will create a new paragraph with the content
          * after the cursor, while retaining all the children, modifiers etc.
@@ -454,12 +456,23 @@ export function useBlocksStore() {
          * Select the parent of the selection because we want the full block, not the leaf.
          * And copy its children to make sure we keep the modifiers.
          */
-        const [createdNode] = Editor.parent(editor, editor.selection.anchor.path);
+        const [fragmentedNode] = Editor.parent(editor, editor.selection.anchor.path);
         Transforms.removeNodes(editor, editor.selection);
-        Transforms.insertNodes(editor, {
-          type: 'paragraph',
-          children: createdNode.children,
-        });
+
+        // Check if after the current position there is another node
+        const hasNextNode = editor.children.length - anchorPathInitialPosition[0] > 1;
+
+        // Insert the new node at the right position. The next line after the editor selection if present or otherwise at the end of the editor.
+        Transforms.insertNodes(
+          editor,
+          {
+            type: 'paragraph',
+            children: fragmentedNode.children,
+          },
+          {
+            at: hasNextNode ? [anchorPathInitialPosition[0] + 1] : [editor.children.length],
+          }
+        );
 
         /**
          * The new selection will by default be at the end of the created node.
@@ -467,7 +480,7 @@ export function useBlocksStore() {
          * Use slice(0, -1) to go 1 level higher in the tree,
          * so we go to the start of the node and not the start of the leaf.
          */
-        Transforms.select(editor, editor.start(editor.selection.anchor.path.slice(0, -1)));
+        Transforms.select(editor, editor.start([anchorPathInitialPosition[0] + 1]));
       },
     },
     'heading-one': {
