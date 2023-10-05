@@ -15,7 +15,7 @@ const smp = new SpeedMeasurePlugin();
 const buildAdmin = async () => {
   const entry = path.join(__dirname, '..', 'admin', 'src');
   const dest = path.join(__dirname, '..', 'build');
-  const tsConfigFilePath = path.join(__dirname, '..', 'admin', 'src', 'tsconfig.json');
+  const tsConfigFilePath = path.join(__dirname, '..', 'admin', 'tsconfig.json');
 
   /**
    * We _always_ install these FE plugins, they're considered "core"
@@ -94,7 +94,11 @@ const buildAdmin = async () => {
                 return acc + error.message;
               }
 
-              return acc + error.join('\n\n');
+              if (Array.isArray(error)) {
+                return acc + error.join('\n\n');
+              }
+
+              return acc + error;
             }, '')
           )
         );

@@ -185,6 +185,7 @@ function ListView({
       };
 
       filter.fieldSchema.mainField = {
+        ...mainField,
         name: 'id',
       };
     }

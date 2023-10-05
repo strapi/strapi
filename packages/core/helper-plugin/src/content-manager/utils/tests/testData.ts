@@ -1,4 +1,4 @@
-import type { Schema } from '@strapi/strapi';
+import type { Schema } from '@strapi/types';
 
 const contentType: Schema.ContentType = {
   uid: 'api::test.test',
