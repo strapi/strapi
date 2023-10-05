@@ -151,12 +151,16 @@ List.propTypes = {
   }).isRequired,
 };
 
+/**
+ * @param {import('slate').Editor} editor
+ * @param {Path} currentListPath
+ */
 const replaceListWithEmptyBlock = (editor, currentListPath) => {
   // Delete the empty list
   Transforms.removeNodes(editor, { at: currentListPath });
 
   if (currentListPath[0] === 0) {
-    // If the list was the only(or first) block element then insert empty paragraph as editor needs default value
+    // If the list was the only (or first) block element then insert empty paragraph as editor needs default value
     Transforms.insertNodes(
       editor,
       {
