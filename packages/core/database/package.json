@@ -49,8 +49,8 @@
     "umzug": "3.2.1"
   },
   "devDependencies": {
-    "eslint-config-custom": "4.14.0",
-    "tsconfig": "4.14.0"
+    "eslint-config-custom": "4.14.3",
+    "tsconfig": "4.14.3"
   },
   "engines": {
     "node": ">=16.0.0 <=20.x.x",
