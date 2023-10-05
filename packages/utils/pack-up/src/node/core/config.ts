@@ -4,9 +4,10 @@ import os from 'os';
 import * as path from 'path';
 import pkgUp from 'pkg-up';
 
-import { Runtime } from '../createBuildContext';
-
 import { Logger } from './logger';
+
+import type { Export } from './exports';
+import type { Runtime } from '../createBuildContext';
 
 interface LoadConfigOptions {
   cwd: string;
@@ -78,6 +79,10 @@ interface ConfigOptions {
    */
   dist?: string;
   /**
+   * @description Overwrite the default exports.
+   */
+  exports?: ConfigProperty<Record<string, Export>>;
+  /**
    * @description a list of external dependencies to exclude from the bundle.
    * We already collect the dependencies & peerDeps from the package.json.
    */
@@ -95,6 +100,23 @@ interface ConfigOptions {
 const defineConfig = (configOptions: ConfigOptions): ConfigOptions => configOptions;
 
 type Config = ConfigOptions;
+
+type ConfigPropertyResolver<T> = (currentValue: T) => T;
+
+type ConfigProperty<T> = T | ConfigPropertyResolver<T>;
+
+/** @internal */
+export function resolveConfigProperty<T>(prop: ConfigProperty<T> | undefined, initialValue: T): T {
+  if (!prop) {
+    return initialValue;
+  }
+
+  if (typeof prop === 'function') {
+    return (prop as ConfigPropertyResolver<T>)(initialValue);
+  }
+
+  return prop;
+}
 
 export { loadConfig, defineConfig, CONFIG_FILE_NAMES };
 export type { Config };

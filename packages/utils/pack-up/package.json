@@ -30,7 +30,6 @@
       "url": "https://strapi.io"
     }
   ],
-  "bin": "./bin/pack-up.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -41,6 +40,11 @@
     },
     "./package.json": "./package.json"
   },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "bin": "./bin/pack-up.js",
   "files": [
     "bin",
     "dist"
@@ -52,8 +56,8 @@
     "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
     "test": "test:ts && test:unit",
-    "test:unit": "run -T jest",
     "test:ts": "run -T tsc --noEmit",
+    "test:unit": "run -T jest",
     "watch": "node -r esbuild-register scripts/watch"
   },
   "dependencies": {
