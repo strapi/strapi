@@ -25,7 +25,7 @@ import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
-import useDebounce from '../../hooks/useDebounce';
+import { useDebounce } from '../../hooks/useDebounce';
 import { selectAdminPermissions } from '../App/selectors';
 
 import MissingPluginBanner from './components/MissingPluginBanner';
