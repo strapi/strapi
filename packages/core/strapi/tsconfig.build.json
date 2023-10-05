@@ -2,7 +2,8 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
-    "noEmit": false
+    "noEmit": false,
+    "declarationMap": true,
   },
   "include": ["src"],
   "exclude": ["node_modules", "**/__tests__/**"]

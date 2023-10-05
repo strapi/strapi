@@ -4,6 +4,7 @@
   "exclude": ["**/*.test.tsx", "**/*.test.ts"],
   "compilerOptions": {
     "rootDir": "./src",
-    "outDir": "./build"
+    "outDir": "./build",
+    "declarationMap": true,
   }
 }
