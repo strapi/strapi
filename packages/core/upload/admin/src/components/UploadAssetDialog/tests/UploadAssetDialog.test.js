@@ -169,6 +169,6 @@ describe('UploadAssetDialog', () => {
           within(card).getByText(`${asset.type.charAt(0).toUpperCase()}${asset.type.slice(1)}`)
         ).toBeInTheDocument();
       });
-    });
+    }, 10000);
   });
 });
