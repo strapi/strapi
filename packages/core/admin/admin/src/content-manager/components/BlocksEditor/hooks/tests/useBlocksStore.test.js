@@ -614,6 +614,50 @@ describe('useBlocksStore', () => {
     ]);
   });
 
+  it('handles enter key on an empty list', () => {
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: '',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor on the first list item
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0, 0], offset: 0 },
+      focus: { path: [0, 0, 0], offset: 0 },
+    });
+
+    // Simulate the enter key
+    result.current['list-ordered'].handleEnterKey(baseEditor);
+
+    // Should remove the empty list and create a paragraph instead
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+    ]);
+  });
+
   it('handles the backspace key on a very first list with single empty list item', () => {
     const { result } = renderHook(useBlocksStore);
 
