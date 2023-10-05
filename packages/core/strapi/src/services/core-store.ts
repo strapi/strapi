@@ -126,13 +126,36 @@ const createCoreStore = ({ db }: { db: Database }) => {
     const data = await db.query('strapi::core-store').findOne({ where });
 
     if (data) {
-      return db.query('strapi::core-store').update({
-        where: { id: data.id },
-        data: {
-          value: JSON.stringify(value) || toString(value),
-          type: typeof value,
-        },
-      });
+      let dataVal = null;
+      if (
+        data.type === 'object' ||
+        data.type === 'array' ||
+        data.type === 'boolean' ||
+        data.type === 'string'
+      ) {
+        try {
+          dataVal = JSON.parse(data.value);
+        } catch (err) {
+          dataVal = new Date(data.value);
+        }
+      } else if (data.type === 'number') {
+        dataVal = Number(data.value);
+      }
+
+      const oldVal = JSON.stringify(dataVal) || toString(dataVal);
+      const newVal = JSON.stringify(value) || toString(value);
+
+      if (oldVal !== newVal) {
+        return db.query('strapi::core-store').update({
+          where: { id: data.id },
+          data: {
+            value: newVal,
+            type: typeof value,
+          },
+        });
+      } else {
+        return {};
+      }
     }
 
     return db.query('strapi::core-store').create({
