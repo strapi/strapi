@@ -10,8 +10,8 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import AuthenticatedApp from '..';
 import packageJSON from '../../../../../package.json';
 import { ConfigurationsContext } from '../../../contexts';
-import Theme from '../../Theme';
-import ThemeToggleProvider from '../../ThemeToggleProvider';
+import { Theme } from '../../Theme';
+import { ThemeToggleProvider } from '../../ThemeToggleProvider';
 import {
   fetchAppInfo,
   fetchCurrentUserPermissions,

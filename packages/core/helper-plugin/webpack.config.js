@@ -35,6 +35,7 @@ const baseConfig = {
           options: {
             loader: 'tsx',
             target: browserslistToEsbuild(),
+            jsx: 'automatic',
           },
         },
       },
@@ -74,7 +75,16 @@ const config = [
     experiments: {
       outputModule: true,
     },
-    plugins: [process.env.DTS ? new ForkTsCheckerPlugin() : undefined].filter((v) => v),
+    plugins: [
+      process.env.DTS
+        ? new ForkTsCheckerPlugin({
+            typescript: {
+              mode: 'write-dts',
+              configFile: `${__dirname}/tsconfig.build.json`,
+            },
+          })
+        : undefined,
+    ].filter((v) => v),
   },
   {
     ...baseConfig,

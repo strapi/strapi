@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { EmptyStateLayout, EmptyStateLayoutProps } from '@strapi/design-system';
 import { EmptyPermissions } from '@strapi/icons';
 import { useIntl } from 'react-intl';

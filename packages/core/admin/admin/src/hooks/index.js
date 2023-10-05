@@ -1,4 +1,4 @@
-export { default as useConfigurations } from './useConfigurations';
+export { useConfigurations } from './useConfigurations';
 export { useContentTypes } from './useContentTypes';
 export { default as useLicenseLimitNotification } from './useLicenseLimitNotification';
 export { default as useMenu } from './useMenu';
@@ -7,4 +7,3 @@ export { default as useRegenerate } from './useRegenerate';
 export { default as useReleaseNotification } from './useReleaseNotification';
 export { default as useSettingsForm } from './useSettingsForm';
 export { default as useSettingsMenu } from './useSettingsMenu';
-export { default as useThemeToggle } from './useThemeToggle';
