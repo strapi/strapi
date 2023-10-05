@@ -1,11 +1,9 @@
-import React from 'react';
-
 import { auth } from '@strapi/helper-plugin';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Route, Router, Switch } from 'react-router-dom';
 
-import PrivateRoute from '..';
+import { PrivateRoute } from '../PrivateRoute';
 
 const ProtectedPage = () => {
   return <div>You are authenticated</div>;
@@ -48,34 +46,32 @@ describe('PrivateRoute', () => {
     // Visit `/`
     act(() => history.push('/'));
     // Should redirected to `/auth/login`
-    await waitFor(() => {
-      expect(history.location.pathname).toBe('/auth/login');
-      // No `redirectTo` in the search params
-      expect(history.location.search).toBe('');
-      expect(screen.getByText('Please login')).toBeInTheDocument();
-    });
+    await waitFor(() => expect(history.location.pathname).toBe('/auth/login'));
+
+    // No `redirectTo` in the search params
+    expect(history.location.search).toBe('');
+    expect(screen.getByText('Please login')).toBeInTheDocument();
 
     // Visit /settings/application-infos (no search params)
     act(() => history.push('/settings/application-infos'));
+
     // Should redirected to `/auth/login` and preserve the `/settings/application-infos` path
-    await waitFor(() => {
-      expect(history.location.pathname).toBe('/auth/login');
-      // Should preserve url in the params
-      expect(history.location.search).toBe(
-        `?redirectTo=${encodeURIComponent('/settings/application-infos')}`
-      );
-      expect(screen.getByText('Please login')).toBeInTheDocument();
-    });
+    await waitFor(() => expect(history.location.pathname).toBe('/auth/login'));
+
+    // Should preserve url in the params
+    expect(history.location.search).toBe(
+      `?redirectTo=${encodeURIComponent('/settings/application-infos')}`
+    );
+    expect(screen.getByText('Please login')).toBeInTheDocument();
 
     // Visit /settings/application-infos (have search params)
     act(() => history.push('/settings/application-infos?hello=world'));
-    await waitFor(() => {
-      expect(history.location.pathname).toBe('/auth/login');
-      // Should preserve search params
-      expect(history.location.search).toBe(
-        `?redirectTo=${encodeURIComponent('/settings/application-infos?hello=world')}`
-      );
-      expect(screen.getByText('Please login')).toBeInTheDocument();
-    });
+
+    await waitFor(() => expect(history.location.pathname).toBe('/auth/login'));
+    // Should preserve search params
+    expect(history.location.search).toBe(
+      `?redirectTo=${encodeURIComponent('/settings/application-infos?hello=world')}`
+    );
+    expect(screen.getByText('Please login')).toBeInTheDocument();
   });
 });
