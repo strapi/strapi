@@ -38,7 +38,9 @@
     "chalk": "4.1.2",
     "cli-table3": "0.6.2",
     "fs-extra": "10.0.0",
-    "lodash": "4.17.21",
+    "lodash": "4.17.21"
+  },
+  "devDependencies": {
     "prettier": "2.8.4",
     "typescript": "5.2.2"
   },
