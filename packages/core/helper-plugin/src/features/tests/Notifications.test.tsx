@@ -1,23 +1,22 @@
-import React from 'react';
-
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { act, render as renderRTL } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 
-import { NotificationsProvider, useNotification } from '../Notifications';
+import { NotificationConfig, NotificationsProvider, useNotification } from '../Notifications';
 
 const defaultNotificationConfig = {
   type: 'success',
   message: 'test',
-};
+} as const;
 
-// eslint-disable-next-line react/prop-types
-const Component = (notificationConfig) => {
+const Component = (notificationConfig: NotificationConfig) => {
   const toggleNotification = useNotification();
 
   const handleClick = () => {
-    toggleNotification({ ...defaultNotificationConfig, ...notificationConfig });
+    if (toggleNotification) {
+      toggleNotification({ ...defaultNotificationConfig, ...notificationConfig });
+    }
   };
 
   return (
@@ -27,7 +26,7 @@ const Component = (notificationConfig) => {
   );
 };
 
-const render = (props) => ({
+const render = (props?: NotificationConfig) => ({
   user: userEvent.setup({
     advanceTimers: jest.advanceTimersByTime,
   }),

@@ -1,16 +1,18 @@
-import React from 'react';
-
 import { DesignSystemProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, MemoryRouterProps } from 'react-router-dom';
 
-import { GenericInput } from '../GenericInput';
+import { GenericInput, GenericInputProps } from '../GenericInput';
 
-function renderField(props, { initialEntries } = {}) {
+function renderField(
+  props?: Partial<GenericInputProps>,
+  { initialEntries }: Pick<MemoryRouterProps, 'initialEntries'> = {}
+) {
   return {
     ...render(
+      // @ts-expect-error - TODO: fix the Attribute issue.
       <GenericInput
         intlLabel={{
           id: 'label.test',
@@ -43,7 +45,7 @@ jest.setTimeout(50000);
 
 describe('GenericInput', () => {
   describe('number', () => {
-    const renderNumber = (props) => {
+    const renderNumber = (props: Partial<GenericInputProps>) => {
       return renderField({
         type: 'number',
         name: 'number',
@@ -51,7 +53,6 @@ describe('GenericInput', () => {
           id: 'placeholder.test',
           defaultMessage: 'Default placeholder',
         },
-        hint: 'Hint message',
         required: true,
         ...props,
       });
@@ -132,7 +133,7 @@ describe('GenericInput', () => {
   });
 
   describe('date', () => {
-    const renderDate = (props) => {
+    const renderDate = (props?: Partial<GenericInputProps>) => {
       return renderField({
         type: 'date',
         name: 'date',
@@ -140,7 +141,6 @@ describe('GenericInput', () => {
           id: 'label.test',
           defaultMessage: 'date',
         },
-        onClear: jest.fn(),
         ...props,
       });
     };
@@ -163,7 +163,7 @@ describe('GenericInput', () => {
   });
 
   describe('datetime', () => {
-    const renderDateTime = (props) => {
+    const renderDateTime = (props?: Partial<GenericInputProps>) => {
       return renderField({
         type: 'datetime',
         name: 'datetime-picker',
@@ -171,7 +171,6 @@ describe('GenericInput', () => {
           id: 'label.test',
           defaultMessage: 'datetime picker',
         },
-        onClear: jest.fn(),
         ...props,
       });
     };
@@ -242,7 +241,7 @@ describe('GenericInput', () => {
       'text',
       'textarea',
       'time',
-    ])('auto-focuses on %s', (type) => {
+    ] as const)('auto-focuses on %s', (type) => {
       const { getByLabelText } = renderField(
         { type, name: 'test' },
         { initialEntries: [{ pathname: '/', search: `field=test` }] }

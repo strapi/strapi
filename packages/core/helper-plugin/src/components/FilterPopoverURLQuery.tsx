@@ -23,7 +23,7 @@ import styled from 'styled-components';
 import { useTracking } from '../features/Tracking';
 import { useQueryParams } from '../hooks/useQueryParams';
 
-import type { EntityService } from '@strapi/strapi';
+import type { EntityService } from '@strapi/types';
 import type { DefaultFilterInputsProps, Filter, FilterData, Operator } from 'types';
 
 export interface FilterPopoverURLQueryProps extends Pick<PopoverProps, 'source'> {

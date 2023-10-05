@@ -2,16 +2,15 @@ module.exports = {
   root: true,
   overrides: [
     {
-      files: ['ee/admin/**/*'],
+      files: ['**/*.js', '**/*.jsx'],
       extends: ['custom/front'],
       rules: {
         'import/extensions': 'off',
       },
     },
     {
-      files: ['**/*'],
-      excludedFiles: ['admin/**/*', 'ee/admin/**/*'],
-      extends: ['custom/back'],
+      files: ['**/*.ts', '**/*.tsx'],
+      extends: ['custom/front/typescript'],
     },
   ],
 };
