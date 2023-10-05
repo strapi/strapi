@@ -1,6 +1,7 @@
 {
   "$schema": "http://json.schemastore.org/tsconfig",
   "compilerOptions": {
+    "declarationMap": true,
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "Bundler",

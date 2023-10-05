@@ -5,6 +5,6 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./build",
-    "declarationMap": true,
+
   }
 }

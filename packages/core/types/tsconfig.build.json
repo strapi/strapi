@@ -4,7 +4,6 @@
     "outDir": "dist",
     "noEmit": false,
     "emitDeclarationOnly": true,
-    "declarationMap": true,
   },
   "include": ["src"],
   "exclude": ["node_modules", "**/__tests__/**"]
