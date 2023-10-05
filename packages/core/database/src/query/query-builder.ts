@@ -398,6 +398,7 @@ const createQueryBuilder = (
 
       state.where = helpers.processWhere(state.where, { qb: this, uid, db });
       state.populate = helpers.processPopulate(state.populate, { qb: this, uid, db });
+
       state.data = helpers.toRow(meta, state.data);
 
       this.processSelect();

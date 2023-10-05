@@ -45,12 +45,7 @@ const XtoOne = async (
   const { attribute, attributeName, results, populateValue, targetMeta, isCount } = input;
   const { db, qb } = ctx;
 
-  const fromTargetRow = (rowOrRows: Row | Row[] | undefined) => {
-    if (!rowOrRows) {
-      return rowOrRows;
-    }
-    return fromRow(targetMeta, rowOrRows);
-  };
+  const fromTargetRow = (rowOrRows: Row | Row[] | undefined) => fromRow(targetMeta, rowOrRows);
 
   if ('joinColumn' in attribute && attribute.joinColumn) {
     const { name: joinColumnName, referencedColumn: referencedColumnName } = attribute.joinColumn;
@@ -167,13 +162,7 @@ const oneToMany = async (input: InputWithTarget<Relation.OneToMany>, ctx: Contex
   const { attribute, attributeName, results, populateValue, targetMeta, isCount } = input;
   const { db, qb } = ctx;
 
-  const fromTargetRow = (rowOrRows: Row | Row[] | undefined) => {
-    if (!rowOrRows) {
-      return rowOrRows;
-    }
-
-    return fromRow(targetMeta, rowOrRows);
-  };
+  const fromTargetRow = (rowOrRows: Row | Row[] | undefined) => fromRow(targetMeta, rowOrRows);
 
   if ('joinColumn' in attribute && attribute.joinColumn) {
     const { name: joinColumnName, referencedColumn: referencedColumnName } = attribute.joinColumn;
@@ -288,13 +277,7 @@ const manyToMany = async (input: InputWithTarget<Relation.ManyToMany>, ctx: Cont
   const { attribute, attributeName, results, populateValue, targetMeta, isCount } = input;
   const { db } = ctx;
 
-  const fromTargetRow = (rowOrRows: Row | Row[] | undefined) => {
-    if (!rowOrRows) {
-      return rowOrRows;
-    }
-
-    return fromRow(targetMeta, rowOrRows);
-  };
+  const fromTargetRow = (rowOrRows: Row | Row[] | undefined) => fromRow(targetMeta, rowOrRows);
 
   const { joinTable } = attribute;
 
@@ -379,13 +362,7 @@ const morphX = async (
   const { attribute, attributeName, results, populateValue, targetMeta } = input;
   const { db, uid } = ctx;
 
-  const fromTargetRow = (rowOrRows: Row | Row[] | undefined) => {
-    if (!rowOrRows) {
-      return rowOrRows;
-    }
-
-    return fromRow(targetMeta, rowOrRows);
-  };
+  const fromTargetRow = (rowOrRows: Row | Row[] | undefined) => fromRow(targetMeta, rowOrRows);
 
   const { target, morphBy } = attribute;
 
@@ -562,12 +539,9 @@ const morphToMany = async (input: Input<Relation.MorphToMany>, ctx: Context) => 
       const id = joinResult[idColumn.name] as ID;
       const type = joinResult[typeColumn.name] as string;
 
-      const fromTargetRow = (rowOrRows: Row | Row[] | undefined) => {
-        if (!rowOrRows) {
-          return rowOrRows;
-        }
-        return fromRow(db.metadata.get(type), rowOrRows);
-      };
+      const targetMeta = db.metadata.get(type);
+
+      const fromTargetRow = (rowOrRows: Row | Row[] | undefined) => fromRow(targetMeta, rowOrRows);
 
       return (map[type][id] || []).map((row) => {
         return {
@@ -642,13 +616,8 @@ const morphToOne = async (input: Input<Relation.MorphToOne>, ctx: Context) => {
 
     const matchingRows = map[type][id];
 
-    const fromTargetRow = (rowOrRows: Row | Row[] | undefined) => {
-      if (!rowOrRows) {
-        return rowOrRows;
-      }
-
-      return fromRow(db.metadata.get(type), rowOrRows);
-    };
+    const fromTargetRow = (rowOrRows: Row | Row[] | undefined) =>
+      fromRow(db.metadata.get(type), rowOrRows);
 
     result[attributeName] = fromTargetRow(_.first(matchingRows));
   });

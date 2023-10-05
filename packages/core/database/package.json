@@ -31,7 +31,7 @@
   "scripts": {
     "build": "run -T tsc -p tsconfig.build.json",
     "build:ts": "run build",
-    "watch": "run -T tsc -w --preserveWatchOutput",
+    "watch": "run build -w --preserveWatchOutput",
     "clean": "run -T rimraf ./dist",
     "prepublishOnly": "yarn clean && yarn build",
     "test:unit": "run -T jest",
