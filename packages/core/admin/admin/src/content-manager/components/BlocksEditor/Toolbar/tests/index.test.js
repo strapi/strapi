@@ -203,7 +203,7 @@ describe('BlocksEditor toolbar', () => {
     expect(ReactEditor.focus).toHaveBeenCalledTimes(2);
   });
 
-  it('transforms the selection to a heading when selected and trasforms it back to text when selected again', async () => {
+  it('transforms the selection to a heading when selected and transforms it back to text when selected again', async () => {
     setup();
 
     const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
@@ -361,5 +361,97 @@ describe('BlocksEditor toolbar', () => {
 
     // The dropdown should show only one option selected which is the block content in the first row
     expect(within(headingsDropdown).getByText(/heading 1/i)).toBeInTheDocument();
+  });
+
+  it('slits the parent list when converting a list item to another type', async () => {
+    setup([
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'A line of text in a paragraph.',
+              },
+            ],
+          },
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'A line of text in a paragraph.',
+              },
+            ],
+          },
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'A line of text in a paragraph.',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    // Select the item in the middle of the list
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 1, 0], offset: 0 },
+      focus: { path: [0, 1, 0], offset: 0 },
+    });
+
+    // Convert it to a code block
+    const selectDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+    await user.click(selectDropdown);
+    await user.click(screen.getByRole('option', { name: 'Code' }));
+
+    // The list should have been split in two
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'A line of text in a paragraph.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        type: 'code',
+        children: [
+          {
+            type: 'text',
+            text: 'A line of text in a paragraph.',
+          },
+        ],
+      },
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'A line of text in a paragraph.',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
   });
 });

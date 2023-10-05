@@ -150,6 +150,13 @@ const toggleBlock = (editor, value) => {
   };
 
   if (editor.selection) {
+    // If the selection is inside a list, split the list
+    // so that the block we're transforming is not inside a list
+    Transforms.unwrapNodes(editor, {
+      match: (node) => node.type === 'list',
+      split: true,
+    });
+
     // When there is a selection, update the existing block in the tree
     Transforms.setNodes(editor, blockProperties);
   } else {
