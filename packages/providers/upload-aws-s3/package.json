@@ -30,25 +30,27 @@
     }
   ],
   "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "files": [
     "./dist"
   ],
   "scripts": {
-    "build": "run -T tsc",
-    "build:ts": "run -T tsc",
-    "watch": "run -T tsc -w --preserveWatchOutput",
+    "build": "pack-up build",
     "clean": "run -T rimraf ./dist",
+    "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "lint": "run -T eslint ."
+    "watch": "pack-up watch"
   },
   "dependencies": {
     "aws-sdk": "2.1437.0",
     "lodash": "4.17.21"
   },
   "devDependencies": {
+    "@strapi/pack-up": "workspace:*",
     "@types/jest": "29.5.2",
     "eslint-config-custom": "4.14.3",
     "tsconfig": "4.14.3"

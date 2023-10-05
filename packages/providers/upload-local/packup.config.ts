@@ -2,6 +2,6 @@
 import { defineConfig } from '@strapi/pack-up';
 
 export default defineConfig({
-  externals: ['node:stream'],
+  externals: ['stream', 'fs', 'path'],
   runtime: 'node',
 });
