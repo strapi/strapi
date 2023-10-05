@@ -8416,6 +8416,7 @@ __metadata:
   resolution: "@strapi/utils@workspace:packages/core/utils"
   dependencies:
     "@sindresorhus/slugify": 1.1.0
+    "@strapi/pack-up": "workspace:*"
     "@types/koa": 2.13.4
     "@types/node": 18.11.9
     date-fns: 2.30.0
