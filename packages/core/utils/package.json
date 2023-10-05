@@ -30,7 +30,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "./dist"
+    "./dist/**/!(*.d.ts.map)"
   ],
   "directories": {
     "lib": "./lib"
