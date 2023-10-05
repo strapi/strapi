@@ -8150,6 +8150,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-audit-logs-local@workspace:packages/providers/audit-logs-local"
   dependencies:
+    "@strapi/pack-up": "workspace:*"
     "@strapi/types": 4.14.3
     eslint-config-custom: 4.14.3
     tsconfig: 4.14.3
