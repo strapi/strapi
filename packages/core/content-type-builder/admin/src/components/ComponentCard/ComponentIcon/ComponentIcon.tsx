@@ -1,11 +1,13 @@
-import React from 'react';
-
 import { Flex, Icon } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 
 import { COMPONENT_ICONS } from '../../IconPicker/constants';
 
-export function ComponentIcon({ isActive, icon }) {
+interface ComponentIconProps {
+  isActive?: boolean;
+  icon?: keyof typeof COMPONENT_ICONS;
+}
+
+export const ComponentIcon = ({ isActive = false, icon = 'cube' }: ComponentIconProps) => {
   return (
     <Flex
       alignItems="center"
@@ -18,14 +20,4 @@ export function ComponentIcon({ isActive, icon }) {
       <Icon as={COMPONENT_ICONS[icon] || COMPONENT_ICONS.cube} height={5} width={5} />
     </Flex>
   );
-}
-
-ComponentIcon.defaultProps = {
-  isActive: false,
-  icon: 'Cube',
-};
-
-ComponentIcon.propTypes = {
-  isActive: PropTypes.bool,
-  icon: PropTypes.string,
 };

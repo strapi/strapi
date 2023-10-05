@@ -16,7 +16,7 @@ import styled from 'styled-components';
 
 import useDataManager from '../../hooks/useDataManager';
 import { getTrad } from '../../utils/getTrad';
-import ComponentCard from '../ComponentCard';
+import { ComponentCard } from '../ComponentCard';
 import ComponentList from '../ComponentList';
 import Tr from '../Tr';
 

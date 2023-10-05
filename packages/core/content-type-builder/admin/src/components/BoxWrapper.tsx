@@ -1,12 +1,7 @@
-/**
- *
- * Wrapper
- *
- */
 import { Box } from '@strapi/design-system';
 import styled from 'styled-components';
 
-const BoxWrapper = styled(Box)`
+export const BoxWrapper = styled(Box)`
   table {
     width: 100%;
     white-space: nowrap;
@@ -42,5 +37,3 @@ const BoxWrapper = styled(Box)`
     outline-offset: -4px;
   }
 `;
-
-export default BoxWrapper;

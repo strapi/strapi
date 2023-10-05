@@ -1,25 +1,27 @@
-/**
- *
- * ComponentList
- *
- */
-/* eslint-disable import/no-cycle */
 import React from 'react';
 
 import get from 'lodash/get';
-import PropTypes from 'prop-types';
 
-import useDataManager from '../../hooks/useDataManager';
-import List from '../List';
-import Tr from '../Tr';
+import useDataManager from '../hooks/useDataManager';
 
-function ComponentList({
+import { List } from './List';
+import { Tr } from './Tr';
+
+interface ComponentListProps {
+  component: string;
+  customRowComponent: React.ComponentType<any>; // Adjust the type as per your specific requirements
+  firstLoopComponentUid?: string;
+  isFromDynamicZone?: boolean;
+  isNestedInDZComponent?: boolean;
+}
+
+export const ComponentList = ({
   customRowComponent,
   component,
-  isFromDynamicZone,
-  isNestedInDZComponent,
+  isFromDynamicZone = false,
+  isNestedInDZComponent = false,
   firstLoopComponentUid,
-}) {
+}: ComponentListProps) => {
   const { modifiedData } = useDataManager();
   const {
     schema: { attributes },
@@ -44,22 +46,4 @@ function ComponentList({
       </td>
     </Tr>
   );
-}
-
-ComponentList.defaultProps = {
-  component: null,
-  customRowComponent: null,
-  firstLoopComponentUid: null,
-  isFromDynamicZone: false,
-  isNestedInDZComponent: false,
 };
-
-ComponentList.propTypes = {
-  component: PropTypes.string,
-  customRowComponent: PropTypes.func,
-  firstLoopComponentUid: PropTypes.string,
-  isFromDynamicZone: PropTypes.bool,
-  isNestedInDZComponent: PropTypes.bool,
-};
-
-export default ComponentList;

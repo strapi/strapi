@@ -1,8 +1,13 @@
 import { pxToRem } from '@strapi/helper-plugin';
 import styled from 'styled-components';
 
+interface TrProps {
+  isFromDynamicZone?: boolean;
+  isChildOfDynamicZone?: boolean;
+}
+
 // Keep component-row for css specificity
-const Tr = styled.tr`
+export const Tr = styled.tr<TrProps>`
   &.component-row,
   &.dynamiczone-row {
     position: relative;
@@ -44,5 +49,3 @@ const Tr = styled.tr`
     padding: 0;
   }
 `;
-
-export default Tr;

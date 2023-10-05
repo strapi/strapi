@@ -1,16 +1,27 @@
-/**
- *
- * CheckboxWithNumberField
- *
- */
-
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { Box, Checkbox, Flex, NumberInput, TextInput } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-const CheckboxWithNumberField = ({ error, intlLabel, modifiedData, name, onChange, value }) => {
+import { IntlLabel } from '../types';
+
+interface CheckboxWithNumberFieldProps {
+  error?: string;
+  intlLabel: IntlLabel;
+  modifiedData: Record<string, any>;
+  name: string;
+  onChange: (value: any) => void;
+  value?: any;
+}
+
+export const CheckboxWithNumberField = ({
+  error,
+  intlLabel,
+  modifiedData,
+  name,
+  onChange,
+  value = null,
+}: CheckboxWithNumberFieldProps) => {
   const { formatMessage } = useIntl();
   const [showInput, setShowInput] = useState(!!value || value === 0);
   const label = intlLabel.id
@@ -30,7 +41,7 @@ const CheckboxWithNumberField = ({ error, intlLabel, modifiedData, name, onChang
       <Checkbox
         id={name}
         name={name}
-        onValueChange={(value) => {
+        onValueChange={(value: any) => {
           const initValue = type === 'text' ? '0' : 0;
           const nextValue = value ? initValue : null;
 
@@ -60,7 +71,7 @@ const CheckboxWithNumberField = ({ error, intlLabel, modifiedData, name, onChang
               error={errorMessage}
               id={name}
               name={name}
-              onValueChange={(value) => {
+              onValueChange={(value: any) => {
                 onChange({ target: { name, value, type } });
               }}
               value={value || 0}
@@ -71,28 +82,3 @@ const CheckboxWithNumberField = ({ error, intlLabel, modifiedData, name, onChang
     </Flex>
   );
 };
-
-CheckboxWithNumberField.defaultProps = {
-  error: null,
-  value: null,
-};
-
-CheckboxWithNumberField.propTypes = {
-  error: PropTypes.string,
-  intlLabel: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }).isRequired,
-  modifiedData: PropTypes.object.isRequired,
-  name: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.object,
-    PropTypes.bool,
-    PropTypes.number,
-  ]),
-};
-
-export default CheckboxWithNumberField;

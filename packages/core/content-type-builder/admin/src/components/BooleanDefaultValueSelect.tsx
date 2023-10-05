@@ -1,11 +1,7 @@
 import { Option, Select } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-interface IntlLabel {
-  id: string;
-  defaultMessage: string;
-  values?: Record<string, any>;
-}
+import { IntlLabel } from '../types';
 
 interface Metadata {
   intlLabel: IntlLabel;

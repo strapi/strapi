@@ -1,43 +1,49 @@
-/**
- *
- * List
- *
- */
-
-/* eslint-disable import/no-cycle */
 import React from 'react';
 
 import { Box, Button, Table, TFooter, Th, Thead, Tr, Typography } from '@strapi/design-system';
 import { EmptyBodyTable, useTracking } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import useDataManager from '../../hooks/useDataManager';
-import useFormModalNavigation from '../../hooks/useFormModalNavigation';
-import { getTrad } from '../../utils/getTrad';
-import ComponentList from '../ComponentList';
-import DynamicZoneList from '../DynamicZoneList';
-import NestedTFooter from '../NestedTFooter';
+import useDataManager from '../hooks/useDataManager';
+import useFormModalNavigation from '../hooks/useFormModalNavigation';
+import { getTrad } from '../utils/getTrad';
 
-import BoxWrapper from './BoxWrapper';
+import { BoxWrapper } from './BoxWrapper';
+import { ComponentList } from './ComponentList';
+import DynamicZoneList from './DynamicZoneList';
+import NestedTFooter from './NestedTFooter';
 
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 
-function List({
+interface ListProps {
+  addComponentToDZ?: () => void;
+  customRowComponent: React.ComponentType<any>;
+  editTarget: string;
+  firstLoopComponentUid?: string;
+  isFromDynamicZone?: boolean;
+  isNestedInDZComponent?: boolean;
+  isMain?: boolean;
+  items: any[];
+  secondLoopComponentUid?: string | null;
+  targetUid?: string;
+  isSub?: boolean;
+}
+
+export const List = ({
   addComponentToDZ,
   customRowComponent,
   editTarget,
   firstLoopComponentUid,
-  isFromDynamicZone,
-  isMain,
-  isNestedInDZComponent,
-  isSub,
-  items,
+  isFromDynamicZone = false,
+  isMain = false,
+  isNestedInDZComponent = false,
+  isSub = false,
+  items = [],
   secondLoopComponentUid,
   targetUid,
-}) {
+}: ListProps) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { isInDevelopmentMode, modifiedData, isInContentTypeView } = useDataManager();
@@ -136,7 +142,7 @@ function List({
                     {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
                   </Typography>
                 </th>
-                <th colSpan="2">
+                <th colSpan={2}>
                   <Typography variant="sigma" textColor="neutral600">
                     {formatMessage({ id: 'global.type', defaultMessage: 'Type' })}
                   </Typography>
@@ -215,33 +221,4 @@ function List({
       )}
     </BoxWrapper>
   );
-}
-
-List.defaultProps = {
-  addComponentToDZ() {},
-  customRowComponent: null,
-  firstLoopComponentUid: null,
-  isFromDynamicZone: false,
-  isNestedInDZComponent: false,
-  isMain: false,
-  isSub: false,
-  items: [],
-  secondLoopComponentUid: null,
-  targetUid: null,
 };
-
-List.propTypes = {
-  addComponentToDZ: PropTypes.func,
-  customRowComponent: PropTypes.func,
-  editTarget: PropTypes.string.isRequired,
-  firstLoopComponentUid: PropTypes.string,
-  isFromDynamicZone: PropTypes.bool,
-  isNestedInDZComponent: PropTypes.bool,
-  isMain: PropTypes.bool,
-  items: PropTypes.instanceOf(Array),
-  secondLoopComponentUid: PropTypes.string,
-  targetUid: PropTypes.string,
-  isSub: PropTypes.bool,
-};
-
-export default List;

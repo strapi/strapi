@@ -1,21 +1,21 @@
-/**
- *
- * ComponentCard
- *
- */
-
-import React from 'react';
-
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Cross } from '@strapi/icons';
 import get from 'lodash/get';
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 import useDataManager from '../../hooks/useDataManager';
 
 import { ComponentIcon } from './ComponentIcon';
+
+interface ComponentCardProps {
+  component: string;
+  dzName: string;
+  index: number;
+  isActive?: boolean;
+  isInDevelopmentMode?: boolean;
+  onClick?: () => void;
+}
 
 const CloseButton = styled(Box)`
   position: absolute;
@@ -70,13 +70,20 @@ const ComponentBox = styled(Flex)`
   }
 `;
 
-function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode, onClick }) {
+export const ComponentCard = ({
+  component,
+  dzName,
+  index,
+  isActive = false,
+  isInDevelopmentMode = false,
+  onClick,
+}: ComponentCardProps) => {
   const { modifiedData, removeComponentFromDynamicZone } = useDataManager();
   const {
     schema: { icon, displayName },
   } = get(modifiedData, ['components', component], { schema: {} });
 
-  const onClose = (e) => {
+  const onClose = (e: any) => {
     e.stopPropagation();
     removeComponentFromDynamicZone(dzName, index);
   };
@@ -114,22 +121,4 @@ function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode
       )}
     </ComponentBox>
   );
-}
-
-ComponentCard.defaultProps = {
-  component: null,
-  isActive: false,
-  isInDevelopmentMode: false,
-  onClick() {},
 };
-
-ComponentCard.propTypes = {
-  component: PropTypes.string,
-  dzName: PropTypes.string.isRequired,
-  index: PropTypes.number.isRequired,
-  isActive: PropTypes.bool,
-  isInDevelopmentMode: PropTypes.bool,
-  onClick: PropTypes.func,
-};
-
-export default ComponentCard;

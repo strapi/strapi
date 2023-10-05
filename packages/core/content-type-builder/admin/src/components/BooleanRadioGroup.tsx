@@ -1,12 +1,8 @@
 import React from 'react';
 
-import { CustomRadioGroup } from '../CustomRadioGroup';
+import { IntlLabel } from '../types';
 
-interface IntlLabel {
-  id: string;
-  defaultMessage: string;
-  values?: Record<string, any>;
-}
+import { CustomRadioGroup } from './CustomRadioGroup';
 
 interface BooleanRadioGroupProps {
   intlLabel: IntlLabel;

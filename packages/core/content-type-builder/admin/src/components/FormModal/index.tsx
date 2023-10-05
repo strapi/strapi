@@ -42,7 +42,7 @@ import AllowedTypesSelect from '../AllowedTypesSelect';
 import AttributeOptions from '../AttributeOptions';
 import BooleanDefaultValueSelect from '../BooleanDefaultValueSelect';
 import BooleanRadioGroup from '../BooleanRadioGroup';
-import CheckboxWithNumberField from '../CheckboxWithNumberField';
+import {CheckboxWithNumberField} from '../CheckboxWithNumberField';
 import ContentTypeRadioGroup from '../ContentTypeRadioGroup';
 import CustomRadioGroup from '../CustomRadioGroup';
 import DraftAndPublishToggle from '../DraftAndPublishToggle';
