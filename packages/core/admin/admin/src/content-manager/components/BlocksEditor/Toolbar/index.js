@@ -424,7 +424,7 @@ const isListActive = (editor, matchNode) => {
   const [match] = Array.from(
     Editor.nodes(editor, {
       at: Editor.unhangRange(editor, selection),
-      match: (node) => isListNode(node) && matchNode(node),
+      match: matchNode,
     })
   );
 
