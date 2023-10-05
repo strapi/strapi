@@ -1,4 +1,4 @@
-import type { Common, Utils } from '..';
+import type { Common, Utils, Entity } from '..';
 
 // TODO Use actual entities instead of regular object
 type Entity = { id: string | number } & Record<string, unknown>;
@@ -41,13 +41,13 @@ export type Generic = {
  */
 export interface CollectionType extends Base {
   find(params: object): Promise<PaginatedEntiies>;
-  findOne(entityId: number | `${number}`, params: object): Promise<Entity | null>;
+  findOne(entityId: Entity.ID, params: object): Promise<Entity | null>;
   create(params: { data: Data; [key: string]: unknown }): Promise<Entity>;
   update(
-    entityId: number | `${number}`,
+    entityId: Entity.ID,
     params: { data: Data; [key: string]: unknown }
   ): Promise<Entity> | Entity;
-  delete(entityId: number | `${number}`, params: object): Promise<Entity> | Entity;
+  delete(entityId: Entity.ID, params: object): Promise<Entity> | Entity;
 }
 
 /**
