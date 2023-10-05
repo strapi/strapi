@@ -134,6 +134,17 @@ const createTasks =
           output: bundle.import,
         });
       }
+
+      if (bundle.types) {
+        const importId = path.join(ctx.pkg.name, bundle.source);
+
+        dtsTask.entries.push({
+          importId,
+          exportPath: bundle.source,
+          sourcePath: bundle.source,
+          targetPath: bundle.types,
+        });
+      }
     }
 
     if (dtsTask.entries.length) {

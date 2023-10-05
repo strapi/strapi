@@ -1,6 +1,7 @@
 import browserslistToEsbuild from 'browserslist-to-esbuild';
 import path from 'path';
 
+import { resolveConfigProperty } from './core/config';
 import { parseExports, ExtMap, Export } from './core/exports';
 import { loadTsConfig } from './core/tsconfig';
 
@@ -74,11 +75,13 @@ const createBuildContext = async ({
     web: ['esnext'],
   };
 
-  const exports = parseExports({ extMap, pkg }).reduce((acc, x) => {
+  const parsedExports = parseExports({ extMap, pkg }).reduce((acc, x) => {
     const { _path: exportPath, ...exportEntry } = x;
 
     return { ...acc, [exportPath]: exportEntry };
   }, {} as Record<string, Export>);
+
+  const exports = resolveConfigProperty(config.exports, parsedExports);
 
   const parsedExternals = [
     ...(pkg.dependencies ? Object.keys(pkg.dependencies) : []),

@@ -110,6 +110,12 @@ be exported by the package, e.g. CLI scripts or Node.js workers.
 
 The path to the directory to which the bundled files should be written.
 
+#### `exports`
+
+- Type: `Record<string, Export>`
+
+Overwrite or amend the parsed exports from your `package.json`.
+
 #### `externals`
 
 - Type: `string[]`

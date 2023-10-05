@@ -12,7 +12,7 @@ import { MarketPlacePage } from '../index';
 
 import server from './server';
 
-jest.mock('../../../hooks/useNavigatorOnLine', () => jest.fn(() => true));
+jest.mock('../hooks/useNavigatorOnline');
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
