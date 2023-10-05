@@ -1,7 +1,9 @@
 import type { Action, SubscriberFn } from '../lifecycles';
 import type { ForeignKey, Index } from '../schema/types';
 
+export type DocID = string;
 export type ID = string | number;
+
 export interface ColumnInfo {
   unsigned?: boolean;
   defaultTo?: unknown;
@@ -221,4 +223,8 @@ export interface Model {
   indexes?: Index[];
   foreignKeys?: ForeignKey[];
   lifecycles?: Partial<Record<Action, SubscriberFn>>;
+  options?: Record<string, unknown>;
+  modelName?: string;
+  // Should we import ModelType from @strapi/types?
+  modelType?: 'contentType' | 'component';
 }
