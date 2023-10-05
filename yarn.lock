@@ -8150,6 +8150,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-audit-logs-local@workspace:packages/providers/audit-logs-local"
   dependencies:
+    "@strapi/pack-up": "workspace:*"
     "@strapi/types": 4.14.3
     eslint-config-custom: 4.14.3
     tsconfig: 4.14.3
@@ -8160,6 +8161,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-amazon-ses@workspace:packages/providers/email-amazon-ses"
   dependencies:
+    "@strapi/pack-up": "workspace:*"
     "@strapi/utils": 4.14.3
     eslint-config-custom: 4.14.3
     node-ses: ^3.0.3
@@ -8171,6 +8173,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-mailgun@workspace:packages/providers/email-mailgun"
   dependencies:
+    "@strapi/pack-up": "workspace:*"
     "@strapi/utils": 4.14.3
     eslint-config-custom: 4.14.3
     form-data: ^4.0.0
@@ -8183,6 +8186,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-nodemailer@workspace:packages/providers/email-nodemailer"
   dependencies:
+    "@strapi/pack-up": "workspace:*"
     "@types/nodemailer": 6.4.7
     eslint-config-custom: 4.14.3
     lodash: 4.17.21
@@ -8196,6 +8200,7 @@ __metadata:
   resolution: "@strapi/provider-email-sendgrid@workspace:packages/providers/email-sendgrid"
   dependencies:
     "@sendgrid/mail": 7.7.0
+    "@strapi/pack-up": "workspace:*"
     "@strapi/utils": 4.14.3
     eslint-config-custom: 4.14.3
     tsconfig: 4.14.3
@@ -8206,6 +8211,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-sendmail@workspace:packages/providers/email-sendmail"
   dependencies:
+    "@strapi/pack-up": "workspace:*"
     "@strapi/utils": 4.14.3
     "@types/sendmail": 1.4.4
     eslint-config-custom: 4.14.3
@@ -8218,6 +8224,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-upload-aws-s3@workspace:packages/providers/upload-aws-s3"
   dependencies:
+    "@strapi/pack-up": "workspace:*"
     "@types/jest": 29.5.2
     aws-sdk: 2.1437.0
     eslint-config-custom: 4.14.3
@@ -8230,6 +8237,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-upload-cloudinary@workspace:packages/providers/upload-cloudinary"
   dependencies:
+    "@strapi/pack-up": "workspace:*"
     "@strapi/utils": 4.14.3
     cloudinary: ^1.41.0
     eslint-config-custom: 4.14.3
@@ -8242,6 +8250,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-upload-local@workspace:packages/providers/upload-local"
   dependencies:
+    "@strapi/pack-up": "workspace:*"
     "@strapi/utils": 4.14.3
     "@types/jest": 29.5.2
     eslint-config-custom: 4.14.3
@@ -8414,6 +8423,7 @@ __metadata:
   resolution: "@strapi/utils@workspace:packages/core/utils"
   dependencies:
     "@sindresorhus/slugify": 1.1.0
+    "@strapi/pack-up": "workspace:*"
     "@types/koa": 2.13.4
     "@types/node": 18.11.9
     date-fns: 2.30.0

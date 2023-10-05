@@ -54,8 +54,6 @@ jobs:
       - uses: nrwl/nx-set-shas@v3
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-      - name: Run build:ts
-        run: yarn nx run-many --target=build:ts --nx-ignore-cycles --skip-nx-cache
       - name: Run build
         run: yarn nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
       - name: Run lint
@@ -75,8 +73,6 @@ jobs:
       - uses: nrwl/nx-set-shas@v3
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-      - name: Run build:ts
-        run: yarn nx run-many --target=build:ts --nx-ignore-cycles --skip-nx-cache
       - name: Run build
         run: yarn nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
       - name: TSC for packages
@@ -103,10 +99,8 @@ jobs:
       - uses: nrwl/nx-set-shas@v3
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-      - name: Run build:ts
-        run: yarn nx run-many --target=build:ts --nx-ignore-cycles --skip-nx-cache
       - name: Run build
-        run: yarn build --projects=@strapi/pack-up --skip-nx-cache
+        run: yarn build --skip-nx-cache
       - name: Run tests
         run: yarn nx affected --target=test:unit --nx-ignore-cycles
 
@@ -127,7 +121,7 @@ jobs:
       - uses: nrwl/nx-set-shas@v3
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-      - name: Run build:ts for admin-test-utils
+      - name: Run build for admin-test-utils
         run: yarn build --projects=@strapi/admin-test-utils,@strapi/helper-plugin --skip-nx-cache
       - name: Run test
         run: yarn nx affected --target=test:front --nx-ignore-cycles
@@ -172,9 +166,6 @@ jobs:
 
       - name: Install Playwright Browsers
         run: npx playwright@1.38.1 install --with-deps
-
-      - name: Run build:ts
-        run: yarn nx run-many --target=build:ts --nx-ignore-cycles --skip-nx-cache
 
       - name: Run build
         run: yarn nx run-many --target=build --nx-ignore-cycles --skip-nx-cache

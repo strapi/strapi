@@ -19,6 +19,6 @@ test.describe('List View', () => {
 
     await expect(page).toHaveTitle('Content Manager');
     await expect(page.getByRole('heading', { name: 'testing' })).toBeVisible();
-    await expect(page.getByRole('link', { name: /Create new entry/ })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Create new entry/ }).first()).toBeVisible();
   });
 });
