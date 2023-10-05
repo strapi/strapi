@@ -8230,6 +8230,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-upload-cloudinary@workspace:packages/providers/upload-cloudinary"
   dependencies:
+    "@strapi/pack-up": "workspace:*"
     "@strapi/utils": 4.14.3
     cloudinary: ^1.41.0
     eslint-config-custom: 4.14.3
