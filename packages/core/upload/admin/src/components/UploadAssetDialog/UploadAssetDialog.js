@@ -134,6 +134,7 @@ UploadAssetDialog.defaultProps = {
   addUploadedFiles: undefined,
   folderId: null,
   initialAssetsToAdd: undefined,
+  onClose() {},
   trackedLocation: undefined,
   validateAssetsTypes: undefined,
 };
@@ -142,7 +143,7 @@ UploadAssetDialog.propTypes = {
   addUploadedFiles: PropTypes.func,
   folderId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   initialAssetsToAdd: PropTypes.arrayOf(AssetDefinition),
-  onClose: PropTypes.func.isRequired,
+  onClose: PropTypes.func,
   trackedLocation: PropTypes.string,
   validateAssetsTypes: PropTypes.func,
 };
