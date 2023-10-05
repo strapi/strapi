@@ -4,23 +4,21 @@
  *
  */
 
-import React, { useState, useEffect } from 'react';
-
-import { LoadingIndicatorPage, useFetchClient } from '@strapi/helper-plugin';
+import React from 'react';
 
 import { Box, GridLayout, Flex, Typography, Link } from '@strapi/design-system';
-
+import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import GithubBox from '../../components/Github';
 import CloudBox from '../../components/Cloud';
+import GithubBox from '../../components/Github';
+import { getTrad } from '../../utils';
 
 import cornerOrnamentPath from './assets/corner-ornament.svg';
-import rightSideCloudPath from './assets/right-side-cloud.png';
 import leftSideCloudPath from './assets/left-side-cloud.png';
+import rightSideCloudPath from './assets/right-side-cloud.png';
 
-import { useIntl } from 'react-intl';
-import { getTrad } from '../../utils';
+
 
 const LogoContainer = styled(Box)`
   position: absolute;
@@ -44,7 +42,7 @@ const RightSideCloudContainer = styled(Box)`
 
 const LeftSideCloudContainer = styled(Box)`
   position: absolute;
-  top: 150px;s
+  top: 150px;
   left: 220px;
 
   img {
@@ -53,42 +51,18 @@ const LeftSideCloudContainer = styled(Box)`
 `;
 
 const HomePage = () => {
-  const fetchClient = useFetchClient();
-  const { get } = fetchClient;
-
   const { formatMessage } = useIntl();
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [isVersionedOnGit, setIsVersionedOnGit] = useState(false);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await get(`/cloud/verify-project-is-versioned-on-git`);
-        setIsVersionedOnGit(res?.data || false);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchData().then(() => {
-      setIsLoading(false);
-    });
-  }, []);
-
-  if (isLoading) {
-    return <LoadingIndicatorPage />;
-  }
 
   return (
     <Box paddingLeft={10} paddingRight={10}>
       <RightSideCloudContainer>
-        <img alt="" aria-hidden src={rightSideCloudPath} />
+        <img alt="right-side-cloud" aria-hidden src={rightSideCloudPath} />
       </RightSideCloudContainer>
       <LeftSideCloudContainer>
-        <img alt="" aria-hidden src={leftSideCloudPath} />
+        <img alt="left-side-cloud" aria-hidden src={leftSideCloudPath} />
       </LeftSideCloudContainer>
       <LogoContainer>
-        <img alt="" aria-hidden src={cornerOrnamentPath} />
+        <img alt="strapi-corner-ornament" aria-hidden src={cornerOrnamentPath} />
       </LogoContainer>
 
       <Box paddingLeft={10} paddingRight={10} paddingBottom={8} paddingTop={10}>
@@ -114,43 +88,28 @@ const HomePage = () => {
       </Box>
       <Box padding={10}>
         <GridLayout>
-          <GithubBox isVersionedOnGit={isVersionedOnGit} />
+          <GithubBox />
           <CloudBox />
         </GridLayout>
         <Box padding={6} borderRadius={8} hasRadius background="neutral0" borderColor="neutral200">
           <Box paddingBottom={2}>
             <Typography variant="delta" fontWeight="bold" textColor="neutral1000" as="p">
-              {isVersionedOnGit
-                ? formatMessage({
-                    id: getTrad('Homepage.textBox.label.versioned'),
-                    defaultMessage: 'Try Strapi Cloud for Free!',
-                  })
-                : formatMessage({
-                    id: getTrad('Homepage.textBox.label.not-versioned'),
-                    defaultMessage: 'Why uploading my project to GitHub?',
-                  })}
+              {formatMessage({
+                id: getTrad('Homepage.textBox.label.versioned'),
+                defaultMessage: 'Try Strapi Cloud for Free!',
+              })}
             </Typography>
           </Box>
 
           <Typography variant="epsilon" textColor="neutral1000" as="p">
-            {isVersionedOnGit ? (
-              <>
-                {formatMessage({
-                  id: getTrad('Homepage.textBox.text.versioned'),
-                  defaultMessage:
-                    'Strapi Cloud offers a 14 days free trial for you to experiment with your project on the cloud including all features.',
-                })}{' '}
-                <Link href="https://strapi.io/cloud" isExternal>
-                  Learn more
-                </Link>
-              </>
-            ) : (
-              formatMessage({
-                id: getTrad('Homepage.textBox.text.not-versioned'),
-                defaultMessage:
-                  'Strapi Cloud will fetch and deploy your project from your GitHub repository. This is the best way to version, manage and deploy your project. Follow the steps on GitHub to successfully upload it.',
-              })
-            )}
+            {formatMessage({
+              id: getTrad('Homepage.textBox.text.versioned'),
+              defaultMessage:
+                'Strapi Cloud offers a 14 days free trial for you to experiment with your project on the cloud including all features.',
+            })}{' '}
+            <Link href="https://strapi.io/cloud?utm_source=Strapi+Plugin+Cloud" isExternal>
+              Learn more
+            </Link>
           </Typography>
         </Box>
       </Box>

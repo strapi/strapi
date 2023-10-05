@@ -1,5 +1,5 @@
 'use strict';
 
-module.exports = ({ strapi }) => {
+module.exports = () => {
   // bootstrap phase
 };

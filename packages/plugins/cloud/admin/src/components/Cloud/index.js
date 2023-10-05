@@ -5,16 +5,15 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
 
-import { ExternalLink } from '@strapi/icons';
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-
-import { UploadIcon } from '../Icons/upload';
-
+import { ExternalLink } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+
 import { getTrad } from '../../utils';
+import { UploadIcon } from '../Icons/upload';
 
 const EmptyStateIconWrapper = styled(Box)`
   svg {
@@ -27,7 +26,7 @@ const CloudBox = () => {
 
   return (
     <Box padding={4} hasRadius>
-      <Flex alignItems="center" direction="column" padding={11} hasRadius={true}>
+      <Flex alignItems="center" direction="column" padding={11} hasRadius>
         <EmptyStateIconWrapper paddingBottom={6} aria-hidden>
           <UploadIcon />
         </EmptyStateIconWrapper>

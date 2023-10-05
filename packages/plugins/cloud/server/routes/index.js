@@ -1,3 +1,3 @@
-module.exports = {
-  cloud: require('./cloud'),
-};
+'use strict'
+
+module.exports = {};

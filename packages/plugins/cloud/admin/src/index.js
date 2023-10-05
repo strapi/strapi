@@ -1,8 +1,10 @@
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
+
 import pluginPkg from '../../package.json';
-import pluginId from './pluginId';
+
 import Initializer from './components/Initializer';
 import PluginIcon from './components/PluginIcon';
+import pluginId from './pluginId';
 
 const name = pluginPkg.strapi.name;
 
@@ -15,7 +17,7 @@ export default {
         id: `${pluginId}.plugin.name`,
         defaultMessage: name,
       },
-      Component: async () => {
+      async Component() {
         const component = await import(/* webpackChunkName: "strapi-cloud-plugin" */ './pages/App');
 
         return component;
@@ -29,7 +31,7 @@ export default {
     });
   },
 
-  bootstrap(app) {},
+  bootstrap() {},
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
       locales.map((locale) => {

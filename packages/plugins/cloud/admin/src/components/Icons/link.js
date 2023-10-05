@@ -68,23 +68,23 @@ export const LinkIcon = () => (
         <path
           d="M103.041 36.617L97.3392 42.3198C92.0656 47.5922 83.4349 47.5922 78.1613 42.3198C72.8877 37.0462 72.8877 28.4155 78.1613 23.1419L89.3486 11.9546C94.6222 6.68223 103.252 6.68223 108.525 11.9546C113.056 16.4858 113.694 23.4934 110.441 28.7226"
           stroke="#7B79FF"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
         <path
           d="M56.3043 45L58.9843 42.32C64.2579 37.0464 72.8874 37.0464 78.161 42.32C83.4346 47.5936 83.4346 56.2243 78.161 61.4979L66.9749 72.684C61.7013 77.9576 53.0706 77.9576 47.797 72.684C42.5234 67.4104 42.5234 58.7809 47.797 53.5061L48.9045 52.3998"
           stroke="#7B79FF"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
         <path
           d="M89.6695 30.8114L66.6536 53.8274"
           stroke="#7B79FF"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
         <path
           fillRule="evenodd"
