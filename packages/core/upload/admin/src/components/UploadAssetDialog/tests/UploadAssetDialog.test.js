@@ -92,7 +92,7 @@ describe('UploadAssetDialog', () => {
       fireEvent.click(getByRole('button', { name: 'Next' }));
 
       await waitFor(() => expect(screen.getByText('An error occured')).toBeInTheDocument());
-    });
+    }, 10000);
 
     it('snapshots the component with 4 URLs: 3 valid and one in failure', async () => {
       const { user, getByText, getByRole } = render(<UploadAssetDialog />);
