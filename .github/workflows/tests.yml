@@ -17,6 +17,9 @@ permissions:
   contents: read # to fetch code (actions/checkout)
   actions: read
 
+env:
+  DTS: true
+
 jobs:
   changes:
     runs-on: ubuntu-latest
@@ -75,7 +78,7 @@ jobs:
       - name: Run build:ts
         run: yarn nx run-many --target=build:ts --nx-ignore-cycles --skip-nx-cache
       - name: Run build
-        run: DTS=true yarn nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
+        run: yarn nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
       - name: TSC for packages
         run: yarn nx affected --target=test:ts --nx-ignore-cycles
       - name: TSC for back
@@ -102,6 +105,8 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
       - name: Run build:ts
         run: yarn nx run-many --target=build:ts --nx-ignore-cycles --skip-nx-cache
+      - name: Run build
+        run: yarn build --projects=@strapi/pack-up --skip-nx-cache
       - name: Run tests
         run: yarn nx affected --target=test:unit --nx-ignore-cycles
 

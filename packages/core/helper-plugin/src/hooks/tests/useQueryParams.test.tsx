@@ -1,7 +1,5 @@
 /* eslint-disable check-file/filename-naming-convention */
 
-import React from 'react';
-
 import { renderHook, act } from '@tests/utils';
 import { Route, useLocation } from 'react-router-dom';
 

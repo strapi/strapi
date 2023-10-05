@@ -2,7 +2,7 @@ import { formatContentTypeData } from '../formatContentTypeData';
 
 import { testData } from './testData';
 
-import type { Schema } from '@strapi/strapi';
+import type { Schema } from '@strapi/types';
 
 const { contentType, components, modifiedData } = testData;
 

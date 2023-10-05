@@ -3,7 +3,7 @@ import * as React from 'react';
 import { MessageDescriptor } from 'react-intl';
 import { InputType } from 'types';
 
-import type { Attribute, Schema } from '@strapi/strapi';
+import type { Attribute, Schema } from '@strapi/types';
 
 /**
  * TODO: All these types could be accurately inferred from
