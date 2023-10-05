@@ -1,13 +1,16 @@
-import React from 'react';
+import * as React from 'react';
 
 import { DesignSystemProvider } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import { createGlobalStyle } from 'styled-components';
 
 import { useThemeToggle } from '../../hooks/useThemeToggle';
-import GlobalStyle from '../GlobalStyle';
 
-const Theme = ({ children }) => {
+interface ThemeProps {
+  children: React.ReactNode;
+}
+
+const Theme = ({ children }: ThemeProps) => {
   const { currentTheme, themes } = useThemeToggle();
   const { locale } = useIntl();
 
@@ -19,8 +22,10 @@ const Theme = ({ children }) => {
   );
 };
 
-Theme.propTypes = {
-  children: PropTypes.element.isRequired,
-};
+const GlobalStyle = createGlobalStyle`
+  body {
+    background: ${({ theme }) => theme.colors.neutral100};
+  }
+`;
 
-export default Theme;
+export { Theme };
