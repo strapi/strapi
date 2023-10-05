@@ -10,12 +10,15 @@ import { LoadingIndicatorPage } from './LoadingIndicatorPage';
 
 import type { Permission } from '@strapi/permissions';
 
-export interface CheckPagePermissions {
+export interface CheckPagePermissionsProps {
   children: React.ReactNode;
   permissions?: Permission[];
 }
 
-const CheckPagePermissions = ({ permissions = [], children }: CheckPagePermissions) => {
+const CheckPagePermissions = ({
+  permissions = [],
+  children,
+}: CheckPagePermissionsProps): React.JSX.Element => {
   const abortController = new AbortController();
   const { signal } = abortController;
   const { allPermissions } = useRBACProvider();

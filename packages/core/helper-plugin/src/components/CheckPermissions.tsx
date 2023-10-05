@@ -9,12 +9,12 @@ import type { Permission } from '@strapi/permissions';
 // NOTE: this component is very similar to the CheckPagePermissions
 // except that it does not handle redirections nor loading state
 
-export interface CheckPagePermissions {
+export interface CheckPermissionsProps {
   children: React.ReactNode;
   permissions?: Permission[];
 }
 
-const CheckPermissions = ({ permissions = [], children }: CheckPagePermissions) => {
+const CheckPermissions = ({ permissions = [], children }: CheckPermissionsProps) => {
   const { allPermissions } = useRBACProvider();
   const toggleNotification = useNotification();
   const [state, setState] = React.useState({ isLoading: true, canAccess: false });
@@ -67,7 +67,7 @@ const CheckPermissions = ({ permissions = [], children }: CheckPagePermissions) 
     return null;
   }
 
-  return children;
+  return <>{children}</>;
 };
 
 export { CheckPermissions };

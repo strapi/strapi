@@ -1,7 +1,0 @@
-{
-  "extends": "./tsconfig.json",
-  "exclude": ["./src/**/*.test.tsx"],
-  "compilerOptions": {
-    "outDir": "./dist/admin"
-  }
-}
