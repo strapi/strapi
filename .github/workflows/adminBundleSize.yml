@@ -12,6 +12,9 @@ on:
       # package.json wasn't changed, e.g. for non-pinned dependencies
       - 'yarn.lock'
 
+env:
+  DTS: true
+
 jobs:
   admin_size:
     runs-on: ubuntu-latest
