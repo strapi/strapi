@@ -8183,6 +8183,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-nodemailer@workspace:packages/providers/email-nodemailer"
   dependencies:
+    "@strapi/pack-up": "workspace:*"
     "@types/nodemailer": 6.4.7
     eslint-config-custom: 4.14.3
     lodash: 4.17.21
@@ -8196,6 +8197,7 @@ __metadata:
   resolution: "@strapi/provider-email-sendgrid@workspace:packages/providers/email-sendgrid"
   dependencies:
     "@sendgrid/mail": 7.7.0
+    "@strapi/pack-up": "workspace:*"
     "@strapi/utils": 4.14.3
     eslint-config-custom: 4.14.3
     tsconfig: 4.14.3

@@ -21,7 +21,7 @@ interface ProviderOptions {
   apiKey: string;
 }
 
-export = {
+export default {
   init(providerOptions: ProviderOptions, settings: Settings) {
     sendgrid.setApiKey(providerOptions.apiKey);
 
