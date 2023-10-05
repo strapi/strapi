@@ -10,25 +10,33 @@ const name = pluginPkg.strapi.name;
 
 export default {
   register(app) {
-    app.addMenuLink({
-      to: `/plugins/${pluginId}`,
-      icon: PluginIcon,
-      intlLabel: {
-        id: `${pluginId}.plugin.name`,
-        defaultMessage: name,
-      },
-      async Component() {
-        const component = await import(/* webpackChunkName: "strapi-cloud-plugin" */ './pages/App');
+    const { backendURL } = window.strapi;
 
-        return component;
-      },
-    });
-    app.registerPlugin({
-      id: pluginId,
-      initializer: Initializer,
-      isReady: false,
-      name,
-    });
+    // Only add the plugin menu link and registering it if the project is on development (localhost).
+    if (backendURL?.includes('localhost')) {
+      app.addMenuLink({
+        to: `/plugins/${pluginId}`,
+        icon: PluginIcon,
+        intlLabel: {
+          id: `${pluginId}.plugin.name`,
+          defaultMessage: name,
+        },
+        async Component() {
+          const component = await import(
+            /* webpackChunkName: "strapi-cloud-plugin" */ './pages/App'
+          );
+
+          return component;
+        },
+      });
+
+      app.registerPlugin({
+        id: pluginId,
+        initializer: Initializer,
+        isReady: false,
+        name,
+      });
+    }
   },
 
   bootstrap() {},
