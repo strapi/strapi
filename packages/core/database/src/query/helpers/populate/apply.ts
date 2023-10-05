@@ -574,7 +574,7 @@ const morphToOne = async (input: Input<Relation.MorphToOne>, ctx: Context) => {
     }
 
     if (!(typeValue in acc)) {
-      acc[typeValue] = [idValue];
+      acc[typeValue] = [];
     }
 
     acc[typeValue].push(idValue);
