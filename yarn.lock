@@ -8218,6 +8218,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-upload-aws-s3@workspace:packages/providers/upload-aws-s3"
   dependencies:
+    "@strapi/pack-up": "workspace:*"
     "@types/jest": 29.5.2
     aws-sdk: 2.1437.0
     eslint-config-custom: 4.14.3
