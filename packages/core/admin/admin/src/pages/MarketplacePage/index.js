@@ -26,7 +26,6 @@ import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
 import useDebounce from '../../hooks/useDebounce';
-import { useNavigatorOnline } from '../../hooks/useNavigatorOnline';
 import { selectAdminPermissions } from '../App/selectors';
 
 import MissingPluginBanner from './components/MissingPluginBanner';
@@ -36,6 +35,7 @@ import NpmPackagesPagination from './components/NpmPackagesPagination';
 import OfflineLayout from './components/OfflineLayout';
 import PageHeader from './components/PageHeader';
 import SortSelect from './components/SortSelect';
+import { useNavigatorOnline } from './hooks/useNavigatorOnline';
 import useMarketplaceData from './utils/useMarketplaceData';
 
 const MarketPlacePage = () => {
