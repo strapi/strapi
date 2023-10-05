@@ -48,12 +48,22 @@ export function useModifiersStore() {
   const editor = useSlate();
   const modifiers = Editor.marks(editor);
 
+  /**
+   * The default handler for checking if a modifier is active
+   *
+   * @param {string} name - The name of the modifier to check
+   */
   const baseCheckIsActive = (name) => {
     if (!modifiers) return false;
 
     return Boolean(modifiers[name]);
   };
 
+  /**
+   * The default handler for toggling a modifier
+   *
+   * @param {string} name - The name of the modifier to toggle
+   */
   const baseHandleToggle = (name) => {
     if (modifiers[name]) {
       Editor.removeMark(editor, name);

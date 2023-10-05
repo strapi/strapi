@@ -1,12 +1,14 @@
 import * as React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { render, screen, renderHook } from '@testing-library/react';
+import { render, screen, renderHook, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
 import { createEditor, Editor, Transforms } from 'slate';
-import { Slate, withReact } from 'slate-react';
+import { Slate, withReact, ReactEditor } from 'slate-react';
 
+import { withLinks } from '../../plugins/withLinks';
 import { useBlocksStore } from '../useBlocksStore';
 
 const initialValue = [
@@ -16,10 +18,18 @@ const initialValue = [
   },
 ];
 
+const mockEvent = {
+  preventDefault: jest.fn(),
+  target: {
+    value: '',
+  },
+};
+const user = userEvent.setup();
+
 const baseEditor = createEditor();
 
 const Wrapper = ({ children }) => {
-  const editor = React.useMemo(() => withReact(baseEditor), []);
+  const [editor] = React.useState(() => withReact(withLinks(baseEditor)));
 
   return (
     <ThemeProvider theme={lightTheme}>
@@ -39,6 +49,12 @@ Wrapper.propTypes = {
 describe('useBlocksStore', () => {
   beforeEach(() => {
     baseEditor.children = initialValue;
+    /**
+     * @TODO: We need to find a way to use the actual implementation
+     * This problem is also present at Toolbar tests
+     */
+    ReactEditor.findPath = jest.fn();
+    ReactEditor.focus = jest.fn();
   });
 
   it('should return a store of blocks', () => {
@@ -221,10 +237,45 @@ describe('useBlocksStore', () => {
   it('renders a link block properly', () => {
     const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
 
+    act(() => {
+      baseEditor.children = [
+        {
+          type: 'paragraph',
+          children: [
+            {
+              type: 'link',
+              url: 'https://example.com',
+              children: [{ text: 'Some link' }],
+            },
+          ],
+        },
+      ];
+    });
+
+    act(() => {
+      render(
+        result.current.link.renderElement({
+          children: 'Some link',
+          element: { type: 'link', url: 'https://example.com', children: [{ text: 'Some link' }] },
+          attributes: {},
+        }),
+        {
+          wrapper: Wrapper,
+        }
+      );
+    });
+    const link = screen.getByRole('link', 'Some link');
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', 'https://example.com');
+  });
+
+  it('renders a popover for each link and its opened when users click the link', async () => {
+    const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
+
     render(
       result.current.link.renderElement({
         children: 'Some link',
-        element: { url: 'https://example.com' },
+        element: { url: 'https://example.com', children: [{ text: 'Some' }, { text: ' link' }] },
         attributes: {},
       }),
       {
@@ -232,8 +283,14 @@ describe('useBlocksStore', () => {
       }
     );
     const link = screen.getByRole('link', 'Some link');
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute('href', 'https://example.com');
+
+    expect(screen.queryByLabelText(/Delete/i, { selector: 'button' })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/Edit/i, { selector: 'button' })).not.toBeInTheDocument();
+
+    await user.click(link);
+
+    expect(screen.queryByLabelText(/Delete/i, { selector: 'button' })).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Edit/i, { selector: 'button' })).toBeInTheDocument();
   });
 
   it('renders a code block properly', () => {
@@ -555,5 +612,262 @@ describe('useBlocksStore', () => {
         ],
       },
     ]);
+  });
+
+  it('handles enter key on an empty list', () => {
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: '',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor on the first list item
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0, 0], offset: 0 },
+      focus: { path: [0, 0, 0], offset: 0 },
+    });
+
+    // Simulate the enter key
+    result.current['list-ordered'].handleEnterKey(baseEditor);
+
+    // Should remove the empty list and create a paragraph instead
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('handles the backspace key on a very first list with single empty list item', () => {
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: '',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor on the first list item
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0, 0], offset: 0 },
+      focus: { path: [0, 0, 0], offset: 0 },
+    });
+
+    // Simulate the backspace key
+    result.current['list-unordered'].handleBackspaceKey(baseEditor, mockEvent);
+
+    // Should remove the empty list item and replace with empty paragraph
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('handles the backspace key on a list with single empty list item', () => {
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'some text',
+          },
+        ],
+      },
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: '',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor on the first list item
+    Transforms.select(baseEditor, {
+      anchor: { path: [1, 0, 0], offset: 0 },
+      focus: { path: [1, 0, 0], offset: 0 },
+    });
+
+    // Simulate the backspace key
+    result.current['list-ordered'].handleBackspaceKey(baseEditor, mockEvent);
+
+    // Should remove the empty list item
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'some text',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('handles enter key on a quote', () => {
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'quote',
+        children: [
+          {
+            type: 'text',
+            text: 'Some quote',
+          },
+        ],
+      },
+    ];
+
+    // Simulate enter key press at the end of the quote
+    Transforms.select(baseEditor, {
+      anchor: Editor.end(baseEditor, []),
+      focus: Editor.end(baseEditor, []),
+    });
+    result.current.quote.handleEnterKey(baseEditor);
+
+    // Should enter a line break within the quote
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'quote',
+        children: [
+          {
+            type: 'text',
+            text: 'Some quote\n',
+          },
+        ],
+      },
+    ]);
+
+    // Simulate enter key press at the end of the quote again
+    Transforms.select(baseEditor, {
+      anchor: Editor.end(baseEditor, []),
+      focus: Editor.end(baseEditor, []),
+    });
+    result.current.quote.handleEnterKey(baseEditor);
+
+    // Should delete the line break and create a paragraph after the quote
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'quote',
+        children: [
+          {
+            type: 'text',
+            text: 'Some quote',
+          },
+        ],
+      },
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('handles enter key called twice on paragraph block', () => {
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'Line of text',
+          },
+          {
+            type: 'text',
+            text: ' with modifiers too',
+            bold: true,
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor after "Line of"
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0], offset: 7 },
+      focus: { path: [0, 0], offset: 7 },
+    });
+
+    const cursorInitialPosition = baseEditor.selection.anchor.path;
+
+    // Simulate the enter key
+    result.current.paragraph.handleEnterKey(baseEditor);
+
+    const cursorPositionAfterFirstEnter = baseEditor.selection.anchor.path;
+
+    // Check if the cursor is positioned in the new line
+    expect(cursorPositionAfterFirstEnter[0]).toEqual(cursorInitialPosition[0] + 1);
+
+    // Set the cursor after "Line of"
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0], offset: 7 },
+      focus: { path: [0, 0], offset: 7 },
+    });
+
+    // Simulate another the enter key
+    result.current.paragraph.handleEnterKey(baseEditor);
+
+    const cursorPositionAfterSecondEnter = baseEditor.selection.anchor.path;
+
+    // Check if the cursor is positioned in the new line
+    expect(cursorPositionAfterSecondEnter[0]).toEqual(cursorInitialPosition[0] + 1);
   });
 });

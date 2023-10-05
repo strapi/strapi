@@ -3,15 +3,16 @@ import * as React from 'react';
 import * as Toolbar from '@radix-ui/react-toolbar';
 import { Flex, Icon, Tooltip, Select, Option, Box, Typography } from '@strapi/design-system';
 import { pxToRem, prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
-import { BulletList, NumberList } from '@strapi/icons';
+import { Link } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement } from 'slate';
-import { useSlate } from 'slate-react';
+import { ReactEditor, useSlate } from 'slate-react';
 import styled from 'styled-components';
 
 import { useBlocksStore } from '../hooks/useBlocksStore';
 import { useModifiersStore } from '../hooks/useModifiersStore';
+import { insertLink } from '../utils/links';
 
 const ToolbarWrapper = styled(Flex)`
   &[aria-disabled='true'] {
@@ -42,6 +43,7 @@ const FlexButton = styled(Flex).attrs({ as: 'button' })`
 `;
 
 const ToolbarButton = ({ icon, name, label, isActive, disabled, handleClick }) => {
+  const editor = useSlate();
   const { formatMessage } = useIntl();
   const labelMessage = formatMessage(label);
 
@@ -62,12 +64,19 @@ const ToolbarButton = ({ icon, name, label, isActive, disabled, handleClick }) =
         asChild
       >
         <FlexButton
+          disabled={disabled}
           background={isActive ? 'primary100' : ''}
           alignItems="center"
           justifyContent="center"
           width={7}
           height={7}
           hasRadius
+          onMouseDown={() => {
+            handleClick();
+            // When a button is clicked it blurs the editor, restore the focus to the editor
+            ReactEditor.focus(editor);
+          }}
+          aria-label={labelMessage}
         >
           <Icon width={3} height={3} as={icon} color={disabled ? 'neutral300' : enabledColor} />
         </FlexButton>
@@ -131,30 +140,26 @@ ModifierButton.propTypes = {
   disabled: PropTypes.bool.isRequired,
 };
 
-const isBlockActive = (editor, matchNode) => {
-  const { selection } = editor;
-
-  if (!selection) return false;
-
-  const match = Array.from(
-    Editor.nodes(editor, {
-      at: Editor.unhangRange(editor, selection),
-      match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n) && matchNode(n),
-    })
-  );
-
-  return match.length > 0;
-};
-
 const toggleBlock = (editor, value) => {
-  const { type, level } = value;
+  const { type, level, format } = value;
 
-  const newProperties = {
+  // Set the selected block properties received from the useBlockStore
+  const blockProperties = {
     type,
     level: level || null,
+    format: format || null,
   };
 
-  Transforms.setNodes(editor, newProperties);
+  if (editor.selection) {
+    // When there is a selection, update the existing block in the tree
+    Transforms.setNodes(editor, blockProperties);
+  } else {
+    // Otherwise, add a new block to the tree
+    Transforms.insertNodes(editor, { ...blockProperties, children: [{ type: 'text', text: '' }] });
+  }
+
+  // When the select is clicked it blurs the editor, restore the focus to the editor
+  ReactEditor.focus(editor);
 };
 
 const ALLOWED_MEDIA_TYPE = 'images';
@@ -202,7 +207,7 @@ const ImageDialog = ({ handleClose }) => {
 
   const handleSelectAssets = (images) => {
     const formattedImages = images.map((image) => {
-      // create an object with imageSchema defined and exclude unnecessary props coming from media library config
+      // Create an object with imageSchema defined and exclude unnecessary props coming from media library config
       const expectedImage = pick(image, IMAGE_SCHEMA_FIELDS);
 
       return {
@@ -215,7 +220,7 @@ const ImageDialog = ({ handleClose }) => {
     insertImages(formattedImages);
 
     if (isLastBlockType(editor, 'image')) {
-      // insert blank line to add new blocks below image block
+      // Insert blank line to add new blocks below image block
       insertEmptyBlockAtLast(editor);
     }
 
@@ -288,6 +293,15 @@ export const BlocksDropdown = ({ disabled }) => {
     if (optionKey === 'image') {
       // Image node created using select or existing selection node needs to be deleted before adding new image nodes
       Transforms.removeNodes(editor);
+    } else if (['list-ordered', 'list-unordered'].includes(optionKey)) {
+      // retrieve the list format
+      const listFormat = blocks[optionKey].value.format;
+
+      // check if the list is already active
+      const isActive = isListActive(editor, blocks[optionKey].matchNode);
+
+      // toggle the list
+      toggleList(editor, isActive, listFormat);
     } else {
       toggleBlock(editor, blocks[optionKey].value);
     }
@@ -295,7 +309,7 @@ export const BlocksDropdown = ({ disabled }) => {
     setBlockSelected(optionKey);
 
     if (optionKey === 'code' && isLastBlockType(editor, 'code')) {
-      // insert blank line to add new blocks below code block
+      // Insert blank line to add new blocks below code block
       insertEmptyBlockAtLast(editor);
     }
 
@@ -304,6 +318,37 @@ export const BlocksDropdown = ({ disabled }) => {
     }
   };
 
+  /**
+   * Prevent the select from focusing itself so ReactEditor.focus(editor) can focus the editor instead.
+   *
+   * The editor first loses focus to a blur event when clicking the select button. However,
+   * refocusing the editor is not enough since the select's default behavior is to refocus itself
+   * after an option is selected.
+   *
+   */
+  const preventSelectFocus = (e) => e.preventDefault();
+
+  // Listen to the selection change and update the selected block in the dropdown
+  React.useEffect(() => {
+    if (editor.selection) {
+      // Get the parent node of the anchor
+      // with a depth of two to retrieve also the list item parents
+      const [anchorNode] = Editor.parent(editor, editor.selection.anchor, {
+        edge: 'start',
+        depth: 2,
+      });
+      // Find the block key that matches the anchor node
+      const anchorBlockKey = Object.keys(blocks).find((blockKey) =>
+        blocks[blockKey].matchNode(anchorNode)
+      );
+
+      // Change the value selected in the dropdown if it doesn't match the anchor block key
+      if (anchorBlockKey && anchorBlockKey !== blockSelected) {
+        setBlockSelected(anchorBlockKey);
+      }
+    }
+  }, [editor.selection, editor, blocks, blockSelected]);
+
   return (
     <>
       <Select
@@ -311,6 +356,7 @@ export const BlocksDropdown = ({ disabled }) => {
         onChange={selectOption}
         placeholder={blocks[blockSelected].label}
         value={blockSelected}
+        onCloseAutoFocus={preventSelectFocus}
         aria-label={formatMessage({
           id: 'components.Blocks.blocks.selectBlock',
           defaultMessage: 'Select a block',
@@ -323,8 +369,6 @@ export const BlocksDropdown = ({ disabled }) => {
             value={key}
             label={blocks[key].label}
             icon={blocks[key].icon}
-            matchNode={blocks[key].matchNode}
-            handleSelection={setBlockSelected}
             blockSelected={blockSelected}
           />
         ))}
@@ -338,18 +382,10 @@ BlocksDropdown.propTypes = {
   disabled: PropTypes.bool.isRequired,
 };
 
-const BlockOption = ({ value, icon, label, handleSelection, blockSelected, matchNode }) => {
+const BlockOption = ({ value, icon, label, blockSelected }) => {
   const { formatMessage } = useIntl();
-  const editor = useSlate();
 
-  const isActive = isBlockActive(editor, matchNode);
   const isSelected = value === blockSelected;
-
-  React.useEffect(() => {
-    if (isActive && !isSelected) {
-      handleSelection(value);
-    }
-  }, [handleSelection, isActive, isSelected, value]);
 
   return (
     <Option
@@ -368,58 +404,63 @@ BlockOption.propTypes = {
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
   }).isRequired,
-  matchNode: PropTypes.func.isRequired,
-  handleSelection: PropTypes.func.isRequired,
   blockSelected: PropTypes.string.isRequired,
 };
 
-const ListButton = ({ icon, format, label, disabled }) => {
+/**
+ *
+ * @param {import('slate').Node} node
+ * @returns boolean
+ */
+const isListNode = (node) => {
+  return !Editor.isEditor(node) && SlateElement.isElement(node) && node.type === 'list';
+};
+
+const isListActive = (editor, matchNode) => {
+  const { selection } = editor;
+
+  if (!selection) return false;
+
+  const [match] = Array.from(
+    Editor.nodes(editor, {
+      at: Editor.unhangRange(editor, selection),
+      match: matchNode,
+    })
+  );
+
+  return Boolean(match);
+};
+
+const toggleList = (editor, isActive, format) => {
+  // Delete the parent list so that we're left with only the list items directly
+  Transforms.unwrapNodes(editor, {
+    match: (node) => isListNode(node) && ['ordered', 'unordered'].includes(node.format),
+    split: true,
+  });
+
+  // Change the type of the current selection
+  Transforms.setNodes(editor, {
+    type: isActive ? 'paragraph' : 'list-item',
+  });
+
+  // If the selection is now a list item, wrap it inside a list
+  if (!isActive) {
+    const block = { type: 'list', format, children: [] };
+    Transforms.wrapNodes(editor, block);
+  }
+};
+
+const ListButton = ({ block, disabled }) => {
   const editor = useSlate();
 
-  /**
-   *
-   * @param {import('slate').Node} node
-   * @returns boolean
-   */
-  const isListNode = (node) => {
-    return !Editor.isEditor(node) && SlateElement.isElement(node) && node.type === 'list';
-  };
+  const {
+    icon,
+    matchNode,
+    value: { format },
+    label,
+  } = block;
 
-  const isListActive = () => {
-    const { selection } = editor;
-
-    if (!selection) return false;
-
-    const [match] = Array.from(
-      Editor.nodes(editor, {
-        at: Editor.unhangRange(editor, selection),
-        match: (node) => isListNode(node) && node.format === format,
-      })
-    );
-
-    return Boolean(match);
-  };
-
-  const isActive = isListActive();
-
-  const toggleList = () => {
-    // Delete the parent list so that we're left with only the list items directly
-    Transforms.unwrapNodes(editor, {
-      match: (node) => isListNode(node) && ['ordered', 'unordered'].includes(node.format),
-      split: true,
-    });
-
-    // Change the type of the current selection
-    Transforms.setNodes(editor, {
-      type: isActive ? 'paragraph' : 'list-item',
-    });
-
-    // If the selection is now a list item, wrap it inside a list
-    if (!isActive) {
-      const block = { type: 'list', format, children: [] };
-      Transforms.wrapNodes(editor, block);
-    }
-  };
+  const isActive = isListActive(editor, matchNode);
 
   return (
     <ToolbarButton
@@ -428,25 +469,68 @@ const ListButton = ({ icon, format, label, disabled }) => {
       label={label}
       isActive={isActive}
       disabled={disabled}
-      handleClick={toggleList}
+      handleClick={() => toggleList(editor, isActive, format)}
     />
   );
 };
 
 ListButton.propTypes = {
-  icon: PropTypes.elementType.isRequired,
-  format: PropTypes.string.isRequired,
-  label: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
+  block: PropTypes.shape({
+    icon: PropTypes.elementType.isRequired,
+    matchNode: PropTypes.func.isRequired,
+    value: PropTypes.shape({
+      format: PropTypes.string.isRequired,
+    }).isRequired,
+    label: PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      defaultMessage: PropTypes.string.isRequired,
+    }).isRequired,
   }).isRequired,
   disabled: PropTypes.bool.isRequired,
 };
 
-// TODO: Remove after the RTE Blocks Alpha release
-const AlphaTag = styled(Box)`
-  background-color: ${({ theme }) => theme.colors.warning100};
-  border: ${({ theme }) => `1px solid ${theme.colors.warning200}`};
+const LinkButton = () => {
+  const editor = useSlate();
+
+  const isLinkActive = () => {
+    const { selection } = editor;
+
+    if (!selection) return false;
+
+    const [match] = Array.from(
+      Editor.nodes(editor, {
+        at: Editor.unhangRange(editor, selection),
+        match: (node) => SlateElement.isElement(node) && node.type === 'link',
+      })
+    );
+
+    return Boolean(match);
+  };
+
+  const addLink = () => {
+    // We insert an empty anchor, so we split the DOM to have a element we can use as reference for the popover
+    insertLink(editor, { url: '' });
+  };
+
+  return (
+    <ToolbarButton
+      icon={Link}
+      name="link"
+      label={{
+        id: 'components.Blocks.link',
+        defaultMessage: 'Link',
+      }}
+      isActive={isLinkActive()}
+      handleClick={addLink}
+      disabled={false}
+    />
+  );
+};
+
+// TODO: Remove after the RTE Blocks Beta release
+const BetaTag = styled(Box)`
+  background-color: ${({ theme }) => theme.colors.secondary100};
+  border: ${({ theme }) => `1px solid ${theme.colors.secondary200}`};
   border-radius: ${({ theme }) => theme.borderRadius};
   font-size: ${({ theme }) => theme.fontSizes[0]};
   padding: ${({ theme }) => `${2 / 16}rem ${theme.spaces[1]}`};
@@ -454,10 +538,11 @@ const AlphaTag = styled(Box)`
 
 const BlocksToolbar = ({ disabled }) => {
   const modifiers = useModifiersStore();
+  const blocks = useBlocksStore();
 
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
-      {/* Remove after the RTE Blocks Alpha release (paddingRight and width) */}
+      {/* Remove after the RTE Blocks Beta release (paddingRight and width) */}
       <ToolbarWrapper gap={1} padding={2} paddingRight={4} width="100%">
         <BlocksDropdown disabled={disabled} />
         <Toolbar.ToggleGroup type="multiple" asChild>
@@ -473,38 +558,23 @@ const BlocksToolbar = ({ disabled }) => {
                 disabled={disabled}
               />
             ))}
+            <LinkButton />
           </Flex>
         </Toolbar.ToggleGroup>
         <Separator />
         <Toolbar.ToggleGroup type="single" asChild>
           <Flex gap={1}>
-            <ListButton
-              label={{
-                id: 'components.Blocks.blocks.unorderedList',
-                defaultMessage: 'Bulleted list',
-              }}
-              format="unordered"
-              icon={BulletList}
-              disabled={disabled}
-            />
-            <ListButton
-              label={{
-                id: 'components.Blocks.blocks.orderedList',
-                defaultMessage: 'Numbered list',
-              }}
-              format="ordered"
-              icon={NumberList}
-              disabled={disabled}
-            />
+            <ListButton block={blocks['list-unordered']} disabled={disabled} />
+            <ListButton block={blocks['list-ordered']} disabled={disabled} />
           </Flex>
         </Toolbar.ToggleGroup>
-        {/* TODO: Remove after the RTE Blocks Alpha release */}
+        {/* TODO: Remove after the RTE Blocks Beta release */}
         <Flex grow={1} justifyContent="flex-end">
-          <AlphaTag>
-            <Typography textColor="warning600" variant="sigma">
-              ALPHA
+          <BetaTag>
+            <Typography textColor="secondary600" variant="sigma">
+              BETA
             </Typography>
-          </AlphaTag>
+          </BetaTag>
         </Flex>
       </ToolbarWrapper>
     </Toolbar.Root>

@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import Hint from '../Hint';
 
 import BlocksInput from './BlocksInput';
+import { withLinks, withStrapiSchema } from './plugins';
 import { BlocksToolbar } from './Toolbar';
 
 const TypographyAsterisk = styled(Typography)`
@@ -29,7 +30,6 @@ const EditorDivider = styled(Divider)`
 
 const Wrapper = styled(Box)`
   width: 100%;
-  max-height: 512px;
   overflow: auto;
   padding: ${({ theme }) => `${theme.spaces[3]} ${theme.spaces[4]}`};
   font-size: ${({ theme }) => theme.fontSizes[2]};
@@ -39,13 +39,33 @@ const Wrapper = styled(Box)`
   border-radius: ${({ theme }) => theme.borderRadius};
 `;
 
+/**
+ * Images are void elements. They handle the rendering of their children instead of Slate.
+ * See the Slate documentation for more information:
+ * - https://docs.slatejs.org/api/nodes/element#void-vs-not-void
+ * - https://docs.slatejs.org/api/nodes/element#rendering-void-elements
+ *
+ * @param {import('slate').Editor} editor
+ */
+const withImages = (editor) => {
+  const { isVoid } = editor;
+
+  editor.isVoid = (element) => {
+    return element.type === 'image' ? true : isVoid(element);
+  };
+
+  return editor;
+};
+
 const BlocksEditor = React.forwardRef(
   (
     { intlLabel, labelAction, name, disabled, required, error, value, onChange, placeholder, hint },
     ref
   ) => {
     const { formatMessage } = useIntl();
-    const [editor] = React.useState(() => withReact(withHistory(createEditor())));
+    const [editor] = React.useState(() =>
+      withReact(withStrapiSchema(withLinks(withImages(withHistory(createEditor())))))
+    );
 
     const label = intlLabel.id
       ? formatMessage(
@@ -97,10 +117,10 @@ const BlocksEditor = React.forwardRef(
             initialValue={value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]}
             onChange={handleSlateChange}
           >
-            <InputWrapper direction="column" alignItems="flex-start">
+            <InputWrapper direction="column" alignItems="flex-start" height="512px">
               <BlocksToolbar disabled={disabled} />
               <EditorDivider width="100%" />
-              <Wrapper>
+              <Wrapper grow={1}>
                 <BlocksInput disabled={disabled} placeholder={formattedPlaceholder} />
               </Wrapper>
             </InputWrapper>

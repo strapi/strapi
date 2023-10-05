@@ -21,6 +21,7 @@ const setup = (props) =>
       hint="blocks description"
       placeholder={{ id: 'blocksPlaceholder', defaultMessage: 'blocks placeholder' }}
       onChange={jest.fn()}
+      disabled={false}
       {...props}
     />,
     {
