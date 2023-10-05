@@ -13,12 +13,11 @@ jest.mock('@strapi/helper-plugin', () => ({
   useLibrary: () => ({ components: { 'media-library': jest.fn() } }),
 }));
 
-const setup = ({ value, ...props }) =>
+const setup = (props) =>
   render(
     <Blocks
       intlLabel={{ id: 'blocks', defaultMessage: 'blocks type' }}
       name="blocks-editor"
-      value={value}
       hint="blocks description"
       placeholder={{ id: 'blocksPlaceholder', defaultMessage: 'blocks placeholder' }}
       onChange={jest.fn()}
