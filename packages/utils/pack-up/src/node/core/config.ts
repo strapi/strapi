@@ -70,6 +70,7 @@ interface ConfigBundle {
   import?: string;
   require?: string;
   runtime?: Runtime;
+  types?: string;
 }
 
 interface ConfigOptions {
