@@ -49,7 +49,6 @@ const resetTimeouts = () => {
     return;
   }
 
-  // store the original strapi httpServer timeouts to replace when transfer is complete
   const { httpServer } = strapi.server;
 
   strapi.log.info('[Data transfer] Restoring http timeouts');
