@@ -233,7 +233,9 @@ const handleEnterKeyOnList = (editor) => {
 };
 
 const Img = styled.img`
+  max-height: 512px;
   max-width: 100%;
+  object-fit: contain;
 `;
 
 const Image = ({ attributes, children, element }) => {
