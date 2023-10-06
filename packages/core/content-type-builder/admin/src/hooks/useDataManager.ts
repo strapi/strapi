@@ -1,7 +1,5 @@
 import { useContext } from 'react';
 
-import DataManagerContext from '../contexts/DataManagerContext';
+import { DataManagerContext } from '../contexts/DataManagerContext';
 
-const useDataManager = () => useContext(DataManagerContext);
-
-export default useDataManager;
+export const useDataManager = () => useContext(DataManagerContext);
