@@ -29,9 +29,9 @@ module.exports = {
     const NpsEnabled = strapi.config.get('admin.npsEnabled', true);
     // FIXME
     try {
-      return { data: { isEE: strapi.EE, features: ee.features.list(), NpsEnabled } };
+      return { data: { isEE: strapi.EE, features: ee.features.list(), npsEnabled } };
     } catch (err) {
-      return { data: { isEE: false, features: [], NpsEnabled } };
+      return { data: { isEE: false, features: [], npsEnabled } };
     }
   },
 
