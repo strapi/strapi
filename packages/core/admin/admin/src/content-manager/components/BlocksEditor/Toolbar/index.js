@@ -489,7 +489,7 @@ ListButton.propTypes = {
   disabled: PropTypes.bool.isRequired,
 };
 
-const LinkButton = () => {
+const LinkButton = ({ disabled }) => {
   const editor = useSlate();
 
   const isLinkActive = () => {
@@ -522,9 +522,13 @@ const LinkButton = () => {
       }}
       isActive={isLinkActive()}
       handleClick={addLink}
-      disabled={false}
+      disabled={disabled}
     />
   );
+};
+
+LinkButton.propTypes = {
+  disabled: PropTypes.bool.isRequired,
 };
 
 // TODO: Remove after the RTE Blocks Beta release
@@ -558,7 +562,7 @@ const BlocksToolbar = ({ disabled }) => {
                 disabled={disabled}
               />
             ))}
-            <LinkButton />
+            <LinkButton disabled={disabled} />
           </Flex>
         </Toolbar.ToggleGroup>
         <Separator />
