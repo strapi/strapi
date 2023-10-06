@@ -6303,26 +6303,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-node-resolve@npm:15.2.0":
-  version: 15.2.0
-  resolution: "@rollup/plugin-node-resolve@npm:15.2.0"
-  dependencies:
-    "@rollup/pluginutils": ^5.0.1
-    "@types/resolve": 1.20.2
-    deepmerge: ^4.2.2
-    is-builtin-module: ^3.2.1
-    is-module: ^1.0.0
-    resolve: ^1.22.1
-  peerDependencies:
-    rollup: ^2.78.0||^3.0.0
-  peerDependenciesMeta:
-    rollup:
-      optional: true
-  checksum: 92abfd7f1f5df08d71e4b8dd433d31cf1d62f68891ae3dd5e03a8a7f8d42d9c4433c14a25ead04204fea8235c663a3bbb66ba5528103a6dab66bd8c124f85a0d
-  languageName: node
-  linkType: hard
-
-"@rollup/pluginutils@npm:^5.0.1, @rollup/pluginutils@npm:^5.0.2":
+"@rollup/pluginutils@npm:^5.0.2":
   version: 5.0.2
   resolution: "@rollup/pluginutils@npm:5.0.2"
   dependencies:
@@ -7688,7 +7669,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/helper-plugin@workspace:packages/core/helper-plugin"
   dependencies:
-    "@rollup/plugin-node-resolve": 15.2.0
     "@storybook/addon-actions": 7.4.0
     "@storybook/addon-essentials": 7.4.0
     "@storybook/addon-links": 7.4.0
@@ -7698,6 +7678,7 @@ __metadata:
     "@strapi/admin-test-utils": 4.14.3
     "@strapi/design-system": 1.12.0
     "@strapi/icons": 1.12.0
+    "@strapi/pack-up": "workspace:*"
     "@strapi/types": 4.14.3
     "@testing-library/react": 14.0.0
     "@testing-library/user-event": 14.4.3
@@ -7707,13 +7688,10 @@ __metadata:
     "@types/react-router-dom": 5.3.3
     "@types/styled-components": 5.1.26
     axios: 1.5.0
-    browserslist-to-esbuild: 1.2.0
     cross-env: ^7.0.3
     date-fns: 2.30.0
-    esbuild-loader: ^2.21.0
     eslint-config-custom: 4.14.3
     eslint-plugin-storybook: 0.6.14
-    fork-ts-checker-webpack-plugin: 8.0.0
     formik: 2.4.0
     immer: 9.0.19
     lodash: 4.17.21
@@ -7732,8 +7710,6 @@ __metadata:
     styled-components: 5.3.3
     typescript: 5.2.2
     vite: 4.4.9
-    webpack: ^5.88.1
-    webpack-cli: ^5.1.0
     yup: 0.32.9
   peerDependencies:
     "@strapi/design-system": 1.12.0
@@ -9727,13 +9703,6 @@ __metadata:
     "@types/scheduler": "*"
     csstype: ^3.0.2
   checksum: ce07dfddcd2bc291c169a53677a754b5ecb754e6552b312f232143c56e7b95f7a851727a98a4469014190f29ace7d7f81c37a44b352d584f605c04f2899dec95
-  languageName: node
-  linkType: hard
-
-"@types/resolve@npm:1.20.2":
-  version: 1.20.2
-  resolution: "@types/resolve@npm:1.20.2"
-  checksum: 61c2cad2499ffc8eab36e3b773945d337d848d3ac6b7b0a87c805ba814bc838ef2f262fc0f109bfd8d2e0898ff8bd80ad1025f9ff64f1f71d3d4294c9f14e5f6
   languageName: node
   linkType: hard
 
@@ -12485,13 +12454,6 @@ __metadata:
     nodemailer-fetch: 1.6.0
     nodemailer-shared: 1.1.0
   checksum: 95ff27f2517c1a9c45b8bef5e2397d4fb5d63beff25cdc76ef5162fb262787dc4ffdb10149cf0ac1f56ae28e3a08355c5470b6b641c4ef10a92dae3e18fa26b1
-  languageName: node
-  linkType: hard
-
-"builtin-modules@npm:^3.3.0":
-  version: 3.3.0
-  resolution: "builtin-modules@npm:3.3.0"
-  checksum: db021755d7ed8be048f25668fe2117620861ef6703ea2c65ed2779c9e3636d5c3b82325bd912244293959ff3ae303afa3471f6a15bf5060c103e4cc3a839749d
   languageName: node
   linkType: hard
 
@@ -19589,15 +19551,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-builtin-module@npm:^3.2.1":
-  version: 3.2.1
-  resolution: "is-builtin-module@npm:3.2.1"
-  dependencies:
-    builtin-modules: ^3.3.0
-  checksum: e8f0ffc19a98240bda9c7ada84d846486365af88d14616e737d280d378695c8c448a621dcafc8332dbf0fcd0a17b0763b845400709963fa9151ddffece90ae88
-  languageName: node
-  linkType: hard
-
 "is-callable@npm:^1.1.3, is-callable@npm:^1.1.4, is-callable@npm:^1.2.4":
   version: 1.2.4
   resolution: "is-callable@npm:1.2.4"
@@ -19872,13 +19825,6 @@ __metadata:
   version: 2.0.2
   resolution: "is-map@npm:2.0.2"
   checksum: ace3d0ecd667bbdefdb1852de601268f67f2db725624b1958f279316e13fecb8fa7df91fd60f690d7417b4ec180712f5a7ee967008e27c65cfd475cc84337728
-  languageName: node
-  linkType: hard
-
-"is-module@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "is-module@npm:1.0.0"
-  checksum: 8cd5390730c7976fb4e8546dd0b38865ee6f7bacfa08dfbb2cc07219606755f0b01709d9361e01f13009bbbd8099fa2927a8ed665118a6105d66e40f1b838c3f
   languageName: node
   linkType: hard
 
