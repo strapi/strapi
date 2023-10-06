@@ -77,7 +77,7 @@ type CreateContentTypeOptions = {
  * Creates a content type and handle the nested components sent with it
  */
 export const createContentType = async (
-  { contentType, components }: CreateContentTypeInput,
+  { contentType, components }: any,
   options: CreateContentTypeOptions = {}
 ) => {
   const builder = options.defaultBuilder || createBuilder();
@@ -99,7 +99,7 @@ export const createContentType = async (
     return infos;
   };
 
-  components?.forEach((component) => {
+  components?.forEach((component: any) => {
     const options = replaceTmpUIDs(targetContentType(component));
 
     if (!_.has(component, 'uid')) {
