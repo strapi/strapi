@@ -38,7 +38,7 @@ const baseRenderElement = (props, blocks) => {
   return block.renderElement(props);
 };
 
-const BlocksInput = ({ disabled }) => {
+const BlocksInput = ({ disabled, placeholder }) => {
   const theme = useTheme();
   const editor = useSlate();
 
@@ -85,6 +85,7 @@ const BlocksInput = ({ disabled }) => {
   return (
     <Editable
       readOnly={disabled}
+      placeholder={placeholder}
       style={getEditorStyle(theme)}
       renderElement={renderElement}
       renderLeaf={renderLeaf}
@@ -93,8 +94,13 @@ const BlocksInput = ({ disabled }) => {
   );
 };
 
+BlocksInput.defaultProps = {
+  placeholder: null,
+};
+
 BlocksInput.propTypes = {
   disabled: PropTypes.bool.isRequired,
+  placeholder: PropTypes.string,
 };
 
 export default BlocksInput;
