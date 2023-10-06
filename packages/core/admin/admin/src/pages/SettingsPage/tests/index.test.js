@@ -8,8 +8,8 @@ import { createMemoryHistory } from 'history';
 import { Route, Router } from 'react-router-dom';
 
 import { SettingsPage } from '..';
-import Theme from '../../../components/Theme';
-import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
+import { Theme } from '../../../components/Theme';
+import { ThemeToggleProvider } from '../../../components/ThemeToggleProvider';
 import { useSettingsMenu } from '../../../hooks';
 
 jest.mock('../../../hooks', () => ({

@@ -7,7 +7,7 @@ import type { UID } from '@strapi/types';
  */
 export async function clear(uid: UID.ContentType) {
   // TODO double check if this is the correct way to get the apiName
-  const { apiName, modelName } = strapi.contentTypes[uid];
+  const { apiName, modelName } = strapi.contentTypes[uid] as any;
 
   const apiFolder = path.join(strapi.dirs.app.api, apiName);
 
@@ -20,7 +20,7 @@ export async function clear(uid: UID.ContentType) {
  * @param {string} uid content type uid
  */
 export async function backup(uid: UID.ContentType) {
-  const { apiName } = strapi.contentTypes[uid];
+  const { apiName } = strapi.contentTypes[uid] as any;
 
   const apiFolder = path.join(strapi.dirs.app.api, apiName);
   const backupFolder = path.join(strapi.dirs.app.api, '.backup', apiName);
@@ -31,10 +31,9 @@ export async function backup(uid: UID.ContentType) {
 
 /**
  * Deletes an API backup folder
- * @param {string} uid content type uid
  */
 async function deleteBackup(uid: UID.ContentType) {
-  const { apiName } = strapi.contentTypes[uid];
+  const { apiName } = strapi.contentTypes[uid] as any;
 
   const backupFolder = path.join(strapi.dirs.app.api, '.backup');
   const apiBackupFolder = path.join(strapi.dirs.app.api, '.backup', apiName);
@@ -49,17 +48,16 @@ async function deleteBackup(uid: UID.ContentType) {
 
 /**
  * Rollbacks the API folder of a contentType
- * @param {string} uid content type uid
  */
 export async function rollback(uid: UID.ContentType) {
-  const { apiName } = strapi.contentTypes[uid];
+  const { apiName } = strapi.contentTypes[uid] as any;
 
   const apiFolder = path.join(strapi.dirs.app.api, apiName);
   const backupFolder = path.join(strapi.dirs.app.api, '.backup', apiName);
 
-  const exists = await fse.access(backupFolder);
-
-  if (!exists) {
+  try {
+    await fse.access(backupFolder);
+  } catch {
     throw new Error('Cannot rollback api that was not backed up');
   }
 

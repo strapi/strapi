@@ -65,7 +65,7 @@ export default function createComponentBuilder() {
     /**
      * create a component in the tmpComponent map
      */
-    editComponent(this: any, infos: any): void {
+    editComponent(this: any, infos: any) {
       const { uid } = infos;
 
       if (!this.components.has(uid)) {

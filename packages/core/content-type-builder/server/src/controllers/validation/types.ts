@@ -27,11 +27,7 @@ const maxLengthIsGreaterThanOrEqualToMinLength = {
   message: 'maxLength must be greater or equal to minLength',
   test(this: TestContext, value: unknown) {
     const { minLength } = this.parent;
-    if (!_.isUndefined(minLength) && !_.isUndefined(value) && (value as number) < minLength) {
-      return false;
-    }
-
-    return true;
+    return !(!_.isUndefined(minLength) && !_.isUndefined(value) && (value as number) < minLength);
   },
 };
 
@@ -51,13 +47,10 @@ export const getTypeValidator = (
   } as any);
 };
 
-const getTypeShape = (
-  attribute: Attribute.Any,
-  { modelType, attributes }: GetTypeValidatorOptions = {}
-) => {
+const getTypeShape = (attribute: Attribute.Any, { modelType, attributes }: any = {}) => {
   switch (attribute.type) {
     /**
-     * complexe types
+     * complex types
      */
 
     case 'media': {
@@ -89,11 +82,7 @@ const getTypeShape = (
             'cannot define a default UID if the targetField is set',
             function (value) {
               const { targetField } = this.parent;
-              if (_.isNil(targetField) || _.isNil(value)) {
-                return true;
-              }
-
-              return false;
+              return !!(_.isNil(targetField) || _.isNil(value));
             }
           )
           .test(isValidUID),

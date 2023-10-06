@@ -10,8 +10,8 @@ import { darkTheme, lightTheme } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
-import Theme from '../../../../components/Theme';
-import ThemeToggleProvider from '../../../../components/ThemeToggleProvider';
+import { Theme } from '../../../../components/Theme';
+import { ThemeToggleProvider } from '../../../../components/ThemeToggleProvider';
 import NoPermissions from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({

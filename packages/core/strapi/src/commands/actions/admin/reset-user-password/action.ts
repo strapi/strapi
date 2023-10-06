@@ -13,7 +13,7 @@ interface Answers {
   confirm: boolean;
 }
 
-const promptQuestions: inquirer.QuestionCollection<Answers> = [
+const promptQuestions: ReadonlyArray<inquirer.DistinctQuestion<Answers>> = [
   { type: 'input', name: 'email', message: 'User email?' },
   { type: 'password', name: 'password', message: 'New password?' },
   {

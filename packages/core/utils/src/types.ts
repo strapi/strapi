@@ -1,7 +1,7 @@
 import type * as Koa from 'koa';
 import type {} from 'koa-body';
 
-type ID = number | `${number}`;
+type ID = number | string;
 
 export type Data = {
   id?: ID;
@@ -52,6 +52,7 @@ export interface ScalarAttribute extends Attribute {
     | 'enumeration'
     | 'boolean'
     | 'json'
+    | 'blocks'
     | 'uid'
     | 'password'
     | 'email'
@@ -72,8 +73,8 @@ export interface Model {
   kind?: Kind;
   info?: {
     displayName: string;
-    singularName: string;
-    pluralName: string;
+    singularName?: string;
+    pluralName?: string;
   };
   options?: {
     populateCreatorFields?: boolean;

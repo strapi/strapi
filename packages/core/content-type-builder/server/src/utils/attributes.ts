@@ -19,7 +19,7 @@ export const isRelation = (attribute: Attribute.Any) => attribute.type === 'rela
 /**
  * Formats a component's attributes
  */
-export const formatAttributes = (model: Schema.Component) => {
+export const formatAttributes = (model: any) => {
   const { getVisibleAttributes } = utils.contentTypes;
 
   // only get attributes that can be seen in the CTB
@@ -65,7 +65,7 @@ export const formatAttribute = (attribute: Attribute.Any & Record<string, any>) 
 };
 
 // TODO: move to schema builder
-export const replaceTemporaryUIDs = (uidMap: any) => (schema: Schema.Schema) => {
+export const replaceTemporaryUIDs = (uidMap: any) => (schema: any) => {
   return {
     ...schema,
     attributes: Object.keys(schema.attributes).reduce((acc: any, key) => {
@@ -91,7 +91,7 @@ export const replaceTemporaryUIDs = (uidMap: any) => (schema: Schema.Schema) => 
       ) {
         acc[key] = {
           ...attr,
-          components: attr.components.map((value) => {
+          components: attr.components.map((value: any) => {
             if (_.has(uidMap, value)) return uidMap[value];
 
             if (!_.has(strapi.components, value)) {

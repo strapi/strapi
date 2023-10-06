@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-mailgun",
-  "version": "4.13.7",
+  "version": "4.14.3",
   "description": "Mailgun provider for strapi email plugin",
   "keywords": [
     "email",
@@ -29,28 +29,30 @@
     }
   ],
   "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "files": [
     "./dist"
   ],
   "scripts": {
-    "build": "run -T tsc",
-    "build:ts": "run -T tsc",
-    "watch": "run -T tsc -w --preserveWatchOutput",
+    "build": "pack-up build",
     "clean": "run -T rimraf ./dist",
+    "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "lint": "run -T eslint ."
+    "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/utils": "4.13.7",
+    "@strapi/utils": "4.14.3",
     "form-data": "^4.0.0",
     "mailgun.js": "8.2.1"
   },
   "devDependencies": {
-    "eslint-config-custom": "4.13.7",
-    "tsconfig": "4.13.7"
+    "@strapi/pack-up": "workspace:*",
+    "eslint-config-custom": "4.14.3",
+    "tsconfig": "4.14.3"
   },
   "engines": {
     "node": ">=16.0.0 <=20.x.x",
