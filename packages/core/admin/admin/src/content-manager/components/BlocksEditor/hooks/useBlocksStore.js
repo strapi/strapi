@@ -239,6 +239,7 @@ const Img = styled.img`
   object-fit: contain;
 `;
 
+// Added a background color to the image wrapper to make it easier to recognize the image block
 const Image = ({ attributes, children, element }) => {
   if (!element.image) return null;
   const { url, alternativeText, width, height } = element.image;
@@ -246,9 +247,9 @@ const Image = ({ attributes, children, element }) => {
   return (
     <Box {...attributes}>
       {children}
-      <Box contentEditable={false}>
+      <Flex background="neutral100" contentEditable={false} justifyContent="center">
         <Img src={url} alt={alternativeText} width={width} height={height} />
-      </Box>
+      </Flex>
     </Box>
   );
 };
