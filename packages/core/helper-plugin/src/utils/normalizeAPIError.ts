@@ -17,8 +17,14 @@ interface NormalizeErrorReturn {
   values: Record<'path', string> | Record<string, never>;
 }
 
+interface YupFormattedError {
+  path: string[];
+  message: string;
+  name: string;
+}
+
 function normalizeError(
-  error: ApiError | errors.YupFormattedError,
+  error: ApiError | YupFormattedError,
   { name, intlMessagePrefixCallback }: NormalizeErrorOptions
 ): NormalizeErrorReturn {
   const { message } = error;
@@ -37,7 +43,9 @@ function normalizeError(
   return normalizedError;
 }
 
-const validateErrorIsYupValidationError = (err: ApiError): err is errors.YupValidationError =>
+const validateErrorIsYupValidationError = (
+  err: ApiError
+): err is errors.YupValidationError & { details: { errors: YupFormattedError[] } } =>
   typeof err.details === 'object' && err.details !== null && 'errors' in err.details;
 
 export function normalizeAPIError(

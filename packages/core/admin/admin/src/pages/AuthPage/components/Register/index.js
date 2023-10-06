@@ -30,7 +30,7 @@ import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useNpsSurveySettings } from '../../../../components/NpsSurvey/hooks/useNpsSurveySettings';
-import Logo from '../../../../components/UnauthenticatedLogo';
+import { Logo } from '../../../../components/UnauthenticatedLogo';
 import UnauthenticatedLayout, { LayoutContent } from '../../../../layouts/UnauthenticatedLayout';
 import FieldActionWrapper from '../FieldActionWrapper';
 
