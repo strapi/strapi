@@ -1,7 +1,7 @@
 import { AxiosError } from 'axios';
 import { IntlFormatters, useIntl } from 'react-intl';
-import { ApiError } from 'types';
 
+import { ApiError } from '../types';
 import { getPrefixedId } from '../utils/getPrefixedId';
 import { NormalizeErrorOptions, normalizeAPIError } from '../utils/normalizeAPIError';
 

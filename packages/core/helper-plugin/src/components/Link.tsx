@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Link as DSLink, LinkProps as DSLinkProps } from '@strapi/design-system/v2';
 import { NavLink } from 'react-router-dom';
 

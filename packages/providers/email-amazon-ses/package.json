@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-amazon-ses",
-  "version": "4.14.0",
+  "version": "4.14.3",
   "description": "Amazon SES provider for strapi email",
   "keywords": [
     "email",
@@ -29,25 +29,27 @@
     }
   ],
   "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "files": [
     "./dist"
   ],
   "scripts": {
-    "build": "run -T tsc",
-    "build:ts": "run -T tsc",
-    "watch": "run -T tsc -w --preserveWatchOutput",
+    "build": "pack-up build",
     "clean": "run -T rimraf ./dist",
+    "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
-    "lint": "run -T eslint ."
+    "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/utils": "4.14.0",
+    "@strapi/utils": "4.14.3",
     "node-ses": "^3.0.3"
   },
   "devDependencies": {
-    "eslint-config-custom": "4.14.0",
-    "tsconfig": "4.14.0"
+    "@strapi/pack-up": "workspace:*",
+    "eslint-config-custom": "4.14.3",
+    "tsconfig": "4.14.3"
   },
   "engines": {
     "node": ">=16.0.0 <=20.x.x",

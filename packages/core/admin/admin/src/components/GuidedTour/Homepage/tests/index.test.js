@@ -72,18 +72,18 @@ describe('GuidedTour Homepage', () => {
         color: #32324d;
       }
 
-      .c18 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #ffffff;
-      }
-
-      .c20 {
+      .c22 {
         font-size: 0.875rem;
         line-height: 1.43;
         font-weight: 500;
         color: #666687;
+      }
+
+      .c29 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #ffffff;
       }
 
       .c0 {
@@ -128,18 +128,7 @@ describe('GuidedTour Homepage', () => {
         margin-top: 8px;
       }
 
-      .c14 {
-        background: #4945ff;
-        padding-top: 8px;
-        padding-right: 16px;
-        padding-bottom: 8px;
-        padding-left: 16px;
-        border-radius: 4px;
-        border-color: #4945ff;
-        border: 1px solid #4945ff;
-      }
-
-      .c19 {
+      .c21 {
         padding: 8px;
         border-radius: 50%;
         border-style: solid;
@@ -149,7 +138,7 @@ describe('GuidedTour Homepage', () => {
         height: 1.875rem;
       }
 
-      .c21 {
+      .c23 {
         background: #c0c0cf;
         border-radius: 4px;
         width: 0.125rem;
@@ -157,7 +146,7 @@ describe('GuidedTour Homepage', () => {
         min-height: 4.0625rem;
       }
 
-      .c23 {
+      .c25 {
         background: #4945ff;
         padding: 8px;
         padding-right: 16px;
@@ -229,22 +218,7 @@ describe('GuidedTour Homepage', () => {
         flex-direction: row;
       }
 
-      .c15 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        gap: 8px;
-      }
-
-      .c22 {
+      .c24 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -262,7 +236,7 @@ describe('GuidedTour Homepage', () => {
         justify-content: flex-end;
       }
 
-      .c24 {
+      .c26 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -275,6 +249,158 @@ describe('GuidedTour Homepage', () => {
         -ms-flex-direction: row;
         flex-direction: row;
         gap: 8px;
+      }
+
+      .c27 {
+        position: relative;
+        outline: none;
+      }
+
+      .c27 > svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c27 > svg > g,
+      .c27 > svg path {
+        fill: #ffffff;
+      }
+
+      .c27[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c27:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c27:focus-visible {
+        outline: none;
+      }
+
+      .c27:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c28 {
+        height: 2rem;
+        border: 1px solid #dcdce4;
+        background: #ffffff;
+      }
+
+      .c28 svg {
+        height: 0.75rem;
+        width: auto;
+      }
+
+      .c28[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c28[aria-disabled='true'] .c2 {
+        color: #666687;
+      }
+
+      .c28[aria-disabled='true'] svg > g,
+      .c28[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c28[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c28[aria-disabled='true']:active .c2 {
+        color: #666687;
+      }
+
+      .c28[aria-disabled='true']:active svg > g,
+      .c28[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c28:hover {
+        background-color: #f6f6f9;
+      }
+
+      .c28:active {
+        background-color: #eaeaef;
+      }
+
+      .c28 .c2 {
+        color: #32324d;
+      }
+
+      .c28 svg > g,
+      .c28 svg path {
+        fill: #32324d;
+      }
+
+      .c14 {
+        background: #4945ff;
+        padding-top: 8px;
+        padding-right: 16px;
+        padding-bottom: 8px;
+        padding-left: 16px;
+        border-radius: 4px;
+        border-color: #4945ff;
+        border: 1px solid #4945ff;
+      }
+
+      .c19 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #ffffff;
+      }
+
+      .c15 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        gap: 8px;
+      }
+
+      .c20 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
       }
 
       .c16 {
@@ -326,62 +452,6 @@ describe('GuidedTour Homepage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c25 {
-        height: 2rem;
-        border: 1px solid #dcdce4;
-        background: #ffffff;
-      }
-
-      .c25 svg {
-        height: 0.75rem;
-        width: auto;
-      }
-
-      .c25[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c25[aria-disabled='true'] .c2 {
-        color: #666687;
-      }
-
-      .c25[aria-disabled='true'] svg > g,
-      .c25[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c25[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c25[aria-disabled='true']:active .c2 {
-        color: #666687;
-      }
-
-      .c25[aria-disabled='true']:active svg > g,
-      .c25[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c25:hover {
-        background-color: #f6f6f9;
-      }
-
-      .c25:active {
-        background-color: #eaeaef;
-      }
-
-      .c25 .c2 {
-        color: #32324d;
-      }
-
-      .c25 svg > g,
-      .c25 svg path {
-        fill: #32324d;
-      }
-
       .c17 {
         -webkit-text-decoration: none;
         text-decoration: none;
@@ -392,7 +462,7 @@ describe('GuidedTour Homepage', () => {
         background: #eaeaef;
       }
 
-      .c17[aria-disabled='true'] .c2 {
+      .c17[aria-disabled='true'] .c18 {
         color: #666687;
       }
 
@@ -406,7 +476,7 @@ describe('GuidedTour Homepage', () => {
         background: #eaeaef;
       }
 
-      .c17[aria-disabled='true']:active .c2 {
+      .c17[aria-disabled='true']:active .c18 {
         color: #666687;
       }
 
@@ -488,13 +558,13 @@ describe('GuidedTour Homepage', () => {
                     href="/plugins/content-type-builder"
                   >
                     <span
-                      class="c2 c18"
+                      class="c18 c19"
                     >
                       Go to the Content type Builder
                     </span>
                     <div
                       aria-hidden="true"
-                      class="c4"
+                      class="c20"
                     >
                       <svg
                         fill="none"
@@ -523,10 +593,10 @@ describe('GuidedTour Homepage', () => {
                   class="c5"
                 >
                   <div
-                    class="c19 c7"
+                    class="c21 c7"
                   >
                     <span
-                      class="c2 c20"
+                      class="c2 c22"
                     >
                       2
                     </span>
@@ -545,7 +615,7 @@ describe('GuidedTour Homepage', () => {
                   class="c11 c7"
                 >
                   <div
-                    class="c21"
+                    class="c23"
                   />
                 </div>
                 <div
@@ -563,10 +633,10 @@ describe('GuidedTour Homepage', () => {
                   class="c5"
                 >
                   <div
-                    class="c19 c7"
+                    class="c21 c7"
                   >
                     <span
-                      class="c2 c20"
+                      class="c2 c22"
                     >
                       3
                     </span>
@@ -592,15 +662,15 @@ describe('GuidedTour Homepage', () => {
           </div>
         </div>
         <div
-          class="c22"
+          class="c24"
         >
           <button
             aria-disabled="false"
-            class="c23 c24 c16 c25"
+            class="c25 c26 c27 c28"
             type="button"
           >
             <span
-              class="c2 c18"
+              class="c2 c29"
             >
               Skip the tour
             </span>

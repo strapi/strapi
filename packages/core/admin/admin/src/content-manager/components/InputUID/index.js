@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 
-import useDebounce from '../../../hooks/useDebounce';
+import { useDebounce } from '../../../hooks/useDebounce';
 
 import { FieldActionWrapper, LoadingWrapper, TextValidation } from './endActionStyle';
 import UID_REGEX from './regex';
