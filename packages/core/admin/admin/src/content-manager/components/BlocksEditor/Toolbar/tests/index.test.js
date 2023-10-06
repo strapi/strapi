@@ -430,7 +430,7 @@ describe('BlocksEditor toolbar', () => {
             children: [
               {
                 type: 'text',
-                text: 'A line of text in a paragraph.',
+                text: 'First list item',
               },
             ],
           },
@@ -439,7 +439,7 @@ describe('BlocksEditor toolbar', () => {
             children: [
               {
                 type: 'text',
-                text: 'A line of text in a paragraph.',
+                text: 'Second list item',
               },
             ],
           },
@@ -448,7 +448,7 @@ describe('BlocksEditor toolbar', () => {
             children: [
               {
                 type: 'text',
-                text: 'A line of text in a paragraph.',
+                text: 'Third list item',
               },
             ],
           },
@@ -478,7 +478,7 @@ describe('BlocksEditor toolbar', () => {
             children: [
               {
                 type: 'text',
-                text: 'A line of text in a paragraph.',
+                text: 'First list item',
               },
             ],
           },
@@ -489,7 +489,7 @@ describe('BlocksEditor toolbar', () => {
         children: [
           {
             type: 'text',
-            text: 'A line of text in a paragraph.',
+            text: 'Second list item',
           },
         ],
       },
@@ -502,7 +502,7 @@ describe('BlocksEditor toolbar', () => {
             children: [
               {
                 type: 'text',
-                text: 'A line of text in a paragraph.',
+                text: 'Third list item',
               },
             ],
           },
