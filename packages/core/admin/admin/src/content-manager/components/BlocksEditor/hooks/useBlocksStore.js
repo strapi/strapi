@@ -292,20 +292,14 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
   const handleSave = (e) => {
     e.stopPropagation();
 
-    if (formData.url === '') {
-      removeLink(editor);
-      setIsEditing(false);
-      setPopoverOpen(false);
-    } else {
-      // If the selection is collapsed, we select the parent node because we want all the link to be replaced
-      if (Range.isCollapsed(editor.selection)) {
-        const [, parentPath] = Editor.parent(editor, editor.selection.focus?.path);
-        Transforms.select(editor, parentPath);
-      }
-
-      editLink(editor, { url: formData.url, text: formData.text });
-      setIsEditing(false);
+    // If the selection is collapsed, we select the parent node because we want all the link to be replaced
+    if (Range.isCollapsed(editor.selection)) {
+      const [, parentPath] = Editor.parent(editor, editor.selection.focus?.path);
+      Transforms.select(editor, parentPath);
     }
+
+    editLink(editor, { url: formData.url, text: formData.text });
+    setIsEditing(false);
   };
 
   const handleCancel = () => {
