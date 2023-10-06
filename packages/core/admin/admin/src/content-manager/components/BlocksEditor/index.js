@@ -8,11 +8,20 @@ import { withHistory } from 'slate-history';
 import { Slate, withReact, ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
+import Hint from '../Hint';
+
 import BlocksInput from './BlocksInput';
+import { withLinks, withStrapiSchema } from './plugins';
 import { BlocksToolbar } from './Toolbar';
 
 const TypographyAsterisk = styled(Typography)`
   line-height: 0;
+`;
+
+const LabelAction = styled(Box)`
+  svg path {
+    fill: ${({ theme }) => theme.colors.neutral500};
+  }
 `;
 
 const EditorDivider = styled(Divider)`
@@ -21,7 +30,6 @@ const EditorDivider = styled(Divider)`
 
 const Wrapper = styled(Box)`
   width: 100%;
-  max-height: 512px;
   overflow: auto;
   padding: ${({ theme }) => `${theme.spaces[3]} ${theme.spaces[4]}`};
   font-size: ${({ theme }) => theme.fontSizes[2]};
@@ -31,10 +39,33 @@ const Wrapper = styled(Box)`
   border-radius: ${({ theme }) => theme.borderRadius};
 `;
 
+/**
+ * Images are void elements. They handle the rendering of their children instead of Slate.
+ * See the Slate documentation for more information:
+ * - https://docs.slatejs.org/api/nodes/element#void-vs-not-void
+ * - https://docs.slatejs.org/api/nodes/element#rendering-void-elements
+ *
+ * @param {import('slate').Editor} editor
+ */
+const withImages = (editor) => {
+  const { isVoid } = editor;
+
+  editor.isVoid = (element) => {
+    return element.type === 'image' ? true : isVoid(element);
+  };
+
+  return editor;
+};
+
 const BlocksEditor = React.forwardRef(
-  ({ intlLabel, name, readOnly, required, error, value, onChange }, ref) => {
+  (
+    { intlLabel, labelAction, name, disabled, required, error, value, onChange, placeholder, hint },
+    ref
+  ) => {
     const { formatMessage } = useIntl();
-    const [editor] = React.useState(() => withReact(withHistory(createEditor())));
+    const [editor] = React.useState(() =>
+      withReact(withStrapiSchema(withLinks(withImages(withHistory(createEditor())))))
+    );
 
     const label = intlLabel.id
       ? formatMessage(
@@ -42,6 +73,10 @@ const BlocksEditor = React.forwardRef(
           { ...intlLabel.values }
         )
       : name;
+
+    const formattedPlaceholder = placeholder
+      ? formatMessage({ id: placeholder.id, defaultMessage: placeholder.defaultMessage })
+      : null;
 
     /** Editable is not able to hold the ref, https://github.com/ianstormtaylor/slate/issues/4082
      *  so with "useImperativeHandle" we can use ReactEditor methods to expose to the parent above
@@ -75,20 +110,22 @@ const BlocksEditor = React.forwardRef(
               {label}
               {required && <TypographyAsterisk textColor="danger600">*</TypographyAsterisk>}
             </Typography>
+            {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
           </Flex>
           <Slate
             editor={editor}
             initialValue={value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]}
             onChange={handleSlateChange}
           >
-            <InputWrapper direction="column" alignItems="flex-start">
-              <BlocksToolbar />
+            <InputWrapper direction="column" alignItems="flex-start" height="512px">
+              <BlocksToolbar disabled={disabled} />
               <EditorDivider width="100%" />
-              <Wrapper>
-                <BlocksInput readOnly={readOnly} />
+              <Wrapper grow={1}>
+                <BlocksInput disabled={disabled} placeholder={formattedPlaceholder} />
               </Wrapper>
             </InputWrapper>
           </Slate>
+          <Hint hint={hint} name={name} error={error} />
         </Flex>
         {error && (
           <Box paddingTop={1}>
@@ -103,10 +140,13 @@ const BlocksEditor = React.forwardRef(
 );
 
 BlocksEditor.defaultProps = {
+  labelAction: null,
+  disabled: false,
   required: false,
-  readOnly: false,
   error: '',
   value: null,
+  placeholder: null,
+  hint: null,
 };
 
 BlocksEditor.propTypes = {
@@ -115,12 +155,18 @@ BlocksEditor.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }).isRequired,
+  labelAction: PropTypes.element,
   name: PropTypes.string.isRequired,
   required: PropTypes.bool,
-  readOnly: PropTypes.bool,
+  disabled: PropTypes.bool,
   error: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.array,
+  placeholder: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+  }),
+  hint: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
 };
 
 export default BlocksEditor;
