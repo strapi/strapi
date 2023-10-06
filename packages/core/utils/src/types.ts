@@ -1,7 +1,7 @@
 import type * as Koa from 'koa';
 import type {} from 'koa-body';
 
-type ID = number | `${number}`;
+type ID = number | string;
 
 export type Data = {
   id?: ID;
