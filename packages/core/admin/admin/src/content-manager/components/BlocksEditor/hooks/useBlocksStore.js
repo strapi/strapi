@@ -232,6 +232,7 @@ const handleEnterKeyOnList = (editor) => {
   }
 };
 
+// The max-height is decided togher with the design team
 const Img = styled.img`
   max-height: 512px;
   max-width: 100%;
