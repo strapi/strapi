@@ -272,17 +272,8 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
   const [isEditing, setIsEditing] = React.useState(element.url === '');
   const linkRef = React.useRef(null);
   const elementText = element.children.map((child) => child.text).join('');
-  const [formData, setFormData] = React.useState({
-    text: elementText,
-    url: element.url,
-  });
-
-  const handleFormDataChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+  const [linkText, setLinkText] = React.useState(elementText);
+  const [linkUrl, setLinkUrl] = React.useState(element.url);
 
   const handleOpenEditPopover = (e) => {
     e.preventDefault();
@@ -298,7 +289,7 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
       Transforms.select(editor, parentPath);
     }
 
-    editLink(editor, { url: formData.url, text: formData.text });
+    editLink(editor, { url: linkUrl, text: linkText });
     setIsEditing(false);
   };
 
@@ -349,8 +340,8 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                     id: 'components.Blocks.popover.text.placeholder',
                     defaultMessage: 'Enter link text',
                   })}
-                  value={formData.text}
-                  onChange={handleFormDataChange}
+                  value={linkText}
+                  onChange={(e) => setLinkText(e.target.value)}
                 />
               </Field>
               <Field width="300px">
@@ -363,8 +354,8 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                 <FieldInput
                   name="url"
                   placeholder="https://strapi.io"
-                  value={formData.url}
-                  onChange={handleFormDataChange}
+                  value={linkUrl}
+                  onChange={(e) => setLinkUrl(e.target.value)}
                 />
               </Field>
               <Flex justifyContent="end" width="100%" gap={2}>
@@ -374,7 +365,7 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                     defaultMessage: 'Cancel',
                   })}
                 </Button>
-                <Button type="submit" disabled={!formData.text || !formData.url}>
+                <Button type="submit" disabled={!linkText || !linkUrl}>
                   {formatMessage({
                     id: 'components.Blocks.popover.save',
                     defaultMessage: 'Save',

@@ -313,11 +313,11 @@ describe('useBlocksStore', () => {
 
     const linkTextInput = screen.getByPlaceholderText('Enter link text');
     const SaveButton = screen.getAllByRole('button', { type: 'submit' });
-    expect(SaveButton[1]).toHaveAttribute('aria-disabled', 'false'); // SaveButton[1] is a popover save button
+    expect(SaveButton[1]).not.toBeDisabled(); // SaveButton[1] is a popover save button
 
     // Remove link text and check if save button is disabled
     userEvent.clear(linkTextInput);
-    expect(SaveButton[1]).toHaveAttribute('aria-disabled', 'true');
+    expect(SaveButton[1]).toBeDisabled();
   });
 
   it('renders a code block properly', () => {
