@@ -2,7 +2,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import * as yup from 'yup';
 
-const formsAPI = {
+export const formsAPI = {
   components: {
     inputs: {},
     add({ id, component }) {
@@ -119,5 +119,3 @@ const formsAPI = {
     return enhancedData;
   },
 };
-
-export default formsAPI;

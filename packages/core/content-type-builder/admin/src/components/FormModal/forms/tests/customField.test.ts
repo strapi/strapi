@@ -1,7 +1,7 @@
 import * as yup from 'yup';
 
-import forms from '..';
-import ctbFormsAPI from '../../../../utils/formAPI';
+import { formsAPI as ctbFormsAPI } from '../../../../utils/formAPI';
+import { SchemaParams, forms } from '../forms';
 
 const mockBaseCustomField = {
   name: 'color',
@@ -62,7 +62,7 @@ const mockNewSectionInput = [
 describe('customField forms', () => {
   describe('schema', () => {
     it('validates input using the provided validator', async () => {
-      const mockArgs = {
+      const mockArgs: SchemaParams = {
         schemaAttributes: [
           {
             type: 'string',
@@ -73,7 +73,9 @@ describe('customField forms', () => {
           },
         ],
         attributeType: 'string',
-        reservedNames: {},
+        reservedNames: {
+          attributes: [],
+        },
         customFieldValidator: () => ({
           test: yup.string().required(),
         }),

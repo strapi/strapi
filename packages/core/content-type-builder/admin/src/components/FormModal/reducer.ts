@@ -2,6 +2,7 @@ import produce from 'immer';
 import set from 'lodash/set';
 import snakeCase from 'lodash/snakeCase';
 import pluralize from 'pluralize';
+import { AnyAction } from 'redux';
 
 import getRelationType from '../../utils/getRelationType';
 import nameToSlug from '../../utils/nameToSlug';
@@ -11,7 +12,15 @@ import { createComponentUid } from './utils/createUid';
 import { customFieldDefaultOptionsReducer } from './utils/customFieldDefaultOptionsReducer';
 import { shouldPluralizeName, shouldPluralizeTargetAttribute } from './utils/relations';
 
-const initialState = {
+// type InitialState = {
+//   formErrors: Record<string, unknown>;
+//   modifiedData: Record<string, unknown>;
+//   initialData: Record<string, unknown>;
+//   componentToCreate: Record<string, unknown>;
+//   isCreatingComponentWhileAddingAField: boolean;
+// };
+
+const initialState: any = {
   formErrors: {},
   modifiedData: {},
   initialData: {},
@@ -19,9 +28,9 @@ const initialState = {
   isCreatingComponentWhileAddingAField: false,
 };
 
-const reducer = (state = initialState, action) =>
+const reducer = (state = initialState, action: AnyAction) =>
   // eslint-disable-next-line consistent-return
-  produce(state, (draftState) => {
+  produce(state, (draftState: any) => {
     switch (action.type) {
       case actions.ON_CHANGE: {
         const { keys, value } = action;
@@ -312,7 +321,7 @@ const reducer = (state = initialState, action) =>
         const optionDefaults = allOptions.reduce(customFieldDefaultOptionsReducer, []);
 
         if (optionDefaults.length) {
-          optionDefaults.forEach(({ name, defaultValue }) =>
+          optionDefaults.forEach(({ name, defaultValue }: { name: string; defaultValue: string }) =>
             set(draftState.modifiedData, name, defaultValue)
           );
         }
@@ -333,5 +342,4 @@ const reducer = (state = initialState, action) =>
     }
   });
 
-export default reducer;
-export { initialState };
+export { initialState, reducer };

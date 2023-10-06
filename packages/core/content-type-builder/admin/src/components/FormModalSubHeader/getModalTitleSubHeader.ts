@@ -1,11 +1,25 @@
 import { getTrad } from '../../utils/getTrad';
 
-const getModalTitleSubHeader = ({ modalType, forTarget, kind, actionType, step }) => {
+type ModalTitleProps = {
+  forTarget?: Array<string>;
+  step?: string;
+  kind?: string;
+  modalType?: string;
+  actionType?: string;
+};
+
+export const getModalTitleSubHeader = ({
+  modalType,
+  forTarget,
+  kind,
+  actionType,
+  step,
+}: ModalTitleProps) => {
   switch (modalType) {
     case 'chooseAttribute':
       return getTrad(
         `modalForm.sub-header.chooseAttribute.${
-          forTarget.includes('component') ? 'component' : kind || 'collectionType'
+          forTarget?.includes('component') ? 'component' : kind || 'collectionType'
         }`
       );
     case 'attribute': {
@@ -24,5 +38,3 @@ const getModalTitleSubHeader = ({ modalType, forTarget, kind, actionType, step }
       return getTrad('configurations');
   }
 };
-
-export default getModalTitleSubHeader;

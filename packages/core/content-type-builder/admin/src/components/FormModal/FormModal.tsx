@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import {
   Box,
@@ -33,21 +33,20 @@ import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
 import useDataManager from '../../hooks/useDataManager';
-import useFormModalNavigation from '../../hooks/useFormModalNavigation';
+import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import pluginId from '../../pluginId';
 import { getTrad, isAllowedContentTypesForRelations } from '../../utils';
 import findAttribute from '../../utils/findAttribute';
 // New compos
-import AllowedTypesSelect from '../AllowedTypesSelect';
+import { AllowedTypesSelect } from '../AllowedTypesSelect';
 import AttributeOptions from '../AttributeOptions';
-import BooleanDefaultValueSelect from '../BooleanDefaultValueSelect';
-import BooleanRadioGroup from '../BooleanRadioGroup';
-import {CheckboxWithNumberField} from '../CheckboxWithNumberField';
-import ContentTypeRadioGroup from '../ContentTypeRadioGroup';
-import CustomRadioGroup from '../CustomRadioGroup';
+import { BooleanDefaultValueSelect } from '../BooleanDefaultValueSelect';
+import { BooleanRadioGroup } from '../BooleanRadioGroup';
+import { CheckboxWithNumberField } from '../CheckboxWithNumberField';
+import { ContentTypeRadioGroup } from '../ContentTypeRadioGroup';
+import { CustomRadioGroup } from '../CustomRadioGroup';
 import DraftAndPublishToggle from '../DraftAndPublishToggle';
-import FormModalEndActions from '../FormModalEndActions';
-import FormModalHeader from '../FormModalHeader';
+import { FormModalEndActions } from '../FormModalEndActions';
 import FormModalSubHeader from '../FormModalSubHeader';
 import IconPicker from '../IconPicker';
 import PluralName from '../PluralName';
@@ -73,8 +72,8 @@ import {
   SET_DYNAMIC_ZONE_DATA_SCHEMA,
   SET_ERRORS,
 } from './constants';
-import forms from './forms';
-import makeSelectFormModal from './selectors';
+import { forms } from './forms/forms';
+import { makeSelectFormModal } from './selectors';
 import { canEditContentType, getAttributesToDisplay, getFormInputNames } from './utils';
 import { createComponentUid, createUid } from './utils/createUid';
 
@@ -87,7 +86,7 @@ const AlphaFeatureAlert = styled(Alert)`
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
-const FormModal = () => {
+export const FormModal = () => {
   const {
     onCloseModal,
     onNavigateToChooseAttributeModal,
@@ -419,7 +418,7 @@ const FormModal = () => {
         // in order to prevent the user from creating a relation with a targetAttribute
         // that may exist in the other content type
         alreadyTakenTargetContentTypeAttributes = targetContentTypeAttributes.filter(
-          ({ name: attrName }) => {
+          ({ name: attrName }: { name: string }) => {
             // Keep all the target content type attributes when creating a relation
             if (actionType !== 'edit') {
               return true;
@@ -809,7 +808,6 @@ const FormModal = () => {
       });
     } catch (err) {
       const errors = getYupInnerErrors(err);
-      console.log({ err, errors });
 
       dispatch({
         type: SET_ERRORS,
@@ -865,7 +863,7 @@ const FormModal = () => {
     }
   };
 
-  const sendButtonAddMoreFieldEvent = (shouldContinue) => {
+  const sendButtonAddMoreFieldEvent = (shouldContinue: boolean) => {
     if (
       modalType === 'attribute' &&
       forTarget === 'contentType' &&

@@ -1,19 +1,40 @@
 import React, { useState } from 'react';
 
 import { useTracking } from '@strapi/helper-plugin';
-import PropTypes from 'prop-types';
 
 import FormModalNavigationContext from '../../contexts/FormModalNavigationContext';
 
 import { INITIAL_STATE_DATA } from './constants';
 
-const FormModalNavigationProvider = ({ children }) => {
+type FormModalNavigationProviderProps = {
+  children: React.ReactNode;
+};
+
+export type State = any;
+
+type ModalEventProps = {
+  attributeType?: string;
+  customFieldUid?: string;
+  dynamicZoneTarget?: string;
+  forTarget?: string;
+  targetUid?: string;
+  attributeName?: string;
+  step?: string;
+  kind?: string;
+  categoryName?: string;
+  modalType?: string;
+  actionType?: string;
+  isOpen?: boolean;
+  showBackLink?: boolean;
+};
+
+export const FormModalNavigationProvider = ({ children }: FormModalNavigationProviderProps) => {
   const [state, setFormModalNavigationState] = useState(INITIAL_STATE_DATA);
   const { trackUsage } = useTracking();
 
-  const onClickSelectCustomField = ({ attributeType, customFieldUid }) => {
+  const onClickSelectCustomField = ({ attributeType, customFieldUid }: ModalEventProps) => {
     // TODO: Add tracking for custom fields
-    setFormModalNavigationState((prevState) => {
+    setFormModalNavigationState((prevState: any) => {
       return {
         ...prevState,
         actionType: 'create',
@@ -24,12 +45,12 @@ const FormModalNavigationProvider = ({ children }) => {
     });
   };
 
-  const onClickSelectField = ({ attributeType, step }) => {
+  const onClickSelectField = ({ attributeType, step }: ModalEventProps) => {
     if (state.forTarget === 'contentType') {
       trackUsage('didSelectContentTypeFieldType', { type: attributeType });
     }
 
-    setFormModalNavigationState((prevState) => {
+    setFormModalNavigationState((prevState: State) => {
       return {
         ...prevState,
         actionType: 'create',
@@ -41,8 +62,8 @@ const FormModalNavigationProvider = ({ children }) => {
     });
   };
 
-  const onOpenModalAddComponentsToDZ = ({ dynamicZoneTarget, targetUid }) => {
-    setFormModalNavigationState((prevState) => {
+  const onOpenModalAddComponentsToDZ = ({ dynamicZoneTarget, targetUid }: ModalEventProps) => {
+    setFormModalNavigationState((prevState: State) => {
       return {
         ...prevState,
         dynamicZoneTarget,
@@ -56,8 +77,8 @@ const FormModalNavigationProvider = ({ children }) => {
     });
   };
 
-  const onOpenModalAddField = ({ forTarget, targetUid }) => {
-    setFormModalNavigationState((prevState) => {
+  const onOpenModalAddField = ({ forTarget, targetUid }: ModalEventProps) => {
+    setFormModalNavigationState((prevState: State) => {
       return {
         ...prevState,
         actionType: 'create',
@@ -70,14 +91,14 @@ const FormModalNavigationProvider = ({ children }) => {
     });
   };
 
-  const onOpenModalCreateSchema = (nextState) => {
+  const onOpenModalCreateSchema = (nextState: State) => {
     setFormModalNavigationState((prevState) => {
       return { ...prevState, ...nextState, isOpen: true };
     });
   };
 
-  const onOpenModalEditCategory = (categoryName) => {
-    setFormModalNavigationState((prevState) => {
+  const onOpenModalEditCategory = (categoryName: string) => {
+    setFormModalNavigationState((prevState: State) => {
       return {
         ...prevState,
         categoryName,
@@ -94,8 +115,8 @@ const FormModalNavigationProvider = ({ children }) => {
     attributeName,
     attributeType,
     customFieldUid,
-  }) => {
-    setFormModalNavigationState((prevState) => {
+  }: ModalEventProps) => {
+    setFormModalNavigationState((prevState: State) => {
       return {
         ...prevState,
         modalType: 'customField',
@@ -110,8 +131,14 @@ const FormModalNavigationProvider = ({ children }) => {
     });
   };
 
-  const onOpenModalEditField = ({ forTarget, targetUid, attributeName, attributeType, step }) => {
-    setFormModalNavigationState((prevState) => {
+  const onOpenModalEditField = ({
+    forTarget,
+    targetUid,
+    attributeName,
+    attributeType,
+    step,
+  }: ModalEventProps) => {
+    setFormModalNavigationState((prevState: State) => {
       return {
         ...prevState,
         modalType: 'attribute',
@@ -126,8 +153,8 @@ const FormModalNavigationProvider = ({ children }) => {
     });
   };
 
-  const onOpenModalEditSchema = ({ modalType, forTarget, targetUid, kind }) => {
-    setFormModalNavigationState((prevState) => {
+  const onOpenModalEditSchema = ({ modalType, forTarget, targetUid, kind }: ModalEventProps) => {
+    setFormModalNavigationState((prevState: State) => {
       return {
         ...prevState,
         modalType,
@@ -144,8 +171,8 @@ const FormModalNavigationProvider = ({ children }) => {
     setFormModalNavigationState(INITIAL_STATE_DATA);
   };
 
-  const onNavigateToChooseAttributeModal = ({ forTarget, targetUid }) => {
-    setFormModalNavigationState((prev) => {
+  const onNavigateToChooseAttributeModal = ({ forTarget, targetUid }: ModalEventProps) => {
+    setFormModalNavigationState((prev: State) => {
       return {
         ...prev,
         forTarget,
@@ -156,7 +183,7 @@ const FormModalNavigationProvider = ({ children }) => {
   };
 
   const onNavigateToCreateComponentStep2 = () => {
-    setFormModalNavigationState((prev) => {
+    setFormModalNavigationState((prev: State) => {
       return {
         ...prev,
         attributeType: 'component',
@@ -166,8 +193,8 @@ const FormModalNavigationProvider = ({ children }) => {
     });
   };
 
-  const onNavigateToAddCompoToDZModal = ({ dynamicZoneTarget }) => {
-    setFormModalNavigationState((prev) => {
+  const onNavigateToAddCompoToDZModal = ({ dynamicZoneTarget }: ModalEventProps) => {
+    setFormModalNavigationState((prev: State) => {
       return {
         ...prev,
         dynamicZoneTarget,
@@ -204,9 +231,3 @@ const FormModalNavigationProvider = ({ children }) => {
     </FormModalNavigationContext.Provider>
   );
 };
-
-FormModalNavigationProvider.propTypes = {
-  children: PropTypes.node.isRequired,
-};
-
-export default FormModalNavigationProvider;

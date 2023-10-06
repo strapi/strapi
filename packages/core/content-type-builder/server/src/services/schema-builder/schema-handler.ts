@@ -1,5 +1,9 @@
 import path from 'path';
+<<<<<<< Updated upstream
 import type { UID, Schema } from '@strapi/types';
+=======
+import type { UID, Schema, Attribute } from '@strapi/types';
+>>>>>>> Stashed changes
 import fse from 'fs-extra';
 import _ from 'lodash';
 
@@ -86,15 +90,24 @@ export default function createSchemaHandler(infos: Infos) {
       return this;
     },
 
+<<<<<<< Updated upstream
     // get a particular path inside the schema
+=======
+    // get a particuar path inside the schema
+>>>>>>> Stashed changes
     get(path: string[]) {
       return _.get(state.schema, path);
     },
 
+<<<<<<< Updated upstream
     // set a particular path inside the schema
     set(path: string[] | string, val: unknown) {
       if (!state.schema) return this;
 
+=======
+    // set a particuar path inside the schema
+    set(path: string[] | string, val: unknown) {
+>>>>>>> Stashed changes
       modified = true;
 
       const value = _.defaultTo(val, _.get(state.schema, path));
@@ -103,7 +116,11 @@ export default function createSchemaHandler(infos: Infos) {
       return this;
     },
 
+<<<<<<< Updated upstream
     // delete a particular path inside the schema
+=======
+    // delete a particuar path inside the schema
+>>>>>>> Stashed changes
     unset(path: string[]) {
       modified = true;
 
@@ -121,7 +138,11 @@ export default function createSchemaHandler(infos: Infos) {
       return this.get(['attributes', key]);
     },
 
+<<<<<<< Updated upstream
     setAttribute(key: string, attribute: any) {
+=======
+    setAttribute(key: string, attribute: Attribute.Any) {
+>>>>>>> Stashed changes
       return this.set(['attributes', key], attribute);
     },
 
@@ -130,8 +151,11 @@ export default function createSchemaHandler(infos: Infos) {
     },
 
     setAttributes(newAttributes: Schema.Attributes) {
+<<<<<<< Updated upstream
       if (!this.schema) return this;
 
+=======
+>>>>>>> Stashed changes
       // delete old configurable attributes
       for (const key in this.schema.attributes) {
         if (isConfigurable(this.schema.attributes[key])) {
@@ -148,9 +172,13 @@ export default function createSchemaHandler(infos: Infos) {
     },
 
     removeContentType(uid: UID.ContentType) {
+<<<<<<< Updated upstream
       if (!state.schema) return this;
 
       const attributes = state.schema.attributes as Record<string, any>;
+=======
+      const { attributes } = state.schema;
+>>>>>>> Stashed changes
 
       Object.keys(attributes).forEach((key) => {
         const attribute = attributes[key];
@@ -165,9 +193,13 @@ export default function createSchemaHandler(infos: Infos) {
 
     // utils
     removeComponent(uid: UID.Component) {
+<<<<<<< Updated upstream
       if (!state.schema) return this;
 
       const attributes = state.schema.attributes as Record<string, any>;
+=======
+      const { attributes } = state.schema;
+>>>>>>> Stashed changes
 
       Object.keys(attributes).forEach((key) => {
         const attr = attributes[key];
@@ -192,9 +224,13 @@ export default function createSchemaHandler(infos: Infos) {
     },
 
     updateComponent(uid: UID.Component, newUID: UID.Component) {
+<<<<<<< Updated upstream
       if (!state.schema) return this;
 
       const attributes = state.schema.attributes as Record<string, any>;
+=======
+      const { attributes } = state.schema;
+>>>>>>> Stashed changes
 
       Object.keys(attributes).forEach((key) => {
         const attr = attributes[key];
@@ -312,4 +348,8 @@ export default function createSchemaHandler(infos: Infos) {
       return Promise.resolve();
     },
   };
+<<<<<<< Updated upstream
 }
+=======
+}
+>>>>>>> Stashed changes

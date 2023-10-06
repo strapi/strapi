@@ -14,13 +14,13 @@ import { Route, Switch } from 'react-router-dom';
 
 import ContentTypeBuilderNav from '../../components/ContentTypeBuilderNav';
 import DataManagerProvider from '../../components/DataManagerProvider';
-import FormModalNavigationProvider from '../../components/FormModalNavigationProvider';
+import FormModalNavigationProvider from '../../components/FormModalNavigationProvider/FormModalNavigationProvider.tsx';
 import { PERMISSIONS } from '../../constants';
 import pluginId from '../../pluginId';
 import RecursivePath from '../RecursivePath';
 
-const ListView = lazy(() =>
-  import(/* webpackChunkName: "content-type-builder-list-view" */ '../ListView')
+const ListView = lazy(
+  () => import(/* webpackChunkName: "content-type-builder-list-view" */ '../ListView')
 );
 
 const App = () => {

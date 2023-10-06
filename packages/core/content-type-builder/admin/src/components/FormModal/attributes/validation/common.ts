@@ -6,11 +6,13 @@ import { getTrad } from '../../../../utils/getTrad';
 
 const NAME_REGEX = /^[A-Za-z][_0-9A-Za-z]*$/;
 
-const alreadyUsedAttributeNames = (usedNames: Array<string>) => {
+const alreadyUsedAttributeNames = (
+  usedNames: Array<string>
+): yup.TestConfig<string | undefined, Record<string, unknown>> => {
   return {
     name: 'attributeNameAlreadyUsed',
     message: errorsTrads.unique,
-    test(value: unknown) {
+    test(value: string | undefined) {
       if (!value) {
         return false;
       }
@@ -36,11 +38,13 @@ const getUsedContentTypeAttributeNames = (
   });
 };
 
-const isNameAllowed = (reservedNames: Array<string>) => {
+const isNameAllowed = (
+  reservedNames: Array<string>
+): yup.TestConfig<string | undefined, Record<string, unknown>> => {
   return {
     name: 'forbiddenAttributeName',
     message: getTrad('error.attributeName.reserved-name'),
-    test(value: string) {
+    test(value: string | undefined) {
       if (!value) {
         return false;
       }
@@ -119,10 +123,17 @@ const createTextShape = (usedAttributeNames: Array<string>, reservedNames: Array
   return shape;
 };
 
-const isMinSuperiorThanMax = {
+type GenericIsMinSuperiorThanMax<T extends (string | null) | number> = yup.TestConfig<
+  T | undefined,
+  Record<string, unknown>
+>;
+
+const isMinSuperiorThanMax = <
+  T extends (string | null) | number
+>(): GenericIsMinSuperiorThanMax<T> => ({
   name: 'isMinSuperiorThanMax',
   message: getTrad('error.validation.minSupMax'),
-  test(min: string) {
+  test(min: T | undefined) {
     if (!min) {
       return true;
     }
@@ -139,7 +150,7 @@ const isMinSuperiorThanMax = {
 
     return toNumber(max) >= toNumber(min);
   },
-};
+});
 
 export {
   alreadyUsedAttributeNames,

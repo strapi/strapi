@@ -1,10 +1,12 @@
 import slugify from '@sindresorhus/slugify';
 
-const toRegressedEnumValue = (value) =>
-  slugify(value, {
+export const toRegressedEnumValue = (value: string | undefined) => {
+  if (!value) {
+    return '';
+  }
+  return slugify(value, {
     decamelize: false,
     lowercase: false,
     separator: '_',
   });
-
-export default toRegressedEnumValue;
+};

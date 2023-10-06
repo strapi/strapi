@@ -1,15 +1,25 @@
-import React from 'react';
-
 import { Flex, Typography } from '@strapi/design-system';
 import upperFirst from 'lodash/upperFirst';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../utils';
 
-import getModalTitleSubHeader from './getModalTitleSubHeader';
+import { getModalTitleSubHeader } from './getModalTitleSubHeader';
 
-const FormModalSubHeader = ({
+type FormModalSubHeaderProps = {
+  actionType: string;
+  modalType: string;
+  forTarget: string[];
+  kind: string;
+  step: string;
+  attributeType: string;
+  attributeName: string;
+  customField: {
+    intlLabel: object;
+  };
+};
+
+export const FormModalSubHeader = ({
   actionType,
   modalType,
   forTarget,
@@ -18,7 +28,7 @@ const FormModalSubHeader = ({
   attributeType,
   attributeName,
   customField,
-}) => {
+}: FormModalSubHeaderProps) => {
   const { formatMessage } = useIntl();
   const intlLabel =
     modalType === 'customField'
@@ -55,27 +65,3 @@ const FormModalSubHeader = ({
     </Flex>
   );
 };
-
-FormModalSubHeader.defaultProps = {
-  actionType: null,
-  modalType: null,
-  forTarget: null,
-  kind: null,
-  step: null,
-  attributeType: null,
-  attributeName: null,
-  customField: null,
-};
-
-FormModalSubHeader.propTypes = {
-  actionType: PropTypes.string,
-  modalType: PropTypes.string,
-  forTarget: PropTypes.string,
-  kind: PropTypes.string,
-  step: PropTypes.string,
-  attributeType: PropTypes.string,
-  attributeName: PropTypes.string,
-  customField: PropTypes.object,
-};
-
-export default FormModalSubHeader;

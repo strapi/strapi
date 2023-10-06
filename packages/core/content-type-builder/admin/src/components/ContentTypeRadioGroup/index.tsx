@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import { getTrad } from '../../utils';
 import CustomRadioGroup from '../CustomRadioGroup';
 
-const ContentTypeRadioGroup = ({ onChange, ...rest }) => {
+export const ContentTypeRadioGroup = ({ onChange, ...rest }) => {
   const toggleNotification = useNotification();
 
   const handleChange = (e) => {
@@ -24,9 +24,3 @@ const ContentTypeRadioGroup = ({ onChange, ...rest }) => {
 
   return <CustomRadioGroup {...rest} onChange={handleChange} />;
 };
-
-ContentTypeRadioGroup.propTypes = {
-  onChange: PropTypes.func.isRequired,
-};
-
-export default ContentTypeRadioGroup;

@@ -1,15 +1,51 @@
 import { getTrad } from '../../../utils/getTrad';
-import { attributesForm, attributeTypes, commonBaseForm } from '../attributes';
+import { commonBaseForm } from '../attributes/commonBaseForm';
+import { attributesForm } from '../attributes/form';
 import { nameField } from '../attributes/nameField';
-import { categoryForm, createCategorySchema } from '../category';
-import { componentForm, createComponentSchema } from '../component/index.js';
-import { contentTypeForm, createContentTypeSchema } from '../contentType';
-import { dynamiczoneForm } from '../dynamicZone';
+import { attributeTypes } from '../attributes/types';
+import { createCategorySchema } from '../category/createCategorySchema';
+import { categoryForm } from '../category/form';
+import { componentForm } from '../component/componentForm';
+import { createComponentSchema } from '../component/createComponentSchema';
+import { contentTypeForm } from '../contentType/contentTypeForm';
+import { createContentTypeSchema } from '../contentType/createContentTypeSchema';
+import { dynamiczoneForm } from '../dynamiczoneForm';
 
 import addItemsToFormSection from './utils/addItemsToFormSection';
-import getUsedAttributeNames from './utils/getUsedAttributeNames';
+import { Attribute, getUsedAttributeNames, SchemaData } from './utils/getUsedAttributeNames';
 
-const forms = {
+import type { Common } from '@strapi/types';
+
+export type SchemaParams = {
+  schemaAttributes: any;
+  attributeType: keyof typeof attributeTypes;
+  customFieldValidator: any;
+  reservedNames: {
+    attributes: Array<string>;
+  };
+  schemaData: any;
+  ctbFormsAPI: any;
+};
+
+type I18nMessage = {
+  id: string;
+  defaultMessage: string;
+};
+
+type Section = {
+  sectionTitle: I18nMessage | null;
+  items: Array<any>;
+};
+
+type Base<TAttributesFormType extends 'base' | 'advanced'> = {
+  data: any;
+  type: keyof (typeof attributesForm)[TAttributesFormType];
+  step: string;
+  attributes: any;
+  extensions: any;
+};
+
+export const forms = {
   customField: {
     schema({
       schemaAttributes,
@@ -18,13 +54,23 @@ const forms = {
       reservedNames,
       schemaData,
       ctbFormsAPI,
-    }) {
+    }: SchemaParams) {
       const usedAttributeNames = getUsedAttributeNames(schemaAttributes, schemaData);
-
-      const attributeShape = attributeTypes[attributeType](
-        usedAttributeNames,
-        reservedNames.attributes
-      );
+      const x = attributeTypes[attributeType];
+      let attributeShape;
+      if (attributeType === 'relation') {
+        attributeShape = attributeTypes[attributeType](
+          usedAttributeNames,
+          reservedNames.attributes,
+          [],
+          { initialData: {}, modifiedData: {} }
+        );
+      } else {
+        attributeShape = attributeTypes[attributeType](
+          usedAttributeNames,
+          reservedNames.attributes
+        );
+      }
 
       return ctbFormsAPI.makeCustomFieldValidator(
         attributeShape,
@@ -35,7 +81,7 @@ const forms = {
       );
     },
     form: {
-      base({ customField }) {
+      base({ customField }: any) {
         // Default section with required name field
         const sections = [{ sectionTitle: null, items: [nameField] }];
 
@@ -45,9 +91,9 @@ const forms = {
 
         return { sections };
       },
-      advanced({ customField, data, step, extensions, ...rest }) {
+      advanced({ customField, data, step, extensions, ...rest }: any) {
         // Default section with no fields
-        const sections = [{ sectionTitle: null, items: [] }];
+        const sections: Array<Section> = [{ sectionTitle: null, items: [] }];
         const injectedInputs = extensions.getAdvancedForm(['attribute', customField.type], {
           data,
           type: customField.type,
@@ -77,15 +123,19 @@ const forms = {
   },
   attribute: {
     schema(
-      currentSchema,
-      attributeType,
-      reservedNames,
-      alreadyTakenTargetContentTypeAttributes,
-      options,
-      extensions
+      currentSchema: any,
+      attributeType: keyof typeof attributeTypes,
+      reservedNames: {
+        attributes: Array<string>;
+      },
+      alreadyTakenTargetContentTypeAttributes: Array<Attribute>,
+      options: SchemaData,
+      extensions: {
+        makeValidator: any;
+      }
     ) {
       // Get the attributes object on the schema
-      const attributes = currentSchema?.schema?.attributes ?? [];
+      const attributes: Array<Attribute> = currentSchema?.schema?.attributes ?? [];
       const usedAttributeNames = getUsedAttributeNames(attributes, options);
 
       try {
@@ -111,7 +161,7 @@ const forms = {
       }
     },
     form: {
-      advanced({ data, type, step, extensions, ...rest }) {
+      advanced({ data, type, step, extensions, ...rest }: Base<'advanced'>) {
         try {
           const baseForm = attributesForm.advanced[type](data, step).sections;
           const itemsToAdd = extensions.getAdvancedForm(['attribute', type], {
@@ -121,7 +171,7 @@ const forms = {
             ...rest,
           });
 
-          const sections = baseForm.reduce((acc, current) => {
+          const sections = baseForm.reduce((acc: Array<any>, current: any) => {
             if (current.sectionTitle === null) {
               acc.push(current);
             } else {
@@ -146,7 +196,7 @@ const forms = {
           return { sections: [] };
         }
       },
-      base({ data, type, step, attributes }) {
+      base({ data, type, step, attributes }: Base<'base'>) {
         try {
           return attributesForm.base[type](data, step, attributes);
         } catch (err) {
@@ -156,12 +206,21 @@ const forms = {
     },
   },
   contentType: {
-    schema(alreadyTakenNames, isEditing, ctUid, reservedNames, extensions, contentTypes) {
-      const singularNames = Object.values(contentTypes).map((contentType) => {
+    schema(
+      alreadyTakenNames: Array<string>,
+      isEditing: boolean,
+      ctUid: Common.UID.ContentType,
+      reservedNames: {
+        models: any;
+      },
+      extensions: any,
+      contentTypes: any
+    ) {
+      const singularNames = Object.values(contentTypes).map((contentType: any) => {
         return contentType.schema.singularName;
       });
 
-      const pluralNames = Object.values(contentTypes).map((contentType) => {
+      const pluralNames = Object.values(contentTypes).map((contentType: any) => {
         return contentType?.schema?.pluralName ?? '';
       });
 
@@ -219,14 +278,14 @@ const forms = {
       );
     },
     form: {
-      base({ actionType }) {
+      base({ actionType }: any) {
         if (actionType === 'create') {
           return contentTypeForm.base.create();
         }
 
         return contentTypeForm.base.edit();
       },
-      advanced({ extensions }) {
+      advanced({ extensions }: any) {
         const baseForm = contentTypeForm.advanced
           .default()
           .sections.map((section) => section.items)
@@ -245,14 +304,16 @@ const forms = {
   },
   component: {
     schema(
-      alreadyTakenAttributes,
-      componentCategory,
-      reservedNames,
+      alreadyTakenAttributes: Array<Common.UID.ContentType>,
+      componentCategory: string,
+      reservedNames: {
+        models: any;
+      },
       isEditing = false,
-      compoUid = null
+      compoUid: Common.UID.ContentType | null = null
     ) {
       const takenNames = isEditing
-        ? alreadyTakenAttributes.filter((uid) => uid !== compoUid)
+        ? alreadyTakenAttributes.filter((uid: Common.UID.ContentType) => uid !== compoUid)
         : alreadyTakenAttributes;
 
       return createComponentSchema(takenNames, reservedNames.models, componentCategory);
@@ -275,7 +336,7 @@ const forms = {
       advanced() {
         return dynamiczoneForm.advanced.default();
       },
-      base({ data }) {
+      base({ data }: any) {
         const isCreatingComponent = data?.createComponent ?? false;
 
         if (isCreatingComponent) {
@@ -287,7 +348,7 @@ const forms = {
     },
   },
   editCategory: {
-    schema(allCategories, initialData) {
+    schema(allCategories: Array<any>, initialData: any) {
       const allowedCategories = allCategories
         .filter((cat) => cat !== initialData.name)
         .map((cat) => cat.toLowerCase());
@@ -302,5 +363,3 @@ const forms = {
     },
   },
 };
-
-export default forms;

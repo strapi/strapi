@@ -6,7 +6,7 @@ import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 
-import FormModalNavigationProvider from '../../FormModalNavigationProvider';
+import FormModalNavigationProvider from '../../FormModalNavigationProvider/FormModalNavigationProvider.tsx';
 import AttributeOptions from '../index';
 
 const mockCustomField = {
