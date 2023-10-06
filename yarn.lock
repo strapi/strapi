@@ -8350,6 +8350,7 @@ __metadata:
     "@koa/router": 10.1.1
     "@strapi/database": 4.14.4
     "@strapi/logger": 4.14.4
+    "@strapi/pack-up": "workspace:*"
     "@strapi/permissions": 4.14.4
     "@strapi/ts-zen": ^0.2.0
     "@strapi/utils": 4.14.4
