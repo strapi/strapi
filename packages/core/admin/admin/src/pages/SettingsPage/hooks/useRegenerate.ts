@@ -1,8 +1,14 @@
 import { useState } from 'react';
 
 import { useAPIErrorHandler, useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { AxiosError } from 'axios';
 
-const useRegenerate = (url, id, onRegenerate, onError) => {
+export const useRegenerate = (
+  url: string,
+  id: number | string,
+  onRegenerate: (accessKey: string) => void,
+  onError?: (error: unknown) => void
+): { isLoadingConfirmation: boolean; regenerateData: () => void } => {
   const [isLoadingConfirmation, setIsLoadingConfirmation] = useState(false);
   const toggleNotification = useNotification();
   const { post } = useFetchClient();
@@ -23,10 +29,12 @@ const useRegenerate = (url, id, onRegenerate, onError) => {
       if (onError) {
         onError(error);
       } else {
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(error),
-        });
+        if (error instanceof AxiosError) {
+          toggleNotification({
+            type: 'warning',
+            message: formatAPIError(error),
+          });
+        }
       }
     }
   };
@@ -36,5 +44,3 @@ const useRegenerate = (url, id, onRegenerate, onError) => {
     isLoadingConfirmation,
   };
 };
-
-export default useRegenerate;
