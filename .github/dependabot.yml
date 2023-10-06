@@ -56,7 +56,7 @@ updates:
 
     commit_message:
       prefix: 'chore'
-      include_scope: true
+      include: 'scope'
     schedule:
       interval: weekly
       day: sunday
@@ -83,7 +83,7 @@ updates:
     directory: /
     commit_message:
       prefix: 'chore'
-      include_scope: true
+      include: 'scope'
     schedule:
       interval: weekly
       day: sunday
