@@ -101,7 +101,7 @@ describe('BlocksEditor toolbar', () => {
     const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
 
     // Set the selection to cover the second and third row
-    Transforms.setSelection(baseEditor, {
+    Transforms.select(baseEditor, {
       anchor: { path: [1, 0], offset: 0 },
       focus: { path: [2, 0], offset: 0 },
     });
@@ -172,7 +172,7 @@ describe('BlocksEditor toolbar', () => {
     const unorderedListButton = screen.getByLabelText(/bulleted list/i);
     const orderedListButton = screen.getByLabelText(/^numbered list/i);
 
-    Transforms.setSelection(baseEditor, {
+    Transforms.select(baseEditor, {
       anchor: { path: [0, 0], offset: 2 },
     });
 
@@ -209,7 +209,7 @@ describe('BlocksEditor toolbar', () => {
 
     const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
 
-    Transforms.setSelection(baseEditor, {
+    Transforms.select(baseEditor, {
       anchor: { path: [0, 0], offset: 2 },
     });
 
@@ -253,7 +253,7 @@ describe('BlocksEditor toolbar', () => {
 
     const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
 
-    Transforms.setSelection(baseEditor, {
+    Transforms.select(baseEditor, {
       anchor: { path: [0, 0], offset: 2 },
     });
 
@@ -309,7 +309,7 @@ describe('BlocksEditor toolbar', () => {
 
     const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
 
-    Transforms.setSelection(baseEditor, {
+    Transforms.select(baseEditor, {
       anchor: { path: [0, 0], offset: 0 },
     });
 
@@ -411,7 +411,7 @@ describe('BlocksEditor toolbar', () => {
     const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
 
     // Set the selection to cover the second and third row
-    Transforms.setSelection(baseEditor, {
+    Transforms.select(baseEditor, {
       anchor: { path: [1, 0], offset: 0 },
     });
 
