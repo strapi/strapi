@@ -19,6 +19,8 @@ import { Provider } from 'react-redux';
 import { MemoryRouter, MemoryRouterProps } from 'react-router-dom';
 import { createStore } from 'redux';
 
+import ModelsContext from '../src/content-manager/contexts/ModelsContext';
+
 import { server } from './server';
 import { initialState } from './store';
 
@@ -48,7 +50,11 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
         <IntlProvider locale="en" textComponent="span">
           <DesignSystemProvider locale="en">
             <QueryClientProvider client={queryClient}>
-              <DndProvider backend={HTML5Backend}>{children}</DndProvider>
+              <DndProvider backend={HTML5Backend}>
+                <ModelsContext.Provider value={{ refetchData: jest.fn() }}>
+                  {children}
+                </ModelsContext.Provider>
+              </DndProvider>
             </QueryClientProvider>
           </DesignSystemProvider>
         </IntlProvider>
