@@ -18,8 +18,6 @@ import cornerOrnamentPath from './assets/corner-ornament.svg';
 import leftSideCloudPath from './assets/left-side-cloud.png';
 import rightSideCloudPath from './assets/right-side-cloud.png';
 
-
-
 const LogoContainer = styled(Box)`
   position: absolute;
   top: 0;

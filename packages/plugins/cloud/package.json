@@ -1,12 +1,11 @@
 {
-  "name": "@strapi/plugin-cloud",
-  "version": "1.0.0",
-  "description": "Instructions to deploy your local project to Strapi Cloud",
+  "name": "cloud",
+  "version": "0.0.0",
+  "description": "This is the description of the plugin.",
   "strapi": {
-    "name": "Strapi Cloud",
-    "description": "Instructions to deploy your local project to Strapi Cloud",
-    "kind": "plugin",
-    "displayName": "Strapi Cloud"
+    "name": "cloud",
+    "description": "Description of cloud plugin",
+    "kind": "plugin"
   },
   "dependencies": {
     "@strapi/design-system": "^1.6.3",
@@ -15,10 +14,16 @@
     "prop-types": "^15.7.2"
   },
   "devDependencies": {
+    "@strapi/typescript-utils": "^4.6.0",
+    "@types/react": "^17.0.53",
+    "@types/react-dom": "^18.0.28",
+    "@types/react-router-dom": "^5.3.3",
+    "@types/styled-components": "^5.1.26",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^5.3.4",
-    "styled-components": "^6.0.8"
+    "styled-components": "^5.3.6",
+    "typescript": "5.0.4"
   },
   "peerDependencies": {
     "react": "^17.0.0 || ^18.0.0",
@@ -27,22 +32,20 @@
     "styled-components": "^5.3.6"
   },
   "author": {
-    "name": "Strapi Solutions SAS",
-    "email": "hi@strapi.io",
-    "url": "https://strapi.io"
+    "name": "A Strapi developer"
   },
   "maintainers": [
     {
-      "name": "Strapi Solutions SAS",
-      "email": "hi@strapi.io",
-      "url": "https://strapi.io"
+      "name": "A Strapi developer"
     }
   ],
   "engines": {
-    "node": ">=16.0.0 <=20.x.x",
+    "node": ">=14.19.1 <=18.x.x",
     "npm": ">=6.0.0"
   },
   "scripts": {
+    "develop": "tsc -p tsconfig.server.json -w",
+    "build": "tsc -p tsconfig.server.json",
     "lint": "run -T eslint ."
   },
   "license": "MIT"

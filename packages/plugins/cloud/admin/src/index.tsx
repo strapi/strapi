@@ -1,19 +1,20 @@
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
 
 import pluginPkg from '../../package.json';
-
+import pluginId from './pluginId';
 import Initializer from './components/Initializer';
 import PluginIcon from './components/PluginIcon';
-import pluginId from './pluginId';
 
 const name = pluginPkg.strapi.name;
 
 export default {
-  register(app) {
+  register(app: any) {
+
     const { backendURL } = window.strapi;
 
     // Only add the plugin menu link and registering it if the project is on development (localhost).
     if (backendURL?.includes('localhost')) {
+
       app.addMenuLink({
         to: `/plugins/${pluginId}`,
         icon: PluginIcon,
@@ -21,31 +22,29 @@ export default {
           id: `${pluginId}.plugin.name`,
           defaultMessage: name,
         },
-        async Component() {
-          const component = await import(
-            /* webpackChunkName: "strapi-cloud-plugin" */ './pages/App'
-          );
+        Component: async () => {
+          const component = await import(/* webpackChunkName: "strapi-plugin-cloud" */ './pages/App');
 
           return component;
         },
       });
-
-      app.registerPlugin({
+      const plugin = {
         id: pluginId,
         initializer: Initializer,
         isReady: false,
         name,
-      });
+      };
+
+      app.registerPlugin(plugin);
     }
   },
 
-  bootstrap() {},
-  async registerTrads({ locales }) {
+  async registerTrads(app: any) {
+    const { locales } = app;
+
     const importedTrads = await Promise.all(
-      locales.map((locale) => {
-        return import(
-          /* webpackChunkName: "translation-[request]" */ `./translations/${locale}.json`
-        )
+      (locales as any[]).map((locale) => {
+        return import(`./translations/${locale}.json`)
           .then(({ default: data }) => {
             return {
               data: prefixPluginTranslations(data, pluginId),
