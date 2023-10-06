@@ -419,7 +419,7 @@ describe('BlocksEditor toolbar', () => {
     expect(within(headingsDropdown).getByText(/heading 1/i)).toBeInTheDocument();
   });
 
-  it('slits the parent list when converting a list item to another type', async () => {
+  it('splits the parent list when converting a list item to another type', async () => {
     setup([
       {
         type: 'list',
