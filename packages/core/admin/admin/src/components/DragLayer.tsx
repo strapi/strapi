@@ -1,11 +1,14 @@
 import * as React from 'react';
 
 import { Box } from '@strapi/design-system';
-import PropTypes from 'prop-types';
-import { useDragLayer } from 'react-dnd';
+import { DragLayerMonitor, XYCoord, useDragLayer } from 'react-dnd';
 
-function getStyle(initialOffset, currentOffset, mouseOffset) {
-  if (!initialOffset || !currentOffset) {
+function getStyle(
+  initialOffset: XYCoord | null,
+  currentOffset: XYCoord | null,
+  mouseOffset: XYCoord | null
+) {
+  if (!initialOffset || !currentOffset || !mouseOffset) {
     return { display: 'none' };
   }
 
@@ -16,7 +19,14 @@ function getStyle(initialOffset, currentOffset, mouseOffset) {
   };
 }
 
-export function DragLayer({ renderItem }) {
+export interface DragLayerProps {
+  renderItem: (item: {
+    item: unknown;
+    type: ReturnType<DragLayerMonitor['getItemType']>;
+  }) => React.ReactNode;
+}
+
+const DragLayer = ({ renderItem }: DragLayerProps) => {
   const { itemType, isDragging, item, initialOffset, currentOffset, mouseOffset } = useDragLayer(
     (monitor) => ({
       item: monitor.getItem(),
@@ -47,8 +57,6 @@ export function DragLayer({ renderItem }) {
       </Box>
     </Box>
   );
-}
-
-DragLayer.propTypes = {
-  renderItem: PropTypes.func.isRequired,
 };
+
+export { DragLayer };

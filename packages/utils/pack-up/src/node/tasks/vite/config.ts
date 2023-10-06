@@ -50,6 +50,15 @@ const resolveViteConfig = (ctx: BuildContext, task: ViteBaseTask) => {
       rollupOptions: {
         external,
         output: {
+          /**
+           * Mimic TypeScript's behavior, by setting the value to "auto" to control
+           * how Rollup handles default, namespace and dynamic imports from external
+           * dependencies in formats like CommonJS that do not natively support
+           * these concepts. Mainly styled-components@5
+           *
+           * For more info see https://rollupjs.org/configuration-options/#output-interop
+           */
+          interop: 'auto',
           chunkFileNames() {
             const parts = outputExt.split('.');
 
