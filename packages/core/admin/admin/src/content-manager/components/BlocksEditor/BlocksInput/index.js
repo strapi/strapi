@@ -90,6 +90,10 @@ const BlocksInput = ({ disabled, placeholder }) => {
       renderElement={renderElement}
       renderLeaf={renderLeaf}
       onKeyDown={handleKeyDown}
+      scrollSelectionIntoView={() => {
+        // This is a noop as Slate has its own default method to scroll a DOM selection into view
+        // thats shifting layout for us when there is vertical scrollbar activated
+      }}
     />
   );
 };
