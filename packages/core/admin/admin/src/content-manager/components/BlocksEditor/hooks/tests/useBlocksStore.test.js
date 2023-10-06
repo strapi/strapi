@@ -293,6 +293,33 @@ describe('useBlocksStore', () => {
     expect(screen.queryByLabelText(/Edit/i, { selector: 'button' })).toBeInTheDocument();
   });
 
+  it('renders link fields to edit when user clicks the edit option and check save button disabled state', async () => {
+    const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
+
+    render(
+      result.current.link.renderElement({
+        children: 'Some link',
+        element: { url: 'https://example.com', children: [{ text: 'Some' }, { text: ' link' }] },
+        attributes: {},
+      }),
+      {
+        wrapper: Wrapper,
+      }
+    );
+    const link = screen.getByRole('link', 'Some link');
+    await user.click(link);
+    const editButton = screen.queryByLabelText(/Edit/i, { selector: 'button' });
+    await user.click(editButton);
+
+    const linkTextInput = screen.getByPlaceholderText('Enter link text');
+    const SaveButton = screen.getAllByRole('button', { type: 'submit' });
+    expect(SaveButton[1]).not.toBeDisabled(); // SaveButton[1] is a popover save button
+
+    // Remove link text and check if save button is disabled
+    userEvent.clear(linkTextInput);
+    expect(SaveButton[1]).toBeDisabled();
+  });
+
   it('renders a code block properly', () => {
     const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
 
