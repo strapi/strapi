@@ -7750,6 +7750,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/logger@workspace:packages/utils/logger"
   dependencies:
+    "@strapi/pack-up": "workspace:*"
     eslint-config-custom: 4.14.4
     lodash: 4.17.21
     tsconfig: 4.14.4
