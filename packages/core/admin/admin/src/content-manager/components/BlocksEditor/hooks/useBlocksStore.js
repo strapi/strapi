@@ -232,9 +232,9 @@ const handleEnterKeyOnList = (editor) => {
   }
 };
 
-// The max-height is decided togher with the design team
+// The max-height is decided with the design team, the 56px is the height of the toolbar
 const Img = styled.img`
-  max-height: 512px;
+  max-height: calc(512px - 56px);
   max-width: 100%;
   object-fit: contain;
 `;
