@@ -10,5 +10,7 @@ export default ({ env }) => ({
       salt: env('TRANSFER_TOKEN_SALT', 'example-salt'),
     },
   },
-  npsEnabled: env.bool('NPS_ENABLED', true),
+  flags: {
+    ps: env.bool('FLAG_NPS', true),
+  },
 });

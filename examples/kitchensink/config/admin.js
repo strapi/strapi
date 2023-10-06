@@ -11,5 +11,7 @@ module.exports = ({ env }) => ({
       salt: env('TRANSFER_TOKEN_SALT', 'example-salt'),
     },
   },
-  npsEnabled: env.bool('NPS_ENABLED', true),
+  flags: {
+    nps: env.bool('FLAG_NPS', true),
+  },
 });
