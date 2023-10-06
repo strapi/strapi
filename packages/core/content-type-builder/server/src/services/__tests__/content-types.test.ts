@@ -39,7 +39,6 @@ describe('Content types service', () => {
       expect(
         formatContentType({
           ...contentType,
-          // @ts-expect-error testing invalid inputs
           kind: undefined,
         })
       ).toMatchObject({
