@@ -353,7 +353,7 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                   name="text"
                   placeholder={formatMessage({
                     id: 'components.Blocks.popover.text.placeholder',
-                    defaultMessage: 'This text is the text of the link',
+                    defaultMessage: 'Enter link text',
                   })}
                   value={formData.text}
                   onChange={handleFormDataChange}

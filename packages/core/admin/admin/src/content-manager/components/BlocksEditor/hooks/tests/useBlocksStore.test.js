@@ -311,7 +311,7 @@ describe('useBlocksStore', () => {
     const editButton = screen.queryByLabelText(/Edit/i, { selector: 'button' });
     await user.click(editButton);
 
-    const linkTextInput = screen.getByPlaceholderText('This text is the text of the link');
+    const linkTextInput = screen.getByPlaceholderText('Enter link text');
     const SaveButton = screen.getAllByRole('button', { type: 'submit' });
     expect(SaveButton[1]).toHaveAttribute('aria-disabled', 'false'); // SaveButton[1] is a popover save button
 
