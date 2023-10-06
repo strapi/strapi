@@ -5,7 +5,7 @@ import { LinkButton } from '@strapi/design-system/v2';
 import { ExternalLink, EmptyPermissions } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-const View = () => {
+const SalesPage = () => {
   const { formatMessage } = useIntl();
 
   return (
@@ -30,13 +30,13 @@ const View = () => {
               <LinkButton
                 variant="default"
                 endIcon={<ExternalLink />}
-                href="https://strapi.io/pricing-self-hosted?utm_source=Strapi+Audit+Logs+CE+Settings+Page"
+                href="https://strp.cc/45mbAdF"
                 isExternal
                 target="_blank"
               >
                 {formatMessage({
                   id: 'global.learn-more',
-                  defaultMessage: 'See our Enterprise Pricing',
+                  defaultMessage: 'Learn more',
                 })}
               </LinkButton>
             }
@@ -47,4 +47,4 @@ const View = () => {
   );
 };
 
-export default View;
+export default SalesPage;

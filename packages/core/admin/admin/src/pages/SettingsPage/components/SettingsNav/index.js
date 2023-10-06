@@ -15,6 +15,11 @@ import { useIntl } from 'react-intl';
 import { NavLink, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
+/**
+ * TODO: refactor the SubNav entirely, we shouldn't have
+ * to do this hack to work a lock at the end. It's a bit hacky.
+ */
+
 const CustomIcon = styled(Icon)`
   right: 15px;
   position: absolute;

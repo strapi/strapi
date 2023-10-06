@@ -167,7 +167,7 @@ export const ROUTES_CE = [
   {
     async Component() {
       const component = await import(
-        /* webpackChunkName: "transfer-tokens-edit-page" */ './pages/AuditLogs/View'
+        /* webpackChunkName: "audit-logs-sales-page" */ './pages/AuditLogs/SalesPage'
       );
 
       return component;
@@ -178,7 +178,7 @@ export const ROUTES_CE = [
   {
     async Component() {
       const component = await import(
-        /* webpackChunkName: "transfer-tokens-edit-page" */ './pages/ReviewWorkflows/View'
+        /* webpackChunkName: "review-workflows-sales-page" */ './pages/ReviewWorkflows/SalesPage'
       );
 
       return component;
@@ -189,7 +189,7 @@ export const ROUTES_CE = [
   {
     async Component() {
       const component = await import(
-        /* webpackChunkName: "transfer-tokens-edit-page" */ './pages/SingleSignOn/View'
+        /* webpackChunkName: "sso-sales-page" */ './pages/SingleSignOn/SalesPage'
       );
 
       return component;
