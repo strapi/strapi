@@ -57,6 +57,12 @@ const withImages = (editor) => {
 
 /**
  * Forces an update of the Slate editor when the value prop changes from outside of Slate.
+ * The root cause is that Slate is not a controlled component: https://github.com/ianstormtaylor/slate/issues/4612
+ * Why not use JSON.stringify(value) as the key?
+ * Because it would force a rerender of the entire editor every time the user types a character.
+ * Why not use the entity id as the key, since it's unique for each locale?
+ * Because it would not solve the problem when using the "fill in from other locale" feature
+ *
  * @param {import('slate').Descendant[]} value
  * @returns {{
  *   key: number,
