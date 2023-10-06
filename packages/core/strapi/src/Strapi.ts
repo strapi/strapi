@@ -12,6 +12,7 @@ import type {
   Server,
   Container,
   EntityService,
+  DocumentService,
   EventHub,
   StartupLogger,
   CronService,
@@ -44,6 +45,7 @@ import createWebhookRunner, { WebhookRunner } from './services/webhook-runner';
 import { webhookModel, createWebhookStore } from './services/webhook-store';
 import { createCoreStore, coreStoreModel } from './services/core-store';
 import createEntityService from './services/entity-service';
+import createDocumentService from './services/document-service';
 import createCronService from './services/cron';
 import entityValidator from './services/entity-validator';
 import createTelemetry from './services/metrics';
@@ -164,6 +166,8 @@ class Strapi implements StrapiI {
   entityValidator?: EntityValidator;
 
   entityService?: EntityService.EntityService;
+
+  documentService?: DocumentService.DocumentService;
 
   telemetry: TelemetryService;
 
@@ -555,6 +559,13 @@ class Strapi implements StrapiI {
 
     this.entityValidator = entityValidator;
     this.entityService = createEntityService({
+      strapi: this,
+      db: this.db,
+      eventHub: this.eventHub,
+      entityValidator: this.entityValidator,
+    });
+
+    this.documentService = createDocumentService({
       strapi: this,
       db: this.db,
       eventHub: this.eventHub,

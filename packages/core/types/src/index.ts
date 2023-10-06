@@ -13,6 +13,7 @@ import type { WebhookStore } from './modules/webhook-store';
 import type { CoreStore } from './modules/core-store';
 import type { EntityValidator } from './modules/entity-validator';
 import type * as EntityService from './modules/entity-service';
+import type * as DocumentService from './modules/document-service';
 import type { TelemetryService } from './modules/metrics';
 import type { RequestContext } from './modules/request-context';
 
@@ -38,6 +39,7 @@ export {
   CoreStore,
   EntityValidator,
   EntityService,
+  DocumentService,
   TelemetryService,
   RequestContext,
   CustomFields,
@@ -97,6 +99,7 @@ export interface Strapi {
   store?: CoreStore;
   entityValidator?: EntityValidator;
   entityService?: EntityService.EntityService;
+  documentService?: DocumentService.DocumentService;
   telemetry: TelemetryService;
   requestContext: RequestContext;
   customFields: CustomFields.CustomFields;
