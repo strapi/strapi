@@ -14,10 +14,12 @@ jest.mock('../../../../../components/LocalesProvider/useLocalesProvider', () => 
   localeNames: { en: 'English' },
   messages: ['test'],
 }));
-jest.mock('../../../../../hooks/useConfigurations', () => () => ({
-  logos: {
-    auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
-  },
+jest.mock('../../../../../hooks/useConfigurations', () => ({
+  useConfigurations: () => ({
+    logos: {
+      auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
+    },
+  }),
 }));
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),

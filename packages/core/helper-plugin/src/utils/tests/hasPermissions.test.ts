@@ -1,11 +1,13 @@
-import { Permission } from '@strapi/permissions';
-
 import {
   hasPermissions,
   findMatchingPermissions,
   formatPermissionsForRequest,
   shouldCheckPermissions,
 } from '../hasPermissions';
+
+import type { domain } from '@strapi/permissions';
+
+type Permission = domain.permission.Permission;
 
 const hasPermissionsTestData: Record<string, Record<string, Permission[]>> = {
   userPermissions: {
