@@ -3,7 +3,7 @@ import * as React from 'react';
 import * as Toolbar from '@radix-ui/react-toolbar';
 import { Flex, Icon, Tooltip, Select, Option, Box, Typography } from '@strapi/design-system';
 import { pxToRem, prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
-import { BulletList, NumberList, Link } from '@strapi/icons';
+import { Link } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement } from 'slate';
@@ -141,12 +141,13 @@ ModifierButton.propTypes = {
 };
 
 const toggleBlock = (editor, value) => {
-  const { type, level } = value;
+  const { type, level, format } = value;
 
   // Set the selected block properties received from the useBlockStore
   const blockProperties = {
     type,
     level: level || null,
+    format: format || null,
   };
 
   if (editor.selection) {
@@ -298,6 +299,15 @@ export const BlocksDropdown = ({ disabled }) => {
     if (optionKey === 'image') {
       // Image node created using select or existing selection node needs to be deleted before adding new image nodes
       Transforms.removeNodes(editor);
+    } else if (['list-ordered', 'list-unordered'].includes(optionKey)) {
+      // retrieve the list format
+      const listFormat = blocks[optionKey].value.format;
+
+      // check if the list is already active
+      const isActive = isListActive(editor, blocks[optionKey].matchNode);
+
+      // toggle the list
+      toggleList(editor, isActive, listFormat);
     } else {
       toggleBlock(editor, blocks[optionKey].value);
     }
@@ -328,7 +338,11 @@ export const BlocksDropdown = ({ disabled }) => {
   React.useEffect(() => {
     if (editor.selection) {
       // Get the parent node of the anchor
-      const [anchorNode] = Editor.parent(editor, editor.selection.anchor);
+      // with a depth of two to retrieve also the list item parents
+      const [anchorNode] = Editor.parent(editor, editor.selection.anchor, {
+        edge: 'start',
+        depth: 2,
+      });
       // Find the block key that matches the anchor node
       const anchorBlockKey = Object.keys(blocks).find((blockKey) =>
         blocks[blockKey].matchNode(anchorNode)
@@ -399,53 +413,60 @@ BlockOption.propTypes = {
   blockSelected: PropTypes.string.isRequired,
 };
 
-const ListButton = ({ icon, format, label, disabled }) => {
+/**
+ *
+ * @param {import('slate').Node} node
+ * @returns boolean
+ */
+const isListNode = (node) => {
+  return !Editor.isEditor(node) && SlateElement.isElement(node) && node.type === 'list';
+};
+
+const isListActive = (editor, matchNode) => {
+  const { selection } = editor;
+
+  if (!selection) return false;
+
+  const [match] = Array.from(
+    Editor.nodes(editor, {
+      at: Editor.unhangRange(editor, selection),
+      match: matchNode,
+    })
+  );
+
+  return Boolean(match);
+};
+
+const toggleList = (editor, isActive, format) => {
+  // Delete the parent list so that we're left with only the list items directly
+  Transforms.unwrapNodes(editor, {
+    match: (node) => isListNode(node) && ['ordered', 'unordered'].includes(node.format),
+    split: true,
+  });
+
+  // Change the type of the current selection
+  Transforms.setNodes(editor, {
+    type: isActive ? 'paragraph' : 'list-item',
+  });
+
+  // If the selection is now a list item, wrap it inside a list
+  if (!isActive) {
+    const block = { type: 'list', format, children: [] };
+    Transforms.wrapNodes(editor, block);
+  }
+};
+
+const ListButton = ({ block, disabled }) => {
   const editor = useSlate();
 
-  /**
-   *
-   * @param {import('slate').Node} node
-   * @returns boolean
-   */
-  const isListNode = (node) => {
-    return !Editor.isEditor(node) && SlateElement.isElement(node) && node.type === 'list';
-  };
+  const {
+    icon,
+    matchNode,
+    value: { format },
+    label,
+  } = block;
 
-  const isListActive = () => {
-    const { selection } = editor;
-
-    if (!selection) return false;
-
-    const [match] = Array.from(
-      Editor.nodes(editor, {
-        at: Editor.unhangRange(editor, selection),
-        match: (node) => isListNode(node) && node.format === format,
-      })
-    );
-
-    return Boolean(match);
-  };
-
-  const isActive = isListActive();
-
-  const toggleList = () => {
-    // Delete the parent list so that we're left with only the list items directly
-    Transforms.unwrapNodes(editor, {
-      match: (node) => isListNode(node) && ['ordered', 'unordered'].includes(node.format),
-      split: true,
-    });
-
-    // Change the type of the current selection
-    Transforms.setNodes(editor, {
-      type: isActive ? 'paragraph' : 'list-item',
-    });
-
-    // If the selection is now a list item, wrap it inside a list
-    if (!isActive) {
-      const block = { type: 'list', format, children: [] };
-      Transforms.wrapNodes(editor, block);
-    }
-  };
+  const isActive = isListActive(editor, matchNode);
 
   return (
     <ToolbarButton
@@ -454,22 +475,27 @@ const ListButton = ({ icon, format, label, disabled }) => {
       label={label}
       isActive={isActive}
       disabled={disabled}
-      handleClick={toggleList}
+      handleClick={() => toggleList(editor, isActive, format)}
     />
   );
 };
 
 ListButton.propTypes = {
-  icon: PropTypes.elementType.isRequired,
-  format: PropTypes.string.isRequired,
-  label: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
+  block: PropTypes.shape({
+    icon: PropTypes.elementType.isRequired,
+    matchNode: PropTypes.func.isRequired,
+    value: PropTypes.shape({
+      format: PropTypes.string.isRequired,
+    }).isRequired,
+    label: PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      defaultMessage: PropTypes.string.isRequired,
+    }).isRequired,
   }).isRequired,
   disabled: PropTypes.bool.isRequired,
 };
 
-const LinkButton = () => {
+const LinkButton = ({ disabled }) => {
   const editor = useSlate();
 
   const isLinkActive = () => {
@@ -502,15 +528,19 @@ const LinkButton = () => {
       }}
       isActive={isLinkActive()}
       handleClick={addLink}
-      disabled={false}
+      disabled={disabled}
     />
   );
 };
 
-// TODO: Remove after the RTE Blocks Alpha release
-const AlphaTag = styled(Box)`
-  background-color: ${({ theme }) => theme.colors.warning100};
-  border: ${({ theme }) => `1px solid ${theme.colors.warning200}`};
+LinkButton.propTypes = {
+  disabled: PropTypes.bool.isRequired,
+};
+
+// TODO: Remove after the RTE Blocks Beta release
+const BetaTag = styled(Box)`
+  background-color: ${({ theme }) => theme.colors.secondary100};
+  border: ${({ theme }) => `1px solid ${theme.colors.secondary200}`};
   border-radius: ${({ theme }) => theme.borderRadius};
   font-size: ${({ theme }) => theme.fontSizes[0]};
   padding: ${({ theme }) => `${2 / 16}rem ${theme.spaces[1]}`};
@@ -518,10 +548,11 @@ const AlphaTag = styled(Box)`
 
 const BlocksToolbar = ({ disabled }) => {
   const modifiers = useModifiersStore();
+  const blocks = useBlocksStore();
 
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
-      {/* Remove after the RTE Blocks Alpha release (paddingRight and width) */}
+      {/* Remove after the RTE Blocks Beta release (paddingRight and width) */}
       <ToolbarWrapper gap={1} padding={2} paddingRight={4} width="100%">
         <BlocksDropdown disabled={disabled} />
         <Toolbar.ToggleGroup type="multiple" asChild>
@@ -537,39 +568,23 @@ const BlocksToolbar = ({ disabled }) => {
                 disabled={disabled}
               />
             ))}
-            <LinkButton />
+            <LinkButton disabled={disabled} />
           </Flex>
         </Toolbar.ToggleGroup>
         <Separator />
         <Toolbar.ToggleGroup type="single" asChild>
           <Flex gap={1}>
-            <ListButton
-              label={{
-                id: 'components.Blocks.blocks.unorderedList',
-                defaultMessage: 'Bulleted list',
-              }}
-              format="unordered"
-              icon={BulletList}
-              disabled={disabled}
-            />
-            <ListButton
-              label={{
-                id: 'components.Blocks.blocks.orderedList',
-                defaultMessage: 'Numbered list',
-              }}
-              format="ordered"
-              icon={NumberList}
-              disabled={disabled}
-            />
+            <ListButton block={blocks['list-unordered']} disabled={disabled} />
+            <ListButton block={blocks['list-ordered']} disabled={disabled} />
           </Flex>
         </Toolbar.ToggleGroup>
-        {/* TODO: Remove after the RTE Blocks Alpha release */}
+        {/* TODO: Remove after the RTE Blocks Beta release */}
         <Flex grow={1} justifyContent="flex-end">
-          <AlphaTag>
-            <Typography textColor="warning600" variant="sigma">
-              ALPHA
+          <BetaTag>
+            <Typography textColor="secondary600" variant="sigma">
+              BETA
             </Typography>
-          </AlphaTag>
+          </BetaTag>
         </Flex>
       </ToolbarWrapper>
     </Toolbar.Root>

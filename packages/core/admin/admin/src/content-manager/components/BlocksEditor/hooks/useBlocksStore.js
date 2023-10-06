@@ -25,6 +25,8 @@ import {
   HeadingSix,
   Trash,
   Pencil,
+  BulletList,
+  NumberList,
 } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -94,15 +96,16 @@ Heading.propTypes = {
 
 const CodeBlock = styled.pre.attrs({ role: 'code' })`
   border-radius: ${({ theme }) => theme.borderRadius};
-  background-color: #32324d; // since the color is same between the themes
+  background-color: ${({ theme }) => theme.colors.neutral100};
   max-width: 100%;
   overflow: auto;
-  padding: ${({ theme }) => theme.spaces[2]};
+  padding: ${({ theme }) => `${theme.spaces[3]} ${theme.spaces[4]}`};
   & > code {
-    color: #839496; // TODO: to confirm with design and get theme color
+    font-family: 'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas,
+      monospace;
+    color: ${({ theme }) => theme.colors.neutral800};
     overflow: auto;
     max-width: 100%;
-    padding: ${({ theme }) => theme.spaces[2]};
   }
 `;
 
@@ -152,6 +155,28 @@ List.propTypes = {
 };
 
 /**
+ * @param {import('slate').Editor} editor
+ * @param {Path} currentListPath
+ */
+const replaceListWithEmptyBlock = (editor, currentListPath) => {
+  // Delete the empty list
+  Transforms.removeNodes(editor, { at: currentListPath });
+
+  if (currentListPath[0] === 0) {
+    // If the list was the only (or first) block element then insert empty paragraph as editor needs default value
+    Transforms.insertNodes(
+      editor,
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: '' }],
+      },
+      { at: currentListPath }
+    );
+    Transforms.select(editor, currentListPath);
+  }
+};
+
+/**
  * Common handler for the backspace event on ordered and unordered lists
  * @param {import('slate').Editor} editor
  * @param {Event} event
@@ -163,21 +188,7 @@ const handleBackspaceKeyOnList = (editor, event) => {
 
   if (isListEmpty) {
     event.preventDefault();
-    // Delete the empty list
-    Transforms.removeNodes(editor, { at: currentListPath });
-
-    if (currentListPath[0] === 0) {
-      // If the list was the only(or first) block element then insert empty paragraph as editor needs default value
-      Transforms.insertNodes(
-        editor,
-        {
-          type: 'paragraph',
-          children: [{ type: 'text', text: '' }],
-        },
-        { at: currentListPath }
-      );
-      Transforms.select(editor, currentListPath);
-    }
+    replaceListWithEmptyBlock(editor, currentListPath);
   }
 };
 
@@ -186,18 +197,21 @@ const handleBackspaceKeyOnList = (editor, event) => {
  * @param {import('slate').Editor} editor
  */
 const handleEnterKeyOnList = (editor) => {
-  // Check if the selected list item is empty
   const [currentListItem, currentListItemPath] = Editor.above(editor, {
     matchNode: (node) => node.type === 'list-item',
   });
-  const isEmptyListItem =
+  const [currentList, currentListPath] = Editor.parent(editor, currentListItemPath);
+  const isListEmpty = currentList.children.length === 1 && currentListItem.children[0].text === '';
+  const isListItemEmpty =
     currentListItem.children.length === 1 && currentListItem.children[0].text === '';
 
-  if (isEmptyListItem) {
+  if (isListEmpty) {
+    replaceListWithEmptyBlock(editor, currentListPath);
+  } else if (isListItemEmpty) {
     // Delete the empty list item
     Transforms.removeNodes(editor, { at: currentListItemPath });
 
-    // And create a new paragraph below the parent list
+    // Create a new paragraph below the parent list
     const listNodeEntry = Editor.above(editor, { match: (n) => n.type === 'list' });
     const createdParagraphPath = Path.next(listNodeEntry[1]);
     Transforms.insertNodes(
@@ -209,7 +223,7 @@ const handleEnterKeyOnList = (editor) => {
       { at: createdParagraphPath }
     );
 
-    // Move selection to the newly created paragraph
+    // Move the selection to the newly created paragraph
     Transforms.select(editor, createdParagraphPath);
   } else {
     // Otherwise just create a new list item by splitting the current one
@@ -434,6 +448,8 @@ export function useBlocksStore() {
       matchNode: (node) => node.type === 'paragraph',
       isInBlocksSelector: true,
       handleEnterKey(editor) {
+        // We need to keep track of the initial position of the cursor
+        const anchorPathInitialPosition = editor.selection.anchor.path;
         /**
          * Split the nodes where the cursor is. This will create a new paragraph with the content
          * after the cursor, while retaining all the children, modifiers etc.
@@ -453,12 +469,23 @@ export function useBlocksStore() {
          * Select the parent of the selection because we want the full block, not the leaf.
          * And copy its children to make sure we keep the modifiers.
          */
-        const [createdNode] = Editor.parent(editor, editor.selection.anchor.path);
+        const [fragmentedNode] = Editor.parent(editor, editor.selection.anchor.path);
         Transforms.removeNodes(editor, editor.selection);
-        Transforms.insertNodes(editor, {
-          type: 'paragraph',
-          children: createdNode.children,
-        });
+
+        // Check if after the current position there is another node
+        const hasNextNode = editor.children.length - anchorPathInitialPosition[0] > 1;
+
+        // Insert the new node at the right position. The next line after the editor selection if present or otherwise at the end of the editor.
+        Transforms.insertNodes(
+          editor,
+          {
+            type: 'paragraph',
+            children: fragmentedNode.children,
+          },
+          {
+            at: hasNextNode ? [anchorPathInitialPosition[0] + 1] : [editor.children.length],
+          }
+        );
 
         /**
          * The new selection will by default be at the end of the created node.
@@ -466,7 +493,7 @@ export function useBlocksStore() {
          * Use slice(0, -1) to go 1 level higher in the tree,
          * so we go to the start of the node and not the start of the leaf.
          */
-        Transforms.select(editor, editor.start(editor.selection.anchor.path.slice(0, -1)));
+        Transforms.select(editor, editor.start([anchorPathInitialPosition[0] + 1]));
       },
     },
     'heading-one': {
@@ -553,6 +580,50 @@ export function useBlocksStore() {
       matchNode: (node) => node.type === 'heading' && node.level === 6,
       isInBlocksSelector: true,
     },
+    'list-ordered': {
+      renderElement: (props) => <List {...props} />,
+      label: {
+        id: 'components.Blocks.blocks.orderedList',
+        defaultMessage: 'Numbered list',
+      },
+      value: {
+        type: 'list',
+        format: 'ordered',
+      },
+      icon: NumberList,
+      matchNode: (node) => node.type === 'list' && node.format === 'ordered',
+      isInBlocksSelector: true,
+      handleEnterKey: handleEnterKeyOnList,
+      handleBackspaceKey: handleBackspaceKeyOnList,
+    },
+    'list-unordered': {
+      renderElement: (props) => <List {...props} />,
+      label: {
+        id: 'components.Blocks.blocks.unorderedList',
+        defaultMessage: 'Bulleted list',
+      },
+      value: {
+        type: 'list',
+        format: 'unordered',
+      },
+      icon: BulletList,
+      matchNode: (node) => node.type === 'list' && node.format === 'unordered',
+      isInBlocksSelector: true,
+      handleEnterKey: handleEnterKeyOnList,
+      handleBackspaceKey: handleBackspaceKeyOnList,
+    },
+    'list-item': {
+      renderElement: (props) => (
+        <Typography as="li" {...props.attributes}>
+          {props.children}
+        </Typography>
+      ),
+      value: {
+        type: 'list-item',
+      },
+      matchNode: (node) => node.type === 'list-item',
+      isInBlocksSelector: false,
+    },
     link: {
       renderElement: (props) => (
         <Link element={props.element} {...props.attributes}>
@@ -565,26 +636,18 @@ export function useBlocksStore() {
       matchNode: (node) => node.type === 'link',
       isInBlocksSelector: false,
     },
-    code: {
-      renderElement: (props) => (
-        <CodeBlock {...props.attributes}>
-          <code>{props.children}</code>
-        </CodeBlock>
-      ),
-      icon: Code,
+    image: {
+      renderElement: (props) => <Image {...props} />,
+      icon: Picture,
       label: {
-        id: 'components.Blocks.blocks.code',
-        defaultMessage: 'Code',
+        id: 'components.Blocks.blocks.image',
+        defaultMessage: 'Image',
       },
       value: {
-        type: 'code',
+        type: 'image',
       },
-      matchNode: (node) => node.type === 'code',
+      matchNode: (node) => node.type === 'image',
       isInBlocksSelector: true,
-      handleEnterKey(editor) {
-        // Insert a new line within the block
-        Transforms.insertText(editor, '\n');
-      },
     },
     quote: {
       renderElement: (props) => <Blockquote {...props.attributes}>{props.children}</Blockquote>,
@@ -624,54 +687,26 @@ export function useBlocksStore() {
         }
       },
     },
-    'list-ordered': {
-      renderElement: (props) => <List {...props} />,
-      value: {
-        type: 'list',
-        format: 'ordered',
-      },
-      matchNode: (node) => node.type === 'list' && node.format === 'ordered',
-      // TODO add icon and label and set isInBlocksEditor to true
-      isInBlocksSelector: false,
-      handleEnterKey: handleEnterKeyOnList,
-      handleBackspaceKey: handleBackspaceKeyOnList,
-    },
-    'list-unordered': {
-      renderElement: (props) => <List {...props} />,
-      value: {
-        type: 'list',
-        format: 'unordered',
-      },
-      matchNode: (node) => node.type === 'list' && node.format === 'unordered',
-      // TODO add icon and label and set isInBlocksEditor to true
-      isInBlocksSelector: false,
-      handleEnterKey: handleEnterKeyOnList,
-      handleBackspaceKey: handleBackspaceKeyOnList,
-    },
-    'list-item': {
+    code: {
       renderElement: (props) => (
-        <Typography as="li" {...props.attributes}>
-          {props.children}
-        </Typography>
+        <CodeBlock {...props.attributes}>
+          <code>{props.children}</code>
+        </CodeBlock>
       ),
-      value: {
-        type: 'list-item',
-      },
-      matchNode: (node) => node.type === 'list-item',
-      isInBlocksSelector: false,
-    },
-    image: {
-      renderElement: (props) => <Image {...props} />,
-      icon: Picture,
+      icon: Code,
       label: {
-        id: 'components.Blocks.blocks.image',
-        defaultMessage: 'Image',
+        id: 'components.Blocks.blocks.code',
+        defaultMessage: 'Code',
       },
       value: {
-        type: 'image',
+        type: 'code',
       },
-      matchNode: (node) => node.type === 'image',
+      matchNode: (node) => node.type === 'code',
       isInBlocksSelector: true,
+      handleEnterKey(editor) {
+        // Insert a new line within the block
+        Transforms.insertText(editor, '\n');
+      },
     },
   };
 }

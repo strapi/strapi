@@ -5,7 +5,7 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
-import { createEditor, Transforms, Editor } from 'slate';
+import { createEditor, Transforms } from 'slate';
 import { Slate, withReact, ReactEditor } from 'slate-react';
 
 import { BlocksDropdown, BlocksToolbar } from '..';
@@ -103,6 +103,7 @@ describe('BlocksEditor toolbar', () => {
     // Set the selection to cover the second and third row
     Transforms.setSelection(baseEditor, {
       anchor: { path: [1, 0], offset: 0 },
+      focus: { path: [2, 0], offset: 0 },
     });
 
     // The dropdown should show only one option selected which is the block content in the second row
@@ -247,6 +248,62 @@ describe('BlocksEditor toolbar', () => {
     expect(ReactEditor.focus).toHaveBeenCalledTimes(2);
   });
 
+  it('transforms the selection to an ordered list and to an unordered list when selected', async () => {
+    setup();
+
+    const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+
+    Transforms.setSelection(baseEditor, {
+      anchor: { path: [0, 0], offset: 2 },
+    });
+
+    await user.click(headingsDropdown);
+
+    await user.click(screen.getByRole('option', { name: 'Numbered list' }));
+
+    screen.debug(headingsDropdown);
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'A line of text in a paragraph.',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    await user.click(headingsDropdown);
+
+    await user.click(screen.getByRole('option', { name: 'Bulleted list' }));
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'A line of text in a paragraph.',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
   it('transforms the selection to a quote when selected and trasforms it back to text when selected again', async () => {
     setup();
 
@@ -353,10 +410,9 @@ describe('BlocksEditor toolbar', () => {
 
     const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
 
-    // Set the selection to cover the entire content
+    // Set the selection to cover the second and third row
     Transforms.setSelection(baseEditor, {
-      anchor: Editor.start(baseEditor, []),
-      focus: Editor.end(baseEditor, []),
+      anchor: { path: [1, 0], offset: 0 },
     });
 
     // The dropdown should show only one option selected which is the block content in the first row

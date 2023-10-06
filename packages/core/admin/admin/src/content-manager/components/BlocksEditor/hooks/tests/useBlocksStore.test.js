@@ -614,6 +614,50 @@ describe('useBlocksStore', () => {
     ]);
   });
 
+  it('handles enter key on an empty list', () => {
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: '',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor on the first list item
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0, 0], offset: 0 },
+      focus: { path: [0, 0, 0], offset: 0 },
+    });
+
+    // Simulate the enter key
+    result.current['list-ordered'].handleEnterKey(baseEditor);
+
+    // Should remove the empty list and create a paragraph instead
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+    ]);
+  });
+
   it('handles the backspace key on a very first list with single empty list item', () => {
     const { result } = renderHook(useBlocksStore);
 
@@ -774,5 +818,56 @@ describe('useBlocksStore', () => {
         ],
       },
     ]);
+  });
+
+  it('handles enter key called twice on paragraph block', () => {
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'Line of text',
+          },
+          {
+            type: 'text',
+            text: ' with modifiers too',
+            bold: true,
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor after "Line of"
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0], offset: 7 },
+      focus: { path: [0, 0], offset: 7 },
+    });
+
+    const cursorInitialPosition = baseEditor.selection.anchor.path;
+
+    // Simulate the enter key
+    result.current.paragraph.handleEnterKey(baseEditor);
+
+    const cursorPositionAfterFirstEnter = baseEditor.selection.anchor.path;
+
+    // Check if the cursor is positioned in the new line
+    expect(cursorPositionAfterFirstEnter[0]).toEqual(cursorInitialPosition[0] + 1);
+
+    // Set the cursor after "Line of"
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0], offset: 7 },
+      focus: { path: [0, 0], offset: 7 },
+    });
+
+    // Simulate another the enter key
+    result.current.paragraph.handleEnterKey(baseEditor);
+
+    const cursorPositionAfterSecondEnter = baseEditor.selection.anchor.path;
+
+    // Check if the cursor is positioned in the new line
+    expect(cursorPositionAfterSecondEnter[0]).toEqual(cursorInitialPosition[0] + 1);
   });
 });
