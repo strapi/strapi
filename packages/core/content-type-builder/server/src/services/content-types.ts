@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { getOr } from 'lodash/fp';
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
-import type { Schema } from '@strapi/types';
+import type { Common, Schema } from '@strapi/types';
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
 import createBuilder from './schema-builder';
 import { coreUids, pluginsUids } from './constants';
@@ -30,11 +30,23 @@ export const getRestrictRelationsTo = (contentType: Schema.ContentType) => {
   return null;
 };
 
+export const createContentTypes = async (contentTypes: any[]) => {
+  const builder = createBuilder();
+  const createdContentTypes = [];
+
+  for (const contentType of contentTypes) {
+    createdContentTypes.push(await createContentType(contentType, { defaultBuilder: builder }));
+  }
+
+  await builder.writeFiles();
+
+  return createdContentTypes;
+};
+
 /**
  * Format a contentType info to be used by the front-end
- * @param {Object} contentType
  */
-const formatContentType = (contentType: Schema.ContentType) => {
+const formatContentType = (contentType: any) => {
   const { uid, kind, modelName, plugin, collectionName, info } = contentType;
 
   return {
@@ -57,31 +69,13 @@ const formatContentType = (contentType: Schema.ContentType) => {
   };
 };
 
-export const createContentTypes = async (contentTypes) => {
-  const builder = createBuilder();
-  const createdContentTypes = [];
-
-  for (const contentType of contentTypes) {
-    createdContentTypes.push(await createContentType(contentType, { defaultBuilder: builder }));
-  }
-
-  await builder.writeFiles();
-
-  return createdContentTypes;
-};
-
-/**
- * Creates a content type and handle the nested components sent with it
- * @param {Object} params params object
- * @param {Object} params.contentType Main component to create
- * @param {Array<Object>} params.components List of nested components to created or edit
- * @param {Object} options
- * @param {Builder} options.defaultBuilder
- */
 type CreateContentTypeOptions = {
   defaultBuilder?: any; // TODO
 };
 
+/**
+ * Creates a content type and handle the nested components sent with it
+ */
 export const createContentType = async (
   { contentType, components }: CreateContentTypeInput,
   options: CreateContentTypeOptions = {}
@@ -94,7 +88,7 @@ export const createContentType = async (
   const newContentType = builder.createContentType(replaceTmpUIDs(contentType));
 
   // allow components to target the new contentType
-  const targetContentType = (infos) => {
+  const targetContentType = (infos: any) => {
     Object.keys(infos.attributes).forEach((key) => {
       const { target } = infos.attributes[key];
       if (target === '__contentType__') {
@@ -105,7 +99,7 @@ export const createContentType = async (
     return infos;
   };
 
-  components.forEach((component) => {
+  components?.forEach((component) => {
     const options = replaceTmpUIDs(targetContentType(component));
 
     if (!_.has(component, 'uid')) {
@@ -117,10 +111,10 @@ export const createContentType = async (
 
   // generate api skeleton
   await generateAPI({
-    displayName: contentType.displayName || contentType.info.displayName,
-    singularName: contentType.singularName,
-    pluralName: contentType.pluralName,
-    kind: contentType.kind,
+    displayName: contentType?.displayName || contentType?.info?.displayName,
+    singularName: contentType?.singularName,
+    pluralName: contentType?.pluralName,
+    kind: contentType?.kind,
   });
 
   if (!options.defaultBuilder) {
@@ -133,10 +127,14 @@ export const createContentType = async (
 };
 
 /**
- * Generate an API squeleton
- * @param {string} name
+ * Generate an API skeleton
  */
-export const generateAPI = ({ singularName, kind = 'collectionType', pluralName, displayName }) => {
+export const generateAPI = ({
+  singularName,
+  kind = 'collectionType',
+  pluralName,
+  displayName,
+}: any) => {
   const strapiGenerators = require('@strapi/generators');
   return strapiGenerators.generate(
     'content-type',
@@ -156,12 +154,11 @@ export const generateAPI = ({ singularName, kind = 'collectionType', pluralName,
 
 /**
  * Edits a contentType and handle the nested contentTypes sent with it
- * @param {String} uid Content-type's uid
- * @param {Object} params params object
- * @param {Object} params.contentType Main contentType to create
- * @param {Array<Object>} params.components List of nested components to created or edit
  */
-export const editContentType = async (uid, { contentType, components = [] }) => {
+export const editContentType = async (
+  uid: Common.UID.ContentType,
+  { contentType, components = [] }: any
+) => {
   const builder = createBuilder();
 
   const previousSchema = builder.contentTypes.get(uid).schema;
@@ -178,7 +175,7 @@ export const editContentType = async (uid, { contentType, components = [] }) => 
       }
 
       return acc;
-    }, {});
+    }, {} as any);
   contentType.attributes = _.merge(prevNonVisibleAttributes, contentType.attributes);
 
   if (newKind !== previousKind && newKind === 'singleType') {
@@ -198,7 +195,7 @@ export const editContentType = async (uid, { contentType, components = [] }) => 
     ...replaceTmpUIDs(contentType),
   });
 
-  components.forEach((component) => {
+  components.forEach((component: any) => {
     if (!_.has(component, 'uid')) {
       return builder.createComponent(replaceTmpUIDs(component));
     }
@@ -237,16 +234,16 @@ export const editContentType = async (uid, { contentType, components = [] }) => 
   return updatedContentType;
 };
 
-export const deleteContentTypes = async (uids) => {
+export const deleteContentTypes = async (UIDs: Common.UID.ContentType[]) => {
   const builder = createBuilder();
   const apiHandler = strapi.plugin('content-type-builder').service('api-handler');
 
-  for (const uid of uids) {
+  for (const uid of UIDs) {
     await deleteContentType(uid, builder);
   }
 
   await builder.writeFiles();
-  for (const uid of uids) {
+  for (const uid of UIDs) {
     try {
       await apiHandler.clear(uid);
     } catch (error) {
@@ -258,10 +255,11 @@ export const deleteContentTypes = async (uids) => {
 
 /**
  * Deletes a content type and the api files related to it
- * @param {string} uid content type uid
- * @param defaultBuilder
  */
-export const deleteContentType = async (uid, defaultBuilder = undefined) => {
+export const deleteContentType = async (
+  uid: Common.UID.ContentType,
+  defaultBuilder: any = undefined
+) => {
   const builder = defaultBuilder || createBuilder();
   // make a backup
   const apiHandler = strapi.plugin('content-type-builder').service('api-handler');

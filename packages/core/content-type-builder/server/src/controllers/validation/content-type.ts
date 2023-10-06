@@ -58,7 +58,6 @@ const VALID_TYPES = [...DEFAULT_TYPES, 'uid', 'component', 'dynamiczone', 'custo
 
 /**
  * Returns a yup schema to validate a content type payload
- * @param {Object} data payload
  */
 const createContentTypeSchema = (data: CreateContentTypeInput, { isEdition = false } = {}) => {
   const kind: keyof typeof VALID_RELATIONS = getOr(
@@ -141,11 +140,7 @@ const forbiddenContentTypeNameValidator = () => {
     name: 'forbiddenContentTypeName',
     message: `Content Type name cannot be one of ${reservedNames.join(', ')}`,
     test(value: unknown) {
-      if (value && reservedNames.includes(value as string)) {
-        return false;
-      }
-
-      return true;
+      return !(value && reservedNames.includes(value as string));
     },
   };
 };
@@ -163,10 +158,7 @@ const nameIsAvailable = (isEdition: boolean) => {
       // don't check on edition
       if (isEdition) return true;
 
-      if (usedNames.includes(value as string)) {
-        return false;
-      }
-      return true;
+      return !usedNames.includes(value as string);
     },
   };
 };
@@ -183,10 +175,7 @@ const nameIsNotExistingCollectionName = (isEdition: boolean) => {
       // don't check on edition
       if (isEdition) return true;
 
-      if (usedNames.includes(value as string)) {
-        return false;
-      }
-      return true;
+      return !usedNames.includes(value as string);
     },
   };
 };

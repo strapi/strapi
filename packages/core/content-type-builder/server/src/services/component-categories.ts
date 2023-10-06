@@ -15,8 +15,6 @@ interface WorkingComponent extends Schema.Component {
 
 /**
  * Edit a category name and move components to the write folder
- * @param {string} name category name
- * @param {Object} infos new category data
  */
 export const editCategory = async (name: string, infos: Infos) => {
   const newName = nameToSlug(infos.name);

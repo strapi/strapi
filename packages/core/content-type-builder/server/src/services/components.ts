@@ -6,10 +6,8 @@ import createBuilder from './schema-builder';
 
 /**
  * Formats a component attributes
- * @param {string} uid - string
- * @param {Object} component - strapi component model
  */
-export const formatComponent = (component: Schema.Component) => {
+export const formatComponent = (component: any) => {
   const { uid, modelName, connection, collectionName, info, category } = component;
 
   return {
@@ -30,11 +28,8 @@ export const formatComponent = (component: Schema.Component) => {
 
 /**
  * Creates a component and handle the nested components sent with it
- * @param {Object} params params object
- * @param {Object} params.component Main component to create
- * @param {Array<Object>} params.components List of nested components to created or edit
  */
-export const createComponent = async ({ component, components = [] }) => {
+export const createComponent = async ({ component, components = [] }: any) => {
   const builder = createBuilder();
 
   const uidMap = builder.createNewComponentUIDMap(components);
@@ -42,7 +37,7 @@ export const createComponent = async ({ component, components = [] }) => {
 
   const newComponent = builder.createComponent(replaceTmpUIDs(component));
 
-  components.forEach((component) => {
+  components.forEach((component: any) => {
     if (!has(component, 'uid')) {
       return builder.createComponent(replaceTmpUIDs(component));
     }
