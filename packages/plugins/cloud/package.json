@@ -1,11 +1,12 @@
 {
-  "name": "cloud",
-  "version": "0.0.0",
-  "description": "This is the description of the plugin.",
+  "name": "@strapi/plugin-cloud",
+  "version": "1.0.0",
+  "description": "Instructions to deploy your local project to Strapi Cloud",
   "strapi": {
-    "name": "cloud",
-    "description": "Description of cloud plugin",
-    "kind": "plugin"
+    "name": "Strapi Cloud",
+    "description": "Instructions to deploy your local project to Strapi Cloud",
+    "kind": "plugin",
+    "displayName": "Strapi Cloud"
   },
   "dependencies": {
     "@strapi/design-system": "^1.6.3",
@@ -32,11 +33,15 @@
     "styled-components": "^5.3.6"
   },
   "author": {
-    "name": "A Strapi developer"
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
   },
   "maintainers": [
     {
-      "name": "A Strapi developer"
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
     }
   ],
   "engines": {
