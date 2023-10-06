@@ -7639,6 +7639,7 @@ __metadata:
   resolution: "@strapi/generate-new@workspace:packages/generators/app"
   dependencies:
     "@sentry/node": 6.19.7
+    "@strapi/pack-up": "workspace:*"
     chalk: ^4.1.2
     copyfiles: 2.4.1
     execa: 5.1.1
