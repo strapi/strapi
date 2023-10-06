@@ -1,7 +1,5 @@
 import { useContext } from 'react';
 
-import FormModalNavigationContext from '../contexts/FormModalNavigationContext';
+import { FormModalNavigationContext } from '../contexts/FormModalNavigationContext';
 
-const useFormModalNavigation = () => useContext(FormModalNavigationContext);
-
-export default useFormModalNavigation;
+export const useFormModalNavigation = () => useContext(FormModalNavigationContext);

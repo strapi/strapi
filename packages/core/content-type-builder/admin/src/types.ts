@@ -3,3 +3,5 @@ export type IntlLabel = {
   defaultMessage: string;
   values?: Record<string, any>;
 };
+
+export type SchemaType = 'contentType' | 'component' | 'components';

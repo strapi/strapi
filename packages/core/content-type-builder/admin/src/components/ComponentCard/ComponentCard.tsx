@@ -4,7 +4,7 @@ import { Cross } from '@strapi/icons';
 import get from 'lodash/get';
 import styled from 'styled-components';
 
-import useDataManager from '../../hooks/useDataManager';
+import { useDataManager } from '../../hooks/useDataManager';
 
 import { ComponentIcon } from './ComponentIcon';
 

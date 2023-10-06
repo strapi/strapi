@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useMemo, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef, ReactNode } from 'react';
 
 import {
   LoadingIndicatorPage,
@@ -15,14 +15,13 @@ import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';
 import set from 'lodash/set';
 import size from 'lodash/size';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { connect, useDispatch } from 'react-redux';
 import { Redirect, useLocation, useRouteMatch } from 'react-router-dom';
 import { compose } from 'redux';
 
-import DataManagerContext from '../../contexts/DataManagerContext';
-import useFormModalNavigation from '../../hooks/useFormModalNavigation';
+import { DataManagerContext } from '../../contexts/DataManagerContext';
+import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import pluginId from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
 import makeUnique from '../../utils/makeUnique';
@@ -55,19 +54,40 @@ import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
 import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
 import retrieveNestedComponents from './utils/retrieveNestedComponents';
 import retrieveSpecificInfoFromComponents from './utils/retrieveSpecificInfoFromComponents';
-import serverRestartWatcher from './utils/serverRestartWatcher';
+import { serverRestartWatcher } from './utils/serverRestartWatcher';
 import validateSchema from './utils/validateSchema';
+
+import type { SchemaType } from '../../types';
+import type { UID } from '@strapi/types';
+
+interface DataManagerProviderProps {
+  children: ReactNode;
+  components?: Record<string, any>;
+  contentTypes: Record<string, any>;
+  isLoading: boolean;
+  isLoadingForDataToBeSet: boolean;
+  initialData: Record<string, any>;
+  modifiedData: Record<string, any>;
+  reservedNames: Record<string, any>;
+}
+
+interface CustomFieldAttributeParams {
+  attributeToSet: Record<string, any>;
+  forTarget: SchemaType;
+  targetUid: UID.Any;
+  initialAttribute: Record<string, any>;
+}
 
 const DataManagerProvider = ({
   children,
-  components,
+  components = {},
   contentTypes,
   isLoading,
   isLoadingForDataToBeSet,
   initialData,
   modifiedData,
   reservedNames,
-}) => {
+}: DataManagerProviderProps) => {
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
@@ -82,14 +102,16 @@ const DataManagerProvider = ({
   const { refetchPermissions } = useRBACProvider();
   const { pathname } = useLocation();
   const { onCloseModal } = useFormModalNavigation();
-  const contentTypeMatch = useRouteMatch(`/plugins/${pluginId}/content-types/:uid`);
-  const componentMatch = useRouteMatch(
+  const contentTypeMatch = useRouteMatch<{ uid: string }>(
+    `/plugins/${pluginId}/content-types/:uid`
+  );
+  const componentMatch = useRouteMatch<{ categoryUid: string; componentUid: string }>(
     `/plugins/${pluginId}/component-categories/:categoryUid/:componentUid`
   );
   const fetchClient = useFetchClient();
   const { put, post, del } = fetchClient;
 
-  const formatMessageRef = useRef();
+  const formatMessageRef = useRef<any>();
   formatMessageRef.current = formatMessage;
   const isInDevelopmentMode = autoReload;
 
@@ -99,7 +121,7 @@ const DataManagerProvider = ({
     ? get(contentTypeMatch, 'params.uid', null)
     : get(componentMatch, 'params.componentUid', null);
 
-  const getDataRef = useRef();
+  const getDataRef = useRef<any>();
   const endPoint = isInContentTypeView ? 'content-types' : 'components';
 
   getDataRef.current = async () => {
@@ -167,11 +189,11 @@ const DataManagerProvider = ({
   }, [autoReload, toggleNotification]);
 
   const addAttribute = (
-    attributeToSet,
-    forTarget,
-    targetUid,
+    attributeToSet: Record<string, any>,
+    forTarget: SchemaType,
+    targetUid: UID.Any,
     isEditing = false,
-    initialAttribute,
+    initialAttribute?: Record<string, any>,
     shouldAddComponentToData = false
   ) => {
     const actionType = isEditing ? EDIT_ATTRIBUTE : ADD_ATTRIBUTE;
@@ -186,7 +208,12 @@ const DataManagerProvider = ({
     });
   };
 
-  const addCustomFieldAttribute = ({ attributeToSet, forTarget, targetUid, initialAttribute }) => {
+  const addCustomFieldAttribute = ({
+    attributeToSet,
+    forTarget,
+    targetUid,
+    initialAttribute,
+  }: CustomFieldAttributeParams) => {
     dispatch({
       type: ADD_CUSTOM_FIELD_ATTRIBUTE,
       attributeToSet,
@@ -196,7 +223,12 @@ const DataManagerProvider = ({
     });
   };
 
-  const editCustomFieldAttribute = ({ attributeToSet, forTarget, targetUid, initialAttribute }) => {
+  const editCustomFieldAttribute = ({
+    attributeToSet,
+    forTarget,
+    targetUid,
+    initialAttribute,
+  }: CustomFieldAttributeParams) => {
     dispatch({
       type: EDIT_CUSTOM_FIELD_ATTRIBUTE,
       attributeToSet,
@@ -206,7 +238,10 @@ const DataManagerProvider = ({
     });
   };
 
-  const addCreatedComponentToDynamicZone = (dynamicZoneTarget, componentsToAdd) => {
+  const addCreatedComponentToDynamicZone = (
+    dynamicZoneTarget: string,
+    componentsToAdd: string[]
+  ) => {
     dispatch({
       type: ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE,
       dynamicZoneTarget,
@@ -215,10 +250,10 @@ const DataManagerProvider = ({
   };
 
   const createSchema = (
-    data,
-    schemaType,
-    uid,
-    componentCategory,
+    data: Record<string, any>,
+    schemaType: SchemaType,
+    uid: UID.Any,
+    componentCategory: string,
     shouldAddComponentToData = false
   ) => {
     const type = schemaType === 'contentType' ? CREATE_SCHEMA : CREATE_COMPONENT_SCHEMA;
@@ -233,7 +268,7 @@ const DataManagerProvider = ({
     });
   };
 
-  const changeDynamicZoneComponents = (dynamicZoneTarget, newComponents) => {
+  const changeDynamicZoneComponents = (dynamicZoneTarget: string, newComponents: string[]) => {
     dispatch({
       type: CHANGE_DYNAMIC_ZONE_COMPONENTS,
       dynamicZoneTarget,
@@ -241,7 +276,11 @@ const DataManagerProvider = ({
     });
   };
 
-  const removeAttribute = (mainDataKey, attributeToRemoveName, componentUid = '') => {
+  const removeAttribute = (
+    mainDataKey: string,
+    attributeToRemoveName: string,
+    componentUid = ''
+  ) => {
     const type =
       mainDataKey === 'components' ? REMOVE_FIELD_FROM_DISPLAYED_COMPONENT : REMOVE_FIELD;
 
@@ -257,7 +296,7 @@ const DataManagerProvider = ({
     });
   };
 
-  const deleteCategory = async (categoryUid) => {
+  const deleteCategory = async (categoryUid: string) => {
     try {
       const requestURL = `/${pluginId}/component-categories/${categoryUid}`;
       // eslint-disable-next-line no-alert
@@ -344,7 +383,7 @@ const DataManagerProvider = ({
     }
   };
 
-  const editCategory = async (categoryUid, body) => {
+  const editCategory = async (categoryUid: string, body: any) => {
     try {
       const requestURL = `/${pluginId}/component-categories/${categoryUid}`;
 
@@ -400,7 +439,7 @@ const DataManagerProvider = ({
     return makeUnique([...editingDataNestedCompos, ...appNestedCompo]);
   };
 
-  const removeComponentFromDynamicZone = (dzName, componentToRemoveIndex) => {
+  const removeComponentFromDynamicZone = (dzName: string, componentToRemoveIndex: number) => {
     dispatch({
       type: REMOVE_COMPONENT_FROM_DYNAMIC_ZONE,
       dzName,
@@ -410,7 +449,7 @@ const DataManagerProvider = ({
 
   const setModifiedData = () => {
     const currentSchemas = isInContentTypeView ? contentTypes : components;
-    const schemaToSet = get(currentSchemas, currentUid, {
+    const schemaToSet = get(currentSchemas, currentUid ?? '', {
       schema: { attributes: [] },
     });
 
@@ -440,7 +479,7 @@ const DataManagerProvider = ({
   const shouldRedirect = useMemo(() => {
     const dataSet = isInContentTypeView ? contentTypes : components;
 
-    if (currentUid === 'create-content-type') {
+    if (currentUid === 'create-content-type' || currentUid === null) {
       return false;
     }
 
@@ -459,11 +498,15 @@ const DataManagerProvider = ({
     return <Redirect to={`/plugins/${pluginId}/content-types/${redirectEndpoint}`} />;
   }
 
-  const submitData = async (additionalContentTypeData) => {
+  const submitData = async (additionalContentTypeData: Record<string, any>) => {
     try {
       const isCreating = get(modifiedData, [firstKeyToMainSchema, 'isTemporary'], false);
 
-      const body = {
+      const body: {
+        components: any[];
+        contentType?: Record<string, any>;
+        component?: any;
+      } = {
         components: getComponentsToPost(
           modifiedData.components,
           components,
@@ -547,7 +590,7 @@ const DataManagerProvider = ({
 
       // Update the app's permissions
       await updatePermissions();
-    } catch (err) {
+    } catch (err: any) {
       if (!isInContentTypeView) {
         trackUsage('didNotSaveComponent');
       }
@@ -566,7 +609,11 @@ const DataManagerProvider = ({
     await refetchPermissions();
   };
 
-  const updateSchema = (data, schemaType, componentUID) => {
+  const updateSchema = (
+    data: Record<string, any>,
+    schemaType: SchemaType,
+    componentUID: UID.Component
+  ) => {
     dispatch({
       type: UPDATE_SCHEMA,
       data,
@@ -584,7 +631,7 @@ const DataManagerProvider = ({
         allComponentsCategories: retrieveSpecificInfoFromComponents(components, ['category']),
         changeDynamicZoneComponents,
         components,
-        componentsGroupedByCategory: groupBy(components, 'category'),
+        componentsGroupedByCategory: groupBy(components, 'category') as Record<string, any[]>,
         componentsThatHaveOtherComponentInTheirAttributes:
           getAllComponentsThatHaveAComponentInTheirAttributes(),
         contentTypes,
@@ -619,22 +666,8 @@ const DataManagerProvider = ({
   );
 };
 
-DataManagerProvider.defaultProps = {
-  components: {},
-};
-
-DataManagerProvider.propTypes = {
-  children: PropTypes.node.isRequired,
-  components: PropTypes.object,
-  contentTypes: PropTypes.object.isRequired,
-  isLoading: PropTypes.bool.isRequired,
-  isLoadingForDataToBeSet: PropTypes.bool.isRequired,
-  initialData: PropTypes.object.isRequired,
-  modifiedData: PropTypes.object.isRequired,
-  reservedNames: PropTypes.object.isRequired,
-};
-
 const mapStateToProps = makeSelectDataManagerProvider();
 const withConnect = connect(mapStateToProps, null);
 
+// eslint-disable-next-line import/no-default-export
 export default compose(withConnect)(memo(DataManagerProvider));

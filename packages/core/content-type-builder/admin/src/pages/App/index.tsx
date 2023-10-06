@@ -13,7 +13,7 @@ import { useIntl } from 'react-intl';
 import { Route, Switch } from 'react-router-dom';
 
 import ContentTypeBuilderNav from '../../components/ContentTypeBuilderNav';
-import DataManagerProvider from '../../components/DataManagerProvider';
+import DataManagerProvider from '../../components/DataManagerProvider/DataManagerProvider';
 import FormModalNavigationProvider from '../../components/FormModalNavigationProvider';
 import { PERMISSIONS } from '../../constants';
 import pluginId from '../../pluginId';

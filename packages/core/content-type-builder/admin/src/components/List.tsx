@@ -1,12 +1,12 @@
-import React from 'react';
+import { ComponentType, Fragment } from 'react';
 
 import { Box, Button, Table, TFooter, Th, Thead, Tr, Typography } from '@strapi/design-system';
 import { EmptyBodyTable, useTracking } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import useDataManager from '../hooks/useDataManager';
-import useFormModalNavigation from '../hooks/useFormModalNavigation';
+import { useDataManager } from '../hooks/useDataManager';
+import { useFormModalNavigation } from '../hooks/useFormModalNavigation';
 import { getTrad } from '../utils/getTrad';
 
 import { BoxWrapper } from './BoxWrapper';
@@ -14,20 +14,20 @@ import { ComponentList } from './ComponentList';
 import DynamicZoneList from './DynamicZoneList';
 import NestedTFooter from './NestedTFooter';
 
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
+import type { SchemaType } from '../types';
+import type { UID } from '@strapi/types';
 
 interface ListProps {
   addComponentToDZ?: () => void;
-  customRowComponent: React.ComponentType<any>;
-  editTarget: string;
+  customRowComponent: ComponentType<any>;
+  editTarget: SchemaType;
   firstLoopComponentUid?: string;
   isFromDynamicZone?: boolean;
   isNestedInDZComponent?: boolean;
   isMain?: boolean;
   items: any[];
   secondLoopComponentUid?: string | null;
-  targetUid?: string;
+  targetUid?: UID.Any;
   isSub?: boolean;
 }
 
@@ -156,7 +156,7 @@ export const List = ({
               const CustomRow = customRowComponent;
 
               return (
-                <React.Fragment key={item.name}>
+                <Fragment key={item.name}>
                   <CustomRow
                     {...item}
                     isNestedInDZComponent={isNestedInDZComponent}
@@ -186,7 +186,7 @@ export const List = ({
                       targetUid={targetUid}
                     />
                   )}
-                </React.Fragment>
+                </Fragment>
               );
             })}
           </tbody>
