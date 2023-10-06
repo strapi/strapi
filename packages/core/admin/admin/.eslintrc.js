@@ -12,5 +12,11 @@ module.exports = {
       files: ['**/*.ts', '**/*.tsx'],
       extends: ['custom/front/typescript'],
     },
+    {
+      files: ['./tests/*'],
+      env: {
+        jest: true,
+      },
+    },
   ],
 };
