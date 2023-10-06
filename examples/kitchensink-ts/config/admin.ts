@@ -10,5 +10,5 @@ export default ({ env }) => ({
       salt: env('TRANSFER_TOKEN_SALT', 'example-salt'),
     },
   },
-  isNpsEnabled: env('IS_NPS_ENABLED', true),
+  npsEnabled: env.bool('NPS_ENABLED', true),
 });

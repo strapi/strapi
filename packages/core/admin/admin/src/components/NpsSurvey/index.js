@@ -83,10 +83,12 @@ const checkIfShouldShowSurvey = (settings) => {
   // For users who had created an account before the NPS feature was introduced,
   // we assume that they would have enabled the NPS feature if they had the chance.
 
-  // User chose not to enable the NPS feature when signing up
-  if(window.strapi.isNpsEnabled === false){
+  // Global strapi disable for NSP.
+  if(window.strapi.npsEnabled === false){
     return false
   }
+
+  // User chose not to enable the NPS feature when signing up
   if (enabled === false) {
     return false;
   }
