@@ -8,7 +8,27 @@ export const server = setupServer(
      * ADMIN
      *
      */
+    rest.get('/admin/roles/:id/permissions', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          data: [
+            {
+              id: 1,
+              action: 'plugin::content-manager.explorer.create',
+              subject: 'api::address.address',
+              properties: {
+                fields: ['postal_code', 'categories'],
+              },
+              conditions: [],
 
+              params: {
+                some: req.url.searchParams.get('some'),
+              },
+            },
+          ],
+        })
+      );
+    }),
     /**
      *
      * CONTENT_MANAGER

@@ -19,6 +19,7 @@ import { Provider } from 'react-redux';
 import { MemoryRouter, MemoryRouterProps } from 'react-router-dom';
 import { createStore } from 'redux';
 
+// @ts-expect-error – no types yet.
 import ModelsContext from '../src/content-manager/contexts/ModelsContext';
 
 import { server } from './server';
