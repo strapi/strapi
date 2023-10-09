@@ -7,9 +7,33 @@ import makeUnique from '../../utils/makeUnique';
 
 import * as actions from './constants';
 import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
-import { Attribute } from '@strapi/types';
+import { Attribute, UID } from '@strapi/types';
+interface StateType {
+  components: Record<string, any>;
+  contentTypes: Record<string, any>;
+  initialComponents: Record<string, any>;
+  initialContentTypes: Record<string, any>;
+  initialData: Record<string, any>;
+  modifiedData: Record<string, any>;
+  reservedNames: Record<string, any>;
+  isLoading: boolean;
+  isLoadingForDataToBeSet: boolean;
+}
 
-const initialState = {
+type Action = {
+  type: string;
+  [key: string]: any;
+};
+
+type findAttributeIndexSchemaParam = {
+  schema: {
+    attributes: {
+      name: string;
+    }[];
+  };
+};
+
+const initialState: StateType = {
   components: {},
   contentTypes: {},
   initialComponents: {},
@@ -35,22 +59,11 @@ const getOppositeRelation = (originalRelation: string) => {
   return originalRelation;
 };
 
-type Action = {
-  type: string;
-};
-
-type findAttributeIndexSchemaParam = {
-  schema: {
-    attributes: {
-      name: string;
-    }[];
-  };
-};
 const findAttributeIndex = (schema: findAttributeIndexSchemaParam, attributeToFind: string) => {
   return schema.schema.attributes.findIndex(({ name }) => name === attributeToFind);
 };
 
-const reducer = (state = initialState, action) =>
+const reducer = (state = initialState, action: Action) =>
   // eslint-disable-next-line consistent-return
   produce(state, (draftState) => {
     switch (action.type) {
@@ -101,11 +114,13 @@ const reducer = (state = initialState, action) =>
           );
 
           // We dont' need to set the already added components otherwise all modifications will be lost so we need to only add the not modified ones
-          const nestedComponentsToAddInModifiedData = nestedComponents.filter((compoUID) => {
-            return get(state, ['modifiedData', 'components', compoUID]) === undefined;
-          });
+          const nestedComponentsToAddInModifiedData = nestedComponents.filter(
+            (compoUID: UID.Component) => {
+              return get(state, ['modifiedData', 'components', compoUID]) === undefined;
+            }
+          );
 
-          nestedComponentsToAddInModifiedData.forEach((compoUID) => {
+          nestedComponentsToAddInModifiedData.forEach((compoUID: UID.Component) => {
             const compoSchema = get(state, ['components', compoUID], {});
             const isTemporary = compoSchema.isTemporary || false;
 
@@ -167,7 +182,7 @@ const reducer = (state = initialState, action) =>
           dynamicZoneTarget
         );
 
-        componentsToAdd.forEach((componentUid) => {
+        componentsToAdd.forEach((componentUid: UID.Component) => {
           draftState.modifiedData.contentType.schema.attributes[dzAttributeIndex].components.push(
             componentUid
           );
@@ -230,7 +245,7 @@ const reducer = (state = initialState, action) =>
           return get(state, ['modifiedData', 'components', compoUID]) === undefined;
         });
 
-        nestedComponentsToAddInModifiedData.forEach((compoUID) => {
+        nestedComponentsToAddInModifiedData.forEach((compoUID: UID.Component) => {
           const compoSchema = get(state, ['components', compoUID], {});
           const isTemporary = compoSchema.isTemporary || false;
 
@@ -312,8 +327,18 @@ const reducer = (state = initialState, action) =>
           'attributes',
         ]).slice();
 
+        type ToSetType = {
+          name: string;
+          relation: string;
+          target: string;
+          targetAttribute: string;
+          type: string;
+          private?: boolean;
+          pluginOptions?: any; // Adjust the type as per actual data type
+        };
+
         // First create the current relation attribute updated
-        const toSet = {
+        const toSet: ToSetType = {
           name,
           relation: rest.relation,
           target: rest.target,

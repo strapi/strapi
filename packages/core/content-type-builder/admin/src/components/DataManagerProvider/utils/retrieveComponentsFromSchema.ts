@@ -2,8 +2,8 @@ import get from 'lodash/get';
 
 import makeUnique from '../../../utils/makeUnique';
 
-const retrieveComponentsFromSchema = (attributes, allComponentsData) => {
-  const allComponents = attributes.reduce((acc, current) => {
+const retrieveComponentsFromSchema = (attributes: any, allComponentsData: any) => {
+  const allComponents = attributes.reduce((acc: any, current: any) => {
     const type = current.type;
 
     if (type === 'component') {
@@ -38,4 +38,4 @@ const retrieveComponentsFromSchema = (attributes, allComponentsData) => {
   return makeUnique(allComponents);
 };
 
-export default retrieveComponentsFromSchema;
+export { retrieveComponentsFromSchema };

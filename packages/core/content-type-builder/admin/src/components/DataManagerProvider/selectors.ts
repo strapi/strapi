@@ -23,5 +23,4 @@ const makeSelectDataManagerProvider = () =>
     return substate;
   });
 
-export default makeSelectDataManagerProvider;
-export { dataManagerProviderDomain };
+export { makeSelectDataManagerProvider, dataManagerProviderDomain };

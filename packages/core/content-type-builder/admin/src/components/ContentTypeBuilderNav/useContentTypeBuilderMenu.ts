@@ -4,8 +4,8 @@ import { useCollator, useFilter, useNotification, useTracking } from '@strapi/he
 import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 
-import useDataManager from '../../hooks/useDataManager';
-import useFormModalNavigation from '../../hooks/useFormModalNavigation';
+import { useDataManager } from '../../hooks/useDataManager';
+import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import pluginId from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
 
