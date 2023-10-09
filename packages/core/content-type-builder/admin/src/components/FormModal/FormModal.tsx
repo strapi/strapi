@@ -39,7 +39,7 @@ import { getTrad, isAllowedContentTypesForRelations } from '../../utils';
 import findAttribute from '../../utils/findAttribute';
 // New compos
 import { AllowedTypesSelect } from '../AllowedTypesSelect';
-import AttributeOptions from '../AttributeOptions';
+import AttributeOptions from '../AttributeOptions/AttributeOptions';
 import { BooleanDefaultValueSelect } from '../BooleanDefaultValueSelect';
 import { BooleanRadioGroup } from '../BooleanRadioGroup';
 import { CheckboxWithNumberField } from '../CheckboxWithNumberField';

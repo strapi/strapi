@@ -131,6 +131,10 @@ export default function createSchemaHandler(infos: Infos) {
 
     setAttributes(newAttributes: Schema.Attributes) {
       if (!this.schema) return this;
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
       // delete old configurable attributes
       for (const key in this.schema.attributes) {
         if (isConfigurable(this.schema.attributes[key])) {

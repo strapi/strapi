@@ -1,7 +1,7 @@
 import { Box } from '@strapi/design-system';
 import styled from 'styled-components';
 
-const BoxWrapper = styled(Box)`
+export const OptionBoxWrapper = styled(Box)`
   width: 100%;
   height: 100%;
   border: 1px solid ${({ theme }) => theme.colors.neutral200};
@@ -11,5 +11,3 @@ const BoxWrapper = styled(Box)`
     border: 1px solid ${({ theme }) => theme.colors.primary200};
   }
 `;
-
-export default BoxWrapper;

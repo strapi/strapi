@@ -1,18 +1,17 @@
-import React from 'react';
-
 import { Box, Flex, Icon, LinkButton, Typography } from '@strapi/design-system';
 import { EmptyDocuments, Plus } from '@strapi/icons';
-import qs from 'qs';
+import * as qs from 'qs';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { getTrad } from '../../../utils';
+import { getTrad } from '../../utils';
 
 const EmptyCard = styled(Box)`
   background: ${({ theme }) =>
     `linear-gradient(180deg, rgba(234, 234, 239, 0) 0%, ${theme.colors.neutral150} 100%)`};
   opacity: 0.33;
 `;
+// MINE this is good
 
 export const EmptyCardGrid = () => {
   return (
@@ -32,7 +31,7 @@ export const EmptyCardGrid = () => {
   );
 };
 
-const EmptyAttributes = () => {
+export const EmptyAttributes = () => {
   const { formatMessage } = useIntl();
 
   return (
@@ -60,7 +59,7 @@ const EmptyAttributes = () => {
               </Box>
             </Box>
           </Box>
-          <LinkButton
+          <LinkButton // MINE check this
             to={`/marketplace?${qs.stringify({ categories: ['Custom fields'] })}`}
             variant="secondary"
             startIcon={<Plus />}
@@ -75,5 +74,3 @@ const EmptyAttributes = () => {
     </Box>
   );
 };
-
-export default EmptyAttributes;

@@ -1,12 +1,15 @@
-import React from 'react';
-
 import { Box, Flex, Grid, GridItem, KeyboardNavigable } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 
-import AttributeOption from '../AttributeOption';
-import getPadding from '../utils/getPadding';
+import { IconByType } from '../AttributeIcon';
 
-const AttributeList = ({ attributes }) => (
+import { AttributeOption } from './AttributeOption';
+import { getPadding } from './utils/getPadding';
+
+type AttributeListProps = {
+  attributes: IconByType[][];
+};
+
+export const AttributeList = ({ attributes }: AttributeListProps) => (
   <KeyboardNavigable tagName="button">
     <Flex direction="column" alignItems="stretch" gap={8}>
       {attributes.map((attributeRow, index) => {
@@ -35,9 +38,3 @@ const AttributeList = ({ attributes }) => (
     </Flex>
   </KeyboardNavigable>
 );
-
-AttributeList.propTypes = {
-  attributes: PropTypes.array.isRequired,
-};
-
-export default AttributeList;

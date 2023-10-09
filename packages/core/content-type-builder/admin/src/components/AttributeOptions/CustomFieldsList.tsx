@@ -1,18 +1,21 @@
-import React from 'react';
-
 import { Box, Flex, Grid, GridItem, KeyboardNavigable, Link } from '@strapi/design-system';
 import { useCustomFields } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
-import { getTrad } from '../../../utils';
-import CustomFieldOption from '../CustomFieldOption';
-import EmptyAttributes from '../EmptyAttributes';
-import getPadding from '../utils/getPadding';
+import { getTrad } from '../../utils';
 
-const CustomFieldsList = () => {
+import { CustomFieldOption } from './CustomFieldOption';
+import { EmptyAttributes } from './EmptyAttributes';
+import { getPadding } from './utils/getPadding';
+
+export const CustomFieldsList = () => {
   const { formatMessage } = useIntl();
   const customFields = useCustomFields();
-  const registeredCustomFields = Object.entries(customFields.getAll());
+  // TODO change this once useCustomFields is typed (helper-plugin types are solved)
+  const registeredCustomFields = Object.entries(customFields.getAll()) as [
+    string,
+    CustomFieldOption
+  ][];
 
   if (!registeredCustomFields.length) {
     return <EmptyAttributes />;
@@ -46,7 +49,7 @@ const CustomFieldsList = () => {
         </Grid>
         <Link
           href="https://docs.strapi.io/developer-docs/latest/development/custom-fields.html"
-          isExternal
+          isExternal // MINE check this
         >
           {formatMessage({
             id: getTrad('modalForm.tabs.custom.howToLink'),
@@ -57,5 +60,3 @@ const CustomFieldsList = () => {
     </KeyboardNavigable>
   );
 };
-
-export default CustomFieldsList;
