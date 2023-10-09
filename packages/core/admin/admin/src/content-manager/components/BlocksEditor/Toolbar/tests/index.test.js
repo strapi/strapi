@@ -261,8 +261,6 @@ describe('BlocksEditor toolbar', () => {
 
     await user.click(screen.getByRole('option', { name: 'Numbered list' }));
 
-    screen.debug(headingsDropdown);
-
     expect(baseEditor.children).toEqual([
       {
         type: 'list',
