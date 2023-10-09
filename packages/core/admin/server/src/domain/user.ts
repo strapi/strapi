@@ -10,7 +10,7 @@ export type AdminUser = {
   email: string;
   password: string;
   resetPasswordToken: string;
-  registrationToken: string;
+  registrationToken: string | null;
   isActive: boolean;
   roles: AdminRole[];
   blocked: boolean;
