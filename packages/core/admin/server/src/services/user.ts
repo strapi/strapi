@@ -2,6 +2,7 @@
 import _ from 'lodash';
 import { defaults } from 'lodash/fp';
 import { stringIncludes, errors } from '@strapi/utils';
+import { Entity, EntityService } from '@strapi/types';
 import { type AdminUser, createUser, hasSuperAdminRole, AdminRole } from '../domain/user';
 import { password as passwordValidator } from '../validation/common-validators';
 import { getService } from '../utils';
@@ -65,7 +66,7 @@ const create = async (attributes: Partial<AdminUser>): Promise<AdminUser> => {
 const updateById = async (
   id: string | number,
   attributes: Partial<AdminUser>
-): Promise<SanitizedAdminUser> => {
+): Promise<AdminUser> => {
   // Check at least one super admin remains
   if (_.has(attributes, 'roles')) {
     const lastAdminUser = await isLastSuperAdminUser(id);
@@ -156,7 +157,7 @@ const isLastSuperAdminUser = async (userId: string | number): Promise<boolean> =
  * Check if a user with specific attributes exists in the database
  * @param attributes A partial user object
  */
-const exists = async (attributes = {} as Partial<AdminUser>): Promise<boolean> => {
+const exists = async (attributes = {} as any): Promise<boolean> => {
   return (await strapi.query('admin::user').count({ where: attributes })) > 0;
 };
 
@@ -209,7 +210,7 @@ const register = async ({
  * Find one user
  */
 const findOne = async (id: string | number, populate = ['roles']) => {
-  // @ts-expect-error - Migrate id type to StrapiID
+  // @ts-ignore - Migrate id type to StrapiID
   return strapi.entityService.findOne('admin::user', id, { populate });
 };
 
@@ -229,7 +230,8 @@ const findOneByEmail = async (email: string, populate = []) => {
 /** Find many users (paginated)
  * @param query
  */
-const findPage = async (query = {}) => {
+// TODO: TS - type find Page. At the moment, 'admin::user'is not being resolved by the ES type registry
+const findPage = async (query = {}): Promise<any> => {
   const enrichedQuery = defaults({ populate: ['roles'] }, query);
   return strapi.entityService.findPage('admin::user', enrichedQuery);
 };

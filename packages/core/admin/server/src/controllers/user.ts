@@ -59,7 +59,7 @@ export default {
 
     ctx.body = {
       data: {
-        results: results.map((user) => userService.sanitizeUser(user)),
+        results: results.map((user: any) => userService.sanitizeUser(user)),
         pagination,
       },
     };
@@ -75,12 +75,13 @@ export default {
     }
 
     ctx.body = {
+      // @ts-ignore
       data: getService('user').sanitizeUser(user),
     };
   },
 
   async update(ctx: any) {
-    const { id } = ctx.params;
+    const { id } = ctx.params as { id: string };
     const { body: input } = ctx.request;
 
     await validateUserUpdateInput(input);
