@@ -228,8 +228,8 @@ const createYupSchemaAttribute = (type, validations, options) => {
         return true;
       }
 
-      // The backend validates the actual schema
-      if (!Array.isArray(value)) {
+      // The backend validates the actual schema, check if a value different than null is not an array
+      if (value && !Array.isArray(value)) {
         return false;
       }
 

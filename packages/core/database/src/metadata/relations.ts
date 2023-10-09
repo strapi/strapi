@@ -55,7 +55,7 @@ const isOwner = (
   !isBidirectional(attribute) || hasInversedBy(attribute);
 
 const shouldUseJoinTable = (attribute: RelationalAttribute) =>
-  'useJoinTable' in attribute && attribute.useJoinTable !== false;
+  !('useJoinTable' in attribute) || attribute.useJoinTable !== false;
 
 export const getJoinTableName = (tableName: string, attributeName: string) =>
   _.snakeCase(`${tableName}_${attributeName}_links`);

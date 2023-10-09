@@ -36,7 +36,6 @@ jest.mock('@strapi/helper-plugin', () => ({
 
 jest.mock('../../../hooks', () => ({
   useMenu: jest.fn(() => ({ isLoading: true, generalSectionLinks: [], pluginsSectionLinks: [] })),
-  useReleaseNotification: jest.fn(),
   useConfigurations: jest.fn(() => ({ showTutorials: false })),
 }));
 

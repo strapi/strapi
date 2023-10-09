@@ -7,8 +7,8 @@ import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { Route, Router } from 'react-router-dom';
 
-import Theme from '../../../../../../../components/Theme';
-import ThemeToggleProvider from '../../../../../../../components/ThemeToggleProvider';
+import { Theme } from '../../../../../../../components/Theme';
+import { ThemeToggleProvider } from '../../../../../../../components/ThemeToggleProvider';
 import PaginationFooter from '../index';
 
 const makeApp = (history, pagination) => {

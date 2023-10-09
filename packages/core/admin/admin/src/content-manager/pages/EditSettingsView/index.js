@@ -73,6 +73,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
         'password',
         'richtext',
         'timestamp',
+        'blocks',
       ].includes(type) && !!type
     );
   });

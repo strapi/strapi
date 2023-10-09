@@ -15,6 +15,8 @@ import { transformContentTypes } from './utils/content-types';
 import { validateDatabase } from './validations';
 import { Model } from './types';
 
+export { isKnexQuery } from './utils/knex';
+
 interface Settings {
   forceMigration?: boolean;
   runMigrations?: boolean;
