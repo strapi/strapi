@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { IconButton, IconButtonProps } from '@strapi/design-system';
 import { Minus } from '@strapi/icons';
 import styled from 'styled-components';

@@ -1,0 +1,81 @@
+---
+title: Templates
+tags:
+  - pack-up
+  - generating
+  - template
+---
+
+Templates are only used for the `init` api. You can either pass a path to the file containing your template (it's expected to be
+a default export) if you're using the CLI. Or alternatively, if you're using the node functions then you can directly pass your template.
+
+A template can either be an object (defined below) or a function returning said object. The function recieves an initiatialisation context
+to be utilised at the discretion of the template author.
+
+## Interfaces
+
+### Template
+
+```ts
+interface Template {
+  /**
+   * If you're not using a template in a CLI environment,
+   * it's not recommended to use prompts. Instead, you should
+   * just return all the files your template needs in from the
+   * `getFiles` function.
+   */
+  prompts?: Array<TemplateFeature | TemplateOption>;
+  /**
+   * A dictionary of the files that will be created in the
+   * new package. The key is the file name and the value is
+   * the file contents, we prettify the contents before writing
+   * using a default config if there's not one in the package.
+   */
+  getFiles: (answers?: Array<{ name: string; answer: string }>) => Promise<Array<TemplateFile>>;
+}
+
+interface TemplateContext {
+  cwd: string;
+  logger: Logger;
+  packagePath: string;
+}
+
+type TemplateResolver = (ctx: TemplateContext) => Promise<Template>;
+```
+
+### Template Features & Options
+
+Features & options are restricted just [prompts](https://github.com/terkelg/prompts). All features are boolean
+answers using the `confirm` type. Options have a lot more flexibility and can be used to capture information.
+
+```ts
+interface TemplateFeature<T extends string = string>
+  extends Pick<prompts.PromptObject<T>, 'initial'> {
+  /**
+   * Name of the feature you want to add to your package.
+   * This must be identical to the name of the feature on npm.
+   */
+  name: string;
+  /**
+   * @default true
+   */
+  optional?: boolean;
+}
+
+interface TemplateOption<T extends string = string>
+  extends Omit<prompts.PromptObject<T>, 'onState' | 'onRender' | 'stdout' | 'stdin' | 'name'> {
+  name: string;
+}
+```
+
+### Template file
+
+Files are just objects with a name and contents. It's advised to use a library like `outdent` to handle indentation in
+your file contents. Although the API will try to prettyify your files before writing them.
+
+```ts
+interface TemplateFile {
+  name: string;
+  contents: string;
+}
+```
