@@ -150,6 +150,7 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
+    "@strapi/ts-zen": "^0.2.0",
     "@types/bcryptjs": "2.4.3",
     "@types/configstore": "5.0.1",
     "@types/delegates": "1.0.0",
@@ -166,7 +167,6 @@
     "@types/statuses": "2.0.1",
     "eslint-config-custom": "4.14.3",
     "supertest": "6.3.3",
-    "ts-zen": "https://github.com/strapi/ts-zen#66e02232f5997674cc7032ea3ee59d9864863732",
     "tsconfig": "4.14.3",
     "typescript": "5.2.2"
   },
