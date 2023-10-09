@@ -16,9 +16,9 @@ import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
 
-import { useAdminRolePermissions } from '../../../../../hooks/useAdminRolePermissions';
 import { useAdminRoles } from '../../../../../hooks/useAdminRoles';
 import { useAdminRolePermissionLayout } from '../hooks/useAdminRolePermissionLayout';
+import { useAdminRolePermissions } from '../hooks/useAdminRolePermissions';
 
 import { Permissions, RoleForm } from './components';
 import schema from './utils/schema';

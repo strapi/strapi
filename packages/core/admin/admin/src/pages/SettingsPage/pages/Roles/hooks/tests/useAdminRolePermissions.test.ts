@@ -1,8 +1,10 @@
 import { renderHook, waitFor } from '@tests/utils';
+import { UseQueryOptions } from 'react-query';
 
-import { useAdminRolePermissions } from '../index';
+import { useAdminRolePermissions, APIRolePermissionsQueryParams } from '../useAdminRolePermissions';
 
-const setup = (...args) => renderHook(() => useAdminRolePermissions(...args));
+const setup = (params?: APIRolePermissionsQueryParams, options?: UseQueryOptions) =>
+  renderHook(() => useAdminRolePermissions(params, options));
 
 describe('useAdminRolePermissions', () => {
   test('fetches permissions', async () => {
@@ -24,7 +26,7 @@ describe('useAdminRolePermissions', () => {
   });
 
   test('forwards all query params except `id`', async () => {
-    const { result } = setup({ id: 1, some: 'param' });
+    const { result } = setup({ id: 1, filters: 'param' });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
@@ -32,7 +34,7 @@ describe('useAdminRolePermissions', () => {
       expect.arrayContaining([
         expect.objectContaining({
           params: {
-            some: 'param',
+            filters: 'param',
           },
         }),
       ])
