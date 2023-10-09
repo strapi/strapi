@@ -4,7 +4,8 @@ import { isEmpty, has, isNil, isArray } from 'lodash/fp';
 import { getService } from '../utils';
 import actionDomain, { type Action } from '../domain/action';
 import { checkFieldsAreCorrectlyNested, checkFieldsDontHaveDuplicates } from './common-functions';
-import { actionFields } from '../../../../../../test-apps/admin/dist/server/domain/action/index';
+import actions from '../domain/action/index';
+const { actionFields } = actions;
 
 const getActionFromProvider = (actionId: string) => {
   return getService('permission').actionProvider.get(actionId);
