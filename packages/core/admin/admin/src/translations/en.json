@@ -628,7 +628,7 @@
   "components.Blocks.modifiers.code": "Code",
   "components.Blocks.link": "Link",
   "components.Blocks.popover.text": "Text",
-  "components.Blocks.popover.text.placeholder": "This text is the text of the link",
+  "components.Blocks.popover.text.placeholder": "Enter link text",
   "components.Blocks.popover.link": "Link",
   "components.Blocks.popover.save": "Save",
   "components.Blocks.popover.cancel": "Cancel",

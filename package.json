@@ -68,6 +68,7 @@
     "watch": "nx run-many --target=watch --nx-ignore-cycles"
   },
   "resolutions": {
+    "@strapi/design-system": "1.12.0-typescript.1",
     "@types/koa": "2.13.4"
   },
   "devDependencies": {
@@ -103,6 +104,7 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-rxjs": "5.0.3",
     "eslint-plugin-testing-library": "6.0.2",
     "execa": "5.1.1",
     "find-up": "5.0.0",

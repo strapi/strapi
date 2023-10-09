@@ -10,8 +10,8 @@ import { Provider } from 'react-redux';
 import { Route, Router } from 'react-router-dom';
 import { createStore } from 'redux';
 
-import Theme from '../../../../../../components/Theme';
-import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
+import { Theme } from '../../../../../../components/Theme';
+import { ThemeToggleProvider } from '../../../../../../components/ThemeToggleProvider';
 import EditView from '../index';
 import { data } from '../utils/tests/dataMock';
 

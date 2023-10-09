@@ -1,5 +1,3 @@
-import React from 'react';
-
 import {
   LinkButton as DSLinkButton,
   LinkButtonProps as DSLinkButtonProps,

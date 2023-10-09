@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 
-import { parse, ParsedQs, stringify } from 'qs';
+import { parse, stringify } from 'qs';
 import { useHistory, useLocation } from 'react-router-dom';
 
 const useQueryParams = <TQuery extends Record<string, unknown>>(initialParams?: TQuery) => {
