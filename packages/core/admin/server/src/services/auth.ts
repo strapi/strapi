@@ -2,32 +2,26 @@ import bcrypt from 'bcryptjs';
 import _ from 'lodash';
 import { getAbsoluteAdminUrl, errors } from '@strapi/utils';
 import { getService } from '../utils';
+import { type AdminUser } from '../domain/user';
+import '@strapi/types';
 
 const { ApplicationError } = errors;
 
 /**
  * hashes a password
- * @param {string} password - password to hash
- * @returns {string} hashed password
  */
 const hashPassword = (password: string) => bcrypt.hash(password, 10);
 
 /**
  * Validate a password
- * @param {string} password
- * @param {string} hash
- * @returns {Promise<boolean>} is the password valid
  */
 const validatePassword = (password: string, hash: string) => bcrypt.compare(password, hash);
 
 /**
  * Check login credentials
- * @param {Object} options
- * @param {string} options.email
- * @param {string} options.password
  */
 const checkCredentials = async ({ email, password }: { email: string; password: string }) => {
-  const user = await strapi.query('admin::user').findOne({ where: { email } });
+  const user: AdminUser = await strapi.query('admin::user').findOne({ where: { email } });
 
   if (!user || !user.password) {
     return [null, false, { message: 'Invalid credentials' }];
@@ -48,12 +42,11 @@ const checkCredentials = async ({ email, password }: { email: string; password: 
 
 /**
  * Send an email to the user if it exists or do nothing
- * @param {Object} param params
- * @param {string} param.email user email for which to reset the password
  */
 const forgotPassword = async ({ email } = {} as { email: string }) => {
-  const user = await strapi.query('admin::user').findOne({ where: { email, isActive: true } });
-
+  const user: AdminUser = await strapi
+    .query('admin::user')
+    .findOne({ where: { email, isActive: true } });
   if (!user) {
     return;
   }
@@ -65,6 +58,7 @@ const forgotPassword = async ({ email } = {} as { email: string }) => {
   const url = `${getAbsoluteAdminUrl(
     strapi.config
   )}/auth/reset-password?code=${resetPasswordToken}`;
+
   return strapi
     .plugin('email')
     .service('email')
@@ -88,14 +82,11 @@ const forgotPassword = async ({ email } = {} as { email: string }) => {
 
 /**
  * Reset a user password
- * @param {Object} param params
- * @param {string} param.resetPasswordToken token generated to request a password reset
- * @param {string} param.password new user password
  */
 const resetPassword = async (
   { resetPasswordToken, password } = {} as { resetPasswordToken: string; password: string }
 ) => {
-  const matchingUser = await strapi
+  const matchingUser: AdminUser = await strapi
     .query('admin::user')
     .findOne({ where: { resetPasswordToken, isActive: true } });
 
