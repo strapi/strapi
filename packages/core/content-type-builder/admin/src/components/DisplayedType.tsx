@@ -1,12 +1,19 @@
-import React from 'react';
-
 import { Typography } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { getTrad } from '../../utils/getTrad';
+import { getTrad } from '../utils/getTrad';
 
-const DisplayedType = ({ type, customField, repeatable }) => {
+type DisplayedTypeProps = {
+  type: string;
+  customField?: string | null;
+  repeatable?: boolean;
+};
+
+export const DisplayedType = ({
+  type,
+  customField = null,
+  repeatable = false,
+}: DisplayedTypeProps) => {
   const { formatMessage } = useIntl();
 
   let readableType = type;
@@ -43,16 +50,3 @@ const DisplayedType = ({ type, customField, repeatable }) => {
     </Typography>
   );
 };
-
-DisplayedType.defaultProps = {
-  customField: null,
-  repeatable: false,
-};
-
-DisplayedType.propTypes = {
-  type: PropTypes.string.isRequired,
-  customField: PropTypes.string,
-  repeatable: PropTypes.bool,
-};
-
-export default DisplayedType;

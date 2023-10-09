@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 
 import { useTracking } from '@strapi/helper-plugin';
 
-import FormModalNavigationContext from '../../contexts/FormModalNavigationContext';
+import { FormModalNavigationContext } from '../../contexts/FormModalNavigationContext';
 
 import { INITIAL_STATE_DATA } from './constants';
 
@@ -29,7 +29,7 @@ type ModalEventProps = {
 };
 
 export const FormModalNavigationProvider = ({ children }: FormModalNavigationProviderProps) => {
-  const [state, setFormModalNavigationState] = useState(INITIAL_STATE_DATA);
+  const [state, setFormModalNavigationState] = React.useState(INITIAL_STATE_DATA);
   const { trackUsage } = useTracking();
 
   const onClickSelectCustomField = ({ attributeType, customFieldUid }: ModalEventProps) => {
