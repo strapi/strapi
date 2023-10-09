@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
 import Blocks from '../index';
@@ -18,8 +18,10 @@ const setup = (props) =>
     <Blocks
       intlLabel={{ id: 'blocks', defaultMessage: 'blocks type' }}
       name="blocks-editor"
-      value={blocksData}
+      hint="blocks description"
+      placeholder={{ id: 'blocksPlaceholder', defaultMessage: 'blocks placeholder' }}
       onChange={jest.fn()}
+      disabled={false}
       {...props}
     />,
     {
@@ -34,20 +36,24 @@ const setup = (props) =>
   );
 
 describe('BlocksEditor', () => {
-  it('should render blocks without error', () => {
-    setup();
+  it('should render blocks without error', async () => {
+    setup({ value: null });
 
     expect(screen.getByText('blocks type')).toBeInTheDocument();
+    expect(screen.getByText('blocks description')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('blocks placeholder')).toBeInTheDocument();
+    });
   });
 
   it('should render blocks with error', () => {
-    setup({ error: 'field is required' });
+    setup({ error: 'field is required', value: blocksData });
 
     expect(screen.getByText(/field is required/));
   });
 
   it('should render blocks with data', () => {
-    setup();
+    setup({ value: blocksData });
 
     expect(screen.getByText('This is bold text').parentElement).toHaveStyle({
       'font-weight': 600,

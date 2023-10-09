@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { TextInput, TextInputProps } from '@strapi/design-system';
 import { EyeStriked } from '@strapi/icons';
 import { useIntl } from 'react-intl';

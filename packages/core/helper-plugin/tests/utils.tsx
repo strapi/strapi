@@ -1,6 +1,7 @@
 /* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
+// @ts-expect-error - the package is slightly broken, but will be fixed with https://github.com/strapi/strapi/pull/18233
 import { fixtures } from '@strapi/admin-test-utils';
 import { DesignSystemProvider } from '@strapi/design-system';
 import {

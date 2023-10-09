@@ -27,7 +27,7 @@ import { SortIcon } from '../icons/SortIcon';
 import { ConfirmDialog } from './ConfirmDialog';
 import { EmptyStateLayout, EmptyStateLayoutProps } from './EmptyStateLayout';
 
-import type { Attribute } from '@strapi/strapi';
+import type { Attribute } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * Context

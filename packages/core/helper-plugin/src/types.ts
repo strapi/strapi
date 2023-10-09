@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import type { TrackingEvent } from './features/Tracking';
-import type { Attribute, EntityService } from '@strapi/strapi';
+import type { Attribute, EntityService } from '@strapi/types';
 import type { errors } from '@strapi/utils';
 import type { MessageDescriptor, PrimitiveType } from 'react-intl';
 
