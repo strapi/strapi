@@ -1,16 +1,10 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { NotificationsProvider, useAppInfo, useTracking } from '@strapi/helper-plugin';
-import { fireEvent, render as renderRTL, screen, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { MemoryRouter } from 'react-router-dom';
+import { useAppInfo, useTracking } from '@strapi/helper-plugin';
+import { screen, within } from '@testing-library/react';
+import { fireEvent, render as renderRTL, waitFor } from '@tests/utils';
 
 import { MarketPlacePage } from '../index';
-
-import server from './server';
 
 jest.mock('../hooks/useNavigatorOnline');
 
@@ -28,46 +22,13 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-const render = (props) => ({
-  ...renderRTL(<MarketPlacePage {...props} />, {
-    wrapper({ children }) {
-      const client = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
-          },
-        },
-      });
-
-      return (
-        <QueryClientProvider client={client}>
-          <IntlProvider locale="en" messages={{}} textComponent="span">
-            <ThemeProvider theme={lightTheme}>
-              <NotificationsProvider>
-                <MemoryRouter>{children}</MemoryRouter>
-              </NotificationsProvider>
-            </ThemeProvider>
-          </IntlProvider>
-        </QueryClientProvider>
-      );
-    },
-  }),
-  user: userEvent.setup(),
-});
+const render = (props) => renderRTL(<MarketPlacePage {...props} />);
 
 const waitForReload = async () => {
   await waitFor(() => expect(screen.queryByText('Loading content...')).not.toBeInTheDocument());
 };
 
 describe('Marketplace page - layout', () => {
-  beforeAll(() => server.listen());
-
-  afterEach(() => {
-    server.resetHandlers();
-  });
-
-  afterAll(() => server.close());
-
   it('renders the online layout', async () => {
     const trackUsage = jest.fn();
     useTracking.mockImplementationOnce(() => ({ trackUsage }));

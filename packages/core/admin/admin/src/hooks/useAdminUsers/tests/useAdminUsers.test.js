@@ -1,76 +1,10 @@
-import * as React from 'react';
-
-import { renderHook, waitFor } from '@testing-library/react';
-import { rest } from 'msw';
-import { setupServer } from 'msw/node';
-import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { renderHook, waitFor } from '@tests/utils';
 
 import { useAdminUsers } from '../useAdminUsers';
 
-const server = setupServer(
-  rest.get('*/users', (req, res, ctx) =>
-    res(
-      ctx.json({
-        data: {
-          results: [
-            {
-              id: 1,
-            },
-          ],
-
-          pagination: {
-            page: 1,
-          },
-        },
-      })
-    )
-  ),
-
-  rest.get('*/users/1', (req, res, ctx) =>
-    res(
-      ctx.json({
-        data: {
-          id: 1,
-          params: {
-            some: req.url.searchParams.get('some'),
-          },
-        },
-      })
-    )
-  )
-);
-
-const setup = (...args) =>
-  renderHook(() => useAdminUsers(...args), {
-    wrapper({ children }) {
-      const client = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
-          },
-        },
-      });
-
-      return (
-        <QueryClientProvider client={client}>
-          <IntlProvider locale="en" messages={{}}>
-            {children}
-          </IntlProvider>
-        </QueryClientProvider>
-      );
-    },
-  });
+const setup = (...args) => renderHook(() => useAdminUsers(...args));
 
 describe('useAdminUsers', () => {
-  beforeAll(() => {
-    server.listen();
-  });
-
-  afterAll(() => {
-    server.close();
-  });
-
   test('fetches users', async () => {
     const { result } = setup();
 

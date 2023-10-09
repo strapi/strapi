@@ -1,32 +1,15 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { Table, useQueryParams } from '@strapi/helper-plugin';
-import {
-  render as renderRTL,
-  screen,
-  waitForElementToBeRemoved,
-  waitFor,
-  fireEvent,
-  within,
-} from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { screen, waitForElementToBeRemoved, within, fireEvent } from '@testing-library/react';
+import { render as renderRTL, waitFor, server } from '@tests/utils';
 import { rest } from 'msw';
-import { setupServer } from 'msw/node';
-import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { Provider } from 'react-redux';
-import { MemoryRouter } from 'react-router-dom';
-import { combineReducers, createStore } from 'redux';
 
-import SelectedEntriesModal from '..';
-import reducers from '../../../../../../../reducers';
+import SelectedEntriesModal from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn(() => {
-    return jest.fn();
-  }),
+  // TODO: get rid of this mock and use `initialEntries` to provide the base query params.
   useQueryParams: jest.fn(() => [
     {
       query: {
@@ -41,119 +24,16 @@ jest.mock('@strapi/helper-plugin', () => ({
   ]),
 }));
 
-jest.mock('../../../../../../../shared/hooks', () => ({
-  ...jest.requireActual('../../../../../../../shared/hooks'),
-  useInjectionZone: () => [],
-}));
-
-const handlers = [
-  rest.get('*/content-manager/collection-types/:apiId', (req, res, ctx) => {
-    return res(
-      ctx.json({
-        results: [
-          {
-            id: 1,
-            name: 'Entry 1',
-            publishedAt: null,
-          },
-          {
-            id: 2,
-            name: 'Entry 2',
-            publishedAt: null,
-          },
-          {
-            id: 3,
-            name: 'Entry 3',
-            publishedAt: null,
-          },
-        ],
-      })
-    );
-  }),
-  rest.post('*/content-manager/collection-types/:apiId/actions/bulkPublish', (req, res, ctx) => {
-    return res(
-      ctx.json({
-        data: {
-          count: 3,
-        },
-      })
-    );
-  }),
-  rest.get(
-    '*/content-manager/collection-types/:apiId/actions/countManyEntriesDraftRelations',
-    (req, res, ctx) => {
-      return res(
-        ctx.status(200),
-        ctx.json({
-          data: 0,
-        })
-      );
-    }
-  ),
-];
-
-const server = setupServer(...handlers);
-
-const rootReducer = combineReducers(reducers);
-const store = createStore(rootReducer, {
-  'content-manager_listView': {
-    contentType: {
-      uid: 'api::test.test',
-      settings: {
-        mainField: 'name',
-      },
-      attributes: {
-        id: { type: 'integer' },
-        name: { type: 'string', required: true },
-      },
-    },
-    components: [],
-  },
-});
-
-const user = userEvent.setup();
-
-const render = (ui) => ({
-  ...renderRTL(ui, {
-    wrapper({ children }) {
-      const client = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
-          },
-        },
-      });
-
-      return (
-        <ThemeProvider theme={lightTheme}>
-          <IntlProvider locale="en" messages={{}} defaultLocale="en">
-            <Provider store={store}>
-              <QueryClientProvider client={client}>
-                <MemoryRouter>{children}</MemoryRouter>
-              </QueryClientProvider>
-            </Provider>
-          </IntlProvider>
-        </ThemeProvider>
-      );
-    },
-  }),
-});
+const render = (props = { onToggle: jest.fn() }) =>
+  renderRTL(
+    <Table.Root defaultSelectedEntries={[1, 2, 3]} colCount={4}>
+      <SelectedEntriesModal {...props} />
+    </Table.Root>
+  );
 
 describe('Bulk publish selected entries modal', () => {
-  beforeAll(() => {
-    server.listen();
-  });
-
-  afterAll(() => {
-    server.close();
-  });
-
   it('renders the selected items in the modal', async () => {
-    const { queryByText } = render(
-      <Table.Root defaultSelectedEntries={[1, 2, 3]} colCount={4}>
-        <SelectedEntriesModal onToggle={jest.fn()} />
-      </Table.Root>
-    );
+    const { queryByText } = render();
 
     await waitForElementToBeRemoved(() => queryByText('Loading content'));
 
@@ -175,11 +55,7 @@ describe('Bulk publish selected entries modal', () => {
       },
     ]);
 
-    const { queryByText } = render(
-      <Table.Root defaultSelectedEntries={[1, 2, 3]} colCount={4}>
-        <SelectedEntriesModal onToggle={jest.fn()} />
-      </Table.Root>
-    );
+    const { queryByText } = render();
 
     await waitForElementToBeRemoved(() => queryByText('Loading content'));
 
@@ -191,11 +67,7 @@ describe('Bulk publish selected entries modal', () => {
   });
 
   it('reacts to selection updates', async () => {
-    const { queryByText } = render(
-      <Table.Root defaultSelectedEntries={[1, 2, 3]} colCount={4}>
-        <SelectedEntriesModal onToggle={jest.fn()} />
-      </Table.Root>
-    );
+    const { queryByText } = render();
 
     await waitForElementToBeRemoved(() => queryByText('Loading content'));
 
@@ -242,11 +114,9 @@ describe('Bulk publish selected entries modal', () => {
   it('should publish valid entries after confirming and close the modal', async () => {
     const mockOnToggle = jest.fn();
 
-    const { queryByText } = render(
-      <Table.Root defaultSelectedEntries={[1, 2, 3]} colCount={4}>
-        <SelectedEntriesModal onToggle={mockOnToggle} />
-      </Table.Root>
-    );
+    const { queryByText, user } = render({
+      onToggle: mockOnToggle,
+    });
 
     await waitForElementToBeRemoved(() => queryByText('Loading content'));
 
@@ -293,11 +163,7 @@ describe('Bulk publish selected entries modal', () => {
       })
     );
 
-    const { queryByText } = render(
-      <Table.Root defaultSelectedEntries={[1, 2, 3]} colCount={4}>
-        <SelectedEntriesModal onToggle={jest.fn()} />
-      </Table.Root>
-    );
+    const { queryByText, user } = render();
 
     await waitForElementToBeRemoved(() => queryByText('Loading content'));
 
@@ -350,11 +216,7 @@ describe('Bulk publish selected entries modal', () => {
       })
     );
 
-    const { queryByText } = render(
-      <Table.Root defaultSelectedEntries={[1, 2, 3]} colCount={4}>
-        <SelectedEntriesModal onToggle={jest.fn()} />
-      </Table.Root>
-    );
+    const { queryByText } = render();
 
     await waitForElementToBeRemoved(() => queryByText('Loading content'));
 
@@ -403,11 +265,7 @@ describe('Bulk publish selected entries modal', () => {
       })
     );
 
-    const { queryByText } = render(
-      <Table.Root defaultSelectedEntries={[1, 2, 3]} colCount={4}>
-        <SelectedEntriesModal onToggle={jest.fn()} />
-      </Table.Root>
-    );
+    const { queryByText } = render();
 
     await waitForElementToBeRemoved(() => queryByText('Loading content'));
 

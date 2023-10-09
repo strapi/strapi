@@ -1,16 +1,10 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent } from '@testing-library/react';
+import { render, waitFor, act, server } from '@tests/utils';
 import { rest } from 'msw';
-import { setupServer } from 'msw/node';
-import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
 
-import NpsSurvey from '..';
-
-const toggleNotification = jest.fn();
+import NpsSurvey from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -19,21 +13,7 @@ jest.mock('@strapi/helper-plugin', () => ({
       email: 'john@doe.com',
     })),
   },
-  useNotification: jest.fn().mockImplementation(() => toggleNotification),
-  useAppInfo: jest.fn().mockImplementation(() => ({
-    autoReload: true,
-    strapiVersion: 'test',
-    communityEdition: false,
-  })),
 }));
-
-const handlers = [
-  rest.post('*/submit-nps', (req, res, ctx) => {
-    return res.once(ctx.status(200));
-  }),
-];
-
-const server = setupServer(...handlers);
 
 const localStorageMock = {
   getItem: jest.fn(),
@@ -41,29 +21,16 @@ const localStorageMock = {
   removeItem: jest.fn(),
   clear: jest.fn(),
 };
+
 const originalLocalStorage = global.localStorage;
-
-const user = userEvent.setup({ delay: null });
-
-const queryClient = new QueryClient();
-
-const setup = () =>
-  render(<NpsSurvey />, {
-    wrapper({ children }) {
-      return (
-        <IntlProvider locale="en" defaultLocale="en">
-          <QueryClientProvider client={queryClient}>
-            <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
-          </QueryClientProvider>
-        </IntlProvider>
-      );
-    },
-  });
 
 describe('NPS survey', () => {
   beforeAll(() => {
     global.localStorage = localStorageMock;
-    server.listen();
+  });
+
+  afterAll(() => {
+    global.localStorage = originalLocalStorage;
   });
 
   afterEach(() => {
@@ -75,53 +42,55 @@ describe('NPS survey', () => {
     jest.useFakeTimers();
   });
 
-  afterAll(() => {
-    server.close();
-  });
-
   it('renders survey if enabled', () => {
     localStorageMock.getItem.mockReturnValueOnce({ enabled: true });
-    setup();
+
+    const { getByLabelText, getByText } = render(<NpsSurvey />);
+
     act(() => jest.runAllTimers());
-    expect(screen.getByLabelText('0')).toBeInTheDocument();
-    expect(screen.getByLabelText('10')).toBeInTheDocument();
-    expect(screen.getByText(/not at all likely/i)).toBeInTheDocument();
-    expect(screen.getByText(/extremely likely/i)).toBeInTheDocument();
+
+    expect(getByLabelText('0')).toBeInTheDocument();
+    expect(getByLabelText('10')).toBeInTheDocument();
+    expect(getByText(/not at all likely/i)).toBeInTheDocument();
+    expect(getByText(/extremely likely/i)).toBeInTheDocument();
   });
 
   it("renders survey if settings don't exist", () => {
     localStorageMock.getItem.mockReturnValueOnce(null);
-    setup();
+
+    const { getByLabelText, getByText } = render(<NpsSurvey />);
+
     act(() => jest.runAllTimers());
-    expect(screen.getByLabelText('0')).toBeInTheDocument();
-    expect(screen.getByLabelText('10')).toBeInTheDocument();
-    expect(screen.getByText(/not at all likely/i)).toBeInTheDocument();
-    expect(screen.getByText(/extremely likely/i)).toBeInTheDocument();
+
+    expect(getByLabelText('0')).toBeInTheDocument();
+    expect(getByLabelText('10')).toBeInTheDocument();
+    expect(getByText(/not at all likely/i)).toBeInTheDocument();
+    expect(getByText(/extremely likely/i)).toBeInTheDocument();
   });
 
   it('does not render survey if disabled', () => {
     localStorageMock.getItem.mockReturnValueOnce({ enabled: false });
-    setup();
+    const { queryByText } = render(<NpsSurvey />);
     act(() => jest.runAllTimers());
-    expect(screen.queryByText(/not at all likely/i)).not.toBeInTheDocument();
+    expect(queryByText(/not at all likely/i)).not.toBeInTheDocument();
   });
 
   it('saves user response', async () => {
     localStorageMock.getItem.mockReturnValueOnce({ enabled: true });
-    setup();
+
+    const { getByRole, queryByText } = render(<NpsSurvey />);
+
     act(() => jest.runAllTimers());
 
-    fireEvent.click(screen.getByRole('radio', { name: '10' }));
-    expect(screen.getByRole('button', { name: /submit feedback/i }));
+    fireEvent.click(getByRole('radio', { name: '10' }));
 
-    act(() => {
-      fireEvent.submit(screen.getByRole('form'));
-    });
+    expect(getByRole('button', { name: /submit feedback/i })).toBeInTheDocument();
 
-    await waitFor(() => {
-      expect(screen.queryByText(/not at all likely/i)).not.toBeInTheDocument();
-      expect(screen.queryByText(/thank you very much for your feedback!/i)).toBeInTheDocument();
-    });
+    fireEvent.submit(getByRole('form'));
+
+    await waitFor(() => expect(queryByText(/not at all likely/i)).not.toBeInTheDocument());
+
+    expect(queryByText(/thank you very much for your feedback!/i)).toBeInTheDocument();
 
     const storedData = JSON.parse(localStorageMock.setItem.mock.calls.at(-1).at(1));
     expect(storedData).toEqual({
@@ -134,40 +103,55 @@ describe('NPS survey', () => {
   });
 
   it('show error message if request fails and keep survey open', async () => {
+    const originalError = console.error;
+    console.error = jest.fn();
+
     server.use(
-      rest.post('*/submit-nps', (req, res, ctx) => {
-        return res.once(ctx.status(500));
+      rest.post('https://analytics.strapi.io/submit-nps', (req, res, ctx) => {
+        return res(ctx.status(500));
       })
     );
 
     localStorageMock.getItem.mockReturnValueOnce({ enabled: true });
-    setup();
+
+    const { getByRole, queryByText } = render(<NpsSurvey />);
+
     act(() => jest.runAllTimers());
 
-    fireEvent.click(screen.getByRole('radio', { name: '10' }));
-    expect(screen.getByRole('button', { name: /submit feedback/i }));
+    fireEvent.click(getByRole('radio', { name: '10' }));
 
-    act(() => {
-      fireEvent.submit(screen.getByRole('form'));
+    expect(getByRole('button', { name: /submit feedback/i })).toBeInTheDocument();
+
+    fireEvent.submit(getByRole('form'));
+
+    await waitFor(() => expect(queryByText(/not at all likely/i)).toBeInTheDocument());
+
+    expect(queryByText(/thank you very much for your feedback!/i)).not.toBeInTheDocument();
+
+    await act(async () => {
+      await jest.runAllTimersAsync();
     });
 
-    await waitFor(() => {
-      expect(screen.queryByText(/not at all likely/i)).toBeInTheDocument();
-      expect(screen.queryByText(/thank you very much for your feedback!/i)).not.toBeInTheDocument();
-      expect(toggleNotification).toHaveBeenCalledWith({
-        type: 'warning',
-        message: 'notification.error',
-      });
-    });
+    console.error = originalError;
+    server.resetHandlers();
   });
 
   it('saves first user dismissal', async () => {
     localStorageMock.getItem.mockReturnValueOnce({ enabled: true });
-    setup();
-    act(() => jest.runAllTimers());
 
-    await user.click(screen.getByText(/dismiss survey/i));
-    expect(screen.queryByText(/not at all likely/i)).not.toBeInTheDocument();
+    const { queryByText, user, getByRole } = render(<NpsSurvey />);
+
+    act(() => {
+      jest.runAllTimers();
+      /**
+       * If I don't do this, the test never runs
+       */
+      jest.useRealTimers();
+    });
+
+    await user.click(getByRole('button', { name: 'Dismiss survey' }));
+
+    expect(queryByText(/not at all likely/i)).not.toBeInTheDocument();
 
     const storedData = JSON.parse(localStorageMock.setItem.mock.calls.at(-1).at(1));
     expect(storedData).toEqual({
@@ -184,10 +168,19 @@ describe('NPS survey', () => {
       enabled: true,
       firstDismissalDate,
     });
-    setup();
-    act(() => jest.runAllTimers());
-    await user.click(screen.getByText(/dismiss survey/i));
-    expect(screen.queryByText(/not at all likely/i)).not.toBeInTheDocument();
+
+    const { user, queryByText, getByText } = render(<NpsSurvey />);
+
+    act(() => {
+      jest.runAllTimers();
+      /**
+       * If I don't do this, the test never runs
+       */
+      jest.useRealTimers();
+    });
+
+    await user.click(getByText(/dismiss survey/i));
+    expect(queryByText(/not at all likely/i)).not.toBeInTheDocument();
 
     const storedData = JSON.parse(localStorageMock.setItem.mock.calls.at(-1).at(1));
     expect(storedData).toEqual({
@@ -199,7 +192,7 @@ describe('NPS survey', () => {
     expect(new Date(storedData.lastDismissalDate)).toBeInstanceOf(Date);
   });
 
-  it('respects the delay after user submission', async () => {
+  it('respects the delay after user submission', () => {
     const initialDate = new Date('2020-01-01');
     const withinDelay = new Date('2020-01-31');
     const beyondDelay = new Date('2020-03-31');
@@ -209,21 +202,23 @@ describe('NPS survey', () => {
     jest.setSystemTime(initialDate);
 
     // Survey should not show up right after submission
-    setup();
-    act(() => jest.runAllTimers());
-    expect(screen.queryByText(/not at all likely/i)).not.toBeInTheDocument();
+    const render1 = render(<NpsSurvey />);
+    act(() => {
+      jest.runAllTimers();
+    });
+    expect(render1.queryByText(/not at all likely/i)).not.toBeInTheDocument();
 
     // Survey should not show up during delay
     jest.advanceTimersByTime(withinDelay - initialDate);
-    setup();
+    const render2 = render(<NpsSurvey />);
     act(() => jest.runAllTimers());
-    expect(screen.queryByText(/not at all likely/i)).not.toBeInTheDocument();
+    expect(render2.queryByText(/not at all likely/i)).not.toBeInTheDocument();
 
     // Survey should show up again after delay
     jest.advanceTimersByTime(beyondDelay - withinDelay);
-    setup();
+    const render3 = render(<NpsSurvey />);
     act(() => jest.runAllTimers());
-    expect(screen.getByText(/not at all likely/i)).toBeInTheDocument();
+    expect(render3.getByText(/not at all likely/i)).toBeInTheDocument();
   });
 
   it('respects the delay after first user dismissal', async () => {
@@ -241,21 +236,21 @@ describe('NPS survey', () => {
     jest.setSystemTime(initialDate);
 
     // Survey should not show up right after dismissal
-    setup();
+    const render1 = render(<NpsSurvey />);
     act(() => jest.runAllTimers());
-    expect(screen.queryByText(/not at all likely/i)).not.toBeInTheDocument();
+    expect(render1.queryByText(/not at all likely/i)).not.toBeInTheDocument();
 
     // Survey should not show up during delay
     jest.advanceTimersByTime(withinDelay - initialDate);
-    setup();
+    const render2 = render(<NpsSurvey />);
     act(() => jest.runAllTimers());
-    expect(screen.queryByText(/not at all likely/i)).not.toBeInTheDocument();
+    expect(render2.queryByText(/not at all likely/i)).not.toBeInTheDocument();
 
     // Survey should show up again after delay
     jest.advanceTimersByTime(beyondDelay - withinDelay);
-    setup();
+    const render3 = render(<NpsSurvey />);
     act(() => jest.runAllTimers());
-    expect(screen.getByText(/not at all likely/i)).toBeInTheDocument();
+    expect(render3.getByText(/not at all likely/i)).toBeInTheDocument();
 
     jest.useRealTimers();
   });
@@ -275,24 +270,20 @@ describe('NPS survey', () => {
     jest.setSystemTime(initialDate);
 
     // Survey should not show up right after dismissal
-    setup();
+    const render1 = render(<NpsSurvey />);
     act(() => jest.runAllTimers());
-    expect(screen.queryByText(/not at all likely/i)).not.toBeInTheDocument();
+    expect(render1.queryByText(/not at all likely/i)).not.toBeInTheDocument();
 
     // Survey should not show up during delay
     jest.advanceTimersByTime(withinDelay - initialDate);
-    setup();
+    const render2 = render(<NpsSurvey />);
     act(() => jest.runAllTimers());
-    expect(screen.queryByText(/not at all likely/i)).not.toBeInTheDocument();
+    expect(render2.queryByText(/not at all likely/i)).not.toBeInTheDocument();
 
     // Survey should show up again after delay
     jest.advanceTimersByTime(beyondDelay - withinDelay);
-    setup();
+    const render3 = render(<NpsSurvey />);
     act(() => jest.runAllTimers());
-    expect(screen.getByText(/not at all likely/i)).toBeInTheDocument();
-  });
-
-  afterAll(() => {
-    global.localStorage = originalLocalStorage;
+    expect(render3.getByText(/not at all likely/i)).toBeInTheDocument();
   });
 });

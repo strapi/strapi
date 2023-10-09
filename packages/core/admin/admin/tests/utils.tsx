@@ -1,7 +1,9 @@
 /* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
+import { fixtures } from '@strapi/admin-test-utils';
 import { DesignSystemProvider } from '@strapi/design-system';
+import { RBACContext } from '@strapi/helper-plugin';
 import {
   renderHook as renderHookRTL,
   render as renderRTL,
@@ -21,6 +23,8 @@ import { createStore } from 'redux';
 
 // @ts-expect-error – no types yet.
 import ModelsContext from '../src/content-manager/contexts/ModelsContext';
+// @ts-expect-error – no types yet.
+import AdminContext from '../src/contexts/Admin';
 
 import { server } from './server';
 import { initialState } from './store';
@@ -39,6 +43,11 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         onError() {},
       },
+      mutations: {
+        // no more errors on the console for tests
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        onError() {},
+      },
     },
   });
 
@@ -52,9 +61,26 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
           <DesignSystemProvider locale="en">
             <QueryClientProvider client={queryClient}>
               <DndProvider backend={HTML5Backend}>
-                <ModelsContext.Provider value={{ refetchData: jest.fn() }}>
-                  {children}
-                </ModelsContext.Provider>
+                <RBACContext.Provider
+                  value={{
+                    allPermissions: [
+                      ...fixtures.permissions.allPermissions,
+                      {
+                        id: 314,
+                        action: 'admin::users.read',
+                        subject: null,
+                        properties: {},
+                        conditions: [],
+                      },
+                    ],
+                  }}
+                >
+                  <ModelsContext.Provider value={{ refetchData: jest.fn() }}>
+                    <AdminContext.Provider value={{ getAdminInjectedComponents: jest.fn() }}>
+                      {children}
+                    </AdminContext.Provider>
+                  </ModelsContext.Provider>
+                </RBACContext.Provider>
               </DndProvider>
             </QueryClientProvider>
           </DesignSystemProvider>
