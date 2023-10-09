@@ -10,4 +10,5 @@ export default ({ env }) => ({
       salt: env('TRANSFER_TOKEN_SALT'),
     },
   },
+  promoteEnterpriseFeatures: env.bool('PROMOTE_ENTERPRISE_FEATURES', true),
 });
