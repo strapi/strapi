@@ -1,5 +1,3 @@
-import type { ConfigExport } from './shared.js';
-
 export interface ApiTokenProp {
   salt: string;
 }
