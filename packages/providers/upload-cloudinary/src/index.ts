@@ -23,7 +23,7 @@ interface File {
   buffer?: Buffer;
 }
 
-export = {
+export default {
   init(options: ConfigOptions) {
     cloudinary.config(options);
 

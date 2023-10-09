@@ -2,7 +2,9 @@ import * as React from 'react';
 
 import { TranslationMessage } from '../types';
 
-import type { Permission } from '@strapi/permissions';
+import type { domain } from '@strapi/permissions';
+
+type Permission = domain.permission.Permission;
 
 interface MenuItem {
   to: string;

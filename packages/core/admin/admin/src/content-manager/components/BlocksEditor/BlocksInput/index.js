@@ -13,6 +13,7 @@ const getEditorStyle = (theme) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spaces[2],
+  height: '100%',
 });
 
 const baseRenderLeaf = (props, modifiers) => {
@@ -37,7 +38,7 @@ const baseRenderElement = (props, blocks) => {
   return block.renderElement(props);
 };
 
-const BlocksInput = ({ readOnly }) => {
+const BlocksInput = ({ disabled, placeholder }) => {
   const theme = useTheme();
   const editor = useSlate();
 
@@ -62,16 +63,29 @@ const BlocksInput = ({ readOnly }) => {
     }
   };
 
+  const handleBackspaceEvent = (event) => {
+    const selectedNode = editor.children[editor.selection.anchor.path[0]];
+    const selectedBlock = Object.values(blocks).find((block) => block.matchNode(selectedNode));
+
+    if (selectedBlock.handleBackspaceKey) {
+      selectedBlock.handleBackspaceKey(editor, event);
+    }
+  };
+
   const handleKeyDown = (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
       handleEnter();
     }
+    if (event.key === 'Backspace') {
+      handleBackspaceEvent(event);
+    }
   };
 
   return (
     <Editable
-      readOnly={readOnly}
+      readOnly={disabled}
+      placeholder={placeholder}
       style={getEditorStyle(theme)}
       renderElement={renderElement}
       renderLeaf={renderLeaf}
@@ -80,8 +94,13 @@ const BlocksInput = ({ readOnly }) => {
   );
 };
 
+BlocksInput.defaultProps = {
+  placeholder: null,
+};
+
 BlocksInput.propTypes = {
-  readOnly: PropTypes.bool.isRequired,
+  disabled: PropTypes.bool.isRequired,
+  placeholder: PropTypes.string,
 };
 
 export default BlocksInput;
