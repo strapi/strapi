@@ -113,7 +113,7 @@ Strapi only supports maintenance and LTS versions of Node.js. Please refer to th
 
 - **Content Types Builder**: Build the most flexible publishing experience for your content managers, by giving them the freedom to create any page on the go with [fields](https://docs.strapi.io/user-docs/content-manager/writing-content#filling-up-fields), components and [Dynamic Zones](https://docs.strapi.io/user-docs/content-manager/writing-content#dynamic-zones).
 - **Media Library**: Upload your images, videos, audio or documents to the media library. Easily find the right asset, edit and reuse it.
-- **Internationalization**: The Internationalization (i18n) plugin allows Strapi users to create, manage and distribute localized content in different languages, called "locales
+- **Internationalization**: The Internationalization (i18n) plugin allows Strapi users to create, manage and distribute localized content in different languages, called "locales"
 - **Role Based Access Control**: Create an unlimited number of custom roles and permissions for admin and end users.
 - **GraphQL or REST**: Consume the API using REST or GraphQL
 

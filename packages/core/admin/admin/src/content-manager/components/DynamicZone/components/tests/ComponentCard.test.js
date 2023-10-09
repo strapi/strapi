@@ -3,7 +3,6 @@ import React from 'react';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { fireEvent, render } from '@testing-library/react';
 
-import GlobalStyle from '../../../../../components/GlobalStyle';
 import ComponentCard from '../ComponentCard';
 
 describe('ComponentCard', () => {
@@ -11,7 +10,6 @@ describe('ComponentCard', () => {
     render(
       <ThemeProvider theme={lightTheme}>
         <ComponentCard {...props}>test</ComponentCard>
-        <GlobalStyle />
       </ThemeProvider>
     );
 

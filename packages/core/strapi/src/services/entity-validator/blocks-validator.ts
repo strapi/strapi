@@ -138,4 +138,5 @@ const blockNodeValidator: any = yup.lazy((value: { type: string }) => {
 
 const blocksValidator = yup.array().of(blockNodeValidator);
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default (metas: any, options: any) => blocksValidator;

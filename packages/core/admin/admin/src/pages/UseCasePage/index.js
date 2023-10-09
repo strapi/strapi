@@ -17,7 +17,7 @@ import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
-import Logo from '../../components/UnauthenticatedLogo';
+import { Logo } from '../../components/UnauthenticatedLogo';
 import UnauthenticatedLayout, { LayoutContent } from '../../layouts/UnauthenticatedLayout';
 
 export const options = [

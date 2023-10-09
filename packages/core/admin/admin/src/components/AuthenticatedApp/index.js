@@ -18,13 +18,9 @@ import NpsSurvey from '../NpsSurvey';
 import PluginsInitializer from '../PluginsInitializer';
 import RBACProvider from '../RBACProvider';
 
-import {
-  fetchAppInfo,
-  fetchCurrentUserPermissions,
-  fetchStrapiLatestRelease,
-  fetchUserRoles,
-} from './utils/api';
-import checkLatestStrapiVersion from './utils/checkLatestStrapiVersion';
+import { fetchAppInfo, fetchCurrentUserPermissions, fetchUserRoles } from './utils/api';
+import { checkLatestStrapiVersion } from './utils/checkLatestStrapiVersion';
+import { fetchStrapiLatestRelease } from './utils/fetchStrapiLatestRelease';
 
 const strapiVersion = packageJSON.version;
 

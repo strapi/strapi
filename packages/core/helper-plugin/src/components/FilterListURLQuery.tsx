@@ -6,7 +6,7 @@ import { useIntl } from 'react-intl';
 
 import { useQueryParams } from '../hooks/useQueryParams';
 
-import type { FilterData, Filter } from 'types';
+import type { FilterData, Filter } from '../types';
 
 export type FilterContent = FilterData<
   {

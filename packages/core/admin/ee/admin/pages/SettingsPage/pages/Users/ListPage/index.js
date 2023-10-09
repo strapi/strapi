@@ -4,10 +4,8 @@ import * as React from 'react';
 import { UserListPageCE } from '../../../../../../../admin/src/pages/SettingsPage/pages/Users/ListPage';
 import { useLicenseLimitNotification } from '../../../../../hooks/useLicenseLimitNotification';
 
-function UserListPageEE() {
+export function UserListPageEE() {
   useLicenseLimitNotification();
 
   return <UserListPageCE />;
 }
-
-export { UserListPageEE };
