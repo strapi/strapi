@@ -3,6 +3,7 @@ import { differenceInHours, parseISO } from 'date-fns';
 import { errors } from '@strapi/utils';
 import constants from '../services/constants';
 import { getService } from '../utils';
+import '@strapi/types';
 
 const { UnauthorizedError, ForbiddenError } = errors;
 
@@ -24,8 +25,6 @@ const extractToken = (ctx: any) => {
 
 /**
  * Authenticate the validity of the token
- *
- *  @type {import('.').AuthenticateFunction}
  */
 export const authenticate = async (ctx: any) => {
   const apiTokenService = getService('api-token');
@@ -136,7 +135,6 @@ export const verify = (auth: any, config: any) => {
 
 export const name = 'api-token';
 
-/** @type {import('.').AuthStrategy} */
 export default {
   name: 'api-token',
   authenticate,

@@ -10,9 +10,11 @@ import permissionDomain, { type Permission } from '../domain/permission';
 import { AdminUser, type AdminRole } from '../domain/user';
 
 import { validatePermissionsExist } from '../validation/permission';
-import { SUPER_ADMIN_CODE, CONTENT_TYPE_SECTION } from './constants';
+import { constants as roleConstants } from './constants';
 import { getService } from '../utils';
 import { Action } from '../domain/action';
+
+const { SUPER_ADMIN_CODE, CONTENT_TYPE_SECTION } = roleConstants;
 
 const { createAsyncSeriesWaterfallHook } = hooksUtils;
 const { ApplicationError } = errors;

@@ -4,7 +4,9 @@ import { stringIncludes, errors } from '@strapi/utils';
 import { createUser, hasSuperAdminRole } from '../domain/user';
 import { password as passwordValidator } from '../validation/common-validators';
 import { getService } from '../utils';
-import { SUPER_ADMIN_CODE } from './constants';
+import { constants } from './constants';
+
+const { SUPER_ADMIN_CODE } = constants;
 
 const { ValidationError } = errors;
 const sanitizeUserRoles = (role: string) => _.pick(role, ['id', 'name', 'description', 'code']);

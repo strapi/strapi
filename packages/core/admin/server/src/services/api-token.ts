@@ -5,7 +5,7 @@ import constants from './constants';
 
 const { ValidationError, NotFoundError } = errors;
 
-interface ApiToken {
+export type ApiToken = {
   id?: number | `${number}`;
   name: string;
   description: string;
@@ -15,13 +15,15 @@ interface ApiToken {
   expiresAt: number;
   type: 'read-only' | 'full-access' | 'custom';
   permissions: (number | ApiTokenPermission)[];
-}
+};
 
-interface ApiTokenPermission {
+export type ApiTokenPermission = {
   id: number | `${number}`;
   action: string;
   token: ApiToken | number;
-}
+};
+
+export type CreateActionPayload = Omit<ApiToken, 'id' | 'accessKey' | 'expiresAt' | 'lastUsedAt'>;
 
 const SELECT_FIELDS = [
   'id',
@@ -42,7 +44,7 @@ const POPULATE_FIELDS = ['permissions'];
 /**
  * Assert that a token's permissions attribute is valid for its type
  */
-const assertCustomTokenPermissionsValidity = (attributes: ApiToken) => {
+const assertCustomTokenPermissionsValidity = (attributes: CreateActionPayload) => {
   // Ensure non-custom tokens doesn't have permissions
   if (attributes.type !== constants.API_TOKEN_TYPE.CUSTOM && !isEmpty(attributes.permissions)) {
     throw new ValidationError('Non-custom tokens should not reference permissions');
@@ -57,7 +59,8 @@ const assertCustomTokenPermissionsValidity = (attributes: ApiToken) => {
   if (attributes.type === constants.API_TOKEN_TYPE.CUSTOM) {
     const validPermissions = strapi.contentAPI.permissions.providers.action.keys();
     // TODO difference requires that the 2 arguments are of the same type
-    const invalidPermissions = difference(attributes.permissions, validPermissions) as any;
+    // @ts-expect-error - Handle type miss match between string[] and number[]
+    const invalidPermissions = difference(attributes.permissions, validPermissions) as string[];
 
     if (!isEmpty(invalidPermissions)) {
       throw new ValidationError(`Unknown permissions provided: ${invalidPermissions.join(', ')}`);
@@ -68,7 +71,7 @@ const assertCustomTokenPermissionsValidity = (attributes: ApiToken) => {
 /**
  * Assert that a token's lifespan is valid
  */
-const assertValidLifespan = ({ lifespan }: ApiToken) => {
+const assertValidLifespan = ({ lifespan }: CreateActionPayload) => {
   if (isNil(lifespan)) {
     return;
   }
@@ -159,7 +162,7 @@ const getExpirationFields = (lifespan: number) => {
 /**
  * Create a token and its permissions
  */
-const create = async (attributes: ApiToken): Promise<ApiToken> => {
+const create = async (attributes: CreateActionPayload): Promise<ApiToken> => {
   const accessKey = crypto.randomBytes(128).toString('hex');
 
   assertCustomTokenPermissionsValidity(attributes);

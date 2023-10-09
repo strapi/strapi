@@ -6,10 +6,11 @@ import {
   validateRolesDeleteInput,
 } from '../validation/role';
 import { validatedUpdatePermissionsInput } from '../validation/permission';
-import { SUPER_ADMIN_CODE } from '../services/constants';
+import { constants } from '../services/constants';
 import { getService } from '../utils';
 
 const { ApplicationError } = errors;
+const { SUPER_ADMIN_CODE } = constants;
 
 export default {
   /**

@@ -1,4 +1,6 @@
-import { SUPER_ADMIN_CODE } from '../services/constants';
+import { constants } from '../services/constants';
+
+const { SUPER_ADMIN_CODE } = constants;
 
 export type AdminUser = {
   id: string | number;
