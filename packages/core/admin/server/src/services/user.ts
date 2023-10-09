@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { defaults } from 'lodash/fp';
 import { stringIncludes, errors } from '@strapi/utils';
-import { createUser, hasSuperAdminRole } from '../domain/user';
+import { type AdminUser, createUser, hasSuperAdminRole } from '../domain/user';
 import { password as passwordValidator } from '../validation/common-validators';
 import { getService } from '../utils';
 import { constants } from './constants';
@@ -27,14 +27,15 @@ const sanitizeUser = (user: any) => {
  * @param attributes A partial user object
  * @returns {Promise<user>}
  */
-const create = async (attributes: any) => {
+const create = async (attributes: Partial<AdminUser>) => {
   const userInfo = {
     registrationToken: getService('token').createToken(),
     ...attributes,
   };
 
   if (_.has(attributes, 'password')) {
-    userInfo.password = await getService('auth').hashPassword(attributes.password);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    userInfo.password = await getService('auth').hashPassword(attributes.password!);
   }
 
   const user = createUser(userInfo);

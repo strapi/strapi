@@ -4,11 +4,17 @@ const { SUPER_ADMIN_CODE } = constants;
 
 export type AdminUser = {
   id: string | number;
-  firstname: string;
-  lastname: string;
-  username: string;
-  // TODO: TS - add more specific types
-  [key: string]: any;
+  firstname?: string;
+  lastname?: string;
+  username?: string;
+  email: string;
+  password: string;
+  resetPasswordToken: string;
+  registrationToken: string;
+  isActive: boolean;
+  roles: AdminRole[];
+  blocked: boolean;
+  preferredLanguage?: string;
 };
 
 export type AdminRole = {

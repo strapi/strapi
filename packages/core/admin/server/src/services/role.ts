@@ -435,7 +435,7 @@ const resetSuperAdminPermissions = async () => {
  * Check if a user object includes the super admin role
  */
 const hasSuperAdminRole = (user: AdminUser): boolean => {
-  const roles = _.get(user, 'roles', []);
+  const roles = _.get(user, 'roles', []) as AdminRole[];
 
   return roles.map(prop('code')).includes(SUPER_ADMIN_CODE);
 };
