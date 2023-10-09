@@ -12,7 +12,6 @@ export type Infos = {
   uid?: UID.ContentType;
   dir: string;
   filename: string;
-  // TODO type this
   schema?: Schema.Schema;
 };
 
