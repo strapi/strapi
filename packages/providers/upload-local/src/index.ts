@@ -37,7 +37,7 @@ interface CheckFileSizeOptions {
   sizeLimit?: number;
 }
 
-export = {
+export default {
   init({ sizeLimit: providerOptionsSizeLimit }: InitOptions = {}) {
     // TODO V5: remove providerOptions sizeLimit
     if (providerOptionsSizeLimit) {

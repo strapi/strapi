@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render as renderRTL, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -22,7 +20,7 @@ describe('ConfirmDialog', () => {
         {...props}
       />,
       {
-        wrapper: ({ children }: { children: React.JSX.Element }) => (
+        wrapper: ({ children }) => (
           <ThemeProvider theme={lightTheme}>
             <IntlProvider locale="en" messages={{}} defaultLocale="en">
               {children}

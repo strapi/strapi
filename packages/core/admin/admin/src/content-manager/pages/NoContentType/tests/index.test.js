@@ -6,8 +6,8 @@ import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 
-import Theme from '../../../../components/Theme';
-import ThemeToggleProvider from '../../../../components/ThemeToggleProvider';
+import { Theme } from '../../../../components/Theme';
+import { ThemeToggleProvider } from '../../../../components/ThemeToggleProvider';
 import NoContentType from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -32,26 +32,19 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c6 {
+      .c5 {
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
         color: #32324d;
       }
 
-      .c13 {
+      .c12 {
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
         color: #666687;
         text-align: center;
-      }
-
-      .c18 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #ffffff;
       }
 
       .c1 {
@@ -66,35 +59,24 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         min-width: 0;
       }
 
-      .c7 {
+      .c6 {
         padding-right: 56px;
         padding-left: 56px;
       }
 
-      .c8 {
+      .c7 {
         background: #ffffff;
         padding: 64px;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c10 {
+      .c9 {
         padding-bottom: 24px;
       }
 
-      .c12 {
+      .c11 {
         padding-bottom: 16px;
-      }
-
-      .c14 {
-        background: #4945ff;
-        padding-top: 8px;
-        padding-right: 16px;
-        padding-bottom: 8px;
-        padding-left: 16px;
-        border-radius: 4px;
-        border-color: #4945ff;
-        border: 1px solid #4945ff;
       }
 
       .c2 {
@@ -129,7 +111,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         flex-direction: row;
       }
 
-      .c9 {
+      .c8 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -143,7 +125,33 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         flex-direction: column;
       }
 
-      .c15 {
+      .c10 svg {
+        height: 5.5rem;
+      }
+
+      .c0:focus-visible {
+        outline: none;
+      }
+
+      .c13 {
+        background: #4945ff;
+        padding-top: 8px;
+        padding-right: 16px;
+        padding-bottom: 8px;
+        padding-left: 16px;
+        border-radius: 4px;
+        border-color: #4945ff;
+        border: 1px solid #4945ff;
+      }
+
+      .c19 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #ffffff;
+      }
+
+      .c14 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -158,26 +166,40 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         gap: 8px;
       }
 
-      .c16 {
+      .c17 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c15 {
         position: relative;
         outline: none;
       }
 
-      .c16 > svg {
+      .c15 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c16 > svg > g,
-      .c16 > svg path {
+      .c15 > svg > g,
+      .c15 > svg path {
         fill: #ffffff;
       }
 
-      .c16[aria-disabled='true'] {
+      .c15[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c16:after {
+      .c15:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -192,11 +214,11 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         border: 2px solid transparent;
       }
 
-      .c16:focus-visible {
+      .c15:focus-visible {
         outline: none;
       }
 
-      .c16:focus-visible:after {
+      .c15:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -207,73 +229,65 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         border: 2px solid #4945ff;
       }
 
-      .c11 svg {
-        height: 5.5rem;
-      }
-
-      .c0:focus-visible {
-        outline: none;
-      }
-
-      .c17 {
+      .c16 {
         -webkit-text-decoration: none;
         text-decoration: none;
         border: 1px solid #d9d8ff;
         background: #f0f0ff;
       }
 
-      .c17[aria-disabled='true'] {
+      .c16[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c17[aria-disabled='true'] .c5 {
+      .c16[aria-disabled='true'] .c18 {
         color: #666687;
       }
 
-      .c17[aria-disabled='true'] svg > g,
-      .c17[aria-disabled='true'] svg path {
+      .c16[aria-disabled='true'] svg > g,
+      .c16[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c17[aria-disabled='true']:active {
+      .c16[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c17[aria-disabled='true']:active .c5 {
+      .c16[aria-disabled='true']:active .c18 {
         color: #666687;
       }
 
-      .c17[aria-disabled='true']:active svg > g,
-      .c17[aria-disabled='true']:active svg path {
+      .c16[aria-disabled='true']:active svg > g,
+      .c16[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c17:hover {
+      .c16:hover {
         background-color: #ffffff;
       }
 
-      .c17:active {
+      .c16:active {
         background-color: #ffffff;
         border: 1px solid #4945ff;
       }
 
-      .c17:active .c5 {
+      .c16:active .c18 {
         color: #4945ff;
       }
 
-      .c17:active svg > g,
-      .c17:active svg path {
+      .c16:active svg > g,
+      .c16:active svg path {
         fill: #4945ff;
       }
 
-      .c17 .c5 {
+      .c16 .c18 {
         color: #271fe0;
       }
 
-      .c17 svg > g,
-      .c17 svg path {
+      .c16 svg > g,
+      .c16 svg path {
         fill: #271fe0;
       }
 
@@ -297,7 +311,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
                 class="c3 c4"
               >
                 <h1
-                  class="c5 c6"
+                  class="c5"
                 >
                   Content
                 </h1>
@@ -306,14 +320,14 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
           </div>
         </div>
         <div
-          class="c7"
+          class="c6"
         >
           <div
-            class="c8 c9"
+            class="c7 c8"
           >
             <div
               aria-hidden="true"
-              class="c10 c11"
+              class="c9 c10"
             >
               <svg
                 fill="none"
@@ -379,22 +393,22 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
               </svg>
             </div>
             <div
-              class="c12"
+              class="c11"
             >
               <p
-                class="c5 c13"
+                class="c12"
               >
                 You don't have any content yet, we recommend you to create your first Content-Type.
               </p>
             </div>
             <a
               aria-disabled="false"
-              class="c14 c15 c16 c17"
+              class="c13 c14 c15 c16"
               href="/plugins/content-type-builder/content-types/create-content-type"
             >
               <div
                 aria-hidden="true"
-                class="c4"
+                class="c17"
               >
                 <svg
                   fill="none"
@@ -410,7 +424,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
                 </svg>
               </div>
               <span
-                class="c5 c18"
+                class="c18 c19"
               >
                 Create your first Content-type
               </span>

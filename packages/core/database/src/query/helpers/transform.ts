@@ -41,7 +41,11 @@ const fromSingleRow = (meta: Meta, row: Row): Rec => {
   return obj;
 };
 
-const fromRow = (meta: Meta, row: Row | Row[]) => {
+const fromRow = (meta: Meta, row: Row | Row[] | undefined) => {
+  if (_.isNil(row)) {
+    return null;
+  }
+
   if (Array.isArray(row)) {
     return row.map((singleRow) => fromSingleRow(meta, singleRow));
   }

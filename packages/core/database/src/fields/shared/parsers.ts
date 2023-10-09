@@ -1,4 +1,4 @@
-import { padCharsEnd } from 'lodash/fp';
+import { padCharsEnd, isString, toString } from 'lodash/fp';
 import * as dateFns from 'date-fns';
 
 import { InvalidDateTimeError, InvalidDateError, InvalidTimeError } from '../../errors';
@@ -16,17 +16,13 @@ export const parseDateTimeOrTimestamp = (value: unknown): Date => {
     return value;
   }
 
-  if (typeof value !== 'string') {
-    throw new InvalidDateTimeError(`Expected a string, got a ${typeof value}`);
-  }
-
   try {
-    const date = dateFns.parseISO(value);
+    const date = dateFns.parseISO(toString(value));
     if (dateFns.isValid(date)) {
       return date;
     }
 
-    const milliUnixDate = dateFns.parse(value, 'T', new Date());
+    const milliUnixDate = dateFns.parse(toString(value), 'T', new Date());
     if (dateFns.isValid(milliUnixDate)) {
       return milliUnixDate;
     }
@@ -42,14 +38,10 @@ export const parseDate = (value: unknown) => {
     return dateFns.format(value, 'yyyy-MM-dd');
   }
 
-  if (typeof value !== 'string') {
-    throw new InvalidDateError(`Expected a string, got a ${typeof value}`);
-  }
-
-  const found = value.match(PARTIAL_DATE_REGEX) || [];
+  const found = isString(value) ? value.match(PARTIAL_DATE_REGEX) || [] : [];
   const extractedValue = found[0];
 
-  if (extractedValue && !DATE_REGEX.test(value)) {
+  if (extractedValue && !DATE_REGEX.test(toString(value))) {
     // TODO V5: throw an error when format yyyy-MM-dd is not respected
     // throw new InvalidDateError(`Invalid format, expected yyyy-MM-dd`);
     process.emitWarning(
@@ -77,6 +69,7 @@ export const parseTime = (value: unknown) => {
   if (typeof value !== 'string') {
     throw new InvalidTimeError(`Expected a string, got a ${typeof value}`);
   }
+
   const result = value.match(TIME_REGEX);
 
   if (result === null) {

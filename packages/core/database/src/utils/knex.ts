@@ -5,6 +5,9 @@ import KnexRaw from 'knex/lib/raw';
 
 import type { Database } from '..';
 
+/**
+ * @internal
+ */
 export function isKnexQuery(value: unknown): value is Knex.Raw | Knex.QueryBuilder {
   return value instanceof KnexBuilder || value instanceof KnexRaw;
 }

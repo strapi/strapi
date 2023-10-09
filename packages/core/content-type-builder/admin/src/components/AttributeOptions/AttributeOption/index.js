@@ -16,10 +16,10 @@ import getTrad from '../../../utils/getTrad';
 import AttributeIcon from '../../AttributeIcon';
 import OptionBoxWrapper from '../OptionBoxWrapper';
 
-// TODO: Remove after the RTE Blocks Alpha release
-const AlphaTag = styled(Box)`
-  background-color: ${({ theme }) => theme.colors.warning100};
-  border: ${({ theme }) => `1px solid ${theme.colors.warning200}`};
+// TODO: Remove after the RTE Blocks Beta release
+const BetaTag = styled(Box)`
+  background-color: ${({ theme }) => theme.colors.secondary100};
+  border: ${({ theme }) => `1px solid ${theme.colors.secondary200}`};
   border-radius: ${({ theme }) => theme.borderRadius};
   font-size: ${({ theme }) => theme.fontSizes[0]};
   padding: ${({ theme }) => `${2 / 16}rem ${theme.spaces[1]}`};
@@ -43,20 +43,20 @@ const AttributeOption = ({ type }) => {
     <OptionBoxWrapper padding={4} as="button" hasRadius type="button" onClick={handleClick}>
       <Flex>
         <AttributeIcon type={type} />
-        {/* TODO: Remove after the RTE Blocks Alpha release (width) */}
+        {/* TODO: Remove after the RTE Blocks Beta release (width) */}
         <Box paddingLeft={4} width="100%">
-          {/* TODO: Remove after the RTE Blocks Alpha release (justifyContent) */}
+          {/* TODO: Remove after the RTE Blocks Beta release (justifyContent) */}
           <Flex justifyContent="space-between">
             <Typography fontWeight="bold">
               {formatMessage({ id: getTrad(`attribute.${type}`), defaultMessage: type })}
             </Typography>
-            {/* Remove after the RTE Blocks Alpha release */}
+            {/* Remove after the RTE Blocks Beta release */}
             {type === 'blocks' && (
-              <AlphaTag>
-                <Typography textColor="warning600" variant="sigma">
-                  ALPHA
+              <BetaTag>
+                <Typography textColor="secondary600" variant="sigma">
+                  BETA
                 </Typography>
-              </AlphaTag>
+              </BetaTag>
             )}
           </Flex>
 
