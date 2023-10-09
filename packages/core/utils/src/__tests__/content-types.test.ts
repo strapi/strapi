@@ -69,6 +69,7 @@ describe('Content types utils', () => {
 
       expect(getNonWritableAttributes(model)).toEqual([
         'id',
+        'documentId',
         'createdAt',
         'updatedAt',
         'non_writable_field',
