@@ -11,6 +11,6 @@ export default ({ env }) => ({
     },
   },
   flags: {
-    ps: env.bool('FLAG_NPS', true),
+    nps: env.bool('FLAG_NPS', true),
   },
 });
