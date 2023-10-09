@@ -7399,6 +7399,7 @@ __metadata:
   resolution: "@strapi/admin-test-utils@workspace:packages/admin-test-utils"
   dependencies:
     "@juggle/resize-observer": 3.4.0
+    "@strapi/pack-up": "workspace:*"
     "@testing-library/jest-dom": 5.16.5
     eslint-config-custom: 4.14.3
     jest-styled-components: 7.1.1
