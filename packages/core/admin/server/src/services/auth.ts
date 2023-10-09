@@ -9,16 +9,23 @@ const { ApplicationError } = errors;
 
 /**
  * hashes a password
+ * @param {string} password - password to hash
+ * @returns {string} hashed password
  */
 const hashPassword = (password: string) => bcrypt.hash(password, 10);
 
 /**
  * Validate a password
+ * @param {string} password
+ * @param {string} hash
+ * @returns {Promise<boolean>} is the password valid
  */
 const validatePassword = (password: string, hash: string) => bcrypt.compare(password, hash);
 
 /**
  * Check login credentials
+ * @param {string} email the users email address
+ * @param {string} password the users password
  */
 const checkCredentials = async ({ email, password }: { email: string; password: string }) => {
   const user: AdminUser = await strapi.query('admin::user').findOne({ where: { email } });
@@ -42,6 +49,7 @@ const checkCredentials = async ({ email, password }: { email: string; password: 
 
 /**
  * Send an email to the user if it exists or do nothing
+ * @param {string} email user email for which to reset the password
  */
 const forgotPassword = async ({ email } = {} as { email: string }) => {
   const user: AdminUser = await strapi
@@ -82,11 +90,13 @@ const forgotPassword = async ({ email } = {} as { email: string }) => {
 
 /**
  * Reset a user password
+ * @param {string} resetPasswordToken token generated to request a password reset
+ * @param {string} password new user password
  */
 const resetPassword = async (
   { resetPasswordToken, password } = {} as { resetPasswordToken: string; password: string }
 ) => {
-  const matchingUser: AdminUser = await strapi
+  const matchingUser: AdminUser | undefined = await strapi
     .query('admin::user')
     .findOne({ where: { resetPasswordToken, isActive: true } });
 
