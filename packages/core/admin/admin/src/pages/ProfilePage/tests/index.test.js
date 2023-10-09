@@ -6,8 +6,8 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
 
-import Theme from '../../../components/Theme';
-import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
+import { Theme } from '../../../components/Theme';
+import { ThemeToggleProvider } from '../../../components/ThemeToggleProvider';
 import ProfilePage from '../index';
 
 import server from './utils/server';
