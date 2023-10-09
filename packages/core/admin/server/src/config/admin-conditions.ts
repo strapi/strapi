@@ -24,3 +24,7 @@ export const conditions = [
     }),
   },
 ];
+
+export default {
+  conditions,
+};

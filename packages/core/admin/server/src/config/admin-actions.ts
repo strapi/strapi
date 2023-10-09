@@ -210,3 +210,7 @@ export const actions = [
     subCategory: 'general',
   },
 ];
+
+export default {
+  actions,
+};

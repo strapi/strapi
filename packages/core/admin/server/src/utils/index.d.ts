@@ -22,4 +22,6 @@ type S = {
   transfer: typeof transfer;
 };
 
-export function getService<T extends keyof S>(name: T): S[T];
+type Resolve<T> = T extends (...args: unknown[]) => unknown ? T : { [K in keyof T]: T[K] };
+
+export function getService<T extends keyof S>(name: T): Resolve<S[T]>;

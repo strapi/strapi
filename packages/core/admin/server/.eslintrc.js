@@ -4,4 +4,9 @@ module.exports = {
   parserOptions: {
     project: ['./server/tsconfig.eslint.json'],
   },
+  rules: {
+    // TODO: TS - Remove this rule when pack-up package PR is merged (#18233)
+    'import/no-import-module-exports': 'off',
+    '@typescript-eslint/ban-ts-comment': 'off',
+  },
 };

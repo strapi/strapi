@@ -145,6 +145,7 @@
     "@testing-library/dom": "9.2.0",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
+    "@types/jsonwebtoken": "9.0.3",
     "@types/lodash": "^4.14.191",
     "duplicate-dependencies-webpack-plugin": "^1.0.2",
     "glob": "8.0.3",

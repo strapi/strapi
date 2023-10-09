@@ -1,7 +1,7 @@
 'use strict';
 
 const createContext = require('../../../../../../test/helpers/create-context');
-const contentApiController = require('../content-api');
+const contentApiController = require('../content-api.ts');
 
 describe('Content API permissions', () => {
   const actionsMap = {
