@@ -150,7 +150,7 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/ts-zen": "4.14.3",
+    "@strapi/ts-zen": "^0.2.0",
     "@types/bcryptjs": "2.4.3",
     "@types/configstore": "5.0.1",
     "@types/delegates": "1.0.0",

@@ -8267,6 +8267,7 @@ __metadata:
     "@strapi/plugin-content-type-builder": 4.14.3
     "@strapi/plugin-email": 4.14.3
     "@strapi/plugin-upload": 4.14.3
+    "@strapi/ts-zen": ^0.2.0
     "@strapi/types": 4.14.3
     "@strapi/typescript-utils": 4.14.3
     "@strapi/utils": 4.14.3
@@ -8337,6 +8338,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@strapi/ts-zen@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "@strapi/ts-zen@npm:0.2.0"
+  peerDependencies:
+    jest: ^29.6.x
+    typescript: ^5.1.x
+  checksum: aecc7360eec9b86c079e406b643f10329d7b4ca64c74c77959c9511de59487d24e564bc3ca946d2addb628371aa828ed64e4242470d97f059f8b281a79baf611
+  languageName: node
+  linkType: hard
+
 "@strapi/types@4.14.3, @strapi/types@workspace:packages/core/types":
   version: 0.0.0-use.local
   resolution: "@strapi/types@workspace:packages/core/types"
@@ -8346,6 +8357,7 @@ __metadata:
     "@strapi/database": 4.14.3
     "@strapi/logger": 4.14.3
     "@strapi/permissions": 4.14.3
+    "@strapi/ts-zen": ^0.2.0
     "@strapi/utils": 4.14.3
     "@types/jest": 29.5.2
     "@types/koa": 2.13.4
