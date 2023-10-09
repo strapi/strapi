@@ -1,16 +1,28 @@
 import { useState, useEffect, useCallback } from 'react';
 
 import { hasPermissions, useRBACProvider, useStrapiApp, useAppInfo } from '@strapi/helper-plugin';
+import sortBy from 'lodash/sortBy';
 import { useSelector } from 'react-redux';
 
-import { selectAdminPermissions } from '../../pages/App/selectors';
-import { useEnterprise } from '../useEnterprise';
+import { SETTINGS_MENU_LINKS_CE } from '../constants';
+import { selectAdminPermissions } from '../pages/App/selectors';
 
-import { LINKS_CE } from './constants';
-import formatLinks from './utils/formatLinks';
-import sortLinks from './utils/sortLinks';
+import { useEnterprise } from './useEnterprise';
 
-const useSettingsMenu = () => {
+const sortLinks = (links) => sortBy(links, (link) => link.id);
+
+const formatLinks = (menu) => {
+  return menu.map((menuSection) => {
+    const formattedLinks = menuSection.links.map((link) => ({
+      ...link,
+      isDisplayed: false,
+    }));
+
+    return { ...menuSection, links: formattedLinks };
+  });
+};
+
+export const useSettingsMenu = () => {
   const [{ isLoading, menu }, setData] = useState({
     isLoading: true,
     menu: [],
@@ -21,8 +33,8 @@ const useSettingsMenu = () => {
   const permissions = useSelector(selectAdminPermissions);
 
   const { global: globalLinks, admin: adminLinks } = useEnterprise(
-    LINKS_CE,
-    async () => (await import('../../../../ee/admin/hooks/useSettingsMenu/constants')).LINKS_EE,
+    SETTINGS_MENU_LINKS_CE,
+    async () => (await import('../../../ee/admin/constants')).SETTINGS_MENU_LINKS_EE,
     {
       combine(ceLinks, eeLinks) {
         return {
@@ -121,5 +133,3 @@ const useSettingsMenu = () => {
 
   return { isLoading, menu: menu.map(filterMenu) };
 };
-
-export default useSettingsMenu;

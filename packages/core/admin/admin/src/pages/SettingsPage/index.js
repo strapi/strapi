@@ -6,8 +6,8 @@ import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { Redirect, Route, Switch, useParams } from 'react-router-dom';
 
-import { useSettingsMenu } from '../../hooks';
 import { useEnterprise } from '../../hooks/useEnterprise';
+import { useSettingsMenu } from '../../hooks/useSettingsMenu';
 import createRoute from '../../utils/createRoute';
 import makeUniqueRoutes from '../../utils/makeUniqueRoutes';
 
