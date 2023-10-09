@@ -1,10 +1,10 @@
 import { act, renderHook } from '@testing-library/react';
 
-import useFormModalNavigation from '../../../hooks/useFormModalNavigation';
+import { useFormModalNavigation } from '../../../hooks/useFormModalNavigation';
 import { INITIAL_STATE_DATA } from '../constants';
-import FormModalNavigationProvider from '../index';
+import { FormModalNavigationProvider, State } from '../FormModalNavigationProvider';
 
-const removeFunctionsFromObject = (state) => {
+const removeFunctionsFromObject = (state: State) => {
   const stringified = JSON.stringify(state);
   const parsed = JSON.parse(stringified);
 
@@ -28,7 +28,7 @@ describe('FromModalNavigationProvider', () => {
     });
 
     act(() => {
-      result.current.onClickSelectCustomField({
+      (result.current as any).onClickSelectCustomField({
         attributeType: 'text',
         customFieldUid: 'plugin::mycustomfields.color',
       });
@@ -52,7 +52,7 @@ describe('FromModalNavigationProvider', () => {
     });
 
     act(() => {
-      result.current.onOpenModalEditCustomField({
+      (result.current as any).onOpenModalEditCustomField({
         forTarget: 'contentType',
         targetUid: 'api::test.test',
         attributeName: 'color',

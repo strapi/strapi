@@ -25,7 +25,7 @@ import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import pluginId from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
 import makeUnique from '../../utils/makeUnique';
-import FormModal from '../FormModal';
+import FormModal from '../FormModal/FormModal';
 
 import {
   ADD_ATTRIBUTE,

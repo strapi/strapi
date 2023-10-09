@@ -9,7 +9,7 @@ const nameField = {
   },
 };
 
-const forms = {
+export const contentTypeForm = {
   advanced: {
     default() {
       return {
@@ -161,5 +161,3 @@ const forms = {
     },
   },
 };
-
-export default forms;

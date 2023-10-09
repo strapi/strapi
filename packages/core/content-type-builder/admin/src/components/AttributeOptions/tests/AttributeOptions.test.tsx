@@ -1,13 +1,11 @@
-import React from 'react';
-
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 
-import FormModalNavigationProvider from '../../FormModalNavigationProvider';
-import AttributeOptions from '../index';
+import { FormModalNavigationProvider } from '../../FormModalNavigationProvider/FormModalNavigationProvider';
+import { AttributeOptions } from '../AttributeOptions';
 
 const mockCustomField = {
   'plugin::mycustomfields.test': {
@@ -101,7 +99,7 @@ describe('<AttributeOptions />', () => {
 
     const comingSoonText = screen.queryByText('Nothing in here yet.');
 
-    expect(comingSoonText).toEqual(null);
+    expect(comingSoonText).not.toBeInTheDocument(); // MINE verify this
   });
 
   it('switches to the custom tab without custom fields', () => {

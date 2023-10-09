@@ -4,17 +4,36 @@
  *
  */
 
-import React from 'react';
+import * as React from 'react';
 
 import { Box, Flex, Typography } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import useFormModalNavigation from '../../../hooks/useFormModalNavigation';
-import AttributeIcon from '../../AttributeIcon';
-import OptionBoxWrapper from '../OptionBoxWrapper';
+import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
+import { AttributeIcon, IconByType } from '../AttributeIcon';
 
-const CustomFieldOption = ({ customFieldUid, customField }) => {
+import { OptionBoxWrapper } from './OptionBoxWrapper';
+
+export type CustomFieldOption = {
+  name: string;
+  type: IconByType;
+  icon: React.ComponentType;
+  intlLabel: {
+    id: string;
+    defaultMessage: string;
+  };
+  intlDescription: {
+    id: string;
+    defaultMessage: string;
+  };
+};
+
+type CustomFieldOptionProps = {
+  customFieldUid: string;
+  customField: CustomFieldOption;
+};
+
+export const CustomFieldOption = ({ customFieldUid, customField }: CustomFieldOptionProps) => {
   const { type, intlLabel, intlDescription } = customField;
   const { formatMessage } = useIntl();
 
@@ -45,21 +64,3 @@ const CustomFieldOption = ({ customFieldUid, customField }) => {
     </OptionBoxWrapper>
   );
 };
-
-CustomFieldOption.propTypes = {
-  customFieldUid: PropTypes.string.isRequired,
-  customField: PropTypes.shape({
-    type: PropTypes.string.isRequired,
-    icon: PropTypes.func,
-    intlLabel: PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      defaultMessage: PropTypes.string.isRequired,
-    }).isRequired,
-    intlDescription: PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      defaultMessage: PropTypes.string.isRequired,
-    }).isRequired,
-  }).isRequired,
-};
-
-export default CustomFieldOption;

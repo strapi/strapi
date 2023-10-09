@@ -1,11 +1,12 @@
-import { getTrad } from '../../../utils/getTrad';
-import { componentField, componentForm } from '../component/index.js';
+import { getTrad } from '../../utils/getTrad';
+import { componentField } from './component/componentField';
+import { componentForm } from './component/componentForm';
 
-const form = {
+export const dynamiczoneForm = {
   advanced: {
     default() {
       return {
-        sections: componentForm.advanced('componentToCreate.'),
+        sections: componentForm.advanced(),
       };
     },
   },
@@ -47,5 +48,3 @@ const form = {
     },
   },
 };
-
-export default form;

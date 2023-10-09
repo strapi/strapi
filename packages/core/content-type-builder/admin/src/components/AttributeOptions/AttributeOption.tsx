@@ -4,17 +4,15 @@
  *
  */
 
-import React from 'react';
-
 import { Box, Flex, Typography } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import useFormModalNavigation from '../../../hooks/useFormModalNavigation';
-import { getTrad } from '../../../utils/getTrad';
-import AttributeIcon from '../../AttributeIcon';
-import OptionBoxWrapper from '../OptionBoxWrapper';
+import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
+import { getTrad } from '../../utils/getTrad';
+import { AttributeIcon, IconByType } from '../AttributeIcon';
+
+import { OptionBoxWrapper } from './OptionBoxWrapper';
 
 // TODO: Remove after the RTE Blocks Alpha release
 const AlphaTag = styled(Box)`
@@ -25,7 +23,11 @@ const AlphaTag = styled(Box)`
   padding: ${({ theme }) => `${2 / 16}rem ${theme.spaces[1]}`};
 `;
 
-const AttributeOption = ({ type }) => {
+type AttributeOptionProps = {
+  type: IconByType;
+};
+
+export const AttributeOption = ({ type = 'text' }: AttributeOptionProps) => {
   const { formatMessage } = useIntl();
 
   const { onClickSelectField } = useFormModalNavigation();
@@ -73,13 +75,3 @@ const AttributeOption = ({ type }) => {
     </OptionBoxWrapper>
   );
 };
-
-AttributeOption.defaultProps = {
-  type: 'text',
-};
-
-AttributeOption.propTypes = {
-  type: PropTypes.string,
-};
-
-export default AttributeOption;

@@ -4,8 +4,6 @@
  *
  */
 
-import React from 'react';
-
 import {
   Box,
   Divider,
@@ -18,15 +16,21 @@ import {
   Tabs,
   Typography,
 } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../utils';
+import { IconByType } from '../AttributeIcon';
 
-import AttributeList from './AttributeList';
-import CustomFieldsList from './CustomFieldsList';
+import { AttributeList } from './AttributeList';
+import { CustomFieldsList } from './CustomFieldsList';
 
-const AttributeOptions = ({ attributes, forTarget, kind }) => {
+type AttributeOptionsProps = {
+  attributes: IconByType[][];
+  forTarget: string;
+  kind: string;
+};
+
+export const AttributeOptions = ({ attributes, forTarget, kind }: AttributeOptionsProps) => {
   const { formatMessage } = useIntl();
 
   const defaultTabId = getTrad('modalForm.tabs.default');
@@ -69,11 +73,3 @@ const AttributeOptions = ({ attributes, forTarget, kind }) => {
     </ModalBody>
   );
 };
-
-AttributeOptions.propTypes = {
-  attributes: PropTypes.array.isRequired,
-  forTarget: PropTypes.string.isRequired,
-  kind: PropTypes.string.isRequired,
-};
-
-export default AttributeOptions;

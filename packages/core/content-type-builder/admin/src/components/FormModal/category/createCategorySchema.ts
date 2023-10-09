@@ -1,7 +1,7 @@
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
 import * as yup from 'yup';
 
-import CATEGORY_NAME_REGEX from './regex';
+import { CATEGORY_NAME_REGEX } from './regex';
 
 export const createCategorySchema = (usedCategoryNames: Array<string>) => {
   const shape = {

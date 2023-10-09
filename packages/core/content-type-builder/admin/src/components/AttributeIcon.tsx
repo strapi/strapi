@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Box } from '@strapi/design-system';
 import { pxToRem, useCustomFields } from '@strapi/helper-plugin';
 import {
@@ -21,7 +19,6 @@ import {
   Uid,
   Blocks,
 } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 const iconByTypes = {
@@ -64,7 +61,14 @@ const IconBox = styled(Box)`
   }
 `;
 
-const AttributeIcon = ({ type, customField, ...rest }) => {
+export type IconByType = keyof typeof iconByTypes;
+
+type AttributeIconProps = {
+  type: IconByType;
+  customField?: string | null;
+};
+
+export const AttributeIcon = ({ type, customField = null, ...rest }: AttributeIconProps) => {
   const customFieldsRegistry = useCustomFields();
 
   let Compo = iconByTypes[type];
@@ -87,14 +91,3 @@ const AttributeIcon = ({ type, customField, ...rest }) => {
     </IconBox>
   );
 };
-
-AttributeIcon.defaultProps = {
-  customField: null,
-};
-
-AttributeIcon.propTypes = {
-  type: PropTypes.string.isRequired,
-  customField: PropTypes.string,
-};
-
-export default AttributeIcon;
