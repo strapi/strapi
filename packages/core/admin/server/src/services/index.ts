@@ -6,7 +6,6 @@ import * as passport from './passport';
 import * as metrics from './metrics';
 import * as contentType from './content-type';
 import * as constants from './constants';
-import * as condition from './condition';
 import * as auth from './auth';
 import * as action from './action';
 import * as apiToken from './api-token';
@@ -23,7 +22,6 @@ export default {
   metrics,
   'content-type': contentType,
   constants,
-  condition,
   auth,
   action,
   'api-token': apiToken,

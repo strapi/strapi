@@ -57,7 +57,6 @@ describe('Content-Type', () => {
   global.strapi = {
     components,
     contentTypes,
-    admin: { services: { condition: { isValidCondition: () => true } } },
   };
 
   describe('getNestedFields', () => {

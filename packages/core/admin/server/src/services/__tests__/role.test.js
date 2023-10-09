@@ -477,7 +477,6 @@ describe('Role', () => {
               createMany,
               conditionProvider: { has: () => true },
             },
-            condition: { isValidCondition: () => true },
             'content-type': { getPermissionsWithNestedFields },
             user: { assignARoleToAll },
           },
@@ -682,7 +681,6 @@ describe('Role', () => {
               conditionProvider: { getAll: getAllConditions },
               deleteByIds,
             },
-            condition: { isValidCondition },
             'content-type': { getPermissionsWithNestedFields },
             role: { getSuperAdmin },
           },
@@ -943,7 +941,6 @@ describe('Role', () => {
             permission: {
               createMany,
             },
-            condition: { isValidCondition: () => true },
           },
         },
       };

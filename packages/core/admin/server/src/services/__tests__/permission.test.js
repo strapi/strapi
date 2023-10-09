@@ -7,20 +7,6 @@ const { toPermission } = require('../../domain/permission');
 const createEventHub = require('../../../../strapi/dist/services/event-hub').default;
 
 describe('Permission Service', () => {
-  beforeEach(() => {
-    global.strapi = {
-      admin: {
-        services: {
-          condition: {
-            isValidCondition() {
-              return true;
-            },
-          },
-        },
-      },
-    };
-  });
-
   describe('Find permissions', () => {
     test('Find calls the right db query', async () => {
       const findMany = jest.fn(() => Promise.resolve([]));
@@ -56,12 +42,6 @@ describe('Permission Service', () => {
 
   describe('Sanitize Permission', () => {
     test('Removes unwanted properties', () => {
-      const isValidCondition = jest.fn((condition) => ['cond'].includes(condition));
-
-      global.strapi = merge(global.strapi, {
-        admin: { services: { condition: { isValidCondition } } },
-      });
-
       const permission = {
         action: 'read',
         subject: 'article',
