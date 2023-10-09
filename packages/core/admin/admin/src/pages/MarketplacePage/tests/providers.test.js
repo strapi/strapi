@@ -18,7 +18,9 @@ jest.setTimeout(50000);
 /**
  * MOCKS
  */
-jest.mock('../../../hooks/useDebounce', () => (value) => value);
+jest.mock('../../../hooks/useDebounce', () => ({
+  useDebounce: jest.fn((value) => value),
+}));
 jest.mock('../hooks/useNavigatorOnline');
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),

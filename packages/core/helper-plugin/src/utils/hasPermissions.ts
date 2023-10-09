@@ -1,7 +1,9 @@
 import { getFetchClient } from './getFetchClient';
 
-import type { Permission } from '@strapi/permissions';
+import type { domain } from '@strapi/permissions';
 import type { GenericAbortSignal } from 'axios';
+
+type Permission = domain.permission.Permission;
 
 const findMatchingPermissions = (userPermissions: Permission[], permissions: Permission[]) =>
   userPermissions.reduce<Permission[]>((acc, curr) => {

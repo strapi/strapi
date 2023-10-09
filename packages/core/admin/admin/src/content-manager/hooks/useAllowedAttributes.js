@@ -2,7 +2,15 @@ import { useRBACProvider, findMatchingPermissions } from '@strapi/helper-plugin'
 
 import { CREATOR_FIELDS } from '../constants/attributes';
 
-const NOT_ALLOWED_FILTERS = ['json', 'component', 'media', 'richtext', 'dynamiczone', 'password'];
+const NOT_ALLOWED_FILTERS = [
+  'json',
+  'component',
+  'media',
+  'richtext',
+  'dynamiczone',
+  'password',
+  'blocks',
+];
 const TIMESTAMPS = ['createdAt', 'updatedAt'];
 
 export const useAllowedAttributes = (contentType, slug) => {
