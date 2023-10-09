@@ -7949,6 +7949,7 @@ __metadata:
     "@strapi/design-system": 1.12.0
     "@strapi/helper-plugin": 4.14.3
     "@strapi/icons": 1.12.0
+    "@strapi/pack-up": "workspace:*"
     "@strapi/provider-email-sendmail": 4.14.3
     "@strapi/types": 4.14.3
     "@strapi/utils": 4.14.3

@@ -9,8 +9,12 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 
 import { PERMISSIONS } from './constants';
 
-export default {
-  register(app) {
+import type { Plugin } from '@strapi/types';
+
+const admin: Plugin.Config.AdminInput = {
+  // TODO typing app in strapi/types as every plugin needs it
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  register(app: any) {
     // Create the email settings section
     app.createSettingSection(
       {
@@ -26,11 +30,11 @@ export default {
           id: 'settings',
           to: `/settings/email`,
           async Component() {
-            const component = await import(
+            const { ProtectedSettingsPage } = await import(
               /* webpackChunkName: "email-settings-page" */ './pages/Settings'
             );
 
-            return component;
+            return ProtectedSettingsPage;
           },
           permissions: PERMISSIONS.settings,
         },
@@ -41,8 +45,9 @@ export default {
       name: 'email',
     });
   },
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   bootstrap() {},
-  async registerTrads({ locales }) {
+  async registerTrads({ locales }: { locales: string[] }) {
     const importedTrads = await Promise.all(
       locales.map((locale) => {
         return import(
@@ -66,3 +71,6 @@ export default {
     return Promise.resolve(importedTrads);
   },
 };
+
+// eslint-disable-next-line import/no-default-export
+export default admin;

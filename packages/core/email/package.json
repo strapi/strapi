@@ -19,13 +19,16 @@
       "url": "https://strapi.io"
     }
   ],
-  "files": [
-    "./dist",
-    "strapi-server.js"
-  ],
   "exports": {
+    "./strapi-admin": {
+      "types": "./dist/admin/src/index.d.ts",
+      "source": "./admin/src/index.ts",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.js"
+    },
     "./strapi-server": {
-      "types": "./dist/server/index.d.ts",
+      "types": "./dist/server/src/index.d.ts",
       "source": "./server/src/index.ts",
       "import": "./dist/server/index.mjs",
       "require": "./dist/server/index.js",
@@ -33,16 +36,21 @@
     },
     "./package.json": "./package.json"
   },
+  "files": [
+    "./dist",
+    "strapi-server.js"
+  ],
   "scripts": {
-    "build": "NODE_ENV=production strapi plugin:build --force",
-    "watch": "run -T tsc -w --preserveWatchOutput",
+    "build": "pack-up build",
     "clean": "run -T rimraf ./dist",
+    "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
-    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
+    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
-    "lint": "run -T eslint ."
+    "test:ts:front": "run -T tsc -p admin/tsconfig.json",
+    "watch": "pack-up watch"
   },
   "dependencies": {
     "@strapi/design-system": "1.12.0",
@@ -57,6 +65,7 @@
   },
   "devDependencies": {
     "@strapi/helper-plugin": "4.14.3",
+    "@strapi/pack-up": "workspace:*",
     "@strapi/types": "4.14.3",
     "@testing-library/react": "14.0.0",
     "@types/koa": "2.13.4",
