@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import PropTypes from 'prop-types';
-import { Editable, useSlate } from 'slate-react';
+import { Editable, useSlate, ReactEditor } from 'slate-react';
 import { useTheme } from 'styled-components';
 
 import { useBlocksStore } from '../hooks/useBlocksStore';
@@ -82,18 +82,36 @@ const BlocksInput = ({ disabled, placeholder }) => {
     }
   };
 
+  /**
+   *  scrollSelectionIntoView : Slate's default method to scroll a DOM selection into the view,
+   *  thats shifting layout for us when there is a overflowY:scroll on the viewport.
+   *  We are overriding it to check if the selection is not fully within the visible area of the editor,
+   *  we use scrollIntoView to scroll it into view smoothly
+   */
+  const handleScrollSelectionIntoView = () => {
+    const domRange = ReactEditor.toDOMRange(editor, editor.selection);
+    const domRect = domRange.getBoundingClientRect();
+    const editorRect = document.getElementById('slate-input').getBoundingClientRect();
+
+    if (domRect.top < editorRect.top || domRect.bottom > editorRect.bottom) {
+      domRange.startContainer.parentElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+        inline: 'nearest',
+      });
+    }
+  };
+
   return (
     <Editable
+      id="slate-input"
       readOnly={disabled}
       placeholder={placeholder}
       style={getEditorStyle(theme)}
       renderElement={renderElement}
       renderLeaf={renderLeaf}
       onKeyDown={handleKeyDown}
-      scrollSelectionIntoView={() => {
-        // This is a noop as Slate has its own default method to scroll a DOM selection into view
-        // thats shifting layout for us when there is vertical scrollbar activated
-      }}
+      scrollSelectionIntoView={handleScrollSelectionIntoView}
     />
   );
 };
