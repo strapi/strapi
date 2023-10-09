@@ -10,7 +10,7 @@ import permissionDomain, { type Permission } from '../domain/permission';
 import { AdminUser, type AdminRole } from '../domain/user';
 
 import { validatePermissionsExist } from '../validation/permission';
-import { constants as roleConstants } from './constants';
+import roleConstants from './constants';
 import { getService } from '../utils';
 import { Action } from '../domain/action';
 

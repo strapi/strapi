@@ -4,7 +4,7 @@ import { stringIncludes, errors } from '@strapi/utils';
 import { type AdminUser, createUser, hasSuperAdminRole } from '../domain/user';
 import { password as passwordValidator } from '../validation/common-validators';
 import { getService } from '../utils';
-import { constants } from './constants';
+import constants from './constants';
 
 const { SUPER_ADMIN_CODE } = constants;
 

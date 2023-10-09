@@ -6,7 +6,7 @@ import {
   validateRolesDeleteInput,
 } from '../validation/role';
 import { validatedUpdatePermissionsInput } from '../validation/permission';
-import { constants } from '../services/constants';
+import constants from '../services/constants';
 import { getService } from '../utils';
 
 const { ApplicationError } = errors;

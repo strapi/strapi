@@ -1,4 +1,4 @@
-import { constants } from '../services/constants';
+import constants from '../services/constants';
 
 const { SUPER_ADMIN_CODE } = constants;
 
