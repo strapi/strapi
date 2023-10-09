@@ -7,6 +7,7 @@ import makeUnique from '../../utils/makeUnique';
 
 import * as actions from './constants';
 import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
+import { Attribute } from '@strapi/types';
 
 const initialState = {
   components: {},
@@ -22,7 +23,7 @@ const initialState = {
 
 const ONE_SIDE_RELATIONS = ['oneWay', 'manyWay'];
 
-const getOppositeRelation = (originalRelation) => {
+const getOppositeRelation = (originalRelation: string) => {
   if (originalRelation === 'manyToOne') {
     return 'oneToMany';
   }
@@ -34,7 +35,18 @@ const getOppositeRelation = (originalRelation) => {
   return originalRelation;
 };
 
-const findAttributeIndex = (schema, attributeToFind) => {
+type Action = {
+  type: string;
+};
+
+type findAttributeIndexSchemaParam = {
+  schema: {
+    attributes: {
+      name: string;
+    }[];
+  };
+};
+const findAttributeIndex = (schema: findAttributeIndexSchemaParam, attributeToFind: string) => {
   return schema.schema.attributes.findIndex(({ name }) => name === attributeToFind);
 };
 
