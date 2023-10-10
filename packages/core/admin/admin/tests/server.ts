@@ -36,7 +36,7 @@ export const server = setupServer(
             id: 1,
             code: 'strapi-editor',
             params: {
-              some: req.url.searchParams.get('some'),
+              filters: req.url.searchParams.get('filters'),
             },
           },
         })
@@ -115,6 +115,7 @@ export const server = setupServer(
         })
       );
     }),
+    rest.get('/admin/users/me/permissions', (req, res, ctx) => res(ctx.json({ data: [] }))),
     /**
      *
      * ADMIN PROVIDERS
@@ -199,6 +200,17 @@ export const server = setupServer(
         })
       );
     }),
+    rest.get('/admin/information', (req, res, ctx) =>
+      res(
+        ctx.json({
+          autoReload: true,
+          communityEdition: false,
+          currentEnvironment: 'development',
+          nodeVersion: 'v14.13.1',
+          strapiVersion: '3.6.0',
+        })
+      )
+    ),
     rest.get('/admin/license-limit-information', (req, res, ctx) => {
       return res(
         ctx.json({
@@ -271,6 +283,23 @@ export const server = setupServer(
         })
       );
     }),
+    rest.get('/admin/registration-info', async (req, res, ctx) => {
+      const token = req.url.searchParams.get('registrationToken');
+
+      if (token === 'error') {
+        return res(ctx.status(500), ctx.json({}));
+      }
+
+      return res(
+        ctx.json({
+          data: {
+            firstname: 'Token firstname',
+            lastname: 'Token lastname',
+            email: 'test+register-token@strapi.io',
+          },
+        })
+      );
+    }),
     /**
      * WEBHOOKS
      */
@@ -323,6 +352,22 @@ export const server = setupServer(
         })
       );
     }),
+    rest.get('/admin/review-workflows/workflows/:id', (req, res, ctx) =>
+      res(
+        ctx.json({
+          data: {
+            id: 1,
+            stages: [
+              {
+                id: 1,
+                name: 'To Review',
+                color: '#FFFFFF',
+              },
+            ],
+          },
+        })
+      )
+    ),
     rest.get('/content-manager/collection-types/:contentType/stages', (req, res, ctx) =>
       res(
         ctx.json({

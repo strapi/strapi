@@ -25,6 +25,7 @@ import { createStore } from 'redux';
 import ModelsContext from '../src/content-manager/contexts/ModelsContext';
 // @ts-expect-error – no types yet.
 import AdminContext from '../src/contexts/Admin';
+import { ConfigurationsContext } from '../src/contexts/configuration';
 
 import { server } from './server';
 import { initialState } from './store';
@@ -76,7 +77,16 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
                   >
                     <ModelsContext.Provider value={{ refetchData: jest.fn() }}>
                       <AdminContext.Provider value={{ getAdminInjectedComponents: jest.fn() }}>
-                        {children}
+                        <ConfigurationsContext.Provider
+                          value={{
+                            showReleaseNotification: false,
+                            logos: {
+                              auth: { default: '' },
+                            },
+                          }}
+                        >
+                          {children}
+                        </ConfigurationsContext.Provider>
                       </AdminContext.Provider>
                     </ModelsContext.Provider>
                   </RBACContext.Provider>

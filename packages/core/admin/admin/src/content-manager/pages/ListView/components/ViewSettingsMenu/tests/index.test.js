@@ -39,27 +39,27 @@ describe('Content Manager | List view | ViewSettingsMenu', () => {
   it('should show the Cog Button', () => {
     const { getByRole } = render(<ViewSettingsMenu layout={layout} slug="api::temp.temp" />);
 
-    const cogBtn = getByRole('button', {
-      name: 'View Settings',
-    });
-
-    expect(cogBtn).toBeInTheDocument();
+    expect(
+      getByRole('button', {
+        name: 'View Settings',
+      })
+    ).toBeInTheDocument();
   });
 
   it('should open the Popover when you click on the Cog Button', async () => {
     const { getByRole, user } = render(<ViewSettingsMenu layout={layout} slug="api::temp.temp" />);
 
-    const cogBtn = getByRole('button', {
-      name: 'View Settings',
-    });
+    await user.click(
+      getByRole('button', {
+        name: 'View Settings',
+      })
+    );
 
-    await user.click(cogBtn);
-
-    const configureViewLink = getByRole('link', {
-      name: 'Configure the view',
-    });
-
-    expect(configureViewLink).toBeInTheDocument();
+    expect(
+      getByRole('link', {
+        name: 'Configure the view',
+      })
+    ).toBeInTheDocument();
   });
 
   it('should show inside the Popover the Configure the view link button', async () => {
@@ -70,7 +70,7 @@ describe('Content Manager | List view | ViewSettingsMenu', () => {
         wrapper({ children }) {
           return (
             <>
-              {children}{' '}
+              {children}
               <Route
                 path="*"
                 render={({ location }) => {
@@ -85,19 +85,17 @@ describe('Content Manager | List view | ViewSettingsMenu', () => {
       },
     });
 
-    const cogBtn = getByRole('button', {
-      name: 'View Settings',
-    });
+    await user.click(
+      getByRole('button', {
+        name: 'View Settings',
+      })
+    );
 
-    await user.click(cogBtn);
-
-    const configureViewLink = getByRole('link', {
-      name: 'Configure the view',
-    });
-
-    expect(configureViewLink).toBeInTheDocument();
-
-    await user.click(configureViewLink);
+    await user.click(
+      getByRole('link', {
+        name: 'Configure the view',
+      })
+    );
 
     await waitFor(() => {
       expect(testLocation.pathname).toBe('/api::temp.temp/configurations/list');
@@ -109,11 +107,11 @@ describe('Content Manager | List view | ViewSettingsMenu', () => {
       <ViewSettingsMenu layout={layout} slug="api::temp.temp" />
     );
 
-    const cogBtn = getByRole('button', {
-      name: 'View Settings',
-    });
-
-    await user.click(cogBtn);
+    await user.click(
+      getByRole('button', {
+        name: 'View Settings',
+      })
+    );
 
     expect(getByText('Displayed fields')).toBeInTheDocument();
   });
@@ -121,16 +119,16 @@ describe('Content Manager | List view | ViewSettingsMenu', () => {
   it('should show inside the Popover the reset button', async () => {
     const { getByRole, user } = render(<ViewSettingsMenu layout={layout} slug="api::temp.temp" />);
 
-    const cogBtn = getByRole('button', {
-      name: 'View Settings',
-    });
+    await user.click(
+      getByRole('button', {
+        name: 'View Settings',
+      })
+    );
 
-    await user.click(cogBtn);
-
-    const resetBtn = getByRole('button', {
-      name: 'Reset',
-    });
-
-    expect(resetBtn).toBeInTheDocument();
+    expect(
+      getByRole('button', {
+        name: 'Reset',
+      })
+    ).toBeInTheDocument();
   });
 });

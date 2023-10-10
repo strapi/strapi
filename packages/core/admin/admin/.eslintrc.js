@@ -13,9 +13,15 @@ module.exports = {
       extends: ['custom/front/typescript'],
     },
     {
-      files: ['./tests/*'],
+      files: ['./tests/*', '**/*.test.*'],
       env: {
         jest: true,
+      },
+      rules: {
+        /**
+         * So we can do `import { render } from '@tests/utils'`
+         */
+        'import/no-unresolved': 'off',
       },
     },
   ],

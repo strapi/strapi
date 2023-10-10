@@ -9,6 +9,18 @@ const initialState = {
   'content-manager_app': {
     fieldSizes: {},
   },
+  rbacProvider: {
+    allPermissions: [
+      ...fixtures.permissions.allPermissions,
+      {
+        id: 314,
+        action: 'admin::users.read',
+        subject: null,
+        properties: {},
+        conditions: [],
+      },
+    ],
+  },
   'content-manager_listView': {
     data: [
       { id: 1, publishedAt: null },
