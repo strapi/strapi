@@ -84,7 +84,7 @@ const checkIfShouldShowSurvey = (settings) => {
   // we assume that they would have enabled the NPS feature if they had the chance.
 
   // Global strapi disable for NSP.
-  if (window?.strapi?.flags === undefined || window.strapi.flags.nps === false) {
+  if (window.strapi.flags.nps === false) {
     return false
   }
 
