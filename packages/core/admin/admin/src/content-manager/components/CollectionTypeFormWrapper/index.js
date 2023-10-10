@@ -145,7 +145,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
     // This is needed in order to reset the form when the query changes
     const init = async () => {
-      dispatch(getData());
+      await dispatch(getData());
       dispatch(initForm(rawQuery));
     };
 
