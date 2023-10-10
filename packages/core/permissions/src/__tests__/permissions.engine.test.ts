@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { subject } from '@casl/ability';
 import { providerFactory } from '@strapi/utils';
-import permissions from '..';
+import * as permissions from '../index';
 import type { HookName } from '../engine/hooks';
 import type { Permission } from '../domain/permission';
 

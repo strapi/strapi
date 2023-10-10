@@ -16,8 +16,8 @@ import { AdminContext } from '../../contexts';
 import ConfigurationsProvider from '../ConfigurationsProvider';
 import GuidedTour from '../GuidedTour';
 import LanguageProvider from '../LanguageProvider';
-import Theme from '../Theme';
-import ThemeToggleProvider from '../ThemeToggleProvider';
+import { Theme } from '../Theme';
+import { ThemeToggleProvider } from '../ThemeToggleProvider';
 
 const queryClient = new QueryClient({
   defaultOptions: {
