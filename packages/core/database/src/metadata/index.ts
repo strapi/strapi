@@ -14,6 +14,7 @@ import {
 } from './relations';
 import { Metadata, Meta, ComponentLinkMeta } from './metadata';
 import type { Attribute, Model, Relation } from '../types';
+import identifiers from '../utils/identifiers';
 
 export type { Metadata, Meta };
 export {
@@ -42,6 +43,7 @@ export const createMetadata = (models: Model[] = []): Metadata => {
 
     metadata.add({
       ...model,
+      tableName: identifiers.create(model.tableName),
       attributes: {
         id: {
           type: 'increments',
@@ -117,7 +119,7 @@ const hasComponentsOrDz = (model: Meta): model is ComponentLinkMeta => {
 
 // NOTE: we might just move the compo logic outside this layer too at some point
 const createCompoLinkModelMeta = (baseModelMeta: Meta): Meta => {
-  const name = `${baseModelMeta.tableName}_components`;
+  const name = identifiers.create(baseModelMeta.tableName, 'components');
 
   return {
     // TODO: make sure there can't be any conflicts with a prefix
@@ -156,26 +158,26 @@ const createCompoLinkModelMeta = (baseModelMeta: Meta): Meta => {
     },
     indexes: [
       {
-        name: `${baseModelMeta.tableName}_field_index`,
+        name: identifiers.create(baseModelMeta.tableName, 'field_index'),
         columns: ['field'],
       },
       {
-        name: `${baseModelMeta.tableName}_component_type_index`,
+        name: identifiers.create(baseModelMeta.tableName, 'component_type_index'),
         columns: ['component_type'],
       },
       {
-        name: `${baseModelMeta.tableName}_entity_fk`,
+        name: identifiers.create(baseModelMeta.tableName, 'entity_fk'),
         columns: ['entity_id'],
       },
       {
-        name: `${baseModelMeta.tableName}_unique`,
+        name: identifiers.create(baseModelMeta.tableName, 'unique'),
         columns: ['entity_id', 'component_id', 'field', 'component_type'],
         type: 'unique',
       },
     ],
     foreignKeys: [
       {
-        name: `${baseModelMeta.tableName}_entity_fk`,
+        name: identifiers.create(baseModelMeta.tableName, 'entity_fk'),
         columns: ['entity_id'],
         referencedColumns: ['id'],
         referencedTable: baseModelMeta.tableName,

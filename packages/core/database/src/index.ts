@@ -12,6 +12,7 @@ import { Callback, transactionCtx, TransactionObject } from './transaction-conte
 
 import { validateDatabase } from './validations';
 import { Model } from './types';
+import identifiers from './utils/identifiers';
 
 export { isKnexQuery } from './utils/knex';
 
@@ -166,6 +167,7 @@ class Database {
   async destroy() {
     await this.lifecycles.clear();
     await this.connection.destroy();
+    identifiers.clear();
   }
 }
 
