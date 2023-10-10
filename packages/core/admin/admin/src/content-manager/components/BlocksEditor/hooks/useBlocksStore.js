@@ -37,6 +37,10 @@ import styled, { css } from 'styled-components';
 import { composeRefs } from '../../../utils';
 import { editLink, removeLink } from '../utils/links';
 
+const StyledBaseLink = styled(BaseLink)`
+  text-decoration: none;
+`;
+
 const H1 = styled(Typography).attrs({ as: 'h1' })`
   font-size: ${42 / 16}rem;
   line-height: ${({ theme }) => theme.lineHeights[1]};
@@ -320,7 +324,7 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
 
   return (
     <>
-      <BaseLink
+      <StyledBaseLink
         {...attributes}
         ref={composedRefs}
         href={element.url}
@@ -328,7 +332,7 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
         color="primary600"
       >
         {children}
-      </BaseLink>
+      </StyledBaseLink>
       {popoverOpen && (
         <Popover source={linkRef} onDismiss={handleDismiss} padding={4} contentEditable={false}>
           {isEditing ? (
@@ -382,9 +386,9 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
           ) : (
             <Flex direction="column" gap={4} alignItems="start" width="400px">
               <Typography>{elementText}</Typography>
-              <BaseLink href={element.url} target="_blank" color="primary600">
+              <StyledBaseLink href={element.url} target="_blank" color="primary600">
                 {element.url}
-              </BaseLink>
+              </StyledBaseLink>
               <Flex justifyContent="end" width="100%" gap={2}>
                 <IconButton
                   icon={<Trash />}
