@@ -114,6 +114,10 @@ describe('Content Manager | List view | ViewSettingsMenu', () => {
     );
 
     expect(getByText('Displayed fields')).toBeInTheDocument();
+
+    await user.click(getByRole('checkbox', { name: 'createdAt' }));
+
+    await user.keyboard('[Escape]');
   });
 
   it('should show inside the Popover the reset button', async () => {
@@ -130,5 +134,9 @@ describe('Content Manager | List view | ViewSettingsMenu', () => {
         name: 'Reset',
       })
     ).toBeInTheDocument();
+
+    await user.click(getByRole('checkbox', { name: 'createdAt' }));
+
+    await user.keyboard('[Escape]');
   });
 });

@@ -106,15 +106,15 @@ describe('NPS survey', () => {
     const originalError = console.error;
     console.error = jest.fn();
 
+    localStorageMock.getItem.mockReturnValueOnce({ enabled: true });
+
     server.use(
       rest.post('https://analytics.strapi.io/submit-nps', (req, res, ctx) => {
         return res(ctx.status(500));
       })
     );
 
-    localStorageMock.getItem.mockReturnValueOnce({ enabled: true });
-
-    const { getByRole, queryByText } = render(<NpsSurvey />);
+    const { getByRole, queryByText, getByText } = render(<NpsSurvey />);
 
     act(() => jest.runAllTimers());
 
@@ -131,6 +131,8 @@ describe('NPS survey', () => {
     await act(async () => {
       await jest.runAllTimersAsync();
     });
+
+    await waitFor(() => expect(getByText('An error occurred')).toBeInTheDocument());
 
     console.error = originalError;
     server.resetHandlers();

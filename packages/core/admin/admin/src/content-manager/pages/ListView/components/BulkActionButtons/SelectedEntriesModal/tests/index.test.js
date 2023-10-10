@@ -179,8 +179,9 @@ describe('Bulk publish selected entries modal', () => {
 
     await user.click(publishDialogButton);
 
+    expect(publishDialog).not.toBeInTheDocument();
+
     await waitFor(() => {
-      expect(publishDialog).not.toBeInTheDocument();
       expect(screen.queryByRole('gridcell', { name: 'Entry 1' })).not.toBeInTheDocument();
       expect(screen.queryByRole('gridcell', { name: 'Entry 2' })).not.toBeInTheDocument();
       expect(screen.getByRole('gridcell', { name: '3' })).toBeInTheDocument();
@@ -188,6 +189,8 @@ describe('Bulk publish selected entries modal', () => {
         screen.getByRole('gridcell', { name: 'components.Input.error.validation.required' })
       ).toBeInTheDocument();
     });
+
+    await waitFor(() => expect(screen.getByText('Published')).toBeInTheDocument());
 
     server.resetHandlers();
   }, 10000);
