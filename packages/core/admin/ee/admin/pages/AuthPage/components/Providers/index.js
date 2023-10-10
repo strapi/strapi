@@ -6,7 +6,7 @@ import { useIntl } from 'react-intl';
 import { Redirect, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
-import Logo from '../../../../../../admin/src/components/UnauthenticatedLogo';
+import { Logo } from '../../../../../../admin/src/components/UnauthenticatedLogo';
 import UnauthenticatedLayout, {
   Column,
   LayoutContent,

@@ -91,6 +91,7 @@ module.exports = ({
           options: {
             loader: 'tsx',
             target: buildTarget,
+            jsx: 'automatic',
           },
         },
         {

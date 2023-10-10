@@ -1,44 +1,6 @@
 import { getFetchClient } from '@strapi/helper-plugin';
 
-import packageJSON from '../../../../../package.json';
-
-import checkLatestStrapiVersion from './checkLatestStrapiVersion';
-
-const strapiVersion = packageJSON.version;
-const showUpdateNotif = !JSON.parse(localStorage.getItem('STRAPI_UPDATE_NOTIF'));
 const { get } = getFetchClient();
-
-const fetchStrapiLatestRelease = async (toggleNotification) => {
-  try {
-    const res = await fetch('https://api.github.com/repos/strapi/strapi/releases/latest');
-
-    if (!res.ok) {
-      throw new Error('Failed to fetch latest Strapi version.');
-    }
-    const { tag_name } = await res.json();
-    const shouldUpdateStrapi = checkLatestStrapiVersion(strapiVersion, tag_name);
-
-    if (shouldUpdateStrapi && showUpdateNotif) {
-      toggleNotification({
-        type: 'info',
-        message: { id: 'notification.version.update.message' },
-        link: {
-          url: `https://github.com/strapi/strapi/releases/tag/${tag_name}`,
-          label: {
-            id: 'global.see-more',
-          },
-        },
-        blockTransition: true,
-        onClose: () => localStorage.setItem('STRAPI_UPDATE_NOTIF', true),
-      });
-    }
-
-    return tag_name;
-  } catch (err) {
-    // Don't throw an error
-    return strapiVersion;
-  }
-};
 
 const fetchAppInfo = async () => {
   try {
@@ -82,4 +44,4 @@ const fetchUserRoles = async () => {
   }
 };
 
-export { fetchAppInfo, fetchCurrentUserPermissions, fetchStrapiLatestRelease, fetchUserRoles };
+export { fetchAppInfo, fetchCurrentUserPermissions, fetchUserRoles };

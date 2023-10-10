@@ -6,8 +6,10 @@ import { useRBACProvider } from '../features/RBAC';
 
 import { useFetchClient } from './useFetchClient';
 
-import type { Permission } from '@strapi/permissions';
+import type { domain } from '@strapi/permissions';
 import type { AxiosResponse } from 'axios';
+
+type Permission = domain.permission.Permission;
 
 type AllowedActions = Record<string, boolean>;
 

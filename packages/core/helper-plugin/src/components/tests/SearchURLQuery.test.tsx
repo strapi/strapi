@@ -1,10 +1,3 @@
-/**
- *
- * Tests for SearchURLQuery
- *
- */
-import React from 'react';
-
 import { render } from '@tests/utils';
 import { Route, RouteProps } from 'react-router-dom';
 
@@ -37,7 +30,7 @@ describe('<SearchURLQuery />', () => {
 
     const { user, getByRole } = render(<SearchURLQuery label="Search label" />, {
       renderOptions: {
-        wrapper({ children }: { children: React.JSX.Element }) {
+        wrapper({ children }) {
           return (
             <>
               {children}
@@ -72,7 +65,7 @@ describe('<SearchURLQuery />', () => {
 
     const { user, getByRole } = render(<SearchURLQuery label="Search label" />, {
       renderOptions: {
-        wrapper({ children }: { children: React.JSX.Element }) {
+        wrapper({ children }) {
           return (
             <>
               {children}

@@ -1,16 +1,9 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { fireEvent, render } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
-import { MemoryRouter } from 'react-router-dom';
+import { RawTable } from '@strapi/design-system';
+import { render, fireEvent } from '@tests/utils';
 
 import { TableRows } from '../TableRows';
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useQueryParams: jest.fn(() => [{ query: {} }]),
-}));
 
 const ASSET_FIXTURE = {
   alternativeText: 'alternative text',
@@ -32,7 +25,7 @@ const ASSET_FIXTURE = {
 
 const FOLDER_FIXTURE = {
   createdAt: '2022-11-17T10:40:06.022Z',
-  id: 1,
+  id: 2,
   name: 'folder 1',
   type: 'folder',
   updatedAt: '2022-11-17T10:40:06.022Z',
@@ -47,26 +40,12 @@ const PROPS_FIXTURE = {
   selected: [],
 };
 
-const ComponentFixture = (props) => {
-  const customProps = {
-    ...PROPS_FIXTURE,
-    ...props,
-  };
-
-  return (
-    <MemoryRouter>
-      <IntlProvider locale="en" messages={{}}>
-        <ThemeProvider theme={lightTheme}>
-          <table>
-            <TableRows {...customProps} />
-          </table>
-        </ThemeProvider>
-      </IntlProvider>
-    </MemoryRouter>
-  );
-};
-
-const setup = (props) => render(<ComponentFixture {...props} />);
+const setup = (props) =>
+  render(<TableRows {...PROPS_FIXTURE} {...props} />, {
+    renderOptions: {
+      wrapper: ({ children }) => <RawTable>{children}</RawTable>,
+    },
+  });
 
 describe('TableList | TableRows', () => {
   describe('rendering assets', () => {
@@ -85,7 +64,10 @@ describe('TableList | TableRows', () => {
       const onSelectOneSpy = jest.fn();
       const { getByRole } = setup({ onSelectOne: onSelectOneSpy });
 
-      fireEvent.click(getByRole('checkbox', { name: 'Select michka asset', hidden: true }));
+      /**
+       * using UserEvent never triggers the onChange event.
+       */
+      fireEvent.click(getByRole('checkbox', { name: 'Select michka asset' }));
 
       expect(onSelectOneSpy).toHaveBeenCalledTimes(1);
     });
@@ -93,34 +75,32 @@ describe('TableList | TableRows', () => {
     it('should reflect non selected assets state', () => {
       const { getByRole } = setup();
 
-      expect(
-        getByRole('checkbox', { name: 'Select michka asset', hidden: true })
-      ).not.toBeChecked();
+      expect(getByRole('checkbox', { name: 'Select michka asset' })).not.toBeChecked();
     });
 
     it('should reflect selected assets state', () => {
       const { getByRole } = setup({ selected: [{ id: 1, type: 'asset' }] });
 
-      expect(getByRole('checkbox', { name: 'Select michka asset', hidden: true })).toBeChecked();
+      expect(getByRole('checkbox', { name: 'Select michka asset' })).toBeChecked();
     });
 
     it('should disable select asset checkbox when users do not have the permission to update', () => {
       const { getByRole } = setup({ canUpdate: false });
 
-      expect(getByRole('checkbox', { name: 'Select michka asset', hidden: true })).toBeDisabled();
+      expect(getByRole('checkbox', { name: 'Select michka asset' })).toBeDisabled();
     });
 
     it('should disable select asset checkbox when users if the file type is not allowed', () => {
       const { getByRole } = setup({ allowedTypes: [] });
 
-      expect(getByRole('checkbox', { name: 'Select michka asset', hidden: true })).toBeDisabled();
+      expect(getByRole('checkbox', { name: 'Select michka asset' })).toBeDisabled();
     });
 
-    it('should call onEditAsset callback', () => {
+    it('should call onEditAsset callback', async () => {
       const onEditAssetSpy = jest.fn();
-      const { getByRole } = setup({ onEditAsset: onEditAssetSpy });
+      const { getByRole, user } = setup({ onEditAsset: onEditAssetSpy });
 
-      fireEvent.click(getByRole('button', { name: 'Edit', hidden: true }));
+      await user.click(getByRole('button', { name: 'Edit', hidden: true }));
 
       expect(onEditAssetSpy).toHaveBeenCalledTimes(1);
     });
@@ -135,14 +115,14 @@ describe('TableList | TableRows', () => {
       expect(getByText('folder 1')).toBeInTheDocument();
     });
 
-    it('should call onEditFolder callback', () => {
+    it('should call onEditFolder callback', async () => {
       const onEditFolderSpy = jest.fn();
-      const { getByRole } = setup({
+      const { getByRole, user } = setup({
         rows: [FOLDER_FIXTURE],
         onEditFolder: onEditFolderSpy,
       });
 
-      fireEvent.click(getByRole('button', { name: 'Edit', hidden: true }));
+      await user.click(getByRole('button', { name: 'Edit', hidden: true }));
 
       expect(onEditFolderSpy).toHaveBeenCalledTimes(1);
     });
@@ -159,13 +139,16 @@ describe('TableList | TableRows', () => {
       expect(getByRole('button', { name: 'Access folder', hidden: true })).toBeInTheDocument();
     });
 
-    it('should call onChangeFolder when clicking on folder navigation button', () => {
+    it('should call onChangeFolder when clicking on folder navigation button', async () => {
       const onChangeFolderSpy = jest.fn();
-      const { getByRole } = setup({ rows: [FOLDER_FIXTURE], onChangeFolder: onChangeFolderSpy });
+      const { getByRole, user } = setup({
+        rows: [FOLDER_FIXTURE],
+        onChangeFolder: onChangeFolderSpy,
+      });
 
-      fireEvent.click(getByRole('button', { name: 'Access folder', hidden: true }));
+      await user.click(getByRole('button', { name: 'Access folder', hidden: true }));
 
-      expect(onChangeFolderSpy).toHaveBeenCalledWith(1);
+      expect(onChangeFolderSpy).toHaveBeenCalledWith(2);
     });
 
     it('should reflect non selected folder state', () => {
@@ -179,7 +162,7 @@ describe('TableList | TableRows', () => {
     it('should reflect selected folder state', () => {
       const { getByRole } = setup({
         rows: [FOLDER_FIXTURE],
-        selected: [{ id: 1, type: 'folder' }],
+        selected: [{ id: 2, type: 'folder' }],
       });
 
       expect(getByRole('checkbox', { name: 'Select folder 1 folder', hidden: true })).toBeChecked();
@@ -208,17 +191,15 @@ describe('TableList | TableRows', () => {
     });
   });
 
-  describe.only('rendering folder & asset with the same id', () => {
+  describe('rendering folder & asset with the same id', () => {
     it('should reflect selected only folder state', () => {
       const { getByRole } = setup({
         rows: [FOLDER_FIXTURE, ASSET_FIXTURE],
-        selected: [{ id: 1, type: 'folder' }],
+        selected: [{ id: 2, type: 'folder' }],
       });
 
       expect(getByRole('checkbox', { name: 'Select folder 1 folder', hidden: true })).toBeChecked();
-      expect(
-        getByRole('checkbox', { name: 'Select michka asset', hidden: true })
-      ).not.toBeChecked();
+      expect(getByRole('checkbox', { name: 'Select michka asset' })).not.toBeChecked();
     });
 
     it('should reflect selected only asset state', () => {
@@ -230,7 +211,7 @@ describe('TableList | TableRows', () => {
       expect(
         getByRole('checkbox', { name: 'Select folder 1 folder', hidden: true })
       ).not.toBeChecked();
-      expect(getByRole('checkbox', { name: 'Select michka asset', hidden: true })).toBeChecked();
+      expect(getByRole('checkbox', { name: 'Select michka asset' })).toBeChecked();
     });
 
     it('should reflect selected both asset & folder state', () => {
@@ -238,12 +219,12 @@ describe('TableList | TableRows', () => {
         rows: [FOLDER_FIXTURE, ASSET_FIXTURE],
         selected: [
           { id: 1, type: 'asset' },
-          { id: 1, type: 'folder' },
+          { id: 2, type: 'folder' },
         ],
       });
 
       expect(getByRole('checkbox', { name: 'Select folder 1 folder', hidden: true })).toBeChecked();
-      expect(getByRole('checkbox', { name: 'Select michka asset', hidden: true })).toBeChecked();
+      expect(getByRole('checkbox', { name: 'Select michka asset' })).toBeChecked();
     });
   });
 });

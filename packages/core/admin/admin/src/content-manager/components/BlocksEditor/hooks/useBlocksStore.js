@@ -232,10 +232,14 @@ const handleEnterKeyOnList = (editor) => {
   }
 };
 
+// The max-height is decided with the design team, the 56px is the height of the toolbar
 const Img = styled.img`
+  max-height: calc(512px - 56px);
   max-width: 100%;
+  object-fit: contain;
 `;
 
+// Added a background color to the image wrapper to make it easier to recognize the image block
 const Image = ({ attributes, children, element }) => {
   if (!element.image) return null;
   const { url, alternativeText, width, height } = element.image;
@@ -243,9 +247,9 @@ const Image = ({ attributes, children, element }) => {
   return (
     <Box {...attributes}>
       {children}
-      <Box contentEditable={false}>
+      <Flex background="neutral100" contentEditable={false} justifyContent="center">
         <Img src={url} alt={alternativeText} width={width} height={height} />
-      </Box>
+      </Flex>
     </Box>
   );
 };
@@ -272,8 +276,9 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
   );
   const [isEditing, setIsEditing] = React.useState(element.url === '');
   const linkRef = React.useRef(null);
-
   const elementText = element.children.map((child) => child.text).join('');
+  const [linkText, setLinkText] = React.useState(elementText);
+  const [linkUrl, setLinkUrl] = React.useState(element.url);
 
   const handleOpenEditPopover = (e) => {
     e.preventDefault();
@@ -282,22 +287,15 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
 
   const handleSave = (e) => {
     e.stopPropagation();
-    const data = new FormData(e.target);
 
-    if (data.get('url') === '') {
-      removeLink(editor);
-      setIsEditing(false);
-      setPopoverOpen(false);
-    } else {
-      // If the selection is collapsed, we select the parent node because we want all the link to be replaced
-      if (Range.isCollapsed(editor.selection)) {
-        const [, parentPath] = Editor.parent(editor, editor.selection.focus?.path);
-        Transforms.select(editor, parentPath);
-      }
-
-      editLink(editor, { url: data.get('url'), text: data.get('text') });
-      setIsEditing(false);
+    // If the selection is collapsed, we select the parent node because we want all the link to be replaced
+    if (Range.isCollapsed(editor.selection)) {
+      const [, parentPath] = Editor.parent(editor, editor.selection.focus?.path);
+      Transforms.select(editor, parentPath);
     }
+
+    editLink(editor, { url: linkUrl, text: linkText });
+    setIsEditing(false);
   };
 
   const handleCancel = () => {
@@ -346,9 +344,10 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                   name="text"
                   placeholder={formatMessage({
                     id: 'components.Blocks.popover.text.placeholder',
-                    defaultMessage: 'This text is the text of the link',
+                    defaultMessage: 'Enter link text',
                   })}
-                  defaultValue={elementText}
+                  value={linkText}
+                  onChange={(e) => setLinkText(e.target.value)}
                 />
               </Field>
               <Field width="300px">
@@ -358,7 +357,12 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                     defaultMessage: 'Link',
                   })}
                 </FieldLabel>
-                <FieldInput name="url" placeholder="https://strapi.io" defaultValue={element.url} />
+                <FieldInput
+                  name="url"
+                  placeholder="https://strapi.io"
+                  value={linkUrl}
+                  onChange={(e) => setLinkUrl(e.target.value)}
+                />
               </Field>
               <Flex justifyContent="end" width="100%" gap={2}>
                 <Button variant="tertiary" onClick={handleCancel}>
@@ -367,7 +371,7 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                     defaultMessage: 'Cancel',
                   })}
                 </Button>
-                <Button type="submit">
+                <Button type="submit" disabled={!linkText || !linkUrl}>
                   {formatMessage({
                     id: 'components.Blocks.popover.save',
                     defaultMessage: 'Save',

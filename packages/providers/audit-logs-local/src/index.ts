@@ -12,7 +12,7 @@ interface Log extends Omit<Event, 'userId'> {
   user: string | number;
 }
 
-export = {
+export default {
   async register({ strapi }: { strapi: Strapi }) {
     const contentTypes = strapi.container.get('content-types');
     if (!contentTypes.keys().includes('admin::audit-log')) {
