@@ -45,6 +45,13 @@ const mixedInitialValue = [
   },
 ];
 
+const emptyInitialValue = [
+  {
+    type: 'paragraph',
+    children: [{ type: 'text', text: '' }],
+  },
+];
+
 const user = userEvent.setup();
 
 // Create editor outside of the component to have direct access to it from the tests
@@ -432,5 +439,39 @@ describe('BlocksEditor toolbar', () => {
     // The dropdown should show only one option selected which is the block content in the first row
     const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
     expect(within(blocksDropdown).getByText(/heading 1/i)).toBeInTheDocument();
+  });
+
+  it('creates a new code block without empty lines before it when you select the option in a empty editor', async () => {
+    setup(emptyInitialValue);
+
+    // Convert selection to a code block
+    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+    await user.click(blocksDropdown);
+    await user.click(screen.getByRole('option', { name: 'Code' }));
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'code',
+        format: null,
+        level: null,
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+    ]);
+
+    expect(ReactEditor.focus).toHaveBeenCalledTimes(1);
   });
 });

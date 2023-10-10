@@ -154,8 +154,32 @@ const toggleBlock = (editor, value) => {
     // When there is a selection, update the existing block in the tree
     Transforms.setNodes(editor, blockProperties);
   } else {
+    // Retrieve the last node inserted and its path
+    const [, lastNodePath] = Editor.last(editor, []);
+    const [parentNode] = Editor.parent(editor, lastNodePath, {
+      match: (node) => node.type !== 'text', // makes sure we get a block node, not an inline node
+    });
+    // Remove the last node inserted
+    Transforms.removeNodes(editor, {
+      void: true,
+      hanging: true,
+      at: {
+        anchor: { path: lastNodePath, offset: 0 },
+        focus: { path: lastNodePath, offset: 0 },
+      },
+    });
     // Otherwise, add a new block to the tree
-    Transforms.insertNodes(editor, { ...blockProperties, children: [{ type: 'text', text: '' }] });
+    Transforms.insertNodes(
+      editor,
+      {
+        ...blockProperties,
+        children: [...parentNode.children],
+      },
+      {
+        at: [lastNodePath[0]],
+        select: true,
+      }
+    );
   }
 
   // When the select is clicked it blurs the editor, restore the focus to the editor
