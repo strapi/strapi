@@ -386,9 +386,11 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
           ) : (
             <Flex direction="column" gap={4} alignItems="start" width="400px">
               <Typography>{elementText}</Typography>
-              <StyledBaseLink href={element.url} target="_blank" color="primary600">
-                {element.url}
-              </StyledBaseLink>
+              <Typography>
+                <StyledBaseLink href={element.url} target="_blank" color="primary600">
+                  {element.url}
+                </StyledBaseLink>
+              </Typography>
               <Flex justifyContent="end" width="100%" gap={2}>
                 <IconButton
                   icon={<Trash />}
