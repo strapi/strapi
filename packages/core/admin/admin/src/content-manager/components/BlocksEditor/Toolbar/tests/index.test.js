@@ -32,7 +32,10 @@ const mixedInitialValue = [
   {
     type: 'heading',
     level: 1,
-    children: [{ type: 'text', text: 'A heading one' }],
+    children: [
+      { type: 'text', text: 'A heading one' },
+      { type: 'text', text: ' with modifiers', bold: true },
+    ],
   },
   {
     type: 'paragraph',
@@ -443,15 +446,15 @@ describe('BlocksEditor toolbar', () => {
       focus: { path: [1, 0], offset: 0 },
     });
 
-    const linksButton = screen.getByLabelText(/link/i);
-    expect(linksButton).toBeDisabled();
+    const linkButton = screen.getByLabelText(/link/i);
+    expect(linkButton).toBeDisabled();
 
-    // Set the selection to a single point, not a range
+    // Set the selection to a range inside the same block node
     await select({
       anchor: { path: [0, 0], offset: 0 },
-      focus: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 1], offset: 2 },
     });
 
-    expect(screen.getByLabelText(/link/i)).not.toBeDisabled();
+    expect(linkButton).not.toBeDisabled();
   });
 });
