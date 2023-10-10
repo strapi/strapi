@@ -47,7 +47,8 @@ const mixedInitialValue = [
 
 const user = userEvent.setup();
 
-const baseEditor = createEditor();
+// Create editor outside of the component to have direct access to it from the tests
+let baseEditor;
 
 const Wrapper = ({ children, initialData }) => {
   const [editor] = React.useState(() => withReact(baseEditor));
@@ -87,6 +88,10 @@ const select = async (location) => {
  * @param {import('slate').Descendant[]} data
  */
 const setup = (data) => {
+  // Create a fresh instance of a Slate editor
+  // so that we have no side effects due to the previous selection or children
+  baseEditor = createEditor();
+
   render(<BlocksToolbar disabled={false} />, {
     wrapper: ({ children }) => <Wrapper initialData={data}>{children}</Wrapper>,
   });
@@ -94,7 +99,6 @@ const setup = (data) => {
 
 describe('BlocksEditor toolbar', () => {
   beforeEach(() => {
-    baseEditor.children = initialValue;
     /**
      * TODO: Find a way to use the actual implementation
      * Currently the editor throws an error as if the editor argument is missing:
