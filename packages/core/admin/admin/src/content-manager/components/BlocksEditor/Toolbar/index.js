@@ -301,7 +301,7 @@ const BlocksDropdown = ({ disabled }) => {
 
       // toggle the list
       toggleList(editor, isActive, listFormat);
-    } else {
+    } else if (optionKey !== 'image') {
       toggleBlock(editor, blocks[optionKey].value);
     }
 
