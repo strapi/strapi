@@ -4,24 +4,41 @@
  *
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { Checkbox } from '@strapi/design-system';
 import { ConfirmDialog } from '@strapi/helper-plugin';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { getTrad } from '../../utils';
+import { getTrad } from '../utils';
 
-const DraftAndPublishToggle = ({
+import type { IntlLabel } from '../types';
+
+interface Description {
+  id: string;
+  defaultMessage: string;
+  values?: Record<string, any>;
+}
+
+interface DraftAndPublishToggleProps {
+  description?: Description;
+  disabled?: boolean;
+  intlLabel: IntlLabel;
+  isCreating: boolean;
+  name: string;
+  onChange: (value: { target: { name: string; value: boolean } }) => void;
+  value?: boolean;
+}
+
+export const DraftAndPublishToggle = ({
   description,
-  disabled,
+  disabled = false,
   intlLabel,
   isCreating,
   name,
   onChange,
-  value,
-}) => {
+  value = false,
+}: DraftAndPublishToggleProps) => {
   const { formatMessage } = useIntl();
   const [showWarning, setShowWarning] = useState(false);
   const label = intlLabel.id
@@ -46,7 +63,7 @@ const DraftAndPublishToggle = ({
     handleToggle();
   };
 
-  const handleChange = ({ target: { checked } }) => {
+  const handleChange = ({ target: { checked } }: { target: { checked: boolean } }) => {
     if (!checked && !isCreating) {
       handleToggle();
 
@@ -82,29 +99,3 @@ const DraftAndPublishToggle = ({
     </>
   );
 };
-
-DraftAndPublishToggle.defaultProps = {
-  description: null,
-  disabled: false,
-  value: false,
-};
-
-DraftAndPublishToggle.propTypes = {
-  description: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }),
-  disabled: PropTypes.bool,
-  intlLabel: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }).isRequired,
-  isCreating: PropTypes.bool.isRequired,
-  name: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.bool,
-};
-
-export default DraftAndPublishToggle;

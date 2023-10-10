@@ -32,33 +32,33 @@ import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
-import useDataManager from '../../hooks/useDataManager';
+import { useDataManager } from '../../hooks/useDataManager';
 import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import pluginId from '../../pluginId';
 import { getTrad, isAllowedContentTypesForRelations } from '../../utils';
 import findAttribute from '../../utils/findAttribute';
 // New compos
 import { AllowedTypesSelect } from '../AllowedTypesSelect';
-import AttributeOptions from '../AttributeOptions/AttributeOptions';
+import { AttributeOptions } from '../AttributeOptions/AttributeOptions';
 import { BooleanDefaultValueSelect } from '../BooleanDefaultValueSelect';
 import { BooleanRadioGroup } from '../BooleanRadioGroup';
 import { CheckboxWithNumberField } from '../CheckboxWithNumberField';
 import { ContentTypeRadioGroup } from '../ContentTypeRadioGroup';
 import { CustomRadioGroup } from '../CustomRadioGroup';
-import DraftAndPublishToggle from '../DraftAndPublishToggle';
+import { DraftAndPublishToggle } from '../DraftAndPublishToggle';
 import { FormModalEndActions } from '../FormModalEndActions';
-import FormModalSubHeader from '../FormModalSubHeader';
-import IconPicker from '../IconPicker';
-import PluralName from '../PluralName';
-import Relation from '../Relation';
-import SelectCategory from '../SelectCategory';
-import SelectComponent from '../SelectComponent';
-import SelectComponents from '../SelectComponents';
-import SelectDateType from '../SelectDateType';
-import SelectNumber from '../SelectNumber';
-import SingularName from '../SingularName';
-import TabForm from '../TabForm';
-import TextareaEnum from '../TextareaEnum';
+import { FormModalSubHeader } from '../FormModalSubHeader';
+import { IconPicker } from '../IconPicker/IconPicker';
+import { PluralName } from '../PluralName';
+import { Relation } from '../Relation/Relation';
+import { SelectCategory } from '../SelectCategory';
+import { SelectComponent } from '../SelectComponent';
+import { SelectComponents } from '../SelectComponents';
+import { SelectDateType } from '../SelectDateType';
+import { SelectNumber } from '../SelectNumber';
+import { SingularName } from '../SingularName';
+import { TabForm } from '../TabForm';
+import { TextareaEnum } from '../TextareaEnum';
 
 import {
   ON_CHANGE,

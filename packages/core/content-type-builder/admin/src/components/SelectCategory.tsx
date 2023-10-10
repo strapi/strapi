@@ -1,18 +1,29 @@
-/**
- *
- * SelectCategory
- *
- */
-
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { ComboboxOption, CreatableCombobox } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import useDataManager from '../../hooks/useDataManager';
+import { useDataManager } from '../hooks/useDataManager';
 
-const SelectCategory = ({ error, intlLabel, name, onChange, value }) => {
+interface SelectCategoryProps {
+  error?: string | null;
+  intlLabel: {
+    id: string;
+    defaultMessage: string;
+    values?: Record<string, any>;
+  };
+  name: string;
+  onChange: (value: { target: { name: string; value: any; type: string } }) => void;
+  value?: string | null;
+}
+
+export const SelectCategory = ({
+  error = null,
+  intlLabel,
+  name,
+  onChange,
+  value = null,
+}: SelectCategoryProps) => {
   const { formatMessage } = useIntl();
   const { allComponentsCategories } = useDataManager();
   const [categories, setCategories] = useState(allComponentsCategories);
@@ -20,11 +31,11 @@ const SelectCategory = ({ error, intlLabel, name, onChange, value }) => {
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
   const label = formatMessage(intlLabel);
 
-  const handleChange = (value) => {
+  const handleChange = (value: any) => {
     onChange({ target: { name, value, type: 'select-category' } });
   };
 
-  const handleCreateOption = (value) => {
+  const handleCreateOption = (value: any) => {
     setCategories((prev) => [...prev, value]);
     handleChange(value);
   };
@@ -47,22 +58,3 @@ const SelectCategory = ({ error, intlLabel, name, onChange, value }) => {
     </CreatableCombobox>
   );
 };
-
-SelectCategory.defaultProps = {
-  error: null,
-  value: null,
-};
-
-SelectCategory.propTypes = {
-  error: PropTypes.string,
-  intlLabel: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }).isRequired,
-  name: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.string,
-};
-
-export default SelectCategory;

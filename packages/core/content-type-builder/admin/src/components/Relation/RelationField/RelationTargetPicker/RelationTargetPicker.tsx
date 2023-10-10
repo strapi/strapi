@@ -1,15 +1,20 @@
-import React from 'react';
-
 import { Menu } from '@strapi/design-system/v2';
-import PropTypes from 'prop-types';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import useDataManager from '../../../../hooks/useDataManager';
+import { useDataManager } from '../../../../hooks/useDataManager';
 import { isAllowedContentTypesForRelations } from '../../../../utils';
 import { ON_CHANGE_RELATION_TARGET } from '../../../FormModal/constants';
 
-const RelationTargetPicker = ({ oneThatIsCreatingARelationWithAnother, target }) => {
+interface RelationTargetPickerProps {
+  oneThatIsCreatingARelationWithAnother: string;
+  target: string;
+}
+
+export const RelationTargetPicker = ({
+  oneThatIsCreatingARelationWithAnother,
+  target,
+}: RelationTargetPickerProps) => {
   const { contentTypes, sortedContentTypesList } = useDataManager();
   const dispatch = useDispatch();
   // TODO: replace with an obj { relation: 'x', bidirctional: true|false }
@@ -21,7 +26,17 @@ const RelationTargetPicker = ({ oneThatIsCreatingARelationWithAnother, target })
     contentTypes?.[target] ?? {};
 
   const handleSelect =
-    ({ uid, plugin, title, restrictRelationsTo }) =>
+    ({
+      uid,
+      plugin,
+      title,
+      restrictRelationsTo,
+    }: {
+      uid: string;
+      plugin: boolean;
+      title: string;
+      restrictRelationsTo: any;
+    }) =>
     () => {
       const selectedContentTypeFriendlyName = plugin ? `${plugin}_${title}` : title;
 
@@ -56,15 +71,6 @@ const RelationTargetPicker = ({ oneThatIsCreatingARelationWithAnother, target })
   );
 };
 
-RelationTargetPicker.defaultProps = {
-  target: null,
-};
-
-RelationTargetPicker.propTypes = {
-  oneThatIsCreatingARelationWithAnother: PropTypes.string.isRequired,
-  target: PropTypes.string,
-};
-
 /**
  * TODO: this needs to be solved in the Design-System
  */
@@ -74,5 +80,3 @@ const MenuTrigger = styled(Menu.Trigger)`
     height: ${4 / 16}rem;
   }
 `;
-
-export default RelationTargetPicker;

@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Flex, KeyboardNavigable, Typography } from '@strapi/design-system';
 import {
   ManyToMany,
@@ -12,15 +10,14 @@ import {
 import get from 'lodash/get';
 import truncate from 'lodash/truncate';
 import pluralize from 'pluralize';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
 
-import useDataManager from '../../../hooks/useDataManager';
+import { useDataManager } from '../../../hooks/useDataManager';
 import { getTrad } from '../../../utils/getTrad';
 import { ON_CHANGE_RELATION_TYPE } from '../../FormModal/constants';
 
-import { IconWrapper, InfosWrapper, Wrapper } from './components';
+import { IconWrapper, InfosWrapper, Wrapper } from './Components';
 
 const relations = {
   oneWay: OneWay,
@@ -31,12 +28,21 @@ const relations = {
   manyWay: ManyWay,
 };
 
-const RelationNaturePicker = ({
+type RelationType = keyof typeof relations;
+
+interface RelationNaturePickerProps {
+  naturePickerType: string;
+  oneThatIsCreatingARelationWithAnother: string;
+  relationType: string;
+  target: string;
+}
+
+export const RelationNaturePicker = ({
   naturePickerType,
   oneThatIsCreatingARelationWithAnother,
   relationType,
   target,
-}) => {
+}: RelationNaturePickerProps) => {
   const dispatch = useDispatch();
   const { formatMessage } = useIntl();
 
@@ -47,7 +53,9 @@ const RelationNaturePicker = ({
     naturePickerType === 'contentType'
       ? get(modifiedData, [naturePickerType, 'schema', 'kind'], '')
       : naturePickerType;
-  const relationsType = dataType === 'collectionType' ? ctRelations : componentRelations;
+  const relationsType = (
+    dataType === 'collectionType' ? ctRelations : componentRelations
+  ) as RelationType[];
 
   const areDisplayedNamesInverted = relationType === 'manyToOne';
   const targetLabel = get(contentTypes, [target, 'schema', 'displayName'], 'unknown');
@@ -119,17 +127,3 @@ const RelationNaturePicker = ({
     </Flex>
   );
 };
-
-RelationNaturePicker.defaultProps = {
-  relationType: null,
-  target: null,
-};
-
-RelationNaturePicker.propTypes = {
-  naturePickerType: PropTypes.string.isRequired,
-  oneThatIsCreatingARelationWithAnother: PropTypes.string.isRequired,
-  relationType: PropTypes.string,
-  target: PropTypes.string,
-};
-
-export default RelationNaturePicker;

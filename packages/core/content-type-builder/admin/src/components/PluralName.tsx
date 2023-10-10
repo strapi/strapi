@@ -1,27 +1,38 @@
-/**
- *
- * PluralName
- *
- */
-
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { TextInput } from '@strapi/design-system';
 import pluralize from 'pluralize';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import nameToSlug from '../../utils/nameToSlug';
+import nameToSlug from '../utils/nameToSlug';
 
-const PluralName = ({
-  description = null,
-  error = null,
+import type { IntlLabel } from '../types';
+
+interface Description {
+  id: string;
+  defaultMessage: string;
+  values?: Record<string, any>;
+}
+
+interface PluralNameProps {
+  description?: Description;
+  error?: string;
+  intlLabel: IntlLabel;
+  modifiedData: Record<string, any>;
+  name: string;
+  onChange: (value: { target: { name: string; value: string } }) => void;
+  value?: string;
+}
+
+export const PluralName = ({
+  description,
+  error,
   intlLabel,
   modifiedData,
   name,
   onChange,
-  value = null,
-}) => {
+  value,
+}: PluralNameProps) => {
   const { formatMessage } = useIntl();
   const onChangeRef = useRef(onChange);
   const displayName = modifiedData?.displayName || '';
@@ -62,29 +73,3 @@ const PluralName = ({
     />
   );
 };
-
-PluralName.defaultProps = {
-  description: null,
-  error: null,
-  value: null,
-};
-
-PluralName.propTypes = {
-  description: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }),
-  error: PropTypes.string,
-  intlLabel: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }).isRequired,
-  modifiedData: PropTypes.object.isRequired,
-  name: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.string,
-};
-
-export default PluralName;

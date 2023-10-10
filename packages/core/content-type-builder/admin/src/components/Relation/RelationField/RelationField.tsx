@@ -1,24 +1,33 @@
-import React from 'react';
-
 import { Box, Divider, Flex, Typography } from '@strapi/design-system';
 import { GenericInput } from '@strapi/helper-plugin';
-import PropTypes from 'prop-types';
 
 import { getTrad } from '../../../utils/getTrad';
 
-import RelationTargetPicker from './RelationTargetPicker';
+import { RelationTargetPicker } from './RelationTargetPicker/RelationTargetPicker';
 
-const RelationFormBox = ({
-  disabled,
+interface RelationFormBoxProps {
+  disabled?: boolean;
+  error?: Record<string, any>;
+  header?: string;
+  isMain?: boolean;
+  name: string;
+  onChange?: (value: any) => void;
+  oneThatIsCreatingARelationWithAnother?: string;
+  target?: string;
+  value?: string;
+}
+
+export const RelationFormBox = ({
+  disabled = false,
   error,
   header,
-  isMain,
+  isMain = false,
   name,
   onChange,
-  oneThatIsCreatingARelationWithAnother,
-  target,
-  value,
-}) => {
+  oneThatIsCreatingARelationWithAnother = '',
+  target = '',
+  value = '',
+}: RelationFormBoxProps) => {
   return (
     <Box background="neutral100" hasRadius borderColor="neutral200">
       <Flex paddingTop={isMain ? 4 : 1} paddingBottom={isMain ? 3 : 1} justifyContent="center">
@@ -51,28 +60,3 @@ const RelationFormBox = ({
     </Box>
   );
 };
-
-RelationFormBox.defaultProps = {
-  disabled: false,
-  error: null,
-  header: null,
-  isMain: false,
-  onChange() {},
-  oneThatIsCreatingARelationWithAnother: null,
-  target: null,
-  value: '',
-};
-
-RelationFormBox.propTypes = {
-  disabled: PropTypes.bool,
-  error: PropTypes.object,
-  header: PropTypes.string,
-  isMain: PropTypes.bool,
-  name: PropTypes.string.isRequired,
-  onChange: PropTypes.func,
-  oneThatIsCreatingARelationWithAnother: PropTypes.string,
-  target: PropTypes.string,
-  value: PropTypes.string,
-};
-
-export default RelationFormBox;
