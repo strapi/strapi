@@ -21,7 +21,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-const initialValue = [
+const defaultInitialValue = [
   {
     type: 'paragraph',
     children: [{ type: 'text', text: 'A line of text in a paragraph.' }],
@@ -50,13 +50,13 @@ const user = userEvent.setup();
 // Create editor outside of the component to have direct access to it from the tests
 let baseEditor;
 
-const Wrapper = ({ children, initialData }) => {
+const Wrapper = ({ children, initialValue }) => {
   const [editor] = React.useState(() => withReact(baseEditor));
 
   return (
     <ThemeProvider theme={lightTheme}>
       <IntlProvider messages={{}} locale="en">
-        <Slate initialValue={initialData} editor={editor}>
+        <Slate initialValue={initialValue} editor={editor}>
           {children}
         </Slate>
       </IntlProvider>
@@ -66,11 +66,7 @@ const Wrapper = ({ children, initialData }) => {
 
 Wrapper.propTypes = {
   children: PropTypes.node.isRequired,
-  initialData: PropTypes.array,
-};
-
-Wrapper.defaultProps = {
-  initialData: initialValue,
+  initialValue: PropTypes.array.isRequired,
 };
 
 /**
@@ -87,13 +83,13 @@ const select = async (location) => {
  * Render the toolbar inside the required context providers
  * @param {import('slate').Descendant[]} data
  */
-const setup = (data) => {
+const setup = (data = defaultInitialValue) => {
   // Create a fresh instance of a Slate editor
   // so that we have no side effects due to the previous selection or children
   baseEditor = createEditor();
 
   render(<BlocksToolbar disabled={false} />, {
-    wrapper: ({ children }) => <Wrapper initialData={data}>{children}</Wrapper>,
+    wrapper: ({ children }) => <Wrapper initialValue={data}>{children}</Wrapper>,
   });
 };
 
@@ -176,7 +172,7 @@ describe('BlocksEditor toolbar', () => {
     await user.click(italicButton);
 
     // The selection should be back a single node
-    expect(baseEditor.children).toEqual(initialValue);
+    expect(baseEditor.children).toEqual(defaultInitialValue);
 
     // The bold and italic buttons should have the inactive state
     expect(boldButton).toHaveAttribute('data-state', 'off');
