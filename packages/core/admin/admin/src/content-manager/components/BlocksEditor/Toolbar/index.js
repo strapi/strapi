@@ -454,7 +454,14 @@ const toggleList = (editor, isActive, format) => {
     const [lastNode, lastNodePath] = Editor.last(editor, []);
 
     // Remove the last node inserted
-    Transforms.removeNodes(editor, { at: lastNodePath });
+    Transforms.removeNodes(editor, {
+      void: true,
+      hanging: true,
+      at: {
+        anchor: { path: lastNodePath, offset: 0 },
+        focus: { path: lastNodePath, offset: 0 },
+      },
+    });
 
     // Change the type of the current selection
     Transforms.insertNodes(
