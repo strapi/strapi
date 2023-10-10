@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { render, screen, within } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
@@ -72,6 +72,20 @@ Wrapper.defaultProps = {
   initialData: initialValue,
 };
 
+/**
+ * Selects the given location without triggering warnings
+ * act is required because we're making an update outside of React that React needs to sync with
+ * And it only works if act is awaited
+ * @param {import('slate').Location} selection
+ */
+const select = async (location) => {
+  await act(async () => Transforms.select(baseEditor, location));
+};
+
+/**
+ * Render the toolbar inside the required context providers
+ * @param {import('slate').Descendant[]} data
+ */
 const setup = (data) => {
   render(<BlocksToolbar disabled={false} />, {
     wrapper: ({ children }) => <Wrapper initialData={data}>{children}</Wrapper>,
@@ -101,7 +115,7 @@ describe('BlocksEditor toolbar', () => {
     const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
 
     // Set the selection to cover the second and third row
-    Transforms.setSelection(baseEditor, {
+    await select({
       anchor: { path: [1, 0], offset: 0 },
       focus: { path: [2, 0], offset: 0 },
     });
@@ -117,7 +131,7 @@ describe('BlocksEditor toolbar', () => {
     const italicButton = screen.getByLabelText(/italic/i);
 
     // Simulate a selection of part of the editor
-    Transforms.select(baseEditor, {
+    await select({
       anchor: { path: [0, 0], offset: 2 },
       focus: { path: [0, 0], offset: 14 },
     });
@@ -172,8 +186,9 @@ describe('BlocksEditor toolbar', () => {
     const unorderedListButton = screen.getByLabelText(/bulleted list/i);
     const orderedListButton = screen.getByLabelText(/^numbered list/i);
 
-    Transforms.setSelection(baseEditor, {
+    await select({
       anchor: { path: [0, 0], offset: 2 },
+      focus: { path: [0, 0], offset: 2 },
     });
 
     await user.click(unorderedListButton);
@@ -209,8 +224,9 @@ describe('BlocksEditor toolbar', () => {
 
     const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
 
-    Transforms.setSelection(baseEditor, {
+    await select({
       anchor: { path: [0, 0], offset: 2 },
+      focus: { path: [0, 0], offset: 2 },
     });
 
     await user.click(headingsDropdown);
@@ -253,8 +269,9 @@ describe('BlocksEditor toolbar', () => {
 
     const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
 
-    Transforms.setSelection(baseEditor, {
+    await select({
       anchor: { path: [0, 0], offset: 2 },
+      focus: { path: [0, 0], offset: 2 },
     });
 
     await user.click(headingsDropdown);
@@ -307,8 +324,9 @@ describe('BlocksEditor toolbar', () => {
 
     const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
 
-    Transforms.setSelection(baseEditor, {
+    await select({
       anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
     });
 
     await user.click(headingsDropdown);
@@ -350,7 +368,7 @@ describe('BlocksEditor toolbar', () => {
       wrapper: Wrapper,
     });
 
-    Transforms.select(baseEditor, {
+    await select({
       anchor: { path: [0, 0], offset: 0 },
       focus: { path: [0, 0], offset: 0 },
     });
@@ -369,7 +387,7 @@ describe('BlocksEditor toolbar', () => {
       wrapper: Wrapper,
     });
 
-    Transforms.select(baseEditor, {
+    await select({
       anchor: { path: [0, 0], offset: 0 },
       focus: { path: [0, 0], offset: 0 },
     });
@@ -408,9 +426,10 @@ describe('BlocksEditor toolbar', () => {
 
     const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
 
-    // Set the selection to cover the second and third row
-    Transforms.setSelection(baseEditor, {
-      anchor: { path: [1, 0], offset: 0 },
+    // Set the selection to cover the first and second
+    await select({
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [1, 0], offset: 0 },
     });
 
     // The dropdown should show only one option selected which is the block content in the first row
