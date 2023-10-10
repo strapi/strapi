@@ -3,6 +3,7 @@ import * as types from '../utils/types';
 import type { Metadata, Meta } from '../metadata';
 import type { Column, Schema, Table } from './types';
 import type { Attribute } from '../types';
+import identifiers from '../utils/identifiers';
 
 const createColumn = (name: string, attribute: Attribute): Column => {
   const { type, args = [], ...opts } = getColumnType(attribute);
@@ -30,7 +31,6 @@ const createTable = (meta: Meta): Table => {
   for (const key of Object.keys(meta.attributes)) {
     const attribute = meta.attributes[key];
 
-    // if (types.isRelation(attribute.type)) {
     if (attribute.type === 'relation') {
       if ('morphColumn' in attribute && attribute.morphColumn && attribute.owner) {
         const { idColumn, typeColumn } = attribute.morphColumn;
@@ -65,7 +65,7 @@ const createTable = (meta: Meta): Table => {
         table.columns.push(column);
 
         table.foreignKeys.push({
-          name: `${table.name}_${columnName}_fk`,
+          name: identifiers.create([table.name, columnName, 'fk']),
           columns: [columnName],
           referencedTable,
           referencedColumns: [referencedColumn],
@@ -74,7 +74,7 @@ const createTable = (meta: Meta): Table => {
         });
 
         table.indexes.push({
-          name: `${table.name}_${columnName}_fk`,
+          name: identifiers.create([table.name, columnName], 'fk'),
           columns: [columnName],
         });
       }
@@ -84,7 +84,7 @@ const createTable = (meta: Meta): Table => {
       if (column.unique) {
         table.indexes.push({
           type: 'unique',
-          name: `${table.name}_${column.name}_unique`,
+          name: identifiers.create([table.name, column.name], 'unique'),
           columns: [column.name],
         });
       }
@@ -92,7 +92,7 @@ const createTable = (meta: Meta): Table => {
       if (column.primary) {
         table.indexes.push({
           type: 'primary',
-          name: `${table.name}_${column.name}_primary`,
+          name: identifiers.create([table.name, column.name], 'primary'),
           columns: [column.name],
         });
       }

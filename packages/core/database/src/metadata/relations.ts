@@ -2,6 +2,7 @@ import _ from 'lodash/fp';
 
 import type { Meta, Metadata } from './metadata';
 import type { RelationalAttribute, Relation, MorphJoinTable } from '../types';
+import identifiers from '../utils/identifiers';
 
 interface JoinColumnOptions {
   attribute: (Relation.OneToOne | Relation.ManyToOne) & Relation.Owner;
@@ -57,8 +58,9 @@ const isOwner = (
 const shouldUseJoinTable = (attribute: RelationalAttribute) =>
   !('useJoinTable' in attribute) || attribute.useJoinTable !== false;
 
-export const getJoinTableName = (tableName: string, attributeName: string) =>
-  _.snakeCase(`${tableName}_${attributeName}_links`);
+export const getJoinTableName = (tableName: string, attributeName: string) => {
+  return identifiers.create(_.snakeCase(`${tableName}_${attributeName}`), 'links');
+};
 
 export const hasOrderColumn = (attribute: RelationalAttribute) => isAnyToMany(attribute);
 export const hasInverseOrderColumn = (attribute: RelationalAttribute) =>
@@ -238,7 +240,10 @@ const createMorphToMany = (
   meta: Meta,
   metadata: Metadata
 ) => {
-  const joinTableName = _.snakeCase(`${meta.tableName}_${attributeName}_morphs`);
+  const joinTableName = identifiers.create(
+    _.snakeCase(`${meta.tableName}_${attributeName}`),
+    'morphs'
+  );
 
   const joinColumnName = _.snakeCase(`${meta.singularName}_id`);
   const morphColumnName = _.snakeCase(`${attributeName}`);
@@ -280,21 +285,21 @@ const createMorphToMany = (
     },
     indexes: [
       {
-        name: `${joinTableName}_fk`,
+        name: identifiers.create(joinTableName, 'fk'),
         columns: [joinColumnName],
       },
       {
-        name: `${joinTableName}_order_index`,
+        name: identifiers.create(joinTableName, 'order_index'),
         columns: ['order'],
       },
       {
-        name: `${joinTableName}_id_column_index`,
+        name: identifiers.create(joinTableName, 'id_column_index'),
         columns: [idColumnName],
       },
     ],
     foreignKeys: [
       {
-        name: `${joinTableName}_fk`,
+        name: identifiers.create(joinTableName, 'fk'),
         columns: [joinColumnName],
         referencedColumns: ['id'],
         referencedTable: meta.tableName,
@@ -455,29 +460,29 @@ const createJoinTable = (
     },
     indexes: [
       {
-        name: `${joinTableName}_fk`,
+        name: identifiers.create(joinTableName, 'fk'),
         columns: [joinColumnName],
       },
       {
-        name: `${joinTableName}_inv_fk`,
+        name: identifiers.create(joinTableName, 'inv_fk'),
         columns: [inverseJoinColumnName],
       },
       {
-        name: `${joinTableName}_unique`,
+        name: identifiers.create(joinTableName, 'unique'),
         columns: [joinColumnName, inverseJoinColumnName],
         type: 'unique',
       },
     ],
     foreignKeys: [
       {
-        name: `${joinTableName}_fk`,
+        name: identifiers.create(joinTableName, 'fk'),
         columns: [joinColumnName],
         referencedColumns: ['id'],
         referencedTable: meta.tableName,
         onDelete: 'CASCADE',
       },
       {
-        name: `${joinTableName}_inv_fk`,
+        name: identifiers.create(joinTableName, 'inv_fk'),
         columns: [inverseJoinColumnName],
         referencedColumns: ['id'],
         referencedTable: targetMeta.tableName,
@@ -511,7 +516,7 @@ const createJoinTable = (
       },
     };
     metadataSchema.indexes.push({
-      name: `${joinTableName}_order_fk`,
+      name: identifiers.create(joinTableName, 'order_fk'),
       columns: [orderColumnName],
     });
     joinTable.orderColumnName = orderColumnName;
@@ -529,7 +534,7 @@ const createJoinTable = (
     };
 
     metadataSchema.indexes.push({
-      name: `${joinTableName}_order_inv_fk`,
+      name: identifiers.create(joinTableName, 'order_inv_fk'),
       columns: [inverseOrderColumnName],
     });
 
