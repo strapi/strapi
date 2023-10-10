@@ -49,6 +49,7 @@ const createCronService = () => {
           jobsSpecs.splice(index, 1);
           return true;
         }
+        return false;
       });
       matchingJobsSpecs.forEach(({ job }) => job.cancel());
       return this;
