@@ -472,7 +472,7 @@ describe('BlocksEditor toolbar', () => {
     ]);
 
     // Select the item in the middle of the list
-    Transforms.select(baseEditor, {
+    await select({
       anchor: { path: [0, 1, 0], offset: 0 },
       focus: { path: [0, 1, 0], offset: 0 },
     });
