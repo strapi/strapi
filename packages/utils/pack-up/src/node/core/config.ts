@@ -89,6 +89,14 @@ interface ConfigOptions {
    */
   externals?: string[];
   minify?: boolean;
+  /**
+   * @alpha
+   *
+   * @description Instead of creating as few chunks as possible, this mode
+   * will create separate chunks for all modules using the original module
+   * names as file names
+   */
+  preserveModules?: boolean;
   sourcemap?: boolean;
   runtime?: Runtime;
 }
