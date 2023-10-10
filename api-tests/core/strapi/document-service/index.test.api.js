@@ -108,4 +108,17 @@ describe('Document Service - Find One', () => {
 
     expect(document).toMatchObject({ name: 'Updated Document' });
   });
+
+  it('delete a document', async () => {
+    const documentDb = await findDBDocument({ name: '3 Document A' });
+
+    const document = await strapi.documentService.delete(
+      'api::document.document',
+      documentDb.documentId
+    );
+
+    const deletedDocumentDb = await findDBDocument({ name: '3 Document A' });
+
+    expect(deletedDocumentDb).toBeNull();
+  });
 });
