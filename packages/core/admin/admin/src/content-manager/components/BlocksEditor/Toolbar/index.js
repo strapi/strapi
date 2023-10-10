@@ -457,6 +457,16 @@ const toggleList = (editor, isActive, format) => {
       match: (node) => node.type !== 'text', // makes sure we get a block node, not an inline node
     });
 
+    // Remove the last node inserted
+    Transforms.removeNodes(editor, {
+      void: true,
+      hanging: true,
+      at: {
+        anchor: { path: lastNodePath, offset: 0 },
+        focus: { path: lastNodePath, offset: 0 },
+      },
+    });
+
     // Change the type of the current selection
     Transforms.insertNodes(
       editor,
@@ -469,16 +479,6 @@ const toggleList = (editor, isActive, format) => {
         select: true,
       }
     );
-
-    // Remove the last node inserted
-    Transforms.removeNodes(editor, {
-      void: true,
-      hanging: true,
-      at: {
-        anchor: { path: lastNodePath, offset: 0 },
-        focus: { path: lastNodePath, offset: 0 },
-      },
-    });
 
     // If the selection is now a list item, wrap it inside a list
     if (!isActive) {
