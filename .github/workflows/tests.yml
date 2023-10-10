@@ -164,8 +164,8 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright@1.38.1 install --with-deps
 
-      - name: Run build
-        run: yarn nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
 
       - name: Run E2E tests
         run: yarn test:e2e --setup --concurrency=1 --project=${{ matrix.project }}
