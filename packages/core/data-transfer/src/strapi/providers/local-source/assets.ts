@@ -1,10 +1,15 @@
 import { join } from 'path';
 import https from 'https';
+import http from 'http';
 import { Duplex, PassThrough, Readable } from 'stream';
 import { stat, createReadStream, ReadStream } from 'fs-extra';
 import type { LoadedStrapi } from '@strapi/types';
 
 import type { IAsset } from '../../../../types';
+
+const protocolForPath = (filepath: string) => {
+  return filepath?.startsWith('https') ? https : http;
+};
 
 function getFileStream(filepath: string, isLocal = false): PassThrough | ReadStream {
   if (isLocal) {
@@ -13,7 +18,7 @@ function getFileStream(filepath: string, isLocal = false): PassThrough | ReadStr
 
   const readableStream = new PassThrough();
 
-  https
+  protocolForPath(filepath)
     .get(filepath, (res) => {
       if (res.statusCode !== 200) {
         readableStream.emit(
@@ -37,7 +42,7 @@ function getFileStats(filepath: string, isLocal = false): Promise<{ size: number
     return stat(filepath);
   }
   return new Promise((resolve, reject) => {
-    https
+    protocolForPath(filepath)
       .get(filepath, (res) => {
         if (res.statusCode !== 200) {
           reject(new Error(`Request failed with status code ${res.statusCode}`));

@@ -8,7 +8,9 @@ import { hasPermissions } from '../utils/hasPermissions';
 
 import { LoadingIndicatorPage } from './LoadingIndicatorPage';
 
-import type { Permission } from '@strapi/permissions';
+import type { domain } from '@strapi/permissions';
+
+type Permission = domain.permission.Permission;
 
 export interface CheckPagePermissionsProps {
   children: React.ReactNode;

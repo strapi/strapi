@@ -10,14 +10,10 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import AuthenticatedApp from '..';
 import packageJSON from '../../../../../package.json';
 import { ConfigurationsContext } from '../../../contexts';
-import Theme from '../../Theme';
-import ThemeToggleProvider from '../../ThemeToggleProvider';
-import {
-  fetchAppInfo,
-  fetchCurrentUserPermissions,
-  fetchStrapiLatestRelease,
-  fetchUserRoles,
-} from '../utils/api';
+import { Theme } from '../../Theme';
+import { ThemeToggleProvider } from '../../ThemeToggleProvider';
+import { fetchAppInfo, fetchCurrentUserPermissions, fetchUserRoles } from '../utils/api';
+import { fetchStrapiLatestRelease } from '../utils/fetchStrapiLatestRelease';
 
 const strapiVersion = packageJSON.version;
 
@@ -35,10 +31,13 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 
 jest.mock('../utils/api', () => ({
-  fetchStrapiLatestRelease: jest.fn(),
   fetchAppInfo: jest.fn(),
   fetchCurrentUserPermissions: jest.fn(),
   fetchUserRoles: jest.fn(),
+}));
+
+jest.mock('../utils/fetchStrapiLatestRelease', () => ({
+  fetchStrapiLatestRelease: jest.fn(),
 }));
 
 jest.mock('../../PluginsInitializer', () => () => {

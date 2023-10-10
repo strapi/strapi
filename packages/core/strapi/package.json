@@ -68,7 +68,7 @@
   "types": "./dist/index.d.ts",
   "bin": "./bin/strapi.js",
   "files": [
-    "./dist",
+    "./dist/**/!(*.d.ts.map)",
     "./bin",
     "./scripts",
     "./resources",
@@ -77,14 +77,14 @@
   "scripts": {
     "build": "run -T tsc -p tsconfig.build.json && run copy-files",
     "build:ts": "run build",
-    "watch": "run -T tsc -p tsconfig.build.json -w --preserveWatchOutput",
     "clean": "run -T rimraf ./dist",
-    "prepublishOnly": "yarn clean && yarn build",
-    "postinstall": "node ./scripts/postinstall.js",
-    "test:unit": "run -T jest",
     "copy-files": "copyfiles -u 1 -a 'src/**/*.html' 'src/**/*.png'  dist",
+    "postinstall": "node ./scripts/postinstall.js",
+    "lint": "run -T eslint .",
+    "prepublishOnly": "yarn clean && yarn build",
+    "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "lint": "run -T eslint ."
+    "watch": "run -T tsc -p tsconfig.build.json -w --preserveWatchOutput"
   },
   "dependencies": {
     "@koa/cors": "3.4.3",
@@ -150,6 +150,7 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
+    "@strapi/ts-zen": "^0.2.0",
     "@types/bcryptjs": "2.4.3",
     "@types/configstore": "5.0.1",
     "@types/delegates": "1.0.0",
@@ -161,12 +162,11 @@
     "@types/koa__router": "12.0.0",
     "@types/lodash": "^4.14.191",
     "@types/mime-types": "2.1.1",
-    "@types/node": "18.11.9",
+    "@types/node": "18.18.4",
     "@types/node-schedule": "2.1.0",
     "@types/statuses": "2.0.1",
     "eslint-config-custom": "4.14.3",
     "supertest": "6.3.3",
-    "ts-zen": "https://github.com/strapi/ts-zen#66e02232f5997674cc7032ea3ee59d9864863732",
     "tsconfig": "4.14.3",
     "typescript": "5.2.2"
   },

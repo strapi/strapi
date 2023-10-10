@@ -6303,26 +6303,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-node-resolve@npm:15.2.0":
-  version: 15.2.0
-  resolution: "@rollup/plugin-node-resolve@npm:15.2.0"
-  dependencies:
-    "@rollup/pluginutils": ^5.0.1
-    "@types/resolve": 1.20.2
-    deepmerge: ^4.2.2
-    is-builtin-module: ^3.2.1
-    is-module: ^1.0.0
-    resolve: ^1.22.1
-  peerDependencies:
-    rollup: ^2.78.0||^3.0.0
-  peerDependenciesMeta:
-    rollup:
-      optional: true
-  checksum: 92abfd7f1f5df08d71e4b8dd433d31cf1d62f68891ae3dd5e03a8a7f8d42d9c4433c14a25ead04204fea8235c663a3bbb66ba5528103a6dab66bd8c124f85a0d
-  languageName: node
-  linkType: hard
-
-"@rollup/pluginutils@npm:^5.0.1, @rollup/pluginutils@npm:^5.0.2":
+"@rollup/pluginutils@npm:^5.0.2":
   version: 5.0.2
   resolution: "@rollup/pluginutils@npm:5.0.2"
   dependencies:
@@ -7418,6 +7399,7 @@ __metadata:
   resolution: "@strapi/admin-test-utils@workspace:packages/admin-test-utils"
   dependencies:
     "@juggle/resize-observer": 3.4.0
+    "@strapi/pack-up": "workspace:*"
     "@testing-library/jest-dom": 5.16.5
     eslint-config-custom: 4.14.3
     jest-styled-components: 7.1.1
@@ -7442,6 +7424,7 @@ __metadata:
     "@strapi/icons": 1.12.0
     "@strapi/permissions": 4.14.3
     "@strapi/provider-audit-logs-local": 4.14.3
+    "@strapi/types": "workspace:*"
     "@strapi/typescript-utils": 4.14.3
     "@strapi/utils": 4.14.3
     "@testing-library/dom": 9.2.0
@@ -7549,7 +7532,7 @@ __metadata:
     "@types/jest": 29.5.2
     "@types/koa": 2.13.4
     "@types/lodash": ^4.14.191
-    "@types/node": 18.11.9
+    "@types/node": 18.18.4
     "@types/semver": 7.5.0
     "@types/stream-chain": 2.0.1
     "@types/stream-json": 1.7.3
@@ -7688,7 +7671,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/helper-plugin@workspace:packages/core/helper-plugin"
   dependencies:
-    "@rollup/plugin-node-resolve": 15.2.0
     "@storybook/addon-actions": 7.4.0
     "@storybook/addon-essentials": 7.4.0
     "@storybook/addon-links": 7.4.0
@@ -7698,6 +7680,7 @@ __metadata:
     "@strapi/admin-test-utils": 4.14.3
     "@strapi/design-system": 1.12.0
     "@strapi/icons": 1.12.0
+    "@strapi/pack-up": "workspace:*"
     "@strapi/types": 4.14.3
     "@testing-library/react": 14.0.0
     "@testing-library/user-event": 14.4.3
@@ -7707,13 +7690,10 @@ __metadata:
     "@types/react-router-dom": 5.3.3
     "@types/styled-components": 5.1.26
     axios: 1.5.0
-    browserslist-to-esbuild: 1.2.0
     cross-env: ^7.0.3
     date-fns: 2.30.0
-    esbuild-loader: ^2.21.0
     eslint-config-custom: 4.14.3
     eslint-plugin-storybook: 0.6.14
-    fork-ts-checker-webpack-plugin: 8.0.0
     formik: 2.4.0
     immer: 9.0.19
     lodash: 4.17.21
@@ -7732,8 +7712,6 @@ __metadata:
     styled-components: 5.3.3
     typescript: 5.2.2
     vite: 4.4.9
-    webpack: ^5.88.1
-    webpack-cli: ^5.1.0
     yup: 0.32.9
   peerDependencies:
     "@strapi/design-system": 1.12.0
@@ -7784,7 +7762,7 @@ __metadata:
     "@types/git-url-parse": 9.0.1
     "@types/ini": 1.3.31
     "@types/prompts": 2.4.4
-    "@vitejs/plugin-react": 4.0.4
+    "@vitejs/plugin-react": 4.1.0
     boxen: 5.1.2
     browserslist-to-esbuild: 1.2.0
     chalk: 4.1.2
@@ -7817,6 +7795,7 @@ __metadata:
   resolution: "@strapi/permissions@workspace:packages/core/permissions"
   dependencies:
     "@casl/ability": 6.5.0
+    "@strapi/pack-up": "workspace:*"
     "@strapi/utils": 4.14.3
     eslint-config-custom: 4.14.3
     lodash: 4.17.21
@@ -8156,6 +8135,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-audit-logs-local@workspace:packages/providers/audit-logs-local"
   dependencies:
+    "@strapi/pack-up": "workspace:*"
     "@strapi/types": 4.14.3
     eslint-config-custom: 4.14.3
     tsconfig: 4.14.3
@@ -8166,6 +8146,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-amazon-ses@workspace:packages/providers/email-amazon-ses"
   dependencies:
+    "@strapi/pack-up": "workspace:*"
     "@strapi/utils": 4.14.3
     eslint-config-custom: 4.14.3
     node-ses: ^3.0.3
@@ -8177,6 +8158,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-mailgun@workspace:packages/providers/email-mailgun"
   dependencies:
+    "@strapi/pack-up": "workspace:*"
     "@strapi/utils": 4.14.3
     eslint-config-custom: 4.14.3
     form-data: ^4.0.0
@@ -8189,6 +8171,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-nodemailer@workspace:packages/providers/email-nodemailer"
   dependencies:
+    "@strapi/pack-up": "workspace:*"
     "@types/nodemailer": 6.4.7
     eslint-config-custom: 4.14.3
     lodash: 4.17.21
@@ -8202,6 +8185,7 @@ __metadata:
   resolution: "@strapi/provider-email-sendgrid@workspace:packages/providers/email-sendgrid"
   dependencies:
     "@sendgrid/mail": 7.7.0
+    "@strapi/pack-up": "workspace:*"
     "@strapi/utils": 4.14.3
     eslint-config-custom: 4.14.3
     tsconfig: 4.14.3
@@ -8212,6 +8196,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-sendmail@workspace:packages/providers/email-sendmail"
   dependencies:
+    "@strapi/pack-up": "workspace:*"
     "@strapi/utils": 4.14.3
     "@types/sendmail": 1.4.4
     eslint-config-custom: 4.14.3
@@ -8224,8 +8209,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-upload-aws-s3@workspace:packages/providers/upload-aws-s3"
   dependencies:
+    "@strapi/pack-up": "workspace:*"
     "@types/jest": 29.5.2
-    aws-sdk: 2.1437.0
+    aws-sdk: 2.1472.0
     eslint-config-custom: 4.14.3
     lodash: 4.17.21
     tsconfig: 4.14.3
@@ -8236,6 +8222,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-upload-cloudinary@workspace:packages/providers/upload-cloudinary"
   dependencies:
+    "@strapi/pack-up": "workspace:*"
     "@strapi/utils": 4.14.3
     cloudinary: ^1.41.0
     eslint-config-custom: 4.14.3
@@ -8248,6 +8235,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-upload-local@workspace:packages/providers/upload-local"
   dependencies:
+    "@strapi/pack-up": "workspace:*"
     "@strapi/utils": 4.14.3
     "@types/jest": 29.5.2
     eslint-config-custom: 4.14.3
@@ -8273,6 +8261,7 @@ __metadata:
     "@strapi/plugin-content-type-builder": 4.14.3
     "@strapi/plugin-email": 4.14.3
     "@strapi/plugin-upload": 4.14.3
+    "@strapi/ts-zen": ^0.2.0
     "@strapi/types": 4.14.3
     "@strapi/typescript-utils": 4.14.3
     "@strapi/utils": 4.14.3
@@ -8287,7 +8276,7 @@ __metadata:
     "@types/koa__router": 12.0.0
     "@types/lodash": ^4.14.191
     "@types/mime-types": 2.1.1
-    "@types/node": 18.11.9
+    "@types/node": 18.18.4
     "@types/node-schedule": 2.1.0
     "@types/statuses": 2.0.1
     "@vitejs/plugin-react": 4.1.0
@@ -8334,7 +8323,6 @@ __metadata:
     semver: 7.5.4
     statuses: 2.0.1
     supertest: 6.3.3
-    ts-zen: "https://github.com/strapi/ts-zen#66e02232f5997674cc7032ea3ee59d9864863732"
     tsconfig: 4.14.3
     typescript: 5.2.2
     vite: 4.4.9
@@ -8344,7 +8332,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/types@4.14.3, @strapi/types@workspace:packages/core/types":
+"@strapi/ts-zen@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "@strapi/ts-zen@npm:0.2.0"
+  peerDependencies:
+    jest: ^29.6.x
+    typescript: ^5.1.x
+  checksum: aecc7360eec9b86c079e406b643f10329d7b4ca64c74c77959c9511de59487d24e564bc3ca946d2addb628371aa828ed64e4242470d97f059f8b281a79baf611
+  languageName: node
+  linkType: hard
+
+"@strapi/types@4.14.3, @strapi/types@workspace:*, @strapi/types@workspace:packages/core/types":
   version: 0.0.0-use.local
   resolution: "@strapi/types@workspace:packages/core/types"
   dependencies:
@@ -8353,6 +8351,7 @@ __metadata:
     "@strapi/database": 4.14.3
     "@strapi/logger": 4.14.3
     "@strapi/permissions": 4.14.3
+    "@strapi/ts-zen": ^0.2.0
     "@strapi/utils": 4.14.3
     "@types/jest": 29.5.2
     "@types/koa": 2.13.4
@@ -8364,7 +8363,6 @@ __metadata:
     koa: 2.13.4
     node-fetch: 2.7.0
     node-schedule: 2.1.0
-    ts-zen: "https://github.com/strapi/ts-zen#66e02232f5997674cc7032ea3ee59d9864863732"
     tsconfig: 4.14.3
     typescript: 5.2.2
   languageName: unknown
@@ -8420,8 +8418,9 @@ __metadata:
   resolution: "@strapi/utils@workspace:packages/core/utils"
   dependencies:
     "@sindresorhus/slugify": 1.1.0
+    "@strapi/pack-up": "workspace:*"
     "@types/koa": 2.13.4
-    "@types/node": 18.11.9
+    "@types/node": 18.18.4
     date-fns: 2.30.0
     eslint-config-custom: 4.14.3
     http-errors: 1.8.1
@@ -9535,10 +9534,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:18.11.9":
-  version: 18.11.9
-  resolution: "@types/node@npm:18.11.9"
-  checksum: cc0aae109e9b7adefc32eecb838d6fad931663bb06484b5e9cbbbf74865c721b03d16fd8d74ad90e31dbe093d956a7c2c306ba5429ba0c00f3f7505103d7a496
+"@types/node@npm:18.18.4":
+  version: 18.18.4
+  resolution: "@types/node@npm:18.18.4"
+  checksum: 4901e91c4cc479bb58acbcd79236a97a0ad6db4a53cb1f4ba4cf32af15324c61b16faa6e31c1b09bf538a20feb5f5274239157ce5237f5741db0b9ab71e69c52
   languageName: node
   linkType: hard
 
@@ -9722,13 +9721,6 @@ __metadata:
     "@types/scheduler": "*"
     csstype: ^3.0.2
   checksum: ce07dfddcd2bc291c169a53677a754b5ecb754e6552b312f232143c56e7b95f7a851727a98a4469014190f29ace7d7f81c37a44b352d584f605c04f2899dec95
-  languageName: node
-  linkType: hard
-
-"@types/resolve@npm:1.20.2":
-  version: 1.20.2
-  resolution: "@types/resolve@npm:1.20.2"
-  checksum: 61c2cad2499ffc8eab36e3b773945d337d848d3ac6b7b0a87c805ba814bc838ef2f262fc0f109bfd8d2e0898ff8bd80ad1025f9ff64f1f71d3d4294c9f14e5f6
   languageName: node
   linkType: hard
 
@@ -10341,20 +10333,6 @@ __metadata:
   bin:
     ncc: dist/ncc/cli.js
   checksum: 859af1b1dcca540ccf564f422a906c40ce5e97762e6cad11aabe319ae212bd7bce2d2c7f2caffcf3aee0aa5d4bf16b6e7a53a4577dd6fd4bc24962c2246fe110
-  languageName: node
-  linkType: hard
-
-"@vitejs/plugin-react@npm:4.0.4":
-  version: 4.0.4
-  resolution: "@vitejs/plugin-react@npm:4.0.4"
-  dependencies:
-    "@babel/core": ^7.22.9
-    "@babel/plugin-transform-react-jsx-self": ^7.22.5
-    "@babel/plugin-transform-react-jsx-source": ^7.22.5
-    react-refresh: ^0.14.0
-  peerDependencies:
-    vite: ^4.2.0
-  checksum: ec25400dc7c5fce914122d1f57de0fbaff9216addb8cd6187308ad2c7a3d3b73ea3a6f2dd0a8c7ec5e90e56b37046fe90d3e0ec285a9446e73695cb174377f84
   languageName: node
   linkType: hard
 
@@ -11709,9 +11687,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"aws-sdk@npm:2.1437.0":
-  version: 2.1437.0
-  resolution: "aws-sdk@npm:2.1437.0"
+"aws-sdk@npm:2.1472.0":
+  version: 2.1472.0
+  resolution: "aws-sdk@npm:2.1472.0"
   dependencies:
     buffer: 4.9.2
     events: 1.1.1
@@ -11723,7 +11701,7 @@ __metadata:
     util: ^0.12.4
     uuid: 8.0.0
     xml2js: 0.5.0
-  checksum: acfd25e94e321b9ebfe98e1155ab32ae378a8ae34070a725ac6b77ae7ba41b28beffe13d3937e2ea695eba77b486f81cd96909fc564818c460633599cc3a8149
+  checksum: 8bce22c556a5eaf351cd0711bb7016fbc78d94869417479d2323a98567bc0a0eb6a034931c1d43230f1a9f26545507dbb1d024a374fbabb6a2d0ae53823bf0bb
   languageName: node
   linkType: hard
 
@@ -12480,13 +12458,6 @@ __metadata:
     nodemailer-fetch: 1.6.0
     nodemailer-shared: 1.1.0
   checksum: 95ff27f2517c1a9c45b8bef5e2397d4fb5d63beff25cdc76ef5162fb262787dc4ffdb10149cf0ac1f56ae28e3a08355c5470b6b641c4ef10a92dae3e18fa26b1
-  languageName: node
-  linkType: hard
-
-"builtin-modules@npm:^3.3.0":
-  version: 3.3.0
-  resolution: "builtin-modules@npm:3.3.0"
-  checksum: db021755d7ed8be048f25668fe2117620861ef6703ea2c65ed2779c9e3636d5c3b82325bd912244293959ff3ae303afa3471f6a15bf5060c103e4cc3a839749d
   languageName: node
   linkType: hard
 
@@ -19584,15 +19555,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-builtin-module@npm:^3.2.1":
-  version: 3.2.1
-  resolution: "is-builtin-module@npm:3.2.1"
-  dependencies:
-    builtin-modules: ^3.3.0
-  checksum: e8f0ffc19a98240bda9c7ada84d846486365af88d14616e737d280d378695c8c448a621dcafc8332dbf0fcd0a17b0763b845400709963fa9151ddffece90ae88
-  languageName: node
-  linkType: hard
-
 "is-callable@npm:^1.1.3, is-callable@npm:^1.1.4, is-callable@npm:^1.2.4":
   version: 1.2.4
   resolution: "is-callable@npm:1.2.4"
@@ -19867,13 +19829,6 @@ __metadata:
   version: 2.0.2
   resolution: "is-map@npm:2.0.2"
   checksum: ace3d0ecd667bbdefdb1852de601268f67f2db725624b1958f279316e13fecb8fa7df91fd60f690d7417b4ec180712f5a7ee967008e27c65cfd475cc84337728
-  languageName: node
-  linkType: hard
-
-"is-module@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "is-module@npm:1.0.0"
-  checksum: 8cd5390730c7976fb4e8546dd0b38865ee6f7bacfa08dfbb2cc07219606755f0b01709d9361e01f13009bbbd8099fa2927a8ed665118a6105d66e40f1b838c3f
   languageName: node
   linkType: hard
 
@@ -30657,16 +30612,6 @@ __metadata:
   bin:
     ts-jest: cli.js
   checksum: 535dc42ad523cbe1e387701fb2e448518419b515c082f09b25411f0b3dd0b854cf3e8141c316d6f4b99883aeb4a4f94159cbb1edfb06d7f77ea6229fadb2e1bf
-  languageName: node
-  linkType: hard
-
-"ts-zen@https://github.com/strapi/ts-zen#66e02232f5997674cc7032ea3ee59d9864863732":
-  version: 0.1.7
-  resolution: "ts-zen@https://github.com/strapi/ts-zen.git#commit=66e02232f5997674cc7032ea3ee59d9864863732"
-  peerDependencies:
-    jest: ^29.6.x
-    typescript: ^5.1.x
-  checksum: 22c034cc8a1cd1f7c19983ff15fabca4983aa32df30a5025d5cc11f8cd4df65d5406ea9d9c5c3668d6c7e35f13dd5cc6a59f0340e1ccc6a83d3dc9646e3643c7
   languageName: node
   linkType: hard
 

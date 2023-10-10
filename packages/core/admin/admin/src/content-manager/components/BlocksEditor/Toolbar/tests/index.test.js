@@ -1,14 +1,14 @@
 import * as React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
 import { createEditor, Transforms } from 'slate';
-import { Slate, withReact } from 'slate-react';
+import { Slate, withReact, ReactEditor } from 'slate-react';
 
-import { BlocksToolbar, BlocksDropdown } from '..';
+import { BlocksToolbar } from '..';
 
 const title = 'dialog component';
 
@@ -21,18 +21,36 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-const initialValue = [
+const defaultInitialValue = [
   {
     type: 'paragraph',
     children: [{ type: 'text', text: 'A line of text in a paragraph.' }],
   },
 ];
 
+const mixedInitialValue = [
+  {
+    type: 'heading',
+    level: 1,
+    children: [{ type: 'text', text: 'A heading one' }],
+  },
+  {
+    type: 'paragraph',
+    children: [{ type: 'text', text: 'A line of text in a paragraph.' }],
+  },
+  {
+    type: 'heading',
+    level: 2,
+    children: [{ type: 'text', text: 'A heading two' }],
+  },
+];
+
 const user = userEvent.setup();
 
-const baseEditor = createEditor();
+// Create editor outside of the component to have direct access to it from the tests
+let baseEditor;
 
-const Wrapper = ({ children }) => {
+const Wrapper = ({ children, initialValue }) => {
   const [editor] = React.useState(() => withReact(baseEditor));
 
   return (
@@ -48,16 +66,41 @@ const Wrapper = ({ children }) => {
 
 Wrapper.propTypes = {
   children: PropTypes.node.isRequired,
+  initialValue: PropTypes.array.isRequired,
 };
 
-const setup = () =>
-  render(<BlocksToolbar />, {
-    wrapper: Wrapper,
+/**
+ * Selects the given location without triggering warnings
+ * act is required because we're making an update outside of React that React needs to sync with
+ * And it only works if act is awaited
+ * @param {import('slate').Location} selection
+ */
+const select = async (location) => {
+  await act(async () => Transforms.select(baseEditor, location));
+};
+
+/**
+ * Render the toolbar inside the required context providers
+ * @param {import('slate').Descendant[]} data
+ */
+const setup = (data = defaultInitialValue) => {
+  // Create a fresh instance of a Slate editor
+  // so that we have no side effects due to the previous selection or children
+  baseEditor = createEditor();
+
+  render(<BlocksToolbar disabled={false} />, {
+    wrapper: ({ children }) => <Wrapper initialValue={data}>{children}</Wrapper>,
   });
+};
 
 describe('BlocksEditor toolbar', () => {
   beforeEach(() => {
-    baseEditor.children = initialValue;
+    /**
+     * TODO: Find a way to use the actual implementation
+     * Currently the editor throws an error as if the editor argument is missing:
+     * Cannot resolve a DOM node from Slate node:
+     */
+    ReactEditor.focus = jest.fn();
   });
 
   it('should render the toolbar', () => {
@@ -66,17 +109,33 @@ describe('BlocksEditor toolbar', () => {
     expect(screen.getByRole('toolbar')).toBeInTheDocument();
   });
 
-  it('toggles the modifier on a selection', async () => {
+  it('checks if a mixed selected content shows only one option selected in the dropdown when you select only part of the content', async () => {
+    setup(mixedInitialValue);
+
+    // Set the selection to cover the second and third row
+    await select({
+      anchor: { path: [1, 0], offset: 0 },
+      focus: { path: [2, 0], offset: 0 },
+    });
+
+    // The dropdown should show only one option selected which is the block content in the second row
+    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+    expect(within(blocksDropdown).getByText(/text/i)).toBeInTheDocument();
+    expect(within(blocksDropdown).queryByText(/heading/i)).not.toBeInTheDocument();
+  });
+
+  it('toggles the modifiers on a selection', async () => {
     setup();
 
-    const boldButton = screen.getByLabelText(/bold/i);
-    const italicButton = screen.getByLabelText(/italic/i);
-
     // Simulate a selection of part of the editor
-    Transforms.select(baseEditor, {
+    await select({
       anchor: { path: [0, 0], offset: 2 },
       focus: { path: [0, 0], offset: 14 },
     });
+
+    // Get modifier buttons
+    const boldButton = screen.getByLabelText(/bold/i);
+    const italicButton = screen.getByLabelText(/italic/i);
 
     // We make that selection bold and italic
     await user.click(boldButton);
@@ -114,27 +173,32 @@ describe('BlocksEditor toolbar', () => {
     await user.click(italicButton);
 
     // The selection should be back a single node
-    expect(baseEditor.children).toEqual(initialValue);
+    expect(baseEditor.children).toEqual(defaultInitialValue);
 
     // The bold and italic buttons should have the inactive state
     expect(boldButton).toHaveAttribute('data-state', 'off');
     expect(italicButton).toHaveAttribute('data-state', 'off');
+    expect(ReactEditor.focus).toHaveBeenCalledTimes(4);
   });
 
   it('transforms the selection to a list and toggles the format', async () => {
     setup();
 
+    await select({
+      anchor: { path: [0, 0], offset: 2 },
+      focus: { path: [0, 0], offset: 2 },
+    });
+
+    // Get modifier buttons
     const unorderedListButton = screen.getByLabelText(/bulleted list/i);
     const orderedListButton = screen.getByLabelText(/^numbered list/i);
 
-    Transforms.setSelection(baseEditor, {
-      anchor: { path: [0, 0], offset: 2 },
-    });
-
+    // Convert the selection to an unordered list
     await user.click(unorderedListButton);
     expect(unorderedListButton).toHaveAttribute('data-state', 'on');
     expect(orderedListButton).toHaveAttribute('data-state', 'off');
 
+    // Convert the selection to an ordered list
     await user.click(orderedListButton);
     expect(unorderedListButton).toHaveAttribute('data-state', 'off');
     expect(orderedListButton).toHaveAttribute('data-state', 'on');
@@ -156,18 +220,21 @@ describe('BlocksEditor toolbar', () => {
         ],
       },
     ]);
+
+    expect(ReactEditor.focus).toHaveBeenCalledTimes(2);
   });
-  it('transforms the selection to a heading when selected and trasforms it back to text when selected again', async () => {
+
+  it('transforms the selection to a heading and transforms it back to text when selected again', async () => {
     setup();
 
-    const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
-
-    Transforms.setSelection(baseEditor, {
+    await select({
       anchor: { path: [0, 0], offset: 2 },
+      focus: { path: [0, 0], offset: 2 },
     });
 
-    await user.click(headingsDropdown);
-
+    // Convert selection to a heading
+    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+    await user.click(blocksDropdown);
     await user.click(screen.getByRole('option', { name: 'Heading 1' }));
 
     expect(baseEditor.children).toEqual([
@@ -183,8 +250,8 @@ describe('BlocksEditor toolbar', () => {
       },
     ]);
 
-    await user.click(headingsDropdown);
-
+    // Convert selection to a paragraph
+    await user.click(blocksDropdown);
     await user.click(screen.getByRole('option', { name: 'Text' }));
 
     expect(baseEditor.children).toEqual([
@@ -198,19 +265,75 @@ describe('BlocksEditor toolbar', () => {
         ],
       },
     ]);
+
+    expect(ReactEditor.focus).toHaveBeenCalledTimes(2);
   });
 
-  it('transforms the selection to a quote when selected and trasforms it back to text when selected again', async () => {
+  it('transforms the selection to an ordered list and to an unordered list', async () => {
     setup();
 
-    const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
-
-    Transforms.setSelection(baseEditor, {
-      anchor: { path: [0, 0], offset: 0 },
+    await select({
+      anchor: { path: [0, 0], offset: 2 },
+      focus: { path: [0, 0], offset: 2 },
     });
 
-    await user.click(headingsDropdown);
+    // Convert selection to an ordered list
+    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+    await user.click(blocksDropdown);
+    await user.click(screen.getByRole('option', { name: 'Numbered list' }));
 
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'A line of text in a paragraph.',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    // Convert selection to an unordered list
+    await user.click(blocksDropdown);
+    await user.click(screen.getByRole('option', { name: 'Bulleted list' }));
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'A line of text in a paragraph.',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('transforms the selection to a quote when selected and transforms it back to text', async () => {
+    setup();
+
+    await select({
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
+    });
+
+    // Convert selection to a quote
+    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+    await user.click(blocksDropdown);
     await user.click(screen.getByRole('option', { name: 'Quote' }));
 
     expect(baseEditor.children).toEqual([
@@ -225,8 +348,8 @@ describe('BlocksEditor toolbar', () => {
       },
     ]);
 
-    await user.click(headingsDropdown);
-
+    // Convert selection to a paragraph
+    await user.click(blocksDropdown);
     await user.click(screen.getByRole('option', { name: 'Text' }));
 
     expect(baseEditor.children).toEqual([
@@ -240,63 +363,37 @@ describe('BlocksEditor toolbar', () => {
         ],
       },
     ]);
+
+    expect(ReactEditor.focus).toHaveBeenCalledTimes(2);
   });
 
-  it('when image is selected, it will set modal dialog open to select the images', async () => {
-    render(<BlocksDropdown />, {
-      wrapper: Wrapper,
-    });
+  it('opens the media library when image is selected', async () => {
+    setup();
 
-    Transforms.select(baseEditor, {
+    await select({
       anchor: { path: [0, 0], offset: 0 },
       focus: { path: [0, 0], offset: 0 },
     });
 
-    const headingsDropdown = screen.getByRole('combobox', { name: /Select a block/i });
-
-    await user.click(headingsDropdown);
-
+    // Convert selection to an image
+    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+    await user.click(blocksDropdown);
     await user.click(screen.getByRole('option', { name: 'Image' }));
 
     expect(screen.getByText(title)).toBeInTheDocument();
-
-    expect(baseEditor.children).toEqual([
-      {
-        type: 'image',
-        children: [
-          {
-            type: 'text',
-            text: 'A line of text in a paragraph.',
-          },
-        ],
-      },
-      // As its the last block in the editor new empty block is added below it
-      {
-        type: 'paragraph',
-        children: [
-          {
-            type: 'text',
-            text: '',
-          },
-        ],
-      },
-    ]);
   });
 
-  it('when code option is selected and if its the last block in the editor then new empty block should be inserted below it', async () => {
-    render(<BlocksDropdown />, {
-      wrapper: Wrapper,
-    });
+  it('creates an empty paragraph below when a code block is created at the end of the editor', async () => {
+    setup();
 
-    Transforms.select(baseEditor, {
+    await select({
       anchor: { path: [0, 0], offset: 0 },
       focus: { path: [0, 0], offset: 0 },
     });
 
-    const selectDropdown = screen.getByRole('combobox', { name: /Select a block/i });
-
-    await user.click(selectDropdown);
-
+    // Convert selection to a code block
+    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+    await user.click(blocksDropdown);
     await user.click(screen.getByRole('option', { name: 'Code' }));
 
     expect(baseEditor.children).toEqual([
@@ -319,5 +416,21 @@ describe('BlocksEditor toolbar', () => {
         ],
       },
     ]);
+
+    expect(ReactEditor.focus).toHaveBeenCalledTimes(1);
+  });
+
+  it('only shows one option selected in the dropdown when mixed content is selected', async () => {
+    setup(mixedInitialValue);
+
+    // Set the selection to cover the first and second
+    await select({
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [1, 0], offset: 0 },
+    });
+
+    // The dropdown should show only one option selected which is the block content in the first row
+    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+    expect(within(blocksDropdown).getByText(/heading 1/i)).toBeInTheDocument();
   });
 });

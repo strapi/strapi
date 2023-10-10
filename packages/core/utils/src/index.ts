@@ -1,12 +1,10 @@
-/* eslint-disable @typescript-eslint/no-namespace */
 /**
  * Export shared utilities
  */
-import type * as yupTypes from 'yup';
-import parseMultipartData from './parse-multipart';
+import { parseMultipartData } from './parse-multipart';
 import parseType from './parse-type';
 import * as policy from './policy';
-import templateConfiguration from './template-configuration';
+import { templateConfiguration } from './template-configuration';
 import { handleYupError, validateYupSchema, validateYupSchemaSync } from './validators';
 import * as yup from './yup';
 
@@ -47,24 +45,7 @@ import * as traverse from './traverse';
 import webhook from './webhook';
 import { isOperator, isOperatorOfType } from './operators';
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
-namespace utils {
-  export namespace yup {
-    export type BaseSchema = yupTypes.BaseSchema;
-    export type AnySchema = yupTypes.AnySchema;
-    export type NumberSchema = yupTypes.NumberSchema;
-    export type StringSchema = yupTypes.StringSchema;
-    export type BooleanSchema = yupTypes.BooleanSchema;
-    export type ObjectSchema = yupTypes.AnyObjectSchema;
-    export type ArraySchema<T extends yupTypes.AnySchema = any> = yupTypes.ArraySchema<T>;
-    export type LazySchema<T extends yupTypes.AnySchema = any> = ReturnType<
-      typeof yupTypes.lazy<T>
-    >;
-  }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-const utils = {
+export {
   parseMultipartData,
   parseType,
   policy,
@@ -115,5 +96,3 @@ const utils = {
   isOperator,
   isOperatorOfType,
 };
-
-export = utils;
