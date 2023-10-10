@@ -7399,6 +7399,7 @@ __metadata:
   resolution: "@strapi/admin-test-utils@workspace:packages/admin-test-utils"
   dependencies:
     "@juggle/resize-observer": 3.4.0
+    "@strapi/pack-up": "workspace:*"
     "@testing-library/jest-dom": 5.16.5
     eslint-config-custom: 4.14.3
     jest-styled-components: 7.1.1
@@ -7423,6 +7424,7 @@ __metadata:
     "@strapi/icons": 1.12.0
     "@strapi/permissions": 4.14.3
     "@strapi/provider-audit-logs-local": 4.14.3
+    "@strapi/types": "workspace:*"
     "@strapi/typescript-utils": 4.14.3
     "@strapi/utils": 4.14.3
     "@testing-library/dom": 9.2.0
@@ -8203,7 +8205,7 @@ __metadata:
   dependencies:
     "@strapi/pack-up": "workspace:*"
     "@types/jest": 29.5.2
-    aws-sdk: 2.1437.0
+    aws-sdk: 2.1472.0
     eslint-config-custom: 4.14.3
     lodash: 4.17.21
     tsconfig: 4.14.3
@@ -8253,6 +8255,7 @@ __metadata:
     "@strapi/plugin-content-type-builder": 4.14.3
     "@strapi/plugin-email": 4.14.3
     "@strapi/plugin-upload": 4.14.3
+    "@strapi/ts-zen": ^0.2.0
     "@strapi/types": 4.14.3
     "@strapi/typescript-utils": 4.14.3
     "@strapi/utils": 4.14.3
@@ -8314,7 +8317,6 @@ __metadata:
     semver: 7.5.4
     statuses: 2.0.1
     supertest: 6.3.3
-    ts-zen: "https://github.com/strapi/ts-zen#66e02232f5997674cc7032ea3ee59d9864863732"
     tsconfig: 4.14.3
     typescript: 5.2.2
     vite: 4.4.9
@@ -8324,7 +8326,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/types@4.14.3, @strapi/types@workspace:packages/core/types":
+"@strapi/ts-zen@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "@strapi/ts-zen@npm:0.2.0"
+  peerDependencies:
+    jest: ^29.6.x
+    typescript: ^5.1.x
+  checksum: aecc7360eec9b86c079e406b643f10329d7b4ca64c74c77959c9511de59487d24e564bc3ca946d2addb628371aa828ed64e4242470d97f059f8b281a79baf611
+  languageName: node
+  linkType: hard
+
+"@strapi/types@4.14.3, @strapi/types@workspace:*, @strapi/types@workspace:packages/core/types":
   version: 0.0.0-use.local
   resolution: "@strapi/types@workspace:packages/core/types"
   dependencies:
@@ -8333,6 +8345,7 @@ __metadata:
     "@strapi/database": 4.14.3
     "@strapi/logger": 4.14.3
     "@strapi/permissions": 4.14.3
+    "@strapi/ts-zen": ^0.2.0
     "@strapi/utils": 4.14.3
     "@types/jest": 29.5.2
     "@types/koa": 2.13.4
@@ -8344,7 +8357,6 @@ __metadata:
     koa: 2.13.4
     node-fetch: 2.7.0
     node-schedule: 2.1.0
-    ts-zen: "https://github.com/strapi/ts-zen#66e02232f5997674cc7032ea3ee59d9864863732"
     tsconfig: 4.14.3
     typescript: 5.2.2
   languageName: unknown
@@ -11669,9 +11681,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"aws-sdk@npm:2.1437.0":
-  version: 2.1437.0
-  resolution: "aws-sdk@npm:2.1437.0"
+"aws-sdk@npm:2.1472.0":
+  version: 2.1472.0
+  resolution: "aws-sdk@npm:2.1472.0"
   dependencies:
     buffer: 4.9.2
     events: 1.1.1
@@ -11683,7 +11695,7 @@ __metadata:
     util: ^0.12.4
     uuid: 8.0.0
     xml2js: 0.5.0
-  checksum: acfd25e94e321b9ebfe98e1155ab32ae378a8ae34070a725ac6b77ae7ba41b28beffe13d3937e2ea695eba77b486f81cd96909fc564818c460633599cc3a8149
+  checksum: 8bce22c556a5eaf351cd0711bb7016fbc78d94869417479d2323a98567bc0a0eb6a034931c1d43230f1a9f26545507dbb1d024a374fbabb6a2d0ae53823bf0bb
   languageName: node
   linkType: hard
 
@@ -30594,16 +30606,6 @@ __metadata:
   bin:
     ts-jest: cli.js
   checksum: 535dc42ad523cbe1e387701fb2e448518419b515c082f09b25411f0b3dd0b854cf3e8141c316d6f4b99883aeb4a4f94159cbb1edfb06d7f77ea6229fadb2e1bf
-  languageName: node
-  linkType: hard
-
-"ts-zen@https://github.com/strapi/ts-zen#66e02232f5997674cc7032ea3ee59d9864863732":
-  version: 0.1.7
-  resolution: "ts-zen@https://github.com/strapi/ts-zen.git#commit=66e02232f5997674cc7032ea3ee59d9864863732"
-  peerDependencies:
-    jest: ^29.6.x
-    typescript: ^5.1.x
-  checksum: 22c034cc8a1cd1f7c19983ff15fabca4983aa32df30a5025d5cc11f8cd4df65d5406ea9d9c5c3668d6c7e35f13dd5cc6a59f0340e1ccc6a83d3dc9646e3643c7
   languageName: node
   linkType: hard
 

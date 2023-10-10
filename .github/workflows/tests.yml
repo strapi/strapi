@@ -58,7 +58,7 @@ jobs:
 
   typescript:
     name: 'typescript'
-    needs: [changes, lint]
+    needs: [changes]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

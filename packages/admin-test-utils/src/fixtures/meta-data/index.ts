@@ -1,3 +1,3 @@
-import { address, Address } from './address';
+import { address, type Address } from './address';
 
 export { Address, address };
