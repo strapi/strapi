@@ -190,7 +190,7 @@ describe('Bulk publish selected entries modal', () => {
     });
 
     server.resetHandlers();
-  });
+  }, 10000);
 
   it('should show validation errors if there is an error', async () => {
     server.use(

@@ -41,19 +41,19 @@ window.console = {
   info(...args: any[]) {
     info(...args);
     if (process.env.CI) {
-      process.exit(1);
+      throw new Error(format(...args));
     }
   },
   log(...args: any[]) {
     log(...args);
     if (process.env.CI) {
-      process.exit(1);
+      throw new Error(format(...args));
     }
   },
   warn(...args: any[]) {
     warn(...args);
     if (process.env.CI) {
-      process.exit(1);
+      throw new Error(format(...args));
     }
   },
   error(...args: any[]) {
@@ -73,9 +73,8 @@ window.console = {
       // do nothing
     } else {
       error(...args);
-
       if (process.env.CI) {
-        process.exit(1);
+        throw new Error(message);
       }
     }
   },
@@ -95,8 +94,8 @@ window.strapi = {
   projectType: 'Community',
   telemetryDisabled: true,
   flags: {
-    nps: true
-  }
+    nps: true,
+  },
 };
 
 /* -------------------------------------------------------------------------------------------------
