@@ -46,7 +46,7 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "aws-sdk": "2.1437.0",
+    "aws-sdk": "2.1472.0",
     "lodash": "4.17.21"
   },
   "devDependencies": {

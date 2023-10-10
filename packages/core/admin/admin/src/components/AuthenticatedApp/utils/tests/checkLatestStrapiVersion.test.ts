@@ -1,4 +1,4 @@
-import checkLatestStrapiVersion from '../checkLatestStrapiVersion';
+import { checkLatestStrapiVersion } from '../checkLatestStrapiVersion';
 
 describe('ADMIN | utils | checkLatestStrapiVersion', () => {
   it('should return true if the current version is lower than the latest published version', () => {

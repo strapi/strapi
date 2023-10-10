@@ -3,7 +3,7 @@
  * useLicenseLimitNotification
  *
  */
-import { useEffect } from 'react';
+import * as React from 'react';
 
 import { useNotification } from '@strapi/helper-plugin';
 import isNil from 'lodash/isNil';
@@ -19,14 +19,14 @@ const BILLING_SELF_HOSTED_URL = 'https://strapi.io/billing/request-seats';
 
 export const useLicenseLimitNotification = () => {
   const { formatMessage } = useIntl();
-  let { license, isError, isLoading } = useLicenseLimits();
+  const { license, isError, isLoading } = useLicenseLimits();
   const toggleNotification = useNotification();
   const { pathname } = useLocation();
 
   const { enforcementUserCount, permittedSeats, licenseLimitStatus, isHostedOnStrapiCloud } =
     license;
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (isError || isLoading) {
       return;
     }
@@ -80,7 +80,7 @@ export const useLicenseLimitNotification = () => {
         },
         blockTransition: true,
         onClose() {
-          window.sessionStorage.setItem(`${STORAGE_KEY_PREFIX}-${pathname}`, true);
+          window.sessionStorage.setItem(`${STORAGE_KEY_PREFIX}-${pathname}`, 'true');
         },
       });
     }

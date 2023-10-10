@@ -376,7 +376,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
   async streamAsset(this: PushHandler, payload) {
     const assetsStream = this.streams?.assets;
 
-    // TODO: close the stream upong receiving an 'end' event instead
+    // TODO: close the stream upon receiving an 'end' event instead
     if (payload === null) {
       this.streams?.assets?.end();
       return;
@@ -485,7 +485,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
   ): Promise<Protocol.Server.Payload<Protocol.Server.EndMessage>> {
     await this.verifyAuth();
 
-    if (this.transferID !== params.transferID) {
+    if (this.transferID !== params?.transferID) {
       throw new ProviderTransferError('Bad transfer ID provided');
     }
 
