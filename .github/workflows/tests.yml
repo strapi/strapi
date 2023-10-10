@@ -70,8 +70,8 @@ jobs:
       - uses: nrwl/nx-set-shas@v3
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-      - name: Run build
-        run: yarn nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
       - name: TSC for packages
         run: yarn nx affected --target=test:ts --nx-ignore-cycles
       - name: TSC for back
