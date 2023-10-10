@@ -12,7 +12,7 @@ runs:
       with:
         path: packages/**/dist
         key: yarn-build-cache-${{ github.sha }}
-
-    - name: 📥 Run build
+    - if: ${{ steps.yarn-build-cache.outputs.cache-hit != 'true' }}
+      name: 📥 Run build
       shell: bash
       run: yarn nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
