@@ -3,11 +3,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      // workaround because @strapi/utils does not export types correctly.
-      "*": ["src/*", "declarations/*"],
       "@tests/*": ["./tests/*"]
     }
   },
-  "include": ["declarations", "src"],
-  "exclude": ["node_modules"]
+  "include": ["src", "custom.d.ts"]
 }

@@ -54,7 +54,7 @@ updates:
           - 'webpack-cli'
           - 'webpack-dev-server'
 
-    commit_message:
+    commit-message:
       prefix: 'chore'
       include: 'scope'
     schedule:
@@ -81,7 +81,7 @@ updates:
   - package-ecosystem: github-actions
     open-pull-requests-limit: 10
     directory: /
-    commit_message:
+    commit-message:
       prefix: 'chore'
       include: 'scope'
     schedule:

@@ -50,6 +50,7 @@
     "@strapi/icons": "1.12.0",
     "@strapi/permissions": "4.14.3",
     "@strapi/provider-audit-logs-local": "4.14.3",
+    "@strapi/types": "workspace:*",
     "@strapi/typescript-utils": "4.14.3",
     "@strapi/utils": "4.14.3",
     "axios": "1.5.0",

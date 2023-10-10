@@ -77,8 +77,8 @@ import { makeSelectFormModal } from './selectors';
 import { canEditContentType, getAttributesToDisplay, getFormInputNames } from './utils';
 import { createComponentUid, createUid } from './utils/createUid';
 
-// TODO: Remove after the RTE Blocks Alpha release
-const AlphaFeatureAlert = styled(Alert)`
+// TODO: Remove after the RTE Blocks Beta release
+const BetaFeatureAlert = styled(Alert)`
   button {
     display: none;
   }
@@ -1070,14 +1070,14 @@ export const FormModal = () => {
                 <TabPanels>
                   <TabPanel>
                     <Flex direction="column" alignItems="stretch" gap={6}>
-                      {/* TODO: Remove after the RTE Blocks Alpha release */}
+                      {/* TODO: Remove after the RTE Blocks Beta release */}
                       {attributeType === 'blocks' && (
-                        <AlphaFeatureAlert variant="warning">
+                        <BetaFeatureAlert>
                           {formatMessage({
-                            id: getTrad('form.feature.alpha'),
-                            defaultMessage: 'This feature is in Alpha.',
+                            id: getTrad('form.feature.beta'),
+                            defaultMessage: 'This feature is in Beta.',
                           })}
-                        </AlphaFeatureAlert>
+                        </BetaFeatureAlert>
                       )}
                       <TabForm
                         form={baseForm}
@@ -1090,14 +1090,14 @@ export const FormModal = () => {
                   </TabPanel>
                   <TabPanel>
                     <Flex direction="column" alignItems="stretch" gap={6}>
-                      {/* TODO: Remove after the RTE Blocks Alpha release */}
+                      {/* TODO: Remove after the RTE Blocks Beta release */}
                       {attributeType === 'blocks' && (
-                        <AlphaFeatureAlert variant="warning">
+                        <BetaFeatureAlert>
                           {formatMessage({
-                            id: getTrad('form.feature.alpha'),
-                            defaultMessage: 'This feature is in Alpha.',
+                            id: getTrad('form.feature.beta'),
+                            defaultMessage: 'This feature is in Beta.',
                           })}
-                        </AlphaFeatureAlert>
+                        </BetaFeatureAlert>
                       )}
                       <TabForm
                         form={advancedForm}

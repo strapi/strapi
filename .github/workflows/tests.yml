@@ -17,9 +17,6 @@ permissions:
   contents: read # to fetch code (actions/checkout)
   actions: read
 
-env:
-  DTS: true
-
 jobs:
   changes:
     runs-on: ubuntu-latest
