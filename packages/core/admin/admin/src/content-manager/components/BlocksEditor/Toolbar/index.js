@@ -507,6 +507,31 @@ const LinkButton = ({ disabled }) => {
     return Boolean(match);
   };
 
+  const isLinkDisabled = () => {
+    // Always disable the whole editor is disabled
+    if (disabled) {
+      return true;
+    }
+
+    // Always enable when there's no selection
+    if (!editor.selection) {
+      return false;
+    }
+
+    // Get the block nodes closest to the anchor and focus
+    const anchorNodeEntry = Editor.above(editor, {
+      at: editor.selection.anchor,
+      match: (node) => node.type !== 'text',
+    });
+    const focusNodeEntry = Editor.above(editor, {
+      at: editor.selection.focus,
+      match: (node) => node.type !== 'text',
+    });
+
+    // Disable if the anchor and focus are not in the same block
+    return anchorNodeEntry[0] !== focusNodeEntry[0];
+  };
+
   const addLink = () => {
     // We insert an empty anchor, so we split the DOM to have a element we can use as reference for the popover
     insertLink(editor, { url: '' });
@@ -522,7 +547,7 @@ const LinkButton = ({ disabled }) => {
       }}
       isActive={isLinkActive()}
       handleClick={addLink}
-      disabled={disabled}
+      disabled={isLinkDisabled()}
     />
   );
 };

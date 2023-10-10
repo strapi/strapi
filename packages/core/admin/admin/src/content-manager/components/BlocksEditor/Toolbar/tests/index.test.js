@@ -433,4 +433,25 @@ describe('BlocksEditor toolbar', () => {
     const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
     expect(within(blocksDropdown).getByText(/heading 1/i)).toBeInTheDocument();
   });
+
+  it('should disable the link button when multiple blocks are selected', async () => {
+    setup(mixedInitialValue);
+
+    // Set the selection to cover the first and second
+    await select({
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [1, 0], offset: 0 },
+    });
+
+    const linksButton = screen.getByLabelText(/link/i);
+    expect(linksButton).toBeDisabled();
+
+    // Set the selection to a single point, not a range
+    await select({
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
+    });
+
+    expect(screen.getByLabelText(/link/i)).not.toBeDisabled();
+  });
 });
