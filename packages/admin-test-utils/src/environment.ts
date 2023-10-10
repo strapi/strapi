@@ -27,13 +27,35 @@ window.ResizeObserver = ResizeObserver;
  * If there's a prop type error then we want to throw an
  * error so that the test fails.
  *
- * NOTE: This can be removed once we move to a typescript
- * setup & we throw tests on type errors.
+ * In the CI we fail the entire process if anything is logged to the console.
+ * This is to stop pollution, you shouldn't need to log _anything_ to the console
+ * for tests.
  */
 
 const error = console.error;
+const warn = console.warn;
+const log = console.log;
+const info = console.info;
 window.console = {
   ...window.console,
+  info(...args: any[]) {
+    info(...args);
+    if (process.env.CI) {
+      process.exit(1);
+    }
+  },
+  log(...args: any[]) {
+    log(...args);
+    if (process.env.CI) {
+      process.exit(1);
+    }
+  },
+  warn(...args: any[]) {
+    warn(...args);
+    if (process.env.CI) {
+      process.exit(1);
+    }
+  },
   error(...args: any[]) {
     const message = format(...args);
 
@@ -44,10 +66,17 @@ window.console = {
       // to styled-components@6 and have separate props that are rendered in the DOM by
       // the ones that aren't using the $ prefix.
       // https://styled-components.com/docs/faqs#transient-as-and-forwardedas-props-have-been-dropped
-    } else if (/React does not recognize the .* prop on a DOM element/.test(message)) {
+    } else if (
+      /React does not recognize the .* prop on a DOM element/.test(message) ||
+      /Unknown event handler property/.test(message)
+    ) {
       // do nothing
     } else {
       error(...args);
+
+      if (process.env.CI) {
+        process.exit(1);
+      }
     }
   },
 };

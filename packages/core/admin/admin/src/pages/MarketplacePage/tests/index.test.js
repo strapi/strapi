@@ -1,8 +1,8 @@
 import React from 'react';
 
 import { useAppInfo, useTracking } from '@strapi/helper-plugin';
-import { screen, within } from '@testing-library/react';
-import { fireEvent, render as renderRTL, waitFor } from '@tests/utils';
+import { screen, within, fireEvent } from '@testing-library/react';
+import { render as renderRTL, waitFor } from '@tests/utils';
 
 import { MarketPlacePage } from '../index';
 

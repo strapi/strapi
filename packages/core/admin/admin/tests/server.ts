@@ -129,6 +129,28 @@ export const server = setupServer(
         })
       );
     }),
+    rest.put('/admin/providers/options', (req, res, ctx) =>
+      res(
+        ctx.json({
+          data: {
+            autoRegister: false,
+            defaultRole: '1',
+            ssoLockedRoles: ['1', '2', '3'],
+          },
+        })
+      )
+    ),
+    rest.get('/admin/providers/options', (req, res, ctx) =>
+      res(
+        ctx.json({
+          data: {
+            autoRegister: false,
+            defaultRole: '1',
+            ssoLockedRoles: ['1', '2'],
+          },
+        })
+      )
+    ),
     /**
      *
      * ADMIN PERMISSIONS
@@ -170,6 +192,13 @@ export const server = setupServer(
      * ADMIN MISC
      *
      */
+    rest.get('/admin/init', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          data: {},
+        })
+      );
+    }),
     rest.get('/admin/license-limit-information', (req, res, ctx) => {
       return res(
         ctx.json({
@@ -208,6 +237,36 @@ export const server = setupServer(
             size: 1.3,
             url: '/uploads/michka.svg',
             width: 256,
+          },
+        })
+      );
+    }),
+    rest.get('/admin/transfer/tokens', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          data: [
+            {
+              id: 1,
+              name: 'My super token',
+              description: 'This describe my super token',
+              type: 'read-only',
+              createdAt: '2021-11-15T00:00:00.000Z',
+              permissions: [],
+            },
+          ],
+        })
+      );
+    }),
+    rest.get('/admin/transfer/tokens/:id', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          data: {
+            id: 1,
+            name: 'My super token',
+            description: 'This describe my super token',
+            type: 'read-only',
+            createdAt: '2021-11-15T00:00:00.000Z',
+            permissions: [],
           },
         })
       );
@@ -314,6 +373,28 @@ export const server = setupServer(
         return res(ctx.status(200));
       }
     ),
+    rest.get('/admin/content-manager/:collectionType/:contentType/:id/stages', (req, res, ctx) =>
+      res(
+        ctx.json({
+          data: [
+            {
+              id: 1,
+              color: '#4945FF',
+              name: 'Stage 1',
+            },
+
+            {
+              id: 2,
+              color: '#4945FF',
+              name: 'Stage 2',
+            },
+          ],
+          meta: {
+            workflowCount: 10,
+          },
+        })
+      )
+    ),
     // /**
     //  *
     //  * CONTENT_MANAGER
@@ -363,6 +444,69 @@ export const server = setupServer(
         })
       );
     }),
+    rest.get('*/content-manager/content-types', (req, res, ctx) =>
+      res(
+        ctx.json({
+          data: [
+            {
+              uid: 'admin::collectionType',
+              isDisplayed: true,
+              apiID: 'permission',
+              kind: 'collectionType',
+            },
+
+            {
+              uid: 'admin::collectionTypeNotDispalyed',
+              isDisplayed: false,
+              apiID: 'permission',
+              kind: 'collectionType',
+            },
+
+            {
+              uid: 'admin::singleType',
+              isDisplayed: true,
+              kind: 'singleType',
+            },
+
+            {
+              uid: 'admin::singleTypeNotDispalyed',
+              isDisplayed: false,
+              kind: 'singleType',
+            },
+          ],
+        })
+      )
+    ),
+    rest.get('*/content-manager/components', (req, res, ctx) =>
+      res(
+        ctx.json({
+          data: [
+            {
+              uid: 'basic.relation',
+              isDisplayed: true,
+              apiID: 'relation',
+              category: 'basic',
+              info: {
+                displayName: 'Relation',
+              },
+              options: {},
+              attributes: {
+                id: {
+                  type: 'integer',
+                },
+                categories: {
+                  type: 'relation',
+                  relation: 'oneToMany',
+                  target: 'api::category.category',
+                  targetModel: 'api::category.category',
+                  relationType: 'oneToMany',
+                },
+              },
+            },
+          ],
+        })
+      )
+    ),
     rest.post(
       '/content-manager/collection-types/:contentType/actions/bulkPublish',
       (req, res, ctx) => {

@@ -189,7 +189,7 @@ describe('Bulk publish selected entries modal', () => {
       ).toBeInTheDocument();
     });
 
-    server.restoreHandlers();
+    server.resetHandlers();
   });
 
   it('should show validation errors if there is an error', async () => {
@@ -237,7 +237,7 @@ describe('Bulk publish selected entries modal', () => {
       expect(publishButton).toBeDisabled();
     });
 
-    server.restoreHandlers();
+    server.resetHandlers();
   });
 
   it('should show the correct messages above the table in the selected entries modal', async () => {
@@ -286,6 +286,6 @@ describe('Bulk publish selected entries modal', () => {
       exact: false,
     });
     expect(countWithErrors).toHaveTextContent('1 entry waiting for action');
-    server.restoreHandlers();
+    server.resetHandlers();
   });
 });

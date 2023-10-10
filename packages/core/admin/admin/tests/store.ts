@@ -10,6 +10,11 @@ const initialState = {
     fieldSizes: {},
   },
   'content-manager_listView': {
+    data: [
+      { id: 1, publishedAt: null },
+      { id: 2, publishedAt: '2023-01-01T10:10:10.408Z' },
+    ],
+    displayedHeaders: [],
     contentType: {
       uid: 'api::test.test',
       settings: {

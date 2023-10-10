@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import { fixtures } from '@strapi/admin-test-utils';
 import { DesignSystemProvider } from '@strapi/design-system';
-import { RBACContext } from '@strapi/helper-plugin';
+import { NotificationsProvider, RBACContext } from '@strapi/helper-plugin';
 import {
   renderHook as renderHookRTL,
   render as renderRTL,
@@ -16,7 +16,7 @@ import userEvent from '@testing-library/user-event';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
 import { Provider } from 'react-redux';
 import { MemoryRouter, MemoryRouterProps } from 'react-router-dom';
 import { createStore } from 'redux';
@@ -29,6 +29,12 @@ import AdminContext from '../src/contexts/Admin';
 import { server } from './server';
 import { initialState } from './store';
 
+setLogger({
+  log: () => {},
+  warn: () => {},
+  error: () => {},
+});
+
 interface ProvidersProps {
   children: React.ReactNode;
   initialEntries?: MemoryRouterProps['initialEntries'];
@@ -39,14 +45,6 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
     defaultOptions: {
       queries: {
         retry: false,
-        // no more errors on the console for tests
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        onError() {},
-      },
-      mutations: {
-        // no more errors on the console for tests
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        onError() {},
       },
     },
   });
@@ -61,26 +59,28 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
           <DesignSystemProvider locale="en">
             <QueryClientProvider client={queryClient}>
               <DndProvider backend={HTML5Backend}>
-                <RBACContext.Provider
-                  value={{
-                    allPermissions: [
-                      ...fixtures.permissions.allPermissions,
-                      {
-                        id: 314,
-                        action: 'admin::users.read',
-                        subject: null,
-                        properties: {},
-                        conditions: [],
-                      },
-                    ],
-                  }}
-                >
-                  <ModelsContext.Provider value={{ refetchData: jest.fn() }}>
-                    <AdminContext.Provider value={{ getAdminInjectedComponents: jest.fn() }}>
-                      {children}
-                    </AdminContext.Provider>
-                  </ModelsContext.Provider>
-                </RBACContext.Provider>
+                <NotificationsProvider>
+                  <RBACContext.Provider
+                    value={{
+                      allPermissions: [
+                        ...fixtures.permissions.allPermissions,
+                        {
+                          id: 314,
+                          action: 'admin::users.read',
+                          subject: null,
+                          properties: {},
+                          conditions: [],
+                        },
+                      ],
+                    }}
+                  >
+                    <ModelsContext.Provider value={{ refetchData: jest.fn() }}>
+                      <AdminContext.Provider value={{ getAdminInjectedComponents: jest.fn() }}>
+                        {children}
+                      </AdminContext.Provider>
+                    </ModelsContext.Provider>
+                  </RBACContext.Provider>
+                </NotificationsProvider>
               </DndProvider>
             </QueryClientProvider>
           </DesignSystemProvider>
