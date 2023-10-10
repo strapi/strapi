@@ -58,8 +58,12 @@ const addFixtures = () => {
 
 const findDBDocument = async (where) => {
   const dbDocument = await strapi.query('api::document.document').findOne({ where });
-
   return dbDocument;
+};
+
+const findDBDocuments = async (where) => {
+  const dbDocuments = await strapi.query('api::document.document').find({ where });
+  return dbDocuments;
 };
 
 const init = async () => {
@@ -120,5 +124,88 @@ describe('Document Service - Find One', () => {
     const deletedDocumentDb = await findDBDocument({ name: '3 Document A' });
 
     expect(deletedDocumentDb).toBeNull();
+  });
+
+  it.skip('count documents', async () => {
+    const documentsDb = await findDBDocuments({});
+
+    const count = await strapi.documentService.count('api::document.document');
+
+    expect(count).toBe(documentsDb.length);
+  });
+
+  it.skip('find page of documents', async () => {
+    const documentsDb = await findDBDocuments({});
+
+    const documents = await strapi.documentService.findPage('api::document.document', {
+      page: 1,
+      pageSize: 10,
+    });
+
+    expect(documents).toMatchObject({
+      results: documentsDb.slice(0, 10),
+      pagination: {
+        page: 1,
+        pageSize: 10,
+        pageCount: Math.ceil(documentsDb.length / 10),
+        total: documentsDb.length,
+      },
+    });
+  });
+
+  it.skip('clone a document', async () => {
+    const documentDb = await findDBDocument({ name: '3 Document A' });
+
+    const document = await strapi.documentService.clone(
+      'api::document.document',
+      documentDb.documentId,
+      {
+        data: {
+          name: 'Cloned Document',
+        },
+      }
+    );
+
+    const clonedDocumentDb = await findDBDocument({ name: 'Cloned Document' });
+
+    expect(clonedDocumentDb).toBeDefined();
+    expect(clonedDocumentDb).toMatchObject({ name: 'Cloned Document' });
+  });
+
+  it.skip('load a document', async () => {
+    const documentDb = await findDBDocument({ name: '3 Document A' });
+
+    const relations = await strapi.documentService.load(
+      'api::document.document',
+      documentDb.documentId,
+      'relations'
+    );
+
+    expect(relations).toMatchObject(fixtures.relations);
+  });
+
+  it.skip('load pages of documents', async () => {
+    const documentsDb = await findDBDocuments({});
+
+    const documents = await strapi.documentService.loadPages(
+      'api::document.document',
+      documentsDb.map((document) => document.documentId),
+      'relations'
+    );
+
+    expect(documents).toMatchObject({ results: fixtures.relations });
+  });
+
+  it.skip('delete many documents', async () => {
+    const documentsDb = await findDBDocuments({});
+
+    const documents = await strapi.documentService.deleteMany(
+      'api::document.document',
+      documentsDb.map((document) => document.documentId)
+    );
+
+    const deletedDocumentsDb = await findDBDocuments({});
+
+    expect(deletedDocumentsDb).toHaveLength(0);
   });
 });
