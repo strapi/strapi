@@ -4,16 +4,15 @@
  *
  */
 
-import React from 'react';
-
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
 import { ExternalLink } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { getTrad } from '../../utils';
-import { UploadIcon } from '../Icons/upload';
+import { getTrad } from '../utils/getTrad';
+
+import { UploadIcon } from './Icons/UploadIcon';
 
 const EmptyStateIconWrapper = styled(Box)`
   svg {
@@ -64,4 +63,4 @@ const CloudBox = () => {
   );
 };
 
-export default CloudBox;
+export { CloudBox };

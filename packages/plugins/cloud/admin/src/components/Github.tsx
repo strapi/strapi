@@ -4,16 +4,15 @@
  *
  */
 
-import React from 'react';
-
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
 import { Github } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { getTrad } from '../../utils';
-import { LinkIcon } from '../Icons/link';
+import { getTrad } from '../utils/getTrad';
+
+import { LinkIcon } from './Icons/LinkIcon';
 
 const EmptyStateIconWrapper = styled(Box)`
   svg {
@@ -73,4 +72,4 @@ const GithubBox = () => {
   );
 };
 
-export default GithubBox;
+export { GithubBox };

@@ -5,7 +5,8 @@
  */
 
 import { useEffect, useRef } from 'react';
-import pluginId from '../../pluginId';
+
+import { pluginId } from '../pluginId';
 
 type InitializerProps = {
   setPlugin: (id: string) => void;
@@ -21,4 +22,4 @@ const Initializer = ({ setPlugin }: InitializerProps) => {
   return null;
 };
 
-export default Initializer;
+export { Initializer };

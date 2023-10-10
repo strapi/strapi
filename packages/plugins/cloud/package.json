@@ -1,37 +1,8 @@
 {
   "name": "@strapi/plugin-cloud",
-  "version": "1.0.0",
+  "version": "4.14.5",
   "description": "Instructions to deploy your local project to Strapi Cloud",
-  "strapi": {
-    "name": "Strapi Cloud",
-    "description": "Instructions to deploy your local project to Strapi Cloud",
-    "kind": "plugin",
-    "displayName": "Strapi Cloud"
-  },
-  "dependencies": {
-    "@strapi/design-system": "^1.6.3",
-    "@strapi/helper-plugin": "^4.6.0",
-    "@strapi/icons": "^1.6.3",
-    "prop-types": "^15.7.2"
-  },
-  "devDependencies": {
-    "@strapi/typescript-utils": "^4.6.0",
-    "@types/react": "^17.0.53",
-    "@types/react-dom": "^18.0.28",
-    "@types/react-router-dom": "^5.3.3",
-    "@types/styled-components": "^5.1.26",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^5.3.4",
-    "styled-components": "^5.3.6",
-    "typescript": "5.0.4"
-  },
-  "peerDependencies": {
-    "react": "^17.0.0 || ^18.0.0",
-    "react-dom": "^17.0.0 || ^18.0.0",
-    "react-router-dom": "^5.3.4",
-    "styled-components": "^5.3.6"
-  },
+  "license": "MIT",
   "author": {
     "name": "Strapi Solutions SAS",
     "email": "hi@strapi.io",
@@ -44,14 +15,64 @@
       "url": "https://strapi.io"
     }
   ],
+  "exports": {
+    "./strapi-admin": {
+      "types": "./dist/admin/index.d.ts",
+      "source": "./admin/src/index.ts",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "./dist"
+  ],
+  "scripts": {
+    "build": "NODE_ENV=production strapi plugin:build --force",
+    "clean": "run -T rimraf ./dist",
+    "develop": "tsc -p tsconfig.server.json -w",
+    "lint": "yarn lint:project && yarn lint:front",
+    "lint:front": "run -T eslint ./admin -c ./admin/.eslintrc.js",
+    "lint:project": "run -T eslint . -c ./.eslintrc.js",
+    "prepublishOnly": "yarn clean && yarn build",
+    "test:ts:front": "run -T tsc -p admin/tsconfig.json"
+  },
+  "dependencies": {
+    "@strapi/design-system": "^1.12.0",
+    "@strapi/helper-plugin": "^4.14.3",
+    "@strapi/icons": "^1.12.0",
+    "react-intl": "6.4.1"
+  },
+  "devDependencies": {
+    "@strapi/strapi": "4.14.5",
+    "@types/react": "^18.2.7",
+    "@types/react-dom": "^18.2.12",
+    "@types/react-router-dom": "^5.3.3",
+    "@types/styled-components": "^5.1.28",
+    "eslint-config-custom": "4.14.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^5.3.4",
+    "styled-components": "^5.3.3",
+    "tsconfig": "4.14.5",
+    "typescript": "5.2.2"
+  },
+  "peerDependencies": {
+    "@strapi/strapi": "^4.4.0",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0",
+    "react-router-dom": "^5.3.4",
+    "styled-components": "^5.3.6"
+  },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",
     "npm": ">=6.0.0"
   },
-  "scripts": {
-    "develop": "tsc -p tsconfig.server.json -w",
-    "build": "tsc -p tsconfig.server.json",
-    "lint": "run -T eslint ."
-  },
-  "license": "MIT"
+  "strapi": {
+    "name": "Strapi Cloud",
+    "description": "Instructions to deploy your local project to Strapi Cloud",
+    "kind": "plugin",
+    "displayName": "Strapi Cloud"
+  }
 }

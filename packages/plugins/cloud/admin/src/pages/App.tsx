@@ -5,11 +5,12 @@
  *
  */
 
-import React from 'react';
-import { Switch, Route } from 'react-router-dom';
 import { AnErrorOccurred } from '@strapi/helper-plugin';
-import pluginId from '../../pluginId';
-import HomePage from '../HomePage';
+import { Switch, Route } from 'react-router-dom';
+
+import { pluginId } from '../pluginId';
+
+import { HomePage } from './HomePage';
 
 const App = () => {
   return (
@@ -22,4 +23,4 @@ const App = () => {
   );
 };
 
-export default App;
+export { App };

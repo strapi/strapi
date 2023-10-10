@@ -1,13 +1,5 @@
-import React from 'react';
-
 export const LinkIcon = () => (
-  <svg
-    width="160"
-    height="88"
-    viewBox="0 0 160 88"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
+  <svg width="160" height="88" viewBox="0 0 160 88" fill="none" xmlns="http://www.w3.org/2000/svg">
     <g clipPath="url(#clip0_7_368)">
       <g opacity="0.84">
         <path
@@ -102,12 +94,7 @@ export const LinkIcon = () => (
     </g>
     <defs>
       <clipPath id="clip0_7_368">
-        <rect
-          width="158.4"
-          height="88"
-          fill="white"
-          transform="translate(0.800049)"
-        />
+        <rect width="158.4" height="88" fill="white" transform="translate(0.800049)" />
       </clipPath>
     </defs>
   </svg>

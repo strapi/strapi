@@ -1,20 +1,19 @@
+/* eslint-disable check-file/filename-naming-convention */
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
 
-import pluginPkg from '../../package.json';
-import pluginId from './pluginId';
-import Initializer from './components/Initializer';
-import PluginIcon from './components/PluginIcon';
+import { Initializer } from './components/Initializer';
+import { PluginIcon } from './components/PluginIcon';
+import { pluginId } from './pluginId';
 
-const name = pluginPkg.strapi.name;
+const name = 'Strapi Cloud';
 
+// eslint-disable-next-line import/no-default-export
 export default {
   register(app: any) {
-
     const { backendURL } = window.strapi;
 
     // Only add the plugin menu link and registering it if the project is on development (localhost).
     if (backendURL?.includes('localhost')) {
-
       app.addMenuLink({
         to: `/plugins/${pluginId}`,
         icon: PluginIcon,
@@ -23,9 +22,9 @@ export default {
           defaultMessage: name,
         },
         Component: async () => {
-          const component = await import(/* webpackChunkName: "strapi-plugin-cloud" */ './pages/App');
+          const { App } = await import(/* webpackChunkName: "strapi-plugin-cloud" */ './pages/App');
 
-          return component;
+          return App;
         },
       });
       const plugin = {

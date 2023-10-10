@@ -4,15 +4,13 @@
  *
  */
 
-import React from 'react';
-
 import { Box, GridLayout, Flex, Typography, Link } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import CloudBox from '../../components/Cloud';
-import GithubBox from '../../components/Github';
-import { getTrad } from '../../utils';
+import { CloudBox } from '../components/Cloud';
+import { GithubBox } from '../components/Github';
+import { getTrad } from '../utils/getTrad';
 
 import cornerOrnamentPath from './assets/corner-ornament.svg';
 import leftSideCloudPath from './assets/left-side-cloud.png';
@@ -105,9 +103,7 @@ const HomePage = () => {
               defaultMessage:
                 'Strapi Cloud offers a 14 days free trial for you to experiment with your project on the cloud including all features.',
             })}{' '}
-            <Link href="https://strapi.io/cloud?utm_source=Strapi+Plugin+Cloud" isExternal>
-              Learn more
-            </Link>
+            <Link href="https://strapi.io/cloud?utm_source=Strapi+Plugin+Cloud">Learn more</Link>
           </Typography>
         </Box>
       </Box>
@@ -115,4 +111,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export { HomePage };
