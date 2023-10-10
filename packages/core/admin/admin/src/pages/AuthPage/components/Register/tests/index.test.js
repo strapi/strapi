@@ -15,7 +15,13 @@ import { FORMS } from '../../../constants';
 
 const PASSWORD_VALID = '!Eight_8_characters!';
 
-jest.mock('../../../../../hooks/useConfigurations');
+jest.mock('../../../../../hooks/useConfigurations', () => ({
+  useConfigurations: () => ({
+    logos: {
+      auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
+    },
+  }),
+}));
 jest.mock('../../../../../components/LocalesProvider/useLocalesProvider');
 
 jest.mock('@strapi/helper-plugin', () => ({

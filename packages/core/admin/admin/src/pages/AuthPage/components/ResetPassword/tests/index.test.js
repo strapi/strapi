@@ -14,10 +14,12 @@ jest.mock('../../../../../components/LocalesProvider/useLocalesProvider', () => 
   localeNames: { en: 'English' },
   messages: ['test'],
 }));
-jest.mock('../../../../../hooks/useConfigurations', () => () => ({
-  logos: {
-    auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
-  },
+jest.mock('../../../../../hooks/useConfigurations', () => ({
+  useConfigurations: () => ({
+    logos: {
+      auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
+    },
+  }),
 }));
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -91,12 +93,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         line-height: 1.33;
         font-weight: 600;
         color: #ffffff;
-      }
-
-      .c46 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #4945ff;
       }
 
       .c1 {
@@ -571,6 +567,12 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         outline: none;
       }
 
+      .c46 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #4945ff;
+      }
+
       .c45 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
@@ -924,7 +926,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                   href="/auth/login"
                 >
                   <span
-                    class="c8 c46"
+                    class="c46"
                   >
                     Ready to sign in?
                   </span>

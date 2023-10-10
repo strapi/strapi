@@ -13,6 +13,7 @@ module.exports = {
     process: true,
   },
   rules: {
+    '@typescript-eslint/no-explicit-any': 'warn',
     /**
      * This is useful to have for JS files, it's overwritten
      * by `plugin:@typescript-eslint/recommended` for TS files.
