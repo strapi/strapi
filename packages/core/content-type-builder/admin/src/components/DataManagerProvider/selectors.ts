@@ -4,10 +4,12 @@ import pluginId from '../../pluginId';
 
 import { initialState } from './reducer';
 
+import type { DataManagerStateType } from '../../types';
+
 /**
  * Direct selector to the dataManagerProvider state domain
  */
-const dataManagerProviderDomain = () => (state) =>
+const dataManagerProviderDomain = () => (state: DataManagerStateType) =>
   state[`${pluginId}_dataManagerProvider`] || initialState;
 
 /**

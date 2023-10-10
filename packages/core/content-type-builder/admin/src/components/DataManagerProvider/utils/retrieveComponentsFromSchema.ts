@@ -1,11 +1,16 @@
 import get from 'lodash/get';
 
-import makeUnique from '../../../utils/makeUnique';
+import { makeUnique } from '../../../utils/makeUnique';
 
-const retrieveComponentsFromSchema = (attributes: any, allComponentsData: any) => {
-  const allComponents = attributes.reduce((acc: any, current: any) => {
+import type { AttributeType } from '../../../types';
+import type { UID } from '@strapi/types';
+
+const retrieveComponentsFromSchema = (
+  attributes: AttributeType<string>[],
+  allComponentsData: any
+): UID.Component[] => {
+  const allComponents = attributes.reduce((acc: UID.Component[], current) => {
     const type = current.type;
-
     if (type === 'component') {
       const currentComponentName = current.component;
       // Push the existing compo
@@ -35,7 +40,7 @@ const retrieveComponentsFromSchema = (attributes: any, allComponentsData: any) =
     return acc;
   }, []);
 
-  return makeUnique(allComponents);
+  return makeUnique<UID.Component>(allComponents);
 };
 
 export { retrieveComponentsFromSchema };

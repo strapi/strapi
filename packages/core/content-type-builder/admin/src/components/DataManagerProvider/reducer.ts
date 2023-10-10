@@ -3,37 +3,28 @@ import get from 'lodash/get';
 import set from 'lodash/set';
 
 import getRelationType from '../../utils/getRelationType';
-import makeUnique from '../../utils/makeUnique';
+import { makeUnique } from '../../utils/makeUnique';
 
 import * as actions from './constants';
-import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
-import { Attribute, UID } from '@strapi/types';
-interface StateType {
-  components: Record<string, any>;
-  contentTypes: Record<string, any>;
-  initialComponents: Record<string, any>;
-  initialContentTypes: Record<string, any>;
-  initialData: Record<string, any>;
-  modifiedData: Record<string, any>;
-  reservedNames: Record<string, any>;
-  isLoading: boolean;
-  isLoadingForDataToBeSet: boolean;
-}
+import { retrieveComponentsFromSchema } from './utils/retrieveComponentsFromSchema';
 
+import type { Attribute, DataManagerStateType } from '../../types';
+import type { UID } from '@strapi/types';
+
+// TODO: Define all possible actions based on type
 type Action = {
   type: string;
+  uid?: string;
   [key: string]: any;
 };
 
 type findAttributeIndexSchemaParam = {
   schema: {
-    attributes: {
-      name: string;
-    }[];
+    attributes: Attribute[];
   };
 };
 
-const initialState: StateType = {
+const initialState: DataManagerStateType = {
   components: {},
   contentTypes: {},
   initialComponents: {},
@@ -150,7 +141,7 @@ const reducer = (state = initialState, action: Action) =>
             relationType !== 'manyWay' &&
             target === currentUid
           ) {
-            const oppositeAttribute = {
+            const oppositeAttribute: Attribute = {
               name: targetAttribute,
               relation: getOppositeRelation(relationType),
               target,
@@ -320,25 +311,15 @@ const reducer = (state = initialState, action: Action) =>
           break;
         }
 
-        const updatedAttributes = get(state, [
+        const updatedAttributes: Attribute[] = get(state, [
           'modifiedData',
           ...pathToDataToEdit,
           'schema',
           'attributes',
         ]).slice();
 
-        type ToSetType = {
-          name: string;
-          relation: string;
-          target: string;
-          targetAttribute: string;
-          type: string;
-          private?: boolean;
-          pluginOptions?: any; // Adjust the type as per actual data type
-        };
-
         // First create the current relation attribute updated
-        const toSet: ToSetType = {
+        const toSet: Attribute = {
           name,
           relation: rest.relation,
           target: rest.target,
@@ -355,7 +336,7 @@ const reducer = (state = initialState, action: Action) =>
         }
 
         const currentAttributeIndex = updatedAttributes.findIndex(
-          ({ name }) => name === initialAttribute.name
+          ({ name }: { name: string }) => name === initialAttribute.name
         );
 
         // First set it in the updatedAttributes
@@ -363,9 +344,9 @@ const reducer = (state = initialState, action: Action) =>
           updatedAttributes.splice(currentAttributeIndex, 1, toSet);
         }
 
-        let oppositeAttributeNameToRemove = null;
-        let oppositeAttributeNameToUpdate = null;
-        let oppositeAttributeToCreate = null;
+        let oppositeAttributeNameToRemove: string | null = null;
+        let oppositeAttributeNameToUpdate: string | null = null;
+        let oppositeAttributeToCreate: Attribute | null = null;
         let initialOppositeAttribute = null;
 
         const currentUid = get(state, ['modifiedData', ...pathToDataToEdit, 'uid']);
@@ -416,7 +397,7 @@ const reducer = (state = initialState, action: Action) =>
         // In case of oneWay or manyWay relation there isn't an opposite attribute
         if (oppositeAttributeNameToRemove) {
           const indexToRemove = updatedAttributes.findIndex(
-            ({ name }) => name === oppositeAttributeNameToRemove
+            ({ name }: { name: string }) => name === oppositeAttributeNameToRemove
           );
 
           updatedAttributes.splice(indexToRemove, 1);
@@ -591,7 +572,8 @@ const reducer = (state = initialState, action: Action) =>
             target === uid && !ONE_SIDE_RELATIONS.includes(relationType);
 
           if (shouldRemoveOppositeAttribute) {
-            const attributes = state.modifiedData[mainDataKey].schema.attributes.slice();
+            const attributes: Attribute[] =
+              state.modifiedData[mainDataKey].schema.attributes.slice();
             const nextAttributes = attributes.filter((attribute) => {
               if (attribute.name === attributeToRemoveName) {
                 return false;
@@ -613,7 +595,7 @@ const reducer = (state = initialState, action: Action) =>
         // Find all uid fields that have the targetField set to the field we are removing
         const uidFieldsToUpdate = state.modifiedData[mainDataKey].schema.attributes
           .slice()
-          .reduce((acc, current) => {
+          .reduce((acc: string[], current) => {
             if (current.type !== 'uid') {
               return acc;
             }
@@ -693,5 +675,4 @@ const reducer = (state = initialState, action: Action) =>
     }
   });
 
-export default reducer;
-export { initialState };
+export { initialState, reducer };

@@ -1,3 +1,3 @@
-const makeUnique = (array) => [...new Set(array)];
+const makeUnique = <T extends string>(array: T[]): T[] => [...new Set(array)];
 
-export default makeUnique;
+export { makeUnique };
