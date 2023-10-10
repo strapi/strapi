@@ -23,20 +23,21 @@
       "url": "https://strapi.io"
     }
   ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
   "files": [
     "./dist"
   ],
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "run -T tsc -p tsconfig.build.json",
-    "build:ts": "run build",
-    "watch": "run build -w --preserveWatchOutput",
+    "build": "pack-up build",
     "clean": "run -T rimraf ./dist",
+    "lint": "run -T tsc --noEmit && run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "lint": "run -T tsc --noEmit && run -T eslint ."
+    "watch": "pack-up watch"
   },
   "dependencies": {
     "@paralleldrive/cuid2": "2.2.2",
@@ -50,6 +51,7 @@
     "umzug": "3.2.1"
   },
   "devDependencies": {
+    "@strapi/pack-up": "workspace:*",
     "eslint-config-custom": "4.14.3",
     "tsconfig": "4.14.3"
   },

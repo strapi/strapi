@@ -16,7 +16,7 @@ import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { usePermissionsDataManager } from '../../../../../../../hooks';
+import { usePermissionsDataManager } from '../../hooks/usePermissionsDataManager';
 
 import ActionRow from './ActionRow';
 import createDefaultConditionsForm from './utils/createDefaultConditionsForm';

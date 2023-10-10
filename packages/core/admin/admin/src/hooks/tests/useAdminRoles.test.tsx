@@ -1,12 +1,12 @@
-import * as React from 'react';
+/* eslint-disable check-file/filename-naming-convention */
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider, UseQueryOptions } from 'react-query';
 
-import { useAdminRoles } from '..';
+import { useAdminRoles, APIRolesQueryParams } from '../useAdminRoles';
 
 const server = setupServer(
   rest.get('*/roles', (req, res, ctx) =>
@@ -34,7 +34,7 @@ const server = setupServer(
           id: 1,
           code: 'strapi-editor',
           params: {
-            some: req.url.searchParams.get('some'),
+            filters: req.url.searchParams.get('filters'),
           },
         },
       })
@@ -42,8 +42,8 @@ const server = setupServer(
   )
 );
 
-const setup = (...args) =>
-  renderHook(() => useAdminRoles(...args), {
+const setup = (params?: APIRolesQueryParams, queryOptions?: UseQueryOptions) =>
+  renderHook(() => useAdminRoles(params, queryOptions), {
     wrapper({ children }) {
       const client = new QueryClient({
         defaultOptions: {
@@ -107,14 +107,14 @@ describe('useAdminRoles', () => {
   });
 
   test('forwards all query params except `id`', async () => {
-    const { result } = setup({ id: 1, some: 'param' });
+    const { result } = setup({ id: 1, filters: 'param' });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.roles).toStrictEqual([
       expect.objectContaining({
         params: {
-          some: 'param',
+          filters: 'param',
         },
       }),
     ]);
