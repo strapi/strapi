@@ -4,18 +4,58 @@
  *
  */
 
-import React from 'react';
-
 import { Option, Select } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-const SelectNumber = ({ intlLabel, error, modifiedData, name, onChange, options, value }) => {
+type SelectNumberProps = {
+  intlLabel: {
+    id: string;
+    defaultMessage: string;
+    values?: object;
+  };
+  error?: string;
+  modifiedData: {
+    default: number;
+    max: number;
+    min: number;
+  };
+  name: string;
+  onChange: (value: {
+    target: {
+      name: string;
+      value: string | number | null;
+      type?: string;
+    };
+  }) => void;
+  options: Array<{
+    metadatas: {
+      intlLabel: {
+        id: string;
+        defaultMessage: string;
+      };
+      disabled?: boolean;
+      hidden?: boolean;
+    };
+    key: string | number;
+    value: string | number;
+  }>;
+  value?: string;
+};
+
+export const SelectNumber = ({
+  intlLabel,
+  error = undefined,
+  modifiedData,
+  name,
+  onChange,
+  options,
+  value = '',
+}: SelectNumberProps) => {
   const { formatMessage } = useIntl();
   const label = formatMessage(intlLabel);
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
 
-  const handleChange = (nextValue) => {
+  const handleChange = (nextValue: string | number) => {
     onChange({ target: { name, value: nextValue, type: 'select' } });
 
     if (!value) {
@@ -36,7 +76,11 @@ const SelectNumber = ({ intlLabel, error, modifiedData, name, onChange, options,
       }
     }
 
-    if (['decimal', 'float', 'integer'].includes(nextValue) && value === 'biginteger') {
+    if (
+      typeof nextValue === 'string' &&
+      ['decimal', 'float', 'integer'].includes(nextValue) &&
+      value === 'biginteger'
+    ) {
       if (modifiedData.default !== undefined && modifiedData.default !== null) {
         onChange({ target: { name: 'default', value: null } });
       }
@@ -75,32 +119,3 @@ SelectNumber.defaultProps = {
   error: undefined,
   value: '',
 };
-
-SelectNumber.propTypes = {
-  error: PropTypes.string,
-  intlLabel: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }).isRequired,
-  modifiedData: PropTypes.object.isRequired,
-  name: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-  options: PropTypes.arrayOf(
-    PropTypes.shape({
-      metadatas: PropTypes.shape({
-        intlLabel: PropTypes.shape({
-          id: PropTypes.string.isRequired,
-          defaultMessage: PropTypes.string.isRequired,
-        }).isRequired,
-        disabled: PropTypes.bool,
-        hidden: PropTypes.bool,
-      }).isRequired,
-      key: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-      value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    }).isRequired
-  ).isRequired,
-  value: PropTypes.string,
-};
-
-export default SelectNumber;
