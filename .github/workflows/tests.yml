@@ -192,6 +192,7 @@ jobs:
     strategy:
       matrix:
         node: [16, 18, 20]
+        shard: [1/2, 2/2]
     services:
       postgres:
         # Docker Hub image
@@ -221,6 +222,7 @@ jobs:
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
+          jestOptions: '--shard=${{ matrix.shard }}'
 
   api_ce_mysql:
     if: needs.changes.outputs.backend == 'true'
@@ -231,6 +233,7 @@ jobs:
       matrix:
         node: [16, 18, 20]
         db_client: ['mysql', 'mysql2']
+        shard: [1/2, 2/2]
     services:
       mysql:
         image: bitnami/mysql:latest
@@ -258,6 +261,7 @@ jobs:
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=${{ matrix.db_client }} --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
+          jestOptions: '--shard=${{ matrix.shard }}'
 
   api_ce_mysql_5:
     if: needs.changes.outputs.backend == 'true'
@@ -268,6 +272,7 @@ jobs:
       matrix:
         node: [16, 18, 20]
         db_client: ['mysql', 'mysql2']
+        shard: [1/2, 2/2]
     services:
       mysql:
         image: bitnami/mysql:5.7
@@ -294,6 +299,7 @@ jobs:
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=${{ matrix.db_client }} --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
+          jestOptions: '--shard=${{ matrix.shard }}'
 
   api_ce_sqlite:
     if: needs.changes.outputs.backend == 'true'
@@ -304,6 +310,7 @@ jobs:
       matrix:
         node: [16, 18, 20]
         sqlite_pkg: ['better-sqlite3', 'sqlite3']
+        shard: [1/2, 2/2]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
@@ -316,6 +323,7 @@ jobs:
           SQLITE_PKG: ${{ matrix.sqlite_pkg }}
         with:
           dbOptions: '--dbclient=sqlite-legacy --dbfile=./tmp/data.db'
+          jestOptions: '--shard=${{ matrix.shard }}'
 
   # EE
   api_ee_pg:
@@ -328,6 +336,7 @@ jobs:
     strategy:
       matrix:
         node: [16, 18, 20]
+        shard: [1/2, 2/2]
     services:
       postgres:
         # Docker Hub image
@@ -358,6 +367,7 @@ jobs:
         with:
           dbOptions: '--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
           runEE: true
+          jestOptions: '--shard=${{ matrix.shard }}'
 
   api_ee_mysql:
     runs-on: ubuntu-latest
@@ -370,6 +380,7 @@ jobs:
       matrix:
         node: [16, 18, 20]
         db_client: ['mysql', 'mysql2']
+        shard: [1/2, 2/2]
     services:
       mysql:
         image: bitnami/mysql:latest
@@ -398,6 +409,7 @@ jobs:
         with:
           dbOptions: '--dbclient=${{ matrix.db_client }} --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
           runEE: true
+          jestOptions: '--shard=${{ matrix.shard }}'
 
   api_ee_sqlite:
     runs-on: ubuntu-latest
@@ -410,6 +422,7 @@ jobs:
       matrix:
         node: [16, 18, 20]
         sqlite_pkg: ['better-sqlite3', 'sqlite3']
+        shard: [1/2, 2/2]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
@@ -423,3 +436,4 @@ jobs:
         with:
           dbOptions: '--dbclient=sqlite --dbfile=./tmp/data.db'
           runEE: true
+          jestOptions: '--shard=${{ matrix.shard }}'
