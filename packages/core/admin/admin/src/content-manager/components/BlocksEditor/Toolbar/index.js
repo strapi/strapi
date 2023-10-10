@@ -451,7 +451,24 @@ const toggleList = (editor, isActive, format) => {
     }
   } else {
     // Retrieve the last node inserted and its path
-    const [lastNode, lastNodePath] = Editor.last(editor, []);
+    const [, lastNodePath] = Editor.last(editor, []);
+
+    const [parentNode] = Editor.parent(editor, lastNodePath, {
+      match: (node) => node.type !== 'text', // makes sure we get a block node, not an inline node
+    });
+
+    // Change the type of the current selection
+    Transforms.insertNodes(
+      editor,
+      {
+        type: isActive ? 'paragraph' : 'list-item',
+        children: [...parentNode.children],
+      },
+      {
+        at: [lastNodePath[0]],
+        select: true,
+      }
+    );
 
     // Remove the last node inserted
     Transforms.removeNodes(editor, {
@@ -462,19 +479,6 @@ const toggleList = (editor, isActive, format) => {
         focus: { path: lastNodePath, offset: 0 },
       },
     });
-
-    // Change the type of the current selection
-    Transforms.insertNodes(
-      editor,
-      {
-        type: isActive ? 'paragraph' : 'list-item',
-        children: [{ ...lastNode }],
-      },
-      {
-        at: [lastNodePath[0]],
-        select: true,
-      }
-    );
 
     // If the selection is now a list item, wrap it inside a list
     if (!isActive) {
