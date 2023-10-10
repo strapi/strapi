@@ -432,21 +432,48 @@ const isListActive = (editor, matchNode) => {
 };
 
 const toggleList = (editor, isActive, format) => {
-  // Delete the parent list so that we're left with only the list items directly
-  Transforms.unwrapNodes(editor, {
-    match: (node) => isListNode(node) && ['ordered', 'unordered'].includes(node.format),
-    split: true,
-  });
+  if (editor.selection) {
+    // Delete the parent list so that we're left with only the list items directly
+    Transforms.unwrapNodes(editor, {
+      match: (node) => isListNode(node) && ['ordered', 'unordered'].includes(node.format),
+      split: true,
+    });
 
-  // Change the type of the current selection
-  Transforms.setNodes(editor, {
-    type: isActive ? 'paragraph' : 'list-item',
-  });
+    // Change the type of the current selection
+    Transforms.setNodes(editor, {
+      type: isActive ? 'paragraph' : 'list-item',
+    });
 
-  // If the selection is now a list item, wrap it inside a list
-  if (!isActive) {
-    const block = { type: 'list', format, children: [] };
-    Transforms.wrapNodes(editor, block);
+    // If the selection is now a list item, wrap it inside a list
+    if (!isActive) {
+      const block = { type: 'list', format, children: [] };
+      Transforms.wrapNodes(editor, block);
+    }
+  } else {
+    // Retrieve the last node inserted and its path
+    const [lastNode, lastNodePath] = Editor.last(editor, []);
+
+    // Remove the last node inserted
+    Transforms.removeNodes(editor, { at: lastNodePath });
+
+    // Change the type of the current selection
+    Transforms.insertNodes(
+      editor,
+      {
+        type: isActive ? 'paragraph' : 'list-item',
+        children: [{ ...lastNode }],
+      },
+      {
+        at: [lastNodePath[0]],
+        select: true,
+      }
+    );
+
+    // If the selection is now a list item, wrap it inside a list
+    if (!isActive) {
+      const block = { type: 'list', format, children: [] };
+      Transforms.wrapNodes(editor, block);
+    }
   }
 };
 
