@@ -278,7 +278,7 @@ const insertEmptyBlockAtLast = (editor) => {
   );
 };
 
-export const BlocksDropdown = ({ disabled }) => {
+const BlocksDropdown = ({ disabled }) => {
   const editor = useSlate();
   const { formatMessage } = useIntl();
   const [isMediaLibraryVisible, setIsMediaLibraryVisible] = React.useState(false);

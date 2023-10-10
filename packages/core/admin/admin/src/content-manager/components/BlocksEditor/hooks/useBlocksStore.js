@@ -232,10 +232,14 @@ const handleEnterKeyOnList = (editor) => {
   }
 };
 
+// The max-height is decided with the design team, the 56px is the height of the toolbar
 const Img = styled.img`
+  max-height: calc(512px - 56px);
   max-width: 100%;
+  object-fit: contain;
 `;
 
+// Added a background color to the image wrapper to make it easier to recognize the image block
 const Image = ({ attributes, children, element }) => {
   if (!element.image) return null;
   const { url, alternativeText, width, height } = element.image;
@@ -243,9 +247,9 @@ const Image = ({ attributes, children, element }) => {
   return (
     <Box {...attributes}>
       {children}
-      <Box contentEditable={false}>
+      <Flex background="neutral100" contentEditable={false} justifyContent="center">
         <Img src={url} alt={alternativeText} width={width} height={height} />
-      </Box>
+      </Flex>
     </Box>
   );
 };

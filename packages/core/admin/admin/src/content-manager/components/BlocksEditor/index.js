@@ -57,6 +57,45 @@ const withImages = (editor) => {
   return editor;
 };
 
+/**
+ * Forces an update of the Slate editor when the value prop changes from outside of Slate.
+ * The root cause is that Slate is not a controlled component: https://github.com/ianstormtaylor/slate/issues/4612
+ * Why not use JSON.stringify(value) as the key?
+ * Because it would force a rerender of the entire editor every time the user types a character.
+ * Why not use the entity id as the key, since it's unique for each locale?
+ * Because it would not solve the problem when using the "fill in from other locale" feature
+ *
+ * @param {import('slate').Descendant[]} value
+ * @returns {{
+ *   key: number,
+ *   incrementSlateUpdatesCount: () => void
+ * }}
+ */
+function useResetKey(value) {
+  // Keep track how how many times Slate detected a change from a user interaction in the editor
+  const slateUpdatesCount = React.useRef(0);
+  // Keep track of how many times the value prop was updated, whether from within editor or from outside
+  const valueUpdatesCount = React.useRef(0);
+  // Use a key to force a rerender of the Slate editor when needed
+  const [key, setKey] = React.useState(0);
+
+  React.useEffect(() => {
+    valueUpdatesCount.current += 1;
+
+    // If the 2 refs are not equal, it means the value was updated from outside
+    if (valueUpdatesCount.current !== slateUpdatesCount.current) {
+      // So we change the key to force a rerender of the Slate editor,
+      // which will pick up the new value through its initialValue prop
+      setKey((previousKey) => previousKey + 1);
+
+      // Then bring the 2 refs back in sync
+      slateUpdatesCount.current = valueUpdatesCount.current;
+    }
+  }, [value]);
+
+  return { key, incrementSlateUpdatesCount: () => (slateUpdatesCount.current += 1) };
+}
+
 const BlocksEditor = React.forwardRef(
   (
     { intlLabel, labelAction, name, disabled, required, error, value, onChange, placeholder, hint },
@@ -92,10 +131,14 @@ const BlocksEditor = React.forwardRef(
       [editor]
     );
 
+    const { key, incrementSlateUpdatesCount } = useResetKey(value);
+
     const handleSlateChange = (state) => {
       const isAstChange = editor.operations.some((op) => op.type !== 'set_selection');
 
       if (isAstChange) {
+        incrementSlateUpdatesCount();
+
         onChange({
           target: { name, value: state, type: 'blocks' },
         });
@@ -116,6 +159,7 @@ const BlocksEditor = React.forwardRef(
             editor={editor}
             initialValue={value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]}
             onChange={handleSlateChange}
+            key={key}
           >
             <InputWrapper direction="column" alignItems="flex-start" height="512px">
               <BlocksToolbar disabled={disabled} />
