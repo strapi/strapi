@@ -185,7 +185,7 @@ jobs:
     strategy:
       matrix:
         node: [16, 18, 20]
-        shard: [1/4, 2/4, 3/4,  4/4]
+        shard: [1/6, 2/6, 3/6, 4/6, 5/6, 6/6]
     services:
       postgres:
         # Docker Hub image
@@ -228,7 +228,7 @@ jobs:
       matrix:
         node: [16, 18, 20]
         db_client: ['mysql', 'mysql2']
-        shard: [1/4, 2/4, 3/4,  4/4]
+        shard: [1/6, 2/6, 3/6, 4/6, 5/6, 6/6]
     services:
       mysql:
         image: bitnami/mysql:latest
@@ -269,7 +269,7 @@ jobs:
       matrix:
         node: [16, 18, 20]
         db_client: ['mysql', 'mysql2']
-        shard: [1/4, 2/4, 3/4,  4/4]
+        shard: [1/6, 2/6, 3/6, 4/6, 5/6, 6/6]
     services:
       mysql:
         image: bitnami/mysql:5.7
@@ -309,7 +309,7 @@ jobs:
       matrix:
         node: [16, 18, 20]
         sqlite_pkg: ['better-sqlite3', 'sqlite3']
-        shard: [1/4, 2/4, 3/4,  4/4]
+        shard: [1/6, 2/6, 3/6, 4/6, 5/6, 6/6]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
@@ -337,7 +337,7 @@ jobs:
     strategy:
       matrix:
         node: [16, 18, 20]
-        shard: [1/4, 2/4, 3/4,  4/4]
+        shard: [1/6, 2/6, 3/6, 4/6, 5/6, 6/6]
     services:
       postgres:
         # Docker Hub image
@@ -383,7 +383,7 @@ jobs:
       matrix:
         node: [16, 18, 20]
         db_client: ['mysql', 'mysql2']
-        shard: [1/4, 2/4, 3/4,  4/4]
+        shard: [1/6, 2/6, 3/6, 4/6, 5/6, 6/6]
     services:
       mysql:
         image: bitnami/mysql:latest
@@ -427,7 +427,7 @@ jobs:
       matrix:
         node: [16, 18, 20]
         sqlite_pkg: ['better-sqlite3', 'sqlite3']
-        shard: [1/4, 2/4, 3/4,  4/4]
+        shard: [1/6, 2/6, 3/6, 4/6, 5/6, 6/6]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
