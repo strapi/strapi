@@ -51,14 +51,14 @@ jobs:
       - uses: nrwl/nx-set-shas@v3
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-      - name: Run build
-        run: yarn nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
       - name: Run lint
         run: yarn nx affected --target=lint --parallel --nx-ignore-cycles
 
   typescript:
     name: 'typescript'
-    needs: [changes]
+    needs: [changes, lint]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -70,8 +70,8 @@ jobs:
       - uses: nrwl/nx-set-shas@v3
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-      - name: Run build
-        run: yarn nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
       - name: TSC for packages
         run: yarn nx affected --target=test:ts --nx-ignore-cycles
       - name: TSC for back
@@ -81,7 +81,7 @@ jobs:
 
   unit_back:
     name: 'unit_back (node: ${{ matrix.node }})'
-    needs: [changes, lint, typescript]
+    needs: [changes, lint]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -96,14 +96,14 @@ jobs:
       - uses: nrwl/nx-set-shas@v3
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-      - name: Run build
-        run: yarn build --skip-nx-cache
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
       - name: Run tests
         run: yarn nx affected --target=test:unit --nx-ignore-cycles
 
   unit_front:
     name: 'unit_front (node: ${{ matrix.node }})'
-    needs: [changes, lint, typescript]
+    needs: [changes, lint]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -118,8 +118,8 @@ jobs:
       - uses: nrwl/nx-set-shas@v3
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-      - name: Run build:ts for admin-test-utils & helper-plugin
-        run: yarn build --projects=@strapi/admin-test-utils,@strapi/helper-plugin --skip-nx-cache
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
       - name: Run test
         run: yarn nx affected --target=test:front --nx-ignore-cycles
 
@@ -137,8 +137,8 @@ jobs:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-      - name: Build
-        run: yarn build --projects=@strapi/admin,@strapi/helper-plugin
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
 
   e2e:
     timeout-minutes: 60
@@ -212,6 +212,8 @@ jobs:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
@@ -251,6 +253,8 @@ jobs:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=${{ matrix.db_client }} --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
@@ -289,6 +293,8 @@ jobs:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=${{ matrix.db_client }} --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
@@ -311,6 +317,8 @@ jobs:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
       - uses: ./.github/actions/run-api-tests
         env:
           SQLITE_PKG: ${{ matrix.sqlite_pkg }}
@@ -356,6 +364,8 @@ jobs:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
@@ -398,6 +408,8 @@ jobs:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=${{ matrix.db_client }} --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
@@ -423,6 +435,8 @@ jobs:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
       - uses: ./.github/actions/run-api-tests
         env:
           SQLITE_PKG: ${{ matrix.sqlite_pkg }}
