@@ -4,6 +4,12 @@ import { createContext } from 'react';
 import type { SchemaType } from '../types';
 import type { UID } from '@strapi/types';
 
+export type Component = {
+  uid: UID.Component;
+  schema: {
+    displayName: string;
+  };
+};
 export interface CustomFieldAttributeParams {
   attributeToSet: Record<string, any>;
   forTarget: SchemaType;
@@ -48,7 +54,7 @@ interface DataManagerContextValue {
     componentUID: UID.Component
   ) => void;
   components: Record<string, any>;
-  componentsGroupedByCategory: Record<string, any[]>;
+  componentsGroupedByCategory: Record<string, Component[]>;
   componentsThatHaveOtherComponentInTheirAttributes: any[]; // Define the actual type
   contentTypes: Record<string, any>;
   initialData: Record<string, any>;
