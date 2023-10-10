@@ -79,9 +79,6 @@
     "rimraf": "3.0.2",
     "typescript": "5.2.2"
   },
-  "peerDependencies": {
-    "@strapi/strapi": "^4.13.7"
-  },
   "engines": {
     "node": ">=16.0.0 <=20.x.x",
     "npm": ">=6.0.0"
