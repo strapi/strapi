@@ -56,6 +56,12 @@ const addFixtures = () => {
   });
 };
 
+const findDBDocument = async (where) => {
+  const dbDocument = await strapi.query('api::document.document').findOne({ where });
+
+  return dbDocument;
+};
+
 const init = async () => {
   addSchemas();
   addFixtures();
@@ -79,9 +85,7 @@ describe('Document Service - Find One', () => {
   });
 
   it('find one selects by document id', async () => {
-    const documentDb = await strapi
-      .query('api::document.document')
-      .findOne({ where: { name: { $eq: '3 Document A' } } });
+    const documentDb = await findDBDocument({ name: '3 Document A' });
 
     const document = await strapi.documentService.findOne(
       'api::document.document',
@@ -89,5 +93,19 @@ describe('Document Service - Find One', () => {
     );
 
     expect(document).toMatchObject(documentDb);
+  });
+
+  it('update a document', async () => {
+    const documentDb = await findDBDocument({ name: '3 Document A' });
+
+    const document = await strapi.documentService.update(
+      'api::document.document',
+      documentDb.documentId,
+      {
+        data: { name: 'Updated Document' },
+      }
+    );
+
+    expect(document).toMatchObject({ name: 'Updated Document' });
   });
 });
