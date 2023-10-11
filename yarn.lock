@@ -7558,7 +7558,7 @@ __metadata:
     typescript: 5.2.2
     ws: 8.13.0
   peerDependencies:
-    "@strapi/strapi": ^4.13.7
+    "@strapi/strapi": ^4.14.3
   languageName: unknown
   linkType: soft
 
@@ -7566,13 +7566,16 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/database@workspace:packages/core/database"
   dependencies:
+    "@strapi/pack-up": "workspace:*"
     "@strapi/utils": 4.14.3
     date-fns: 2.30.0
     debug: 4.3.4
+    eslint-config-custom: 4.14.3
     fs-extra: 10.0.0
     knex: 2.5.0
     lodash: 4.17.21
     semver: 7.5.4
+    tsconfig: 4.14.3
     umzug: 3.2.1
   languageName: unknown
   linkType: soft
