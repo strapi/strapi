@@ -1,6 +1,6 @@
 {
   "name": "@strapi/generate-new",
-  "version": "4.14.3",
+  "version": "4.14.4",
   "description": "Generate a new Strapi application.",
   "keywords": [
     "generate",
@@ -36,11 +36,11 @@
   "scripts": {
     "build": "run -T tsc && run copy-files",
     "build:ts": "run build",
-    "watch": "run -T tsc -w --preserveWatchOutput",
     "clean": "run -T rimraf ./dist",
-    "prepublishOnly": "yarn clean && yarn build",
     "copy-files": "copyfiles -u 1 -a 'src/resources/files/**/*' 'src/resources/dot-files/**/*' 'src/resources/**/*.template' dist",
-    "lint": "run -T eslint ."
+    "lint": "run -T eslint .",
+    "prepublishOnly": "yarn clean && yarn build",
+    "watch": "run -T tsc -w --preserveWatchOutput"
   },
   "dependencies": {
     "@sentry/node": "6.19.7",
@@ -55,11 +55,11 @@
     "semver": "7.5.4",
     "tar": "6.1.13"
   },
+  "devDependencies": {
+    "copyfiles": "2.4.1"
+  },
   "engines": {
     "node": ">=16.0.0 <=20.x.x",
     "npm": ">=6.0.0"
-  },
-  "devDependencies": {
-    "copyfiles": "2.4.1"
   }
 }
