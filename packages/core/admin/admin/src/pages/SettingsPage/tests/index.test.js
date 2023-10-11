@@ -22,6 +22,7 @@ jest.mock('react-intl', () => ({
   FormattedMessage: ({ id }) => id,
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => id) }),
 }));
+
 jest.mock('../pages/ApplicationInfosPage', () => () => {
   return <h1>App infos</h1>;
 });

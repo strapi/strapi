@@ -95,7 +95,7 @@ const Providers = ({
 
 Providers.propTypes = {
   authLogo: PropTypes.oneOfType([PropTypes.string, PropTypes.any]).isRequired,
-  children: PropTypes.element.isRequired,
+  children: PropTypes.node.isRequired,
   components: PropTypes.object.isRequired,
   customFields: PropTypes.object.isRequired,
   fields: PropTypes.object.isRequired,
