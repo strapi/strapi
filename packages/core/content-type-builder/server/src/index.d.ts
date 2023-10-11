@@ -1,1 +1,0 @@
-import '@strapi/types';
