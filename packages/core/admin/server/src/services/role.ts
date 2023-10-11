@@ -9,11 +9,11 @@ import { Entity } from '@strapi/types';
 
 import permissionDomain, { type Permission } from '../domain/permission';
 import { AdminUser, type AdminRole } from '../domain/user';
+import type { Action } from '../domain/action';
 
 import { validatePermissionsExist } from '../validation/permission';
 import { constants as roleConstants } from './constants';
 import { getService } from '../utils';
-import { Action } from '../domain/action';
 
 const { SUPER_ADMIN_CODE, CONTENT_TYPE_SECTION } = roleConstants;
 
@@ -108,12 +108,16 @@ const find = (params = {}, populate: any) => {
   return strapi.query('admin::role').findMany({ where: params, populate });
 };
 
+export type AdminRoleWithUsersCount = AdminRole & { usersCount: number };
+
 /**
  * Find all roles in database
- * @returns {Promise<array>}
  */
-const findAllWithUsersCount = async (params: any) => {
-  const roles = (await strapi.entityService.findMany('admin::role', params)) as any;
+const findAllWithUsersCount = async (params: any): Promise<AdminRoleWithUsersCount[]> => {
+  const roles = (await strapi.entityService.findMany(
+    'admin::role',
+    params
+  )) as AdminRoleWithUsersCount[];
 
   for (const role of roles) {
     role.usersCount = await getUsersCount(role.id);
@@ -295,7 +299,6 @@ const getDefaultPluginPermissions = ({ isAuthor = false } = {}) => {
 
 /** Display a warning if the role superAdmin doesn't exist
  *  or if the role is not assigned to at least one user
- * @returns {Promise<>}
  */
 const displayWarningIfNoSuperAdmin = async () => {
   const superAdminRole = await getSuperAdminWithUsersCount();
@@ -313,7 +316,7 @@ const displayWarningIfNoSuperAdmin = async () => {
  * @param roleId - role ID
  * @param {Array<Permission{action,subject,fields,conditions}>} permissions - permissions to assign to the role
  */
-const assignPermissions = async (roleId: Entity.ID, permissions = []) => {
+const assignPermissions = async (roleId: Entity.ID, permissions = [] as Permission[]) => {
   await validatePermissionsExist(permissions);
 
   // Internal actions are not handled by the role service, so any permission
@@ -323,7 +326,7 @@ const assignPermissions = async (roleId: Entity.ID, permissions = []) => {
     .filter((action) => action.section === 'internal')
     .map((action) => action.actionId);
 
-  const superAdmin = (await getService('role').getSuperAdmin()) as any;
+  const superAdmin = await getService('role').getSuperAdmin();
   const isSuperAdmin = superAdmin && superAdmin.id === roleId;
   const assignRole = set('role', roleId);
 
@@ -331,35 +334,35 @@ const assignPermissions = async (roleId: Entity.ID, permissions = []) => {
     // Add the role attribute to every permission
     .map(assignRole)
     // Transform each permission into a Permission instance
-    // @ts-expect-error
+    // @ts-expect-error - lodash set doesn't resolve the type appropriately
     .map(permissionDomain.create);
 
-  const existingPermissions = (await getService('permission').findMany({
+  const existingPermissions = await getService('permission').findMany({
     where: { role: { id: roleId } },
     populate: ['role'],
-  })) as any;
+  });
 
   const permissionsToAdd = differenceWith(
     arePermissionsEqual,
     permissionsWithRole,
     existingPermissions
-  ).filter((permission: any) => !internalActions.includes(permission.action));
+  ).filter((permission: Permission) => !internalActions.includes(permission.action));
 
   const permissionsToDelete = differenceWith(
     arePermissionsEqual,
     existingPermissions,
     permissionsWithRole
-    // @ts-expect-error
-  ).filter((permission: any) => !internalActions.includes(permission.action));
+  ).filter((permission: Permission) => !internalActions.includes(permission.action));
 
-  const permissionsToReturn = differenceBy('id', permissionsToDelete, existingPermissions) as any;
+  const permissionsToReturn = differenceBy('id', permissionsToDelete, existingPermissions);
 
   if (permissionsToDelete.length > 0) {
+    // @ts-expect-error - lodash prop doesn't resolve the type appropriately
     await getService('permission').deleteByIds(permissionsToDelete.map(prop('id')));
   }
 
   if (permissionsToAdd.length > 0) {
-    const newPermissions = (await addPermissions(roleId, permissionsToAdd)) as any;
+    const newPermissions = await addPermissions(roleId, permissionsToAdd);
     permissionsToReturn.push(...newPermissions);
   }
 
@@ -376,7 +379,8 @@ const addPermissions = async (roleId: Entity.ID, permissions: any) => {
 
   const permissionsWithRole = permissions
     .map(set('role', roleId))
-    // @ts-expect-error
+    // @ts-expect-error - refactor domain/permission Condition type, as it's now expecting
+    // a string but it should be a Condition interface
     .map(sanitizeConditions(conditionProvider))
     .map(permissionDomain.create);
 
@@ -403,7 +407,9 @@ const resetSuperAdminPermissions = async () => {
   const otherActions = allActions.filter((action) => !isContentTypeAction(action));
 
   // First, get the content-types permissions
-  const permissions = contentTypeService.getPermissionsWithNestedFields(contentTypesActions);
+  const permissions = contentTypeService.getPermissionsWithNestedFields(
+    contentTypesActions
+  ) as Permission[];
 
   // Then add every other permission
   const otherPermissions = otherActions.reduce((acc, action) => {
@@ -418,13 +424,13 @@ const resetSuperAdminPermissions = async () => {
     }
 
     return acc;
-  }, [] as any);
+  }, [] as Permission[]);
 
   permissions.push(...otherPermissions);
 
   const transformedPermissions = (await hooks.willResetSuperAdminPermissions.call(
     permissions
-  )) as any;
+  )) as Permission[];
 
   await assignPermissions(superAdminRole.id, transformedPermissions);
 };

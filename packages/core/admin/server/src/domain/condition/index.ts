@@ -1,5 +1,4 @@
 import { pipe, merge, set, pick } from 'lodash/fp';
-import { Utils } from '@strapi/types';
 
 export type Condition = {
   id: string;

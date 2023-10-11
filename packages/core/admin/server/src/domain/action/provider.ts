@@ -3,6 +3,7 @@ import { validateRegisterProviderAction } from '../../validation/action-provider
 
 import domain from './index';
 import type { Action, CreateActionPayload } from './index';
+import type { Permission } from '../permission';
 
 type Options = Parameters<typeof providerFactory>['0'];
 
@@ -45,7 +46,7 @@ const createActionProvider = (options?: Options) => {
       return this;
     },
 
-    async appliesToProperty(property: string, actionId: string, subject: string) {
+    async appliesToProperty(property: string, actionId: string, subject: Permission['subject']) {
       const action = provider.get(actionId) as Action | undefined;
       if (!action) {
         return false;
