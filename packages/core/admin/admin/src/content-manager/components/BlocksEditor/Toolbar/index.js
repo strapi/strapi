@@ -154,12 +154,13 @@ const toggleBlock = (editor, value) => {
     // When there is a selection, update the existing block in the tree
     Transforms.setNodes(editor, blockProperties);
   } else {
-    // Retrieve the last node inserted and its path
+    /**
+     * When there is no selection, we want to insert a new block just after the last node inserted and prevent the code to add an empty paragraph between them.
+     */
     const [, lastNodePath] = Editor.last(editor, []);
     const [parentNode] = Editor.parent(editor, lastNodePath, {
       match: (node) => node.type !== 'text', // makes sure we get a block node, not an inline node
     });
-    // Remove the last node inserted
     Transforms.removeNodes(editor, {
       void: true,
       hanging: true,
@@ -168,12 +169,11 @@ const toggleBlock = (editor, value) => {
         focus: { path: lastNodePath, offset: 0 },
       },
     });
-    // Otherwise, add a new block to the tree
     Transforms.insertNodes(
       editor,
       {
         ...blockProperties,
-        children: [...parentNode.children],
+        children: parentNode.children,
       },
       {
         at: [lastNodePath[0]],
