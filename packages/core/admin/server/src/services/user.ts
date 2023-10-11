@@ -14,7 +14,10 @@ const { ValidationError } = errors;
 const sanitizeUserRoles = (role: AdminRole): SanitizedAdminRole =>
   _.pick(role, ['id', 'name', 'description', 'code']);
 
-export type SanitizedAdminRole = Omit<AdminRole, 'id' | 'name' | 'description' | 'code'>;
+export type SanitizedAdminRole = Omit<
+  AdminRole,
+  'id' | 'name' | 'description' | 'code' | 'users' | 'permissions'
+>;
 export type SanitizedAdminUser = Omit<
   AdminUser,
   'password' | 'resetPasswordToken' | 'registrationToken' | 'roles'
