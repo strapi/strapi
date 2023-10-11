@@ -199,6 +199,8 @@ const ImageDialog = ({ handleClose }) => {
   const MediaLibraryDialog = components['media-library'];
 
   const insertImages = (images) => {
+    // Image node created using select or existing selection node needs to be deleted before adding new image nodes
+    Transforms.removeNodes(editor);
     images.forEach((img) => {
       const image = { type: 'image', image: img, children: [{ type: 'text', text: '' }] };
       Transforms.insertNodes(editor, image);
@@ -290,10 +292,7 @@ const BlocksDropdown = ({ disabled }) => {
    * @param {string} optionKey - key of the heading selected
    */
   const selectOption = (optionKey) => {
-    if (optionKey === 'image') {
-      // Image node created using select or existing selection node needs to be deleted before adding new image nodes
-      Transforms.removeNodes(editor);
-    } else if (['list-ordered', 'list-unordered'].includes(optionKey)) {
+    if (['list-ordered', 'list-unordered'].includes(optionKey)) {
       // retrieve the list format
       const listFormat = blocks[optionKey].value.format;
 
@@ -302,7 +301,7 @@ const BlocksDropdown = ({ disabled }) => {
 
       // toggle the list
       toggleList(editor, isActive, listFormat);
-    } else {
+    } else if (optionKey !== 'image') {
       toggleBlock(editor, blocks[optionKey].value);
     }
 
