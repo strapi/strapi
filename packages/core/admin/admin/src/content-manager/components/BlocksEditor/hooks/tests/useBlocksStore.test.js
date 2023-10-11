@@ -221,7 +221,7 @@ describe('useBlocksStore', () => {
     const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
 
     render(
-      result.current['heading-six'].renderElement({
+      result.current['heading-two'].renderElement({
         children: 'Some heading',
         element: { level: 2 },
         attributes: {},

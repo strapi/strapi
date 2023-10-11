@@ -1,12 +1,16 @@
 import { renderHook, waitFor } from '@testing-library/react';
 
-import { useEnterprise } from '../useEnterprise';
+import { useEnterprise, UseEnterpriseOptions } from '../useEnterprise';
 
 const CE_DATA_FIXTURE = ['CE'];
 const EE_DATA_FIXTURE = ['EE'];
 
-function setup(...args) {
-  return renderHook(() => useEnterprise(...args));
+function setup(
+  ceData: any,
+  eeCallback: () => Promise<any>,
+  options?: UseEnterpriseOptions<any, any, any>
+) {
+  return renderHook(() => useEnterprise(ceData, eeCallback, options));
 }
 
 describe('useEnterprise (CE)', () => {
@@ -36,7 +40,7 @@ describe('useEnterprise (EE)', () => {
 
   test('Combines CE and EE data', async () => {
     const { result } = setup(CE_DATA_FIXTURE, async () => EE_DATA_FIXTURE, {
-      combine(ceData, eeData) {
+      combine(ceData: string[], eeData: string[]) {
         return [...ceData, ...eeData];
       },
     });

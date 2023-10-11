@@ -128,7 +128,10 @@ const ListView = () => {
                     onOpenModalAddField({ forTarget, targetUid });
                   }}
                 >
-                  {formatMessage({ id: getTrad('button.attributes.add.another') })}
+                  {formatMessage({
+                    id: getTrad('button.attributes.add.another'),
+                    defaultMessage: 'Add another field',
+                  })}
                 </Button>
               )}
               <Button
