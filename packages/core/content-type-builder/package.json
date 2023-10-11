@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-content-type-builder",
-  "version": "4.14.3",
+  "version": "4.14.4",
   "description": "Strapi plugin to create content type",
   "repository": {
     "type": "git",
@@ -20,21 +20,21 @@
     }
   ],
   "scripts": {
-    "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch",
+    "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
-    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
+    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
-    "lint": "run -T eslint ."
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch"
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/design-system": "1.12.0",
-    "@strapi/generators": "4.14.3",
-    "@strapi/helper-plugin": "4.14.3",
+    "@strapi/generators": "4.14.4",
+    "@strapi/helper-plugin": "4.14.4",
     "@strapi/icons": "1.12.0",
-    "@strapi/utils": "4.14.3",
+    "@strapi/utils": "4.14.4",
     "fs-extra": "10.0.0",
     "immer": "9.0.19",
     "lodash": "4.17.21",
@@ -49,7 +49,7 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "4.14.3",
+    "@strapi/admin": "4.14.4",
     "@testing-library/react": "14.0.0",
     "@testing-library/react-hooks": "8.0.1",
     "history": "^4.9.0",
