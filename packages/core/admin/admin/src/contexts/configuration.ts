@@ -1,17 +1,25 @@
 import { createContext } from 'react';
 
-interface ConfigurationsContextValue {
-  showReleaseNotification: boolean;
+export interface ConfigurationContextValue {
   logos: {
-    auth: { custom?: string; default: string };
+    auth: { custom?: string | null; default: string };
+    menu: { custom?: string | null; default: string };
   };
+  showTutorials: boolean;
+  showReleaseNotification: boolean;
+  updateProjectSettings: (settings: { authLogo?: string; menuLogo?: string }) => void;
 }
 
-const ConfigurationsContext = createContext<ConfigurationsContextValue>({
-  showReleaseNotification: false,
+const ConfigurationContext = createContext<ConfigurationContextValue>({
   logos: {
     auth: { default: '' },
+    menu: { default: '' },
+  },
+  showTutorials: false,
+  showReleaseNotification: false,
+  updateProjectSettings: () => {
+    throw new Error('updateProjectSettings was not implemented');
   },
 });
 
-export { ConfigurationsContext };
+export { ConfigurationContext };
