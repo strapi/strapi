@@ -508,17 +508,17 @@ const LinkButton = ({ disabled }) => {
   };
 
   const isLinkDisabled = () => {
-    // Always disable the whole editor is disabled
+    // Always disabled when the whole editor is disabled
     if (disabled) {
       return true;
     }
 
-    // Always enable when there's no selection
+    // Always enabled when there's no selection
     if (!editor.selection) {
       return false;
     }
 
-    // Get the block nodes closest to the anchor and focus
+    // Get the block node closest to the anchor and focus
     const anchorNodeEntry = Editor.above(editor, {
       at: editor.selection.anchor,
       match: (node) => node.type !== 'text',
@@ -528,7 +528,7 @@ const LinkButton = ({ disabled }) => {
       match: (node) => node.type !== 'text',
     });
 
-    // Disable if the anchor and focus are not in the same block
+    // Disabled if the anchor and focus are not in the same block
     return anchorNodeEntry[0] !== focusNodeEntry[0];
   };
 
