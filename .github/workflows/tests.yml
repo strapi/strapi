@@ -47,8 +47,6 @@ jobs:
       - uses: nrwl/nx-set-shas@v3
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-      - name: Monorepo build
-        uses: ./.github/actions/run-build
       - name: Run lint
         run: yarn nx affected --target=lint --parallel --nx-ignore-cycles
 
