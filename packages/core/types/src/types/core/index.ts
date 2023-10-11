@@ -1,4 +1,3 @@
-export type * as Config from './config';
 export type * as Attribute from './attributes';
 export type * as Schema from './schemas';
 export type * as Plugin from './plugins';

@@ -28,6 +28,9 @@ import type { Container } from './container';
 
 export type * from './types';
 
+// TODO add this to ./types/core when the ts-lint (Multiple import/export error with same name) issue is fixed
+export type * as Config from './types/core/config';
+
 export {
   Container,
   Server,
