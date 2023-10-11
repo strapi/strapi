@@ -67,7 +67,7 @@ export type Any =
   | Attribute.JSON
   | Attribute.Media<Attribute.MediaKind | undefined, boolean>
   | Attribute.Password
-  | Attribute.Relation<Common.UID.Schema, Attribute.RelationKind.Any, Common.UID.Schema>
+  | Attribute.Relation
   | Attribute.RichText
   | Attribute.String
   | Attribute.Text
