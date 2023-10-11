@@ -31,30 +31,10 @@ window.ResizeObserver = ResizeObserver;
  * This is to stop pollution, you shouldn't need to log _anything_ to the console
  * for tests.
  */
-
-const error = console.error;
-const warn = console.warn;
-const log = console.log;
-const info = console.info;
 window.console = {
   ...window.console,
-  info(...args: any[]) {
-    info(...args);
-    if (process.env.CI) {
-      throw new Error(format(...args));
-    }
-  },
-  log(...args: any[]) {
-    log(...args);
-    if (process.env.CI) {
-      throw new Error(format(...args));
-    }
-  },
   warn(...args: any[]) {
-    warn(...args);
-    if (process.env.CI) {
-      throw new Error(format(...args));
-    }
+    throw new Error(format(...args));
   },
   error(...args: any[]) {
     const message = format(...args);
@@ -72,10 +52,7 @@ window.console = {
     ) {
       // do nothing
     } else {
-      error(...args);
-      if (process.env.CI) {
-        throw new Error(message);
-      }
+      throw new Error(message);
     }
   },
 };
