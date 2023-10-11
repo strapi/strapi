@@ -31,6 +31,7 @@ const INTERNAL_PLUGINS = [
   '@strapi/plugin-content-type-builder',
   '@strapi/plugin-email',
   '@strapi/plugin-upload',
+  '@strapi/content-releases',
 ];
 
 const isStrapiPlugin = (info: PluginInfo) => get('strapi.kind', info) === 'plugin';
