@@ -54,6 +54,9 @@ updates:
           - 'webpack-cli'
           - 'webpack-dev-server'
 
+    commit-message:
+      prefix: 'chore'
+      include: 'scope'
     schedule:
       interval: weekly
       day: sunday
@@ -78,6 +81,9 @@ updates:
   - package-ecosystem: github-actions
     open-pull-requests-limit: 10
     directory: /
+    commit-message:
+      prefix: 'chore'
+      include: 'scope'
     schedule:
       interval: weekly
       day: sunday

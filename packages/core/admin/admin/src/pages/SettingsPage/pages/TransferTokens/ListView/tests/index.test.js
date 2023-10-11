@@ -11,8 +11,8 @@ import { Provider } from 'react-redux';
 import { Route, Router } from 'react-router-dom';
 import { createStore } from 'redux';
 
-import Theme from '../../../../../../components/Theme';
-import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
+import { Theme } from '../../../../../../components/Theme';
+import { ThemeToggleProvider } from '../../../../../../components/ThemeToggleProvider';
 import ListView from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
