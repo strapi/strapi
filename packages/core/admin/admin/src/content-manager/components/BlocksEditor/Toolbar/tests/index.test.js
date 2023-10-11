@@ -32,7 +32,10 @@ const mixedInitialValue = [
   {
     type: 'heading',
     level: 1,
-    children: [{ type: 'text', text: 'A heading one' }],
+    children: [
+      { type: 'text', text: 'A heading one' },
+      { type: 'text', text: ' with modifiers', bold: true },
+    ],
   },
   {
     type: 'paragraph',
@@ -432,5 +435,26 @@ describe('BlocksEditor toolbar', () => {
     // The dropdown should show only one option selected which is the block content in the first row
     const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
     expect(within(blocksDropdown).getByText(/heading 1/i)).toBeInTheDocument();
+  });
+
+  it('should disable the link button when multiple blocks are selected', async () => {
+    setup(mixedInitialValue);
+
+    // Set the selection to cover the first and second
+    await select({
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [1, 0], offset: 0 },
+    });
+
+    const linkButton = screen.getByLabelText(/link/i);
+    expect(linkButton).toBeDisabled();
+
+    // Set the selection to a range inside the same block node
+    await select({
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 1], offset: 2 },
+    });
+
+    expect(linkButton).not.toBeDisabled();
   });
 });

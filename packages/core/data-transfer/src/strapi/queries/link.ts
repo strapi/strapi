@@ -197,7 +197,11 @@ export const createLinkQuery = (strapi: LoadedStrapi, trx?: Knex.Transaction) =>
 
       const payload = {};
 
-      if (attribute.joinColumn) {
+      if (attribute.type !== 'relation') {
+        throw new Error(`Attribute ${left.field} is not a relation`);
+      }
+
+      if ('joinColumn' in attribute && attribute.joinColumn) {
         const joinColumnName = attribute.joinColumn.name;
 
         // Note: this addSchema may not be necessary, but is added for safety
@@ -210,50 +214,45 @@ export const createLinkQuery = (strapi: LoadedStrapi, trx?: Knex.Transaction) =>
         await qb;
       }
 
-      if (attribute.joinTable) {
-        const {
-          name,
-          joinColumn,
-          inverseJoinColumn,
-          orderColumnName,
-          inverseOrderColumnName,
-          morphColumn,
-        } = attribute.joinTable;
+      if ('joinTable' in attribute && attribute.joinTable) {
+        const { joinTable } = attribute;
 
-        if (joinColumn) {
-          Object.assign(payload, { [joinColumn.name]: left.ref });
+        if (joinTable.joinColumn) {
+          Object.assign(payload, { [joinTable.joinColumn.name]: left.ref });
         }
 
         const assignInverseColumn = () => {
-          if (inverseJoinColumn) {
+          if ('inverseJoinColumn' in joinTable && joinTable.inverseJoinColumn) {
             Object.assign(payload, {
-              [inverseJoinColumn.name]: right.ref,
+              [joinTable.inverseJoinColumn.name]: right.ref,
             });
           }
         };
 
         const assignOrderColumns = () => {
-          if (orderColumnName) {
-            Object.assign(payload, { [orderColumnName]: left.pos ?? null });
+          if ('orderColumnName' in joinTable && joinTable.orderColumnName) {
+            Object.assign(payload, { [joinTable.orderColumnName]: left.pos ?? null });
           }
 
-          if (inverseOrderColumnName) {
-            Object.assign(payload, { [inverseOrderColumnName]: right.pos ?? null });
+          if ('inverseOrderColumnName' in joinTable && joinTable.inverseOrderColumnName) {
+            Object.assign(payload, { [joinTable.inverseOrderColumnName]: right.pos ?? null });
           }
         };
 
         const assignMorphColumns = () => {
-          const { idColumn, typeColumn } = morphColumn ?? {};
+          if ('morphColumn' in joinTable && joinTable.morphColumn) {
+            const { idColumn, typeColumn } = joinTable.morphColumn ?? {};
 
-          if (idColumn) {
-            Object.assign(payload, { [idColumn.name]: right.ref });
+            if (idColumn) {
+              Object.assign(payload, { [idColumn.name]: right.ref });
+            }
+
+            if (typeColumn) {
+              Object.assign(payload, { [typeColumn.name]: right.type });
+            }
+
+            Object.assign(payload, { order: right.pos ?? null, field: right.field ?? null });
           }
-
-          if (typeColumn) {
-            Object.assign(payload, { [typeColumn.name]: right.type });
-          }
-
-          Object.assign(payload, { order: right.pos ?? null, field: right.field ?? null });
         };
 
         if (kind === 'relation.basic' || kind === 'relation.circular') {
@@ -266,7 +265,7 @@ export const createLinkQuery = (strapi: LoadedStrapi, trx?: Knex.Transaction) =>
 
         assignOrderColumns();
 
-        const qb = connection.insert(payload).into(addSchema(name));
+        const qb = connection.insert(payload).into(addSchema(joinTable.name));
         if (trx) {
           qb.transacting(trx);
         }
