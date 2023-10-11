@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Duration, intervalToDuration, isPast } from 'date-fns';
 import { useIntl } from 'react-intl';
 

@@ -21,7 +21,7 @@ import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 
-import PrivateRoute from '../../components/PrivateRoute';
+import { PrivateRoute } from '../../components/PrivateRoute';
 import { ADMIN_PERMISSIONS_CE } from '../../constants';
 import { useConfigurations } from '../../hooks';
 import { useEnterprise } from '../../hooks/useEnterprise';

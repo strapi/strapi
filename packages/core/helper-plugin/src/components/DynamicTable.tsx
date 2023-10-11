@@ -1,4 +1,4 @@
-import React, { Children, cloneElement, useState } from 'react';
+import * as React from 'react';
 
 import {
   Button,
@@ -67,11 +67,11 @@ const Table = ({
   withMainAction = false,
   renderBulkActionsBar,
   ...rest
-}: TableProps<any>) => {
-  const [selectedEntries, setSelectedEntries] = useState<Array<number | string>>([]);
-  const [showConfirmDeleteAll, setShowConfirmDeleteAll] = useState(false);
-  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-  const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
+}: TableProps<{ id: string }>) => {
+  const [selectedEntries, setSelectedEntries] = React.useState<Array<number | string>>([]);
+  const [showConfirmDeleteAll, setShowConfirmDeleteAll] = React.useState(false);
+  const [showConfirmDelete, setShowConfirmDelete] = React.useState(false);
+  const [isConfirmButtonLoading, setIsConfirmButtonLoading] = React.useState(false);
   const [{ query }] = useQueryParams();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -209,8 +209,8 @@ const Table = ({
             action={action}
           />
         ) : (
-          Children.toArray(children).map((child) =>
-            cloneElement(child as React.ReactElement<any>, {
+          React.Children.toArray(children).map((child) =>
+            React.cloneElement(child as React.ReactElement, {
               entriesToDelete: selectedEntries,
               onClickDelete: handleClickDelete,
               onSelectRow: handleSelectRow,

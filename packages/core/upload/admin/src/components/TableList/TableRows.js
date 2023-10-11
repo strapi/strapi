@@ -46,7 +46,7 @@ export const TableRows = ({
               fn: () => handleRowClickFn(element, contentType, id, path),
             })}
           >
-            <Td {...stopPropagation}>
+            <Td onClick={(e) => e.stopPropagation()}>
               <BaseCheckbox
                 aria-label={formatMessage(
                   {
