@@ -171,7 +171,7 @@ const NpsSurvey = () => {
       onError() {
         toggleNotification({
           type: 'warning',
-          message: formatMessage({ id: 'notification.error' }),
+          message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
         });
       },
     }

@@ -83,7 +83,7 @@ function DynamicZoneList({ customRowComponent, components, addComponent, name, t
                   <Typography variant="pi" fontWeight="bold" textColor="primary600">
                     {formatMessage({
                       id: getTrad('button.component.add'),
-                      formatMessage: 'Add a component',
+                      defaultMessage: 'Add a component',
                     })}
                   </Typography>
                 </ComponentStack>
