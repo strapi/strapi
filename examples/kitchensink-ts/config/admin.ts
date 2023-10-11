@@ -10,6 +10,9 @@ const adminConfig = ({ env }) => ({
       salt: env('TRANSFER_TOKEN_SALT', 'example-salt'),
     },
   },
+  flags: {
+    nps: env.bool('FLAG_NPS', true),
+  },
 });
 
 export default adminConfig;

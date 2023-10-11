@@ -2,7 +2,7 @@ import React from 'react';
 
 import PropTypes from 'prop-types';
 
-import { PermissionsDataManagerContext } from '../../../../../../../contexts';
+import { PermissionsDataManagerContext } from '../../hooks/usePermissionsDataManager';
 
 const PermissionsDataManagerProvider = ({ children, value }) => {
   return (

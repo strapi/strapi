@@ -2,6 +2,8 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import { InlineConfig, createLogger } from 'vite';
 
+import { resolveConfigProperty } from '../../core/config';
+
 import type { ViteBaseTask } from './types';
 import type { BuildContext } from '../../createBuildContext';
 
@@ -9,7 +11,7 @@ import type { BuildContext } from '../../createBuildContext';
  * @internal
  */
 const resolveViteConfig = (ctx: BuildContext, task: ViteBaseTask) => {
-  const { cwd, distPath, targets, external, extMap, pkg, config: packUpConfig } = ctx;
+  const { cwd, distPath, targets, external, extMap, pkg } = ctx;
   const { entries, format, output, runtime } = task;
   const outputExt = extMap[pkg.type || 'commonjs'][format];
   const outDir = path.relative(cwd, distPath);
@@ -28,8 +30,8 @@ const resolveViteConfig = (ctx: BuildContext, task: ViteBaseTask) => {
     clearScreen: false,
     customLogger,
     build: {
-      minify: packUpConfig?.minify ?? false,
-      sourcemap: packUpConfig?.sourcemap ?? true,
+      minify: resolveConfigProperty(ctx.config.minify, false),
+      sourcemap: resolveConfigProperty(ctx.config.sourcemap, true),
       /**
        * The task runner will clear this for us
        */
@@ -50,6 +52,7 @@ const resolveViteConfig = (ctx: BuildContext, task: ViteBaseTask) => {
       rollupOptions: {
         external,
         output: {
+          preserveModules: resolveConfigProperty(ctx.config.preserveModules, false),
           /**
            * Mimic TypeScript's behavior, by setting the value to "auto" to control
            * how Rollup handles default, namespace and dynamic imports from external

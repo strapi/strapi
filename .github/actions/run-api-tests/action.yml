@@ -6,6 +6,8 @@ inputs:
     required: true
   runEE:
     description: 'Should run EE or CE tests'
+  jestOptions:
+    description: 'Jest options'
 runs:
   using: 'composite'
   steps:
@@ -13,4 +15,5 @@ runs:
       env:
         DB_OPTIONS: ${{ inputs.dbOptions }}
         RUN_EE: ${{ inputs.runEE }}
+        JEST_OPTIONS: ${{ inputs.jestOptions }}
       shell: bash
