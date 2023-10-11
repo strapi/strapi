@@ -54,7 +54,7 @@ export default class MysqlDialect extends Dialect {
     };
   }
 
-  async initialize(nativeConnection) {
+  async initialize(nativeConnection: unknown) {
     try {
       await this.db.connection
         .raw(`set session sql_require_primary_key = 0;`)
