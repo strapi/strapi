@@ -448,6 +448,13 @@ export function useBlocksStore() {
           always: true,
         });
 
+        // Check if the created node is empty (if there was no text after the cursor in the node)
+        // This lets us know if we need to carry over the modifiers from the previous node
+        const [, parentBlockPath] = Editor.above(editor, {
+          match: (n) => n.type !== 'text',
+        });
+        const createdEmptyNode = Editor.isEnd(editor, editor.selection.anchor, parentBlockPath);
+
         /**
          * Delete and recreate the node that was created at the right of the cursor.
          * This is to avoid node pollution
@@ -461,12 +468,14 @@ export function useBlocksStore() {
         // Check if after the current position there is another node
         const hasNextNode = editor.children.length - anchorPathInitialPosition[0] > 1;
 
-        // Insert the new node at the right position. The next line after the editor selection if present or otherwise at the end of the editor.
+        // Insert the new node at the right position.
+        // The next line after the editor selection if present or otherwise at the end of the editor.
         Transforms.insertNodes(
           editor,
           {
             type: 'paragraph',
-            children: fragmentedNode.children,
+            // Don't carry over the modifiers from the previous node when there's no text
+            children: createdEmptyNode ? [{ type: 'text', text: '' }] : fragmentedNode.children,
           },
           {
             at: hasNextNode ? [anchorPathInitialPosition[0] + 1] : [editor.children.length],

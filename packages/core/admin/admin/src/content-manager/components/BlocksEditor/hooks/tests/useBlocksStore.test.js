@@ -897,4 +897,55 @@ describe('useBlocksStore', () => {
     // Check if the cursor is positioned in the new line
     expect(cursorPositionAfterSecondEnter[0]).toEqual(cursorInitialPosition[0] + 1);
   });
+
+  it('disables modifiers when creating a new node with enter key', () => {
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'Line of text with modifiers',
+            bold: true,
+            italic: true,
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor at the end of the block with modifiers
+    Transforms.select(baseEditor, {
+      anchor: Editor.end(baseEditor, []),
+      focus: Editor.end(baseEditor, []),
+    });
+
+    // Simulate the enter key
+    result.current.paragraph.handleEnterKey(baseEditor);
+
+    // Should insert a new paragraph without modifiers
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'Line of text with modifiers',
+            bold: true,
+            italic: true,
+          },
+        ],
+      },
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+    ]);
+  });
 });
