@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import produce, { current } from 'immer';
 import get from 'lodash/get';
 import set from 'lodash/set';
@@ -8,20 +9,17 @@ import { makeUnique } from '../../utils/makeUnique';
 import * as actions from './constants';
 import { retrieveComponentsFromSchema } from './utils/retrieveComponentsFromSchema';
 
-import type { DataManagerStateType } from '../../types';
-import type { UID, Attribute } from '@strapi/types';
+import type { DataManagerStateType, ContentType, AttributeType, Component } from '../../types';
+import type { UID } from '@strapi/types';
 
 // TODO: Define all possible actions based on type
 type Action = {
   type: string;
   uid?: string;
+  mainDataKey: 'component' | 'components' | 'contentTypes' | 'contentType';
+  schemaType: 'component' | 'contentType';
+  attributeToRemoveName?: string;
   [key: string]: any;
-};
-
-type findAttributeIndexSchemaParam = {
-  schema: {
-    attributes: Partial<Attribute.Any>[];
-  };
 };
 
 const initialState: DataManagerStateType = {
@@ -38,7 +36,19 @@ const initialState: DataManagerStateType = {
 
 const ONE_SIDE_RELATIONS = ['oneWay', 'manyWay'];
 
-const getOppositeRelation = (originalRelation: string) => {
+type Relations =
+  | 'oneToOne'
+  | 'oneToMany'
+  | 'manyToOne'
+  | 'manyToMany'
+  | 'oneWay'
+  | 'manyWay'
+  | 'morphOne'
+  | 'morphMany'
+  | 'morphToOne'
+  | 'morphToMany';
+
+const getOppositeRelation = (originalRelation: Relations) => {
   if (originalRelation === 'manyToOne') {
     return 'oneToMany';
   }
@@ -50,12 +60,13 @@ const getOppositeRelation = (originalRelation: string) => {
   return originalRelation;
 };
 
-const findAttributeIndex = (schema: findAttributeIndexSchemaParam, attributeToFind: string) => {
-  return schema.schema.attributes.findIndex(({ name }) => name === attributeToFind);
+const findAttributeIndex = (schema: any, attributeToFind: string) => {
+  return schema.schema.attributes.findIndex(
+    ({ name }: { name: string }) => name === attributeToFind
+  );
 };
 
 const reducer = (state = initialState, action: Action) =>
-  // eslint-disable-next-line consistent-return
   produce(state, (draftState) => {
     switch (action.type) {
       case actions.ADD_ATTRIBUTE: {
@@ -90,14 +101,19 @@ const reducer = (state = initialState, action: Action) =>
           const componentToAdd = state?.components?.[componentToAddUID];
           const isTemporaryComponent = componentToAdd.isTemporary;
           const hasComponentAlreadyBeenAdded =
-            state?.modifiedData?.components?.[componentToAddUID] !== undefined;
+            state.modifiedData.components?.[componentToAddUID] !== undefined;
 
           if (isTemporaryComponent || hasComponentAlreadyBeenAdded) {
             break;
           }
 
+          // Initialize modifiedData.components if it is undefined
+          if (!draftState.modifiedData.components) {
+            draftState.modifiedData.components = {};
+          }
+
           // Add the added component to the modifiedData.components
-          draftState.modifiedData.components.[componentToAddUID] = componentToAdd;
+          draftState.modifiedData.components[componentToAddUID] = componentToAdd;
 
           const nestedComponents = retrieveComponentsFromSchema(
             componentToAdd.schema.attributes,
@@ -117,6 +133,9 @@ const reducer = (state = initialState, action: Action) =>
 
             // If the nested component has not been saved we don't need to add them as they are already in the state
             if (!isTemporary) {
+              if (!draftState.modifiedData.components) {
+                draftState.modifiedData.components = {};
+              }
               draftState.modifiedData.components[compoUID] = compoSchema;
             }
           });
@@ -141,15 +160,17 @@ const reducer = (state = initialState, action: Action) =>
             relationType !== 'manyWay' &&
             target === currentUid
           ) {
-            const oppositeAttribute: Attribute.Relation = {
+            const oppositeAttribute = {
               name: targetAttribute,
               relation: getOppositeRelation(relationType),
               target,
               targetAttribute: name,
               type: 'relation',
-            };
+            } as AttributeType;
 
             if (rest.private) {
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
               oppositeAttribute.private = rest.private;
             }
 
@@ -169,12 +190,21 @@ const reducer = (state = initialState, action: Action) =>
         const { dynamicZoneTarget, componentsToAdd } = action;
 
         const dzAttributeIndex = findAttributeIndex(
-          state.modifiedData.contentType,
+          state.modifiedData.contentType!,
           dynamicZoneTarget
         );
 
         componentsToAdd.forEach((componentUid: UID.Component) => {
-          draftState.modifiedData.contentType.schema.attributes[dzAttributeIndex].components.push(
+          if (
+            // @ts-ignore
+            !draftState.modifiedData.contentType?.schema.attributes[dzAttributeIndex].components
+          ) {
+            // @ts-ignore
+            draftState.modifiedData.contentType!.schema.attributes[dzAttributeIndex].components =
+              [];
+          }
+          // @ts-ignore
+          draftState.modifiedData.contentType!.schema.attributes[dzAttributeIndex].components.push(
             componentUid
           );
         });
@@ -213,21 +243,30 @@ const reducer = (state = initialState, action: Action) =>
         const { dynamicZoneTarget, newComponents } = action;
 
         const dzAttributeIndex = findAttributeIndex(
-          state.modifiedData.contentType,
+          state.modifiedData.contentType!,
           dynamicZoneTarget
         );
+        // Add the components property to the AttributeType interface
+        type AttributeTypeWithComponents = AttributeType & { components?: UID.Component[] };
 
-        const currentDZComponents =
-          state.modifiedData.contentType.schema.attributes[dzAttributeIndex].components;
+        const currentDZComponents = (
+          state.modifiedData.contentType!.schema.attributes[
+            dzAttributeIndex
+          ] as AttributeTypeWithComponents
+        ).components;
 
+        // @ts-ignore
         const updatedComponents = makeUnique([...currentDZComponents, ...newComponents]);
 
-        draftState.modifiedData.contentType.schema.attributes[dzAttributeIndex].components =
-          updatedComponents;
+        (
+          draftState.modifiedData.contentType!.schema.attributes[
+            dzAttributeIndex
+          ] as AttributeTypeWithComponents
+        ).components = updatedComponents;
 
         // Retrieve all the components that needs to be added to the modifiedData.components
         const nestedComponents = retrieveComponentsFromSchema(
-          current(draftState.modifiedData.contentType.schema.attributes),
+          current(draftState.modifiedData.contentType!.schema.attributes),
           state.components
         );
 
@@ -242,6 +281,9 @@ const reducer = (state = initialState, action: Action) =>
 
           // If the nested component has not been saved we don't need to add them as they are already in the state
           if (!isTemporary) {
+            if (!draftState.modifiedData.components) {
+              draftState.modifiedData.components = {};
+            }
             draftState.modifiedData.components[compoUID] = compoSchema;
           }
         });
@@ -249,8 +291,8 @@ const reducer = (state = initialState, action: Action) =>
         break;
       }
       case actions.CREATE_COMPONENT_SCHEMA: {
-        const newSchema = {
-          uid: action.uid,
+        const newSchema: Component = {
+          uid: action.uid as UID.Component,
           isTemporary: true,
           category: action.componentCategory,
           schema: {
@@ -259,17 +301,17 @@ const reducer = (state = initialState, action: Action) =>
           },
         };
 
-        draftState.components[action.uid] = newSchema;
+        draftState.components![action.uid!] = newSchema;
 
         if (action.shouldAddComponentToData) {
-          draftState.modifiedData.components[action.uid] = newSchema;
+          draftState.modifiedData.components![action.uid!] = newSchema;
         }
 
         break;
       }
       case actions.CREATE_SCHEMA: {
-        const newSchema = {
-          uid: action.uid,
+        const newSchema: ContentType = {
+          uid: action.uid!,
           isTemporary: true,
           schema: {
             ...action.data,
@@ -277,7 +319,7 @@ const reducer = (state = initialState, action: Action) =>
           },
         };
 
-        draftState.contentTypes[action.uid] = newSchema;
+        draftState.contentTypes![action.uid!] = newSchema;
 
         break;
       }
@@ -311,7 +353,7 @@ const reducer = (state = initialState, action: Action) =>
           break;
         }
 
-        const updatedAttributes: Attribute[] = get(state, [
+        const updatedAttributes: AttributeType[] = get(state, [
           'modifiedData',
           ...pathToDataToEdit,
           'schema',
@@ -319,15 +361,16 @@ const reducer = (state = initialState, action: Action) =>
         ]).slice();
 
         // First create the current relation attribute updated
-        const toSet: Attribute = {
+        const toSet = {
           name,
           relation: rest.relation,
           target: rest.target,
           targetAttribute: rest.targetAttribute,
           type: 'relation',
-        };
+        } as AttributeType;
 
         if (rest.private) {
+          // @ts-ignore
           toSet.private = rest.private;
         }
 
@@ -335,9 +378,9 @@ const reducer = (state = initialState, action: Action) =>
           toSet.pluginOptions = rest.pluginOptions;
         }
 
-        const currentAttributeIndex = updatedAttributes.findIndex(
-          ({ name }: { name: string }) => name === initialAttribute.name
-        );
+        const currentAttributeIndex = updatedAttributes.findIndex((value: AttributeType) => {
+          return value.name !== undefined && value.name === initialAttribute.name;
+        });
 
         // First set it in the updatedAttributes
         if (currentAttributeIndex !== -1) {
@@ -346,7 +389,7 @@ const reducer = (state = initialState, action: Action) =>
 
         let oppositeAttributeNameToRemove: string | null = null;
         let oppositeAttributeNameToUpdate: string | null = null;
-        let oppositeAttributeToCreate: Attribute | null = null;
+        let oppositeAttributeToCreate: AttributeType | null = null;
         let initialOppositeAttribute = null;
 
         const currentUid = get(state, ['modifiedData', ...pathToDataToEdit, 'uid']);
@@ -397,7 +440,7 @@ const reducer = (state = initialState, action: Action) =>
         // In case of oneWay or manyWay relation there isn't an opposite attribute
         if (oppositeAttributeNameToRemove) {
           const indexToRemove = updatedAttributes.findIndex(
-            ({ name }: { name: string }) => name === oppositeAttributeNameToRemove
+            (value) => value.name === oppositeAttributeNameToRemove
           );
 
           updatedAttributes.splice(indexToRemove, 1);
@@ -437,9 +480,10 @@ const reducer = (state = initialState, action: Action) =>
             target: rest.target,
             targetAttribute: name,
             type: 'relation',
-          };
+          } as AttributeType;
 
           if (rest.private) {
+            // @ts-ignore
             oppositeAttributeToCreate.private = rest.private;
           }
 
@@ -470,9 +514,10 @@ const reducer = (state = initialState, action: Action) =>
             target: rest.target,
             targetAttribute: name,
             type: 'relation',
-          };
+          } as AttributeType;
 
           if (rest.private) {
+            // @ts-ignore
             oppositeAttributeToCreate.private = rest.private;
           }
 
@@ -539,9 +584,9 @@ const reducer = (state = initialState, action: Action) =>
         return initialState;
       }
       case actions.REMOVE_COMPONENT_FROM_DYNAMIC_ZONE: {
-        const dzAttributeIndex = findAttributeIndex(state.modifiedData.contentType, action.dzName);
-
-        draftState.modifiedData.contentType.schema.attributes[dzAttributeIndex].components.splice(
+        const dzAttributeIndex = findAttributeIndex(state.modifiedData.contentType!, action.dzName);
+        //@ts-ignore
+        draftState.modifiedData.contentType!.schema.attributes[dzAttributeIndex].components.splice(
           action.componentToRemoveIndex,
           1
         );
@@ -552,11 +597,13 @@ const reducer = (state = initialState, action: Action) =>
         const { mainDataKey, attributeToRemoveName } = action;
         const pathToAttributes = ['modifiedData', mainDataKey, 'schema', 'attributes'];
         const attributeToRemoveIndex = findAttributeIndex(
+          //@ts-ignore
           state.modifiedData[mainDataKey],
-          attributeToRemoveName
+          attributeToRemoveName!
         );
 
         const pathToAttributeToRemove = [...pathToAttributes, attributeToRemoveIndex];
+        //@ts-ignore
         const attributeToRemoveData = get(state, pathToAttributeToRemove);
         const isRemovingRelationAttribute = attributeToRemoveData.type === 'relation';
         // Only content types can have relations with themselves since
@@ -567,18 +614,19 @@ const reducer = (state = initialState, action: Action) =>
           const { target, relation, targetAttribute } = attributeToRemoveData;
           const relationType = getRelationType(relation, targetAttribute);
 
-          const uid = state.modifiedData.contentType.uid;
+          const uid = state.modifiedData.contentType!.uid;
           const shouldRemoveOppositeAttribute =
             target === uid && !ONE_SIDE_RELATIONS.includes(relationType);
 
           if (shouldRemoveOppositeAttribute) {
-            const attributes: Attribute[] =
-              state.modifiedData[mainDataKey].schema.attributes.slice();
+            const attributes: AttributeType[] =
+              state.modifiedData[mainDataKey]!.schema.attributes.slice();
             const nextAttributes = attributes.filter((attribute) => {
               if (attribute.name === attributeToRemoveName) {
                 return false;
               }
 
+              // @ts-ignore
               if (attribute.target === uid && attribute.targetAttribute === attributeToRemoveName) {
                 return false;
               }
@@ -586,6 +634,7 @@ const reducer = (state = initialState, action: Action) =>
               return true;
             });
 
+            // @ts-ignore
             draftState.modifiedData[mainDataKey].schema.attributes = nextAttributes;
 
             break;
@@ -593,29 +642,30 @@ const reducer = (state = initialState, action: Action) =>
         }
 
         // Find all uid fields that have the targetField set to the field we are removing
-        const uidFieldsToUpdate = state.modifiedData[mainDataKey].schema.attributes
-          .slice()
-          .reduce((acc: string[], current) => {
-            if (current.type !== 'uid') {
-              return acc;
-            }
-
-            if (current.targetField !== attributeToRemoveName) {
-              return acc;
-            }
-
-            acc.push(current.name);
-
+        const uidFieldsToUpdate: string[] = state.modifiedData[
+          mainDataKey
+          // @ts-ignore
+        ]!.schema.attributes.slice().reduce((acc: string[], current: AttributeType) => {
+          if (current.type !== 'uid') {
             return acc;
-          }, []);
+          }
+
+          if (current.targetField !== attributeToRemoveName) {
+            return acc;
+          }
+
+          acc.push(current.name!);
+
+          return acc;
+        }, []);
 
         uidFieldsToUpdate.forEach((fieldName) => {
           const fieldIndex = findAttributeIndex(state.modifiedData[mainDataKey], fieldName);
 
-          delete draftState.modifiedData[mainDataKey].schema.attributes[fieldIndex].targetField;
+          delete draftState.modifiedData[mainDataKey]!.schema.attributes[fieldIndex].targetField;
         });
 
-        draftState.modifiedData[mainDataKey].schema.attributes.splice(attributeToRemoveIndex, 1);
+        draftState.modifiedData[mainDataKey]!.schema.attributes.splice(attributeToRemoveIndex, 1);
 
         break;
       }
@@ -624,9 +674,9 @@ const reducer = (state = initialState, action: Action) =>
 
         const attributeToRemoveIndex = findAttributeIndex(
           state.modifiedData.components?.[componentUid],
-          attributeToRemoveName
+          attributeToRemoveName!
         );
-
+        // @ts-ignore
         draftState.modifiedData.components?.[componentUid]?.schema?.attributes?.splice(
           attributeToRemoveIndex,
           1
@@ -655,18 +705,20 @@ const reducer = (state = initialState, action: Action) =>
           uid,
         } = action;
 
-        draftState.modifiedData[schemaType].schema.displayName = displayName;
+        // @ts-ignore
+        draftState.modifiedData[schemaType]!.schema.displayName = displayName;
 
         if (action.schemaType === 'component') {
-          draftState.modifiedData.component.category = category;
-          draftState.modifiedData.component.schema.icon = icon;
+          draftState.modifiedData.component!.category = category;
+          // @ts-ignore
+          draftState.modifiedData.component!.schema.icon = icon;
           const addedComponent = current(draftState.modifiedData.component);
-          draftState.components[uid] = addedComponent;
+          draftState.components![uid!] = addedComponent;
 
           break;
         }
 
-        draftState.modifiedData.contentType.schema.kind = kind;
+        draftState.modifiedData.contentType!.schema.kind = kind;
 
         break;
       }

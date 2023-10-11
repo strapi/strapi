@@ -1,19 +1,19 @@
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
 
-import pluginPkg from '../../../package.json';
+import pluginPkg from '../../package.json';
 
-import PluginIcon from './components/PluginIcon';
+import { PluginIcon } from './components/PluginIcon';
 import { PERMISSIONS } from './constants';
-import pluginId from './pluginId';
-import reducers from './reducers';
-import formsAPI from './utils/formAPI';
+import { pluginId } from './pluginId';
+import { reducers } from './reducers';
+import { formsAPI } from './utils/formAPI';
 
 const name = pluginPkg.strapi.name;
 
+// eslint-disable-next-line import/no-default-export
 export default {
-  register(app) {
+  register(app: any) {
     app.addReducers(reducers);
-
     app.addMenuLink({
       to: `/plugins/${pluginId}`,
       icon: PluginIcon,
@@ -41,7 +41,7 @@ export default {
     });
   },
   bootstrap() {},
-  async registerTrads({ locales }) {
+  async registerTrads({ locales }: { locales: string[] }) {
     const importedTrads = await Promise.all(
       locales.map((locale) => {
         return import(

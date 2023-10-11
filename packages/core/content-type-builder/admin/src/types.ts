@@ -8,18 +8,26 @@ export type IntlLabel = {
 
 export type SchemaType = 'contentType' | 'component' | 'components';
 
+export type AttributeType = Attribute.Any & {
+  name?: string;
+};
+
 export interface Component {
   uid: UID.Component;
   category: string;
   schema: Schema.Schema;
   isTemporary?: boolean;
-  attributes?: Partial<Attribute.Any>[] | any[];
+  attributes?: AttributeType[];
+  [key: string]: any;
 }
 
 export interface ContentType {
   uid: string;
   isTemporary?: boolean;
-  schema: Schema.ContentType;
+  schema: Schema.ContentType & {
+    attributes?: AttributeType[];
+  };
+  [key: string]: any;
 }
 
 export type Components = Record<string, Component>;
@@ -33,8 +41,9 @@ export interface DataManagerStateType {
   initialData: Record<string, any>;
   modifiedData: {
     components?: Components;
-    contentTypes?: Record<string, ContentType>;
+    contentTypes?: ContentTypes;
     contentType?: ContentType;
+    component?: Component;
   };
   reservedNames: Record<string, any>;
   isLoading: boolean;

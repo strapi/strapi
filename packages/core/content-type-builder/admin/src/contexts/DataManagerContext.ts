@@ -1,7 +1,6 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { createContext } from 'react';
 
-import type { EditableContentTypeData } from '../components/FormModal/utils/canEditContentType';
 import type { SchemaType } from '../types';
 import type { Common, UID } from '@strapi/types';
 
@@ -56,8 +55,8 @@ interface DataManagerContextValue {
   contentTypes: Record<string, any>;
   initialData: Record<string, any>;
   isInContentTypeView: boolean;
-  isInDevelopmentMode: boolean;
-  modifiedData: EditableContentTypeData;
+  isInDevelopmentMode?: boolean;
+  modifiedData: Record<string, any>;
   nestedComponents: any[]; // Define the actual type
   reservedNames: {
     models: string[];

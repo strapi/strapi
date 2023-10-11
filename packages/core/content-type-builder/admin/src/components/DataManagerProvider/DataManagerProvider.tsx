@@ -22,7 +22,7 @@ import { compose } from 'redux';
 
 import { DataManagerContext } from '../../contexts/DataManagerContext';
 import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
-import pluginId from '../../pluginId';
+import { pluginId } from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
 import { makeUnique } from '../../utils/makeUnique';
 import { FormModal } from '../FormModal/FormModal';
@@ -47,7 +47,7 @@ import {
 } from './constants';
 import { makeSelectDataManagerProvider } from './selectors';
 import { formatMainDataType, getComponentsToPost, sortContentType } from './utils/cleanData';
-import createDataObject from './utils/createDataObject';
+import { createDataObject } from './utils/createDataObject';
 import createModifiedDataSchema from './utils/createModifiedDataSchema';
 import formatSchemas from './utils/formatSchemas';
 import { retrieveComponentsFromSchema } from './utils/retrieveComponentsFromSchema';
@@ -57,7 +57,7 @@ import retrieveSpecificInfoFromComponents from './utils/retrieveSpecificInfoFrom
 import { serverRestartWatcher } from './utils/serverRestartWatcher';
 import validateSchema from './utils/validateSchema';
 
-import type { SchemaType } from '../../types';
+import type { ContentType, SchemaType } from '../../types';
 import type { UID } from '@strapi/types';
 
 interface DataManagerProviderProps {
@@ -98,7 +98,7 @@ const DataManagerProvider = ({
 
   const { getPlugin } = useStrapiApp();
 
-  const { apis } = getPlugin(pluginId);
+  const plugin = getPlugin(pluginId);
   const { autoReload } = useAppInfo();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -312,7 +312,7 @@ const DataManagerProvider = ({
       onCloseModal();
 
       if (userConfirm) {
-        lockAppWithAutoreload();
+        lockAppWithAutoreload?.();
 
         await del(requestURL);
 
@@ -320,7 +320,7 @@ const DataManagerProvider = ({
         await serverRestartWatcher(true);
 
         // Unlock the app
-        await unlockAppWithAutoreload();
+        unlockAppWithAutoreload?.();
 
         await updatePermissions();
       }
@@ -331,7 +331,7 @@ const DataManagerProvider = ({
         message: { id: 'notification.error' },
       });
     } finally {
-      unlockAppWithAutoreload();
+      unlockAppWithAutoreload?.();
     }
   };
 
@@ -362,7 +362,7 @@ const DataManagerProvider = ({
           return;
         }
 
-        lockAppWithAutoreload();
+        lockAppWithAutoreload?.();
 
         await del(requestURL);
 
@@ -370,7 +370,7 @@ const DataManagerProvider = ({
         await serverRestartWatcher(true);
 
         // Unlock the app
-        await unlockAppWithAutoreload();
+        await unlockAppWithAutoreload?.();
 
         // Refetch the permissions
         await updatePermissions();
@@ -382,7 +382,7 @@ const DataManagerProvider = ({
         message: { id: 'notification.error' },
       });
     } finally {
-      unlockAppWithAutoreload();
+      unlockAppWithAutoreload?.();
     }
   };
 
@@ -394,7 +394,7 @@ const DataManagerProvider = ({
       onCloseModal();
 
       // Lock the app
-      lockAppWithAutoreload();
+      lockAppWithAutoreload?.();
 
       // Update the category
       await put(requestURL, body);
@@ -403,7 +403,7 @@ const DataManagerProvider = ({
       await serverRestartWatcher(true);
 
       // Unlock the app
-      await unlockAppWithAutoreload();
+      await unlockAppWithAutoreload?.();
 
       await updatePermissions();
     } catch (err) {
@@ -413,7 +413,7 @@ const DataManagerProvider = ({
         message: { id: 'notification.error' },
       });
     } finally {
-      unlockAppWithAutoreload();
+      unlockAppWithAutoreload?.();
     }
   };
 
@@ -519,13 +519,14 @@ const DataManagerProvider = ({
       };
 
       if (isInContentTypeView) {
-        const contentType = apis.forms.mutateContentTypeSchema(
+        const PluginForms = plugin?.apis?.forms as any;
+        const contentType = PluginForms.mutateContentTypeSchema(
           {
             ...formatMainDataType(modifiedData.contentType),
             ...additionalContentTypeData,
           },
           initialData.contentType
-        );
+        ) as ContentType;
 
         const isValidSchema = validateSchema(contentType);
 
@@ -552,7 +553,7 @@ const DataManagerProvider = ({
       }
 
       // Lock the app
-      lockAppWithAutoreload();
+      lockAppWithAutoreload?.();
 
       const baseURL = `/${pluginId}/${endPoint}`;
       const requestURL = isCreating ? baseURL : `${baseURL}/${currentUid}`;
@@ -567,7 +568,7 @@ const DataManagerProvider = ({
       await serverRestartWatcher(true);
 
       // Unlock the app
-      await unlockAppWithAutoreload();
+      await unlockAppWithAutoreload?.();
 
       if (
         isCreating &&
@@ -604,12 +605,14 @@ const DataManagerProvider = ({
         message: { id: 'notification.error' },
       });
     } finally {
-      unlockAppWithAutoreload();
+      unlockAppWithAutoreload?.();
     }
   };
 
   const updatePermissions = async () => {
-    await refetchPermissions();
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    await refetchPermissions?.();
   };
 
   const updateSchema = (
