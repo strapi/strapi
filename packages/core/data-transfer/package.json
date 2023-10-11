@@ -26,19 +26,19 @@
   ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "./dist/**/!(*.d.ts.map)"
+  ],
   "scripts": {
     "build": "run -T tsc -p tsconfig.build.json",
     "build:ts": "run build",
     "clean": "rimraf ./dist",
+    "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "tsc -p tsconfig.build.json -w --preserveWatchOutput",
-    "lint": "run -T eslint ."
+    "watch": "tsc -p tsconfig.build.json -w --preserveWatchOutput"
   },
-  "files": [
-    "./dist"
-  ],
   "dependencies": {
     "@strapi/logger": "4.14.3",
     "@strapi/strapi": "4.14.3",
@@ -60,7 +60,7 @@
     "ws": "8.13.0"
   },
   "peerDependencies": {
-    "@strapi/strapi": "^4.13.7"
+    "@strapi/strapi": "^4.14.3"
   },
   "devDependencies": {
     "@types/fs-extra": "9.0.13",
