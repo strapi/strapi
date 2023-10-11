@@ -1,5 +1,6 @@
 import { Readable } from 'stream';
 import { randomUUID } from 'crypto';
+import type { LoadedStrapi } from '@strapi/types';
 
 import { Handler } from './abstract';
 import { handlerControllerFactory, isDataTransferMessage } from './utils';
@@ -293,7 +294,7 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
 
     this.provider = createLocalStrapiSourceProvider({
       autoDestroy: false,
-      getStrapi: () => strapi,
+      getStrapi: () => strapi as LoadedStrapi,
     });
 
     return { transferID: this.transferID };
@@ -305,7 +306,7 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
   ): Promise<Protocol.Server.Payload<Protocol.Server.EndMessage>> {
     await this.verifyAuth();
 
-    if (this.transferID !== params.transferID) {
+    if (this.transferID !== params?.transferID) {
       throw new ProviderTransferError('Bad transfer ID provided');
     }
 

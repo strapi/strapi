@@ -50,7 +50,6 @@ const NpmPackagesFilters = ({
         <ButtonToggle
           variant="tertiary"
           ref={buttonRef}
-          data-testid="filters-button"
           startIcon={<Filter />}
           onClick={handleToggle}
           size="S"

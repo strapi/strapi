@@ -57,6 +57,26 @@ export async function validateWorkflow({ values, formatMessage }) {
               })
             )
             .matches(/^#(?:[0-9a-fA-F]{3}){1,2}$/i),
+
+          permissions: yup
+            .array(
+              yup.object({
+                role: yup
+                  .number()
+                  .strict()
+                  .typeError(
+                    formatMessage({
+                      id: 'Settings.review-workflows.validation.stage.permissions.role.number',
+                      defaultMessage: 'Role must be of type number',
+                    })
+                  ).required,
+                action: yup.string().required({
+                  id: 'Settings.review-workflows.validation.stage.permissions.action.required',
+                  defaultMessage: 'Action is a required argument',
+                }),
+              })
+            )
+            .strict(),
         })
       )
       .min(1),

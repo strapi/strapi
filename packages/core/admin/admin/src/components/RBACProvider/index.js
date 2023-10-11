@@ -31,7 +31,7 @@ const RBACProvider = ({ children, permissions, refetchPermissions }) => {
 };
 
 RBACProvider.propTypes = {
-  children: PropTypes.element.isRequired,
+  children: PropTypes.node.isRequired,
   permissions: PropTypes.array.isRequired,
   refetchPermissions: PropTypes.func.isRequired,
 };

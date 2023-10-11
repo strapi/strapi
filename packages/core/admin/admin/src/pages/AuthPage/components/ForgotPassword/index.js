@@ -6,7 +6,7 @@ import { Formik } from 'formik';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import Logo from '../../../../components/UnauthenticatedLogo';
+import { Logo } from '../../../../components/UnauthenticatedLogo';
 import UnauthenticatedLayout, {
   Column,
   LayoutContent,

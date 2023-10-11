@@ -1,5 +1,5 @@
-import type { ILocalStrapiDestinationProviderOptions } from '../../../../src/strapi/providers';
-import type { TransferMethod } from '../../../../src/strapi/remote/constants';
+import type { ILocalStrapiDestinationProviderOptions } from '../../../../strapi/providers';
+import type { TransferMethod } from '../../../../strapi/remote/constants';
 
 export type CommandMessage = { type: 'command' } & (InitCommand | EndCommand | StatusCommand);
 

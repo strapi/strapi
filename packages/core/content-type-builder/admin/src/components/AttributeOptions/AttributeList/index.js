@@ -17,7 +17,7 @@ const AttributeList = ({ attributes }) => (
               const { paddingLeft, paddingRight } = getPadding(index);
 
               return (
-                <GridItem key={attribute} col={6} style={{ height: '100%' }}>
+                <GridItem key={attribute} col={6}>
                   <Box
                     paddingLeft={paddingLeft}
                     paddingRight={paddingRight}

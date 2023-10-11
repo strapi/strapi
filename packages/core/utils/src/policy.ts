@@ -4,7 +4,7 @@
 
 import _ from 'lodash';
 import { eq } from 'lodash/fp';
-import type { Context } from './types';
+import type Koa from 'koa';
 
 const PLUGIN_PREFIX = 'plugin::';
 const API_PREFIX = 'api::';
@@ -51,7 +51,7 @@ const searchLocalPolicy = (policyName: string, policyContext: PolicyContext) => 
 };
 
 const globalPolicy = ({ method, endpoint, controller, action, plugin }: RouteInfo) => {
-  return async (ctx: Context, next: () => void) => {
+  return async (ctx: Koa.Context, next: () => void) => {
     ctx.request.route = {
       endpoint: `${method} ${endpoint}`,
       controller: _.toLower(controller),
@@ -64,13 +64,13 @@ const globalPolicy = ({ method, endpoint, controller, action, plugin }: RouteInf
   };
 };
 
-const resolvePolicies = (config: PolicyInfo[], policyContext: PolicyContext) => {
+const resolvePolicies = (config: PolicyConfig[], policyContext: PolicyContext) => {
   const { pluginName, apiName } = policyContext ?? {};
 
   return config.map((policyConfig) => {
     return {
       handler: getPolicy(policyConfig, { pluginName, apiName }),
-      config: policyConfig.config || {},
+      config: (typeof policyConfig === 'object' && policyConfig.config) || {},
     };
   });
 };

@@ -2,7 +2,7 @@
 
 const localProvider = require('@strapi/provider-audit-logs-local');
 const { scheduleJob } = require('node-schedule');
-const { features } = require('@strapi/strapi/lib/utils/ee');
+const { features } = require('@strapi/strapi/dist/utils/ee').default;
 
 const DEFAULT_RETENTION_DAYS = 90;
 

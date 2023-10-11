@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { useAPIErrorHandler, useFetchClient, useNotification } from '@strapi/helper-plugin';
 import { useQueries } from 'react-query';
 
@@ -29,16 +31,25 @@ export function useContentTypes() {
   const [components, contentTypes] = queries;
   const isLoading = components.isLoading || contentTypes.isLoading;
 
-  const collectionTypes = (contentTypes?.data ?? []).filter(
-    (contentType) => contentType.kind === 'collectionType' && contentType.isDisplayed
-  );
-  const singleTypes = (contentTypes?.data ?? []).filter(
-    (contentType) => contentType.kind !== 'collectionType' && contentType.isDisplayed
-  );
+  // the return value needs to be memoized, because intantiating
+  // an empty array as default value would lead to an unstable return
+  // value, which later on triggers infinite loops if used in the
+  // dependency arrays of other hooks
+  const collectionTypes = React.useMemo(() => {
+    return (contentTypes?.data ?? []).filter(
+      (contentType) => contentType.kind === 'collectionType' && contentType.isDisplayed
+    );
+  }, [contentTypes?.data]);
+
+  const singleTypes = React.useMemo(() => {
+    return (contentTypes?.data ?? []).filter(
+      (contentType) => contentType.kind !== 'collectionType' && contentType.isDisplayed
+    );
+  }, [contentTypes?.data]);
 
   return {
     isLoading,
-    components: components?.data ?? [],
+    components: React.useMemo(() => components?.data ?? [], [components?.data]),
     collectionTypes,
     singleTypes,
   };
