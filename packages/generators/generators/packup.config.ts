@@ -2,6 +2,13 @@
 import { defineConfig } from '@strapi/pack-up';
 
 export default defineConfig({
-  externals: ['node:path'],
+  bundles: [
+    {
+      source: './src/plopfile.ts',
+      require: './dist/plopfile.js',
+      import: './dist/plopfile.mjs',
+    },
+  ],
+  externals: ['node:path', 'path'],
   runtime: 'node',
 });
