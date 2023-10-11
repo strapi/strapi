@@ -74,7 +74,7 @@ describe('Webhooks | ListView', () => {
 
     server.use(
       rest.get('/admin/webhooks', (req, res, ctx) => {
-        return res(
+        return res.once(
           ctx.json({
             data: [],
           })
@@ -87,8 +87,6 @@ describe('Webhooks | ListView', () => {
     await waitFor(() => {
       expect(getByText('No webhooks found')).toBeInTheDocument();
     });
-
-    server.resetHandlers();
   });
 
   it('should delete a single webhook', async () => {
@@ -106,7 +104,7 @@ describe('Webhooks | ListView', () => {
 
     server.use(
       rest.get('/admin/webhooks', (req, res, ctx) => {
-        return res(
+        return res.once(
           ctx.json({
             data: [mockData.webhooks[1]],
           })
@@ -119,8 +117,6 @@ describe('Webhooks | ListView', () => {
     await waitFor(async () => {
       expect(await findByText('http://me.io')).toBeInTheDocument();
     });
-
-    server.resetHandlers();
   });
 
   it('should disable a webhook', async () => {

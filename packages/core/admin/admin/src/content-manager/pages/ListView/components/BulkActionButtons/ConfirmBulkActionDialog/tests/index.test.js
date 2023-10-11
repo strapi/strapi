@@ -149,8 +149,6 @@ describe('ConfirmDialogPublishAll', () => {
     await waitFor(() =>
       expect(getByText('Request failed with status code 500')).toBeInTheDocument()
     );
-
-    server.resetHandlers();
   });
 
   it('should show the warning message with 2 draft relations and 2 entries even if the locale param is not passed', async () => {
@@ -184,7 +182,5 @@ describe('ConfirmDialogPublishAll', () => {
       expect(publishDialog).toBeInTheDocument();
       within(publishDialog).getByText(/2 relations out of 2 entries are/i);
     });
-
-    server.resetHandlers();
   });
 });

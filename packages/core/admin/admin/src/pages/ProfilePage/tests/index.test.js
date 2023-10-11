@@ -69,7 +69,7 @@ describe('Profile page', () => {
   it('should not display the change password section and all the fields if the user role is Locked', async () => {
     server.use(
       rest.get('/admin/providers/isSSOLocked', (req, res, ctx) => {
-        return res(
+        return res.once(
           ctx.json({
             data: {
               isSSOLocked: true,
@@ -96,7 +96,5 @@ describe('Profile page', () => {
     expect(queryByLabelText('Password')).not.toBeInTheDocument();
 
     expect(queryByLabelText('Password confirmation')).not.toBeInTheDocument();
-
-    server.resetHandlers();
   });
 });

@@ -191,14 +191,12 @@ describe('Bulk publish selected entries modal', () => {
     });
 
     await waitFor(() => expect(screen.getByText('Published')).toBeInTheDocument());
-
-    server.resetHandlers();
   }, 10000);
 
   it('should show validation errors if there is an error', async () => {
     server.use(
       rest.get('*/content-manager/collection-types/:apiId', (req, res, ctx) => {
-        return res(
+        return res.once(
           ctx.json({
             results: [
               {
@@ -239,14 +237,12 @@ describe('Bulk publish selected entries modal', () => {
     await waitFor(() => {
       expect(publishButton).toBeDisabled();
     });
-
-    server.resetHandlers();
   });
 
   it('should show the correct messages above the table in the selected entries modal', async () => {
     server.use(
       rest.get('*/content-manager/collection-types/:apiId', (req, res, ctx) => {
-        return res(
+        return res.once(
           ctx.json({
             results: [
               {
@@ -289,6 +285,5 @@ describe('Bulk publish selected entries modal', () => {
       exact: false,
     });
     expect(countWithErrors).toHaveTextContent('1 entry waiting for action');
-    server.resetHandlers();
   });
 });

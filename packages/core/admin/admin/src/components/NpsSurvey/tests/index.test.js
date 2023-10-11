@@ -110,7 +110,7 @@ describe('NPS survey', () => {
 
     server.use(
       rest.post('https://analytics.strapi.io/submit-nps', (req, res, ctx) => {
-        return res(ctx.status(500));
+        return res.once(ctx.status(500));
       })
     );
 
@@ -135,7 +135,6 @@ describe('NPS survey', () => {
     await waitFor(() => expect(getByText('An error occurred')).toBeInTheDocument());
 
     console.error = originalError;
-    server.resetHandlers();
   });
 
   it('saves first user dismissal', async () => {

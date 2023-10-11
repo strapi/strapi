@@ -55,7 +55,5 @@ describe('EE | Content Manager | EditView | InformationBox | StageSelect', () =>
     await waitFor(() =>
       expect(getByText('You don’t have the permission to update this stage.')).toBeInTheDocument()
     );
-
-    server.resetHandlers();
   });
 });

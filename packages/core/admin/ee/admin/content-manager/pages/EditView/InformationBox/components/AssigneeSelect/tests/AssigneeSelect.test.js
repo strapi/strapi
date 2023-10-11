@@ -78,8 +78,6 @@ describe('EE | Content Manager | EditView | InformationBox | AssigneeSelect', ()
     const { queryByRole } = render(<AssigneeSelect />);
 
     await waitFor(() => expect(queryByRole('combobox')).toHaveAttribute('aria-disabled', 'true'));
-
-    server.resetHandlers();
   });
 
   it('renders an error message, when fetching user fails', async () => {
@@ -109,8 +107,6 @@ describe('EE | Content Manager | EditView | InformationBox | AssigneeSelect', ()
     );
 
     console.error = origConsoleError;
-
-    server.resetHandlers();
   });
 
   it('renders an error message, when the assignee update fails', async () => {
@@ -154,7 +150,5 @@ describe('EE | Content Manager | EditView | InformationBox | AssigneeSelect', ()
     );
 
     console.error = origConsoleError;
-
-    server.resetHandlers();
   });
 });
