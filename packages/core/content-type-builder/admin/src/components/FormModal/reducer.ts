@@ -4,21 +4,13 @@ import snakeCase from 'lodash/snakeCase';
 import pluralize from 'pluralize';
 import { AnyAction } from 'redux';
 
-import getRelationType from '../../utils/getRelationType';
+import { getRelationType } from '../../utils/getRelationType';
 import nameToSlug from '../../utils/nameToSlug';
 
 import * as actions from './constants';
 import { createComponentUid } from './utils/createUid';
 import { customFieldDefaultOptionsReducer } from './utils/customFieldDefaultOptionsReducer';
 import { shouldPluralizeName, shouldPluralizeTargetAttribute } from './utils/relations';
-
-// type InitialState = {
-//   formErrors: Record<string, unknown>;
-//   modifiedData: Record<string, unknown>;
-//   initialData: Record<string, unknown>;
-//   componentToCreate: Record<string, unknown>;
-//   isCreatingComponentWhileAddingAField: boolean;
-// };
 
 const initialState: any = {
   formErrors: {},

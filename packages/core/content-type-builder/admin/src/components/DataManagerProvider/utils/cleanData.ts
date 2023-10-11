@@ -7,7 +7,12 @@ import sortBy from 'lodash/sortBy';
 import pluginId from '../../../pluginId';
 import { makeUnique } from '../../../utils/makeUnique';
 
-const getCreatedAndModifiedComponents = (allComponents, initialComponents) => {
+import type { Components, Component, ContentType, ContentTypes } from '../../../types';
+
+const getCreatedAndModifiedComponents = (
+  allComponents: Components,
+  initialComponents: Components
+) => {
   const componentUIDsToReturn = Object.keys(allComponents).filter((compoUid) => {
     const currentCompo = get(allComponents, compoUid, {});
     const initialCompo = get(initialComponents, compoUid, {});
@@ -20,7 +25,7 @@ const getCreatedAndModifiedComponents = (allComponents, initialComponents) => {
   return makeUnique(componentUIDsToReturn);
 };
 
-const formatComponent = (component, mainDataUID) => {
+const formatComponent = (component: Component, mainDataUID: string) => {
   const formattedAttributes = formatAttributes(
     get(component, 'schema.attributes', []),
     mainDataUID
@@ -45,7 +50,7 @@ const formatComponent = (component, mainDataUID) => {
   return formattedComponent;
 };
 
-const formatMainDataType = (data, isComponent = false) => {
+const formatMainDataType = (data: any, isComponent = false) => {
   const mainDataUID = get(data, 'uid', null);
 
   const formattedAttributes = formatAttributes(get(data, 'schema.attributes', []), mainDataUID);

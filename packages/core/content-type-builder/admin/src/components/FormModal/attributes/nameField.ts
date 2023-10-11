@@ -1,6 +1,6 @@
 import { getTrad } from '../../../utils/getTrad';
 
-const nameField = {
+export const nameField = {
   name: 'name',
   type: 'text',
   intlLabel: {
@@ -15,5 +15,3 @@ const nameField = {
   //   required: true,
   // },
 };
-
-export { nameField };

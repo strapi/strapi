@@ -1,6 +1,6 @@
-import canEditContentType from '../canEditContentType';
+import { canEditContentType } from '../canEditContentType';
 
-import rawData from './rawData';
+import { rawData } from './rawData';
 
 describe('canEditContentType', () => {
   it('should allow content type edition if one of attributes is a oneWay or manyWay relation', () => {

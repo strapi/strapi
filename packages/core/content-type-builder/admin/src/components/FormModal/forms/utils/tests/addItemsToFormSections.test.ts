@@ -1,4 +1,4 @@
-import addItemsToFormSections from '../addItemsToFormSection';
+import { addItemsToFormSection } from '../addItemsToFormSection';
 
 describe('addItemsToFormSection', () => {
   it('adds items to the default section', () => {
@@ -37,7 +37,7 @@ describe('addItemsToFormSection', () => {
       },
     ];
 
-    addItemsToFormSections(itemsToAdd, sections);
+    addItemsToFormSection(itemsToAdd, sections);
 
     expect(sections.length).toBe(1);
     expect(sections[0].items.length).toBe(1);
@@ -84,7 +84,7 @@ describe('addItemsToFormSection', () => {
       },
     ];
 
-    addItemsToFormSections(itemsToAdd, sections);
+    addItemsToFormSection(itemsToAdd, sections);
 
     expect(sections.length).toBe(2);
   });

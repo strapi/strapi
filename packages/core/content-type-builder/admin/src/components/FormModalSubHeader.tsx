@@ -4,8 +4,10 @@ import { useIntl } from 'react-intl';
 
 import { getTrad } from '../utils';
 
+import type { SchemaType } from '../types';
+
 type ModalTitleProps = {
-  forTarget?: Array<string>;
+  forTarget?: SchemaType;
   step?: string;
   kind?: string;
   modalType?: string;
@@ -46,13 +48,15 @@ export const getModalTitleSubHeader = ({
 type FormModalSubHeaderProps = {
   actionType: string;
   modalType: string;
-  forTarget: string[];
-  kind: string;
-  step: string;
+  forTarget: SchemaType;
+  kind?: string;
+  step?: string;
   attributeType: string;
   attributeName: string;
-  customField: {
-    intlLabel: object;
+  customField?: {
+    intlLabel: {
+      id: string;
+    };
   };
 };
 
@@ -69,7 +73,7 @@ export const FormModalSubHeader = ({
   const { formatMessage } = useIntl();
   const intlLabel =
     modalType === 'customField'
-      ? customField.intlLabel
+      ? customField?.intlLabel
       : { id: getTrad(`attribute.${attributeType}`) };
 
   return (
@@ -87,7 +91,7 @@ export const FormModalSubHeader = ({
             defaultMessage: 'Add new field',
           },
           {
-            type: upperFirst(formatMessage(intlLabel)),
+            type: intlLabel ? upperFirst(formatMessage(intlLabel)) : '',
             name: upperFirst(attributeName),
             step,
           }

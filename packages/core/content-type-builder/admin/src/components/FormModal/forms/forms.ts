@@ -11,10 +11,19 @@ import { contentTypeForm } from '../contentType/contentTypeForm';
 import { createContentTypeSchema } from '../contentType/createContentTypeSchema';
 import { dynamiczoneForm } from '../dynamiczoneForm';
 
-import addItemsToFormSection from './utils/addItemsToFormSection';
+import { addItemsToFormSection, FormTypeOptions } from './utils/addItemsToFormSection';
 import { Attribute, getUsedAttributeNames, SchemaData } from './utils/getUsedAttributeNames';
 
 import type { Common } from '@strapi/types';
+
+// MINE remove any and improve types
+type ContentType = {
+  schema: {
+    singularName: string;
+    pluralName: string;
+    collectionName: string;
+  };
+};
 
 export type SchemaParams = {
   schemaAttributes: any;
@@ -25,16 +34,6 @@ export type SchemaParams = {
   };
   schemaData: any;
   ctbFormsAPI: any;
-};
-
-type I18nMessage = {
-  id: string;
-  defaultMessage: string;
-};
-
-type Section = {
-  sectionTitle: I18nMessage | null;
-  items: Array<any>;
 };
 
 type Base<TAttributesFormType extends 'base' | 'advanced'> = {
@@ -83,7 +82,7 @@ export const forms = {
     form: {
       base({ customField }: any) {
         // Default section with required name field
-        const sections = [{ sectionTitle: null, items: [nameField] }];
+        const sections: FormTypeOptions = [{ sectionTitle: null, items: [nameField] }];
 
         if (customField.options?.base) {
           addItemsToFormSection(customField.options.base, sections);
@@ -93,7 +92,7 @@ export const forms = {
       },
       advanced({ customField, data, step, extensions, ...rest }: any) {
         // Default section with no fields
-        const sections: Array<Section> = [{ sectionTitle: null, items: [] }];
+        const sections: FormTypeOptions = [{ sectionTitle: null, items: [] }];
         const injectedInputs = extensions.getAdvancedForm(['attribute', customField.type], {
           data,
           type: customField.type,
@@ -139,7 +138,7 @@ export const forms = {
       const usedAttributeNames = getUsedAttributeNames(attributes, options);
 
       try {
-        let attributeShape = attributeTypes[attributeType](
+        const attributeShape = attributeTypes[attributeType](
           usedAttributeNames,
           reservedNames.attributes,
           alreadyTakenTargetContentTypeAttributes,
@@ -214,9 +213,9 @@ export const forms = {
         models: any;
       },
       extensions: any,
-      contentTypes: any
+      contentTypes: Record<string, ContentType>
     ) {
-      const singularNames = Object.values(contentTypes).map((contentType: any) => {
+      const singularNames = Object.values(contentTypes).map((contentType) => {
         return contentType.schema.singularName;
       });
 
@@ -304,16 +303,16 @@ export const forms = {
   },
   component: {
     schema(
-      alreadyTakenAttributes: Array<Common.UID.ContentType>,
+      alreadyTakenAttributes: Array<Common.UID.Component>,
       componentCategory: string,
       reservedNames: {
         models: any;
       },
       isEditing = false,
-      compoUid: Common.UID.ContentType | null = null
+      compoUid: Common.UID.Component | null = null
     ) {
       const takenNames = isEditing
-        ? alreadyTakenAttributes.filter((uid: Common.UID.ContentType) => uid !== compoUid)
+        ? alreadyTakenAttributes.filter((uid: Common.UID.Component) => uid !== compoUid)
         : alreadyTakenAttributes;
 
       return createComponentSchema(takenNames, reservedNames.models, componentCategory);

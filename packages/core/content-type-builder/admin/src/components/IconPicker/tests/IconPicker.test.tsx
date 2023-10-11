@@ -17,8 +17,9 @@ const defaultProps = {
   value: '',
 };
 
-const setup = (props: Partial<IconPickerProps>) => {
+const setup = (props?: Partial<IconPickerProps>) => {
   return {
+    user: userEvent.setup(),
     ...render(<IconPicker {...defaultProps} {...props} />, {
       wrapper: ({ children }) => (
         <IntlProvider locale="en" defaultLocale="en">
@@ -28,7 +29,6 @@ const setup = (props: Partial<IconPickerProps>) => {
         </IntlProvider>
       ),
     }),
-    user: userEvent.setup(),
   };
 };
 

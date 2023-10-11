@@ -1,7 +1,9 @@
 import cloneDeep from 'lodash/cloneDeep';
 
 import { ADD_CUSTOM_FIELD_ATTRIBUTE } from '../constants';
-import reducer, { initialState } from '../reducer';
+import { reducer, initialState } from '../reducer';
+
+import type { DataManagerStateType, Component, ContentType } from '../../../types';
 
 describe('CTB | components | DataManagerProvider | reducer | ADD_CUSTOM_FIELD_ATTRIBUTE', () => {
   it('adds a custom field to a contentType', () => {
@@ -112,7 +114,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_CUSTOM_FIELD_AT
   });
 
   it('adds a custom field to a component that is an attribute of a content type', () => {
-    const componentSchema = {
+    const componentSchema: Component = {
       uid: 'basic.simple',
       category: 'basic',
       schema: {
@@ -128,7 +130,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_CUSTOM_FIELD_AT
       },
     };
 
-    const contentType = {
+    const contentType: ContentType = {
       uid: 'api::test.test',
       schema: {
         name: 'test',
@@ -142,7 +144,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_CUSTOM_FIELD_AT
       },
     };
 
-    const state = {
+    const state: DataManagerStateType = {
       ...initialState,
       components: {
         'basic.simple': componentSchema,

@@ -7,10 +7,10 @@
 import { MultiSelectNested } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
+import { Component } from '../contexts/DataManagerContext';
 import { useDataManager } from '../hooks/useDataManager';
 import { getTrad } from '../utils';
 import findAttribute from '../utils/findAttribute';
-import { Component } from '../contexts/DataManagerContext';
 
 type SelectComponentsProps = {
   dynamicZoneTarget: string;

@@ -1,5 +1,7 @@
 import { ADD_ATTRIBUTE } from '../constants';
-import reducer, { initialState } from '../reducer';
+import { initialState, reducer } from '../reducer';
+
+import type { DataManagerStateType, Component, ContentType } from '../../../types';
 
 describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () => {
   describe('Adding a common field that is not a relation', () => {
@@ -70,7 +72,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
     });
 
     it('Should add an integer field to a component that is an attribute of a content type', () => {
-      const compoSchema = {
+      const compoSchema: Component = {
         uid: 'default.dish',
         category: 'default',
         schema: {
@@ -114,7 +116,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
           ],
         },
       };
-      const contentType = {
+      const contentType: ContentType = {
         uid: 'api::country.country',
         schema: {
           name: 'country',
@@ -129,7 +131,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const state = {
+      const state: DataManagerStateType = {
         ...initialState,
         components: {
           'default.dish': compoSchema,

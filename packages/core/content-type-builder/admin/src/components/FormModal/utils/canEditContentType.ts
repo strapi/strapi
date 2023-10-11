@@ -1,8 +1,27 @@
 import get from 'lodash/get';
 
-import getRelationType from '../../../utils/getRelationType';
+import { getRelationType } from '../../../utils/getRelationType';
 
-const canEditContentType = (data, modifiedData) => {
+import type { Schema, Attribute } from '@strapi/types';
+
+export type EditableContentTypeData = {
+  contentType: {
+    schema: {
+      kind: Schema.ContentTypeKind;
+      attributes: {
+        relation: Attribute.RelationKind.WithTarget;
+        type: string;
+        targetAttribute: string;
+      }[];
+    };
+  };
+};
+
+type ModifiedData = {
+  kind: Schema.ContentTypeKind;
+};
+
+export const canEditContentType = (data: EditableContentTypeData, modifiedData: ModifiedData) => {
   const kind = get(data, ['contentType', 'schema', 'kind'], '');
 
   // if kind isn't modified or content type is a single type, there is no need to check attributes.
@@ -10,7 +29,12 @@ const canEditContentType = (data, modifiedData) => {
     return true;
   }
 
-  const contentTypeAttributes = get(data, ['contentType', 'schema', 'attributes'], []);
+  const contentTypeAttributes = get(
+    data,
+    ['contentType', 'schema', 'attributes'],
+    []
+  ) as EditableContentTypeData['contentType']['schema']['attributes'];
+
   const relationAttributes = contentTypeAttributes.filter(({ relation, type, targetAttribute }) => {
     const relationType = getRelationType(relation, targetAttribute);
 
@@ -19,5 +43,3 @@ const canEditContentType = (data, modifiedData) => {
 
   return relationAttributes.length === 0;
 };
-
-export default canEditContentType;

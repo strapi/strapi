@@ -1,11 +1,13 @@
+import { Attribute } from '@strapi/types';
+
 /**
  *
  * Retrieves the relation type
- * @param {string} relation
- * @param {string} targetAttribute
- * @returns {string} the relation type
  */
-const getRelationType = (relation, targetAttribute) => {
+export const getRelationType = (
+  relation: Attribute.RelationKind.WithTarget,
+  targetAttribute: string
+) => {
   const hasNotTargetAttribute = targetAttribute === undefined || targetAttribute === null;
 
   if (relation === 'oneToOne' && hasNotTargetAttribute) {
@@ -18,5 +20,3 @@ const getRelationType = (relation, targetAttribute) => {
 
   return relation;
 };
-
-export default getRelationType;

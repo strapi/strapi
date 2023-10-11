@@ -25,7 +25,7 @@ import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import pluginId from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
 import { makeUnique } from '../../utils/makeUnique';
-import FormModal from '../FormModal/FormModal';
+import { FormModal } from '../FormModal/FormModal';
 
 import {
   ADD_ATTRIBUTE,
@@ -68,7 +68,10 @@ interface DataManagerProviderProps {
   isLoadingForDataToBeSet: boolean;
   initialData: Record<string, any>;
   modifiedData: Record<string, any>;
-  reservedNames: Record<string, any>;
+  reservedNames: {
+    models: string[];
+    attributes: string[];
+  };
 }
 
 interface CustomFieldAttributeParams {
@@ -253,7 +256,7 @@ const DataManagerProvider = ({
     data: Record<string, any>,
     schemaType: SchemaType,
     uid: UID.Any,
-    componentCategory: string,
+    componentCategory?: string,
     shouldAddComponentToData = false
   ) => {
     const type = schemaType === 'contentType' ? CREATE_SCHEMA : CREATE_COMPONENT_SCHEMA;
@@ -612,7 +615,7 @@ const DataManagerProvider = ({
   const updateSchema = (
     data: Record<string, any>,
     schemaType: SchemaType,
-    componentUID: UID.Component
+    componentUID: UID.Any
   ) => {
     dispatch({
       type: UPDATE_SCHEMA,

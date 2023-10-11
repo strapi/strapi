@@ -2,14 +2,14 @@ import produce, { current } from 'immer';
 import get from 'lodash/get';
 import set from 'lodash/set';
 
-import getRelationType from '../../utils/getRelationType';
+import { getRelationType } from '../../utils/getRelationType';
 import { makeUnique } from '../../utils/makeUnique';
 
 import * as actions from './constants';
 import { retrieveComponentsFromSchema } from './utils/retrieveComponentsFromSchema';
 
-import type { Attribute, DataManagerStateType } from '../../types';
-import type { UID } from '@strapi/types';
+import type { DataManagerStateType } from '../../types';
+import type { UID, Attribute } from '@strapi/types';
 
 // TODO: Define all possible actions based on type
 type Action = {
@@ -20,7 +20,7 @@ type Action = {
 
 type findAttributeIndexSchemaParam = {
   schema: {
-    attributes: Attribute[];
+    attributes: Partial<Attribute.Any>[];
   };
 };
 
@@ -87,17 +87,17 @@ const reducer = (state = initialState, action: Action) =>
 
         if (action.shouldAddComponentToData) {
           const componentToAddUID = rest.component;
-          const componentToAdd = state.components[componentToAddUID];
+          const componentToAdd = state?.components?.[componentToAddUID];
           const isTemporaryComponent = componentToAdd.isTemporary;
           const hasComponentAlreadyBeenAdded =
-            state.modifiedData.components[componentToAddUID] !== undefined;
+            state?.modifiedData?.components?.[componentToAddUID] !== undefined;
 
           if (isTemporaryComponent || hasComponentAlreadyBeenAdded) {
             break;
           }
 
           // Add the added component to the modifiedData.components
-          draftState.modifiedData.components[componentToAddUID] = componentToAdd;
+          draftState.modifiedData.components.[componentToAddUID] = componentToAdd;
 
           const nestedComponents = retrieveComponentsFromSchema(
             componentToAdd.schema.attributes,
@@ -141,7 +141,7 @@ const reducer = (state = initialState, action: Action) =>
             relationType !== 'manyWay' &&
             target === currentUid
           ) {
-            const oppositeAttribute: Attribute = {
+            const oppositeAttribute: Attribute.Relation = {
               name: targetAttribute,
               relation: getOppositeRelation(relationType),
               target,
@@ -623,11 +623,11 @@ const reducer = (state = initialState, action: Action) =>
         const { attributeToRemoveName, componentUid } = action;
 
         const attributeToRemoveIndex = findAttributeIndex(
-          state.modifiedData.components[componentUid],
+          state.modifiedData.components?.[componentUid],
           attributeToRemoveName
         );
 
-        draftState.modifiedData.components[componentUid].schema.attributes.splice(
+        draftState.modifiedData.components?.[componentUid]?.schema?.attributes?.splice(
           attributeToRemoveIndex,
           1
         );

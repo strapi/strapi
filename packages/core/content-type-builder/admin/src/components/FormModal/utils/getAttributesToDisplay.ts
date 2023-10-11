@@ -1,5 +1,12 @@
-const getAttributes = (dataTarget = '', targetUid, nestedComponents) => {
-  const defaultAttributes = [
+import type { IconByType } from '../../AttributeIcon';
+import type { UID } from '@strapi/types';
+
+export const getAttributesToDisplay = (
+  dataTarget = '',
+  targetUid: UID.Any,
+  nestedComponents: Array<UID.Any>
+): IconByType[][] => {
+  const defaultAttributes: IconByType[] = [
     'text',
     'email',
     'richtext',
@@ -32,5 +39,3 @@ const getAttributes = (dataTarget = '', targetUid, nestedComponents) => {
 
   return [defaultAttributes];
 };
-
-export default getAttributes;

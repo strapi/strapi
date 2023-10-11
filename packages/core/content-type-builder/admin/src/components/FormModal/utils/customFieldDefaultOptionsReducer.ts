@@ -1,4 +1,4 @@
-const customFieldDefaultOptionsReducer = (acc, option) => {
+export const customFieldDefaultOptionsReducer = (acc: any, option: any) => {
   if (option.items) {
     return option.items.reduce(customFieldDefaultOptionsReducer, acc);
   }
@@ -10,5 +10,3 @@ const customFieldDefaultOptionsReducer = (acc, option) => {
 
   return acc;
 };
-
-export { customFieldDefaultOptionsReducer };

@@ -1,4 +1,4 @@
-const data = {
+export const rawData = {
   homeSingleType: {
     contentType: {
       uid: 'plugin::myplugins.home',
@@ -57,5 +57,3 @@ const data = {
     },
   },
 };
-
-export default data;

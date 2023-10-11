@@ -1,13 +1,8 @@
-/**
- * Creates an object of content types from an array
- * @params {Object[]} arr array of content types
- * @returns {Object} an object of content types
- */
-const createDataObject = (arr) =>
-  arr.reduce((acc, current) => {
+import { ContentType } from '../../../types';
+
+export const createDataObject = (arr: ContentType[]) =>
+  arr.reduce((acc: Record<string, ContentType>, current) => {
     acc[current.uid] = current;
 
     return acc;
   }, {});
-
-export default createDataObject;

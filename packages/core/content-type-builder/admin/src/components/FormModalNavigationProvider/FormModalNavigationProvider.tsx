@@ -12,7 +12,7 @@ type FormModalNavigationProviderProps = {
 
 export type State = any;
 
-type ModalEventProps = {
+export type ModalEventProps = {
   attributeType?: string;
   customFieldUid?: string;
   dynamicZoneTarget?: string;

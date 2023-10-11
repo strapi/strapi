@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { SyntheticEvent, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import {
   Box,
@@ -74,11 +74,16 @@ import {
 } from './constants';
 import { forms } from './forms/forms';
 import { makeSelectFormModal } from './selectors';
-import { canEditContentType, getAttributesToDisplay, getFormInputNames } from './utils';
+import { canEditContentType } from './utils/canEditContentType';
 import { createComponentUid, createUid } from './utils/createUid';
+import { getAttributesToDisplay } from './utils/getAttributesToDisplay';
+import { getFormInputNames } from './utils/getFormInputNames';
+
+import type { CustomFieldAttributeParams } from '../../contexts/DataManagerContext';
+import type { Common } from '@strapi/types';
 
 // TODO: Remove after the RTE Blocks Beta release
-const BetaFeatureAlert = styled(Alert)`
+const BetaFeatureAlert = styled(Alert)<{ title?: string }>`
   button {
     display: none;
   }
@@ -101,14 +106,13 @@ export const FormModal = () => {
     forTarget,
     modalType,
     isOpen,
-    showBackLink,
     kind,
     step,
     targetUid,
   } = useFormModalNavigation();
   const customField = useCustomFields().get(customFieldUid);
 
-  const tabGroupRef = useRef();
+  const tabGroupRef = useRef<any>();
 
   const formModalSelector = useMemo(makeSelectFormModal, []);
   const dispatch = useDispatch();
@@ -331,7 +335,6 @@ export const FormModal = () => {
     modalType,
   ]);
 
-  // FIXME rename this constant
   const isCreatingContentType = modalType === 'contentType';
   const isCreatingComponent = modalType === 'component';
   const isCreatingAttribute = modalType === 'attribute';
@@ -344,7 +347,9 @@ export const FormModal = () => {
   const isEditingCategory = modalType === 'editCategory';
   const isPickingAttribute = modalType === 'chooseAttribute';
   const uid = createUid(modifiedData.displayName || '');
-  const attributes = get(allDataSchema, [...pathToSchema, 'schema', 'attributes'], null);
+  const attributes = get(allDataSchema, [...pathToSchema, 'schema', 'attributes'], null) as {
+    name: string;
+  }[];
 
   const checkFormValidity = async () => {
     let schema;
@@ -369,12 +374,12 @@ export const FormModal = () => {
       // This is happening when the user click on the link from the left menu
     } else if (isCreatingComponent) {
       schema = forms.component.schema(
-        Object.keys(components),
+        Object.keys(components) as Common.UID.Component[],
         modifiedData.category || '',
         reservedNames,
         actionType === 'edit',
-        get(allDataSchema, [...pathToSchema, 'uid'], null),
-        ctbFormsAPI
+        get(allDataSchema, [...pathToSchema, 'uid'], null)
+        // ctbFormsAPI
       );
     } else if (isCreatingCustomFieldAttribute) {
       schema = forms.customField.schema({
@@ -392,7 +397,7 @@ export const FormModal = () => {
       // The data is set in the componentToCreate key
     } else if (isComponentAttribute && isCreatingComponentFromAView && isInFirstComponentStep) {
       schema = forms.component.schema(
-        Object.keys(components),
+        Object.keys(components) as Common.UID.Component[],
         get(modifiedData, 'componentToCreate.category', ''),
         reservedNames,
         ctbFormsAPI
@@ -438,15 +443,15 @@ export const FormModal = () => {
         ctbFormsAPI
       );
     } else if (isEditingCategory) {
-      schema = forms.editCategory.schema(allComponentsCategories, initialData, ctbFormsAPI);
+      // MINE schema = forms.editCategory.schema(allComponentsCategories, initialData, ctbFormsAPI);
+      schema = forms.editCategory.schema(allComponentsCategories, initialData);
     } else {
       // The user is either in the addComponentToDynamicZone modal or
       // in step 1 of the add component (modalType=attribute&attributeType=component) but not creating a component
-
       // eslint-disable-next-line no-lonely-if
       if (isInFirstComponentStep && isCreatingComponentFromAView) {
         schema = forms.component.schema(
-          Object.keys(components),
+          Object.keys(components) as Common.UID.Component[],
           get(modifiedData, 'componentToCreate.category', ''),
           reservedNames,
           ctbFormsAPI
@@ -462,7 +467,7 @@ export const FormModal = () => {
   };
 
   const handleChange = useCallback(
-    ({ target: { name, value, type, ...rest } }) => {
+    ({ target: { name, value, ...rest } }: { target: { name: string; value: string } }) => {
       const namesThatCanResetToNullValue = [
         'enumName',
         'max',
@@ -511,7 +516,7 @@ export const FormModal = () => {
     [dispatch, formErrors]
   );
 
-  const handleSubmit = async (e, shouldContinue = isCreating) => {
+  const handleSubmit = async (e: SyntheticEvent, shouldContinue = isCreating) => {
     e.preventDefault();
 
     try {
@@ -588,7 +593,7 @@ export const FormModal = () => {
         // Add/edit a field to a content type
         // Add/edit a field to a created component (the end modal is not step 2)
       } else if (isCreatingCustomFieldAttribute) {
-        const customFieldAttributeUpdate = {
+        const customFieldAttributeUpdate: CustomFieldAttributeParams = {
           attributeToSet: { ...modifiedData, customField: customFieldUid },
           forTarget,
           targetUid,
@@ -626,7 +631,9 @@ export const FormModal = () => {
               type: RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ,
             });
 
-            tabGroupRef.current._handlers.setSelectedTabIndex(0);
+            if (tabGroupRef.current !== undefined) {
+              tabGroupRef.current._handlers.setSelectedTabIndex(0);
+            }
 
             onNavigateToAddCompoToDZModal({ dynamicZoneTarget: modifiedData.name });
           } else {
@@ -847,7 +854,7 @@ export const FormModal = () => {
     }
   };
 
-  const sendAdvancedTabEvent = (tab) => {
+  const sendAdvancedTabEvent = (tab: string) => {
     if (tab !== 'advanced') {
       return;
     }
@@ -999,18 +1006,12 @@ export const FormModal = () => {
 
   return (
     <ModalLayout onClose={handleClosed} labelledBy="title">
-      <FormModalHeader
+      <FormModalSubHeader
         actionType={actionType}
         attributeName={attributeName}
-        categoryName={categoryName}
-        contentTypeKind={kind}
-        dynamicZoneTarget={dynamicZoneTarget}
         modalType={modalType}
         forTarget={forTarget}
-        targetUid={targetUid}
         attributeType={attributeType}
-        customFieldUid={customFieldUid}
-        showBackLink={showBackLink}
       />
       {isPickingAttribute && (
         <AttributeOptions
@@ -1160,5 +1161,3 @@ export const FormModal = () => {
     </ModalLayout>
   );
 };
-
-export default FormModal;

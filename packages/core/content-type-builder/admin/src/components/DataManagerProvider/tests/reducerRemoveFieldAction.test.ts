@@ -1,5 +1,5 @@
 import { REMOVE_FIELD } from '../constants';
-import reducer, { initialState } from '../reducer';
+import { reducer, initialState } from '../reducer';
 
 import testData from './data';
 

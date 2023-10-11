@@ -1,7 +1,9 @@
 import get from 'lodash/get';
 
 import * as actions from '../constants';
-import reducer, { initialState } from '../reducer';
+import { reducer, initialState } from '../reducer';
+
+import type { DataManagerStateType, Component, ContentType } from '../../../types';
 
 import testData from './data';
 
@@ -14,7 +16,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
 
   describe('ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE', () => {
     it('should add the created component to the dynamic zone', () => {
-      const createdComponent = {
+      const createdComponent: Component = {
         uid: 'default.test',
         category: 'default',
         isTemporary: true,
@@ -26,7 +28,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
 
-      const components = {
+      const components: Record<string,Component> = {
         'default.test': createdComponent,
         'default.other': {
           uid: 'default.other',
@@ -53,7 +55,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
 
-      const state = {
+      const state:  DataManagerStateType = {
         ...initialState,
         components,
         modifiedData: {
@@ -364,7 +366,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
 
   describe('DELETE_NOT_SAVED_TYPE', () => {
     it('Should reset the components and and contentTypes object', () => {
-      const state = {
+      const state:  = {
         ...initialState,
         components: {
           foo: {},

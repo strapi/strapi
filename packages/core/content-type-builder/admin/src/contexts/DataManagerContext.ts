@@ -1,8 +1,9 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { createContext } from 'react';
 
+import type { EditableContentTypeData } from '../components/FormModal/utils/canEditContentType';
 import type { SchemaType } from '../types';
-import type { UID } from '@strapi/types';
+import type { Common, UID } from '@strapi/types';
 
 export type Component = {
   uid: UID.Component;
@@ -32,7 +33,7 @@ interface DataManagerContextValue {
     data: Record<string, any>,
     schemaType: SchemaType,
     uid: UID.Any,
-    componentCategory: string,
+    componentCategory?: string,
     shouldAddComponentToData?: boolean
   ) => void;
   changeDynamicZoneComponents: (dynamicZoneTarget: string, newComponents: string[]) => void;
@@ -48,21 +49,20 @@ interface DataManagerContextValue {
   setModifiedData: () => void;
   sortedContentTypesList: any[]; // Define the actual type
   submitData: (additionalContentTypeData: Record<string, any>) => void;
-  updateSchema: (
-    data: Record<string, any>,
-    schemaType: SchemaType,
-    componentUID: UID.Component
-  ) => void;
-  components: Record<string, any>;
+  updateSchema: (data: Record<string, any>, schemaType: SchemaType, componentUID: UID.Any) => void;
+  components: Record<Common.UID.Component, unknown>;
   componentsGroupedByCategory: Record<string, Component[]>;
   componentsThatHaveOtherComponentInTheirAttributes: any[]; // Define the actual type
   contentTypes: Record<string, any>;
   initialData: Record<string, any>;
   isInContentTypeView: boolean;
   isInDevelopmentMode: boolean;
-  modifiedData: Record<string, any>;
+  modifiedData: EditableContentTypeData;
   nestedComponents: any[]; // Define the actual type
-  reservedNames: Record<string, any>;
+  reservedNames: {
+    models: string[];
+    attributes: string[];
+  };
   allComponentsCategories: any[];
 }
 

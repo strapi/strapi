@@ -9,6 +9,7 @@ import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../utils';
+import { SyntheticEvent } from 'react';
 
 type FormModalEndActionsProps = {
   categoryName?: string;
@@ -31,17 +32,17 @@ type FormModalEndActionsProps = {
   isEditingAttribute: boolean;
   isEditingCategory: boolean;
   isInFirstComponentStep: boolean;
-  onSubmitAddComponentAttribute: (e: Event, shouldContinue: boolean) => void;
-  onSubmitAddComponentToDz: (e: Event, shouldContinue: boolean) => void;
-  onSubmitCreateContentType: (e: Event, shouldContinue: boolean) => void;
-  onSubmitCreateComponent: (e: Event, shouldContinue: boolean) => void;
-  onSubmitCreateDz: (e: Event, shouldContinue: boolean) => void;
-  onSubmitEditAttribute: (e: Event, shouldContinue: boolean) => void;
-  onSubmitEditCategory: (e: Event) => void;
-  onSubmitEditComponent: (e: Event, shouldContinue: boolean) => void;
-  onSubmitEditContentType: (e: Event, shouldContinue: boolean) => void;
-  onSubmitEditCustomFieldAttribute: (e: Event, shouldContinue: boolean) => void;
-  onSubmitEditDz: (e: Event, shouldContinue: boolean) => void;
+  onSubmitAddComponentAttribute: (e: SyntheticEvent, shouldContinue: boolean) => void;
+  onSubmitAddComponentToDz: (e: SyntheticEvent, shouldContinue: boolean) => void;
+  onSubmitCreateContentType: (e: SyntheticEvent, shouldContinue: boolean) => void;
+  onSubmitCreateComponent: (e: SyntheticEvent, shouldContinue: boolean) => void;
+  onSubmitCreateDz: (e: SyntheticEvent, shouldContinue: boolean) => void;
+  onSubmitEditAttribute: (e: SyntheticEvent, shouldContinue: boolean) => void;
+  onSubmitEditCategory: (e: SyntheticEvent) => void;
+  onSubmitEditComponent: (e: SyntheticEvent, shouldContinue: boolean) => void;
+  onSubmitEditContentType: (e: SyntheticEvent, shouldContinue: boolean) => void;
+  onSubmitEditCustomFieldAttribute: (e: SyntheticEvent, shouldContinue: boolean) => void;
+  onSubmitEditDz: (e: SyntheticEvent, shouldContinue: boolean) => void;
   onClickFinish: () => void;
 };
 
