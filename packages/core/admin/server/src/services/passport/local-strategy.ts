@@ -1,5 +1,4 @@
 import { toLower } from 'lodash/fp';
-// @ts-expect-error
 import { Strategy as LocalStrategy } from 'passport-local';
 import type { Strapi } from '@strapi/types';
 

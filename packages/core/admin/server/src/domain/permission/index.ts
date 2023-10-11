@@ -120,10 +120,11 @@ export const setProperty = (
  * Returns a new permission without the given property name set
  * @param property - The name of the property to delete
  * @param permission - The permission on which we want to remove the property
- * @return {Permission}
  */
-export const deleteProperty = (property: string, permission: Permission) =>
-  omit(`properties.${property}`, permission);
+export const deleteProperty = <TProperty extends string>(
+  property: TProperty,
+  permission: Permission
+) => omit(`properties.${property}`, permission) as Omit<Permission, TProperty>;
 
 /**
  * Creates a new {@link Permission} object from raw attributes. Set default values for certain fields

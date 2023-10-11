@@ -1,4 +1,3 @@
-// @ts-expect-error
 import passport from 'koa-passport';
 import compose from 'koa-compose';
 import { errors } from '@strapi/utils';
