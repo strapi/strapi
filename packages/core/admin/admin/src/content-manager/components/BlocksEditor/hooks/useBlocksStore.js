@@ -369,9 +369,8 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                 <IconButton
                   icon={<Trash />}
                   size="L"
-                  variant="danger"
                   onClick={() => removeLink(editor)}
-                  label={formatMessage({
+                  aria-label={formatMessage({
                     id: 'components.Blocks.popover.delete',
                     defaultMessage: 'Delete',
                   })}
@@ -380,7 +379,7 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                   icon={<Pencil />}
                   size="L"
                   onClick={() => setIsEditing(true)}
-                  label={formatMessage({
+                  aria-label={formatMessage({
                     id: 'components.Blocks.popover.edit',
                     defaultMessage: 'Edit',
                   })}
