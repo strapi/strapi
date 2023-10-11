@@ -451,10 +451,8 @@ export function useBlocksStore() {
          * after the cursor, while retaining all the children, modifiers etc.
          */
         Transforms.splitNodes(editor, {
-          /**
-           * Makes sure we always create a new node,
-           * even if there's nothing to the right of the cursor in the node.
-           */
+          // Makes sure we always create a new node,
+          // even if there's nothing to the right of the cursor in the node.
           always: true,
         });
 
@@ -463,7 +461,7 @@ export function useBlocksStore() {
         const [, parentBlockPath] = Editor.above(editor, {
           match: (n) => n.type !== 'text',
         });
-        const createdEmptyNode = Editor.isEnd(editor, editor.selection.anchor, parentBlockPath);
+        const isNodeEnd = Editor.isEnd(editor, editor.selection.anchor, parentBlockPath);
 
         /**
          * Delete and recreate the node that was created at the right of the cursor.
@@ -484,8 +482,8 @@ export function useBlocksStore() {
           editor,
           {
             type: 'paragraph',
-            // Don't carry over the modifiers from the previous node when there's no text
-            children: createdEmptyNode ? [{ type: 'text', text: '' }] : fragmentedNode.children,
+            // Don't carry over the modifiers from the previous node if there was no text after the cursor
+            children: isNodeEnd ? [{ type: 'text', text: '' }] : fragmentedNode.children,
           },
           {
             at: hasNextNode ? [anchorPathInitialPosition[0] + 1] : [editor.children.length],
