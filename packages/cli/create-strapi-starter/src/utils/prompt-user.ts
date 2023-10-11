@@ -9,7 +9,7 @@ interface Answers {
 
 // Prompts the user with required questions to create the project and return the answers
 export default async function promptUser(projectName: string, starter: string, program: Program) {
-  const questions: inquirer.QuestionCollection = [
+  const questions: ReadonlyArray<inquirer.DistinctQuestion<Answers>> = [
     {
       type: 'input',
       default: 'my-strapi-project',

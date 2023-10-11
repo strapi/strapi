@@ -50,4 +50,4 @@ function printValue(value: unknown, quoteStrings: boolean) {
   );
 }
 
-export = printValue;
+export { printValue };

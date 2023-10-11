@@ -30,7 +30,7 @@ import { useFocusInputField } from '../hooks/useFocusInputField';
 import { pxToRem } from '../utils/pxToRem';
 
 import type { InputType, TranslationMessage } from '../types';
-import type { Attribute } from '@strapi/strapi';
+import type { Attribute } from '@strapi/types';
 
 interface InputOption {
   metadatas: {
@@ -48,7 +48,7 @@ interface CustomInputProps<TAttribute extends Attribute.Any>
   hint?: string | React.JSX.Element | (string | React.JSX.Element)[];
 }
 
-interface GenericInputProps<TAttribute extends Attribute.Any = Attribute.Any> {
+export interface GenericInputProps<TAttribute extends Attribute.Any = Attribute.Any> {
   attribute: TAttribute;
   autoComplete?: string;
   customInputs?: Record<string, React.ComponentType<CustomInputProps<TAttribute>>>;
