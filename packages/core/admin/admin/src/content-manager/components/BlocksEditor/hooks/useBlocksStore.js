@@ -205,8 +205,18 @@ const handleEnterKeyOnList = (editor) => {
     // Move the selection to the newly created paragraph
     Transforms.select(editor, createdParagraphPath);
   } else {
-    // Otherwise just create a new list item by splitting the current one
-    Transforms.splitNodes(editor, { always: true });
+    // Check if the cursor is at the end of the list item
+    const isNodeEnd = Editor.isEnd(editor, editor.selection.anchor, currentListItemPath);
+
+    if (isNodeEnd) {
+      // If there was nothing after the cursor, create a fresh new list item,
+      // in order to avoid carrying over the modifiers from the previous list item
+      Transforms.insertNodes(editor, { type: 'list-item', children: [{ type: 'text', text: '' }] });
+    } else {
+      // If there is something after the cursor, split the current list item,
+      // so that we keep the content and the modifiers
+      Transforms.splitNodes(editor);
+    }
   }
 };
 

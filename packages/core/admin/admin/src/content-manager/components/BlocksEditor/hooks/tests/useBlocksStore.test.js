@@ -898,7 +898,7 @@ describe('useBlocksStore', () => {
     expect(cursorPositionAfterSecondEnter[0]).toEqual(cursorInitialPosition[0] + 1);
   });
 
-  it('disables modifiers when creating a new node with enter key', () => {
+  it('disables modifiers when creating a new node with enter key in a paragraph', () => {
     const { result } = renderHook(useBlocksStore);
 
     baseEditor.children = [
@@ -943,6 +943,69 @@ describe('useBlocksStore', () => {
           {
             type: 'text',
             text: '',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('disables modifiers when creating a new node with enter key in a list item', () => {
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'Line of text with modifiers',
+                bold: true,
+                italic: true,
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor at the end of the block with modifiers
+    Transforms.select(baseEditor, {
+      anchor: Editor.end(baseEditor, []),
+      focus: Editor.end(baseEditor, []),
+    });
+
+    // Simulate the enter key
+    result.current['list-unordered'].handleEnterKey(baseEditor);
+
+    // Should insert a new list item without modifiers
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'Line of text with modifiers',
+                bold: true,
+                italic: true,
+              },
+            ],
+          },
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: '',
+              },
+            ],
           },
         ],
       },
