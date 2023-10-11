@@ -34,7 +34,7 @@
       "default": "./dist/admin/index.js"
     },
     "./strapi-server": {
-      "types": "./dist/server/index.d.ts",
+      "types": "./dist/server/src/index.d.ts",
       "source": "./server/src/index.ts",
       "import": "./dist/server/index.mjs",
       "require": "./dist/server/index.js",
@@ -44,9 +44,8 @@
   },
   "scripts": {
     "build:legacy": "run -T tsc -p tsconfig.build.json",
-    "build": "NODE_ENV=production strapi plugin:build --force",
-    "build:ts": "run build",
-    "watch": "run -T tsc -p tsconfig.build.json -w --preserveWatchOutput",
+    "build": "pack-up build",
+    "watch": "pack-up watch",
     "clean": "run -T rimraf ./dist",
     "prepublishOnly": "yarn clean && yarn build",
     "test:unit": "run -T jest",
@@ -81,6 +80,7 @@
   },
   "devDependencies": {
     "@strapi/admin": "4.14.3",
+    "@strapi/pack-up": "workspace:*",
     "@testing-library/react": "14.0.0",
     "@testing-library/react-hooks": "8.0.1",
     "@types/pluralize": "0.0.30",
