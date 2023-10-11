@@ -1,19 +1,34 @@
-/**
- *
- * SelectComponent
- *
- */
-
-import React from 'react';
-
 import { Option, Select } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import useDataManager from '../../hooks/useDataManager';
+import { useDataManager } from '../hooks/useDataManager';
 
-const SelectComponent = ({
-  error,
+interface Option {
+  uid: string;
+  label: string;
+  categoryName: string;
+}
+
+interface SelectComponentProps {
+  componentToCreate?: Record<string, any> | null;
+  error?: string | null;
+  intlLabel: {
+    id: string;
+    defaultMessage: string;
+    values?: Record<string, any>;
+  };
+  isAddingAComponentToAnotherComponent: boolean;
+  isCreating: boolean;
+  isCreatingComponentWhileAddingAField: boolean;
+  name: string;
+  onChange: (value: any) => void;
+  targetUid: string;
+  value: string;
+  forTarget: string;
+}
+
+export const SelectComponent = ({
+  error = null,
   intlLabel,
   isAddingAComponentToAnotherComponent,
   isCreating,
@@ -24,7 +39,7 @@ const SelectComponent = ({
   targetUid,
   forTarget,
   value,
-}) => {
+}: SelectComponentProps) => {
   const { formatMessage } = useIntl();
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
   const label = formatMessage(intlLabel);
@@ -34,18 +49,21 @@ const SelectComponent = ({
 
   const isTargetAComponent = ['component', 'components'].includes(forTarget);
 
-  let options = Object.entries(componentsGroupedByCategory).reduce((acc, current) => {
-    const [categoryName, components] = current;
-    const compos = components.map((component) => {
-      return {
-        uid: component.uid,
-        label: component.schema.displayName,
-        categoryName,
-      };
-    });
+  let options: Option[] = Object.entries(componentsGroupedByCategory).reduce(
+    (acc: Option[], current) => {
+      const [categoryName, components] = current;
+      const compos = components.map((component) => {
+        return {
+          uid: component.uid,
+          label: component.schema.displayName,
+          categoryName,
+        };
+      });
 
-    return [...acc, ...compos];
-  }, []);
+      return [...acc, ...compos];
+    },
+    []
+  );
 
   if (isAddingAComponentToAnotherComponent) {
     options = options.filter((option) => {
@@ -63,8 +81,8 @@ const SelectComponent = ({
     options = [
       {
         uid: value,
-        label: componentToCreate.displayName,
-        categoryName: componentToCreate.category,
+        label: componentToCreate?.displayName,
+        categoryName: componentToCreate?.category,
       },
     ];
   }
@@ -76,7 +94,7 @@ const SelectComponent = ({
       label={label}
       id={name}
       name={name}
-      onChange={(value) => {
+      onChange={(value: any) => {
         onChange({ target: { name, value, type: 'select-category' } });
       }}
       value={value || ''}
@@ -91,28 +109,3 @@ const SelectComponent = ({
     </Select>
   );
 };
-
-SelectComponent.defaultProps = {
-  componentToCreate: null,
-  error: null,
-};
-
-SelectComponent.propTypes = {
-  componentToCreate: PropTypes.object,
-  forTarget: PropTypes.string.isRequired,
-  error: PropTypes.string,
-  intlLabel: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }).isRequired,
-  isAddingAComponentToAnotherComponent: PropTypes.bool.isRequired,
-  isCreating: PropTypes.bool.isRequired,
-  isCreatingComponentWhileAddingAField: PropTypes.bool.isRequired,
-  name: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-  targetUid: PropTypes.string.isRequired,
-  value: PropTypes.string.isRequired,
-};
-
-export default SelectComponent;

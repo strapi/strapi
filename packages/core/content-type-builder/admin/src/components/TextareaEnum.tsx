@@ -1,20 +1,33 @@
-import React from 'react';
+import { ReactNode, ChangeEvent } from 'react';
 
 import { Textarea } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-const TextareaEnum = ({
-  description,
-  disabled,
-  error,
+import type { IntlLabel } from '../types';
+
+interface TextareaEnumProps {
+  description?: IntlLabel | null;
+  disabled?: boolean;
+  error?: string;
+  intlLabel: IntlLabel;
+  labelAction?: ReactNode;
+  name: string;
+  onChange: (value: { target: { name: string; value: string | string[] } }) => void;
+  placeholder?: IntlLabel | null;
+  value: string | string[] | undefined;
+}
+
+export const TextareaEnum = ({
+  description = null,
+  disabled = false,
+  error = '',
   intlLabel,
   labelAction,
   name,
   onChange,
-  placeholder,
-  value,
-}) => {
+  placeholder = null,
+  value = '',
+}: TextareaEnumProps) => {
   const { formatMessage } = useIntl();
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
   const hint = description
@@ -33,7 +46,7 @@ const TextareaEnum = ({
 
   const inputValue = Array.isArray(value) ? value.join('\n') : '';
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const arrayValue = e.target.value.split('\n');
 
     onChange({ target: { name, value: arrayValue } });
@@ -56,38 +69,3 @@ const TextareaEnum = ({
     </Textarea>
   );
 };
-
-TextareaEnum.defaultProps = {
-  description: null,
-  disabled: false,
-  error: '',
-  labelAction: undefined,
-  placeholder: null,
-  value: '',
-};
-
-TextareaEnum.propTypes = {
-  description: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }),
-  disabled: PropTypes.bool,
-  error: PropTypes.string,
-  intlLabel: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }).isRequired,
-  labelAction: PropTypes.element,
-  name: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-  placeholder: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }),
-  value: PropTypes.oneOfType([PropTypes.array, PropTypes.string]),
-};
-
-export default TextareaEnum;

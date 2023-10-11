@@ -11,8 +11,8 @@ import { getTrad } from '../utils/getTrad';
 
 import { BoxWrapper } from './BoxWrapper';
 import { ComponentList } from './ComponentList';
-import DynamicZoneList from './DynamicZoneList';
-import NestedTFooter from './NestedTFooter';
+import { DynamicZoneList } from './DynamicZoneList';
+import { NestedTFooter } from './NestedFooter';
 
 import type { SchemaType } from '../types';
 import type { UID } from '@strapi/types';

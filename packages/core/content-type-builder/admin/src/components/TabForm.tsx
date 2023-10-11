@@ -1,19 +1,24 @@
-/**
- *
- * TabForm
- *
- */
-
-import React from 'react';
-
 import { Box, Grid, GridItem, Typography } from '@strapi/design-system';
 import { GenericInput } from '@strapi/helper-plugin';
 import get from 'lodash/get';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
+interface TabFormProps {
+  form: Array<Record<string, any>>;
+  formErrors: Record<string, any>;
+  genericInputProps: Record<string, any>;
+  modifiedData: Record<string, any>;
+  onChange: (value: any) => void;
+}
+
 /* eslint-disable react/no-array-index-key */
-const TabForm = ({ form, formErrors, genericInputProps, modifiedData, onChange }) => {
+export const TabForm = ({
+  form,
+  formErrors,
+  genericInputProps,
+  modifiedData,
+  onChange,
+}: TabFormProps) => {
   const { formatMessage } = useIntl();
 
   return form.map((section, sectionIndex) => {
@@ -32,7 +37,7 @@ const TabForm = ({ form, formErrors, genericInputProps, modifiedData, onChange }
           </Box>
         )}
         <Grid gap={4}>
-          {section.items.map((input, i) => {
+          {section.items.map((input: any, i: number) => {
             const key = `${sectionIndex}.${i}`;
 
             const value = get(modifiedData, input.name, '');
@@ -59,7 +64,7 @@ const TabForm = ({ form, formErrors, genericInputProps, modifiedData, onChange }
                       // Since the component info is stored in the
                       // componentToCreate object we can access the error
                       // By removing the key
-                      .filter((key) => key !== 'componentToCreate'),
+                      .filter((key: string) => key !== 'componentToCreate'),
                     'id',
                   ],
                   null
@@ -90,13 +95,3 @@ const TabForm = ({ form, formErrors, genericInputProps, modifiedData, onChange }
     );
   });
 };
-
-TabForm.propTypes = {
-  form: PropTypes.arrayOf(PropTypes.object).isRequired,
-  formErrors: PropTypes.object.isRequired,
-  genericInputProps: PropTypes.object.isRequired,
-  modifiedData: PropTypes.object.isRequired,
-  onChange: PropTypes.func.isRequired,
-};
-
-export default TabForm;

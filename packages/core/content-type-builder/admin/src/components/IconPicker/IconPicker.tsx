@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import {
   Box,
@@ -15,13 +15,14 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Search, Trash } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import { getTrad } from '../../utils';
 
 import { COMPONENT_ICONS } from './constants';
+
+import type { IntlLabel } from '../../types';
 
 const IconPickerWrapper = styled(Flex)`
   label {
@@ -31,7 +32,17 @@ const IconPickerWrapper = styled(Flex)`
   }
 `;
 
-const IconPick = ({ iconKey, name, onChange, isSelected, ariaLabel }) => {
+type Icons = keyof typeof COMPONENT_ICONS;
+
+interface IconPickProps {
+  iconKey: Icons;
+  name: string;
+  onChange: (value: any) => void;
+  isSelected: boolean;
+  ariaLabel: string;
+}
+
+const IconPick = ({ iconKey, name, onChange, isSelected, ariaLabel }: IconPickProps) => {
   return (
     <Field name={name} required={false}>
       <FieldLabel htmlFor={iconKey} id={`${iconKey}-label`}>
@@ -56,19 +67,18 @@ const IconPick = ({ iconKey, name, onChange, isSelected, ariaLabel }) => {
   );
 };
 
-IconPick.propTypes = {
-  iconKey: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-  isSelected: PropTypes.bool.isRequired,
-  ariaLabel: PropTypes.string.isRequired,
-};
+export interface IconPickerProps {
+  intlLabel: IntlLabel;
+  name: string;
+  onChange: (value: { target: { name: string; value: string } }) => void;
+  value?: string;
+}
 
-const IconPicker = ({ intlLabel, name, onChange, value }) => {
+export const IconPicker = ({ intlLabel, name, onChange, value = '' }: IconPickerProps) => {
   const { formatMessage } = useIntl();
   const [showSearch, setShowSearch] = useState(false);
   const [search, setSearch] = useState('');
-  const allIcons = Object.keys(COMPONENT_ICONS);
+  const allIcons = Object.keys(COMPONENT_ICONS) as Icons[];
   const [icons, setIcons] = useState(allIcons);
   const searchIconRef = useRef(null);
   const searchBarRef = useRef(null);
@@ -77,7 +87,7 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
     setShowSearch(!showSearch);
   };
 
-  const onChangeSearch = ({ target: { value } }) => {
+  const onChangeSearch = ({ target: { value } }: { target: { value: string } }) => {
     setSearch(value);
     setIcons(() => allIcons.filter((icon) => icon.toLowerCase().includes(value.toLowerCase())));
   };
@@ -94,7 +104,7 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
 
   useEffect(() => {
     if (showSearch) {
-      searchBarRef.current.focus();
+      (searchBarRef.current as unknown as HTMLInputElement)?.focus();
     }
   }, [showSearch]);
 
@@ -206,16 +216,3 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
     </>
   );
 };
-
-IconPicker.defaultProps = {
-  value: '',
-};
-
-IconPicker.propTypes = {
-  intlLabel: PropTypes.object.isRequired,
-  name: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.string,
-};
-
-export default IconPicker;

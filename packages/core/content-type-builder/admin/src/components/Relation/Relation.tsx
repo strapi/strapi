@@ -1,25 +1,30 @@
-/**
- *
- * Relation
- *
- */
-
-import React from 'react';
-
 import { Flex } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 
 import getRelationType from '../../utils/getRelationType';
 
-import RelationField from './RelationField';
-import RelationNaturePicker from './RelationNaturePicker';
+import { RelationFormBox } from './RelationField/RelationField';
+import { RelationNaturePicker } from './RelationNaturePicker/RelationNaturePicker';
 
-const Relation = ({ formErrors, mainBoxHeader, modifiedData, naturePickerType, onChange }) => {
+interface RelationProps {
+  formErrors: Record<string, any>;
+  mainBoxHeader: string;
+  modifiedData: Record<string, any>;
+  onChange: (value: any) => void;
+  naturePickerType: string;
+}
+
+export const Relation = ({
+  formErrors,
+  mainBoxHeader,
+  modifiedData,
+  naturePickerType,
+  onChange,
+}: RelationProps) => {
   const relationType = getRelationType(modifiedData.relation, modifiedData.targetAttribute);
 
   return (
     <Flex style={{ position: 'relative' }}>
-      <RelationField
+      <RelationFormBox
         isMain
         header={mainBoxHeader}
         error={formErrors?.name || null}
@@ -33,7 +38,7 @@ const Relation = ({ formErrors, mainBoxHeader, modifiedData, naturePickerType, o
         relationType={relationType}
         target={modifiedData.target}
       />
-      <RelationField
+      <RelationFormBox
         disabled={['oneWay', 'manyWay'].includes(relationType)}
         error={formErrors?.targetAttribute || null}
         name="targetAttribute"
@@ -45,13 +50,3 @@ const Relation = ({ formErrors, mainBoxHeader, modifiedData, naturePickerType, o
     </Flex>
   );
 };
-
-Relation.propTypes = {
-  formErrors: PropTypes.object.isRequired,
-  mainBoxHeader: PropTypes.string.isRequired,
-  modifiedData: PropTypes.object.isRequired,
-  naturePickerType: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-};
-
-export default Relation;

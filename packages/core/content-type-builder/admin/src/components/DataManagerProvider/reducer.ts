@@ -3,13 +3,28 @@ import get from 'lodash/get';
 import set from 'lodash/set';
 
 import getRelationType from '../../utils/getRelationType';
-import makeUnique from '../../utils/makeUnique';
+import { makeUnique } from '../../utils/makeUnique';
 
 import * as actions from './constants';
-import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
-import { Attribute } from '@strapi/types';
+import { retrieveComponentsFromSchema } from './utils/retrieveComponentsFromSchema';
 
-const initialState = {
+import type { Attribute, DataManagerStateType } from '../../types';
+import type { UID } from '@strapi/types';
+
+// TODO: Define all possible actions based on type
+type Action = {
+  type: string;
+  uid?: string;
+  [key: string]: any;
+};
+
+type findAttributeIndexSchemaParam = {
+  schema: {
+    attributes: Attribute[];
+  };
+};
+
+const initialState: DataManagerStateType = {
   components: {},
   contentTypes: {},
   initialComponents: {},
@@ -35,22 +50,11 @@ const getOppositeRelation = (originalRelation: string) => {
   return originalRelation;
 };
 
-type Action = {
-  type: string;
-};
-
-type findAttributeIndexSchemaParam = {
-  schema: {
-    attributes: {
-      name: string;
-    }[];
-  };
-};
 const findAttributeIndex = (schema: findAttributeIndexSchemaParam, attributeToFind: string) => {
   return schema.schema.attributes.findIndex(({ name }) => name === attributeToFind);
 };
 
-const reducer = (state = initialState, action) =>
+const reducer = (state = initialState, action: Action) =>
   // eslint-disable-next-line consistent-return
   produce(state, (draftState) => {
     switch (action.type) {
@@ -101,11 +105,13 @@ const reducer = (state = initialState, action) =>
           );
 
           // We dont' need to set the already added components otherwise all modifications will be lost so we need to only add the not modified ones
-          const nestedComponentsToAddInModifiedData = nestedComponents.filter((compoUID) => {
-            return get(state, ['modifiedData', 'components', compoUID]) === undefined;
-          });
+          const nestedComponentsToAddInModifiedData = nestedComponents.filter(
+            (compoUID: UID.Component) => {
+              return get(state, ['modifiedData', 'components', compoUID]) === undefined;
+            }
+          );
 
-          nestedComponentsToAddInModifiedData.forEach((compoUID) => {
+          nestedComponentsToAddInModifiedData.forEach((compoUID: UID.Component) => {
             const compoSchema = get(state, ['components', compoUID], {});
             const isTemporary = compoSchema.isTemporary || false;
 
@@ -135,7 +141,7 @@ const reducer = (state = initialState, action) =>
             relationType !== 'manyWay' &&
             target === currentUid
           ) {
-            const oppositeAttribute = {
+            const oppositeAttribute: Attribute = {
               name: targetAttribute,
               relation: getOppositeRelation(relationType),
               target,
@@ -167,7 +173,7 @@ const reducer = (state = initialState, action) =>
           dynamicZoneTarget
         );
 
-        componentsToAdd.forEach((componentUid) => {
+        componentsToAdd.forEach((componentUid: UID.Component) => {
           draftState.modifiedData.contentType.schema.attributes[dzAttributeIndex].components.push(
             componentUid
           );
@@ -230,7 +236,7 @@ const reducer = (state = initialState, action) =>
           return get(state, ['modifiedData', 'components', compoUID]) === undefined;
         });
 
-        nestedComponentsToAddInModifiedData.forEach((compoUID) => {
+        nestedComponentsToAddInModifiedData.forEach((compoUID: UID.Component) => {
           const compoSchema = get(state, ['components', compoUID], {});
           const isTemporary = compoSchema.isTemporary || false;
 
@@ -305,7 +311,7 @@ const reducer = (state = initialState, action) =>
           break;
         }
 
-        const updatedAttributes = get(state, [
+        const updatedAttributes: Attribute[] = get(state, [
           'modifiedData',
           ...pathToDataToEdit,
           'schema',
@@ -313,7 +319,7 @@ const reducer = (state = initialState, action) =>
         ]).slice();
 
         // First create the current relation attribute updated
-        const toSet = {
+        const toSet: Attribute = {
           name,
           relation: rest.relation,
           target: rest.target,
@@ -330,7 +336,7 @@ const reducer = (state = initialState, action) =>
         }
 
         const currentAttributeIndex = updatedAttributes.findIndex(
-          ({ name }) => name === initialAttribute.name
+          ({ name }: { name: string }) => name === initialAttribute.name
         );
 
         // First set it in the updatedAttributes
@@ -338,9 +344,9 @@ const reducer = (state = initialState, action) =>
           updatedAttributes.splice(currentAttributeIndex, 1, toSet);
         }
 
-        let oppositeAttributeNameToRemove = null;
-        let oppositeAttributeNameToUpdate = null;
-        let oppositeAttributeToCreate = null;
+        let oppositeAttributeNameToRemove: string | null = null;
+        let oppositeAttributeNameToUpdate: string | null = null;
+        let oppositeAttributeToCreate: Attribute | null = null;
         let initialOppositeAttribute = null;
 
         const currentUid = get(state, ['modifiedData', ...pathToDataToEdit, 'uid']);
@@ -391,7 +397,7 @@ const reducer = (state = initialState, action) =>
         // In case of oneWay or manyWay relation there isn't an opposite attribute
         if (oppositeAttributeNameToRemove) {
           const indexToRemove = updatedAttributes.findIndex(
-            ({ name }) => name === oppositeAttributeNameToRemove
+            ({ name }: { name: string }) => name === oppositeAttributeNameToRemove
           );
 
           updatedAttributes.splice(indexToRemove, 1);
@@ -566,7 +572,8 @@ const reducer = (state = initialState, action) =>
             target === uid && !ONE_SIDE_RELATIONS.includes(relationType);
 
           if (shouldRemoveOppositeAttribute) {
-            const attributes = state.modifiedData[mainDataKey].schema.attributes.slice();
+            const attributes: Attribute[] =
+              state.modifiedData[mainDataKey].schema.attributes.slice();
             const nextAttributes = attributes.filter((attribute) => {
               if (attribute.name === attributeToRemoveName) {
                 return false;
@@ -588,7 +595,7 @@ const reducer = (state = initialState, action) =>
         // Find all uid fields that have the targetField set to the field we are removing
         const uidFieldsToUpdate = state.modifiedData[mainDataKey].schema.attributes
           .slice()
-          .reduce((acc, current) => {
+          .reduce((acc: string[], current) => {
             if (current.type !== 'uid') {
               return acc;
             }
@@ -668,5 +675,4 @@ const reducer = (state = initialState, action) =>
     }
   });
 
-export default reducer;
-export { initialState };
+export { initialState, reducer };

@@ -1,18 +1,37 @@
-/**
- *
- * SingularName
- *
- */
-
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { TextInput } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import nameToSlug from '../../utils/nameToSlug';
+import nameToSlug from '../utils/nameToSlug';
 
-const SingularName = ({ description, error, intlLabel, modifiedData, name, onChange, value }) => {
+import type { IntlLabel } from '../types';
+
+interface Description {
+  id: string;
+  defaultMessage: string;
+  values?: Record<string, any>;
+}
+
+interface SingularNameProps {
+  description?: Description | null;
+  error?: string | null;
+  intlLabel: IntlLabel;
+  modifiedData: Record<string, any>;
+  name: string;
+  onChange: (value: { target: { name: string; value: string } }) => void;
+  value?: string | null;
+}
+
+export const SingularName = ({
+  description = null,
+  error = null,
+  intlLabel,
+  modifiedData,
+  name,
+  onChange,
+  value = null,
+}: SingularNameProps) => {
   const { formatMessage } = useIntl();
   const onChangeRef = useRef(onChange);
   const displayName = modifiedData?.displayName || '';
@@ -46,29 +65,3 @@ const SingularName = ({ description, error, intlLabel, modifiedData, name, onCha
     />
   );
 };
-
-SingularName.defaultProps = {
-  description: null,
-  error: null,
-  value: null,
-};
-
-SingularName.propTypes = {
-  description: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }),
-  error: PropTypes.string,
-  intlLabel: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }).isRequired,
-  modifiedData: PropTypes.object.isRequired,
-  name: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.string,
-};
-
-export default SingularName;

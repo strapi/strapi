@@ -5,8 +5,7 @@ import { fireEvent, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
-
-import IconPicker from '../index';
+import { IconPicker, IconPickerProps } from '../IconPicker';
 
 const defaultProps = {
   intlLabel: {
@@ -18,11 +17,11 @@ const defaultProps = {
   value: '',
 };
 
-const setup = (props) => {
+const setup = (props: Partial<IconPickerProps>) => {
   return {
     ...render(<IconPicker {...defaultProps} {...props} />, {
       wrapper: ({ children }) => (
-        <IntlProvider locale="en" messages={{}} defaultLocale="en">
+        <IntlProvider locale="en" defaultLocale="en">
           <ThemeProvider theme={lightTheme}>
             <MemoryRouter history={history}>{children}</MemoryRouter>
           </ThemeProvider>

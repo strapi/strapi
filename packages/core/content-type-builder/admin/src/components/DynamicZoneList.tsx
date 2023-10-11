@@ -1,24 +1,27 @@
-/**
- *
- * DynamicZoneList
- *
- */
-
-/* eslint-disable import/no-cycle */
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import useDataManager from '../../hooks/useDataManager';
-import { getTrad } from '../../utils/getTrad';
-import { ComponentCard } from '../ComponentCard';
-import ComponentList from '../ComponentList';
-import Tr from '../Tr';
+import { useDataManager } from '../hooks/useDataManager';
+import { getTrad } from '../utils/getTrad';
+
+import { ComponentCard } from './ComponentCard';
+import { ComponentList } from './ComponentList';
+import { Tr } from './Tr';
+
+import type { UID } from '@strapi/types';
+
+interface DynamicZoneListProps {
+  addComponent: (name?: string) => void;
+  components: Array<string>;
+  customRowComponent?: () => void;
+  name?: string;
+  targetUid: UID.Component;
+}
 
 const StyledAddIcon = styled(Plus)`
   width: ${pxToRem(32)};
@@ -56,12 +59,18 @@ const ComponentStack = styled(Flex)`
   align-items: center;
 `;
 
-function DynamicZoneList({ customRowComponent, components, addComponent, name, targetUid }) {
+export const DynamicZoneList = ({
+  customRowComponent,
+  components = [],
+  addComponent,
+  name,
+  targetUid,
+}: DynamicZoneListProps) => {
   const { isInDevelopmentMode } = useDataManager();
   const [activeTab, setActiveTab] = useState(0);
   const { formatMessage } = useIntl();
 
-  const toggle = (tab) => {
+  const toggle = (tab: number) => {
     if (activeTab !== tab) {
       setActiveTab(tab);
     }
@@ -83,7 +92,7 @@ function DynamicZoneList({ customRowComponent, components, addComponent, name, t
                   <Typography variant="pi" fontWeight="bold" textColor="primary600">
                     {formatMessage({
                       id: getTrad('button.component.add'),
-                      formatMessage: 'Add a component',
+                      defaultMessage: 'Add a component',
                     })}
                   </Typography>
                 </ComponentStack>
@@ -94,7 +103,7 @@ function DynamicZoneList({ customRowComponent, components, addComponent, name, t
                 return (
                   <ComponentCard
                     key={component}
-                    dzName={name}
+                    dzName={name || ''}
                     index={index}
                     component={component}
                     isActive={activeTab === index}
@@ -127,7 +136,7 @@ function DynamicZoneList({ customRowComponent, components, addComponent, name, t
                     <ComponentList
                       {...props}
                       isFromDynamicZone
-                      targetUid={targetUid}
+                      component={targetUid}
                       key={component}
                     />
                   </tbody>
@@ -139,21 +148,4 @@ function DynamicZoneList({ customRowComponent, components, addComponent, name, t
       </td>
     </Tr>
   );
-}
-
-DynamicZoneList.defaultProps = {
-  addComponent() {},
-  components: [],
-  customRowComponent: null,
-  name: null,
 };
-
-DynamicZoneList.propTypes = {
-  addComponent: PropTypes.func,
-  components: PropTypes.instanceOf(Array),
-  customRowComponent: PropTypes.func,
-  name: PropTypes.string,
-  targetUid: PropTypes.string.isRequired,
-};
-
-export default DynamicZoneList;

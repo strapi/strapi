@@ -1,10 +1,13 @@
 import get from 'lodash/get';
 
-import makeUnique from '../../../utils/makeUnique';
+import { makeUnique } from '../../../utils/makeUnique';
 
-const retrieveComponentsThatHaveComponents = (allComponents) => {
+import type { Component, Schema } from '../../../types';
+import type { UID } from '@strapi/types';
+
+const retrieveComponentsThatHaveComponents = (allComponents: any) => {
   const componentsThatHaveNestedComponents = Object.keys(allComponents).reduce((acc, current) => {
-    const currentComponent = get(allComponents, [current], {});
+    const currentComponent: Component = get(allComponents, [current], {});
     const uid = currentComponent.uid;
 
     if (doesComponentHaveAComponentField(currentComponent)) {
@@ -17,7 +20,7 @@ const retrieveComponentsThatHaveComponents = (allComponents) => {
   return makeUnique(componentsThatHaveNestedComponents);
 };
 
-const doesComponentHaveAComponentField = (component) => {
+const doesComponentHaveAComponentField = (component: Component) => {
   const attributes = get(component, ['schema', 'attributes'], []);
 
   return attributes.some((attribute) => {

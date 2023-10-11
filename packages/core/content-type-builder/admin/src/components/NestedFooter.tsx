@@ -1,7 +1,6 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 
 import { Box, Flex, Typography } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 const IconBox = styled(Box)`
@@ -31,7 +30,14 @@ const ButtonBox = styled(Box)`
   left: -0.25rem;
 `;
 
-const NestedTFooter = ({ children, icon, color, ...props }) => {
+interface NestedTFooterProps {
+  color: string;
+  children: ReactNode;
+  icon: ReactNode;
+  onClick?: () => void;
+}
+
+export const NestedTFooter = ({ children, icon, color, ...props }: NestedTFooterProps) => {
   return (
     <ButtonBox paddingBottom={4} paddingTop={4} as="button" type="button" {...props}>
       <Flex>
@@ -47,11 +53,3 @@ const NestedTFooter = ({ children, icon, color, ...props }) => {
     </ButtonBox>
   );
 };
-
-NestedTFooter.propTypes = {
-  color: PropTypes.string.isRequired,
-  children: PropTypes.string.isRequired,
-  icon: PropTypes.node.isRequired,
-};
-
-export default NestedTFooter;

@@ -1,5 +1,3 @@
-import React from 'react';
-
 import get from 'lodash/get';
 
 import { useDataManager } from '../hooks/useDataManager';
@@ -11,7 +9,7 @@ import type { UID } from '@strapi/types';
 
 interface ComponentListProps {
   component: UID.Component;
-  customRowComponent: React.ComponentType<any>;
+  customRowComponent: any;
   firstLoopComponentUid?: string;
   isFromDynamicZone?: boolean;
   isNestedInDZComponent?: boolean;

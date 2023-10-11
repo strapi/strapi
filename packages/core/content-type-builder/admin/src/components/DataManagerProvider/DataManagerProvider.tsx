@@ -24,7 +24,7 @@ import { DataManagerContext } from '../../contexts/DataManagerContext';
 import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import pluginId from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
-import makeUnique from '../../utils/makeUnique';
+import { makeUnique } from '../../utils/makeUnique';
 import FormModal from '../FormModal/FormModal';
 
 import {
@@ -45,12 +45,12 @@ import {
   SET_MODIFIED_DATA,
   UPDATE_SCHEMA,
 } from './constants';
-import makeSelectDataManagerProvider from './selectors';
+import { makeSelectDataManagerProvider } from './selectors';
 import { formatMainDataType, getComponentsToPost, sortContentType } from './utils/cleanData';
 import createDataObject from './utils/createDataObject';
 import createModifiedDataSchema from './utils/createModifiedDataSchema';
 import formatSchemas from './utils/formatSchemas';
-import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
+import { retrieveComponentsFromSchema } from './utils/retrieveComponentsFromSchema';
 import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
 import retrieveNestedComponents from './utils/retrieveNestedComponents';
 import retrieveSpecificInfoFromComponents from './utils/retrieveSpecificInfoFromComponents';
