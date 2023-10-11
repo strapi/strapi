@@ -15,7 +15,7 @@ import packageJSON from '../../../../package.json';
 import { useConfiguration } from '../../hooks';
 import { getFullName, hashAdminUserEmail } from '../../utils';
 import NpsSurvey from '../NpsSurvey';
-import PluginsInitializer from '../PluginsInitializer';
+import { PluginsInitializer } from '../PluginsInitializer';
 import RBACProvider from '../RBACProvider';
 
 import { fetchAppInfo, fetchCurrentUserPermissions, fetchUserRoles } from './utils/api';
