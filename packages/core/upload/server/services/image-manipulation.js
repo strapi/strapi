@@ -85,7 +85,7 @@ const generateThumbnail = async (file) => {
  *
  */
 const optimize = async (file) => {
-  const { sizeOptimization = false, autoOrientation = false } = await getService(
+  const { sizeOptimization = false, autoOrientation = true } = await getService(
     'upload'
   ).getSettings();
 
@@ -98,7 +98,7 @@ const optimize = async (file) => {
     // reduce image quality
     transformer[format]({ quality: sizeOptimization ? 80 : 100 });
     // rotate image based on EXIF data
-    if (autoOrientation) {
+    if (!autoOrientation) {
       transformer.rotate();
     }
     const filePath = join(file.tmpWorkingDirectory, `optimized-${file.hash}`);
