@@ -35,7 +35,7 @@ jobs:
           filters: .github/filters.yaml
 
   lint:
-    name: 'lint'
+    name: 'lint (node: 18)'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -92,7 +92,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [18, 20]
+        node: [16, 18, 20]
     steps:
       - uses: actions/checkout@v4
         with:
