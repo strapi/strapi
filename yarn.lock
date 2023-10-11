@@ -7418,12 +7418,14 @@ __metadata:
     "@casl/ability": 6.5.0
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.10
     "@radix-ui/react-toolbar": 1.0.4
+    "@strapi/admin-test-utils": 4.14.4
     "@strapi/data-transfer": 4.14.4
     "@strapi/design-system": 1.12.0
     "@strapi/helper-plugin": 4.14.4
     "@strapi/icons": 1.12.0
     "@strapi/permissions": 4.14.4
     "@strapi/provider-audit-logs-local": 4.14.4
+    "@strapi/types": "workspace:*"
     "@strapi/typescript-utils": 4.14.4
     "@strapi/utils": 4.14.4
     "@testing-library/dom": 9.2.0
@@ -7557,7 +7559,7 @@ __metadata:
     typescript: 5.2.2
     ws: 8.13.0
   peerDependencies:
-    "@strapi/strapi": ^4.13.7
+    "@strapi/strapi": ^4.14.4
   languageName: unknown
   linkType: soft
 
@@ -7565,13 +7567,16 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/database@workspace:packages/core/database"
   dependencies:
+    "@strapi/pack-up": "workspace:*"
     "@strapi/utils": 4.14.4
     date-fns: 2.30.0
     debug: 4.3.4
+    eslint-config-custom: 4.14.4
     fs-extra: 10.0.0
     knex: 2.5.0
     lodash: 4.17.21
     semver: 7.5.4
+    tsconfig: 4.14.4
     umzug: 3.2.1
   languageName: unknown
   linkType: soft
@@ -7697,7 +7702,6 @@ __metadata:
     immer: 9.0.19
     lodash: 4.17.21
     msw: 1.3.0
-    prop-types: ^15.8.1
     qs: 6.11.1
     react: ^18.2.0
     react-dom: ^18.2.0
@@ -8335,7 +8339,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/types@4.14.4, @strapi/types@workspace:packages/core/types":
+"@strapi/types@4.14.4, @strapi/types@workspace:*, @strapi/types@workspace:packages/core/types":
   version: 0.0.0-use.local
   resolution: "@strapi/types@workspace:packages/core/types"
   dependencies:

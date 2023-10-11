@@ -50,6 +50,7 @@
     "@strapi/icons": "1.12.0",
     "@strapi/permissions": "4.14.4",
     "@strapi/provider-audit-logs-local": "4.14.4",
+    "@strapi/types": "workspace:*",
     "@strapi/typescript-utils": "4.14.4",
     "@strapi/utils": "4.14.4",
     "axios": "1.5.0",
@@ -134,6 +135,7 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
+    "@strapi/admin-test-utils": "4.14.4",
     "@testing-library/dom": "9.2.0",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",

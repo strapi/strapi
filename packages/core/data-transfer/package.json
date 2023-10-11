@@ -27,7 +27,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "./dist"
+    "./dist/**/!(*.d.ts.map)"
   ],
   "scripts": {
     "build": "run -T tsc -p tsconfig.build.json",
@@ -77,7 +77,7 @@
     "typescript": "5.2.2"
   },
   "peerDependencies": {
-    "@strapi/strapi": "^4.13.7"
+    "@strapi/strapi": "^4.14.4"
   },
   "engines": {
     "node": ">=16.0.0 <=20.x.x",
