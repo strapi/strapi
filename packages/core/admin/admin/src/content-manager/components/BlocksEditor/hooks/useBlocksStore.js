@@ -37,6 +37,10 @@ import styled, { css } from 'styled-components';
 import { composeRefs } from '../../../utils';
 import { editLink, removeLink } from '../utils/links';
 
+const StyledBaseLink = styled(BaseLink)`
+  text-decoration: none;
+`;
+
 const H1 = styled(Typography).attrs({ as: 'h1' })`
   font-size: ${42 / 16}rem;
   line-height: ${({ theme }) => theme.lineHeights[1]};
@@ -67,33 +71,6 @@ const H6 = styled(Typography).attrs({ as: 'h6' })`
   line-height: ${({ theme }) => theme.lineHeights[1]};
 `;
 
-const Heading = ({ attributes, children, element }) => {
-  switch (element.level) {
-    case 1:
-      return <H1 {...attributes}>{children}</H1>;
-    case 2:
-      return <H2 {...attributes}>{children}</H2>;
-    case 3:
-      return <H3 {...attributes}>{children}</H3>;
-    case 4:
-      return <H4 {...attributes}>{children}</H4>;
-    case 5:
-      return <H5 {...attributes}>{children}</H5>;
-    case 6:
-      return <H6 {...attributes}>{children}</H6>;
-    default: // do nothing
-      return null;
-  }
-};
-
-Heading.propTypes = {
-  attributes: PropTypes.object.isRequired,
-  children: PropTypes.node.isRequired,
-  element: PropTypes.shape({
-    level: PropTypes.oneOf([1, 2, 3, 4, 5, 6]).isRequired,
-  }).isRequired,
-};
-
 const CodeBlock = styled.pre.attrs({ role: 'code' })`
   border-radius: ${({ theme }) => theme.borderRadius};
   background-color: ${({ theme }) => theme.colors.neutral100};
@@ -113,8 +90,9 @@ const CodeBlock = styled.pre.attrs({ role: 'code' })`
 const Blockquote = styled.blockquote.attrs({ role: 'blockquote' })`
   margin: ${({ theme }) => `${theme.spaces[4]} 0`};
   font-weight: ${({ theme }) => theme.fontWeights.regular};
-  border-left: ${({ theme }) => `${theme.spaces[1]} solid ${theme.colors.neutral150}`};
+  border-left: ${({ theme }) => `${theme.spaces[1]} solid ${theme.colors.neutral200}`};
   padding: ${({ theme }) => theme.spaces[2]} ${({ theme }) => theme.spaces[5]};
+  color: ${({ theme }) => theme.colors.neutral600};
 `;
 
 const listStyle = css`
@@ -320,7 +298,7 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
 
   return (
     <>
-      <BaseLink
+      <StyledBaseLink
         {...attributes}
         ref={composedRefs}
         href={element.url}
@@ -328,7 +306,7 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
         color="primary600"
       >
         {children}
-      </BaseLink>
+      </StyledBaseLink>
       {popoverOpen && (
         <Popover source={linkRef} onDismiss={handleDismiss} padding={4} contentEditable={false}>
           {isEditing ? (
@@ -382,9 +360,11 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
           ) : (
             <Flex direction="column" gap={4} alignItems="start" width="400px">
               <Typography>{elementText}</Typography>
-              <BaseLink href={element.url} target="_blank" color="primary600">
-                {element.url}
-              </BaseLink>
+              <Typography>
+                <StyledBaseLink href={element.url} target="_blank" color="primary600">
+                  {element.url}
+                </StyledBaseLink>
+              </Typography>
               <Flex justifyContent="end" width="100%" gap={2}>
                 <IconButton
                   icon={<Trash />}
@@ -503,7 +483,7 @@ export function useBlocksStore() {
       },
     },
     'heading-one': {
-      renderElement: (props) => <Heading {...props} />,
+      renderElement: (props) => <H1 {...props.attributes}>{props.children}</H1>,
       icon: HeadingOne,
       label: {
         id: 'components.Blocks.blocks.heading1',
@@ -517,7 +497,7 @@ export function useBlocksStore() {
       isInBlocksSelector: true,
     },
     'heading-two': {
-      renderElement: (props) => <Heading {...props} />,
+      renderElement: (props) => <H2 {...props.attributes}>{props.children}</H2>,
       icon: HeadingTwo,
       label: {
         id: 'components.Blocks.blocks.heading2',
@@ -531,7 +511,7 @@ export function useBlocksStore() {
       isInBlocksSelector: true,
     },
     'heading-three': {
-      renderElement: (props) => <Heading {...props} />,
+      renderElement: (props) => <H3 {...props.attributes}>{props.children}</H3>,
       icon: HeadingThree,
       label: {
         id: 'components.Blocks.blocks.heading3',
@@ -545,7 +525,7 @@ export function useBlocksStore() {
       isInBlocksSelector: true,
     },
     'heading-four': {
-      renderElement: (props) => <Heading {...props} />,
+      renderElement: (props) => <H4 {...props.attributes}>{props.children}</H4>,
       icon: HeadingFour,
       label: {
         id: 'components.Blocks.blocks.heading4',
@@ -559,7 +539,7 @@ export function useBlocksStore() {
       isInBlocksSelector: true,
     },
     'heading-five': {
-      renderElement: (props) => <Heading {...props} />,
+      renderElement: (props) => <H5 {...props.attributes}>{props.children}</H5>,
       icon: HeadingFive,
       label: {
         id: 'components.Blocks.blocks.heading5',
@@ -573,7 +553,7 @@ export function useBlocksStore() {
       isInBlocksSelector: true,
     },
     'heading-six': {
-      renderElement: (props) => <Heading {...props} />,
+      renderElement: (props) => <H6 {...props.attributes}>{props.children}</H6>,
       icon: HeadingSix,
       label: {
         id: 'components.Blocks.blocks.heading6',
