@@ -18,12 +18,12 @@ import {
 
 export type Permission = {
   id?: string;
-  role?: string;
   action: string;
   actionParameters: object;
+  subject?: string | null;
   properties: object;
   conditions: string[];
-  subject: string | null;
+  role?: string; // TODO: This should be AdminRole
 };
 
 type Provider = ReturnType<typeof providerFactory>;
