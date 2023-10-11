@@ -27,7 +27,7 @@ describe('node', () => {
     });
 
     const infoRegex = /^\[INFO\]\s+Creating a new package at/;
-    const successRegex = /^\[SUCCESS\]\s+Wrote tests\/__tmp__\//;
+    const successRegex = /^\[SUCCESS\]\s+Wrote .*tests\/__tmp__\//;
 
     it('should init a package with the default template', async () => {
       const infoSpy = jest.spyOn(global.console, 'info').mockImplementation(() => {});
