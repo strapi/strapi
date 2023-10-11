@@ -1,16 +1,10 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { NotificationsProvider } from '@strapi/helper-plugin';
-import { render as renderRTL, screen, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { MemoryRouter, Route } from 'react-router-dom';
+import { screen, within } from '@testing-library/react';
+import { render as renderRTL, waitFor } from '@tests/utils';
+import { Route } from 'react-router-dom';
 
 import { MarketPlacePage } from '../index';
-
-import server from './server';
 
 // Increase the jest timeout to accommodate long running tests
 jest.setTimeout(50000);
@@ -36,52 +30,28 @@ const waitForReload = async () => {
 
 let testLocation = null;
 
-const render = (props) => ({
-  ...renderRTL(<MarketPlacePage {...props} />, {
-    wrapper({ children }) {
-      const client = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
-          },
-        },
-      });
+const render = (props) =>
+  renderRTL(<MarketPlacePage {...props} />, {
+    renderOptions: {
+      wrapper({ children }) {
+        return (
+          <>
+            {children}
+            <Route
+              path="*"
+              render={({ location }) => {
+                testLocation = location;
 
-      return (
-        <QueryClientProvider client={client}>
-          <IntlProvider locale="en" messages={{}} textComponent="span">
-            <ThemeProvider theme={lightTheme}>
-              <NotificationsProvider>
-                <MemoryRouter>
-                  {children}
-                  <Route
-                    path="*"
-                    render={({ location }) => {
-                      testLocation = location;
-
-                      return null;
-                    }}
-                  />
-                </MemoryRouter>
-              </NotificationsProvider>
-            </ThemeProvider>
-          </IntlProvider>
-        </QueryClientProvider>
-      );
+                return null;
+              }}
+            />
+          </>
+        );
+      },
     },
-  }),
-  user: userEvent.setup(),
-});
-
-describe('Marketplace page - plugins tab', () => {
-  beforeAll(() => server.listen());
-
-  afterEach(() => {
-    server.resetHandlers();
   });
 
-  afterAll(() => server.close());
-
+describe('Marketplace page - plugins tab', () => {
   it('renders the plugins tab', async () => {
     const { getByRole, getByText, queryByText } = render();
 

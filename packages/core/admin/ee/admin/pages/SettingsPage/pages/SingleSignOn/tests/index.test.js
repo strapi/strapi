@@ -11,8 +11,6 @@ import { createStore } from 'redux';
 
 import { SingleSignOn } from '../index';
 
-import server from './server';
-
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn().mockImplementation(() => jest.fn()),
@@ -63,15 +61,9 @@ const setup = (props) =>
   });
 
 describe('Admin | ee | SettingsPage | SSO', () => {
-  beforeAll(() => server.listen());
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
-  afterEach(() => server.resetHandlers());
-
-  afterAll(() => server.close());
 
   it('renders and matches the snapshot', async () => {
     useRBAC.mockImplementation(() => ({

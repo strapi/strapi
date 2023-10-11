@@ -24,7 +24,7 @@ const setup = (props) => {
       wrapper: ({ children }) => (
         <IntlProvider locale="en" messages={{}} defaultLocale="en">
           <ThemeProvider theme={lightTheme}>
-            <MemoryRouter history={history}>{children}</MemoryRouter>
+            <MemoryRouter>{children}</MemoryRouter>
           </ThemeProvider>
         </IntlProvider>
       ),
