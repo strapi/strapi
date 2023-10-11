@@ -4,23 +4,33 @@ import { contentTypes as contentTypesUtils } from '@strapi/utils';
 import { getService } from '../utils';
 import actionDomain from '../domain/action';
 import permissionDomain from '../domain/permission';
+import { Schema, Permissions } from '@strapi/types';
+
+interface FieldOptions {
+  prefix?: string; // prefix to add to the path
+  nestingLevel?: number; // level of nesting to achieve
+  requiredOnly?: boolean; // only returns required nestedFields
+  existingFields?: string[]; // fields that are already selected, meaning that some sub-fields may be required
+  restrictedSubjects?: string[]; // subjectsId to ignore
+  components?: {
+    // components where components attributes can be found
+    [key: string]: any;
+  };
+}
 
 /**
  * Creates an array of paths to the fields and nested fields, without path nodes
- * @param {string} model model used to get the nested fields
- * @param {Object} options
- * @param {string} options.prefix prefix to add to the path
- * @param {number} options.nestingLevel level of nesting to achieve
- * @param {object} options.components components where components attributes can be found
- * @param {object} options.requiredOnly only returns required nestedFields
- * @param {object} options.existingFields fields that are already selected, meaning that some sub-fields may be required
- * @returns {array<string>}
- * @param model
  */
 const getNestedFields = (
-  model: any,
-  { prefix = '', nestingLevel = 15, components = {}, requiredOnly = false, existingFields = [] }
-): any => {
+  model: Schema.ContentType,
+  {
+    prefix = '',
+    nestingLevel = 15,
+    components = {},
+    requiredOnly = false,
+    existingFields = [],
+  }: FieldOptions
+): string[] => {
   if (nestingLevel === 0) {
     return prefix ? [prefix] : [];
   }
@@ -38,7 +48,6 @@ const getNestedFields = (
 
       if (attr.type === 'component') {
         if (shouldBeIncluded || insideExistingFields) {
-          // @ts-expect-error
           const compoFields = getNestedFields(components[attr.component], {
             nestingLevel: nestingLevel - 1,
             prefix: fieldPath,
@@ -68,18 +77,11 @@ const getNestedFields = (
 
 /**
  * Creates an array of paths to the fields and nested fields, with path nodes
- * @param {string} model model used to get the nested fields
- * @param {Object} options
- * @param {string} options.prefix prefix to add to the path
- * @param {number} options.nestingLevel level of nesting to achieve
- * @param {object} options.components components where components attributes can be found
- * @returns {array<string>}
  */
-
 const getNestedFieldsWithIntermediate = (
-  model: any,
-  { prefix = '', nestingLevel = 15, components = {} }
-) => {
+  model: Schema.ContentType,
+  { prefix = '', nestingLevel = 15, components = {} }: FieldOptions
+): string[] => {
   if (nestingLevel === 0) {
     return [];
   }
@@ -95,7 +97,6 @@ const getNestedFieldsWithIntermediate = (
       fields.push(fieldPath);
 
       if (attr.type === 'component') {
-        // @ts-expect-error
         const compoFields = getNestedFieldsWithIntermediate(components[attr.component], {
           nestingLevel: nestingLevel - 1,
           prefix: fieldPath,
@@ -113,16 +114,11 @@ const getNestedFieldsWithIntermediate = (
 
 /**
  * Creates an array of permissions with the "properties.fields" attribute filled
- * @param {array} actions array of actions
- * @param {object} options
- * @param {number} options.nestingLevel level of nesting
- * @param {array} options.restrictedSubjects subjectsId to ignore
- * @returns {Permission[]}
  */
 const getPermissionsWithNestedFields = (
   actions: any[],
-  { nestingLevel, restrictedSubjects = [] } = {} as any
-) => {
+  { nestingLevel, restrictedSubjects = [] }: FieldOptions = {}
+): Permissions.PermissionRule[] => {
   return actions.reduce((permissions, action) => {
     const validSubjects = action.subjects.filter(
       (subject: any) => !restrictedSubjects.includes(subject)
@@ -152,12 +148,11 @@ const getPermissionsWithNestedFields = (
 
 /**
  * Cleans permissions' fields (add required ones, remove the non-existing ones)
- * @param {Permission[]} permissions array of existing permissions in db
- * @param {object} options
- * @param {number} options.nestingLevel level of nesting
- * @returns {Permission[]}
  */
-const cleanPermissionFields = (permissions: any, { nestingLevel } = {} as any) => {
+const cleanPermissionFields = (
+  permissions: Permissions.PermissionRule[],
+  { nestingLevel }: FieldOptions = {}
+): Permissions.PermissionRule[] => {
   const { actionProvider } = getService('permission');
 
   return permissions.map((permission: any) => {

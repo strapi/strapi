@@ -1,25 +1,11 @@
 import * as sift from 'sift';
 import qs from 'qs';
-import { AbilityBuilder, Ability, Subject } from '@casl/ability';
+import { AbilityBuilder, Ability } from '@casl/ability';
 import { pick, isNil, isObject } from 'lodash/fp';
-
-export interface ParametrizedAction {
-  name: string;
-  params: Record<string, unknown>;
-}
-
-export interface PermissionRule {
-  action: string | ParametrizedAction;
-  subject?: Subject | null;
-  properties?: {
-    fields?: string[];
-  };
-  condition?: Record<string, unknown>;
-}
-
+import { Permissions as PermissionsTypes } from '@strapi/types';
 export interface CustomAbilityBuilder {
-  can(permission: PermissionRule): ReturnType<AbilityBuilder<Ability>['can']>;
-  buildParametrizedAction: (parametrizedAction: ParametrizedAction) => string;
+  can(permission: PermissionsTypes.PermissionRule): ReturnType<AbilityBuilder<Ability>['can']>;
+  buildParametrizedAction: (parametrizedAction: PermissionsTypes.ParametrizedAction) => string;
   build(): Ability;
 }
 
@@ -44,7 +30,7 @@ const conditionsMatcher = (conditions: unknown) => {
   return sift.createQueryTester(conditions, { operations });
 };
 
-const buildParametrizedAction = ({ name, params }: ParametrizedAction) => {
+const buildParametrizedAction = ({ name, params }: PermissionsTypes.ParametrizedAction) => {
   return `${name}?${qs.stringify(params)}`;
 };
 
@@ -55,7 +41,7 @@ export const caslAbilityBuilder = (): CustomAbilityBuilder => {
   const { can, build, ...rest } = new AbilityBuilder(Ability);
 
   return {
-    can(permission: PermissionRule) {
+    can(permission: PermissionsTypes.PermissionRule) {
       const { action, subject, properties = {}, condition } = permission;
       const { fields } = properties;
 
@@ -69,7 +55,7 @@ export const caslAbilityBuilder = (): CustomAbilityBuilder => {
       );
     },
 
-    buildParametrizedAction({ name, params }: ParametrizedAction) {
+    buildParametrizedAction({ name, params }: PermissionsTypes.ParametrizedAction) {
       return `${name}?${qs.stringify(params)}`;
     },
 

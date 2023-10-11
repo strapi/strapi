@@ -5,6 +5,7 @@ import { getService } from '../utils';
 import actionDomain, { type Action } from '../domain/action';
 import { checkFieldsAreCorrectlyNested, checkFieldsDontHaveDuplicates } from './common-functions';
 import actions from '../domain/action/index';
+
 const { actionFields } = actions;
 
 const getActionFromProvider = (actionId: string) => {
