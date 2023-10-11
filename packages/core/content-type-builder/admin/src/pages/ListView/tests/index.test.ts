@@ -12,7 +12,7 @@ import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 
-import FormModalNavigationProvider from '../../../components/FormModalNavigationProvider';
+import FormModalNavigationProvider from '../../../components/FormModalNavigationProvider/FormModalNavigationProvider.tsx';
 import pluginEn from '../../../translations/en.json';
 import { getTrad } from '../../../utils/getTrad';
 import ListView from '../index';

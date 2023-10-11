@@ -4,7 +4,7 @@ import * as yup from 'yup';
 
 import getRelationType from '../../../utils/getRelationType';
 import { getTrad } from '../../../utils/getTrad';
-import toRegressedEnumValue from '../../../utils/toRegressedEnumValue';
+import { toRegressedEnumValue } from '../../../utils/toRegressedEnumValue';
 
 import {
   alreadyUsedAttributeNames,
@@ -15,8 +15,8 @@ import {
   validators,
 } from './validation/common';
 
-export const types = {
-  date(usedAttributeNames, reservedNames) {
+export const attributeTypes = {
+  date(usedAttributeNames: Array<string>, reservedNames: Array<string>) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -24,7 +24,7 @@ export const types = {
 
     return yup.object(shape);
   },
-  datetime(usedAttributeNames, reservedNames) {
+  datetime(usedAttributeNames: Array<string>, reservedNames: Array<string>) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -32,7 +32,7 @@ export const types = {
 
     return yup.object(shape);
   },
-  time(usedAttributeNames, reservedNames) {
+  time(usedAttributeNames: Array<string>, reservedNames: Array<string>) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -40,7 +40,7 @@ export const types = {
 
     return yup.object(shape);
   },
-  default(usedAttributeNames, reservedNames) {
+  default(usedAttributeNames: Array<string>, reservedNames: Array<string>) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -48,7 +48,7 @@ export const types = {
 
     return yup.object(shape);
   },
-  biginteger(usedAttributeNames, reservedNames) {
+  biginteger(usedAttributeNames: Array<string>, reservedNames: Array<string>) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -65,13 +65,13 @@ export const types = {
       min: yup
         .string()
         .nullable()
-        .test(isMinSuperiorThanMax)
+        .test(isMinSuperiorThanMax<string | null>())
         .matches(/^-?\d*$/, errorsTrads.regex),
     };
 
     return yup.object(shape);
   },
-  boolean(usedAttributeNames, reservedNames) {
+  boolean(usedAttributeNames: Array<string>, reservedNames: Array<string>) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       default: yup.boolean().nullable(),
@@ -81,7 +81,7 @@ export const types = {
 
     return yup.object(shape);
   },
-  component(usedAttributeNames, reservedNames) {
+  component(usedAttributeNames: Array<string>, reservedNames: Array<string>) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -93,19 +93,19 @@ export const types = {
 
     return yup.object(shape);
   },
-  decimal(usedAttributeNames, reservedNames) {
+  decimal(usedAttributeNames: Array<string>, reservedNames: Array<string>) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
       default: yup.number(),
       required: validators.required(),
       max: yup.number(),
-      min: yup.number().test(isMinSuperiorThanMax),
+      min: yup.number().test(isMinSuperiorThanMax<number>()),
     };
 
     return yup.object(shape);
   },
-  dynamiczone(usedAttributeNames, reservedNames) {
+  dynamiczone(usedAttributeNames: Array<string>, reservedNames: Array<string>) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -116,7 +116,7 @@ export const types = {
 
     return yup.object(shape);
   },
-  email(usedAttributeNames, reservedNames) {
+  email(usedAttributeNames: Array<string>, reservedNames: Array<string>) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -129,7 +129,7 @@ export const types = {
 
     return yup.object(shape);
   },
-  enumeration(usedAttributeNames, reservedNames) {
+  enumeration(usedAttributeNames: Array<string>, reservedNames: Array<string>) {
     /**
      * For enumerations the least common denomiator is GraphQL, where
      * values needs to match the secure name regex:
@@ -163,6 +163,9 @@ export const types = {
           name: 'areEnumValuesUnique',
           message: getTrad('error.validation.enum-duplicate'),
           test(values) {
+            if (!values) {
+              return false;
+            }
             const duplicates = uniq(
               values
                 .map(toRegressedEnumValue)
@@ -175,32 +178,43 @@ export const types = {
         .test({
           name: 'doesNotHaveEmptyValues',
           message: getTrad('error.validation.enum-empty-string'),
-          test: (values) => !values.map(toRegressedEnumValue).some((val) => val === ''),
+          test: (values) => {
+            if (!values) {
+              return false;
+            }
+            return !values.map(toRegressedEnumValue).some((val) => val === '');
+          },
         })
         .test({
           name: 'doesMatchRegex',
           message: getTrad('error.validation.enum-regex'),
-          test: (values) =>
-            values.map(toRegressedEnumValue).every((value) => GRAPHQL_ENUM_REGEX.test(value)),
+          test: (values) => {
+            if (!values) {
+              return false;
+            }
+            return values
+              .map(toRegressedEnumValue)
+              .every((value) => GRAPHQL_ENUM_REGEX.test(value));
+          },
         }),
       enumName: yup.string().nullable(),
     };
 
     return yup.object(shape);
   },
-  float(usedAttributeNames, reservedNames) {
+  float(usedAttributeNames: Array<string>, reservedNames: Array<string>) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
       required: validators.required(),
       default: yup.number(),
       max: yup.number(),
-      min: yup.number().test(isMinSuperiorThanMax),
+      min: yup.number().test(isMinSuperiorThanMax<number>()),
     };
 
     return yup.object(shape);
   },
-  integer(usedAttributeNames, reservedNames) {
+  integer(usedAttributeNames: Array<string>, reservedNames: Array<string>) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -213,7 +227,7 @@ export const types = {
 
     return yup.object(shape);
   },
-  json(usedAttributeNames, reservedNames) {
+  json(usedAttributeNames: Array<string>, reservedNames: Array<string>) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -223,7 +237,7 @@ export const types = {
 
     return yup.object(shape);
   },
-  media(usedAttributeNames, reservedNames) {
+  media(usedAttributeNames: Array<string>, reservedNames: Array<string>) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -238,7 +252,7 @@ export const types = {
 
     return yup.object(shape);
   },
-  password(usedAttributeNames, reservedNames) {
+  password(usedAttributeNames: Array<string>, reservedNames: Array<string>) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -252,10 +266,20 @@ export const types = {
     return yup.object(shape);
   },
   relation(
-    usedAttributeNames,
-    reservedNames,
-    alreadyTakenTargetAttributes,
-    { initialData, modifiedData }
+    usedAttributeNames: Array<string>,
+    reservedNames: Array<string>,
+    alreadyTakenTargetAttributes: Array<{ name: string }>,
+    {
+      initialData,
+      modifiedData,
+    }: {
+      initialData: { targetAttribute?: string };
+      modifiedData: {
+        name?: string;
+        relation?: string;
+        targetAttribute?: string;
+      };
+    }
   ) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
@@ -269,13 +293,13 @@ export const types = {
           return yup.string().nullable();
         }
 
-        let schema = yup.string().test(isNameAllowed(reservedNames));
+        const schema = yup.string().test(isNameAllowed(reservedNames));
         const initialForbiddenName = [
           ...alreadyTakenTargetAttributes.map(({ name }) => name),
           modifiedData.name,
         ];
 
-        let forbiddenTargetAttributeName = initialForbiddenName.filter(
+        const forbiddenTargetAttributeName = initialForbiddenName.filter(
           (val) => val !== initialData.targetAttribute
         );
 
@@ -298,7 +322,7 @@ export const types = {
 
     return yup.object(shape);
   },
-  richtext(usedAttributeNames, reservedNames) {
+  richtext(usedAttributeNames: Array<string>, reservedNames: Array<string>) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -311,7 +335,7 @@ export const types = {
 
     return yup.object(shape);
   },
-  blocks(usedAttributeNames, reservedNames) {
+  blocks(usedAttributeNames: Array<string>, reservedNames: Array<string>) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -324,17 +348,17 @@ export const types = {
 
     return yup.object(shape);
   },
-  string(usedAttributeNames, reservedNames) {
+  string(usedAttributeNames: Array<string>, reservedNames: Array<string>) {
     const shape = createTextShape(usedAttributeNames, reservedNames);
 
     return yup.object(shape);
   },
-  text(usedAttributeNames, reservedNames) {
+  text(usedAttributeNames: Array<string>, reservedNames: Array<string>) {
     const shape = createTextShape(usedAttributeNames, reservedNames);
 
     return yup.object(shape);
   },
-  uid(usedAttributeNames, reservedNames) {
+  uid(usedAttributeNames: Array<string>, reservedNames: Array<string>) {
     const shape = createTextShape(usedAttributeNames, reservedNames);
 
     return yup.object(shape);

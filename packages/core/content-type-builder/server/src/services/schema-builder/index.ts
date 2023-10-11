@@ -45,6 +45,8 @@ export default function createBuilder() {
       schema: contentTypeInput.__schema__,
       config: contentTypeInput.config,
     };
+
+    return contentType;
   });
 
   return createSchemaBuilder({

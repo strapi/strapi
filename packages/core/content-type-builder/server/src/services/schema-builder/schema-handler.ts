@@ -12,7 +12,6 @@ export type Infos = {
   uid?: UID.ContentType;
   dir: string;
   filename: string;
-  // TODO type this
   schema?: Schema.Schema;
 };
 
@@ -45,6 +44,7 @@ export default function createSchemaHandler(infos: Infos) {
     get plugin() {
       return initialState.plugin;
     },
+
     get category() {
       return initialState.category;
     },
@@ -131,7 +131,10 @@ export default function createSchemaHandler(infos: Infos) {
 
     setAttributes(newAttributes: Schema.Attributes) {
       if (!this.schema) return this;
+<<<<<<< Updated upstream
+=======
 
+>>>>>>> Stashed changes
       // delete old configurable attributes
       for (const key in this.schema.attributes) {
         if (isConfigurable(this.schema.attributes[key])) {

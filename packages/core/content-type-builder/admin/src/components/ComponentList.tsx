@@ -1,15 +1,15 @@
-import React from 'react';
-
 import get from 'lodash/get';
 
-import useDataManager from '../hooks/useDataManager';
+import { useDataManager } from '../hooks/useDataManager';
 
 import { List } from './List';
 import { Tr } from './Tr';
 
+import type { UID } from '@strapi/types';
+
 interface ComponentListProps {
-  component: string;
-  customRowComponent: React.ComponentType<any>; // Adjust the type as per your specific requirements
+  component: UID.Component;
+  customRowComponent: any;
   firstLoopComponentUid?: string;
   isFromDynamicZone?: boolean;
   isNestedInDZComponent?: boolean;

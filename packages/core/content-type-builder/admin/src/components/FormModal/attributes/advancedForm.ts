@@ -1,5 +1,5 @@
 import { getTrad } from '../../../utils/getTrad';
-import { componentForm } from '../component/form';
+import { componentForm } from '../component/componentForm';
 
 import { attributeOptions } from './attributeOptions';
 

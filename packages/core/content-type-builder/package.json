@@ -81,6 +81,7 @@
   "devDependencies": {
     "@strapi/admin": "4.14.3",
     "@strapi/pack-up": "workspace:*",
+    "@strapi/types": "4.14.3",
     "@testing-library/react": "14.0.0",
     "@testing-library/react-hooks": "8.0.1",
     "@types/pluralize": "0.0.30",

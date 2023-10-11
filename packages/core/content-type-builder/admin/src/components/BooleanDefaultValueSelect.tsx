@@ -71,7 +71,3 @@ export const BooleanDefaultValueSelect = ({
     </Select>
   );
 };
-
-BooleanDefaultValueSelect.defaultProps = {
-  value: null,
-};

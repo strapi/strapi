@@ -5,7 +5,7 @@ import omit from 'lodash/omit';
 import sortBy from 'lodash/sortBy';
 
 import pluginId from '../../../pluginId';
-import makeUnique from '../../../utils/makeUnique';
+import { makeUnique } from '../../../utils/makeUnique';
 
 const getCreatedAndModifiedComponents = (allComponents, initialComponents) => {
   const componentUIDsToReturn = Object.keys(allComponents).filter((compoUid) => {

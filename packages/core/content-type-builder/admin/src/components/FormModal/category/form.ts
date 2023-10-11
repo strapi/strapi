@@ -1,6 +1,6 @@
 import { getTrad } from '../../../utils/getTrad';
 
-export const form = {
+export const categoryForm = {
   base: {
     sections: [
       {
