@@ -16,3 +16,4 @@ runs:
       name: 📥 Run build
       shell: bash
       run: yarn nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
+      

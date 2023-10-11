@@ -35,7 +35,7 @@ jobs:
           filters: .github/filters.yaml
 
   lint:
-    name: 'lint (node: 18)'
+    name: 'lint (node: 20)'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -43,7 +43,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
       - uses: nrwl/nx-set-shas@v3
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
@@ -51,13 +51,13 @@ jobs:
         run: yarn nx affected --target=lint --parallel --nx-ignore-cycles
 
   build:
-    name: 'build'
+    name: 'build (node: 20)'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
@@ -174,7 +174,7 @@ jobs:
     strategy:
       matrix:
         node: [18, 20]
-        shard: [1/6, 2/6, 3/6, 4/6, 5/6, 6/6]
+        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
 
     services:
       postgres:
@@ -218,7 +218,7 @@ jobs:
       matrix:
         node: [18, 20]
         db_client: ['mysql', 'mysql2']
-        shard: [1/6, 2/6, 3/6, 4/6, 5/6, 6/6]
+        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       mysql:
         image: bitnami/mysql:latest
@@ -259,7 +259,7 @@ jobs:
       matrix:
         node: [18, 20]
         db_client: ['mysql', 'mysql2']
-        shard: [1/6, 2/6, 3/6, 4/6, 5/6, 6/6]
+        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       mysql:
         image: bitnami/mysql:5.7
@@ -299,7 +299,7 @@ jobs:
       matrix:
         node: [18, 20]
         sqlite_pkg: ['better-sqlite3', 'sqlite3']
-        shard: [1/6, 2/6, 3/6, 4/6, 5/6, 6/6]
+        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
@@ -327,7 +327,7 @@ jobs:
     strategy:
       matrix:
         node: [18, 20]
-        shard: [1/6, 2/6, 3/6, 4/6, 5/6, 6/6]
+        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       postgres:
         # Docker Hub image
@@ -373,7 +373,7 @@ jobs:
       matrix:
         node: [18, 20]
         db_client: ['mysql', 'mysql2']
-        shard: [1/6, 2/6, 3/6, 4/6, 5/6, 6/6]
+        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       mysql:
         image: bitnami/mysql:latest
@@ -417,7 +417,7 @@ jobs:
       matrix:
         node: [18, 20]
         sqlite_pkg: ['better-sqlite3', 'sqlite3']
-        shard: [1/6, 2/6, 3/6, 4/6, 5/6, 6/6]
+        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
