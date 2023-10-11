@@ -432,6 +432,9 @@ const isListActive = (editor, matchNode) => {
 };
 
 const toggleList = (editor, isActive, format) => {
+  /**
+   * If the selection is inside a list we want to create a new node (list or paragraph) with the same content as the selection
+   */
   if (editor.selection) {
     // Delete the parent list so that we're left with only the list items directly
     Transforms.unwrapNodes(editor, {
@@ -449,6 +452,9 @@ const toggleList = (editor, isActive, format) => {
       const block = { type: 'list', format, children: [] };
       Transforms.wrapNodes(editor, block);
     }
+    /**
+     * Otherwise retrieve the last node content, remove it and create a new node with the same content
+     */
   } else {
     // Retrieve the last node inserted and its path
     const [, lastNodePath] = Editor.last(editor, []);
