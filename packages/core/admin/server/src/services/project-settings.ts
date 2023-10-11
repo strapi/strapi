@@ -1,9 +1,17 @@
 import fs from 'fs';
 import { pick } from 'lodash';
 
-const PROJECT_SETTINGS_FILE_INPUTS = ['menuLogo', 'authLogo'];
+const PROJECT_SETTINGS_FILE_INPUTS = ['menuLogo', 'authLogo'] as const;
 
-const parseFilesData = async (files: any) => {
+// TODO: TS - Update file definition with the upload plugin files
+export type ProjectSettingFile = any;
+
+export type ProjectSettings = {
+  menuLogo: ProjectSettingFile;
+  authLogo: ProjectSettingFile;
+};
+
+const parseFilesData = async (files: ProjectSettingFile) => {
   const formatedFilesData = {} as any;
 
   await Promise.all(
@@ -80,11 +88,11 @@ const getProjectSettings = async () => {
   return projectSettings;
 };
 
-const uploadFiles = async (files = {}) => {
+const uploadFiles = async (files = {} as Record<string, ProjectSettingFile>) => {
   // Call the provider upload function for each file
   return Promise.all(
     Object.values(files)
-      .filter((file: any) => file.stream instanceof fs.ReadStream)
+      .filter((file: ProjectSettingFile) => file.stream instanceof fs.ReadStream)
       .map((file) => strapi.plugin('upload').provider.uploadStream(file))
   );
 };
@@ -123,7 +131,7 @@ const deleteOldFiles = async ({ previousSettings, newSettings }: any) => {
   );
 };
 
-const updateProjectSettings = async (newSettings: any) => {
+const updateProjectSettings = async (newSettings: ProjectSettings) => {
   const store = strapi.store({ type: 'core', name: 'admin' });
   const previousSettings = (await store.get({ key: 'project-settings' })) as any;
   const files = pick(newSettings, PROJECT_SETTINGS_FILE_INPUTS);
