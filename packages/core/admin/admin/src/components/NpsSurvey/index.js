@@ -85,7 +85,7 @@ const checkIfShouldShowSurvey = (settings) => {
 
   // Global strapi disable for NSP.
   if (window.strapi.flags.nps === false) {
-    return false
+    return false;
   }
 
   // User chose not to enable the NPS feature when signing up
@@ -171,7 +171,7 @@ const NpsSurvey = () => {
       onError() {
         toggleNotification({
           type: 'warning',
-          message: formatMessage({ id: 'notification.error' }),
+          message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
         });
       },
     }
