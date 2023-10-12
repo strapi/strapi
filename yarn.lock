@@ -7726,32 +7726,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/helper-plugin@npm:4.14.3":
-  version: 4.14.3
-  resolution: "@strapi/helper-plugin@npm:4.14.3"
-  dependencies:
-    axios: 1.5.0
-    date-fns: 2.30.0
-    formik: 2.4.0
-    immer: 9.0.19
-    lodash: 4.17.21
-    prop-types: ^15.8.1
-    qs: 6.11.1
-    react-helmet: 6.1.0
-    react-intl: 6.4.1
-    react-query: 3.39.3
-    react-select: 5.7.0
-  peerDependencies:
-    "@strapi/design-system": 1.11.0
-    "@strapi/icons": 1.11.0
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^5.3.4
-    styled-components: ^5.3.3
-  checksum: f97b40b94078811aa9d2a49ebeddff05d6bbbeec3b4d7e40c969e4f5ce3871102f0ebc742dd30bcdfdb0816309cdd8b2618a75ab276081f5feeb747fe93fa804
-  languageName: node
-  linkType: hard
-
 "@strapi/icons@npm:1.11.0":
   version: 1.11.0
   resolution: "@strapi/icons@npm:1.11.0"
@@ -7955,7 +7929,7 @@ __metadata:
   resolution: "@strapi/plugin-email@workspace:packages/core/email"
   dependencies:
     "@strapi/design-system": 1.12.0
-    "@strapi/helper-plugin": 4.14.3
+    "@strapi/helper-plugin": 4.14.4
     "@strapi/icons": 1.12.0
     "@strapi/pack-up": "workspace:*"
     "@strapi/provider-email-sendmail": 4.14.4
