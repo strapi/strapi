@@ -1,5 +1,5 @@
 import { forceOption } from '../../../utils/commander';
-import { getLocalScript } from '../../../utils/helpers';
+import { assertCwdContainsStrapiProject, handleScriptFail } from '../../../utils/helpers';
 import type { StrapiCommand } from '../../../types';
 
 /**
@@ -11,7 +11,18 @@ const command: StrapiCommand = ({ command }) => {
     .description('Bundle your strapi plugin for publishing.')
     .addOption(forceOption)
     .option('-d, --debug', 'Enable debugging mode with verbose logs', false)
-    .action(getLocalScript('plugin/build-command'));
+    .action(async (...args) => {
+      const name = 'plugin/build-command';
+
+      assertCwdContainsStrapiProject(name);
+
+      try {
+        const { action } = await import(`./action`);
+        await action(...args);
+      } catch (err) {
+        handleScriptFail(name, err);
+      }
+    });
 };
 
 export default command;

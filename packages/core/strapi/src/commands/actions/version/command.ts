@@ -4,9 +4,9 @@ import type { StrapiCommand } from '../../types';
 /**
  * `$ strapi version`
  */
-const command: StrapiCommand = ({ command }) => {
+const command: StrapiCommand = async ({ command }) => {
   // load the Strapi package.json to get version and other information
-  const packageJSON = require('../../../../package.json');
+  const packageJSON = await import('../../../../package.json');
 
   command.version(packageJSON.version, '-v, --version', 'Output the version number');
   command

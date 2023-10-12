@@ -5,7 +5,7 @@ import strapi from '../../../index';
 /**
  * `$ strapi start`
  */
-export default async () => {
+export const action = async () => {
   const appDir = process.cwd();
 
   const isTSProject = await tsUtils.isUsingTypeScript(appDir);

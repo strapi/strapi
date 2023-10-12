@@ -14,7 +14,7 @@ interface CmdOptions {
 /**
  * Will restore configurations. It reads from a file or stdin
  */
-export default async ({ file: filePath, strategy = 'replace' }: CmdOptions) => {
+export const action = async ({ file: filePath, strategy = 'replace' }: CmdOptions = {}) => {
   const input = filePath ? fs.readFileSync(filePath) : await readStdin();
 
   const appContext = await strapi.compile();

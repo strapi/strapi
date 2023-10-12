@@ -71,7 +71,7 @@ const promptQuestions: inquirer.QuestionCollection<Answers> = [
 /**
  * Create new admin user
  */
-export default async (cmdOptions: CmdOptions = {}) => {
+export const action = async (cmdOptions: CmdOptions = {}) => {
   let { email, password, firstname, lastname } = cmdOptions;
 
   if (

@@ -1,4 +1,4 @@
-import { getLocalScript } from '../../utils/helpers';
+import { assertCwdContainsStrapiProject, handleScriptFail } from '../../utils/helpers';
 import type { StrapiCommand } from '../../types';
 
 /**
@@ -13,7 +13,18 @@ const command: StrapiCommand = ({ command }) => {
     .option('--polling', 'Watch for file changes in network directories', false)
     .option('--browser <name>', 'Open the browser', true)
     .description('Start your Strapi application in development mode')
-    .action(getLocalScript('develop'));
+    .action(async (...args) => {
+      const name = 'develop';
+
+      assertCwdContainsStrapiProject(name);
+
+      try {
+        const { action } = await import(`./action`);
+        await action(...args);
+      } catch (err) {
+        handleScriptFail(name, err);
+      }
+    });
 };
 
 export default command;

@@ -25,7 +25,7 @@ const CHUNK_SIZE = 100;
  * Will dump configurations to a file or stdout
  * @param {string} file filepath to use as output
  */
-export default async ({ file: filePath, pretty }: CmdOptions) => {
+export const action = async ({ file: filePath, pretty }: CmdOptions = {}) => {
   const output: Output = filePath ? fs.createWriteStream(filePath) : process.stdout;
 
   const appContext = await strapi.compile();

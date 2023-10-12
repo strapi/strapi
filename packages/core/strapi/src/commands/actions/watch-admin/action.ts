@@ -5,7 +5,7 @@ import { getEnabledPlugins } from '../../../core/loaders/plugins/get-enabled-plu
 import addSlash from '../../../utils/addSlash';
 import strapi from '../../../index';
 
-export default async ({ browser }: { browser: boolean }) => {
+export const action = async ({ browser }: { browser: boolean }) => {
   const appContext = await strapi.compile();
 
   const strapiInstance = strapi({

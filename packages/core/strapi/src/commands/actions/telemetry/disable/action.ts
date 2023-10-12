@@ -49,7 +49,7 @@ const sendEvent = async (uuid: string) => {
   }
 };
 
-export default async function optOutTelemetry() {
+export const action = async () => {
   const packageJSONPath = resolve(process.cwd(), 'package.json');
   const exists = await fse.pathExists(packageJSONPath);
 
@@ -87,4 +87,4 @@ export default async function optOutTelemetry() {
   await sendEvent(uuid);
   console.log(`${chalk.green('Successfully opted out of Strapi telemetry')}`);
   process.exit(0);
-}
+};

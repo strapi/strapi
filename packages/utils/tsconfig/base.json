@@ -2,6 +2,8 @@
   "$schema": "http://json.schemastore.org/tsconfig",
   "extends": "@tsconfig/node18/tsconfig.json",
   "compilerOptions": {
+    "module": "ES2022",
+    "moduleResolution": "Bundler",
     "declaration": true,
     "declarationMap": true,
     "esModuleInterop": true,

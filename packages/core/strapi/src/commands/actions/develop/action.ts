@@ -23,7 +23,7 @@ interface CmdOptions {
  * `$ strapi develop`
  *
  */
-export default async ({ build, watchAdmin, polling, browser }: CmdOptions) => {
+export const action = async ({ build, watchAdmin, polling, browser }: CmdOptions = {}) => {
   const appDir = process.cwd();
 
   const isTSProject = await tsUtils.isUsingTypeScript(appDir);

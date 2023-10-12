@@ -1,4 +1,4 @@
-import { getLocalScript } from '../../../utils/helpers';
+import { assertCwdContainsStrapiProject, handleScriptFail } from '../../../utils/helpers';
 import type { StrapiCommand } from '../../../types';
 
 /**
@@ -11,7 +11,18 @@ const command: StrapiCommand = ({ command }) => {
     .description("Reset an admin user's password")
     .option('-e, --email <email>', 'The user email')
     .option('-p, --password <password>', 'New password for the user')
-    .action(getLocalScript('admin/reset-user-password'));
+    .action(async (...args) => {
+      const name = 'admin/reset-user-password';
+
+      assertCwdContainsStrapiProject(name);
+
+      try {
+        const { action } = await import(`./action`);
+        await action(...args);
+      } catch (err) {
+        handleScriptFail(name, err);
+      }
+    });
 };
 
 export default command;

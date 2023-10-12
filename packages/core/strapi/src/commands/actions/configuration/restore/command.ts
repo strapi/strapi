@@ -1,4 +1,4 @@
-import { getLocalScript } from '../../../utils/helpers';
+import { assertCwdContainsStrapiProject, handleScriptFail } from '../../../utils/helpers';
 import type { StrapiCommand } from '../../../types';
 
 /**
@@ -11,7 +11,18 @@ const command: StrapiCommand = ({ command }) => {
     .description('Restore configurations of your application')
     .option('-f, --file <file>', 'Input file, default input is stdin')
     .option('-s, --strategy <strategy>', 'Strategy name, one of: "replace", "merge", "keep"')
-    .action(getLocalScript('configuration/restore'));
+    .action(async (...args) => {
+      const name = 'configuration/restore';
+
+      assertCwdContainsStrapiProject(name);
+
+      try {
+        const { action } = await import(`./action`);
+        await action(...args);
+      } catch (err) {
+        handleScriptFail(name, err);
+      }
+    });
 };
 
 export default command;

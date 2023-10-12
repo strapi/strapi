@@ -9,7 +9,7 @@ interface CmdOptions {
   deleteFiles?: boolean;
 }
 
-export default async (plugins: string[], { deleteFiles }: CmdOptions) => {
+export const action = async (plugins: string[], { deleteFiles }: CmdOptions = {}) => {
   const answers = await inquirer.prompt([
     {
       type: 'confirm',

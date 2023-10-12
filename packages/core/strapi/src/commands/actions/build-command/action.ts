@@ -9,7 +9,7 @@ interface CmdOptions {
 /**
  * `$ strapi build`
  */
-export default async ({ optimization, forceBuild = true }: CmdOptions) => {
+export const action = async ({ optimization, forceBuild = true }: CmdOptions = {}) => {
   const { appDir, distDir } = await strapi.compile();
 
   await buildAdmin({

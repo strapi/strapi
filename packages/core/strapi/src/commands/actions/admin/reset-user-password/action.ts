@@ -26,7 +26,7 @@ const promptQuestions: ReadonlyArray<inquirer.DistinctQuestion<Answers>> = [
 /**
  * Reset user's password
  */
-export default async (cmdOptions: CmdOptions = {}) => {
+export const action = async (cmdOptions: CmdOptions = {}) => {
   const { email, password } = cmdOptions;
 
   if (_.isEmpty(email) && _.isEmpty(password) && process.stdin.isTTY) {

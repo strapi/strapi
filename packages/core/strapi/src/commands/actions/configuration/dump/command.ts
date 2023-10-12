@@ -1,4 +1,4 @@
-import { getLocalScript } from '../../../utils/helpers';
+import { assertCwdContainsStrapiProject, handleScriptFail } from '../../../utils/helpers';
 import type { StrapiCommand } from '../../../types';
 
 /**
@@ -11,7 +11,18 @@ const command: StrapiCommand = ({ command }) => {
     .description('Dump configurations of your application')
     .option('-f, --file <file>', 'Output file, default output is stdout')
     .option('-p, --pretty', 'Format the output JSON with indentation and line breaks', false)
-    .action(getLocalScript('configuration/dump'));
+    .action(async (...args) => {
+      const name = 'configuration/dump';
+
+      assertCwdContainsStrapiProject(name);
+
+      try {
+        const { action } = await import(`./action`);
+        await action(...args);
+      } catch (err) {
+        handleScriptFail(name, err);
+      }
+    });
 };
 
 export default command;

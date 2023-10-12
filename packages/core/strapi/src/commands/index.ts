@@ -60,11 +60,11 @@ const strapiCommands = {
   buildPluginCommand,
 } as const;
 
-const buildStrapiCommand = (argv: string[], command = new Command()) => {
+const buildStrapiCommand = async (argv: string[], command = new Command()) => {
   try {
     // NOTE: this is a hack to allow loading dts commands without make dts a dependency of strapi and thus avoiding circular dependencies
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const dtsCommands = require(require.resolve('@strapi/data-transfer')).commands;
+    const { commands: dtsCommands } = await import('@strapi/data-transfer');
     Object.assign(strapiCommands, dtsCommands);
   } catch (e) {
     // noop
@@ -93,7 +93,7 @@ const buildStrapiCommand = (argv: string[], command = new Command()) => {
 };
 
 const runStrapiCommand = async (argv = process.argv, command = new Command()) => {
-  await buildStrapiCommand(argv, command).parseAsync(argv);
+  await (await buildStrapiCommand(argv, command)).parseAsync(argv);
 };
 
 export { runStrapiCommand, buildStrapiCommand, strapiCommands };

@@ -18,7 +18,7 @@ interface ActionOptions {
   debug?: boolean;
 }
 
-export default async ({ force, debug }: ActionOptions) => {
+export const action = async ({ force, debug }: ActionOptions = {}) => {
   const logger = createLogger({ debug, timestamp: false });
   try {
     /**

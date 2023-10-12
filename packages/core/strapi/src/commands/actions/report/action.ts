@@ -7,7 +7,7 @@ interface CmdOptions {
   all: boolean;
 }
 
-export default async ({ uuid, dependencies, all }: CmdOptions) => {
+export const action = async ({ uuid, dependencies, all }: CmdOptions) => {
   const config = {
     reportUUID: Boolean(all || uuid),
     reportDependencies: Boolean(all || dependencies),

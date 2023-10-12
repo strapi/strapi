@@ -1,4 +1,4 @@
-import { getLocalScript } from '../../utils/helpers';
+import { assertCwdContainsStrapiProject, handleScriptFail } from '../../utils/helpers';
 import type { StrapiCommand } from '../../types';
 
 /**
@@ -11,7 +11,18 @@ const command: StrapiCommand = ({ command }) => {
     .option('-u, --uuid', 'Include Project UUID')
     .option('-d, --dependencies', 'Include Project Dependencies')
     .option('--all', 'Include All Information')
-    .action(getLocalScript('report'));
+    .action(async (args) => {
+      const name = 'report';
+
+      assertCwdContainsStrapiProject(name);
+
+      try {
+        const { action } = await import(`./action`);
+        await action(args);
+      } catch (err) {
+        handleScriptFail(name, err);
+      }
+    });
 };
 
 export default command;

@@ -8,7 +8,7 @@ interface CmdOptions {
   outDir?: string;
 }
 
-export default async ({ debug, silent, verbose, outDir }: CmdOptions) => {
+export const action = async ({ debug, silent, verbose, outDir }: CmdOptions = {}) => {
   if ((debug || verbose) && silent) {
     console.error('Flags conflict: both silent and debug mode are enabled, exiting...');
     process.exit(1);

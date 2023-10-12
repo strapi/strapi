@@ -1,4 +1,4 @@
-import { getLocalScript } from '../../../utils/helpers';
+import { assertCwdContainsStrapiProject, handleScriptFail } from '../../../utils/helpers';
 import type { StrapiCommand } from '../../../types';
 
 /**
@@ -8,7 +8,18 @@ const command: StrapiCommand = ({ command }) => {
   command
     .command('middlewares:list')
     .description('List all the application middlewares')
-    .action(getLocalScript('middlewares/list'));
+    .action(async () => {
+      const name = 'middlewares/list';
+
+      assertCwdContainsStrapiProject(name);
+
+      try {
+        const { action } = await import(`./action`);
+        await action();
+      } catch (err) {
+        handleScriptFail(name, err);
+      }
+    });
 };
 
 export default command;

@@ -5,7 +5,7 @@ import ora from 'ora';
 import execa from 'execa';
 import findPackagePath from '../../../load/package-path';
 
-export default async (plugins: string[]) => {
+export const action = async (plugins: string[]) => {
   const loader = ora();
   const dir = process.cwd();
 

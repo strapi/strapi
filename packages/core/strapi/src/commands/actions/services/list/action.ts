@@ -3,7 +3,7 @@ import chalk from 'chalk';
 
 import strapi from '../../../../index';
 
-export default async () => {
+export const action = async () => {
   const appContext = await strapi.compile();
   const app = await strapi(appContext).register();
 

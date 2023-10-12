@@ -1,4 +1,4 @@
-import { getLocalScript } from '../../../utils/helpers';
+import { assertCwdContainsStrapiProject, handleScriptFail } from '../../../utils/helpers';
 import type { StrapiCommand } from '../../../types';
 
 /**
@@ -15,7 +15,18 @@ const command: StrapiCommand = ({ command }) => {
       '-o, --out-dir <outDir>',
       'Specify a relative root directory in which the definitions will be generated. Changing this value might break types exposed by Strapi that relies on generated types.'
     )
-    .action(getLocalScript('ts/generate-types'));
+    .action(async (...args) => {
+      const name = 'ts/generate-types';
+
+      assertCwdContainsStrapiProject(name);
+
+      try {
+        const { action } = await import(`./action`);
+        await action(...args);
+      } catch (err) {
+        handleScriptFail(name, err);
+      }
+    });
 };
 
 export default command;

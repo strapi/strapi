@@ -1,4 +1,4 @@
-import { getLocalScript } from '../../../utils/helpers';
+import { assertCwdContainsStrapiProject, handleScriptFail } from '../../../utils/helpers';
 import type { StrapiCommand } from '../../../types';
 
 /**
@@ -13,7 +13,18 @@ const command: StrapiCommand = ({ command }) => {
     .option('-p, --password <password>', 'Password of the new admin')
     .option('-f, --firstname <first name>', 'First name of the new admin')
     .option('-l, --lastname <last name>', 'Last name of the new admin')
-    .action(getLocalScript('admin/create-user'));
+    .action(async (...args) => {
+      const name = 'admin/create-user';
+
+      assertCwdContainsStrapiProject(name);
+
+      try {
+        const { action } = await import(`./action`);
+        await action(...args);
+      } catch (err) {
+        handleScriptFail(name, err);
+      }
+    });
 };
 
 export default command;

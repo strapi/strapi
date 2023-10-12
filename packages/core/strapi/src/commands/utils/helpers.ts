@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import chalk from 'chalk';
 import { has, isString, isArray } from 'lodash/fp';
-import resolveCwd from 'resolve-cwd';
 import { prompt } from 'inquirer';
 import boxen from 'boxen';
 import type { Command } from 'commander';
@@ -133,32 +132,18 @@ const assertCwdContainsStrapiProject = (name: string) => {
   }
 };
 
-const getLocalScript =
-  (name: string) =>
-  (...args: unknown[]) => {
-    assertCwdContainsStrapiProject(name);
-
-    const cmdPath = resolveCwd.silent(`@strapi/strapi/dist/commands/actions/${name}/action`);
-    if (!cmdPath) {
-      console.log(
-        `Error loading the local ${chalk.yellow(
-          name
-        )} command. Strapi might not be installed in your "node_modules". You may need to run "yarn install".`
-      );
-      process.exit(1);
-    }
-
-    const script = require(cmdPath).default;
-
-    Promise.resolve()
-      .then(() => {
-        return script(...args);
-      })
-      .catch((error) => {
-        console.error(error);
-        process.exit(1);
-      });
-  };
+const handleScriptFail = (name: string, error: unknown): never => {
+  /**
+   * TODO: do we still need the message below since we're always bundling it all up?
+   */
+  console.log(
+    `Error loading the local ${chalk.yellow(
+      name
+    )} command. Strapi might not be installed in your "node_modules". You may need to run "yarn install".`
+  );
+  console.error(error);
+  process.exit(1);
+};
 
 /**
  * @description Notify users this is an experimental command and get them to approve first
@@ -210,7 +195,7 @@ export {
   assertUrlHasProtocol,
   ifOptions,
   readableBytes,
-  getLocalScript,
+  handleScriptFail,
   assertCwdContainsStrapiProject,
   notifyExperimentalCommand,
 };

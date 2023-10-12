@@ -56,7 +56,7 @@ async function templateConfigExists(rootPath: string) {
   return configExists;
 }
 
-export default async function generateTemplate(directory: string) {
+export const action = async (directory: string) => {
   const rootPath = resolve(directory);
 
   // Get path to template directory: <rootPath>/template
@@ -90,4 +90,4 @@ export default async function generateTemplate(directory: string) {
   }
 
   console.log(`${chalk.green('success')}: generated template at ${chalk.yellow(rootPath)}`);
-}
+};

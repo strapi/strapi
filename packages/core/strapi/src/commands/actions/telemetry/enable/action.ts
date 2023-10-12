@@ -86,7 +86,7 @@ const sendEvent = async (uuid: string) => {
   }
 };
 
-async function optInTelemetry() {
+export const action = async () => {
   const packageJSONPath = resolve(process.cwd(), 'package.json');
   const exists = await fse.pathExists(packageJSONPath);
 
@@ -115,6 +115,4 @@ async function optInTelemetry() {
   await sendEvent(updatedPackageJSON.strapi.uuid);
   console.log(`${chalk.green('Successfully opted into and enabled Strapi telemetry')}`);
   process.exit(0);
-}
-
-export default optInTelemetry;
+};
