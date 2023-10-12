@@ -10,5 +10,7 @@ module.exports = ({ env }) => ({
       salt: env('TRANSFER_TOKEN_SALT'),
     },
   },
-  promoteEnterpriseFeatures: env.bool('PROMOTE_ENTERPRISE_FEATURES', true),
+  flags: {
+    promoteEnterpriseFeatures: env.bool('PROMOTE_ENTERPRISE_FEATURES', true),
+  },
 });

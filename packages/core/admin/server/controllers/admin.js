@@ -26,14 +26,14 @@ module.exports = {
   // When removing this we need to update the /admin/src/index.js file
   // where we set the strapi.window.isEE value
   async getProjectType() {
-    const promoteEnterpriseFeatures = strapi.config.get('admin.promoteEnterpriseFeatures', true);
+    const flags = strapi.config.get('admin.flags', true);
     // FIXME
     try {
       return {
         data: {
           isEE: strapi.EE,
           features: ee.features.list(),
-          promoteEnterpriseFeatures: strapi.EE ? false : promoteEnterpriseFeatures,
+          flags,
         },
       };
     } catch (err) {
@@ -41,7 +41,7 @@ module.exports = {
         data: {
           isEE: false,
           features: [],
-          promoteEnterpriseFeatures,
+          flags,
         },
       };
     }

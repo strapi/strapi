@@ -22,7 +22,9 @@ window.strapi = {
     AUDIT_LOGS: 'audit-logs',
     REVIEW_WORKFLOWS: 'review-workflows',
   },
-  promoteEnterpriseFeatures: true,
+  flags: {
+    promoteEnterpriseFeatures: true,
+  },
   projectType: 'Community',
 };
 
@@ -42,12 +44,12 @@ const run = async () => {
   try {
     const {
       data: {
-        data: { isEE, features, promoteEnterpriseFeatures },
+        data: { isEE, features, flags },
       },
     } = await get('/admin/project-type');
 
     window.strapi.isEE = isEE;
-    window.strapi.promoteEnterpriseFeatures = promoteEnterpriseFeatures;
+    window.strapi.flags = flags;
     window.strapi.features = {
       ...window.strapi.features,
       isEnabled: (featureName) => features.some((feature) => feature.name === featureName),

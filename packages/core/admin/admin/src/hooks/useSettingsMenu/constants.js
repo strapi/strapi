@@ -24,7 +24,7 @@ export const LINKS_CE = {
     // If the Enterprise feature is not enabled and if the config doesn't disable it, we promote the Enterprise feature by displaying them in the settings menu.
     // Disable this by adding "promoteEnterpriseFeatures: false" to your `./config/admin.js` file
     ...(!window.strapi.features.isEnabled(window.strapi.features.SSO) &&
-    window.strapi.promoteEnterpriseFeatures
+    window.strapi?.flags?.promoteEnterpriseFeatures
       ? [
           {
             intlLabel: { id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' },
@@ -36,7 +36,7 @@ export const LINKS_CE = {
       : []),
 
     ...(!window.strapi.features.isEnabled(window.strapi.features.REVIEW_WORKFLOWS) &&
-    window.strapi.promoteEnterpriseFeatures
+    window.strapi?.flags?.promoteEnterpriseFeatures
       ? [
           {
             intlLabel: {
@@ -64,7 +64,7 @@ export const LINKS_CE = {
       id: 'users',
     },
     ...(!window.strapi.features.isEnabled(window.strapi.features.AUDIT_LOGS) &&
-    window.strapi.promoteEnterpriseFeatures
+    window.strapi?.flags?.promoteEnterpriseFeatures
       ? [
           {
             intlLabel: { id: 'global.auditLogs', defaultMessage: 'Audit Logs' },

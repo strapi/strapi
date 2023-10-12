@@ -1,4 +1,4 @@
-export {};
+export { };
 
 declare global {
   interface Window {
@@ -11,6 +11,9 @@ declare global {
       };
       projectType: string;
       telemetryDisabled: boolean;
+      flags: {
+        promoteEnterpriseFeatures: boolean,
+      }
     };
   }
 }
