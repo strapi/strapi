@@ -434,7 +434,7 @@ describe('Admin Transfer Token CRUD (api)', () => {
     });
   });
 
-  test('Returns a 404 if the ressource to retrieve does not exist', async () => {
+  test('Returns a 404 if the resource to retrieve does not exist', async () => {
     const res = await rq({
       url: '/admin/transfer/tokens/42',
       method: 'GET',

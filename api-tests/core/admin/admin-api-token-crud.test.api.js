@@ -621,7 +621,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
     });
   });
 
-  test('Does not return an error if the ressource to delete does not exist', async () => {
+  test('Does not return an error if the resource to delete does not exist', async () => {
     const res = await rq({
       url: '/admin/api-tokens/42',
       method: 'DELETE',
@@ -682,7 +682,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
     });
   });
 
-  test('Returns a 404 if the ressource to retrieve does not exist', async () => {
+  test('Returns a 404 if the resource to retrieve does not exist', async () => {
     const res = await rq({
       url: '/admin/api-tokens/42',
       method: 'GET',
@@ -743,7 +743,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
     // expect(updatedRes.body.data.updated)
   });
 
-  test('Returns a 404 if the ressource to update does not exist', async () => {
+  test('Returns a 404 if the resource to update does not exist', async () => {
     const body = {
       name: 'api-token_tests-updated-name',
       description: 'api-token_tests-updated-description',
