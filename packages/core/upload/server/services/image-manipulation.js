@@ -47,7 +47,7 @@ const THUMBNAIL_RESIZE_OPTIONS = {
 const resizeFileTo = async (file, options, { name, hash }) => {
   const filePath = join(file.tmpWorkingDirectory, hash);
 
-  await writeStreamToFile(file.getStream().pipe(sharp().resize(options)), filePath);
+  await writeStreamToFile(file.getStream().pipe(sharp().resize(options).withMetadata()), filePath);
   const newFile = {
     name,
     hash,
@@ -87,7 +87,7 @@ const optimize = async (file) => {
   const { sizeOptimization = false, autoOrientation = false } = await getService(
     'upload'
   ).getSettings();
-  
+
   const newFile = { ...file };
 
   const { width, height, size, format } = await getMetadata(newFile);
@@ -98,7 +98,9 @@ const optimize = async (file) => {
     transformer[format]({ quality: sizeOptimization ? 80 : 100 });
 
     // rotate image based on EXIF data which rotate function checks by default or keeps it unchanged.
-    transformer.rotate();
+    if(autoOrientation){
+      transformer.rotate();
+    }
 
     const filePath = join(file.tmpWorkingDirectory, `optimized-${file.hash}`);
 
