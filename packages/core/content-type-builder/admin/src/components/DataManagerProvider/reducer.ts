@@ -28,7 +28,10 @@ const initialState: DataManagerStateType = {
   initialComponents: {},
   initialContentTypes: {},
   initialData: {},
-  modifiedData: {},
+  modifiedData: {
+    components: {},
+    contentTypes: {},
+  },
   reservedNames: {},
   isLoading: true,
   isLoadingForDataToBeSet: true,
@@ -60,7 +63,7 @@ const getOppositeRelation = (originalRelation: Relations) => {
   return originalRelation;
 };
 
-const findAttributeIndex = (schema: any, attributeToFind: string) => {
+const findAttributeIndex = (schema: any, attributeToFind?: string) => {
   return schema.schema.attributes.findIndex(
     ({ name }: { name: string }) => name === attributeToFind
   );
@@ -99,7 +102,7 @@ const reducer = (state = initialState, action: Action) =>
         if (action.shouldAddComponentToData) {
           const componentToAddUID = rest.component;
           const componentToAdd = state?.components?.[componentToAddUID];
-          const isTemporaryComponent = componentToAdd.isTemporary;
+          const isTemporaryComponent = componentToAdd?.isTemporary;
           const hasComponentAlreadyBeenAdded =
             state.modifiedData.components?.[componentToAddUID] !== undefined;
 
@@ -113,10 +116,13 @@ const reducer = (state = initialState, action: Action) =>
           }
 
           // Add the added component to the modifiedData.components
+          // @ts-ignore
           draftState.modifiedData.components[componentToAddUID] = componentToAdd;
 
           const nestedComponents = retrieveComponentsFromSchema(
+            // @ts-ignore
             componentToAdd.schema.attributes,
+            // @ts-ignore
             state.components
           );
 
@@ -190,7 +196,7 @@ const reducer = (state = initialState, action: Action) =>
         const { dynamicZoneTarget, componentsToAdd } = action;
 
         const dzAttributeIndex = findAttributeIndex(
-          state.modifiedData.contentType!,
+          state.modifiedData.contentType,
           dynamicZoneTarget
         );
 
@@ -200,11 +206,10 @@ const reducer = (state = initialState, action: Action) =>
             !draftState.modifiedData.contentType?.schema.attributes[dzAttributeIndex].components
           ) {
             // @ts-ignore
-            draftState.modifiedData.contentType!.schema.attributes[dzAttributeIndex].components =
-              [];
+            draftState.modifiedData.contentType.schema.attributes[dzAttributeIndex].components = [];
           }
           // @ts-ignore
-          draftState.modifiedData.contentType!.schema.attributes[dzAttributeIndex].components.push(
+          draftState.modifiedData.contentType.schema.attributes[dzAttributeIndex].components.push(
             componentUid
           );
         });
@@ -243,14 +248,14 @@ const reducer = (state = initialState, action: Action) =>
         const { dynamicZoneTarget, newComponents } = action;
 
         const dzAttributeIndex = findAttributeIndex(
-          state.modifiedData.contentType!,
+          state.modifiedData.contentType,
           dynamicZoneTarget
         );
         // Add the components property to the AttributeType interface
         type AttributeTypeWithComponents = AttributeType & { components?: UID.Component[] };
 
         const currentDZComponents = (
-          state.modifiedData.contentType!.schema.attributes[
+          state.modifiedData.contentType?.schema.attributes[
             dzAttributeIndex
           ] as AttributeTypeWithComponents
         ).components;
@@ -259,14 +264,16 @@ const reducer = (state = initialState, action: Action) =>
         const updatedComponents = makeUnique([...currentDZComponents, ...newComponents]);
 
         (
-          draftState.modifiedData.contentType!.schema.attributes[
+          draftState.modifiedData.contentType?.schema.attributes[
             dzAttributeIndex
           ] as AttributeTypeWithComponents
         ).components = updatedComponents;
 
         // Retrieve all the components that needs to be added to the modifiedData.components
         const nestedComponents = retrieveComponentsFromSchema(
-          current(draftState.modifiedData.contentType!.schema.attributes),
+          // @ts-ignore
+          current(draftState.modifiedData.contentType.schema.attributes),
+          // @ts-ignore
           state.components
         );
 
@@ -300,18 +307,20 @@ const reducer = (state = initialState, action: Action) =>
             attributes: [],
           },
         };
-
-        draftState.components![action.uid!] = newSchema;
+        // @ts-ignore
+        draftState.components[action.uid] = newSchema;
 
         if (action.shouldAddComponentToData) {
-          draftState.modifiedData.components![action.uid!] = newSchema;
+          // @ts-ignore
+          draftState.modifiedData.components[action.uid] = newSchema;
         }
 
         break;
       }
       case actions.CREATE_SCHEMA: {
         const newSchema: ContentType = {
-          uid: action.uid!,
+          // @ts-ignore
+          uid: action.uid,
           isTemporary: true,
           schema: {
             ...action.data,
@@ -319,7 +328,8 @@ const reducer = (state = initialState, action: Action) =>
           },
         };
 
-        draftState.contentTypes![action.uid!] = newSchema;
+        // @ts-ignore
+        draftState.contentTypes[action.uid] = newSchema;
 
         break;
       }
@@ -584,9 +594,9 @@ const reducer = (state = initialState, action: Action) =>
         return initialState;
       }
       case actions.REMOVE_COMPONENT_FROM_DYNAMIC_ZONE: {
-        const dzAttributeIndex = findAttributeIndex(state.modifiedData.contentType!, action.dzName);
+        const dzAttributeIndex = findAttributeIndex(state.modifiedData.contentType, action.dzName);
         //@ts-ignore
-        draftState.modifiedData.contentType!.schema.attributes[dzAttributeIndex].components.splice(
+        draftState.modifiedData.contentType.schema.attributes[dzAttributeIndex].components.splice(
           action.componentToRemoveIndex,
           1
         );
@@ -599,7 +609,7 @@ const reducer = (state = initialState, action: Action) =>
         const attributeToRemoveIndex = findAttributeIndex(
           //@ts-ignore
           state.modifiedData[mainDataKey],
-          attributeToRemoveName!
+          attributeToRemoveName
         );
 
         const pathToAttributeToRemove = [...pathToAttributes, attributeToRemoveIndex];
@@ -614,13 +624,14 @@ const reducer = (state = initialState, action: Action) =>
           const { target, relation, targetAttribute } = attributeToRemoveData;
           const relationType = getRelationType(relation, targetAttribute);
 
-          const uid = state.modifiedData.contentType!.uid;
+          const uid = state.modifiedData.contentType?.uid;
           const shouldRemoveOppositeAttribute =
             target === uid && !ONE_SIDE_RELATIONS.includes(relationType);
 
           if (shouldRemoveOppositeAttribute) {
+            // @ts-ignore
             const attributes: AttributeType[] =
-              state.modifiedData[mainDataKey]!.schema.attributes.slice();
+              state.modifiedData[mainDataKey]?.schema.attributes.slice();
             const nextAttributes = attributes.filter((attribute) => {
               if (attribute.name === attributeToRemoveName) {
                 return false;
@@ -642,30 +653,30 @@ const reducer = (state = initialState, action: Action) =>
         }
 
         // Find all uid fields that have the targetField set to the field we are removing
-        const uidFieldsToUpdate: string[] = state.modifiedData[
-          mainDataKey
-          // @ts-ignore
-        ]!.schema.attributes.slice().reduce((acc: string[], current: AttributeType) => {
-          if (current.type !== 'uid') {
+        // @ts-ignore
+        const uidFieldsToUpdate: string[] = state.modifiedData[mainDataKey].schema.attributes
+          .slice()
+          .reduce((acc: string[], current: AttributeType) => {
+            if (current.type !== 'uid') {
+              return acc;
+            }
+
+            if (current.targetField !== attributeToRemoveName) {
+              return acc;
+            }
+
+            acc.push(current.name);
+
             return acc;
-          }
-
-          if (current.targetField !== attributeToRemoveName) {
-            return acc;
-          }
-
-          acc.push(current.name!);
-
-          return acc;
-        }, []);
+          }, []);
 
         uidFieldsToUpdate.forEach((fieldName) => {
           const fieldIndex = findAttributeIndex(state.modifiedData[mainDataKey], fieldName);
 
-          delete draftState.modifiedData[mainDataKey]!.schema.attributes[fieldIndex].targetField;
+          delete draftState.modifiedData[mainDataKey]?.schema.attributes[fieldIndex].targetField;
         });
 
-        draftState.modifiedData[mainDataKey]!.schema.attributes.splice(attributeToRemoveIndex, 1);
+        draftState.modifiedData[mainDataKey]?.schema.attributes.splice(attributeToRemoveIndex, 1);
 
         break;
       }
@@ -674,7 +685,7 @@ const reducer = (state = initialState, action: Action) =>
 
         const attributeToRemoveIndex = findAttributeIndex(
           state.modifiedData.components?.[componentUid],
-          attributeToRemoveName!
+          attributeToRemoveName
         );
         // @ts-ignore
         draftState.modifiedData.components?.[componentUid]?.schema?.attributes?.splice(
@@ -706,19 +717,21 @@ const reducer = (state = initialState, action: Action) =>
         } = action;
 
         // @ts-ignore
-        draftState.modifiedData[schemaType]!.schema.displayName = displayName;
+        draftState.modifiedData[schemaType].schema.displayName = displayName;
 
         if (action.schemaType === 'component') {
-          draftState.modifiedData.component!.category = category;
           // @ts-ignore
-          draftState.modifiedData.component!.schema.icon = icon;
+          draftState.modifiedData.component.category = category;
+          // @ts-ignore
+          draftState.modifiedData.component.schema.icon = icon;
           const addedComponent = current(draftState.modifiedData.component);
-          draftState.components![uid!] = addedComponent;
+          // @ts-ignore
+          draftState.components[uid] = addedComponent;
 
           break;
         }
-
-        draftState.modifiedData.contentType!.schema.kind = kind;
+        // @ts-ignore
+        draftState.modifiedData.contentType.schema.kind = kind;
 
         break;
       }

@@ -1,11 +1,9 @@
-const validateSchema = (schema) => {
+export const validateSchema = (schema: any) => {
   const dynamicZoneAttributes = Object.values(schema.attributes).filter(
-    ({ type }) => type === 'dynamiczone'
+    (attribute: any) => attribute.type === 'dynamiczone'
   );
 
   return dynamicZoneAttributes.every(
-    ({ components }) => Array.isArray(components) && components.length > 0
+    (attribute: any) => Array.isArray(attribute.components) && attribute.components.length > 0
   );
 };
-
-export default validateSchema;

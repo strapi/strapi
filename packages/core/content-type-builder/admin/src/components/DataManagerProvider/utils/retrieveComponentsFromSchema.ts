@@ -2,14 +2,14 @@ import get from 'lodash/get';
 
 import { makeUnique } from '../../../utils/makeUnique';
 
-import type { AttributeType } from '../../../types';
+import type { AttributeType, Components } from '../../../types';
 import type { UID } from '@strapi/types';
 
 const retrieveComponentsFromSchema = (
-  attributes: AttributeType<string>[],
-  allComponentsData: any
+  attributes: AttributeType[],
+  allComponentsData: Components
 ): UID.Component[] => {
-  const allComponents = attributes.reduce((acc: UID.Component[], current) => {
+  const allComponents: UID.Component[] = attributes.reduce((acc: any, current) => {
     const type = current.type;
     if (type === 'component') {
       const currentComponentName = current.component;
@@ -28,7 +28,7 @@ const retrieveComponentsFromSchema = (
 
     if (type === 'dynamiczone') {
       const dynamicZoneComponents = current.components;
-      const componentsFromDZComponents = dynamicZoneComponents.reduce((acc2, currentUid) => {
+      const componentsFromDZComponents = dynamicZoneComponents.reduce((acc2: any, currentUid) => {
         const compoAttrs = get(allComponentsData, [currentUid, 'schema', 'attributes'], []);
 
         return [...acc2, ...retrieveComponentsFromSchema(compoAttrs, allComponentsData)];

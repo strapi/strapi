@@ -4,10 +4,11 @@ import isEqual from 'lodash/isEqual';
 import omit from 'lodash/omit';
 import sortBy from 'lodash/sortBy';
 
-import pluginId from '../../../pluginId';
+import { pluginId } from '../../../pluginId';
 import { makeUnique } from '../../../utils/makeUnique';
 
-import type { Components, Component, ContentType, ContentTypes } from '../../../types';
+import type { Components, Component, AttributeType, ContentTypes } from '../../../types';
+import type { UID } from '@strapi/types';
 
 const getCreatedAndModifiedComponents = (
   allComponents: Components,
@@ -25,7 +26,7 @@ const getCreatedAndModifiedComponents = (
   return makeUnique(componentUIDsToReturn);
 };
 
-const formatComponent = (component: Component, mainDataUID: string) => {
+const formatComponent = (component: Component | Record<string, any>, mainDataUID: UID.Any) => {
   const formattedAttributes = formatAttributes(
     get(component, 'schema.attributes', []),
     mainDataUID
@@ -73,8 +74,8 @@ const formatMainDataType = (data: any, isComponent = false) => {
  * @param {Object} attributes
  * @param {String} mainDataUID uid of the main data type
  */
-const formatAttributes = (attributes, mainDataUID) => {
-  return attributes.reduce((acc, { name, ...rest }) => {
+const formatAttributes = (attributes: AttributeType[], mainDataUID: UID.Any) => {
+  return attributes.reduce((acc: Record<string, AttributeType>, { name, ...rest }) => {
     const currentAttribute = rest;
     const hasARelationWithMainDataUID = currentAttribute.target === mainDataUID;
     const isRelationType = currentAttribute.type === 'relation';
@@ -86,9 +87,9 @@ const formatAttributes = (attributes, mainDataUID) => {
           targetAttribute: formatRelationTargetAttribute(currentTargetAttribute),
         });
 
-        acc[name] = removeNullKeys(relationAttr);
+        acc[name] = removeNullKeys(relationAttr) as AttributeType;
       } else {
-        acc[name] = removeNullKeys(currentAttribute);
+        acc[name] = removeNullKeys(currentAttribute) as AttributeType;
       }
     }
 
@@ -100,23 +101,23 @@ const formatAttributes = (attributes, mainDataUID) => {
         targetAttribute: formatRelationTargetAttribute(currentTargetAttribute),
       });
 
-      acc[name] = removeNullKeys(formattedRelationAttribute);
+      acc[name] = removeNullKeys(formattedRelationAttribute) as AttributeType;
     }
 
     if (currentAttribute.customField) {
       const customFieldAttribute = { ...currentAttribute, type: 'customField' };
-      acc[name] = removeNullKeys(customFieldAttribute);
+      acc[name] = removeNullKeys(customFieldAttribute) as AttributeType;
     }
 
     return acc;
   }, {});
 };
 
-const formatRelationTargetAttribute = (targetAttribute) =>
+const formatRelationTargetAttribute = (targetAttribute: string | null) =>
   targetAttribute === '-' ? null : targetAttribute;
 
-const removeNullKeys = (obj) =>
-  Object.keys(obj).reduce((acc, current) => {
+const removeNullKeys = (obj: Record<string, any>) =>
+  Object.keys(obj).reduce((acc: Record<string, any>, current) => {
     if (obj[current] !== null && current !== 'plugin') {
       acc[current] = obj[current];
     }
@@ -125,15 +126,14 @@ const removeNullKeys = (obj) =>
   }, {});
 
 const getComponentsToPost = (
-  allComponents,
-  initialComponents,
-  mainDataUID,
-  isCreatingData = false
+  allComponents: Components,
+  initialComponents: Components,
+  mainDataUID: UID.Any
 ) => {
   const componentsToFormat = getCreatedAndModifiedComponents(allComponents, initialComponents);
   const formattedComponents = componentsToFormat.map((compoUID) => {
     const currentCompo = get(allComponents, compoUID, {});
-    const formattedComponent = formatComponent(currentCompo, mainDataUID, isCreatingData);
+    const formattedComponent = formatComponent(currentCompo, mainDataUID);
 
     return formattedComponent;
   });
@@ -141,7 +141,7 @@ const getComponentsToPost = (
   return formattedComponents;
 };
 
-const sortContentType = (types) =>
+const sortContentType = (types: ContentTypes) =>
   sortBy(
     Object.keys(types)
       .map((uid) => ({

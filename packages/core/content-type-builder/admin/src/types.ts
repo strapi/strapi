@@ -8,14 +8,25 @@ export type IntlLabel = {
 
 export type SchemaType = 'contentType' | 'component' | 'components';
 
+export type DifferentAttributesKind = 'Populatable' | 'NonPopulatable' | 'Any';
+
 export type AttributeType = Attribute.Any & {
-  name?: string;
+  name: string;
+  target: string;
+  targetAttribute: string;
+  customField?: any;
 };
 
 export interface Component {
   uid: UID.Component;
   category: string;
-  schema: Schema.Schema;
+  schema: Schema.Component & {
+    name: string;
+    description?: string;
+    icon?: string;
+    attributes?: AttributeType[];
+    [key: string]: any;
+  };
   isTemporary?: boolean;
   attributes?: AttributeType[];
   [key: string]: any;
@@ -26,6 +37,9 @@ export interface ContentType {
   isTemporary?: boolean;
   schema: Schema.ContentType & {
     attributes?: AttributeType[];
+    visible?: boolean;
+    restrictRelationsTo?: any;
+    displayName?: string;
   };
   [key: string]: any;
 }
@@ -34,18 +48,18 @@ export type Components = Record<string, Component>;
 
 export type ContentTypes = Record<string, ContentType>;
 export interface DataManagerStateType {
-  components?: Record<string, any>;
-  contentTypes?: Record<string, ContentType>;
-  initialComponents: Record<string, any>;
-  initialContentTypes: Record<string, any>;
+  components?: Components;
+  contentTypes?: ContentTypes;
+  initialComponents: Components;
+  initialContentTypes: ContentTypes;
   initialData: Record<string, any>;
   modifiedData: {
-    components?: Components;
-    contentTypes?: ContentTypes;
+    components: Components;
+    contentTypes: ContentTypes;
     contentType?: ContentType;
     component?: Component;
   };
-  reservedNames: Record<string, any>;
+  reservedNames: Record<string, string>;
   isLoading: boolean;
   isLoadingForDataToBeSet: boolean;
   [key: string]: any;

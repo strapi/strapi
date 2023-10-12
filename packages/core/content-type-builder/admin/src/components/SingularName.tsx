@@ -7,14 +7,8 @@ import nameToSlug from '../utils/nameToSlug';
 
 import type { IntlLabel } from '../types';
 
-interface Description {
-  id: string;
-  defaultMessage: string;
-  values?: Record<string, any>;
-}
-
 interface SingularNameProps {
-  description?: Description | null;
+  description?: IntlLabel | null;
   error?: string | null;
   intlLabel: IntlLabel;
   modifiedData: Record<string, any>;

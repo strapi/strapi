@@ -5,11 +5,11 @@ const SERVER_HAS_BEEN_KILLED_MESSAGE = 'server is down';
  * Server restart watcher
  * Sends an HEAD method to check if the server has been shut down correctly
  * and then pings until it's back on
- * @param response
- * @returns {object} the response data
  */
 export function serverRestartWatcher(response: any, didShutDownServer?: boolean) {
   return new Promise((resolve) => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     fetch(`${window.strapi.backendURL}/_health`, {
       method: 'HEAD',
       mode: 'no-cors',

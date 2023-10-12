@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect';
 
-import pluginId from '../../pluginId';
+import { pluginId } from '../../pluginId';
 
 import { initialState } from './reducer';
 

@@ -48,14 +48,14 @@ import {
 import { makeSelectDataManagerProvider } from './selectors';
 import { formatMainDataType, getComponentsToPost, sortContentType } from './utils/cleanData';
 import { createDataObject } from './utils/createDataObject';
-import createModifiedDataSchema from './utils/createModifiedDataSchema';
-import formatSchemas from './utils/formatSchemas';
+import { createModifiedDataSchema } from './utils/createModifiedDataSchema';
+import { formatSchemas } from './utils/formatSchemas';
 import { retrieveComponentsFromSchema } from './utils/retrieveComponentsFromSchema';
 import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
-import retrieveNestedComponents from './utils/retrieveNestedComponents';
-import retrieveSpecificInfoFromComponents from './utils/retrieveSpecificInfoFromComponents';
+import { retrieveNestedComponents } from './utils/retrieveNestedComponents';
+import { retrieveSpecificInfoFromComponents } from './utils/retrieveSpecificInfoFromComponents';
 import { serverRestartWatcher } from './utils/serverRestartWatcher';
-import validateSchema from './utils/validateSchema';
+import { validateSchema } from './utils/validateSchema';
 
 import type { ContentType, SchemaType } from '../../types';
 import type { UID } from '@strapi/types';
@@ -513,7 +513,7 @@ const DataManagerProvider = ({
         components: getComponentsToPost(
           modifiedData.components,
           components,
-          currentUid,
+          currentUid!,
           isCreating
         ),
       };
@@ -612,7 +612,7 @@ const DataManagerProvider = ({
   const updatePermissions = async () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    await refetchPermissions?.();
+    await refetchPermissions();
   };
 
   const updateSchema = (

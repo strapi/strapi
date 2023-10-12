@@ -1,7 +1,7 @@
-import makeUnique from '../../../utils/makeUnique';
+import { makeUnique } from '../../../utils/makeUnique';
 
-const retrieveNestedComponents = (appComponents) => {
-  const nestedComponents = Object.keys(appComponents).reduce((acc, current) => {
+export const retrieveNestedComponents = (appComponents: any) => {
+  const nestedComponents = Object.keys(appComponents).reduce((acc: any, current) => {
     const componentAttributes = appComponents?.[current]?.schema?.attributes ?? [];
     const currentComponentNestedCompos = getComponentsFromComponent(componentAttributes);
 
@@ -11,8 +11,8 @@ const retrieveNestedComponents = (appComponents) => {
   return makeUnique(nestedComponents);
 };
 
-const getComponentsFromComponent = (componentAttributes) => {
-  return componentAttributes.reduce((acc, current) => {
+const getComponentsFromComponent = (componentAttributes: any) => {
+  return componentAttributes.reduce((acc: any, current: any) => {
     const { type, component } = current;
 
     if (type === 'component') {
@@ -22,5 +22,3 @@ const getComponentsFromComponent = (componentAttributes) => {
     return acc;
   }, []);
 };
-
-export default retrieveNestedComponents;

@@ -1,20 +1,15 @@
 import get from 'lodash/get';
 
-/**
- *
- * @params {Object} contentTypeSchema
- * @params {Object[]} retrievedComponents array of components that are used in the content type
- * @params {Object} allComponentsSchema All app's components
- * @params {Boolean} isInContentTypeView
- * @returns {Object} The modifiedData to set in the reducer
- */
-const createModifiedDataSchema = (
-  contentTypeSchema,
-  retrievedComponents,
-  allComponentsSchema,
-  isInContentTypeView
+import type { ContentType, Components } from '../../../types';
+import type { UID } from '@strapi/types';
+
+export const createModifiedDataSchema = (
+  contentTypeSchema: ContentType,
+  retrievedComponents: UID.Component[],
+  allComponentsSchema: Components,
+  isInContentTypeView: boolean
 ) => {
-  const componentsAssociatedToContentType = retrievedComponents.reduce((acc, current) => {
+  const componentsAssociatedToContentType = retrievedComponents.reduce((acc: any, current) => {
     const componentSchema = get(allComponentsSchema, current, {});
 
     acc[current] = componentSchema;
@@ -29,5 +24,3 @@ const createModifiedDataSchema = (
 
   return schema;
 };
-
-export default createModifiedDataSchema;
