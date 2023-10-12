@@ -180,7 +180,9 @@ function App() {
 
   return (
     <Suspense fallback={<LoadingIndicatorPage />}>
-      <SkipToContent>{formatMessage({ id: 'skipToContent' })}</SkipToContent>
+      <SkipToContent>
+        {formatMessage({ id: 'skipToContent', defaultMessage: 'Skip to content' })}
+      </SkipToContent>
       <TrackingProvider value={trackingInfo}>
         <Switch>
           {authRoutes}
