@@ -69,9 +69,16 @@ class Database {
     this.dialect = getDialect(this);
     this.dialect.configure();
 
-    this.connection = createConnection(this.config.connection);
+    const onAfterCreate = (nativeConnection: unknown, done: Function) => {
+      console.log('on after create called');
+      // run initialize for it since commands such as postgres SET and sqlite PRAGMA are per-connection
+      this.dialect.initialize(nativeConnection).then(() => {
+        console.log('dialect initialized called');
+        return done(null, nativeConnection);
+      });
+    };
 
-    this.dialect.initialize();
+    this.connection = createConnection(this.config.connection, onAfterCreate);
 
     this.schema = createSchemaProvider(this);
 
