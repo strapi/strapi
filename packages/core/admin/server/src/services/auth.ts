@@ -9,23 +9,23 @@ const { ApplicationError } = errors;
 
 /**
  * hashes a password
- * @param {string} password - password to hash
- * @returns {string} hashed password
+ * @param password - password to hash
+ * @returns hashed password
  */
 const hashPassword = (password: string) => bcrypt.hash(password, 10);
 
 /**
  * Validate a password
- * @param {string} password
- * @param {string} hash
+ * @param password
+ * @param hash
  * @returns {Promise<boolean>} is the password valid
  */
 const validatePassword = (password: string, hash: string) => bcrypt.compare(password, hash);
 
 /**
  * Check login credentials
- * @param {string} email the users email address
- * @param {string} password the users password
+ * @param email the users email address
+ * @param password the users password
  */
 const checkCredentials = async ({ email, password }: { email: string; password: string }) => {
   const user: AdminUser = await strapi.query('admin::user').findOne({ where: { email } });
@@ -49,7 +49,7 @@ const checkCredentials = async ({ email, password }: { email: string; password: 
 
 /**
  * Send an email to the user if it exists or do nothing
- * @param {string} email user email for which to reset the password
+ * @param email user email for which to reset the password
  */
 const forgotPassword = async ({ email } = {} as { email: string }) => {
   const user: AdminUser = await strapi
@@ -90,8 +90,8 @@ const forgotPassword = async ({ email } = {} as { email: string }) => {
 
 /**
  * Reset a user password
- * @param {string} resetPasswordToken token generated to request a password reset
- * @param {string} password new user password
+ * @param resetPasswordToken token generated to request a password reset
+ * @param password new user password
  */
 const resetPassword = async (
   { resetPasswordToken, password } = {} as { resetPasswordToken: string; password: string }
