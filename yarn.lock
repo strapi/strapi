@@ -7639,6 +7639,7 @@ __metadata:
   resolution: "@strapi/generate-new@workspace:packages/generators/app"
   dependencies:
     "@sentry/node": 6.19.7
+    "@strapi/pack-up": "workspace:*"
     chalk: ^4.1.2
     copyfiles: 2.4.1
     execa: 5.1.1
@@ -7658,6 +7659,7 @@ __metadata:
   resolution: "@strapi/generators@workspace:packages/generators/generators"
   dependencies:
     "@sindresorhus/slugify": 1.1.0
+    "@strapi/pack-up": "workspace:*"
     "@strapi/typescript-utils": 4.14.4
     "@strapi/utils": 4.14.4
     chalk: 4.1.2
@@ -7750,6 +7752,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/logger@workspace:packages/utils/logger"
   dependencies:
+    "@strapi/pack-up": "workspace:*"
     eslint-config-custom: 4.14.4
     lodash: 4.17.21
     tsconfig: 4.14.4
@@ -8347,6 +8350,7 @@ __metadata:
     "@koa/router": 10.1.1
     "@strapi/database": 4.14.4
     "@strapi/logger": 4.14.4
+    "@strapi/pack-up": "workspace:*"
     "@strapi/permissions": 4.14.4
     "@strapi/ts-zen": ^0.2.0
     "@strapi/utils": 4.14.4
