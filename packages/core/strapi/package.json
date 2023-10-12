@@ -64,7 +64,9 @@
       "url": "https://strapi.io"
     }
   ],
-  "main": "./index.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "bin": "./bin/strapi.js",
   "files": [
@@ -75,16 +77,14 @@
     "index.js"
   ],
   "scripts": {
-    "build": "run -T tsc -p tsconfig.build.json && run copy-files",
-    "build:ts": "run build",
-    "clean": "run -T rimraf ./dist",
+    "build": "run pack-up build && run copy-files",
     "copy-files": "copyfiles -u 1 -a 'src/**/*.html' 'src/**/*.png'  dist",
     "postinstall": "node ./scripts/postinstall.js",
     "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "run -T tsc -p tsconfig.build.json -w --preserveWatchOutput"
+    "watch": "pack-up watch"
   },
   "dependencies": {
     "@koa/cors": "3.4.3",
@@ -142,7 +142,6 @@
     "ora": "5.4.1",
     "package-json": "7.0.0",
     "qs": "6.11.1",
-    "resolve-cwd": "3.0.0",
     "semver": "7.5.4",
     "statuses": "2.0.1",
     "typescript": "5.2.2",
@@ -150,6 +149,7 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
+    "@strapi/pack-up": "workspace:*",
     "@strapi/ts-zen": "^0.2.0",
     "@types/bcryptjs": "2.4.3",
     "@types/configstore": "5.0.1",

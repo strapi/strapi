@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import chalk from 'chalk';
 import { has, isString, isArray } from 'lodash/fp';
-import resolveCwd from 'resolve-cwd';
 import { prompt } from 'inquirer';
 import boxen from 'boxen';
 import type { Command } from 'commander';
@@ -133,26 +132,14 @@ const assertCwdContainsStrapiProject = (name: string) => {
   }
 };
 
-const getLocalScript =
-  (name: string) =>
+const runAction =
+  (name: string, action: (...args: any[]) => Promise<void>) =>
   (...args: unknown[]) => {
     assertCwdContainsStrapiProject(name);
 
-    const cmdPath = resolveCwd.silent(`@strapi/strapi/dist/commands/actions/${name}/action`);
-    if (!cmdPath) {
-      console.log(
-        `Error loading the local ${chalk.yellow(
-          name
-        )} command. Strapi might not be installed in your "node_modules". You may need to run "yarn install".`
-      );
-      process.exit(1);
-    }
-
-    const script = require(cmdPath).default;
-
     Promise.resolve()
       .then(() => {
-        return script(...args);
+        return action(...args);
       })
       .catch((error) => {
         console.error(error);
@@ -210,7 +197,7 @@ export {
   assertUrlHasProtocol,
   ifOptions,
   readableBytes,
-  getLocalScript,
+  runAction,
   assertCwdContainsStrapiProject,
   notifyExperimentalCommand,
 };

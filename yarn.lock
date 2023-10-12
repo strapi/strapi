@@ -8262,6 +8262,7 @@ __metadata:
     "@strapi/generate-new": 4.14.4
     "@strapi/generators": 4.14.4
     "@strapi/logger": 4.14.4
+    "@strapi/pack-up": "workspace:*"
     "@strapi/permissions": 4.14.4
     "@strapi/plugin-content-manager": 4.14.4
     "@strapi/plugin-content-type-builder": 4.14.4
@@ -8325,7 +8326,6 @@ __metadata:
     ora: 5.4.1
     package-json: 7.0.0
     qs: 6.11.1
-    resolve-cwd: 3.0.0
     semver: 7.5.4
     statuses: 2.0.1
     supertest: 6.3.3

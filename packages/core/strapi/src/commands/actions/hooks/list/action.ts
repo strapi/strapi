@@ -1,7 +1,7 @@
 import CLITable from 'cli-table3';
 import chalk from 'chalk';
 
-import strapi from '../../../../index';
+import strapi from '../../../../Strapi';
 
 export default async () => {
   const appContext = await strapi.compile();
