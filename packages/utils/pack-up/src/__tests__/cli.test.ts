@@ -1,14 +1,9 @@
 import { spawn } from '../../tests/spawn';
-import { cleanupWorkspaces } from '../../tests/workspaces';
 
 /**
  * This has issues running in the CI due to how yarn3 works.
  */
 describe('cli', () => {
-  afterAll(async () => {
-    await cleanupWorkspaces();
-  });
-
   const timeout = 1000 * 120;
 
   describe('build & check', () => {

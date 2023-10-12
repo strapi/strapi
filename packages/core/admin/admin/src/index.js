@@ -24,7 +24,7 @@ window.strapi = {
   },
   projectType: 'Community',
   flags: {
-    nps: false
+    nps: false,
   },
 };
 
