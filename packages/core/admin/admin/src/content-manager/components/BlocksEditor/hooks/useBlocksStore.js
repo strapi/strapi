@@ -245,6 +245,21 @@ Image.propTypes = {
   }).isRequired,
 };
 
+const IconButtonCustom = styled(IconButton)`
+  background-color: ${({ theme, buttonVariant }) =>
+    buttonVariant === 'delete' ? theme.colors.danger100 : theme.colors.neutral0};
+    &:hover {
+      background-color: ${({ theme }) => theme.colors.neutral0};
+    }
+};
+
+  svg path,
+  &:focus svg path {
+    fill: ${({ theme, buttonVariant }) =>
+      buttonVariant === 'delete' ? theme.colors.danger700 : theme.colors.neutral600};
+  }
+`;
+
 const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRef) => {
   const { formatMessage } = useIntl();
   const editor = useSlate();
@@ -366,17 +381,17 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                 </StyledBaseLink>
               </Typography>
               <Flex justifyContent="end" width="100%" gap={2}>
-                <IconButton
+                <IconButtonCustom
                   icon={<Trash />}
                   size="L"
-                  variant="danger"
                   onClick={() => removeLink(editor)}
                   label={formatMessage({
                     id: 'components.Blocks.popover.delete',
                     defaultMessage: 'Delete',
                   })}
+                  buttonVariant="delete"
                 />
-                <IconButton
+                <IconButtonCustom
                   icon={<Pencil />}
                   size="L"
                   onClick={() => setIsEditing(true)}
@@ -384,6 +399,7 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                     id: 'components.Blocks.popover.edit',
                     defaultMessage: 'Edit',
                   })}
+                  buttonVariant="edit"
                 />
               </Flex>
             </Flex>
