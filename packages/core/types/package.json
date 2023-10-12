@@ -29,7 +29,7 @@
   "main": "index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "./dist/**/!(*.d.ts.map)",
+    "./dist",
     "index.js"
   ],
   "scripts": {

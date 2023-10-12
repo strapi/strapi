@@ -68,7 +68,7 @@
   "types": "./dist/index.d.ts",
   "bin": "./bin/strapi.js",
   "files": [
-    "./dist/**/!(*.d.ts.map)",
+    "./dist",
     "./bin",
     "./scripts",
     "./resources",
