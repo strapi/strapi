@@ -1011,4 +1011,60 @@ describe('useBlocksStore', () => {
       },
     ]);
   });
+
+  it('keeps modifiers when creating a new line in the middle of a block with modifiers', () => {
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'Line of text with modifiers',
+            bold: true,
+            code: true,
+            italic: true,
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor at the middle of the block with modifiers
+    Transforms.select(baseEditor, {
+      anchor: Editor.point(baseEditor, { path: [0, 0], offset: 10 }),
+      focus: Editor.point(baseEditor, { path: [0, 0], offset: 10 }),
+    });
+
+    // Simulate the enter key
+    result.current.paragraph.handleEnterKey(baseEditor);
+
+    // Should insert a new line with modifiers
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'Line of te',
+            bold: true,
+            code: true,
+            italic: true,
+          },
+        ],
+      },
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'xt with modifiers',
+            bold: true,
+            code: true,
+            italic: true,
+          },
+        ],
+      },
+    ]);
+  });
 });
