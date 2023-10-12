@@ -160,8 +160,35 @@ const toggleBlock = (editor, value) => {
     // When there is a selection, update the existing block in the tree
     Transforms.setNodes(editor, blockProperties);
   } else {
-    // Otherwise, add a new block to the tree
-    Transforms.insertNodes(editor, { ...blockProperties, children: [{ type: 'text', text: '' }] });
+    /**
+     * When there is no selection, we want to insert a new block just after
+     * the last node inserted and prevent the code to add an empty paragraph
+     * between them.
+     */
+    const [, lastNodePath] = Editor.last(editor, []);
+    const [parentNode] = Editor.parent(editor, lastNodePath, {
+      // Makes sure we get a block node, not an inline node
+      match: (node) => node.type !== 'text',
+    });
+    Transforms.removeNodes(editor, {
+      void: true,
+      hanging: true,
+      at: {
+        anchor: { path: lastNodePath, offset: 0 },
+        focus: { path: lastNodePath, offset: 0 },
+      },
+    });
+    Transforms.insertNodes(
+      editor,
+      {
+        ...blockProperties,
+        children: parentNode.children,
+      },
+      {
+        at: [lastNodePath[0]],
+        select: true,
+      }
+    );
   }
 
   // When the select is clicked it blurs the editor, restore the focus to the editor
@@ -610,6 +637,32 @@ const BetaTag = styled(Box)`
 const BlocksToolbar = ({ disabled }) => {
   const modifiers = useModifiersStore();
   const blocks = useBlocksStore();
+  const editor = useSlate();
+
+  /**
+   * The modifier buttons are disabled when an image is selected.
+   */
+
+  const checkButtonDisabled = () => {
+    // Always disabled when the whole editor is disabled
+    if (disabled) {
+      return true;
+    }
+
+    if (!editor.selection) {
+      return false;
+    }
+
+    const selectedNode = editor.children[editor.selection.anchor.path[0]];
+
+    if (selectedNode.type === 'image') {
+      return true;
+    }
+
+    return false;
+  };
+
+  const isButtonDisabled = checkButtonDisabled();
 
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
@@ -626,10 +679,10 @@ const BlocksToolbar = ({ disabled }) => {
                 label={modifier.label}
                 isActive={modifier.checkIsActive()}
                 handleClick={modifier.handleToggle}
-                disabled={disabled}
+                disabled={isButtonDisabled}
               />
             ))}
-            <LinkButton disabled={disabled} />
+            <LinkButton disabled={isButtonDisabled} />
           </Flex>
         </Toolbar.ToggleGroup>
         <Separator />

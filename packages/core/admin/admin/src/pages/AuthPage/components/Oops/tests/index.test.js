@@ -57,6 +57,12 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         color: #32324d;
       }
 
+      .c26 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #4945ff;
+      }
+
       .c1 {
         padding-top: 24px;
         padding-right: 40px;
@@ -260,12 +266,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         outline: none;
       }
 
-      .c26 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #4945ff;
-      }
-
       .c25 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
@@ -467,7 +467,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
                   href="/auth/login"
                 >
                   <span
-                    class="c26"
+                    class="c8 c26"
                   >
                     Sign in
                   </span>

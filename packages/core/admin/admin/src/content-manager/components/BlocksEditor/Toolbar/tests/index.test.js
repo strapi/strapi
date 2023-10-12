@@ -48,13 +48,6 @@ const mixedInitialValue = [
   },
 ];
 
-const emptyInitialValue = [
-  {
-    type: 'paragraph',
-    children: [{ type: 'text', text: '' }],
-  },
-];
-
 const paragraphWithModifiersInitialValue = [
   {
     type: 'paragraph',
@@ -74,6 +67,31 @@ const paragraphWithModifiersInitialValue = [
         text: ' in a paragraph.',
       },
     ],
+  },
+];
+
+const imageInitialValue = [
+  {
+    type: 'image',
+    url: 'test.photos/200/300',
+    children: [{ text: '', type: 'text' }],
+    image: {
+      name: 'test.jpg',
+      alternativeText: 'test',
+      caption: null,
+      createdAt: '2021-08-31T14:00:00.000Z',
+      ext: '.jpg',
+      formats: {},
+      hash: 'test',
+      height: 300,
+      mime: 'image/jpeg',
+      previewUrl: null,
+      provider: 'local',
+      size: 100,
+      updatedAt: '2021-08-31T14:00:00.000Z',
+      url: '/uploads/test.jpg',
+      width: 200,
+    },
   },
 ];
 
@@ -558,6 +576,45 @@ describe('BlocksEditor toolbar', () => {
     ]);
   });
 
+  it('creates a new code block without empty lines before it when you select the option in a empty editor', async () => {
+    setup([
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: '' }],
+      },
+    ]);
+
+    // Convert selection to a code block
+    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+    await user.click(blocksDropdown);
+    await user.click(screen.getByRole('option', { name: 'Code' }));
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'code',
+        format: null,
+        level: null,
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+    ]);
+
+    expect(ReactEditor.focus).toHaveBeenCalledTimes(1);
+  });
+
   it('should disable the link button when multiple blocks are selected', async () => {
     setup(mixedInitialValue);
 
@@ -580,7 +637,12 @@ describe('BlocksEditor toolbar', () => {
   });
 
   it('creates a new list with empty content when you click on the button with an empty editor', async () => {
-    setup(emptyInitialValue);
+    setup([
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: '' }],
+      },
+    ]);
 
     // Get the unordered list button
     const unorderedListButton = screen.getByLabelText(/bulleted list/i);
@@ -685,5 +747,38 @@ describe('BlocksEditor toolbar', () => {
         ],
       },
     ]);
+  });
+  it('should disable the modifiers buttons when the selection is inside an image', async () => {
+    setup(imageInitialValue);
+
+    await select({
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
+    });
+
+    // The dropdown should show only one option selected which is the image
+    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+    expect(within(blocksDropdown).getByText(/image/i)).toBeInTheDocument();
+
+    const boldButton = screen.getByLabelText(/bold/i);
+    const italicButton = screen.getByLabelText(/italic/i);
+    expect(boldButton).toBeDisabled();
+    expect(italicButton).toBeDisabled();
+  });
+
+  it('should disable the link button when the selection is inside an image', async () => {
+    setup(imageInitialValue);
+
+    await select({
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
+    });
+
+    // The dropdown should show only one option selected which is the image
+    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+    expect(within(blocksDropdown).getByText(/image/i)).toBeInTheDocument();
+
+    const linkButton = screen.getByLabelText(/link/i);
+    expect(linkButton).toBeDisabled();
   });
 });
