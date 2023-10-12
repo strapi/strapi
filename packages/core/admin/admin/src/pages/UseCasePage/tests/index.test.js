@@ -14,8 +14,8 @@ jest.mock('../../../components/LocalesProvider/useLocalesProvider', () => () => 
   localeNames: { en: 'English' },
   messages: ['test'],
 }));
-jest.mock('../../../hooks/useConfigurations', () => ({
-  useConfigurations: () => ({
+jest.mock('../../../hooks/useConfiguration', () => ({
+  useConfiguration: () => ({
     logos: {
       auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
     },

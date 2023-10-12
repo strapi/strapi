@@ -1,10 +1,8 @@
-import React from 'react';
-
 import { fireEvent } from '@testing-library/react';
 import { render, waitFor, act, server } from '@tests/utils';
 import { rest } from 'msw';
 
-import NpsSurvey from '../index';
+import { NpsSurvey } from '../NpsSurvey';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -22,15 +20,16 @@ const localStorageMock = {
   clear: jest.fn(),
 };
 
-const originalLocalStorage = global.localStorage;
+const originalLocalStorage = window.localStorage;
 
 describe('NPS survey', () => {
   beforeAll(() => {
-    global.localStorage = localStorageMock;
+    // @ts-expect-error we're mocking.
+    window.localStorage = localStorageMock;
   });
 
   afterAll(() => {
-    global.localStorage = originalLocalStorage;
+    window.localStorage = originalLocalStorage;
   });
 
   afterEach(() => {
@@ -78,7 +77,7 @@ describe('NPS survey', () => {
   it('saves user response', async () => {
     localStorageMock.getItem.mockReturnValueOnce({ enabled: true });
 
-    const { getByRole, queryByText } = render(<NpsSurvey />);
+    const { getByRole, queryByText, getByText } = render(<NpsSurvey />);
 
     act(() => jest.runAllTimers());
 
@@ -90,7 +89,7 @@ describe('NPS survey', () => {
 
     await waitFor(() => expect(queryByText(/not at all likely/i)).not.toBeInTheDocument());
 
-    expect(queryByText(/thank you very much for your feedback!/i)).toBeInTheDocument();
+    expect(getByText(/thank you very much for your feedback!/i)).toBeInTheDocument();
 
     const storedData = JSON.parse(localStorageMock.setItem.mock.calls.at(-1).at(1));
     expect(storedData).toEqual({
@@ -114,7 +113,7 @@ describe('NPS survey', () => {
       })
     );
 
-    const { getByRole, queryByText, getByText } = render(<NpsSurvey />);
+    const { getByRole, queryByText, findByText } = render(<NpsSurvey />);
 
     act(() => jest.runAllTimers());
 
@@ -124,7 +123,7 @@ describe('NPS survey', () => {
 
     fireEvent.submit(getByRole('form'));
 
-    await waitFor(() => expect(queryByText(/not at all likely/i)).toBeInTheDocument());
+    await findByText(/not at all likely/i);
 
     expect(queryByText(/thank you very much for your feedback!/i)).not.toBeInTheDocument();
 
@@ -132,7 +131,7 @@ describe('NPS survey', () => {
       await jest.runAllTimersAsync();
     });
 
-    await waitFor(() => expect(getByText('An error occurred')).toBeInTheDocument());
+    await findByText('An error occurred');
 
     console.error = originalError;
   });
@@ -210,13 +209,13 @@ describe('NPS survey', () => {
     expect(render1.queryByText(/not at all likely/i)).not.toBeInTheDocument();
 
     // Survey should not show up during delay
-    jest.advanceTimersByTime(withinDelay - initialDate);
+    jest.advanceTimersByTime(withinDelay.getTime() - initialDate.getTime());
     const render2 = render(<NpsSurvey />);
     act(() => jest.runAllTimers());
     expect(render2.queryByText(/not at all likely/i)).not.toBeInTheDocument();
 
     // Survey should show up again after delay
-    jest.advanceTimersByTime(beyondDelay - withinDelay);
+    jest.advanceTimersByTime(beyondDelay.getTime() - withinDelay.getTime());
     const render3 = render(<NpsSurvey />);
     act(() => jest.runAllTimers());
     expect(render3.getByText(/not at all likely/i)).toBeInTheDocument();
@@ -242,13 +241,13 @@ describe('NPS survey', () => {
     expect(render1.queryByText(/not at all likely/i)).not.toBeInTheDocument();
 
     // Survey should not show up during delay
-    jest.advanceTimersByTime(withinDelay - initialDate);
+    jest.advanceTimersByTime(withinDelay.getTime() - initialDate.getTime());
     const render2 = render(<NpsSurvey />);
     act(() => jest.runAllTimers());
     expect(render2.queryByText(/not at all likely/i)).not.toBeInTheDocument();
 
     // Survey should show up again after delay
-    jest.advanceTimersByTime(beyondDelay - withinDelay);
+    jest.advanceTimersByTime(beyondDelay.getTime() - withinDelay.getTime());
     const render3 = render(<NpsSurvey />);
     act(() => jest.runAllTimers());
     expect(render3.getByText(/not at all likely/i)).toBeInTheDocument();
@@ -276,13 +275,13 @@ describe('NPS survey', () => {
     expect(render1.queryByText(/not at all likely/i)).not.toBeInTheDocument();
 
     // Survey should not show up during delay
-    jest.advanceTimersByTime(withinDelay - initialDate);
+    jest.advanceTimersByTime(withinDelay.getTime() - initialDate.getTime());
     const render2 = render(<NpsSurvey />);
     act(() => jest.runAllTimers());
     expect(render2.queryByText(/not at all likely/i)).not.toBeInTheDocument();
 
     // Survey should show up again after delay
-    jest.advanceTimersByTime(beyondDelay - withinDelay);
+    jest.advanceTimersByTime(beyondDelay.getTime() - withinDelay.getTime());
     const render3 = render(<NpsSurvey />);
     act(() => jest.runAllTimers());
     expect(render3.getByText(/not at all likely/i)).toBeInTheDocument();
