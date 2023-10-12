@@ -1,12 +1,7 @@
 {
   "name": "create-strapi-app",
-  "version": "4.14.3",
+  "version": "4.14.4",
   "description": "Generate a new Strapi application.",
-  "dependencies": {
-    "@strapi/generate-new": "4.14.3",
-    "commander": "8.3.0",
-    "inquirer": "8.2.5"
-  },
   "keywords": [
     "create-strapi-app",
     "create",
@@ -43,14 +38,19 @@
   "scripts": {
     "build": "run -T tsc",
     "build:ts": "run -T tsc",
-    "watch": "run -T tsc -w --preserveWatchOutput",
     "clean": "run -T rimraf ./dist",
+    "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
-    "lint": "run -T eslint ."
+    "watch": "run -T tsc -w --preserveWatchOutput"
+  },
+  "dependencies": {
+    "@strapi/generate-new": "4.14.4",
+    "commander": "8.3.0",
+    "inquirer": "8.2.5"
   },
   "devDependencies": {
-    "eslint-config-custom": "4.14.3",
-    "tsconfig": "4.14.3"
+    "eslint-config-custom": "4.14.4",
+    "tsconfig": "4.14.4"
   },
   "engines": {
     "node": ">=16.0.0 <=20.x.x",

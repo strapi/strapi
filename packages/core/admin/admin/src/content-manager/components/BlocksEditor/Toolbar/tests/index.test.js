@@ -32,7 +32,10 @@ const mixedInitialValue = [
   {
     type: 'heading',
     level: 1,
-    children: [{ type: 'text', text: 'A heading one' }],
+    children: [
+      { type: 'text', text: 'A heading one' },
+      { type: 'text', text: ' with modifiers', bold: true },
+    ],
   },
   {
     type: 'paragraph',
@@ -432,5 +435,157 @@ describe('BlocksEditor toolbar', () => {
     // The dropdown should show only one option selected which is the block content in the first row
     const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
     expect(within(blocksDropdown).getByText(/heading 1/i)).toBeInTheDocument();
+  });
+
+  it('splits the parent list when converting a list item to another type', async () => {
+    setup([
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'First list item',
+              },
+            ],
+          },
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'Second list item',
+              },
+            ],
+          },
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'Third list item',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    // Select the item in the middle of the list
+    await select({
+      anchor: { path: [0, 1, 0], offset: 0 },
+      focus: { path: [0, 1, 0], offset: 0 },
+    });
+
+    // Convert it to a code block
+    const selectDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+    await user.click(selectDropdown);
+    await user.click(screen.getByRole('option', { name: 'Code' }));
+
+    // The list should have been split in two
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'First list item',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        type: 'code',
+        children: [
+          {
+            type: 'text',
+            text: 'Second list item',
+          },
+        ],
+      },
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'Third list item',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('creates a new code block without empty lines before it when you select the option in a empty editor', async () => {
+    setup([
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: '' }],
+      },
+    ]);
+
+    // Convert selection to a code block
+    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+    await user.click(blocksDropdown);
+    await user.click(screen.getByRole('option', { name: 'Code' }));
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'code',
+        format: null,
+        level: null,
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+    ]);
+
+    expect(ReactEditor.focus).toHaveBeenCalledTimes(1);
+  });
+
+  it('should disable the link button when multiple blocks are selected', async () => {
+    setup(mixedInitialValue);
+
+    // Set the selection to cover the first and second
+    await select({
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [1, 0], offset: 0 },
+    });
+
+    const linkButton = screen.getByLabelText(/link/i);
+    expect(linkButton).toBeDisabled();
+
+    // Set the selection to a range inside the same block node
+    await select({
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 1], offset: 2 },
+    });
+
+    expect(linkButton).not.toBeDisabled();
   });
 });

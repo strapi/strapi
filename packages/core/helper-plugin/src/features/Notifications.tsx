@@ -133,7 +133,7 @@ const Notification = ({
   },
   onClose,
   timeout = 2500,
-  title = 'success',
+  title,
   type,
 }: NotificationProps) => {
   const { formatMessage } = useIntl();

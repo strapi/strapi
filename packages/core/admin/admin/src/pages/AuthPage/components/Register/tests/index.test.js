@@ -1,17 +1,10 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { TrackingProvider, useNotification, useQuery } from '@strapi/helper-plugin';
-import { fireEvent, render, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { createMemoryHistory } from 'history';
-import { rest } from 'msw';
-import { setupServer } from 'msw/node';
-import { IntlProvider } from 'react-intl';
-import { Router } from 'react-router-dom';
+import { fireEvent } from '@testing-library/react';
+import { render, waitFor } from '@tests/utils';
 
-import Register from '..';
 import { FORMS } from '../../../constants';
+import Register from '../index';
 
 const PASSWORD_VALID = '!Eight_8_characters!';
 
@@ -22,84 +15,24 @@ jest.mock('../../../../../hooks/useConfigurations', () => ({
     },
   }),
 }));
+
 jest.mock('../../../../../components/LocalesProvider/useLocalesProvider');
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useQuery: jest.fn().mockReturnValue({
-    get: jest.fn(),
-  }),
-  useNotification: jest.fn().mockReturnValue(jest.fn()),
-}));
+describe('AUTH | Register', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-const server = setupServer(
-  rest.get('*/registration-info', async (req, res, ctx) => {
-    const token = req.url.searchParams.get('registrationToken');
-
-    if (token === 'error') {
-      return res(ctx.status(401), ctx.json({}));
-    }
-
-    return res(
-      ctx.json({
-        data: {
-          firstname: 'Token firstname',
-          lastname: 'Token lastname',
-          email: 'test+register-token@strapi.io',
-        },
-      })
-    );
-  })
-);
-
-const setup = (props) => {
-  const user = userEvent.setup();
-
-  return {
-    ...render(
+  it('Render form elements', () => {
+    const { getByText, getByRole, getByLabelText } = render(
       <Register
         authType="register-admin"
         fieldsToDisable={[]}
         noSignin
         onSubmit={() => {}}
         schema={FORMS['register-admin'].schema}
-        {...props}
-      />,
-      {
-        wrapper({ children }) {
-          const history = createMemoryHistory();
-
-          return (
-            <IntlProvider locale="en" messages={{}}>
-              <TrackingProvider>
-                <ThemeProvider theme={lightTheme}>
-                  <Router history={history}>{children}</Router>
-                </ThemeProvider>
-              </TrackingProvider>
-            </IntlProvider>
-          );
-        },
-      }
-    ),
-    user,
-  };
-};
-
-describe('ADMIN | PAGES | AUTH | Register Admin', () => {
-  beforeAll(() => {
-    server.listen();
-  });
-
-  afterAll(() => {
-    server.close();
-  });
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('Render form elements', () => {
-    const { getByText, getByRole, getByLabelText } = setup();
+      />
+    );
 
     const labels = ['Firstname', 'Lastname', 'Email', 'Password', 'Confirm Password'];
 
@@ -119,7 +52,15 @@ describe('ADMIN | PAGES | AUTH | Register Admin', () => {
 
   it('Serialize the form and normalize input values', async () => {
     const spy = jest.fn();
-    const { getByRole, getByLabelText, user } = setup({ onSubmit: spy });
+    const { getByRole, getByLabelText, user } = render(
+      <Register
+        authType="register-admin"
+        fieldsToDisable={[]}
+        noSignin
+        onSubmit={spy}
+        schema={FORMS['register-admin'].schema}
+      />
+    );
 
     await user.type(getByLabelText(/Firstname/i), ' First name ');
     await user.type(getByLabelText(/Lastname/i), ' Last name ');
@@ -147,7 +88,15 @@ describe('ADMIN | PAGES | AUTH | Register Admin', () => {
 
   it('Validates optional Lastname value to be null', async () => {
     const spy = jest.fn();
-    const { getByRole, getByLabelText, user } = setup({ onSubmit: spy });
+    const { getByRole, getByLabelText, user } = render(
+      <Register
+        authType="register-admin"
+        fieldsToDisable={[]}
+        noSignin
+        onSubmit={spy}
+        schema={FORMS['register-admin'].schema}
+      />
+    );
 
     await user.type(getByLabelText(/Firstname/i), 'First name');
     await user.type(getByLabelText(/Email/i), 'test@strapi.io');
@@ -174,7 +123,15 @@ describe('ADMIN | PAGES | AUTH | Register Admin', () => {
 
   it('Validates optional Lastname value to be empty space', async () => {
     const spy = jest.fn();
-    const { getByRole, getByLabelText, user } = setup({ onSubmit: spy });
+    const { getByRole, getByLabelText, user } = render(
+      <Register
+        authType="register-admin"
+        fieldsToDisable={[]}
+        noSignin
+        onSubmit={spy}
+        schema={FORMS['register-admin'].schema}
+      />
+    );
 
     await user.type(getByLabelText(/Firstname/i), 'First name');
     await user.type(getByLabelText(/Lastname/i), ' ');
@@ -201,27 +158,36 @@ describe('ADMIN | PAGES | AUTH | Register Admin', () => {
   });
 
   it('Disable fields', () => {
-    const { getByLabelText } = setup({
-      fieldsToDisable: ['email', 'firstname'],
-    });
+    const { getByLabelText } = render(
+      <Register
+        authType="register-admin"
+        fieldsToDisable={['email', 'firstname']}
+        noSignin
+        onSubmit={() => {}}
+        schema={FORMS['register-admin'].schema}
+      />
+    );
 
     expect(getByLabelText(/Firstname/i)).not.toHaveAttribute('disabled');
     expect(getByLabelText(/Email/i)).toHaveAttribute('disabled');
   });
 
   it('Shows an error notification if the token does not exist', async () => {
-    const query = useQuery();
-    const toggleNotification = useNotification();
+    const { getByText } = render(
+      <Register
+        authType="register-admin"
+        fieldsToDisable={[]}
+        noSignin
+        onSubmit={() => {}}
+        schema={FORMS['register-admin'].schema}
+      />,
+      {
+        initialEntries: ['/?registrationToken=error'],
+      }
+    );
 
-    query.get.mockReturnValue('error');
-
-    setup();
-
-    await waitFor(() => expect(toggleNotification).toHaveBeenCalled());
-
-    expect(toggleNotification).toHaveBeenCalledWith({
-      type: 'warning',
-      message: expect.any(String),
-    });
+    await waitFor(() =>
+      expect(getByText('Request failed with status code 500')).toBeInTheDocument()
+    );
   });
 });

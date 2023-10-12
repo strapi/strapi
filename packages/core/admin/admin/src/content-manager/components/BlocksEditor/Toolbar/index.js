@@ -151,11 +151,44 @@ const toggleBlock = (editor, value) => {
   };
 
   if (editor.selection) {
+    // If the selection is inside a list, split the list so that the modified block is outside of it
+    Transforms.unwrapNodes(editor, {
+      match: (node) => node.type === 'list',
+      split: true,
+    });
+
     // When there is a selection, update the existing block in the tree
     Transforms.setNodes(editor, blockProperties);
   } else {
-    // Otherwise, add a new block to the tree
-    Transforms.insertNodes(editor, { ...blockProperties, children: [{ type: 'text', text: '' }] });
+    /**
+     * When there is no selection, we want to insert a new block just after
+     * the last node inserted and prevent the code to add an empty paragraph
+     * between them.
+     */
+    const [, lastNodePath] = Editor.last(editor, []);
+    const [parentNode] = Editor.parent(editor, lastNodePath, {
+      // Makes sure we get a block node, not an inline node
+      match: (node) => node.type !== 'text',
+    });
+    Transforms.removeNodes(editor, {
+      void: true,
+      hanging: true,
+      at: {
+        anchor: { path: lastNodePath, offset: 0 },
+        focus: { path: lastNodePath, offset: 0 },
+      },
+    });
+    Transforms.insertNodes(
+      editor,
+      {
+        ...blockProperties,
+        children: parentNode.children,
+      },
+      {
+        at: [lastNodePath[0]],
+        select: true,
+      }
+    );
   }
 
   // When the select is clicked it blurs the editor, restore the focus to the editor
@@ -199,6 +232,8 @@ const ImageDialog = ({ handleClose }) => {
   const MediaLibraryDialog = components['media-library'];
 
   const insertImages = (images) => {
+    // Image node created using select or existing selection node needs to be deleted before adding new image nodes
+    Transforms.removeNodes(editor);
     images.forEach((img) => {
       const image = { type: 'image', image: img, children: [{ type: 'text', text: '' }] };
       Transforms.insertNodes(editor, image);
@@ -290,10 +325,7 @@ const BlocksDropdown = ({ disabled }) => {
    * @param {string} optionKey - key of the heading selected
    */
   const selectOption = (optionKey) => {
-    if (optionKey === 'image') {
-      // Image node created using select or existing selection node needs to be deleted before adding new image nodes
-      Transforms.removeNodes(editor);
-    } else if (['list-ordered', 'list-unordered'].includes(optionKey)) {
+    if (['list-ordered', 'list-unordered'].includes(optionKey)) {
       // retrieve the list format
       const listFormat = blocks[optionKey].value.format;
 
@@ -302,7 +334,7 @@ const BlocksDropdown = ({ disabled }) => {
 
       // toggle the list
       toggleList(editor, isActive, listFormat);
-    } else {
+    } else if (optionKey !== 'image') {
       toggleBlock(editor, blocks[optionKey].value);
     }
 
@@ -507,6 +539,31 @@ const LinkButton = ({ disabled }) => {
     return Boolean(match);
   };
 
+  const isLinkDisabled = () => {
+    // Always disabled when the whole editor is disabled
+    if (disabled) {
+      return true;
+    }
+
+    // Always enabled when there's no selection
+    if (!editor.selection) {
+      return false;
+    }
+
+    // Get the block node closest to the anchor and focus
+    const anchorNodeEntry = Editor.above(editor, {
+      at: editor.selection.anchor,
+      match: (node) => node.type !== 'text',
+    });
+    const focusNodeEntry = Editor.above(editor, {
+      at: editor.selection.focus,
+      match: (node) => node.type !== 'text',
+    });
+
+    // Disabled if the anchor and focus are not in the same block
+    return anchorNodeEntry[0] !== focusNodeEntry[0];
+  };
+
   const addLink = () => {
     // We insert an empty anchor, so we split the DOM to have a element we can use as reference for the popover
     insertLink(editor, { url: '' });
@@ -522,7 +579,7 @@ const LinkButton = ({ disabled }) => {
       }}
       isActive={isLinkActive()}
       handleClick={addLink}
-      disabled={disabled}
+      disabled={isLinkDisabled()}
     />
   );
 };
