@@ -1,7 +1,4 @@
-import React from 'react';
-
 import { Box } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 const StyledBox = styled(Box)`
@@ -13,7 +10,7 @@ const StyledBox = styled(Box)`
     content: '';
     width: ${4 / 16}rem;
     height: ${12 / 16}rem;
-    background: ${({ theme, color }) => theme.colors[color]};
+    background: ${({ theme, color }) => theme.colors[color!]};
     display: block;
   }
 `;
@@ -24,11 +21,15 @@ const Svg = styled.svg`
   transform: translate(-0.5px, -1px);
 
   * {
-    fill: ${({ theme, color }) => theme.colors[color]};
+    fill: ${({ theme, color }) => theme.colors[color!]};
   }
 `;
 
-const Curve = (props) => (
+interface CurveProps {
+  color: string;
+}
+
+export const Curve = (props: CurveProps) => (
   <StyledBox>
     <Svg
       width="20"
@@ -46,9 +47,3 @@ const Curve = (props) => (
     </Svg>
   </StyledBox>
 );
-
-Curve.propTypes = {
-  color: PropTypes.string.isRequired,
-};
-
-export default Curve;

@@ -1,4 +1,4 @@
-const translations = require('../en.json');
+import translations from '../en.json';
 
 describe('translations', () => {
   describe('plural syntax', () => {
@@ -11,7 +11,7 @@ describe('translations', () => {
         // Fail only if a PAIR of .singular/.plural keys is found
         if (keyParts.length > 1 && lastKeyPart === 'singular') {
           keyParts.push('plural');
-          const pluralKey = keyParts.join('.');
+          const pluralKey = keyParts.join('.') as keyof typeof translations;
 
           expect(translations[pluralKey]).toBeUndefined();
         }
