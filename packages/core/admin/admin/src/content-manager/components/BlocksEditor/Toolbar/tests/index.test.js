@@ -48,6 +48,31 @@ const mixedInitialValue = [
   },
 ];
 
+const imageInitialValue = [
+  {
+    type: 'image',
+    url: 'test.photos/200/300',
+    children: [{ text: '', type: 'text' }],
+    image: {
+      name: 'test.jpg',
+      alternativeText: 'test',
+      caption: null,
+      createdAt: '2021-08-31T14:00:00.000Z',
+      ext: '.jpg',
+      formats: {},
+      hash: 'test',
+      height: 300,
+      mime: 'image/jpeg',
+      previewUrl: null,
+      provider: 'local',
+      size: 100,
+      updatedAt: '2021-08-31T14:00:00.000Z',
+      url: '/uploads/test.jpg',
+      width: 200,
+    },
+  },
+];
+
 const user = userEvent.setup();
 
 // Create editor outside of the component to have direct access to it from the tests
@@ -551,30 +576,7 @@ describe('BlocksEditor toolbar', () => {
   });
 
   it('should disable the modifiers buttons when the selection is inside an image', async () => {
-    setup([
-      {
-        type: 'image',
-        url: 'test.photos/200/300',
-        children: [{ text: '', type: 'text' }],
-        image: {
-          name: 'test.jpg',
-          alternativeText: 'test',
-          caption: null,
-          createdAt: '2021-08-31T14:00:00.000Z',
-          ext: '.jpg',
-          formats: {},
-          hash: 'test',
-          height: 300,
-          mime: 'image/jpeg',
-          previewUrl: null,
-          provider: 'local',
-          size: 100,
-          updatedAt: '2021-08-31T14:00:00.000Z',
-          url: '/uploads/test.jpg',
-          width: 200,
-        },
-      },
-    ]);
+    setup(imageInitialValue);
 
     await select({
       anchor: { path: [0, 0], offset: 0 },
@@ -589,5 +591,21 @@ describe('BlocksEditor toolbar', () => {
     const italicButton = screen.getByLabelText(/italic/i);
     expect(boldButton).toBeDisabled();
     expect(italicButton).toBeDisabled();
+  });
+
+  it('should disable the link button when the selection is inside an image', async () => {
+    setup(imageInitialValue);
+
+    await select({
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
+    });
+
+    // The dropdown should show only one option selected which is the image
+    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+    expect(within(blocksDropdown).getByText(/image/i)).toBeInTheDocument();
+
+    const linkButton = screen.getByLabelText(/link/i);
+    expect(linkButton).toBeDisabled();
   });
 });

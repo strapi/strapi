@@ -579,7 +579,7 @@ const BlocksToolbar = ({ disabled }) => {
    * The modifier buttons are disabled when an image is selected.
    */
 
-  const isToolbarButtonDisabled = () => {
+  const checkButtonDisabled = () => {
     // Always disabled when the whole editor is disabled
     if (disabled) {
       return true;
@@ -598,6 +598,8 @@ const BlocksToolbar = ({ disabled }) => {
     return false;
   };
 
+  const isButtonDisabled = checkButtonDisabled();
+
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
       {/* Remove after the RTE Blocks Beta release (paddingRight and width) */}
@@ -613,10 +615,10 @@ const BlocksToolbar = ({ disabled }) => {
                 label={modifier.label}
                 isActive={modifier.checkIsActive()}
                 handleClick={modifier.handleToggle}
-                disabled={isToolbarButtonDisabled()}
+                disabled={isButtonDisabled}
               />
             ))}
-            <LinkButton disabled={disabled} />
+            <LinkButton disabled={isButtonDisabled} />
           </Flex>
         </Toolbar.ToggleGroup>
         <Separator />
