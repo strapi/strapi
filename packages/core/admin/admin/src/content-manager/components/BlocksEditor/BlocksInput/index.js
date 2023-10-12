@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import PropTypes from 'prop-types';
-import { Editable, useSlate, ReactEditor } from 'slate-react';
+import { Editable, useSlate } from 'slate-react';
 import { useTheme } from 'styled-components';
 
 import { useBlocksStore } from '../hooks/useBlocksStore';
@@ -88,23 +88,16 @@ const BlocksInput = ({ disabled, placeholder }) => {
    *  We are overriding it to check if the selection is not fully within the visible area of the editor,
    *  we use scrollBy one line to the bottom
    */
-  const handleScrollSelectionIntoView = () => {
-    const domRange = ReactEditor.toDOMRange(editor, editor.selection);
+  const handleScrollSelectionIntoView = (_, domRange) => {
     const domRect = domRange.getBoundingClientRect();
     const slateInput = document.getElementById('slate-input');
     const editorRect = slateInput.parentElement.getBoundingClientRect(); // editorWrapper with overflow:auto
 
     // Check if the selection is not fully within the visible area of the editor
     if (domRect.top < editorRect.top || domRect.bottom > editorRect.bottom) {
-      const lastLineHeightDiff = domRect.top - editorRect.bottom;
-
-      // If the selection is half visible then calculate diff to add it to the scroll height position
-      const extraHeightToScrollBy =
-        lastLineHeightDiff < 28 && lastLineHeightDiff > 0 ? lastLineHeightDiff : 0;
-
       // Scroll by one line to the bottom
       slateInput.parentElement.scrollBy({
-        top: 28 + extraHeightToScrollBy, // 20px is the line-height + 8px line gap
+        top: 28, // 20px is the line-height + 8px line gap
         behavior: 'smooth',
       });
     }
