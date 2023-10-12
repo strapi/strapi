@@ -18,6 +18,9 @@ declare global {
         REVIEW_WORKFLOWS: 'review-workflows';
         isEnabled: (featureName?: string) => boolean;
       };
+      flags: {
+        nps?: boolean;
+      };
       projectType: 'Community' | 'Enterprise';
       telemetryDisabled: boolean;
     };
