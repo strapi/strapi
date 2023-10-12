@@ -175,12 +175,14 @@ The goal of this convention is to help us generate changelogs that can be commun
 
 #### Type
 
-The types are based on our GitHub label:
+The types are based on our GitHub label, here are a subset:
 
 - `fix` – When fixing an issue.
 - `chore` – When doing some cleanup, working on tooling, some refactoring. (usually reserved for **internal** work)
 - `doc` – When writing documentation.
 - `feat` – When working on a feature.
+
+You can see the complete list [here](https://github.com/strapi/strapi/blob/1cb6f95889ccaad897759cfa14d2804adeaeb7ee/.commitlintrc.ts#L11).
 
 #### Subject
 
