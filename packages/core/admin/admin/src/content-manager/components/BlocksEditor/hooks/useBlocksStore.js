@@ -1,6 +1,17 @@
 import * as React from 'react';
 
-import { Box, Typography, BaseLink } from '@strapi/design-system';
+import {
+  Box,
+  Typography,
+  BaseLink,
+  Popover,
+  IconButton,
+  Field,
+  FieldLabel,
+  FieldInput,
+  Flex,
+  Button,
+} from '@strapi/design-system';
 import {
   Code,
   Quote,
@@ -12,10 +23,23 @@ import {
   HeadingFour,
   HeadingFive,
   HeadingSix,
+  Trash,
+  Pencil,
+  BulletList,
+  NumberList,
 } from '@strapi/icons';
 import PropTypes from 'prop-types';
-import { Editor, Path, Transforms } from 'slate';
+import { useIntl } from 'react-intl';
+import { Editor, Path, Transforms, Range } from 'slate';
+import { useSlate, ReactEditor } from 'slate-react';
 import styled, { css } from 'styled-components';
+
+import { composeRefs } from '../../../utils';
+import { editLink, removeLink } from '../utils/links';
+
+const StyledBaseLink = styled(BaseLink)`
+  text-decoration: none;
+`;
 
 const H1 = styled(Typography).attrs({ as: 'h1' })`
   font-size: ${42 / 16}rem;
@@ -47,53 +71,28 @@ const H6 = styled(Typography).attrs({ as: 'h6' })`
   line-height: ${({ theme }) => theme.lineHeights[1]};
 `;
 
-const Heading = ({ attributes, children, element }) => {
-  switch (element.level) {
-    case 1:
-      return <H1 {...attributes}>{children}</H1>;
-    case 2:
-      return <H2 {...attributes}>{children}</H2>;
-    case 3:
-      return <H3 {...attributes}>{children}</H3>;
-    case 4:
-      return <H4 {...attributes}>{children}</H4>;
-    case 5:
-      return <H5 {...attributes}>{children}</H5>;
-    case 6:
-      return <H6 {...attributes}>{children}</H6>;
-    default: // do nothing
-      return null;
-  }
-};
-
-Heading.propTypes = {
-  attributes: PropTypes.object.isRequired,
-  children: PropTypes.node.isRequired,
-  element: PropTypes.shape({
-    level: PropTypes.oneOf([1, 2, 3, 4, 5, 6]).isRequired,
-  }).isRequired,
-};
-
 const CodeBlock = styled.pre.attrs({ role: 'code' })`
   border-radius: ${({ theme }) => theme.borderRadius};
-  background-color: #32324d; // since the color is same between the themes
+  background-color: ${({ theme }) => theme.colors.neutral100};
   max-width: 100%;
   overflow: auto;
-  padding: ${({ theme }) => theme.spaces[2]};
+  padding: ${({ theme }) => `${theme.spaces[3]} ${theme.spaces[4]}`};
+  flex-shrink: 0;
   & > code {
-    color: #839496; // TODO: to confirm with design and get theme color
+    font-family: 'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas,
+      monospace;
+    color: ${({ theme }) => theme.colors.neutral800};
     overflow: auto;
     max-width: 100%;
-    padding: ${({ theme }) => theme.spaces[2]};
   }
 `;
 
 const Blockquote = styled.blockquote.attrs({ role: 'blockquote' })`
-  margin: ${({ theme }) => `${theme.spaces[6]} 0`};
+  margin: ${({ theme }) => `${theme.spaces[4]} 0`};
   font-weight: ${({ theme }) => theme.fontWeights.regular};
-  border-left: ${({ theme }) => `${theme.spaces[1]} solid ${theme.colors.neutral150}`};
-  font-style: italic;
+  border-left: ${({ theme }) => `${theme.spaces[1]} solid ${theme.colors.neutral200}`};
   padding: ${({ theme }) => theme.spaces[2]} ${({ theme }) => theme.spaces[5]};
+  color: ${({ theme }) => theme.colors.neutral600};
 `;
 
 const listStyle = css`
@@ -134,10 +133,91 @@ List.propTypes = {
   }).isRequired,
 };
 
+/**
+ * @param {import('slate').Editor} editor
+ * @param {Path} currentListPath
+ */
+const replaceListWithEmptyBlock = (editor, currentListPath) => {
+  // Delete the empty list
+  Transforms.removeNodes(editor, { at: currentListPath });
+
+  if (currentListPath[0] === 0) {
+    // If the list was the only (or first) block element then insert empty paragraph as editor needs default value
+    Transforms.insertNodes(
+      editor,
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: '' }],
+      },
+      { at: currentListPath }
+    );
+    Transforms.select(editor, currentListPath);
+  }
+};
+
+/**
+ * Common handler for the backspace event on ordered and unordered lists
+ * @param {import('slate').Editor} editor
+ * @param {Event} event
+ */
+const handleBackspaceKeyOnList = (editor, event) => {
+  const [currentListItem, currentListItemPath] = Editor.parent(editor, editor.selection.anchor);
+  const [currentList, currentListPath] = Editor.parent(editor, currentListItemPath);
+  const isListEmpty = currentList.children.length === 1 && currentListItem.children[0].text === '';
+
+  if (isListEmpty) {
+    event.preventDefault();
+    replaceListWithEmptyBlock(editor, currentListPath);
+  }
+};
+
+/**
+ * Common handler for the enter key on ordered and unordered lists
+ * @param {import('slate').Editor} editor
+ */
+const handleEnterKeyOnList = (editor) => {
+  const [currentListItem, currentListItemPath] = Editor.above(editor, {
+    matchNode: (node) => node.type === 'list-item',
+  });
+  const [currentList, currentListPath] = Editor.parent(editor, currentListItemPath);
+  const isListEmpty = currentList.children.length === 1 && currentListItem.children[0].text === '';
+  const isListItemEmpty =
+    currentListItem.children.length === 1 && currentListItem.children[0].text === '';
+
+  if (isListEmpty) {
+    replaceListWithEmptyBlock(editor, currentListPath);
+  } else if (isListItemEmpty) {
+    // Delete the empty list item
+    Transforms.removeNodes(editor, { at: currentListItemPath });
+
+    // Create a new paragraph below the parent list
+    const listNodeEntry = Editor.above(editor, { match: (n) => n.type === 'list' });
+    const createdParagraphPath = Path.next(listNodeEntry[1]);
+    Transforms.insertNodes(
+      editor,
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: '' }],
+      },
+      { at: createdParagraphPath }
+    );
+
+    // Move the selection to the newly created paragraph
+    Transforms.select(editor, createdParagraphPath);
+  } else {
+    // Otherwise just create a new list item by splitting the current one
+    Transforms.splitNodes(editor, { always: true });
+  }
+};
+
+// The max-height is decided with the design team, the 56px is the height of the toolbar
 const Img = styled.img`
+  max-height: calc(512px - 56px);
   max-width: 100%;
+  object-fit: contain;
 `;
 
+// Added a background color to the image wrapper to make it easier to recognize the image block
 const Image = ({ attributes, children, element }) => {
   if (!element.image) return null;
   const { url, alternativeText, width, height } = element.image;
@@ -145,9 +225,9 @@ const Image = ({ attributes, children, element }) => {
   return (
     <Box {...attributes}>
       {children}
-      <Box contentEditable={false}>
+      <Flex background="neutral100" contentEditable={false} justifyContent="center">
         <Img src={url} alt={alternativeText} width={width} height={height} />
-      </Box>
+      </Flex>
     </Box>
   );
 };
@@ -165,40 +245,158 @@ Image.propTypes = {
   }).isRequired,
 };
 
-/**
- * Common handler for the enter key on ordered and unordered lists
- * @param {import('slate').Editor} editor
- */
-const handleEnterKeyOnList = (editor) => {
-  // Check if the selected list item is empty
-  const [currentListItem, currentListItemPath] = Editor.above(editor, {
-    matchNode: (node) => node.type === 'list-item',
-  });
-  const isEmptyListItem =
-    currentListItem.children.length === 1 && currentListItem.children[0].text === '';
+const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRef) => {
+  const { formatMessage } = useIntl();
+  const editor = useSlate();
+  const path = ReactEditor.findPath(editor, element);
+  const [popoverOpen, setPopoverOpen] = React.useState(
+    editor.lastInsertedLinkPath ? Path.equals(path, editor.lastInsertedLinkPath) : false
+  );
+  const [isEditing, setIsEditing] = React.useState(element.url === '');
+  const linkRef = React.useRef(null);
+  const elementText = element.children.map((child) => child.text).join('');
+  const [linkText, setLinkText] = React.useState(elementText);
+  const [linkUrl, setLinkUrl] = React.useState(element.url);
 
-  if (isEmptyListItem) {
-    // Delete the empty list item
-    Transforms.removeNodes(editor, { at: currentListItemPath });
+  const handleOpenEditPopover = (e) => {
+    e.preventDefault();
+    setPopoverOpen(true);
+  };
 
-    // And create a new paragraph below the parent list
-    const listNodeEntry = Editor.above(editor, { match: (n) => n.type === 'list' });
-    const createdParagraphPath = Path.next(listNodeEntry[1]);
-    Transforms.insertNodes(
-      editor,
-      {
-        type: 'paragraph',
-        children: [{ type: 'text', text: '' }],
-      },
-      { at: createdParagraphPath }
-    );
+  const handleSave = (e) => {
+    e.stopPropagation();
 
-    // Move selection to the newly created paragraph
-    Transforms.select(editor, createdParagraphPath);
-  } else {
-    // Otherwise just create a new list item by splitting the current one
-    Transforms.splitNodes(editor, { always: true });
-  }
+    // If the selection is collapsed, we select the parent node because we want all the link to be replaced
+    if (Range.isCollapsed(editor.selection)) {
+      const [, parentPath] = Editor.parent(editor, editor.selection.focus?.path);
+      Transforms.select(editor, parentPath);
+    }
+
+    editLink(editor, { url: linkUrl, text: linkText });
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+
+    if (element.url === '') {
+      removeLink(editor);
+    }
+  };
+
+  const handleDismiss = () => {
+    setPopoverOpen(false);
+
+    if (element.url === '') {
+      removeLink(editor);
+    }
+
+    ReactEditor.focus(editor);
+  };
+
+  const composedRefs = composeRefs(linkRef, forwardedRef);
+
+  return (
+    <>
+      <StyledBaseLink
+        {...attributes}
+        ref={composedRefs}
+        href={element.url}
+        onClick={handleOpenEditPopover}
+        color="primary600"
+      >
+        {children}
+      </StyledBaseLink>
+      {popoverOpen && (
+        <Popover source={linkRef} onDismiss={handleDismiss} padding={4} contentEditable={false}>
+          {isEditing ? (
+            <Flex as="form" onSubmit={handleSave} direction="column" gap={4}>
+              <Field width="300px">
+                <FieldLabel>
+                  {formatMessage({
+                    id: 'components.Blocks.popover.text',
+                    defaultMessage: 'Text',
+                  })}
+                </FieldLabel>
+                <FieldInput
+                  name="text"
+                  placeholder={formatMessage({
+                    id: 'components.Blocks.popover.text.placeholder',
+                    defaultMessage: 'Enter link text',
+                  })}
+                  value={linkText}
+                  onChange={(e) => setLinkText(e.target.value)}
+                />
+              </Field>
+              <Field width="300px">
+                <FieldLabel>
+                  {formatMessage({
+                    id: 'components.Blocks.popover.link',
+                    defaultMessage: 'Link',
+                  })}
+                </FieldLabel>
+                <FieldInput
+                  name="url"
+                  placeholder="https://strapi.io"
+                  value={linkUrl}
+                  onChange={(e) => setLinkUrl(e.target.value)}
+                />
+              </Field>
+              <Flex justifyContent="end" width="100%" gap={2}>
+                <Button variant="tertiary" onClick={handleCancel}>
+                  {formatMessage({
+                    id: 'components.Blocks.popover.cancel',
+                    defaultMessage: 'Cancel',
+                  })}
+                </Button>
+                <Button type="submit" disabled={!linkText || !linkUrl}>
+                  {formatMessage({
+                    id: 'components.Blocks.popover.save',
+                    defaultMessage: 'Save',
+                  })}
+                </Button>
+              </Flex>
+            </Flex>
+          ) : (
+            <Flex direction="column" gap={4} alignItems="start" width="400px">
+              <Typography>{elementText}</Typography>
+              <Typography>
+                <StyledBaseLink href={element.url} target="_blank" color="primary600">
+                  {element.url}
+                </StyledBaseLink>
+              </Typography>
+              <Flex justifyContent="end" width="100%" gap={2}>
+                <IconButton
+                  icon={<Trash />}
+                  size="L"
+                  variant="danger"
+                  onClick={() => removeLink(editor)}
+                  label={formatMessage({
+                    id: 'components.Blocks.popover.delete',
+                    defaultMessage: 'Delete',
+                  })}
+                />
+                <IconButton
+                  icon={<Pencil />}
+                  size="L"
+                  onClick={() => setIsEditing(true)}
+                  label={formatMessage({
+                    id: 'components.Blocks.popover.edit',
+                    defaultMessage: 'Edit',
+                  })}
+                />
+              </Flex>
+            </Flex>
+          )}
+        </Popover>
+      )}
+    </>
+  );
+});
+
+Link.propTypes = {
+  element: PropTypes.object.isRequired,
+  children: PropTypes.node.isRequired,
 };
 
 /**
@@ -213,6 +411,7 @@ const handleEnterKeyOnList = (editor) => {
  *     matchNode: (node: Object) => boolean,
  *     isInBlocksSelector: true,
  *     handleEnterKey: (editor: import('slate').Editor) => void,
+ *     handleBackspaceKey?:(editor: import('slate').Editor, event: Event) => void,
  *   }
  * }} an object containing rendering functions and metadata for different blocks, indexed by name.
  */
@@ -235,6 +434,8 @@ export function useBlocksStore() {
       matchNode: (node) => node.type === 'paragraph',
       isInBlocksSelector: true,
       handleEnterKey(editor) {
+        // We need to keep track of the initial position of the cursor
+        const anchorPathInitialPosition = editor.selection.anchor.path;
         /**
          * Split the nodes where the cursor is. This will create a new paragraph with the content
          * after the cursor, while retaining all the children, modifiers etc.
@@ -254,12 +455,23 @@ export function useBlocksStore() {
          * Select the parent of the selection because we want the full block, not the leaf.
          * And copy its children to make sure we keep the modifiers.
          */
-        const [createdNode] = Editor.parent(editor, editor.selection.anchor.path);
+        const [fragmentedNode] = Editor.parent(editor, editor.selection.anchor.path);
         Transforms.removeNodes(editor, editor.selection);
-        Transforms.insertNodes(editor, {
-          type: 'paragraph',
-          children: createdNode.children,
-        });
+
+        // Check if after the current position there is another node
+        const hasNextNode = editor.children.length - anchorPathInitialPosition[0] > 1;
+
+        // Insert the new node at the right position. The next line after the editor selection if present or otherwise at the end of the editor.
+        Transforms.insertNodes(
+          editor,
+          {
+            type: 'paragraph',
+            children: fragmentedNode.children,
+          },
+          {
+            at: hasNextNode ? [anchorPathInitialPosition[0] + 1] : [editor.children.length],
+          }
+        );
 
         /**
          * The new selection will by default be at the end of the created node.
@@ -267,11 +479,11 @@ export function useBlocksStore() {
          * Use slice(0, -1) to go 1 level higher in the tree,
          * so we go to the start of the node and not the start of the leaf.
          */
-        Transforms.select(editor, editor.start(editor.selection.anchor.path.slice(0, -1)));
+        Transforms.select(editor, editor.start([anchorPathInitialPosition[0] + 1]));
       },
     },
     'heading-one': {
-      renderElement: (props) => <Heading {...props} />,
+      renderElement: (props) => <H1 {...props.attributes}>{props.children}</H1>,
       icon: HeadingOne,
       label: {
         id: 'components.Blocks.blocks.heading1',
@@ -285,7 +497,7 @@ export function useBlocksStore() {
       isInBlocksSelector: true,
     },
     'heading-two': {
-      renderElement: (props) => <Heading {...props} />,
+      renderElement: (props) => <H2 {...props.attributes}>{props.children}</H2>,
       icon: HeadingTwo,
       label: {
         id: 'components.Blocks.blocks.heading2',
@@ -299,7 +511,7 @@ export function useBlocksStore() {
       isInBlocksSelector: true,
     },
     'heading-three': {
-      renderElement: (props) => <Heading {...props} />,
+      renderElement: (props) => <H3 {...props.attributes}>{props.children}</H3>,
       icon: HeadingThree,
       label: {
         id: 'components.Blocks.blocks.heading3',
@@ -313,7 +525,7 @@ export function useBlocksStore() {
       isInBlocksSelector: true,
     },
     'heading-four': {
-      renderElement: (props) => <Heading {...props} />,
+      renderElement: (props) => <H4 {...props.attributes}>{props.children}</H4>,
       icon: HeadingFour,
       label: {
         id: 'components.Blocks.blocks.heading4',
@@ -327,7 +539,7 @@ export function useBlocksStore() {
       isInBlocksSelector: true,
     },
     'heading-five': {
-      renderElement: (props) => <Heading {...props} />,
+      renderElement: (props) => <H5 {...props.attributes}>{props.children}</H5>,
       icon: HeadingFive,
       label: {
         id: 'components.Blocks.blocks.heading5',
@@ -341,7 +553,7 @@ export function useBlocksStore() {
       isInBlocksSelector: true,
     },
     'heading-six': {
-      renderElement: (props) => <Heading {...props} />,
+      renderElement: (props) => <H6 {...props.attributes}>{props.children}</H6>,
       icon: HeadingSix,
       label: {
         id: 'components.Blocks.blocks.heading6',
@@ -354,17 +566,112 @@ export function useBlocksStore() {
       matchNode: (node) => node.type === 'heading' && node.level === 6,
       isInBlocksSelector: true,
     },
+    'list-ordered': {
+      renderElement: (props) => <List {...props} />,
+      label: {
+        id: 'components.Blocks.blocks.orderedList',
+        defaultMessage: 'Numbered list',
+      },
+      value: {
+        type: 'list',
+        format: 'ordered',
+      },
+      icon: NumberList,
+      matchNode: (node) => node.type === 'list' && node.format === 'ordered',
+      isInBlocksSelector: true,
+      handleEnterKey: handleEnterKeyOnList,
+      handleBackspaceKey: handleBackspaceKeyOnList,
+    },
+    'list-unordered': {
+      renderElement: (props) => <List {...props} />,
+      label: {
+        id: 'components.Blocks.blocks.unorderedList',
+        defaultMessage: 'Bulleted list',
+      },
+      value: {
+        type: 'list',
+        format: 'unordered',
+      },
+      icon: BulletList,
+      matchNode: (node) => node.type === 'list' && node.format === 'unordered',
+      isInBlocksSelector: true,
+      handleEnterKey: handleEnterKeyOnList,
+      handleBackspaceKey: handleBackspaceKeyOnList,
+    },
+    'list-item': {
+      renderElement: (props) => (
+        <Typography as="li" {...props.attributes}>
+          {props.children}
+        </Typography>
+      ),
+      value: {
+        type: 'list-item',
+      },
+      matchNode: (node) => node.type === 'list-item',
+      isInBlocksSelector: false,
+    },
     link: {
       renderElement: (props) => (
-        <BaseLink href={props.element.url} {...props.attributes}>
+        <Link element={props.element} {...props.attributes}>
           {props.children}
-        </BaseLink>
+        </Link>
       ),
       value: {
         type: 'link',
       },
       matchNode: (node) => node.type === 'link',
       isInBlocksSelector: false,
+    },
+    image: {
+      renderElement: (props) => <Image {...props} />,
+      icon: Picture,
+      label: {
+        id: 'components.Blocks.blocks.image',
+        defaultMessage: 'Image',
+      },
+      value: {
+        type: 'image',
+      },
+      matchNode: (node) => node.type === 'image',
+      isInBlocksSelector: true,
+    },
+    quote: {
+      renderElement: (props) => <Blockquote {...props.attributes}>{props.children}</Blockquote>,
+      icon: Quote,
+      label: {
+        id: 'components.Blocks.blocks.quote',
+        defaultMessage: 'Quote',
+      },
+      value: {
+        type: 'quote',
+      },
+      matchNode: (node) => node.type === 'quote',
+      isInBlocksSelector: true,
+      handleEnterKey(editor) {
+        /**
+         * To determine if we should break out of the quote node, check 2 things:
+         * 1. If the cursor is at the end of the quote node
+         * 2. If the last line of the quote node is empty
+         */
+        const [quoteNode, quoteNodePath] = Editor.above(editor, {
+          match: (n) => n.type === 'quote',
+        });
+        const isNodeEnd = Editor.isEnd(editor, editor.selection.anchor, quoteNodePath);
+        const isEmptyLine = quoteNode.children.at(-1).text.endsWith('\n');
+
+        if (isNodeEnd && isEmptyLine) {
+          // Remove the last line break
+          Transforms.delete(editor, { distance: 1, unit: 'character', reverse: true });
+          // Break out of the quote node new paragraph
+          Transforms.insertNodes(editor, {
+            type: 'paragraph',
+            children: [{ type: 'text', text: '' }],
+          });
+        } else {
+          // Otherwise insert a new line within the quote node
+          Transforms.insertText(editor, '\n');
+        }
+      },
     },
     code: {
       renderElement: (props) => (
@@ -386,66 +693,6 @@ export function useBlocksStore() {
         // Insert a new line within the block
         Transforms.insertText(editor, '\n');
       },
-    },
-    quote: {
-      renderElement: (props) => <Blockquote {...props.attributes}>{props.children}</Blockquote>,
-      icon: Quote,
-      label: {
-        id: 'components.Blocks.blocks.quote',
-        defaultMessage: 'Quote',
-      },
-      value: {
-        type: 'quote',
-      },
-      matchNode: (node) => node.type === 'quote',
-      isInBlocksSelector: true,
-    },
-    'list-ordered': {
-      renderElement: (props) => <List {...props} />,
-      value: {
-        type: 'list',
-        format: 'ordered',
-      },
-      matchNode: (node) => node.type === 'list' && node.format === 'ordered',
-      // TODO add icon and label and set isInBlocksEditor to true
-      isInBlocksSelector: false,
-      handleEnterKey: handleEnterKeyOnList,
-    },
-    'list-unordered': {
-      renderElement: (props) => <List {...props} />,
-      value: {
-        type: 'list',
-        format: 'unordered',
-      },
-      matchNode: (node) => node.type === 'list' && node.format === 'unordered',
-      // TODO add icon and label and set isInBlocksEditor to true
-      isInBlocksSelector: false,
-      handleEnterKey: handleEnterKeyOnList,
-    },
-    'list-item': {
-      renderElement: (props) => (
-        <Typography as="li" {...props.attributes}>
-          {props.children}
-        </Typography>
-      ),
-      value: {
-        type: 'list-item',
-      },
-      matchNode: (node) => node.type === 'list-item',
-      isInBlocksSelector: false,
-    },
-    image: {
-      renderElement: (props) => <Image {...props} />,
-      icon: Picture,
-      label: {
-        id: 'components.Blocks.blocks.image',
-        defaultMessage: 'Image',
-      },
-      value: {
-        type: 'image',
-      },
-      matchNode: (node) => node.type === 'image',
-      isInBlocksSelector: true,
     },
   };
 }

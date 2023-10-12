@@ -4,23 +4,29 @@ import { Typography } from '@strapi/design-system';
 import { Bold, Italic, Underline, StrikeThrough, Code } from '@strapi/icons';
 import { Editor } from 'slate';
 import { useSlate } from 'slate-react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+
+const stylesToInherit = css`
+  font-size: inherit;
+  color: inherit;
+  line-height: inherit;
+`;
 
 const BoldText = styled(Typography).attrs({ fontWeight: 'bold' })`
-  font-size: inherit;
+  ${stylesToInherit}
 `;
 
 const ItalicText = styled(Typography)`
   font-style: italic;
-  font-size: inherit;
+  ${stylesToInherit}
 `;
 
 const UnderlineText = styled(Typography).attrs({ textDecoration: 'underline' })`
-  font-size: inherit;
+  ${stylesToInherit}
 `;
 
 const StrikeThroughText = styled(Typography).attrs({ textDecoration: 'line-through' })`
-  font-size: inherit;
+  ${stylesToInherit}
 `;
 
 const InlineCode = styled.code`
@@ -29,6 +35,7 @@ const InlineCode = styled.code`
   padding: ${({ theme }) => `0 ${theme.spaces[2]}`};
   font-family: 'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas,
     monospace;
+  color: inherit;
 `;
 
 /**
@@ -48,12 +55,22 @@ export function useModifiersStore() {
   const editor = useSlate();
   const modifiers = Editor.marks(editor);
 
+  /**
+   * The default handler for checking if a modifier is active
+   *
+   * @param {string} name - The name of the modifier to check
+   */
   const baseCheckIsActive = (name) => {
     if (!modifiers) return false;
 
     return Boolean(modifiers[name]);
   };
 
+  /**
+   * The default handler for toggling a modifier
+   *
+   * @param {string} name - The name of the modifier to toggle
+   */
   const baseHandleToggle = (name) => {
     if (modifiers[name]) {
       Editor.removeMark(editor, name);

@@ -24,7 +24,7 @@ import { useIntl } from 'react-intl';
 import { NavLink as RouterNavLink, useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { useConfigurations } from '../../hooks';
+import { useConfiguration } from '../../hooks';
 
 const LinkUserWrapper = styled(Box)`
   width: ${150 / 16}rem;
@@ -59,7 +59,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
   const [userLinksVisible, setUserLinksVisible] = useState(false);
   const {
     logos: { menu },
-  } = useConfigurations();
+  } = useConfiguration();
   const [condensed, setCondensed] = usePersistentState('navbar-condensed', false);
   const { userDisplayName } = useAppInfo();
   const { formatMessage } = useIntl();

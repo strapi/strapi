@@ -1,6 +1,6 @@
 {
   "name": "@strapi/pack-up",
-  "version": "4.14.3",
+  "version": "4.14.4",
   "description": "Simple tools for creating interoperable CJS & ESM packages.",
   "keywords": [
     "strapi",
@@ -61,7 +61,7 @@
     "watch": "node -r esbuild-register scripts/watch"
   },
   "dependencies": {
-    "@vitejs/plugin-react": "4.0.4",
+    "@vitejs/plugin-react": "4.1.0",
     "boxen": "5.1.2",
     "browserslist-to-esbuild": "1.2.0",
     "chalk": "4.1.2",

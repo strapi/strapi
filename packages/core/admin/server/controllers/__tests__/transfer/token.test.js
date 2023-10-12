@@ -457,7 +457,6 @@ describe('Transfer Token Controller', () => {
       try {
         await transferTokenController.update(ctx);
       } catch (e) {
-        console.log(e);
         expect(e instanceof ApplicationError).toBe(true);
         expect(e.message).toEqual('Name already taken');
       }

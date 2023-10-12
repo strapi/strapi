@@ -2,6 +2,8 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import { InlineConfig, createLogger } from 'vite';
 
+import { resolveConfigProperty } from '../../core/config';
+
 import type { ViteBaseTask } from './types';
 import type { BuildContext } from '../../createBuildContext';
 
@@ -9,7 +11,7 @@ import type { BuildContext } from '../../createBuildContext';
  * @internal
  */
 const resolveViteConfig = (ctx: BuildContext, task: ViteBaseTask) => {
-  const { cwd, distPath, targets, external, extMap, pkg, config: packUpConfig } = ctx;
+  const { cwd, distPath, targets, external, extMap, pkg, exports: exportMap } = ctx;
   const { entries, format, output, runtime } = task;
   const outputExt = extMap[pkg.type || 'commonjs'][format];
   const outDir = path.relative(cwd, distPath);
@@ -20,6 +22,9 @@ const resolveViteConfig = (ctx: BuildContext, task: ViteBaseTask) => {
   customLogger.error = (msg) => ctx.logger.error(msg);
   customLogger.info = () => {};
 
+  const exportIds = Object.keys(exportMap).map((exportPath) => path.join(pkg.name, exportPath));
+  const sourcePaths = Object.values(exportMap).map((exp) => path.resolve(cwd, exp.source));
+
   const config = {
     configFile: false,
     root: cwd,
@@ -28,8 +33,8 @@ const resolveViteConfig = (ctx: BuildContext, task: ViteBaseTask) => {
     clearScreen: false,
     customLogger,
     build: {
-      minify: packUpConfig?.minify ?? false,
-      sourcemap: packUpConfig?.sourcemap ?? true,
+      minify: resolveConfigProperty(ctx.config.minify, false),
+      sourcemap: resolveConfigProperty(ctx.config.sourcemap, true),
       /**
        * The task runner will clear this for us
        */
@@ -41,15 +46,59 @@ const resolveViteConfig = (ctx: BuildContext, task: ViteBaseTask) => {
         formats: [format],
         /**
          * this enforces the file name to match what the output we've
-         * determined from the package.json exports.
+         * determined from the package.json exports. However, when preserving modules
+         * we want to let Rollup handle the file names.
          */
-        fileName() {
-          return `${path.relative(outDir, output).replace(/\.[^/.]+$/, '')}${outputExt}`;
-        },
+        fileName: resolveConfigProperty(ctx.config.preserveModules, false)
+          ? undefined
+          : () => {
+              return `${path.relative(outDir, output).replace(/\.[^/.]+$/, '')}${outputExt}`;
+            },
       },
       rollupOptions: {
-        external,
+        external(id, importer) {
+          // Check if the id is a self-referencing import
+          if (exportIds?.includes(id)) {
+            return true;
+          }
+
+          // Check if the id is a file path that points to an exported source file
+          if (importer && (id.startsWith('.') || id.startsWith('/'))) {
+            const idPath = path.resolve(path.dirname(importer), id);
+
+            if (sourcePaths?.includes(idPath)) {
+              ctx.logger.warn(
+                `detected self-referencing import – treating as external: ${path.relative(
+                  cwd,
+                  idPath
+                )}`
+              );
+
+              return true;
+            }
+          }
+
+          const idParts = id.split('/');
+
+          const name = idParts[0].startsWith('@') ? `${idParts[0]}/${idParts[1]}` : idParts[0];
+
+          if (name && external.includes(name)) {
+            return true;
+          }
+
+          return false;
+        },
         output: {
+          preserveModules: resolveConfigProperty(ctx.config.preserveModules, false),
+          /**
+           * Mimic TypeScript's behavior, by setting the value to "auto" to control
+           * how Rollup handles default, namespace and dynamic imports from external
+           * dependencies in formats like CommonJS that do not natively support
+           * these concepts. Mainly styled-components@5
+           *
+           * For more info see https://rollupjs.org/configuration-options/#output-interop
+           */
+          interop: 'auto',
           chunkFileNames() {
             const parts = outputExt.split('.');
 
