@@ -529,6 +529,45 @@ describe('BlocksEditor toolbar', () => {
     ]);
   });
 
+  it('creates a new code block without empty lines before it when you select the option in a empty editor', async () => {
+    setup([
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: '' }],
+      },
+    ]);
+
+    // Convert selection to a code block
+    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+    await user.click(blocksDropdown);
+    await user.click(screen.getByRole('option', { name: 'Code' }));
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'code',
+        format: null,
+        level: null,
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+    ]);
+
+    expect(ReactEditor.focus).toHaveBeenCalledTimes(1);
+  });
+
   it('should disable the link button when multiple blocks are selected', async () => {
     setup(mixedInitialValue);
 
