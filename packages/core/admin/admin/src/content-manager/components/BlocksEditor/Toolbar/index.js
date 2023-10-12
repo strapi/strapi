@@ -161,11 +161,14 @@ const toggleBlock = (editor, value) => {
     Transforms.setNodes(editor, blockProperties);
   } else {
     /**
-     * When there is no selection, we want to insert a new block just after the last node inserted and prevent the code to add an empty paragraph between them.
+     * When there is no selection, we want to insert a new block just after
+     * the last node inserted and prevent the code to add an empty paragraph
+     * between them.
      */
     const [, lastNodePath] = Editor.last(editor, []);
     const [parentNode] = Editor.parent(editor, lastNodePath, {
-      match: (node) => node.type !== 'text', // makes sure we get a block node, not an inline node
+      // Makes sure we get a block node, not an inline node
+      match: (node) => node.type !== 'text',
     });
     Transforms.removeNodes(editor, {
       void: true,
