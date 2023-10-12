@@ -5,8 +5,8 @@ import { useGuidedTour } from '@strapi/helper-plugin';
 import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
-import Theme from '../../../Theme';
-import ThemeToggleProvider from '../../../ThemeToggleProvider';
+import { Theme } from '../../../Theme';
+import { ThemeToggleProvider } from '../../../ThemeToggleProvider';
 import GuidedTourModal from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({

@@ -44,7 +44,7 @@ interface InitOptions extends Partial<AWS.S3.ClientConfiguration> {
   };
 }
 
-export = {
+export default {
   init({ baseUrl, rootPath, s3Options, ...legacyS3Options }: InitOptions) {
     if (Object.keys(legacyS3Options).length > 0) {
       process.emitWarning(

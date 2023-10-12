@@ -9,8 +9,8 @@ import * as yup from 'yup';
 
 import BaseLogin from '../BaseLogin';
 
-jest.mock('../../../../../hooks/useConfigurations', () => ({
-  useConfigurations: () => ({
+jest.mock('../../../../../hooks/useConfiguration', () => ({
+  useConfiguration: () => ({
     logos: {
       auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
     },

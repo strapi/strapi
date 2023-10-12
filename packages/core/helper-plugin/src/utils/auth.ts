@@ -39,9 +39,6 @@ interface StorageItems {
 
 type StorageItemValues = StorageItems[keyof StorageItems];
 
-const parse = JSON.parse;
-const stringify = JSON.stringify;
-
 const auth = {
   clear(key: keyof StorageItems) {
     if (localStorage.getItem(key)) {
@@ -71,14 +68,14 @@ const auth = {
 
       localStorage.clear();
 
-      localStorage.setItem('videos', stringify(videos));
-      localStorage.setItem(CURRENT_STEP, stringify(guidedTourCurrentStep));
-      localStorage.setItem(COMPLETED_STEPS, stringify(guidedTourState));
-      localStorage.setItem(SKIPPED, stringify(guidedTourSkipped));
-      localStorage.setItem('STRAPI_UPDATE_NOTIF', stringify(strapiUpdateNotification));
+      localStorage.setItem('videos', JSON.stringify(videos));
+      localStorage.setItem(CURRENT_STEP, JSON.stringify(guidedTourCurrentStep));
+      localStorage.setItem(COMPLETED_STEPS, JSON.stringify(guidedTourState));
+      localStorage.setItem(SKIPPED, JSON.stringify(guidedTourSkipped));
+      localStorage.setItem('STRAPI_UPDATE_NOTIF', JSON.stringify(strapiUpdateNotification));
 
       if (onboarding) {
-        localStorage.setItem('onboarding', stringify(onboarding));
+        localStorage.setItem('onboarding', JSON.stringify(onboarding));
       }
 
       if (localeLang) {
@@ -90,11 +87,11 @@ const auth = {
       }
 
       if (!isNil(uploadMediaLibraryView)) {
-        localStorage.setItem(UPLOAD_VIEW, stringify(uploadMediaLibraryView));
+        localStorage.setItem(UPLOAD_VIEW, JSON.stringify(uploadMediaLibraryView));
       }
 
       if (!isNil(uploadMediaLibraryModalView)) {
-        localStorage.setItem(UPLOAD_MODAL_VIEW, stringify(uploadMediaLibraryModalView));
+        localStorage.setItem(UPLOAD_MODAL_VIEW, JSON.stringify(uploadMediaLibraryModalView));
       }
     }
 
@@ -105,7 +102,7 @@ const auth = {
     const localStorageItem = localStorage.getItem(key);
     if (localStorageItem) {
       try {
-        const parsedItem = parse(localStorageItem);
+        const parsedItem = JSON.parse(localStorageItem);
         return parsedItem;
       } catch (error) {
         // Failed to parse return the string value
@@ -116,7 +113,7 @@ const auth = {
     const sessionStorageItem = sessionStorage.getItem(key);
     if (sessionStorageItem) {
       try {
-        const parsedItem = parse(sessionStorageItem);
+        const parsedItem = JSON.parse(sessionStorageItem);
         return parsedItem;
       } catch (error) {
         // Failed to parse return the string value
@@ -133,10 +130,10 @@ const auth = {
     }
 
     if (isLocalStorage) {
-      return localStorage.setItem(key, stringify(value));
+      return localStorage.setItem(key, JSON.stringify(value));
     }
 
-    return sessionStorage.setItem(key, stringify(value));
+    return sessionStorage.setItem(key, JSON.stringify(value));
   },
 
   /**

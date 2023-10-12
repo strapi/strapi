@@ -1,4 +1,4 @@
-import type { Attribute, Common, Utils } from '../../../types';
+import type { Attribute, Common, Utils, Entity } from '../../../types';
 
 export type NonFilterableKind = Extract<Attribute.Kind, 'password' | 'dynamiczone'>;
 export type FilterableKind = Exclude<Attribute.Kind, NonFilterableKind>;
@@ -19,7 +19,7 @@ export type GetNestedKeys<TSchemaUID extends Common.UID.Schema> = Exclude<
   GetNonFilterableKeys<TSchemaUID>
 >;
 
-export type ID = `${number}` | number;
+export type ID = Entity.ID;
 
 export type BooleanValue = boolean | 'true' | 'false' | 't' | 'f' | '1' | '0' | 1 | 0;
 

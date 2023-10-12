@@ -454,21 +454,19 @@ class StrapiApp {
         showReleaseNotification={this.configurations.notifications.releases}
         store={store}
       >
-        <>
-          <Helmet
-            link={[
-              {
-                rel: 'icon',
-                type: 'image/png',
-                href: this.configurations.head.favicon,
-              },
-            ]}
-            htmlAttributes={{ lang: localStorage.getItem(localStorageKey) || 'en' }}
-          />
-          <BrowserRouter basename={basename}>
-            <App store={store} />
-          </BrowserRouter>
-        </>
+        <Helmet
+          link={[
+            {
+              rel: 'icon',
+              type: 'image/png',
+              href: this.configurations.head.favicon,
+            },
+          ]}
+          htmlAttributes={{ lang: localStorage.getItem(localStorageKey) || 'en' }}
+        />
+        <BrowserRouter basename={basename}>
+          <App store={store} />
+        </BrowserRouter>
       </Providers>
     );
   }

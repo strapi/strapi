@@ -26,6 +26,9 @@ window.strapi = {
     promoteEnterpriseFeatures: true,
   },
   projectType: 'Community',
+  flags: {
+    nps: false,
+  },
 };
 
 const customConfig = appCustomisations;
@@ -54,7 +57,6 @@ const run = async () => {
       ...window.strapi.features,
       isEnabled: (featureName) => features.some((feature) => feature.name === featureName),
     };
-
     window.strapi.projectType = isEE ? 'Enterprise' : 'Community';
   } catch (err) {
     console.error(err);
