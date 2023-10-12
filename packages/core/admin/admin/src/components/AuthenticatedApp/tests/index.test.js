@@ -18,9 +18,11 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-jest.mock('../../PluginsInitializer', () => () => {
-  return <div>PluginsInitializer</div>;
-});
+jest.mock('../../PluginsInitializer', () => ({
+  PluginsInitializer() {
+    return <div>PluginsInitializer</div>;
+  },
+}));
 
 describe('AuthenticatedApp', () => {
   beforeEach(() => {

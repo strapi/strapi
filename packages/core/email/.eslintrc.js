@@ -7,7 +7,7 @@ module.exports = {
     },
     {
       files: ['**/*'],
-      excludedFiles: ['admin/**/*'],
+      excludedFiles: ['admin/**/*', 'server/**/*'],
       extends: ['custom/back'],
     },
   ],
