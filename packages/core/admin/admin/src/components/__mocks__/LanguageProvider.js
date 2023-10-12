@@ -1,4 +1,4 @@
-export default function useLocalesProvider() {
+export function useLocalesProvider() {
   return {
     changeLocale() {},
     localeNames: { en: 'English' },

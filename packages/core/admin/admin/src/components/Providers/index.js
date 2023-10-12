@@ -15,7 +15,7 @@ import { Provider } from 'react-redux';
 import { AdminContext } from '../../contexts';
 import { ConfigurationProvider } from '../ConfigurationProvider';
 import GuidedTour from '../GuidedTour';
-import LanguageProvider from '../LanguageProvider';
+import { LanguageProvider } from '../LanguageProvider';
 import { Theme } from '../Theme';
 import { ThemeToggleProvider } from '../ThemeToggleProvider';
 
