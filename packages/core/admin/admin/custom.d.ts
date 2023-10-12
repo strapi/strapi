@@ -19,7 +19,7 @@ declare global {
         isEnabled: (featureName?: string) => boolean;
       };
       flags: {
-        nps: boolean;
+        nps?: boolean;
       };
       projectType: 'Community' | 'Enterprise';
       telemetryDisabled: boolean;
