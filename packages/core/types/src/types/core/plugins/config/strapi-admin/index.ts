@@ -3,5 +3,5 @@
 export interface AdminInput {
   register: unknown;
   bootstrap: unknown;
-  registerTrads: unknown;
+  registerTrads: ({ locales }: { locales: string[] }) => Promise<unknown>;
 }
