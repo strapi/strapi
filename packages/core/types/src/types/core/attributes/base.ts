@@ -2,6 +2,7 @@
  * List of all the Strapi attribute types
  */
 export type Kind =
+  | 'customField'
   | 'string'
   | 'text'
   | 'richtext'
