@@ -69,7 +69,10 @@ class Database {
     this.dialect = getDialect(this);
     this.dialect.configure();
 
-    const onAfterCreate = (nativeConnection: unknown, done: Function) => {
+    const onAfterCreate = (
+      nativeConnection: unknown,
+      done: (error: Error | null, nativeConnection: unknown) => Promise<void>
+    ) => {
       console.log('on after create called');
       // run initialize for it since commands such as postgres SET and sqlite PRAGMA are per-connection
       this.dialect.initialize(nativeConnection).then(() => {
