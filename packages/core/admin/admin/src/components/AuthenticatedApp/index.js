@@ -14,7 +14,7 @@ import { useQueries } from 'react-query';
 import packageJSON from '../../../../package.json';
 import { useConfiguration } from '../../hooks';
 import { getFullName, hashAdminUserEmail } from '../../utils';
-import NpsSurvey from '../NpsSurvey';
+import { NpsSurvey } from '../NpsSurvey';
 import { PluginsInitializer } from '../PluginsInitializer';
 import RBACProvider from '../RBACProvider';
 

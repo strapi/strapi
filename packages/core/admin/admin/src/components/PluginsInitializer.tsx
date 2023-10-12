@@ -1,6 +1,10 @@
 import * as React from 'react';
 
-import { LoadingIndicatorPage, useStrapiApp, StrapiAppContextValue } from '@strapi/helper-plugin';
+import {
+  LoadingIndicatorPage,
+  useStrapiApp,
+  type StrapiAppContextValue,
+} from '@strapi/helper-plugin';
 import produce from 'immer';
 import set from 'lodash/set';
 

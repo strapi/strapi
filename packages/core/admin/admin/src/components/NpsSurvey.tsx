@@ -13,15 +13,13 @@ import {
   FieldInput,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { auth, useNotification, useAppInfo } from '@strapi/helper-plugin';
+import { auth, useNotification, useAppInfo, usePersistentState } from '@strapi/helper-plugin';
 import { Cross } from '@strapi/icons';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 import styled, { useTheme } from 'styled-components';
 import * as yup from 'yup';
-
-import { useNpsSurveySettings } from './hooks/useNpsSurveySettings';
 
 const FieldWrapper = styled(Field)`
   height: ${32 / 16}rem;
@@ -67,7 +65,7 @@ const delays = {
 
 const ratingArray = [...Array(11).keys()];
 
-const checkIfShouldShowSurvey = (settings) => {
+const checkIfShouldShowSurvey = (settings: NpsSurveySettings) => {
   const { enabled, lastResponseDate, firstDismissalDate, lastDismissalDate } = settings;
 
   // This function goes through all the cases where we'd want to not show the survey:
@@ -138,7 +136,16 @@ const NpsSurvey = () => {
   const toggleNotification = useNotification();
   const { currentEnvironment, strapiVersion } = useAppInfo();
 
-  const { mutate, isLoading } = useMutation(
+  interface NpsSurveyMutationBody {
+    email: string;
+    rating: number | null;
+    comment: string;
+    environment?: string;
+    version?: string;
+    license: 'Enterprise' | 'Community';
+  }
+
+  const { mutate, isLoading } = useMutation<unknown, unknown, NpsSurveyMutationBody>(
     async (form) => {
       const res = await fetch('https://analytics.strapi.io/submit-nps', {
         method: 'POST',
@@ -158,7 +165,7 @@ const NpsSurvey = () => {
       onSuccess() {
         setNpsSurveySettings((settings) => ({
           ...settings,
-          lastResponseDate: new Date(),
+          lastResponseDate: new Date().toString(),
           firstDismissalDate: null,
           lastDismissalDate: null,
         }));
@@ -203,12 +210,18 @@ const NpsSurvey = () => {
     return null;
   }
 
-  const handleSubmitResponse = ({ npsSurveyRating: rating, npsSurveyFeedback: comment }) => {
-    const { email } = auth.getUserInfo();
+  const handleSubmitResponse = ({
+    npsSurveyRating,
+    npsSurveyFeedback,
+  }: {
+    npsSurveyRating: NpsSurveyMutationBody['rating'];
+    npsSurveyFeedback: NpsSurveyMutationBody['comment'];
+  }) => {
+    const userInfo = auth.getUserInfo();
     mutate({
-      email,
-      rating,
-      comment,
+      email: typeof userInfo === 'object' && userInfo !== null ? userInfo.email : '',
+      rating: npsSurveyRating,
+      comment: npsSurveyFeedback,
       environment: currentEnvironment,
       version: strapiVersion,
       license: window.strapi.projectType,
@@ -224,10 +237,10 @@ const NpsSurvey = () => {
 
       if (settings.firstDismissalDate) {
         // If the user dismisses the survey for the second time
-        nextSettings.lastDismissalDate = new Date();
+        nextSettings.lastDismissalDate = new Date().toString();
       } else {
         // If the user dismisses the survey for the first time
-        nextSettings.firstDismissalDate = new Date();
+        nextSettings.firstDismissalDate = new Date().toString();
       }
 
       return nextSettings;
@@ -272,6 +285,7 @@ const NpsSurvey = () => {
               ) : (
                 <Box as="fieldset" width="100%">
                   <Flex justifyContent="space-between" width="100%">
+                    {/* @ts-expect-error fixed in the next version of the DS */}
                     <Box marginLeft="auto" marginRight="auto">
                       <Typography fontWeight="semiBold" as="legend">
                         {formatMessage({
@@ -301,7 +315,7 @@ const NpsSurvey = () => {
                       return (
                         <FieldWrapper
                           key={number}
-                          className={values.npsSurveyRating === number ? 'selected' : null} // "selected" class added when child radio button is checked
+                          className={values.npsSurveyRating === number ? 'selected' : undefined} // "selected" class added when child radio button is checked
                           hasRadius
                           background="primary100"
                           borderColor="primary200"
@@ -309,6 +323,7 @@ const NpsSurvey = () => {
                           position="relative"
                           cursor="pointer"
                         >
+                          {/* @ts-expect-error fixed in the next version of the DS */}
                           <FieldLabel htmlFor={`nps-survey-rating-${number}-input`}>
                             <VisuallyHidden>
                               <FieldInput
@@ -337,6 +352,7 @@ const NpsSurvey = () => {
                   {values.npsSurveyRating !== null && (
                     <Flex direction="column">
                       <Box marginTop={2}>
+                        {/* @ts-expect-error fixed in the next version of the DS */}
                         <FieldLabel htmlFor="npsSurveyFeedback" fontWeight="semiBold" fontSize={2}>
                           {formatMessage({
                             id: 'app.components.NpsSurvey.feedback-question',
@@ -371,4 +387,32 @@ const NpsSurvey = () => {
   );
 };
 
-export default NpsSurvey;
+interface NpsSurveySettings {
+  enabled: boolean;
+  lastResponseDate: string | null;
+  firstDismissalDate: string | null;
+  lastDismissalDate: string | null;
+}
+
+/**
+ * We exported to make it available during admin user registration.
+ * Because we only enable the NPS for users who subscribe to the newsletter when signing up
+ */
+function useNpsSurveySettings() {
+  const [npsSurveySettings, setNpsSurveySettings] = usePersistentState<NpsSurveySettings>(
+    'STRAPI_NPS_SURVEY_SETTINGS',
+    {
+      enabled: true,
+      lastResponseDate: null,
+      firstDismissalDate: null,
+      lastDismissalDate: null,
+    }
+  );
+
+  /**
+   * TODO: should this just be an array so we can alias the `usePersistentState` hook?
+   */
+  return { npsSurveySettings, setNpsSurveySettings };
+}
+
+export { NpsSurvey, useNpsSurveySettings };
