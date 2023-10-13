@@ -687,6 +687,12 @@ export function useBlocksStore() {
         } else {
           // Otherwise insert a new line within the quote node
           Transforms.insertText(editor, '\n');
+
+          // If there's nothing after the cursor, disable modifiers
+          if (isNodeEnd) {
+            Editor.removeMark(editor, 'bold');
+            Editor.removeMark(editor, 'italic');
+          }
         }
       },
     },

@@ -1067,4 +1067,36 @@ describe('useBlocksStore', () => {
       },
     ]);
   });
+
+  it('disables modifiers when creating a new node with enter key at the end of a quote', () => {
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'quote',
+        children: [
+          {
+            type: 'text',
+            text: 'Some quote',
+            bold: true,
+            italic: true,
+          },
+        ],
+      },
+    ];
+
+    Transforms.select(baseEditor, {
+      anchor: Editor.end(baseEditor, []),
+      focus: Editor.end(baseEditor, []),
+    });
+
+    // Bold and italic should be enabled
+    expect(Editor.marks(baseEditor)).toEqual({ bold: true, italic: true, type: 'text' });
+
+    // Simulate the enter key then user typing
+    result.current.quote.handleEnterKey(baseEditor);
+
+    // Once on the new line, bold and italic should be disabled
+    expect(Editor.marks(baseEditor)).toEqual({ type: 'text' });
+  });
 });
