@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import produce, { current } from 'immer';
 import get from 'lodash/get';
 import set from 'lodash/set';
@@ -173,7 +172,6 @@ const reducer = (state = initialState, action: Action) =>
 
             if (rest.private) {
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
               oppositeAttribute.private = rest.private;
             }
 
@@ -199,13 +197,10 @@ const reducer = (state = initialState, action: Action) =>
 
         componentsToAdd.forEach((componentUid: UID.Component) => {
           if (
-            // @ts-ignore
             !draftState.modifiedData.contentType?.schema.attributes[dzAttributeIndex].components
           ) {
-            // @ts-ignore
             draftState.modifiedData.contentType.schema.attributes[dzAttributeIndex].components = [];
           }
-          // @ts-ignore
           draftState.modifiedData.contentType.schema.attributes[dzAttributeIndex].components.push(
             componentUid
           );
@@ -248,29 +243,18 @@ const reducer = (state = initialState, action: Action) =>
           state.modifiedData.contentType,
           dynamicZoneTarget
         );
-        // Add the components property to the AttributeType interface
-        type AttributeTypeWithComponents = AttributeType & { components?: UID.Component[] };
 
-        const currentDZComponents = (
-          state.modifiedData.contentType?.schema.attributes[
-            dzAttributeIndex
-          ] as AttributeTypeWithComponents
-        ).components;
+        const currentDZComponents =
+          (state.modifiedData.contentType?.schema.attributes[dzAttributeIndex]).components;
 
-        // @ts-ignore
         const updatedComponents = makeUnique([...currentDZComponents, ...newComponents]);
 
-        (
-          draftState.modifiedData.contentType?.schema.attributes[
-            dzAttributeIndex
-          ] as AttributeTypeWithComponents
-        ).components = updatedComponents;
+        (draftState.modifiedData.contentType?.schema.attributes[dzAttributeIndex]).components =
+          updatedComponents;
 
         // Retrieve all the components that needs to be added to the modifiedData.components
         const nestedComponents = retrieveComponentsFromSchema(
-          // @ts-ignore
           current(draftState.modifiedData.contentType.schema.attributes),
-          // @ts-ignore
           state.components
         );
 
@@ -304,20 +288,17 @@ const reducer = (state = initialState, action: Action) =>
             attributes: [],
           },
         };
-        // @ts-ignore
-        draftState.components[action.uid] = newSchema;
+        draftState.components[action.uid as string] = newSchema;
 
         if (action.shouldAddComponentToData) {
-          // @ts-ignore
-          draftState.modifiedData.components[action.uid] = newSchema;
+          draftState.modifiedData.components[action.uid as string] = newSchema;
         }
 
         break;
       }
       case actions.CREATE_SCHEMA: {
         const newSchema: ContentType = {
-          // @ts-ignore
-          uid: action.uid,
+          uid: action.uid as UID.Any,
           isTemporary: true,
           schema: {
             ...action.data,
@@ -325,8 +306,7 @@ const reducer = (state = initialState, action: Action) =>
           },
         };
 
-        // @ts-ignore
-        draftState.contentTypes[action.uid] = newSchema;
+        draftState.contentTypes[action.uid as string] = newSchema;
 
         break;
       }
@@ -377,7 +357,6 @@ const reducer = (state = initialState, action: Action) =>
         } as AttributeType;
 
         if (rest.private) {
-          // @ts-ignore
           toSet.private = rest.private;
         }
 
@@ -490,7 +469,6 @@ const reducer = (state = initialState, action: Action) =>
           } as AttributeType;
 
           if (rest.private) {
-            // @ts-ignore
             oppositeAttributeToCreate.private = rest.private;
           }
 
@@ -524,7 +502,6 @@ const reducer = (state = initialState, action: Action) =>
           } as AttributeType;
 
           if (rest.private) {
-            // @ts-ignore
             oppositeAttributeToCreate.private = rest.private;
           }
 
@@ -592,7 +569,6 @@ const reducer = (state = initialState, action: Action) =>
       }
       case actions.REMOVE_COMPONENT_FROM_DYNAMIC_ZONE: {
         const dzAttributeIndex = findAttributeIndex(state.modifiedData.contentType, action.dzName);
-        //@ts-ignore
         draftState.modifiedData.contentType.schema.attributes[dzAttributeIndex].components.splice(
           action.componentToRemoveIndex,
           1
@@ -604,13 +580,11 @@ const reducer = (state = initialState, action: Action) =>
         const { mainDataKey, attributeToRemoveName } = action;
         const pathToAttributes = ['modifiedData', mainDataKey, 'schema', 'attributes'];
         const attributeToRemoveIndex = findAttributeIndex(
-          //@ts-ignore
           state.modifiedData[mainDataKey],
           attributeToRemoveName
         );
 
         const pathToAttributeToRemove = [...pathToAttributes, attributeToRemoveIndex];
-        //@ts-ignore
         const attributeToRemoveData = get(state, pathToAttributeToRemove);
         const isRemovingRelationAttribute = attributeToRemoveData.type === 'relation';
         // Only content types can have relations with themselves since
@@ -626,7 +600,6 @@ const reducer = (state = initialState, action: Action) =>
             target === uid && !ONE_SIDE_RELATIONS.includes(relationType);
 
           if (shouldRemoveOppositeAttribute) {
-            // @ts-ignore
             const attributes: AttributeType[] =
               state.modifiedData[mainDataKey]?.schema.attributes.slice();
             const nextAttributes = attributes.filter((attribute) => {
@@ -634,7 +607,6 @@ const reducer = (state = initialState, action: Action) =>
                 return false;
               }
 
-              // @ts-ignore
               if (attribute.target === uid && attribute.targetAttribute === attributeToRemoveName) {
                 return false;
               }
@@ -642,7 +614,6 @@ const reducer = (state = initialState, action: Action) =>
               return true;
             });
 
-            // @ts-ignore
             draftState.modifiedData[mainDataKey].schema.attributes = nextAttributes;
 
             break;

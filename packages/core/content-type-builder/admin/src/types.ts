@@ -38,8 +38,8 @@ export interface ContentType {
   uid: string;
   isTemporary?: boolean;
   visible?: boolean;
-  name: UID.Any;
-  title: string;
+  name?: UID.Any;
+  title?: string;
   plugin?: string;
   to?: string;
   kind?: 'singleType' | 'collectionType';
