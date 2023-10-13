@@ -16,7 +16,12 @@ import type {
 } from './types';
 import type { Database } from '..';
 
-const RESERVED_TABLE_NAMES = ['strapi_migrations', 'strapi_database_schema'];
+// TODO: get that list dynamically instead
+const RESERVED_TABLE_NAMES = [
+  'strapi_migrations',
+  'strapi_migrations_internal',
+  'strapi_database_schema',
+];
 
 const statuses = {
   CHANGED: 'CHANGED',
