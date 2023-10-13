@@ -6383,7 +6383,9 @@ __metadata:
     "@testing-library/react": 14.0.0
     "@testing-library/user-event": 14.4.3
     "@types/jsonwebtoken": 9.0.3
+    "@types/koa-passport": 6.0.1
     "@types/lodash": ^4.14.191
+    "@types/passport-local": 1.0.36
     axios: 1.5.0
     bcryptjs: 2.4.3
     browserslist: ^4.22.1
@@ -8269,6 +8271,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/koa-passport@npm:6.0.1":
+  version: 6.0.1
+  resolution: "@types/koa-passport@npm:6.0.1"
+  dependencies:
+    "@types/koa": "*"
+    "@types/passport": "*"
+  checksum: b2f58c9018d0f4e1cfeb2c59f7b0bad580f5cda20bfe9e93d9bf858abbae1142f4fb6d9005da5d329c531be2cd1ec6df7d5c75096ea79e005f722ab658a62fdf
+  languageName: node
+  linkType: hard
+
 "@types/koa-send@npm:*":
   version: 4.1.4
   resolution: "@types/koa-send@npm:4.1.4"
@@ -8498,6 +8510,36 @@ __metadata:
   version: 4.0.0
   resolution: "@types/parse-json@npm:4.0.0"
   checksum: fd6bce2b674b6efc3db4c7c3d336bd70c90838e8439de639b909ce22f3720d21344f52427f1d9e57b265fcb7f6c018699b99e5e0c208a1a4823014269a6bf35b
+  languageName: node
+  linkType: hard
+
+"@types/passport-local@npm:1.0.36":
+  version: 1.0.36
+  resolution: "@types/passport-local@npm:1.0.36"
+  dependencies:
+    "@types/express": "*"
+    "@types/passport": "*"
+    "@types/passport-strategy": "*"
+  checksum: 32c9259053e659088527298c364ba2f05eac202412df89246506ad847d755107c08fe8452e50ebaca079cecedbb25acfd71fbb4565f109acc0557d1bf0db8386
+  languageName: node
+  linkType: hard
+
+"@types/passport-strategy@npm:*":
+  version: 0.2.36
+  resolution: "@types/passport-strategy@npm:0.2.36"
+  dependencies:
+    "@types/express": "*"
+    "@types/passport": "*"
+  checksum: 7f626eb6a12110c1ce64dd5d5181fc0795e77d60123872e33f6fa1c02a2a19451207eaf03543232241a1d70bfe0318f2ffeef88f6309d7cbaa43d2bf6ec1d1e8
+  languageName: node
+  linkType: hard
+
+"@types/passport@npm:*":
+  version: 1.0.13
+  resolution: "@types/passport@npm:1.0.13"
+  dependencies:
+    "@types/express": "*"
+  checksum: 84330bedb330302ffd92b009b9b88eb20d3c66b659b383badb9aa3035612b40b47052153858b2498a95d9979d668443bdee3182345819cb18635dfb7f24c109c
   languageName: node
   linkType: hard
 

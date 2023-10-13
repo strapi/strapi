@@ -1,6 +1,7 @@
 import { validateCheckPermissionsInput } from '../validation/permission';
 import { getService } from '../utils';
 import { formatConditions } from './formatters';
+import type { Action } from '../domain/action';
 
 export default {
   /**
@@ -29,7 +30,7 @@ export default {
   async getAll(ctx: any) {
     const { sectionsBuilder, actionProvider, conditionProvider } = getService('permission');
 
-    const actions = actionProvider.values();
+    const actions = actionProvider.values() as Action[];
     const conditions = conditionProvider.values();
     const sections = await sectionsBuilder.build(actions);
 

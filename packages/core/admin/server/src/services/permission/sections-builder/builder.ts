@@ -1,4 +1,5 @@
-import createSection from './section';
+import { Action } from '../../../domain/action';
+import createSection, { SectionOptions } from './section';
 
 /**
  * Create a new section builder with its own sections registry
@@ -11,11 +12,10 @@ const createSectionBuilder = () => {
   return {
     /**
      * Create & add a section to the builder's registry
-     * @param {string} sectionName - The unique name of the section
-     * @param {SectionOptions} options - The options used to build a {@link Section}
-     * @return {this}
+     * @param sectionName - The unique name of the section
+     * @param options - The options used to build a {@link Section}
      */
-    createSection(sectionName: string, options: any) {
+    createSection(sectionName: string, options: SectionOptions) {
       const section = createSection(options);
 
       state.sections.set(sectionName, section);
@@ -25,8 +25,7 @@ const createSectionBuilder = () => {
 
     /**
      * Removes a section from the builder's registry using its unique name
-     * @param {string} sectionName - The name of the section to delete
-     * @return {this}
+     * @param sectionName - The name of the section to delete
      */
     deleteSection(sectionName: string) {
       // @ts-expect-error
@@ -37,9 +36,8 @@ const createSectionBuilder = () => {
 
     /**
      * Register a handler function for a given section
-     * @param {string} sectionName - The name of the section
-     * @param {Function} handler - The handler to register
-     * @return {this}
+     * @param  sectionName - The name of the section
+     * @param  handler - The handler to register
      */
     addHandler(sectionName: string, handler: () => unknown) {
       if (state.sections.has(sectionName)) {
@@ -51,9 +49,9 @@ const createSectionBuilder = () => {
 
     /**
      * Register a matcher function for a given section
-     * @param {string} sectionName - The name of the section
-     * @param {Function} matcher - The handler to register
-     * @return {this}
+     * @param sectionName - The name of the section
+     * @param matcher - The handler to register
+
      */
     addMatcher(sectionName: string, matcher: () => unknown) {
       if (state.sections.has(sectionName)) {
@@ -65,10 +63,9 @@ const createSectionBuilder = () => {
 
     /**
      * Build a section tree based on the registered actions and the given actions
-     * @param {Array<Action>} actions - The actions used to build each section
-     * @return {Promise<any>}
+     * @param actions - The actions used to build each section
      */
-    async build(actions = [] as any) {
+    async build(actions = [] as Action[]) {
       const sections = {} as any;
 
       for (const [sectionName, section] of state.sections.entries()) {
