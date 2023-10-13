@@ -283,7 +283,7 @@ const useTracking = (): UseTrackingReturn => {
     ) => {
       try {
         if (uuid && !window.strapi.telemetryDisabled) {
-          const res = await axios.post<string>(
+          const res = axios.post<string>(
             'https://analytics.strapi.io/api/v2/track',
             {
               event,

@@ -32,7 +32,7 @@ const sendEvent = async (uuid: string) => {
   try {
     const event = 'didOptOutTelemetry';
 
-    await fetch('https://analytics.strapi.io/api/v2/track', {
+    fetch('https://analytics.strapi.io/api/v2/track', {
       method: 'POST',
       body: JSON.stringify({
         event,

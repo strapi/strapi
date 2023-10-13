@@ -89,7 +89,7 @@ export default (strapi: Strapi): Sender => {
     };
 
     try {
-      const res = await strapi.fetch(`${ANALYTICS_URI}/api/v2/track`, reqParams);
+      const res = strapi.fetch(`${ANALYTICS_URI}/api/v2/track`, reqParams);
       return res.ok;
     } catch (err) {
       return false;

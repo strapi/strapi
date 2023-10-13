@@ -128,7 +128,7 @@ function App() {
 
           try {
             const event = 'didInitializeAdministration';
-            await post(
+            post(
               'https://analytics.strapi.io/api/v2/track',
               {
                 // This event is anonymous
