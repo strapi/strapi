@@ -1,6 +1,5 @@
 import { providerFactory } from '@strapi/utils';
-import { Utils } from '@strapi/types';
-
+import { Utils, Entity } from '@strapi/types';
 import {
   pipe,
   set,
@@ -17,14 +16,22 @@ import {
 } from 'lodash/fp';
 
 export type Permission = {
-  id?: string;
+  id: Entity.ID;
   action: string;
   actionParameters: object;
   subject?: string | null;
-  properties: object;
-  conditions: string[];
+  properties: {
+    fields: string[];
+    [key: string]: any;
+  };
+  conditions: string[]; // TODO: This should be a Condition interface
   role?: string; // TODO: This should be AdminRole
 };
+
+export type CreatePermissionPayload = Utils.Object.PartialBy<
+  Permission,
+  'actionParameters' | 'conditions' | 'properties' | 'subject' | 'id'
+>;
 
 type Provider = ReturnType<typeof providerFactory>;
 
@@ -44,9 +51,12 @@ export const sanitizedPermissionFields = [
   'subject',
   'properties',
   'conditions',
-];
+] as const;
 
-export const sanitizePermissionFields = pick(sanitizedPermissionFields);
+export type SanitizedPermission = Pick<Permission, (typeof sanitizedPermissionFields)[number]>;
+
+export const sanitizePermissionFields: (p: Permission) => SanitizedPermission =
+  pick(sanitizedPermissionFields);
 
 /**
  * Creates a permission with default values
@@ -119,12 +129,7 @@ export const deleteProperty = (property: string, permission: Permission) =>
  * Creates a new {@link Permission} object from raw attributes. Set default values for certain fields
  * @param  attributes
  */
-export const create = (
-  attributes: Utils.Object.PartialBy<
-    Permission,
-    'actionParameters' | 'conditions' | 'properties' | 'subject'
-  >
-) => {
+export const create = (attributes: CreatePermissionPayload) => {
   return pipe(pick(permissionFields), merge(getDefaultPermission()))(attributes) as Permission;
 };
 
@@ -152,7 +157,10 @@ export const sanitizeConditions = curry(
  * Transform raw attributes into valid permissions using the create domain function.
  * @param  payload - Can either be a single object of attributes or an array of those objects.
  */
-export const toPermission = (payload: object | object[]): Permission =>
+
+export const toPermission = <T extends object | object[]>(
+  payload: T
+): T extends object[] ? Permission[] : Permission =>
   // @ts-expect-error
   isArray(payload) ? map(create, payload) : create(payload);
 
