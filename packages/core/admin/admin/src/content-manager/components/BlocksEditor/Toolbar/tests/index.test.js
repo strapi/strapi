@@ -48,28 +48,6 @@ const mixedInitialValue = [
   },
 ];
 
-const paragraphWithModifiersInitialValue = [
-  {
-    type: 'paragraph',
-    children: [
-      {
-        type: 'text',
-        text: 'A ',
-      },
-      {
-        type: 'text',
-        text: 'line of text',
-        bold: true,
-        italic: true,
-      },
-      {
-        type: 'text',
-        text: ' in a paragraph.',
-      },
-    ],
-  },
-];
-
 const imageInitialValue = [
   {
     type: 'image',
@@ -671,7 +649,27 @@ describe('BlocksEditor toolbar', () => {
   });
 
   it('creates a new list with mixed content when you click on the button and editor contains mixed content paragraph', async () => {
-    setup(paragraphWithModifiersInitialValue);
+    setup([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'A ',
+          },
+          {
+            type: 'text',
+            text: 'line of text',
+            bold: true,
+            italic: true,
+          },
+          {
+            type: 'text',
+            text: ' in a paragraph.',
+          },
+        ],
+      },
+    ]);
 
     // Get the unordered list button
     const unorderedListButton = screen.getByLabelText(/bulleted list/i);
@@ -709,7 +707,7 @@ describe('BlocksEditor toolbar', () => {
     expect(ReactEditor.focus).toHaveBeenCalledTimes(1);
   });
 
-  it('creates a new list with some content when you select the option in the dropdown and editor contains an heading on the last line', async () => {
+  it('creates a new list with some content when you select the option in the dropdown and editor contains a heading on the last line', async () => {
     setup(mixedInitialValue);
 
     const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
@@ -748,6 +746,7 @@ describe('BlocksEditor toolbar', () => {
       },
     ]);
   });
+
   it('should disable the modifiers buttons when the selection is inside an image', async () => {
     setup(imageInitialValue);
 

@@ -464,9 +464,9 @@ const isListActive = (editor, matchNode) => {
 };
 
 const toggleList = (editor, isActive, format) => {
-  /**
-   * If we have selected a portion of content in the editor, we want to convert it to a list or if it is already a list, convert it back to a paragraph
-   */
+  // If we have selected a portion of content in the editor,
+  // we want to convert it to a list or if it is already a list,
+  // convert it back to a paragraph
   if (editor.selection) {
     Transforms.unwrapNodes(editor, {
       match: (node) => isListNode(node) && ['ordered', 'unordered'].includes(node.format),
@@ -481,14 +481,14 @@ const toggleList = (editor, isActive, format) => {
       const block = { type: 'list', format, children: [] };
       Transforms.wrapNodes(editor, block);
     }
-    /**
-     * Otherwise if there is not a selected portion in the editor, we want to convert the last inserted node to a list or if it is already a list, convert it back to a paragraph
-     */
   } else {
+    // There is no selection, convert the last inserted node to a list
+    // If it is already a list, convert it back to a paragraph
     const [, lastNodePath] = Editor.last(editor, []);
 
     const [parentNode] = Editor.parent(editor, lastNodePath, {
-      match: (node) => node.type !== 'text', // makes sure we get a block node, not an inline node
+      // Makes sure we get a block node, not an inline node
+      match: (node) => node.type !== 'text',
     });
 
     Transforms.removeNodes(editor, {
@@ -513,6 +513,7 @@ const toggleList = (editor, isActive, format) => {
     );
 
     if (!isActive) {
+      // If the selection is now a list item, wrap it inside a list
       const block = { type: 'list', format, children: [] };
       Transforms.wrapNodes(editor, block);
     }
