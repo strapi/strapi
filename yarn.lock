@@ -7526,6 +7526,7 @@ __metadata:
   resolution: "@strapi/data-transfer@workspace:packages/core/data-transfer"
   dependencies:
     "@strapi/logger": 4.14.4
+    "@strapi/pack-up": "workspace:*"
     "@strapi/strapi": 4.14.4
     "@strapi/types": 4.14.4
     "@strapi/utils": 4.14.4
