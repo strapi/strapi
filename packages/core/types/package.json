@@ -31,7 +31,6 @@
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "files": [
-    "./dist/**/!(*.d.ts.map)",
     "./dist"
   ],
   "scripts": {

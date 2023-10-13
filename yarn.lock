@@ -14324,6 +14324,7 @@ __metadata:
   resolution: "create-strapi-app@workspace:packages/cli/create-strapi-app"
   dependencies:
     "@strapi/generate-new": 4.14.4
+    "@strapi/pack-up": "workspace:*"
     commander: 8.3.0
     eslint-config-custom: 4.14.4
     inquirer: 8.2.5
@@ -14338,6 +14339,7 @@ __metadata:
   resolution: "create-strapi-starter@workspace:packages/cli/create-strapi-starter"
   dependencies:
     "@strapi/generate-new": 4.14.4
+    "@strapi/pack-up": "workspace:*"
     chalk: 4.1.2
     ci-info: 3.8.0
     commander: 8.3.0
