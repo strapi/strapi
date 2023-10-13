@@ -2,7 +2,7 @@ import { formatContentTypeData } from '../formatContentTypeData';
 
 import { testData } from './testData';
 
-import type { Schema } from '@strapi/strapi';
+import type { Schema } from '@strapi/types';
 
 const { contentType, components, modifiedData } = testData;
 
@@ -83,6 +83,8 @@ describe('STRAPI_HELPER_PLUGIN | utils | formatContentTypeData', () => {
   it('should stringify json fields', () => {
     const contentType: Schema.ContentType = {
       uid: 'api::test.test',
+      modelName: 'test.test',
+      globalId: 'Test.Test',
       attributes: {
         id: { type: 'integer' },
         name: { type: 'string' },
@@ -94,16 +96,19 @@ describe('STRAPI_HELPER_PLUGIN | utils | formatContentTypeData', () => {
       modelType: 'contentType',
       kind: 'collectionType',
       info: {
+        singularName: 'test',
+        pluralName: 'tests',
         displayName: 'Test',
       },
     };
 
     const components: Record<string, Schema.Component> = {
       'compos.sub-compo': {
+        uid: 'api::compos.sub-compo',
+        modelName: 'compos.sub-compo',
+        category: 'component',
+        globalId: 'Compos.SubCompo',
         modelType: 'component',
-        info: {
-          displayName: 'Test',
-        },
         attributes: {
           id: { type: 'integer' },
           name: { type: 'string' },

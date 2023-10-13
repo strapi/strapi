@@ -39,7 +39,7 @@
 
 Strapi Community Edition is a free and open-source headless CMS enabling you to manage any content, anywhere.
 
-- **Self-hosted or Cloud**: You can host and scale Strapi projects the way you want. You can save time by deploying to [Strapi Cloud](https://cloud.strapi.io/signups?source=github1) or deploy to the hosting platform you want**: AWS, Azure, Google Cloud, DigitalOcean.
+- **Self-hosted or Cloud**: You can host and scale Strapi projects the way you want. You can save time by deploying to [Strapi Cloud](https://cloud.strapi.io/signups?source=github1) or deploy to the hosting platform you want\*\*: AWS, Azure, Google Cloud, DigitalOcean.
 - **Modern Admin Pane**: Elegant, entirely customizable and a fully extensible admin panel.
 - **Multi-database support**: You can choose the database you prefer: PostgreSQL, MySQL, MariaDB, and SQLite.
 - **Customizable**: You can quickly build your logic by fully customizing APIs, routes, or plugins to fit your needs perfectly.
@@ -113,7 +113,7 @@ Strapi only supports maintenance and LTS versions of Node.js. Please refer to th
 
 - **Content Types Builder**: Build the most flexible publishing experience for your content managers, by giving them the freedom to create any page on the go with [fields](https://docs.strapi.io/user-docs/content-manager/writing-content#filling-up-fields), components and [Dynamic Zones](https://docs.strapi.io/user-docs/content-manager/writing-content#dynamic-zones).
 - **Media Library**: Upload your images, videos, audio or documents to the media library. Easily find the right asset, edit and reuse it.
-- **Internationalization**: The Internationalization (i18n) plugin allows Strapi users to create, manage and distribute localized content in different languages, called "locales
+- **Internationalization**: The Internationalization (i18n) plugin allows Strapi users to create, manage and distribute localized content in different languages, called "locales"
 - **Role Based Access Control**: Create an unlimited number of custom roles and permissions for admin and end users.
 - **GraphQL or REST**: Consume the API using REST or GraphQL
 

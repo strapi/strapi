@@ -6,8 +6,8 @@ import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 
-import Theme from '../../../../components/Theme';
-import ThemeToggleProvider from '../../../../components/ThemeToggleProvider';
+import { Theme } from '../../../../components/Theme';
+import { ThemeToggleProvider } from '../../../../components/ThemeToggleProvider';
 import NoContentType from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({

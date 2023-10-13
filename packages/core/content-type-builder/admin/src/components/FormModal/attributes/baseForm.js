@@ -1,5 +1,3 @@
-// import React, { Fragment } from 'react';
-// import { FormattedMessage } from 'react-intl';
 import getTrad from '../../../utils/getTrad';
 import { componentField, componentForm } from '../component';
 

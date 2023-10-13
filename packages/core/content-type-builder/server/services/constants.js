@@ -14,6 +14,7 @@ const DEFAULT_TYPES = [
   'string',
   'text',
   'richtext',
+  'blocks',
   'json',
   'enumeration',
   'password',

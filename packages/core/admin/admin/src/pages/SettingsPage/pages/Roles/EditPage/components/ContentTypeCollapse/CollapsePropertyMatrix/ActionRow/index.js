@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { usePermissionsDataManager } from '../../../../../../../../../hooks';
+import { usePermissionsDataManager } from '../../../../hooks/usePermissionsDataManager';
 import HiddenAction from '../../../HiddenAction';
 import { cellWidth, rowHeight } from '../../../Permissions/utils/constants';
 import RequiredSign from '../../../RequiredSign';

@@ -1,12 +1,14 @@
 'use strict';
 
-jest.mock('@strapi/strapi/ee', () => ({
-  features: {
-    isEnabled() {
-      return true;
-    },
-    list() {
-      return [{ name: 'sso' }];
+jest.mock('@strapi/strapi/dist/utils/ee', () => ({
+  default: {
+    features: {
+      isEnabled() {
+        return true;
+      },
+      list() {
+        return [{ name: 'sso' }];
+      },
     },
   },
 }));

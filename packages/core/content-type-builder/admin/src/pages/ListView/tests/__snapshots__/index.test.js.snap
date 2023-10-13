@@ -1164,7 +1164,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
             <span
               class="c3 c14"
             >
-              content-type-builder.button.attributes.add.another
+              Add another field
             </span>
           </button>
           <button
@@ -1243,7 +1243,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
               <span
                 class="c3 c14"
               >
-                content-type-builder.form.button.configure-view
+                Configure the view
               </span>
             </button>
           </div>
@@ -3556,7 +3556,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             <span
                               class="c3 c54"
                             >
-                              content-type-builder.button.component.add
+                              Add a component
                             </span>
                           </div>
                         </button>

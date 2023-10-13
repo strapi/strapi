@@ -1,9 +1,8 @@
 import React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { FormikProvider, useFormik } from 'formik';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IntlProvider } from 'react-intl';
@@ -11,7 +10,7 @@ import { Provider } from 'react-redux';
 
 import configureStore from '../../../../../../../../../admin/src/core/store/configureStore';
 import * as actions from '../../../actions';
-import { ACTION_SET_WORKFLOW, STAGE_COLOR_DEFAULT } from '../../../constants';
+import { STAGE_COLOR_DEFAULT } from '../../../constants';
 import { reducer } from '../../../reducer';
 import { Stages } from '../Stages';
 
@@ -19,6 +18,15 @@ import { Stages } from '../Stages';
 jest.mock('../../../actions', () => ({
   __esModule: true,
   ...jest.requireActual('../../../actions'),
+}));
+
+// A single stage needs a formik provider, which is a bit complicated to setup.
+// Since we don't want to test the single stages, but the overall composition
+// it is the easiest for the test setup to just render an id instead of the
+// whole component.
+jest.mock('../Stage', () => ({
+  __esModule: true,
+  Stage: ({ id }) => id,
 }));
 
 const STAGES_FIXTURE = [
@@ -35,44 +43,25 @@ const STAGES_FIXTURE = [
   },
 ];
 
-const WORKFLOWS_FIXTURE = [
-  {
-    id: 1,
-    stages: STAGES_FIXTURE,
-  },
-];
+const setup = (props) => ({
+  ...render(<Stages stages={STAGES_FIXTURE} {...props} />, {
+    wrapper({ children }) {
+      const store = configureStore([], [reducer]);
 
-const ComponentFixture = (props) => {
-  const store = configureStore([], [reducer]);
-
-  store.dispatch({ type: ACTION_SET_WORKFLOW, payload: { workflows: WORKFLOWS_FIXTURE } });
-
-  const formik = useFormik({
-    enableReinitialize: true,
-    initialValues: {
-      stages: STAGES_FIXTURE,
+      return (
+        <DndProvider backend={HTML5Backend}>
+          <Provider store={store}>
+            <IntlProvider locale="en" messages={{}}>
+              <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
+            </IntlProvider>
+          </Provider>
+        </DndProvider>
+      );
     },
-    validateOnChange: false,
-  });
+  }),
 
-  return (
-    <DndProvider backend={HTML5Backend}>
-      <Provider store={store}>
-        <FormikProvider value={formik}>
-          <IntlProvider locale="en" messages={{}}>
-            <ThemeProvider theme={lightTheme}>
-              <Stages stages={STAGES_FIXTURE} {...props} />
-            </ThemeProvider>
-          </IntlProvider>
-        </FormikProvider>
-      </Provider>
-    </DndProvider>
-  );
-};
-
-const setup = (props) => render(<ComponentFixture {...props} />);
-
-const user = userEvent.setup();
+  user: userEvent.setup(),
+});
 
 describe('Admin | Settings | Review Workflow | Stages', () => {
   beforeEach(() => {
@@ -82,8 +71,8 @@ describe('Admin | Settings | Review Workflow | Stages', () => {
   it('should render a list of stages', () => {
     const { getByText } = setup();
 
-    expect(getByText(STAGES_FIXTURE[0].name)).toBeInTheDocument();
-    expect(getByText(STAGES_FIXTURE[1].name)).toBeInTheDocument();
+    expect(getByText(STAGES_FIXTURE[0].id)).toBeInTheDocument();
+    expect(getByText(STAGES_FIXTURE[1].id)).toBeInTheDocument();
   });
 
   it('should render a "add new stage" button', () => {
@@ -93,7 +82,7 @@ describe('Admin | Settings | Review Workflow | Stages', () => {
   });
 
   it('should append a new stage when clicking "add new stage"', async () => {
-    const { getByRole } = setup();
+    const { getByRole, user } = setup();
     const spy = jest.spyOn(actions, 'addStage');
 
     await user.click(
@@ -104,23 +93,6 @@ describe('Admin | Settings | Review Workflow | Stages', () => {
 
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith({ name: '' });
-  });
-
-  it('should update the name of a stage by changing the input value', async () => {
-    const { queryByRole, getByRole } = setup();
-    const spy = jest.spyOn(actions, 'updateStage');
-
-    await user.click(getByRole('button', { name: /stage-2/i }));
-
-    const input = queryByRole('textbox', {
-      name: /stage name/i,
-    });
-
-    fireEvent.change(input, { target: { value: 'New name' } });
-
-    expect(spy).toBeCalledWith(2, {
-      name: 'New name',
-    });
   });
 
   it('should not render the "add stage" button if canUpdate = false', () => {

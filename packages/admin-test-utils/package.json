@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin-test-utils",
-  "version": "4.13.6",
+  "version": "4.14.4",
   "private": true,
   "description": "Test utilities for the Strapi administration panel",
   "license": "MIT",
@@ -16,24 +16,54 @@
       "url": "https://strapi.io"
     }
   ],
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "require": "./dist/index.js"
+      "types": "./dist/index.d.ts",
+      "module": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "source": "./src/index.ts",
+      "default": "./dist/index.js"
     },
     "./after-env": {
-      "require": "./dist/after-env.js"
+      "types": "./dist/after-env.d.ts",
+      "module": "./dist/after-env.mjs",
+      "require": "./dist/after-env.js",
+      "source": "./src/after-env.ts",
+      "default": "./dist/after-env.js"
     },
     "./environment": {
-      "require": "./dist/environment.js"
+      "types": "./dist/environment.d.ts",
+      "module": "./dist/environment.mjs",
+      "require": "./dist/environment.js",
+      "source": "./src/environment.ts",
+      "default": "./dist/environment.js"
     },
     "./file-mock": {
-      "require": "./dist/file-mock.js"
+      "types": "./dist/file-mock.d.ts",
+      "module": "./dist/file-mock.mjs",
+      "require": "./dist/file-mock.js",
+      "source": "./src/file-mock.ts",
+      "default": "./dist/file-mock.js"
     },
     "./global-setup": {
-      "require": "./dist/global-setup.js"
-    }
+      "types": "./dist/global-setup.d.ts",
+      "module": "./dist/global-setup.mjs",
+      "require": "./dist/global-setup.js",
+      "source": "./src/global-setup.ts",
+      "default": "./dist/global-setup.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "pack-up build",
+    "clean": "run -T rimraf ./dist",
+    "lint": "run -T eslint .",
+    "test:ts": "run -T tsc --noEmit",
+    "watch": "pack-up watch"
   },
   "dependencies": {
     "@juggle/resize-observer": "3.4.0",
@@ -42,19 +72,13 @@
     "whatwg-fetch": "3.6.2"
   },
   "devDependencies": {
-    "eslint-config-custom": "4.13.6",
+    "@strapi/pack-up": "workspace:*",
+    "eslint-config-custom": "4.14.4",
     "redux": "^4.2.1",
-    "tsconfig": "4.13.6"
+    "tsconfig": "4.14.4"
   },
   "peerDependencies": {
     "redux": "^4.2.1"
-  },
-  "scripts": {
-    "build": "run -T tsc",
-    "build:ts": "run -T tsc",
-    "watch": "run -T tsc -w --preserveWatchOutput",
-    "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint ."
   },
   "engines": {
     "node": ">=16.0.0 <=20.x.x"

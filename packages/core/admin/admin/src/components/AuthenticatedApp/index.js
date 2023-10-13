@@ -12,19 +12,15 @@ import { useQueries } from 'react-query';
 //  TODO: DS add loader
 
 import packageJSON from '../../../../package.json';
-import { useConfigurations } from '../../hooks';
+import { useConfiguration } from '../../hooks';
 import { getFullName, hashAdminUserEmail } from '../../utils';
-import NpsSurvey from '../NpsSurvey';
-import PluginsInitializer from '../PluginsInitializer';
+import { NpsSurvey } from '../NpsSurvey';
+import { PluginsInitializer } from '../PluginsInitializer';
 import RBACProvider from '../RBACProvider';
 
-import {
-  fetchAppInfo,
-  fetchCurrentUserPermissions,
-  fetchStrapiLatestRelease,
-  fetchUserRoles,
-} from './utils/api';
-import checkLatestStrapiVersion from './utils/checkLatestStrapiVersion';
+import { fetchAppInfo, fetchCurrentUserPermissions, fetchUserRoles } from './utils/api';
+import { checkLatestStrapiVersion } from './utils/checkLatestStrapiVersion';
+import { fetchStrapiLatestRelease } from './utils/fetchStrapiLatestRelease';
 
 const strapiVersion = packageJSON.version;
 
@@ -35,7 +31,7 @@ const AuthenticatedApp = () => {
   const userName = get(userInfo, 'username') || getFullName(userInfo.firstname, userInfo.lastname);
   const [userDisplayName, setUserDisplayName] = useState(userName);
   const [userId, setUserId] = useState(null);
-  const { showReleaseNotification } = useConfigurations();
+  const { showReleaseNotification } = useConfiguration();
   const [
     { data: appInfos, status },
     { data: tagName, isLoading },

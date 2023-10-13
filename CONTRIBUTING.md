@@ -58,6 +58,8 @@ The Strapi core team will review your pull request and either merge it, request 
 - Ensure the following test suites are passing:
   - `yarn test:unit`
   - `yarn test:front`
+  - `yarn test:e2e --setup --concurrency=1`
+    - you ***may*** need to install Playwright browsers first: `yarn playwright install`
 - Make sure your code lints by running `yarn lint`.
 - If your contribution fixes an existing issue, please make sure to link it in your pull request.
 

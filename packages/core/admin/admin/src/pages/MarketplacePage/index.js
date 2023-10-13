@@ -25,8 +25,7 @@ import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
-import useDebounce from '../../hooks/useDebounce';
-import useNavigatorOnLine from '../../hooks/useNavigatorOnLine';
+import { useDebounce } from '../../hooks/useDebounce';
 import { selectAdminPermissions } from '../App/selectors';
 
 import MissingPluginBanner from './components/MissingPluginBanner';
@@ -36,6 +35,7 @@ import NpmPackagesPagination from './components/NpmPackagesPagination';
 import OfflineLayout from './components/OfflineLayout';
 import PageHeader from './components/PageHeader';
 import SortSelect from './components/SortSelect';
+import { useNavigatorOnline } from './hooks/useNavigatorOnline';
 import useMarketplaceData from './utils/useMarketplaceData';
 
 const MarketPlacePage = () => {
@@ -47,7 +47,7 @@ const MarketPlacePage = () => {
   const debouncedSearch = useDebounce(query?.search, 500) || '';
 
   const { autoReload: isInDevelopmentMode, dependencies, useYarn, strapiVersion } = useAppInfo();
-  const isOnline = useNavigatorOnLine();
+  const isOnline = useNavigatorOnline();
 
   const npmPackageType = query?.npmPackageType || 'plugin';
 

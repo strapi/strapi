@@ -9,10 +9,12 @@ import * as yup from 'yup';
 
 import BaseLogin from '../BaseLogin';
 
-jest.mock('../../../../../hooks/useConfigurations', () => () => ({
-  logos: {
-    auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
-  },
+jest.mock('../../../../../hooks/useConfiguration', () => ({
+  useConfiguration: () => ({
+    logos: {
+      auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
+    },
+  }),
 }));
 
 describe('ADMIN | PAGES | AUTH | BaseLogin', () => {

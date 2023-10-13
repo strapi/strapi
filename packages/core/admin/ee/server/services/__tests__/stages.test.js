@@ -1,15 +1,17 @@
 'use strict';
 
-jest.mock('@strapi/strapi/lib/utils/ee', () => {
+jest.mock('@strapi/strapi/dist/utils/ee', () => {
   const eeModule = () => true;
 
   Object.assign(eeModule, {
-    features: {
-      isEnabled() {
-        return true;
-      },
-      getEnabled() {
-        return ['review-workflows'];
+    default: {
+      features: {
+        isEnabled() {
+          return true;
+        },
+        getEnabled() {
+          return ['review-workflows'];
+        },
       },
     },
   });
@@ -77,6 +79,12 @@ const servicesMock = {
     register: jest.fn(),
     validateWorkflowCount: jest.fn().mockResolvedValue(true),
     validateWorkflowStages: jest.fn(),
+  },
+  'admin::stage-permissions': {
+    register: jest.fn(),
+    registerMany: jest.fn(),
+    unregister: jest.fn(),
+    can: jest.fn(() => true),
   },
 };
 
@@ -240,6 +248,30 @@ describe('Review workflows - Stages service', () => {
       expect(entityServiceMock.create).toBeCalled();
       expect(entityServiceMock.update).toBeCalled();
       expect(entityServiceMock.delete).toBeCalled();
+    });
+
+    test('Undefined destination stage permissions should apply a partial permission update', async () => {
+      const srcStages = workflowMock.stages.map((stage) => ({
+        ...stage,
+        permissions: [{ id: 1, role: 'role', action: 'action' }],
+      }));
+
+      const destStages = workflowMock.stages.map((stage, index) => ({
+        ...stage,
+        name: `Updated Name ${index}`,
+      }));
+
+      await stagesService.replaceStages(srcStages, destStages);
+
+      expect(entityServiceMock.create).not.toBeCalled();
+      expect(entityServiceMock.delete).not.toBeCalled();
+      expect(entityServiceMock.update).toBeCalledTimes(4);
+
+      destStages.forEach((stage, index) => {
+        expect(entityServiceMock.update).toBeCalledWith('admin::workflow-stage', stage.id, {
+          data: { ...stage, permissions: srcStages[index].permissions },
+        });
+      });
     });
   });
 });

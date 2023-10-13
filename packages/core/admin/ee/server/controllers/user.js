@@ -1,7 +1,7 @@
 'use strict';
 
 // eslint-disable-next-line node/no-extraneous-require
-const ee = require('@strapi/strapi/lib/utils/ee');
+const ee = require('@strapi/strapi/dist/utils/ee').default;
 const _ = require('lodash');
 const { pick, isNil } = require('lodash/fp');
 const { ApplicationError, ForbiddenError } = require('@strapi/utils').errors;

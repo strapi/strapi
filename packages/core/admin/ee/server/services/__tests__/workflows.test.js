@@ -1,15 +1,17 @@
 'use strict';
 
-jest.mock('@strapi/strapi/lib/utils/ee', () => {
+jest.mock('@strapi/strapi/dist/utils/ee', () => {
   const eeModule = () => true;
 
   Object.assign(eeModule, {
-    features: {
-      isEnabled() {
-        return true;
-      },
-      getEnabled() {
-        return ['review-workflows'];
+    default: {
+      features: {
+        isEnabled() {
+          return true;
+        },
+        getEnabled() {
+          return ['review-workflows'];
+        },
       },
     },
   });
@@ -24,7 +26,7 @@ jest.mock('../review-workflows/workflows/content-types', () => {
 });
 
 const workflowsServiceFactory = require('../review-workflows/workflows');
-const { WORKFLOW_MODEL_UID } = require('../../constants/workflows');
+const { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } = require('../../constants/workflows');
 
 const workflowMock = {
   id: 1,
@@ -70,6 +72,12 @@ const servicesMock = {
   'admin::stages': {
     replaceStages: jest.fn(async () => stagesMock),
     createMany: jest.fn(async () => stagesMock),
+  },
+  'admin::stage-permissions': {
+    register: jest.fn(),
+    registerMany: jest.fn(),
+    unregister: jest.fn(),
+    can: jest.fn(() => true),
   },
 };
 
@@ -145,7 +153,7 @@ describe('Review workflows - Workflows service', () => {
           return stage;
         }),
       },
-      populate: undefined,
+      populate: WORKFLOW_POPULATE,
     };
 
     test('Should call entityService with the right model UID', async () => {
@@ -158,7 +166,7 @@ describe('Review workflows - Workflows service', () => {
           name: 'Default',
           stages: workflow.stages.map((stage) => stage.id),
         },
-        populate: undefined,
+        populate: WORKFLOW_POPULATE,
       });
       expect(servicesMock['admin::review-workflows-metrics'].sendDidEditWorkflow).toBeCalled();
     });
@@ -177,7 +185,7 @@ describe('Review workflows - Workflows service', () => {
           },
         ],
       },
-      populate: undefined,
+      populate: WORKFLOW_POPULATE,
     };
 
     test('Should call entityService with the right model UID', async () => {
@@ -189,7 +197,7 @@ describe('Review workflows - Workflows service', () => {
           name: 'Workflow',
           stages: stagesMock.map((stage) => stage.id),
         },
-        populate: { stages: true },
+        populate: WORKFLOW_POPULATE,
       });
       expect(servicesMock['admin::review-workflows-metrics'].sendDidCreateWorkflow).toBeCalled();
     });
