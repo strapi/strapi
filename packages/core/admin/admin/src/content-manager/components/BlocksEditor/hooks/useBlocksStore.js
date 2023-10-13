@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import {
   Box,
+  Icon,
   Typography,
   BaseLink,
   Popover,
@@ -11,6 +12,7 @@ import {
   FieldInput,
   Flex,
   Button,
+  Tooltip,
 } from '@strapi/design-system';
 import {
   Code,
@@ -245,21 +247,6 @@ Image.propTypes = {
   }).isRequired,
 };
 
-const IconButtonCustom = styled(IconButton)`
-  background-color: ${({ theme, buttonVariant }) =>
-    buttonVariant === 'delete' ? theme.colors.danger100 : theme.colors.neutral0};
-    &:hover {
-      background-color: ${({ theme }) => theme.colors.neutral0};
-    }
-};
-
-  svg path,
-  &:focus svg path {
-    fill: ${({ theme, buttonVariant }) =>
-      buttonVariant === 'delete' ? theme.colors.danger700 : theme.colors.neutral600};
-  }
-`;
-
 const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRef) => {
   const { formatMessage } = useIntl();
   const editor = useSlate();
@@ -381,26 +368,43 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                 </StyledBaseLink>
               </Typography>
               <Flex justifyContent="end" width="100%" gap={2}>
-                <IconButtonCustom
-                  icon={<Trash />}
-                  size="L"
-                  onClick={() => removeLink(editor)}
-                  label={formatMessage({
+                <Tooltip
+                  description={formatMessage({
                     id: 'components.Blocks.popover.delete',
                     defaultMessage: 'Delete',
                   })}
-                  buttonVariant="delete"
-                />
-                <IconButtonCustom
-                  icon={<Pencil />}
-                  size="L"
-                  onClick={() => setIsEditing(true)}
-                  label={formatMessage({
+                >
+                  <Button
+                    size="L"
+                    variant="danger-light"
+                    onClick={() => removeLink(editor)}
+                    aria-label={formatMessage({
+                      id: 'components.Blocks.popover.delete',
+                      defaultMessage: 'Delete',
+                    })}
+                  >
+                    <Icon width={3} height={3} as={Trash} />
+                  </Button>
+                </Tooltip>
+
+                <Tooltip
+                  description={formatMessage({
                     id: 'components.Blocks.popover.edit',
                     defaultMessage: 'Edit',
                   })}
-                  buttonVariant="edit"
-                />
+                >
+                  <Button
+                    size="L"
+                    variant="tertiary"
+                    onClick={() => setIsEditing(true)}
+                    aria-label={formatMessage({
+                      id: 'components.Blocks.popover.edit',
+                      defaultMessage: 'Edit',
+                    })}
+                  >
+                    <Icon width={3} height={3} as={Pencil} />
+                  </Button>
+                </Tooltip>
               </Flex>
             </Flex>
           )}
