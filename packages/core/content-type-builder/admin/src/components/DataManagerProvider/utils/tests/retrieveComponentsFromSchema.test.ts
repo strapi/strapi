@@ -1,8 +1,10 @@
-import retrieveComponentsFromSchema from '../retrieveComponentsFromSchema';
+import { retrieveComponentsFromSchema } from '../retrieveComponentsFromSchema';
+
+import type { AttributeType, Components } from '../../../../types';
 
 describe('CONTENT TYPE BUILDER | components | DataManagerProvider | utils | retrieveComponentsFromSchema', () => {
   it('should return an array of components name', () => {
-    const attributes = [
+    const attributes: AttributeType[] = [
       {
         maxLength: 50,
         required: true,
@@ -48,7 +50,7 @@ describe('CONTENT TYPE BUILDER | components | DataManagerProvider | utils | ret
       },
     ];
 
-    const components = {
+    const components: Components = {
       'blog.test-como': {
         uid: 'blog.test-como',
         category: 'blog',

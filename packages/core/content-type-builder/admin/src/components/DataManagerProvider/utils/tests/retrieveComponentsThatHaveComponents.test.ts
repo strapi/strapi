@@ -3,7 +3,7 @@ import {
   retrieveComponentsThatHaveComponents,
 } from '../retrieveComponentsThatHaveComponents';
 
-const data = {
+const data: any = {
   // Slider has a component
   'blog.slider': {
     uid: 'blog.slider',

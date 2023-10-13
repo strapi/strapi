@@ -70,7 +70,7 @@ const findAttributeIndex = (schema: any, attributeToFind?: string) => {
 };
 
 const reducer = (state = initialState, action: Action) =>
-  produce(state, (draftState) => {
+  produce(state, (draftState: any) => {
     switch (action.type) {
       case actions.ADD_ATTRIBUTE: {
         const {
@@ -101,7 +101,7 @@ const reducer = (state = initialState, action: Action) =>
 
         if (action.shouldAddComponentToData) {
           const componentToAddUID = rest.component;
-          const componentToAdd = state?.components?.[componentToAddUID];
+          const componentToAdd = state.components[componentToAddUID];
           const isTemporaryComponent = componentToAdd?.isTemporary;
           const hasComponentAlreadyBeenAdded =
             state.modifiedData.components?.[componentToAddUID] !== undefined;
@@ -116,13 +116,10 @@ const reducer = (state = initialState, action: Action) =>
           }
 
           // Add the added component to the modifiedData.components
-          // @ts-ignore
           draftState.modifiedData.components[componentToAddUID] = componentToAdd;
 
           const nestedComponents = retrieveComponentsFromSchema(
-            // @ts-ignore
-            componentToAdd.schema.attributes,
-            // @ts-ignore
+            componentToAdd.schema.attributes as AttributeType[],
             state.components
           );
 
@@ -134,7 +131,7 @@ const reducer = (state = initialState, action: Action) =>
           );
 
           nestedComponentsToAddInModifiedData.forEach((compoUID: UID.Component) => {
-            const compoSchema = get(state, ['components', compoUID], {});
+            const compoSchema = get(state, ['components', compoUID], {}) as Component;
             const isTemporary = compoSchema.isTemporary || false;
 
             // If the nested component has not been saved we don't need to add them as they are already in the state
@@ -283,7 +280,7 @@ const reducer = (state = initialState, action: Action) =>
         });
 
         nestedComponentsToAddInModifiedData.forEach((compoUID: UID.Component) => {
-          const compoSchema = get(state, ['components', compoUID], {});
+          const compoSchema = get(state, ['components', compoUID], {}) as Component;
           const isTemporary = compoSchema.isTemporary || false;
 
           // If the nested component has not been saved we don't need to add them as they are already in the state
@@ -653,22 +650,22 @@ const reducer = (state = initialState, action: Action) =>
         }
 
         // Find all uid fields that have the targetField set to the field we are removing
-        // @ts-ignore
-        const uidFieldsToUpdate: string[] = state.modifiedData[mainDataKey].schema.attributes
-          .slice()
-          .reduce((acc: string[], current: AttributeType) => {
-            if (current.type !== 'uid') {
-              return acc;
-            }
 
-            if (current.targetField !== attributeToRemoveName) {
-              return acc;
-            }
-
-            acc.push(current.name);
-
+        const uidFieldsToUpdate: string[] = state.modifiedData[
+          mainDataKey
+        ]!.schema.attributes.slice().reduce((acc: string[], current: AttributeType) => {
+          if (current.type !== 'uid') {
             return acc;
-          }, []);
+          }
+
+          if (current.targetField !== attributeToRemoveName) {
+            return acc;
+          }
+
+          acc.push(current.name as string);
+
+          return acc;
+        }, []);
 
         uidFieldsToUpdate.forEach((fieldName) => {
           const fieldIndex = findAttributeIndex(state.modifiedData[mainDataKey], fieldName);
@@ -687,7 +684,7 @@ const reducer = (state = initialState, action: Action) =>
           state.modifiedData.components?.[componentUid],
           attributeToRemoveName
         );
-        // @ts-ignore
+
         draftState.modifiedData.components?.[componentUid]?.schema?.attributes?.splice(
           attributeToRemoveIndex,
           1
@@ -716,21 +713,17 @@ const reducer = (state = initialState, action: Action) =>
           uid,
         } = action;
 
-        // @ts-ignore
         draftState.modifiedData[schemaType].schema.displayName = displayName;
 
         if (action.schemaType === 'component') {
-          // @ts-ignore
           draftState.modifiedData.component.category = category;
-          // @ts-ignore
           draftState.modifiedData.component.schema.icon = icon;
           const addedComponent = current(draftState.modifiedData.component);
-          // @ts-ignore
-          draftState.components[uid] = addedComponent;
+          draftState.components[uid as string] = addedComponent;
 
           break;
         }
-        // @ts-ignore
+
         draftState.modifiedData.contentType.schema.kind = kind;
 
         break;

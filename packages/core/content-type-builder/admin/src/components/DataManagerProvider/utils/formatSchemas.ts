@@ -16,7 +16,7 @@ export const formatSchemas = (schemas: Record<string, any>) => {
   }, {});
 };
 
-export const toAttributesArray = (attributes: AttributeType[]) => {
+export const toAttributesArray = (attributes: Record<string, AttributeType>) => {
   return Object.keys(attributes).reduce((acc: AttributeType[], current: any) => {
     acc.push({ ...attributes[current], name: current });
 

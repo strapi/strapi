@@ -1,15 +1,18 @@
-import createModifiedDataSchema from '../createModifiedDataSchema';
+import { createModifiedDataSchema } from '../createModifiedDataSchema';
+
+import type { Components } from '../../../../types';
+import type { UID } from '@strapi/types';
 
 describe('CONTENT TYPE BUILDER | COMPONENTS | DataManagerProvider | utils | createModifiedDataSchema', () => {
   it('should create the modifiedData object correctly when it is used in the content type view and there is no associated components', () => {
-    const dataSchema = {
+    const dataSchema: any = {
       apiID: 'test',
       schema: {
         attributes: [{ type: 'string', name: 'name' }],
       },
     };
 
-    const retrievedComponents = [];
+    const retrievedComponents: UID.Component[] = [];
     const components = {};
     const isInContentTypeView = true;
 
@@ -24,14 +27,14 @@ describe('CONTENT TYPE BUILDER | COMPONENTS | DataManagerProvider | utils | cre
   });
 
   it('should create the modifiedData object correctly when it is used in the component view and there is no associated components', () => {
-    const dataSchema = {
+    const dataSchema: any = {
       apiID: 'test',
       schema: {
         attributes: [{ type: 'string', name: 'name' }],
       },
     };
 
-    const retrievedComponents = [];
+    const retrievedComponents: UID.Component[] = [];
     const components = {};
     const isInContentTypeView = false;
 
@@ -46,7 +49,7 @@ describe('CONTENT TYPE BUILDER | COMPONENTS | DataManagerProvider | utils | cre
   });
 
   it('should create the modifiedData object correctly when it is used in the content type view and there are some associated components', () => {
-    const dataSchema = {
+    const dataSchema: any = {
       apiID: 'test',
       schema: {
         attributes: [
@@ -56,12 +59,14 @@ describe('CONTENT TYPE BUILDER | COMPONENTS | DataManagerProvider | utils | cre
       },
     };
 
-    const retrievedComponents = ['blog.dish'];
-    const components = {
+    const retrievedComponents: UID.Component[] = ['blog.dish'];
+    const components: Components = {
       'blog.dish': {
+        uid: 'blog.dish',
         schema: { attributes: [{ name: 'name', type: 'string' }] },
       },
       'blog.test': {
+        uid: 'blog.test',
         schema: { attributes: [{ type: 'string', name: 'name' }] },
       },
     };

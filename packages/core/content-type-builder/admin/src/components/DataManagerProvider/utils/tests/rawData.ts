@@ -1,4 +1,16 @@
-const data = {
+import type { Components, ContentType, ContentTypes } from '../../../../types';
+
+type DataType = {
+  initialComponents: Components;
+  rawData: {
+    components: Components;
+    contentTypesToSort: ContentTypes;
+    contentTypeToCreate: ContentType;
+    contentTypeToEdit: ContentType;
+  };
+};
+
+export const data: DataType = {
   initialComponents: {
     'default.metas': {
       uid: 'default.metas',
@@ -156,6 +168,8 @@ const data = {
     },
     contentTypesToSort: {
       'plugin::myplugins.test': {
+        name: 'plugin::myplugins.test',
+        title: 'test',
         uid: 'plugin::myplugins.test',
         schema: {
           displayName: 'plugin::myplugins.test',
@@ -165,6 +179,8 @@ const data = {
         },
       },
       'plugin::myplugins.btest': {
+        name: 'plugin::myplugins.test',
+        title: 'test',
         uid: 'plugin::myplugins.btest',
         schema: {
           displayName: 'plugin::myplugins.btest',
@@ -174,6 +190,8 @@ const data = {
         },
       },
       'plugin::myplugins.atest': {
+        name: 'plugin::myplugins.test',
+        title: 'test',
         uid: 'plugin::myplugins.atest',
         schema: {
           displayName: 'plugin::myplugins.atest',
@@ -183,6 +201,8 @@ const data = {
         },
       },
       'plugin::myplugins.ctest': {
+        name: 'plugin::myplugins.ctest',
+        title: 'test',
         uid: 'plugin::myplugins.ctest',
         schema: {
           displayName: 'plugin::myplugins.ctest',
@@ -194,6 +214,8 @@ const data = {
     },
 
     contentTypeToCreate: {
+      name: 'api::test-content-type.test-content-type',
+      title: 'test',
       uid: 'api::test-content-type.test-content-type',
       isTemporary: true,
       schema: {
@@ -253,6 +275,8 @@ const data = {
       },
     },
     contentTypeToEdit: {
+      name: 'api::test-content-type.test-content-type',
+      title: 'test',
       uid: 'api::test-content-type.test-content-type',
       schema: {
         displayName: 'test content type',
@@ -312,5 +336,3 @@ const data = {
     },
   },
 };
-
-export default data;

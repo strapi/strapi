@@ -87,9 +87,9 @@ const formatAttributes = (attributes: AttributeType[], mainDataUID: UID.Any) => 
           targetAttribute: formatRelationTargetAttribute(currentTargetAttribute),
         });
 
-        acc[name] = removeNullKeys(relationAttr) as AttributeType;
+        acc[name as string] = removeNullKeys(relationAttr) as AttributeType;
       } else {
-        acc[name] = removeNullKeys(currentAttribute) as AttributeType;
+        acc[name as string] = removeNullKeys(currentAttribute) as AttributeType;
       }
     }
 
@@ -101,12 +101,12 @@ const formatAttributes = (attributes: AttributeType[], mainDataUID: UID.Any) => 
         targetAttribute: formatRelationTargetAttribute(currentTargetAttribute),
       });
 
-      acc[name] = removeNullKeys(formattedRelationAttribute) as AttributeType;
+      acc[name as string] = removeNullKeys(formattedRelationAttribute) as AttributeType;
     }
 
     if (currentAttribute.customField) {
       const customFieldAttribute = { ...currentAttribute, type: 'customField' };
-      acc[name] = removeNullKeys(customFieldAttribute) as AttributeType;
+      acc[name as string] = removeNullKeys(customFieldAttribute) as AttributeType;
     }
 
     return acc;

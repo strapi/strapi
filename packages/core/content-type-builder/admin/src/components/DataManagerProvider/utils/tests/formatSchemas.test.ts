@@ -1,9 +1,11 @@
-import formatSchemas, { toAttributesArray } from '../formatSchemas';
+import { formatSchemas, toAttributesArray } from '../formatSchemas';
+
+import type { AttributeType } from '../../../../types';
 
 describe('CONTENT TYPE BUILDER | components | DataManagerProvider | utils ', () => {
   describe('toAttributesArray', () => {
     it('should return an array of attributes', () => {
-      const attributes = {
+      const attributes: Record<string, AttributeType> = {
         name: { type: 'string', pluginOptions: { i18n: { enabled: false } } },
         price: { type: 'integer' },
       };

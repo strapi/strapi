@@ -11,17 +11,19 @@ export type SchemaType = 'contentType' | 'component' | 'components';
 export type DifferentAttributesKind = 'Populatable' | 'NonPopulatable' | 'Any';
 
 export type AttributeType = Attribute.Any & {
-  name: string;
-  target: string;
-  targetAttribute: string;
+  name?: string;
+  target?: string;
+  targetAttribute?: string | null;
   customField?: any;
+  default?: any;
+  [key: string]: any;
 };
 
 export interface Component {
   uid: UID.Component;
-  category: string;
-  schema: Schema.Component & {
-    name: string;
+  category?: string;
+  schema: {
+    name?: string;
     description?: string;
     icon?: string;
     attributes?: AttributeType[];
@@ -42,13 +44,15 @@ export interface ContentType {
   to?: string;
   kind?: 'singleType' | 'collectionType';
   restrictRelationsTo?: unknown;
+  schema: any;
+  [key: string]: any;
 }
 
 export type Components = Record<string, Component>;
 
 export type ContentTypes = Record<string, ContentType>;
 export interface DataManagerStateType {
-  components?: Components;
+  components: Components;
   contentTypes?: ContentTypes;
   initialComponents: Components;
   initialContentTypes: ContentTypes;

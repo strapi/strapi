@@ -1,4 +1,4 @@
-import retrieveNestedComponents from '../retrieveNestedComponents';
+import { retrieveNestedComponents } from '../retrieveNestedComponents';
 
 describe('CONTENT TYPE BUILDER | COMPONENTS | DataManagerProvider | utils | retrieveNestedComponents', () => {
   it('should return an array of nested components', () => {
