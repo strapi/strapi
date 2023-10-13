@@ -21,7 +21,7 @@ import { selectAdminPermissions } from '../pages/App/selectors';
 
 type MenuItem = StrapiAppContextValue['menu'][number];
 
-interface Menu {
+export interface Menu {
   generalSectionLinks: MenuItem[];
   pluginsSectionLinks: MenuItem[];
   isLoading: boolean;

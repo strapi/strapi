@@ -13,7 +13,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 
 import GuidedTourModal from '../../components/GuidedTour/Modal';
-import LeftMenu from '../../components/LeftMenu';
+import { LeftMenu } from '../../components/LeftMenu';
 import { useConfiguration } from '../../hooks';
 import { useMenu } from '../../hooks/useMenu';
 import AppLayout from '../../layouts/AppLayout';
