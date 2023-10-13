@@ -4102,6 +4102,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@internationalized/number@npm:^3.2.1":
+  version: 3.2.1
+  resolution: "@internationalized/number@npm:3.2.1"
+  dependencies:
+    "@swc/helpers": ^0.5.0
+  checksum: 8/5b716de97a491c8e276679a47a131d9fc94484f27ae7d2dba2d9e312c607fbdd2deabe0702a9faa79ad1d84ea0676061fd051c3565946f520acfdccc73dd1956
+  languageName: node
+  linkType: hard
+
 "@internationalized/number@npm:^3.3.0":
   version: 3.3.0
   resolution: "@internationalized/number@npm:3.3.0"
@@ -8147,6 +8156,33 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@strapi/design-system@npm:1.12.0-typescript.1":
+  version: 1.12.0-typescript.1
+  resolution: "@strapi/design-system@npm:1.12.0-typescript.1"
+  dependencies:
+    "@codemirror/lang-json": ^6.0.1
+    "@floating-ui/react-dom": ^2.0.2
+    "@internationalized/date": ^3.5.0
+    "@internationalized/number": ^3.2.1
+    "@radix-ui/react-dismissable-layer": ^1.0.5
+    "@radix-ui/react-dropdown-menu": ^2.0.6
+    "@radix-ui/react-focus-scope": 1.0.4
+    "@strapi/ui-primitives": 1.12.0-typescript.1
+    "@uiw/react-codemirror": ^4.21.18
+    aria-hidden: ^1.2.3
+    compute-scroll-into-view: ^3.1.0
+    prop-types: ^15.8.1
+    react-remove-scroll: ^2.5.6
+  peerDependencies:
+    "@strapi/icons": 1.12.0-typescript.1
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+    react-router-dom: ^5.2.0
+    styled-components: ^5.2.1
+  checksum: 8/cf966142378314ff3c7853e46244f6d85ceb064e9b95dde01e305f1a970412b5c9a5db35afec891e2ffd31592d3fb6745899f11846fc9f9e43f354a6d2564431
+  languageName: node
+  linkType: hard
+
 "@strapi/design-system@npm:1.13.0-typescript.1":
   version: 1.13.0-typescript.1
   resolution: "@strapi/design-system@npm:1.13.0-typescript.1"
@@ -8489,6 +8525,16 @@ __metadata:
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
   checksum: 10/3042a0089e8bfb7e94de17ae7d0ab3e647d2c2dedd787c61b841bce15fee7ccd369fa8ebc23ee6501e2c61820749a811e86302f979043a43b86c444be5c5ff23
+  languageName: node
+  linkType: hard
+
+"@strapi/icons@npm:1.12.0":
+  version: 1.12.0
+  resolution: "@strapi/icons@npm:1.12.0"
+  peerDependencies:
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+  checksum: 8/cf35b06d236f790330df64f5e46fbbe4a59e71b9ab6ca6f249c60db1cc255ffc230e37dfd7e82cd1a3177c37dd52cdbf329d5e5776571ad1cf9d52a63d7061dc
   languageName: node
   linkType: hard
 
@@ -9791,6 +9837,38 @@ __metadata:
   checksum: 10/undefined
   languageName: unknown
   linkType: soft
+
+"@strapi/ui-primitives@npm:1.12.0-typescript.1":
+  version: 1.12.0-typescript.1
+  resolution: "@strapi/ui-primitives@npm:1.12.0-typescript.1"
+  dependencies:
+    "@radix-ui/number": ^1.0.1
+    "@radix-ui/primitive": ^1.0.1
+    "@radix-ui/react-collection": 1.0.3
+    "@radix-ui/react-compose-refs": ^1.0.1
+    "@radix-ui/react-context": ^1.0.1
+    "@radix-ui/react-direction": 1.0.1
+    "@radix-ui/react-dismissable-layer": ^1.0.5
+    "@radix-ui/react-focus-guards": 1.0.1
+    "@radix-ui/react-focus-scope": 1.0.4
+    "@radix-ui/react-id": ^1.0.1
+    "@radix-ui/react-popper": ^1.1.3
+    "@radix-ui/react-portal": ^1.0.4
+    "@radix-ui/react-primitive": ^1.0.3
+    "@radix-ui/react-slot": ^1.0.2
+    "@radix-ui/react-use-callback-ref": ^1.0.1
+    "@radix-ui/react-use-controllable-state": ^1.0.1
+    "@radix-ui/react-use-layout-effect": 1.0.1
+    "@radix-ui/react-use-previous": ^1.0.1
+    "@radix-ui/react-visually-hidden": ^1.0.3
+    aria-hidden: ^1.2.3
+    react-remove-scroll: ^2.5.6
+  peerDependencies:
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+  checksum: 8/80dd3cb4286b2322e6f156ff06d51be82d59d288a291c850af3fc6b34a0c3f3d7be59f006bf11d8ab35ef24eb95af2f59d902510aca84cbdf0c39fd0df15b150
+  languageName: node
+  linkType: hard
 
 "@strapi/ui-primitives@npm:^1.13.0-typescript.1":
   version: 1.13.0-typescript.1
@@ -11881,6 +11959,29 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@uiw/codemirror-extensions-basic-setup@npm:4.21.18":
+  version: 4.21.18
+  resolution: "@uiw/codemirror-extensions-basic-setup@npm:4.21.18"
+  dependencies:
+    "@codemirror/autocomplete": ^6.0.0
+    "@codemirror/commands": ^6.0.0
+    "@codemirror/language": ^6.0.0
+    "@codemirror/lint": ^6.0.0
+    "@codemirror/search": ^6.0.0
+    "@codemirror/state": ^6.0.0
+    "@codemirror/view": ^6.0.0
+  peerDependencies:
+    "@codemirror/autocomplete": ">=6.0.0"
+    "@codemirror/commands": ">=6.0.0"
+    "@codemirror/language": ">=6.0.0"
+    "@codemirror/lint": ">=6.0.0"
+    "@codemirror/search": ">=6.0.0"
+    "@codemirror/state": ">=6.0.0"
+    "@codemirror/view": ">=6.0.0"
+  checksum: 8/c643eebc45e2067080c46e28fdb4ac40043e5890f4862bd45fe5bf816894b6c118ea901ca9ba1dce8862877622ebd793db6ec220491506355ed562a0dc0c4507
+  languageName: node
+  linkType: hard
+
 "@uiw/codemirror-extensions-basic-setup@npm:4.21.20":
   version: 4.21.20
   resolution: "@uiw/codemirror-extensions-basic-setup@npm:4.21.20"
@@ -11901,6 +12002,28 @@ __metadata:
     "@codemirror/state": ">=6.0.0"
     "@codemirror/view": ">=6.0.0"
   checksum: 10/5c1b0a5d399993d06479cbccaec97ad9d810d522eb665204fa14b6548e8b4283eb4d827271903e053516a9d1907018e9115a807a884b8720d73f0a0f6b58f910
+  languageName: node
+  linkType: hard
+
+"@uiw/react-codemirror@npm:^4.21.18":
+  version: 4.21.18
+  resolution: "@uiw/react-codemirror@npm:4.21.18"
+  dependencies:
+    "@babel/runtime": ^7.18.6
+    "@codemirror/commands": ^6.1.0
+    "@codemirror/state": ^6.1.1
+    "@codemirror/theme-one-dark": ^6.0.0
+    "@uiw/codemirror-extensions-basic-setup": 4.21.18
+    codemirror: ^6.0.0
+  peerDependencies:
+    "@babel/runtime": ">=7.11.0"
+    "@codemirror/state": ">=6.0.0"
+    "@codemirror/theme-one-dark": ">=6.0.0"
+    "@codemirror/view": ">=6.0.0"
+    codemirror: ">=6.0.0"
+    react: ">=16.8.0"
+    react-dom: ">=16.8.0"
+  checksum: 8/ef3897e9901b98fd981d4b9db2ae8702aa7ffda4cf5cab3286963580606a6dde38e77a4314c12574b6f5f251d62b62e59f0a1a445009b5927b8500f4b5fd795c
   languageName: node
   linkType: hard
 
@@ -21315,6 +21438,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"immer@npm:^9.0.6":
+  version: 9.0.21
+  resolution: "immer@npm:9.0.21"
+  checksum: 8/70e3c274165995352f6936695f0ef4723c52c92c92dd0e9afdfe008175af39fa28e76aafb3a2ca9d57d1fb8f796efc4dd1e1cc36f18d33fa5b74f3dfb0375432
+  languageName: node
+  linkType: hard
+
 "import-fresh@npm:^3.0.0, import-fresh@npm:^3.2.1, import-fresh@npm:^3.3.0":
   version: 3.3.0
   resolution: "import-fresh@npm:3.3.0"
@@ -30270,6 +30400,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"reselect@npm:4.1.7":
+  version: 4.1.7
+  resolution: "reselect@npm:4.1.7"
+  checksum: 8/738d8e2b8f0dca154ad29de6a209c9fbca2d70ae6788fd85df87f2c74b95a65bbf2d16d43a9e2faff39de34d17a29d706ba08a6b2ee5660c09589edbd19af7e1
+  languageName: node
+  linkType: hard
+
 "reselect@npm:^4.1.8":
   version: 4.1.8
   resolution: "reselect@npm:4.1.8"
@@ -33609,6 +33746,16 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 8/0f4da2f15e6f1245e49db15801dbee52f2bbfb267e1c39225afdab5afee1a72839cd86000e65ee9d7e4dfaff12239d28beaf5ee431357fcced15fb08583d72ca
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@5.2.2#~builtin<compat/typescript>, typescript@patch:typescript@^4.6.4 || ^5.0.0#~builtin<compat/typescript>":
+  version: 5.2.2
+  resolution: "typescript@patch:typescript@npm%3A5.2.2#~builtin<compat/typescript>::version=5.2.2&hash=14eedb"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 8/07106822b4305de3f22835cbba949a2b35451cad50888759b6818421290ff95d522b38ef7919e70fb381c5fe9c1c643d7dea22c8b31652a717ddbd57b7f4d554
   languageName: node
   linkType: hard
 
