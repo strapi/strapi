@@ -1,16 +1,23 @@
 import * as React from 'react';
 
+import { LinkProps } from 'react-router-dom';
+
 import { TranslationMessage } from '../types';
 
 import type { domain } from '@strapi/permissions';
 
 type Permission = domain.permission.Permission;
 
-interface MenuItem {
+interface MenuItem extends Pick<LinkProps, 'to'> {
   to: string;
-  icon: React.ComponentType;
+  icon: React.ElementType;
   intlLabel: TranslationMessage;
-  permissions?: Permission[];
+  /**
+   * TODO: add type from the BE for what an Admin Permission looks like –
+   * most likely shared throught the helper plugin...? or duplicated, idm.
+   */
+  permissions: Permission[];
+  notificationsCount?: number;
   Component?: React.ComponentType;
 }
 

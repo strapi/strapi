@@ -7,7 +7,7 @@ import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 
-import { useMenu } from '../../../hooks';
+import { useMenu } from '../../../hooks/useMenu';
 import Admin from '../index';
 
 jest.mock('react-redux', () => ({
