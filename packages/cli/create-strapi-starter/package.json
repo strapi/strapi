@@ -30,18 +30,18 @@
       "url": "https://strapi.io"
     }
   ],
+  "main": "",
   "bin": "./bin/index.js",
   "files": [
     "./dist",
     "./bin"
   ],
   "scripts": {
-    "build": "run -T tsc",
-    "build:ts": "run -T tsc",
+    "build": "pack-up build",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
-    "watch": "run -T tsc -w --preserveWatchOutput"
+    "watch": "pack-up watch"
   },
   "dependencies": {
     "@strapi/generate-new": "4.14.4",
@@ -54,6 +54,7 @@
     "ora": "5.4.1"
   },
   "devDependencies": {
+    "@strapi/pack-up": "workspace:*",
     "eslint-config-custom": "4.14.4",
     "tsconfig": "4.14.4"
   },

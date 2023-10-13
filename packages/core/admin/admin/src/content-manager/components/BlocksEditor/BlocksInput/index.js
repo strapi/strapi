@@ -82,14 +82,37 @@ const BlocksInput = ({ disabled, placeholder }) => {
     }
   };
 
+  /**
+   *  scrollSelectionIntoView : Slate's default method to scroll a DOM selection into the view,
+   *  thats shifting layout for us when there is a overflowY:scroll on the viewport.
+   *  We are overriding it to check if the selection is not fully within the visible area of the editor,
+   *  we use scrollBy one line to the bottom
+   */
+  const handleScrollSelectionIntoView = (_, domRange) => {
+    const domRect = domRange.getBoundingClientRect();
+    const slateInput = document.getElementById('slate-input');
+    const editorRect = slateInput.parentElement.getBoundingClientRect(); // editorWrapper with overflow:auto
+
+    // Check if the selection is not fully within the visible area of the editor
+    if (domRect.top < editorRect.top || domRect.bottom > editorRect.bottom) {
+      // Scroll by one line to the bottom
+      slateInput.parentElement.scrollBy({
+        top: 28, // 20px is the line-height + 8px line gap
+        behavior: 'smooth',
+      });
+    }
+  };
+
   return (
     <Editable
+      id="slate-input"
       readOnly={disabled}
       placeholder={placeholder}
       style={getEditorStyle(theme)}
       renderElement={renderElement}
       renderLeaf={renderLeaf}
       onKeyDown={handleKeyDown}
+      scrollSelectionIntoView={handleScrollSelectionIntoView}
     />
   );
 };

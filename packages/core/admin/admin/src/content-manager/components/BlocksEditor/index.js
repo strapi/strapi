@@ -31,7 +31,8 @@ const EditorDivider = styled(Divider)`
 const Wrapper = styled(Box)`
   width: 100%;
   overflow: auto;
-  padding: ${({ theme }) => `${theme.spaces[3]} ${theme.spaces[4]}`};
+  padding: ${({ theme }) => `0 ${theme.spaces[4]}`};
+  margin: ${({ theme }) => `${theme.spaces[3]} 0`};
   font-size: ${({ theme }) => theme.fontSizes[2]};
   background-color: ${({ theme }) => theme.colors.neutral0};
   color: ${({ theme }) => theme.colors.neutral800};

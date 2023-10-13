@@ -1,9 +1,11 @@
-const translations = require('../en.json');
+import translations from '../en.json';
+
+const typedTranslations: Record<string, string> = translations;
 
 describe('translations', () => {
   describe('plural syntax', () => {
     it('should avoid .plural/.singular syntax', () => {
-      Object.keys(translations).forEach((translationKey) => {
+      Object.keys(typedTranslations).forEach((translationKey) => {
         const keyParts = translationKey.split('.');
         const lastKeyPart = keyParts.pop();
 
@@ -13,7 +15,7 @@ describe('translations', () => {
           keyParts.push('plural');
           const pluralKey = keyParts.join('.');
 
-          expect(translations[pluralKey]).toBeUndefined();
+          expect(typedTranslations[pluralKey]).toBeUndefined();
         }
       });
     });

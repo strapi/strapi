@@ -7934,9 +7934,14 @@ __metadata:
     "@strapi/design-system": 1.12.0
     "@strapi/helper-plugin": 4.14.4
     "@strapi/icons": 1.12.0
+    "@strapi/pack-up": "workspace:*"
     "@strapi/provider-email-sendmail": 4.14.4
+    "@strapi/types": "workspace:*"
     "@strapi/utils": 4.14.4
     "@testing-library/react": 14.0.0
+    "@types/koa": 2.13.4
+    "@types/lodash": ^4.14.191
+    koa: 2.13.4
     lodash: 4.17.21
     msw: 1.3.0
     prop-types: ^15.8.1
@@ -7948,6 +7953,7 @@ __metadata:
     styled-components: 5.3.3
     yup: 0.32.9
   peerDependencies:
+    koa: 2.13.4
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: 5.3.4
@@ -13945,6 +13951,7 @@ __metadata:
   resolution: "create-strapi-app@workspace:packages/cli/create-strapi-app"
   dependencies:
     "@strapi/generate-new": 4.14.4
+    "@strapi/pack-up": "workspace:*"
     commander: 8.3.0
     eslint-config-custom: 4.14.4
     inquirer: 8.2.5
@@ -13959,6 +13966,7 @@ __metadata:
   resolution: "create-strapi-starter@workspace:packages/cli/create-strapi-starter"
   dependencies:
     "@strapi/generate-new": 4.14.4
+    "@strapi/pack-up": "workspace:*"
     chalk: 4.1.2
     ci-info: 3.8.0
     commander: 8.3.0

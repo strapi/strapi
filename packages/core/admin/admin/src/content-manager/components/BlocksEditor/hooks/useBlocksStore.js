@@ -205,8 +205,18 @@ const handleEnterKeyOnList = (editor) => {
     // Move the selection to the newly created paragraph
     Transforms.select(editor, createdParagraphPath);
   } else {
-    // Otherwise just create a new list item by splitting the current one
-    Transforms.splitNodes(editor, { always: true });
+    // Check if the cursor is at the end of the list item
+    const isNodeEnd = Editor.isEnd(editor, editor.selection.anchor, currentListItemPath);
+
+    if (isNodeEnd) {
+      // If there was nothing after the cursor, create a fresh new list item,
+      // in order to avoid carrying over the modifiers from the previous list item
+      Transforms.insertNodes(editor, { type: 'list-item', children: [{ type: 'text', text: '' }] });
+    } else {
+      // If there is something after the cursor, split the current list item,
+      // so that we keep the content and the modifiers
+      Transforms.splitNodes(editor);
+    }
   }
 };
 
@@ -441,12 +451,17 @@ export function useBlocksStore() {
          * after the cursor, while retaining all the children, modifiers etc.
          */
         Transforms.splitNodes(editor, {
-          /**
-           * Makes sure we always create a new node,
-           * even if there's nothing to the right of the cursor in the node.
-           */
+          // Makes sure we always create a new node,
+          // even if there's nothing to the right of the cursor in the node.
           always: true,
         });
+
+        // Check if the created node is empty (if there was no text after the cursor in the node)
+        // This lets us know if we need to carry over the modifiers from the previous node
+        const [, parentBlockPath] = Editor.above(editor, {
+          match: (n) => n.type !== 'text',
+        });
+        const isNodeEnd = Editor.isEnd(editor, editor.selection.anchor, parentBlockPath);
 
         /**
          * Delete and recreate the node that was created at the right of the cursor.
@@ -461,12 +476,14 @@ export function useBlocksStore() {
         // Check if after the current position there is another node
         const hasNextNode = editor.children.length - anchorPathInitialPosition[0] > 1;
 
-        // Insert the new node at the right position. The next line after the editor selection if present or otherwise at the end of the editor.
+        // Insert the new node at the right position.
+        // The next line after the editor selection if present or otherwise at the end of the editor.
         Transforms.insertNodes(
           editor,
           {
             type: 'paragraph',
-            children: fragmentedNode.children,
+            // Don't carry over the modifiers from the previous node if there was no text after the cursor
+            children: isNodeEnd ? [{ type: 'text', text: '' }] : fragmentedNode.children,
           },
           {
             at: hasNextNode ? [anchorPathInitialPosition[0] + 1] : [editor.children.length],
@@ -670,6 +687,12 @@ export function useBlocksStore() {
         } else {
           // Otherwise insert a new line within the quote node
           Transforms.insertText(editor, '\n');
+
+          // If there's nothing after the cursor, disable modifiers
+          if (isNodeEnd) {
+            Editor.removeMark(editor, 'bold');
+            Editor.removeMark(editor, 'italic');
+          }
         }
       },
     },
