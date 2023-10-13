@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import assert from 'assert';
 import { map, isArray, omit, uniq, isNil, difference, isEmpty } from 'lodash/fp';
 import { errors } from '@strapi/utils';
+import '@strapi/types';
 import constants from '../constants';
 import { getService } from '../../utils';
 
@@ -209,7 +210,7 @@ const update = async (
       ...updatedToken,
       permissions: permissionsFromDb ? permissionsFromDb.map((p) => p.action) : undefined,
     };
-  }) as Promise<SanitizedTransferToken>;
+  }) as unknown as Promise<SanitizedTransferToken>;
 };
 
 /**
@@ -220,7 +221,7 @@ const revoke = async (id: string | number): Promise<SanitizedTransferToken> => {
     strapi
       .query(TRANSFER_TOKEN_UID)
       .delete({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: { id } })
-  ) as Promise<SanitizedTransferToken>;
+  ) as unknown as Promise<SanitizedTransferToken>;
 };
 
 /**
