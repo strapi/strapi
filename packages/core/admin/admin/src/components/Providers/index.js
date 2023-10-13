@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 
-import { AdminContext } from '../../contexts';
+import { AdminContext } from '../../contexts/admin';
 import { ConfigurationProvider } from '../ConfigurationProvider';
 import GuidedTour from '../GuidedTour';
 import { LanguageProvider } from '../LanguageProvider';

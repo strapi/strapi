@@ -33,7 +33,7 @@ const useLocales = () => React.useContext(LocalesContext);
  * LanguageProvider
  * -----------------------------------------------------------------------------------------------*/
 
-const LOCAL_STORAGE_KEY = 'strapi-admin-language';
+const LANGUAGE_LOCAL_STORAGE_KEY = 'strapi-admin-language';
 
 interface LanguageProviderProps {
   children: React.ReactNode;
@@ -46,7 +46,7 @@ const LanguageProvider = ({ children, localeNames, messages }: LanguageProviderP
     reducer,
     initialState,
     () => {
-      const languageFromLocaleStorage = window.localStorage.getItem(LOCAL_STORAGE_KEY);
+      const languageFromLocaleStorage = window.localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY);
       if (languageFromLocaleStorage && localeNames[languageFromLocaleStorage]) {
         return {
           locale: languageFromLocaleStorage,
@@ -63,7 +63,7 @@ const LanguageProvider = ({ children, localeNames, messages }: LanguageProviderP
 
   React.useEffect(() => {
     // Set user language in local storage.
-    window.localStorage.setItem(LOCAL_STORAGE_KEY, locale);
+    window.localStorage.setItem(LANGUAGE_LOCAL_STORAGE_KEY, locale);
     document.documentElement.setAttribute('lang', locale);
   }, [locale]);
 
@@ -126,4 +126,4 @@ const reducer = (state = initialState, action: Action) => {
   }
 };
 
-export { LanguageProvider, useLocales };
+export { LanguageProvider, useLocales, LANGUAGE_LOCAL_STORAGE_KEY };
