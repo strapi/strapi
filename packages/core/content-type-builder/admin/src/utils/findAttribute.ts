@@ -1,5 +1,5 @@
-const findAttribute = (attributes, attributeToFind) => {
+import { AttributeType } from '../types';
+
+export const findAttribute = (attributes: AttributeType[], attributeToFind: string) => {
   return attributes.find(({ name }) => name === attributeToFind);
 };
-
-export default findAttribute;

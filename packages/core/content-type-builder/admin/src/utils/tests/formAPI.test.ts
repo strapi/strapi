@@ -1,6 +1,6 @@
 import * as yup from 'yup';
 
-import formsAPI from '../formAPI';
+import { formsAPI } from '../formAPI';
 
 describe('formsAPI', () => {
   describe('makeValidator', () => {

@@ -1,4 +1,4 @@
-const getAttributeDisplayedType = (type) => {
+export const getAttributeDisplayedType = (type: string) => {
   let displayedType;
 
   switch (type) {
@@ -27,5 +27,3 @@ const getAttributeDisplayedType = (type) => {
 
   return displayedType;
 };
-
-export default getAttributeDisplayedType;

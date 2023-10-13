@@ -4,8 +4,8 @@ import * as yup from 'yup';
 
 export const formsAPI = {
   components: {
-    inputs: {},
-    add({ id, component }) {
+    inputs: {} as Record<string, any>,
+    add({ id, component }: { id: string; component: any }) {
       if (!this.inputs[id]) {
         this.inputs[id] = component;
       }
@@ -41,7 +41,7 @@ export const formsAPI = {
     },
   },
   contentTypeSchemaMutations: [],
-  addContentTypeSchemaMutation(cb) {
+  addContentTypeSchemaMutation(cb: any) {
     this.contentTypeSchemaMutations.push(cb);
   },
   extendContentType({ validator, form: { advanced, base } }) {
@@ -107,12 +107,12 @@ export const formsAPI = {
 
     return initShape.shape({ pluginOptions: yup.object().shape(pluginOptionsShape) });
   },
-  mutateContentTypeSchema(data, initialData) {
+  mutateContentTypeSchema(data: Record<string, unknown>, initialData: Record<string, unknown>) {
     let enhancedData = cloneDeep(data);
 
     const refData = cloneDeep(initialData);
 
-    this.contentTypeSchemaMutations.forEach((cb) => {
+    this.contentTypeSchemaMutations.forEach((cb: (value: any) => void) => {
       enhancedData = cb(enhancedData, refData);
     });
 

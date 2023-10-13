@@ -1,4 +1,4 @@
-import makeUnique from '../makeUnique';
+import { makeUnique } from '../makeUnique';
 
 describe('CTB | utils | makeUnique', () => {
   it('Should remove the duplicate elements', () => {

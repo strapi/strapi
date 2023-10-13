@@ -1,4 +1,6 @@
-const isAllowedContentTypesForRelations = (contentType) => {
+import { ContentType } from '../types';
+
+export const isAllowedContentTypesForRelations = (contentType: ContentType) => {
   return (
     contentType.kind === 'collectionType' &&
     (contentType.restrictRelationsTo === null ||
@@ -6,5 +8,3 @@ const isAllowedContentTypesForRelations = (contentType) => {
         contentType.restrictRelationsTo.length > 0))
   );
 };
-
-export default isAllowedContentTypesForRelations;

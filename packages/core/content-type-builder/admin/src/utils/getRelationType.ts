@@ -6,7 +6,7 @@ import { Attribute } from '@strapi/types';
  */
 export const getRelationType = (
   relation: Attribute.RelationKind.WithTarget,
-  targetAttribute: string
+  targetAttribute?: string | null
 ) => {
   const hasNotTargetAttribute = targetAttribute === undefined || targetAttribute === null;
 

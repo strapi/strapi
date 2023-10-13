@@ -35,13 +35,13 @@ export interface Component {
 export interface ContentType {
   uid: string;
   isTemporary?: boolean;
-  schema: Schema.ContentType & {
-    attributes?: AttributeType[];
-    visible?: boolean;
-    restrictRelationsTo?: any;
-    displayName?: string;
-  };
-  [key: string]: any;
+  visible?: boolean;
+  name: UID.Any;
+  title: string;
+  plugin?: string;
+  to?: string;
+  kind?: 'singleType' | 'collectionType';
+  restrictRelationsTo?: unknown;
 }
 
 export type Components = Record<string, Component>;

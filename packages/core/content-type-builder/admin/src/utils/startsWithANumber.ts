@@ -1,3 +1,1 @@
-const startsWithANumber = (value) => /^[0-9]/.test(value);
-
-export default startsWithANumber;
+export const startsWithANumber = (value: string) => /^[0-9]/.test(value);

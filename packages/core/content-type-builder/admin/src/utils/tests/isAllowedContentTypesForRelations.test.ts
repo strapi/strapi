@@ -1,8 +1,10 @@
-import isAllowedContentTypesForRelations from '../isAllowedContentTypesForRelations';
+import { isAllowedContentTypesForRelations } from '../isAllowedContentTypesForRelations';
+
+import type { ContentType } from '../../types';
 
 describe('CTB | utils | isAllowedContentTypesForRelations', () => {
   it('should be falsy if the model is a single type', () => {
-    const contentType = {
+    const contentType: ContentType = {
       visible: true,
       name: 'plugin::users-permissions.user',
       title: 'User',
@@ -17,7 +19,7 @@ describe('CTB | utils | isAllowedContentTypesForRelations', () => {
   });
 
   it('should be falsy if the restricted relations is an empty array', () => {
-    const contentType = {
+    const contentType: ContentType = {
       visible: true,
       name: 'plugin::users-permissions.user',
       title: 'User',
@@ -32,7 +34,7 @@ describe('CTB | utils | isAllowedContentTypesForRelations', () => {
   });
 
   it('should be truthy if the model is a collection type and the restricted relations is null', () => {
-    const contentType = {
+    const contentType: ContentType = {
       visible: true,
       name: 'plugin::users-permissions.user',
       title: 'User',
@@ -47,7 +49,7 @@ describe('CTB | utils | isAllowedContentTypesForRelations', () => {
   });
 
   it('should be truthy if the model is a collection type and the restricted relations is not empty array', () => {
-    const contentType = {
+    const contentType: ContentType = {
       visible: true,
       name: 'plugin::users-permissions.user',
       title: 'User',
@@ -62,7 +64,7 @@ describe('CTB | utils | isAllowedContentTypesForRelations', () => {
   });
 
   it('should be falsy if restrictRelationsTo is undefined', () => {
-    const contentType = {
+    const contentType: ContentType = {
       visible: true,
       name: 'plugin::users-permissions.user',
       title: 'User',
@@ -76,7 +78,7 @@ describe('CTB | utils | isAllowedContentTypesForRelations', () => {
   });
 
   it('should be falsy if kind is undefined', () => {
-    const contentType = {
+    const contentType: ContentType = {
       visible: true,
       name: 'plugin::users-permissions.user',
       title: 'User',
