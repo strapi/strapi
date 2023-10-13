@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Box, Button, ContentLayout, Flex, HeaderLayout } from '@strapi/design-system';
 import { Link, useTracking } from '@strapi/helper-plugin';
 import { ArrowLeft, Check, Pencil, Plus } from '@strapi/icons';
@@ -10,14 +8,14 @@ import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { Prompt, useRouteMatch } from 'react-router-dom';
 
-import List from '../../components/List';
-import ListRow from '../../components/ListRow';
-import useDataManager from '../../hooks/useDataManager';
-import useFormModalNavigation from '../../hooks/useFormModalNavigation';
-import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
+import { List } from '../../components/List';
+import { ListRow } from '../../components/ListRow';
+import { useDataManager } from '../../hooks/useDataManager';
+import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
+import { getAttributeDisplayedType } from '../../utils/getAttributeDisplayedType';
 import { getTrad } from '../../utils/getTrad';
 
-import LinkToCMSettingsView from './LinkToCMSettingsView';
+import { LinkToCMSettingsView } from './LinkToCMSettingsView';
 
 /* eslint-disable indent */
 
@@ -27,7 +25,9 @@ const ListView = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
-  const match = useRouteMatch('/plugins/content-type-builder/:kind/:currentUID');
+  const match = useRouteMatch<{ kind: string; currentUID: string }>(
+    '/plugins/content-type-builder/:kind/:currentUID'
+  );
 
   const {
     onOpenModalAddComponentsToDZ,
@@ -49,11 +49,17 @@ const ListView = () => {
 
   const forTarget = isInContentTypeView ? 'contentType' : 'component';
 
-  const handleClickAddComponentToDZ = (dynamicZoneTarget) => {
+  const handleClickAddComponentToDZ = (dynamicZoneTarget?: string) => {
     onOpenModalAddComponentsToDZ({ dynamicZoneTarget, targetUid });
   };
 
-  const handleClickEditField = async (forTarget, targetUid, attributeName, type, customField) => {
+  const handleClickEditField = async (
+    forTarget: string,
+    targetUid: string,
+    attributeName: string,
+    type: string,
+    customField: any
+  ) => {
     const attributeType = getAttributeDisplayedType(type);
     const step = type === 'component' ? '2' : null;
 
@@ -201,4 +207,5 @@ const ListView = () => {
   );
 };
 
+// eslint-disable-next-line import/no-default-export
 export default ListView;

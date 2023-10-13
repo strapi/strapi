@@ -1,10 +1,7 @@
-/**
- *
- * App
- *
- */
-
-import React, { lazy, Suspense, useEffect, useRef } from 'react';
+/* eslint-disable import/no-default-export */
+/* eslint-disable check-file/filename-naming-convention  */
+/* eslint-disable check-file/no-index */
+import { lazy, Suspense, useEffect, useRef } from 'react';
 
 import { Layout } from '@strapi/design-system';
 import { CheckPagePermissions, LoadingIndicatorPage, useGuidedTour } from '@strapi/helper-plugin';
@@ -13,14 +10,14 @@ import { useIntl } from 'react-intl';
 import { Route, Switch } from 'react-router-dom';
 
 import ContentTypeBuilderNav from '../../components/ContentTypeBuilderNav';
-import DataManagerProvider from '../../components/DataManagerProvider';
-import FormModalNavigationProvider from '../../components/FormModalNavigationProvider/FormModalNavigationProvider.tsx';
+import DataManagerProvider from '../../components/DataManagerProvider/DataManagerProvider';
+import { FormModalNavigationProvider } from '../../components/FormModalNavigationProvider/FormModalNavigationProvider';
 import { PERMISSIONS } from '../../constants';
-import pluginId from '../../pluginId';
-import RecursivePath from '../RecursivePath';
+import { pluginId } from '../../pluginId';
+import { RecursivePath } from '../RecursivePath/RecursivePath';
 
 const ListView = lazy(
-  () => import(/* webpackChunkName: "content-type-builder-list-view" */ '../ListView')
+  () => import(/* webpackChunkName: "content-type-builder-list-view" */ '../ListView/ListView')
 );
 
 const App = () => {
@@ -42,6 +39,8 @@ const App = () => {
     <CheckPagePermissions permissions={PERMISSIONS.main}>
       <Helmet title={title} />
       <FormModalNavigationProvider>
+        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+        {/* @ts-ignore */}
         <DataManagerProvider>
           <Layout sideNav={<ContentTypeBuilderNav />}>
             <Suspense fallback={<LoadingIndicatorPage />}>

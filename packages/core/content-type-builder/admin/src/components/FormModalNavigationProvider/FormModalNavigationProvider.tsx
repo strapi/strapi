@@ -19,7 +19,7 @@ export type ModalEventProps = {
   forTarget?: string;
   targetUid?: string;
   attributeName?: string;
-  step?: string;
+  step?: string | null;
   kind?: string;
   categoryName?: string;
   modalType?: string;

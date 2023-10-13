@@ -12,10 +12,8 @@ import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 
-import FormModalNavigationProvider from '../../../components/FormModalNavigationProvider/FormModalNavigationProvider.tsx';
 import pluginEn from '../../../translations/en.json';
 import { getTrad } from '../../../utils/getTrad';
-import ListView from '../index';
 
 import mockData from './mockData';
 
@@ -32,15 +30,15 @@ jest.mock('../../../hooks/useDataManager', () => {
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  // eslint-disable-next-line
-  CheckPermissions: ({ children }) => <div>{children}</div>,
+  CheckPermissions: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
 const makeApp = () => {
   const history = createMemoryHistory();
+  type PluginEnKey = keyof typeof pluginEn;
   const messages = {
-    en: Object.keys(pluginEn).reduce((acc, current) => {
-      acc[getTrad(current)] = pluginEn[current];
+    en: Object.keys(pluginEn).reduce((acc: Record<string, string>, current) => {
+      acc[getTrad(current)] = pluginEn[current as PluginEnKey];
 
       return acc;
     }, {}),
@@ -61,7 +59,7 @@ const makeApp = () => {
 
 describe('<ListView />', () => {
   it('renders and matches the snapshot', () => {
-    const App = makeApp();
+    const App: any = makeApp();
     const { container } = render(App);
 
     expect(container).toMatchSnapshot();

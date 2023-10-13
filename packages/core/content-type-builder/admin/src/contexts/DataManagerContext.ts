@@ -47,7 +47,7 @@ interface DataManagerContextValue {
   removeComponentFromDynamicZone: (dzName: string, componentToRemoveIndex: number) => void;
   setModifiedData: () => void;
   sortedContentTypesList: any[]; // Define the actual type
-  submitData: (additionalContentTypeData: Record<string, any>) => void;
+  submitData: (additionalContentTypeData?: Record<string, any>) => void;
   updateSchema: (data: Record<string, any>, schemaType: SchemaType, componentUID: UID.Any) => void;
   components: Record<Common.UID.Component, unknown>;
   componentsGroupedByCategory: Record<string, Component[]>;
