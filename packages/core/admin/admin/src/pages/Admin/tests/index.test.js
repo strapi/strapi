@@ -34,14 +34,15 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-jest.mock('../../../hooks', () => ({
+jest.mock('../../../hooks/useMenu', () => ({
   useMenu: jest.fn(() => ({ isLoading: true, generalSectionLinks: [], pluginsSectionLinks: [] })),
-  useConfiguration: jest.fn(() => ({ showTutorials: false })),
 }));
 
-jest.mock('../../../components/LeftMenu', () => () => {
-  return <div>menu</div>;
-});
+jest.mock('../../../components/LeftMenu', () => ({
+  LeftMenu() {
+    return <div>menu</div>;
+  },
+}));
 jest.mock('../../HomePage', () => () => {
   return <div>HomePage</div>;
 });

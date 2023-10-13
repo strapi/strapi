@@ -14,7 +14,7 @@ import { Route, Switch } from 'react-router-dom';
 
 import GuidedTourModal from '../../components/GuidedTour/Modal';
 import { LeftMenu } from '../../components/LeftMenu';
-import { useConfiguration } from '../../hooks';
+import { useConfiguration } from '../../hooks/useConfiguration';
 import { useMenu } from '../../hooks/useMenu';
 import AppLayout from '../../layouts/AppLayout';
 import { createRoute } from '../../utils';
