@@ -11,17 +11,36 @@ async function run() {
 
   console.log('Unlinking all packages');
 
-  const packages = packageDirs
-    .filter((dir) => fs.pathExistsSync(join(dir, 'package.json')))
-    .map((dir) => ({
-      dir,
-      pkgJSON: fs.readJSONSync(join(dir, 'package.json')),
-    }));
+ const pLimit = require('p-limit'); // Add p-limit library
+const packages = packageDirs
+  .filter((dir) => fs.pathExistsSync(join(dir, 'package.json')))
+  .map((dir) => ({
+    dir,
+    pkgJSON: fs.readJSONSync(join(dir, 'package.json')),
+  }));
 
-  await Promise.all(packages.map(({ dir }) => execa('yarn', ['unlink'], { cwd: dir })));
+async function unlinkPackages() {
+  console.log('Unlinking packages...');
 
-  const packageNames = packages.map((p) => p.pkgJSON.name).join(' ');
-  console.log(`Package names: \n ${packageNames}\n`);
+  try {
+    const concurrencyLimit = 5; // Adjust as needed
+    const unlinkPromises = packages.map(({ dir, pkgJSON }) =>
+      execa('yarn', ['unlink'], { cwd: dir })
+        .then(() => console.log(`Package ${pkgJSON.name} unlinked successfully.`))
+        .catch((error) => console.error(`Error unlinking ${pkgJSON.name}: ${error}`))
+    );
+
+    const results = await pLimit(concurrencyLimit)(unlinkPromises);
+    console.log('Unlinking complete.');
+
+    const packageNames = packages.map((p) => p.pkgJSON.name);
+    console.log(`Package names:\n${packageNames.join('\n')}\n`);
+  } catch (error) {
+    console.error('Error occurred while unlinking packages:', error);
+  }
 }
+
+unlinkPackages();
+
 
 run().catch((err) => console.error(err));
