@@ -62,6 +62,7 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
                 <NotificationsProvider>
                   <RBACContext.Provider
                     value={{
+                      refetchPermissions: jest.fn(),
                       allPermissions: [
                         ...fixtures.permissions.allPermissions,
                         {

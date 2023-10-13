@@ -9,7 +9,7 @@ type Permission = domain.permission.Permission;
  * Context
  * -----------------------------------------------------------------------------------------------*/
 
-type RBACContextValue = {
+export type RBACContextValue = {
   allPermissions: Permission[]; // The permissions of the current user.
   refetchPermissions: QueryObserverBaseResult<Permission[]>['refetch'];
 };
