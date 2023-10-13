@@ -56,7 +56,7 @@ export const server = setupServer(
               conditions: [],
 
               params: {
-                some: req.url.searchParams.get('some'),
+                filters: req.url.searchParams.get('filters'),
               },
             },
           ],
