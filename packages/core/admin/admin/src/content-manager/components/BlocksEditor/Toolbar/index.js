@@ -97,49 +97,6 @@ ToolbarButton.propTypes = {
   handleClick: PropTypes.func.isRequired,
 };
 
-const ModifierButton = ({ icon, name, label, disabled }) => {
-  const editor = useSlate();
-
-  const isModifierActive = () => {
-    const modifiers = Editor.marks(editor);
-
-    if (!modifiers) return false;
-
-    return Boolean(modifiers[name]);
-  };
-
-  const isActive = isModifierActive();
-
-  const toggleModifier = () => {
-    if (isActive) {
-      Editor.removeMark(editor, name);
-    } else {
-      Editor.addMark(editor, name, true);
-    }
-  };
-
-  return (
-    <ToolbarButton
-      icon={icon}
-      name={name}
-      label={label}
-      isActive={isActive}
-      disabled={disabled}
-      handleClick={toggleModifier}
-    />
-  );
-};
-
-ModifierButton.propTypes = {
-  icon: PropTypes.elementType.isRequired,
-  name: PropTypes.string.isRequired,
-  label: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-  }).isRequired,
-  disabled: PropTypes.bool.isRequired,
-};
-
 const toggleBlock = (editor, value) => {
   const { type, level, format } = value;
 
