@@ -2,7 +2,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import * as yup from 'yup';
 
-export const formsAPI = {
+export const formsAPI: any = {
   components: {
     inputs: {} as Record<string, any>,
     add({ id, component }: { id: string; component: any }) {
@@ -44,17 +44,17 @@ export const formsAPI = {
   addContentTypeSchemaMutation(cb: any) {
     this.contentTypeSchemaMutations.push(cb);
   },
-  extendContentType({ validator, form: { advanced, base } }) {
+  extendContentType({ validator, form: { advanced, base } }: any) {
     const { contentType } = this.types;
 
     contentType.validators.push(validator);
     contentType.form.advanced.push(advanced);
     contentType.form.base.push(base);
   },
-  extendFields(fields, { validator, form: { advanced, base } }) {
+  extendFields(fields: any, { validator, form: { advanced, base } }: any) {
     const formType = this.types.attribute;
 
-    fields.forEach((field) => {
+    fields.forEach((field: any) => {
       if (!formType[field]) {
         formType[field] = {
           validators: [],
@@ -75,9 +75,9 @@ export const formsAPI = {
     });
   },
 
-  getAdvancedForm(target, props = null) {
+  getAdvancedForm(target: any, props = null) {
     const sectionsToAdd = get(this.types, [...target, 'form', 'advanced'], []).reduce(
-      (acc, current) => {
+      (acc: any, current: any) => {
         const sections = current(props);
 
         return [...acc, ...sections];
@@ -88,7 +88,7 @@ export const formsAPI = {
     return sectionsToAdd;
   },
 
-  makeCustomFieldValidator(attributeShape, validator, ...validatorArgs) {
+  makeCustomFieldValidator(attributeShape: any, validator: any, ...validatorArgs: any) {
     // When no validator, return the attribute shape
     if (!validator) return attributeShape;
 
@@ -96,10 +96,10 @@ export const formsAPI = {
     return attributeShape.shape({ options: yup.object().shape(validator(validatorArgs)) });
   },
 
-  makeValidator(target, initShape, ...args) {
+  makeValidator(target: any, initShape: any, ...args: any) {
     const validators = get(this.types, [...target, 'validators'], []);
 
-    const pluginOptionsShape = validators.reduce((acc, current) => {
+    const pluginOptionsShape = validators.reduce((acc: any, current: any) => {
       const pluginOptionShape = current(args);
 
       return { ...acc, ...pluginOptionShape };
@@ -108,11 +108,11 @@ export const formsAPI = {
     return initShape.shape({ pluginOptions: yup.object().shape(pluginOptionsShape) });
   },
   mutateContentTypeSchema(data: Record<string, unknown>, initialData: Record<string, unknown>) {
-    let enhancedData = cloneDeep(data);
+    let enhancedData: any = cloneDeep(data);
 
-    const refData = cloneDeep(initialData);
+    const refData: any = cloneDeep(initialData);
 
-    this.contentTypeSchemaMutations.forEach((cb: (value: any) => void) => {
+    this.contentTypeSchemaMutations.forEach((cb: any) => {
       enhancedData = cb(enhancedData, refData);
     });
 

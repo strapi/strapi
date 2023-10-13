@@ -3,7 +3,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import { ADD_CUSTOM_FIELD_ATTRIBUTE } from '../constants';
 import { reducer, initialState } from '../reducer';
 
-import type { DataManagerStateType, Component, ContentType } from '../../../types';
+import type { Component, ContentType } from '../../../types';
 
 describe('CTB | components | DataManagerProvider | reducer | ADD_CUSTOM_FIELD_ATTRIBUTE', () => {
   it('adds a custom field to a contentType', () => {
@@ -27,7 +27,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_CUSTOM_FIELD_AT
       customField: 'plugin::mycustomfields.color',
     };
 
-    const action = {
+    const action: any = {
       type: ADD_CUSTOM_FIELD_ATTRIBUTE,
       attributeToSet: newCustomFieldAttribute,
       forTarget: 'contentType',
@@ -35,7 +35,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_CUSTOM_FIELD_AT
       initialAttribute: {},
     };
 
-    const state = {
+    const state: any = {
       ...initialState,
       modifiedData: {
         components: {},
@@ -83,7 +83,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_CUSTOM_FIELD_AT
       customField: 'plugin::mycustomfields.color',
     };
 
-    const action = {
+    const action: any = {
       type: ADD_CUSTOM_FIELD_ATTRIBUTE,
       attributeToSet: newCustomFieldAttribute,
       forTarget: 'component',
@@ -91,7 +91,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_CUSTOM_FIELD_AT
       initialAttribute: {},
     };
 
-    const state = {
+    const state: any = {
       ...initialState,
       modifiedData: {
         components: {},
@@ -144,7 +144,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_CUSTOM_FIELD_AT
       },
     };
 
-    const state: DataManagerStateType = {
+    const state: any = {
       ...initialState,
       components: {
         'basic.simple': componentSchema,
@@ -166,7 +166,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_CUSTOM_FIELD_AT
       customField: 'plugin::mycustomfields.color',
     };
 
-    const action = {
+    const action: any = {
       type: ADD_CUSTOM_FIELD_ATTRIBUTE,
       attributeToSet: newCustomFieldAttribute,
       forTarget: 'components',

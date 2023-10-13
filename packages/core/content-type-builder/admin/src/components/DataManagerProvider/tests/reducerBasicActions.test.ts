@@ -3,15 +3,15 @@ import get from 'lodash/get';
 import * as actions from '../constants';
 import { reducer, initialState } from '../reducer';
 
-import type { DataManagerStateType, Component, ContentType } from '../../../types';
+import { data as testData } from './data';
 
-import testData from './data';
+import type { Component } from '../../../types';
 
 describe('CTB | components | DataManagerProvider | reducer | basics actions ', () => {
   it('Should return the initial state', () => {
     const state = { ...initialState };
 
-    expect(reducer(state, { type: 'TEST' })).toEqual(initialState);
+    expect(reducer(state, { type: 'TEST' } as any)).toEqual(initialState);
   });
 
   describe('ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE', () => {
@@ -28,7 +28,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
 
-      const components: Record<string,Component> = {
+      const components: Record<string, Component> = {
         'default.test': createdComponent,
         'default.other': {
           uid: 'default.other',
@@ -55,7 +55,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
 
-      const state:  DataManagerStateType = {
+      const state: any = {
         ...initialState,
         components,
         modifiedData: {
@@ -85,7 +85,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
 
-      const action = {
+      const action: any = {
         type: actions.ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE,
         dynamicZoneTarget: 'dz',
         componentsToAdd: ['default.test'],
@@ -129,7 +129,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         components: testData.components,
         modifiedData: {
@@ -177,7 +177,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
 
-      const action = {
+      const action: any = {
         type: actions.CHANGE_DYNAMIC_ZONE_COMPONENTS,
         dynamicZoneTarget: 'dz',
         newComponents: ['default.dish'],
@@ -201,7 +201,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         components: testData.components,
         modifiedData: {
@@ -214,7 +214,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
 
       const componentToAddUid = 'default.closingperiod';
 
-      const action = {
+      const action: any = {
         type: actions.CHANGE_DYNAMIC_ZONE_COMPONENTS,
         dynamicZoneTarget: 'dz',
         newComponents: [componentToAddUid],
@@ -250,7 +250,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
 
   describe('CREATE_COMPONENT_SCHEMA', () => {
     it('Should add the created component schema to the components object when creating a component using the left menu link', () => {
-      const action = {
+      const action: any = {
         type: actions.CREATE_COMPONENT_SCHEMA,
         data: { name: 'new component', icon: 'arrow-alt-circle-down' },
         componentCategory: 'test',
@@ -259,7 +259,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         shouldAddComponentToData: false,
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         components: testData.components,
         initialComponents: testData.components,
@@ -286,7 +286,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
     });
 
     it('Should add the created component schema to the components object, create the attribute and also add the created component to modifiedData.components when using the add attribute modal', () => {
-      const action = {
+      const action: any = {
         type: actions.CREATE_COMPONENT_SCHEMA,
         data: { name: 'new component', icon: 'arrow-alt-circle-down' },
         componentCategory: 'test',
@@ -304,7 +304,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         components: testData.components,
         initialComponents: testData.components,
@@ -343,7 +343,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
 
       const state = { ...initialState };
 
-      const action = { type: actions.CREATE_SCHEMA, uid, data };
+      const action: any = { type: actions.CREATE_SCHEMA, uid, data };
 
       const expected = {
         ...initialState,
@@ -366,7 +366,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
 
   describe('DELETE_NOT_SAVED_TYPE', () => {
     it('Should reset the components and and contentTypes object', () => {
-      const state:  = {
+      const state: any = {
         ...initialState,
         components: {
           foo: {},
@@ -396,7 +396,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
 
-      const action = { type: actions.DELETE_NOT_SAVED_TYPE };
+      const action: any = { type: actions.DELETE_NOT_SAVED_TYPE };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -443,7 +443,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
           components,
           contentTypes,
           reservedNames,
-        })
+        } as any)
       ).toEqual(expected);
     });
   });
@@ -455,7 +455,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
       expect(
         reducer(state, {
           type: actions.RELOAD_PLUGIN,
-        })
+        } as any)
       ).toEqual(initialState);
     });
   });
@@ -538,13 +538,13 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
           },
         },
       };
-      const state = {
+      const state: any = {
         ...initialState,
         components,
         modifiedData,
       };
 
-      const action = {
+      const action: any = {
         type: actions.REMOVE_COMPONENT_FROM_DYNAMIC_ZONE,
         dzName: 'dz',
         componentToRemoveIndex: 1,
@@ -590,7 +590,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
 
   describe('REMOVE_FIELD_FROM_DISPLAYED_COMPONENT', () => {
     it('Should remove the selected field', () => {
-      const state = {
+      const state: any = {
         ...initialState,
         modifiedData: {
           components: {
@@ -616,7 +616,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
 
-      const action = {
+      const action: any = {
         type: actions.REMOVE_FIELD_FROM_DISPLAYED_COMPONENT,
         componentUid: 'default.test',
         attributeToRemoveName: 'other',
@@ -657,7 +657,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         modifiedData: null,
         initialData: null,
@@ -676,7 +676,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
           type: actions.SET_MODIFIED_DATA,
           schemaToSet,
           hasJustCreatedSchema: true,
-        })
+        } as any)
       ).toEqual(expected);
     });
 
@@ -688,7 +688,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         initialComponents: { ok: true },
         initialContentTypes: { ok: false },
@@ -711,7 +711,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
           type: actions.SET_MODIFIED_DATA,
           schemaToSet,
           hasJustCreatedSchema: false,
-        })
+        } as any)
       ).toEqual(expected);
     });
   });
@@ -722,7 +722,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         displayName: 'test1',
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         modifiedData: {
           components: {},
@@ -741,7 +741,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
 
-      const action = {
+      const action: any = {
         type: actions.UPDATE_SCHEMA,
         data,
         schemaType: 'contentType',
@@ -775,7 +775,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         icon: 'test',
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         components: {
           test: {
@@ -812,7 +812,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
 
-      const action = {
+      const action: any = {
         type: actions.UPDATE_SCHEMA,
         data,
         schemaType: 'component',

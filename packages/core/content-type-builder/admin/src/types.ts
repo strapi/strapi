@@ -22,20 +22,14 @@ export type AttributeType = Attribute.Any & {
 export interface Component {
   uid: UID.Component;
   category?: string;
-  schema: {
-    name?: string;
-    description?: string;
-    icon?: string;
-    attributes?: AttributeType[];
-    [key: string]: any;
-  };
+  schema: any;
   isTemporary?: boolean;
   attributes?: AttributeType[];
   [key: string]: any;
 }
 
 export interface ContentType {
-  uid: string;
+  uid?: string;
   isTemporary?: boolean;
   visible?: boolean;
   name?: UID.Any;
@@ -44,7 +38,7 @@ export interface ContentType {
   to?: string;
   kind?: 'singleType' | 'collectionType';
   restrictRelationsTo?: unknown;
-  schema: any;
+  schema?: any;
   [key: string]: any;
 }
 

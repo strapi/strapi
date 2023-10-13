@@ -1,19 +1,19 @@
 import { REMOVE_FIELD } from '../constants';
 import { reducer, initialState } from '../reducer';
 
-import testData from './data';
+import { data as testData } from './data';
 
 describe('CTB | components | DataManagerProvider | reducer | REMOVE_FIELD', () => {
   describe('Removing a field that is not a relation', () => {
     it('Should remove the attribute correctly from the content type', () => {
-      const action = {
+      const action: any = {
         type: REMOVE_FIELD,
         mainDataKey: 'contentType',
         attributeToRemoveName: 'city',
         componentUid: '',
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         contentTypes: testData.contentTypes,
         initialContentTypes: testData.contentTypes,
@@ -84,14 +84,14 @@ describe('CTB | components | DataManagerProvider | reducer | REMOVE_FIELD', () =
   describe('Removing a relation attribute with another content type', () => {
     it('Should remove the attribute correctly if the relation is made with another content type', () => {
       const attributeToRemoveName = 'menu';
-      const action = {
+      const action: any = {
         type: REMOVE_FIELD,
         mainDataKey: 'contentType',
         attributeToRemoveName,
         componentUid: '',
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         contentTypes: testData.contentTypes,
         initialContentTypes: testData.contentTypes,
@@ -160,7 +160,7 @@ describe('CTB | components | DataManagerProvider | reducer | REMOVE_FIELD', () =
     it('Should handle the removal of the one side (oneWay or manyWay) nature correctly', () => {
       const contentTypeUID = 'api::dummy.dummy';
 
-      const action = {
+      const action: any = {
         type: REMOVE_FIELD,
         mainDataKey: 'contentType',
         attributeToRemoveName: 'one_way_attr',
@@ -232,7 +232,7 @@ describe('CTB | components | DataManagerProvider | reducer | REMOVE_FIELD', () =
         },
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         contentTypes: {
           [contentTypeUID]: contentType,
@@ -259,7 +259,7 @@ describe('CTB | components | DataManagerProvider | reducer | REMOVE_FIELD', () =
 
     it('Should handle the removal of the two sides (oneToOne, oneToMany, manyToOne, manyToMany) nature correctly', () => {
       const contentTypeUID = 'api::dummy.dummy';
-      const action = {
+      const action: any = {
         type: REMOVE_FIELD,
         mainDataKey: 'contentType',
         attributeToRemoveName: 'one_to_many_left',
@@ -323,7 +323,7 @@ describe('CTB | components | DataManagerProvider | reducer | REMOVE_FIELD', () =
         },
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         contentTypes: { [contentTypeUID]: contentType },
         modifiedData: {
@@ -354,14 +354,14 @@ describe('CTB | components | DataManagerProvider | reducer | REMOVE_FIELD', () =
   describe('Removing a field that is targeted by a UID field', () => {
     it('Should remove the attribute correctly and remove the targetField from the UID field', () => {
       const attributeToRemoveName = 'description';
-      const action = {
+      const action: any = {
         type: REMOVE_FIELD,
         mainDataKey: 'contentType',
         attributeToRemoveName,
         componentUid: '',
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         contentTypes: testData.contentTypes,
         initialContentTypes: testData.contentTypes,

@@ -1,4 +1,4 @@
-const data = {
+export const data = {
   components: {
     'default.closingperiod': {
       uid: 'default.closingperiod',
@@ -509,5 +509,3 @@ const data = {
     },
   },
 };
-
-export default data;

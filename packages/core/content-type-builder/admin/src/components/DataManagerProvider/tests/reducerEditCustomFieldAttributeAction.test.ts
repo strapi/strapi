@@ -23,7 +23,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_CUSTOM_FIELD_A
       },
     };
 
-    const state = {
+    const state: any = {
       ...initialState,
       contentTypes: { [contentTypeUID]: contentType },
       initialContentTypes: { [contentTypeUID]: contentType },
@@ -42,7 +42,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_CUSTOM_FIELD_A
       customField: 'plugin::mycustomfields.color',
     };
 
-    const action = {
+    const action: any = {
       type: EDIT_CUSTOM_FIELD_ATTRIBUTE,
       attributeToSet: updatedCustomFieldAttribute,
       forTarget: 'contentType',

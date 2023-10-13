@@ -25,7 +25,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
         },
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         contentTypes: { [contentTypeUID]: contentType },
         initialContentTypes: { [contentTypeUID]: contentType },
@@ -35,7 +35,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
         },
       };
 
-      const action = {
+      const action: any = {
         type: EDIT_ATTRIBUTE,
         attributeToSet: {
           type: 'media',
@@ -136,7 +136,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
         },
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         components: { [componentUID]: component },
         initialComponents: { [componentUID]: component },
@@ -148,7 +148,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
         },
       };
 
-      const action = {
+      const action: any = {
         type: EDIT_ATTRIBUTE,
         attributeToSet: {
           type: 'text',
@@ -251,7 +251,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             },
           };
 
-          const state = {
+          const state: any = {
             ...initialState,
             components: {},
             initialComponents: {},
@@ -263,7 +263,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             },
           };
 
-          const action = {
+          const action: any = {
             type: EDIT_ATTRIBUTE,
             attributeToSet: {
               relation: 'oneToMany',
@@ -378,7 +378,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
               ],
             },
           };
-          const state = {
+          const state: any = {
             ...initialState,
             components: {},
             initialComponents: {},
@@ -390,7 +390,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             },
           };
 
-          const action = {
+          const action: any = {
             type: EDIT_ATTRIBUTE,
             attributeToSet: {
               relation: 'oneToOne',
@@ -506,7 +506,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             },
           };
 
-          const state = {
+          const state: any = {
             ...initialState,
             components: {},
             initialComponents: {},
@@ -518,7 +518,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             },
           };
 
-          const action = {
+          const action: any = {
             type: EDIT_ATTRIBUTE,
             attributeToSet: {
               relation: 'oneToOne',
@@ -613,7 +613,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             },
           };
 
-          const state = {
+          const state: any = {
             ...initialState,
             components: {},
             initialComponents: {},
@@ -625,7 +625,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             },
           };
 
-          const action = {
+          const action: any = {
             type: EDIT_ATTRIBUTE,
             attributeToSet: {
               relation: 'oneToOne',
@@ -723,7 +723,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
               ],
             },
           };
-          const state = {
+          const state: any = {
             ...initialState,
             components: {},
             initialComponents: {},
@@ -735,7 +735,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             },
           };
 
-          const action = {
+          const action: any = {
             type: EDIT_ATTRIBUTE,
             attributeToSet: {
               relation: 'manyToMany',
@@ -831,7 +831,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             },
           };
 
-          const state = {
+          const state: any = {
             ...initialState,
             components: {},
             initialComponents: {},
@@ -843,7 +843,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             },
           };
 
-          const action = {
+          const action: any = {
             type: EDIT_ATTRIBUTE,
             attributeToSet: {
               relation: 'manyToMany',
@@ -942,7 +942,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
               ],
             },
           };
-          const state = {
+          const state: any = {
             ...initialState,
             components: {},
             initialComponents: {},
@@ -954,7 +954,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             },
           };
 
-          const action = {
+          const action: any = {
             type: EDIT_ATTRIBUTE,
             attributeToSet: {
               relation: 'oneToOne',
@@ -1056,7 +1056,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             ],
           },
         };
-        const state = {
+        const state: any = {
           ...initialState,
           components: {},
           initialComponents: {},
@@ -1068,7 +1068,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
           },
         };
 
-        const action = {
+        const action: any = {
           type: EDIT_ATTRIBUTE,
           attributeToSet: {
             relation: 'oneToOne',
@@ -1166,7 +1166,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             ],
           },
         };
-        const state = {
+        const state: any = {
           ...initialState,
           components: {},
           initialComponents: {},
@@ -1178,7 +1178,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
           },
         };
 
-        const action = {
+        const action: any = {
           type: EDIT_ATTRIBUTE,
           attributeToSet: {
             relation: 'oneToMany',
@@ -1284,7 +1284,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             ],
           },
         };
-        const state = {
+        const state: any = {
           ...initialState,
           components: {},
           initialComponents: {},
@@ -1296,7 +1296,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
           },
         };
 
-        const action = {
+        const action: any = {
           type: EDIT_ATTRIBUTE,
           attributeToSet: {
             relation: 'manyToMany',
@@ -1403,7 +1403,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             ],
           },
         };
-        const state = {
+        const state: any = {
           ...initialState,
           components: {},
           initialComponents: {},
@@ -1415,7 +1415,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
           },
         };
 
-        const action = {
+        const action: any = {
           type: EDIT_ATTRIBUTE,
           attributeToSet: {
             relation: 'oneToOne',
@@ -1534,7 +1534,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             ],
           },
         };
-        const state = {
+        const state: any = {
           ...initialState,
           components: {},
           initialComponents: {},
@@ -1546,7 +1546,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
           },
         };
 
-        const action = {
+        const action: any = {
           type: EDIT_ATTRIBUTE,
           attributeToSet: {
             relation: 'oneToMany',
@@ -1688,7 +1688,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
           },
         };
 
-        const state = {
+        const state: any = {
           ...initialState,
           components: { [componentUID]: component },
           initialComponents: { [componentUID]: component },
@@ -1700,7 +1700,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
           },
         };
 
-        const action = {
+        const action: any = {
           type: EDIT_ATTRIBUTE,
           attributeToSet: {
             name: 'category',
@@ -1837,7 +1837,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
           },
         };
 
-        const state = {
+        const state: any = {
           ...initialState,
           components: { [componentUID]: component },
           initialComponents: { [componentUID]: component },
@@ -1849,7 +1849,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
           },
         };
 
-        const action = {
+        const action: any = {
           type: EDIT_ATTRIBUTE,
           attributeToSet: {
             name: 'category-new',
@@ -1978,7 +1978,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
           },
         };
 
-        const state = {
+        const state: any = {
           ...initialState,
           components: { [componentUID]: component },
           initialComponents: { [componentUID]: component },
@@ -1990,7 +1990,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
           },
         };
 
-        const action = {
+        const action: any = {
           type: EDIT_ATTRIBUTE,
           attributeToSet: {
             name: 'category',
@@ -2119,7 +2119,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
           },
         };
 
-        const state = {
+        const state: any = {
           ...initialState,
           components: { [componentUID]: component },
           initialComponents: { [componentUID]: component },
@@ -2131,7 +2131,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
           },
         };
 
-        const action = {
+        const action: any = {
           type: EDIT_ATTRIBUTE,
           attributeToSet: {
             name: 'category-new',

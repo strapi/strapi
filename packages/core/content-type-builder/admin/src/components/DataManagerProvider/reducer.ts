@@ -12,7 +12,7 @@ import type { DataManagerStateType, ContentType, AttributeType, Component } from
 import type { UID } from '@strapi/types';
 
 // TODO: Define all possible actions based on type
-type Action = {
+export type Action = {
   type: string;
   uid?: string;
   mainDataKey: 'component' | 'components' | 'contentTypes' | 'contentType';

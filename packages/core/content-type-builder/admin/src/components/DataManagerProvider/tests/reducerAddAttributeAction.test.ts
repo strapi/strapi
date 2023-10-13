@@ -1,7 +1,7 @@
 import { ADD_ATTRIBUTE } from '../constants';
 import { initialState, reducer } from '../reducer';
 
-import type { DataManagerStateType, Component, ContentType } from '../../../types';
+import type { Component, ContentType } from '../../../types';
 
 describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () => {
   describe('Adding a common field that is not a relation', () => {
@@ -16,7 +16,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
           attributes: [{ name: 'test', type: 'string' }],
         },
       };
-      const state = {
+      const state: any = {
         ...initialState,
         modifiedData: {
           components: {},
@@ -24,7 +24,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const action = {
+      const action: any = {
         type: ADD_ATTRIBUTE,
         attributeToSet: {
           type: 'string',
@@ -131,7 +131,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const state: DataManagerStateType = {
+      const state: any = {
         ...initialState,
         components: {
           'default.dish': compoSchema,
@@ -144,7 +144,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const action = {
+      const action: any = {
         type: ADD_ATTRIBUTE,
         attributeToSet: {
           name: 'test',
@@ -221,7 +221,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
       const componentToAddUID = 'default.dish';
-      const componentSchema = {
+      const componentSchema: Component = {
         uid: 'default.dish',
         category: 'default',
         schema: {
@@ -266,7 +266,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         components: {
           [componentToAddUID]: componentSchema,
@@ -282,7 +282,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const action = {
+      const action: any = {
         type: ADD_ATTRIBUTE,
         attributeToSet: {
           type: 'component',
@@ -445,7 +445,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         components: {
           [componentToAddUID]: componentSchema,
@@ -464,7 +464,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const action = {
+      const action: any = {
         type: ADD_ATTRIBUTE,
         attributeToSet: {
           type: 'component',
@@ -631,7 +631,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         components: {
           [componentToAddUID]: componentSchema,
@@ -661,7 +661,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const action = {
+      const action: any = {
         type: ADD_ATTRIBUTE,
         attributeToSet: {
           type: 'component',
@@ -756,7 +756,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         components: {
           [componentToCreateUID]: componentToCreate,
@@ -769,7 +769,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const action = {
+      const action: any = {
         type: ADD_ATTRIBUTE,
         attributeToSet: {
           name: 'newCompo',
@@ -831,7 +831,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         modifiedData: {
           components: {},
@@ -839,7 +839,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const action = {
+      const action: any = {
         type: ADD_ATTRIBUTE,
         attributeToSet: {
           type: 'dynamiczone',
@@ -912,7 +912,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         contentTypes: {
           [contentTypeUID]: contentType,
@@ -928,7 +928,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const action = {
+      const action: any = {
         type: ADD_ATTRIBUTE,
         attributeToSet: {
           name: 'categories',
@@ -1010,7 +1010,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         components: { [componentUID]: compoSchema },
         initialComponents: { [componentUID]: compoSchema },
@@ -1020,7 +1020,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const action = {
+      const action: any = {
         type: ADD_ATTRIBUTE,
         attributeToSet: {
           name: 'address',
@@ -1087,7 +1087,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         components: { [componentUID]: compoSchema },
         initialComponents: { [componentUID]: compoSchema },
@@ -1097,7 +1097,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const action = {
+      const action: any = {
         type: ADD_ATTRIBUTE,
         attributeToSet: {
           name: 'address',
@@ -1159,7 +1159,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         contentTypes: { [contentTypeUID]: contentType },
         initialContentTypes: { [contentTypeUID]: contentType },
@@ -1169,7 +1169,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const action = {
+      const action: any = {
         type: ADD_ATTRIBUTE,
         forTarget: 'contentType',
         targetUid: contentTypeUID,
@@ -1224,7 +1224,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         contentTypes: { [contentTypeUID]: contentType },
         initialContentTypes: { [contentTypeUID]: contentType },
@@ -1234,7 +1234,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const action = {
+      const action: any = {
         type: ADD_ATTRIBUTE,
         forTarget: 'contentType',
         targetUid: contentTypeUID,
@@ -1292,7 +1292,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         contentTypes: { [contentTypeUID]: contentType },
         initialContentTypes: { [contentTypeUID]: contentType },
@@ -1311,7 +1311,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         target: contentTypeUID,
         type: 'relation',
       };
-      const action = {
+      const action: any = {
         type: ADD_ATTRIBUTE,
         forTarget: 'contentType',
         targetUid: contentTypeUID,
@@ -1358,7 +1358,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         contentTypes: { [contentTypeUID]: contentType },
         initialContentTypes: { [contentTypeUID]: contentType },
@@ -1378,7 +1378,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         target: contentTypeUID,
         type: 'relation',
       };
-      const action = {
+      const action: any = {
         type: ADD_ATTRIBUTE,
         forTarget: 'contentType',
         targetUid: contentTypeUID,
@@ -1425,7 +1425,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         contentTypes: { [contentTypeUID]: contentType },
         initialContentTypes: { [contentTypeUID]: contentType },
@@ -1444,7 +1444,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         target: contentTypeUID,
         type: 'relation',
       };
-      const action = {
+      const action: any = {
         type: ADD_ATTRIBUTE,
         forTarget: 'contentType',
         targetUid: contentTypeUID,
@@ -1491,7 +1491,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
 
-      const state = {
+      const state: any = {
         ...initialState,
         contentTypes: { [contentTypeUID]: contentType },
         initialContentTypes: { [contentTypeUID]: contentType },
@@ -1510,7 +1510,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         target: contentTypeUID,
         type: 'relation',
       };
-      const action = {
+      const action: any = {
         type: ADD_ATTRIBUTE,
         forTarget: 'contentType',
         targetUid: contentTypeUID,
