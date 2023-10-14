@@ -14,8 +14,8 @@ jest.mock('../../../../../components/LocalesProvider/useLocalesProvider', () => 
   localeNames: { en: 'English' },
   messages: ['test'],
 }));
-jest.mock('../../../../../hooks/useConfigurations', () => ({
-  useConfigurations: () => ({
+jest.mock('../../../../../hooks/useConfiguration', () => ({
+  useConfiguration: () => ({
     logos: {
       auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
     },
@@ -93,6 +93,12 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         line-height: 1.33;
         font-weight: 600;
         color: #ffffff;
+      }
+
+      .c46 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #4945ff;
       }
 
       .c1 {
@@ -567,12 +573,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         outline: none;
       }
 
-      .c46 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #4945ff;
-      }
-
       .c45 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
@@ -926,7 +926,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                   href="/auth/login"
                 >
                   <span
-                    class="c46"
+                    class="c8 c46"
                   >
                     Ready to sign in?
                   </span>
