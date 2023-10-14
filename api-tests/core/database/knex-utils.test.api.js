@@ -1,7 +1,7 @@
 'use strict';
 
 const { createStrapiInstance } = require('api-tests/strapi');
-const { isKnexQuery } = require('../../../packages/core/database/lib/utils/knex');
+const { isKnexQuery } = require('@strapi/database');
 
 let strapi;
 

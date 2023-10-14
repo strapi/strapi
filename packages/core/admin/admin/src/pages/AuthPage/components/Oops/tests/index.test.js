@@ -13,12 +13,13 @@ jest.mock('../../../../../components/LocalesProvider/useLocalesProvider', () => 
   localeNames: { en: 'English' },
   messages: ['test'],
 }));
-jest.mock('../../../../../hooks/useConfigurations', () => () => ({
-  logos: {
-    auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
-  },
+jest.mock('../../../../../hooks/useConfiguration', () => ({
+  useConfiguration: () => ({
+    logos: {
+      auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
+    },
+  }),
 }));
-
 describe('ADMIN | PAGES | AUTH | Oops', () => {
   it('should render and match the snapshot', () => {
     const history = createMemoryHistory();

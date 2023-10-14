@@ -4,7 +4,7 @@ import * as yup from 'yup';
 import _ from 'lodash';
 import { isNumber, isInteger, get } from 'lodash/fp';
 import * as utils from './string-formatting';
-import printValue from './print-value';
+import { printValue } from './print-value';
 
 export * from 'yup';
 
@@ -116,6 +116,7 @@ declare module 'yup' {
     isKebabCase(message?: string): this;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ObjectSchema<TShape> {
     onlyContainsFunctions(message?: string): this;
   }

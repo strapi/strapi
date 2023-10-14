@@ -1,14 +1,10 @@
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor, server } from '@tests/utils';
 import { rest } from 'msw';
-import { setupServer } from 'msw/node';
 
 import useSettingsForm from '../index';
 
-const toggleNotification = jest.fn();
-
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn().mockImplementation(() => toggleNotification),
   useOverlayBlocker: () => ({ lockApp: jest.fn(), unlockApp: jest.fn() }),
 }));
 
@@ -16,45 +12,9 @@ const mockSchema = {
   validate: () => true,
 };
 
-const handlers = [
-  rest.put('*/providers/options', (req, res, ctx) =>
-    res(
-      ctx.status(200),
-      ctx.json({
-        data: {
-          autoRegister: false,
-          defaultRole: '1',
-          ssoLockedRoles: ['1', '2', '3'],
-        },
-      })
-    )
-  ),
-  rest.get('*/providers/options', (req, res, ctx) =>
-    res(
-      ctx.status(200),
-      ctx.json({
-        data: {
-          autoRegister: false,
-          defaultRole: '1',
-          ssoLockedRoles: ['1', '2'],
-        },
-      })
-    )
-  ),
-];
-
-const server = setupServer(...handlers);
-
 const setup = (...args) => renderHook(() => useSettingsForm(...args));
 
 describe('useSettingsForm', () => {
-  beforeAll(() => {
-    server.listen();
-  });
-
-  afterAll(() => {
-    server.close();
-  });
   test('fetches all the providers options', async () => {
     const { result } = setup('/admin/providers/options', mockSchema, jest.fn(), [
       'autoRegister',

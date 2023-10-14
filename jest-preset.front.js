@@ -32,7 +32,7 @@ module.exports = {
       '@swc/jest',
       {
         env: {
-          coreJs: '3.28.0',
+          coreJs: '3.33.0',
           mode: 'usage',
         },
 

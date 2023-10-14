@@ -8,8 +8,8 @@ import { createMemoryHistory } from 'history';
 import { Route, Router } from 'react-router-dom';
 
 import { SettingsPage } from '..';
-import Theme from '../../../components/Theme';
-import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
+import { Theme } from '../../../components/Theme';
+import { ThemeToggleProvider } from '../../../components/ThemeToggleProvider';
 import { useSettingsMenu } from '../../../hooks';
 
 jest.mock('../../../hooks', () => ({
@@ -22,6 +22,7 @@ jest.mock('react-intl', () => ({
   FormattedMessage: ({ id }) => id,
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => id) }),
 }));
+
 jest.mock('../pages/ApplicationInfosPage', () => () => {
   return <h1>App infos</h1>;
 });

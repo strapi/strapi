@@ -54,6 +54,7 @@ export type DefaultTo<T> = { default: T };
 export type Any =
   | Attribute.BigInteger
   | Attribute.Boolean
+  | Attribute.Blocks
   | Attribute.Component<Common.UID.Component, boolean>
   | Attribute.DateTime
   | Attribute.Date
@@ -66,7 +67,7 @@ export type Any =
   | Attribute.JSON
   | Attribute.Media<Attribute.MediaKind | undefined, boolean>
   | Attribute.Password
-  | Attribute.Relation<Common.UID.Schema, Attribute.RelationKind.Any, Common.UID.Schema>
+  | Attribute.Relation
   | Attribute.RichText
   | Attribute.String
   | Attribute.Text

@@ -9,8 +9,6 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import en from '../../../translations/en.json';
 import { RemoveAssetDialog } from '../RemoveAssetDialog';
 
-import server from './server';
-
 jest.mock('../../../utils/deleteRequest', () => ({
   ...jest.requireActual('../../../utils/deleteRequest'),
   deleteRequest: jest.fn().mockResolvedValue({ id: 1 }),
@@ -111,11 +109,6 @@ const renderCompo = (handleCloseSpy = jest.fn()) => {
 };
 
 describe('RemoveAssetDialog', () => {
-  beforeAll(() => server.listen());
-
-  afterEach(() => server.resetHandlers());
-  afterAll(() => server.close());
-
   it('snapshots the component', () => {
     renderCompo();
 

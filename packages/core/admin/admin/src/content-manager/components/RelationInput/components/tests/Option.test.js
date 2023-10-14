@@ -14,7 +14,7 @@ const setup = (props) => ({
       <IntlProvider locale="en" messages={{}}>
         <Combobox>
           {props.options.map((opt) => (
-            <Option {...opt} />
+            <Option key={opt.mainField} {...opt} />
           ))}
         </Combobox>
       </IntlProvider>

@@ -5,7 +5,7 @@ const checkIfAttributeIsDisplayable = (attribute) => {
     return !(attribute?.relationType ?? '').toLowerCase().includes('morph');
   }
 
-  return !['json', 'dynamiczone', 'richtext', 'password'].includes(type) && !!type;
+  return !['json', 'dynamiczone', 'richtext', 'password', 'blocks'].includes(type) && !!type;
 };
 
 export default checkIfAttributeIsDisplayable;

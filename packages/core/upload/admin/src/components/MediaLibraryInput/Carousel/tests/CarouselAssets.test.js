@@ -1,18 +1,8 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { fireEvent, render } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { render, waitFor } from '@tests/utils';
 
 import { CarouselAssets } from '../CarouselAssets';
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn(() => ({
-    toggleNotification: jest.fn(),
-  })),
-}));
 
 const ASSET_FIXTURES = [
   {
@@ -33,38 +23,21 @@ const ASSET_FIXTURES = [
   },
 ];
 
-const client = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-});
-
-const ComponentFixture = (props) => {
-  return (
-    <QueryClientProvider client={client}>
-      <IntlProvider locale="en" messages={{}}>
-        <ThemeProvider theme={lightTheme}>
-          <CarouselAssets
-            assets={ASSET_FIXTURES}
-            label="Carousel"
-            onAddAsset={jest.fn}
-            onDeleteAsset={jest.fn}
-            onDeleteAssetFromMediaLibrary={jest.fn}
-            onEditAsset={jest.fn}
-            onNext={jest.fn}
-            onPrevious={jest.fn}
-            selectedAssetIndex={0}
-            {...props}
-          />
-        </ThemeProvider>
-      </IntlProvider>
-    </QueryClientProvider>
+const setup = (props) =>
+  render(
+    <CarouselAssets
+      assets={ASSET_FIXTURES}
+      label="Carousel"
+      onAddAsset={jest.fn}
+      onDeleteAsset={jest.fn}
+      onDeleteAssetFromMediaLibrary={jest.fn}
+      onEditAsset={jest.fn}
+      onNext={jest.fn}
+      onPrevious={jest.fn}
+      selectedAssetIndex={0}
+      {...props}
+    />
   );
-};
-
-const setup = (props) => render(<ComponentFixture {...props} />);
 
 describe('MediaLibraryInput | Carousel | CarouselAssets', () => {
   it('should render empty carousel', () => {
@@ -90,30 +63,32 @@ describe('MediaLibraryInput | Carousel | CarouselAssets', () => {
     expect(getByRole('button', { name: 'edit' })).toBeInTheDocument();
   });
 
-  it('should call onAddAsset', () => {
+  it('should call onAddAsset', async () => {
     const onAddAssetSpy = jest.fn();
-    const { getByRole } = setup({ onAddAsset: onAddAssetSpy });
+    const { getByRole, user } = setup({ onAddAsset: onAddAssetSpy });
 
-    fireEvent.click(getByRole('button', { name: 'Add' }));
+    await user.click(getByRole('button', { name: 'Add' }));
 
     expect(onAddAssetSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('should call onDeleteAsset', () => {
+  it('should call onDeleteAsset', async () => {
     const onDeleteAssetSpy = jest.fn();
-    const { getByRole } = setup({ onDeleteAsset: onDeleteAssetSpy });
+    const { getByRole, user } = setup({ onDeleteAsset: onDeleteAssetSpy });
 
-    fireEvent.click(getByRole('button', { name: 'Delete' }));
+    await user.click(getByRole('button', { name: 'Delete' }));
 
     expect(onDeleteAssetSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('should open edit view', () => {
-    const { getByRole, getByText } = setup();
+  it('should open edit view', async () => {
+    const { getByRole, getByText, user, queryByText } = setup();
 
-    fireEvent.click(getByRole('button', { name: 'edit' }));
+    await user.click(getByRole('button', { name: 'edit' }));
 
     expect(getByText('Details')).toBeInTheDocument();
+
+    await waitFor(() => expect(queryByText('Content is loading.')).not.toBeInTheDocument());
   });
 
   it('should render the localized label', () => {

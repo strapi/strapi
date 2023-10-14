@@ -2,30 +2,14 @@ import { join } from 'path';
 import fse from 'fs-extra';
 import { defaultsDeep, defaults, getOr, get } from 'lodash/fp';
 import { env } from '@strapi/utils';
-import type { Strapi, Common, Schema } from '@strapi/types';
+import type { Strapi, Plugin } from '@strapi/types';
 import { loadFile } from '../../app-configuration/load-config-file';
 import loadFiles from '../../../load/load-files';
 import { getEnabledPlugins } from './get-enabled-plugins';
 import { getUserPluginsConfig } from './get-user-plugins-config';
 
-type LoadedPlugin = {
-  config: {
-    default: Record<string, unknown> | ((opts: { env: typeof env }) => Record<string, unknown>);
-    validator: (config: Record<string, unknown>) => void;
-  };
-  bootstrap: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
-  destroy: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
-  register: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
-  routes: Record<string, Common.Router>;
-  controllers: Record<string, Common.Controller>;
-  services: Record<string, Common.Service>;
-  policies: Record<string, Common.Policy>;
-  middlewares: Record<string, Common.Middleware>;
-  contentTypes: Record<string, { schema: Schema.ContentType }>;
-};
-
 interface Plugins {
-  [key: string]: LoadedPlugin;
+  [key: string]: Plugin.LoadedPlugin;
 }
 
 const defaultPlugin = {

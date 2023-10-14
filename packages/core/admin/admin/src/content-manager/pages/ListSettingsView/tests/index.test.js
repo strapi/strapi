@@ -1,21 +1,10 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { fireEvent, render as renderRTL, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { MemoryRouter, Route } from 'react-router-dom';
+import { fireEvent } from '@testing-library/react';
+import { render as renderRTL, waitFor } from '@tests/utils';
+import { Route } from 'react-router-dom';
 
-import ModelsContext from '../../../contexts/ModelsContext';
 import { ListSettingsView } from '../index';
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn(),
-}));
 
 const layout = {
   attributes: {
@@ -91,46 +80,29 @@ const render = ({ initialEntries } = {}) => ({
   ...renderRTL(
     <ListSettingsView layout={layout} slug="api::restaurant.restaurant" updateLayout={jest.fn()} />,
     {
-      wrapper({ children }) {
-        const client = new QueryClient({
-          defaultOptions: {
-            queries: {
-              retry: false,
-            },
-          },
-        });
+      initialEntries,
+      renderOptions: {
+        wrapper({ children }) {
+          return (
+            <>
+              {children}
+              <Route
+                path="*"
+                render={({ location }) => {
+                  testLocation = location;
 
-        return (
-          <MemoryRouter initialEntries={initialEntries}>
-            <ModelsContext.Provider value={{ refetchData: jest.fn() }}>
-              <QueryClientProvider client={client}>
-                <IntlProvider messages={{ en: {} }} textComponent="span" locale="en">
-                  <ThemeProvider theme={lightTheme}>
-                    <DndProvider backend={HTML5Backend}>{children}</DndProvider>
-                  </ThemeProvider>
-                </IntlProvider>
-              </QueryClientProvider>
-            </ModelsContext.Provider>
-            <Route
-              path="*"
-              render={({ location }) => {
-                testLocation = location;
-
-                return null;
-              }}
-            />
-          </MemoryRouter>
-        );
+                  return null;
+                }}
+              />
+            </>
+          );
+        },
       },
     }
   ),
-  user: userEvent.setup(),
 });
 
-/**
- * TODO: we should be using MSW for the network events
- */
-describe('ADMIN | CM | LV | Configure the view', () => {
+describe('CM | LV | Configure the view', () => {
   it('renders and matches the snapshot', async () => {
     const { getByRole } = render();
 

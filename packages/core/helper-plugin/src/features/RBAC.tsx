@@ -1,7 +1,9 @@
 import * as React from 'react';
 
-import type { Permission } from '@strapi/permissions';
+import type { domain } from '@strapi/permissions';
 import type { QueryObserverBaseResult } from 'react-query';
+
+type Permission = domain.permission.Permission;
 
 /* -------------------------------------------------------------------------------------------------
  * Context

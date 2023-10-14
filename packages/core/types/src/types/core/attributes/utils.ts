@@ -1,4 +1,4 @@
-import type { Attribute, Common } from '..';
+import type { Attribute, Common, Entity } from '..';
 import type { Utils } from '../..';
 
 export type GetKeysByType<
@@ -68,6 +68,7 @@ export type GetKeysWithTarget<TSchemaUID extends Common.UID.Schema> = keyof {
 export type GetValue<TAttribute extends Attribute.Attribute, TGuard = unknown> = Utils.Guard.Never<
   | Attribute.GetBigIntegerValue<TAttribute>
   | Attribute.GetBooleanValue<TAttribute>
+  | Attribute.GetBlocksValue<TAttribute>
   | Attribute.GetComponentValue<TAttribute>
   | Attribute.GetDecimalValue<TAttribute>
   | Attribute.GetDynamicZoneValue<TAttribute>
@@ -100,7 +101,7 @@ export type GetValueByKey<
 export type GetValues<
   TSchemaUID extends Common.UID.Schema,
   TKey extends GetKeys<TSchemaUID> = GetKeys<TSchemaUID>
-> = { id: number | `${number}` } & {
+> = { id: Entity.ID } & {
   // Handle required attributes
   [key in GetRequiredKeys<TSchemaUID> as key extends TKey ? key : never]-?: GetValueByKey<
     TSchemaUID,
