@@ -39,6 +39,27 @@ export interface DocumentService {
     >
   >;
 
+  findPage<
+    TContentTypeUID extends Common.UID.ContentType,
+    TParams extends Params.Pick<
+      TContentTypeUID,
+      | 'fields'
+      | 'filters'
+      | '_q'
+      | 'pagination:page'
+      | 'sort'
+      | 'populate'
+      | 'publicationState'
+      | 'plugin'
+    >
+  >(
+    uid: TContentTypeUID,
+    paginationParams?: Params.Pagination.PageNotation
+  ): Promise<{
+    results: [Common.UID.IsCollectionType<TContentTypeUID>, Result<TContentTypeUID, TParams>[]];
+    pagination: any; // TODO
+  }>;
+
   findFirst<
     TContentTypeUID extends Common.UID.ContentType,
     TParams extends Params.Pick<
@@ -68,6 +89,24 @@ export interface DocumentService {
     params?: TParams
   ): Promise<Result<TContentTypeUID, TParams> | null>;
 
+  deleteMany<
+    TContentTypeUID extends Common.UID.ContentType,
+    TParams extends Params.Pick<
+      TContentTypeUID,
+      | 'fields'
+      | 'filters'
+      | '_q'
+      | 'pagination:offset'
+      | 'sort'
+      | 'populate'
+      | 'publicationState'
+      | 'plugin'
+    >
+  >(
+    uid: TContentTypeUID,
+    params?: TParams
+  ): Promise<number | null>;
+
   // TODO: Make data param required
   create<
     TContentTypeUID extends Common.UID.ContentType,
@@ -75,6 +114,15 @@ export interface DocumentService {
   >(
     uid: TContentTypeUID,
     params: TParams
+  ): Promise<Result<TContentTypeUID, TParams>>;
+
+  clone<
+    TContentTypeUID extends Common.UID.ContentType,
+    TParams extends Params.Pick<TContentTypeUID, 'data' | 'files' | 'fields' | 'populate'>
+  >(
+    uid: TContentTypeUID,
+    documentId: Params.Attribute.ID,
+    params?: TParams
   ): Promise<Result<TContentTypeUID, TParams>>;
 
   update<
@@ -85,4 +133,22 @@ export interface DocumentService {
     documentId: Params.Attribute.ID,
     params?: TParams
   ): Promise<Result<TContentTypeUID, TParams> | null>;
+
+  count<
+    TContentTypeUID extends Common.UID.ContentType,
+    TParams extends Params.Pick<
+      TContentTypeUID,
+      | 'fields'
+      | 'filters'
+      | '_q'
+      | 'pagination:offset'
+      | 'sort'
+      | 'populate'
+      | 'publicationState'
+      | 'plugin'
+    >
+  >(
+    uid: TContentTypeUID,
+    params?: TParams
+  ): Promise<number | null>;
 }

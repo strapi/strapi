@@ -2,6 +2,7 @@ import type { Strapi, DocumentService, EntityValidator, EventHub } from '@strapi
 import { convertQueryParams } from '@strapi/utils';
 import type { Database } from '@strapi/database';
 
+import { isArray } from 'lodash/fp';
 import uploadFiles from '../utils/upload-files';
 import { pickSelectionParams } from './params';
 
@@ -16,7 +17,7 @@ const { transformParamsToQuery } = convertQueryParams;
  * TODO: D&P
  * TODO: i18n
  * TODO: Apply default parameters (status & locale)
- * TODO: Sanitization
+ * TODO: Sanitization / validation built-in
  * TODO: Other methods
  *        Count
  *        FindPage
@@ -28,6 +29,9 @@ const { transformParamsToQuery } = convertQueryParams;
  * TODO: Audit logs
  * TODO: File upload
  * TODO: Transactions?
+ *
+ * TODO: replace 'any'
+ * CountVersions?
  */
 
 const createDocumentService = ({
@@ -51,6 +55,15 @@ const createDocumentService = ({
     }
 
     return db.query(uid).findMany(query) as any;
+  },
+
+  async findPage(uid, paginationParams) {
+    const query = transformParamsToQuery(uid, paginationParams || ({} as any));
+
+    return {
+      results: (await db.query(uid).findMany(query)) as any,
+      pagination: {}, // TODO
+    };
   },
 
   async findFirst(uid, params) {
@@ -79,6 +92,20 @@ const createDocumentService = ({
     // Delete entry
     await db.query(uid).delete({ where: { id: entryToDelete.id } });
     return entryToDelete;
+  },
+
+  // TODO: should we provide two separate methods?
+  async deleteMany(uid, paramsOrIds) {
+    let queryParams;
+    if (isArray(paramsOrIds)) {
+      queryParams = { filter: { where: { documentID: { $in: paramsOrIds } } } };
+    } else {
+      queryParams = paramsOrIds;
+    }
+
+    const query = transformParamsToQuery(uid, queryParams || ({} as any));
+
+    return db.query(uid).deleteMany(query) as any;
   },
 
   async create(uid, params) {
@@ -110,6 +137,16 @@ const createDocumentService = ({
     }
 
     return db.query(uid).update({ ...query, where: { id: entryToUpdate.id }, data }) as any;
+  },
+
+  async count(uid, params = undefined) {
+    const query = transformParamsToQuery(uid, pickSelectionParams(params || {}));
+
+    return db.query(uid).count(query) as any;
+  },
+
+  async clone(uid, documentId, params) {
+    return db.query(uid).clone(documentId, params || {});
   },
 });
 
