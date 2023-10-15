@@ -111,7 +111,7 @@
     "targets": {
       "build": {
         "outputs": [
-          "./build"
+          "{projectRoot}/build"
         ]
       }
     }
