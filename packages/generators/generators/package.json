@@ -28,20 +28,22 @@
     }
   ],
   "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "files": [
     "./dist"
   ],
   "scripts": {
-    "build": "run -T tsc && run copy-files",
-    "build:ts": "run build",
+    "build": "pack-up build && run copy-files",
     "clean": "run -T rimraf ./dist",
     "copy-files": "copyfiles -u 1 -a 'src/templates/**/*' 'src/files/**/*' dist",
     "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
+    "test:ts": "run -T tsc --noEmit",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "run -T tsc -w --preserveWatchOutput"
+    "watch": "pack-up watch"
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
@@ -55,6 +57,7 @@
     "pluralize": "8.0.0"
   },
   "devDependencies": {
+    "@strapi/pack-up": "workspace:*",
     "eslint-config-custom": "4.14.4",
     "tsconfig": "4.14.4"
   },

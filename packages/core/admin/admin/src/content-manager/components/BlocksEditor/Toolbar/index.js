@@ -97,49 +97,6 @@ ToolbarButton.propTypes = {
   handleClick: PropTypes.func.isRequired,
 };
 
-const ModifierButton = ({ icon, name, label, disabled }) => {
-  const editor = useSlate();
-
-  const isModifierActive = () => {
-    const modifiers = Editor.marks(editor);
-
-    if (!modifiers) return false;
-
-    return Boolean(modifiers[name]);
-  };
-
-  const isActive = isModifierActive();
-
-  const toggleModifier = () => {
-    if (isActive) {
-      Editor.removeMark(editor, name);
-    } else {
-      Editor.addMark(editor, name, true);
-    }
-  };
-
-  return (
-    <ToolbarButton
-      icon={icon}
-      name={name}
-      label={label}
-      isActive={isActive}
-      disabled={disabled}
-      handleClick={toggleModifier}
-    />
-  );
-};
-
-ModifierButton.propTypes = {
-  icon: PropTypes.elementType.isRequired,
-  name: PropTypes.string.isRequired,
-  label: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-  }).isRequired,
-  disabled: PropTypes.bool.isRequired,
-};
-
 const toggleBlock = (editor, value) => {
   const { type, level, format } = value;
 
@@ -464,21 +421,59 @@ const isListActive = (editor, matchNode) => {
 };
 
 const toggleList = (editor, isActive, format) => {
-  // Delete the parent list so that we're left with only the list items directly
-  Transforms.unwrapNodes(editor, {
-    match: (node) => isListNode(node) && ['ordered', 'unordered'].includes(node.format),
-    split: true,
-  });
+  // If we have selected a portion of content in the editor,
+  // we want to convert it to a list or if it is already a list,
+  // convert it back to a paragraph
+  if (editor.selection) {
+    Transforms.unwrapNodes(editor, {
+      match: (node) => isListNode(node) && ['ordered', 'unordered'].includes(node.format),
+      split: true,
+    });
 
-  // Change the type of the current selection
-  Transforms.setNodes(editor, {
-    type: isActive ? 'paragraph' : 'list-item',
-  });
+    Transforms.setNodes(editor, {
+      type: isActive ? 'paragraph' : 'list-item',
+    });
 
-  // If the selection is now a list item, wrap it inside a list
-  if (!isActive) {
-    const block = { type: 'list', format, children: [] };
-    Transforms.wrapNodes(editor, block);
+    if (!isActive) {
+      const block = { type: 'list', format, children: [] };
+      Transforms.wrapNodes(editor, block);
+    }
+  } else {
+    // There is no selection, convert the last inserted node to a list
+    // If it is already a list, convert it back to a paragraph
+    const [, lastNodePath] = Editor.last(editor, []);
+
+    const [parentNode] = Editor.parent(editor, lastNodePath, {
+      // Makes sure we get a block node, not an inline node
+      match: (node) => node.type !== 'text',
+    });
+
+    Transforms.removeNodes(editor, {
+      void: true,
+      hanging: true,
+      at: {
+        anchor: { path: lastNodePath, offset: 0 },
+        focus: { path: lastNodePath, offset: 0 },
+      },
+    });
+
+    Transforms.insertNodes(
+      editor,
+      {
+        type: isActive ? 'paragraph' : 'list-item',
+        children: [...parentNode.children],
+      },
+      {
+        at: [lastNodePath[0]],
+        select: true,
+      }
+    );
+
+    if (!isActive) {
+      // If the selection is now a list item, wrap it inside a list
+      const block = { type: 'list', format, children: [] };
+      Transforms.wrapNodes(editor, block);
+    }
   }
 };
 
@@ -600,6 +595,32 @@ const BetaTag = styled(Box)`
 const BlocksToolbar = ({ disabled }) => {
   const modifiers = useModifiersStore();
   const blocks = useBlocksStore();
+  const editor = useSlate();
+
+  /**
+   * The modifier buttons are disabled when an image is selected.
+   */
+
+  const checkButtonDisabled = () => {
+    // Always disabled when the whole editor is disabled
+    if (disabled) {
+      return true;
+    }
+
+    if (!editor.selection) {
+      return false;
+    }
+
+    const selectedNode = editor.children[editor.selection.anchor.path[0]];
+
+    if (selectedNode.type === 'image') {
+      return true;
+    }
+
+    return false;
+  };
+
+  const isButtonDisabled = checkButtonDisabled();
 
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
@@ -616,10 +637,10 @@ const BlocksToolbar = ({ disabled }) => {
                 label={modifier.label}
                 isActive={modifier.checkIsActive()}
                 handleClick={modifier.handleToggle}
-                disabled={disabled}
+                disabled={isButtonDisabled}
               />
             ))}
-            <LinkButton disabled={disabled} />
+            <LinkButton disabled={isButtonDisabled} />
           </Flex>
         </Toolbar.ToggleGroup>
         <Separator />
