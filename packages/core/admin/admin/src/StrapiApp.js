@@ -9,7 +9,7 @@ import { Helmet } from 'react-helmet';
 import { BrowserRouter } from 'react-router-dom';
 
 import Logo from './assets/images/logo-strapi-2022.svg';
-import localStorageKey from './components/LanguageProvider/utils/localStorageKey';
+import { LANGUAGE_LOCAL_STORAGE_KEY } from './components/LanguageProvider';
 import Providers from './components/Providers';
 import { customFields, Plugin } from './core/apis';
 import configureStore from './core/store/configureStore';
@@ -462,7 +462,7 @@ class StrapiApp {
               href: this.configurations.head.favicon,
             },
           ]}
-          htmlAttributes={{ lang: localStorage.getItem(localStorageKey) || 'en' }}
+          htmlAttributes={{ lang: localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) || 'en' }}
         />
         <BrowserRouter basename={basename}>
           <App store={store} />
