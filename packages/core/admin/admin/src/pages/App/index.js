@@ -23,7 +23,7 @@ import { Route, Switch } from 'react-router-dom';
 
 import { PrivateRoute } from '../../components/PrivateRoute';
 import { ADMIN_PERMISSIONS_CE } from '../../constants';
-import { useConfigurations } from '../../hooks';
+import { useConfiguration } from '../../hooks';
 import { useEnterprise } from '../../hooks/useEnterprise';
 import { createRoute, makeUniqueRoutes } from '../../utils';
 import AuthPage from '../AuthPage';
@@ -57,7 +57,7 @@ function App() {
     }
   );
   const toggleNotification = useNotification();
-  const { updateProjectSettings } = useConfigurations();
+  const { updateProjectSettings } = useConfiguration();
   const { formatMessage } = useIntl();
   const [{ isLoading, hasAdmin, uuid, deviceId }, setState] = useState({
     isLoading: true,
@@ -180,7 +180,9 @@ function App() {
 
   return (
     <Suspense fallback={<LoadingIndicatorPage />}>
-      <SkipToContent>{formatMessage({ id: 'skipToContent' })}</SkipToContent>
+      <SkipToContent>
+        {formatMessage({ id: 'skipToContent', defaultMessage: 'Skip to content' })}
+      </SkipToContent>
       <TrackingProvider value={trackingInfo}>
         <Switch>
           {authRoutes}

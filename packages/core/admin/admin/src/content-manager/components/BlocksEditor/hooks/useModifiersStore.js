@@ -4,27 +4,29 @@ import { Typography } from '@strapi/design-system';
 import { Bold, Italic, Underline, StrikeThrough, Code } from '@strapi/icons';
 import { Editor } from 'slate';
 import { useSlate } from 'slate-react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-const BoldText = styled(Typography).attrs({ fontWeight: 'bold' })`
+const stylesToInherit = css`
   font-size: inherit;
   color: inherit;
+  line-height: inherit;
+`;
+
+const BoldText = styled(Typography).attrs({ fontWeight: 'bold' })`
+  ${stylesToInherit}
 `;
 
 const ItalicText = styled(Typography)`
   font-style: italic;
-  font-size: inherit;
-  color: inherit;
+  ${stylesToInherit}
 `;
 
 const UnderlineText = styled(Typography).attrs({ textDecoration: 'underline' })`
-  font-size: inherit;
-  color: inherit;
+  ${stylesToInherit}
 `;
 
 const StrikeThroughText = styled(Typography).attrs({ textDecoration: 'line-through' })`
-  font-size: inherit;
-  color: inherit;
+  ${stylesToInherit}
 `;
 
 const InlineCode = styled.code`
@@ -70,7 +72,7 @@ export function useModifiersStore() {
    * @param {string} name - The name of the modifier to toggle
    */
   const baseHandleToggle = (name) => {
-    if (modifiers[name]) {
+    if (modifiers?.[name]) {
       Editor.removeMark(editor, name);
     } else {
       Editor.addMark(editor, name, true);

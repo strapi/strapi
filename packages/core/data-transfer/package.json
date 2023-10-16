@@ -1,6 +1,6 @@
 {
   "name": "@strapi/data-transfer",
-  "version": "4.14.3",
+  "version": "4.14.4",
   "description": "Data transfer capabilities for Strapi",
   "keywords": [
     "strapi",
@@ -25,25 +25,26 @@
     }
   ],
   "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
-  "scripts": {
-    "build": "run -T tsc -p tsconfig.build.json",
-    "build:ts": "run build",
-    "clean": "rimraf ./dist",
-    "prepublishOnly": "yarn clean && yarn build",
-    "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch",
-    "watch": "tsc -p tsconfig.build.json -w --preserveWatchOutput",
-    "lint": "run -T eslint ."
-  },
   "files": [
     "./dist"
   ],
+  "scripts": {
+    "build": "pack-up build",
+    "clean": "rimraf ./dist",
+    "lint": "run -T eslint .",
+    "prepublishOnly": "yarn clean && yarn build",
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
+    "watch": "pack-up watch"
+  },
   "dependencies": {
-    "@strapi/logger": "4.14.3",
-    "@strapi/strapi": "4.14.3",
-    "@strapi/types": "4.14.3",
-    "@strapi/utils": "4.14.3",
+    "@strapi/logger": "4.14.4",
+    "@strapi/strapi": "4.14.4",
+    "@strapi/types": "4.14.4",
+    "@strapi/utils": "4.14.4",
     "chalk": "4.1.2",
     "cli-table3": "0.6.2",
     "commander": "8.3.0",
@@ -59,10 +60,8 @@
     "tar-stream": "2.2.0",
     "ws": "8.13.0"
   },
-  "peerDependencies": {
-    "@strapi/strapi": "^4.13.7"
-  },
   "devDependencies": {
+    "@strapi/pack-up": "workspace:*",
     "@types/fs-extra": "9.0.13",
     "@types/jest": "29.5.2",
     "@types/koa": "2.13.4",
@@ -78,6 +77,9 @@
     "koa": "2.13.4",
     "rimraf": "3.0.2",
     "typescript": "5.2.2"
+  },
+  "peerDependencies": {
+    "@strapi/strapi": "^4.14.4"
   },
   "engines": {
     "node": ">=16.0.0 <=20.x.x",

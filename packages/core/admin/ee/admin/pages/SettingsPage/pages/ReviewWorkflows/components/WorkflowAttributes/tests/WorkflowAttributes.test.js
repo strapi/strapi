@@ -90,7 +90,7 @@ const withMarkup = (query) => (text) =>
   });
 
 const setup = ({ collectionTypes, singleTypes, currentWorkflow, ...props } = {}) => ({
-  ...render(<ComponentFixture {...props} />, {
+  ...render(<ComponentFixture currentWorkflow={currentWorkflow} {...props} />, {
     wrapper({ children }) {
       const store = createStore(reducer, {
         [REDUX_NAMESPACE]: {
@@ -147,25 +147,25 @@ describe('Admin | Settings | Review Workflow | WorkflowAttributes', () => {
   it('should disabled fields if canUpdate = false', async () => {
     const { getByRole } = setup({ canUpdate: false });
 
-    await waitFor(() => {
-      expect(getByRole('textbox')).toHaveAttribute('disabled');
-      expect(getByRole('combobox', { name: /associated to/i })).toHaveAttribute('data-disabled');
-    });
+    await waitFor(() => expect(getByRole('textbox')).toHaveAttribute('disabled'));
+
+    expect(getByRole('combobox', { name: /associated to/i })).toHaveAttribute('data-disabled');
   });
 
   it('should not render a collection-type group if there are no collection-types', async () => {
     const { getByRole, queryByRole, user } = setup({
       collectionTypes: [],
+      currentWorkflow: {
+        ...WORKFLOWS_FIXTURE[0],
+        contentTypes: ['single-uid1'],
+      },
     });
 
-    const contentTypesSelect = getByRole('combobox', { name: /associated to/i });
+    await user.click(getByRole('combobox', { name: /associated to/i }));
 
-    await user.click(contentTypesSelect);
+    await waitFor(() => expect(getByRole('option', { name: /Single Types/i })).toBeInTheDocument());
 
-    await waitFor(() => {
-      expect(getByRole('option', { name: /Single Types/i })).toBeInTheDocument();
-      expect(queryByRole('option', { name: /Collection Types/i })).not.toBeInTheDocument();
-    });
+    expect(queryByRole('option', { name: /Collection Types/i })).not.toBeInTheDocument();
   });
 
   it('should not render a collection-type group if there are no single-types', async () => {

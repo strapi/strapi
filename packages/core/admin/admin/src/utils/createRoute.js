@@ -12,7 +12,10 @@ const LazyCompo = ({ loadComponent }) => {
       try {
         const loadedCompo = await loadComponent();
 
-        setCompo(() => loadedCompo.default);
+        // TODO the loaded component provided can currently come from a default or named export
+        // We will move the entire codebase to use named exports only
+        // Until then we support both cases with priority given to the existing default exports
+        setCompo(() => loadedCompo?.default ?? loadedCompo);
       } catch (err) {
         // TODO return the error component
         console.log(err);

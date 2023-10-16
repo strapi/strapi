@@ -24,7 +24,7 @@ const setup = (props?: Partial<IconPickerProps>) => {
       wrapper: ({ children }) => (
         <IntlProvider locale="en" defaultLocale="en">
           <ThemeProvider theme={lightTheme}>
-            <MemoryRouter history={history}>{children}</MemoryRouter>
+            <MemoryRouter>{children}</MemoryRouter>
           </ThemeProvider>
         </IntlProvider>
       ),

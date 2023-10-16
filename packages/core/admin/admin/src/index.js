@@ -23,6 +23,9 @@ window.strapi = {
     REVIEW_WORKFLOWS: 'review-workflows',
   },
   projectType: 'Community',
+  flags: {
+    nps: false,
+  },
 };
 
 const customConfig = appCustomisations;
@@ -41,16 +44,16 @@ const run = async () => {
   try {
     const {
       data: {
-        data: { isEE, features },
+        data: { isEE, features, flags },
       },
     } = await get('/admin/project-type');
 
     window.strapi.isEE = isEE;
+    window.strapi.flags = flags;
     window.strapi.features = {
       ...window.strapi.features,
       isEnabled: (featureName) => features.some((feature) => feature.name === featureName),
     };
-
     window.strapi.projectType = isEE ? 'Enterprise' : 'Community';
   } catch (err) {
     console.error(err);

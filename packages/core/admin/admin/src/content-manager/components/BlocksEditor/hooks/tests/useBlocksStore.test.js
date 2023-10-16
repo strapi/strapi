@@ -221,7 +221,7 @@ describe('useBlocksStore', () => {
     const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
 
     render(
-      result.current['heading-six'].renderElement({
+      result.current['heading-two'].renderElement({
         children: 'Some heading',
         element: { level: 2 },
         attributes: {},
@@ -896,5 +896,207 @@ describe('useBlocksStore', () => {
 
     // Check if the cursor is positioned in the new line
     expect(cursorPositionAfterSecondEnter[0]).toEqual(cursorInitialPosition[0] + 1);
+  });
+
+  it('disables modifiers when creating a new node with enter key in a paragraph', () => {
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'Line of text with modifiers',
+            bold: true,
+            italic: true,
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor at the end of the block with modifiers
+    Transforms.select(baseEditor, {
+      anchor: Editor.end(baseEditor, []),
+      focus: Editor.end(baseEditor, []),
+    });
+
+    // Simulate the enter key
+    result.current.paragraph.handleEnterKey(baseEditor);
+
+    // Should insert a new paragraph without modifiers
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'Line of text with modifiers',
+            bold: true,
+            italic: true,
+          },
+        ],
+      },
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('disables modifiers when creating a new node with enter key in a list item', () => {
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'Line of text with modifiers',
+                bold: true,
+                italic: true,
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor at the end of the block with modifiers
+    Transforms.select(baseEditor, {
+      anchor: Editor.end(baseEditor, []),
+      focus: Editor.end(baseEditor, []),
+    });
+
+    // Simulate the enter key
+    result.current['list-unordered'].handleEnterKey(baseEditor);
+
+    // Should insert a new list item without modifiers
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'Line of text with modifiers',
+                bold: true,
+                italic: true,
+              },
+            ],
+          },
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: '',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('keeps modifiers when creating a new line in the middle of a block with modifiers', () => {
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'Line of text with modifiers',
+            bold: true,
+            code: true,
+            italic: true,
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor at the middle of the block with modifiers
+    Transforms.select(baseEditor, {
+      anchor: Editor.point(baseEditor, { path: [0, 0], offset: 10 }),
+      focus: Editor.point(baseEditor, { path: [0, 0], offset: 10 }),
+    });
+
+    // Simulate the enter key
+    result.current.paragraph.handleEnterKey(baseEditor);
+
+    // Should insert a new line with modifiers
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'Line of te',
+            bold: true,
+            code: true,
+            italic: true,
+          },
+        ],
+      },
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'xt with modifiers',
+            bold: true,
+            code: true,
+            italic: true,
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('disables modifiers when creating a new node with enter key at the end of a quote', () => {
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'quote',
+        children: [
+          {
+            type: 'text',
+            text: 'Some quote',
+            bold: true,
+            italic: true,
+          },
+        ],
+      },
+    ];
+
+    Transforms.select(baseEditor, {
+      anchor: Editor.end(baseEditor, []),
+      focus: Editor.end(baseEditor, []),
+    });
+
+    // Bold and italic should be enabled
+    expect(Editor.marks(baseEditor)).toEqual({ bold: true, italic: true, type: 'text' });
+
+    // Simulate the enter key then user typing
+    result.current.quote.handleEnterKey(baseEditor);
+
+    // Once on the new line, bold and italic should be disabled
+    expect(Editor.marks(baseEditor)).toEqual({ type: 'text' });
   });
 });
