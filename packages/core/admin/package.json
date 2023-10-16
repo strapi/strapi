@@ -44,6 +44,7 @@
     "@casl/ability": "6.5.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",
     "@radix-ui/react-toolbar": "1.0.4",
+    "@reduxjs/toolkit": "1.9.7",
     "@strapi/data-transfer": "4.14.4",
     "@strapi/design-system": "1.12.2",
     "@strapi/helper-plugin": "4.14.4",
