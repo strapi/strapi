@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { Redirect, useHistory, useRouteMatch } from 'react-router-dom';
 
 import persistStateToLocaleStorage from '../../components/GuidedTour/utils/persistStateToLocaleStorage';
-import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
+import { useLocales } from '../../components/LanguageProvider';
 import getTrad from '../../content-manager/utils/getTrad';
 import { useEnterprise } from '../../hooks/useEnterprise';
 import formatAPIErrors from '../../utils/formatAPIErrors';
@@ -24,7 +24,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     push,
     location: { search },
   } = useHistory();
-  const { changeLocale } = useLocalesProvider();
+  const { changeLocale } = useLocales();
   const { setSkipped } = useGuidedTour();
   const { trackUsage } = useTracking();
   const {
@@ -156,6 +156,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         changeLocale(user.preferedLanguage);
       }
 
+      auth.setToken(token, body.rememberMe);
       auth.setUserInfo(user, body.rememberMe);
 
       if (mfa) {
@@ -285,7 +286,6 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       push('/');
     }
   };
-
 
   // Redirect the user to the login page if
   // the endpoint does not exist or

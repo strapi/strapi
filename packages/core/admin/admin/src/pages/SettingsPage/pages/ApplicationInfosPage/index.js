@@ -29,7 +29,7 @@ import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
 
-import { useConfiguration } from '../../../../hooks';
+import { useConfiguration } from '../../../../hooks/useConfiguration';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../App/selectors';
 
