@@ -7861,7 +7861,7 @@ __metadata:
     "@types/react": "npm:^18.2.7"
     "@types/react-dom": "npm:^18.2.12"
     "@types/react-router-dom": "npm:^5.3.3"
-    "@types/styled-components": "npm:^5.1.28"
+    "@types/styled-components": "npm:5.1.26"
     eslint-config-custom: "npm:4.14.5"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
@@ -9922,17 +9922,6 @@ __metadata:
     "@types/react": "npm:*"
     csstype: "npm:^3.0.2"
   checksum: e40c942c97f4467310c658608e7d02d6b9571d390d0fa519bdbd37e48ed2c605a6c9e464812c36d0a1339402bff65cb473b9e785288a29419d7af994595bba33
-  languageName: node
-  linkType: hard
-
-"@types/styled-components@npm:^5.1.28":
-  version: 5.1.28
-  resolution: "@types/styled-components@npm:5.1.28"
-  dependencies:
-    "@types/hoist-non-react-statics": "npm:*"
-    "@types/react": "npm:*"
-    csstype: "npm:^3.0.2"
-  checksum: 0f539b4742274d973e2a5afc72dc4455e8b045d7da5e5879301181a1523d300900395eee8745a13cc0204726a4102ba989ebe531e5fda4cd100adaf8b6c6b507
   languageName: node
   linkType: hard
 
