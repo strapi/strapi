@@ -34,9 +34,9 @@ import styled from 'styled-components';
 
 import { useDataManager } from '../../hooks/useDataManager';
 import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
-import pluginId from '../../pluginId';
+import { pluginId } from '../../pluginId';
 import { getTrad, isAllowedContentTypesForRelations } from '../../utils';
-import findAttribute from '../../utils/findAttribute';
+import { findAttribute } from '../../utils/findAttribute';
 // New compos
 import { AllowedTypesSelect } from '../AllowedTypesSelect';
 import { AttributeOptions } from '../AttributeOptions/AttributeOptions';
@@ -80,10 +80,11 @@ import { getAttributesToDisplay } from './utils/getAttributesToDisplay';
 import { getFormInputNames } from './utils/getFormInputNames';
 
 import type { CustomFieldAttributeParams } from '../../contexts/DataManagerContext';
+import type { AttributeType } from '../../types';
 import type { Common } from '@strapi/types';
 
 // TODO: Remove after the RTE Blocks Beta release
-const BetaFeatureAlert = styled(Alert)<{ title?: string }>`
+const BetaFeatureAlert = styled(Alert)`
   button {
     display: none;
   }
@@ -284,7 +285,7 @@ export const FormModal = () => {
         const attributeToEditNotFormatted = findAttribute(
           get(allDataSchema, pathToAttributes, []),
           attributeName
-        );
+        ) as AttributeType;
         const attributeToEdit = {
           ...attributeToEditNotFormatted,
           name: attributeName,
@@ -443,7 +444,6 @@ export const FormModal = () => {
         ctbFormsAPI
       );
     } else if (isEditingCategory) {
-      // MINE schema = forms.editCategory.schema(allComponentsCategories, initialData, ctbFormsAPI);
       schema = forms.editCategory.schema(allComponentsCategories, initialData);
     } else {
       // The user is either in the addComponentToDynamicZone modal or
@@ -1073,7 +1073,7 @@ export const FormModal = () => {
                     <Flex direction="column" alignItems="stretch" gap={6}>
                       {/* TODO: Remove after the RTE Blocks Beta release */}
                       {attributeType === 'blocks' && (
-                        <BetaFeatureAlert>
+                        <BetaFeatureAlert title="" closeLabel="Close" onClose={() => {}}>
                           {formatMessage({
                             id: getTrad('form.feature.beta'),
                             defaultMessage: 'This feature is in Beta.',
@@ -1093,7 +1093,7 @@ export const FormModal = () => {
                     <Flex direction="column" alignItems="stretch" gap={6}>
                       {/* TODO: Remove after the RTE Blocks Beta release */}
                       {attributeType === 'blocks' && (
-                        <BetaFeatureAlert>
+                        <BetaFeatureAlert title="" closeLabel="Close" onClose={() => {}}>
                           {formatMessage({
                             id: getTrad('form.feature.beta'),
                             defaultMessage: 'This feature is in Beta.',

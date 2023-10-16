@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import { TextInput } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import nameToSlug from '../utils/nameToSlug';
+import { nameToSlug } from '../utils/nameToSlug';
 
 import type { IntlLabel } from '../types';
 

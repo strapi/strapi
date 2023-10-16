@@ -4,12 +4,13 @@
  *
  */
 
+import { MouseEvent, SyntheticEvent } from 'react';
+
 import { Button } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../utils';
-import { SyntheticEvent } from 'react';
 
 type FormModalEndActionsProps = {
   categoryName?: string;
@@ -88,7 +89,7 @@ export const FormModalEndActions = ({
         <Button
           variant="secondary"
           type="submit"
-          onClick={(e: Event) => {
+          onClick={(e: SyntheticEvent) => {
             e.preventDefault();
 
             onSubmitAddComponentToDz(e, true);
@@ -107,7 +108,7 @@ export const FormModalEndActions = ({
       <Button
         variant="default"
         type="submit"
-        onClick={(e: Event) => {
+        onClick={(e: SyntheticEvent) => {
           e.preventDefault();
 
           onSubmitAddComponentToDz(e, false);
@@ -126,7 +127,7 @@ export const FormModalEndActions = ({
       <Button
         variant="default"
         type="submit"
-        onClick={(e: Event) => {
+        onClick={(e: SyntheticEvent) => {
           e.preventDefault();
 
           onClickFinish();
@@ -147,7 +148,7 @@ export const FormModalEndActions = ({
         <Button
           variant="secondary"
           type="submit"
-          onClick={(e: Event) => {
+          onClick={(e: SyntheticEvent) => {
             e.preventDefault();
 
             onSubmitCreateDz(e, true);
@@ -184,7 +185,7 @@ export const FormModalEndActions = ({
         <Button
           variant="secondary"
           type="submit"
-          onClick={(e: Event) => {
+          onClick={(e: SyntheticEvent) => {
             e.preventDefault();
 
             onSubmitAddComponentAttribute(e, true);
@@ -208,7 +209,7 @@ export const FormModalEndActions = ({
         <Button
           variant="secondary"
           type="submit"
-          onClick={(e: Event) => {
+          onClick={(e: SyntheticEvent) => {
             e.preventDefault();
 
             onSubmitAddComponentAttribute(e, true);
@@ -228,7 +229,7 @@ export const FormModalEndActions = ({
         <Button
           variant="default"
           type="button"
-          onClick={(e: Event) => {
+          onClick={(e: SyntheticEvent) => {
             e.preventDefault();
 
             onClickFinish();
@@ -250,7 +251,7 @@ export const FormModalEndActions = ({
         <Button
           type={isEditingAttribute ? 'button' : 'submit'}
           variant="secondary"
-          onClick={(e: Event) => {
+          onClick={(e: SyntheticEvent) => {
             e.preventDefault();
 
             onSubmitEditAttribute(e, true);
@@ -265,7 +266,7 @@ export const FormModalEndActions = ({
         <Button
           type={isEditingAttribute ? 'submit' : 'button'}
           variant="default"
-          onClick={(e: Event) => {
+          onClick={(e: SyntheticEvent) => {
             e.preventDefault();
 
             onClickFinish();
@@ -289,7 +290,7 @@ export const FormModalEndActions = ({
             <Button
               type="button"
               variant="danger"
-              onClick={(e: Event) => {
+              onClick={(e: SyntheticEvent) => {
                 e.preventDefault();
                 deleteContentType();
               }}
@@ -302,7 +303,7 @@ export const FormModalEndActions = ({
             <Button
               type="submit"
               variant="default"
-              onClick={(e: Event) => {
+              onClick={(e: SyntheticEvent) => {
                 e.preventDefault();
 
                 onSubmitEditContentType(e, false);
@@ -319,7 +320,7 @@ export const FormModalEndActions = ({
           <Button
             type="submit"
             variant="secondary"
-            onClick={(e: Event) => {
+            onClick={(e: SyntheticEvent) => {
               e.preventDefault();
 
               onSubmitCreateContentType(e, true);
@@ -343,7 +344,7 @@ export const FormModalEndActions = ({
             <Button
               type="button"
               variant="danger"
-              onClick={(e: Event) => {
+              onClick={(e: SyntheticEvent) => {
                 e.preventDefault();
                 deleteComponent();
               }}
@@ -356,7 +357,7 @@ export const FormModalEndActions = ({
             <Button
               type="submit"
               variant="default"
-              onClick={(e: Event) => {
+              onClick={(e: SyntheticEvent) => {
                 e.preventDefault();
 
                 onSubmitEditComponent(e, false);
@@ -373,7 +374,7 @@ export const FormModalEndActions = ({
           <Button
             type="submit"
             variant="secondary"
-            onClick={(e: Event) => {
+            onClick={(e: SyntheticEvent) => {
               e.preventDefault();
 
               onSubmitCreateComponent(e, true);
@@ -395,7 +396,7 @@ export const FormModalEndActions = ({
         <Button
           type="button"
           variant="danger"
-          onClick={(e: Event) => {
+          onClick={(e: SyntheticEvent) => {
             e.preventDefault();
             if (categoryName) {
               deleteCategory(categoryName);
@@ -410,7 +411,7 @@ export const FormModalEndActions = ({
         <Button
           type="submit"
           variant="default"
-          onClick={(e: Event) => {
+          onClick={(e: SyntheticEvent) => {
             e.preventDefault();
 
             onSubmitEditCategory(e);
@@ -431,7 +432,7 @@ export const FormModalEndActions = ({
         <Button
           type={isEditingAttribute ? 'button' : 'submit'}
           variant="secondary"
-          onClick={(e: Event) => {
+          onClick={(e: SyntheticEvent) => {
             e.preventDefault();
 
             onSubmitEditCustomFieldAttribute(e, true);
@@ -446,7 +447,7 @@ export const FormModalEndActions = ({
         <Button
           type={isEditingAttribute ? 'submit' : 'button'}
           variant="default"
-          onClick={(e: Event) => {
+          onClick={(e: SyntheticEvent) => {
             e.preventDefault();
 
             onClickFinish();

@@ -8,7 +8,7 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import { useDataManager } from '../hooks/useDataManager';
-import Curve from '../icons/Curve';
+import { Curve } from '../icons/Curve';
 import { getTrad } from '../utils/getTrad';
 
 import { AttributeIcon, IconByType } from './AttributeIcon';

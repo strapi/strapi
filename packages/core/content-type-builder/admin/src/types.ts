@@ -16,6 +16,7 @@ export type AttributeType = Attribute.Any & {
   targetAttribute?: string | null;
   customField?: any;
   default?: any;
+  repeatable?: boolean;
   [key: string]: any;
 };
 

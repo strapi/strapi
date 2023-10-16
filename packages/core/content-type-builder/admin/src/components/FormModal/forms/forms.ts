@@ -16,7 +16,6 @@ import { Attribute, getUsedAttributeNames, SchemaData } from './utils/getUsedAtt
 
 import type { Common } from '@strapi/types';
 
-// MINE remove any and improve types
 type ContentType = {
   schema: {
     singularName: string;

@@ -5,7 +5,7 @@ import pluralize from 'pluralize';
 import { AnyAction } from 'redux';
 
 import { getRelationType } from '../../utils/getRelationType';
-import nameToSlug from '../../utils/nameToSlug';
+import { nameToSlug } from '../../utils/nameToSlug';
 
 import * as actions from './constants';
 import { createComponentUid } from './utils/createUid';

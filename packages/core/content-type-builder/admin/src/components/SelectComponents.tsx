@@ -10,7 +10,7 @@ import { useIntl } from 'react-intl';
 import { Component } from '../contexts/DataManagerContext';
 import { useDataManager } from '../hooks/useDataManager';
 import { getTrad } from '../utils';
-import findAttribute from '../utils/findAttribute';
+import { findAttribute } from '../utils/findAttribute';
 
 type SelectComponentsProps = {
   dynamicZoneTarget: string;
@@ -39,22 +39,22 @@ export const SelectComponents = ({
 }: SelectComponentsProps) => {
   const { formatMessage } = useIntl();
   const { componentsGroupedByCategory, modifiedData } = useDataManager();
-  const dzSchema =
-    findAttribute(modifiedData.contentType.schema.attributes, dynamicZoneTarget) || {};
-  const alreadyUsedComponents = dzSchema.components || [];
-  const filteredComponentsGroupedByCategory = Object.keys(componentsGroupedByCategory).reduce<
-    Component | object
-  >((acc, current) => {
-    const filteredComponents = componentsGroupedByCategory[current].filter(({ uid }) => {
-      return !alreadyUsedComponents.includes(uid);
-    });
+  const dzSchema = findAttribute(modifiedData.contentType.schema.attributes, dynamicZoneTarget);
+  const alreadyUsedComponents = dzSchema?.components || [];
+  const filteredComponentsGroupedByCategory = Object.keys(componentsGroupedByCategory).reduce(
+    (acc, current) => {
+      const filteredComponents = componentsGroupedByCategory[current].filter(({ uid }) => {
+        return !alreadyUsedComponents.includes(uid);
+      });
 
-    if (filteredComponents.length > 0) {
-      acc[current] = filteredComponents;
-    }
+      if (filteredComponents.length > 0) {
+        acc[current] = filteredComponents;
+      }
 
-    return acc;
-  }, {});
+      return acc;
+    },
+    {} as Record<string, Component[]>
+  );
   const options = Object.entries(filteredComponentsGroupedByCategory).reduce((acc, current) => {
     const [categoryName, components] = current;
     const section = {
@@ -67,7 +67,7 @@ export const SelectComponents = ({
     acc.push(section);
 
     return acc;
-  }, []);
+  }, [] as Array<{ label: string; children: Array<{ label: string; value: string }> }>);
 
   const displayedValue = formatMessage(
     {

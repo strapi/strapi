@@ -209,23 +209,25 @@ export const FormModalNavigationProvider = ({ children }: FormModalNavigationPro
 
   return (
     <FormModalNavigationContext.Provider
-      value={{
-        ...state,
-        onClickSelectField,
-        onClickSelectCustomField,
-        onCloseModal,
-        onNavigateToChooseAttributeModal,
-        onNavigateToAddCompoToDZModal,
-        onOpenModalAddComponentsToDZ,
-        onNavigateToCreateComponentStep2,
-        onOpenModalAddField,
-        onOpenModalCreateSchema,
-        onOpenModalEditCategory,
-        onOpenModalEditField,
-        onOpenModalEditCustomField,
-        onOpenModalEditSchema,
-        setFormModalNavigationState,
-      }}
+      value={
+        {
+          ...state,
+          onClickSelectField,
+          onClickSelectCustomField,
+          onCloseModal,
+          onNavigateToChooseAttributeModal,
+          onNavigateToAddCompoToDZModal,
+          onOpenModalAddComponentsToDZ,
+          onNavigateToCreateComponentStep2,
+          onOpenModalAddField,
+          onOpenModalCreateSchema,
+          onOpenModalEditCategory,
+          onOpenModalEditField,
+          onOpenModalEditCustomField,
+          onOpenModalEditSchema,
+          setFormModalNavigationState,
+        } as any
+      }
     >
       {children}
     </FormModalNavigationContext.Provider>

@@ -2,18 +2,19 @@ import get from 'lodash/get';
 
 import { getRelationType } from '../../../utils/getRelationType';
 
-import type { Schema, Attribute } from '@strapi/types';
+import type { AttributeType } from '../../../types';
+import type { Schema, UID } from '@strapi/types';
+
+export type EditableContentTypeSchema = {
+  kind: Schema.ContentTypeKind;
+  name: string;
+  attributes: AttributeType[];
+};
 
 export type EditableContentTypeData = {
   contentType: {
-    schema: {
-      kind: Schema.ContentTypeKind;
-      attributes: {
-        relation: Attribute.RelationKind.WithTarget;
-        type: string;
-        targetAttribute: string;
-      }[];
-    };
+    uid: UID.Any;
+    schema: EditableContentTypeSchema;
   };
 };
 
@@ -38,7 +39,7 @@ export const canEditContentType = (data: EditableContentTypeData, modifiedData: 
   const relationAttributes = contentTypeAttributes.filter(({ relation, type, targetAttribute }) => {
     const relationType = getRelationType(relation, targetAttribute);
 
-    return type === 'relation' && !['oneWay', 'manyWay'].includes(relationType);
+    return type === 'relation' && !['oneWay', 'manyWay'].includes(relationType || '');
   });
 
   return relationAttributes.length === 0;

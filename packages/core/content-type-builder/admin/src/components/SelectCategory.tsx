@@ -14,7 +14,7 @@ interface SelectCategoryProps {
   };
   name: string;
   onChange: (value: { target: { name: string; value: any; type: string } }) => void;
-  value?: string | null;
+  value?: string;
 }
 
 export const SelectCategory = ({
@@ -22,7 +22,7 @@ export const SelectCategory = ({
   intlLabel,
   name,
   onChange,
-  value = null,
+  value = undefined,
 }: SelectCategoryProps) => {
   const { formatMessage } = useIntl();
   const { allComponentsCategories } = useDataManager();

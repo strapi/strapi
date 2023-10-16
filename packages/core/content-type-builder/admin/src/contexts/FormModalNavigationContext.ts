@@ -10,7 +10,7 @@ import type {
 import type { SchemaType } from '../types';
 import type { UID } from '@strapi/types';
 
-interface FormModalNavigationContextValue {
+export interface FormModalNavigationContextValue {
   onCloseModal: () => void;
   onOpenModalAddField: (options: { forTarget: SchemaType; targetUid?: UID.Any }) => void;
   onClickSelectField: (option: ModalEventProps) => void;
@@ -33,8 +33,8 @@ interface FormModalNavigationContextValue {
   dynamicZoneTarget: string;
   forTarget: SchemaType;
   modalType: string;
-  isOpen: string;
-  showBackLink: string;
+  isOpen: boolean;
+  showBackLink: boolean;
   kind: string;
   step: string;
   targetUid: UID.Any;

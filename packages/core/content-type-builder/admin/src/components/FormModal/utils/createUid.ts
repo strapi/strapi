@@ -1,4 +1,4 @@
-import nameToSlug from '../../../utils/nameToSlug';
+import { nameToSlug } from '../../../utils/nameToSlug';
 
 import type { UID } from '@strapi/types';
 

@@ -1,8 +1,9 @@
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
+import { RelationKind } from '@strapi/types/dist/types/core/attributes';
 import uniq from 'lodash/uniq';
 import * as yup from 'yup';
 
-import getRelationType from '../../../utils/getRelationType';
+import { getRelationType } from '../../../utils/getRelationType';
 import { getTrad } from '../../../utils/getTrad';
 import { toRegressedEnumValue } from '../../../utils/toRegressedEnumValue';
 
@@ -276,7 +277,7 @@ export const attributeTypes = {
       initialData: { targetAttribute?: string };
       modifiedData: {
         name?: string;
-        relation?: string;
+        relation?: RelationKind.WithTarget;
         targetAttribute?: string;
       };
     }

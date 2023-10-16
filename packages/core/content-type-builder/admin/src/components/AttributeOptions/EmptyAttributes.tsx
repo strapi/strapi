@@ -11,7 +11,6 @@ const EmptyCard = styled(Box)`
     `linear-gradient(180deg, rgba(234, 234, 239, 0) 0%, ${theme.colors.neutral150} 100%)`};
   opacity: 0.33;
 `;
-// MINE this is good
 
 export const EmptyCardGrid = () => {
   return (
@@ -59,7 +58,7 @@ export const EmptyAttributes = () => {
               </Box>
             </Box>
           </Box>
-          <LinkButton // MINE check this
+          <LinkButton
             to={`/marketplace?${qs.stringify({ categories: ['Custom fields'] })}`}
             variant="secondary"
             startIcon={<Plus />}
