@@ -1,16 +1,17 @@
 import crypto from 'crypto';
 import { TextEncoder } from 'util';
 
-import hashAdminUserEmail, { utils } from '../uniqueAdminHash';
+import { hashAdminUserEmail, utils } from '../hashAdminUserEmail';
 
 const testHashValue = '8544bf5b5389959462912699664f03ed664a4b6d24f03b13bdbc362efc147873';
 
 describe('Creating admin user email hash in admin', () => {
   afterAll(() => {
-    Object.defineProperty(global.self, 'crypto', {
+    Object.defineProperty(window.self, 'crypto', {
       value: undefined,
     });
-    Object.defineProperty(global.self, 'TextEncoder', {
+
+    Object.defineProperty(window.self, 'TextEncoder', {
       value: undefined,
     });
   });
@@ -22,7 +23,7 @@ describe('Creating admin user email hash in admin', () => {
   });
 
   it('should return hash using crypto subtle', async () => {
-    Object.defineProperty(global.self, 'crypto', {
+    Object.defineProperty(window.self, 'crypto', {
       value: {
         subtle: {
           digest: jest.fn((type, message) => crypto.createHash('sha256').update(message).digest()),
@@ -31,13 +32,21 @@ describe('Creating admin user email hash in admin', () => {
       configurable: true,
     });
 
-    Object.defineProperty(global.self, 'TextEncoder', {
+    Object.defineProperty(window.self, 'TextEncoder', {
       value: TextEncoder,
       configurable: true,
     });
 
     const payload = {
+      id: 1,
+      firstname: 'Test',
+      isActive: true,
+      blocked: false,
       email: 'testemail@strapi.io',
+      preferedLanguage: 'en',
+      roles: [],
+      createdAt: '2021-07-06T08:00:00.000Z',
+      updatedAt: '2021-07-06T08:00:00.000Z',
     };
 
     const spy = jest.spyOn(utils, 'digestMessage');
