@@ -1,4 +1,4 @@
-const layout = {
+const LAYOUT_DATA = {
   contentTypeBuilder: {
     home: {
       title: {
@@ -157,6 +157,16 @@ const layout = {
       trackingEvent: 'didGenerateGuidedTourApiTokens',
     },
   },
-};
+} as const;
 
-export default layout;
+const STATES = {
+  IS_DONE: 'IS_DONE',
+  IS_ACTIVE: 'IS_ACTIVE',
+  IS_NOT_DONE: 'IS_NOT_DONE',
+} as const;
+
+type LayoutData = typeof LAYOUT_DATA;
+type States = keyof typeof STATES;
+
+export { LAYOUT_DATA, STATES };
+export type { LayoutData, States };

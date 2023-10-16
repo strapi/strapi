@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import * as React from 'react';
 
 import { useGuidedTour } from '@strapi/helper-plugin/';
 import { fireEvent, render, screen } from '@testing-library/react';
 
-import GuidedTour from '../index';
+import { GuidedTourProvider } from '../Provider';
 
 describe('GuidedTour', () => {
   afterEach(() => {
@@ -12,24 +12,20 @@ describe('GuidedTour', () => {
   });
 
   it('should not crash', () => {
-    const { container } = render(
-      <GuidedTour>
+    const { getByText } = render(
+      <GuidedTourProvider>
         <div>Test</div>
-      </GuidedTour>
+      </GuidedTourProvider>
     );
 
-    expect(container.firstChild).toMatchInlineSnapshot(`
-      <div>
-        Test
-      </div>
-    `);
+    expect(getByText('Test')).toBeInTheDocument();
   });
 
   it('should update isGuidedTourVisible to true', () => {
     const Test = () => {
       const { setGuidedTourVisibility, isGuidedTourVisible } = useGuidedTour();
 
-      useEffect(() => {
+      React.useEffect(() => {
         setGuidedTourVisibility(true);
       }, [setGuidedTourVisibility]);
 
@@ -37,9 +33,9 @@ describe('GuidedTour', () => {
     };
 
     render(
-      <GuidedTour>
+      <GuidedTourProvider>
         <Test />
-      </GuidedTour>
+      </GuidedTourProvider>
     );
 
     expect(screen.getByText('hello guided tour')).toBeInTheDocument();
@@ -49,7 +45,7 @@ describe('GuidedTour', () => {
     const Test = () => {
       const { setGuidedTourVisibility, isGuidedTourVisible } = useGuidedTour();
 
-      useEffect(() => {
+      React.useEffect(() => {
         setGuidedTourVisibility(false);
       }, [setGuidedTourVisibility]);
 
@@ -57,9 +53,9 @@ describe('GuidedTour', () => {
     };
 
     const { queryByText } = render(
-      <GuidedTour>
+      <GuidedTourProvider>
         <Test />
-      </GuidedTour>
+      </GuidedTourProvider>
     );
 
     expect(queryByText('hello guided tour')).not.toBeInTheDocument();
@@ -69,7 +65,7 @@ describe('GuidedTour', () => {
     const Test = () => {
       const { setCurrentStep, currentStep, setSkipped } = useGuidedTour();
 
-      useEffect(() => {
+      React.useEffect(() => {
         setSkipped(false);
       }, [setSkipped]);
 
@@ -84,9 +80,9 @@ describe('GuidedTour', () => {
     };
 
     const { queryByText } = render(
-      <GuidedTour>
+      <GuidedTourProvider>
         <Test />
-      </GuidedTour>
+      </GuidedTourProvider>
     );
 
     expect(queryByText('Current step updated')).not.toBeInTheDocument();
@@ -113,9 +109,9 @@ describe('GuidedTour', () => {
     };
 
     const { queryByText } = render(
-      <GuidedTour>
+      <GuidedTourProvider>
         <Test />
-      </GuidedTour>
+      </GuidedTourProvider>
     );
 
     expect(queryByText('Guided tour updated')).not.toBeInTheDocument();
@@ -129,7 +125,8 @@ describe('GuidedTour', () => {
     const Test = () => {
       const { startSection, currentStep } = useGuidedTour();
 
-      useEffect(() => {
+      React.useEffect(() => {
+        // @ts-expect-error – testing it doesn't do something we don't want it too.
         startSection('failTest');
       }, [startSection]);
 
@@ -137,9 +134,9 @@ describe('GuidedTour', () => {
     };
 
     const { queryByText } = render(
-      <GuidedTour>
+      <GuidedTourProvider>
         <Test />
-      </GuidedTour>
+      </GuidedTourProvider>
     );
 
     expect(queryByText('Hello world')).not.toBeInTheDocument();
@@ -149,7 +146,7 @@ describe('GuidedTour', () => {
     const Test = () => {
       const { startSection, currentStep, setStepState } = useGuidedTour();
 
-      useEffect(() => {
+      React.useEffect(() => {
         setStepState('contentTypeBuilder.create', true);
       }, [setStepState]);
 
@@ -164,9 +161,9 @@ describe('GuidedTour', () => {
     };
 
     const { queryByText } = render(
-      <GuidedTour>
+      <GuidedTourProvider>
         <Test />
-      </GuidedTour>
+      </GuidedTourProvider>
     );
 
     expect(queryByText('Hello world')).not.toBeInTheDocument();
@@ -180,7 +177,7 @@ describe('GuidedTour', () => {
     const Test = () => {
       const { startSection, currentStep } = useGuidedTour();
 
-      useEffect(() => {
+      React.useEffect(() => {
         startSection('contentManager');
       }, [startSection]);
 
@@ -188,31 +185,31 @@ describe('GuidedTour', () => {
     };
 
     const { queryByText } = render(
-      <GuidedTour>
+      <GuidedTourProvider>
         <Test />
-      </GuidedTour>
+      </GuidedTourProvider>
     );
 
     expect(queryByText('Hello world')).not.toBeInTheDocument();
   });
 
-  it('should update currentStep with startSection when first step of section is not done', () => {
+  it('should update currentStep with startSection when first step of section is not done', async () => {
     const Test = () => {
       const { startSection, currentStep } = useGuidedTour();
 
-      useEffect(() => {
+      React.useEffect(() => {
         startSection('contentTypeBuilder');
       }, [startSection]);
 
       return <div>{currentStep && <p>Hello world</p>}</div>;
     };
 
-    const { queryByText } = render(
-      <GuidedTour>
+    const { findByText } = render(
+      <GuidedTourProvider>
         <Test />
-      </GuidedTour>
+      </GuidedTourProvider>
     );
 
-    expect(queryByText('Hello world')).toBeInTheDocument();
+    await findByText('Hello world');
   });
 });

@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { TrackingProvider, useGuidedTour } from '@strapi/helper-plugin';
 import { render, screen } from '@testing-library/react';
@@ -7,7 +5,7 @@ import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 
-import GuidedTourHomepage from '../index';
+import { GuidedTourHomepage } from '../Homepage';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -611,6 +609,7 @@ describe('GuidedTour Homepage', () => {
   });
 
   it('should show guided tour when guided tour not complete', () => {
+    // @ts-expect-error – mocking
     useGuidedTour.mockImplementation(() => ({
       isGuidedTourVisible: true,
       guidedTourState: {
@@ -635,6 +634,7 @@ describe('GuidedTour Homepage', () => {
   });
 
   it("shouldn't show guided tour when guided tour is completed", () => {
+    // @ts-expect-error – mocking
     useGuidedTour.mockImplementation(() => ({
       isGuidedTourVisible: true,
       guidedTourState: {
@@ -659,6 +659,7 @@ describe('GuidedTour Homepage', () => {
   });
 
   it("shouldn't show guided tour when guided tour is skipped", () => {
+    // @ts-expect-error – mocking
     useGuidedTour.mockImplementation(() => ({
       isSkipped: true,
       isGuidedTourVisible: true,
