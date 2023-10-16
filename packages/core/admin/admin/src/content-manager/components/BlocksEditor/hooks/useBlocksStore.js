@@ -256,6 +256,10 @@ Image.propTypes = {
   }).isRequired,
 };
 
+const TooltipCustom = styled(Tooltip)`
+  z-index: 6;
+`;
+
 const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRef) => {
   const { formatMessage } = useIntl();
   const editor = useSlate();
@@ -377,7 +381,7 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                 </StyledBaseLink>
               </Typography>
               <Flex justifyContent="end" width="100%" gap={2}>
-                <Tooltip
+                <TooltipCustom
                   description={formatMessage({
                     id: 'components.Blocks.popover.delete',
                     defaultMessage: 'Delete',
@@ -394,9 +398,9 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                   >
                     <Icon width={3} height={3} as={Trash} />
                   </Button>
-                </Tooltip>
+                </TooltipCustom>
 
-                <Tooltip
+                <TooltipCustom
                   description={formatMessage({
                     id: 'components.Blocks.popover.edit',
                     defaultMessage: 'Edit',
@@ -413,7 +417,7 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                   >
                     <Icon width={3} height={3} as={Pencil} />
                   </Button>
-                </Tooltip>
+                </TooltipCustom>
               </Flex>
             </Flex>
           )}
