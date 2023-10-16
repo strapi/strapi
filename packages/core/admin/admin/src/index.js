@@ -22,12 +22,10 @@ window.strapi = {
     AUDIT_LOGS: 'audit-logs',
     REVIEW_WORKFLOWS: 'review-workflows',
   },
-  flags: {
-    promoteEnterpriseFeatures: true,
-  },
   projectType: 'Community',
   flags: {
     nps: false,
+    promoteEE: true,
   },
 };
 

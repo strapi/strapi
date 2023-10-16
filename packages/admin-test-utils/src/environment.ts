@@ -72,7 +72,7 @@ window.strapi = {
   telemetryDisabled: true,
   flags: {
     nps: true,
-    promoteEnterpriseFeatures: true,
+    promoteEE: true,
   },
 };
 

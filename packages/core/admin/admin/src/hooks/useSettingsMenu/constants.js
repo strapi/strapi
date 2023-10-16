@@ -22,9 +22,9 @@ export const LINKS_CE = {
       id: 'transfer-tokens',
     },
     // If the Enterprise feature is not enabled and if the config doesn't disable it, we promote the Enterprise feature by displaying them in the settings menu.
-    // Disable this by adding "promoteEnterpriseFeatures: false" to your `./config/admin.js` file
+    // Disable this by adding "promoteEE: false" to your `./config/admin.js` file
     ...(!window.strapi.features.isEnabled(window.strapi.features.SSO) &&
-    window.strapi?.flags?.promoteEnterpriseFeatures
+    window.strapi?.flags?.promoteEE
       ? [
           {
             intlLabel: { id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' },
@@ -36,7 +36,7 @@ export const LINKS_CE = {
       : []),
 
     ...(!window.strapi.features.isEnabled(window.strapi.features.REVIEW_WORKFLOWS) &&
-    window.strapi?.flags?.promoteEnterpriseFeatures
+    window.strapi?.flags?.promoteEE
       ? [
           {
             intlLabel: {
@@ -64,7 +64,7 @@ export const LINKS_CE = {
       id: 'users',
     },
     ...(!window.strapi.features.isEnabled(window.strapi.features.AUDIT_LOGS) &&
-    window.strapi?.flags?.promoteEnterpriseFeatures
+    window.strapi?.flags?.promoteEE
       ? [
           {
             intlLabel: { id: 'global.auditLogs', defaultMessage: 'Audit Logs' },
