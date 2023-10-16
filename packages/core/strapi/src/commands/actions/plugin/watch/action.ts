@@ -1,11 +1,11 @@
 import boxen from 'boxen';
 import chalk from 'chalk';
-import { BuildCLIOptions, ConfigBundle, build } from '@strapi/pack-up';
+import { ConfigBundle, WatchCLIOptions, watch } from '@strapi/pack-up';
 import { notifyExperimentalCommand } from '../../../utils/helpers';
 import { createLogger } from '../../../utils/logger';
 import { Export, loadPkg, validatePkg } from '../../../utils/pkg';
 
-interface ActionOptions extends BuildCLIOptions {
+interface ActionOptions extends WatchCLIOptions {
   force?: boolean;
 }
 
@@ -16,7 +16,7 @@ export default async ({ force, ...opts }: ActionOptions) => {
      * Notify users this is an experimental command and get them to approve first
      * this can be opted out by setting the argument --yes
      */
-    await notifyExperimentalCommand('plugin:build', { force });
+    await notifyExperimentalCommand('plugin:watch', { force });
 
     const cwd = process.cwd();
 
@@ -69,7 +69,7 @@ export default async ({ force, ...opts }: ActionOptions) => {
       bundles.push(bundle);
     }
 
-    await build({
+    await watch({
       cwd,
       configFile: false,
       config: {

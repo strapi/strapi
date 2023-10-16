@@ -8,26 +8,23 @@ tags:
   - building
 ---
 
-The `plugin:build` command is used to build plugins in a CJS/ESM compatible format that can be instantly published to NPM.
+The `plugin:watch` command is used to watch plugin source files and compile them to production viable assets in real-time.
 This is done by using `pack-up` underneath and a specific configuration, for this command we _do not_ look for a `packup.config` file.
 
 ## Usage
 
 ```bash
-strapi plugin:build
+strapi plugin:watch
 ```
 
 ### Options
 
 ```bash
-Bundle your strapi plugin for publishing.
+Watch & compile your strapi plugin for local development.
 
 Options:
-  --force      Automatically answer "yes" to all prompts, including potentially destructive requests, and run non-interactively.
   -d, --debug  Enable debugging mode with verbose logs (default: false)
   --silent     Don't log anything (default: false)
-  --sourcemap  produce sourcemaps (default: false)
-  --minify     minify the output (default: false)
   -h, --help   Display help for command
 ```
 
@@ -39,5 +36,5 @@ The command sequence can be visualised as follows:
 - Validate that package.json against a `yup` schema
 - Validate the ordering of an export map if `pkg.exports` is defined
 - Create a set of "bundles" to build ignoring the package.json exports map that is _specifically_ set up for strapi-plugins.
-- Pass the created config to `pack-up`'s build API.
-- Finish
+- Pass the created config to `pack-up`'s watch API.
+- Run's indefinitely

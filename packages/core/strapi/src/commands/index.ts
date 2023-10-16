@@ -28,6 +28,7 @@ import uninstallCommand from './actions/uninstall/command';
 import versionCommand from './actions/version/command';
 import watchAdminCommand from './actions/watch-admin/command';
 import buildPluginCommand from './actions/plugin/build-command/command';
+import watchPluginCommand from './actions/plugin/watch/command';
 
 const strapiCommands = {
   createAdminUser,
@@ -58,6 +59,7 @@ const strapiCommands = {
   versionCommand,
   watchAdminCommand,
   buildPluginCommand,
+  watchPluginCommand,
 } as const;
 
 const buildStrapiCommand = (argv: string[], command = new Command()) => {
