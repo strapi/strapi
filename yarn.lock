@@ -7519,7 +7519,6 @@ __metadata:
     react-router-dom: 5.3.4
     react-select: 5.7.0
     react-window: 1.8.8
-    reselect: 4.1.7
     rimraf: 3.0.2
     sanitize-html: 2.11.0
     semver: 7.5.4
@@ -7898,7 +7897,6 @@ __metadata:
     react-intl: 6.4.1
     react-redux: 8.1.1
     react-router-dom: 5.3.4
-    reselect: 4.1.7
     styled-components: 5.3.3
     yup: 0.32.9
   peerDependencies:
@@ -27886,13 +27884,6 @@ __metadata:
   version: 1.0.0
   resolution: "requires-port@npm:1.0.0"
   checksum: eee0e303adffb69be55d1a214e415cf42b7441ae858c76dfc5353148644f6fd6e698926fc4643f510d5c126d12a705e7c8ed7e38061113bdf37547ab356797ff
-  languageName: node
-  linkType: hard
-
-"reselect@npm:4.1.7":
-  version: 4.1.7
-  resolution: "reselect@npm:4.1.7"
-  checksum: 738d8e2b8f0dca154ad29de6a209c9fbca2d70ae6788fd85df87f2c74b95a65bbf2d16d43a9e2faff39de34d17a29d706ba08a6b2ee5660c09589edbd19af7e1
   languageName: node
   linkType: hard
 

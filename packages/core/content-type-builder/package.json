@@ -44,7 +44,6 @@
     "react-helmet": "^6.1.0",
     "react-intl": "6.4.1",
     "react-redux": "8.1.1",
-    "reselect": "4.1.7",
     "yup": "0.32.9"
   },
   "devDependencies": {
