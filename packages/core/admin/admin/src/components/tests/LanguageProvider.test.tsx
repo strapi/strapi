@@ -1,15 +1,15 @@
-import React from 'react';
-
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { useIntl } from 'react-intl';
 
-import en from '../../../translations/en.json';
-import fr from '../../../translations/fr.json';
-import useLocalesProvider from '../../LocalesProvider/useLocalesProvider';
-import LanguageProvider from '../index';
+import en from '../../translations/en.json';
+import fr from '../../translations/fr.json';
+import { LanguageProvider, useLocales } from '../LanguageProvider';
 
 const messages = { en, fr };
 const localeNames = { en: 'English', fr: 'Français' };
+
+const user = userEvent.setup();
 
 describe('LanguageProvider', () => {
   afterEach(() => {
@@ -17,27 +17,23 @@ describe('LanguageProvider', () => {
   });
 
   it('should not crash', () => {
-    const { container } = render(
+    const { getByText } = render(
       <LanguageProvider messages={messages} localeNames={localeNames}>
         <div>Test</div>
       </LanguageProvider>
     );
 
-    expect(container.firstChild).toMatchInlineSnapshot(`
-      <div>
-        Test
-      </div>
-    `);
+    expect(getByText('Test')).toBeInTheDocument();
   });
 
   it('should change the locale and set the strapi-admin-language item in the localStorage', async () => {
     const Test = () => {
       const { locale } = useIntl();
-      const { changeLocale } = useLocalesProvider();
+      const { changeLocale } = useLocales();
 
       return (
         <div>
-          <h1>{localeNames[locale]}</h1>
+          <h1>{localeNames[locale as keyof typeof messages]}</h1>
           <button type="button" onClick={() => changeLocale('fr')}>
             CHANGE
           </button>
@@ -45,7 +41,7 @@ describe('LanguageProvider', () => {
       );
     };
 
-    render(
+    const { getByText, getByRole } = render(
       <LanguageProvider messages={messages} localeNames={localeNames}>
         <Test />
       </LanguageProvider>
@@ -53,11 +49,11 @@ describe('LanguageProvider', () => {
 
     expect(localStorage.getItem('strapi-admin-language')).toEqual('en');
 
-    expect(screen.getByText('English')).toBeInTheDocument();
+    expect(getByText('English')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('CHANGE'));
+    await user.click(getByRole('button', { name: 'CHANGE' }));
 
-    expect(screen.getByText('Français')).toBeInTheDocument();
+    expect(getByText('Français')).toBeInTheDocument();
     expect(localStorage.getItem('strapi-admin-language')).toEqual('fr');
   });
 });
