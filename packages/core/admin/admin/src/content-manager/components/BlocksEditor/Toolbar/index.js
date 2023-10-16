@@ -613,7 +613,7 @@ const BlocksToolbar = ({ disabled }) => {
 
     const selectedNode = editor.children[editor.selection.anchor.path[0]];
 
-    if (selectedNode.type === 'image') {
+    if (selectedNode.type === 'image' || selectedNode.type === 'code') {
       return true;
     }
 
