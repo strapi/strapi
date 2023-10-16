@@ -99,7 +99,7 @@ export interface Strapi {
   store?: CoreStore;
   entityValidator?: EntityValidator;
   entityService?: EntityService.EntityService;
-  documentService?: DocumentService.DocumentService;
+  documents?: DocumentService.DocumentService;
   telemetry: TelemetryService;
   requestContext: RequestContext;
   customFields: CustomFields.CustomFields;

@@ -167,7 +167,7 @@ class Strapi implements StrapiI {
 
   entityService?: EntityService.EntityService;
 
-  documentService?: DocumentService.DocumentService;
+  documents?: DocumentService.DocumentService;
 
   telemetry: TelemetryService;
 
@@ -565,7 +565,7 @@ class Strapi implements StrapiI {
       entityValidator: this.entityValidator,
     });
 
-    this.documentService = createDocumentService({
+    this.documents = createDocumentService({
       strapi: this,
       db: this.db,
       eventHub: this.eventHub,

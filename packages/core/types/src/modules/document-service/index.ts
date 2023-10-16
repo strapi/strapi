@@ -2,6 +2,8 @@ import type { Common, Utils } from '../../types';
 import type { Result } from './result';
 import type * as Params from './params';
 
+export type CountResult = { count: number };
+
 export type UploadFile = (
   uid: Common.UID.Schema,
   entity: Record<string, unknown>,
@@ -105,7 +107,7 @@ export interface DocumentService {
   >(
     uid: TContentTypeUID,
     params?: TParams
-  ): Promise<number | null>;
+  ): Promise<CountResult | null>;
 
   // TODO: Make data param required
   create<

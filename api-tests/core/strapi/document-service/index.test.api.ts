@@ -103,9 +103,12 @@ describe('Document Service', () => {
     it('find one selects by document id', async () => {
       const documentDb = await findDBDocument({ name: '3 Document A' });
 
-      const document = await strapi.documentService.findOne(
-        'api::document.document' as Common.UID.ContentType,
-        documentDb.documentId
+      const document = await strapi.documents.findOne(
+        'api::document.document',
+        documentDb.documentId,
+        {
+          locales: 'all',
+        }
       );
 
       expect(document).toMatchObject(documentDb);
@@ -116,14 +119,11 @@ describe('Document Service', () => {
     it('find many selects by document name', async () => {
       const documentsDb = await findDBDocuments({ name: '3 Document A' });
 
-      const documents = await strapi.documentService.findMany(
-        'api::document.document' as Common.UID.ContentType,
-        {
-          filters: {
-            name: '3 Document A',
-          },
-        }
-      );
+      const documents = await strapi.documents.findMany('api::document.document', {
+        filters: {
+          name: '3 Document A',
+        },
+      });
 
       expect(documents.length).toBe(1);
       expect(documents).toMatchObject(documentsDb);
@@ -136,8 +136,8 @@ describe('Document Service', () => {
       const documentDb = await findDBDocument({ name: '3 Document A' });
       const newName = 'Updated Document';
 
-      const document = await strapi.documentService.update(
-        'api::document.document' as Common.UID.ContentType,
+      const document = await strapi.documents.update(
+        'api::document.document',
         documentDb.documentId,
         {
           data: { name: newName },
@@ -166,8 +166,8 @@ describe('Document Service', () => {
     testInTransaction(async () => {
       const documentDb = await findDBDocument({ name: '3 Document A' });
 
-      const document = await strapi.documentService.delete(
-        'api::document.document' as Common.UID.ContentType,
+      const document = await strapi.documents.delete(
+        'api::document.document',
         documentDb.documentId
       );
 
@@ -182,9 +182,7 @@ describe('Document Service', () => {
   it('counts documents', async () => {
     const documentsDb = await findDBDocuments({});
 
-    const count = await strapi.documentService.count(
-      'api::document.document' as Common.UID.ContentType
-    );
+    const count = await strapi.documents.count('api::document.document');
 
     expect(count).toBe(documentsDb.length);
   });
@@ -194,13 +192,10 @@ describe('Document Service', () => {
   it('find page of documents', async () => {
     const documentsDb = await findDBDocuments({});
 
-    const documents = await strapi.documentService.findPage(
-      'api::document.document' as Common.UID.ContentType,
-      {
-        page: 1,
-        pageSize: 10,
-      }
-    );
+    const documents = await strapi.documents.findPage('api::document.document', {
+      page: 1,
+      pageSize: 10,
+    });
 
     expect(documents).toMatchObject({
       results: documentsDb.slice(0, 10),
@@ -218,7 +213,7 @@ describe('Document Service', () => {
     testInTransaction(async () => {
       const documentDb = await findDBDocument({ name: '3 Document A' });
 
-      const document = await strapi.documentService.clone(
+      const document = await strapi.documents.clone(
         'api::document.document',
         documentDb.documentId,
         {
@@ -238,7 +233,7 @@ describe('Document Service', () => {
   it('load a document', async () => {
     const documentDb = await findDBDocument({ name: '3 Document A' });
 
-    const relations = await strapi.documentService.load(
+    const relations = await strapi.documents.load(
       'api::document.document',
       documentDb.documentId,
       'relations'
@@ -250,7 +245,7 @@ describe('Document Service', () => {
   it('load pages of documents', async () => {
     const documentsDb = await findDBDocuments({});
 
-    const documents = await strapi.documentService.loadPages(
+    const documents = await strapi.documents.loadPages(
       'api::document.document',
       documentsDb.map((document) => document.documentId),
       'relations'
@@ -263,7 +258,7 @@ describe('Document Service', () => {
     'delete many documents with where clause',
     testInTransaction(async () => {
       const documentsDb = await findDBDocuments({});
-      const count = await strapi.documentService.deleteMany('api::document.document', {
+      const count = await strapi.documents.deleteMany('api::document.document', {
         where: { documentId: { $in: documentsDb.map((document) => document.documentId) } },
       });
 
@@ -278,7 +273,7 @@ describe('Document Service', () => {
     testInTransaction(async () => {
       const documentsDb = await findDBDocuments({});
 
-      const count = await strapi.documentService.deleteMany(
+      const count = await strapi.documents.deleteMany(
         'api::document.document',
         documentsDb.map((document) => document.documentId)
       );

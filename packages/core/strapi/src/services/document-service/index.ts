@@ -51,29 +51,25 @@ const createDocumentService = ({
     const query = transformParamsToQuery(uid, params || ({} as any));
 
     if (kind === 'singleType') {
-      return db.query(uid).findOne(query) as any;
+      return db.query(uid).findOne(query);
     }
 
-    return db.query(uid).findMany(query) as any;
+    return db.query(uid).findMany(query);
   },
 
   async findPage(uid, paginationParams) {
     const query = transformParamsToQuery(uid, paginationParams || ({} as any));
-
-    return {
-      results: (await db.query(uid).findMany(query)) as any,
-      pagination: {}, // TODO
-    };
+    return db.query(uid).findPage(query) as any;
   },
 
   async findFirst(uid, params) {
     const query = transformParamsToQuery(uid, params || ({} as any));
-    return db.query(uid).findOne(query) as any;
+    return db.query(uid).findOne(query);
   },
 
   async findOne(uid, documentId, params) {
     const query = transformParamsToQuery(uid, params || ({} as any));
-    return db.query(uid).findOne({ ...query, where: { ...query.where, documentId } }) as any;
+    return db.query(uid).findOne({ ...query, where: { ...query.where, documentId } });
   },
 
   // NOTE: What happens if user doesn't provide specific publications state and locale to delete?
@@ -81,9 +77,9 @@ const createDocumentService = ({
     const query = transformParamsToQuery(uid, params || ({} as any));
 
     // Find entry to delete
-    const entryToDelete = (await db
+    const entryToDelete = await db
       .query(uid)
-      .findOne({ ...query, where: { documentId, ...query?.where } })) as any;
+      .findOne({ ...query, where: { documentId, ...query?.where } });
 
     if (!entryToDelete) {
       return null;
@@ -105,7 +101,7 @@ const createDocumentService = ({
 
     const query = transformParamsToQuery(uid, queryParams || ({} as any));
 
-    return db.query(uid).deleteMany(query) as any;
+    return db.query(uid).deleteMany(query);
   },
 
   async create(uid, params) {
@@ -119,7 +115,7 @@ const createDocumentService = ({
     // select / populate
     const query = transformParamsToQuery(uid, pickSelectionParams(params));
 
-    return db.query(uid).create({ ...query, data }) as any;
+    return db.query(uid).create({ ...query, data });
   },
 
   // NOTE: What happens if user doesn't provide specific publications state and locale to update?
@@ -128,15 +124,15 @@ const createDocumentService = ({
 
     const query = transformParamsToQuery(uid, pickSelectionParams(params || {}));
 
-    const entryToUpdate = (await db
+    const entryToUpdate = await db
       .query(uid)
-      .findOne({ ...query, where: { documentId, ...query?.where } })) as any;
+      .findOne({ ...query, where: { documentId, ...query?.where } });
 
     if (!entryToUpdate) {
       return null;
     }
 
-    return db.query(uid).update({ ...query, where: { id: entryToUpdate.id }, data }) as any;
+    return db.query(uid).update({ ...query, where: { id: entryToUpdate.id }, data });
   },
 
   async count(uid, params = undefined) {
