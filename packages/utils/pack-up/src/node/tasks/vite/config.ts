@@ -1,4 +1,5 @@
 import react from '@vitejs/plugin-react';
+import { builtinModules } from 'node:module';
 import path from 'path';
 import { InlineConfig, createLogger } from 'vite';
 
@@ -82,7 +83,15 @@ const resolveViteConfig = (ctx: BuildContext, task: ViteBaseTask) => {
 
           const name = idParts[0].startsWith('@') ? `${idParts[0]}/${idParts[1]}` : idParts[0];
 
-          if (name && external.includes(name)) {
+          const builtinModulesWithNodePrefix = [
+            ...builtinModules,
+            ...builtinModules.map((modName) => `node:${modName}`),
+          ];
+
+          if (
+            (name && external.includes(name)) ||
+            (name && builtinModulesWithNodePrefix.includes(name))
+          ) {
             return true;
           }
 
