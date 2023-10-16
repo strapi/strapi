@@ -759,23 +759,32 @@ describe('BlocksEditor toolbar', () => {
     const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
     expect(within(blocksDropdown).getByText(/image/i)).toBeInTheDocument();
 
-    const boldButton = screen.getByLabelText(/bold/i);
-    const italicButton = screen.getByLabelText(/italic/i);
-    expect(boldButton).toBeDisabled();
-    expect(italicButton).toBeDisabled();
+    const linkButton = screen.getByLabelText(/link/i);
+    expect(linkButton).toBeDisabled();
   });
 
-  it('should disable the link button when the selection is inside an image', async () => {
-    setup(imageInitialValue);
+  it('should disable the modifiers buttons and the link button when the selection is inside a code block', async () => {
+    setup([
+      {
+        type: 'code',
+        children: [
+          {
+            type: 'text',
+            text: 'A line of code.',
+          },
+        ],
+      },
+    ]);
 
     await select({
       anchor: { path: [0, 0], offset: 0 },
       focus: { path: [0, 0], offset: 0 },
     });
 
-    // The dropdown should show only one option selected which is the image
-    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
-    expect(within(blocksDropdown).getByText(/image/i)).toBeInTheDocument();
+    const boldButton = screen.getByLabelText(/bold/i);
+    const italicButton = screen.getByLabelText(/italic/i);
+    expect(boldButton).toBeDisabled();
+    expect(italicButton).toBeDisabled();
 
     const linkButton = screen.getByLabelText(/link/i);
     expect(linkButton).toBeDisabled();
