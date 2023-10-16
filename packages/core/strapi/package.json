@@ -72,14 +72,12 @@
   "files": [
     "./dist",
     "./bin",
-    "./scripts",
     "./resources",
     "index.js"
   ],
   "scripts": {
     "build": "run pack-up build && run copy-files",
     "copy-files": "copyfiles -u 1 -a 'src/**/*.html' 'src/**/*.png'  dist",
-    "postinstall": "node ./scripts/postinstall.js",
     "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
     "test:unit": "run -T jest",
