@@ -1,6 +1,4 @@
-import type { EditableContentTypeData } from '../canEditContentType';
-
-export const rawData: Record<string, EditableContentTypeData> = {
+export const rawData: any = {
   homeSingleType: {
     contentType: {
       uid: 'plugin::myplugins.home',

@@ -1,4 +1,5 @@
-import { Box, Flex, Grid, GridItem, KeyboardNavigable, Link } from '@strapi/design-system';
+import { Box, Flex, Grid, GridItem, KeyboardNavigable } from '@strapi/design-system';
+import { Link } from '@strapi/design-system/v2';
 import { useCustomFields } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
@@ -49,7 +50,7 @@ export const CustomFieldsList = () => {
         </Grid>
         <Link
           href="https://docs.strapi.io/developer-docs/latest/development/custom-fields.html"
-          isExternal // MINE check this
+          isExternal
         >
           {formatMessage({
             id: getTrad('modalForm.tabs.custom.howToLink'),

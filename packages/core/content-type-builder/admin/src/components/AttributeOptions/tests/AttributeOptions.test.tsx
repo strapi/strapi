@@ -7,6 +7,8 @@ import { Router } from 'react-router-dom';
 import { FormModalNavigationProvider } from '../../FormModalNavigationProvider/FormModalNavigationProvider';
 import { AttributeOptions } from '../AttributeOptions';
 
+import type { IconByType } from '../../AttributeIcon';
+
 const mockCustomField = {
   'plugin::mycustomfields.test': {
     name: 'color',
@@ -36,7 +38,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   }),
 }));
 
-const mockAttributes = [
+const mockAttributes: IconByType[][] = [
   [
     'text',
     'email',
@@ -99,7 +101,7 @@ describe('<AttributeOptions />', () => {
 
     const comingSoonText = screen.queryByText('Nothing in here yet.');
 
-    expect(comingSoonText).not.toBeInTheDocument(); // MINE verify this
+    expect(comingSoonText).not.toBeInTheDocument();
   });
 
   it('switches to the custom tab without custom fields', () => {
