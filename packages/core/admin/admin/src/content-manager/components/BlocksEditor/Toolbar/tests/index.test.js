@@ -614,6 +614,139 @@ describe('BlocksEditor toolbar', () => {
     expect(linkButton).not.toBeDisabled();
   });
 
+  it('creates a new list with empty content when you click on the button with an empty editor', async () => {
+    setup([
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: '' }],
+      },
+    ]);
+
+    // Get the unordered list button
+    const unorderedListButton = screen.getByLabelText(/bulleted list/i);
+
+    // Convert selection to a unordered list
+    await user.click(unorderedListButton);
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: '',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    expect(ReactEditor.focus).toHaveBeenCalledTimes(1);
+  });
+
+  it('creates a new list with mixed content when you click on the button and editor contains mixed content paragraph', async () => {
+    setup([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'A ',
+          },
+          {
+            type: 'text',
+            text: 'line of text',
+            bold: true,
+            italic: true,
+          },
+          {
+            type: 'text',
+            text: ' in a paragraph.',
+          },
+        ],
+      },
+    ]);
+
+    // Get the unordered list button
+    const unorderedListButton = screen.getByLabelText(/bulleted list/i);
+
+    // Convert selection to a unordered list
+    await user.click(unorderedListButton);
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'A ',
+              },
+              {
+                bold: true,
+                italic: true,
+                type: 'text',
+                text: 'line of text',
+              },
+              {
+                type: 'text',
+                text: ' in a paragraph.',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    expect(ReactEditor.focus).toHaveBeenCalledTimes(1);
+  });
+
+  it('creates a new list with some content when you select the option in the dropdown and editor contains a heading on the last line', async () => {
+    setup(mixedInitialValue);
+
+    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+
+    // Convert selection to an ordered list
+    await user.click(blocksDropdown);
+    await user.click(screen.getByRole('option', { name: 'Numbered list' }));
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'heading',
+        level: 1,
+        children: [
+          { type: 'text', text: 'A heading one' },
+          { type: 'text', text: ' with modifiers', bold: true },
+        ],
+      },
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: 'A line of text in a paragraph.' }],
+      },
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'A heading two',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
   it('should disable the modifiers buttons when the selection is inside an image', async () => {
     setup(imageInitialValue);
 
