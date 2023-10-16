@@ -161,6 +161,10 @@
       }
     },
     "implicitDependencies": [
+      "@strapi/plugin-email",
+      "@strapi/plugin-content-manager",
+      "@strapi/plugin-content-type-builder",
+      "@strapi/plugin-upload",
       "!@strapi/data-transfer",
       "!@strapi/strapi"
     ]
