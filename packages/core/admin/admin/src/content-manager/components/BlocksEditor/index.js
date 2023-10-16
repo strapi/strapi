@@ -28,18 +28,6 @@ const EditorDivider = styled(Divider)`
   background: ${({ theme }) => theme.colors.neutral200};
 `;
 
-const Wrapper = styled(Box)`
-  width: 100%;
-  overflow: auto;
-  padding: ${({ theme }) => `0 ${theme.spaces[4]}`};
-  margin: ${({ theme }) => `${theme.spaces[3]} 0`};
-  font-size: ${({ theme }) => theme.fontSizes[2]};
-  background-color: ${({ theme }) => theme.colors.neutral0};
-  color: ${({ theme }) => theme.colors.neutral800};
-  line-height: ${({ theme }) => theme.lineHeights[6]};
-  border-radius: ${({ theme }) => theme.borderRadius};
-`;
-
 /**
  * Images are void elements. They handle the rendering of their children instead of Slate.
  * See the Slate documentation for more information:
@@ -165,9 +153,7 @@ const BlocksEditor = React.forwardRef(
             <InputWrapper direction="column" alignItems="flex-start" height="512px">
               <BlocksToolbar disabled={disabled} />
               <EditorDivider width="100%" />
-              <Wrapper grow={1}>
-                <BlocksInput disabled={disabled} placeholder={formattedPlaceholder} />
-              </Wrapper>
+              <BlocksInput disabled={disabled} placeholder={formattedPlaceholder} />
             </InputWrapper>
           </Slate>
           <Hint hint={hint} name={name} error={error} />
