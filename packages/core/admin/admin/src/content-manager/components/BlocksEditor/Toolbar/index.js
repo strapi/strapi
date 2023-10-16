@@ -625,7 +625,7 @@ const BlocksToolbar = ({ disabled }) => {
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
       {/* Remove after the RTE Blocks Beta release (paddingRight and width) */}
-      <ToolbarWrapper gap={1} padding={2} paddingRight={4} width="100%">
+      <ToolbarWrapper gap={2} padding={2} paddingRight={4} width="100%">
         <BlocksDropdown disabled={disabled} />
         <Toolbar.ToggleGroup type="multiple" asChild>
           <Flex gap={1} marginLeft={1}>
