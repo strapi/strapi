@@ -9,10 +9,10 @@ import React from 'react';
 import { SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import useLocalesProvider from '../../../components/LocalesProvider/useLocalesProvider';
+import { useLocales } from '../../../components/LanguageProvider';
 
 const LocaleToggle = () => {
-  const { changeLocale, localeNames } = useLocalesProvider();
+  const { changeLocale, localeNames } = useLocales();
   const { locale } = useIntl();
 
   return (

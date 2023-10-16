@@ -9,12 +9,17 @@ type Permission = domain.permission.Permission;
  * Context
  * -----------------------------------------------------------------------------------------------*/
 
-type RBACContextValue = {
-  allPermissions?: Permission[]; // The permissions of the current user.
-  refetchPermissions?: QueryObserverBaseResult<Permission[]>;
+export type RBACContextValue = {
+  allPermissions: Permission[]; // The permissions of the current user.
+  refetchPermissions: QueryObserverBaseResult<Permission[]>['refetch'];
 };
 
-const RBACContext: React.Context<RBACContextValue> = React.createContext({});
+const RBACContext = React.createContext<RBACContextValue>({
+  allPermissions: [],
+  refetchPermissions: async () => {
+    throw new Error('RBACContext: refetchPermissions() not implemented');
+  },
+});
 
 /**
  * @deprecated Use RBACContext instead.

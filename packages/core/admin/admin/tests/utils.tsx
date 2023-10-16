@@ -23,8 +23,7 @@ import { createStore } from 'redux';
 
 // @ts-expect-error – no types yet.
 import ModelsContext from '../src/content-manager/contexts/ModelsContext';
-// @ts-expect-error – no types yet.
-import AdminContext from '../src/contexts/Admin';
+import { AdminContext } from '../src/contexts/admin';
 import { ConfigurationContext } from '../src/contexts/configuration';
 
 import { server } from './server';
@@ -63,6 +62,7 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
                 <NotificationsProvider>
                   <RBACContext.Provider
                     value={{
+                      refetchPermissions: jest.fn(),
                       allPermissions: [
                         ...fixtures.permissions.allPermissions,
                         {
