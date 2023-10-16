@@ -1,7 +1,6 @@
-import React from 'react';
+import * as React from 'react';
 
 import { Box, Flex, SkipToContent } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
@@ -9,7 +8,12 @@ const FlexBox = styled(Box)`
   flex: 1;
 `;
 
-const AppLayout = ({ children, sideNav }) => {
+interface AppLayoutProps {
+  children: React.ReactNode;
+  sideNav: React.ReactNode;
+}
+
+export const AppLayout = ({ children, sideNav }: AppLayoutProps) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -24,10 +28,3 @@ const AppLayout = ({ children, sideNav }) => {
     </Box>
   );
 };
-
-AppLayout.propTypes = {
-  children: PropTypes.node.isRequired,
-  sideNav: PropTypes.node.isRequired,
-};
-
-export default AppLayout;
