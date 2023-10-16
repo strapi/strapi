@@ -126,28 +126,30 @@ function App() {
 
           setTelemetryProperties(properties);
 
-          try {
-            const event = 'didInitializeAdministration';
-            post(
-              'https://analytics.strapi.io/api/v2/track',
-              {
-                // This event is anonymous
-                event,
-                userId: '',
-                deviceId,
-                eventPropeties: {},
-                userProperties: { environment: appInfo.currentEnvironment },
-                groupProperties: { ...properties, projectId: uuid },
+          const event = 'didInitializeAdministration';
+          post(
+            'https://analytics.strapi.io/api/v2/track',
+            {
+              // This event is anonymous
+              event,
+              userId: '',
+              deviceId,
+              eventPropeties: {},
+              userProperties: { environment: appInfo.currentEnvironment },
+              groupProperties: { ...properties, projectId: uuid },
+            },
+            {
+              headers: {
+                'X-Strapi-Event': event,
               },
-              {
-                headers: {
-                  'X-Strapi-Event': event,
-                },
-              }
-            );
-          } catch (e) {
-            // Silent.
-          }
+            }
+          )
+            .then(() => {
+              // Request was successful, do nothing here
+            })
+            .catch((e) => {
+              // Silent.
+            });
         }
 
         setState({ isLoading: false, hasAdmin, uuid, deviceId });
