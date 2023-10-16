@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { combineReducers, configureStore } from '@reduxjs/toolkit';
+import { configureStore } from '@reduxjs/toolkit';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { Table, useTableContext } from '@strapi/helper-plugin';
 import { render, screen, waitFor, within } from '@testing-library/react';
@@ -10,7 +10,6 @@ import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 
 import BulkActionButtons from '..';
-import reducers from '../../../../../../reducers';
 
 const toggleNotification = jest.fn();
 
@@ -35,7 +34,7 @@ jest.mock('../SelectedEntriesModal', () => () => <div>SelectedEntriesModal</div>
 const user = userEvent.setup();
 
 const store = configureStore({
-  reducer: combineReducers(reducers),
+  reducer: (s) => s,
   preloadedState: {
     'content-manager_listView': {
       data: [

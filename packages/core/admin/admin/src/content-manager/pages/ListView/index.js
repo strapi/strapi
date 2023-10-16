@@ -43,7 +43,7 @@ import { useMutation } from 'react-query';
 import { useDispatch } from 'react-redux';
 import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
 
-import { useTypedSelector } from '../../../core/store/configureStore';
+import { useTypedSelector } from '../../../core/store';
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
 import { useAdminUsers } from '../../../hooks/useAdminUsers';
 import { useEnterprise } from '../../../hooks/useEnterprise';

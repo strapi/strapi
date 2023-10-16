@@ -10,19 +10,19 @@ import {
 import { useDispatch, useStore, TypedUseSelectorHook, useSelector } from 'react-redux';
 
 // @ts-expect-error no types, yet.
-import rbacProviderReducer from '../../components/RBACProvider/reducer';
+import rbacProviderReducer from '../components/RBACProvider/reducer';
 // @ts-expect-error no types, yet.
-import rbacManagerReducer from '../../content-manager/hooks/useSyncRbac/reducer';
+import rbacManagerReducer from '../content-manager/hooks/useSyncRbac/reducer';
 // @ts-expect-error no types, yet.
-import cmAppReducer from '../../content-manager/pages/App/reducer';
+import cmAppReducer from '../content-manager/pages/App/reducer';
 // @ts-expect-error no types, yet.
-import editViewLayoutManagerReducer from '../../content-manager/pages/EditViewLayoutManager/reducer';
+import editViewLayoutManagerReducer from '../content-manager/pages/EditViewLayoutManager/reducer';
 // @ts-expect-error no types, yet.
-import listViewReducer from '../../content-manager/pages/ListView/reducer';
+import listViewReducer from '../content-manager/pages/ListView/reducer';
 // @ts-expect-error no types, yet.
-import editViewCrudReducer from '../../content-manager/sharedReducers/crudReducer/reducer';
+import editViewCrudReducer from '../content-manager/sharedReducers/crudReducer/reducer';
 // @ts-expect-error no types, yet.
-import appReducer from '../../pages/App/reducer';
+import appReducer from '../pages/App/reducer';
 
 const createReducer = (
   appReducers: Record<string, Reducer>,
@@ -71,8 +71,8 @@ const injectReducerStoreEnhancer: (appReducers: Record<string, Reducer>) => Stor
  * which we're trying to phase out. App Middlewares could potentially be improved...?
  */
 const configureStoreImpl = (
-  appMiddlewares: Array<() => Middleware>,
-  injectedReducers: Record<string, Reducer>
+  appMiddlewares: Array<() => Middleware> = [],
+  injectedReducers: Record<string, Reducer> = {}
 ) => {
   const coreReducers = { ...staticReducers, ...injectedReducers };
 

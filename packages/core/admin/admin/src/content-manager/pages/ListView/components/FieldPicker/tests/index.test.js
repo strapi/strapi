@@ -1,12 +1,12 @@
 import React from 'react';
 
-import { combineReducers, configureStore } from '@reduxjs/toolkit';
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render as renderRTL, fireEvent } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Provider } from 'react-redux';
 
-import reducers from '../../../../../../reducers';
+import listViewReducer from '../../../reducer';
 import { FieldPicker } from '../index';
 
 const layout = {
@@ -43,7 +43,9 @@ const render = () => ({
   ...renderRTL(<FieldPicker layout={layout} />, {
     wrapper({ children }) {
       const store = configureStore({
-        reducer: combineReducers(reducers),
+        reducer: combineReducers({
+          'content-manager_listView': listViewReducer,
+        }),
         preloadedState: {
           'content-manager_listView': {
             contentType: {
