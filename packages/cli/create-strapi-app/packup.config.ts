@@ -10,6 +10,5 @@ export default defineConfig({
     },
   ],
   dist: './dist',
-  externals: ['node:fs', 'node:path'],
   runtime: 'node',
 });
