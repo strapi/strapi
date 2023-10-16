@@ -35,11 +35,12 @@ describe('createStorage', () => {
   describe('logMigration', () => {
     it('should insert a new migration log', async () => {
       const name = '20220101120000_create_users_table';
-      const time = new Date();
 
       await storage.logMigration({ name });
 
-      expect(db.getConnection().insert).toHaveBeenCalledWith({ name, time });
+      expect(db.getConnection().insert).toHaveBeenCalledWith(
+        expect.objectContaining({ name, time: expect.any(Date) })
+      );
       expect(db.getConnection().insert({}).into).toHaveBeenCalledWith(tableName);
     });
   });
