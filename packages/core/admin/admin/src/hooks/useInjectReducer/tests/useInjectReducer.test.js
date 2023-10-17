@@ -3,10 +3,10 @@ import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
-import configureStore from '../../../core/store/configureStore';
+import { configureStore } from '../../../core/store';
 import { useInjectReducer } from '../useInjectReducer';
 
-const store = configureStore([], [(state = {}) => state]);
+const store = configureStore();
 
 // eslint-disable-next-line no-unused-vars, react/prop-types
 const ComponentFixture = ({ children }) => <Provider store={store}>{children}</Provider>;

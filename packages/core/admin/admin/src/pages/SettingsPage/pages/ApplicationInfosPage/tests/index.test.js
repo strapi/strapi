@@ -16,7 +16,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   useRBAC: jest.fn(() => ({ allowedActions: { canRead: true, canUpdate: true } })),
 }));
 
-jest.mock('../../../../../hooks', () => ({
+jest.mock('../../../../../hooks/useConfiguration', () => ({
   useConfiguration: jest.fn(() => ({
     logos: {
       menu: { custom: 'customMenuLogo.png', default: 'defaultMenuLogo.png' },

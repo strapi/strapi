@@ -4,7 +4,7 @@ import { Observable, distinctUntilChanged, scan, startWith, switchMap } from 'rx
 
 import { CommonCLIOptions } from '../types';
 
-import { CONFIG_FILE_NAMES, loadConfig } from './core/config';
+import { CONFIG_FILE_NAMES, Config, loadConfig } from './core/config';
 import { getExportExtensionMap, validateExportsOrdering } from './core/exports';
 import { createLogger } from './core/logger';
 import { loadPkg, validatePkg } from './core/pkg';
@@ -12,12 +12,24 @@ import { createBuildContext } from './createBuildContext';
 import { WatchTask, createWatchTasks } from './createTasks';
 import { TaskHandler, taskHandlers } from './tasks';
 
-export interface WatchOptions extends CommonCLIOptions {
+interface WatchCLIOptions extends CommonCLIOptions {}
+
+interface WatchOptionsWithoutConfig extends WatchCLIOptions {
+  configFile?: true;
+  config?: never;
   cwd?: string;
 }
 
-export const watch = async (opts: WatchOptions) => {
-  const { silent, debug, cwd = process.cwd() } = opts;
+interface WatchOptionsWithConfig extends WatchCLIOptions {
+  configFile: false;
+  config?: Config;
+  cwd?: string;
+}
+
+type WatchOptions = WatchOptionsWithConfig | WatchOptionsWithoutConfig;
+
+const watch = async (opts: WatchOptions) => {
+  const { silent, debug, cwd = process.cwd(), configFile = true, config: providedConfig } = opts;
 
   const logger = createLogger({ silent, debug });
 
@@ -112,11 +124,16 @@ export const watch = async (opts: WatchOptions) => {
       );
 
       /**
+       * If configFile is true – which is the default, atempt to load the config
+       * otherwise if it's explicitly false then we suspect there might be a config passed
+       * in the options, so we'll use that instead.
+       */
+      const config = configFile ? await loadConfig({ cwd, logger }) : providedConfig;
+      /**
        * We create tasks based on the exports of the package.json
        * their handlers are then ran in the order of the exports map
        * and results are logged to see gradual progress.
        */
-      const config = await loadConfig({ cwd, logger });
 
       const extMap = getExportExtensionMap();
 
@@ -154,3 +171,6 @@ export const watch = async (opts: WatchOptions) => {
     }
   });
 };
+
+export { watch };
+export type { WatchOptions, WatchOptionsWithConfig, WatchOptionsWithoutConfig, WatchCLIOptions };

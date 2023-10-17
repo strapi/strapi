@@ -23,7 +23,7 @@ import { Route, Switch } from 'react-router-dom';
 
 import { PrivateRoute } from '../../components/PrivateRoute';
 import { ADMIN_PERMISSIONS_CE } from '../../constants';
-import { useConfiguration } from '../../hooks';
+import { useConfiguration } from '../../hooks/useConfiguration';
 import { useEnterprise } from '../../hooks/useEnterprise';
 import { createRoute, makeUniqueRoutes } from '../../utils';
 import AuthPage from '../AuthPage';

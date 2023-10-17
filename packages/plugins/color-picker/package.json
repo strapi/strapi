@@ -57,9 +57,9 @@
     "watch": "run -T tsc -w --preserveWatchOutput"
   },
   "dependencies": {
-    "@strapi/design-system": "1.12.0",
+    "@strapi/design-system": "1.12.2",
     "@strapi/helper-plugin": "4.14.4",
-    "@strapi/icons": "1.12.0",
+    "@strapi/icons": "1.12.2",
     "prop-types": "^15.8.1",
     "react-colorful": "5.6.1",
     "react-intl": "6.4.1"

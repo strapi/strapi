@@ -28,9 +28,9 @@
     "test:unit:watch": "run -T jest --watch"
   },
   "dependencies": {
-    "@strapi/design-system": "1.12.0",
+    "@strapi/design-system": "1.12.2",
     "@strapi/helper-plugin": "4.14.4",
-    "@strapi/icons": "1.12.0",
+    "@strapi/icons": "1.12.2",
     "@strapi/utils": "4.14.4",
     "bcryptjs": "2.4.3",
     "cheerio": "^1.0.0-rc.12",
