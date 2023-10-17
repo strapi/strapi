@@ -3,14 +3,14 @@ import os from "os";
 import fs from "fs-extra";
 import path from "path";
 
-let playground = `${os.tmpdir()}/@strapi-playground/core/database/migrations/`;
+const playground = `${os.tmpdir()}/@strapi-playground/core/database/migrations/`;
 beforeAll(async () => {
   fs.removeSync(playground);
   fs.ensureDirSync(playground);
 })
 
 describe('js project', () => {
-  let projectDir = `${playground}/js-project`;
+  const projectDir = `${playground}/js-project`;
   beforeEach(async () => {
     fs.removeSync(projectDir);
     fs.ensureDirSync(projectDir);
@@ -24,13 +24,13 @@ describe('js project', () => {
   })
 
   it("should find migration dir under root", async () => {
-    let migrationDir = await findMigrationsDir(strapi.dirs.app.root);
+    const migrationDir = await findMigrationsDir(strapi.dirs.app.root);
     expect(path.resolve(migrationDir)).toBe(path.resolve(`${projectDir}/database/migrations`));
   })
 });
 
 describe('ts project', () => {
-  let projectDir = `${playground}/ts-project`;
+  const projectDir = `${playground}/ts-project`;
 
   beforeEach(async () => {
     fs.removeSync(projectDir);
@@ -57,7 +57,7 @@ describe('ts project', () => {
   })
 
   it("should find migration dir under root/dist", async () => {
-    let migrationDir = await findMigrationsDir(strapi.dirs.app.root);
+    const migrationDir = await findMigrationsDir(strapi.dirs.app.root);
     expect(path.resolve(migrationDir)).toBe(path.resolve(`${projectDir}/dist/database/migrations`));
   })
 });

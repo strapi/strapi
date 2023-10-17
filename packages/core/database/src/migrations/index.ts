@@ -55,7 +55,7 @@ const migrationResolver: MigrationResolver = ({name, path, context}) => {
 };
 
 export async function findMigrationsDir(root: string) {
-  let s = path.join(await tsUtils.resolveOutDir(root) || root, 'database/migrations');
+  const s = path.join(await tsUtils.resolveOutDir(root) || root, 'database/migrations');
   console.info(`Found database migrations at ${s}`);
   return s;
 }
