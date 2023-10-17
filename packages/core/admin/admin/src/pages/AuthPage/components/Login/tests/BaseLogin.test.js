@@ -9,8 +9,8 @@ import * as yup from 'yup';
 
 import BaseLogin from '../BaseLogin';
 
-jest.mock('../../../../../hooks/useConfigurations', () => ({
-  useConfigurations: () => ({
+jest.mock('../../../../../hooks/useConfiguration', () => ({
+  useConfiguration: () => ({
     logos: {
       auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
     },
@@ -80,6 +80,12 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         line-height: 1.33;
         font-weight: 600;
         color: #ffffff;
+      }
+
+      .c40 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #4945ff;
       }
 
       .c1 {
@@ -561,12 +567,6 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         outline: none;
       }
 
-      .c40 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #4945ff;
-      }
-
       .c39 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
@@ -852,7 +852,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
               href="/auth/forgot-password"
             >
               <span
-                class="c40"
+                class="c7 c40"
               >
                 Forgot your password?
               </span>

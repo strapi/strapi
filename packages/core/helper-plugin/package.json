@@ -23,8 +23,8 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "require": "./dist/index.js",
       "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
       "source": "./src/index.ts",
       "default": "./dist/index.js"
     },
@@ -56,7 +56,6 @@
     "formik": "2.4.0",
     "immer": "9.0.19",
     "lodash": "4.17.21",
-    "prop-types": "^15.8.1",
     "qs": "6.11.1",
     "react-helmet": "6.1.0",
     "react-intl": "6.4.1",
@@ -71,8 +70,8 @@
     "@storybook/builder-vite": "7.4.0",
     "@storybook/react-vite": "7.4.0",
     "@strapi/admin-test-utils": "4.14.4",
-    "@strapi/design-system": "1.12.0",
-    "@strapi/icons": "1.12.0",
+    "@strapi/design-system": "1.12.2",
+    "@strapi/icons": "1.12.2",
     "@strapi/pack-up": "workspace:*",
     "@strapi/types": "4.14.4",
     "@testing-library/react": "14.0.0",
@@ -97,8 +96,8 @@
     "yup": "0.32.9"
   },
   "peerDependencies": {
-    "@strapi/design-system": "1.12.0",
-    "@strapi/icons": "1.12.0",
+    "@strapi/design-system": "1.12.2",
+    "@strapi/icons": "1.12.2",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^5.3.4",

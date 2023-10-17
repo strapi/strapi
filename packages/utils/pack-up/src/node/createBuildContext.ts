@@ -65,7 +65,7 @@ const createBuildContext = async ({
 }: BuildContextArgs): Promise<BuildContext> => {
   const tsConfig = loadTsConfig({
     cwd,
-    path: 'tsconfig.build.json',
+    path: resolveConfigProperty(config.tsconfig, 'tsconfig.build.json'),
     logger,
   });
 

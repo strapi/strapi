@@ -9,18 +9,6 @@ import * as yup from 'yup';
 
 import ResetPassword from '..';
 
-jest.mock('../../../../../components/LocalesProvider/useLocalesProvider', () => () => ({
-  changeLocale() {},
-  localeNames: { en: 'English' },
-  messages: ['test'],
-}));
-jest.mock('../../../../../hooks/useConfigurations', () => ({
-  useConfigurations: () => ({
-    logos: {
-      auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
-    },
-  }),
-}));
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: () => jest.fn({}),
@@ -93,6 +81,12 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         line-height: 1.33;
         font-weight: 600;
         color: #ffffff;
+      }
+
+      .c46 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #4945ff;
       }
 
       .c1 {
@@ -492,11 +486,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         flex-wrap: wrap;
       }
 
-      .c47[data-state='checked'] .c8 {
-        font-weight: bold;
-        color: #4945ff;
-      }
-
       .c29 {
         border: none;
         border-radius: 4px;
@@ -565,12 +554,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
 
       .c14:focus-visible {
         outline: none;
-      }
-
-      .c46 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #4945ff;
       }
 
       .c45 {
@@ -697,9 +680,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                     >
                       <span
                         class="c11"
-                      >
-                        English
-                      </span>
+                      />
                     </span>
                   </span>
                   <span
@@ -753,7 +734,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                     alt=""
                     aria-hidden="true"
                     class="c19"
-                    src="customAuthLogo.png"
+                    src=""
                   />
                   <div
                     class="c20"
@@ -926,7 +907,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                   href="/auth/login"
                 >
                   <span
-                    class="c46"
+                    class="c8 c46"
                   >
                     Ready to sign in?
                   </span>

@@ -1,7 +1,7 @@
-import { build as nodeBuild, BuildOptions } from '../../node/build';
+import { build as nodeBuild, BuildCLIOptions } from '../../node/build';
 import { handleError } from '../errors';
 
-export const build = async (options: Omit<BuildOptions, 'cwd'>) => {
+export const build = async (options: BuildCLIOptions) => {
   try {
     await nodeBuild(options);
   } catch (err) {

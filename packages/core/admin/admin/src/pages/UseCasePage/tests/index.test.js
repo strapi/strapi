@@ -9,19 +9,6 @@ import { Router } from 'react-router-dom';
 
 import UseCasePage from '../index';
 
-jest.mock('../../../components/LocalesProvider/useLocalesProvider', () => () => ({
-  changeLocale() {},
-  localeNames: { en: 'English' },
-  messages: ['test'],
-}));
-jest.mock('../../../hooks/useConfigurations', () => ({
-  useConfigurations: () => ({
-    logos: {
-      auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
-    },
-  }),
-}));
-
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(),
@@ -590,9 +577,7 @@ describe('Admin | UseCasePage', () => {
                       >
                         <span
                           class="c11"
-                        >
-                          English
-                        </span>
+                        />
                       </span>
                     </span>
                     <span
@@ -643,7 +628,7 @@ describe('Admin | UseCasePage', () => {
                       alt=""
                       aria-hidden="true"
                       class="c19"
-                      src="customAuthLogo.png"
+                      src=""
                     />
                     <div
                       class="c20"

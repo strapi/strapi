@@ -13,8 +13,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 
 import GuidedTourModal from '../../components/GuidedTour/Modal';
-import LeftMenu from '../../components/LeftMenu';
-import { useConfigurations, useMenu } from '../../hooks';
+import { LeftMenu } from '../../components/LeftMenu';
+import { useConfiguration } from '../../hooks/useConfiguration';
+import { useMenu } from '../../hooks/useMenu';
 import AppLayout from '../../layouts/AppLayout';
 import { createRoute } from '../../utils';
 import { SET_APP_RUNTIME_STATUS } from '../App/constants';
@@ -73,7 +74,7 @@ const Admin = () => {
   useTrackUsage();
   const { isLoading, generalSectionLinks, pluginsSectionLinks } = useMenu();
   const { menu } = useStrapiApp();
-  const { showTutorials } = useConfigurations();
+  const { showTutorials } = useConfiguration();
 
   const routes = useMemo(() => {
     return menu

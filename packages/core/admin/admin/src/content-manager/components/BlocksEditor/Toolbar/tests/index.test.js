@@ -32,7 +32,10 @@ const mixedInitialValue = [
   {
     type: 'heading',
     level: 1,
-    children: [{ type: 'text', text: 'A heading one' }],
+    children: [
+      { type: 'text', text: 'A heading one' },
+      { type: 'text', text: ' with modifiers', bold: true },
+    ],
   },
   {
     type: 'paragraph',
@@ -42,6 +45,31 @@ const mixedInitialValue = [
     type: 'heading',
     level: 2,
     children: [{ type: 'text', text: 'A heading two' }],
+  },
+];
+
+const imageInitialValue = [
+  {
+    type: 'image',
+    url: 'test.photos/200/300',
+    children: [{ text: '', type: 'text' }],
+    image: {
+      name: 'test.jpg',
+      alternativeText: 'test',
+      caption: null,
+      createdAt: '2021-08-31T14:00:00.000Z',
+      ext: '.jpg',
+      formats: {},
+      hash: 'test',
+      height: 300,
+      mime: 'image/jpeg',
+      previewUrl: null,
+      provider: 'local',
+      size: 100,
+      updatedAt: '2021-08-31T14:00:00.000Z',
+      url: '/uploads/test.jpg',
+      width: 200,
+    },
   },
 ];
 
@@ -432,5 +460,333 @@ describe('BlocksEditor toolbar', () => {
     // The dropdown should show only one option selected which is the block content in the first row
     const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
     expect(within(blocksDropdown).getByText(/heading 1/i)).toBeInTheDocument();
+  });
+
+  it('splits the parent list when converting a list item to another type', async () => {
+    setup([
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'First list item',
+              },
+            ],
+          },
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'Second list item',
+              },
+            ],
+          },
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'Third list item',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    // Select the item in the middle of the list
+    await select({
+      anchor: { path: [0, 1, 0], offset: 0 },
+      focus: { path: [0, 1, 0], offset: 0 },
+    });
+
+    // Convert it to a code block
+    const selectDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+    await user.click(selectDropdown);
+    await user.click(screen.getByRole('option', { name: 'Code' }));
+
+    // The list should have been split in two
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'First list item',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        type: 'code',
+        children: [
+          {
+            type: 'text',
+            text: 'Second list item',
+          },
+        ],
+      },
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'Third list item',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('creates a new code block without empty lines before it when you select the option in a empty editor', async () => {
+    setup([
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: '' }],
+      },
+    ]);
+
+    // Convert selection to a code block
+    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+    await user.click(blocksDropdown);
+    await user.click(screen.getByRole('option', { name: 'Code' }));
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'code',
+        format: null,
+        level: null,
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+    ]);
+
+    expect(ReactEditor.focus).toHaveBeenCalledTimes(1);
+  });
+
+  it('should disable the link button when multiple blocks are selected', async () => {
+    setup(mixedInitialValue);
+
+    // Set the selection to cover the first and second
+    await select({
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [1, 0], offset: 0 },
+    });
+
+    const linkButton = screen.getByLabelText(/link/i);
+    expect(linkButton).toBeDisabled();
+
+    // Set the selection to a range inside the same block node
+    await select({
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 1], offset: 2 },
+    });
+
+    expect(linkButton).not.toBeDisabled();
+  });
+
+  it('creates a new list with empty content when you click on the button with an empty editor', async () => {
+    setup([
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: '' }],
+      },
+    ]);
+
+    // Get the unordered list button
+    const unorderedListButton = screen.getByLabelText(/bulleted list/i);
+
+    // Convert selection to a unordered list
+    await user.click(unorderedListButton);
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: '',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    expect(ReactEditor.focus).toHaveBeenCalledTimes(1);
+  });
+
+  it('creates a new list with mixed content when you click on the button and editor contains mixed content paragraph', async () => {
+    setup([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'A ',
+          },
+          {
+            type: 'text',
+            text: 'line of text',
+            bold: true,
+            italic: true,
+          },
+          {
+            type: 'text',
+            text: ' in a paragraph.',
+          },
+        ],
+      },
+    ]);
+
+    // Get the unordered list button
+    const unorderedListButton = screen.getByLabelText(/bulleted list/i);
+
+    // Convert selection to a unordered list
+    await user.click(unorderedListButton);
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'A ',
+              },
+              {
+                bold: true,
+                italic: true,
+                type: 'text',
+                text: 'line of text',
+              },
+              {
+                type: 'text',
+                text: ' in a paragraph.',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    expect(ReactEditor.focus).toHaveBeenCalledTimes(1);
+  });
+
+  it('creates a new list with some content when you select the option in the dropdown and editor contains a heading on the last line', async () => {
+    setup(mixedInitialValue);
+
+    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+
+    // Convert selection to an ordered list
+    await user.click(blocksDropdown);
+    await user.click(screen.getByRole('option', { name: 'Numbered list' }));
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'heading',
+        level: 1,
+        children: [
+          { type: 'text', text: 'A heading one' },
+          { type: 'text', text: ' with modifiers', bold: true },
+        ],
+      },
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: 'A line of text in a paragraph.' }],
+      },
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'A heading two',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('should disable the modifiers buttons when the selection is inside an image', async () => {
+    setup(imageInitialValue);
+
+    await select({
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
+    });
+
+    // The dropdown should show only one option selected which is the image
+    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+    expect(within(blocksDropdown).getByText(/image/i)).toBeInTheDocument();
+
+    const linkButton = screen.getByLabelText(/link/i);
+    expect(linkButton).toBeDisabled();
+  });
+
+  it('should disable the modifiers buttons and the link button when the selection is inside a code block', async () => {
+    setup([
+      {
+        type: 'code',
+        children: [
+          {
+            type: 'text',
+            text: 'A line of code.',
+          },
+        ],
+      },
+    ]);
+
+    await select({
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
+    });
+
+    const boldButton = screen.getByLabelText(/bold/i);
+    const italicButton = screen.getByLabelText(/italic/i);
+    expect(boldButton).toBeDisabled();
+    expect(italicButton).toBeDisabled();
+
+    const linkButton = screen.getByLabelText(/link/i);
+    expect(linkButton).toBeDisabled();
   });
 });

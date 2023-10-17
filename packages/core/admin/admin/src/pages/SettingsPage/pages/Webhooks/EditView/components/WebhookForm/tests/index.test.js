@@ -7,7 +7,7 @@ import { createMemoryHistory } from 'history';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Router } from 'react-router-dom';
 
-import LanguageProvider from '../../../../../../../../components/LanguageProvider';
+import { LanguageProvider } from '../../../../../../../../components/LanguageProvider';
 import en from '../../../../../../../../translations/en.json';
 import WebhookForm from '../index';
 

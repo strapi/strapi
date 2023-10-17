@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { Redirect, useHistory, useRouteMatch } from 'react-router-dom';
 
 import persistStateToLocaleStorage from '../../components/GuidedTour/utils/persistStateToLocaleStorage';
-import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
+import { useLocales } from '../../components/LanguageProvider';
 import { useEnterprise } from '../../hooks/useEnterprise';
 import formatAPIErrors from '../../utils/formatAPIErrors';
 
@@ -23,7 +23,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     push,
     location: { search },
   } = useHistory();
-  const { changeLocale } = useLocalesProvider();
+  const { changeLocale } = useLocales();
   const { setSkipped } = useGuidedTour();
   const { trackUsage } = useTracking();
   const {
