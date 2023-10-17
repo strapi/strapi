@@ -2,7 +2,11 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default {
-  register() {},
+  register() {
+    if (window.strapi.features.isEnabled('cms-content-releases')) {
+      // @TODO Remove this once we actually do stuff
+    }
+  },
   async registerTrads({ locales }: { locales: string[] }) {
     const importedTrads = await Promise.all(
       locales.map((locale) => {
