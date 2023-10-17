@@ -1,7 +1,7 @@
 import { isNil } from 'lodash/fp';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
-import { constants } from './constants';
+import constants from './constants';
 import type { AdminRole } from '../domain/user';
 
 const { AUTHOR_CODE, PUBLISH_ACTION } = constants;

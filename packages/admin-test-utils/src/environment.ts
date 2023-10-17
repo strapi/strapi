@@ -66,8 +66,8 @@ window.strapi = {
   projectType: 'Community',
   telemetryDisabled: true,
   flags: {
-    nps: true
-  }
+    nps: true,
+  },
 };
 
 /* -------------------------------------------------------------------------------------------------

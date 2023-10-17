@@ -12,7 +12,7 @@ import { AdminUser, type AdminRole } from '../domain/user';
 import type { Action } from '../domain/action';
 
 import { validatePermissionsExist } from '../validation/permission';
-import { constants as roleConstants } from './constants';
+import roleConstants from './constants';
 import { getService } from '../utils';
 
 const { SUPER_ADMIN_CODE, CONTENT_TYPE_SECTION } = roleConstants;

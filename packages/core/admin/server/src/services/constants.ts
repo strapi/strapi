@@ -1,6 +1,6 @@
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
-export const constants = {
+const constants = {
   CONTENT_TYPE_SECTION: 'contentTypes',
   SUPER_ADMIN_CODE: 'strapi-super-admin',
   EDITOR_CODE: 'strapi-editor',

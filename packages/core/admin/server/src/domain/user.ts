@@ -1,5 +1,5 @@
 import type { Entity } from '@strapi/types';
-import { constants } from '../services/constants';
+import constants from '../services/constants';
 import { Permission } from './permission';
 
 const { SUPER_ADMIN_CODE } = constants;
