@@ -885,9 +885,4 @@ ListView.propTypes = {
   slug: PropTypes.string.isRequired,
 };
 
-export function mapDispatchToProps(dispatch) {
-  return bindActionCreators({}, dispatch);
-}
-// const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
 export default React.memo(ListView, isEqual);
