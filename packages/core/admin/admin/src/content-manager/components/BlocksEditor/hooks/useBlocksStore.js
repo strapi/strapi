@@ -256,12 +256,13 @@ Image.propTypes = {
   }).isRequired,
 };
 
-// This styled component is used to make sure the tooltip is above the popover
+// Make sure the tooltip is above the popover
 const TooltipCustom = styled(Tooltip)`
   z-index: 6;
 `;
 
-const ButtonLink = styled(Button)`
+// Used for the Edit and Cancel buttons in the link popover
+const CustomButton = styled(Button)`
   & > span {
     line-height: normal;
   }
@@ -394,7 +395,7 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                     defaultMessage: 'Delete',
                   })}
                 >
-                  <ButtonLink
+                  <CustomButton
                     size="S"
                     width="2rem"
                     variant="danger-light"
@@ -407,7 +408,7 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                     justifyContent="center"
                   >
                     <Icon width={3} height={3} as={Trash} />
-                  </ButtonLink>
+                  </CustomButton>
                 </TooltipCustom>
 
                 <TooltipCustom
@@ -416,7 +417,7 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                     defaultMessage: 'Edit',
                   })}
                 >
-                  <ButtonLink
+                  <CustomButton
                     size="S"
                     width="2rem"
                     variant="tertiary"
@@ -429,7 +430,7 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                     justifyContent="center"
                   >
                     <Icon width={3} height={3} as={Pencil} />
-                  </ButtonLink>
+                  </CustomButton>
                 </TooltipCustom>
               </Flex>
             </Flex>
