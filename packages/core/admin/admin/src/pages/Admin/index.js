@@ -36,7 +36,9 @@ const NotFoundPage = lazy(() =>
   import(/* webpackChunkName: "Admin_NotFoundPage" */ '../NotFoundPage')
 );
 const InternalErrorPage = lazy(() =>
-  import(/* webpackChunkName: "Admin_InternalErrorPage" */ '../InternalErrorPage')
+  import(/* webpackChunkName: "Admin_InternalErrorPage" */ '../InternalErrorPage').then(({ InternalErrorPage }) => ({
+    default: InternalErrorPage
+  }))
 );
 
 const ProfilePage = lazy(() =>
