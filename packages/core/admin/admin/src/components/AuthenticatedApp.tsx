@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import {
+  AppInfoContextValue,
   AppInfoProvider,
   auth,
   LoadingIndicatorPage,
@@ -14,7 +15,9 @@ import valid from 'semver/functions/valid';
 //  TODO: DS add loader
 
 import packageJSON from '../../../package.json';
+import { UserEntity } from '../../../shared/entities';
 import { useConfiguration } from '../hooks/useConfiguration';
+import { APIResponse, APIResponseUsersLegacy } from '../types/adminAPI';
 // @ts-expect-error - no types yet.
 import { getFullName, hashAdminUserEmail } from '../utils';
 
@@ -31,7 +34,7 @@ const AuthenticatedApp = () => {
     ? lodashGet(userInfo, 'username') || getFullName(userInfo.firstname, userInfo.lastname)
     : null;
   const [userDisplayName, setUserDisplayName] = React.useState(userName);
-  const [userId, setUserId] = React.useState(null);
+  const [userId, setUserId] = React.useState<string>();
   const { showReleaseNotification } = useConfiguration();
   const { get } = useFetchClient();
   const [
@@ -43,7 +46,21 @@ const AuthenticatedApp = () => {
     {
       queryKey: 'app-infos',
       async queryFn() {
-        const { data } = await get('/admin/information');
+        const { data } = await get<
+          APIResponse<
+            Pick<
+              AppInfoContextValue,
+              | 'currentEnvironment'
+              | 'autoReload'
+              | 'communityEdition'
+              | 'dependencies'
+              | 'useYarn'
+              | 'projectId'
+              | 'strapiVersion'
+              | 'nodeVersion'
+            >
+          >
+        >('/admin/information');
 
         return data.data;
       },
@@ -55,12 +72,16 @@ const AuthenticatedApp = () => {
           const res = await fetch('https://api.github.com/repos/strapi/strapi/releases/latest');
 
           if (!res.ok) {
-            throw new Error('Failed to fetch latest Strapi version.');
+            throw new Error();
           }
 
-          const { tag_name } = await res.json();
+          const response = (await res.json()) as { tag_name: string | null | undefined };
 
-          return tag_name;
+          if (!response.tag_name) {
+            throw new Error();
+          }
+
+          return response.tag_name;
         } catch (err) {
           // Don't throw an error
           return strapiVersion;
@@ -85,7 +106,7 @@ const AuthenticatedApp = () => {
           data: {
             data: { roles },
           },
-        } = await get<{ data: { roles: [] } }>('/admin/users/me');
+        } = await get<APIResponseUsersLegacy<UserEntity>>('/admin/users/me');
 
         return roles;
       },
@@ -151,7 +172,7 @@ const AuthenticatedApp = () => {
 
 const checkLatestStrapiVersion = (
   currentPackageVersion: string,
-  latestPublishedVersion: string
+  latestPublishedVersion: string = ''
 ): boolean => {
   if (!valid(currentPackageVersion) || !valid(latestPublishedVersion)) {
     return false;

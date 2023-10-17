@@ -34,7 +34,7 @@ import { ROUTES_CE, SET_ADMIN_PERMISSIONS } from './constants';
 
 const AuthenticatedApp = lazy(() =>
   import(/* webpackChunkName: "Admin-authenticatedApp" */ '../../components/AuthenticatedApp').then(
-    (mod) => mod.AuthenticatedApp
+    (mod) => ({ default: mod.AuthenticatedApp })
   )
 );
 
