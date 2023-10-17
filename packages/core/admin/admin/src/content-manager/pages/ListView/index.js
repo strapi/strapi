@@ -731,9 +731,11 @@ function ListView({
                 >
                   {data.map((rowData, index) => {
                     return (
-                      <Tr cursor="pointer" key={data.id} onClick={handleRowClick(rowData.id)}>
+                      <Tr cursor="pointer" key={rowData.id} onClick={handleRowClick(rowData.id)}>
                         {/* Bulk action row checkbox */}
-                        <Body.CheckboxDataCell rowId={rowData.id} index={index} />
+                        <Td>
+                          <Body.CheckboxDataCell rowId={rowData.id} index={index} />
+                        </Td>
                         {/* Field data */}
                         {tableHeaders.map(({ key, name, cellFormatter, ...rest }) => {
                           if (hasDraftAndPublish && name === 'publishedAt') {
@@ -832,14 +834,16 @@ function ListView({
                         })}
                         {/* Actions: edit, duplicate, delete */}
                         {(canDelete || canPublish) && isBulkable && (
-                          <Body.EntityActionsDataCell
-                            rowId={rowData.id}
-                            index={index}
-                            setIsConfirmDeleteRowOpen={setIsConfirmDeleteRowOpen}
-                            canCreate={canCreate}
-                            canDelete={canDelete}
-                            handleCloneClick={handleCloneClick}
-                          />
+                          <Td>
+                            <Body.EntityActionsDataCell
+                              rowId={rowData.id}
+                              index={index}
+                              setIsConfirmDeleteRowOpen={setIsConfirmDeleteRowOpen}
+                              canCreate={canCreate}
+                              canDelete={canDelete}
+                              handleCloneClick={handleCloneClick}
+                            />
+                          </Td>
                         )}
                       </Tr>
                     );
