@@ -1,4 +1,5 @@
 import type { Context, Next } from 'koa';
+import 'koa-bodyparser';
 import passport from 'koa-passport';
 import compose from 'koa-compose';
 import { errors } from '@strapi/utils';
