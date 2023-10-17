@@ -1,0 +1,54 @@
+import { Common } from '@strapi/types';
+import type { SanitizedAdminUser, Permission } from './shared';
+
+/**
+ * GET /users/me - Log in as an admin user
+ */
+export declare namespace GetMe {
+  export interface Request {
+    query: {};
+    body: {};
+  }
+
+  export interface Response {
+    data: {};
+    errors?: {};
+  }
+}
+
+/**
+ * PUT /users/me - Update the current admin user
+ */
+export declare namespace UpdateMe {
+  export interface Request {
+    query: {};
+    body: {
+      email?: string;
+      firstname?: string;
+      lastname?: string;
+      username?: string;
+      password?: string;
+      currentPassword?: string;
+    };
+  }
+
+  export interface Response {
+    data: SanitizedAdminUser;
+    errors?: Common.BadRequestError<{ currentPassword: string[] }> | Common.YupValidationError;
+  }
+}
+
+/**
+ * GET /users/me/permissions - Get the permissions of the current admin user
+ */
+export declare namespace GetOwnPermissions {
+  export interface Request {
+    query: {};
+    body: {};
+  }
+
+  export interface Response {
+    data: Permission[];
+    errors?: {};
+  }
+}

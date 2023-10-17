@@ -1,17 +1,21 @@
-import { validateProfileUpdateInput } from '../validation/user';
+import type { Context } from 'koa';
+import 'koa-bodyparser';
 import { getService } from '../utils';
+import type { AdminUser } from '../domain/user';
+import { validateProfileUpdateInput } from '../validation/user';
+import { GetMe, GetOwnPermissions, UpdateMe } from '../../../shared/contracts/users';
 
 export default {
-  async getMe(ctx: any) {
-    const userInfo = getService('user').sanitizeUser(ctx.state.user);
+  async getMe(ctx: Context) {
+    const userInfo = getService('user').sanitizeUser(ctx.state.user as AdminUser);
 
     ctx.body = {
       data: userInfo,
-    };
+    } satisfies GetMe.Response;
   },
 
-  async updateMe(ctx: any) {
-    const input = ctx.request.body;
+  async updateMe(ctx: Context) {
+    const input = ctx.request.body as UpdateMe.Request['body'];
 
     await validateProfileUpdateInput(input);
 
@@ -24,6 +28,7 @@ export default {
       const isValid = await authServer.validatePassword(currentPassword, ctx.state.user.password);
 
       if (!isValid) {
+        // @ts-expect-error - refactor ctx bad request to take a second argument
         return ctx.badRequest('ValidationError', {
           currentPassword: ['Invalid credentials'],
         });
@@ -34,17 +39,17 @@ export default {
 
     ctx.body = {
       data: userService.sanitizeUser(updatedUser),
-    };
+    } satisfies UpdateMe.Response;
   },
 
-  async getOwnPermissions(ctx: any) {
+  async getOwnPermissions(ctx: Context) {
     const { findUserPermissions, sanitizePermission } = getService('permission');
     const { user } = ctx.state;
 
-    const userPermissions = await findUserPermissions(user);
+    const userPermissions = await findUserPermissions(user as AdminUser);
 
     ctx.body = {
       data: userPermissions.map(sanitizePermission),
-    };
+    } satisfies GetOwnPermissions.Response;
   },
 };
