@@ -1,6 +1,6 @@
 'use strict';
 
-const ee = require('@strapi/strapi/dist/utils/ee').default;
+const ee = require('@strapi/strapi/dist/utils/ee');
 const { authEventsMapper } = require('../../../../server/services/passport');
 const createProviderRegistry = require('./provider-registry');
 

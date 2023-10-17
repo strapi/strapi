@@ -1,6 +1,7 @@
 import { forceOption } from '../../../utils/commander';
-import { getLocalScript } from '../../../utils/helpers';
 import type { StrapiCommand } from '../../../types';
+import { runAction } from '../../../utils/helpers';
+import action from './action';
 
 /**
  * `$ strapi plugin:build`
@@ -14,7 +15,7 @@ const command: StrapiCommand = ({ command }) => {
     .option('--silent', "Don't log anything", false)
     .option('--sourcemap', 'produce sourcemaps', false)
     .option('--minify', 'minify the output', false)
-    .action(getLocalScript('plugin/build-command'));
+    .action(runAction('plugin:build', action));
 };
 
 export default command;
