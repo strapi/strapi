@@ -77,4 +77,14 @@ describe('Utils.Object', () => {
     type('ValuesNever').isNever();
     type('ValuesContainNever').isUnion([t.stringLiteral('foo'), t.stringLiteral('bar')]);
   });
+
+  test('Replace', () => {
+    const expectedResultType = t.object({
+      properties: {
+        foo: t.numberLiteral(2),
+        bar: t.stringLiteral('foo'),
+      },
+    });
+    type('Replace').isObject(expectedResultType);
+  });
 });
