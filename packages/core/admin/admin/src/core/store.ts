@@ -9,8 +9,7 @@ import {
 } from '@reduxjs/toolkit';
 import { useDispatch, useStore, TypedUseSelectorHook, useSelector } from 'react-redux';
 
-// @ts-expect-error no types, yet.
-import rbacProviderReducer from '../components/RBACProvider/reducer';
+import { RBACReducer } from '../components/RBACProvider';
 // @ts-expect-error no types, yet.
 import rbacManagerReducer from '../content-manager/hooks/useSyncRbac/reducer';
 // @ts-expect-error no types, yet.
@@ -24,22 +23,12 @@ import editViewCrudReducer from '../content-manager/sharedReducers/crudReducer/r
 // @ts-expect-error no types, yet.
 import appReducer from '../pages/App/reducer';
 
-const createReducer = (
-  appReducers: Record<string, Reducer>,
-  asyncReducers: Record<string, Reducer>
-) => {
-  return combineReducers({
-    ...appReducers,
-    ...asyncReducers,
-  });
-};
-
 /**
  * @description Static reducers are ones we know, they live in the admin package.
  */
-const staticReducers: Record<string, Reducer> = {
+const staticReducers = {
   admin_app: appReducer,
-  rbacProvider: rbacProviderReducer,
+  rbacProvider: RBACReducer,
   'content-manager_app': cmAppReducer,
   'content-manager_listView': listViewReducer,
   'content-manager_rbacManager': rbacManagerReducer,
@@ -60,8 +49,13 @@ const injectReducerStoreEnhancer: (appReducers: Record<string, Reducer>) => Stor
       asyncReducers,
       injectReducer: (key: string, asyncReducer: Reducer) => {
         asyncReducers[key] = asyncReducer;
-        // @ts-expect-error we dynamically add reducers which makes the types uncomfortable.
-        store.replaceReducer(createReducer(appReducers, asyncReducers));
+        store.replaceReducer(
+          // @ts-expect-error we dynamically add reducers which makes the types uncomfortable.
+          combineReducers({
+            ...appReducers,
+            ...asyncReducers,
+          })
+        );
       },
     };
   };
@@ -74,10 +68,10 @@ const configureStoreImpl = (
   appMiddlewares: Array<() => Middleware> = [],
   injectedReducers: Record<string, Reducer> = {}
 ) => {
-  const coreReducers = { ...staticReducers, ...injectedReducers };
+  const coreReducers = { ...staticReducers, ...injectedReducers } as const;
 
   const store = configureStore({
-    reducer: createReducer(coreReducers, {}),
+    reducer: coreReducers,
     devTools: process.env.NODE_ENV !== 'production',
     middleware: (getDefaultMiddleware) => [
       ...getDefaultMiddleware(),
@@ -111,4 +105,4 @@ export {
   configureStoreImpl as configureStore,
   createTypedSelector,
 };
-export type { RootState };
+export type { RootState, Store };

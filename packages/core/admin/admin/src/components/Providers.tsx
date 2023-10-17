@@ -22,6 +22,8 @@ import { LanguageProvider, LanguageProviderProps } from './LanguageProvider';
 import { Theme } from './Theme';
 import { ThemeToggleProvider, ThemeToggleProviderProps } from './ThemeToggleProvider';
 
+import type { Store } from '../core/store';
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -51,7 +53,7 @@ interface ProvidersProps
       | 'settings'
     > {
   children: React.ReactNode;
-  store: unknown;
+  store: Store;
 }
 
 const Providers = ({

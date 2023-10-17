@@ -17,6 +17,7 @@ import packageJSON from '../../../package.json';
 import { useConfiguration } from '../hooks/useConfiguration';
 // @ts-expect-error - no types yet.
 import { getFullName, hashAdminUserEmail } from '../utils';
+
 import { NpsSurvey } from './NpsSurvey';
 import { PluginsInitializer } from './PluginsInitializer';
 import { RBACProvider, Permission } from './RBACProvider';

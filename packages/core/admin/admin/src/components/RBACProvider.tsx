@@ -7,7 +7,8 @@ import {
   RBACContextValue,
 } from '@strapi/helper-plugin';
 import produce from 'immer';
-import { useDispatch, useSelector } from 'react-redux';
+
+import { useTypedSelector, useTypedDispatch } from '../core/store';
 
 /* -------------------------------------------------------------------------------------------------
  * RBACProvider
@@ -20,9 +21,9 @@ interface RBACProviderProps {
 }
 
 const RBACProvider = ({ children, permissions, refetchPermissions }: RBACProviderProps) => {
-  const { allPermissions } = useSelector((state) => state.rbacProvider);
+  const allPermissions = useTypedSelector((state) => state.rbacProvider.allPermissions);
 
-  const dispatch = useDispatch();
+  const dispatch = useTypedDispatch();
 
   React.useEffect(() => {
     dispatch(setPermissionsAction(permissions));

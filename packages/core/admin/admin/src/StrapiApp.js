@@ -10,11 +10,10 @@ import { BrowserRouter } from 'react-router-dom';
 
 import Logo from './assets/images/logo-strapi-2022.svg';
 import { LANGUAGE_LOCAL_STORAGE_KEY } from './components/LanguageProvider';
+import { Providers } from './components/Providers';
 import { HOOKS, INJECTION_ZONES } from './constants';
 import { customFields, Plugin, Reducers } from './core/apis';
 import { configureStore } from './core/store';
-import { Providers } from './components/Providers';
-import configureStore from './core/store/configureStore';
 import { basename, createHook } from './core/utils';
 import favicon from './favicon.png';
 import App from './pages/App';
