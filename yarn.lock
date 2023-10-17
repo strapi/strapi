@@ -6415,6 +6415,8 @@ __metadata:
     invariant: ^2.2.4
     js-cookie: 2.2.1
     jsonwebtoken: 9.0.0
+    koa: 2.13.4
+    koa-bodyparser: 4.4.1
     koa-compose: 4.1.0
     koa-passport: 5.0.0
     koa-static: 5.0.0
@@ -19756,7 +19758,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"koa-bodyparser@npm:^4.3.0":
+"koa-bodyparser@npm:4.4.1, koa-bodyparser@npm:^4.3.0":
   version: 4.4.1
   resolution: "koa-bodyparser@npm:4.4.1"
   dependencies:
