@@ -7,9 +7,13 @@ import * as React from 'react';
 
 /* -------------------------------------------------------------------------------------------------
  * Context
- * ------------------x-----------------------------------------------------------------------------*/
+ * ------------------------------------------------------------------------------------------------*/
+
+type SectionKey = keyof GuidedTourContextValue['guidedTourState'];
+type StepKey = keyof GuidedTourContextValue['guidedTourState'][SectionKey];
+type Step = `${SectionKey}.${StepKey}`;
 interface GuidedTourContextValue {
-  currentStep: string | null;
+  currentStep: Step | null;
   guidedTourState: {
     contentTypeBuilder: {
       create: boolean;
@@ -26,11 +30,11 @@ interface GuidedTourContextValue {
   };
   isGuidedTourVisible: boolean;
   isSkipped: boolean;
-  setCurrentStep: (step: string) => void | null;
+  setCurrentStep: (step: Step | null) => void | null;
   setGuidedTourVisibility: (isVisible: boolean) => void;
   setSkipped: (isSkipped: boolean) => void;
-  setStepState: (step: string, state: { create: boolean; success: boolean }) => void;
-  startSection: (section: string) => string | null;
+  setStepState: (step: Step, state: boolean) => void;
+  startSection: (section: SectionKey) => void;
 }
 
 const GuidedTourContext = React.createContext<GuidedTourContextValue>({
@@ -112,4 +116,9 @@ const GuidedTourProvider = ({
 
 const useGuidedTour = () => React.useContext(GuidedTourContext);
 
+type GuidedTourStep = Step;
+type GuidedTourSectionKey = SectionKey;
+type GuidedTourStepKey = StepKey;
+
 export { GuidedTourContext, GuidedTourProvider, useGuidedTour };
+export type { GuidedTourContextValue, GuidedTourStep, GuidedTourSectionKey, GuidedTourStepKey };
