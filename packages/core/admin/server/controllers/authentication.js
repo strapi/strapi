@@ -170,7 +170,7 @@ module.exports = {
   async multiFactorAuthentication(ctx) {
     const input = ctx.request.body;
     await validateMultiFactorAuthenticationInput(input);
-    if (input.code !== ctx.session.verificationCode) {
+    if (input.code !== Number(ctx.session.verificationCode)) {
       // Throw forbidden error if verification code is incorrect
       throw new ForbiddenError("Verification code is incorrect");
     } else {
