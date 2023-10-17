@@ -9,6 +9,5 @@ export default defineConfig({
       import: './dist/plopfile.mjs',
     },
   ],
-  externals: ['node:path', 'path'],
   runtime: 'node',
 });

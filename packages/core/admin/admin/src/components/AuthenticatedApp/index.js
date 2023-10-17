@@ -12,7 +12,7 @@ import { useQueries } from 'react-query';
 //  TODO: DS add loader
 
 import packageJSON from '../../../../package.json';
-import { useConfiguration } from '../../hooks';
+import { useConfiguration } from '../../hooks/useConfiguration';
 import { getFullName, hashAdminUserEmail } from '../../utils';
 import { NpsSurvey } from '../NpsSurvey';
 import { PluginsInitializer } from '../PluginsInitializer';

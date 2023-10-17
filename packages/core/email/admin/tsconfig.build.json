@@ -1,0 +1,9 @@
+{
+  "extends": "./admin/tsconfig.json",
+  "include": ["./admin/src", "./shared"],
+  "exclude": ["**/*.test.ts"],
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "./dist"
+  }
+}

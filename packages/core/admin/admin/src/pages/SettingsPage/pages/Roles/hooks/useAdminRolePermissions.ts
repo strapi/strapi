@@ -1,14 +1,21 @@
 import { useFetchClient } from '@strapi/helper-plugin';
+import { Entity } from '@strapi/types';
 import { useQuery } from 'react-query';
 
-export const useAdminRolePermissions = (params = {}, queryOptions = {}) => {
+import { RolePermissions } from '../../../../../../../shared/permissions';
+import { APIBaseParams, APIResponse } from '../../../../../types/adminAPI';
+
+export interface APIRolePermissionsQueryParams extends APIBaseParams {
+  id: null | Entity.ID;
+}
+
+export const useAdminRolePermissions = (
+  params: APIRolePermissionsQueryParams = { id: null },
+  queryOptions = {}
+) => {
   const { id, ...queryParams } = params;
 
   const { get } = useFetchClient();
-
-  if (!id && (queryOptions?.enabled === undefined || !!queryOptions?.enabled === true)) {
-    throw new Error('"id" is a required argument');
-  }
 
   const {
     data: permissions,
@@ -21,7 +28,7 @@ export const useAdminRolePermissions = (params = {}, queryOptions = {}) => {
     async () => {
       const {
         data: { data },
-      } = await get(`/admin/roles/${id}/permissions`, {
+      } = await get<APIResponse<RolePermissions>>(`/admin/roles/${id}/permissions`, {
         params: queryParams,
       });
 

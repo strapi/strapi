@@ -143,6 +143,7 @@ const createTasks =
           exportPath: bundle.source,
           sourcePath: bundle.source,
           targetPath: bundle.types,
+          tsconfig: bundle.tsconfig,
         });
       }
     }

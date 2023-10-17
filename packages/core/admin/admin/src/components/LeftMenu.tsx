@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import * as React from 'react';
 
 import { Box, Divider, Flex, FocusTrap, Typography } from '@strapi/design-system';
 import {
@@ -19,12 +19,12 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Exit, Write } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { NavLink as RouterNavLink, useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { useConfiguration } from '../../hooks';
+import { useConfiguration } from '../hooks/useConfiguration';
+import { Menu } from '../hooks/useMenu';
 
 const LinkUserWrapper = styled(Box)`
   width: ${150 / 16}rem;
@@ -33,7 +33,7 @@ const LinkUserWrapper = styled(Box)`
   left: ${({ theme }) => theme.spaces[5]};
 `;
 
-const LinkUser = styled(RouterNavLink)`
+const LinkUser = styled(RouterNavLink)<{ logout?: boolean }>`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -54,9 +54,11 @@ const LinkUser = styled(RouterNavLink)`
   }
 `;
 
-const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
-  const buttonRef = useRef();
-  const [userLinksVisible, setUserLinksVisible] = useState(false);
+interface LeftMenuProps extends Pick<Menu, 'generalSectionLinks' | 'pluginsSectionLinks'> {}
+
+const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) => {
+  const navUserRef = React.useRef<HTMLDivElement>(null!);
+  const [userLinksVisible, setUserLinksVisible] = React.useState(false);
   const {
     logos: { menu },
   } = useConfiguration();
@@ -83,16 +85,19 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
     history.push('/auth/login');
   };
 
-  const handleBlur = (e) => {
+  const handleBlur: React.FocusEventHandler = (e) => {
     if (
       !e.currentTarget.contains(e.relatedTarget) &&
+      /**
+       * TODO: can we replace this by just using the navUserRef?
+       */
       e.relatedTarget?.parentElement?.id !== 'main-nav-user-button'
     ) {
       setUserLinksVisible(false);
     }
   };
 
-  const handleClickOnLink = (destination = null) => {
+  const handleClickOnLink = (destination: string) => {
     trackUsage('willNavigate', { from: pathname, to: destination });
   };
 
@@ -126,6 +131,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
       <NavSections>
         <NavLink
           as={RouterNavLink}
+          // @ts-expect-error the props from the passed as prop are not inferred // joined together
           to="/content-manager"
           icon={<Write />}
           onClick={() => handleClickOnLink('/content-manager')}
@@ -146,6 +152,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
               return (
                 <NavLink
                   as={RouterNavLink}
+                  // @ts-expect-error the props from the passed as prop are not inferred // joined together
                   to={link.to}
                   key={link.to}
                   icon={<Icon />}
@@ -172,8 +179,11 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
                 <NavLink
                   as={RouterNavLink}
                   badgeContent={
-                    (link.notificationsCount > 0 && link.notificationsCount.toString()) || undefined
+                    link.notificationsCount && link.notificationsCount > 0
+                      ? link.notificationsCount.toString()
+                      : undefined
                   }
+                  // @ts-expect-error the props from the passed as prop are not inferred // joined together
                   to={link.to}
                   key={link.to}
                   icon={<LinkIcon />}
@@ -190,7 +200,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
       <NavFooter>
         <NavUser
           id="main-nav-user-button"
-          ref={buttonRef}
+          ref={navUserRef}
           onClick={handleToggleUserLinks}
           initials={initials}
         >
@@ -244,9 +254,4 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
   );
 };
 
-LeftMenu.propTypes = {
-  generalSectionLinks: PropTypes.array.isRequired,
-  pluginsSectionLinks: PropTypes.array.isRequired,
-};
-
-export default LeftMenu;
+export { LeftMenu };

@@ -3784,12 +3784,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@internationalized/number@npm:^3.2.1":
-  version: 3.2.1
-  resolution: "@internationalized/number@npm:3.2.1"
+"@internationalized/number@npm:^3.3.0":
+  version: 3.3.0
+  resolution: "@internationalized/number@npm:3.3.0"
   dependencies:
     "@swc/helpers": ^0.5.0
-  checksum: 5b716de97a491c8e276679a47a131d9fc94484f27ae7d2dba2d9e312c607fbdd2deabe0702a9faa79ad1d84ea0676061fd051c3565946f520acfdccc73dd1956
+  checksum: 76e5bd0e7713d8010be90b2d3427371a0ee97e34e6d81da2c10587986503be308ab8bfd8f590e1d88977800f5d79f9e2d91e7ac1d6d34006575216027125f302
   languageName: node
   linkType: hard
 
@@ -7420,9 +7420,9 @@ __metadata:
     "@radix-ui/react-toolbar": 1.0.4
     "@strapi/admin-test-utils": 4.14.4
     "@strapi/data-transfer": 4.14.4
-    "@strapi/design-system": 1.12.0
+    "@strapi/design-system": 1.12.2
     "@strapi/helper-plugin": 4.14.4
-    "@strapi/icons": 1.12.0
+    "@strapi/icons": 1.12.2
     "@strapi/permissions": 4.14.4
     "@strapi/provider-audit-logs-local": 4.14.4
     "@strapi/types": "workspace:*"
@@ -7526,6 +7526,7 @@ __metadata:
   resolution: "@strapi/data-transfer@workspace:packages/core/data-transfer"
   dependencies:
     "@strapi/logger": 4.14.4
+    "@strapi/pack-up": "workspace:*"
     "@strapi/strapi": 4.14.4
     "@strapi/types": 4.14.4
     "@strapi/utils": 4.14.4
@@ -7581,30 +7582,30 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/design-system@npm:1.12.0-typescript.1":
-  version: 1.12.0-typescript.1
-  resolution: "@strapi/design-system@npm:1.12.0-typescript.1"
+"@strapi/design-system@npm:1.13.0-typescript.1":
+  version: 1.13.0-typescript.1
+  resolution: "@strapi/design-system@npm:1.13.0-typescript.1"
   dependencies:
     "@codemirror/lang-json": ^6.0.1
     "@floating-ui/react-dom": ^2.0.2
     "@internationalized/date": ^3.5.0
-    "@internationalized/number": ^3.2.1
+    "@internationalized/number": ^3.3.0
     "@radix-ui/react-dismissable-layer": ^1.0.5
     "@radix-ui/react-dropdown-menu": ^2.0.6
     "@radix-ui/react-focus-scope": 1.0.4
-    "@strapi/ui-primitives": 1.12.0-typescript.1
-    "@uiw/react-codemirror": ^4.21.18
+    "@strapi/ui-primitives": ^1.13.0-typescript.1
+    "@uiw/react-codemirror": ^4.21.19
     aria-hidden: ^1.2.3
     compute-scroll-into-view: ^3.1.0
     prop-types: ^15.8.1
     react-remove-scroll: ^2.5.6
   peerDependencies:
-    "@strapi/icons": 1.12.0-typescript.1
+    "@strapi/icons": 1.13.0-typescript.1
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^5.2.0
     styled-components: ^5.2.1
-  checksum: cf966142378314ff3c7853e46244f6d85ceb064e9b95dde01e305f1a970412b5c9a5db35afec891e2ffd31592d3fb6745899f11846fc9f9e43f354a6d2564431
+  checksum: 00f4e8dd04ab3a7097afc3ce557f541cd968760ba9f772c3e9801bb450435b2bbcacd8a1f7a14582e1a1c82086079d3e20ef4a29cec1ee94c205a6251cf0d401
   languageName: node
   linkType: hard
 
@@ -7684,8 +7685,8 @@ __metadata:
     "@storybook/builder-vite": 7.4.0
     "@storybook/react-vite": 7.4.0
     "@strapi/admin-test-utils": 4.14.4
-    "@strapi/design-system": 1.12.0
-    "@strapi/icons": 1.12.0
+    "@strapi/design-system": 1.12.2
+    "@strapi/icons": 1.12.2
     "@strapi/pack-up": "workspace:*"
     "@strapi/types": 4.14.4
     "@testing-library/react": 14.0.0
@@ -7719,8 +7720,8 @@ __metadata:
     vite: 4.4.9
     yup: 0.32.9
   peerDependencies:
-    "@strapi/design-system": 1.12.0
-    "@strapi/icons": 1.12.0
+    "@strapi/design-system": 1.12.2
+    "@strapi/icons": 1.12.2
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^5.3.4
@@ -7738,13 +7739,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/icons@npm:1.12.0":
-  version: 1.12.0
-  resolution: "@strapi/icons@npm:1.12.0"
+"@strapi/icons@npm:1.12.2":
+  version: 1.12.2
+  resolution: "@strapi/icons@npm:1.12.2"
   peerDependencies:
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-  checksum: cf35b06d236f790330df64f5e46fbbe4a59e71b9ab6ca6f249c60db1cc255ffc230e37dfd7e82cd1a3177c37dd52cdbf329d5e5776571ad1cf9d52a63d7061dc
+  checksum: 6bbb9928d7658e7c9c8c43b1653400e6f554b973a4ab59e7fe9f99714e99a8e4c48745bf80b4adc463b1cb5151637134530216479fe20200791fa6e64dea807c
   languageName: node
   linkType: hard
 
@@ -7815,9 +7816,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-color-picker@workspace:packages/plugins/color-picker"
   dependencies:
-    "@strapi/design-system": 1.12.0
+    "@strapi/design-system": 1.12.2
     "@strapi/helper-plugin": 4.14.4
-    "@strapi/icons": 1.12.0
+    "@strapi/icons": 1.12.2
     "@strapi/strapi": 4.14.4
     "@testing-library/react": 14.0.0
     "@testing-library/user-event": 14.4.3
@@ -7856,10 +7857,10 @@ __metadata:
   dependencies:
     "@sindresorhus/slugify": 1.1.0
     "@strapi/admin": 4.14.4
-    "@strapi/design-system": 1.12.0
+    "@strapi/design-system": 1.12.2
     "@strapi/generators": 4.14.4
     "@strapi/helper-plugin": 4.14.4
-    "@strapi/icons": 1.12.0
+    "@strapi/icons": 1.12.2
     "@strapi/utils": 4.14.4
     "@testing-library/react": 14.0.0
     "@testing-library/react-hooks": 8.0.1
@@ -7893,9 +7894,9 @@ __metadata:
   resolution: "@strapi/plugin-documentation@workspace:packages/plugins/documentation"
   dependencies:
     "@apidevtools/swagger-parser": ^10.1.0
-    "@strapi/design-system": 1.12.0
+    "@strapi/design-system": 1.12.2
     "@strapi/helper-plugin": 4.14.4
-    "@strapi/icons": 1.12.0
+    "@strapi/icons": 1.12.2
     "@strapi/utils": 4.14.4
     "@testing-library/react": 14.0.0
     "@testing-library/user-event": 14.4.3
@@ -7931,9 +7932,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-email@workspace:packages/core/email"
   dependencies:
-    "@strapi/design-system": 1.12.0
+    "@strapi/design-system": 1.12.2
     "@strapi/helper-plugin": 4.14.4
-    "@strapi/icons": 1.12.0
+    "@strapi/icons": 1.12.2
     "@strapi/pack-up": "workspace:*"
     "@strapi/provider-email-sendmail": 4.14.4
     "@strapi/types": "workspace:*"
@@ -7967,9 +7968,9 @@ __metadata:
   dependencies:
     "@graphql-tools/schema": 8.5.1
     "@graphql-tools/utils": ^8.13.1
-    "@strapi/design-system": 1.12.0
+    "@strapi/design-system": 1.12.2
     "@strapi/helper-plugin": 4.14.4
-    "@strapi/icons": 1.12.0
+    "@strapi/icons": 1.12.2
     "@strapi/utils": 4.14.4
     apollo-server-core: 3.12.1
     apollo-server-koa: 3.10.0
@@ -8002,9 +8003,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-i18n@workspace:packages/plugins/i18n"
   dependencies:
-    "@strapi/design-system": 1.12.0
+    "@strapi/design-system": 1.12.2
     "@strapi/helper-plugin": 4.14.4
-    "@strapi/icons": 1.12.0
+    "@strapi/icons": 1.12.2
     "@strapi/utils": 4.14.4
     "@testing-library/react": 14.0.0
     formik: 2.4.0
@@ -8035,9 +8036,9 @@ __metadata:
   resolution: "@strapi/plugin-sentry@workspace:packages/plugins/sentry"
   dependencies:
     "@sentry/node": 6.19.7
-    "@strapi/design-system": 1.12.0
+    "@strapi/design-system": 1.12.2
     "@strapi/helper-plugin": 4.14.4
-    "@strapi/icons": 1.12.0
+    "@strapi/icons": 1.12.2
     react: ^18.2.0
     react-dom: ^18.2.0
     react-router-dom: 5.3.4
@@ -8055,9 +8056,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-upload@workspace:packages/core/upload"
   dependencies:
-    "@strapi/design-system": 1.12.0
+    "@strapi/design-system": 1.12.2
     "@strapi/helper-plugin": 4.14.4
-    "@strapi/icons": 1.12.0
+    "@strapi/icons": 1.12.2
     "@strapi/provider-upload-local": 4.14.4
     "@strapi/utils": 4.14.4
     "@testing-library/dom": 9.2.0
@@ -8101,9 +8102,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-users-permissions@workspace:packages/plugins/users-permissions"
   dependencies:
-    "@strapi/design-system": 1.12.0
+    "@strapi/design-system": 1.12.2
     "@strapi/helper-plugin": 4.14.4
-    "@strapi/icons": 1.12.0
+    "@strapi/icons": 1.12.2
     "@strapi/utils": 4.14.4
     "@testing-library/dom": 9.2.0
     "@testing-library/react": 14.0.0
@@ -8325,6 +8326,7 @@ __metadata:
     open: 8.4.0
     ora: 5.4.1
     package-json: 7.0.0
+    pkg-up: 3.1.0
     qs: 6.11.1
     semver: 7.5.4
     statuses: 2.0.1
@@ -8388,9 +8390,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/ui-primitives@npm:1.12.0-typescript.1":
-  version: 1.12.0-typescript.1
-  resolution: "@strapi/ui-primitives@npm:1.12.0-typescript.1"
+"@strapi/ui-primitives@npm:^1.13.0-typescript.1":
+  version: 1.13.0-typescript.1
+  resolution: "@strapi/ui-primitives@npm:1.13.0-typescript.1"
   dependencies:
     "@radix-ui/number": ^1.0.1
     "@radix-ui/primitive": ^1.0.1
@@ -8416,7 +8418,7 @@ __metadata:
   peerDependencies:
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-  checksum: 80dd3cb4286b2322e6f156ff06d51be82d59d288a291c850af3fc6b34a0c3f3d7be59f006bf11d8ab35ef24eb95af2f59d902510aca84cbdf0c39fd0df15b150
+  checksum: 8976f0d0b62c11c5bffa6f7ca61c3ef4332259a84708b6bc024df834015e8dab0d30856a5902ecd4e62b7bd782fe25b66df96daf1546cd35d697af974f8dd402
   languageName: node
   linkType: hard
 
@@ -10287,9 +10289,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@uiw/codemirror-extensions-basic-setup@npm:4.21.18":
-  version: 4.21.18
-  resolution: "@uiw/codemirror-extensions-basic-setup@npm:4.21.18"
+"@uiw/codemirror-extensions-basic-setup@npm:4.21.20":
+  version: 4.21.20
+  resolution: "@uiw/codemirror-extensions-basic-setup@npm:4.21.20"
   dependencies:
     "@codemirror/autocomplete": ^6.0.0
     "@codemirror/commands": ^6.0.0
@@ -10306,19 +10308,19 @@ __metadata:
     "@codemirror/search": ">=6.0.0"
     "@codemirror/state": ">=6.0.0"
     "@codemirror/view": ">=6.0.0"
-  checksum: c643eebc45e2067080c46e28fdb4ac40043e5890f4862bd45fe5bf816894b6c118ea901ca9ba1dce8862877622ebd793db6ec220491506355ed562a0dc0c4507
+  checksum: 76a6caf05bbcf06c515c680ab952e79b8470ca10c9d8c3166fdb05310232239782b170da276b1dbf33900ca894332fc2aba3bd6955665b2c2580548c7e17cbc0
   languageName: node
   linkType: hard
 
-"@uiw/react-codemirror@npm:^4.21.18":
-  version: 4.21.18
-  resolution: "@uiw/react-codemirror@npm:4.21.18"
+"@uiw/react-codemirror@npm:^4.21.19":
+  version: 4.21.20
+  resolution: "@uiw/react-codemirror@npm:4.21.20"
   dependencies:
     "@babel/runtime": ^7.18.6
     "@codemirror/commands": ^6.1.0
     "@codemirror/state": ^6.1.1
     "@codemirror/theme-one-dark": ^6.0.0
-    "@uiw/codemirror-extensions-basic-setup": 4.21.18
+    "@uiw/codemirror-extensions-basic-setup": 4.21.20
     codemirror: ^6.0.0
   peerDependencies:
     "@babel/runtime": ">=7.11.0"
@@ -10328,7 +10330,7 @@ __metadata:
     codemirror: ">=6.0.0"
     react: ">=16.8.0"
     react-dom: ">=16.8.0"
-  checksum: ef3897e9901b98fd981d4b9db2ae8702aa7ffda4cf5cab3286963580606a6dde38e77a4314c12574b6f5f251d62b62e59f0a1a445009b5927b8500f4b5fd795c
+  checksum: 63ea348a922c535ff91c8bff1c1dac40ced0227d1c17139142dbc28017bb254cc32428a15686660ec4f4cd6935c574d627b6a4872910357af51da8e90faaf4da
   languageName: node
   linkType: hard
 
@@ -30941,11 +30943,11 @@ __metadata:
 
 "typescript@patch:typescript@5.2.2#~builtin<compat/typescript>":
   version: 5.2.2
-  resolution: "typescript@patch:typescript@npm%3A5.2.2#~builtin<compat/typescript>::version=5.2.2&hash=14eedb"
+  resolution: "typescript@patch:typescript@npm%3A5.2.2#~builtin<compat/typescript>::version=5.2.2&hash=f3b441"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 07106822b4305de3f22835cbba949a2b35451cad50888759b6818421290ff95d522b38ef7919e70fb381c5fe9c1c643d7dea22c8b31652a717ddbd57b7f4d554
+  checksum: 0f4da2f15e6f1245e49db15801dbee52f2bbfb267e1c39225afdab5afee1a72839cd86000e65ee9d7e4dfaff12239d28beaf5ee431357fcced15fb08583d72ca
   languageName: node
   linkType: hard
 

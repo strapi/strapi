@@ -16,8 +16,6 @@ jest.mock('../../../../../hooks/useConfiguration', () => ({
   }),
 }));
 
-jest.mock('../../../../../components/LocalesProvider/useLocalesProvider');
-
 describe('AUTH | Register', () => {
   beforeEach(() => {
     jest.clearAllMocks();
