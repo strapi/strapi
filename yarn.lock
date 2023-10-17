@@ -7521,6 +7521,32 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@strapi/content-releases@4.14.4, @strapi/content-releases@workspace:packages/core/content-releases":
+  version: 0.0.0-use.local
+  resolution: "@strapi/content-releases@workspace:packages/core/content-releases"
+  dependencies:
+    "@strapi/design-system": 1.12.0
+    "@strapi/helper-plugin": 4.14.4
+    "@strapi/icons": 1.12.0
+    "@strapi/pack-up": "workspace:*"
+    "@strapi/strapi": 4.14.4
+    "@testing-library/react": 14.0.0
+    "@testing-library/user-event": 14.4.3
+    "@types/styled-components": 5.1.26
+    react: ^18.2.0
+    react-dom: ^18.2.0
+    react-intl: 6.4.1
+    react-router-dom: 5.3.4
+    styled-components: 5.3.3
+    typescript: 5.2.2
+  peerDependencies:
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+    react-router-dom: 5.3.4
+    styled-components: 5.3.3
+  languageName: unknown
+  linkType: soft
+
 "@strapi/data-transfer@4.14.4, @strapi/data-transfer@workspace:packages/core/data-transfer":
   version: 0.0.0-use.local
   resolution: "@strapi/data-transfer@workspace:packages/core/data-transfer"
@@ -7736,6 +7762,16 @@ __metadata:
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
   checksum: 112949935895d8dca06d14731c0734d93d1b24a7aa56d187a54f393d6ee211b46e87d348be9ddb497918dbdfa7766d92097be84b1c76284f39021b99aa4b1cde
+  languageName: node
+  linkType: hard
+
+"@strapi/icons@npm:1.12.0":
+  version: 1.12.0
+  resolution: "@strapi/icons@npm:1.12.0"
+  peerDependencies:
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+  checksum: cf35b06d236f790330df64f5e46fbbe4a59e71b9ab6ca6f249c60db1cc255ffc230e37dfd7e82cd1a3177c37dd52cdbf329d5e5776571ad1cf9d52a63d7061dc
   languageName: node
   linkType: hard
 
@@ -8258,6 +8294,7 @@ __metadata:
     "@koa/cors": 3.4.3
     "@koa/router": 10.1.1
     "@strapi/admin": 4.14.4
+    "@strapi/content-releases": 4.14.4
     "@strapi/data-transfer": 4.14.4
     "@strapi/database": 4.14.4
     "@strapi/generate-new": 4.14.4
