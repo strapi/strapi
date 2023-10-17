@@ -70,6 +70,7 @@ interface ConfigBundle {
   import?: string;
   require?: string;
   runtime?: Runtime;
+  tsconfig?: string;
   types?: string;
 }
 
@@ -99,6 +100,12 @@ interface ConfigOptions {
   preserveModules?: boolean;
   sourcemap?: boolean;
   runtime?: Runtime;
+  /**
+   * @description path to the tsconfig file to use for the bundle.
+   *
+   * @default tsconfig.build.json
+   */
+  tsconfig?: string;
 }
 
 /**
@@ -128,4 +135,4 @@ export function resolveConfigProperty<T>(prop: ConfigProperty<T> | undefined, in
 }
 
 export { loadConfig, defineConfig, CONFIG_FILE_NAMES };
-export type { Config };
+export type { Config, ConfigOptions, ConfigBundle, ConfigPropertyResolver, ConfigProperty };

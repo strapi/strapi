@@ -156,7 +156,9 @@ const SelectedEntriesTableContent = ({
       <Table.Body>
         {rowsToDisplay.map((row, index) => (
           <Tr key={row.id}>
-            <Body.CheckboxDataCell rowId={row.id} index={index} />
+            <Td>
+              <Body.CheckboxDataCell rowId={row.id} index={index} />
+            </Td>
             <Td>
               <Typography>{row.id}</Typography>
             </Td>

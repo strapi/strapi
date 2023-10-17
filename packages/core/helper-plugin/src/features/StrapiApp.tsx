@@ -1,16 +1,23 @@
 import * as React from 'react';
 
+import { LinkProps } from 'react-router-dom';
+
 import { TranslationMessage } from '../types';
 
 import type { domain } from '@strapi/permissions';
 
 type Permission = domain.permission.Permission;
 
-interface MenuItem {
+interface MenuItem extends Pick<LinkProps, 'to'> {
   to: string;
-  icon: React.ComponentType;
+  icon: React.ElementType;
   intlLabel: TranslationMessage;
-  permissions?: Permission[];
+  /**
+   * TODO: add type from the BE for what an Admin Permission looks like –
+   * most likely shared throught the helper plugin...? or duplicated, idm.
+   */
+  permissions: Permission[];
+  notificationsCount?: number;
   Component?: React.ComponentType;
 }
 
@@ -22,7 +29,7 @@ interface MenuItem {
 interface Plugin {
   apis: Record<string, unknown>;
   injectionZones: Record<string, unknown>;
-  initializer: ({ setPlugin }: { setPlugin: (pluginId: string) => void }) => null;
+  initializer: React.ComponentType<{ setPlugin(pluginId: string): void }>;
   getInjectedComponents: (
     containerName: string,
     blockName: string
@@ -55,7 +62,7 @@ type RunHookWaterfall = <InitialValue, Store>(
   store: Store
 ) => unknown | Promise<unknown>;
 
-interface StrapiAppContextValue {
+export interface StrapiAppContextValue {
   menu: MenuItem[];
   plugins: Record<string, Plugin>;
   settings: Record<string, StrapiAppSetting>;

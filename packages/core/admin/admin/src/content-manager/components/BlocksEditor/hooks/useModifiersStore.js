@@ -72,7 +72,7 @@ export function useModifiersStore() {
    * @param {string} name - The name of the modifier to toggle
    */
   const baseHandleToggle = (name) => {
-    if (modifiers[name]) {
+    if (modifiers?.[name]) {
       Editor.removeMark(editor, name);
     } else {
       Editor.addMark(editor, name, true);

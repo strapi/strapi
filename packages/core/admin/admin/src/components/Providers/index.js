@@ -12,10 +12,10 @@ import PropTypes from 'prop-types';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 
-import { AdminContext } from '../../contexts';
-import ConfigurationsProvider from '../ConfigurationsProvider';
-import GuidedTour from '../GuidedTour';
-import LanguageProvider from '../LanguageProvider';
+import { AdminContext } from '../../contexts/admin';
+import { ConfigurationProvider } from '../ConfigurationProvider';
+import { GuidedTourProvider } from '../GuidedTour/Provider';
+import { LanguageProvider } from '../LanguageProvider';
 import { Theme } from '../Theme';
 import { ThemeToggleProvider } from '../ThemeToggleProvider';
 
@@ -56,7 +56,7 @@ const Providers = ({
           <QueryClientProvider client={queryClient}>
             <Provider store={store}>
               <AdminContext.Provider value={{ getAdminInjectedComponents }}>
-                <ConfigurationsProvider
+                <ConfigurationProvider
                   authLogo={authLogo}
                   menuLogo={menuLogo}
                   showReleaseNotification={showReleaseNotification}
@@ -75,15 +75,15 @@ const Providers = ({
                       <CustomFieldsProvider customFields={customFields}>
                         <AutoReloadOverlayBlockerProvider>
                           <OverlayBlockerProvider>
-                            <GuidedTour>
+                            <GuidedTourProvider>
                               <NotificationsProvider>{children}</NotificationsProvider>
-                            </GuidedTour>
+                            </GuidedTourProvider>
                           </OverlayBlockerProvider>
                         </AutoReloadOverlayBlockerProvider>
                       </CustomFieldsProvider>
                     </LibraryProvider>
                   </StrapiAppProvider>
-                </ConfigurationsProvider>
+                </ConfigurationProvider>
               </AdminContext.Provider>
             </Provider>
           </QueryClientProvider>
@@ -95,7 +95,7 @@ const Providers = ({
 
 Providers.propTypes = {
   authLogo: PropTypes.oneOfType([PropTypes.string, PropTypes.any]).isRequired,
-  children: PropTypes.element.isRequired,
+  children: PropTypes.node.isRequired,
   components: PropTypes.object.isRequired,
   customFields: PropTypes.object.isRequired,
   fields: PropTypes.object.isRequired,
