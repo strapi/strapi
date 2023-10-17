@@ -12,7 +12,7 @@ export declare namespace GetMe {
 
   export interface Response {
     data: {};
-    errors?: {};
+    error?: {};
   }
 }
 
@@ -34,7 +34,9 @@ export declare namespace UpdateMe {
 
   export interface Response {
     data: SanitizedAdminUser;
-    errors?: Common.BadRequestError<{ currentPassword: string[] }> | Common.YupValidationError;
+    error?:
+      | Common.BadRequestError<{ currentPassword: ['Invalid credentials'] }>
+      | Common.YupValidationError;
   }
 }
 
@@ -49,6 +51,6 @@ export declare namespace GetOwnPermissions {
 
   export interface Response {
     data: Permission[];
-    errors?: {};
+    error?: {};
   }
 }
