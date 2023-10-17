@@ -64,11 +64,11 @@
     "@strapi/design-system": "1.12.0",
     "@strapi/helper-plugin": "4.14.4",
     "@strapi/icons": "1.12.0",
-    "@strapi/strapi": "4.14.4",
     "react-intl": "6.4.1"
   },
   "devDependencies": {
     "@strapi/pack-up": "workspace:*",
+    "@strapi/strapi": "4.14.4",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
     "@types/styled-components": "5.1.26",
@@ -79,6 +79,7 @@
     "typescript": "5.2.2"
   },
   "peerDependencies": {
+    "@strapi/strapi": "4.14.4",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "5.3.4",
