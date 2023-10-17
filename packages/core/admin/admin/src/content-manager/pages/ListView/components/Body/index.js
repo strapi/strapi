@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { BaseCheckbox, IconButton, Td, Flex } from '@strapi/design-system';
+import { BaseCheckbox, IconButton, Flex } from '@strapi/design-system';
 import { useTracking, useTableContext, Table } from '@strapi/helper-plugin';
 import { Trash, Duplicate, Pencil } from '@strapi/icons';
 import PropTypes from 'prop-types';
@@ -29,15 +29,14 @@ const CheckboxDataCell = ({ rowId, index }) => {
   );
 
   return (
-    <Td onClick={stopPropagation}>
       <BaseCheckbox
         aria-label={ariaLabel}
         checked={isChecked}
+        onClick={stopPropagation}
         onChange={() => {
           onSelectRow({ name: rowId, value: !isChecked });
         }}
       />
-    </Td>
   );
 };
 
@@ -75,7 +74,6 @@ const EntityActionsDataCell = ({
   );
 
   return (
-    <Td>
       <Flex gap={1} justifyContent="end" onClick={stopPropagation}>
         <IconButton
           forwardedAs={Link}
@@ -129,7 +127,6 @@ const EntityActionsDataCell = ({
           </IconButton>
         )}
       </Flex>
-    </Td>
   );
 };
 
