@@ -11,8 +11,8 @@ import { BrowserRouter } from 'react-router-dom';
 import Logo from './assets/images/logo-strapi-2022.svg';
 import { LANGUAGE_LOCAL_STORAGE_KEY } from './components/LanguageProvider';
 import Providers from './components/Providers';
-import { customFields, Plugin } from './core/apis';
-import configureStore from './core/store/configureStore';
+import { customFields, Plugin, Reducers } from './core/apis';
+import { configureStore } from './core/store';
 import { basename, createHook } from './core/utils';
 import {
   INJECT_COLUMN_IN_TABLE,
@@ -26,7 +26,7 @@ import App from './pages/App';
 import languageNativeNames from './translations/languageNativeNames';
 
 class StrapiApp {
-  constructor({ adminConfig, appPlugins, library, middlewares, reducers }) {
+  constructor({ adminConfig, appPlugins, library, middlewares }) {
     this.customConfigurations = adminConfig.config;
     this.customBootstrapConfiguration = adminConfig.bootstrap;
     this.configurations = {
@@ -43,7 +43,7 @@ class StrapiApp {
     this.library = library;
     this.middlewares = middlewares;
     this.plugins = {};
-    this.reducers = reducers;
+    this.reducers = Reducers({});
     this.translations = {};
     this.hooksDict = {};
     this.admin = {

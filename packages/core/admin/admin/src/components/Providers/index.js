@@ -14,7 +14,7 @@ import { Provider } from 'react-redux';
 
 import { AdminContext } from '../../contexts/admin';
 import { ConfigurationProvider } from '../ConfigurationProvider';
-import GuidedTour from '../GuidedTour';
+import { GuidedTourProvider } from '../GuidedTour/Provider';
 import { LanguageProvider } from '../LanguageProvider';
 import { Theme } from '../Theme';
 import { ThemeToggleProvider } from '../ThemeToggleProvider';
@@ -75,9 +75,9 @@ const Providers = ({
                       <CustomFieldsProvider customFields={customFields}>
                         <AutoReloadOverlayBlockerProvider>
                           <OverlayBlockerProvider>
-                            <GuidedTour>
+                            <GuidedTourProvider>
                               <NotificationsProvider>{children}</NotificationsProvider>
-                            </GuidedTour>
+                            </GuidedTourProvider>
                           </OverlayBlockerProvider>
                         </AutoReloadOverlayBlockerProvider>
                       </CustomFieldsProvider>

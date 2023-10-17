@@ -1,12 +1,12 @@
 import React from 'react';
 
+import { configureStore } from '@reduxjs/toolkit';
 import { fixtures } from '@strapi/admin-test-utils';
 import { renderHook, waitFor } from '@testing-library/react';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
-import { createStore } from 'redux';
 
 import { useLicenseLimits } from '../useLicenseLimits';
 
@@ -42,8 +42,11 @@ const setup = (...args) =>
 
       return (
         <Provider
-          store={createStore((state) => state, {
-            admin_app: { permissions: fixtures.permissions.app },
+          store={configureStore({
+            reducer: (state) => state,
+            preloadedState: {
+              admin_app: { permissions: fixtures.permissions.app },
+            },
           })}
         >
           <QueryClientProvider client={client}>{children}</QueryClientProvider>

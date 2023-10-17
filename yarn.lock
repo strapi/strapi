@@ -6303,6 +6303,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@reduxjs/toolkit@npm:1.9.7":
+  version: 1.9.7
+  resolution: "@reduxjs/toolkit@npm:1.9.7"
+  dependencies:
+    immer: ^9.0.21
+    redux: ^4.2.1
+    redux-thunk: ^2.4.2
+    reselect: ^4.1.8
+  peerDependencies:
+    react: ^16.9.0 || ^17.0.0 || ^18
+    react-redux: ^7.2.1 || ^8.0.2
+  peerDependenciesMeta:
+    react:
+      optional: true
+    react-redux:
+      optional: true
+  checksum: ac25dec73a5d2df9fc7fbe98c14ccc73919e5ee1d6f251db0d2ec8f90273f92ef39c26716704bf56b5a40189f72d94b4526dc3a8c7ac3986f5daf44442bcc364
+  languageName: node
+  linkType: hard
+
 "@rollup/pluginutils@npm:^5.0.2":
   version: 5.0.2
   resolution: "@rollup/pluginutils@npm:5.0.2"
@@ -7399,15 +7419,16 @@ __metadata:
   resolution: "@strapi/admin-test-utils@workspace:packages/admin-test-utils"
   dependencies:
     "@juggle/resize-observer": 3.4.0
+    "@reduxjs/toolkit": 1.9.7
     "@strapi/pack-up": "workspace:*"
     "@testing-library/jest-dom": 5.16.5
     eslint-config-custom: 4.14.4
     jest-styled-components: 7.1.1
-    redux: ^4.2.1
     tsconfig: 4.14.4
     whatwg-fetch: 3.6.2
   peerDependencies:
-    redux: ^4.2.1
+    "@reduxjs/toolkit": ^1.9.7
+    "@testing-library/jest-dom": ^5.16.5
   languageName: unknown
   linkType: soft
 
@@ -7418,6 +7439,7 @@ __metadata:
     "@casl/ability": 6.5.0
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.10
     "@radix-ui/react-toolbar": 1.0.4
+    "@reduxjs/toolkit": 1.9.7
     "@strapi/admin-test-utils": 4.14.4
     "@strapi/data-transfer": 4.14.4
     "@strapi/design-system": 1.12.2
@@ -7497,8 +7519,6 @@ __metadata:
     react-router-dom: 5.3.4
     react-select: 5.7.0
     react-window: 1.8.8
-    redux: ^4.2.1
-    reselect: 4.1.7
     rimraf: 3.0.2
     sanitize-html: 2.11.0
     semver: 7.5.4
@@ -7877,8 +7897,6 @@ __metadata:
     react-intl: 6.4.1
     react-redux: 8.1.1
     react-router-dom: 5.3.4
-    redux: ^4.2.1
-    reselect: 4.1.7
     styled-components: 5.3.3
     yup: 0.32.9
   peerDependencies:
@@ -8003,6 +8021,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-i18n@workspace:packages/plugins/i18n"
   dependencies:
+    "@reduxjs/toolkit": 1.9.7
     "@strapi/design-system": 1.12.2
     "@strapi/helper-plugin": 4.14.4
     "@strapi/icons": 1.12.2
@@ -8020,7 +8039,6 @@ __metadata:
     react-query: 3.39.3
     react-redux: 8.1.1
     react-router-dom: 5.3.4
-    redux: ^4.2.1
     styled-components: 5.3.3
     yup: 0.32.9
   peerDependencies:
@@ -19163,7 +19181,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"immer@npm:^9.0.6":
+"immer@npm:^9.0.21, immer@npm:^9.0.6":
   version: 9.0.21
   resolution: "immer@npm:9.0.21"
   checksum: 70e3c274165995352f6936695f0ef4723c52c92c92dd0e9afdfe008175af39fa28e76aafb3a2ca9d57d1fb8f796efc4dd1e1cc36f18d33fa5b74f3dfb0375432
@@ -27513,6 +27531,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"redux-thunk@npm:^2.4.2":
+  version: 2.4.2
+  resolution: "redux-thunk@npm:2.4.2"
+  peerDependencies:
+    redux: ^4
+  checksum: c7f757f6c383b8ec26152c113e20087818d18ed3edf438aaad43539e9a6b77b427ade755c9595c4a163b6ad3063adf3497e5fe6a36c68884eb1f1cfb6f049a5c
+  languageName: node
+  linkType: hard
+
 "redux@npm:^4.1.2":
   version: 4.2.0
   resolution: "redux@npm:4.2.0"
@@ -27859,10 +27886,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"reselect@npm:4.1.7":
-  version: 4.1.7
-  resolution: "reselect@npm:4.1.7"
-  checksum: 738d8e2b8f0dca154ad29de6a209c9fbca2d70ae6788fd85df87f2c74b95a65bbf2d16d43a9e2faff39de34d17a29d706ba08a6b2ee5660c09589edbd19af7e1
+"reselect@npm:^4.1.8":
+  version: 4.1.8
+  resolution: "reselect@npm:4.1.8"
+  checksum: a4ac87cedab198769a29be92bc221c32da76cfdad6911eda67b4d3e7136dca86208c3b210e31632eae31ebd2cded18596f0dd230d3ccc9e978df22f233b5583e
   languageName: node
   linkType: hard
 
