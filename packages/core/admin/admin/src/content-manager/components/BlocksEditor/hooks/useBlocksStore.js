@@ -256,7 +256,7 @@ Image.propTypes = {
   }).isRequired,
 };
 
-// This styled components is used to make sure the tooltip is above the popover
+// This styled component is used to make sure the tooltip is above the popover
 const TooltipCustom = styled(Tooltip)`
   z-index: 6;
 `;
