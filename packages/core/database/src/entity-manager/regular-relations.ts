@@ -220,7 +220,7 @@ const cleanOrderColumns = async ({
     return;
   }
 
-  // Handle databases that don't support window function ROW_NUMBER (here it's MySQL 5)
+  // Handle databases that don't support window function ROW_NUMBER
   if (!strapi.db.dialect.supportsWindowFunctions()) {
     await cleanOrderColumnsForOldDatabases({ id, attribute, db, inverseRelIds, transaction: trx });
     return;
@@ -351,7 +351,7 @@ const cleanOrderColumns = async ({
 
 /*
  * Ensure that orders are following a 1, 2, 3 sequence, without gap.
- * The use of a session variable instead of a window function makes the query compatible with MySQL 5
+ * The use of a session variable instead of a window function makes the query compatible with databases without ROW_NUMBER
  */
 const cleanOrderColumnsForOldDatabases = async ({
   id,
