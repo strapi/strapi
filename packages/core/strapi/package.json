@@ -90,6 +90,7 @@
     "@koa/cors": "3.4.3",
     "@koa/router": "10.1.1",
     "@strapi/admin": "4.14.5",
+    "@strapi/content-releases": "4.14.5",
     "@strapi/data-transfer": "4.14.5",
     "@strapi/database": "4.14.5",
     "@strapi/generate-new": "4.14.5",
