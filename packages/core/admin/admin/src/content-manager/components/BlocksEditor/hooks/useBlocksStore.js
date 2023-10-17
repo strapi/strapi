@@ -2,15 +2,16 @@ import * as React from 'react';
 
 import {
   Box,
+  Icon,
   Typography,
   BaseLink,
   Popover,
-  IconButton,
   Field,
   FieldLabel,
   FieldInput,
   Flex,
   Button,
+  Tooltip,
 } from '@strapi/design-system';
 import {
   Code,
@@ -255,6 +256,18 @@ Image.propTypes = {
   }).isRequired,
 };
 
+// Make sure the tooltip is above the popover
+const TooltipCustom = styled(Tooltip)`
+  z-index: 6;
+`;
+
+// Used for the Edit and Cancel buttons in the link popover
+const CustomButton = styled(Button)`
+  & > span {
+    line-height: normal;
+  }
+`;
+
 const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRef) => {
   const { formatMessage } = useIntl();
   const editor = useSlate();
@@ -376,25 +389,49 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                 </StyledBaseLink>
               </Typography>
               <Flex justifyContent="end" width="100%" gap={2}>
-                <IconButton
-                  icon={<Trash />}
-                  size="L"
-                  variant="danger"
-                  onClick={() => removeLink(editor)}
-                  label={formatMessage({
+                <TooltipCustom
+                  description={formatMessage({
                     id: 'components.Blocks.popover.delete',
                     defaultMessage: 'Delete',
                   })}
-                />
-                <IconButton
-                  icon={<Pencil />}
-                  size="L"
-                  onClick={() => setIsEditing(true)}
-                  label={formatMessage({
+                >
+                  <CustomButton
+                    size="S"
+                    width="2rem"
+                    variant="danger-light"
+                    onClick={() => removeLink(editor)}
+                    aria-label={formatMessage({
+                      id: 'components.Blocks.popover.delete',
+                      defaultMessage: 'Delete',
+                    })}
+                    type="button"
+                    justifyContent="center"
+                  >
+                    <Icon width={3} height={3} as={Trash} />
+                  </CustomButton>
+                </TooltipCustom>
+
+                <TooltipCustom
+                  description={formatMessage({
                     id: 'components.Blocks.popover.edit',
                     defaultMessage: 'Edit',
                   })}
-                />
+                >
+                  <CustomButton
+                    size="S"
+                    width="2rem"
+                    variant="tertiary"
+                    onClick={() => setIsEditing(true)}
+                    aria-label={formatMessage({
+                      id: 'components.Blocks.popover.edit',
+                      defaultMessage: 'Edit',
+                    })}
+                    type="button"
+                    justifyContent="center"
+                  >
+                    <Icon width={3} height={3} as={Pencil} />
+                  </CustomButton>
+                </TooltipCustom>
               </Flex>
             </Flex>
           )}
