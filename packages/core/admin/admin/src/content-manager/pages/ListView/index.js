@@ -43,8 +43,8 @@ import { useMutation } from 'react-query';
 import { useDispatch } from 'react-redux';
 import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
 
+import { HOOKS } from '../../../constants';
 import { useTypedSelector } from '../../../core/store';
-import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
 import { useAdminUsers } from '../../../hooks/useAdminUsers';
 import { useEnterprise } from '../../../hooks/useEnterprise';
 import { InjectionZone } from '../../../shared/components';
@@ -62,6 +62,7 @@ import { ViewSettingsMenu } from './components/ViewSettingsMenu';
 import makeSelectListView, { selectDisplayedHeaders } from './selectors';
 import { buildValidGetParams } from './utils';
 
+const { INJECT_COLUMN_IN_TABLE } = HOOKS;
 const REVIEW_WORKFLOW_COLUMNS_CE = null;
 const REVIEW_WORKFLOW_COLUMNS_CELL_CE = () => null;
 const REVIEW_WORKFLOW_FILTER_CE = [];
