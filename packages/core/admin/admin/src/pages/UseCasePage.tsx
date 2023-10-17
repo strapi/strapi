@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 
 import {
   Box,
@@ -17,8 +17,8 @@ import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { Logo } from '../../components/UnauthenticatedLogo';
-import { LayoutContent, UnauthenticatedLayout } from '../../layouts/UnauthenticatedLayout';
+import { Logo } from '../components/UnauthenticatedLogo';
+import { LayoutContent, UnauthenticatedLayout } from '../layouts/UnauthenticatedLayout';
 
 export const options = [
   {
@@ -69,19 +69,19 @@ const TypographyCenter = styled(Typography)`
   text-align: center;
 `;
 
-const UseCasePage = () => {
+export const UseCasePage = () => {
   const toggleNotification = useNotification();
   const { push, location } = useHistory();
   const { formatMessage } = useIntl();
-  const [role, setRole] = useState();
-  const [otherRole, setOtherRole] = useState('');
+  const [role, setRole] = React.useState<string | number | null>(null);
+  const [otherRole, setOtherRole] = React.useState('');
   const { post } = useFetchClient();
 
-  const { firstname, email } = auth.getUserInfo();
+  const { firstname, email } = auth.get('userInfo') ?? {};
   const { hasAdmin } = parse(location?.search, { ignoreQueryPrefix: true });
   const isOther = role === 'other';
 
-  const handleSubmit = async (event, skipPersona) => {
+  const handleSubmit = async (event: React.FormEvent, skipPersona: boolean) => {
     event.preventDefault();
     try {
       await post('https://analytics.strapi.io/register', {
@@ -133,7 +133,7 @@ const UseCasePage = () => {
                 })}
                 // onClear={() => setRole(null)}
                 // clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-                onChange={setRole}
+                onChange={(value) => setRole(value)}
                 value={role}
               >
                 {options.map(({ intlLabel, value }) => (
@@ -159,7 +159,7 @@ const UseCasePage = () => {
         </LayoutContent>
         <Flex justifyContent="center">
           <Box paddingTop={4}>
-            <TextButton onClick={() => handleSubmit(true)}>
+            <TextButton onClick={(event) => handleSubmit(event, true)}>
               {formatMessage({
                 id: 'Usecase.button.skip',
                 defaultMessage: 'Skip this question',
@@ -171,5 +171,3 @@ const UseCasePage = () => {
     </UnauthenticatedLayout>
   );
 };
-
-export default UseCasePage;
