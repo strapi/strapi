@@ -1,21 +1,21 @@
-import type {Knex} from 'knex';
+import type { Knex } from 'knex';
 
-import {Dialect, getDialect} from './dialects';
-import {createSchemaProvider, SchemaProvider} from './schema';
-import {createMetadata, Metadata} from './metadata';
-import {createEntityManager, EntityManager} from './entity-manager';
-import {createMigrationsProvider, MigrationProvider} from './migrations';
-import {createLifecyclesProvider, LifecycleProvider} from './lifecycles';
-import {createConnection} from './connection';
+import { Dialect, getDialect } from './dialects';
+import { createSchemaProvider, SchemaProvider } from './schema';
+import { createMetadata, Metadata } from './metadata';
+import { createEntityManager, EntityManager } from './entity-manager';
+import { createMigrationsProvider, MigrationProvider } from './migrations';
+import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
+import { createConnection } from './connection';
 import * as errors from './errors';
-import {Callback, transactionCtx, TransactionObject} from './transaction-context';
+import { Callback, transactionCtx, TransactionObject } from './transaction-context';
 
 // TODO: move back into strapi
-import {transformContentTypes} from './utils/content-types';
-import {validateDatabase} from './validations';
-import {Model} from './types';
+import { transformContentTypes } from './utils/content-types';
+import { validateDatabase } from './validations';
+import { Model } from './types';
 
-export {isKnexQuery} from './utils/knex';
+export { isKnexQuery } from './utils/knex';
 
 interface Settings {
   forceMigration?: boolean;
@@ -120,7 +120,7 @@ class Database {
     }
 
     if (!cb) {
-      return {commit, rollback, get: () => trx};
+      return { commit, rollback, get: () => trx };
     }
 
     return transactionCtx.run(trx, async () => {
@@ -169,4 +169,4 @@ class Database {
   }
 }
 
-export {Database, errors};
+export { Database, errors };

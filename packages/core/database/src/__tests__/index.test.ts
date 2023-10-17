@@ -1,4 +1,4 @@
-import {Database, DatabaseConfig} from '../index';
+import { Database, DatabaseConfig } from '../index';
 
 jest.mock('../connection', () => ({
   createConnection: jest.fn(() => {

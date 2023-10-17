@@ -1,13 +1,13 @@
 import path from 'node:path';
 import fse from 'fs-extra';
-import type {Resolver} from 'umzug';
-import {Umzug} from 'umzug';
-import type {Knex} from 'knex';
+import type { Resolver } from 'umzug';
+import { Umzug } from 'umzug';
+import type { Knex } from 'knex';
 import tsUtils from '@strapi/typescript-utils';
 
-import {createStorage} from './storage';
+import { createStorage } from './storage';
 
-import type {Database} from '..';
+import type { Database } from '..';
 
 export interface MigrationProvider {
   shouldRun(): Promise<boolean>;
@@ -24,8 +24,8 @@ const wrapTransaction = (db: Database) => (fn: (knex: Knex) => unknown) => () =>
 };
 
 // TODO: check multiple commands in one sql statement
-const migrationResolver: MigrationResolver = ({name, path, context}) => {
-  const {db} = context;
+const migrationResolver: MigrationResolver = ({ name, path, context }) => {
+  const { db } = context;
 
   if (!path) {
     throw new Error(`Migration ${name} has no path`);
@@ -55,7 +55,7 @@ const migrationResolver: MigrationResolver = ({name, path, context}) => {
 };
 
 export async function findMigrationsDir(root: string) {
-  const s = path.join(await tsUtils.resolveOutDir(root) || root, 'database/migrations');
+  const s = path.join((await tsUtils.resolveOutDir(root)) || root, 'database/migrations');
   console.info(`Found database migrations at ${s}`);
   return s;
 }
@@ -66,11 +66,11 @@ const createUmzugProvider = async (db: Database) => {
   fse.ensureDirSync(migrationDir);
 
   return new Umzug({
-    storage: createStorage({db, tableName: 'strapi_migrations'}),
+    storage: createStorage({ db, tableName: 'strapi_migrations' }),
     logger: console,
-    context: {db},
+    context: { db },
     migrations: {
-      glob: ['*.{js,sql}', {cwd: migrationDir}],
+      glob: ['*.{js,sql}', { cwd: migrationDir }],
       resolve: migrationResolver,
     },
   });
