@@ -1,21 +1,22 @@
 {
   "name": "kitchensink",
+  "version": "4.14.4",
   "private": true,
-  "version": "4.14.3",
   "description": "A Strapi application.",
+  "license": "SEE LICENSE IN LICENSE",
   "scripts": {
+    "build": "strapi build",
+    "build:ce": "STRAPI_DISABLE_EE=true strapi build",
     "develop": "strapi develop",
     "develop:ce": "STRAPI_DISABLE_EE=true strapi develop",
     "start": "strapi start",
-    "build": "strapi build",
-    "build:ce": "STRAPI_DISABLE_EE=true strapi build",
     "strapi": "strapi"
   },
   "dependencies": {
-    "@strapi/provider-email-mailgun": "4.14.3",
-    "@strapi/provider-upload-aws-s3": "4.14.3",
-    "@strapi/provider-upload-cloudinary": "4.14.3",
-    "@strapi/strapi": "4.14.3",
+    "@strapi/provider-email-mailgun": "4.14.4",
+    "@strapi/provider-upload-aws-s3": "4.14.4",
+    "@strapi/provider-upload-cloudinary": "4.14.4",
+    "@strapi/strapi": "4.14.4",
     "lodash": "4.17.21",
     "mysql": "2.18.1",
     "mysql2": "3.6.0",
@@ -27,12 +28,11 @@
     "sqlite3": "5.1.2",
     "styled-components": "5.3.3"
   },
-  "strapi": {
-    "uuid": "getstarted"
-  },
   "engines": {
     "node": ">=16.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   },
-  "license": "SEE LICENSE IN LICENSE"
+  "strapi": {
+    "uuid": "getstarted"
+  }
 }
