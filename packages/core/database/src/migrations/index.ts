@@ -1,21 +1,19 @@
 import path from 'node:path';
 import fse from 'fs-extra';
-import { Umzug } from 'umzug';
+import type {Resolver} from 'umzug';
+import {Umzug} from 'umzug';
+import type {Knex} from 'knex';
+import tsUtils from '@strapi/typescript-utils';
 
-import type { Resolver } from 'umzug';
-import type { Knex } from 'knex';
+import {createStorage} from './storage';
 
-import { createStorage } from './storage';
-const path = require('path');
-const fse = require('fs-extra');
-const { Umzug } = require('umzug');
-const { resolveOutDir } = require('@strapi/typescript-utils');
-
-import type { Database } from '..';
+import type {Database} from '..';
 
 export interface MigrationProvider {
   shouldRun(): Promise<boolean>;
+
   up(): Promise<void>;
+
   down(): Promise<void>;
 }
 
@@ -26,8 +24,8 @@ const wrapTransaction = (db: Database) => (fn: (knex: Knex) => unknown) => () =>
 };
 
 // TODO: check multiple commands in one sql statement
-const migrationResolver: MigrationResolver = ({ name, path, context }) => {
-  const { db } = context;
+const migrationResolver: MigrationResolver = ({name, path, context}) => {
+  const {db} = context;
 
   if (!path) {
     throw new Error(`Migration ${name} has no path`);
@@ -56,8 +54,8 @@ const migrationResolver: MigrationResolver = ({ name, path, context }) => {
   };
 };
 
-export async function findMigrationsDir(root) {
-  let s = path.join(await resolveOutDir(root) || root, 'database/migrations');
+export async function findMigrationsDir(root: string) {
+  let s = path.join(await tsUtils.resolveOutDir(root) || root, 'database/migrations');
   console.info(`Found database migrations at ${s}`);
   return s;
 }
@@ -68,11 +66,11 @@ const createUmzugProvider = async (db: Database) => {
   fse.ensureDirSync(migrationDir);
 
   return new Umzug({
-    storage: createStorage({ db, tableName: 'strapi_migrations' }),
+    storage: createStorage({db, tableName: 'strapi_migrations'}),
     logger: console,
-    context: { db },
+    context: {db},
     migrations: {
-      glob: ['*.{js,sql}', { cwd: migrationDir }],
+      glob: ['*.{js,sql}', {cwd: migrationDir}],
       resolve: migrationResolver,
     },
   });
@@ -84,7 +82,7 @@ const createUmzugProvider = async (db: Database) => {
  * Creates migrations provider
  * @type {import('.').createMigrationsProvider}
  */
-export const createMigrationsProvider = async (db: Database): MigrationProvider => {
+export const createMigrationsProvider = async (db: Database): Promise<MigrationProvider> => {
   const migrations = await createUmzugProvider(db);
 
   return {

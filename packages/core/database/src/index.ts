@@ -1,25 +1,26 @@
-import type { Knex } from 'knex';
+import type {Knex} from 'knex';
 
-import { Dialect, getDialect } from './dialects';
-import { createSchemaProvider, SchemaProvider } from './schema';
-import { createMetadata, Metadata } from './metadata';
-import { createEntityManager, EntityManager } from './entity-manager';
-import { createMigrationsProvider, MigrationProvider } from './migrations';
-import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
-import { createConnection } from './connection';
+import {Dialect, getDialect} from './dialects';
+import {createSchemaProvider, SchemaProvider} from './schema';
+import {createMetadata, Metadata} from './metadata';
+import {createEntityManager, EntityManager} from './entity-manager';
+import {createMigrationsProvider, MigrationProvider} from './migrations';
+import {createLifecyclesProvider, LifecycleProvider} from './lifecycles';
+import {createConnection} from './connection';
 import * as errors from './errors';
-import { Callback, transactionCtx, TransactionObject } from './transaction-context';
+import {Callback, transactionCtx, TransactionObject} from './transaction-context';
 
 // TODO: move back into strapi
-import { transformContentTypes } from './utils/content-types';
-import { validateDatabase } from './validations';
-import { Model } from './types';
+import {transformContentTypes} from './utils/content-types';
+import {validateDatabase} from './validations';
+import {Model} from './types';
 
-export { isKnexQuery } from './utils/knex';
+export {isKnexQuery} from './utils/knex';
 
 interface Settings {
   forceMigration?: boolean;
   runMigrations?: boolean;
+
   [key: string]: unknown;
 }
 
@@ -38,18 +39,19 @@ class Database {
 
   metadata: Metadata;
 
-  schema: SchemaProvider;
+  schema?: SchemaProvider;
 
-  migrations: MigrationProvider;
+  migrations?: MigrationProvider;
 
-  lifecycles: LifecycleProvider;
+  lifecycles?: LifecycleProvider;
 
-  entityManager: EntityManager;
+  entityManager?: EntityManager;
 
   static transformContentTypes = transformContentTypes;
 
   static async init(config: DatabaseConfig) {
     const db = new Database(config);
+    await db.setup();
     await validateDatabase(db);
     return db;
   }
@@ -70,12 +72,14 @@ class Database {
     this.dialect.configure();
 
     this.connection = createConnection(this.config.connection);
+  }
 
+  async setup() {
     this.dialect.initialize();
 
     this.schema = createSchemaProvider(this);
 
-    this.migrations = createMigrationsProvider(this);
+    this.migrations = await createMigrationsProvider(this);
     this.lifecycles = createLifecyclesProvider(this);
 
     this.entityManager = createEntityManager(this);
@@ -86,7 +90,7 @@ class Database {
       throw new Error(`Model ${uid} not found`);
     }
 
-    return this.entityManager.getRepository(uid);
+    return this.entityManager!.getRepository(uid);
   }
 
   inTransaction() {
@@ -116,7 +120,7 @@ class Database {
     }
 
     if (!cb) {
-      return { commit, rollback, get: () => trx };
+      return {commit, rollback, get: () => trx};
     }
 
     return transactionCtx.run(trx, async () => {
@@ -156,13 +160,13 @@ class Database {
   }
 
   queryBuilder(uid: string) {
-    return this.entityManager.createQueryBuilder(uid);
+    return this.entityManager!.createQueryBuilder(uid);
   }
 
   async destroy() {
-    await this.lifecycles.clear();
+    await this.lifecycles!.clear();
     await this.connection.destroy();
   }
 }
 
-export { Database, errors };
+export {Database, errors};
