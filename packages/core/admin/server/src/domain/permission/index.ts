@@ -21,7 +21,7 @@ export type Permission = {
   actionParameters: object;
   subject?: string | null;
   properties: {
-    fields: string[];
+    fields: string[] | undefined;
     [key: string]: any;
   };
   conditions: string[]; // TODO: This should be a Condition interface
