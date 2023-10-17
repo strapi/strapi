@@ -6,6 +6,7 @@ import camelCase from 'lodash/camelCase';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
 import PropTypes from 'prop-types';
+import {useIntl} from "react-intl";
 import { Redirect, useHistory, useRouteMatch } from 'react-router-dom';
 
 import persistStateToLocaleStorage from '../../components/GuidedTour/utils/persistStateToLocaleStorage';
@@ -24,6 +25,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     push,
     location: { search },
   } = useHistory();
+  const { formatMessage } = useIntl();
   const { changeLocale } = useLocales();
   const { setSkipped } = useGuidedTour();
   const { trackUsage } = useTracking();
@@ -135,9 +137,19 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       redirectToPreviousLocation();
     } catch (err) {
       if (err?.response?.status === 403) {
-        setErrors({ errorMessage: getTrad('notification.error.invalid-verification-code') });
+        setErrors({
+          errorMessage: formatMessage({
+            id: getTrad('notification.error.invalid-verification-code'),
+            defaultMessage: "Invalid validation code"
+          })
+        });
       } else {
-        setErrors({ errorMessage: getTrad('notification.error.internal-error') });
+        setErrors({
+          errorMessage: formatMessage({
+            id: getTrad('notification.error.internal-error'),
+            defaultMessage: "Internal error"
+          })
+        });
       }
     } finally {
       setSubmitting(false);
