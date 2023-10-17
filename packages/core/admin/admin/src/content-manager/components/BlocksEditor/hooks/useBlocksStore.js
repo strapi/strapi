@@ -256,8 +256,15 @@ Image.propTypes = {
   }).isRequired,
 };
 
+// This styled components is used to make sure the tooltip is above the popover
 const TooltipCustom = styled(Tooltip)`
   z-index: 6;
+`;
+
+const ButtonLink = styled(Button)`
+  & > span {
+    line-height: normal;
+  }
 `;
 
 const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRef) => {
@@ -387,17 +394,20 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                     defaultMessage: 'Delete',
                   })}
                 >
-                  <Button
-                    size="L"
+                  <ButtonLink
+                    size="S"
+                    width="2rem"
                     variant="danger-light"
                     onClick={() => removeLink(editor)}
                     aria-label={formatMessage({
                       id: 'components.Blocks.popover.delete',
                       defaultMessage: 'Delete',
                     })}
+                    type="button"
+                    justifyContent="center"
                   >
                     <Icon width={3} height={3} as={Trash} />
-                  </Button>
+                  </ButtonLink>
                 </TooltipCustom>
 
                 <TooltipCustom
@@ -406,17 +416,20 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                     defaultMessage: 'Edit',
                   })}
                 >
-                  <Button
-                    size="L"
+                  <ButtonLink
+                    size="S"
+                    width="2rem"
                     variant="tertiary"
                     onClick={() => setIsEditing(true)}
                     aria-label={formatMessage({
                       id: 'components.Blocks.popover.edit',
                       defaultMessage: 'Edit',
                     })}
+                    type="button"
+                    justifyContent="center"
                   >
                     <Icon width={3} height={3} as={Pencil} />
-                  </Button>
+                  </ButtonLink>
                 </TooltipCustom>
               </Flex>
             </Flex>
