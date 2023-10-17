@@ -9,6 +9,13 @@ export interface HttpError<TDetails = unknown> {
   details: TDetails;
 }
 
+export interface ApplicationError<TDetails = unknown> extends HttpError<TDetails> {
+  status: 400;
+  name: 'ApplicationError';
+  message: string;
+  details: TDetails;
+}
+
 export interface BadRequestError<TDetails = unknown> extends HttpError<TDetails> {
   status: 400;
   name: 'BadRequestError';
