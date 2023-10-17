@@ -163,9 +163,6 @@
     "node": ">=16.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   },
-  "resolutions": {
-    "@types/react": "18.2.7"
-  },
   "nx": {
     "targets": {
       "build": {
