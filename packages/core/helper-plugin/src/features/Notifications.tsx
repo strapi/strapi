@@ -44,7 +44,9 @@ export interface NotificationsContextValue {
   toggleNotification: (config: NotificationConfig) => void;
 }
 
-const NotificationsContext = React.createContext<NotificationsContextValue | null>(null);
+const NotificationsContext = React.createContext<NotificationsContextValue>({
+  toggleNotification: () => {},
+});
 
 /* -------------------------------------------------------------------------------------------------
  * Provider
@@ -255,10 +257,10 @@ const Notification = ({
  * import { useNotification } from '@strapi/helper-plugin';
  *
  * const MyComponent = () => {
- *  const { toggleNotification } = useNotification();
+ *  const toggleNotification = useNotification();
  *
  *  return <button onClick={() => toggleNotification({ message: 'Hello world!' })}>Click me</button>;
  */
-const useNotification = () => React.useContext(NotificationsContext)?.toggleNotification;
+const useNotification = () => React.useContext(NotificationsContext).toggleNotification;
 
 export { NotificationsContext, NotificationsProvider, useNotification };

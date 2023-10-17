@@ -1,10 +1,5 @@
 {
   "extends": "tsconfig/client.json",
-  "compilerOptions": {
-    "noEmit": false,
-    "noImplicitAny": true,
-    "outDir": "dist",
-  },
   "include": ["src", "./custom.d.ts"],
-  "exclude": ["node_modules", "**/__tests__/**"]
+  "exclude": ["node_modules"]
 }

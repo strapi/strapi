@@ -1,4 +1,4 @@
-import type { Attribute, Common, Utils } from '../../../types';
+import type { Attribute, Common, Utils, Entity } from '../../../types';
 
 export type NonFilterableKind = Extract<Attribute.Kind, 'password' | 'dynamiczone'>;
 export type FilterableKind = Exclude<Attribute.Kind, NonFilterableKind>;
@@ -19,7 +19,7 @@ export type GetNestedKeys<TSchemaUID extends Common.UID.Schema> = Exclude<
   GetNonFilterableKeys<TSchemaUID>
 >;
 
-export type ID = `${number}` | number;
+export type ID = Entity.ID;
 
 export type BooleanValue = boolean | 'true' | 'false' | 't' | 'f' | '1' | '0' | 1 | 0;
 
@@ -91,6 +91,7 @@ export type GetValue<TAttribute extends Attribute.Attribute> = Utils.Expression.
       // Relation
       [
         Utils.Expression.Extends<TAttribute, Attribute.OfType<'relation'>>,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         TAttribute extends Attribute.Relation<infer _TOrigin, infer TRelationKind, infer TTarget>
           ? Utils.Expression.If<
               Utils.Expression.IsNotNever<TTarget>,

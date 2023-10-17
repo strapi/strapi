@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { usePermissionsDataManager } from '../../../../../../../../../hooks';
+import { usePermissionsDataManager } from '../../../../hooks/usePermissionsDataManager';
 import CollapseLabel from '../../../CollapseLabel';
 import Curve from '../../../Curve';
 import HiddenAction from '../../../HiddenAction';

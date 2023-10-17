@@ -1,16 +1,18 @@
+import type { Entity } from '@strapi/types';
 import constants from '../services/constants';
+import { Permission } from './permission';
 
 const { SUPER_ADMIN_CODE } = constants;
 
 export type AdminUser = {
-  id: string | number;
+  id: Entity.ID;
   firstname?: string;
   lastname?: string;
   username?: string;
   email: string;
   password: string;
-  resetPasswordToken: string;
-  registrationToken: string;
+  resetPasswordToken?: string | null;
+  registrationToken?: string | null;
   isActive: boolean;
   roles: AdminRole[];
   blocked: boolean;
@@ -18,10 +20,12 @@ export type AdminUser = {
 };
 
 export type AdminRole = {
-  id: string | number;
+  id: Entity.ID;
+  name: string;
   code: string;
-  // TODO: TS - add more specific types
-  [key: string]: any;
+  description?: string;
+  users: AdminUser[];
+  permissions: Permission[];
 };
 
 /**

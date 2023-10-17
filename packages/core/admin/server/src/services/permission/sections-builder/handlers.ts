@@ -1,5 +1,4 @@
 import { contentTypes } from '@strapi/utils';
-
 import {
   toSubjectTemplate,
   getValidOptions,
@@ -8,33 +7,33 @@ import {
   resolveContentType,
   isOfKind,
 } from './utils';
+import type { Action } from '../../../domain/action';
 
 const { isVisibleAttribute } = contentTypes;
 
-/**
- * @typedef ContentTypesSection
- * @property {Array<Action>} actions
- * @property {Array<Object>} subjects
- */
+export type ContentTypesSection = {
+  actions: Action[];
+  subjects: any[];
+};
 
-/**
- * @typedef {Array<Action>} ActionArraySection
- */
+export type ActionArraySection = Action[];
 
 /**
  * Transforms & adds the given  setting action to the section
  * Note: The action is transformed to a setting specific format
- * @param {object} options
- * @param {Action} options.action
- * @param {ActionArraySection} section
+ * @param options
+ * @param options.action
+ * @param section
  */
-const settings = ({ action, section }: any) => {
+const settings = ({ action, section }: { action: Action; section: ActionArraySection }) => {
   const { category, subCategory, displayName, actionId } = action;
 
   section.push({
     displayName,
     category,
     subCategory,
+    // @ts-expect-error - action should be actionID, TODO: Investigate at which point the action property
+    // is transformed to actionId
     action: actionId,
   });
 };
@@ -46,11 +45,12 @@ const settings = ({ action, section }: any) => {
  * @param {Action} options.action
  * @param {ActionArraySection} section
  */
-const plugins = ({ action, section }: any) => {
+const plugins = ({ action, section }: { action: Action; section: ActionArraySection }) => {
   const { pluginName, subCategory, displayName, actionId } = action;
 
   section.push({
     displayName,
+    // @ts-expect-error - plugin should be pluginName, TODO: Investigate at which point the plugin property
     plugin: pluginName,
     subCategory,
     action: actionId,
@@ -64,10 +64,17 @@ const plugins = ({ action, section }: any) => {
  * @param {Action} options.action
  * @param {ContentTypesSection} section
  */
-const contentTypesBase = ({ action, section }: any) => {
+const contentTypesBase = ({
+  action,
+  section,
+}: {
+  action: Action;
+  section: ContentTypesSection;
+}) => {
   const { displayName, actionId, subjects, options } = action;
 
   section.actions.push({
+    // @ts-expect-error - label should be displayName, TODO: Investigate at which point the label property
     label: displayName,
     actionId,
     subjects,
@@ -79,9 +86,13 @@ const contentTypesBase = ({ action, section }: any) => {
  * Initialize the subjects array of a section based on the action's subjects
  */
 const subjectsHandlerFor =
-  (kind: any) =>
-  ({ action, section: contentTypesSection }: any) => {
+  (kind: string) =>
+  ({ action, section: contentTypesSection }: { action: Action; section: ContentTypesSection }) => {
     const { subjects } = action;
+
+    if (!subjects?.length) {
+      return;
+    }
 
     const newSubjects = subjects
       // Ignore already added subjects
@@ -96,7 +107,7 @@ const subjectsHandlerFor =
     contentTypesSection.subjects.push(...newSubjects);
   };
 
-const buildNode = (model: any, attributeName: any, attribute: any) => {
+const buildNode = (model: any, attributeName: string, attribute: any) => {
   if (!isVisibleAttribute(model, attributeName)) {
     return null;
   }
@@ -123,16 +134,13 @@ const buildDeepAttributesCollection = (model: any): any => {
 
 /**
  * Create and populate the fields property for section's subjects based on the action's subjects list
- * @param {object} options
- * @param {Action} options.action
- * @param {ContentTypesSection} section
  */
-const fieldsProperty = ({ action, section }: any) => {
+const fieldsProperty = ({ action, section }: { action: Action; section: ContentTypesSection }) => {
   const { subjects } = action;
 
   section.subjects
-    .filter((subject: any) => subjects.includes(subject.uid))
-    .forEach((subject: any) => {
+    .filter((subject) => subjects?.includes(subject.uid))
+    .forEach((subject) => {
       const { uid } = subject;
       const contentType = resolveContentType(uid);
 
