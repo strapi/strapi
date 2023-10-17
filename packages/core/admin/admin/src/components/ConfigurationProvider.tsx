@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { ConfigurationContext, ConfigurationContextValue } from '../contexts/configuration';
 
-export interface ConfigurationProviderProps {
+interface ConfigurationProviderProps {
   children: React.ReactNode;
   authLogo: string;
   menuLogo: string;
@@ -65,3 +65,4 @@ const ConfigurationProvider = ({
 };
 
 export { ConfigurationProvider };
+export type { ConfigurationProviderProps };

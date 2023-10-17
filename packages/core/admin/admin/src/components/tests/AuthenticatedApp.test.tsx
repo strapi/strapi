@@ -1,8 +1,6 @@
-import React from 'react';
-
 import { render, waitFor } from '@tests/utils';
 
-import AuthenticatedApp from '../index';
+import { AuthenticatedApp } from '../AuthenticatedApp';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -34,10 +32,10 @@ describe('AuthenticatedApp', () => {
   });
 
   it('should not crash', async () => {
-    const { queryByText } = render(<AuthenticatedApp />);
+    const { queryByText, getByText } = render(<AuthenticatedApp />);
 
     await waitFor(() => expect(queryByText(/Loading/)).not.toBeInTheDocument());
 
-    expect(queryByText(/PluginsInitializer/)).toBeInTheDocument();
+    expect(getByText(/PluginsInitializer/)).toBeInTheDocument();
   });
 });

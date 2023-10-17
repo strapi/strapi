@@ -16,3 +16,4 @@ const AdminContext = React.createContext<AdminContextValue>({
 const useAdmin = () => React.useContext(AdminContext);
 
 export { AdminContext, useAdmin };
+export type { AdminContextValue };

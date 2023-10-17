@@ -1,10 +1,15 @@
 import { fixtures } from '@strapi/admin-test-utils';
 
-import { resetStore, setPermissions } from '../actions';
-import rbacProviderReducer, { initialState } from '../reducer';
+import {
+  Permission,
+  RBACReducer,
+  RBACState,
+  resetStoreAction,
+  setPermissionsAction,
+} from '../RBACProvider';
 
-describe('rbacProviderReducer', () => {
-  let state;
+describe('RBACReducer', () => {
+  let state: RBACState;
 
   beforeEach(() => {
     state = {
@@ -16,24 +21,41 @@ describe('rbacProviderReducer', () => {
   it('returns the initial state', () => {
     const expected = state;
 
-    expect(rbacProviderReducer(undefined, {})).toEqual(expected);
+    // @ts-expect-error – testing the default case
+    expect(RBACReducer(undefined, {})).toEqual(expected);
   });
 
-  describe('resetStore', () => {
+  describe('resetStoreAction', () => {
     it('should reset the state to its initial value', () => {
-      state.allPermissions = true;
-      state.collectionTypesRelatedPermissions = true;
+      state.allPermissions = [];
+      state.collectionTypesRelatedPermissions = {
+        apple: {},
+      };
 
-      expect(rbacProviderReducer(state, resetStore())).toEqual(initialState);
+      expect(RBACReducer(state, resetStoreAction())).toMatchInlineSnapshot(`
+        {
+          "allPermissions": null,
+          "collectionTypesRelatedPermissions": {},
+        }
+      `);
     });
   });
 
-  describe('setPermissions', () => {
+  describe('setPermissionsAction', () => {
     it('should set the allPermissions value correctly', () => {
-      const permissions = [{ action: 'test', subject: null }];
+      const permissions: Permission[] = [
+        {
+          id: 0,
+          action: 'test',
+          subject: null,
+          conditions: [],
+          properties: {},
+          actionParameters: {},
+        },
+      ];
       const expected = { ...state, allPermissions: permissions };
 
-      expect(rbacProviderReducer(state, setPermissions(permissions))).toEqual(expected);
+      expect(RBACReducer(state, setPermissionsAction(permissions))).toEqual(expected);
     });
 
     it('should set the collectionTypesRelatedPermissions correctly', () => {
@@ -89,7 +111,7 @@ describe('rbacProviderReducer', () => {
       };
 
       expect(
-        rbacProviderReducer(state, setPermissions(fixtures.permissions.allPermissions))
+        RBACReducer(state, setPermissionsAction(fixtures.permissions.allPermissions))
           .collectionTypesRelatedPermissions
       ).toEqual(expected);
     });

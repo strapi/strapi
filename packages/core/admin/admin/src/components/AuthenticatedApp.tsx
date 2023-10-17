@@ -1,58 +1,93 @@
-import React, { useEffect, useState } from 'react';
+import * as React from 'react';
 
 import {
   AppInfoProvider,
   auth,
   LoadingIndicatorPage,
+  useFetchClient,
   useGuidedTour,
-  useNotification,
 } from '@strapi/helper-plugin';
-import get from 'lodash/get';
+import lodashGet from 'lodash/get';
 import { useQueries } from 'react-query';
+import lt from 'semver/functions/lt';
+import valid from 'semver/functions/valid';
 //  TODO: DS add loader
 
-import packageJSON from '../../../../package.json';
-import { useConfiguration } from '../../hooks/useConfiguration';
-import { getFullName, hashAdminUserEmail } from '../../utils';
-import { NpsSurvey } from '../NpsSurvey';
-import { PluginsInitializer } from '../PluginsInitializer';
-import RBACProvider from '../RBACProvider';
-
-import { fetchAppInfo, fetchCurrentUserPermissions, fetchUserRoles } from './utils/api';
-import { checkLatestStrapiVersion } from './utils/checkLatestStrapiVersion';
-import { fetchStrapiLatestRelease } from './utils/fetchStrapiLatestRelease';
+import packageJSON from '../../../package.json';
+import { useConfiguration } from '../hooks/useConfiguration';
+// @ts-expect-error - no types yet.
+import { getFullName, hashAdminUserEmail } from '../utils';
+import { NpsSurvey } from './NpsSurvey';
+import { PluginsInitializer } from './PluginsInitializer';
+import { RBACProvider, Permission } from './RBACProvider';
 
 const strapiVersion = packageJSON.version;
 
 const AuthenticatedApp = () => {
   const { setGuidedTourVisibility } = useGuidedTour();
-  const toggleNotification = useNotification();
-  const userInfo = auth.getUserInfo();
-  const userName = get(userInfo, 'username') || getFullName(userInfo.firstname, userInfo.lastname);
-  const [userDisplayName, setUserDisplayName] = useState(userName);
-  const [userId, setUserId] = useState(null);
+  const userInfo = auth.get('userInfo');
+  const userName = userInfo
+    ? lodashGet(userInfo, 'username') || getFullName(userInfo.firstname, userInfo.lastname)
+    : null;
+  const [userDisplayName, setUserDisplayName] = React.useState(userName);
+  const [userId, setUserId] = React.useState(null);
   const { showReleaseNotification } = useConfiguration();
+  const { get } = useFetchClient();
   const [
     { data: appInfos, status },
     { data: tagName, isLoading },
     { data: permissions, status: fetchPermissionsStatus, refetch, isFetching },
     { data: userRoles },
   ] = useQueries([
-    { queryKey: 'app-infos', queryFn: fetchAppInfo },
+    {
+      queryKey: 'app-infos',
+      async queryFn() {
+        const { data } = await get('/admin/information');
+
+        return data.data;
+      },
+    },
     {
       queryKey: 'strapi-release',
-      queryFn: () => fetchStrapiLatestRelease(toggleNotification),
+      async queryFn() {
+        try {
+          const res = await fetch('https://api.github.com/repos/strapi/strapi/releases/latest');
+
+          if (!res.ok) {
+            throw new Error('Failed to fetch latest Strapi version.');
+          }
+
+          const { tag_name } = await res.json();
+
+          return tag_name;
+        } catch (err) {
+          // Don't throw an error
+          return strapiVersion;
+        }
+      },
       enabled: showReleaseNotification,
       initialData: strapiVersion,
     },
     {
       queryKey: 'admin-users-permission',
-      queryFn: fetchCurrentUserPermissions,
+      async queryFn() {
+        const { data } = await get<{ data: Permission[] }>('/admin/users/me/permissions');
+
+        return data.data;
+      },
       initialData: [],
     },
     {
       queryKey: 'user-roles',
-      queryFn: fetchUserRoles,
+      async queryFn() {
+        const {
+          data: {
+            data: { roles },
+          },
+        } = await get<{ data: { roles: [] } }>('/admin/users/me');
+
+        return roles;
+      },
     },
   ]);
 
@@ -61,7 +96,7 @@ const AuthenticatedApp = () => {
   /**
    * TODO: does this actually need to be an effect?
    */
-  useEffect(() => {
+  React.useEffect(() => {
     if (userRoles) {
       const isUserSuperAdmin = userRoles.find(({ code }) => code === 'strapi-super-admin');
 
@@ -71,7 +106,7 @@ const AuthenticatedApp = () => {
     }
   }, [userRoles, appInfos, setGuidedTourVisibility]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const getUserId = async () => {
       const userId = await hashAdminUserEmail(userInfo);
       setUserId(userId);
@@ -105,7 +140,7 @@ const AuthenticatedApp = () => {
       shouldUpdateStrapi={shouldUpdateStrapi}
       userDisplayName={userDisplayName}
     >
-      <RBACProvider permissions={permissions} refetchPermissions={refetch}>
+      <RBACProvider permissions={permissions ?? []} refetchPermissions={refetch}>
         <NpsSurvey />
         <PluginsInitializer />
       </RBACProvider>
@@ -113,4 +148,15 @@ const AuthenticatedApp = () => {
   );
 };
 
-export default AuthenticatedApp;
+const checkLatestStrapiVersion = (
+  currentPackageVersion: string,
+  latestPublishedVersion: string
+): boolean => {
+  if (!valid(currentPackageVersion) || !valid(latestPublishedVersion)) {
+    return false;
+  }
+
+  return lt(currentPackageVersion, latestPublishedVersion);
+};
+
+export { AuthenticatedApp };
