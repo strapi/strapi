@@ -5,8 +5,14 @@
  *
  */
 
-import { ContentLayout, EmptyStateLayout, HeaderLayout, Main } from '@strapi/design-system';
-import { LinkButton, useFocusWhenNavigate } from '@strapi/helper-plugin';
+import {
+  ContentLayout,
+  EmptyStateLayout,
+  HeaderLayout,
+  LinkButton,
+  Main,
+} from '@strapi/design-system';
+import { useFocusWhenNavigate } from '@strapi/helper-plugin';
 import { ArrowRight, EmptyPictures } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
