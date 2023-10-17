@@ -1,6 +1,7 @@
 /* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
+import { configureStore } from '@reduxjs/toolkit';
 import { fixtures } from '@strapi/admin-test-utils';
 import { DesignSystemProvider } from '@strapi/design-system';
 import { NotificationsProvider, RBACContext } from '@strapi/helper-plugin';
@@ -19,7 +20,6 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
 import { Provider } from 'react-redux';
 import { MemoryRouter, MemoryRouterProps } from 'react-router-dom';
-import { createStore } from 'redux';
 
 // @ts-expect-error – no types yet.
 import ModelsContext from '../src/content-manager/contexts/ModelsContext';
@@ -49,7 +49,10 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
     },
   });
 
-  const store = createStore((state = initialState) => state, initialState);
+  const store = configureStore({
+    preloadedState: initialState,
+    reducer: (state = initialState) => state,
+  });
 
   // en is the default locale of the admin app.
   return (

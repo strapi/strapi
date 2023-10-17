@@ -31,7 +31,7 @@ updates:
 
       redux:
         patterns:
-          - 'redux'
+          - '@reduxjs/toolkit'
           - 'react-redux'
 
       richtext-editor:

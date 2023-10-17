@@ -30,6 +30,7 @@
     "test:unit:watch": "run -T jest --watch"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "1.9.7",
     "@strapi/design-system": "1.12.2",
     "@strapi/helper-plugin": "4.14.4",
     "@strapi/icons": "1.12.2",
@@ -42,7 +43,6 @@
     "react-intl": "6.4.1",
     "react-query": "3.39.3",
     "react-redux": "8.1.1",
-    "redux": "^4.2.1",
     "yup": "0.32.9"
   },
   "devDependencies": {
