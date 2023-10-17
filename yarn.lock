@@ -7781,7 +7781,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/pack-up@4.14.4, @strapi/pack-up@workspace:*, @strapi/pack-up@workspace:packages/utils/pack-up":
+"@strapi/pack-up@workspace:*, @strapi/pack-up@workspace:packages/utils/pack-up":
   version: 0.0.0-use.local
   resolution: "@strapi/pack-up@workspace:packages/utils/pack-up"
   dependencies:
@@ -8281,7 +8281,7 @@ __metadata:
     "@strapi/generate-new": 4.14.4
     "@strapi/generators": 4.14.4
     "@strapi/logger": 4.14.4
-    "@strapi/pack-up": 4.14.4
+    "@strapi/pack-up": "workspace:*"
     "@strapi/permissions": 4.14.4
     "@strapi/plugin-content-manager": 4.14.4
     "@strapi/plugin-content-type-builder": 4.14.4
@@ -8346,7 +8346,6 @@ __metadata:
     package-json: 7.0.0
     pkg-up: 3.1.0
     qs: 6.11.1
-    resolve-cwd: 3.0.0
     semver: 7.5.4
     statuses: 2.0.1
     supertest: 6.3.3

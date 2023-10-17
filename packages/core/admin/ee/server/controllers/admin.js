@@ -2,7 +2,7 @@
 
 const { isNil } = require('lodash/fp');
 // eslint-disable-next-line node/no-extraneous-require
-const ee = require('@strapi/strapi/dist/utils/ee').default;
+const ee = require('@strapi/strapi/dist/utils/ee');
 const { env } = require('@strapi/utils');
 const { getService } = require('../../../server/utils');
 
