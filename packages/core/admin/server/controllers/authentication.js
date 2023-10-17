@@ -65,7 +65,7 @@ module.exports = {
 
       ctx.body = {
         data: {
-          token: getService('token').createJwtToken(user),
+          token: null,
           user: getService('user').sanitizeUser(user), // TODO: fetch more detailed info,
           mfa: advanced.multi_factor_authentication
         },
