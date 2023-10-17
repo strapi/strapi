@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-namespace */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable vars-on-top */
 /* eslint-disable no-var */
+
+// TODO v5: change all 'any' to 'unknown' or a real type
 
 import type { Database } from '@strapi/database';
 import type { Logger } from '@strapi/logger';
