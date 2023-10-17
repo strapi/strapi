@@ -12,7 +12,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 
-import GuidedTourModal from '../../components/GuidedTour/Modal';
+import { GuidedTourModal } from '../../components/GuidedTour/Modal';
 import { LeftMenu } from '../../components/LeftMenu';
 import { useConfiguration } from '../../hooks/useConfiguration';
 import { useMenu } from '../../hooks/useMenu';

@@ -1,13 +1,11 @@
-import React from 'react';
-
 import { darkTheme, lightTheme } from '@strapi/design-system';
 import { useGuidedTour } from '@strapi/helper-plugin';
 import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
-import { Theme } from '../../../Theme';
-import { ThemeToggleProvider } from '../../../ThemeToggleProvider';
-import GuidedTourModal from '../index';
+import { Theme } from '../../Theme';
+import { ThemeToggleProvider } from '../../ThemeToggleProvider';
+import { GuidedTourModal } from '../Modal';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -68,14 +66,14 @@ describe('<GuidedTourModal />', () => {
         color: #4945ff;
       }
 
-      .c19 {
+      .c18 {
         font-size: 0.875rem;
         line-height: 1.43;
         font-weight: 500;
         color: #ffffff;
       }
 
-      .c20 {
+      .c19 {
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
@@ -83,13 +81,13 @@ describe('<GuidedTourModal />', () => {
         color: #32324d;
       }
 
-      .c24 {
+      .c23 {
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c28 {
+      .c27 {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
@@ -136,23 +134,20 @@ describe('<GuidedTourModal />', () => {
       }
 
       .c17 {
-        padding-top: 12px;
-        padding-bottom: 12px;
-      }
-
-      .c18 {
         background: #4945ff;
         padding: 8px;
+        padding-top: 12px;
+        padding-bottom: 12px;
         border-radius: 50%;
         width: 1.875rem;
         height: 1.875rem;
       }
 
-      .c22 {
+      .c21 {
         padding-bottom: 24px;
       }
 
-      .c25 {
+      .c24 {
         background: #4945ff;
         padding: 8px;
         padding-right: 16px;
@@ -242,7 +237,7 @@ describe('<GuidedTourModal />', () => {
         flex-direction: row;
       }
 
-      .c21 {
+      .c20 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -260,7 +255,7 @@ describe('<GuidedTourModal />', () => {
         justify-content: center;
       }
 
-      .c23 {
+      .c22 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
         -ms-flex-align: stretch;
@@ -275,7 +270,7 @@ describe('<GuidedTourModal />', () => {
         gap: 16px;
       }
 
-      .c26 {
+      .c25 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -339,111 +334,111 @@ describe('<GuidedTourModal />', () => {
         border: 2px solid #4945ff;
       }
 
-      .c27 {
+      .c26 {
         height: 2rem;
       }
 
-      .c27 svg {
+      .c26 svg {
         height: 0.75rem;
         width: auto;
       }
 
-      .c27[aria-disabled='true'] {
+      .c26[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c27[aria-disabled='true'] .c14 {
+      .c26[aria-disabled='true'] .c14 {
         color: #666687;
       }
 
-      .c27[aria-disabled='true'] svg > g,
-      .c27[aria-disabled='true'] svg path {
+      .c26[aria-disabled='true'] svg > g,
+      .c26[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c27[aria-disabled='true']:active {
+      .c26[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c27[aria-disabled='true']:active .c14 {
+      .c26[aria-disabled='true']:active .c14 {
         color: #666687;
       }
 
-      .c27[aria-disabled='true']:active svg > g,
-      .c27[aria-disabled='true']:active svg path {
+      .c26[aria-disabled='true']:active svg > g,
+      .c26[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c27:hover {
+      .c26:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c27:active {
+      .c26:active {
         border: 1px solid #4945ff;
         background: #4945ff;
       }
 
-      .c27 svg > g,
-      .c27 svg path {
+      .c26 svg > g,
+      .c26 svg path {
         fill: #ffffff;
       }
 
-      .c29 {
+      .c28 {
         height: 2rem;
         border: 1px solid #dcdce4;
         background: #ffffff;
       }
 
-      .c29 svg {
+      .c28 svg {
         height: 0.75rem;
         width: auto;
       }
 
-      .c29[aria-disabled='true'] {
+      .c28[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c29[aria-disabled='true'] .c14 {
+      .c28[aria-disabled='true'] .c14 {
         color: #666687;
       }
 
-      .c29[aria-disabled='true'] svg > g,
-      .c29[aria-disabled='true'] svg path {
+      .c28[aria-disabled='true'] svg > g,
+      .c28[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c29[aria-disabled='true']:active {
+      .c28[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c29[aria-disabled='true']:active .c14 {
+      .c28[aria-disabled='true']:active .c14 {
         color: #666687;
       }
 
-      .c29[aria-disabled='true']:active svg > g,
-      .c29[aria-disabled='true']:active svg path {
+      .c28[aria-disabled='true']:active svg > g,
+      .c28[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c29:hover {
+      .c28:hover {
         background-color: #f6f6f9;
       }
 
-      .c29:active {
+      .c28:active {
         background-color: #eaeaef;
       }
 
-      .c29 .c14 {
+      .c28 .c14 {
         color: #32324d;
       }
 
-      .c29 svg > g,
-      .c29 svg path {
+      .c28 svg > g,
+      .c28 svg path {
         fill: #32324d;
       }
 
@@ -568,21 +563,17 @@ describe('<GuidedTourModal />', () => {
                       class="c12 c16"
                     >
                       <div
-                        class="c17"
+                        class="c17 c2"
                       >
-                        <div
-                          class="c18 c2"
+                        <span
+                          class="c14 c18"
                         >
-                          <span
-                            class="c14 c19"
-                          >
-                            3
-                          </span>
-                        </div>
+                          3
+                        </span>
                       </div>
                     </div>
                     <h3
-                      class="c14 c20"
+                      class="c14 c19"
                       id="title"
                     >
                       🧠 Create a first Collection type
@@ -592,33 +583,33 @@ describe('<GuidedTourModal />', () => {
                     class="c11"
                   >
                     <div
-                      class="c12 c21"
+                      class="c12 c20"
                     />
                     <div
                       class=""
                     >
                       <div
-                        class="c22 c23"
+                        class="c21 c22"
                       >
                         <span
-                          class="c14 c24"
+                          class="c14 c23"
                         >
                           Collection types help you manage several entries, Single types are suitable to manage only one entry.
                         </span>
                          
                         <span
-                          class="c14 c24"
+                          class="c14 c23"
                         >
                           Ex: For a Blog website, Articles would be a Collection type whereas a Homepage would be a Single type.
                         </span>
                       </div>
                       <button
                         aria-disabled="false"
-                        class="c25 c26 c8 c27"
+                        class="c24 c25 c8 c26"
                         type="button"
                       >
                         <span
-                          class="c14 c28"
+                          class="c14 c27"
                         >
                           Build a Collection type
                         </span>
@@ -648,11 +639,11 @@ describe('<GuidedTourModal />', () => {
                 >
                   <button
                     aria-disabled="false"
-                    class="c25 c26 c8 c29"
+                    class="c24 c25 c8 c28"
                     type="button"
                   >
                     <span
-                      class="c14 c28"
+                      class="c14 c27"
                     >
                       Skip the tour
                     </span>
@@ -667,6 +658,7 @@ describe('<GuidedTourModal />', () => {
   });
 
   it('should not render modal when no currentStep', () => {
+    // @ts-expect-error – mocking
     useGuidedTour.mockImplementation(() => ({
       isGuidedTourVisible: true,
       guidedTourState: {
@@ -692,6 +684,7 @@ describe('<GuidedTourModal />', () => {
   });
 
   it('should not render modal when currentStep but isGuidedTourVisible is false', () => {
+    // @ts-expect-error – mocking
     useGuidedTour.mockImplementation(() => ({
       isGuidedTourVisible: false,
       guidedTourState: {
