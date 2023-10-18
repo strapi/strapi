@@ -85,7 +85,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [16, 18, 20]
+        node: [18, 20]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -129,7 +129,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [16, 18, 20]
+        node: [18, 20]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
@@ -184,7 +184,7 @@ jobs:
     name: '[CE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
-        node: [16, 18, 20]
+        node: [18, 20]
         shard: [1/2, 2/2]
     services:
       postgres:
@@ -224,7 +224,7 @@ jobs:
     name: '[CE] API Integration (mysql:latest, client: ${{ matrix.db_client }}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
-        node: [16, 18, 20]
+        node: [18, 20]
         db_client: ['mysql', 'mysql2']
         shard: [1/2, 2/2]
     services:
@@ -263,7 +263,7 @@ jobs:
     name: '[CE] API Integration (mysql:5, client: ${{ matrix.db_client }} , node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
-        node: [16, 18, 20]
+        node: [18, 20]
         db_client: ['mysql', 'mysql2']
         shard: [1/2, 2/2]
     services:
@@ -301,7 +301,7 @@ jobs:
     name: '[CE] API Integration (sqlite, client: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
-        node: [16, 18, 20]
+        node: [18, 20]
         sqlite_pkg: ['better-sqlite3', 'sqlite3']
         shard: [1/2, 2/2]
     steps:
@@ -328,7 +328,7 @@ jobs:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [16, 18, 20]
+        node: [18, 20]
         shard: [1/2, 2/2]
     services:
       postgres:
@@ -371,7 +371,7 @@ jobs:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [16, 18, 20]
+        node: [18, 20]
         db_client: ['mysql', 'mysql2']
         shard: [1/2, 2/2]
     services:
@@ -413,7 +413,7 @@ jobs:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [16, 18, 20]
+        node: [18, 20]
         sqlite_pkg: ['better-sqlite3', 'sqlite3']
         shard: [1/2, 2/2]
     steps:
