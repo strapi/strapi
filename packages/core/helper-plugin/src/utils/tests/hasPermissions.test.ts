@@ -5,9 +5,7 @@ import {
   shouldCheckPermissions,
 } from '../hasPermissions';
 
-import type { domain } from '@strapi/permissions';
-
-type Permission = domain.permission.Permission;
+import type { Permission } from '../../features/RBAC';
 
 const hasPermissionsTestData: Record<string, Record<string, Permission[]>> = {
   userPermissions: {

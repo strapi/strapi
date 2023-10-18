@@ -33,7 +33,9 @@ import UseCasePage from '../UseCasePage';
 import { ROUTES_CE, SET_ADMIN_PERMISSIONS } from './constants';
 
 const AuthenticatedApp = lazy(() =>
-  import(/* webpackChunkName: "Admin-authenticatedApp" */ '../../components/AuthenticatedApp')
+  import(/* webpackChunkName: "Admin-authenticatedApp" */ '../../components/AuthenticatedApp').then(
+    (mod) => ({ default: mod.AuthenticatedApp })
+  )
 );
 
 function App() {
