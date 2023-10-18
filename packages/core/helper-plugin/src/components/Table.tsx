@@ -360,7 +360,7 @@ interface EmptyBodyProps extends EmptyStateLayoutProps {
 
 const EmptyBody = ({ contentType, ...rest }: EmptyBodyProps) => {
   const { rows, colCount, isLoading } = useTableContext();
-  const [{ query }] = useQueryParams();
+  const [{ query }] = useQueryParams<{ filters?: string[] }>();
   const hasFilters = query?.filters !== undefined;
   const content = hasFilters
     ? {

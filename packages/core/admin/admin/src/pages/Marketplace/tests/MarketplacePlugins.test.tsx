@@ -1,10 +1,10 @@
-import React from 'react';
-
+/* eslint-disable testing-library/no-node-access */
 import { screen, within } from '@testing-library/react';
 import { render as renderRTL, waitFor } from '@tests/utils';
+import { Location } from 'history';
 import { Route } from 'react-router-dom';
 
-import { MarketPlacePage } from '../index';
+import { MarketplacePage } from '../MarketplacePage';
 
 // Increase the jest timeout to accommodate long running tests
 jest.setTimeout(50000);
@@ -28,10 +28,10 @@ const waitForReload = async () => {
   await waitFor(() => expect(screen.queryByText('Loading content...')).not.toBeInTheDocument());
 };
 
-let testLocation = null;
+let testLocation: Location = null!;
 
-const render = (props) =>
-  renderRTL(<MarketPlacePage {...props} />, {
+const render = () =>
+  renderRTL(<MarketplacePage />, {
     renderOptions: {
       wrapper({ children }) {
         return (
@@ -59,7 +59,7 @@ describe('Marketplace page - plugins tab', () => {
 
     expect(getByRole('tab', { selected: true, name: /plugins/i })).toBeInTheDocument();
     expect(getByText('Comments')).toBeVisible();
-    expect(queryByText('Cloudinary')).toEqual(null);
+    expect(queryByText('Cloudinary')).not.toBeInTheDocument();
     expect(getByRole('link', { name: 'Submit plugin' })).toBeVisible();
   });
 
@@ -76,8 +76,8 @@ describe('Marketplace page - plugins tab', () => {
     const provider = queryByText('Cloudinary');
 
     expect(match).toBeVisible();
-    expect(notMatch).toEqual(null);
-    expect(provider).toEqual(null);
+    expect(notMatch).not.toBeInTheDocument();
+    expect(provider).not.toBeInTheDocument();
   });
 
   it('should return empty plugin search results given a bad query', async () => {
@@ -100,14 +100,14 @@ describe('Marketplace page - plugins tab', () => {
     // Plugin that's already installed
     const alreadyInstalledCard = getAllByTestId('npm-package-card').find((div) =>
       div.innerHTML.includes('Documentation')
-    );
+    )!;
     const alreadyInstalledText = within(alreadyInstalledCard).queryByText(/installed/i);
     expect(alreadyInstalledText).toBeVisible();
 
     // Plugin that's not installed
     const notInstalledCard = getAllByTestId('npm-package-card').find((div) =>
       div.innerHTML.includes('Comments')
-    );
+    )!;
     const notInstalledText = within(notInstalledCard).queryByText(/copy install command/i);
     expect(notInstalledText).toBeVisible();
   });
@@ -177,7 +177,7 @@ describe('Marketplace page - plugins tab', () => {
     const collectionPlugin = getByText('Gatsby Preview');
     const notCollectionPlugin = queryByText('Comments');
     expect(collectionPlugin).toBeVisible();
-    expect(notCollectionPlugin).toEqual(null);
+    expect(notCollectionPlugin).not.toBeInTheDocument();
   });
 
   it('filters a category option', async () => {
@@ -203,7 +203,7 @@ describe('Marketplace page - plugins tab', () => {
     const categoryPlugin = getByText('CKEditor 5 custom field');
     const notCategoryPlugin = queryByText('Comments');
     expect(categoryPlugin).toBeVisible();
-    expect(notCategoryPlugin).toEqual(null);
+    expect(notCategoryPlugin).not.toBeInTheDocument();
   });
 
   it('filters a category and a collection option', async () => {
@@ -242,12 +242,12 @@ describe('Marketplace page - plugins tab', () => {
     const collectionPlugin = getByText('Gatsby Preview');
     const notCollectionPlugin = queryByText('Comments');
     expect(collectionPlugin).toBeVisible();
-    expect(notCollectionPlugin).toEqual(null);
+    expect(notCollectionPlugin).not.toBeInTheDocument();
     // They should see the category option results
     const categoryPlugin = getByText('CKEditor 5 custom field');
     const notCategoryPlugin = queryByText('Config Sync');
     expect(categoryPlugin).toBeVisible();
-    expect(notCategoryPlugin).toEqual(null);
+    expect(notCategoryPlugin).not.toBeInTheDocument();
   });
 
   it('filters multiple collection options', async () => {
@@ -280,7 +280,7 @@ describe('Marketplace page - plugins tab', () => {
     expect(getAllByTestId('npm-package-card').length).toEqual(3);
     expect(getByText('Gatsby Preview')).toBeVisible();
     expect(getByText('Config Sync')).toBeVisible();
-    expect(queryByText('Comments')).toEqual(null);
+    expect(queryByText('Comments')).not.toBeInTheDocument();
   });
 
   it('filters multiple category options', async () => {
@@ -313,7 +313,7 @@ describe('Marketplace page - plugins tab', () => {
     expect(getAllByTestId('npm-package-card').length).toEqual(3);
     expect(getByText('CKEditor 5 custom field')).toBeVisible();
     expect(getByText('Sentry')).toBeVisible();
-    expect(queryByText('Comments')).toEqual(null);
+    expect(queryByText('Comments')).not.toBeInTheDocument();
   });
 
   it('removes a filter option tag', async () => {
@@ -394,7 +394,7 @@ describe('Marketplace page - plugins tab', () => {
 
     const documentationCard = getAllByTestId('npm-package-card').find((div) =>
       div.innerHTML.includes('Documentation')
-    );
+    )!;
 
     const githubStarsLabel = within(documentationCard).getByLabelText(
       /this plugin was starred \d+ on GitHub/i
@@ -421,17 +421,17 @@ describe('Marketplace page - plugins tab', () => {
     expect(getByText(/go to previous page/i).closest('a')).toHaveAttribute('aria-disabled', 'true');
 
     // Can go to next page
-    await user.click(getByText(/go to next page/i).closest('a'));
+    await user.click(getByText(/go to next page/i).closest('a')!);
     await waitForReload();
     expect(testLocation.search).toBe('?page=2');
 
     // Can go to previous page
-    await user.click(getByText(/go to previous page/i).closest('a'));
+    await user.click(getByText(/go to previous page/i).closest('a')!);
     await waitForReload();
     expect(testLocation.search).toBe('?page=1');
 
     // Can go to specific page
-    await user.click(getByText(/go to page 3/i).closest('a'));
+    await user.click(getByText(/go to page 3/i).closest('a')!);
     await waitForReload();
     expect(testLocation.search).toBe('?page=3');
   });

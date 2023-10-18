@@ -1,10 +1,9 @@
-import React from 'react';
-
+/* eslint-disable testing-library/no-node-access */
 import { useAppInfo, useTracking } from '@strapi/helper-plugin';
 import { screen, within, fireEvent } from '@testing-library/react';
 import { render as renderRTL, waitFor } from '@tests/utils';
 
-import { MarketPlacePage } from '../index';
+import { MarketplacePage } from '../MarketplacePage';
 
 jest.mock('../hooks/useNavigatorOnline');
 
@@ -22,7 +21,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-const render = (props) => renderRTL(<MarketPlacePage {...props} />);
+const render = () => renderRTL(<MarketplacePage />);
 
 const waitForReload = async () => {
   await waitFor(() => expect(screen.queryByText('Loading content...')).not.toBeInTheDocument());
@@ -31,6 +30,7 @@ const waitForReload = async () => {
 describe('Marketplace page - layout', () => {
   it('renders the online layout', async () => {
     const trackUsage = jest.fn();
+    // @ts-expect-error - mock
     useTracking.mockImplementationOnce(() => ({ trackUsage }));
 
     const { queryByText, getByRole } = render();
@@ -39,7 +39,7 @@ describe('Marketplace page - layout', () => {
     expect(trackUsage).toHaveBeenCalledWith('didGoToMarketplace');
     expect(trackUsage).toHaveBeenCalledTimes(1);
 
-    expect(queryByText('You are offline')).toEqual(null);
+    expect(queryByText('You are offline')).not.toBeInTheDocument();
     // Shows the sort button
     expect(getByRole('combobox', { name: /Sort by/i })).toBeVisible();
     // Shows the filters button
@@ -51,11 +51,11 @@ describe('Marketplace page - layout', () => {
 
     const alreadyInstalledCard = (await findAllByTestId('npm-package-card')).find((div) =>
       div.innerHTML.includes('Transformer')
-    );
+    )!;
 
     const button = within(alreadyInstalledCard)
       .getByText(/copy install command/i)
-      .closest('button');
+      .closest('button')!;
 
     // User event throws an error that there are no pointer events
     fireEvent.mouseOver(button);
@@ -70,16 +70,16 @@ describe('Marketplace page - layout', () => {
 
     const alreadyInstalledCard = (await findAllByTestId('npm-package-card')).find((div) =>
       div.innerHTML.includes('Config Sync')
-    );
+    )!;
 
     const button = within(alreadyInstalledCard)
       .getByText(/copy install command/i)
-      .closest('button');
+      .closest('button')!;
 
     await user.hover(button);
     const tooltip = await findByTestId(`tooltip-Config Sync`);
 
-    expect(button).not.toBeDisabled();
+    expect(button).toBeEnabled();
     expect(tooltip).toBeInTheDocument();
     expect(tooltip).toHaveTextContent(
       'Unable to verify compatibility with your Strapi version: "4.1.0"'
@@ -88,6 +88,7 @@ describe('Marketplace page - layout', () => {
 
   it('handles production environment', async () => {
     // Simulate production environment
+    // @ts-expect-error - mock
     useAppInfo.mockImplementation(() => ({
       autoReload: false,
       dependencies: {},
@@ -99,24 +100,24 @@ describe('Marketplace page - layout', () => {
 
     expect(getByText('Manage plugins from the development environment')).toBeVisible();
     // Should not show install buttons
-    expect(queryByText(/copy install command/i)).toEqual(null);
+    expect(queryByText(/copy install command/i)).not.toBeInTheDocument();
   });
 
   it('shows only downloads count and not github stars if there are no or 0 stars and no downloads available for any package', async () => {
     const { findByText, findAllByTestId, user } = render();
 
-    const providersTab = (await findByText(/providers/i)).closest('button');
+    const providersTab = (await findByText(/providers/i)).closest('button')!;
     await user.click(providersTab);
 
     const nodeMailerCard = (await findAllByTestId('npm-package-card')).find((div) =>
       div.innerHTML.includes('Nodemailer')
-    );
+    )!;
 
     const githubStarsLabel = within(nodeMailerCard).queryByLabelText(
       /this provider was starred \d+ on GitHub/i
     );
 
-    expect(githubStarsLabel).toBe(null);
+    expect(githubStarsLabel).not.toBeInTheDocument();
 
     const downloadsLabel = within(nodeMailerCard).getByLabelText(
       /this provider has \d+ weekly downloads/i
