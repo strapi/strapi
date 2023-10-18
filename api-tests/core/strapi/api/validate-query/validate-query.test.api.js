@@ -742,7 +742,14 @@ describe('Core API - Validate', () => {
    */
 
   describe('Fields', () => {
-    const allDocumentFields = ['name', 'name_non_searchable', 'misc', 'createdAt', 'updatedAt'];
+    const allDocumentFields = [
+      'name',
+      'name_non_searchable',
+      'misc',
+      'createdAt',
+      'updatedAt',
+      'publishedAt',
+    ];
 
     describe('No fields param', () => {
       it('Select all fields sort when no fields param is provided', async () => {

@@ -155,13 +155,17 @@ describe('Test type UID', () => {
     });
 
     test('Cannot set value to be null', async () => {
-      const res = await rq.post(
+      const createRes = await rq.post(
         '/content-manager/collection-types/api::withrequireduid.withrequireduid',
         {
           body: {
             slug: null,
           },
         }
+      );
+
+      const res = await rq.post(
+        `/content-manager/collection-types/api::withrequireduid.withrequireduid/${createRes.body.id}/actions/publish`
       );
 
       expect(res.statusCode).toBe(400);

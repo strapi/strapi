@@ -105,8 +105,8 @@ describe('Non repeatable and required component', () => {
       }
     );
 
-    test('Throws when sending a null value', async () => {
-      const res = await rq.post('/', {
+    test('Throws when publishing a null value', async () => {
+      const creationRes = await rq.post('/', {
         body: {
           field: null,
         },
@@ -115,16 +115,20 @@ describe('Non repeatable and required component', () => {
         },
       });
 
+      const res = await rq.post(`/${creationRes.body.id}/actions/publish`);
+
       expect(res.statusCode).toBe(400);
     });
 
     test('Throws when the component is not provided', async () => {
-      const res = await rq.post('/', {
+      const creationRes = await rq.post('/', {
         body: {},
         qs: {
           populate: ['field'],
         },
       });
+
+      const res = await rq.post(`/${creationRes.body.id}/actions/publish`);
 
       expect(res.statusCode).toBe(400);
     });
@@ -231,8 +235,8 @@ describe('Non repeatable and required component', () => {
       });
     });
 
-    test('Throws if component is null', async () => {
-      const res = await rq.post('/', {
+    test('Throws when publishing if component is null', async () => {
+      const creationRes = await rq.post('/', {
         body: {
           field: {
             name: 'someString',
@@ -243,7 +247,7 @@ describe('Non repeatable and required component', () => {
         },
       });
 
-      const updateRes = await rq.put(`/${res.body.id}`, {
+      const updateRes = await rq.put(`/${creationRes.body.id}`, {
         body: {
           field: null,
         },
@@ -252,16 +256,18 @@ describe('Non repeatable and required component', () => {
         },
       });
 
-      expect(updateRes.statusCode).toBe(400);
+      const res = await rq.post(`/${updateRes.body.id}/actions/publish`);
 
-      const getRes = await rq.get(`/${res.body.id}`, {
+      expect(res.statusCode).toBe(400);
+
+      const getRes = await rq.get(`/${creationRes.body.id}`, {
         qs: {
           populate: ['field'],
         },
       });
 
       expect(getRes.statusCode).toBe(200);
-      expect(getRes.body).toMatchObject(res.body);
+      expect(getRes.body).toMatchObject(updateRes.body);
     });
 
     test('Replaces the previous component if sent without id', async () => {

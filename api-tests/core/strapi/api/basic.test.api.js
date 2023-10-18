@@ -77,7 +77,7 @@ describe('Core API - Basic', () => {
         attributes: product,
       },
     });
-    expect(body.data.attributes.publishedAt).toBeUndefined();
+    expect(body.data.attributes.publishedAt).toBeDefined();
 
     data.product.push(body.data);
   });
@@ -106,7 +106,7 @@ describe('Core API - Basic', () => {
     );
 
     body.data.forEach((p) => {
-      expect(p.attributes.publishedAt).toBeUndefined();
+      expect(p.attributes.publishedAt).toBeDefined();
     });
   });
 
@@ -131,7 +131,7 @@ describe('Core API - Basic', () => {
     });
 
     expect(body.data.id).toEqual(data.product[0].id);
-    expect(body.data.attributes.publishedAt).toBeUndefined();
+    expect(body.data.attributes.publishedAt).toBeDefined();
 
     data.product[0] = res.body.data;
   });
@@ -147,7 +147,7 @@ describe('Core API - Basic', () => {
     expect(statusCode).toBe(200);
     expect(body.data).toMatchObject(data.product[0]);
     expect(body.data.id).toEqual(data.product[0].id);
-    expect(body.data.attributes.publishedAt).toBeUndefined();
+    expect(body.data.attributes.publishedAt).toBeDefined();
     data.product.shift();
   });
 });

@@ -99,7 +99,7 @@ describe('Relations', () => {
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeUndefined();
+      expect(body.publishedAt).toBeDefined();
     });
 
     test('Create tag2', async () => {
@@ -123,7 +123,7 @@ describe('Relations', () => {
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeUndefined();
+      expect(body.publishedAt).toBeDefined();
     });
 
     test('Create tag3', async () => {
@@ -147,7 +147,7 @@ describe('Relations', () => {
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeUndefined();
+      expect(body.publishedAt).toBeDefined();
     });
 
     test('Create article1 without relation', async () => {
@@ -176,7 +176,7 @@ describe('Relations', () => {
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeUndefined();
+      expect(body.publishedAt).toBeDefined();
 
       const tags = (await getRelations('article', 'tags', body.id)).results;
       expect(tags.length).toBe(0);
@@ -208,7 +208,7 @@ describe('Relations', () => {
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeUndefined();
+      expect(body.publishedAt).toBeDefined();
 
       const tags = (await getRelations('article', 'tags', body.id)).results;
       expect(tags.length).toBe(1);
@@ -239,7 +239,7 @@ describe('Relations', () => {
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeUndefined();
+      expect(body.publishedAt).toBeDefined();
 
       const tags = (await getRelations('article', 'tags', body.id)).results;
       expect(tags.length).toBe(1);
@@ -266,7 +266,7 @@ describe('Relations', () => {
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeUndefined();
+      expect(body.publishedAt).toBeDefined();
 
       const tags = (await getRelations('article', 'tags', body.id)).results;
       expect(tags.length).toBe(3);
@@ -292,7 +292,7 @@ describe('Relations', () => {
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeUndefined();
+      expect(body.publishedAt).toBeDefined();
 
       const tags = (await getRelations('article', 'tags', body.id)).results;
       expect(tags.length).toBe(2);
@@ -322,7 +322,7 @@ describe('Relations', () => {
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeUndefined();
+      expect(body.publishedAt).toBeDefined();
 
       const tags = (await getRelations('article', 'tags', body.id)).results;
       expect(tags.length).toBe(0);
@@ -484,7 +484,7 @@ describe('Relations', () => {
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeUndefined();
+      expect(body.publishedAt).toBeDefined();
 
       const articles = (await getRelations('category', 'articles', body.id)).results;
       expect(articles.length).toBe(0);
@@ -511,7 +511,7 @@ describe('Relations', () => {
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeUndefined();
+      expect(body.publishedAt).toBeDefined();
       const articles = (await getRelations('category', 'articles', body.id)).results;
       expect(articles.length).toBe(0);
     });
@@ -542,7 +542,7 @@ describe('Relations', () => {
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeUndefined();
+      expect(body.publishedAt).toBeDefined();
 
       const tags = (await getRelations('article', 'tags', body.id)).results;
       expect(tags.length).toBe(0);
@@ -816,7 +816,7 @@ describe('Relations', () => {
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeUndefined();
+      expect(body.publishedAt).toBeDefined();
     });
 
     test('Update article1 with ref1', async () => {

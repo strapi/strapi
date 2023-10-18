@@ -54,6 +54,12 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       url: `/content-manager/collection-types/${uid}`,
       body: data,
     });
+
+    await requests.admin({
+      method: 'POST',
+      url: `/content-manager/collection-types/${uid}/${body.id}/actions/publish`,
+    });
+
     return body;
   };
 

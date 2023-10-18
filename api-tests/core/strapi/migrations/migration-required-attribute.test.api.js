@@ -68,7 +68,7 @@ describe('Migration - required attribute', () => {
       expect(dogWithNameNull).toBeTruthy();
     });
 
-    test('Cannot create an entry with null after migration', async () => {
+    test('Cannot publish an entry with null after migration', async () => {
       // remove null values otherwise the migration would fail
 
       const { body } = await rq({
@@ -86,10 +86,15 @@ describe('Migration - required attribute', () => {
       await restart();
 
       // Try to create an entry with null
-      const res = await rq({
+      const creationRes = await rq({
         method: 'POST',
         url: '/content-manager/collection-types/api::dog.dog',
         body: { name: null },
+      });
+
+      const res = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/api::dog.dog/${creationRes.body.id}/actions/publish`,
       });
 
       expect(res.body).toMatchObject({

@@ -122,6 +122,12 @@ describe('CM API - Basic', () => {
       url: '/content-manager/collection-types/api::category.category',
       body: { name: 'Food' },
     });
+
+    await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/api::category.category/${category.id}/actions/publish`,
+    });
+
     data.categories.push(category);
 
     const { body: categoryPublished } = await rq({
@@ -129,10 +135,12 @@ describe('CM API - Basic', () => {
       url: '/content-manager/collection-types/api::categorydp.categorydp',
       body: { name: 'Food' },
     });
+
     await rq({
       method: 'POST',
       url: `/content-manager/collection-types/api::categorydp.categorydp/${categoryPublished.id}/actions/publish`,
     });
+
     data.categoriesdp.published.push(categoryPublished);
 
     const { body: categoryDraft1 } = await rq({
@@ -140,6 +148,7 @@ describe('CM API - Basic', () => {
       url: '/content-manager/collection-types/api::categorydp.categorydp',
       body: { name: 'Food' },
     });
+
     data.categoriesdp.draft.push(categoryDraft1);
 
     const { body: categoryDraft2 } = await rq({
@@ -147,6 +156,7 @@ describe('CM API - Basic', () => {
       url: '/content-manager/collection-types/api::categorydp.categorydp',
       body: { name: 'Food' },
     });
+
     data.categoriesdp.draft.push(categoryDraft2);
   });
 

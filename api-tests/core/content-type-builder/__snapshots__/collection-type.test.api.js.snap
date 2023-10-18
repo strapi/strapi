@@ -34,7 +34,7 @@ exports[`Content Type Builder - Content types Collection Types Get collection ty
 }
 `;
 
-exports[`Content Type Builder - Content types Collection Types Get collection type returns full schema and informations with 1`] = `
+exports[`Content Type Builder - Content types Collection Types Get collection type returns full schema and informations 1`] = `
 {
   "data": {
     "apiID": "ct-with-dp",
