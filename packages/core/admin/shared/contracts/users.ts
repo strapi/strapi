@@ -1,4 +1,4 @@
-import { Common } from '@strapi/types';
+import type { errors } from '@strapi/utils';
 import type { SanitizedAdminUser, Permission } from './shared';
 
 /**
@@ -12,7 +12,7 @@ export declare namespace GetMe {
 
   export interface Response {
     data: {};
-    error?: Common.ApplicationError;
+    error?: errors.ApplicationError;
   }
 }
 
@@ -35,9 +35,9 @@ export declare namespace UpdateMe {
   export interface Response {
     data: SanitizedAdminUser;
     error?:
-      | Common.ApplicationError
-      | Common.BadRequestError<'ValidationError', { currentPassword: ['Invalid credentials'] }>
-      | Common.YupValidationError;
+      | errors.ApplicationError
+      | errors.ValidationError<'ValidationError', { currentPassword: ['Invalid credentials'] }>
+      | errors.YupValidationError;
   }
 }
 
@@ -52,6 +52,6 @@ export declare namespace GetOwnPermissions {
 
   export interface Response {
     data: Permission[];
-    error?: Common.ApplicationError;
+    error?: errors.ApplicationError;
   }
 }

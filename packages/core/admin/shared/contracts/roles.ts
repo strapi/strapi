@@ -1,4 +1,5 @@
-import { Common, EntityService } from '@strapi/types';
+import { EntityService } from '@strapi/types';
+import type { errors } from '@strapi/utils';
 import { AdminRole, Permission, SanitizedAdminRole, SanitizedAdminUser } from './shared';
 
 type SanitizedAdminRoleWithUsersCount = SanitizedAdminRole & { usersCount?: number };
@@ -15,7 +16,7 @@ export declare namespace GetPermissions {
 
   export interface Response {
     data: Permission[];
-    error?: Common.ApplicationError | Common.NotFoundError;
+    error?: errors.ApplicationError | errors.NotFoundError;
   }
 }
 
@@ -34,9 +35,9 @@ export declare namespace UpdatePermissions {
   export interface Response {
     data: Permission[];
     error?:
-      | Common.ApplicationError
-      | Common.NotFoundError // One of the permissions not found
-      | Common.YupValidationError;
+      | errors.ApplicationError
+      | errors.NotFoundError // One of the permissions not found
+      | errors.YupValidationError;
   }
 }
 
@@ -52,7 +53,7 @@ export declare namespace FindOne {
 
   export interface Response {
     data: SanitizedAdminRoleWithUsersCount;
-    error?: Common.ApplicationError | Common.NotFoundError;
+    error?: errors.ApplicationError | errors.NotFoundError;
   }
 }
 
@@ -67,7 +68,7 @@ export declare namespace FindAll {
 
   export interface Response {
     data: SanitizedAdminRoleWithUsersCount[];
-    error?: Common.ApplicationError | Common.ValidationError;
+    error?: errors.ApplicationError | errors.ValidationError;
   }
 }
 
@@ -85,7 +86,7 @@ export declare namespace Create {
 
   export interface Response {
     data: SanitizedAdminRole;
-    error?: Common.ApplicationError | Common.YupValidationError;
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
 
@@ -104,7 +105,7 @@ export declare namespace Update {
 
   export interface Response {
     data: SanitizedAdminRole;
-    error?: Common.ApplicationError | Common.NotFoundError;
+    error?: errors.ApplicationError | errors.NotFoundError;
   }
 }
 
@@ -120,7 +121,7 @@ export declare namespace Delete {
 
   export interface Response {
     data: Omit<AdminRole, 'users' | 'permissions'> | null;
-    error?: Common.ApplicationError;
+    error?: errors.ApplicationError;
   }
 }
 
@@ -137,6 +138,6 @@ export declare namespace BatchDelete {
 
   export interface Response {
     data: (Omit<AdminRole, 'users' | 'permissions'> | null)[];
-    error?: Common.ApplicationError | Common.YupValidationError;
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }

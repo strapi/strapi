@@ -1,3 +1,4 @@
+import type { errors } from '@strapi/utils';
 import { Common } from '@strapi/types';
 
 /**
@@ -11,7 +12,7 @@ export declare namespace GetPermissions {
 
   export interface Response {
     data: Record<string, { controllers: Record<string, string[]> }>;
-    error?: Common.ApplicationError;
+    error?: errors.ApplicationError;
   }
 }
 
@@ -26,6 +27,6 @@ export declare namespace GetRoutes {
 
   export interface Response {
     data: Record<string, Common.Route[]>;
-    error?: Common.ApplicationError;
+    error?: errors.ApplicationError;
   }
 }

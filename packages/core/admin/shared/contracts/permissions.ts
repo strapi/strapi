@@ -1,4 +1,4 @@
-import { Common } from '@strapi/types';
+import type { errors } from '@strapi/utils';
 import { Permission } from './shared';
 
 /**
@@ -19,7 +19,7 @@ export declare namespace GetAll {
       };
       sections: Record<string, unknown>;
     };
-    error?: Common.ApplicationError;
+    error?: errors.ApplicationError;
   }
 }
 
@@ -36,6 +36,6 @@ export declare namespace Check {
 
   export interface Response {
     data: boolean;
-    error?: Common.ApplicationError | Common.YupValidationError;
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }

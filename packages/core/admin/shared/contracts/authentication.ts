@@ -1,4 +1,5 @@
 import type { AdminUser, SanitizedAdminUser } from './shared';
+import type { errors } from '@strapi/utils';
 
 /**
  * /login - Log in as an admin user
@@ -15,6 +16,7 @@ export declare namespace Login {
       token: string;
       user: Omit<SanitizedAdminUser, 'permissions'>;
     };
+    errors?: errors.ApplicationError | errors.NotImplementedError;
   }
 }
 
@@ -32,6 +34,7 @@ export declare namespace RenewToken {
     data: {
       token: string;
     };
+    errors?: errors.ApplicationError | errors.ValidationError<'Invalid token'>;
   }
 }
 
@@ -51,6 +54,7 @@ export declare namespace RegistrationInfo {
       firstname?: string;
       lastname?: string;
     };
+    errors?: errors.ApplicationError | errors.ValidationError<'Invalid registrationToken'>;
   }
 }
 
@@ -70,6 +74,27 @@ export declare namespace Register {
       token: string;
       user: Omit<SanitizedAdminUser, 'permissions'>;
     };
+    errors?: errors.ApplicationError | errors.YupValidationError;
+  }
+}
+
+/**
+ * /register/admin - Register an admin user
+ */
+export declare namespace RegisterAdmin {
+  export interface Request {
+    body: {
+      registrationToken: string;
+      userInfo: Pick<AdminUser, 'email' | 'firstname' | 'lastname' | 'password'>;
+    };
+  }
+
+  export interface Response {
+    data: {
+      token: string;
+      user: Omit<SanitizedAdminUser, 'permissions'>;
+    };
+    errors?: errors.ApplicationError | errors.YupValidationError;
   }
 }
 
