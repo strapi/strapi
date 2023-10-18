@@ -85,7 +85,6 @@ const createContentType = (uid: string, definition: ContentTypeDefinition) => {
     writable: true,
     visible: false,
     default() {
-      console.log('la');
       return new Date();
     },
   };

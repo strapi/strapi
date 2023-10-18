@@ -162,7 +162,7 @@ Headers.propTypes = {
 };
 
 const Body = ({ providedEvents }) => {
-  const events = providedEvents || CEEvents();
+  const events = providedEvents || CEEvents;
   const { values, handleChange: onChange } = useFormikContext();
 
   const inputName = 'events';

@@ -75,7 +75,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         color: #ffffff;
       }
 
-      .c14 {
+      .c15 {
         font-size: 1rem;
         line-height: 1.5;
         color: #666687;
@@ -206,6 +206,8 @@ describe('CONTENT MANAGER | EditView | Header', () => {
 
       .c12 {
         height: 2rem;
+        border: 1px solid #d9d8ff;
+        background: #f0f0ff;
       }
 
       .c12 svg {
@@ -242,17 +244,81 @@ describe('CONTENT MANAGER | EditView | Header', () => {
       }
 
       .c12:hover {
-        border: 1px solid #7b79ff;
-        background: #7b79ff;
+        background-color: #ffffff;
       }
 
       .c12:active {
+        background-color: #ffffff;
         border: 1px solid #4945ff;
-        background: #4945ff;
+      }
+
+      .c12:active .c3 {
+        color: #4945ff;
+      }
+
+      .c12:active svg > g,
+      .c12:active svg path {
+        fill: #4945ff;
+      }
+
+      .c12 .c3 {
+        color: #271fe0;
       }
 
       .c12 svg > g,
       .c12 svg path {
+        fill: #271fe0;
+      }
+
+      .c14 {
+        height: 2rem;
+      }
+
+      .c14 svg {
+        height: 0.75rem;
+        width: auto;
+      }
+
+      .c14[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c14[aria-disabled='true'] .c3 {
+        color: #666687;
+      }
+
+      .c14[aria-disabled='true'] svg > g,
+      .c14[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c14[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c14[aria-disabled='true']:active .c3 {
+        color: #666687;
+      }
+
+      .c14[aria-disabled='true']:active svg > g,
+      .c14[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c14:hover {
+        border: 1px solid #7b79ff;
+        background: #7b79ff;
+      }
+
+      .c14:active {
+        border: 1px solid #4945ff;
+        background: #4945ff;
+      }
+
+      .c14 svg > g,
+      .c14 svg path {
         fill: #ffffff;
       }
 
@@ -371,6 +437,35 @@ describe('CONTENT MANAGER | EditView | Header', () => {
                 aria-disabled="true"
                 class="c10 c9 c11 c12"
                 disabled=""
+                type="button"
+              >
+                <div
+                  aria-hidden="true"
+                  class=""
+                >
+                  <svg
+                    fill="none"
+                    height="1rem"
+                    viewBox="0 0 24 24"
+                    width="1rem"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
+                      fill="#212134"
+                    />
+                  </svg>
+                </div>
+                <span
+                  class="c3 c13"
+                >
+                  Publish
+                </span>
+              </button>
+              <button
+                aria-disabled="true"
+                class="c10 c9 c11 c14"
+                disabled=""
                 type="submit"
               >
                 <span
@@ -382,7 +477,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
             </div>
           </div>
           <p
-            class="c3 c14"
+            class="c3 c15"
           >
             API ID  : restaurant
           </p>

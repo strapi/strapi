@@ -116,7 +116,9 @@ describe('i18n - Find existing relations', () => {
     });
 
     expect(res.body.results).toHaveLength(1);
-    expect(res.body.results[0]).toStrictEqual(pick(['id', 'name'], data.products[0]));
+    expect(res.body.results[0]).toStrictEqual(
+      pick(['id', 'name', 'publishedAt'], data.products[0])
+    );
   });
 
   test('Get english product for english shop', async () => {
@@ -126,6 +128,8 @@ describe('i18n - Find existing relations', () => {
     });
 
     expect(res.body.results).toHaveLength(1);
-    expect(res.body.results[0]).toStrictEqual(pick(['id', 'name'], data.products[1]));
+    expect(res.body.results[0]).toStrictEqual(
+      pick(['id', 'name', 'publishedAt'], data.products[1])
+    );
   });
 });
