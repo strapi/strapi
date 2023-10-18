@@ -33,12 +33,16 @@ const MarketplacePage = lazy(() =>
   import(/* webpackChunkName: "Admin_marketplace" */ '../MarketplacePage')
 );
 const NotFoundPage = lazy(() =>
-  import(/* webpackChunkName: "Admin_NotFoundPage" */ '../NotFoundPage').then(({ NotFoundPage }) => ({ default: NotFoundPage }))
+  import(/* webpackChunkName: "Admin_NotFoundPage" */ '../NotFoundPage').then(
+    ({ NotFoundPage }) => ({ default: NotFoundPage })
+  )
 );
 const InternalErrorPage = lazy(() =>
-  import(/* webpackChunkName: "Admin_InternalErrorPage" */ '../InternalErrorPage').then(({ InternalErrorPage }) => ({
-    default: InternalErrorPage
-  }))
+  import(/* webpackChunkName: "Admin_InternalErrorPage" */ '../InternalErrorPage').then(
+    ({ InternalErrorPage }) => ({
+      default: InternalErrorPage,
+    })
+  )
 );
 
 const ProfilePage = lazy(() =>

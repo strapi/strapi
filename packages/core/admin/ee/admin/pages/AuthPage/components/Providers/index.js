@@ -10,7 +10,7 @@ import { Logo } from '../../../../../../admin/src/components/UnauthenticatedLogo
 import {
   Column,
   LayoutContent,
-  UnauthenticatedLayout
+  UnauthenticatedLayout,
 } from '../../../../../../admin/src/layouts/UnauthenticatedLayout';
 import { useAuthProviders } from '../../../../hooks/useAuthProviders';
 

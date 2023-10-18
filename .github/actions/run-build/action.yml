@@ -5,7 +5,6 @@ runs:
   using: 'composite'
 
   steps:
-
     - name: ♻️ Restore build cache
       uses: actions/cache@v3
       id: yarn-build-cache
@@ -16,4 +15,3 @@ runs:
       name: 📥 Run build
       shell: bash
       run: yarn nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
-      
