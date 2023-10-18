@@ -23,7 +23,7 @@ import { useModifiersStore } from '../hooks/useModifiersStore';
 import { insertLink } from '../utils/links';
 
 const ToolbarWrapper = styled(Flex)`
-  &[aria-disabled] {
+  &[aria-disabled='true'] {
     cursor: not-allowed;
   }
 `;
@@ -58,13 +58,14 @@ const SelectWrapper = styled(Box)`
 
     &[aria-disabled='false'] {
       &:hover {
+        cursor: pointer;
         background: ${({ theme }) => theme.colors.primary100};
       }
     }
 
     &[aria-disabled] {
       background: transparent;
-      cursor: not-allowed;
+      cursor: inherit;
 
       // Select text and icons should also have disabled color
       span {
