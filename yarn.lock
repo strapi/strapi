@@ -7540,6 +7540,7 @@ __metadata:
     styled-components: 5.3.3
     typescript: 5.2.2
   peerDependencies:
+    "@strapi/strapi": 4.14.4
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: 5.3.4

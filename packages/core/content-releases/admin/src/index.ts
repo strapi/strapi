@@ -4,7 +4,8 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 export default {
   register() {
     if (window.strapi.features.isEnabled('cms-content-releases')) {
-      // @TODO Remove this once we actually do stuff
+      // EE Code would be here
+      // For testing if the plugin is working, add a console.log
     }
   },
   async registerTrads({ locales }: { locales: string[] }) {
