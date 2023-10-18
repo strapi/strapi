@@ -50,7 +50,7 @@ interface Config {
   /**
    * An array of Vite plugins to use when bundling.
    */
-  plugins?: PluginOption[];
+  plugins?: PluginOption[] | (({ runtime }: { runtime: Runtime }) => PluginOption[]);
   /**
    * @alpha
    *

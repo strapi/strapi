@@ -130,9 +130,9 @@ Whether to minify the output or not.
 
 #### `plugins`
 
-- Type: `PluginOption[]`
+- Type: `PluginOption[] | (({ runtime }: { runtime: Runtime }) => PluginOption[]);`
 
-An array of Vite plugins to use when bundling.
+An array of Vite plugins to use when bundling, or optionally a function that returns an array of plugins based on the runtime.
 
 #### `preserveModules`
 

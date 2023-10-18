@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import react from '@vitejs/plugin-react';
 import { builtinModules } from 'node:module';
 import path from 'path';
@@ -27,6 +28,12 @@ const resolveViteConfig = (ctx: BuildContext, task: ViteBaseTask) => {
   const sourcePaths = Object.values(exportMap).map((exp) => path.resolve(cwd, exp.source));
 
   const basePlugins = runtime === 'node' ? [] : [react()];
+
+  const plugins = ctx.config.plugins
+    ? typeof ctx.config.plugins === 'function'
+      ? ctx.config.plugins({ runtime })
+      : ctx.config.plugins
+    : [];
 
   const config = {
     configFile: false,
@@ -122,7 +129,7 @@ const resolveViteConfig = (ctx: BuildContext, task: ViteBaseTask) => {
         },
       },
     },
-    plugins: [...basePlugins, ...ctx.plugins],
+    plugins: [...basePlugins, ...plugins],
   } satisfies InlineConfig;
 
   return config;

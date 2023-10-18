@@ -91,7 +91,7 @@ interface ConfigOptions {
    */
   externals?: string[];
   minify?: boolean;
-  plugins?: PluginOption[];
+  plugins?: PluginOption[] | (({ runtime }: { runtime: Runtime }) => PluginOption[]);
   /**
    * @alpha
    *
