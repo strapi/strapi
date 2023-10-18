@@ -3,15 +3,9 @@ import { pick } from 'lodash';
 
 const PROJECT_SETTINGS_FILE_INPUTS = ['menuLogo', 'authLogo'] as const;
 
-// TODO: TS - Update file definition with the upload plugin files
-export type ProjectSettingFile = any;
+import { ProjectSettings, SettingsFile } from '../../../shared/contracts/admin';
 
-export type ProjectSettings = {
-  menuLogo: ProjectSettingFile;
-  authLogo: ProjectSettingFile;
-};
-
-const parseFilesData = async (files: ProjectSettingFile) => {
+const parseFilesData = async (files: SettingsFile) => {
   const formatedFilesData = {} as any;
 
   await Promise.all(
@@ -54,7 +48,7 @@ const parseFilesData = async (files: ProjectSettingFile) => {
   return formatedFilesData;
 };
 
-const getProjectSettings = async () => {
+const getProjectSettings = async (): Promise<ProjectSettings.Response> => {
   const store = strapi.store({ type: 'core', name: 'admin' });
 
   // Returns an object with file inputs names as key and null as value
@@ -88,11 +82,11 @@ const getProjectSettings = async () => {
   return projectSettings;
 };
 
-const uploadFiles = async (files = {} as Record<string, ProjectSettingFile>) => {
+const uploadFiles = async (files = {} as Record<string, ProjectSettings.Response>) => {
   // Call the provider upload function for each file
   return Promise.all(
     Object.values(files)
-      .filter((file: ProjectSettingFile) => file.stream instanceof fs.ReadStream)
+      .filter((file: SettingsFile) => file.stream instanceof fs.ReadStream)
       .map((file) => strapi.plugin('upload').provider.uploadStream(file))
   );
 };
@@ -131,7 +125,7 @@ const deleteOldFiles = async ({ previousSettings, newSettings }: any) => {
   );
 };
 
-const updateProjectSettings = async (newSettings: ProjectSettings) => {
+const updateProjectSettings = async (newSettings: ProjectSettings.Response) => {
   const store = strapi.store({ type: 'core', name: 'admin' });
   const previousSettings = (await store.get({ key: 'project-settings' })) as any;
   const files = pick(newSettings, PROJECT_SETTINGS_FILE_INPUTS);
