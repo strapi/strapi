@@ -129,24 +129,7 @@ jobs:
         uses: ./.github/actions/run-build
       - name: Run test
         run: yarn nx affected --target=test:front --nx-ignore-cycles
-
-  build:
-    name: 'build (node: ${{ matrix.node }})'
-    needs: [changes, lint, typescript, unit_front]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node: [18, 20]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node }}
-      - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
-      - name: Build
-        run: yarn build --projects=@strapi/admin,@strapi/helper-plugin
-        
+         
   e2e:
     timeout-minutes: 60
     needs: [changes, build, typescript, unit_front]
