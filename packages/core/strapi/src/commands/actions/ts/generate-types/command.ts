@@ -1,5 +1,6 @@
-import { getLocalScript } from '../../../utils/helpers';
 import type { StrapiCommand } from '../../../types';
+import { runAction } from '../../../utils/helpers';
+import action from './action';
 
 /**
  * `$ strapi ts:generate-types`
@@ -15,7 +16,7 @@ const command: StrapiCommand = ({ command }) => {
       '-o, --out-dir <outDir>',
       'Specify a relative root directory in which the definitions will be generated. Changing this value might break types exposed by Strapi that relies on generated types.'
     )
-    .action(getLocalScript('ts/generate-types'));
+    .action(runAction('ts:generate-types', action));
 };
 
 export default command;

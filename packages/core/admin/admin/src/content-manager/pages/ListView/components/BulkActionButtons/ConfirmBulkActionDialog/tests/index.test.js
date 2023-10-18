@@ -1,39 +1,17 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { Table, useQueryParams } from '@strapi/helper-plugin';
-import { render as renderRTL, screen, waitFor, within } from '@testing-library/react';
+import { within } from '@testing-library/react';
+import { render as renderRTL, waitFor, server } from '@tests/utils';
 import { rest } from 'msw';
-import { setupServer } from 'msw/node';
-import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { Provider } from 'react-redux';
-import { MemoryRouter } from 'react-router-dom/cjs/react-router-dom.min';
-import { combineReducers, createStore } from 'redux';
 
-import { ConfirmBulkActionDialog, ConfirmDialogPublishAll } from '..';
-import reducers from '../../../../../../../reducers';
-
-jest.mock('../../../../../../../shared/hooks', () => ({
-  ...jest.requireActual('../../../../../../../shared/hooks'),
-  useInjectionZone: () => [],
-}));
-
-const client = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-});
-
-const toggleNotification = jest.fn();
+import { ConfirmBulkActionDialog, ConfirmDialogPublishAll } from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn(() => {
-    return toggleNotification;
-  }),
+  /**
+   * TODO: can we remove this mock by instead passing a value to `initialEntries`?
+   */
   useQueryParams: jest.fn(() => [
     {
       query: {
@@ -47,34 +25,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   ]),
 }));
 
-const handlers = [
-  rest.get('*/countManyEntriesDraftRelations', (req, res, ctx) => {
-    return res.once(
-      ctx.status(200),
-      ctx.json({
-        data: 0,
-      })
-    );
-  }),
-];
-
-const server = setupServer(...handlers);
-
-const rootReducer = combineReducers(reducers);
-const store = createStore(rootReducer, {
-  'content-manager_listView': {
-    data: [
-      { id: 1, publishedAt: null },
-      { id: 2, publishedAt: '2023-01-01T10:10:10.408Z' },
-    ],
-    contentType: {
-      settings: {
-        mainField: 'name',
-      },
-    },
-  },
-});
-
 describe('ConfirmBulkActionDialog', () => {
   const Component = (props) => (
     <ConfirmBulkActionDialog
@@ -86,97 +36,69 @@ describe('ConfirmBulkActionDialog', () => {
     />
   );
 
-  const render = (props) => ({
-    ...renderRTL(<Component {...props} />, {
-      wrapper: ({ children }) => (
-        <ThemeProvider theme={lightTheme}>
-          <IntlProvider locale="en" messages={{}} defaultLocale="en">
-            {children}
-          </IntlProvider>
-        </ThemeProvider>
-      ),
-    }),
-  });
-
   it('should toggle the dialog', () => {
-    const { rerender } = render();
+    const { rerender, queryByRole, getByRole, getByTestId } = renderRTL(<Component />);
 
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(queryByRole('dialog')).not.toBeInTheDocument();
 
     rerender(<Component isOpen />);
 
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByTestId('dialog-body')).toBeInTheDocument();
-    expect(screen.getByTestId('end-action')).toBeInTheDocument();
+    expect(getByRole('dialog')).toBeInTheDocument();
+    expect(getByTestId('dialog-body')).toBeInTheDocument();
+    expect(getByTestId('end-action')).toBeInTheDocument();
   });
 });
 
 describe('ConfirmDialogPublishAll', () => {
-  const Component = () => (
-    <ConfirmDialogPublishAll
-      isOpen
-      onConfirm={jest.fn()}
-      onToggleDialog={jest.fn()}
-      isConfirmButtonLoading
-    />
-  );
-
-  const render = (props) => ({
-    ...renderRTL(<Component {...props} />, {
-      wrapper: ({ children }) => (
-        <ThemeProvider theme={lightTheme}>
-          <QueryClientProvider client={client}>
-            <IntlProvider locale="en" messages={{}} defaultLocale="en">
-              <Provider store={store}>
-                <MemoryRouter>
-                  <Table.Root defaultSelectedEntries={[1, 2]}>{children}</Table.Root>
-                </MemoryRouter>
-              </Provider>
-            </IntlProvider>
-          </QueryClientProvider>
-        </ThemeProvider>
-      ),
-    }),
-  });
-
-  beforeAll(() => {
-    server.listen();
-  });
-
-  afterAll(() => {
-    server.close();
+  const render = () => ({
+    ...renderRTL(
+      <ConfirmDialogPublishAll
+        isOpen
+        onConfirm={jest.fn()}
+        onToggleDialog={jest.fn()}
+        isConfirmButtonLoading
+      />,
+      {
+        renderOptions: {
+          wrapper: ({ children }) => (
+            <Table.Root defaultSelectedEntries={[1, 2]}>{children}</Table.Root>
+          ),
+        },
+      }
+    ),
   });
 
   it('should show a default message if there are not draft relations', async () => {
-    render();
+    const { findByText, getByRole, queryByText } = render();
 
-    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+    await waitFor(() => expect(getByRole('dialog')).toBeInTheDocument());
 
     expect(
-      screen.queryByText('not published yet and might lead to unexpected behavior')
+      queryByText('not published yet and might lead to unexpected behavior')
     ).not.toBeInTheDocument();
 
-    expect(
-      await screen.findByText('Are you sure you want to publish these entries?')
-    ).toBeInTheDocument();
+    expect(await findByText('Are you sure you want to publish these entries?')).toBeInTheDocument();
   });
 
   it('should show the warning message with just 1 draft relation and 2 entries', async () => {
     server.use(
-      rest.get('*/countManyEntriesDraftRelations', (req, res, ctx) => {
-        return res.once(
-          ctx.status(200),
-          ctx.json({
-            data: 1,
-          })
-        );
-      })
+      rest.get(
+        '/content-manager/collection-types/:contentType/actions/countManyEntriesDraftRelations',
+        (req, res, ctx) => {
+          return res.once(
+            ctx.status(200),
+            ctx.json({
+              data: 1,
+            })
+          );
+        }
+      )
     );
 
-    render();
+    const { getByRole } = render();
 
     await waitFor(() => {
-      const publishDialog = screen.getByRole('dialog');
+      const publishDialog = getByRole('dialog');
       expect(publishDialog).toBeInTheDocument();
       within(publishDialog).getByText(/1 relation out of 2 entries is/i);
     });
@@ -184,20 +106,23 @@ describe('ConfirmDialogPublishAll', () => {
 
   it('should show the warning message with 2 draft relations and 2 entries', async () => {
     server.use(
-      rest.get('*/countManyEntriesDraftRelations', (req, res, ctx) => {
-        return res.once(
-          ctx.status(200),
-          ctx.json({
-            data: 2,
-          })
-        );
-      })
+      rest.get(
+        '/content-manager/collection-types/:contentType/actions/countManyEntriesDraftRelations',
+        (req, res, ctx) => {
+          return res.once(
+            ctx.status(200),
+            ctx.json({
+              data: 2,
+            })
+          );
+        }
+      )
     );
 
-    render();
+    const { getByRole } = render();
 
     await waitFor(() => {
-      const publishDialog = screen.getByRole('dialog');
+      const publishDialog = getByRole('dialog');
       expect(publishDialog).toBeInTheDocument();
       within(publishDialog).getByText(/2 relations out of 2 entries are/i);
     });
@@ -205,26 +130,25 @@ describe('ConfirmDialogPublishAll', () => {
 
   it('should not show the Confirmation component if there is an error coming from the API', async () => {
     server.use(
-      rest.get('*/countManyEntriesDraftRelations', (req, res, ctx) => {
-        return res.once(
-          ctx.status(500),
-          ctx.json({
-            errorMessage: 'Error',
-          })
-        );
-      })
+      rest.get(
+        '/content-manager/collection-types/:contentType/actions/countManyEntriesDraftRelations',
+        (req, res, ctx) => {
+          return res.once(
+            ctx.status(500),
+            ctx.json({
+              errorMessage: 'Error',
+            })
+          );
+        }
+      )
     );
 
-    render();
+    const { getByText, queryByRole } = render();
 
-    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    await waitFor(() => expect(queryByRole('dialog')).not.toBeInTheDocument());
     await waitFor(() =>
-      expect(toggleNotification).toHaveBeenCalledWith({
-        type: 'warning',
-        message: 'Request failed with status code 500',
-      })
+      expect(getByText('Request failed with status code 500')).toBeInTheDocument()
     );
-    expect(await screen.getByRole('alert')).toBeInTheDocument();
   });
 
   it('should show the warning message with 2 draft relations and 2 entries even if the locale param is not passed', async () => {
@@ -239,20 +163,22 @@ describe('ConfirmDialogPublishAll', () => {
     ]);
 
     server.use(
-      rest.get('*/countManyEntriesDraftRelations', (req, res, ctx) => {
-        return res.once(
-          ctx.status(200),
-          ctx.json({
-            data: 2,
-          })
-        );
-      })
+      rest.get(
+        '/content-manager/collection-types/:contentType/actions/countManyEntriesDraftRelations',
+        (req, res, ctx) => {
+          return res.once(
+            ctx.json({
+              data: 2,
+            })
+          );
+        }
+      )
     );
 
-    render();
+    const { getByRole } = render();
 
     await waitFor(() => {
-      const publishDialog = screen.getByRole('dialog');
+      const publishDialog = getByRole('dialog');
       expect(publishDialog).toBeInTheDocument();
       within(publishDialog).getByText(/2 relations out of 2 entries are/i);
     });

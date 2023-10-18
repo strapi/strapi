@@ -3,7 +3,7 @@ import React from 'react';
 import { Flex, GridItem, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { useApiTokenPermissionsContext } from '../../../../../../../contexts/ApiTokenPermissions';
+import { useApiTokenPermissionsContext } from '../../../../../../../contexts/apiTokenPermissions';
 import BoundRoute from '../BoundRoute';
 
 const ActionBoundRoutes = () => {

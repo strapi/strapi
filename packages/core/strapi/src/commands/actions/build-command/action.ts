@@ -1,4 +1,4 @@
-import strapi from '../../..';
+import strapi from '../../../Strapi';
 import { buildAdmin } from '../../builders';
 
 interface CmdOptions {

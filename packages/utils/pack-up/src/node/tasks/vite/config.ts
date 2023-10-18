@@ -1,4 +1,5 @@
 import react from '@vitejs/plugin-react';
+import { builtinModules } from 'node:module';
 import path from 'path';
 import { InlineConfig, createLogger } from 'vite';
 
@@ -11,7 +12,7 @@ import type { BuildContext } from '../../createBuildContext';
  * @internal
  */
 const resolveViteConfig = (ctx: BuildContext, task: ViteBaseTask) => {
-  const { cwd, distPath, targets, external, extMap, pkg } = ctx;
+  const { cwd, distPath, targets, external, extMap, pkg, exports: exportMap } = ctx;
   const { entries, format, output, runtime } = task;
   const outputExt = extMap[pkg.type || 'commonjs'][format];
   const outDir = path.relative(cwd, distPath);
@@ -21,6 +22,9 @@ const resolveViteConfig = (ctx: BuildContext, task: ViteBaseTask) => {
   customLogger.warnOnce = (msg) => ctx.logger.warn(msg);
   customLogger.error = (msg) => ctx.logger.error(msg);
   customLogger.info = () => {};
+
+  const exportIds = Object.keys(exportMap).map((exportPath) => path.join(pkg.name, exportPath));
+  const sourcePaths = Object.values(exportMap).map((exp) => path.resolve(cwd, exp.source));
 
   const config = {
     configFile: false,
@@ -43,14 +47,56 @@ const resolveViteConfig = (ctx: BuildContext, task: ViteBaseTask) => {
         formats: [format],
         /**
          * this enforces the file name to match what the output we've
-         * determined from the package.json exports.
+         * determined from the package.json exports. However, when preserving modules
+         * we want to let Rollup handle the file names.
          */
-        fileName() {
-          return `${path.relative(outDir, output).replace(/\.[^/.]+$/, '')}${outputExt}`;
-        },
+        fileName: resolveConfigProperty(ctx.config.preserveModules, false)
+          ? undefined
+          : () => {
+              return `${path.relative(outDir, output).replace(/\.[^/.]+$/, '')}${outputExt}`;
+            },
       },
       rollupOptions: {
-        external,
+        external(id, importer) {
+          // Check if the id is a self-referencing import
+          if (exportIds?.includes(id)) {
+            return true;
+          }
+
+          // Check if the id is a file path that points to an exported source file
+          if (importer && (id.startsWith('.') || id.startsWith('/'))) {
+            const idPath = path.resolve(path.dirname(importer), id);
+
+            if (sourcePaths?.includes(idPath)) {
+              ctx.logger.warn(
+                `detected self-referencing import – treating as external: ${path.relative(
+                  cwd,
+                  idPath
+                )}`
+              );
+
+              return true;
+            }
+          }
+
+          const idParts = id.split('/');
+
+          const name = idParts[0].startsWith('@') ? `${idParts[0]}/${idParts[1]}` : idParts[0];
+
+          const builtinModulesWithNodePrefix = [
+            ...builtinModules,
+            ...builtinModules.map((modName) => `node:${modName}`),
+          ];
+
+          if (
+            (name && external.includes(name)) ||
+            (name && builtinModulesWithNodePrefix.includes(name))
+          ) {
+            return true;
+          }
+
+          return false;
+        },
         output: {
           preserveModules: resolveConfigProperty(ctx.config.preserveModules, false),
           /**

@@ -3,7 +3,7 @@ import React, { memo } from 'react';
 import { Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { useApiTokenPermissionsContext } from '../../../../../../../contexts/ApiTokenPermissions';
+import { useApiTokenPermissionsContext } from '../../../../../../../contexts/apiTokenPermissions';
 import ActionBoundRoutes from '../ActionBoundRoutes';
 import ContentTypesSection from '../ContenTypesSection';
 

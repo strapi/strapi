@@ -86,9 +86,9 @@ The command sequence can be visualised as follows:
 
 There are three different runtimes available for plugins:
 
-- `node` which equates to a `node16` target
+- `node` which equates to a `node18` target
 - `web` which equates to a `esnext` target
-- `*` (universal) which equates to `["last 3 major versions", "Firefox ESR", "last 2 Opera versions", "not dead", "node 16.0.0"]`
+- `*` (universal) which equates to `["last 3 major versions", "Firefox ESR", "last 2 Opera versions", "not dead", "node 18.0.0"]`
 
 The `node` and `web` targets are specifically used for the export maps with they keys `./strapi-server` and `./strapi-admin` respectively.
 Any other export map values will be transpiled to the universal target. The universal target can be overwritten by adding the `browserslist`
