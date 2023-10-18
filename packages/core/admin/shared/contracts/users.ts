@@ -36,7 +36,7 @@ export declare namespace UpdateMe {
     data: SanitizedAdminUser;
     error?:
       | Common.ApplicationError
-      | Common.BadRequestError<{ currentPassword: ['Invalid credentials'] }>
+      | Common.BadRequestError<'ValidationError', { currentPassword: ['Invalid credentials'] }>
       | Common.YupValidationError;
   }
 }
