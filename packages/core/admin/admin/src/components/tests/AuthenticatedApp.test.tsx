@@ -9,14 +9,14 @@ jest.mock('@strapi/helper-plugin', () => ({
    */
   usePersistentState: jest.fn().mockImplementation(() => [{ enabled: false }, jest.fn()]),
   auth: {
-    getUserInfo: () => ({ firstname: 'kai', lastname: 'doe', email: 'testemail@strapi.io' }),
+    get: () => ({ firstname: 'kai', lastname: 'doe', email: 'testemail@strapi.io' }),
   },
   useGuidedTour: jest.fn(() => ({
     setGuidedTourVisibility: jest.fn(),
   })),
 }));
 
-jest.mock('../../PluginsInitializer', () => ({
+jest.mock('../PluginsInitializer', () => ({
   PluginsInitializer() {
     return <div>PluginsInitializer</div>;
   },

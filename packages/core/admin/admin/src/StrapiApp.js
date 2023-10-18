@@ -13,7 +13,7 @@ import { LANGUAGE_LOCAL_STORAGE_KEY } from './components/LanguageProvider';
 import { Providers } from './components/Providers';
 import { HOOKS, INJECTION_ZONES } from './constants';
 import { customFields, Plugin, Reducers } from './core/apis';
-import { configureStore } from './core/store';
+import { configureStore } from './core/store/configure';
 import { basename, createHook } from './core/utils';
 import favicon from './favicon.png';
 import App from './pages/App';

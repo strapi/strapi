@@ -22,7 +22,7 @@ import { LanguageProvider, LanguageProviderProps } from './LanguageProvider';
 import { Theme } from './Theme';
 import { ThemeToggleProvider, ThemeToggleProviderProps } from './ThemeToggleProvider';
 
-import type { Store } from '../core/store';
+import type { Store } from '../core/store/configure';
 
 const queryClient = new QueryClient({
   defaultOptions: {

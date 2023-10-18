@@ -8,7 +8,7 @@ import {
 } from '@strapi/helper-plugin';
 import produce from 'immer';
 
-import { useTypedSelector, useTypedDispatch } from '../core/store';
+import { useTypedSelector, useTypedDispatch } from '../core/store/hooks';
 
 /* -------------------------------------------------------------------------------------------------
  * RBACProvider
