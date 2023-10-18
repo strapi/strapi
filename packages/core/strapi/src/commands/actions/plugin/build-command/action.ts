@@ -16,7 +16,7 @@ export default async ({ force, ...opts }: ActionOptions) => {
      * Notify users this is an experimental command and get them to approve first
      * this can be opted out by setting the argument --yes
      */
-    await notifyExperimentalCommand({ force });
+    await notifyExperimentalCommand('plugin:build', { force });
 
     const cwd = process.cwd();
 

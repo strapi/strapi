@@ -1,5 +1,5 @@
 name: 'PR Checker'
 description: 'Check PR status for mergeability'
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'

@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { configureStore } from '@reduxjs/toolkit';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -8,7 +9,6 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IntlProvider } from 'react-intl';
 import { Provider } from 'react-redux';
 
-import configureStore from '../../../../../../../../../admin/src/core/store/configureStore';
 import * as actions from '../../../actions';
 import { STAGE_COLOR_DEFAULT } from '../../../constants';
 import { reducer } from '../../../reducer';
@@ -46,7 +46,9 @@ const STAGES_FIXTURE = [
 const setup = (props) => ({
   ...render(<Stages stages={STAGES_FIXTURE} {...props} />, {
     wrapper({ children }) {
-      const store = configureStore([], [reducer]);
+      const store = configureStore({
+        reducer,
+      });
 
       return (
         <DndProvider backend={HTML5Backend}>

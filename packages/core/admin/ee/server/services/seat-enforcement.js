@@ -1,7 +1,7 @@
 'use strict';
 
 // eslint-disable-next-line node/no-extraneous-require
-const ee = require('@strapi/strapi/dist/utils/ee').default;
+const ee = require('@strapi/strapi/dist/utils/ee');
 const { take, drop, map, prop, pick, reverse, isNil } = require('lodash/fp');
 const { getService } = require('../../../server/utils');
 const { SUPER_ADMIN_CODE } = require('../../../server/services/constants');

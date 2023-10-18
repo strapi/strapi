@@ -44,6 +44,7 @@
     "@casl/ability": "6.5.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",
     "@radix-ui/react-toolbar": "1.0.4",
+    "@reduxjs/toolkit": "1.9.7",
     "@strapi/data-transfer": "4.14.5",
     "@strapi/design-system": "1.12.2",
     "@strapi/helper-plugin": "4.14.5",
@@ -116,8 +117,6 @@
     "react-router-dom": "5.3.4",
     "react-select": "5.7.0",
     "react-window": "1.8.8",
-    "redux": "^4.2.1",
-    "reselect": "4.1.7",
     "rimraf": "3.0.2",
     "sanitize-html": "2.11.0",
     "semver": "7.5.4",
@@ -149,14 +148,14 @@
     "@strapi/strapi": "^4.3.4"
   },
   "engines": {
-    "node": ">=16.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   },
   "nx": {
     "targets": {
       "build": {
         "outputs": [
-          "./build"
+          "{projectRoot}/build"
         ]
       }
     },

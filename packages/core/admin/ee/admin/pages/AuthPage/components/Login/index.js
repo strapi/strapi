@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import UnauthenticatedLayout from '../../../../../../admin/src/layouts/UnauthenticatedLayout';
+import { UnauthenticatedLayout } from '../../../../../../admin/src/layouts/UnauthenticatedLayout';
 import BaseLogin from '../../../../../../admin/src/pages/AuthPage/components/Login/BaseLogin';
 import { useAuthProviders } from '../../../../hooks/useAuthProviders';
 import SSOProviders from '../Providers/SSOProviders';

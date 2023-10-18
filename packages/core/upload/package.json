@@ -49,7 +49,7 @@
     "react-query": "3.39.3",
     "react-redux": "8.1.1",
     "react-select": "5.7.0",
-    "sharp": "0.32.0",
+    "sharp": "0.32.6",
     "yup": "0.32.9"
   },
   "devDependencies": {
@@ -69,7 +69,7 @@
     "styled-components": "5.3.3"
   },
   "engines": {
-    "node": ">=16.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {

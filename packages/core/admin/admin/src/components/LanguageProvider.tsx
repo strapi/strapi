@@ -127,3 +127,4 @@ const reducer = (state = initialState, action: Action) => {
 };
 
 export { LanguageProvider, useLocales, LANGUAGE_LOCAL_STORAGE_KEY };
+export type { LanguageProviderProps, LocalesContextValue };

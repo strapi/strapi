@@ -1,5 +1,5 @@
 import REPL from 'repl';
-import strapi from '../../../index';
+import strapi from '../../../Strapi';
 
 /**
  * `$ strapi console`

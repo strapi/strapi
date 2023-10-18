@@ -42,7 +42,7 @@
     "strapi-server.js"
   ],
   "scripts": {
-    "build": "NODE_ENV=production strapi plugin:build --force",
+    "build": "strapi plugin:build --force",
     "clean": "run -T rimraf ./dist",
     "lint": "yarn lint:project && yarn lint:back && yarn lint:front",
     "lint:back": "run -T eslint ./server -c ./server/.eslintrc.js",
@@ -54,7 +54,7 @@
     "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
-    "watch": "run -T tsc -w --preserveWatchOutput"
+    "watch": "strapi plugin:watch"
   },
   "dependencies": {
     "@strapi/design-system": "1.12.2",
@@ -83,7 +83,7 @@
     "styled-components": "5.3.3"
   },
   "engines": {
-    "node": ">=16.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {
