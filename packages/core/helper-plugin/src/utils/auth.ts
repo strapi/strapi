@@ -98,26 +98,16 @@ const auth = {
     sessionStorage.clear();
   },
 
-  get<T extends keyof StorageItems>(key: T): StorageItems[T] | string | null {
-    const localStorageItem = localStorage.getItem(key);
-    if (localStorageItem) {
+  get<T extends keyof StorageItems>(key: T): StorageItems[T] | null {
+    const item = localStorage.getItem(key) ?? sessionStorage.getItem(key);
+    if (item) {
       try {
-        const parsedItem = JSON.parse(localStorageItem);
+        const parsedItem = JSON.parse(item);
         return parsedItem;
       } catch (error) {
         // Failed to parse return the string value
-        return localStorageItem;
-      }
-    }
-
-    const sessionStorageItem = sessionStorage.getItem(key);
-    if (sessionStorageItem) {
-      try {
-        const parsedItem = JSON.parse(sessionStorageItem);
-        return parsedItem;
-      } catch (error) {
-        // Failed to parse return the string value
-        return sessionStorageItem;
+        // @ts-expect-error - this is fine
+        return item;
       }
     }
 
