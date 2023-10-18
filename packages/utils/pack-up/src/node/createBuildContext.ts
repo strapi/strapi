@@ -9,6 +9,7 @@ import type { Config } from './core/config';
 import type { Logger } from './core/logger';
 import type { PackageJson } from './core/pkg';
 import type { ParsedCommandLine } from 'typescript';
+import type { PluginOption } from 'vite';
 
 interface BuildContextArgs {
   config: Config;
@@ -35,6 +36,7 @@ interface BuildContext {
   extMap: ExtMap;
   logger: Logger;
   pkg: PackageJson;
+  plugins: PluginOption[];
   runtime?: Runtime;
   targets: Targets;
   ts?: {
@@ -134,6 +136,7 @@ const createBuildContext = async ({
     external,
     extMap,
     logger,
+    plugins: resolveConfigProperty(config.plugins, []),
     pkg,
     runtime: config?.runtime,
     targets,

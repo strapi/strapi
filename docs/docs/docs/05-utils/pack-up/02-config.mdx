@@ -48,7 +48,13 @@ interface Config {
    */
   minify?: boolean;
   /**
-   * Instead of creating as few chunks as possible, this mode
+   * An array of Vite plugins to use when bundling.
+   */
+  plugins?: PluginOption[];
+  /**
+   * @alpha
+   *
+   * @description Instead of creating as few chunks as possible, this mode
    * will create separate chunks for all modules using the original module
    * names as file names
    */
@@ -63,7 +69,7 @@ interface Config {
    */
   runtime?: Runtime;
   /**
-   * path to the tsconfig file to use for the bundle.
+   * Path to the tsconfig file to use for the bundle.
    */
   tsconfig?: string;
 }

@@ -26,6 +26,8 @@ const resolveViteConfig = (ctx: BuildContext, task: ViteBaseTask) => {
   const exportIds = Object.keys(exportMap).map((exportPath) => path.join(pkg.name, exportPath));
   const sourcePaths = Object.values(exportMap).map((exp) => path.resolve(cwd, exp.source));
 
+  const basePlugins = runtime === 'node' ? [] : [react()];
+
   const config = {
     configFile: false,
     root: cwd,
@@ -120,14 +122,7 @@ const resolveViteConfig = (ctx: BuildContext, task: ViteBaseTask) => {
         },
       },
     },
-    /**
-     * We _could_ omit this, but we'd need to introduce the
-     * concept of a custom config for the scripts straight away
-     *
-     * and since this is isolated to the Strapi CLI, we can make
-     * some assumptions and add some weight until we move it outside.
-     */
-    plugins: runtime === 'node' ? [] : [react()],
+    plugins: [...basePlugins, ...ctx.plugins],
   } satisfies InlineConfig;
 
   return config;

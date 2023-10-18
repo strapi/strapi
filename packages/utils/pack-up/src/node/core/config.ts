@@ -8,6 +8,7 @@ import { Logger } from './logger';
 
 import type { Export } from './exports';
 import type { Runtime } from '../createBuildContext';
+import type { PluginOption } from 'vite';
 
 interface LoadConfigOptions {
   cwd: string;
@@ -90,6 +91,7 @@ interface ConfigOptions {
    */
   externals?: string[];
   minify?: boolean;
+  plugins?: PluginOption[];
   /**
    * @alpha
    *

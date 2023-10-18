@@ -128,6 +128,18 @@ An array of modules that should not be bundled but instead be resolved at runtim
 
 Whether to minify the output or not.
 
+#### `plugins`
+
+- Type: `PluginOption[]`
+
+An array of Vite plugins to use when bundling.
+
+#### `preserveModules`
+
+- Type: `boolean`
+
+Instead of creating as few chunks as possible, this mode will create separate chunks for all modules using the original module names as file names.
+
 #### `sourcemap`
 
 - Type: `boolean`
@@ -139,3 +151,9 @@ Whether to generate sourcemaps for the output or not.
 - Type: `Runtime`
 
 The transpilation target of the bundle. This is useful if you're bundling many different CLIs or Node.js workers and you want them to be transpiled for the node environment.
+
+#### `tsconfig`
+
+- Type: `string`
+
+Path to the tsconfig file to use for the bundle, defaults to `tsconfig.build.json`.
