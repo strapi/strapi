@@ -48,3 +48,4 @@ const ThemeToggleProvider = ({ children, themes }: ThemeToggleProviderProps) => 
 };
 
 export { ThemeToggleProvider };
+export type { ThemeToggleProviderProps };

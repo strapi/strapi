@@ -4,10 +4,7 @@ import { LinkProps } from 'react-router-dom';
 
 import { TranslationMessage } from '../types';
 
-import type { domain } from '@strapi/permissions';
-
-type Permission = domain.permission.Permission;
-
+import type { Permission } from './RBAC';
 interface MenuItem extends Pick<LinkProps, 'to'> {
   to: string;
   icon: React.ElementType;
@@ -62,7 +59,7 @@ type RunHookWaterfall = <InitialValue, Store>(
   store: Store
 ) => unknown | Promise<unknown>;
 
-export interface StrapiAppContextValue {
+interface StrapiAppContextValue {
   menu: MenuItem[];
   plugins: Record<string, Plugin>;
   settings: Record<string, StrapiAppSetting>;
@@ -124,3 +121,13 @@ const StrapiAppProvider = ({
 const useStrapiApp = () => React.useContext(StrapiAppContext);
 
 export { StrapiAppContext, StrapiAppProvider, useStrapiApp };
+export type {
+  StrapiAppProviderProps,
+  StrapiAppContextValue,
+  MenuItem,
+  Plugin,
+  StrapiAppSettingLink,
+  StrapiAppSetting,
+  RunHookSeries,
+  RunHookWaterfall,
+};

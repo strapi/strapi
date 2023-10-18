@@ -2,14 +2,11 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { useQueries } from 'react-query';
 
-import { useRBACProvider } from '../features/RBAC';
+import { useRBACProvider, Permission } from '../features/RBAC';
 
 import { useFetchClient } from './useFetchClient';
 
-import type { domain } from '@strapi/permissions';
 import type { AxiosResponse } from 'axios';
-
-type Permission = domain.permission.Permission;
 
 type AllowedActions = Record<string, boolean>;
 
@@ -71,8 +68,7 @@ export const useRBAC = (
               data: { data },
             } = await post<
               { data: { data: boolean[] } },
-              AxiosResponse<{ data: { data: boolean[] } }>,
-              { permissions: Permission[] }
+              AxiosResponse<{ data: { data: boolean[] } }>
             >('/admin/permissions/check', {
               permissions: matchingPermissions.map(({ action, subject }) => ({
                 action,
