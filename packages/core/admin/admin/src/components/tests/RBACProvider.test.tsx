@@ -111,7 +111,7 @@ describe('RBACReducer', () => {
       };
 
       expect(
-        RBACReducer(state, setPermissionsAction(fixtures.permissions.allPermissions))
+        RBACReducer(state, setPermissionsAction(fixtures.permissions.contentManager))
           .collectionTypesRelatedPermissions
       ).toEqual(expected);
     });
