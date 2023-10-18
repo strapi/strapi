@@ -25,7 +25,7 @@ export default {
 
     ctx.body = {
       data: checkPermissionsFn(input.permissions as Permission[]),
-    };
+    } satisfies Check.Response;
   },
 
   /**

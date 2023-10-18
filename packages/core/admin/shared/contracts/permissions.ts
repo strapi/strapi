@@ -35,7 +35,7 @@ export declare namespace Check {
   }
 
   export interface Response {
-    data: boolean;
+    data: boolean[];
     error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
