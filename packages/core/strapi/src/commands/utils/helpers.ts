@@ -151,22 +151,20 @@ const runAction =
  * @description Notify users this is an experimental command and get them to approve first
  * this can be opted out by passing `yes` as a property of the args object.
  *
- * @type {(args?: { force?: boolean }) => Promise<void>}
- *
  * @example
  * ```ts
  * const { notifyExperimentalCommand } = require('../utils/helpers');
  *
  * const myCommand = async ({ force }) => {
- *  await notifyExperimentalCommand({ force });
+ *  await notifyExperimentalCommand('plugin:build', { force });
  * }
  * ```
  */
-const notifyExperimentalCommand = async ({ force }: { force?: boolean } = {}) => {
+const notifyExperimentalCommand = async (name: string, { force }: { force?: boolean } = {}) => {
   console.log(
     boxen(
       `The ${chalk.bold(
-        chalk.underline('plugin:build')
+        chalk.underline(name)
       )} command is considered experimental, use at your own risk.`,
       {
         title: 'Warning',
