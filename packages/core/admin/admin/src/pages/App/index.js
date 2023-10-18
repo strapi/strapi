@@ -27,7 +27,7 @@ import { useConfiguration } from '../../hooks/useConfiguration';
 import { useEnterprise } from '../../hooks/useEnterprise';
 import { createRoute, makeUniqueRoutes } from '../../utils';
 import AuthPage from '../AuthPage';
-import NotFoundPage from '../NotFoundPage';
+import { NotFoundPage } from '../NotFoundPage';
 import UseCasePage from '../UseCasePage';
 
 import { ROUTES_CE, SET_ADMIN_PERMISSIONS } from './constants';

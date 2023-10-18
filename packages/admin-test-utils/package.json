@@ -82,6 +82,6 @@
     "@testing-library/jest-dom": "^5.16.5"
   },
   "engines": {
-    "node": ">=16.0.0 <=20.x.x"
+    "node": ">=18.0.0 <=20.x.x"
   }
 }
