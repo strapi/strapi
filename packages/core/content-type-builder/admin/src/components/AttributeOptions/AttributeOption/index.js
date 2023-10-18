@@ -6,24 +6,15 @@
 
 import React from 'react';
 
-import { Box, Flex, Typography } from '@strapi/design-system';
+import { Box, Flex, Typography, Icon } from '@strapi/design-system';
+import { Spark } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
 
 import useFormModalNavigation from '../../../hooks/useFormModalNavigation';
 import getTrad from '../../../utils/getTrad';
 import AttributeIcon from '../../AttributeIcon';
 import OptionBoxWrapper from '../OptionBoxWrapper';
-
-// TODO: Remove after the RTE Blocks Beta release
-const BetaTag = styled(Box)`
-  background-color: ${({ theme }) => theme.colors.secondary100};
-  border: ${({ theme }) => `1px solid ${theme.colors.secondary200}`};
-  border-radius: ${({ theme }) => theme.borderRadius};
-  font-size: ${({ theme }) => theme.fontSizes[0]};
-  padding: ${({ theme }) => `${2 / 16}rem ${theme.spaces[1]}`};
-`;
 
 const AttributeOption = ({ type }) => {
   const { formatMessage } = useIntl();
@@ -43,20 +34,34 @@ const AttributeOption = ({ type }) => {
     <OptionBoxWrapper padding={4} as="button" hasRadius type="button" onClick={handleClick}>
       <Flex>
         <AttributeIcon type={type} />
-        {/* TODO: Remove after the RTE Blocks Beta release (width) */}
+        {/* TODO: Remove after the RTE Blocks Stable release (width) */}
         <Box paddingLeft={4} width="100%">
-          {/* TODO: Remove after the RTE Blocks Beta release (justifyContent) */}
+          {/* TODO: Remove after the RTE Blocks Stable release (justifyContent) */}
           <Flex justifyContent="space-between">
             <Typography fontWeight="bold">
               {formatMessage({ id: getTrad(`attribute.${type}`), defaultMessage: type })}
             </Typography>
-            {/* Remove after the RTE Blocks Beta release */}
+            {/* Remove after the RTE Blocks Stable release */}
             {type === 'blocks' && (
-              <BetaTag>
-                <Typography textColor="secondary600" variant="sigma">
-                  BETA
-                </Typography>
-              </BetaTag>
+              <Flex grow={1} justifyContent="flex-end">
+                <Flex
+                  gap={1}
+                  fontSizes={0}
+                  hasRadius
+                  background="alternative100"
+                  padding={`${2 / 16}rem ${4 / 16}rem`}
+                >
+                  <Icon
+                    width={`${10 / 16}rem`}
+                    height={`${10 / 16}rem`}
+                    as={Spark}
+                    color="alternative600"
+                  />
+                  <Typography textColor="alternative600" variant="sigma">
+                    New
+                  </Typography>
+                </Flex>
+              </Flex>
             )}
           </Flex>
 

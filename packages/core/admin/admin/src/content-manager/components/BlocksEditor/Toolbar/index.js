@@ -1,9 +1,9 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
-import { Flex, Icon, Tooltip, Select, Option, Box, Typography } from '@strapi/design-system';
+import { Flex, Icon, Tooltip, Select, Option, Typography } from '@strapi/design-system';
 import { pxToRem, prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
-import { Link } from '@strapi/icons';
+import { Link, Spark } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement } from 'slate';
@@ -583,15 +583,6 @@ LinkButton.propTypes = {
   disabled: PropTypes.bool.isRequired,
 };
 
-// TODO: Remove after the RTE Blocks Beta release
-const BetaTag = styled(Box)`
-  background-color: ${({ theme }) => theme.colors.secondary100};
-  border: ${({ theme }) => `1px solid ${theme.colors.secondary200}`};
-  border-radius: ${({ theme }) => theme.borderRadius};
-  font-size: ${({ theme }) => theme.fontSizes[0]};
-  padding: ${({ theme }) => `${2 / 16}rem ${theme.spaces[1]}`};
-`;
-
 const BlocksToolbar = ({ disabled }) => {
   const modifiers = useModifiersStore();
   const blocks = useBlocksStore();
@@ -624,7 +615,7 @@ const BlocksToolbar = ({ disabled }) => {
 
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
-      {/* Remove after the RTE Blocks Beta release (paddingRight and width) */}
+      {/* Remove after the RTE Blocks Stable release (paddingRight and width) */}
       <ToolbarWrapper gap={2} padding={2} paddingRight={4} width="100%">
         <BlocksDropdown disabled={disabled} />
         <Toolbar.ToggleGroup type="multiple" asChild>
@@ -650,13 +641,25 @@ const BlocksToolbar = ({ disabled }) => {
             <ListButton block={blocks['list-ordered']} disabled={disabled} />
           </Flex>
         </Toolbar.ToggleGroup>
-        {/* TODO: Remove after the RTE Blocks Beta release */}
+        {/* TODO: Remove after the RTE Blocks Stable release */}
         <Flex grow={1} justifyContent="flex-end">
-          <BetaTag>
-            <Typography textColor="secondary600" variant="sigma">
-              BETA
+          <Flex
+            gap={1}
+            fontSizes={0}
+            hasRadius
+            background="alternative100"
+            padding={`${2 / 16}rem ${4 / 16}rem`}
+          >
+            <Icon
+              width={`${10 / 16}rem`}
+              height={`${10 / 16}rem`}
+              as={Spark}
+              color="alternative600"
+            />
+            <Typography textColor="alternative600" variant="sigma">
+              New
             </Typography>
-          </BetaTag>
+          </Flex>
         </Flex>
       </ToolbarWrapper>
     </Toolbar.Root>
