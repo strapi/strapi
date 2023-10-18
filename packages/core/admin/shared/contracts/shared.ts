@@ -41,3 +41,5 @@ export type AdminRole = {
   users: AdminUser[];
   permissions: Permission[];
 };
+
+export type SanitizedAdminRole = Omit<AdminRole, 'users' | 'permissions'>;

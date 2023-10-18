@@ -28,7 +28,13 @@ const ACTIONS = {
   publish: 'plugin::content-manager.explorer.publish',
 };
 
-const sanitizeRole = omit(['users', 'permissions']);
+// @ts-expect-error
+const sanitizeRole: <T extends object>(obj: T) => Omit<T, 'users' | 'permissions'> = omit([
+  'users',
+  'permissions',
+] as const);
+
+export type AdminRoleWithUsersCount = AdminRole & { usersCount: number };
 
 const COMPARABLE_FIELDS = ['conditions', 'properties', 'subject', 'action', 'actionParameters'];
 const pickComparableFields = pick(COMPARABLE_FIELDS);
@@ -76,9 +82,8 @@ const create = async (attributes: Partial<AdminRole>): Promise<AdminRole> => {
  * Find a role in database
  * @param params query params to find the role
  * @param populate
- * @returns {Promise<role>}
  */
-const findOne = (params = {}, populate?: any) => {
+const findOne = (params = {}, populate?: any): Promise<AdminRole> => {
   return strapi.query('admin::role').findOne({ where: params, populate });
 };
 
@@ -86,9 +91,11 @@ const findOne = (params = {}, populate?: any) => {
  * Find a role in database with usersCounts
  * @param params query params to find the role
  * @param populate
- * @returns {Promise<role>}
  */
-const findOneWithUsersCount = async (params = {}, populate?: any) => {
+const findOneWithUsersCount = async (
+  params = {},
+  populate?: any
+): Promise<AdminRoleWithUsersCount> => {
   const role = await strapi.query('admin::role').findOne({ where: params, populate });
 
   if (role) {
@@ -102,13 +109,10 @@ const findOneWithUsersCount = async (params = {}, populate?: any) => {
  * Find roles in database
  * @param params query params to find the roles
  * @param populate
- * @returns {Promise<array>}
  */
-const find = (params = {}, populate: any) => {
+const find = (params = {}, populate: any): Promise<AdminRole[]> => {
   return strapi.query('admin::role').findMany({ where: params, populate });
 };
-
-export type AdminRoleWithUsersCount = AdminRole & { usersCount: number };
 
 /**
  * Find all roles in database

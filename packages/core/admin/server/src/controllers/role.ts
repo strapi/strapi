@@ -1,3 +1,5 @@
+import type { Context } from 'koa';
+import 'koa-bodyparser';
 import { errors } from '@strapi/utils';
 import {
   validateRoleUpdateInput,
@@ -8,6 +10,17 @@ import {
 import { validatedUpdatePermissionsInput } from '../validation/permission';
 import constants from '../services/constants';
 import { getService } from '../utils';
+import type {
+  Create,
+  FindAll,
+  FindOne,
+  Update,
+  GetPermissions,
+  UpdatePermissions,
+  Delete,
+  BatchDelete,
+} from '../../../shared/contracts/roles';
+import { AdminRole } from '../domain/user';
 
 const { ApplicationError } = errors;
 const { SUPER_ADMIN_CODE } = constants;
@@ -17,23 +30,24 @@ export default {
    * Create a new role
    * @param {KoaContext} ctx - koa context
    */
-  async create(ctx: any) {
-    await validateRoleCreateInput(ctx.request.body);
+  async create(ctx: Context) {
+    const { body } = ctx.request as Create.Request;
+    await validateRoleCreateInput(body);
 
     const roleService = getService('role');
 
-    const role = await roleService.create(ctx.request.body);
-    const sanitizedRole = roleService.sanitizeRole(role);
+    const role = await roleService.create(body);
+    const sanitizedRole = roleService.sanitizeRole(role) as Omit<AdminRole, 'users' | 'permission'>;
 
-    ctx.created({ data: sanitizedRole });
+    ctx.created({ data: sanitizedRole } satisfies Create.Response);
   },
 
   /**
    * Returns on role by id
    * @param {KoaContext} ctx - koa context
    */
-  async findOne(ctx: any) {
-    const { id } = ctx.params;
+  async findOne(ctx: Context) {
+    const { id } = ctx.params as FindOne.Request['params'];
     const role = await getService('role').findOneWithUsersCount({ id });
 
     if (!role) {
@@ -42,15 +56,15 @@ export default {
 
     ctx.body = {
       data: role,
-    };
+    } satisfies FindOne.Response;
   },
 
   /**
    * Returns every roles
    * @param {KoaContext} ctx - koa context
    */
-  async findAll(ctx: any) {
-    const { query } = ctx.request;
+  async findAll(ctx: Context) {
+    const { query } = ctx.request as FindAll.Request;
 
     const permissionsManager = getService('permission').createPermissionsManager({
       ability: ctx.state.userAbility,
@@ -64,16 +78,16 @@ export default {
 
     ctx.body = {
       data: roles,
-    };
+    } satisfies FindAll.Response;
   },
 
   /**
    * Updates a role by id
    * @param {KoaContext} ctx - koa context
    */
-  async update(ctx: any) {
-    const { id } = ctx.params;
-    const { body } = ctx.request;
+  async update(ctx: Context) {
+    const { id } = ctx.params as Update.Request['params'];
+    const { body } = ctx.request as Omit<Update.Request, 'params'>;
 
     const roleService = getService('role');
 
@@ -90,19 +104,22 @@ export default {
     }
 
     const updatedRole = await roleService.update({ id }, body);
-    const sanitizedRole = roleService.sanitizeRole(updatedRole);
+    const sanitizedRole = roleService.sanitizeRole(updatedRole) as Omit<
+      AdminRole,
+      'users' | 'permission'
+    >;
 
     ctx.body = {
       data: sanitizedRole,
-    };
+    } satisfies Update.Response;
   },
 
   /**
    * Returns the permissions assigned to a role
    * @param {KoaContext} ctx - koa context
    */
-  async getPermissions(ctx: any) {
-    const { id } = ctx.params;
+  async getPermissions(ctx: Context) {
+    const { id } = ctx.params as GetPermissions.Request['params'];
 
     const roleService = getService('role');
     const permissionService = getService('permission');
@@ -119,16 +136,16 @@ export default {
 
     ctx.body = {
       data: sanitizedPermissions,
-    };
+    } satisfies GetPermissions.Response;
   },
 
   /**
    * Updates the permissions assigned to a role
    * @param {KoaContext} ctx - koa context
    */
-  async updatePermissions(ctx: any) {
-    const { id } = ctx.params;
-    const { body: input } = ctx.request;
+  async updatePermissions(ctx: Context) {
+    const { id } = ctx.params as UpdatePermissions.Request['params'];
+    const { body: input } = ctx.request as Omit<UpdatePermissions.Request, 'params'>;
 
     const roleService = getService('role');
     const permissionService = getService('permission');
@@ -155,15 +172,15 @@ export default {
 
     ctx.body = {
       data: sanitizedPermissions,
-    };
+    } satisfies UpdatePermissions.Response;
   },
 
   /**
    * Delete a role
    * @param {KoaContext} ctx - koa context
    */
-  async deleteOne(ctx: any) {
-    const { id } = ctx.params;
+  async deleteOne(ctx: Context) {
+    const { id } = ctx.params as Delete.Request['params'];
 
     await validateRoleDeleteInput(id);
 
@@ -175,15 +192,15 @@ export default {
 
     return ctx.deleted({
       data: sanitizedRole,
-    });
+    } satisfies Delete.Response);
   },
 
   /**
    * delete several roles
    * @param {KoaContext} ctx - koa context
    */
-  async deleteMany(ctx: any) {
-    const { body } = ctx.request;
+  async deleteMany(ctx: Context) {
+    const { body } = ctx.request as BatchDelete.Request;
 
     await validateRolesDeleteInput(body);
 
@@ -194,6 +211,6 @@ export default {
 
     return ctx.deleted({
       data: sanitizedRoles,
-    });
+    } satisfies BatchDelete.Response);
   },
 };
