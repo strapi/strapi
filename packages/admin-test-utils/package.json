@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin-test-utils",
-  "version": "4.14.4",
+  "version": "4.14.5",
   "private": true,
   "description": "Test utilities for the Strapi administration panel",
   "license": "MIT",
@@ -73,9 +73,9 @@
   },
   "devDependencies": {
     "@strapi/pack-up": "workspace:*",
-    "eslint-config-custom": "4.14.4",
+    "eslint-config-custom": "4.14.5",
     "redux": "^4.2.1",
-    "tsconfig": "4.14.4"
+    "tsconfig": "4.14.5"
   },
   "peerDependencies": {
     "redux": "^4.2.1"
