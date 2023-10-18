@@ -1,8 +1,6 @@
-import React from 'react';
-
 import { render, waitFor } from '@tests/utils';
 
-import AuthenticatedApp from '../index';
+import { AuthenticatedApp } from '../AuthenticatedApp';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -11,14 +9,14 @@ jest.mock('@strapi/helper-plugin', () => ({
    */
   usePersistentState: jest.fn().mockImplementation(() => [{ enabled: false }, jest.fn()]),
   auth: {
-    getUserInfo: () => ({ firstname: 'kai', lastname: 'doe', email: 'testemail@strapi.io' }),
+    get: () => ({ firstname: 'kai', lastname: 'doe', email: 'testemail@strapi.io' }),
   },
   useGuidedTour: jest.fn(() => ({
     setGuidedTourVisibility: jest.fn(),
   })),
 }));
 
-jest.mock('../../PluginsInitializer', () => ({
+jest.mock('../PluginsInitializer', () => ({
   PluginsInitializer() {
     return <div>PluginsInitializer</div>;
   },
@@ -34,10 +32,10 @@ describe('AuthenticatedApp', () => {
   });
 
   it('should not crash', async () => {
-    const { queryByText } = render(<AuthenticatedApp />);
+    const { queryByText, getByText } = render(<AuthenticatedApp />);
 
     await waitFor(() => expect(queryByText(/Loading/)).not.toBeInTheDocument());
 
-    expect(queryByText(/PluginsInitializer/)).toBeInTheDocument();
+    expect(getByText(/PluginsInitializer/)).toBeInTheDocument();
   });
 });
