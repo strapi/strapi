@@ -153,4 +153,10 @@ export interface DocumentService {
     uid: TContentTypeUID,
     params?: TParams
   ): Promise<number | null>;
+
+  publish<TContentTypeUID extends Common.UID.ContentType>(
+    uid: TContentTypeUID,
+    documentId: Params.Attribute.ID,
+    params?: { locales: string[] }
+  ): Promise<number | null>;
 }

@@ -5,7 +5,12 @@ module.exports = {
   singularName: 'document',
   pluralName: 'documents',
   kind: 'collectionType',
-
+  draftAndPublish: true,
+  pluginOptions: {
+    i18n: {
+      localized: true,
+    },
+  },
   attributes: {
     name: {
       type: 'string',

@@ -33,6 +33,8 @@ const { fixtures, schemas } = resources;
 
 const builder = createTestBuilder();
 
+const DOCUMENT_UID = 'api::document.document' as Common.UID.ContentType;
+
 let data: ReturnType<typeof builder.sanitizedFixtures>;
 let strapi: LoadedStrapi;
 let rq: ReturnType<typeof createAuthRequest>;
@@ -103,13 +105,9 @@ describe('Document Service', () => {
     it('find one selects by document id', async () => {
       const documentDb = await findDBDocument({ name: '3 Document A' });
 
-      const document = await strapi.documents.findOne(
-        'api::document.document',
-        documentDb.documentId,
-        {
-          locales: 'all',
-        }
-      );
+      const document = await strapi.documents.findOne(DOCUMENT_UID, documentDb.documentId, {
+        locales: 'all',
+      });
 
       expect(document).toMatchObject(documentDb);
     });
@@ -119,7 +117,7 @@ describe('Document Service', () => {
     it('find many selects by document name', async () => {
       const documentsDb = await findDBDocuments({ name: '3 Document A' });
 
-      const documents = await strapi.documents.findMany('api::document.document', {
+      const documents = await strapi.documents.findMany(DOCUMENT_UID, {
         filters: {
           name: '3 Document A',
         },
@@ -136,13 +134,9 @@ describe('Document Service', () => {
       const documentDb = await findDBDocument({ name: '3 Document A' });
       const newName = 'Updated Document';
 
-      const document = await strapi.documents.update(
-        'api::document.document',
-        documentDb.documentId,
-        {
-          data: { name: newName },
-        }
-      );
+      const document = await strapi.documents.update(DOCUMENT_UID, documentDb.documentId, {
+        data: { name: newName },
+      });
 
       // verify that the returned document was updated
       expect(document).toMatchObject({
@@ -166,10 +160,7 @@ describe('Document Service', () => {
     testInTransaction(async () => {
       const documentDb = await findDBDocument({ name: '3 Document A' });
 
-      const document = await strapi.documents.delete(
-        'api::document.document',
-        documentDb.documentId
-      );
+      const document = await strapi.documents.delete(DOCUMENT_UID, documentDb.documentId);
 
       const deletedDocumentDb = await findDBDocument({ name: '3 Document A' });
 
@@ -192,7 +183,7 @@ describe('Document Service', () => {
   it('find page of documents', async () => {
     const documentsDb = await findDBDocuments({});
 
-    const documents = await strapi.documents.findPage('api::document.document', {
+    const documents = await strapi.documents.findPage(DOCUMENT_UID, {
       page: 1,
       pageSize: 10,
     });
@@ -213,15 +204,11 @@ describe('Document Service', () => {
     testInTransaction(async () => {
       const documentDb = await findDBDocument({ name: '3 Document A' });
 
-      const document = await strapi.documents.clone(
-        'api::document.document',
-        documentDb.documentId,
-        {
-          data: {
-            name: 'Cloned Document',
-          },
-        }
-      );
+      const document = await strapi.documents.clone(DOCUMENT_UID, documentDb.documentId, {
+        data: {
+          name: 'Cloned Document',
+        },
+      });
 
       const clonedDocumentDb = await findDBDocument({ name: 'Cloned Document' });
 
@@ -233,11 +220,7 @@ describe('Document Service', () => {
   it('load a document', async () => {
     const documentDb = await findDBDocument({ name: '3 Document A' });
 
-    const relations = await strapi.documents.load(
-      'api::document.document',
-      documentDb.documentId,
-      'relations'
-    );
+    const relations = await strapi.documents.load(DOCUMENT_UID, documentDb.documentId, 'relations');
 
     expect(relations).toMatchObject(fixtures.relations);
   });
@@ -246,7 +229,7 @@ describe('Document Service', () => {
     const documentsDb = await findDBDocuments({});
 
     const documents = await strapi.documents.loadPages(
-      'api::document.document',
+      DOCUMENT_UID,
       documentsDb.map((document) => document.documentId),
       'relations'
     );
@@ -258,7 +241,7 @@ describe('Document Service', () => {
     'delete many documents with where clause',
     testInTransaction(async () => {
       const documentsDb = await findDBDocuments({});
-      const count = await strapi.documents.deleteMany('api::document.document', {
+      const count = await strapi.documents.deleteMany(DOCUMENT_UID, {
         where: { documentId: { $in: documentsDb.map((document) => document.documentId) } },
       });
 
@@ -274,7 +257,7 @@ describe('Document Service', () => {
       const documentsDb = await findDBDocuments({});
 
       const count = await strapi.documents.deleteMany(
-        'api::document.document',
+        DOCUMENT_UID,
         documentsDb.map((document) => document.documentId)
       );
 
@@ -283,4 +266,93 @@ describe('Document Service', () => {
       expect(count).toHaveLength(0);
     })
   );
+
+  describe('Publish', () => {
+    // will automatically publish the draft over the published version unless the draft wasn't modified
+    // documents.publish('uid', documentId, {
+    // support publishing one or many locales
+    // support publishing relations at the same time or not
+    /**
+     *  locales: string[]
+     *
+     * strapi.documents.publish('uid', docId, { locales: ['en', 'fr']})
+     *
+     * What if you don't specify any locale?
+     *  - Error? ❌
+     *      - Super annoying if not using i18n
+     *  - Publish all locales?
+     *      - this is how all doc service methods work ✅
+
+      // Happy path
+      Scenario 1: Publishing a document with no locales
+      Scenario 2: Publishing a single locale of a document with multiple locales
+      Scenario 3: Publish multiple locales of a document
+      Scenario 4: Publish all locales of a document
+
+      // Edge cases
+      Scenario 5: Publishing a document that does not exist should throw an error
+
+      // FUTURE:
+      Scenario 6: Publishing a document with multiple locales and relations
+      - publish relations automatically
+    */
+    /**
+     * open a transaction
+     * try:
+     *  find all versions of document(s) for the requested locales
+     *  for each draft locale
+     *    - if published version exists
+     *      - delete published
+     *    - clone draft as published [also clone the components]
+     * catch:
+     * - rollback
+     * - re-throw the error
+     * commit transaction
+     */
+    it.only(
+      'publishes all locales when locale is not passed',
+      testInTransaction(async () => {
+        const locales = ['en', 'es', 'fr'];
+        const originalDocsDb = await findDBDocuments({ locale: { $in: locales } });
+
+        const results = await strapi.documents.publish(DOCUMENT_UID, 'doc-en-fr-es');
+        expect(results).toBe({ count: 3 });
+
+        const updatedDocsDb = await findDBDocuments({ locale: { $in: locales } });
+
+        // this is wrong, thinking about the right way
+        // expect 3 draft and 3 publish
+        expect(updatedDocsDb.length).toBe(6);
+        locales.forEach((locale) => {
+          const published = updatedDocsDb.find(
+            (doc) => doc.status === 'published' && doc.locale === locale
+          );
+          // expect published from db to match original from
+          const draft = updatedDocsDb.find(
+            (doc) => doc.status === 'draft' && doc.locale === locale
+          );
+        });
+      })
+    );
+
+    it.skip(
+      'publishes one locale of a document with multiple locales when locale is string',
+      testInTransaction(async () => {
+        const results = await strapi.documents.publish(DOCUMENT_UID, 'doc-en-fr-es', {
+          locales: 'en',
+        });
+        expect(results).toBe({ count: 1 });
+      })
+    );
+    it.skip(
+      'publishes specified locales of a document with multiple locales when locale is array',
+      testInTransaction(async () => {
+        const results = await strapi.documents.publish(DOCUMENT_UID, 'doc-en-fr-es', {
+          locales: ['en', 'fr'],
+        });
+        expect(results).toBe({ count: 2 });
+      })
+    );
+    it('publishes all locales of a document', async () => {});
+  });
 });

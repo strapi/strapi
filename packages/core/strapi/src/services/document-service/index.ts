@@ -1,5 +1,5 @@
 import type { Strapi, DocumentService, EntityValidator, EventHub } from '@strapi/types';
-import { convertQueryParams } from '@strapi/utils';
+import { convertQueryParams, mapAsync } from '@strapi/utils';
 import type { Database } from '@strapi/database';
 
 import { isArray } from 'lodash/fp';
@@ -25,6 +25,8 @@ const { transformParamsToQuery } = convertQueryParams;
  *        Load
  *        LoadPages
  *        DeleteMany
+ * TODO: Create DocumentRepository to
+ *       call documentService as strapi.document(uid, {}).method()
  * TODO: Webhooks
  * TODO: Audit logs
  * TODO: File upload
@@ -142,7 +144,36 @@ const createDocumentService = ({
   },
 
   async clone(uid, documentId, params) {
+    // TODO: Transform params to query
     return db.query(uid).clone(documentId, params || {});
+  },
+
+  async publish(uid, documentId, params) {
+    // const { locales } = params || { locales: [] };
+
+    // Find all version of documents of the requested locales
+    const draftVersions = await db.query(uid).findMany({
+      where: {
+        documentId,
+        publishedAt: null,
+        // locales: { $in: locales },
+      },
+    });
+
+    // TODO: Throw error?
+    if (!draftVersions.length) {
+      return null;
+    }
+
+    await strapi.db?.transaction(async () =>
+      // Clone every draft version to be published
+      mapAsync(draftVersions, (draftVersion: any) => {
+        // @ts-expect-error - publishedAt is not allowed
+        return this.clone(uid, draftVersion.id, { ...params, data: { published_at: new Date() } });
+      })
+    );
+
+    return draftVersions.length;
   },
 });
 
