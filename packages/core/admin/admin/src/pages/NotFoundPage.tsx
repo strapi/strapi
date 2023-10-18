@@ -4,14 +4,18 @@
  * This is the page we show when the user visits a url that doesn't have a route
  *
  */
-import React from 'react';
-
-import { ContentLayout, EmptyStateLayout, HeaderLayout, Main } from '@strapi/design-system';
-import { LinkButton, useFocusWhenNavigate } from '@strapi/helper-plugin';
+import {
+  ContentLayout,
+  EmptyStateLayout,
+  HeaderLayout,
+  LinkButton,
+  Main,
+} from '@strapi/design-system';
+import { useFocusWhenNavigate } from '@strapi/helper-plugin';
 import { ArrowRight, EmptyPictures } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-const NoContentType = () => {
+export const NotFoundPage = () => {
   const { formatMessage } = useIntl();
   useFocusWhenNavigate();
 
@@ -46,5 +50,3 @@ const NoContentType = () => {
     </Main>
   );
 };
-
-export default NoContentType;
