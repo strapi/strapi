@@ -37,9 +37,7 @@ type StrapiRoute = Pick<MenuItem, 'exact' | 'to'> & Required<Pick<MenuItem, 'Com
 const ROUTES_CE: StrapiRoute[] | null = null;
 
 const AuthenticatedApp = React.lazy(() =>
-  import(/* webpackChunkName: "Admin-authenticatedApp" */ './components/AuthenticatedApp').then(
-    ({ AuthenticatedApp }) => ({ default: AuthenticatedApp })
-  )
+  import('./components/AuthenticatedApp').then((mod) => ({ default: mod.AuthenticatedApp }))
 );
 
 export const App = () => {
