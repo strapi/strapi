@@ -25,9 +25,26 @@ export declare namespace Init {
 }
 
 /**
- * /project-settings - Get and modify the project settings
+ * /project-settings - Get the project settings
  */
-export declare namespace ProjectSettings {
+export declare namespace GetProjectSettings {
+  export interface Response {
+    menuLogo: SettingsFile;
+    authLogo: SettingsFile;
+  }
+}
+
+/**
+ * /project-settings - Update the project settings
+ */
+export declare namespace UpdateProjectSettings {
+  export interface Request {
+    body: {
+      menuLogo: SettingsFile;
+      authLogo: SettingsFile;
+    };
+    files: SettingsFile[];
+  }
   export interface Response {
     menuLogo: SettingsFile;
     authLogo: SettingsFile;

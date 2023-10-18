@@ -3,7 +3,11 @@ import { pick } from 'lodash';
 
 const PROJECT_SETTINGS_FILE_INPUTS = ['menuLogo', 'authLogo'] as const;
 
-import { ProjectSettings, SettingsFile } from '../../../shared/contracts/admin';
+import {
+  GetProjectSettings,
+  SettingsFile,
+  UpdateProjectSettings,
+} from '../../../shared/contracts/admin';
 
 const parseFilesData = async (files: SettingsFile) => {
   const formatedFilesData = {} as any;
@@ -48,7 +52,7 @@ const parseFilesData = async (files: SettingsFile) => {
   return formatedFilesData;
 };
 
-const getProjectSettings = async (): Promise<ProjectSettings.Response> => {
+const getProjectSettings = async (): Promise<GetProjectSettings.Response> => {
   const store = strapi.store({ type: 'core', name: 'admin' });
 
   // Returns an object with file inputs names as key and null as value
@@ -82,7 +86,7 @@ const getProjectSettings = async (): Promise<ProjectSettings.Response> => {
   return projectSettings;
 };
 
-const uploadFiles = async (files = {} as Record<string, ProjectSettings.Response>) => {
+const uploadFiles = async (files = {} as Record<string, UpdateProjectSettings.Response>) => {
   // Call the provider upload function for each file
   return Promise.all(
     Object.values(files)
@@ -125,7 +129,7 @@ const deleteOldFiles = async ({ previousSettings, newSettings }: any) => {
   );
 };
 
-const updateProjectSettings = async (newSettings: ProjectSettings.Response) => {
+const updateProjectSettings = async (newSettings: UpdateProjectSettings.Response) => {
   const store = strapi.store({ type: 'core', name: 'admin' });
   const previousSettings = (await store.get({ key: 'project-settings' })) as any;
   const files = pick(newSettings, PROJECT_SETTINGS_FILE_INPUTS);

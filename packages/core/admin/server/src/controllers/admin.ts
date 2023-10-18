@@ -18,10 +18,11 @@ import { getService } from '../utils';
 
 import type {
   Init,
-  ProjectSettings,
+  GetProjectSettings,
   Information,
   Plugins,
   TelemetryProperties,
+  UpdateProjectSettings,
 } from '../../../shared/contracts/admin';
 
 const { isUsingTypeScript } = tsUtils;
@@ -81,13 +82,13 @@ export async function init() {
 export async function getProjectSettings() {
   return getService(
     'project-settings'
-  ).getProjectSettings() satisfies Promise<ProjectSettings.Response>;
+  ).getProjectSettings() satisfies Promise<GetProjectSettings.Response>;
 }
 
 export async function updateProjectSettings(ctx: Context) {
   const {
     request: { files, body },
-  } = ctx;
+  } = ctx as { request: UpdateProjectSettings.Request };
 
   const projectSettingsService = getService('project-settings');
 
@@ -100,7 +101,7 @@ export async function updateProjectSettings(ctx: Context) {
   return projectSettingsService.updateProjectSettings({
     ...(body as object),
     ...formatedFiles,
-  }) satisfies Promise<ProjectSettings.Response>;
+  }) satisfies Promise<UpdateProjectSettings.Response>;
 }
 
 export async function telemetryProperties(ctx: Context) {
