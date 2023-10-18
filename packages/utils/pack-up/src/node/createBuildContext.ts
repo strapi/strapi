@@ -48,7 +48,7 @@ const DEFAULT_BROWSERS_LIST_CONFIG = [
   'Firefox ESR',
   'last 2 Opera  versions',
   'not dead',
-  'node 16.0.0',
+  'node 18.0.0',
 ];
 
 /**
@@ -71,7 +71,7 @@ const createBuildContext = async ({
 
   const targets = {
     '*': browserslistToEsbuild(pkg.browserslist ?? DEFAULT_BROWSERS_LIST_CONFIG),
-    node: browserslistToEsbuild(['node 16.0.0']),
+    node: browserslistToEsbuild(['node 18.0.0']),
     web: ['esnext'],
   };
 
