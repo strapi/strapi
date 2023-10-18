@@ -13,7 +13,6 @@ exports[`Content types service format ContentType Returns consistent schemas 1`]
     "collectionName": "tests",
     "description": "My description",
     "displayName": "My name",
-    "draftAndPublish": false,
     "kind": "singleType",
     "pluginOptions": {
       "content-manager": {

@@ -13,7 +13,6 @@ const data = {
 };
 
 const dogModel = {
-  draftAndPublish: false,
   attributes: {
     name: {
       type: 'string',

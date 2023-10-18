@@ -8,10 +8,7 @@
     "description": "",
     "name": "Address"
   },
-  "options": {
-    "reviewWorkflows": true,
-    "draftAndPublish": false
-  },
+  "options": {},
   "pluginOptions": {},
   "attributes": {
     "postal_code": {

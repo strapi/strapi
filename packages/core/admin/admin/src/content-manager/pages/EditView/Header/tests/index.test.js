@@ -22,7 +22,6 @@ const defaultProps = {
   initialData: {},
   isCreatingEntry: true,
   isSingleType: false,
-  hasDraftAndPublish: false,
   layout: ct,
   modifiedData: {},
   onPublish: jest.fn(),

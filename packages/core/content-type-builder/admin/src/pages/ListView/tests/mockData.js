@@ -5,7 +5,6 @@ export default {
     schema: {
       name: 'Address',
       description: '',
-      draftAndPublish: false,
       pluginOptions: {
         i18n: {
           localized: true,

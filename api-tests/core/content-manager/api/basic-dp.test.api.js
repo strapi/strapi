@@ -25,7 +25,6 @@ const productWithDP = {
       maxLength: 30,
     },
   },
-  draftAndPublish: true,
   displayName: 'product with DP',
   singularName: 'product-with-dp',
   pluralName: 'product-with-dps',
@@ -48,7 +47,7 @@ const compo = {
   },
 };
 
-describe('CM API - Basic + draftAndPublish', () => {
+describe('CM API - Basic', () => {
   beforeAll(async () => {
     await builder.addComponent(compo).addContentType(productWithDP).build();
 

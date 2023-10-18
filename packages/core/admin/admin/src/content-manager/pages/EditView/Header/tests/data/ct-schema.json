@@ -6,7 +6,6 @@
   "isDisplayed": true,
   "info": { "name": "restaurant", "description": "" },
   "options": {
-    "draftAndPublish": false,
     "increments": true,
     "timestamps": ["createdAt", "updatedAt"],
     "comment": ""

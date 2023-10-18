@@ -147,7 +147,6 @@ module.exports = {
       description: '',
       name: 'Kitchen Sink',
     },
-    options: { draftAndPublish: true },
     pluginOptions: {},
     attributes: {
       short_text: { type: 'string' },
@@ -254,7 +253,6 @@ module.exports = {
     kind: 'singleType',
     collectionName: 'homepages',
     info: { displayName: 'Homepage', singularName: 'homepage', pluralName: 'homepages' },
-    options: { draftAndPublish: true },
     pluginOptions: { i18n: { localized: true } },
     attributes: {
       title: { type: 'string', required: true, pluginOptions: { i18n: { localized: true } } },

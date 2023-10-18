@@ -4,7 +4,6 @@ import { errors, contentTypes as contentTypeUtils } from '@strapi/utils';
 import { getFetchParams } from './get-fetch-params';
 
 const {
-  hasDraftAndPublish,
   constants: { PUBLISHED_AT_ATTRIBUTE },
 } = contentTypeUtils;
 
@@ -48,9 +47,8 @@ const createSingleTypeService = ({
           throw new errors.ValidationError('singleType.alreadyExists');
         }
 
-        if (hasDraftAndPublish(contentType)) {
-          setPublishedAt(data);
-        }
+        setPublishedAt(data);
+
         return strapi.entityService?.create(uid, { ...params, data });
       }
 

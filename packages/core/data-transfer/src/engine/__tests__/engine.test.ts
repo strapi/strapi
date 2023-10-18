@@ -103,7 +103,7 @@ const schemas = {
   'api::homepage.homepage': {
     collectionName: 'homepages',
     info: { displayName: 'Homepage', singularName: 'homepage', pluralName: 'homepages' },
-    options: { draftAndPublish: true },
+    options: {},
     pluginOptions: { i18n: { localized: true } },
     attributes: {
       title: { type: 'string', required: true, pluginOptions: { i18n: { localized: true } } },
@@ -176,9 +176,7 @@ const schemas = {
       displayName: 'bar',
       description: '',
     },
-    options: {
-      draftAndPublish: true,
-    },
+    options: {},
     pluginOptions: {},
     attributes: {
       bar: {
@@ -201,9 +199,7 @@ const schemas = {
       pluralName: 'foos',
       displayName: 'foo',
     },
-    options: {
-      draftAndPublish: true,
-    },
+    options: {},
     pluginOptions: {},
     attributes: {
       foo: {

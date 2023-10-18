@@ -107,14 +107,9 @@ const isVisibleAttribute = (model: Model, attributeName: string) => {
   return getVisibleAttributes(model).includes(attributeName);
 };
 
-const getOptions = (model: Model) =>
-  _.assign({ draftAndPublish: false }, _.get(model, 'options', {}));
+const getOptions = (model: Model) => _.get(model, 'options', {});
 
-const hasDraftAndPublish = (model: Model) =>
-  _.get(model, 'options.draftAndPublish', false) === true;
-
-const isDraft = <T extends object>(data: T, model: Model) =>
-  hasDraftAndPublish(model) && _.get(data, PUBLISHED_AT_ATTRIBUTE) === null;
+const isDraft = <T extends object>(data: T) => _.get(data, PUBLISHED_AT_ATTRIBUTE) === null;
 
 const isSingleType = ({ kind = COLLECTION_TYPE }) => kind === SINGLE_TYPE;
 const isCollectionType = ({ kind = COLLECTION_TYPE }) => kind === COLLECTION_TYPE;
@@ -221,7 +216,6 @@ export {
   getTimestamps,
   getCreatorFields,
   isVisibleAttribute,
-  hasDraftAndPublish,
   getOptions,
   isDraft,
   isSingleType,

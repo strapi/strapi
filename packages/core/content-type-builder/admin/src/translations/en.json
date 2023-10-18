@@ -53,8 +53,6 @@
   "contentType.collectionName.description": "Useful when the name of your Content Type and your table name differ",
   "contentType.collectionName.label": "Collection name",
   "contentType.displayName.label": "Display name",
-  "contentType.draftAndPublish.description": "Allows writing a draft version of an entry, before it is published",
-  "contentType.draftAndPublish.label": "Draft & publish",
   "contentType.kind.change.warning": "You just changed the kind of a content type: API will be reset (routes, controllers, and services will be overwritten).",
   "error.attributeName.reserved-name": "This name cannot be used in your content type as it might break other functionalities",
   "error.contentType.pluralName-used": "This value cannot be the same as the singular one",

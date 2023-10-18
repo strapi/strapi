@@ -50,8 +50,6 @@
   "contentType.collectionName.description": "Przydatne, gdy nazwa typu zawartości i nazwa tabeli różnią się",
   "contentType.collectionName.label": "Nazwa kolekcji",
   "contentType.displayName.label": "Nazwa",
-  "contentType.draftAndPublish.description": "Napisz szkic każdego wpisu przed publikacją",
-  "contentType.draftAndPublish.label": "System szkicu/publikacji",
   "contentType.kind.change.warning": "Właśnie zmieniłeś rodzaj typu treści: API zostanie zresetowane (ścieżki, kontrolery i usługi zostaną nadpisane).",
   "error.attributeName.reserved-name": "Ta nazwa nie może być używana w tym typie treści, ponieważ może uszkodzić inne funkcje",
   "error.contentType.pluralName-used": "Ta wartość nie może być taka sama jak pojedyncza",

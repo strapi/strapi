@@ -31,9 +31,7 @@ const categoryModel = {
   pluralName: 'categories',
   description: '',
   name: 'Category',
-  options: {
-    draftAndPublish: false,
-  },
+  options: {},
   pluginOptions: {
     i18n: {
       localized: true,
@@ -52,9 +50,7 @@ const dogSchema = {
   displayName: 'Dog',
   singularName: 'dog',
   pluralName: 'dogs',
-  options: {
-    draftAndPublish: false,
-  },
+  options: {},
   pluginOptions: {
     i18n: {
       localized: true,

@@ -64,7 +64,6 @@ const categoryDPModel = {
   displayName: 'Category Draft & Publish',
   singularName: 'categorydp',
   pluralName: 'categoriesdp',
-  draftAndPublish: true,
   attributes: {
     name: {
       type: 'string',

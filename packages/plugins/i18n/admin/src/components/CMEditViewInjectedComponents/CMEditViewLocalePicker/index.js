@@ -18,7 +18,6 @@ const CMEditViewLocalePicker = ({
   createPermissions,
   currentEntityId,
   currentLocaleStatus,
-  hasDraftAndPublishEnabled,
   isSingleType,
   localizations,
   query,
@@ -110,11 +109,7 @@ const CMEditViewLocalePicker = ({
           onChange={handleChange}
           value={value?.value}
         >
-          <Option
-            value={value?.value}
-            disabled
-            startIcon={hasDraftAndPublishEnabled ? <Bullet status={currentLocaleStatus} /> : null}
-          >
+          <Option value={value?.value} disabled startIcon={<Bullet status={currentLocaleStatus} />}>
             {value?.label}
           </Option>
           {filteredOptions.map((option) => {
@@ -122,7 +117,7 @@ const CMEditViewLocalePicker = ({
               <Option
                 key={option.value}
                 value={option.value}
-                startIcon={hasDraftAndPublishEnabled ? <Bullet status={option.status} /> : null}
+                startIcon={<Bullet status={option.status} />}
               >
                 {option.label}
               </Option>
@@ -155,7 +150,6 @@ CMEditViewLocalePicker.propTypes = {
   createPermissions: PropTypes.array,
   currentEntityId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   currentLocaleStatus: PropTypes.string,
-  hasDraftAndPublishEnabled: PropTypes.bool.isRequired,
   isSingleType: PropTypes.bool,
   localizations: PropTypes.array,
   query: PropTypes.object,

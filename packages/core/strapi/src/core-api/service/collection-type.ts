@@ -11,7 +11,6 @@ import {
 import { getFetchParams } from './get-fetch-params';
 
 const {
-  hasDraftAndPublish,
   constants: { PUBLISHED_AT_ATTRIBUTE },
 } = contentTypes;
 
@@ -69,9 +68,7 @@ const createCollectionTypeService = ({
     create(params = { data: {} }) {
       const { data } = params;
 
-      if (hasDraftAndPublish(contentType)) {
-        setPublishedAt(data);
-      }
+      setPublishedAt(data);
 
       return strapi.entityService?.create(uid, { ...params, data });
     },
