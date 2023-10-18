@@ -6,7 +6,7 @@ import { pxToRem, prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper
 import { Link } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Editor, Transforms, Element as SlateElement, Path } from 'slate';
+import { Editor, Transforms, Element as SlateElement } from 'slate';
 import { ReactEditor, useSlate } from 'slate-react';
 import styled from 'styled-components';
 
