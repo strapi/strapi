@@ -18,7 +18,6 @@ const Preferences = ({ onChange, values, localeNames, allApplicationThemes }) =>
   const themesToDisplay = Object.keys(allApplicationThemes).filter(
     (themeName) => allApplicationThemes[themeName]
   );
-  console.log({ allApplicationThemes, themesToDisplay });
 
   return (
     <Box
