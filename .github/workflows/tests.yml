@@ -216,11 +216,10 @@ jobs:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     needs: [changes, build, typescript, unit_back, unit_front]
-    name: '[CE] API Integration (mysql:latest, client: ${{ matrix.db_client }}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
+    name: '[CE] API Integration (mysql:latest, package: mysql2}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
         node: [18, 20]
-        db_client: ['mysql', 'mysql2']
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       mysql:
@@ -230,7 +229,6 @@ jobs:
           MYSQL_USER: strapi
           MYSQL_PASSWORD: strapi
           MYSQL_DATABASE: strapi_test
-          MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
@@ -250,14 +248,14 @@ jobs:
         uses: ./.github/actions/run-build
       - uses: ./.github/actions/run-api-tests
         with:
-          dbOptions: '--dbclient=${{ matrix.db_client }} --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
+          dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
           jestOptions: '--shard=${{ matrix.shard }}'
 
   api_ce_sqlite:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     needs: [changes, build, typescript, unit_back, unit_front]
-    name: '[CE] API Integration (sqlite, client: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
+    name: '[CE] API Integration (sqlite, package: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
         node: [18, 20]
@@ -325,14 +323,13 @@ jobs:
   api_ee_mysql:
     runs-on: ubuntu-latest
     needs: [changes, build, typescript, unit_back, unit_front]
-    name: '[EE] API Integration (mysql:latest, client: ${{ matrix.db_client }}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
+    name: '[EE] API Integration (mysql:latest, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
         node: [18, 20]
-        db_client: ['mysql', 'mysql2']
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       mysql:
@@ -342,7 +339,6 @@ jobs:
           MYSQL_USER: strapi
           MYSQL_PASSWORD: strapi
           MYSQL_DATABASE: strapi_test
-          MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
@@ -362,7 +358,7 @@ jobs:
         uses: ./.github/actions/run-build
       - uses: ./.github/actions/run-api-tests
         with:
-          dbOptions: '--dbclient=${{ matrix.db_client }} --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
+          dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
           runEE: true
           jestOptions: '--shard=${{ matrix.shard }}'
 
