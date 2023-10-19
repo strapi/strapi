@@ -57,6 +57,7 @@ import { createStrapiFetch } from './utils/fetch';
 import { LIFECYCLES } from './utils/lifecycles';
 import ee from './utils/ee';
 import contentTypesRegistry from './core/registries/content-types';
+import componentsRegistry from './core/registries/components';
 import servicesRegistry from './core/registries/services';
 import policiesRegistry from './core/registries/policies';
 import middlewaresRegistry from './core/registries/middlewares';
@@ -68,7 +69,7 @@ import customFieldsRegistry from './core/registries/custom-fields';
 import createConfigProvider from './core/registries/config';
 import apisRegistry from './core/registries/apis';
 import bootstrap from './core/bootstrap';
-import loaders from './core/loaders';
+import * as loaders from './core/loaders';
 import { destroyOnSignal } from './utils/signals';
 import getNumberOfDynamicZones from './services/utils/dynamic-zones';
 import sanitizersRegistry from './core/registries/sanitizers';
@@ -185,8 +186,6 @@ class Strapi implements StrapiI {
 
   EE?: boolean;
 
-  components: Shared.Components;
-
   reload: Reloader;
 
   constructor(opts: StrapiOptions = {}) {
@@ -198,9 +197,10 @@ class Strapi implements StrapiI {
     const appConfig = loadConfiguration(rootDirs, opts);
 
     // Instantiate the Strapi container
-    this.container = createContainer(this)
+    this.container = createContainer()
       .register('config', createConfigProvider(appConfig))
       .register('content-types', contentTypesRegistry())
+      .register('components', componentsRegistry())
       .register('services', servicesRegistry(this))
       .register('policies', policiesRegistry())
       .register('middlewares', middlewaresRegistry())
@@ -214,8 +214,6 @@ class Strapi implements StrapiI {
       .register('content-api', createContentAPI(this))
       .register('sanitizers', sanitizersRegistry())
       .register('validators', validatorsRegistry());
-
-    this.components = {};
 
     // Create a mapping of every useful directory (for the app, dist and static directories)
     this.dirs = utils.getDirs(rootDirs, { strapi: this });
@@ -275,6 +273,10 @@ class Strapi implements StrapiI {
 
   contentType(name: Common.UID.ContentType) {
     return this.container.get('content-types').get(name);
+  }
+
+  get components(): Shared.Components {
+    return this.container.get('components').getAll();
   }
 
   get policies() {
@@ -471,7 +473,7 @@ class Strapi implements StrapiI {
   }
 
   async loadComponents() {
-    this.components = await loaders.loadComponents(this);
+    await loaders.loadComponents(this);
   }
 
   async loadMiddlewares() {

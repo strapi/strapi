@@ -1,6 +1,6 @@
-import type { Strapi, Container } from '@strapi/types';
+import type { Container } from '@strapi/types';
 
-export const createContainer = (strapi: Strapi): Container => {
+export const createContainer = (): Container => {
   const registered = new Map<string, unknown>();
   const resolved = new Map();
 
@@ -24,7 +24,7 @@ export const createContainer = (strapi: Strapi): Container => {
         const resolver = registered.get(name);
 
         if (typeof resolver === 'function') {
-          resolved.set(name, resolver({ strapi }, args));
+          resolved.set(name, resolver(this, args));
         } else {
           resolved.set(name, resolver);
         }
