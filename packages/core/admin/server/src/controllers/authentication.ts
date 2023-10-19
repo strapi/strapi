@@ -1,3 +1,5 @@
+import type { Context, Next } from 'koa';
+import 'koa-bodyparser';
 import passport from 'koa-passport';
 import compose from 'koa-compose';
 import { errors } from '@strapi/utils';
@@ -11,59 +13,66 @@ import {
   validateRenewTokenInput,
 } from '../validation/authentication';
 
+import type {
+  ForgotPassword,
+  Login,
+  Register,
+  RegistrationInfo,
+  RenewToken,
+  ResetPassword,
+} from '../../../shared/contracts/authentication';
+import { AdminUser } from '../../../shared/contracts/shared';
+
 const { ApplicationError, ValidationError } = errors;
 
 export default {
   login: compose([
-    (ctx: any, next: any) => {
-      return passport.authenticate(
-        'local',
-        { session: false },
-        (err: any, user: any, info: any) => {
-          if (err) {
-            strapi.eventHub.emit('admin.auth.error', { error: err, provider: 'local' });
-            // if this is a recognized error, allow it to bubble up to user
-            if (err.details?.code === 'LOGIN_NOT_ALLOWED') {
-              throw err;
-            }
-
-            // for all other errors throw a generic error to prevent leaking info
-            return ctx.notImplemented();
+    (ctx: Context, next: Next) => {
+      return passport.authenticate('local', { session: false }, (err, user, info) => {
+        if (err) {
+          strapi.eventHub.emit('admin.auth.error', { error: err, provider: 'local' });
+          // if this is a recognized error, allow it to bubble up to user
+          if (err.details?.code === 'LOGIN_NOT_ALLOWED') {
+            throw err;
           }
 
-          if (!user) {
-            strapi.eventHub.emit('admin.auth.error', {
-              error: new Error(info.message),
-              provider: 'local',
-            });
-            throw new ApplicationError(info.message);
-          }
-
-          ctx.state.user = user;
-
-          const sanitizedUser = getService('user').sanitizeUser(user);
-          strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider: 'local' });
-
-          return next();
+          // for all other errors throw a generic error to prevent leaking info
+          return ctx.notImplemented();
         }
-      )(ctx, next);
+
+        if (!user) {
+          strapi.eventHub.emit('admin.auth.error', {
+            error: new Error(info.message),
+            provider: 'local',
+          });
+          throw new ApplicationError(info.message);
+        }
+
+        const query = ctx.state as Login.Request['query'];
+        query.user = user;
+
+        const sanitizedUser = getService('user').sanitizeUser(user);
+        strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider: 'local' });
+
+        return next();
+      })(ctx, next);
     },
-    (ctx: any) => {
-      const { user } = ctx.state;
+    (ctx: Context) => {
+      const { user } = ctx.state as { user: AdminUser };
 
       ctx.body = {
         data: {
           token: getService('token').createJwtToken(user),
           user: getService('user').sanitizeUser(ctx.state.user), // TODO: fetch more detailed info
         },
-      };
+      } satisfies Login.Response;
     },
   ]),
 
-  async renewToken(ctx: any) {
+  async renewToken(ctx: Context) {
     await validateRenewTokenInput(ctx.request.body);
 
-    const { token } = ctx.request.body;
+    const { token } = ctx.request.body as RenewToken.Request['body'];
 
     const { isValid, payload } = getService('token').decodeJwtToken(token);
 
@@ -75,13 +84,13 @@ export default {
       data: {
         token: getService('token').createJwtToken({ id: payload.id }),
       },
-    };
+    } satisfies RenewToken.Response;
   },
 
-  async registrationInfo(ctx: any) {
+  async registrationInfo(ctx: Context) {
     await validateRegistrationInfoQuery(ctx.request.query);
 
-    const { registrationToken } = ctx.request.query;
+    const { registrationToken } = ctx.request.query as RegistrationInfo.Request['query'];
 
     const registrationInfo = await getService('user').findRegistrationInfo(registrationToken);
 
@@ -89,11 +98,11 @@ export default {
       throw new ValidationError('Invalid registrationToken');
     }
 
-    ctx.body = { data: registrationInfo };
+    ctx.body = { data: registrationInfo } satisfies RegistrationInfo.Response;
   },
 
-  async register(ctx: any) {
-    const input = ctx.request.body;
+  async register(ctx: Context) {
+    const input = ctx.request.body as Register.Request['body'];
 
     await validateRegistrationInput(input);
 
@@ -104,11 +113,11 @@ export default {
         token: getService('token').createJwtToken(user),
         user: getService('user').sanitizeUser(user),
       },
-    };
+    } satisfies Register.Response;
   },
 
-  async registerAdmin(ctx: any) {
-    const input = ctx.request.body;
+  async registerAdmin(ctx: Context) {
+    const input = ctx.request.body as Register.Request['body'];
 
     await validateAdminRegistrationInput(input);
 
@@ -130,6 +139,7 @@ export default {
       ...input,
       registrationToken: null,
       isActive: true,
+      // @ts-expect-error - use Utils.Object.Replace to create a new CreateUserPayload type
       roles: superAdminRole ? [superAdminRole.id] : [],
     });
 
@@ -143,8 +153,8 @@ export default {
     };
   },
 
-  async forgotPassword(ctx: any) {
-    const input = ctx.request.body;
+  async forgotPassword(ctx: Context) {
+    const input = ctx.request.body as ForgotPassword.Request['body'];
 
     await validateForgotPasswordInput(input);
 
@@ -153,8 +163,8 @@ export default {
     ctx.status = 204;
   },
 
-  async resetPassword(ctx: any) {
-    const input = ctx.request.body;
+  async resetPassword(ctx: Context) {
+    const input = ctx.request.body as ResetPassword.Request['body'];
 
     await validateResetPasswordInput(input);
 
@@ -165,10 +175,10 @@ export default {
         token: getService('token').createJwtToken(user),
         user: getService('user').sanitizeUser(user),
       },
-    };
+    } satisfies ResetPassword.Response;
   },
 
-  logout(ctx: any) {
+  logout(ctx: Context) {
     const sanitizedUser = getService('user').sanitizeUser(ctx.state.user);
     strapi.eventHub.emit('admin.logout', { user: sanitizedUser });
     ctx.body = { data: {} };
