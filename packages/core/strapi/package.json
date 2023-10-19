@@ -117,6 +117,7 @@
     "delegates": "1.0.0",
     "dotenv": "14.2.0",
     "execa": "5.1.1",
+    "fast-json-stable-stringify": "2.1.0",
     "fs-extra": "10.0.0",
     "glob": "7.2.3",
     "http-errors": "1.8.1",

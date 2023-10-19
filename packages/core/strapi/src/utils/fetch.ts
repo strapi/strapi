@@ -1,19 +1,22 @@
-import nodeFetch, { RequestInit, Response } from 'node-fetch';
 import { HttpsProxyAgent, HttpsProxyAgentOptions } from 'https-proxy-agent';
+import stringify from 'fast-json-stable-stringify';
 
 import type { Strapi } from '@strapi/types';
 
 export interface Fetch {
   (url: string, options: RequestInit): Promise<Response>;
-  agent?: HttpsProxyAgent;
+  dispatcher?: HttpsProxyAgent;
 }
 
+// Create a wrapper for Node's Fetch API that applies a global proxy
 export function createStrapiFetch(strapi: Strapi): Fetch {
-  function fetch(url: string, options: RequestInit) {
-    return nodeFetch(url, {
-      ...(fetch.agent ? { agent: fetch.agent } : {}),
+  function strapiFetch(url: string, options: RequestInit) {
+    const fetchOptions = {
+      ...(strapiFetch.dispatcher ? { dispatcher: strapiFetch.dispatcher } : {}),
       ...options,
-    });
+    };
+    strapi.logger.debug(`Fetch request for ${url} with ${stringify(fetchOptions)}`);
+    return fetch(url, fetchOptions);
   }
 
   const { globalProxy: proxy } = strapi.config.get<{
@@ -21,8 +24,8 @@ export function createStrapiFetch(strapi: Strapi): Fetch {
   }>('server');
 
   if (proxy) {
-    fetch.agent = new HttpsProxyAgent(proxy);
+    strapiFetch.dispatcher = new HttpsProxyAgent(proxy);
   }
 
-  return fetch;
+  return strapiFetch;
 }

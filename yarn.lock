@@ -8554,6 +8554,7 @@ __metadata:
     dotenv: "npm:14.2.0"
     eslint-config-custom: "npm:4.14.5"
     execa: "npm:5.1.1"
+    fast-json-stable-stringify: "npm:2.1.0"
     fs-extra: "npm:10.0.0"
     glob: "npm:7.2.3"
     http-errors: "npm:1.8.1"
@@ -17260,7 +17261,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-json-stable-stringify@npm:2.x, fast-json-stable-stringify@npm:^2.0.0, fast-json-stable-stringify@npm:^2.1.0":
+"fast-json-stable-stringify@npm:2.1.0, fast-json-stable-stringify@npm:2.x, fast-json-stable-stringify@npm:^2.0.0, fast-json-stable-stringify@npm:^2.1.0":
   version: 2.1.0
   resolution: "fast-json-stable-stringify@npm:2.1.0"
   checksum: 2c20055c1fa43c922428f16ca8bb29f2807de63e5c851f665f7ac9790176c01c3b40335257736b299764a8d383388dabc73c8083b8e1bc3d99f0a941444ec60e
