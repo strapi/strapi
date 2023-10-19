@@ -9,7 +9,7 @@ import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { Route, Switch } from 'react-router-dom';
 
-import ContentTypeBuilderNav from '../../components/ContentTypeBuilderNav';
+import { ContentTypeBuilderNav } from '../../components/ContentTypeBuilderNav/ContentTypeBuilderNav';
 import DataManagerProvider from '../../components/DataManagerProvider/DataManagerProvider';
 import { FormModalNavigationProvider } from '../../components/FormModalNavigationProvider/FormModalNavigationProvider';
 import { PERMISSIONS } from '../../constants';

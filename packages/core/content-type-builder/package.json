@@ -83,6 +83,7 @@
     "@strapi/types": "4.14.4",
     "@testing-library/react": "14.0.0",
     "@testing-library/react-hooks": "8.0.1",
+    "@testing-library/user-event": "14.4.3",
     "@types/pluralize": "0.0.30",
     "history": "^4.9.0",
     "koa": "2.13.4",

@@ -2,13 +2,13 @@ import { defineConfig } from '@strapi/pack-up';
 
 export default defineConfig({
   bundles: [
-    // {
-    //   source: './admin/src/index.ts',
-    //   import: './dist/admin/index.mjs',
-    //   require: './dist/admin/index.js',
-    //   types: './dist/admin/src/index.d.ts',
-    //   runtime: 'web',
-    // },
+    {
+      source: './admin/src/index.ts',
+      import: './dist/admin/index.mjs',
+      require: './dist/admin/index.js',
+      types: './dist/admin/src/index.d.ts',
+      runtime: 'web',
+    },
     {
       source: './server/src/index.ts',
       import: './dist/server/index.mjs',

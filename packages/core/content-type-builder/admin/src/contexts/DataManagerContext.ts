@@ -2,15 +2,9 @@
 import { createContext } from 'react';
 
 import type { EditableContentTypeData } from '../components/FormModal/utils/canEditContentType';
-import type { SchemaType } from '../types';
-import type { Common, UID } from '@strapi/types';
+import type { SchemaType, Component } from '../types';
+import type { UID } from '@strapi/types';
 
-export type Component = {
-  uid: UID.Component;
-  schema: {
-    displayName: string;
-  };
-};
 export interface CustomFieldAttributeParams {
   attributeToSet: Record<string, any>;
   forTarget: SchemaType;
@@ -50,7 +44,7 @@ interface DataManagerContextValue {
   sortedContentTypesList: any[]; // Define the actual type
   submitData: (additionalContentTypeData?: Record<string, any>) => void;
   updateSchema: (data: Record<string, any>, schemaType: SchemaType, componentUID: UID.Any) => void;
-  components: Record<Common.UID.Component, unknown>;
+  components: Record<UID.Component, Component>;
   componentsGroupedByCategory: Record<string, Component[]>;
   componentsThatHaveOtherComponentInTheirAttributes: any[]; // Define the actual type
   contentTypes: Record<string, any>;

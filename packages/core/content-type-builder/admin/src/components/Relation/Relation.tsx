@@ -1,6 +1,6 @@
 import { Flex } from '@strapi/design-system';
 
-import getRelationType from '../../utils/getRelationType';
+import { getRelationType } from '../../utils/getRelationType';
 
 import { RelationFormBox } from './RelationField/RelationField';
 import { RelationNaturePicker } from './RelationNaturePicker/RelationNaturePicker';

@@ -1,20 +1,13 @@
-/**
- *
- * Tests for ContentTypeBuilderNav
- *
- */
-
-import React from 'react';
-
+/* eslint-disable check-file/filename-naming-convention */
 import { Layout, lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 
-import ContentTypeBuilderNav from '../index';
+import { ContentTypeBuilderNav } from '../ContentTypeBuilderNav';
 
-import mockData from './mockData';
+import { mockData } from './mockData';
 
 jest.mock('../useContentTypeBuilderMenu.js', () => {
   return jest.fn(() => ({
@@ -42,7 +35,7 @@ const makeApp = () => {
 
 describe('<ContentTypeBuilderNav />', () => {
   it('renders and matches the snapshot', () => {
-    const App = makeApp(ContentTypeBuilderNav);
+    const App = makeApp();
     const { container } = render(App);
 
     expect(container).toMatchSnapshot();
