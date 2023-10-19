@@ -1,15 +1,9 @@
 import { join } from 'path';
-import https from 'https';
-import http from 'http';
 import { Duplex, PassThrough, Readable } from 'stream';
 import { stat, createReadStream, ReadStream } from 'fs-extra';
 import type { LoadedStrapi } from '@strapi/types';
 
 import type { IAsset } from '../../../../types';
-
-const protocolForPath = (filepath: string) => {
-  return filepath?.startsWith('https') ? https : http;
-};
 
 function getFileStream(filepath: string, isLocal = false): PassThrough | ReadStream {
   if (isLocal) {
@@ -18,19 +12,29 @@ function getFileStream(filepath: string, isLocal = false): PassThrough | ReadStr
 
   const readableStream = new PassThrough();
 
-  protocolForPath(filepath)
-    .get(filepath, (res) => {
-      if (res.statusCode !== 200) {
-        readableStream.emit(
-          'error',
-          new Error(`Request failed with status code ${res.statusCode}`)
-        );
+  fetch(filepath)
+    .then((res) => {
+      if (res.status !== 200) {
+        readableStream.emit('error', new Error(`Request failed with status code ${res.status}`));
         return;
       }
 
-      res.pipe(readableStream);
+      // Use pipeTo to transfer it from the Response.body to the readable stream
+      const writable = new WritableStream({
+        write(chunk) {
+          readableStream.write(chunk);
+        },
+        close() {
+          readableStream.end();
+        },
+        abort() {
+          readableStream.destroy();
+        },
+      });
+
+      res?.body?.pipeTo(writable);
     })
-    .on('error', (error) => {
+    .catch((error) => {
       readableStream.emit('error', error);
     });
 
@@ -42,21 +46,21 @@ function getFileStats(filepath: string, isLocal = false): Promise<{ size: number
     return stat(filepath);
   }
   return new Promise((resolve, reject) => {
-    protocolForPath(filepath)
-      .get(filepath, (res) => {
-        if (res.statusCode !== 200) {
-          reject(new Error(`Request failed with status code ${res.statusCode}`));
+    fetch(filepath)
+      .then((res) => {
+        if (res.status !== 200) {
+          reject(new Error(`Request failed with status code ${res.status}`));
           return;
         }
 
-        const contentLength = res.headers['content-length'];
+        const contentLength = res.headers.get('content-length');
         const stats = {
           size: contentLength ? parseInt(contentLength, 10) : 0,
         };
 
         resolve(stats);
       })
-      .on('error', (error) => {
+      .catch((error) => {
         reject(error);
       });
   });
