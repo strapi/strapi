@@ -32,6 +32,7 @@ module.exports = {
     'no-process-exit': 'off',
     'no-loop-func': 'off',
     'max-classes-per-file': 'off',
+    'node/prefer-promises/fs': 'error',
     'no-param-reassign': [
       'error',
       {

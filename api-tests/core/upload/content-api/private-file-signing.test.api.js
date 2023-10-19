@@ -98,10 +98,10 @@ const mockProvider = () => ({
       uploadStream(file) {
         file.url = 'strapi.jpg';
       },
-      upload(file) {
+      async upload(file) {
         file.url = 'strapi.jpg';
       },
-      delete() {},
+      async delete() {},
       checkFileSize() {},
     };
   },

@@ -3,7 +3,11 @@ import localProvider from '../index';
 
 jest.mock('fs', () => {
   return {
-    writeFile: jest.fn((_path, _buffer, callback) => callback()),
+    promises: {
+      writeFile: jest.fn(() => Promise.resolve()),
+      access: jest.fn(() => Promise.resolve()),
+      unlink: jest.fn(() => Promise.resolve()),
+    },
   };
 });
 

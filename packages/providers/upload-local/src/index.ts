@@ -96,44 +96,38 @@ export default {
           );
         });
       },
-      upload(file: File): Promise<void> {
+      async upload(file: File): Promise<void> {
         if (!file.buffer) {
           return Promise.reject(new Error('Missing file buffer'));
         }
 
         const { buffer } = file;
 
-        return new Promise((resolve, reject) => {
-          // write file in public/assets folder
-          fs.writeFile(path.join(uploadPath, `${file.hash}${file.ext}`), buffer, (err) => {
-            if (err) {
-              return reject(err);
-            }
-
+        return fs.promises
+          .writeFile(path.join(uploadPath, `${file.hash}${file.ext}`), buffer)
+          .then(() => {
             file.url = `/${UPLOADS_FOLDER_NAME}/${file.hash}${file.ext}`;
-
-            resolve();
           });
-        });
       },
-      delete(file: File): Promise<string | void> {
-        return new Promise((resolve, reject) => {
-          const filePath = path.join(uploadPath, `${file.hash}${file.ext}`);
+      async delete(file: File): Promise<string | void> {
+        const filePath = path.join(uploadPath, `${file.hash}${file.ext}`);
 
-          if (!fs.existsSync(filePath)) {
-            resolve("File doesn't exist");
-            return;
-          }
-
-          // remove file from public/assets folder
-          fs.unlink(filePath, (err) => {
-            if (err) {
-              return reject(err);
-            }
-
-            resolve();
+        return fs.promises
+          .access(filePath, fs.constants.F_OK)
+          .then(() => {
+            // File exists, so delete it
+            return fs.promises
+              .unlink(filePath)
+              .then(() => {
+                return undefined; // Resolve with undefined on successful deletion
+              })
+              .catch((err) => {
+                throw err; // Forward the error to reject the promise
+              });
+          })
+          .catch(() => {
+            return "File doesn't exist"; // Resolve with the message if the file doesn't exist
           });
-        });
       },
     };
   },
