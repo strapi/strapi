@@ -1,5 +1,6 @@
 import path from 'path';
 
+import ee from '@strapi/strapi/dist/utils/ee';
 import { map, values, sumBy, pipe, flatMap, propEq } from 'lodash/fp';
 import _ from 'lodash';
 import { exists } from 'fs-extra';
@@ -14,9 +15,6 @@ import { getService } from '../utils';
 
 const { isUsingTypeScript } = tsUtils;
 
-// eslint-disable-next-line node/no-extraneous-require
-// const ee = require('@strapi/strapi/dist/utils/ee').default;
-
 /**
  * A set of functions called "actions" for `Admin`
  */
@@ -28,8 +26,7 @@ export async function getProjectType() {
   const flags = strapi.config.get('admin.flags', {});
   // FIXME
   try {
-    // TODO: TS - Migrate EE to ts
-    // return { data: { isEE: strapi.EE, features: ee.features.list(), flags } };
+    return { data: { isEE: strapi.EE, features: ee.features.list(), flags } };
   } catch (err) {
     return { data: { isEE: false, features: [], flags } };
   }
