@@ -10,6 +10,7 @@ const Preferences = ({ onChange, values, localeNames, allApplicationThemes }) =>
   const themesToDisplay = Object.keys(allApplicationThemes).filter(
     (themeName) => allApplicationThemes[themeName]
   );
+  console.log({ allApplicationThemes, themesToDisplay });
 
   return (
     <Box
@@ -130,6 +131,12 @@ const Preferences = ({ onChange, values, localeNames, allApplicationThemes }) =>
                   )}
                 </Option>
               ))}
+              <Option value="system">
+                {formatMessage({
+                  id: 'Settings.profile.form.section.experience.mode.option-system-label',
+                  defaultMessage: 'Use system settings',
+                })}
+              </Option>
             </Select>
           </GridItem>
         </Grid>

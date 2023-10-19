@@ -2,7 +2,7 @@ import { createContext } from 'react';
 
 import { DefaultTheme } from 'styled-components';
 
-export type ThemeName = 'light' | 'dark';
+export type ThemeName = 'light' | 'dark' | 'system';
 
 interface ThemeToggleContextContextValue {
   currentTheme?: ThemeName;
