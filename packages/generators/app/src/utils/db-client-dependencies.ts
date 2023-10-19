@@ -5,7 +5,6 @@ const sqlClientModule = {
   mysql2: { mysql2: '3.6.0' },
   postgres: { pg: '8.8.0' },
   sqlite: { 'better-sqlite3': '8.6.0' },
-  'sqlite-legacy': { sqlite3: '5.1.2' },
 };
 
 /**
