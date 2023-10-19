@@ -48,7 +48,7 @@ const CloudBox = () => {
           <LinkButton
             variant="default"
             endIcon={<ExternalLink />}
-            href="https://cloud.strapi.io/login?utm_source=Strapi+Cloud+Plugin"
+            href="https://cloud.strapi.io/login?utm_campaign=Strapi%20Cloud%20Plugin&utm_source=In-Product&utm_medium=CTA"
             isExternal
             target="_blank"
           >
