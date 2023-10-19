@@ -8,7 +8,7 @@ import loadAdmin from './admin';
 import loadSanitizers from './sanitizers';
 import loadValidators from './validators';
 
-export default {
+export {
   loadSrcIndex,
   loadAPIs,
   loadMiddlewares,
