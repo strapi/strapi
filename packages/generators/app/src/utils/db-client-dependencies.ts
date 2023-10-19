@@ -1,8 +1,7 @@
 import type { ClientName } from '../types';
 
 const sqlClientModule = {
-  mysql: { mysql: '2.18.1' },
-  mysql2: { mysql2: '3.6.0' },
+  mysql: { mysql2: '3.6.0' },
   postgres: { pg: '8.8.0' },
   sqlite: { 'better-sqlite3': '9.0.0' },
 };
