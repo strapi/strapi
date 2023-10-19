@@ -122,6 +122,12 @@ const Preferences = ({ onChange, values, localeNames, allApplicationThemes }) =>
                 });
               }}
             >
+              <SingleSelectOption value="system">
+                {formatMessage({
+                  id: 'Settings.profile.form.section.experience.mode.option-system-label',
+                  defaultMessage: 'Use system settings',
+                })}
+              </SingleSelectOption>
               {themesToDisplay.map((theme) => (
                 <SingleSelectOption value={theme} key={theme}>
                   {formatMessage(
@@ -138,12 +144,6 @@ const Preferences = ({ onChange, values, localeNames, allApplicationThemes }) =>
                   )}
                 </SingleSelectOption>
               ))}
-              <SingleSelectOption value="system">
-                {formatMessage({
-                  id: 'Settings.profile.form.section.experience.mode.option-system-label',
-                  defaultMessage: 'Use system settings',
-                })}
-              </SingleSelectOption>
             </SingleSelect>
           </GridItem>
         </Grid>

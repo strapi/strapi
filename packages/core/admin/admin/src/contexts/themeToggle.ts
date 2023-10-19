@@ -3,6 +3,7 @@ import { createContext } from 'react';
 import { DefaultTheme } from 'styled-components';
 
 export type ThemeName = 'light' | 'dark' | 'system';
+export type NonSystemThemeName = Exclude<ThemeName, 'system'>;
 
 interface ThemeToggleContextContextValue {
   currentTheme?: ThemeName;
@@ -11,6 +12,7 @@ interface ThemeToggleContextContextValue {
     dark: DefaultTheme;
     light: DefaultTheme;
   };
+  systemTheme?: NonSystemThemeName;
 }
 
 export const ThemeToggleContext = createContext<ThemeToggleContextContextValue>({});
