@@ -1,6 +1,14 @@
 import React from 'react';
 
-import { Box, Flex, Grid, GridItem, Option, Select, Typography } from '@strapi/design-system';
+import {
+  Box,
+  Flex,
+  Grid,
+  GridItem,
+  SingleSelect,
+  SingleSelectOption,
+  Typography,
+} from '@strapi/design-system';
 import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -58,7 +66,7 @@ const Preferences = ({ onChange, values, localeNames, allApplicationThemes }) =>
         </Flex>
         <Grid gap={5}>
           <GridItem s={12} col={6}>
-            <Select
+            <SingleSelect
               label={formatMessage({
                 id: 'Settings.profile.form.section.experience.interfaceLanguage',
                 defaultMessage: 'Interface language',
@@ -88,14 +96,14 @@ const Preferences = ({ onChange, values, localeNames, allApplicationThemes }) =>
               }}
             >
               {Object.entries(localeNames).map(([language, langName]) => (
-                <Option value={language} key={language}>
+                <SingleSelectOption value={language} key={language}>
                   {langName}
-                </Option>
+                </SingleSelectOption>
               ))}
-            </Select>
+            </SingleSelect>
           </GridItem>
           <GridItem s={12} col={6}>
-            <Select
+            <SingleSelect
               label={formatMessage({
                 id: 'Settings.profile.form.section.experience.mode.label',
                 defaultMessage: 'Interface mode',
@@ -116,7 +124,7 @@ const Preferences = ({ onChange, values, localeNames, allApplicationThemes }) =>
               }}
             >
               {themesToDisplay.map((theme) => (
-                <Option value={theme} key={theme}>
+                <SingleSelectOption value={theme} key={theme}>
                   {formatMessage(
                     {
                       id: 'Settings.profile.form.section.experience.mode.option-label',
@@ -129,15 +137,15 @@ const Preferences = ({ onChange, values, localeNames, allApplicationThemes }) =>
                       }),
                     }
                   )}
-                </Option>
+                </SingleSelectOption>
               ))}
-              <Option value="system">
+              <SingleSelectOption value="system">
                 {formatMessage({
                   id: 'Settings.profile.form.section.experience.mode.option-system-label',
                   defaultMessage: 'Use system settings',
                 })}
-              </Option>
-            </Select>
+              </SingleSelectOption>
+            </SingleSelect>
           </GridItem>
         </Grid>
       </Flex>
