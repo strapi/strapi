@@ -53,7 +53,6 @@
     "commander": "8.3.0",
     "https-proxy-agent": "5.0.1",
     "koa": "2.13.4",
-    "node-fetch": "2.7.0",
     "node-schedule": "2.1.0"
   },
   "devDependencies": {

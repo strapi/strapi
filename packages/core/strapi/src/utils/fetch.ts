@@ -15,7 +15,7 @@ export function createStrapiFetch(strapi: Strapi): Fetch {
       ...(strapiFetch.dispatcher ? { dispatcher: strapiFetch.dispatcher } : {}),
       ...options,
     };
-    strapi.logger.debug(`Fetch request for ${url} with ${stringify(fetchOptions)}`);
+    strapi.log.debug(`Fetch request for ${url} with ${stringify(fetchOptions)}`);
     return fetch(url, fetchOptions);
   }
 

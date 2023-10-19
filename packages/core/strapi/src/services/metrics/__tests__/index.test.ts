@@ -1,8 +1,6 @@
 import { get } from 'lodash/fp';
 import metrics from '../index';
 
-jest.mock('node-fetch', () => jest.fn(() => Promise.resolve()));
-
 const fetch = jest.fn(() => Promise.resolve());
 
 describe('metrics', () => {
