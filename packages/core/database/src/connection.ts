@@ -3,7 +3,7 @@ import type { Knex } from 'knex';
 
 const clientMap = {
   sqlite: 'better-sqlite3',
-  mysql: 'mysql',
+  mysql: 'mysql2',
   postgres: 'pg',
 };
 
