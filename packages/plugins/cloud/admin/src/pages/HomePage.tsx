@@ -103,7 +103,9 @@ const HomePage = () => {
               defaultMessage:
                 'Strapi Cloud offers a 14 days free trial for you to experiment with your project on the cloud including all features.',
             })}{' '}
-            <Link href="https://strapi.io/cloud?utm_campaign=Strapi%20Cloud%20Plugin&utm_source=In-Product&utm_medium=CTA">Learn more</Link>
+            <Link href="https://strapi.io/cloud?utm_campaign=Strapi%20Cloud%20Plugin&utm_source=In-Product&utm_medium=CTA">
+              Learn more
+            </Link>
           </Typography>
         </Box>
       </Box>
