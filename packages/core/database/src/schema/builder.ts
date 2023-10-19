@@ -72,9 +72,8 @@ export default (db: Database) => {
     async updateSchema(schemaDiff: SchemaDiff['diff']) {
       const forceMigration = db.config.settings?.forceMigration;
 
-      // TODO: startSchemaUpdate and endSchemaUpdate need to be part of the transaction or it may not run on the same connection
-      await db.dialect.startSchemaUpdate();
       await db.connection.transaction(async (trx) => {
+        await db.dialect.startSchemaUpdate();
         await this.createTables(schemaDiff.tables.added, trx);
 
         if (forceMigration) {
@@ -101,9 +100,8 @@ export default (db: Database) => {
 
           await helpers.alterTable(schemaBuilder, table);
         }
+        await db.dialect.endSchemaUpdate();
       });
-
-      await db.dialect.endSchemaUpdate();
     },
   };
 };
