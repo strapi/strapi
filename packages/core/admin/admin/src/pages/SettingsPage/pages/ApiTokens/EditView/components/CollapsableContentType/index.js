@@ -17,7 +17,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { useApiTokenPermissionsContext } from '../../../../../../../contexts/ApiTokenPermissions';
+import { useApiTokenPermissionsContext } from '../../../../../../../contexts/apiTokenPermissions';
 
 import CheckboxWrapper from './CheckBoxWrapper';
 

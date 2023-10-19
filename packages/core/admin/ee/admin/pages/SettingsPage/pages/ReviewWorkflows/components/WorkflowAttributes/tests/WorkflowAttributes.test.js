@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { configureStore } from '@reduxjs/toolkit';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -8,7 +9,6 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IntlProvider } from 'react-intl';
 import { Provider } from 'react-redux';
-import { createStore } from 'redux';
 
 import { REDUX_NAMESPACE } from '../../../constants';
 import { reducer } from '../../../reducer';
@@ -92,21 +92,24 @@ const withMarkup = (query) => (text) =>
 const setup = ({ collectionTypes, singleTypes, currentWorkflow, ...props } = {}) => ({
   ...render(<ComponentFixture currentWorkflow={currentWorkflow} {...props} />, {
     wrapper({ children }) {
-      const store = createStore(reducer, {
-        [REDUX_NAMESPACE]: {
-          serverState: {
-            contentTypes: {
-              collectionTypes: collectionTypes || CONTENT_TYPES_FIXTURE.collectionTypes,
-              singleTypes: singleTypes || CONTENT_TYPES_FIXTURE.singleTypes,
+      const store = configureStore({
+        reducer,
+        preloadedState: {
+          [REDUX_NAMESPACE]: {
+            serverState: {
+              contentTypes: {
+                collectionTypes: collectionTypes || CONTENT_TYPES_FIXTURE.collectionTypes,
+                singleTypes: singleTypes || CONTENT_TYPES_FIXTURE.singleTypes,
+              },
+              roles: ROLES_FIXTURE,
+              workflow: WORKFLOWS_FIXTURE[0],
+              workflows: WORKFLOWS_FIXTURE,
             },
-            roles: ROLES_FIXTURE,
-            workflow: WORKFLOWS_FIXTURE[0],
-            workflows: WORKFLOWS_FIXTURE,
-          },
 
-          clientState: {
-            currentWorkflow: {
-              data: currentWorkflow || WORKFLOWS_FIXTURE[0],
+            clientState: {
+              currentWorkflow: {
+                data: currentWorkflow || WORKFLOWS_FIXTURE[0],
+              },
             },
           },
         },

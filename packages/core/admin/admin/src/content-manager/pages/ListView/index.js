@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { bindActionCreators } from '@reduxjs/toolkit';
 import {
   Main,
   ActionLayout,
@@ -39,11 +40,11 @@ import PropTypes from 'prop-types';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
-import { connect, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
-import { bindActionCreators, compose } from 'redux';
 
-import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
+import { HOOKS } from '../../../constants';
+import { useTypedSelector } from '../../../core/store/hooks';
 import { useAdminUsers } from '../../../hooks/useAdminUsers';
 import { useEnterprise } from '../../../hooks/useEnterprise';
 import { InjectionZone } from '../../../shared/components';
@@ -53,7 +54,7 @@ import { CREATOR_FIELDS } from '../../constants/attributes';
 import { useAllowedAttributes } from '../../hooks/useAllowedAttributes';
 import { getTrad, getDisplayName } from '../../utils';
 
-import { getData, getDataSucceeded, onChangeListHeaders, onResetListHeaders } from './actions';
+import * as Actions from './actions';
 import { Body } from './components/Body';
 import BulkActionButtons from './components/BulkActionButtons';
 import CellContent from './components/CellContent';
@@ -61,24 +62,23 @@ import { ViewSettingsMenu } from './components/ViewSettingsMenu';
 import makeSelectListView, { selectDisplayedHeaders } from './selectors';
 import { buildValidGetParams } from './utils';
 
+const { INJECT_COLUMN_IN_TABLE } = HOOKS;
 const REVIEW_WORKFLOW_COLUMNS_CE = null;
 const REVIEW_WORKFLOW_COLUMNS_CELL_CE = () => null;
 const REVIEW_WORKFLOW_FILTER_CE = [];
 const USER_FILTER_ATTRIBUTES = [...CREATOR_FIELDS, 'strapi_assignee'];
 
-function ListView({
-  canCreate,
-  canDelete,
-  canRead,
-  canPublish,
-  data,
-  getData,
-  getDataSucceeded,
-  isLoading,
-  layout,
-  pagination,
-  slug,
-}) {
+function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
+  const dispatch = useDispatch();
+  const { getData, getDataSucceeded } = React.useMemo(
+    () =>
+      bindActionCreators(
+        { getData: Actions.getData, getDataSucceeded: Actions.getDataSucceeded },
+        dispatch
+      ),
+    [dispatch]
+  );
+  const { pagination, isLoading, data } = useTypedSelector(makeSelectListView());
   const { total } = pagination;
   const { contentType } = layout;
   const {
@@ -468,7 +468,7 @@ function ListView({
   });
 
   const { runHookWaterfall } = useStrapiApp();
-  const displayedHeaders = useSelector(selectDisplayedHeaders);
+  const displayedHeaders = useTypedSelector(selectDisplayedHeaders);
 
   const tableHeaders = React.useMemo(() => {
     const headers = runHookWaterfall(INJECT_COLUMN_IN_TABLE, {
@@ -869,7 +869,6 @@ ListView.propTypes = {
   canDelete: PropTypes.bool.isRequired,
   canRead: PropTypes.bool.isRequired,
   canPublish: PropTypes.bool.isRequired,
-  data: PropTypes.array.isRequired,
   layout: PropTypes.exact({
     components: PropTypes.object.isRequired,
     contentType: PropTypes.shape({
@@ -884,27 +883,7 @@ ListView.propTypes = {
       settings: PropTypes.object.isRequired,
     }).isRequired,
   }).isRequired,
-  isLoading: PropTypes.bool.isRequired,
-  getData: PropTypes.func.isRequired,
-  getDataSucceeded: PropTypes.func.isRequired,
-  pagination: PropTypes.shape({ total: PropTypes.number.isRequired, pageCount: PropTypes.number })
-    .isRequired,
   slug: PropTypes.string.isRequired,
 };
 
-const mapStateToProps = makeSelectListView();
-
-export function mapDispatchToProps(dispatch) {
-  return bindActionCreators(
-    {
-      getData,
-      getDataSucceeded,
-      onChangeListHeaders,
-      onResetListHeaders,
-    },
-    dispatch
-  );
-}
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
-export default compose(withConnect)(React.memo(ListView, isEqual));
+export default React.memo(ListView, isEqual);

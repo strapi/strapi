@@ -561,6 +561,7 @@ describe('Admin | UseCasePage', () => {
                     aria-controls="radix-:r3:"
                     aria-describedby=":r0:-hint :r0:-error"
                     aria-expanded="false"
+                    aria-label="Select interface language"
                     class="c3 c4 c5"
                     data-state="closed"
                     dir="ltr"

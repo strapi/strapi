@@ -284,13 +284,13 @@ describe('useBlocksStore', () => {
     );
     const link = screen.getByRole('link', 'Some link');
 
-    expect(screen.queryByLabelText(/Delete/i, { selector: 'button' })).not.toBeInTheDocument();
-    expect(screen.queryByLabelText(/Edit/i, { selector: 'button' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Delete/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Edit/i })).not.toBeInTheDocument();
 
     await user.click(link);
 
-    expect(screen.queryByLabelText(/Delete/i, { selector: 'button' })).toBeInTheDocument();
-    expect(screen.queryByLabelText(/Edit/i, { selector: 'button' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Delete/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Edit/i })).toBeInTheDocument();
   });
 
   it('renders link fields to edit when user clicks the edit option and check save button disabled state', async () => {

@@ -16,7 +16,7 @@ import { GuidedTourModal } from '../../components/GuidedTour/Modal';
 import { LeftMenu } from '../../components/LeftMenu';
 import { useConfiguration } from '../../hooks/useConfiguration';
 import { useMenu } from '../../hooks/useMenu';
-import AppLayout from '../../layouts/AppLayout';
+import { AppLayout } from '../../layouts/AppLayout';
 import { createRoute } from '../../utils';
 import { SET_APP_RUNTIME_STATUS } from '../App/constants';
 
@@ -33,10 +33,16 @@ const MarketplacePage = lazy(() =>
   import(/* webpackChunkName: "Admin_marketplace" */ '../MarketplacePage')
 );
 const NotFoundPage = lazy(() =>
-  import(/* webpackChunkName: "Admin_NotFoundPage" */ '../NotFoundPage')
+  import(/* webpackChunkName: "Admin_NotFoundPage" */ '../NotFoundPage').then(
+    ({ NotFoundPage }) => ({ default: NotFoundPage })
+  )
 );
 const InternalErrorPage = lazy(() =>
-  import(/* webpackChunkName: "Admin_InternalErrorPage" */ '../InternalErrorPage')
+  import(/* webpackChunkName: "Admin_InternalErrorPage" */ '../InternalErrorPage').then(
+    ({ InternalErrorPage }) => ({
+      default: InternalErrorPage,
+    })
+  )
 );
 
 const ProfilePage = lazy(() =>
