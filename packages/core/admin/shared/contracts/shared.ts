@@ -7,10 +7,10 @@ export type Permission = {
   subject?: string | null;
   properties: {
     fields?: string[];
+    locales?: string[];
     [key: string]: any;
   };
-  conditions: string[]; // TODO: This should be a Condition interface
-  role?: string; // TODO: This should be AdminRole
+  conditions: string[];
 };
 
 export type AdminUser = {
@@ -41,3 +41,5 @@ export type AdminRole = {
   users: AdminUser[];
   permissions: Permission[];
 };
+
+export type SanitizedAdminRole = Omit<AdminRole, 'users' | 'permissions'>;
