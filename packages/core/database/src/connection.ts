@@ -49,10 +49,7 @@ const getSqlitePackageName = (): ClientKey => {
   return matchingPackage;
 };
 
-export const createConnection = (
-  config: Knex.Config,
-  onAfterCreate: Knex.PoolConfig['afterCreate'] | undefined = undefined
-) => {
+export const createConnection = (config: Knex.Config, mergeWithUserConfig?: Knex.Config) => {
   const knexConfig = { ...config };
   if (knexConfig.client === 'sqlite') {
     const sqlitePackageName = getSqlitePackageName();
@@ -62,7 +59,8 @@ export const createConnection = (
 
   // initialization code to run upon opening a new connection
   // In theory this should be required but there may be cases where it's not desired
-  if (onAfterCreate) {
+  if (mergeWithUserConfig?.pool?.afterCreate) {
+    const strapiAfterCreate = mergeWithUserConfig.pool.afterCreate;
     knexConfig.pool = knexConfig.pool || {};
     // if the user has set their own afterCreate in config, we will replace it and call it
     const userAfterCreate = knexConfig.pool?.afterCreate;
@@ -70,7 +68,7 @@ export const createConnection = (
       conn: unknown,
       done: (err: Error | null | undefined, connection: any) => void
     ) => {
-      onAfterCreate(conn, (err: Error | null | undefined, nativeConn: any) => {
+      strapiAfterCreate(conn, (err: Error | null | undefined, nativeConn: any) => {
         if (err) {
           return done(err, nativeConn);
         }

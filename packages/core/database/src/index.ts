@@ -69,7 +69,7 @@ class Database {
     this.dialect = getDialect(this);
     this.dialect.configure();
 
-    const onAfterCreate = (
+    const afterCreate = (
       nativeConnection: unknown,
       done: (error: Error | null, nativeConnection: unknown) => Promise<void>
     ) => {
@@ -81,7 +81,7 @@ class Database {
       });
     };
 
-    this.connection = createConnection(this.config.connection, onAfterCreate);
+    this.connection = createConnection(this.config.connection, { pool: { afterCreate } });
 
     this.schema = createSchemaProvider(this);
 
