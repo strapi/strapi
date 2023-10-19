@@ -41,6 +41,7 @@ interface InitOptions extends Partial<AWS.S3.ClientConfiguration> {
       ACL?: string;
       signedUrlExpires?: string;
     };
+    buildFileUrl?: (data: AWS.S3.ManagedUpload.SendData) => string;
   };
 }
 
@@ -93,7 +94,10 @@ export default {
           }
 
           // set the bucket file url
-          if (baseUrl) {
+          if (config.buildFileUrl) {
+            // Use the custom config function to build the file url
+            file.url = config.buildFileUrl(data);
+          } else if (baseUrl) {
             // Construct the url with the baseUrl
             file.url = `${baseUrl}/${fileKey}`;
           } else {
