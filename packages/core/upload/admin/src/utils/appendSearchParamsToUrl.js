@@ -13,7 +13,8 @@ const appendSearchParamsToUrl = ({ url, params }) => {
   const urlObj = new URL(url, window.strapi.backendURL);
 
   Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined) {
+    
+    if (value !== undefined && key !== "updatedAt") {
       urlObj.searchParams.append(key, value);
     }
   });
