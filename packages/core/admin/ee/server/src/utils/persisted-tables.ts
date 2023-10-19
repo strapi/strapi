@@ -1,0 +1,141 @@
+import { LoadedStrapi } from '@strapi/types';
+import { differenceWith, isEqual } from 'lodash/fp';
+
+/**
+ * Transform table name to the object format
+ * @param {Array<string|{ table: string; dependsOn?: Array<{ table: string;}> }>} table
+ * @returns Array<{ table: string; dependsOn?: Array<{ table: string;}> }>
+ */
+const transformTableName = (table: any) => {
+  if (typeof table === 'string') {
+    return { name: table };
+  }
+  return table;
+};
+
+/**
+ * Finds all tables in the database matching the regular expression
+ * @param {Object} ctx
+ * @param {Strapi} ctx.strapi
+ * @param {RegExp} regex
+ * @returns {Promise<string[]>}
+ */
+export async function findTables({ strapi }: { strapi: LoadedStrapi }, regex: any) {
+  // @ts-expect-error - getTables is not typed into the schema inspector
+  const tables = await strapi.db.dialect.schemaInspector.getTables();
+  return tables.filter((tableName: string) => regex.test(tableName));
+}
+
+/**
+ * Add tables name to the reserved tables in core store
+ * @param {Object} ctx
+ * @param {Strapi} ctx.strapi
+ * @param {Array<string|{ table: string; dependsOn?: Array<{ table: string;}> }>} tableNames
+ * @return {Promise<void>}
+ */
+async function addPersistTables({ strapi }: { strapi: LoadedStrapi }, tableNames: string[]) {
+  const persistedTables = await getPersistedTables({ strapi });
+  const tables = tableNames.map(transformTableName);
+
+  // Get new tables to be persisted, remove tables if they already were persisted
+  const notPersistedTableNames = differenceWith(isEqual, tables, persistedTables);
+  // Remove tables that are going to be changed
+  const tablesToPersist = differenceWith(
+    (t1: any, t2: any) => t1.name === t2.name,
+    persistedTables,
+    notPersistedTableNames
+  );
+
+  if (!notPersistedTableNames.length) {
+    return;
+  }
+
+  // @ts-expect-error
+  tablesToPersist.push(...notPersistedTableNames);
+  await strapi.store.set({
+    type: 'core',
+    key: 'persisted_tables',
+    value: tablesToPersist,
+  });
+}
+
+/**
+ * Get all reserved table names from the core store
+ * @param {Object} ctx
+ * @param {Strapi} ctx.strapi
+ * @param {RegExp} regex
+ * @returns {Promise<string[]>}
+ */
+
+async function getPersistedTables({ strapi }: { strapi: LoadedStrapi }) {
+  const persistedTables = await strapi.store.get({
+    type: 'core',
+    key: 'persisted_tables',
+  });
+
+  // @ts-expect-error
+  return (persistedTables || []).map(transformTableName);
+}
+
+/**
+ * Set all reserved table names in the core store
+ * @param {Object} ctx
+ * @param {Strapi} ctx.strapi
+ * @param {Array<string|{ table: string; dependsOn?: Array<{ table: string;}> }>} tableNames
+ * @returns {Promise<void>}
+ */
+async function setPersistedTables({ strapi }: { strapi: LoadedStrapi }, tableNames: string[]) {
+  await strapi.store.set({
+    type: 'core',
+    key: 'persisted_tables',
+    value: tableNames,
+  });
+}
+/**
+ * Add all table names that start with a prefix to the reserved tables in
+ * core store
+ * @param {string} tableNamePrefix
+ * @return {Promise<void>}
+ */
+
+export const persistTablesWithPrefix = async (tableNamePrefix: string) => {
+  const tableNameRegex = new RegExp(`^${tableNamePrefix}.*`);
+  const tableNames = await findTables({ strapi }, tableNameRegex);
+
+  await addPersistTables({ strapi }, tableNames);
+};
+
+/**
+ * Remove all table names that end with a suffix from the reserved tables in core store
+ * @param {string} tableNameSuffix
+ * @return {Promise<void>}
+ */
+export const removePersistedTablesWithSuffix = async (tableNameSuffix: string) => {
+  const tableNameRegex = new RegExp(`.*${tableNameSuffix}$`);
+  const persistedTables = await getPersistedTables({ strapi });
+
+  const filteredPersistedTables = persistedTables.filter((table: any) => {
+    return !tableNameRegex.test(table.name);
+  });
+
+  if (filteredPersistedTables.length === persistedTables.length) {
+    return;
+  }
+
+  await setPersistedTables({ strapi }, filteredPersistedTables);
+};
+
+/**
+ * Add tables to the reserved tables in core store
+ * @param {Array<string|{ table: string; dependsOn?: Array<{ table: string;}> }} tables
+ */
+export const persistTables = async (tables: any) => {
+  await addPersistTables({ strapi }, tables);
+};
+
+export default {
+  persistTablesWithPrefix,
+  removePersistedTablesWithSuffix,
+  persistTables,
+  findTables,
+};

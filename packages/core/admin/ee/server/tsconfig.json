@@ -3,9 +3,8 @@
   "include": ["src"],
   "exclude": ["node_modules"],
   "compilerOptions": {
-    "types": ["lodash", "jest"],
+    "types": ["lodash"],
     "esModuleInterop": true,
     "allowJs": true,
   },
-
 }
