@@ -142,6 +142,40 @@ describe('AWS-S3 provider', () => {
       expect(file.url).toBeDefined();
       expect(file.url).toEqual('https://cdn.test/dir/dir2/tmp/test/test.json');
     });
+
+    test('Should use the function for custom url building if provided', async () => {
+      const providerInstance = awsProvider.init({
+        baseUrl: 'https://cdn.test',
+        rootPath: 'dir/dir2',
+        s3Options: {
+          params: {
+            Bucket: 'test',
+          },
+          buildFileUrl: (data) => `https://buildFileUrl.test/${data.Location}`,
+        },
+      });
+
+      S3InstanceMock.upload.mockImplementationOnce((params, callback) =>
+        callback(null, { Location: 'validurl.test' })
+      );
+
+      const file: File = {
+        name: 'test',
+        size: 100,
+        url: '',
+        path: 'tmp/test',
+        hash: 'test',
+        ext: '.json',
+        mime: 'application/json',
+        buffer: Buffer.from(''),
+      };
+
+      await providerInstance.upload(file);
+
+      expect(S3InstanceMock.upload).toBeCalled();
+      expect(file.url).toBeDefined();
+      expect(file.url).toEqual(`https://buildFileUrl.test/validurl.test`);
+    });
   });
 
   describe('isPrivate', () => {
