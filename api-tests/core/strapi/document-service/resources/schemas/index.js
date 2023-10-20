@@ -2,11 +2,12 @@
 
 module.exports = {
   'content-types': {
-    'api::relation.relation': require('./relation'),
-    'api::document.document': require('./document'),
+    'api::category.category': require('./category'),
+    'api::article.article': require('./article'),
   },
   components: {
-    'default.component-a': require('./component-a'),
-    'default.component-b': require('./component-b'),
+    'article.comp': require('./comp'),
+    'article.dz_comp': require('./dz-comp'),
+    'article.dz_other_comp': require('./dz-other-comp'),
   },
 };

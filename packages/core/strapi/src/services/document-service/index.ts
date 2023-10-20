@@ -168,8 +168,11 @@ const createDocumentService = ({
     await strapi.db?.transaction(async () =>
       // Clone every draft version to be published
       mapAsync(draftVersions, (draftVersion: any) => {
-        // @ts-expect-error - publishedAt is not allowed
-        return this.clone(uid, draftVersion.id, { ...params, data: { published_at: new Date() } });
+        return this.clone(uid, draftVersion.id, {
+          ...params,
+          // @ts-expect-error - publishedAt is not allowed
+          data: { publishedAt: new Date() },
+        });
       })
     );
 

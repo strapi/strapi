@@ -19,7 +19,7 @@ export type Params = {
   count?: boolean;
 };
 
-type FindOneParams = Pick<Params, 'where' | 'select' | 'populate' | '_q' | 'orderBy'>;
+export type FindOneParams = Pick<Params, 'where' | 'select' | 'populate' | '_q' | 'orderBy'>;
 
 export interface Repository {
   findOne(params?: FindOneParams): Promise<any>;
