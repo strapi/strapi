@@ -1,3 +1,5 @@
+import type { Strapi } from '@strapi/types';
+
 import loadSrcIndex from './src-index';
 import loadAPIs from './apis';
 import loadMiddlewares from './middlewares';
@@ -8,14 +10,16 @@ import loadAdmin from './admin';
 import loadSanitizers from './sanitizers';
 import loadValidators from './validators';
 
-export {
-  loadSrcIndex,
-  loadAPIs,
-  loadMiddlewares,
-  loadComponents,
-  loadPolicies,
-  loadPlugins,
-  loadAdmin,
-  loadSanitizers,
-  loadValidators,
-};
+export async function loadApplicationContext(strapi: Strapi) {
+  await Promise.all([
+    loadSrcIndex(strapi),
+    loadSanitizers(strapi),
+    loadValidators(strapi),
+    loadPlugins(strapi),
+    loadAdmin(strapi),
+    loadAPIs(strapi),
+    loadComponents(strapi),
+    loadMiddlewares(strapi),
+    loadPolicies(strapi),
+  ]);
+}
