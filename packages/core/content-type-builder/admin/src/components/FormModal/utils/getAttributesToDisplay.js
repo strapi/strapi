@@ -21,6 +21,7 @@ const getAttributes = (dataTarget = '', targetUid, nestedComponents) => {
 
   if (isPickingAttributeForAContentType) {
     return [
+      // Insert UID before the last item (richtext)
       [...defaultAttributes.slice(0, -1), 'uid', ...defaultAttributes.slice(-1)],
       ['component', 'dynamiczone'],
     ];
