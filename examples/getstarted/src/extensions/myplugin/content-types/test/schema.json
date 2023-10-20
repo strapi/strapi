@@ -24,14 +24,6 @@
           "localized": true
         }
       }
-    },
-    "blocks": {
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      },
-      "type": "blocks"
     }
   }
 }
