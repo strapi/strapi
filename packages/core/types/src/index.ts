@@ -84,9 +84,8 @@ export interface ConfigProvider {
   [key: string]: any;
 }
 
-export interface Strapi {
+export interface Strapi extends Container {
   server: Server;
-  container: Container;
   log: Logger;
   fs: StrapiFS;
   eventHub: EventHub;
