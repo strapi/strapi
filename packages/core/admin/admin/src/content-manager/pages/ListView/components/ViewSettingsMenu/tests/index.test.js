@@ -1,14 +1,8 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { fireEvent, render as renderRTL, waitFor } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
-import { IntlProvider } from 'react-intl';
-import { Provider } from 'react-redux';
-import { Router } from 'react-router-dom';
-import { combineReducers, createStore } from 'redux';
+import { render, waitFor } from '@tests/utils';
+import { Route } from 'react-router-dom';
 
-import reducers from '../../../../../../reducers';
 import { ViewSettingsMenu } from '../index';
 
 const layout = {
@@ -41,116 +35,108 @@ const layout = {
   },
 };
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  // eslint-disable-next-line react/prop-types
-  CheckPermissions: ({ children }) => <div>{children}</div>,
-}));
-
-const history = createMemoryHistory();
-
-const render = () => ({
-  ...renderRTL(<ViewSettingsMenu layout={layout} slug="api::temp.temp" />, {
-    wrapper({ children }) {
-      const rootReducer = combineReducers(reducers);
-
-      const store = createStore(rootReducer, {
-        'content-manager_listView': {
-          displayedHeaders: [],
-        },
-        admin_app: {
-          permissions: {
-            contentManager: {},
-          },
-        },
-      });
-
-      return (
-        <Router history={history}>
-          <IntlProvider messages={{}} textComponent="span" locale="en">
-            <ThemeProvider theme={lightTheme}>
-              <Provider store={store}>{children}</Provider>
-            </ThemeProvider>
-          </IntlProvider>
-        </Router>
-      );
-    },
-  }),
-});
-
 describe('Content Manager | List view | ViewSettingsMenu', () => {
   it('should show the Cog Button', () => {
-    const { getByRole } = render();
+    const { getByRole } = render(<ViewSettingsMenu layout={layout} slug="api::temp.temp" />);
 
-    const cogBtn = getByRole('button', {
-      name: 'View Settings',
-    });
-
-    expect(cogBtn).toBeInTheDocument();
+    expect(
+      getByRole('button', {
+        name: 'View Settings',
+      })
+    ).toBeInTheDocument();
   });
 
-  it('should open the Popover when you click on the Cog Button', () => {
-    const { getByRole } = render();
+  it('should open the Popover when you click on the Cog Button', async () => {
+    const { getByRole, user } = render(<ViewSettingsMenu layout={layout} slug="api::temp.temp" />);
 
-    const cogBtn = getByRole('button', {
-      name: 'View Settings',
-    });
+    await user.click(
+      getByRole('button', {
+        name: 'View Settings',
+      })
+    );
 
-    fireEvent.click(cogBtn);
-
-    const configureViewLink = getByRole('link', {
-      name: 'Configure the view',
-    });
-
-    expect(configureViewLink).toBeInTheDocument();
+    expect(
+      getByRole('link', {
+        name: 'Configure the view',
+      })
+    ).toBeInTheDocument();
   });
 
   it('should show inside the Popover the Configure the view link button', async () => {
-    const { getByRole } = render();
+    let testLocation = null;
 
-    const cogBtn = getByRole('button', {
-      name: 'View Settings',
+    const { getByRole, user } = render(<ViewSettingsMenu layout={layout} slug="api::temp.temp" />, {
+      renderOptions: {
+        wrapper({ children }) {
+          return (
+            <>
+              {children}
+              <Route
+                path="*"
+                render={({ location }) => {
+                  testLocation = location;
+
+                  return null;
+                }}
+              />
+            </>
+          );
+        },
+      },
     });
 
-    fireEvent.click(cogBtn);
+    await user.click(
+      getByRole('button', {
+        name: 'View Settings',
+      })
+    );
 
-    const configureViewLink = getByRole('link', {
-      name: 'Configure the view',
-    });
+    await user.click(
+      getByRole('link', {
+        name: 'Configure the view',
+      })
+    );
 
-    expect(configureViewLink).toBeInTheDocument();
-
-    fireEvent.click(configureViewLink);
     await waitFor(() => {
-      expect(history.location.pathname).toBe('/api::temp.temp/configurations/list');
+      expect(testLocation.pathname).toBe('/api::temp.temp/configurations/list');
     });
   });
 
   it('should show inside the Popover the title Dysplayed fields title', async () => {
-    const { getByText, getByRole } = render();
+    const { getByText, getByRole, user } = render(
+      <ViewSettingsMenu layout={layout} slug="api::temp.temp" />
+    );
 
-    const cogBtn = getByRole('button', {
-      name: 'View Settings',
-    });
-
-    fireEvent.click(cogBtn);
+    await user.click(
+      getByRole('button', {
+        name: 'View Settings',
+      })
+    );
 
     expect(getByText('Displayed fields')).toBeInTheDocument();
+
+    await user.click(getByRole('checkbox', { name: 'createdAt' }));
+
+    await user.keyboard('[Escape]');
   });
 
-  it('should show inside the Popover the reset button', () => {
-    const { getByRole } = render();
+  it('should show inside the Popover the reset button', async () => {
+    const { getByRole, user } = render(<ViewSettingsMenu layout={layout} slug="api::temp.temp" />);
 
-    const cogBtn = getByRole('button', {
-      name: 'View Settings',
-    });
+    await user.click(
+      getByRole('button', {
+        name: 'View Settings',
+      })
+    );
 
-    fireEvent.click(cogBtn);
+    expect(
+      getByRole('button', {
+        name: 'Reset',
+      })
+    ).toBeInTheDocument();
 
-    const resetBtn = getByRole('button', {
-      name: 'Reset',
-    });
+    await user.click(getByRole('checkbox', { name: 'createdAt' }));
 
-    expect(resetBtn).toBeInTheDocument();
+    await user.keyboard('[Escape]');
   });
 });

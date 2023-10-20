@@ -9,24 +9,25 @@ import { Helmet } from 'react-helmet';
 import { BrowserRouter } from 'react-router-dom';
 
 import Logo from './assets/images/logo-strapi-2022.svg';
-import localStorageKey from './components/LanguageProvider/utils/localStorageKey';
-import Providers from './components/Providers';
-import { customFields, Plugin } from './core/apis';
-import configureStore from './core/store/configureStore';
+import { LANGUAGE_LOCAL_STORAGE_KEY } from './components/LanguageProvider';
+import { Providers } from './components/Providers';
+import { HOOKS, INJECTION_ZONES } from './constants';
+import { customFields, Plugin, Reducers } from './core/apis';
+import { configureStore } from './core/store/configure';
 import { basename, createHook } from './core/utils';
-import {
+import favicon from './favicon.png';
+import App from './pages/App';
+import languageNativeNames from './translations/languageNativeNames';
+
+const {
   INJECT_COLUMN_IN_TABLE,
   MUTATE_COLLECTION_TYPES_LINKS,
   MUTATE_EDIT_VIEW_LAYOUT,
   MUTATE_SINGLE_TYPES_LINKS,
-} from './exposedHooks';
-import favicon from './favicon.png';
-import injectionZones from './injectionZones';
-import App from './pages/App';
-import languageNativeNames from './translations/languageNativeNames';
+} = HOOKS;
 
 class StrapiApp {
-  constructor({ adminConfig, appPlugins, library, middlewares, reducers }) {
+  constructor({ adminConfig, appPlugins, library, middlewares }) {
     this.customConfigurations = adminConfig.config;
     this.customBootstrapConfiguration = adminConfig.bootstrap;
     this.configurations = {
@@ -43,11 +44,11 @@ class StrapiApp {
     this.library = library;
     this.middlewares = middlewares;
     this.plugins = {};
-    this.reducers = reducers;
+    this.reducers = Reducers({});
     this.translations = {};
     this.hooksDict = {};
     this.admin = {
-      injectionZones,
+      injectionZones: INJECTION_ZONES,
     };
     this.customFields = customFields;
 
@@ -454,21 +455,19 @@ class StrapiApp {
         showReleaseNotification={this.configurations.notifications.releases}
         store={store}
       >
-        <>
-          <Helmet
-            link={[
-              {
-                rel: 'icon',
-                type: 'image/png',
-                href: this.configurations.head.favicon,
-              },
-            ]}
-            htmlAttributes={{ lang: localStorage.getItem(localStorageKey) || 'en' }}
-          />
-          <BrowserRouter basename={basename}>
-            <App store={store} />
-          </BrowserRouter>
-        </>
+        <Helmet
+          link={[
+            {
+              rel: 'icon',
+              type: 'image/png',
+              href: this.configurations.head.favicon,
+            },
+          ]}
+          htmlAttributes={{ lang: localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) || 'en' }}
+        />
+        <BrowserRouter basename={basename}>
+          <App store={store} />
+        </BrowserRouter>
       </Providers>
     );
   }

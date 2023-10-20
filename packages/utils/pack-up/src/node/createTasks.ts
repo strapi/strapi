@@ -1,5 +1,6 @@
 import path from 'path';
 
+import { DtsWatchTask } from './tasks/dts/watch';
 import { ViteBaseTask, ViteTaskEntry } from './tasks/vite/types';
 import { ViteWatchTask } from './tasks/vite/watch';
 
@@ -10,7 +11,7 @@ import type { DtsBaseTask } from './tasks/dts/types';
 import type { ViteBuildTask } from './tasks/vite/build';
 
 type BuildTask = DtsBuildTask | ViteBuildTask;
-type WatchTask = ViteWatchTask;
+type WatchTask = ViteWatchTask | DtsWatchTask;
 
 type BaseTask = ViteBaseTask | DtsBaseTask;
 
@@ -143,6 +144,7 @@ const createTasks =
           exportPath: bundle.source,
           sourcePath: bundle.source,
           targetPath: bundle.types,
+          tsconfig: bundle.tsconfig,
         });
       }
     }

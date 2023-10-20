@@ -1,5 +1,5 @@
 import { stripColor } from '../../tests/console';
-import { cleanupWorkspaces, createWorkspace } from '../../tests/workspaces';
+import { createWorkspace } from '../../tests/workspaces';
 import { init } from '../node/init';
 import { defaultTemplate } from '../node/templates/internal/default';
 import { Template, TemplateOrTemplateResolver, TemplateResolver } from '../node/templates/types';
@@ -12,10 +12,6 @@ const loggerMock = {
 };
 
 describe('node', () => {
-  afterAll(async () => {
-    await cleanupWorkspaces();
-  });
-
   /**
    * @note You can't use the default template because it has prompts and we can't
    * interact with the terminal when using the node-api. Instead we just pass a small
@@ -27,7 +23,7 @@ describe('node', () => {
     });
 
     const infoRegex = /^\[INFO\]\s+Creating a new package at/;
-    const successRegex = /^\[SUCCESS\]\s+Wrote tests\/__tmp__\//;
+    const successRegex = /^\[SUCCESS\]\s+Wrote .*tests\/__tmp__\//;
 
     it('should init a package with the default template', async () => {
       const infoSpy = jest.spyOn(global.console, 'info').mockImplementation(() => {});

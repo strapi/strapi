@@ -1,5 +1,5 @@
+import { createSelector } from '@reduxjs/toolkit';
 import isEqual from 'lodash/isEqual';
-import { createSelector } from 'reselect';
 
 import { REDUX_NAMESPACE } from './constants';
 import { initialState } from './reducer';

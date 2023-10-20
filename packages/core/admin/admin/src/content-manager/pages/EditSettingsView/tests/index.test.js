@@ -1,16 +1,7 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { NotificationsProvider } from '@strapi/helper-plugin';
-import { fireEvent, render as renderRTL } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { Provider } from 'react-redux';
-import { MemoryRouter } from 'react-router-dom';
-import { createStore } from 'redux';
+import { fireEvent } from '@testing-library/react';
+import { render as renderRTL } from '@tests/utils';
 
 import EditSettingsView from '../index';
 
@@ -55,50 +46,15 @@ const components = {
   compo1: { uid: 'compo1' },
 };
 
-const render = ({ layout } = {}) => ({
-  ...renderRTL(
+const render = ({ layout } = {}) =>
+  renderRTL(
     <EditSettingsView
       mainLayout={layout || mainLayout}
       components={components}
       isContentTypeView
       slug="api::address.address"
-    />,
-    {
-      wrapper({ children }) {
-        const store = createStore((state) => state, {
-          'content-manager_app': {
-            fieldSizes: {},
-          },
-        });
-
-        const client = new QueryClient({
-          defaultOptions: {
-            queries: {
-              retry: false,
-            },
-          },
-        });
-
-        return (
-          <MemoryRouter>
-            <Provider store={store}>
-              <QueryClientProvider client={client}>
-                <IntlProvider messages={{}} textComponent="span" locale="en">
-                  <ThemeProvider theme={lightTheme}>
-                    <NotificationsProvider>
-                      <DndProvider backend={HTML5Backend}>{children}</DndProvider>
-                    </NotificationsProvider>
-                  </ThemeProvider>
-                </IntlProvider>
-              </QueryClientProvider>
-            </Provider>
-          </MemoryRouter>
-        );
-      },
-    }
-  ),
-  user: userEvent.setup(),
-});
+    />
+  );
 
 /**
  * TODO: we should use MSW for network calls

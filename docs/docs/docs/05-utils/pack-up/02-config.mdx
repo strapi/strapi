@@ -48,6 +48,12 @@ interface Config {
    */
   minify?: boolean;
   /**
+   * Instead of creating as few chunks as possible, this mode
+   * will create separate chunks for all modules using the original module
+   * names as file names
+   */
+  preserveModules?: boolean;
+  /**
    * Whether to generate sourcemaps for the output or not.
    */
   sourcemap?: boolean;
@@ -56,6 +62,10 @@ interface Config {
    * Node.js workers and you want them to be transpiled for the node environment.
    */
   runtime?: Runtime;
+  /**
+   * path to the tsconfig file to use for the bundle.
+   */
+  tsconfig?: string;
 }
 
 interface ConfigBundle {
@@ -63,6 +73,8 @@ interface ConfigBundle {
   import?: string;
   require?: string;
   runtime?: Runtime;
+  tsconfig?: string;
+  types?: string;
 }
 
 type Runtime = '*' | 'node' | 'web';

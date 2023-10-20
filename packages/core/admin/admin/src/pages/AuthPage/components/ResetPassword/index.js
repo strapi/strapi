@@ -9,9 +9,10 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import { Logo } from '../../../../components/UnauthenticatedLogo';
-import UnauthenticatedLayout, {
+import {
   Column,
   LayoutContent,
+  UnauthenticatedLayout
 } from '../../../../layouts/UnauthenticatedLayout';
 import FieldActionWrapper from '../FieldActionWrapper';
 

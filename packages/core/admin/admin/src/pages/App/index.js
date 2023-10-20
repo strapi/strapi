@@ -23,17 +23,19 @@ import { Route, Switch } from 'react-router-dom';
 
 import { PrivateRoute } from '../../components/PrivateRoute';
 import { ADMIN_PERMISSIONS_CE } from '../../constants';
-import { useConfigurations } from '../../hooks';
+import { useConfiguration } from '../../hooks/useConfiguration';
 import { useEnterprise } from '../../hooks/useEnterprise';
 import { createRoute, makeUniqueRoutes } from '../../utils';
 import AuthPage from '../AuthPage';
-import NotFoundPage from '../NotFoundPage';
+import { NotFoundPage } from '../NotFoundPage';
 import UseCasePage from '../UseCasePage';
 
 import { ROUTES_CE, SET_ADMIN_PERMISSIONS } from './constants';
 
 const AuthenticatedApp = lazy(() =>
-  import(/* webpackChunkName: "Admin-authenticatedApp" */ '../../components/AuthenticatedApp')
+  import(/* webpackChunkName: "Admin-authenticatedApp" */ '../../components/AuthenticatedApp').then(
+    (mod) => ({ default: mod.AuthenticatedApp })
+  )
 );
 
 function App() {
@@ -57,7 +59,7 @@ function App() {
     }
   );
   const toggleNotification = useNotification();
-  const { updateProjectSettings } = useConfigurations();
+  const { updateProjectSettings } = useConfiguration();
   const { formatMessage } = useIntl();
   const [{ isLoading, hasAdmin, uuid, deviceId }, setState] = useState({
     isLoading: true,
@@ -180,7 +182,9 @@ function App() {
 
   return (
     <Suspense fallback={<LoadingIndicatorPage />}>
-      <SkipToContent>{formatMessage({ id: 'skipToContent' })}</SkipToContent>
+      <SkipToContent>
+        {formatMessage({ id: 'skipToContent', defaultMessage: 'Skip to content' })}
+      </SkipToContent>
       <TrackingProvider value={trackingInfo}>
         <Switch>
           {authRoutes}
