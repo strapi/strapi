@@ -7,7 +7,7 @@ export default async () => {
   const appContext = await strapi.compile();
   const app = await strapi(appContext).register();
 
-  const list = app.container.get('services').keys();
+  const list = app.get('services').keys();
 
   const infoTable = new CLITable({
     head: [chalk.blue('Name')],

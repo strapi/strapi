@@ -19,7 +19,7 @@ module.exports = async ({ strapi }) => {
   if (auditLogsIsEnabled) {
     strapi.hook('strapi::content-types.beforeSync').register(migrateAuditLogsTable);
     const auditLogsService = createAuditLogsService(strapi);
-    strapi.container.register('audit-logs', auditLogsService);
+    strapi.add('audit-logs', auditLogsService);
     await auditLogsService.register();
   }
   if (features.isEnabled('review-workflows')) {

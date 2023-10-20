@@ -33,7 +33,7 @@ const createStrapiInstance = async ({
   const instance = strapi(options);
 
   if (bypassAuth) {
-    instance.container.get('auth').register('content-api', {
+    instance.get('auth').register('content-api', {
       name: 'test-auth',
       authenticate() {
         return { authenticated: true };
@@ -43,7 +43,7 @@ const createStrapiInstance = async ({
   }
 
   if (bootstrap) {
-    const modules = instance.container.get('modules');
+    const modules = instance.get('modules');
     const originalBootstrap = modules.bootstrap;
     // decorate modules bootstrap
     modules.bootstrap = async () => {
