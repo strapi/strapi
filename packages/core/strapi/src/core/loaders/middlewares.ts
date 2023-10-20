@@ -8,8 +8,8 @@ import { middlewares as internalMiddlewares } from '../../middlewares';
 export default async function loadMiddlewares(strapi: Strapi) {
   const localMiddlewares = await loadLocalMiddlewares(strapi);
 
-  strapi.container.get('middlewares').add(`global::`, localMiddlewares);
-  strapi.container.get('middlewares').add(`strapi::`, internalMiddlewares);
+  strapi.get('middlewares').add(`global::`, localMiddlewares);
+  strapi.get('middlewares').add(`strapi::`, internalMiddlewares);
 }
 
 const loadLocalMiddlewares = async (strapi: Strapi) => {

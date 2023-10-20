@@ -55,22 +55,20 @@ const addSignedFileUrlsToAdmin = async () => {
     return;
   }
 
-  strapi.container
-    .get('services')
-    .extend('plugin::content-manager.entity-manager', (entityManager) => {
-      /**
-       * Map entity manager responses to sign private media URLs
-       * @param {Object} entity
-       * @param {string} uid
-       * @returns
-       */
-      const mapEntity = async (entity, uid) => {
-        const mappedEntity = await entityManager.mapEntity(entity, uid);
-        return signEntityMedia(mappedEntity, uid);
-      };
+  strapi.get('services').extend('plugin::content-manager.entity-manager', (entityManager) => {
+    /**
+     * Map entity manager responses to sign private media URLs
+     * @param {Object} entity
+     * @param {string} uid
+     * @returns
+     */
+    const mapEntity = async (entity, uid) => {
+      const mappedEntity = await entityManager.mapEntity(entity, uid);
+      return signEntityMedia(mappedEntity, uid);
+    };
 
-      return { ...entityManager, mapEntity };
-    });
+    return { ...entityManager, mapEntity };
+  });
 };
 
 module.exports = {

@@ -10,8 +10,8 @@ module.exports = ({ strapi }) => {
   const passportMiddleware = strapi.admin.services.passport.init();
 
   strapi.server.api('admin').use(passportMiddleware);
-  strapi.container.get('auth').register('admin', adminAuthStrategy);
-  strapi.container.get('auth').register('content-api', apiTokenAuthStrategy);
+  strapi.get('auth').register('admin', adminAuthStrategy);
+  strapi.get('auth').register('content-api', apiTokenAuthStrategy);
 
   if (strapi.config.serveAdminPanel) {
     registerAdminPanelRoute({ strapi });

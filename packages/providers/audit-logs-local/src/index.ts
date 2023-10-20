@@ -14,9 +14,9 @@ interface Log extends Omit<Event, 'userId'> {
 
 export default {
   async register({ strapi }: { strapi: Strapi }) {
-    const contentTypes = strapi.container.get('content-types');
+    const contentTypes = strapi.get('content-types');
     if (!contentTypes.keys().includes('admin::audit-log')) {
-      strapi.container.get('content-types').add('admin::', { 'audit-log': auditLogContentType });
+      strapi.get('content-types').add('admin::', { 'audit-log': auditLogContentType });
     }
 
     // Return the provider object

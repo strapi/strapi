@@ -32,7 +32,7 @@ const createAuthorizeMiddleware =
   async (ctx, next) => {
     const { auth, route } = ctx.state;
 
-    const authService = strapi.container.get('auth');
+    const authService = strapi.get('auth');
 
     try {
       await authService.verify(auth, getAuthConfig(route));
@@ -54,7 +54,7 @@ const createAuthorizeMiddleware =
 const createAuthenticateMiddleware =
   (strapi: Strapi): Common.MiddlewareHandler =>
   async (ctx, next) => {
-    return strapi.container.get('auth').authenticate(ctx, next);
+    return strapi.get('auth').authenticate(ctx, next);
   };
 
 const returnBodyMiddleware: Common.MiddlewareHandler = async (ctx, next) => {
