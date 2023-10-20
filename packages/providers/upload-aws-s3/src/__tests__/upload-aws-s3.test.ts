@@ -151,7 +151,7 @@ describe('AWS-S3 provider', () => {
           params: {
             Bucket: 'test',
           },
-          buildFileUrl: (data) => `https://buildFileUrl.test/${data.Location}`,
+          mapFileDataToUrl: (data) => `https://mapFileDataToUrl.test/${data.Location}`,
         },
       });
 
@@ -174,7 +174,7 @@ describe('AWS-S3 provider', () => {
 
       expect(S3InstanceMock.upload).toBeCalled();
       expect(file.url).toBeDefined();
-      expect(file.url).toEqual(`https://buildFileUrl.test/validurl.test`);
+      expect(file.url).toEqual(`https://mapFileDataToUrl.test/validurl.test`);
     });
   });
 

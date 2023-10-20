@@ -30,7 +30,7 @@ npm install @strapi/provider-upload-aws-s3 --save
   - `signedUrlExpires` is the number of seconds before a signed URL expires. (See [how signed URLs work](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-signed-urls.html)). Defaults to 15 minutes and URLs are only signed when ACL is set to `private`.
   - `Bucket` is the name of the bucket to upload to.
 - `actionOptions` is passed directly to the parameters to each method respectively. You can find the complete list of [upload/ uploadStream options](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#upload-property) and [delete options](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#deleteObject-property)
-- `buildFileUrl` optionally pass this function to define custom logic for building file url. This is provided as a way to handle the many different s3 provider options.
+- `mapFileDataToUrl` optionally pass this function to define custom logic for building file url. This is provided as a way to handle the many different s3 provider options.
 
 See the [documentation about using a provider](https://docs.strapi.io/developer-docs/latest/plugins/upload.html#using-a-provider) for information on installing and using a provider. To understand how environment variables are used in Strapi, please refer to the [documentation about environment variables](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/environment.html#environment-variables).
 
@@ -59,7 +59,7 @@ module.exports = ({ env }) => ({
             Bucket: env('AWS_BUCKET'),
           },
         },
-        buildFileUrl: () => 'BUILD_CUSTOM_FILE_URL',
+        mapFileDataToUrl: () => 'BUILD_CUSTOM_FILE_URL',
       },
       actionOptions: {
         upload: {},
