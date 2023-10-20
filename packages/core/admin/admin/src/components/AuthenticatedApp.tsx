@@ -8,7 +8,6 @@ import {
   useFetchClient,
   useGuidedTour,
 } from '@strapi/helper-plugin';
-import lodashGet from 'lodash/get';
 import { useQueries } from 'react-query';
 import lt from 'semver/functions/lt';
 import valid from 'semver/functions/valid';
@@ -18,8 +17,8 @@ import packageJSON from '../../../package.json';
 import { UserEntity } from '../../../shared/entities';
 import { useConfiguration } from '../hooks/useConfiguration';
 import { APIResponse, APIResponseUsersLegacy } from '../types/adminAPI';
-// @ts-expect-error - no types yet.
-import { getFullName, hashAdminUserEmail } from '../utils';
+import { getFullName } from '../utils/getFullName';
+import { hashAdminUserEmail } from '../utils/hashAdminUserEmail';
 
 import { NpsSurvey } from './NpsSurvey';
 import { PluginsInitializer } from './PluginsInitializer';
@@ -30,10 +29,9 @@ const strapiVersion = packageJSON.version;
 const AuthenticatedApp = () => {
   const { setGuidedTourVisibility } = useGuidedTour();
   const userInfo = auth.get('userInfo');
-  const userName = userInfo
-    ? lodashGet(userInfo, 'username') || getFullName(userInfo.firstname, userInfo.lastname)
-    : null;
-  const [userDisplayName, setUserDisplayName] = React.useState(userName);
+  const [userDisplayName, setUserDisplayName] = React.useState<string>(() =>
+    userInfo ? userInfo.username || getFullName(userInfo.firstname ?? '', userInfo.lastname) : ''
+  );
   const [userId, setUserId] = React.useState<string>();
   const { showReleaseNotification } = useConfiguration();
   const { get } = useFetchClient();
@@ -130,8 +128,13 @@ const AuthenticatedApp = () => {
 
   React.useEffect(() => {
     const getUserId = async () => {
-      const userId = await hashAdminUserEmail(userInfo);
-      setUserId(userId);
+      if (userInfo) {
+        const userId = await hashAdminUserEmail(userInfo);
+
+        if (userId) {
+          setUserId(userId);
+        }
+      }
     };
 
     getUserId();

@@ -19,8 +19,8 @@ interface UserInfo {
   id: number;
   isActive?: boolean;
   blocked: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface StorageItems {
@@ -183,3 +183,4 @@ const auth = {
 };
 
 export { auth };
+export type { UserInfo, StorageItems };

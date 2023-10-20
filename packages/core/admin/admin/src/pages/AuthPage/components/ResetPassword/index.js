@@ -12,7 +12,7 @@ import { Logo } from '../../../../components/UnauthenticatedLogo';
 import {
   Column,
   LayoutContent,
-  UnauthenticatedLayout
+  UnauthenticatedLayout,
 } from '../../../../layouts/UnauthenticatedLayout';
 import FieldActionWrapper from '../FieldActionWrapper';
 
