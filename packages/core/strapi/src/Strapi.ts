@@ -35,6 +35,8 @@ import * as factories from './factories';
 import compile from './compile';
 
 import * as utils from './utils';
+import * as registries from './core/registries';
+import * as loaders from './core/loaders';
 import { Container } from './container';
 import createStrapiFs from './services/fs';
 import createEventHub from './services/event-hub';
@@ -55,24 +57,10 @@ import createStartupLogger from './utils/startup-logger';
 import { createStrapiFetch } from './utils/fetch';
 import { LIFECYCLES } from './utils/lifecycles';
 import ee from './utils/ee';
-import contentTypesRegistry from './core/registries/content-types';
-import componentsRegistry from './core/registries/components';
-import servicesRegistry from './core/registries/services';
-import policiesRegistry from './core/registries/policies';
-import middlewaresRegistry from './core/registries/middlewares';
-import hooksRegistry from './core/registries/hooks';
-import controllersRegistry from './core/registries/controllers';
-import modulesRegistry from './core/registries/modules';
-import pluginsRegistry from './core/registries/plugins';
-import customFieldsRegistry from './core/registries/custom-fields';
-import createConfigProvider from './core/registries/config';
-import apisRegistry from './core/registries/apis';
 import bootstrap from './core/bootstrap';
-import * as loaders from './core/loaders';
 import { destroyOnSignal } from './utils/signals';
 import getNumberOfDynamicZones from './services/utils/dynamic-zones';
-import sanitizersRegistry from './core/registries/sanitizers';
-import validatorsRegistry from './core/registries/validators';
+
 import convertCustomFieldType from './utils/convert-custom-field-type';
 
 // TODO: move somewhere else
@@ -196,22 +184,22 @@ class Strapi extends Container implements StrapiI {
     const appConfig = loadConfiguration(rootDirs, opts);
 
     // Instantiate the Strapi container
-    this.add('config', createConfigProvider(appConfig))
-      .add('content-types', contentTypesRegistry())
-      .add('components', componentsRegistry())
-      .add('services', servicesRegistry(this))
-      .add('policies', policiesRegistry())
-      .add('middlewares', middlewaresRegistry())
-      .add('hooks', hooksRegistry())
-      .add('controllers', controllersRegistry(this))
-      .add('modules', modulesRegistry(this))
-      .add('plugins', pluginsRegistry(this))
-      .add('custom-fields', customFieldsRegistry(this))
-      .add('apis', apisRegistry(this))
-      .add('auth', createAuth())
+    this.add('config', registries.config(appConfig))
+      .add('content-types', registries.contentTypes())
+      .add('components', registries.components())
+      .add('services', registries.services(this))
+      .add('policies', registries.policies())
+      .add('middlewares', registries.middlewares())
+      .add('hooks', registries.hooks())
+      .add('controllers', registries.controllers(this))
+      .add('modules', registries.modules(this))
+      .add('plugins', registries.plugins(this))
+      .add('custom-fields', registries.customFields(this))
+      .add('apis', registries.apis(this))
+      .add('sanitizers', registries.sanitizers())
+      .add('validators', registries.validators())
       .add('content-api', createContentAPI(this))
-      .add('sanitizers', sanitizersRegistry())
-      .add('validators', validatorsRegistry());
+      .add('auth', createAuth());
 
     // Create a mapping of every useful directory (for the app, dist and static directories)
     this.dirs = utils.getDirs(rootDirs, { strapi: this });
@@ -454,42 +442,6 @@ class Strapi extends Container implements StrapiI {
     process.exit(exitCode);
   }
 
-  async loadAdmin() {
-    await loaders.loadAdmin(this);
-  }
-
-  async loadPlugins() {
-    await loaders.loadPlugins(this);
-  }
-
-  async loadPolicies() {
-    await loaders.loadPolicies(this);
-  }
-
-  async loadAPIs() {
-    await loaders.loadAPIs(this);
-  }
-
-  async loadComponents() {
-    await loaders.loadComponents(this);
-  }
-
-  async loadMiddlewares() {
-    await loaders.loadMiddlewares(this);
-  }
-
-  async loadApp() {
-    this.app = await loaders.loadSrcIndex(this);
-  }
-
-  async loadSanitizers() {
-    await loaders.loadSanitizers(this);
-  }
-
-  async loadValidators() {
-    await loaders.loadValidators(this);
-  }
-
   registerInternalHooks() {
     this.get('hooks').set('strapi::content-types.beforeSync', hooks.createAsyncParallelHook());
 
@@ -500,17 +452,7 @@ class Strapi extends Container implements StrapiI {
   }
 
   async register() {
-    await Promise.all([
-      this.loadApp(),
-      this.loadSanitizers(),
-      this.loadValidators(),
-      this.loadPlugins(),
-      this.loadAdmin(),
-      this.loadAPIs(),
-      this.loadComponents(),
-      this.loadMiddlewares(),
-      this.loadPolicies(),
-    ]);
+    await loaders.loadApplicationContext(this);
 
     await bootstrap({ strapi: this });
 
