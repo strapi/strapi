@@ -87,23 +87,23 @@ export default async function createProject(
         'tsconfig-server.json.js': '.',
       };
 
-      for (const [fileName, path] of Object.entries(filesMap)) {
+      await Promise.all(Object.entries(filesMap).map(([fileName, path]) => {
         const destPath = join(rootPath, path, 'tsconfig.json');
 
         if (fileName === 'tsconfig-admin.json.js') {
-          await fse.writeJSON(destPath, adminTsconfig(), { spaces: 2 });
+          return fse.writeJSON(destPath, adminTsconfig(), { spaces: 2 });
         }
         if (fileName === 'tsconfig-server.json.js') {
-          await fse.writeJSON(destPath, serverTsconfig(), { spaces: 2 });
+          return fse.writeJSON(destPath, serverTsconfig(), { spaces: 2 });
         }
-      }
+      }));
     } else {
       const filesMap = { 'jsconfig.json.js': '.' };
 
-      for (const [, path] of Object.entries(filesMap)) {
+      await Promise.all(Object.entries(filesMap).map(([, path]) => {
         const destPath = join(rootPath, path, 'jsconfig.json');
-        await fse.writeJSON(destPath, jsconfig(), { spaces: 2 });
-      }
+        return fse.writeJSON(destPath, jsconfig(), { spaces: 2 });
+      }));
     }
 
     // ensure node_modules is created
