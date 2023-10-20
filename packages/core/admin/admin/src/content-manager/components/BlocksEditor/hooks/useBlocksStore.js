@@ -165,9 +165,20 @@ const handleBackspaceKeyOnList = (editor, event) => {
   const [currentListItem, currentListItemPath] = Editor.parent(editor, editor.selection.anchor);
   const [currentList, currentListPath] = Editor.parent(editor, currentListItemPath);
   const isListEmpty = currentList.children.length === 1 && currentListItem.children[0].text === '';
+  const isNodeStart = Editor.isStart(editor, editor.selection.anchor, currentListItemPath);
+  const isEditorStart = Editor.before(editor, currentListPath) == null;
 
   if (isListEmpty) {
     event.preventDefault();
+    replaceListWithEmptyBlock(editor, currentListPath);
+  } else if (isNodeStart) {
+    if (isEditorStart) {
+      Transforms.liftNodes(editor);
+    }
+    // Transforms the list item into a paragraph
+    Transforms.setNodes(editor, { type: 'paragraph' });
+  } else {
+    // In the other cases just remove all the content selected
     replaceListWithEmptyBlock(editor, currentListPath);
   }
 };

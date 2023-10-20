@@ -123,6 +123,7 @@ const BlocksEditor = React.forwardRef(
     const { key, incrementSlateUpdatesCount } = useResetKey(value);
 
     const handleSlateChange = (state) => {
+      console.log('SLATE CHANGE', state);
       const isAstChange = editor.operations.some((op) => op.type !== 'set_selection');
 
       if (isAstChange) {
