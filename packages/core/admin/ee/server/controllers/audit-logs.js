@@ -7,7 +7,7 @@ module.exports = {
     const { query } = ctx.request;
     await validateFindMany(query);
 
-    const auditLogs = strapi.container.get('audit-logs');
+    const auditLogs = strapi.get('audit-logs');
     const body = await auditLogs.findMany(query);
 
     ctx.body = body;
@@ -16,7 +16,7 @@ module.exports = {
   async findOne(ctx) {
     const { id } = ctx.params;
 
-    const auditLogs = strapi.container.get('audit-logs');
+    const auditLogs = strapi.get('audit-logs');
     const body = await auditLogs.findOne(id);
 
     ctx.body = body;

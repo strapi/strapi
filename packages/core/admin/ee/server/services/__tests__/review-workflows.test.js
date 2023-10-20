@@ -76,8 +76,8 @@ const reviewWorkflowsValidationMock = {
 const hookMock = jest.fn().mockReturnValue({ register: jest.fn() });
 
 const strapiMock = {
+  ...containerMock,
   contentTypes: contentTypesMock,
-  container: containerMock,
   hook: hookMock,
   query: jest.fn(() => queryMock),
   service(serviceName) {

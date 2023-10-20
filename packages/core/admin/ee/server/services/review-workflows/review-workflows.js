@@ -76,7 +76,7 @@ function extendReviewWorkflowContentTypes({ strapi }) {
       [assertContentTypeCompatibility, setReviewWorkflowAttributes],
       [stubTrue, incompatibleContentTypeAlert],
     ]);
-    strapi.container.get('content-types').extend(contentTypeUID, extendContentTypeIfCompatible);
+    strapi.get('content-types').extend(contentTypeUID, extendContentTypeIfCompatible);
   };
 
   pipe([
