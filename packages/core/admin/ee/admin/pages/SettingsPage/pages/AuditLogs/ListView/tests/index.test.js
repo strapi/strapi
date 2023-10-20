@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { configureStore } from '@reduxjs/toolkit';
 import { fixtures } from '@strapi/admin-test-utils';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
@@ -9,7 +10,6 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
-import { createStore } from 'redux';
 
 import useAuditLogsData from '../hooks/useAuditLogsData';
 import ListView from '../index';
@@ -54,15 +54,18 @@ const setup = (props) => ({
 
       return (
         <Provider
-          store={createStore((state) => state, {
-            admin_app: {
-              permissions: {
-                ...fixtures.permissions.app,
-                settings: {
-                  ...fixtures.permissions.app.settings,
-                  auditLogs: {
-                    main: [{ action: 'admin::audit-logs.read', subject: null }],
-                    read: [{ action: 'admin::audit-logs.read', subject: null }],
+          store={configureStore({
+            reducer: (state) => state,
+            preloadedState: {
+              admin_app: {
+                permissions: {
+                  ...fixtures.permissions.app,
+                  settings: {
+                    ...fixtures.permissions.app.settings,
+                    auditLogs: {
+                      main: [{ action: 'admin::audit-logs.read', subject: null }],
+                      read: [{ action: 'admin::audit-logs.read', subject: null }],
+                    },
                   },
                 },
               },

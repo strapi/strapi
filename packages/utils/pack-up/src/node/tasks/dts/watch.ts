@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import ts from 'typescript';
 
 import { isError } from '../../core/errors';
+import { loadTsConfig } from '../../core/tsconfig';
 
 import { printDiagnostic } from './diagnostic';
 import { DtsBaseTask } from './types';
@@ -36,7 +37,18 @@ const dtsWatchTask: TaskHandler<DtsWatchTask, ts.Diagnostic> = {
     return new Observable((subscriber) => {
       Promise.all(
         task.entries.map(async (entry) => {
-          if (!ctx.ts) {
+          /**
+           * Entry level tsconfig's take precedence
+           */
+          const tsconfig = entry.tsconfig
+            ? loadTsConfig({
+                cwd: ctx.cwd,
+                path: entry.tsconfig,
+                logger: ctx.logger,
+              })
+            : ctx.ts;
+
+          if (!tsconfig) {
             ctx.logger.warn(
               `You've added a types entry but no tsconfig.json was found for ${entry.targetPath}. Skipping...`
             );
@@ -45,8 +57,8 @@ const dtsWatchTask: TaskHandler<DtsWatchTask, ts.Diagnostic> = {
           }
 
           const compilerHost = ts.createWatchCompilerHost(
-            'tsconfig.build.json',
-            ctx.ts.config.options,
+            tsconfig.path,
+            tsconfig.config.options,
             ts.sys,
             ts.createEmitAndSemanticDiagnosticsBuilderProgram,
             (diagnostic) => {

@@ -4,7 +4,7 @@ const _ = require('lodash');
 const { merge } = require('lodash/fp');
 const permissionService = require('../permission');
 const { toPermission } = require('../../domain/permission');
-const createEventHub = require('../../../../strapi/dist/services/event-hub').default;
+const createEventHub = require('../../../../strapi/dist/services/event-hub');
 
 describe('Permission Service', () => {
   beforeEach(() => {

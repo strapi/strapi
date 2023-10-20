@@ -12,8 +12,7 @@ import { FormattedMessage } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
-import GuidedTourHomepage from '../../components/GuidedTour/Homepage';
-import isGuidedTourCompleted from '../../components/GuidedTour/utils/isGuidedTourCompleted';
+import { GuidedTourHomepage } from '../../components/GuidedTour/Homepage';
 import { useContentTypes } from '../../hooks/useContentTypes';
 import { useEnterprise } from '../../hooks/useEnterprise';
 
@@ -37,7 +36,11 @@ export const HomePageCE = () => {
   const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useContentTypes();
   const { guidedTourState, isGuidedTourVisible, isSkipped } = useGuidedTour();
   const showGuidedTour =
-    !isGuidedTourCompleted(guidedTourState) && isGuidedTourVisible && !isSkipped;
+    !Object.values(guidedTourState).every((section) =>
+      Object.values(section).every((step) => step)
+    ) &&
+    isGuidedTourVisible &&
+    !isSkipped;
   const { push } = useHistory();
   const handleClick = (e) => {
     e.preventDefault();

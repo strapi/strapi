@@ -8,7 +8,7 @@ const { exists } = require('fs-extra');
 const { env } = require('@strapi/utils');
 const { isUsingTypeScript } = require('@strapi/typescript-utils');
 // eslint-disable-next-line node/no-extraneous-require
-const ee = require('@strapi/strapi/dist/utils/ee').default;
+const ee = require('@strapi/strapi/dist/utils/ee');
 
 const {
   validateUpdateProjectSettings,
@@ -26,11 +26,12 @@ module.exports = {
   // When removing this we need to update the /admin/src/index.js file
   // where we set the strapi.window.isEE value
   async getProjectType() {
+    const flags = strapi.config.get('admin.flags', {});
     // FIXME
     try {
-      return { data: { isEE: strapi.EE, features: ee.features.list() } };
+      return { data: { isEE: strapi.EE, features: ee.features.list(), flags } };
     } catch (err) {
-      return { data: { isEE: false, features: [] } };
+      return { data: { isEE: false, features: [], flags } };
     }
   },
 

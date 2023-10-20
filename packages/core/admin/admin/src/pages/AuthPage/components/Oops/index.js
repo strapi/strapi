@@ -5,9 +5,10 @@ import { Link, useQuery } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import { Logo } from '../../../../components/UnauthenticatedLogo';
-import UnauthenticatedLayout, {
+import {
   Column,
   LayoutContent,
+  UnauthenticatedLayout
 } from '../../../../layouts/UnauthenticatedLayout';
 
 const Oops = () => {

@@ -7,9 +7,10 @@ import { Redirect, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { Logo } from '../../../../../../admin/src/components/UnauthenticatedLogo';
-import UnauthenticatedLayout, {
+import {
   Column,
   LayoutContent,
+  UnauthenticatedLayout
 } from '../../../../../../admin/src/layouts/UnauthenticatedLayout';
 import { useAuthProviders } from '../../../../hooks/useAuthProviders';
 
