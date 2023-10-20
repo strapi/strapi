@@ -137,15 +137,6 @@ export interface Strapi extends Container {
   listen(): Promise<void>;
   stopWithError(err: unknown, customMessage?: string): never;
   stop(exitCode?: number): never;
-  loadAdmin(): Promise<void>;
-  loadPlugins(): Promise<void>;
-  loadPolicies(): Promise<void>;
-  loadAPIs(): Promise<void>;
-  loadComponents(): Promise<void>;
-  loadMiddlewares(): Promise<void>;
-  loadApp(): Promise<void>;
-  loadSanitizers(): Promise<void>;
-  loadValidators(): Promise<void>;
   registerInternalHooks(): void;
   register(): Promise<Strapi>;
   bootstrap(): Promise<Strapi>;
