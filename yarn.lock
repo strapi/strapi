@@ -7848,7 +7848,7 @@ __metadata:
   dependencies:
     "@paralleldrive/cuid2": 2.2.2
     "@strapi/pack-up": "workspace:*"
-    "@strapi/utils": 4.14.5
+    "@strapi/utils": 4.14.4
     date-fns: 2.30.0
     debug: 4.3.4
     eslint-config-custom: 4.14.5
@@ -8718,6 +8718,20 @@ __metadata:
     yup: 0.32.9
   languageName: unknown
   linkType: soft
+
+"@strapi/utils@npm:4.14.4":
+  version: 4.14.4
+  resolution: "@strapi/utils@npm:4.14.4"
+  dependencies:
+    "@sindresorhus/slugify": 1.1.0
+    date-fns: 2.30.0
+    http-errors: 1.8.1
+    lodash: 4.17.21
+    p-map: 4.0.0
+    yup: 0.32.9
+  checksum: ee97c5679e9ef613339afed9eb1bacb1daf3d6c294163ef31dfcd04f30be0803f65fc70ab606ad2356c37fde63638ae45f3fb9496ee6a0483437de6fd74208a2
+  languageName: node
+  linkType: hard
 
 "@swc/cli@npm:0.1.62":
   version: 0.1.62
