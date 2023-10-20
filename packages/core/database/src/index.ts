@@ -30,28 +30,107 @@ export interface DatabaseConfig {
 }
 
 class Database {
-  connection: Knex;
-
-  dialect: Dialect;
-
   config: DatabaseConfig;
 
   metadata: Metadata;
 
-  schema: SchemaProvider;
+  /**
+   * NOTE: The get/set methods are necessary to prevent a breaking change in typescript now that they are not set in the constructor
+   */
 
-  migrations: MigrationProvider;
+  #connection?: Knex;
 
-  lifecycles: LifecycleProvider;
+  #dialect?: Dialect;
 
-  entityManager: EntityManager;
+  #schema?: SchemaProvider;
+
+  #migrations?: MigrationProvider;
+
+  #lifecycles?: LifecycleProvider;
+
+  #entityManager?: EntityManager;
+
+  get connection(): Knex {
+    if (!this.#connection) {
+      throw new Error('Database.connection is not loaded');
+    }
+    return this.#connection;
+  }
+
+  set connection(value: Knex) {
+    this.#connection = value;
+  }
+
+  get dialect(): Dialect {
+    if (!this.#dialect) {
+      throw new Error('Database.dialect is not loaded');
+    }
+    return this.#dialect;
+  }
+
+  set dialect(value: Dialect) {
+    this.#dialect = value;
+  }
+
+  get schema(): SchemaProvider {
+    if (!this.#schema) {
+      throw new Error('Database.schema is not loaded');
+    }
+    return this.#schema;
+  }
+
+  set schema(value: SchemaProvider) {
+    this.#schema = value;
+  }
+
+  get migrations(): MigrationProvider {
+    if (!this.#migrations) {
+      throw new Error('Database.migrations is not loaded');
+    }
+    return this.#migrations;
+  }
+
+  set migrations(value: MigrationProvider) {
+    this.#migrations = value;
+  }
+
+  get lifecycles(): LifecycleProvider {
+    if (!this.#lifecycles) {
+      throw new Error('Database.lifecycles is not loaded');
+    }
+    return this.#lifecycles;
+  }
+
+  set lifecycles(value: LifecycleProvider) {
+    this.#lifecycles = value;
+  }
+
+  get entityManager(): EntityManager {
+    if (!this.#entityManager) {
+      throw new Error('Database.entityManager is not loaded');
+    }
+    return this.#entityManager;
+  }
+
+  set entityManager(value: EntityManager) {
+    this.#entityManager = value;
+  }
+
+  #bootstrapComplete = false;
 
   static transformContentTypes = transformContentTypes;
 
   static async init(config: DatabaseConfig) {
     const db = new Database(config);
+    await db.bootstrap();
     await validateDatabase(db);
     return db;
+  }
+
+  isReady() {
+    if (!this.#bootstrapComplete) {
+      throw new Error('Database is not ready');
+    }
   }
 
   constructor(config: DatabaseConfig) {
@@ -65,23 +144,26 @@ class Database {
         ...(config.settings ?? {}),
       },
     };
+  }
 
+  async bootstrap() {
     this.dialect = getDialect(this);
     this.dialect.configure();
 
     this.connection = createConnection(this.config.connection);
 
-    this.dialect.initialize();
+    await this.dialect.initialize();
 
     this.schema = createSchemaProvider(this);
-
-    this.migrations = createMigrationsProvider(this);
+    this.migrations = await createMigrationsProvider(this);
     this.lifecycles = createLifecyclesProvider(this);
-
     this.entityManager = createEntityManager(this);
+
+    this.#bootstrapComplete = true;
   }
 
   query(uid: string) {
+    this.isReady();
     if (!this.metadata.has(uid)) {
       throw new Error(`Model ${uid} not found`);
     }
@@ -90,6 +172,7 @@ class Database {
   }
 
   inTransaction() {
+    this.isReady();
     return !!transactionCtx.get();
   }
 
@@ -98,6 +181,7 @@ class Database {
   async transaction<TCallback extends Callback>(
     cb?: TCallback
   ): Promise<ReturnType<TCallback> | TransactionObject> {
+    this.isReady();
     const notNestedTransaction = !transactionCtx.get();
     const trx = notNestedTransaction
       ? await this.connection.transaction()
@@ -139,27 +223,32 @@ class Database {
   }
 
   getSchemaName(): string | undefined {
+    this.isReady();
     return this.connection.client.connectionSettings.schema;
   }
 
   getConnection(): Knex;
   getConnection(tableName?: string): Knex.QueryBuilder;
   getConnection(tableName?: string): Knex | Knex.QueryBuilder {
+    this.isReady();
     const schema = this.getSchemaName();
     const connection = tableName ? this.connection(tableName) : this.connection;
     return schema ? connection.withSchema(schema) : connection;
   }
 
   getSchemaConnection(trx = this.connection) {
+    this.isReady();
     const schema = this.getSchemaName();
-    return schema ? trx.schema.withSchema(schema) : trx.schema;
+    return schema ? trx?.schema.withSchema(schema) : trx?.schema;
   }
 
   queryBuilder(uid: string) {
+    this.isReady();
     return this.entityManager.createQueryBuilder(uid);
   }
 
   async destroy() {
+    this.isReady();
     await this.lifecycles.clear();
     await this.connection.destroy();
   }

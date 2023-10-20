@@ -54,6 +54,11 @@ describe('Database', () => {
   });
 
   describe('Transaction', () => {
+    it('should throw if used before init', async () => {
+      const db = new Database(config);
+      expect(async () => db.transaction()).rejects.toThrow('Database is not ready');
+    });
+
     it('transaction should be defined', async () => {
       const db = await Database.init(config);
       expect(db.transaction).toBeDefined();

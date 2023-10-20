@@ -70,11 +70,7 @@ const createUmzugProvider = (db: Database) => {
 
 // NOTE: when needed => add internal migrations for core & plugins. How do we overlap them with users migrations ?
 
-/**
- * Creates migrations provider
- * @type {import('.').createMigrationsProvider}
- */
-export const createMigrationsProvider = (db: Database): MigrationProvider => {
+export const createMigrationsProvider = async (db: Database): Promise<MigrationProvider> => {
   const migrations = createUmzugProvider(db);
 
   return {

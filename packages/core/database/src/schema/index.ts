@@ -22,9 +22,6 @@ export interface SchemaProvider {
   drop(): Promise<void>;
 }
 
-/**
- * @type {import('.').default}
- */
 export const createSchemaProvider = (db: Database): SchemaProvider => {
   const schema = metadataToSchema(db.metadata);
 

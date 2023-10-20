@@ -19,7 +19,9 @@ export default class Dialect {
 
   configure() {}
 
-  initialize() {}
+  async initialize() {
+    // noop
+  }
 
   getSqlType(type: unknown) {
     return type;
