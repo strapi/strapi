@@ -31,7 +31,7 @@ import {
 } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Editor, Path, Transforms, Range } from 'slate';
+import { Editor, Path, Transforms, Range, Point } from 'slate';
 import { useSlate, ReactEditor } from 'slate-react';
 import styled, { css } from 'styled-components';
 
@@ -167,6 +167,7 @@ const handleBackspaceKeyOnList = (editor, event) => {
   const isListEmpty = currentList.children.length === 1 && currentListItem.children[0].text === '';
   const isNodeStart = Editor.isStart(editor, editor.selection.anchor, currentListItemPath);
   const isEditorStart = Editor.before(editor, currentListPath) == null;
+  const isFocusAtTheBeginningOfALine = editor.selection.focus.offset === 0;
 
   if (isListEmpty) {
     event.preventDefault();
@@ -177,9 +178,9 @@ const handleBackspaceKeyOnList = (editor, event) => {
     }
     // Transforms the list item into a paragraph
     Transforms.setNodes(editor, { type: 'paragraph' });
-  } else {
-    // In the other cases just remove all the content selected
-    replaceListWithEmptyBlock(editor, currentListPath);
+  } else if (isFocusAtTheBeginningOfALine) {
+    // If the focus is at the beginning of a line we need to replace it with a paragraph
+    Transforms.setNodes(editor, { type: 'paragraph' });
   }
 };
 
