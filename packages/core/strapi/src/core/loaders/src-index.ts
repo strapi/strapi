@@ -39,5 +39,5 @@ export default (strapi: Strapi) => {
     throw e;
   }
 
-  return srcIndex;
+  strapi.app = srcIndex;
 };
