@@ -1,4 +1,4 @@
-import getFullName from '../getFullName';
+import { getFullName } from '../getFullName';
 
 describe('ADMIN | utils | getFullName', () => {
   it('should return names separated with a space', () => {

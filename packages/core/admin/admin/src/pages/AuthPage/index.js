@@ -10,7 +10,7 @@ import { Redirect, useHistory, useRouteMatch } from 'react-router-dom';
 
 import { useLocales } from '../../components/LanguageProvider';
 import { useEnterprise } from '../../hooks/useEnterprise';
-import formatAPIErrors from '../../utils/formatAPIErrors';
+import { formatAPIErrors} from '../../utils/formatAPIErrors';
 
 import { LoginCE } from './components/Login';
 import { FORMS } from './constants';
