@@ -18,6 +18,7 @@ import {
   isUndefined,
   map,
   mergeWith,
+  getOr,
   omit,
   pick,
   uniqBy,
@@ -197,9 +198,13 @@ const processData = (
         const joinColumnName = attribute.joinColumn.name;
 
         // allow setting to null
-        const attrValue = !isUndefined(data[attributeName])
+        let attrValue = !isUndefined(data[attributeName])
           ? data[attributeName]
           : data[joinColumnName];
+
+        if ('useJoinTable' in attribute && !attribute.useJoinTable && isObject(attrValue)) {
+          attrValue = getOr(null, 'connect.0.id', attrValue);
+        }
 
         if (!isUndefined(attrValue)) {
           obj[joinColumnName] = attrValue;
@@ -661,7 +666,11 @@ export const createEntityManager = (db: Database): EntityManager => {
         }
 
         if ('joinColumn' in attribute && attribute.joinColumn && attribute.owner) {
-          const relIdsToAdd = toIds(cleanRelationData.set);
+          let relIdsToAdd = toIds(cleanRelationData.set);
+          if ('useJoinTable' in attribute && !attribute.useJoinTable && !relIdsToAdd.length && !isEmpty(cleanRelationData.connect)) {
+            relIdsToAdd = map('id', cleanRelationData.connect);
+          }
+          // update others entity to null for oneToOne relation
           if (
             attribute.relation === 'oneToOne' &&
             isBidirectional(attribute) &&
@@ -683,20 +692,26 @@ export const createEntityManager = (db: Database): EntityManager => {
           const { target } = attribute;
 
           // TODO: check it is an id & the entity exists (will throw due to FKs otherwise so not a big pbl in SQL)
-          const relIdsToAdd = toIds(cleanRelationData.set);
+          let relIdsToAdd = toIds(cleanRelationData.set);
+          if (!relIdsToAdd.length && !isEmpty(cleanRelationData.connect)) {
+            relIdsToAdd = map('id', cleanRelationData.connect);
+          }
 
           await this.createQueryBuilder(target)
-            .where({ [attribute.joinColumn.referencedColumn]: id })
+            .where({ [attribute.joinColumn.referencedColumn]: id, id: { $notIn: relIdsToAdd } })
             .update({ [attribute.joinColumn.referencedColumn]: null })
             .transacting(trx)
             .execute();
 
-          await this.createQueryBuilder(target)
-            .update({ [attribute.joinColumn.referencedColumn]: id })
-            // NOTE: works if it is an array or a single id
-            .where({ id: relIdsToAdd })
-            .transacting(trx)
-            .execute();
+
+          if (relIdsToAdd.length) {
+            await this.createQueryBuilder(target)
+              .update({ [attribute.joinColumn.referencedColumn]: id })
+              // NOTE: works if it is an array or a single id
+              .where({ id: relIdsToAdd })
+              .transacting(trx)
+              .execute();
+          }
         }
 
         if ('joinTable' in attribute && attribute.joinTable) {
@@ -914,6 +929,22 @@ export const createEntityManager = (db: Database): EntityManager => {
 
         if ('joinColumn' in attribute && attribute.joinColumn && attribute.owner) {
           // handled in the row itself
+          let relIdsToAdd = toIds(cleanRelationData.set);
+          if ('useJoinTable' in attribute && !attribute.useJoinTable && !relIdsToAdd.length && !isEmpty(cleanRelationData.connect)) {
+            relIdsToAdd = map('id', cleanRelationData.connect);
+          }
+          // update others entity to null for oneToOne relation
+          if (
+            attribute.relation === 'oneToOne' &&
+            isBidirectional(attribute) &&
+            relIdsToAdd.length
+          ) {
+            await this.createQueryBuilder(uid)
+              .where({ [attribute.joinColumn.name]: relIdsToAdd, id: { $ne: id } })
+              .update({ [attribute.joinColumn.name]: null })
+              .transacting(trx)
+              .execute();
+          }
           continue;
         }
 
@@ -929,8 +960,11 @@ export const createEntityManager = (db: Database): EntityManager => {
             .transacting(trx)
             .execute();
 
-          if (!isNull(cleanRelationData.set)) {
-            const relIdsToAdd = toIds(cleanRelationData.set);
+          let relIdsToAdd = toIds(cleanRelationData.set);
+          if (!relIdsToAdd.length && !isEmpty(cleanRelationData.connect)) {
+            relIdsToAdd = map('id', cleanRelationData.connect);
+          }
+          if (relIdsToAdd.length) {
             await this.createQueryBuilder(target)
               .where({ id: relIdsToAdd })
               .update({ [attribute.joinColumn.referencedColumn]: id })
