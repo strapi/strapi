@@ -187,6 +187,9 @@ const handleBackspaceKeyOnList = (editor, event) => {
       }
     );
   } else if (isFocusAtTheBeginningOfALine) {
+    Transforms.liftNodes(editor, {
+      match: (n) => n.type === 'list-item',
+    });
     // If the focus is at the beginning of a line we need to replace it with a paragraph
     Transforms.setNodes(editor, { type: 'paragraph' });
   }
