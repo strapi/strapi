@@ -16,7 +16,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 
-import { getFullName } from '../../../../../../../utils';
+import { getFullName } from '../../../../../../../utils/getFullName';
 
 const TableRows = ({
   canDelete,

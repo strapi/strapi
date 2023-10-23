@@ -44,7 +44,7 @@ import { useDispatch } from 'react-redux';
 import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
 
 import { HOOKS } from '../../../constants';
-import { useTypedSelector } from '../../../core/store';
+import { useTypedSelector } from '../../../core/store/hooks';
 import { useAdminUsers } from '../../../hooks/useAdminUsers';
 import { useEnterprise } from '../../../hooks/useEnterprise';
 import { InjectionZone } from '../../../shared/components';

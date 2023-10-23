@@ -24,7 +24,7 @@ export interface RoleEntity extends Entity {
 export interface UserEntity extends Entity {
   firstname: string;
   lastname?: string;
-  username: null | string;
+  username?: null | string;
   email: string;
   isActive: boolean;
   blocked: boolean;
