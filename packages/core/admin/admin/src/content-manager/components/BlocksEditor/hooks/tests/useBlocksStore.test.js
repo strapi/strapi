@@ -850,6 +850,50 @@ describe('useBlocksStore', () => {
     ]);
   });
 
+  it('handles the backspace key on a empty list with just one list item', () => {
+    const { result } = renderHook(useBlocksStore);
+
+    baseEditor.children = [
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: '',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor on the first list item
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0, 0], offset: 0 },
+      focus: { path: [0, 0, 0], offset: 0 },
+    });
+
+    // Simulate the backspace key
+    result.current['list-ordered'].handleBackspaceKey(baseEditor, mockEvent);
+
+    // Should convert the first list item in a paragraph
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+    ]);
+  });
+
   it('handles enter key on a quote', () => {
     const { result } = renderHook(useBlocksStore);
 
