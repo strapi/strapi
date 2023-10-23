@@ -218,6 +218,7 @@
   "Settings.profile.form.section.experience.mode.hint": "Displays your interface in the chosen mode.",
   "Settings.profile.form.section.experience.mode.label": "Interface mode",
   "Settings.profile.form.section.experience.mode.option-label": "{name} mode",
+  "Settings.profile.form.section.experience.mode.option-system-label": "Use system settings",
   "Settings.profile.form.section.experience.title": "Experience",
   "Settings.profile.form.section.helmet.title": "User profile",
   "Settings.profile.form.section.profile.page.title": "Profile page",
