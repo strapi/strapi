@@ -198,8 +198,35 @@ const createDocumentService = ({
   },
 
   async clone(uid, documentId, params) {
+    // TODO: File upload
+    // TODO: Entity validator.
+    const { data } = params!;
+
+    if (!data) {
+      throw new Error('Create requires data attribute');
+    }
+
+    const model = strapi.getModel(uid);
+
+    // TODO: Pick locale and publications state params
+    const entryToClone = await db.query(uid).findOne({ where: { id: documentId } });
+
+    if (!entryToClone) {
+      return null;
+    }
+
+    const query = transformParamsToQuery(uid, pickSelectionParams(params));
+    const componentData = await cloneComponents(uid, entryToClone, data);
+    const entityData = createPipeline(
+      Object.assign(omitComponentData(model, data), componentData),
+      { contentType: model }
+    );
+
     // TODO: Transform params to query
-    return db.query(uid).clone(documentId, params || {});
+    return db.query(uid).clone(documentId, {
+      ...query,
+      data: entityData,
+    });
   },
 
   async publish(uid, documentId, params) {
