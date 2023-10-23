@@ -181,16 +181,17 @@ module.exports = {
 
     const sanitizedBody = await sanitizeFn(body);
 
-    const mediaFields = Object.keys(model.attributes).filter((attributeName) => {
-      const attribute = model.attributes[attributeName];
-      return attribute.type === 'media';
-    });
+    const entityAttributes = entity.attributes || {};
 
-    for (const mediaField of mediaFields) {
-      if (entity[mediaField]) {
-        clonedEntity[mediaField] = entity[mediaField];
+    Object.keys(entityAttributes).forEach((attributeName) => {
+      if (entity.attributes[attributeName].type === 'media') {
+        if (entity[attributeName]) {
+          sanitizedBody[attributeName] = entity[attributeName];
+        } else {
+          sanitizedBody[attributeName] = null;
+        }
       }
-    }
+    });
 
     const clonedEntity = await entityManager.clone(entity, sanitizedBody, model);
 

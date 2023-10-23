@@ -1,6 +1,6 @@
 'use strict';
 
-const { set } = require('lodash/fp');
+const { set, get, cloneDeep } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
 
 const { isVisibleAttribute } = strapiUtils.contentTypes;
@@ -72,13 +72,19 @@ const excludeNotCreatableFields =
             attributeName,
           ]);
         }
+        case 'media':
+          if (canCreate(attributePath)) {
+            const originalValue = get(attributePath, body);
+            return set(attributePath, originalValue, body);
+          }
+          return body;
         // Attribute should be null if the user can't create it
         default: {
           if (canCreate(attributePath)) return body;
           return set(attributePath, null, body);
         }
       }
-    }, body);
+    }, cloneDeep(body));
   };
 
 module.exports = {
