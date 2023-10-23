@@ -1,3 +1,6 @@
+import { errors } from '@strapi/utils';
+import { ValidationError as YupValidationError } from 'yup';
+
 export type ApiTokenPermission = {
   id: number | `${number}`;
   action: string;
@@ -25,10 +28,12 @@ type ApiTokenResponse = Omit<ApiToken, 'accessKey'>;
 export declare namespace Create {
   export interface Request {
     body: ApiTokenBody;
+    query: {};
   }
 
   export interface Response {
     data: ApiToken;
+    errors?: errors.ApplicationError | YupValidationError;
   }
 }
 
@@ -38,10 +43,12 @@ export declare namespace Create {
 export declare namespace List {
   export interface Request {
     body: {};
+    query: {};
   }
 
   export interface Response {
     data: ApiTokenResponse[];
+    errors?: errors.ApplicationError;
   }
 }
 
@@ -51,6 +58,7 @@ export declare namespace List {
 export declare namespace Revoke {
   export interface Request {
     body: {};
+    query: {};
   }
 
   export interface Params {
@@ -59,6 +67,7 @@ export declare namespace Revoke {
 
   export interface Response {
     data: ApiTokenResponse;
+    errors?: errors.ApplicationError;
   }
 }
 
@@ -68,6 +77,7 @@ export declare namespace Revoke {
 export declare namespace Get {
   export interface Request {
     body: {};
+    query: {};
   }
 
   export interface Params {
@@ -76,6 +86,7 @@ export declare namespace Get {
 
   export interface Response {
     data: ApiTokenResponse;
+    errors?: errors.ApplicationError;
   }
 }
 
@@ -85,6 +96,7 @@ export declare namespace Get {
 export declare namespace Update {
   export interface Request {
     body: ApiTokenBody;
+    query: {};
   }
 
   export interface Params {
@@ -93,5 +105,6 @@ export declare namespace Update {
 
   export interface Response {
     data: ApiTokenResponse;
+    errors?: errors.ApplicationError | YupValidationError;
   }
 }
