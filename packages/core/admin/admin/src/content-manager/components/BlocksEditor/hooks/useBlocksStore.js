@@ -174,7 +174,9 @@ const handleBackspaceKeyOnList = (editor, event) => {
     replaceListWithEmptyBlock(editor, currentListPath);
   } else if (isNodeStart) {
     if (isEditorStart) {
-      Transforms.liftNodes(editor);
+      Transforms.liftNodes(editor, {
+        match: (n) => n.type === 'list-item',
+      });
     }
     // Transforms the list item into a paragraph
     Transforms.setNodes(editor, { type: 'paragraph' });
