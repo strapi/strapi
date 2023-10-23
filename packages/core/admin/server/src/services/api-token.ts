@@ -5,7 +5,25 @@ import constants from './constants';
 
 const { ValidationError, NotFoundError } = errors;
 
-import type { ApiToken, Update } from '../../../shared/contracts/api-token';
+import type { Update } from '../../../shared/contracts/api-token';
+
+type ApiTokenPermission = {
+  id: number | `${number}`;
+  action: string;
+  token: ApiToken | number;
+};
+
+export type ApiToken = {
+  id?: number | `${number}`;
+  name: string;
+  description: string;
+  accessKey: string;
+  lastUsedAt: number;
+  lifespan: number | null;
+  expiresAt: number;
+  type: 'read-only' | 'full-access' | 'custom';
+  permissions: (number | ApiTokenPermission)[];
+};
 
 export type CreateActionPayload = Omit<ApiToken, 'id' | 'accessKey' | 'expiresAt' | 'lastUsedAt'>;
 

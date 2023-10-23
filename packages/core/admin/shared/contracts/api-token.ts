@@ -1,23 +1,7 @@
 import { errors } from '@strapi/utils';
 import { ValidationError as YupValidationError } from 'yup';
 
-export type ApiTokenPermission = {
-  id: number | `${number}`;
-  action: string;
-  token: ApiToken | number;
-};
-
-export type ApiToken = {
-  id?: number | `${number}`;
-  name: string;
-  description: string;
-  accessKey: string;
-  lastUsedAt: number;
-  lifespan: number | null;
-  expiresAt: number;
-  type: 'read-only' | 'full-access' | 'custom';
-  permissions: (number | ApiTokenPermission)[];
-};
+import type { ApiToken } from '../../server/src/services/api-token';
 
 type ApiTokenBody = Pick<ApiToken, 'lifespan' | 'description' | 'type' | 'name' | 'permissions'>;
 type ApiTokenResponse = Omit<ApiToken, 'accessKey'>;
