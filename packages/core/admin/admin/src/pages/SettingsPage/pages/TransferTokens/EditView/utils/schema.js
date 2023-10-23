@@ -1,5 +1,5 @@
-import * as yup from 'yup';
 import { translatedErrors } from '@strapi/helper-plugin';
+import * as yup from 'yup';
 
 const schema = yup.object().shape({
   name: yup.string(translatedErrors.string).max(100).required(translatedErrors.required),

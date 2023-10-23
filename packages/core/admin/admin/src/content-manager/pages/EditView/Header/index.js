@@ -1,25 +1,28 @@
 import React, { memo, useState } from 'react';
-import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
-import PropTypes from 'prop-types';
-import isEqualFastCompare from 'react-fast-compare';
-import get from 'lodash/get';
-import isEqual from 'lodash/isEqual';
-import isEmpty from 'lodash/isEmpty';
-import { ArrowLeft, Check, ExclamationMarkCircle } from '@strapi/icons';
-import { Link } from '@strapi/helper-plugin';
+
 import {
-  HeaderLayout,
   Box,
   Button,
   Dialog,
   DialogBody,
   DialogFooter,
   Flex,
+  HeaderLayout,
   Typography,
 } from '@strapi/design-system';
+import { Link } from '@strapi/helper-plugin';
+import { ArrowLeft, Check, ExclamationMarkCircle } from '@strapi/icons';
+import get from 'lodash/get';
+import isEmpty from 'lodash/isEmpty';
+import isEqualFastCompare from 'lodash/isEqual';
+import isEqual from 'lodash/isEqual';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+
 import { getTrad } from '../../../utils';
+
 import { connect, select } from './utils';
 
 // TODO: replace with textAlign Typography props when available

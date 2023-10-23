@@ -127,6 +127,30 @@ describe('CM API - Basic + compo', () => {
     data.productsWithCompo.shift();
   });
 
+  test('Clone product with compo', async () => {
+    const product = {
+      name: 'Product 1',
+      description: 'Product description',
+      compo: {
+        name: 'compo name',
+        description: 'short',
+      },
+    };
+    const { body: createdProduct } = await rq({
+      method: 'POST',
+      url: '/content-manager/collection-types/api::product-with-compo.product-with-compo',
+      body: product,
+    });
+
+    const res = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/api::product-with-compo.product-with-compo/clone/${createdProduct.id}`,
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toMatchObject(product);
+  });
+
   describe('validation', () => {
     test('Cannot create product with compo - compo required', async () => {
       const product = {

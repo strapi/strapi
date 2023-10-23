@@ -1,10 +1,12 @@
 'use strict';
 
 const { yup } = require('@strapi/utils');
+const { getService } = require('../../utils');
 const {
   isListable,
   hasEditableAttribute,
 } = require('../../services/utils/configuration/attributes');
+const { isValidDefaultSort } = require('../../services/utils/configuration/settings');
 /**
  * Creates the validation schema for content-type configurations
  */
@@ -15,6 +17,7 @@ module.exports = (schema, opts = {}) =>
       settings: createSettingsSchema(schema).default(null).nullable(),
       metadatas: createMetadasSchema(schema).default(null).nullable(),
       layouts: createLayoutsSchema(schema, opts).default(null).nullable(),
+      options: yup.object().optional(),
     })
     .noUnknown();
 
@@ -31,7 +34,12 @@ const createSettingsSchema = (schema) => {
       // should be reset when the type changes
       mainField: yup.string().oneOf(validAttributes.concat('id')).default('id'),
       // should be reset when the type changes
-      defaultSortBy: yup.string().oneOf(validAttributes.concat('id')).default('id'),
+      defaultSortBy: yup
+        .string()
+        .test('is-valid-sort-attribute', '${path} is not a valid sort attribute', async (value) =>
+          isValidDefaultSort(schema, value)
+        )
+        .default('id'),
       defaultSortOrder: yup.string().oneOf(['ASC', 'DESC']).default('ASC'),
     })
     .noUnknown();
@@ -51,16 +59,25 @@ const createMetadasSchema = (schema) => {
               placeholder: yup.string(),
               editable: yup.boolean(),
               visible: yup.boolean(),
-              mainField: yup.string(),
-              step: yup
-                .number()
-                .integer()
-                .positive()
-                .test(
-                  'isDivisibleBy60',
-                  'Step must be either 1 or divisible by 60',
-                  (value) => !value || value === 1 || (value * 24) % 60 === 0
-                ),
+              mainField: yup.lazy((value) => {
+                if (!value) {
+                  return yup.string();
+                }
+
+                const targetSchema = getService('content-types').findContentType(
+                  schema.attributes[key].targetModel
+                );
+
+                if (!targetSchema) {
+                  return yup.string();
+                }
+
+                const validAttributes = Object.keys(targetSchema.attributes).filter((key) =>
+                  isListable(targetSchema, key)
+                );
+
+                return yup.string().oneOf(validAttributes.concat('id')).default('id');
+              }),
             })
             .noUnknown()
             .required(),

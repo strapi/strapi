@@ -1,13 +1,14 @@
 'use strict';
 
 // eslint-disable-next-line node/no-extraneous-require
-const ee = require('@strapi/strapi/lib/utils/ee');
+const ee = require('@strapi/strapi/dist/utils/ee');
 const _ = require('lodash');
 const { pick, isNil } = require('lodash/fp');
 const { ApplicationError, ForbiddenError } = require('@strapi/utils').errors;
 const { validateUserCreationInput } = require('../validation/user');
 const { validateUserUpdateInput } = require('../../../server/validation/user');
 const { getService } = require('../../../server/utils');
+const { isSsoLocked } = require('../utils/sso-lock');
 
 const pickUserCreationAttributes = pick(['firstname', 'lastname', 'email', 'roles']);
 
@@ -93,6 +94,17 @@ module.exports = {
 
     ctx.body = {
       data: getService('user').sanitizeUser(updatedUser),
+    };
+  },
+
+  async isSSOLocked(ctx) {
+    const { user } = ctx.state;
+    const isSSOLocked = await isSsoLocked(user);
+
+    ctx.body = {
+      data: {
+        isSSOLocked,
+      },
     };
   },
 };

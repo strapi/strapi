@@ -1,9 +1,11 @@
-import React, { useState, useRef } from 'react';
-import styled from 'styled-components';
-import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
+import React, { useRef, useState } from 'react';
+
 import { Box, Button, Tag } from '@strapi/design-system';
 import { Cross, Filter } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+
 import FiltersPopover from './FiltersPopover';
 
 const FilterTag = ({ name, handleRemove }) => {
@@ -48,7 +50,6 @@ const NpmPackagesFilters = ({
         <ButtonToggle
           variant="tertiary"
           ref={buttonRef}
-          data-testid="filters-button"
           startIcon={<Filter />}
           onClick={handleToggle}
           size="S"

@@ -1,13 +1,16 @@
-import React, { memo, useReducer, forwardRef, useImperativeHandle } from 'react';
+import React, { forwardRef, memo, useImperativeHandle, useReducer } from 'react';
+
+import { Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import { Typography, Flex, Grid, GridItem } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import getTrad from '../../utils/getTrad';
-import Policies from '../Policies';
-import Permissions from '../Permissions';
-import reducer, { initialState } from './reducer';
+
 import { UsersPermissionsProvider } from '../../contexts/UsersPermissionsContext';
+import getTrad from '../../utils/getTrad';
+import Permissions from '../Permissions';
+import Policies from '../Policies';
+
 import init from './init';
+import reducer, { initialState } from './reducer';
 
 const UsersPermissions = forwardRef(({ permissions, routes }, ref) => {
   const { formatMessage } = useIntl();

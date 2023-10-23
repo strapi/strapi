@@ -11,7 +11,7 @@ const registrationSchema = yup
       .object()
       .shape({
         firstname: validators.firstname.required(),
-        lastname: validators.lastname,
+        lastname: validators.lastname.nullable(),
         password: validators.password.required(),
       })
       .required()
@@ -32,7 +32,7 @@ const adminRegistrationSchema = yup
   .shape({
     email: validators.email.required(),
     firstname: validators.firstname.required(),
-    lastname: validators.lastname,
+    lastname: validators.lastname.nullable(),
     password: validators.password.required(),
   })
   .required()

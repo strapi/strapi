@@ -1,6 +1,7 @@
 import produce from 'immer'; // current
-import set from 'lodash/set';
 import get from 'lodash/get';
+import set from 'lodash/set';
+
 import { ON_CHANGE, SET_LOADED } from './actionTypes';
 import { init, initialState } from './init';
 

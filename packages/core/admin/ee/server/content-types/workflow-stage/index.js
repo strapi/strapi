@@ -1,5 +1,7 @@
 'use strict';
 
+const { STAGE_DEFAULT_COLOR } = require('../../constants/workflows');
+
 module.exports = {
   schema: {
     collectionName: 'strapi_workflows_stages',
@@ -10,7 +12,9 @@ module.exports = {
       pluralName: 'workflow-stages',
       displayName: 'Stages',
     },
-    options: {},
+    options: {
+      version: '1.1.0',
+    },
     pluginOptions: {
       'content-manager': {
         visible: false,
@@ -24,11 +28,22 @@ module.exports = {
         type: 'string',
         configurable: false,
       },
+      color: {
+        type: 'string',
+        configurable: false,
+        default: STAGE_DEFAULT_COLOR,
+      },
       workflow: {
         type: 'relation',
         target: 'admin::workflow',
         relation: 'manyToOne',
         inversedBy: 'stages',
+        configurable: false,
+      },
+      permissions: {
+        type: 'relation',
+        target: 'admin::permission',
+        relation: 'manyToMany',
         configurable: false,
       },
     },

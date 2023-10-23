@@ -7,6 +7,7 @@
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
 const modelsUtils = require('api-tests/models');
+const { createTestBuilder } = require('api-tests/builder');
 
 let strapi;
 let rq;
@@ -17,8 +18,28 @@ const restart = async () => {
   rq = await createAuthRequest({ strapi });
 };
 
+const builder = createTestBuilder();
+
+const localTestData = {
+  models: {
+    dog: {
+      singularName: 'dog',
+      pluralName: 'dogs',
+      collectionName: 'dogs-collection',
+      displayName: 'Dog Display',
+      kind: 'collectionType',
+      attributes: {
+        name: {
+          type: 'string',
+        },
+      },
+    },
+  },
+};
+
 describe('Content Type Builder - Content types', () => {
   beforeAll(async () => {
+    await builder.addContentType(localTestData.models.dog).build();
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
   });
@@ -40,6 +61,7 @@ describe('Content Type Builder - Content types', () => {
     await modelsUtils.deleteContentTypes(modelsUIDs, { strapi });
 
     await strapi.destroy();
+    await builder.cleanup();
   });
 
   describe('Collection Types', () => {
@@ -92,7 +114,7 @@ describe('Content Type Builder - Content types', () => {
       expect(res.body).toMatchSnapshot();
     });
 
-    test('Successfull creation of a collection type with draftAndPublish enabled', async () => {
+    test('Successful creation of a collection type with draftAndPublish enabled', async () => {
       const res = await rq({
         method: 'POST',
         url: '/content-type-builder/content-types',
@@ -127,6 +149,54 @@ describe('Content Type Builder - Content types', () => {
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchSnapshot();
+    });
+
+    test.each([
+      ['singularName', 'singularName'],
+      ['singularName', 'pluralName'],
+      ['pluralName', 'singularName'],
+      ['pluralName', 'pluralName'],
+      ['pluralName', 'collectionName'],
+    ])(`Cannot use %p that exists as another type's %p`, async (sourceField, matchField) => {
+      const body = {
+        contentType: {
+          displayName: 'Frogs Frogs Frogs',
+          pluralName: 'safe-plural-name',
+          singularName: 'safe-singular-name',
+          collectionName: 'safe-collection-name',
+          attributes: {
+            name: {
+              type: 'string',
+            },
+          },
+        },
+      };
+
+      // set the conflicting name in the given field
+      body.contentType[sourceField] = localTestData.models.dog[matchField];
+
+      const res = await rq({
+        method: 'POST',
+        url: '/content-type-builder/content-types',
+        body,
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toEqual({
+        error: {
+          details: {
+            errors: [
+              {
+                message: `contentType: name \`${body.contentType[sourceField]}\` is already being used by another content type.`,
+                name: 'ValidationError',
+                path: ['contentType', sourceField],
+              },
+            ],
+          },
+          message: `contentType: name \`${body.contentType[sourceField]}\` is already being used by another content type.`,
+          name: 'ValidationError',
+        },
+      });
     });
 
     test('Cannot use same string for singularName and pluralName', async () => {
@@ -193,19 +263,9 @@ describe('Content Type Builder - Content types', () => {
                 path: ['contentType', 'displayName'],
               },
               {
-                message: 'Content Type name `undefined` is already being used.',
-                name: 'ValidationError',
-                path: ['contentType', 'singularName'],
-              },
-              {
                 message: 'contentType.singularName is a required field',
                 name: 'ValidationError',
                 path: ['contentType', 'singularName'],
-              },
-              {
-                message: 'Content Type name `undefined` is already being used.',
-                name: 'ValidationError',
-                path: ['contentType', 'pluralName'],
               },
               {
                 message: 'contentType.pluralName is a required field',
@@ -219,7 +279,7 @@ describe('Content Type Builder - Content types', () => {
               },
             ],
           },
-          message: '6 errors occurred',
+          message: '4 errors occurred',
           name: 'ValidationError',
         },
       });

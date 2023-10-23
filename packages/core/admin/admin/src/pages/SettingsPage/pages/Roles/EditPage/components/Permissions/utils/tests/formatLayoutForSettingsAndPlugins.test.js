@@ -1,4 +1,5 @@
 import formatLayoutForSettingsAndPlugins from '../formatLayoutForSettingsAndPlugins';
+
 import permissionsLayout from './data';
 
 describe('ADMIN | COMPONENTS | ROLE | PluginsAndSettings | formatLayoutForSettingsAndPlugins', () => {

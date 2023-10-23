@@ -12,6 +12,9 @@ import mergeTemplate from './utils/merge-template.js';
 import tryGitInit from './utils/git';
 
 import packageJSON from './resources/json/common/package.json';
+import jsconfig from './resources/json/js/jsconfig.json';
+import adminTsconfig from './resources/json/ts/tsconfig-admin.json';
+import serverTsconfig from './resources/json/ts/tsconfig-server.json';
 import { createDatabaseConfig, generateDbEnvariables } from './resources/templates/database';
 import createEnvFile from './resources/templates/env';
 import { Configuration, Scope, isStderrError } from './types';
@@ -79,19 +82,27 @@ export default async function createProject(
     await trackUsage({ event: 'didWritePackageJSON', scope });
 
     if (useTypescript) {
-      const tsJSONDir = join(__dirname, 'resources/json/ts');
       const filesMap = {
         'tsconfig-admin.json.js': 'src/admin',
         'tsconfig-server.json.js': '.',
       };
 
       for (const [fileName, path] of Object.entries(filesMap)) {
-        const srcPath = join(tsJSONDir, fileName);
         const destPath = join(rootPath, path, 'tsconfig.json');
 
-        const json = require(srcPath).default();
+        if (fileName === 'tsconfig-admin.json.js') {
+          await fse.writeJSON(destPath, adminTsconfig(), { spaces: 2 });
+        }
+        if (fileName === 'tsconfig-server.json.js') {
+          await fse.writeJSON(destPath, serverTsconfig(), { spaces: 2 });
+        }
+      }
+    } else {
+      const filesMap = { 'jsconfig.json.js': '.' };
 
-        await fse.writeJSON(destPath, json, { spaces: 2 });
+      for (const [, path] of Object.entries(filesMap)) {
+        const destPath = join(rootPath, path, 'jsconfig.json');
+        await fse.writeJSON(destPath, jsconfig(), { spaces: 2 });
       }
     }
 

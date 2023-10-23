@@ -1,5 +1,5 @@
+import { Badge, Box, Flex } from '@strapi/design-system';
 import styled from 'styled-components';
-import { Box, Flex, Badge } from '@strapi/design-system';
 
 export const RelativeBox = styled(Box)`
   position: relative;

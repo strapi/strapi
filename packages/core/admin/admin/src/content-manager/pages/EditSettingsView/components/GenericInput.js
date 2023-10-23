@@ -1,6 +1,7 @@
 import React from 'react';
+
+import { Option, Select, TextInput, ToggleInput } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import { TextInput, ToggleInput, Select, Option } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 const GenericInput = ({ type, options, onChange, value, name, ...inputProps }) => {

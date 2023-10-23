@@ -2,7 +2,7 @@
 
 const { isNil } = require('lodash/fp');
 // eslint-disable-next-line node/no-extraneous-require
-const ee = require('@strapi/strapi/lib/utils/ee');
+const ee = require('@strapi/strapi/dist/utils/ee');
 const { env } = require('@strapi/utils');
 const { getService } = require('../../../server/utils');
 
@@ -42,6 +42,7 @@ module.exports = {
       shouldStopCreate: isNil(permittedSeats) ? false : currentActiveUserCount >= permittedSeats,
       licenseLimitStatus,
       isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
+      features: ee.features.list() ?? [],
     };
 
     return { data };

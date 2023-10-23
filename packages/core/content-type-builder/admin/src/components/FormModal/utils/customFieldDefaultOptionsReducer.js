@@ -11,4 +11,4 @@ const customFieldDefaultOptionsReducer = (acc, option) => {
   return acc;
 };
 
-module.exports = { customFieldDefaultOptionsReducer };
+export { customFieldDefaultOptionsReducer };

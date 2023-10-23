@@ -1,9 +1,10 @@
 import React from 'react';
+
+import { Flex, IconButton, Typography } from '@strapi/design-system';
+import { pxToRem } from '@strapi/helper-plugin';
+import { CarretDown, Drag, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { pxToRem } from '@strapi/helper-plugin';
-import { Flex, Typography, IconButton } from '@strapi/design-system';
-import { Trash, Drag, CarretDown } from '@strapi/icons';
 
 const DropdownIconWrapper = styled(Flex)`
   border-radius: 50%;

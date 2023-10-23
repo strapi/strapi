@@ -1,0 +1,133 @@
+---
+title: Review Workflows
+slug: /settings/review-workflows
+description: Guide for review workflows in settings.
+tags:
+  - settings
+  - review-workflows
+---
+
+## Summary
+
+There are 3 views available to manage workflows and stages: List, Edit and Create. These pages are only **accessible in enterprise mode** and
+if the user has the permission `admin::review-workflows.read`.
+
+Upon mount the settings pages injects themselves into the global redux store under the namespace `settings_review-workflows`. Redux is
+then used for all state management updates. `Formik` is used to render and validate the edit and create views. It
+is integrated with redux, so that all input components are controlled components.
+
+### License limits
+
+Most licenses have feature-based usage limits configured through Chargebee. These limits are exposed to the frontend through [`useLicenseLimits`](/docs/core/admin/ee/hooks/use-license-limits).
+Offline licenses do not have these limits and therefore the endpoint does not return any. For offline licenses hard-coded limits apply: max. 200 workflows, max. 200 stages per workflow.
+
+The frontend aswell as the admin API restrict actions on the settings pages in various ways (more below), if the license limits are about to exceed or already exceeded.
+
+### List view
+
+The list-view displays all available workflows.
+
+#### License limits
+
+Displays a modal in case the user is at or above the license limit on page load. In case a user attempts to create a new workflow the same modal is shown again, in case that creation
+would exceed the limit.
+
+### Edit & Create views
+
+The edit and create views allow workflows and stages to be edited (existing ones) and new workflows to be created. To enable a review-workflow on a content-type users select
+from a list of all content-types (collections aswell as single-types) for each workflow. In case a content-type is already assigned to another content-type, the content-type
+will be re-assigned to the new workflow.
+
+Stages always have a color assigned to them. Colors are stored as hex-codes in the database, to avoid coupling with the design-system and developers to know about possible color-names. The
+admin app renders the color badges for a stage based in the matching theme-color and in case it doesn't find any the stored hex-code. It was not possible to normalize the hex-codes
+to be uppercase everywhere (e.g. if they are created via lifecycle methods), so the frontend does the normalization.
+
+#### Form submission
+
+The form wrapping boths views submits all stages at once, because we expect the number of stages per workflow to be
+rather small. Because of this we can simply re-order stages by sending them in a different order. Every stage that sends a corresponding `id`
+attribute will be re-ordered and not created.
+
+Stages without an `id` property will be created in the database on submission. Stages that existed already, but are not submitted again will be deleted on submission.
+
+When editing a workflow and the `permissions` of a stage have not been modified by a user, they are sent as `undefined`. This special case allows users to edit a workflow without having to have
+permissions to read `roles`, because the API won't update anything in the database.
+
+Users without read permissions for roles are able to create workflows, but they will not be able to define which roles can change a stage, so that stages of that workflow can only be changed
+by the super-admin unless the roles are set.
+
+### Edit view
+
+Displays a license-limits modal in case the user is above the license limit on page load and upon form submission.
+
+#### Deletion of a stage
+
+If a stage is deleted, all **entities which are connected to that stage are moved to the previous stage**. Because a stage deletion
+might have big effects on the database, a confirmation is shown before users save changes.
+
+Changes are only applied once the user clicks "Save". It is not possible to remove all stages from a workflow (neither in the UI nor the API).
+
+#### Create view
+
+Displays a license-limit modal in case the user is at or above the license limit on page load and upon form submission.
+
+### Hooks
+
+#### `useReviewWorkflows(queryParams)`
+
+This hook allows to fetch either one (if `params` contains an `id`) or all workflows. By default stages are populated. The
+hooks returns a partial react-query result.
+
+```ts
+useReviewWorkflows(queryParams: object): {
+  meta: { workflowCount: number }
+  workflows: Workflow[],
+  isLoading: boolean,
+  status: string,
+  refetch: () => Promise<void>,
+}
+```
+
+#### `useReviewWorkflowsStages({ id, layout }, reactQueryOptions)`
+
+This hook allows to fetch stages for a given workflow, that a user has permissions to transition to.
+
+```ts
+type ContentTypeLayout {
+  uid: string;
+  kind: 'collectionType' | 'singleType';
+}
+
+useReviewWorkflowsStages({ id: number, layout: ContentTypeLayout }, reactQueryOptions): {
+  meta: { workflowCount: number, stagesCount: number }
+  stages: Stage[],
+  isLoading: boolean,
+  refetch: () => Promise<void>,
+}
+```
+
+### Data shapes
+
+```ts
+type Stage {
+    id: number;
+    color: string; // hex code
+    name: string; // max-length: 255 characters
+    permissions: Permission[];
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+type Workflow {
+    id: number;
+    name: string; // max-length: 255 characters, unique
+    contentTypes: number[];
+    stages: Stage[];
+    createdAt: Date;
+    updatedAt: Date;
+}
+```
+
+### Endpoints
+
+For a list of all available endpoints please refer to the [detailed backend design documentation](/docs/core/admin/ee/review-workflows).

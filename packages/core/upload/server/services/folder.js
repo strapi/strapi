@@ -56,16 +56,22 @@ const deleteByIds = async (ids = []) => {
   // delete files
   const filesToDelete = await strapi.db.query(FILE_MODEL_UID).findMany({
     where: {
-      $or: pathsToDelete.map((path) => ({ folderPath: { $startsWith: path } })),
+      $or: pathsToDelete.flatMap((path) => [
+        { folderPath: { $eq: path } },
+        { folderPath: { $startsWith: `${path}/` } },
+      ]),
     },
   });
 
   await Promise.all(filesToDelete.map((file) => getService('upload').remove(file)));
 
-  // delete folders
+  // delete folders and subfolders
   const { count: totalFolderNumber } = await strapi.db.query(FOLDER_MODEL_UID).deleteMany({
     where: {
-      $or: pathsToDelete.map((path) => ({ path: { $startsWith: path } })),
+      $or: pathsToDelete.flatMap((path) => [
+        { path: { $eq: path } },
+        { path: { $startsWith: `${path}/` } },
+      ]),
     },
   });
 

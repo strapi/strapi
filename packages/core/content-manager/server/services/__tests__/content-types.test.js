@@ -47,6 +47,29 @@ describe('Model Configuration', () => {
     spyFn.mockRestore();
   });
 
+  test('setConfiguration should store optional options object', async () => {
+    const uid = 'test-uid';
+    const spyFn = jest.spyOn(storeUtils, 'setModelConfiguration').mockImplementation(() => {});
+
+    const { setConfiguration } = createCfg();
+    await setConfiguration(uid, {
+      layouts: {},
+      metadatas: {},
+      settings: {},
+      options: { test: true },
+    });
+
+    expect(spyFn).toHaveBeenCalledWith('test_prefix::test-uid', {
+      layouts: {},
+      metadatas: {},
+      settings: {},
+      options: { test: true },
+      uid: 'test-uid',
+    });
+
+    spyFn.mockRestore();
+  });
+
   test('setConfiguration calls store with isComponent if set in factory option', async () => {
     const uid = 'test-uid';
     const spyFn = jest.spyOn(storeUtils, 'setModelConfiguration').mockImplementation(() => {});

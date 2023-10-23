@@ -1,12 +1,19 @@
 import React from 'react';
+
 import { CheckPagePermissions } from '@strapi/helper-plugin';
-import adminPermissions from '../../../../../permissions';
+import { useSelector } from 'react-redux';
+
+import { selectAdminPermissions } from '../../../../App/selectors';
 import ListPage from '../ListPage';
 
-const ProtectedListPage = () => (
-  <CheckPagePermissions permissions={adminPermissions.settings.roles.main}>
-    <ListPage />
-  </CheckPagePermissions>
-);
+const ProtectedListPage = () => {
+  const permissions = useSelector(selectAdminPermissions);
+
+  return (
+    <CheckPagePermissions permissions={permissions.settings.roles.main}>
+      <ListPage />
+    </CheckPagePermissions>
+  );
+};
 
 export default ProtectedListPage;

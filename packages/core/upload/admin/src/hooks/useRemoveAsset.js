@@ -1,8 +1,8 @@
-import { useMutation, useQueryClient } from 'react-query';
 import { useNotification } from '@strapi/helper-plugin';
+import { useMutation, useQueryClient } from 'react-query';
 
-import { deleteRequest } from '../utils/deleteRequest';
 import pluginId from '../pluginId';
+import { deleteRequest } from '../utils/deleteRequest';
 
 export const useRemoveAsset = (onSuccess) => {
   const toggleNotification = useNotification();

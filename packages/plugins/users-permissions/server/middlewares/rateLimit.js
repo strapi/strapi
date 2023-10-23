@@ -1,27 +1,47 @@
 'use strict';
 
+const path = require('path');
+const utils = require('@strapi/utils');
+const { isString, has, toLower } = require('lodash/fp');
+
+const { RateLimitError } = utils.errors;
+
 module.exports =
   (config, { strapi }) =>
   async (ctx, next) => {
-    const ratelimit = require('koa2-ratelimit').RateLimit;
+    let rateLimitConfig = strapi.config.get('plugin.users-permissions.ratelimit');
 
-    const message = [
-      {
-        messages: [
-          {
-            id: 'Auth.form.error.ratelimit',
-            message: 'Too many attempts, please try again in a minute.',
-          },
-        ],
-      },
-    ];
+    if (!rateLimitConfig) {
+      rateLimitConfig = {
+        enabled: true,
+      };
+    }
 
-    return ratelimit.middleware({
-      interval: 1 * 60 * 1000,
-      max: 5,
-      prefixKey: `${ctx.request.path}:${ctx.request.ip}`,
-      message,
-      ...strapi.config.get('plugin.users-permissions.ratelimit'),
-      ...config,
-    })(ctx, next);
+    if (!has('enabled', rateLimitConfig)) {
+      rateLimitConfig.enabled = true;
+    }
+
+    if (rateLimitConfig.enabled === true) {
+      const rateLimit = require('koa2-ratelimit').RateLimit;
+
+      const userIdentifier = toLower(ctx.request.body.email) || 'unknownIdentifier';
+      const requestPath = isString(ctx.request.path)
+        ? toLower(path.normalize(ctx.request.path))
+        : 'invalidPath';
+
+      const loadConfig = {
+        interval: { min: 5 },
+        max: 5,
+        prefixKey: `${userIdentifier}:${requestPath}:${ctx.request.ip}`,
+        handler() {
+          throw new RateLimitError();
+        },
+        ...rateLimitConfig,
+        ...config,
+      };
+
+      return rateLimit.middleware(loadConfig)(ctx, next);
+    }
+
+    return next();
   };

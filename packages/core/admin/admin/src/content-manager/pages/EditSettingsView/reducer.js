@@ -1,8 +1,10 @@
 import produce from 'immer';
-import set from 'lodash/set';
-import get from 'lodash/get';
 import cloneDeep from 'lodash/cloneDeep';
+import get from 'lodash/get';
+import set from 'lodash/set';
+
 import { arrayMoveItem } from '../../utils';
+
 import { formatLayout, getFieldSize, setFieldSize } from './utils/layout';
 
 const DEFAULT_FIELD_SIZE = 6;

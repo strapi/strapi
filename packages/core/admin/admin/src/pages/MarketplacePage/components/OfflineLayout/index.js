@@ -1,9 +1,11 @@
 import React from 'react';
-import { useIntl } from 'react-intl';
+
+import { Box, Flex, Layout, Main, Typography } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
-import { Box, Flex, Typography, Layout, Main } from '@strapi/design-system';
-import PageHeader from '../PageHeader';
+import { useIntl } from 'react-intl';
+
 import offlineCloud from '../../../../assets/images/icon_offline-cloud.svg';
+import PageHeader from '../PageHeader';
 
 const OfflineLayout = () => {
   const { formatMessage } = useIntl();

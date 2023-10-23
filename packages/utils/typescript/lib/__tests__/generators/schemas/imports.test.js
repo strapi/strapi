@@ -6,7 +6,7 @@ const {
   addImport,
   generateImportDefinition,
   getImports,
-} = require('../../../generators/schemas/imports');
+} = require('../../../generators/common/imports');
 
 describe('Imports', () => {
   test('When first loaded, the list of imports should be empty', () => {
@@ -27,28 +27,30 @@ describe('Imports', () => {
   });
 
   test('Generate an import type definition containing the registered import', () => {
-    const def = generateImportDefinition();
+    const defs = generateImportDefinition();
 
-    expect(def.kind).toBe(ts.SyntaxKind.ImportDeclaration);
+    defs.forEach((def) => {
+      expect(def.kind).toBe(ts.SyntaxKind.ImportDeclaration);
 
-    // Module specifier
-    expect(def.moduleSpecifier.kind).toBe(ts.SyntaxKind.StringLiteral);
-    expect(def.moduleSpecifier.text).toBe('@strapi/strapi');
+      // Module specifier
+      expect(def.moduleSpecifier.kind).toBe(ts.SyntaxKind.StringLiteral);
+      expect(def.moduleSpecifier.text).toBe('@strapi/strapi');
 
-    // Import clause (should be named imports)
-    expect(def.importClause.kind).toBe(ts.SyntaxKind.ImportClause);
+      // Import clause (should be named imports)
+      expect(def.importClause.kind).toBe(ts.SyntaxKind.ImportClause);
 
-    const { elements } = def.importClause.namedBindings;
+      const { elements } = def.importClause.namedBindings;
 
-    expect(elements).toHaveLength(2);
+      expect(elements).toHaveLength(2);
 
-    // Import clauses
-    getImports().forEach((namedImport, index) => {
-      const element = elements[index];
+      // Import clauses
+      getImports().forEach((namedImport, index) => {
+        const element = elements[index];
 
-      expect(element.kind).toBe(ts.SyntaxKind.ImportSpecifier);
-      expect(element.name.kind).toBe(ts.SyntaxKind.Identifier);
-      expect(element.name.escapedText).toBe(namedImport);
+        expect(element.kind).toBe(ts.SyntaxKind.ImportSpecifier);
+        expect(element.name.kind).toBe(ts.SyntaxKind.Identifier);
+        expect(element.name.escapedText).toBe(namedImport);
+      });
     });
   });
 });

@@ -110,6 +110,7 @@
   "modalForm.editCategory.base.name.description": "类别名称不允许有空格",
   "modalForm.header-edit": "编辑 {name}",
   "modalForm.header.categories": "类别",
+  "modalForm.header.back": "后退",
   "modalForm.sub-header.addComponentToDynamicZone": "将新组件添加到动态区域",
   "modalForm.sub-header.attribute.create": "添加新的 {type} 字段",
   "modalForm.sub-header.attribute.create.step": "添加新的组件 ({step}/2)",

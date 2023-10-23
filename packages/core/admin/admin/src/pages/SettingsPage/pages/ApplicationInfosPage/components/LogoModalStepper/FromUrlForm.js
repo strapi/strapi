@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+
+import { Box, Button, ModalFooter, TextInput } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Box, Button, TextInput, ModalFooter } from '@strapi/design-system';
-import urlToFile from '../../utils/urlToFile';
+
+import { DIMENSION, SIZE } from '../../utils/constants';
 import { parseFileMetadatas } from '../../utils/parseFileMetadatas';
-import { SIZE, DIMENSION } from '../../utils/constants';
+import urlToFile from '../../utils/urlToFile';
 
 const FromUrlForm = ({ goTo, next, onClose, setLocalImage }) => {
   const { formatMessage } = useIntl();

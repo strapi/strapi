@@ -1,5 +1,6 @@
 import React from 'react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 
 import { ContextInfo } from '../index';

@@ -126,6 +126,7 @@
   "modalForm.editCategory.base.name.description": "Пробелы в имени категории недопустимы",
   "modalForm.header-edit": "Редактирование {name}",
   "modalForm.header.categories": "Категории",
+  "modalForm.header.back": "Назад",
   "modalForm.singleType.header-create": "Создание одиночного типа",
   "modalForm.sub-header.addComponentToDynamicZone": "Добавить компонент в динамическую зону",
   "modalForm.sub-header.attribute.create": "Добавить новое поле типа {type}",

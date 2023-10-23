@@ -1,10 +1,11 @@
 import React from 'react';
+
+import { Box, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
+import { pxToRem } from '@strapi/helper-plugin';
+import { Check, Cross, Loader } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { pxToRem } from '@strapi/helper-plugin';
-import { Check, Cross, Loader } from '@strapi/icons';
-import { Box, Flex, Typography, Grid, GridItem } from '@strapi/design-system';
 
 // Being discussed in Notion: create a <Icon /> component in Parts
 const Icon = styled.svg(

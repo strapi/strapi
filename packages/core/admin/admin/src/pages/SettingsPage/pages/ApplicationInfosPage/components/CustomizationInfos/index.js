@@ -1,20 +1,23 @@
-import React, { useReducer, forwardRef, useImperativeHandle } from 'react';
+import React, { forwardRef, useImperativeHandle, useReducer } from 'react';
+
+import { Box, Grid, GridItem, Typography } from '@strapi/design-system';
+import { useTracking } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useTracking } from '@strapi/helper-plugin';
-import { Grid, GridItem, Box, Typography } from '@strapi/design-system';
-import { useConfigurations } from '../../../../../../hooks';
+
+import { useConfiguration } from '../../../../../../hooks/useConfiguration';
 import { DIMENSION, SIZE } from '../../utils/constants';
 import LogoInput from '../LogoInput';
-import reducer, { initialState } from './reducer';
+
 import init from './init';
+import reducer, { initialState } from './reducer';
 
 const CustomizationInfos = forwardRef(({ canUpdate, projectSettingsStored }, ref) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const {
     logos: { menu, auth },
-  } = useConfigurations();
+  } = useConfiguration();
   const [{ menuLogo, authLogo }, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, projectSettingsStored)
   );

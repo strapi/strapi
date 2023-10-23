@@ -1,59 +1,12 @@
 'use strict';
 
 const path = require('path');
-const _ = require('lodash');
 const fs = require('fs-extra');
 const tsUtils = require('@strapi/typescript-utils');
 const getCustomAppConfigFile = require('./get-custom-app-config-file');
+const { filterPluginsByAdminEntry, createPluginFile } = require('./plugins');
 
 const getPkgPath = (name) => path.dirname(require.resolve(`${name}/package.json`));
-
-async function createPluginsJs(plugins, dest) {
-  const pluginsArray = plugins.map(({ pathToPlugin, name }) => {
-    const shortName = _.camelCase(name);
-
-    /**
-     * path.join, on windows, it uses backslashes to resolve path.
-     * The problem is that Webpack does not windows paths
-     * With this tool, we need to rely on "/" and not "\".
-     * This is the reason why '..\\..\\..\\node_modules\\@strapi\\plugin-content-type-builder/strapi-admin.js' was not working.
-     * The regexp at line 105 aims to replace the windows backslashes by standard slash so that webpack can deal with them.
-     * Backslash looks to work only for absolute paths with webpack => https://webpack.js.org/concepts/module-resolution/#absolute-paths
-     */
-    const realPath = path
-      .join(path.relative(path.resolve(dest, 'admin', 'src'), pathToPlugin), 'strapi-admin.js')
-      .replace(/\\/g, '/');
-
-    return {
-      name,
-      pathToPlugin: realPath,
-      shortName,
-    };
-  });
-
-  const content = `
-${pluginsArray
-  .map(({ pathToPlugin, shortName }) => {
-    const req = `'${pathToPlugin}'`;
-
-    return `import ${shortName} from ${req};`;
-  })
-  .join('\n')}
-
-
-const plugins = {
-${[...pluginsArray]
-  .map(({ name, shortName }) => {
-    return `  '${name}': ${shortName},`;
-  })
-  .join('\n')}
-};
-
-export default plugins;
-`;
-
-  return fs.writeFile(path.resolve(dest, 'admin', 'src', 'plugins.js'), content);
-}
 
 async function copyAdmin(dest) {
   const adminPath = getPkgPath('@strapi/admin');
@@ -76,13 +29,9 @@ async function createCacheDir({ appDir, plugins }) {
     'tsconfig.json'
   );
 
-  const pluginsWithFront = Object.keys(plugins)
-    .filter((pluginName) => {
-      const pluginInfo = plugins[pluginName];
-      return fs.existsSync(path.resolve(pluginInfo.pathToPlugin, 'strapi-admin.js'));
-    })
-    .map((name) => ({ name, ...plugins[name] }));
-
+  const pluginsWithFront = Object.entries(plugins)
+    .map(([name, plugin]) => ({ name, ...plugin }))
+    .filter(filterPluginsByAdminEntry);
   // create .cache dir
   await fs.emptyDir(cacheDir);
 
@@ -120,7 +69,7 @@ async function createCacheDir({ appDir, plugins }) {
   }
 
   // create plugins.js with plugins requires
-  await createPluginsJs(pluginsWithFront, cacheDir);
+  await createPluginFile(pluginsWithFront, cacheDir);
 
   // create the tsconfig.json file so we can develop plugins in ts while being in a JS project
   if (!useTypeScript) {
@@ -128,4 +77,4 @@ async function createCacheDir({ appDir, plugins }) {
   }
 }
 
-module.exports = createCacheDir;
+module.exports = { createCacheDir };

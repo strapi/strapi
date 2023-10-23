@@ -1,14 +1,16 @@
+import { generateNKeysBetween } from 'fractional-indexing';
 import produce from 'immer';
-import unset from 'lodash/unset';
+import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import set from 'lodash/set';
 import take from 'lodash/take';
-import cloneDeep from 'lodash/cloneDeep';
 import uniqBy from 'lodash/uniqBy';
-import { generateNKeysBetween } from 'fractional-indexing';
+import unset from 'lodash/unset';
+
+import { CREATOR_FIELDS } from '../../constants/attributes';
+import { getMaxTempKey } from '../../utils';
 
 import { findAllAndReplace, moveFields } from './utils';
-import { getMaxTempKey } from '../../utils';
 
 const initialState = {
   componentsDataStructure: {},
@@ -52,7 +54,13 @@ const reducer = (state, action) =>
       }
       case 'ADD_COMPONENT_TO_DYNAMIC_ZONE':
       case 'ADD_REPEATABLE_COMPONENT_TO_FIELD': {
-        const { keys, allComponents, componentLayoutData, shouldCheckErrors } = action;
+        const {
+          keys,
+          allComponents,
+          componentLayoutData,
+          shouldCheckErrors,
+          position = undefined,
+        } = action;
 
         if (shouldCheckErrors) {
           draftState.shouldCheckErrors = !state.shouldCheckErrors;
@@ -62,7 +70,15 @@ const reducer = (state, action) =>
           draftState.modifiedDZName = keys[0];
         }
 
-        const currentValue = get(state, ['modifiedData', ...keys], []);
+        const currentValue = [...get(state, ['modifiedData', ...keys], [])];
+
+        let actualPosition = position;
+
+        if (actualPosition === undefined) {
+          actualPosition = currentValue.length;
+        } else if (actualPosition < 0) {
+          actualPosition = 0;
+        }
 
         const defaultDataStructure =
           action.type === 'ADD_COMPONENT_TO_DYNAMIC_ZONE'
@@ -87,11 +103,9 @@ const reducer = (state, action) =>
           componentLayoutData.attributes
         );
 
-        const newValue = Array.isArray(currentValue)
-          ? [...currentValue, componentDataStructure]
-          : [componentDataStructure];
+        currentValue.splice(actualPosition, 0, componentDataStructure);
 
-        set(draftState, ['modifiedData', ...keys], newValue);
+        set(draftState, ['modifiedData', ...keys], currentValue);
 
         break;
       }
@@ -125,17 +139,16 @@ const reducer = (state, action) =>
           __temp_key__: keys[index],
         }));
 
-        set(
-          draftState,
-          initialDataPath,
-          uniqBy([...valuesWithKeys, ...initialDataRelations], 'id')
-        );
-
         /**
          * We need to set the value also on modifiedData, because initialData
          * and modifiedData need to stay in sync, so that the CM can compare
          * both states, to render the dirty UI state
          */
+        set(
+          draftState,
+          initialDataPath,
+          uniqBy([...valuesWithKeys, ...initialDataRelations], 'id')
+        );
         set(
           draftState,
           modifiedDataPath,
@@ -224,8 +237,12 @@ const reducer = (state, action) =>
 
         const findAllRelationsAndReplaceWithEmptyArray = findAllAndReplace(
           components,
-          (value) => {
-            return value.type === 'relation';
+          (value, { path }) => {
+            const fieldName = path[path.length - 1];
+            // We don't replace creator fields because we already return them without need to populate them separately
+            const isCreatorField = CREATOR_FIELDS.includes(fieldName);
+
+            return value.type === 'relation' && !isCreatorField;
           },
           (_, { path }) => {
             if (state.modifiedData?.id === data.id && get(state.modifiedData, path)) {

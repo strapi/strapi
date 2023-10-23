@@ -97,13 +97,13 @@ describe('CM API - Basic + dz', () => {
 
   test('Update product with compo', async () => {
     const product = {
-      name: 'Product 1 updated',
-      description: 'Updated Product description',
+      name: 'Product 1',
+      description: 'Product description',
       dz: [
         {
           __component: 'default.compo',
-          name: 'compo name updated',
-          description: 'update',
+          name: 'compo name',
+          description: 'short',
         },
       ],
     };
@@ -131,6 +131,34 @@ describe('CM API - Basic + dz', () => {
     expect(res.body.id).toEqual(data.productsWithDz[0].id);
     expect(res.body.publishedAt).toBeUndefined();
     data.productsWithDz.shift();
+  });
+
+  test('Clone product with compo', async () => {
+    const product = {
+      name: 'Product 1',
+      description: 'Product description',
+      dz: [
+        {
+          __component: 'default.compo',
+          name: 'compo name',
+          description: 'short',
+        },
+      ],
+    };
+    const { body: createdProduct } = await rq({
+      method: 'POST',
+      url: '/content-manager/collection-types/api::product-with-dz.product-with-dz',
+      body: product,
+    });
+
+    const res = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/api::product-with-dz.product-with-dz/clone/${createdProduct.id}`,
+      body: {},
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toMatchObject(product);
   });
 
   describe('validation', () => {

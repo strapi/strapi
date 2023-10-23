@@ -1,7 +1,8 @@
 import React from 'react';
-import { IntlProvider } from 'react-intl';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { fireEvent, render as renderTL } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { IntlProvider } from 'react-intl';
 
 import PendingLogoDialog from '../PendingLogoDialog';
 

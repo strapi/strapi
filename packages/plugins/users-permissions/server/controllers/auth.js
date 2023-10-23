@@ -9,7 +9,11 @@
 /* eslint-disable no-useless-escape */
 const crypto = require('crypto');
 const _ = require('lodash');
+const { concat, compact, isArray } = require('lodash/fp');
 const utils = require('@strapi/utils');
+const {
+  contentTypes: { getNonWritableAttributes },
+} = require('@strapi/utils');
 const { getService } = require('../utils');
 const {
   validateCallbackBody,
@@ -22,7 +26,7 @@ const {
 } = require('./validation/auth');
 
 const { getAbsoluteAdminUrl, getAbsoluteServerUrl, sanitize } = utils;
-const { ApplicationError, ValidationError } = utils.errors;
+const { ApplicationError, ValidationError, ForbiddenError } = utils.errors;
 
 const sanitizeUser = (user, ctx) => {
   const { auth } = ctx.state;
@@ -95,6 +99,10 @@ module.exports = {
     // Connect the user with the third-party provider.
     try {
       const user = await getService('providers').connect(provider, ctx.query);
+
+      if (user.blocked) {
+        throw new ForbiddenError('Your account has been blocked by an administrator');
+      }
 
       return ctx.send({
         jwt: getService('jwt').issue({ id: user.id }),
@@ -273,20 +281,49 @@ module.exports = {
       throw new ApplicationError('Register action is currently disabled');
     }
 
+    const { register } = strapi.config.get('plugin.users-permissions');
+    const alwaysAllowedKeys = ['username', 'password', 'email'];
+    const userModel = strapi.contentTypes['plugin::users-permissions.user'];
+    const { attributes } = userModel;
+
+    const nonWritable = getNonWritableAttributes(userModel);
+
+    const allowedKeys = compact(
+      concat(
+        alwaysAllowedKeys,
+        isArray(register?.allowedFields)
+          ? // Note that we do not filter allowedFields in case a user explicitly chooses to allow a private or otherwise omitted field on registration
+            register.allowedFields // if null or undefined, compact will remove it
+          : // to prevent breaking changes, if allowedFields is not set in config, we only remove private and known dangerous user schema fields
+            // TODO V5: allowedFields defaults to [] when undefined and remove this case
+            Object.keys(attributes).filter(
+              (key) =>
+                !nonWritable.includes(key) &&
+                !attributes[key].private &&
+                ![
+                  // many of these are included in nonWritable, but we'll list them again to be safe and since we're removing this code in v5 anyway
+                  // Strapi user schema fields
+                  'confirmed',
+                  'blocked',
+                  'confirmationToken',
+                  'resetPasswordToken',
+                  'provider',
+                  'id',
+                  'role',
+                  // other Strapi fields that might be added
+                  'createdAt',
+                  'updatedAt',
+                  'createdBy',
+                  'updatedBy',
+                  'publishedAt', // d&p
+                  'strapi_reviewWorkflows_stage', // review workflows
+                ].includes(key)
+            )
+      )
+    );
+
     const params = {
-      ..._.omit(ctx.request.body, [
-        'confirmed',
-        'blocked',
-        'confirmationToken',
-        'resetPasswordToken',
-        'provider',
-        'id',
-        'createdAt',
-        'updatedAt',
-        'createdBy',
-        'updatedBy',
-        'role',
-      ]),
+      ..._.pick(ctx.request.body, allowedKeys),
       provider: 'local',
     };
 

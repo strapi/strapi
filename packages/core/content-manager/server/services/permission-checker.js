@@ -44,6 +44,17 @@ const createPermissionChecker =
       });
     };
 
+    const validateQuery = (query, { action = ACTIONS.read } = {}) => {
+      return permissionsManager.validateQuery(query, { subject: model, action });
+    };
+
+    const validateInput = (action, data, entity) => {
+      return permissionsManager.validateInput(data, {
+        subject: entity ? toSubject(entity) : model,
+        action,
+      });
+    };
+
     const sanitizeCreateInput = (data) => sanitizeInput(ACTIONS.create, data);
     const sanitizeUpdateInput = (entity) => (data) => sanitizeInput(ACTIONS.update, data, entity);
 
@@ -75,13 +86,16 @@ const createPermissionChecker =
 
     return {
       // Permission utils
-      can,
-      cannot,
+      can, // check if you have the permission
+      cannot, // check if you don't have the permission
       // Sanitizers
       sanitizeOutput,
       sanitizeQuery,
       sanitizeCreateInput,
       sanitizeUpdateInput,
+      // Validators
+      validateQuery,
+      validateInput,
       // Queries Builder
       sanitizedQuery,
     };

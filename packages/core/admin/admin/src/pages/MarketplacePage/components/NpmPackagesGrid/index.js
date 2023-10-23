@@ -1,10 +1,12 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { Grid, GridItem, Flex, Loader } from '@strapi/design-system';
-import { useIntl } from 'react-intl';
+
+import { Flex, Grid, GridItem, Loader } from '@strapi/design-system';
 import { AnErrorOccurred } from '@strapi/helper-plugin';
-import NpmPackageCard from '../NpmPackageCard';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+
 import EmptyNpmPackageSearch from '../EmptyNpmPackageSearch';
+import NpmPackageCard from '../NpmPackageCard';
 
 const NpmPackagesGrid = ({
   status,
@@ -47,7 +49,7 @@ const NpmPackagesGrid = ({
   }
 
   return (
-    <Grid gap={4} data-testid="marketplace-results">
+    <Grid gap={4}>
       {npmPackages.map((npmPackage) => (
         <GridItem col={4} s={6} xs={12} style={{ height: '100%' }} key={npmPackage.id}>
           <NpmPackageCard

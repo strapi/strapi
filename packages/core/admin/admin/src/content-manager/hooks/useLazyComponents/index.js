@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+
 import { useCustomFields } from '@strapi/helper-plugin';
 
 const componentStore = new Map();

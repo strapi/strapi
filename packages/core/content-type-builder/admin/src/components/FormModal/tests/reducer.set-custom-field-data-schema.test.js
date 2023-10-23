@@ -1,5 +1,5 @@
-import reducer, { initialState } from '../reducer';
 import * as actions from '../constants';
+import reducer, { initialState } from '../reducer';
 
 const mockCustomField = {
   type: 'string',

@@ -1,7 +1,7 @@
-import type { SchemaUID } from '@strapi/strapi/lib/types/utils';
+import { Writable } from 'stream';
+import type { LoadedStrapi, Common, Schema } from '@strapi/types';
 
 import { get, last } from 'lodash/fp';
-import { Writable } from 'stream';
 
 import { ProviderTransferError } from '../../../../../errors/providers';
 import type { IEntity, Transaction } from '../../../../../../types';
@@ -9,8 +9,12 @@ import { json } from '../../../../../utils';
 import * as queries from '../../../../queries';
 
 interface IEntitiesRestoreStreamOptions {
-  strapi: Strapi.Strapi;
-  updateMappingTable<T extends SchemaUID | string>(type: T, oldID: number, newID: number): void;
+  strapi: LoadedStrapi;
+  updateMappingTable<TSchemaUID extends Common.UID.Schema>(
+    type: TSchemaUID,
+    oldID: number,
+    newID: number
+  ): void;
   transaction?: Transaction;
 }
 
@@ -27,12 +31,16 @@ const createEntitiesWriteStream = (options: IEntitiesRestoreStreamOptions) => {
         const { create, getDeepPopulateComponentLikeQuery } = query(type);
         const contentType = strapi.getModel(type);
 
+        let cType:
+          | Schema.ContentType
+          | Schema.Component
+          | ((...opts: any[]) => Schema.ContentType | Schema.Component) = contentType;
+
         /**
          * Resolve the component UID of an entity's attribute based
          * on a given path (components & dynamic zones only)
          */
-        const resolveType = (paths: string[]): string | undefined => {
-          let cType = contentType;
+        const resolveType = (paths: string[]): Common.UID.Schema | undefined => {
           let value: unknown = data;
 
           for (const path of paths) {
@@ -52,12 +60,17 @@ const createEntitiesWriteStream = (options: IEntitiesRestoreStreamOptions) => {
               }
 
               if (attribute.type === 'dynamiczone') {
-                cType = ({ __component }: { __component: string }) => strapi.getModel(__component);
+                cType = ({ __component }: { __component: Common.UID.Component }) =>
+                  strapi.getModel(__component);
               }
             }
           }
 
-          return cType?.uid;
+          if ('uid' in cType) {
+            return cType.uid;
+          }
+
+          return undefined;
         };
 
         try {

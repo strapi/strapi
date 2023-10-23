@@ -1,8 +1,10 @@
 import React from 'react';
-import styled from 'styled-components';
-import PropTypes from 'prop-types';
+
+import { buttonFocusStyle, Typography, VisuallyHidden } from '@strapi/design-system';
 import { ChevronLeft, ChevronRight } from '@strapi/icons';
-import { Typography, buttonFocusStyle, VisuallyHidden } from '@strapi/design-system';
+import PropTypes from 'prop-types';
+import styled from 'styled-components';
+
 import { usePagination } from './PaginationContext';
 
 const PaginationText = styled(Typography)`

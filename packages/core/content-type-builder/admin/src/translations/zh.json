@@ -149,6 +149,7 @@
   "modalForm.editCategory.base.name.description": "分類名稱不允許空白",
   "modalForm.header-edit": "編輯 {name}",
   "modalForm.header.categories": "複數分類",
+  "modalForm.header.back": "後退",
   "modalForm.singleType.header-create": "建立單一型別",
   "modalForm.sub-header.addComponentToDynamicZone": "在動態配置區新增一個元件",
   "modalForm.sub-header.attribute.create": "新增 {type} 欄位",

@@ -16,6 +16,7 @@ const getBreadcrumbDataML = (folder) => {
     data.push({
       id: folder.parent.id,
       label: folder.parent.name,
+      path: folder.parent.path,
     });
   }
 
@@ -23,6 +24,7 @@ const getBreadcrumbDataML = (folder) => {
     data.push({
       id: folder.id,
       label: folder.name,
+      path: folder.path,
     });
   }
 

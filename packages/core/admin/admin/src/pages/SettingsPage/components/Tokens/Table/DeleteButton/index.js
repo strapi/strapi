@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+
+import { Box, IconButton } from '@strapi/design-system';
+import { ConfirmDialog, useTracking } from '@strapi/helper-plugin';
 import { Trash } from '@strapi/icons';
-import { IconButton, Box } from '@strapi/design-system';
-import { useTracking, ConfirmDialog } from '@strapi/helper-plugin';
-import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 
 const DeleteButton = ({ tokenName, onClickDelete, tokenType }) => {
   const { formatMessage } = useIntl();

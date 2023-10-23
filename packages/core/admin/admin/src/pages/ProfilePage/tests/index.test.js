@@ -1,77 +1,98 @@
 import React from 'react';
-import { render, waitFor, screen } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { lightTheme, darkTheme } from '@strapi/design-system';
-import ProfilePage from '../index';
-import server from './utils/server';
-import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
-import Theme from '../../../components/Theme';
 
-jest.mock('../../../components/LocalesProvider/useLocalesProvider', () => () => ({
-  changeLocale() {},
-  localeNames: ['en'],
-  messages: ['test'],
-}));
+import { render, waitFor, server } from '@tests/utils';
+import { rest } from 'msw';
+
+import ProfilePage from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn(),
   useFocusWhenNavigate: jest.fn(),
   useAppInfo: jest.fn(() => ({ setUserDisplayName: jest.fn() })),
   useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn, unlockApp: jest.fn() })),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
 }));
 
-const client = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-});
+describe('Profile page', () => {
+  const originalIsEnabled = window.strapi.features.isEnabled;
+  const originalIsEE = window.strapi.isEE;
 
-const App = (
-  <QueryClientProvider client={client}>
-    <IntlProvider messages={{}} textComponent="span" locale="en">
-      <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-        <Theme>
-          <ProfilePage />
-        </Theme>
-      </ThemeToggleProvider>
-    </IntlProvider>
-  </QueryClientProvider>
-);
+  beforeAll(() => {
+    window.strapi.isEE = true;
+    window.strapi.features.isEnabled = () => true;
+  });
 
-describe('ADMIN | Pages | Profile page', () => {
-  beforeAll(() => server.listen());
+  afterAll(() => {
+    window.strapi.isEE = originalIsEE;
+    window.strapi.features.isEnabled = originalIsEnabled;
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  afterEach(() => {
-    server.resetHandlers();
-  });
-
-  afterAll(() => {
-    jest.resetAllMocks();
-    server.close();
-  });
-
-  it('renders and matches the snapshot', async () => {
-    const { container } = render(App);
+  it('renders and show the Interface Language section', async () => {
+    const { getByText } = render(<ProfilePage />);
     await waitFor(() => {
-      expect(screen.getByText('Interface language')).toBeInTheDocument();
+      expect(getByText('Interface language')).toBeInTheDocument();
     });
-
-    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('should display username if it exists', async () => {
-    render(App);
+    const { getByText } = render(<ProfilePage />);
     await waitFor(() => {
-      expect(screen.getByText('yolo')).toBeInTheDocument();
+      expect(getByText('yolo')).toBeInTheDocument();
     });
+  });
+
+  it('should display the change password section and all its fields', async () => {
+    const { getByRole, queryByTestId, getByLabelText } = render(<ProfilePage />);
+
+    await waitFor(() => {
+      expect(queryByTestId('loader')).not.toBeInTheDocument();
+    });
+
+    expect(
+      getByRole('heading', {
+        name: 'Change password',
+      })
+    ).toBeInTheDocument();
+
+    expect(getByLabelText('Current Password')).toBeInTheDocument();
+
+    expect(getByLabelText('Password')).toBeInTheDocument();
+
+    expect(getByLabelText('Password confirmation')).toBeInTheDocument();
+  });
+
+  it('should not display the change password section and all the fields if the user role is Locked', async () => {
+    server.use(
+      rest.get('/admin/providers/isSSOLocked', (req, res, ctx) => {
+        return res.once(
+          ctx.json({
+            data: {
+              isSSOLocked: true,
+            },
+          })
+        );
+      })
+    );
+
+    const { queryByRole, queryByTestId, queryByLabelText } = render(<ProfilePage />);
+
+    const changePasswordHeading = queryByRole('heading', {
+      name: 'Change password',
+    });
+
+    await waitFor(() => {
+      expect(queryByTestId('loader')).not.toBeInTheDocument();
+    });
+
+    expect(changePasswordHeading).not.toBeInTheDocument();
+
+    expect(queryByLabelText('Current Password')).not.toBeInTheDocument();
+
+    expect(queryByLabelText('Password')).not.toBeInTheDocument();
+
+    expect(queryByLabelText('Password confirmation')).not.toBeInTheDocument();
   });
 });

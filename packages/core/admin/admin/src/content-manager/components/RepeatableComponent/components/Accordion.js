@@ -1,8 +1,9 @@
 import React from 'react';
+
+import { Box, KeyboardNavigable, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { Box, Typography, KeyboardNavigable } from '@strapi/design-system';
 
 export const Footer = styled(Box)`
   overflow: hidden;

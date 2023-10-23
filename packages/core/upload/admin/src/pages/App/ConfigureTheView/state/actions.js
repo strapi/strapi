@@ -1,4 +1,4 @@
-import { SET_LOADED, ON_CHANGE } from './actionTypes';
+import { ON_CHANGE, SET_LOADED } from './actionTypes';
 
 export const onChange = ({ name, value }) => ({
   type: ON_CHANGE,

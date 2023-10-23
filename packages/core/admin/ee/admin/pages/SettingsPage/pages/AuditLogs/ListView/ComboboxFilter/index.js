@@ -1,7 +1,8 @@
 import React from 'react';
+
+import { Combobox, ComboboxOption } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Combobox, ComboboxOption } from '@strapi/design-system';
 
 const ComboboxFilter = ({ value, options, onChange }) => {
   const { formatMessage } = useIntl();

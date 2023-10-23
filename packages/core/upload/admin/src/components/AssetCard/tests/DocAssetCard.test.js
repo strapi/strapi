@@ -1,8 +1,10 @@
 import React from 'react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
-import { DocAssetCard } from '../DocAssetCard';
+
 import en from '../../../translations/en.json';
+import { DocAssetCard } from '../DocAssetCard';
 
 jest.mock('../../../utils', () => ({
   ...jest.requireActual('../../../utils'),
@@ -29,6 +31,39 @@ describe('DocAssetCard', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
+      .c17 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c25 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c26 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #666687;
+      }
+
+      .c34 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #666687;
+      }
+
       .c0 {
         background: #ffffff;
         border-radius: 4px;
@@ -57,8 +92,6 @@ describe('DocAssetCard', () => {
         border-radius: 4px;
         border-color: #dcdce4;
         border: 1px solid #dcdce4;
-        width: 2rem;
-        height: 2rem;
         cursor: pointer;
       }
 
@@ -157,27 +190,6 @@ describe('DocAssetCard', () => {
         justify-content: center;
       }
 
-      .c25 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c26 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #666687;
-      }
-
-      .c34 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-        color: #666687;
-      }
-
       .c32 {
         border-radius: 4px;
         height: 1.5rem;
@@ -188,13 +200,13 @@ describe('DocAssetCard', () => {
         outline: none;
       }
 
-      .c15 svg {
+      .c15 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c15 svg > g,
-      .c15 svg path {
+      .c15 > svg > g,
+      .c15 > svg path {
         fill: #ffffff;
       }
 
@@ -300,18 +312,6 @@ describe('DocAssetCard', () => {
         background-color: #8e8ea9;
       }
 
-      .c17 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
       .c7 > * {
         margin-left: 0;
         margin-right: 0;
@@ -352,19 +352,22 @@ describe('DocAssetCard', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c16 svg > g,
+      .c16 {
+        border-color: #dcdce4;
+        height: 2rem;
+        width: 2rem;
+      }
+
+      .c16 svg g,
       .c16 svg path {
         fill: #8e8ea9;
       }
 
-      .c16:hover svg > g,
-      .c16:hover svg path {
+      .c16:hover svg g,
+      .c16:focus svg g,
+      .c16:hover svg path,
+      .c16:focus svg path {
         fill: #666687;
-      }
-
-      .c16:active svg > g,
-      .c16:active svg path {
-        fill: #a5a5ba;
       }
 
       .c16[aria-disabled='true'] svg path {
@@ -402,7 +405,7 @@ describe('DocAssetCard', () => {
 
       <div>
         <article
-          aria-labelledby="1-title"
+          aria-labelledby=":r0:-title"
           class="c0 c1"
           role="button"
           tabindex="-1"
@@ -418,7 +421,7 @@ describe('DocAssetCard', () => {
                   class=""
                 >
                   <input
-                    aria-labelledby="1-title"
+                    aria-labelledby=":r0:-title"
                     class="c9"
                     type="checkbox"
                   />
@@ -431,7 +434,7 @@ describe('DocAssetCard', () => {
               <span>
                 <button
                   aria-disabled="false"
-                  aria-labelledby="0"
+                  aria-labelledby=":r1:"
                   class="c14 c3 c15 c16"
                   tabindex="0"
                   type="button"
@@ -498,7 +501,7 @@ describe('DocAssetCard', () => {
                 >
                   <h2
                     class="c25"
-                    id="1-title"
+                    id=":r0:-title"
                   >
                     hello.png
                   </h2>
@@ -511,7 +514,6 @@ describe('DocAssetCard', () => {
                   >
                     png
                   </span>
-                  
                 </div>
               </div>
               <div

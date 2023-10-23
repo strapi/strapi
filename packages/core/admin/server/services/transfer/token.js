@@ -1,7 +1,8 @@
 'use strict';
 
-const { map, isArray, omit, uniq, isNil, difference, isEmpty } = require('lodash/fp');
 const crypto = require('crypto');
+const assert = require('assert');
+const { map, isArray, omit, uniq, isNil, difference, isEmpty } = require('lodash/fp');
 
 const {
   errors: { ValidationError, NotFoundError },
@@ -66,6 +67,24 @@ const list = async () => {
 };
 
 /**
+ * Create a random token's access key
+ * @returns {string}
+ */
+const generateRandomAccessKey = () => crypto.randomBytes(128).toString('hex');
+
+/**
+ * Validate the given access key's format and returns it if valid
+ * @param {string} accessKey
+ * @return {string}
+ */
+const validateAccessKey = (accessKey) => {
+  assert(typeof accessKey === 'string', 'Access key needs to be a string');
+  assert(accessKey.length >= 15, 'Access key needs to have at least 15 characters');
+
+  return accessKey;
+};
+
+/**
  * Create a token and its permissions
  *
  * @param {Object} attributes
@@ -73,11 +92,16 @@ const list = async () => {
  * @param {string} attributes.description
  * @param {number} attributes.lifespan
  * @param {string[]} attributes.permissions
+ * @param {string} [attributes.accessKey]
  *
  * @returns {Promise<TransferToken>}
  */
 const create = async (attributes) => {
-  const accessKey = crypto.randomBytes(128).toString('hex');
+  const accessKey =
+    'accessKey' in attributes ? validateAccessKey(attributes.accessKey) : generateRandomAccessKey();
+
+  // Make sure the access key isn't picked up directly from the attributes for the next steps
+  delete attributes.accessKey;
 
   assertTokenPermissionsValidity(attributes);
   assertValidLifespan(attributes);
@@ -380,8 +404,7 @@ const flattenTokenPermissions = (token) => {
 
 /**
  * Assert that a token's permissions are valid
- *
- * @param {TransferToken} token
+ * @param {object} attributes
  */
 const assertTokenPermissionsValidity = (attributes) => {
   const permissionService = strapi.admin.services.transfer.permission;

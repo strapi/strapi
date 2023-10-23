@@ -1,6 +1,7 @@
-import reducer, { initialState } from '../reducer';
-import testData from './data';
 import { REMOVE_FIELD } from '../constants';
+import reducer, { initialState } from '../reducer';
+
+import testData from './data';
 
 describe('CTB | components | DataManagerProvider | reducer | REMOVE_FIELD', () => {
   describe('Removing a field that is not a relation', () => {

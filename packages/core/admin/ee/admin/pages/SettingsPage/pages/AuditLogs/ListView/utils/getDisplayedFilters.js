@@ -1,5 +1,6 @@
 import ComboboxFilter from '../ComboboxFilter';
-import { getDefaultMessage, actionTypes } from './getActionTypesDefaultMessages';
+
+import { actionTypes, getDefaultMessage } from './getActionTypesDefaultMessages';
 
 const customOperators = [
   {
@@ -35,8 +36,8 @@ const getDisplayedFilters = ({ formatMessage, users, canReadUsers }) => {
           id: 'Settings.permissions.auditLogs.action',
           defaultMessage: 'Action',
         }),
-        options: actionOptions,
         customInput: ComboboxFilter,
+        options: actionOptions,
       },
       fieldSchema: { type: 'enumeration' },
     },
@@ -74,7 +75,7 @@ const getDisplayedFilters = ({ formatMessage, users, canReadUsers }) => {
       return user.email;
     };
 
-    const userOptions = users.results.map((user) => {
+    const userOptions = users.map((user) => {
       return {
         label: getDisplayNameFromUser(user),
         // Combobox expects a string value

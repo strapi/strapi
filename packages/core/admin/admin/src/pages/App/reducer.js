@@ -1,7 +1,9 @@
 import produce from 'immer';
-import { SET_APP_RUNTIME_STATUS } from './constants';
+
+import { SET_APP_RUNTIME_STATUS, SET_ADMIN_PERMISSIONS } from './constants';
 
 const initialState = {
+  permissions: {},
   status: 'init',
 };
 
@@ -13,6 +15,12 @@ const reducer = (state = initialState, action) =>
         draftState.status = 'runtime';
         break;
       }
+
+      case SET_ADMIN_PERMISSIONS: {
+        draftState.permissions = action.payload;
+        break;
+      }
+
       default:
         return draftState;
     }

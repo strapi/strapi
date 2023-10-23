@@ -1,7 +1,9 @@
 import React, { useReducer } from 'react';
+
+import { ModalHeader, ModalLayout, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { ModalLayout, ModalHeader, Typography } from '@strapi/design-system';
+
 import reducer, { initialState } from './reducer';
 
 const LogoModalStepper = ({

@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
+
 import { useTracking } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
+
 import FormModalNavigationContext from '../../contexts/FormModalNavigationContext';
+
 import { INITIAL_STATE_DATA } from './constants';
 
 const FormModalNavigationProvider = ({ children }) => {
@@ -33,6 +36,7 @@ const FormModalNavigationProvider = ({ children }) => {
         modalType: 'attribute',
         step,
         attributeType,
+        showBackLink: true,
       };
     });
   };
@@ -61,6 +65,7 @@ const FormModalNavigationProvider = ({ children }) => {
         targetUid,
         modalType: 'chooseAttribute',
         isOpen: true,
+        showBackLink: false,
       };
     });
   };

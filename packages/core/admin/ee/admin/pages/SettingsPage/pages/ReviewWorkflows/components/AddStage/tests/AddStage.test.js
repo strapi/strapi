@@ -1,7 +1,7 @@
 import React from 'react';
-import { render } from '@testing-library/react';
 
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { render } from '@testing-library/react';
 
 import { AddStage } from '../AddStage';
 

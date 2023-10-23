@@ -1,23 +1,24 @@
 import React from 'react';
+
+import { Box, Flex, Icon, Tooltip, Typography } from '@strapi/design-system';
+import { LinkButton } from '@strapi/design-system/v2';
+import { useTracking } from '@strapi/helper-plugin';
+import { CheckCircle, ExternalLink } from '@strapi/icons';
+import pluralize from 'pluralize';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import pluralize from 'pluralize';
-import { Box, Typography, Flex, Icon, Tooltip } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
-import { ExternalLink, CheckCircle } from '@strapi/icons';
-import { useTracking } from '@strapi/helper-plugin';
+
 import StrapiLogo from '../../../../assets/images/logo-strapi-2022.svg';
+
 import InstallPluginButton from './InstallPluginButton';
 import PackageStats from './PackageStats';
 
 // Custom component to have an ellipsis after the 2nd line
 const EllipsisText = styled(Typography)`
-  /* stylelint-disable value-no-vendor-prefix, property-no-vendor-prefix */
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
-  /* stylelint-enable value-no-vendor-prefix, property-no-vendor-prefix */
   overflow: hidden;
 `;
 

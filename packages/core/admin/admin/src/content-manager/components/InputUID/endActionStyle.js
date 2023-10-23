@@ -1,5 +1,5 @@
+import { FieldAction, Flex } from '@strapi/design-system';
 import styled, { keyframes } from 'styled-components';
-import { Flex, FieldAction } from '@strapi/design-system';
 
 export const FieldActionWrapper = styled(FieldAction)`
   svg {

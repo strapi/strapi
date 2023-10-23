@@ -1,21 +1,23 @@
 import React from 'react';
-import { useIntl } from 'react-intl';
-import { LoadingIndicatorPage, useFocusWhenNavigate } from '@strapi/helper-plugin';
+
 import {
-  useNotifyAT,
-  Layout,
-  HeaderLayout,
   ContentLayout,
+  HeaderLayout,
+  Layout,
   Main,
-  Typography,
   Table,
-  Thead,
   Tbody,
-  Tr,
   Td,
   Th,
+  Thead,
+  Tr,
+  Typography,
+  useNotifyAT,
 } from '@strapi/design-system';
-import useFetchEnabledPlugins from '../../hooks/useFetchEnabledPlugins';
+import { LoadingIndicatorPage, useFocusWhenNavigate } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
+
+import { usePlugins } from './hooks/usePlugins';
 
 const Plugins = () => {
   const { formatMessage } = useIntl();
@@ -39,7 +41,7 @@ const Plugins = () => {
     );
   };
 
-  const { status, data } = useFetchEnabledPlugins(notifyPluginPageLoad);
+  const { status, data } = usePlugins(notifyPluginPageLoad);
 
   const isLoading = status !== 'success' && status !== 'error';
 

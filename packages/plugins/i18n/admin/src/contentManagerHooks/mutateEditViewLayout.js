@@ -1,6 +1,8 @@
 import React from 'react';
-import get from 'lodash/get';
+
 import { Earth as I18N, EarthStriked as StrikedWorld } from '@strapi/icons';
+import get from 'lodash/get';
+
 import LabelAction from '../components/LabelAction';
 import { getTrad } from '../utils';
 

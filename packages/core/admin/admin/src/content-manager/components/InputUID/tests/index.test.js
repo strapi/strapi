@@ -1,12 +1,15 @@
 import React from 'react';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { IntlProvider } from 'react-intl';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { NotificationsProvider } from '@strapi/helper-plugin';
+import { render as renderRTL, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
-import InputUID from '../index';
+import { InputUID } from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -18,14 +21,7 @@ jest.mock('@strapi/helper-plugin', () => ({
       name: 'initial-data',
     },
   })),
-  useNotification: jest.fn().mockReturnValue(() => {}),
 }));
-
-function sleep(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
 
 const server = setupServer(
   rest.post('*/uid/generate', async (req, res, ctx) => {
@@ -49,9 +45,9 @@ const server = setupServer(
   })
 );
 
-const ComponentFixture = (props) => (
-  <ThemeProvider theme={lightTheme}>
-    <IntlProvider locale="en" messages={{}}>
+const render = (props) => {
+  return {
+    ...renderRTL(
       <InputUID
         attribute={{ targetField: 'target', required: true }}
         contentTypeUID="api::test.test"
@@ -62,20 +58,34 @@ const ComponentFixture = (props) => (
         name="name"
         onChange={jest.fn()}
         {...props}
-      />
-    </IntlProvider>
-  </ThemeProvider>
-);
+      />,
+      {
+        wrapper({ children }) {
+          const client = new QueryClient({
+            defaultOptions: {
+              queries: {
+                retry: false,
+              },
+            },
+          });
 
-function setup(props) {
-  return new Promise((resolve) => {
-    act(() => {
-      resolve(render(<ComponentFixture {...props} />));
-    });
-  });
-}
+          return (
+            <QueryClientProvider client={client}>
+              <ThemeProvider theme={lightTheme}>
+                <IntlProvider locale="en" messages={{}}>
+                  <NotificationsProvider>{children}</NotificationsProvider>
+                </IntlProvider>
+              </ThemeProvider>
+            </QueryClientProvider>
+          );
+        },
+      }
+    ),
+    user: userEvent.setup(),
+  };
+};
 
-describe('Content-Manager | <InputUID />', () => {
+describe('InputUID', () => {
   beforeAll(() => {
     server.listen();
   });
@@ -86,16 +96,17 @@ describe('Content-Manager | <InputUID />', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   test('renders', async () => {
-    const { getByText, getByRole } = await setup({
+    const { getByText, getByRole } = render({
       hint: 'hint',
       value: 'test',
       required: true,
       labelAction: <>action</>,
     });
+
+    await waitFor(() => expect(getByText('Unavailable')).toBeInTheDocument());
 
     expect(getByText('Label')).toBeInTheDocument();
     expect(getByText('*')).toBeInTheDocument();
@@ -105,55 +116,56 @@ describe('Content-Manager | <InputUID />', () => {
   });
 
   test('renders an error', async () => {
-    const { getByText } = await setup({
+    const { getByText } = render({
+      value: 'test',
       error: 'error',
     });
+
+    await waitFor(() => expect(getByText('Unavailable')).toBeInTheDocument());
 
     expect(getByText('error')).toBeInTheDocument();
   });
 
   test('Hides the regenerate label when disabled', async () => {
-    const { queryByRole } = await setup({ disabled: true, value: 'test' });
+    const { queryByRole, getByText } = render({ disabled: true, value: 'test' });
+
+    await waitFor(() => expect(getByText('Unavailable')).toBeInTheDocument());
 
     expect(queryByRole('button', { name: /regenerate/i })).not.toBeInTheDocument();
   });
 
   test('Calls onChange handler', async () => {
     const spy = jest.fn();
-    const { getByRole } = await setup({ value: 'test', onChange: spy });
+    const { getByRole, user } = render({ value: 'test', onChange: spy });
 
-    fireEvent.change(getByRole('textbox'), { target: { value: 'test-new' } });
+    const value = 'test-new';
 
-    expect(spy).toHaveBeenCalledTimes(1);
+    await user.type(getByRole('textbox'), value);
+
+    expect(spy).toHaveBeenCalledTimes(value.length);
   });
 
   test('Regenerates the value based on the target field', async () => {
-    const user = userEvent.setup();
     const spy = jest.fn();
-    const { getByRole, queryByTestId } = await setup({ onChange: spy, value: '' });
+    const { getByRole, queryByTestId, user } = render({ onChange: spy, value: '' });
 
-    await act(async () => {
-      await user.click(getByRole('button', { name: /regenerate/i }));
-    });
+    await user.click(getByRole('button', { name: /regenerate/i }));
 
     await waitFor(() => expect(queryByTestId('loading-wrapper')).not.toBeInTheDocument());
 
-    expect(spy).toHaveBeenCalledWith(
-      {
-        target: {
-          name: 'name',
-          type: 'text',
-          value: 'source-string',
-        },
+    expect(spy).toHaveBeenCalledWith({
+      target: {
+        name: 'name',
+        type: 'text',
+        value: 'source-string',
       },
-      true
-    );
+    });
   });
 
   test('If the field is required and the value is empty it should automatically fill it', async () => {
     const spy = jest.fn();
 
-    const { queryByTestId } = await setup({
+    const { queryByTestId } = render({
       value: '',
       required: true,
       onChange: spy,
@@ -176,7 +188,7 @@ describe('Content-Manager | <InputUID />', () => {
   test('If the field is required and the value is not empty it should not automatically fill it', async () => {
     const spy = jest.fn();
 
-    const { queryByTestId } = await setup({
+    const { queryByTestId } = render({
       value: 'test',
       required: true,
       onChange: spy,
@@ -190,7 +202,7 @@ describe('Content-Manager | <InputUID />', () => {
   test('Checks the initial availability (isAvailable)', async () => {
     const spy = jest.fn();
 
-    const { getByText, queryByText, queryByTestId } = await setup({
+    const { getByText, queryByText, queryByTestId } = render({
       value: 'available',
       required: true,
       onChange: spy,
@@ -200,15 +212,15 @@ describe('Content-Manager | <InputUID />', () => {
 
     expect(getByText('Available')).toBeInTheDocument();
 
-    await sleep(4500);
-
-    expect(queryByText('Available')).not.toBeInTheDocument();
+    await waitFor(() => expect(queryByText('Available')).not.toBeInTheDocument(), {
+      timeout: 10000,
+    });
   });
 
   test('Checks the initial availability (!isAvailable)', async () => {
     const spy = jest.fn();
 
-    const { getByText, queryByTestId, queryByText } = await setup({
+    const { getByText, queryByTestId, queryByText } = render({
       value: 'not-available',
       required: true,
       onChange: spy,
@@ -218,15 +230,15 @@ describe('Content-Manager | <InputUID />', () => {
 
     expect(getByText('Unavailable')).toBeInTheDocument();
 
-    await sleep(4500);
-
-    expect(queryByText('Available')).not.toBeInTheDocument();
+    await waitFor(() => expect(queryByText('Available')).not.toBeInTheDocument(), {
+      timeout: 10000,
+    });
   });
 
   test('Does not check the initial availability without a value', async () => {
     const spy = jest.fn();
 
-    const { queryByText, queryByTestId } = await setup({
+    const { queryByText, queryByTestId } = render({
       value: '',
       required: true,
       onChange: spy,

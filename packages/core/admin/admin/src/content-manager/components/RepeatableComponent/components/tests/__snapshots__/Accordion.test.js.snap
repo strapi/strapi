@@ -164,16 +164,6 @@ exports[`RepeatableComponent | Accordion Group should render the children passed
 `;
 
 exports[`RepeatableComponent | Accordion Group should render the error if there is one 1`] = `
-.c0 {
-  padding-top: 4px;
-}
-
-.c1 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #d02b20;
-}
-
 .c2 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
@@ -184,6 +174,16 @@ exports[`RepeatableComponent | Accordion Group should render the error if there 
   padding: 0;
   position: absolute;
   width: 1px;
+}
+
+.c1 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #d02b20;
+}
+
+.c0 {
+  padding-top: 4px;
 }
 
 <div>

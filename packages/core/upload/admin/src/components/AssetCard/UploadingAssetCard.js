@@ -1,24 +1,24 @@
 import React, { useEffect } from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
 
 import {
+  Box,
   Card,
+  CardBadge,
   CardBody,
   CardContent,
   CardHeader,
-  CardTitle,
   CardSubtitle,
-  CardBadge,
-  Typography,
-  Box,
+  CardTitle,
   Flex,
+  Typography,
 } from '@strapi/design-system';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
-import { getTrad } from '../../utils';
 import { AssetType } from '../../constants';
 import { useUpload } from '../../hooks/useUpload';
+import { getTrad } from '../../utils';
 import { UploadProgress } from '../UploadProgress';
 
 const UploadProgressWrapper = styled.div`

@@ -1,7 +1,9 @@
 import React from 'react';
+
+import { Option, Select, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Select, Option, Typography } from '@strapi/design-system';
+
 import { getDateOfExpiration } from '../../../pages/ApiTokens/EditView/utils';
 
 const LifeSpanInput = ({ token, errors, values, onChange, isCreating }) => {

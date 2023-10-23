@@ -1,18 +1,18 @@
-import type { ContentTypeSchema } from '@strapi/strapi';
+import type { LoadedStrapi, Schema } from '@strapi/types';
 import { ProviderTransferError } from '../../../../../errors/providers';
 import * as queries from '../../../../queries';
 
 export interface IRestoreOptions {
-  assets?: boolean;
+  assets?: boolean; // delete media library files before transfer
   configuration?: {
-    webhook?: boolean;
-    coreStore?: boolean;
+    webhook?: boolean; // delete webhooks before transfer
+    coreStore?: boolean; // delete core store before transfer
   };
   entities?: {
-    include?: string[];
-    exclude?: string[];
-    filters?: ((contentType: ContentTypeSchema) => boolean)[];
-    params?: { [uid: string]: unknown };
+    include?: string[]; // only delete these stage entities before transfer
+    exclude?: string[]; // exclude these stage entities from deletion
+    filters?: ((contentType: Schema.ContentType) => boolean)[]; // custom filters to exclude a content type from deletion
+    params?: { [uid: string]: unknown }; // params object passed to deleteMany before transfer for custom deletions
   };
 }
 
@@ -21,8 +21,8 @@ interface IDeleteResults {
   aggregate: { [uid: string]: { count: number } };
 }
 
-export const deleteRecords = async (strapi: Strapi.Strapi, options?: IRestoreOptions) => {
-  const entities = await deleteEntitiesRecord(strapi, options);
+export const deleteRecords = async (strapi: LoadedStrapi, options: IRestoreOptions) => {
+  const entities = await deleteEntitiesRecords(strapi, options);
   const configuration = await deleteConfigurationRecords(strapi, options);
 
   return {
@@ -32,30 +32,34 @@ export const deleteRecords = async (strapi: Strapi.Strapi, options?: IRestoreOpt
   };
 };
 
-const deleteEntitiesRecord = async (
-  strapi: Strapi.Strapi,
+const deleteEntitiesRecords = async (
+  strapi: LoadedStrapi,
   options: IRestoreOptions = {}
 ): Promise<IDeleteResults> => {
   const { entities } = options;
   const query = queries.entity.createEntityQuery(strapi);
-  const contentTypes = Object.values<ContentTypeSchema>(strapi.contentTypes);
+  const contentTypes = Object.values<Schema.ContentType>(
+    strapi.contentTypes as Record<string, Schema.ContentType>
+  );
 
   const contentTypesToClear = contentTypes.filter((contentType) => {
-    let keep = true;
+    let removeThisContentType = true;
 
+    // include means "only include these types" so if it's not in here, it's not being included
     if (entities?.include) {
-      keep = entities.include.includes(contentType.uid);
+      removeThisContentType = entities.include.includes(contentType.uid);
     }
 
-    if (entities?.exclude) {
-      keep = !entities.exclude.includes(contentType.uid);
+    // if something is excluded, remove it. But lack of being excluded doesn't mean it's kept
+    if (entities?.exclude && entities.exclude.includes(contentType.uid)) {
+      removeThisContentType = false;
     }
 
     if (entities?.filters) {
-      keep = entities.filters.every((filter) => filter(contentType));
+      removeThisContentType = entities.filters.every((filter) => filter(contentType));
     }
 
-    return keep;
+    return removeThisContentType;
   });
 
   const [results, updateResults] = useResults(
@@ -76,7 +80,7 @@ const deleteEntitiesRecord = async (
 };
 
 const deleteConfigurationRecords = async (
-  strapi: Strapi.Strapi,
+  strapi: LoadedStrapi,
   options: IRestoreOptions = {}
 ): Promise<IDeleteResults> => {
   const { coreStore = true, webhook = true } = options?.configuration ?? {};

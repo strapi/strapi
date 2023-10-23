@@ -1,37 +1,39 @@
 import React, { useEffect, useRef } from 'react';
-import { useIntl } from 'react-intl';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { useHistory } from 'react-router-dom';
-import qs from 'qs';
 
+import { ContentLayout, HeaderLayout, Main } from '@strapi/design-system';
 import {
-  SettingsPageTitle,
-  useFocusWhenNavigate,
-  useNotification,
-  NoPermissions,
-  useRBAC,
-  NoContent,
-  useTracking,
-  useGuidedTour,
   LinkButton,
+  NoContent,
+  NoPermissions,
+  SettingsPageTitle,
   useFetchClient,
+  useFocusWhenNavigate,
+  useGuidedTour,
+  useNotification,
+  useRBAC,
+  useTracking,
 } from '@strapi/helper-plugin';
-import { HeaderLayout, ContentLayout, Main, Button } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
+import qs from 'qs';
+import { useIntl } from 'react-intl';
+import { useMutation, useQuery } from 'react-query';
+import { useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 
-import adminPermissions from '../../../../../permissions';
-import tableHeaders from './utils/tableHeaders';
-import Table from '../../../components/Tokens/Table';
+import { selectAdminPermissions } from '../../../../App/selectors';
 import { TRANSFER_TOKEN_TYPE } from '../../../components/Tokens/constants';
+import Table from '../../../components/Tokens/Table';
+
+import tableHeaders from './utils/tableHeaders';
 
 const TransferTokenListView = () => {
   useFocusWhenNavigate();
-  const queryClient = useQueryClient();
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
+  const permissions = useSelector(selectAdminPermissions);
   const {
     allowedActions: { canCreate, canDelete, canUpdate, canRead },
-  } = useRBAC(adminPermissions.settings['transfer-tokens']);
+  } = useRBAC(permissions.settings['transfer-tokens']);
   const { push } = useHistory();
   const { trackUsage } = useTracking();
 
@@ -61,6 +63,7 @@ const TransferTokenListView = () => {
     data: transferTokens,
     status,
     isFetching,
+    refetch,
   } = useQuery(
     ['transfer-tokens'],
     async () => {
@@ -78,8 +81,6 @@ const TransferTokenListView = () => {
     {
       enabled: canRead,
       onError(err) {
-        console.log('error', err);
-
         if (err?.response?.data?.error?.details?.code === 'INVALID_TOKEN_SALT') {
           toggleNotification({
             type: 'warning',
@@ -109,7 +110,7 @@ const TransferTokenListView = () => {
     },
     {
       async onSuccess() {
-        await queryClient.invalidateQueries(['transfer-tokens']);
+        await refetch(['transfer-tokens']);
       },
       onError(err) {
         if (err?.response?.data?.data) {
@@ -133,9 +134,10 @@ const TransferTokenListView = () => {
     }
   );
 
-  const shouldDisplayDynamicTable = canRead && transferTokens;
-  const shouldDisplayNoContent = canRead && !transferTokens && !canCreate;
-  const shouldDisplayNoContentWithCreationButton = canRead && !transferTokens && canCreate;
+  const hasTransferTokens = transferTokens && transferTokens?.length > 0;
+  const shouldDisplayDynamicTable = canRead && hasTransferTokens;
+  const shouldDisplayNoContent = canRead && !hasTransferTokens && !canCreate;
+  const shouldDisplayNoContentWithCreationButton = canRead && !hasTransferTokens && canCreate;
 
   return (
     <Main aria-busy={isLoading}>
@@ -191,12 +193,16 @@ const TransferTokenListView = () => {
               defaultMessage: 'Add your first Transfer Token',
             }}
             action={
-              <Button variant="secondary" startIcon={<Plus />}>
+              <LinkButton
+                variant="secondary"
+                startIcon={<Plus />}
+                to="/settings/transfer-tokens/create"
+              >
                 {formatMessage({
                   id: 'Settings.transferTokens.addNewToken',
                   defaultMessage: 'Add new Transfer Token',
                 })}
-              </Button>
+              </LinkButton>
             }
           />
         )}

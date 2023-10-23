@@ -1,4 +1,5 @@
 import { getFetchClient, hasPermissions } from '@strapi/helper-plugin';
+
 import getContentTypeLinks from '../getContentTypeLinks';
 
 // FIXME
@@ -10,7 +11,7 @@ describe('checkPermissions', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('creates an array of boolean corresponding to the permission state', async () => {

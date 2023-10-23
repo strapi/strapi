@@ -4,7 +4,7 @@ module.exports = {
   displayName: 'API integration tests',
   testMatch: ['**/?(*.)+(spec|test).api.js'],
   testEnvironment: 'node',
-  setupFilesAfterEnv: ['<rootDir>/test/jest-api.setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/test/setup/jest-api.setup.js'],
   coveragePathIgnorePatterns: [
     '<rootDir>/dist/',
     '<rootDir>/node_modules/',

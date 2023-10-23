@@ -115,6 +115,7 @@
   "modalForm.editCategory.base.name.description": "Er is geen spatie toegestaan in de naam van een categorie",
   "modalForm.header-edit": "Bewerk {name}",
   "modalForm.header.categories": "Categorieën",
+  "modalForm.header.back": "Rug",
   "modalForm.singleType.header-create": "Maak een enkel type",
   "modalForm.sub-header.addComponentToDynamicZone": "Voeg een nieuw component toe aan de dynamische zone",
   "modalForm.sub-header.attribute.create": "Voeg een nieuw {type} veld toe",

@@ -1,12 +1,13 @@
 import React from 'react';
+
+import { Box } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Box } from '@strapi/design-system';
 
 const ShadowBox = styled(Box)`
   position: relative;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
+  flex: 1;
 
   &:before,
   &:after {

@@ -1,8 +1,6 @@
 import formData from 'form-data';
 import Mailgun from 'mailgun.js';
-import utils from '@strapi/utils';
 import Options from 'mailgun.js/interfaces/Options';
-import { MailgunMessageData } from 'mailgun.js/interfaces/Messages';
 
 interface Settings {
   defaultFrom: string;
@@ -33,7 +31,7 @@ const optionsMap: Record<string, LegacyOptionMapper> = {
   host: { field: 'url', fn: (value) => `https://${value || 'api.mailgun.net'}` },
 };
 
-export = {
+export default {
   convertProviderOptions(providerOptions: ProviderOptions): Record<string, unknown> {
     const newOptions: Record<string, unknown> = {};
     if (typeof providerOptions === 'object') {
@@ -73,9 +71,9 @@ export = {
           text,
           html,
           ...rest,
-        } as MailgunMessageData;
+        };
 
-        return mg.messages.create(providerOptions.domain as string, utils.removeUndefined(data));
+        return mg.messages.create(providerOptions.domain as string, data);
       },
     };
   },

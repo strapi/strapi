@@ -96,5 +96,5 @@ test
 tests
 __tests__
 jest.config.js
-testApp
 coverage
+dist/**/*.d.ts.map

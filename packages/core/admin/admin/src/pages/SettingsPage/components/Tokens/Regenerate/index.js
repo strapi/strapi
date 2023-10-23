@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+
+import { Button } from '@strapi/design-system';
+import { ConfirmDialog } from '@strapi/helper-plugin';
+import { Refresh } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Button } from '@strapi/design-system';
-import { Refresh } from '@strapi/icons';
-import { ConfirmDialog } from '@strapi/helper-plugin';
-import { useRegenerate } from '../../../../../hooks';
+
+import { useRegenerate } from '../../../hooks/useRegenerate';
 
 export const Regenerate = ({ onRegenerate, idToRegenerate, backUrl, onError }) => {
   const { formatMessage } = useIntl();

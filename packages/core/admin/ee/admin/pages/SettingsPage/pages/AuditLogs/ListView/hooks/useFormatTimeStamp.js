@@ -1,5 +1,5 @@
-import { useIntl } from 'react-intl';
 import parseISO from 'date-fns/parseISO';
+import { useIntl } from 'react-intl';
 
 const useFormatTimeStamp = () => {
   const { formatDate } = useIntl();

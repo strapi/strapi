@@ -41,8 +41,9 @@ const syncLocalizations = async (entry, { model }) => {
     };
 
     // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
+    // TODO: use a transaction to avoid deadlocks
     await mapAsync(entry.localizations, (localization) => updateLocalization(localization.id), {
-      concurrency: isDialectMySQL() ? 1 : Infinity,
+      concurrency: isDialectMySQL() && !strapi.db.inTransaction() ? 1 : Infinity,
     });
   }
 };
@@ -68,8 +69,9 @@ const syncNonLocalizedAttributes = async (entry, { model }) => {
     };
 
     // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
+    // TODO: use a transaction to avoid deadlocks
     await mapAsync(entry.localizations, (localization) => updateLocalization(localization.id), {
-      concurrency: isDialectMySQL() ? 1 : Infinity,
+      concurrency: isDialectMySQL() && !strapi.db.inTransaction() ? 1 : Infinity,
     });
   }
 };

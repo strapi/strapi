@@ -1,9 +1,9 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
 
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { PlusCircle } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import styled from 'styled-components';
 
 const StyledAddIcon = styled(PlusCircle)`
   > circle {

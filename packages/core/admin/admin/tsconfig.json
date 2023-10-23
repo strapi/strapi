@@ -1,0 +1,11 @@
+{
+  "extends": "tsconfig/client.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@tests/*": ["./tests/*"]
+    }
+  },
+  "include": ["src", "tests", "custom.d.ts"],
+  "exclude": ["node_modules"]
+}

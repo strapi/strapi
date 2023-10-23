@@ -5,22 +5,23 @@
  */
 
 import React from 'react';
-import { useIntl } from 'react-intl';
+
 import {
   Button,
   Flex,
-  Breadcrumbs,
-  Crumb,
   Grid,
   GridItem,
-  ModalLayout,
-  ModalHeader,
-  ModalFooter,
   ModalBody,
+  ModalFooter,
+  ModalHeader,
+  ModalLayout,
 } from '@strapi/design-system';
-import PropTypes from 'prop-types';
-import { Formik } from 'formik';
+import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
 import { Form } from '@strapi/helper-plugin';
+import { Formik } from 'formik';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+
 import Input from './Input';
 
 const FormModal = ({
@@ -43,8 +44,10 @@ const FormModal = ({
     <ModalLayout onClose={onToggle} labelledBy="title">
       <ModalHeader>
         <Breadcrumbs label={headerBreadcrumbs.join(', ')}>
-          {headerBreadcrumbs.map((crumb) => (
-            <Crumb key={crumb}>{crumb}</Crumb>
+          {headerBreadcrumbs.map((crumb, index, arr) => (
+            <Crumb isCurrent={index === arr.length - 1} key={crumb}>
+              {crumb}
+            </Crumb>
           ))}
         </Breadcrumbs>
       </ModalHeader>

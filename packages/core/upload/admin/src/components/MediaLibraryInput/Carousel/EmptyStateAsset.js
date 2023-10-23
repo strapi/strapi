@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
-import { Icon, Flex, Typography } from '@strapi/design-system';
+
+import { Flex, Icon, Typography } from '@strapi/design-system';
 import { PicturePlus } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+
+import { AssetSource } from '../../../constants';
 import getTrad from '../../../utils/getTrad';
 import { rawFileToAsset } from '../../../utils/rawFileToAsset';
-import { AssetSource } from '../../../constants';
 
 const TextAlignTypography = styled(Typography)`
   align-items: center;

@@ -1,13 +1,14 @@
 import React from 'react';
+
+import { Button, ContentLayout, HeaderLayout, Main } from '@strapi/design-system';
 import {
-  SettingsPageTitle,
   LoadingIndicatorPage,
+  SettingsPageTitle,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
-import { HeaderLayout, ContentLayout, Main, Button } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
-import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 
 const LoadingView = ({ apiTokenName }) => {
   const { formatMessage } = useIntl();

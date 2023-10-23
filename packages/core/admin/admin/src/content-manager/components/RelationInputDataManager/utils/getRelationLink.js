@@ -1,5 +1,3 @@
-import { getRequestUrl } from '../../../utils';
-
 export function getRelationLink(targetModel, id) {
-  return `${getRequestUrl(`collectionType/${targetModel}/${id ?? ''}`)}`;
+  return `/content-manager/collectionType/${targetModel}/${id ?? ''}`;
 }

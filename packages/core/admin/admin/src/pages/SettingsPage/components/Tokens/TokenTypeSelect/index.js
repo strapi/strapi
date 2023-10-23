@@ -1,8 +1,8 @@
 import React from 'react';
+
+import { Option, Select } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-
-import { Select, Option } from '@strapi/design-system';
 
 const TokenTypeSelect = ({ name, errors, values, onChange, canEditInputs, options, label }) => {
   const { formatMessage } = useIntl();

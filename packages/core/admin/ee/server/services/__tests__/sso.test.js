@@ -1,6 +1,6 @@
 'use strict';
 
-jest.mock('@strapi/strapi/ee', () => ({
+jest.mock('@strapi/strapi/dist/utils/ee', () => ({
   features: {
     isEnabled() {
       return true;

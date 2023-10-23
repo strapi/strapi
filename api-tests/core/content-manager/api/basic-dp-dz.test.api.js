@@ -136,6 +136,38 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
     data.productsWithDzAndDP.shift();
   });
 
+  test('Clone product with compo', async () => {
+    const product = {
+      name: 'Product 1',
+      description: 'Product description',
+      dz: [
+        {
+          __component: 'default.compo',
+          name: 'compo name',
+          description: 'short',
+        },
+      ],
+    };
+    const { body: createdProduct } = await rq({
+      method: 'POST',
+      url: '/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp',
+      body: product,
+    });
+
+    const res = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp/clone/${createdProduct.id}`,
+      body: {
+        publishedAt: new Date().toISOString(),
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toMatchObject(product);
+    // When cloning the new entry must be a draft
+    expect(res.body.publishedAt).toBeNull();
+  });
+
   describe('validation', () => {
     describe.each(['create', 'update'])('%p', (method) => {
       test(`Can ${method} product with compo - compo required - []`, async () => {

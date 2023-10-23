@@ -5,9 +5,11 @@
  */
 
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
 import Input from '../index';
 
 const messages = {};
@@ -34,6 +36,13 @@ describe('<Input />', () => {
     } = render(makeApp('test', 'text', 'test'));
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c1 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
       .c0 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
@@ -65,13 +74,6 @@ describe('<Input />', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
-      }
-
-      .c1 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
       }
 
       .c2 {
@@ -155,7 +157,7 @@ describe('<Input />', () => {
           >
             <label
               class="c1 c2"
-              for="1"
+              for=":r0:"
             >
               Enabled
             </label>
@@ -168,7 +170,7 @@ describe('<Input />', () => {
                 aria-label="test"
                 aria-required="false"
                 class="c5"
-                id="1"
+                id=":r0:"
                 name="test"
                 placeholder=""
                 type="text"
@@ -184,7 +186,9 @@ describe('<Input />', () => {
   it('should set the value correctly when the input\'s name is "noName"', () => {
     const { getByLabelText } = render(makeApp('noName', 'text', 'test'));
 
-    expect(getByLabelText('noName').value).toBe(`${strapi.backendURL}/api/connect/email/callback`);
+    expect(getByLabelText('noName').value).toBe(
+      `${window.strapi.backendURL}/api/connect/email/callback`
+    );
   });
 
   it('should display the toggleCheckbox correctly', () => {

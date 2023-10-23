@@ -1,5 +1,5 @@
-import getTrad from './getTrad';
 import getFolderURL from './getFolderURL';
+import getTrad from './getTrad';
 
 const getBreadcrumbDataML = (folder, { pathname, query }) => {
   let data = [
@@ -18,7 +18,10 @@ const getBreadcrumbDataML = (folder, { pathname, query }) => {
     data.push({
       id: folder.parent.id,
       label: folder.parent.name,
-      href: getFolderURL(pathname, query, folder.parent?.id),
+      href: getFolderURL(pathname, query, {
+        folder: folder.parent.id,
+        folderPath: folder.parent.path,
+      }),
     });
   }
 

@@ -1,8 +1,11 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { Box, Flex, Divider, Typography } from '@strapi/design-system';
+
+import { Box, Divider, Flex, Typography } from '@strapi/design-system';
 import { GenericInput } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
+
 import getTrad from '../../../utils/getTrad';
+
 import RelationTargetPicker from './RelationTargetPicker';
 
 const RelationFormBox = ({

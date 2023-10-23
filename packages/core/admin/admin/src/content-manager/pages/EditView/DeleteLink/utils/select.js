@@ -1,5 +1,5 @@
-import isEmpty from 'lodash/isEmpty';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
+import isEmpty from 'lodash/isEmpty';
 
 function useSelect() {
   const { hasDraftAndPublish, modifiedData } = useCMEditViewDataManager();

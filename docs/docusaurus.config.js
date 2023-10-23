@@ -67,22 +67,28 @@ const config = {
         },
         items: [
           {
-            type: 'doc',
+            type: 'docSidebar',
             position: 'left',
-            docId: 'index',
+            sidebarId: 'guides',
+            label: 'Guides',
+          },
+          {
+            type: 'docSidebar',
+            position: 'left',
+            sidebarId: 'docs',
             label: 'Docs',
           },
           {
             type: 'docSidebar',
             position: 'left',
             sidebarId: 'api',
-            label: 'API',
+            label: 'API Reference',
           },
           {
             type: 'docSidebar',
             position: 'left',
-            sidebarId: 'community',
-            label: 'Community',
+            sidebarId: 'rfcs',
+            label: 'RFCs',
           },
         ],
       },

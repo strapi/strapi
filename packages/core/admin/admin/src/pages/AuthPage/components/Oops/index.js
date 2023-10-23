@@ -1,12 +1,15 @@
 import React from 'react';
+
+import { Box, Flex, Main, Typography } from '@strapi/design-system';
+import { Link, useQuery } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { useQuery, Link } from '@strapi/helper-plugin';
-import { Box, Main, Flex, Typography } from '@strapi/design-system';
-import UnauthenticatedLayout, {
+
+import { Logo } from '../../../../components/UnauthenticatedLogo';
+import {
   Column,
   LayoutContent,
+  UnauthenticatedLayout,
 } from '../../../../layouts/UnauthenticatedLayout';
-import Logo from '../../../../components/UnauthenticatedLogo';
 
 const Oops = () => {
   const { formatMessage } = useIntl();

@@ -179,6 +179,11 @@ const createLocalizationRoute = (contentType) => {
 const addCreateLocalizationAction = (contentType) => {
   const { modelName, apiName } = contentType;
 
+  // in case we add i18N to a content type that is not in an api
+  if (!apiName) {
+    return;
+  }
+
   const localizationRoute = createLocalizationRoute(contentType);
 
   strapi.api[apiName].routes[modelName].routes.push(localizationRoute);

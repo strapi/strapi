@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
+
 import { ModalLayout } from '@strapi/design-system';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+
+import { AssetDefinition } from '../../constants';
+import { EditAssetDialog } from '../EditAssetDialog';
 
 import { AddAssetStep } from './AddAssetStep/AddAssetStep';
 import { PendingAssetStep } from './PendingAssetStep/PendingAssetStep';
-import { EditAssetDialog } from '../EditAssetDialog';
-import { AssetDefinition } from '../../constants';
 
 const Steps = {
   AddAsset: 'AddAsset',
@@ -132,6 +134,7 @@ UploadAssetDialog.defaultProps = {
   addUploadedFiles: undefined,
   folderId: null,
   initialAssetsToAdd: undefined,
+  onClose() {},
   trackedLocation: undefined,
   validateAssetsTypes: undefined,
 };
@@ -140,7 +143,7 @@ UploadAssetDialog.propTypes = {
   addUploadedFiles: PropTypes.func,
   folderId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   initialAssetsToAdd: PropTypes.arrayOf(AssetDefinition),
-  onClose: PropTypes.func.isRequired,
+  onClose: PropTypes.func,
   trackedLocation: PropTypes.string,
   validateAssetsTypes: PropTypes.func,
 };

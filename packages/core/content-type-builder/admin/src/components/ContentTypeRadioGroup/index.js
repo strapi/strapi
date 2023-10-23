@@ -1,6 +1,8 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+
 import { useNotification } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
+
 import { getTrad } from '../../utils';
 import CustomRadioGroup from '../CustomRadioGroup';
 

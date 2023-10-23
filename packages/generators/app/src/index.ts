@@ -14,13 +14,13 @@ import type { Scope, NewOptions } from './types';
 
 export { default as checkInstallPath } from './utils/check-install-path';
 
-sentry.init({
-  dsn: 'https://841d2b2c9b4d4b43a4cde92794cb705a@sentry.io/1762059',
-});
-
 const packageJson = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf8'));
 
 export const generateNewApp = (projectDirectory: string, options: Partial<NewOptions>) => {
+  sentry.init({
+    dsn: 'https://841d2b2c9b4d4b43a4cde92794cb705a@sentry.io/1762059',
+  });
+
   checkRequirements();
 
   const rootPath = resolve(projectDirectory);

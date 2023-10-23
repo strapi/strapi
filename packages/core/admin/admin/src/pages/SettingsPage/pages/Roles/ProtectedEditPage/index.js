@@ -1,21 +1,22 @@
-import React, { useMemo } from 'react';
-import { useRBAC, LoadingIndicatorPage } from '@strapi/helper-plugin';
+import React from 'react';
+
+import { LoadingIndicatorPage, useRBAC } from '@strapi/helper-plugin';
+import { useSelector } from 'react-redux';
 import { Redirect } from 'react-router-dom';
-import adminPermissions from '../../../../../permissions';
+
+import { selectAdminPermissions } from '../../../../App/selectors';
 import EditPage from '../EditPage';
 
 const ProtectedEditPage = () => {
-  const permissions = useMemo(() => {
-    return {
-      read: adminPermissions.settings.roles.read,
-      update: adminPermissions.settings.roles.update,
-    };
-  }, []);
+  const permissions = useSelector(selectAdminPermissions);
 
   const {
     isLoading,
     allowedActions: { canRead, canUpdate },
-  } = useRBAC(permissions);
+  } = useRBAC({
+    read: permissions.settings.roles.read,
+    update: permissions.settings.roles.update,
+  });
 
   if (isLoading) {
     return <LoadingIndicatorPage />;

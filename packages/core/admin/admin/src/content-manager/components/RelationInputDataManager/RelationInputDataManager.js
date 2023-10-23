@@ -1,30 +1,30 @@
 /* eslint-disable no-nested-ternary */
-import PropTypes from 'prop-types';
 import React, { memo, useMemo, useState } from 'react';
-import { useIntl } from 'react-intl';
+
+import { NotAllowedInput, useCMEditViewDataManager } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import pick from 'lodash/pick';
-
-import { useCMEditViewDataManager, NotAllowedInput } from '@strapi/helper-plugin';
-
-import { RelationInput } from '../RelationInput';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 
 import { useRelation } from '../../hooks/useRelation';
-
 import { getTrad } from '../../utils';
+import { getInitialDataPathUsingTempKeys } from '../../utils/paths';
+import { RelationInput } from '../RelationInput';
 
 import { PUBLICATION_STATES, RELATIONS_TO_DISPLAY, SEARCH_RESULTS_TO_DISPLAY } from './constants';
-import { connect, select, normalizeSearchResults, diffRelations, normalizeRelation } from './utils';
-import { getInitialDataPathUsingTempKeys } from '../../utils/paths';
+import { connect, diffRelations, normalizeRelation, normalizeSearchResults, select } from './utils';
 
 export const RelationInputDataManager = ({
   error,
+  entityId,
   componentId,
   isComponentRelation,
   editable,
   description,
   intlLabel,
   isCreatingEntry,
+  isCloningEntry,
   isFieldAllowed,
   isFieldReadable,
   labelAction,
@@ -88,11 +88,12 @@ export const RelationInputDataManager = ({
         pageParams: {
           ...defaultParams,
           // eslint-disable-next-line no-nested-ternary
-          entityId: isCreatingEntry
-            ? undefined
-            : isComponentRelation
-            ? componentId
-            : initialData.id,
+          entityId:
+            isCreatingEntry || isCloningEntry
+              ? undefined
+              : isComponentRelation
+              ? componentId
+              : entityId,
           pageSize: SEARCH_RESULTS_TO_DISPLAY,
         },
       },
@@ -302,7 +303,7 @@ export const RelationInputDataManager = ({
       })} ${totalRelations > 0 ? `(${totalRelations})` : ''}`}
       labelAction={labelAction}
       labelLoadMore={
-        !isCreatingEntry
+        !isCreatingEntry || isCloningEntry
           ? formatMessage({
               id: getTrad('relation.loadMore'),
               defaultMessage: 'Load More',
@@ -374,6 +375,7 @@ export const RelationInputDataManager = ({
 
 RelationInputDataManager.defaultProps = {
   componentId: undefined,
+  entityId: undefined,
   editable: true,
   error: undefined,
   description: '',
@@ -386,6 +388,7 @@ RelationInputDataManager.defaultProps = {
 
 RelationInputDataManager.propTypes = {
   componentId: PropTypes.number,
+  entityId: PropTypes.number,
   editable: PropTypes.bool,
   error: PropTypes.string,
   description: PropTypes.string,
@@ -395,6 +398,7 @@ RelationInputDataManager.propTypes = {
     values: PropTypes.object,
   }).isRequired,
   labelAction: PropTypes.element,
+  isCloningEntry: PropTypes.bool.isRequired,
   isCreatingEntry: PropTypes.bool.isRequired,
   isComponentRelation: PropTypes.bool,
   isFieldAllowed: PropTypes.bool,

@@ -5,12 +5,13 @@
 
 import produce from 'immer';
 import get from 'lodash/get';
+
 import {
   GET_DATA,
   GET_DATA_SUCCEEDED,
-  RESET_PROPS,
   ON_CHANGE_LIST_HEADERS,
   ON_RESET_LIST_HEADERS,
+  RESET_PROPS,
   SET_LIST_LAYOUT,
 } from './constants';
 

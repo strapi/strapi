@@ -5,9 +5,10 @@
  */
 
 import React from 'react';
-import { useIntl } from 'react-intl';
-import { Box, Flex, Select, Option, Typography } from '@strapi/design-system';
+
+import { Box, Flex, Option, Select, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 
 const PageSize = ({ onChangePageSize, pageSize }) => {
   const { formatMessage } = useIntl();

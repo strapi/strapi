@@ -1,30 +1,26 @@
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { TrackingProvider } from '@strapi/helper-plugin';
 
-import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
+import { screen, within } from '@testing-library/react';
+import { render as renderRTL, waitFor } from '@tests/utils';
+import { Route } from 'react-router-dom';
 
-import MarketPlacePage from '../index';
-import server from './server';
+import { MarketPlacePage } from '../index';
 
 // Increase the jest timeout to accommodate long running tests
 jest.setTimeout(50000);
-const toggleNotification = jest.fn();
-jest.mock('../../../hooks/useNavigatorOnLine', () => jest.fn(() => true));
-jest.mock('../../../hooks/useDebounce', () => (value) => value);
+
+/**
+ * MOCKS
+ */
+jest.mock('../../../hooks/useDebounce', () => ({
+  useDebounce: jest.fn((value) => value),
+}));
+jest.mock('../hooks/useNavigatorOnline');
+/**
+ * TODO: remove this mock.
+ */
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn(() => {
-    return toggleNotification;
-  }),
-  pxToRem: jest.fn(),
-  CheckPagePermissions: ({ children }) => children,
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useAppInfo: jest.fn(() => ({
     autoReload: true,
     dependencies: {
@@ -35,60 +31,45 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-const user = userEvent.setup();
+let testLocation = null;
 
-const client = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
+const render = (props) =>
+  renderRTL(<MarketPlacePage {...props} />, {
+    renderOptions: {
+      wrapper({ children }) {
+        return (
+          <>
+            {children}
+            <Route
+              path="*"
+              render={({ location }) => {
+                testLocation = location;
+
+                return null;
+              }}
+            />
+          </>
+        );
+      },
     },
-  },
-});
+    initialEntries: ['/?npmPackageType=provider&sort=name:asc'],
+  });
 
 const waitForReload = async () => {
-  await screen.findByTestId('marketplace-results');
+  await waitFor(() => expect(screen.queryByText('Loading content...')).not.toBeInTheDocument());
 };
 
 describe('Marketplace page - providers tab', () => {
-  let history;
-
-  beforeAll(() => server.listen());
-
-  afterEach(() => {
-    server.resetHandlers();
-    // Clear the cache to isolate each test
-    client.clear();
-  });
-
-  afterAll(() => server.close());
-
-  beforeEach(async () => {
-    history = createMemoryHistory({ initialEntries: ['/?npmPackageType=provider&sort=name:asc'] });
-
-    // Make sure each test isolated
-    render(
-      <QueryClientProvider client={client}>
-        <TrackingProvider>
-          <IntlProvider locale="en" messages={{}} textComponent="span">
-            <ThemeProvider theme={lightTheme}>
-              <Router history={history}>
-                <MarketPlacePage />
-              </Router>
-            </ThemeProvider>
-          </IntlProvider>
-        </TrackingProvider>
-      </QueryClientProvider>
-    );
+  it('renders the providers tab', async () => {
+    const { getByText, getByRole, queryByText } = render();
 
     await waitForReload();
-  });
 
-  it('renders the providers tab', async () => {
-    const providersTab = screen.getByText(/providers/i).closest('button');
-    const tabPanel = screen.getByRole('tabpanel');
+    const providersTab = getByText(/providers/i).closest('button');
+    const tabPanel = getByRole('tabpanel');
     const providerCardText = within(tabPanel).getByText('Cloudinary');
     const pluginCardText = within(tabPanel).queryByText('Comments');
-    const submitProviderText = screen.queryByText('Submit provider');
+    const submitProviderText = queryByText('Submit provider');
 
     expect(providersTab).toBeDefined();
     expect(providersTab).toHaveAttribute('aria-selected', 'true');
@@ -98,12 +79,18 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('should return providers search results matching the query', async () => {
-    const input = screen.getByPlaceholderText('Search');
-    await user.type(input, 'cloudina');
+    const { getByText, getByPlaceholderText, user, queryByText } = render();
+
     await waitForReload();
-    const match = screen.getByText('Cloudinary');
-    const notMatch = screen.queryByText('Mailgun');
-    const plugin = screen.queryByText('Comments');
+
+    const input = getByPlaceholderText('Search');
+    await user.type(input, 'cloudina');
+
+    await waitForReload();
+
+    const match = getByText('Cloudinary');
+    const notMatch = queryByText('Mailgun');
+    const plugin = queryByText('Comments');
 
     expect(match).toBeVisible();
     expect(notMatch).toEqual(null);
@@ -111,19 +98,26 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('should return empty providers search results given a bad query', async () => {
-    const input = screen.getByPlaceholderText('Search');
+    const { getByText, getByPlaceholderText, user } = render();
+
+    await waitForReload();
+
+    const input = getByPlaceholderText('Search');
     const badQuery = 'asdf';
     await user.type(input, badQuery);
     await waitForReload();
-    const noResult = screen.getByText(`No result for "${badQuery}"`);
+    const noResult = getByText(`No result for "${badQuery}"`);
 
     expect(noResult).toBeVisible();
   });
 
   it('shows the installed text for installed providers', async () => {
-    const user = userEvent.setup();
+    const { getByRole, user } = render();
+
+    await waitForReload();
+
     // Open providers tab
-    const providersTab = screen.getByRole('tab', { name: /providers/i });
+    const providersTab = getByRole('tab', { name: /providers/i });
     await user.click(providersTab);
 
     // Provider that's already installed
@@ -142,152 +136,186 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('shows providers filters popover', async () => {
-    const filtersButton = screen.getByTestId('filters-button');
+    const { getByRole, user } = render();
+
+    await waitForReload();
+
+    const filtersButton = getByRole('button', { name: 'Filters' });
 
     // Only show collections filters on providers
-    const providersTab = screen.getByRole('tab', { name: /providers/i });
+    const providersTab = getByRole('tab', { name: /providers/i });
     await user.click(providersTab);
     await user.click(filtersButton);
-    screen.getByLabelText(/no collections selected/i);
+
+    expect(getByRole('combobox', { name: 'Collections' })).toBeVisible();
   });
 
   it('shows the collections filter options', async () => {
-    const filtersButton = screen.getByTestId('filters-button');
+    const { getByRole, user } = render();
+
+    await waitForReload();
+
+    const filtersButton = getByRole('button', { name: 'Filters' });
     await user.click(filtersButton);
 
-    const collectionsButton = screen.getByTestId('Collections-button');
+    const collectionsButton = getByRole('combobox', { name: 'Collections' });
     await user.click(collectionsButton);
 
-    const mockedServerCollections = {
-      'Made by official partners': 0,
-      'Made by Strapi': 6,
-      'Made by the community': 2,
-      Verified: 6,
-    };
-
-    Object.entries(mockedServerCollections).forEach(([collectionName, count]) => {
-      const option = screen.getByTestId(`${collectionName}-${count}`);
-      expect(option).toBeVisible();
+    [
+      'Made by official partners (0)',
+      'Made by Strapi (6)',
+      'Made by the community (2)',
+      'Verified (6)',
+    ].forEach((name) => {
+      expect(getByRole('option', { name })).toBeVisible();
     });
   });
 
   it('filters a collection option', async () => {
-    const filtersButton = screen.getByTestId('filters-button');
-    await user.click(filtersButton);
+    const { getAllByTestId, getByRole, getByText, queryByText, user } = render();
 
-    const collectionsButton = screen.getByTestId('Collections-button');
-    await user.click(collectionsButton);
-
-    const option = screen.getByTestId('Made by Strapi-6');
-    await user.click(option);
     await waitForReload();
 
-    const optionTag = screen.getByRole('button', { name: 'Made by Strapi' });
-    expect(optionTag).toBeVisible();
+    await user.click(getByRole('button', { name: 'Filters' }));
+    await user.click(getByRole('combobox', { name: 'Collections' }));
+    await user.click(getByRole('option', { name: 'Made by Strapi (6)' }));
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
+    await user.keyboard('[Escape]');
 
-    const collectionCards = screen.getAllByTestId('npm-package-card');
+    await waitForReload();
+
+    expect(getByRole('button', { name: 'Made by Strapi' })).toBeVisible();
+
+    const collectionCards = getAllByTestId('npm-package-card');
     expect(collectionCards.length).toEqual(2);
 
-    const collectionPlugin = screen.getByText('Amazon SES');
-    const notCollectionPlugin = screen.queryByText('Cloudinary');
+    const collectionPlugin = getByText('Amazon SES');
+    const notCollectionPlugin = queryByText('Cloudinary');
     expect(collectionPlugin).toBeVisible();
     expect(notCollectionPlugin).toEqual(null);
   });
 
   it('filters multiple collection options', async () => {
-    await user.click(screen.getByTestId('filters-button'));
-    await user.click(screen.getByTestId('Collections-button'));
-    await user.click(screen.getByTestId('Made by Strapi-6'));
+    const { getAllByTestId, getByRole, getByText, queryByText, user } = render();
 
     await waitForReload();
 
-    await user.click(
-      screen.getByRole('combobox', { name: `Collections 1 collection selected Made by Strapi` })
-    );
-    await user.click(screen.getByRole('option', { name: `Verified (6)` }));
+    await user.click(getByRole('button', { name: 'Filters' }));
+    await user.click(getByRole('combobox', { name: 'Collections' }));
+    await user.click(getByRole('option', { name: 'Made by Strapi (6)' }));
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
+    await user.keyboard('[Escape]');
+
     await waitForReload();
 
-    const madeByStrapiTag = screen.getByRole('button', { name: 'Made by Strapi' });
-    const verifiedTag = screen.getByRole('button', { name: 'Verified' });
+    await user.click(getByRole('button', { name: 'Filters' }));
+    await user.click(getByRole('combobox', { name: `Collections` }));
+    await user.click(getByRole('option', { name: `Verified (6)` }));
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
+    await user.keyboard('[Escape]');
+    await waitForReload();
+
+    const madeByStrapiTag = getByRole('button', { name: 'Made by Strapi' });
+    const verifiedTag = getByRole('button', { name: 'Verified' });
     expect(madeByStrapiTag).toBeVisible();
     expect(verifiedTag).toBeVisible();
-    expect(screen.getAllByTestId('npm-package-card').length).toEqual(3);
-    expect(screen.getByText('Amazon SES')).toBeVisible();
-    expect(screen.getByText('Nodemailer')).toBeVisible();
-    expect(screen.queryByText('Cloudinary')).toEqual(null);
+    expect(getAllByTestId('npm-package-card').length).toEqual(3);
+    expect(getByText('Amazon SES')).toBeVisible();
+    expect(getByText('Nodemailer')).toBeVisible();
+    expect(queryByText('Cloudinary')).toEqual(null);
   });
 
   it('removes a filter option tag', async () => {
-    const filtersButton = screen.getByTestId('filters-button');
-    await user.click(filtersButton);
+    const { getByRole, user } = render();
 
-    const collectionsButton = screen.getByTestId('Collections-button');
-    await user.click(collectionsButton);
-
-    const option = screen.getByTestId('Made by Strapi-6');
-    await user.click(option);
     await waitForReload();
 
-    const optionTag = screen.getByRole('button', { name: 'Made by Strapi' });
-    expect(optionTag).toBeVisible();
+    await user.click(getByRole('button', { name: 'Filters' }));
+    await user.click(getByRole('combobox', { name: 'Collections' }));
 
-    await user.click(optionTag);
+    await user.click(getByRole('option', { name: 'Made by Strapi (6)' }));
 
-    expect(optionTag).not.toBeVisible();
-    expect(history.location.search).toBe('?npmPackageType=provider&sort=name:asc&page=1');
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
+    await user.keyboard('[Escape]');
+
+    await waitForReload();
+
+    await user.click(getByRole('button', { name: 'Made by Strapi' }));
+
+    await waitForReload();
+    expect(testLocation.search).toBe('?npmPackageType=provider&sort=name:asc&page=1');
   });
 
   it('only filters in the providers tab', async () => {
-    const filtersButton = screen.getByTestId('filters-button');
-    await user.click(filtersButton);
+    const { getAllByTestId, getByRole, findAllByTestId, findByText, user } = render();
 
-    const collectionsButton = screen.getByTestId('Collections-button');
-    await user.click(collectionsButton);
+    await waitForReload();
 
-    const option = screen.getByTestId('Made by Strapi-6');
-    await user.click(option);
+    await user.click(getByRole('button', { name: 'Filters' }));
+    await user.click(getByRole('combobox', { name: 'Collections' }));
+    await user.click(getByRole('option', { name: 'Made by Strapi (6)' }));
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
+    await user.keyboard('[Escape]');
 
-    const collectionCards = await screen.findAllByTestId('npm-package-card');
+    const collectionCards = await findAllByTestId('npm-package-card');
     expect(collectionCards.length).toBe(2);
 
-    await user.click((await screen.findByText(/plugins/i)).closest('button'));
+    await user.click((await findByText(/plugins/i)).closest('button'));
 
-    const pluginCards = screen.getAllByTestId('npm-package-card');
+    const pluginCards = getAllByTestId('npm-package-card');
     expect(pluginCards.length).toBe(5);
 
-    await user.click((await screen.findByText(/providers/i)).closest('button'));
+    await user.click((await findByText(/providers/i)).closest('button'));
     expect(collectionCards.length).toBe(2);
   });
 
   it('shows the correct options on sort select', async () => {
-    const user = userEvent.setup();
-    const sortButton = screen.getByRole('combobox', { name: /Sort by/i });
+    const { getByRole, user } = render();
+
+    await waitForReload();
+
+    const sortButton = getByRole('combobox', { name: /Sort by/i });
     await user.click(sortButton);
 
-    const alphabeticalOption = screen.getByText('Alphabetical order').closest('li');
-    const newestOption = screen.getByText('Newest').closest('li');
+    const alphabeticalOption = getByRole('option', { name: 'Alphabetical order' });
+    const newestOption = getByRole('option', { name: 'Newest' });
 
     expect(alphabeticalOption).toBeVisible();
     expect(newestOption).toBeVisible();
   });
 
   it('changes the url on sort option select', async () => {
-    const user = userEvent.setup();
-    const sortButton = screen.getByRole('combobox', { name: /Sort by/i });
+    const { getByRole, user } = render();
+
+    await waitForReload();
+
+    const sortButton = getByRole('combobox', { name: /Sort by/i });
     await user.click(sortButton);
 
-    const newestOption = screen.getByText('Newest').closest('li');
+    const newestOption = getByRole('option', { name: 'Newest' });
     await user.click(newestOption);
 
-    expect(history.location.search).toEqual(
-      '?npmPackageType=provider&sort=submissionDate:desc&page=1'
-    );
+    await waitForReload();
+
+    expect(testLocation.search).toEqual('?npmPackageType=provider&sort=submissionDate:desc&page=1');
   });
 
   it('shows github stars and weekly downloads count for each provider', async () => {
-    const user = userEvent.setup();
-    const providersTab = screen.getByRole('tab', { name: /providers/i });
-    await user.click(providersTab);
+    const { getByRole, user } = render();
+
+    await waitForReload();
+
+    await user.click(getByRole('tab', { name: /providers/i }));
 
     const cloudinaryCard = screen
       .getAllByTestId('npm-package-card')
@@ -305,31 +333,32 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('paginates the results', async () => {
+    const { getByText, getByLabelText, getAllByText, user } = render();
+
+    await waitForReload();
+
     // Should have pagination section with 4 pages
-    const pagination = screen.getByLabelText(/pagination/i);
+    const pagination = getByLabelText(/pagination/i);
     expect(pagination).toBeVisible();
-    const pageButtons = screen.getAllByText(/go to page \d+/i).map((el) => el.closest('a'));
+    const pageButtons = getAllByText(/go to page \d+/i).map((el) => el.closest('a'));
     expect(pageButtons.length).toBe(4);
 
     // Can't go to previous page since there isn't one
-    expect(screen.getByText(/go to previous page/i).closest('a')).toHaveAttribute(
-      'aria-disabled',
-      'true'
-    );
+    expect(getByText(/go to previous page/i).closest('a')).toHaveAttribute('aria-disabled', 'true');
 
     // Can go to next page
-    await user.click(screen.getByText(/go to next page/i).closest('a'));
+    await user.click(getByText(/go to next page/i).closest('a'));
     await waitForReload();
-    expect(history.location.search).toBe('?npmPackageType=provider&sort=name:asc&page=2');
+    expect(testLocation.search).toBe('?npmPackageType=provider&sort=name:asc&page=2');
 
     // Can go to previous page
-    await user.click(screen.getByText(/go to previous page/i).closest('a'));
+    await user.click(getByText(/go to previous page/i).closest('a'));
     await waitForReload();
-    expect(history.location.search).toBe('?npmPackageType=provider&sort=name:asc&page=1');
+    expect(testLocation.search).toBe('?npmPackageType=provider&sort=name:asc&page=1');
 
     // Can go to specific page
-    await user.click(screen.getByText(/go to page 3/i).closest('a'));
+    await user.click(getByText(/go to page 3/i).closest('a'));
     await waitForReload();
-    expect(history.location.search).toBe('?npmPackageType=provider&sort=name:asc&page=3');
+    expect(testLocation.search).toBe('?npmPackageType=provider&sort=name:asc&page=3');
   });
 });

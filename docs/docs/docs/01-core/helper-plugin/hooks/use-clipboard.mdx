@@ -1,0 +1,37 @@
+---
+title: useClipboard
+description: API reference for the useClipboard hook in Strapi
+tags:
+  - hooks
+  - helper-plugin
+---
+
+A small abstraction around the [`navigation.clipboard`](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard) API.
+Currently we only expose a `copy` method which abstracts the `writeText` method of the clipboard API.
+
+## Usage
+
+```jsx
+import { useClipboard } from '@strapi/helper-plugin';
+
+const MyComponent = () => {
+  const { copy } = useClipboard();
+  const handleClick = async () => {
+    const didCopy = await copy('hello world');
+
+    if (didCopy) {
+      alert('copied!');
+    }
+  };
+
+  return <button onClick={handleClick}>Copy text</button>;
+};
+```
+
+## Typescript
+
+```ts
+function useClipboard(): {
+  copy: (text: string) => Promise<boolean>;
+};
+```

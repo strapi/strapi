@@ -1,12 +1,14 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { Typography, Box, Flex, Icon } from '@strapi/design-system';
+
+import { Box, Flex, Icon, Typography } from '@strapi/design-system';
 import { EmptyDocuments } from '@strapi/icons';
+import PropTypes from 'prop-types';
+
 import { EmptyNpmPackageGrid } from './EmptyNpmPackageGrid';
 
 const EmptyNpmPackageSearch = ({ content }) => {
   return (
-    <Box position="relative" data-testid="marketplace-results">
+    <Box position="relative">
       <EmptyNpmPackageGrid />
       <Box position="absolute" top={11} width="100%">
         <Flex alignItems="center" justifyContent="center" direction="column">

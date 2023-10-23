@@ -5,17 +5,14 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { fireEvent, render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
 import SearchAsset from '../index';
 
 const handleChange = jest.fn();
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
-}));
 
 const makeApp = (queryValue) => (
   <ThemeProvider theme={lightTheme}>
@@ -30,14 +27,24 @@ describe('<SearchURLQuery />', () => {
     const { container } = render(makeApp(null));
 
     expect(container).toMatchInlineSnapshot(`
+      .c4 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
       .c0 {
         background: #ffffff;
         padding: 8px;
         border-radius: 4px;
         border-color: #dcdce4;
         border: 1px solid #dcdce4;
-        width: 2rem;
-        height: 2rem;
         cursor: pointer;
       }
 
@@ -64,13 +71,13 @@ describe('<SearchURLQuery />', () => {
         outline: none;
       }
 
-      .c2 svg {
+      .c2 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c2 svg > g,
-      .c2 svg path {
+      .c2 > svg > g,
+      .c2 > svg path {
         fill: #ffffff;
       }
 
@@ -108,31 +115,22 @@ describe('<SearchURLQuery />', () => {
         border: 2px solid #4945ff;
       }
 
-      .c4 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
+      .c3 {
+        border-color: #dcdce4;
+        height: 2rem;
+        width: 2rem;
       }
 
-      .c3 svg > g,
+      .c3 svg g,
       .c3 svg path {
         fill: #8e8ea9;
       }
 
-      .c3:hover svg > g,
-      .c3:hover svg path {
+      .c3:hover svg g,
+      .c3:focus svg g,
+      .c3:hover svg path,
+      .c3:focus svg path {
         fill: #666687;
-      }
-
-      .c3:active svg > g,
-      .c3:active svg path {
-        fill: #a5a5ba;
       }
 
       .c3[aria-disabled='true'] svg path {
@@ -143,7 +141,7 @@ describe('<SearchURLQuery />', () => {
         <span>
           <button
             aria-disabled="false"
-            aria-labelledby="0"
+            aria-labelledby=":r0:"
             class="c0 c1 c2 c3"
             tabindex="0"
             type="button"

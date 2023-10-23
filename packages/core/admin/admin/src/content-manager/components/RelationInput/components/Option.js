@@ -1,11 +1,10 @@
 import React from 'react';
-import styled from 'styled-components';
-import { components } from 'react-select';
-import { useIntl } from 'react-intl';
-import PropTypes from 'prop-types';
 
+import { Flex, Typography, ComboboxOption } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
-import { Flex, Typography } from '@strapi/design-system';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 import { getTrad } from '../../../utils';
 
@@ -19,10 +18,9 @@ const StyledBullet = styled.div`
   border-radius: 50%;
 `;
 
-export const Option = (props) => {
+export const Option = ({ publicationState, mainField, id }) => {
   const { formatMessage } = useIntl();
-  const Component = components.Option;
-  const { publicationState, mainField, id } = props.data;
+  const stringifiedDisplayValue = (mainField ?? id).toString();
 
   if (publicationState) {
     const isDraft = publicationState === 'draft';
@@ -37,24 +35,29 @@ export const Option = (props) => {
     const title = isDraft ? formatMessage(draftMessage) : formatMessage(publishedMessage);
 
     return (
-      <Component {...props}>
+      <ComboboxOption value={id} textValue={stringifiedDisplayValue}>
         <Flex>
           <StyledBullet title={title} isDraft={isDraft} />
-          <Typography ellipsis>{mainField ?? id}</Typography>
+          <Typography ellipsis>{stringifiedDisplayValue}</Typography>
         </Flex>
-      </Component>
+      </ComboboxOption>
     );
   }
 
-  return <Component {...props}>{mainField ?? id}</Component>;
+  return (
+    <ComboboxOption value={id} textValue={stringifiedDisplayValue}>
+      {stringifiedDisplayValue}
+    </ComboboxOption>
+  );
+};
+
+Option.defaultProps = {
+  mainField: undefined,
+  publicationState: undefined,
 };
 
 Option.propTypes = {
-  isFocused: PropTypes.bool.isRequired,
-  data: PropTypes.shape({
-    id: PropTypes.number.isRequired,
-    isDraft: PropTypes.bool,
-    mainField: PropTypes.string,
-    publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
-  }).isRequired,
+  id: PropTypes.number.isRequired,
+  mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
 };

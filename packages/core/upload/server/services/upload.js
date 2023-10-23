@@ -17,14 +17,14 @@ const {
   sanitize,
   nameToSlug,
   contentTypes: contentTypesUtils,
-  webhook: webhookUtils,
   errors: { ApplicationError, NotFoundError },
   file: { bytesToKbytes },
 } = require('@strapi/utils');
 
-const { MEDIA_UPDATE, MEDIA_CREATE, MEDIA_DELETE } = webhookUtils.webhookEvents;
-
-const { FILE_MODEL_UID } = require('../constants');
+const {
+  FILE_MODEL_UID,
+  ALLOWED_WEBHOOK_EVENTS: { MEDIA_CREATE, MEDIA_UPDATE, MEDIA_DELETE },
+} = require('../constants');
 const { getService } = require('../utils');
 
 const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;

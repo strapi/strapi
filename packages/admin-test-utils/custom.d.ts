@@ -10,6 +10,10 @@ declare global {
         isEnabled: (featureName?: string) => boolean;
       };
       projectType: string;
+      telemetryDisabled: boolean;
+      flags: {
+        nps: boolean;
+      };
     };
   }
 }

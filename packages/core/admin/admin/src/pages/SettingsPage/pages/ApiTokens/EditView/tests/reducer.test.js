@@ -1,6 +1,6 @@
+import init from '../init';
 import reducer from '../reducer';
 import { data } from '../utils/tests/dataMock';
-import init from '../init';
 
 describe('ADMIN | Pages | API TOKENS | EditView | reducer', () => {
   const initialState = init({}, data.data);

@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
-import { useIntl } from 'react-intl';
-import PropTypes from 'prop-types';
-import { Button, Main, EmptyStateLayout, ContentLayout, HeaderLayout } from '@strapi/design-system';
+
+import { Button, ContentLayout, EmptyStateLayout, HeaderLayout, Main } from '@strapi/design-system';
 import { useFocusWhenNavigate } from '@strapi/helper-plugin';
-import { Plus, EmptyDocuments } from '@strapi/icons';
+import { EmptyDocuments, Plus } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+
 import useLocales from '../../hooks/useLocales';
 import { getTrad } from '../../utils';
-import ModalEdit from '../ModalEdit';
-import ModalDelete from '../ModalDelete';
 import ModalCreate from '../ModalCreate';
+import ModalDelete from '../ModalDelete';
+import ModalEdit from '../ModalEdit';
+
 import LocaleTable from './LocaleTable';
 
 const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal, isCreating }) => {

@@ -1,34 +1,32 @@
 /* eslint-disable import/no-cycle */
 import React, { memo, useEffect, useRef } from 'react';
-import PropTypes from 'prop-types';
-import { getEmptyImage } from 'react-dnd-html5-backend';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
-import toString from 'lodash/toString';
-import get from 'lodash/get';
 
-import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import {
   Accordion,
-  AccordionToggle,
   AccordionContent,
+  AccordionToggle,
+  Box,
+  Flex,
   Grid,
   GridItem,
-  Flex,
-  Box,
   IconButton,
 } from '@strapi/design-system';
-import { Trash, Drag } from '@strapi/icons';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
+import { Drag, Trash } from '@strapi/icons';
+import get from 'lodash/get';
+import toString from 'lodash/toString';
+import PropTypes from 'prop-types';
+import { getEmptyImage } from 'react-dnd-html5-backend';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 import { useDragAndDrop } from '../../../hooks/useDragAndDrop';
-
+import useLazyComponents from '../../../hooks/useLazyComponents';
 import { composeRefs, getTrad, ItemTypes } from '../../../utils';
-
-import Inputs from '../../Inputs';
 import FieldComponent from '../../FieldComponent';
+import Inputs from '../../Inputs';
 
 import Preview from './Preview';
-import useLazyComponents from '../../../hooks/useLazyComponents';
 
 const CustomIconButton = styled(IconButton)`
   background-color: transparent;

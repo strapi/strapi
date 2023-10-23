@@ -26,8 +26,23 @@ const {
  * @property {string} subject - The subject on which the permission should applies
  */
 
-const permissionFields = ['id', 'action', 'subject', 'properties', 'conditions', 'role'];
-const sanitizedPermissionFields = ['id', 'action', 'subject', 'properties', 'conditions'];
+const permissionFields = [
+  'id',
+  'action',
+  'actionParameters',
+  'subject',
+  'properties',
+  'conditions',
+  'role',
+];
+const sanitizedPermissionFields = [
+  'id',
+  'action',
+  'actionParameters',
+  'subject',
+  'properties',
+  'conditions',
+];
 
 const sanitizePermissionFields = pick(sanitizedPermissionFields);
 
@@ -36,6 +51,7 @@ const sanitizePermissionFields = pick(sanitizedPermissionFields);
  * @return {Permission}
  */
 const getDefaultPermission = () => ({
+  actionParameters: {},
   conditions: [],
   properties: {},
   subject: null,

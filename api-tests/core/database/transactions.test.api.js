@@ -225,6 +225,27 @@ describe('transactions', () => {
 
       expect(end[0].key).toEqual(original[0].key);
     });
+
+    test('onCommit hook works', async () => {
+      let count = 0;
+      await strapi.db.transaction(({ onCommit, onRollback }) => {
+        onCommit(() => count++);
+      });
+      expect(count).toEqual(1);
+    });
+
+    test('onRollback hook works', async () => {
+      let count = 0;
+      try {
+        await strapi.db.transaction(({ onRollback }) => {
+          onRollback(() => count++);
+          throw new Error('test');
+        });
+      } catch (e) {
+        // do nothing
+      }
+      expect(count).toEqual(1);
+    });
   });
 
   describe('using a transaction object', () => {
@@ -263,7 +284,7 @@ describe('transactions', () => {
         .where({ id: 1 })
         .execute();
 
-      expect(end[0].key).toEqual('strapi_content_types_schema');
+      expect(end[0].key).toEqual(original[0].key);
     });
 
     test('rollback successfully', async () => {
@@ -302,7 +323,7 @@ describe('transactions', () => {
         .where({ id: 1 })
         .execute();
 
-      expect(end[0].key).toEqual('strapi_content_types_schema');
+      expect(end[0].key).toEqual(original[0].key);
     });
   });
 });

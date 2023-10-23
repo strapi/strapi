@@ -1,11 +1,10 @@
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { QueryClientProvider, QueryClient } from 'react-query';
-import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { useAppInfo, useRBAC, TrackingProvider } from '@strapi/helper-plugin';
+
+import { useAppInfo, useRBAC } from '@strapi/helper-plugin';
+import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
+import { render, waitFor } from '@tests/utils';
+
 import ApplicationInfosPage from '../index';
-import server from './server';
 
 const updateProjectSettingsSpy = jest.fn();
 
@@ -14,25 +13,11 @@ jest.mock('@strapi/helper-plugin', () => ({
   // eslint-disable-next-line
   CheckPermissions: ({ children }) => <div>{children}</div>,
   useAppInfo: jest.fn(() => ({ shouldUpdateStrapi: false, latestStrapiReleaseTag: 'v3.6.8' })),
-  useNotification: jest.fn(() => jest.fn()),
   useRBAC: jest.fn(() => ({ allowedActions: { canRead: true, canUpdate: true } })),
-  useFetchClient: jest.fn().mockReturnValue({
-    get: jest.fn().mockResolvedValue({
-      data: {
-        menuLogo: {
-          ext: 'png',
-          height: 256,
-          name: 'image.png',
-          size: 27.4,
-          url: 'uploads/image_fe95c5abb9.png',
-          width: 246,
-        },
-      },
-    }),
-  }),
 }));
-jest.mock('../../../../../hooks', () => ({
-  useConfigurations: jest.fn(() => ({
+
+jest.mock('../../../../../hooks/useConfiguration', () => ({
+  useConfiguration: jest.fn(() => ({
     logos: {
       menu: { custom: 'customMenuLogo.png', default: 'defaultMenuLogo.png' },
       auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
@@ -40,98 +25,79 @@ jest.mock('../../../../../hooks', () => ({
     updateProjectSettings: updateProjectSettingsSpy,
   })),
 }));
-jest.mock(
-  'ee_else_ce/pages/SettingsPage/pages/ApplicationInfosPage/components/AdminSeatInfo',
-  () => () => {
-    return <></>;
-  }
-);
-
-const client = new QueryClient();
-
-const App = (
-  <QueryClientProvider client={client}>
-    <TrackingProvider>
-      <ThemeProvider theme={lightTheme}>
-        <IntlProvider locale="en" messages={{}} textComponent="span">
-          <ApplicationInfosPage />
-        </IntlProvider>
-      </ThemeProvider>
-    </TrackingProvider>
-  </QueryClientProvider>
-);
 
 describe('Application page', () => {
-  beforeAll(() => server.listen());
-
   afterEach(() => {
-    server.resetHandlers();
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
-  afterAll(() => server.close());
+  it('should not display link upgrade version if not necessary', async () => {
+    const { queryByText } = render(<ApplicationInfosPage />);
 
-  it('should not display link upgrade version if not necessary', () => {
-    const { queryByText } = render(App);
+    await waitForElementToBeRemoved(() => queryByText('Loading'));
 
     expect(queryByText('Upgrade your admin panel')).not.toBeInTheDocument();
   });
 
-  it('should display upgrade version warning if the version is behind the latest one', () => {
-    useAppInfo.mockImplementationOnce(() => {
-      return {
-        shouldUpdateStrapi: true,
-        latestStrapiReleaseTag: 'v3.6.8',
-        strapiVersion: '4.0.0',
-      };
+  it('should display upgrade version warning if the version is behind the latest one', async () => {
+    useAppInfo.mockReturnValue({
+      shouldUpdateStrapi: true,
+      latestStrapiReleaseTag: 'v3.6.8',
+      strapiVersion: '4.0.0',
     });
 
-    render(App);
+    const { getByText, queryByText } = render(<ApplicationInfosPage />);
 
-    expect(screen.getByText('v4.0.0')).toBeInTheDocument();
-    expect(screen.getByText('Upgrade your admin panel')).toBeInTheDocument();
+    await waitForElementToBeRemoved(() => queryByText('Loading'));
+
+    expect(getByText('v4.0.0')).toBeInTheDocument();
+    expect(getByText('Upgrade your admin panel')).toBeInTheDocument();
   });
 
   it('should render logo input if read permissions', async () => {
-    const { queryByText } = render(App);
+    const { queryByText } = render(<ApplicationInfosPage />);
 
-    await waitFor(() => {
-      expect(queryByText('Menu logo')).toBeInTheDocument();
-    });
+    await waitForElementToBeRemoved(() => queryByText('Loading'));
+
+    expect(queryByText('Menu logo')).toBeInTheDocument();
   });
 
   it('should not render logo input if no read permissions', async () => {
     useRBAC.mockImplementationOnce(() => ({
       allowedActions: { canRead: false, canUpdate: false },
     }));
-    const { queryByText } = render(App);
+    const { queryByText } = render(<ApplicationInfosPage />);
 
-    await waitFor(() => {
-      expect(queryByText('Menu logo')).not.toBeInTheDocument();
-    });
+    expect(queryByText('Menu logo')).not.toBeInTheDocument();
   });
 
   it('should render save button if update permissions', async () => {
-    const { queryByText } = render(App);
+    const { queryByText } = render(<ApplicationInfosPage />);
 
-    await waitFor(() => {
-      expect(queryByText('Save')).toBeInTheDocument();
-    });
+    await waitForElementToBeRemoved(() => queryByText('Loading'));
+
+    expect(queryByText('Save')).toBeInTheDocument();
   });
 
   it('should not render save button if no update permissions', async () => {
-    useRBAC.mockImplementationOnce(() => ({ allowedActions: { canRead: true, canUpdate: false } }));
-    const { queryByText } = render(App);
+    useRBAC.mockReturnValue({ allowedActions: { canRead: true, canUpdate: false } });
 
-    await waitFor(() => {
-      expect(queryByText('Save')).not.toBeInTheDocument();
-    });
+    const { queryByText } = render(<ApplicationInfosPage />);
+
+    await waitForElementToBeRemoved(() => queryByText('Loading'));
+
+    expect(queryByText('Save')).not.toBeInTheDocument();
   });
 
   it('should update project settings on save', async () => {
-    const { getByRole } = render(App);
+    useRBAC.mockReturnValue({ allowedActions: { canRead: true, canUpdate: true } });
+
+    const { getByRole, queryByText } = render(<ApplicationInfosPage />);
+
+    await waitForElementToBeRemoved(() => queryByText('Loading'));
 
     fireEvent.click(getByRole('button', { name: 'Save' }));
+
     await waitFor(() => expect(updateProjectSettingsSpy).toHaveBeenCalledTimes(1));
   });
 });

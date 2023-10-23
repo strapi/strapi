@@ -10,6 +10,7 @@ const operators = {
   eq: require('./eq'),
   eqi: require('./eqi'),
   ne: require('./ne'),
+  nei: require('./nei'),
 
   startsWith: require('./starts-with'),
   endsWith: require('./ends-with'),

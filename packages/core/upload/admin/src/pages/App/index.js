@@ -1,14 +1,16 @@
-import React, { useEffect, Suspense, lazy } from 'react';
-import { Switch, Route } from 'react-router-dom';
-import { useIntl } from 'react-intl';
-import { Helmet } from 'react-helmet';
-import { LoadingIndicatorPage, useQueryParams, useFocusWhenNavigate } from '@strapi/helper-plugin';
+import React, { lazy, Suspense, useEffect } from 'react';
+
 import { Main } from '@strapi/design-system';
+import { LoadingIndicatorPage, useFocusWhenNavigate, useQueryParams } from '@strapi/helper-plugin';
+import { Helmet } from 'react-helmet';
+import { useIntl } from 'react-intl';
+import { Route, Switch } from 'react-router-dom';
+
+import { useConfig } from '../../hooks/useConfig';
+import pluginID from '../../pluginId';
+import { getTrad } from '../../utils';
 
 import { MediaLibrary } from './MediaLibrary';
-import { getTrad } from '../../utils';
-import pluginID from '../../pluginId';
-import { useConfig } from '../../hooks/useConfig';
 
 const ConfigureTheView = lazy(() =>
   import(/* webpackChunkName: "Upload_ConfigureTheView" */ './ConfigureTheView')

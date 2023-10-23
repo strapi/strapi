@@ -1,5 +1,5 @@
-import { setupServer } from 'msw/node';
 import { rest } from 'msw';
+import { setupServer } from 'msw/node';
 
 const handlers = [
   rest.get('*/providers/options', (req, res, ctx) => {
@@ -10,6 +10,7 @@ const handlers = [
         data: {
           autoRegister: true,
           defaultRole: '2',
+          ssoLockedRoles: ['1'],
         },
       })
     );

@@ -149,6 +149,7 @@
   "modalForm.editCategory.base.name.description": "Inget mellanslag får finnas i namnet på kategorin",
   "modalForm.header-edit": "Redigera {name}",
   "modalForm.header.categories": "Kategorier",
+  "modalForm.header.back": "Tillbaka",
   "modalForm.singleType.header-create": "Skapa engångstyp",
   "modalForm.sub-header.addComponentToDynamicZone": "Lägg till ny komponent till dynamisk zon",
   "modalForm.sub-header.attribute.create": "Lägg till {type}-fält",

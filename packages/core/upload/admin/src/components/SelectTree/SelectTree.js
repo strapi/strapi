@@ -1,9 +1,13 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import PropTypes from 'prop-types';
+import React, { useEffect, useMemo, useState } from 'react';
+
+/**
+ * @note – This component is way too complex to convert to the DS version.
+ */
+// eslint-disable-next-line no-restricted-imports
 import { ReactSelect as Select } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
 
 import Option from './Option';
-
 import flattenTree from './utils/flattenTree';
 import getOpenValues from './utils/getOpenValues';
 import getValuesToClose from './utils/getValuesToClose';

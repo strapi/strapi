@@ -45,4 +45,4 @@ const createDefaultPluginsFormFromLayout = (pluginsLayout, conditions, initialPe
 };
 
 export default createDefaultPluginsFormFromLayout;
-export { createSubCategoryForm, createChildrenDefaultForm };
+export { createChildrenDefaultForm, createSubCategoryForm };

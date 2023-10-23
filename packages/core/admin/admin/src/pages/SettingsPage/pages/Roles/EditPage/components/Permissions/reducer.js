@@ -1,8 +1,8 @@
 import produce from 'immer';
 import cloneDeep from 'lodash/cloneDeep';
+import get from 'lodash/get';
 import has from 'lodash/has';
 import isObject from 'lodash/isObject';
-import get from 'lodash/get';
 import set from 'lodash/set';
 
 import updateConditionsToFalse from './utils/updateConditionsToFalse';

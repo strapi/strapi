@@ -32,13 +32,6 @@ jest.mock('@strapi/provider-upload-local', () => ({
   },
 }));
 
-jest.mock('../utils', () => ({
-  ...jest.requireActual('../utils'),
-  getService: () => ({
-    contentManager: { entityManager: { addSignedFileUrlsToAdmin: jest.fn() } },
-  }),
-}));
-
 describe('Upload plugin register function', () => {
   test('The upload plugin registers the /upload route', async () => {
     const registerRoute = jest.fn();

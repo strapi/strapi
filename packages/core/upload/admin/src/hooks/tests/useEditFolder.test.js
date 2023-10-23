@@ -1,12 +1,12 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { NotificationsProvider, useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { QueryClientProvider, QueryClient, useQueryClient } from 'react-query';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { QueryClient, QueryClientProvider, useQueryClient } from 'react-query';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 
-import { NotificationsProvider, useNotification, useFetchClient } from '@strapi/helper-plugin';
-
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { useEditFolder } from '../useEditFolder';
 
 const FOLDER_CREATE_FIXTURE = {
@@ -159,7 +159,6 @@ describe('useEditFolder', () => {
     const queryClient = useQueryClient();
     const {
       result: { current },
-      waitFor,
     } = await setup();
     const { editFolder } = current;
 

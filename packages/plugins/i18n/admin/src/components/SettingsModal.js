@@ -1,16 +1,18 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+
 import {
-  ModalHeader,
   HeaderModal,
   HeaderModalTitle,
   ModalForm,
+  ModalHeader,
+  Tab,
   Tabs,
   TabsNav,
-  Tab,
   TabsPanel,
 } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+
 import { getTrad } from '../utils';
 
 const SettingsModal = ({ children, title, breadCrumb, tabsAriaLabel, tabsId }) => {

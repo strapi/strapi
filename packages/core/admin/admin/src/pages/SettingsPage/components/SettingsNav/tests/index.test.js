@@ -1,15 +1,12 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import SettingsNav from '../index';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
-}));
+import SettingsNav from '../index';
 
 const menu = [
   {

@@ -1,11 +1,11 @@
 import React, { forwardRef, useMemo } from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { NavLink } from 'react-router-dom';
 
-import { pxToRem } from '@strapi/helper-plugin';
 import { Box, CardAction, Flex } from '@strapi/design-system';
+import { pxToRem } from '@strapi/helper-plugin';
 import { Folder } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { NavLink } from 'react-router-dom';
+import styled from 'styled-components';
 
 import { FolderCardContext } from '../contexts/FolderCard';
 import useId from '../hooks/useId';

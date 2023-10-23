@@ -4,19 +4,22 @@
  *
  */
 
-import React, { Suspense, useEffect, useMemo, lazy } from 'react';
-import { Switch, Route } from 'react-router-dom';
-import { useTracking, LoadingIndicatorPage, useStrapiApp } from '@strapi/helper-plugin';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { lazy, Suspense, useEffect, useMemo } from 'react';
+
+import { LoadingIndicatorPage, useStrapiApp, useTracking } from '@strapi/helper-plugin';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { useDispatch, useSelector } from 'react-redux';
+import { Route, Switch } from 'react-router-dom';
 
-import GuidedTourModal from '../../components/GuidedTour/Modal';
-import LeftMenu from '../../components/LeftMenu';
-import AppLayout from '../../layouts/AppLayout';
-import { useMenu, useConfigurations } from '../../hooks';
-import { createRoute } from '../../utils';
+import { GuidedTourModal } from '../../components/GuidedTour/Modal';
+import { LeftMenu } from '../../components/LeftMenu';
+import { useConfiguration } from '../../hooks/useConfiguration';
+import { useMenu } from '../../hooks/useMenu';
+import { AppLayout } from '../../layouts/AppLayout';
+import { createRoute } from '../../utils/createRoute';
 import { SET_APP_RUNTIME_STATUS } from '../App/constants';
+
 import Onboarding from './Onboarding';
 
 const CM = lazy(() =>
@@ -30,20 +33,31 @@ const MarketplacePage = lazy(() =>
   import(/* webpackChunkName: "Admin_marketplace" */ '../MarketplacePage')
 );
 const NotFoundPage = lazy(() =>
-  import(/* webpackChunkName: "Admin_NotFoundPage" */ '../NotFoundPage')
+  import(/* webpackChunkName: "Admin_NotFoundPage" */ '../NotFoundPage').then(
+    ({ NotFoundPage }) => ({ default: NotFoundPage })
+  )
 );
 const InternalErrorPage = lazy(() =>
-  import(/* webpackChunkName: "Admin_InternalErrorPage" */ '../InternalErrorPage')
+  import(/* webpackChunkName: "Admin_InternalErrorPage" */ '../InternalErrorPage').then(
+    ({ InternalErrorPage }) => ({
+      default: InternalErrorPage,
+    })
+  )
 );
 
 const ProfilePage = lazy(() =>
   import(/* webpackChunkName: "Admin_profilePage" */ '../ProfilePage')
 );
 const SettingsPage = lazy(() =>
-  import(/* webpackChunkName: "Admin_settingsPage" */ '../SettingsPage')
+  import(/* webpackChunkName: "Admin_settingsPage" */ '../SettingsPage').then((module) => ({
+    default: module.SettingsPage,
+  }))
 );
 
 // Simple hook easier for testing
+/**
+ * TODO: remove this, it's bad.
+ */
 const useTrackUsage = () => {
   const { trackUsage } = useTracking();
   const dispatch = useDispatch();
@@ -66,7 +80,7 @@ const Admin = () => {
   useTrackUsage();
   const { isLoading, generalSectionLinks, pluginsSectionLinks } = useMenu();
   const { menu } = useStrapiApp();
-  const { showTutorials } = useConfigurations();
+  const { showTutorials } = useConfiguration();
 
   const routes = useMemo(() => {
     return menu

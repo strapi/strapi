@@ -1,12 +1,13 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { NotificationsProvider } from '@strapi/helper-plugin';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { NotificationsProvider } from '@strapi/helper-plugin';
-import { RemoveAssetDialog } from '../RemoveAssetDialog';
+
 import en from '../../../translations/en.json';
-import server from './server';
+import { RemoveAssetDialog } from '../RemoveAssetDialog';
 
 jest.mock('../../../utils/deleteRequest', () => ({
   ...jest.requireActual('../../../utils/deleteRequest'),
@@ -108,11 +109,6 @@ const renderCompo = (handleCloseSpy = jest.fn()) => {
 };
 
 describe('RemoveAssetDialog', () => {
-  beforeAll(() => server.listen());
-
-  afterEach(() => server.resetHandlers());
-  afterAll(() => server.close());
-
   it('snapshots the component', () => {
     renderCompo();
 

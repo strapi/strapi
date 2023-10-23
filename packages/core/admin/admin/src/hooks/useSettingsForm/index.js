@@ -1,9 +1,24 @@
 import { useEffect, useReducer } from 'react';
-import { useFetchClient, useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
+
+import { getYupInnerErrors, useFetchClient, useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
 import omit from 'lodash/omit';
-import { checkFormValidity, formatAPIErrors } from '../../utils';
-import { initialState, reducer } from './reducer';
+
+import { formatAPIErrors } from '../../utils/formatAPIErrors';
+
 import init from './init';
+import { initialState, reducer } from './reducer';
+
+const checkFormValidity = async (data, schema) => {
+  let errors = null;
+
+  try {
+    await schema.validate(data, { abortEarly: false });
+  } catch (err) {
+    errors = getYupInnerErrors(err);
+  }
+
+  return errors;
+};
 
 /**
  * TODO: refactor this, it's confusing and hard to read.
@@ -87,11 +102,13 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
         dispatch({
           type: 'ON_SUBMIT',
         });
-
         const cleanedData = omit(modifiedData, ['confirmPassword', 'registrationToken']);
 
         if (cleanedData.roles) {
           cleanedData.roles = cleanedData.roles.map((role) => role.id);
+        }
+        if (cleanedData.ssoLockedRoles) {
+          cleanedData.ssoLockedRoles = [...new Set(cleanedData.ssoLockedRoles)];
         }
 
         const {

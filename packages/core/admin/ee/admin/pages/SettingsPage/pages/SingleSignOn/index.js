@@ -1,90 +1,80 @@
-import React, { useEffect } from 'react';
+import * as React from 'react';
+
 import {
-  CheckPagePermissions,
-  SettingsPageTitle,
-  useRBAC,
-  LoadingIndicatorPage,
-  useFocusWhenNavigate,
-} from '@strapi/helper-plugin';
-import { Check } from '@strapi/icons';
-import {
-  ContentLayout,
-  HeaderLayout,
-  Layout,
   Button,
-  Main,
-  Typography,
-  ToggleInput,
-  Select,
-  Option,
+  ContentLayout,
+  Flex,
   Grid,
   GridItem,
-  Flex,
+  HeaderLayout,
+  Layout,
+  Main,
+  MultiSelect,
+  MultiSelectOption,
+  Option,
+  Select,
+  ToggleInput,
+  Typography,
 } from '@strapi/design-system';
-import { useIntl } from 'react-intl';
+import {
+  CheckPagePermissions,
+  LoadingIndicatorPage,
+  SettingsPageTitle,
+  useFocusWhenNavigate,
+  useRBAC,
+} from '@strapi/helper-plugin';
+import { Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
-import { getRequestUrl } from '../../../../../../admin/src/utils';
-import { useRolesList, useSettingsForm } from '../../../../../../admin/src/hooks';
-import adminPermissions from '../../../../../../admin/src/permissions';
+import { useIntl } from 'react-intl';
+import { useSelector } from 'react-redux';
+
+import { useSettingsForm } from '../../../../../../admin/src/hooks';
+import { useAdminRoles } from '../../../../../../admin/src/hooks/useAdminRoles';
+import { selectAdminPermissions } from '../../../../../../admin/src/pages/App/selectors';
+
 import schema from './utils/schema';
 
-const ssoPermissions = {
-  ...adminPermissions.settings.sso,
-  readRoles: adminPermissions.settings.roles.read,
-};
-
 export const SingleSignOn = () => {
-  const { formatMessage } = useIntl();
-
-  const {
-    isLoading: isLoadingForPermissions,
-    allowedActions: { canUpdate, canReadRoles },
-  } = useRBAC(ssoPermissions);
-
-  const [
-    { formErrors, initialData, isLoading, modifiedData, showHeaderButtonLoader },
-    // eslint-disable-next-line no-unused-vars
-    dispatch,
-    { handleChange, handleSubmit },
-  ] = useSettingsForm(getRequestUrl('providers/options'), schema, () => {}, [
-    'autoRegister',
-    'defaultRole',
-  ]);
-  const { roles } = useRolesList(canReadRoles);
-
   useFocusWhenNavigate();
 
-  const showLoader = isLoadingForPermissions || isLoading;
+  const { formatMessage } = useIntl();
+  const permissions = useSelector(selectAdminPermissions);
 
-  useEffect(() => {
-    if (formErrors.defaultRole) {
-      const selector = `[name="defaultRole"]`;
+  const {
+    isLoading: isLoadingPermissions,
+    allowedActions: { canUpdate, canReadRoles },
+  } = useRBAC({
+    ...permissions.settings.sso,
+    readRoles: permissions.settings.roles.read,
+  });
 
-      document.querySelector(selector).focus();
-    }
-  }, [formErrors]);
+  const [
+    { formErrors, initialData, isLoading: isLoadingForm, modifiedData, showHeaderButtonLoader },
+    ,
+    { handleChange, handleSubmit },
+  ] = useSettingsForm('/admin/providers/options', schema, () => {}, [
+    'autoRegister',
+    'defaultRole',
+    'ssoLockedRoles',
+  ]);
 
-  const isHeaderButtonDisabled = isEqual(initialData, modifiedData);
+  const { roles, isLoading: isLoadingRoles } = useAdminRoles(undefined, {
+    enabled: canReadRoles,
+  });
+
+  const isLoading = isLoadingPermissions || isLoadingRoles || isLoadingForm;
+  // TODO: focus() first error field, but it looks like that requires refactoring from useSettingsForm to Formik
 
   return (
     <Layout>
       <SettingsPageTitle name="SSO" />
       <Main tabIndex={-1}>
-        <form
-          onSubmit={(e) => {
-            if (isHeaderButtonDisabled) {
-              e.preventDefault();
-
-              return;
-            }
-            handleSubmit(e);
-          }}
-        >
+        <form onSubmit={handleSubmit}>
           <HeaderLayout
             primaryAction={
               <Button
                 data-testid="save-button"
-                disabled={isHeaderButtonDisabled}
+                disabled={isEqual(initialData, modifiedData)}
                 loading={showHeaderButtonLoader}
                 startIcon={<Check />}
                 type="submit"
@@ -103,7 +93,7 @@ export const SingleSignOn = () => {
             })}
           />
           <ContentLayout>
-            {showLoader ? (
+            {isLoading ? (
               <LoadingIndicatorPage />
             ) : (
               <Flex
@@ -189,6 +179,48 @@ export const SingleSignOn = () => {
                       ))}
                     </Select>
                   </GridItem>
+                  <GridItem col={6} m={6} s={12}>
+                    <MultiSelect
+                      disabled={!canUpdate}
+                      hint={formatMessage({
+                        id: 'Settings.sso.form.localAuthenticationLock.description',
+                        defaultMessage:
+                          'Select the roles for which you want to disable the local authentication',
+                      })}
+                      error={
+                        formErrors.ssoLockedRoles
+                          ? formatMessage({
+                              id: formErrors.ssoLockedRoles.id,
+                              defaultMessage: formErrors.ssoLockedRoles.id,
+                            })
+                          : ''
+                      }
+                      label={formatMessage({
+                        id: 'Settings.sso.form.localAuthenticationLock.label',
+                        defaultMessage: 'Local authentication lock-out',
+                      })}
+                      name="ssoLockedRoles"
+                      onChange={(value) => {
+                        handleChange({ target: { name: 'ssoLockedRoles', value } });
+                      }}
+                      placeholder={formatMessage({
+                        id: 'components.InputSelect.option.placeholder',
+                        defaultMessage: 'Choose here',
+                      })}
+                      onClear={() => {
+                        const emptyArray = [];
+                        handleChange({ target: { name: 'ssoLockedRoles', emptyArray } });
+                      }}
+                      value={modifiedData.ssoLockedRoles || []}
+                      withTags
+                    >
+                      {roles.map(({ id, name }) => (
+                        <MultiSelectOption key={id} value={id.toString()}>
+                          {name}
+                        </MultiSelectOption>
+                      ))}
+                    </MultiSelect>
+                  </GridItem>
                 </Grid>
               </Flex>
             )}
@@ -199,10 +231,14 @@ export const SingleSignOn = () => {
   );
 };
 
-const ProtectedSSO = () => (
-  <CheckPagePermissions permissions={ssoPermissions.main}>
-    <SingleSignOn />
-  </CheckPagePermissions>
-);
+const ProtectedSSO = () => {
+  const permissions = useSelector(selectAdminPermissions);
+
+  return (
+    <CheckPagePermissions permissions={permissions.settings.sso.main}>
+      <SingleSignOn />
+    </CheckPagePermissions>
+  );
+};
 
 export default ProtectedSSO;

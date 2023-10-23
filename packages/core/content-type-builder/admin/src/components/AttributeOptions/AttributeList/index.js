@@ -1,6 +1,8 @@
 import React from 'react';
+
+import { Box, Flex, Grid, GridItem, KeyboardNavigable } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import { Box, Grid, GridItem, KeyboardNavigable, Flex } from '@strapi/design-system';
+
 import AttributeOption from '../AttributeOption';
 import getPadding from '../utils/getPadding';
 
@@ -15,7 +17,7 @@ const AttributeList = ({ attributes }) => (
               const { paddingLeft, paddingRight } = getPadding(index);
 
               return (
-                <GridItem key={attribute} col={6} style={{ height: '100%' }}>
+                <GridItem key={attribute} col={6}>
                   <Box
                     paddingLeft={paddingLeft}
                     paddingRight={paddingRight}

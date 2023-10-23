@@ -1,7 +1,7 @@
-import { combineReducers, createStore } from 'redux';
+import { combineReducers, configureStore } from '@reduxjs/toolkit';
 
 const reducers = {
-  admin_app: jest.fn(() => ({ status: 'init' })),
+  admin_app: jest.fn(() => ({ permissions: {}, status: 'init' })),
   'content-manager_app': jest.fn(() => ({
     components: [],
     status: 'loading',
@@ -33,7 +33,9 @@ const reducers = {
   rbacProvider: jest.fn(() => ({ allPermissions: null, collectionTypesRelatedPermissions: {} })),
 };
 
-const store = createStore(combineReducers(reducers));
+const store = configureStore({
+  reducer: combineReducers(reducers),
+});
 
 export default {
   store,

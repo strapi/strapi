@@ -1,35 +1,38 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
-import { useDispatch } from 'react-redux';
+
 import { Box, Flex } from '@strapi/design-system';
 import { useTracking } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import { useDispatch } from 'react-redux';
+import styled from 'styled-components';
 
 import { addStage } from '../../actions';
 import { AddStage } from '../AddStage';
+
 import { Stage } from './Stage';
 
-const StagesContainer = styled(Box)`
-  position: relative;
-`;
-
 const Background = styled(Box)`
-  left: 50%;
-  position: absolute;
-  top: 0;
   transform: translateX(-50%);
 `;
 
-function Stages({ stages }) {
+export function Stages({ canDelete, canUpdate, stages }) {
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
   const { trackUsage } = useTracking();
 
   return (
     <Flex direction="column" gap={6} width="100%">
-      <StagesContainer spacing={4} width="100%">
-        <Background background="neutral200" height="100%" width={2} zIndex={1} />
+      <Box position="relative" spacing={4} width="100%">
+        <Background
+          background="neutral200"
+          height="100%"
+          left="50%"
+          position="absolute"
+          top="0"
+          width={2}
+          zIndex={1}
+        />
 
         <Flex
           direction="column"
@@ -45,19 +48,21 @@ function Stages({ stages }) {
             return (
               <Box key={`stage-${id}`} as="li">
                 <Stage
-                  {...stage}
                   id={id}
                   index={index}
-                  canDelete={stages.length > 1}
                   isOpen={!stage.id}
+                  canDelete={stages.length > 1 && canDelete}
+                  canReorder={stages.length > 1}
+                  canUpdate={canUpdate}
+                  stagesCount={stages.length}
                 />
               </Box>
             );
           })}
         </Flex>
-      </StagesContainer>
+      </Box>
 
-      <Flex direction="column" gap={6}>
+      {canUpdate && (
         <AddStage
           type="button"
           onClick={() => {
@@ -70,18 +75,20 @@ function Stages({ stages }) {
             defaultMessage: 'Add new stage',
           })}
         </AddStage>
-      </Flex>
+      )}
     </Flex>
   );
 }
 
-export { Stages };
-
 Stages.defaultProps = {
+  canDelete: true,
+  canUpdate: true,
   stages: [],
 };
 
 Stages.propTypes = {
+  canDelete: PropTypes.bool,
+  canUpdate: PropTypes.bool,
   stages: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.number,

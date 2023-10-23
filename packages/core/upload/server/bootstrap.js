@@ -1,7 +1,7 @@
 'use strict';
 
 const { getService } = require('./utils');
-const { ALLOWED_SORT_STRINGS } = require('./constants');
+const { ALLOWED_SORT_STRINGS, ALLOWED_WEBHOOK_EVENTS } = require('./constants');
 
 module.exports = async ({ strapi }) => {
   const defaultConfig = {
@@ -36,10 +36,22 @@ module.exports = async ({ strapi }) => {
   }
 
   await registerPermissionActions();
+  await registerWebhookEvents();
 
   await getService('weeklyMetrics').registerCron();
   getService('metrics').sendUploadPluginMetrics();
+
+  if (strapi.config.get('plugin.upload.signAdminURLsOnly', false)) {
+    getService('extensions').contentManager.entityManager.addSignedFileUrlsToAdmin();
+  } else {
+    getService('extensions').core.entityService.addSignedFileUrlsToEntityService();
+  }
 };
+
+const registerWebhookEvents = async () =>
+  Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
+    strapi.webhookStore.addAllowedEvent(key, value);
+  });
 
 const registerPermissionActions = async () => {
   const actions = [

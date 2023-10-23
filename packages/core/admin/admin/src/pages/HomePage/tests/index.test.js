@@ -1,17 +1,18 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { useAppInfo } from '@strapi/helper-plugin';
 import { render } from '@testing-library/react';
-import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
-import { useAppInfo } from '@strapi/helper-plugin';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { Router } from 'react-router-dom';
+
+import { useContentTypes } from '../../../hooks/useContentTypes';
 import HomePage from '../index';
-import { useModels } from '../../../hooks';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useAppInfo: jest.fn(() => ({ communityEdition: true })),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useGuidedTour: jest.fn(() => ({
     isGuidedTourVisible: false,
     guidedTourState: {
@@ -31,14 +32,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-jest.mock('../../../hooks', () => ({
-  useModels: jest.fn(),
-}));
-
-jest.mock('ee_else_ce/hooks/useLicenseLimitNotification', () => ({
-  __esModule: true,
-  default: jest.fn(),
-}));
+jest.mock('../../../hooks/useContentTypes');
 
 const history = createMemoryHistory();
 
@@ -53,12 +47,6 @@ const App = (
 );
 
 describe('Homepage', () => {
-  useModels.mockImplementation(() => ({
-    isLoading: false,
-    collectionTypes: [],
-    singleTypes: [],
-  }));
-
   test('should render all homepage links', () => {
     const { getByRole } = render(App);
     expect(getByRole('link', { name: /we are hiring/i })).toBeInTheDocument();
@@ -114,11 +102,11 @@ describe('Homepage', () => {
   });
 
   it('should display particular text and action when there are collectionTypes and singletypes', () => {
-    useModels.mockImplementation(() => ({
+    useContentTypes.mockReturnValue({
       isLoading: false,
       collectionTypes: [{ uuid: 102 }],
       singleTypes: [{ isDisplayed: true }],
-    }));
+    });
 
     const { getByText, getByRole } = render(App);
 
