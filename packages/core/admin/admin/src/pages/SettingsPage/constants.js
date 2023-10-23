@@ -164,4 +164,37 @@ export const ROUTES_CE = [
     to: '/settings/transfer-tokens/:id',
     exact: true,
   },
+  {
+    async Component() {
+      const component = await import(
+        /* webpackChunkName: "audit-logs-sales-page" */ './pages/AuditLogs/SalesPage'
+      );
+
+      return component;
+    },
+    to: '/settings/purchase-audit-logs',
+    exact: true,
+  },
+  {
+    async Component() {
+      const component = await import(
+        /* webpackChunkName: "review-workflows-sales-page" */ './pages/ReviewWorkflows/SalesPage'
+      );
+
+      return component;
+    },
+    to: '/settings/purchase-review-workflows',
+    exact: true,
+  },
+  {
+    async Component() {
+      const component = await import(
+        /* webpackChunkName: "sso-sales-page" */ './pages/SingleSignOn/SalesPage'
+      );
+
+      return component;
+    },
+    to: '/settings/purchase-single-sign-on',
+    exact: true,
+  },
 ];
