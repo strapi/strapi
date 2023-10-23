@@ -1,12 +1,15 @@
 import { LoadedStrapi } from '@strapi/types';
 import { differenceWith, isEqual } from 'lodash/fp';
 
+interface PersistedTable {
+  name: string;
+  dependsOn?: Array<{ name: string }>;
+}
+
 /**
  * Transform table name to the object format
- * @param {Array<string|{ table: string; dependsOn?: Array<{ table: string;}> }>} table
- * @returns Array<{ table: string; dependsOn?: Array<{ table: string;}> }>
  */
-const transformTableName = (table: any) => {
+const transformTableName = (table: string | PersistedTable) => {
   if (typeof table === 'string') {
     return { name: table };
   }
@@ -28,12 +31,11 @@ export async function findTables({ strapi }: { strapi: LoadedStrapi }, regex: an
 
 /**
  * Add tables name to the reserved tables in core store
- * @param {Object} ctx
- * @param {Strapi} ctx.strapi
- * @param {Array<string|{ table: string; dependsOn?: Array<{ table: string;}> }>} tableNames
- * @return {Promise<void>}
  */
-async function addPersistTables({ strapi }: { strapi: LoadedStrapi }, tableNames: string[]) {
+async function addPersistTables(
+  { strapi }: { strapi: LoadedStrapi },
+  tableNames: Array<string | PersistedTable>
+) {
   const persistedTables = await getPersistedTables({ strapi });
   const tables = tableNames.map(transformTableName);
 
@@ -84,7 +86,10 @@ async function getPersistedTables({ strapi }: { strapi: LoadedStrapi }) {
  * @param {Array<string|{ table: string; dependsOn?: Array<{ table: string;}> }>} tableNames
  * @returns {Promise<void>}
  */
-async function setPersistedTables({ strapi }: { strapi: LoadedStrapi }, tableNames: string[]) {
+async function setPersistedTables(
+  { strapi }: { strapi: LoadedStrapi },
+  tableNames: Array<string | PersistedTable>
+) {
   await strapi.store.set({
     type: 'core',
     key: 'persisted_tables',
@@ -127,9 +132,8 @@ export const removePersistedTablesWithSuffix = async (tableNameSuffix: string) =
 
 /**
  * Add tables to the reserved tables in core store
- * @param {Array<string|{ table: string; dependsOn?: Array<{ table: string;}> }} tables
  */
-export const persistTables = async (tables: any) => {
+export const persistTables = async (tables: Array<string | PersistedTable>) => {
   await addPersistTables({ strapi }, tables);
 };
 
