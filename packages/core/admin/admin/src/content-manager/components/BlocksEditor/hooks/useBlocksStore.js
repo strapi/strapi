@@ -31,7 +31,7 @@ import {
 } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Editor, Path, Transforms, Range, Point } from 'slate';
+import { Editor, Path, Transforms, Range } from 'slate';
 import { useSlate, ReactEditor } from 'slate-react';
 import styled, { css } from 'styled-components';
 
