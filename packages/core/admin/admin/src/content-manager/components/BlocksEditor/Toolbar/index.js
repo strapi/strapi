@@ -1,9 +1,9 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
-import { Flex, Icon, Tooltip, Select, Option, Typography } from '@strapi/design-system';
+import { Flex, Icon, Tooltip, Select, Option } from '@strapi/design-system';
 import { pxToRem, prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
-import { Link, Spark } from '@strapi/icons';
+import { Link } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement } from 'slate';
@@ -641,26 +641,6 @@ const BlocksToolbar = ({ disabled }) => {
             <ListButton block={blocks['list-ordered']} disabled={disabled} />
           </Flex>
         </Toolbar.ToggleGroup>
-        {/* TODO: Remove after the RTE Blocks Stable release */}
-        <Flex grow={1} justifyContent="flex-end">
-          <Flex
-            gap={1}
-            fontSizes={0}
-            hasRadius
-            background="alternative100"
-            padding={`${2 / 16}rem ${4 / 16}rem`}
-          >
-            <Icon
-              width={`${10 / 16}rem`}
-              height={`${10 / 16}rem`}
-              as={Spark}
-              color="alternative600"
-            />
-            <Typography textColor="alternative600" variant="sigma">
-              New
-            </Typography>
-          </Flex>
-        </Flex>
       </ToolbarWrapper>
     </Toolbar.Root>
   );
