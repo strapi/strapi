@@ -27,7 +27,10 @@ import type {
 
 const { isUsingTypeScript } = tsUtils;
 
-// TODO what is the best way to extend the Request interface with files?
+/* TODO extend the request in this way once Replace is available
+  type FileRequest = Context['request'] & { file: any };
+  type FileContext = Replace<Context, { request: FileRequest }>;
+*/
 declare module 'koa' {
   interface Request {
     files: any;

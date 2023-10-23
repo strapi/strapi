@@ -1,3 +1,6 @@
+import { errors } from '@strapi/utils';
+import { ValidationError as YupValidationError } from 'yup';
+
 // TODO replace SettingsFile with type from the upload plugin ?
 interface Logo {
   name: string;
@@ -14,6 +17,10 @@ export type SettingsFile = any;
  * /init - Initialize the admin panel
  */
 export declare namespace Init {
+  export interface Request {
+    body: {};
+    query: {};
+  }
   export interface Response {
     data: {
       uuid: string | false;
@@ -21,6 +28,7 @@ export declare namespace Init {
       menuLogo?: SettingsFile;
       authLogo?: SettingsFile;
     };
+    error?: errors.ApplicationError;
   }
 }
 
@@ -28,9 +36,15 @@ export declare namespace Init {
  * /project-settings - Get the project settings
  */
 export declare namespace GetProjectSettings {
+  export interface Request {
+    body: {};
+    query: {};
+  }
+
   export interface Response {
     menuLogo: SettingsFile;
     authLogo: SettingsFile;
+    error?: errors.ApplicationError;
   }
 }
 
@@ -43,11 +57,13 @@ export declare namespace UpdateProjectSettings {
       menuLogo: SettingsFile;
       authLogo: SettingsFile;
     };
+    query: {};
     files: SettingsFile[];
   }
   export interface Response {
     menuLogo: SettingsFile;
     authLogo: SettingsFile;
+    error?: errors.ApplicationError | YupValidationError;
   }
 }
 
@@ -55,6 +71,10 @@ export declare namespace UpdateProjectSettings {
  * /information - get project information
  */
 export declare namespace Information {
+  export interface Request {
+    body: {};
+    query: {};
+  }
   export interface Response {
     data: {
       currentEnvironment: string;
@@ -66,6 +86,7 @@ export declare namespace Information {
       communityEdition: boolean;
       useYarn: boolean;
     };
+    error?: errors.ApplicationError;
   }
 }
 
@@ -73,6 +94,10 @@ export declare namespace Information {
  * /telemetry-properties - get telemetry properties
  */
 export declare namespace TelemetryProperties {
+  export interface Request {
+    body: {};
+    query: {};
+  }
   export interface Response {
     data: {
       useTypescriptOnServer: boolean;
@@ -82,6 +107,7 @@ export declare namespace TelemetryProperties {
       numberOfComponents: number;
       numberOfDynamicZones: number;
     };
+    error?: errors.ApplicationError;
   }
 }
 
@@ -89,14 +115,19 @@ export declare namespace TelemetryProperties {
  * /plugins - get plugin information
  */
 export declare namespace Plugins {
-  // TODO should this type come from elsewhere ?
   interface Plugin {
     name: string;
     displayName: string;
     description: string;
   }
 
+  export interface Request {
+    body: {};
+    query: {};
+  }
+
   export interface Response {
     plugins: Plugin[];
+    error?: errors.ApplicationError;
   }
 }
