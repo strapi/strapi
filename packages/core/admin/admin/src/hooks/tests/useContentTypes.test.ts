@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@tests/utils';
 
-import { useContentTypes } from '../index';
+import { useContentTypes } from '../useContentTypes';
 
 describe('useContentTypes', () => {
   test('fetches models and content-types', async () => {
