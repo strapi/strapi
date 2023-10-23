@@ -1,10 +1,29 @@
-import type { Strapi, DocumentService, EntityValidator, EventHub } from '@strapi/types';
+import type {
+  Common,
+  Strapi,
+  Schema,
+  Shared,
+  DocumentService,
+  EntityValidator,
+  EventHub,
+} from '@strapi/types';
 import { convertQueryParams, mapAsync } from '@strapi/utils';
 import type { Database } from '@strapi/database';
 
 import { isArray } from 'lodash/fp';
 import uploadFiles from '../utils/upload-files';
+
+import {
+  omitComponentData,
+  getComponents,
+  createComponents,
+  updateComponents,
+  deleteComponents,
+  cloneComponents,
+} from '../entity-service/components';
+
 import { pickSelectionParams } from './params';
+import { applyTransforms } from '../entity-service/attributes';
 
 const { transformParamsToQuery } = convertQueryParams;
 
@@ -35,6 +54,17 @@ const { transformParamsToQuery } = convertQueryParams;
  * TODO: replace 'any'
  * CountVersions?
  */
+type Context = {
+  contentType: Schema.ContentType;
+};
+
+const createPipeline = (data: Record<string, unknown>, context: Context) => {
+  return applyTransforms(data, context);
+};
+
+const updatePipeline = (data: Record<string, unknown>, context: Context) => {
+  return applyTransforms(data, context);
+};
 
 const createDocumentService = ({
   strapi,
@@ -87,8 +117,12 @@ const createDocumentService = ({
       return null;
     }
 
-    // Delete entry
+    // Delete entry & components
+    const componentsToDelete = await getComponents(uid, entryToDelete);
+
     await db.query(uid).delete({ where: { id: entryToDelete.id } });
+    await deleteComponents(uid, componentsToDelete as any, { loadComponents: false });
+
     return entryToDelete;
   },
 
@@ -110,19 +144,33 @@ const createDocumentService = ({
     // TODO: File upload - Probably in the lifecycles?
     const { data } = params;
 
+    // TODO: Prevent creating a published document
+    // TODO: Entity validator.
+
     if (!data) {
       throw new Error('Create requires data attribute');
     }
 
+    const model = strapi.getModel(uid) as Shared.ContentTypes[Common.UID.ContentType];
+
+    const componentData = await createComponents(uid, data);
+    const entryData = createPipeline(Object.assign(omitComponentData(model, data), componentData), {
+      contentType: model,
+    });
+
     // select / populate
     const query = transformParamsToQuery(uid, pickSelectionParams(params));
 
-    return db.query(uid).create({ ...query, data });
+    return db.query(uid).create({ ...query, data: entryData });
   },
 
   // NOTE: What happens if user doesn't provide specific publications state and locale to update?
   async update(uid, documentId, params) {
+    // TODO: Prevent updating a published document
+    // TODO: Entity validator.
+    // TODO: File upload
     const { data } = params || {};
+    const model = strapi.getModel(uid);
 
     const query = transformParamsToQuery(uid, pickSelectionParams(params || {}));
 
@@ -134,7 +182,13 @@ const createDocumentService = ({
       return null;
     }
 
-    return db.query(uid).update({ ...query, where: { id: entryToUpdate.id }, data });
+    const componentData = await updateComponents(uid, entryToUpdate, data!);
+    const entryData = updatePipeline(
+      Object.assign(omitComponentData(model, data!), componentData),
+      { contentType: model }
+    );
+
+    return db.query(uid).update({ ...query, where: { id: entryToUpdate.id }, data: entryData });
   },
 
   async count(uid, params = undefined) {
