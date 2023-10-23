@@ -923,6 +923,88 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
 
       expect(reducer(state, action)).toEqual(expected);
     });
+
+    it('should add a component with a __temp_key__ that is higher than the highest id to not get rendering conflicts', () => {
+      const components = {
+        'blog.simple': {
+          uid: 'blog.simple',
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            name: {
+              type: 'string',
+            },
+          },
+        },
+      };
+
+      const state = {
+        ...initialState,
+        componentsDataStructure: {
+          'blog.simple': { name: 'test' },
+        },
+        initialData: {
+          name: 'name',
+          dz: [
+            { name: 'test', __component: 'blog.simple', id: 1 },
+            { name: 'test', __component: 'blog.simple', id: 42 },
+          ],
+        },
+        modifiedData: {
+          name: 'name',
+          dz: [
+            { name: 'test', __component: 'blog.simple', id: 1 },
+            { name: 'test', __component: 'blog.simple', id: 42 },
+          ],
+        },
+      };
+
+      const expected = {
+        ...initialState,
+        componentsDataStructure: {
+          'blog.simple': { name: 'test' },
+        },
+        initialData: {
+          name: 'name',
+          dz: [
+            { name: 'test', __component: 'blog.simple', id: 1 },
+            { name: 'test', __component: 'blog.simple', id: 42 },
+          ],
+        },
+        modifiedData: {
+          name: 'name',
+          dz: [
+            { name: 'test', __component: 'blog.simple', __temp_key__: 43 },
+            { name: 'test', __component: 'blog.simple', id: 1 },
+            { name: 'test', __component: 'blog.simple', id: 42 },
+          ],
+        },
+        modifiedDZName: 'dz',
+        shouldCheckErrors: true,
+      };
+
+      const action = {
+        type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE',
+        componentLayoutData: {
+          uid: 'blog.simple',
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            name: {
+              type: 'string',
+            },
+          },
+        },
+        allComponents: components,
+        keys: ['dz'],
+        shouldCheckErrors: true,
+        position: -1,
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
   });
 
   describe('CONNECT_RELATION', () => {
