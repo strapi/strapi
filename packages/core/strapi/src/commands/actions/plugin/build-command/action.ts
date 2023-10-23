@@ -1,119 +1,89 @@
-import fs from 'fs/promises';
 import boxen from 'boxen';
 import chalk from 'chalk';
-import ora from 'ora';
-import { createLogger } from '../../../utils/logger';
+import { BuildCLIOptions, ConfigBundle, build } from '@strapi/pack-up';
 import { notifyExperimentalCommand } from '../../../utils/helpers';
-import {
-  loadPkg,
-  validatePkg,
-  validateExportsOrdering,
-  getExportExtensionMap,
-} from '../../../utils/pkg';
-import { createBuildContext, createBuildTasks } from '../../../builders/packages';
-import { buildTaskHandlers } from '../../../builders/tasks';
+import { createLogger } from '../../../utils/logger';
+import { Export, loadPkg, validatePkg } from '../../../utils/pkg';
 
-interface ActionOptions {
+interface ActionOptions extends BuildCLIOptions {
   force?: boolean;
-  debug?: boolean;
 }
 
-export default async ({ force, debug }: ActionOptions) => {
-  const logger = createLogger({ debug, timestamp: false });
+export default async ({ force, ...opts }: ActionOptions) => {
+  const logger = createLogger({ debug: opts.debug, silent: opts.silent, timestamp: false });
   try {
     /**
      * Notify users this is an experimental command and get them to approve first
      * this can be opted out by setting the argument --yes
      */
-    await notifyExperimentalCommand({ force });
+    await notifyExperimentalCommand('plugin:build', { force });
 
     const cwd = process.cwd();
 
-    /**
-     * Load the closest package.json and then verify the structure against what we expect.
-     */
-    const packageJsonLoader = ora('Verifying package.json \n').start();
+    const pkg = await loadPkg({ cwd, logger });
+    const pkgJson = await validatePkg({ pkg });
 
-    const rawPkg = await loadPkg({ cwd, logger }).catch((err) => {
-      packageJsonLoader.fail();
-      logger.error(err.message);
-      logger.debug(`Path checked – ${cwd}`);
-      process.exit(1);
-    });
+    if (!pkgJson.exports['./strapi-admin'] && !pkgJson.exports['./strapi-server']) {
+      throw new Error(
+        'You need to have either a strapi-admin or strapi-server export in your package.json'
+      );
+    }
 
-    const validatedPkg = await validatePkg({
-      pkg: rawPkg,
-    }).catch((err) => {
-      packageJsonLoader.fail();
-      logger.error(err.message);
-      process.exit(1);
-    });
+    const bundles: ConfigBundle[] = [];
 
-    /**
-     * Validate the exports of the package incl. the order of the
-     * exports within the exports map if applicable
-     */
-    const packageJson = await validateExportsOrdering({ pkg: validatedPkg, logger }).catch(
-      (err) => {
-        packageJsonLoader.fail();
-        logger.error(err.message);
-        process.exit(1);
+    if (pkgJson.exports['./strapi-admin']) {
+      const exp = pkgJson.exports['./strapi-admin'] as Export;
+
+      const bundle: ConfigBundle = {
+        source: exp.source,
+        import: exp.import,
+        require: exp.require,
+        runtime: 'web',
+      };
+
+      if (exp.types) {
+        bundle.types = exp.types;
+        // TODO: should this be sliced from the source path...?
+        bundle.tsconfig = './admin/tsconfig.build.json';
       }
-    );
 
-    packageJsonLoader.succeed('Verified package.json');
+      bundles.push(bundle);
+    }
 
-    /**
-     * We create tasks based on the exports of the package.json
-     * their handlers are then ran in the order of the exports map
-     * and results are logged to see gradual progress.
-     */
+    if (pkgJson.exports['./strapi-server']) {
+      const exp = pkgJson.exports['./strapi-server'] as Export;
 
-    const buildContextLoader = ora('Creating build context \n').start();
+      const bundle: ConfigBundle = {
+        source: exp.source,
+        import: exp.import,
+        require: exp.require,
+        runtime: 'node',
+      };
 
-    const extMap = getExportExtensionMap();
+      if (exp.types) {
+        bundle.types = exp.types;
+        // TODO: should this be sliced from the source path...?
+        bundle.tsconfig = './server/tsconfig.build.json';
+      }
 
-    const ctx = await createBuildContext({
+      bundles.push(bundle);
+    }
+
+    await build({
       cwd,
-      extMap,
-      logger,
-      pkg: packageJson,
-    }).catch((err) => {
-      buildContextLoader.fail();
-      logger.error(err.message);
-      process.exit(1);
+      configFile: false,
+      config: {
+        bundles,
+        dist: './dist',
+        /**
+         * ignore the exports map of a plugin, because we're streamlining the
+         * process and ensuring the server package and admin package are built
+         * with the correct runtime and their individual tsconfigs
+         */
+        exports: {},
+      },
+      ...opts,
     });
-
-    logger.debug('Build context: \n', ctx);
-
-    const buildTasks = await createBuildTasks(ctx);
-
-    buildContextLoader.succeed('Created build context');
-
-    /**
-     * If the distPath already exists, clean it
-     */
-    try {
-      logger.debug(`Cleaning dist folder: ${ctx.distPath}`);
-      await fs.rm(ctx.distPath, { recursive: true, force: true });
-      logger.debug('Cleaned dist folder');
-    } catch {
-      // do nothing, it will fail if the folder does not exist
-      logger.debug('There was no dist folder to clean');
-    }
-
-    for (const task of buildTasks) {
-      const handler = buildTaskHandlers(task);
-      handler.print(ctx, task);
-
-      await handler.run(ctx, task).catch((err: NodeJS.ErrnoException) => {
-        if (err instanceof Error) {
-          logger.error(err.message);
-        }
-
-        process.exit(1);
-      });
-    }
   } catch (err) {
     logger.error(
       'There seems to be an unexpected error, try again with --debug for more information \n'

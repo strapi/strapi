@@ -1,6 +1,6 @@
 {
   "name": "kitchensink-ts",
-  "version": "4.14.4",
+  "version": "4.14.5",
   "private": true,
   "description": "A Strapi application",
   "license": "MIT",
@@ -14,9 +14,9 @@
     "strapi": "strapi"
   },
   "dependencies": {
-    "@strapi/plugin-i18n": "4.14.4",
-    "@strapi/plugin-users-permissions": "4.14.4",
-    "@strapi/strapi": "4.14.4",
+    "@strapi/plugin-i18n": "4.14.5",
+    "@strapi/plugin-users-permissions": "4.14.5",
+    "@strapi/strapi": "4.14.5",
     "better-sqlite3": "8.6.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -24,7 +24,7 @@
     "styled-components": "5.3.3"
   },
   "engines": {
-    "node": ">=16.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {

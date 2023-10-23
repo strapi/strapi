@@ -1,6 +1,6 @@
 {
   "name": "@strapi/utils",
-  "version": "4.14.4",
+  "version": "4.14.5",
   "description": "Shared utilities for the Strapi packages",
   "keywords": [
     "strapi",
@@ -32,7 +32,7 @@
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "files": [
-    "./dist/**/!(*.d.ts.map)"
+    "./dist"
   ],
   "scripts": {
     "build": "pack-up build",
@@ -56,13 +56,13 @@
     "@strapi/pack-up": "workspace:*",
     "@types/koa": "2.13.4",
     "@types/node": "18.18.4",
-    "eslint-config-custom": "4.14.4",
+    "eslint-config-custom": "4.14.5",
     "koa": "2.13.4",
     "koa-body": "4.2.0",
-    "tsconfig": "4.14.4"
+    "tsconfig": "4.14.5"
   },
   "engines": {
-    "node": ">=16.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/generate-new",
-  "version": "4.14.4",
+  "version": "4.14.5",
   "description": "Generate a new Strapi application.",
   "keywords": [
     "generate",
@@ -29,18 +29,20 @@
     }
   ],
   "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "files": [
     "./dist"
   ],
   "scripts": {
-    "build": "run -T tsc && run copy-files",
-    "build:ts": "run build",
+    "build": "pack-up build && run copy-files",
     "clean": "run -T rimraf ./dist",
     "copy-files": "copyfiles -u 1 -a 'src/resources/files/**/*' 'src/resources/dot-files/**/*' 'src/resources/**/*.template' dist",
     "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
-    "watch": "run -T tsc -w --preserveWatchOutput"
+    "test:ts": "run -T tsc --noEmit",
+    "watch": "pack-up watch"
   },
   "dependencies": {
     "@sentry/node": "6.19.7",
@@ -56,10 +58,11 @@
     "tar": "6.1.13"
   },
   "devDependencies": {
+    "@strapi/pack-up": "workspace:*",
     "copyfiles": "2.4.1"
   },
   "engines": {
-    "node": ">=16.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   }
 }

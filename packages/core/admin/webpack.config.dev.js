@@ -62,6 +62,7 @@ module.exports = () => {
 
           return acc;
         }, {}),
+        '@strapi/helper-plugin$': path.resolve(__dirname, '..', 'helper-plugin', 'src'),
       },
     },
 

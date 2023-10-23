@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import ts from 'typescript';
 
 import { isError } from '../../core/errors';
+import { loadTsConfig } from '../../core/tsconfig';
 
 import { printDiagnostic } from './diagnostic';
 import { DtsBaseTask } from './types';
@@ -33,7 +34,18 @@ const dtsBuildTask: TaskHandler<DtsBuildTask> = {
     return new Observable((subscriber) => {
       Promise.all(
         task.entries.map(async (entry) => {
-          if (!ctx.ts) {
+          /**
+           * Entry level tsconfig's take precedence
+           */
+          const tsconfig = entry.tsconfig
+            ? loadTsConfig({
+                cwd: ctx.cwd,
+                path: entry.tsconfig,
+                logger: ctx.logger,
+              })
+            : ctx.ts;
+
+          if (!tsconfig) {
             ctx.logger.warn(
               `You've added a types entry but no tsconfig.json was found for ${entry.targetPath}. Skipping...`
             );
@@ -41,7 +53,7 @@ const dtsBuildTask: TaskHandler<DtsBuildTask> = {
             return;
           }
 
-          const program = ts.createProgram(ctx.ts.config.fileNames, ctx.ts.config.options);
+          const program = ts.createProgram(tsconfig.config.fileNames, tsconfig.config.options);
 
           const emitResult = program.emit();
 

@@ -2,35 +2,35 @@
  * Components
  * -----------------------------------------------------------------------------------------------*/
 
-export { AnErrorOccurred } from './components/AnErrorOccurred';
-export { CheckPagePermissions } from './components/CheckPagePermissions';
-export { CheckPermissions } from './components/CheckPermissions';
+export * from './components/AnErrorOccurred';
+export * from './components/CheckPagePermissions';
+export * from './components/CheckPermissions';
 export * from './components/ConfirmDialog';
-export { ContentBox } from './components/ContentBox';
-export { DateTimePicker } from './components/DateTimePicker';
-export { DynamicTable } from './components/DynamicTable';
-export { Table, useTableContext } from './components/Table';
-export { EmptyStateLayout } from './components/EmptyStateLayout';
-export { EmptyBodyTable } from './components/EmptyBodyTable';
-export { FilterListURLQuery } from './components/FilterListURLQuery';
-export { FilterPopoverURLQuery } from './components/FilterPopoverURLQuery';
-export { Form } from './components/Form';
-export { GenericInput } from './components/GenericInput';
+export * from './components/ContentBox';
+export * from './components/DateTimePicker';
+export * from './components/DynamicTable';
+export * from './components/Table';
+export * from './components/EmptyStateLayout';
+export * from './components/EmptyBodyTable';
+export * from './components/FilterListURLQuery';
+export * from './components/FilterPopoverURLQuery';
+export * from './components/Form';
+export * from './components/GenericInput';
 export * from './components/InjectionZone';
-export { Link } from './components/Link';
-export { LinkButton } from './components/LinkButton';
-export { LoadingIndicatorPage } from './components/LoadingIndicatorPage';
-export { NoContent } from './components/NoContent';
-export { NoMedia } from './components/NoMedia';
-export { NoPermissions } from './components/NoPermissions';
-export { NotAllowedInput } from './components/NotAllowedInput';
-export { PageSizeURLQuery } from './components/PageSizeURLQuery';
-export { PaginationURLQuery } from './components/PaginationURLQuery';
-export { ReactSelect } from './components/ReactSelect';
-export { RelativeTime } from './components/RelativeTime';
-export { SearchURLQuery } from './components/SearchURLQuery';
-export { SettingsPageTitle } from './components/SettingsPageTitle';
-export { Status } from './components/Status';
+export * from './components/Link';
+export * from './components/LinkButton';
+export * from './components/LoadingIndicatorPage';
+export * from './components/NoContent';
+export * from './components/NoMedia';
+export * from './components/NoPermissions';
+export * from './components/NotAllowedInput';
+export * from './components/PageSizeURLQuery';
+export * from './components/PaginationURLQuery';
+export * from './components/ReactSelect';
+export * from './components/RelativeTime';
+export * from './components/SearchURLQuery';
+export * from './components/SettingsPageTitle';
+export * from './components/Status';
 
 /* -------------------------------------------------------------------------------------------------
  * Content Manager
@@ -40,7 +40,7 @@ export {
   useCMEditViewDataManager,
   ContentManagerEditViewDataManagerContext,
 } from './content-manager/CMEditViewDataManager';
-export { getOtherInfos, getType } from './content-manager/utils/getAttributeInfos';
+export * from './content-manager/utils/getAttributeInfos';
 
 /* -------------------------------------------------------------------------------------------------
  * Features
@@ -62,48 +62,47 @@ export * from './features/Tracking';
  * -----------------------------------------------------------------------------------------------*/
 
 export * from './hooks/useAPIErrorHandler';
-export { useCallbackRef } from './hooks/useCallbackRef';
-export { useClipboard } from './hooks/useClipboard';
-export { useCollator } from './hooks/useCollator';
-export { useFetchClient } from './hooks/useFetchClient';
-export { useFilter } from './hooks/useFilter';
-export { useFocusInputField } from './hooks/useFocusInputField';
-export { useFocusWhenNavigate } from './hooks/useFocusWhenNavigate';
-export { useLockScroll } from './hooks/useLockScroll';
-export { usePersistentState } from './hooks/usePersistentState';
-export { useQuery } from './hooks/useQuery';
-export { useQueryParams } from './hooks/useQueryParams';
-export { useRBAC } from './hooks/useRBAC';
-export { useSelectionState } from './hooks/useSelectionState';
+export * from './hooks/useCallbackRef';
+export * from './hooks/useClipboard';
+export * from './hooks/useCollator';
+export * from './hooks/useFetchClient';
+export * from './hooks/useFilter';
+export * from './hooks/useFocusInputField';
+export * from './hooks/useFocusWhenNavigate';
+export * from './hooks/useLockScroll';
+export * from './hooks/usePersistentState';
+export * from './hooks/useQuery';
+export * from './hooks/useQueryParams';
+export * from './hooks/useRBAC';
+export * from './hooks/useSelectionState';
 
 /* -------------------------------------------------------------------------------------------------
  * Icons
  * -----------------------------------------------------------------------------------------------*/
 
-export { RemoveRoundedButton } from './icons/RemoveRoundedButton';
-export { SortIcon } from './icons/SortIcon';
+export * from './icons/RemoveRoundedButton';
+export * from './icons/SortIcon';
 
 /* -------------------------------------------------------------------------------------------------
  * Utils
  * -----------------------------------------------------------------------------------------------*/
 
-export { contentManagementUtilRemoveFieldsFromData } from './content-manager/utils/contentManagementUtilRemoveFieldsFromData';
-export { formatContentTypeData } from './content-manager/utils/formatContentTypeData';
-export { auth } from './utils/auth';
-export { to } from './utils/awaitToJs';
-export { difference } from './utils/difference';
-export { getAPIInnerErrors } from './utils/getAPIInnerErrors';
-export { getFetchClient } from './utils/getFetchClient';
-export { getFileExtension } from './utils/getFileExtension';
-export { getYupInnerErrors } from './utils/getYupInnerErrors';
-export { hasPermissions } from './utils/hasPermissions';
-export { findMatchingPermissions } from './utils/hasPermissions';
-export { normalizeAPIError } from './utils/normalizeAPIError';
-export { prefixFileUrlWithBackendUrl } from './utils/prefixFileUrlWithBackendUrl';
-export { prefixPluginTranslations } from './utils/prefixPluginTranslations';
-export { pxToRem } from './utils/pxToRem';
-export { request } from './utils/request';
-export { setHexOpacity } from './utils/setHexOpacity';
+export * from './content-manager/utils/contentManagementUtilRemoveFieldsFromData';
+export * from './content-manager/utils/formatContentTypeData';
+export * from './utils/auth';
+export * from './utils/awaitToJs';
+export * from './utils/difference';
+export * from './utils/getAPIInnerErrors';
+export * from './utils/getFetchClient';
+export * from './utils/getFileExtension';
+export * from './utils/getYupInnerErrors';
+export * from './utils/hasPermissions';
+export * from './utils/normalizeAPIError';
+export * from './utils/prefixFileUrlWithBackendUrl';
+export * from './utils/prefixPluginTranslations';
+export * from './utils/pxToRem';
+export * from './utils/request';
+export * from './utils/setHexOpacity';
 export * from './utils/stopPropagation';
-export { translatedErrors } from './utils/translatedErrors';
-export { wrapAxiosInstance } from './utils/wrapAxiosInstance';
+export * from './utils/translatedErrors';
+export * from './utils/wrapAxiosInstance';

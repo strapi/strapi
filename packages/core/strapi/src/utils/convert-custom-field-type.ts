@@ -23,7 +23,7 @@ const convertCustomFieldType = (strapi: Strapi) => {
   for (const schemaAttrbutes of allSchemasAttributes) {
     for (const attribute of Object.values(schemaAttrbutes)) {
       if (attribute.type === 'customField') {
-        const customField = strapi.container.get('custom-fields').get(attribute.customField);
+        const customField = strapi.get('custom-fields').get(attribute.customField);
         attribute.type = customField.type;
       }
     }

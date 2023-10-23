@@ -1,6 +1,6 @@
 {
   "name": "@strapi/data-transfer",
-  "version": "4.14.4",
+  "version": "4.14.5",
   "description": "Data transfer capabilities for Strapi",
   "keywords": [
     "strapi",
@@ -25,25 +25,26 @@
     }
   ],
   "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "files": [
-    "./dist/**/!(*.d.ts.map)"
+    "./dist"
   ],
   "scripts": {
-    "build": "run -T tsc -p tsconfig.build.json",
-    "build:ts": "run build",
+    "build": "pack-up build",
     "clean": "rimraf ./dist",
     "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "tsc -p tsconfig.build.json -w --preserveWatchOutput"
+    "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/logger": "4.14.4",
-    "@strapi/strapi": "4.14.4",
-    "@strapi/types": "4.14.4",
-    "@strapi/utils": "4.14.4",
+    "@strapi/logger": "4.14.5",
+    "@strapi/strapi": "4.14.5",
+    "@strapi/types": "4.14.5",
+    "@strapi/utils": "4.14.5",
     "chalk": "4.1.2",
     "cli-table3": "0.6.2",
     "commander": "8.3.0",
@@ -60,6 +61,7 @@
     "ws": "8.13.0"
   },
   "devDependencies": {
+    "@strapi/pack-up": "workspace:*",
     "@types/fs-extra": "9.0.13",
     "@types/jest": "29.5.2",
     "@types/koa": "2.13.4",
@@ -80,7 +82,7 @@
     "@strapi/strapi": "^4.14.4"
   },
   "engines": {
-    "node": ">=16.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   }
 }

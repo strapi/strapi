@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { configureStore } from '@reduxjs/toolkit';
 import { fixtures } from '@strapi/admin-test-utils';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { useRBAC } from '@strapi/helper-plugin';
@@ -7,7 +8,6 @@ import { fireEvent, getByLabelText, render, waitFor } from '@testing-library/rea
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
-import { createStore } from 'redux';
 
 import { SingleSignOn } from '../index';
 
@@ -33,16 +33,19 @@ const setup = (props) =>
       return (
         <QueryClientProvider client={client}>
           <Provider
-            store={createStore((state) => state, {
-              admin_app: {
-                permissions: {
-                  ...fixtures.permissions.app,
-                  settings: {
-                    ...fixtures.permissions.app.settings,
-                    sso: {
-                      main: [{ action: 'admin::provider-login.read', subject: null }],
-                      read: [{ action: 'admin::provider-login.read', subject: null }],
-                      update: [{ action: 'admin::provider-login.update', subject: null }],
+            store={configureStore({
+              reducer: (state) => state,
+              preloadedState: {
+                admin_app: {
+                  permissions: {
+                    ...fixtures.permissions.app,
+                    settings: {
+                      ...fixtures.permissions.app.settings,
+                      sso: {
+                        main: [{ action: 'admin::provider-login.read', subject: null }],
+                        read: [{ action: 'admin::provider-login.read', subject: null }],
+                        update: [{ action: 'admin::provider-login.update', subject: null }],
+                      },
                     },
                   },
                 },

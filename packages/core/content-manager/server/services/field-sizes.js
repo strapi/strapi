@@ -84,7 +84,7 @@ const createFieldSizesService = ({ strapi }) => {
 
     setCustomFieldInputSizes() {
       // Find all custom fields already registered
-      const customFields = strapi.container.get('custom-fields').getAll();
+      const customFields = strapi.get('custom-fields').getAll();
 
       // If they have a custom field size, register it
       Object.entries(customFields).forEach(([uid, customField]) => {

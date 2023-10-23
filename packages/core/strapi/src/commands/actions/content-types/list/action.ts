@@ -1,13 +1,13 @@
 import CLITable from 'cli-table3';
 import chalk from 'chalk';
 
-import strapi from '../../../../index';
+import strapi from '../../../../Strapi';
 
 export default async () => {
   const appContext = await strapi.compile();
   const app = await strapi(appContext).register();
 
-  const list = app.container.get('content-types').keys();
+  const list = app.get('content-types').keys();
 
   const infoTable = new CLITable({
     head: [chalk.blue('Name')],

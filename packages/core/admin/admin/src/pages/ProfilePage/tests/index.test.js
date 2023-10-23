@@ -5,8 +5,6 @@ import { rest } from 'msw';
 
 import ProfilePage from '../index';
 
-jest.mock('../../../components/LocalesProvider/useLocalesProvider');
-
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useFocusWhenNavigate: jest.fn(),

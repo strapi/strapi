@@ -1,6 +1,6 @@
 'use strict';
 
-const { features } = require('@strapi/strapi/dist/utils/ee').default;
+const { features } = require('@strapi/strapi/dist/utils/ee');
 const executeCERegister = require('../../server/register');
 const migrateAuditLogsTable = require('./migrations/audit-logs-table');
 const migrateReviewWorkflowStagesColor = require('./migrations/review-workflows-stages-color');
@@ -19,7 +19,7 @@ module.exports = async ({ strapi }) => {
   if (auditLogsIsEnabled) {
     strapi.hook('strapi::content-types.beforeSync').register(migrateAuditLogsTable);
     const auditLogsService = createAuditLogsService(strapi);
-    strapi.container.register('audit-logs', auditLogsService);
+    strapi.add('audit-logs', auditLogsService);
     await auditLogsService.register();
   }
   if (features.isEnabled('review-workflows')) {

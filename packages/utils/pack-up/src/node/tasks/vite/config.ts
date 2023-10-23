@@ -1,4 +1,6 @@
+/* eslint-disable no-nested-ternary */
 import react from '@vitejs/plugin-react';
+import { builtinModules } from 'node:module';
 import path from 'path';
 import { InlineConfig, createLogger } from 'vite';
 
@@ -24,6 +26,14 @@ const resolveViteConfig = (ctx: BuildContext, task: ViteBaseTask) => {
 
   const exportIds = Object.keys(exportMap).map((exportPath) => path.join(pkg.name, exportPath));
   const sourcePaths = Object.values(exportMap).map((exp) => path.resolve(cwd, exp.source));
+
+  const basePlugins = runtime === 'node' ? [] : [react()];
+
+  const plugins = ctx.config.plugins
+    ? typeof ctx.config.plugins === 'function'
+      ? ctx.config.plugins({ runtime })
+      : ctx.config.plugins
+    : [];
 
   const config = {
     configFile: false,
@@ -82,7 +92,15 @@ const resolveViteConfig = (ctx: BuildContext, task: ViteBaseTask) => {
 
           const name = idParts[0].startsWith('@') ? `${idParts[0]}/${idParts[1]}` : idParts[0];
 
-          if (name && external.includes(name)) {
+          const builtinModulesWithNodePrefix = [
+            ...builtinModules,
+            ...builtinModules.map((modName) => `node:${modName}`),
+          ];
+
+          if (
+            (name && external.includes(name)) ||
+            (name && builtinModulesWithNodePrefix.includes(name))
+          ) {
             return true;
           }
 
@@ -111,14 +129,7 @@ const resolveViteConfig = (ctx: BuildContext, task: ViteBaseTask) => {
         },
       },
     },
-    /**
-     * We _could_ omit this, but we'd need to introduce the
-     * concept of a custom config for the scripts straight away
-     *
-     * and since this is isolated to the Strapi CLI, we can make
-     * some assumptions and add some weight until we move it outside.
-     */
-    plugins: runtime === 'node' ? [] : [react()],
+    plugins: [...basePlugins, ...plugins],
   } satisfies InlineConfig;
 
   return config;

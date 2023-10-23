@@ -23,17 +23,20 @@ import { Route, Switch } from 'react-router-dom';
 
 import { PrivateRoute } from '../../components/PrivateRoute';
 import { ADMIN_PERMISSIONS_CE } from '../../constants';
-import { useConfiguration } from '../../hooks';
+import { useConfiguration } from '../../hooks/useConfiguration';
 import { useEnterprise } from '../../hooks/useEnterprise';
-import { createRoute, makeUniqueRoutes } from '../../utils';
+import { createRoute } from '../../utils/createRoute';
+import { makeUniqueRoutes } from '../../utils/makeUniqueRoutes';
 import AuthPage from '../AuthPage';
-import NotFoundPage from '../NotFoundPage';
-import UseCasePage from '../UseCasePage';
+import { NotFoundPage } from '../NotFoundPage';
+import { UseCasePage } from '../UseCasePage';
 
 import { ROUTES_CE, SET_ADMIN_PERMISSIONS } from './constants';
 
 const AuthenticatedApp = lazy(() =>
-  import(/* webpackChunkName: "Admin-authenticatedApp" */ '../../components/AuthenticatedApp')
+  import(/* webpackChunkName: "Admin-authenticatedApp" */ '../../components/AuthenticatedApp').then(
+    (mod) => ({ default: mod.AuthenticatedApp })
+  )
 );
 
 function App() {

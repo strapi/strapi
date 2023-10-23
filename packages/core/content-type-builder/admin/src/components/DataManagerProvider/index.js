@@ -17,9 +17,8 @@ import set from 'lodash/set';
 import size from 'lodash/size';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { connect, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { Redirect, useLocation, useRouteMatch } from 'react-router-dom';
-import { compose } from 'redux';
 
 import DataManagerContext from '../../contexts/DataManagerContext';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';
@@ -58,17 +57,17 @@ import retrieveSpecificInfoFromComponents from './utils/retrieveSpecificInfoFrom
 import serverRestartWatcher from './utils/serverRestartWatcher';
 import validateSchema from './utils/validateSchema';
 
-const DataManagerProvider = ({
-  children,
-  components,
-  contentTypes,
-  isLoading,
-  isLoadingForDataToBeSet,
-  initialData,
-  modifiedData,
-  reservedNames,
-}) => {
+const DataManagerProvider = ({ children }) => {
   const dispatch = useDispatch();
+  const {
+    components,
+    contentTypes,
+    isLoading,
+    isLoadingForDataToBeSet,
+    initialData,
+    modifiedData,
+    reservedNames,
+  } = useSelector(makeSelectDataManagerProvider());
   const toggleNotification = useNotification();
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
   const { setCurrentStep } = useGuidedTour();
@@ -619,22 +618,8 @@ const DataManagerProvider = ({
   );
 };
 
-DataManagerProvider.defaultProps = {
-  components: {},
-};
-
 DataManagerProvider.propTypes = {
   children: PropTypes.node.isRequired,
-  components: PropTypes.object,
-  contentTypes: PropTypes.object.isRequired,
-  isLoading: PropTypes.bool.isRequired,
-  isLoadingForDataToBeSet: PropTypes.bool.isRequired,
-  initialData: PropTypes.object.isRequired,
-  modifiedData: PropTypes.object.isRequired,
-  reservedNames: PropTypes.object.isRequired,
 };
 
-const mapStateToProps = makeSelectDataManagerProvider();
-const withConnect = connect(mapStateToProps, null);
-
-export default compose(withConnect)(memo(DataManagerProvider));
+export default memo(DataManagerProvider);
