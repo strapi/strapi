@@ -1,32 +1,55 @@
 import * as React from 'react';
 
 import { useAPIErrorHandler, useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { AxiosError } from 'axios';
 import { useQueries } from 'react-query';
+
+import { Component, ContentType } from '../../../shared/schema';
+import { APIResponse } from '../types/adminAPI';
 
 export function useContentTypes() {
   const { get } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
-  const queries = useQueries(
-    ['components', 'content-types'].map((type) => {
-      return {
-        queryKey: ['content-manager', type],
-        async queryFn() {
-          const {
-            data: { data },
-          } = await get(`/content-manager/${type}`);
+  const queries = useQueries([
+    {
+      queryKey: ['content-manager', 'components'],
+      async queryFn() {
+        const {
+          data: { data },
+        } = await get<APIResponse<Component[]>>(`/content-manager/components`);
 
-          return data;
-        },
-        onError(error) {
+        return data;
+      },
+      onError(error: unknown) {
+        if (error instanceof AxiosError) {
           toggleNotification({
             type: 'warning',
             message: formatAPIError(error),
           });
-        },
-      };
-    })
-  );
+        }
+      },
+    },
+
+    {
+      queryKey: ['content-manager', 'content-types'],
+      async queryFn() {
+        const {
+          data: { data },
+        } = await get<APIResponse<ContentType[]>>(`/content-manager/content-types`);
+
+        return data;
+      },
+      onError(error: unknown) {
+        if (error instanceof AxiosError) {
+          toggleNotification({
+            type: 'warning',
+            message: formatAPIError(error),
+          });
+        }
+      },
+    },
+  ]);
 
   const [components, contentTypes] = queries;
   const isLoading = components.isLoading || contentTypes.isLoading;
