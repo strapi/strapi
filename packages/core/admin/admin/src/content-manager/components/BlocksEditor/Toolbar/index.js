@@ -183,8 +183,6 @@ const toggleBlock = (editor, value) => {
   ReactEditor.focus(editor);
 };
 
-const ALLOWED_MEDIA_TYPE = 'images';
-
 const IMAGE_SCHEMA_FIELDS = [
   'name',
   'alternativeText',
@@ -220,12 +218,30 @@ const ImageDialog = ({ handleClose }) => {
   const MediaLibraryDialog = components['media-library'];
 
   const insertImages = (images) => {
-    // Image node created using select or existing selection node needs to be deleted before adding new image nodes
-    Transforms.removeNodes(editor);
-    images.forEach((img) => {
-      const image = { type: 'image', image: img, children: [{ type: 'text', text: '' }] };
-      Transforms.insertNodes(editor, image);
+    // If the selection is inside a list, split the list so that the modified block is outside of it
+    Transforms.unwrapNodes(editor, {
+      match: (node) => node.type === 'list',
+      split: true,
     });
+
+    // Save the path of the node that is being replaced by an image to insert the images there later
+    // It's the closest full block node above the selection
+    const [, pathToInsert] = Editor.above(editor, {
+      match(node) {
+        const isInlineNode = ['text', 'link'].includes(node.type);
+
+        return !isInlineNode;
+      },
+    });
+
+    // Remove the previous node that is being replaced by an image
+    Transforms.removeNodes(editor);
+
+    // Convert images to nodes and insert them
+    const nodesToInsert = images.map((image) => {
+      return { type: 'image', image, children: [{ type: 'text', text: '' }] };
+    });
+    Transforms.insertNodes(editor, nodesToInsert, { at: pathToInsert });
   };
 
   const handleSelectAssets = (images) => {
@@ -252,7 +268,7 @@ const ImageDialog = ({ handleClose }) => {
 
   return (
     <MediaLibraryDialog
-      allowedTypes={[ALLOWED_MEDIA_TYPE]}
+      allowedTypes={['images']}
       onClose={handleClose}
       onSelectAssets={handleSelectAssets}
     />
