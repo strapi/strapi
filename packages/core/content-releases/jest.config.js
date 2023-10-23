@@ -1,6 +1,6 @@
 'use strict';
 
 module.exports = {
-  preset: '../../../jest-preset.front.js',
+  preset: '../../../jest-preset.unit.js',
   displayName: 'Core Content Releases',
 };

@@ -6,6 +6,6 @@ const { features } = require('@strapi/strapi/dist/utils/ee').default;
 export const register = () => {
   if (features.isEnabled('cms-content-releases')) {
     // EE Code would be here
-    // For testing if the plugin is working, add a console.log
+    console.log('cms-content-releases is enabled');
   }
 };
