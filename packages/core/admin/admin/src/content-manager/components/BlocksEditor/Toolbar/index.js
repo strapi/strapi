@@ -51,16 +51,14 @@ const FlexButton = styled(Flex).attrs({ as: 'button' })`
 `;
 
 const SelectWrapper = styled(Box)`
-  // Styling changes to SingleSelect component doesn't work, so adding wrapper to target SingleSelect
-  & > * div[role='combobox'] {
+  // Styling changes to SingleSelect component don't work, so adding wrapper to target SingleSelect
+  div[role='combobox'] {
     border: none;
     cursor: pointer;
 
-    &[aria-disabled='false'] {
-      &:hover {
-        cursor: pointer;
-        background: ${({ theme }) => theme.colors.primary100};
-      }
+    &[aria-disabled='false']:hover {
+      cursor: pointer;
+      background: ${({ theme }) => theme.colors.primary100};
     }
 
     &[aria-disabled] {
