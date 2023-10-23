@@ -54,9 +54,7 @@ const AttributeOption = ({ type }) => {
     <OptionBoxWrapper padding={4} as="button" hasRadius type="button" onClick={handleClick}>
       <Flex>
         <AttributeIcon type={type} />
-        {/* TODO: Remove after the RTE Blocks Stable release (width) */}
         <Box paddingLeft={4} width="100%">
-          {/* TODO: Remove after the RTE Blocks Stable release (justifyContent) */}
           <Flex justifyContent="space-between">
             <Typography fontWeight="bold">
               {formatMessage({ id: getTrad(`attribute.${type}`), defaultMessage: type })}
