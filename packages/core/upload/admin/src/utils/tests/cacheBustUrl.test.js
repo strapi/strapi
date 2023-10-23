@@ -6,7 +6,7 @@ describe('cacheBustUrl', () => {
   const urlWithoutTimestamp = 'https://example.com/image.jpg';
   const urlWithUnixTimestamp = 'https://example.com/image.jpg?timestamp=1634645967';
   const urlWithExistingTimestamp = 'https://example.com/image.jpg?updatedAt=2023-10-19T15:39:24Z';
-  const urlWithExistingTimestampNoHyphens = 'https://example.com/image.jpg?X-Am-Date=20231023T093645Z';
+  const urlWithExistingTimestampNoHyphens = 'https://example.com/image.jpg?X-Amz-Date=20231023T093645Z';
 
   test('returns undefined for undefined url string', () => {
     const result = cacheBustUrl({ url: undefined, timestamp });
