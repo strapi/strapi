@@ -128,3 +128,10 @@ const CustomFieldsProvider = ({ children, customFields }: CustomFieldsProviderPr
 const useCustomFields = () => React.useContext(CustomFieldsContext);
 
 export { CustomFieldsContext, CustomFieldsProvider, useCustomFields };
+export type {
+  CustomFieldsProviderProps,
+  CustomField,
+  CustomFieldComponents,
+  CustomFieldOption,
+  CustomFieldOptions,
+};

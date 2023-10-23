@@ -3,7 +3,7 @@ import { getConfigUrls, getAbsoluteServerUrl } from '@strapi/utils';
 
 import { getEnabledPlugins } from '../../../core/loaders/plugins/get-enabled-plugins';
 import addSlash from '../../../utils/addSlash';
-import strapi from '../../../index';
+import strapi from '../../../Strapi';
 
 export default async ({ browser }: { browser: boolean }) => {
   const appContext = await strapi.compile();

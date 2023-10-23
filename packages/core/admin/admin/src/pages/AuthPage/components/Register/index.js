@@ -32,7 +32,7 @@ import styled from 'styled-components';
 
 import { useNpsSurveySettings } from '../../../../components/NpsSurvey';
 import { Logo } from '../../../../components/UnauthenticatedLogo';
-import UnauthenticatedLayout, { LayoutContent } from '../../../../layouts/UnauthenticatedLayout';
+import { LayoutContent, UnauthenticatedLayout } from '../../../../layouts/UnauthenticatedLayout';
 import FieldActionWrapper from '../FieldActionWrapper';
 
 const A = styled.a`

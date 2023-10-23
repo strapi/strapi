@@ -115,3 +115,5 @@ export {
   useAppInfo,
   useAppInfos,
 };
+
+export type { AppInfoContextValue, AppInfoProviderProps };

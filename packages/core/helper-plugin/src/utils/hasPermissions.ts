@@ -1,9 +1,7 @@
 import { getFetchClient } from './getFetchClient';
 
-import type { domain } from '@strapi/permissions';
+import type { Permission } from '../features/RBAC';
 import type { GenericAbortSignal } from 'axios';
-
-type Permission = domain.permission.Permission;
 
 const findMatchingPermissions = (userPermissions: Permission[], permissions: Permission[]) =>
   userPermissions.reduce<Permission[]>((acc, curr) => {
@@ -24,7 +22,7 @@ const formatPermissionsForRequest = (permissions: Permission[]) =>
       return {};
     }
 
-    const returnedPermission: Permission = {
+    const returnedPermission: Partial<Permission> = {
       action: permission.action,
     };
 

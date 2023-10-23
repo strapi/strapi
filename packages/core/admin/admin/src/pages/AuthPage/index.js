@@ -8,10 +8,9 @@ import omit from 'lodash/omit';
 import PropTypes from 'prop-types';
 import { Redirect, useHistory, useRouteMatch } from 'react-router-dom';
 
-import persistStateToLocaleStorage from '../../components/GuidedTour/utils/persistStateToLocaleStorage';
 import { useLocales } from '../../components/LanguageProvider';
 import { useEnterprise } from '../../hooks/useEnterprise';
-import formatAPIErrors from '../../utils/formatAPIErrors';
+import { formatAPIErrors} from '../../utils/formatAPIErrors';
 
 import { LoginCE } from './components/Login';
 import { FORMS } from './constants';
@@ -181,7 +180,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         const isUserSuperAdmin = roles.find(({ code }) => code === 'strapi-super-admin');
 
         if (isUserSuperAdmin) {
-          persistStateToLocaleStorage.setSkipped(false);
+          auth.set(false, 'GUIDED_TOUR_SKIPPED', true);
           setSkipped(false);
           trackUsage('didLaunchGuidedtour');
         }

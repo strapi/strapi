@@ -5,7 +5,7 @@ import { getConfigUrls } from '@strapi/utils';
 
 import ee from '../../utils/ee';
 import addSlash from '../../utils/addSlash';
-import strapi from '../../index';
+import strapi from '../../Strapi';
 import { getEnabledPlugins } from '../../core/loaders/plugins/get-enabled-plugins';
 
 export interface Options {
