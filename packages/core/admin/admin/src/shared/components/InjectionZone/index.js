@@ -2,7 +2,7 @@ import React from 'react';
 
 import PropTypes from 'prop-types';
 
-import { useInjectionZone } from '../../hooks';
+import { useInjectionZone } from '../../hooks/useInjectionZone';
 
 const InjectionZone = ({ area, ...props }) => {
   const compos = useInjectionZone(area);

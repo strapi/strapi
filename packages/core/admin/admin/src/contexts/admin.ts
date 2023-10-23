@@ -4,7 +4,7 @@ interface AdminContextValue {
   /**
    * TODO: this should come from `StrapiApp['getAdminInjectedComponents']`
    */
-  getAdminInjectedComponents: () => unknown;
+  getAdminInjectedComponents: (moduleName: string, page: string, position: string) => unknown;
 }
 
 const AdminContext = React.createContext<AdminContextValue>({
