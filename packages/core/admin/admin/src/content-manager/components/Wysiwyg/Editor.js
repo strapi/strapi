@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 
 import CodeMirror from 'codemirror5';
 import PropTypes from 'prop-types';
@@ -29,6 +29,11 @@ const Editor = forwardRef(
     const onChangeRef = useRef(onChange);
 
     useEffect(() => {
+      if (editorRef.current) {
+        // Ensure the editor and its wrapper are cleaned up whenever this view is re-rendered
+        // e.g. in case of re-ordering wysiwyg components in a DynamicZone
+        editorRef.current.toTextArea();
+      }
       editorRef.current = CodeMirror.fromTextArea(textareaRef.current, {
         lineWrapping: true,
         extraKeys: {
