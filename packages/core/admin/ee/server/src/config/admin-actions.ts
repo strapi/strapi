@@ -1,6 +1,4 @@
-'use strict';
-
-module.exports = {
+export default {
   sso: [
     {
       uid: 'provider-login.read',
