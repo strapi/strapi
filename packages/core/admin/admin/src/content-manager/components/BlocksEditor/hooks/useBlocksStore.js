@@ -167,7 +167,8 @@ const handleBackspaceKeyOnList = (editor, event) => {
   const isListEmpty = currentList.children.length === 1 && currentListItem.children[0].text === '';
   const isNodeStart = Editor.isStart(editor, editor.selection.anchor, currentListItemPath);
   const isEditorStart = Editor.before(editor, currentListPath) == null;
-  const isFocusAtTheBeginningOfALine = editor.selection.focus.offset === 0;
+  const isFocusAtTheBeginningOfALine =
+    editor.selection.focus.offset === 0 && editor.selection.focus.at(-1) === 0;
 
   if (isListEmpty) {
     event.preventDefault();
