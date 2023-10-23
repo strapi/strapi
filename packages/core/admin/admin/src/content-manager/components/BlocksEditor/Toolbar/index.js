@@ -1,7 +1,15 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
-import { Flex, Icon, Tooltip, Select, Option, Box, Typography } from '@strapi/design-system';
+import {
+  Flex,
+  Icon,
+  Tooltip,
+  SingleSelect,
+  SingleSelectOption,
+  Box,
+  Typography,
+} from '@strapi/design-system';
 import { pxToRem, prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
 import { Link } from '@strapi/icons';
 import PropTypes from 'prop-types';
@@ -38,6 +46,29 @@ const FlexButton = styled(Flex).attrs({ as: 'button' })`
     // Only apply hover styles if the button is enabled
     &:hover {
       background: ${({ theme }) => theme.colors.primary100};
+    }
+  }
+`;
+
+const SelectWrapper = styled(Box)`
+  // Styling changes to SingleSelect component don't work, so adding wrapper to target SingleSelect
+  div[role='combobox'] {
+    border: none;
+    cursor: pointer;
+
+    &[aria-disabled='false']:hover {
+      cursor: pointer;
+      background: ${({ theme }) => theme.colors.primary100};
+    }
+
+    &[aria-disabled] {
+      background: transparent;
+      cursor: inherit;
+
+      // Select text and icons should also have disabled color
+      span {
+        color: ${({ theme }) => theme.colors.neutral600};
+      }
     }
   }
 `;
@@ -340,28 +371,30 @@ const BlocksDropdown = ({ disabled }) => {
 
   return (
     <>
-      <Select
-        startIcon={<Icon as={blocks[blockSelected].icon} />}
-        onChange={selectOption}
-        placeholder={blocks[blockSelected].label}
-        value={blockSelected}
-        onCloseAutoFocus={preventSelectFocus}
-        aria-label={formatMessage({
-          id: 'components.Blocks.blocks.selectBlock',
-          defaultMessage: 'Select a block',
-        })}
-        disabled={disabled}
-      >
-        {blockKeysToInclude.map((key) => (
-          <BlockOption
-            key={key}
-            value={key}
-            label={blocks[key].label}
-            icon={blocks[key].icon}
-            blockSelected={blockSelected}
-          />
-        ))}
-      </Select>
+      <SelectWrapper>
+        <SingleSelect
+          startIcon={<Icon as={blocks[blockSelected].icon} />}
+          onChange={selectOption}
+          placeholder={blocks[blockSelected].label}
+          value={blockSelected}
+          onCloseAutoFocus={preventSelectFocus}
+          aria-label={formatMessage({
+            id: 'components.Blocks.blocks.selectBlock',
+            defaultMessage: 'Select a block',
+          })}
+          disabled={disabled}
+        >
+          {blockKeysToInclude.map((key) => (
+            <BlockOption
+              key={key}
+              value={key}
+              label={blocks[key].label}
+              icon={blocks[key].icon}
+              blockSelected={blockSelected}
+            />
+          ))}
+        </SingleSelect>
+      </SelectWrapper>
       {isMediaLibraryVisible && <ImageDialog handleClose={() => setIsMediaLibraryVisible(false)} />}
     </>
   );
@@ -377,12 +410,12 @@ const BlockOption = ({ value, icon, label, blockSelected }) => {
   const isSelected = value === blockSelected;
 
   return (
-    <Option
+    <SingleSelectOption
       startIcon={<Icon as={icon} color={isSelected ? 'primary600' : 'neutral600'} />}
       value={value}
     >
       {formatMessage(label)}
-    </Option>
+    </SingleSelectOption>
   );
 };
 
@@ -627,6 +660,7 @@ const BlocksToolbar = ({ disabled }) => {
       {/* Remove after the RTE Blocks Beta release (paddingRight and width) */}
       <ToolbarWrapper gap={2} padding={2} paddingRight={4} width="100%">
         <BlocksDropdown disabled={disabled} />
+        <Separator />
         <Toolbar.ToggleGroup type="multiple" asChild>
           <Flex gap={1} marginLeft={1}>
             {Object.entries(modifiers).map(([name, modifier]) => (
