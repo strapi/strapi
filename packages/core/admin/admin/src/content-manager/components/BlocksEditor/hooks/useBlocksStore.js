@@ -179,7 +179,13 @@ const handleBackspaceKeyOnList = (editor, event) => {
       });
     }
     // Transforms the list item into a paragraph
-    Transforms.setNodes(editor, { type: 'paragraph' });
+    Transforms.setNodes(
+      editor,
+      { type: 'paragraph' },
+      {
+        hanging: true,
+      }
+    );
   } else if (isFocusAtTheBeginningOfALine) {
     // If the focus is at the beginning of a line we need to replace it with a paragraph
     Transforms.setNodes(editor, { type: 'paragraph' });
