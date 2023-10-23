@@ -33,7 +33,7 @@ export declare namespace Create {
 
   export interface Response {
     data: ApiToken;
-    errors?: errors.ApplicationError | YupValidationError;
+    error?: errors.ApplicationError | YupValidationError;
   }
 }
 
@@ -48,7 +48,7 @@ export declare namespace List {
 
   export interface Response {
     data: ApiTokenResponse[];
-    errors?: errors.ApplicationError;
+    error?: errors.ApplicationError;
   }
 }
 
@@ -67,7 +67,7 @@ export declare namespace Revoke {
 
   export interface Response {
     data: ApiTokenResponse;
-    errors?: errors.ApplicationError;
+    error?: errors.ApplicationError;
   }
 }
 
@@ -86,7 +86,7 @@ export declare namespace Get {
 
   export interface Response {
     data: ApiTokenResponse;
-    errors?: errors.ApplicationError;
+    error?: errors.ApplicationError;
   }
 }
 
@@ -105,6 +105,6 @@ export declare namespace Update {
 
   export interface Response {
     data: ApiTokenResponse;
-    errors?: errors.ApplicationError | YupValidationError;
+    error?: errors.ApplicationError | YupValidationError;
   }
 }
