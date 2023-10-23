@@ -42,6 +42,13 @@ const sanitizeMainField = (model, mainField, userAbility) => {
       }
     }
 
+    //allow fetching the field of relation field (linked to admin user collection) if has read permission.
+    if (model.uid === 'admin::user') {
+      if (userAbility.can('admin::users.read', 'admin::users')) {
+        return mainField;
+      }
+    }
+
     return 'id';
   }
 
