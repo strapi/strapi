@@ -193,7 +193,7 @@ const ImageDialog = ({ handleClose }) => {
       split: true,
     });
 
-    // Save the path of the node that is being replaced by an image to later insert the images there
+    // Save the path of the node that is being replaced by an image to insert the images there later
     // It's the closest full block node above the selection
     const [, pathToInsert] = Editor.above(editor, {
       match(node) {
