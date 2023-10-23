@@ -3,16 +3,16 @@ import React from 'react';
 import { CardAsset } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 
-import { appendSearchParamsToUrl } from '../../utils';
+import { cacheBustUrl } from '../../utils';
 
 import { AssetCardBase } from './AssetCardBase';
 
 export const ImageAssetCard = ({ height, width, thumbnail, size, alt, ...props }) => {
   // Prevents the browser from caching the URL for all sizes and allow react-query to make a smooth update
   // instead of a full refresh
-  const urlWithCacheBusting = appendSearchParamsToUrl({
+  const urlWithCacheBusting = cacheBustUrl({
     url: thumbnail,
-    params: { updatedAt: props.updatedAt },
+    timestamp: props.updatedAt,
   });
 
   return (
