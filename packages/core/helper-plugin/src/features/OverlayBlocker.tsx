@@ -10,11 +10,14 @@ import styled from 'styled-components';
  * -----------------------------------------------------------------------------------------------*/
 
 interface OverlayBlockerContextValue {
-  lockApp?: () => void;
-  unlockApp?: () => void;
+  lockApp: () => void;
+  unlockApp: () => void;
 }
 
-const OverlayBlockerContext = React.createContext<OverlayBlockerContextValue>({});
+const OverlayBlockerContext = React.createContext<OverlayBlockerContextValue>({
+  lockApp: () => {},
+  unlockApp: () => {},
+});
 
 /* -------------------------------------------------------------------------------------------------
  * Provider
