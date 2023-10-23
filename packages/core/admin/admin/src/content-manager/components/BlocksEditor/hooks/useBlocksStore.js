@@ -167,8 +167,8 @@ const handleBackspaceKeyOnList = (editor, event) => {
   const isListEmpty = currentList.children.length === 1 && currentListItem.children[0].text === '';
   const isNodeStart = Editor.isStart(editor, editor.selection.anchor, currentListItemPath);
   const isEditorStart = Editor.before(editor, currentListPath) == null;
-  const isFocusAtTheBeginningOfALine =
-    editor.selection.focus.offset === 0 && editor.selection.focus.at(-1) === 0;
+  const isFocusAtTheBeginningOfAChild =
+    editor.selection.focus.offset === 0 && editor.selection.focus.path.at(-1) === 0;
 
   if (isListEmpty) {
     event.preventDefault();
@@ -187,11 +187,11 @@ const handleBackspaceKeyOnList = (editor, event) => {
         hanging: true,
       }
     );
-  } else if (isFocusAtTheBeginningOfALine) {
+  } else if (isFocusAtTheBeginningOfAChild) {
     Transforms.liftNodes(editor, {
       match: (n) => n.type === 'list-item',
     });
-    // If the focus is at the beginning of a line we need to replace it with a paragraph
+    // If the focus is at the beginning of a child node we need to replace it with a paragraph
     Transforms.setNodes(editor, { type: 'paragraph' });
   }
 };
