@@ -166,7 +166,6 @@ const handleBackspaceKeyOnList = (editor, event) => {
   const [currentList, currentListPath] = Editor.parent(editor, currentListItemPath);
   const isListEmpty = currentList.children.length === 1 && currentListItem.children[0].text === '';
   const isNodeStart = Editor.isStart(editor, editor.selection.anchor, currentListItemPath);
-  const isEditorStart = Editor.before(editor, currentListPath) == null;
   const isFocusAtTheBeginningOfAChild =
     editor.selection.focus.offset === 0 && editor.selection.focus.path.at(-1) === 0;
 
@@ -174,11 +173,9 @@ const handleBackspaceKeyOnList = (editor, event) => {
     event.preventDefault();
     replaceListWithEmptyBlock(editor, currentListPath);
   } else if (isNodeStart) {
-    if (isEditorStart) {
-      Transforms.liftNodes(editor, {
-        match: (n) => n.type === 'list-item',
-      });
-    }
+    Transforms.liftNodes(editor, {
+      match: (n) => n.type === 'list-item',
+    });
     // Transforms the list item into a paragraph
     Transforms.setNodes(
       editor,
