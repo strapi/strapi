@@ -3,7 +3,7 @@ import React from 'react';
 import { CheckPagePermissions } from '@strapi/helper-plugin';
 import { useSelector } from 'react-redux';
 
-import { selectAdminPermissions } from '../../../../../../../../admin/src/pages/App/selectors';
+import { selectAdminPermissions } from '../../../../../../../../admin/src/selectors';
 
 import { ReviewWorkflowsCreateView } from './CreateView';
 

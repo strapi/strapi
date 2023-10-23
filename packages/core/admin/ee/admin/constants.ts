@@ -1,3 +1,6 @@
+// @ts-expect-error not converted yet
+import { AuthResponse } from './pages/AuthResponse';
+
 export const ADMIN_PERMISSIONS_EE = {
   settings: {
     auditLogs: {
@@ -17,3 +20,11 @@ export const ADMIN_PERMISSIONS_EE = {
     },
   },
 };
+
+export const ROUTES_EE = [
+  {
+    Component: () => ({ default: AuthResponse }),
+    to: '/auth/login/:authResponse',
+    exact: true,
+  },
+];
