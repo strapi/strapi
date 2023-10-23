@@ -660,6 +660,7 @@ const BlocksToolbar = ({ disabled }) => {
       {/* Remove after the RTE Blocks Beta release (paddingRight and width) */}
       <ToolbarWrapper gap={2} padding={2} paddingRight={4} width="100%">
         <BlocksDropdown disabled={disabled} />
+        <Separator />
         <Toolbar.ToggleGroup type="multiple" asChild>
           <Flex gap={1} marginLeft={1}>
             {Object.entries(modifiers).map(([name, modifier]) => (
