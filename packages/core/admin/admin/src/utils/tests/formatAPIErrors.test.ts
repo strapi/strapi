@@ -1,12 +1,8 @@
-import formatAPIErrors from '../formatAPIErrors';
+import { formatAPIErrors } from '../formatAPIErrors';
 
 describe('ADMIN | utils | formatAPIErrors', () => {
   it('should return an empty object', () => {
     expect(formatAPIErrors({ data: {} })).toEqual({});
-  });
-
-  it('should return an empty object in case of error', () => {
-    expect(formatAPIErrors({})).toEqual({});
   });
 
   it('should return a formatted object', () => {

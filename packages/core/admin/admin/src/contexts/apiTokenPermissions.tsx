@@ -8,7 +8,7 @@ interface PseudoEvent {
   target: { value: string };
 }
 
-interface APITokenPermissionsContextProviderProps {
+interface ApiTokenPermissionsContextValue {
   selectedAction: string[] | null;
   routes: string[];
   selectedActions: string[];
@@ -25,11 +25,11 @@ interface APITokenPermissionsContextProviderProps {
   setSelectedAction: ({ target: { value } }: PseudoEvent) => void;
 }
 
-interface ApiTokenPermissionsContextProviderProps extends APITokenPermissionsContextProviderProps {
+interface ApiTokenPermissionsContextProviderProps extends ApiTokenPermissionsContextValue {
   children: React.ReactNode[];
 }
 
-const ApiTokenPermissionsContext = React.createContext<APITokenPermissionsContextProviderProps>({
+const ApiTokenPermissionsContext = React.createContext<ApiTokenPermissionsContextValue>({
   selectedAction: null,
   routes: [],
   selectedActions: [],
@@ -60,3 +60,5 @@ export {
   ApiTokenPermissionsContextProvider,
   useApiTokenPermissionsContext,
 };
+
+export type { ApiTokenPermissionsContextValue, ApiTokenPermissionsContextProviderProps };
