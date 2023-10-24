@@ -1,15 +1,7 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
-import {
-  Flex,
-  Icon,
-  Tooltip,
-  SingleSelect,
-  SingleSelectOption,
-  Box,
-  Typography,
-} from '@strapi/design-system';
+import { Flex, Icon, Tooltip, SingleSelect, SingleSelectOption, Box } from '@strapi/design-system';
 import { pxToRem, prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
 import { Link } from '@strapi/icons';
 import PropTypes from 'prop-types';
@@ -632,15 +624,6 @@ LinkButton.propTypes = {
   disabled: PropTypes.bool.isRequired,
 };
 
-// TODO: Remove after the RTE Blocks Beta release
-const BetaTag = styled(Box)`
-  background-color: ${({ theme }) => theme.colors.secondary100};
-  border: ${({ theme }) => `1px solid ${theme.colors.secondary200}`};
-  border-radius: ${({ theme }) => theme.borderRadius};
-  font-size: ${({ theme }) => theme.fontSizes[0]};
-  padding: ${({ theme }) => `${2 / 16}rem ${theme.spaces[1]}`};
-`;
-
 const BlocksToolbar = ({ disabled }) => {
   const modifiers = useModifiersStore();
   const blocks = useBlocksStore();
@@ -673,8 +656,7 @@ const BlocksToolbar = ({ disabled }) => {
 
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
-      {/* Remove after the RTE Blocks Beta release (paddingRight and width) */}
-      <ToolbarWrapper gap={2} padding={2} paddingRight={4} width="100%">
+      <ToolbarWrapper gap={2} padding={2}>
         <BlocksDropdown disabled={disabled} />
         <Separator />
         <Toolbar.ToggleGroup type="multiple" asChild>
@@ -700,14 +682,6 @@ const BlocksToolbar = ({ disabled }) => {
             <ListButton block={blocks['list-ordered']} disabled={disabled} />
           </Flex>
         </Toolbar.ToggleGroup>
-        {/* TODO: Remove after the RTE Blocks Beta release */}
-        <Flex grow={1} justifyContent="flex-end">
-          <BetaTag>
-            <Typography textColor="secondary600" variant="sigma">
-              BETA
-            </Typography>
-          </BetaTag>
-        </Flex>
       </ToolbarWrapper>
     </Toolbar.Root>
   );
