@@ -2,6 +2,7 @@
   "extends": "tsconfig/client.json",
   "include": [
     "src",
+    "custom.d.ts"
   ],
   "compilerOptions": {
     "rootDir": "../",

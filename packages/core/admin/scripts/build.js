@@ -23,7 +23,7 @@ const buildAdmin = async () => {
    */
   const plugins = getPlugins([
     '@strapi/plugin-content-type-builder',
-    '@strapi/content-releases',
+    process.env.FEATURE_FLAG_CONTENT_RELEASES && '@strapi/content-releases',
     '@strapi/plugin-email',
     '@strapi/plugin-upload',
     '@strapi/plugin-i18n',
