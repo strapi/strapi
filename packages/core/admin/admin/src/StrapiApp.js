@@ -8,6 +8,7 @@ import pick from 'lodash/pick';
 import { Helmet } from 'react-helmet';
 import { BrowserRouter } from 'react-router-dom';
 
+import { App } from './App';
 import Logo from './assets/images/logo-strapi-2022.svg';
 import { LANGUAGE_LOCAL_STORAGE_KEY } from './components/LanguageProvider';
 import { Providers } from './components/Providers';
@@ -16,7 +17,6 @@ import { customFields, Plugin, Reducers } from './core/apis';
 import { configureStore } from './core/store/configure';
 import { basename, createHook } from './core/utils';
 import favicon from './favicon.png';
-import App from './pages/App';
 import languageNativeNames from './translations/languageNativeNames';
 
 const {
@@ -466,7 +466,7 @@ class StrapiApp {
           htmlAttributes={{ lang: localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) || 'en' }}
         />
         <BrowserRouter basename={basename}>
-          <App store={store} />
+          <App />
         </BrowserRouter>
       </Providers>
     );

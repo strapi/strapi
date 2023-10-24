@@ -44,7 +44,7 @@ import { useMutation, useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
 
-import { selectAdminPermissions } from '../../../../App/selectors';
+import { selectAdminPermissions } from '../../../../../selectors';
 
 const ListView = () => {
   const [showModal, setShowModal] = useState(false);

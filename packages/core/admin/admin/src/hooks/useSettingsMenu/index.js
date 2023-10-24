@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { hasPermissions, useRBACProvider, useStrapiApp, useAppInfo } from '@strapi/helper-plugin';
 import { useSelector } from 'react-redux';
 
-import { selectAdminPermissions } from '../../pages/App/selectors';
+import { selectAdminPermissions } from '../../selectors';
 import { useEnterprise } from '../useEnterprise';
 
 import { LINKS_CE } from './constants';
