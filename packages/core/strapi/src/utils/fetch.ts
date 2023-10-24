@@ -1,5 +1,4 @@
 import { HttpsProxyAgent, HttpsProxyAgentOptions } from 'https-proxy-agent';
-import stringify from 'fast-json-stable-stringify';
 
 import type { Strapi } from '@strapi/types';
 
@@ -15,16 +14,16 @@ export function createStrapiFetch(strapi: Strapi): Fetch {
       ...(strapiFetch.dispatcher ? { dispatcher: strapiFetch.dispatcher } : {}),
       ...options,
     };
-    strapi.log.debug(`Fetch request for ${url} with ${stringify(fetchOptions)}`);
+    strapi.log.debug(`Fetch request for ${url}`);
     return fetch(url, fetchOptions);
   }
 
-  const { globalProxy: proxy } = strapi.config.get<{
+  const { globalProxy } = strapi.config.get<{
     globalProxy: HttpsProxyAgentOptions;
   }>('server');
 
-  if (proxy) {
-    strapiFetch.dispatcher = new HttpsProxyAgent(proxy);
+  if (globalProxy) {
+    strapiFetch.dispatcher = new HttpsProxyAgent(globalProxy);
   }
 
   return strapiFetch;
