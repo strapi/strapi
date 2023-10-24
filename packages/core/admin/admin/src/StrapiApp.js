@@ -15,7 +15,8 @@ import { Providers } from './components/Providers';
 import { HOOKS, INJECTION_ZONES } from './constants';
 import { customFields, Plugin, Reducers } from './core/apis';
 import { configureStore } from './core/store/configure';
-import { basename, createHook } from './core/utils';
+import { basename } from './core/utils/basename';
+import { createHook } from './core/utils/createHook';
 import favicon from './favicon.png';
 import languageNativeNames from './translations/languageNativeNames';
 
