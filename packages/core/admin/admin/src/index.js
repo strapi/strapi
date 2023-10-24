@@ -1,10 +1,15 @@
 import { getFetchClient } from '@strapi/helper-plugin';
 import { createRoot } from 'react-dom/client';
 
-import appCustomisations from './app';
 import { Components, Fields, Middlewares } from './core/apis';
 // eslint-disable-next-line import/extensions
 import plugins from './plugins';
+
+const config = {
+  locales: ['fr'],
+};
+
+const bootstrap = () => {};
 
 window.strapi = {
   /**
@@ -24,10 +29,11 @@ window.strapi = {
   projectType: 'Community',
   flags: {
     nps: false,
+    promoteEE: true,
   },
 };
 
-const customConfig = appCustomisations;
+const customConfig = { config, bootstrap };
 
 const library = {
   components: Components(),

@@ -1,13 +1,12 @@
 import React from 'react';
 
-import { Box, Flex, Grid, GridItem, KeyboardNavigable, Link } from '@strapi/design-system';
+import { Flex, Grid, GridItem, KeyboardNavigable, Link } from '@strapi/design-system';
 import { useCustomFields } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../../utils';
 import CustomFieldOption from '../CustomFieldOption';
 import EmptyAttributes from '../EmptyAttributes';
-import getPadding from '../utils/getPadding';
 
 const CustomFieldsList = () => {
   const { formatMessage } = useIntl();
@@ -26,23 +25,12 @@ const CustomFieldsList = () => {
   return (
     <KeyboardNavigable tagName="button">
       <Flex direction="column" alignItems="stretch" gap={3}>
-        <Grid gap={0}>
-          {sortedCustomFields.map(([uid, customField], index) => {
-            const { paddingLeft, paddingRight } = getPadding(index);
-
-            return (
-              <GridItem key={uid} col={6} style={{ height: '100%' }}>
-                <Box
-                  paddingLeft={paddingLeft}
-                  paddingRight={paddingRight}
-                  paddingBottom={1}
-                  style={{ height: '100%' }}
-                >
-                  <CustomFieldOption key={uid} customFieldUid={uid} customField={customField} />
-                </Box>
-              </GridItem>
-            );
-          })}
+        <Grid gap={3}>
+          {sortedCustomFields.map(([uid, customField]) => (
+            <GridItem key={uid} col={6}>
+              <CustomFieldOption key={uid} customFieldUid={uid} customField={customField} />
+            </GridItem>
+          ))}
         </Grid>
         <Link
           href="https://docs.strapi.io/developer-docs/latest/development/custom-fields.html"

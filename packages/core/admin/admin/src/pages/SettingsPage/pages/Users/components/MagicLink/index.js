@@ -3,7 +3,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import basename from '../../../../../../core/utils/basename';
+import { basename } from '../../../../../../core/utils/basename';
 
 import MagicLinkWrapper from './MagicLinkWrapper';
 

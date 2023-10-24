@@ -4,7 +4,7 @@
  *
  */
 
-import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import * as React from 'react';
 
 import { SkipToContent } from '@strapi/design-system';
 import {
@@ -21,28 +21,34 @@ import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 
-import { PrivateRoute } from '../../components/PrivateRoute';
-import { ADMIN_PERMISSIONS_CE } from '../../constants';
-import { useConfiguration } from '../../hooks/useConfiguration';
-import { useEnterprise } from '../../hooks/useEnterprise';
-import { createRoute } from '../../utils/createRoute';
-import { makeUniqueRoutes } from '../../utils/makeUniqueRoutes';
-import AuthPage from '../AuthPage';
-import { NotFoundPage } from '../NotFoundPage';
-import { UseCasePage } from '../UseCasePage';
+import { PrivateRoute } from './components/PrivateRoute';
+import { ADMIN_PERMISSIONS_CE, ACTION_SET_ADMIN_PERMISSIONS } from './constants';
+import { useConfiguration } from './hooks/useConfiguration';
+import { useEnterprise } from './hooks/useEnterprise';
+// @ts-expect-error not converted yet
+import AuthPage from './pages/AuthPage';
+import { NotFoundPage } from './pages/NotFoundPage';
+import { UseCasePage } from './pages/UseCasePage';
+import { createRoute, TModule } from './utils/createRoute';
 
-import { ROUTES_CE, SET_ADMIN_PERMISSIONS } from './constants';
+interface TRoute {
+  Component: TModule;
+  to: string;
+  exact?: boolean;
+}
 
-const AuthenticatedApp = lazy(() =>
-  import(/* webpackChunkName: "Admin-authenticatedApp" */ '../../components/AuthenticatedApp').then(
-    (mod) => ({ default: mod.AuthenticatedApp })
+const ROUTES_CE: TRoute[] | null = null;
+
+const AuthenticatedApp = React.lazy(() =>
+  import(/* webpackChunkName: "Admin-authenticatedApp" */ './components/AuthenticatedApp').then(
+    ({ AuthenticatedApp }) => ({ default: AuthenticatedApp })
   )
 );
 
-function App() {
+export const App = () => {
   const adminPermissions = useEnterprise(
     ADMIN_PERMISSIONS_CE,
-    async () => (await import('../../../../ee/admin/constants')).ADMIN_PERMISSIONS_EE,
+    async () => (await import('../../ee/admin/constants')).ADMIN_PERMISSIONS_EE,
     {
       combine(cePermissions, eePermissions) {
         // the `settings` NS e.g. are deep nested objects, that need a deep merge
@@ -52,9 +58,9 @@ function App() {
       defaultValue: ADMIN_PERMISSIONS_CE,
     }
   );
-  const routes = useEnterprise(
+  const routes = useEnterprise<TRoute[] | null, TRoute[], TRoute[]>(
     ROUTES_CE,
-    async () => (await import('../../../../ee/admin/pages/App/constants')).ROUTES_EE,
+    async () => (await import('../../ee/admin/constants')).ROUTES_EE,
     {
       defaultValue: [],
     }
@@ -62,27 +68,31 @@ function App() {
   const toggleNotification = useNotification();
   const { updateProjectSettings } = useConfiguration();
   const { formatMessage } = useIntl();
-  const [{ isLoading, hasAdmin, uuid, deviceId }, setState] = useState({
+  const [{ isLoading, hasAdmin, uuid, deviceId }, setState] = React.useState({
     isLoading: true,
+    deviceId: undefined,
     hasAdmin: false,
+    uuid: false,
   });
   const dispatch = useDispatch();
   const appInfo = useAppInfo();
   const { get, post } = useFetchClient();
 
-  const authRoutes = useMemo(() => {
-    return makeUniqueRoutes(
-      routes.map(({ to, Component, exact }) => createRoute(Component, to, exact))
-    );
+  const authRoutes = React.useMemo(() => {
+    if (!routes) {
+      return null;
+    }
+
+    return routes.map(({ to, Component, exact }) => createRoute(Component, to, exact));
   }, [routes]);
 
-  const [telemetryProperties, setTelemetryProperties] = useState(null);
+  const [telemetryProperties, setTelemetryProperties] = React.useState(undefined);
 
-  useEffect(() => {
-    dispatch({ type: SET_ADMIN_PERMISSIONS, payload: adminPermissions });
+  React.useEffect(() => {
+    dispatch({ type: ACTION_SET_ADMIN_PERMISSIONS, payload: adminPermissions });
   }, [adminPermissions, dispatch]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const currentToken = auth.getToken();
 
     const renewToken = async () => {
@@ -105,7 +115,7 @@ function App() {
     }
   }, [post]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const getData = async () => {
       try {
         const {
@@ -166,9 +176,9 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toggleNotification, updateProjectSettings]);
 
-  const setHasAdmin = (hasAdmin) => setState((prev) => ({ ...prev, hasAdmin }));
+  const setHasAdmin = (hasAdmin: boolean) => setState((prev) => ({ ...prev, hasAdmin }));
 
-  const trackingInfo = useMemo(
+  const trackingInfo = React.useMemo(
     () => ({
       uuid,
       telemetryProperties,
@@ -182,7 +192,7 @@ function App() {
   }
 
   return (
-    <Suspense fallback={<LoadingIndicatorPage />}>
+    <React.Suspense fallback={<LoadingIndicatorPage />}>
       <SkipToContent>
         {formatMessage({ id: 'skipToContent', defaultMessage: 'Skip to content' })}
       </SkipToContent>
@@ -201,8 +211,6 @@ function App() {
           <Route path="" component={NotFoundPage} />
         </Switch>
       </TrackingProvider>
-    </Suspense>
+    </React.Suspense>
   );
-}
-
-export default App;
+};

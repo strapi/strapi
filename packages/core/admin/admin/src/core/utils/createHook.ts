@@ -1,21 +1,22 @@
-// TODO: refacto this file to avoid eslint issues
-/* eslint-disable no-unused-vars */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
-const createHook = () => {
-  const _handlers = [];
+
+type Handler = (...args: any[]) => any;
+
+export const createHook = () => {
+  const _handlers: Handler[] = [];
 
   return {
-    register(fn) {
+    register(fn: Handler) {
       _handlers.push(fn);
     },
-    delete(handler) {
+    delete(handler: Handler) {
       _handlers.splice(_handlers.indexOf(handler), 1);
     },
-    runWaterfall(args, store) {
+    runWaterfall<T>(args: T, store?: any) {
       return _handlers.reduce((acc, fn) => fn(acc, store), args);
     },
-    async runWaterfallAsync(args, store) {
+    async runWaterfallAsync<T>(args: T, store?: any) {
       let result = args;
 
       for (const fn of _handlers) {
@@ -24,10 +25,10 @@ const createHook = () => {
 
       return result;
     },
-    runSeries(...args) {
+    runSeries<T extends any[]>(...args: T) {
       return _handlers.map((fn) => fn(...args));
     },
-    async runSeriesAsync(...args) {
+    async runSeriesAsync<T extends any[]>(...args: T) {
       const result = [];
 
       for (const fn of _handlers) {
@@ -36,7 +37,7 @@ const createHook = () => {
 
       return result;
     },
-    runParallel(...args) {
+    runParallel<T extends any[]>(...args: T) {
       return Promise.all(
         _handlers.map((fn) => {
           return fn(...args);
@@ -45,5 +46,3 @@ const createHook = () => {
     },
   };
 };
-
-export default createHook;

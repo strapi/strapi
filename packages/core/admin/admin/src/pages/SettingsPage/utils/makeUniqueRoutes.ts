@@ -1,7 +1,10 @@
-import { RouteProps } from 'react-router-dom';
+import { TModule } from '../../../utils/createRoute';
 
-interface UniqueRouteProps extends RouteProps {
+interface UniqueRouteProps {
   key: string;
+  Component: TModule;
+  to: string;
+  exact?: boolean;
 }
 
 export function makeUniqueRoutes(routes: UniqueRouteProps[]) {

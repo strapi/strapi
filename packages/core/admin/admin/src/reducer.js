@@ -1,6 +1,6 @@
 import produce from 'immer';
 
-import { SET_APP_RUNTIME_STATUS, SET_ADMIN_PERMISSIONS } from './constants';
+import { ACTION_SET_APP_RUNTIME_STATUS, ACTION_SET_ADMIN_PERMISSIONS } from './constants';
 
 const initialState = {
   permissions: {},
@@ -11,12 +11,12 @@ const reducer = (state = initialState, action) =>
   /* eslint-disable-next-line consistent-return */
   produce(state, (draftState) => {
     switch (action.type) {
-      case SET_APP_RUNTIME_STATUS: {
+      case ACTION_SET_APP_RUNTIME_STATUS: {
         draftState.status = 'runtime';
         break;
       }
 
-      case SET_ADMIN_PERMISSIONS: {
+      case ACTION_SET_ADMIN_PERMISSIONS: {
         draftState.permissions = action.payload;
         break;
       }

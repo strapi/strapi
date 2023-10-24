@@ -5,7 +5,7 @@ import axios from 'axios';
 import { shallowEqual, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
-import { selectAdminPermissions } from '../../../pages/App/selectors';
+import { selectAdminPermissions } from '../../../selectors';
 import { getData, getDataSucceeded } from '../../sharedReducers/crudReducer/actions';
 import crudReducer, { crudInitialState } from '../../sharedReducers/crudReducer/reducer';
 import { mergeMetasWithSchema } from '../../utils';
