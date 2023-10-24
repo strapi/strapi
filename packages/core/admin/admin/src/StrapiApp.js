@@ -13,7 +13,12 @@ import Logo from './assets/images/logo-strapi-2022.svg';
 import { LANGUAGE_LOCAL_STORAGE_KEY } from './components/LanguageProvider';
 import { Providers } from './components/Providers';
 import { HOOKS, INJECTION_ZONES } from './constants';
-import { customFields, Plugin, Reducers } from './core/apis';
+import { Components } from './core/apis/Components';
+import { CustomFields } from './core/apis/CustomFields';
+import { Fields } from './core/apis/Fields';
+import { Middlewares } from './core/apis/Middlewares';
+import { Plugin } from './core/apis/Plugin';
+import { Reducers } from './core/apis/Reducers';
 import { configureStore } from './core/store/configure';
 import { basename } from './core/utils/basename';
 import { createHook } from './core/utils/createHook';
@@ -28,7 +33,7 @@ const {
 } = HOOKS;
 
 class StrapiApp {
-  constructor({ adminConfig, appPlugins, library, middlewares }) {
+  constructor({ adminConfig, appPlugins }) {
     this.customConfigurations = adminConfig.config;
     this.customBootstrapConfiguration = adminConfig.bootstrap;
     this.configurations = {
@@ -42,17 +47,19 @@ class StrapiApp {
       tutorials: true,
     };
     this.appPlugins = appPlugins || {};
-    this.library = library;
-    this.middlewares = middlewares;
+    this.library = {
+      components: new Components(),
+      fields: new Fields(),
+    };
+    this.middlewares = new Middlewares();
     this.plugins = {};
-    this.reducers = Reducers({});
+    this.reducers = new Reducers({});
     this.translations = {};
     this.hooksDict = {};
     this.admin = {
       injectionZones: INJECTION_ZONES,
     };
-    this.customFields = customFields;
-
+    this.customFields = new CustomFields();
     this.menu = [];
     this.settings = {
       global: {
@@ -407,7 +414,7 @@ class StrapiApp {
   };
 
   registerPlugin = (pluginConf) => {
-    const plugin = Plugin(pluginConf);
+    const plugin = new Plugin(pluginConf);
 
     this.plugins[plugin.pluginId] = plugin;
   };

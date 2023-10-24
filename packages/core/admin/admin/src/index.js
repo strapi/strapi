@@ -1,7 +1,6 @@
 import { getFetchClient } from '@strapi/helper-plugin';
 import { createRoot } from 'react-dom/client';
 
-import { Components, Fields, Middlewares } from './core/apis';
 // eslint-disable-next-line import/extensions
 import plugins from './plugins';
 
@@ -35,12 +34,6 @@ window.strapi = {
 
 const customConfig = { config, bootstrap };
 
-const library = {
-  components: Components(),
-  fields: Fields(),
-};
-const middlewares = Middlewares();
-
 const MOUNT_NODE = document.getElementById('app');
 
 const run = async () => {
@@ -69,10 +62,8 @@ const run = async () => {
 
   const app = StrapiApp.default({
     appPlugins: plugins,
-    library,
     adminConfig: customConfig,
     bootstrap: customConfig,
-    middlewares,
   });
 
   await app.bootstrapAdmin();
