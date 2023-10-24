@@ -58,6 +58,7 @@
     "test:front:watch": "cross-env IS_EE=true run test:front --watch",
     "test:front:watch:ce": "cross-env IS_EE=false run test:front --watch",
     "test:generate-app": "yarn build:ts && node test/scripts/generate-test-app.js",
+    "test:generate-app:no-build": "node test/scripts/generate-test-app.js",
     "test:ts": "yarn test:ts:packages && yarn test:ts:front && yarn test:ts:back",
     "test:ts:back": "nx run-many --target=test:ts:back --nx-ignore-cycles",
     "test:ts:front": "nx run-many --target=test:ts:front --nx-ignore-cycles",
@@ -68,7 +69,7 @@
     "watch": "nx run-many --target=watch --nx-ignore-cycles"
   },
   "resolutions": {
-    "@strapi/design-system": "1.12.0-typescript.1",
+    "@strapi/design-system": "1.14.0-typescript.0",
     "@types/koa": "2.13.4",
     "@types/react": "18.2.7"
   },
@@ -132,9 +133,9 @@
     "typescript": "5.2.2",
     "yargs": "17.7.2"
   },
-  "packageManager": "yarn@3.6.1",
+  "packageManager": "yarn@3.6.4",
   "engines": {
-    "node": ">=16.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   }
 }

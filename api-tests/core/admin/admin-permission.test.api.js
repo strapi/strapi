@@ -34,7 +34,7 @@ describe('Role CRUD End to End', () => {
     sortedData.conditions = sortedData.conditions.sort();
 
     // eslint-disable-next-line node/no-extraneous-require
-    const { features } = require('@strapi/strapi/dist/utils/ee').default;
+    const { features } = require('@strapi/strapi/dist/utils/ee');
     const hasSSO = features.isEnabled('sso');
 
     if (hasSSO) {

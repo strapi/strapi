@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { configureStore } from '@reduxjs/toolkit';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -8,7 +9,6 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IntlProvider } from 'react-intl';
 import { Provider } from 'react-redux';
-import { createStore } from 'redux';
 
 import { REDUX_NAMESPACE } from '../../../constants';
 import { reducer } from '../../../reducer';
@@ -90,23 +90,26 @@ const withMarkup = (query) => (text) =>
   });
 
 const setup = ({ collectionTypes, singleTypes, currentWorkflow, ...props } = {}) => ({
-  ...render(<ComponentFixture {...props} />, {
+  ...render(<ComponentFixture currentWorkflow={currentWorkflow} {...props} />, {
     wrapper({ children }) {
-      const store = createStore(reducer, {
-        [REDUX_NAMESPACE]: {
-          serverState: {
-            contentTypes: {
-              collectionTypes: collectionTypes || CONTENT_TYPES_FIXTURE.collectionTypes,
-              singleTypes: singleTypes || CONTENT_TYPES_FIXTURE.singleTypes,
+      const store = configureStore({
+        reducer,
+        preloadedState: {
+          [REDUX_NAMESPACE]: {
+            serverState: {
+              contentTypes: {
+                collectionTypes: collectionTypes || CONTENT_TYPES_FIXTURE.collectionTypes,
+                singleTypes: singleTypes || CONTENT_TYPES_FIXTURE.singleTypes,
+              },
+              roles: ROLES_FIXTURE,
+              workflow: WORKFLOWS_FIXTURE[0],
+              workflows: WORKFLOWS_FIXTURE,
             },
-            roles: ROLES_FIXTURE,
-            workflow: WORKFLOWS_FIXTURE[0],
-            workflows: WORKFLOWS_FIXTURE,
-          },
 
-          clientState: {
-            currentWorkflow: {
-              data: currentWorkflow || WORKFLOWS_FIXTURE[0],
+            clientState: {
+              currentWorkflow: {
+                data: currentWorkflow || WORKFLOWS_FIXTURE[0],
+              },
             },
           },
         },
@@ -147,25 +150,25 @@ describe('Admin | Settings | Review Workflow | WorkflowAttributes', () => {
   it('should disabled fields if canUpdate = false', async () => {
     const { getByRole } = setup({ canUpdate: false });
 
-    await waitFor(() => {
-      expect(getByRole('textbox')).toHaveAttribute('disabled');
-      expect(getByRole('combobox', { name: /associated to/i })).toHaveAttribute('data-disabled');
-    });
+    await waitFor(() => expect(getByRole('textbox')).toHaveAttribute('disabled'));
+
+    expect(getByRole('combobox', { name: /associated to/i })).toHaveAttribute('data-disabled');
   });
 
   it('should not render a collection-type group if there are no collection-types', async () => {
     const { getByRole, queryByRole, user } = setup({
       collectionTypes: [],
+      currentWorkflow: {
+        ...WORKFLOWS_FIXTURE[0],
+        contentTypes: ['single-uid1'],
+      },
     });
 
-    const contentTypesSelect = getByRole('combobox', { name: /associated to/i });
+    await user.click(getByRole('combobox', { name: /associated to/i }));
 
-    await user.click(contentTypesSelect);
+    await waitFor(() => expect(getByRole('option', { name: /Single Types/i })).toBeInTheDocument());
 
-    await waitFor(() => {
-      expect(getByRole('option', { name: /Single Types/i })).toBeInTheDocument();
-      expect(queryByRole('option', { name: /Collection Types/i })).not.toBeInTheDocument();
-    });
+    expect(queryByRole('option', { name: /Collection Types/i })).not.toBeInTheDocument();
   });
 
   it('should not render a collection-type group if there are no single-types', async () => {

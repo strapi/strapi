@@ -1,5 +1,6 @@
-import { getLocalScript } from '../../utils/helpers';
 import type { StrapiCommand } from '../../types';
+import { runAction } from '../../utils/helpers';
+import action from './action';
 
 /**
  * `$ strapi uninstall`
@@ -9,7 +10,7 @@ const command: StrapiCommand = ({ command }) => {
     .command('uninstall [plugins...]')
     .description('Uninstall a Strapi plugin')
     .option('-d, --delete-files', 'Delete files', false)
-    .action(getLocalScript('uninstall'));
+    .action(runAction('uninstall', action));
 };
 
 export default command;

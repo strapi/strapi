@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { configureStore } from '@reduxjs/toolkit';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -8,7 +9,6 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IntlProvider } from 'react-intl';
 import { Provider } from 'react-redux';
-import { createStore } from 'redux';
 
 import { REDUX_NAMESPACE, STAGE_COLOR_DEFAULT } from '../../../../constants';
 import { reducer } from '../../../../reducer';
@@ -128,18 +128,21 @@ const ComponentFixture = ({
 const setup = ({ roles, ...props } = {}) => ({
   ...render(<ComponentFixture {...props} />, {
     wrapper({ children }) {
-      const store = createStore(reducer, {
-        [REDUX_NAMESPACE]: {
-          serverState: {
-            contentTypes: CONTENT_TYPES_FIXTURE,
-            roles: roles ?? ROLES_FIXTURE,
-            workflow: WORKFLOWS_FIXTURE[0],
-            workflows: WORKFLOWS_FIXTURE,
-          },
+      const store = configureStore({
+        reducer,
+        preloadedState: {
+          [REDUX_NAMESPACE]: {
+            serverState: {
+              contentTypes: CONTENT_TYPES_FIXTURE,
+              roles: roles ?? ROLES_FIXTURE,
+              workflow: WORKFLOWS_FIXTURE[0],
+              workflows: WORKFLOWS_FIXTURE,
+            },
 
-          clientState: {
-            currentWorkflow: {
-              data: WORKFLOWS_FIXTURE[0],
+            clientState: {
+              currentWorkflow: {
+                data: WORKFLOWS_FIXTURE[0],
+              },
             },
           },
         },

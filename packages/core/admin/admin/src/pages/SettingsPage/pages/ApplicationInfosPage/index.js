@@ -29,7 +29,7 @@ import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
 
-import { useConfigurations } from '../../../../hooks';
+import { useConfiguration } from '../../../../hooks/useConfiguration';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../App/selectors';
 
@@ -44,7 +44,7 @@ const ApplicationInfosPage = () => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const { get, post } = useFetchClient();
-  const { updateProjectSettings } = useConfigurations();
+  const { updateProjectSettings } = useConfiguration();
   const permissions = useSelector(selectAdminPermissions);
   const { formatAPIError } = useAPIErrorHandler();
 

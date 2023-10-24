@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-documentation",
-  "version": "4.14.3",
+  "version": "4.14.5",
   "description": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
   "repository": {
     "type": "git",
@@ -22,16 +22,16 @@
   ],
   "scripts": {
     "lint": "run -T eslint .",
-    "test:unit": "jest --verbose",
-    "test:unit:watch": "run -T jest --watch",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
-    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll"
+    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
+    "test:unit": "jest --verbose",
+    "test:unit:watch": "run -T jest --watch"
   },
   "dependencies": {
-    "@strapi/design-system": "1.12.0",
-    "@strapi/helper-plugin": "4.14.3",
-    "@strapi/icons": "1.12.0",
-    "@strapi/utils": "4.14.3",
+    "@strapi/design-system": "1.13.0",
+    "@strapi/helper-plugin": "4.14.5",
+    "@strapi/icons": "1.13.0",
+    "@strapi/utils": "4.14.5",
     "bcryptjs": "2.4.3",
     "cheerio": "^1.0.0-rc.12",
     "formik": "2.4.0",
@@ -47,13 +47,6 @@
     "yaml": "1.10.2",
     "yup": "0.32.9"
   },
-  "peerDependencies": {
-    "@strapi/strapi": "^4.0.0",
-    "react": "^17.0.0 || ^18.0.0",
-    "react-dom": "^17.0.0 || ^18.0.0",
-    "react-router-dom": "5.3.4",
-    "styled-components": "5.3.3"
-  },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^10.1.0",
     "@testing-library/react": "14.0.0",
@@ -64,8 +57,15 @@
     "react-router-dom": "5.3.4",
     "styled-components": "5.3.3"
   },
+  "peerDependencies": {
+    "@strapi/strapi": "^4.0.0",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0",
+    "react-router-dom": "5.3.4",
+    "styled-components": "5.3.3"
+  },
   "engines": {
-    "node": ">=16.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {
