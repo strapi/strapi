@@ -6,6 +6,7 @@
 
 import React from 'react';
 
+import { configureStore } from '@reduxjs/toolkit';
 import { fixtures } from '@strapi/admin-test-utils';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { useRBAC } from '@strapi/helper-plugin';
@@ -15,7 +16,6 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
-import { createStore } from 'redux';
 
 import { useAdminRoles } from '../../../../../../hooks/useAdminRoles';
 import ListPage from '../index';
@@ -46,8 +46,11 @@ const setup = (props) =>
       return (
         <QueryClientProvider client={client}>
           <Provider
-            store={createStore((state) => state, {
-              admin_app: { permissions: fixtures.permissions.app },
+            store={configureStore({
+              reducer: (state) => state,
+              preloadedState: {
+                admin_app: { permissions: fixtures.permissions.app },
+              },
             })}
           >
             <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">

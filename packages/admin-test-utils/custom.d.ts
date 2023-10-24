@@ -12,8 +12,9 @@ declare global {
       projectType: string;
       telemetryDisabled: boolean;
       flags: {
-        nps: boolean;
-      };
+        nps: boolean,
+        promoteEE: boolean,
+      }
     };
   }
 }

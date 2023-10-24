@@ -18,8 +18,8 @@ import { useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 
-import { ApiTokenPermissionsContextProvider } from '../../../../../contexts/ApiTokenPermissions';
-import { formatAPIErrors } from '../../../../../utils';
+import { ApiTokenPermissionsContextProvider } from '../../../../../contexts/apiTokenPermissions';
+import { formatAPIErrors } from '../../../../../utils/formatAPIErrors';
 import { selectAdminPermissions } from '../../../../App/selectors';
 import { API_TOKEN_TYPE } from '../../../components/Tokens/constants';
 import FormHead from '../../../components/Tokens/FormHead';

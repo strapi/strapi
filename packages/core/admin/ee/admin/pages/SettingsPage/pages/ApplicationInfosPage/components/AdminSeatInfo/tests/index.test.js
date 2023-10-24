@@ -1,12 +1,12 @@
 import React from 'react';
 
+import { configureStore } from '@reduxjs/toolkit';
 import { fixtures } from '@strapi/admin-test-utils';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
-import { createStore } from 'redux';
 
 import { AdminSeatInfoEE } from '..';
 import { useLicenseLimits } from '../../../../../../../hooks/useLicenseLimits';
@@ -54,8 +54,11 @@ const setup = (props) =>
       return (
         <QueryClientProvider client={client}>
           <Provider
-            store={createStore((state) => state, {
-              admin_app: { permissions: fixtures.permissions.app },
+            store={configureStore({
+              reducer: (state) => state,
+              preloadedState: {
+                admin_app: { permissions: fixtures.permissions.app },
+              },
             })}
           >
             <ThemeProvider theme={lightTheme}>

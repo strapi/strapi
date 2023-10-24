@@ -93,7 +93,6 @@ const NotificationsProvider = ({ children }: NotificationsProviderProps) => {
     <NotificationsContext.Provider value={value}>
       <Flex
         left="50%"
-        // @ts-expect-error - TODO: We need to find a way to accept custom sizes on DS or refactor this
         marginLeft="-250px"
         position="fixed"
         direction="column"
@@ -133,7 +132,7 @@ const Notification = ({
   },
   onClose,
   timeout = 2500,
-  title = 'success',
+  title,
   type,
 }: NotificationProps) => {
   const { formatMessage } = useIntl();

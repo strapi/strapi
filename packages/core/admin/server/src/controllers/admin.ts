@@ -1,9 +1,13 @@
+import type { Context } from 'koa';
+import 'koa-bodyparser';
+
 import path from 'path';
 
 import ee from '@strapi/strapi/dist/utils/ee';
 import { map, values, sumBy, pipe, flatMap, propEq } from 'lodash/fp';
 import _ from 'lodash';
 import { exists } from 'fs-extra';
+import '@strapi/types';
 import { env } from '@strapi/utils';
 import tsUtils from '@strapi/typescript-utils';
 import {
@@ -13,7 +17,26 @@ import {
 } from '../validation/project-settings';
 import { getService } from '../utils';
 
+import type {
+  Init,
+  GetProjectSettings,
+  Information,
+  Plugins,
+  TelemetryProperties,
+  UpdateProjectSettings,
+} from '../../../shared/contracts/admin';
+
 const { isUsingTypeScript } = tsUtils;
+
+/* TODO extend the request in this way once Replace is available
+  type FileRequest = Context['request'] & { file: any };
+  type FileContext = Replace<Context, { request: FileRequest }>;
+*/
+declare module 'koa' {
+  interface Request {
+    files: any;
+  }
+}
 
 /**
  * A set of functions called "actions" for `Admin`
@@ -37,7 +60,10 @@ export async function init() {
   const hasAdmin = await getService('user').exists();
   const { menuLogo, authLogo } = await getService('project-settings').getProjectSettings();
   // set to null if telemetryDisabled flag not avaialble in package.json
-  const telemetryDisabled = strapi.config.get('packageJsonStrapi.telemetryDisabled', null);
+  const telemetryDisabled: boolean | null = strapi.config.get(
+    'packageJsonStrapi.telemetryDisabled',
+    null
+  );
 
   if (telemetryDisabled !== null && telemetryDisabled === true) {
     uuid = false;
@@ -50,19 +76,21 @@ export async function init() {
       menuLogo: menuLogo ? menuLogo.url : null,
       authLogo: authLogo ? authLogo.url : null,
     },
-  };
+  } satisfies Init.Response;
 }
 
 export async function getProjectSettings() {
-  return getService('project-settings').getProjectSettings();
+  return getService(
+    'project-settings'
+  ).getProjectSettings() satisfies Promise<GetProjectSettings.Response>;
 }
 
-export async function updateProjectSettings(ctx: any) {
-  const projectSettingsService = getService('project-settings');
-
+export async function updateProjectSettings(ctx: Context) {
   const {
     request: { files, body },
-  } = ctx;
+  } = ctx as { request: UpdateProjectSettings.Request };
+
+  const projectSettingsService = getService('project-settings');
 
   await validateUpdateProjectSettings(body);
   await validateUpdateProjectSettingsFiles(files);
@@ -70,10 +98,13 @@ export async function updateProjectSettings(ctx: any) {
   const formatedFiles = await projectSettingsService.parseFilesData(files);
   await validateUpdateProjectSettingsImagesDimensions(formatedFiles);
 
-  return projectSettingsService.updateProjectSettings({ ...body, ...formatedFiles });
+  return projectSettingsService.updateProjectSettings({
+    ...(body as object),
+    ...formatedFiles,
+  }) satisfies Promise<UpdateProjectSettings.Response>;
 }
 
-export async function telemetryProperties(ctx: any) {
+export async function telemetryProperties(ctx: Context) {
   // If the telemetry is disabled, ignore the request and return early
   if (strapi.telemetry.isDisabled) {
     ctx.status = 204;
@@ -107,19 +138,19 @@ export async function telemetryProperties(ctx: any) {
       numberOfComponents,
       numberOfDynamicZones: getNumberOfDynamicZones(),
     },
-  };
+  } satisfies TelemetryProperties.Response;
 }
 
 export async function information() {
-  const currentEnvironment = strapi.config.get('environment');
+  const currentEnvironment: string = strapi.config.get('environment');
   const autoReload = strapi.config.get('autoReload', false);
   const strapiVersion = strapi.config.get('info.strapi', null);
   const dependencies = strapi.config.get('info.dependencies', {});
   const projectId = strapi.config.get('uuid', null);
   const nodeVersion = process.version;
   const communityEdition = !strapi.EE;
-  // @ts-expect-error
-  const useYarn = await exists(path.join(process.cwd(), 'yarn.lock'));
+  // @ts-expect-error replace use of exists
+  const useYarn: boolean = await exists(path.join(process.cwd(), 'yarn.lock'));
 
   return {
     data: {
@@ -132,10 +163,10 @@ export async function information() {
       communityEdition,
       useYarn,
     },
-  };
+  } satisfies Information.Response;
 }
 
-export async function plugins(ctx: any) {
+export async function plugins(ctx: Context) {
   const enabledPlugins = strapi.config.get('enabledPlugins') as any;
 
   const plugins = Object.entries(enabledPlugins).map(([key, plugin]: any) => ({
@@ -145,5 +176,5 @@ export async function plugins(ctx: any) {
     packageName: plugin.info.packageName,
   }));
 
-  ctx.send({ plugins });
+  ctx.send({ plugins }) satisfies Plugins.Response;
 }

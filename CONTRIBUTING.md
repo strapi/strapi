@@ -46,7 +46,7 @@ The Strapi core team will review your pull request and either merge it, request 
 
 ## Contribution Prerequisites
 
-- You have [Node.js](https://nodejs.org/en/) at version >= v16 and <= v20 and [Yarn](https://yarnpkg.com/en/) at v1.2.0+ installed.
+- You have [Node.js](https://nodejs.org/en/) at version >= v18 and <= v20 and [Yarn](https://yarnpkg.com/en/) at v1.2.0+ installed.
 - You are familiar with [Git](https://git-scm.com).
 
 **Before submitting your pull request** make sure the following requirements are fulfilled:
@@ -58,6 +58,8 @@ The Strapi core team will review your pull request and either merge it, request 
 - Ensure the following test suites are passing:
   - `yarn test:unit`
   - `yarn test:front`
+  - `yarn test:e2e --setup --concurrency=1`
+    - you **_may_** need to install Playwright browsers first: `yarn playwright install`
 - Make sure your code lints by running `yarn lint`.
 - If your contribution fixes an existing issue, please make sure to link it in your pull request.
 

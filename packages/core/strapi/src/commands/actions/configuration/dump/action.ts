@@ -1,5 +1,5 @@
 import fs from 'fs';
-import strapi from '../../../../index';
+import strapi from '../../../../Strapi';
 
 interface CmdOptions {
   file?: string;

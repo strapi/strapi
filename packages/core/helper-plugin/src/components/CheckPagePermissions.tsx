@@ -3,21 +3,20 @@ import * as React from 'react';
 import { Redirect } from 'react-router-dom';
 
 import { useNotification } from '../features/Notifications';
-import { useRBACProvider } from '../features/RBAC';
+import { Permission, useRBACProvider } from '../features/RBAC';
 import { hasPermissions } from '../utils/hasPermissions';
 
 import { LoadingIndicatorPage } from './LoadingIndicatorPage';
 
-import type { domain } from '@strapi/permissions';
-
-type Permission = domain.permission.Permission;
-
-export interface CheckPagePermissions {
+export interface CheckPagePermissionsProps {
   children: React.ReactNode;
   permissions?: Permission[];
 }
 
-const CheckPagePermissions = ({ permissions = [], children }: CheckPagePermissions) => {
+const CheckPagePermissions = ({
+  permissions = [],
+  children,
+}: CheckPagePermissionsProps): React.JSX.Element => {
   const abortController = new AbortController();
   const { signal } = abortController;
   const { allPermissions } = useRBACProvider();
@@ -73,7 +72,7 @@ const CheckPagePermissions = ({ permissions = [], children }: CheckPagePermissio
     return <Redirect to="/" />;
   }
 
-  return children;
+  return <>{children}</>;
 };
 
 export { CheckPagePermissions };

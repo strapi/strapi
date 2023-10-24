@@ -5,22 +5,24 @@ import constants from './constants';
 
 const { ValidationError, NotFoundError } = errors;
 
+import type { Update } from '../../../shared/contracts/api-token';
+
+type ApiTokenPermission = {
+  id: number | `${number}`;
+  action: string;
+  token: ApiToken | number;
+};
+
 export type ApiToken = {
   id?: number | `${number}`;
   name: string;
   description: string;
   accessKey: string;
   lastUsedAt: number;
-  lifespan: number;
+  lifespan: number | null;
   expiresAt: number;
   type: 'read-only' | 'full-access' | 'custom';
   permissions: (number | ApiTokenPermission)[];
-};
-
-export type ApiTokenPermission = {
-  id: number | `${number}`;
-  action: string;
-  token: ApiToken | number;
 };
 
 export type CreateActionPayload = Omit<ApiToken, 'id' | 'accessKey' | 'expiresAt' | 'lastUsedAt'>;
@@ -146,9 +148,9 @@ const hash = (accessKey: string) => {
     .digest('hex');
 };
 
-const getExpirationFields = (lifespan: number) => {
+const getExpirationFields = (lifespan: number | null) => {
   // it must be nil or a finite number >= 0
-  const isValidNumber = Number.isFinite(lifespan) && lifespan > 0;
+  const isValidNumber = Number.isFinite(lifespan) && (lifespan as number) > 0;
   if (!isValidNumber && !isNil(lifespan)) {
     throw new ValidationError('lifespan must be a positive number or null');
   }
@@ -293,7 +295,7 @@ const getByName = async (name: string) => {
  */
 const update = async (
   id: string | number,
-  attributes: ApiToken
+  attributes: Update.Request['body']
 ): Promise<Omit<ApiToken, 'accessKey'>> => {
   // retrieve token without permissions
   const originalToken: ApiToken = await strapi.query('admin::api-token').findOne({ where: { id } });

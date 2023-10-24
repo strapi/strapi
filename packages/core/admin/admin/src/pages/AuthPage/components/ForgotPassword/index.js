@@ -7,9 +7,10 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { Logo } from '../../../../components/UnauthenticatedLogo';
-import UnauthenticatedLayout, {
+import {
   Column,
   LayoutContent,
+  UnauthenticatedLayout,
 } from '../../../../layouts/UnauthenticatedLayout';
 
 const ForgotPassword = ({ onSubmit, schema }) => {
