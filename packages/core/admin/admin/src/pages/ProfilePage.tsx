@@ -104,6 +104,7 @@ const UserInfo = ({
               type="text"
               name="firstname"
               required
+              attribute={{ type: 'text' }}
             />
           </GridItem>
           <GridItem s={12} col={6}>
@@ -117,6 +118,7 @@ const UserInfo = ({
               value={values.lastname}
               type="text"
               name="lastname"
+              attribute={{ type: 'text' }}
             />
           </GridItem>
           <GridItem s={12} col={6}>
@@ -128,6 +130,7 @@ const UserInfo = ({
               type="email"
               name="email"
               required
+              attribute={{ type: 'text' }}
             />
           </GridItem>
           <GridItem s={12} col={6}>
@@ -141,6 +144,7 @@ const UserInfo = ({
               value={values.username}
               type="text"
               name="username"
+              attribute={{ type: 'text' }}
             />
           </GridItem>
         </Grid>
