@@ -72,8 +72,6 @@ const createDocumentService = ({
 }: {
   strapi: Strapi;
   db: Database;
-  eventHub: EventHub;
-  entityValidator: EntityValidator;
 }): DocumentService.DocumentService => ({
   uploadFiles,
 
@@ -251,7 +249,6 @@ const createDocumentService = ({
       mapAsync(draftVersions, (draftVersion: any) => {
         return this.clone(uid, draftVersion.id, {
           ...params,
-          // @ts-expect-error - publishedAt is not allowed
           data: { publishedAt: new Date() },
         });
       })
@@ -261,12 +258,7 @@ const createDocumentService = ({
   },
 });
 
-export default (ctx: {
-  strapi: Strapi;
-  db: Database;
-  eventHub: EventHub;
-  entityValidator: EntityValidator;
-}): DocumentService.DocumentService => {
+export default (ctx: { strapi: Strapi; db: Database }): DocumentService.DocumentService => {
   const implementation = createDocumentService(ctx);
 
   // TODO: Wrap with database error handling
