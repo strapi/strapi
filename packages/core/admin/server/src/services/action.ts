@@ -2,7 +2,7 @@ import { isNil } from 'lodash/fp';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import constants from './constants';
-import type { AdminRole } from '../domain/user';
+import type { AdminRole } from '../../../shared/contracts/shared';
 
 const { AUTHOR_CODE, PUBLISH_ACTION } = constants;
 

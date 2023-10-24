@@ -1,38 +1,18 @@
-import type { Entity } from '@strapi/types';
 import constants from '../services/constants';
-import { Permission } from './permission';
+
+import type {
+  AdminUser,
+  AdminRole,
+  AdminUserCreationPayload,
+} from '../../../shared/contracts/shared';
 
 const { SUPER_ADMIN_CODE } = constants;
-
-export type AdminUser = {
-  id: Entity.ID;
-  firstname?: string;
-  lastname?: string;
-  username?: string;
-  email: string;
-  password: string;
-  resetPasswordToken?: string | null;
-  registrationToken?: string | null;
-  isActive: boolean;
-  roles: AdminRole[];
-  blocked: boolean;
-  preferredLanguage?: string;
-};
-
-export type AdminRole = {
-  id: Entity.ID;
-  name: string;
-  code: string;
-  description?: string;
-  users: AdminUser[];
-  permissions: Permission[];
-};
 
 /**
  * Create a new user model by merging default and specified attributes
  * @param attributes A partial user object
  */
-export function createUser(attributes: Partial<AdminUser>) {
+export function createUser(attributes: Partial<AdminUserCreationPayload>) {
   return {
     roles: [],
     isActive: false,

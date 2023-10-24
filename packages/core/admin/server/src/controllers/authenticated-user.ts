@@ -1,7 +1,7 @@
 import type { Context } from 'koa';
 import 'koa-bodyparser';
 import { getService } from '../utils';
-import type { AdminUser } from '../domain/user';
+import type { AdminUser } from '../../../shared/contracts/shared';
 import { validateProfileUpdateInput } from '../validation/user';
 import { GetMe, GetOwnPermissions, UpdateMe } from '../../../shared/contracts/users';
 

@@ -1,3 +1,6 @@
+import type { Context } from 'koa';
+import 'koa-bodyparser';
+
 import _ = require('lodash');
 import { errors } from '@strapi/utils';
 import {
@@ -6,12 +9,20 @@ import {
   validateUsersDeleteInput,
 } from '../validation/user';
 import { getService } from '../utils';
+import {
+  Create,
+  DeleteMany,
+  DeleteOne,
+  Find,
+  FindOne,
+  Update,
+} from '../../../shared/contracts/user';
 
 const { ApplicationError } = errors;
 
 export default {
-  async create(ctx: any) {
-    const { body } = ctx.request;
+  async create(ctx: Context) {
+    const { body } = ctx.request as Create.Request;
     const cleanData = { ...body, email: _.get(body, `email`, ``).toLowerCase() };
 
     await validateUserCreationInput(cleanData);
@@ -41,10 +52,10 @@ export default {
     Object.assign(userInfo, { registrationToken: createdUser.registrationToken });
 
     // Send 201 created
-    ctx.created({ data: userInfo });
+    ctx.created({ data: userInfo } satisfies Create.Response);
   },
 
-  async find(ctx: any) {
+  async find(ctx: Context) {
     const userService = getService('user');
 
     const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
@@ -62,11 +73,11 @@ export default {
         results: results.map((user: any) => userService.sanitizeUser(user)),
         pagination,
       },
-    };
+    } satisfies Find.Response;
   },
 
-  async findOne(ctx: any) {
-    const { id } = ctx.params;
+  async findOne(ctx: Context) {
+    const { id } = ctx.params as FindOne.Params;
 
     const user = await getService('user').findOne(id);
 
@@ -77,12 +88,12 @@ export default {
     ctx.body = {
       // @ts-ignore
       data: getService('user').sanitizeUser(user),
-    };
+    } as FindOne.Response;
   },
 
-  async update(ctx: any) {
-    const { id } = ctx.params as { id: string };
-    const { body: input } = ctx.request;
+  async update(ctx: Context) {
+    const { id } = ctx.params as Update.Params;
+    const { body: input } = ctx.request as Update.Request;
 
     await validateUserUpdateInput(input);
 
@@ -105,11 +116,11 @@ export default {
 
     ctx.body = {
       data: getService('user').sanitizeUser(updatedUser),
-    };
+    } satisfies Update.Response;
   },
 
-  async deleteOne(ctx: any) {
-    const { id } = ctx.params;
+  async deleteOne(ctx: Context) {
+    const { id } = ctx.params as DeleteOne.Params;
 
     const deletedUser = await getService('user').deleteById(id);
 
@@ -119,15 +130,15 @@ export default {
 
     return ctx.deleted({
       data: getService('user').sanitizeUser(deletedUser),
-    });
+    } satisfies DeleteOne.Response);
   },
 
   /**
    * Delete several users
-   * @param {KoaContext} ctx - koa context
+   * @param ctx - koa context
    */
-  async deleteMany(ctx: any) {
-    const { body } = ctx.request;
+  async deleteMany(ctx: Context) {
+    const { body } = ctx.request as DeleteMany.Request;
     await validateUsersDeleteInput(body);
 
     const users = await getService('user').deleteByIds(body.ids);
@@ -136,6 +147,6 @@ export default {
 
     return ctx.deleted({
       data: sanitizedUsers,
-    });
+    } satisfies DeleteMany.Response);
   },
 };

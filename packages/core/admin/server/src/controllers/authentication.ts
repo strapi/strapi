@@ -2,6 +2,7 @@ import type { Context, Next } from 'koa';
 import 'koa-bodyparser';
 import passport from 'koa-passport';
 import compose from 'koa-compose';
+import '@strapi/types';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import {
@@ -139,7 +140,6 @@ export default {
       ...input,
       registrationToken: null,
       isActive: true,
-      // @ts-expect-error - use Utils.Object.Replace to create a new CreateUserPayload type
       roles: superAdminRole ? [superAdminRole.id] : [],
     });
 
