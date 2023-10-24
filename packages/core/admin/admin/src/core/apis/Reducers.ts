@@ -3,13 +3,13 @@
 import { Reducer, ReducersMapObject } from '@reduxjs/toolkit';
 
 interface ReducerConstructorArgs {
-  appReducers: ReducersMapObject;
+  appReducers?: ReducersMapObject;
 }
 
 export class Reducers {
   reducers: ReducersMapObject;
 
-  constructor({ appReducers }: ReducerConstructorArgs) {
+  constructor({ appReducers = {} }: ReducerConstructorArgs = {}) {
     this.reducers = { ...appReducers };
   }
 

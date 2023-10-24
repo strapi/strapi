@@ -3,14 +3,18 @@ import { Middleware } from '@reduxjs/toolkit';
 
 import { RootState } from '../store/configure';
 
-export class Middlewares {
-  middlewares: Array<Middleware<object, RootState>>;
+type TypedMiddleware = () => Middleware<object, RootState>;
+
+class Middlewares {
+  middlewares: Array<TypedMiddleware>;
 
   constructor() {
     this.middlewares = [];
   }
 
-  add(middleware: Middleware<object, RootState>) {
+  add(middleware: TypedMiddleware) {
     this.middlewares.push(middleware);
   }
 }
+
+export { Middlewares, TypedMiddleware as Middleware };

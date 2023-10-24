@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 
 // eslint-disable-next-line import/extensions
 import plugins from './plugins';
+import { StrapiApp } from './StrapiApp';
 
 const config = {
   locales: ['fr'],
@@ -56,11 +57,7 @@ const run = async () => {
     console.error(err);
   }
 
-  // We need to make sure to fetch the project type before importing the StrapiApp
-  // otherwise the strapi-babel-plugin does not work correctly
-  const StrapiApp = await import(/* webpackChunkName: "admin-app" */ './StrapiApp');
-
-  const app = StrapiApp.default({
+  const app = new StrapiApp({
     appPlugins: plugins,
     adminConfig: customConfig,
     bootstrap: customConfig,

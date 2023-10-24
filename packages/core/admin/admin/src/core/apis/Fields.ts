@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import invariant from 'invariant';
 
-interface Field {
+export interface Field {
   type: string;
   Component: React.ComponentType;
 }

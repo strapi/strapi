@@ -1,12 +1,12 @@
-const fs = require('fs-extra');
-const path = require('path');
+import { readdirSync } from 'fs-extra';
+import path from 'path';
 
-const languageNativeNames = require('../languageNativeNames').default;
+import { languageNativeNames } from '../languageNativeNames';
 
-const languages = fs
-  .readdirSync(path.join(__dirname, '..'))
+// eslint-disable-next-line no-undef
+const languages = readdirSync(path.join(__dirname, '..'))
   .filter((file) => file.includes('.json'))
-  .map((file) => file.replace('.json', ''));
+  .map((file) => file.replace('.json', '')) as Array<keyof typeof languageNativeNames>;
 
 describe('translations', () => {
   describe('languageNativeNames', () => {

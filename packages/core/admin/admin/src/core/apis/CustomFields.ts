@@ -1,8 +1,12 @@
 /* eslint-disable check-file/filename-naming-convention */
-import * as React from 'react';
-
 import invariant from 'invariant';
-import { MessageDescriptor } from 'react-intl';
+
+import type {
+  CustomField,
+  CustomFieldOption,
+  CustomFieldOptionSection,
+  CustomFieldUID,
+} from '@strapi/helper-plugin';
 
 const ALLOWED_TYPES = [
   'biginteger',
@@ -35,30 +39,6 @@ const ALLOWED_ROOT_LEVEL_OPTIONS = [
   'private',
   'default',
 ] as const;
-
-type AllowedRootLevelOptions = (typeof ALLOWED_ROOT_LEVEL_OPTIONS)[number];
-
-interface CustomFieldOption {
-  name: AllowedRootLevelOptions | `options.${AllowedRootLevelOptions}`;
-  items: CustomFieldOption[];
-}
-
-interface CustomField {
-  name: string;
-  pluginId: string;
-  type: (typeof ALLOWED_TYPES)[number];
-  intlLabel: MessageDescriptor;
-  intlDescription: MessageDescriptor;
-  components: {
-    Input: React.ComponentType;
-  };
-  options?: {
-    base: CustomFieldOption[];
-    advanced: CustomFieldOption[];
-  };
-}
-
-type CustomFieldUID = `plugin::${string}.${string}` | `global::${string}`;
 
 export class CustomFields {
   customFields: Record<CustomFieldUID, CustomField>;
@@ -125,7 +105,7 @@ export class CustomFields {
     return this.customFields;
   }
 
-  get(uid: CustomFieldUID) {
+  get(uid: CustomFieldUID): CustomField | undefined {
     return this.customFields[uid];
   }
 }
@@ -137,9 +117,9 @@ interface OptionValidation {
 
 const optionsValidationReducer = (
   acc: OptionValidation[],
-  option: CustomFieldOption
+  option: CustomFieldOptionSection | CustomFieldOption
 ): OptionValidation[] => {
-  if (option.items) {
+  if ('items' in option) {
     return option.items.reduce(optionsValidationReducer, acc);
   }
 
@@ -151,8 +131,7 @@ const optionsValidationReducer = (
   } else {
     acc.push({
       isValidOptionPath:
-        option.name.startsWith('options') ||
-        ALLOWED_ROOT_LEVEL_OPTIONS.includes(option.name as AllowedRootLevelOptions),
+        option.name.startsWith('options') || ALLOWED_ROOT_LEVEL_OPTIONS.includes(option.name),
       errorMessage: `'${option.name}' must be prefixed with 'options.'`,
     });
   }

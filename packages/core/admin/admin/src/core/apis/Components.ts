@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import invariant from 'invariant';
 
-interface Component {
+export interface Component {
   name: string;
   Component: React.ComponentType;
 }
