@@ -1,7 +1,7 @@
-import createHook from '../createHook';
+import { createHook } from '../createHook';
 
 describe('ADMIN | core | utils | createHook', () => {
-  let hooksContainer;
+  let hooksContainer: ReturnType<typeof createHook>;
 
   beforeEach(() => {
     hooksContainer = createHook();
