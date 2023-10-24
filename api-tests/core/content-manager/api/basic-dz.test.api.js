@@ -80,7 +80,7 @@ describe('CM API - Basic + dz', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(product);
-    expect(res.body.publishedAt).toBeUndefined();
+    expect(res.body.publishedAt).toBe(null);
     data.productsWithDz.push(res.body);
   });
 
@@ -92,7 +92,7 @@ describe('CM API - Basic + dz', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(data.productsWithDz[0]);
-    expect(res.body.publishedAt).toBeUndefined();
+    expect(res.body.publishedAt).toBe(null);
   });
 
   test('Update product with compo', async () => {
@@ -116,7 +116,7 @@ describe('CM API - Basic + dz', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(product);
     expect(res.body.id).toEqual(data.productsWithDz[0].id);
-    expect(res.body.publishedAt).toBeUndefined();
+    expect(res.body.publishedAt).toBe(null);
     data.productsWithDz[0] = res.body;
   });
 
@@ -129,7 +129,7 @@ describe('CM API - Basic + dz', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(data.productsWithDz[0]);
     expect(res.body.id).toEqual(data.productsWithDz[0].id);
-    expect(res.body.publishedAt).toBeUndefined();
+    expect(res.body.publishedAt).toBe(null);
     data.productsWithDz.shift();
   });
 
@@ -162,7 +162,7 @@ describe('CM API - Basic + dz', () => {
   });
 
   describe('validation', () => {
-    test('Cannot create product with compo - compo required', async () => {
+    test('Cannot publish product with compo - compo required', async () => {
       const product = {
         name: 'Product 1',
         description: 'Product description',
@@ -205,10 +205,15 @@ describe('CM API - Basic + dz', () => {
           },
         ],
       };
-      const res = await rq({
+      const creationRes = await rq({
         method: 'POST',
         url: '/content-manager/collection-types/api::product-with-dz.product-with-dz',
         body: product,
+      });
+
+      const res = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/api::product-with-dz.product-with-dz/${creationRes.body.id}/actions/publish`,
       });
 
       expect(res.statusCode).toBe(400);
@@ -280,10 +285,16 @@ describe('CM API - Basic + dz', () => {
           },
         ],
       };
-      const res = await rq({
+
+      const creationRes = await rq({
         method: 'POST',
         url: '/content-manager/collection-types/api::product-with-dz.product-with-dz',
         body: product,
+      });
+
+      const res = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/api::product-with-dz.product-with-dz/${creationRes.body.id}/actions/publish`,
       });
 
       expect(res.statusCode).toBe(400);
@@ -292,12 +303,12 @@ describe('CM API - Basic + dz', () => {
         error: {
           status: 400,
           name: 'ValidationError',
-          message: 'dz[0].name must be defined.',
+          message: 'dz[0].name must be a `string` type, but the final value was: `null`.',
           details: {
             errors: [
               {
                 path: ['dz', '0', 'name'],
-                message: 'dz[0].name must be defined.',
+                message: 'dz[0].name must be a `string` type, but the final value was: `null`.',
                 name: 'ValidationError',
               },
             ],
@@ -317,6 +328,7 @@ describe('CM API - Basic + dz', () => {
           },
         ],
       };
+
       const res = await rq({
         method: 'POST',
         url: '/content-manager/collection-types/api::product-with-dz.product-with-dz',

@@ -34,7 +34,7 @@ export const TableRows = ({
   canCreate,
   canDelete,
   contentType,
-  features: { hasDraftAndPublish, hasReviewWorkflows },
+  features: { hasReviewWorkflows },
   headers,
   entriesToDelete,
   onClickDelete,
@@ -153,7 +153,7 @@ export const TableRows = ({
             )}
 
             {headers.map(({ key, cellFormatter, name, ...rest }) => {
-              if (hasDraftAndPublish && name === 'publishedAt') {
+              if (name === 'publishedAt') {
                 return (
                   <Td key={key}>
                     <Status
@@ -292,7 +292,6 @@ TableRows.propTypes = {
   }).isRequired,
   entriesToDelete: PropTypes.array,
   features: PropTypes.shape({
-    hasDraftAndPublish: PropTypes.bool.isRequired,
     hasReviewWorkflows: PropTypes.bool.isRequired,
   }).isRequired,
   headers: PropTypes.array.isRequired,

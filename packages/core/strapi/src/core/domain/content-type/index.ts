@@ -79,14 +79,15 @@ const createContentType = (uid: string, definition: ContentTypeDefinition) => {
     },
   });
 
-  if (contentTypesUtils.hasDraftAndPublish(schema as any)) {
-    schema.attributes[PUBLISHED_AT_ATTRIBUTE] = {
-      type: 'datetime',
-      configurable: false,
-      writable: true,
-      visible: false,
-    };
-  }
+  schema.attributes[PUBLISHED_AT_ATTRIBUTE] = {
+    type: 'datetime',
+    configurable: false,
+    writable: true,
+    visible: false,
+    default() {
+      return new Date();
+    },
+  };
 
   const isPrivate = !_.get(schema, 'options.populateCreatorFields', false);
 

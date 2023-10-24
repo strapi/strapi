@@ -7,9 +7,7 @@
     "displayName": "Relations",
     "description": ""
   },
-  "options": {
-    "draftAndPublish": true
-  },
+  "options": {},
   "pluginOptions": {
     "i18n": {
       "localized": true
@@ -47,10 +45,7 @@
         }
       },
       "type": "dynamiczone",
-      "components": [
-        "basic.relation",
-        "basic.simple"
-      ]
+      "components": ["basic.relation", "basic.simple"]
     },
     "single_relation": {
       "type": "component",

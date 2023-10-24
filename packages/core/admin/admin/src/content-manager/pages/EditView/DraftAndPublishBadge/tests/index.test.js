@@ -24,7 +24,7 @@ const makeApp = (props) => (
 
 describe('<DraftAndPublishBadge />', () => {
   it('renders and matches the snapshot', () => {
-    const App = makeApp({ hasDraftAndPublish: true, isPublished: true });
+    const App = makeApp({ isPublished: true });
 
     const {
       container: { firstChild },
@@ -124,7 +124,7 @@ describe('<DraftAndPublishBadge />', () => {
   });
 
   it('should show the draft design when it is not published', () => {
-    const App = makeApp({ hasDraftAndPublish: true, isPublished: false });
+    const App = makeApp({ isPublished: false });
 
     const {
       container: { firstChild },
@@ -221,13 +221,5 @@ describe('<DraftAndPublishBadge />', () => {
         </div>
       </aside>
     `);
-  });
-
-  it('should show return null when hasDraftAndPublish is falsy', () => {
-    const App = makeApp({ hasDraftAndPublish: false, isPublished: false });
-
-    const { queryByText } = render(App);
-
-    expect(queryByText('Editing')).not.toBeInTheDocument();
   });
 });

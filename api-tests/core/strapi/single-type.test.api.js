@@ -16,7 +16,6 @@ const model = {
   displayName: 'single-type',
   singularName: 'single-type',
   pluralName: 'single-types',
-  draftAndPublish: true,
   attributes: {
     title: {
       type: 'string',

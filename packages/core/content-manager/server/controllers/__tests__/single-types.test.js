@@ -131,9 +131,7 @@ describe('Single Types', () => {
       },
       getModel() {
         return {
-          options: {
-            draftAndPublish: true,
-          },
+          options: {},
           attributes: {
             title: {
               type: 'string',
@@ -248,9 +246,7 @@ describe('Single Types', () => {
       },
       getModel() {
         return {
-          options: {
-            draftAndPublish: true,
-          },
+          options: {},
           attributes: {
             title: {
               type: 'string',
@@ -346,9 +342,7 @@ describe('Single Types', () => {
       },
       getModel() {
         return {
-          options: {
-            draftAndPublish: true,
-          },
+          options: {},
           attributes: {
             title: {
               type: 'string',
@@ -444,9 +438,7 @@ describe('Single Types', () => {
       },
       getModel() {
         return {
-          options: {
-            draftAndPublish: true,
-          },
+          options: {},
           attributes: {
             title: {
               type: 'string',

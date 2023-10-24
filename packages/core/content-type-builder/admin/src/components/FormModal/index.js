@@ -184,35 +184,29 @@ const FormModal = () => {
         });
       }
 
-      // Create content type we need to add the default option draftAndPublish
+      // Create content type
       if (modalType === 'contentType' && actionType === 'create') {
         dispatch({
           type: SET_DATA_TO_EDIT,
           modalType,
           actionType,
-          data: {
-            draftAndPublish: true,
-          },
+          data: {},
           pluginOptions: {},
         });
       }
 
       // Edit content type
       if (modalType === 'contentType' && actionType === 'edit') {
-        const {
-          displayName,
-          draftAndPublish,
-          kind,
-          pluginOptions,
-          pluralName,
-          reviewWorkflows,
-          singularName,
-        } = get(allDataSchema, [...pathToSchema, 'schema'], {
-          displayName: null,
-          pluginOptions: {},
-          singularName: null,
-          pluralName: null,
-        });
+        const { displayName, kind, pluginOptions, pluralName, reviewWorkflows, singularName } = get(
+          allDataSchema,
+          [...pathToSchema, 'schema'],
+          {
+            displayName: null,
+            pluginOptions: {},
+            singularName: null,
+            pluralName: null,
+          }
+        );
 
         dispatch({
           type: SET_DATA_TO_EDIT,
@@ -220,7 +214,6 @@ const FormModal = () => {
           modalType,
           data: {
             displayName,
-            draftAndPublish,
             kind,
             pluginOptions,
             pluralName,

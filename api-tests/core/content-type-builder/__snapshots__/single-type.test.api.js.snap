@@ -18,7 +18,6 @@ exports[`Content Type Builder - Content types Single Types Get single type retur
       "collectionName": "test_single_types",
       "description": "",
       "displayName": "Test Single Type",
-      "draftAndPublish": false,
       "kind": "singleType",
       "pluginOptions": {
         "i18n": {

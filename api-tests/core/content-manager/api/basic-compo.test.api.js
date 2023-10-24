@@ -77,7 +77,7 @@ describe('CM API - Basic + compo', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(product);
-    expect(res.body.publishedAt).toBeUndefined();
+    expect(res.body.publishedAt).toBeDefined();
     data.productsWithCompo.push(res.body);
   });
 
@@ -89,7 +89,7 @@ describe('CM API - Basic + compo', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(data.productsWithCompo[0]);
-    expect(res.body.publishedAt).toBeUndefined();
+    expect(res.body.publishedAt).toBeDefined();
   });
 
   test('Update product with compo', async () => {
@@ -110,7 +110,7 @@ describe('CM API - Basic + compo', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(product);
     expect(res.body.id).toEqual(data.productsWithCompo[0].id);
-    expect(res.body.publishedAt).toBeUndefined();
+    expect(res.body.publishedAt).toBeDefined();
     data.productsWithCompo[0] = res.body;
   });
 
@@ -123,7 +123,7 @@ describe('CM API - Basic + compo', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(data.productsWithCompo[0]);
     expect(res.body.id).toEqual(data.productsWithCompo[0].id);
-    expect(res.body.publishedAt).toBeUndefined();
+    expect(res.body.publishedAt).toBeDefined();
     data.productsWithCompo.shift();
   });
 
@@ -152,28 +152,34 @@ describe('CM API - Basic + compo', () => {
   });
 
   describe('validation', () => {
-    test('Cannot create product with compo - compo required', async () => {
+    test('Cannot publish product with compo - compo required', async () => {
       const product = {
         name: 'Product 1',
         description: 'Product description',
       };
-      const res = await rq({
+
+      const creationRes = await rq({
         method: 'POST',
         url: '/content-manager/collection-types/api::product-with-compo.product-with-compo',
         body: product,
+      });
+
+      const res = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/api::product-with-compo.product-with-compo/${creationRes.body.id}/actions/publish`,
       });
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
         data: null,
         error: {
-          message: 'compo must be defined.',
+          message: 'compo must be a `object` type, but the final value was: `null`.',
           name: 'ValidationError',
           details: {
             errors: [
               {
                 path: ['compo'],
-                message: 'compo must be defined.',
+                message: 'compo must be a `object` type, but the final value was: `null`.',
                 name: 'ValidationError',
               },
             ],
@@ -182,7 +188,7 @@ describe('CM API - Basic + compo', () => {
       });
     });
 
-    test('Cannot create product with compo - minLength', async () => {
+    test('Cannot publish product with compo - minLength', async () => {
       const product = {
         name: 'Product 1',
         description: 'Product description',
@@ -191,10 +197,16 @@ describe('CM API - Basic + compo', () => {
           description: '',
         },
       };
-      const res = await rq({
+
+      const creationRes = await rq({
         method: 'POST',
         url: '/content-manager/collection-types/api::product-with-compo.product-with-compo',
         body: product,
+      });
+
+      const res = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/api::product-with-compo.product-with-compo/${creationRes.body.id}/actions/publish`,
       });
 
       expect(res.statusCode).toBe(400);
@@ -225,6 +237,7 @@ describe('CM API - Basic + compo', () => {
           description: 'A very long description that exceed the min length.',
         },
       };
+
       const res = await rq({
         method: 'POST',
         url: '/content-manager/collection-types/api::product-with-compo.product-with-compo',
@@ -250,7 +263,7 @@ describe('CM API - Basic + compo', () => {
       });
     });
 
-    test('Cannot create product with compo - required', async () => {
+    test('Cannot publish product with compo - required', async () => {
       const product = {
         name: 'Product 1',
         description: 'Product description',
@@ -258,23 +271,29 @@ describe('CM API - Basic + compo', () => {
           description: 'short',
         },
       };
-      const res = await rq({
+
+      const creationRes = await rq({
         method: 'POST',
         url: '/content-manager/collection-types/api::product-with-compo.product-with-compo',
         body: product,
+      });
+
+      const res = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/api::product-with-compo.product-with-compo/${creationRes.body.id}/actions/publish`,
       });
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
         data: null,
         error: {
-          message: 'compo.name must be defined.',
+          message: 'compo.name must be a `string` type, but the final value was: `null`.',
           name: 'ValidationError',
           details: {
             errors: [
               {
                 path: ['compo', 'name'],
-                message: 'compo.name must be defined.',
+                message: 'compo.name must be a `string` type, but the final value was: `null`.',
                 name: 'ValidationError',
               },
             ],

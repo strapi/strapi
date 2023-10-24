@@ -19,12 +19,8 @@ const CustomBullet = styled(Dot)`
   }
 `;
 
-const DraftAndPublishBadge = ({ hasDraftAndPublish, isPublished }) => {
+const DraftAndPublishBadge = ({ isPublished }) => {
   const { formatMessage } = useIntl();
-
-  if (!hasDraftAndPublish) {
-    return null;
-  }
 
   const colors = {
     draft: {
@@ -85,7 +81,6 @@ const DraftAndPublishBadge = ({ hasDraftAndPublish, isPublished }) => {
 };
 
 DraftAndPublishBadge.propTypes = {
-  hasDraftAndPublish: PropTypes.bool.isRequired,
   isPublished: PropTypes.bool.isRequired,
 };
 

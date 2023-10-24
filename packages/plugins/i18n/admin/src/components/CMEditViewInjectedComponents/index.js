@@ -23,7 +23,6 @@ const CMEditViewInjectedComponents = () => {
   const defaultLocale = locales.find((loc) => loc.isDefault);
   const currentLocale = get(query, 'plugins.i18n.locale', defaultLocale.code);
   const hasI18nEnabled = get(layout, ['pluginOptions', 'i18n', 'localized'], false);
-  const hasDraftAndPublishEnabled = get(layout, ['options', 'draftAndPublish'], false);
 
   const defaultQuery = useMemo(() => {
     if (!query) {
@@ -54,7 +53,6 @@ const CMEditViewInjectedComponents = () => {
       currentEntityId={currentEntityId}
       createPermissions={createPermissions}
       currentLocaleStatus={currentLocaleStatus}
-      hasDraftAndPublishEnabled={hasDraftAndPublishEnabled}
       localizations={localizations}
       isSingleType={isSingleType}
       query={defaultQuery}

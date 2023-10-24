@@ -16,9 +16,7 @@ describe('Content types service', () => {
         pluralName: 'my-names',
         description: 'My description',
       },
-      options: {
-        draftAndPublish: false,
-      },
+      options: {},
       pluginOptions: {
         'content-manager': {
           visible: true,

@@ -36,7 +36,6 @@ interface CMEditViewDataManagerContext {
   };
   createActionAllowedFields: string[];
   formErrors: Record<string, MessageDescriptor>;
-  hasDraftAndPublish: boolean;
   // TODO: define the tree, can it be inferred?
   initialData: Record<string, unknown>;
   isCreatingEntry: boolean;
@@ -88,7 +87,6 @@ const ContentManagerEditViewDataManagerContext = React.createContext<CMEditViewD
   },
   createActionAllowedFields: [],
   formErrors: {},
-  hasDraftAndPublish: false,
   initialData: {},
   isCreatingEntry: false,
   isSingleType: false,

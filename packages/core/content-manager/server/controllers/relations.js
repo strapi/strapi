@@ -1,7 +1,6 @@
 'use strict';
 
 const { prop, isEmpty, uniq, flow } = require('lodash/fp');
-const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
 const { isAnyToMany } = require('@strapi/utils').relations;
 const { PUBLISHED_AT_ATTRIBUTE } = require('@strapi/utils').contentTypes.constants;
 const { isOperatorOfType } = require('@strapi/utils');
@@ -122,10 +121,7 @@ module.exports = {
       (mainField) => sanitizeMainField(targetedModel, mainField, userAbility)
     )(modelConfig);
 
-    const fieldsToSelect = uniq(['id', mainField]);
-    if (hasDraftAndPublish(targetedModel)) {
-      fieldsToSelect.push(PUBLISHED_AT_ATTRIBUTE);
-    }
+    const fieldsToSelect = uniq(['id', mainField, PUBLISHED_AT_ATTRIBUTE]);
 
     const queryParams = {
       sort: mainField,
@@ -233,10 +229,7 @@ module.exports = {
       (mainField) => sanitizeMainField(targetedModel, mainField, userAbility)
     )(modelConfig);
 
-    const fieldsToSelect = uniq(['id', mainField]);
-    if (hasDraftAndPublish(targetedModel)) {
-      fieldsToSelect.push(PUBLISHED_AT_ATTRIBUTE);
-    }
+    const fieldsToSelect = uniq(['id', mainField, PUBLISHED_AT_ATTRIBUTE]);
 
     const queryParams = {
       fields: fieldsToSelect,

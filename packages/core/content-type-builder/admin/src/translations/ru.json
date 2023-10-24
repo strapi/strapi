@@ -45,8 +45,6 @@
   "contentType.collectionName.description": "Полезно, когда имя вашего типа контента и имя вашей таблицы различаются",
   "contentType.collectionName.label": "Название коллекции",
   "contentType.displayName.label": "Отображаемое имя",
-  "contentType.draftAndPublish.description": "Напишите черновую версию каждой записи перед публикацией",
-  "contentType.draftAndPublish.label": "Система черновиков/публикаций",
   "contentType.kind.change.warning": "Вы только что изменили тип типа контента: API будет сброшен (маршруты, контроллеры и сервисы будут перезаписаны).",
   "error.attributeName.reserved-name": "Это имя нельзя использовать в вашем типе контента, так как это может нарушить другие функции.",
   "error.contentTypeName.reserved-name": "Это название зарезервировано и не может быть использовано в проекте",

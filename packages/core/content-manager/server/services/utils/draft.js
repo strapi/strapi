@@ -3,7 +3,7 @@
 const { castArray } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
 
-const { hasDraftAndPublish, isVisibleAttribute } = strapiUtils.contentTypes;
+const { isVisibleAttribute } = strapiUtils.contentTypes;
 /**
  * sumDraftCounts works recursively on the attributes of a model counting the
  * number of draft relations
@@ -24,8 +24,7 @@ const sumDraftCounts = (entity, uid) => {
 
     switch (attribute.type) {
       case 'relation': {
-        const childModel = strapi.getModel(attribute.target);
-        if (hasDraftAndPublish(childModel) && isVisibleAttribute(model, attributeName)) {
+        if (isVisibleAttribute(model, attributeName)) {
           return sum + value.count;
         }
         return sum;

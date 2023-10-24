@@ -2,18 +2,15 @@ import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import isEmpty from 'lodash/isEmpty';
 
 function useSelect() {
-  const { hasDraftAndPublish, modifiedData } = useCMEditViewDataManager();
+  const { modifiedData } = useCMEditViewDataManager();
 
   let trackerProperty = {};
 
-  if (hasDraftAndPublish) {
-    const isDraft = isEmpty(modifiedData.publishedAt);
+  const isDraft = isEmpty(modifiedData.publishedAt);
 
-    trackerProperty = isDraft ? { status: 'draft' } : { status: 'published' };
-  }
+  trackerProperty = isDraft ? { status: 'draft' } : { status: 'published' };
 
   return {
-    hasDraftAndPublish,
     trackerProperty,
   };
 }

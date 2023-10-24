@@ -77,13 +77,9 @@ const EditViewDataManagerProvider = ({
 
   const currentContentTypeLayout = get(allLayoutData, ['contentType'], {});
 
-  const hasDraftAndPublish = useMemo(() => {
-    return get(currentContentTypeLayout, ['options', 'draftAndPublish'], false);
-  }, [currentContentTypeLayout]);
-
   const shouldNotRunValidations = useMemo(() => {
-    return hasDraftAndPublish && !initialData.publishedAt;
-  }, [hasDraftAndPublish, initialData.publishedAt]);
+    return !initialData.publishedAt;
+  }, [initialData.publishedAt]);
 
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
@@ -358,12 +354,8 @@ const EditViewDataManagerProvider = ({
   );
 
   const trackerProperty = useMemo(() => {
-    if (!hasDraftAndPublish) {
-      return {};
-    }
-
     return shouldNotRunValidations ? { status: 'draft' } : {};
-  }, [hasDraftAndPublish, shouldNotRunValidations]);
+  }, [shouldNotRunValidations]);
 
   const handlePublishPromptDismissal = useCallback(async (e) => {
     e.preventDefault();
@@ -619,7 +611,6 @@ const EditViewDataManagerProvider = ({
         checkFormErrors,
         createActionAllowedFields,
         formErrors,
-        hasDraftAndPublish,
         initialData,
         isCreatingEntry,
         isSingleType,

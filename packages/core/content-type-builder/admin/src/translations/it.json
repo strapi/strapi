@@ -45,8 +45,6 @@
   "contentType.collectionName.description": "Utile quando il nome della Collezione differisce dal nome della tabella del DB",
   "contentType.collectionName.label": "Nome della Collezione",
   "contentType.displayName.label": "Nome visualizzato",
-  "contentType.draftAndPublish.description": "Scrivi una bozza dell'elemento prima di pubblicarlo",
-  "contentType.draftAndPublish.label": "Sistema Bozza/pubblicato",
   "contentType.kind.change.warning": "Hai cambiato il genere di questo Tipo di Contenuto. Le API verranno ripristinate (route, controller e services verranno sovrascritti).",
   "error.attributeName.reserved-name": "Questo nome non può essere utilizzato nel tuo Tipo di Contenuto perché potrebbe danneggiare altre funzionalità",
   "error.contentTypeName.reserved-name": "Questo nome non può essere utilizzato nel tuo progetto perché potrebbe danneggiare altre funzionalità",

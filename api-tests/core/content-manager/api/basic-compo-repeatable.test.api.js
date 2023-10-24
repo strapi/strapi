@@ -80,7 +80,7 @@ describe('CM API - Basic + compo', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(product);
-    expect(res.body.publishedAt).toBeUndefined();
+    expect(res.body.publishedAt).toBeDefined();
     data.productsWithCompo.push(res.body);
   });
 
@@ -92,7 +92,7 @@ describe('CM API - Basic + compo', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(data.productsWithCompo[0]);
-    expect(res.body.publishedAt).toBeUndefined();
+    expect(res.body.publishedAt).toBeDefined();
   });
 
   test('Update product with compo', async () => {
@@ -115,7 +115,7 @@ describe('CM API - Basic + compo', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(product);
     expect(res.body.id).toEqual(data.productsWithCompo[0].id);
-    expect(res.body.publishedAt).toBeUndefined();
+    expect(res.body.publishedAt).toBeDefined();
     data.productsWithCompo[0] = res.body;
   });
 
@@ -128,7 +128,7 @@ describe('CM API - Basic + compo', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(data.productsWithCompo[0]);
     expect(res.body.id).toEqual(data.productsWithCompo[0].id);
-    expect(res.body.publishedAt).toBeUndefined();
+    expect(res.body.publishedAt).toBeDefined();
     data.productsWithCompo.shift();
   });
 
@@ -175,10 +175,16 @@ describe('CM API - Basic + compo', () => {
           },
         ],
       };
-      const res = await rq({
+
+      const creationRes = await rq({
         method: 'POST',
         url: '/content-manager/collection-types/api::product-with-compo.product-with-compo',
         body: product,
+      });
+
+      const res = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/api::product-with-compo.product-with-compo/${creationRes.body.id}/actions/publish`,
       });
 
       expect(res.statusCode).toBe(400);
@@ -248,10 +254,16 @@ describe('CM API - Basic + compo', () => {
           },
         ],
       };
-      const res = await rq({
+
+      const creationRes = await rq({
         method: 'POST',
         url: '/content-manager/collection-types/api::product-with-compo.product-with-compo',
         body: product,
+      });
+
+      const res = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/api::product-with-compo.product-with-compo/${creationRes.body.id}/actions/publish`,
       });
 
       expect(res.statusCode).toBe(400);
@@ -260,12 +272,12 @@ describe('CM API - Basic + compo', () => {
         error: {
           status: 400,
           name: 'ValidationError',
-          message: 'compo[0].name must be defined.',
+          message: 'compo[0].name must be a `string` type, but the final value was: `null`.',
           details: {
             errors: [
               {
                 path: ['compo', '0', 'name'],
-                message: 'compo[0].name must be defined.',
+                message: 'compo[0].name must be a `string` type, but the final value was: `null`.',
                 name: 'ValidationError',
               },
             ],

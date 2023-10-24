@@ -36,8 +36,7 @@ const compo = (withRelations = false) => ({
   },
 });
 
-const productModel = (draftAndPublish = false) => ({
-  draftAndPublish,
+const productModel = () => ({
   attributes: {
     name: {
       type: 'string',
@@ -50,8 +49,7 @@ const productModel = (draftAndPublish = false) => ({
   collectionName: '',
 });
 
-const shopModel = (draftAndPublish = false) => ({
-  draftAndPublish,
+const shopModel = () => ({
   attributes: {
     name: {
       type: 'string',
@@ -110,15 +108,14 @@ const createEntry = async (uid, data) => {
   return body;
 };
 
-describe.each([[false], [true]])('Relations, with d&p: %p', (withDraftAndPublish) => {
+describe('Relations, with d&p: %p', () => {
   const builder = createTestBuilder();
-  const addPublishedAtCheck = (value) => (withDraftAndPublish ? { publishedAt: value } : undefined);
+  const addPublishedAtCheck = (value) => {
+    publishedAt: value;
+  };
 
   beforeAll(async () => {
-    await builder
-      .addComponent(compo(false))
-      .addContentTypes([productModel(withDraftAndPublish), shopModel(withDraftAndPublish)])
-      .build();
+    await builder.addComponent(compo(false)).addContentTypes([productModel(), shopModel()]).build();
 
     await modelsUtils.modifyComponent(compo(true));
 
@@ -128,12 +125,10 @@ describe.each([[false], [true]])('Relations, with d&p: %p', (withDraftAndPublish
     const createdProduct1 = await createEntry('api::product.product', { name: 'Skate' });
     const createdProduct2 = await createEntry('api::product.product', { name: 'Candle' });
 
-    if (withDraftAndPublish) {
-      await rq({
-        url: `/content-manager/collection-types/api::product.product/${createdProduct1.id}/actions/publish`,
-        method: 'POST',
-      });
-    }
+    await rq({
+      url: `/content-manager/collection-types/api::product.product/${createdProduct1.id}/actions/publish`,
+      method: 'POST',
+    });
 
     data.products.push(createdProduct1);
     data.products.push(createdProduct2);
