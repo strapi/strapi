@@ -1,5 +1,6 @@
 import { join } from 'path';
 import { Duplex, PassThrough, Readable } from 'stream';
+import * as webStream from 'stream/web';
 import { stat, createReadStream, ReadStream } from 'fs-extra';
 import type { LoadedStrapi } from '@strapi/types';
 
@@ -12,27 +13,33 @@ function getFileStream(filepath: string, isLocal = false): PassThrough | ReadStr
 
   const readableStream = new PassThrough();
 
+  // fetch the image from remote url and stream it
   fetch(filepath)
     .then((res) => {
       if (res.status !== 200) {
         readableStream.emit('error', new Error(`Request failed with status code ${res.status}`));
         return;
       }
-
-      // Use pipeTo to transfer it from the Response.body to the readable stream
-      const writable = new WritableStream({
-        write(chunk) {
-          readableStream.write(chunk);
-        },
-        close() {
-          readableStream.end();
-        },
-        abort() {
-          readableStream.destroy();
-        },
-      });
-
-      res?.body?.pipeTo(writable);
+      fetch(filepath)
+        .then((res) => {
+          if (res.status !== 200) {
+            readableStream.emit(
+              'error',
+              new Error(`Request failed with status code ${res.status}`)
+            );
+            return;
+          }
+          const source = res.body;
+          if (source) {
+            // pipe the image data
+            Readable.fromWeb(new webStream.ReadableStream(res.body)).pipe(readableStream);
+          } else {
+            readableStream.emit('error', new Error('Empty data found for file'));
+          }
+        })
+        .catch((error) => {
+          readableStream.emit('error', error);
+        });
     })
     .catch((error) => {
       readableStream.emit('error', error);
