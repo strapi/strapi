@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 
-import { useStore } from 'react-redux';
+import { Reducer } from '@reduxjs/toolkit';
+
+import { useTypedStore } from '../core/store/hooks';
 
 /**
  * Inject a new reducer into the global redux-store.
@@ -11,8 +13,8 @@ import { useStore } from 'react-redux';
  * @return void
  */
 
-export function useInjectReducer(namespace, reducer) {
-  const store = useStore();
+export function useInjectReducer(namespace: string, reducer: Reducer) {
+  const store = useTypedStore();
 
   useEffect(() => {
     store.injectReducer(namespace, reducer);

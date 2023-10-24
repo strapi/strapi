@@ -1,21 +1,11 @@
-import React from 'react';
+import { renderHook } from '@tests/utils';
 
-import { renderHook } from '@testing-library/react';
-import { Provider } from 'react-redux';
-
-import { configureStore } from '../../../core/store/configure';
+import { configureStore } from '../../core/store/configure';
 import { useInjectReducer } from '../useInjectReducer';
 
 const store = configureStore();
 
-// eslint-disable-next-line no-unused-vars, react/prop-types
-const ComponentFixture = ({ children }) => <Provider store={store}>{children}</Provider>;
-
-function setup(...args) {
-  return renderHook(() => useInjectReducer(...args), { wrapper: ComponentFixture });
-}
-
-function reducerFixture(state = {}, action) {
+function reducerFixture(state = {}, action: { type: 'namespaced_action' }) {
   switch (action.type) {
     case 'namespaced_action':
       return {
@@ -30,12 +20,14 @@ function reducerFixture(state = {}, action) {
 
 describe('useInjectReducer', () => {
   test('injects a new reducer into the global redux store', () => {
-    setup('namespace', reducerFixture);
+    renderHook(() => useInjectReducer('namespace', reducerFixture));
 
+    // @ts-expect-error - we dynamically add reducers which makes the types uncomfortable.
     expect(store.getState().namespace).toStrictEqual({});
 
     store.dispatch({ type: 'namespaced_action' });
 
+    // @ts-expect-error - we dynamically add reducers which makes the types uncomfortable.
     expect(store.getState().namespace).toStrictEqual({ namespacedAction: true });
   });
 });
