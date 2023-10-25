@@ -7531,9 +7531,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/content-releases@workspace:packages/core/content-releases"
   dependencies:
-    "@strapi/design-system": "npm:1.12.0"
+    "@strapi/design-system": "npm:1.13.0"
     "@strapi/helper-plugin": "npm:4.14.4"
-    "@strapi/icons": "npm:1.12.0"
+    "@strapi/icons": "npm:1.13.0"
     "@strapi/pack-up": "workspace:*"
     "@strapi/strapi": "npm:4.14.5"
     "@testing-library/react": "npm:14.0.0"
@@ -7800,16 +7800,6 @@ __metadata:
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
   checksum: cb2f28eb9f98168721e79b65d4324e6c80f79fc2902e3b270ccb6f8a582402b4047ae126ab342d3bf7d97ef6b071e277748fc47f4ea3142cdc4a30b7ffb4486d
-  languageName: node
-  linkType: hard
-
-"@strapi/icons@npm:1.12.0":
-  version: 1.12.0
-  resolution: "@strapi/icons@npm:1.12.0"
-  peerDependencies:
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
-  checksum: 260748fef55585cd048ef65d2262e1eb158d4ba05b092db87d12ac864198269fa6c9ccade3c67c8274923dcf212a24e86a1e5f765c672deb6f53ca56aac1458b
   languageName: node
   linkType: hard
 

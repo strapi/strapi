@@ -62,9 +62,9 @@
     "watch": "packup watch"
   },
   "dependencies": {
-    "@strapi/design-system": "1.12.0",
+    "@strapi/design-system": "1.13.0",
     "@strapi/helper-plugin": "4.14.4",
-    "@strapi/icons": "1.12.0",
+    "@strapi/icons": "1.13.0",
     "react-intl": "6.4.1"
   },
   "devDependencies": {
