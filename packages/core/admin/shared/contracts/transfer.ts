@@ -1,5 +1,12 @@
 import { errors } from '@strapi/utils';
 import { ValidationError as YupValidationError } from 'yup';
+
+import type {
+  SanitizedTransferToken,
+  TransferToken,
+  TokenUpdatePayload,
+} from '../../server/src/services/transfer/token';
+
 /**
  * GET /transfer/runner/push
  */
@@ -11,7 +18,7 @@ export declare namespace RunnerPush {
 
   export interface Response {
     data: {};
-    error?: errors.ApplicationError;
+    error?: errors.ApplicationError | errors.UnauthorizedError;
   }
 }
 /**
@@ -25,27 +32,12 @@ export declare namespace RunnerPull {
 
   export interface Response {
     data: {};
-    error?: errors.ApplicationError;
+    error?: errors.ApplicationError | errors.UnauthorizedError;
   }
 }
 
 /**
- * POST /transfer/tokens - Create a transfer token
- */
-export declare namespace TokenCreate {
-  export interface Request {
-    body: {};
-    query: {};
-  }
-
-  export interface Response {
-    data: {};
-    error?: errors.ApplicationError;
-  }
-}
-
-/**
- * /transfer/tokens - List all transfer tokens
+ * GET /transfer/tokens - List all transfer tokens
  */
 export declare namespace TokenList {
   export interface Request {
@@ -54,22 +46,7 @@ export declare namespace TokenList {
   }
 
   export interface Response {
-    data: {};
-    error?: errors.ApplicationError;
-  }
-}
-
-/**
- * DELETE /transfer/tokens/:id - Delete a transfer token
- */
-export declare namespace TokenRevoke {
-  export interface Request {
-    body: {};
-    query: {};
-  }
-
-  export interface Response {
-    data: {};
+    data: SanitizedTransferToken[];
     error?: errors.ApplicationError;
   }
 }
@@ -83,9 +60,28 @@ export declare namespace TokenGetById {
     query: {};
   }
 
+  export interface Params {
+    id: string | number;
+  }
+
   export interface Response {
-    data: {};
+    data: SanitizedTransferToken;
     error?: errors.ApplicationError;
+  }
+}
+
+/**
+ * POST /transfer/tokens - Create a transfer token
+ */
+export declare namespace TokenCreate {
+  export interface Request {
+    body: TokenUpdatePayload;
+    query: {};
+  }
+
+  export interface Response {
+    data: TransferToken;
+    error?: errors.ApplicationError | YupValidationError;
   }
 }
 
@@ -94,12 +90,35 @@ export declare namespace TokenGetById {
  */
 export declare namespace TokenUpdate {
   export interface Request {
+    body: TokenUpdatePayload;
+    query: {};
+  }
+
+  export interface Params {
+    id: string | number;
+  }
+
+  export interface Response {
+    data: SanitizedTransferToken;
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
+ * DELETE /transfer/tokens/:id - Delete a transfer token
+ */
+export declare namespace TokenRevoke {
+  export interface Request {
     body: {};
     query: {};
   }
 
+  export interface Params {
+    id: string | number;
+  }
+
   export interface Response {
-    data: {};
+    data: SanitizedTransferToken;
     error?: errors.ApplicationError;
   }
 }
@@ -113,8 +132,12 @@ export declare namespace TokenRegenerate {
     query: {};
   }
 
+  export interface Params {
+    id: string | number;
+  }
+
   export interface Response {
-    data: {};
+    data: TransferToken;
     error?: errors.ApplicationError;
   }
 }
