@@ -31,7 +31,6 @@ import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
 import { useDebounce } from '../../hooks/useDebounce';
-// @ts-expect-error - No types, yet.
 import { selectAdminPermissions } from '../../selectors';
 
 import { NpmPackagesFilters } from './components/NpmPackagesFilters';
