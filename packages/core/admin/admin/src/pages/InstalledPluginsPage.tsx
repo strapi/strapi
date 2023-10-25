@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 import {
   ContentLayout,
@@ -14,34 +14,63 @@ import {
   Typography,
   useNotifyAT,
 } from '@strapi/design-system';
-import { LoadingIndicatorPage, useFocusWhenNavigate } from '@strapi/helper-plugin';
+import {
+  CheckPagePermissions,
+  LoadingIndicatorPage,
+  useFetchClient,
+  useFocusWhenNavigate,
+  useNotification,
+} from '@strapi/helper-plugin';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
+import { useQuery } from 'react-query';
+import { useSelector } from 'react-redux';
 
-import { usePlugins } from './hooks/usePlugins';
+import { selectAdminPermissions } from '../selectors';
 
-const Plugins = () => {
+const InstalledPluginsPage = () => {
   const { formatMessage } = useIntl();
   const { notifyStatus } = useNotifyAT();
+  const toggleNotification = useNotification();
+  const { get } = useFetchClient();
   useFocusWhenNavigate();
 
-  const title = formatMessage({
-    id: 'global.plugins',
-    defaultMessage: 'Plugins',
+  const { status, data, error } = useQuery(['plugins'], async () => {
+    /**
+     * TODO: why is this a different format?
+     */
+    const { data } = await get<{
+      plugins: Array<{ name: string; displayName: string; description: string }>;
+    }>('/admin/plugins');
+
+    return data;
   });
 
-  const notifyPluginPageLoad = () => {
-    notifyStatus(
-      formatMessage(
-        {
-          id: 'app.utils.notify.data-loaded',
-          defaultMessage: 'The {target} has loaded',
-        },
-        { target: title }
-      )
-    );
-  };
+  React.useEffect(() => {
+    if (data) {
+      notifyStatus(
+        formatMessage(
+          {
+            id: 'app.utils.notify.data-loaded',
+            defaultMessage: 'The {target} has loaded',
+          },
+          {
+            target: formatMessage({
+              id: 'global.plugins',
+              defaultMessage: 'Plugins',
+            }),
+          }
+        )
+      );
+    }
 
-  const { status, data } = usePlugins(notifyPluginPageLoad);
+    if (error) {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error', defaultMessage: 'An error occured' },
+      });
+    }
+  }, [data, error, formatMessage, notifyStatus, toggleNotification]);
 
   const isLoading = status !== 'success' && status !== 'error';
 
@@ -59,7 +88,10 @@ const Plugins = () => {
     <Layout>
       <Main>
         <HeaderLayout
-          title={title}
+          title={formatMessage({
+            id: 'global.plugins',
+            defaultMessage: 'Plugins',
+          })}
           subtitle={formatMessage({
             id: 'app.components.ListPluginsPage.description',
             defaultMessage: 'List of the installed plugins in the project.',
@@ -88,7 +120,7 @@ const Plugins = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {data.plugins.map(({ name, displayName, description }) => {
+              {data?.plugins.map(({ name, displayName, description }) => {
                 return (
                   <Tr key={name}>
                     <Td>
@@ -118,4 +150,21 @@ const Plugins = () => {
   );
 };
 
-export default Plugins;
+const ProtectedInstalledPluginsPage = () => {
+  const { formatMessage } = useIntl();
+  const permissions = useSelector(selectAdminPermissions);
+
+  return (
+    <CheckPagePermissions permissions={permissions.marketplace?.main}>
+      <Helmet
+        title={formatMessage({
+          id: 'global.plugins',
+          defaultMessage: 'Plugins',
+        })}
+      />
+      <InstalledPluginsPage />
+    </CheckPagePermissions>
+  );
+};
+
+export { ProtectedInstalledPluginsPage, InstalledPluginsPage };
