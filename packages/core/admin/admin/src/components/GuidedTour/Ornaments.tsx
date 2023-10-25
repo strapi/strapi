@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { Box, BoxProps, Flex, FlexProps, Typography } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';

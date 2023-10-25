@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { Box, Button, Flex, Typography } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
 import { GuidedTourContextValue, pxToRem, useGuidedTour, useTracking } from '@strapi/helper-plugin';
