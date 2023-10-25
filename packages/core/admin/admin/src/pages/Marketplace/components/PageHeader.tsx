@@ -1,13 +1,17 @@
-import React from 'react';
-
 import { HeaderLayout } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
 import { useTracking } from '@strapi/helper-plugin';
 import { Upload } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-const PageHeader = ({ isOnline, npmPackageType }) => {
+import type { NpmPackageType } from '../MarketplacePage';
+
+interface PageHeaderProps {
+  isOnline?: boolean;
+  npmPackageType?: NpmPackageType;
+}
+
+const PageHeader = ({ isOnline, npmPackageType = 'plugin' }: PageHeaderProps) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
@@ -43,13 +47,5 @@ const PageHeader = ({ isOnline, npmPackageType }) => {
   );
 };
 
-export default PageHeader;
-
-PageHeader.defaultProps = {
-  npmPackageType: 'plugin',
-};
-
-PageHeader.propTypes = {
-  isOnline: PropTypes.bool.isRequired,
-  npmPackageType: PropTypes.string,
-};
+export { PageHeader };
+export type { PageHeaderProps };

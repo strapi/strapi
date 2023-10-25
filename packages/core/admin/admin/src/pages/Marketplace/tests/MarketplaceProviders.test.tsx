@@ -1,10 +1,10 @@
-import React from 'react';
-
+/* eslint-disable testing-library/no-node-access */
 import { screen, within } from '@testing-library/react';
 import { render as renderRTL, waitFor } from '@tests/utils';
+import { Location } from 'history';
 import { Route } from 'react-router-dom';
 
-import { MarketPlacePage } from '../index';
+import { MarketplacePage } from '../MarketplacePage';
 
 // Increase the jest timeout to accommodate long running tests
 jest.setTimeout(50000);
@@ -31,10 +31,10 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-let testLocation = null;
+let testLocation: Location = null!;
 
-const render = (props) =>
-  renderRTL(<MarketPlacePage {...props} />, {
+const render = () =>
+  renderRTL(<MarketplacePage />, {
     renderOptions: {
       wrapper({ children }) {
         return (
@@ -75,7 +75,7 @@ describe('Marketplace page - providers tab', () => {
     expect(providersTab).toHaveAttribute('aria-selected', 'true');
     expect(providerCardText).toBeVisible();
     expect(submitProviderText).toBeVisible();
-    expect(pluginCardText).toEqual(null);
+    expect(pluginCardText).not.toBeInTheDocument();
   });
 
   it('should return providers search results matching the query', async () => {
@@ -88,13 +88,9 @@ describe('Marketplace page - providers tab', () => {
 
     await waitForReload();
 
-    const match = getByText('Cloudinary');
-    const notMatch = queryByText('Mailgun');
-    const plugin = queryByText('Comments');
-
-    expect(match).toBeVisible();
-    expect(notMatch).toEqual(null);
-    expect(plugin).toEqual(null);
+    expect(getByText('Cloudinary')).toBeVisible();
+    expect(queryByText('Mailgun')).not.toBeInTheDocument();
+    expect(queryByText('Comments')).not.toBeInTheDocument();
   });
 
   it('should return empty providers search results given a bad query', async () => {
@@ -123,14 +119,14 @@ describe('Marketplace page - providers tab', () => {
     // Provider that's already installed
     const alreadyInstalledCard = screen
       .getAllByTestId('npm-package-card')
-      .find((div) => div.innerHTML.includes('Cloudinary'));
+      .find((div) => div.innerHTML.includes('Cloudinary'))!;
     const alreadyInstalledText = within(alreadyInstalledCard).queryByText(/installed/i);
     expect(alreadyInstalledText).toBeVisible();
 
     // Provider that's not installed
     const notInstalledCard = screen
       .getAllByTestId('npm-package-card')
-      .find((div) => div.innerHTML.includes('Rackspace'));
+      .find((div) => div.innerHTML.includes('Rackspace'))!;
     const notInstalledText = within(notInstalledCard).queryByText(/copy install command/i);
     expect(notInstalledText).toBeVisible();
   });
@@ -194,7 +190,7 @@ describe('Marketplace page - providers tab', () => {
     const collectionPlugin = getByText('Amazon SES');
     const notCollectionPlugin = queryByText('Cloudinary');
     expect(collectionPlugin).toBeVisible();
-    expect(notCollectionPlugin).toEqual(null);
+    expect(notCollectionPlugin).not.toBeInTheDocument();
   });
 
   it('filters multiple collection options', async () => {
@@ -228,7 +224,7 @@ describe('Marketplace page - providers tab', () => {
     expect(getAllByTestId('npm-package-card').length).toEqual(3);
     expect(getByText('Amazon SES')).toBeVisible();
     expect(getByText('Nodemailer')).toBeVisible();
-    expect(queryByText('Cloudinary')).toEqual(null);
+    expect(queryByText('Cloudinary')).not.toBeInTheDocument();
   });
 
   it('removes a filter option tag', async () => {
@@ -270,12 +266,12 @@ describe('Marketplace page - providers tab', () => {
     const collectionCards = await findAllByTestId('npm-package-card');
     expect(collectionCards.length).toBe(2);
 
-    await user.click((await findByText(/plugins/i)).closest('button'));
+    await user.click((await findByText(/plugins/i)).closest('button')!);
 
     const pluginCards = getAllByTestId('npm-package-card');
     expect(pluginCards.length).toBe(5);
 
-    await user.click((await findByText(/providers/i)).closest('button'));
+    await user.click((await findByText(/providers/i)).closest('button')!);
     expect(collectionCards.length).toBe(2);
   });
 
@@ -319,7 +315,7 @@ describe('Marketplace page - providers tab', () => {
 
     const cloudinaryCard = screen
       .getAllByTestId('npm-package-card')
-      .find((div) => div.innerHTML.includes('Cloudinary'));
+      .find((div) => div.innerHTML.includes('Cloudinary'))!;
 
     const githubStarsLabel = within(cloudinaryCard).getByLabelText(
       /this provider was starred \d+ on GitHub/i
@@ -347,17 +343,17 @@ describe('Marketplace page - providers tab', () => {
     expect(getByText(/go to previous page/i).closest('a')).toHaveAttribute('aria-disabled', 'true');
 
     // Can go to next page
-    await user.click(getByText(/go to next page/i).closest('a'));
+    await user.click(getByText(/go to next page/i).closest('a')!);
     await waitForReload();
     expect(testLocation.search).toBe('?npmPackageType=provider&sort=name:asc&page=2');
 
     // Can go to previous page
-    await user.click(getByText(/go to previous page/i).closest('a'));
+    await user.click(getByText(/go to previous page/i).closest('a')!);
     await waitForReload();
     expect(testLocation.search).toBe('?npmPackageType=provider&sort=name:asc&page=1');
 
     // Can go to specific page
-    await user.click(getByText(/go to page 3/i).closest('a'));
+    await user.click(getByText(/go to page 3/i).closest('a')!);
     await waitForReload();
     expect(testLocation.search).toBe('?npmPackageType=provider&sort=name:asc&page=3');
   });

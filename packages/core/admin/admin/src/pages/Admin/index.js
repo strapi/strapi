@@ -30,7 +30,9 @@ const InstalledPluginsPage = lazy(() =>
   import(/* webpackChunkName: "Admin_pluginsPage" */ '../InstalledPluginsPage')
 );
 const MarketplacePage = lazy(() =>
-  import(/* webpackChunkName: "Admin_marketplace" */ '../MarketplacePage')
+  import(/* webpackChunkName: "Admin_marketplace" */ '../Marketplace/MarketplacePage').then(
+    (mod) => ({ default: mod.ProtectedMarketplacePage })
+  )
 );
 const NotFoundPage = lazy(() =>
   import(/* webpackChunkName: "Admin_NotFoundPage" */ '../NotFoundPage').then(

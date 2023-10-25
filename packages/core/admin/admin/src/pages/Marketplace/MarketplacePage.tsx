@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import * as React from 'react';
 
 import {
   Box,
   ContentLayout,
   Flex,
+  Icon,
   Layout,
   Main,
   Searchbar,
@@ -15,35 +16,54 @@ import {
 } from '@strapi/design-system';
 import {
   CheckPagePermissions,
+  ContentBox,
+  PageSizeURLQuery,
+  PaginationURLQuery,
   useAppInfo,
   useFocusWhenNavigate,
   useNotification,
   useQueryParams,
   useTracking,
 } from '@strapi/helper-plugin';
+import { ExternalLink, GlassesSquare } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
 import { useDebounce } from '../../hooks/useDebounce';
+// @ts-expect-error - No types, yet.
 import { selectAdminPermissions } from '../../selectors';
 
-import MissingPluginBanner from './components/MissingPluginBanner';
-import NpmPackagesFilters from './components/NpmPackagesFilters';
-import NpmPackagesGrid from './components/NpmPackagesGrid';
-import NpmPackagesPagination from './components/NpmPackagesPagination';
-import OfflineLayout from './components/OfflineLayout';
-import PageHeader from './components/PageHeader';
-import SortSelect from './components/SortSelect';
+import { NpmPackagesFilters } from './components/NpmPackagesFilters';
+import { NpmPackagesGrid } from './components/NpmPackagesGrid';
+import { OfflineLayout } from './components/OfflineLayout';
+import { PageHeader } from './components/PageHeader';
+import { SortSelect, SortSelectProps } from './components/SortSelect';
+import { FilterTypes, useMarketplaceData } from './hooks/useMarketplaceData';
 import { useNavigatorOnline } from './hooks/useNavigatorOnline';
-import useMarketplaceData from './utils/useMarketplaceData';
 
-const MarketPlacePage = () => {
+type NpmPackageType = 'plugin' | 'provider';
+
+interface MarketplacePageQuery {
+  collections?: string[];
+  categories?: string[];
+  npmPackageType?: NpmPackageType;
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  sort?: SortSelectProps['sortQuery'];
+}
+
+interface TabQuery {
+  plugin: MarketplacePageQuery;
+  provider: MarketplacePageQuery;
+}
+
+const MarketplacePage = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const trackUsageRef = useRef(trackUsage);
   const toggleNotification = useNotification();
-  const [{ query }, setQuery] = useQueryParams();
+  const [{ query }, setQuery] = useQueryParams<MarketplacePageQuery>();
   const debouncedSearch = useDebounce(query?.search, 500) || '';
 
   const { autoReload: isInDevelopmentMode, dependencies, useYarn, strapiVersion } = useAppInfo();
@@ -51,18 +71,18 @@ const MarketPlacePage = () => {
 
   const npmPackageType = query?.npmPackageType || 'plugin';
 
-  const [tabQuery, setTabQuery] = useState({
+  const [tabQuery, setTabQuery] = React.useState<TabQuery>({
     plugin: npmPackageType === 'plugin' ? { ...query } : {},
     provider: npmPackageType === 'provider' ? { ...query } : {},
   });
 
   useFocusWhenNavigate();
 
-  useEffect(() => {
-    trackUsageRef.current('didGoToMarketplace');
-  }, []);
+  React.useEffect(() => {
+    trackUsage('didGoToMarketplace');
+  }, [trackUsage]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!isInDevelopmentMode) {
       toggleNotification({
         type: 'info',
@@ -88,7 +108,7 @@ const MarketPlacePage = () => {
     return <OfflineLayout />;
   }
 
-  const handleTabChange = (selected) => {
+  const handleTabChange = (selected: number) => {
     const selectedTab = selected === 0 ? 'plugin' : 'provider';
     const hasTabQuery = tabQuery[selectedTab] && Object.keys(tabQuery[selectedTab]).length;
 
@@ -116,7 +136,7 @@ const MarketPlacePage = () => {
     }
   };
 
-  const handleSelectChange = (update) => {
+  const handleSelectChange = (update: Partial<MarketplacePageQuery>) => {
     setQuery({ ...update, page: 1 });
     setTabQuery((prev) => ({
       ...prev,
@@ -124,13 +144,17 @@ const MarketPlacePage = () => {
     }));
   };
 
-  const handleSelectClear = (filterType) => {
-    setQuery({ [filterType]: [], page: null }, 'remove');
+  const handleSelectClear = (filterType: FilterTypes) => {
+    setQuery({ [filterType]: [], page: undefined }, 'remove');
     setTabQuery((prev) => ({ ...prev, [npmPackageType]: {} }));
   };
 
+  const handleSortSelectChange: SortSelectProps['handleSelectChange'] = ({ sort }) =>
+    // @ts-expect-error - this is a narrowing issue.
+    handleSelectChange({ sort });
+
   // Check if plugins and providers are installed already
-  const installedPackageNames = Object.keys(dependencies);
+  const installedPackageNames = Object.keys(dependencies ?? {});
 
   return (
     <Layout>
@@ -160,18 +184,14 @@ const MarketPlacePage = () => {
                     id: 'admin.pages.MarketPlacePage.plugins',
                     defaultMessage: 'Plugins',
                   })}{' '}
-                  {pluginsStatus === 'success'
-                    ? `(${pluginsResponse.meta.pagination.total})`
-                    : '...'}
+                  {pluginsResponse ? `(${pluginsResponse.meta.pagination.total})` : '...'}
                 </Tab>
                 <Tab>
                   {formatMessage({
                     id: 'admin.pages.MarketPlacePage.providers',
                     defaultMessage: 'Providers',
                   })}{' '}
-                  {providersStatus === 'success'
-                    ? `(${providersResponse.meta.pagination.total})`
-                    : '...'}
+                  {providersResponse ? `(${providersResponse.meta.pagination.total})` : '...'}
                 </Tab>
               </Tabs>
               <Box width="25%">
@@ -199,7 +219,7 @@ const MarketPlacePage = () => {
             <Flex paddingBottom={4} gap={2}>
               <SortSelect
                 sortQuery={query?.sort || 'name:asc'}
-                handleSelectChange={handleSelectChange}
+                handleSelectChange={handleSortSelectChange}
               />
               <NpmPackagesFilters
                 npmPackageType={npmPackageType}
@@ -239,9 +259,39 @@ const MarketPlacePage = () => {
               </TabPanel>
             </TabPanels>
           </TabGroup>
-          {pagination && <NpmPackagesPagination pagination={pagination} />}
+          {pagination ? (
+            <Box paddingTop={4}>
+              <Flex alignItems="flex-end" justifyContent="space-between">
+                <PageSizeURLQuery options={['12', '24', '50', '100']} defaultValue="24" />
+                <PaginationURLQuery pagination={pagination} />
+              </Flex>
+            </Box>
+          ) : null}
           <Box paddingTop={8}>
-            <MissingPluginBanner />
+            <a
+              href="https://strapi.canny.io/plugin-requests"
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              style={{ textDecoration: 'none' }}
+              onClick={() => trackUsage('didMissMarketplacePlugin')}
+            >
+              <ContentBox
+                title={formatMessage({
+                  id: 'admin.pages.MarketPlacePage.missingPlugin.title',
+                  defaultMessage: 'Documentation',
+                })}
+                subtitle={formatMessage({
+                  id: 'admin.pages.MarketPlacePage.missingPlugin.description',
+                  defaultMessage:
+                    "Tell us what plugin you are looking for and we'll let our community plugin developers know in case they are in search for inspiration!",
+                })}
+                icon={<GlassesSquare />}
+                iconBackground="alternative100"
+                endAction={
+                  <Icon as={ExternalLink} color="neutral600" width={3} height={3} marginLeft={2} />
+                }
+              />
+            </a>
           </Box>
         </ContentLayout>
       </Main>
@@ -249,15 +299,16 @@ const MarketPlacePage = () => {
   );
 };
 
-const ProtectedMarketPlace = () => {
+const ProtectedMarketplacePage = () => {
   const permissions = useSelector(selectAdminPermissions);
 
   return (
+    // @ts-expect-error – the selector is not typed.
     <CheckPagePermissions permissions={permissions.marketplace.main}>
-      <MarketPlacePage />
+      <MarketplacePage />
     </CheckPagePermissions>
   );
 };
 
-export { MarketPlacePage };
-export default ProtectedMarketPlace;
+export { MarketplacePage, ProtectedMarketplacePage };
+export type { NpmPackageType, MarketplacePageQuery, TabQuery };
