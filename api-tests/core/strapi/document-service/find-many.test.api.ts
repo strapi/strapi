@@ -27,7 +27,7 @@ describe('Document Service', () => {
 
   describe('FindMany', () => {
     it('find many selects by document name', async () => {
-      const articlesDb = await findArticlesDb({ name: '3 Document A' });
+      const articlesDb = await findArticlesDb({ title: '3 Document A' });
 
       const articles = await strapi.documents.findMany(ARTICLE_UID, {
         filters: {

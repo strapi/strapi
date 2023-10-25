@@ -3,6 +3,7 @@ import './resources/types/contentTypes.d.ts';
 import resources from './resources/index';
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
 import { testInTransaction } from '../../../utils/index';
+import '@strapi/types';
 
 const ARTICLE_UID = 'api::article.article';
 
@@ -29,7 +30,7 @@ describe('Document Service', () => {
     it(
       'update a document',
       testInTransaction(async () => {
-        const articleDb = await findArticleDb({ name: '3 Document A' });
+        const articleDb = await findArticleDb({ title: '3 Document A' });
         const newName = 'Updated Document';
 
         const article = await strapi.documents.update(ARTICLE_UID, articleDb.documentId, {
@@ -39,15 +40,15 @@ describe('Document Service', () => {
         // verify that the returned document was updated
         expect(article).toMatchObject({
           ...articleDb,
-          name: newName,
+          title: newName,
           updatedAt: article.updatedAt,
         });
 
         // verify it was updated in the database
-        const updatedArticleDb = await findArticleDb({ name: newName });
+        const updatedArticleDb = await findArticleDb({ title: newName });
         expect(updatedArticleDb).toMatchObject({
           ...articleDb,
-          name: newName,
+          title: newName,
           updatedAt: article.updatedAt,
         });
       })

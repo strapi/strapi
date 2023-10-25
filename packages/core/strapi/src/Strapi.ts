@@ -150,7 +150,7 @@ class Strapi extends Container implements StrapiI {
 
   entityService?: EntityService.EntityService;
 
-  documentService?: DocumentService.DocumentService;
+  documents?: DocumentService.DocumentService;
 
   telemetry: TelemetryService;
 
@@ -445,6 +445,7 @@ class Strapi extends Container implements StrapiI {
 
   registerInternalHooks() {
     this.get('hooks').set('strapi::content-types.beforeSync', hooks.createAsyncParallelHook());
+    this.get('hooks').set('strapi::content-types.afterSync', hooks.createAsyncParallelHook());
   }
 
   async register() {
@@ -495,7 +496,10 @@ class Strapi extends Container implements StrapiI {
       entityValidator: this.entityValidator,
     });
 
-    this.documents = createDocumentService;
+    this.documents = createDocumentService({
+      strapi: this,
+      db: this.db,
+    });
 
     if (this.config.get('server.cron.enabled', true)) {
       const cronTasks = this.config.get('server.cron.tasks', {});

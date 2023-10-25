@@ -26,6 +26,10 @@ type DocumentRepositoryInstance = {
   findOne(documentId: any, params?: any): Promise<any>;
   create(params: any): Promise<any>;
   delete(documentId: any, params: any): Promise<any>;
+  deleteMany(params: any): Promise<any>;
+  clone(documentId: any, params: any): Promise<any>;
+  publish(documentId: any, params: any): Promise<any>;
+  unpublish(documentId: any, params: any): Promise<any>;
   with(params: object): any;
 };
 
@@ -74,6 +78,9 @@ interface MiddlewareContext {
  *  const enDocs = strapi.documents.with({ locales: ['en']})
  *  const frDocs = strapi.documents.with({ locales: ['fr']})
  *
+ *  // Sanitize documents
+ *  const sanitizedDocs = strapi.documents.with({ auth })
+ *
  *  const enArticles = enDocs('api::article.article').findMany(params)
  *  const frArticles = frDocs('api::article.article').findMany(params)
  *
@@ -84,14 +91,13 @@ interface MiddlewareContext {
  *    // Add default locale
  *    if (!params.locale) params.locale = 'en'
  *    return next(ctx)
- *  }
+ *  })
  *
  *  // Middleware for specific uid
  *  strapi.documents.use('api::article.article', async (ctx, next) => {
  *    // Filter private fields
  *    const { privateField, ...result } = await next(ctx)
  *    return result;
- *
  *  })
  *
  */
