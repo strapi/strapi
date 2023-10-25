@@ -79,13 +79,13 @@ describe('Utils.Object', () => {
   });
 
   test.skip('Replace', () => {
-    const expectedResultType = t.object({
-      properties: {
-        foo: t.numberLiteral(2),
-        bar: t.stringLiteral('foo'),
-      },
-    });
-    // TODO: Fix object type check
-    type('Replace').isObject(expectedResultType);
+    // const expectedResultType = t.object({
+    //   properties: {
+    //     foo: t.numberLiteral(2),
+    //     bar: t.stringLiteral('foo'),
+    //   },
+    // });
+    // // TODO: Fix object type check
+    // type('Replace').isObject(expectedResultType);
   });
 });
