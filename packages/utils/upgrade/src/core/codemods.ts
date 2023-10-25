@@ -13,11 +13,12 @@ export interface VersionRange {
 }
 
 export interface CreateLoaderOptions {
-  dir: string;
+  dir?: string;
   range: VersionRange;
   logger: Logger;
 }
 
+const INTERNAL_CODEMODS_DIR = path.join(__dirname, '..', '..', 'resources', 'codemods');
 const CODEMOD_SUFFIX = '.codemod';
 const CODEMOD_EXT = '.ts';
 
@@ -33,7 +34,7 @@ const createSemverRange = (range: VersionRange): semver.Range => {
 };
 
 export const createCodemodsLoader = (options: CreateLoaderOptions) => {
-  const { dir, range, logger } = options;
+  const { dir = INTERNAL_CODEMODS_DIR, range, logger } = options;
 
   const semverRange = createSemverRange(range);
 

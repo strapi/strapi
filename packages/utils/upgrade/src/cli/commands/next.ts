@@ -30,7 +30,7 @@ export const next = async (options: CLIOptions) => {
     const version = pkg.version as Version.SemVer;
 
     // TODO: Allow to load the app codemods directory
-    const codemodsDir = path.join(cwd, 'resources', 'codemods');
+    // const codemodsDir = path.join(cwd, 'codemods');
 
     const fCurrentVersion = chalk.italic(chalk.yellow(version));
 
@@ -38,7 +38,7 @@ export const next = async (options: CLIOptions) => {
 
     const range: VersionRange = { from: version, to: 'latest' };
 
-    const codemodsLoader = createCodemodsLoader({ dir: codemodsDir, logger, range });
+    const codemodsLoader = createCodemodsLoader({ logger, range });
     const parser = createVersionParser(version).setAvailable(codemodsLoader.availableVersions);
     const target = parser.nextMajor();
 
