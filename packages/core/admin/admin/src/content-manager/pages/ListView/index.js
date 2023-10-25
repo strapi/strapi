@@ -47,7 +47,7 @@ import { HOOKS } from '../../../constants';
 import { useTypedSelector } from '../../../core/store/hooks';
 import { useAdminUsers } from '../../../hooks/useAdminUsers';
 import { useEnterprise } from '../../../hooks/useEnterprise';
-import { InjectionZone } from '../../../shared/components';
+import { InjectionZone } from '../../../shared/components/InjectionZone';
 import { Filter } from '../../components/Filter';
 import { AdminUsersFilter } from '../../components/Filter/CustomInputs/AdminUsersFilter';
 import { CREATOR_FIELDS } from '../../constants/attributes';
