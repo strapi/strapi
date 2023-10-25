@@ -11,6 +11,8 @@ export interface ColumnInfo {
 
 export type Attribute = ScalarAttribute | RelationalAttribute;
 
+export type CountResult = { count: number };
+
 export type RelationalAttribute =
   | Relation.OneToOne
   | Relation.OneToMany
@@ -21,7 +23,7 @@ export type RelationalAttribute =
   | Relation.MorphToOne
   | Relation.MorphToMany;
 
-export interface BasAttribute {
+export interface BaseAttribute {
   type: string;
   columnName?: string;
   default?: any;
@@ -37,7 +39,7 @@ export interface BasAttribute {
   searchable?: boolean;
 }
 
-export interface ScalarAttribute extends BasAttribute {
+export interface ScalarAttribute extends BaseAttribute {
   type:
     | 'increments'
     | 'password'

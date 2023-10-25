@@ -11,6 +11,7 @@ import type {
   Strapi as StrapiI,
   Server,
   EntityService,
+  DocumentService,
   EventHub,
   StartupLogger,
   CronService,
@@ -45,6 +46,7 @@ import createWebhookRunner, { WebhookRunner } from './services/webhook-runner';
 import { webhookModel, createWebhookStore } from './services/webhook-store';
 import { createCoreStore, coreStoreModel } from './services/core-store';
 import createEntityService from './services/entity-service';
+import createDocumentService from './services/document-service';
 import createCronService from './services/cron';
 import entityValidator from './services/entity-validator';
 import createTelemetry from './services/metrics';
@@ -147,6 +149,8 @@ class Strapi extends Container implements StrapiI {
   entityValidator?: EntityValidator;
 
   entityService?: EntityService.EntityService;
+
+  documentService?: DocumentService.DocumentService;
 
   telemetry: TelemetryService;
 
@@ -490,6 +494,8 @@ class Strapi extends Container implements StrapiI {
       eventHub: this.eventHub,
       entityValidator: this.entityValidator,
     });
+
+    this.documents = createDocumentService;
 
     if (this.config.get('server.cron.enabled', true)) {
       const cronTasks = this.config.get('server.cron.tasks', {});

@@ -43,7 +43,7 @@ export const createMetadata = (models: Model[] = []): Metadata => {
 
     const documentIdAttribute: Meta['attributes'] =
       model.modelType === 'contentType'
-        ? { documentID: { type: 'string', default: createId } }
+        ? { documentId: { type: 'string', default: createId } }
         : {};
 
     metadata.add({
