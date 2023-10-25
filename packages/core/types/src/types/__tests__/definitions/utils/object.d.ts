@@ -30,6 +30,9 @@ type Values = Utils.Object.Values<{ foo: 'bar'; bar: 'foo'; foobar: 2 }>;
 type ValuesNever = Utils.Object.Values<never>;
 type ValuesContainNever = Utils.Object.Values<{ foo: 'bar'; bar: 'foo'; foobar: never }>;
 
+// Replace
+type Replace = Utils.Object.Replace<{ foo: 'bar'; bar: 'foo' }, { foo: 2 }>;
+
 export {
   // KeysBy
   KeysByString,
@@ -56,4 +59,7 @@ export {
   Values,
   ValuesNever,
   ValuesContainNever,
+
+  // Replace
+  Replace,
 };
