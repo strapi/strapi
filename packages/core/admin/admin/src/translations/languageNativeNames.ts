@@ -1,4 +1,4 @@
-const languageNativeNames = {
+export const languageNativeNames = {
   ar: 'العربية',
   ca: 'Català',
   cs: 'Čeština',
@@ -33,6 +33,4 @@ const languageNativeNames = {
   zh: '中文 (繁體)',
   sa: 'संस्कृत',
   hi: 'हिन्दी',
-};
-
-export default languageNativeNames;
+} as const;

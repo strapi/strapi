@@ -1,24 +1,38 @@
-import React from 'react';
-
+import { ReducersMapObject } from '@reduxjs/toolkit';
 import { darkTheme, lightTheme } from '@strapi/design-system';
+import { MenuItem, StrapiAppSetting, StrapiAppSettingLink } from '@strapi/helper-plugin';
 import invariant from 'invariant';
 import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
 import { Helmet } from 'react-helmet';
 import { BrowserRouter } from 'react-router-dom';
+import { DefaultTheme } from 'styled-components';
 
 import { App } from './App';
 import Logo from './assets/images/logo-strapi-2022.svg';
 import { LANGUAGE_LOCAL_STORAGE_KEY } from './components/LanguageProvider';
 import { Providers } from './components/Providers';
-import { HOOKS, INJECTION_ZONES } from './constants';
-import { customFields, Plugin, Reducers } from './core/apis';
-import { configureStore } from './core/store/configure';
+import { HOOKS } from './constants';
+import { Components, Component } from './core/apis/Components';
+import { CustomFields } from './core/apis/CustomFields';
+import { Field, Fields } from './core/apis/Fields';
+import { Middleware, Middlewares } from './core/apis/Middlewares';
+import { Plugin, PluginConfig } from './core/apis/Plugin';
+import { Reducers } from './core/apis/Reducers';
+import { Store, configureStore } from './core/store/configure';
 import { basename } from './core/utils/basename';
-import { createHook } from './core/utils/createHook';
+import { Handler, createHook } from './core/utils/createHook';
 import favicon from './favicon.png';
-import languageNativeNames from './translations/languageNativeNames';
+import {
+  INJECTION_ZONES,
+  InjectionZoneBlock,
+  InjectionZoneComponent,
+  InjectionZoneContainer,
+  InjectionZoneModule,
+  InjectionZones,
+} from './shared/components/InjectionZone';
+import { languageNativeNames } from './translations/languageNativeNames';
 
 const {
   INJECT_COLUMN_IN_TABLE,
@@ -27,10 +41,73 @@ const {
   MUTATE_SINGLE_TYPES_LINKS,
 } = HOOKS;
 
-class StrapiApp {
-  constructor({ adminConfig, appPlugins, library, middlewares }) {
-    this.customConfigurations = adminConfig.config;
-    this.customBootstrapConfiguration = adminConfig.bootstrap;
+interface StrapiAppConstructorArgs extends Partial<Pick<StrapiApp, 'appPlugins'>> {
+  adminConfig?: {
+    config?: StrapiApp['customConfigurations'];
+    bootstrap?: StrapiApp['customBootstrapConfiguration'];
+  };
+}
+
+interface StrapiAppPlugin {
+  bootstrap: (
+    args: Pick<
+      StrapiApp,
+      | 'addSettingsLink'
+      | 'addSettingsLinks'
+      | 'getPlugin'
+      | 'injectContentManagerComponent'
+      | 'injectAdminComponent'
+      | 'registerHook'
+    >
+  ) => void;
+  register: (app: StrapiApp) => void;
+  registerTrads: (args: {
+    locales: string[];
+  }) => Promise<{ data: Record<string, string>; locale: string }[]>;
+}
+
+export class StrapiApp {
+  admin: {
+    injectionZones: InjectionZones;
+  };
+  appPlugins: Record<string, StrapiAppPlugin>;
+  configurations: {
+    authLogo: string;
+    head: { favicon: string };
+    locales: string[];
+    menuLogo: string;
+    notifications: { releases: boolean };
+    themes: { light: DefaultTheme; dark: DefaultTheme };
+    translations: Record<string, Record<string, string>>;
+    tutorials: boolean;
+  };
+  customBootstrapConfiguration: unknown;
+  customConfigurations: {
+    auth?: { logo: string };
+    head?: { favicon: string };
+    locales?: string[];
+    menu?: { logo: string };
+    notifications?: { releases: boolean };
+    theme?: { light: DefaultTheme; dark: DefaultTheme };
+    translations?: Record<string, unknown>;
+    tutorials?: boolean;
+  };
+  customFields: CustomFields;
+  hooksDict: Record<string, ReturnType<typeof createHook>>;
+  library: {
+    components: Components;
+    fields: Fields;
+  };
+  menu: MenuItem[];
+  middlewares: Middlewares;
+  plugins: Record<string, Plugin>;
+  reducers: Reducers;
+  settings: Record<string, StrapiAppSetting>;
+  translations: StrapiApp['configurations']['translations'];
+
+  constructor({ adminConfig, appPlugins }: StrapiAppConstructorArgs = {}) {
+    this.customConfigurations = adminConfig?.config ?? {};
+    this.customBootstrapConfiguration = adminConfig?.bootstrap;
     this.configurations = {
       authLogo: Logo,
       head: { favicon },
@@ -42,17 +119,19 @@ class StrapiApp {
       tutorials: true,
     };
     this.appPlugins = appPlugins || {};
-    this.library = library;
-    this.middlewares = middlewares;
+    this.library = {
+      components: new Components(),
+      fields: new Fields(),
+    };
+    this.middlewares = new Middlewares();
     this.plugins = {};
-    this.reducers = Reducers({});
+    this.reducers = new Reducers();
     this.translations = {};
     this.hooksDict = {};
     this.admin = {
       injectionZones: INJECTION_ZONES,
     };
-    this.customFields = customFields;
-
+    this.customFields = new CustomFields();
     this.menu = [];
     this.settings = {
       global: {
@@ -66,7 +145,7 @@ class StrapiApp {
     };
   }
 
-  addComponents = (components) => {
+  addComponents = (components: Component | Component[]) => {
     if (Array.isArray(components)) {
       components.map((compo) => this.library.components.add(compo));
     } else {
@@ -74,7 +153,7 @@ class StrapiApp {
     }
   };
 
-  addCorePluginMenuLink = (link) => {
+  addCorePluginMenuLink = (link: MenuItem) => {
     const stringifiedLink = JSON.stringify(link);
 
     invariant(link.to, `link.to should be defined for ${stringifiedLink}`);
@@ -94,7 +173,7 @@ class StrapiApp {
     this.menu.push(link);
   };
 
-  addFields = (fields) => {
+  addFields = (fields: Field | Field[]) => {
     if (Array.isArray(fields)) {
       fields.map((field) => this.library.fields.add(field));
     } else {
@@ -102,7 +181,7 @@ class StrapiApp {
     }
   };
 
-  addMenuLink = (link) => {
+  addMenuLink = (link: MenuItem) => {
     const stringifiedLink = JSON.stringify(link);
 
     invariant(link.to, `link.to should be defined for ${stringifiedLink}`);
@@ -126,19 +205,19 @@ class StrapiApp {
     this.menu.push(link);
   };
 
-  addMiddlewares = (middlewares) => {
+  addMiddlewares = (middlewares: Middleware[]) => {
     middlewares.forEach((middleware) => {
       this.middlewares.add(middleware);
     });
   };
 
-  addReducers = (reducers) => {
+  addReducers = (reducers: ReducersMapObject) => {
     Object.keys(reducers).forEach((reducerName) => {
       this.reducers.add(reducerName, reducers[reducerName]);
     });
   };
 
-  addSettingsLink = (sectionId, link) => {
+  addSettingsLink = (sectionId: keyof StrapiApp['settings'], link: StrapiAppSettingLink) => {
     invariant(this.settings[sectionId], 'The section does not exist');
 
     const stringifiedLink = JSON.stringify(link);
@@ -157,7 +236,7 @@ class StrapiApp {
     this.settings[sectionId].links.push(link);
   };
 
-  addSettingsLinks = (sectionId, links) => {
+  addSettingsLinks = (sectionId: keyof StrapiApp['settings'], links: StrapiAppSettingLink[]) => {
     invariant(this.settings[sectionId], 'The section does not exist');
     invariant(Array.isArray(links), 'TypeError expected links to be an array');
 
@@ -254,11 +333,11 @@ class StrapiApp {
     }
   };
 
-  createHook = (name) => {
+  createHook = (name: string) => {
     this.hooksDict[name] = createHook();
   };
 
-  createSettingSection = (section, links) => {
+  createSettingSection = (section: StrapiAppSetting, links: StrapiAppSettingLink[]) => {
     invariant(section.id, 'section.id should be defined');
     invariant(
       section.intlLabel?.id && section.intlLabel?.defaultMessage,
@@ -278,20 +357,25 @@ class StrapiApp {
   createStore = () => {
     const store = configureStore(this.middlewares.middlewares, this.reducers.reducers);
 
-    return store;
+    return store as Store;
   };
 
-  getAdminInjectedComponents = (moduleName, containerName, blockName) => {
+  getAdminInjectedComponents = (
+    moduleName: InjectionZoneModule,
+    containerName: InjectionZoneContainer,
+    blockName: InjectionZoneBlock
+  ): InjectionZoneComponent[] => {
     try {
+      // @ts-expect-error – we have a catch block so if you don't pass it correctly we still return an array.
       return this.admin.injectionZones[moduleName][containerName][blockName] || [];
     } catch (err) {
       console.error('Cannot get injected component', err);
 
-      return err;
+      return [];
     }
   };
 
-  getPlugin = (pluginId) => {
+  getPlugin = (pluginId: PluginConfig['id']) => {
     return this.plugins[pluginId];
   };
 
@@ -301,23 +385,33 @@ class StrapiApp {
     });
   }
 
-  injectContentManagerComponent = (containerName, blockName, component) => {
+  injectContentManagerComponent = <TContainerName extends keyof InjectionZones['contentManager']>(
+    containerName: TContainerName,
+    blockName: keyof InjectionZones['contentManager'][TContainerName],
+    component: InjectionZoneComponent
+  ) => {
     invariant(
       this.admin.injectionZones.contentManager[containerName]?.[blockName],
-      `The ${containerName} ${blockName} zone is not defined in the content manager`
+      `The ${containerName} ${String(blockName)} zone is not defined in the content manager`
     );
     invariant(component, 'A Component must be provided');
 
+    // @ts-expect-error – we've alredy checked above that the block exists.
     this.admin.injectionZones.contentManager[containerName][blockName].push(component);
   };
 
-  injectAdminComponent = (containerName, blockName, component) => {
+  injectAdminComponent = <TContainerName extends keyof InjectionZones['admin']>(
+    containerName: TContainerName,
+    blockName: keyof InjectionZones['admin'][TContainerName],
+    component: InjectionZoneComponent
+  ) => {
     invariant(
       this.admin.injectionZones.admin[containerName]?.[blockName],
-      `The ${containerName} ${blockName} zone is not defined in the admin`
+      `The ${containerName} ${String(blockName)} zone is not defined in the admin`
     );
     invariant(component, 'A Component must be provided');
 
+    // @ts-expect-error – we've alredy checked above that the block exists.
     this.admin.injectionZones.admin[containerName][blockName].push(component);
   };
 
@@ -337,13 +431,16 @@ class StrapiApp {
     });
     const adminLocales = await Promise.all(arrayOfPromises);
 
-    const translations = adminLocales.reduce((acc, current) => {
-      if (current.data) {
-        acc[current.locale] = current.data;
-      }
+    const translations = adminLocales.reduce<{ [locale: string]: Record<string, string> }>(
+      (acc, current) => {
+        if (current.data) {
+          acc[current.locale] = current.data;
+        }
 
-      return acc;
-    }, {});
+        return acc;
+      },
+      {}
+    );
 
     return translations;
   }
@@ -368,26 +465,36 @@ class StrapiApp {
       })
       .filter((a) => a);
 
-    const pluginsTrads = await Promise.all(arrayOfPromises);
-    const mergedTrads = pluginsTrads.reduce((acc, currentPluginTrads) => {
-      const pluginTrads = currentPluginTrads.reduce((acc1, current) => {
-        acc1[current.locale] = current.data;
+    type Translation = Awaited<ReturnType<StrapiAppPlugin['registerTrads']>>[number];
 
-        return acc1;
-      }, {});
+    const pluginsTrads = (await Promise.all(arrayOfPromises)) as Array<Translation[]>;
+    const mergedTrads = pluginsTrads.reduce<{ [locale: string]: Translation['data'] }>(
+      (acc, currentPluginTrads) => {
+        const pluginTrads = currentPluginTrads.reduce<{ [locale: string]: Translation['data'] }>(
+          (acc1, current) => {
+            acc1[current.locale] = current.data;
 
-      Object.keys(pluginTrads).forEach((locale) => {
-        acc[locale] = { ...acc[locale], ...pluginTrads[locale] };
-      });
+            return acc1;
+          },
+          {}
+        );
 
-      return acc;
-    }, {});
+        Object.keys(pluginTrads).forEach((locale) => {
+          acc[locale] = { ...acc[locale], ...pluginTrads[locale] };
+        });
 
-    const translations = this.configurations.locales.reduce((acc, current) => {
+        return acc;
+      },
+      {}
+    );
+
+    const translations = this.configurations.locales.reduce<{
+      [locale: string]: Translation['data'];
+    }>((acc, current) => {
       acc[current] = {
         ...adminTranslations[current],
         ...(mergedTrads[current] || {}),
-        ...this.customConfigurations?.translations?.[current],
+        ...(this.customConfigurations?.translations?.[current] ?? {}),
       };
 
       return acc;
@@ -398,7 +505,7 @@ class StrapiApp {
     return Promise.resolve();
   }
 
-  registerHook = (name, fn) => {
+  registerHook = (name: string, fn: Handler) => {
     invariant(
       this.hooksDict[name],
       `The hook ${name} is not defined. You are trying to register a hook that does not exist in the application.`
@@ -406,22 +513,27 @@ class StrapiApp {
     this.hooksDict[name].register(fn);
   };
 
-  registerPlugin = (pluginConf) => {
-    const plugin = Plugin(pluginConf);
+  registerPlugin = (pluginConf: PluginConfig) => {
+    const plugin = new Plugin(pluginConf);
 
     this.plugins[plugin.pluginId] = plugin;
   };
 
-  runHookSeries = (name, asynchronous = false) =>
+  runHookSeries = (name: string, asynchronous = false) =>
     asynchronous ? this.hooksDict[name].runSeriesAsync() : this.hooksDict[name].runSeries();
 
-  runHookWaterfall = (name, initialValue, asynchronous = false, store) => {
+  runHookWaterfall = (
+    name: string,
+    initialValue: unknown,
+    asynchronous = false,
+    store?: unknown
+  ) => {
     return asynchronous
       ? this.hooksDict[name].runWaterfallAsync(initialValue, store)
       : this.hooksDict[name].runWaterfall(initialValue, store);
   };
 
-  runHookParallel = (name) => this.hooksDict[name].runParallel();
+  runHookParallel = (name: string) => this.hooksDict[name].runParallel();
 
   render() {
     const store = this.createStore();
@@ -473,6 +585,3 @@ class StrapiApp {
     );
   }
 }
-
-export default ({ adminConfig = {}, appPlugins, library, middlewares, reducers }) =>
-  new StrapiApp({ adminConfig, appPlugins, library, middlewares, reducers });

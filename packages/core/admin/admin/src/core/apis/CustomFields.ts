@@ -1,4 +1,12 @@
+/* eslint-disable check-file/filename-naming-convention */
 import invariant from 'invariant';
+
+import type {
+  CustomField,
+  CustomFieldOption,
+  CustomFieldOptionSection,
+  CustomFieldUID,
+} from '@strapi/helper-plugin';
 
 const ALLOWED_TYPES = [
   'biginteger',
@@ -17,7 +25,7 @@ const ALLOWED_TYPES = [
   'text',
   'time',
   'uid',
-];
+] as const;
 
 const ALLOWED_ROOT_LEVEL_OPTIONS = [
   'min',
@@ -30,35 +38,16 @@ const ALLOWED_ROOT_LEVEL_OPTIONS = [
   'unique',
   'private',
   'default',
-];
+] as const;
 
-const optionValidationsReducer = (acc, option) => {
-  if (option.items) {
-    return option.items.reduce(optionValidationsReducer, acc);
-  }
+export class CustomFields {
+  customFields: Record<CustomFieldUID, CustomField>;
 
-  if (!option.name) {
-    acc.push({
-      isValidOptionPath: false,
-      errorMessage: "The 'name' property is required on an options object",
-    });
-  } else {
-    acc.push({
-      isValidOptionPath:
-        ALLOWED_ROOT_LEVEL_OPTIONS.includes(option.name) || option.name.startsWith('options'),
-      errorMessage: `'${option.name}' must be prefixed with 'options.'`,
-    });
-  }
-
-  return acc;
-};
-
-class CustomFields {
   constructor() {
     this.customFields = {};
   }
 
-  register(customFields) {
+  register(customFields: CustomField | CustomField[]) {
     if (Array.isArray(customFields)) {
       // If several custom fields are passed, register them one by one
       customFields.forEach((customField) => {
@@ -94,14 +83,15 @@ class CustomFields {
       const allFormOptions = [...(options?.base || []), ...(options?.advanced || [])];
 
       if (allFormOptions.length) {
-        const optionPathValidations = allFormOptions.reduce(optionValidationsReducer, []);
+        const optionPathValidations = allFormOptions.reduce(optionsValidationReducer, []);
+
         optionPathValidations.forEach(({ isValidOptionPath, errorMessage }) => {
           invariant(isValidOptionPath, errorMessage);
         });
       }
 
       // When no plugin is specified, default to the global namespace
-      const uid = pluginId ? `plugin::${pluginId}.${name}` : `global::${name}`;
+      const uid: CustomFieldUID = pluginId ? `plugin::${pluginId}.${name}` : `global::${name}`;
 
       // Ensure the uid is unique
       const uidAlreadyUsed = Object.prototype.hasOwnProperty.call(this.customFields, uid);
@@ -115,10 +105,36 @@ class CustomFields {
     return this.customFields;
   }
 
-  get(uid) {
+  get(uid: CustomFieldUID): CustomField | undefined {
     return this.customFields[uid];
   }
 }
 
-// Export an instance since it's a singleton
-export default new CustomFields();
+interface OptionValidation {
+  isValidOptionPath: boolean;
+  errorMessage: string;
+}
+
+const optionsValidationReducer = (
+  acc: OptionValidation[],
+  option: CustomFieldOptionSection | CustomFieldOption
+): OptionValidation[] => {
+  if ('items' in option) {
+    return option.items.reduce(optionsValidationReducer, acc);
+  }
+
+  if (!option.name) {
+    acc.push({
+      isValidOptionPath: false,
+      errorMessage: "The 'name' property is required on an options object",
+    });
+  } else {
+    acc.push({
+      isValidOptionPath:
+        option.name.startsWith('options') || ALLOWED_ROOT_LEVEL_OPTIONS.includes(option.name),
+      errorMessage: `'${option.name}' must be prefixed with 'options.'`,
+    });
+  }
+
+  return acc;
+};

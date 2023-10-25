@@ -1,24 +1,19 @@
+/* eslint-disable check-file/filename-naming-convention */
 import { fixtures } from '@strapi/admin-test-utils';
-import { render, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 
-import { Components, Fields } from '../core/apis';
-import StrapiApp from '../StrapiApp';
+import { StrapiApp } from '../StrapiApp';
 
-const library = { fields: Fields(), components: Components() };
-const middlewares = { middlewares: [] };
-
-describe('ADMIN | StrapiApp', () => {
+describe('ADMIN | new StrapiApp', () => {
   it('should render the app without plugins', async () => {
-    const app = StrapiApp({ middlewares, library });
-    const { container, getByRole } = render(app.render());
+    const app = new StrapiApp();
+    const { findByRole } = render(app.render());
 
-    expect(container.firstChild).toMatchSnapshot();
-
-    await waitFor(() => expect(getByRole('combobox')).toBeInTheDocument());
+    await findByRole('combobox');
   });
 
   it('should create a valid store', () => {
-    const app = StrapiApp({ middlewares, library });
+    const app = new StrapiApp();
 
     const store = app.createStore();
 
@@ -27,7 +22,7 @@ describe('ADMIN | StrapiApp', () => {
 
   describe('Hook api', () => {
     it('runs the "moto" hooks in series', () => {
-      const app = StrapiApp({ middlewares, library });
+      const app = new StrapiApp();
 
       app.createHook('hello');
       app.createHook('moto');
@@ -37,6 +32,7 @@ describe('ADMIN | StrapiApp', () => {
       app.registerHook('moto', () => 2);
       app.registerHook('moto', () => 3);
 
+      // @ts-expect-error – the type could be written better to infer asynchronous behaviour
       const [a, b, c] = app.runHookSeries('moto');
 
       expect(a).toBe(1);
@@ -45,7 +41,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('runs the "moto" hooks in series asynchronously', async () => {
-      const app = StrapiApp({ middlewares, library });
+      const app = new StrapiApp();
 
       app.createHook('hello');
       app.createHook('moto');
@@ -63,7 +59,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('runs the "moto" hooks in waterfall', () => {
-      const app = StrapiApp({ middlewares, library });
+      const app = new StrapiApp();
 
       app.createHook('hello');
       app.createHook('moto');
@@ -79,7 +75,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('runs the "moto" hooks in waterfall asynchronously', async () => {
-      const app = StrapiApp({ middlewares, library });
+      const app = new StrapiApp();
 
       app.createHook('hello');
       app.createHook('moto');
@@ -95,7 +91,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('runs the "moto" hooks in parallel', async () => {
-      const app = StrapiApp({ middlewares, library });
+      const app = new StrapiApp();
 
       app.createHook('hello');
       app.createHook('moto');
@@ -115,21 +111,22 @@ describe('ADMIN | StrapiApp', () => {
 
   describe('Settings api', () => {
     it('the settings should be defined', () => {
-      const app = StrapiApp({ middlewares, library });
+      const app = new StrapiApp();
 
       expect(app.settings).toBeDefined();
       expect(app.settings.global).toBeDefined();
     });
 
     it('should creates a new section', () => {
-      const app = StrapiApp({ middlewares, library });
-      const section = { id: 'foo', intlLabel: { id: 'foo', defaultMessage: 'foo' } };
+      const app = new StrapiApp();
+      const section = { id: 'foo', intlLabel: { id: 'foo', defaultMessage: 'foo' }, links: [] };
       const links = [
         {
           Component: jest.fn(),
           to: '/bar',
           id: 'bar',
           intlLabel: { id: 'bar', defaultMessage: 'bar' },
+          permissions: [],
         },
       ];
       app.createSettingSection(section, links);
@@ -139,12 +136,13 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('should add a link correctly to the global section', () => {
-      const app = StrapiApp({ middlewares, library });
+      const app = new StrapiApp();
       const link = {
         Component: jest.fn(),
         to: '/bar',
         id: 'bar',
         intlLabel: { id: 'bar', defaultMessage: 'bar' },
+        permissions: [],
       };
 
       app.addSettingsLink('global', link);
@@ -154,13 +152,14 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('should add an array of links correctly to the global section', () => {
-      const app = StrapiApp({ middlewares, library });
+      const app = new StrapiApp();
       const links = [
         {
           Component: jest.fn(),
           to: '/bar',
           id: 'bar',
           intlLabel: { id: 'bar', defaultMessage: 'bar' },
+          permissions: [],
         },
       ];
 
@@ -173,7 +172,7 @@ describe('ADMIN | StrapiApp', () => {
 
   describe('Custom fields api', () => {
     it('should register a custom field', () => {
-      const app = StrapiApp({ middlewares, library });
+      const app = new StrapiApp();
       const field = {
         name: 'pluginCustomField',
         pluginId: 'myplugin',
@@ -184,7 +183,7 @@ describe('ADMIN | StrapiApp', () => {
         components: {
           Input: jest.fn(),
         },
-      };
+      } as const;
 
       app.customFields.register(field);
       expect(app.customFields.get('plugin::myplugin.pluginCustomField')).toEqual(field);
@@ -194,7 +193,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('should register a custom field with valid options', () => {
-      const app = StrapiApp({ middlewares, library });
+      const app = new StrapiApp();
       const field = {
         name: 'optionsCustomField',
         pluginId: 'myplugin',
@@ -216,12 +215,13 @@ describe('ADMIN | StrapiApp', () => {
         },
       };
 
+      // @ts-expect-error - test
       app.customFields.register(field);
       expect(app.customFields.get('plugin::myplugin.optionsCustomField')).toEqual(field);
     });
 
     it('should register several custom fields at once', () => {
-      const app = StrapiApp({ middlewares, library });
+      const app = new StrapiApp();
       const fields = [
         {
           name: 'field1',
@@ -247,13 +247,14 @@ describe('ADMIN | StrapiApp', () => {
         },
       ];
 
+      // @ts-expect-error - test
       app.customFields.register(fields);
       expect(app.customFields.get('plugin::myplugin.field1')).toEqual(fields[0]);
       expect(app.customFields.get('plugin::myplugin.field2')).toEqual(fields[1]);
     });
 
     it('should register a custom field without pluginId', () => {
-      const app = StrapiApp({ middlewares, library });
+      const app = new StrapiApp();
       const field = {
         name: 'appCustomField',
         type: 'text',
@@ -265,13 +266,14 @@ describe('ADMIN | StrapiApp', () => {
         },
       };
 
+      // @ts-expect-error - test
       app.customFields.register(field);
       const uid = 'global::appCustomField';
       expect(app.customFields.get(uid)).toEqual(field);
     });
 
     it('should prevent registering same custom field twice', () => {
-      const app = StrapiApp({ middlewares, library });
+      const app = new StrapiApp();
       const field = {
         name: 'redundantCustomField',
         pluginId: 'myplugin',
@@ -285,14 +287,16 @@ describe('ADMIN | StrapiApp', () => {
       };
 
       // Second register call should throw
+      // @ts-expect-error - test
       app.customFields.register(field);
+      // @ts-expect-error - test
       expect(() => app.customFields.register(field)).toThrowError(
         "Custom field: 'plugin::myplugin.redundantCustomField' has already been registered"
       );
     });
 
     it('should validate the name can be used as an object key', () => {
-      const app = StrapiApp({ middlewares, library });
+      const app = new StrapiApp();
       const field = {
         name: 'test.boom',
         pluginId: 'myplugin',
@@ -304,23 +308,25 @@ describe('ADMIN | StrapiApp', () => {
         },
       };
 
+      // @ts-expect-error - test
       expect(() => app.customFields.register(field)).toThrowError(
         "Custom field name: 'test.boom' is not a valid object key"
       );
     });
 
     it('should prevent registering incomplete custom field', () => {
-      const app = StrapiApp({ middlewares, library });
+      const app = new StrapiApp();
       const field = {
         name: 'incompleteCustomField',
         pluginId: 'myplugin',
       };
 
+      // @ts-expect-error - test
       expect(() => app.customFields.register(field)).toThrowError(/(a|an) .* must be provided/i);
     });
 
     it('should validate option path names', () => {
-      const app = StrapiApp({ middlewares, library });
+      const app = new StrapiApp();
       const field = {
         name: 'test',
         pluginId: 'myplugin',
@@ -337,18 +343,21 @@ describe('ADMIN | StrapiApp', () => {
       };
 
       // Test shallow value
+      // @ts-expect-error - test
       expect(() => app.customFields.register(field)).toThrowError(
         "'plop' must be prefixed with 'options.'"
       );
       // Test deep value
+      // @ts-expect-error - test
       field.options.advanced = [{ sectionTitle: null, items: [{ name: 'deep.plop' }] }];
+      // @ts-expect-error - test
       expect(() => app.customFields.register(field)).toThrowError(
         "'deep.plop' must be prefixed with 'options.'"
       );
     });
 
     it('requires options to have a name property', () => {
-      const app = StrapiApp({ middlewares, library });
+      const app = new StrapiApp();
       const field = {
         name: 'test',
         pluginId: 'myplugin',
@@ -364,6 +373,7 @@ describe('ADMIN | StrapiApp', () => {
         },
       };
 
+      // @ts-expect-error - test
       expect(() => app.customFields.register(field)).toThrowError(
         "The 'name' property is required on an options object"
       );
@@ -372,20 +382,20 @@ describe('ADMIN | StrapiApp', () => {
 
   describe('Menu api', () => {
     it('the menu should be defined', () => {
-      const app = StrapiApp({ middlewares, library });
+      const app = new StrapiApp();
 
       expect(app.menu).toBeDefined();
       expect(Array.isArray(app.menu)).toBe(true);
     });
 
     it('addMenuLink should add a link to the menu', () => {
-      const app = StrapiApp({ middlewares, library });
+      const app = new StrapiApp();
       const link = {
         Component: jest.fn(),
         to: '/plugins/bar',
         intlLabel: { id: 'bar', defaultMessage: 'bar' },
         permissions: [],
-        icon: () => 'book',
+        icon: () => <>{'book'}</>,
       };
 
       app.addMenuLink(link);
@@ -395,10 +405,10 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('addCorePluginMenuLink should add a link to the menu', () => {
-      const app = StrapiApp({ middlewares, library });
+      const app = new StrapiApp();
       const link = {
         to: '/plugins/content-type-builder',
-        icon: () => 'book',
+        icon: () => <>{'book'}</>,
         permissions: [],
         intlLabel: {
           id: 'content-type-builder.plugin.name',
@@ -418,7 +428,7 @@ describe('ADMIN | StrapiApp', () => {
       const adminConfig = {
         config: { locales: ['fr'] },
       };
-      const app = StrapiApp({ middlewares, library, adminConfig });
+      const app = new StrapiApp({ adminConfig });
 
       app.createCustomConfigurations();
 
@@ -429,7 +439,7 @@ describe('ADMIN | StrapiApp', () => {
       const adminConfig = {
         config: { auth: { logo: 'fr' } },
       };
-      const app = StrapiApp({ middlewares, library, adminConfig });
+      const app = new StrapiApp({ adminConfig });
 
       app.createCustomConfigurations();
 
@@ -440,7 +450,7 @@ describe('ADMIN | StrapiApp', () => {
       const adminConfig = {
         config: { menu: { logo: 'fr' } },
       };
-      const app = StrapiApp({ middlewares, library, adminConfig });
+      const app = new StrapiApp({ adminConfig });
 
       app.createCustomConfigurations();
 
@@ -451,7 +461,7 @@ describe('ADMIN | StrapiApp', () => {
       const adminConfig = {
         config: { head: { favicon: 'fr' } },
       };
-      const app = StrapiApp({ middlewares, library, adminConfig });
+      const app = new StrapiApp({ adminConfig });
 
       app.createCustomConfigurations();
 
@@ -462,10 +472,12 @@ describe('ADMIN | StrapiApp', () => {
       const adminConfig = {
         config: { theme: { light: { colors: { red: 'black' } } } },
       };
-      const app = StrapiApp({ middlewares, library, adminConfig });
+      // @ts-expect-error - test mocks
+      const app = new StrapiApp({ adminConfig });
 
       app.createCustomConfigurations();
 
+      // @ts-expect-error - test mocks
       expect(app.configurations.themes.light.colors.red).toBe('black');
     });
 
@@ -473,10 +485,12 @@ describe('ADMIN | StrapiApp', () => {
       const adminConfig = {
         config: { theme: { dark: { colors: { red: 'black' } } } },
       };
-      const app = StrapiApp({ middlewares, library, adminConfig });
+      // @ts-expect-error - test mocks
+      const app = new StrapiApp({ adminConfig });
 
       app.createCustomConfigurations();
 
+      // @ts-expect-error - test mocks
       expect(app.configurations.themes.dark.colors.red).toBe('black');
     });
 
@@ -488,10 +502,13 @@ describe('ADMIN | StrapiApp', () => {
       const adminConfig = {
         config: { theme: { colors: { red: 'black' } } },
       };
-      const app = StrapiApp({ middlewares, library, adminConfig });
+
+      // @ts-expect-error - test mocks
+      const app = new StrapiApp({ adminConfig });
 
       app.createCustomConfigurations();
 
+      // @ts-expect-error - test mocks
       expect(app.configurations.themes.light.colors.red).toBe('black');
       expect(console.warn).toBeCalledTimes(1);
 
@@ -502,7 +519,7 @@ describe('ADMIN | StrapiApp', () => {
       const adminConfig = {
         config: { tutorials: false },
       };
-      const app = StrapiApp({ middlewares, library, adminConfig });
+      const app = new StrapiApp({ adminConfig });
 
       app.createCustomConfigurations();
 
@@ -513,7 +530,7 @@ describe('ADMIN | StrapiApp', () => {
       const adminConfig = {
         config: { notifications: { releases: false } },
       };
-      const app = StrapiApp({ middlewares, library, adminConfig });
+      const app = new StrapiApp({ adminConfig });
 
       app.createCustomConfigurations();
 

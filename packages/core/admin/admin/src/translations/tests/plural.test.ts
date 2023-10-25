@@ -1,4 +1,4 @@
-const translations = require('../en.json');
+import translations from '../en.json';
 
 describe('translations', () => {
   describe('plural syntax', () => {
@@ -13,6 +13,7 @@ describe('translations', () => {
           keyParts.push('plural');
           const pluralKey = keyParts.join('.');
 
+          // @ts-expect-error - We are sure that the key exists
           expect(translations[pluralKey]).toBeUndefined();
         }
       });
