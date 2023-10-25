@@ -3,7 +3,6 @@
 const { entries, mapValues, omit } = require('lodash/fp');
 const {
   pagination: { withDefaultPagination },
-  contentTypes: { hasDraftAndPublish },
 } = require('@strapi/utils');
 
 module.exports = ({ strapi }) => {
@@ -44,22 +43,17 @@ module.exports = ({ strapi }) => {
           filters: naming.getFiltersInputTypeName(contentType),
           pagination: args.PaginationArg,
           sort: args.SortArg,
+          publicationState: args.PublicationStateArg,
         };
-
-        if (hasDraftAndPublish(contentType)) {
-          Object.assign(params, { publicationState: args.PublicationStateArg });
-        }
 
         return params;
       }
 
       // Single Types
       if (kind === 'singleType') {
-        const params = {};
-
-        if (hasDraftAndPublish(contentType)) {
-          Object.assign(params, { publicationState: args.PublicationStateArg });
-        }
+        const params = {
+          publicationState: args.PublicationStateArg,
+        };
 
         return params;
       }

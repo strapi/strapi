@@ -114,7 +114,7 @@ describe('Content Type Builder - Content types', () => {
       expect(res.body).toMatchSnapshot();
     });
 
-    test('Successful creation of a collection type with draftAndPublish enabled', async () => {
+    test('Successful creation of a collection type', async () => {
       const res = await rq({
         method: 'POST',
         url: '/content-type-builder/content-types',
@@ -123,7 +123,6 @@ describe('Content Type Builder - Content types', () => {
             displayName: 'CT with DP',
             singularName: 'ct-with-dp',
             pluralName: 'ct-with-dps',
-            draftAndPublish: true,
             attributes: {
               title: {
                 type: 'string',
@@ -141,7 +140,7 @@ describe('Content Type Builder - Content types', () => {
       });
     });
 
-    test('Get collection type returns full schema and informations with draftAndPublish', async () => {
+    test('Get collection type returns full schema and informations', async () => {
       const res = await rq({
         method: 'GET',
         url: `/content-type-builder/content-types/${ctWithDpUID}`,
@@ -208,7 +207,6 @@ describe('Content Type Builder - Content types', () => {
             displayName: 'same string',
             singularName: 'same-string',
             pluralName: 'same-string',
-            draftAndPublish: true,
             attributes: {
               title: {
                 type: 'string',
@@ -242,7 +240,6 @@ describe('Content Type Builder - Content types', () => {
         url: '/content-type-builder/content-types',
         body: {
           contentType: {
-            draftAndPublish: true,
             attributes: {
               title: {
                 type: 'string',
@@ -295,7 +292,6 @@ describe('Content Type Builder - Content types', () => {
             displayName: 'new displayName',
             singularName: 'ct-with-dp-new',
             pluralName: 'ct-with-dps-new',
-            draftAndPublish: true,
             attributes: {
               title: {
                 type: 'string',
@@ -321,7 +317,6 @@ describe('Content Type Builder - Content types', () => {
             displayName: 'new displayName',
             singularName: 'ct-with-dp', // no change
             pluralName: 'ct-with-dps',
-            draftAndPublish: true,
             attributes: {
               title: {
                 type: 'string',
@@ -350,7 +345,6 @@ describe('Content Type Builder - Content types', () => {
             displayName: 'same string',
             singularName,
             pluralName,
-            draftAndPublish: true,
             attributes: {
               title: {
                 type: 'string',

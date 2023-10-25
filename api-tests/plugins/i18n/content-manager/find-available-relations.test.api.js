@@ -114,7 +114,9 @@ describe('i18n - Find available relations', () => {
     });
 
     expect(res.body.results).toHaveLength(1);
-    expect(res.body.results[0]).toStrictEqual(pick(['id', 'name'], data.products[1]));
+    expect(res.body.results[0]).toStrictEqual(
+      pick(['id', 'name', 'publishedAt'], data.products[1])
+    );
   });
 
   test('Can filter on any locale', async () => {
@@ -125,6 +127,8 @@ describe('i18n - Find available relations', () => {
     });
 
     expect(res.body.results).toHaveLength(1);
-    expect(res.body.results[0]).toStrictEqual(pick(['id', 'name'], data.products[0]));
+    expect(res.body.results[0]).toStrictEqual(
+      pick(['id', 'name', 'publishedAt'], data.products[0])
+    );
   });
 });

@@ -13,7 +13,6 @@ import {
   TabPanel,
   TabPanels,
   Tabs,
-  Alert,
 } from '@strapi/design-system';
 import {
   getYupInnerErrors,
@@ -30,7 +29,6 @@ import toLower from 'lodash/toLower';
 import { useIntl } from 'react-intl';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
 
 import useDataManager from '../../hooks/useDataManager';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';
@@ -77,13 +75,6 @@ import forms from './forms';
 import makeSelectFormModal from './selectors';
 import { canEditContentType, getAttributesToDisplay, getFormInputNames } from './utils';
 import { createComponentUid, createUid } from './utils/createUid';
-
-// TODO: Remove after the RTE Blocks Beta release
-const BetaFeatureAlert = styled(Alert)`
-  button {
-    display: none;
-  }
-`;
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
@@ -193,35 +184,29 @@ const FormModal = () => {
         });
       }
 
-      // Create content type we need to add the default option draftAndPublish
+      // Create content type
       if (modalType === 'contentType' && actionType === 'create') {
         dispatch({
           type: SET_DATA_TO_EDIT,
           modalType,
           actionType,
-          data: {
-            draftAndPublish: true,
-          },
+          data: {},
           pluginOptions: {},
         });
       }
 
       // Edit content type
       if (modalType === 'contentType' && actionType === 'edit') {
-        const {
-          displayName,
-          draftAndPublish,
-          kind,
-          pluginOptions,
-          pluralName,
-          reviewWorkflows,
-          singularName,
-        } = get(allDataSchema, [...pathToSchema, 'schema'], {
-          displayName: null,
-          pluginOptions: {},
-          singularName: null,
-          pluralName: null,
-        });
+        const { displayName, kind, pluginOptions, pluralName, reviewWorkflows, singularName } = get(
+          allDataSchema,
+          [...pathToSchema, 'schema'],
+          {
+            displayName: null,
+            pluginOptions: {},
+            singularName: null,
+            pluralName: null,
+          }
+        );
 
         dispatch({
           type: SET_DATA_TO_EDIT,
@@ -229,7 +214,6 @@ const FormModal = () => {
           modalType,
           data: {
             displayName,
-            draftAndPublish,
             kind,
             pluginOptions,
             pluralName,
@@ -1072,15 +1056,6 @@ const FormModal = () => {
                 <TabPanels>
                   <TabPanel>
                     <Flex direction="column" alignItems="stretch" gap={6}>
-                      {/* TODO: Remove after the RTE Blocks Beta release */}
-                      {attributeType === 'blocks' && (
-                        <BetaFeatureAlert>
-                          {formatMessage({
-                            id: getTrad('form.feature.beta'),
-                            defaultMessage: 'This feature is in Beta.',
-                          })}
-                        </BetaFeatureAlert>
-                      )}
                       <TabForm
                         form={baseForm}
                         formErrors={formErrors}
@@ -1092,15 +1067,6 @@ const FormModal = () => {
                   </TabPanel>
                   <TabPanel>
                     <Flex direction="column" alignItems="stretch" gap={6}>
-                      {/* TODO: Remove after the RTE Blocks Beta release */}
-                      {attributeType === 'blocks' && (
-                        <BetaFeatureAlert>
-                          {formatMessage({
-                            id: getTrad('form.feature.beta'),
-                            defaultMessage: 'This feature is in Beta.',
-                          })}
-                        </BetaFeatureAlert>
-                      )}
                       <TabForm
                         form={advancedForm}
                         formErrors={formErrors}

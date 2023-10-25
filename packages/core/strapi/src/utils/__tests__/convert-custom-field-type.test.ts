@@ -3,17 +3,16 @@ import convertCustomFieldType from '../convert-custom-field-type';
 describe('format attributes', () => {
   it('replaces type customField with the underlying data type', () => {
     global.strapi = {
-      container: {
-        // mock container.get('custom-fields')
+      // mock container.get('custom-fields')
+      get: jest.fn(() => ({
+        // mock container.get('custom-fields').get(uid)
         get: jest.fn(() => ({
-          // mock container.get('custom-fields').get(uid)
-          get: jest.fn(() => ({
-            name: 'color',
-            plugin: 'mycustomfields',
-            type: 'text',
-          })),
+          name: 'color',
+          plugin: 'mycustomfields',
+          type: 'text',
         })),
-      },
+      })),
+
       contentTypes: {
         test: {
           attributes: {

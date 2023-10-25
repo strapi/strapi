@@ -47,7 +47,7 @@ import { HOOKS } from '../../../constants';
 import { useTypedSelector } from '../../../core/store/hooks';
 import { useAdminUsers } from '../../../hooks/useAdminUsers';
 import { useEnterprise } from '../../../hooks/useEnterprise';
-import { InjectionZone } from '../../../shared/components';
+import { InjectionZone } from '../../../shared/components/InjectionZone';
 import { Filter } from '../../components/Filter';
 import { AdminUsersFilter } from '../../components/Filter/CustomInputs/AdminUsersFilter';
 import { CREATOR_FIELDS } from '../../constants/attributes';
@@ -193,7 +193,6 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
     return filter;
   });
 
-  const hasDraftAndPublish = options?.draftAndPublish ?? false;
   const hasReviewWorkflows = options?.reviewWorkflows ?? false;
 
   const reviewWorkflowColumns = useEnterprise(
@@ -507,23 +506,21 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
       };
     });
 
-    if (hasDraftAndPublish) {
-      formattedHeaders.push({
-        key: '__published_at_temp_key__',
-        name: 'publishedAt',
-        fieldSchema: {
-          type: 'custom',
-        },
-        metadatas: {
-          label: formatMessage({
-            id: getTrad(`containers.ListPage.table-headers.publishedAt`),
-            defaultMessage: 'publishedAt',
-          }),
-          searchable: false,
-          sortable: true,
-        },
-      });
-    }
+    formattedHeaders.push({
+      key: '__published_at_temp_key__',
+      name: 'publishedAt',
+      fieldSchema: {
+        type: 'custom',
+      },
+      metadatas: {
+        label: formatMessage({
+          id: getTrad(`containers.ListPage.table-headers.publishedAt`),
+          defaultMessage: 'publishedAt',
+        }),
+        searchable: false,
+        sortable: true,
+      },
+    });
 
     if (reviewWorkflowColumns) {
       // Make sure the column header label is translated
@@ -539,14 +536,7 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
     }
 
     return formattedHeaders;
-  }, [
-    runHookWaterfall,
-    displayedHeaders,
-    layout,
-    reviewWorkflowColumns,
-    hasDraftAndPublish,
-    formatMessage,
-  ]);
+  }, [runHookWaterfall, displayedHeaders, layout, reviewWorkflowColumns, formatMessage]);
 
   const subtitle = canRead
     ? formatMessage(
@@ -564,7 +554,7 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
         {...props}
         forwardedAs={ReactRouterLink}
         onClick={() => {
-          const trackerProperty = hasDraftAndPublish ? { status: 'draft' } : {};
+          const trackerProperty = { status: 'draft' };
 
           trackUsageRef.current('willCreateEntry', trackerProperty);
         }}
@@ -691,7 +681,7 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
             <Table.Root rows={data} isLoading={isLoading} colCount={colCount}>
               <Table.ActionBar>
                 <BulkActionButtons
-                  showPublish={canPublish && hasDraftAndPublish}
+                  showPublish={canPublish}
                   showDelete={canDelete}
                   onConfirmDeleteAll={handleConfirmDeleteAllData}
                   onConfirmUnpublishAll={handleConfirmUnpublishAllData}
@@ -738,7 +728,7 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
                         </Td>
                         {/* Field data */}
                         {tableHeaders.map(({ key, name, cellFormatter, ...rest }) => {
-                          if (hasDraftAndPublish && name === 'publishedAt') {
+                          if (name === 'publishedAt') {
                             return (
                               <Td key={key}>
                                 <Status

@@ -106,7 +106,7 @@ describe('Relations', () => {
         'target',
         expect.objectContaining({
           sort: 'myField',
-          fields: ['id', 'myField'],
+          fields: ['id', 'myField', 'publishedAt'],
           filters: {
             $and: [
               {
@@ -146,7 +146,7 @@ describe('Relations', () => {
         'targetWithHidden',
         expect.objectContaining({
           sort: 'id',
-          fields: ['id'],
+          fields: ['id', 'publishedAt'],
           filters: {
             $and: [
               {
@@ -190,7 +190,7 @@ describe('Relations', () => {
         { id: 1 },
         'relation',
         expect.objectContaining({
-          fields: ['id', 'myField'],
+          fields: ['id', 'myField', 'publishedAt'],
         })
       );
     });
@@ -220,7 +220,7 @@ describe('Relations', () => {
         { id: 1 },
         'relationWithHidden',
         expect.objectContaining({
-          fields: ['id'],
+          fields: ['id', 'publishedAt'],
         })
       );
     });
@@ -266,7 +266,7 @@ describe('Relations', () => {
       { id: 1 },
       'relationWithHidden',
       expect.objectContaining({
-        fields: ['id'],
+        fields: ['id', 'publishedAt'],
       })
     );
   });

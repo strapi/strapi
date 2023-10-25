@@ -18,7 +18,6 @@ const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 const productUID = 'api::product.product';
 const model = {
-  draftAndPublish: true,
   pluginOptions: {},
   singularName: 'product',
   pluralName: 'products',

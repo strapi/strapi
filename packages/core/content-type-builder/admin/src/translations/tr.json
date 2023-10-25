@@ -42,8 +42,6 @@
   "contentType.collectionName.description": "İçerik tipin ve tablo adın farklı olduğu durumlarda kullanışlıdır",
   "contentType.collectionName.label": "Koleksiyon adı",
   "contentType.displayName.label": "Görüntülenme adı",
-  "contentType.draftAndPublish.description": "Yayınlamadan önce girdilerin taslak halini yaz",
-  "contentType.draftAndPublish.label": "Taslak/Yayın sistemi",
   "contentType.kind.change.warning": "İçerik tipinin çeşidini değiştirdiniz. API sıfırlanacak (routes, controllers, services).",
   "error.attributeName.reserved-name": "Bu isim, diğer özellikleri bozabileceğinden, içerik tipi için kullanılamaz",
   "error.contentType.pluralName-used": "Bu değer tekil olanla aynı olamaz",

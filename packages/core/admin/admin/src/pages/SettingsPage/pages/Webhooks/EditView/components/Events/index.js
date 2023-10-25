@@ -62,44 +62,26 @@ const StyledTable = styled(Table)`
   }
 `;
 
-const getCEHeaders = (isDraftAndPublish) => {
+const getCEHeaders = () => {
   const headers = [
     { id: 'Settings.webhooks.events.create', defaultMessage: 'Create' },
     { id: 'Settings.webhooks.events.update', defaultMessage: 'Update' },
     { id: 'app.utils.delete', defaultMessage: 'Delete' },
+    { id: 'app.utils.publish', defaultMessage: 'Publish' },
+    { id: 'app.utils.unpublish', defaultMessage: 'Unpublish' },
   ];
-
-  if (isDraftAndPublish) {
-    headers.push({ id: 'app.utils.publish', defaultMessage: 'Publish' });
-    headers.push({ id: 'app.utils.unpublish', defaultMessage: 'Unpublish' });
-  }
 
   return headers;
 };
 
-const getCEEvents = (isDraftAndPublish) => {
-  const entryEvents = ['entry.create', 'entry.update', 'entry.delete'];
-
-  if (isDraftAndPublish) {
-    entryEvents.push('entry.publish', 'entry.unpublish');
-  }
-
-  return {
-    entry: entryEvents,
-    media: ['media.create', 'media.update', 'media.delete'],
-  };
+const CEEvents = {
+  entry: ['entry.create', 'entry.update', 'entry.delete', 'entry.publish', 'entry.unpublish'],
+  media: ['media.create', 'media.update', 'media.delete'],
 };
-
-const WebhookEventContext = React.createContext();
 
 const Root = ({ children }) => {
   const { formatMessage } = useIntl();
-  const { collectionTypes, isLoading } = useContentTypes();
-
-  const isDraftAndPublish = React.useMemo(
-    () => collectionTypes.some((ct) => ct.options.draftAndPublish === true),
-    [collectionTypes]
-  );
+  const { isLoading } = useContentTypes();
 
   const label = formatMessage({
     id: 'Settings.webhooks.form.events',
@@ -107,20 +89,18 @@ const Root = ({ children }) => {
   });
 
   return (
-    <WebhookEventContext.Provider value={{ isDraftAndPublish }}>
-      <Flex direction="column" alignItems="stretch" gap={1}>
-        <FieldLabel aria-hidden>{label}</FieldLabel>
-        {isLoading && (
-          <Loader>
-            {formatMessage({
-              id: 'Settings.webhooks.events.isLoading',
-              defaultMessage: 'Events loading',
-            })}
-          </Loader>
-        )}
-        <StyledTable aria-label={label}>{children}</StyledTable>
-      </Flex>
-    </WebhookEventContext.Provider>
+    <Flex direction="column" alignItems="stretch" gap={1}>
+      <FieldLabel aria-hidden>{label}</FieldLabel>
+      {isLoading && (
+        <Loader>
+          {formatMessage({
+            id: 'Settings.webhooks.events.isLoading',
+            defaultMessage: 'Events loading',
+          })}
+        </Loader>
+      )}
+      <StyledTable aria-label={label}>{children}</StyledTable>
+    </Flex>
   );
 };
 
@@ -129,10 +109,8 @@ Root.propTypes = {
 };
 
 const Headers = ({ getHeaders = getCEHeaders }) => {
-  const { isDraftAndPublish } = React.useContext(WebhookEventContext);
-
   const { formatMessage } = useIntl();
-  const headers = getHeaders(isDraftAndPublish);
+  const headers = getHeaders();
 
   return (
     <Thead>
@@ -184,9 +162,7 @@ Headers.propTypes = {
 };
 
 const Body = ({ providedEvents }) => {
-  const { isDraftAndPublish } = React.useContext(WebhookEventContext);
-
-  const events = providedEvents || getCEEvents(isDraftAndPublish);
+  const events = providedEvents || CEEvents;
   const { values, handleChange: onChange } = useFormikContext();
 
   const inputName = 'events';

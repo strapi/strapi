@@ -17,10 +17,6 @@ module.exports = ({ strapi }) => ({
     const displayedContentTypes = getService('content-types').findDisplayedContentTypes();
     const contentTypesUids = displayedContentTypes.map(prop('uid'));
 
-    const draftAndPublishContentTypesUids = displayedContentTypes
-      .filter(contentTypesUtils.hasDraftAndPublish)
-      .map(prop('uid'));
-
     const actions = [
       {
         section: 'contentTypes',
@@ -64,7 +60,7 @@ module.exports = ({ strapi }) => ({
         displayName: 'Publish',
         uid: 'explorer.publish',
         pluginName: 'content-manager',
-        subjects: draftAndPublishContentTypesUids,
+        subjects: contentTypesUids,
       },
       {
         section: 'plugins',

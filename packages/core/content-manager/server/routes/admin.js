@@ -161,7 +161,6 @@ module.exports = {
       config: {
         middlewares: [routing],
         policies: [
-          'plugin::content-manager.has-draft-and-publish',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
@@ -177,7 +176,6 @@ module.exports = {
       config: {
         middlewares: [routing],
         policies: [
-          'plugin::content-manager.has-draft-and-publish',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
@@ -313,7 +311,6 @@ module.exports = {
       config: {
         middlewares: [routing],
         policies: [
-          'plugin::content-manager.has-draft-and-publish',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
@@ -329,7 +326,6 @@ module.exports = {
       config: {
         middlewares: [routing],
         policies: [
-          'plugin::content-manager.has-draft-and-publish',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
@@ -360,7 +356,6 @@ module.exports = {
       config: {
         middlewares: [routing],
         policies: [
-          'plugin::content-manager.has-draft-and-publish',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
@@ -376,7 +371,6 @@ module.exports = {
       config: {
         middlewares: [routing],
         policies: [
-          'plugin::content-manager.has-draft-and-publish',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',

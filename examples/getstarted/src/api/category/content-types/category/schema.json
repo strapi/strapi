@@ -9,8 +9,7 @@
     "name": "Category"
   },
   "options": {
-    "reviewWorkflows": true,
-    "draftAndPublish": true
+    "reviewWorkflows": true
   },
   "pluginOptions": {
     "i18n": {

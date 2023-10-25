@@ -3,7 +3,7 @@
 const { merge, isEmpty, set, propEq } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
 
-const { hasDraftAndPublish, isVisibleAttribute } = strapiUtils.contentTypes;
+const { isVisibleAttribute } = strapiUtils.contentTypes;
 const { isAnyToMany } = strapiUtils.relations;
 const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
 
@@ -168,8 +168,7 @@ const getDeepPopulateDraftCount = (uid) => {
 
     switch (attribute.type) {
       case 'relation': {
-        const childModel = strapi.getModel(attribute.target);
-        if (hasDraftAndPublish(childModel) && isVisibleAttribute(model, attributeName)) {
+        if (isVisibleAttribute(model, attributeName)) {
           populateAcc[attributeName] = {
             count: true,
             filters: { [PUBLISHED_AT_ATTRIBUTE]: { $null: true } },

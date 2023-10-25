@@ -2,7 +2,6 @@
 
 const _ = require('lodash');
 
-const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
 const { getService } = require('../utils');
 const {
   validateContentTypeInput,
@@ -67,7 +66,6 @@ module.exports = {
       const metricsPayload = {
         eventProperties: {
           kind: contentType.kind,
-          hasDraftAndPublish: hasDraftAndPublish(contentType.schema),
         },
       };
 

@@ -51,8 +51,6 @@
   "contentType.collectionName.description": "使用於當內容集合名稱與資料集合名稱不同時",
   "contentType.collectionName.label": "集合名稱",
   "contentType.displayName.label": "顯示名稱",
-  "contentType.draftAndPublish.description": "在發佈項目前，撰寫草稿版本",
-  "contentType.draftAndPublish.label": "草稿/發佈系統",
   "contentType.kind.change.warning": "你變更了內容類型：API 將會被重置 (路由器、控制器、和服務將會被覆寫)。",
   "error.attributeName.reserved-name": "這個欄位名稱不可以在此內容類型內被使用，有可能會破壞其他功能",
   "error.contentType.pluralName-used": "此數值不能與單數相同",

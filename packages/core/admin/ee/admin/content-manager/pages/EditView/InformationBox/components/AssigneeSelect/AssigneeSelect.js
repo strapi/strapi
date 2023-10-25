@@ -14,7 +14,7 @@ import { useSelector } from 'react-redux';
 
 import { getDisplayName } from '../../../../../../../../admin/src/content-manager/utils';
 import { useAdminUsers } from '../../../../../../../../admin/src/hooks/useAdminUsers';
-import { selectAdminPermissions } from '../../../../../../../../admin/src/pages/App/selectors';
+import { selectAdminPermissions } from '../../../../../../../../admin/src/selectors';
 import { ASSIGNEE_ATTRIBUTE_NAME } from '../../constants';
 
 export function AssigneeSelect() {

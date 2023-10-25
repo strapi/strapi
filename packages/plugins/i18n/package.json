@@ -31,9 +31,9 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/design-system": "1.12.2",
+    "@strapi/design-system": "1.13.0",
     "@strapi/helper-plugin": "4.14.5",
-    "@strapi/icons": "1.12.2",
+    "@strapi/icons": "1.13.0",
     "@strapi/utils": "4.14.5",
     "formik": "2.4.0",
     "immer": "9.0.19",

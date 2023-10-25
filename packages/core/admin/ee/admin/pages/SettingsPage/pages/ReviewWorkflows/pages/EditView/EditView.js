@@ -19,7 +19,7 @@ import { useParams } from 'react-router-dom';
 import { useAdminRoles } from '../../../../../../../../admin/src/hooks/useAdminRoles';
 import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
 import { useInjectReducer } from '../../../../../../../../admin/src/hooks/useInjectReducer';
-import { selectAdminPermissions } from '../../../../../../../../admin/src/pages/App/selectors';
+import { selectAdminPermissions } from '../../../../../../../../admin/src/selectors';
 import { useLicenseLimits } from '../../../../../../hooks/useLicenseLimits';
 import {
   resetWorkflow,

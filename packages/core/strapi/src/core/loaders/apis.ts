@@ -56,7 +56,7 @@ export default async function loadAPIs(strapi: Strapi) {
   validateContentTypesUnicity(apis);
 
   for (const apiName of Object.keys(apis)) {
-    strapi.container.get('apis').add(apiName, apis[apiName]);
+    strapi.get('apis').add(apiName, apis[apiName]);
   }
 }
 

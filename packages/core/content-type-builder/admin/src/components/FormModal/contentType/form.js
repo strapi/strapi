@@ -15,22 +15,7 @@ const forms = {
       return {
         sections: [
           {
-            items: [
-              {
-                intlLabel: {
-                  id: getTrad('contentType.draftAndPublish.label'),
-                  defaultMessage: 'Draft & publish',
-                },
-                description: {
-                  id: getTrad('contentType.draftAndPublish.description'),
-                  defaultMessage:
-                    'Allows writing a draft version of an entry, before it is published',
-                },
-                name: 'draftAndPublish',
-                type: 'toggle-draft-publish',
-                validations: {},
-              },
-            ],
+            items: [],
           },
         ],
       };

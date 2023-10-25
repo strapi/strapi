@@ -19,8 +19,8 @@ import {
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
-import { selectAdminPermissions } from '../../../../../../../admin/src/pages/App/selectors';
 import Filters from '../../../../../../../admin/src/pages/SettingsPage/components/Filters';
+import { selectAdminPermissions } from '../../../../../../../admin/src/selectors';
 
 import useAuditLogsData from './hooks/useAuditLogsData';
 import Modal from './Modal';

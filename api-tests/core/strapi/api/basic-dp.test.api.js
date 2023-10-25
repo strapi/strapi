@@ -40,7 +40,6 @@ const productWithDP = {
       maxLength: 30,
     },
   },
-  draftAndPublish: true,
   displayName: 'product-with-dp',
   singularName: 'product-with-dp',
   pluralName: 'product-with-dps',
@@ -48,7 +47,7 @@ const productWithDP = {
   collectionName: '',
 };
 
-describe('Core API - Basic + draftAndPublish', () => {
+describe('Core API - Basic', () => {
   beforeAll(async () => {
     await builder.addComponent(compo).addContentType(productWithDP).build();
 

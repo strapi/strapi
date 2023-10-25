@@ -80,7 +80,6 @@ export interface Attributes {
  * Structure containing every core schema options and their associated value
  */
 export interface Options {
-  draftAndPublish?: boolean;
   populateCreatorFields?: boolean;
   comment?: string;
   version?: string;

@@ -50,8 +50,6 @@
   "contentType.collectionName.description": "Brugbar når navnet på din indholdstype og dit tabel navn er forskellige",
   "contentType.collectionName.label": "Dokument navn",
   "contentType.displayName.label": "Visningsnavn",
-  "contentType.draftAndPublish.description": "Opret en version som udkast for hvert element inden det offentliggøres",
-  "contentType.draftAndPublish.label": "Udkast/offentliggør system",
   "contentType.kind.change.warning": "Du har lige ændret typen af en indholdstype: API bliver nustillet (ruter, controllere, og services bliver overskrevet).",
   "error.attributeName.reserved-name": "Dette navn kan ikke bruges i din indholdstype, da det måske kan ødelægge andre funktioner",
   "error.contentType.pluralName-used": "Denne værdi kan ikke være den samme som ved ental",

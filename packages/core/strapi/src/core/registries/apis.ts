@@ -16,7 +16,7 @@ const apisRegistry = (strapi: Strapi) => {
         throw new Error(`API ${apiName} has already been registered.`);
       }
 
-      const api = strapi.container.get('modules').add(`api::${apiName}`, apiConfig);
+      const api = strapi.get('modules').add(`api::${apiName}`, apiConfig);
 
       apis[apiName] = api;
 

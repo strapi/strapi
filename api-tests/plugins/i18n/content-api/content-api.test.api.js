@@ -15,9 +15,7 @@ const categoryModel = {
   pluralName: 'categories',
   description: '',
   name: 'Category',
-  options: {
-    draftAndPublish: false,
-  },
+  options: {},
   pluginOptions: {
     i18n: {
       localized: true,
@@ -41,9 +39,7 @@ const homepageModel = {
   displayName: 'Homepage',
   singularName: 'homepage',
   pluralName: 'homepages',
-  options: {
-    draftAndPublish: false,
-  },
+  options: {},
   pluginOptions: {
     i18n: {
       localized: true,

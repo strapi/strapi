@@ -13,7 +13,6 @@ const {
   ALLOWED_WEBHOOK_EVENTS: { ENTRY_PUBLISH, ENTRY_UNPUBLISH },
 } = require('../constants');
 
-const { hasDraftAndPublish } = strapiUtils.contentTypes;
 const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
 
 const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
@@ -89,13 +88,10 @@ module.exports = ({ strapi }) => ({
   },
 
   async create(body, uid) {
-    const modelDef = strapi.getModel(uid);
     const publishData = { ...body };
     const populate = await buildDeepPopulate(uid);
 
-    if (hasDraftAndPublish(modelDef)) {
-      publishData[PUBLISHED_AT_ATTRIBUTE] = null;
-    }
+    publishData[PUBLISHED_AT_ATTRIBUTE] = null;
 
     const params = { data: publishData, populate };
 
@@ -126,13 +122,10 @@ module.exports = ({ strapi }) => ({
     return updatedEntity;
   },
   async clone(entity, body, uid) {
-    const modelDef = strapi.getModel(uid);
     const populate = await buildDeepPopulate(uid);
     const publishData = { ...body };
 
-    if (hasDraftAndPublish(modelDef)) {
-      publishData[PUBLISHED_AT_ATTRIBUTE] = null;
-    }
+    publishData[PUBLISHED_AT_ATTRIBUTE] = null;
 
     const params = {
       data: publishData,

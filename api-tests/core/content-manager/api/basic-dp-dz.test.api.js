@@ -42,7 +42,6 @@ const productWithCompoAndDP = {
       required: true,
     },
   },
-  draftAndPublish: true,
   displayName: 'product with dz and DP',
   singularName: 'product-with-dz-and-dp',
   pluralName: 'product-with-dz-and-dps',
@@ -50,7 +49,7 @@ const productWithCompoAndDP = {
   collectionName: '',
 };
 
-describe('CM API - Basic + dz + draftAndPublish', () => {
+describe('CM API - Basic + dz', () => {
   beforeAll(async () => {
     await builder.addComponent(compo).addContentType(productWithCompoAndDP).build();
 

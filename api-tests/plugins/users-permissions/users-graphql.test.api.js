@@ -262,7 +262,6 @@ describe('Advanced Test GraphQL Users API End to End', () => {
           singularName: 'user',
           pluralName: 'users',
           description: '',
-          draftAndPublish: false,
           kind: 'collectionType',
           collectionName: 'up_users',
           attributes: {

@@ -33,7 +33,7 @@ export default async function loadComponents(strapi: Strapi) {
 
   const map = await loadFiles<LoadedComponents>(strapi.dirs.dist.components, '*/*.*(js|json)');
 
-  return Object.keys(map).reduce((acc, category) => {
+  const components = Object.keys(map).reduce((acc, category) => {
     Object.keys(map[category]).forEach((key) => {
       const schema = map[category][key];
 
@@ -60,4 +60,6 @@ export default async function loadComponents(strapi: Strapi) {
 
     return acc;
   }, {} as ComponentMap);
+
+  strapi.get('components').add(components);
 }

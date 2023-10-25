@@ -13,6 +13,7 @@ declare global {
       telemetryDisabled: boolean;
       flags: {
         nps: boolean;
+        promoteEE: boolean;
       };
     };
   }

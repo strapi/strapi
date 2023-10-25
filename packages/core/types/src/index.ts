@@ -84,9 +84,8 @@ export interface ConfigProvider {
   [key: string]: any;
 }
 
-export interface Strapi {
+export interface Strapi extends Container {
   server: Server;
-  container: Container;
   log: Logger;
   fs: StrapiFS;
   eventHub: EventHub;
@@ -138,15 +137,6 @@ export interface Strapi {
   listen(): Promise<void>;
   stopWithError(err: unknown, customMessage?: string): never;
   stop(exitCode?: number): never;
-  loadAdmin(): Promise<void>;
-  loadPlugins(): Promise<void>;
-  loadPolicies(): Promise<void>;
-  loadAPIs(): Promise<void>;
-  loadComponents(): Promise<void>;
-  loadMiddlewares(): Promise<void>;
-  loadApp(): Promise<void>;
-  loadSanitizers(): Promise<void>;
-  loadValidators(): Promise<void>;
   registerInternalHooks(): void;
   register(): Promise<Strapi>;
   bootstrap(): Promise<Strapi>;

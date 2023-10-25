@@ -5,8 +5,13 @@ import * as React from 'react';
 import { LoadingIndicatorPage } from '@strapi/helper-plugin';
 import { Route } from 'react-router-dom';
 
+export type TModule = () =>
+  | Promise<{ default?: React.ComponentType } | React.ComponentType>
+  | { default?: React.ComponentType }
+  | React.ComponentType;
+
 interface LazyCompoProps {
-  loadComponent: () => Promise<{ default?: React.ComponentType } | React.ComponentType>;
+  loadComponent: TModule;
 }
 
 const LazyCompo = ({ loadComponent }: LazyCompoProps) => {

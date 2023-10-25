@@ -43,12 +43,10 @@ describe('Audit logs service', () => {
 
     it('should not register the audit logs service when is disabled by the user', async () => {
       const eeAdminRegister = require('../../register');
-      const mockRegister = jest.fn();
+      const mockAdd = jest.fn();
 
       const strapi = {
-        container: {
-          register: mockRegister,
-        },
+        add: mockAdd,
         config: {
           get: () => false,
         },
@@ -56,16 +54,14 @@ describe('Audit logs service', () => {
 
       await eeAdminRegister({ strapi });
 
-      expect(mockRegister).not.toHaveBeenCalledWith('audit-logs', expect.anything());
+      expect(mockAdd).not.toHaveBeenCalledWith('audit-logs', expect.anything());
     });
 
     it('should not subscribe to events when the license does not allow it', async () => {
       const mockSubscribe = jest.fn();
 
       const strapi = {
-        container: {
-          register: jest.fn(),
-        },
+        add: jest.fn(),
         config: {
           get(key) {
             switch (key) {
@@ -113,7 +109,7 @@ describe('Audit logs service', () => {
   });
 
   describe('Init with audit logs enabled', () => {
-    const mockRegister = jest.fn();
+    const mockAdd = jest.fn();
     const mockScheduleJob = jest.fn((rule, callback) => callback());
 
     // Audit logs Local Provider mocks
@@ -142,9 +138,7 @@ describe('Audit logs service', () => {
             },
           },
         },
-        container: {
-          register: mockRegister,
-        },
+        add: mockAdd,
         eventHub: createEventHub(),
         hook: () => ({ register: jest.fn() }),
         config: {
@@ -193,7 +187,7 @@ describe('Audit logs service', () => {
 
       await eeAdminRegister({ strapi });
 
-      expect(mockRegister).toHaveBeenCalledWith('audit-logs', expect.anything());
+      expect(mockAdd).toHaveBeenCalledWith('audit-logs', expect.anything());
     });
 
     it('should emit an event and capture it in the audit logs', async () => {

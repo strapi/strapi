@@ -35,7 +35,6 @@ const Header = ({
   initialData,
   isCreatingEntry,
   isSingleType,
-  hasDraftAndPublish,
   layout,
   modifiedData,
   onPublish,
@@ -73,11 +72,9 @@ const Header = ({
   if (isCreatingEntry && canCreate) {
     primaryAction = (
       <Flex gap={2}>
-        {hasDraftAndPublish && (
-          <Button disabled startIcon={<Check />} variant="secondary">
-            {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
-          </Button>
-        )}
+        <Button disabled startIcon={<Check />} variant="secondary">
+          {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
+        </Button>
         <Button disabled={!didChangeData} loading={status === 'submit-pending'} type="submit">
           {formatMessage({
             id: getTrad('containers.Edit.submit'),
@@ -89,7 +86,7 @@ const Header = ({
   }
 
   if (!isCreatingEntry && canUpdate) {
-    const shouldShowPublishButton = hasDraftAndPublish && canPublish;
+    const shouldShowPublishButton = canPublish;
     const isPublished = !isEmpty(initialData.publishedAt);
     const isPublishButtonLoading = isPublished
       ? status === 'unpublish-pending'
@@ -286,7 +283,6 @@ Header.propTypes = {
   isSingleType: PropTypes.bool.isRequired,
   status: PropTypes.string.isRequired,
   layout: PropTypes.object.isRequired,
-  hasDraftAndPublish: PropTypes.bool.isRequired,
   modifiedData: PropTypes.object.isRequired,
   onPublish: PropTypes.func.isRequired,
   onUnpublish: PropTypes.func.isRequired,
