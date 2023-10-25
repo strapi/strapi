@@ -1,5 +1,19 @@
+import type { Context } from 'koa';
+import 'koa-bodyparser';
+
 import _ from 'lodash';
 import { yup, validateYupSchema } from '@strapi/utils';
+import '@strapi/types';
+
+import {
+  CreateWebhook,
+  DeleteWebhook,
+  DeleteWebhooks,
+  GetWebhook,
+  ListWebhooks,
+  UpdateWebhook,
+  TriggerWebhook,
+} from '../../../shared/contracts/webhooks';
 
 const urlRegex =
   /^(?:([a-z0-9+.-]+):\/\/)(?:\S+(?::\S*)?@)?(?:(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9_]-*)*[a-z\u00a1-\uffff0-9_]+)(?:\.(?:[a-z\u00a1-\uffff0-9_]-*)*[a-z\u00a1-\uffff0-9_]+)*\.?)(?::\d{2,5})?(?:[/?#]\S*)?$/;
@@ -31,12 +45,12 @@ const updateWebhookValidator = webhookValidator.shape({
 });
 
 export default {
-  async listWebhooks(ctx: any) {
+  async listWebhooks(ctx: Context) {
     const webhooks = await strapi.webhookStore.findWebhooks();
-    ctx.send({ data: webhooks });
+    ctx.send({ data: webhooks } satisfies ListWebhooks.Response);
   },
 
-  async getWebhook(ctx: any) {
+  async getWebhook(ctx: Context) {
     const { id } = ctx.params;
     const webhook = await strapi.webhookStore.findWebhook(id);
 
@@ -44,11 +58,11 @@ export default {
       return ctx.notFound('webhook.notFound');
     }
 
-    ctx.send({ data: webhook });
+    ctx.send({ data: webhook } satisfies GetWebhook.Response);
   },
 
-  async createWebhook(ctx: any) {
-    const { body } = ctx.request;
+  async createWebhook(ctx: Context) {
+    const { body } = ctx.request as CreateWebhook.Request;
 
     await validateYupSchema(webhookValidator)(body);
 
@@ -56,12 +70,12 @@ export default {
 
     strapi.webhookRunner.add(webhook);
 
-    ctx.created({ data: webhook });
+    ctx.created({ data: webhook } satisfies CreateWebhook.Response);
   },
 
-  async updateWebhook(ctx: any) {
-    const { id } = ctx.params;
-    const { body } = ctx.request;
+  async updateWebhook(ctx: Context) {
+    const { id } = ctx.params as UpdateWebhook.Params;
+    const { body } = ctx.request as UpdateWebhook.Request;
 
     await validateYupSchema(updateWebhookValidator)(body);
 
@@ -82,10 +96,10 @@ export default {
 
     strapi.webhookRunner.update(updatedWebhook);
 
-    ctx.send({ data: updatedWebhook });
+    ctx.send({ data: updatedWebhook } satisfies UpdateWebhook.Response);
   },
 
-  async deleteWebhook(ctx: any) {
+  async deleteWebhook(ctx: Context) {
     const { id } = ctx.params;
     const webhook = await strapi.webhookStore.findWebhook(id);
 
@@ -97,11 +111,11 @@ export default {
 
     strapi.webhookRunner.remove(webhook);
 
-    ctx.body = { data: webhook };
+    ctx.body = { data: webhook } satisfies DeleteWebhook.Response;
   },
 
-  async deleteWebhooks(ctx: any) {
-    const { ids } = ctx.request.body;
+  async deleteWebhooks(ctx: Context) {
+    const { ids } = ctx.request.body as DeleteWebhooks.Request['body'];
 
     if (!Array.isArray(ids) || ids.length === 0) {
       return ctx.badRequest('ids must be an array of id');
@@ -116,16 +130,16 @@ export default {
       }
     }
 
-    ctx.send({ data: ids });
+    ctx.send({ data: ids } satisfies DeleteWebhooks.Response);
   },
 
-  async triggerWebhook(ctx: any) {
+  async triggerWebhook(ctx: Context) {
     const { id } = ctx.params;
 
     const webhook = (await strapi.webhookStore.findWebhook(id)) as any;
 
     const response = await strapi.webhookRunner.run(webhook, 'trigger-test', {});
 
-    ctx.body = { data: response };
+    ctx.body = { data: response } satisfies TriggerWebhook.Response;
   },
 };
