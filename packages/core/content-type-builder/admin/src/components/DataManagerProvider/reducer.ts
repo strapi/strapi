@@ -9,7 +9,7 @@ import * as actions from './constants';
 import { retrieveComponentsFromSchema } from './utils/retrieveComponentsFromSchema';
 
 import type { DataManagerStateType, ContentType, AttributeType, Component } from '../../types';
-import type { UID } from '@strapi/types';
+import type { UID, Attribute } from '@strapi/types';
 
 // TODO: Define all possible actions based on type
 export type Action = {
@@ -38,19 +38,7 @@ const initialState: DataManagerStateType = {
 
 const ONE_SIDE_RELATIONS = ['oneWay', 'manyWay'];
 
-type Relations =
-  | 'oneToOne'
-  | 'oneToMany'
-  | 'manyToOne'
-  | 'manyToMany'
-  | 'oneWay'
-  | 'manyWay'
-  | 'morphOne'
-  | 'morphMany'
-  | 'morphToOne'
-  | 'morphToMany';
-
-const getOppositeRelation = (originalRelation: Relations) => {
+const getOppositeRelation = (originalRelation?: Attribute.RelationKind.WithTarget) => {
   if (originalRelation === 'manyToOne') {
     return 'oneToMany';
   }
@@ -396,24 +384,24 @@ const reducer = (state = initialState, action: Action) =>
         const shouldRemoveOppositeAttributeBecauseOfRelationTypeChange =
           didChangeRelationType &&
           hadInternalRelation &&
-          ['oneWay', 'manyWay'].includes(relationType) &&
+          ['oneWay', 'manyWay'].includes(relationType!) &&
           isEditingRelation;
         const shouldUpdateOppositeAttributeBecauseOfRelationTypeChange =
-          !ONE_SIDE_RELATIONS.includes(initialRelationType) &&
-          !ONE_SIDE_RELATIONS.includes(relationType) &&
+          !ONE_SIDE_RELATIONS.includes(initialRelationType!) &&
+          !ONE_SIDE_RELATIONS.includes(relationType!) &&
           hadInternalRelation &&
           didCreateInternalRelation &&
           isEditingRelation;
         const shouldCreateOppositeAttributeBecauseOfRelationTypeChange =
-          ONE_SIDE_RELATIONS.includes(initialRelationType) &&
-          !ONE_SIDE_RELATIONS.includes(relationType) &&
+          ONE_SIDE_RELATIONS.includes(initialRelationType!) &&
+          !ONE_SIDE_RELATIONS.includes(relationType!) &&
           hadInternalRelation &&
           didCreateInternalRelation &&
           isEditingRelation;
         const shouldCreateOppositeAttributeBecauseOfTargetChange =
           didChangeTargetRelation &&
           didCreateInternalRelation &&
-          !ONE_SIDE_RELATIONS.includes(relationType);
+          !ONE_SIDE_RELATIONS.includes(relationType!);
 
         // Store opposite attribute name to remove at the end of the loop
         if (
@@ -597,7 +585,7 @@ const reducer = (state = initialState, action: Action) =>
 
           const uid = state.modifiedData.contentType?.uid;
           const shouldRemoveOppositeAttribute =
-            target === uid && !ONE_SIDE_RELATIONS.includes(relationType);
+            target === uid && !ONE_SIDE_RELATIONS.includes(relationType!);
 
           if (shouldRemoveOppositeAttribute) {
             const attributes: AttributeType[] =

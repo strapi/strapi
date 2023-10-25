@@ -126,7 +126,6 @@ export const DynamicZoneList = ({
               <Box
                 id={`dz-${name}-panel-${index}`}
                 role="tabpanel"
-                tabindex={0}
                 aria-labelledby={`dz-${name}-tab-${index}`}
                 key={component}
                 style={{ display: activeTab === index ? 'block' : 'none' }}

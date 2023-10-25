@@ -22,7 +22,7 @@ type ModifiedData = {
   kind: Schema.ContentTypeKind;
 };
 
-export const canEditContentType = (data: EditableContentTypeData, modifiedData: ModifiedData) => {
+export const canEditContentType = (data: Record<string, any>, modifiedData: ModifiedData) => {
   const kind = get(data, ['contentType', 'schema', 'kind'], '');
 
   // if kind isn't modified or content type is a single type, there is no need to check attributes.
@@ -34,7 +34,7 @@ export const canEditContentType = (data: EditableContentTypeData, modifiedData: 
     data,
     ['contentType', 'schema', 'attributes'],
     []
-  ) as EditableContentTypeData['contentType']['schema']['attributes'];
+  ) as AttributeType[];
 
   const relationAttributes = contentTypeAttributes.filter(({ relation, type, targetAttribute }) => {
     const relationType = getRelationType(relation, targetAttribute);

@@ -57,7 +57,7 @@ import { retrieveSpecificInfoFromComponents } from './utils/retrieveSpecificInfo
 import { serverRestartWatcher } from './utils/serverRestartWatcher';
 import { validateSchema } from './utils/validateSchema';
 
-import type { ContentType, SchemaType } from '../../types';
+import type { ContentType, SchemaType, Components } from '../../types';
 import type { UID } from '@strapi/types';
 
 interface DataManagerProviderProps {
@@ -511,10 +511,9 @@ const DataManagerProvider = ({
         component?: any;
       } = {
         components: getComponentsToPost(
-          modifiedData.components,
-          components,
-          currentUid!,
-          isCreating
+          modifiedData.components as Components,
+          components as Components,
+          currentUid as UID.Any
         ),
       };
 

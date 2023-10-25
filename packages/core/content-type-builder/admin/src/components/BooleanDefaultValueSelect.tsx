@@ -38,7 +38,7 @@ export const BooleanDefaultValueSelect = ({
       )
     : name;
 
-  const handleChange = (value: string) => {
+  const handleChange = (value: any) => {
     let nextValue: boolean | string = '';
 
     if (value === 'true') {

@@ -5,6 +5,7 @@ import { useIntl } from 'react-intl';
 import { getTrad } from '../utils';
 
 import type { SchemaType } from '../types';
+import type { CustomField } from '@strapi/helper-plugin';
 
 type ModalTitleProps = {
   forTarget?: SchemaType;
@@ -53,11 +54,7 @@ type FormModalSubHeaderProps = {
   step?: string;
   attributeType: string;
   attributeName: string;
-  customField?: {
-    intlLabel: {
-      id: string;
-    };
-  };
+  customField?: CustomField;
 };
 
 export const FormModalSubHeader = ({
