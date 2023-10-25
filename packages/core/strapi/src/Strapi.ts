@@ -441,6 +441,7 @@ class Strapi extends Container implements StrapiI {
 
   registerInternalHooks() {
     this.get('hooks').set('strapi::content-types.beforeSync', hooks.createAsyncParallelHook());
+    this.get('hooks').set('strapi::content-types.afterSync', hooks.createAsyncParallelHook());
   }
 
   async register() {
