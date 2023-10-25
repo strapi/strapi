@@ -61,7 +61,7 @@ const ApplicationInfosPage = () => {
     async () =>
       (
         await import(
-          '../../../../../../ee/admin/pages/SettingsPage/pages/ApplicationInfosPage/components/AdminSeatInfo'
+          '../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfosPage/components/AdminSeatInfo'
         )
       ).AdminSeatInfoEE
   );

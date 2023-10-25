@@ -201,7 +201,7 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
     async () =>
       (
         await import(
-          '../../../../../ee/admin/content-manager/pages/ListView/ReviewWorkflowsColumn/constants'
+          '../../../../../ee/admin/src/content-manager/pages/ListView/ReviewWorkflowsColumn/constants'
         )
       ).REVIEW_WORKFLOW_COLUMNS_EE,
     {
@@ -212,7 +212,7 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
     REVIEW_WORKFLOW_COLUMNS_CELL_CE,
     async () => {
       const { ReviewWorkflowsStageEE, ReviewWorkflowsAssigneeEE } = await import(
-        '../../../../../ee/admin/content-manager/pages/ListView/ReviewWorkflowsColumn'
+        '../../../../../ee/admin/src/content-manager/pages/ListView/ReviewWorkflowsColumn'
       );
 
       return { ReviewWorkflowsStageEE, ReviewWorkflowsAssigneeEE };
@@ -227,7 +227,7 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
     async () =>
       (
         await import(
-          '../../../../../ee/admin/content-manager/components/Filter/CustomInputs/ReviewWorkflows/constants'
+          '../../../../../ee/admin/src/content-manager/components/Filter/CustomInputs/ReviewWorkflows/constants'
         )
       ).REVIEW_WORKFLOW_FILTERS,
     {

@@ -48,7 +48,7 @@ const AuthenticatedApp = React.lazy(() =>
 export const App = () => {
   const adminPermissions = useEnterprise(
     ADMIN_PERMISSIONS_CE,
-    async () => (await import('../../ee/admin/constants')).ADMIN_PERMISSIONS_EE,
+    async () => (await import('../../ee/admin/src/constants')).ADMIN_PERMISSIONS_EE,
     {
       combine(cePermissions, eePermissions) {
         // the `settings` NS e.g. are deep nested objects, that need a deep merge
@@ -60,7 +60,7 @@ export const App = () => {
   );
   const routes = useEnterprise<TRoute[] | null, TRoute[], TRoute[]>(
     ROUTES_CE,
-    async () => (await import('../../ee/admin/constants')).ROUTES_EE,
+    async () => (await import('../../ee/admin/src/constants')).ROUTES_EE,
     {
       defaultValue: [],
     }

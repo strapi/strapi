@@ -25,7 +25,11 @@ import Onboarding from './Onboarding';
 const CM = lazy(() =>
   import(/* webpackChunkName: "content-manager" */ '../../content-manager/pages/App')
 );
-const HomePage = lazy(() => import(/* webpackChunkName: "Admin_homePage" */ '../HomePage'));
+const HomePage = lazy(() =>
+  import(/* webpackChunkName: "Admin_homePage" */ '../HomePage').then((mod) => ({
+    default: mod.HomePage,
+  }))
+);
 const InstalledPluginsPage = lazy(() =>
   import(/* webpackChunkName: "Admin_pluginsPage" */ '../InstalledPluginsPage')
 );
