@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import _ from 'lodash';
 import { getAbsoluteAdminUrl, errors } from '@strapi/utils';
 import { getService } from '../utils';
-import { type AdminUser } from '../domain/user';
+import type { AdminUser } from '../../../shared/contracts/shared';
 import '@strapi/types';
 
 const { ApplicationError } = errors;

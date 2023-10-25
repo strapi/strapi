@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import _ from 'lodash';
 import jwt from 'jsonwebtoken';
-import type { AdminUser } from '../domain/user';
+import type { AdminUser } from '../../../shared/contracts/shared';
 
 const defaultJwtOptions = { expiresIn: '30d' };
 
