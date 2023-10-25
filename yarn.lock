@@ -8594,7 +8594,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/utils@npm:4.15.5, @strapi/utils@workspace:packages/core/utils":
+"@strapi/upgrade@workspace:packages/utils/upgrade":
+  version: 0.0.0-use.local
+  resolution: "@strapi/upgrade@workspace:packages/utils/upgrade"
+  dependencies:
+    "@strapi/pack-up": "workspace:*"
+    boxen: 5.1.2
+    chalk: 4.1.2
+    chokidar: 3.5.3
+    commander: 8.3.0
+    eslint-config-custom: "workspace:*"
+    ora: 5.4.1
+    pkg-up: 3.1.0
+    prompts: 2.4.2
+    rimraf: 3.0.2
+    semver: 7.5.4
+  bin:
+    upgrade: ./bin/upgrade.js
+  languageName: unknown
+  linkType: soft
+
+"@strapi/utils@4.14.5, @strapi/utils@workspace:packages/core/utils":
   version: 0.0.0-use.local
   resolution: "@strapi/utils@workspace:packages/core/utils"
   dependencies:
