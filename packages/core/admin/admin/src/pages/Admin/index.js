@@ -14,11 +14,11 @@ import { Route, Switch } from 'react-router-dom';
 
 import { GuidedTourModal } from '../../components/GuidedTour/Modal';
 import { LeftMenu } from '../../components/LeftMenu';
+import { ACTION_SET_APP_RUNTIME_STATUS } from '../../constants';
 import { useConfiguration } from '../../hooks/useConfiguration';
 import { useMenu } from '../../hooks/useMenu';
 import { AppLayout } from '../../layouts/AppLayout';
 import { createRoute } from '../../utils/createRoute';
-import { SET_APP_RUNTIME_STATUS } from '../App/constants';
 
 import Onboarding from './Onboarding';
 
@@ -30,7 +30,9 @@ const InstalledPluginsPage = lazy(() =>
   import(/* webpackChunkName: "Admin_pluginsPage" */ '../InstalledPluginsPage')
 );
 const MarketplacePage = lazy(() =>
-  import(/* webpackChunkName: "Admin_marketplace" */ '../MarketplacePage')
+  import(/* webpackChunkName: "Admin_marketplace" */ '../Marketplace/MarketplacePage').then(
+    (mod) => ({ default: mod.ProtectedMarketplacePage })
+  )
 );
 const NotFoundPage = lazy(() =>
   import(/* webpackChunkName: "Admin_NotFoundPage" */ '../NotFoundPage').then(
@@ -70,7 +72,7 @@ const useTrackUsage = () => {
     if (appStatus === 'init') {
       trackUsage('didAccessAuthenticatedAdministration');
 
-      dispatch({ type: SET_APP_RUNTIME_STATUS });
+      dispatch({ type: ACTION_SET_APP_RUNTIME_STATUS });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appStatus]);

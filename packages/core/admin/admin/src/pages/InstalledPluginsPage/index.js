@@ -5,7 +5,7 @@ import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
-import { selectAdminPermissions } from '../App/selectors';
+import { selectAdminPermissions } from '../../selectors';
 
 import Plugins from './Plugins';
 

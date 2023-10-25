@@ -14,7 +14,7 @@ import { useSelector } from 'react-redux';
 import { Redirect, Route, Switch, useLocation, useRouteMatch } from 'react-router-dom';
 
 import { DragLayer } from '../../../components/DragLayer';
-import { selectAdminPermissions } from '../../../pages/App/selectors';
+import { selectAdminPermissions } from '../../../selectors';
 import ModelsContext from '../../contexts/ModelsContext';
 import getTrad from '../../utils/getTrad';
 import ItemTypes from '../../utils/ItemTypes';

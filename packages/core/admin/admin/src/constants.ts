@@ -136,3 +136,6 @@ export const INJECTION_ZONES = {
     },
   },
 };
+
+export const ACTION_SET_APP_RUNTIME_STATUS = 'StrapiAdmin/APP/SET_APP_RUNTIME_STATUS';
+export const ACTION_SET_ADMIN_PERMISSIONS = 'StrapiAdmin/App/SET_ADMIN_PERMISSIONS';
