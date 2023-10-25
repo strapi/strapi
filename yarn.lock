@@ -19164,7 +19164,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "getstarted@workspace:examples/getstarted"
   dependencies:
-    "@faker-js/faker": 8.2.0
     "@strapi/icons": 1.11.0
     "@strapi/plugin-color-picker": 4.14.4
     "@strapi/plugin-documentation": 4.14.4
