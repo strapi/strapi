@@ -73,11 +73,14 @@ export declare namespace UpdateWebhook {
 /**
  * /deleteWebhook - Delete a webhook
  */
-// TODO types for id
 export declare namespace DeleteWebhook {
   export interface Request {
     body: {};
     query: {};
+  }
+
+  export interface Params {
+    id: string;
   }
 
   export interface Response {
@@ -117,8 +120,10 @@ export declare namespace TriggerWebhook {
   }
 
   export interface Response {
-    // TODO type this
-    data: unknown;
+    data: {
+      statusCode: number;
+      message?: string;
+    };
     error?: errors.ApplicationError;
   }
 }
