@@ -8,10 +8,11 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import Logo from '../../../../components/UnauthenticatedLogo';
-import UnauthenticatedLayout, {
+import { Logo } from '../../../../components/UnauthenticatedLogo';
+import {
   Column,
   LayoutContent,
+  UnauthenticatedLayout,
 } from '../../../../layouts/UnauthenticatedLayout';
 import FieldActionWrapper from '../FieldActionWrapper';
 

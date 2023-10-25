@@ -1,16 +1,13 @@
-import { curry, isEmpty, isNil, isObject } from 'lodash/fp';
+import { curry, isEmpty, isNil } from 'lodash/fp';
 
 import { pipeAsync } from '../async';
-import traverseEntity, { Data } from '../traverse-entity';
+import traverseEntity from '../traverse-entity';
 import { isScalarAttribute } from '../content-types';
-
 import { traverseQueryFilters, traverseQuerySort, traverseQueryFields } from '../traverse';
-
 import { throwPassword, throwPrivate, throwDynamicZones, throwMorphToRelations } from './visitors';
 import { isOperator } from '../operators';
-
-import type { Model } from '../types';
 import { throwInvalidParam } from './utils';
+import type { Model, Data } from '../types';
 
 const throwPasswords = (schema: Model) => async (entity: Data) => {
   if (!schema) {
@@ -50,16 +47,8 @@ const defaultValidateFilters = curry((schema: Model, filters: unknown) => {
     // passwords from filters
     traverseQueryFilters(throwPassword, { schema }),
     // private from filters
-    traverseQueryFilters(throwPrivate, { schema }),
-    // empty objects
-    traverseQueryFilters(
-      ({ key, value }) => {
-        if (isObject(value) && isEmpty(value)) {
-          throwInvalidParam({ key });
-        }
-      },
-      { schema }
-    )
+    traverseQueryFilters(throwPrivate, { schema })
+    // we allow empty objects to validate and only sanitize them out, so that users may write "lazy" queries without checking their params exist
   )(filters);
 });
 

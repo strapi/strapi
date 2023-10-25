@@ -1,6 +1,6 @@
 {
   "name": "@strapi/utils",
-  "version": "4.13.2",
+  "version": "4.14.5",
   "description": "Shared utilities for the Strapi packages",
   "keywords": [
     "strapi",
@@ -28,22 +28,21 @@
     }
   ],
   "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "files": [
     "./dist"
   ],
-  "directories": {
-    "lib": "./lib"
-  },
   "scripts": {
-    "build": "run -T tsc",
-    "build:ts": "run build",
-    "watch": "run -T tsc -w --preserveWatchOutput",
+    "build": "pack-up build",
     "clean": "run -T rimraf ./dist",
+    "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
+    "test:ts": "run -T tsc --noEmit",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "lint": "run -T eslint ."
+    "watch": "run -T pack-up watch"
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
@@ -54,14 +53,16 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
+    "@strapi/pack-up": "workspace:*",
     "@types/koa": "2.13.4",
-    "eslint-config-custom": "4.13.2",
+    "@types/node": "18.18.4",
+    "eslint-config-custom": "4.14.5",
     "koa": "2.13.4",
     "koa-body": "4.2.0",
-    "tsconfig": "4.13.2"
+    "tsconfig": "4.14.5"
   },
   "engines": {
-    "node": ">=16.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   }
 }

@@ -1,78 +1,16 @@
 import React from 'react';
 
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { render, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, waitFor, server } from '@tests/utils';
 import { rest } from 'msw';
-import { setupServer } from 'msw/node';
-import { IntlProvider } from 'react-intl';
-import { QueryClientProvider, QueryClient } from 'react-query';
-import { Provider } from 'react-redux';
-import { createStore } from 'redux';
 
 import { ASSIGNEE_ATTRIBUTE_NAME } from '../../../constants';
 import { AssigneeSelect } from '../AssigneeSelect';
 
-const server = setupServer(
-  rest.get('*/users', (req, res, ctx) =>
-    res(
-      ctx.json({
-        data: {
-          results: [
-            {
-              id: 1,
-              firstname: 'Firstname 1',
-              lastname: 'Lastname 1',
-            },
-
-            {
-              id: 2,
-              firstname: 'Firstname 2',
-              lastname: 'Lastname 2',
-            },
-          ],
-        },
-      })
-    )
-  )
-);
-
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useCMEditViewDataManager: jest.fn(),
-  useNotification: jest.fn(() => ({
-    toggleNotification: jest.fn(),
-  })),
 }));
-
-const setup = (props) => {
-  return {
-    user: userEvent.setup(),
-    ...render(<AssigneeSelect {...props} />, {
-      wrapper({ children }) {
-        const store = createStore((state = {}) => state, {});
-        const queryClient = new QueryClient({
-          defaultOptions: {
-            queries: {
-              retry: false,
-            },
-          },
-        });
-
-        return (
-          <Provider store={store}>
-            <QueryClientProvider client={queryClient}>
-              <IntlProvider locale="en" defaultLocale="en">
-                <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
-              </IntlProvider>
-            </QueryClientProvider>
-          </Provider>
-        );
-      },
-    }),
-  };
-};
 
 useCMEditViewDataManager.mockReturnValue({
   initialData: {
@@ -81,25 +19,19 @@ useCMEditViewDataManager.mockReturnValue({
   layout: { uid: 'api::articles:articles' },
 });
 
-describe.skip('EE | Content Manager | EditView | InformationBox | AssigneeSelect', () => {
+describe('EE | Content Manager | EditView | InformationBox | AssigneeSelect', () => {
   beforeAll(() => {
-    server.listen();
     jest.clearAllMocks();
   });
 
-  afterAll(() => {
-    server.close();
-  });
-
   it('renders a select with users, none is selected', async () => {
-    const { queryByRole, getByText, queryByText, user } = setup();
-    const select = queryByRole('combobox');
+    const { getByRole, getByText, queryByText, user } = render(<AssigneeSelect />);
 
-    expect(queryByText('Firstname 1 Lastname 1')).not.toBeInTheDocument();
+    await waitFor(() => expect(queryByText('John Doe')).not.toBeInTheDocument());
 
-    await user.click(select);
+    await user.click(getByRole('combobox'));
 
-    expect(getByText('Firstname 1 Lastname 1')).toBeInTheDocument();
+    await waitFor(() => expect(getByText('John Doe')).toBeInTheDocument());
   });
 
   it('renders a select with users, first user is selected', async () => {
@@ -107,16 +39,45 @@ describe.skip('EE | Content Manager | EditView | InformationBox | AssigneeSelect
       initialData: {
         [ASSIGNEE_ATTRIBUTE_NAME]: {
           id: 1,
-          firstname: 'Firstname 1',
-          lastname: 'Lastname 1',
+          firstname: 'John',
+          lastname: 'Doe',
         },
       },
       layout: { uid: 'api::articles:articles' },
     });
 
-    const { getByText } = setup();
+    const { queryByRole } = render(<AssigneeSelect />);
 
-    expect(getByText('Firstname 1 Lastname 1')).toBeInTheDocument();
+    await waitFor(() => expect(queryByRole('combobox')).toHaveValue('John Doe'));
+  });
+
+  it('renders a disabled select when there are no users to select', async () => {
+    useCMEditViewDataManager.mockReturnValue({
+      initialData: {
+        [ASSIGNEE_ATTRIBUTE_NAME]: {
+          id: 1,
+          firstname: 'John',
+          lastname: 'Doe',
+        },
+      },
+      layout: { uid: 'api::articles:articles' },
+    });
+
+    server.use(
+      rest.get('/admin/users', (req, res, ctx) => {
+        return res.once(
+          ctx.json({
+            data: {
+              results: [],
+            },
+          })
+        );
+      })
+    );
+
+    const { queryByRole } = render(<AssigneeSelect />);
+
+    await waitFor(() => expect(queryByRole('combobox')).toHaveAttribute('aria-disabled', 'true'));
   });
 
   it('renders an error message, when fetching user fails', async () => {
@@ -125,7 +86,7 @@ describe.skip('EE | Content Manager | EditView | InformationBox | AssigneeSelect
     console.error = jest.fn();
 
     server.use(
-      rest.get('*/users', (req, res, ctx) => {
+      rest.get('/admin/users', (req, res, ctx) => {
         return res.once(
           ctx.status(500),
           ctx.json({
@@ -139,33 +100,54 @@ describe.skip('EE | Content Manager | EditView | InformationBox | AssigneeSelect
       })
     );
 
-    const { getByText, queryByTestId } = setup();
+    const { getByText } = render(<AssigneeSelect />);
 
-    await waitFor(() => expect(queryByTestId('loader')).not.toBeInTheDocument());
-
-    expect(getByText('An error occurred while fetching users')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(getByText('An error occurred while fetching users')).toBeInTheDocument()
+    );
 
     console.error = origConsoleError;
   });
 
-  it('renders a loading state when running the mutation', async () => {
-    const { getByTestId, queryByTestId } = setup();
-
-    expect(getByTestId('loader')).toBeInTheDocument();
-
-    await waitFor(() => expect(queryByTestId('loader')).not.toBeInTheDocument());
-  });
-
-  it('renders an error message, when the mutation fails', async () => {
+  it('renders an error message, when the assignee update fails', async () => {
     const origConsoleError = console.error;
+
+    useCMEditViewDataManager.mockReturnValue({
+      initialData: {
+        id: 1,
+        [ASSIGNEE_ATTRIBUTE_NAME]: null,
+      },
+      layout: { uid: 'api::articles:articles' },
+    });
 
     console.error = jest.fn();
 
-    const { queryByTestId } = setup();
+    server.use(
+      rest.put(
+        '/admin/content-manager/collection-types/:contentType/:id/assignee',
+        (req, res, ctx) => {
+          return res.once(
+            ctx.status(500),
+            ctx.json({
+              data: {
+                error: {
+                  message: 'Server side error message',
+                },
+              },
+            })
+          );
+        }
+      )
+    );
 
-    await waitFor(() => expect(queryByTestId('loader')).not.toBeInTheDocument());
+    const { getByRole, getByText, user } = render(<AssigneeSelect />);
 
-    // TODO
+    await user.click(getByRole('combobox'));
+    await user.click(getByText('John Doe'));
+
+    await waitFor(() =>
+      expect(getByText('Request failed with status code 500')).toBeInTheDocument()
+    );
 
     console.error = origConsoleError;
   });

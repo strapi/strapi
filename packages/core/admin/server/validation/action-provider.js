@@ -17,7 +17,7 @@ const registerProviderActionSchema = yup
             (v) => `${v.path}: The id can only contain lowercase letters, dots and hyphens.`
           )
           .required(),
-        section: yup.string().oneOf(['contentTypes', 'plugins', 'settings']).required(),
+        section: yup.string().oneOf(['contentTypes', 'plugins', 'settings', 'internal']).required(),
         pluginName: yup.mixed().when('section', {
           is: 'plugins',
           then: validators.isAPluginName.required(),

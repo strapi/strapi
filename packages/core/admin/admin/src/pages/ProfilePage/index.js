@@ -26,9 +26,9 @@ import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
-import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
-import { useThemeToggle } from '../../hooks';
-import { getFullName } from '../../utils';
+import { useLocales } from '../../components/LanguageProvider';
+import { useThemeToggle } from '../../hooks/useThemeToggle';
+import { getFullName } from '../../utils/getFullName';
 
 import Password from './components/Password';
 import Preferences from './components/Preferences';
@@ -36,7 +36,7 @@ import UserInfo from './components/UserInfo';
 import schema from './utils/schema';
 
 const ProfilePage = () => {
-  const { changeLocale, localeNames } = useLocalesProvider();
+  const { changeLocale, localeNames } = useLocales();
   const { setUserDisplayName } = useAppInfo();
   const queryClient = useQueryClient();
   const { formatMessage } = useIntl();

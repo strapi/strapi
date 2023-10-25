@@ -2,8 +2,7 @@
 
 const { join } = require('path');
 const fs = require('fs-extra');
-const { getPlugins } = require('../utils/get-plugins');
-const { createPluginsJs } = require('../utils/create-cache-dir');
+const { getPlugins, createPluginFile } = require('../utils/plugins');
 
 /**
  * Write the plugins.js file or copy the plugins-dev.js file if it exists
@@ -20,7 +19,7 @@ const createFile = async () => {
 
   const plugins = getPlugins();
 
-  return createPluginsJs(plugins, join(__dirname, '..'));
+  return createPluginFile(plugins, join(__dirname, '..'));
 };
 
 createFile()

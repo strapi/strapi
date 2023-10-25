@@ -1,68 +1,12 @@
 'use strict';
 
 const path = require('path');
-const _ = require('lodash');
 const fs = require('fs-extra');
 const tsUtils = require('@strapi/typescript-utils');
 const getCustomAppConfigFile = require('./get-custom-app-config-file');
+const { filterPluginsByAdminEntry, createPluginFile } = require('./plugins');
 
 const getPkgPath = (name) => path.dirname(require.resolve(`${name}/package.json`));
-
-async function createPluginsJs(plugins, dest) {
-  const pluginsArray = plugins.map(({ pathToPlugin, name, info }) => {
-    const shortName = _.camelCase(name);
-
-    let realPath = '';
-
-    /**
-     * We're using a module here so we want to keep using the module resolution procedure.
-     */
-    if (info?.packageName || info?.required) {
-      /**
-       * path.join, on windows, it uses backslashes to resolve path.
-       * The problem is that Webpack does not windows paths
-       * With this tool, we need to rely on "/" and not "\".
-       * This is the reason why '..\\..\\..\\node_modules\\@strapi\\plugin-content-type-builder/strapi-admin.js' was not working.
-       * The regexp at line 105 aims to replace the windows backslashes by standard slash so that webpack can deal with them.
-       * Backslash looks to work only for absolute paths with webpack => https://webpack.js.org/concepts/module-resolution/#absolute-paths
-       */
-      realPath = path.join(pathToPlugin, 'strapi-admin').replace(/\\/g, '/');
-    } else {
-      realPath = path
-        .join(path.relative(path.resolve(dest, 'admin', 'src'), pathToPlugin), 'strapi-admin')
-        .replace(/\\/g, '/');
-    }
-
-    return {
-      name,
-      pathToPlugin: realPath,
-      shortName,
-    };
-  });
-
-  const content = `
-${pluginsArray
-  .map(({ pathToPlugin, shortName }) => {
-    const req = `'${pathToPlugin}'`;
-
-    return `import ${shortName} from ${req};`;
-  })
-  .join('\n')}
-
-
-const plugins = {
-${[...pluginsArray]
-  .map(({ name, shortName }) => {
-    return `  '${name}': ${shortName},`;
-  })
-  .join('\n')}
-};
-
-export default plugins;
-`;
-
-  return fs.writeFile(path.resolve(dest, 'admin', 'src', 'plugins.js'), content);
-}
 
 async function copyAdmin(dest) {
   const adminPath = getPkgPath('@strapi/admin');
@@ -86,49 +30,8 @@ async function createCacheDir({ appDir, plugins }) {
   );
 
   const pluginsWithFront = Object.entries(plugins)
-    .filter(([, plugin]) => {
-      /**
-       * There are two ways a plugin should be imported, either it's local to the strapi app,
-       * or it's an actual npm module that's installed and resolved via node_modules.
-       *
-       * We first check if the plugin is local to the strapi app, using a regular `resolve` because
-       * the pathToPlugin will be relative i.e. `/Users/my-name/strapi-app/src/plugins/my-plugin`.
-       *
-       * If the file doesn't exist well then it's probably a node_module, so instead we use `require.resolve`
-       * which will resolve the path to the module in node_modules. If it fails with the specific code `MODULE_NOT_FOUND`
-       * then it doesn't have an admin part to the package.
-       *
-       * NOTE: we should try to move to `./package.json[exports]` map with bundling of our own plugins,
-       * because these entry files are written in commonjs restricting features e.g. tree-shaking.
-       */
-      try {
-        const isLocalPluginWithLegacyAdminFile = fs.existsSync(
-          path.resolve(`${plugin.pathToPlugin}/strapi-admin.js`)
-        );
-
-        if (!isLocalPluginWithLegacyAdminFile) {
-          const isModulewithLegacyAdminFile = require.resolve(
-            `${plugin.pathToPlugin}/strapi-admin.js`
-          );
-
-          return isModulewithLegacyAdminFile;
-        }
-
-        return isLocalPluginWithLegacyAdminFile;
-      } catch (err) {
-        if (err.code === 'MODULE_NOT_FOUND') {
-          /**
-           * the plugin does not contain FE code, so we
-           * don't want to import it anyway
-           */
-          return false;
-        }
-
-        throw err;
-      }
-    })
-    .map(([name, plugin]) => ({ name, ...plugin }));
-
+    .map(([name, plugin]) => ({ name, ...plugin }))
+    .filter(filterPluginsByAdminEntry);
   // create .cache dir
   await fs.emptyDir(cacheDir);
 
@@ -166,7 +69,7 @@ async function createCacheDir({ appDir, plugins }) {
   }
 
   // create plugins.js with plugins requires
-  await createPluginsJs(pluginsWithFront, cacheDir);
+  await createPluginFile(pluginsWithFront, cacheDir);
 
   // create the tsconfig.json file so we can develop plugins in ts while being in a JS project
   if (!useTypeScript) {
@@ -174,4 +77,4 @@ async function createCacheDir({ appDir, plugins }) {
   }
 }
 
-module.exports = { createCacheDir, createPluginsJs };
+module.exports = { createCacheDir };

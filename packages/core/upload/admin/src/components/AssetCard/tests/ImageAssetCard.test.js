@@ -95,8 +95,6 @@ describe('ImageAssetCard', () => {
         border-radius: 4px;
         border-color: #dcdce4;
         border: 1px solid #dcdce4;
-        width: 2rem;
-        height: 2rem;
         cursor: pointer;
       }
 
@@ -376,19 +374,22 @@ describe('ImageAssetCard', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c16 svg > g,
+      .c16 {
+        border-color: #dcdce4;
+        height: 2rem;
+        width: 2rem;
+      }
+
+      .c16 svg g,
       .c16 svg path {
         fill: #8e8ea9;
       }
 
-      .c16:hover svg > g,
-      .c16:hover svg path {
+      .c16:hover svg g,
+      .c16:focus svg g,
+      .c16:hover svg path,
+      .c16:focus svg path {
         fill: #666687;
-      }
-
-      .c16:active svg > g,
-      .c16:active svg path {
-        fill: #a5a5ba;
       }
 
       .c16[aria-disabled='true'] svg path {

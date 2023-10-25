@@ -1,14 +1,7 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { render } from '@testing-library/react';
-import { rest } from 'msw';
-import { setupServer } from 'msw/node';
-import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { Provider } from 'react-redux';
-import { createStore } from 'redux';
+import { render as renderRTL, waitFor } from '@tests/utils';
 
 import { STAGE_ATTRIBUTE_NAME, ASSIGNEE_ATTRIBUTE_NAME } from '../constants';
 import { InformationBoxEE } from '../InformationBoxEE';
@@ -16,78 +9,12 @@ import { InformationBoxEE } from '../InformationBoxEE';
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useCMEditViewDataManager: jest.fn(),
-  useNotification: jest.fn(() => ({
-    toggleNotification: jest.fn(),
-  })),
 }));
 
-const server = setupServer(
-  rest.get('*/users', (req, res, ctx) =>
-    res(
-      ctx.json({
-        data: {
-          results: [
-            {
-              id: 1,
-            },
-          ],
-
-          pagination: {
-            page: 1,
-          },
-        },
-      })
-    )
-  ),
-
-  rest.get('*/review-workflows/workflows', (req, res, ctx) =>
-    res(
-      ctx.json({
-        data: [
-          {
-            id: 1,
-          },
-        ],
-      })
-    )
-  )
-);
-
-const setup = (props) => {
-  return render(<InformationBoxEE {...props} />, {
-    wrapper({ children }) {
-      const store = createStore((state = {}) => state, {});
-      const queryClient = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
-          },
-        },
-      });
-
-      return (
-        <Provider store={store}>
-          <QueryClientProvider client={queryClient}>
-            <IntlProvider locale="en" defaultLocale="en">
-              <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
-            </IntlProvider>
-          </QueryClientProvider>
-        </Provider>
-      );
-    },
-  });
-};
+const render = (props) => renderRTL(<InformationBoxEE {...props} />);
 
 describe('EE | Content Manager | EditView | InformationBox', () => {
-  beforeAll(() => {
-    server.listen();
-  });
-
-  afterAll(() => {
-    server.close();
-  });
-
-  it('renders the title and body of the Information component', () => {
+  it('renders the title and body of the Information component', async () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {},
       isCreatingEntry: true,
@@ -98,13 +25,13 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
       },
     });
 
-    const { getByText } = setup();
+    const { getByText } = render();
 
-    expect(getByText('Information')).toBeInTheDocument();
-    expect(getByText('Last update')).toBeInTheDocument();
+    await waitFor(() => expect(getByText('Information')).toBeInTheDocument());
+    await waitFor(() => expect(getByText('Last update')).toBeInTheDocument());
   });
 
-  it('renders neither stage nor assignee select inputs, if no nothing is returned for an entity', () => {
+  it('renders neither stage nor assignee select inputs, if no nothing is returned for an entity', async () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {},
       layout: {
@@ -114,12 +41,12 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
       },
     });
 
-    const { queryByRole } = setup();
+    const { queryByRole } = render();
 
-    expect(queryByRole('combobox')).not.toBeInTheDocument();
+    await waitFor(() => expect(queryByRole('combobox')).not.toBeInTheDocument());
   });
 
-  it.skip('renders stage and assignee select inputs, if it is returned for an entity', () => {
+  it('renders stage and assignee select inputs, if both are set on an entity', async () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {
         [STAGE_ATTRIBUTE_NAME]: {
@@ -132,7 +59,6 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
         [ASSIGNEE_ATTRIBUTE_NAME]: {
           id: 1,
           firstname: 'Firstname',
-          lastname: 'Lastname',
         },
       },
       layout: {
@@ -143,8 +69,13 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
       },
     });
 
-    const { queryAllByRole } = setup();
+    const { queryAllByRole, getByRole } = render();
 
     expect(queryAllByRole('combobox').length).toBe(2);
+    expect(getByRole('combobox', { name: 'Review stage' })).toHaveTextContent('Stage 1');
+
+    await waitFor(() =>
+      expect(getByRole('combobox', { name: 'Assignee' })).toHaveValue('John Doe')
+    );
   });
 });

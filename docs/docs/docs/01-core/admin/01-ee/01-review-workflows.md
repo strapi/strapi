@@ -29,6 +29,7 @@ This code is separated into several elements:
 - Controllers
   - _workflows_: `packages/core/admin/ee/server/controllers/workflows/index.js`
   - _stages_: `packages/core/admin/ee/server/controllers/workflows/stages/index.js`
+  - _assignees_: `packages/core/admin/ee/server/controllers/workflows/assignees/index.js`
 - Middlewares
   - [_DEPRECATED_] _contentTypeMiddleware_: `packages/core/admin/ee/server/middlewares/review-workflows.js`
 - Routes
@@ -38,7 +39,10 @@ This code is separated into several elements:
   - _workflows_: `packages/core/admin/ee/server/services/review-workflows/workflows.js`
   - _stages_: `packages/core/admin/ee/server/services/review-workflows/stages.js`
   - _metrics_: `packages/core/admin/ee/server/services/review-workflows/metrics.js`
+  - _weekly-metrics_: `packages/core/admin/ee/server/services/review-workflows/weekly-metrics.js`
   - _validation_: `packages/core/admin/ee/server/services/review-workflows/validation.js`
+  - _assignees_: `packages/core/admin/ee/server/services/review-workflows/assignees.js`
+  - _stage-permissions_: `packages/core/admin/ee/server/services/review-workflows/stage-permissions.js`
 - Decorators
   - _EntityService_ decorator: `packages/core/admin/ee/server/services/review-workflows/entity-service-decorator.js`
 - Utils file
@@ -66,6 +70,10 @@ Used to interact with the `strapi_workflows` content-type.
 #### stages
 
 Used to interact with the `strapi_workflows_stages` content-type.
+
+#### assignees
+
+Used to interact with the `admin_users` content-type entities related to review workflow enabled content types.
 
 ### Middlewares
 
@@ -113,6 +121,14 @@ This route updates the stages associated with a specific workflow identified by 
 
 This route updates the stage of a specific entity identified by the id parameter and belonging to a specific collection identified by the model_uid parameter. The new stage value is passed in the request body.
 
+#### GET `/content-manager/(collection|single)-types/:model_uid/:id/stages`
+
+Returns a list of stages that a user has permission to transition into (based on the permission settings of a stage).
+
+#### PUT `/content-manager/(collection|single)-types/:model_uid/:id/assignee`
+
+This route updates the assignee of the entity identified by the model_uid and id parameters. The updated entity is passed to the request body.
+
 ### Services
 
 The Review Workflow feature of the Enterprise Edition includes several services to manipulate workflows and stages. Here is a list of those services:
@@ -132,6 +148,18 @@ This service is used to manipulate the stages entities and to update stages on o
 #### metrics
 
 This is the telemetry service used to gather information on the usage of this feature. It provides information on the number of workflows and stages created, as well as the frequency of stage updates on entities.
+
+#### weekly-metrics
+
+Once a week we report on review workflows usage statistic. This service is used to set up the cron job responsible for gathering and sending statistics on: number of active workflows, average number of stages in a workflow, maximum number of stages across all workflows and the content types on which review workflows is activated.
+
+#### assignees
+
+This service is used to interact with admin user assignee relations on review workflow enabled content types. It provides the ability to: find the Id of an entity assignee, update and delete (unassign) the assignee on an entity.
+
+#### stage-permissions
+
+This service is used to enable RBAC functionality for review workflow stages. Each entry of the `strapi_workflows_stages` has a manyToMany relation with `admin_permissions`. The permissions held in this relation indicate which roles can change the review stage of an entry in this stage. The service provides the ability to: register and unregister new stage permissions based on stage and role Ids and to find out whether a role can transition from a given stage.
 
 #### validation
 

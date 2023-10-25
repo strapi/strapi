@@ -11,7 +11,7 @@ interface EntityManager {
   publish(): any;
   unpublish(): any;
   countDraftRelations(id: string, uid: string): number;
-  countManyEntriesDraftRelations(ids: number[], uid: string): number;
+  countManyEntriesDraftRelations(ids: number[], uid: string, locale?: string): number;
 }
 
 export default function (opts: { strapi: Strapi }): EntityManager;

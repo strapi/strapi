@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-upload",
-  "version": "4.13.2",
+  "version": "4.14.5",
   "description": "Makes it easy to upload images and files to your Strapi Application.",
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -16,20 +16,20 @@
     }
   ],
   "scripts": {
-    "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch",
+    "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
-    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
+    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
-    "lint": "run -T eslint ."
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch"
   },
   "dependencies": {
-    "@strapi/design-system": "1.9.0",
-    "@strapi/helper-plugin": "4.13.2",
-    "@strapi/icons": "1.9.0",
-    "@strapi/provider-upload-local": "4.13.2",
-    "@strapi/utils": "4.13.2",
+    "@strapi/design-system": "1.13.0",
+    "@strapi/helper-plugin": "4.14.5",
+    "@strapi/icons": "1.13.0",
+    "@strapi/provider-upload-local": "4.14.5",
+    "@strapi/utils": "4.14.5",
     "axios": "1.5.0",
     "byte-size": "7.0.1",
     "cropperjs": "1.6.0",
@@ -49,7 +49,7 @@
     "react-query": "3.39.3",
     "react-redux": "8.1.1",
     "react-select": "5.7.0",
-    "sharp": "0.32.0",
+    "sharp": "0.32.6",
     "yup": "0.32.9"
   },
   "devDependencies": {
@@ -69,7 +69,7 @@
     "styled-components": "5.3.3"
   },
   "engines": {
-    "node": ">=16.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {

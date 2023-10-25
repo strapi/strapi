@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { configureStore } from '@reduxjs/toolkit';
 import { fixtures } from '@strapi/admin-test-utils';
 import { darkTheme, lightTheme } from '@strapi/design-system';
 import { TrackingProvider, useRBAC } from '@strapi/helper-plugin';
@@ -8,10 +9,9 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 import { Route, MemoryRouter } from 'react-router-dom';
-import { createStore } from 'redux';
 
-import Theme from '../../../../../../components/Theme';
-import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
+import { Theme } from '../../../../../../components/Theme';
+import { ThemeToggleProvider } from '../../../../../../components/ThemeToggleProvider';
 import ListView from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -78,8 +78,11 @@ const setup = ({ path, ...props } = {}) =>
 
       return (
         <Provider
-          store={createStore((state) => state, {
-            admin_app: { permissions: { ...fixtures.permissions.app } },
+          store={configureStore({
+            reducer: (state) => state,
+            preloadedState: {
+              admin_app: { permissions: fixtures.permissions.app },
+            },
           })}
         >
           <QueryClientProvider client={client}>

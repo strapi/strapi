@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import {
   Box,
@@ -26,12 +26,13 @@ import { Formik } from 'formik';
 import omit from 'lodash/omit';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import { useQuery as useReactQuery } from 'react-query';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { useNpsSurveySettings } from '../../../../components/NpsSurvey/hooks/useNpsSurveySettings';
-import Logo from '../../../../components/UnauthenticatedLogo';
-import UnauthenticatedLayout, { LayoutContent } from '../../../../layouts/UnauthenticatedLayout';
+import { useNpsSurveySettings } from '../../../../components/NpsSurvey';
+import { Logo } from '../../../../components/UnauthenticatedLogo';
+import { LayoutContent, UnauthenticatedLayout } from '../../../../layouts/UnauthenticatedLayout';
 import FieldActionWrapper from '../FieldActionWrapper';
 
 const A = styled.a`
@@ -50,7 +51,6 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
   const [passwordShown, setPasswordShown] = useState(false);
   const [confirmPasswordShown, setConfirmPasswordShown] = useState(false);
   const [submitCount, setSubmitCount] = useState(0);
-  const [userInfo, setUserInfo] = useState({});
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const query = useQuery();
@@ -60,39 +60,34 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
 
   const registrationToken = query.get('registrationToken');
 
-  useEffect(() => {
-    if (registrationToken) {
-      const getData = async () => {
-        try {
-          const {
-            data: { data },
-          } = await get(`/admin/registration-info`, {
-            params: {
-              registrationToken,
-            },
-          });
+  const { data: userInfo } = useReactQuery({
+    queryKey: ['admin', 'registration-info', registrationToken],
+    async queryFn() {
+      const {
+        data: { data },
+      } = await get(`/admin/registration-info`, {
+        params: {
+          registrationToken,
+        },
+      });
 
-          if (data) {
-            setUserInfo(data);
-          }
-        } catch (error) {
-          const message = formatAPIError(error);
+      return data;
+    },
+    enabled: !!registrationToken,
+    initialData: {},
+    onError(err) {
+      const message = formatAPIError(err);
 
-          toggleNotification({
-            type: 'warning',
-            message,
-          });
+      toggleNotification({
+        type: 'warning',
+        message,
+      });
 
-          // Redirect to the oops page in case of an invalid token
-          // @alexandrebodin @JAB I am not sure it is the wanted behavior
-          push(`/auth/oops?info=${encodeURIComponent(message)}`);
-        }
-      };
-
-      getData();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [registrationToken]);
+      // Redirect to the oops page in case of an invalid token
+      // @alexandrebodin @JAB I am not sure it is the wanted behavior
+      push(`/auth/oops?info=${encodeURIComponent(message)}`);
+    },
+  });
 
   function normalizeData(data) {
     return Object.entries(data).reduce((acc, [key, value]) => {

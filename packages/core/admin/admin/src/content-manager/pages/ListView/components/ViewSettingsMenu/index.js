@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
-import { selectAdminPermissions } from '../../../../../pages/App/selectors';
+import { selectAdminPermissions } from '../../../../../selectors';
 import { FieldPicker } from '../FieldPicker';
 
 export const ViewSettingsMenu = ({ slug, layout }) => {

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/data-transfer",
-  "version": "4.13.2",
+  "version": "4.14.5",
   "description": "Data transfer capabilities for Strapi",
   "keywords": [
     "strapi",
@@ -25,26 +25,34 @@
     }
   ],
   "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
-  "scripts": {
-    "build": "tsc",
-    "build:ts": "tsc",
-    "clean": "rimraf ./dist",
-    "prepublishOnly": "yarn clean && yarn build",
-    "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch",
-    "watch": "tsc -w --preserveWatchOutput",
-    "lint": "run -T eslint ."
-  },
   "files": [
     "./dist"
   ],
+  "scripts": {
+    "build": "pack-up build",
+    "clean": "rimraf ./dist",
+    "lint": "run -T eslint .",
+    "prepublishOnly": "yarn clean && yarn build",
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
+    "watch": "pack-up watch"
+  },
   "dependencies": {
-    "@strapi/logger": "4.13.2",
-    "@strapi/strapi": "4.13.2",
+    "@strapi/logger": "4.14.5",
+    "@strapi/strapi": "4.14.5",
+    "@strapi/types": "4.14.5",
+    "@strapi/utils": "4.14.5",
     "chalk": "4.1.2",
+    "cli-table3": "0.6.2",
+    "commander": "8.3.0",
     "fs-extra": "10.0.0",
+    "inquirer": "8.2.5",
     "lodash": "4.17.21",
+    "ora": "5.4.1",
+    "resolve-cwd": "3.0.0",
     "semver": "7.5.4",
     "stream-chain": "2.2.5",
     "stream-json": "1.8.0",
@@ -52,15 +60,13 @@
     "tar-stream": "2.2.0",
     "ws": "8.13.0"
   },
-  "peerDependencies": {
-    "@strapi/strapi": "4.12.4"
-  },
   "devDependencies": {
-    "@tsconfig/node16": "1.0.3",
+    "@strapi/pack-up": "workspace:*",
     "@types/fs-extra": "9.0.13",
     "@types/jest": "29.5.2",
     "@types/koa": "2.13.4",
     "@types/lodash": "^4.14.191",
+    "@types/node": "18.18.4",
     "@types/semver": "7.5.0",
     "@types/stream-chain": "2.0.1",
     "@types/stream-json": "1.7.3",
@@ -70,10 +76,13 @@
     "knex": "2.5.0",
     "koa": "2.13.4",
     "rimraf": "3.0.2",
-    "typescript": "5.1.3"
+    "typescript": "5.2.2"
+  },
+  "peerDependencies": {
+    "@strapi/strapi": "^4.14.4"
   },
   "engines": {
-    "node": ">=16.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   }
 }

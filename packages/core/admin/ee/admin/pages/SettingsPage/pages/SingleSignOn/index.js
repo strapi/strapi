@@ -30,7 +30,7 @@ import { useSelector } from 'react-redux';
 
 import { useSettingsForm } from '../../../../../../admin/src/hooks';
 import { useAdminRoles } from '../../../../../../admin/src/hooks/useAdminRoles';
-import { selectAdminPermissions } from '../../../../../../admin/src/pages/App/selectors';
+import { selectAdminPermissions } from '../../../../../../admin/src/selectors';
 
 import schema from './utils/schema';
 

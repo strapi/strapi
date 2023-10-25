@@ -21,6 +21,40 @@ export const transformUpgradeHeader = (header = '') => {
   return header.split(',').map((s) => s.trim().toLowerCase());
 };
 
+let timeouts: Record<string, number> | undefined;
+
+// temporarily disable server timeouts while transfer is running
+const disableTimeouts = () => {
+  if (!strapi?.server?.httpServer) {
+    return;
+  }
+
+  const { httpServer } = strapi.server;
+
+  // save the original timeouts to restore after
+  if (!timeouts) {
+    timeouts = {
+      headersTimeout: httpServer.headersTimeout,
+      requestTimeout: httpServer.requestTimeout,
+    };
+  }
+
+  httpServer.headersTimeout = 0;
+  httpServer.requestTimeout = 0;
+
+  strapi.log.info('[Data transfer] Disabling http timeouts');
+};
+const resetTimeouts = () => {
+  if (!strapi?.server?.httpServer || !timeouts) {
+    return;
+  }
+
+  const { httpServer } = strapi.server;
+
+  strapi.log.info('[Data transfer] Restoring http timeouts');
+  httpServer.headersTimeout = timeouts.headersTimeout;
+  httpServer.requestTimeout = timeouts.requestTimeout;
+};
 /**
  * Make sure that the upgrade header is a valid websocket one
  */
@@ -79,6 +113,14 @@ export const handleWSUpgrade = (wss: WebSocketServer, ctx: Context, callback: WS
   assertValidHeader(ctx);
 
   wss.handleUpgrade(ctx.req, ctx.request.socket, Buffer.alloc(0), (client, request) => {
+    if (!client) {
+      // If the WebSocket upgrade failed, destroy the socket to avoid hanging
+      ctx.request.socket.destroy();
+      return;
+    }
+
+    disableTimeouts();
+
     // Create a connection between the client & the server
     wss.emit('connection', client, ctx.req);
 
@@ -99,9 +141,22 @@ export const handlerControllerFactory =
     const wss = new WebSocket.Server({ ...serverOptions, noServer: true });
 
     return async (ctx: Context) => {
-      handleWSUpgrade(wss, ctx, (ws) => {
+      const cb: WSCallback = (ws) => {
         const state: TransferState = { id: undefined };
         const messageUUIDs = new Set<string>();
+
+        const cannotRespondHandler = (err: unknown) => {
+          strapi?.log?.error(
+            '[Data transfer] Cannot send error response to client, closing connection'
+          );
+          strapi?.log?.error(err);
+          try {
+            ws.terminate();
+            ctx.req.socket.destroy();
+          } catch (err) {
+            strapi?.log?.error('[Data transfer] Failed to close socket on error');
+          }
+        };
 
         const prototype: Handler = {
           // Transfer ID
@@ -159,7 +214,7 @@ export const handlerControllerFactory =
             }
           },
 
-          respond(uuid, e, data) {
+          async respond(uuid, e, data) {
             let details = {};
             return new Promise<void>((resolve, reject) => {
               if (!uuid && !e) {
@@ -226,19 +281,19 @@ export const handlerControllerFactory =
           async executeAndRespond(uuid, fn) {
             try {
               const response = await fn();
-              this.respond(uuid, null, response);
+              await this.respond(uuid, null, response);
             } catch (e) {
               if (e instanceof Error) {
-                this.respond(uuid, e);
+                await this.respond(uuid, e).catch(cannotRespondHandler);
               } else if (typeof e === 'string') {
-                this.respond(uuid, new ProviderTransferError(e));
+                await this.respond(uuid, new ProviderTransferError(e)).catch(cannotRespondHandler);
               } else {
-                this.respond(
+                await this.respond(
                   uuid,
                   new ProviderTransferError('Unexpected error', {
                     error: e,
                   })
-                );
+                ).catch(cannotRespondHandler);
               }
             }
           },
@@ -271,9 +326,42 @@ export const handlerControllerFactory =
         const handler: Handler = Object.assign(Object.create(prototype), implementation(prototype));
 
         // Bind ws events to handler methods
-        ws.on('close', (...args) => handler.onClose(...args));
-        ws.on('error', (...args) => handler.onError(...args));
-        ws.on('message', (...args) => handler.onMessage(...args));
-      });
+        ws.on('close', async (...args) => {
+          try {
+            await handler.onClose(...args);
+          } catch (err) {
+            strapi?.log?.error('[Data transfer] Uncaught error closing connection');
+            strapi?.log?.error(err);
+            cannotRespondHandler(err);
+          } finally {
+            resetTimeouts();
+          }
+        });
+        ws.on('error', async (...args) => {
+          try {
+            await handler.onError(...args);
+          } catch (err) {
+            strapi?.log?.error('[Data transfer] Uncaught error in error handling');
+            strapi?.log?.error(err);
+            cannotRespondHandler(err);
+          }
+        });
+        ws.on('message', async (...args) => {
+          try {
+            await handler.onMessage(...args);
+          } catch (err) {
+            strapi?.log?.error('[Data transfer] Uncaught error in message handling');
+            strapi?.log?.error(err);
+            cannotRespondHandler(err);
+          }
+        });
+      };
+
+      try {
+        handleWSUpgrade(wss, ctx, cb);
+      } catch (err) {
+        strapi?.log?.error('[Data transfer] Error in websocket upgrade request');
+        strapi?.log?.error(err);
+      }
     };
   };

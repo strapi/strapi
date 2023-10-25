@@ -8,17 +8,6 @@ import { Router } from 'react-router-dom';
 
 import Oops from '..';
 
-jest.mock('../../../../../components/LocalesProvider/useLocalesProvider', () => () => ({
-  changeLocale() {},
-  localeNames: { en: 'English' },
-  messages: ['test'],
-}));
-jest.mock('../../../../../hooks/useConfigurations', () => () => ({
-  logos: {
-    auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
-  },
-}));
-
 describe('ADMIN | PAGES | AUTH | Oops', () => {
   it('should render and match the snapshot', () => {
     const history = createMemoryHistory();
@@ -33,7 +22,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
     );
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c9 {
+      .c8 {
         font-size: 0.875rem;
         line-height: 1.43;
         display: block;
@@ -43,17 +32,23 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         color: #32324d;
       }
 
-      .c21 {
+      .c20 {
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
         color: #32324d;
       }
 
-      .c22 {
+      .c21 {
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
+      }
+
+      .c25 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #4945ff;
       }
 
       .c1 {
@@ -78,12 +73,12 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         flex: 1;
       }
 
-      .c13 {
+      .c12 {
         padding-top: 8px;
         padding-bottom: 64px;
       }
 
-      .c15 {
+      .c14 {
         background: #ffffff;
         padding-top: 48px;
         padding-right: 56px;
@@ -93,12 +88,12 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c20 {
+      .c19 {
         padding-top: 24px;
         padding-bottom: 32px;
       }
 
-      .c23 {
+      .c22 {
         padding-top: 16px;
       }
 
@@ -169,7 +164,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         gap: 12px;
       }
 
-      .c17 {
+      .c16 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -183,7 +178,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         flex-direction: row;
       }
 
-      .c24 {
+      .c23 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -225,21 +220,21 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c12 > svg {
+      .c11 > svg {
         width: 0.375rem;
       }
 
-      .c12 > svg > path {
+      .c11 > svg > path {
         fill: #666687;
       }
 
-      .c10 {
+      .c9 {
         -webkit-flex: 1;
         -ms-flex: 1;
         flex: 1;
       }
 
-      .c11 {
+      .c10 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -250,22 +245,11 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         flex-wrap: wrap;
       }
 
-      .c27[data-state='checked'] .c8 {
-        font-weight: bold;
-        color: #4945ff;
-      }
-
-      .c14:focus-visible {
+      .c13:focus-visible {
         outline: none;
       }
 
-      .c26 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #4945ff;
-      }
-
-      .c25 {
+      .c24 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
@@ -281,23 +265,23 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         outline: none;
       }
 
-      .c25 svg {
+      .c24 svg {
         font-size: 0.625rem;
       }
 
-      .c25 svg path {
+      .c24 svg path {
         fill: #4945ff;
       }
 
-      .c25:hover {
+      .c24:hover {
         color: #7b79ff;
       }
 
-      .c25:active {
+      .c24:active {
         color: #271fe0;
       }
 
-      .c25:after {
+      .c24:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -312,11 +296,11 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         border: 2px solid transparent;
       }
 
-      .c25:focus-visible {
+      .c24:focus-visible {
         outline: none;
       }
 
-      .c25:focus-visible:after {
+      .c24:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -327,16 +311,16 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         border: 2px solid #4945ff;
       }
 
-      .c19 {
+      .c18 {
         height: 4.5rem;
       }
 
-      .c16 {
+      .c15 {
         margin: 0 auto;
         width: 552px;
       }
 
-      .c18 {
+      .c17 {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
@@ -360,6 +344,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
                   aria-controls="radix-:r3:"
                   aria-describedby=":r0:-hint :r0:-error"
                   aria-expanded="false"
+                  aria-label="Select interface language"
                   class="c3 c4 c5"
                   data-state="closed"
                   dir="ltr"
@@ -372,13 +357,11 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
                     class="c6 c7"
                   >
                     <span
-                      class="c8 c9 c10"
+                      class="c8 c9"
                     >
                       <span
-                        class="c11"
-                      >
-                        English
-                      </span>
+                        class="c10"
+                      />
                     </span>
                   </span>
                   <span
@@ -386,7 +369,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
                   >
                     <span
                       aria-hidden="true"
-                      class="c12"
+                      class="c11"
                     >
                       <svg
                         fill="none"
@@ -410,45 +393,45 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
           </div>
         </header>
         <div
-          class="c13"
+          class="c12"
         >
           <main
             aria-labelledby="main-content-title"
-            class="c14"
+            class="c13"
             id="main-content"
             tabindex="-1"
           >
             <div
-              class="c15 c16"
+              class="c14 c15"
             >
               <div
-                class="c17 c18"
+                class="c16 c17"
               >
                 <img
                   alt=""
                   aria-hidden="true"
-                  class="c19"
-                  src="customAuthLogo.png"
+                  class="c18"
+                  src=""
                 />
                 <div
-                  class="c20"
+                  class="c19"
                 >
                   <h1
-                    class="c8 c21"
+                    class="c20"
                   >
                     Oops...
                   </h1>
                 </div>
                 <span
-                  class="c8 c22"
+                  class="c21"
                 >
                   Your account has been suspended.
                 </span>
                 <div
-                  class="c23"
+                  class="c22"
                 >
                   <span
-                    class="c8 c22"
+                    class="c21"
                   >
                     If this is a mistake, please contact your administrator.
                   </span>
@@ -456,17 +439,17 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
               </div>
             </div>
             <div
-              class="c24"
+              class="c23"
             >
               <div
-                class="c23"
+                class="c22"
               >
                 <a
-                  class="c25"
+                  class="c24"
                   href="/auth/login"
                 >
                   <span
-                    class="c26"
+                    class="c25"
                   >
                     Sign in
                   </span>

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-loop-func */
 import { isNil, pick } from 'lodash/fp';
 import {
+  AnyAttribute,
   Attribute,
   ComponentAttribute,
   DynamicZoneAttribute,
@@ -23,7 +24,7 @@ export interface VisitorOptions {
   value: unknown;
   schema: Model;
   key: string;
-  attribute: Attribute;
+  attribute: AnyAttribute;
   path: Path;
 }
 
