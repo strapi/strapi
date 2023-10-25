@@ -6405,6 +6405,7 @@ __metadata:
     "@testing-library/dom": 9.2.0
     "@testing-library/react": 14.0.0
     "@testing-library/user-event": 14.4.3
+    "@types/jest": 29.5.2
     "@types/jsonwebtoken": 9.0.3
     "@types/koa-passport": 6.0.1
     "@types/lodash": ^4.14.191

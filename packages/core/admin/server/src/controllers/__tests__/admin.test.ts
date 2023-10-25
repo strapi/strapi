@@ -1,5 +1,3 @@
-'use strict';
-
 jest.mock('@strapi/strapi/dist/utils/ee', () => {
   const eeModule = () => false;
 
@@ -36,7 +34,7 @@ describe('Admin Controller', () => {
             },
           },
         },
-      };
+      } as any;
     });
 
     test('Returns the uuid and if the app has admins', async () => {
@@ -63,7 +61,7 @@ describe('Admin Controller', () => {
       global.strapi = {
         config: {
           get: jest.fn(
-            (key, value) =>
+            (key: string, value) =>
               ({
                 autoReload: undefined,
                 'info.strapi': '1.0.0',
@@ -76,13 +74,13 @@ describe('Admin Controller', () => {
           ),
         },
         EE: true,
-      };
+      } as any;
     });
 
     test('Returns application information', async () => {
       const result = await adminController.information();
 
-      expect(global.strapi.config.get.mock.calls).toEqual([
+      expect((global.strapi.config.get as jest.Mock).mock.calls).toEqual([
         ['environment'],
         ['autoReload', false],
         ['info.strapi', null],
