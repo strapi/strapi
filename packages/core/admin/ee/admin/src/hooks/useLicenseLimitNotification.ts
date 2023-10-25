@@ -5,11 +5,12 @@
  */
 import * as React from 'react';
 
-import { useNotification } from '@strapi/helper-plugin';
+import { NotificationConfig, useNotification } from '@strapi/helper-plugin';
 import isNil from 'lodash/isNil';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 
+// @ts-expect-error – Not typed, yet.
 import { useLicenseLimits } from './useLicenseLimits';
 
 const STORAGE_KEY_PREFIX = 'strapi-notification-seat-limit';
@@ -36,7 +37,7 @@ export const useLicenseLimitNotification = () => {
       !window.sessionStorage.getItem(`${STORAGE_KEY_PREFIX}-${pathname}`) &&
       (licenseLimitStatus === 'AT_LIMIT' || licenseLimitStatus === 'OVER_LIMIT');
 
-    let notificationType;
+    let notificationType: NotificationConfig['type'];
 
     if (licenseLimitStatus === 'OVER_LIMIT') {
       notificationType = 'warning';

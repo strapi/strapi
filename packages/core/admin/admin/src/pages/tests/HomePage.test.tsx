@@ -30,7 +30,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-jest.mock('../../../hooks/useContentTypes');
+jest.mock('../../hooks/useContentTypes');
 
 const history = createMemoryHistory();
 

@@ -1,9 +1,7 @@
-import React from 'react';
-
 import { useAppInfo } from '@strapi/helper-plugin';
 import { render } from '@tests/utils';
 
-import Onboarding from '../index';
+import { Onboarding } from '../Onboarding';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -39,6 +37,7 @@ describe('Onboarding', () => {
   });
 
   test('should display support link for EE edition', async () => {
+    // @ts-expect-error - mock
     useAppInfo.mockImplementation(() => ({ communityEdition: false }));
     const { getByRole, user } = render(<Onboarding />);
 

@@ -3,7 +3,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const ForkTsCheckerPlugin = require('fork-ts-checker-webpack-plugin');
+// const ForkTsCheckerPlugin = require('fork-ts-checker-webpack-plugin');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { ESBuildMinifyPlugin } = require('esbuild-loader');
@@ -26,7 +26,7 @@ module.exports = ({
     adminPath: '/admin/',
     features: [],
   },
-  tsConfigFilePath,
+  // tsConfigFilePath,
   enforceSourceMaps,
 }) => {
   const isProduction = env === 'production';
@@ -162,11 +162,11 @@ module.exports = ({
       }),
       new webpack.DefinePlugin(envVariables),
 
-      new ForkTsCheckerPlugin({
-        typescript: {
-          configFile: tsConfigFilePath,
-        },
-      }),
+      // new ForkTsCheckerPlugin({
+      //   typescript: {
+      //     configFile: tsConfigFilePath,
+      //   },
+      // }),
       !isProduction && process.env.REACT_REFRESH !== 'false' && new ReactRefreshWebpackPlugin(),
       ...webpackPlugins,
     ].filter(Boolean),

@@ -10,6 +10,7 @@ import { SkipToContent } from '@strapi/design-system';
 import {
   auth,
   LoadingIndicatorPage,
+  MenuItem,
   prefixFileUrlWithBackendUrl,
   TrackingProvider,
   useAppInfo,
@@ -29,15 +30,11 @@ import { useEnterprise } from './hooks/useEnterprise';
 import AuthPage from './pages/AuthPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { UseCasePage } from './pages/UseCasePage';
-import { createRoute, TModule } from './utils/createRoute';
+import { createRoute } from './utils/createRoute';
 
-interface TRoute {
-  Component: TModule;
-  to: string;
-  exact?: boolean;
-}
+type StrapiRoute = Pick<MenuItem, 'exact' | 'to'> & Required<Pick<MenuItem, 'Component'>>;
 
-const ROUTES_CE: TRoute[] | null = null;
+const ROUTES_CE: StrapiRoute[] | null = null;
 
 const AuthenticatedApp = React.lazy(() =>
   import(/* webpackChunkName: "Admin-authenticatedApp" */ './components/AuthenticatedApp').then(
@@ -58,7 +55,7 @@ export const App = () => {
       defaultValue: ADMIN_PERMISSIONS_CE,
     }
   );
-  const routes = useEnterprise<TRoute[] | null, TRoute[], TRoute[]>(
+  const routes = useEnterprise<StrapiRoute[] | null, StrapiRoute[], StrapiRoute[]>(
     ROUTES_CE,
     async () => (await import('../../ee/admin/src/constants')).ROUTES_EE,
     {
