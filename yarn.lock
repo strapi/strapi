@@ -4169,13 +4169,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@faker-js/faker@npm:8.2.0":
-  version: 8.2.0
-  resolution: "@faker-js/faker@npm:8.2.0"
-  checksum: febc17018acfb841a348591bfe415e815ea981bf7fa0a12670ac2b449479ad7e9e7b130c42878ec30210da964c13a620a3303dc00d63cb13ded00c6fc701e2be
-  languageName: node
-  linkType: hard
-
 "@fal-works/esbuild-plugin-global-externals@npm:^2.1.2":
   version: 2.1.2
   resolution: "@fal-works/esbuild-plugin-global-externals@npm:2.1.2"
@@ -19128,37 +19121,6 @@ __metadata:
   checksum: ab18d55661db264e3eac6012c2d3daeafaab7a501c035ae0ccb193c3c23e9849c6e29b6ac762b9c2adae460266f925d55a3a2a3a3c8b94be2f222df94d70c046
   languageName: node
   linkType: hard
-
-"getstarted-remote@workspace:examples/getstarted-remote":
-  version: 0.0.0-use.local
-  resolution: "getstarted-remote@workspace:examples/getstarted-remote"
-  dependencies:
-    "@faker-js/faker": 8.2.0
-    "@strapi/icons": 1.11.0
-    "@strapi/plugin-color-picker": 4.14.4
-    "@strapi/plugin-documentation": 4.14.4
-    "@strapi/plugin-graphql": 4.14.4
-    "@strapi/plugin-i18n": 4.14.4
-    "@strapi/plugin-sentry": 4.14.4
-    "@strapi/plugin-users-permissions": 4.14.4
-    "@strapi/provider-email-mailgun": 4.14.4
-    "@strapi/provider-upload-aws-s3": 4.14.4
-    "@strapi/provider-upload-cloudinary": 4.14.4
-    "@strapi/strapi": 4.14.4
-    better-sqlite3: 8.6.0
-    lodash: 4.17.21
-    mysql: 2.18.1
-    mysql2: 3.6.0
-    passport-google-oauth2: 0.2.0
-    pg: 8.11.1
-    react: ^18.2.0
-    react-dom: ^18.2.0
-    react-intl: 6.4.1
-    react-router-dom: 5.3.4
-    sqlite3: 5.1.2
-    styled-components: 5.3.3
-  languageName: unknown
-  linkType: soft
 
 "getstarted@workspace:examples/getstarted":
   version: 0.0.0-use.local
