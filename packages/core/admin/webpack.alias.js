@@ -1,6 +1,5 @@
 'use strict';
 
-const path = require('path');
 const findRoot = require('find-root');
 
 const aliasExactMatch = [
@@ -38,6 +37,4 @@ module.exports = {
     acc[`${moduleName}$`] = findRoot(require.resolve(moduleName));
     return acc;
   }, {}),
-
-  ee_else_ce: path.resolve(__dirname),
 };

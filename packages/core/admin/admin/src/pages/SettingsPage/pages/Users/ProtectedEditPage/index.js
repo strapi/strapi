@@ -4,19 +4,25 @@ import { LoadingIndicatorPage, useNotification, useRBAC } from '@strapi/helper-p
 import { useSelector } from 'react-redux';
 import { Redirect, useLocation } from 'react-router-dom';
 
-import { selectAdminPermissions } from '../../../../App/selectors';
+import { selectAdminPermissions } from '../../../../../selectors';
 import EditPage from '../EditPage';
 
 const ProtectedEditPage = () => {
   const toggleNotification = useNotification();
   const permissions = useSelector(selectAdminPermissions);
+
+  const memoizedPermissions = React.useMemo(
+    () => ({
+      read: permissions.settings.users.read,
+      update: permissions.settings.users.update,
+    }),
+    [permissions.settings.users]
+  );
+
   const {
     isLoading,
     allowedActions: { canRead, canUpdate },
-  } = useRBAC({
-    read: permissions.settings.users.read,
-    update: permissions.settings.users.update,
-  });
+  } = useRBAC(memoizedPermissions);
   const { state } = useLocation();
   const from = state?.from ?? '/';
 

@@ -59,7 +59,7 @@ const resetPassword = async ({ resetPasswordToken, password } = {}) => {
     .query('admin::user')
     .findOne({ where: { resetPasswordToken, isActive: true } });
 
-  if (!matchingUser || isSsoLocked(matchingUser)) {
+  if (!matchingUser || (await isSsoLocked(matchingUser))) {
     throw new ApplicationError();
   }
 

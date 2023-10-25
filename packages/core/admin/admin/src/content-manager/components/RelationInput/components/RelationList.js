@@ -6,8 +6,8 @@ import styled from 'styled-components';
 
 const ShadowBox = styled(Box)`
   position: relative;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
+  flex: 1;
 
   &:before,
   &:after {

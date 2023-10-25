@@ -14,13 +14,14 @@ module.exports = ({ isComponent, prefix, storeUtils, getModels }) => {
   };
 
   const setConfiguration = (uid, input) => {
-    const { settings, metadatas, layouts } = input;
+    const { settings, metadatas, layouts, options } = input;
 
     const configuration = {
       uid,
       settings,
       metadatas,
       layouts,
+      ...(options ? { options } : {}),
     };
 
     if (isComponent) {

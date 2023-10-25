@@ -1,13 +1,14 @@
-import { chain } from 'stream-chain';
 import { Readable } from 'stream';
+import { chain } from 'stream-chain';
 import { set } from 'lodash/fp';
+import type { LoadedStrapi } from '@strapi/types';
 
 import type { IConfiguration } from '../../../../types';
 
 /**
  * Create a readable stream that export the Strapi app configuration
  */
-export const createConfigurationStream = (strapi: Strapi.Strapi): Readable => {
+export const createConfigurationStream = (strapi: LoadedStrapi): Readable => {
   return Readable.from(
     (async function* configurationGenerator(): AsyncGenerator<IConfiguration> {
       // Core Store

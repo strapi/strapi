@@ -7,14 +7,7 @@ const { isObject } = require('lodash');
 const SpeedMeasurePlugin = require('speed-measure-webpack-plugin');
 
 const webpackConfig = require('../webpack.config');
-const getPluginsPath = require('../utils/get-plugins-path');
-const {
-  getCorePluginsPath,
-  getPluginToInstallPath,
-  createPluginsFile,
-} = require('./create-plugins-file');
-
-const PLUGINS_TO_INSTALL = ['i18n', 'users-permissions'];
+const { getPlugins, createPluginFile } = require('../utils/plugins');
 
 // Wrapper that outputs the webpack speed
 const smp = new SpeedMeasurePlugin();
@@ -22,20 +15,26 @@ const smp = new SpeedMeasurePlugin();
 const buildAdmin = async () => {
   const entry = path.join(__dirname, '..', 'admin', 'src');
   const dest = path.join(__dirname, '..', 'build');
-  const tsConfigFilePath = path.join(__dirname, '..', 'admin', 'src', 'tsconfig.json');
+  const tsConfigFilePath = path.join(__dirname, '..', 'admin', 'tsconfig.build.json');
 
-  const corePlugins = getCorePluginsPath();
-  const plugins = getPluginToInstallPath(PLUGINS_TO_INSTALL);
-  const allPlugins = { ...corePlugins, ...plugins };
-  const pluginsPath = getPluginsPath();
+  /**
+   * We _always_ install these FE plugins, they're considered "core"
+   * and are typically marked as `required` in their package.json
+   */
+  const plugins = getPlugins([
+    '@strapi/plugin-content-type-builder',
+    '@strapi/plugin-email',
+    '@strapi/plugin-upload',
+    '@strapi/plugin-i18n',
+    '@strapi/plugin-users-permissions',
+  ]);
 
-  await createPluginsFile(allPlugins);
+  await createPluginFile(plugins, path.join(__dirname, '..'));
 
   const args = {
     entry,
     dest,
-    cacheDir: path.join(__dirname, '..'),
-    pluginsPath,
+    plugins,
     env: 'production',
     optimize: true,
     options: {
@@ -54,6 +53,7 @@ const buildAdmin = async () => {
       telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true' ?? false,
     },
     tsConfigFilePath,
+    enforceSourceMaps: process.env.STRAPI_ENFORCE_SOURCEMAPS === 'true' ?? false,
   };
 
   const config =
@@ -94,7 +94,11 @@ const buildAdmin = async () => {
                 return acc + error.message;
               }
 
-              return acc + error.join('\n\n');
+              if (Array.isArray(error)) {
+                return acc + error.join('\n\n');
+              }
+
+              return acc + error;
             }, '')
           )
         );

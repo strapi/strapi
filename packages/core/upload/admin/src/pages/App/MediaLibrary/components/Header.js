@@ -25,6 +25,7 @@ export const Header = ({
   const backQuery = {
     ...query,
     folder: folder?.parent?.id ?? undefined,
+    folderPath: folder?.parent?.path ?? undefined,
   };
 
   return (

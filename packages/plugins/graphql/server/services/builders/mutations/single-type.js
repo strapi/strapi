@@ -5,7 +5,7 @@ const { omit, isNil } = require('lodash/fp');
 
 const utils = require('@strapi/utils');
 
-const { sanitize } = utils;
+const { sanitize, validate } = utils;
 const { NotFoundError } = utils.errors;
 
 module.exports = ({ strapi }) => {
@@ -53,6 +53,13 @@ module.exports = ({ strapi }) => {
           .get('content-api')
           .buildMutationsResolvers({ contentType });
 
+        // For single types, the validation and sanitization of args is done here instead of being
+        // delegated to the query builders since we're calling the entity service directly
+
+        await validate.contentAPI.query(omit(['data', 'files'], transformedArgs), contentType, {
+          auth,
+        });
+
         const sanitizedQuery = await sanitize.contentAPI.query(
           omit(['data', 'files'], transformedArgs),
           contentType,
@@ -90,6 +97,11 @@ module.exports = ({ strapi }) => {
         const { delete: deleteResolver } = getService('builders')
           .get('content-api')
           .buildMutationsResolvers({ contentType });
+
+        // For single types, the validation and sanitization of args is done here instead of being
+        // delegated to the query builders since we're calling the entity service directly
+
+        await validate.contentAPI.query(transformedArgs, contentType, { auth: ctx?.state?.auth });
 
         const sanitizedQuery = await sanitize.contentAPI.query(transformedArgs, contentType, {
           auth: ctx?.state?.auth,

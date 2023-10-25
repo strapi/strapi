@@ -1,13 +1,11 @@
-import { useMemo } from 'react';
-
 import { useRBAC } from '@strapi/helper-plugin';
-import omit from 'lodash/omit';
 
 import { PERMISSIONS } from '../constants';
 
+const { main, ...restPermissions } = PERMISSIONS;
+
 export const useMediaLibraryPermissions = () => {
-  const permissions = useMemo(() => omit(PERMISSIONS, 'main'), []);
-  const { allowedActions, isLoading } = useRBAC(permissions);
+  const { allowedActions, isLoading } = useRBAC(restPermissions);
 
   return { ...allowedActions, isLoading };
 };

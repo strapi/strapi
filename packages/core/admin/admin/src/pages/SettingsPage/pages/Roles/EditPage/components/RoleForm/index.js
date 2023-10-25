@@ -65,6 +65,7 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
               })}
               onChange={onChange}
               onBlur={onBlur}
+              required
               value={values.name || ''}
             />
           </GridItem>

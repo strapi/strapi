@@ -1,12 +1,12 @@
-import type Chain from 'stream-chain';
 import { PassThrough, Transform, Readable, Writable } from 'stream';
 import { extname } from 'path';
 import { EOL } from 'os';
+import type Chain from 'stream-chain';
 import { chain } from 'stream-chain';
 import { isEmpty, uniq, last, isNumber, difference, set, omit } from 'lodash/fp';
 import { diff as semverDiff } from 'semver';
 
-import type { Schema, Utils } from '@strapi/strapi';
+import type { Schema, Utils } from '@strapi/types';
 import type {
   IAsset,
   IDestinationProvider,
@@ -26,6 +26,10 @@ import type {
   StreamItem,
   SchemaDiffHandler,
   SchemaDiffHandlerContext,
+  ErrorHandler,
+  ErrorHandlerContext,
+  ErrorHandlers,
+  ErrorCode,
 } from '../../types';
 import type { Diff } from '../utils/json';
 
@@ -39,6 +43,7 @@ import {
 } from './diagnostic';
 import { DataTransferError } from '../errors';
 import * as utils from '../utils';
+import { ProviderTransferError } from '../errors/providers';
 
 export const TRANSFER_STAGES: ReadonlyArray<TransferStage> = Object.freeze([
   'entities',
@@ -69,7 +74,6 @@ export const TransferGroupPresets: TransferGroupFilter = {
   },
   files: {
     assets: true,
-    links: true,
   },
   config: {
     configuration: true,
@@ -108,12 +112,34 @@ class TransferEngine<
 
   #handlers: {
     schemaDiff: SchemaDiffHandler[];
+    errors: Partial<ErrorHandlers>;
   } = {
     schemaDiff: [],
+    errors: {},
   };
 
   onSchemaDiff(handler: SchemaDiffHandler) {
     this.#handlers?.schemaDiff?.push(handler);
+  }
+
+  addErrorHandler(handlerName: ErrorCode, handler: ErrorHandler) {
+    if (!this.#handlers.errors[handlerName]) {
+      this.#handlers.errors[handlerName] = [];
+    }
+    this.#handlers.errors[handlerName]?.push(handler);
+  }
+
+  async attemptResolveError(error: Error) {
+    const context: ErrorHandlerContext = {};
+    if (error instanceof ProviderTransferError && error.details?.details.code) {
+      const errorCode = error.details?.details.code as ErrorCode;
+      if (!this.#handlers.errors[errorCode]) {
+        this.#handlers.errors[errorCode] = [];
+      }
+      await utils.middleware.runMiddleware(context ?? {}, this.#handlers.errors[errorCode] ?? []);
+    }
+
+    return !!context.ignore;
   }
 
   // Save the currently open stream so that we can access it at any time
@@ -457,13 +483,13 @@ class TransferEngine<
 
     // everything is included by default unless 'only' has been set
     let included = isEmpty(only);
-    if (only?.length > 0) {
+    if (only && only.length > 0) {
       included = only.some((transferGroup) => {
         return TransferGroupPresets[transferGroup][stage];
       });
     }
 
-    if (exclude?.length > 0) {
+    if (exclude && exclude.length > 0) {
       if (included) {
         included = !exclude.some((transferGroup) => {
           return TransferGroupPresets[transferGroup][stage];
@@ -745,8 +771,12 @@ class TransferEngine<
       try {
         await provider.beforeTransfer?.();
       } catch (error) {
-        // Error happening during the before transfer step should be considered fatal errors
         if (error instanceof Error) {
+          const resolved = await this.attemptResolveError(error);
+
+          if (resolved) {
+            return;
+          }
           this.panic(error);
         } else {
           this.panic(
@@ -762,6 +792,9 @@ class TransferEngine<
 
   async transferSchemas(): Promise<void> {
     const stage: TransferStage = 'schemas';
+    if (this.shouldSkipStage(stage)) {
+      return;
+    }
 
     const source = await this.sourceProvider.createSchemasReadStream?.();
     const destination = await this.destinationProvider.createSchemasWriteStream?.();
@@ -776,6 +809,9 @@ class TransferEngine<
 
   async transferEntities(): Promise<void> {
     const stage: TransferStage = 'entities';
+    if (this.shouldSkipStage(stage)) {
+      return;
+    }
 
     const source = await this.sourceProvider.createEntitiesReadStream?.();
     const destination = await this.destinationProvider.createEntitiesWriteStream?.();
@@ -819,6 +855,9 @@ class TransferEngine<
 
   async transferLinks(): Promise<void> {
     const stage: TransferStage = 'links';
+    if (this.shouldSkipStage(stage)) {
+      return;
+    }
 
     const source = await this.sourceProvider.createLinksReadStream?.();
     const destination = await this.destinationProvider.createLinksWriteStream?.();
@@ -829,15 +868,12 @@ class TransferEngine<
         objectMode: true,
         transform: async (link: ILink, _encoding, callback) => {
           const { destinationSchemas: schemas } = await this.#getSchemas();
-
           if (!schemas) {
             return callback(null, link);
           }
 
           // TODO: this would be safer if we only ignored things in ignoredDiffs, otherwise continue and let an error be thrown
-          const availableContentTypes = Object.entries(schemas)
-            .filter(([, schema]) => schema.modelType === 'contentType')
-            .map(([uid]) => uid);
+          const availableContentTypes = Object.keys(schemas);
 
           const isValidType = (uid: string) => availableContentTypes.includes(uid);
 
@@ -875,6 +911,9 @@ class TransferEngine<
 
   async transferConfiguration(): Promise<void> {
     const stage: TransferStage = 'configuration';
+    if (this.shouldSkipStage(stage)) {
+      return;
+    }
 
     const source = await this.sourceProvider.createConfigurationReadStream?.();
     const destination = await this.destinationProvider.createConfigurationWriteStream?.();
@@ -892,6 +931,19 @@ export const createTransferEngine = <S extends ISourceProvider, D extends IDesti
   options: ITransferEngineOptions
 ): TransferEngine<S, D> => {
   return new TransferEngine<S, D>(sourceProvider, destinationProvider, options);
+};
+
+export type {
+  TransferEngine,
+  ITransferEngine,
+  ITransferEngineOptions,
+  ISourceProvider,
+  IDestinationProvider,
+  TransferStage,
+  TransferFilterPreset,
+  ErrorHandlerContext,
+  SchemaDiffHandlerContext,
+  ITransferResults,
 };
 
 export * as errors from './errors';

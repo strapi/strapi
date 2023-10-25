@@ -2,14 +2,12 @@ import { useFetchClient } from '@strapi/helper-plugin';
 import { useMutation, useQueryClient } from 'react-query';
 
 import pluginId from '../pluginId';
-import { getRequestUrl } from '../utils';
 
 const editFolderRequest = (put, post, { attrs, id }) => {
   const isEditing = !!id;
   const method = isEditing ? put : post;
-  const url = getRequestUrl(`folders/${id ?? ''}`);
 
-  return method(url, attrs).then((res) => res.data);
+  return method(`/upload/folders/${id ?? ''}`, attrs).then((res) => res.data);
 };
 
 export const useEditFolder = () => {

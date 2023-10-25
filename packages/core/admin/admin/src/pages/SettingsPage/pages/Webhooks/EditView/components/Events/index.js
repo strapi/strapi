@@ -308,7 +308,7 @@ const EventRow = ({ disabledEvents, name, events, inputValue, handleSelect, hand
           </Td>
         );
       })}
-      {events.length < targetColumns && <Td colSpan={`${targetColumns - events.length}`} />}
+      {events.length < targetColumns && <Td colSpan={targetColumns - events.length} />}
     </Tr>
   );
 };

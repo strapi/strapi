@@ -20,13 +20,13 @@ import {
   useNotification,
   useOverlayBlocker,
 } from '@strapi/helper-plugin';
-import MagicLink from 'ee_else_ce/pages/SettingsPage/pages/Users/components/MagicLink';
 import { Formik } from 'formik';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 
 import { useEnterprise } from '../../../../../../hooks/useEnterprise';
+import { MagicLinkCE } from '../../components/MagicLink';
 import SelectRoles from '../../components/SelectRoles';
 
 import { FORM_LAYOUT, FORM_SCHEMA, FORM_INITIAL_VALUES, ROLE_LAYOUT, STEPPER } from './constants';
@@ -73,6 +73,15 @@ const ModalForm = ({ onSuccess, onToggle }) => {
 
       defaultValue: FORM_INITIAL_VALUES,
     }
+  );
+  const MagicLink = useEnterprise(
+    MagicLinkCE,
+    async () =>
+      (
+        await import(
+          '../../../../../../../../ee/admin/pages/SettingsPage/pages/Users/components/MagicLink'
+        )
+      ).MagicLinkEE
   );
   const postMutation = useMutation(
     (body) => {
@@ -141,6 +150,11 @@ const ModalForm = ({ onSuccess, onToggle }) => {
         {formatMessage(buttonSubmitLabel)}
       </Button>
     );
+
+  // block rendering until the EE component is fully loaded
+  if (!MagicLink) {
+    return null;
+  }
 
   return (
     <ModalLayout onClose={onToggle} labelledBy="title">

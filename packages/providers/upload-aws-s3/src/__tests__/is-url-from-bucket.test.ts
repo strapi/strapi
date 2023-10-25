@@ -73,6 +73,6 @@ describe('Test for URLs', () => {
   test('CDN', async () => {
     const url = 'https://cdn.example.com/v1/img.png';
     const isFromBucket = isUrlFromBucket(url, 'bucket', 'https://cdn.example.com/v1/');
-    expect(isFromBucket).toEqual(true);
+    expect(isFromBucket).toEqual(false);
   });
 });

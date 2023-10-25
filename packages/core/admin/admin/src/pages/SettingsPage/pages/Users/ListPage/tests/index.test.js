@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { configureStore } from '@reduxjs/toolkit';
 import { fixtures } from '@strapi/admin-test-utils';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { TrackingProvider, useRBAC } from '@strapi/helper-plugin';
@@ -9,7 +10,6 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 import { Route, Router } from 'react-router-dom';
-import { createStore } from 'redux';
 
 import ListPage from '../index';
 
@@ -63,11 +63,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-jest.mock('ee_else_ce/hooks/useLicenseLimitNotification', () => ({
-  __esModule: true,
-  default: jest.fn(),
-}));
-
 const setup = (props) =>
   render(() => <ListPage {...props} />, {
     wrapper({ children }) {
@@ -82,8 +77,11 @@ const setup = (props) =>
 
       return (
         <Provider
-          store={createStore((state) => state, {
-            admin_app: { permissions: fixtures.permissions.app },
+          store={configureStore({
+            reducer: (state) => state,
+            preloadedState: {
+              admin_app: { permissions: fixtures.permissions.app },
+            },
           })}
         >
           <QueryClientProvider client={client}>
@@ -107,10 +105,6 @@ const setup = (props) =>
 describe('ADMIN | Pages | USERS | ListPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  afterAll(() => {
-    jest.resetAllMocks();
   });
 
   it('should show a list of users', async () => {

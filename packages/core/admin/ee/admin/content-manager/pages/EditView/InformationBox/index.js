@@ -1,3 +1,1 @@
-import { InformationBoxEE } from './InformationBoxEE';
-
-export default InformationBoxEE;
+export * from './InformationBoxEE';

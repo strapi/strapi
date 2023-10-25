@@ -11,7 +11,7 @@ const utils = require('@strapi/utils');
 const { getService } = require('../utils');
 const { validateCreateUserBody, validateUpdateUserBody } = require('./validation/user');
 
-const { sanitize } = utils;
+const { sanitize, validate } = utils;
 const { ApplicationError, ValidationError, NotFoundError } = utils.errors;
 
 const sanitizeOutput = async (user, ctx) => {
@@ -19,6 +19,13 @@ const sanitizeOutput = async (user, ctx) => {
   const { auth } = ctx.state;
 
   return sanitize.contentAPI.output(user, schema, { auth });
+};
+
+const validateQuery = async (query, ctx) => {
+  const schema = strapi.getModel('plugin::users-permissions.user');
+  const { auth } = ctx.state;
+
+  return validate.contentAPI.query(query, schema, { auth });
 };
 
 const sanitizeQuery = async (query, ctx) => {
@@ -143,6 +150,7 @@ module.exports = {
    * @return {Object|Array}
    */
   async find(ctx) {
+    await validateQuery(ctx.query, ctx);
     const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
     const users = await getService('user').fetchAll(sanitizedQuery);
 
@@ -155,6 +163,7 @@ module.exports = {
    */
   async findOne(ctx) {
     const { id } = ctx.params;
+    await validateQuery(ctx.query, ctx);
     const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
 
     let data = await getService('user').fetch(id, sanitizedQuery);
@@ -171,6 +180,7 @@ module.exports = {
    * @return {Number}
    */
   async count(ctx) {
+    await validateQuery(ctx.query, ctx);
     const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
 
     ctx.body = await getService('user').count(sanitizedQuery);
@@ -201,6 +211,7 @@ module.exports = {
       return ctx.unauthorized();
     }
 
+    await validateQuery(query, ctx);
     const sanitizedQuery = await sanitizeQuery(query, ctx);
     const user = await getService('user').fetch(authUser.id, sanitizedQuery);
 

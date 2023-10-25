@@ -77,8 +77,10 @@ exports[`Content-Manager || RelationInput || RelationList should render and matc
 
 .c0 {
   position: relative;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
 }
 
 .c0:before,

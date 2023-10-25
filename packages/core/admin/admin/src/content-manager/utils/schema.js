@@ -55,7 +55,12 @@ const getAttributes = (data) => get(data, ['attributes'], {});
 const createYupSchema = (
   model,
   { components },
-  options = { isCreatingEntry: true, isDraft: true, isFromComponent: false }
+  options = {
+    isCreatingEntry: true,
+    isDraft: true,
+    isFromComponent: false,
+    isJSONTestDisabled: false,
+  }
 ) => {
   const attributes = getAttributes(model);
 
@@ -211,10 +216,36 @@ const createYupSchemaAttribute = (type, validations, options) => {
     schema = yup.string();
   }
 
+  if (type === 'blocks') {
+    schema = yup.mixed().test('isJSON', errorsTrads.json, (value) => {
+      // Disable the test for bulk publish, it's valid when it comes from the db
+      if (options.isJSONTestDisabled) {
+        return true;
+      }
+
+      // Don't run validations on drafts
+      if (options.isDraft) {
+        return true;
+      }
+
+      // The backend validates the actual schema, check if a value different than null is not an array
+      if (value && !Array.isArray(value)) {
+        return false;
+      }
+
+      return true;
+    });
+  }
+
   if (type === 'json') {
     schema = yup
       .mixed(errorsTrads.json)
       .test('isJSON', errorsTrads.json, (value) => {
+        // Disable the test for bulk publish, it's valid when it comes from the db
+        if (options.isJSONTestDisabled) {
+          return true;
+        }
+
         if (!value || !value.length) {
           return true;
         }

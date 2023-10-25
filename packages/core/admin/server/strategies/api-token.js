@@ -1,6 +1,7 @@
 'use strict';
 
 const { castArray, isNil } = require('lodash/fp');
+const { differenceInHours, parseISO } = require('date-fns');
 const { UnauthorizedError, ForbiddenError } = require('@strapi/utils').errors;
 const constants = require('../services/constants');
 const { getService } = require('../utils');
@@ -53,11 +54,14 @@ const authenticate = async (ctx) => {
     }
   }
 
-  // update lastUsedAt
-  await strapi.query('admin::api-token').update({
-    where: { id: apiToken.id },
-    data: { lastUsedAt: currentDate },
-  });
+  // update lastUsedAt if the token has not been used in the last hour
+  const hoursSinceLastUsed = differenceInHours(currentDate, parseISO(apiToken.lastUsedAt));
+  if (hoursSinceLastUsed >= 1) {
+    await strapi.query('admin::api-token').update({
+      where: { id: apiToken.id },
+      data: { lastUsedAt: currentDate },
+    });
+  }
 
   if (apiToken.type === constants.API_TOKEN_TYPE.CUSTOM) {
     const ability = await strapi.contentAPI.permissions.engine.generateAbility(

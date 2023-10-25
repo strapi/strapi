@@ -2,17 +2,21 @@
 
 const {
   mapAsync,
-  errors: { ApplicationError },
+  reduceAsync,
+  errors: { ApplicationError, ValidationError },
 } = require('@strapi/utils');
-const { map } = require('lodash/fp');
+const { map, pick, isEqual } = require('lodash/fp');
 
-const { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
+const { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE, ERRORS } = require('../../constants/workflows');
 const { getService } = require('../../utils');
-const { getContentTypeUIDsWithActivatedReviewWorkflows } = require('../../utils/review-workflows');
+
+const sanitizedStageFields = ['id', 'name', 'workflow', 'color'];
+const sanitizeStageFields = pick(sanitizedStageFields);
 
 module.exports = ({ strapi }) => {
-  const workflowsService = getService('workflows', { strapi });
   const metrics = getService('review-workflows-metrics', { strapi });
+  const stagePermissionsService = getService('stage-permissions', { strapi });
+  const workflowsValidationService = getService('review-workflows-validation', { strapi });
 
   return {
     find({ workflowId, populate }) {
@@ -30,23 +34,75 @@ module.exports = ({ strapi }) => {
       return strapi.entityService.findOne(STAGE_MODEL_UID, id, params);
     },
 
-    async createMany(stagesList, { fields }) {
-      const params = { select: fields };
+    async createMany(stagesList, { fields } = {}) {
+      const params = { select: fields ?? '*' };
 
+      // TODO: pick the fields from the stage
       const stages = await Promise.all(
         stagesList.map((stage) =>
-          strapi.entityService.create(STAGE_MODEL_UID, { data: stage, ...params })
+          strapi.entityService.create(STAGE_MODEL_UID, {
+            data: sanitizeStageFields(stage),
+            ...params,
+          })
         )
       );
+
+      // Create stage permissions
+      await reduceAsync(stagesList)(async (_, stage, idx) => {
+        // Ignore stages without permissions
+        if (!stage.permissions || stage.permissions.length === 0) {
+          return;
+        }
+
+        const stagePermissions = stage.permissions;
+        const stageId = stages[idx].id;
+
+        const permissions = await mapAsync(
+          stagePermissions,
+          // Register each stage permission
+          (permission) =>
+            stagePermissionsService.register({
+              roleId: permission.role,
+              action: permission.action,
+              fromStage: stageId,
+            })
+        );
+
+        // Update stage with the new permissions
+        await strapi.entityService.update(STAGE_MODEL_UID, stageId, {
+          data: {
+            permissions: permissions.flat().map((p) => p.id),
+          },
+        });
+      }, []);
 
       metrics.sendDidCreateStage();
 
       return stages;
     },
 
-    async update(stageId, stageData) {
+    async update(srcStage, destStage) {
+      let stagePermissions = srcStage?.permissions ?? [];
+      const stageId = destStage.id;
+
+      if (destStage.permissions) {
+        await this.deleteStagePermissions([srcStage]);
+
+        const permissions = await mapAsync(destStage.permissions, (permission) =>
+          stagePermissionsService.register({
+            roleId: permission.role,
+            action: permission.action,
+            fromStage: stageId,
+          })
+        );
+        stagePermissions = permissions.flat().map((p) => p.id);
+      }
+
       const stage = await strapi.entityService.update(STAGE_MODEL_UID, stageId, {
-        data: stageData,
+        data: {
+          ...destStage,
+          permissions: stagePermissions,
+        },
       });
 
       metrics.sendDidEditStage();
@@ -54,50 +110,75 @@ module.exports = ({ strapi }) => {
       return stage;
     },
 
-    async delete(stageId) {
-      const stage = await strapi.entityService.delete(STAGE_MODEL_UID, stageId);
+    async delete(stage) {
+      // Unregister all permissions related to this stage id
+      await this.deleteStagePermissions([stage]);
+
+      const deletedStage = await strapi.entityService.delete(STAGE_MODEL_UID, stage.id);
 
       metrics.sendDidDeleteStage();
 
-      return stage;
+      return deletedStage;
     },
 
-    count() {
-      return strapi.entityService.count(STAGE_MODEL_UID);
+    async deleteMany(stages) {
+      await this.deleteStagePermissions(stages);
+
+      return strapi.entityService.deleteMany(STAGE_MODEL_UID, {
+        filters: { id: { $in: stages.map((s) => s.id) } },
+      });
     },
 
-    async replaceWorkflowStages(workflowId, stages) {
-      const workflow = await workflowsService.findById(workflowId, { populate: ['stages'] });
+    async deleteStagePermissions(stages) {
+      // TODO: Find another way to do this for when we use the "to" parameter.
+      const permissions = stages.map((s) => s.permissions || []).flat();
+      await stagePermissionsService.unregister(permissions || []);
+    },
 
-      const { created, updated, deleted } = getDiffBetweenStages(workflow.stages, stages);
+    count({ workflowId } = {}) {
+      const opts = {};
 
-      assertAtLeastOneStageRemain(workflow.stages, { created, deleted });
+      if (workflowId) {
+        opts.where = {
+          workflow: workflowId,
+        };
+      }
+      return strapi.entityService.count(STAGE_MODEL_UID, opts);
+    },
 
+    async replaceStages(srcStages, destStages, contentTypesToMigrate = []) {
+      const { created, updated, deleted } = getDiffBetweenStages(srcStages, destStages);
+
+      assertAtLeastOneStageRemain(srcStages || [], { created, deleted });
+
+      // Update stages and assign entity stages
       return strapi.db.transaction(async ({ trx }) => {
         // Create the new stages
         const createdStages = await this.createMany(created, { fields: ['id'] });
         // Put all the newly created stages ids
         const createdStagesIds = map('id', createdStages);
-        const stagesIds = stages.map((stage) => stage.id ?? createdStagesIds.shift());
-        const contentTypes = getContentTypeUIDsWithActivatedReviewWorkflows(strapi.contentTypes);
 
         // Update the workflow stages
-        await mapAsync(updated, (stage) => this.update(stage.id, stage));
+        await mapAsync(updated, (destStage) => {
+          const srcStage = srcStages.find((s) => s.id === destStage.id);
+
+          return this.update(srcStage, destStage);
+        });
 
         // Delete the stages that are not in the new stages list
         await mapAsync(deleted, async (stage) => {
           // Find the nearest stage in the workflow and newly created stages
           // that is not deleted, prioritizing the previous stages
           const nearestStage = findNearestMatchingStage(
-            [...workflow.stages, ...createdStages],
-            workflow.stages.findIndex((s) => s.id === stage.id),
+            [...srcStages, ...createdStages],
+            srcStages.findIndex((s) => s.id === stage.id),
             (targetStage) => {
               return !deleted.find((s) => s.id === targetStage.id);
             }
           );
 
           // Assign the new stage to entities that had the deleted stage
-          await mapAsync(contentTypes, (contentTypeUID) => {
+          await mapAsync(contentTypesToMigrate, (contentTypeUID) => {
             this.updateEntitiesStage(contentTypeUID, {
               fromStageId: stage.id,
               toStageId: nearestStage.id,
@@ -105,12 +186,10 @@ module.exports = ({ strapi }) => {
             });
           });
 
-          return this.delete(stage.id);
+          return this.delete(stage);
         });
 
-        return workflowsService.update(workflowId, {
-          stages: stagesIds,
-        });
+        return destStages.map((stage) => ({ ...stage, id: stage.id ?? createdStagesIds.shift() }));
       });
     },
 
@@ -124,6 +203,8 @@ module.exports = ({ strapi }) => {
      */
     async updateEntity(entityInfo, stageId) {
       const stage = await this.findById(stageId);
+
+      await workflowsValidationService.validateWorkflowCount();
 
       if (!stage) {
         throw new ApplicationError(`Selected stage does not exist`);
@@ -140,43 +221,72 @@ module.exports = ({ strapi }) => {
     },
 
     /**
-     * Updates the stage of all entities of a content type that are in a specific stage
+     * Updates entity stages of a content type:
+     *  - If fromStageId is undefined, all entities with an existing stage will be assigned the new stage
+     *  - If fromStageId is null, all entities without a stage will be assigned the new stage
+     *  - If fromStageId is a number, all entities with that stage will be assigned the new stage
+     *
+     * For performance reasons we use knex queries directly.
+     *
      * @param {string} contentTypeUID
-     * @param {number} fromStageId
+     * @param {number | undefined | null} fromStageId
      * @param {number} toStageId
      * @param {import('knex').Knex.Transaction} trx
      * @returns
      */
-    async updateEntitiesStage(contentTypeUID, { fromStageId, toStageId, trx = null }) {
+    async updateEntitiesStage(contentTypeUID, { fromStageId, toStageId }) {
       const { attributes, tableName } = strapi.db.metadata.get(contentTypeUID);
       const joinTable = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable;
       const joinColumn = joinTable.joinColumn.name;
       const invJoinColumn = joinTable.inverseJoinColumn.name;
 
-      const selectStatement = strapi.db
-        .getConnection()
-        .select({ [joinColumn]: 't1.id', [invJoinColumn]: toStageId })
-        .from(`${tableName} as t1`)
-        .leftJoin(`${joinTable.name} as t2`, `t1.id`, `t2.${joinColumn}`)
-        .where(`t2.${invJoinColumn}`, fromStageId)
-        .toSQL();
+      await workflowsValidationService.validateWorkflowCount();
 
-      // Insert rows for all entries of the content type that do not have a
-      // default stage
-      const query = strapi.db
-        .getConnection(joinTable.name)
-        .insert(
-          strapi.db.connection.raw(
-            `(${joinColumn}, ${invJoinColumn})  ${selectStatement.sql}`,
-            selectStatement.bindings
+      return strapi.db.transaction(async ({ trx }) => {
+        // Update all already existing links to the new stage
+        if (fromStageId === undefined) {
+          return strapi.db
+            .getConnection()
+            .from(joinTable.name)
+            .update({ [invJoinColumn]: toStageId })
+            .transacting(trx);
+        }
+
+        // Update all links from the specified stage to the new stage
+        const selectStatement = strapi.db
+          .getConnection()
+          .select({ [joinColumn]: 't1.id', [invJoinColumn]: toStageId })
+          .from(`${tableName} as t1`)
+          .leftJoin(`${joinTable.name} as t2`, `t1.id`, `t2.${joinColumn}`)
+          .where(`t2.${invJoinColumn}`, fromStageId)
+          .toSQL();
+
+        // Insert rows for all entries of the content type that have the specified stage
+        return strapi.db
+          .getConnection(joinTable.name)
+          .insert(
+            strapi.db.connection.raw(
+              `(${joinColumn}, ${invJoinColumn})  ${selectStatement.sql}`,
+              selectStatement.bindings
+            )
           )
-        );
+          .transacting(trx);
+      });
+    },
 
-      if (trx) {
-        query.transacting(trx);
-      }
+    /**
+     * Deletes all entity stages of a content type
+     * @param {string} contentTypeUID
+     * @returns
+     */
+    async deleteAllEntitiesStage(contentTypeUID) {
+      const { attributes } = strapi.db.metadata.get(contentTypeUID);
+      const joinTable = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable;
 
-      return query;
+      // Delete all stage links for the content type
+      return strapi.db.transaction(async ({ trx }) =>
+        strapi.db.getConnection().from(joinTable.name).delete().transacting(trx)
+      );
     },
   };
 };
@@ -203,12 +313,19 @@ module.exports = ({ strapi }) => {
  */
 function getDiffBetweenStages(sourceStages, comparisonStages) {
   const result = comparisonStages.reduce(
+    // ...
+
     (acc, stageToCompare) => {
       const srcStage = sourceStages.find((stage) => stage.id === stageToCompare.id);
 
       if (!srcStage) {
         acc.created.push(stageToCompare);
-      } else if (srcStage.name !== stageToCompare.name || srcStage.color !== stageToCompare.color) {
+      } else if (
+        !isEqual(
+          pick(['name', 'color', 'permissions'], srcStage),
+          pick(['name', 'color', 'permissions'], stageToCompare)
+        )
+      ) {
         acc.updated.push(stageToCompare);
       }
       return acc;
@@ -231,13 +348,13 @@ function getDiffBetweenStages(sourceStages, comparisonStages) {
  * @param {Array} diffStages.deleted - An array of stages that are planned to be deleted from the workflow.
  * @param {Array} diffStages.created - An array of stages that are planned to be created in the workflow.
  *
- * @throws {ApplicationError} If the number of remaining stages in the workflow after applying deletions and additions is less than 1.
+ * @throws {ValidationError} If the number of remaining stages in the workflow after applying deletions and additions is less than 1.
  */
 function assertAtLeastOneStageRemain(workflowStages, diffStages) {
   const remainingStagesCount =
     workflowStages.length - diffStages.deleted.length + diffStages.created.length;
   if (remainingStagesCount < 1) {
-    throw new ApplicationError('At least one stage must remain in the workflow.');
+    throw new ValidationError(ERRORS.WORKFLOW_WITHOUT_STAGES);
   }
 }
 

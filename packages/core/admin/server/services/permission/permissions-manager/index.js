@@ -4,8 +4,9 @@ const _ = require('lodash');
 const { cloneDeep, isPlainObject } = require('lodash/fp');
 const { subject: asSubject } = require('@casl/ability');
 const createSanitizeHelpers = require('./sanitize');
+const createValidateHelpers = require('./validate');
 
-const { buildStrapiQuery, buildCaslQuery } = require('./query-builers');
+const { buildStrapiQuery, buildCaslQuery } = require('./query-builders');
 
 module.exports = ({ ability, action, model }) => ({
   ability,
@@ -48,4 +49,5 @@ module.exports = ({ ability, action, model }) => ({
   },
 
   ...createSanitizeHelpers({ action, ability, model }),
+  ...createValidateHelpers({ action, ability, model }),
 });

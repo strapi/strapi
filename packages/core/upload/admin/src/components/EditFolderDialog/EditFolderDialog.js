@@ -147,152 +147,150 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
   }
 
   return (
-    <>
-      <ModalLayout onClose={() => onClose()} labelledBy="title">
-        <Formik
-          validationSchema={folderSchema}
-          validateOnChange={false}
-          onSubmit={handleSubmit}
-          initialValues={initialFormData}
-        >
-          {({ values, errors, handleChange, setFieldValue }) => (
-            <Form noValidate>
-              <EditFolderModalHeader isEditing={isEditing} />
+    <ModalLayout onClose={() => onClose()} labelledBy="title">
+      <Formik
+        validationSchema={folderSchema}
+        validateOnChange={false}
+        onSubmit={handleSubmit}
+        initialValues={initialFormData}
+      >
+        {({ values, errors, handleChange, setFieldValue }) => (
+          <Form noValidate>
+            <EditFolderModalHeader isEditing={isEditing} />
 
-              <ModalBody>
-                <Grid gap={4}>
-                  {isEditing && (
-                    <GridItem xs={12} col={12}>
-                      <ContextInfo
-                        blocks={[
-                          {
-                            label: formatMessage({
-                              id: getTrad('modal.folder.create.elements'),
-                              defaultMessage: 'Elements',
-                            }),
-                            value: formatMessage(
-                              {
-                                id: getTrad('modal.folder.elements.count'),
-                                defaultMessage: '{folderCount} folders, {assetCount} assets',
-                              },
-                              {
-                                assetCount: folder?.files?.count ?? 0,
-                                folderCount: folder?.children?.count ?? 0,
-                              }
-                            ),
-                          },
+            <ModalBody>
+              <Grid gap={4}>
+                {isEditing && (
+                  <GridItem xs={12} col={12}>
+                    <ContextInfo
+                      blocks={[
+                        {
+                          label: formatMessage({
+                            id: getTrad('modal.folder.create.elements'),
+                            defaultMessage: 'Elements',
+                          }),
+                          value: formatMessage(
+                            {
+                              id: getTrad('modal.folder.elements.count'),
+                              defaultMessage: '{folderCount} folders, {assetCount} assets',
+                            },
+                            {
+                              assetCount: folder?.files?.count ?? 0,
+                              folderCount: folder?.children?.count ?? 0,
+                            }
+                          ),
+                        },
 
-                          {
-                            label: formatMessage({
-                              id: getTrad('modal.folder.create.creation-date'),
-                              defaultMessage: 'Creation Date',
-                            }),
-                            value: formatDate(new Date(folder.createdAt)),
-                          },
-                        ]}
-                      />
-                    </GridItem>
-                  )}
-
-                  <GridItem xs={12} col={6}>
-                    <TextInput
-                      label={formatMessage({
-                        id: getTrad('form.input.label.folder-name'),
-                        defaultMessage: 'Name',
-                      })}
-                      name="name"
-                      value={values.name}
-                      error={errors.name}
-                      onChange={handleChange}
-                      disabled={formDisabled}
+                        {
+                          label: formatMessage({
+                            id: getTrad('modal.folder.create.creation-date'),
+                            defaultMessage: 'Creation Date',
+                          }),
+                          value: formatDate(new Date(folder.createdAt)),
+                        },
+                      ]}
                     />
                   </GridItem>
+                )}
 
-                  <GridItem xs={12} col={6}>
-                    <Flex direction="column" alignItems="stretch" gap={1}>
-                      <FieldLabel htmlFor="folder-parent">
-                        {formatMessage({
-                          id: getTrad('form.input.label.folder-location'),
-                          defaultMessage: 'Location',
-                        })}
-                      </FieldLabel>
+                <GridItem xs={12} col={6}>
+                  <TextInput
+                    label={formatMessage({
+                      id: getTrad('form.input.label.folder-name'),
+                      defaultMessage: 'Name',
+                    })}
+                    name="name"
+                    value={values.name}
+                    error={errors.name}
+                    onChange={handleChange}
+                    disabled={formDisabled}
+                  />
+                </GridItem>
 
-                      <SelectTree
-                        options={folderStructure}
-                        onChange={(value) => {
-                          setFieldValue('parent', value);
-                        }}
-                        isDisabled={formDisabled}
-                        defaultValue={values.parent}
-                        name="parent"
-                        menuPortalTarget={document.querySelector('body')}
-                        inputId="folder-parent"
-                        disabled={formDisabled}
-                        error={errors?.parent}
-                        ariaErrorMessage="folder-parent-error"
-                      />
+                <GridItem xs={12} col={6}>
+                  <Flex direction="column" alignItems="stretch" gap={1}>
+                    <FieldLabel htmlFor="folder-parent">
+                      {formatMessage({
+                        id: getTrad('form.input.label.folder-location'),
+                        defaultMessage: 'Location',
+                      })}
+                    </FieldLabel>
 
-                      {errors.parent && (
-                        <Typography
-                          variant="pi"
-                          as="p"
-                          id="folder-parent-error"
-                          textColor="danger600"
-                        >
-                          {errors.parent}
-                        </Typography>
-                      )}
-                    </Flex>
-                  </GridItem>
-                </Grid>
-              </ModalBody>
-
-              <ModalFooter
-                startActions={
-                  <Button onClick={() => onClose()} variant="tertiary" name="cancel">
-                    {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
-                  </Button>
-                }
-                endActions={
-                  <Flex gap={2}>
-                    {isEditing && canUpdate && (
-                      <Button
-                        type="button"
-                        variant="danger-light"
-                        onClick={() => setShowConfirmDialog(true)}
-                        name="delete"
-                        disabled={!canUpdate || isEditFolderLoading}
-                      >
-                        {formatMessage({
-                          id: getTrad('modal.folder.create.delete'),
-                          defaultMessage: 'Delete folder',
-                        })}
-                      </Button>
-                    )}
-
-                    <Button
-                      name="submit"
-                      loading={isEditFolderLoading}
+                    <SelectTree
+                      options={folderStructure}
+                      onChange={(value) => {
+                        setFieldValue('parent', value);
+                      }}
+                      isDisabled={formDisabled}
+                      defaultValue={values.parent}
+                      name="parent"
+                      menuPortalTarget={document.querySelector('body')}
+                      inputId="folder-parent"
                       disabled={formDisabled}
-                      type="submit"
-                    >
-                      {formatMessage(
-                        isEditing
-                          ? { id: getTrad('modal.folder.edit.submit'), defaultMessage: 'Save' }
-                          : { id: getTrad('modal.folder.create.submit'), defaultMessage: 'Create' }
-                      )}
-                    </Button>
+                      error={errors?.parent}
+                      ariaErrorMessage="folder-parent-error"
+                    />
+
+                    {errors.parent && (
+                      <Typography
+                        variant="pi"
+                        as="p"
+                        id="folder-parent-error"
+                        textColor="danger600"
+                      >
+                        {errors.parent}
+                      </Typography>
+                    )}
                   </Flex>
-                }
-              />
-            </Form>
-          )}
-        </Formik>
-      </ModalLayout>
+                </GridItem>
+              </Grid>
+            </ModalBody>
+
+            <ModalFooter
+              startActions={
+                <Button onClick={() => onClose()} variant="tertiary" name="cancel">
+                  {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
+                </Button>
+              }
+              endActions={
+                <Flex gap={2}>
+                  {isEditing && canUpdate && (
+                    <Button
+                      type="button"
+                      variant="danger-light"
+                      onClick={() => setShowConfirmDialog(true)}
+                      name="delete"
+                      disabled={!canUpdate || isEditFolderLoading}
+                    >
+                      {formatMessage({
+                        id: getTrad('modal.folder.create.delete'),
+                        defaultMessage: 'Delete folder',
+                      })}
+                    </Button>
+                  )}
+
+                  <Button
+                    name="submit"
+                    loading={isEditFolderLoading}
+                    disabled={formDisabled}
+                    type="submit"
+                  >
+                    {formatMessage(
+                      isEditing
+                        ? { id: getTrad('modal.folder.edit.submit'), defaultMessage: 'Save' }
+                        : { id: getTrad('modal.folder.create.submit'), defaultMessage: 'Create' }
+                    )}
+                  </Button>
+                </Flex>
+              }
+            />
+          </Form>
+        )}
+      </Formik>
       {showConfirmDialog && (
         <RemoveFolderDialog onClose={() => setShowConfirmDialog(false)} onConfirm={handleDelete} />
       )}
-    </>
+    </ModalLayout>
   );
 };
 

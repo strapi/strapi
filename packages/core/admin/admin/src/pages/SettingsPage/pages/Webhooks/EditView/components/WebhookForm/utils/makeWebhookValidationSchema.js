@@ -1,4 +1,3 @@
-import { translatedErrors } from '@strapi/helper-plugin';
 import * as yup from 'yup';
 
 const NAME_REGEX = /(^$)|(^[A-Za-z][_0-9A-Za-z ]*$)/;
@@ -10,11 +9,18 @@ export const makeWebhookValidationSchema = ({ formatMessage }) =>
       .string()
       .required(
         formatMessage({
-          id: 'Settings.webhooks.validation.name',
+          id: 'Settings.webhooks.validation.name.required',
           defaultMessage: 'Name is required',
         })
       )
-      .matches(NAME_REGEX, translatedErrors.regex),
+      .matches(
+        NAME_REGEX,
+        formatMessage({
+          id: 'Settings.webhooks.validation.name.regex',
+          defaultMessage:
+            'The name must start with a letter and only contain letters, numbers, spaces and underscores',
+        })
+      ),
     url: yup
       .string()
       .required(
@@ -26,8 +32,8 @@ export const makeWebhookValidationSchema = ({ formatMessage }) =>
       .matches(
         URL_REGEX,
         formatMessage({
-          id: translatedErrors.regex,
-          defaultMessage: 'The value does not match the regex',
+          id: 'Settings.webhooks.validation.url.regex',
+          defaultMessage: 'The value must be a valid Url',
         })
       ),
     headers: yup.lazy((array) => {

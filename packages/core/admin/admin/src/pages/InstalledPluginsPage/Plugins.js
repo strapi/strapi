@@ -17,7 +17,7 @@ import {
 import { LoadingIndicatorPage, useFocusWhenNavigate } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
-import useFetchEnabledPlugins from '../../hooks/useFetchEnabledPlugins';
+import { usePlugins } from './hooks/usePlugins';
 
 const Plugins = () => {
   const { formatMessage } = useIntl();
@@ -41,7 +41,7 @@ const Plugins = () => {
     );
   };
 
-  const { status, data } = useFetchEnabledPlugins(notifyPluginPageLoad);
+  const { status, data } = usePlugins(notifyPluginPageLoad);
 
   const isLoading = status !== 'success' && status !== 'error';
 

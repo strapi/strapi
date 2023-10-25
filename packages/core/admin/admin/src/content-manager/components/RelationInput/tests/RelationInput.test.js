@@ -1,7 +1,8 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { render, waitFor, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IntlProvider } from 'react-intl';
@@ -88,79 +89,79 @@ const Component = (props) => (
   </MemoryRouter>
 );
 
-const setup = (props) => render(<Component {...props} />);
+const setup = (props) => ({
+  ...render(<Component {...props} />),
+  user: userEvent.setup(),
+});
 
 describe('Content-Manager || RelationInput', () => {
   test('should render and match snapshot', () => {
-    const { container } = setup();
+    const { container, getByText, getByRole } = setup();
 
     expect(container).toMatchSnapshot();
-    expect(screen.getByText('Some Relation')).toBeInTheDocument();
-    expect(screen.getByText('Load more')).toBeInTheDocument();
-    expect(screen.getByText('Select...')).toBeInTheDocument();
+    expect(getByText('Some Relation')).toBeInTheDocument();
+    expect(getByText('Load more')).toBeInTheDocument();
+    expect(getByRole('combobox')).toBeInTheDocument();
     expect(
-      screen.getByRole('link', {
+      getByRole('link', {
         name: /relation 1/i,
       })
     ).toBeInTheDocument();
   });
 
   describe('Callbacks', () => {
-    test('should call onSearch', () => {
+    test('should call onSearch', async () => {
       const spy = jest.fn();
-      setup({ onSearch: spy });
+      const { user, getByRole } = setup({ onSearch: spy });
 
-      fireEvent.mouseDown(screen.getByText(/select\.\.\./i));
+      await user.click(getByRole('combobox'));
 
       expect(spy).toHaveBeenCalled();
     });
 
-    test('should call onRelationConnect', () => {
+    test('should call onRelationConnect', async () => {
       const onAddSpy = jest.fn();
-      setup({ onRelationConnect: onAddSpy });
+      const { user, getByText, getByRole } = setup({ onRelationConnect: onAddSpy });
 
-      fireEvent.mouseDown(screen.getByText(/select\.\.\./i));
-      expect(screen.getByText('Relation 4')).toBeInTheDocument();
+      await user.click(getByRole('combobox'));
+      expect(getByText('Relation 4')).toBeInTheDocument();
 
-      fireEvent.click(screen.getByText('Relation 4'));
+      await user.click(getByText('Relation 4'));
 
       expect(onAddSpy).toHaveBeenCalled();
     });
 
-    test('should call onRelationDisconnect', () => {
+    test('should call onRelationDisconnect', async () => {
       const spy = jest.fn();
-      setup({ onRelationDisconnect: spy });
+      const { user, getByTestId } = setup({ onRelationDisconnect: spy });
 
-      fireEvent.click(screen.getByTestId('remove-relation-1'));
+      await user.click(getByTestId('remove-relation-1'));
 
       expect(spy).toHaveBeenCalled();
     });
 
-    test('should call onRelationLoadMore', () => {
+    test('should call onRelationLoadMore', async () => {
       const onRelationLoadMoreSpy = jest.fn();
-      setup({ onRelationLoadMore: onRelationLoadMoreSpy });
+      const { user, getByText } = setup({ onRelationLoadMore: onRelationLoadMoreSpy });
 
-      fireEvent.click(screen.getByText('Load more'));
+      await user.click(getByText('Load more'));
 
       expect(onRelationLoadMoreSpy).toHaveBeenCalled();
     });
 
-    test('should call onSearch', () => {
+    test('should call onSearch', async () => {
       const spy = jest.fn();
-      const { container } = setup({ onSearch: spy });
+      const { user, getByRole } = setup({ onSearch: spy });
 
-      fireEvent.change(container.querySelector('input'), {
-        target: { value: 'searching' },
-      });
-
+      await user.type(getByRole('combobox'), 'searching');
       expect(spy).toHaveBeenCalled();
     });
 
     test('should call onRelationReorder', () => {
       const spy = jest.fn();
-      setup({ onRelationReorder: spy });
+      const { getAllByText } = setup({ onRelationReorder: spy });
 
-      const [draggedItem, dropZone] = screen.getAllByText('Drag');
+      const [draggedItem, dropZone] = getAllByText('Drag');
 
       fireEvent.dragStart(draggedItem);
       fireEvent.dragEnter(dropZone);
@@ -172,9 +173,9 @@ describe('Content-Manager || RelationInput', () => {
 
     it('should not call onRelationReorder when the indices are the same', () => {
       const spy = jest.fn();
-      setup({ onRelationReorder: spy });
+      const { getAllByText } = setup({ onRelationReorder: spy });
 
-      const [draggedItem] = screen.getAllByText('Drag');
+      const [draggedItem] = getAllByText('Drag');
 
       fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
       fireEvent.keyDown(draggedItem, { key: 'ArrowUp', code: 'ArrowUp' });
@@ -191,7 +192,7 @@ describe('Content-Manager || RelationInput', () => {
 
       const newRelation = { id: 6, mainField: 'Relation 6', publicationState: 'draft' };
 
-      const { rerender } = setup({
+      const { user, rerender, getByRole, getByText } = setup({
         relations: {
           ...FIXTURES_RELATIONS,
           data,
@@ -202,15 +203,13 @@ describe('Content-Manager || RelationInput', () => {
         },
       });
 
-      const el = screen.getByRole('list');
+      expect(getByRole('list').parentNode.scrollTop).toBe(0);
 
-      expect(el.parentNode.scrollTop).toBe(0);
+      await user.click(getByRole('combobox'));
 
-      fireEvent.mouseDown(screen.getByText(/select\.\.\./i));
+      expect(getByText('Relation 6')).toBeInTheDocument();
 
-      await waitFor(() => expect(screen.getByText('Relation 6')).toBeInTheDocument());
-
-      fireEvent.click(screen.getByText('Relation 6'));
+      await user.click(getByText('Relation 6'));
 
       rerender(
         <Component
@@ -221,9 +220,9 @@ describe('Content-Manager || RelationInput', () => {
         />
       );
 
-      await waitFor(() => expect(el.parentNode.scrollTop).toBeGreaterThan(0));
+      await waitFor(() => expect(getByRole('list').parentNode.scrollTop).toBeGreaterThan(0));
 
-      fireEvent.click(screen.getByText('Load more'));
+      fireEvent.click(getByText('Load more'));
 
       rerender(
         <Component
@@ -238,7 +237,7 @@ describe('Content-Manager || RelationInput', () => {
         />
       );
 
-      await waitFor(() => expect(el.parentNode.scrollTop).toBe(0));
+      await waitFor(() => expect(getByRole('list').parentNode.scrollTop).toBe(0));
     });
 
     // TODO: check if it is possible to fire scroll event here
@@ -246,8 +245,8 @@ describe('Content-Manager || RelationInput', () => {
     //   const spy = jest.fn();
     //   const { container } = setup({ onSearchNextPage: spy });
 
-    //   fireEvent.mouseDown(screen.getByText(/select\.\.\./i));
-    //   fireEvent.scroll(screen.getByText('Relation 4'), {
+    //   fireEvent.mouseDown(getByRole('combobox'));
+    //   fireEvent.scroll(getByText('Relation 4'), {
     //     not working with scrollY either
     //     target: { scrollBottom: 100 },
     //   });
@@ -257,16 +256,18 @@ describe('Content-Manager || RelationInput', () => {
   });
 
   describe('States', () => {
-    test('should display search loading state', () => {
-      setup({ searchResults: { data: [], isLoading: true, isSuccess: true } });
+    test('should display search loading state', async () => {
+      const { user, getByText, getByRole } = setup({
+        searchResults: { data: [], isLoading: true, isSuccess: true },
+      });
 
-      fireEvent.mouseDown(screen.getByText(/select\.\.\./i));
+      await user.click(getByRole('combobox'));
 
-      expect(screen.getByText('Relations are loading')).toBeInTheDocument();
+      expect(getByText('Relations are loading')).toBeInTheDocument();
     });
 
     test('should display load more button loading if loading is true', () => {
-      setup({
+      const { getByRole } = setup({
         relations: {
           data: [],
           isLoading: true,
@@ -276,14 +277,11 @@ describe('Content-Manager || RelationInput', () => {
         },
       });
 
-      expect(screen.getByRole('button', { name: /load more/i })).toHaveAttribute(
-        'aria-disabled',
-        'true'
-      );
+      expect(getByRole('button', { name: /load more/i })).toHaveAttribute('aria-disabled', 'true');
     });
 
     test('should not display load more button loading if there is no next page', () => {
-      setup({
+      const { queryByText } = setup({
         relations: {
           data: [],
           isLoading: false,
@@ -293,23 +291,23 @@ describe('Content-Manager || RelationInput', () => {
         },
       });
 
-      expect(screen.queryByText('Load more')).not.toBeInTheDocument();
+      expect(queryByText('Load more')).not.toBeInTheDocument();
     });
 
     test('should display error state', () => {
-      setup({ error: 'This is an error' });
+      const { getByText } = setup({ error: 'This is an error' });
 
-      expect(screen.getByText('This is an error')).toBeInTheDocument();
+      expect(getByText('This is an error')).toBeInTheDocument();
     });
 
-    test('should display disabled state with only read permission', () => {
+    test('should display disabled state with only read permission', async () => {
       const onRelationLoadMoreSpy = jest.fn();
-      const { getAllByRole, getByRole, getByTestId, getByText, container } = setup({
+      const { user, getAllByRole, getByRole, getByTestId, getByText, container } = setup({
         disabled: true,
         onRelationLoadMore: onRelationLoadMoreSpy,
       });
 
-      fireEvent.click(getByText('Load more'));
+      await user.click(getByText('Load more'));
       expect(onRelationLoadMoreSpy).toHaveBeenCalledTimes(1);
 
       expect(container.querySelector('input')).toBeDisabled();

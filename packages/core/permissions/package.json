@@ -1,6 +1,6 @@
 {
   "name": "@strapi/permissions",
-  "version": "4.11.2",
+  "version": "4.14.5",
   "description": "Strapi's permission layer.",
   "repository": {
     "type": "git",
@@ -19,20 +19,37 @@
       "url": "https://strapi.io"
     }
   ],
-  "main": "./lib/index.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "./dist"
+  ],
   "scripts": {
+    "build": "pack-up build",
+    "clean": "run -T rimraf ./dist",
+    "lint": "run -T eslint .",
+    "prepublishOnly": "yarn clean && yarn build",
+    "test:ts": "run -T tsc --noEmit",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "lint": "run -T eslint ."
+    "watch": "pack-up watch"
   },
   "dependencies": {
-    "@casl/ability": "5.4.4",
-    "@strapi/utils": "4.11.2",
+    "@casl/ability": "6.5.0",
+    "@strapi/utils": "4.14.5",
     "lodash": "4.17.21",
+    "qs": "6.11.1",
     "sift": "16.0.1"
   },
+  "devDependencies": {
+    "@strapi/pack-up": "workspace:*",
+    "eslint-config-custom": "4.14.5",
+    "tsconfig": "4.14.5"
+  },
   "engines": {
-    "node": ">=14.19.1 <=18.x.x",
+    "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   }
 }

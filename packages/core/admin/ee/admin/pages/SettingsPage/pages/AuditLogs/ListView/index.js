@@ -19,8 +19,8 @@ import {
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
-import { selectAdminPermissions } from '../../../../../../../admin/src/pages/App/selectors';
 import Filters from '../../../../../../../admin/src/pages/SettingsPage/components/Filters';
+import { selectAdminPermissions } from '../../../../../../../admin/src/selectors';
 
 import useAuditLogsData from './hooks/useAuditLogsData';
 import Modal from './Modal';
@@ -33,17 +33,12 @@ const ListView = () => {
   const { formatMessage } = useIntl();
   const permissions = useSelector(selectAdminPermissions);
 
-  // TODO: this is necessary because otherwise we run into an
-  // infinite rendering loop
-  const permissionsMemoized = React.useMemo(() => {
-    return {
-      ...permissions.settings.auditLogs,
-      readUsers: permissions.settings.users.read,
-    };
-  }, [permissions.settings.auditLogs, permissions.settings.users.read]);
   const {
     allowedActions: { canRead: canReadAuditLogs, canReadUsers },
-  } = useRBAC(permissionsMemoized);
+  } = useRBAC({
+    ...permissions.settings.auditLogs,
+    readUsers: permissions.settings.users.read,
+  });
 
   const [{ query }, setQuery] = useQueryParams();
   const { auditLogs, users, isLoading, hasError } = useAuditLogsData({

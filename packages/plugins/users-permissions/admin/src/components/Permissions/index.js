@@ -1,6 +1,6 @@
 import React, { useReducer } from 'react';
 
-import { Accordion, AccordionContent, AccordionToggle, Box, Flex } from '@strapi/design-system';
+import { Accordion, AccordionContent, AccordionToggle, Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useUsersPermissions } from '../../contexts/UsersPermissionsContext';
@@ -44,9 +44,7 @@ const Permissions = () => {
             variant={index % 2 ? 'primary' : 'secondary'}
           />
           <AccordionContent>
-            <Box>
-              <PermissionRow permissions={modifiedData[collapse.name]} name={collapse.name} />
-            </Box>
+            <PermissionRow permissions={modifiedData[collapse.name]} name={collapse.name} />
           </AccordionContent>
         </Accordion>
       ))}

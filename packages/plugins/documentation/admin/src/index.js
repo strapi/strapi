@@ -5,10 +5,10 @@
 // Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
+import { Information } from '@strapi/icons';
 
 import pluginPkg from '../../package.json';
 
-import PluginIcon from './components/PluginIcon';
 import { PERMISSIONS } from './constants';
 import pluginId from './pluginId';
 
@@ -18,7 +18,7 @@ export default {
   register(app) {
     app.addMenuLink({
       to: `/plugins/${pluginId}`,
-      icon: PluginIcon,
+      icon: Information,
       intlLabel: {
         id: `${pluginId}.plugin.name`,
         defaultMessage: 'Documentation',

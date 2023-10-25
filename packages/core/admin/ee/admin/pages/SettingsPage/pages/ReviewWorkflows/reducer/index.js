@@ -1,23 +1,42 @@
-import { current, produce } from 'immer';
-import isEqual from 'lodash/isEqual';
+import { produce } from 'immer';
 
 import {
   ACTION_ADD_STAGE,
+  ACTION_CLONE_STAGE,
   ACTION_DELETE_STAGE,
+  ACTION_RESET_WORKFLOW,
+  ACTION_SET_CONTENT_TYPES,
+  ACTION_SET_IS_LOADING,
+  ACTION_SET_ROLES,
+  ACTION_SET_WORKFLOW,
   ACTION_SET_WORKFLOWS,
   ACTION_UPDATE_STAGE,
+  ACTION_UPDATE_STAGES,
   ACTION_UPDATE_STAGE_POSITION,
+  ACTION_UPDATE_WORKFLOW,
   STAGE_COLOR_DEFAULT,
 } from '../constants';
 
 export const initialState = {
-  status: 'loading',
   serverState: {
-    currentWorkflow: null,
+    contentTypes: {
+      collectionTypes: [],
+      singleTypes: [],
+    },
+    roles: [],
+    workflow: null,
     workflows: [],
   },
   clientState: {
-    currentWorkflow: { data: null, isDirty: false, hasDeletedServerStages: false },
+    currentWorkflow: {
+      data: {
+        name: '',
+        contentTypes: [],
+        stages: [],
+        permissions: undefined,
+      },
+    },
+    isLoading: true,
   },
 };
 
@@ -26,29 +45,47 @@ export function reducer(state = initialState, action) {
     const { payload } = action;
 
     switch (action.type) {
-      case ACTION_SET_WORKFLOWS: {
-        const { status, workflows } = payload;
+      case ACTION_SET_CONTENT_TYPES: {
+        draft.serverState.contentTypes = payload;
+        break;
+      }
 
-        draft.status = status;
+      case ACTION_SET_IS_LOADING: {
+        draft.clientState.isLoading = payload;
+        break;
+      }
 
-        if (workflows?.length > 0) {
-          let defaultWorkflow = workflows[0];
+      case ACTION_SET_ROLES: {
+        draft.serverState.roles = payload;
+        break;
+      }
 
-          // A safety net in case a stage does not have a color assigned;
-          // this normallly should not happen
-          defaultWorkflow = {
-            ...defaultWorkflow,
-            stages: defaultWorkflow.stages.map((stage) => ({
+      case ACTION_SET_WORKFLOW: {
+        const workflow = payload;
+
+        if (workflow) {
+          draft.serverState.workflow = workflow;
+          draft.clientState.currentWorkflow.data = {
+            ...workflow,
+            stages: workflow.stages.map((stage) => ({
               ...stage,
+              // A safety net in case a stage does not have a color assigned;
+              // this should not happen
               color: stage?.color ?? STAGE_COLOR_DEFAULT,
             })),
           };
-
-          draft.serverState.workflows = workflows;
-          draft.serverState.currentWorkflow = defaultWorkflow;
-          draft.clientState.currentWorkflow.data = defaultWorkflow;
-          draft.clientState.currentWorkflow.hasDeletedServerStages = false;
         }
+        break;
+      }
+
+      case ACTION_SET_WORKFLOWS: {
+        draft.serverState.workflows = payload;
+        break;
+      }
+
+      case ACTION_RESET_WORKFLOW: {
+        draft.clientState = initialState.clientState;
+        draft.serverState = initialState.serverState;
         break;
       }
 
@@ -59,11 +96,6 @@ export function reducer(state = initialState, action) {
         draft.clientState.currentWorkflow.data.stages = currentWorkflow.data.stages.filter(
           (stage) => (stage?.id ?? stage.__temp_key__) !== stageId
         );
-
-        if (!currentWorkflow.hasDeletedServerStages) {
-          draft.clientState.currentWorkflow.hasDeletedServerStages =
-            !!state.serverState.currentWorkflow.stages.find((stage) => stage.id === stageId);
-        }
 
         break;
       }
@@ -88,6 +120,24 @@ export function reducer(state = initialState, action) {
         break;
       }
 
+      case ACTION_CLONE_STAGE: {
+        const { currentWorkflow } = state.clientState;
+        const { id } = payload;
+
+        const sourceStageIndex = currentWorkflow.data.stages.findIndex(
+          (stage) => (stage?.id ?? stage?.__temp_key__) === id
+        );
+        const sourceStage = currentWorkflow.data.stages[sourceStageIndex];
+
+        draft.clientState.currentWorkflow.data.stages.splice(sourceStageIndex + 1, 0, {
+          ...sourceStage,
+          id: undefined,
+          __temp_key__: getMaxTempKey(draft.clientState.currentWorkflow.data.stages),
+        });
+
+        break;
+      }
+
       case ACTION_UPDATE_STAGE: {
         const { currentWorkflow } = state.clientState;
         const { stageId, ...modified } = payload;
@@ -99,6 +149,19 @@ export function reducer(state = initialState, action) {
                 ...modified,
               }
             : stage
+        );
+
+        break;
+      }
+
+      case ACTION_UPDATE_STAGES: {
+        const { currentWorkflow } = state.clientState;
+
+        draft.clientState.currentWorkflow.data.stages = currentWorkflow.data.stages.map(
+          (stage) => ({
+            ...stage,
+            ...payload,
+          })
         );
 
         break;
@@ -125,15 +188,17 @@ export function reducer(state = initialState, action) {
         break;
       }
 
+      case ACTION_UPDATE_WORKFLOW: {
+        draft.clientState.currentWorkflow.data = {
+          ...draft.clientState.currentWorkflow.data,
+          ...payload,
+        };
+
+        break;
+      }
+
       default:
         break;
-    }
-
-    if (state.clientState.currentWorkflow.data) {
-      draft.clientState.currentWorkflow.isDirty = !isEqual(
-        current(draft.clientState.currentWorkflow).data,
-        draft.serverState.currentWorkflow
-      );
     }
   });
 }

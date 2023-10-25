@@ -45,11 +45,66 @@ describe('API Token Auth Strategy', () => {
       const response = await apiTokenStrategy.authenticate(ctx);
 
       expect(getBy).toHaveBeenCalledWith({ accessKey: 'api-token_tests-hashed-access-key' });
+
+      expect(response).toStrictEqual({ authenticated: true, credentials: apiToken });
+    });
+
+    test('Updates lastUsedAt if the token has not been used in the last hour', async () => {
+      // Mock lastUsedAt to be less than an hour ago
+      const getBy = jest.fn(() => ({
+        ...apiToken,
+        lastUsedAt: new Date(Date.now() - 3600000).toISOString(),
+      }));
+      const update = jest.fn(() => apiToken);
+      const ctx = createContext({}, { request });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              getBy,
+              hash,
+            },
+          },
+        },
+        query() {
+          return { update };
+        },
+      };
+
+      await apiTokenStrategy.authenticate(ctx);
+      // It should update the lastUsedAt field if the token has not been used in the last hour
       expect(update).toHaveBeenCalledWith({
         data: { lastUsedAt: expect.any(Date) },
         where: { id: apiToken.id },
       });
-      expect(response).toStrictEqual({ authenticated: true, credentials: apiToken });
+    });
+
+    test('Does not update lastUsedAt if the token has been used in the last hour', async () => {
+      // Mock lastUsedAt to be less than an hour ago
+      const getBy = jest.fn(() => ({
+        ...apiToken,
+        lastUsedAt: new Date().toISOString(),
+      }));
+      const update = jest.fn(() => apiToken);
+      const ctx = createContext({}, { request });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              getBy,
+              hash,
+            },
+          },
+        },
+        query() {
+          return { update };
+        },
+      };
+
+      await apiTokenStrategy.authenticate(ctx);
+      expect(update).not.toHaveBeenCalled();
     });
 
     test('Fails to authenticate if the authorization header is missing', async () => {

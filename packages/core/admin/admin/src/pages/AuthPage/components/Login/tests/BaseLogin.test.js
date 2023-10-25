@@ -9,10 +9,12 @@ import * as yup from 'yup';
 
 import BaseLogin from '../BaseLogin';
 
-jest.mock('../../../../../hooks/useConfigurations', () => () => ({
-  logos: {
-    auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
-  },
+jest.mock('../../../../../hooks/useConfiguration', () => ({
+  useConfiguration: () => ({
+    logos: {
+      auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
+    },
+  }),
 }));
 
 describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
@@ -77,8 +79,13 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
-        line-height: 0;
         color: #ffffff;
+      }
+
+      .c40 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #4945ff;
       }
 
       .c1 {
@@ -382,7 +389,8 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         color: #666687;
       }
 
-      .c35[aria-disabled='true'] svg > g,.c35[aria-disabled='true'] svg path {
+      .c35[aria-disabled='true'] svg > g,
+      .c35[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -395,7 +403,8 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         color: #666687;
       }
 
-      .c35[aria-disabled='true']:active svg > g,.c35[aria-disabled='true']:active svg path {
+      .c35[aria-disabled='true']:active svg > g,
+      .c35[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
@@ -556,12 +565,6 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
 
       .c0:focus-visible {
         outline: none;
-      }
-
-      .c40 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #4945ff;
       }
 
       .c39 {
@@ -849,7 +852,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
               href="/auth/forgot-password"
             >
               <span
-                class="c40"
+                class="c7 c40"
               >
                 Forgot your password?
               </span>

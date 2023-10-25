@@ -4,8 +4,6 @@ import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import { useRouteMatch } from 'react-router-dom';
 
-import { getRequestUrl } from '../../../utils';
-
 function useSelect({
   componentUid,
   isUserAllowedToEditField,
@@ -78,20 +76,20 @@ function useSelect({
       // if no componentId exists in modifiedData it means that the user just created it
       // there then are no relations to request
       return componentId
-        ? getRequestUrl(`relations/${componentUid}/${componentId}/${fieldNameKeys.at(-1)}`)
+        ? `/content-manager/relations/${componentUid}/${componentId}/${fieldNameKeys.at(-1)}`
         : null;
     }
 
-    return getRequestUrl(`relations/${slug}/${entityId}/${name.split('.').at(-1)}`);
+    return `/content-manager/relations/${slug}/${entityId}/${name.split('.').at(-1)}`;
   }, [isCreatingEntry, origin, componentUid, slug, entityId, name, componentId, fieldNameKeys]);
 
   // /content-manager/relations/[model]/[field-name]
   const relationSearchEndpoint = useMemo(() => {
     if (componentUid) {
-      return getRequestUrl(`relations/${componentUid}/${name.split('.').at(-1)}`);
+      return `/content-manager/relations/${componentUid}/${name.split('.').at(-1)}`;
     }
 
-    return getRequestUrl(`relations/${slug}/${name.split('.').at(-1)}`);
+    return `/content-manager/relations/${slug}/${name.split('.').at(-1)}`;
   }, [componentUid, slug, name]);
 
   return {

@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import { Writable, PassThrough } from 'stream';
+import type { LoadedStrapi } from '@strapi/types';
 
 import type { TransferFlow, Step } from '../flows';
 import type { TransferStage, IAsset, Protocol } from '../../../../types';
@@ -375,45 +376,51 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
   async streamAsset(this: PushHandler, payload) {
     const assetsStream = this.streams?.assets;
 
-    // TODO: close the stream upong receiving an 'end' event instead
+    // TODO: close the stream upon receiving an 'end' event instead
     if (payload === null) {
       this.streams?.assets?.end();
       return;
     }
 
     for (const item of payload) {
-      const { action, assetID } = item;
+      /**
+       * This queues the given callback function to be executed in the next iteration
+       * of the event loop, immediately after the current operation completes.
+       */
+      process.nextTick(async () => {
+        const { action, assetID } = item;
 
-      if (!assetsStream) {
-        throw new Error('Stream not defined');
-      }
+        if (!assetsStream) {
+          throw new Error('Stream not defined');
+        }
 
-      if (action === 'start') {
-        this.assets[assetID] = { ...item.data, stream: new PassThrough() };
-        writeAsync(assetsStream, this.assets[assetID]);
-      }
+        if (action === 'start') {
+          this.assets[assetID] = { ...item.data, stream: new PassThrough() };
+          writeAsync(assetsStream, this.assets[assetID]);
+        }
 
-      if (action === 'stream') {
-        // The buffer has gone through JSON operations and is now of shape { type: "Buffer"; data: UInt8Array }
-        // We need to transform it back into a Buffer instance
-        const rawBuffer = item.data as unknown as { type: 'Buffer'; data: Uint8Array };
-        const chunk = Buffer.from(rawBuffer.data);
+        if (action === 'stream') {
+          // The buffer has gone through JSON operations and is now of shape { type: "Buffer"; data: UInt8Array }
+          // We need to transform it back into a Buffer instance
+          const rawBuffer = item.data as unknown as { type: 'Buffer'; data: Uint8Array };
+          const chunk = Buffer.from(rawBuffer.data);
 
-        await writeAsync(this.assets[assetID].stream, chunk);
-      }
+          await writeAsync(this.assets[assetID].stream, chunk);
+        }
 
-      if (action === 'end') {
-        await new Promise<void>((resolve, reject) => {
-          const { stream: assetStream } = this.assets[assetID];
-          assetStream
-            .on('close', () => {
-              delete this.assets[assetID];
-              resolve();
-            })
-            .on('error', reject)
-            .end();
-        });
-      }
+        if (action === 'end') {
+          await new Promise<void>((resolve, reject) => {
+            const { stream: assetStream } = this.assets[assetID];
+            assetStream
+              .on('close', () => {
+                delete this.assets[assetID];
+                resolve();
+              })
+              .on('error', reject)
+              .end();
+          });
+        }
+      });
     }
   },
 
@@ -449,7 +456,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
     this.provider = createLocalStrapiDestinationProvider({
       ...params.options,
       autoDestroy: false,
-      getStrapi: () => strapi,
+      getStrapi: () => strapi as LoadedStrapi,
     });
 
     return { transferID: this.transferID };
@@ -478,7 +485,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
   ): Promise<Protocol.Server.Payload<Protocol.Server.EndMessage>> {
     await this.verifyAuth();
 
-    if (this.transferID !== params.transferID) {
+    if (this.transferID !== params?.transferID) {
       throw new ProviderTransferError('Bad transfer ID provided');
     }
 

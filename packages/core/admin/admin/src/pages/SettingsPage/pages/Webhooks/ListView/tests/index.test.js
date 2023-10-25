@@ -1,30 +1,15 @@
 import React from 'react';
 
-import { fixtures } from '@strapi/admin-test-utils';
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { useRBAC } from '@strapi/helper-plugin';
-import {
-  fireEvent,
-  render as renderRTL,
-  waitFor,
-  waitForElementToBeRemoved,
-} from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { Provider } from 'react-redux';
-import { MemoryRouter } from 'react-router-dom';
-import { createStore } from 'redux';
+import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
+import { mockData } from '@tests/mockData';
+import { render as renderRTL, waitFor, server } from '@tests/utils';
+import { rest } from 'msw';
 
 import ListView from '../index';
 
-import server, { resetWebhooks } from './server';
-
-const toggleNotification = jest.fn();
-
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn().mockImplementation(() => toggleNotification),
   useRBAC: jest.fn().mockImplementation(() => ({
     isLoading: false,
     allowedActions: { canUpdate: true, canCreate: true, canDelete: true },
@@ -32,61 +17,11 @@ jest.mock('@strapi/helper-plugin', () => ({
   useFocusWhenNavigate: jest.fn(),
 }));
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-    },
-  },
-});
+const render = (props) => renderRTL(<ListView {...props} />);
 
-const render = (props) => ({
-  ...renderRTL(<ListView {...props} />, {
-    wrapper: ({ children }) => (
-      <Provider
-        store={createStore((state) => state, {
-          admin_app: { permissions: fixtures.permissions.app },
-        })}
-      >
-        <ThemeProvider theme={lightTheme}>
-          <QueryClientProvider client={queryClient}>
-            <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
-              <MemoryRouter>{children}</MemoryRouter>
-            </IntlProvider>
-          </QueryClientProvider>
-        </ThemeProvider>
-      </Provider>
-    ),
-  }),
-});
-
-const originalError = console.error;
-
-const user = userEvent.setup();
-
-describe('Admin | containers | ListView', () => {
-  beforeAll(() => {
-    console.error = (...args) => {
-      if (args[0] instanceof Error && args[0].name.includes('CanceledError')) {
-        return;
-      }
-      originalError.call(console, ...args);
-    };
-    server.listen();
-  });
-
+describe('Webhooks | ListView', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  afterEach(async () => {
-    resetWebhooks();
-    server.resetHandlers();
-  });
-
-  afterAll(() => {
-    console.error = originalError;
-    server.close();
   });
 
   it('should show a loader when data is loading and then display the data', async () => {
@@ -103,15 +38,17 @@ describe('Admin | containers | ListView', () => {
     });
   });
 
-  it('should show a loader when permissions are loading', () => {
+  it('should show a loader when permissions are loading', async () => {
     useRBAC.mockImplementationOnce(() => ({
       isLoading: true,
       allowedActions: { canUpdate: true, canCreate: true, canDelete: true },
     }));
 
-    const { getByText } = render();
+    const { queryByText } = render();
 
-    expect(getByText('Loading content.')).toBeInTheDocument();
+    expect(queryByText('Loading content.')).toBeInTheDocument();
+
+    await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
   });
 
   it('should show a list of webhooks', async () => {
@@ -123,7 +60,7 @@ describe('Admin | containers | ListView', () => {
   });
 
   it('should delete all webhooks', async () => {
-    const { getByText, getByRole, findByText } = render();
+    const { getByText, user, getByRole, findByText } = render();
     await waitFor(() => {
       getByText('http:://strapi.io');
     });
@@ -135,15 +72,25 @@ describe('Admin | containers | ListView', () => {
       expect(await findByText('Are you sure you want to delete this?')).toBeInTheDocument();
     });
 
+    server.use(
+      rest.get('/admin/webhooks', (req, res, ctx) => {
+        return res.once(
+          ctx.json({
+            data: [],
+          })
+        );
+      })
+    );
+
     await user.click(getByRole('button', { name: /confirm/i }));
 
-    await waitFor(async () => {
-      expect(await findByText('No webhooks found')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(getByText('No webhooks found')).toBeInTheDocument();
     });
   });
 
   it('should delete a single webhook', async () => {
-    const { getByText, getByRole, findByText, getAllByRole } = render();
+    const { getByText, getByRole, findByText, getAllByRole, user } = render();
     await waitFor(() => {
       getByText('http:://strapi.io');
     });
@@ -155,9 +102,17 @@ describe('Admin | containers | ListView', () => {
       expect(await findByText('Are you sure you want to delete this?')).toBeInTheDocument();
     });
 
-    await user.click(getByRole('button', { name: /confirm/i }));
+    server.use(
+      rest.get('/admin/webhooks', (req, res, ctx) => {
+        return res.once(
+          ctx.json({
+            data: [mockData.webhooks[1]],
+          })
+        );
+      })
+    );
 
-    await waitForElementToBeRemoved(() => getByText('http:://strapi.io'));
+    await user.click(getByRole('button', { name: /confirm/i }));
 
     await waitFor(async () => {
       expect(await findByText('http://me.io')).toBeInTheDocument();
@@ -165,12 +120,28 @@ describe('Admin | containers | ListView', () => {
   });
 
   it('should disable a webhook', async () => {
-    const { getByText, getAllByRole } = render();
+    const { getByText, getAllByRole, user } = render();
     await waitFor(() => {
       getByText('http:://strapi.io');
     });
 
     const enableSwitches = getAllByRole('switch', { name: /status/i });
+
+    server.use(
+      rest.get('/admin/webhooks', (req, res, ctx) => {
+        return res(
+          ctx.json({
+            data: [
+              {
+                ...mockData.webhooks[0],
+                isEnabled: false,
+              },
+              ...mockData.webhooks.slice(1),
+            ],
+          })
+        );
+      })
+    );
 
     await user.click(enableSwitches[0]);
 

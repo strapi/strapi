@@ -8,7 +8,7 @@ import { useConfig } from './useConfig';
 const useModalQueryParams = (initialState) => {
   const { trackUsage } = useTracking();
   const {
-    config: { isLoading, isError, data: config },
+    config: { data: config },
   } = useConfig();
 
   const [queryObject, setQueryObject] = useState({
@@ -22,15 +22,14 @@ const useModalQueryParams = (initialState) => {
   });
 
   useEffect(() => {
-    if (isLoading || isError) {
-      return;
+    if (config) {
+      setQueryObject((prevQuery) => ({
+        ...prevQuery,
+        sort: config.sort,
+        pageSize: config.pageSize,
+      }));
     }
-    setQueryObject((prevQuery) => ({
-      ...prevQuery,
-      sort: config.sort,
-      pageSize: config.pageSize,
-    }));
-  }, [isLoading, isError, config]);
+  }, [config]);
 
   const handleChangeFilters = (nextFilters) => {
     trackUsage('didFilterMediaLibraryElements', {
@@ -72,8 +71,8 @@ const useModalQueryParams = (initialState) => {
     }
   };
 
-  const handleChangeFolder = (folder) => {
-    setQueryObject((prev) => ({ ...prev, folder: folder ?? null }));
+  const handleChangeFolder = (folder, folderPath) => {
+    setQueryObject((prev) => ({ ...prev, folder: folder ?? null, folderPath }));
   };
 
   return [

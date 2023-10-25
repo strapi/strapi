@@ -1,7 +1,7 @@
 import { NodePlopAPI } from 'plop';
 import chalk from 'chalk';
 import tsUtils from '@strapi/typescript-utils';
-import utils from '@strapi/utils';
+import * as utils from '@strapi/utils';
 
 import validateInput from './utils/validate-input';
 

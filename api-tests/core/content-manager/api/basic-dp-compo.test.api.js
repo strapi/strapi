@@ -222,4 +222,60 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
       data.productsWithCompoAndDP.push(res.body);
     });
   });
+
+  describe('Publication', () => {
+    test('Can publish product with compo - required', async () => {
+      const product = {
+        name: 'Product 1',
+        description: 'Product description',
+        compo: {
+          name: 'compo name',
+          description: 'short',
+        },
+      };
+      const res = await rq({
+        method: 'POST',
+        url: '/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp',
+        body: product,
+      });
+
+      const publishRes = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp/${res.body.id}/actions/publish`,
+        body: product,
+      });
+
+      expect(publishRes.statusCode).toBe(200);
+      expect(publishRes.body).toMatchObject(product);
+      expect(publishRes.body.id).toEqual(res.body.id);
+      expect(publishRes.body.publishedAt).not.toBeNull();
+    });
+
+    test('Can bulk publish product with compo - required', async () => {
+      const product = {
+        name: 'Product 1',
+        description: 'Product description',
+        compo: {
+          name: 'compo name',
+          description: 'short',
+        },
+      };
+      const res = await rq({
+        method: 'POST',
+        url: '/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp',
+        body: product,
+      });
+
+      const publishRes = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp/actions/bulkPublish`,
+        body: {
+          ids: [res.body.id],
+        },
+      });
+
+      expect(publishRes.statusCode).toBe(200);
+      expect(publishRes.body).toMatchObject({ count: 1 });
+    });
+  });
 });

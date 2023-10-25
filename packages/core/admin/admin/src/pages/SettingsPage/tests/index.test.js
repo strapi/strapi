@@ -8,8 +8,8 @@ import { createMemoryHistory } from 'history';
 import { Route, Router } from 'react-router-dom';
 
 import { SettingsPage } from '..';
-import Theme from '../../../components/Theme';
-import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
+import { Theme } from '../../../components/Theme';
+import { ThemeToggleProvider } from '../../../components/ThemeToggleProvider';
 import { useSettingsMenu } from '../../../hooks';
 
 jest.mock('../../../hooks', () => ({
@@ -22,6 +22,7 @@ jest.mock('react-intl', () => ({
   FormattedMessage: ({ id }) => id,
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => id) }),
 }));
+
 jest.mock('../pages/ApplicationInfosPage', () => () => {
   return <h1>App infos</h1>;
 });
@@ -72,17 +73,11 @@ describe('ADMIN | pages | SettingsPage', () => {
     const { container } = render(App);
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c11 {
-        padding-bottom: 56px;
-      }
-
-      .c0 {
-        display: grid;
-        grid-template-columns: auto 1fr;
-      }
-
-      .c12 {
-        overflow-x: hidden;
+      .c4 {
+        font-weight: 600;
+        font-size: 1.125rem;
+        line-height: 1.22;
+        color: #32324d;
       }
 
       .c2 {
@@ -105,11 +100,8 @@ describe('ADMIN | pages | SettingsPage', () => {
         padding-bottom: 16px;
       }
 
-      .c4 {
-        font-weight: 600;
-        font-size: 1.125rem;
-        line-height: 1.22;
-        color: #32324d;
+      .c11 {
+        padding-bottom: 56px;
       }
 
       .c3 {
@@ -152,6 +144,15 @@ describe('ADMIN | pages | SettingsPage', () => {
         -ms-flex-negative: 0;
         flex-shrink: 0;
         margin: 0;
+      }
+
+      .c0 {
+        display: grid;
+        grid-template-columns: auto 1fr;
+      }
+
+      .c12 {
+        overflow-x: hidden;
       }
 
       .c1 {

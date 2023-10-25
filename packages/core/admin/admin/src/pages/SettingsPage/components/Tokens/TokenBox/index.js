@@ -17,7 +17,7 @@ const TokenBox = ({ token, tokenType }) => {
     const didCopy = await copy(token);
 
     if (didCopy) {
-      trackUsage.current('didCopyTokenKey', {
+      trackUsage('didCopyTokenKey', {
         tokenType,
       });
       toggleNotification({

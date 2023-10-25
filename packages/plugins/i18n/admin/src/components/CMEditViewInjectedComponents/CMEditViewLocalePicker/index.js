@@ -101,46 +101,40 @@ const CMEditViewLocalePicker = ({
       <Typography variant="sigma" textColor="neutral600">
         {formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Internationalization' })}
       </Typography>
-      <Box paddingTop={2} paddingBottom={6}>
-        <Divider />
-      </Box>
-      <Flex direction="column" alignItems="stretch" gaps={2}>
-        <Box>
-          <Select
-            label={formatMessage({
-              id: getTrad('Settings.locales.modal.locales.label'),
-            })}
-            onChange={handleChange}
+      <Divider unsetMargin={false} marginTop={2} marginBottom={6} />
+      <Flex direction="column" alignItems="stretch" gap={2}>
+        <Select
+          label={formatMessage({
+            id: getTrad('Settings.locales.modal.locales.label'),
+          })}
+          onChange={handleChange}
+          value={value?.value}
+        >
+          <Option
             value={value?.value}
+            disabled
+            startIcon={hasDraftAndPublishEnabled ? <Bullet status={currentLocaleStatus} /> : null}
           >
-            <Option
-              value={value?.value}
-              disabled
-              startIcon={hasDraftAndPublishEnabled ? <Bullet status={currentLocaleStatus} /> : null}
-            >
-              {value?.label}
-            </Option>
-            {filteredOptions.map((option) => {
-              return (
-                <Option
-                  key={option.value}
-                  value={option.value}
-                  startIcon={hasDraftAndPublishEnabled ? <Bullet status={option.status} /> : null}
-                >
-                  {option.label}
-                </Option>
-              );
-            })}
-          </Select>
-        </Box>
-        <Box>
-          <CMEditViewCopyLocale
-            appLocales={appLocales}
-            currentLocale={currentLocale}
-            localizations={localizations}
-            readPermissions={readPermissions}
-          />
-        </Box>
+            {value?.label}
+          </Option>
+          {filteredOptions.map((option) => {
+            return (
+              <Option
+                key={option.value}
+                value={option.value}
+                startIcon={hasDraftAndPublishEnabled ? <Bullet status={option.status} /> : null}
+              >
+                {option.label}
+              </Option>
+            );
+          })}
+        </Select>
+        <CMEditViewCopyLocale
+          appLocales={appLocales}
+          currentLocale={currentLocale}
+          localizations={localizations}
+          readPermissions={readPermissions}
+        />
       </Flex>
     </Box>
   );

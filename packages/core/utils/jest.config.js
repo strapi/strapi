@@ -2,6 +2,9 @@
 
 module.exports = {
   preset: '../../../jest-preset.unit.js',
-  testMatch: ['<rootDir>/**/*.test.js'],
+  transform: {
+    '^.+\\.ts$': ['@swc/jest'],
+  },
+  testMatch: ['<rootDir>/**/*.test.ts'],
   displayName: 'Core utils',
 };

@@ -1,20 +1,34 @@
 import React from 'react';
 
+import { configureStore } from '@reduxjs/toolkit';
+import { fixtures } from '@strapi/admin-test-utils';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { Provider } from 'react-redux';
 
-import AdminSeatInfo from '..';
-import { useLicenseLimits } from '../../../../../../../hooks';
+import { AdminSeatInfoEE } from '..';
+import { useLicenseLimits } from '../../../../../../../hooks/useLicenseLimits';
+
+jest.mock('../../../../../../../hooks/useLicenseLimits');
+
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useRBAC: jest.fn().mockReturnValue({
+    isLoading: false,
+    allowedActions: { canRead: true, canCreate: true, canUpdate: true, canDelete: true },
+  }),
+}));
 
 const LICENSE_MOCK = {
+  isLoading: false,
+  isError: false,
   license: {
-    data: {
-      enforcementUserCount: 10,
-      licenseLimitStatus: '',
-      permittedSeats: 100,
-      isHostedOnStrapiCloud: false,
-    },
+    enforcementUserCount: 10,
+    licenseLimitStatus: '',
+    permittedSeats: 100,
+    isHostedOnStrapiCloud: false,
   },
 };
 
@@ -26,39 +40,49 @@ const withMarkup = (query) => (text) =>
     return hasText(node) && childrenDontHaveText;
   });
 
-jest.mock('../../../../../../../hooks', () => ({
-  ...jest.requireActual('../../../../../../../hooks'),
-  useLicenseLimits: jest.fn(),
-}));
+const setup = (props) =>
+  render(<AdminSeatInfoEE {...props} />, {
+    wrapper({ children }) {
+      const client = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+          },
+        },
+      });
 
-const ComponentFixture = (props) => (
-  <ThemeProvider theme={lightTheme}>
-    <IntlProvider locale="en" messages={{}}>
-      <AdminSeatInfo {...props} />
-    </IntlProvider>
-  </ThemeProvider>
-);
-
-function setup(props) {
-  return render(<ComponentFixture {...props} />);
-}
+      return (
+        <QueryClientProvider client={client}>
+          <Provider
+            store={configureStore({
+              reducer: (state) => state,
+              preloadedState: {
+                admin_app: { permissions: fixtures.permissions.app },
+              },
+            })}
+          >
+            <ThemeProvider theme={lightTheme}>
+              <IntlProvider locale="en" messages={{}}>
+                {children}
+              </IntlProvider>
+            </ThemeProvider>
+          </Provider>
+        </QueryClientProvider>
+      );
+    },
+  });
 
 describe('<AdminSeatInfo />', () => {
-  beforeEach(() => {
+  afterEach(() => {
     jest.clearAllMocks();
-
-    useLicenseLimits.mockReturnValue(LICENSE_MOCK);
   });
 
   test('Do not render anything, when permittedSeats is falsy', () => {
-    useLicenseLimits.mockReturnValue({
+    useLicenseLimits.mockReturnValueOnce({
       ...LICENSE_MOCK,
       license: {
         ...LICENSE_MOCK.license,
-        data: {
-          ...LICENSE_MOCK.license.data,
-          permittedSeats: null,
-        },
+        permittedSeats: null,
       },
     });
 
@@ -68,7 +92,10 @@ describe('<AdminSeatInfo />', () => {
   });
 
   test('Render seat info', () => {
+    useLicenseLimits.mockReturnValueOnce(LICENSE_MOCK);
+
     const { getByText } = setup();
+
     const getByTextWithMarkup = withMarkup(getByText);
 
     expect(getByText('Admin seats')).toBeInTheDocument();
@@ -76,6 +103,8 @@ describe('<AdminSeatInfo />', () => {
   });
 
   test('Render billing link (not on strapi cloud)', () => {
+    useLicenseLimits.mockReturnValueOnce(LICENSE_MOCK);
+
     const { getByText } = setup();
 
     expect(getByText('Contact sales')).toBeInTheDocument();
@@ -86,14 +115,11 @@ describe('<AdminSeatInfo />', () => {
   });
 
   test('Render billing link (on strapi cloud)', () => {
-    useLicenseLimits.mockReturnValue({
+    useLicenseLimits.mockReturnValueOnce({
       ...LICENSE_MOCK,
       license: {
         ...LICENSE_MOCK.license,
-        data: {
-          ...LICENSE_MOCK.license.data,
-          isHostedOnStrapiCloud: true,
-        },
+        isHostedOnStrapiCloud: true,
       },
     });
 
@@ -107,14 +133,11 @@ describe('<AdminSeatInfo />', () => {
   });
 
   test('Render OVER_LIMIT icon', () => {
-    useLicenseLimits.mockReturnValue({
+    useLicenseLimits.mockReturnValueOnce({
       ...LICENSE_MOCK,
       license: {
         ...LICENSE_MOCK.license,
-        data: {
-          ...LICENSE_MOCK.license.data,
-          licenseLimitStatus: 'OVER_LIMIT',
-        },
+        licenseLimitStatus: 'OVER_LIMIT',
       },
     });
 

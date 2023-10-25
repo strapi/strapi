@@ -1,4 +1,4 @@
 module.exports = {
   root: true,
-  extends: ['custom/typescript'],
+  extends: ['custom/back/typescript'],
 };

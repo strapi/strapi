@@ -136,6 +136,7 @@
   "modalForm.editCategory.base.name.description": "카테고리 이름에 공백을 사용할 수 없습니다.",
   "modalForm.header-edit": "{name} 수정",
   "modalForm.header.categories": "카테고리",
+  "modalForm.header.back": "뒤쪽에",
   "modalForm.singleType.header-create": "싱글 타입 생성",
   "modalForm.sub-header.addComponentToDynamicZone": "다이나믹 존에 새 컴포넌트를 추가합니다.",
   "modalForm.sub-header.attribute.create": "새 {type} 필드 추가",

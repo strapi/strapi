@@ -13,6 +13,26 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   width: 1px;
 }
 
+.c6 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #8e8ea9;
+}
+
+.c12 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c14 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
 .c4 {
   padding-right: 4px;
   padding-left: 4px;
@@ -36,27 +56,6 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   padding-right: 8px;
   padding-bottom: 4px;
   padding-left: 8px;
-}
-
-.c6 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #8e8ea9;
-}
-
-.c12 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 0;
-  color: #ffffff;
-}
-
-.c14 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
 }
 
 .c0 {
@@ -100,26 +99,6 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   -ms-flex-direction: row;
   flex-direction: row;
   gap: 8px;
-}
-
-.c1:first-child {
-  margin-left: calc(-1*8px);
-}
-
-.c3 {
-  border-radius: 4px;
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.43;
-  padding: 4px 8px;
-  -webkit-text-decoration: none;
-  text-decoration: none;
-}
-
-.c3:hover,
-.c3:focus {
-  background-color: #dcdce4;
-  color: #4a4a6a;
 }
 
 .c9 {
@@ -191,7 +170,8 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   color: #666687;
 }
 
-.c10[aria-disabled='true'] svg > g,.c10[aria-disabled='true'] svg path {
+.c10[aria-disabled='true'] svg > g,
+.c10[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -204,7 +184,8 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   color: #666687;
 }
 
-.c10[aria-disabled='true']:active svg > g,.c10[aria-disabled='true']:active svg path {
+.c10[aria-disabled='true']:active svg > g,
+.c10[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -226,8 +207,29 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   fill: #8e8ea9;
 }
 
+.c1:first-child {
+  margin-left: calc(-1*8px);
+}
+
+.c3 {
+  border-radius: 4px;
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.43;
+  padding: 4px 8px;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+}
+
+.c3:hover,
+.c3:focus {
+  background-color: #dcdce4;
+  color: #4a4a6a;
+}
+
 .c11 {
-  padding: 4px 12px;
+  padding: 4px 8px;
+  height: unset;
 }
 
 .c11:hover,
@@ -272,7 +274,7 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
           aria-expanded="false"
           aria-haspopup="menu"
           aria-label="Get more ascendants folders"
-          class="c7 c8 c9 c10 c11 sc-dcgwPl c10"
+          class="c7 c8 c9 c10 c11 sc-iwjdpV c10"
           data-state="closed"
           id="radix-:r1:"
           label="..."
@@ -286,26 +288,6 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
             >
               ...
             </span>
-            <div
-              aria-hidden="true"
-              class="c0"
-            >
-              <svg
-                aria-hidden="true"
-                fill="none"
-                height="0.25rem"
-                viewBox="0 0 14 8"
-                width="0.375rem"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  clip-rule="evenodd"
-                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                  fill="#32324D"
-                  fill-rule="evenodd"
-                />
-              </svg>
-            </div>
           </span>
         </button>
         <div

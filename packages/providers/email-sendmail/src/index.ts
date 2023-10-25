@@ -1,5 +1,4 @@
 import sendmailFactory, { Options, MailInput } from 'sendmail';
-import utils from '@strapi/utils';
 
 interface Settings {
   defaultFrom: string;
@@ -20,7 +19,7 @@ interface SendOptions {
 
 type ProviderOptions = Options;
 
-export = {
+export default {
   init(providerOptions: ProviderOptions, settings: Settings) {
     const sendmail = sendmailFactory({
       silent: true,
@@ -44,7 +43,7 @@ export = {
             ...rest,
           };
 
-          sendmail(utils.removeUndefined(msg), (err) => {
+          sendmail(msg, (err) => {
             if (err) {
               reject(err);
             } else {

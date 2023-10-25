@@ -136,6 +136,7 @@
   "modalForm.editCategory.base.name.description": "No se permiten espacios para el nombre de la categoría.",
   "modalForm.header-edit": "Editar {name}",
   "modalForm.header.categories": "Categorías",
+  "modalForm.header.back": "Atrás",
   "modalForm.singleType.header-create": "Crea un tipo único",
   "modalForm.sub-header.addComponentToDynamicZone": "Agregar nuevo componente a la zona dinámica",
   "modalForm.sub-header.attribute.create": "Agregar nuevo campo {type}",

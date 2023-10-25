@@ -3,7 +3,7 @@
 const path = require('path');
 const _ = require('lodash');
 const dotenv = require('dotenv');
-const strapi = require('../../core/strapi/lib');
+const strapi = require('../../core/strapi');
 const { createUtils } = require('./utils');
 
 const superAdminCredentials = {
@@ -15,8 +15,6 @@ const superAdminCredentials = {
 
 const superAdminLoginInfo = _.pick(superAdminCredentials, ['email', 'password']);
 
-const TEST_APP_URL = path.resolve(__dirname, '../../../testApp');
-
 const createStrapiInstance = async ({
   ensureSuperAdmin = true,
   logLevel = 'error',
@@ -25,9 +23,12 @@ const createStrapiInstance = async ({
 } = {}) => {
   // read .env file as it could have been updated
   dotenv.config({ path: process.env.ENV_PATH });
+
+  const baseDir = path.dirname(process.env.ENV_PATH);
+
   const options = {
-    appDir: TEST_APP_URL,
-    distDir: TEST_APP_URL,
+    appDir: baseDir,
+    distDir: baseDir,
   };
   const instance = strapi(options);
 

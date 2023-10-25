@@ -45,7 +45,7 @@ const STATIC_FIELDS = [ID_ATTRIBUTE];
 module.exports = ({ action, ability, model }) => {
   const schema = strapi.getModel(model);
 
-  const { allowedFields } = sanitize.visitors;
+  const { removeDisallowedFields } = sanitize.visitors;
 
   const createSanitizeQuery = (options = {}) => {
     const { fields } = options;
@@ -54,8 +54,9 @@ module.exports = ({ action, ability, model }) => {
     const permittedFields = fields.shouldIncludeAll ? null : getQueryFields(fields.permitted);
 
     const sanitizeFilters = pipeAsync(
-      traverse.traverseQueryFilters(allowedFields(permittedFields), { schema }),
+      traverse.traverseQueryFilters(removeDisallowedFields(permittedFields), { schema }),
       traverse.traverseQueryFilters(omitDisallowedAdminUserFields, { schema }),
+      traverse.traverseQueryFilters(omitHiddenFields, { schema }),
       traverse.traverseQueryFilters(removePassword, { schema }),
       traverse.traverseQueryFilters(
         ({ key, value }, { remove }) => {
@@ -68,8 +69,9 @@ module.exports = ({ action, ability, model }) => {
     );
 
     const sanitizeSort = pipeAsync(
-      traverse.traverseQuerySort(allowedFields(permittedFields), { schema }),
+      traverse.traverseQuerySort(removeDisallowedFields(permittedFields), { schema }),
       traverse.traverseQuerySort(omitDisallowedAdminUserFields, { schema }),
+      traverse.traverseQuerySort(omitHiddenFields, { schema }),
       traverse.traverseQuerySort(removePassword, { schema }),
       traverse.traverseQuerySort(
         ({ key, attribute, value }, { remove }) => {
@@ -82,13 +84,15 @@ module.exports = ({ action, ability, model }) => {
     );
 
     const sanitizePopulate = pipeAsync(
-      traverse.traverseQueryPopulate(allowedFields(permittedFields), { schema }),
+      traverse.traverseQueryPopulate(removeDisallowedFields(permittedFields), { schema }),
       traverse.traverseQueryPopulate(omitDisallowedAdminUserFields, { schema }),
+      traverse.traverseQueryPopulate(omitHiddenFields, { schema }),
       traverse.traverseQueryPopulate(removePassword, { schema })
     );
 
     const sanitizeFields = pipeAsync(
-      traverse.traverseQueryFields(allowedFields(permittedFields), { schema }),
+      traverse.traverseQueryFields(removeDisallowedFields(permittedFields), { schema }),
+      traverse.traverseQueryFields(omitHiddenFields, { schema }),
       traverse.traverseQueryFields(removePassword, { schema })
     );
 
@@ -126,7 +130,7 @@ module.exports = ({ action, ability, model }) => {
       // Remove unallowed fields from admin::user relations
       traverseEntity(pickAllowedAdminUserFields, { schema }),
       // Remove not allowed fields (RBAC)
-      traverseEntity(allowedFields(permittedFields), { schema }),
+      traverseEntity(removeDisallowedFields(permittedFields), { schema }),
       // Remove all fields of type 'password'
       sanitize.sanitizers.sanitizePasswords(schema)
     );
@@ -141,7 +145,7 @@ module.exports = ({ action, ability, model }) => {
       // Remove fields hidden from the admin
       traverseEntity(omitHiddenFields, { schema }),
       // Remove not allowed fields (RBAC)
-      traverseEntity(allowedFields(permittedFields), { schema }),
+      traverseEntity(removeDisallowedFields(permittedFields), { schema }),
       // Remove roles from createdBy & updateBy fields
       omitCreatorRoles
     );
@@ -256,13 +260,21 @@ module.exports = ({ action, ability, model }) => {
   };
 
   const getQueryFields = (fields = []) => {
+    const nonVisibleAttributes = getNonVisibleAttributes(schema);
+    const writableAttributes = getWritableAttributes(schema);
+
+    const nonVisibleWritableAttributes = intersection(nonVisibleAttributes, writableAttributes);
+
     return uniq([
       ...fields,
       ...STATIC_FIELDS,
       ...COMPONENT_FIELDS,
+      ...nonVisibleWritableAttributes,
       CREATED_AT_ATTRIBUTE,
       UPDATED_AT_ATTRIBUTE,
       PUBLISHED_AT_ATTRIBUTE,
+      CREATED_BY_ATTRIBUTE,
+      UPDATED_BY_ATTRIBUTE,
     ]);
   };
 

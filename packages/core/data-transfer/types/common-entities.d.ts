@@ -1,5 +1,5 @@
-import type { Attribute, Common } from '@strapi/strapi';
 import type { Readable } from 'stream';
+import type { Attribute, Common } from '@strapi/types';
 
 export interface IMetadata {
   strapi?: {
@@ -129,11 +129,32 @@ export interface IConfiguration<T = unknown> {
   value: T;
 }
 
+interface IFile {
+  name: string;
+  alternativeText?: string;
+  caption?: string;
+  width?: number;
+  height?: number;
+  formats?: Record<string, IFile>;
+  hash: string;
+  ext?: string;
+  mime: string;
+  size: number;
+  url: string;
+  previewUrl?: string;
+  path?: string;
+  provider?: string;
+  provider_metadata?: Record<string, unknown>;
+  type?: string;
+  mainHash?: string;
+}
 export interface IAsset {
   filename: string;
   filepath: string;
   stream: Readable;
   stats: IAssetStats;
+  buffer?: Buffer;
+  metadata?: IFile;
 }
 
 export interface IAssetStats {

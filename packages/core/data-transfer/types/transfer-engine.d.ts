@@ -1,8 +1,8 @@
 import type { PassThrough } from 'stream';
 import type { ITransferResults, TransferTransforms, TransferProgress } from './utils';
 import type { ISourceProvider, IDestinationProvider } from './providers';
-import type { IDiagnosticReporter } from '../src/engine/diagnostic';
-import type { Diff } from '../src/utils/json';
+import type { IDiagnosticReporter } from '../engine/diagnostic';
+import type { Diff } from '../utils/json';
 
 export type TransferFilterPreset = 'content' | 'files' | 'config';
 
@@ -17,6 +17,16 @@ export type SchemaDiffHandlerContext = {
   destination: IDestinationProvider;
 };
 export type SchemaDiffHandler = Middleware<SchemaDiffHandlerContext>;
+
+export type ErrorHandlerContext = {
+  ignore?: boolean;
+};
+
+export type ErrorHandler<T extends ErrorHandlerContext = ErrorHandlerContext> = Middleware<T>;
+
+export type ErrorCode = 'ASSETS_DIRECTORY_ERR';
+
+export type ErrorHandlers = { [k in ErrorCode]: ErrorHandler[] };
 
 /**
  * Defines the capabilities and properties of the transfer engine
@@ -70,6 +80,16 @@ export interface ITransferEngine<
    * connections, open files, etc...
    */
   bootstrap(): Promise<void>;
+
+  /**
+   * Abort the transfer process
+   */
+  abortTransfer(): Promise<void>;
+
+  /**
+   * Run the integrity check which will make sure it's possible
+   */
+  reportWarning(message: string, origin?: string): void;
 
   /**
    * Engine init step. Must be called after the providers bootstrap.
@@ -150,9 +170,9 @@ export interface ITransferEngineOptions {
   transforms?: TransferTransforms;
 
   // List of TransferTransformList preset options to exclude/include
-  exclude: TransferFilterPreset[];
-  only: TransferFilterPreset[];
+  exclude?: TransferFilterPreset[];
+  only?: TransferFilterPreset[];
 
   // delay after each record
-  throttle: number;
+  throttle?: number;
 }

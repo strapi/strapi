@@ -1,3 +1,1 @@
-import { EventTableCE } from './EventTableCE';
-
-export default EventTableCE;
+export * from './EventTableCE';

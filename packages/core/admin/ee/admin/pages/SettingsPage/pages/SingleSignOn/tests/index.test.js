@@ -1,16 +1,15 @@
 import React from 'react';
 
+import { configureStore } from '@reduxjs/toolkit';
 import { fixtures } from '@strapi/admin-test-utils';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { useRBAC } from '@strapi/helper-plugin';
 import { fireEvent, getByLabelText, render, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
-import { createStore } from 'redux';
 
 import { SingleSignOn } from '../index';
-
-import server from './server';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -23,44 +22,51 @@ jest.mock('@strapi/helper-plugin', () => ({
 const setup = (props) =>
   render(<SingleSignOn {...props} />, {
     wrapper({ children }) {
+      const client = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+          },
+        },
+      });
+
       return (
-        <Provider
-          store={createStore((state) => state, {
-            admin_app: {
-              permissions: {
-                ...fixtures.permissions.app,
-                settings: {
-                  ...fixtures.permissions.app.settings,
-                  sso: {
-                    main: [{ action: 'admin::provider-login.read', subject: null }],
-                    read: [{ action: 'admin::provider-login.read', subject: null }],
-                    update: [{ action: 'admin::provider-login.update', subject: null }],
+        <QueryClientProvider client={client}>
+          <Provider
+            store={configureStore({
+              reducer: (state) => state,
+              preloadedState: {
+                admin_app: {
+                  permissions: {
+                    ...fixtures.permissions.app,
+                    settings: {
+                      ...fixtures.permissions.app.settings,
+                      sso: {
+                        main: [{ action: 'admin::provider-login.read', subject: null }],
+                        read: [{ action: 'admin::provider-login.read', subject: null }],
+                        update: [{ action: 'admin::provider-login.update', subject: null }],
+                      },
+                    },
                   },
                 },
               },
-            },
-          })}
-        >
-          <ThemeProvider theme={lightTheme}>
-            <IntlProvider locale="en" messages={{}} textComponent="span">
-              {children}
-            </IntlProvider>
-          </ThemeProvider>
-        </Provider>
+            })}
+          >
+            <ThemeProvider theme={lightTheme}>
+              <IntlProvider locale="en" messages={{}} textComponent="span">
+                {children}
+              </IntlProvider>
+            </ThemeProvider>
+          </Provider>
+        </QueryClientProvider>
       );
     },
   });
 
 describe('Admin | ee | SettingsPage | SSO', () => {
-  beforeAll(() => server.listen());
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
-  afterEach(() => server.resetHandlers());
-
-  afterAll(() => server.close());
 
   it('renders and matches the snapshot', async () => {
     useRBAC.mockImplementation(() => ({

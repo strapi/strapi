@@ -18,9 +18,9 @@ import { useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 
-import { ApiTokenPermissionsContextProvider } from '../../../../../contexts/ApiTokenPermissions';
-import { formatAPIErrors } from '../../../../../utils';
-import { selectAdminPermissions } from '../../../../App/selectors';
+import { ApiTokenPermissionsContextProvider } from '../../../../../contexts/apiTokenPermissions';
+import { selectAdminPermissions } from '../../../../../selectors';
+import { formatAPIErrors } from '../../../../../utils/formatAPIErrors';
 import { API_TOKEN_TYPE } from '../../../components/Tokens/constants';
 import FormHead from '../../../components/Tokens/FormHead';
 import TokenBox from '../../../components/Tokens/TokenBox';

@@ -1,6 +1,6 @@
 import pluralize from 'pluralize';
 import slugify from '@sindresorhus/slugify';
-import utils from '@strapi/utils';
+import * as utils from '@strapi/utils';
 
 import type { PromptQuestion } from 'node-plop';
 

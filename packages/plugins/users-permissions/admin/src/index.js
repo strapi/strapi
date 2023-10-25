@@ -9,7 +9,6 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 
 import { PERMISSIONS } from './constants';
-import pluginId from './pluginId';
 import getTrad from './utils/getTrad';
 
 const name = pluginPkg.strapi.name;
@@ -19,7 +18,7 @@ export default {
     // Create the plugin's settings section
     app.createSettingSection(
       {
-        id: pluginId,
+        id: 'users-permissions',
         intlLabel: {
           id: getTrad('Settings.section-label'),
           defaultMessage: 'Users & Permissions plugin',
@@ -32,7 +31,7 @@ export default {
             defaultMessage: 'Roles',
           },
           id: 'roles',
-          to: `/settings/${pluginId}/roles`,
+          to: `/settings/users-permissions/roles`,
           async Component() {
             const component = await import(
               /* webpackChunkName: "users-roles-settings-page" */ './pages/Roles'
@@ -48,7 +47,7 @@ export default {
             defaultMessage: 'Providers',
           },
           id: 'providers',
-          to: `/settings/${pluginId}/providers`,
+          to: `/settings/users-permissions/providers`,
           async Component() {
             const component = await import(
               /* webpackChunkName: "users-providers-settings-page" */ './pages/Providers'
@@ -64,7 +63,7 @@ export default {
             defaultMessage: 'Email templates',
           },
           id: 'email-templates',
-          to: `/settings/${pluginId}/email-templates`,
+          to: `/settings/users-permissions/email-templates`,
           async Component() {
             const component = await import(
               /* webpackChunkName: "users-email-settings-page" */ './pages/EmailTemplates'
@@ -80,7 +79,7 @@ export default {
             defaultMessage: 'Advanced Settings',
           },
           id: 'advanced-settings',
-          to: `/settings/${pluginId}/advanced-settings`,
+          to: `/settings/users-permissions/advanced-settings`,
           async Component() {
             const component = await import(
               /* webpackChunkName: "users-advanced-settings-page" */ './pages/AdvancedSettings'
@@ -94,7 +93,7 @@ export default {
     );
 
     app.registerPlugin({
-      id: pluginId,
+      id: 'users-permissions',
       name,
     });
   },
@@ -107,7 +106,7 @@ export default {
         )
           .then(({ default: data }) => {
             return {
-              data: prefixPluginTranslations(data, pluginId),
+              data: prefixPluginTranslations(data, 'users-permissions'),
               locale,
             };
           })

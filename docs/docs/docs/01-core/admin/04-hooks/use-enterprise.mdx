@@ -54,3 +54,8 @@ if (!Component) {
     return;
 }
 ```
+
+### `enabled`
+
+Similar to react-query this boolean flag allows disabling the EE import, e.g. when more than one condition needs to be applied. If `enabled`
+is set to false, the first argument (CE_DATA) will be returned.
