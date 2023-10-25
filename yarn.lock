@@ -2814,6 +2814,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@emotion/is-prop-valid@npm:^1.1.0":
+  version: 1.2.1
+  resolution: "@emotion/is-prop-valid@npm:1.2.1"
+  dependencies:
+    "@emotion/memoize": "npm:^0.8.1"
+  checksum: fe231c472d38b3bbe519bcc9a5585cd41c45604147f3a065e333caf0f695d668aa21bc4229e657c1b6ea7398e096899e6ad54662548c73f11f6ba594aebd76a1
+  languageName: node
+  linkType: hard
+
 "@emotion/memoize@npm:0.7.4":
   version: 0.7.4
   resolution: "@emotion/memoize@npm:0.7.4"
@@ -2825,6 +2834,13 @@ __metadata:
   version: 0.8.0
   resolution: "@emotion/memoize@npm:0.8.0"
   checksum: c87bb110b829edd8e1c13b90a6bc37cebc39af29c7599a1e66a48e06f9bec43e8e53495ba86278cc52e7589549492c8dfdc81d19f4fdec0cee6ba13d2ad2c928
+  languageName: node
+  linkType: hard
+
+"@emotion/memoize@npm:^0.8.1":
+  version: 0.8.1
+  resolution: "@emotion/memoize@npm:0.8.1"
+  checksum: a19cc01a29fcc97514948eaab4dc34d8272e934466ed87c07f157887406bc318000c69ae6f813a9001c6a225364df04249842a50e692ef7a9873335fbcc141b0
   languageName: node
   linkType: hard
 
@@ -7687,7 +7703,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/helper-plugin@npm:4.14.5, @strapi/helper-plugin@workspace:packages/core/helper-plugin":
+"@strapi/helper-plugin@npm:4.14.5, @strapi/helper-plugin@npm:^4.14.3, @strapi/helper-plugin@workspace:packages/core/helper-plugin":
   version: 0.0.0-use.local
   resolution: "@strapi/helper-plugin@workspace:packages/core/helper-plugin"
   dependencies:
@@ -7762,6 +7778,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@strapi/icons@npm:^1.12.0":
+  version: 1.12.0
+  resolution: "@strapi/icons@npm:1.12.0"
+  peerDependencies:
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+  checksum: 1886def6deeda79147bf02e107570988af08ad70419418f3aad631fc1199c7c22788eeba78c50578eab36115966f622868fb161e3181975390f350b2f43e0a51
+  languageName: node
+  linkType: hard
+
 "@strapi/logger@npm:4.14.5, @strapi/logger@workspace:packages/utils/logger":
   version: 0.0.0-use.local
   resolution: "@strapi/logger@workspace:packages/utils/logger"
@@ -7822,6 +7848,35 @@ __metadata:
     qs: "npm:6.11.1"
     sift: "npm:16.0.1"
     tsconfig: "npm:4.14.5"
+  languageName: unknown
+  linkType: soft
+
+"@strapi/plugin-cloud@workspace:packages/plugins/cloud":
+  version: 0.0.0-use.local
+  resolution: "@strapi/plugin-cloud@workspace:packages/plugins/cloud"
+  dependencies:
+    "@strapi/design-system": "npm:^1.12.0"
+    "@strapi/helper-plugin": "npm:^4.14.3"
+    "@strapi/icons": "npm:^1.12.0"
+    "@strapi/strapi": "npm:4.14.5"
+    "@types/react": "npm:^18.2.7"
+    "@types/react-dom": "npm:^18.2.12"
+    "@types/react-router-dom": "npm:^5.3.3"
+    "@types/styled-components": "npm:5.1.26"
+    eslint-config-custom: "npm:4.14.5"
+    react: "npm:^18.2.0"
+    react-dom: "npm:^18.2.0"
+    react-intl: "npm:6.4.1"
+    react-router-dom: "npm:^5.3.4"
+    styled-components: "npm:^5.3.3"
+    tsconfig: "npm:4.14.5"
+    typescript: "npm:5.2.2"
+  peerDependencies:
+    "@strapi/strapi": ^4.4.0
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+    react-router-dom: ^5.3.4
+    styled-components: ^5.3.6
   languageName: unknown
   linkType: soft
 
@@ -9668,6 +9723,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-dom@npm:^18.2.12":
+  version: 18.2.12
+  resolution: "@types/react-dom@npm:18.2.12"
+  dependencies:
+    "@types/react": "npm:*"
+  checksum: 589bcdb941a77555aa8aea72271c59d92447a8364b95db0e431252cd5fa7281e2430a364de07b8cd8d22ae0599595d281625b380dd8dce68f172861abad55a80
+  languageName: node
+  linkType: hard
+
 "@types/react-helmet@npm:6.1.6":
   version: 6.1.6
   resolution: "@types/react-helmet@npm:6.1.6"
@@ -9677,7 +9741,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-router-dom@npm:5.3.3":
+"@types/react-router-dom@npm:5.3.3, @types/react-router-dom@npm:^5.3.3":
   version: 5.3.3
   resolution: "@types/react-router-dom@npm:5.3.3"
   dependencies:
@@ -27118,7 +27182,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-dom@npm:5.3.4":
+"react-router-dom@npm:5.3.4, react-router-dom@npm:^5.3.4":
   version: 5.3.4
   resolution: "react-router-dom@npm:5.3.4"
   dependencies:
@@ -29893,6 +29957,28 @@ __metadata:
     react-dom: ">= 16.8.0"
     react-is: ">= 16.8.0"
   checksum: b242a805479bac5346d0fa2c860a5a95b78fb2883b859a5b508e8f03d26cf4aa4f80eef49a3c3b8eb11db904f0a9dbab1627674725475fa3d7c6d0eed5f2d3dc
+  languageName: node
+  linkType: hard
+
+"styled-components@npm:^5.3.3":
+  version: 5.3.11
+  resolution: "styled-components@npm:5.3.11"
+  dependencies:
+    "@babel/helper-module-imports": "npm:^7.0.0"
+    "@babel/traverse": "npm:^7.4.5"
+    "@emotion/is-prop-valid": "npm:^1.1.0"
+    "@emotion/stylis": "npm:^0.8.4"
+    "@emotion/unitless": "npm:^0.7.4"
+    babel-plugin-styled-components: "npm:>= 1.12.0"
+    css-to-react-native: "npm:^3.0.0"
+    hoist-non-react-statics: "npm:^3.0.0"
+    shallowequal: "npm:^1.1.0"
+    supports-color: "npm:^5.5.0"
+  peerDependencies:
+    react: ">= 16.8.0"
+    react-dom: ">= 16.8.0"
+    react-is: ">= 16.8.0"
+  checksum: 7e1baee0f7b4479fe1a4064e4ae87e40f1ba583030d04827cef73fa7b36d3a91ed552dc76164d319216039f906af42a5229648c023482280fa4b5f71f00eef2d
   languageName: node
   linkType: hard
 
