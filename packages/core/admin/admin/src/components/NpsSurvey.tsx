@@ -285,7 +285,6 @@ const NpsSurvey = () => {
               ) : (
                 <Box as="fieldset" width="100%">
                   <Flex justifyContent="space-between" width="100%">
-                    {/* @ts-expect-error fixed in the next version of the DS */}
                     <Box marginLeft="auto" marginRight="auto">
                       <Typography fontWeight="semiBold" as="legend">
                         {formatMessage({
@@ -323,7 +322,6 @@ const NpsSurvey = () => {
                           position="relative"
                           cursor="pointer"
                         >
-                          {/* @ts-expect-error fixed in the next version of the DS */}
                           <FieldLabel htmlFor={`nps-survey-rating-${number}-input`}>
                             <VisuallyHidden>
                               <FieldInput
@@ -352,7 +350,6 @@ const NpsSurvey = () => {
                   {values.npsSurveyRating !== null && (
                     <Flex direction="column">
                       <Box marginTop={2}>
-                        {/* @ts-expect-error fixed in the next version of the DS */}
                         <FieldLabel htmlFor="npsSurveyFeedback" fontWeight="semiBold" fontSize={2}>
                           {formatMessage({
                             id: 'app.components.NpsSurvey.feedback-question',

@@ -20,7 +20,7 @@ import { useLocation } from 'react-router-dom';
 
 import { useAdminUsers } from '../../../../../hooks/useAdminUsers';
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
-import { selectAdminPermissions } from '../../../../App/selectors';
+import { selectAdminPermissions } from '../../../../../selectors';
 import Filters from '../../../components/Filters';
 
 import { CreateActionCE } from './CreateAction';

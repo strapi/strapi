@@ -6,7 +6,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { useSelector } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 
-import { selectAdminPermissions } from '../../../pages/App/selectors';
+import { selectAdminPermissions } from '../../../selectors';
 import { ContentTypeLayoutContext } from '../../contexts';
 import { useFetchContentTypeLayout } from '../../hooks';
 import { formatLayoutToApi } from '../../utils';

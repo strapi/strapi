@@ -72,7 +72,7 @@ const Table = ({
   const [showConfirmDeleteAll, setShowConfirmDeleteAll] = React.useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = React.useState(false);
   const [isConfirmButtonLoading, setIsConfirmButtonLoading] = React.useState(false);
-  const [{ query }] = useQueryParams();
+  const [{ query }] = useQueryParams<{ filters: string[] }>();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const ROW_COUNT = rows.length + 1;
@@ -271,8 +271,8 @@ const TableHead = ({
   withBulkActions,
 }: TableHeadProps) => {
   const { formatMessage } = useIntl();
-  const [{ query }, setQuery] = useQueryParams();
-  const sort = typeof query?.sort === 'string' ? query.sort : '';
+  const [{ query }, setQuery] = useQueryParams<{ sort?: string }>();
+  const sort = query?.sort ?? '';
   const [sortBy, sortOrder] = sort.split(':');
   const isIndeterminate = !areAllEntriesSelected && entriesToDelete.length > 0;
 

@@ -10,13 +10,51 @@ import { Slate, withReact, ReactEditor } from 'slate-react';
 
 import { BlocksToolbar } from '..';
 
-const title = 'dialog component';
+const mockMediaLibraryTitle = 'dialog component';
+const mockMediaLibrarySubmitButton = 'upload images';
+const mockMediaLibraryImage = {
+  name: 'Screenshot 2023-10-18 at 15.03.11.png',
+  alternativeText: 'Screenshot 2023-10-18 at 15.03.11.png',
+  caption: null,
+  width: 437,
+  height: 420,
+  formats: {
+    thumbnail: {
+      name: 'thumbnail_Screenshot 2023-10-18 at 15.03.11.png',
+      hash: 'thumbnail_Screenshot_2023_10_18_at_15_03_11_c6d21f899b',
+      ext: '.png',
+      mime: 'image/png',
+      path: null,
+      width: 162,
+      height: 156,
+      size: 45.75,
+      url: '/uploads/thumbnail_Screenshot_2023_10_18_at_15_03_11_c6d21f899b.png',
+    },
+  },
+  hash: 'Screenshot_2023_10_18_at_15_03_11_c6d21f899b',
+  ext: '.png',
+  mime: 'image/png',
+  size: 47.67,
+  url: 'http://localhost:1337/uploads/Screenshot_2023_10_18_at_15_03_11_c6d21f899b.png',
+  previewUrl: null,
+  provider: 'local',
+  provider_metadata: null,
+  createdAt: '2023-10-18T15:54:33.504Z',
+  updatedAt: '2023-10-18T15:54:33.504Z',
+};
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useLibrary: jest.fn().mockImplementation(() => ({
     components: {
-      'media-library': () => <div>{title}</div>,
+      'media-library': ({ onSelectAssets }) => (
+        <div>
+          <p>{mockMediaLibraryTitle}</p>
+          <button type="button" onClick={() => onSelectAssets([mockMediaLibraryImage])}>
+            {mockMediaLibrarySubmitButton}
+          </button>
+        </div>
+      ),
     },
   })),
 }));
@@ -408,7 +446,7 @@ describe('BlocksEditor toolbar', () => {
     await user.click(blocksDropdown);
     await user.click(screen.getByRole('option', { name: 'Image' }));
 
-    expect(screen.getByText(title)).toBeInTheDocument();
+    expect(screen.getByText(mockMediaLibraryTitle)).toBeInTheDocument();
   });
 
   it('creates an empty paragraph below when a code block is created at the end of the editor', async () => {
@@ -614,25 +652,140 @@ describe('BlocksEditor toolbar', () => {
     expect(linkButton).not.toBeDisabled();
   });
 
-  it('should disable the modifiers buttons when the selection is inside an image', async () => {
-    setup(imageInitialValue);
+  it('creates a new list with empty content when you click on the button with an empty editor', async () => {
+    setup([
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: '' }],
+      },
+    ]);
 
-    await select({
-      anchor: { path: [0, 0], offset: 0 },
-      focus: { path: [0, 0], offset: 0 },
-    });
+    // Get the unordered list button
+    const unorderedListButton = screen.getByLabelText(/bulleted list/i);
 
-    // The dropdown should show only one option selected which is the image
-    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
-    expect(within(blocksDropdown).getByText(/image/i)).toBeInTheDocument();
+    // Convert selection to a unordered list
+    await user.click(unorderedListButton);
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: '',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
 
-    const boldButton = screen.getByLabelText(/bold/i);
-    const italicButton = screen.getByLabelText(/italic/i);
-    expect(boldButton).toBeDisabled();
-    expect(italicButton).toBeDisabled();
+    expect(ReactEditor.focus).toHaveBeenCalledTimes(1);
   });
 
-  it('should disable the link button when the selection is inside an image', async () => {
+  it('creates a new list with mixed content when you click on the button and editor contains mixed content paragraph', async () => {
+    setup([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'A ',
+          },
+          {
+            type: 'text',
+            text: 'line of text',
+            bold: true,
+            italic: true,
+          },
+          {
+            type: 'text',
+            text: ' in a paragraph.',
+          },
+        ],
+      },
+    ]);
+
+    // Get the unordered list button
+    const unorderedListButton = screen.getByLabelText(/bulleted list/i);
+
+    // Convert selection to a unordered list
+    await user.click(unorderedListButton);
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'A ',
+              },
+              {
+                bold: true,
+                italic: true,
+                type: 'text',
+                text: 'line of text',
+              },
+              {
+                type: 'text',
+                text: ' in a paragraph.',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    expect(ReactEditor.focus).toHaveBeenCalledTimes(1);
+  });
+
+  it('creates a new list with some content when you select the option in the dropdown and editor contains a heading on the last line', async () => {
+    setup(mixedInitialValue);
+
+    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+
+    // Convert selection to an ordered list
+    await user.click(blocksDropdown);
+    await user.click(screen.getByRole('option', { name: 'Numbered list' }));
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'heading',
+        level: 1,
+        children: [
+          { type: 'text', text: 'A heading one' },
+          { type: 'text', text: ' with modifiers', bold: true },
+        ],
+      },
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: 'A line of text in a paragraph.' }],
+      },
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'A heading two',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('should disable the modifiers buttons when the selection is inside an image', async () => {
     setup(imageInitialValue);
 
     await select({
@@ -646,5 +799,82 @@ describe('BlocksEditor toolbar', () => {
 
     const linkButton = screen.getByLabelText(/link/i);
     expect(linkButton).toBeDisabled();
+  });
+
+  it('should disable the modifiers buttons and the link button when the selection is inside a code block', async () => {
+    setup([
+      {
+        type: 'code',
+        children: [
+          {
+            type: 'text',
+            text: 'A line of code.',
+          },
+        ],
+      },
+    ]);
+
+    await select({
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
+    });
+
+    const boldButton = screen.getByLabelText(/bold/i);
+    const italicButton = screen.getByLabelText(/italic/i);
+    expect(boldButton).toBeDisabled();
+    expect(italicButton).toBeDisabled();
+
+    const linkButton = screen.getByLabelText(/link/i);
+    expect(linkButton).toBeDisabled();
+  });
+
+  it('splits a list in two when converting a list item to an image', async () => {
+    setup([
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          { type: 'list-item', children: [{ type: 'text', text: 'First list item' }] },
+          { type: 'list-item', children: [{ type: 'text', text: 'Second list item' }] },
+          { type: 'list-item', children: [{ type: 'text', text: 'Third list item' }] },
+        ],
+      },
+    ]);
+
+    // Select the item in the middle of the list
+    await select({
+      anchor: { path: [0, 1, 0], offset: 0 },
+      focus: { path: [0, 1, 0], offset: 0 },
+    });
+
+    // Convert it to an image
+    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+    await user.click(blocksDropdown);
+    await user.click(screen.getByRole('option', { name: 'Image' }));
+    await user.click(screen.getByText(mockMediaLibrarySubmitButton));
+
+    // The list should have been split in two
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [{ type: 'list-item', children: [{ type: 'text', text: 'First list item' }] }],
+      },
+      {
+        type: 'image',
+        image: mockMediaLibraryImage,
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [{ type: 'list-item', children: [{ type: 'text', text: 'Third list item' }] }],
+      },
+    ]);
   });
 });

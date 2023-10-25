@@ -1,11 +1,15 @@
 import { getFetchClient } from '@strapi/helper-plugin';
 import { createRoot } from 'react-dom/client';
 
-import appCustomisations from './app';
-import { Components, Fields, Middlewares, Reducers } from './core/apis';
+import { Components, Fields, Middlewares } from './core/apis';
 // eslint-disable-next-line import/extensions
 import plugins from './plugins';
-import appReducers from './reducers';
+
+const config = {
+  locales: ['fr'],
+};
+
+const bootstrap = () => {};
 
 window.strapi = {
   /**
@@ -25,17 +29,17 @@ window.strapi = {
   projectType: 'Community',
   flags: {
     nps: false,
+    promoteEE: true,
   },
 };
 
-const customConfig = appCustomisations;
+const customConfig = { config, bootstrap };
 
 const library = {
   components: Components(),
   fields: Fields(),
 };
 const middlewares = Middlewares();
-const reducers = Reducers({ appReducers });
 
 const MOUNT_NODE = document.getElementById('app');
 
@@ -69,7 +73,6 @@ const run = async () => {
     adminConfig: customConfig,
     bootstrap: customConfig,
     middlewares,
-    reducers,
   });
 
   await app.bootstrapAdmin();

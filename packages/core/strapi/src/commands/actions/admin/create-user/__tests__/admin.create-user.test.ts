@@ -25,7 +25,7 @@ const mock = {
   admin,
 };
 
-jest.mock('../../../../../index', () => {
+jest.mock('../../../../../Strapi', () => {
   const impl: any = jest.fn(() => mock);
 
   impl.compile = jest.fn();

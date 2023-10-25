@@ -5,7 +5,7 @@ import { useTracking } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { useConfiguration } from '../../../../../../hooks';
+import { useConfiguration } from '../../../../../../hooks/useConfiguration';
 import { DIMENSION, SIZE } from '../../utils/constants';
 import LogoInput from '../LogoInput';
 

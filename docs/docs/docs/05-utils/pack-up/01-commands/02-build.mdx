@@ -32,6 +32,8 @@ build();
 
 ```ts
 interface BuildOptions {
+  configFile: false;
+  config?: Config;
   cwd?: string;
   debug?: boolean;
   minify?: boolean;

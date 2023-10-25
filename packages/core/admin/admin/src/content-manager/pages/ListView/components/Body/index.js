@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { BaseCheckbox, IconButton, Td, Flex } from '@strapi/design-system';
+import { BaseCheckbox, IconButton, Flex } from '@strapi/design-system';
 import { useTracking, useTableContext, Table } from '@strapi/helper-plugin';
 import { Trash, Duplicate, Pencil } from '@strapi/icons';
 import PropTypes from 'prop-types';
@@ -29,15 +29,14 @@ const CheckboxDataCell = ({ rowId, index }) => {
   );
 
   return (
-    <Td onClick={stopPropagation}>
-      <BaseCheckbox
-        aria-label={ariaLabel}
-        checked={isChecked}
-        onChange={() => {
-          onSelectRow({ name: rowId, value: !isChecked });
-        }}
-      />
-    </Td>
+    <BaseCheckbox
+      aria-label={ariaLabel}
+      checked={isChecked}
+      onClick={stopPropagation}
+      onChange={() => {
+        onSelectRow({ name: rowId, value: !isChecked });
+      }}
+    />
   );
 };
 
@@ -75,61 +74,59 @@ const EntityActionsDataCell = ({
   );
 
   return (
-    <Td>
-      <Flex gap={1} justifyContent="end" onClick={stopPropagation}>
+    <Flex gap={1} justifyContent="end" onClick={stopPropagation}>
+      <IconButton
+        forwardedAs={Link}
+        onClick={() => {
+          trackUsage('willEditEntryFromButton');
+        }}
+        to={{
+          pathname: `${pathname}/${rowId}`,
+          state: { from: pathname },
+          search: pluginsQueryParams,
+        }}
+        label={formatMessage(
+          { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
+          { target: itemLineText }
+        )}
+        noBorder
+      >
+        <Pencil />
+      </IconButton>
+
+      {canCreate && (
         <IconButton
-          forwardedAs={Link}
-          onClick={() => {
-            trackUsage('willEditEntryFromButton');
-          }}
-          to={{
-            pathname: `${pathname}/${rowId}`,
-            state: { from: pathname },
-            search: pluginsQueryParams,
-          }}
+          onClick={handleCloneClick(rowId)}
           label={formatMessage(
-            { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
+            {
+              id: 'app.component.table.duplicate',
+              defaultMessage: 'Duplicate {target}',
+            },
             { target: itemLineText }
           )}
           noBorder
         >
-          <Pencil />
+          <Duplicate />
         </IconButton>
+      )}
 
-        {canCreate && (
-          <IconButton
-            onClick={handleCloneClick(rowId)}
-            label={formatMessage(
-              {
-                id: 'app.component.table.duplicate',
-                defaultMessage: 'Duplicate {target}',
-              },
-              { target: itemLineText }
-            )}
-            noBorder
-          >
-            <Duplicate />
-          </IconButton>
-        )}
-
-        {canDelete && (
-          <IconButton
-            onClick={() => {
-              trackUsage('willDeleteEntryFromList');
-              setSelectedEntries([rowId]);
-              setIsConfirmDeleteRowOpen(true);
-            }}
-            label={formatMessage(
-              { id: 'global.delete-target', defaultMessage: 'Delete {target}' },
-              { target: itemLineText }
-            )}
-            noBorder
-          >
-            <Trash />
-          </IconButton>
-        )}
-      </Flex>
-    </Td>
+      {canDelete && (
+        <IconButton
+          onClick={() => {
+            trackUsage('willDeleteEntryFromList');
+            setSelectedEntries([rowId]);
+            setIsConfirmDeleteRowOpen(true);
+          }}
+          label={formatMessage(
+            { id: 'global.delete-target', defaultMessage: 'Delete {target}' },
+            { target: itemLineText }
+          )}
+          noBorder
+        >
+          <Trash />
+        </IconButton>
+      )}
+    </Flex>
   );
 };
 

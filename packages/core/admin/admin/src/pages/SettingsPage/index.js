@@ -8,12 +8,13 @@ import { Redirect, Route, Switch, useParams } from 'react-router-dom';
 
 import { useSettingsMenu } from '../../hooks';
 import { useEnterprise } from '../../hooks/useEnterprise';
-import createRoute from '../../utils/createRoute';
-import makeUniqueRoutes from '../../utils/makeUniqueRoutes';
+import { createRoute } from '../../utils/createRoute';
 
 import SettingsNav from './components/SettingsNav';
 import { ROUTES_CE } from './constants';
 import ApplicationInfosPage from './pages/ApplicationInfosPage';
+// TODO: inline utility once the file is converted to TypeScript
+import { makeUniqueRoutes } from './utils/makeUniqueRoutes';
 
 export function SettingsPage() {
   const { settingId } = useParams();
