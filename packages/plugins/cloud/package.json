@@ -29,9 +29,9 @@
     "./dist"
   ],
   "scripts": {
-    "build": "NODE_ENV=production strapi plugin:build --force",
+    "build": "strapi plugin:build --force",
     "clean": "run -T rimraf ./dist",
-    "develop": "tsc -p tsconfig.server.json -w",
+    "develop": "strapi plugin:watch",
     "lint": "yarn lint:project && yarn lint:front",
     "lint:front": "run -T eslint ./admin -c ./admin/.eslintrc.js",
     "lint:project": "run -T eslint . -c ./.eslintrc.js",
