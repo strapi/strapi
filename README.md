@@ -1,3 +1,4 @@
+<div id="top"></div>
 <p align="center">
   <a href="https://strapi.io/#gh-light-mode-only">
     <img src="https://strapi.io/assets/strapi-logo-dark.svg" width="318px" alt="Strapi logo" />
@@ -160,3 +161,4 @@ See for yourself what's under the hood by getting access to a [hosted Strapi pro
 ## License
 
 See the [LICENSE](./LICENSE) file for licensing information.
+<p align="right"><a href="#top">🔼 Back to top</a></p>
