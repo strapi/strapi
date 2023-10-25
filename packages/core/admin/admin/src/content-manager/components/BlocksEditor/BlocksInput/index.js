@@ -122,6 +122,7 @@ const BlocksInput = ({ disabled, placeholder }) => {
       marginBottom={3}
     >
       <Editable
+        data-testid="slate-editor"
         readOnly={disabled}
         placeholder={placeholder}
         style={getEditorStyle(theme)}

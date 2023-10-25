@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 
 import Blocks from '../index';
@@ -73,5 +74,20 @@ describe('BlocksEditor', () => {
     expect(screen.getByRole('heading', { level: 2 })).toBeInTheDocument();
 
     expect(screen.getByRole('img')).toBeInTheDocument();
+  });
+
+  it.skip('when there is no selection, selecting modifiers should work at the end of the editor', async () => {
+    setup({ value: null });
+
+    const boldButton = screen.getByLabelText(/bold/i);
+    await userEvent.click(boldButton);
+
+    const editorContainer = screen.getByTestId('slate-editor');
+    // domRange.getBoundingClientRect = jest.fn(); TODO: mock getBoundingClientRect on a selection element
+    userEvent.type(editorContainer, 'bold text here');
+
+    expect(screen.getByText('bold text here').parentElement).toHaveStyle({
+      'font-weight': 600,
+    });
   });
 });
