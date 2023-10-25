@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-// eslint-disable-next-line node/no-extraneous-require
-const { features } = require('@strapi/strapi/dist/utils/ee').default;
+const { features } = require('@strapi/strapi/dist/utils/ee');
 
 export const register = () => {
   if (features.isEnabled('cms-content-releases')) {

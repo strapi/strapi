@@ -1,23 +1,14 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable node/no-missing-require */
 
-const { features } = require('@strapi/strapi/dist/utils/ee').default;
+const { features } = require('@strapi/strapi/dist/utils/ee');
 const { register } = require('../register');
 
-jest.mock('@strapi/strapi/dist/utils/ee', () => {
-  const eeModule = () => true;
-
-  Object.assign(eeModule, {
-    default: {
-      features: {
-        isEnabled: jest.fn(),
-      },
-    },
-  });
-
-  return eeModule;
-});
-
+jest.mock('@strapi/strapi/dist/utils/ee', () => ({
+  features: {
+    isEnabled: jest.fn(),
+  },
+}));
 describe('register', () => {
   jest.spyOn(console, 'log').mockImplementation(() => {});
 
