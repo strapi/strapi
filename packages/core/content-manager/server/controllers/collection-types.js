@@ -23,6 +23,7 @@ module.exports = {
     const permissionQuery = await permissionChecker.sanitizedQuery.read(query);
 
     const populate = await getService('populate-builder')(model)
+      .populateFromQuery(permissionQuery)
       .populateDeep(1)
       .countRelations({ toOne: false, toMany: true })
       .build();

@@ -27,6 +27,7 @@ const buildAdmin = async () => {
     '@strapi/plugin-upload',
     '@strapi/plugin-i18n',
     '@strapi/plugin-users-permissions',
+    '@strapi/plugin-cloud',
   ]);
 
   await createPluginFile(plugins, path.join(__dirname, '..'));
