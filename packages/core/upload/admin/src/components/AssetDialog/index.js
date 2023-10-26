@@ -44,6 +44,7 @@ const LoadingBody = styled(Flex)`
 export const AssetDialog = ({
   allowedTypes,
   folderId,
+  folderPath,
   onClose,
   onAddAsset,
   onAddFolder,
@@ -75,7 +76,7 @@ export const AssetDialog = ({
       onChangeSearch,
       onChangeFolder: onChangeFolderParam,
     },
-  ] = useModalQueryParams({ folder: folderId });
+  ] = useModalQueryParams({ folder: folderId, folderPath });
 
   const {
     data: { pagination, results: assets } = {},
@@ -217,7 +218,7 @@ export const AssetDialog = ({
   };
 
   const handleFolderChange = (folderId, folderPath) => {
-    onChangeFolder(folderId);
+    onChangeFolder(folderId, folderPath);
     onChangeFolderParam(folderId, folderPath);
   };
 
@@ -322,6 +323,7 @@ export const AssetDialog = ({
 AssetDialog.defaultProps = {
   allowedTypes: [],
   folderId: null,
+  folderPath: undefined,
   initiallySelectedAssets: [],
   multiple: false,
   trackedLocation: undefined,
@@ -330,6 +332,7 @@ AssetDialog.defaultProps = {
 AssetDialog.propTypes = {
   allowedTypes: PropTypes.arrayOf(PropTypes.string),
   folderId: PropTypes.number,
+  folderPath: PropTypes.string,
   initiallySelectedAssets: PropTypes.arrayOf(AssetDefinition),
   multiple: PropTypes.bool,
   onAddAsset: PropTypes.func.isRequired,
