@@ -28,16 +28,8 @@
     "./strapi-server": {
       "types": "./dist/server/src/index.d.ts",
       "source": "./server/src/index.ts",
-      "import": "./dist/server/index.mjs",
-      "require": "./dist/server/index.js",
-      "default": "./dist/server/index.js"
-    },
-    "./ee": {
-      "types": "./dist/ee/server/src/index.d.ts",
-      "source": "./ee/server/src/index.ts",
-      "import": "./dist/ee/server/index.mjs",
-      "require": "./dist/ee/server/index.js",
-      "default": "./dist/ee/server/index.js"
+      "require": "./strapi-server.js",
+      "default": "./strapi-server.js"
     },
     "./package.json": "./package.json"
   },

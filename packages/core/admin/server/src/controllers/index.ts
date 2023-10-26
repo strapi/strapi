@@ -1,4 +1,4 @@
-import * as admin from './admin';
+import admin from './admin';
 import apiToken from './api-token';
 import authenticatedUser from './authenticated-user';
 import authentication from './authentication';

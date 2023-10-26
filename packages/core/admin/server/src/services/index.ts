@@ -1,13 +1,14 @@
-import * as user from './user';
+// NOTE: Make sure to use default export for services overwritten in EE
+import auth from './auth';
+import user from './user';
+import role from './role';
+import passport from './passport';
 import * as token from './token';
-import * as role from './role';
 import * as permission from './permission';
-import * as passport from './passport';
 import * as metrics from './metrics';
 import * as contentType from './content-type';
 import * as constants from './constants';
 import * as condition from './condition';
-import * as auth from './auth';
 import * as action from './action';
 import * as apiToken from './api-token';
 import * as transfer from './transfer';
@@ -15,16 +16,16 @@ import * as projectSettings from './project-settings';
 
 // TODO: TS - Export services one by one as this export is cjs
 export default {
+  auth,
   user,
-  token,
   role,
-  permission,
   passport,
+  token,
+  permission,
   metrics,
   'content-type': contentType,
   constants,
   condition,
-  auth,
   action,
   'api-token': apiToken,
   transfer,

@@ -110,4 +110,4 @@ const resetPassword = async (
   });
 };
 
-export { checkCredentials, validatePassword, hashPassword, forgotPassword, resetPassword };
+export default { checkCredentials, validatePassword, hashPassword, forgotPassword, resetPassword };
