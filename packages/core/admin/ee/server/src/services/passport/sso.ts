@@ -1,6 +1,5 @@
 import '@strapi/types';
 import EE from '@strapi/strapi/dist/utils/ee';
-// import { authEventsMapper } from '../../../../../server/src/services/passport';
 import passport from '../../../../../server/src/services/passport';
 import createProviderRegistry from './provider-registry';
 
