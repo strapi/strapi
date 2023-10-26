@@ -1,7 +1,6 @@
 {
   "name": "@strapi/content-releases",
   "version": "4.14.5",
-  "private": true,
   "description": "Strapi plugin for organizing and releasing content",
   "repository": {
     "type": "git",
@@ -58,17 +57,19 @@
     "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
     "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
     "watch": "packup watch"
   },
   "dependencies": {
-    "@strapi/design-system": "1.12.0",
+    "@strapi/design-system": "1.13.0",
     "@strapi/helper-plugin": "4.14.4",
-    "@strapi/icons": "1.12.0",
+    "@strapi/icons": "1.13.0",
     "react-intl": "6.4.1"
   },
   "devDependencies": {
     "@strapi/pack-up": "workspace:*",
-    "@strapi/strapi": "4.14.4",
+    "@strapi/strapi": "4.14.5",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
     "@types/styled-components": "5.1.26",
@@ -79,6 +80,7 @@
     "typescript": "5.2.2"
   },
   "peerDependencies": {
+    "@strapi/strapi": "^4.14.5",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "5.3.4",
@@ -87,5 +89,10 @@
   "engines": {
     "node": ">=16.0.0 <=20.x.x",
     "npm": ">=6.0.0"
+  },
+  "nx": {
+    "implicitDependencies": [
+      "!@strapi/strapi"
+    ]
   }
 }
