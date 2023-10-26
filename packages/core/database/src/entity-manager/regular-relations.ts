@@ -220,12 +220,6 @@ const cleanOrderColumns = async ({
     return;
   }
 
-  // Handle databases that don't support window function ROW_NUMBER
-  if (!strapi.db.dialect.supportsWindowFunctions()) {
-    await cleanOrderColumnsForOldDatabases({ id, attribute, db, inverseRelIds, transaction: trx });
-    return;
-  }
-
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } = joinTable;
 
@@ -347,91 +341,6 @@ const cleanOrderColumns = async ({
   };
 
   return Promise.all([updateOrderColumn(), updateInverseOrderColumn()]);
-};
-
-/*
- * Ensure that orders are following a 1, 2, 3 sequence, without gap.
- * The use of a session variable instead of a window function makes the query compatible with databases without ROW_NUMBER
- */
-const cleanOrderColumnsForOldDatabases = async ({
-  id,
-  attribute,
-  db,
-  inverseRelIds,
-  transaction: trx,
-}: {
-  id?: ID;
-  attribute: Relation.Bidirectional;
-  db: Database;
-  inverseRelIds: ID[];
-  transaction?: Knex.Transaction;
-}) => {
-  const { joinTable } = attribute;
-  const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } = joinTable;
-
-  const randomSuffix = `${new Date().valueOf()}_${randomBytes(16).toString('hex')}`;
-
-  if (hasOrderColumn(attribute) && id) {
-    // raw query as knex doesn't allow updating from a subquery
-    // https://github.com/knex/knex/issues/2504
-    const orderVar = `order_${randomSuffix}`;
-    await db.connection.raw(`SET @${orderVar} = 0;`).transacting(trx);
-    await db.connection
-      .raw(
-        `UPDATE :joinTableName: as a, (
-          SELECT id, (@${orderVar}:=@${orderVar} + 1) AS src_order
-          FROM :joinTableName:
-	        WHERE :joinColumnName: = :id
-	        ORDER BY :orderColumnName:
-        ) AS b
-        SET :orderColumnName: = b.src_order
-        WHERE a.id = b.id
-        AND a.:joinColumnName: = :id`,
-        {
-          joinTableName: joinTable.name,
-          orderColumnName,
-          joinColumnName: joinColumn.name,
-          id,
-        }
-      )
-      .transacting(trx);
-  }
-
-  if (hasInverseOrderColumn(attribute) && !isEmpty(inverseRelIds)) {
-    const orderVar = `order_${randomSuffix}`;
-    const columnVar = `col_${randomSuffix}`;
-    await db.connection.raw(`SET @${orderVar} = 0;`).transacting(trx);
-    await db.connection
-      .raw(
-        `UPDATE ?? as a, (
-          SELECT
-          	id,
-            @${orderVar}:=CASE WHEN @${columnVar} = ?? THEN @${orderVar} + 1 ELSE 1 END AS inv_order,
-        	  @${columnVar}:=?? ??
-        	FROM ?? a
-        	WHERE ?? IN(${inverseRelIds.map(() => '?').join(', ')})
-        	ORDER BY ??, ??
-        ) AS b
-        SET ?? = b.inv_order
-        WHERE a.id = b.id
-        AND a.?? IN(${inverseRelIds.map(() => '?').join(', ')})`,
-        [
-          joinTable.name,
-          inverseJoinColumn.name,
-          inverseJoinColumn.name,
-          inverseJoinColumn.name,
-          joinTable.name,
-          inverseJoinColumn.name,
-          ...inverseRelIds,
-          inverseJoinColumn.name,
-          joinColumn.name,
-          inverseOrderColumnName,
-          inverseJoinColumn.name,
-          ...inverseRelIds,
-        ]
-      )
-      .transacting(trx);
-  }
 };
 
 /**

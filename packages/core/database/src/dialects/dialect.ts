@@ -41,10 +41,6 @@ export default class Dialect {
     return false;
   }
 
-  supportsWindowFunctions() {
-    return true;
-  }
-
   supportsOperator(operator?: string): boolean;
   supportsOperator(): boolean {
     return true;
