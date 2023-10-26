@@ -1,12 +1,12 @@
 import React from 'react';
 
+import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render as renderTL, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
-import { combineReducers, createStore } from 'redux';
 
 import LocaleSelect from '..';
 import reducers from '../../../hooks/reducers';
@@ -58,7 +58,9 @@ const queryClient = new QueryClient({
   },
 });
 
-const store = createStore(combineReducers(reducers));
+const store = configureStore({
+  reducer: combineReducers(reducers),
+});
 
 const render = (props) => ({
   user: userEvent.setup(),

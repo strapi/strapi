@@ -135,7 +135,10 @@ const EditorStylesContainer = styled.div`
   .CodeMirror {
     /* Set height, width, borders, and global font properties here */
     font-size: ${14 / 16}rem;
-    height: ${({ isExpandMode }) => (isExpandMode ? '100%' : '290px')};
+    height: ${({ isExpandMode }) =>
+      isExpandMode
+        ? '100%'
+        : '410px'}; //  512px(total height) - 48px (header) - 52px(footer) - 2px border
     color: ${({ theme }) => theme.colors.neutral800};
     direction: ltr;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,

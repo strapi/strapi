@@ -30,8 +30,11 @@ export const Settings = ({
   const sortOptions = useEnterprise(
     sortOptionsCE,
     async () =>
-      (await import('../../../../../../ee/admin/content-manager/pages/ListSettingsView/constants'))
-        .REVIEW_WORKFLOW_STAGE_SORT_OPTION_NAME,
+      (
+        await import(
+          '../../../../../../ee/admin/src/content-manager/pages/ListSettingsView/constants'
+        )
+      ).REVIEW_WORKFLOW_STAGE_SORT_OPTION_NAME,
     {
       combine(ceOptions, eeOption) {
         return [...ceOptions, { ...eeOption, label: formatMessage(eeOption.label) }];

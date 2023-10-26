@@ -1,6 +1,7 @@
 /* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
+import { configureStore } from '@reduxjs/toolkit';
 import { fixtures } from '@strapi/admin-test-utils';
 import { DesignSystemProvider } from '@strapi/design-system';
 import { NotificationsProvider, RBACContext } from '@strapi/helper-plugin';
@@ -11,6 +12,7 @@ import {
   RenderOptions as RTLRenderOptions,
   RenderResult,
   act,
+  screen,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DndProvider } from 'react-dnd';
@@ -19,12 +21,10 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
 import { Provider } from 'react-redux';
 import { MemoryRouter, MemoryRouterProps } from 'react-router-dom';
-import { createStore } from 'redux';
 
 // @ts-expect-error – no types yet.
 import ModelsContext from '../src/content-manager/contexts/ModelsContext';
-// @ts-expect-error – no types yet.
-import AdminContext from '../src/contexts/Admin';
+import { AdminContext } from '../src/contexts/admin';
 import { ConfigurationContext } from '../src/contexts/configuration';
 
 import { server } from './server';
@@ -50,7 +50,10 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
     },
   });
 
-  const store = createStore((state = initialState) => state, initialState);
+  const store = configureStore({
+    preloadedState: initialState,
+    reducer: (state = initialState) => state,
+  });
 
   // en is the default locale of the admin app.
   return (
@@ -63,6 +66,7 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
                 <NotificationsProvider>
                   <RBACContext.Provider
                     value={{
+                      refetchPermissions: jest.fn(),
                       allPermissions: [
                         ...fixtures.permissions.allPermissions,
                         {
@@ -144,4 +148,4 @@ const renderHook: typeof renderHookRTL = (hook, options) => {
   });
 };
 
-export { render, renderHook, waitFor, server, act };
+export { render, renderHook, waitFor, server, act, screen };

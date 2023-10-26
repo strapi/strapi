@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 
 import React from 'react';
-// import { createStore, combineReducers } from 'redux';
+// import { configureStore, combineReducers } from '@reduxjs/toolkit';
 // import { Provider } from 'react-redux';
 // import { request, useRBAC } from '@strapi/helper-plugin';
 // import { fireEvent, render, screen, within, waitFor } from '@testing-library/react';
@@ -17,7 +17,10 @@ import React from 'react';
 //   const queryClient = new QueryClient();
 
 //   const rootReducer = combineReducers(i18nReducers);
-//   const store = createStore(rootReducer, { [`${pluginId}_locales`]: initialState });
+// const store = configureStore({
+//   reducer: rootReducer,
+//   preloadedState: { [`${pluginId}_locales`]: initialState },
+// });
 
 //   return (
 //     <Provider store={store}>

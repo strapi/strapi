@@ -16,7 +16,7 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter, MemoryRouterProps } from 'react-router-dom';
 
-import { RBACContext } from '../src/features/RBAC';
+import { RBACContext, RBACContextValue } from '../src/features/RBAC';
 
 import { server } from './server';
 
@@ -26,9 +26,10 @@ interface ProvidersProps {
 }
 
 const Providers = ({ children, initialEntries }: ProvidersProps) => {
-  const rbacContextValue = React.useMemo(
+  const rbacContextValue: RBACContextValue = React.useMemo(
     () => ({
       allPermissions: fixtures.permissions.allPermissions,
+      refetchPermissions: jest.fn(),
     }),
     []
   );

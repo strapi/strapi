@@ -8,10 +8,9 @@ import omit from 'lodash/omit';
 import PropTypes from 'prop-types';
 import { Redirect, useHistory, useRouteMatch } from 'react-router-dom';
 
-import persistStateToLocaleStorage from '../../components/GuidedTour/utils/persistStateToLocaleStorage';
-import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
+import { useLocales } from '../../components/LanguageProvider';
 import { useEnterprise } from '../../hooks/useEnterprise';
-import formatAPIErrors from '../../utils/formatAPIErrors';
+import { formatAPIErrors } from '../../utils/formatAPIErrors';
 
 import { LoginCE } from './components/Login';
 import { FORMS } from './constants';
@@ -23,7 +22,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     push,
     location: { search },
   } = useHistory();
-  const { changeLocale } = useLocalesProvider();
+  const { changeLocale } = useLocales();
   const { setSkipped } = useGuidedTour();
   const { trackUsage } = useTracking();
   const {
@@ -32,11 +31,11 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   const query = useQuery();
   const Login = useEnterprise(
     LoginCE,
-    async () => (await import('../../../../ee/admin/pages/AuthPage/components/Login')).LoginEE
+    async () => (await import('../../../../ee/admin/src/pages/AuthPage/components/Login')).LoginEE
   );
   const forms = useEnterprise(
     FORMS,
-    async () => (await import('../../../../ee/admin/pages/AuthPage/constants')).FORMS,
+    async () => (await import('../../../../ee/admin/src/pages/AuthPage/constants')).FORMS,
     {
       combine(ceForms, eeForms) {
         return {
@@ -181,7 +180,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         const isUserSuperAdmin = roles.find(({ code }) => code === 'strapi-super-admin');
 
         if (isUserSuperAdmin) {
-          persistStateToLocaleStorage.setSkipped(false);
+          auth.set(false, 'GUIDED_TOUR_SKIPPED', true);
           setSkipped(false);
           trackUsage('didLaunchGuidedtour');
         }

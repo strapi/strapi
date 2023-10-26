@@ -40,7 +40,7 @@ export const AttributeOptions = ({ attributes, forTarget, kind }: AttributeOptio
   const titleId = getTrad(`modalForm.sub-header.chooseAttribute.${titleIdSuffix}`);
 
   return (
-    <ModalBody padding={6}>
+    <ModalBody padding={7}>
       <TabGroup
         label={formatMessage({
           id: getTrad('modalForm.tabs.label'),

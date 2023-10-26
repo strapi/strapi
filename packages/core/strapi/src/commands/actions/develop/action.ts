@@ -9,7 +9,7 @@ import tsUtils from '@strapi/typescript-utils';
 import type { Strapi } from '@strapi/types';
 
 import loadConfiguration from '../../../core/app-configuration';
-import strapi from '../../../index';
+import strapi from '../../../Strapi';
 import { buildTypeScript, buildAdmin } from '../../builders';
 
 interface CmdOptions {
@@ -23,7 +23,7 @@ interface CmdOptions {
  * `$ strapi develop`
  *
  */
-export default async ({ build, watchAdmin, polling, browser }: CmdOptions) => {
+export default async ({ build, watchAdmin, polling, browser }: CmdOptions): Promise<void> => {
   const appDir = process.cwd();
 
   const isTSProject = await tsUtils.isUsingTypeScript(appDir);
@@ -183,7 +183,7 @@ const workerProcess = async ({
     }
   });
 
-  return strapiInstance.start();
+  strapiInstance.start();
 };
 
 /**

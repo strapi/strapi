@@ -2,15 +2,16 @@ import * as React from 'react';
 
 import {
   Box,
+  Icon,
   Typography,
   BaseLink,
   Popover,
-  IconButton,
   Field,
   FieldLabel,
   FieldInput,
   Flex,
   Button,
+  Tooltip,
 } from '@strapi/design-system';
 import {
   Code,
@@ -164,10 +165,31 @@ const handleBackspaceKeyOnList = (editor, event) => {
   const [currentListItem, currentListItemPath] = Editor.parent(editor, editor.selection.anchor);
   const [currentList, currentListPath] = Editor.parent(editor, currentListItemPath);
   const isListEmpty = currentList.children.length === 1 && currentListItem.children[0].text === '';
+  const isNodeStart = Editor.isStart(editor, editor.selection.anchor, currentListItemPath);
+  const isFocusAtTheBeginningOfAChild =
+    editor.selection.focus.offset === 0 && editor.selection.focus.path.at(-1) === 0;
 
   if (isListEmpty) {
     event.preventDefault();
     replaceListWithEmptyBlock(editor, currentListPath);
+  } else if (isNodeStart) {
+    Transforms.liftNodes(editor, {
+      match: (n) => n.type === 'list-item',
+    });
+    // Transforms the list item into a paragraph
+    Transforms.setNodes(
+      editor,
+      { type: 'paragraph' },
+      {
+        hanging: true,
+      }
+    );
+  } else if (isFocusAtTheBeginningOfAChild) {
+    Transforms.liftNodes(editor, {
+      match: (n) => n.type === 'list-item',
+    });
+    // If the focus is at the beginning of a child node we need to replace it with a paragraph
+    Transforms.setNodes(editor, { type: 'paragraph' });
   }
 };
 
@@ -254,6 +276,18 @@ Image.propTypes = {
     }),
   }).isRequired,
 };
+
+// Make sure the tooltip is above the popover
+const TooltipCustom = styled(Tooltip)`
+  z-index: 6;
+`;
+
+// Used for the Edit and Cancel buttons in the link popover
+const CustomButton = styled(Button)`
+  & > span {
+    line-height: normal;
+  }
+`;
 
 const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRef) => {
   const { formatMessage } = useIntl();
@@ -376,25 +410,49 @@ const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRe
                 </StyledBaseLink>
               </Typography>
               <Flex justifyContent="end" width="100%" gap={2}>
-                <IconButton
-                  icon={<Trash />}
-                  size="L"
-                  variant="danger"
-                  onClick={() => removeLink(editor)}
-                  label={formatMessage({
+                <TooltipCustom
+                  description={formatMessage({
                     id: 'components.Blocks.popover.delete',
                     defaultMessage: 'Delete',
                   })}
-                />
-                <IconButton
-                  icon={<Pencil />}
-                  size="L"
-                  onClick={() => setIsEditing(true)}
-                  label={formatMessage({
+                >
+                  <CustomButton
+                    size="S"
+                    width="2rem"
+                    variant="danger-light"
+                    onClick={() => removeLink(editor)}
+                    aria-label={formatMessage({
+                      id: 'components.Blocks.popover.delete',
+                      defaultMessage: 'Delete',
+                    })}
+                    type="button"
+                    justifyContent="center"
+                  >
+                    <Icon width={3} height={3} as={Trash} />
+                  </CustomButton>
+                </TooltipCustom>
+
+                <TooltipCustom
+                  description={formatMessage({
                     id: 'components.Blocks.popover.edit',
                     defaultMessage: 'Edit',
                   })}
-                />
+                >
+                  <CustomButton
+                    size="S"
+                    width="2rem"
+                    variant="tertiary"
+                    onClick={() => setIsEditing(true)}
+                    aria-label={formatMessage({
+                      id: 'components.Blocks.popover.edit',
+                      defaultMessage: 'Edit',
+                    })}
+                    type="button"
+                    justifyContent="center"
+                  >
+                    <Icon width={3} height={3} as={Pencil} />
+                  </CustomButton>
+                </TooltipCustom>
               </Flex>
             </Flex>
           )}

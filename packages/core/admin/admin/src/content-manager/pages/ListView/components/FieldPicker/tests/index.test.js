@@ -1,12 +1,12 @@
 import React from 'react';
 
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render as renderRTL, fireEvent } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Provider } from 'react-redux';
-import { combineReducers, createStore } from 'redux';
 
-import reducers from '../../../../../../reducers';
+import listViewReducer from '../../../reducer';
 import { FieldPicker } from '../index';
 
 const layout = {
@@ -42,70 +42,73 @@ const layout = {
 const render = () => ({
   ...renderRTL(<FieldPicker layout={layout} />, {
     wrapper({ children }) {
-      const rootReducer = combineReducers(reducers);
-
-      const store = createStore(rootReducer, {
-        'content-manager_listView': {
-          contentType: {
-            attributes: {
-              id: { type: 'integer' },
-              name: { type: 'string' },
-              createdAt: { type: 'datetime' },
-              updatedAt: { type: 'datetime' },
+      const store = configureStore({
+        reducer: combineReducers({
+          'content-manager_listView': listViewReducer,
+        }),
+        preloadedState: {
+          'content-manager_listView': {
+            contentType: {
+              attributes: {
+                id: { type: 'integer' },
+                name: { type: 'string' },
+                createdAt: { type: 'datetime' },
+                updatedAt: { type: 'datetime' },
+              },
+              metadatas: {
+                id: {
+                  edit: {},
+                  list: { label: 'id', searchable: true, sortable: true },
+                },
+                name: {
+                  edit: {
+                    label: 'name',
+                    description: '',
+                    placeholder: '',
+                    visible: true,
+                    editable: true,
+                  },
+                  list: { label: 'name', searchable: true, sortable: true },
+                },
+                createdAt: {
+                  edit: {
+                    label: 'createdAt',
+                    description: '',
+                    placeholder: '',
+                    visible: false,
+                    editable: true,
+                  },
+                  list: { label: 'createdAt', searchable: true, sortable: true },
+                },
+                updatedAt: {
+                  edit: {
+                    label: 'updatedAt',
+                    description: '',
+                    placeholder: '',
+                    visible: false,
+                    editable: true,
+                  },
+                  list: { label: 'updatedAt', searchable: true, sortable: true },
+                },
+              },
             },
-            metadatas: {
-              id: {
-                edit: {},
-                list: { label: 'id', searchable: true, sortable: true },
+            displayedHeaders: [
+              {
+                key: '__id_key__',
+                name: 'id',
+                fieldSchema: { type: 'integer' },
+                metadatas: { label: 'id', searchable: true, sortable: true },
               },
-              name: {
-                edit: {
-                  label: 'name',
-                  description: '',
-                  placeholder: '',
-                  visible: true,
-                  editable: true,
-                },
-                list: { label: 'name', searchable: true, sortable: true },
+            ],
+            initialDisplayedHeaders: [
+              {
+                key: '__id_key__',
+                name: 'id',
+                fieldSchema: { type: 'integer' },
+                metadatas: { label: 'id', searchable: true, sortable: true },
               },
-              createdAt: {
-                edit: {
-                  label: 'createdAt',
-                  description: '',
-                  placeholder: '',
-                  visible: false,
-                  editable: true,
-                },
-                list: { label: 'createdAt', searchable: true, sortable: true },
-              },
-              updatedAt: {
-                edit: {
-                  label: 'updatedAt',
-                  description: '',
-                  placeholder: '',
-                  visible: false,
-                  editable: true,
-                },
-                list: { label: 'updatedAt', searchable: true, sortable: true },
-              },
-            },
+            ],
           },
-          displayedHeaders: [
-            {
-              key: '__id_key__',
-              name: 'id',
-              fieldSchema: { type: 'integer' },
-              metadatas: { label: 'id', searchable: true, sortable: true },
-            },
-          ],
-          initialDisplayedHeaders: [
-            {
-              key: '__id_key__',
-              name: 'id',
-              fieldSchema: { type: 'integer' },
-              metadatas: { label: 'id', searchable: true, sortable: true },
-            },
-          ],
         },
       });
 
