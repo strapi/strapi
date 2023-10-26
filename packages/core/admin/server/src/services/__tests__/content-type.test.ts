@@ -1,8 +1,11 @@
-'use strict';
-
-const { merge } = require('lodash/fp');
-const { toPermission } = require('../../domain/permission');
-const contentTypeService = require('../content-type');
+import { merge } from 'lodash/fp';
+import { toPermission } from '../../domain/permission';
+import {
+  getNestedFields,
+  getPermissionsWithNestedFields,
+  cleanPermissionFields,
+  getNestedFieldsWithIntermediate,
+} from '../content-type';
 
 describe('Content-Type', () => {
   const contentTypes = {
@@ -58,7 +61,7 @@ describe('Content-Type', () => {
     components,
     contentTypes,
     admin: { services: { condition: { isValidCondition: () => true } } },
-  };
+  } as any;
 
   describe('getNestedFields', () => {
     const testsA = [
@@ -113,8 +116,8 @@ describe('Content-Type', () => {
       ],
     ];
 
-    test.each(testsA)('%p level(s)', async (nestingLevel, expectedResult) => {
-      const res = contentTypeService.getNestedFields(contentTypes.user, {
+    test.each(testsA)('%p level(s)', async (nestingLevel: any, expectedResult: any) => {
+      const res = getNestedFields(contentTypes.user as any, {
         nestingLevel,
         components: strapi.components,
       });
@@ -137,8 +140,9 @@ describe('Content-Type', () => {
       ],
     ];
 
-    test.each(testsB)('requiredOnly : %p -> %p', (existingFields, expectedResult) => {
-      const res = contentTypeService.getNestedFields(contentTypes.user, {
+    //@ts-expect-error
+    test.each(testsB)('requiredOnly : %p -> %p', (existingFields: any, expectedResult: any) => {
+      const res = getNestedFields(contentTypes.user as any, {
         components: strapi.components,
         requiredOnly: true,
         existingFields,
@@ -213,19 +217,25 @@ describe('Content-Type', () => {
       ],
     ];
 
-    test.each(tests)('%p level(s) - withIntermediate', async (nestingLevel, expectedResult) => {
-      const res = contentTypeService.getNestedFieldsWithIntermediate(contentTypes.user, {
-        nestingLevel,
-        components: strapi.components,
-        withIntermediate: true,
-      });
-      expect(res).toEqual(expectedResult);
-    });
+    test.each(tests)(
+      '%p level(s) - withIntermediate',
+      async (nestingLevel: any, expectedResult: any) => {
+        const res = getNestedFieldsWithIntermediate(
+          contentTypes.user as any,
+          {
+            nestingLevel,
+            components: strapi.components,
+            withIntermediate: true,
+          } as any
+        );
+        expect(res).toEqual(expectedResult);
+      }
+    );
   });
 
   describe('getPermissionsWithNestedFields', () => {
     test('1 action (no nesting)', async () => {
-      const resultLevel1 = contentTypeService.getPermissionsWithNestedFields([
+      const resultLevel1 = getPermissionsWithNestedFields([
         { actionId: 'action-1', subjects: ['country'], options: { applyToProperties: ['fields'] } },
       ]);
 
@@ -241,7 +251,7 @@ describe('Content-Type', () => {
     });
 
     test('2 actions (with nesting level 1)', async () => {
-      const resultLevel1 = contentTypeService.getPermissionsWithNestedFields(
+      const resultLevel1 = getPermissionsWithNestedFields(
         [
           {
             actionId: 'action-1',
@@ -270,7 +280,7 @@ describe('Content-Type', () => {
     });
 
     test('2 actions (with nesting level 2)', async () => {
-      const resultLevel1 = contentTypeService.getPermissionsWithNestedFields(
+      const resultLevel1 = getPermissionsWithNestedFields(
         [
           {
             actionId: 'action-1',
@@ -307,7 +317,7 @@ describe('Content-Type', () => {
     });
 
     test('2 actions (with nesting level 100)', async () => {
-      const resultLevel1 = contentTypeService.getPermissionsWithNestedFields([
+      const resultLevel1 = getPermissionsWithNestedFields([
         {
           actionId: 'action-1',
           subjects: ['country', 'user'],
@@ -378,8 +388,9 @@ describe('Content-Type', () => {
       ],
     ];
 
+    //@ts-expect-error
     test.each(tests)('requiredOnly : %p -> %p', (fields, expectedFields) => {
-      const res = contentTypeService.cleanPermissionFields(
+      const res = cleanPermissionFields(
         toPermission([
           {
             action: 'foo',

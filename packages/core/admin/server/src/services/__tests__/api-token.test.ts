@@ -1,12 +1,18 @@
-'use strict';
-
-const crypto = require('crypto');
-const {
-  errors: { NotFoundError, ApplicationError },
-} = require('@strapi/utils');
-const { omit, uniq } = require('lodash/fp');
-const apiTokenService = require('../api-token');
-const constants = require('../constants');
+import crypto from 'crypto';
+import { errors } from '@strapi/utils';
+import { omit, uniq } from 'lodash/fp';
+import constants from '../constants';
+import {
+  create as apiTokenCreate,
+  regenerate,
+  checkSaltIsDefined,
+  hash,
+  list,
+  revoke,
+  getById,
+  update as apiTokenUpdate,
+  getByName,
+} from '../api-token';
 
 const getActionProvider = (actions = []) => {
   return {
@@ -20,8 +26,8 @@ describe('API Token', () => {
     hexedString: '6170692d746f6b656e5f746573742d72616e646f6d2d6279746573',
   };
 
-  let now;
-  let nowSpy;
+  let now: any;
+  let nowSpy: any;
 
   beforeAll(() => {
     jest
@@ -49,21 +55,21 @@ describe('API Token', () => {
         config: {
           get: jest.fn(() => ''),
         },
-      };
+      } as any;
 
       const attributes = {
         name: 'api-token_tests-name',
         description: 'api-token_tests-description',
         type: 'read-only',
-      };
+      } as any;
 
-      const res = await apiTokenService.create(attributes);
+      const res = await apiTokenCreate(attributes);
 
       expect(create).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
         data: {
           ...attributes,
-          accessKey: apiTokenService.hash(mockedApiToken.hexedString),
+          accessKey: hash(mockedApiToken.hexedString),
           expiresAt: null,
           lifespan: null,
         },
@@ -83,7 +89,7 @@ describe('API Token', () => {
         description: 'api-token_tests-description',
         type: 'read-only',
         lifespan: constants.API_TOKEN_LIFESPANS.DAYS_90,
-      };
+      } as any;
 
       const expectedExpires = Date.now() + attributes.lifespan;
 
@@ -95,15 +101,15 @@ describe('API Token', () => {
         config: {
           get: jest.fn(() => ''),
         },
-      };
+      } as any;
 
-      const res = await apiTokenService.create(attributes);
+      const res = await apiTokenCreate(attributes);
 
       expect(create).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
         data: {
           ...attributes,
-          accessKey: apiTokenService.hash(mockedApiToken.hexedString),
+          accessKey: hash(mockedApiToken.hexedString),
           expiresAt: expectedExpires,
           lifespan: attributes.lifespan,
         },
@@ -124,7 +130,7 @@ describe('API Token', () => {
         description: 'api-token_tests-description',
         type: 'read-only',
         lifespan: 12345,
-      };
+      } as any;
 
       const create = jest.fn(({ data }) => Promise.resolve(data));
       global.strapi = {
@@ -134,10 +140,10 @@ describe('API Token', () => {
         config: {
           get: jest.fn(() => ''),
         },
-      };
+      } as any;
 
       expect(async () => {
-        await apiTokenService.create(attributes);
+        await apiTokenCreate(attributes);
       }).rejects.toThrow(/lifespan/);
 
       expect(create).not.toHaveBeenCalled();
@@ -149,7 +155,8 @@ describe('API Token', () => {
         description: 'api-token_tests-description',
         type: 'custom',
         permissions: ['admin::content.content.read'],
-      };
+      } as any;
+
       const createTokenResult = {
         ...attributes,
         lifespan: null,
@@ -161,7 +168,7 @@ describe('API Token', () => {
       const create = jest.fn().mockResolvedValue(createTokenResult);
       const load = jest.fn().mockResolvedValueOnce(
         Promise.resolve(
-          attributes.permissions.map((p) => {
+          attributes.permissions.map((p: any) => {
             return {
               action: p,
             };
@@ -170,7 +177,7 @@ describe('API Token', () => {
       );
 
       global.strapi = {
-        ...getActionProvider(['admin::content.content.read']),
+        ...getActionProvider(['admin::content.content.read'] as any),
         query() {
           return {
             findOne,
@@ -183,9 +190,9 @@ describe('API Token', () => {
         entityService: {
           load,
         },
-      };
+      } as any;
 
-      const res = await apiTokenService.create(attributes);
+      const res = await apiTokenCreate(attributes);
 
       expect(load).toHaveBeenCalledWith(
         'admin::api-token',
@@ -200,7 +207,7 @@ describe('API Token', () => {
         select: expect.arrayContaining([expect.any(String)]),
         data: {
           ...omit('permissions', attributes),
-          accessKey: apiTokenService.hash(mockedApiToken.hexedString),
+          accessKey: hash(mockedApiToken.hexedString),
           expiresAt: null,
           lifespan: null,
         },
@@ -232,7 +239,8 @@ describe('API Token', () => {
         description: 'api-token_tests-description',
         type: 'custom',
         permissions: [],
-      };
+      } as any;
+
       const createTokenResult = {
         ...attributes,
         lifespan: null,
@@ -244,7 +252,7 @@ describe('API Token', () => {
       const create = jest.fn().mockResolvedValue(createTokenResult);
       const load = jest.fn().mockResolvedValueOnce(
         Promise.resolve(
-          attributes.permissions.map((p) => {
+          attributes.permissions.map((p: any) => {
             return {
               action: p,
             };
@@ -253,7 +261,7 @@ describe('API Token', () => {
       );
 
       global.strapi = {
-        ...getActionProvider(['admin::content.content.read']),
+        ...getActionProvider(['admin::content.content.read'] as any),
         query() {
           return {
             findOne,
@@ -266,9 +274,9 @@ describe('API Token', () => {
         entityService: {
           load,
         },
-      };
+      } as any;
 
-      const res = await apiTokenService.create(attributes);
+      const res = await apiTokenCreate(attributes);
 
       expect(load).toHaveBeenCalledWith(
         'admin::api-token',
@@ -284,7 +292,7 @@ describe('API Token', () => {
         select: expect.arrayContaining([expect.any(String)]),
         data: {
           ...omit('permissions', attributes),
-          accessKey: apiTokenService.hash(mockedApiToken.hexedString),
+          accessKey: hash(mockedApiToken.hexedString),
           expiresAt: null,
           lifespan: null,
         },
@@ -305,7 +313,8 @@ describe('API Token', () => {
         description: 'api-token_tests-description',
         type: 'custom',
         permissions: ['api::foo.foo.find', 'api::foo.foo.find', 'api::foo.foo.create'],
-      };
+      } as any;
+
       const createTokenResult = {
         ...attributes,
         lifespan: null,
@@ -317,7 +326,7 @@ describe('API Token', () => {
       const create = jest.fn().mockResolvedValue(createTokenResult);
       const load = jest.fn().mockResolvedValueOnce(
         Promise.resolve(
-          uniq(attributes.permissions).map((p) => {
+          uniq(attributes.permissions).map((p: any) => {
             return {
               action: p,
             };
@@ -326,7 +335,7 @@ describe('API Token', () => {
       );
 
       global.strapi = {
-        ...getActionProvider(['api::foo.foo.find', 'api::foo.foo.create']),
+        ...getActionProvider(['api::foo.foo.find', 'api::foo.foo.create'] as any),
         query() {
           return {
             findOne,
@@ -339,9 +348,9 @@ describe('API Token', () => {
         entityService: {
           load,
         },
-      };
+      } as any;
 
-      const res = await apiTokenService.create(attributes);
+      const res = await apiTokenCreate(attributes);
 
       expect(res.permissions).toHaveLength(2);
       expect(res.permissions).toEqual(['api::foo.foo.find', 'api::foo.foo.create']);
@@ -353,7 +362,8 @@ describe('API Token', () => {
         description: 'api-token_tests-description',
         type: 'custom',
         permissions: ['valid-permission', 'unknown-permission-A', 'unknown-permission-B'],
-      };
+      } as any;
+
       const createTokenResult = {
         ...attributes,
         lifespan: null,
@@ -364,7 +374,7 @@ describe('API Token', () => {
       const create = jest.fn().mockResolvedValue(createTokenResult);
       const load = jest.fn().mockResolvedValueOnce(
         Promise.resolve(
-          uniq(attributes.permissions).map((p) => {
+          uniq(attributes.permissions).map((p: any) => {
             return {
               action: p,
             };
@@ -373,7 +383,7 @@ describe('API Token', () => {
       );
 
       global.strapi = {
-        ...getActionProvider(['valid-permission']),
+        ...getActionProvider(['valid-permission'] as any),
         query() {
           return {
             create,
@@ -385,10 +395,10 @@ describe('API Token', () => {
         entityService: {
           load,
         },
-      };
+      } as any;
 
-      await expect(() => apiTokenService.create(attributes)).rejects.toThrowError(
-        new ApplicationError(
+      await expect(() => apiTokenCreate(attributes)).rejects.toThrowError(
+        new errors.ApplicationError(
           `Unknown permissions provided: unknown-permission-A, unknown-permission-B`
         )
       );
@@ -410,9 +420,9 @@ describe('API Token', () => {
           })),
           set: mockedConfigSet,
         },
-      };
+      } as any;
 
-      apiTokenService.checkSaltIsDefined();
+      checkSaltIsDefined();
 
       expect(mockedAppendFile).not.toHaveBeenCalled();
       expect(mockedConfigSet).not.toHaveBeenCalled();
@@ -423,11 +433,11 @@ describe('API Token', () => {
         config: {
           get: jest.fn(() => null),
         },
-      };
+      } as any;
 
       try {
-        apiTokenService.checkSaltIsDefined();
-      } catch (e) {
+        checkSaltIsDefined();
+      } catch (e: any) {
         expect(e.message.includes('Missing apiToken.salt.')).toBe(true);
       }
 
@@ -442,10 +452,10 @@ describe('API Token', () => {
         config: {
           get: jest.fn(() => null),
         },
-      };
+      } as any;
 
       try {
-        apiTokenService.createSaltIfNotDefined();
+        checkSaltIsDefined();
       } catch (err) {
         expect(err).toBeInstanceOf(Error);
       }
@@ -475,9 +485,9 @@ describe('API Token', () => {
         query() {
           return { findMany };
         },
-      };
+      } as any;
 
-      const res = await apiTokenService.list();
+      const res = await list();
 
       expect(findMany).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
@@ -503,9 +513,9 @@ describe('API Token', () => {
         query() {
           return { delete: mockedDelete };
         },
-      };
+      } as any;
 
-      const res = await apiTokenService.revoke(token.id);
+      const res = await revoke(token.id);
 
       expect(mockedDelete).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
@@ -522,9 +532,9 @@ describe('API Token', () => {
         query() {
           return { delete: mockedDelete };
         },
-      };
+      } as any;
 
-      const res = await apiTokenService.revoke(42);
+      const res = await revoke(42);
 
       expect(mockedDelete).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
@@ -550,9 +560,9 @@ describe('API Token', () => {
         query() {
           return { findOne };
         },
-      };
+      } as any;
 
-      const res = await apiTokenService.getById(token.id);
+      const res = await getById(token.id);
 
       expect(findOne).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
@@ -569,9 +579,9 @@ describe('API Token', () => {
         query() {
           return { findOne };
         },
-      };
+      } as any;
 
-      const res = await apiTokenService.getById(42);
+      const res = await getById(42);
 
       expect(findOne).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
@@ -593,16 +603,16 @@ describe('API Token', () => {
         config: {
           get: jest.fn(() => ''),
         },
-      };
+      } as any;
 
       const id = 1;
-      const res = await apiTokenService.regenerate(id);
+      const res = await regenerate(id);
 
       expect(update).toHaveBeenCalledWith({
         where: { id },
         select: ['id', 'accessKey'],
         data: {
-          accessKey: apiTokenService.hash(mockedApiToken.hexedString),
+          accessKey: hash(mockedApiToken.hexedString),
         },
       });
       expect(res).toEqual({ accessKey: mockedApiToken.hexedString });
@@ -618,18 +628,18 @@ describe('API Token', () => {
         config: {
           get: jest.fn(() => ''),
         },
-      };
+      } as any;
 
       const id = 1;
       await expect(async () => {
-        await apiTokenService.regenerate(id);
-      }).rejects.toThrowError(NotFoundError);
+        await regenerate(id);
+      }).rejects.toThrowError(errors.NotFoundError);
 
       expect(update).toHaveBeenCalledWith({
         where: { id },
         select: ['id', 'accessKey'],
         data: {
-          accessKey: apiTokenService.hash(mockedApiToken.hexedString),
+          accessKey: hash(mockedApiToken.hexedString),
         },
       });
     });
@@ -663,16 +673,16 @@ describe('API Token', () => {
         entityService: {
           load,
         },
-      };
+      } as any;
 
       const id = 1;
       const attributes = {
         name: 'api-token_tests-updated-name',
         description: 'api-token_tests-description',
         type: 'read-only',
-      };
+      } as any;
 
-      const res = await apiTokenService.update(id, attributes);
+      const res = await apiTokenUpdate(id, attributes);
       // ensure any existing permissions have been deleted
       expect(deleteFn).toHaveBeenCalledWith({
         where: {
@@ -700,7 +710,7 @@ describe('API Token', () => {
 
       const updatedAttributes = {
         permissions: ['valid-permission-A', 'unknown-permission'],
-      };
+      } as any;
 
       const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
       const update = jest.fn(({ data }) => Promise.resolve(data));
@@ -709,7 +719,7 @@ describe('API Token', () => {
       const load = jest.fn();
 
       global.strapi = {
-        ...getActionProvider(['valid-permission-A']),
+        ...getActionProvider(['valid-permission-A'] as any),
         query() {
           return {
             update,
@@ -724,10 +734,10 @@ describe('API Token', () => {
         entityService: {
           load,
         },
-      };
+      } as any;
 
-      expect(() => apiTokenService.update(id, updatedAttributes)).rejects.toThrowError(
-        new ApplicationError(`Unknown permissions provided: unknown-permission`)
+      expect(() => apiTokenUpdate(id, updatedAttributes)).rejects.toThrowError(
+        new errors.ApplicationError(`Unknown permissions provided: unknown-permission`)
       );
 
       expect(update).not.toHaveBeenCalled();
@@ -750,7 +760,7 @@ describe('API Token', () => {
       const updatedAttributes = {
         name: 'api-token_tests-updated-name',
         type: 'custom',
-      };
+      } as any;
 
       const update = jest.fn(({ data }) => Promise.resolve(data));
       const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
@@ -794,9 +804,9 @@ describe('API Token', () => {
         entityService: {
           load,
         },
-      };
+      } as any;
 
-      const res = await apiTokenService.update(id, updatedAttributes);
+      const res = await apiTokenUpdate(id, updatedAttributes);
 
       expect(update).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
@@ -833,7 +843,7 @@ describe('API Token', () => {
           'admin::subject.newAction',
           'admin::subject.otherAction',
         ],
-      };
+      } as any;
 
       const update = jest.fn(({ data }) => Promise.resolve(data));
       const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
@@ -854,7 +864,7 @@ describe('API Token', () => {
         // second call to check new permissions
         .mockResolvedValueOnce(
           Promise.resolve(
-            updatedAttributes.permissions.map((p) => {
+            updatedAttributes.permissions.map((p: any) => {
               return {
                 action: p,
               };
@@ -868,7 +878,7 @@ describe('API Token', () => {
           'admin::subject.newAction',
           'admin::subject.newAction',
           'admin::subject.otherAction',
-        ]),
+        ] as any),
         query() {
           return {
             update,
@@ -883,9 +893,9 @@ describe('API Token', () => {
         entityService: {
           load,
         },
-      };
+      } as any;
 
-      const res = await apiTokenService.update(id, updatedAttributes);
+      const res = await apiTokenUpdate(id, updatedAttributes);
 
       expect(deleteFn).toHaveBeenCalledTimes(1);
       // expect(deleteFn).toHaveBeenCalledWith({
@@ -946,9 +956,9 @@ describe('API Token', () => {
         query() {
           return { findOne };
         },
-      };
+      } as any;
 
-      const res = await apiTokenService.getByName(token.name);
+      const res = await getByName(token.name);
 
       expect(findOne).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
@@ -965,9 +975,9 @@ describe('API Token', () => {
         query() {
           return { findOne };
         },
-      };
+      } as any;
 
-      const res = await apiTokenService.getByName('unexistant-name');
+      const res = await getByName('unexistant-name');
 
       expect(findOne).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),

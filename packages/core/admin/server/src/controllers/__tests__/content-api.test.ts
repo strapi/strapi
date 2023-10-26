@@ -1,7 +1,5 @@
-'use strict';
-
-const createContext = require('../../../../../../test/helpers/create-context');
-const contentApiController = require('../content-api.ts');
+import createContext from '../../../../../../../test/helpers/create-context';
+import contentApiController from '../content-api.ts';
 
 describe('Content API permissions', () => {
   const actionsMap = {
@@ -28,9 +26,9 @@ describe('Content API permissions', () => {
           getActionsMap,
         },
       },
-    };
+    } as any;
 
-    await contentApiController.getPermissions(ctx);
+    await contentApiController.getPermissions(ctx as any);
 
     expect(getActionsMap).toHaveBeenCalled();
     expect(send).toHaveBeenCalledWith({ data: actionsMap });
@@ -163,9 +161,9 @@ describe('Content API permissions', () => {
       contentAPI: {
         getRoutesMap,
       },
-    };
+    } as any;
 
-    await contentApiController.getRoutes(ctx);
+    await contentApiController.getRoutes(ctx as any);
 
     expect(getRoutesMap).toHaveBeenCalled();
     expect(send).toHaveBeenCalledWith({ data: routesMap });

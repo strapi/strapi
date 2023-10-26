@@ -1,8 +1,6 @@
-'use strict';
+import { createJwtToken, getTokenOptions, decodeJwtToken, createToken } from '../token';
 
-const { createJwtToken, getTokenOptions, decodeJwtToken, createToken } = require('../token');
-
-const delay = (time) =>
+const delay = (time: any) =>
   new Promise((resolve) => {
     setTimeout(resolve, time);
   });
@@ -15,7 +13,7 @@ describe('Token', () => {
         config: {
           get: getFn,
         },
-      };
+      } as any;
 
       const res = getTokenOptions();
 
@@ -34,7 +32,7 @@ describe('Token', () => {
         config: {
           get: getFn,
         },
-      };
+      } as any;
 
       const res = getTokenOptions();
 
@@ -60,7 +58,7 @@ describe('Token', () => {
         config: {
           get: getFn,
         },
-      };
+      } as any;
 
       const res = getTokenOptions();
 
@@ -84,7 +82,7 @@ describe('Token', () => {
             };
           },
         },
-      };
+      } as any;
 
       const token = createJwtToken({ id: 1 });
 
@@ -101,13 +99,10 @@ describe('Token', () => {
             };
           },
         },
-      };
+      } as any;
 
       const token = createJwtToken({
         id: 1,
-        password: 'pcw123',
-        firstname: 'Test',
-        email: 'test@strapi.io',
       });
 
       const { payload } = decodeJwtToken(token);
@@ -136,7 +131,7 @@ describe('Token', () => {
             };
           },
         },
-      };
+      } as any;
 
       const user = { id: 1 };
       const token = createJwtToken(user);
@@ -149,7 +144,7 @@ describe('Token', () => {
             };
           },
         },
-      };
+      } as any;
 
       const { payload, isValid } = decodeJwtToken(token);
       expect(payload).toBe(null);
@@ -168,7 +163,7 @@ describe('Token', () => {
             };
           },
         },
-      };
+      } as any;
 
       const user = { id: 1 };
       const token = createJwtToken(user);
@@ -190,7 +185,7 @@ describe('Token', () => {
             };
           },
         },
-      };
+      } as any;
 
       const user = { id: 1 };
       const token = createJwtToken(user);

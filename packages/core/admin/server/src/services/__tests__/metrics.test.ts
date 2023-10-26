@@ -1,6 +1,8 @@
-'use strict';
-
-const metricsService = require('../metrics');
+import {
+  sendDidInviteUser,
+  sendDidUpdateRolePermissions,
+  sendDidChangeInterfaceLanguage,
+} from '../metrics';
 
 describe('Metrics', () => {
   test('sendDidInviteUser', async () => {
@@ -15,9 +17,9 @@ describe('Metrics', () => {
           role: { count: countRoles },
         },
       },
-    };
+    } as any;
 
-    await metricsService.sendDidInviteUser();
+    await sendDidInviteUser();
 
     expect(send).toHaveBeenCalledWith('didInviteUser', {
       groupProperties: {
@@ -33,9 +35,9 @@ describe('Metrics', () => {
     const send = jest.fn(() => Promise.resolve());
     global.strapi = {
       telemetry: { send },
-    };
+    } as any;
 
-    await metricsService.sendDidUpdateRolePermissions();
+    await sendDidUpdateRolePermissions();
 
     expect(send).toHaveBeenCalledWith('didUpdateRolePermissions');
   });
@@ -51,9 +53,9 @@ describe('Metrics', () => {
           user: { getLanguagesInUse },
         },
       },
-    };
+    } as any;
 
-    await metricsService.sendDidChangeInterfaceLanguage();
+    await sendDidChangeInterfaceLanguage();
 
     expect(getLanguagesInUse).toHaveBeenCalledWith();
     expect(send).toHaveBeenCalledWith('didChangeInterfaceLanguage', {

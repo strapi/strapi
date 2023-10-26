@@ -1,8 +1,6 @@
-'use strict';
-
-const { omit } = require('lodash/fp');
-const createActionProvider = require('../provider');
-const domain = require('..');
+import { omit } from 'lodash/fp';
+import createActionProvider from '../provider';
+import domain from '..';
 
 const providerMethods = [
   'register',
@@ -25,7 +23,7 @@ describe('Action Provider', () => {
       plugins: {
         bar: {},
       },
-    };
+    } as any;
   });
 
   test('ActionProvider is a provider instance', () => {
@@ -145,7 +143,7 @@ describe('Action Provider', () => {
             displayName: 'Bar foo',
             uid: 'bar',
           },
-        ];
+        ] as any;
 
         const actionProvider = createActionProvider();
 
@@ -169,7 +167,7 @@ describe('Action Provider', () => {
             displayName: 'Bar foo',
             uid: 'bar',
           },
-        ];
+        ] as any;
 
         const actionProvider = createActionProvider();
         const registerAll = () => actionProvider.registerMany(attributes);
@@ -194,7 +192,8 @@ describe('Action Provider', () => {
             displayName: 'Bar foo',
             uid: 'bar',
           },
-        ];
+        ] as any;
+
         const willRegister = jest.fn();
         const didRegister = jest.fn();
 
@@ -217,14 +216,14 @@ describe('Action Provider', () => {
           subjects: ['foo', 'bar'],
           displayName: 'Foo bar',
           uid: 'foobar',
-        };
+        } as any;
 
         const actionId = domain.computeActionId(action);
         const actionProvider = createActionProvider();
 
         await actionProvider.register(action);
 
-        const applies = await actionProvider.appliesToProperty('fields', actionId);
+        const applies = await actionProvider.appliesToProperty('fields', actionId, undefined);
 
         expect(applies).toBe(false);
       });
@@ -238,14 +237,14 @@ describe('Action Provider', () => {
           options: {
             applyToProperties: ['fields'],
           },
-        };
+        } as any;
 
         const actionId = domain.computeActionId(action);
         const actionProvider = createActionProvider();
 
         await actionProvider.register(action);
 
-        const applies = await actionProvider.appliesToProperty('fields', actionId);
+        const applies = await actionProvider.appliesToProperty('fields', actionId, undefined);
 
         expect(applies).toBe(true);
       });
@@ -259,7 +258,7 @@ describe('Action Provider', () => {
           options: {
             applyToProperties: ['fields'],
           },
-        };
+        } as any;
 
         const actionId = domain.computeActionId(action);
         const actionProvider = createActionProvider();
@@ -280,7 +279,7 @@ describe('Action Provider', () => {
           options: {
             applyToProperties: ['fields'],
           },
-        };
+        } as any;
 
         const actionId = domain.computeActionId(action);
         const actionProvider = createActionProvider();
@@ -301,7 +300,7 @@ describe('Action Provider', () => {
           options: {
             applyToProperties: ['fields'],
           },
-        };
+        } as any;
 
         const actionId = domain.computeActionId(action);
         const actionProvider = createActionProvider();
@@ -341,7 +340,7 @@ describe('Action Provider', () => {
           options: {
             applyToProperties: ['fields'],
           },
-        };
+        } as any;
 
         const actionId = domain.computeActionId(action);
         const actionProvider = createActionProvider();

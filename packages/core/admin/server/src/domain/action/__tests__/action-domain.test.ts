@@ -1,12 +1,10 @@
-'use strict';
-
-const domain = require('..');
+import domain from '..';
 
 describe('Action Domain', () => {
   describe('appliesToProperty', () => {
     test('Should return false when action.options.applyToProperties is Nil', () => {
-      const action = { options: {} };
-      const property = 'foo';
+      const action: any = { options: {} };
+      const property: any = 'foo';
 
       const result = domain.appliesToProperty(property, action);
 
@@ -14,8 +12,8 @@ describe('Action Domain', () => {
     });
 
     test('Should return true when action.options.applyToProperties contains the property', () => {
-      const action = { options: { applyToProperties: ['foo', 'bar'] } };
-      const property = 'foo';
+      const action: any = { options: { applyToProperties: ['foo', 'bar'] } };
+      const property: any = 'foo';
 
       const result = domain.appliesToProperty(property, action);
 
@@ -23,8 +21,8 @@ describe('Action Domain', () => {
     });
 
     test('Should allow currying (arity of 2)', () => {
-      const action = { options: { applyToProperties: ['foo', 'bar'] } };
-      const property = 'foo';
+      const action: any = { options: { applyToProperties: ['foo', 'bar'] } };
+      const property: any = 'foo';
 
       const curriedForProperty = domain.appliesToProperty(property);
       const result = curriedForProperty(action);
@@ -35,8 +33,8 @@ describe('Action Domain', () => {
 
   describe('appliesToSubject', () => {
     test('Should return false when action.subjects is not an array (applies to no subjects)', () => {
-      const action = {};
-      const subject = 'foo';
+      const action: any = {};
+      const subject: any = 'foo';
 
       const result = domain.appliesToSubject(subject, action);
 
@@ -44,8 +42,8 @@ describe('Action Domain', () => {
     });
 
     test('Should return true when action.subjects contains the subject', () => {
-      const action = { subjects: ['foo', 'bar'] };
-      const subject = 'foo';
+      const action: any = { subjects: ['foo', 'bar'] };
+      const subject: any = 'foo';
 
       const result = domain.appliesToSubject(subject, action);
 
@@ -53,8 +51,8 @@ describe('Action Domain', () => {
     });
 
     test(`Should return false when action.subjects doesn't contains the subject`, () => {
-      const action = { subjects: ['foo', 'bar'] };
-      const subject = 'foobar';
+      const action: any = { subjects: ['foo', 'bar'] };
+      const subject: any = 'foobar';
 
       const result = domain.appliesToSubject(subject, action);
 
@@ -62,8 +60,8 @@ describe('Action Domain', () => {
     });
 
     test('Should allow currying (arity of 2)', () => {
-      const action = { subjects: ['foo', 'bar'] };
-      const subject = 'foo';
+      const action: any = { subjects: ['foo', 'bar'] };
+      const subject: any = 'foo';
 
       const curriedForSubject = domain.appliesToSubject(subject);
       const result = curriedForSubject(action);
@@ -74,7 +72,7 @@ describe('Action Domain', () => {
 
   describe('assignActionId', () => {
     test('Create a new action with an actionId attribute. Prevent mutation on original object', () => {
-      const action = { uid: 'foobar' };
+      const action: any = { uid: 'foobar' };
 
       const newAction = domain.assignActionId(action);
 
@@ -88,7 +86,7 @@ describe('Action Domain', () => {
 
   describe('assignOrOmitSubCategory', () => {
     test('Should keep the subCategory property if action.section is "settings"', () => {
-      const action = { section: 'settings', subCategory: 'foo' };
+      const action: any = { section: 'settings', subCategory: 'foo' };
 
       const newAction = domain.assignOrOmitSubCategory(action);
 
@@ -96,7 +94,7 @@ describe('Action Domain', () => {
     });
 
     test('Should keep the subCategory property if action.section is "plugins"', () => {
-      const action = { section: 'plugins', subCategory: 'foo' };
+      const action: any = { section: 'plugins', subCategory: 'foo' };
 
       const newAction = domain.assignOrOmitSubCategory(action);
 
@@ -104,7 +102,7 @@ describe('Action Domain', () => {
     });
 
     test('Should add a generic subCategory property if action.section is "settings" or "plugins" and action.subCategory is not defined', () => {
-      const action = { section: 'settings' };
+      const action: any = { section: 'settings' };
 
       const newAction = domain.assignOrOmitSubCategory(action);
 
@@ -112,7 +110,7 @@ describe('Action Domain', () => {
     });
 
     test(`Shouldn't add the subCategory property if action.section is not "settings" or "plugins"`, () => {
-      const action = { section: 'contentTypes' };
+      const action: any = { section: 'contentTypes' };
 
       const newAction = domain.assignOrOmitSubCategory(action);
 
@@ -120,7 +118,7 @@ describe('Action Domain', () => {
     });
 
     test(`Should omit the subCategory property if action.section is not "settings" or "plugins"`, () => {
-      const action = { section: 'contentTypes', subCategory: 'foo' };
+      const action: any = { section: 'contentTypes', subCategory: 'foo' };
 
       const newAction = domain.assignOrOmitSubCategory(action);
 
@@ -130,8 +128,8 @@ describe('Action Domain', () => {
 
   describe('create', () => {
     test('Should register an action with the minimum amount of information', () => {
-      const action = { section: 'contentTypes', uid: 'foo' };
-      const expected = { section: 'contentTypes', actionId: 'api::foo' };
+      const action: any = { section: 'contentTypes', uid: 'foo' };
+      const expected: any = { section: 'contentTypes', actionId: 'api::foo' };
 
       const result = domain.create(action);
 
@@ -139,7 +137,7 @@ describe('Action Domain', () => {
     });
 
     test('Should handle multiple step of transformation', () => {
-      const action = {
+      const action: any = {
         section: 'settings',
         uid: 'foo',
         pluginName: 'bar',
@@ -162,30 +160,27 @@ describe('Action Domain', () => {
 
   describe('computeActionId', () => {
     test('Should return an actionId prefixed with "api::" when there is no pluginName', () => {
-      const attributes = { uid: 'foobar' };
-      const expected = 'api::foobar';
+      const attributes: any = { uid: 'foobar' };
 
       const actionId = domain.computeActionId(attributes);
 
-      expect(actionId).toBe(expected);
+      expect(actionId).toBe('api::foobar');
     });
 
     test('Should return an actionId prefixed with "admin::" when the pluginName is "admin"', () => {
-      const attributes = { uid: 'foobar', pluginName: 'admin' };
-      const expected = 'admin::foobar';
+      const attributes: any = { uid: 'foobar', pluginName: 'admin' };
 
       const actionId = domain.computeActionId(attributes);
 
-      expect(actionId).toBe(expected);
+      expect(actionId).toBe('admin::foobar');
     });
 
     test('Should return an actionId prefixed with "plugin::" when there is a pluginName (other than admin)', () => {
-      const attributes = { uid: 'foobar', pluginName: 'myPlugin' };
-      const expected = 'plugin::myPlugin.foobar';
+      const attributes: any = { uid: 'foobar', pluginName: 'myPlugin' };
 
       const actionId = domain.computeActionId(attributes);
 
-      expect(actionId).toBe(expected);
+      expect(actionId).toBe('plugin::myPlugin.foobar');
     });
   });
 
@@ -199,10 +194,10 @@ describe('Action Domain', () => {
   });
 
   describe('sanitizeActionAttributes', () => {
-    const getSortedAttributes = (object) => Object.keys(object).sort();
+    const getSortedAttributes = (object: any) => Object.keys(object).sort();
 
     test(`It shouldn't remove attributes contained in domain.actionFields`, () => {
-      const action = domain.actionFields.reduce(
+      const action: any = domain.actionFields.reduce(
         (attrs, attrName) => ({ ...attrs, [attrName]: 'foo' }),
         {}
       );
@@ -215,8 +210,8 @@ describe('Action Domain', () => {
 
     test('It should remove attributes not contained in domain.actionFields', () => {
       const invalidAttributes = ['foo', 'bar'];
-      const action = domain.actionFields
-        .concat(invalidAttributes)
+      const action: any = domain.actionFields
+        .concat(invalidAttributes as any)
         .reduce((attrs, attrName) => ({ ...attrs, [attrName]: 'foo' }), {});
 
       const sanitizedAction = domain.sanitizeActionAttributes(action);

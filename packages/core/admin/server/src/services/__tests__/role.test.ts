@@ -1,10 +1,27 @@
-'use strict';
+import _ from 'lodash';
+import constants from '../constants';
+import { create as createPermission, toPermission } from '../../domain/permission';
+import createEventHub from '../../../../../strapi/dist/services/event-hub';
 
-const _ = require('lodash');
-const roleService = require('../role');
-const { SUPER_ADMIN_CODE } = require('../constants');
-const { create: createPermission, toPermission } = require('../../domain/permission');
-const createEventHub = require('../../../../strapi/dist/services/event-hub');
+import {
+  sanitizeRole,
+  create,
+  findOne,
+  findOneWithUsersCount,
+  find,
+  findAllWithUsersCount,
+  update,
+  count,
+  deleteByIds,
+  getUsersCount,
+  createRolesIfNoneExist,
+  displayWarningIfNoSuperAdmin,
+  addPermissions,
+  assignPermissions,
+  resetSuperAdminPermissions,
+} from '../role';
+
+const { SUPER_ADMIN_CODE } = constants;
 
 describe('Role', () => {
   describe('create', () => {
@@ -15,7 +32,7 @@ describe('Role', () => {
       global.strapi = {
         query: () => ({ create: dbCreate, count: dbCount }),
         eventHub: createEventHub(),
-      };
+      } as any;
 
       const input = {
         name: 'super_admin',
@@ -23,7 +40,7 @@ describe('Role', () => {
         code: 'super-admin',
       };
 
-      const createdRole = await roleService.create(input);
+      const createdRole = await create(input);
 
       expect(dbCreate).toHaveBeenCalledWith({ data: input });
       expect(createdRole).toStrictEqual(input);
@@ -41,9 +58,9 @@ describe('Role', () => {
 
       global.strapi = {
         query: () => ({ findOne: dbFindOne }),
-      };
+      } as any;
 
-      const foundRole = await roleService.findOne({ id: role.id });
+      const foundRole = await findOne({ id: role.id });
 
       expect(dbFindOne).toHaveBeenCalledWith({ where: { id: role.id } });
       expect(foundRole).toStrictEqual(role);
@@ -62,9 +79,9 @@ describe('Role', () => {
       const dbCount = jest.fn(() => Promise.resolve(0));
       global.strapi = {
         query: () => ({ findOne: dbFindOne, count: dbCount }),
-      };
+      } as any;
 
-      const foundRole = await roleService.findOneWithUsersCount({ id: role.id });
+      const foundRole = await findOneWithUsersCount({ id: role.id });
 
       expect(dbFindOne).toHaveBeenCalledWith({ where: { id: role.id } });
       expect(dbCount).toHaveBeenCalledWith({ where: { roles: { id: role.id } } });
@@ -85,9 +102,10 @@ describe('Role', () => {
 
       global.strapi = {
         query: () => ({ findMany: dbFind }),
-      };
+      } as any;
 
-      const foundRoles = await roleService.find();
+      //@ts-expect-error
+      const foundRoles = await find();
 
       expect(dbFind).toHaveBeenCalledWith({ where: {} });
       expect(foundRoles).toStrictEqual(roles);
@@ -112,7 +130,7 @@ describe('Role', () => {
         entityService: {
           findMany,
         },
-      };
+      } as any;
 
       const params = {
         filters: {
@@ -126,7 +144,7 @@ describe('Role', () => {
         },
       };
 
-      const foundRoles = await roleService.findAllWithUsersCount(params);
+      const foundRoles = await findAllWithUsersCount(params);
 
       expect(findMany).toHaveBeenCalledWith('admin::role', params);
       expect(foundRoles).toStrictEqual(roles);
@@ -153,9 +171,9 @@ describe('Role', () => {
       global.strapi = {
         query: () => ({ update: dbUpdate, count: dbCount }),
         eventHub: createEventHub(),
-      };
+      } as any;
 
-      const updatedRole = await roleService.update(
+      const updatedRole = await update(
         {
           id: role.id,
         },
@@ -189,9 +207,9 @@ describe('Role', () => {
         admin: { config: { superAdminCode: SUPER_ADMIN_CODE } },
         errors: { badRequest },
         eventHub: createEventHub(),
-      };
+      } as any;
 
-      await roleService.update({ id: 1 }, { code: 'new_code' });
+      await update({ id: 1 }, { code: 'new_code' });
 
       expect(dbUpdate).toHaveBeenCalledWith({ where: { id: 1 }, data: {} });
     });
@@ -203,9 +221,9 @@ describe('Role', () => {
       const dbCount = jest.fn(() => Promise.resolve(0));
       global.strapi = {
         query: () => ({ count: dbCount }),
-      };
+      } as any;
 
-      const usersCount = await roleService.getUsersCount(roleId);
+      const usersCount = await getUsersCount(roleId);
 
       expect(dbCount).toHaveBeenCalledWith({ where: { roles: { id: roleId } } });
       expect(usersCount).toEqual(0);
@@ -241,9 +259,9 @@ describe('Role', () => {
           config: { superAdminCode: SUPER_ADMIN_CODE },
         },
         eventHub: createEventHub(),
-      };
+      } as any;
 
-      const deletedRoles = await roleService.deleteByIds([role.id]);
+      const deletedRoles = await deleteByIds([role.id]);
 
       expect(dbCount).toHaveBeenCalledWith({ where: { roles: { id: role.id } } });
       expect(dbDelete).toHaveBeenCalledWith({ where: { id: role.id } });
@@ -294,9 +312,9 @@ describe('Role', () => {
           config: { superAdminCode: SUPER_ADMIN_CODE },
         },
         eventHub: createEventHub(),
-      };
+      } as any;
 
-      const deletedRoles = await roleService.deleteByIds(rolesIds);
+      const deletedRoles = await deleteByIds(rolesIds);
 
       expect(dbCount).toHaveBeenNthCalledWith(1, { where: { roles: { id: rolesIds[0] } } });
       expect(dbCount).toHaveBeenNthCalledWith(2, { where: { roles: { id: rolesIds[1] } } });
@@ -320,11 +338,9 @@ describe('Role', () => {
           }),
         }),
         admin: { config: { superAdminCode: SUPER_ADMIN_CODE } },
-      };
+      } as any;
 
-      expect(() => roleService.deleteByIds([1])).rejects.toThrowError(
-        'You cannot delete the super admin role'
-      );
+      expect(() => deleteByIds([1])).rejects.toThrowError('You cannot delete the super admin role');
     });
 
     test('Cannot delete a role attached to some user', async () => {
@@ -342,9 +358,9 @@ describe('Role', () => {
           }),
         }),
         admin: { config: { superAdminCode: SUPER_ADMIN_CODE } },
-      };
+      } as any;
 
-      expect(() => roleService.deleteByIds([1])).rejects.toThrowError(
+      expect(() => deleteByIds([1])).rejects.toThrowError(
         'Some roles are still assigned to some users'
       );
     });
@@ -352,28 +368,28 @@ describe('Role', () => {
 
   describe('Count roles', () => {
     test('Count roles without params', async () => {
-      const count = jest.fn(() => Promise.resolve(2));
+      const dbCount = jest.fn(() => Promise.resolve(2));
       global.strapi = {
-        query: () => ({ count }),
-      };
+        query: () => ({ count: dbCount }),
+      } as any;
 
-      const amount = await roleService.count();
+      const amount = await count();
 
       expect(amount).toBe(2);
-      expect(count).toHaveBeenCalledWith({});
+      expect(dbCount).toHaveBeenCalledWith({});
     });
 
     test('Count roles with params', async () => {
-      const count = jest.fn(() => Promise.resolve(2));
+      const dbCount = jest.fn(() => Promise.resolve(2));
       global.strapi = {
-        query: () => ({ count }),
-      };
+        query: () => ({ count: dbCount }),
+      } as any;
 
       const params = { foo: 'bar' };
-      const amount = await roleService.count(params);
+      const amount = await count(params);
 
       expect(amount).toBe(2);
-      expect(count).toHaveBeenCalledWith(params);
+      expect(dbCount).toHaveBeenCalledWith(params);
     });
   });
 
@@ -383,8 +399,8 @@ describe('Role', () => {
       const create = jest.fn();
       global.strapi = {
         query: () => ({ count, create }),
-      };
-      await roleService.createRolesIfNoneExist();
+      } as any;
+      await createRolesIfNoneExist();
 
       expect(create).toHaveBeenCalledTimes(0);
     });
@@ -483,9 +499,9 @@ describe('Role', () => {
           },
         },
         eventHub: createEventHub(),
-      };
+      } as any;
 
-      await roleService.createRolesIfNoneExist();
+      await createRolesIfNoneExist();
 
       expect(create).toHaveBeenCalledTimes(3);
 
@@ -552,9 +568,9 @@ describe('Role', () => {
         query: () => ({ findOne, count }),
         admin: { services: { user: { exists } } },
         log: { warn },
-      };
+      } as any;
 
-      await roleService.displayWarningIfNoSuperAdmin();
+      await displayWarningIfNoSuperAdmin();
 
       expect(warn).toHaveBeenCalledTimes(0);
     });
@@ -568,9 +584,9 @@ describe('Role', () => {
         query: () => ({ findOne, count }),
         admin: { services: { user: { exists } } },
         log: { warn },
-      };
+      } as any;
 
-      await roleService.displayWarningIfNoSuperAdmin();
+      await displayWarningIfNoSuperAdmin();
 
       expect(warn).toHaveBeenCalledWith("Your application doesn't have a super admin role.");
     });
@@ -584,9 +600,9 @@ describe('Role', () => {
         query: () => ({ findOne, count }),
         admin: { services: { user: { exists } } },
         log: { warn },
-      };
+      } as any;
 
-      await roleService.displayWarningIfNoSuperAdmin();
+      await displayWarningIfNoSuperAdmin();
 
       expect(warn).toHaveBeenCalledWith("Your application doesn't have a super admin user.");
     });
@@ -600,9 +616,9 @@ describe('Role', () => {
       global.strapi = {
         query: () => ({ createMany }),
         admin: { services: { role: { getSuperAdmin } } },
-      };
+      } as any;
 
-      await roleService.resetSuperAdminPermissions();
+      await resetSuperAdminPermissions();
 
       expect(createMany).toHaveBeenCalledTimes(0);
     });
@@ -688,9 +704,9 @@ describe('Role', () => {
           },
         },
         eventHub: createEventHub(),
-      };
+      } as any;
 
-      await roleService.resetSuperAdminPermissions();
+      await resetSuperAdminPermissions();
 
       expect(deleteByIds).toHaveBeenCalledWith([2]);
       expect(createMany).toHaveBeenCalledWith(
@@ -722,9 +738,9 @@ describe('Role', () => {
           },
         },
         eventHub: createEventHub(),
-      };
+      } as any;
 
-      await roleService.assignPermissions(1, []);
+      await assignPermissions(1, []);
 
       expect(deleteByIds).toHaveBeenCalledWith([3]);
     });
@@ -758,15 +774,15 @@ describe('Role', () => {
           },
         },
         eventHub: createEventHub(),
-      };
+      } as any;
 
-      const permissionsToAssign = [...permissions];
+      const permissionsToAssign: any = [...permissions];
       permissionsToAssign[4] = {
         ...permissions[4],
         conditions: ['cond'],
       };
 
-      await roleService.assignPermissions(1, permissionsToAssign);
+      await assignPermissions(1, permissionsToAssign);
 
       expect(createMany).toHaveBeenCalledTimes(1);
       expect(createMany).toHaveBeenCalledWith([
@@ -818,7 +834,7 @@ describe('Role', () => {
         { action: `action-0` },
         { action: `action-1` },
         { action: 'action-internal' },
-      ];
+      ] as any;
 
       const createMany = jest.fn(() => Promise.resolve([]));
       const getSuperAdmin = jest.fn(() => Promise.resolve({ id: 0 }));
@@ -848,9 +864,9 @@ describe('Role', () => {
           },
         },
         eventHub: createEventHub(),
-      };
+      } as any;
 
-      await roleService.assignPermissions(1, permissions);
+      await assignPermissions(1, permissions);
 
       expect(createMany).toHaveBeenCalledTimes(1);
       expect(createMany).toHaveBeenCalledWith([
@@ -874,7 +890,7 @@ describe('Role', () => {
     });
 
     test('Filter internal permissions on delete', async () => {
-      const permissions = [{ action: `action-0` }, { action: `action-1` }];
+      const permissions = [{ action: `action-0` }, { action: `action-1` }] as any;
 
       const createMany = jest.fn(() => Promise.resolve(permissions));
       const getSuperAdmin = jest.fn(() => Promise.resolve({ id: 0 }));
@@ -908,9 +924,9 @@ describe('Role', () => {
           },
         },
         eventHub: createEventHub(),
-      };
+      } as any;
 
-      const returnedPermissions = await roleService.assignPermissions(1, permissions);
+      const returnedPermissions = await assignPermissions(1, permissions);
       expect(deleteByIds).toHaveBeenCalledTimes(0);
       expect(returnedPermissions).toEqual(permissions);
     });
@@ -946,9 +962,9 @@ describe('Role', () => {
             condition: { isValidCondition: () => true },
           },
         },
-      };
+      } as any;
 
-      await roleService.addPermissions(roleId, input);
+      await addPermissions(roleId, input);
 
       expect(createMany).toHaveBeenCalledWith(expect.arrayContaining(expected));
     });
@@ -962,7 +978,7 @@ describe('Role', () => {
       permissions: [{ id: 1 }],
     };
 
-    expect(roleService.sanitizeRole(role)).toEqual({
+    expect(sanitizeRole(role)).toEqual({
       id: 1,
       name: 'Some Role',
     });

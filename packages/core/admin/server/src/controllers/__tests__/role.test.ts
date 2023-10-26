@@ -1,8 +1,6 @@
-'use strict';
-
-const { ApplicationError } = require('@strapi/utils').errors;
-const createContext = require('../../../../../../test/helpers/create-context');
-const roleController = require('../role');
+import { errors } from '@strapi/utils';
+import createContext from '../../../../../../../test/helpers/create-context';
+import roleController from '../role';
 
 describe('Role controller', () => {
   describe('getPermissions', () => {
@@ -17,7 +15,7 @@ describe('Role controller', () => {
         {
           notFound,
         }
-      );
+      ) as any;
 
       global.strapi = {
         admin: {
@@ -27,7 +25,7 @@ describe('Role controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       await roleController.getPermissions(ctx);
 
@@ -52,7 +50,7 @@ describe('Role controller', () => {
 
       const ctx = createContext({
         params: { id: 1 },
-      });
+      }) as any;
 
       global.strapi = {
         admin: {
@@ -66,7 +64,7 @@ describe('Role controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       await roleController.getPermissions(ctx);
 
@@ -85,7 +83,7 @@ describe('Role controller', () => {
       const ctx = createContext({
         params: { id: 1 },
         body: {},
-      });
+      }) as any;
 
       global.strapi = {
         admin: {
@@ -98,14 +96,14 @@ describe('Role controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       expect.assertions(2);
 
       try {
         await roleController.updatePermissions(ctx);
-      } catch (e) {
-        expect(e instanceof ApplicationError).toBe(true);
+      } catch (e: any) {
+        expect(e instanceof errors.ApplicationError).toBe(true);
         expect(e.message).toEqual('permissions is a required field');
       }
     });
@@ -118,7 +116,8 @@ describe('Role controller', () => {
         body: {
           permissions: [{}],
         },
-      });
+      }) as any;
+
       global.strapi = {
         admin: {
           services: {
@@ -130,14 +129,14 @@ describe('Role controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       expect.assertions(2);
 
       try {
         await roleController.updatePermissions(ctx);
-      } catch (e) {
-        expect(e instanceof ApplicationError).toBe(true);
+      } catch (e: any) {
+        expect(e instanceof errors.ApplicationError).toBe(true);
         expect(e.message).toEqual('permissions[0].action is a required field');
       }
     });
@@ -160,7 +159,7 @@ describe('Role controller', () => {
         body: {
           permissions: inputPermissions,
         },
-      });
+      }) as any;
 
       global.strapi = {
         admin: {
@@ -186,7 +185,7 @@ describe('Role controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       await roleController.updatePermissions(ctx);
 

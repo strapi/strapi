@@ -1,7 +1,6 @@
-'use strict';
-
-const { getAllowedActionsForRole } = require('../action');
-const { AUTHOR_CODE, PUBLISH_ACTION } = require('../constants');
+import { getAllowedActionsForRole } from '../action';
+import constants from '../constants';
+const { AUTHOR_CODE, PUBLISH_ACTION } = constants;
 
 const fixtures = [
   {
@@ -30,7 +29,7 @@ describe('Action', () => {
             },
           },
         },
-      };
+      } as any;
 
       const actions = await getAllowedActionsForRole();
       expect(actions.length).toBe(fixtures.length);
@@ -39,7 +38,7 @@ describe('Action', () => {
 
     test('returns every action if role is not the author role', async () => {
       const findOneRoleMock = jest.fn(() => ({ code: 'custom-code ' }));
-      const roleId = 1;
+      const roleId = '1';
 
       global.strapi = {
         admin: {
@@ -56,7 +55,7 @@ describe('Action', () => {
             },
           },
         },
-      };
+      } as any;
 
       const actions = await getAllowedActionsForRole(roleId);
 
@@ -67,7 +66,7 @@ describe('Action', () => {
 
     test('excludes publish action for author role', async () => {
       const findOneRoleMock = jest.fn(() => ({ code: AUTHOR_CODE }));
-      const roleId = 1;
+      const roleId = '1';
 
       global.strapi = {
         admin: {
@@ -84,7 +83,7 @@ describe('Action', () => {
             },
           },
         },
-      };
+      } as any;
 
       const actions = await getAllowedActionsForRole(roleId);
 

@@ -1,11 +1,9 @@
-'use strict';
-
-const domain = require('..');
+import domain from '..';
 
 describe('Permission Domain', () => {
   describe('addCondition', () => {
     test(`Init the condition array if it doesn't exists`, async () => {
-      const permission = {};
+      const permission: any = {};
 
       const newPermission = domain.addCondition('foo', permission);
 
@@ -14,7 +12,7 @@ describe('Permission Domain', () => {
     });
 
     test('Adds the new condition to the permission.conditions property', async () => {
-      const permission = { conditions: ['foo'] };
+      const permission: any = { conditions: ['foo'] };
 
       const newPermission = domain.addCondition('bar', permission);
 
@@ -23,7 +21,7 @@ describe('Permission Domain', () => {
     });
 
     test(`Don't add the new condition to the permission.conditions property if it's already been added`, async () => {
-      const permission = { conditions: ['foo'] };
+      const permission: any = { conditions: ['foo'] };
 
       const newPermission = domain.addCondition('foo', permission);
 
@@ -34,7 +32,7 @@ describe('Permission Domain', () => {
 
   describe('removeCondition', () => {
     test('Can remove added condition from permission.conditions', () => {
-      const permission = { conditions: ['foo', 'bar'] };
+      const permission: any = { conditions: ['foo', 'bar'] };
 
       const newPermission = domain.removeCondition('foo', permission);
 
@@ -43,7 +41,7 @@ describe('Permission Domain', () => {
     });
 
     test(`Do not remove anything if the condition isn't present in permission.conditions`, () => {
-      const permission = { conditions: ['foo', 'bar'] };
+      const permission: any = { conditions: ['foo', 'bar'] };
 
       const newPermission = domain.removeCondition('foobar', permission);
 
@@ -71,7 +69,7 @@ describe('Permission Domain', () => {
 
   describe('sanitizePermissionFields', () => {
     test('Returns a new permission without the invalid fields', () => {
-      const invalidPermission = { action: 'foo', subject: 'bar', properties: {}, foo: 'bar' };
+      const invalidPermission: any = { action: 'foo', subject: 'bar', properties: {}, foo: 'bar' };
 
       const permission = domain.sanitizePermissionFields(invalidPermission);
 
@@ -81,7 +79,7 @@ describe('Permission Domain', () => {
 
   describe('setProperty', () => {
     test('Can set a new property and its value', () => {
-      const permission = { properties: {} };
+      const permission: any = { properties: {} };
 
       const newPermission = domain.setProperty('foo', 'bar', permission);
 
@@ -90,7 +88,7 @@ describe('Permission Domain', () => {
     });
 
     test('Can update the value of an existing property', () => {
-      const permission = { properties: { foo: 'bar' } };
+      const permission: any = { properties: { foo: 'bar' } };
 
       const newPermission = domain.setProperty('foo', 'foobar', permission);
 
@@ -99,7 +97,7 @@ describe('Permission Domain', () => {
     });
 
     test('Can perform a deep update on a property', () => {
-      const permission = { properties: { foo: { bar: { foobar: null } } }, bar: 'foo' };
+      const permission: any = { properties: { foo: { bar: { foobar: null } } }, bar: 'foo' };
 
       const newPermission = domain.setProperty('foo.bar.foobar', 1, permission);
 
@@ -110,7 +108,7 @@ describe('Permission Domain', () => {
 
   describe('deleteProperty', () => {
     test('Can delete an existing property', () => {
-      const permission = { properties: { foo: 'bar', bar: 'foo' } };
+      const permission: any = { properties: { foo: 'bar', bar: 'foo' } };
 
       const newPermission = domain.deleteProperty('foo', permission);
 
@@ -119,7 +117,7 @@ describe('Permission Domain', () => {
     });
 
     test('Delete a non-existing property does nothing', () => {
-      const permission = { properties: { foo: 'bar' } };
+      const permission: any = { properties: { foo: 'bar' } };
 
       const newPermission = domain.deleteProperty('bar', permission);
 
@@ -128,7 +126,10 @@ describe('Permission Domain', () => {
     });
 
     test('Can perform a deep delete on a property', () => {
-      const permission = { properties: { foo: { bar: { foobar: null, barfoo: 2 } } }, bar: 'foo' };
+      const permission: any = {
+        properties: { foo: { bar: { foobar: null, barfoo: 2 } } },
+        bar: 'foo',
+      };
 
       const newPermission = domain.deleteProperty('foo.bar.barfoo', permission);
 
@@ -183,7 +184,7 @@ describe('Permission Domain', () => {
 
   describe('getProperty', () => {
     test('Can get a property if it exists', () => {
-      const permission = { properties: { foo: 'bar' } };
+      const permission: any = { properties: { foo: 'bar' } };
 
       const property = domain.getProperty('foo', permission);
 
@@ -191,7 +192,7 @@ describe('Permission Domain', () => {
     });
 
     test('Can get a deep property if it exists', () => {
-      const permission = { properties: { foo: { bar: 'foobar' } } };
+      const permission: any = { properties: { foo: { bar: 'foobar' } } };
 
       const property = domain.getProperty('foo.bar', permission);
 
@@ -199,7 +200,7 @@ describe('Permission Domain', () => {
     });
 
     test(`Trying to get a property that doesn't exist returns undefined`, () => {
-      const permission = { properties: { foo: 'bar' } };
+      const permission: any = { properties: { foo: 'bar' } };
 
       const property = domain.getProperty('bar', permission);
 
@@ -207,11 +208,11 @@ describe('Permission Domain', () => {
     });
 
     test('getProperty should allow currying', () => {
-      const permissions = [{ properties: { foo: 'bar' } }, { properties: { foo: 'foobar' } }];
+      const permissions: any = [{ properties: { foo: 'bar' } }, { properties: { foo: 'foobar' } }];
 
       const getFooProperty = domain.getProperty('foo');
 
-      permissions.forEach((permission) => {
+      permissions.forEach((permission: any) => {
         const fooProperty = getFooProperty(permission);
 
         expect(fooProperty).toBe(permission.properties.foo);
@@ -219,7 +220,7 @@ describe('Permission Domain', () => {
     });
 
     test(`Trying to access property if permission.properties isn't defined should return undefined`, () => {
-      const permission = {};
+      const permission: any = {};
 
       const property = domain.getProperty('foo', permission);
 
@@ -229,14 +230,14 @@ describe('Permission Domain', () => {
 
   describe('sanitizeConditions', () => {
     const conditions = ['foo', 'bar'];
-    const conditionProvider = { has: (condition) => conditions.includes(condition) };
+    const conditionProvider = { has: (condition: any) => conditions.includes(condition) };
 
     test(`No conditions should be removed if they're valid`, () => {
       const permission = { conditions: ['foo', 'bar'] };
 
       const permissionWithSanitizedConditions = domain.sanitizeConditions(
-        conditionProvider,
-        permission
+        conditionProvider as any,
+        permission as any
       );
 
       expect(permissionWithSanitizedConditions).toHaveProperty('conditions', ['foo', 'bar']);
@@ -246,8 +247,8 @@ describe('Permission Domain', () => {
       const permission = { conditions: ['foo', 'foobar'] };
 
       const permissionWithSanitizedConditions = domain.sanitizeConditions(
-        conditionProvider,
-        permission
+        conditionProvider as any,
+        permission as any
       );
 
       expect(permissionWithSanitizedConditions).toHaveProperty('conditions', ['foo']);
@@ -257,8 +258,8 @@ describe('Permission Domain', () => {
       const permission = {};
 
       const permissionWithSanitizedConditions = domain.sanitizeConditions(
-        conditionProvider,
-        permission
+        conditionProvider as any,
+        permission as any
       );
 
       expect(permissionWithSanitizedConditions).not.toHaveProperty('conditions');
@@ -271,9 +272,9 @@ describe('Permission Domain', () => {
       [{ conditions: ['foobar'] }, []],
       [{}, undefined],
     ])('Should allow currying (arity 2)', (permission, expected) => {
-      const sanitizeConditionsWithProvider = domain.sanitizeConditions(conditionProvider);
+      const sanitizeConditionsWithProvider = domain.sanitizeConditions(conditionProvider as any);
 
-      const permissionWithSanitizedConditions = sanitizeConditionsWithProvider(permission);
+      const permissionWithSanitizedConditions = sanitizeConditionsWithProvider(permission as any);
 
       if (expected === undefined) {
         expect(permissionWithSanitizedConditions).not.toHaveProperty('conditions');

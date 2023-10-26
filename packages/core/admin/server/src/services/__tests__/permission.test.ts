@@ -1,10 +1,13 @@
-'use strict';
-
-const _ = require('lodash');
-const { merge } = require('lodash/fp');
-const permissionService = require('../permission');
-const { toPermission } = require('../../domain/permission');
-const createEventHub = require('../../../../strapi/dist/services/event-hub');
+import _ from 'lodash';
+import { merge } from 'lodash/fp';
+import {
+  cleanPermissionsInDatabase,
+  findUserPermissions,
+  sanitizePermission,
+  findMany as permissionsServiceFindMany,
+} from '../permission';
+import { toPermission } from '../../domain/permission';
+import createEventHub from '../../../../../strapi/dist/services/event-hub';
 
 describe('Permission Service', () => {
   beforeEach(() => {
@@ -18,7 +21,7 @@ describe('Permission Service', () => {
           },
         },
       },
-    };
+    } as any;
   });
 
   describe('Find permissions', () => {
@@ -30,7 +33,7 @@ describe('Permission Service', () => {
         },
       });
 
-      await permissionService.findMany({ where: { role: { id: 1 } } });
+      await permissionsServiceFindMany({ where: { role: { id: 1 } } });
 
       expect(findMany).toHaveBeenCalledWith({ where: { role: { id: 1 } } });
     });
@@ -46,9 +49,9 @@ describe('Permission Service', () => {
         },
       });
 
-      await permissionService.findUserPermissions({
+      await findUserPermissions({
         id: 1,
-      });
+      } as any);
 
       expect(findMany).toHaveBeenCalledWith({ where: { role: { users: { id: 1 } } } });
     });
@@ -68,9 +71,9 @@ describe('Permission Service', () => {
         properties: { fields: ['*'] },
         conditions: ['cond'],
         foo: 'bar',
-      };
+      } as any;
 
-      const sanitizedPermission = permissionService.sanitizePermission(permission);
+      const sanitizedPermission: any = sanitizePermission(permission);
 
       expect(sanitizedPermission.foo).toBeUndefined();
       expect(sanitizedPermission).toMatchObject({
@@ -158,7 +161,7 @@ describe('Permission Service', () => {
         eventHub: createEventHub(),
       });
 
-      await permissionService.cleanPermissionsInDatabase();
+      await cleanPermissionsInDatabase();
 
       expect(findMany).toHaveBeenCalledWith({ limit: 200, offset: 0 });
       expect(update).toHaveBeenNthCalledWith(1, {

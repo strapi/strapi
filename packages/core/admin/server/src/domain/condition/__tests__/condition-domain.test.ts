@@ -1,11 +1,9 @@
-'use strict';
-
-const domain = require('..');
+import domain from '..';
 
 describe('Condition Domain', () => {
   describe('assignConditionId', () => {
     test('Create a new condition with an id attribute. Prevent mutation on original object', () => {
-      const condition = { name: 'foobar' };
+      const condition: any = { name: 'foobar' };
 
       const newCondition = domain.assignConditionId(condition);
 
@@ -19,7 +17,7 @@ describe('Condition Domain', () => {
 
   describe('computeConditionId', () => {
     test('Should return a condition ID prefixed with "api::" when there is no plugin', () => {
-      const attributes = { name: 'foobar' };
+      const attributes: any = { name: 'foobar' };
       const expected = 'api::foobar';
 
       const id = domain.computeConditionId(attributes);
@@ -28,7 +26,7 @@ describe('Condition Domain', () => {
     });
 
     test('Should return a condition id prefixed with "admin::" when the plugin is "admin"', () => {
-      const attributes = { name: 'foobar', plugin: 'admin' };
+      const attributes: any = { name: 'foobar', plugin: 'admin' };
       const expected = 'admin::foobar';
 
       const id = domain.computeConditionId(attributes);
@@ -37,7 +35,7 @@ describe('Condition Domain', () => {
     });
 
     test('Should return a condition id prefixed with "plugin::" when there is a plugin (other than admin)', () => {
-      const attributes = { name: 'foobar', plugin: 'myPlugin' };
+      const attributes: any = { name: 'foobar', plugin: 'myPlugin' };
       const expected = 'plugin::myPlugin.foobar';
 
       const id = domain.computeConditionId(attributes);
@@ -91,7 +89,7 @@ describe('Condition Domain', () => {
   });
 
   describe('sanitizeConditionAttributes', () => {
-    const getSortedAttributes = (object) => Object.keys(object).sort();
+    const getSortedAttributes = (object: any) => Object.keys(object).sort();
 
     test(`It shouldn't remove attributes contained in domain.conditionAttributes`, () => {
       const condition = domain.conditionFields.reduce(
@@ -106,7 +104,7 @@ describe('Condition Domain', () => {
     });
 
     test('It should remove attributes not contained in domain.conditionFields', () => {
-      const invalidAttributes = ['foo', 'bar'];
+      const invalidAttributes: any = ['foo', 'bar'];
       const condition = domain.conditionFields
         .concat(invalidAttributes)
         .reduce((attrs, attrName) => ({ ...attrs, [attrName]: 'foo' }), {});
@@ -114,7 +112,7 @@ describe('Condition Domain', () => {
       const sanitizedCondition = domain.sanitizeConditionAttributes(condition);
 
       expect(getSortedAttributes(sanitizedCondition)).not.toEqual(getSortedAttributes(condition));
-      invalidAttributes.forEach((attribute) =>
+      invalidAttributes.forEach((attribute: any) =>
         expect(sanitizedCondition).not.toHaveProperty(attribute)
       );
     });

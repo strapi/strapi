@@ -1,7 +1,5 @@
-'use strict';
-
-const createContext = require('../../../../../../test/helpers/create-context');
-const adminAuthStrategy = require('../admin');
+import createContext from '../../../../../../../test/helpers/create-context';
+import adminAuthStrategy from '../admin';
 
 describe('Admin Auth Strategy', () => {
   describe('Authenticate a user', () => {
@@ -26,7 +24,7 @@ describe('Admin Auth Strategy', () => {
           },
         },
         query: jest.fn(() => ({ findOne })),
-      };
+      } as any;
 
       const response = await adminAuthStrategy.authenticate(ctx);
 
@@ -65,7 +63,7 @@ describe('Admin Auth Strategy', () => {
             token: { decodeJwtToken },
           },
         },
-      };
+      } as any;
 
       const response = await adminAuthStrategy.authenticate(ctx);
 
@@ -85,7 +83,7 @@ describe('Admin Auth Strategy', () => {
           },
         },
         query: jest.fn(() => ({ findOne })),
-      };
+      } as any;
 
       const response = await adminAuthStrategy.authenticate(ctx);
 
@@ -106,7 +104,7 @@ describe('Admin Auth Strategy', () => {
           },
         },
         query: jest.fn(() => ({ findOne })),
-      };
+      } as any;
 
       const response = await adminAuthStrategy.authenticate(ctx);
 
