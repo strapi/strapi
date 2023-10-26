@@ -43,7 +43,10 @@
   },
   "files": [
     "./dist",
-    "strapi-server.js"
+    "strapi-server.js",
+    "server",
+    "ee/strapi-server.js",
+    "ee/server/**"
   ],
   "scripts": {
     "build": "pack-up build",
