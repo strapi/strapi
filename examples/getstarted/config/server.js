@@ -21,4 +21,9 @@ module.exports = ({ env }) => ({
   },
   // ℹ️ http_proxy is the env var used by system to set proxy globally
   globalProxy: env('http_proxy'),
+  http: {
+    serverOptions: {
+      requestTimeout: 60 * 10, // set request timeout to 10 minutes instead of default 5
+    },
+  },
 });
