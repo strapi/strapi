@@ -1,4 +1,4 @@
-import resolveFrom from 'resolve-from';
+import path from 'path';
 import findRoot from 'find-root';
 import type { StrapiMonorepo } from '../core/monorepo';
 
@@ -37,7 +37,7 @@ const adminPackageAliases = [
 /**
  * @deprecated we will not support aliasing dependencies from V5.
  */
-const getAdminDependencyAliases = (cwd: string, monorepo?: StrapiMonorepo) =>
+const getAdminDependencyAliases = (monorepo?: StrapiMonorepo) =>
   adminPackageAliases
     .filter(
       (moduleName) => !monorepo?.path || (monorepo.path && moduleName !== '@strapi/helper-plugin')
@@ -77,11 +77,11 @@ const devAliases: Record<string, string> = {
 };
 
 const getAliases = (cwd: string, monorepo?: StrapiMonorepo) => {
-  const adminAliases = getAdminDependencyAliases(cwd, monorepo);
+  const adminAliases = getAdminDependencyAliases(monorepo);
   const monorepoAliases = monorepo
     ? Object.fromEntries(
         Object.entries(devAliases).map(([key, modulePath]) => {
-          return [key, resolveFrom(monorepo.path, modulePath)];
+          return [key, path.join(monorepo.path, modulePath)];
         })
       )
     : {};

@@ -42,6 +42,12 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
           },
         },
         {
+          test: /\.m?js/,
+          resolve: {
+            fullySpecified: false,
+          },
+        },
+        {
           test: /\.css$/i,
           use: [require.resolve('style-loader'), require.resolve('css-loader')],
         },

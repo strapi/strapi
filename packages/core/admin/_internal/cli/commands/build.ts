@@ -15,7 +15,7 @@ const build = async (options: BuildCLIOptions) => {
         "[@strapi/strapi]: you've set STRAPI_ENFORCE_SOURCEMAPS, this is now deprecated. You can enable sourcemaps by passing '--sourcemaps' to the build command."
       );
     }
-    if (typeof options.optimization !== 'undefined') {
+    if (typeof options.optimization !== 'undefined' && options.optimization !== true) {
       options.logger.warn(
         "[@strapi/strapi]: you've set the optimization argument, this is now deprecated. Use '--minifiy' instead."
       );

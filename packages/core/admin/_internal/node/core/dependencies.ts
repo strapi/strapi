@@ -4,21 +4,29 @@ import path from 'node:path';
 import inquirer from 'inquirer';
 import semver, { SemVer } from 'semver';
 import resolveFrom from 'resolve-from';
+import execa, { CommonOptions, ExecaReturnValue } from 'execa';
 import readPkgUp, { PackageJson } from 'read-pkg-up';
 import type { BuildOptions } from '../build';
+import { getPackageManager } from './managers';
 
 /**
  * From V5 this will be imported from the package.json of `@strapi/strapi`.
  */
 const PEER_DEPS = {
-  react: '^18',
-  'react-dom': '^18',
-  'react-router-dom': '^5',
-  'styled-components': '^5.3',
+  react: '^18.0.0',
+  'react-dom': '^18.0.0',
+  'react-router-dom': '^5.0.0',
+  'styled-components': '^5.0.0',
 };
 
 interface CheckRequiredDependenciesResult {
   didInstall: boolean;
+}
+
+interface DepToInstall {
+  name: string;
+  wantedVersion: string;
+  declaredVersion?: never;
 }
 
 /**
@@ -46,12 +54,6 @@ const checkRequiredDependencies = async ({
     name: string;
     wantedVersion: string;
     declaredVersion: string;
-  }
-
-  interface DepToInstall {
-    name: string;
-    wantedVersion: string;
-    declaredVersion?: never;
   }
 
   /**
@@ -96,6 +98,14 @@ const checkRequiredDependencies = async ({
       os.EOL,
       install.map(({ name, wantedVersion }) => `  - ${name}@${wantedVersion}`).join(os.EOL)
     );
+
+    /**
+     * temporary until V5 when we _will_ be enforcing these dependencies as required.
+     */
+    if (process.env.NODE_ENV !== 'development') {
+      return { didInstall: false };
+    }
+
     /**
      * This prompt can be removed in V5 & therefore the code underneath can be refactored to
      * only install the deps and return that we installed deps.
@@ -108,15 +118,20 @@ const checkRequiredDependencies = async ({
         'Would you like to install these dependencies now? These are not required but are recommended, from V5 these will be required.',
     });
 
-    if (installAns && process.env.NODE_ENV === 'development') {
+    if (installAns) {
+      await installDependencies(install, {
+        cwd,
+        logger,
+      });
+
+      const [file, ...args] = process.argv;
+
       /**
-       * TODO: Add an install deps command here. We need to resolve the package manager to do this & we also
-       * need to re-run this command because the node_modules shape could have changed post installation.
-       * So for now log an error and tell them to install them manually.
+       * Re-run the same command after installation e.g. strapi build because the yarn.lock might
+       * not be the same and could break installations. It's not the best solution, but it works.
        */
-      throw new Error(
-        'Please install the dependencies manually and then re-run this command, we have not implemented this yet.'
-      );
+      await execa(file, args, { cwd, stdio: 'inherit' });
+      return { didInstall: true };
     } else {
       return { didInstall: false };
     }
@@ -192,6 +207,48 @@ const getModuleVersion = async (name: string, cwd: string): Promise<string | nul
   const pkg = await getModule(name, cwd);
 
   return pkg?.version || null;
+};
+
+const installDependencies = async (
+  install: DepToInstall[],
+  { cwd, logger }: Pick<BuildOptions, 'cwd' | 'logger'>
+) => {
+  const packageManager = getPackageManager();
+
+  if (!packageManager) {
+    logger.error(
+      'Could not find a supported package manager, please install the dependencies manually.'
+    );
+    process.exit(1);
+  }
+
+  const execOptions: CommonOptions<'utf8'> = {
+    encoding: 'utf8',
+    cwd,
+    stdio: 'inherit',
+  };
+
+  const packages = install.map(({ name, wantedVersion }) => `${name}@${wantedVersion}`);
+
+  let result: ExecaReturnValue<string> | undefined;
+
+  if (packageManager === 'npm') {
+    const npmArgs = ['install', '--legacy-peer-deps', '--save', ...packages];
+    logger.info(`Running 'npm ${npmArgs.join(' ')}'`);
+    result = await execa('npm', npmArgs, execOptions);
+  } else if (packageManager === 'yarn') {
+    const yarnArgs = ['add', ...packages];
+    logger.info(`Running 'yarn ${yarnArgs.join(' ')}'`);
+    result = await execa('yarn', yarnArgs, execOptions);
+  } else if (packageManager === 'pnpm') {
+    const pnpmArgs = ['add', '--save-prod', ...packages];
+    logger.info(`Running 'pnpm ${pnpmArgs.join(' ')}'`);
+    result = await execa('pnpm', pnpmArgs, execOptions);
+  }
+
+  if (result?.exitCode || result?.failed) {
+    throw new Error('Package installation failed');
+  }
 };
 
 export { checkRequiredDependencies, getModule };
