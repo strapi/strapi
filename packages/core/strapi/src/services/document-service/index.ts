@@ -1,4 +1,4 @@
-import type { Common, Strapi, Schema, Shared, DocumentService } from '@strapi/types';
+import type { Common, Strapi, Schema, Shared, Documents } from '@strapi/types';
 import { convertQueryParams, mapAsync } from '@strapi/utils';
 import type { Database } from '@strapi/database';
 
@@ -64,7 +64,7 @@ const createDocumentService = ({
 }: {
   strapi: Strapi;
   db: Database;
-}): DocumentService.DocumentService => ({
+}): Documents.Service => ({
   uploadFiles,
 
   async findMany(uid, params) {
@@ -241,6 +241,7 @@ const createDocumentService = ({
       mapAsync(draftVersions, (draftVersion: any) => {
         return this.clone(uid, draftVersion.id, {
           ...params,
+          // @ts-expect-error - Generic type does not have publishedAt attribute by default
           data: { publishedAt: new Date() },
         });
       })
@@ -250,7 +251,7 @@ const createDocumentService = ({
   },
 });
 
-export default (ctx: { strapi: Strapi; db: Database }): DocumentService.DocumentService => {
+export default (ctx: { strapi: Strapi; db: Database }): Documents.Service => {
   const implementation = createDocumentService(ctx);
 
   // TODO: Wrap with database error handling

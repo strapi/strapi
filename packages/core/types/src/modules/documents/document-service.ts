@@ -4,6 +4,8 @@ import type * as Params from './params';
 
 export type CountResult = { count: number };
 
+export type ID = string;
+
 export type UploadFile = (
   uid: Common.UID.Schema,
   entity: Record<string, unknown>,
@@ -16,17 +18,7 @@ export interface DocumentService {
   // TODO: Split in 2 different signatures for both single types & collection types
   findMany<
     TContentTypeUID extends Common.UID.ContentType,
-    TParams extends Params.Pick<
-      TContentTypeUID,
-      | 'fields'
-      | 'filters'
-      | '_q'
-      | 'pagination:offset'
-      | 'sort'
-      | 'populate'
-      | 'publicationState'
-      | 'plugin'
-    >
+    TParams extends Params.FindMany<TContentTypeUID>
   >(
     uid: TContentTypeUID,
     params?: TParams
@@ -43,17 +35,7 @@ export interface DocumentService {
 
   findPage<
     TContentTypeUID extends Common.UID.ContentType,
-    TParams extends Params.Pick<
-      TContentTypeUID,
-      | 'fields'
-      | 'filters'
-      | '_q'
-      | 'pagination:page'
-      | 'sort'
-      | 'populate'
-      | 'publicationState'
-      | 'plugin'
-    >
+    TParams extends Params.FindPage<TContentTypeUID>
   >(
     uid: TContentTypeUID,
     paginationParams?: Params.Pagination.PageNotation
@@ -64,10 +46,7 @@ export interface DocumentService {
 
   findFirst<
     TContentTypeUID extends Common.UID.ContentType,
-    TParams extends Params.Pick<
-      TContentTypeUID,
-      'fields' | 'filters' | '_q' | 'sort' | 'populate' | 'publicationState' | 'plugin'
-    >
+    TParams extends Params.FindFirst<TContentTypeUID>
   >(
     uid: TContentTypeUID,
     params?: TParams
@@ -75,35 +54,25 @@ export interface DocumentService {
 
   findOne<
     TContentTypeUID extends Common.UID.ContentType,
-    TParams extends Params.Pick<TContentTypeUID, 'fields' | 'populate' | 'filters' | 'sort'>
+    TParams extends Params.FindOne<TContentTypeUID>
   >(
     uid: TContentTypeUID,
-    documentId: Params.Attribute.ID,
+    documentId: ID,
     params?: TParams
   ): Promise<Result<TContentTypeUID, TParams> | null>;
 
   delete<
     TContentTypeUID extends Common.UID.ContentType,
-    TParams extends Params.Pick<TContentTypeUID, 'fields' | 'populate'>
+    TParams extends Params.Delete<TContentTypeUID>
   >(
     uid: TContentTypeUID,
-    documentId: Params.Attribute.ID,
+    documentId: ID,
     params?: TParams
   ): Promise<Result<TContentTypeUID, TParams> | null>;
 
   deleteMany<
     TContentTypeUID extends Common.UID.ContentType,
-    TParams extends Params.Pick<
-      TContentTypeUID,
-      | 'fields'
-      | 'filters'
-      | '_q'
-      | 'pagination:offset'
-      | 'sort'
-      | 'populate'
-      | 'publicationState'
-      | 'plugin'
-    >
+    TParams extends Params.DeleteMany<TContentTypeUID>
   >(
     uid: TContentTypeUID,
     params?: TParams
@@ -112,7 +81,7 @@ export interface DocumentService {
   // TODO: Make data param required
   create<
     TContentTypeUID extends Common.UID.ContentType,
-    TParams extends Params.Pick<TContentTypeUID, 'data' | 'files' | 'fields' | 'populate'>
+    TParams extends Params.Create<TContentTypeUID>
   >(
     uid: TContentTypeUID,
     params: TParams
@@ -120,35 +89,25 @@ export interface DocumentService {
 
   clone<
     TContentTypeUID extends Common.UID.ContentType,
-    TParams extends Params.Pick<TContentTypeUID, 'data' | 'files' | 'fields' | 'populate'>
+    TParams extends Params.Clone<TContentTypeUID>
   >(
     uid: TContentTypeUID,
-    documentId: Params.Attribute.ID,
+    documentId: ID,
     params?: TParams
   ): Promise<Result<TContentTypeUID, TParams>>;
 
   update<
     TContentTypeUID extends Common.UID.ContentType,
-    TParams extends Params.Pick<TContentTypeUID, 'data:partial' | 'files' | 'fields' | 'populate'>
+    TParams extends Params.Update<TContentTypeUID>
   >(
     uid: TContentTypeUID,
-    documentId: Params.Attribute.ID,
+    documentId: ID,
     params?: TParams
   ): Promise<Result<TContentTypeUID, TParams> | null>;
 
   count<
     TContentTypeUID extends Common.UID.ContentType,
-    TParams extends Params.Pick<
-      TContentTypeUID,
-      | 'fields'
-      | 'filters'
-      | '_q'
-      | 'pagination:offset'
-      | 'sort'
-      | 'populate'
-      | 'publicationState'
-      | 'plugin'
-    >
+    TParams extends Params.Count<TContentTypeUID>
   >(
     uid: TContentTypeUID,
     params?: TParams
