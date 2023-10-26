@@ -73,10 +73,9 @@ class Database {
       nativeConnection: unknown,
       done: (error: Error | null, nativeConnection: unknown) => Promise<void>
     ) => {
-      console.log('on after create called');
+      strapi.log.debug('Knex opened new pool connection; running dialect init');
       // run initialize for it since commands such as postgres SET and sqlite PRAGMA are per-connection
       this.dialect.initialize(nativeConnection).then(() => {
-        console.log('dialect initialized called');
         return done(null, nativeConnection);
       });
     };
