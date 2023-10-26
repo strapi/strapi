@@ -162,10 +162,6 @@ interface BuildOptions extends CLIContext {
    */
   stats?: boolean;
   /**
-   * An unloaded strapi instance.
-   */
-  strapi: Strapi;
-  /**
    * The tsconfig to use for the build. If undefined, this is not a TS project.
    */
   tsconfig?: TsConfig;

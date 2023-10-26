@@ -27,8 +27,6 @@ import versionCommand from './actions/version/command';
 import buildPluginCommand from './actions/plugin/build-command/command';
 import watchPluginCommand from './actions/plugin/watch/command';
 
-import strapiNodeInstance from '../Strapi';
-
 import { createLogger } from './utils/logger';
 import { loadTsConfig } from './utils/tsconfig';
 import { CLIContext } from './types';
@@ -100,25 +98,9 @@ const buildStrapiCommand = async (argv: string[], command = new Command()) => {
     logger,
   });
 
-  /**
-   * this is the distDir for the node side of strapi, not the admin panel so
-   * if it's not TS, there is no build folder for things like the configs.
-   */
-  const distDir = tsconfig?.config.options.outDir ?? '';
-
-  const strapiInstance = strapiNodeInstance({
-    // Directories
-    appDir: cwd,
-    distDir,
-    // Options
-    autoReload: true,
-    serveAdminPanel: false,
-  });
-
   const ctx = {
     cwd,
     logger,
-    strapi: strapiInstance,
     tsconfig,
   } satisfies CLIContext;
 

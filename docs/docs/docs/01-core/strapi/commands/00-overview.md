@@ -43,7 +43,6 @@ supplies a number of useful properties:
 interface CLIContext {
   cwd: string;
   logger: Logger;
-  strapi: Strapi;
   tsconfig?: TsConfig;
 }
 ```
@@ -64,10 +63,6 @@ interface Logger {
 ```
 
 The shared logger means that any command can accept `--debug` and `--silent` flags to control the output of the CLI. Due to incorperating `ora` into the logger, we can also provide a spinner for long running tasks but more importantly, easily silence them when `--silent` is passed.
-
-### `strapi`
-
-This is an _unloaded_ strapi instance. This means you can perform many tasks such as adding middlewares to the server or getting the directories that are programmed. Alternatively, you can run `strapi.load()` to get a fully loaded strapi instance.
 
 ### `tsconfig`
 

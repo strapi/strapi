@@ -16,7 +16,7 @@ interface DevelopOptions extends CLIContext {
   open?: boolean;
 }
 
-const develop = async ({ cwd, polling, logger, tsconfig, strapi, ...options }: DevelopOptions) => {
+const develop = async ({ cwd, polling, logger, tsconfig, ...options }: DevelopOptions) => {
   const timer = getTimer();
 
   const { didInstall } = await checkRequiredDependencies({ cwd, logger }).catch((err) => {
@@ -28,6 +28,17 @@ const develop = async ({ cwd, polling, logger, tsconfig, strapi, ...options }: D
     return;
   }
 
+  if (tsconfig?.config) {
+    timer.start('compilingTS');
+    const compilingTsSpinner = logger.spinner(`Compiling TS`).start();
+
+    tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
+
+    const compilingDuration = timer.end('compilingTS');
+    compilingTsSpinner.text = `Compiling TS (${compilingDuration}ms)`;
+    compilingTsSpinner.succeed();
+  }
+
   timer.start('createBuildContext');
   const contextSpinner = logger.spinner(`Building build context`).start();
   console.log('');
@@ -35,8 +46,8 @@ const develop = async ({ cwd, polling, logger, tsconfig, strapi, ...options }: D
   const ctx = await createBuildContext({
     cwd,
     logger,
+    tsconfig,
     options,
-    strapi,
   });
   const contextDuration = timer.end('createBuildContext');
   contextSpinner.text = `Building build context (${contextDuration}ms)`;
@@ -53,7 +64,7 @@ const develop = async ({ cwd, polling, logger, tsconfig, strapi, ...options }: D
   adminSpinner.text = `Creating admin (${adminDuration}ms)`;
   adminSpinner.succeed();
 
-  const strapiInstance = await strapi.load();
+  const strapiInstance = await ctx.strapi.load();
 
   timer.start('generatingTS');
   const generatingTsSpinner = logger.spinner(`Generating types`).start();
@@ -69,17 +80,6 @@ const develop = async ({ cwd, polling, logger, tsconfig, strapi, ...options }: D
   const generatingDuration = timer.end('generatingTS');
   generatingTsSpinner.text = `Generating types (${generatingDuration}ms)`;
   generatingTsSpinner.succeed();
-
-  if (tsconfig?.config) {
-    timer.start('compilingTS');
-    const compilingTsSpinner = logger.spinner(`Compiling TS`).start();
-
-    tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
-
-    const compilingDuration = timer.end('compilingTS');
-    compilingTsSpinner.text = `Compiling TS (${compilingDuration}ms)`;
-    compilingTsSpinner.succeed();
-  }
 
   const restart = async () => {
     if (strapiInstance.reload.isWatching && !strapiInstance.reload.isReloading) {

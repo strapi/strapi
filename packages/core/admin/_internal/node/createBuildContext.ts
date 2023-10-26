@@ -3,10 +3,11 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import syncFs from 'node:fs';
 import camelCase from 'lodash/camelCase';
-import { getConfigUrls } from '@strapi/utils';
 import browserslist from 'browserslist';
+import strapiFactory, { CLIContext } from '@strapi/strapi';
+import type { Strapi } from '@strapi/types';
+import { getConfigUrls } from '@strapi/utils';
 
-import type { CLIContext } from '@strapi/strapi';
 import { getStrapiAdminEnvVars, loadEnv } from './core/env';
 import { isError } from './core/errors';
 
@@ -65,7 +66,7 @@ interface BuildContext {
   /**
    * The Strapi instance
    */
-  strapi: CLIContext['strapi'];
+  strapi: Strapi;
   /**
    * The browserslist target either loaded from the user's workspace or falling back to the default
    */
@@ -87,18 +88,26 @@ const DEFAULT_BROWSERSLIST = [
 const createBuildContext = async ({
   cwd,
   logger,
-  strapi,
   tsconfig,
   options = {},
 }: CreateBuildContextArgs) => {
-  const { serverUrl, adminPath } = getConfigUrls(strapi.config, true);
+  const strapiInstance = strapiFactory({
+    // Directories
+    appDir: cwd,
+    distDir: tsconfig?.config.options.outDir ?? '',
+    // Options
+    autoReload: true,
+    serveAdminPanel: false,
+  });
+
+  const { serverUrl, adminPath } = getConfigUrls(strapiInstance.config, true);
 
   await loadEnv(cwd);
 
   const env = getStrapiAdminEnvVars({
     ADMIN_PATH: adminPath,
     STRAPI_ADMIN_BACKEND_URL: serverUrl,
-    STRAPI_TELEMETRY_DISABLED: String(strapi.telemetry.isDisabled),
+    STRAPI_TELEMETRY_DISABLED: String(strapiInstance.telemetry.isDisabled),
   });
 
   const envKeys = Object.keys(env);
@@ -112,8 +121,8 @@ const createBuildContext = async ({
     );
   }
 
-  const distDir = strapi.dirs.dist.root;
-  const distPath = path.resolve(path.join(cwd, distDir));
+  const distPath = path.join(strapiInstance.dirs.dist.root, 'build');
+  const distDir = path.relative(cwd, distPath);
 
   /**
    * If the distPath already exists, clean it
@@ -130,7 +139,7 @@ const createBuildContext = async ({
   const runtimeDir = path.join(cwd, '.strapi', 'client');
   const entry = path.relative(cwd, path.join(runtimeDir, 'app.js'));
 
-  const plugins = await getEnabledPlugins({ cwd, logger, strapi });
+  const plugins = await getEnabledPlugins({ cwd, logger, strapi: strapiInstance });
 
   logger.debug('Enabled plugins', os.EOL, plugins);
 
@@ -149,7 +158,7 @@ const createBuildContext = async ({
   const target = browserslist.loadConfig({ path: cwd }) ?? DEFAULT_BROWSERSLIST;
 
   const buildContext = {
-    appDir: strapi.dirs.app.root,
+    appDir: strapiInstance.dirs.app.root,
     basePath: `${adminPath}/`,
     cwd,
     distDir,
@@ -160,7 +169,7 @@ const createBuildContext = async ({
     options,
     plugins: pluginsWithFront,
     runtimeDir,
-    strapi,
+    strapi: strapiInstance,
     target,
     tsconfig,
   } satisfies BuildContext;

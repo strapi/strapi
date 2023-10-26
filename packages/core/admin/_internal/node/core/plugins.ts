@@ -2,7 +2,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { getModule, PackageJson } from './dependencies';
 import { loadFile } from './files';
-import { CreateBuildContextArgs } from '../createBuildContext';
+import { BuildContext, CreateBuildContextArgs } from '../createBuildContext';
 
 const CORE_PLUGINS = [
   '@strapi/plugin-content-manager',
@@ -42,7 +42,7 @@ export const getEnabledPlugins = async ({
   strapi,
   cwd,
   logger,
-}: Pick<CreateBuildContextArgs, 'cwd' | 'logger' | 'strapi'>) => {
+}: Pick<BuildContext, 'cwd' | 'logger' | 'strapi'>) => {
   const plugins: Record<string, PluginMeta> = {};
 
   logger.debug('Core plugins', os.EOL, CORE_PLUGINS);

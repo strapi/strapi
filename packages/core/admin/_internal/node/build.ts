@@ -1,4 +1,4 @@
-import ora from 'ora';
+import * as tsUtils from '@strapi/typescript-utils';
 import { checkRequiredDependencies } from './core/dependencies';
 import { writeStaticClientFiles } from './staticFiles';
 import { build as buildWebpack } from './webpack/build';
@@ -31,7 +31,7 @@ interface BuildOptions extends CLIContext {
  *
  * @description Builds the admin panel of the strapi application.
  */
-const build = async ({ logger, strapi, cwd, ...options }: BuildOptions) => {
+const build = async ({ logger, cwd, tsconfig, ...options }: BuildOptions) => {
   const timer = getTimer();
 
   const { didInstall } = await checkRequiredDependencies({ cwd, logger }).catch((err) => {
@@ -43,6 +43,17 @@ const build = async ({ logger, strapi, cwd, ...options }: BuildOptions) => {
     return;
   }
 
+  if (tsconfig?.config) {
+    timer.start('compilingTS');
+    const compilingTsSpinner = logger.spinner(`Compiling TS`).start();
+
+    tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
+
+    const compilingDuration = timer.end('compilingTS');
+    compilingTsSpinner.text = `Compiling TS (${compilingDuration}ms)`;
+    compilingTsSpinner.succeed();
+  }
+
   timer.start('createBuildContext');
   const contextSpinner = logger.spinner(`Building build context`).start();
   console.log('');
@@ -50,8 +61,8 @@ const build = async ({ logger, strapi, cwd, ...options }: BuildOptions) => {
   const ctx = await createBuildContext({
     cwd,
     logger,
+    tsconfig,
     options,
-    strapi,
   });
   const contextDuration = timer.end('createBuildContext');
   contextSpinner.text = `Building build context (${contextDuration}ms)`;
