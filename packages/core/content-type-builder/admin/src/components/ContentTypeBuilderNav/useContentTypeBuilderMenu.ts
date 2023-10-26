@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, MouseEvent } from 'react';
 
 import { useCollator, useFilter, useNotification, useTracking } from '@strapi/helper-plugin';
 import isEqual from 'lodash/isEqual';
@@ -6,10 +6,12 @@ import { useIntl } from 'react-intl';
 
 import { useDataManager } from '../../hooks/useDataManager';
 import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
-import pluginId from '../../pluginId';
+import { pluginId } from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
 
-const useContentTypeBuilderMenu = () => {
+import type { UID } from '@strapi/types';
+
+export const useContentTypeBuilderMenu = () => {
   const {
     components,
     componentsGroupedByCategory,
@@ -29,16 +31,15 @@ const useContentTypeBuilderMenu = () => {
     sensitivity: 'base',
   });
 
-  /**
-   * @type {Intl.Collator}
-   */
   const formatter = useCollator(locale, {
     sensitivity: 'base',
   });
 
   const canOpenModalCreateCTorComponent =
     !Object.keys(contentTypes).some((ct) => contentTypes[ct].isTemporary === true) &&
-    !Object.keys(components).some((component) => components[component].isTemporary === true) &&
+    !Object.keys(components).some(
+      (component) => components[component as UID.Component].isTemporary === true
+    ) &&
     isEqual(modifiedData, initialData);
 
   const handleClickOpenModalCreateCollectionType = () => {
@@ -107,7 +108,7 @@ const useContentTypeBuilderMenu = () => {
       name: category,
       title: category,
       isEditable: isInDevelopmentMode,
-      onClickEdit(e, data) {
+      onClickEdit(e: MouseEvent, data: any) {
         e.stopPropagation();
 
         if (canOpenModalCreateCTorComponent) {
@@ -176,7 +177,7 @@ const useContentTypeBuilderMenu = () => {
         ...section,
         links: section.links
           .map((link) => {
-            const filteredLinks = link.links.filter((link) => startsWith(link.title, search));
+            const filteredLinks = link.links.filter((link: any) => startsWith(link.title, search));
 
             if (filteredLinks.length === 0) {
               return null;
@@ -184,7 +185,7 @@ const useContentTypeBuilderMenu = () => {
 
             return {
               ...link,
-              links: filteredLinks.sort((a, b) => formatter.compare(a.title, b.title)),
+              links: filteredLinks.sort((a: any, b: any) => formatter.compare(a.title, b.title)),
             };
           })
           .filter(Boolean),
@@ -205,5 +206,3 @@ const useContentTypeBuilderMenu = () => {
     onSearchChange: setSearch,
   };
 };
-
-export default useContentTypeBuilderMenu;

@@ -7973,6 +7973,7 @@ __metadata:
     "@strapi/utils": "npm:4.14.5"
     "@testing-library/react": "npm:14.0.0"
     "@testing-library/react-hooks": "npm:8.0.1"
+    "@testing-library/user-event": "npm:14.4.3"
     "@types/pluralize": "npm:0.0.30"
     fs-extra: "npm:10.0.0"
     history: "npm:^4.9.0"

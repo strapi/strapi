@@ -115,7 +115,7 @@ export const FormModal = () => {
   const { formatMessage } = useIntl();
   const { getPlugin } = useStrapiApp();
   const ctbPlugin = getPlugin(pluginId);
-  const ctbFormsAPI = ctbPlugin.apis.forms;
+  const ctbFormsAPI: any = ctbPlugin?.apis.forms;
   const inputsFromPlugins = ctbFormsAPI.components.inputs;
 
   const {
@@ -376,11 +376,11 @@ export const FormModal = () => {
     } else if (isCreatingCustomFieldAttribute) {
       schema = forms.customField.schema({
         schemaAttributes: get(allDataSchema, [...pathToSchema, 'schema', 'attributes'], []),
-        attributeType: customField.type,
+        attributeType: customField!.type,
         reservedNames,
         schemaData: { modifiedData, initialData },
         ctbFormsAPI,
-        customFieldValidator: customField.options?.validator,
+        customFieldValidator: customField!.options?.validator,
       });
 
       // Check for validity for creating a component
@@ -804,7 +804,7 @@ export const FormModal = () => {
       dispatch({
         type: RESET_PROPS,
       });
-    } catch (err) {
+    } catch (err: any) {
       const errors = getYupInnerErrors(err);
 
       dispatch({

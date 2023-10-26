@@ -74,7 +74,7 @@ interface CustomFieldOptions {
   validator?: () => Record<string, AnySchema>;
 }
 
-interface CustomField {
+export interface CustomField {
   name: string;
   pluginId?: string;
   type: CustomFieldType;

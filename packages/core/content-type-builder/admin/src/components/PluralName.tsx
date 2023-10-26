@@ -4,7 +4,7 @@ import { TextInput } from '@strapi/design-system';
 import pluralize from 'pluralize';
 import { useIntl } from 'react-intl';
 
-import nameToSlug from '../utils/nameToSlug';
+import { nameToSlug } from '../utils/nameToSlug';
 
 import type { IntlLabel } from '../types';
 

@@ -1,10 +1,9 @@
-import React from 'react';
-
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { fireEvent, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
+
 import { IconPicker, IconPickerProps } from '../IconPicker';
 
 const defaultProps = {

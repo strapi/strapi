@@ -3,11 +3,7 @@ import { useIntl } from 'react-intl';
 
 import { Wrapper } from './Styles';
 
-interface IntlLabel {
-  id: string;
-  defaultMessage: string;
-  values?: Record<string, any>;
-}
+import type { IntlLabel } from '../../types';
 
 interface Radio {
   title: IntlLabel;

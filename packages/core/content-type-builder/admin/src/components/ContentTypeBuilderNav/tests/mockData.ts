@@ -1,4 +1,4 @@
-export default [
+export const mockData = [
   {
     name: 'models',
     title: {

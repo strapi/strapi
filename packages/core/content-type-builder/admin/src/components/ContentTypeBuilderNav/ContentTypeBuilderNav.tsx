@@ -1,4 +1,5 @@
-import React from 'react';
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+import { Fragment } from 'react';
 
 import { Box, Icon, TextButton } from '@strapi/design-system';
 import {
@@ -17,9 +18,9 @@ import { NavLink } from 'react-router-dom';
 
 import { getTrad } from '../../utils/getTrad';
 
-import useContentTypeBuilderMenu from './useContentTypeBuilderMenu';
+import { useContentTypeBuilderMenu } from './useContentTypeBuilderMenu';
 
-const ContentTypeBuilderNav = () => {
+export const ContentTypeBuilderNav = () => {
   const { menu, searchValue, onSearchChange } = useContentTypeBuilderMenu();
   const { formatMessage } = useIntl();
 
@@ -46,7 +47,7 @@ const ContentTypeBuilderNav = () => {
       />
       <SubNavSections>
         {menu.map((section) => (
-          <React.Fragment key={section.name}>
+          <Fragment key={section.name}>
             <SubNavSection
               label={formatMessage({
                 id: section.title.id,
@@ -59,9 +60,10 @@ const ContentTypeBuilderNav = () => {
                 if (link.links) {
                   return (
                     <SubNavLinkSection key={link.name} label={upperFirst(link.title)}>
-                      {link.links.map((subLink) => (
+                      {link.links.map((subLink: any) => (
                         <SubNavLink
                           as={NavLink}
+                          // @ts-ignore
                           to={subLink.to}
                           active={subLink.active}
                           key={subLink.name}
@@ -77,6 +79,8 @@ const ContentTypeBuilderNav = () => {
                 }
 
                 return (
+                  // verify if "to" is needed
+                  // @ts-ignore
                   <SubNavLink as={NavLink} to={link.to} active={link.active} key={link.name}>
                     {upperFirst(formatMessage({ id: link.name, defaultMessage: link.title }))}
                   </SubNavLink>
@@ -97,11 +101,9 @@ const ContentTypeBuilderNav = () => {
                 </TextButton>
               </Box>
             )}
-          </React.Fragment>
+          </Fragment>
         ))}
       </SubNavSections>
     </SubNav>
   );
 };
-
-export default ContentTypeBuilderNav;

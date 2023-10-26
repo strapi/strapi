@@ -71,11 +71,11 @@ type AttributeIconProps = {
 export const AttributeIcon = ({ type, customField = null, ...rest }: AttributeIconProps) => {
   const customFieldsRegistry = useCustomFields();
 
-  let Compo = iconByTypes[type];
+  let Compo: any = iconByTypes[type];
 
   if (customField) {
-    const { icon } = customFieldsRegistry.get(customField);
-
+    const customFieldObject = customFieldsRegistry.get(customField);
+    const icon = customFieldObject?.icon;
     if (icon) {
       Compo = icon;
     }
