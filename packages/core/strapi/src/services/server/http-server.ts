@@ -21,7 +21,7 @@ const createHTTPServer = (strapi: Strapi, koaApp: Koa): Server => {
   };
 
   const options = strapi.config.get<Record<string, unknown>>(
-    'server.http.server.options',
+    'server.http.serverOptions',
     {}
   ) as http.ServerOptions;
 
