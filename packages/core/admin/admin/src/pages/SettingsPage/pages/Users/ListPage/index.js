@@ -60,7 +60,7 @@ export const UserListPageCE = () => {
     async () =>
       (
         await import(
-          '../../../../../../../ee/admin/pages/SettingsPage/pages/Users/ListPage/CreateAction'
+          '../../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/ListPage/CreateAction'
         )
       ).CreateActionEE
   );
@@ -186,7 +186,7 @@ const UsersListPageSwitch = () => {
     UserListPageCE,
     async () =>
       // eslint-disable-next-line import/no-cycle
-      (await import('../../../../../../../ee/admin/pages/SettingsPage/pages/Users/ListPage'))
+      (await import('../../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/ListPage'))
         .UserListPageEE
   );
 

@@ -1,9 +1,9 @@
 import { getFetchClient } from '@strapi/helper-plugin';
 import { createRoot } from 'react-dom/client';
 
-import { Components, Fields, Middlewares } from './core/apis';
 // eslint-disable-next-line import/extensions
 import plugins from './plugins';
+import { StrapiApp } from './StrapiApp';
 
 const config = {
   locales: ['fr'],
@@ -35,12 +35,6 @@ window.strapi = {
 
 const customConfig = { config, bootstrap };
 
-const library = {
-  components: Components(),
-  fields: Fields(),
-};
-const middlewares = Middlewares();
-
 const MOUNT_NODE = document.getElementById('app');
 
 const run = async () => {
@@ -63,16 +57,10 @@ const run = async () => {
     console.error(err);
   }
 
-  // We need to make sure to fetch the project type before importing the StrapiApp
-  // otherwise the strapi-babel-plugin does not work correctly
-  const StrapiApp = await import(/* webpackChunkName: "admin-app" */ './StrapiApp');
-
-  const app = StrapiApp.default({
+  const app = new StrapiApp({
     appPlugins: plugins,
-    library,
     adminConfig: customConfig,
     bootstrap: customConfig,
-    middlewares,
   });
 
   await app.bootstrapAdmin();

@@ -22,7 +22,7 @@ const useSettingsMenu = () => {
 
   const { global: globalLinks, admin: adminLinks } = useEnterprise(
     LINKS_CE,
-    async () => (await import('../../../../ee/admin/hooks/useSettingsMenu/constants')).LINKS_EE,
+    async () => (await import('../../../../ee/admin/src/hooks/useSettingsMenu/constants')).LINKS_EE,
     {
       combine(ceLinks, eeLinks) {
         return {
