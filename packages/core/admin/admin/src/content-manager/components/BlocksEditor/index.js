@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import Hint from '../Hint';
 
 import BlocksInput from './BlocksInput';
-import { withLinks, withStrapiSchema } from './plugins';
+import { withLinks, withStrapiSchema, withDataInsertion } from './plugins';
 import { BlocksToolbar } from './Toolbar';
 
 const TypographyAsterisk = styled(Typography)`
@@ -85,6 +85,11 @@ function useResetKey(value) {
   return { key, incrementSlateUpdatesCount: () => (slateUpdatesCount.current += 1) };
 }
 
+const pipe =
+  (...fns) =>
+  (value) =>
+    fns.reduce((prev, fn) => fn(prev), value);
+
 const BlocksEditor = React.forwardRef(
   (
     { intlLabel, labelAction, name, disabled, required, error, value, onChange, placeholder, hint },
@@ -92,7 +97,14 @@ const BlocksEditor = React.forwardRef(
   ) => {
     const { formatMessage } = useIntl();
     const [editor] = React.useState(() =>
-      withReact(withStrapiSchema(withLinks(withImages(withHistory(createEditor())))))
+      pipe(
+        withHistory,
+        withImages,
+        withLinks,
+        withDataInsertion,
+        withStrapiSchema,
+        withReact
+      )(createEditor())
     );
 
     const label = intlLabel.id

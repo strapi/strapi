@@ -74,6 +74,35 @@ const BlocksInput = ({ disabled, placeholder }) => {
     }
   };
 
+  /**
+   * Modifier keyboard shortcuts
+   */
+  const handleKeyboardShortcuts = (event) => {
+    const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
+    const isCtrlOrCmd = isMac ? event.metaKey : event.ctrlKey;
+
+    if (isCtrlOrCmd) {
+      switch (event.key) {
+        case 'b':
+          modifiers.bold.handleToggle();
+          break;
+        case 'i':
+          modifiers.italic.handleToggle();
+          break;
+        case 'u':
+          modifiers.underline.handleToggle();
+          break;
+        case 'e':
+          modifiers.code.handleToggle();
+          break;
+        case 'S':
+          if (event.shiftKey) modifiers.strikethrough.handleToggle();
+          break;
+        default: // do nothing
+      }
+    }
+  };
+
   const handleKeyDown = (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
@@ -82,6 +111,7 @@ const BlocksInput = ({ disabled, placeholder }) => {
     if (event.key === 'Backspace') {
       handleBackspaceEvent(event);
     }
+    handleKeyboardShortcuts(event);
   };
 
   /**
