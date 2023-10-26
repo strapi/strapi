@@ -1,8 +1,8 @@
+import { LoadedStrapi } from '@strapi/types';
 import './resources/types/components.d.ts';
 import './resources/types/contentTypes.d.ts';
 import resources from './resources/index';
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
-import { testInTransaction } from '../../../utils/index';
 
 const ARTICLE_UID = 'api::article.article';
 
@@ -16,9 +16,11 @@ const findArticlesDb = async (where: any) => {
 
 describe('Document Service', () => {
   let testUtils;
+  let strapi: LoadedStrapi;
 
   beforeAll(async () => {
     testUtils = await createTestSetup(resources);
+    strapi = testUtils.strapi;
   });
 
   afterAll(async () => {
@@ -27,12 +29,10 @@ describe('Document Service', () => {
 
   describe('FindMany', () => {
     it('find many selects by document name', async () => {
-      const articlesDb = await findArticlesDb({ title: '3 Document A' });
+      const articlesDb = await findArticlesDb({ title: 'Article1-Draft-EN' });
 
-      const articles = await strapi.documents.findMany(ARTICLE_UID, {
-        filters: {
-          title: '3 Document A',
-        },
+      const articles = await strapi.documents('api::article.article').findMany({
+        filters: { title: 'Article1-Draft-EN' },
       });
 
       expect(articles.length).toBe(1);

@@ -11,7 +11,7 @@ import type {
   Strapi as StrapiI,
   Server,
   EntityService,
-  DocumentService,
+  Documents,
   EventHub,
   StartupLogger,
   CronService,
@@ -46,7 +46,7 @@ import createWebhookRunner, { WebhookRunner } from './services/webhook-runner';
 import { webhookModel, createWebhookStore } from './services/webhook-store';
 import { createCoreStore, coreStoreModel } from './services/core-store';
 import createEntityService from './services/entity-service';
-import createDocumentService from './services/document-service';
+
 import createCronService from './services/cron';
 import entityValidator from './services/entity-validator';
 import createTelemetry from './services/metrics';
@@ -64,6 +64,7 @@ import { destroyOnSignal } from './utils/signals';
 import getNumberOfDynamicZones from './services/utils/dynamic-zones';
 
 import convertCustomFieldType from './utils/convert-custom-field-type';
+import { createDocumentRepository } from './services/document-service/document-repository';
 
 /**
  * Resolve the working directories based on the instance options.
@@ -150,7 +151,7 @@ class Strapi extends Container implements StrapiI {
 
   entityService?: EntityService.EntityService;
 
-  documents?: DocumentService.DocumentService;
+  documents?: Documents.Repository;
 
   telemetry: TelemetryService;
 
@@ -496,10 +497,7 @@ class Strapi extends Container implements StrapiI {
       entityValidator: this.entityValidator,
     });
 
-    this.documents = createDocumentService({
-      strapi: this,
-      db: this.db,
-    });
+    this.documents = createDocumentRepository(this);
 
     if (this.config.get('server.cron.enabled', true)) {
       const cronTasks = this.config.get('server.cron.tasks', {});
