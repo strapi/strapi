@@ -23,7 +23,7 @@ Everytime a new EE feature is added in Strapi, in the settings menu, you should 
 
 ```js
 ...
- 
+
  ...(!window.strapi.features.isEnabled(window.strapi.features.NEW_EE_FEATURE) &&
     window.strapi?.flags?.promoteEE
       ? [

@@ -64,3 +64,15 @@ export type DeepPartial<TObject> = TObject extends object
       [TKey in keyof TObject]?: DeepPartial<TObject[TKey]>;
     }
   : TObject;
+
+/**
+ * Replace the keys of an object with the keys of another object
+ *
+ * @example
+ * type X = Replace<{ foo: number, bar: number}, { foo: string }>
+ *  // { foo: string, bar: number }
+ */
+export type Replace<
+  TObject extends object,
+  TNew extends Partial<{ [key in keyof TObject]: unknown }>
+> = Omit<TObject, keyof TNew> & TNew;

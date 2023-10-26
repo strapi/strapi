@@ -1,10 +1,8 @@
 import * as React from 'react';
 
+import type { StrapiApp } from '../StrapiApp';
 interface AdminContextValue {
-  /**
-   * TODO: this should come from `StrapiApp['getAdminInjectedComponents']`
-   */
-  getAdminInjectedComponents: () => unknown;
+  getAdminInjectedComponents: StrapiApp['getAdminInjectedComponents'];
 }
 
 const AdminContext = React.createContext<AdminContextValue>({

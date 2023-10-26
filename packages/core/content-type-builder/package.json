@@ -38,7 +38,7 @@
     "fs-extra": "10.0.0",
     "immer": "9.0.19",
     "lodash": "4.17.21",
-    "pluralize": "^8.0.0",
+    "pluralize": "8.0.0",
     "prop-types": "^15.8.1",
     "qs": "6.11.1",
     "react-helmet": "^6.1.0",
@@ -49,7 +49,6 @@
   "devDependencies": {
     "@strapi/admin": "4.15.0",
     "@testing-library/react": "14.0.0",
-    "@testing-library/react-hooks": "8.0.1",
     "history": "^4.9.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

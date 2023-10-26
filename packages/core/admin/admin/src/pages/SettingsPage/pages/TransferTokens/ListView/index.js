@@ -20,7 +20,7 @@ import { useMutation, useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
-import { selectAdminPermissions } from '../../../../App/selectors';
+import { selectAdminPermissions } from '../../../../../selectors';
 import { TRANSFER_TOKEN_TYPE } from '../../../components/Tokens/constants';
 import Table from '../../../components/Tokens/Table';
 

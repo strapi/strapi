@@ -31,7 +31,7 @@ import { useSelector } from 'react-redux';
 
 import { useConfiguration } from '../../../../hooks/useConfiguration';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
-import { selectAdminPermissions } from '../../../App/selectors';
+import { selectAdminPermissions } from '../../../../selectors';
 
 import CustomizationInfos from './components/CustomizationInfos';
 import getFormData from './utils/getFormData';
@@ -61,7 +61,7 @@ const ApplicationInfosPage = () => {
     async () =>
       (
         await import(
-          '../../../../../../ee/admin/pages/SettingsPage/pages/ApplicationInfosPage/components/AdminSeatInfo'
+          '../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfosPage/components/AdminSeatInfo'
         )
       ).AdminSeatInfoEE
   );

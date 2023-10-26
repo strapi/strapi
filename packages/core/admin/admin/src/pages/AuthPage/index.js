@@ -10,7 +10,7 @@ import { Redirect, useHistory, useRouteMatch } from 'react-router-dom';
 
 import { useLocales } from '../../components/LanguageProvider';
 import { useEnterprise } from '../../hooks/useEnterprise';
-import { formatAPIErrors} from '../../utils/formatAPIErrors';
+import { formatAPIErrors } from '../../utils/formatAPIErrors';
 
 import { LoginCE } from './components/Login';
 import { FORMS } from './constants';
@@ -31,11 +31,11 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   const query = useQuery();
   const Login = useEnterprise(
     LoginCE,
-    async () => (await import('../../../../ee/admin/pages/AuthPage/components/Login')).LoginEE
+    async () => (await import('../../../../ee/admin/src/pages/AuthPage/components/Login')).LoginEE
   );
   const forms = useEnterprise(
     FORMS,
-    async () => (await import('../../../../ee/admin/pages/AuthPage/constants')).FORMS,
+    async () => (await import('../../../../ee/admin/src/pages/AuthPage/constants')).FORMS,
     {
       combine(ceForms, eeForms) {
         return {
