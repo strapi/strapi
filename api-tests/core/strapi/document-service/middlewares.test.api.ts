@@ -27,8 +27,8 @@ describe('Document Service', () => {
     await destroyTestSetup(testUtils);
   });
 
-  describe('FindMany', () => {
-    it('find many selects by document name', async () => {
+  describe('Middlewares', () => {
+    it('Add filters', async () => {
       strapi.documents.use('findMany', (ctx, next) => {
         // @ts-expect-error - how do we fix this? Params should be more generic
         ctx.params.filters = { title: 'Article1-Draft-EN' };
