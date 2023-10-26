@@ -3,7 +3,7 @@ import 'koa-bodyparser';
 
 import path from 'path';
 
-import ee from '@strapi/strapi/dist/utils/ee';
+// import ee from '@strapi/strapi/dist/utils/ee';
 import { map, values, sumBy, pipe, flatMap, propEq } from 'lodash/fp';
 import _ from 'lodash';
 import { exists } from 'fs-extra';
@@ -49,7 +49,8 @@ export async function getProjectType() {
   const flags = strapi.config.get('admin.flags', {});
   // FIXME
   try {
-    return { data: { isEE: strapi.EE, features: ee.features.list(), flags } };
+    // return { data: { isEE: strapi.EE, features: ee.features.list(), flags } };
+    return { data: { isEE: false, features: [], flags } };
   } catch (err) {
     return { data: { isEE: false, features: [], flags } };
   }

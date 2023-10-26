@@ -32,6 +32,13 @@
       "require": "./dist/server/index.js",
       "default": "./dist/server/index.js"
     },
+    "./ee": {
+      "types": "./dist/ee/server/src/index.d.ts",
+      "source": "./ee/server/src/index.ts",
+      "import": "./dist/ee/server/index.mjs",
+      "require": "./dist/ee/server/index.js",
+      "default": "./dist/ee/server/index.js"
+    },
     "./package.json": "./package.json"
   },
   "main": "./index.js",
@@ -63,7 +70,7 @@
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "run build:ts -w --preserveWatchOutput"
+    "watch": "pack-up watch"
   },
   "resolutions": {
     "@types/react": "18.2.7"
