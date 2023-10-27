@@ -4,7 +4,7 @@ import { DefaultTheme } from 'styled-components';
 type ThemeName = 'light' | 'dark' | 'system';
 type NonSystemThemeName = Exclude<ThemeName, 'system'>;
 
-export interface ThemeToggleContextContextValue {
+interface ThemeToggleContextContextValue {
   currentTheme?: ThemeName;
   onChangeTheme?: (nextTheme: ThemeName) => void;
   themes?: {
