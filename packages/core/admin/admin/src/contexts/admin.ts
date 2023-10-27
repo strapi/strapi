@@ -1,17 +1,15 @@
 import * as React from 'react';
 
+import { createContext } from '@radix-ui/react-context';
+
 import type { StrapiApp } from '../StrapiApp';
 interface AdminContextValue {
   getAdminInjectedComponents: StrapiApp['getAdminInjectedComponents'];
 }
 
-const AdminContext = React.createContext<AdminContextValue>({
-  getAdminInjectedComponents() {
-    throw new Error('AdminContext: getAdminInjectedComponents() not implemented');
-  },
-});
+const [AdminContextProvider, useAdminContext] = createContext<AdminContextValue>('AdminContext');
 
-const useAdmin = () => React.useContext(AdminContext);
+const useAdmin = () => useAdminContext('useAdmin');
 
-export { AdminContext, useAdmin };
+export { AdminContextProvider, useAdmin };
 export type { AdminContextValue };
