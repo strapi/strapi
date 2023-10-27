@@ -14,8 +14,8 @@ const withDataInsertion = (editor) => {
 
     if (pastedText) {
       try {
-        // eslint-disable-next-line no-unused-vars
-        const _url = new URL(pastedText);
+        // eslint-disable-next-line no-new
+        new URL(pastedText);
         insertLink(editor, { url: pastedText });
 
         return;

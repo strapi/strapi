@@ -82,13 +82,8 @@ const BlocksInput = ({ disabled, placeholder }) => {
 
     if (isCtrlOrCmd) {
       Object.values(modifiers).forEach((value) => {
-        if (value.eventKey === event.key) {
-          if (event.key === 'S' && event.shiftKey) {
-            // Ctrl(Cmd) + Shift + s: strikethrough
-            value.handleToggle();
-          } else if (event.key !== 'S') {
-            value.handleToggle();
-          }
+        if (value.isValidEventKey(event)) {
+          value.handleToggle();
         }
       });
     }
