@@ -1,7 +1,6 @@
 'use strict';
 
 import { isNil } from 'lodash/fp';
-import ee from '@strapi/strapi/dist/utils/ee';
 import { env } from '@strapi/utils';
 import { getService } from '../utils';
 
@@ -10,14 +9,14 @@ export default {
   async getProjectType() {
     const flags = strapi.config.get('admin.flags', {});
     try {
-      return { data: { isEE: strapi.EE, features: ee.features.list(), flags } };
+      return { data: { isEE: strapi.EE, features: strapi.EE.features.list(), flags } };
     } catch (err) {
       return { data: { isEE: false, features: [], flags } };
     }
   },
 
   async licenseLimitInformation() {
-    const permittedSeats = ee.seats;
+    const permittedSeats = strapi.EE.seats;
 
     let shouldNotify = false;
     let licenseLimitStatus = null;
@@ -51,7 +50,7 @@ export default {
       shouldStopCreate: isNil(permittedSeats) ? false : currentActiveUserCount >= permittedSeats,
       licenseLimitStatus,
       isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
-      features: ee.features.list() ?? [],
+      features: strapi.EE.features.list() ?? [],
     };
 
     return { data };

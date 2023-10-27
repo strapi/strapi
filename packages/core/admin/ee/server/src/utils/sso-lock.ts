@@ -1,8 +1,8 @@
-import EE from '@strapi/strapi/dist/utils/ee';
+import '@strapi/types';
 import { isEmpty } from 'lodash/fp';
 
 export const isSsoLocked = async (user: any) => {
-  if (!EE.features.isEnabled('sso')) {
+  if (!strapi.EE.features.isEnabled('sso')) {
     return false;
   }
 

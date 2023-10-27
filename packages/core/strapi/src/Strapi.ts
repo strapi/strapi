@@ -14,6 +14,7 @@ import type {
   EntityService,
   EventHub,
   StartupLogger,
+  EE,
   CronService,
   WebhookStore,
   CoreStore,
@@ -183,7 +184,7 @@ class Strapi implements StrapiI {
 
   app: any;
 
-  EE?: boolean;
+  EE?: EE;
 
   components: Shared.Components;
 
@@ -243,7 +244,20 @@ class Strapi implements StrapiI {
     Object.defineProperty<Strapi>(this, 'EE', {
       get: () => {
         ee.init(this.dirs.app.root, this.log);
-        return ee.isEE;
+
+        // TODO: V5, expose ee features directly without assigning them to the strapi EE property
+        return {
+          // Getter without name
+          get(): boolean {
+            return ee.isEE;
+          },
+          get features() {
+            return ee.features || [];
+          },
+          get seats() {
+            return ee.seats;
+          },
+        };
       },
       configurable: false,
     });

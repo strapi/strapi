@@ -84,6 +84,14 @@ export interface ConfigProvider {
   [key: string]: any;
 }
 
+export interface EE {
+  // Getter returns true if the EE is enabled
+  (): boolean;
+  // Access EE feature list
+  features: Record<string, any>;
+  seats: number;
+}
+
 export interface Strapi {
   server: Server;
   container: Container;
@@ -106,7 +114,7 @@ export interface Strapi {
   isLoaded: boolean;
   db?: Database;
   app: any;
-  EE?: boolean;
+  EE?: EE;
   components: Shared.Components;
   reload: Reloader;
   config: ConfigProvider;

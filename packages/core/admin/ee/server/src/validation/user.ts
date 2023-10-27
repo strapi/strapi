@@ -1,5 +1,5 @@
 import { yup, validateYupSchema } from '@strapi/utils';
-import EE from '@strapi/strapi/dist/utils/ee';
+import '@strapi/types';
 import { schemas } from '../../../../server/src/validation/user';
 
 const ssoUserCreationInputExtension = yup
@@ -12,7 +12,7 @@ const ssoUserCreationInputExtension = yup
 export const validateUserCreationInput = (data: any) => {
   let schema = schemas.userCreationSchema;
 
-  if (EE.features.isEnabled('sso')) {
+  if (strapi.EE.features.isEnabled('sso')) {
     schema = schema.concat(ssoUserCreationInputExtension);
   }
 

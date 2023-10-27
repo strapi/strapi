@@ -1,7 +1,5 @@
 'use strict';
 
-// eslint-disable-next-line node/no-extraneous-require
-import ee from '@strapi/strapi/dist/utils/ee';
 import { take, drop, map, prop, pick, reverse, isNil } from 'lodash/fp';
 import { getService } from '../utils';
 import constants from '../../../../server/src/services/constants';
@@ -91,7 +89,7 @@ const syncDisabledUserRecords = async () => {
 };
 
 const seatEnforcementWorkflow = async () => {
-  const adminSeats = ee.seats;
+  const adminSeats = strapi.EE.seats;
   if (isNil(adminSeats)) {
     return;
   }
