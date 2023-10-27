@@ -4,7 +4,7 @@
  *
  */
 
-import { MouseEvent, SyntheticEvent } from 'react';
+import { SyntheticEvent } from 'react';
 
 import { Button } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
