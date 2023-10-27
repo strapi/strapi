@@ -243,13 +243,13 @@ interface CardButtonProps
 
 const CardButton = ({
   strapiPeerDepVersion,
-  strapiAppVersion = '',
+  strapiAppVersion,
   handleCopy,
   pluginName,
 }: CardButtonProps) => {
   const { formatMessage } = useIntl();
   const versionRange = semver.validRange(strapiPeerDepVersion);
-  const isCompatible = semver.satisfies(strapiAppVersion, versionRange ?? '');
+  const isCompatible = semver.satisfies(strapiAppVersion ?? '', versionRange ?? '');
 
   const installMessage = formatMessage({
     id: 'admin.pages.MarketPlacePage.plugin.copy',
