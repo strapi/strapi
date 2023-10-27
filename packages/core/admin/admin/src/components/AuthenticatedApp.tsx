@@ -15,7 +15,7 @@ import valid from 'semver/functions/valid';
 
 import packageJSON from '../../../package.json';
 import { UserEntity } from '../../../shared/entities';
-import { useConfiguration } from '../hooks/useConfiguration';
+import { useConfiguration } from '../contexts/configuration';
 import { APIResponse, APIResponseUsersLegacy } from '../types/adminAPI';
 import { getFullName } from '../utils/getFullName';
 import { hashAdminUserEmail } from '../utils/hashAdminUserEmail';
