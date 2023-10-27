@@ -1,4 +1,4 @@
-import { Attribute } from '@strapi/types';
+import type { Attribute } from '@strapi/types';
 
 /**
  *
