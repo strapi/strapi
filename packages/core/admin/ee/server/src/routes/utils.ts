@@ -1,7 +1,7 @@
-import '@strapi/types';
+import EE from '@strapi/strapi/dist/utils/ee';
 
 export const enableFeatureMiddleware = (featureName: string) => (ctx: any, next: any) => {
-  if (strapi.EE.features.isEnabled(featureName)) {
+  if (EE.features.isEnabled(featureName)) {
     return next();
   }
 

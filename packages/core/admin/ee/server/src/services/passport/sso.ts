@@ -1,4 +1,5 @@
 import '@strapi/types';
+import EE from '@strapi/strapi/dist/utils/ee';
 import passport from '../../../../../server/src/services/passport';
 import createProviderRegistry from './provider-registry';
 
@@ -6,7 +7,7 @@ export const providerRegistry = createProviderRegistry();
 const errorMessage = 'SSO is disabled. Its functionnalities cannot be accessed.';
 
 export const getStrategyCallbackURL = (providerName: string) => {
-  if (!strapi.EE.features.isEnabled('sso')) {
+  if (!EE.features.isEnabled('sso')) {
     throw new Error(errorMessage);
   }
 
@@ -14,7 +15,7 @@ export const getStrategyCallbackURL = (providerName: string) => {
 };
 
 export const syncProviderRegistryWithConfig = () => {
-  if (!strapi.EE.features.isEnabled('sso')) {
+  if (!EE.features.isEnabled('sso')) {
     throw new Error(errorMessage);
   }
 

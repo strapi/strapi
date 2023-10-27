@@ -1,7 +1,9 @@
 'use strict';
 
+// eslint-disable-next-line node/no-extraneous-require
+import EE from '@strapi/strapi/dist/utils/ee';
+
 import { errors } from '@strapi/utils';
-import '@strapi/types';
 import createLocalStrategy from '../../../../server/src/services/passport/local-strategy';
 import sso from './passport/sso';
 import { isSsoLocked } from '../utils/sso-lock';
@@ -24,7 +26,7 @@ const localStrategyMiddleware = async ([error, user, message]: any, done: any) =
 };
 
 const getPassportStrategies = () => {
-  if (!strapi.EE.features.isEnabled('sso')) {
+  if (!EE.features.isEnabled('sso')) {
     return [createLocalStrategy(strapi)];
   }
 

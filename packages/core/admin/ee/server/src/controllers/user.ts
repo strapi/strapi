@@ -1,7 +1,7 @@
+import ee from '@strapi/strapi/dist/utils/ee';
 import _ from 'lodash';
 import { pick, isNil } from 'lodash/fp';
 import { errors } from '@strapi/utils';
-import '@strapi/types';
 import { validateUserCreationInput } from '../validation/user';
 import { validateUserUpdateInput } from '../../../../server/src/validation/user';
 import { getService } from '../utils';
@@ -16,7 +16,7 @@ const hasAdminSeatsAvaialble = async () => {
     return true;
   }
 
-  const permittedSeats = strapi.EE.seats as any;
+  const permittedSeats = ee.seats as any;
   if (isNil(permittedSeats)) {
     return true;
   }

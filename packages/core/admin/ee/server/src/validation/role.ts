@@ -1,5 +1,5 @@
 import { yup, validateYupSchema } from '@strapi/utils';
-import '@strapi/types';
+import EE from '@strapi/strapi/dist/utils/ee';
 
 const roleCreateSchema = yup
   .object()
@@ -24,7 +24,7 @@ const rolesDeleteSchema = yup
           try {
             await strapi.admin.services.role.checkRolesIdForDeletion(ids);
 
-            if (strapi.EE.features.isEnabled('sso')) {
+            if (EE.features.isEnabled('sso')) {
               await strapi.admin.services.role.ssoCheckRolesIdForDeletion(ids);
             }
           } catch (e: any) {
@@ -47,7 +47,7 @@ const roleDeleteSchema = yup
       try {
         await strapi.admin.services.role.checkRolesIdForDeletion([id]);
 
-        if (strapi.EE.features.isEnabled('sso')) {
+        if (EE.features.isEnabled('sso')) {
           await strapi.admin.services.role.ssoCheckRolesIdForDeletion([id]);
         }
       } catch (e: any) {
