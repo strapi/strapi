@@ -1,21 +1,39 @@
-'use strict';
+import _ from 'lodash';
+import { errors } from '@strapi/utils';
+import constants from '../constants';
+const { SUPER_ADMIN_CODE } = constants;
 
-const _ = require('lodash');
-const { ApplicationError } = require('@strapi/utils').errors;
-const userService = require('../user');
-const { SUPER_ADMIN_CODE } = require('../constants');
+import {
+  create,
+  updateById,
+  exists,
+  findRegistrationInfo,
+  register,
+  sanitizeUser,
+  findOne,
+  findOneByEmail,
+  findPage,
+  deleteById,
+  deleteByIds,
+  countUsersWithoutRole,
+  count,
+  assignARoleToAll,
+  displayWarningIfUsersDontHaveRole,
+  resetPasswordByEmail,
+  getLanguagesInUse,
+} from '../user';
 
 describe('User', () => {
   describe('sanitizeUser', () => {
     test('Removes password and resetPasswordToken', () => {
-      const res = userService.sanitizeUser({
+      const res = sanitizeUser({
         id: 1,
         firstname: 'Test',
         otherField: 'Hello',
         password: '$5IAZUDB871',
         resetPasswordToken: '3456-5678-6789-789',
         roles: [],
-      });
+      } as any);
 
       expect(res).toEqual({
         id: 1,
@@ -31,7 +49,7 @@ describe('User', () => {
     const sendDidInviteUser = jest.fn();
 
     test('Creates a user by merging given and default attributes', async () => {
-      const create = jest.fn(({ data }) => Promise.resolve(data));
+      const dbCreate = jest.fn(({ data }) => Promise.resolve(data));
       const createToken = jest.fn(() => 'token');
       const hashPassword = jest.fn(() => Promise.resolve('123456789'));
 
@@ -48,22 +66,22 @@ describe('User', () => {
           },
         },
         query() {
-          return { create, count };
+          return { create: dbCreate, count };
         },
-      };
+      } as any;
 
       const input = { firstname: 'Kai', lastname: 'Doe', email: 'kaidoe@email.com' };
       const expected = { ...input, isActive: false, roles: [], registrationToken: 'token' };
 
-      const result = await userService.create(input);
+      const result = await create(input);
 
-      expect(create).toHaveBeenCalled();
+      expect(dbCreate).toHaveBeenCalled();
       expect(createToken).toHaveBeenCalled();
       expect(result).toMatchObject(expected);
     });
 
     test('Creates a user and hash password if provided', async () => {
-      const create = jest.fn(({ data }) => Promise.resolve(data));
+      const dbCreate = jest.fn(({ data }) => Promise.resolve(data));
       const createToken = jest.fn(() => 'token');
       const hashPassword = jest.fn(() => Promise.resolve('123456789'));
 
@@ -80,9 +98,9 @@ describe('User', () => {
           },
         },
         query() {
-          return { create, count };
+          return { create: dbCreate, count };
         },
-      };
+      } as any;
 
       const input = {
         firstname: 'Kai',
@@ -98,9 +116,9 @@ describe('User', () => {
         registrationToken: 'token',
       };
 
-      const result = await userService.create(input);
+      const result = await create(input);
 
-      expect(create).toHaveBeenCalled();
+      expect(dbCreate).toHaveBeenCalled();
       expect(hashPassword).toHaveBeenCalledWith(input.password);
       expect(createToken).toHaveBeenCalled();
       expect(result).toMatchObject(expected);
@@ -108,7 +126,7 @@ describe('User', () => {
     });
 
     test('Creates a user by using given attributes', async () => {
-      const create = jest.fn(({ data }) => Promise.resolve(data));
+      const dbCreate = jest.fn(({ data }) => Promise.resolve(data));
       const createToken = jest.fn(() => 'token');
       const hashPassword = jest.fn(() => Promise.resolve('123456789'));
 
@@ -125,9 +143,9 @@ describe('User', () => {
           },
         },
         query() {
-          return { create, count };
+          return { create: dbCreate, count };
         },
-      };
+      } as any;
 
       const input = {
         firstname: 'Kai',
@@ -138,7 +156,7 @@ describe('User', () => {
         registrationToken: 'another-token',
       };
       const expected = _.clone(input);
-      const result = await userService.create(input);
+      const result = await create(input);
 
       expect(result).toMatchObject(expected);
     });
@@ -146,28 +164,28 @@ describe('User', () => {
 
   describe('Count users', () => {
     test('Count users without params', async () => {
-      const count = jest.fn(() => Promise.resolve(2));
+      const dbCount = jest.fn(() => Promise.resolve(2));
       global.strapi = {
-        query: () => ({ count }),
-      };
+        query: () => ({ count: dbCount }),
+      } as any;
 
-      const amount = await userService.count();
+      const amount = await count();
 
       expect(amount).toBe(2);
-      expect(count).toHaveBeenCalledWith({ where: {} });
+      expect(dbCount).toHaveBeenCalledWith({ where: {} });
     });
 
     test('Count users with params', async () => {
-      const count = jest.fn(() => Promise.resolve(2));
+      const dbCount = jest.fn(() => Promise.resolve(2));
       global.strapi = {
-        query: () => ({ count }),
-      };
+        query: () => ({ count: dbCount }),
+      } as any;
 
       const params = { foo: 'bar' };
-      const amount = await userService.count(params);
+      const amount = await count(params);
 
       expect(amount).toBe(2);
-      expect(count).toHaveBeenCalledWith({ where: params });
+      expect(dbCount).toHaveBeenCalledWith({ where: params });
     });
   });
 
@@ -194,9 +212,9 @@ describe('User', () => {
             auth: { hashPassword },
           },
         },
-      };
+      } as any;
 
-      const result = await userService.updateById(id, input);
+      const result = await updateById(id, input);
 
       expect(hashPassword).toHaveBeenCalledWith(input.password);
       expect(update).toHaveBeenCalledWith({
@@ -226,10 +244,10 @@ describe('User', () => {
         query() {
           return { update, findOne };
         },
-      };
+      } as any;
       const id = 1;
       const input = { email: 'test@strapi.io' };
-      const result = await userService.updateById(id, input);
+      const result = await updateById(id, input);
 
       expect(update).toHaveBeenCalledWith({ where: { id }, data: input, populate: ['roles'] });
       expect(result).toBe(user);
@@ -271,9 +289,9 @@ describe('User', () => {
             },
           },
         },
-      };
+      } as any;
 
-      await userService.resetPasswordByEmail(email, password);
+      await resetPasswordByEmail(email, password);
       expect(findOne).toHaveBeenCalledWith({ where: { email }, populate: ['roles'] });
       expect(update).toHaveBeenCalledWith({
         where: { id: userId },
@@ -298,14 +316,14 @@ describe('User', () => {
         },
         query: () => ({ findOne }),
         admin: { services: { role: { getSuperAdminWithUsersCount } } },
-      };
+      } as any;
 
       expect.assertions(2);
 
       try {
-        await userService.deleteById(2);
-      } catch (e) {
-        expect(e instanceof ApplicationError).toBe(true);
+        await deleteById(2);
+      } catch (e: any) {
+        expect(e instanceof errors.ApplicationError).toBe(true);
         expect(e.message).toEqual('You must have at least one user with super admin role.');
       }
     });
@@ -322,9 +340,9 @@ describe('User', () => {
         },
         query: () => ({ findOne, delete: deleteFn }),
         admin: { services: { role: { getSuperAdminWithUsersCount } } },
-      };
+      } as any;
 
-      const res = await userService.deleteById(user.id);
+      const res = await deleteById(user.id);
 
       expect(deleteFn).toHaveBeenCalledWith({ where: { id: user.id }, populate: ['roles'] });
       expect(res).toEqual(user);
@@ -341,14 +359,14 @@ describe('User', () => {
         },
         query: () => ({ count }),
         admin: { services: { role: { getSuperAdminWithUsersCount } } },
-      };
+      } as any;
 
       expect.assertions(2);
 
       try {
-        await userService.deleteByIds([2, 3]);
-      } catch (e) {
-        expect(e instanceof ApplicationError).toBe(true);
+        await deleteByIds([2, 3]);
+      } catch (e: any) {
+        expect(e instanceof errors.ApplicationError).toBe(true);
         expect(e.message).toEqual('You must have at least one user with super admin role.');
       }
     });
@@ -368,9 +386,9 @@ describe('User', () => {
         },
         query: () => ({ count, delete: deleteFn }),
         admin: { services: { role: { getSuperAdminWithUsersCount } } },
-      };
+      } as any;
 
-      const res = await userService.deleteByIds([2, 3]);
+      const res = await deleteByIds([2, 3]);
 
       expect(deleteFn).toHaveBeenNthCalledWith(1, { where: { id: 2 }, populate: ['roles'] });
       expect(deleteFn).toHaveBeenNthCalledWith(2, { where: { id: 3 }, populate: ['roles'] });
@@ -387,9 +405,9 @@ describe('User', () => {
         query() {
           return { count };
         },
-      };
+      } as any;
 
-      const result = await userService.exists();
+      const result = await exists();
 
       expect(result).toBeTruthy();
     });
@@ -401,9 +419,9 @@ describe('User', () => {
         query() {
           return { count };
         },
-      };
+      } as any;
 
-      const result = await userService.exists();
+      const result = await exists();
 
       expect(result).toBeFalsy();
     });
@@ -426,12 +444,12 @@ describe('User', () => {
         entityService: {
           findPage,
         },
-      };
+      } as any;
     });
 
     test('Fetch users with custom pagination', async () => {
       const pagination = { page: 2, pageSize: 15 };
-      const foundPage = await userService.findPage(pagination);
+      const foundPage = await findPage(pagination);
 
       expect(foundPage.results.length).toBe(15);
       expect(foundPage.results[0]).toBe(15);
@@ -439,7 +457,7 @@ describe('User', () => {
     });
 
     test('Fetch users with default pagination', async () => {
-      const foundPage = await userService.findPage();
+      const foundPage = await findPage();
 
       expect(foundPage.results.length).toBe(100);
       expect(foundPage.results[0]).toBe(0);
@@ -448,7 +466,7 @@ describe('User', () => {
 
     test('Fetch users with partial pagination', async () => {
       const pagination = { page: 2 };
-      const foundPage = await userService.findPage(pagination);
+      const foundPage = await findPage(pagination);
 
       expect(foundPage.results.length).toBe(100);
       expect(foundPage.results[0]).toBe(100);
@@ -460,7 +478,7 @@ describe('User', () => {
     const user = { firstname: 'Kai', lastname: 'Doe', email: 'kaidoe@email.com' };
 
     beforeEach(() => {
-      const findOne = jest.fn((uid, id) =>
+      const findOne = jest.fn((uid, id: number) =>
         Promise.resolve(
           {
             1: user,
@@ -472,12 +490,12 @@ describe('User', () => {
         entityService: {
           findOne,
         },
-      };
+      } as any;
     });
 
     test('Finds and returns a user by its ID', async () => {
       const id = 1;
-      const res = await userService.findOne(id);
+      const res = await findOne(id);
 
       expect(res).not.toBeNull();
       expect(res).toMatchObject(user);
@@ -485,7 +503,7 @@ describe('User', () => {
 
     test('Fails to find a user with provided params', async () => {
       const id = 27;
-      const res = await userService.findOne(id);
+      const res = await findOne(id);
 
       expect(res).toBeNull();
     });
@@ -499,9 +517,9 @@ describe('User', () => {
         query() {
           return { findOne };
         },
-      };
+      } as any;
 
-      const res = await userService.findRegistrationInfo('ABCD');
+      const res = await findRegistrationInfo('ABCD');
       expect(res).toBeUndefined();
       expect(findOne).toHaveBeenCalledWith({ where: { registrationToken: 'ABCD' } });
     });
@@ -520,9 +538,9 @@ describe('User', () => {
         query() {
           return { findOne };
         },
-      };
+      } as any;
 
-      const res = await userService.findRegistrationInfo('ABCD');
+      const res = await findRegistrationInfo('ABCD');
 
       expect(res).toEqual({
         email: user.email,
@@ -542,7 +560,7 @@ describe('User', () => {
             findOne,
           };
         },
-      };
+      } as any;
 
       const input = {
         registrationToken: '123',
@@ -553,7 +571,7 @@ describe('User', () => {
         },
       };
 
-      expect(userService.register(input)).rejects.toThrowError('Invalid registration info');
+      expect(register(input)).rejects.toThrowError('Invalid registration info');
     });
 
     test('Calls udpate service', async () => {
@@ -571,7 +589,7 @@ describe('User', () => {
             user: { updateById },
           },
         },
-      };
+      } as any;
 
       const input = {
         registrationToken: '123',
@@ -582,7 +600,7 @@ describe('User', () => {
         },
       };
 
-      await userService.register(input);
+      await register(input);
 
       expect(updateById).toHaveBeenCalledWith(
         1,
@@ -605,7 +623,7 @@ describe('User', () => {
             user: { updateById },
           },
         },
-      };
+      } as any;
 
       const input = {
         registrationToken: '123',
@@ -616,7 +634,7 @@ describe('User', () => {
         },
       };
 
-      await userService.register(input);
+      await register(input);
 
       expect(updateById).toHaveBeenCalledWith(1, expect.objectContaining({ isActive: true }));
     });
@@ -636,7 +654,7 @@ describe('User', () => {
             user: { updateById },
           },
         },
-      };
+      } as any;
 
       const input = {
         registrationToken: '123',
@@ -647,7 +665,7 @@ describe('User', () => {
         },
       };
 
-      await userService.register(input);
+      await register(input);
 
       expect(updateById).toHaveBeenCalledWith(
         1,
@@ -666,9 +684,9 @@ describe('User', () => {
       global.strapi = {
         query: () => ({ model: { orm: 'bookshelf' }, count }),
         log: { warn },
-      };
+      } as any;
 
-      await userService.displayWarningIfUsersDontHaveRole();
+      await displayWarningIfUsersDontHaveRole();
 
       expect(warn).toHaveBeenCalledTimes(0);
     });
@@ -680,9 +698,9 @@ describe('User', () => {
       global.strapi = {
         query: () => ({ model: { orm: 'bookshelf' }, count }),
         log: { warn },
-      };
+      } as any;
 
-      await userService.displayWarningIfUsersDontHaveRole();
+      await displayWarningIfUsersDontHaveRole();
 
       expect(warn).toHaveBeenCalledWith("Some users (2) don't have any role.");
     });
@@ -703,9 +721,9 @@ describe('User', () => {
             findOne,
           };
         },
-      };
+      } as any;
 
-      await expect(userService.resetPasswordByEmail(email, password)).rejects.toEqual(
+      await expect(resetPasswordByEmail(email, password)).rejects.toEqual(
         new Error(`User not found for email: ${email}`)
       );
 
@@ -725,9 +743,9 @@ describe('User', () => {
               findOne,
             };
           },
-        };
+        } as any;
 
-        await expect(userService.resetPasswordByEmail(email, password)).rejects.toEqual(
+        await expect(resetPasswordByEmail(email, password)).rejects.toEqual(
           new Error(
             'Invalid password. Expected a minimum of 8 characters with at least one number and one uppercase letter'
           )
@@ -763,9 +781,9 @@ describe('User', () => {
             findMany,
           };
         },
-      };
+      } as any;
 
-      expect(userService.getLanguagesInUse()).resolves.toEqual(['en', 'fr', 'en']);
+      expect(getLanguagesInUse()).resolves.toEqual(['en', 'fr', 'en']);
     });
   });
 });

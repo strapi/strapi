@@ -1,8 +1,6 @@
-'use strict';
-
-const { omit } = require('lodash/fp');
-const createConditionProvider = require('../provider');
-const domain = require('..');
+import { omit } from 'lodash/fp';
+import createConditionProvider from '../provider';
+import domain from '..';
 
 const providerMethods = [
   'register',
@@ -21,7 +19,7 @@ describe('Condition Provider', () => {
   beforeEach(() => {
     global.strapi = {
       isLoaded: false,
-    };
+    } as any;
   });
 
   test('ConditionProvider is a provider instance', () => {
@@ -37,7 +35,7 @@ describe('Condition Provider', () => {
   describe('Methods', () => {
     describe('Register', () => {
       test('Can register a new condition using condition attributes', async () => {
-        const attributes = {
+        const attributes: any = {
           name: 'foobar',
           displayName: 'Foo bar',
           plugin: 'foo',
@@ -60,7 +58,7 @@ describe('Condition Provider', () => {
       test(`Can't register a condition if strapi is loaded`, async () => {
         global.strapi.isLoaded = true;
 
-        const attributes = {
+        const attributes: any = {
           name: 'foobar',
           displayName: 'Foo bar',
           plugin: 'foo',
@@ -77,7 +75,7 @@ describe('Condition Provider', () => {
       });
 
       test('Registration hooks are triggered on register', async () => {
-        const attributes = {
+        const attributes: any = {
           name: 'foobar',
           displayName: 'Foo bar',
           plugin: 'foo',
@@ -101,7 +99,7 @@ describe('Condition Provider', () => {
 
     describe('Register Many', () => {
       test('Can register multiple condition at once', async () => {
-        const attributes = [
+        const attributes: any = [
           {
             name: 'foobar-A',
             displayName: 'Foo bar A',
@@ -124,7 +122,7 @@ describe('Condition Provider', () => {
       });
 
       test('Registering many condition shall trigger the registration hooks multiple time', async () => {
-        const attributes = [
+        const attributes: any = [
           {
             name: 'foobar-A',
             displayName: 'Foo bar A',

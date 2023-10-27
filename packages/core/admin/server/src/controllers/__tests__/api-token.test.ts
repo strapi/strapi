@@ -1,10 +1,8 @@
-'use strict';
-
-const { ApplicationError } = require('@strapi/utils').errors;
-const { omit } = require('lodash/fp');
-const createContext = require('../../../../../../test/helpers/create-context');
-const constants = require('../../services/constants');
-const apiTokenController = require('../api-token');
+import { errors } from '@strapi/utils';
+import { omit } from 'lodash/fp';
+import createContext from '../../../../../../../test/helpers/create-context';
+import constants from '../../services/constants';
+import apiTokenController from '../api-token';
 
 describe('API Token Controller', () => {
   describe('Create API Token', () => {
@@ -37,14 +35,14 @@ describe('API Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       expect.assertions(3);
 
       try {
-        await apiTokenController.create(ctx);
-      } catch (e) {
-        expect(e instanceof ApplicationError).toBe(true);
+        await apiTokenController.create(ctx as any);
+      } catch (e: any) {
+        expect(e instanceof errors.ApplicationError).toBe(true);
         expect(e.message).toEqual('Name already taken');
       }
 
@@ -67,9 +65,9 @@ describe('API Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
-      await apiTokenController.create(ctx);
+      await apiTokenController.create(ctx as any);
 
       expect(exists).toHaveBeenCalledWith({ name: body.name });
       expect(badRequest).not.toHaveBeenCalled();
@@ -104,9 +102,9 @@ describe('API Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
-      await apiTokenController.create(ctx);
+      await apiTokenController.create(ctx as any);
 
       expect(exists).toHaveBeenCalledWith({ name: tokenBody.name });
       expect(badRequest).not.toHaveBeenCalled();
@@ -133,10 +131,10 @@ describe('API Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       expect(async () => {
-        await apiTokenController.create(ctx);
+        await apiTokenController.create(ctx as any);
       }).rejects.toThrow(/lifespan must be one of the following values/);
       expect(create).not.toHaveBeenCalled();
       expect(created).not.toHaveBeenCalled();
@@ -161,10 +159,10 @@ describe('API Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       expect(async () => {
-        await apiTokenController.create(ctx);
+        await apiTokenController.create(ctx as any);
       }).rejects.toThrow(/lifespan must be one of the following values/);
       expect(create).not.toHaveBeenCalled();
       expect(created).not.toHaveBeenCalled();
@@ -199,9 +197,9 @@ describe('API Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
-      await apiTokenController.create(ctx);
+      await apiTokenController.create(ctx as any);
 
       expect(exists).toHaveBeenCalledWith({ name: tokenBody.name });
       expect(badRequest).not.toHaveBeenCalled();
@@ -239,9 +237,9 @@ describe('API Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
-      await apiTokenController.list(ctx);
+      await apiTokenController.list(ctx as any);
 
       expect(list).toHaveBeenCalled();
       expect(send).toHaveBeenCalledWith({ data: tokens });
@@ -269,9 +267,9 @@ describe('API Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
-      await apiTokenController.revoke(ctx);
+      await apiTokenController.revoke(ctx as any);
 
       expect(revoke).toHaveBeenCalledWith(token.id);
       expect(deleted).toHaveBeenCalledWith({ data: token });
@@ -290,9 +288,9 @@ describe('API Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
-      await apiTokenController.revoke(ctx);
+      await apiTokenController.revoke(ctx as any);
 
       expect(revoke).toHaveBeenCalledWith(token.id);
       expect(deleted).toHaveBeenCalledWith({ data: null });
@@ -322,9 +320,9 @@ describe('API Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
-      await apiTokenController.regenerate(ctx);
+      await apiTokenController.regenerate(ctx as any);
 
       expect(regenerate).toHaveBeenCalledWith(token.id);
     });
@@ -345,9 +343,9 @@ describe('API Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
-      await apiTokenController.regenerate(ctx);
+      await apiTokenController.regenerate(ctx as any);
 
       expect(regenerate).not.toHaveBeenCalled();
       expect(getById).toHaveBeenCalledWith(token.id);
@@ -376,9 +374,9 @@ describe('API Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
-      await apiTokenController.get(ctx);
+      await apiTokenController.get(ctx as any);
 
       expect(getById).toHaveBeenCalledWith(token.id);
       expect(send).toHaveBeenCalledWith({ data: token });
@@ -397,9 +395,9 @@ describe('API Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
-      await apiTokenController.get(ctx);
+      await apiTokenController.get(ctx as any);
 
       expect(getById).toHaveBeenCalledWith(token.id);
       expect(notFound).toHaveBeenCalledWith('API Token not found');
@@ -429,14 +427,14 @@ describe('API Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       expect.assertions(3);
 
       try {
-        await apiTokenController.update(ctx);
-      } catch (e) {
-        expect(e instanceof ApplicationError).toBe(true);
+        await apiTokenController.update(ctx as any);
+      } catch (e: any) {
+        expect(e instanceof errors.ApplicationError).toBe(true);
         expect(e.message).toEqual('Name already taken');
       }
 
@@ -456,9 +454,9 @@ describe('API Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
-      await apiTokenController.update(ctx);
+      await apiTokenController.update(ctx as any);
 
       expect(getById).toHaveBeenCalledWith(id);
       expect(notFound).toHaveBeenCalledWith('API Token not found');
@@ -482,9 +480,9 @@ describe('API Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
-      await apiTokenController.update(ctx);
+      await apiTokenController.update(ctx as any);
 
       expect(getById).toHaveBeenCalledWith(id);
       expect(getByName).toHaveBeenCalledWith(body.name);

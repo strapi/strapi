@@ -44,6 +44,7 @@
     "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
+    "test:ts:back": "run -T tsc --noEmit -p server/tsconfig.json",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
     "watch": "run build:ts -w --preserveWatchOutput"
@@ -151,6 +152,7 @@
     "@testing-library/dom": "9.2.0",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
+    "@types/jest": "29.5.2",
     "@types/jsonwebtoken": "9.0.3",
     "@types/koa-passport": "6.0.1",
     "@types/lodash": "^4.14.191",

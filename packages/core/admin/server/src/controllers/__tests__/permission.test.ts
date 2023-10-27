@@ -1,7 +1,5 @@
-'use strict';
-
-const createContext = require('../../../../../../test/helpers/create-context');
-const permissionController = require('../permission');
+import createContext from '../../../../../../../test/helpers/create-context';
+import permissionController from '../permission';
 
 describe('Permission Controller', () => {
   const localTestData = {
@@ -30,16 +28,18 @@ describe('Permission Controller', () => {
       services: {
         permission: {
           engine: {
-            checkMany: jest.fn((ability) => (permissions) => {
-              return permissions.map(({ action, subject, field }) =>
-                ability.can(action, subject, field)
-              );
-            }),
+            checkMany: jest.fn(
+              (ability) => (permissions: { action: any; subject: any; field: any }[]) => {
+                return permissions.map(({ action, subject, field }) =>
+                  ability.can(action, subject, field)
+                );
+              }
+            ),
           },
         },
       },
     },
-  };
+  } as any;
 
   afterEach(async () => {
     jest.clearAllMocks();
@@ -55,7 +55,7 @@ describe('Permission Controller', () => {
       expect.assertions(1);
 
       try {
-        await permissionController.check(ctx);
+        await permissionController.check(ctx as any);
       } catch (e) {
         expect(e).toMatchObject({
           name: 'ValidationError',
@@ -83,7 +83,7 @@ describe('Permission Controller', () => {
       expect.assertions(1);
 
       try {
-        await permissionController.check(ctx);
+        await permissionController.check(ctx as any);
       } catch (e) {
         expect(e).toMatchObject({
           name: 'ValidationError',
@@ -110,7 +110,7 @@ describe('Permission Controller', () => {
       expect.assertions(1);
 
       try {
-        await permissionController.check(ctx);
+        await permissionController.check(ctx as any);
       } catch (e) {
         expect(e).toMatchObject({
           name: 'ValidationError',
@@ -138,7 +138,7 @@ describe('Permission Controller', () => {
       expect.assertions(1);
 
       try {
-        await permissionController.check(ctx);
+        await permissionController.check(ctx as any);
       } catch (e) {
         expect(e).toMatchObject({
           name: 'ValidationError',
@@ -166,7 +166,7 @@ describe('Permission Controller', () => {
       expect.assertions(1);
 
       try {
-        await permissionController.check(ctx);
+        await permissionController.check(ctx as any);
       } catch (e) {
         expect(e).toMatchObject({
           name: 'ValidationError',
@@ -188,7 +188,7 @@ describe('Permission Controller', () => {
       const ctx = createContext(
         { body: { permissions: localTestData.permissions.valid } },
         { state: { userAbility: localTestData.ability } }
-      );
+      ) as any;
 
       await permissionController.check(ctx);
 

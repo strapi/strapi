@@ -1,9 +1,4 @@
-'use strict';
-
-const {
-  checkFieldsAreCorrectlyNested,
-  checkFieldsDontHaveDuplicates,
-} = require('../common-functions');
+import { checkFieldsAreCorrectlyNested, checkFieldsDontHaveDuplicates } from '../common-functions';
 
 describe('Common validation functions', () => {
   describe('checkFieldsAreCorrectlyNested', () => {
@@ -27,6 +22,7 @@ describe('Common validation functions', () => {
       [3, false],
     ];
 
+    //@ts-expect-error
     test.each(tests)('%p to be %p', (fields, expectedResult) => {
       const result = checkFieldsAreCorrectlyNested(fields);
       expect(result).toBe(expectedResult);
@@ -46,6 +42,7 @@ describe('Common validation functions', () => {
       [3, false],
     ];
 
+    //@ts-expect-error
     test.each(tests)('%p to be %p', (fields, expectedResult) => {
       const result = checkFieldsDontHaveDuplicates(fields);
       expect(result).toBe(expectedResult);

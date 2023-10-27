@@ -1,12 +1,20 @@
-'use strict';
-
-const crypto = require('crypto');
-const {
-  errors: { NotFoundError, ApplicationError },
-} = require('@strapi/utils');
-const { omit, uniq } = require('lodash/fp');
-const transferTokenService = require('../../transfer/token');
-const constants = require('../../constants');
+import crypto from 'crypto';
+import { errors } from '@strapi/utils';
+import { omit, uniq } from 'lodash/fp';
+import {
+  create as tokenServiceCreate,
+  list,
+  exists,
+  getBy,
+  getById,
+  getByName,
+  update as tokenServiceUpdate,
+  revoke,
+  regenerate,
+  hash,
+  checkSaltIsDefined,
+} from '../../transfer/token';
+import constants from '../../constants';
 
 const getActionProvider = (actions = []) => {
   return {
@@ -27,8 +35,8 @@ describe('Transfer Token', () => {
     hexedString: '7472616e736665722d746f6b656e5f746573742d72616e646f6d2d6279746573',
   };
 
-  let now;
-  let nowSpy;
+  let now: any;
+  let nowSpy: any;
 
   beforeAll(() => {
     jest
@@ -51,7 +59,7 @@ describe('Transfer Token', () => {
         name: 'transfer-token_tests-name',
         description: 'transfer-token_tests-description',
         permissions: ['push'],
-      };
+      } as any;
       const createTokenResult = {
         ...attributes,
         lifespan: null,
@@ -62,7 +70,7 @@ describe('Transfer Token', () => {
       const create = jest.fn().mockResolvedValue(createTokenResult);
       const load = jest.fn().mockResolvedValueOnce(
         Promise.resolve(
-          attributes.permissions.map((p) => {
+          attributes.permissions.map((p: any) => {
             return {
               action: p,
             };
@@ -71,7 +79,7 @@ describe('Transfer Token', () => {
       );
 
       global.strapi = {
-        ...getActionProvider(['push']),
+        ...getActionProvider(['push'] as any),
         query() {
           return { create };
         },
@@ -82,9 +90,9 @@ describe('Transfer Token', () => {
         entityService: {
           load,
         },
-      };
+      } as any;
 
-      const res = await transferTokenService.create(attributes);
+      const res = await tokenServiceCreate(attributes);
 
       expect(load).toHaveBeenCalledWith(
         'admin::transfer-token',
@@ -99,7 +107,7 @@ describe('Transfer Token', () => {
         select: expect.arrayContaining([expect.any(String)]),
         data: {
           ...omit('permissions', attributes),
-          accessKey: transferTokenService.hash(mockedTransferToken.hexedString),
+          accessKey: hash(mockedTransferToken.hexedString),
           expiresAt: null,
           lifespan: null,
         },
@@ -147,7 +155,7 @@ describe('Transfer Token', () => {
       );
 
       global.strapi = {
-        ...getActionProvider(['push']),
+        ...getActionProvider(['push'] as any),
         query() {
           return { create };
         },
@@ -156,15 +164,15 @@ describe('Transfer Token', () => {
         config: {
           get: jest.fn(() => ''),
         },
-      };
+      } as any;
 
-      const res = await transferTokenService.create(attributes);
+      const res = await tokenServiceCreate(attributes);
 
       expect(create).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
         data: {
           ...attributes,
-          accessKey: transferTokenService.hash(mockedTransferToken.hexedString),
+          accessKey: hash(mockedTransferToken.hexedString),
           expiresAt: expectedExpires,
           lifespan: attributes.lifespan,
         },
@@ -185,11 +193,11 @@ describe('Transfer Token', () => {
         description: 'transfer-token_tests-description',
         permissions: ['push'],
         lifespan: 12345,
-      };
+      } as any;
 
       const create = jest.fn(({ data }) => Promise.resolve(data));
       global.strapi = {
-        ...getActionProvider(['push']),
+        ...getActionProvider(['push'] as any),
         query() {
           return { create };
         },
@@ -197,10 +205,10 @@ describe('Transfer Token', () => {
         config: {
           get: jest.fn(() => ''),
         },
-      };
+      } as any;
 
       expect(async () => {
-        await transferTokenService.create(attributes);
+        await tokenServiceCreate(attributes);
       }).rejects.toThrow(/lifespan/);
 
       expect(create).not.toHaveBeenCalled();
@@ -211,7 +219,8 @@ describe('Transfer Token', () => {
         name: 'transfer-token_tests-name',
         description: 'transfer-token_tests-description',
         permissions: [],
-      };
+      } as any;
+
       const createTokenResult = {
         ...attributes,
         lifespan: null,
@@ -223,7 +232,7 @@ describe('Transfer Token', () => {
       const create = jest.fn().mockResolvedValue(createTokenResult);
       const load = jest.fn().mockResolvedValueOnce(
         Promise.resolve(
-          attributes.permissions.map((p) => {
+          attributes.permissions.map((p: any) => {
             return {
               action: p,
             };
@@ -232,7 +241,7 @@ describe('Transfer Token', () => {
       );
 
       global.strapi = {
-        ...getActionProvider(['push']),
+        ...getActionProvider(['push'] as any),
         query() {
           return {
             findOne,
@@ -246,9 +255,9 @@ describe('Transfer Token', () => {
         entityService: {
           load,
         },
-      };
+      } as any;
 
-      const res = await transferTokenService.create(attributes);
+      const res = await tokenServiceCreate(attributes);
 
       expect(load).toHaveBeenCalledWith(
         'admin::transfer-token',
@@ -264,7 +273,7 @@ describe('Transfer Token', () => {
         select: expect.arrayContaining([expect.any(String)]),
         data: {
           ...omit('permissions', attributes),
-          accessKey: transferTokenService.hash(mockedTransferToken.hexedString),
+          accessKey: hash(mockedTransferToken.hexedString),
           expiresAt: null,
           lifespan: null,
         },
@@ -285,7 +294,8 @@ describe('Transfer Token', () => {
         description: 'transfer-token_tests-description',
         type: 'custom',
         permissions: ['push', 'push', 'push'],
-      };
+      } as any;
+
       const createTokenResult = {
         ...attributes,
         lifespan: null,
@@ -306,7 +316,7 @@ describe('Transfer Token', () => {
       );
 
       global.strapi = {
-        ...getActionProvider(['push']),
+        ...getActionProvider(['push'] as any),
         query() {
           return {
             findOne,
@@ -320,9 +330,9 @@ describe('Transfer Token', () => {
         entityService: {
           load,
         },
-      };
+      } as any;
 
-      const res = await transferTokenService.create(attributes);
+      const res = await tokenServiceCreate(attributes);
 
       expect(res.permissions).toHaveLength(1);
       expect(res.permissions).toEqual(['push']);
@@ -334,7 +344,8 @@ describe('Transfer Token', () => {
         description: 'transfer-token_tests-description',
         type: 'custom',
         permissions: ['foo', 'bar'],
-      };
+      } as any;
+
       const createTokenResult = {
         ...attributes,
         lifespan: null,
@@ -354,7 +365,7 @@ describe('Transfer Token', () => {
       );
 
       global.strapi = {
-        ...getActionProvider(['push']),
+        ...getActionProvider(['push'] as any),
         query() {
           return {
             create,
@@ -367,10 +378,10 @@ describe('Transfer Token', () => {
         entityService: {
           load,
         },
-      };
+      } as any;
 
-      await expect(() => transferTokenService.create(attributes)).rejects.toThrowError(
-        new ApplicationError(`Unknown permissions provided: foo, bar`)
+      await expect(() => tokenServiceCreate(attributes)).rejects.toThrowError(
+        new errors.ApplicationError(`Unknown permissions provided: foo, bar`)
       );
 
       expect(load).not.toHaveBeenCalled();
@@ -400,9 +411,9 @@ describe('Transfer Token', () => {
           })),
           set: mockedConfigSet,
         },
-      };
+      } as any;
 
-      transferTokenService.checkSaltIsDefined();
+      checkSaltIsDefined();
 
       expect(mockedAppendFile).not.toHaveBeenCalled();
       expect(mockedConfigSet).not.toHaveBeenCalled();
@@ -432,9 +443,9 @@ describe('Transfer Token', () => {
         query() {
           return { findMany };
         },
-      };
+      } as any;
 
-      const res = await transferTokenService.list();
+      const res = await list();
 
       expect(findMany).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
@@ -467,9 +478,9 @@ describe('Transfer Token', () => {
           return { delete: mockedDelete };
         },
         db: { transaction: jest.fn((cb) => cb()) },
-      };
+      } as any;
 
-      const res = await transferTokenService.revoke(token.id);
+      const res = await revoke(token.id);
 
       expect(mockedDelete).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
@@ -487,9 +498,9 @@ describe('Transfer Token', () => {
           return { delete: mockedDelete };
         },
         db: { transaction: jest.fn((cb) => cb()) },
-      };
+      } as any;
 
-      const res = await transferTokenService.revoke(42);
+      const res = await revoke(42);
 
       expect(mockedDelete).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
@@ -505,7 +516,7 @@ describe('Transfer Token', () => {
       id: 1,
       name: 'transfer-token_tests-name',
       description: 'transfer-token_tests-description',
-      permissions: [{ actions: 'push' }],
+      permissions: [{ action: 'push' }],
     };
 
     test('It retrieves the token', async () => {
@@ -515,9 +526,9 @@ describe('Transfer Token', () => {
         query() {
           return { findOne };
         },
-      };
+      } as any;
 
-      const res = await transferTokenService.getById(token.id);
+      const res = await getById(token.id);
 
       expect(findOne).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
@@ -538,9 +549,9 @@ describe('Transfer Token', () => {
         query() {
           return { findOne };
         },
-      };
+      } as any;
 
-      const res = await transferTokenService.getById(42);
+      const res = await getById(42);
 
       expect(findOne).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
@@ -572,16 +583,16 @@ describe('Transfer Token', () => {
         config: {
           get: jest.fn(() => ''),
         },
-      };
+      } as any;
 
       const id = 1;
-      const res = await transferTokenService.regenerate(id);
+      const res = await regenerate(id);
 
       expect(update).toHaveBeenCalledWith({
         where: { id },
         select: ['id', 'accessKey'],
         data: {
-          accessKey: transferTokenService.hash(mockedTransferToken.hexedString),
+          accessKey: hash(mockedTransferToken.hexedString),
         },
       });
       expect(res).toEqual({ accessKey: mockedTransferToken.hexedString });
@@ -607,18 +618,18 @@ describe('Transfer Token', () => {
         config: {
           get: jest.fn(() => ''),
         },
-      };
+      } as any;
 
       const id = 1;
       await expect(async () => {
-        await transferTokenService.regenerate(id);
-      }).rejects.toThrowError(NotFoundError);
+        await regenerate(id);
+      }).rejects.toThrowError(errors.NotFoundError);
 
       expect(update).toHaveBeenCalledWith({
         where: { id },
         select: ['id', 'accessKey'],
         data: {
-          accessKey: transferTokenService.hash(mockedTransferToken.hexedString),
+          accessKey: hash(mockedTransferToken.hexedString),
         },
       });
     });
@@ -642,7 +653,7 @@ describe('Transfer Token', () => {
           // It should ignore the duplicate and not call create
           'push',
         ],
-      };
+      } as any;
 
       const update = jest.fn(({ data }) => Promise.resolve(data));
       const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
@@ -663,7 +674,7 @@ describe('Transfer Token', () => {
         // second call to check new permissions
         .mockResolvedValueOnce(
           Promise.resolve(
-            updatedAttributes.permissions.map((p) => {
+            updatedAttributes.permissions.map((p: any) => {
               return {
                 action: p,
               };
@@ -672,7 +683,7 @@ describe('Transfer Token', () => {
         );
 
       global.strapi = {
-        ...getActionProvider(['push']),
+        ...getActionProvider(['push'] as any),
         query() {
           return {
             update,
@@ -688,9 +699,9 @@ describe('Transfer Token', () => {
         entityService: {
           load,
         },
-      };
+      } as any;
 
-      const res = await transferTokenService.update(id, updatedAttributes);
+      const res = await tokenServiceUpdate(id, updatedAttributes);
 
       expect(deleteFn).not.toHaveBeenCalled();
 
@@ -715,7 +726,7 @@ describe('Transfer Token', () => {
 
       const updatedAttributes = {
         name: 'transfer-token_tests-updated-name',
-      };
+      } as any;
 
       const update = jest.fn(({ data }) => Promise.resolve(data));
       const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
@@ -745,7 +756,7 @@ describe('Transfer Token', () => {
         );
 
       global.strapi = {
-        ...getActionProvider(['push']),
+        ...getActionProvider(['push'] as any),
         query() {
           return {
             update,
@@ -761,9 +772,9 @@ describe('Transfer Token', () => {
         entityService: {
           load,
         },
-      };
+      } as any;
 
-      const res = await transferTokenService.update(id, updatedAttributes);
+      const res = await tokenServiceUpdate(id, updatedAttributes);
 
       expect(update).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
@@ -789,7 +800,7 @@ describe('Transfer Token', () => {
 
       const updatedAttributes = {
         permissions: ['push', 'unknown-permission'],
-      };
+      } as any;
 
       const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
       const update = jest.fn(({ data }) => Promise.resolve(data));
@@ -798,7 +809,7 @@ describe('Transfer Token', () => {
       const load = jest.fn();
 
       global.strapi = {
-        ...getActionProvider(['push']),
+        ...getActionProvider(['push'] as any),
         query() {
           return {
             update,
@@ -813,10 +824,10 @@ describe('Transfer Token', () => {
         entityService: {
           load,
         },
-      };
+      } as any;
 
-      expect(() => transferTokenService.update(id, updatedAttributes)).rejects.toThrowError(
-        new ApplicationError(`Unknown permissions provided: unknown-permission`)
+      expect(() => tokenServiceUpdate(id, updatedAttributes)).rejects.toThrowError(
+        new errors.ApplicationError(`Unknown permissions provided: unknown-permission`)
       );
 
       expect(update).not.toHaveBeenCalled();
@@ -841,9 +852,9 @@ describe('Transfer Token', () => {
         query() {
           return { findOne };
         },
-      };
+      } as any;
 
-      const res = await transferTokenService.getByName(token.name);
+      const res = await getByName(token.name);
 
       expect(findOne).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
@@ -863,9 +874,9 @@ describe('Transfer Token', () => {
         query() {
           return { findOne };
         },
-      };
+      } as any;
 
-      const res = await transferTokenService.getByName('unexistant-name');
+      const res = await getByName('unexistant-name');
 
       expect(findOne).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),

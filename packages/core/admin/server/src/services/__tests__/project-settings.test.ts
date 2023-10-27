@@ -1,11 +1,9 @@
-'use strict';
-
-const {
+import {
   parseFilesData,
   getProjectSettings,
   deleteOldFiles,
   updateProjectSettings,
-} = require('../project-settings');
+} from '../project-settings';
 
 jest.mock('fs', () => ({
   ...jest.requireActual('fs'),
@@ -24,7 +22,7 @@ global.strapi = {
   plugins: {
     upload: {
       provider: {
-        async uploadStream(file) {
+        async uploadStream(file: any) {
           file.url = `/uploads/${file.hash}`;
         },
         delete: providerDelete,
@@ -70,7 +68,7 @@ global.strapi = {
     }),
     set: storeSet,
   }),
-};
+} as any;
 
 describe('Project setting', () => {
   beforeEach(jest.clearAllMocks);
@@ -385,7 +383,7 @@ describe('Project setting', () => {
         },
       };
 
-      await updateProjectSettings({ ...body, ...files });
+      await updateProjectSettings({ ...body, ...files } as any);
 
       expect(storeSet).toBeCalledTimes(1);
       expect(storeSet).toBeCalledWith({

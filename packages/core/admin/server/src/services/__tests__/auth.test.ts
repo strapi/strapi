@@ -1,15 +1,13 @@
-'use strict';
+import _ from 'lodash';
+import { errors } from '@strapi/utils';
 
-const _ = require('lodash');
-const { ApplicationError } = require('@strapi/utils').errors;
-
-const {
+import {
   validatePassword,
   hashPassword,
   checkCredentials,
   forgotPassword,
   resetPassword,
-} = require('../auth');
+} from '../auth';
 
 describe('Auth', () => {
   describe('checkCredentials', () => {
@@ -20,7 +18,7 @@ describe('Auth', () => {
         query() {
           return { findOne };
         },
-      };
+      } as any;
 
       const input = { email: 'test@strapi.io', password: 'pcw123' };
       const res = await checkCredentials(input);
@@ -44,7 +42,7 @@ describe('Auth', () => {
         query() {
           return { findOne };
         },
-      };
+      } as any;
 
       const input = { email: 'test@strapi.io', password: 'wrong-password' };
       const res = await checkCredentials(input);
@@ -69,7 +67,7 @@ describe('Auth', () => {
         query() {
           return { findOne };
         },
-      };
+      } as any;
 
       const input = { email: 'test@strapi.io', password: 'test-password' };
       const res = await checkCredentials(input);
@@ -94,7 +92,7 @@ describe('Auth', () => {
         query() {
           return { findOne };
         },
-      };
+      } as any;
 
       const input = { email: 'test@strapi.io', password: 'test-password' };
       const res = await checkCredentials(input);
@@ -131,7 +129,7 @@ describe('Auth', () => {
         query() {
           return { findOne };
         },
-      };
+      } as any;
 
       const input = { email: 'test@strapi.io' };
       await forgotPassword(input);
@@ -154,7 +152,7 @@ describe('Auth', () => {
             },
           },
         },
-      };
+      } as any;
 
       const input = { email: 'test@strapi.io' };
       await forgotPassword(input);
@@ -185,7 +183,7 @@ describe('Auth', () => {
       global.strapi = {
         config: {
           ...config,
-          get(path, def) {
+          get(path: any, def: any) {
             return _.get(path, def);
           },
         },
@@ -194,7 +192,7 @@ describe('Auth', () => {
         },
         admin: { services: { user: { updateById }, token: { createToken } } },
         plugins: { email: { services: { email: { send, sendTemplatedEmail: send } } } },
-      };
+      } as any;
 
       const input = { email: user.email };
       await forgotPassword(input);
@@ -227,7 +225,7 @@ describe('Auth', () => {
       global.strapi = {
         config: {
           ...config,
-          get(path, def) {
+          get(path: any, def: any) {
             return _.get(path, def);
           },
         },
@@ -241,7 +239,7 @@ describe('Auth', () => {
           },
         },
         plugins: { email: { services: { email: { send, sendTemplatedEmail } } } },
-      };
+      } as any;
 
       const input = { email: user.email };
       await forgotPassword(input);
@@ -261,14 +259,14 @@ describe('Auth', () => {
         query() {
           return { findOne };
         },
-      };
+      } as any;
 
       expect.assertions(2);
 
       try {
         await resetPassword({ resetPasswordToken, password: 'Test1234' });
       } catch (e) {
-        expect(e instanceof ApplicationError).toBe(true);
+        expect(e instanceof errors.ApplicationError).toBe(true);
       }
 
       expect(findOne).toHaveBeenCalledWith({ where: { resetPasswordToken, isActive: true } });
@@ -282,14 +280,14 @@ describe('Auth', () => {
         query() {
           return { findOne };
         },
-      };
+      } as any;
 
       expect.assertions(1);
 
       try {
         await resetPassword({ resetPasswordToken, password: 'Test1234' });
       } catch (e) {
-        expect(e instanceof ApplicationError).toBe(true);
+        expect(e instanceof errors.ApplicationError).toBe(true);
       }
     });
 
@@ -305,7 +303,7 @@ describe('Auth', () => {
           return { findOne };
         },
         admin: { services: { user: { updateById } } },
-      };
+      } as any;
 
       const input = { resetPasswordToken, password: 'Test1234' };
       await resetPassword(input);

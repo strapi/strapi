@@ -244,7 +244,10 @@ const getBy = async (
     .query(TRANSFER_TOKEN_UID)
     .findOne({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: whereParams });
 
-  if (!token) return token;
+  if (!token) {
+    return token;
+  }
+
   return flattenTokenPermissions(token);
 };
 
@@ -353,7 +356,9 @@ For security reasons, prefer storing the secret in an environment variable and r
  * Flatten a token's database permissions objects to an array of strings
  */
 const flattenTokenPermissions = (token: TransferToken): TransferToken => {
-  if (!token) return token;
+  if (!token) {
+    return token;
+  }
 
   return {
     ...token,

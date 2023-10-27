@@ -1,8 +1,6 @@
-'use strict';
-
-const { ApplicationError } = require('@strapi/utils').errors;
-const createContext = require('../../../../../../test/helpers/create-context');
-const userController = require('../user');
+import { errors } from '@strapi/utils';
+import createContext from '../../../../../../../test/helpers/create-context';
+import userController from '../user';
 
 describe('User Controller', () => {
   describe('Create User', () => {
@@ -15,7 +13,7 @@ describe('User Controller', () => {
 
     test('Fails if user already exist', async () => {
       const exists = jest.fn(() => Promise.resolve(true));
-      const ctx = createContext({ body });
+      const ctx = createContext({ body }) as any;
 
       global.strapi = {
         admin: {
@@ -25,14 +23,14 @@ describe('User Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       expect.assertions(3);
 
       try {
         await userController.create(ctx);
-      } catch (e) {
-        expect(e instanceof ApplicationError).toBe(true);
+      } catch (e: any) {
+        expect(e instanceof errors.ApplicationError).toBe(true);
         expect(e.message).toEqual('Email already taken');
       }
 
@@ -44,7 +42,7 @@ describe('User Controller', () => {
       const exists = jest.fn(() => Promise.resolve(false));
       const sanitizeUser = jest.fn((user) => Promise.resolve(user));
       const created = jest.fn();
-      const ctx = createContext({ body }, { created });
+      const ctx = createContext({ body }, { created }) as any;
 
       global.strapi = {
         admin: {
@@ -56,7 +54,7 @@ describe('User Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       await userController.create(ctx);
 
@@ -72,7 +70,7 @@ describe('User Controller', () => {
       const exists = jest.fn(() => Promise.resolve(false));
       const sanitizeUser = jest.fn((user) => Promise.resolve(user));
       const created = jest.fn();
-      const ctx = createContext({ body: camelCaseBody }, { created });
+      const ctx = createContext({ body: camelCaseBody }, { created }) as any;
 
       global.strapi = {
         admin: {
@@ -84,7 +82,7 @@ describe('User Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       await userController.create(ctx);
 
@@ -111,7 +109,7 @@ describe('User Controller', () => {
     test('Find a user correctly', async () => {
       const findOne = jest.fn(() => user);
       const sanitizeUser = jest.fn((user) => user);
-      const ctx = createContext({ params: { id: user.id } });
+      const ctx = createContext({ params: { id: user.id } }) as any;
 
       global.strapi = {
         admin: {
@@ -119,7 +117,7 @@ describe('User Controller', () => {
             user: { findOne, sanitizeUser },
           },
         },
-      };
+      } as any;
 
       await userController.findOne(ctx);
 
@@ -132,7 +130,7 @@ describe('User Controller', () => {
       const fakeId = 42;
       const notFound = jest.fn();
       const findOne = jest.fn(() => Promise.resolve(null));
-      const ctx = createContext({ params: { id: fakeId } }, { notFound });
+      const ctx = createContext({ params: { id: fakeId } }, { notFound }) as any;
 
       global.strapi = {
         admin: {
@@ -140,7 +138,7 @@ describe('User Controller', () => {
             user: { findOne },
           },
         },
-      };
+      } as any;
 
       await userController.findOne(ctx);
 
@@ -182,12 +180,12 @@ describe('User Controller', () => {
       };
 
       const sanitizeUser = jest.fn((user) => user);
-      const ctx = createContext({});
+      const ctx = createContext({}) as any;
       ctx.state = state;
 
       const createPermissionsManager = jest.fn(() => ({
         ability: state.userAbility,
-        sanitizeQuery: (query) => query,
+        sanitizeQuery: (query: any) => query,
         validateQuery() {},
       }));
 
@@ -200,7 +198,7 @@ describe('User Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       await userController.find(ctx);
 
@@ -224,13 +222,13 @@ describe('User Controller', () => {
       };
 
       const sanitizeUser = jest.fn((user) => user);
-      const ctx = createContext({ query: { _q: 'foo' } });
+      const ctx = createContext({ query: { _q: 'foo' } }) as any;
 
       ctx.state = state;
 
       const createPermissionsManager = jest.fn(() => ({
         ability: state.userAbility,
-        sanitizeQuery: (query) => query,
+        sanitizeQuery: (query: any) => query,
         validateQuery() {},
       }));
 
@@ -243,7 +241,7 @@ describe('User Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       await userController.find(ctx);
 
@@ -268,7 +266,7 @@ describe('User Controller', () => {
       const notFound = jest.fn();
       const body = { username: 'Foo' };
 
-      const ctx = createContext({ params: { id: fakeId }, body }, { notFound });
+      const ctx = createContext({ params: { id: fakeId }, body }, { notFound }) as any;
 
       global.strapi = {
         admin: {
@@ -276,7 +274,7 @@ describe('User Controller', () => {
             user: { updateById },
           },
         },
-      };
+      } as any;
 
       await userController.update(ctx);
 
@@ -287,14 +285,14 @@ describe('User Controller', () => {
     test('Validation error', async () => {
       const body = { firstname: 21 };
 
-      const ctx = createContext({ params: { id: user.id }, body });
+      const ctx = createContext({ params: { id: user.id }, body }) as any;
 
       expect.assertions(2);
 
       try {
         await userController.update(ctx);
-      } catch (e) {
-        expect(e instanceof ApplicationError).toBe(true);
+      } catch (e: any) {
+        expect(e instanceof errors.ApplicationError).toBe(true);
         expect(e.message).toEqual(
           'firstname must be a `string` type, but the final value was: `21`.'
         );
@@ -306,7 +304,7 @@ describe('User Controller', () => {
       const sanitizeUser = jest.fn((user) => user);
       const body = { firstname: 'Foo' };
 
-      const ctx = createContext({ params: { id: user.id }, body });
+      const ctx = createContext({ params: { id: user.id }, body }) as any;
 
       global.strapi = {
         admin: {
@@ -314,7 +312,7 @@ describe('User Controller', () => {
             user: { updateById, sanitizeUser },
           },
         },
-      };
+      } as any;
 
       await userController.update(ctx);
 

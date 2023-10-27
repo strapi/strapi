@@ -1,10 +1,8 @@
-'use strict';
+import { AbilityBuilder, Ability } from '@casl/ability';
+import { pick } from 'lodash/fp';
+import sift from 'sift';
 
-const { AbilityBuilder, Ability } = require('@casl/ability');
-const { pick } = require('lodash/fp');
-const sift = require('sift');
-
-const createValidateHelpers = require('../permission/permissions-manager/validate');
+import createValidateHelpers from '../permission/permissions-manager/validate';
 
 const allowedOperations = [
   '$or',
@@ -23,11 +21,12 @@ const allowedOperations = [
 
 const operations = pick(allowedOperations, sift);
 
-const conditionsMatcher = (conditions) => {
+const conditionsMatcher = (conditions: any) => {
+  //@ts-expect-error
   return sift.createQueryTester(conditions, { operations });
 };
 
-const defineAbility = (register) => {
+const defineAbility = (register: any) => {
   const { can, build } = new AbilityBuilder(Ability);
 
   register(can);
@@ -77,14 +76,14 @@ describe('Permissions Manager - Validate', () => {
           },
         },
       },
-    };
+    } as any;
 
     Object.assign(
       validateHelpers,
       createValidateHelpers({
         action: 'read',
         model: fooModel,
-        ability: defineAbility((can) => can('read', 'api::foo.foo')),
+        ability: defineAbility((can: any) => can('read', 'api::foo.foo')),
       })
     );
   });
@@ -92,6 +91,7 @@ describe('Permissions Manager - Validate', () => {
   describe('Validate Input', () => {
     it('Passes valid input', async () => {
       const data = { c: 'Bar' };
+      //@ts-expect-error
       const result = await validateHelpers.validateInput(data, { subject: fooModel.uid });
 
       expect(result).toEqual({ c: 'Bar' });
@@ -100,6 +100,7 @@ describe('Permissions Manager - Validate', () => {
     it('Throws on hidden fields', async () => {
       const data = { a: 'Foo', c: 'Bar' };
       expect(async () => {
+        //@ts-expect-error
         await validateHelpers.validateInput(data, { subject: fooModel.uid });
       }).rejects.toThrow('Invalid parameter a');
     });
@@ -112,6 +113,7 @@ describe('Permissions Manager - Validate', () => {
       ['fields', 'password', { fields: ['c', 'b'] }, 'b'],
     ])('Throws on %s with %s', async (key, type, data, invalidParam) => {
       expect(async () => {
+        //@ts-expect-error
         await validateHelpers.validateQuery(data, { subject: fooModel.uid });
       }).rejects.toThrow(`Invalid parameter ${invalidParam}`);
     });

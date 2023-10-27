@@ -1,4 +1,6 @@
-'use strict';
+import passport from 'koa-passport';
+import { getPassportStrategies, init } from '../passport';
+import createLocalStrategy from '../passport/local-strategy';
 
 jest.mock('koa-passport', () => ({
   use: jest.fn(),
@@ -8,18 +10,15 @@ jest.mock('koa-passport', () => ({
 jest.mock('passport-local', () => {
   return {
     Strategy: class {
-      constructor(options, handler) {
+      options: any;
+      handler: any;
+      constructor(options: any, handler: any) {
         this.options = options;
         this.handler = handler;
       }
     },
   };
 });
-
-const passport = require('koa-passport');
-
-const { getPassportStrategies, init } = require('../passport');
-const createLocalStrategy = require('../passport/local-strategy');
 
 describe('Passport', () => {
   describe('Init', () => {
@@ -33,7 +32,7 @@ describe('Passport', () => {
             passport: { getPassportStrategies: getPassportStrategiesSpy, authEventsMapper: {} },
           },
         },
-      };
+      } as any;
 
       init();
 
@@ -55,11 +54,12 @@ describe('Passport', () => {
             },
           },
         },
-      };
+      } as any;
 
       const strategy = createLocalStrategy(strapi);
       const done = jest.fn();
 
+      //@ts-expect-error
       await strategy.handler('foo', 'bar', done);
 
       expect(done).toHaveBeenCalledWith(new Error('Bad credentials'));
@@ -77,11 +77,12 @@ describe('Passport', () => {
             },
           },
         },
-      };
+      } as any;
 
       const strategy = createLocalStrategy(strapi);
       const done = jest.fn();
 
+      //@ts-expect-error
       await strategy.handler('foo', 'bar', done);
 
       expect(done).toHaveBeenCalledWith(...args);

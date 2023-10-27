@@ -14,7 +14,7 @@ const { NotFoundError } = errors;
  * @param {string|number} roleId
  * @returns {object[]}
  */
-const getAllowedActionsForRole = async (roleId: string) => {
+const getAllowedActionsForRole = async (roleId?: string) => {
   const { actionProvider } = getService('permission');
 
   if (!isNil(roleId)) {

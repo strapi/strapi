@@ -1,6 +1,4 @@
-'use strict';
-
-const createSection = require('../permission/sections-builder/section');
+import createSection from '../permission/sections-builder/section';
 
 describe('Section', () => {
   test('Creates a new section with the correct properties', () => {

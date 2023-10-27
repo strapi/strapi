@@ -1,10 +1,8 @@
-'use strict';
-
-const { ApplicationError } = require('@strapi/utils').errors;
-const { omit } = require('lodash/fp');
-const createContext = require('../../../../../../../test/helpers/create-context');
-const constants = require('../../../services/constants');
-const transferTokenController = require('../../transfer/token');
+import { errors } from '@strapi/utils';
+import { omit } from 'lodash/fp';
+import createContext from '../../../../../../../../test/helpers/create-context';
+import constants from '../../../services/constants';
+import transferTokenController from '../../transfer/token';
 
 describe('Transfer Token Controller', () => {
   describe('Create Transfer Token', () => {
@@ -16,7 +14,7 @@ describe('Transfer Token Controller', () => {
 
     test('Fails if transfer token already exists', async () => {
       const exists = jest.fn(() => true);
-      const ctx = createContext({ body });
+      const ctx = createContext({ body }) as any;
 
       global.strapi = {
         admin: {
@@ -37,14 +35,14 @@ describe('Transfer Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       expect.assertions(3);
 
       try {
         await transferTokenController.create(ctx);
-      } catch (e) {
-        expect(e instanceof ApplicationError).toBe(true);
+      } catch (e: any) {
+        expect(e instanceof errors.ApplicationError).toBe(true);
         expect(e.message).toEqual('Name already taken');
       }
 
@@ -69,7 +67,7 @@ describe('Transfer Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       await transferTokenController.create(ctx);
 
@@ -107,7 +105,7 @@ describe('Transfer Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       await transferTokenController.create(ctx);
 
@@ -136,7 +134,7 @@ describe('Transfer Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       expect(async () => {
         await transferTokenController.create(ctx);
@@ -166,7 +164,7 @@ describe('Transfer Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       expect(async () => {
         await transferTokenController.create(ctx);
@@ -205,7 +203,7 @@ describe('Transfer Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       await transferTokenController.create(ctx);
 
@@ -234,7 +232,7 @@ describe('Transfer Token Controller', () => {
 
     test('List transfer tokens successfully', async () => {
       const list = jest.fn().mockResolvedValue(tokens);
-      const ctx = createContext({});
+      const ctx = createContext({}) as any;
 
       global.strapi = {
         admin: {
@@ -246,7 +244,7 @@ describe('Transfer Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       await transferTokenController.list(ctx);
 
@@ -278,7 +276,7 @@ describe('Transfer Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       await transferTokenController.revoke(ctx);
 
@@ -301,7 +299,7 @@ describe('Transfer Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       await transferTokenController.revoke(ctx);
 
@@ -335,7 +333,7 @@ describe('Transfer Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       await transferTokenController.regenerate(ctx);
 
@@ -360,7 +358,7 @@ describe('Transfer Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       await transferTokenController.regenerate(ctx);
 
@@ -381,7 +379,7 @@ describe('Transfer Token Controller', () => {
     test('Retrieve a transfer token successfully', async () => {
       const getById = jest.fn().mockResolvedValue(token);
       const send = jest.fn();
-      const ctx = createContext({ params: { id: token.id } }, { send });
+      const ctx = createContext({ params: { id: token.id } }, { send }) as any;
 
       global.strapi = {
         admin: {
@@ -393,7 +391,7 @@ describe('Transfer Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       await transferTokenController.getById(ctx);
 
@@ -416,7 +414,7 @@ describe('Transfer Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       await transferTokenController.getById(ctx);
 
@@ -450,14 +448,14 @@ describe('Transfer Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       expect.assertions(3);
 
       try {
         await transferTokenController.update(ctx);
-      } catch (e) {
-        expect(e instanceof ApplicationError).toBe(true);
+      } catch (e: any) {
+        expect(e instanceof errors.ApplicationError).toBe(true);
         expect(e.message).toEqual('Name already taken');
       }
 
@@ -481,7 +479,7 @@ describe('Transfer Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       await transferTokenController.update(ctx);
 
@@ -508,7 +506,7 @@ describe('Transfer Token Controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       await transferTokenController.update(ctx);
 
