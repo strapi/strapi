@@ -119,20 +119,5 @@ export const HOOKS = {
   MUTATE_SINGLE_TYPES_LINKS: 'Admin/CM/pages/App/mutate-single-types-links',
 };
 
-export const INJECTION_ZONES = {
-  admin: {
-    // Temporary injection zone, support for the react-tour plugin in foodadvisor
-    tutorials: {
-      links: [],
-    },
-  },
-  contentManager: {
-    editView: { informations: [], 'right-links': [] },
-    listView: {
-      actions: [],
-      deleteModalAdditionalInfos: [],
-      publishModalAdditionalInfos: [],
-      unpublishModalAdditionalInfos: [],
-    },
-  },
-};
+export const ACTION_SET_APP_RUNTIME_STATUS = 'StrapiAdmin/APP/SET_APP_RUNTIME_STATUS';
+export const ACTION_SET_ADMIN_PERMISSIONS = 'StrapiAdmin/App/SET_ADMIN_PERMISSIONS';

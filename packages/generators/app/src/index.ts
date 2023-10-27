@@ -54,6 +54,7 @@ export const generateNewApp = (projectDirectory: string, options: Partial<NewOpt
       '@strapi/strapi',
       '@strapi/plugin-users-permissions',
       '@strapi/plugin-i18n',
+      '@strapi/plugin-cloud',
     ],
     additionalsDependencies: {},
     useTypescript: Boolean(options.typescript),

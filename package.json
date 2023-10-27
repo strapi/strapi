@@ -69,8 +69,9 @@
     "watch": "nx run-many --target=watch --nx-ignore-cycles"
   },
   "resolutions": {
-    "@strapi/design-system": "1.13.0-typescript.1",
-    "@types/koa": "2.13.4"
+    "@strapi/design-system": "1.14.0-typescript.0",
+    "@types/koa": "2.13.4",
+    "@types/react": "18.2.7"
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",
@@ -132,7 +133,7 @@
     "typescript": "5.2.2",
     "yargs": "17.7.2"
   },
-  "packageManager": "yarn@3.6.4",
+  "packageManager": "yarn@4.0.0+sha256.6d855253732ba8d231b6cd917961654f6c8439164c962a4e355c9c58360ebe44",
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
