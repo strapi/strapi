@@ -6,7 +6,7 @@ interface StrapiMonorepo {
 }
 
 /**
- * Load information about the strpai CMS monorepo (if applicable)
+ * Load information about the strapi CMS monorepo (if applicable)
  *
  * @internal
  */
