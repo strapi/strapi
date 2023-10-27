@@ -29,6 +29,8 @@ const develop: StrapiCommand = ({ command, ctx }) => {
   command
     .command('develop')
     .alias('dev')
+    .option('-d, --debug', 'Enable debugging mode with verbose logs', false)
+    .option('--silent', "Don't log anything", false)
     .option('--polling', 'Watch for file changes in network directories', false)
     .option(
       '--no-build',
