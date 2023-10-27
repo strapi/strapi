@@ -24,7 +24,7 @@ import { Route, Switch } from 'react-router-dom';
 
 import { PrivateRoute } from './components/PrivateRoute';
 import { ADMIN_PERMISSIONS_CE, ACTION_SET_ADMIN_PERMISSIONS } from './constants';
-import { useConfiguration } from './hooks/useConfiguration';
+import { useConfiguration } from './contexts/configuration';
 import { useEnterprise } from './hooks/useEnterprise';
 // @ts-expect-error not converted yet
 import AuthPage from './pages/AuthPage';

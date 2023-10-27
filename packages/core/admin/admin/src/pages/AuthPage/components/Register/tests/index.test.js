@@ -8,14 +8,6 @@ import Register from '../index';
 
 const PASSWORD_VALID = '!Eight_8_characters!';
 
-jest.mock('../../../../../hooks/useConfiguration', () => ({
-  useConfiguration: () => ({
-    logos: {
-      auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
-    },
-  }),
-}));
-
 describe('AUTH | Register', () => {
   beforeEach(() => {
     jest.clearAllMocks();
