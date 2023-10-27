@@ -4,9 +4,9 @@
  *
  */
 
-import { Box, Flex, Typography } from '@strapi/design-system';
+import { Box, Flex, Typography, Icon } from '@strapi/design-system';
+import { Spark } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
 
 import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import { getTrad } from '../../utils/getTrad';
@@ -14,14 +14,25 @@ import { AttributeIcon, IconByType } from '../AttributeIcon';
 
 import { OptionBoxWrapper } from './OptionBoxWrapper';
 
-// TODO: Remove after the RTE Blocks Beta release
-const BetaTag = styled(Box)`
-  background-color: ${({ theme }) => theme.colors.secondary100};
-  border: ${({ theme }) => `1px solid ${theme.colors.secondary200}`};
-  border-radius: ${({ theme }) => theme.borderRadius};
-  font-size: ${({ theme }) => theme.fontSizes[0]};
-  padding: ${({ theme }) => `${2 / 16}rem ${theme.spaces[1]}`};
-`;
+// TODO: remove blocks from array on 4.16 release (after blocks stable)
+const newAttributes = ['blocks'];
+
+const NewBadge = () => (
+  <Flex grow={1} justifyContent="flex-end">
+    <Flex
+      gap={1}
+      fontSizes={0}
+      hasRadius
+      background="alternative100"
+      padding={`${2 / 16}rem ${4 / 16}rem`}
+    >
+      <Icon width={`${10 / 16}rem`} height={`${10 / 16}rem`} as={Spark} color="alternative600" />
+      <Typography textColor="alternative600" variant="sigma">
+        New
+      </Typography>
+    </Flex>
+  </Flex>
+);
 
 type AttributeOptionProps = {
   type: IconByType;
@@ -45,23 +56,13 @@ export const AttributeOption = ({ type = 'text' }: AttributeOptionProps) => {
     <OptionBoxWrapper padding={4} as="button" hasRadius type="button" onClick={handleClick}>
       <Flex>
         <AttributeIcon type={type} />
-        {/* TODO: Remove after the RTE Blocks Beta release (width) */}
         <Box paddingLeft={4} width="100%">
-          {/* TODO: Remove after the RTE Blocks Beta release (justifyContent) */}
           <Flex justifyContent="space-between">
             <Typography fontWeight="bold">
               {formatMessage({ id: getTrad(`attribute.${type}`), defaultMessage: type })}
             </Typography>
-            {/* Remove after the RTE Blocks Beta release */}
-            {type === 'blocks' && (
-              <BetaTag>
-                <Typography textColor="secondary600" variant="sigma">
-                  BETA
-                </Typography>
-              </BetaTag>
-            )}
+            {newAttributes.includes(type) && <NewBadge />}
           </Flex>
-
           <Flex>
             <Typography variant="pi" textColor="neutral600">
               {formatMessage({

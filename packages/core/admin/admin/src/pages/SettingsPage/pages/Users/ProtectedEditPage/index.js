@@ -4,7 +4,7 @@ import { LoadingIndicatorPage, useNotification, useRBAC } from '@strapi/helper-p
 import { useSelector } from 'react-redux';
 import { Redirect, useLocation } from 'react-router-dom';
 
-import { selectAdminPermissions } from '../../../../App/selectors';
+import { selectAdminPermissions } from '../../../../../selectors';
 import EditPage from '../EditPage';
 
 const ProtectedEditPage = () => {

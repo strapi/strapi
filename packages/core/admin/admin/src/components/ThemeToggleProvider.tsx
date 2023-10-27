@@ -2,19 +2,14 @@ import * as React from 'react';
 
 import { DefaultTheme } from 'styled-components';
 
-import { ThemeToggleContext, ThemeName } from '../contexts/themeToggle';
+import { ThemeToggleContext, ThemeName, NonSystemThemeName } from '../contexts/themeToggle';
 
 const THEME_KEY = 'STRAPI_THEME';
 
 const getDefaultTheme = () => {
-  const browserTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   const persistedTheme = localStorage.getItem(THEME_KEY) as ThemeName | null;
 
-  if (!persistedTheme) {
-    localStorage.setItem(THEME_KEY, browserTheme);
-  }
-
-  return persistedTheme || browserTheme;
+  return persistedTheme || 'system';
 };
 
 interface ThemeToggleProviderProps {
@@ -26,7 +21,8 @@ interface ThemeToggleProviderProps {
 }
 
 const ThemeToggleProvider = ({ children, themes }: ThemeToggleProviderProps) => {
-  const [currentTheme, setCurrentTheme] = React.useState(getDefaultTheme());
+  const [currentTheme, setCurrentTheme] = React.useState<ThemeName>(getDefaultTheme());
+  const [systemTheme, setSystemTheme] = React.useState<NonSystemThemeName>();
 
   const handleChangeTheme = React.useCallback(
     (nextTheme: ThemeName) => {
@@ -36,15 +32,33 @@ const ThemeToggleProvider = ({ children, themes }: ThemeToggleProviderProps) => 
     [setCurrentTheme]
   );
 
+  // Listen to changes in the system theme
+  React.useEffect(() => {
+    const themeWatcher = window.matchMedia('(prefers-color-scheme: dark)');
+    setSystemTheme(themeWatcher.matches ? 'dark' : 'light');
+
+    const listener = (event: MediaQueryListEvent) => {
+      setSystemTheme(event.matches ? 'dark' : 'light');
+    };
+    themeWatcher.addEventListener('change', listener);
+
+    // Remove listener on cleanup
+    return () => {
+      themeWatcher.removeEventListener('change', listener);
+    };
+  }, []);
+
   const themeValues = React.useMemo(() => {
     return {
       currentTheme,
       onChangeTheme: handleChangeTheme,
       themes,
+      systemTheme,
     };
-  }, [currentTheme, handleChangeTheme, themes]);
+  }, [currentTheme, handleChangeTheme, themes, systemTheme]);
 
   return <ThemeToggleContext.Provider value={themeValues}>{children}</ThemeToggleContext.Provider>;
 };
 
 export { ThemeToggleProvider };
+export type { ThemeToggleProviderProps };

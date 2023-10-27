@@ -1,6 +1,13 @@
 import React, { useRef, useState } from 'react';
 
-import { Button, Flex, IconButtonGroup, Option, Popover, Select } from '@strapi/design-system';
+import {
+  Button,
+  Flex,
+  IconButtonGroup,
+  SingleSelectOption,
+  Popover,
+  SingleSelect,
+} from '@strapi/design-system';
 import {
   Bold,
   BulletList,
@@ -52,16 +59,21 @@ const WysiwygNav = ({
 
   if (disabled || isPreviewMode) {
     return (
-      <Flex padding={2} background="neutral100" justifyContent="space-between">
+      <Flex
+        padding={2}
+        background="neutral100"
+        justifyContent="space-between"
+        borderRadius={`${4 / 16}rem ${4 / 16}rem 0 0`}
+      >
         <StyledFlex>
-          <Select disabled placeholder={selectPlaceholder} size="S" label={selectPlaceholder}>
-            <Option value="h1">h1</Option>
-            <Option value="h2">h2</Option>
-            <Option value="h3">h3</Option>
-            <Option value="h4">h4</Option>
-            <Option value="h5">h5</Option>
-            <Option value="h6">h6</Option>
-          </Select>
+          <SingleSelect disabled placeholder={selectPlaceholder} size="S" label={selectPlaceholder}>
+            <SingleSelectOption value="h1">h1</SingleSelectOption>
+            <SingleSelectOption value="h2">h2</SingleSelectOption>
+            <SingleSelectOption value="h3">h3</SingleSelectOption>
+            <SingleSelectOption value="h4">h4</SingleSelectOption>
+            <SingleSelectOption value="h5">h5</SingleSelectOption>
+            <SingleSelectOption value="h6">h6</SingleSelectOption>
+          </SingleSelect>
 
           <MainButtons>
             <CustomIconButton disabled label="Bold" name="Bold" icon={<Bold />} />
@@ -85,21 +97,26 @@ const WysiwygNav = ({
   }
 
   return (
-    <Flex padding={2} background="neutral100" justifyContent="space-between">
+    <Flex
+      padding={2}
+      background="neutral100"
+      justifyContent="space-between"
+      borderRadius={`${4 / 16}rem ${4 / 16}rem 0 0`}
+    >
       <StyledFlex>
-        <Select
+        <SingleSelect
           placeholder={selectPlaceholder}
           label={selectPlaceholder}
           size="S"
           onChange={(value) => onActionClick(value, editorRef)}
         >
-          <Option value="h1">h1</Option>
-          <Option value="h2">h2</Option>
-          <Option value="h3">h3</Option>
-          <Option value="h4">h4</Option>
-          <Option value="h5">h5</Option>
-          <Option value="h6">h6</Option>
-        </Select>
+          <SingleSelectOption value="h1">h1</SingleSelectOption>
+          <SingleSelectOption value="h2">h2</SingleSelectOption>
+          <SingleSelectOption value="h3">h3</SingleSelectOption>
+          <SingleSelectOption value="h4">h4</SingleSelectOption>
+          <SingleSelectOption value="h5">h5</SingleSelectOption>
+          <SingleSelectOption value="h6">h6</SingleSelectOption>
+        </SingleSelect>
 
         <MainButtons>
           <CustomIconButton

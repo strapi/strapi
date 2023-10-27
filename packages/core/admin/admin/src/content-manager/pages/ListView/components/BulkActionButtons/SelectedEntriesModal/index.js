@@ -32,7 +32,7 @@ import { useSelector } from 'react-redux';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
-import formatAPIError from '../../../../../../utils/formatAPIErrors';
+import { formatAPIErrors } from '../../../../../../utils/formatAPIErrors';
 import { getTrad, createYupSchema } from '../../../../../utils';
 import { listViewDomain } from '../../../selectors';
 import { Body } from '../../Body';
@@ -156,7 +156,9 @@ const SelectedEntriesTableContent = ({
       <Table.Body>
         {rowsToDisplay.map((row, index) => (
           <Tr key={row.id}>
-            <Body.CheckboxDataCell rowId={row.id} index={index} />
+            <Td>
+              <Body.CheckboxDataCell rowId={row.id} index={index} />
+            </Td>
             <Td>
               <Typography>{row.id}</Typography>
             </Td>
@@ -301,7 +303,7 @@ const SelectedEntriesModalContent = ({
       onError(error) {
         toggleNotification({
           type: 'warning',
-          message: formatAPIError(error),
+          message: formatAPIErrors(error),
         });
       },
     }

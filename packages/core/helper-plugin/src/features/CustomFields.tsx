@@ -85,12 +85,14 @@ export interface CustomField {
   options?: CustomFieldOptions;
 }
 
+type CustomFieldUID = `plugin::${string}.${string}` | `global::${string}`;
+
 /* -------------------------------------------------------------------------------------------------
  * Context
  * -----------------------------------------------------------------------------------------------*/
 
 interface CustomFieldsContextValue {
-  get: (uid: string) => CustomField | undefined;
+  get: (uid: CustomFieldUID) => CustomField | undefined;
   getAll: () => Record<string, CustomField>;
 }
 
@@ -128,3 +130,12 @@ const CustomFieldsProvider = ({ children, customFields }: CustomFieldsProviderPr
 const useCustomFields = () => React.useContext(CustomFieldsContext);
 
 export { CustomFieldsContext, CustomFieldsProvider, useCustomFields };
+export type {
+  CustomFieldsProviderProps,
+  CustomField,
+  CustomFieldComponents,
+  CustomFieldOptionSection,
+  CustomFieldOption,
+  CustomFieldOptions,
+  CustomFieldUID,
+};

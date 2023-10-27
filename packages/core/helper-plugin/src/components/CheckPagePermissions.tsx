@@ -3,14 +3,10 @@ import * as React from 'react';
 import { Redirect } from 'react-router-dom';
 
 import { useNotification } from '../features/Notifications';
-import { useRBACProvider } from '../features/RBAC';
+import { Permission, useRBACProvider } from '../features/RBAC';
 import { hasPermissions } from '../utils/hasPermissions';
 
 import { LoadingIndicatorPage } from './LoadingIndicatorPage';
-
-import type { domain } from '@strapi/permissions';
-
-type Permission = domain.permission.Permission;
 
 export interface CheckPagePermissionsProps {
   children: React.ReactNode;

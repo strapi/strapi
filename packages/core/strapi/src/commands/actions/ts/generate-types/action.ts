@@ -1,5 +1,5 @@
 import tsUtils from '@strapi/typescript-utils';
-import strapi from '../../../../index';
+import strapi from '../../../../Strapi';
 
 interface CmdOptions {
   debug?: boolean;

@@ -1,20 +1,39 @@
 import * as React from 'react';
 
-import type { domain } from '@strapi/permissions';
+import type { Entity } from '@strapi/types';
 import type { QueryObserverBaseResult } from 'react-query';
 
-type Permission = domain.permission.Permission;
+/**
+ * This is duplicated from the `@strapi/admin` package.
+ */
+type Permission = {
+  id?: Entity.ID;
+  action: string;
+  subject: string | null;
+  actionParameters?: object;
+  properties?: {
+    fields?: string[];
+    locales?: string[];
+    [key: string]: unknown;
+  };
+  conditions?: string[];
+};
 
 /* -------------------------------------------------------------------------------------------------
  * Context
  * -----------------------------------------------------------------------------------------------*/
 
-type RBACContextValue = {
-  allPermissions?: Permission[]; // The permissions of the current user.
-  refetchPermissions?: QueryObserverBaseResult<Permission[]>;
+export type RBACContextValue = {
+  allPermissions: Permission[]; // The permissions of the current user.
+  refetchPermissions: QueryObserverBaseResult<Permission[]>['refetch'];
 };
 
-const RBACContext: React.Context<RBACContextValue> = React.createContext({});
+const RBACContext = React.createContext<RBACContextValue>({
+  allPermissions: [],
+  refetchPermissions: async () => {
+    throw new Error('RBACContext: refetchPermissions() not implemented');
+  },
+});
 
 /**
  * @deprecated Use RBACContext instead.

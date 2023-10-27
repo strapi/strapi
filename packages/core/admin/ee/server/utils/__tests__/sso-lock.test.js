@@ -7,11 +7,9 @@ let ssoEnabled = true;
 
 jest.mock('@strapi/strapi/dist/utils/ee', () => {
   return {
-    default: {
-      features: {
-        isEnabled() {
-          return ssoEnabled;
-        },
+    features: {
+      isEnabled() {
+        return ssoEnabled;
       },
     },
   };

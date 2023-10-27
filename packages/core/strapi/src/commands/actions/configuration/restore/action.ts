@@ -2,7 +2,7 @@ import fs from 'fs';
 import _ from 'lodash';
 import type { Database } from '@strapi/database';
 
-import strapi from '../../../../index';
+import strapi from '../../../../Strapi';
 
 type Strategy = 'replace' | 'merge' | 'keep';
 

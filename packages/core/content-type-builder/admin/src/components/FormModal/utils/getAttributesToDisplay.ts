@@ -8,17 +8,17 @@ export const getAttributesToDisplay = (
 ): IconByType[][] => {
   const defaultAttributes: IconByType[] = [
     'text',
-    'email',
-    'richtext',
-    'password',
-    'blocks',
-    'number',
-    'enumeration',
-    'date',
-    'media',
     'boolean',
+    'blocks',
     'json',
+    'number',
+    'email',
+    'date',
+    'password',
+    'media',
+    'enumeration',
     'relation',
+    'richtext',
   ];
 
   const isPickingAttributeForAContentType = dataTarget === 'contentType';
@@ -28,7 +28,8 @@ export const getAttributesToDisplay = (
 
   if (isPickingAttributeForAContentType) {
     return [
-      [...defaultAttributes, 'uid'],
+      // Insert UID before the last item (richtext)
+      [...defaultAttributes.slice(0, -1), 'uid', ...defaultAttributes.slice(-1)],
       ['component', 'dynamiczone'],
     ];
   }
