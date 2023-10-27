@@ -13,12 +13,14 @@ const withDataInsertion = (editor) => {
     const pastedText = data.getData('text/plain');
 
     if (pastedText) {
-      const isValidUrl = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(pastedText);
-
-      if (isValidUrl) {
+      try {
+        // eslint-disable-next-line no-unused-vars
+        const _url = new URL(pastedText);
         insertLink(editor, { url: pastedText });
 
         return;
+      } catch (error) {
+        // continue normal data insertion
       }
     }
 

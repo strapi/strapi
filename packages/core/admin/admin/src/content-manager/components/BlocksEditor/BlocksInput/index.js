@@ -78,28 +78,19 @@ const BlocksInput = ({ disabled, placeholder }) => {
    * Modifier keyboard shortcuts
    */
   const handleKeyboardShortcuts = (event) => {
-    const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
-    const isCtrlOrCmd = isMac ? event.metaKey : event.ctrlKey;
+    const isCtrlOrCmd = event.metaKey || event.ctrlKey;
 
     if (isCtrlOrCmd) {
-      switch (event.key) {
-        case 'b':
-          modifiers.bold.handleToggle();
-          break;
-        case 'i':
-          modifiers.italic.handleToggle();
-          break;
-        case 'u':
-          modifiers.underline.handleToggle();
-          break;
-        case 'e':
-          modifiers.code.handleToggle();
-          break;
-        case 'S':
-          if (event.shiftKey) modifiers.strikethrough.handleToggle();
-          break;
-        default: // do nothing
-      }
+      Object.values(modifiers).forEach((value) => {
+        if (value.eventKey === event.key) {
+          if (event.key === 'S' && event.shiftKey) {
+            // Ctrl(Cmd) + Shift + s: strikethrough
+            value.handleToggle();
+          } else if (event.key !== 'S') {
+            value.handleToggle();
+          }
+        }
+      });
     }
   };
 

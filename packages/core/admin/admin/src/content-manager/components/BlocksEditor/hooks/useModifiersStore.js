@@ -44,6 +44,7 @@ const InlineCode = styled.code`
  * @returns {{
  *   [key: string]: {
  *     icon: IconComponent,
+ *     eventKey: string,
  *     label: {id: string, defaultMessage: string},
  *     checkIsActive: () => boolean,
  *     handleToggle: () => void,
@@ -82,6 +83,7 @@ export function useModifiersStore() {
   return {
     bold: {
       icon: Bold,
+      eventKey: 'b',
       label: { id: 'components.Blocks.modifiers.bold', defaultMessage: 'Bold' },
       checkIsActive: () => baseCheckIsActive('bold'),
       handleToggle: () => baseHandleToggle('bold'),
@@ -89,6 +91,7 @@ export function useModifiersStore() {
     },
     italic: {
       icon: Italic,
+      eventKey: 'i',
       label: { id: 'components.Blocks.modifiers.italic', defaultMessage: 'Italic' },
       checkIsActive: () => baseCheckIsActive('italic'),
       handleToggle: () => baseHandleToggle('italic'),
@@ -96,6 +99,7 @@ export function useModifiersStore() {
     },
     underline: {
       icon: Underline,
+      eventKey: 'u',
       label: { id: 'components.Blocks.modifiers.underline', defaultMessage: 'Underline' },
       checkIsActive: () => baseCheckIsActive('underline'),
       handleToggle: () => baseHandleToggle('underline'),
@@ -103,6 +107,7 @@ export function useModifiersStore() {
     },
     strikethrough: {
       icon: StrikeThrough,
+      eventKey: 'S',
       label: { id: 'components.Blocks.modifiers.strikethrough', defaultMessage: 'Strikethrough' },
       checkIsActive: () => baseCheckIsActive('strikethrough'),
       handleToggle: () => baseHandleToggle('strikethrough'),
@@ -110,6 +115,7 @@ export function useModifiersStore() {
     },
     code: {
       icon: Code,
+      eventKey: 'e',
       label: { id: 'components.Blocks.modifiers.code', defaultMessage: 'Code' },
       checkIsActive: () => baseCheckIsActive('code'),
       handleToggle: () => baseHandleToggle('code'),

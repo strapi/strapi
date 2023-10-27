@@ -101,9 +101,9 @@ const BlocksEditor = React.forwardRef(
         withHistory,
         withImages,
         withLinks,
-        withDataInsertion,
         withStrapiSchema,
-        withReact
+        withReact,
+        withDataInsertion
       )(createEditor())
     );
 
