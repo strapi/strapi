@@ -1,4 +1,4 @@
-import { ContentType } from '../types';
+import type { ContentType } from '../types';
 
 export const isAllowedContentTypesForRelations = (contentType: ContentType) => {
   return (
