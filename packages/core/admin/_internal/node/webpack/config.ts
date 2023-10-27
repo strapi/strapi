@@ -120,7 +120,7 @@ const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<Configuratio
     entry: {
       ...baseConfig.entry,
       main: [
-        `${require.resolve('webpack-hot-middleware/client')}?path=__webpack_hmr`,
+        `${require.resolve('webpack-hot-middleware/client')}?path=/__webpack_hmr`,
         ...baseConfig.entry.main,
       ],
     },

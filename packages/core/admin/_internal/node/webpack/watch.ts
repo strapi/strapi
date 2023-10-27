@@ -21,6 +21,7 @@ const watch = async (ctx: BuildContext) => {
     // @ts-ignore
     const hotMiddleware = webpackHotMiddleware(compiler, {
       log: false,
+      path: '/__webpack_hmr',
     });
 
     ctx.strapi.server.app.use((ctx, next) => {
