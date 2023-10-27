@@ -1,4 +1,4 @@
-import type { UID, Attribute, Schema } from '@strapi/types';
+import type { UID, Attribute } from '@strapi/types';
 
 export type IntlLabel = {
   id: string;
