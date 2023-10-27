@@ -1,5 +1,6 @@
 import { Strapi, Common, Documents } from '@strapi/types';
 import createDocumentService from '.';
+import createMiddlewareManager from './middlewares';
 
 /**
  * TODO:
@@ -23,42 +24,17 @@ import createDocumentService from '.';
  */
 export const createDocumentRepository = (
   strapi: Strapi,
-  { defaults = {}, parent }: { defaults?: any; parent?: Documents.Repository } = {}
+  { defaults = {} }: { defaults?: any } = {}
 ): Documents.Repository => {
-  const middlewares = {
-    // Applies to all uid's
-    global: [],
-  } as Record<string, any>;
   const documents = createDocumentService({ strapi, db: strapi.db! });
-
-  // QUESTION: Can we do this in another way
-  // eslint-disable-next-line @typescript-eslint/no-this-alias
-  const repository = this;
+  const middlewareManager = createMiddlewareManager();
 
   function create<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID
   ): Documents.RepositoryInstance<TContentTypeUID> {
     return {
-      async runMiddlewares(ctx, cb) {
-        // TODO
-        // if (parent) {
-        //   await parent.runMiddlewares(ctx, cb);
-        // }
-
-        // Get middlewares for the given uid
-        // TODO: Add global middlewares if uid is undefined
-        const contentTypeMiddlewares = middlewares[ctx.action] || [];
-
-        // Build middleware stack and run it
-        const run = contentTypeMiddlewares.reduceRight(
-          (next: any, middleware: any) => (ctx: any) => middleware(ctx, next),
-          cb
-        );
-        return run(ctx);
-      },
-
       async findOne(id, params = {}) {
-        return this.runMiddlewares(
+        return middlewareManager.run(
           {
             action: 'findOne',
             uid,
@@ -70,7 +46,7 @@ export const createDocumentRepository = (
       },
 
       async findMany(params = {}) {
-        return this.runMiddlewares(
+        return middlewareManager.run(
           {
             action: 'findMany',
             uid,
@@ -88,18 +64,20 @@ export const createDocumentRepository = (
       with(params: object) {
         return createDocumentRepository(strapi, {
           defaults: { ...defaults, ...params },
-          parent: repository,
         })(uid);
+      },
+
+      use(action, cb) {
+        middlewareManager.add(uid, action, cb);
+        return this;
       },
     };
   }
 
   Object.assign(create, {
-    use(uid: any, cb: any) {
-      if (!middlewares[uid]) {
-        middlewares[uid] = [];
-      }
-      middlewares[uid].push(cb);
+    use(action: any, cb: any) {
+      middlewareManager.add('allUIDs', action, cb);
+      return create;
     },
     // NOTE : We should do this in a different way, where lifecycles are executed for the different methods
     ...documents,

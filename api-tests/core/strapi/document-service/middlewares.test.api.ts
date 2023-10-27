@@ -30,12 +30,23 @@ describe('Document Service', () => {
   describe('Middlewares', () => {
     it('Add filters', async () => {
       strapi.documents.use('findMany', (ctx, next) => {
-        // @ts-expect-error - how do we fix this? Params should be more generic
         ctx.params.filters = { title: 'Article1-Draft-EN' };
         return next(ctx);
       });
 
       const articles = await strapi.documents('api::article.article').findMany({});
+      expect(articles).toHaveLength(1);
+    });
+  });
+
+  describe('Middleware on uid', () => {
+    it('Add filters on uid', async () => {
+      strapi.documents(ARTICLE_UID).use('findMany', (ctx, next) => {
+        ctx.params.filters = { title: 'Article1-Draft-EN' };
+        return next(ctx);
+      });
+
+      const articles = await strapi.documents(ARTICLE_UID).findMany({});
       expect(articles).toHaveLength(1);
     });
   });
