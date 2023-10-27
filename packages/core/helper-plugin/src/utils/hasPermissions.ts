@@ -3,7 +3,13 @@ import { getFetchClient } from './getFetchClient';
 import type { Permission } from '../features/RBAC';
 import type { GenericAbortSignal } from 'axios';
 
-const findMatchingPermissions = (userPermissions: Permission[], permissions: Permission[]) =>
+type PermissionToCheckAgainst = Pick<Permission, 'action' | 'subject'> &
+  Partial<Pick<Permission, 'actionParameters' | 'conditions' | 'properties'>>;
+
+const findMatchingPermissions = (
+  userPermissions: Permission[],
+  permissions: PermissionToCheckAgainst[]
+) =>
   userPermissions.reduce<Permission[]>((acc, curr) => {
     const associatedPermission = permissions.find(
       (perm) => perm.action === curr.action && perm.subject === curr.subject
@@ -42,7 +48,7 @@ const shouldCheckPermissions = (permissions: Permission[]) =>
 
 const hasPermissions = async (
   userPermissions: Permission[],
-  permissions: Permission[],
+  permissions: PermissionToCheckAgainst[],
   signal?: GenericAbortSignal
 ) => {
   if (!permissions || !permissions.length) {
@@ -82,3 +88,5 @@ export {
   formatPermissionsForRequest,
   shouldCheckPermissions,
 };
+
+export type { PermissionToCheckAgainst };
