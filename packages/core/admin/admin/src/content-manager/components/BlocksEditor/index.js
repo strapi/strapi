@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import Hint from '../Hint';
 
 import BlocksInput from './BlocksInput';
-import { withLinks, withStrapiSchema, withDataInsertion } from './plugins';
+import { withLinks, withStrapiSchema } from './plugins';
 import { BlocksToolbar } from './Toolbar';
 
 const TypographyAsterisk = styled(Typography)`
@@ -97,14 +97,7 @@ const BlocksEditor = React.forwardRef(
   ) => {
     const { formatMessage } = useIntl();
     const [editor] = React.useState(() =>
-      pipe(
-        withHistory,
-        withImages,
-        withLinks,
-        withStrapiSchema,
-        withReact,
-        withDataInsertion
-      )(createEditor())
+      pipe(withHistory, withImages, withStrapiSchema, withReact, withLinks)(createEditor())
     );
 
     const label = intlLabel.id
