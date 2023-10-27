@@ -59,7 +59,12 @@ const IconPick = ({ iconKey, name, onChange, isSelected, ariaLabel }: IconPickPr
           />
           {ariaLabel}
         </VisuallyHidden>
-        <Flex padding={2} cursor="pointer" hasRadius background={isSelected && 'primary200'}>
+        <Flex
+          padding={2}
+          cursor="pointer"
+          hasRadius
+          background={isSelected ? 'primary200' : undefined}
+        >
           <Icon as={COMPONENT_ICONS[iconKey]} color={isSelected ? 'primary600' : 'neutral300'} />
         </Flex>
       </FieldLabel>

@@ -11,7 +11,7 @@ interface RelationFormBoxProps {
   header?: string;
   isMain?: boolean;
   name: string;
-  onChange?: (value: any) => void;
+  onChange: (value: any) => void;
   oneThatIsCreatingARelationWithAnother?: string;
   target?: string;
   value?: string;

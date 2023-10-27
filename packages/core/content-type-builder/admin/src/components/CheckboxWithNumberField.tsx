@@ -62,7 +62,7 @@ export const CheckboxWithNumberField = ({
               id={name}
               name={name}
               onChange={onChange}
-              value={value === null ? '' : value} 
+              value={value === null ? '' : value}
             />
           ) : (
             <NumberInput

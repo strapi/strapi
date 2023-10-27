@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Fragment } from 'react';
 
 import { Box, Icon, TextButton } from '@strapi/design-system';
@@ -63,7 +62,9 @@ export const ContentTypeBuilderNav = () => {
                       {link.links.map((subLink: any) => (
                         <SubNavLink
                           as={NavLink}
-                          // @ts-ignore
+                          // verify if "to" is needed
+                          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                          // @ts-expect-error
                           to={subLink.to}
                           active={subLink.active}
                           key={subLink.name}
@@ -80,7 +81,8 @@ export const ContentTypeBuilderNav = () => {
 
                 return (
                   // verify if "to" is needed
-                  // @ts-ignore
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-expect-error
                   <SubNavLink as={NavLink} to={link.to} active={link.active} key={link.name}>
                     {upperFirst(formatMessage({ id: link.name, defaultMessage: link.title }))}
                   </SubNavLink>

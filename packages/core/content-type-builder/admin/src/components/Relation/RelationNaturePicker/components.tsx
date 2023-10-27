@@ -15,7 +15,7 @@ const Wrapper = styled(Box)`
   }
 `;
 
-const IconWrapper = styled(Box)`
+const IconWrapper = styled(Box)<{ isSelected: boolean }>`
   background: ${({ theme, isSelected }) => theme.colors[isSelected ? 'primary100' : 'neutral0']};
   border: 1px solid
     ${({ theme, isSelected }) => theme.colors[isSelected ? 'primary700' : 'neutral200']};

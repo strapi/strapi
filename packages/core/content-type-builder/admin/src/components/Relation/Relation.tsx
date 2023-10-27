@@ -35,11 +35,11 @@ export const Relation = ({
       <RelationNaturePicker
         naturePickerType={naturePickerType}
         oneThatIsCreatingARelationWithAnother={mainBoxHeader}
-        relationType={relationType}
+        relationType={relationType!}
         target={modifiedData.target}
       />
       <RelationFormBox
-        disabled={['oneWay', 'manyWay'].includes(relationType)}
+        disabled={['oneWay', 'manyWay'].includes(relationType!)}
         error={formErrors?.targetAttribute || null}
         name="targetAttribute"
         onChange={onChange}
