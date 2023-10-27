@@ -1,10 +1,13 @@
 import * as React from 'react';
 
-import { Box } from '@strapi/design-system';
+import { Box, Flex, Icon } from '@strapi/design-system';
+import { Drag } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { Editable, useSlate } from 'slate-react';
-import { useTheme } from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 
+import { useDragAndDrop } from '../../../hooks/useDragAndDrop';
+import { composeRefs } from '../../../utils';
 import { useBlocksStore } from '../hooks/useBlocksStore';
 import { useModifiersStore } from '../hooks/useModifiersStore';
 
@@ -16,6 +19,14 @@ const getEditorStyle = (theme) => ({
   gap: theme.spaces[2],
   height: '100%',
 });
+
+const FlexButton = styled(Flex)`
+  cursor: pointer;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.neutral200}; // TODO: confirm with UX
+  }
+`;
 
 const baseRenderLeaf = (props, modifiers) => {
   // Recursively wrap the children for each active modifier
@@ -32,11 +43,67 @@ const baseRenderLeaf = (props, modifiers) => {
   return <span {...props.attributes}>{wrappedChildren}</span>;
 };
 
+const BlockPlaceholder = () => (
+  <Box
+    paddingTop={2}
+    paddingBottom={2}
+    paddingLeft={4}
+    paddingRight={4}
+    hasRadius
+    borderStyle="dashed"
+    borderColor="primary600"
+    borderWidth="1px"
+    background="primary100"
+    height={7}
+  />
+);
+
+const DragAndDropElement = ({ children }) => {
+  const [{ handlerId, isDragging, handleKeyDown }, myRef, dropRef, dragRef] = useDragAndDrop(true, {
+    type: 'my-type',
+    // index,
+    // onMoveItem,
+  });
+
+  const composedRefs = composeRefs(myRef, dragRef);
+
+  return (
+    <Box ref={dropRef} cursor="all-scroll">
+      {isDragging ? (
+        <BlockPlaceholder />
+      ) : (
+        <Flex ref={composedRefs} data-handler-id={handlerId} gap={2}>
+          <FlexButton
+            role="button"
+            tabIndex={0}
+            aria-label="Drag"
+            onKeyDown={handleKeyDown}
+            color="neutral600"
+            alignItems="center"
+            justifyContent="center"
+            hasRadius
+            height={6}
+            width={4}
+          >
+            {/*  TODO: confirm icon with UX as in design its quite thin dots */}
+            <Icon width={3} height={3} as={Drag} color="neutral600" />
+          </FlexButton>
+          {children}
+        </Flex>
+      )}
+    </Box>
+  );
+};
+
+DragAndDropElement.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
 const baseRenderElement = (props, blocks) => {
   const blockMatch = Object.values(blocks).find((block) => block.matchNode(props.element));
   const block = blockMatch || blocks.paragraph;
 
-  return block.renderElement(props);
+  return <DragAndDropElement>{block.renderElement(props)}</DragAndDropElement>;
 };
 
 const BlocksInput = ({ disabled, placeholder }) => {
@@ -74,7 +141,7 @@ const BlocksInput = ({ disabled, placeholder }) => {
     }
   };
 
-  const handleKeyDown = (event) => {
+  const handleEditorKeyDown = (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
       handleEnter();
@@ -127,7 +194,7 @@ const BlocksInput = ({ disabled, placeholder }) => {
         style={getEditorStyle(theme)}
         renderElement={renderElement}
         renderLeaf={renderLeaf}
-        onKeyDown={handleKeyDown}
+        onKeyDown={handleEditorKeyDown}
         scrollSelectionIntoView={handleScrollSelectionIntoView}
       />
     </Box>
