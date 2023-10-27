@@ -3,7 +3,7 @@ import { createContext } from 'react';
 
 import type { SchemaType, Component } from '../types';
 import type { UID } from '@strapi/types';
-
+// TODO V5 Convert this any types to real types
 export interface CustomFieldAttributeParams {
   attributeToSet: Record<string, any>;
   forTarget: SchemaType;
