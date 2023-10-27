@@ -22,8 +22,6 @@ export default defineConfig({
       source: './ee/server/src/index.ts',
       import: './dist/ee/server/index.mjs',
       require: './dist/ee/server/index.js',
-      types: './dist/ee/server/src/index.d.ts',
-      tsconfig: './ee/server/tsconfig.build.json',
       runtime: 'node',
     },
   ],
