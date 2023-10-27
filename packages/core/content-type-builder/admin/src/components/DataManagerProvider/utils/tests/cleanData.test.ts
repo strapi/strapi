@@ -9,7 +9,6 @@ import {
 import expectedData from './expectedFormattedData';
 import { data as rawData } from './rawData';
 
-import type { Components } from '../../../../types';
 
 describe('CleanData utils', () => {
   describe('FormatComponent', () => {
