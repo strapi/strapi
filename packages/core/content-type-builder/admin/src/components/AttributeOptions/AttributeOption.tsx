@@ -19,13 +19,7 @@ const newAttributes = ['blocks'];
 
 const NewBadge = () => (
   <Flex grow={1} justifyContent="flex-end">
-    <Flex
-      gap={1}
-      fontSizes={0}
-      hasRadius
-      background="alternative100"
-      padding={`${2 / 16}rem ${4 / 16}rem`}
-    >
+    <Flex gap={1} hasRadius background="alternative100" padding={`${2 / 16}rem ${4 / 16}rem`}>
       <Icon width={`${10 / 16}rem`} height={`${10 / 16}rem`} as={Spark} color="alternative600" />
       <Typography textColor="alternative600" variant="sigma">
         New

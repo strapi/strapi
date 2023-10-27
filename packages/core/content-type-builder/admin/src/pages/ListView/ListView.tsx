@@ -172,6 +172,7 @@ const ListView = () => {
           defaultMessage: 'Build the data architecture of your content',
         })}
         navigationAction={
+          // @ts-expect-error change from Link to alternative non-deprecated component
           <Link startIcon={<ArrowLeft />} to="/plugins/content-type-builder/">
             {formatMessage({
               id: 'global.back',

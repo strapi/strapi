@@ -1,6 +1,6 @@
 import { Flex, Grid, GridItem, KeyboardNavigable } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { useCustomFields } from '@strapi/helper-plugin';
+import { useCustomFields, CustomFieldUID } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../utils';
@@ -13,7 +13,7 @@ export const CustomFieldsList = () => {
   const customFields = useCustomFields();
   // TODO change this once useCustomFields is typed (helper-plugin types are solved)
   const registeredCustomFields = Object.entries(customFields.getAll()) as [
-    string,
+    CustomFieldUID,
     CustomFieldOption
   ][];
 

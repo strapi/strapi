@@ -42,8 +42,10 @@ export const RelationFormBox = ({
           />
         )}
       </Flex>
+      {/* @ts-expect-error check if background is a valid prop */}
       <Divider background="neutral200" />
       <Box padding={4}>
+        {/* @ts-expect-error check if attribute is a necessary props */}
         <GenericInput
           disabled={disabled}
           error={error?.id || null}

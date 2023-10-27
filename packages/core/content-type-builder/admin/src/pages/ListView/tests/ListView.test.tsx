@@ -1,4 +1,3 @@
-// eslint-disable-next-line check-file/filename-naming-convention
 import { ReactNode } from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';

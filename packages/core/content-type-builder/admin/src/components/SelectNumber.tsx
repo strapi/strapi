@@ -1,9 +1,4 @@
-/**
- *
- * SelectNumber
- *
- */
-
+// TODO: change option and select with non deprecated alternative
 import { Option, Select } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 

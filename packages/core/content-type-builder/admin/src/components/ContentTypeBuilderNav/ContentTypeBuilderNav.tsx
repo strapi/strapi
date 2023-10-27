@@ -62,9 +62,7 @@ export const ContentTypeBuilderNav = () => {
                       {link.links.map((subLink: any) => (
                         <SubNavLink
                           as={NavLink}
-                          // verify if "to" is needed
-                          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                          // @ts-expect-error
+                          // @ts-expect-error verify if "to" is needed
                           to={subLink.to}
                           active={subLink.active}
                           key={subLink.name}
@@ -80,9 +78,7 @@ export const ContentTypeBuilderNav = () => {
                 }
 
                 return (
-                  // verify if "to" is needed
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-expect-error
+                  // @ts-expect-error verify if "to" is needed
                   <SubNavLink as={NavLink} to={link.to} active={link.active} key={link.name}>
                     {upperFirst(formatMessage({ id: link.name, defaultMessage: link.title }))}
                   </SubNavLink>

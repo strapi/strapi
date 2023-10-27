@@ -1,9 +1,3 @@
-/**
- *
- * AttributeOption
- *
- */
-
 import * as React from 'react';
 
 import { Box, Flex, Typography } from '@strapi/design-system';
@@ -13,6 +7,8 @@ import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import { AttributeIcon, IconByType } from '../AttributeIcon';
 
 import { OptionBoxWrapper } from './OptionBoxWrapper';
+
+import type { CustomFieldUID } from '@strapi/helper-plugin';
 
 export type CustomFieldOption = {
   name: string;
@@ -29,7 +25,7 @@ export type CustomFieldOption = {
 };
 
 type CustomFieldOptionProps = {
-  customFieldUid: string;
+  customFieldUid: CustomFieldUID;
   customField: CustomFieldOption;
 };
 

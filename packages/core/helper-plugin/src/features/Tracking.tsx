@@ -128,7 +128,8 @@ interface EventWithoutProperties {
     | 'willInstallPlugin'
     | 'willSaveComponent'
     | 'willSaveContentType'
-    | 'willSaveContentTypeLayout';
+    | 'willSaveContentTypeLayout'
+    | 'didEditFieldNameOnContentType';
   properties?: never;
 }
 
@@ -182,7 +183,7 @@ interface MediaEvents {
 interface DidSelectContentTypeFieldTypeEvent {
   name: 'didSelectContentTypeFieldType';
   properties: {
-    type: string;
+    type?: string;
   };
 }
 
@@ -213,7 +214,6 @@ interface DidAccessTokenListEvent {
     number: string;
   };
 }
-
 interface LogoEvent {
   name: 'didChangeLogo' | 'didClickResetLogo';
   properties: {
@@ -245,7 +245,8 @@ type EventsWithProperties =
   | DidSubmitWithErrorsFirstAdminEvent
   | LogoEvent
   | TokenEvents
-  | WillNavigateEvent;
+  | WillNavigateEvent
+  | DidSelectContentTypeFieldTypeEvent;
 
 export type TrackingEvent = EventWithoutProperties | EventsWithProperties;
 export interface UseTrackingReturn {

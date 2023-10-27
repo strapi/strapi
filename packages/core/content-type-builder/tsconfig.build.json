@@ -1,6 +1,6 @@
 {
   "extends": "tsconfig/client.json",
-  "include": ["./shared", "./server"],
+  "include": ["./shared", "./server", "./admin"],
   "compilerOptions": {
     "declarationDir": "./dist",
     "outDir": "./dist"

@@ -56,6 +56,7 @@ export const CheckboxWithNumberField = ({
         <Box paddingLeft={6} style={{ maxWidth: '200px' }}>
           {type === 'text' ? (
             <TextInput
+              label=""
               aria-label={label}
               disabled={disabled}
               error={errorMessage}

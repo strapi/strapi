@@ -1,9 +1,4 @@
-/**
- *
- * SelectDateType
- *
- */
-
+// TODO: change option and select with non deprecated alternative
 import { Option, Select } from '@strapi/design-system';
 import { PrimitiveType, useIntl } from 'react-intl';
 

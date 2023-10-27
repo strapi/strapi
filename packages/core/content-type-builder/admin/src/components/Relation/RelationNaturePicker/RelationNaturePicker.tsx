@@ -17,7 +17,7 @@ import { useDataManager } from '../../../hooks/useDataManager';
 import { getTrad } from '../../../utils/getTrad';
 import { ON_CHANGE_RELATION_TYPE } from '../../FormModal/constants';
 
-import { IconWrapper, InfosWrapper, Wrapper } from './components';
+import { IconWrapper, InfosWrapper, Wrapper } from './Components';
 
 const relations = {
   oneWay: OneWay,

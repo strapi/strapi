@@ -8,6 +8,7 @@ import type {
   State,
 } from '../components/FormModalNavigationProvider/FormModalNavigationProvider';
 import type { SchemaType } from '../types';
+import type { CustomFieldUID } from '@strapi/helper-plugin';
 import type { UID } from '@strapi/types';
 
 export interface FormModalNavigationContextValue {
@@ -28,7 +29,7 @@ export interface FormModalNavigationContextValue {
   actionType: string;
   attributeName: string;
   attributeType: string;
-  customFieldUid: string;
+  customFieldUid: CustomFieldUID;
   categoryName: string;
   dynamicZoneTarget: string;
   forTarget: SchemaType;
@@ -40,6 +41,5 @@ export interface FormModalNavigationContextValue {
   targetUid: UID.Any;
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+// @ts-expect-error need to pass initial value to params
 export const FormModalNavigationContext = React.createContext<FormModalNavigationContextValue>();

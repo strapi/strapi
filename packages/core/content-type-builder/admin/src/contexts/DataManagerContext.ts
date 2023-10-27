@@ -10,7 +10,7 @@ export interface CustomFieldAttributeParams {
   targetUid: UID.Any;
   initialAttribute: Record<string, any>;
 }
-interface DataManagerContextValue {
+export interface DataManagerContextValue {
   addAttribute: (
     attributeToSet: Record<string, any>,
     forTarget: SchemaType,
@@ -41,7 +41,7 @@ interface DataManagerContextValue {
   removeComponentFromDynamicZone: (dzName: string, componentToRemoveIndex: number) => void;
   setModifiedData: () => void;
   sortedContentTypesList: any[]; // Define the actual type
-  submitData: (additionalContentTypeData: Record<string, any>) => void;
+  submitData: (additionalContentTypeData?: Record<string, any>) => void;
   updateSchema: (data: Record<string, any>, schemaType: SchemaType, componentUID: UID.Any) => void;
   components: Record<UID.Component, Component>;
   componentsGroupedByCategory: Record<string, Component[]>;
@@ -59,6 +59,5 @@ interface DataManagerContextValue {
   allComponentsCategories: any[];
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+// @ts-expect-error need to pass initial value to params
 export const DataManagerContext = createContext<DataManagerContextValue>();

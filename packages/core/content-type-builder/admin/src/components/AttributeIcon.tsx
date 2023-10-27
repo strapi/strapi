@@ -1,5 +1,5 @@
 import { Box } from '@strapi/design-system';
-import { pxToRem, useCustomFields } from '@strapi/helper-plugin';
+import { pxToRem, useCustomFields, CustomFieldUID } from '@strapi/helper-plugin';
 import {
   Boolean,
   CollectionType,
@@ -65,7 +65,7 @@ export type IconByType = keyof typeof iconByTypes;
 
 type AttributeIconProps = {
   type: IconByType;
-  customField?: string | null;
+  customField?: CustomFieldUID | null;
 };
 
 export const AttributeIcon = ({ type, customField = null, ...rest }: AttributeIconProps) => {

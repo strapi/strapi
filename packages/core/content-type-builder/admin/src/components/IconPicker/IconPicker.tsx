@@ -26,7 +26,7 @@ import type { IntlLabel } from '../../types';
 
 const IconPickerWrapper = styled(Flex)`
   label {
-    ${inputFocusStyle}
+    ${inputFocusStyle()}
     border-radius: ${({ theme }) => theme.borderRadius};
     border: 1px solid ${({ theme }) => theme.colors.neutral100};
   }

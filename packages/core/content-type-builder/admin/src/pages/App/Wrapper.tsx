@@ -1,3 +1,4 @@
+// @ts-expect-error check were sizes should be imported from and defined
 import { sizes } from '@strapi/helper-plugin';
 import styled from 'styled-components';
 

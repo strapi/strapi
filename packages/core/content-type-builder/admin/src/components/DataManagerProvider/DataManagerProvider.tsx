@@ -490,7 +490,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     return <Redirect to={`/plugins/${pluginId}/content-types/${redirectEndpoint}`} />;
   }
 
-  const submitData = async (additionalContentTypeData: Record<string, any>) => {
+  const submitData = async (additionalContentTypeData?: Record<string, any>) => {
     try {
       const isCreating = get(modifiedData, [firstKeyToMainSchema, 'isTemporary'], false);
 
