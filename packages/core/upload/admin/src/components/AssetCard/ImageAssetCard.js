@@ -7,17 +7,16 @@ import { cacheBustUrl } from '../../utils';
 
 import { AssetCardBase } from './AssetCardBase';
 
-export const ImageAssetCard = ({ height, width, thumbnail, size, alt, ...props }) => {
-  // Prevents the browser from caching the URL for all sizes and allow react-query to make a smooth update
-  // instead of a full refresh
-  const urlWithCacheBusting = cacheBustUrl({
+export const ImageAssetCard = ({ height, width, thumbnail, size, alt, isUrlSigned, ...props }) => {
+
+  const thumbnailUrl = isUrlSigned ? thumbnail : cacheBustUrl({
     url: thumbnail,
     timestamp: props.updatedAt,
   });
 
   return (
     <AssetCardBase {...props} subtitle={height && width && ` - ${width}✕${height}`} variant="Image">
-      <CardAsset src={urlWithCacheBusting} size={size} alt={alt} />
+      <CardAsset src={thumbnailUrl} size={size} alt={alt} />
     </AssetCardBase>
   );
 };
@@ -46,4 +45,5 @@ ImageAssetCard.propTypes = {
   selected: PropTypes.bool,
   size: PropTypes.oneOf(['S', 'M']),
   updatedAt: PropTypes.string,
+  isUrlSigned: PropTypes.bool.isRequired,
 };
