@@ -3,7 +3,6 @@ import { getFetchClient } from '@strapi/helper-plugin';
 import { createRoot } from 'react-dom/client';
 
 import { StrapiApp, StrapiAppConstructorArgs } from './StrapiApp';
-import { APIResponse } from './types/adminAPI';
 
 interface RenderAdminArgs {
   plugins: StrapiAppConstructorArgs['appPlugins'];
@@ -56,7 +55,7 @@ const renderAdmin = async (mountNode: HTMLElement | null, { plugins }: RenderAdm
       data: {
         data: { isEE, features, flags },
       },
-    } = await get<APIResponse<ProjectType>>('/admin/project-type');
+    } = await get<{ data: ProjectType }>('/admin/project-type');
 
     window.strapi.isEE = isEE;
     window.strapi.flags = flags;

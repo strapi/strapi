@@ -47,6 +47,7 @@ import { getFullName } from '../utils/getFullName';
 // @ts-expect-error – no types available
 import { profileValidation } from './SettingsPage/pages/Users/utils/validations/users';
 
+import type { IsSSOLocked } from '../../../shared/contracts/providers';
 import type { GetMe, UpdateMe } from '../../../shared/contracts/users';
 
 const schema = yup.object().shape(profileValidation);
@@ -102,7 +103,7 @@ const ProfilePage = () => {
     async () => {
       const {
         data: { data },
-      } = await get('/admin/providers/isSSOLocked');
+      } = await get<IsSSOLocked.Response>('/admin/providers/isSSOLocked');
 
       return data;
     },
