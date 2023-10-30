@@ -1,5 +1,5 @@
 import createContext from '../../../../../../../test/helpers/create-context';
-import contentApiController from '../content-api.ts';
+import contentApiController from '../content-api';
 
 describe('Content API permissions', () => {
   const actionsMap = {
