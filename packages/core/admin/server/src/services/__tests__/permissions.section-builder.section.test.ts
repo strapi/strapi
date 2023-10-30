@@ -19,8 +19,8 @@ describe('Section', () => {
 
     const section = createSection({ handlers: [handler], matchers: [matcher] });
 
-    await section.hooks.matchers.call();
-    await section.hooks.handlers.call();
+    await section.hooks.matchers.call({});
+    await section.hooks.handlers.call({});
 
     expect(handler).toHaveBeenCalled();
     expect(matcher).toHaveBeenCalled();
@@ -35,8 +35,8 @@ describe('Section', () => {
     section.hooks.handlers.register(handler);
     section.hooks.matchers.register(matcher);
 
-    await section.hooks.matchers.call();
-    await section.hooks.handlers.call();
+    await section.hooks.matchers.call({});
+    await section.hooks.handlers.call({});
 
     expect(handler).toHaveBeenCalled();
     expect(matcher).toHaveBeenCalled();
@@ -45,7 +45,7 @@ describe('Section', () => {
   describe('appliesToAction', () => {
     test(`If there is no matcher registered, it should return false everytime`, async () => {
       const section = createSection();
-      const action = {};
+      const action = {} as any;
 
       const applies = await section.appliesToAction(action);
 
@@ -53,7 +53,7 @@ describe('Section', () => {
     });
 
     test(`If there is at least one matcher returning true, it should return true`, async () => {
-      const action = { foo: 'bar' };
+      const action = { foo: 'bar' } as any;
       const matchers = [jest.fn((a) => a.foo === 'bar'), jest.fn((a) => a.bar === 'foo')];
       const section = createSection({ matchers });
 
@@ -64,7 +64,7 @@ describe('Section', () => {
     });
 
     test('If every matcher returns other results than true, it should return false', async () => {
-      const action = { foo: 'bar' };
+      const action = { foo: 'bar' } as any;
       const matchers = [jest.fn((a) => a.foo === 'foo'), jest.fn((a) => a.bar === 'foo')];
       const section = createSection({ matchers });
 
@@ -88,7 +88,7 @@ describe('Section', () => {
 
     test('Trying to build the section without any registered matcher should return the section initial state', async () => {
       const initialStateFactory = jest.fn(() => ({ foo: 'bar' }));
-      const actions = [{ foo: 'bar' }, { bar: 'foo' }];
+      const actions = [{ foo: 'bar' }, { bar: 'foo' }] as any;
       const section = createSection({ initialStateFactory });
 
       const result = await section.build(actions);
@@ -100,7 +100,7 @@ describe('Section', () => {
     test('Trying to build the section without any registered handler should return the section initial state', async () => {
       const initialStateFactory = jest.fn(() => ({ foo: 'bar' }));
       const matchers = [jest.fn(() => true)];
-      const actions = [{ foo: 'bar' }, { bar: 'foo' }];
+      const actions = [{ foo: 'bar' }, { bar: 'foo' }] as any;
       const section = createSection({ initialStateFactory, matchers });
 
       const result = await section.build(actions);
@@ -121,7 +121,7 @@ describe('Section', () => {
           section.barfoo = 2;
         }),
       ];
-      const actions = [{ foo: 'bar' }, { bar: 'foo' }];
+      const actions = [{ foo: 'bar' }, { bar: 'foo' }] as any;
       const section = createSection({ initialStateFactory, matchers, handlers });
 
       const result = await section.build(actions);
