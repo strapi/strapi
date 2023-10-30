@@ -23,6 +23,8 @@ const localStorageMock = {
 const originalLocalStorage = window.localStorage;
 
 describe('NPS survey', () => {
+  const NPS_KEY = 'STRAPI_NPS_SURVEY_SETTINGS';
+
   beforeAll(() => {
     // @ts-expect-error we're mocking.
     window.localStorage = localStorageMock;
@@ -39,11 +41,17 @@ describe('NPS survey', () => {
 
   beforeEach(() => {
     jest.useFakeTimers();
+
+    localStorageMock.getItem.mockImplementation((key) => {
+      if (key === NPS_KEY) {
+        return { enabled: true };
+      }
+
+      return originalLocalStorage.getItem(key);
+    });
   });
 
   it('renders survey if enabled', () => {
-    localStorageMock.getItem.mockReturnValueOnce({ enabled: true });
-
     const { getByLabelText, getByText } = render(<NpsSurvey />);
 
     act(() => jest.runAllTimers());
@@ -55,7 +63,13 @@ describe('NPS survey', () => {
   });
 
   it("renders survey if settings don't exist", () => {
-    localStorageMock.getItem.mockReturnValueOnce(null);
+    localStorageMock.getItem.mockImplementation((key) => {
+      if (key === NPS_KEY) {
+        return null;
+      }
+
+      return originalLocalStorage.getItem(key);
+    });
 
     const { getByLabelText, getByText } = render(<NpsSurvey />);
 
@@ -68,15 +82,20 @@ describe('NPS survey', () => {
   });
 
   it('does not render survey if disabled', () => {
-    localStorageMock.getItem.mockReturnValueOnce({ enabled: false });
+    localStorageMock.getItem.mockImplementation((key) => {
+      if (key === NPS_KEY) {
+        return { enabled: false };
+      }
+
+      return originalLocalStorage.getItem(key);
+    });
+
     const { queryByText } = render(<NpsSurvey />);
     act(() => jest.runAllTimers());
     expect(queryByText(/not at all likely/i)).not.toBeInTheDocument();
   });
 
   it('saves user response', async () => {
-    localStorageMock.getItem.mockReturnValueOnce({ enabled: true });
-
     const { getByRole, queryByText, getByText } = render(<NpsSurvey />);
 
     act(() => jest.runAllTimers());
@@ -104,8 +123,6 @@ describe('NPS survey', () => {
   it('show error message if request fails and keep survey open', async () => {
     const originalError = console.error;
     console.error = jest.fn();
-
-    localStorageMock.getItem.mockReturnValueOnce({ enabled: true });
 
     server.use(
       rest.post('https://analytics.strapi.io/submit-nps', (req, res, ctx) => {
@@ -137,8 +154,6 @@ describe('NPS survey', () => {
   });
 
   it('saves first user dismissal', async () => {
-    localStorageMock.getItem.mockReturnValueOnce({ enabled: true });
-
     const { queryByText, user, getByRole } = render(<NpsSurvey />);
 
     act(() => {
@@ -164,9 +179,13 @@ describe('NPS survey', () => {
 
   it('saves subsequent user dismissal', async () => {
     const firstDismissalDate = '2000-07-20T09:28:51.963Z';
-    localStorageMock.getItem.mockReturnValueOnce({
-      enabled: true,
-      firstDismissalDate,
+
+    localStorageMock.getItem.mockImplementation((key) => {
+      if (key === NPS_KEY) {
+        return { enabled: true, firstDismissalDate };
+      }
+
+      return originalLocalStorage.getItem(key);
     });
 
     const { user, queryByText, getByText } = render(<NpsSurvey />);
@@ -197,7 +216,13 @@ describe('NPS survey', () => {
     const withinDelay = new Date('2020-01-31');
     const beyondDelay = new Date('2020-03-31');
 
-    localStorageMock.getItem.mockReturnValue({ enabled: true, lastResponseDate: initialDate });
+    localStorageMock.getItem.mockImplementation((key) => {
+      if (key === NPS_KEY) {
+        return { enabled: true, lastResponseDate: initialDate };
+      }
+
+      return originalLocalStorage.getItem(key);
+    });
 
     jest.setSystemTime(initialDate);
 
@@ -226,11 +251,17 @@ describe('NPS survey', () => {
     const withinDelay = new Date('2020-01-04');
     const beyondDelay = new Date('2020-01-08');
 
-    localStorageMock.getItem.mockReturnValue({
-      enabled: true,
-      firstDismissalDate: initialDate,
-      lastDismissalDate: null,
-      lastResponseDate: null,
+    localStorageMock.getItem.mockImplementation((key) => {
+      if (key === NPS_KEY) {
+        return {
+          enabled: true,
+          firstDismissalDate: initialDate,
+          lastDismissalDate: null,
+          lastResponseDate: null,
+        };
+      }
+
+      return originalLocalStorage.getItem(key);
     });
 
     jest.setSystemTime(initialDate);
@@ -260,11 +291,17 @@ describe('NPS survey', () => {
     const withinDelay = new Date('2020-03-30');
     const beyondDelay = new Date('2020-04-01');
 
-    localStorageMock.getItem.mockReturnValue({
-      enabled: true,
-      firstDismissalDate: initialDate,
-      lastDismissalDate: initialDate,
-      lastResponseDate: null,
+    localStorageMock.getItem.mockImplementation((key) => {
+      if (key === NPS_KEY) {
+        return {
+          enabled: true,
+          firstDismissalDate: initialDate,
+          lastDismissalDate: initialDate,
+          lastResponseDate: null,
+        };
+      }
+
+      return originalLocalStorage.getItem(key);
     });
 
     jest.setSystemTime(initialDate);

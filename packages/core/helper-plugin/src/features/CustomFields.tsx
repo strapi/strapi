@@ -85,12 +85,14 @@ interface CustomField {
   options?: CustomFieldOptions;
 }
 
+type CustomFieldUID = `plugin::${string}.${string}` | `global::${string}`;
+
 /* -------------------------------------------------------------------------------------------------
  * Context
  * -----------------------------------------------------------------------------------------------*/
 
 interface CustomFieldsContextValue {
-  get: (uid: string) => CustomField | undefined;
+  get: (uid: CustomFieldUID) => CustomField | undefined;
   getAll: () => Record<string, CustomField>;
 }
 
@@ -132,6 +134,8 @@ export type {
   CustomFieldsProviderProps,
   CustomField,
   CustomFieldComponents,
+  CustomFieldOptionSection,
   CustomFieldOption,
   CustomFieldOptions,
+  CustomFieldUID,
 };

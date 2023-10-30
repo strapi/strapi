@@ -33,7 +33,7 @@ import { useSelector } from 'react-redux';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { selectAdminPermissions } from '../../../../App/selectors';
+import { selectAdminPermissions } from '../../../../../selectors';
 import Permissions from '../EditPage/components/Permissions';
 import { useAdminRolePermissionLayout } from '../hooks/useAdminRolePermissionLayout';
 import { useAdminRolePermissions } from '../hooks/useAdminRolePermissions';
