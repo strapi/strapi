@@ -1,19 +1,19 @@
 'use strict';
 
-const { omit } = require('lodash/fp');
-const { mapAsync } = require('@strapi/utils');
+import { omit } from 'lodash/fp';
+import { mapAsync } from '@strapi/utils';
 
-const { createStrapiInstance } = require('api-tests/strapi');
-const { createAuthRequest, createRequest } = require('api-tests/request');
-const { createTestBuilder } = require('api-tests/builder');
-const { describeOnCondition, createUtils } = require('api-tests/utils');
+import { createStrapiInstance } from 'api-tests/strapi';
+import { createAuthRequest, createRequest } from 'api-tests/request';
+import { createTestBuilder } from 'api-tests/builder';
+import { describeOnCondition, createUtils } from 'api-tests/utils';
 
-const {
+import {
   STAGE_MODEL_UID,
   WORKFLOW_MODEL_UID,
   ENTITY_STAGE_ATTRIBUTE,
   ENTITY_ASSIGNEE_ATTRIBUTE,
-} = require('../../../../packages/core/admin/ee/server/constants/workflows');
+} from '../../../../packages/core/admin/ee/server/src/constants/workflows';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -97,8 +97,10 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     // eslint-disable-next-line node/no-extraneous-require
     hasRW = require('@strapi/strapi/dist/utils/ee').features.isEnabled('review-workflows');
 
+    // @ts-expect-error - We don't have the type for this
     strapi = await createStrapiInstance({ bypassAuth: false });
     requests.admin = await createAuthRequest({ strapi });
+    // @ts-expect-error - We don't have the type for this
     requests.public = createRequest({ strapi }).setToken(await getFullAccessToken());
 
     defaultStage = await strapi.query(STAGE_MODEL_UID).create({
@@ -742,6 +744,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         roles: [role.id],
       });
 
+      // @ts-expect-error - We don't have the type for this
       restrictedRequest = await createAuthRequest({ strapi, userInfo: restrictedUserInfo });
     });
 
