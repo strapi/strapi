@@ -45,8 +45,6 @@
     "build": "run build:ts && rimraf build && node ./scripts/build.js",
     "build:measure": "run build:ts && rimraf build && cross-env MEASURE_BUILD_SPEED=true node ./scripts/build.js",
     "build:ts": "pack-up build",
-    "build:ts2": "run -T tsc -p server/tsconfig.json --outDir ./dist && run build:ts:ee",
-    "build:ts:ee": "run -T tsc -p ee/server/tsconfig.json --outDir ./dist",
     "clean": "run -T rimraf ./dist",
     "create:plugin-file": "node ./scripts/create-dev-plugins-file.js",
     "develop": "yarn create:plugin-file && yarn develop:webpack",
