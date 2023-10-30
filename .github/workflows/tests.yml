@@ -257,11 +257,10 @@ jobs:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     needs: [changes, build, typescript, unit_back, unit_front]
-    name: '[CE] API Integration (sqlite, client: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
+    name: '[CE] API Integration (sqlite, client: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
         node: [18, 20]
-        sqlite_pkg: ['better-sqlite3', 'sqlite3']
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     steps:
       - uses: actions/checkout@v4
@@ -273,10 +272,8 @@ jobs:
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - uses: ./.github/actions/run-api-tests
-        env:
-          SQLITE_PKG: ${{ matrix.sqlite_pkg }}
         with:
-          dbOptions: '--dbclient=sqlite-legacy --dbfile=./tmp/data.db'
+          dbOptions: '--dbclient=sqlite --dbfile=./tmp/data.db'
           jestOptions: '--shard=${{ matrix.shard }}'
 
   # EE
@@ -372,14 +369,13 @@ jobs:
   api_ee_sqlite:
     runs-on: ubuntu-latest
     needs: [changes, build, typescript, unit_back, unit_front]
-    name: '[EE] API Integration (sqlite, client: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
+    name: '[EE] API Integration (sqlite, client: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
         node: [18, 20]
-        sqlite_pkg: ['better-sqlite3', 'sqlite3']
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     steps:
       - uses: actions/checkout@v4
@@ -391,8 +387,6 @@ jobs:
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - uses: ./.github/actions/run-api-tests
-        env:
-          SQLITE_PKG: ${{ matrix.sqlite_pkg }}
         with:
           dbOptions: '--dbclient=sqlite --dbfile=./tmp/data.db'
           runEE: true
