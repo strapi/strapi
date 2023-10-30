@@ -82,8 +82,6 @@ class Database {
 
     this.connection = createConnection(this.config.connection, { pool: { afterCreate } });
 
-    this.dialect.initialize();
-
     this.schema = createSchemaProvider(this);
 
     this.migrations = createMigrationsProvider(this);
