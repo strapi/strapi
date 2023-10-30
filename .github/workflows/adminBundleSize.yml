@@ -31,6 +31,9 @@ jobs:
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
 
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+
       - uses: preactjs/compressed-size-action@v2
         with:
           build-script: 'build:size'
