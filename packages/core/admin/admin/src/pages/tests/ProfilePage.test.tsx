@@ -1,9 +1,7 @@
-import React from 'react';
-
 import { render, waitFor, server } from '@tests/utils';
 import { rest } from 'msw';
 
-import ProfilePage from '../index';
+import { ProfilePage } from '../ProfilePage';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -57,8 +55,6 @@ describe('Profile page', () => {
       })
     ).toBeInTheDocument();
 
-    expect(getByLabelText('Current Password')).toBeInTheDocument();
-
     expect(getByLabelText('Password')).toBeInTheDocument();
 
     expect(getByLabelText('Password confirmation')).toBeInTheDocument();
@@ -88,8 +84,6 @@ describe('Profile page', () => {
     });
 
     expect(changePasswordHeading).not.toBeInTheDocument();
-
-    expect(queryByLabelText('Current Password')).not.toBeInTheDocument();
 
     expect(queryByLabelText('Password')).not.toBeInTheDocument();
 

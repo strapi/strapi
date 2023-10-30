@@ -4,7 +4,7 @@ import * as React from 'react';
 import { configureStore } from '@reduxjs/toolkit';
 import { fixtures } from '@strapi/admin-test-utils';
 import { DesignSystemProvider, darkTheme, lightTheme } from '@strapi/design-system';
-import { NotificationsProvider, RBACContext } from '@strapi/helper-plugin';
+import { NotificationsProvider, Permission, RBACContext } from '@strapi/helper-plugin';
 import {
   renderHook as renderHookRTL,
   render as renderRTL,
@@ -87,8 +87,9 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
                             subject: null,
                             properties: {},
                             conditions: [],
+                            actionParameters: {},
                           },
-                        ],
+                        ] as Permission[],
                       }}
                     >
                       <ModelsContext.Provider value={{ refetchData: jest.fn() }}>

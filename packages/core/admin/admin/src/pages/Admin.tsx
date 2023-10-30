@@ -47,9 +47,10 @@ const InternalErrorPage = React.lazy(() =>
   }))
 );
 
-const ProfilePage = React.lazy(
-  // @ts-expect-error – No types, yet.
-  () => import('./ProfilePage')
+const ProfilePage = React.lazy(() =>
+  import('./ProfilePage').then((mod) => ({
+    default: mod.ProfilePage,
+  }))
 );
 const SettingsPage = React.lazy(() =>
   // @ts-expect-error – No types, yet.
