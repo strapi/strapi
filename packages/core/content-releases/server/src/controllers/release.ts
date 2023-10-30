@@ -14,16 +14,29 @@ const releaseController = {
       throw new ApplicationError('Content Releases is a superadmin only feature');
     }
 
-    const results = await strapi.entityService.findMany(RELEASE_MODEL_UID, {
-      populate: {
-        actions: {
-          count: true,
-        },
-      },
+    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+      ability: ctx.state.userAbility,
+      model: RELEASE_MODEL_UID,
     });
 
+    await permissionsManager.validateQuery(ctx.query);
+    const query = await permissionsManager.sanitizeQuery(ctx.query);
+
+    const { results, pagination } = await strapi.entityService.findWithRelationCountsPage(
+      RELEASE_MODEL_UID,
+      {
+        ...query,
+        populate: {
+          actions: {
+            count: true,
+          },
+        },
+      }
+    );
+
     ctx.body = {
-      data: results,
+      data: await permissionsManager.sanitizeOutput(results),
+      pagination,
     };
   },
 
@@ -42,8 +55,13 @@ const releaseController = {
 
     const release = await releaseService.create(body, { user });
 
+    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+      ability: ctx.state.userAbility,
+      model: RELEASE_MODEL_UID,
+    });
+
     ctx.body = {
-      data: release,
+      data: await permissionsManager.sanitizeOutput(release),
     };
   },
 };
