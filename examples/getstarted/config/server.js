@@ -23,7 +23,7 @@ module.exports = ({ env }) => ({
   globalProxy: env('http_proxy'),
   http: {
     serverOptions: {
-      requestTimeout: 60 * 10, // set request timeout to 10 minutes instead of default 5
+      requestTimeout: 1000 * 60 * 10, // set request timeout to 600000ms (10 minutes)
     },
   },
 });
