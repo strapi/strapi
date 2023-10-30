@@ -41,14 +41,6 @@ describe('<NoPermissions />', () => {
         color: #32324d;
       }
 
-      .c12 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #666687;
-        text-align: center;
-      }
-
       .c1 {
         background: #f6f6f9;
         padding-top: 40px;
@@ -64,21 +56,6 @@ describe('<NoPermissions />', () => {
       .c6 {
         padding-right: 56px;
         padding-left: 56px;
-      }
-
-      .c7 {
-        background: #ffffff;
-        padding: 64px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c9 {
-        padding-bottom: 24px;
-      }
-
-      .c11 {
-        padding-bottom: 16px;
       }
 
       .c2 {
@@ -113,6 +90,33 @@ describe('<NoPermissions />', () => {
         flex-direction: row;
       }
 
+      .c0:focus-visible {
+        outline: none;
+      }
+
+      .c12 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #666687;
+        text-align: center;
+      }
+
+      .c7 {
+        background: #ffffff;
+        padding: 64px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c9 {
+        padding-bottom: 24px;
+      }
+
+      .c11 {
+        padding-bottom: 16px;
+      }
+
       .c8 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -129,10 +133,6 @@ describe('<NoPermissions />', () => {
 
       .c10 svg {
         height: 5.5rem;
-      }
-
-      .c0:focus-visible {
-        outline: none;
       }
 
       <main
