@@ -24,11 +24,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   }),
 }));
 
-jest.mock('../../../../../../shared/hooks', () => ({
-  ...jest.requireActual('../../../../../../shared/hooks'),
-  useInjectionZone: () => [],
-}));
-
+jest.mock('../../../../../../shared/hooks/useInjectionZone');
 jest.mock('../SelectedEntriesModal', () => () => <div>SelectedEntriesModal</div>);
 
 const user = userEvent.setup();

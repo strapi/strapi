@@ -4,7 +4,7 @@ import type { Ability } from '@casl/ability';
 import permissionDomain, { type Permission } from '../../domain/permission';
 import { getService } from '../../utils';
 import { Action } from '../../domain/action';
-import { AdminUser } from '../../domain/user';
+import type { AdminUser } from '../../../../shared/contracts/shared';
 
 export default (params: { providers: engine.EngineParams['providers'] }) => {
   const { providers } = params;

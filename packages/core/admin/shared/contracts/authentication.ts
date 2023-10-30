@@ -50,7 +50,7 @@ export declare namespace RegistrationInfo {
 
   export interface Response {
     data: {
-      email: string;
+      email?: string;
       firstname?: string;
       lastname?: string;
     };
@@ -65,7 +65,7 @@ export declare namespace Register {
   export interface Request {
     body: {
       registrationToken: string;
-      userInfo: Pick<AdminUser, 'firstname' | 'lastname' | 'password'>;
+      userInfo: Pick<AdminUser, 'firstname' | 'lastname' | 'email' | 'password'>;
     };
   }
 

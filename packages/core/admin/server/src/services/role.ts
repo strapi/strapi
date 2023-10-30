@@ -8,7 +8,7 @@ import { generateTimestampCode, stringIncludes, hooks as hooksUtils, errors } fr
 import { Entity } from '@strapi/types';
 
 import permissionDomain, { type Permission } from '../domain/permission';
-import { AdminUser, type AdminRole } from '../domain/user';
+import type { AdminUser, AdminRole } from '../../../shared/contracts/shared';
 import type { Action } from '../domain/action';
 
 import { validatePermissionsExist } from '../validation/permission';

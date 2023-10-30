@@ -18,14 +18,18 @@ export type AdminUser = {
   firstname?: string;
   lastname?: string;
   username?: string;
-  email: string;
-  password: string;
+  email?: string;
+  password?: string;
   resetPasswordToken?: string | null;
   registrationToken?: string | null;
   isActive: boolean;
   roles: AdminRole[];
   blocked: boolean;
   preferredLanguage?: string;
+};
+
+export type AdminUserCreationPayload = Omit<AdminUser, 'roles' | 'id'> & {
+  roles: Entity.ID[];
 };
 
 export type SanitizedAdminUser = Omit<

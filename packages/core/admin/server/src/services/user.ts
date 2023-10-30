@@ -2,8 +2,14 @@
 import _ from 'lodash';
 import { defaults } from 'lodash/fp';
 import { stringIncludes, errors } from '@strapi/utils';
+import '@strapi/types';
 import { Entity } from '@strapi/types';
-import { type AdminUser, createUser, hasSuperAdminRole, AdminRole } from '../domain/user';
+import { createUser, hasSuperAdminRole } from '../domain/user';
+import type {
+  AdminUser,
+  AdminRole,
+  AdminUserCreationPayload,
+} from '../../../shared/contracts/shared';
 import { password as passwordValidator } from '../validation/common-validators';
 import { getService } from '../utils';
 import constants from './constants';
@@ -40,7 +46,7 @@ const sanitizeUser = (user: AdminUser): SanitizedAdminUser => {
  * Create and save a user in database
  * @param attributes A partial user object
  */
-const create = async (attributes: Partial<AdminUser>): Promise<AdminUser> => {
+const create = async (attributes: Partial<AdminUserCreationPayload>): Promise<AdminUser> => {
   const userInfo = {
     registrationToken: getService('token').createToken(),
     ...attributes,
@@ -66,7 +72,10 @@ const create = async (attributes: Partial<AdminUser>): Promise<AdminUser> => {
  * @param id query params to find the user to update
  * @param attributes A partial user object
  */
-const updateById = async (id: Entity.ID, attributes: Partial<AdminUser>): Promise<AdminUser> => {
+const updateById = async (
+  id: Entity.ID,
+  attributes: Partial<AdminUserCreationPayload>
+): Promise<AdminUser> => {
   // Check at least one super admin remains
   if (_.has(attributes, 'roles')) {
     const lastAdminUser = await isLastSuperAdminUser(id);
