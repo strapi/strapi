@@ -12,12 +12,12 @@ const build = async (options: BuildCLIOptions) => {
   try {
     if (typeof process.env.STRAPI_ENFORCE_SOURCEMAPS !== 'undefined') {
       options.logger.warn(
-        "[@strapi/strapi]: you've set STRAPI_ENFORCE_SOURCEMAPS, this is now deprecated. You can enable sourcemaps by passing '--sourcemaps' to the build command."
+        "[@strapi/strapi]: STRAPI_ENFORCE_SOURCEMAPS is now deprecated. You can enable sourcemaps by passing '--sourcemaps' to the build command."
       );
     }
     if (typeof options.optimization !== 'undefined' && options.optimization !== true) {
       options.logger.warn(
-        "[@strapi/strapi]: you've set the optimization argument, this is now deprecated. Use '--minifiy' instead."
+        "[@strapi/strapi]: The optimization argument is now deprecated. Use '--minify' instead."
       );
     }
 

@@ -97,7 +97,7 @@ async function watchAdmin({ browser, open, polling }) {
   console.warn(
     [
       "[@strapi/admin]: the watchAdmin api exported from this package is now deprecated. We don't plan to expose this for public consumption and this will be removed in V5.",
-      "This command is also now longer necessary, we now inject the admin's dev server as a middleware to the strapi server. This is why we're about to start a strapi instance for you.",
+      "This command is no longer necessary, the admin's dev server is now injected as a middleware to the strapi server. This is why we're about to start a strapi instance for you.",
     ].join(os.EOL)
   );
 

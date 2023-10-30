@@ -8,7 +8,7 @@ tags:
 
 ## How it works
 
-The develop command set's itself up much like the [build](build) command. Once we've injected our middlewares we load the strapi instance and then generate the types based off the user's instance as well as potentially compiling any TS server code if we're in a TS project. The final step is to watch the project directory so we can restart the strapi instance in real-time as a user is developing their project & being the actual strapi instance.
+The develop command sets itself up much like the [build](build) command. Once we've injected our middlewares, we load the strapi instance and then generate the types based off the user's instance as well as potentially compiling any TS server code if we're in a TS project. The final step is to watch the project directory so we can restart the strapi instance in real-time as a user is developing their project & being the actual strapi instance.
 
 ## CLI Usage
 

@@ -24,6 +24,8 @@ import generateTemplates from './actions/templates/generate/command';
 import generateTsTypes from './actions/ts/generate-types/command';
 import uninstallCommand from './actions/uninstall/command';
 import versionCommand from './actions/version/command';
+import watchAdminCommand from './actions/watch-admin/command';
+
 import buildPluginCommand from './actions/plugin/build-command/command';
 import watchPluginCommand from './actions/plugin/watch/command';
 
@@ -56,6 +58,7 @@ const strapiCommands = {
   generateTsTypes,
   uninstallCommand,
   versionCommand,
+  watchAdminCommand,
   /**
    * Plugins
    */

@@ -20,6 +20,12 @@
     }
   ],
   "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "source": "./index.js",
+      "require": "./index.js",
+      "default": "./index.js"
+    },
     "./strapi-admin": {
       "types": "./dist/admin/src/index.d.ts",
       "source": "./admin/src/index.ts",

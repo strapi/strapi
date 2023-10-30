@@ -12,7 +12,7 @@ const develop = async (options: DevelopCLIOptions) => {
   try {
     if (typeof options.browser !== 'undefined') {
       options.logger.warn(
-        "[@strapi/strapi]: you've set the browser argument, this is now deprecated. Use '--open' instead."
+        "[@strapi/strapi]: The browser argument, this is now deprecated. Use '--open' instead."
       );
     }
 
