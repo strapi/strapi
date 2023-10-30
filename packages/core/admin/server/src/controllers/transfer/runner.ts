@@ -25,7 +25,10 @@ const verify = async (ctx: any, scope: any) => {
   await dataTransferAuthStrategy.verify(auth, { scope });
 };
 
-export = {
-  push: createPushController({ verify }),
-  pull: createPullController({ verify }),
+export const push = createPushController({ verify });
+export const pull = createPullController({ verify });
+
+export default {
+  push,
+  pull,
 };

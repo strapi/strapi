@@ -19,7 +19,21 @@
       "url": "https://strapi.io"
     }
   ],
-  "main": "index.js",
+  "exports": {
+    ".": {
+      "source": "./index.js",
+      "require": "./index.js",
+      "default": "./index.js"
+    },
+    "./strapi-server": {
+      "types": "./dist/server/src/index.d.ts",
+      "source": "./server/src/index.ts",
+      "require": "./strapi-server.js",
+      "default": "./strapi-server.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./index.js",
   "files": [
     "./dist",
     "./admin",
@@ -30,7 +44,7 @@
     "analyze:deps": "ANALYZE_DEPS=true webpack serve --config webpack.config.dev.js --progress profile",
     "build": "run build:ts && rimraf build && node ./scripts/build.js",
     "build:measure": "run build:ts && rimraf build && cross-env MEASURE_BUILD_SPEED=true node ./scripts/build.js",
-    "build:ts": "run -T tsc -p server/tsconfig.json --outDir ./dist/server",
+    "build:ts": "pack-up build",
     "clean": "run -T rimraf ./dist",
     "create:plugin-file": "node ./scripts/create-dev-plugins-file.js",
     "develop": "yarn create:plugin-file && yarn develop:webpack",
@@ -47,7 +61,7 @@
     "test:ts:back": "run -T tsc --noEmit -p server/tsconfig.json",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "run build:ts -w --preserveWatchOutput"
+    "watch": "pack-up watch"
   },
   "resolutions": {
     "@types/react": "18.2.7"
@@ -150,6 +164,7 @@
   },
   "devDependencies": {
     "@strapi/admin-test-utils": "4.15.0",
+    "@strapi/pack-up": "workspace:*",
     "@testing-library/dom": "9.2.0",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",

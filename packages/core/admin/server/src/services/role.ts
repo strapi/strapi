@@ -452,7 +452,7 @@ const constants = {
   superAdminCode: SUPER_ADMIN_CODE,
 };
 
-export {
+export default {
   hooks,
   sanitizeRole,
   create,
