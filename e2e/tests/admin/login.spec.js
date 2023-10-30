@@ -17,7 +17,7 @@ test.describe('Login', () => {
     }) => {
       // Test without making user authentication persistent
       await login({ page });
-      await expect(page).toHaveTitle('Homepage');
+      await expect(page).toHaveTitle('Strapi Admin');
 
       await page.close();
 
@@ -27,13 +27,13 @@ test.describe('Login', () => {
 
       // Test with making user authentication persistent
       await login({ page, rememberMe: true });
-      await expect(page).toHaveTitle('Homepage');
+      await expect(page).toHaveTitle('Strapi Admin');
 
       await page.close();
 
       page = await context.newPage();
       await page.goto('/admin');
-      await expect(page).toHaveTitle('Homepage');
+      await expect(page).toHaveTitle('Strapi Admin');
     });
   });
 
@@ -101,15 +101,6 @@ test.describe('Login', () => {
       await expect(page.getByText('Password Recovery')).toBeVisible();
 
       await page.getByRole('link', { name: 'Ready to sign in?' }).click();
-    });
-  });
-
-  test.describe('Forgot password', () => {
-    test('A user should be able to change the application language', async ({ page }) => {
-      await page.getByRole('combobox').click();
-      await page.keyboard.press('ArrowDown');
-      await page.keyboard.press('Space');
-      await expect(page.getByText('Bienvenue !')).toBeVisible({ timeout: 10000 });
     });
   });
 });

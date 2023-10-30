@@ -22,7 +22,7 @@ export default {
           defaultMessage: name,
         },
         Component: async () => {
-          const { App } = await import(/* webpackChunkName: "strapi-plugin-cloud" */ './pages/App');
+          const { App } = await import('./pages/App');
 
           return App;
         },
