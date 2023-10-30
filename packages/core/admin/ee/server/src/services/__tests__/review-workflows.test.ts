@@ -1,7 +1,6 @@
-'use strict';
-
-const reviewWorkflowsServiceFactory = require('../review-workflows/review-workflows');
-const { ENTITY_STAGE_ATTRIBUTE, ENTITY_ASSIGNEE_ATTRIBUTE } = require('../../constants/workflows');
+import { LoadedStrapi } from '@strapi/types';
+import reviewWorkflowsServiceFactory from '../review-workflows/review-workflows';
+import { ENTITY_STAGE_ATTRIBUTE, ENTITY_ASSIGNEE_ATTRIBUTE } from '../../constants/workflows';
 
 const workflowMock = {
   id: 1,
@@ -34,7 +33,7 @@ const queryMock = {
   findOne: jest.fn(),
 };
 
-const contentTypesMock = {
+const contentTypesMock: Record<string, any> = {
   test1: {
     options: {},
     attributes: {},
@@ -80,7 +79,7 @@ const strapiMock = {
   container: containerMock,
   hook: hookMock,
   query: jest.fn(() => queryMock),
-  service(serviceName) {
+  service(serviceName: string) {
     switch (serviceName) {
       case 'admin::stages':
         return stagesServiceMock;
@@ -95,7 +94,7 @@ const strapiMock = {
   webhookStore: {
     addAllowedEvent: jest.fn(),
   },
-};
+} as unknown as LoadedStrapi;
 
 const reviewWorkflowsService = reviewWorkflowsServiceFactory({ strapi: strapiMock });
 
@@ -114,6 +113,7 @@ describe('Review workflows service', () => {
       expect(workflowsServiceMock.create).toBeCalled();
     });
     test('With a workflow in DB', async () => {
+      // @ts-expect-error - mock
       workflowsServiceMock.count.mockResolvedValue(1);
       await reviewWorkflowsService.bootstrap();
 
@@ -124,6 +124,7 @@ describe('Review workflows service', () => {
       expect(workflowsServiceMock.create).not.toBeCalled();
     });
     test('With stages in DB', async () => {
+      // @ts-expect-error - mock
       stagesServiceMock.count.mockResolvedValue(5);
       await reviewWorkflowsService.bootstrap();
 

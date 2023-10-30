@@ -1,23 +1,23 @@
-'use strict';
+import EE from '@strapi/strapi/dist/utils/ee';
+import auditLogs from '@strapi/provider-audit-logs-local';
+import { scheduleJob } from 'node-schedule';
+import createAuditLogsService from '../audit-logs';
+import createEventHub from '@strapi/strapi/dist/services/event-hub';
+import '@strapi/types';
+import { LoadedStrapi } from '@strapi/types';
 
-const { features } = require('@strapi/strapi/dist/utils/ee').default;
-const { register } = require('@strapi/provider-audit-logs-local');
-const { scheduleJob } = require('node-schedule');
-const createAuditLogsService = require('../audit-logs');
-const createEventHub = require('@strapi/strapi/dist/services/event-hub').default;
+const { register } = auditLogs;
 
-jest.mock('../../../../server/register');
+jest.mock('../../../../../server/src/register');
 
 jest.mock('../../utils', () => ({
   getService: jest.fn().mockReturnValue({}),
 }));
 
 jest.mock('@strapi/strapi/dist/utils/ee', () => ({
-  default: {
-    features: {
-      isEnabled: jest.fn(),
-      get: jest.fn(),
-    },
+  features: {
+    isEnabled: jest.fn(),
+    get: jest.fn(),
   },
 }));
 
@@ -28,6 +28,8 @@ jest.mock('@strapi/provider-audit-logs-local', () => ({
 jest.mock('node-schedule', () => ({
   scheduleJob: jest.fn(),
 }));
+
+// import eeAdminRegister from '../../register';
 
 describe('Audit logs service', () => {
   afterEach(() => {
@@ -40,11 +42,12 @@ describe('Audit logs service', () => {
 
   describe('Init with audit logs disabled', () => {
     beforeAll(() => {
-      features.isEnabled.mockReturnValue(false);
+      // @ts-expect-error - isEnabled is a mock
+      EE.features.isEnabled.mockReturnValue(false);
     });
 
     it('should not register the audit logs service when is disabled by the user', async () => {
-      const eeAdminRegister = require('../../register');
+      const eeAdminRegister = require('../../register').default;
       const mockRegister = jest.fn();
 
       const strapi = {
@@ -54,7 +57,7 @@ describe('Audit logs service', () => {
         config: {
           get: () => false,
         },
-      };
+      } as any;
 
       await eeAdminRegister({ strapi });
 
@@ -69,7 +72,7 @@ describe('Audit logs service', () => {
           register: jest.fn(),
         },
         config: {
-          get(key) {
+          get(key: any) {
             switch (key) {
               case 'admin.auditLogs.enabled':
                 return true;
@@ -87,7 +90,7 @@ describe('Audit logs service', () => {
         hook: () => ({
           register: jest.fn(),
         }),
-      };
+      } as any;
 
       // Should not subscribe to events at first
       const auditLogsService = createAuditLogsService(strapi);
@@ -95,13 +98,15 @@ describe('Audit logs service', () => {
       expect(mockSubscribe).not.toHaveBeenCalled();
 
       // Should subscribe to events when license gets enabled
-      features.isEnabled.mockImplementationOnce(() => true);
+      // @ts-expect-error - isEnabled is a mock
+      EE.features.isEnabled.mockImplementationOnce(() => true);
       await strapi.eventHub.emit('ee.enable');
       expect(mockSubscribe).toHaveBeenCalled();
 
       // Should unsubscribe to events when license gets disabled
       mockSubscribe.mockClear();
-      features.isEnabled.mockImplementationOnce(() => false);
+      // @ts-expect-error - isEnabled is a mock
+      EE.features.isEnabled.mockImplementationOnce(() => false);
       await strapi.eventHub.emit('ee.disable');
       expect(mockSubscribe).not.toHaveBeenCalled();
 
@@ -124,16 +129,19 @@ describe('Audit logs service', () => {
     const mockFindMany = jest.fn();
     const mockDeleteExpiredEvents = jest.fn();
 
-    let strapi = {};
+    let strapi = {} as LoadedStrapi;
 
     beforeAll(() => {
-      features.isEnabled.mockReturnValue(true);
+      // @ts-expect-error - isEnabled is a mock
+      EE.features.isEnabled.mockReturnValue(true);
+      // @ts-expect-error - register is a mock
       register.mockReturnValue({
         saveEvent: mockSaveEvent,
         findOne: mockFindOne,
         findMany: mockFindMany,
         deleteExpiredEvents: mockDeleteExpiredEvents,
       });
+      // @ts-expect-error - scheduleJob is a mock
       scheduleJob.mockImplementation(mockScheduleJob);
 
       strapi = {
@@ -148,21 +156,21 @@ describe('Audit logs service', () => {
           register: mockRegister,
         },
         eventHub: createEventHub(),
-        hook: () => ({ register: jest.fn() }),
+        hook: () => ({ register: () => this }),
         config: {
           get: () => 90,
         },
         db: {
-          transaction(cb) {
+          transaction(cb: any) {
             const opt = {
-              onCommit(func) {
+              onCommit(func: any) {
                 return func();
               },
             };
             return cb(opt);
           },
         },
-      };
+      } as unknown as LoadedStrapi;
     });
 
     afterEach(() => {
@@ -173,6 +181,7 @@ describe('Audit logs service', () => {
 
     beforeEach(() => {
       strapi.requestContext = {
+        // @ts-expect-error - mocking the request context
         get() {
           return {
             state: {
@@ -191,8 +200,7 @@ describe('Audit logs service', () => {
     });
 
     it('should register and init the audit logs service when registered', async () => {
-      const eeAdminRegister = require('../../register');
-
+      const eeAdminRegister = require('../../register').default;
       await eeAdminRegister({ strapi });
 
       expect(mockRegister).toHaveBeenCalledWith('audit-logs', expect.anything());
@@ -278,6 +286,7 @@ describe('Audit logs service', () => {
 
     it('should not log event if strategy is not admin', async () => {
       strapi.requestContext = {
+        // @ts-expect-error - mocking the request context
         get() {
           return {
             state: {

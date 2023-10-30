@@ -5,9 +5,20 @@ jest.mock('koa-passport', () => ({
   initialize: jest.fn(),
 }));
 
-const passport = require('koa-passport');
+import passport from 'koa-passport';
 
-const { init } = require('../../../../server/services/passport');
+let ssoEnabled = true;
+jest.mock('@strapi/strapi/dist/utils/ee', () => ({
+  features: {
+    // Disable the SSO feature
+    isEnabled: () => ssoEnabled,
+  },
+}));
+
+import passportService from '../../../../../server/src/services/passport';
+import eePassportService from '../passport';
+
+const { init } = passportService;
 
 describe('Passport', () => {
   afterEach(() => {
@@ -19,17 +30,12 @@ describe('Passport', () => {
 
   describe('Init (SSO disabled)', () => {
     beforeAll(() => {
-      jest.mock('@strapi/strapi/dist/utils/ee', () => ({
-        features: {
-          // Disable the SSO feature
-          isEnabled: (feature) => feature !== 'sso',
-        },
-      }));
+      ssoEnabled = false;
     });
 
     test('It should register the local provider in passport and init it', () => {
       const createStrategy = jest.fn(() => ({ foo: 'bar' }));
-      const { getPassportStrategies } = require('../passport');
+      const { getPassportStrategies } = eePassportService;
 
       global.strapi = {
         admin: {
@@ -46,7 +52,7 @@ describe('Passport', () => {
             ],
           }),
         },
-      };
+      } as any;
 
       init();
 
@@ -57,17 +63,12 @@ describe('Passport', () => {
 
   describe('Init (SSO enabled)', () => {
     beforeAll(() => {
-      jest.mock('@strapi/strapi/dist/utils/ee', () => ({
-        features: {
-          // Enable all the features (including SSO)
-          isEnabled: () => true,
-        },
-      }));
+      ssoEnabled = true;
     });
 
     test('It should register all providers in passport and init them', () => {
       const createStrategy = jest.fn(() => ({ foo: 'bar' }));
-      const { getPassportStrategies } = require('../passport');
+      const { getPassportStrategies } = eePassportService;
 
       global.strapi = {
         admin: {
@@ -84,7 +85,7 @@ describe('Passport', () => {
             ],
           }),
         },
-      };
+      } as any;
 
       init();
 
