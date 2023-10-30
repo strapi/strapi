@@ -1,5 +1,7 @@
+import boxen from 'boxen';
 import { build as nodeBuild, BuildOptions } from '../../node/build';
 import { handleUnexpectedError } from '../../node/core/errors';
+import chalk from 'chalk';
 
 interface BuildCLIOptions extends BuildOptions {
   /**
@@ -21,7 +23,30 @@ const build = async (options: BuildCLIOptions) => {
       );
     }
 
+    if (options.bundler !== 'webpack') {
+      options.logger.log(
+        boxen(
+          `Using ${chalk.bold(
+            chalk.underline(options.bundler)
+          )} as a bundler is considered experimental, use at your own risk. If you do experience bugs, open a new issue on Github – https://github.com/strapi/strapi/issues/new?template=BUG_REPORT.md`,
+          {
+            title: 'Warning',
+            padding: 1,
+            margin: 1,
+            align: 'center',
+            borderColor: 'yellow',
+            borderStyle: 'bold',
+          }
+        )
+      );
+    }
+
     const envSourceMaps = process.env.STRAPI_ENFORCE_SOURCEMAPS === 'true';
+
+    /**
+     * ENFORCE NODE_ENV to production when building
+     */
+    process.env.NODE_ENV = process.env.NODE_ENV ?? 'production';
 
     await nodeBuild({
       ...options,

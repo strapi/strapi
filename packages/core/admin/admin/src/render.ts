@@ -95,6 +95,10 @@ const renderAdmin = async (mountNode: HTMLElement | null, { plugins }: RenderAdm
   ) {
     module.hot.accept();
   }
+
+  if (typeof import.meta.hot?.accept === 'function') {
+    import.meta.hot.accept();
+  }
 };
 
 export { renderAdmin };

@@ -7,8 +7,8 @@ import cluster from 'node:cluster';
 import { getTimer } from './core/timer';
 import { checkRequiredDependencies } from './core/dependencies';
 import { createBuildContext } from './createBuildContext';
-import { WebpackWatcher, watch as watchWebpack } from './webpack/watch';
-import { build as buildWebpack } from './webpack/build';
+import type { WebpackWatcher } from './webpack/watch';
+import type { ViteWatcher } from './vite/watch';
 
 import EE from '@strapi/strapi/dist/utils/ee';
 import { writeStaticClientFiles } from './staticFiles';
@@ -19,6 +19,12 @@ interface DevelopOptions extends CLIContext {
    * @default false
    */
   ignorePrompts?: boolean;
+  /**
+   * Which bundler to use for building.
+   *
+   * @default webpack
+   */
+  bundler?: 'webpack' | 'vite';
   polling?: boolean;
   open?: boolean;
   watchAdmin?: boolean;
@@ -72,7 +78,14 @@ const develop = async ({
 
       EE.init(cwd);
       await writeStaticClientFiles(ctx);
-      await buildWebpack(ctx);
+
+      if (ctx.bundler === 'webpack') {
+        const { build: buildWebpack } = await import('./webpack/build');
+        await buildWebpack(ctx);
+      } else if (ctx.bundler === 'vite') {
+        const { build: buildVite } = await import('./vite/build');
+        await buildVite(ctx);
+      }
 
       const adminDuration = timer.end('creatingAdmin');
       adminSpinner.text = `Creating admin (${adminDuration}ms)`;
@@ -122,7 +135,7 @@ const develop = async ({
       serveAdminPanel: !watchAdmin,
     });
 
-    let webpackWatcher: WebpackWatcher | undefined;
+    let bundleWatcher: WebpackWatcher | ViteWatcher | undefined;
 
     /**
      * If we're watching the admin panel then we're going to attach the watcher
@@ -149,7 +162,14 @@ const develop = async ({
 
       EE.init(cwd);
       await writeStaticClientFiles(ctx);
-      webpackWatcher = await watchWebpack(ctx);
+
+      if (ctx.bundler === 'webpack') {
+        const { watch: watchWebpack } = await import('./webpack/watch');
+        bundleWatcher = await watchWebpack(ctx);
+      } else if (ctx.bundler === 'vite') {
+        const { watch: watchVite } = await import('./vite/watch');
+        bundleWatcher = await watchVite(ctx);
+      }
 
       const adminDuration = timer.end('creatingAdmin');
       adminSpinner.text = `Creating admin (${adminDuration}ms)`;
@@ -232,8 +252,8 @@ const develop = async ({
 
           await strapiInstance.destroy();
 
-          if (webpackWatcher) {
-            webpackWatcher.close();
+          if (bundleWatcher) {
+            bundleWatcher.close();
           }
           process.send?.('killed');
           break;

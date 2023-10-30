@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 import { StrapiTheme } from '@strapi/design-system';
 
 declare module 'styled-components' {
