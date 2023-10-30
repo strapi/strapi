@@ -1,13 +1,9 @@
 import _ from 'lodash';
 import { errors } from '@strapi/utils';
 
-import {
-  validatePassword,
-  hashPassword,
-  checkCredentials,
-  forgotPassword,
-  resetPassword,
-} from '../auth';
+import authService from '../auth';
+const { validatePassword, hashPassword, checkCredentials, forgotPassword, resetPassword } =
+  authService;
 
 describe('Auth', () => {
   describe('checkCredentials', () => {

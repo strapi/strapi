@@ -1,6 +1,7 @@
 import passport from 'koa-passport';
-import { getPassportStrategies, init } from '../passport';
 import createLocalStrategy from '../passport/local-strategy';
+import passportService from '../passport';
+const { getPassportStrategies, init } = passportService;
 
 jest.mock('koa-passport', () => ({
   use: jest.fn(),
