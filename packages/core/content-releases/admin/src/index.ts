@@ -10,8 +10,6 @@ const admin: Plugin.Config.AdminInput = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register(app: any) {
     if (window.strapi.features.isEnabled('cms-content-releases')) {
-      // EE Code would be here
-      // For testing if the plugin is working, add a console.log
       app.addMenuLink({
         to: `/plugins/${pluginId}`,
         icon: PaperPlane,
