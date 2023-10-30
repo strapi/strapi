@@ -30,7 +30,10 @@ const useSettingsMenu = () => {
     ceLinks,
     async () => (await import('../../../../ee/admin/src/constants')).SETTINGS_LINKS_EE(),
     {
-      combine(ceLinks, eeLinks) {
+      combine(getCeLinks, getEeLinks) {
+        const ceLinks = getCeLinks();
+        const eeLinks = getEeLinks();
+
         return {
           admin: [...eeLinks.admin, ...ceLinks.admin],
           global: [...ceLinks.global, ...eeLinks.global],
