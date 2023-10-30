@@ -23,7 +23,24 @@ const admin: Plugin.Config.AdminInput = {
           );
           return Releases;
         },
-        permissions: [], // array of permissions (object), allow a user to access a plugin depending on its permissions
+        permissions: [
+          {
+            action: 'admin::users.read',
+            subject: null,
+          },
+          {
+            action: 'admin::users.create',
+            subject: null,
+          },
+          {
+            action: 'admin::users.delete',
+            subject: null,
+          },
+          {
+            action: 'admin::users.update',
+            subject: null,
+          },
+        ],
       });
     }
   },
