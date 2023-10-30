@@ -52,14 +52,19 @@ export default class MysqlDialect extends Dialect {
     };
   }
 
-  async initialize() {
+  async initialize(nativeConnection: unknown) {
     try {
-      await this.db.connection.raw(`set session sql_require_primary_key = 0;`);
+      await this.db.connection
+        .raw(`set session sql_require_primary_key = 0;`)
+        .connection(nativeConnection);
     } catch (err) {
       // Ignore error due to lack of session permissions
     }
 
-    this.info = await this.databaseInspector.getInformation();
+    // We only need to get info on the first connection in the pool
+    if (!this.info) {
+      this.info = await this.databaseInspector.getInformation();
+    }
   }
 
   async startSchemaUpdate() {
