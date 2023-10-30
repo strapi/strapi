@@ -36,7 +36,6 @@
     "format": "yarn format:code && yarn format:other",
     "format:code": "yarn prettier:code --write",
     "format:other": "yarn prettier:other --write",
-    "generate": "plop --plopfile ./packages/generators/admin/plopfile.js",
     "lint": "nx run-many --target=lint --nx-ignore-cycles && yarn lint:other",
     "lint:fix": "nx run-many --target=lint --nx-ignore-cycles -- --fix",
     "lint:other": "npm run prettier:other -- --check",
