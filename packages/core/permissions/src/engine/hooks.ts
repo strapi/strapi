@@ -1,9 +1,10 @@
 import { cloneDeep, has, isArray } from 'lodash/fp';
 import { hooks } from '@strapi/utils';
+// eslint-disable-next-line node/no-extraneous-import
+import type { Permissions as PermissionsTypes } from '@strapi/types';
 
 import * as domain from '../domain';
 import type { Permission } from '../domain/permission';
-import type { Permissions as PermissionsTypes } from '@strapi/types';
 
 export interface PermissionEngineHooks {
   'before-format::validate.permission': ReturnType<typeof hooks.createAsyncBailHook>;
