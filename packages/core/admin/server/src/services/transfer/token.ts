@@ -109,7 +109,7 @@ const create = async (attributes: TokenUpdatePayload): Promise<TransferToken> =>
     });
 
     await Promise.all(
-      //@ts-expect-error
+      // @ts-expect-error
       uniq(attributes.permissions).map((action) =>
         strapi
           .query(TRANSFER_TOKEN_PERMISSION_UID)
@@ -167,7 +167,7 @@ const update = async (
       );
 
       const currentPermissions = map('action', currentPermissionsResult || []);
-      //@ts-expect-error
+      // @ts-expect-error
       const newPermissions = uniq(attributes.permissions);
 
       const actionsToDelete = difference(currentPermissions, newPermissions);
@@ -369,11 +369,11 @@ const flattenTokenPermissions = (token: TransferToken): TransferToken => {
 const assertTokenPermissionsValidity = (attributes: TokenUpdatePayload) => {
   const permissionService = strapi.admin.services.transfer.permission;
   const validPermissions = permissionService.providers.action.keys();
-  //@ts-expect-error
+  // @ts-expect-error
   const invalidPermissions = difference(attributes.permissions, validPermissions);
 
   if (!isEmpty(invalidPermissions)) {
-    //@ts-expect-error
+    // @ts-expect-error
     throw new ValidationError(`Unknown permissions provided: ${invalidPermissions.join(', ')}`);
   }
 };

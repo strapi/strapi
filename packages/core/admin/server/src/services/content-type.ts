@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import { uniq, startsWith, intersection } from 'lodash/fp';
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
+import { Schema, Permissions } from '@strapi/types';
 import { getService } from '../utils';
 import actionDomain from '../domain/action';
 import permissionDomain from '../domain/permission';
-import { Schema, Permissions } from '@strapi/types';
 
 interface FieldOptions {
   prefix?: string; // prefix to add to the path

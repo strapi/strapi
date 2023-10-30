@@ -1,9 +1,10 @@
 import _ from 'lodash';
 import { errors } from '@strapi/utils';
 import constants from '../constants';
+import userService from '../user';
+
 const { SUPER_ADMIN_CODE } = constants;
 
-import userService from '../user';
 const {
   create,
   updateById,

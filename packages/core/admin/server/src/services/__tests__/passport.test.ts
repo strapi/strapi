@@ -1,6 +1,7 @@
 import passport from 'koa-passport';
 import createLocalStrategy from '../passport/local-strategy';
 import passportService from '../passport';
+
 const { getPassportStrategies, init } = passportService;
 
 jest.mock('koa-passport', () => ({
@@ -12,7 +13,9 @@ jest.mock('passport-local', () => {
   return {
     Strategy: class {
       options: any;
+
       handler: any;
+
       constructor(options: any, handler: any) {
         this.options = options;
         this.handler = handler;
@@ -60,7 +63,7 @@ describe('Passport', () => {
       const strategy = createLocalStrategy(strapi);
       const done = jest.fn();
 
-      //@ts-expect-error
+      // @ts-expect-error
       await strategy.handler('foo', 'bar', done);
 
       expect(done).toHaveBeenCalledWith(new Error('Bad credentials'));
@@ -83,7 +86,7 @@ describe('Passport', () => {
       const strategy = createLocalStrategy(strapi);
       const done = jest.fn();
 
-      //@ts-expect-error
+      // @ts-expect-error
       await strategy.handler('foo', 'bar', done);
 
       expect(done).toHaveBeenCalledWith(...args);

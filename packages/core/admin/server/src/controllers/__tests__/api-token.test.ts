@@ -1,5 +1,6 @@
 import { errors } from '@strapi/utils';
 import { omit } from 'lodash/fp';
+// eslint-disable-next-line import/no-relative-packages
 import createContext from '../../../../../../../test/helpers/create-context';
 import constants from '../../services/constants';
 import apiTokenController from '../api-token';
