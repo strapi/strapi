@@ -3,7 +3,8 @@ import constants from '../constants';
 import { create as createPermission, toPermission } from '../../domain/permission';
 import createEventHub from '../../../../../strapi/dist/services/event-hub';
 
-import {
+import roleService from '../role';
+const {
   sanitizeRole,
   create,
   findOne,
@@ -19,7 +20,7 @@ import {
   addPermissions,
   assignPermissions,
   resetSuperAdminPermissions,
-} from '../role';
+} = roleService;
 
 const { SUPER_ADMIN_CODE } = constants;
 
