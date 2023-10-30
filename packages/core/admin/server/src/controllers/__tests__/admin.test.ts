@@ -1,3 +1,5 @@
+import adminController from '../admin';
+
 jest.mock('@strapi/strapi/dist/utils/ee', () => {
   const eeModule = () => false;
 
@@ -14,8 +16,6 @@ jest.mock('@strapi/strapi/dist/utils/ee', () => {
 
   return eeModule;
 });
-
-const adminController = require('../admin');
 
 describe('Admin Controller', () => {
   describe('init', () => {

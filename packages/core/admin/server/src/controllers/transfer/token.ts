@@ -1,22 +1,32 @@
+import { Context } from 'koa';
 import { trim, has } from 'lodash/fp';
 import { errors, stringEquals } from '@strapi/utils';
 import { getService } from '../../utils';
 import { token } from '../../validation/transfer';
+
+import {
+  TokenCreate,
+  TokenGetById,
+  TokenList,
+  TokenRegenerate,
+  TokenRevoke,
+  TokenUpdate,
+} from '../../../../shared/contracts/transfer';
 
 const { ApplicationError } = errors;
 
 const { validateTransferTokenCreationInput, validateTransferTokenUpdateInput } = token;
 
 export default {
-  async list(ctx: any) {
+  async list(ctx: Context) {
     const transferService = getService('transfer');
     const transferTokens = await transferService.token.list();
 
-    ctx.body = { data: transferTokens };
+    ctx.body = { data: transferTokens } satisfies TokenList.Response;
   },
 
-  async getById(ctx: any) {
-    const { id } = ctx.params;
+  async getById(ctx: Context) {
+    const { id } = ctx.params as TokenGetById.Params;
     const tokenService = getService('transfer').token;
 
     const transferToken = await tokenService.getById(id);
@@ -26,11 +36,11 @@ export default {
       return;
     }
 
-    ctx.body = { data: transferToken };
+    ctx.body = { data: transferToken } satisfies TokenGetById.Response;
   },
 
-  async create(ctx: any) {
-    const { body } = ctx.request;
+  async create(ctx: Context) {
+    const { body } = ctx.request as TokenCreate.Request;
     const { token: tokenService } = getService('transfer');
 
     /**
@@ -54,12 +64,12 @@ export default {
 
     const transferTokens = await tokenService.create(attributes);
 
-    ctx.created({ data: transferTokens });
+    ctx.created({ data: transferTokens } satisfies TokenCreate.Response);
   },
 
-  async update(ctx: any) {
-    const { body } = ctx.request;
-    const { id } = ctx.params;
+  async update(ctx: Context) {
+    const { body } = ctx.request as TokenUpdate.Request;
+    const { id } = ctx.params as TokenUpdate.Params;
     const { token: tokenService } = getService('transfer');
 
     const attributes = body;
@@ -98,20 +108,20 @@ export default {
 
     const apiToken = await tokenService.update(id, attributes);
 
-    ctx.body = { data: apiToken };
+    ctx.body = { data: apiToken } satisfies TokenUpdate.Response;
   },
 
-  async revoke(ctx: any) {
-    const { id } = ctx.params;
+  async revoke(ctx: Context) {
+    const { id } = ctx.params as TokenRevoke.Params;
     const { token: tokenService } = getService('transfer');
 
     const transferToken = await tokenService.revoke(id);
 
-    ctx.deleted({ data: transferToken });
+    ctx.deleted({ data: transferToken } satisfies TokenRevoke.Response);
   },
 
-  async regenerate(ctx: any) {
-    const { id } = ctx.params;
+  async regenerate(ctx: Context) {
+    const { id } = ctx.params as TokenRegenerate.Params;
     const { token: tokenService } = getService('transfer');
 
     const exists = await tokenService.getById(id);
@@ -122,6 +132,6 @@ export default {
 
     const accessToken = await tokenService.regenerate(id);
 
-    ctx.created({ data: accessToken });
+    ctx.created({ data: accessToken } satisfies TokenRegenerate.Response);
   },
 };

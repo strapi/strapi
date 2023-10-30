@@ -3,7 +3,8 @@ import { errors } from '@strapi/utils';
 import constants from '../constants';
 const { SUPER_ADMIN_CODE } = constants;
 
-import {
+import userService from '../user';
+const {
   create,
   updateById,
   exists,
@@ -11,17 +12,14 @@ import {
   register,
   sanitizeUser,
   findOne,
-  findOneByEmail,
   findPage,
   deleteById,
   deleteByIds,
-  countUsersWithoutRole,
   count,
-  assignARoleToAll,
   displayWarningIfUsersDontHaveRole,
   resetPasswordByEmail,
   getLanguagesInUse,
-} from '../user';
+} = userService;
 
 describe('User', () => {
   describe('sanitizeUser', () => {
