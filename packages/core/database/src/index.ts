@@ -73,7 +73,7 @@ class Database {
       nativeConnection: unknown,
       done: (error: Error | null, nativeConnection: unknown) => Promise<void>
     ) => {
-      strapi.log.debug('Knex opened new pool connection; running dialect init');
+      strapi?.log?.debug('Knex opened new pool connection; running dialect init');
       // run initialize for it since commands such as postgres SET and sqlite PRAGMA are per-connection
       this.dialect.initialize(nativeConnection).then(() => {
         return done(null, nativeConnection);
