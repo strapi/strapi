@@ -39,4 +39,4 @@ const init = () => {
   return passport.initialize();
 };
 
-export { init, getPassportStrategies, authEventsMapper };
+export default { init, getPassportStrategies, authEventsMapper };

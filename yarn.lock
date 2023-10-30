@@ -6397,6 +6397,7 @@ __metadata:
     "@strapi/design-system": 1.13.0
     "@strapi/helper-plugin": 4.14.5
     "@strapi/icons": 1.13.0
+    "@strapi/pack-up": "workspace:*"
     "@strapi/permissions": 4.14.5
     "@strapi/provider-audit-logs-local": 4.14.5
     "@strapi/types": "workspace:*"

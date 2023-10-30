@@ -1,11 +1,10 @@
 import crypto from 'crypto';
 import { omit, difference, isNil, isEmpty, map, isArray, uniq } from 'lodash/fp';
 import { errors } from '@strapi/utils';
+import type { Update } from '../../../shared/contracts/api-token';
 import constants from './constants';
 
 const { ValidationError, NotFoundError } = errors;
-
-import type { Update } from '../../../shared/contracts/api-token';
 
 type ApiTokenPermission = {
   id: number | `${number}`;

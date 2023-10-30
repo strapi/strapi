@@ -6,6 +6,16 @@ import { env } from '@strapi/utils';
 import { getService } from '../utils';
 
 export default {
+  // NOTE: Overrides CE admin controller
+  async getProjectType() {
+    const flags = strapi.config.get('admin.flags', {});
+    try {
+      return { data: { isEE: strapi.EE, features: ee.features.list(), flags } };
+    } catch (err) {
+      return { data: { isEE: false, features: [], flags } };
+    }
+  },
+
   async licenseLimitInformation() {
     const permittedSeats = ee.seats;
 

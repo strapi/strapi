@@ -1,11 +1,11 @@
-import * as role from '../services/role';
-import * as user from '../services/user';
-import * as passport from '../services/passport';
+import auth from '../services/auth';
+import role from '../services/role';
+import user from '../services/user';
+import passport from '../services/passport';
 import * as permission from '../services/permission';
 import * as contentType from '../services/content-type';
 import * as metrics from '../services/metrics';
 import * as token from '../services/token';
-import * as auth from '../services/auth';
 import * as apiToken from '../services/api-token';
 import * as projectSettings from '../services/project-settings';
 import * as transfer from '../services/transfer';

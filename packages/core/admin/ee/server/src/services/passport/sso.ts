@@ -1,6 +1,6 @@
 import '@strapi/types';
 import EE from '@strapi/strapi/dist/utils/ee';
-import { authEventsMapper } from '../../../../../server/src/services/passport';
+import passport from '../../../../../server/src/services/passport';
 import createProviderRegistry from './provider-registry';
 
 export const providerRegistry = createProviderRegistry();
@@ -33,5 +33,5 @@ export default {
   providerRegistry,
   getStrategyCallbackURL,
   syncProviderRegistryWithConfig,
-  authEventsMapper: { ...authEventsMapper, ...SSOAuthEventsMapper },
+  authEventsMapper: { ...passport.authEventsMapper, ...SSOAuthEventsMapper },
 };
