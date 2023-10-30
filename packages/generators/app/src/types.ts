@@ -45,7 +45,7 @@ export interface Configuration {
   dependencies: Record<string, string>;
 }
 
-export type ClientName = 'mysql' | 'mysql2' | 'postgres' | 'sqlite';
+export type ClientName = 'mysql' | 'postgres' | 'sqlite';
 
 export interface DatabaseInfo {
   client?: string;
