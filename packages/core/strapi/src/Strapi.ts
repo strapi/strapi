@@ -60,7 +60,6 @@ import ee from './utils/ee';
 import bootstrap from './core/bootstrap';
 import { destroyOnSignal } from './utils/signals';
 import getNumberOfDynamicZones from './services/utils/dynamic-zones';
-
 import convertCustomFieldType from './utils/convert-custom-field-type';
 
 /**

@@ -1,10 +1,8 @@
-import semver from 'semver';
 import type { Knex } from 'knex';
 
 import Dialect from '../dialect';
 import MysqlSchemaInspector from './schema-inspector';
 import MysqlDatabaseInspector from './database-inspector';
-import { MYSQL } from './constants';
 import type { Database } from '../..';
 
 import type { Information } from './database-inspector';
@@ -78,18 +76,6 @@ export default class MysqlDialect extends Dialect {
   }
 
   supportsUnsigned() {
-    return true;
-  }
-
-  supportsWindowFunctions() {
-    const isMysqlDB = !this.info?.database || this.info.database === MYSQL;
-    const isBeforeV8 =
-      !semver.valid(this.info?.version) || semver.lt(this.info?.version ?? '', '8.0.0');
-
-    if (isMysqlDB && isBeforeV8) {
-      return false;
-    }
-
     return true;
   }
 

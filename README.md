@@ -94,6 +94,7 @@ Strapi only supports maintenance and LTS versions of Node.js. Please refer to th
 
 | Strapi Version  | Recommended | Minimum |
 | --------------- | ----------- | ------- |
+| 5.0.0 and up    | 20.x        | 18.x    |
 | 4.14.5 and up   | 20.x        | 18.x    |
 | 4.11.0 and up   | 18.x        | 16.x    |
 | 4.3.9 to 4.10.x | 18.x        | 14.x    |
@@ -103,7 +104,7 @@ Strapi only supports maintenance and LTS versions of Node.js. Please refer to th
 
 | Database   | Recommended | Minimum |
 | ---------- | ----------- | ------- |
-| MySQL      | 8.0         | 5.7.8   |
+| MySQL      | 8.0         | 8.0     |
 | MariaDB    | 10.6        | 10.3    |
 | PostgreSQL | 14.0        | 11.0    |
 | SQLite     | 3           | 3       |
