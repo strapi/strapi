@@ -22,13 +22,18 @@ export type TransferToken = {
   name: string;
   description: string;
   accessKey: string;
-  lastUsedAt: number;
+  lastUsedAt?: number;
   lifespan: number;
   expiresAt: number;
   permissions: string[] | TransferTokenPermission[];
 };
 
-type SanitizedTransferToken = Omit<TransferToken, 'accessKey'>;
+export type SanitizedTransferToken = Omit<TransferToken, 'accessKey'>;
+
+export type TokenUpdatePayload = Pick<
+  TransferToken,
+  'name' | 'description' | 'lastUsedAt' | 'permissions' | 'lifespan'
+> & { accessKey?: string };
 
 const SELECT_FIELDS = [
   'id',
@@ -81,13 +86,7 @@ export const hasAccessKey = <T extends { accessKey?: string }>(
 /**
  * Create a token and its permissions
  */
-const create = async (attributes: {
-  name: string;
-  description: string;
-  lifespan: number;
-  permissions: string[];
-  accessKey?: string;
-}): Promise<TransferToken> => {
+const create = async (attributes: TokenUpdatePayload): Promise<TransferToken> => {
   const accessKey = hasAccessKey(attributes)
     ? validateAccessKey(attributes.accessKey)
     : generateRandomAccessKey();
@@ -110,6 +109,7 @@ const create = async (attributes: {
     });
 
     await Promise.all(
+      //@ts-expect-error
       uniq(attributes.permissions).map((action) =>
         strapi
           .query(TRANSFER_TOKEN_PERMISSION_UID)
@@ -138,13 +138,7 @@ const create = async (attributes: {
  */
 const update = async (
   id: string | number,
-  attributes: {
-    name: string;
-    description: string;
-    lastUsedAt: number;
-    permissions: string[];
-    lifespan: number;
-  }
+  attributes: TokenUpdatePayload
 ): Promise<SanitizedTransferToken> => {
   // retrieve token without permissions
   const originalToken = await strapi.query(TRANSFER_TOKEN_UID).findOne({ where: { id } });
@@ -173,6 +167,7 @@ const update = async (
       );
 
       const currentPermissions = map('action', currentPermissionsResult || []);
+      //@ts-expect-error
       const newPermissions = uniq(attributes.permissions);
 
       const actionsToDelete = difference(currentPermissions, newPermissions);
@@ -371,12 +366,14 @@ const flattenTokenPermissions = (token: TransferToken): TransferToken => {
 /**
  * Assert that a token's permissions are valid
  */
-const assertTokenPermissionsValidity = (attributes: { permissions: string[] }) => {
+const assertTokenPermissionsValidity = (attributes: TokenUpdatePayload) => {
   const permissionService = strapi.admin.services.transfer.permission;
   const validPermissions = permissionService.providers.action.keys();
+  //@ts-expect-error
   const invalidPermissions = difference(attributes.permissions, validPermissions);
 
   if (!isEmpty(invalidPermissions)) {
+    //@ts-expect-error
     throw new ValidationError(`Unknown permissions provided: ${invalidPermissions.join(', ')}`);
   }
 };
