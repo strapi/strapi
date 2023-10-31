@@ -140,7 +140,7 @@ describe('Content-Type', () => {
       ],
     ];
 
-    //@ts-expect-error
+    // @ts-expect-error
     test.each(testsB)('requiredOnly : %p -> %p', (existingFields: any, expectedResult: any) => {
       const res = getNestedFields(contentTypes.user as any, {
         components: strapi.components,
@@ -388,7 +388,7 @@ describe('Content-Type', () => {
       ],
     ];
 
-    //@ts-expect-error
+    // @ts-expect-error
     test.each(tests)('requiredOnly : %p -> %p', (fields, expectedFields) => {
       const res = cleanPermissionFields(
         toPermission([

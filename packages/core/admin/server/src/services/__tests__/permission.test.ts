@@ -7,6 +7,7 @@ import {
   findMany as permissionsServiceFindMany,
 } from '../permission';
 import { toPermission } from '../../domain/permission';
+// eslint-disable-next-line import/no-relative-packages
 import createEventHub from '../../../../../strapi/dist/services/event-hub';
 
 describe('Permission Service', () => {

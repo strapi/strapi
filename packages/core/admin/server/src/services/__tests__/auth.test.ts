@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { errors } from '@strapi/utils';
-
 import authService from '../auth';
+
 const { validatePassword, hashPassword, checkCredentials, forgotPassword, resetPassword } =
   authService;
 

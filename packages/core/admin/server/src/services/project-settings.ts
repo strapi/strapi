@@ -1,13 +1,12 @@
 import fs from 'fs';
 import { pick } from 'lodash';
-
-const PROJECT_SETTINGS_FILE_INPUTS = ['menuLogo', 'authLogo'] as const;
-
 import {
   GetProjectSettings,
   SettingsFile,
   UpdateProjectSettings,
 } from '../../../shared/contracts/admin';
+
+const PROJECT_SETTINGS_FILE_INPUTS = ['menuLogo', 'authLogo'] as const;
 
 const parseFilesData = async (files: SettingsFile) => {
   const formatedFilesData = {} as any;

@@ -1,6 +1,4 @@
-'use strict';
-
-const reviewWorkflowsMiddlewares = require('../review-workflows');
+import reviewWorkflowsMiddlewares from '../review-workflows';
 
 const strapiMock = {
   server: {
@@ -8,7 +6,7 @@ const strapiMock = {
       use: jest.fn(),
     },
   },
-};
+} as any;
 describe('Review workflows middlewares', () => {
   describe('contentTypeMiddleware', () => {
     test('Should add middleware to content-type-builder route', () => {
@@ -23,7 +21,7 @@ describe('Review workflows middlewares', () => {
         },
       };
       const nextMock = () => {};
-      strapiMock.server.router.use.mockImplementationOnce((route, callback) =>
+      strapiMock.server.router.use.mockImplementationOnce((route: any, callback: any) =>
         callback(ctxMock, nextMock)
       );
       reviewWorkflowsMiddlewares.contentTypeMiddleware(strapiMock);
@@ -34,6 +32,7 @@ describe('Review workflows middlewares', () => {
         expect.any(Function)
       );
       expect(ctxMock.request.body.contentType.reviewWorkflows).toBeUndefined();
+      // @ts-expect-error - options should be in contentType
       expect(ctxMock.request.body.contentType.options?.reviewWorkflows).toBe(true);
     });
   });

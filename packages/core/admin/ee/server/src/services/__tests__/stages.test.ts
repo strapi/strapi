@@ -1,5 +1,3 @@
-'use strict';
-
 jest.mock('@strapi/strapi/dist/utils/ee', () => {
   const eeModule = () => true;
 
@@ -17,10 +15,10 @@ jest.mock('@strapi/strapi/dist/utils/ee', () => {
   return eeModule;
 });
 
-const { cloneDeep } = require('lodash/fp');
-
-const stageFactory = require('../review-workflows/stages');
-const { STAGE_MODEL_UID } = require('../../constants/workflows');
+import { LoadedStrapi } from '@strapi/types';
+import { cloneDeep } from 'lodash/fp';
+import stageFactory from '../review-workflows/stages';
+import { STAGE_MODEL_UID } from '../../constants/workflows';
 
 const stageMock = {
   id: 1,
@@ -62,7 +60,7 @@ const entityServiceMock = {
   update: jest.fn((uid, id, { data }) => data),
   delete: jest.fn(() => true),
 };
-const servicesMock = {
+const servicesMock: Record<string, any> = {
   'admin::workflows': {
     findById: jest.fn(() => workflowMock),
     update: jest.fn((id, data) => data),
@@ -123,15 +121,16 @@ const strapiMock = {
       },
     },
   },
-};
+} as unknown as LoadedStrapi;
 
 const stagesService = stageFactory({ strapi: strapiMock });
 
 describe('Review workflows - Stages service', () => {
-  let mockUpdateEntitiesStage;
+  let mockUpdateEntitiesStage: any;
   beforeEach(() => {
     mockUpdateEntitiesStage = jest
       .spyOn(stagesService, 'updateEntitiesStage')
+      // @ts-expect-error -  spyOn does have a mockImplementation method
       .mockImplementation(() => {
         return Promise.resolve();
       });

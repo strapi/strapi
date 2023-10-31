@@ -4,8 +4,6 @@ import { omit, uniq } from 'lodash/fp';
 import {
   create as tokenServiceCreate,
   list,
-  exists,
-  getBy,
   getById,
   getByName,
   update as tokenServiceUpdate,

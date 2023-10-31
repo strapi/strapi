@@ -1,5 +1,3 @@
-'use strict';
-
 jest.mock('@strapi/strapi/dist/utils/ee', () => {
   const eeModule = () => true;
 
@@ -23,21 +21,23 @@ jest.mock('../review-workflows/workflows/content-types', () => {
   }));
 });
 
-const validationServiceFactory = require('../review-workflows/validation');
-const { MAX_WORKFLOWS, MAX_STAGES_PER_WORKFLOW } = require('../../constants/workflows');
+import { LoadedStrapi } from '@strapi/types';
+import validationServiceFactory from '../review-workflows/validation';
+import { MAX_WORKFLOWS, MAX_STAGES_PER_WORKFLOW } from '../../constants/workflows';
 
 const workflowsServiceMock = {
   count: jest.fn(() => 1),
 };
 
-const servicesMock = {
+const servicesMock: Record<string, any> = {
   'admin::workflows': workflowsServiceMock,
 };
 
 const strapiMock = {
   service: jest.fn((serviceName) => servicesMock[serviceName]),
-};
-let validationService;
+} as unknown as LoadedStrapi;
+
+let validationService: any;
 
 describe('Review workflows - Validation service', () => {
   beforeEach(() => {

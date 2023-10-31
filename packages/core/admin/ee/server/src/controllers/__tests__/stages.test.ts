@@ -1,7 +1,6 @@
-'use strict';
-
-const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
-const stages = require('../workflows/stages');
+import { ENTITY_STAGE_ATTRIBUTE } from '../../constants/workflows';
+import stages from '../workflows/stages';
+import '@strapi/types';
 
 describe('Stages', () => {
   const nonExistantEntityId = 1;
@@ -13,6 +12,7 @@ describe('Stages', () => {
   const readMock = jest.fn(() => false);
 
   global.strapi = {
+    // @ts-expect-error - only defining the properties we need
     admin: {
       services: {
         'stage-permissions': {
@@ -43,6 +43,7 @@ describe('Stages', () => {
             },
           },
         },
+        // @ts-expect-error - only defining the properties we need
         service(name) {
           return this.services[name];
         },
@@ -52,6 +53,7 @@ describe('Stages', () => {
       return this.plugins[name];
     },
     entityService: {
+      // @ts-expect-error - only defining the properties we need
       findOne: jest.fn((_, id) => {
         if (id === nonExistantEntityId) {
           return Promise.resolve(null);
@@ -81,14 +83,14 @@ describe('Stages', () => {
           model_uid: modelUID,
           id: nonExistantEntityId,
         },
-        throw(status, message) {
-          const error = new Error(message);
+        throw(status: any, message: any) {
+          const error = new Error(message) as any;
           error.status = status;
           throw error;
         },
       };
 
-      let error;
+      let error: any;
       try {
         await stages.listAvailableStages(ctx);
       } catch (e) {
@@ -102,7 +104,7 @@ describe('Stages', () => {
     test('cannot transition', async () => {
       global.strapi.admin.services['stage-permissions'].can.mockReturnValueOnce(false);
 
-      const ctx = {
+      const ctx: any = {
         ...baseCtx,
         params: {
           model_uid: modelUID,
@@ -125,13 +127,13 @@ describe('Stages', () => {
           id: entityId,
         },
         forbidden() {
-          const error = new Error();
+          const error = new Error() as any;
           error.status = 403;
           throw error;
         },
       };
 
-      let error;
+      let error: any;
       try {
         await stages.listAvailableStages(ctx);
       } catch (e) {
@@ -143,7 +145,7 @@ describe('Stages', () => {
     test('cannot transition', async () => {
       global.strapi.admin.services['stage-permissions'].can.mockReturnValueOnce(false);
 
-      const ctx = {
+      const ctx: any = {
         ...baseCtx,
         params: {
           model_uid: modelUID,
@@ -157,7 +159,7 @@ describe('Stages', () => {
     });
 
     test('can transition', async () => {
-      const ctx = {
+      const ctx: any = {
         ...baseCtx,
         params: {
           model_uid: modelUID,

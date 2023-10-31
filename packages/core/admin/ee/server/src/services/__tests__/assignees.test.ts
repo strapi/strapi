@@ -1,5 +1,3 @@
-'use strict';
-
 jest.mock('@strapi/strapi/dist/utils/ee', () => {
   const eeModule = () => true;
 
@@ -17,8 +15,8 @@ jest.mock('@strapi/strapi/dist/utils/ee', () => {
   return eeModule;
 });
 
-const { ENTITY_ASSIGNEE_ATTRIBUTE } = require('../../constants/workflows');
-const assigneeFactory = require('../review-workflows/assignees');
+import { ENTITY_ASSIGNEE_ATTRIBUTE } from '../../constants/workflows';
+import assigneeFactory from '../review-workflows/assignees';
 
 const uid = 'uid';
 const fromAssigneeId = 1;
@@ -32,7 +30,7 @@ const entityServiceMock = {
   }),
   update: jest.fn((uid, id, { data }) => data),
 };
-const servicesMock = {
+const servicesMock: Record<string, any> = {
   'admin::user': {
     exists: jest.fn(() => true),
   },
@@ -48,6 +46,7 @@ const strapiMock = {
   }),
 };
 
+// @ts-expect-error - use strapi mock
 const assigneeService = assigneeFactory({ strapi: strapiMock });
 
 describe('Review workflows - Stages service', () => {

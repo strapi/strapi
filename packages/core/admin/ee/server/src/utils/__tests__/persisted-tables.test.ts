@@ -1,6 +1,4 @@
-'use strict';
-
-const { findTables } = require('../persisted-tables');
+import { findTables } from '../persisted-tables';
 
 const strapiMock = {
   db: {
@@ -10,7 +8,8 @@ const strapiMock = {
       },
     },
   },
-};
+} as any;
+
 describe('Persist table functions', () => {
   describe('findTables', () => {
     test('should return an empty array if no tables are found', async () => {

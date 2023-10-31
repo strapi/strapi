@@ -1,6 +1,4 @@
-'use strict';
-
-const contentTypeServiceFactory = require('../content-types');
+import contentTypeServiceFactory from '../content-types';
 
 const stagesServiceMock = {
   updateEntitiesStage: jest.fn(),
@@ -18,7 +16,7 @@ const reviewWorkflowsValidationMock = {
   validateWorkflowStages: jest.fn(),
 };
 
-const getServiceMock = {
+const getServiceMock: Record<string, any> = {
   stages: stagesServiceMock,
   workflows: workflowsServiceMock,
   'review-workflows-validation': reviewWorkflowsValidationMock,
@@ -35,7 +33,7 @@ const CTMPContentTypesServiceMock = {
   updateConfiguration: jest.fn(),
 };
 
-const contentManagerPluginServicesMock = {
+const contentManagerPluginServicesMock: Record<string, any> = {
   'content-types': CTMPContentTypesServiceMock,
 };
 
@@ -43,7 +41,7 @@ const contentManagerPluginMock = {
   service: jest.fn((serviceName) => contentManagerPluginServicesMock[serviceName]),
 };
 
-const pluginsMock = {
+const pluginsMock: Record<string, any> = {
   'content-manager': contentManagerPluginMock,
 };
 
@@ -54,7 +52,7 @@ const entityServiceMock = {
 const strapiMock = {
   plugin: jest.fn((pluginName) => pluginsMock[pluginName]),
   entityService: entityServiceMock,
-};
+} as any;
 
 describe('Review Workflows', () => {
   afterEach(() => {

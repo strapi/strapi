@@ -2,6 +2,7 @@ import _ from 'lodash/fp';
 import qs from 'qs';
 import { Ability } from '@casl/ability';
 import { providerFactory } from '@strapi/utils';
+// eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-import
 import { Permissions as PermissionsTypes } from '@strapi/types';
 
 import {
