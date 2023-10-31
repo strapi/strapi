@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/default-param-last */
-import _ = require('lodash');
+import _ from 'lodash';
 import { cloneDeep, isPlainObject } from 'lodash/fp';
 import { subject as asSubject } from '@casl/ability';
 import createSanitizeHelpers from './sanitize';
@@ -32,6 +31,7 @@ export default ({ ability, action, model }: any) => ({
     return buildStrapiQuery(buildCaslQuery(ability, queryAction, model));
   },
 
+  // eslint-disable-next-line @typescript-eslint/default-param-last
   addPermissionsQueryTo(query = {} as any, action: any) {
     const newQuery = cloneDeep(query);
     const permissionQuery = this.getQuery(action) ?? undefined;

@@ -52,6 +52,7 @@ export default {
     Object.assign(userInfo, { registrationToken: createdUser.registrationToken });
 
     // Send 201 created
+    // @ts-expect-error: TODO MARC, fix AdminUser role
     ctx.created({ data: userInfo } satisfies Create.Response);
   },
 
@@ -115,6 +116,7 @@ export default {
     }
 
     ctx.body = {
+      // @ts-expect-error: TODO MARC, fix AdminUser role
       data: getService('user').sanitizeUser(updatedUser),
     } satisfies Update.Response;
   },
@@ -129,6 +131,7 @@ export default {
     }
 
     return ctx.deleted({
+      // @ts-expect-error: TODO MARC, fix AdminUser role
       data: getService('user').sanitizeUser(deletedUser),
     } satisfies DeleteOne.Response);
   },
@@ -146,6 +149,7 @@ export default {
     const sanitizedUsers = users.map(getService('user').sanitizeUser);
 
     return ctx.deleted({
+      // @ts-expect-error: TODO MARC, fix AdminUser role
       data: sanitizedUsers,
     } satisfies DeleteMany.Response);
   },

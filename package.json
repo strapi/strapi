@@ -84,6 +84,7 @@
     "@swc/core": "1.3.58",
     "@swc/helpers": "0.5.1",
     "@swc/jest": "0.2.26",
+    "@types/prettier": "2.7.3",
     "@typescript-eslint/eslint-plugin": "6.7.3",
     "@typescript-eslint/parser": "6.7.3",
     "babel-eslint": "10.1.0",
