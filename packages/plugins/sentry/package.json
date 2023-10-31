@@ -20,10 +20,27 @@
       "url": "https://strapi.io"
     }
   ],
+  "exports": {
+    "./strapi-admin": {
+      "source": "./admin/src/index.js",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.js"
+    },
+    "./strapi-server": {
+      "source": "./strapi-server.js",
+      "require": "./strapi-server.js",
+      "default": "./strapi-server.js"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
+    "build": "pack-up build",
+    "clean": "run -T rimraf dist",
     "lint": "run -T eslint .",
     "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch"
+    "test:unit:watch": "run -T jest --watch",
+    "watch": "pack-up watch"
   },
   "dependencies": {
     "@sentry/node": "6.19.7",
@@ -32,6 +49,8 @@
     "@strapi/icons": "1.13.0"
   },
   "devDependencies": {
+    "@strapi/pack-up": "workspace:*",
+    "@strapi/strapi": "4.15.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "5.3.4",

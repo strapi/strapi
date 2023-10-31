@@ -50,7 +50,9 @@
   },
   "files": [
     "./dist",
-    "strapi-server.js"
+    "strapi-server.js",
+    "index.js",
+    "index.d.ts"
   ],
   "scripts": {
     "build": "pack-up build",
@@ -75,7 +77,6 @@
     "@radix-ui/react-context": "1.0.1",
     "@radix-ui/react-toolbar": "1.0.4",
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/data-transfer": "4.15.0",
     "@strapi/design-system": "1.13.0",
     "@strapi/helper-plugin": "4.15.0",
     "@strapi/icons": "1.13.0",
@@ -174,7 +175,9 @@
   },
   "devDependencies": {
     "@strapi/admin-test-utils": "4.15.0",
+    "@strapi/data-transfer": "4.15.0",
     "@strapi/pack-up": "workspace:*",
+    "@strapi/strapi": "4.15.0",
     "@testing-library/dom": "9.2.0",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
@@ -192,7 +195,8 @@
     "vite": "4.4.9"
   },
   "peerDependencies": {
-    "@strapi/strapi": "^4.14.0"
+    "@strapi/data-transfer": "4.15.0",
+    "@strapi/strapi": "^4.3.4"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
@@ -205,14 +209,6 @@
           "{projectRoot}/build"
         ]
       }
-    },
-    "implicitDependencies": [
-      "@strapi/plugin-email",
-      "@strapi/plugin-content-manager",
-      "@strapi/plugin-content-type-builder",
-      "@strapi/plugin-upload",
-      "!@strapi/data-transfer",
-      "!@strapi/strapi"
-    ]
+    }
   }
 }

@@ -1,0 +1,10 @@
+{
+  "root": true,
+  "overrides": [
+    {
+      "files": ["**/*"],
+      "excludedFiles": ["admin/**/*", "ee/admin/**/*", "server/**/*"],
+      "extends": ["custom/back"]
+    }
+  ]
+}
