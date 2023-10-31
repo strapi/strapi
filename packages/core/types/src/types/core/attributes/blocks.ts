@@ -1,13 +1,5 @@
 import type { Attribute } from '..';
 
-export type Blocks = Attribute.OfType<'blocks'> &
-  // Options
-  Attribute.ConfigurableOption &
-  Attribute.PrivateOption &
-  Attribute.RequiredOption &
-  Attribute.WritableOption &
-  Attribute.VisibleOption;
-
 interface TextInlineNode {
   type: 'text';
   text: string;
@@ -30,6 +22,7 @@ interface ListItemInlineNode {
 }
 
 type DefaultInlineNode = TextInlineNode | LinkInlineNode;
+type NonTextInlineNode = Exclude<DefaultInlineNode | ListItemInlineNode, TextInlineNode>;
 
 interface ParagraphBlockNode {
   type: 'paragraph';
@@ -77,6 +70,23 @@ type RootNode =
   | ListBlockNode
   | ImageBlockNode;
 
+export type Blocks = Attribute.OfType<'blocks'> &
+  // Options
+  Attribute.ConfigurableOption &
+  Attribute.PrivateOption &
+  Attribute.RequiredOption &
+  Attribute.WritableOption &
+  Attribute.VisibleOption;
+
 export type BlocksValue = RootNode[];
+
+// Type utils needed for the blocks renderer and the blocks editor (useBlocksStore)
+export type BlockNode<NodeKind extends 'root' | 'inline' | 'all'> = NodeKind extends 'root'
+  ? RootNode
+  : NodeKind extends 'inline'
+  ? NonTextInlineNode
+  : NodeKind extends 'all'
+  ? RootNode | NonTextInlineNode
+  : never;
 
 export type GetBlocksValue<T extends Attribute.Attribute> = T extends Blocks ? BlocksValue : never;
