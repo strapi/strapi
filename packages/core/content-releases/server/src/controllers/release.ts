@@ -22,22 +22,7 @@ const releaseController = {
     await permissionsManager.validateQuery(ctx.query);
     const query = await permissionsManager.sanitizeQuery(ctx.query);
 
-    const { results, pagination } = await strapi.entityService.findWithRelationCountsPage(
-      RELEASE_MODEL_UID,
-      {
-        ...query,
-        populate: {
-          actions: {
-            count: true,
-          },
-        },
-      }
-    );
-
-    ctx.body = {
-      data: await permissionsManager.sanitizeOutput(results),
-      pagination,
-    };
+    ctx.body = await strapi.plugin('content-releases').service('release').findMany(query);
   },
 
   async create(ctx: Koa.Context) {
