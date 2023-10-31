@@ -1,3 +1,5 @@
+/* eslint-disable check-file/filename-naming-convention */
+
 import * as React from 'react';
 
 import {
@@ -29,7 +31,7 @@ import {
   BulletList,
   NumberList,
 } from '@strapi/icons';
-import PropTypes from 'prop-types';
+import { Attribute } from '@strapi/types';
 import { useIntl } from 'react-intl';
 import { Editor, Path, Transforms, Range } from 'slate';
 import { useSlate, ReactEditor } from 'slate-react';
@@ -466,6 +468,12 @@ Link.propTypes = {
   element: PropTypes.object.isRequired,
   children: PropTypes.node.isRequired,
 };
+
+type BlocksStore = {
+  [K in Attribute.BlocksValue[0]['type']]: boolean;
+};
+
+const a: BlocksStore = {};
 
 /**
  * Manages a store of all the available blocks.
