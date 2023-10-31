@@ -17,7 +17,6 @@ declare global {
         isEnabled: (featureName?: string) => boolean;
       };
       flags: {
-        promoteEE?: boolean;
         nps?: boolean;
         promoteEE: boolean;
       };
