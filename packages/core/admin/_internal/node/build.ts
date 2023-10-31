@@ -1,7 +1,6 @@
 import * as tsUtils from '@strapi/typescript-utils';
 import { checkRequiredDependencies } from './core/dependencies';
 import { writeStaticClientFiles } from './staticFiles';
-import { build as buildWebpack } from './webpack/build';
 import { createBuildContext } from './createBuildContext';
 
 import EE from '@strapi/strapi/dist/utils/ee';
@@ -10,6 +9,12 @@ import { getTimer } from './core/timer';
 import type { CLIContext } from '@strapi/strapi';
 
 interface BuildOptions extends CLIContext {
+  /**
+   * The chosen bundler
+   *
+   * @default 'webpack'
+   */
+  bundler?: 'webpack' | 'rspack';
   /**
    * Minify the output
    *
@@ -76,7 +81,13 @@ const build = async ({ logger, cwd, tsconfig, ...options }: BuildOptions) => {
     EE.init(cwd);
 
     await writeStaticClientFiles(ctx);
-    await buildWebpack(ctx);
+    if (ctx.bundler === 'webpack') {
+      const { build: buildWebpack } = await import('./webpack/build');
+      await buildWebpack(ctx);
+    } else if (ctx.bundler === 'rspack') {
+      const { build: buildRspack } = await import('./rspack/build');
+      await buildRspack(ctx);
+    }
 
     const buildDuration = timer.end('buildAdmin');
     buildingSpinner.text = `Building admin panel (${buildDuration}ms)`;

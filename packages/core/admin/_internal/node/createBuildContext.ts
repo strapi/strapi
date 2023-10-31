@@ -26,6 +26,10 @@ interface BuildContext {
    */
   basePath: string;
   /**
+   * The bundler to use for building & watching
+   */
+  bundler: Pick<Required<BuildOptions>, 'bundler'>['bundler'];
+  /**
    * The current working directory
    */
   cwd: string;
@@ -75,7 +79,7 @@ interface BuildContext {
 }
 
 interface CreateBuildContextArgs extends CLIContext {
-  options?: BuildContext['options'];
+  options?: BuildContext['options'] & { bundler?: BuildOptions['bundler'] };
 }
 
 const DEFAULT_BROWSERSLIST = [
@@ -157,16 +161,19 @@ const createBuildContext = async ({
 
   const target = browserslist.loadConfig({ path: cwd }) ?? DEFAULT_BROWSERSLIST;
 
+  const { bundler = 'webpack', ...restOptions } = options;
+
   const buildContext = {
     appDir: strapiInstance.dirs.app.root,
     basePath: `${adminPath}/`,
+    bundler,
     cwd,
     distDir,
     distPath,
     entry,
     env,
     logger,
-    options,
+    options: restOptions,
     plugins: pluginsWithFront,
     runtimeDir,
     strapi: strapiInstance,

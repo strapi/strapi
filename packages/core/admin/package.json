@@ -73,6 +73,8 @@
     "@radix-ui/react-context": "1.0.1",
     "@radix-ui/react-toolbar": "1.0.4",
     "@reduxjs/toolkit": "1.9.7",
+    "@rspack/core": "0.3.8-canary-1c9f8af-20231026052844",
+    "@rspack/plugin-react-refresh": "0.3.8",
     "@strapi/data-transfer": "4.15.0",
     "@strapi/design-system": "1.13.0",
     "@strapi/helper-plugin": "4.15.0",

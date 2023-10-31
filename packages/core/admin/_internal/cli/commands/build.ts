@@ -1,5 +1,7 @@
+import chalk from 'chalk';
 import { build as nodeBuild, BuildOptions } from '../../node/build';
 import { handleUnexpectedError } from '../../node/core/errors';
+import boxen from 'boxen';
 
 interface BuildCLIOptions extends BuildOptions {
   /**
@@ -18,6 +20,23 @@ const build = async (options: BuildCLIOptions) => {
     if (typeof options.optimization !== 'undefined' && options.optimization !== true) {
       options.logger.warn(
         "[@strapi/strapi]: The optimization argument is now deprecated. Use '--minify' instead."
+      );
+    }
+    if (options.bundler !== 'webpack') {
+      options.logger.log(
+        boxen(
+          `Using ${chalk.bold(
+            chalk.underline(options.bundler)
+          )} as a bundler is considered experimental, use at your own risk. If you do experience bugs, open a new issue on Github – https://github.com/strapi/strapi/issues/new?template=BUG_REPORT.md`,
+          {
+            title: 'Warning',
+            padding: 1,
+            margin: 1,
+            align: 'center',
+            borderColor: 'yellow',
+            borderStyle: 'bold',
+          }
+        )
       );
     }
 

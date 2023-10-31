@@ -85,7 +85,13 @@ const develop = async ({ cwd, polling, logger, tsconfig, ...options }: DevelopOp
 
     EE.init(cwd);
     await writeStaticClientFiles(ctx);
-    await watchWebpack(ctx);
+    if (ctx.bundler === 'webpack') {
+      const { watch: watchWebpack } = await import('./webpack/watch');
+      await watchWebpack(ctx);
+    } else if (ctx.bundler === 'rspack') {
+      const { watch: watchRspack } = await import('./rspack/watch');
+      await watchRspack(ctx);
+    }
 
     const adminDuration = timer.end('creatingAdmin');
     adminSpinner.text = `Creating admin (${adminDuration}ms)`;
