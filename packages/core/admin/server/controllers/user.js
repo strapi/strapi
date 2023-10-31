@@ -53,8 +53,10 @@ module.exports = {
       model: 'admin::user',
     });
 
-    await permissionsManager.validateQuery(ctx.query);
-    const sanitizedQuery = await permissionsManager.sanitizeQuery(ctx.query);
+    const query = { ...ctx.query, isListAdmin: true };
+    await permissionsManager.validateQuery(query);
+
+    const sanitizedQuery = await permissionsManager.sanitizeQuery(query);
 
     const { results, pagination } = await userService.findPage(sanitizedQuery);
 

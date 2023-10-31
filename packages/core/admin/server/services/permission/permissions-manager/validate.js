@@ -59,7 +59,7 @@ module.exports = ({ action, ability, model }) => {
 
     const validateFilters = pipeAsync(
       traverse.traverseQueryFilters(throwDisallowedFields(permittedFields), { schema }),
-      traverse.traverseQueryFilters(throwDisallowedAdminUserFields, { schema }),
+      traverse.traverseQueryFilters(throwDisallowedAdminUserFields(fields.isListAdmin), { schema }),
       traverse.traverseQueryFilters(throwPassword, { schema }),
       traverse.traverseQueryFilters(
         ({ key, value }) => {
@@ -73,7 +73,7 @@ module.exports = ({ action, ability, model }) => {
 
     const validateSort = pipeAsync(
       traverse.traverseQuerySort(throwDisallowedFields(permittedFields), { schema }),
-      traverse.traverseQuerySort(throwDisallowedAdminUserFields, { schema }),
+      traverse.traverseQuerySort(throwDisallowedAdminUserFields(fields.isListAdmin), { schema }),
       traverse.traverseQuerySort(throwPassword, { schema }),
       traverse.traverseQuerySort(
         ({ key, attribute, value }) => {
@@ -145,6 +145,7 @@ module.exports = ({ action, ability, model }) => {
         fields: {
           shouldIncludeAll: shouldIncludeAllFields,
           permitted: permittedFields,
+          isListAdmin: data.isListAdmin,
           hasAtLeastOneRegistered,
         },
       };
@@ -180,11 +181,18 @@ module.exports = ({ action, ability, model }) => {
   /**
    * Visitor used to omit disallowed fields from the admin users entities & avoid leaking sensitive information
    */
-  const throwDisallowedAdminUserFields = ({ key, attribute, schema }) => {
-    if (schema.uid === 'admin::user' && attribute && !ADMIN_USER_ALLOWED_FIELDS.includes(key)) {
-      throwInvalidParam({ key });
-    }
-  };
+  const throwDisallowedAdminUserFields =
+    (isListAdmin) =>
+    ({ key, attribute, schema }) => {
+      if (
+        schema.uid === 'admin::user' &&
+        attribute &&
+        !isListAdmin &&
+        !ADMIN_USER_ALLOWED_FIELDS.includes(key)
+      ) {
+        throwInvalidParam({ key });
+      }
+    };
 
   const getInputFields = (fields = []) => {
     const nonVisibleAttributes = getNonVisibleAttributes(schema);
