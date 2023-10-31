@@ -34,7 +34,7 @@ jest.mock('@strapi/helper-plugin', () => {
   };
 });
 
-jest.mock('../../useLicenseLimits', () => ({
+jest.mock('../useLicenseLimits', () => ({
   useLicenseLimits: jest.fn(() => ({
     license: baseLicenseInfo,
   })),

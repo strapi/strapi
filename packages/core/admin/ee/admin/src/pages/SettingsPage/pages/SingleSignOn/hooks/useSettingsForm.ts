@@ -1,8 +1,4 @@
 import * as React from 'react';
-import produce from 'immer';
-import pick from 'lodash/pick';
-import set from 'lodash/set';
-import { ValidationError } from 'yup';
 
 import {
   getYupInnerErrors,
@@ -10,7 +6,11 @@ import {
   useNotification,
   useOverlayBlocker,
 } from '@strapi/helper-plugin';
+import produce from 'immer';
 import omit from 'lodash/omit';
+import pick from 'lodash/pick';
+import set from 'lodash/set';
+import { ValidationError } from 'yup';
 
 import { formatAPIErrors } from '../../../../../../../../admin/src/utils/formatAPIErrors';
 
@@ -223,11 +223,11 @@ export const useSettingsForm = (
         const cleanedData = omit(modifiedData, ['confirmPassword', 'registrationToken']);
 
         if (cleanedData.roles) {
-          // @ts-ignore hooks needs refactoring anyways
+          // @ts-expect-error hooks needs refactoring anyways
           cleanedData.roles = cleanedData.roles.map((role) => role.id);
         }
         if (cleanedData.ssoLockedRoles) {
-          // @ts-ignore hooks needs refactoring anyways
+          // @ts-expect-error hooks needs refactoring anyways
           cleanedData.ssoLockedRoles = [...new Set(cleanedData.ssoLockedRoles)];
         }
 
@@ -247,7 +247,7 @@ export const useSettingsForm = (
           message: { id: 'notification.success.saved' },
         });
       } catch (err) {
-        // @ts-ignore hooks needs refactoring anyways
+        // @ts-expect-error hooks needs refactoring anyways
         const data = err?.response?.payload ?? { data: {} };
 
         if (!!data?.data && typeof data.data === 'string') {
@@ -279,5 +279,5 @@ export const useSettingsForm = (
     { formErrors, initialData, isLoading, modifiedData, showHeaderButtonLoader, showHeaderLoader },
     dispatch,
     { handleCancel, handleChange, handleSubmit, setField },
-  ];
+  ] as const;
 };
