@@ -8,7 +8,6 @@ export default defineConfig({
      * they will be included in the bundle which means they
      * will fail...
      */
-    'knex/lib/dialects/sqlite3/index',
     'knex/lib/query/querybuilder',
     'knex/lib/raw',
   ],

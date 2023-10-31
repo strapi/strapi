@@ -48,6 +48,7 @@ const generateTestApp = async ({ appPath, database, template, link = false }) =>
       '@strapi/plugin-graphql',
       '@strapi/plugin-documentation',
       '@strapi/plugin-i18n',
+      '@strapi/plugin-cloud',
     ],
     additionalsDependencies: {},
     template: template ? path.resolve(template) : template,

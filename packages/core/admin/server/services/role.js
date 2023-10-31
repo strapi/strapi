@@ -1,8 +1,17 @@
 'use strict';
 
 const _ = require('lodash');
-const { set, omit, pick, prop, isArray, differenceWith, differenceBy } = require('lodash/fp');
-const deepEqual = require('fast-deep-equal');
+const {
+  set,
+  omit,
+  pick,
+  prop,
+  isArray,
+  differenceWith,
+  differenceBy,
+  isEqual,
+} = require('lodash/fp');
+
 const {
   generateTimestampCode,
   stringIncludes,
@@ -37,7 +46,7 @@ const jsonClean = (data) => JSON.parse(JSON.stringify(data));
  */
 const arePermissionsEqual = (p1, p2) => {
   if (p1.action === p2.action) {
-    return deepEqual(jsonClean(pickComparableFields(p1)), jsonClean(pickComparableFields(p2)));
+    return isEqual(jsonClean(pickComparableFields(p1)), jsonClean(pickComparableFields(p2)));
   }
 
   return false;
