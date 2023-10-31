@@ -52,7 +52,9 @@
     "strapi-server.js",
     "server",
     "ee/strapi-server.js",
-    "ee/server/**"
+    "ee/server/**",
+    "index.js",
+    "index.d.ts"
   ],
   "scripts": {
     "build": "pack-up build",
