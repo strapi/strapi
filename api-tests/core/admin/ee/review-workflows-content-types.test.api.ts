@@ -1,14 +1,14 @@
 'use strict';
 
-const { createStrapiInstance } = require('api-tests/strapi');
-const { createAuthRequest } = require('api-tests/request');
-const { createTestBuilder } = require('api-tests/builder');
-const { describeOnCondition } = require('api-tests/utils');
+import { createStrapiInstance } from 'api-tests/strapi';
+import { createAuthRequest } from 'api-tests/request';
+import { createTestBuilder } from 'api-tests/builder';
+import { describeOnCondition } from 'api-tests/utils';
 
-const {
+import {
   WORKFLOW_MODEL_UID,
   ENTITY_STAGE_ATTRIBUTE,
-} = require('../../../../packages/core/admin/ee/server/constants/workflows');
+} from '../../../../packages/core/admin/ee/server/src/constants/workflows';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -386,9 +386,8 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
   // And we do not handle too long content type name on `created_by_id` attribute, causing the tests to fail on mysql
   describe.skip('With long content type names', () => {
     test('Should not load Review Workflow on too long content-type name', async () => {
-      const contentType = strapi.contentTypes[longCTUID];
-
-      expect(contentType.attributes[ENTITY_STAGE_ATTRIBUTE]).toBeUndefined();
+      // const contentType = strapi.contentTypes[longCTUID];
+      // expect(contentType.attributes[ENTITY_STAGE_ATTRIBUTE]).toBeUndefined();
       // Cannot test the log as it happens during the Strapi instance creation (in the beforeAll)
     });
   });
