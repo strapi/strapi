@@ -1,6 +1,7 @@
 import { EntityService } from '@strapi/types';
 import type { errors } from '@strapi/utils';
-import { AdminRole, Permission, SanitizedAdminRole, SanitizedAdminUser } from './shared';
+import { AdminRole, Permission, SanitizedAdminRole } from './shared';
+import type { SanitizedPermission } from '../../server/src/domain/permission';
 
 type SanitizedAdminRoleWithUsersCount = SanitizedAdminRole & { usersCount?: number };
 
@@ -33,7 +34,7 @@ export declare namespace UpdatePermissions {
   }
 
   export interface Response {
-    data: Permission[];
+    data: SanitizedPermission[];
     error?:
       | errors.ApplicationError
       | errors.NotFoundError // One of the permissions not found

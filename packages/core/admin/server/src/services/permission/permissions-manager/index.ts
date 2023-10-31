@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/default-param-last */
-import _ = require('lodash');
+import _ from 'lodash';
 import { cloneDeep, isPlainObject } from 'lodash/fp';
 import { subject as asSubject } from '@casl/ability';
 import createSanitizeHelpers from './sanitize';
