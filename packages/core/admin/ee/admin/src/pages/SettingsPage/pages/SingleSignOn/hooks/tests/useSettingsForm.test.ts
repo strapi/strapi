@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor, server } from '@tests/utils';
 import { rest } from 'msw';
 
-import useSettingsForm from '../index';
+import { useSettingsForm } from '../useSettingsForm';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -12,11 +12,12 @@ const mockSchema = {
   validate: () => true,
 };
 
+// @ts-expect-error this is fine
 const setup = (...args) => renderHook(() => useSettingsForm(...args));
 
 describe('useSettingsForm', () => {
   test('fetches all the providers options', async () => {
-    const { result } = setup('/admin/providers/options', mockSchema, jest.fn(), [
+    const { result } = setup(mockSchema, jest.fn(), [
       'autoRegister',
       'defaultRole',
       'ssoLockedRoles',
@@ -71,7 +72,7 @@ describe('useSettingsForm', () => {
 
     const cbSucc = jest.fn();
 
-    const { result } = setup('/admin/providers/options', mockSchema, cbSucc, [
+    const { result } = setup(mockSchema, cbSucc, [
       'autoRegister',
       'defaultRole',
       'ssoLockedRoles',
