@@ -7,7 +7,6 @@ import {
   findMany as permissionsServiceFindMany,
 } from '../permission';
 import { toPermission } from '../../domain/permission';
-import createEventHub from '../../../../../strapi/dist/services/event-hub';
 
 describe('Permission Service', () => {
   beforeEach(() => {
@@ -158,7 +157,9 @@ describe('Permission Service', () => {
             },
           },
         },
-        eventHub: createEventHub(),
+        eventHub: {
+          emit: jest.fn(),
+        },
       });
 
       await cleanPermissionsInDatabase();
