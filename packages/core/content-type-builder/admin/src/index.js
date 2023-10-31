@@ -23,9 +23,7 @@ export default {
       },
       permissions: PERMISSIONS.main,
       async Component() {
-        const component = await import(
-          /* webpackChunkName: "content-type-builder" */ './pages/App'
-        );
+        const component = await import('./pages/App');
 
         return component;
       },
@@ -44,9 +42,7 @@ export default {
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
       locales.map((locale) => {
-        return import(
-          /* webpackChunkName: "content-type-builder-translation-[request]" */ `./translations/${locale}.json`
-        )
+        return import(`./translations/${locale}.json`)
           .then(({ default: data }) => {
             return {
               data: prefixPluginTranslations(data, pluginId),

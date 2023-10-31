@@ -135,6 +135,7 @@ export default {
     const sanitizedPermissions = permissions.map(permissionService.sanitizePermission);
 
     ctx.body = {
+      // @ts-expect-error - transform response type to sanitized permission
       data: sanitizedPermissions,
     } satisfies GetPermissions.Response;
   },

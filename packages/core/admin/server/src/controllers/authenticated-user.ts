@@ -49,6 +49,7 @@ export default {
     const userPermissions = await findUserPermissions(user as AdminUser);
 
     ctx.body = {
+      // @ts-expect-error - transform response type to sanitized permission
       data: userPermissions.map(sanitizePermission),
     } satisfies GetOwnPermissions.Response;
   },

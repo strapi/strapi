@@ -137,4 +137,12 @@ export function resolveConfigProperty<T>(prop: ConfigProperty<T> | undefined, in
 }
 
 export { loadConfig, defineConfig, CONFIG_FILE_NAMES };
-export type { Config, ConfigOptions, ConfigBundle, ConfigPropertyResolver, ConfigProperty };
+export type {
+  Config,
+  ConfigOptions,
+  ConfigBundle,
+  ConfigPropertyResolver,
+  ConfigProperty,
+  PluginOption,
+  Runtime,
+};

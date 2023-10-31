@@ -3,10 +3,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { hasPermissions, useRBACProvider, useStrapiApp, useAppInfo } from '@strapi/helper-plugin';
 import { useSelector } from 'react-redux';
 
+import { SETTINGS_LINKS_CE } from '../../constants';
 import { selectAdminPermissions } from '../../selectors';
 import { useEnterprise } from '../useEnterprise';
 
-import { LINKS_CE } from './constants';
 import formatLinks from './utils/formatLinks';
 import sortLinks from './utils/sortLinks';
 
@@ -21,10 +21,13 @@ const useSettingsMenu = () => {
   const permissions = useSelector(selectAdminPermissions);
 
   const { global: globalLinks, admin: adminLinks } = useEnterprise(
-    LINKS_CE,
-    async () => (await import('../../../../ee/admin/src/hooks/useSettingsMenu/constants')).LINKS_EE,
+    SETTINGS_LINKS_CE,
+    async () => (await import('../../../../ee/admin/src/constants')).SETTINGS_LINKS_EE,
     {
-      combine(ceLinks, eeLinks) {
+      combine(getCeLinks, getEeLinks) {
+        const ceLinks = getCeLinks();
+        const eeLinks = getEeLinks();
+
         return {
           admin: [...eeLinks.admin, ...ceLinks.admin],
           global: [...ceLinks.global, ...eeLinks.global],

@@ -4,8 +4,6 @@
   "exclude": ["node_modules"],
   "compilerOptions": {
     "types": ["lodash", "jest"],
-    "esModuleInterop": true,
-    "allowJs": true,
-  },
-
+    "esModuleInterop": true
+  }
 }
