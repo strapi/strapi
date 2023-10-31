@@ -34,6 +34,15 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   color: #ffffff;
 }
 
+.c0 {
+  margin-left: -250px;
+  position: fixed;
+  left: 50%;
+  top: 2.875rem;
+  z-index: 10;
+  width: 31.25rem;
+}
+
 .c3 {
   padding-right: 40px;
   padding-left: 40px;
@@ -69,6 +78,10 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   padding: 32px;
 }
 
+.c22 {
+  padding-right: 12px;
+}
+
 .c27 {
   background: #4945ff;
   padding: 8px;
@@ -78,6 +91,21 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   border-color: #4945ff;
   border: 1px solid #4945ff;
   cursor: pointer;
+}
+
+.c1 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .c4 {
@@ -365,34 +393,6 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
 .c16 {
   overflow: auto;
   max-height: 60vh;
-}
-
-.c0 {
-  margin-left: -250px;
-  position: fixed;
-  left: 50%;
-  top: 2.875rem;
-  z-index: 10;
-  width: 31.25rem;
-}
-
-.c22 {
-  padding-right: 12px;
-}
-
-.c1 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  gap: 8px;
 }
 
 .c23 {

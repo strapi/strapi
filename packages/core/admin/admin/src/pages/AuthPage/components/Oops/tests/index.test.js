@@ -45,6 +45,12 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         color: #32324d;
       }
 
+      .c25 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #4945ff;
+      }
+
       .c1 {
         padding-top: 24px;
         padding-right: 40px;
@@ -241,12 +247,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
 
       .c13:focus-visible {
         outline: none;
-      }
-
-      .c25 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #4945ff;
       }
 
       .c24 {

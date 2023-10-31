@@ -27,6 +27,15 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
+.c0 {
+  margin-left: -250px;
+  position: fixed;
+  left: 50%;
+  top: 2.875rem;
+  z-index: 10;
+  width: 31.25rem;
+}
+
 .c5 {
   background: #f6f6f9;
   padding: 8px;
@@ -66,6 +75,21 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   margin-bottom: 12px;
   width: 30px;
   height: 24px;
+}
+
+.c1 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .c2 {
@@ -155,30 +179,6 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-}
-
-.c0 {
-  margin-left: -250px;
-  position: fixed;
-  left: 50%;
-  top: 2.875rem;
-  z-index: 10;
-  width: 31.25rem;
-}
-
-.c1 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  gap: 8px;
 }
 
 .c18 {
