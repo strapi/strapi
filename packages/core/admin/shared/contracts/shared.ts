@@ -51,4 +51,7 @@ export interface AdminRole extends Entity {
   permissions: Permission[];
 }
 
-export type SanitizedAdminRole = Omit<AdminRole, 'users' | 'permissions'>;
+export type SanitizedAdminRole = Omit<
+  AdminRole,
+  'users' | 'permissions' | 'createdAt' | 'updatedAt'
+>;

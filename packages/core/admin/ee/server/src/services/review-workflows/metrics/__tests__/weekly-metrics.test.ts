@@ -1,8 +1,8 @@
 'use strict';
 
-const weeklyMetrics = require('../weekly-metrics');
+import weeklyMetrics from '../weekly-metrics';
 
-jest.mock('../../../../../../server/utils', () => {
+jest.mock('../../../../../../server/src/utils', () => {
   return {
     getService: jest.fn(() => {
       const workflowsMock = {
@@ -51,7 +51,7 @@ jest.mock('../../../../../../server/utils', () => {
 describe('Review workflows - Weekly Metrics', () => {
   describe('computeMetrics', () => {
     test('Computes the correct workflow metrics', async () => {
-      const service = weeklyMetrics({ strapi: {} });
+      const service = weeklyMetrics({ strapi: {} as any });
 
       const metrics = await service.computeMetrics();
       expect(metrics).toEqual({

@@ -8,6 +8,8 @@ import type {
   AdminUser,
   AdminRole,
   AdminUserCreationPayload,
+  SanitizedAdminUser,
+  SanitizedAdminRole,
   // eslint-disable-next-line node/no-unpublished-import
 } from '../../../shared/contracts/shared';
 import { password as passwordValidator } from '../validation/common-validators';
@@ -18,19 +20,7 @@ const { SUPER_ADMIN_CODE } = constants;
 
 const { ValidationError } = errors;
 const sanitizeUserRoles = (role: AdminRole): SanitizedAdminRole =>
-  // @ts-expect-error - TODO: add updated and created at
   _.pick(role, ['id', 'name', 'description', 'code']);
-
-export type SanitizedAdminRole = Omit<
-  AdminRole,
-  'id' | 'name' | 'description' | 'code' | 'users' | 'permissions'
->;
-export type SanitizedAdminUser = Omit<
-  AdminUser,
-  'password' | 'resetPasswordToken' | 'registrationToken' | 'roles'
-> & {
-  roles: SanitizedAdminRole[];
-};
 
 /**
  * Remove private user fields

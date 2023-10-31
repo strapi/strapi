@@ -1,9 +1,7 @@
-'use strict';
-
-const { omit } = require('lodash');
-const { createStrapiInstance } = require('api-tests/strapi');
-const { createAuthRequest } = require('api-tests/request');
-const constants = require('../../../packages/core/admin/server/services/constants');
+import { omit } from 'lodash';
+import { createStrapiInstance } from 'api-tests/strapi';
+import { createAuthRequest } from 'api-tests/request';
+import constants from '../../../packages/core/admin/server/src/services/constants';
 
 describe('Admin Transfer Token CRUD (api)', () => {
   let rq;
@@ -126,8 +124,10 @@ describe('Admin Transfer Token CRUD (api)', () => {
       permissions: expect.arrayContaining(body.permissions),
       description: body.description,
       id: expect.any(Number),
+      // @ts-expect-error - Add `expect.toBeISODate()` to jest types
       createdAt: expect.toBeISODate(),
       lastUsedAt: null,
+      // @ts-expect-error - Add `expect.toBeISODate()` to jest types
       updatedAt: expect.toBeISODate(),
       expiresAt: null,
       lifespan: null,
@@ -155,9 +155,12 @@ describe('Admin Transfer Token CRUD (api)', () => {
       permissions: expect.arrayContaining(body.permissions),
       description: body.description,
       id: expect.any(Number),
+      // @ts-expect-error - Add `expect.toBeISODate()` to jest types
       createdAt: expect.toBeISODate(),
       lastUsedAt: null,
+      // @ts-expect-error - Add `expect.toBeISODate()` to jest types
       updatedAt: expect.toBeISODate(),
+      // @ts-expect-error - Add `expect.toBeISODate()` to jest types
       expiresAt: expect.toBeISODate(),
       lifespan: String(body.lifespan),
     });
@@ -188,9 +191,12 @@ describe('Admin Transfer Token CRUD (api)', () => {
       permissions: expect.arrayContaining(body.permissions),
       description: body.description,
       id: expect.any(Number),
+      // @ts-expect-error - Add `expect.toBeISODate()` to jest types
       createdAt: expect.toBeISODate(),
       lastUsedAt: null,
+      // @ts-expect-error - Add `expect.toBeISODate()` to jest types
       updatedAt: expect.toBeISODate(),
+      // @ts-expect-error - Add `expect.toBeISODate()` to jest types
       expiresAt: expect.toBeISODate(),
       lifespan: String(body.lifespan),
     });
@@ -221,9 +227,12 @@ describe('Admin Transfer Token CRUD (api)', () => {
       permissions: expect.arrayContaining(body.permissions),
       description: body.description,
       id: expect.any(Number),
+      // @ts-expect-error - Add `expect.toBeISODate()` to jest types
       createdAt: expect.toBeISODate(),
       lastUsedAt: null,
+      // @ts-expect-error - Add `expect.toBeISODate()` to jest types
       updatedAt: expect.toBeISODate(),
+      // @ts-expect-error - Add `expect.toBeISODate()` to jest types
       expiresAt: expect.toBeISODate(),
       lifespan: String(body.lifespan),
     });
@@ -254,8 +263,10 @@ describe('Admin Transfer Token CRUD (api)', () => {
       permissions: expect.arrayContaining(body.permissions),
       description: body.description,
       id: expect.any(Number),
+      // @ts-expect-error - Add `expect.toBeISODate()` to jest types
       createdAt: expect.toBeISODate(),
       lastUsedAt: null,
+      // @ts-expect-error - Add `expect.toBeISODate()` to jest types
       updatedAt: expect.toBeISODate(),
       expiresAt: null,
       lifespan: body.lifespan,

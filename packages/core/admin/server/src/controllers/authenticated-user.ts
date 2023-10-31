@@ -10,7 +10,6 @@ export default {
     const userInfo = getService('user').sanitizeUser(ctx.state.user as AdminUser);
 
     ctx.body = {
-      // @ts-expect-error: TODO MARC, fix AdminUser role
       data: userInfo,
     } satisfies GetMe.Response;
   },
@@ -39,7 +38,6 @@ export default {
     const updatedUser = await userService.updateById(ctx.state.user.id, userInfo);
 
     ctx.body = {
-      // @ts-expect-error: TODO MARC, fix AdminUser role
       data: userService.sanitizeUser(updatedUser),
     } satisfies UpdateMe.Response;
   },

@@ -1,18 +1,7 @@
-'use strict';
-
-const { mapAsync } = require('@strapi/utils');
-
-const { createStrapiInstance } = require('api-tests/strapi');
-const { createAuthRequest, createRequest } = require('api-tests/request');
-const { createTestBuilder } = require('api-tests/builder');
-const { describeOnCondition } = require('api-tests/utils');
-
-const {
-  STAGE_MODEL_UID,
-  WORKFLOW_MODEL_UID,
-  ENTITY_STAGE_ATTRIBUTE,
-} = require('../../../../packages/core/admin/ee/server/constants/workflows');
-const { create } = require('lodash');
+import { createStrapiInstance } from 'api-tests/strapi';
+import { createAuthRequest, createRequest } from 'api-tests/request';
+import { createTestBuilder } from 'api-tests/builder';
+import { describeOnCondition } from 'api-tests/utils';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 

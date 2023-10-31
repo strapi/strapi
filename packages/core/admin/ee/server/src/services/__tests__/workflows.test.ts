@@ -23,33 +23,34 @@ jest.mock('../review-workflows/workflows/content-types', () => {
   }));
 });
 
-const workflowsServiceFactory = require('../review-workflows/workflows');
-const { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } = require('../../constants/workflows');
+import { LoadedStrapi } from '@strapi/types';
+import workflowsServiceFactory from '../review-workflows/workflows';
+import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../../constants/workflows';
 
 const workflowMock = {
   id: 1,
 };
 
-const entityServiceMock = {
+const entityServiceMock: Record<string, any> = {
   findOne: jest.fn(() => workflowMock),
   findMany: jest.fn(() => [workflowMock]),
   update: jest.fn(() => [workflowMock]),
   create: jest.fn(() => [workflowMock]),
 };
 
-const contentManagerServicesMock = {
+const contentManagerServicesMock: Record<string, any> = {
   'content-types': {
     updateConfiguration: jest.fn(() => Promise.resolve()),
   },
 };
 
-const pluginsMock = {
+const pluginsMock: Record<string, any> = {
   'content-manager': {
     service: jest.fn((name) => contentManagerServicesMock[name]),
   },
 };
 
-const reviewWorkflowsValidationMock = {
+const reviewWorkflowsValidationMock: Record<string, any> = {
   validateWorkflowCount: jest.fn().mockResolvedValue(true),
   validateWorkflowStages: jest.fn(),
 };
@@ -61,7 +62,7 @@ const stagesMock = [
   { id: 2 },
 ];
 
-const servicesMock = {
+const servicesMock: Record<string, any> = {
   'admin::review-workflows-validation': reviewWorkflowsValidationMock,
   'admin::review-workflows-metrics': {
     sendDidCreateWorkflow: jest.fn(),
@@ -86,7 +87,7 @@ const strapiMock = {
   db: {
     transaction: jest.fn((func) => func()),
   },
-};
+} as unknown as LoadedStrapi;
 
 const workflowsService = workflowsServiceFactory({ strapi: strapiMock });
 

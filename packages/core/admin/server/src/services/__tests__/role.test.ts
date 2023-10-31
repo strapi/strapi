@@ -3,6 +3,7 @@ import constants from '../constants';
 import { create as createPermission, toPermission } from '../../domain/permission';
 
 import roleService from '../role';
+
 const {
   sanitizeRole,
   create,
@@ -106,7 +107,7 @@ describe('Role', () => {
         query: () => ({ findMany: dbFind }),
       } as any;
 
-      //@ts-expect-error
+      // @ts-expect-error - fix types
       const foundRoles = await find();
 
       expect(dbFind).toHaveBeenCalledWith({ where: {} });

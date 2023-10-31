@@ -1,5 +1,3 @@
-'use strict';
-
 jest.mock('@strapi/strapi/dist/utils/ee', () => ({
   features: {
     isEnabled() {
@@ -11,27 +9,30 @@ jest.mock('@strapi/strapi/dist/utils/ee', () => ({
   },
 }));
 
-const {
+import {
   syncProviderRegistryWithConfig,
   getStrategyCallbackURL,
   providerRegistry,
-} = require('../passport/sso');
-const createProviderRegistry = require('../passport/provider-registry');
+} from '../passport/sso';
+import createProviderRegistry from '../passport/provider-registry';
 
 describe('SSO', () => {
   afterEach(() => {
     providerRegistry.clear();
   });
 
+  // @ts-expect-error - providerRegistry is a mock
   const register = jest.spyOn(providerRegistry, 'register');
 
   describe('Sync Provider Registry with Config', () => {
     test('The provider registry should match the auth config', async () => {
       global.strapi = {
         config: {
-          get: () => ({ providers: [{ uid: 'foo' }, { uid: 'bar' }] }),
+          get: () => ({
+            providers: [{ uid: 'foo' }, { uid: 'bar' }],
+          }),
         },
-      };
+      } as any;
 
       syncProviderRegistryWithConfig();
 
@@ -51,13 +52,13 @@ describe('SSO', () => {
   });
 
   describe('Provider Registry', () => {
-    const registry = createProviderRegistry();
+    const registry = createProviderRegistry() as any;
     const setSpy = jest.spyOn(registry, 'set');
     const fooProvider = { uid: 'foo', createStrategy: jest.fn() };
     const barProvider = { uid: 'bar', createStrategy: jest.fn() };
 
     beforeEach(() => {
-      global.strapi = { isLoaded: false };
+      global.strapi = { isLoaded: false } as any;
     });
 
     afterEach(() => {
@@ -66,7 +67,7 @@ describe('SSO', () => {
     });
 
     test('Cannot register after bootstrap', () => {
-      global.strapi = { isLoaded: true };
+      global.strapi = { isLoaded: true } as any;
 
       const fn = () => registry.register(fooProvider);
 

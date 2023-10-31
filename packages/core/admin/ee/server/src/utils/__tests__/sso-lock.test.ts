@@ -1,6 +1,4 @@
-'use strict';
-
-const { isSsoLocked } = require('../sso-lock');
+import { isSsoLocked } from '../sso-lock';
 
 // allow toggling the feature within tests
 let ssoEnabled = true;
@@ -55,7 +53,7 @@ describe('isSsoLocked', () => {
         }),
       };
     }),
-  };
+  } as any;
 
   afterEach(() => {
     jest.clearAllMocks();

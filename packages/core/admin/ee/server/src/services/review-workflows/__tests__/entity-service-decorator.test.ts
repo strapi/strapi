@@ -1,10 +1,10 @@
-'use strict';
+import { omit } from 'lodash/fp';
+import { WORKFLOW_UPDATE_STAGE } from '../../../constants/webhookEvents';
+import { ENTITY_STAGE_ATTRIBUTE } from '../../../constants/workflows';
+import entityServiceDecorator from '../entity-service-decorator';
+import utils from '../../../utils';
 
-const { omit } = require('lodash/fp');
-const { WORKFLOW_UPDATE_STAGE } = require('../../../constants/webhookEvents');
-const { ENTITY_STAGE_ATTRIBUTE } = require('../../../constants/workflows');
-const { decorator } = require('../entity-service-decorator')();
-const utils = require('../../../utils');
+const { decorator } = entityServiceDecorator();
 
 jest.mock('../../../utils', () => {
   const workflowsMock = {
@@ -28,7 +28,7 @@ const model = {
   },
 };
 
-const models = {
+const models: Record<string, any> = {
   'test-model': rwModel,
   'non-rw-model': model,
 };
@@ -36,7 +36,7 @@ const models = {
 describe('Entity service decorator', () => {
   beforeAll(() => {
     global.strapi = {
-      getModel(uid) {
+      getModel(uid: string) {
         return models[uid || 'test-model'];
       },
       query: () => ({
@@ -48,11 +48,12 @@ describe('Entity service decorator', () => {
       entityService: {
         findOne: jest.fn(),
       },
-    };
+    } as any;
   });
 
   describe('Create', () => {
     test('Calls original create for non review workflow content types', async () => {
+      // @ts-expect-error - mocking getService
       utils.getService().getAssignedWorkflow.mockReturnValueOnce(null);
       const entry = {
         id: 1,
@@ -156,7 +157,7 @@ describe('Entity service decorator', () => {
         eventHub: {
           emit,
         },
-      };
+      } as any;
 
       const service = decorator(defaultService);
 
