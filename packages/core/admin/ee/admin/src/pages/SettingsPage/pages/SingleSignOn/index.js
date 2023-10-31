@@ -28,10 +28,10 @@ import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
-import { useSettingsForm } from '../../../../../../../admin/src/hooks';
 import { useAdminRoles } from '../../../../../../../admin/src/hooks/useAdminRoles';
 import { selectAdminPermissions } from '../../../../../../../admin/src/selectors';
 
+import { useSettingsForm } from './hooks/useSettingsForm';
 import schema from './utils/schema';
 
 export const SingleSignOn = () => {
@@ -52,7 +52,7 @@ export const SingleSignOn = () => {
     { formErrors, initialData, isLoading: isLoadingForm, modifiedData, showHeaderButtonLoader },
     ,
     { handleChange, handleSubmit },
-  ] = useSettingsForm('/admin/providers/options', schema, () => {}, [
+  ] = useSettingsForm(schema, () => {}, [
     'autoRegister',
     'defaultRole',
     'ssoLockedRoles',
@@ -208,8 +208,7 @@ export const SingleSignOn = () => {
                         defaultMessage: 'Choose here',
                       })}
                       onClear={() => {
-                        const emptyArray = [];
-                        handleChange({ target: { name: 'ssoLockedRoles', emptyArray } });
+                        handleChange({ target: { name: 'ssoLockedRoles' } });
                       }}
                       value={modifiedData.ssoLockedRoles || []}
                       withTags
