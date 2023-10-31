@@ -1,9 +1,9 @@
-import React from 'react';
-
+/* eslint-disable check-file/filename-naming-convention */
 import { renderHook } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
 import { useLicenseLimitNotification } from '../useLicenseLimitNotification';
+// @ts-expect-error - no types, yet.
 import { useLicenseLimits } from '../useLicenseLimits';
 
 const baseLicenseInfo = {
@@ -40,10 +40,10 @@ jest.mock('../../useLicenseLimits', () => ({
   })),
 }));
 
-const setup = (...args) =>
-  renderHook(() => useLicenseLimitNotification(...args), {
+const setup = () =>
+  renderHook(() => useLicenseLimitNotification(), {
     wrapper({ children }) {
-      return <IntlProvider>{children}</IntlProvider>;
+      return <IntlProvider locale="en">{children}</IntlProvider>;
     },
   });
 
