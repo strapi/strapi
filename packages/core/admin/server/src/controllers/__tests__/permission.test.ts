@@ -1,3 +1,4 @@
+// @ts-expect-error - types are not generated for this file
 // eslint-disable-next-line import/no-relative-packages
 import createContext from '../../../../../../../test/helpers/create-context';
 import permissionController from '../permission';

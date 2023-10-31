@@ -2,13 +2,15 @@
 import _ from 'lodash';
 import { defaults } from 'lodash/fp';
 import { stringIncludes, errors } from '@strapi/utils';
-import '@strapi/types';
 import { Entity } from '@strapi/types';
 import { createUser, hasSuperAdminRole } from '../domain/user';
 import type {
   AdminUser,
   AdminRole,
   AdminUserCreationPayload,
+  SanitizedAdminUser,
+  SanitizedAdminRole,
+  // eslint-disable-next-line node/no-unpublished-import
 } from '../../../shared/contracts/shared';
 import { password as passwordValidator } from '../validation/common-validators';
 import { getService } from '../utils';
@@ -19,17 +21,6 @@ const { SUPER_ADMIN_CODE } = constants;
 const { ValidationError } = errors;
 const sanitizeUserRoles = (role: AdminRole): SanitizedAdminRole =>
   _.pick(role, ['id', 'name', 'description', 'code']);
-
-export type SanitizedAdminRole = Omit<
-  AdminRole,
-  'id' | 'name' | 'description' | 'code' | 'users' | 'permissions'
->;
-export type SanitizedAdminUser = Omit<
-  AdminUser,
-  'password' | 'resetPasswordToken' | 'registrationToken' | 'roles'
-> & {
-  roles: SanitizedAdminRole[];
-};
 
 /**
  * Remove private user fields

@@ -11,7 +11,7 @@ export declare namespace GetMe {
   }
 
   export interface Response {
-    data: {};
+    data: SanitizedAdminUser;
     error?: errors.ApplicationError;
   }
 }
@@ -29,6 +29,7 @@ export declare namespace UpdateMe {
       username?: string;
       password?: string;
       currentPassword?: string;
+      preferedLanguage?: string;
     };
   }
 

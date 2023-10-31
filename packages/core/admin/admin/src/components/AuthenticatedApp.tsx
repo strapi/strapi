@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import {
-  AppInfoContextValue,
   AppInfoProvider,
   auth,
   LoadingIndicatorPage,
@@ -14,15 +13,16 @@ import valid from 'semver/functions/valid';
 //  TODO: DS add loader
 
 import packageJSON from '../../../package.json';
-import { UserEntity } from '../../../shared/entities';
 import { useConfiguration } from '../contexts/configuration';
-import { APIResponse, APIResponseUsersLegacy } from '../types/adminAPI';
 import { getFullName } from '../utils/getFullName';
 import { hashAdminUserEmail } from '../utils/hashAdminUserEmail';
 
 import { NpsSurvey } from './NpsSurvey';
 import { PluginsInitializer } from './PluginsInitializer';
-import { RBACProvider, Permission } from './RBACProvider';
+import { RBACProvider } from './RBACProvider';
+
+import type { Information } from '../../../shared/contracts/admin';
+import type { GetOwnPermissions, GetMe } from '../../../shared/contracts/users';
 
 const strapiVersion = packageJSON.version;
 
@@ -44,21 +44,7 @@ const AuthenticatedApp = () => {
     {
       queryKey: 'app-infos',
       async queryFn() {
-        const { data } = await get<
-          APIResponse<
-            Pick<
-              AppInfoContextValue,
-              | 'currentEnvironment'
-              | 'autoReload'
-              | 'communityEdition'
-              | 'dependencies'
-              | 'useYarn'
-              | 'projectId'
-              | 'strapiVersion'
-              | 'nodeVersion'
-            >
-          >
-        >('/admin/information');
+        const { data } = await get<Information.Response>('/admin/information');
 
         return data.data;
       },
@@ -91,7 +77,7 @@ const AuthenticatedApp = () => {
     {
       queryKey: 'admin-users-permission',
       async queryFn() {
-        const { data } = await get<{ data: Permission[] }>('/admin/users/me/permissions');
+        const { data } = await get<GetOwnPermissions.Response>('/admin/users/me/permissions');
 
         return data.data;
       },
@@ -104,7 +90,7 @@ const AuthenticatedApp = () => {
           data: {
             data: { roles },
           },
-        } = await get<APIResponseUsersLegacy<UserEntity>>('/admin/users/me');
+        } = await get<GetMe.Response>('/admin/users/me');
 
         return roles;
       },

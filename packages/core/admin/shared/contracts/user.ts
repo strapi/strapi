@@ -22,6 +22,7 @@ export declare namespace Create {
 /**
  * /find - Find admin users
  */
+// TODO: Rename to FindAll
 export declare namespace Find {
   // TODO make the types for this
   export interface Request {

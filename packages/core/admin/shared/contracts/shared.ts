@@ -1,7 +1,12 @@
-import type { Entity } from '@strapi/types';
+import type { Entity as TEntity } from '@strapi/types';
 
-export type Permission = {
-  id: Entity.ID;
+export interface Entity {
+  id: TEntity.ID;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Permission extends Entity {
   action: string;
   actionParameters: object;
   subject?: string | null;
@@ -11,10 +16,9 @@ export type Permission = {
     [key: string]: any;
   };
   conditions: string[];
-};
+}
 
-export type AdminUser = {
-  id: Entity.ID;
+export interface AdminUser extends Entity {
   firstname?: string;
   lastname?: string;
   username?: string;
@@ -25,25 +29,29 @@ export type AdminUser = {
   isActive: boolean;
   roles: AdminRole[];
   blocked: boolean;
-  preferredLanguage?: string;
-};
+  preferedLanguage?: string;
+}
 
 export type AdminUserCreationPayload = Omit<AdminUser, 'roles' | 'id'> & {
-  roles: Entity.ID[];
+  roles: TEntity.ID[];
 };
 
 export type SanitizedAdminUser = Omit<
   AdminUser,
   'password' | 'resetPasswordToken' | 'registrationToken' | 'roles'
->;
+> & {
+  roles: SanitizedAdminRole[];
+};
 
-export type AdminRole = {
-  id: Entity.ID;
+export interface AdminRole extends Entity {
   name: string;
   code: string;
   description?: string;
   users: AdminUser[];
   permissions: Permission[];
-};
+}
 
-export type SanitizedAdminRole = Omit<AdminRole, 'users' | 'permissions'>;
+export type SanitizedAdminRole = Omit<
+  AdminRole,
+  'users' | 'permissions' | 'createdAt' | 'updatedAt'
+>;
