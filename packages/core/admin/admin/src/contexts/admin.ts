@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import { createContext } from '@radix-ui/react-context';
 
 import type { StrapiApp } from '../StrapiApp';

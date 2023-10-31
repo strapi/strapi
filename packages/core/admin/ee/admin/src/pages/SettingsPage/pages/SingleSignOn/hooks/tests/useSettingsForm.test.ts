@@ -72,18 +72,16 @@ describe('useSettingsForm', () => {
 
     const cbSucc = jest.fn();
 
-    const { result } = setup(mockSchema, cbSucc, [
-      'autoRegister',
-      'defaultRole',
-      'ssoLockedRoles',
-    ]);
+    const { result } = setup(mockSchema, cbSucc, ['autoRegister', 'defaultRole', 'ssoLockedRoles']);
     await waitFor(() => expect(result.current[0].isLoading).toBe(false));
     // call the handleSubmit handler to see if the data provided in modified data are cleaned without duplicates in the ssoLockedRoles list
     const e = { preventDefault: jest.fn() };
     await act(async () => {
+      // @ts-expect-error – this is fine
       await result.current[2].handleSubmit(e);
     });
 
+    // @ts-expect-error – the return type of the hook could be better.
     expect(result.current[0].modifiedData.ssoLockedRoles.length).not.toBe(
       ssoLockedRolesWithDuplications.length
     );
