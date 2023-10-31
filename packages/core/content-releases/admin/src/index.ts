@@ -44,8 +44,6 @@ const admin: Plugin.Config.AdminInput = {
       });
     }
   },
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  bootstrap() {},
   async registerTrads({ locales }: { locales: string[] }) {
     const importedTrads = await Promise.all(
       locales.map((locale) => {
