@@ -7428,6 +7428,7 @@ __metadata:
     "@strapi/pack-up": "workspace:*"
     "@strapi/permissions": "npm:4.15.0"
     "@strapi/provider-audit-logs-local": "npm:4.15.0"
+    "@strapi/strapi": "npm:4.15.0"
     "@strapi/types": "workspace:*"
     "@strapi/typescript-utils": "npm:4.15.0"
     "@strapi/utils": "npm:4.15.0"
@@ -7527,6 +7528,7 @@ __metadata:
     webpack-hot-middleware: "npm:2.25.4"
     yup: "npm:0.32.9"
   peerDependencies:
+    "@strapi/data-transfer": 4.15.0
     "@strapi/strapi": ^4.3.4
   languageName: unknown
   linkType: soft
