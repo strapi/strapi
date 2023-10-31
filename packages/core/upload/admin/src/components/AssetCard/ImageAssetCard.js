@@ -3,15 +3,17 @@ import React from 'react';
 import { CardAsset } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 
-import { cacheBustUrl } from '../../utils';
+import { appendSearchParamsToUrl } from '../../utils';
 
 import { AssetCardBase } from './AssetCardBase';
 
 export const ImageAssetCard = ({ height, width, thumbnail, size, alt, isUrlSigned, ...props }) => {
 
-  const thumbnailUrl = isUrlSigned ? thumbnail : cacheBustUrl({
+  // appending the updatedAt param to the thumbnail URL prevents it from being cached by the browser (cache busting)
+  // applied only if the url is not signed to prevent the signature from being invalidated
+  const thumbnailUrl = isUrlSigned ? thumbnail : appendSearchParamsToUrl({
     url: thumbnail,
-    timestamp: props.updatedAt,
+    params: { updatedAt: props.updatedAt },
   });
 
   return (
