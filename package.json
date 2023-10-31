@@ -30,6 +30,7 @@
   ],
   "scripts": {
     "build": "nx run-many --target=build --nx-ignore-cycles",
+    "build:size": "cd examples/getstarted && yarn build",
     "build:ts": "nx run-many --target=build:ts --nx-ignore-cycles",
     "clean": "nx run-many --target=clean --nx-ignore-cycles",
     "doc:api": "node scripts/open-api/serve.js",
@@ -136,5 +137,6 @@
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
-  }
+  },
+  "isStrapiMonorepo": true
 }

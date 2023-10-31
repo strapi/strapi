@@ -1,15 +1,22 @@
-import { defineConfig } from '@strapi/pack-up';
+import { Config, defineConfig } from '@strapi/pack-up';
+import { transformWithEsbuild } from 'vite';
 
-export default defineConfig({
+const config: Config = defineConfig({
   bundles: [
-    // {
-    //   source: './admin/src/index.ts',
-    //   import: './dist/admin/index.mjs',
-    //   require: './dist/admin/index.js',
-    //   types: './dist/admin/src/index.d.ts',
-    //   tsconfig: './admin/tsconfig.build.json',
-    //   runtime: 'web',
-    // },
+    {
+      source: './admin/src/index.ts',
+      import: './dist/admin/index.mjs',
+      require: './dist/admin/index.js',
+      types: './dist/admin/src/index.d.ts',
+      tsconfig: './admin/tsconfig.build.json',
+      runtime: 'web',
+    },
+    {
+      source: './_internal/index.ts',
+      import: './dist/cli.mjs',
+      require: './dist/cli.js',
+      runtime: 'node',
+    },
     {
       source: './server/src/index.ts',
       import: './dist/server/index.mjs',
@@ -23,7 +30,7 @@ export default defineConfig({
       import: './dist/ee/server/index.mjs',
       require: './dist/ee/server/index.js',
       runtime: 'node',
-    },
+    }
   ],
   dist: './dist',
   /**
@@ -32,4 +39,26 @@ export default defineConfig({
    * what they look like in the package.json
    */
   exports: {},
+  plugins: [
+    {
+      name: 'treat-js-files-as-jsx',
+      async transform(code, id) {
+        /**
+         * Matches all files in src/ and ee/ that end with .js
+         */
+        if (!id.match(/src\/.*\.js$/) && !id.match(/ee\/.*\.js$/)) {
+          return null;
+        }
+
+        // Use the exposed transform from vite, instead of directly
+        // transforming with esbuild
+        return transformWithEsbuild(code, id, {
+          loader: 'tsx',
+          jsx: 'automatic',
+        });
+      },
+    },
+  ],
 });
+
+export default config;

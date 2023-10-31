@@ -30,9 +30,7 @@ const admin: Plugin.Config.AdminInput = {
           id: 'settings',
           to: `/settings/email`,
           async Component() {
-            const { ProtectedSettingsPage } = await import(
-              /* webpackChunkName: "email-settings-page" */ './pages/Settings'
-            );
+            const { ProtectedSettingsPage } = await import('./pages/Settings');
 
             return ProtectedSettingsPage;
           },
@@ -50,9 +48,7 @@ const admin: Plugin.Config.AdminInput = {
   async registerTrads({ locales }: { locales: string[] }) {
     const importedTrads = await Promise.all(
       locales.map((locale) => {
-        return import(
-          /* webpackChunkName: "email-translation-[request]" */ `./translations/${locale}.json`
-        )
+        return import(`./translations/${locale}.json`)
           .then(({ default: data }) => {
             return {
               data: prefixPluginTranslations(data, 'email'),

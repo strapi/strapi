@@ -4,7 +4,7 @@ import { errors, stringEquals } from '@strapi/utils';
 import { getService } from '../../utils';
 import { token } from '../../validation/transfer';
 
-import {
+import type {
   TokenCreate,
   TokenGetById,
   TokenList,

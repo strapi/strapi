@@ -21,9 +21,8 @@ import { Middleware, Middlewares } from './core/apis/Middlewares';
 import { Plugin, PluginConfig } from './core/apis/Plugin';
 import { Reducers } from './core/apis/Reducers';
 import { Store, configureStore } from './core/store/configure';
-import { basename } from './core/utils/basename';
+import { getBasename } from './core/utils/basename';
 import { Handler, createHook } from './core/utils/createHook';
-import favicon from './favicon.png';
 import {
   INJECTION_ZONES,
   InjectionZoneBlock,
@@ -66,7 +65,7 @@ interface StrapiAppPlugin {
   }) => Promise<{ data: Record<string, string>; locale: string }[]>;
 }
 
-export class StrapiApp {
+class StrapiApp {
   admin: {
     injectionZones: InjectionZones;
   };
@@ -110,7 +109,7 @@ export class StrapiApp {
     this.customBootstrapConfiguration = adminConfig?.bootstrap;
     this.configurations = {
       authLogo: Logo,
-      head: { favicon },
+      head: { favicon: '' },
       locales: ['en'],
       menuLogo: Logo,
       notifications: { releases: true },
@@ -421,7 +420,7 @@ export class StrapiApp {
    */
   async loadAdminTrads() {
     const arrayOfPromises = this.configurations.locales.map((locale) => {
-      return import(/* webpackChunkName: "[request]" */ `./translations/${locale}.json`)
+      return import(`./translations/${locale}.json`)
         .then(({ default: data }) => {
           return { data, locale };
         })
@@ -569,19 +568,14 @@ export class StrapiApp {
         store={store}
       >
         <Helmet
-          link={[
-            {
-              rel: 'icon',
-              type: 'image/png',
-              href: this.configurations.head.favicon,
-            },
-          ]}
           htmlAttributes={{ lang: localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) || 'en' }}
         />
-        <BrowserRouter basename={basename}>
+        <BrowserRouter basename={getBasename()}>
           <App />
         </BrowserRouter>
       </Providers>
     );
   }
 }
+
+export { StrapiApp, StrapiAppConstructorArgs };

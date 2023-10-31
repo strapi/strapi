@@ -1,6 +1,6 @@
 node_modules/
 .eslintrc.js
-build/
+dist
 admin/src/plugins.js
 index.d.ts
 dist/
