@@ -7428,6 +7428,7 @@ __metadata:
     "@strapi/pack-up": "workspace:*"
     "@strapi/permissions": "npm:4.15.1"
     "@strapi/provider-audit-logs-local": "npm:4.15.1"
+    "@strapi/strapi": "npm:4.15.1"
     "@strapi/types": "workspace:*"
     "@strapi/typescript-utils": "npm:4.15.1"
     "@strapi/utils": "npm:4.15.1"
@@ -7528,7 +7529,7 @@ __metadata:
     webpack-hot-middleware: "npm:2.25.4"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/data-transfer": 4.15.0
+    "@strapi/data-transfer": 4.15.1
     "@strapi/strapi": ^4.3.4
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
@@ -7770,16 +7771,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/icons@npm:^1.12.0":
-  version: 1.12.0
-  resolution: "@strapi/icons@npm:1.12.0"
-  peerDependencies:
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
-  checksum: 1886def6deeda79147bf02e107570988af08ad70419418f3aad631fc1199c7c22788eeba78c50578eab36115966f622868fb161e3181975390f350b2f43e0a51
-  languageName: node
-  linkType: hard
-
 "@strapi/logger@npm:4.15.1, @strapi/logger@workspace:packages/utils/logger":
   version: 0.0.0-use.local
   resolution: "@strapi/logger@workspace:packages/utils/logger"
@@ -7847,17 +7838,17 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-cloud@workspace:packages/plugins/cloud"
   dependencies:
-    "@strapi/design-system": "npm:^1.12.0"
+    "@strapi/design-system": "npm:1.13.0"
     "@strapi/helper-plugin": "npm:4.15.1"
-    "@strapi/icons": "npm:^1.12.0"
+    "@strapi/icons": "npm:1.13.0"
     "@strapi/strapi": "npm:4.15.1"
-    "@types/react": "npm:^18.2.7"
-    "@types/react-dom": "npm:^18.2.12"
+    "@types/react": "npm:18.2.7"
+    "@types/react-dom": "npm:18.2.12"
     "@types/react-router-dom": "npm:^5.3.3"
     "@types/styled-components": "npm:5.1.26"
     eslint-config-custom: "npm:4.15.1"
-    react: "npm:^18.2.0"
-    react-dom: "npm:^18.2.0"
+    react: "npm:18.2.0"
+    react-dom: "npm:18.2.0"
     react-intl: "npm:6.4.1"
     react-router-dom: "npm:5.3.4"
     styled-components: "npm:5.3.3"
@@ -7867,8 +7858,8 @@ __metadata:
     "@strapi/strapi": ^4.4.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^5.2.0
-    styled-components: ^5.2.1
+    react-router-dom: 5.3.4
+    styled-components: 5.3.3
   languageName: unknown
   linkType: soft
 
@@ -7916,11 +7907,12 @@ __metadata:
   resolution: "@strapi/plugin-content-type-builder@workspace:packages/core/content-type-builder"
   dependencies:
     "@sindresorhus/slugify": "npm:1.1.0"
-    "@strapi/admin": "npm:4.15.1"
     "@strapi/design-system": "npm:1.13.0"
     "@strapi/generators": "npm:4.15.1"
     "@strapi/helper-plugin": "npm:4.15.1"
     "@strapi/icons": "npm:1.13.0"
+    "@strapi/pack-up": "workspace:*"
+    "@strapi/strapi": "npm:4.15.1"
     "@strapi/utils": "npm:4.15.1"
     "@testing-library/react": "npm:14.0.0"
     fs-extra: "npm:10.0.0"
@@ -7939,6 +7931,7 @@ __metadata:
     styled-components: "npm:5.3.3"
     yup: "npm:0.32.9"
   peerDependencies:
+    "@strapi/strapi": ^4.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^5.2.0
@@ -7954,6 +7947,8 @@ __metadata:
     "@strapi/design-system": "npm:1.13.0"
     "@strapi/helper-plugin": "npm:4.15.1"
     "@strapi/icons": "npm:1.13.0"
+    "@strapi/pack-up": "workspace:*"
+    "@strapi/strapi": "npm:4.15.1"
     "@strapi/utils": "npm:4.15.1"
     "@testing-library/react": "npm:14.0.0"
     "@testing-library/user-event": "npm:14.4.3"
@@ -8028,6 +8023,8 @@ __metadata:
     "@strapi/design-system": "npm:1.13.0"
     "@strapi/helper-plugin": "npm:4.15.1"
     "@strapi/icons": "npm:1.13.0"
+    "@strapi/pack-up": "workspace:*"
+    "@strapi/strapi": "npm:4.15.1"
     "@strapi/utils": "npm:4.15.1"
     apollo-server-core: "npm:3.12.1"
     apollo-server-koa: "npm:3.10.0"
@@ -8063,6 +8060,8 @@ __metadata:
     "@strapi/design-system": "npm:1.13.0"
     "@strapi/helper-plugin": "npm:4.15.1"
     "@strapi/icons": "npm:1.13.0"
+    "@strapi/pack-up": "workspace:*"
+    "@strapi/strapi": "npm:4.15.1"
     "@strapi/utils": "npm:4.15.1"
     "@testing-library/react": "npm:14.0.0"
     formik: "npm:2.4.0"
@@ -8080,6 +8079,7 @@ __metadata:
     styled-components: "npm:5.3.3"
     yup: "npm:0.32.9"
   peerDependencies:
+    "@strapi/strapi": ^4.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^5.2.0
@@ -8095,6 +8095,8 @@ __metadata:
     "@strapi/design-system": "npm:1.13.0"
     "@strapi/helper-plugin": "npm:4.15.1"
     "@strapi/icons": "npm:1.13.0"
+    "@strapi/pack-up": "workspace:*"
+    "@strapi/strapi": "npm:4.15.1"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
     react-router-dom: "npm:5.3.4"
@@ -8115,7 +8117,9 @@ __metadata:
     "@strapi/design-system": "npm:1.13.0"
     "@strapi/helper-plugin": "npm:4.15.1"
     "@strapi/icons": "npm:1.13.0"
+    "@strapi/pack-up": "workspace:*"
     "@strapi/provider-upload-local": "npm:4.15.1"
+    "@strapi/strapi": "npm:4.15.1"
     "@strapi/utils": "npm:4.15.1"
     "@testing-library/dom": "npm:9.2.0"
     "@testing-library/react": "npm:14.0.0"
@@ -8147,6 +8151,7 @@ __metadata:
     styled-components: "npm:5.3.3"
     yup: "npm:0.32.9"
   peerDependencies:
+    "@strapi/strapi": ^4.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^5.2.0
@@ -8161,6 +8166,8 @@ __metadata:
     "@strapi/design-system": "npm:1.13.0"
     "@strapi/helper-plugin": "npm:4.15.1"
     "@strapi/icons": "npm:1.13.0"
+    "@strapi/pack-up": "workspace:*"
+    "@strapi/strapi": "npm:4.15.1"
     "@strapi/utils": "npm:4.15.1"
     "@testing-library/dom": "npm:9.2.0"
     "@testing-library/react": "npm:14.0.0"
@@ -8187,6 +8194,7 @@ __metadata:
     url-join: "npm:4.0.1"
     yup: "npm:0.32.9"
   peerDependencies:
+    "@strapi/strapi": 4.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^5.2.0
@@ -9671,6 +9679,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-dom@npm:18.2.12":
+  version: 18.2.12
+  resolution: "@types/react-dom@npm:18.2.12"
+  dependencies:
+    "@types/react": "npm:*"
+  checksum: 589bcdb941a77555aa8aea72271c59d92447a8364b95db0e431252cd5fa7281e2430a364de07b8cd8d22ae0599595d281625b380dd8dce68f172861abad55a80
+  languageName: node
+  linkType: hard
+
 "@types/react-dom@npm:18.2.7":
   version: 18.2.7
   resolution: "@types/react-dom@npm:18.2.7"
@@ -9686,15 +9703,6 @@ __metadata:
   dependencies:
     "@types/react": "npm:*"
   checksum: e6dd39b2ef65f6e6257f1792c62e997273a06c3e72e05f082185d0b8dfd8972340f9d5452408183b4bf03bd68cbb2fb9da89e063f1ba98c287a38953491febec
-  languageName: node
-  linkType: hard
-
-"@types/react-dom@npm:^18.2.12":
-  version: 18.2.12
-  resolution: "@types/react-dom@npm:18.2.12"
-  dependencies:
-    "@types/react": "npm:*"
-  checksum: 589bcdb941a77555aa8aea72271c59d92447a8364b95db0e431252cd5fa7281e2430a364de07b8cd8d22ae0599595d281625b380dd8dce68f172861abad55a80
   languageName: node
   linkType: hard
 
@@ -26602,7 +26610,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:^18.2.0":
+"react-dom@npm:18.2.0, react-dom@npm:^18.2.0":
   version: 18.2.0
   resolution: "react-dom@npm:18.2.0"
   dependencies:
@@ -26949,7 +26957,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:^18.2.0":
+"react@npm:18.2.0, react@npm:^18.2.0":
   version: 18.2.0
   resolution: "react@npm:18.2.0"
   dependencies:
