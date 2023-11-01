@@ -1,31 +1,36 @@
-import React from 'react';
-
 import { Box, Button, Divider, Flex, Loader, Main, Typography } from '@strapi/design-system';
-import { Link } from '@strapi/helper-plugin';
+import { Link } from '@strapi/design-system/v2';
+import { useFetchClient } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { Redirect, useHistory } from 'react-router-dom';
+import { useQuery } from 'react-query';
+import { NavLink, Redirect, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { Logo } from '../../../../../../../admin/src/components/UnauthenticatedLogo';
+import { Logo } from '../../../../../../admin/src/components/UnauthenticatedLogo';
 import {
   Column,
   LayoutContent,
   UnauthenticatedLayout,
-} from '../../../../../../../admin/src/layouts/UnauthenticatedLayout';
-import { useAuthProviders } from '../../../../hooks/useAuthProviders';
+} from '../../../../../../admin/src/layouts/UnauthenticatedLayout';
+import { GetProviders } from '../../../../../../shared/contracts/providers';
 
-import SSOProviders from './SSOProviders';
-
-const DividerFull = styled(Divider)`
-  flex: 1;
-`;
+import { SSOProviders } from './SSOProviders';
 
 const Providers = () => {
   const { push } = useHistory();
   const { formatMessage } = useIntl();
-  const { isLoading, providers } = useAuthProviders({
-    enabled: window.strapi.features.isEnabled(window.strapi.features.SSO),
-  });
+  const { get } = useFetchClient();
+  const { isLoading, data: providers = [] } = useQuery(
+    ['ee', 'providers'],
+    async () => {
+      const { data } = await get<GetProviders.Response>('/admin/providers');
+
+      return data;
+    },
+    {
+      enabled: window.strapi.features.isEnabled(window.strapi.features.SSO),
+    }
+  );
 
   const handleClick = () => {
     push('/auth/login');
@@ -79,7 +84,8 @@ const Providers = () => {
         </LayoutContent>
         <Flex justifyContent="center">
           <Box paddingTop={4}>
-            <Link to="/auth/forgot-password">
+            {/* @ts-expect-error – error with inferring the props from the as component */}
+            <Link as={NavLink} to="/auth/forgot-password">
               <Typography variant="pi">
                 {formatMessage({ id: 'Auth.link.forgot-password' })}
               </Typography>
@@ -91,4 +97,8 @@ const Providers = () => {
   );
 };
 
-export default Providers;
+const DividerFull = styled(Divider)`
+  flex: 1;
+`;
+
+export { Providers };

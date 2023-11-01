@@ -11,4 +11,4 @@ const FieldActionWrapper = styled(FieldAction)`
   }
 `;
 
-export default FieldActionWrapper;
+export { FieldActionWrapper };
