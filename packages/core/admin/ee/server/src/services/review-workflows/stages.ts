@@ -1,4 +1,4 @@
-import { LoadedStrapi as Strapi } from '@strapi/types';
+import { Entity, LoadedStrapi as Strapi } from '@strapi/types';
 import { mapAsync, reduceAsync, errors } from '@strapi/utils';
 import { map, pick, isEqual } from 'lodash/fp';
 import { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE, ERRORS } from '../../constants/workflows';
@@ -22,7 +22,7 @@ export default ({ strapi }: { strapi: Strapi }) => {
       return strapi.entityService.findMany(STAGE_MODEL_UID, params);
     },
 
-    findById(id: string, { populate }: any = {}) {
+    findById(id: Entity.ID, { populate }: any = {}) {
       const params = {
         populate,
       };

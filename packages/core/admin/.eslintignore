@@ -1,6 +1,1 @@
-node_modules/
-.eslintrc.js
 dist
-admin/src/plugins.js
-index.d.ts
-dist/

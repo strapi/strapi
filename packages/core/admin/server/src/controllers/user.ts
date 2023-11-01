@@ -17,6 +17,7 @@ import {
   FindOne,
   Update,
 } from '../../../shared/contracts/user';
+import { AdminUser } from '../../../shared/contracts/shared';
 
 const { ApplicationError } = errors;
 
@@ -86,8 +87,7 @@ export default {
     }
 
     ctx.body = {
-      // @ts-ignore
-      data: getService('user').sanitizeUser(user),
+      data: getService('user').sanitizeUser(user as AdminUser),
     } as FindOne.Response;
   },
 

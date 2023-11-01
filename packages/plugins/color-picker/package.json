@@ -44,10 +44,7 @@
   "scripts": {
     "build": "strapi plugin:build --force",
     "clean": "run -T rimraf ./dist",
-    "lint": "yarn lint:project && yarn lint:back && yarn lint:front",
-    "lint:back": "run -T eslint ./server -c ./server/.eslintrc.js",
-    "lint:front": "run -T eslint ./admin -c ./admin/.eslintrc.js",
-    "lint:project": "run -T eslint . -c ./.eslintrc.js",
+    "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",

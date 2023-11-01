@@ -1,5 +1,6 @@
 import { getAllowedActionsForRole } from '../action';
 import constants from '../constants';
+
 const { AUTHOR_CODE, PUBLISH_ACTION } = constants;
 
 const fixtures = [

@@ -29,7 +29,7 @@ export interface AdminUser extends Entity {
   isActive: boolean;
   roles: AdminRole[];
   blocked: boolean;
-  preferredLanguage?: string;
+  preferedLanguage?: string;
 }
 
 export type AdminUserCreationPayload = Omit<AdminUser, 'roles' | 'id'> & {
@@ -39,7 +39,9 @@ export type AdminUserCreationPayload = Omit<AdminUser, 'roles' | 'id'> & {
 export type SanitizedAdminUser = Omit<
   AdminUser,
   'password' | 'resetPasswordToken' | 'registrationToken' | 'roles'
->;
+> & {
+  roles: SanitizedAdminRole[];
+};
 
 export interface AdminRole extends Entity {
   name: string;
@@ -49,4 +51,7 @@ export interface AdminRole extends Entity {
   permissions: Permission[];
 }
 
-export type SanitizedAdminRole = Omit<AdminRole, 'users' | 'permissions'>;
+export type SanitizedAdminRole = Omit<
+  AdminRole,
+  'users' | 'permissions' | 'createdAt' | 'updatedAt'
+>;

@@ -21,7 +21,7 @@ const allowedOperations = [
 const operations = pick(allowedOperations, sift);
 
 const conditionsMatcher = (conditions: any) => {
-  //@ts-expect-error
+  // @ts-expect-error
   return sift.createQueryTester(conditions, { operations });
 };
 

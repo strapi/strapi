@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import constants from '../constants';
 import { create as createPermission, toPermission } from '../../domain/permission';
-import createEventHub from '../../../../../strapi/dist/services/event-hub';
 
 import roleService from '../role';
+
 const {
   sanitizeRole,
   create,
@@ -32,7 +32,9 @@ describe('Role', () => {
 
       global.strapi = {
         query: () => ({ create: dbCreate, count: dbCount }),
-        eventHub: createEventHub(),
+        eventHub: {
+          emit: jest.fn(),
+        },
       } as any;
 
       const input = {
@@ -105,7 +107,7 @@ describe('Role', () => {
         query: () => ({ findMany: dbFind }),
       } as any;
 
-      //@ts-expect-error
+      // @ts-expect-error - fix types
       const foundRoles = await find();
 
       expect(dbFind).toHaveBeenCalledWith({ where: {} });
@@ -171,7 +173,9 @@ describe('Role', () => {
 
       global.strapi = {
         query: () => ({ update: dbUpdate, count: dbCount }),
-        eventHub: createEventHub(),
+        eventHub: {
+          emit: jest.fn(),
+        },
       } as any;
 
       const updatedRole = await update(
@@ -207,7 +211,9 @@ describe('Role', () => {
         query: () => ({ find: dbFind, findOne: dbFindOne, update: dbUpdate }),
         admin: { config: { superAdminCode: SUPER_ADMIN_CODE } },
         errors: { badRequest },
-        eventHub: createEventHub(),
+        eventHub: {
+          emit: jest.fn(),
+        },
       } as any;
 
       await update({ id: 1 }, { code: 'new_code' });
@@ -259,7 +265,9 @@ describe('Role', () => {
           },
           config: { superAdminCode: SUPER_ADMIN_CODE },
         },
-        eventHub: createEventHub(),
+        eventHub: {
+          emit: jest.fn(),
+        },
       } as any;
 
       const deletedRoles = await deleteByIds([role.id]);
@@ -312,7 +320,9 @@ describe('Role', () => {
           },
           config: { superAdminCode: SUPER_ADMIN_CODE },
         },
-        eventHub: createEventHub(),
+        eventHub: {
+          emit: jest.fn(),
+        },
       } as any;
 
       const deletedRoles = await deleteByIds(rolesIds);
@@ -499,7 +509,9 @@ describe('Role', () => {
             user: { assignARoleToAll },
           },
         },
-        eventHub: createEventHub(),
+        eventHub: {
+          emit: jest.fn(),
+        },
       } as any;
 
       await createRolesIfNoneExist();
@@ -704,7 +716,9 @@ describe('Role', () => {
             role: { getSuperAdmin },
           },
         },
-        eventHub: createEventHub(),
+        eventHub: {
+          emit: jest.fn(),
+        },
       } as any;
 
       await resetSuperAdminPermissions();
@@ -738,7 +752,9 @@ describe('Role', () => {
             role: { getSuperAdmin },
           },
         },
-        eventHub: createEventHub(),
+        eventHub: {
+          emit: jest.fn(),
+        },
       } as any;
 
       await assignPermissions(1, []);
@@ -774,7 +790,9 @@ describe('Role', () => {
             },
           },
         },
-        eventHub: createEventHub(),
+        eventHub: {
+          emit: jest.fn(),
+        },
       } as any;
 
       const permissionsToAssign: any = [...permissions];
@@ -864,7 +882,9 @@ describe('Role', () => {
             },
           },
         },
-        eventHub: createEventHub(),
+        eventHub: {
+          emit: jest.fn(),
+        },
       } as any;
 
       await assignPermissions(1, permissions);
@@ -924,7 +944,9 @@ describe('Role', () => {
             },
           },
         },
-        eventHub: createEventHub(),
+        eventHub: {
+          emit: jest.fn(),
+        },
       } as any;
 
       const returnedPermissions = await assignPermissions(1, permissions);
