@@ -32,7 +32,7 @@ export declare namespace RenewToken {
     data: {
       token: string;
     };
-    errors?: errors.ApplicationError | errors.ValidationError<'Invalid token'>;
+    errors?: errors.ApplicationError | errors.ValidationError;
   }
 }
 
@@ -52,7 +52,7 @@ export declare namespace RegistrationInfo {
       firstname?: string;
       lastname?: string;
     };
-    errors?: errors.ApplicationError | errors.ValidationError<'Invalid registrationToken'>;
+    errors?: errors.ApplicationError | errors.ValidationError;
   }
 }
 
