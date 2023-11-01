@@ -56,7 +56,7 @@ describe('Transfer Token Controller', () => {
       const exists = jest.fn(() => false);
       const badRequest = jest.fn();
       const created = jest.fn();
-      const ctx = createContext({ body }, { badRequest, created });
+      const ctx = createContext({ body }, { badRequest, created }) as any;
 
       global.strapi = {
         admin: {
@@ -94,7 +94,7 @@ describe('Transfer Token Controller', () => {
       const exists = jest.fn(() => false);
       const badRequest = jest.fn();
       const created = jest.fn();
-      const ctx = createContext({ body: createBody }, { badRequest, created });
+      const ctx = createContext({ body: createBody }, { badRequest, created }) as any;
 
       global.strapi = {
         admin: {
@@ -126,7 +126,7 @@ describe('Transfer Token Controller', () => {
 
       const create = jest.fn();
       const created = jest.fn();
-      const ctx = createContext({ body: createBody }, { created });
+      const ctx = createContext({ body: createBody }, { created }) as any;
 
       global.strapi = {
         admin: {
@@ -154,7 +154,7 @@ describe('Transfer Token Controller', () => {
 
       const create = jest.fn();
       const created = jest.fn();
-      const ctx = createContext({ body: createBody }, { created });
+      const ctx = createContext({ body: createBody }, { created }) as any;
 
       global.strapi = {
         admin: {
@@ -192,7 +192,7 @@ describe('Transfer Token Controller', () => {
       const exists = jest.fn(() => false);
       const badRequest = jest.fn();
       const created = jest.fn();
-      const ctx = createContext({ body: createBody }, { badRequest, created });
+      const ctx = createContext({ body: createBody }, { badRequest, created }) as any;
 
       global.strapi = {
         admin: {
@@ -266,7 +266,7 @@ describe('Transfer Token Controller', () => {
     test('Deletes an transfer token successfully', async () => {
       const revoke = jest.fn().mockResolvedValue(token);
       const deleted = jest.fn();
-      const ctx = createContext({ params: { id: token.id } }, { deleted });
+      const ctx = createContext({ params: { id: token.id } }, { deleted }) as any;
 
       global.strapi = {
         admin: {
@@ -289,7 +289,7 @@ describe('Transfer Token Controller', () => {
     test('Does not return an error if the resource does not exists', async () => {
       const revoke = jest.fn().mockResolvedValue(null);
       const deleted = jest.fn();
-      const ctx = createContext({ params: { id: token.id } }, { deleted });
+      const ctx = createContext({ params: { id: token.id } }, { deleted }) as any;
 
       global.strapi = {
         admin: {
@@ -322,7 +322,7 @@ describe('Transfer Token Controller', () => {
       const regenerate = jest.fn().mockResolvedValue(token);
       const getById = jest.fn().mockResolvedValue(token);
       const created = jest.fn();
-      const ctx = createContext({ params: { id: token.id } }, { created });
+      const ctx = createContext({ params: { id: token.id } }, { created }) as any;
 
       global.strapi = {
         admin: {
@@ -347,7 +347,7 @@ describe('Transfer Token Controller', () => {
       const getById = jest.fn().mockResolvedValue(null);
       const created = jest.fn();
       const notFound = jest.fn();
-      const ctx = createContext({ params: { id: token.id } }, { created, notFound });
+      const ctx = createContext({ params: { id: token.id } }, { created, notFound }) as any;
 
       global.strapi = {
         admin: {
@@ -404,7 +404,7 @@ describe('Transfer Token Controller', () => {
     test('Fails if the transfer token does not exist', async () => {
       const getById = jest.fn().mockResolvedValue(null);
       const notFound = jest.fn();
-      const ctx = createContext({ params: { id: token.id } }, { notFound });
+      const ctx = createContext({ params: { id: token.id } }, { notFound }) as any;
 
       global.strapi = {
         admin: {
@@ -437,7 +437,7 @@ describe('Transfer Token Controller', () => {
     test('Fails if the name is already taken', async () => {
       const getById = jest.fn(() => ({ id, ...body }));
       const getByName = jest.fn(() => ({ id: 2, name: body.name }));
-      const ctx = createContext({ body, params: { id } });
+      const ctx = createContext({ body, params: { id } }) as any;
 
       global.strapi = {
         admin: {
@@ -468,7 +468,7 @@ describe('Transfer Token Controller', () => {
       const getById = jest.fn(() => null);
       const notFound = jest.fn();
       const getByName = jest.fn(() => ({ id: 1, name: body.name }));
-      const ctx = createContext({ body, params: { id } }, { notFound });
+      const ctx = createContext({ body, params: { id } }, { notFound }) as any;
 
       global.strapi = {
         admin: {
@@ -494,7 +494,7 @@ describe('Transfer Token Controller', () => {
       const getById = jest.fn(() => ({ id, ...body }));
       const getByName = jest.fn(() => ({ id, name: body.name }));
       const notFound = jest.fn();
-      const ctx = createContext({ body, params: { id } }, { notFound });
+      const ctx = createContext({ body, params: { id } }, { notFound }) as any;
 
       global.strapi = {
         admin: {
