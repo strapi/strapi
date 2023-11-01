@@ -172,6 +172,8 @@ const Register = ({ hasAdmin }: RegisterProps) => {
             pathname: '/usecase',
             search: `?hasAdmin=${true}`,
           });
+        } else {
+          push('/');
         }
       },
       onError(err: AxiosError<{ error: Exclude<RegisterAdmin.Response['errors'], undefined> }>) {
@@ -205,6 +207,8 @@ const Register = ({ hasAdmin }: RegisterProps) => {
             pathname: '/usecase',
             search: `?hasAdmin=${hasAdmin}`,
           });
+        } else {
+          push('/');
         }
       },
       onError(err: AxiosError<{ error: Exclude<RegisterAdmin.Response['errors'], undefined> }>) {

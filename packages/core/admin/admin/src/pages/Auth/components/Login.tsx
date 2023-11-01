@@ -36,6 +36,7 @@ const LOGIN_SCHEMA = yup.object().shape({
 });
 
 const Login = ({ children }: LoginProps) => {
+  const [apiError, setApiError] = React.useState<string>();
   const [passwordShown, setPasswordShown] = React.useState(false);
   const { formatMessage } = useIntl();
   const { post } = useFetchClient();
@@ -76,6 +77,8 @@ const Login = ({ children }: LoginProps) => {
           push('/auth/oops');
           return;
         }
+
+        setApiError(message);
       },
     }
   );
@@ -102,12 +105,9 @@ const Login = ({ children }: LoginProps) => {
                 })}
               </Typography>
             </Box>
-            {mutation.isError ? (
+            {mutation.isError && apiError ? (
               <Typography id="global-form-error" role="alert" tabIndex={-1} textColor="danger600">
-                {formatMessage({
-                  id: 'notification.error',
-                  defaultMessage: 'An error occurred',
-                })}
+                {apiError}
               </Typography>
             ) : null}
           </Column>

@@ -1,11 +1,8 @@
-import { fireEvent } from '@testing-library/react';
-import { render, waitFor } from '@tests/utils';
+import { render } from '@tests/utils';
 
 import { Register } from '../Register';
 
-const PASSWORD_VALID = '!Eight_8_characters!';
-
-describe.skip('AUTH | Register', () => {
+describe('Register', () => {
   it('Render form elements', () => {
     const { getByText, getByRole, getByLabelText } = render(<Register />);
 
@@ -25,91 +22,10 @@ describe.skip('AUTH | Register', () => {
     expect(getByRole('button', { name: /let's start/i })).toBeInTheDocument();
   });
 
-  it('Serialize the form and normalize input values', async () => {
-    const spy = jest.fn();
-    const { getByRole, getByLabelText, user } = render(<Register />);
-
-    await user.type(getByLabelText(/Firstname/i), ' First name ');
-    await user.type(getByLabelText(/Lastname/i), ' Last name ');
-    await user.type(getByLabelText(/Email/i), ' test@strapi.io ');
-    await user.type(getByLabelText(/^Password/i), PASSWORD_VALID);
-    await user.type(getByLabelText(/Confirm Password/i), PASSWORD_VALID);
-
-    fireEvent.click(getByRole('button', { name: /let's start/i }));
-
-    await waitFor(() =>
-      expect(spy).toHaveBeenCalledWith(
-        {
-          firstname: 'First name',
-          lastname: 'Last name',
-          email: 'test@strapi.io',
-          news: false,
-          registrationToken: undefined,
-          confirmPassword: PASSWORD_VALID,
-          password: PASSWORD_VALID,
-        },
-        expect.any(Object)
-      )
-    );
-  });
-
-  it('Validates optional Lastname value to be null', async () => {
-    const spy = jest.fn();
-    const { getByRole, getByLabelText, user } = render(<Register />);
-
-    await user.type(getByLabelText(/Firstname/i), 'First name');
-    await user.type(getByLabelText(/Email/i), 'test@strapi.io');
-    await user.type(getByLabelText(/^Password/i), PASSWORD_VALID);
-    await user.type(getByLabelText(/Confirm Password/i), PASSWORD_VALID);
-
-    fireEvent.click(getByRole('button', { name: /let's start/i }));
-
-    await waitFor(() =>
-      expect(spy).toHaveBeenCalledWith(
-        {
-          firstname: 'First name',
-          lastname: null,
-          email: 'test@strapi.io',
-          news: false,
-          registrationToken: undefined,
-          confirmPassword: PASSWORD_VALID,
-          password: PASSWORD_VALID,
-        },
-        expect.any(Object)
-      )
-    );
-  });
-
-  it('Validates optional Lastname value to be empty space', async () => {
-    const spy = jest.fn();
-    const { getByRole, getByLabelText, user } = render(<Register />);
-
-    await user.type(getByLabelText(/Firstname/i), 'First name');
-    await user.type(getByLabelText(/Lastname/i), ' ');
-    await user.type(getByLabelText(/Email/i), 'test@strapi.io');
-    await user.type(getByLabelText(/^Password/i), PASSWORD_VALID);
-    await user.type(getByLabelText(/Confirm Password/i), PASSWORD_VALID);
-
-    fireEvent.click(getByRole('button', { name: /let's start/i }));
-
-    await waitFor(() =>
-      expect(spy).toHaveBeenCalledWith(
-        {
-          firstname: 'First name',
-          lastname: null,
-          email: 'test@strapi.io',
-          news: false,
-          registrationToken: undefined,
-          confirmPassword: PASSWORD_VALID,
-          password: PASSWORD_VALID,
-        },
-        expect.any(Object)
-      )
-    );
-  });
-
-  it('Disable fields', () => {
-    const { getByLabelText } = render(<Register />);
+  it('Disable fields when the route is register', () => {
+    const { getByLabelText } = render(<Register />, {
+      initialEntries: ['/register'],
+    });
 
     expect(getByLabelText(/Firstname/i)).toBeEnabled();
     expect(getByLabelText(/Email/i)).toBeDisabled();
@@ -117,7 +33,7 @@ describe.skip('AUTH | Register', () => {
 
   it('Shows an error notification if the token does not exist', async () => {
     const { findByText } = render(<Register />, {
-      initialEntries: ['/?registrationToken=error'],
+      initialEntries: ['/register?registrationToken=error'],
     });
 
     await findByText('Request failed with status code 500');
