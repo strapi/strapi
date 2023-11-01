@@ -44,10 +44,6 @@
   },
   "devDependencies": {
     "@strapi/strapi": "4.15.0",
-    "@types/react": "18.2.7",
-    "@types/react-dom": "18.2.12",
-    "@types/react-router-dom": "^5.3.3",
-    "@types/styled-components": "5.1.26",
     "eslint-config-custom": "4.15.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",

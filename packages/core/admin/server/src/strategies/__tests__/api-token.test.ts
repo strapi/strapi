@@ -1,5 +1,6 @@
+/* eslint-disable import/no-relative-packages */
 import { errors } from '@strapi/utils';
-// eslint-disable-next-line import/no-relative-packages
+// @ts-expect-error - test purposes
 import createContext from '../../../../../../../test/helpers/create-context';
 import apiTokenStrategy from '../api-token';
 

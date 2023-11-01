@@ -1,4 +1,5 @@
-// eslint-disable-next-line import/no-relative-packages
+/* eslint-disable import/no-relative-packages */
+// @ts-expect-error - test purposes
 import createContext from '../../../../../../../test/helpers/create-context';
 import adminAuthStrategy from '../admin';
 

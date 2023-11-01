@@ -68,9 +68,6 @@
     "test:unit:watch": "run -T jest --watch",
     "watch": "pack-up watch"
   },
-  "resolutions": {
-    "@types/react": "18.2.7"
-  },
   "dependencies": {
     "@casl/ability": "6.5.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",
