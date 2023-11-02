@@ -1,5 +1,3 @@
-'use strict';
-
 import { isNil } from 'lodash/fp';
 import ee from '@strapi/strapi/dist/utils/ee';
 import { env } from '@strapi/utils';

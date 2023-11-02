@@ -1,5 +1,3 @@
-'use strict';
-
 import _ from 'lodash';
 import { pipe, map, castArray, toNumber } from 'lodash/fp';
 import { stringIncludes } from '@strapi/utils';

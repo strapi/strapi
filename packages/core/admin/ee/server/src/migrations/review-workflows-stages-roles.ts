@@ -1,5 +1,3 @@
-'use strict';
-
 import { STAGE_TRANSITION_UID, STAGE_MODEL_UID } from '../constants/workflows';
 import { getService } from '../utils';
 

@@ -1,5 +1,3 @@
-'use strict';
-
 import { getService } from '../../../utils';
 import { validateUpdateAssigneeOnEntity } from '../../../validation/review-workflows';
 

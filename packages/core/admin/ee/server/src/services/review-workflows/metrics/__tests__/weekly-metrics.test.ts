@@ -1,5 +1,3 @@
-'use strict';
-
 import weeklyMetrics from '../weekly-metrics';
 
 jest.mock('../../../../../../server/src/utils', () => {

@@ -1,5 +1,3 @@
-'use strict';
-
 // eslint-disable-next-line node/no-extraneous-require
 import ee from '@strapi/strapi/dist/utils/ee';
 import { take, drop, map, prop, pick, reverse, isNil } from 'lodash/fp';

@@ -1,5 +1,3 @@
-'use strict';
-
 jest.mock('@strapi/strapi/dist/utils/ee', () => {
   const eeModule = () => true;
 

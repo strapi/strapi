@@ -1,5 +1,3 @@
-'use strict';
-
 // TODO concatenate admin + content type singular name
 export const WORKFLOW_MODEL_UID = 'admin::workflow';
 export const STAGE_MODEL_UID = 'admin::workflow-stage';

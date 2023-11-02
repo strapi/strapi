@@ -1,5 +1,3 @@
-'use strict';
-
 import { difference, keys } from 'lodash/fp';
 import { mapAsync } from '@strapi/utils';
 import { WORKFLOW_MODEL_UID } from '../constants/workflows';

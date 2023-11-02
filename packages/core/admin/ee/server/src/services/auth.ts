@@ -1,5 +1,3 @@
-'use strict';
-
 import _ from 'lodash';
 import { getAbsoluteAdminUrl } from '@strapi/utils';
 import { errors } from '@strapi/utils';

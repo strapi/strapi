@@ -1,5 +1,3 @@
-'use strict';
-
 import { enableFeatureMiddleware } from './utils';
 
 export default {

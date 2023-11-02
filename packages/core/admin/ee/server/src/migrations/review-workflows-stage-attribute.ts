@@ -1,5 +1,3 @@
-'use strict';
-
 import semver from 'semver';
 import { getOr } from 'lodash/fp';
 import { mapAsync } from '@strapi/utils';

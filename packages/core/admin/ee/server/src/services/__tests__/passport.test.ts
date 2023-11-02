@@ -1,5 +1,3 @@
-'use strict';
-
 jest.mock('koa-passport', () => ({
   use: jest.fn(),
   initialize: jest.fn(),

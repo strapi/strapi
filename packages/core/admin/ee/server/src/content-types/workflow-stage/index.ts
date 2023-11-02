@@ -1,5 +1,3 @@
-'use strict';
-
 import { STAGE_DEFAULT_COLOR } from '../../constants/workflows';
 
 export default {
