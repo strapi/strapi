@@ -8,6 +8,7 @@ import { Logger } from './logger';
 
 import type { Export } from './exports';
 import type { Runtime } from '../createBuildContext';
+import type { PluginOption } from 'vite';
 
 interface LoadConfigOptions {
   cwd: string;
@@ -90,6 +91,7 @@ interface ConfigOptions {
    */
   externals?: string[];
   minify?: boolean;
+  plugins?: PluginOption[] | (({ runtime }: { runtime: Runtime }) => PluginOption[]);
   /**
    * @alpha
    *
@@ -135,4 +137,12 @@ export function resolveConfigProperty<T>(prop: ConfigProperty<T> | undefined, in
 }
 
 export { loadConfig, defineConfig, CONFIG_FILE_NAMES };
-export type { Config, ConfigOptions, ConfigBundle, ConfigPropertyResolver, ConfigProperty };
+export type {
+  Config,
+  ConfigOptions,
+  ConfigBundle,
+  ConfigPropertyResolver,
+  ConfigProperty,
+  PluginOption,
+  Runtime,
+};

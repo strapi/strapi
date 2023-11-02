@@ -1,12 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 import { hasPermissions, useRBACProvider, useStrapiApp, useAppInfo } from '@strapi/helper-plugin';
 import { useSelector } from 'react-redux';
 
-import { selectAdminPermissions } from '../../pages/App/selectors';
+import { SETTINGS_LINKS_CE } from '../../constants';
+import { selectAdminPermissions } from '../../selectors';
 import { useEnterprise } from '../useEnterprise';
 
-import { LINKS_CE } from './constants';
 import formatLinks from './utils/formatLinks';
 import sortLinks from './utils/sortLinks';
 
@@ -20,9 +20,15 @@ const useSettingsMenu = () => {
   const { settings } = useStrapiApp();
   const permissions = useSelector(selectAdminPermissions);
 
+  /**
+   * memoize the return value of this function to avoid re-computing it on every render
+   * because it's used in an effect it ends up re-running recursively.
+   */
+  const ceLinks = useMemo(() => SETTINGS_LINKS_CE(), []);
+
   const { global: globalLinks, admin: adminLinks } = useEnterprise(
-    LINKS_CE,
-    async () => (await import('../../../../ee/admin/hooks/useSettingsMenu/constants')).LINKS_EE,
+    ceLinks,
+    async () => (await import('../../../../ee/admin/src/constants')).SETTINGS_LINKS_EE(),
     {
       combine(ceLinks, eeLinks) {
         return {
@@ -69,24 +75,26 @@ const useSettingsMenu = () => {
 
       const menuPermissions = await buildMenuPermissions(sections);
 
-      setData((prev) => ({
-        ...prev,
-        isLoading: false,
-        menu: sections.map((section, sectionIndex) => ({
-          ...section,
-          links: section.links.map((link, linkIndex) => {
-            const permission = menuPermissions.find(
-              (permission) =>
-                permission.sectionIndex === sectionIndex && permission.linkIndex === linkIndex
-            );
+      setData((prev) => {
+        return {
+          ...prev,
+          isLoading: false,
+          menu: sections.map((section, sectionIndex) => ({
+            ...section,
+            links: section.links.map((link, linkIndex) => {
+              const permission = menuPermissions.find(
+                (permission) =>
+                  permission.sectionIndex === sectionIndex && permission.linkIndex === linkIndex
+              );
 
-            return {
-              ...link,
-              isDisplayed: Boolean(permission.hasPermission),
-            };
-          }),
-        })),
-      }));
+              return {
+                ...link,
+                isDisplayed: Boolean(permission.hasPermission),
+              };
+            }),
+          })),
+        };
+      });
     };
 
     const { global, ...otherSections } = settings;

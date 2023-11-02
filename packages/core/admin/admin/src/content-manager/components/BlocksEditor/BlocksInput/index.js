@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { Box } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { Editable, useSlate } from 'slate-react';
 import { useTheme } from 'styled-components';
@@ -41,6 +42,7 @@ const baseRenderElement = (props, blocks) => {
 const BlocksInput = ({ disabled, placeholder }) => {
   const theme = useTheme();
   const editor = useSlate();
+  const blocksRef = React.useRef();
 
   // Create renderLeaf function based on the modifiers store
   const modifiers = useModifiersStore();
@@ -72,6 +74,21 @@ const BlocksInput = ({ disabled, placeholder }) => {
     }
   };
 
+  /**
+   * Modifier keyboard shortcuts
+   */
+  const handleKeyboardShortcuts = (event) => {
+    const isCtrlOrCmd = event.metaKey || event.ctrlKey;
+
+    if (isCtrlOrCmd) {
+      Object.values(modifiers).forEach((value) => {
+        if (value.isValidEventKey(event)) {
+          value.handleToggle();
+        }
+      });
+    }
+  };
+
   const handleKeyDown = (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
@@ -80,6 +97,7 @@ const BlocksInput = ({ disabled, placeholder }) => {
     if (event.key === 'Backspace') {
       handleBackspaceEvent(event);
     }
+    handleKeyboardShortcuts(event);
   };
 
   /**
@@ -90,13 +108,13 @@ const BlocksInput = ({ disabled, placeholder }) => {
    */
   const handleScrollSelectionIntoView = (_, domRange) => {
     const domRect = domRange.getBoundingClientRect();
-    const slateInput = document.getElementById('slate-input');
-    const editorRect = slateInput.parentElement.getBoundingClientRect(); // editorWrapper with overflow:auto
+    const blocksInput = blocksRef.current;
+    const editorRect = blocksInput.getBoundingClientRect();
 
     // Check if the selection is not fully within the visible area of the editor
     if (domRect.top < editorRect.top || domRect.bottom > editorRect.bottom) {
       // Scroll by one line to the bottom
-      slateInput.parentElement.scrollBy({
+      blocksInput.scrollBy({
         top: 28, // 20px is the line-height + 8px line gap
         behavior: 'smooth',
       });
@@ -104,16 +122,31 @@ const BlocksInput = ({ disabled, placeholder }) => {
   };
 
   return (
-    <Editable
-      id="slate-input"
-      readOnly={disabled}
-      placeholder={placeholder}
-      style={getEditorStyle(theme)}
-      renderElement={renderElement}
-      renderLeaf={renderLeaf}
-      onKeyDown={handleKeyDown}
-      scrollSelectionIntoView={handleScrollSelectionIntoView}
-    />
+    <Box
+      ref={blocksRef}
+      grow={1}
+      width="100%"
+      overflow="auto"
+      fontSize={2}
+      background="neutral0"
+      color="neutral800"
+      lineHeight={6}
+      hasRadius
+      paddingLeft={4}
+      paddingRight={4}
+      marginTop={3}
+      marginBottom={3}
+    >
+      <Editable
+        readOnly={disabled}
+        placeholder={placeholder}
+        style={getEditorStyle(theme)}
+        renderElement={renderElement}
+        renderLeaf={renderLeaf}
+        onKeyDown={handleKeyDown}
+        scrollSelectionIntoView={handleScrollSelectionIntoView}
+      />
+    </Box>
   );
 };
 

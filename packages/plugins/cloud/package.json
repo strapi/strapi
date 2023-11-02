@@ -1,0 +1,76 @@
+{
+  "name": "@strapi/plugin-cloud",
+  "version": "4.15.0",
+  "description": "Instructions to deploy your local project to Strapi Cloud",
+  "license": "MIT",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "exports": {
+    "./strapi-admin": {
+      "types": "./dist/admin/index.d.ts",
+      "source": "./admin/src/index.ts",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "./dist"
+  ],
+  "scripts": {
+    "build": "strapi plugin:build --force",
+    "clean": "run -T rimraf ./dist",
+    "develop": "strapi plugin:watch",
+    "lint": "run -T eslint .",
+    "prepublishOnly": "yarn clean && yarn build",
+    "test:ts:front": "run -T tsc -p admin/tsconfig.json"
+  },
+  "dependencies": {
+    "@strapi/design-system": "1.13.0",
+    "@strapi/helper-plugin": "4.15.0",
+    "@strapi/icons": "1.13.0",
+    "react-intl": "6.4.1"
+  },
+  "devDependencies": {
+    "@strapi/strapi": "4.15.0",
+    "@types/react": "18.2.7",
+    "@types/react-dom": "18.2.12",
+    "@types/react-router-dom": "^5.3.3",
+    "@types/styled-components": "5.1.26",
+    "eslint-config-custom": "4.15.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-router-dom": "5.3.4",
+    "styled-components": "5.3.3",
+    "tsconfig": "4.15.0",
+    "typescript": "5.2.2"
+  },
+  "peerDependencies": {
+    "@strapi/strapi": "^4.4.0",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0",
+    "react-router-dom": "5.3.4",
+    "styled-components": "5.3.3"
+  },
+  "engines": {
+    "node": ">=14.19.1 <=18.x.x",
+    "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "name": "strapi-cloud",
+    "description": "Instructions to deploy your local project to Strapi Cloud",
+    "kind": "plugin",
+    "displayName": "Strapi Cloud"
+  }
+}

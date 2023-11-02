@@ -8,6 +8,7 @@
 
 import * as React from 'react';
 
+import { createContext } from '@radix-ui/react-context';
 import defaultsDeep from 'lodash/defaultsDeep';
 import { IntlProvider } from 'react-intl';
 
@@ -20,14 +21,10 @@ interface LocalesContextValue {
   localeNames: Record<string, string>;
 }
 
-const LocalesContext = React.createContext<LocalesContextValue>({
-  changeLocale: () => {
-    throw new Error('LocalesContext: changeLocale() is not implemented');
-  },
-  localeNames: {},
-});
+const [LocalesContextProvider, useLocalesContext] =
+  createContext<LocalesContextValue>('LocalesContext');
 
-const useLocales = () => React.useContext(LocalesContext);
+const useLocales = () => useLocalesContext('useLocales');
 
 /* -------------------------------------------------------------------------------------------------
  * LanguageProvider
@@ -76,14 +73,11 @@ const LanguageProvider = ({ children, localeNames, messages }: LanguageProviderP
 
   const appMessages = defaultsDeep(messages[locale], messages.en);
 
-  const contextValue = React.useMemo(
-    () => ({ changeLocale, localeNames }),
-    [changeLocale, localeNames]
-  );
-
   return (
     <IntlProvider locale={locale} defaultLocale="en" messages={appMessages} textComponent="span">
-      <LocalesContext.Provider value={contextValue}>{children}</LocalesContext.Provider>
+      <LocalesContextProvider changeLocale={changeLocale} localeNames={localeNames}>
+        {children}
+      </LocalesContextProvider>
     </IntlProvider>
   );
 };
@@ -127,3 +121,4 @@ const reducer = (state = initialState, action: Action) => {
 };
 
 export { LanguageProvider, useLocales, LANGUAGE_LOCAL_STORAGE_KEY };
+export type { LanguageProviderProps, LocalesContextValue };

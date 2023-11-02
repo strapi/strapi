@@ -1,7 +1,9 @@
 import { Path, Transforms, Range, Point, Editor } from 'slate';
 
+import { insertLink } from '../utils/links';
+
 const withLinks = (editor) => {
-  const { isInline, apply, insertText } = editor;
+  const { isInline, apply, insertText, insertData } = editor;
 
   // Links are inline elements, so we need to override the isInline method for slate
   editor.isInline = (element) => {
@@ -53,6 +55,25 @@ const withLinks = (editor) => {
     }
 
     insertText(text);
+  };
+
+  // Add data as a clickable link if its a valid URL
+  editor.insertData = (data) => {
+    const pastedText = data.getData('text/plain');
+
+    if (pastedText) {
+      try {
+        // eslint-disable-next-line no-new
+        new URL(pastedText);
+        insertLink(editor, { url: pastedText });
+
+        return;
+      } catch (error) {
+        // continue normal data insertion
+      }
+    }
+
+    insertData(data);
   };
 
   return editor;

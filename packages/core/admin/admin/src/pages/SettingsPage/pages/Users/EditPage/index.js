@@ -34,7 +34,8 @@ import { useHistory, useRouteMatch } from 'react-router-dom';
 
 import { useAdminUsers } from '../../../../../hooks/useAdminUsers';
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
-import { formatAPIErrors, getFullName } from '../../../../../utils';
+import { formatAPIErrors } from '../../../../../utils/formatAPIErrors';
+import { getFullName } from '../../../../../utils/getFullName';
 import { MagicLinkCE } from '../components/MagicLink';
 import SelectRoles from '../components/SelectRoles';
 import { editValidation } from '../utils/validations/users';
@@ -58,7 +59,7 @@ const EditPage = ({ canUpdate }) => {
     async () =>
       (
         await import(
-          '../../../../../../../ee/admin/pages/SettingsPage/pages/Users/components/MagicLink'
+          '../../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/MagicLink'
         )
       ).MagicLinkEE
   );

@@ -39,7 +39,10 @@ async function askDbInfosAndTest(scope: Scope) {
   return {
     client,
     connection,
-    dependencies: clientDependencies({ client }),
+    dependencies: {
+      ...clientDependencies({ client }),
+      ...scope.additionalsDependencies,
+    },
   } as Configuration;
 }
 

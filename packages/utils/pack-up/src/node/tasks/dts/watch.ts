@@ -57,7 +57,7 @@ const dtsWatchTask: TaskHandler<DtsWatchTask, ts.Diagnostic> = {
           }
 
           const compilerHost = ts.createWatchCompilerHost(
-            'tsconfig.build.json',
+            tsconfig.path,
             tsconfig.config.options,
             ts.sys,
             ts.createEmitAndSemanticDiagnosticsBuilderProgram,

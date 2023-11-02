@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
-import { Flex, Icon, Tooltip, Select, Option, Box, Typography } from '@strapi/design-system';
+import { Flex, Icon, Tooltip, SingleSelect, SingleSelectOption, Box } from '@strapi/design-system';
 import { pxToRem, prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
 import { Link } from '@strapi/icons';
 import PropTypes from 'prop-types';
@@ -38,6 +38,32 @@ const FlexButton = styled(Flex).attrs({ as: 'button' })`
     // Only apply hover styles if the button is enabled
     &:hover {
       background: ${({ theme }) => theme.colors.primary100};
+    }
+  }
+`;
+
+const SelectWrapper = styled(Box)`
+  // Styling changes to SingleSelect component don't work, so adding wrapper to target SingleSelect
+  div[role='combobox'] {
+    border: none;
+    cursor: pointer;
+    min-height: unset;
+    padding-top: 6px;
+    padding-bottom: 6px;
+
+    &[aria-disabled='false']:hover {
+      cursor: pointer;
+      background: ${({ theme }) => theme.colors.primary100};
+    }
+
+    &[aria-disabled] {
+      background: transparent;
+      cursor: inherit;
+
+      // Select text and icons should also have disabled color
+      span {
+        color: ${({ theme }) => theme.colors.neutral600};
+      }
     }
   }
 `;
@@ -152,8 +178,6 @@ const toggleBlock = (editor, value) => {
   ReactEditor.focus(editor);
 };
 
-const ALLOWED_MEDIA_TYPE = 'images';
-
 const IMAGE_SCHEMA_FIELDS = [
   'name',
   'alternativeText',
@@ -189,12 +213,30 @@ const ImageDialog = ({ handleClose }) => {
   const MediaLibraryDialog = components['media-library'];
 
   const insertImages = (images) => {
-    // Image node created using select or existing selection node needs to be deleted before adding new image nodes
-    Transforms.removeNodes(editor);
-    images.forEach((img) => {
-      const image = { type: 'image', image: img, children: [{ type: 'text', text: '' }] };
-      Transforms.insertNodes(editor, image);
+    // If the selection is inside a list, split the list so that the modified block is outside of it
+    Transforms.unwrapNodes(editor, {
+      match: (node) => node.type === 'list',
+      split: true,
     });
+
+    // Save the path of the node that is being replaced by an image to insert the images there later
+    // It's the closest full block node above the selection
+    const [, pathToInsert] = Editor.above(editor, {
+      match(node) {
+        const isInlineNode = ['text', 'link'].includes(node.type);
+
+        return !isInlineNode;
+      },
+    });
+
+    // Remove the previous node that is being replaced by an image
+    Transforms.removeNodes(editor);
+
+    // Convert images to nodes and insert them
+    const nodesToInsert = images.map((image) => {
+      return { type: 'image', image, children: [{ type: 'text', text: '' }] };
+    });
+    Transforms.insertNodes(editor, nodesToInsert, { at: pathToInsert });
   };
 
   const handleSelectAssets = (images) => {
@@ -221,7 +263,7 @@ const ImageDialog = ({ handleClose }) => {
 
   return (
     <MediaLibraryDialog
-      allowedTypes={[ALLOWED_MEDIA_TYPE]}
+      allowedTypes={['images']}
       onClose={handleClose}
       onSelectAssets={handleSelectAssets}
     />
@@ -340,28 +382,30 @@ const BlocksDropdown = ({ disabled }) => {
 
   return (
     <>
-      <Select
-        startIcon={<Icon as={blocks[blockSelected].icon} />}
-        onChange={selectOption}
-        placeholder={blocks[blockSelected].label}
-        value={blockSelected}
-        onCloseAutoFocus={preventSelectFocus}
-        aria-label={formatMessage({
-          id: 'components.Blocks.blocks.selectBlock',
-          defaultMessage: 'Select a block',
-        })}
-        disabled={disabled}
-      >
-        {blockKeysToInclude.map((key) => (
-          <BlockOption
-            key={key}
-            value={key}
-            label={blocks[key].label}
-            icon={blocks[key].icon}
-            blockSelected={blockSelected}
-          />
-        ))}
-      </Select>
+      <SelectWrapper>
+        <SingleSelect
+          startIcon={<Icon as={blocks[blockSelected].icon} />}
+          onChange={selectOption}
+          placeholder={blocks[blockSelected].label}
+          value={blockSelected}
+          onCloseAutoFocus={preventSelectFocus}
+          aria-label={formatMessage({
+            id: 'components.Blocks.blocks.selectBlock',
+            defaultMessage: 'Select a block',
+          })}
+          disabled={disabled}
+        >
+          {blockKeysToInclude.map((key) => (
+            <BlockOption
+              key={key}
+              value={key}
+              label={blocks[key].label}
+              icon={blocks[key].icon}
+              blockSelected={blockSelected}
+            />
+          ))}
+        </SingleSelect>
+      </SelectWrapper>
       {isMediaLibraryVisible && <ImageDialog handleClose={() => setIsMediaLibraryVisible(false)} />}
     </>
   );
@@ -377,12 +421,12 @@ const BlockOption = ({ value, icon, label, blockSelected }) => {
   const isSelected = value === blockSelected;
 
   return (
-    <Option
+    <SingleSelectOption
       startIcon={<Icon as={icon} color={isSelected ? 'primary600' : 'neutral600'} />}
       value={value}
     >
       {formatMessage(label)}
-    </Option>
+    </SingleSelectOption>
   );
 };
 
@@ -583,15 +627,6 @@ LinkButton.propTypes = {
   disabled: PropTypes.bool.isRequired,
 };
 
-// TODO: Remove after the RTE Blocks Beta release
-const BetaTag = styled(Box)`
-  background-color: ${({ theme }) => theme.colors.secondary100};
-  border: ${({ theme }) => `1px solid ${theme.colors.secondary200}`};
-  border-radius: ${({ theme }) => theme.borderRadius};
-  font-size: ${({ theme }) => theme.fontSizes[0]};
-  padding: ${({ theme }) => `${2 / 16}rem ${theme.spaces[1]}`};
-`;
-
 const BlocksToolbar = ({ disabled }) => {
   const modifiers = useModifiersStore();
   const blocks = useBlocksStore();
@@ -613,7 +648,7 @@ const BlocksToolbar = ({ disabled }) => {
 
     const selectedNode = editor.children[editor.selection.anchor.path[0]];
 
-    if (selectedNode.type === 'image') {
+    if (['image', 'code'].includes(selectedNode.type)) {
       return true;
     }
 
@@ -624,11 +659,11 @@ const BlocksToolbar = ({ disabled }) => {
 
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
-      {/* Remove after the RTE Blocks Beta release (paddingRight and width) */}
-      <ToolbarWrapper gap={1} padding={2} paddingRight={4} width="100%">
+      <ToolbarWrapper gap={2} padding={2}>
         <BlocksDropdown disabled={disabled} />
+        <Separator />
         <Toolbar.ToggleGroup type="multiple" asChild>
-          <Flex gap={1} marginLeft={1}>
+          <Flex gap={1}>
             {Object.entries(modifiers).map(([name, modifier]) => (
               <ToolbarButton
                 key={name}
@@ -650,14 +685,6 @@ const BlocksToolbar = ({ disabled }) => {
             <ListButton block={blocks['list-ordered']} disabled={disabled} />
           </Flex>
         </Toolbar.ToggleGroup>
-        {/* TODO: Remove after the RTE Blocks Beta release */}
-        <Flex grow={1} justifyContent="flex-end">
-          <BetaTag>
-            <Typography textColor="secondary600" variant="sigma">
-              BETA
-            </Typography>
-          </BetaTag>
-        </Flex>
       </ToolbarWrapper>
     </Toolbar.Root>
   );

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-sentry",
-  "version": "4.14.4",
+  "version": "4.15.0",
   "description": "Send Strapi error events to Sentry",
   "repository": {
     "type": "git",
@@ -20,18 +20,37 @@
       "url": "https://strapi.io"
     }
   ],
+  "exports": {
+    "./strapi-admin": {
+      "source": "./admin/src/index.js",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.js"
+    },
+    "./strapi-server": {
+      "source": "./strapi-server.js",
+      "require": "./strapi-server.js",
+      "default": "./strapi-server.js"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
+    "build": "pack-up build",
+    "clean": "run -T rimraf dist",
     "lint": "run -T eslint .",
     "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch"
+    "test:unit:watch": "run -T jest --watch",
+    "watch": "pack-up watch"
   },
   "dependencies": {
     "@sentry/node": "6.19.7",
-    "@strapi/design-system": "1.12.2",
-    "@strapi/helper-plugin": "4.14.4",
-    "@strapi/icons": "1.12.2"
+    "@strapi/design-system": "1.13.0",
+    "@strapi/helper-plugin": "4.15.0",
+    "@strapi/icons": "1.13.0"
   },
   "devDependencies": {
+    "@strapi/pack-up": "workspace:*",
+    "@strapi/strapi": "4.15.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "5.3.4",
@@ -45,7 +64,7 @@
     "styled-components": "5.3.3"
   },
   "engines": {
-    "node": ">=16.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {

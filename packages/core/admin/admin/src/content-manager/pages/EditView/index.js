@@ -15,8 +15,8 @@ import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
 import { useEnterprise } from '../../../hooks/useEnterprise';
-import { selectAdminPermissions } from '../../../pages/App/selectors';
-import { InjectionZone } from '../../../shared/components';
+import { selectAdminPermissions } from '../../../selectors';
+import { InjectionZone } from '../../../shared/components/InjectionZone';
 import CollectionTypeFormWrapper from '../../components/CollectionTypeFormWrapper';
 import { DynamicZone } from '../../components/DynamicZone';
 import EditViewDataManagerProvider from '../../components/EditViewDataManagerProvider';
@@ -46,7 +46,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
   const Information = useEnterprise(
     InformationBoxCE,
     async () =>
-      (await import('../../../../../ee/admin/content-manager/pages/EditView/InformationBox'))
+      (await import('../../../../../ee/admin/src/content-manager/pages/EditView/InformationBox'))
         .InformationBoxEE
   );
 

@@ -4,15 +4,17 @@ import { DesignSystemProvider } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { createGlobalStyle } from 'styled-components';
 
-import { useThemeToggle } from '../hooks/useThemeToggle';
+import { useThemeToggle } from '../contexts/themeToggle';
 
 interface ThemeProps {
   children: React.ReactNode;
 }
 
 const Theme = ({ children }: ThemeProps) => {
-  const { currentTheme, themes } = useThemeToggle();
+  const { currentTheme, themes, systemTheme } = useThemeToggle();
   const { locale } = useIntl();
+
+  const computedThemeName = currentTheme === 'system' ? systemTheme : currentTheme;
 
   return (
     <DesignSystemProvider
@@ -22,7 +24,7 @@ const Theme = ({ children }: ThemeProps) => {
        * if it can't find it, that way the type is always fully defined and we're
        * not checking it all the time...
        */
-      theme={currentTheme && themes ? themes[currentTheme] : themes?.light}
+      theme={themes?.[computedThemeName || 'light']}
     >
       {children}
       <GlobalStyle />
