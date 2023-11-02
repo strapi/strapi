@@ -90,11 +90,6 @@ const getConfig = ({ baseUrl, rootPath, s3Options, ...legacyS3Options }: InitOpt
 
 export default {
   init({ baseUrl, rootPath, s3Options, ...legacyS3Options }: InitOptions) {
-    if (Object.keys(legacyS3Options).length > 0) {
-      process.emitWarning(
-        "S3 configuration options passed at root level of the plugin's providerOptions is deprecated and will be removed in a future release. Please wrap them inside the 's3Options:{}' property."
-      );
-    }
     // TODO V5 change config structure to avoid having to do this
     const config = getConfig({ baseUrl, rootPath, s3Options, ...legacyS3Options });
     const s3Client = new S3Client(config);
