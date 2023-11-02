@@ -47,6 +47,9 @@ const SelectWrapper = styled(Box)`
   div[role='combobox'] {
     border: none;
     cursor: pointer;
+    min-height: unset;
+    padding-top: 6px;
+    padding-bottom: 6px;
 
     &[aria-disabled='false']:hover {
       cursor: pointer;
@@ -660,7 +663,7 @@ const BlocksToolbar = ({ disabled }) => {
         <BlocksDropdown disabled={disabled} />
         <Separator />
         <Toolbar.ToggleGroup type="multiple" asChild>
-          <Flex gap={1} marginLeft={1}>
+          <Flex gap={1}>
             {Object.entries(modifiers).map(([name, modifier]) => (
               <ToolbarButton
                 key={name}
