@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import * as React from 'react';
 
 import {
   Accordion,
@@ -13,13 +13,37 @@ import {
 } from '@strapi/design-system';
 import { Cog } from '@strapi/icons';
 import capitalize from 'lodash/capitalize';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-import { useApiTokenPermissions } from '../../../../../../../contexts/apiTokenPermissions';
+import { ContentApiPermission } from '../../../../../../../../shared/contracts/content-api/permissions';
+import { useApiTokenPermissions } from '../../../../../../contexts/apiTokenPermissions';
 
-import CheckboxWrapper from './CheckBoxWrapper';
+const activeCheckboxWrapperStyles = css`
+  background: ${(props) => props.theme.colors.primary100};
+  svg {
+    opacity: 1;
+  }
+`;
+
+const CheckboxWrapper = styled(Box)<{ isActive: boolean }>`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  svg {
+    opacity: 0;
+    path {
+      fill: ${(props) => props.theme.colors.primary600};
+    }
+  }
+
+  /* Show active style both on hover and when the action is selected */
+  ${(props) => props.isActive && activeCheckboxWrapperStyles}
+  &:hover {
+    ${activeCheckboxWrapperStyles}
+  }
+`;
 
 const Border = styled.div`
   flex: 1;
@@ -27,18 +51,27 @@ const Border = styled.div`
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
-const CollapsableContentType = ({
-  controllers,
+interface CollapsableContentTypeProps {
+  controllers?: ContentApiPermission['controllers'];
+  label: ContentApiPermission['label'];
+  orderNumber?: number;
+  disabled?: boolean;
+  onExpanded?: (orderNumber: number) => void;
+  indexExpandendCollapsedContent: number | null;
+}
+
+export const CollapsableContentType = ({
+  controllers = [],
   label,
-  orderNumber,
-  disabled,
-  onExpanded,
-  indexExpandendCollapsedContent,
-}) => {
+  orderNumber = 0,
+  disabled = false,
+  onExpanded = () => null,
+  indexExpandendCollapsedContent = null,
+}: CollapsableContentTypeProps) => {
   const {
     value: { onChangeSelectAll, onChange, selectedActions, setSelectedAction, selectedAction },
   } = useApiTokenPermissions();
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = React.useState(false);
   const { formatMessage } = useIntl();
 
   const handleExpandedAccordion = () => {
@@ -46,7 +79,7 @@ const CollapsableContentType = ({
     onExpanded(orderNumber);
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (
       indexExpandendCollapsedContent !== null &&
       indexExpandendCollapsedContent !== orderNumber &&
@@ -56,7 +89,7 @@ const CollapsableContentType = ({
     }
   }, [indexExpandendCollapsedContent, orderNumber, expanded]);
 
-  const isActionSelected = (actionId) => actionId === selectedAction;
+  const isActionSelected = (actionId: string) => actionId === selectedAction;
 
   return (
     <Accordion
@@ -139,22 +172,3 @@ const CollapsableContentType = ({
     </Accordion>
   );
 };
-
-CollapsableContentType.defaultProps = {
-  controllers: [],
-  orderNumber: 0,
-  disabled: false,
-  onExpanded: () => null,
-  indexExpandendCollapsedContent: null,
-};
-
-CollapsableContentType.propTypes = {
-  controllers: PropTypes.array,
-  orderNumber: PropTypes.number,
-  label: PropTypes.string.isRequired,
-  disabled: PropTypes.bool,
-  onExpanded: PropTypes.func,
-  indexExpandendCollapsedContent: PropTypes.number,
-};
-
-export default CollapsableContentType;

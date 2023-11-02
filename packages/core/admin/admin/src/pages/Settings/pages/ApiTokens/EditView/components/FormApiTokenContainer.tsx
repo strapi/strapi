@@ -1,27 +1,50 @@
-import React from 'react';
+import * as React from 'react';
 
 import { Box, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
-import PropTypes from 'prop-types';
+import { FormikErrors } from 'formik';
 import { useIntl } from 'react-intl';
 
-import LifeSpanInput from '../../../../../components/Tokens/LifeSpanInput';
-import TokenDescription from '../../../../../components/Tokens/TokenDescription';
-import TokenName from '../../../../../components/Tokens/TokenName';
-import TokenTypeSelect from '../../../../../components/Tokens/TokenTypeSelect';
+// @ts-expect-error not converted yet
+import LifeSpanInput from '../../../../components/Tokens/LifeSpanInput';
+// @ts-expect-error not converted yet
+import TokenDescription from '../../../../components/Tokens/TokenDescription';
+// @ts-expect-error not converted yet
+import TokenName from '../../../../components/Tokens/TokenName';
+// @ts-expect-error not converted yet
+import TokenTypeSelect from '../../../../components/Tokens/TokenTypeSelect';
 
-const FormApiTokenContainer = ({
-  errors,
+type TokenType = 'full-access' | 'read-only' | 'custom';
+
+import type { ApiToken } from '../../../../../../../../shared/contracts/api-token';
+
+interface FormApiTokenContainerProps {
+  errors?: FormikErrors<Pick<ApiToken, 'name' | 'description' | 'lifespan' | 'type'>>;
+  onChange: ({ target: { name, value } }: { target: { name: string; value: TokenType } }) => void;
+  canEditInputs: boolean;
+  values: undefined | Partial<Pick<ApiToken, 'name' | 'description' | 'lifespan' | 'type'>>;
+  isCreating: boolean;
+  apiToken?: null | Partial<ApiToken>;
+  onDispatch: React.Dispatch<any>;
+  setHasChangedPermissions: (hasChanged: boolean) => void;
+}
+
+export const FormApiTokenContainer = ({
+  errors = {},
   onChange,
   canEditInputs,
   isCreating,
   values,
-  apiToken,
+  apiToken = {},
   onDispatch,
   setHasChangedPermissions,
-}) => {
+}: FormApiTokenContainerProps) => {
   const { formatMessage } = useIntl();
 
-  const handleChangeSelectApiTokenType = ({ target: { value } }) => {
+  const handleChangeSelectApiTokenType = ({
+    target: { value },
+  }: {
+    target: { value: TokenType };
+  }) => {
     setHasChangedPermissions(false);
 
     if (value === 'full-access') {
@@ -112,7 +135,7 @@ const FormApiTokenContainer = ({
                 id: 'Settings.tokens.form.type',
                 defaultMessage: 'Token type',
               }}
-              onChange={(value) => {
+              onChange={(value: TokenType) => {
                 handleChangeSelectApiTokenType({ target: { value } });
                 onChange({ target: { name: 'type', value } });
               }}
@@ -125,40 +148,3 @@ const FormApiTokenContainer = ({
     </Box>
   );
 };
-
-FormApiTokenContainer.propTypes = {
-  errors: PropTypes.shape({
-    name: PropTypes.string,
-    description: PropTypes.string,
-    lifespan: PropTypes.string,
-    type: PropTypes.string,
-  }),
-  onChange: PropTypes.func.isRequired,
-  canEditInputs: PropTypes.bool.isRequired,
-  values: PropTypes.shape({
-    name: PropTypes.string,
-    description: PropTypes.string,
-    lifespan: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    type: PropTypes.string,
-  }).isRequired,
-  isCreating: PropTypes.bool.isRequired,
-  apiToken: PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    type: PropTypes.string,
-    lifespan: PropTypes.string,
-    name: PropTypes.string,
-    accessKey: PropTypes.string,
-    permissions: PropTypes.array,
-    description: PropTypes.string,
-    createdAt: PropTypes.string,
-  }),
-  onDispatch: PropTypes.func.isRequired,
-  setHasChangedPermissions: PropTypes.func.isRequired,
-};
-
-FormApiTokenContainer.defaultProps = {
-  errors: {},
-  apiToken: {},
-};
-
-export default FormApiTokenContainer;

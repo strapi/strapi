@@ -4,7 +4,7 @@ import { Option, Select, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { getDateOfExpiration } from '../../../pages/ApiTokens/EditView/utils';
+import { getDateOfExpiration } from '../../../pages/ApiTokens/EditView/utils/getDateOfExpiration';
 
 const LifeSpanInput = ({ token, errors, values, onChange, isCreating }) => {
   const { formatMessage } = useIntl();

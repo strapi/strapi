@@ -11,8 +11,22 @@ import { Route, MemoryRouter } from 'react-router-dom';
 
 import { Theme } from '../../../../../../components/Theme';
 import { ThemeToggleProvider } from '../../../../../../components/ThemeToggleProvider';
-import EditView from '../index';
-import { data } from '../utils/tests/dataMock';
+import { EditView } from '../EditViewPage';
+
+const data = {
+  data: {
+    'api::address': {
+      controllers: {
+        address: ['find', 'findOne'],
+      },
+    },
+    'api::category': {
+      controllers: {
+        category: ['find', 'findOne', 'create', 'update', 'delete', 'createLocalization'],
+      },
+    },
+  },
+};
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),

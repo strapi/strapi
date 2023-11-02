@@ -1,6 +1,19 @@
-import transformPermissionsData from '../transformPermissionsData';
+import { transformPermissionsData } from '../transformPermissionsData';
 
-import { data } from './dataMock';
+const data = {
+  data: {
+    'api::address': {
+      controllers: {
+        address: ['find', 'findOne'],
+      },
+    },
+    'api::category': {
+      controllers: {
+        category: ['find', 'findOne', 'create', 'update', 'delete', 'createLocalization'],
+      },
+    },
+  },
+};
 
 describe('ADMIN | Container | SettingsPage | ApiTokens | EditView | utils | transformPermissionsData', () => {
   it('should return transformed data correctly', () => {

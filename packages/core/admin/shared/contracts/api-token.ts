@@ -1,9 +1,25 @@
 import { errors } from '@strapi/utils';
+import { Entity } from '@strapi/types';
 
-import type { ApiToken } from '../../server/src/services/api-token';
+export type ApiToken = {
+  accessKey: string;
+  createdAt: string;
+  description: string;
+  expiresAt: string;
+  id: Entity.ID;
+  lastUsedAt: string | null;
+  lifespan: string | number;
+  name: string;
+  permissions: string[];
+  type: 'custom' | 'full-access' | 'read-only';
+  updatedAt: string;
+};
 
-type ApiTokenBody = Pick<ApiToken, 'lifespan' | 'description' | 'type' | 'name' | 'permissions'>;
-type ApiTokenResponse = Omit<ApiToken, 'accessKey'>;
+interface ApiTokenBody extends Pick<ApiToken, 'description' | 'name'> {
+  lifespan?: ApiToken['lifespan'] | number | null;
+  permissions?: ApiToken['permissions'] | null;
+  type: ApiToken['type'] | undefined;
+}
 
 /**
  * POST /api-tokens - Create an api token
@@ -30,7 +46,7 @@ export declare namespace List {
   }
 
   export interface Response {
-    data: ApiTokenResponse[];
+    data: ApiToken[];
     error?: errors.ApplicationError;
   }
 }
@@ -49,7 +65,7 @@ export declare namespace Revoke {
   }
 
   export interface Response {
-    data: ApiTokenResponse;
+    data: ApiToken;
     error?: errors.ApplicationError;
   }
 }
@@ -68,7 +84,7 @@ export declare namespace Get {
   }
 
   export interface Response {
-    data: ApiTokenResponse;
+    data: ApiToken;
     error?: errors.ApplicationError;
   }
 }
@@ -87,7 +103,7 @@ export declare namespace Update {
   }
 
   export interface Response {
-    data: ApiTokenResponse;
+    data: ApiToken;
     error?: errors.ApplicationError | errors.YupValidationError;
   }
 }

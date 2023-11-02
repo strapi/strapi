@@ -24,6 +24,21 @@ export declare namespace Create {
 }
 
 /**
+ * /create - Create an admin user
+ */
+export declare namespace Create {
+  export interface Request {
+    body: AdminUserCreationPayload;
+    query: {};
+  }
+
+  export interface Response {
+    data: SanitizedAdminUser;
+    error?: errors.ApplicationError | errors.YupValidationError;
+  }
+}
+
+/**
  * /find - Find admin users
  */
 
