@@ -79,7 +79,7 @@
     "typescript": "5.2.2"
   },
   "peerDependencies": {
-    "@strapi/strapi": "^4.14.4"
+    "@strapi/strapi": "^4.14.5"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
