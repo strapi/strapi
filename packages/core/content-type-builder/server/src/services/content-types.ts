@@ -5,7 +5,6 @@ import type { Common, Schema } from '@strapi/types';
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
 import createBuilder from './schema-builder';
 import { coreUids, pluginsUids } from './constants';
-import type { CreateContentTypeInput } from '../controllers/validation/content-type';
 
 const { ApplicationError } = errors;
 
