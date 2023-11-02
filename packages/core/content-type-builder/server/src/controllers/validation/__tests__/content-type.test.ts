@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import {
   validateKind,
   validateUpdateContentTypeInput,
@@ -35,7 +36,7 @@ describe('Content type validator', () => {
     });
 
     it('allows undefined', async () => {
-      // @ts-expect-error test that it can handle undefined as expected, even if it's invalid typescript
+      // @ts-ignore-error test that it can handle undefined as expected, even if it's invalid typescript
       await expect(validateKind()).resolves.toBeUndefined();
     });
   });
@@ -54,7 +55,7 @@ describe('Content type validator', () => {
             },
           },
         },
-      } as CreateContentTypeInput;
+      } as unknown as CreateContentTypeInput;
 
       expect.assertions(1);
 
@@ -95,11 +96,11 @@ describe('Content type validator', () => {
             },
           },
         },
-      } as CreateContentTypeInput;
+      } as unknown as CreateContentTypeInput;
 
       expect.assertions(1);
 
-      await validateContentTypeInput(input).then((data) => {
+      await validateContentTypeInput(input).then((data: any) => {
         expect(data.contentType.attributes).toBe(input?.contentType?.attributes);
       });
     });
@@ -155,7 +156,7 @@ describe('Content type validator', () => {
     });
 
     test('Deleted UID target fields are removed from input data', async () => {
-      const data: CreateContentTypeInput = {
+      const data = {
         contentType: {
           displayName: 'test',
           singularName: 'test',
@@ -167,7 +168,7 @@ describe('Content type validator', () => {
             },
           },
         },
-      };
+      } as unknown as CreateContentTypeInput;
 
       expect.assertions(1);
 
