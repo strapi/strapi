@@ -25,8 +25,8 @@ export declare namespace Init {
     data: {
       uuid: string | false;
       hasAdmin: boolean;
-      menuLogo?: SettingsFile;
-      authLogo?: SettingsFile;
+      menuLogo: string;
+      authLogo: string;
     };
     error?: errors.ApplicationError;
   }
