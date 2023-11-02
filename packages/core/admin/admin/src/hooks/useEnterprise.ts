@@ -2,6 +2,12 @@ import * as React from 'react';
 
 import { useCallbackRef } from '@strapi/helper-plugin';
 
+/**
+ * TODO: this hook needs typing better, it's a bit similar to react-query's useQuery tbf
+ * We have an async function that returns something, and we can set initialData as well as
+ * a select function, the return type of the function should infer it all...
+ */
+
 function isEnterprise() {
   return window.strapi.isEE;
 }
@@ -17,7 +23,7 @@ export function useEnterprise<TCEData, TEEData, TCombinedData = unknown>(
   eeCallback: () => Promise<TEEData>,
   {
     defaultValue = null,
-    combine = (ceData: TCEData, eeData: TEEData) => eeData,
+    combine = <C, E>(ceData: C, eeData: E) => eeData,
     enabled = true,
   }: UseEnterpriseOptions<TCEData, TEEData, TCombinedData> = {}
 ) {

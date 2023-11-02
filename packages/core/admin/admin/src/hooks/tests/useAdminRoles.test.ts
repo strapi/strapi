@@ -38,6 +38,7 @@ describe('useAdminRoles', () => {
   });
 
   test('forwards all query params except `id`', async () => {
+    // @ts-expect-error - test purposes
     const { result } = renderHook(() => useAdminRoles({ id: 1, filters: 'param' }));
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -56,7 +57,7 @@ describe('useAdminRoles', () => {
   test('extends the default react-query options', async () => {
     const { result } = renderHook(() =>
       useAdminRoles(
-        { id: null },
+        {},
         {
           enabled: false,
         }
