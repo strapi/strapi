@@ -1,61 +1,74 @@
-import React from 'react';
-
 import { Box, Button, Flex, Main, TextInput, Typography } from '@strapi/design-system';
-import { Form, Link } from '@strapi/helper-plugin';
+import { Link } from '@strapi/design-system/v2';
+import { Form, translatedErrors, useFetchClient } from '@strapi/helper-plugin';
 import { Formik } from 'formik';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import { useMutation } from 'react-query';
+import { NavLink, useHistory } from 'react-router-dom';
+import * as yup from 'yup';
 
-import { Logo } from '../../../../components/UnauthenticatedLogo';
+import { ForgotPassword } from '../../../../../shared/contracts/authentication';
+import { Logo } from '../../../components/UnauthenticatedLogo';
 import {
   Column,
   LayoutContent,
   UnauthenticatedLayout,
-} from '../../../../layouts/UnauthenticatedLayout';
+} from '../../../layouts/UnauthenticatedLayout';
 
-const ForgotPassword = ({ onSubmit, schema }) => {
+const ForgotPassword = () => {
+  const { push } = useHistory();
+  const { post } = useFetchClient();
   const { formatMessage } = useIntl();
+
+  const { mutate, isError } = useMutation(
+    async (body: ForgotPassword.Request['body']) => {
+      await post('/admin/forgot-password', body);
+    },
+    {
+      onSuccess() {
+        push('/auth/forgot-password-success');
+      },
+    }
+  );
 
   return (
     <UnauthenticatedLayout>
       <Main>
         <LayoutContent>
+          <Column>
+            <Logo />
+            <Box paddingTop={6} paddingBottom={7}>
+              <Typography as="h1" variant="alpha">
+                {formatMessage({
+                  id: 'Auth.form.button.password-recovery',
+                  defaultMessage: 'Password Recovery',
+                })}
+              </Typography>
+            </Box>
+            {isError ? (
+              <Typography id="global-form-error" role="alert" tabIndex={-1} textColor="danger600">
+                {formatMessage({
+                  id: 'notification.error',
+                  defaultMessage: 'An error occurred',
+                })}
+              </Typography>
+            ) : null}
+          </Column>
           <Formik
             enableReinitialize
             initialValues={{
               email: '',
             }}
-            onSubmit={onSubmit}
-            validationSchema={schema}
+            onSubmit={(values) => {
+              mutate(values);
+            }}
+            validationSchema={yup.object().shape({
+              email: yup.string().email(translatedErrors.email).required(translatedErrors.required),
+            })}
             validateOnChange={false}
           >
             {({ values, errors, handleChange }) => (
-              <Form noValidate>
-                <Column>
-                  <Logo />
-                  <Box paddingTop={6} paddingBottom={7}>
-                    <Typography as="h1" variant="alpha">
-                      {formatMessage({
-                        id: 'Auth.form.button.password-recovery',
-                        defaultMessage: 'Password Recovery',
-                      })}
-                    </Typography>
-                  </Box>
-                  {errors.errorMessage && (
-                    <Typography
-                      id="global-form-error"
-                      role="alert"
-                      tabIndex={-1}
-                      textColor="danger600"
-                    >
-                      {formatMessage({
-                        id: errors.errorMessage,
-                        defaultMessage: 'An error occurred',
-                      })}
-                    </Typography>
-                  )}
-                </Column>
-
+              <Form>
                 <Flex direction="column" alignItems="stretch" gap={6}>
                   <TextInput
                     error={
@@ -89,7 +102,8 @@ const ForgotPassword = ({ onSubmit, schema }) => {
         </LayoutContent>
         <Flex justifyContent="center">
           <Box paddingTop={4}>
-            <Link to="/auth/login">
+            {/* @ts-expect-error – error with inferring the props from the as component */}
+            <Link as={NavLink} to="/auth/login">
               {formatMessage({ id: 'Auth.link.ready', defaultMessage: 'Ready to sign in?' })}
             </Link>
           </Box>
@@ -99,15 +113,4 @@ const ForgotPassword = ({ onSubmit, schema }) => {
   );
 };
 
-ForgotPassword.defaultProps = {
-  onSubmit: (e) => e.preventDefault(),
-};
-
-ForgotPassword.propTypes = {
-  onSubmit: PropTypes.func,
-  schema: PropTypes.shape({
-    type: PropTypes.string.isRequired,
-  }).isRequired,
-};
-
-export default ForgotPassword;
+export { ForgotPassword };
