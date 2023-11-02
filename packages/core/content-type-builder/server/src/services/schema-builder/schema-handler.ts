@@ -12,7 +12,7 @@ export type Infos = {
   uid?: UID.ContentType;
   dir: string;
   filename: string;
-  schema?: Schema.Schema;
+  schema?: Schema.ContentType;
 };
 
 export default function createSchemaHandler(infos: Infos) {
@@ -79,7 +79,7 @@ export default function createSchemaHandler(infos: Infos) {
       return _.cloneDeep(state.schema);
     },
 
-    setSchema(val: Schema.Schema) {
+    setSchema(val: Schema.ContentType) {
       modified = true;
 
       state.schema = _.cloneDeep(val);
