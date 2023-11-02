@@ -11,7 +11,7 @@ export const MagicLinkCE = ({ registrationToken }) => {
   const { formatMessage } = useIntl();
   const target = `${
     window.location.origin
-  }${getBasename()}auth/register?registrationToken=${registrationToken}`;
+  }${getBasename()}/auth/register?registrationToken=${registrationToken}`;
 
   return (
     <MagicLinkWrapper target={target}>

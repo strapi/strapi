@@ -1,32 +1,32 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import * as React from 'react';
 
 import { auth, LoadingIndicatorPage, useFetchClient } from '@strapi/helper-plugin';
 import Cookies from 'js-cookie';
 import { useIntl } from 'react-intl';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 
-export const AuthResponse = () => {
-  const {
-    params: { authResponse },
-  } = useRouteMatch('/auth/login/:authResponse');
+const AuthResponse = () => {
+  const match = useRouteMatch<{ authResponse: string }>('/auth/login/:authResponse');
   const { formatMessage } = useIntl();
   const { push } = useHistory();
-  const formatMessageRef = useRef(formatMessage);
 
-  let redirectToOops = useCallback(() => {
+  const redirectToOops = React.useCallback(() => {
     push(
       `/auth/oops?info=${encodeURIComponent(
-        formatMessageRef.current({
+        formatMessage({
           id: 'Auth.form.button.login.providers.error',
           defaultMessage: 'We cannot connect you through the selected provider.',
         })
       )}`
     );
-  }, [push]);
+  }, [push, formatMessage]);
 
   const { get } = useFetchClient();
 
-  const fetchUserInfo = useCallback(async () => {
+  /**
+   * TODO: refactor this to use `react-query`
+   */
+  const fetchUserInfo = React.useCallback(async () => {
     try {
       const jwtToken = Cookies.get('jwtToken');
 
@@ -50,17 +50,17 @@ export const AuthResponse = () => {
     }
   }, [get, push, redirectToOops]);
 
-  useEffect(() => {
-    if (authResponse === 'error') {
+  React.useEffect(() => {
+    if (match?.params.authResponse === 'error') {
       redirectToOops();
     }
 
-    if (authResponse === 'success') {
+    if (match?.params.authResponse === 'success') {
       fetchUserInfo();
     }
-  }, [authResponse, fetchUserInfo, redirectToOops]);
+  }, [match, fetchUserInfo, redirectToOops]);
 
   return <LoadingIndicatorPage />;
 };
 
-export default AuthResponse;
+export { AuthResponse };
