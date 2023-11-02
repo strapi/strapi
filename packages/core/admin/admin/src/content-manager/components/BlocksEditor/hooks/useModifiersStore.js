@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Typography } from '@strapi/design-system';
 import { Bold, Italic, Underline, StrikeThrough, Code } from '@strapi/icons';
-import { Editor } from 'slate';
+import { Editor, Transforms } from 'slate';
 import { useSlate } from 'slate-react';
 import styled, { css } from 'styled-components';
 
@@ -73,6 +73,11 @@ export function useModifiersStore() {
    * @param {string} name - The name of the modifier to toggle
    */
   const baseHandleToggle = (name) => {
+    // If there is no selection, set selection to the end of line
+    if (!editor.selection) {
+      const endOfEditor = Editor.end(editor, []);
+      Transforms.select(editor, endOfEditor);
+    }
     if (modifiers?.[name]) {
       Editor.removeMark(editor, name);
     } else {
