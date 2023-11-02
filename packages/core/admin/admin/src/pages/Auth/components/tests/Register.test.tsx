@@ -2,14 +2,22 @@ import { render } from '@tests/utils';
 
 import { Register } from '../Register';
 
+const FIELD_LABELS = ['Firstname', 'Lastname', 'Email', 'Password', 'Confirm Password'];
+
 describe('Register', () => {
-  it('Render form elements', () => {
-    const { getByText, getByRole, getByLabelText } = render(<Register />);
+  it('renders correctly', () => {
+    const { getByText, getByRole, getByLabelText } = render(<Register />, {
+      initialEntries: ['/auth/register'],
+    });
 
-    const labels = ['Firstname', 'Lastname', 'Email', 'Password', 'Confirm Password'];
+    expect(getByRole('heading', { name: 'Welcome to Strapi!' })).toBeInTheDocument();
+    expect(
+      getByText(
+        'Credentials are only used to authenticate in Strapi. All saved data will be stored in your database.'
+      )
+    ).toBeInTheDocument();
 
-    labels.forEach((label) => {
-      expect(getByText(label)).toBeInTheDocument();
+    FIELD_LABELS.forEach((label) => {
       expect(getByLabelText(new RegExp(`^${label}`, 'i'))).toBeInTheDocument();
     });
 
@@ -22,20 +30,27 @@ describe('Register', () => {
     expect(getByRole('button', { name: /let's start/i })).toBeInTheDocument();
   });
 
-  it('Disable fields when the route is register', () => {
+  it('should disable the email field on the register field', () => {
     const { getByLabelText } = render(<Register />, {
-      initialEntries: ['/register'],
+      initialEntries: ['/auth/register'],
     });
 
-    expect(getByLabelText(/Firstname/i)).toBeEnabled();
-    expect(getByLabelText(/Email/i)).toBeDisabled();
+    FIELD_LABELS.forEach((label) => {
+      if (label === 'Email') {
+        expect(getByLabelText(new RegExp(`^${label}`, 'i'))).toBeDisabled();
+      } else {
+        expect(getByLabelText(new RegExp(`^${label}`, 'i'))).toBeEnabled();
+      }
+    });
   });
 
-  it('Shows an error notification if the token does not exist', async () => {
-    const { findByText } = render(<Register />, {
-      initialEntries: ['/register?registrationToken=error'],
+  it('should enable all fields on the register-admin route', () => {
+    const { getByLabelText } = render(<Register />, {
+      initialEntries: ['/auth/register-admin'],
     });
 
-    await findByText('Request failed with status code 500');
+    FIELD_LABELS.forEach((label) => {
+      expect(getByLabelText(new RegExp(`^${label}`, 'i'))).toBeEnabled();
+    });
   });
 });
