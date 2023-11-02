@@ -7438,6 +7438,7 @@ __metadata:
     "@types/find-root": "npm:1.1.3"
     "@types/invariant": "npm:2.2.36"
     "@types/jest": "npm:29.5.2"
+    "@types/js-cookie": "npm:3.0.5"
     "@types/jsonwebtoken": "npm:9.0.3"
     "@types/koa-passport": "npm:6.0.1"
     "@types/lodash": "npm:^4.14.191"
@@ -9291,6 +9292,13 @@ __metadata:
     expect: "npm:^29.0.0"
     pretty-format: "npm:^29.0.0"
   checksum: c45d1f2825b31c87b479d6ea0e22d0353c11c547f02c85e504623550527460e4fc572cd566374c4c00fcff2c8a022ef71c4b52545ccb03118b603b3c1e4e884f
+  languageName: node
+  linkType: hard
+
+"@types/js-cookie@npm:3.0.5":
+  version: 3.0.5
+  resolution: "@types/js-cookie@npm:3.0.5"
+  checksum: 4d91ae26445499fdde283928aac9ad149be3561ef9b4d959f77e44694608accd5939c8c68ba42c50c2cfc007ccd442cc566a41077d7f2766390088fa91b612ce
   languageName: node
   linkType: hard
 

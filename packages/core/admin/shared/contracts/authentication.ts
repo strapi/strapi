@@ -9,6 +9,7 @@ export declare namespace Login {
     query: {
       user: Pick<AdminUser, 'email' | 'password'>;
     };
+    body: Pick<AdminUser, 'email' | 'password'>;
   }
 
   export interface Response {
@@ -39,7 +40,7 @@ export declare namespace RenewToken {
 }
 
 /**
- * /register-admin - Register an admin user
+ * /registration-info - Get the info via a registration token
  */
 export declare namespace RegistrationInfo {
   export interface Request {
@@ -79,14 +80,11 @@ export declare namespace Register {
 }
 
 /**
- * /register/admin - Register an admin user
+ * /register-admin - Register an admin user
  */
 export declare namespace RegisterAdmin {
   export interface Request {
-    body: {
-      registrationToken: string;
-      userInfo: Pick<AdminUser, 'email' | 'firstname' | 'lastname' | 'password'>;
-    };
+    body: Pick<AdminUser, 'email' | 'firstname' | 'lastname' | 'password'>;
   }
 
   export interface Response {

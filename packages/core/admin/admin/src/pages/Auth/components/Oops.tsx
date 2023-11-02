@@ -1,15 +1,15 @@
-import React from 'react';
-
 import { Box, Flex, Main, Typography } from '@strapi/design-system';
-import { Link, useQuery } from '@strapi/helper-plugin';
+import { Link } from '@strapi/design-system/v2';
+import { useQuery } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
+import { NavLink } from 'react-router-dom';
 
-import { Logo } from '../../../../components/UnauthenticatedLogo';
+import { Logo } from '../../../components/UnauthenticatedLogo';
 import {
   Column,
   LayoutContent,
   UnauthenticatedLayout,
-} from '../../../../layouts/UnauthenticatedLayout';
+} from '../../../layouts/UnauthenticatedLayout';
 
 const Oops = () => {
   const { formatMessage } = useIntl();
@@ -46,7 +46,8 @@ const Oops = () => {
         </LayoutContent>
         <Flex justifyContent="center">
           <Box paddingTop={4}>
-            <Link to="/auth/login">
+            {/* @ts-expect-error – error with inferring the props from the as component */}
+            <Link as={NavLink} to="/auth/login">
               {formatMessage({ id: 'Auth.link.signin', defaultMessage: 'Sign in' })}
             </Link>
           </Box>
@@ -56,4 +57,4 @@ const Oops = () => {
   );
 };
 
-export default Oops;
+export { Oops };

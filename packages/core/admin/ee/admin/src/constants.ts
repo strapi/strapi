@@ -1,4 +1,3 @@
-// @ts-expect-error not converted yet
 import { AuthResponse } from './pages/AuthResponse';
 
 export const ADMIN_PERMISSIONS_EE = {
