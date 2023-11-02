@@ -1,3 +1,6 @@
+import type { AwsCredentialIdentity } from '@aws-sdk/types';
+import type { InitOptions } from '.';
+
 const ENDPOINT_PATTERN = /^(.+\.)?s3[.-]([a-z0-9-]+)\./;
 
 interface BucketInfo {
@@ -84,3 +87,30 @@ function getBucketFromAwsUrl(fileUrl: string): BucketInfo {
   // https://<bucket-name>.s3.amazonaws.com/
   return { bucket: prefix.substring(0, prefix.length - 1) };
 }
+
+// TODO Remove this in V5 since we will only support the new config structure
+export const extractCredentials = (options: InitOptions): AwsCredentialIdentity => {
+  // legacy
+  if (options.accessKeyId && options.secretAccessKey) {
+    return {
+      accessKeyId: options.accessKeyId,
+      secretAccessKey: options.secretAccessKey,
+    };
+  }
+  // Legacy
+  if (options.s3Options?.accessKeyId && options.s3Options.secretAccessKey) {
+    return {
+      accessKeyId: options.s3Options.accessKeyId,
+      secretAccessKey: options.s3Options.secretAccessKey,
+    };
+  }
+  // V%
+  if (options.s3Options?.credentials) {
+    return {
+      accessKeyId: options.s3Options.credentials.accessKeyId,
+      secretAccessKey: options.s3Options.credentials.secretAccessKey,
+    };
+  }
+
+  throw new Error("Couldn't find AWS credentials.");
+};

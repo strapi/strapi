@@ -14,9 +14,9 @@ import {
 import type { AwsCredentialIdentity } from '@aws-sdk/types';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Upload } from '@aws-sdk/lib-storage';
-import { isUrlFromBucket } from './utils';
+import { extractCredentials, isUrlFromBucket } from './utils';
 
-interface File {
+export interface File {
   name: string;
   alternativeText?: string;
   caption?: string;
@@ -36,58 +36,38 @@ interface File {
   buffer?: Buffer;
 }
 
-type UploadCommandOutput = (
+export type UploadCommandOutput = (
   | CompleteMultipartUploadCommandOutput
   | AbortMultipartUploadCommandOutput
 ) & {
   Location: string;
 };
 
-interface InitOptions {
-  baseUrl?: string;
-  rootPath?: string;
-  s3Options: S3ClientConfig & {
-    // TODO Remove this in V5
-    accessKeyId?: AwsCredentialIdentity['accessKeyId'];
-    secretAccessKey?: AwsCredentialIdentity['secretAccessKey'];
-    // Keep this for V5
-    credentials?: AwsCredentialIdentity;
-    params: {
-      Bucket: string; // making it required
-      ACL?: ObjectCannedACL;
-      signedUrlExpires?: number;
-    };
-  };
+export interface AWSParams {
+  Bucket: string; // making it required
+  ACL?: ObjectCannedACL;
+  signedUrlExpires?: number;
+}
+
+export interface DefaultOptions extends S3ClientConfig {
+  // TODO Remove this in V5
+  accessKeyId?: AwsCredentialIdentity['accessKeyId'];
+  secretAccessKey?: AwsCredentialIdentity['secretAccessKey'];
+  // Keep this for V5
+  credentials?: AwsCredentialIdentity;
+  params?: AWSParams;
   [k: string]: any;
 }
+
+export type InitOptions = (DefaultOptions | { s3Options: DefaultOptions }) & {
+  baseUrl?: string;
+  rootPath?: string;
+  [k: string]: any;
+};
 
 const assertUrlProtocol = (url: string) => {
   // Regex to test protocol like "http://", "https://"
   return /^\w*:\/\//.test(url);
-};
-
-// TODO Remove this in V5 since we will only support the new config structure
-const extractCredentials = (options: InitOptions): AwsCredentialIdentity => {
-  // legacy
-  if ((options.accessKeyId, options.secretAccessKey)) {
-    return {
-      accessKeyId: options.accessKeyId,
-      secretAccessKey: options.secretAccessKey,
-    };
-  }
-  if (options.s3Options.credentials) {
-    return {
-      accessKeyId: options.s3Options.credentials.accessKeyId,
-      secretAccessKey: options.s3Options.credentials.secretAccessKey,
-    };
-  }
-  if (options.s3Options.accessKeyId && options.s3Options.secretAccessKey) {
-    return {
-      accessKeyId: options.s3Options.accessKeyId,
-      secretAccessKey: options.s3Options.secretAccessKey,
-    };
-  }
-  throw new Error("Couldn't find AWS credentials.");
 };
 
 const getConfig = ({ baseUrl, rootPath, s3Options, ...legacyS3Options }: InitOptions) => {
@@ -103,7 +83,7 @@ const getConfig = ({ baseUrl, rootPath, s3Options, ...legacyS3Options }: InitOpt
     credentials: extractCredentials({ s3Options, ...legacyS3Options }),
   };
 
-  config.params.ACL = getOr('public-read', ['params', 'ACL'], config);
+  config.params.ACL = getOr(ObjectCannedACL.public_read, ['params', 'ACL'], config);
 
   return config;
 };
