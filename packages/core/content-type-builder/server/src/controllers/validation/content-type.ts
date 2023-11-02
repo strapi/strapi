@@ -3,7 +3,7 @@
 import { flatMap, getOr, has } from 'lodash/fp';
 import { yup, validateYupSchema } from '@strapi/utils';
 
-import type { Schema, Shared, UID } from '@strapi/types';
+import type { Schema, UID } from '@strapi/types';
 import { getService } from '../../utils';
 import { modelTypes, DEFAULT_TYPES, typeKinds } from '../../services/constants';
 import { createSchema } from './model-schema';
