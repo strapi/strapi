@@ -3,7 +3,7 @@ import * as React from 'react';
 import {
   hasPermissions,
   StrapiAppSetting,
-  StrapiAppSettingLink,
+  StrapiAppSettingLink as IStrapiAppSettingLink,
   useRBACProvider,
   useStrapiApp,
   useAppInfo,
@@ -13,6 +13,7 @@ import { useSelector } from 'react-redux';
 
 import { SETTINGS_LINKS_CE, SettingsMenuLink } from '../constants';
 import { selectAdminPermissions } from '../selectors';
+import { PermissionMap } from '../types/permissions';
 
 import { useEnterprise } from './useEnterprise';
 
@@ -27,18 +28,24 @@ const formatLinks = (menu: SettingsMenuSection[]): SettingsMenuSectionWithDispla
   });
 
 interface SettingsMenuLinkWithPermissions extends SettingsMenuLink {
-  permissions: StrapiAppSettingLink['permissions'];
+  permissions: IStrapiAppSettingLink['permissions'];
+  hasNotification?: boolean;
+}
+
+interface StrapiAppSettingsLink extends IStrapiAppSettingLink {
+  lockIcon?: never;
+  hasNotification?: never;
 }
 
 interface SettingsMenuSection extends Omit<StrapiAppSetting, 'links'> {
-  links: Array<SettingsMenuLinkWithPermissions | StrapiAppSettingLink>;
+  links: Array<SettingsMenuLinkWithPermissions | StrapiAppSettingsLink>;
 }
 
 interface SettingsMenuLinkWithPermissionsAndDisplayed extends SettingsMenuLinkWithPermissions {
   isDisplayed: boolean;
 }
 
-interface StrapiAppSettingLinkWithDisplayed extends StrapiAppSettingLink {
+interface StrapiAppSettingLinkWithDisplayed extends StrapiAppSettingsLink {
   isDisplayed: boolean;
 }
 
@@ -95,7 +102,8 @@ const useSettingsMenu = (): {
 
       return {
         ...link,
-        permissions: permissions.settings?.[link.id]?.main ?? [],
+        // @ts-expect-error – TODO: fix this type error
+        permissions: permissions.settings?.[link.id as keyof PermissionMap['settings']]?.main ?? [],
       } satisfies SettingsMenuLinkWithPermissions;
     },
     [permissions.settings]

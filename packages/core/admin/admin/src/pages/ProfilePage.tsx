@@ -45,7 +45,7 @@ import { useThemeToggle, ThemeName, ThemeToggleContextContextValue } from '../co
 import { getFullName } from '../utils/getFullName';
 
 // @ts-expect-error – no types available
-import { profileValidation } from './SettingsPage/pages/Users/utils/validations/users';
+import { profileValidation } from './Settings/pages/Users/utils/validations/users';
 
 import type { IsSSOLocked } from '../../../shared/contracts/providers';
 import type { GetMe, UpdateMe } from '../../../shared/contracts/users';

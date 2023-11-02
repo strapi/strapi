@@ -21,7 +21,7 @@ interface MenuItem extends Pick<LinkProps, 'to'> {
    */
   permissions: Permission[];
   notificationsCount?: number;
-  Component?: ComponentModule;
+  Component: ComponentModule;
   exact?: boolean;
 }
 
@@ -50,8 +50,9 @@ interface StrapiAppSettingLink {
   id: string;
   to: string;
   intlLabel: TranslationMessage;
-  Component: React.ComponentType;
+  Component: ComponentModule;
   permissions: Permission[];
+  exact?: boolean;
 }
 
 interface StrapiAppSetting {

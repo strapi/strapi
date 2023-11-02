@@ -1,22 +1,19 @@
 import type { Permission } from '@strapi/helper-plugin';
 
+type SettingsPermissions = 'project-settings' | 'users' | 'webhooks';
+
+interface CRUDPermissions {
+  main: Permission[];
+  read: Permission[];
+  create: Permission[];
+  update: Permission[];
+  delete: Permission[];
+  [key: string]: Permission[];
+}
+
 interface PermissionMap {
-  marketplace: {
-    main: Permission[];
-  };
-  /**
-   * TODO: remove the use of record to make it "concrete".
-   */
-  settings: Record<
-    string,
-    {
-      main: Permission[];
-      create: Permission[];
-      read: Permission[];
-      update: Permission[];
-      delete: Permission[];
-    }
-  >;
+  marketplace: CRUDPermissions;
+  settings: Record<SettingsPermissions, CRUDPermissions>;
 }
 
 export { PermissionMap };

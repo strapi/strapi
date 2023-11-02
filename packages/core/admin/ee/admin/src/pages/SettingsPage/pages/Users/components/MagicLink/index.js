@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { getBasename } from '../../../../../../../../../admin/src/core/utils/basename';
-import MagicLinkWrapper from '../../../../../../../../../admin/src/pages/SettingsPage/pages/Users/components/MagicLink/MagicLinkWrapper';
+import MagicLinkWrapper from '../../../../../../../../../admin/src/pages/Settings/pages/Users/components/MagicLink/MagicLinkWrapper';
 
 // FIXME replace with parts compo when ready
 export const MagicLinkEE = ({ registrationToken }) => {

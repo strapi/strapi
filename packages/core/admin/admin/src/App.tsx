@@ -11,7 +11,6 @@ import {
   auth,
   LoadingIndicatorPage,
   MenuItem,
-  prefixFileUrlWithBackendUrl,
   TrackingProvider,
   useAppInfo,
   useFetchClient,
@@ -24,7 +23,6 @@ import { Route, Switch } from 'react-router-dom';
 
 import { PrivateRoute } from './components/PrivateRoute';
 import { ADMIN_PERMISSIONS_CE, ACTION_SET_ADMIN_PERMISSIONS } from './constants';
-import { useConfiguration } from './contexts/configuration';
 import { useEnterprise } from './hooks/useEnterprise';
 import { AuthPage } from './pages/Auth/AuthPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -60,7 +58,6 @@ export const App = () => {
     }
   );
   const toggleNotification = useNotification();
-  const { updateProjectSettings } = useConfiguration();
   const { formatMessage } = useIntl();
   const [{ isLoading, hasAdmin, uuid, deviceId }, setState] = React.useState({
     isLoading: true,
@@ -114,14 +111,9 @@ export const App = () => {
       try {
         const {
           data: {
-            data: { hasAdmin, uuid, menuLogo, authLogo },
+            data: { hasAdmin, uuid },
           },
         } = await get(`/admin/init`);
-
-        updateProjectSettings({
-          menuLogo: prefixFileUrlWithBackendUrl(menuLogo),
-          authLogo: prefixFileUrlWithBackendUrl(authLogo),
-        });
 
         if (uuid) {
           const {
@@ -135,7 +127,7 @@ export const App = () => {
 
           try {
             const event = 'didInitializeAdministration';
-            await post(
+            post(
               'https://analytics.strapi.io/api/v2/track',
               {
                 // This event is anonymous
@@ -168,7 +160,7 @@ export const App = () => {
 
     getData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [toggleNotification, updateProjectSettings]);
+  }, [toggleNotification]);
 
   const trackingInfo = React.useMemo(
     () => ({
