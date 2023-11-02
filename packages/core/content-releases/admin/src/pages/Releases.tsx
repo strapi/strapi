@@ -1,22 +1,56 @@
-import { Main } from '@strapi/design-system';
-import { Route, Switch } from 'react-router-dom';
+/*
+ *
+ * Releases
+ *
+ */
+import React from 'react';
 
-import { pluginId } from '../pluginId';
+import { Button, Main, HeaderLayout } from '@strapi/design-system';
+import { Plus } from '@strapi/icons';
+import { useIntl } from 'react-intl';
 
-export const Releases = () => {
+import { AddReleaseDialog } from '../components/AddReleaseDialog';
+
+const ReleasesPage = () => {
+  const [showAddReleaseDialog, setShowAddReleaseDialog] = React.useState(false);
+  const { formatMessage } = useIntl();
+
+  const total = 0; // TODO: replace it with the total number of releases
+
+  const subtitle = formatMessage(
+    {
+      id: 'content-releases.pages.Releases.header-subtitle',
+      defaultMessage: '{number, plural, =0 {No releases} one {# release} other {# releases}}',
+    },
+    { number: total }
+  );
+
+  const toggleAddReleaseDialog = () => {
+    setShowAddReleaseDialog((prev: boolean) => !prev);
+  };
+
   return (
-    <Main>
-      <Switch>
-        <Route
-          exact
-          path={`/plugins/${pluginId}`}
-          render={() => <div>TODO: This is the ListPage</div>}
+    <>
+      <Main>
+        <HeaderLayout
+          title={formatMessage({
+            id: 'content-releases.pages.Releases.title',
+            defaultMessage: 'Releases',
+          })}
+          subtitle={subtitle}
+          primaryAction={
+            <Button startIcon={<Plus />} onClick={toggleAddReleaseDialog}>
+              {formatMessage({
+                id: 'content-releases.header.actions.add-release',
+                defaultMessage: 'New release',
+              })}
+            </Button>
+          }
         />
-        <Route
-          path={`/plugins/${pluginId}/:releaseId`}
-          render={() => <div>TODO: This is the DetailsPage</div>}
-        />
-      </Switch>
-    </Main>
+      </Main>
+      {showAddReleaseDialog && <AddReleaseDialog onClose={() => toggleAddReleaseDialog()} />}
+    </>
   );
 };
+
+export { ReleasesPage };

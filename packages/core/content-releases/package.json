@@ -62,10 +62,13 @@
     "watch": "packup watch"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "1.9.7",
     "@strapi/design-system": "1.13.0",
     "@strapi/helper-plugin": "4.14.4",
     "@strapi/icons": "1.13.0",
-    "react-intl": "6.4.1"
+    "formik": "2.4.0",
+    "react-intl": "6.4.1",
+    "yup": "0.32.9"
   },
   "devDependencies": {
     "@strapi/pack-up": "workspace:*",

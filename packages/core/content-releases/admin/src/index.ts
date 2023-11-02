@@ -15,11 +15,11 @@ const admin: Plugin.Config.AdminInput = {
         icon: PaperPlane,
         intlLabel: {
           id: `${pluginId}.plugin.name`,
-          defaultMessage: 'Releases',
+          defaultMessage: 'Content Releases',
         },
         async Component() {
           const { Releases } = await import(
-            /* webpackChunkName: "content-type-builder" */ './pages/Releases'
+            /* webpackChunkName: "content-type-builder" */ './pages/App'
           );
           return Releases;
         },
@@ -30,10 +30,12 @@ const admin: Plugin.Config.AdminInput = {
   async registerTrads({ locales }: { locales: string[] }) {
     const importedTrads = await Promise.all(
       locales.map((locale) => {
-        return import(`./translations/${locale}.json`)
+        return import(
+          /* webpackChunkName: "content-releases-translation-[request]" */ `./translations/${locale}.json`
+        )
           .then(({ default: data }) => {
             return {
-              data: prefixPluginTranslations(data, 'releases'),
+              data: prefixPluginTranslations(data, 'content-releases'),
               locale,
             };
           })
