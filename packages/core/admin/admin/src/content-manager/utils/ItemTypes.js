@@ -4,4 +4,5 @@ export default {
   FIELD: 'field',
   DYNAMIC_ZONE: 'dynamicZone',
   RELATION: 'relation',
+  BLOCKS: 'blocks',
 };

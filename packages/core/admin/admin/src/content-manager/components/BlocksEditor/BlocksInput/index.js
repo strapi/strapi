@@ -7,7 +7,7 @@ import { Editable, useSlate } from 'slate-react';
 import styled, { useTheme } from 'styled-components';
 
 import { useDragAndDrop } from '../../../hooks/useDragAndDrop';
-import { composeRefs } from '../../../utils';
+import { composeRefs, ItemTypes } from '../../../utils';
 import { useBlocksStore } from '../hooks/useBlocksStore';
 import { useModifiersStore } from '../hooks/useModifiersStore';
 
@@ -28,21 +28,6 @@ const FlexButton = styled(Flex)`
   }
 `;
 
-const baseRenderLeaf = (props, modifiers) => {
-  // Recursively wrap the children for each active modifier
-  const wrappedChildren = Object.entries(modifiers).reduce((currentChildren, modifierEntry) => {
-    const [name, modifier] = modifierEntry;
-
-    if (props.leaf[name]) {
-      return modifier.renderLeaf(currentChildren);
-    }
-
-    return currentChildren;
-  }, props.children);
-
-  return <span {...props.attributes}>{wrappedChildren}</span>;
-};
-
 const BlockPlaceholder = () => (
   <Box
     paddingTop={2}
@@ -58,17 +43,22 @@ const BlockPlaceholder = () => (
   />
 );
 
-const DragAndDropElement = ({ children }) => {
-  const [{ handlerId, isDragging, handleKeyDown }, myRef, dropRef, dragRef] = useDragAndDrop(true, {
-    type: 'my-type',
-    // index,
-    // onMoveItem,
-  });
+const DragAndDropElement = ({ children, index, disabled, name, onMoveItem }) => {
+  const [{ handlerId, isDragging, handleKeyDown }, myRef, boxRef, dropRef, dragRef] =
+    useDragAndDrop(!disabled, {
+      type: `${ItemTypes.BLOCKS}._${name}`,
+      index,
+      item: {
+        displayedValue: children,
+      },
+      onMoveItem,
+    });
 
   const composedRefs = composeRefs(myRef, dragRef);
+  const composedBoxRefs = composeRefs(boxRef, dropRef);
 
   return (
-    <Box ref={dropRef} cursor="all-scroll">
+    <Box ref={composedBoxRefs} cursor="all-scroll">
       {isDragging ? (
         <BlockPlaceholder />
       ) : (
@@ -97,16 +87,56 @@ const DragAndDropElement = ({ children }) => {
 
 DragAndDropElement.propTypes = {
   children: PropTypes.node.isRequired,
+  index: PropTypes.number.isRequired,
+  disabled: PropTypes.bool.isRequired,
+  name: PropTypes.string.isRequired,
+  onMoveItem: PropTypes.func.isRequired,
 };
 
-const baseRenderElement = (props, blocks) => {
+// TODO: Remove useful links
+// https://codesandbox.io/s/example-for-issues-3522-1meyy
+// https://codesandbox.io/s/vertical-list-nixx4?file=/index.js
+// https://codesandbox.io/s/slate-dnd-kit-brld4z?file=/src/App.js:779-790
+
+// https://codesandbox.io/s/osmfq?file=/src/App.js
+
+const baseRenderElement = (props, blocks, editor, disabled, name, handleMoveItem) => {
   const blockMatch = Object.values(blocks).find((block) => block.matchNode(props.element));
   const block = blockMatch || blocks.paragraph;
 
-  return <DragAndDropElement>{block.renderElement(props)}</DragAndDropElement>;
+  const currElemIndex = editor.children.reduce(
+    (accum, curr, i) => (props.element.id === curr.id ? i : accum),
+    -1
+  );
+
+  return (
+    <DragAndDropElement
+      index={currElemIndex}
+      disabled={disabled}
+      name={name}
+      onMoveItem={handleMoveItem}
+    >
+      {block.renderElement(props)}
+    </DragAndDropElement>
+  );
 };
 
-const BlocksInput = ({ disabled, placeholder }) => {
+const baseRenderLeaf = (props, modifiers) => {
+  // Recursively wrap the children for each active modifier
+  const wrappedChildren = Object.entries(modifiers).reduce((currentChildren, modifierEntry) => {
+    const [name, modifier] = modifierEntry;
+
+    if (props.leaf[name]) {
+      return modifier.renderLeaf(currentChildren);
+    }
+
+    return currentChildren;
+  }, props.children);
+
+  return <span {...props.attributes}>{wrappedChildren}</span>;
+};
+
+const BlocksInput = ({ disabled, placeholder, name, handleMoveItem }) => {
   const theme = useTheme();
   const editor = useSlate();
   const blocksRef = React.useRef();
@@ -117,7 +147,10 @@ const BlocksInput = ({ disabled, placeholder }) => {
 
   // Create renderElement function base on the blocks store
   const blocks = useBlocksStore();
-  const renderElement = React.useCallback((props) => baseRenderElement(props, blocks), [blocks]);
+  const renderElement = React.useCallback(
+    (props) => baseRenderElement(props, blocks, editor, disabled, name, handleMoveItem),
+    [blocks, editor, disabled, name, handleMoveItem]
+  );
 
   const handleEnter = () => {
     const selectedNode = editor.children[editor.selection.anchor.path[0]];
@@ -172,6 +205,12 @@ const BlocksInput = ({ disabled, placeholder }) => {
     }
   };
 
+  const onDrop = () => {
+    // As we have our own handler to drag and drop the elements
+    // returing true will skip slate's own event handler
+    return true;
+  };
+
   return (
     <Box
       ref={blocksRef}
@@ -196,6 +235,7 @@ const BlocksInput = ({ disabled, placeholder }) => {
         renderLeaf={renderLeaf}
         onKeyDown={handleEditorKeyDown}
         scrollSelectionIntoView={handleScrollSelectionIntoView}
+        onDrop={onDrop}
       />
     </Box>
   );
@@ -208,6 +248,8 @@ BlocksInput.defaultProps = {
 BlocksInput.propTypes = {
   disabled: PropTypes.bool.isRequired,
   placeholder: PropTypes.string,
+  name: PropTypes.string.isRequired,
+  handleMoveItem: PropTypes.func.isRequired,
 };
 
 export default BlocksInput;

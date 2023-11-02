@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Box, Flex, Typography, InputWrapper, Divider } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { createEditor } from 'slate';
+import { createEditor, Transforms } from 'slate';
 import { withHistory } from 'slate-history';
 import { Slate, withReact, ReactEditor } from 'slate-react';
 import styled from 'styled-components';
@@ -134,6 +134,22 @@ const BlocksEditor = React.forwardRef(
       }
     };
 
+    // TODO: refactor to use right id generating method
+    const setIdsToItems = () => {
+      const items = value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }];
+
+      return items.map((item, index) => ({ ...item, id: index + 1 }));
+    };
+
+    const handleMoveItem = (newIndex, currentIndex) => {
+      Transforms.moveNodes(editor, {
+        at: [currentIndex],
+        to: [newIndex],
+      });
+
+      Transforms.select(editor, [currentIndex]);
+    };
+
     return (
       <>
         <Flex direction="column" alignItems="stretch" gap={1}>
@@ -146,14 +162,19 @@ const BlocksEditor = React.forwardRef(
           </Flex>
           <Slate
             editor={editor}
-            initialValue={value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]}
+            initialValue={setIdsToItems()}
             onChange={handleSlateChange}
             key={key}
           >
             <InputWrapper direction="column" alignItems="flex-start" height="512px">
               <BlocksToolbar disabled={disabled} />
               <EditorDivider width="100%" />
-              <BlocksInput disabled={disabled} placeholder={formattedPlaceholder} />
+              <BlocksInput
+                disabled={disabled}
+                placeholder={formattedPlaceholder}
+                name={name}
+                handleMoveItem={handleMoveItem}
+              />
             </InputWrapper>
           </Slate>
           <Hint hint={hint} name={name} error={error} />
