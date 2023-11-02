@@ -1,8 +1,8 @@
 import type * as components from '../services/components';
-import type builder from '../services/builder';
-import type contentTypes from '../services/content-types';
-import * as componentCategories from '../services/component-categories';
-import * as apiHandler from '../services/api-handler';
+import type * as builder from '../services/builder';
+import type * as contentTypes from '../services/content-types';
+import type * as componentCategories from '../services/component-categories';
+import type * as apiHandler from '../services/api-handler';
 
 type S = {
   'content-types': typeof contentTypes;

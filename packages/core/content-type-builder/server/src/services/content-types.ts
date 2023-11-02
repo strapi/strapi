@@ -45,7 +45,7 @@ export const createContentTypes = async (contentTypes: any[]) => {
 /**
  * Format a contentType info to be used by the front-end
  */
-const formatContentType = (contentType: any) => {
+export const formatContentType = (contentType: any) => {
   const { uid, kind, modelName, plugin, collectionName, info } = contentType;
 
   return {
@@ -280,11 +280,11 @@ export const deleteContentType = async (
   return contentType;
 };
 
-export default () => ({
-  createContentType,
-  editContentType,
-  deleteContentType,
-  formatContentType,
-  createContentTypes,
-  deleteContentTypes,
-});
+// export default () => ({
+//   createContentType,
+//   editContentType,
+//   deleteContentType,
+//   formatContentType,
+//   createContentTypes,
+//   deleteContentTypes,
+// });

@@ -1,7 +1,6 @@
 import { Schema } from '@strapi/types';
-import getContentTypes from '../content-types';
+import { formatContentType } from '../content-types';
 
-const { formatContentType } = getContentTypes();
 describe('Content types service', () => {
   describe('format ContentType', () => {
     const contentType = {
