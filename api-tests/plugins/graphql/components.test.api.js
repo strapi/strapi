@@ -51,7 +51,7 @@ const labelModel = {
   collectionName: '',
 };
 
-describe('Test Graphql Relations API End to End', () => {
+describe('Test Graphql Components API End to End', () => {
   beforeAll(async () => {
     await builder.addComponent(rgbColorComponent).addContentTypes([labelModel]).build();
 
