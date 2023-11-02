@@ -21,7 +21,7 @@ import {
 
 import { FieldActionWrapper } from './FieldActionWrapper';
 
-const REGISTER_SCHEMA = yup.object().shape({
+const RESET_PASSWORD_SCHEMA = yup.object().shape({
   password: yup
     .string()
     .min(8, translatedErrors.minLength)
@@ -98,9 +98,9 @@ const ResetPassword = () => {
               confirmPassword: '',
             }}
             onSubmit={(values) => {
-              mutate(values);
+              mutate({ password: values.password });
             }}
-            validationSchema={REGISTER_SCHEMA}
+            validationSchema={RESET_PASSWORD_SCHEMA}
             validateOnChange={false}
           >
             {({ values, errors, handleChange }) => (
@@ -112,10 +112,15 @@ const ResetPassword = () => {
                     value={values.password}
                     error={
                       errors.password
-                        ? formatMessage({
-                            id: errors.password,
-                            defaultMessage: 'This field is required.',
-                          })
+                        ? formatMessage(
+                            {
+                              id: errors.password,
+                              defaultMessage: 'This field is required.',
+                            },
+                            {
+                              min: 8,
+                            }
+                          )
                         : undefined
                     }
                     endAction={
