@@ -5,6 +5,4 @@ const hasPermissionsSchema = yup.object({
   hasAtLeastOne: yup.boolean(),
 });
 
-export default {
-  validateHasPermissionsInput: validateYupSchemaSync(hasPermissionsSchema),
-};
+export const validateHasPermissionsInput = validateYupSchemaSync(hasPermissionsSchema);

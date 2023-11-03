@@ -1,10 +1,9 @@
 import { Config, defineConfig } from '@strapi/pack-up';
-import { transformWithEsbuild } from 'vite';
 
 const config: Config = defineConfig({
   bundles: [
     {
-      source: './server/src/index.js',
+      source: './server/src/index.ts',
       import: './dist/server/index.mjs',
       require: './dist/server/index.js',
       types: './dist/server/src/index.d.ts',

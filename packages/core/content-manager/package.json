@@ -22,7 +22,7 @@
   "exports": {
     "./strapi-server": {
       "types": "./dist/server/src/index.d.ts",
-      "source": "./server/src/index.js",
+      "source": "./server/src/index.ts",
       "require": "./strapi-server.js",
       "default": "./strapi-server.js"
     },

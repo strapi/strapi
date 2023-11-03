@@ -1,7 +1,7 @@
 import '@strapi/types';
 
-const getService = (name) => {
+const getService = (name: string) => {
   return strapi.plugin('content-manager').service(name);
 };
 
-export default { getService };
+export { getService };
