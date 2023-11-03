@@ -96,6 +96,7 @@
     "css-loader": "^6.8.1",
     "date-fns": "2.30.0",
     "dotenv": "14.2.0",
+    "esbuild": "0.19.2",
     "esbuild-loader": "^2.21.0",
     "esbuild-register": "3.5.0",
     "execa": "5.1.1",
@@ -185,7 +186,12 @@
     "vite": "4.4.9"
   },
   "peerDependencies": {
-    "@strapi/strapi": "^4.3.4"
+    "@strapi/data-transfer": "4.15.0",
+    "@strapi/strapi": "^4.3.4",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0",
+    "react-router-dom": "^5.2.0",
+    "styled-components": "^5.2.1"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
