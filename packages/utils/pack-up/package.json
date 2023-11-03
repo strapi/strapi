@@ -1,6 +1,6 @@
 {
   "name": "@strapi/pack-up",
-  "version": "4.14.5",
+  "version": "4.14.6",
   "description": "Simple tools for creating interoperable CJS & ESM packages.",
   "keywords": [
     "strapi",
