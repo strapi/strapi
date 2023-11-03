@@ -41,7 +41,11 @@ interface DepToInstall {
 const checkRequiredDependencies = async ({
   cwd,
   logger,
-}: Pick<BuildOptions, 'cwd' | 'logger'>): Promise<CheckRequiredDependenciesResult> => {
+  ignorePrompts,
+}: Pick<
+  BuildOptions,
+  'cwd' | 'logger' | 'ignorePrompts'
+>): Promise<CheckRequiredDependenciesResult> => {
   const pkg = await readPkgUp({ cwd });
 
   if (!pkg) {
@@ -102,7 +106,7 @@ const checkRequiredDependencies = async ({
     /**
      * temporary until V5 when we _will_ be enforcing these dependencies as required.
      */
-    if (process.env.NODE_ENV !== 'development') {
+    if (process.env.NODE_ENV !== 'development' || ignorePrompts) {
       return { didInstall: false };
     }
 
