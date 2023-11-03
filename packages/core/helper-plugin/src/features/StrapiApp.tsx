@@ -25,7 +25,10 @@ interface MenuItem extends Pick<LinkProps, 'to'> {
 // TODO: this should come from `core/admin/src/core/apis/Plugins`
 interface Plugin {
   apis: Record<string, unknown>;
-  injectionZones: Record<string, unknown>;
+  injectionZones: Record<
+    string,
+    Record<string, Array<{ name: string; Component: React.ComponentType }>>
+  >;
   initializer: React.ComponentType<{ setPlugin(pluginId: string): void }>;
   getInjectedComponents: (
     containerName: string,
