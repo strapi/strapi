@@ -134,20 +134,22 @@ const BlocksEditor = React.forwardRef(
       }
     };
 
-    // TODO: refactor to use right id generating method
-    const setIdsToItems = () => {
-      const items = value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }];
-
-      return items.map((item, index) => ({ ...item, id: index + 1 }));
-    };
-
     const handleMoveItem = (newIndex, currentIndex) => {
-      Transforms.moveNodes(editor, {
-        at: [currentIndex],
-        to: [newIndex],
-      });
+      if (newIndex || newIndex === 0) {
+        const newIndexArray = Array.from(String(newIndex), Number);
+        const currentIndexArray = Array.from(String(currentIndex), Number);
 
-      Transforms.select(editor, [currentIndex]);
+        Transforms.moveNodes(editor, {
+          at: currentIndexArray,
+          to: newIndexArray,
+        });
+
+        // TODO: fix selection to new index
+        Transforms.select(editor, {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 0 },
+        });
+      }
     };
 
     return (
@@ -162,7 +164,7 @@ const BlocksEditor = React.forwardRef(
           </Flex>
           <Slate
             editor={editor}
-            initialValue={setIdsToItems()}
+            initialValue={value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]}
             onChange={handleSlateChange}
             key={key}
           >

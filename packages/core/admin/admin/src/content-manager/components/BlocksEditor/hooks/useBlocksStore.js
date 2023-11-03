@@ -108,6 +108,10 @@ const listStyle = css`
     margin-block-start: ${({ theme }) => theme.spaces[0]};
     margin-block-end: ${({ theme }) => theme.spaces[0]};
   }
+
+  & > * li {
+    margin-left: ${({ theme }) => theme.spaces[3]};
+  }
 `;
 
 const Orderedlist = styled.ol`

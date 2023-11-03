@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Box, Flex, Icon } from '@strapi/design-system';
 import { Drag } from '@strapi/icons';
 import PropTypes from 'prop-types';
-import { Editable, useSlate } from 'slate-react';
+import { Editable, useSlate, ReactEditor } from 'slate-react';
 import styled, { useTheme } from 'styled-components';
 
 import { useDragAndDrop } from '../../../hooks/useDragAndDrop';
@@ -20,26 +20,45 @@ const getEditorStyle = (theme) => ({
   height: '100%',
 });
 
-const FlexButton = styled(Flex)`
+const DragItem = styled(Flex)`
+  opacity: ${({ isDragging }) => (isDragging ? 0.1 : 1)};
+  &:hover {
+    & > div {
+      visibility: visible;
+      opacity: inherit;
+    }
+  }
+
+  & > *:nth-child(2) {
+    width: 100%;
+    opacity: inherit;
+    color: ${({ isDragging, theme }) => (isDragging ? theme.colors.neutral500 : 'initial')};
+  }
+`;
+
+const DragButton = styled(Flex)`
   cursor: pointer;
+  visibility: hidden;
+  opacity: ${({ isDragging }) => (isDragging ? 0.1 : 1)};
 
   &:hover {
-    background: ${({ theme }) => theme.colors.neutral200}; // TODO: confirm with UX
+    background: ${({ theme }) => theme.colors.neutral200};
+  }
+
+  &:active {
+    // check :focus-within
+    cursor: grabbing;
+    background: ${({ theme }) => theme.colors.neutral200};
   }
 `;
 
 const BlockPlaceholder = () => (
   <Box
-    paddingTop={2}
-    paddingBottom={2}
-    paddingLeft={4}
-    paddingRight={4}
-    hasRadius
-    borderStyle="dashed"
-    borderColor="primary600"
-    borderWidth="1px"
-    background="primary100"
-    height={7}
+    borderStyle="solid"
+    borderColor="secondary200"
+    borderWidth="2px"
+    width="calc(100% - 24px)"
+    marginLeft="auto"
   />
 );
 
@@ -58,12 +77,12 @@ const DragAndDropElement = ({ children, index, disabled, name, onMoveItem }) => 
   const composedBoxRefs = composeRefs(boxRef, dropRef);
 
   return (
-    <Box ref={composedBoxRefs} cursor="all-scroll">
+    <Box ref={composedBoxRefs}>
       {isDragging ? (
         <BlockPlaceholder />
       ) : (
-        <Flex ref={composedRefs} data-handler-id={handlerId} gap={2}>
-          <FlexButton
+        <DragItem ref={composedRefs} data-handler-id={handlerId} gap={2} isDragging={isDragging}>
+          <DragButton
             role="button"
             tabIndex={0}
             aria-label="Drag"
@@ -75,11 +94,10 @@ const DragAndDropElement = ({ children, index, disabled, name, onMoveItem }) => 
             height={6}
             width={4}
           >
-            {/*  TODO: confirm icon with UX as in design its quite thin dots */}
             <Icon width={3} height={3} as={Drag} color="neutral600" />
-          </FlexButton>
+          </DragButton>
           {children}
-        </Flex>
+        </DragItem>
       )}
     </Box>
   );
@@ -93,21 +111,14 @@ DragAndDropElement.propTypes = {
   onMoveItem: PropTypes.func.isRequired,
 };
 
-// TODO: Remove useful links
-// https://codesandbox.io/s/example-for-issues-3522-1meyy
-// https://codesandbox.io/s/vertical-list-nixx4?file=/index.js
-// https://codesandbox.io/s/slate-dnd-kit-brld4z?file=/src/App.js:779-790
-
-// https://codesandbox.io/s/osmfq?file=/src/App.js
-
 const baseRenderElement = (props, blocks, editor, disabled, name, handleMoveItem) => {
   const blockMatch = Object.values(blocks).find((block) => block.matchNode(props.element));
   const block = blockMatch || blocks.paragraph;
 
-  const currElemIndex = editor.children.reduce(
-    (accum, curr, i) => (props.element.id === curr.id ? i : accum),
-    -1
-  );
+  const nodePath = ReactEditor.findPath(editor, props.element);
+  const currElemIndex = parseInt(nodePath.join(''), 10);
+
+  if (block.value.type === 'list') return block.renderElement(props);
 
   return (
     <DragAndDropElement
@@ -208,6 +219,7 @@ const BlocksInput = ({ disabled, placeholder, name, handleMoveItem }) => {
   const onDrop = () => {
     // As we have our own handler to drag and drop the elements
     // returing true will skip slate's own event handler
+
     return true;
   };
 
@@ -222,7 +234,7 @@ const BlocksInput = ({ disabled, placeholder, name, handleMoveItem }) => {
       color="neutral800"
       lineHeight={6}
       hasRadius
-      paddingLeft={4}
+      paddingLeft={2}
       paddingRight={4}
       marginTop={3}
       marginBottom={3}
