@@ -26,7 +26,7 @@ const getEntryModule = ({ plugins }: EntryModuleArgs): string => {
          * Any modifications made will be discarded.
          */
         ${pluginsImport}
-        import { renderAdmin } from "@strapi/admin/strapi-admin"
+        import { renderAdmin } from "@strapi/strapi/admin"
         
         renderAdmin(
           document.getElementById("strapi"),

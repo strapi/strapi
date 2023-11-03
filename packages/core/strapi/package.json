@@ -64,6 +64,30 @@
       "url": "https://strapi.io"
     }
   ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "source": "./src/index.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./dist/utils/ee": {
+      "types": "./dist/utils/ee.d.ts",
+      "source": "./src/utils/ee.ts",
+      "import": "./dist/utils/ee.mjs",
+      "require": "./dist/utils/ee.js",
+      "default": "./dist/utils/ee.js"
+    },
+    "./admin": {
+      "types": "./dist/admin.d.ts",
+      "source": "./src/admin.ts",
+      "import": "./dist/admin.mjs",
+      "require": "./dist/admin.js",
+      "default": "./dist/admin.js"
+    },
+    "./package.json": "./package.json"
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "source": "./src/index.ts",
