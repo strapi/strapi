@@ -54,8 +54,12 @@ const getInitialProviders = ({ purest }) => ({
       .auth(accessToken)
       .request()
       .then(({ body }) => {
-        // Combine username and discriminator because discord username is not unique
-        const username = `${body.username}#${body.discriminator}`;
+        // Combine username and discriminator (if discriminator exist)
+        // TODO: #0 discriminator is a temporary solution by Discrod: https://support-dev.discord.com/hc/en-us/articles/13667755828631#h_01GYA87X9QZ19H2X6PJ3M35ZDH
+        const username =
+          body.discriminator && body.discriminator !== '0'
+            ? `${body.username}#${body.discriminator}`
+            : body.username;
         return {
           username,
           email: body.email,
