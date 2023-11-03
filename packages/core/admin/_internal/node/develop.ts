@@ -85,7 +85,7 @@ const develop = async ({ cwd, polling, logger, tsconfig, ...options }: DevelopOp
 
     EE.init(cwd);
     await writeStaticClientFiles(ctx);
-    await watchWebpack(ctx);
+    const webpackWatcher = await watchWebpack(ctx);
 
     const adminDuration = timer.end('creatingAdmin');
     adminSpinner.text = `Creating admin (${adminDuration}ms)`;
@@ -165,6 +165,7 @@ const develop = async ({ cwd, polling, logger, tsconfig, ...options }: DevelopOp
           );
           await watcher.close();
           await strapiInstance.destroy();
+          webpackWatcher.close();
           process.send?.('killed');
           break;
         }
