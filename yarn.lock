@@ -8350,7 +8350,7 @@ __metadata:
     bcryptjs: "npm:2.4.3"
     boxen: "npm:5.1.2"
     chalk: "npm:4.1.2"
-    ci-info: "npm:3.8.0"
+    ci-info: "npm:3.9.0"
     cli-table3: "npm:0.6.2"
     commander: "npm:8.3.0"
     configstore: "npm:5.0.1"
@@ -12958,10 +12958,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ci-info@npm:3.8.0, ci-info@npm:^3.2.0, ci-info@npm:^3.6.1":
-  version: 3.8.0
-  resolution: "ci-info@npm:3.8.0"
-  checksum: b00e9313c1f7042ca8b1297c157c920d6d69f0fbad7b867910235676df228c4b4f4df33d06cacae37f9efba7a160b0a167c6be85492b419ef71d85660e60606b
+"ci-info@npm:3.9.0":
+  version: 3.9.0
+  resolution: "ci-info@npm:3.9.0"
+  checksum: 75bc67902b4d1c7b435497adeb91598f6d52a3389398e44294f6601b20cfef32cf2176f7be0eb961d9e085bb333a8a5cae121cb22f81cf238ae7f58eb80e9397
   languageName: node
   linkType: hard
 
@@ -12969,6 +12969,13 @@ __metadata:
   version: 2.0.0
   resolution: "ci-info@npm:2.0.0"
   checksum: 3b374666a85ea3ca43fa49aa3a048d21c9b475c96eb13c133505d2324e7ae5efd6a454f41efe46a152269e9b6a00c9edbe63ec7fa1921957165aae16625acd67
+  languageName: node
+  linkType: hard
+
+"ci-info@npm:^3.2.0, ci-info@npm:^3.6.1":
+  version: 3.8.0
+  resolution: "ci-info@npm:3.8.0"
+  checksum: b00e9313c1f7042ca8b1297c157c920d6d69f0fbad7b867910235676df228c4b4f4df33d06cacae37f9efba7a160b0a167c6be85492b419ef71d85660e60606b
   languageName: node
   linkType: hard
 
@@ -13911,7 +13918,7 @@ __metadata:
     "@strapi/generate-new": "npm:4.15.1"
     "@strapi/pack-up": "workspace:*"
     chalk: "npm:4.1.2"
-    ci-info: "npm:3.8.0"
+    ci-info: "npm:3.9.0"
     commander: "npm:8.3.0"
     eslint-config-custom: "npm:4.15.1"
     execa: "npm:5.1.1"
