@@ -4,15 +4,16 @@ import * as Toolbar from '@radix-ui/react-toolbar';
 import { Flex, Icon, Tooltip, SingleSelect, SingleSelectOption, Box } from '@strapi/design-system';
 import { pxToRem, prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
 import { Link } from '@strapi/icons';
-import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
-import { Editor, Transforms, Element as SlateElement } from 'slate';
+import { Attribute } from '@strapi/types';
+import { MessageDescriptor, useIntl } from 'react-intl';
+import { Editor, Transforms, Element as SlateElement, Element, Node } from 'slate';
 import { ReactEditor, useSlate } from 'slate-react';
 import styled from 'styled-components';
 
-import { useBlocksStore } from '../hooks/useBlocksStore';
+import { BlocksStore, SelectorBlockKey, useBlocksStore } from '../hooks/useBlocksStore';
 import { useModifiersStore } from '../hooks/useModifiersStore';
 import { insertLink } from '../utils/links';
+import { Block, getEntries, getKeys, isSelectorBlockKey, isText } from '../utils/types';
 
 const ToolbarWrapper = styled(Flex)`
   &[aria-disabled='true'] {
@@ -68,7 +69,23 @@ const SelectWrapper = styled(Box)`
   }
 `;
 
-const ToolbarButton = ({ icon, name, label, isActive, disabled, handleClick }) => {
+interface ToolbarButtonProps {
+  icon: React.ComponentType;
+  name: string;
+  label: MessageDescriptor;
+  isActive: boolean;
+  disabled: boolean;
+  handleClick: () => void;
+}
+
+const ToolbarButton = ({
+  icon,
+  name,
+  label,
+  isActive,
+  disabled,
+  handleClick,
+}: ToolbarButtonProps) => {
   const editor = useSlate();
   const { formatMessage } = useIntl();
   const labelMessage = formatMessage(label);
@@ -90,6 +107,7 @@ const ToolbarButton = ({ icon, name, label, isActive, disabled, handleClick }) =
         asChild
       >
         <FlexButton
+          as="button" // needed for typescript
           disabled={disabled}
           background={isActive ? 'primary100' : ''}
           alignItems="center"
@@ -111,32 +129,22 @@ const ToolbarButton = ({ icon, name, label, isActive, disabled, handleClick }) =
   );
 };
 
-ToolbarButton.propTypes = {
-  icon: PropTypes.elementType.isRequired,
-  name: PropTypes.string.isRequired,
-  label: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-  }).isRequired,
-  isActive: PropTypes.bool.isRequired,
-  disabled: PropTypes.bool.isRequired,
-  handleClick: PropTypes.func.isRequired,
-};
-
-const toggleBlock = (editor, value) => {
-  const { type, level, format } = value;
+const toggleBlock = (editor: Editor, value: Partial<Element>) => {
+  if (!value.type) {
+    throw new Error('The block type is required');
+  }
 
   // Set the selected block properties received from the useBlockStore
   const blockProperties = {
-    type,
-    level: level || null,
-    format: format || null,
+    type: value.type,
+    level: (value as Block<'heading'>).level || null,
+    format: (value as Block<'list'>).format || null,
   };
 
   if (editor.selection) {
     // If the selection is inside a list, split the list so that the modified block is outside of it
     Transforms.unwrapNodes(editor, {
-      match: (node) => node.type === 'list',
+      match: (node) => !Editor.isEditor(node) && node.type === 'list',
       split: true,
     });
 
@@ -149,12 +157,9 @@ const toggleBlock = (editor, value) => {
      * between them.
      */
     const [, lastNodePath] = Editor.last(editor, []);
-    const [parentNode] = Editor.parent(editor, lastNodePath, {
-      // Makes sure we get a block node, not an inline node
-      match: (node) => node.type !== 'text',
-    });
+    const [parentNode] = Editor.parent(editor, lastNodePath);
     Transforms.removeNodes(editor, {
-      void: true,
+      voids: true,
       hanging: true,
       at: {
         anchor: { path: lastNodePath, offset: 0 },
@@ -166,7 +171,7 @@ const toggleBlock = (editor, value) => {
       {
         ...blockProperties,
         children: parentNode.children,
-      },
+      } as Node,
       {
         at: [lastNodePath[0]],
         select: true,
@@ -197,58 +202,72 @@ const IMAGE_SCHEMA_FIELDS = [
   'updatedAt',
 ];
 
-const pick = (object, imageSchemaFields) => {
-  return Object.keys(object).reduce((acc, key) => {
-    if (imageSchemaFields.includes(key)) {
-      acc[key] = object[key];
-    }
-
-    return acc;
-  }, {});
+const pick = <T extends object, K extends keyof T>(object: T, keys: K[]): Pick<T, K> => {
+  const entries = keys.map((key) => [key, object[key]]);
+  return Object.fromEntries(entries);
 };
 
-const ImageDialog = ({ handleClose }) => {
+const ImageDialog = ({ handleClose }: { handleClose: () => void }) => {
   const editor = useSlate();
   const { components } = useLibrary();
-  const MediaLibraryDialog = components['media-library'];
 
-  const insertImages = (images) => {
+  if (!components) return null;
+
+  const MediaLibraryDialog = components['media-library'] as React.ComponentType<{
+    allowedTypes: Attribute.MediaKind[];
+    onClose: () => void;
+    onSelectAssets: (_images: Attribute.MediaValue<true>) => void;
+  }>;
+
+  const insertImages = (images: Block<'image'>['image'][]) => {
     // If the selection is inside a list, split the list so that the modified block is outside of it
     Transforms.unwrapNodes(editor, {
-      match: (node) => node.type === 'list',
+      match: (node) => !Editor.isEditor(node) && node.type === 'list',
       split: true,
     });
 
     // Save the path of the node that is being replaced by an image to insert the images there later
     // It's the closest full block node above the selection
-    const [, pathToInsert] = Editor.above(editor, {
+    const nodeEntryBeingReplaced = Editor.above(editor, {
       match(node) {
+        if (Editor.isEditor(node)) return false;
+
         const isInlineNode = ['text', 'link'].includes(node.type);
 
         return !isInlineNode;
       },
     });
 
+    if (!nodeEntryBeingReplaced) return;
+    const [, pathToInsert] = nodeEntryBeingReplaced;
+
     // Remove the previous node that is being replaced by an image
     Transforms.removeNodes(editor);
 
     // Convert images to nodes and insert them
     const nodesToInsert = images.map((image) => {
-      return { type: 'image', image, children: [{ type: 'text', text: '' }] };
+      const imageNode: Block<'image'> = {
+        type: 'image',
+        image,
+        children: [{ type: 'text', text: '' }],
+      };
+      return imageNode;
     });
     Transforms.insertNodes(editor, nodesToInsert, { at: pathToInsert });
   };
 
-  const handleSelectAssets = (images) => {
+  const handleSelectAssets = (images: Attribute.MediaValue<true>) => {
     const formattedImages = images.map((image) => {
       // Create an object with imageSchema defined and exclude unnecessary props coming from media library config
       const expectedImage = pick(image, IMAGE_SCHEMA_FIELDS);
 
-      return {
+      const nodeImage: Block<'image'>['image'] = {
         ...expectedImage,
         alternativeText: expectedImage.alternativeText || expectedImage.name,
         url: prefixFileUrlWithBackendUrl(image.url),
       };
+
+      return nodeImage;
     });
 
     insertImages(formattedImages);
@@ -270,18 +289,14 @@ const ImageDialog = ({ handleClose }) => {
   );
 };
 
-ImageDialog.propTypes = {
-  handleClose: PropTypes.func.isRequired,
-};
-
-const isLastBlockType = (editor, type) => {
+const isLastBlockType = (editor: Editor, type: Element['type']) => {
   const { selection } = editor;
 
   if (!selection) return false;
 
   const [currentBlock] = Editor.nodes(editor, {
     at: selection,
-    match: (n) => n.type === type,
+    match: (node) => !Editor.isEditor(node) && node.type === type,
   });
 
   if (currentBlock) {
@@ -295,7 +310,7 @@ const isLastBlockType = (editor, type) => {
   return false;
 };
 
-const insertEmptyBlockAtLast = (editor) => {
+const insertEmptyBlockAtLast = (editor: Editor) => {
   Transforms.insertNodes(
     editor,
     {
@@ -306,30 +321,37 @@ const insertEmptyBlockAtLast = (editor) => {
   );
 };
 
-const BlocksDropdown = ({ disabled }) => {
+const BlocksDropdown = ({ disabled }: { disabled: boolean }) => {
   const editor = useSlate();
   const { formatMessage } = useIntl();
   const [isMediaLibraryVisible, setIsMediaLibraryVisible] = React.useState(false);
 
   const blocks = useBlocksStore();
-  const blockKeysToInclude = Object.entries(blocks).reduce((currentKeys, entry) => {
+
+  const blockKeysToInclude: SelectorBlockKey[] = getEntries(blocks).reduce<
+    ReturnType<typeof getEntries>
+  >((currentKeys, entry) => {
     const [key, block] = entry;
 
     return block.isInBlocksSelector ? [...currentKeys, key] : currentKeys;
   }, []);
 
-  const [blockSelected, setBlockSelected] = React.useState(Object.keys(blocks)[0]);
+  const [blockSelected, setBlockSelected] = React.useState<SelectorBlockKey>('paragraph');
 
-  /**
-   * @param {string} optionKey - key of the heading selected
-   */
-  const selectOption = (optionKey) => {
+  const selectOption = (optionKey: unknown) => {
+    if (!isSelectorBlockKey(optionKey)) {
+      return;
+    }
+
     if (['list-ordered', 'list-unordered'].includes(optionKey)) {
       // retrieve the list format
-      const listFormat = blocks[optionKey].value.format;
+      const listFormat = (blocks[optionKey].value as { format: Block<'list'>['format'] })?.format;
 
       // check if the list is already active
-      const isActive = isListActive(editor, blocks[optionKey].matchNode);
+      const isActive = isListActive(
+        editor,
+        (node) => !Editor.isEditor(node) && !isText(node) && blocks[optionKey].matchNode(node)
+      );
 
       // toggle the list
       toggleList(editor, isActive, listFormat);
@@ -337,7 +359,7 @@ const BlocksDropdown = ({ disabled }) => {
       toggleBlock(editor, blocks[optionKey].value);
     }
 
-    setBlockSelected(optionKey);
+    setBlockSelected(optionKey as SelectorBlockKey);
 
     if (optionKey === 'code' && isLastBlockType(editor, 'code')) {
       // Insert blank line to add new blocks below code block
@@ -357,7 +379,7 @@ const BlocksDropdown = ({ disabled }) => {
    * after an option is selected.
    *
    */
-  const preventSelectFocus = (e) => e.preventDefault();
+  const preventSelectFocus = (e: Event) => e.preventDefault();
 
   // Listen to the selection change and update the selected block in the dropdown
   React.useEffect(() => {
@@ -369,13 +391,13 @@ const BlocksDropdown = ({ disabled }) => {
         depth: 2,
       });
       // Find the block key that matches the anchor node
-      const anchorBlockKey = Object.keys(blocks).find((blockKey) =>
-        blocks[blockKey].matchNode(anchorNode)
+      const anchorBlockKey = getKeys(blocks).find(
+        (blockKey) => !Editor.isEditor(anchorNode) && blocks[blockKey].matchNode(anchorNode)
       );
 
       // Change the value selected in the dropdown if it doesn't match the anchor block key
       if (anchorBlockKey && anchorBlockKey !== blockSelected) {
-        setBlockSelected(anchorBlockKey);
+        setBlockSelected(anchorBlockKey as SelectorBlockKey);
       }
     }
   }, [editor.selection, editor, blocks, blockSelected]);
@@ -386,7 +408,7 @@ const BlocksDropdown = ({ disabled }) => {
         <SingleSelect
           startIcon={<Icon as={blocks[blockSelected].icon} />}
           onChange={selectOption}
-          placeholder={blocks[blockSelected].label}
+          placeholder={formatMessage(blocks[blockSelected].label)}
           value={blockSelected}
           onCloseAutoFocus={preventSelectFocus}
           aria-label={formatMessage({
@@ -411,11 +433,14 @@ const BlocksDropdown = ({ disabled }) => {
   );
 };
 
-BlocksDropdown.propTypes = {
-  disabled: PropTypes.bool.isRequired,
-};
+interface BlockOptionProps {
+  value: string;
+  icon: React.ComponentType;
+  label: MessageDescriptor;
+  blockSelected: string;
+}
 
-const BlockOption = ({ value, icon, label, blockSelected }) => {
+const BlockOption = ({ value, icon, label, blockSelected }: BlockOptionProps) => {
   const { formatMessage } = useIntl();
 
   const isSelected = value === blockSelected;
@@ -430,26 +455,11 @@ const BlockOption = ({ value, icon, label, blockSelected }) => {
   );
 };
 
-BlockOption.propTypes = {
-  icon: PropTypes.elementType.isRequired,
-  value: PropTypes.string.isRequired,
-  label: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-  }).isRequired,
-  blockSelected: PropTypes.string.isRequired,
-};
-
-/**
- *
- * @param {import('slate').Node} node
- * @returns boolean
- */
-const isListNode = (node) => {
+const isListNode = (node: Node): node is Block<'list'> => {
   return !Editor.isEditor(node) && SlateElement.isElement(node) && node.type === 'list';
 };
 
-const isListActive = (editor, matchNode) => {
+const isListActive = (editor: Editor, matchNode: (node: Node) => boolean) => {
   const { selection } = editor;
 
   if (!selection) return false;
@@ -464,7 +474,7 @@ const isListActive = (editor, matchNode) => {
   return Boolean(match);
 };
 
-const toggleList = (editor, isActive, format) => {
+const toggleList = (editor: Editor, isActive: boolean, format: Block<'list'>['format']) => {
   // If we have selected a portion of content in the editor,
   // we want to convert it to a list or if it is already a list,
   // convert it back to a paragraph
@@ -479,7 +489,7 @@ const toggleList = (editor, isActive, format) => {
     });
 
     if (!isActive) {
-      const block = { type: 'list', format, children: [] };
+      const block = { type: 'list' as const, format, children: [] };
       Transforms.wrapNodes(editor, block);
     }
   } else {
@@ -487,13 +497,10 @@ const toggleList = (editor, isActive, format) => {
     // If it is already a list, convert it back to a paragraph
     const [, lastNodePath] = Editor.last(editor, []);
 
-    const [parentNode] = Editor.parent(editor, lastNodePath, {
-      // Makes sure we get a block node, not an inline node
-      match: (node) => node.type !== 'text',
-    });
+    const [parentNode] = Editor.parent(editor, lastNodePath);
 
     Transforms.removeNodes(editor, {
-      void: true,
+      voids: true,
       hanging: true,
       at: {
         anchor: { path: lastNodePath, offset: 0 },
@@ -506,7 +513,7 @@ const toggleList = (editor, isActive, format) => {
       {
         type: isActive ? 'paragraph' : 'list-item',
         children: [...parentNode.children],
-      },
+      } as Node,
       {
         at: [lastNodePath[0]],
         select: true,
@@ -515,23 +522,27 @@ const toggleList = (editor, isActive, format) => {
 
     if (!isActive) {
       // If the selection is now a list item, wrap it inside a list
-      const block = { type: 'list', format, children: [] };
+      const block = { type: 'list' as const, format, children: [] };
       Transforms.wrapNodes(editor, block);
     }
   }
 };
 
-const ListButton = ({ block, disabled }) => {
+interface ListButtonProps {
+  block: BlocksStore['list-ordered'] | BlocksStore['list-unordered'];
+  disabled: boolean;
+}
+
+const ListButton = ({ block, disabled }: ListButtonProps) => {
   const editor = useSlate();
 
-  const {
-    icon,
-    matchNode,
-    value: { format },
-    label,
-  } = block;
+  const { icon, matchNode, value, label } = block;
+  const { format } = value as { format: Block<'list'>['format'] };
 
-  const isActive = isListActive(editor, matchNode);
+  const isActive = isListActive(
+    editor,
+    (node) => !Editor.isEditor(node) && node.type !== 'text' && matchNode(node)
+  );
 
   return (
     <ToolbarButton
@@ -545,22 +556,11 @@ const ListButton = ({ block, disabled }) => {
   );
 };
 
-ListButton.propTypes = {
-  block: PropTypes.shape({
-    icon: PropTypes.elementType.isRequired,
-    matchNode: PropTypes.func.isRequired,
-    value: PropTypes.shape({
-      format: PropTypes.string.isRequired,
-    }).isRequired,
-    label: PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      defaultMessage: PropTypes.string.isRequired,
-    }).isRequired,
-  }).isRequired,
-  disabled: PropTypes.bool.isRequired,
-};
+interface LinkButtonProps {
+  disabled: boolean;
+}
 
-const LinkButton = ({ disabled }) => {
+const LinkButton = ({ disabled }: LinkButtonProps) => {
   const editor = useSlate();
 
   const isLinkActive = () => {
@@ -592,12 +592,16 @@ const LinkButton = ({ disabled }) => {
     // Get the block node closest to the anchor and focus
     const anchorNodeEntry = Editor.above(editor, {
       at: editor.selection.anchor,
-      match: (node) => node.type !== 'text',
+      match: (node) => !Editor.isEditor(node) && node.type !== 'text',
     });
     const focusNodeEntry = Editor.above(editor, {
       at: editor.selection.focus,
-      match: (node) => node.type !== 'text',
+      match: (node) => !Editor.isEditor(node) && node.type !== 'text',
     });
+
+    if (!anchorNodeEntry || !focusNodeEntry) {
+      return false;
+    }
 
     // Disabled if the anchor and focus are not in the same block
     return anchorNodeEntry[0] !== focusNodeEntry[0];
@@ -623,11 +627,11 @@ const LinkButton = ({ disabled }) => {
   );
 };
 
-LinkButton.propTypes = {
-  disabled: PropTypes.bool.isRequired,
-};
+interface BlocksToolbarProps {
+  disabled: boolean;
+}
 
-const BlocksToolbar = ({ disabled }) => {
+const BlocksToolbar = ({ disabled }: BlocksToolbarProps) => {
   const modifiers = useModifiersStore();
   const blocks = useBlocksStore();
   const editor = useSlate();
@@ -688,10 +692,6 @@ const BlocksToolbar = ({ disabled }) => {
       </ToolbarWrapper>
     </Toolbar.Root>
   );
-};
-
-BlocksToolbar.propTypes = {
-  disabled: PropTypes.bool.isRequired,
 };
 
 export { BlocksToolbar };

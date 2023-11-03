@@ -1,8 +1,11 @@
+/* eslint-disable check-file/filename-naming-convention */
+
 import * as React from 'react';
 
 import { Typography } from '@strapi/design-system';
 import { Bold, Italic, Underline, StrikeThrough, Code } from '@strapi/icons';
-import { Editor } from 'slate';
+import { type MessageDescriptor } from 'react-intl';
+import { Editor, Text } from 'slate';
 import { useSlate } from 'slate-react';
 import styled, { css } from 'styled-components';
 
@@ -38,21 +41,23 @@ const InlineCode = styled.code`
   color: inherit;
 `;
 
+type ModifierKey = Exclude<keyof Text, 'type' | 'text'>;
+
+export type ModifiersStore = {
+  [K in ModifierKey]: {
+    icon: React.ComponentType;
+    isValidEventKey: (event: React.KeyboardEvent<HTMLDivElement>) => boolean;
+    label: MessageDescriptor;
+    checkIsActive: () => boolean;
+    handleToggle: () => void;
+    renderLeaf: (children: React.JSX.Element | string) => React.JSX.Element;
+  };
+};
+
 /**
  * Manages a store of all the available modifiers.
- *
- * @returns {{
- *   [key: string]: {
- *     icon: IconComponent,
- *     isValidEventKey: (event: Event) => boolean,
- *     label: {id: string, defaultMessage: string},
- *     checkIsActive: () => boolean,
- *     handleToggle: () => void,
- *     renderLeaf: (children: JSX.Element) => JSX.Element,
- *   }
- * }} An object containing rendering functions and metadata for different text modifiers, indexed by name.
  */
-export function useModifiersStore() {
+export function useModifiersStore(): ModifiersStore {
   const editor = useSlate();
   const modifiers = Editor.marks(editor);
 
@@ -61,7 +66,7 @@ export function useModifiersStore() {
    *
    * @param {string} name - The name of the modifier to check
    */
-  const baseCheckIsActive = (name) => {
+  const baseCheckIsActive = (name: ModifierKey) => {
     if (!modifiers) return false;
 
     return Boolean(modifiers[name]);
@@ -72,7 +77,7 @@ export function useModifiersStore() {
    *
    * @param {string} name - The name of the modifier to toggle
    */
-  const baseHandleToggle = (name) => {
+  const baseHandleToggle = (name: ModifierKey) => {
     if (modifiers?.[name]) {
       Editor.removeMark(editor, name);
     } else {

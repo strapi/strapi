@@ -4,7 +4,7 @@ import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
-import Blocks from '../index';
+import { BlocksEditor } from '../BlocksEditor';
 
 import { blocksData } from './mock-schema';
 
@@ -15,7 +15,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 
 const setup = (props) =>
   render(
-    <Blocks
+    <BlocksEditor
       intlLabel={{ id: 'blocks', defaultMessage: 'blocks type' }}
       name="blocks-editor"
       hint="blocks description"

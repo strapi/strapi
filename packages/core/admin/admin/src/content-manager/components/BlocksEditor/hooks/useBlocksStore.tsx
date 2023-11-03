@@ -31,14 +31,15 @@ import {
   BulletList,
   NumberList,
 } from '@strapi/icons';
-import { Attribute } from '@strapi/types';
-import { useIntl } from 'react-intl';
-import { Editor, Path, Transforms, Range } from 'slate';
-import { useSlate, ReactEditor } from 'slate-react';
+import { useIntl, type MessageDescriptor } from 'react-intl';
+import { Editor, Path, Transforms, Range, type Element, Text } from 'slate';
+import { useSlate, ReactEditor, RenderElementProps } from 'slate-react';
 import styled, { css } from 'styled-components';
 
+// @ts-expect-error TODO migrate this file
 import { composeRefs } from '../../../utils';
 import { editLink, removeLink } from '../utils/links';
+import { isText, type Block } from '../utils/types';
 
 const StyledBaseLink = styled(BaseLink)`
   text-decoration: none;
@@ -122,25 +123,15 @@ const Unorderedlist = styled.ul`
   ${listStyle}
 `;
 
-const List = ({ attributes, children, element }) => {
-  if (element.format === 'ordered') return <Orderedlist {...attributes}>{children}</Orderedlist>;
+const List = ({ attributes, children, element }: RenderElementProps) => {
+  if ((element as Block<'list'>).format === 'ordered') {
+    return <Orderedlist {...attributes}>{children}</Orderedlist>;
+  }
 
   return <Unorderedlist {...attributes}>{children}</Unorderedlist>;
 };
 
-List.propTypes = {
-  attributes: PropTypes.object.isRequired,
-  children: PropTypes.node.isRequired,
-  element: PropTypes.shape({
-    format: PropTypes.string.isRequired,
-  }).isRequired,
-};
-
-/**
- * @param {import('slate').Editor} editor
- * @param {Path} currentListPath
- */
-const replaceListWithEmptyBlock = (editor, currentListPath) => {
+const replaceListWithEmptyBlock = (editor: Editor, currentListPath: Path) => {
   // Delete the empty list
   Transforms.removeNodes(editor, { at: currentListPath });
 
@@ -160,13 +151,16 @@ const replaceListWithEmptyBlock = (editor, currentListPath) => {
 
 /**
  * Common handler for the backspace event on ordered and unordered lists
- * @param {import('slate').Editor} editor
- * @param {Event} event
  */
-const handleBackspaceKeyOnList = (editor, event) => {
+const handleBackspaceKeyOnList = (editor: Editor, event: React.KeyboardEvent<HTMLDivElement>) => {
+  if (!editor.selection) return;
+
   const [currentListItem, currentListItemPath] = Editor.parent(editor, editor.selection.anchor);
   const [currentList, currentListPath] = Editor.parent(editor, currentListItemPath);
-  const isListEmpty = currentList.children.length === 1 && currentListItem.children[0].text === '';
+  const isListEmpty =
+    currentList.children.length === 1 &&
+    isText(currentListItem.children[0]) &&
+    currentListItem.children[0].text === '';
   const isNodeStart = Editor.isStart(editor, editor.selection.anchor, currentListItemPath);
   const isFocusAtTheBeginningOfAChild =
     editor.selection.focus.offset === 0 && editor.selection.focus.path.at(-1) === 0;
@@ -176,7 +170,7 @@ const handleBackspaceKeyOnList = (editor, event) => {
     replaceListWithEmptyBlock(editor, currentListPath);
   } else if (isNodeStart) {
     Transforms.liftNodes(editor, {
-      match: (n) => n.type === 'list-item',
+      match: (node) => !Editor.isEditor(node) && node.type === 'list-item',
     });
     // Transforms the list item into a paragraph
     Transforms.setNodes(
@@ -188,7 +182,7 @@ const handleBackspaceKeyOnList = (editor, event) => {
     );
   } else if (isFocusAtTheBeginningOfAChild) {
     Transforms.liftNodes(editor, {
-      match: (n) => n.type === 'list-item',
+      match: (node) => !Editor.isEditor(node) && node.type === 'list-item',
     });
     // If the focus is at the beginning of a child node we need to replace it with a paragraph
     Transforms.setNodes(editor, { type: 'paragraph' });
@@ -197,16 +191,24 @@ const handleBackspaceKeyOnList = (editor, event) => {
 
 /**
  * Common handler for the enter key on ordered and unordered lists
- * @param {import('slate').Editor} editor
  */
-const handleEnterKeyOnList = (editor) => {
-  const [currentListItem, currentListItemPath] = Editor.above(editor, {
-    matchNode: (node) => node.type === 'list-item',
+const handleEnterKeyOnList = (editor: Editor) => {
+  const currentListItemEntry = Editor.above(editor, {
+    match: (node) => !Editor.isEditor(node) && node.type === 'list-item',
   });
+
+  if (!currentListItemEntry || !editor.selection) {
+    return;
+  }
+
+  const [currentListItem, currentListItemPath] = currentListItemEntry;
   const [currentList, currentListPath] = Editor.parent(editor, currentListItemPath);
-  const isListEmpty = currentList.children.length === 1 && currentListItem.children[0].text === '';
+  const isListEmpty =
+    currentList.children.length === 1 &&
+    isText(currentListItem.children[0]) &&
+    currentListItem.children[0].text === '';
   const isListItemEmpty =
-    currentListItem.children.length === 1 && currentListItem.children[0].text === '';
+    currentListItem.children.length === 1 && (currentListItem.children[0] as Text).text === '';
 
   if (isListEmpty) {
     replaceListWithEmptyBlock(editor, currentListPath);
@@ -215,7 +217,14 @@ const handleEnterKeyOnList = (editor) => {
     Transforms.removeNodes(editor, { at: currentListItemPath });
 
     // Create a new paragraph below the parent list
-    const listNodeEntry = Editor.above(editor, { match: (n) => n.type === 'list' });
+    const listNodeEntry = Editor.above(editor, {
+      match: (node) => !Editor.isEditor(node) && node.type === 'list',
+    });
+
+    if (!listNodeEntry) {
+      return;
+    }
+
     const createdParagraphPath = Path.next(listNodeEntry[1]);
     Transforms.insertNodes(
       editor,
@@ -251,9 +260,16 @@ const Img = styled.img`
   object-fit: contain;
 `;
 
+// Type guard to force TypeScript to narrow the type of the element in Blocks component
+const isImage = (element: Element): element is Block<'image'> => {
+  return element.type === 'image';
+};
+
 // Added a background color to the image wrapper to make it easier to recognize the image block
-const Image = ({ attributes, children, element }) => {
-  if (!element.image) return null;
+const Image = ({ attributes, children, element }: RenderElementProps) => {
+  if (!isImage(element)) {
+    return null;
+  }
   const { url, alternativeText, width, height } = element.image;
 
   return (
@@ -264,19 +280,6 @@ const Image = ({ attributes, children, element }) => {
       </Flex>
     </Box>
   );
-};
-
-Image.propTypes = {
-  attributes: PropTypes.object.isRequired,
-  children: PropTypes.node.isRequired,
-  element: PropTypes.shape({
-    image: PropTypes.shape({
-      url: PropTypes.string.isRequired,
-      alternativeText: PropTypes.string,
-      width: PropTypes.number,
-      height: PropTypes.number,
-    }),
-  }).isRequired,
 };
 
 // Make sure the tooltip is above the popover
@@ -291,207 +294,229 @@ const CustomButton = styled(Button)`
   }
 `;
 
-const Link = React.forwardRef(({ element, children, ...attributes }, forwardedRef) => {
-  const { formatMessage } = useIntl();
-  const editor = useSlate();
-  const path = ReactEditor.findPath(editor, element);
-  const [popoverOpen, setPopoverOpen] = React.useState(
-    editor.lastInsertedLinkPath ? Path.equals(path, editor.lastInsertedLinkPath) : false
-  );
-  const [isEditing, setIsEditing] = React.useState(element.url === '');
-  const linkRef = React.useRef(null);
-  const elementText = element.children.map((child) => child.text).join('');
-  const [linkText, setLinkText] = React.useState(elementText);
-  const [linkUrl, setLinkUrl] = React.useState(element.url);
+const Link = React.forwardRef<HTMLAnchorElement, RenderElementProps>(
+  ({ element, children, attributes }, forwardedRef) => {
+    const { formatMessage } = useIntl();
+    const editor = useSlate();
+    const path = ReactEditor.findPath(editor, element);
+    const [popoverOpen, setPopoverOpen] = React.useState(
+      editor.lastInsertedLinkPath ? Path.equals(path, editor.lastInsertedLinkPath) : false
+    );
 
-  const handleOpenEditPopover = (e) => {
-    e.preventDefault();
-    setPopoverOpen(true);
-  };
+    const elementAsLink = element as Block<'link'>;
 
-  const handleSave = (e) => {
-    e.stopPropagation();
+    const [isEditing, setIsEditing] = React.useState(elementAsLink.url === '');
+    const linkRef = React.useRef(null!);
+    const elementText = elementAsLink.children.map((child) => child.text).join('');
+    const [linkText, setLinkText] = React.useState(elementText);
+    const [linkUrl, setLinkUrl] = React.useState(elementAsLink.url);
 
-    // If the selection is collapsed, we select the parent node because we want all the link to be replaced
-    if (Range.isCollapsed(editor.selection)) {
-      const [, parentPath] = Editor.parent(editor, editor.selection.focus?.path);
-      Transforms.select(editor, parentPath);
-    }
+    const handleOpenEditPopover: React.MouseEventHandler<HTMLAnchorElement> = (e) => {
+      e.preventDefault();
+      setPopoverOpen(true);
+    };
 
-    editLink(editor, { url: linkUrl, text: linkText });
-    setIsEditing(false);
-  };
+    const handleSave: React.FormEventHandler = (e) => {
+      e.stopPropagation();
 
-  const handleCancel = () => {
-    setIsEditing(false);
+      // If the selection is collapsed, we select the parent node because we want all the link to be replaced)
+      if (editor.selection && Range.isCollapsed(editor.selection)) {
+        const [, parentPath] = Editor.parent(editor, editor.selection.focus?.path);
+        Transforms.select(editor, parentPath);
+      }
 
-    if (element.url === '') {
-      removeLink(editor);
-    }
-  };
+      editLink(editor, { url: linkUrl, text: linkText });
+      setIsEditing(false);
+    };
 
-  const handleDismiss = () => {
-    setPopoverOpen(false);
+    const handleCancel = () => {
+      setIsEditing(false);
 
-    if (element.url === '') {
-      removeLink(editor);
-    }
+      if (elementAsLink.url === '') {
+        removeLink(editor);
+      }
+    };
 
-    ReactEditor.focus(editor);
-  };
+    const handleDismiss = () => {
+      setPopoverOpen(false);
 
-  const composedRefs = composeRefs(linkRef, forwardedRef);
+      if (elementAsLink.url === '') {
+        removeLink(editor);
+      }
 
-  return (
-    <>
-      <StyledBaseLink
-        {...attributes}
-        ref={composedRefs}
-        href={element.url}
-        onClick={handleOpenEditPopover}
-        color="primary600"
-      >
-        {children}
-      </StyledBaseLink>
-      {popoverOpen && (
-        <Popover source={linkRef} onDismiss={handleDismiss} padding={4} contentEditable={false}>
-          {isEditing ? (
-            <Flex as="form" onSubmit={handleSave} direction="column" gap={4}>
-              <Field width="300px">
-                <FieldLabel>
-                  {formatMessage({
-                    id: 'components.Blocks.popover.text',
-                    defaultMessage: 'Text',
-                  })}
-                </FieldLabel>
-                <FieldInput
-                  name="text"
-                  placeholder={formatMessage({
-                    id: 'components.Blocks.popover.text.placeholder',
-                    defaultMessage: 'Enter link text',
-                  })}
-                  value={linkText}
-                  onChange={(e) => setLinkText(e.target.value)}
-                />
-              </Field>
-              <Field width="300px">
-                <FieldLabel>
-                  {formatMessage({
-                    id: 'components.Blocks.popover.link',
-                    defaultMessage: 'Link',
-                  })}
-                </FieldLabel>
-                <FieldInput
-                  name="url"
-                  placeholder="https://strapi.io"
-                  value={linkUrl}
-                  onChange={(e) => setLinkUrl(e.target.value)}
-                />
-              </Field>
-              <Flex justifyContent="end" width="100%" gap={2}>
-                <Button variant="tertiary" onClick={handleCancel}>
-                  {formatMessage({
-                    id: 'components.Blocks.popover.cancel',
-                    defaultMessage: 'Cancel',
-                  })}
-                </Button>
-                <Button type="submit" disabled={!linkText || !linkUrl}>
-                  {formatMessage({
-                    id: 'components.Blocks.popover.save',
-                    defaultMessage: 'Save',
-                  })}
-                </Button>
+      ReactEditor.focus(editor);
+    };
+
+    const composedRefs = composeRefs(linkRef, forwardedRef);
+
+    return (
+      <>
+        <StyledBaseLink
+          {...attributes}
+          ref={composedRefs}
+          href={elementAsLink.url}
+          onClick={handleOpenEditPopover}
+          color="primary600"
+        >
+          {children}
+        </StyledBaseLink>
+        {popoverOpen && (
+          <Popover source={linkRef} onDismiss={handleDismiss} padding={4} contentEditable={false}>
+            {isEditing ? (
+              <Flex as="form" onSubmit={handleSave} direction="column" gap={4}>
+                <Field width="300px">
+                  <FieldLabel>
+                    {formatMessage({
+                      id: 'components.Blocks.popover.text',
+                      defaultMessage: 'Text',
+                    })}
+                  </FieldLabel>
+                  <FieldInput
+                    name="text"
+                    placeholder={formatMessage({
+                      id: 'components.Blocks.popover.text.placeholder',
+                      defaultMessage: 'Enter link text',
+                    })}
+                    value={linkText}
+                    onChange={(e) => setLinkText(e.target.value)}
+                  />
+                </Field>
+                <Field width="300px">
+                  <FieldLabel>
+                    {formatMessage({
+                      id: 'components.Blocks.popover.link',
+                      defaultMessage: 'Link',
+                    })}
+                  </FieldLabel>
+                  <FieldInput
+                    name="url"
+                    placeholder="https://strapi.io"
+                    value={linkUrl}
+                    onChange={(e) => setLinkUrl(e.target.value)}
+                  />
+                </Field>
+                <Flex justifyContent="end" width="100%" gap={2}>
+                  <Button variant="tertiary" onClick={handleCancel}>
+                    {formatMessage({
+                      id: 'components.Blocks.popover.cancel',
+                      defaultMessage: 'Cancel',
+                    })}
+                  </Button>
+                  <Button type="submit" disabled={!linkText || !linkUrl}>
+                    {formatMessage({
+                      id: 'components.Blocks.popover.save',
+                      defaultMessage: 'Save',
+                    })}
+                  </Button>
+                </Flex>
               </Flex>
-            </Flex>
-          ) : (
-            <Flex direction="column" gap={4} alignItems="start" width="400px">
-              <Typography>{elementText}</Typography>
-              <Typography>
-                <StyledBaseLink href={element.url} target="_blank" color="primary600">
-                  {element.url}
-                </StyledBaseLink>
-              </Typography>
-              <Flex justifyContent="end" width="100%" gap={2}>
-                <TooltipCustom
-                  description={formatMessage({
-                    id: 'components.Blocks.popover.delete',
-                    defaultMessage: 'Delete',
-                  })}
-                >
-                  <CustomButton
-                    size="S"
-                    width="2rem"
-                    variant="danger-light"
-                    onClick={() => removeLink(editor)}
-                    aria-label={formatMessage({
+            ) : (
+              <Flex direction="column" gap={4} alignItems="start" width="400px">
+                <Typography>{elementText}</Typography>
+                <Typography>
+                  <StyledBaseLink href={elementAsLink.url} target="_blank" color="primary600">
+                    {elementAsLink.url}
+                  </StyledBaseLink>
+                </Typography>
+                <Flex justifyContent="end" width="100%" gap={2}>
+                  <TooltipCustom
+                    description={formatMessage({
                       id: 'components.Blocks.popover.delete',
                       defaultMessage: 'Delete',
                     })}
-                    type="button"
-                    justifyContent="center"
                   >
-                    <Icon width={3} height={3} as={Trash} />
-                  </CustomButton>
-                </TooltipCustom>
+                    <CustomButton
+                      size="S"
+                      width="2rem"
+                      variant="danger-light"
+                      onClick={() => removeLink(editor)}
+                      aria-label={formatMessage({
+                        id: 'components.Blocks.popover.delete',
+                        defaultMessage: 'Delete',
+                      })}
+                      type="button"
+                      justifyContent="center"
+                    >
+                      <Icon width={3} height={3} as={Trash} />
+                    </CustomButton>
+                  </TooltipCustom>
 
-                <TooltipCustom
-                  description={formatMessage({
-                    id: 'components.Blocks.popover.edit',
-                    defaultMessage: 'Edit',
-                  })}
-                >
-                  <CustomButton
-                    size="S"
-                    width="2rem"
-                    variant="tertiary"
-                    onClick={() => setIsEditing(true)}
-                    aria-label={formatMessage({
+                  <TooltipCustom
+                    description={formatMessage({
                       id: 'components.Blocks.popover.edit',
                       defaultMessage: 'Edit',
                     })}
-                    type="button"
-                    justifyContent="center"
                   >
-                    <Icon width={3} height={3} as={Pencil} />
-                  </CustomButton>
-                </TooltipCustom>
+                    <CustomButton
+                      size="S"
+                      width="2rem"
+                      variant="tertiary"
+                      onClick={() => setIsEditing(true)}
+                      aria-label={formatMessage({
+                        id: 'components.Blocks.popover.edit',
+                        defaultMessage: 'Edit',
+                      })}
+                      type="button"
+                      justifyContent="center"
+                    >
+                      <Icon width={3} height={3} as={Pencil} />
+                    </CustomButton>
+                  </TooltipCustom>
+                </Flex>
               </Flex>
-            </Flex>
-          )}
-        </Popover>
-      )}
-    </>
-  );
-});
+            )}
+          </Popover>
+        )}
+      </>
+    );
+  }
+);
 
-Link.propTypes = {
-  element: PropTypes.object.isRequired,
-  children: PropTypes.node.isRequired,
+interface NonSelectorBlock {
+  renderElement: (props: RenderElementProps) => React.JSX.Element;
+  value: object;
+  matchNode: (node: Element) => boolean;
+  isInBlocksSelector: false;
+  handleEnterKey?: (editor: Editor) => void;
+  handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLDivElement>) => void;
+}
+
+type SelectorBlock = Omit<NonSelectorBlock, 'isInBlocksSelector'> & {
+  isInBlocksSelector: true;
+  icon: React.ComponentType;
+  label: MessageDescriptor;
 };
 
-type BlocksStore = {
-  [K in Attribute.BlocksValue[0]['type']]: boolean;
-};
+export const nonSelectorBlockKeys = ['list-item', 'link'] as const;
+export type NonSelectorBlockKey = (typeof nonSelectorBlockKeys)[number];
 
-const a: BlocksStore = {};
+export const selectorBlockKeys = [
+  'paragraph',
+  'heading-one',
+  'heading-two',
+  'heading-three',
+  'heading-four',
+  'heading-five',
+  'heading-six',
+  'list-ordered',
+  'list-unordered',
+  'image',
+  'quote',
+  'code',
+] as const;
+
+export type SelectorBlockKey = (typeof selectorBlockKeys)[number];
+
+export type BlocksStore = {
+  [K in SelectorBlockKey]: SelectorBlock;
+} & {
+  [K in NonSelectorBlockKey]: NonSelectorBlock;
+};
 
 /**
  * Manages a store of all the available blocks.
- *
- * @returns {{
- *   [key: string]: {
- *     renderElement: (props: Object) => JSX.Element,
- *     icon: React.ComponentType,
- *     label: {id: string, defaultMessage: string},
- *     value: Object,
- *     matchNode: (node: Object) => boolean,
- *     isInBlocksSelector: true,
- *     handleEnterKey: (editor: import('slate').Editor) => void,
- *     handleBackspaceKey?:(editor: import('slate').Editor, event: Event) => void,
- *   }
- * }} an object containing rendering functions and metadata for different blocks, indexed by name.
  */
-export function useBlocksStore() {
+export function useBlocksStore(): BlocksStore {
   return {
     paragraph: {
       renderElement: (props) => (
@@ -510,6 +535,10 @@ export function useBlocksStore() {
       matchNode: (node) => node.type === 'paragraph',
       isInBlocksSelector: true,
       handleEnterKey(editor) {
+        if (!editor.selection) {
+          return;
+        }
+
         // We need to keep track of the initial position of the cursor
         const anchorPathInitialPosition = editor.selection.anchor.path;
         /**
@@ -524,9 +553,13 @@ export function useBlocksStore() {
 
         // Check if the created node is empty (if there was no text after the cursor in the node)
         // This lets us know if we need to carry over the modifiers from the previous node
-        const [, parentBlockPath] = Editor.above(editor, {
-          match: (n) => n.type !== 'text',
+        const parentBlockEntry = Editor.above(editor, {
+          match: (node) => !Editor.isEditor(node) && node.type !== 'text',
         });
+        if (!parentBlockEntry) {
+          return;
+        }
+        const [, parentBlockPath] = parentBlockEntry;
         const isNodeEnd = Editor.isEnd(editor, editor.selection.anchor, parentBlockPath);
 
         /**
@@ -537,7 +570,7 @@ export function useBlocksStore() {
          * And copy its children to make sure we keep the modifiers.
          */
         const [fragmentedNode] = Editor.parent(editor, editor.selection.anchor.path);
-        Transforms.removeNodes(editor, editor.selection);
+        Transforms.removeNodes(editor);
 
         // Check if after the current position there is another node
         const hasNextNode = editor.children.length - anchorPathInitialPosition[0] > 1;
@@ -549,7 +582,9 @@ export function useBlocksStore() {
           {
             type: 'paragraph',
             // Don't carry over the modifiers from the previous node if there was no text after the cursor
-            children: isNodeEnd ? [{ type: 'text', text: '' }] : fragmentedNode.children,
+            children: (isNodeEnd
+              ? [{ type: 'text', text: '' }]
+              : fragmentedNode.children) as Text[],
           },
           {
             at: hasNextNode ? [anchorPathInitialPosition[0] + 1] : [editor.children.length],
@@ -695,7 +730,7 @@ export function useBlocksStore() {
     },
     link: {
       renderElement: (props) => (
-        <Link element={props.element} {...props.attributes}>
+        <Link element={props.element} attributes={props.attributes}>
           {props.children}
         </Link>
       ),
@@ -736,11 +771,16 @@ export function useBlocksStore() {
          * 1. If the cursor is at the end of the quote node
          * 2. If the last line of the quote node is empty
          */
-        const [quoteNode, quoteNodePath] = Editor.above(editor, {
-          match: (n) => n.type === 'quote',
+        const quoteNodeEntry = Editor.above(editor, {
+          match: (node) => !Editor.isEditor(node) && node.type === 'quote',
         });
+        if (!quoteNodeEntry || !editor.selection) {
+          return;
+        }
+        const [quoteNode, quoteNodePath] = quoteNodeEntry;
         const isNodeEnd = Editor.isEnd(editor, editor.selection.anchor, quoteNodePath);
-        const isEmptyLine = quoteNode.children.at(-1).text.endsWith('\n');
+        const lastTextNode = quoteNode.children.at(-1);
+        const isEmptyLine = isText(lastTextNode) && lastTextNode.text.endsWith('\n');
 
         if (isNodeEnd && isEmptyLine) {
           // Remove the last line break

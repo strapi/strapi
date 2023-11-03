@@ -1,22 +1,24 @@
+/* eslint-disable check-file/filename-naming-convention */
+
 import * as React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render, renderHook, screen } from '@testing-library/react';
 import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
-import { createEditor } from 'slate';
+import { createEditor, Descendant } from 'slate';
 import { Slate, withReact } from 'slate-react';
 
 import { useModifiersStore } from '../useModifiersStore';
 
-const initialValue = [
+const initialValue: Descendant[] = [
   {
     type: 'paragraph',
-    children: [{ text: 'A line of text in a paragraph.' }],
+    children: [{ type: 'text', text: 'A line of text in a paragraph.' }],
   },
 ];
 
-const Wrapper = ({ children }) => {
+const Wrapper = ({ children }: { children: React.ReactNode }) => {
   const editor = React.useMemo(() => withReact(createEditor()), []);
 
   return (

@@ -1,18 +1,20 @@
 import * as React from 'react';
 
 import { Box, Flex, Typography, InputWrapper, Divider } from '@strapi/design-system';
-import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
-import { createEditor } from 'slate';
-import { withHistory } from 'slate-history';
+import { type Attribute } from '@strapi/types';
+import { MessageDescriptor, useIntl } from 'react-intl';
+import { BaseEditor, createEditor, Descendant, Editor } from 'slate';
+import { HistoryEditor, withHistory } from 'slate-history';
 import { Slate, withReact, ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
-import Hint from '../Hint';
+// @ts-expect-error TODO convert to typescript
+import { Hint } from '../Hint';
 
-import BlocksInput from './BlocksInput';
-import { withLinks, withStrapiSchema } from './plugins';
-import { BlocksToolbar } from './Toolbar';
+import { BlocksInput } from './BlocksInput';
+import { withLinks, type LinkEditor } from './plugins/withLinks';
+import { withStrapiSchema } from './plugins/withStrapiSchema';
+import { BlocksToolbar } from './Toolbar/Toolbar';
 
 const TypographyAsterisk = styled(Typography)`
   line-height: 0;
@@ -33,10 +35,8 @@ const EditorDivider = styled(Divider)`
  * See the Slate documentation for more information:
  * - https://docs.slatejs.org/api/nodes/element#void-vs-not-void
  * - https://docs.slatejs.org/api/nodes/element#rendering-void-elements
- *
- * @param {import('slate').Editor} editor
  */
-const withImages = (editor) => {
+const withImages = (editor: Editor) => {
   const { isVoid } = editor;
 
   editor.isVoid = (element) => {
@@ -53,14 +53,11 @@ const withImages = (editor) => {
  * Because it would force a rerender of the entire editor every time the user types a character.
  * Why not use the entity id as the key, since it's unique for each locale?
  * Because it would not solve the problem when using the "fill in from other locale" feature
- *
- * @param {import('slate').Descendant[]} value
- * @returns {{
- *   key: number,
- *   incrementSlateUpdatesCount: () => void
- * }}
  */
-function useResetKey(value) {
+function useResetKey(value: Attribute.BlocksValue | null): {
+  key: number;
+  incrementSlateUpdatesCount: () => void;
+} {
   // Keep track how how many times Slate detected a change from a user interaction in the editor
   const slateUpdatesCount = React.useRef(0);
   // Keep track of how many times the value prop was updated, whether from within editor or from outside
@@ -86,13 +83,56 @@ function useResetKey(value) {
 }
 
 const pipe =
-  (...fns) =>
-  (value) =>
-    fns.reduce((prev, fn) => fn(prev), value);
+  (...fns: ((baseEditor: Editor) => Editor)[]) =>
+  (value: Editor) =>
+    fns.reduce<Editor>((prev, fn) => fn(prev), value);
 
-const BlocksEditor = React.forwardRef(
+declare module 'slate' {
+  interface CustomTypes {
+    Editor: BaseEditor & ReactEditor & HistoryEditor & LinkEditor;
+    Element: Attribute.BlockNode<'all'>;
+    // Descendant: Attribute.BlockNode<'inline'>;
+    Text: {
+      type: 'text';
+      text: string;
+      bold?: boolean;
+      italic?: boolean;
+      underline?: boolean;
+      strikethrough?: boolean;
+      code?: boolean;
+    };
+  }
+}
+
+interface BlocksEditorProps {
+  intlLabel: MessageDescriptor;
+  onChange: (event: { target: { name: string; value: Descendant[]; type: 'blocks' } }) => void;
+  attribute: { type: string; [key: string]: unknown };
+  name: string;
+  description?: MessageDescriptor;
+  disabled?: boolean;
+  error?: string;
+  labelAction?: React.ReactNode;
+  required?: boolean;
+  value?: Attribute.BlocksValue;
+  placeholder?: MessageDescriptor;
+  hint?: string | string[];
+}
+
+const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
   (
-    { intlLabel, labelAction, name, disabled, required, error, value, onChange, placeholder, hint },
+    {
+      intlLabel,
+      labelAction = null,
+      name,
+      disabled = false,
+      required = false,
+      error = '',
+      value = null,
+      onChange,
+      placeholder,
+      hint = null,
+    },
     ref
   ) => {
     const { formatMessage } = useIntl();
@@ -100,16 +140,11 @@ const BlocksEditor = React.forwardRef(
       pipe(withHistory, withImages, withStrapiSchema, withReact, withLinks)(createEditor())
     );
 
-    const label = intlLabel.id
-      ? formatMessage(
-          { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
-          { ...intlLabel.values }
-        )
-      : name;
+    const label = intlLabel.id ? formatMessage(intlLabel) : name;
 
-    const formattedPlaceholder = placeholder
-      ? formatMessage({ id: placeholder.id, defaultMessage: placeholder.defaultMessage })
-      : null;
+    const formattedPlaceholder =
+      placeholder &&
+      formatMessage({ id: placeholder.id, defaultMessage: placeholder.defaultMessage });
 
     /** Editable is not able to hold the ref, https://github.com/ianstormtaylor/slate/issues/4082
      *  so with "useImperativeHandle" we can use ReactEditor methods to expose to the parent above
@@ -127,7 +162,7 @@ const BlocksEditor = React.forwardRef(
 
     const { key, incrementSlateUpdatesCount } = useResetKey(value);
 
-    const handleSlateChange = (state) => {
+    const handleSlateChange = (state: Descendant[]) => {
       const isAstChange = editor.operations.some((op) => op.type !== 'set_selection');
 
       if (isAstChange) {
@@ -155,7 +190,13 @@ const BlocksEditor = React.forwardRef(
             onChange={handleSlateChange}
             key={key}
           >
-            <InputWrapper direction="column" alignItems="flex-start" height="512px">
+            <InputWrapper
+              direction="column"
+              alignItems="flex-start"
+              height="512px"
+              disabled={Boolean(disabled)}
+              hasError={Boolean(error)}
+            >
               <BlocksToolbar disabled={disabled} />
               <EditorDivider width="100%" />
               <BlocksInput disabled={disabled} placeholder={formattedPlaceholder} />
@@ -175,34 +216,4 @@ const BlocksEditor = React.forwardRef(
   }
 );
 
-BlocksEditor.defaultProps = {
-  labelAction: null,
-  disabled: false,
-  required: false,
-  error: '',
-  value: null,
-  placeholder: null,
-  hint: null,
-};
-
-BlocksEditor.propTypes = {
-  intlLabel: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }).isRequired,
-  labelAction: PropTypes.element,
-  name: PropTypes.string.isRequired,
-  required: PropTypes.bool,
-  disabled: PropTypes.bool,
-  error: PropTypes.string,
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.array,
-  placeholder: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-  }),
-  hint: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
-};
-
-export default BlocksEditor;
+export { BlocksEditor };
