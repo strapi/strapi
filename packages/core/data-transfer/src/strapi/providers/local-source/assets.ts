@@ -6,7 +6,11 @@ import type { LoadedStrapi } from '@strapi/types';
 
 import type { IAsset } from '../../../../types';
 
-function getFileStream(filepath: string, isLocal = false): PassThrough | ReadStream {
+function getFileStream(
+  filepath: string,
+  strapi: LoadedStrapi,
+  isLocal = false
+): PassThrough | ReadStream {
   if (isLocal) {
     return createReadStream(filepath);
   }
@@ -14,47 +18,40 @@ function getFileStream(filepath: string, isLocal = false): PassThrough | ReadStr
   const readableStream = new PassThrough();
 
   // fetch the image from remote url and stream it
-  fetch(filepath)
-    .then((res) => {
+  strapi
+    .fetch(filepath)
+    .then((res: Response) => {
       if (res.status !== 200) {
         readableStream.emit('error', new Error(`Request failed with status code ${res.status}`));
         return;
       }
-      fetch(filepath)
-        .then((res) => {
-          if (res.status !== 200) {
-            readableStream.emit(
-              'error',
-              new Error(`Request failed with status code ${res.status}`)
-            );
-            return;
-          }
-          const source = res.body;
-          if (source) {
-            // pipe the image data
-            Readable.fromWeb(new webStream.ReadableStream(res.body)).pipe(readableStream);
-          } else {
-            readableStream.emit('error', new Error('Empty data found for file'));
-          }
-        })
-        .catch((error) => {
-          readableStream.emit('error', error);
-        });
+
+      if (res.body) {
+        // pipe the image data
+        Readable.fromWeb(new webStream.ReadableStream(res.body)).pipe(readableStream);
+      } else {
+        readableStream.emit('error', new Error('Empty data found for file'));
+      }
     })
-    .catch((error) => {
+    .catch((error: unknown) => {
       readableStream.emit('error', error);
     });
 
   return readableStream;
 }
 
-function getFileStats(filepath: string, isLocal = false): Promise<{ size: number }> {
+function getFileStats(
+  filepath: string,
+  strapi: LoadedStrapi,
+  isLocal = false
+): Promise<{ size: number }> {
   if (isLocal) {
     return stat(filepath);
   }
   return new Promise((resolve, reject) => {
-    fetch(filepath)
-      .then((res) => {
+    strapi
+      .fetch(filepath)
+      .then((res: Response) => {
         if (res.status !== 200) {
           reject(new Error(`Request failed with status code ${res.status}`));
           return;
@@ -67,7 +64,7 @@ function getFileStats(filepath: string, isLocal = false): Promise<{ size: number
 
         resolve(stats);
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         reject(error);
       });
   });
@@ -88,8 +85,8 @@ export const createAssetsStream = (strapi: LoadedStrapi): Duplex => {
     for await (const file of stream) {
       const isLocalProvider = file.provider === 'local';
       const filepath = isLocalProvider ? join(strapi.dirs.static.public, file.url) : file.url;
-      const stats = await getFileStats(filepath, isLocalProvider);
-      const stream = getFileStream(filepath, isLocalProvider);
+      const stats = await getFileStats(filepath, strapi, isLocalProvider);
+      const stream = getFileStream(filepath, strapi, isLocalProvider);
 
       yield {
         metadata: file,
