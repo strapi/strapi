@@ -7892,7 +7892,12 @@ __metadata:
   resolution: "@strapi/plugin-content-manager@workspace:packages/core/content-manager"
   dependencies:
     "@sindresorhus/slugify": "npm:1.1.0"
+    "@strapi/pack-up": "workspace:*"
     "@strapi/utils": "npm:4.15.1"
+    "@types/jest": "npm:29.5.2"
+    "@types/lodash": "npm:^4.14.191"
+    koa: "npm:2.13.4"
+    koa-bodyparser: "npm:4.4.1"
     lodash: "npm:4.17.21"
     qs: "npm:6.11.1"
   languageName: unknown
@@ -21382,6 +21387,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"koa-bodyparser@npm:4.4.1":
+  version: 4.4.1
+  resolution: "koa-bodyparser@npm:4.4.1"
+  dependencies:
+    co-body: "npm:^6.0.0"
+    copy-to: "npm:^2.0.1"
+    type-is: "npm:^1.6.18"
+  checksum: c741a99ccacc92ee126edad121fed2d200753348e0dedfd65ec67fcfa513b4db9f791ef3200817358ab2c120bcf8e73488cbd0b7f3c7d522a0b21bbb647ce616
+  languageName: node
+  linkType: hard
+
 "koa-bodyparser@npm:^4.3.0":
   version: 4.3.0
   resolution: "koa-bodyparser@npm:4.3.0"
@@ -30438,7 +30454,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"type-is@npm:^1.6.14, type-is@npm:^1.6.16, type-is@npm:~1.6.18":
+"type-is@npm:^1.6.14, type-is@npm:^1.6.16, type-is@npm:^1.6.18, type-is@npm:~1.6.18":
   version: 1.6.18
   resolution: "type-is@npm:1.6.18"
   dependencies:
