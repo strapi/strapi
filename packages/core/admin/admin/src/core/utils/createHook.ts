@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 
-type Handler = (...args: any[]) => any;
+export type Handler = (...args: any[]) => any;
 
 export const createHook = () => {
   const _handlers: Handler[] = [];
