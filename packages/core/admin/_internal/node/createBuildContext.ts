@@ -218,7 +218,11 @@ const filterPluginsByAdminEntry = (plugin: Plugin) => {
 
     return isLocalPluginWithLegacyAdminFile;
   } catch (err) {
-    if (isError(err) && 'code' in err && err.code === 'MODULE_NOT_FOUND') {
+    if (
+      isError(err) &&
+      'code' in err &&
+      (err.code === 'MODULE_NOT_FOUND' || err.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED')
+    ) {
       /**
        * the plugin does not contain FE code, so we
        * don't want to import it anyway
