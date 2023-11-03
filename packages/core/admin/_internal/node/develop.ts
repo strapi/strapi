@@ -13,18 +13,31 @@ import EE from '@strapi/strapi/dist/utils/ee';
 import { writeStaticClientFiles } from './staticFiles';
 
 interface DevelopOptions extends CLIContext {
+  /**
+   * @default false
+   */
+  ignorePrompts?: boolean;
   polling?: boolean;
   open?: boolean;
 }
 
-const develop = async ({ cwd, polling, logger, tsconfig, ...options }: DevelopOptions) => {
+const develop = async ({
+  cwd,
+  polling,
+  logger,
+  tsconfig,
+  ignorePrompts,
+  ...options
+}: DevelopOptions) => {
   const timer = getTimer();
 
   if (cluster.isPrimary) {
-    const { didInstall } = await checkRequiredDependencies({ cwd, logger }).catch((err) => {
-      logger.error(err.message);
-      process.exit(1);
-    });
+    const { didInstall } = await checkRequiredDependencies({ cwd, logger, ignorePrompts }).catch(
+      (err) => {
+        logger.error(err.message);
+        process.exit(1);
+      }
+    );
 
     if (didInstall) {
       return;
