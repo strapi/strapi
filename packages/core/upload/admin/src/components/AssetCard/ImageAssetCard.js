@@ -8,13 +8,14 @@ import { appendSearchParamsToUrl } from '../../utils';
 import { AssetCardBase } from './AssetCardBase';
 
 export const ImageAssetCard = ({ height, width, thumbnail, size, alt, isUrlSigned, ...props }) => {
-
   // appending the updatedAt param to the thumbnail URL prevents it from being cached by the browser (cache busting)
   // applied only if the url is not signed to prevent the signature from being invalidated
-  const thumbnailUrl = isUrlSigned ? thumbnail : appendSearchParamsToUrl({
-    url: thumbnail,
-    params: { updatedAt: props.updatedAt },
-  });
+  const thumbnailUrl = isUrlSigned
+    ? thumbnail
+    : appendSearchParamsToUrl({
+        url: thumbnail,
+        params: { updatedAt: props.updatedAt },
+      });
 
   return (
     <AssetCardBase {...props} subtitle={height && width && ` - ${width}✕${height}`} variant="Image">
