@@ -40,11 +40,11 @@ const createAuthorizeMiddleware =
       return await next();
     } catch (error) {
       if (error instanceof errors.UnauthorizedError) {
-        return ctx.unauthorized();
+        return ctx.unauthorized(error.message, error.details);
       }
 
       if (error instanceof errors.ForbiddenError) {
-        return ctx.forbidden();
+        return ctx.forbidden(error.message, error.details);
       }
 
       throw error;
