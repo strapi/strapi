@@ -1,9 +1,7 @@
 export const ROUTES_CE = [
   {
     async Component() {
-      const component = await import(
-        /* webpackChunkName: "admin-roles-list" */ './pages/Roles/ProtectedListPage'
-      );
+      const component = await import('./pages/Roles/ProtectedListPage');
 
       return component;
     },
@@ -12,9 +10,7 @@ export const ROUTES_CE = [
   },
   {
     async Component() {
-      const component = await import(
-        /* webpackChunkName: "admin-edit-roles-page" */ './pages/Roles/CreatePage'
-      );
+      const component = await import('./pages/Roles/CreatePage');
 
       return component;
     },
@@ -23,9 +19,7 @@ export const ROUTES_CE = [
   },
   {
     async Component() {
-      const component = await import(
-        /* webpackChunkName: "admin-edit-roles-page" */ './pages/Roles/CreatePage'
-      );
+      const component = await import('./pages/Roles/CreatePage');
 
       return component;
     },
@@ -34,9 +28,7 @@ export const ROUTES_CE = [
   },
   {
     async Component() {
-      const component = await import(
-        /* webpackChunkName: "admin-edit-roles-page" */ './pages/Roles/ProtectedEditPage'
-      );
+      const component = await import('./pages/Roles/ProtectedEditPage');
 
       return component;
     },
@@ -45,9 +37,7 @@ export const ROUTES_CE = [
   },
   {
     async Component() {
-      const component = await import(
-        /* webpackChunkName: "admin-users" */ './pages/Users/ProtectedListPage'
-      );
+      const component = await import('./pages/Users/ProtectedListPage');
 
       return component;
     },
@@ -56,9 +46,7 @@ export const ROUTES_CE = [
   },
   {
     async Component() {
-      const component = await import(
-        /* webpackChunkName: "admin-edit-users" */ './pages/Users/ProtectedEditPage'
-      );
+      const component = await import('./pages/Users/ProtectedEditPage');
 
       return component;
     },
@@ -67,9 +55,7 @@ export const ROUTES_CE = [
   },
   {
     async Component() {
-      const component = await import(
-        /* webpackChunkName: "webhook-edit-page" */ './pages/Webhooks/ProtectedCreateView'
-      );
+      const component = await import('./pages/Webhooks/ProtectedCreateView');
 
       return component;
     },
@@ -78,9 +64,7 @@ export const ROUTES_CE = [
   },
   {
     async Component() {
-      const component = await import(
-        /* webpackChunkName: "webhook-edit-page" */ './pages/Webhooks/ProtectedEditView'
-      );
+      const component = await import('./pages/Webhooks/ProtectedEditView');
 
       return component;
     },
@@ -89,9 +73,7 @@ export const ROUTES_CE = [
   },
   {
     async Component() {
-      const component = await import(
-        /* webpackChunkName: "webhook-list-page" */ './pages/Webhooks/ProtectedListView'
-      );
+      const component = await import('./pages/Webhooks/ProtectedListView');
 
       return component;
     },
@@ -100,9 +82,7 @@ export const ROUTES_CE = [
   },
   {
     async Component() {
-      const component = await import(
-        /* webpackChunkName: "api-tokens-list-page" */ './pages/ApiTokens/ProtectedListView'
-      );
+      const component = await import('./pages/ApiTokens/ProtectedListView');
 
       return component;
     },
@@ -111,9 +91,7 @@ export const ROUTES_CE = [
   },
   {
     async Component() {
-      const component = await import(
-        /* webpackChunkName: "api-tokens-create-page" */ './pages/ApiTokens/ProtectedCreateView'
-      );
+      const component = await import('./pages/ApiTokens/ProtectedCreateView');
 
       return component;
     },
@@ -122,9 +100,7 @@ export const ROUTES_CE = [
   },
   {
     async Component() {
-      const component = await import(
-        /* webpackChunkName: "api-tokens-edit-page" */ './pages/ApiTokens/ProtectedEditView'
-      );
+      const component = await import('./pages/ApiTokens/ProtectedEditView');
 
       return component;
     },
@@ -133,9 +109,7 @@ export const ROUTES_CE = [
   },
   {
     async Component() {
-      const component = await import(
-        /* webpackChunkName: "transfer-tokens-create-page" */ './pages/TransferTokens/ProtectedCreateView'
-      );
+      const component = await import('./pages/TransferTokens/ProtectedCreateView');
 
       return component;
     },
@@ -144,9 +118,7 @@ export const ROUTES_CE = [
   },
   {
     async Component() {
-      const component = await import(
-        /* webpackChunkName: "transfer-tokens-list-page" */ './pages/TransferTokens/ProtectedListView'
-      );
+      const component = await import('./pages/TransferTokens/ProtectedListView');
 
       return component;
     },
@@ -155,9 +127,7 @@ export const ROUTES_CE = [
   },
   {
     async Component() {
-      const component = await import(
-        /* webpackChunkName: "transfer-tokens-edit-page" */ './pages/TransferTokens/ProtectedEditView'
-      );
+      const component = await import('./pages/TransferTokens/ProtectedEditView');
 
       return component;
     },
@@ -166,9 +136,7 @@ export const ROUTES_CE = [
   },
   {
     async Component() {
-      const component = await import(
-        /* webpackChunkName: "audit-logs-sales-page" */ './pages/AuditLogs/SalesPage'
-      );
+      const component = await import('./pages/AuditLogs/SalesPage');
 
       return component;
     },
@@ -177,9 +145,7 @@ export const ROUTES_CE = [
   },
   {
     async Component() {
-      const component = await import(
-        /* webpackChunkName: "review-workflows-sales-page" */ './pages/ReviewWorkflows/SalesPage'
-      );
+      const component = await import('./pages/ReviewWorkflows/SalesPage');
 
       return component;
     },
@@ -188,9 +154,7 @@ export const ROUTES_CE = [
   },
   {
     async Component() {
-      const component = await import(
-        /* webpackChunkName: "sso-sales-page" */ './pages/SingleSignOn/SalesPage'
-      );
+      const component = await import('./pages/SingleSignOn/SalesPage');
 
       return component;
     },

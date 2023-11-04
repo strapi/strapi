@@ -3,7 +3,7 @@ import { useCallback, useMemo } from 'react';
 import { parse, stringify } from 'qs';
 import { useHistory, useLocation } from 'react-router-dom';
 
-const useQueryParams = <TQuery extends Record<string, unknown>>(initialParams?: TQuery) => {
+const useQueryParams = <TQuery extends object>(initialParams?: TQuery) => {
   const { search } = useLocation();
   const { push } = useHistory();
 
@@ -24,6 +24,7 @@ const useQueryParams = <TQuery extends Record<string, unknown>>(initialParams?: 
       if (method === 'remove') {
         Object.keys(nextParams).forEach((key) => {
           if (Object.prototype.hasOwnProperty.call(nextQuery, key)) {
+            // @ts-expect-error – this is fine, if you want to fix it, please do.
             delete nextQuery[key];
           }
         });

@@ -17,8 +17,7 @@ import editViewLayoutManagerReducer from '../../content-manager/pages/EditViewLa
 import listViewReducer from '../../content-manager/pages/ListView/reducer';
 // @ts-expect-error no types, yet.
 import editViewCrudReducer from '../../content-manager/sharedReducers/crudReducer/reducer';
-// @ts-expect-error no types, yet.
-import appReducer from '../../reducer';
+import { reducer as appReducer } from '../../reducer';
 
 /**
  * @description Static reducers are ones we know, they live in the admin package.

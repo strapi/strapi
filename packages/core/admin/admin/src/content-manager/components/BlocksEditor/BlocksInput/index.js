@@ -74,6 +74,21 @@ const BlocksInput = ({ disabled, placeholder }) => {
     }
   };
 
+  /**
+   * Modifier keyboard shortcuts
+   */
+  const handleKeyboardShortcuts = (event) => {
+    const isCtrlOrCmd = event.metaKey || event.ctrlKey;
+
+    if (isCtrlOrCmd) {
+      Object.values(modifiers).forEach((value) => {
+        if (value.isValidEventKey(event)) {
+          value.handleToggle();
+        }
+      });
+    }
+  };
+
   const handleKeyDown = (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
@@ -82,6 +97,7 @@ const BlocksInput = ({ disabled, placeholder }) => {
     if (event.key === 'Backspace') {
       handleBackspaceEvent(event);
     }
+    handleKeyboardShortcuts(event);
   };
 
   /**

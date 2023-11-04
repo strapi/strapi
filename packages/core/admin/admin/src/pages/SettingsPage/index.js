@@ -23,7 +23,7 @@ export function SettingsPage() {
   const { isLoading, menu } = useSettingsMenu();
   const routes = useEnterprise(
     ROUTES_CE,
-    async () => (await import('../../../../ee/admin/pages/SettingsPage/constants')).ROUTES_EE,
+    async () => (await import('../../../../ee/admin/src/pages/SettingsPage/constants')).ROUTES_EE,
     {
       combine(ceRoutes, eeRoutes) {
         return [...ceRoutes, ...eeRoutes];

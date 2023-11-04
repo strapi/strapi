@@ -29,7 +29,7 @@ import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
 
-import { useConfiguration } from '../../../../hooks/useConfiguration';
+import { useConfiguration } from '../../../../contexts/configuration';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../../selectors';
 
@@ -61,7 +61,7 @@ const ApplicationInfosPage = () => {
     async () =>
       (
         await import(
-          '../../../../../../ee/admin/pages/SettingsPage/pages/ApplicationInfosPage/components/AdminSeatInfo'
+          '../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfosPage/components/AdminSeatInfo'
         )
       ).AdminSeatInfoEE
   );

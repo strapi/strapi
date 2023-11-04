@@ -2,16 +2,11 @@
 
 import * as React from 'react';
 
-import { LoadingIndicatorPage } from '@strapi/helper-plugin';
+import { LoadingIndicatorPage, MenuItem } from '@strapi/helper-plugin';
 import { Route } from 'react-router-dom';
 
-export type TModule = () =>
-  | Promise<{ default?: React.ComponentType } | React.ComponentType>
-  | { default?: React.ComponentType }
-  | React.ComponentType;
-
 interface LazyCompoProps {
-  loadComponent: TModule;
+  loadComponent: Required<MenuItem>['Component'];
 }
 
 const LazyCompo = ({ loadComponent }: LazyCompoProps) => {
@@ -45,8 +40,8 @@ const LazyCompo = ({ loadComponent }: LazyCompoProps) => {
 
 export const createRoute = (
   loadComponent: LazyCompoProps['loadComponent'],
-  to: string,
-  exact: boolean = false
+  to: MenuItem['to'],
+  exact: MenuItem['exact'] = false
 ) => {
   return (
     <Route
