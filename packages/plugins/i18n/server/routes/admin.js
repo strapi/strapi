@@ -20,7 +20,7 @@ module.exports = {
     {
       method: 'GET',
       path: '/locales',
-      handler: 'locales.listLocales',
+      handler: 'locales.find',
       config: {
         policies: ['admin::isAuthenticatedAdmin'],
       },

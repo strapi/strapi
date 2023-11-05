@@ -1,7 +1,7 @@
 'use strict';
 
 const { ApplicationError } = require('@strapi/utils').errors;
-const { listLocales, createLocale, updateLocale, deleteLocale } = require('../locales');
+const { find, findOne, createLocale, updateLocale, deleteLocale } = require('../locales');
 const localeModel = require('../../content-types/locale');
 
 const sanitizers = {
@@ -11,12 +11,12 @@ const sanitizers = {
 };
 
 describe('Locales', () => {
-  describe('listLocales', () => {
+  describe('find', () => {
     test('can get locales', async () => {
       const locales = [{ code: 'af', name: 'Afrikaans (af)' }];
       const expectedLocales = [{ code: 'af', name: 'Afrikaans (af)', isDefault: true }];
       const setIsDefault = jest.fn(() => expectedLocales);
-      const find = jest.fn(() => locales);
+      const findLocales = jest.fn(() => locales);
       const getModel = jest.fn(() => localeModel.schema);
       global.strapi = {
         getModel,
@@ -24,7 +24,7 @@ describe('Locales', () => {
           i18n: {
             services: {
               locales: {
-                find,
+                find: findLocales,
                 setIsDefault,
               },
             },
@@ -34,10 +34,39 @@ describe('Locales', () => {
       };
 
       const ctx = {};
-      await listLocales(ctx);
+      await find(ctx);
 
       expect(setIsDefault).toHaveBeenCalledWith(locales);
-      expect(find).toHaveBeenCalledWith();
+      expect(findLocales).toHaveBeenCalledWith();
+      expect(ctx.body).toMatchObject(expectedLocales);
+    });
+
+    test('can get a locale', async () => {
+      const locale = { code: 'af', name: 'Afrikaans (af)' };
+      const expectedLocales = { code: 'af', name: 'Afrikaans (af)', isDefault: false };
+      const setIsDefault = jest.fn(() => expectedLocales);
+      const findById = jest.fn(() => locale);
+      const getModel = jest.fn(() => localeModel.schema);
+      global.strapi = {
+        getModel,
+        plugins: {
+          i18n: {
+            services: {
+              locales: {
+                findById,
+                setIsDefault,
+              },
+            },
+          },
+        },
+        sanitizers,
+      };
+
+      const ctx = { params: { id: 1 } };
+      await findOne(ctx);
+
+      expect(setIsDefault).toHaveBeenCalledWith(locale);
+      expect(findById).toHaveBeenCalledWith(1);
       expect(ctx.body).toMatchObject(expectedLocales);
     });
   });
