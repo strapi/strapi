@@ -12,14 +12,6 @@ const ReleasesPage = () => {
 
   const total = 0; // TODO: replace it with the total number of releases
 
-  const subtitle = formatMessage(
-    {
-      id: 'content-releases.pages.Releases.header-subtitle',
-      defaultMessage: '{number, plural, =0 {No releases} one {# release} other {# releases}}',
-    },
-    { number: total }
-  );
-
   const toggleAddReleaseDialog = () => {
     setAddReleaseDialogIsShown((prev) => !prev);
   };
@@ -32,7 +24,14 @@ const ReleasesPage = () => {
             id: 'content-releases.pages.Releases.title',
             defaultMessage: 'Releases',
           })}
-          subtitle={subtitle}
+          subtitle={formatMessage(
+            {
+              id: 'content-releases.pages.Releases.header-subtitle',
+              defaultMessage:
+                '{number, plural, =0 {No releases} one {# release} other {# releases}}',
+            },
+            { number: total }
+          )}
           primaryAction={
             <Button startIcon={<Plus />} onClick={toggleAddReleaseDialog}>
               {formatMessage({

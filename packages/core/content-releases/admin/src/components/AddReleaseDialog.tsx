@@ -18,7 +18,7 @@ const releaseSchema = yup.object({
   name: yup.string().required(),
 });
 
-const initialValues = {
+const INITIAL_VALUES = {
   name: '',
 };
 
@@ -39,23 +39,23 @@ export const AddReleaseDialog = ({ handleClose }: { handleClose: () => void }) =
   };
 
   return (
-    <ModalLayout onClose={() => handleClose()} labelledBy="title">
+    <ModalLayout onClose={handleClose} labelledBy="title">
+      <ModalHeader>
+        <Typography id="title" fontWeight="bold" textColor="neutral800">
+          {formatMessage({
+            id: 'content-releases.modal.add-release-title',
+            defaultMessage: 'New release',
+          })}
+        </Typography>
+      </ModalHeader>
       <Formik
         validateOnChange={false}
         onSubmit={handleSubmit}
-        initialValues={initialValues}
+        initialValues={INITIAL_VALUES}
         validationSchema={releaseSchema}
       >
         {({ values, errors, handleChange }) => (
           <Form>
-            <ModalHeader>
-              <Typography id="title" fontWeight="bold" textColor="neutral800">
-                {formatMessage({
-                  id: 'content-releases.modal.add-release-title',
-                  defaultMessage: 'New release',
-                })}
-              </Typography>
-            </ModalHeader>
             <ModalBody>
               <Grid gap={4}>
                 <GridItem xs={12} col={12}>
