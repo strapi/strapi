@@ -18,9 +18,7 @@ const admin: Plugin.Config.AdminInput = {
           defaultMessage: 'Content Releases',
         },
         async Component() {
-          const { Releases } = await import(
-            /* webpackChunkName: "content-releases" */ './pages/App'
-          );
+          const { Releases } = await import('./pages/App');
           return Releases;
         },
         permissions: [],
