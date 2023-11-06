@@ -1,6 +1,4 @@
-'use strict';
-
-const { hasProhibitedCloningFields } = require('../clone');
+import { hasProhibitedCloningFields } from '../clone';
 
 describe('Populate', () => {
   const fakeModels = {
@@ -74,13 +72,13 @@ describe('Populate', () => {
         },
       },
     },
-  };
+  } as any;
 
   describe('hasProhibitedCloningFields', () => {
     beforeEach(() => {
       global.strapi = {
         getModel: jest.fn((uid) => fakeModels[uid]),
-      };
+      } as any;
     });
 
     afterEach(() => {

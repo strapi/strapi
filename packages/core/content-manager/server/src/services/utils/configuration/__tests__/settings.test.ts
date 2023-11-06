@@ -1,6 +1,4 @@
-'use strict';
-
-const settingsService = require('../settings');
+import * as settingsService from '../settings';
 
 jest.mock('@strapi/utils', () => ({
   ...jest.requireActual('@strapi/utils'),
@@ -8,6 +6,19 @@ jest.mock('@strapi/utils', () => ({
     traverseQuerySort: jest.fn((a, b, c) => c),
   },
 }));
+
+jest.mock('../settings', () => {
+  const originalSettingsService = jest.requireActual('../settings');
+
+  const mockCreateDefaultSettings = jest.fn((...args) => {
+    return originalSettingsService.createDefaultSettings(...args);
+  });
+
+  return {
+    ...originalSettingsService,
+    createDefaultSettings: mockCreateDefaultSettings,
+  };
+});
 
 describe('Configuration settings service', () => {
   describe('createDefaultSettings', () => {
@@ -128,12 +139,9 @@ describe('Configuration settings service', () => {
       const schema = { attributes: {} };
       const existingConfig = {};
 
-      const spyFn = jest.spyOn(settingsService, 'createDefaultSettings');
-
       await settingsService.syncSettings(existingConfig, schema);
-      expect(spyFn).toHaveBeenCalledWith(schema);
 
-      spyFn.mockRestore();
+      expect(settingsService.createDefaultSettings).toHaveBeenCalledWith(schema);
     });
 
     test('Reuses the existing config', async () => {

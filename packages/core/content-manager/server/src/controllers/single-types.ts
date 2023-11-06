@@ -5,7 +5,7 @@ import { getService } from '../utils';
 const findEntity = async (query: any, model: any) => {
   const entityManager = getService('entity-manager');
 
-  // @ts-ignore TODO
+  // @ts-expect-error populate builder needs to be called with a UID
   const populate = await getService('populate-builder')(model)
     .populateFromQuery(query)
     .populateDeep(Infinity)

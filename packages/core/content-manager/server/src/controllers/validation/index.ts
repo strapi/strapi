@@ -1,10 +1,8 @@
 import _ from 'lodash';
-import { yup, validateYupSchema } from '@strapi/utils';
-import { errors } from '@strapi/utils';
-const { PaginationError, ValidationError } = errors;
-
+import { yup, validateYupSchema, errors } from '@strapi/utils';
 import createModelConfigurationSchema from './model-configuration';
 
+const { PaginationError, ValidationError } = errors;
 const TYPES = ['singleType', 'collectionType'];
 
 /**

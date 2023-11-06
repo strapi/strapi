@@ -1,6 +1,4 @@
-'use strict';
-
-const hasDraftAndPublish = require('../has-draft-and-publish');
+import hasDraftAndPublish from '../has-draft-and-publish';
 
 describe('hasDraftAndPublish policy', () => {
   beforeEach(() => {
@@ -20,7 +18,7 @@ describe('hasDraftAndPublish policy', () => {
           },
         },
       },
-    };
+    } as any;
   });
 
   afterEach(() => {

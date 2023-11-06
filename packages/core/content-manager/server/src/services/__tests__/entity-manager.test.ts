@@ -1,9 +1,8 @@
-'use strict';
+import _ from 'lodash';
+import entityManagerLoader from '../entity-manager';
+import populateBuilder from '../populate-builder';
 
-const _ = require('lodash');
-const entityManagerLoader = require('../entity-manager');
-
-let entityManager;
+let entityManager: any;
 
 const queryUpdateMock = jest.fn(() => Promise.resolve());
 describe('Content-Manager', () => {
@@ -29,10 +28,10 @@ describe('Content-Manager', () => {
           validateEntityCreation() {},
           validateEntityUpdate: jest.fn().mockReturnValue([{ id: 1 }, { id: 2 }]),
         },
-        eventHub: { emit: jest.fn(), sanitizeEntity: (entity) => entity },
+        eventHub: { emit: jest.fn(), sanitizeEntity: (entity: any) => entity },
         getModel: jest.fn(() => fakeModel),
         config: {
-          get: (path, defaultValue) => _.get(defaultConfig, path, defaultValue),
+          get: (path: any, defaultValue: any) => _.get(defaultConfig, path, defaultValue),
         },
         webhookStore: {
           allowedEvents: new Map([['ENTRY_PUBLISH', 'entry.publish']]),
@@ -40,11 +39,11 @@ describe('Content-Manager', () => {
         plugins: {
           'content-manager': {
             services: {
-              'populate-builder': require('../populate-builder')(),
+              'populate-builder': populateBuilder(),
             },
           },
         },
-      };
+      } as any;
       entityManager = entityManagerLoader({ strapi });
     });
 
@@ -84,7 +83,7 @@ describe('Content-Manager', () => {
 
       await entityManager.publishMany(entities, uid);
 
-      expect(strapi.db.query().updateMany).toHaveBeenCalledWith({
+      expect(strapi.db.query(uid).updateMany).toHaveBeenCalledWith({
         where: {
           id: { $in: [1, 2] },
         },
@@ -119,7 +118,7 @@ describe('Content-Manager', () => {
 
       await entityManager.publishMany(entities, uid);
 
-      expect(strapi.db.query().updateMany).toHaveBeenCalledWith({
+      expect(strapi.db.query(uid).updateMany).toHaveBeenCalledWith({
         where: {
           id: { $in: [2] },
         },
@@ -153,10 +152,10 @@ describe('Content-Manager', () => {
           findMany: jest.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]),
           update: jest.fn().mockReturnValue({ id: 1, publishedAt: null }),
         },
-        eventHub: { emit: jest.fn(), sanitizeEntity: (entity) => entity },
+        eventHub: { emit: jest.fn(), sanitizeEntity: (entity: any) => entity },
         getModel: jest.fn(() => fakeModel),
         config: {
-          get: (path, defaultValue) => _.get(defaultConfig, path, defaultValue),
+          get: (path: any, defaultValue: any) => _.get(defaultConfig, path, defaultValue),
         },
         webhookStore: {
           allowedEvents: new Map([['ENTRY_UNPUBLISH', 'entry.unpublish']]),
@@ -164,11 +163,11 @@ describe('Content-Manager', () => {
         plugins: {
           'content-manager': {
             services: {
-              'populate-builder': require('../populate-builder')(),
+              'populate-builder': populateBuilder(),
             },
           },
         },
-      };
+      } as any;
       entityManager = entityManagerLoader({ strapi });
     });
 
@@ -237,7 +236,7 @@ describe('Content-Manager', () => {
 
       await entityManager.unpublishMany(entities, uid);
 
-      expect(strapi.db.query().updateMany).toHaveBeenCalledWith({
+      expect(strapi.db.query(uid).updateMany).toHaveBeenCalledWith({
         where: {
           id: { $in: [1] },
         },

@@ -1,6 +1,4 @@
-'use strict';
-
-const { syncLayouts } = require('../layouts');
+import { syncLayouts } from '../layouts';
 
 jest.mock('../../../../utils', () => ({
   getService: jest.fn().mockReturnValue({

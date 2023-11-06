@@ -1,8 +1,6 @@
-'use strict';
+import { getQueryPopulate } from '../populate';
 
-const { getQueryPopulate } = require('../populate');
-
-const getFilterQuery = (conditions) => ({
+const getFilterQuery = (conditions: any) => ({
   filters: {
     $or: [
       {
@@ -68,7 +66,7 @@ describe('Populate', () => {
         },
       },
     },
-  };
+  } as any;
 
   describe('getQueryPopulate', () => {
     beforeEach(() => {
@@ -80,7 +78,7 @@ describe('Populate', () => {
             get: jest.fn((uid) => ({ ...fakeModels[uid], columnToAttribute: {} })),
           },
         },
-      };
+      } as any;
     });
 
     afterEach(() => {

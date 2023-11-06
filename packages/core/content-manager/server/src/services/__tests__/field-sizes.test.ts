@@ -1,7 +1,7 @@
-'use strict';
+import { errors } from '@strapi/utils';
+import createFieldSizesService from '../field-sizes';
 
-const { ApplicationError } = require('@strapi/utils').errors;
-const createFieldSizesService = require('../field-sizes');
+const { ApplicationError } = errors;
 
 const strapi = {
   container: {
@@ -32,7 +32,7 @@ describe('field sizes service', () => {
   it('should return the correct field sizes', () => {
     const { getAllFieldSizes } = createFieldSizesService({ strapi });
     const fieldSizes = getAllFieldSizes();
-    Object.values(fieldSizes).forEach((fieldSize) => {
+    Object.values(fieldSizes).forEach((fieldSize: any) => {
       expect(typeof fieldSize.isResizable).toBe('boolean');
       expect([4, 6, 8, 12]).toContain(fieldSize.default);
     });
@@ -50,7 +50,7 @@ describe('field sizes service', () => {
 
     try {
       getFieldSize('not-found');
-    } catch (error) {
+    } catch (error: any) {
       expect(error instanceof ApplicationError).toBe(true);
       expect(error.message).toBe('Could not find field size for type not-found');
     }
@@ -61,7 +61,7 @@ describe('field sizes service', () => {
 
     try {
       getFieldSize();
-    } catch (error) {
+    } catch (error: any) {
       expect(error instanceof ApplicationError).toBe(true);
       expect(error.message).toBe('The type is required');
     }

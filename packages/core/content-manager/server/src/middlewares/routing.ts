@@ -30,7 +30,7 @@ export default async (ctx: any, next: any) => {
     const [controller, action] = actionConfig.split('.');
 
     if (controller && action) {
-      // @ts-ignore TODO
+      // @ts-expect-error TODO number of arguments
       return target.controllers[controller.toLowerCase()][action](ctx);
     }
   }

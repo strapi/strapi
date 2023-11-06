@@ -1,7 +1,5 @@
-'use strict';
-
-const createConfigurationService = require('../configuration');
-const storeUtils = require('../utils/store');
+import createConfigurationService from '../configuration';
+import storeUtils from '../utils/store';
 
 const createCfg = (opts = {}) => {
   return createConfigurationService({
@@ -17,7 +15,9 @@ const createCfg = (opts = {}) => {
 describe('Model Configuration', () => {
   test('getConfiguration calls store with right key', async () => {
     const uid = 'test-uid';
-    const spyFn = jest.spyOn(storeUtils, 'getModelConfiguration').mockImplementation(() => {});
+    const spyFn = jest
+      .spyOn(storeUtils, 'getModelConfiguration')
+      .mockImplementation((() => {}) as any);
 
     const { getConfiguration } = createCfg();
     await getConfiguration(uid);
@@ -28,7 +28,9 @@ describe('Model Configuration', () => {
 
   test('setConfiguration calls store with right params', async () => {
     const uid = 'test-uid';
-    const spyFn = jest.spyOn(storeUtils, 'setModelConfiguration').mockImplementation(() => {});
+    const spyFn = jest
+      .spyOn(storeUtils, 'setModelConfiguration')
+      .mockImplementation((() => {}) as any);
 
     const { setConfiguration } = createCfg();
     await setConfiguration(uid, {
@@ -49,7 +51,9 @@ describe('Model Configuration', () => {
 
   test('setConfiguration should store optional options object', async () => {
     const uid = 'test-uid';
-    const spyFn = jest.spyOn(storeUtils, 'setModelConfiguration').mockImplementation(() => {});
+    const spyFn = jest
+      .spyOn(storeUtils, 'setModelConfiguration')
+      .mockImplementation((() => {}) as any);
 
     const { setConfiguration } = createCfg();
     await setConfiguration(uid, {
@@ -72,7 +76,9 @@ describe('Model Configuration', () => {
 
   test('setConfiguration calls store with isComponent if set in factory option', async () => {
     const uid = 'test-uid';
-    const spyFn = jest.spyOn(storeUtils, 'setModelConfiguration').mockImplementation(() => {});
+    const spyFn = jest
+      .spyOn(storeUtils, 'setModelConfiguration')
+      .mockImplementation((() => {}) as any);
 
     const { setConfiguration } = createCfg({ isComponent: true });
     await setConfiguration(uid, {
@@ -94,7 +100,7 @@ describe('Model Configuration', () => {
 
   test('deleteConfiguration calls store with right params', async () => {
     const uid = 'test-uid';
-    const spyFn = jest.spyOn(storeUtils, 'deleteKey').mockImplementation(() => {});
+    const spyFn = jest.spyOn(storeUtils, 'deleteKey').mockImplementation((() => {}) as any);
 
     const { deleteConfiguration } = createCfg();
     await deleteConfiguration(uid);

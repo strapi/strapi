@@ -1,7 +1,7 @@
 import { policy } from '@strapi/utils';
-const { createPolicy } = policy;
-
 import { validateHasPermissionsInput } from '../validation/policies/hasPermissions';
+
+const { createPolicy } = policy;
 
 export default createPolicy({
   name: 'plugin::content-manager.hasPermissions',

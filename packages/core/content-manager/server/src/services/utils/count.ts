@@ -1,4 +1,5 @@
 import { contentTypes } from '@strapi/utils';
+
 const { isVisibleAttribute } = contentTypes;
 
 function getCountForRelation(attributeName: any, entity: any, model: any) {

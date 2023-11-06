@@ -75,15 +75,15 @@ const createPermissionChecker =
 
     // Sanitized queries shortcuts
     Object.keys(ACTIONS).forEach((action: any) => {
-      // @ts-ignore TODO
+      // @ts-expect-error TODO
       sanitizedQuery[action] = (query: any) => sanitizedQuery(query, ACTIONS[action]);
     });
 
     // Permission utils shortcuts
     Object.keys(ACTIONS).forEach((action) => {
-      // @ts-ignore TODO
+      // @ts-expect-error TODO
       can[action] = (...args: any) => can(ACTIONS[action], ...args);
-      // @ts-ignore TODO
+      // @ts-expect-error TODO
       cannot[action] = (...args: any) => cannot(ACTIONS[action], ...args);
     });
 

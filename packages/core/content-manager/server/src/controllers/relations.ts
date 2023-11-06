@@ -1,12 +1,12 @@
 import { prop, isEmpty, uniq, flow } from 'lodash/fp';
 import { isOperatorOfType, contentTypes, relations } from '@strapi/utils';
-const { hasDraftAndPublish } = contentTypes;
-const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;
-const { isAnyToMany } = relations;
-
 import { getService } from '../utils';
 import { validateFindAvailable, validateFindExisting } from './validation/relations';
 import { isListable } from '../services/utils/configuration/attributes';
+
+const { hasDraftAndPublish } = contentTypes;
+const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;
+const { isAnyToMany } = relations;
 
 const addFiltersClause = (params: any, filtersClause: any) => {
   params.filters = params.filters || {};
@@ -83,7 +83,7 @@ export default {
         const entityManager = getService('entity-manager');
 
         const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
-        // @ts-ignore TODO
+        // @ts-expect-error populate builder needs to be called with a UID
         const populate = await getService('populate-builder')(model)
           .populateFromQuery(permissionQuery)
           .build();
@@ -199,7 +199,7 @@ export default {
       }
 
       const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
-      // @ts-ignore TODO
+      // @ts-expect-error populate builder needs to be called with a UID
       const populate = await getService('populate-builder')(model)
         .populateFromQuery(permissionQuery)
         .build();

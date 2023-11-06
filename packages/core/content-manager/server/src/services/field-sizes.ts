@@ -1,4 +1,5 @@
 import { errors } from '@strapi/utils';
+
 const { ApplicationError } = errors;
 
 const needsFullSize = {
@@ -56,7 +57,7 @@ const createFieldSizesService = ({ strapi }: any) => {
       return !!fieldSizes[type];
     },
 
-    getFieldSize(type: any) {
+    getFieldSize(type?: any) {
       if (!type) {
         throw new ApplicationError('The type is required');
       }

@@ -1,5 +1,6 @@
 import { intersection, prop } from 'lodash/fp';
 import { relations } from '@strapi/utils';
+
 const { getRelationalFields } = relations;
 
 export default ({ strapi }: any) => {

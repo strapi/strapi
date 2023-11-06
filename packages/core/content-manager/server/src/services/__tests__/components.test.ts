@@ -1,6 +1,4 @@
-'use strict';
-
-const componentsService = require('../components');
+import componentsService from '../components';
 
 const configuration = {
   test: 'value',

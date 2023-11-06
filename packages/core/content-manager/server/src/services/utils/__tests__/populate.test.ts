@@ -1,6 +1,4 @@
-'use strict';
-
-const { getDeepPopulate } = require('../populate');
+import { getDeepPopulate } from '../populate';
 
 describe('Populate', () => {
   const fakeModels = {
@@ -52,13 +50,13 @@ describe('Populate', () => {
         },
       },
     },
-  };
+  } as any;
 
   describe('getDeepPopulate', () => {
     beforeEach(() => {
       global.strapi = {
         getModel: jest.fn((uid) => fakeModels[uid]),
-      };
+      } as any;
     });
 
     afterEach(() => {

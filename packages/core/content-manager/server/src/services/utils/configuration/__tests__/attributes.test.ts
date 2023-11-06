@@ -1,8 +1,6 @@
-'use strict';
+import { isSortable, isVisible } from '../attributes';
 
-const { isSortable, isVisible } = require('../attributes');
-
-const createMockSchema = (attrs, timestamps = true) => {
+const createMockSchema = (attrs: any, timestamps = true) => {
   return {
     options: {
       timestamps: timestamps ? ['createdAt', 'updatedAt'] : false,

@@ -1,6 +1,4 @@
-'use strict';
-
-const { getDeepRelationsCount } = require('../count');
+import { getDeepRelationsCount } from '../count';
 
 const fakeModels = {
   component: {
@@ -57,13 +55,13 @@ const fakeModels = {
       },
     },
   },
-};
+} as any;
 
 describe('getDeepRelationsCount', () => {
   beforeEach(() => {
     global.strapi = {
       getModel: jest.fn((uid) => fakeModels[uid]),
-    };
+    } as any;
   });
 
   afterEach(() => {

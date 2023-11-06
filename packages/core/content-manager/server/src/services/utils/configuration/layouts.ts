@@ -27,13 +27,11 @@ const getDefaultFieldSize = (attribute: any) => {
 };
 
 async function createDefaultLayouts(schema: any) {
-  // TODO check this error is correct, list and edit will always be overwritten?
-  // const list = createDefaultListLayout(schema);
-  // const edit = createDefaultEditLayout(schema);
-
   return {
-    // list,
-    // edit,
+    // @ts-expect-error necessary to provide this default layout
+    list: createDefaultListLayout(schema),
+    // @ts-expect-error necessary to provide this default layout
+    edit: createDefaultEditLayout(schema),
     ..._.pick(_.get(schema, ['config', 'layouts'], {}), ['list', 'edit']),
   };
 }
@@ -129,6 +127,7 @@ function syncLayouts(configuration: any, schema: any) {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/default-param-last
 const appendToEditLayout = (layout: any = [], keysToAppend: any, schema: any) => {
   if (keysToAppend.length === 0) return layout;
   let currentRowIndex = Math.max(layout.length - 1, 0);

@@ -1,10 +1,9 @@
-import { setCreatorFields, pipeAsync } from '@strapi/utils';
-import { errors } from '@strapi/utils';
-const { ApplicationError } = errors;
-
+import { setCreatorFields, pipeAsync, errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateBulkActionInput } from './validation';
 import { hasProhibitedCloningFields, excludeNotCreatableFields } from './utils/clone';
+
+const { ApplicationError } = errors;
 
 export default {
   async find(ctx: any) {
@@ -21,7 +20,7 @@ export default {
 
     const permissionQuery = await permissionChecker.sanitizedQuery.read(query);
 
-    // @ts-ignore TODO
+    // @ts-expect-error populate builder needs to be called with a UID
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .populateDeep(1)
@@ -55,7 +54,7 @@ export default {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
-    //@ts-ignore TODO
+    // @ts-expect-error populate builder needs to be called with a UID
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .populateDeep(Infinity)
@@ -128,7 +127,7 @@ export default {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.update(ctx.query);
-    //@ts-ignore TODO
+    // @ts-expect-error populate builder needs to be called with a UID
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .build();
@@ -166,7 +165,7 @@ export default {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.create(ctx.query);
-    //@ts-ignore TODO
+    // @ts-expect-error populate builder needs to be called with a UID
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .build();
@@ -216,7 +215,7 @@ export default {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.delete(ctx.query);
-    //@ts-ignore TODO
+    // @ts-expect-error populate builder needs to be called with a UID
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .build();
@@ -248,7 +247,7 @@ export default {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
-    //@ts-ignore TODO
+    // @ts-expect-error populate builder needs to be called with a UID
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .populateDeep(Infinity)
@@ -290,7 +289,7 @@ export default {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
-    //@ts-ignore TODO
+    // @ts-expect-error populate builder needs to be called with a UID
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .populateDeep(Infinity)
@@ -330,7 +329,7 @@ export default {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
-    //@ts-ignore TODO
+    // @ts-expect-error populate builder needs to be called with a UID
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .build();
@@ -364,7 +363,7 @@ export default {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.unpublish(ctx.query);
-    //@ts-ignore TODO
+    // @ts-expect-error populate builder needs to be called with a UID
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .build();
@@ -431,7 +430,7 @@ export default {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
-    //@ts-ignore TODO
+    // @ts-expect-error populate builder needs to be called with a UID
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .build();

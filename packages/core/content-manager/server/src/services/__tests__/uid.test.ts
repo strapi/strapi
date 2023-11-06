@@ -1,6 +1,4 @@
-'use strict';
-
-const uidServiceLoader = require('../uid');
+import uidServiceLoader from '../uid';
 
 describe('Test uid service', () => {
   describe('generateUIDField', () => {

@@ -1,7 +1,7 @@
-'use strict';
-
-const createContext = require('../../../../../../test/helpers/create-context');
-const relations = require('../relations');
+// @ts-expect-error - types are not generated for this file
+// eslint-disable-next-line import/no-relative-packages
+import createContext from '../../../../../../../test/helpers/create-context';
+import relations from '../relations';
 
 const contentTypes = {
   main: {
@@ -26,7 +26,7 @@ const contentTypes = {
     uid: 'target',
     attributes: { myField: { type: 'string' } },
   },
-};
+} as any;
 
 describe('Relations', () => {
   beforeAll(() => {
@@ -72,7 +72,7 @@ describe('Relations', () => {
           },
         },
       },
-    };
+    } as any;
   });
 
   afterAll(() => {

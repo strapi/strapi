@@ -1,7 +1,8 @@
-'use strict';
-
-const createContext = require('../../../../../../test/helpers/create-context');
-const singleTypes = require('../single-types');
+// @ts-expect-error - types are not generated for this file
+// eslint-disable-next-line import/no-relative-packages
+import createContext from '../../../../../../../test/helpers/create-context';
+import singleTypes from '../single-types';
+import populateBuilder from '../../services/populate-builder';
 
 // Mock the populate functions
 jest.mock('../../services/utils/populate', () => ({
@@ -31,7 +32,7 @@ describe('Single Types', () => {
       },
       buildReadQuery: jest.fn((query) => query),
       sanitizedQuery: {
-        read: (q) => q,
+        read: (q: any) => q,
       },
     };
 
@@ -51,8 +52,8 @@ describe('Single Types', () => {
               find() {
                 return Promise.resolve();
               },
-              assocCreatorRoles(enitty) {
-                return enitty;
+              assocCreatorRoles(entity: any) {
+                return entity;
               },
             },
             'permission-checker': {
@@ -60,14 +61,14 @@ describe('Single Types', () => {
                 return permissionChecker;
               },
             },
-            'populate-builder': require('../../services/populate-builder')(),
+            'populate-builder': populateBuilder(),
           },
         },
       },
       entityService: {
         find: jest.fn(),
       },
-    };
+    } as any;
 
     const modelUid = 'test-model';
 
@@ -110,11 +111,11 @@ describe('Single Types', () => {
         update: jest.fn(() => false),
         create: jest.fn(() => false),
       },
-      sanitizeCreateInput: (obj) => obj,
-      sanitizeOutput: (obj) => obj,
+      sanitizeCreateInput: (obj: any) => obj,
+      sanitizeOutput: (obj: any) => obj,
       buildReadQuery: jest.fn((query) => query),
       sanitizedQuery: {
-        update: (q) => q,
+        update: (q: any) => q,
       },
     };
 
@@ -148,8 +149,8 @@ describe('Single Types', () => {
               find() {
                 return Promise.resolve();
               },
-              assocCreatorRoles(enitty) {
-                return enitty;
+              assocCreatorRoles(entity: any) {
+                return entity;
               },
               create: createFn,
             },
@@ -158,7 +159,7 @@ describe('Single Types', () => {
                 return permissionChecker;
               },
             },
-            'populate-builder': require('../../services/populate-builder')(),
+            'populate-builder': populateBuilder(),
           },
         },
       },
@@ -168,7 +169,7 @@ describe('Single Types', () => {
       telemetry: {
         send: sendTelemetry,
       },
-    };
+    } as any;
 
     const ctx = createContext(
       {
@@ -232,7 +233,7 @@ describe('Single Types', () => {
       sanitizeOutput: jest.fn((obj) => obj),
       buildReadQuery: jest.fn((query) => query),
       sanitizedQuery: {
-        delete: (q) => q,
+        delete: (q: any) => q,
       },
     };
 
@@ -265,8 +266,8 @@ describe('Single Types', () => {
               find() {
                 return Promise.resolve(entity);
               },
-              assocCreatorRoles(enitty) {
-                return enitty;
+              assocCreatorRoles(entity: any) {
+                return entity;
               },
               delete: deleteFn,
             },
@@ -275,14 +276,14 @@ describe('Single Types', () => {
                 return permissionChecker;
               },
             },
-            'populate-builder': require('../../services/populate-builder')(),
+            'populate-builder': populateBuilder(),
           },
         },
       },
       entityService: {
         find: jest.fn(),
       },
-    };
+    } as any;
 
     const ctx = createContext(
       {
@@ -330,7 +331,7 @@ describe('Single Types', () => {
       sanitizeOutput: jest.fn((obj) => obj),
       buildReadQuery: jest.fn((query) => query),
       sanitizedQuery: {
-        publish: (q) => q,
+        publish: (q: any) => q,
       },
     };
 
@@ -363,8 +364,8 @@ describe('Single Types', () => {
               find() {
                 return Promise.resolve(entity);
               },
-              assocCreatorRoles(enitty) {
-                return enitty;
+              assocCreatorRoles(entity: any) {
+                return entity;
               },
               publish: publishFn,
             },
@@ -373,14 +374,14 @@ describe('Single Types', () => {
                 return permissionChecker;
               },
             },
-            'populate-builder': require('../../services/populate-builder')(),
+            'populate-builder': populateBuilder(),
           },
         },
       },
       entityService: {
         find: jest.fn(),
       },
-    };
+    } as any;
 
     const ctx = createContext(
       {
@@ -428,7 +429,7 @@ describe('Single Types', () => {
       sanitizeOutput: jest.fn((obj) => obj),
       buildReadQuery: jest.fn((query) => query),
       sanitizedQuery: {
-        unpublish: (q) => q,
+        unpublish: (q: any) => q,
       },
     };
 
@@ -461,7 +462,7 @@ describe('Single Types', () => {
               find() {
                 return Promise.resolve(entity);
               },
-              assocCreatorRoles(entity) {
+              assocCreatorRoles(entity: any) {
                 return entity;
               },
               unpublish: unpublishFn,
@@ -471,14 +472,14 @@ describe('Single Types', () => {
                 return permissionChecker;
               },
             },
-            'populate-builder': require('../../services/populate-builder')(),
+            'populate-builder': populateBuilder(),
           },
         },
       },
       entityService: {
         find: jest.fn(),
       },
-    };
+    } as any;
 
     const ctx = createContext(
       {

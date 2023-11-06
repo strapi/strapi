@@ -1,7 +1,7 @@
-'use strict';
-
-const createContext = require('../../../../../../test/helpers/create-context');
-const contentTypes = require('../content-types');
+// @ts-expect-error - types are not generated for this file
+// eslint-disable-next-line import/no-relative-packages
+import createContext from '../../../../../../../test/helpers/create-context';
+import contentTypes from '../content-types';
 
 describe('Content Types', () => {
   test('findContentTypesSettings', async () => {
@@ -38,7 +38,7 @@ describe('Content Types', () => {
           },
         },
       },
-    };
+    } as any;
 
     const ctx = createContext({});
 
