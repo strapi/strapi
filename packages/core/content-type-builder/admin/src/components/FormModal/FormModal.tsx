@@ -80,6 +80,8 @@ import { getFormInputNames } from './utils/getFormInputNames';
 import type { CustomFieldAttributeParams } from '../../contexts/DataManagerContext';
 import type { AttributeType } from '../../types';
 import type { Common } from '@strapi/types';
+import { FormModalHeader } from '../FormModalHeader';
+import { IconByType } from '../AttributeIcon';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
@@ -101,6 +103,7 @@ export const FormModal = () => {
     kind,
     step,
     targetUid,
+    showBackLink,
   } = useFormModalNavigation();
   const customField = useCustomFields().get(customFieldUid);
 
@@ -349,7 +352,6 @@ export const FormModal = () => {
       isCreatingComponentFromAView && step === '1'
         ? get(modifiedData, 'componentToCreate', {})
         : modifiedData;
-
     // Check form validity for content type
     if (isCreatingContentType) {
       schema = forms.contentType.schema(
@@ -458,7 +460,11 @@ export const FormModal = () => {
   };
 
   const handleChange = useCallback(
-    ({ target: { name, value, ...rest } }: { target: { name: string; value: string } }) => {
+    ({
+      target: { name, value, type, ...rest },
+    }: {
+      target: { name: string; value: string; type: string };
+    }) => {
       const namesThatCanResetToNullValue = [
         'enumName',
         'max',
@@ -997,12 +1003,18 @@ export const FormModal = () => {
 
   return (
     <ModalLayout onClose={handleClosed} labelledBy="title">
-      <FormModalSubHeader
+      <FormModalHeader
         actionType={actionType}
         attributeName={attributeName}
+        categoryName={categoryName}
+        contentTypeKind={kind as IconByType}
+        dynamicZoneTarget={dynamicZoneTarget}
         modalType={modalType}
         forTarget={forTarget}
-        attributeType={attributeType}
+        targetUid={targetUid}
+        attributeType={attributeType as IconByType}
+        customFieldUid={customFieldUid}
+        showBackLink={showBackLink}
       />
       {isPickingAttribute && (
         <AttributeOptions

@@ -28,7 +28,7 @@ export const BooleanDefaultValueSelect = ({
   name,
   options,
   onChange,
-  value,
+  value = null,
 }: BooleanDefaultValueSelectProps) => {
   const { formatMessage } = useIntl();
   const label = intlLabel.id

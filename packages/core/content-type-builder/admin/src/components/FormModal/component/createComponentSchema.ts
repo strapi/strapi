@@ -33,7 +33,6 @@ export const createComponentSchema = (
           if (!value) {
             return false;
           }
-
           return !reservedNames.includes(value?.trim()?.toLowerCase());
         },
       })

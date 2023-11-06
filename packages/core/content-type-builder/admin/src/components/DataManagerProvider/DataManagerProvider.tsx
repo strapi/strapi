@@ -470,12 +470,11 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
   const shouldRedirect = useMemo(() => {
     const dataSet = isInContentTypeView ? contentTypes : components;
-
-    if (currentUid === 'create-content-type' || currentUid === null) {
+    if (currentUid === 'create-content-type') {
       return false;
     }
 
-    return !Object.keys(dataSet).includes(currentUid) && !isLoading;
+    return !Object.keys(dataSet).includes(currentUid || '') && !isLoading;
   }, [components, contentTypes, currentUid, isInContentTypeView, isLoading]);
 
   const redirectEndpoint = useMemo(() => {

@@ -27,7 +27,7 @@ export const AllowedTypesSelect = ({
   intlLabel,
   name,
   onChange,
-  value,
+  value = null,
 }: AllowedTypesSelectProps) => {
   const { formatMessage } = useIntl();
 

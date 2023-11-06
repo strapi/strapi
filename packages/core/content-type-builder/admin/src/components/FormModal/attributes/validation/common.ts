@@ -16,7 +16,6 @@ const alreadyUsedAttributeNames = (
       if (!value) {
         return false;
       }
-
       return !usedNames.includes(value);
     },
   };
@@ -111,10 +110,7 @@ const createTextShape = (usedAttributeNames: Array<string>, reservedNames: Array
         name: 'isValidRegExpPattern',
         message: getTrad('error.validation.regex'),
         test(value) {
-          if (!value) {
-            return false;
-          }
-          return new RegExp(value) !== null;
+          return new RegExp(value || '') !== null;
         },
       })
       .nullable(),

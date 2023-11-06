@@ -15,7 +15,6 @@ export const createCategorySchema = (usedCategoryNames: Array<string>) => {
           if (!value) {
             return false;
           }
-
           return !usedCategoryNames.includes(value?.toLowerCase());
         },
       })

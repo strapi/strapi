@@ -7588,22 +7588,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/database@npm:4.14.4":
-  version: 4.14.4
-  resolution: "@strapi/database@npm:4.14.4"
-  dependencies:
-    "@strapi/utils": "npm:4.14.4"
-    date-fns: "npm:2.30.0"
-    debug: "npm:4.3.4"
-    fs-extra: "npm:10.0.0"
-    knex: "npm:2.5.0"
-    lodash: "npm:4.17.21"
-    semver: "npm:7.5.4"
-    umzug: "npm:3.2.1"
-  checksum: 9c740c866c0aebc0835a2def3ef35c8013b3e9e6926ce0d6253fef878a118f1d409f1adc20c095f592e3c017a5b48179e17d1079d40bb4ab3184ae001892a2fe
-  languageName: node
-  linkType: hard
-
 "@strapi/database@npm:4.14.5, @strapi/database@workspace:packages/core/database":
   version: 0.0.0-use.local
   resolution: "@strapi/database@workspace:packages/core/database"
@@ -7804,16 +7788,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/logger@npm:4.14.4":
-  version: 4.14.4
-  resolution: "@strapi/logger@npm:4.14.4"
-  dependencies:
-    lodash: "npm:4.17.21"
-    winston: "npm:3.10.0"
-  checksum: 477a2d5ada6da1fdfc753770a6d0907707359032c168e88a265797618359d1c9c032d774c1a02e967466bf779edbed98232d734a15fcecedbdef873b5a3ba771
-  languageName: node
-  linkType: hard
-
 "@strapi/logger@npm:4.14.5, @strapi/logger@workspace:packages/utils/logger":
   version: 0.0.0-use.local
   resolution: "@strapi/logger@workspace:packages/utils/logger"
@@ -7861,19 +7835,6 @@ __metadata:
     pack-up: ./bin/pack-up.js
   languageName: unknown
   linkType: soft
-
-"@strapi/permissions@npm:4.14.4":
-  version: 4.14.4
-  resolution: "@strapi/permissions@npm:4.14.4"
-  dependencies:
-    "@casl/ability": "npm:6.5.0"
-    "@strapi/utils": "npm:4.14.4"
-    lodash: "npm:4.17.21"
-    qs: "npm:6.11.1"
-    sift: "npm:16.0.1"
-  checksum: cb9d8204d0cd246b361e5d229531c509e5e4c8d9c309bf5d31a862425d987253da2e28ecc12cd1dbcac2b61d0f131e1c3f133c6d2601edfe1f649f4c8422cd3e
-  languageName: node
-  linkType: hard
 
 "@strapi/permissions@npm:4.14.5, @strapi/permissions@workspace:packages/core/permissions":
   version: 0.0.0-use.local
@@ -7969,7 +7930,7 @@ __metadata:
     "@strapi/helper-plugin": "npm:4.14.5"
     "@strapi/icons": "npm:1.13.0"
     "@strapi/pack-up": "workspace:*"
-    "@strapi/types": "npm:4.14.4"
+    "@strapi/types": "npm:4.14.5"
     "@strapi/utils": "npm:4.14.5"
     "@testing-library/react": "npm:14.0.0"
     "@testing-library/react-hooks": "npm:8.0.1"
@@ -8461,25 +8422,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/types@npm:4.14.4":
-  version: 4.14.4
-  resolution: "@strapi/types@npm:4.14.4"
-  dependencies:
-    "@koa/cors": "npm:3.4.3"
-    "@koa/router": "npm:10.1.1"
-    "@strapi/database": "npm:4.14.4"
-    "@strapi/logger": "npm:4.14.4"
-    "@strapi/permissions": "npm:4.14.4"
-    "@strapi/utils": "npm:4.14.4"
-    commander: "npm:8.3.0"
-    https-proxy-agent: "npm:5.0.1"
-    koa: "npm:2.13.4"
-    node-fetch: "npm:2.7.0"
-    node-schedule: "npm:2.1.0"
-  checksum: 4dc2c4af6c314bf54a959149ca44ef0f669837a0e5b54871e5163c2d86889cd8a0f2a25287ed28a4620cef5fb2d12be1a9d4a51505974c24f67b66ca5db07881
-  languageName: node
-  linkType: hard
-
 "@strapi/types@npm:4.14.5, @strapi/types@workspace:*, @strapi/types@workspace:packages/core/types":
   version: 0.0.0-use.local
   resolution: "@strapi/types@workspace:packages/core/types"
@@ -8549,20 +8491,6 @@ __metadata:
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
   checksum: adc91b8b9a3043ea4cec333fab5905dbac536be536f064131a7ece20660d3e0b98327362c4aabdbaa5e0d71abf65ebba42746cf3704ef78b690f7ef71ae8ed92
-  languageName: node
-  linkType: hard
-
-"@strapi/utils@npm:4.14.4":
-  version: 4.14.4
-  resolution: "@strapi/utils@npm:4.14.4"
-  dependencies:
-    "@sindresorhus/slugify": "npm:1.1.0"
-    date-fns: "npm:2.30.0"
-    http-errors: "npm:1.8.1"
-    lodash: "npm:4.17.21"
-    p-map: "npm:4.0.0"
-    yup: "npm:0.32.9"
-  checksum: f662e25e881379bd1e37bdc3e5c9be4a362e08f9b5509d50675028ee248b3989d5c0384813c5ee26613a425abf6f37a89fd3d986b112fd1e8d402c28be925ba5
   languageName: node
   linkType: hard
 
