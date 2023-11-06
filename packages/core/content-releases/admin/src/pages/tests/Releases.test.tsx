@@ -21,16 +21,12 @@ describe('Releases home page', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the Releases title as an heading and subtitle with number of releases', () => {
+  it('renders the Releases title, subtitle, "New Releases" button and a dialog', async () => {
     render();
-    const pageTitle = screen.getByRole('heading', { level: 1 });
-    expect(pageTitle).toHaveTextContent('Releases');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Releases');
     // if there are 0 releases
     expect(screen.getByText('No releases')).toBeInTheDocument();
-  });
 
-  it('shows a dialog when clicking on the "New release" button', async () => {
-    render();
     const newReleaseButton = screen.getByRole('button', { name: 'New release' });
     expect(newReleaseButton).toBeInTheDocument();
     await user.click(newReleaseButton);
