@@ -5,6 +5,8 @@ import { IntlProvider } from 'react-intl';
 
 import { ReleasesPage } from '../Releases';
 
+const user = userEvent.setup();
+
 const render = () => ({
   ...renderRTL(<ReleasesPage />, {
     wrapper: ({ children }) => (
@@ -15,7 +17,6 @@ const render = () => ({
       </ThemeProvider>
     ),
   }),
-  user: userEvent.setup(),
 });
 
 describe('Releases home page', () => {
@@ -23,94 +24,75 @@ describe('Releases home page', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the Releases title as an heading', async () => {
+  it('renders the Releases title as an heading', () => {
     const { getByRole } = render();
 
     const pageTitle = getByRole('heading', { level: 1 });
     expect(pageTitle).toHaveTextContent('Releases');
   });
 
-  it('shows a subtitle with the numnber of releases', async () => {
+  it('shows a subtitle with the number of releases', () => {
     const { getByText } = render();
 
     // if there are 0 releases
     expect(getByText('No releases')).toBeInTheDocument();
   });
 
-  it('shows a button to create a new release', async () => {
+  it('shows a button to create a new release', () => {
     const { getByRole } = render();
 
     const newReleaseButton = getByRole('button', { name: 'New release' });
-
     expect(newReleaseButton).toBeInTheDocument();
   });
 
   it('shows a dialog when clicking on the "New release" button', async () => {
-    const { user, getByRole } = render();
+    const { getByRole } = render();
 
     const newReleaseButton = getByRole('button', { name: 'New release' });
-
     await user.click(newReleaseButton);
 
     const dialogContainer = getByRole('dialog');
-
     const dialogTitle = within(dialogContainer).getByText(/new release/i);
-
     expect(dialogTitle).toBeInTheDocument();
 
     const dialogCloseButton = within(dialogContainer).getByRole('button', {
       name: /close the modal/i,
     });
-
     expect(dialogCloseButton).toBeInTheDocument();
-
     await user.click(dialogCloseButton);
-
     expect(dialogTitle).not.toBeInTheDocument();
   });
 
   it('hides the dialog when clicking on the "Cancel" button', async () => {
-    const { user, getByRole } = render();
+    const { getByRole } = render();
 
     const newReleaseButton = getByRole('button', { name: 'New release' });
-
     await user.click(newReleaseButton);
 
     const dialogContainer = getByRole('dialog');
-
     const dialogCancelButton = within(dialogContainer).getByRole('button', {
       name: /cancel/i,
     });
-
     expect(dialogCancelButton).toBeInTheDocument();
-
     await user.click(dialogCancelButton);
-
     expect(dialogContainer).not.toBeInTheDocument();
   });
 
-  it('shows the button Continue at the beginning disabled and then enabled when you enter some text, to submit the new release', async () => {
-    const { user, getByRole } = render();
+  it("disables continue button when there's no release name", async () => {
+    const { getByRole } = render();
 
     const newReleaseButton = getByRole('button', { name: 'New release' });
-
     await user.click(newReleaseButton);
 
     const dialogContainer = getByRole('dialog');
-
     const dialogContinueButton = within(dialogContainer).getByRole('button', {
       name: /continue/i,
     });
-
     expect(dialogContinueButton).toBeInTheDocument();
     expect(dialogContinueButton).toBeDisabled();
 
-    const value = 'new release';
-
     const inputElement = within(dialogContainer).getByRole('textbox', { name: /name/i });
-
-    await user.type(inputElement, value);
-
+    await user.type(inputElement, 'new release');
     expect(dialogContinueButton).toBeEnabled();
   });
 });

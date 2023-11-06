@@ -1,8 +1,3 @@
-/*
- *
- * Releases
- *
- */
 import React from 'react';
 
 import { Button, Main, HeaderLayout } from '@strapi/design-system';
@@ -12,7 +7,7 @@ import { useIntl } from 'react-intl';
 import { AddReleaseDialog } from '../components/AddReleaseDialog';
 
 const ReleasesPage = () => {
-  const [showAddReleaseDialog, setShowAddReleaseDialog] = React.useState(false);
+  const [addReleaseDialogIsShown, setAddReleaseDialogIsShown] = React.useState(false);
   const { formatMessage } = useIntl();
 
   const total = 0; // TODO: replace it with the total number of releases
@@ -26,7 +21,7 @@ const ReleasesPage = () => {
   );
 
   const toggleAddReleaseDialog = () => {
-    setShowAddReleaseDialog((prev: boolean) => !prev);
+    setAddReleaseDialogIsShown((prev) => !prev);
   };
 
   return (
@@ -48,7 +43,7 @@ const ReleasesPage = () => {
           }
         />
       </Main>
-      {showAddReleaseDialog && <AddReleaseDialog onClose={() => toggleAddReleaseDialog()} />}
+      {addReleaseDialogIsShown && <AddReleaseDialog handleClose={toggleAddReleaseDialog} />}
     </>
   );
 };

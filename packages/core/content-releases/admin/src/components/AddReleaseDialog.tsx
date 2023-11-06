@@ -22,12 +22,12 @@ const initialValues = {
   name: '',
 };
 
-export const AddReleaseDialog = ({ onClose }: { onClose: () => void }) => {
+export const AddReleaseDialog = ({ handleClose }: { handleClose: () => void }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
 
   const handleSubmit = () => {
-    onClose();
+    handleClose();
 
     toggleNotification({
       type: 'success',
@@ -39,7 +39,7 @@ export const AddReleaseDialog = ({ onClose }: { onClose: () => void }) => {
   };
 
   return (
-    <ModalLayout onClose={() => onClose()} labelledBy="title">
+    <ModalLayout onClose={() => handleClose()} labelledBy="title">
       <Formik
         validateOnChange={false}
         onSubmit={handleSubmit}
@@ -49,7 +49,7 @@ export const AddReleaseDialog = ({ onClose }: { onClose: () => void }) => {
         {({ values, errors, handleChange }) => (
           <Form>
             <ModalHeader>
-              <Typography variant="h2" id="title" fontWeight="bold" textColor="neutral800">
+              <Typography id="title" fontWeight="bold" textColor="neutral800">
                 {formatMessage({
                   id: 'content-releases.modal.add-release-title',
                   defaultMessage: 'New release',
@@ -75,7 +75,7 @@ export const AddReleaseDialog = ({ onClose }: { onClose: () => void }) => {
             </ModalBody>
             <ModalFooter
               startActions={
-                <Button onClick={() => onClose()} variant="tertiary" name="cancel">
+                <Button onClick={handleClose} variant="tertiary" name="cancel">
                   {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
                 </Button>
               }
