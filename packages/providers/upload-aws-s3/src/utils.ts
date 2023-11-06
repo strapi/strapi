@@ -100,14 +100,14 @@ export const extractCredentials = (options: InitOptions): AwsCredentialIdentity 
   // Legacy
   if (options.s3Options?.accessKeyId && options.s3Options.secretAccessKey) {
     process.emitWarning(
-      'Credentials passed directly to s3Options is deprectaed and will be removed in a future release. Please wrap them inside a credentials object.'
+      'Credentials passed directly to s3Options is deprecated and will be removed in a future release. Please wrap them inside a credentials object.'
     );
     return {
       accessKeyId: options.s3Options.accessKeyId,
       secretAccessKey: options.s3Options.secretAccessKey,
     };
   }
-  // V%
+  // V5
   if (options.s3Options?.credentials) {
     return {
       accessKeyId: options.s3Options.credentials.accessKeyId,

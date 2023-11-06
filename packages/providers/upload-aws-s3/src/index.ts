@@ -102,7 +102,7 @@ export default {
 
     const upload = async (file: File, customParams: Partial<PutObjectCommandInput> = {}) => {
       const fileKey = getFileKey(file);
-      const parallelUploads = new Upload({
+      const uploadObj = new Upload({
         client: s3Client,
         params: {
           Bucket: config.params.Bucket,
@@ -114,7 +114,7 @@ export default {
         },
       });
 
-      const upload = (await parallelUploads.done()) as UploadCommandOutput;
+      const upload = (await uploadObj.done()) as UploadCommandOutput;
 
       if (assertUrlProtocol(upload.Location)) {
         file.url = baseUrl ? `${baseUrl}/${fileKey}` : upload.Location;
