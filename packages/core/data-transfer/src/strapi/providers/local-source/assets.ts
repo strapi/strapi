@@ -103,8 +103,8 @@ export const createAssetsStream = (strapi: LoadedStrapi): Duplex => {
             ? join(strapi.dirs.static.public, fileFormat.url)
             : fileFormat.url;
 
-          const fileFormatStats = await getFileStats(fileFormatFilepath, isLocalProvider);
-          const fileFormatStream = getFileStream(fileFormatFilepath, isLocalProvider);
+          const fileFormatStats = await getFileStats(fileFormatFilepath, strapi, isLocalProvider);
+          const fileFormatStream = getFileStream(fileFormatFilepath, strapi, isLocalProvider);
           const metadata = { ...fileFormat, type: format, mainHash: file.hash };
           yield {
             metadata,
