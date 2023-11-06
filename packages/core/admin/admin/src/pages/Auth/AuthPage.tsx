@@ -24,7 +24,7 @@ const AuthPage = ({ hasAdmin }: AuthPageProps) => {
     LoginCE,
     async () => (await import('../../../../ee/admin/src/pages/AuthPage/components/Login')).LoginEE
   );
-  const forms = useEnterprise<FormDictionary, Partial<FormDictionary>, FormDictionary>(
+  const forms = useEnterprise<FormDictionary, Partial<FormDictionary>>(
     FORMS,
     async () => (await import('../../../../ee/admin/src/pages/AuthPage/constants')).FORMS,
     {

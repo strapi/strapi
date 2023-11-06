@@ -1,3 +1,5 @@
+import { StrapiAppSettingLink } from '@strapi/helper-plugin';
+
 export const ADMIN_PERMISSIONS_CE = {
   contentManager: {
     main: [],
@@ -122,13 +124,22 @@ export const HOOKS = {
 export const ACTION_SET_APP_RUNTIME_STATUS = 'StrapiAdmin/APP/SET_APP_RUNTIME_STATUS';
 export const ACTION_SET_ADMIN_PERMISSIONS = 'StrapiAdmin/App/SET_ADMIN_PERMISSIONS';
 
-export const SETTINGS_LINKS_CE = () => ({
+export interface SettingsMenuLink extends Omit<StrapiAppSettingLink, 'Component' | 'permissions'> {
+  Component?: never;
+  lockIcon?: boolean;
+}
+
+export type SettingsMenu = {
+  admin: SettingsMenuLink[];
+  global: SettingsMenuLink[];
+};
+
+export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
   global: [
     {
       intlLabel: { id: 'Settings.application.title', defaultMessage: 'Overview' },
       to: '/settings/application-infos',
       id: '000-application-infos',
-      permissions: [],
     },
     {
       intlLabel: { id: 'Settings.webhooks.title', defaultMessage: 'Webhooks' },
@@ -182,7 +193,7 @@ export const SETTINGS_LINKS_CE = () => ({
       id: 'roles',
     },
     {
-      intlLabel: { id: 'global.users' },
+      intlLabel: { id: 'global.users', defaultMessage: 'Users' },
       // Init the search params directly
       to: '/settings/users?pageSize=10&page=1&sort=firstname',
       id: 'users',
