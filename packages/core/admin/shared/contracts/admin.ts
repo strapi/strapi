@@ -71,18 +71,18 @@ export declare namespace Information {
  * /license-limit-information – get license limit information
  */
 
-interface SSOFeature {
+export interface SSOFeature {
   name: 'sso';
 }
 
-interface AuditLogsFeature {
+export interface AuditLogsFeature {
   name: 'audit-logs';
   options: {
     retentionDays: number | null;
   };
 }
 
-interface ReviewWorkflowsFeature {
+export interface ReviewWorkflowsFeature {
   name: 'review-workflows';
 }
 

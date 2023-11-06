@@ -67,30 +67,27 @@ export const ROUTES_CE: Route[] = [
   },
   {
     async Component() {
-      // @ts-expect-error – No types, yet.
-      const component = await import('./pages/Webhooks/ProtectedCreateView');
+      const { ProtectedCreatePage } = await import('./pages/Webhooks/CreatePage');
 
-      return component;
+      return ProtectedCreatePage;
     },
     to: '/settings/webhooks/create',
     exact: true,
   },
   {
     async Component() {
-      // @ts-expect-error – No types, yet.
-      const component = await import('./pages/Webhooks/ProtectedEditView');
+      const { ProtectedEditPage } = await import('./pages/Webhooks/EditPage');
 
-      return component;
+      return ProtectedEditPage;
     },
     to: '/settings/webhooks/:id',
     exact: true,
   },
   {
     async Component() {
-      // @ts-expect-error – No types, yet.
-      const component = await import('./pages/Webhooks/ProtectedListView');
+      const { ProtectedListPage } = await import('./pages/Webhooks/ListPage');
 
-      return component;
+      return ProtectedListPage;
     },
     to: '/settings/webhooks',
     exact: true,

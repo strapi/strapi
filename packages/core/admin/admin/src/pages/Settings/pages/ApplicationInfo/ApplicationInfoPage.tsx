@@ -34,10 +34,10 @@ import { DIMENSION, SIZE } from './utils/constants';
 const AdminSeatInfoCE = () => null;
 
 /* -------------------------------------------------------------------------------------------------
- * ApplicationInfosPage
+ * ApplicationInfoPage
  * -----------------------------------------------------------------------------------------------*/
 
-const ApplicationInfosPage = () => {
+const ApplicationInfoPage = () => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const { logos: serverLogos, updateProjectSettings } = useConfiguration();
@@ -57,7 +57,7 @@ const ApplicationInfosPage = () => {
     async () =>
       (
         await import(
-          '../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfosPage/components/AdminSeatInfo'
+          '../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfoPage/components/AdminSeatInfo'
         )
       ).AdminSeatInfoEE
   );
@@ -294,4 +294,4 @@ const ApplicationInfosPage = () => {
   );
 };
 
-export { ApplicationInfosPage };
+export { ApplicationInfoPage };
