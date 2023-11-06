@@ -26,28 +26,24 @@ describe('Releases home page', () => {
 
   it('renders the Releases title as an heading', () => {
     const { getByRole } = render();
-
     const pageTitle = getByRole('heading', { level: 1 });
     expect(pageTitle).toHaveTextContent('Releases');
   });
 
   it('shows a subtitle with the number of releases', () => {
     const { getByText } = render();
-
     // if there are 0 releases
     expect(getByText('No releases')).toBeInTheDocument();
   });
 
   it('shows a button to create a new release', () => {
     const { getByRole } = render();
-
     const newReleaseButton = getByRole('button', { name: 'New release' });
     expect(newReleaseButton).toBeInTheDocument();
   });
 
   it('shows a dialog when clicking on the "New release" button', async () => {
     const { getByRole } = render();
-
     const newReleaseButton = getByRole('button', { name: 'New release' });
     await user.click(newReleaseButton);
 
@@ -65,7 +61,6 @@ describe('Releases home page', () => {
 
   it('hides the dialog when clicking on the "Cancel" button', async () => {
     const { getByRole } = render();
-
     const newReleaseButton = getByRole('button', { name: 'New release' });
     await user.click(newReleaseButton);
 
@@ -80,7 +75,6 @@ describe('Releases home page', () => {
 
   it("disables continue button when there's no release name", async () => {
     const { getByRole } = render();
-
     const newReleaseButton = getByRole('button', { name: 'New release' });
     await user.click(newReleaseButton);
 
