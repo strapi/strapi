@@ -52,7 +52,7 @@ export const App = () => {
       defaultValue: ADMIN_PERMISSIONS_CE,
     }
   );
-  const routes = useEnterprise<StrapiRoute[] | null, StrapiRoute[], StrapiRoute[]>(
+  const routes = useEnterprise(
     ROUTES_CE,
     async () => (await import('../../ee/admin/src/constants')).ROUTES_EE,
     {
