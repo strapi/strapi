@@ -77,6 +77,7 @@
   ],
   "scripts": {
     "build": "run pack-up build && run copy-files",
+    "clean": "run -T rimraf ./dist",
     "copy-files": "copyfiles -u 1 -a 'src/**/*.html' 'src/**/*.png'  dist",
     "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
