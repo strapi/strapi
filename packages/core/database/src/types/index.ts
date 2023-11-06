@@ -225,8 +225,4 @@ export interface Model {
   indexes?: Index[];
   foreignKeys?: ForeignKey[];
   lifecycles?: Partial<Record<Action, SubscriberFn>>;
-  options?: Record<string, unknown>;
-  modelName?: string;
-  // Should we import ModelType from @strapi/types?
-  modelType?: 'contentType' | 'component';
 }

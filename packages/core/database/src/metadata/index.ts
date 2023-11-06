@@ -1,5 +1,4 @@
 import _ from 'lodash/fp';
-import { createId } from '@paralleldrive/cuid2';
 
 import * as types from '../utils/types';
 import {
@@ -41,18 +40,12 @@ export const createMetadata = (models: Model[] = []): Metadata => {
       throw new Error('The attribute "id" is reserved and cannot be used in a model');
     }
 
-    const documentIdAttribute: Meta['attributes'] =
-      model.modelType === 'contentType'
-        ? { documentId: { type: 'string', default: createId } }
-        : {};
-
     metadata.add({
       ...model,
       attributes: {
         id: {
           type: 'increments',
         },
-        ...documentIdAttribute,
         ...model.attributes,
       },
       lifecycles: model.lifecycles ?? {},

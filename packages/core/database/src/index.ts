@@ -10,8 +10,6 @@ import { createConnection } from './connection';
 import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
 
-// TODO: move back into strapi
-import { transformContentTypes } from './utils/content-types';
 import { validateDatabase } from './validations';
 import { Model } from './types';
 
@@ -46,8 +44,6 @@ class Database {
 
   entityManager: EntityManager;
 
-  static transformContentTypes = transformContentTypes;
-
   static async init(config: DatabaseConfig) {
     const db = new Database(config);
     await validateDatabase(db);
@@ -69,9 +65,17 @@ class Database {
     this.dialect = getDialect(this);
     this.dialect.configure();
 
-    this.connection = createConnection(this.config.connection);
+    const afterCreate = (
+      nativeConnection: unknown,
+      done: (error: Error | null, nativeConnection: unknown) => Promise<void>
+    ) => {
+      // run initialize for it since commands such as postgres SET and sqlite PRAGMA are per-connection
+      this.dialect.initialize(nativeConnection).then(() => {
+        return done(null, nativeConnection);
+      });
+    };
 
-    this.dialect.initialize();
+    this.connection = createConnection(this.config.connection, { pool: { afterCreate } });
 
     this.schema = createSchemaProvider(this);
 

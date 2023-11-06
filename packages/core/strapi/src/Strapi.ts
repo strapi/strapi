@@ -62,8 +62,8 @@ import ee from './utils/ee';
 import bootstrap from './core/bootstrap';
 import { destroyOnSignal } from './utils/signals';
 import getNumberOfDynamicZones from './services/utils/dynamic-zones';
-
 import convertCustomFieldType from './utils/convert-custom-field-type';
+import { transformContentTypesToModels } from './utils/transform-content-types-to-models';
 import { createDocumentRepository } from './services/document-service/document-repository';
 
 /**
@@ -483,7 +483,7 @@ class Strapi extends Container implements StrapiI {
 
     this.db = await Database.init({
       ...this.config.get('database'),
-      models: Database.transformContentTypes(contentTypes),
+      models: transformContentTypesToModels(contentTypes),
     });
 
     this.store = createCoreStore({ db: this.db });
