@@ -29,19 +29,6 @@ export const getRestrictRelationsTo = (contentType: Schema.ContentType) => {
   return null;
 };
 
-export const createContentTypes = async (contentTypes: any[]) => {
-  const builder = createBuilder();
-  const createdContentTypes = [];
-
-  for (const contentType of contentTypes) {
-    createdContentTypes.push(await createContentType(contentType, { defaultBuilder: builder }));
-  }
-
-  await builder.writeFiles();
-
-  return createdContentTypes;
-};
-
 /**
  * Format a contentType info to be used by the front-end
  */
@@ -66,6 +53,19 @@ export const formatContentType = (contentType: any) => {
       restrictRelationsTo: getRestrictRelationsTo(contentType),
     },
   };
+};
+
+export const createContentTypes = async (contentTypes: any[]) => {
+  const builder = createBuilder();
+  const createdContentTypes = [];
+
+  for (const contentType of contentTypes) {
+    createdContentTypes.push(await createContentType(contentType, { defaultBuilder: builder }));
+  }
+
+  await builder.writeFiles();
+
+  return createdContentTypes;
 };
 
 type CreateContentTypeOptions = {
@@ -110,10 +110,10 @@ export const createContentType = async (
 
   // generate api skeleton
   await generateAPI({
-    displayName: contentType?.displayName || contentType?.info?.displayName,
-    singularName: contentType?.singularName,
-    pluralName: contentType?.pluralName,
-    kind: contentType?.kind,
+    displayName: contentType!.displayName || contentType!.info.displayName,
+    singularName: contentType!.singularName,
+    pluralName: contentType!.pluralName,
+    kind: contentType!.kind,
   });
 
   if (!options.defaultBuilder) {
@@ -233,16 +233,16 @@ export const editContentType = async (
   return updatedContentType;
 };
 
-export const deleteContentTypes = async (UIDs: Common.UID.ContentType[]) => {
+export const deleteContentTypes = async (uids: Common.UID.ContentType[]) => {
   const builder = createBuilder();
   const apiHandler = strapi.plugin('content-type-builder').service('api-handler');
 
-  for (const uid of UIDs) {
+  for (const uid of uids) {
     await deleteContentType(uid, builder);
   }
 
   await builder.writeFiles();
-  for (const uid of UIDs) {
+  for (const uid of uids) {
     try {
       await apiHandler.clear(uid);
     } catch (error) {
@@ -279,12 +279,3 @@ export const deleteContentType = async (
 
   return contentType;
 };
-
-// export default () => ({
-//   createContentType,
-//   editContentType,
-//   deleteContentType,
-//   formatContentType,
-//   createContentTypes,
-//   deleteContentTypes,
-// });
