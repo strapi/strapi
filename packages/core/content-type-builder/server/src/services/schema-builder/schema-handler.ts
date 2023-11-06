@@ -25,7 +25,13 @@ export default function createSchemaHandler(infos: Infos) {
     uid,
     dir,
     filename,
-    schema,
+    schema:
+      schema ||
+      ({
+        info: {},
+        options: {},
+        attributes: {},
+      } as Schema.ContentType),
   };
 
   const state = _.cloneDeep(initialState);
@@ -134,7 +140,7 @@ export default function createSchemaHandler(infos: Infos) {
 
       // delete old configurable attributes
       for (const key in this.schema.attributes) {
-        if (isConfigurable(this.schema.attributes[key])) {
+        if (isConfigurable((this.schema.attributes as any)[key])) {
           this.deleteAttribute(key);
         }
       }
@@ -247,7 +253,7 @@ export default function createSchemaHandler(infos: Infos) {
         await fse.writeJSON(
           filePath,
           {
-            kind: (state.schema as any).kind,
+            kind: state.schema.kind,
             collectionName: state.schema.collectionName,
             info: state.schema.info,
             options: state.schema.options,
