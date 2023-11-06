@@ -1,5 +1,6 @@
-// @ts-expect-error not converted yet
 import { AuthResponse } from './pages/AuthResponse';
+
+import type { SettingsMenu } from '../../../admin/src/constants';
 
 export const ADMIN_PERMISSIONS_EE = {
   settings: {
@@ -32,7 +33,7 @@ export const ROUTES_EE = [
 // TODO: the constants.js file is imported before the React application is setup and
 // therefore `window.strapi` might not exist at import-time. We should probably define
 // which constant is available at which stage of the application lifecycle.
-export const SETTINGS_LINKS_EE = () => ({
+export const SETTINGS_LINKS_EE = (): SettingsMenu => ({
   global: [
     ...(window.strapi.features.isEnabled(window.strapi.features.SSO)
       ? [

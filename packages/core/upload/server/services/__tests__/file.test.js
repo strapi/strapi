@@ -72,7 +72,7 @@ describe('file', () => {
         plugins: {
           upload: {
             provider,
-          }
+          },
         },
         config: {
           get: jest.fn((key) => {

@@ -26,8 +26,7 @@ import { PrivateRoute } from './components/PrivateRoute';
 import { ADMIN_PERMISSIONS_CE, ACTION_SET_ADMIN_PERMISSIONS } from './constants';
 import { useConfiguration } from './contexts/configuration';
 import { useEnterprise } from './hooks/useEnterprise';
-// @ts-expect-error not converted yet
-import AuthPage from './pages/AuthPage';
+import { AuthPage } from './pages/Auth/AuthPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { UseCasePage } from './pages/UseCasePage';
 import { createRoute } from './utils/createRoute';
@@ -53,7 +52,7 @@ export const App = () => {
       defaultValue: ADMIN_PERMISSIONS_CE,
     }
   );
-  const routes = useEnterprise<StrapiRoute[] | null, StrapiRoute[], StrapiRoute[]>(
+  const routes = useEnterprise(
     ROUTES_CE,
     async () => (await import('../../ee/admin/src/constants')).ROUTES_EE,
     {
@@ -171,8 +170,6 @@ export const App = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toggleNotification, updateProjectSettings]);
 
-  const setHasAdmin = (hasAdmin: boolean) => setState((prev) => ({ ...prev, hasAdmin }));
-
   const trackingInfo = React.useMemo(
     () => ({
       uuid,
@@ -196,9 +193,7 @@ export const App = () => {
           {authRoutes}
           <Route
             path="/auth/:authType"
-            render={(routerProps) => (
-              <AuthPage {...routerProps} setHasAdmin={setHasAdmin} hasAdmin={hasAdmin} />
-            )}
+            render={(routerProps) => <AuthPage {...routerProps} hasAdmin={hasAdmin} />}
             exact
           />
           <PrivateRoute path="/usecase" component={UseCasePage} />
