@@ -1,4 +1,8 @@
-export const blocksData = [
+/* eslint-disable check-file/filename-naming-convention */
+
+import { type Attribute } from '@strapi/types';
+
+export const blocksData: Attribute.BlocksValue = [
   {
     type: 'paragraph',
     children: [
@@ -18,7 +22,6 @@ export const blocksData = [
   },
   {
     type: 'code',
-    syntax: 'javascript',
     children: [
       {
         type: 'text',

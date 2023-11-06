@@ -13,9 +13,12 @@ jest.mock('@strapi/helper-plugin', () => ({
   useLibrary: () => ({ components: { 'media-library': jest.fn() } }),
 }));
 
-const setup = (props) =>
+type BlocksEditorProps = React.ComponentProps<typeof BlocksEditor>;
+
+const setup = (props: Partial<BlocksEditorProps>) =>
   render(
     <BlocksEditor
+      attribute={{ type: 'blocks' }}
       intlLabel={{ id: 'blocks', defaultMessage: 'blocks type' }}
       name="blocks-editor"
       hint="blocks description"
@@ -37,7 +40,7 @@ const setup = (props) =>
 
 describe('BlocksEditor', () => {
   it('should render blocks without error', async () => {
-    setup({ value: null });
+    setup({ value: undefined });
 
     expect(screen.getByText('blocks type')).toBeInTheDocument();
     expect(screen.getByText('blocks description')).toBeInTheDocument();
@@ -55,14 +58,17 @@ describe('BlocksEditor', () => {
   it('should render blocks with data', () => {
     setup({ value: blocksData });
 
+    // eslint-disable-next-line testing-library/no-node-access
     expect(screen.getByText('This is bold text').parentElement).toHaveStyle({
       'font-weight': 600,
     });
 
+    // eslint-disable-next-line testing-library/no-node-access
     expect(screen.getByText('This is deleted text').parentElement).toHaveStyle({
       'text-decoration': 'line-through',
     });
 
+    // eslint-disable-next-line testing-library/no-node-access
     expect(screen.getByText('click me').parentElement).toHaveStyle({
       'font-style': 'italic',
     });
