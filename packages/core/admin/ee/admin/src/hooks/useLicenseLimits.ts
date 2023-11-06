@@ -3,6 +3,38 @@ import * as React from 'react';
 import { useFetchClient } from '@strapi/helper-plugin';
 import { useQuery } from 'react-query';
 
+interface FeatureSSO {
+  name: 'sso';
+  options: undefined;
+}
+
+interface FeatureAuditLogs {
+  name: 'audit-logs';
+  options: undefined;
+}
+
+interface FeatureReviewWorkflows {
+  name: 'review-workflows';
+  options: {
+    numberOfWorkflows: number;
+    stagesPerWorkflow: number;
+  };
+}
+
+type Feature = FeatureSSO | FeatureAuditLogs | FeatureReviewWorkflows;
+
+// TODO: make this an API contract
+interface LicenseLimitResponse {
+  enforcementUserCount?: number;
+  currentActiveUserCount?: number;
+  permittedSeats?: number | null;
+  shouldNotify?: boolean;
+  shouldStopCreate?: boolean;
+  licenseLimitStatus?: 'OVER_LIMIT' | 'AT_LIMIT' | null;
+  isHostedOnStrapiCloud?: boolean;
+  features?: Feature[];
+}
+
 export function useLicenseLimits({ enabled } = { enabled: true }) {
   const { get } = useFetchClient();
   const { data, isError, isLoading } = useQuery(
@@ -10,7 +42,7 @@ export function useLicenseLimits({ enabled } = { enabled: true }) {
     async () => {
       const {
         data: { data },
-      } = await get('/admin/license-limit-information');
+      } = await get<{ data: LicenseLimitResponse }>('/admin/license-limit-information');
 
       return data;
     },
@@ -25,7 +57,7 @@ export function useLicenseLimits({ enabled } = { enabled: true }) {
   const license = React.useMemo(() => data ?? {}, [data]);
 
   const getFeature = React.useCallback(
-    (name) => {
+    (name: Feature['name']) => {
       const feature = (license?.features ?? []).find((feature) => feature.name === name);
 
       return feature?.options ?? {};

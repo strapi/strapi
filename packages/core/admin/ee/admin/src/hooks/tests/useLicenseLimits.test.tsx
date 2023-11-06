@@ -1,4 +1,4 @@
-import React from 'react';
+/* eslint-disable check-file/filename-naming-convention */
 
 import { configureStore } from '@reduxjs/toolkit';
 import { fixtures } from '@strapi/admin-test-utils';
@@ -19,8 +19,8 @@ const server = setupServer(
             attribute: 1,
 
             features: [
-              { name: 'without-options' },
-              { name: 'with-options', options: { something: true } },
+              { name: 'audit-logs' },
+              { name: 'review-workflows', options: { something: true } },
             ],
           },
         })
@@ -29,6 +29,7 @@ const server = setupServer(
   ]
 );
 
+// @ts-expect-error this is fine
 const setup = (...args) =>
   renderHook(() => useLicenseLimits(...args), {
     wrapper({ children }) {
@@ -84,13 +85,13 @@ describe('useLicenseLimits', () => {
   it('exposes a getFeature() method as a shortcut to feature options', async () => {
     const { result } = setup();
 
-    expect(result.current.getFeature('without-options')).toStrictEqual({});
-    expect(result.current.getFeature('with-options')).toStrictEqual({});
+    expect(result.current.getFeature('audit-logs')).toStrictEqual({});
+    expect(result.current.getFeature('review-workflows')).toStrictEqual({});
 
     await waitFor(() => expect(result.current.isLoading).toBeFalsy());
 
-    expect(result.current.getFeature('without-options')).toStrictEqual({});
-    expect(result.current.getFeature('with-options')).toStrictEqual({ something: true });
+    expect(result.current.getFeature('audit-logs')).toStrictEqual({});
+    expect(result.current.getFeature('review-workflows')).toStrictEqual({ something: true });
   });
 
   it('does return an empty object of enabled == false', async () => {
