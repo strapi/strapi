@@ -1,12 +1,14 @@
 import EE from '@strapi/strapi/dist/utils/ee';
+import { Common } from '@strapi/types';
 
-export const enableFeatureMiddleware = (featureName: string) => (ctx: any, next: any) => {
-  if (EE.features.isEnabled(featureName)) {
-    return next();
-  }
+export const enableFeatureMiddleware: Common.MiddlewareFactory =
+  (featureName: string) => (ctx, next) => {
+    if (EE.features.isEnabled(featureName)) {
+      return next();
+    }
 
-  ctx.status = 404;
-};
+    ctx.status = 404;
+  };
 
 export default {
   enableFeatureMiddleware,

@@ -1,5 +1,4 @@
 import { errors } from '@strapi/utils';
-import { ValidationError as YupValidationError } from 'yup';
 
 // TODO replace SettingsFile with type from the upload plugin ?
 interface Logo {
@@ -63,7 +62,7 @@ export declare namespace UpdateProjectSettings {
   export interface Response {
     menuLogo: SettingsFile;
     authLogo: SettingsFile;
-    error?: errors.ApplicationError | YupValidationError;
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
 

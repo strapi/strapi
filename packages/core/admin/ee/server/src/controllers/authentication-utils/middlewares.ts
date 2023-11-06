@@ -1,11 +1,11 @@
-import '@strapi/types';
+import { Common } from '@strapi/types';
 import passport from 'koa-passport';
 import { getService } from '../../utils';
 import utils from './utils';
 
 const defaultConnectionError = () => new Error('Invalid connection payload');
 
-export const authenticate = async (ctx: any, next: any) => {
+export const authenticate: Common.MiddlewareHandler = async (ctx, next) => {
   const {
     params: { provider },
   } = ctx;
@@ -33,63 +33,65 @@ export const authenticate = async (ctx: any, next: any) => {
   })(ctx, next);
 };
 
-const existingUserScenario = (ctx: any, next: any) => async (user: any, provider: any) => {
-  const redirectUrls = utils.getPrefixedRedirectUrls();
+const existingUserScenario: Common.MiddlewareHandler =
+  (ctx, next) => async (user: any, provider: any) => {
+    const redirectUrls = utils.getPrefixedRedirectUrls();
 
-  if (!user.isActive) {
-    strapi.eventHub.emit('admin.auth.error', {
-      error: new Error(`Deactivated user tried to login (${user.id})`),
+    if (!user.isActive) {
+      strapi.eventHub.emit('admin.auth.error', {
+        error: new Error(`Deactivated user tried to login (${user.id})`),
+        provider,
+      });
+      return ctx.redirect(redirectUrls.error);
+    }
+
+    ctx.state.user = user;
+    return next();
+  };
+
+const nonExistingUserScenario: Common.MiddlewareHandler =
+  (ctx, next) => async (profile: any, provider: any) => {
+    const { email, firstname, lastname, username } = profile;
+    const redirectUrls = utils.getPrefixedRedirectUrls();
+    const adminStore = await utils.getAdminStore();
+    const { providers } = (await adminStore.get({ key: 'auth' })) as any;
+
+    // We need at least the username or the firstname/lastname combination to register a new user
+    const isMissingRegisterFields = !username && (!firstname || !lastname);
+
+    if (!providers.autoRegister || !providers.defaultRole || isMissingRegisterFields) {
+      strapi.eventHub.emit('admin.auth.error', { error: defaultConnectionError(), provider });
+      return ctx.redirect(redirectUrls.error);
+    }
+
+    const defaultRole = await getService('role').findOne({ id: providers.defaultRole });
+
+    // If the default role has been misconfigured, redirect with an error
+    if (!defaultRole) {
+      strapi.eventHub.emit('admin.auth.error', { error: defaultConnectionError(), provider });
+      return ctx.redirect(redirectUrls.error);
+    }
+
+    // Register a new user with the information given by the provider and login with it
+    ctx.state.user = await getService('user').create({
+      email,
+      username,
+      firstname,
+      lastname,
+      roles: [defaultRole.id],
+      isActive: true,
+      registrationToken: null,
+    });
+
+    strapi.eventHub.emit('admin.auth.autoRegistration', {
+      user: ctx.state.user,
       provider,
     });
-    return ctx.redirect(redirectUrls.error);
-  }
 
-  ctx.state.user = user;
-  return next();
-};
+    return next();
+  };
 
-const nonExistingUserScenario = (ctx: any, next: any) => async (profile: any, provider: any) => {
-  const { email, firstname, lastname, username } = profile;
-  const redirectUrls = utils.getPrefixedRedirectUrls();
-  const adminStore = await utils.getAdminStore();
-  const { providers } = (await adminStore.get({ key: 'auth' })) as any;
-
-  // We need at least the username or the firstname/lastname combination to register a new user
-  const isMissingRegisterFields = !username && (!firstname || !lastname);
-
-  if (!providers.autoRegister || !providers.defaultRole || isMissingRegisterFields) {
-    strapi.eventHub.emit('admin.auth.error', { error: defaultConnectionError(), provider });
-    return ctx.redirect(redirectUrls.error);
-  }
-
-  const defaultRole = await getService('role').findOne({ id: providers.defaultRole });
-
-  // If the default role has been misconfigured, redirect with an error
-  if (!defaultRole) {
-    strapi.eventHub.emit('admin.auth.error', { error: defaultConnectionError(), provider });
-    return ctx.redirect(redirectUrls.error);
-  }
-
-  // Register a new user with the information given by the provider and login with it
-  ctx.state.user = await getService('user').create({
-    email,
-    username,
-    firstname,
-    lastname,
-    roles: [defaultRole.id],
-    isActive: true,
-    registrationToken: null,
-  });
-
-  strapi.eventHub.emit('admin.auth.autoRegistration', {
-    user: ctx.state.user,
-    provider,
-  });
-
-  return next();
-};
-
-export const redirectWithAuth = (ctx: any) => {
+export const redirectWithAuth: Common.MiddlewareHandler = (ctx) => {
   const {
     params: { provider },
   } = ctx;

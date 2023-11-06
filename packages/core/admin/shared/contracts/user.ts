@@ -1,5 +1,4 @@
 import { errors } from '@strapi/utils';
-import { ValidationError as YupValidationError } from 'yup';
 
 import type { SanitizedAdminUser, AdminUserCreationPayload } from './shared';
 import { Entity } from '@strapi/types';
@@ -15,7 +14,7 @@ export declare namespace Create {
 
   export interface Response {
     data: SanitizedAdminUser;
-    error?: errors.ApplicationError | YupValidationError;
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
 
@@ -76,7 +75,7 @@ export declare namespace Update {
 
   export interface Response {
     data: SanitizedAdminUser;
-    error?: errors.ApplicationError | YupValidationError;
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
 
@@ -112,6 +111,6 @@ export declare namespace DeleteMany {
 
   export interface Response {
     data: SanitizedAdminUser[];
-    error?: errors.ApplicationError | YupValidationError;
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }

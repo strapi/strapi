@@ -1,5 +1,4 @@
 import { errors } from '@strapi/utils';
-import { ValidationError as YupValidationError } from 'yup';
 
 import type { ApiToken } from '../../server/src/services/api-token';
 
@@ -17,7 +16,7 @@ export declare namespace Create {
 
   export interface Response {
     data: ApiToken;
-    error?: errors.ApplicationError | YupValidationError;
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
 
@@ -89,6 +88,6 @@ export declare namespace Update {
 
   export interface Response {
     data: ApiTokenResponse;
-    error?: errors.ApplicationError | YupValidationError;
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }

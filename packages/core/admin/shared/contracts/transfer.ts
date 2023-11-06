@@ -1,5 +1,4 @@
 import { errors } from '@strapi/utils';
-import { ValidationError as YupValidationError } from 'yup';
 
 import type {
   SanitizedTransferToken,
@@ -81,7 +80,7 @@ export declare namespace TokenCreate {
 
   export interface Response {
     data: TransferToken;
-    error?: errors.ApplicationError | YupValidationError;
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
 

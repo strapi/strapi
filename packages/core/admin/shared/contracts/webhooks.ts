@@ -1,9 +1,8 @@
 import { errors } from '@strapi/utils';
-import { ValidationError as YupValidationError } from 'yup';
 import type { Webhook } from '@strapi/types';
 
 /**
- * /listWebhooks - List all webhooks
+ * GET /webhooks - List all webhooks
  */
 export declare namespace ListWebhooks {
   export interface Request {
@@ -18,7 +17,7 @@ export declare namespace ListWebhooks {
 }
 
 /**
- * /getWebhook
+ * GET /webhooks/:id - Get a webhook
  */
 export declare namespace GetWebhook {
   export interface Request {
@@ -37,7 +36,7 @@ export declare namespace GetWebhook {
 }
 
 /**
- * /createWebhook - Create a webhook
+ * POST /webhooks - Create a webhook
  */
 export declare namespace CreateWebhook {
   export interface Request {
@@ -47,12 +46,12 @@ export declare namespace CreateWebhook {
 
   export interface Response {
     data: Webhook;
-    error?: errors.ApplicationError | YupValidationError;
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
 
 /**
- * /updateWebhook - Update a webhook
+ * PUT /webhooks/:id - Update a webhook
  */
 export declare namespace UpdateWebhook {
   export interface Request {
@@ -66,12 +65,12 @@ export declare namespace UpdateWebhook {
 
   export interface Response {
     data: Webhook;
-    error?: errors.ApplicationError | YupValidationError;
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
 
 /**
- * /deleteWebhook - Delete a webhook
+ * DELETE /webhooks/:id - Delete a webhook
  */
 export declare namespace DeleteWebhook {
   export interface Request {
@@ -90,7 +89,7 @@ export declare namespace DeleteWebhook {
 }
 
 /**
- * /deleteWebhooks - Delete multiple webhooks
+ * POST /webhooks/batch-delete' - Delete multiple webhooks
  */
 export declare namespace DeleteWebhooks {
   export interface Request {
@@ -107,7 +106,7 @@ export declare namespace DeleteWebhooks {
 }
 
 /**
- * /triggerWebhook - Trigger a webhook
+ * POST /webhooks/:id/trigger - Trigger a webhook
  */
 export declare namespace TriggerWebhook {
   export interface Request {
