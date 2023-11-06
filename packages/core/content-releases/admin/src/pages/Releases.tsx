@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 import { Button, Main, HeaderLayout } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
