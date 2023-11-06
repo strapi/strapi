@@ -8,7 +8,14 @@ export type ParamsMap<TContentTypeUID extends Common.UID.ContentType = Common.UI
   findMany: Params.FindMany<TContentTypeUID>;
   findPage: Params.FindPage<TContentTypeUID>;
   findFirst: Params.FindFirst<TContentTypeUID>;
-  // ...
+  delete: Params.Delete<TContentTypeUID>;
+  deleteMany: Params.DeleteMany<TContentTypeUID>;
+  create: Params.Create<TContentTypeUID>;
+  clone: Params.Clone<TContentTypeUID>;
+  update: Params.Update<TContentTypeUID>;
+  count: Params.Count<TContentTypeUID>;
+  publish: Params.Publish<TContentTypeUID>;
+  unpublish: Params.Unpublish<TContentTypeUID>;
 };
 
 export interface Context<

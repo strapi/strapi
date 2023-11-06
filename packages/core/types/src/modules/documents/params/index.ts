@@ -40,7 +40,7 @@ export type FindOne<TContentTypeUID extends Common.UID.ContentType> = Params.Pic
 
 export type Delete<TContentTypeUID extends Common.UID.ContentType> = Params.Pick<
   TContentTypeUID,
-  'fields' | 'populate'
+  'fields' | 'populate' | 'filters'
 >;
 
 export type DeleteMany<TContentTypeUID extends Common.UID.ContentType> = Params.Pick<
@@ -81,3 +81,9 @@ export type Count<TContentTypeUID extends Common.UID.ContentType> = Params.Pick<
   | 'publicationState'
   | 'plugin'
 >;
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export type Publish<TContentTypeUID extends Common.UID.ContentType> = Record<string, any>;
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export type Unpublish<TContentTypeUID extends Common.UID.ContentType> = Record<string, any>;

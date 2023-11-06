@@ -1,5 +1,5 @@
 import type { Common, Strapi, Schema, Shared, Documents } from '@strapi/types';
-import { convertQueryParams, mapAsync } from '@strapi/utils';
+import { convertQueryParams } from '@strapi/utils';
 import type { Database } from '@strapi/database';
 
 import { isArray } from 'lodash/fp';
@@ -21,9 +21,9 @@ const { transformParamsToQuery } = convertQueryParams;
 
 /**
  * TODO: TESTS - In progress
- * TODO: Components
+ * TODO: Components - In progress
  * TODO: Entity Validation
- * TODO: Lifecycles
+ * TODO: Lifecycles - In progress
  *        Plugin extensions
  * TODO: D&P
  * TODO: i18n
@@ -95,6 +95,9 @@ const createDocumentService = ({
   },
 
   // NOTE: What happens if user doesn't provide specific publications state and locale to delete?
+  // By default delete will remove all versions of the document
+  // You need to specify the locale and publication state to delete a specific version
+  // Should forbid deleting a draft version without deleting the published version
   async delete(uid, documentId, params) {
     const query = transformParamsToQuery(uid, params || ({} as any));
 
@@ -219,35 +222,40 @@ const createDocumentService = ({
     });
   },
 
+  // TODO: Handle relations so they target the published version
   async publish(uid, documentId, params) {
-    // const { locales } = params || { locales: [] };
+    // @ts-expect-error - TODO: Add typings
+    const { filters } = params || {};
 
-    // Find all version of documents of the requested locales
-    const draftVersions = await db.query(uid).findMany({
-      where: {
-        documentId,
-        publishedAt: null,
-        // locales: { $in: locales },
+    // Clone every draft version to be published
+    this.clone(uid, documentId, {
+      ...(params || {}),
+      filters: {
+        ...filters,
+        publishedAt: { $ne: null },
+      },
+      // @ts-expect-error - Generic type does not have publishedAt attribute by default
+      data: { publishedAt: new Date() },
+    });
+
+    // TODO: Return actual count
+    return 0;
+  },
+
+  async unpublish(uid, documentId, params) {
+    // @ts-expect-error - TODO: Add typings
+    const { filters } = params || {};
+
+    this.delete(uid, documentId, {
+      ...(params || {}),
+      filters: {
+        ...filters,
+        publishedAt: { $ne: null },
       },
     });
 
-    // TODO: Throw error?
-    if (!draftVersions.length) {
-      return null;
-    }
-
-    await strapi.db?.transaction(async () =>
-      // Clone every draft version to be published
-      mapAsync(draftVersions, (draftVersion: any) => {
-        return this.clone(uid, draftVersion.id, {
-          ...params,
-          // @ts-expect-error - Generic type does not have publishedAt attribute by default
-          data: { publishedAt: new Date() },
-        });
-      })
-    );
-
-    return draftVersions.length;
+    // TODO: Return actual count
+    return 0;
   },
 });
 

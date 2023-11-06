@@ -1,5 +1,5 @@
 import { Common } from '../..';
-import { ID, DocumentService } from './document-service';
+import { ID, type DocumentService } from './document-service';
 import type * as Params from './params';
 import type * as Middleware from './middleware';
 
@@ -7,15 +7,17 @@ export type RepositoryInstance<
   TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType
 > = {
   findOne: (id: ID, params?: Params.FindOne<TContentTypeUID>) => any;
-  findMany: (params?: any) => any;
-  // findPage: (params?: any) => any;
-  // findFirst: (params?: any) => any;
-  // create: (params: any) => any;
-  // delete: (documentId: any, params: any) => any;
-  // deleteMany: (params: any) => any;
-  // clone: (documentId: any, params: any) => any;
-  // publish: (documentId: any, params: any) => any;
-  // unpublish: OmitUid<DocumentService['unpublish']>;
+  findMany: (params?: Params.FindMany<TContentTypeUID>) => any;
+  findPage: (params?: Params.FindPage<TContentTypeUID>) => any;
+  findFirst: (params?: Params.FindFirst<TContentTypeUID>) => any;
+  delete: (documentId: ID, params: Params.Delete<TContentTypeUID>) => any;
+  deleteMany: (params: Params.DeleteMany<TContentTypeUID>) => any;
+  create: (params: Params.Create<TContentTypeUID>) => any;
+  clone: (documentId: ID, params: Params.Clone<TContentTypeUID>) => any;
+  update: (documentId: ID, params: Params.Update<TContentTypeUID>) => any;
+  count: (params: Params.Count<TContentTypeUID>) => any;
+  publish: (documentId: ID, params: Params.Publish<TContentTypeUID>) => any;
+  unpublish(documentId: ID, params: Params.Unpublish<TContentTypeUID>): any;
 
   /** Add a middleware for a specific uid
    *  @example
@@ -68,5 +70,5 @@ export type Repository = {
   ) => Repository;
 } & DocumentService;
 
-export { ID } from './document-service';
+export { ID, DocumentService as Service } from './document-service';
 export type * as Middleware from './middleware';

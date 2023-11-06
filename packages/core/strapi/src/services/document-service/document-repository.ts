@@ -5,7 +5,6 @@ import createMiddlewareManager from './middlewares';
 /**
  * TODO:
  *  - Transactions
- *  - _executeMiddlewares
  *
  * Repository to :
  * - Access documents via actions (findMany, findOne, create, update, delete, ...)
@@ -33,33 +32,87 @@ export const createDocumentRepository = (
     uid: TContentTypeUID
   ): Documents.RepositoryInstance<TContentTypeUID> {
     return {
-      async findOne(id, params = {}) {
+      async findMany(params = {} as any) {
         return middlewareManager.run(
-          {
-            action: 'findOne',
-            uid,
-            params,
-            options: { id },
-          },
-          ({ params }) => documents.findOne(uid, id, params)
-        );
-      },
-
-      async findMany(params = {}) {
-        return middlewareManager.run(
-          {
-            action: 'findMany',
-            uid,
-            params,
-            options: {},
-          },
+          { action: 'findMany', uid, params, options: {} },
           ({ params }) => documents.findMany(uid, params)
         );
       },
 
-      // async create(params = {} as any) {
-      //   return documents.create(uid, params);
-      // },
+      async findPage(params = {} as any) {
+        return middlewareManager.run(
+          { action: 'findPage', uid, params, options: {} },
+          ({ params }) => documents.findPage(uid, params)
+        );
+      },
+
+      async findFirst(params = {} as any) {
+        return middlewareManager.run(
+          { action: 'findFirst', uid, params, options: {} },
+          ({ params }) => documents.findFirst(uid, params)
+        );
+      },
+
+      async findOne(id: string, params = {} as any) {
+        return middlewareManager.run(
+          { action: 'findOne', uid, params, options: { id } },
+          ({ params }) => documents.findOne(uid, id, params)
+        );
+      },
+
+      async delete(id: string, params = {} as any) {
+        return middlewareManager.run(
+          { action: 'delete', uid, params, options: { id } },
+          ({ params }) => documents.delete(uid, id, params)
+        );
+      },
+
+      async deleteMany(params = {} as any) {
+        return middlewareManager.run(
+          { action: 'deleteMany', uid, params, options: {} },
+          ({ params }) => documents.deleteMany(uid, params)
+        );
+      },
+
+      async create(params = {} as any) {
+        return middlewareManager.run({ action: 'create', uid, params, options: {} }, ({ params }) =>
+          documents.create(uid, params)
+        );
+      },
+
+      async clone(id: string, params = {} as any) {
+        return middlewareManager.run(
+          { action: 'clone', uid, params, options: { id } },
+          ({ params }) => documents.clone(uid, id, params)
+        );
+      },
+
+      async update(id: string, params = {} as any) {
+        return middlewareManager.run(
+          { action: 'update', uid, params, options: { id } },
+          ({ params }) => documents.update(uid, id, params)
+        );
+      },
+
+      async count(params = {} as any) {
+        return middlewareManager.run({ action: 'count', uid, params, options: {} }, ({ params }) =>
+          documents.count(uid, params)
+        );
+      },
+
+      async publish(id: string, params = {} as any) {
+        return middlewareManager.run(
+          { action: 'publish', uid, params, options: { id } },
+          ({ params }) => documents.publish(uid, id, params)
+        );
+      },
+
+      async unpublish(id: string, params = {} as any) {
+        return middlewareManager.run(
+          { action: 'unpublish', uid, params, options: { id } },
+          ({ params }) => documents.unpublish(uid, id, params)
+        );
+      },
 
       with(params: object) {
         return createDocumentRepository(strapi, {

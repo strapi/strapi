@@ -113,9 +113,21 @@ export interface DocumentService {
     params?: TParams
   ): Promise<number | null>;
 
-  publish<TContentTypeUID extends Common.UID.ContentType>(
+  publish<
+    TContentTypeUID extends Common.UID.ContentType,
+    TParams extends Params.Publish<TContentTypeUID>
+  >(
     uid: TContentTypeUID,
-    documentId: Params.Attribute.ID,
-    params?: { locales: string[] }
+    documentId: ID,
+    params?: TParams
+  ): Promise<number | null>;
+
+  unpublish<
+    TContentTypeUID extends Common.UID.ContentType,
+    TParams extends Params.Unpublish<TContentTypeUID>
+  >(
+    uid: TContentTypeUID,
+    documentId: ID,
+    params?: TParams
   ): Promise<number | null>;
 }
