@@ -1,35 +1,42 @@
-import React from 'react';
-
 import { darkTheme, lightTheme } from '@strapi/design-system';
-import { AppInfosContext, StrapiAppProvider, TrackingProvider } from '@strapi/helper-plugin';
+import {
+  AppInfosContext,
+  StrapiAppProvider,
+  StrapiAppProviderProps,
+  TrackingProvider,
+} from '@strapi/helper-plugin';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createMemoryHistory } from 'history';
+import { History, createMemoryHistory } from 'history';
 import { Route, Router } from 'react-router-dom';
 
-import { SettingsPage } from '..';
 import { Theme } from '../../../components/Theme';
 import { ThemeToggleProvider } from '../../../components/ThemeToggleProvider';
 import { useSettingsMenu } from '../../../hooks/useSettingsMenu';
+import { SettingsPage } from '../SettingsPage';
 
 jest.mock('../../../hooks/useSettingsMenu');
 
 jest.mock('react-intl', () => ({
-  FormattedMessage: ({ id }) => id,
+  FormattedMessage: ({ id }: { id: string }) => id,
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => id) }),
 }));
 
-jest.mock('../pages/ApplicationInfosPage', () => () => {
-  return <h1>App infos</h1>;
-});
+jest.mock(
+  '../pages/ApplicationInfosPage',
+  () =>
+    function () {
+      return <h1>App infos</h1>;
+    }
+);
 
-const appInfos = { shouldUpdateStrapi: false };
-
-const makeApp = (history, settings) => (
+const makeApp = (history: History, settings: StrapiAppProviderProps['settings']) => (
   <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
     <TrackingProvider>
       <Theme>
-        <AppInfosContext.Provider value={appInfos}>
+        <AppInfosContext.Provider
+          value={{ shouldUpdateStrapi: false, setUserDisplayName: () => {}, userDisplayName: '' }}
+        >
           <StrapiAppProvider
             settings={settings}
             plugins={{}}
@@ -68,6 +75,7 @@ describe('ADMIN | pages | SettingsPage', () => {
 
     const { container } = render(App);
 
+    // eslint-disable-next-line testing-library/no-node-access
     expect(container.firstChild).toMatchInlineSnapshot(`
       .c4 {
         font-weight: 600;
@@ -237,6 +245,7 @@ describe('ADMIN | pages | SettingsPage', () => {
   });
 
   it('should create the plugins routes correctly', async () => {
+    // @ts-expect-error - mocking for test
     useSettingsMenu.mockImplementation(() => ({
       isLoading: false,
       menu: [
@@ -286,7 +295,6 @@ describe('ADMIN | pages | SettingsPage', () => {
           {
             id: 'internationalization',
             intlLabel: { id: 'i18n.plugin.name', defaultMessage: 'Internationalization' },
-            isDisplayed: true,
             permissions: [],
             to: '/settings/internationalization',
             Component: () => ({ default: () => <div>i18n settings</div> }),
@@ -300,7 +308,6 @@ describe('ADMIN | pages | SettingsPage', () => {
           {
             id: 'email-settings',
             intlLabel: { id: 'email', defaultMessage: 'email' },
-            isDisplayed: true,
             permissions: [],
             to: '/settings/email-settings',
             Component: () => ({ default: () => <div>email settings</div> }),

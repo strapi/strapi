@@ -21,7 +21,7 @@ interface MenuItem extends Pick<LinkProps, 'to'> {
    */
   permissions: Permission[];
   notificationsCount?: number;
-  Component: ComponentModule;
+  Component?: ComponentModule;
   exact?: boolean;
 }
 

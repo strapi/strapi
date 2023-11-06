@@ -102,7 +102,6 @@ const useSettingsMenu = (): {
 
       return {
         ...link,
-        // @ts-expect-error – TODO: fix this type error
         permissions: permissions.settings?.[link.id as keyof PermissionMap['settings']]?.main ?? [],
       } satisfies SettingsMenuLinkWithPermissions;
     },

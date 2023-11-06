@@ -28,10 +28,25 @@ describe('ConfigurationProvider', () => {
 
       return (
         <div>
-          <button type="button" onClick={() => updateProjectSettings({ menuLogo: 'michka.jpg' })}>
+          <button
+            type="button"
+            onClick={() =>
+              updateProjectSettings({
+                menuLogo: {
+                  name: 'michka.jpg',
+                  width: 1,
+                  height: 1,
+                  ext: 'jpg',
+                  size: 2,
+                  url: 'michka.jpg',
+                },
+                authLogo: null,
+              })
+            }
+          >
             Change logo
           </button>
-          <div>{menu.custom ?? menu.default}</div>
+          <div>{menu.custom?.url ?? menu.default}</div>
         </div>
       );
     };

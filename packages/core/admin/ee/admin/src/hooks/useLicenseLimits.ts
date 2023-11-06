@@ -25,10 +25,6 @@ function useLicenseLimits({ enabled }: UseLicenseLimitsArgs = { enabled: true })
     }
   );
 
-  // this needs memoization, because a default value of `{}`
-  // would lead to infinite rendering loops, when used as
-  // effect dependency
-
   type FeatureNames = GetLicenseLimitInformation.Response['data']['features'][number]['name'];
 
   const getFeature = React.useCallback(
