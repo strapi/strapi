@@ -91,7 +91,6 @@ declare module 'slate' {
   interface CustomTypes {
     Editor: BaseEditor & ReactEditor & HistoryEditor & LinkEditor;
     Element: Attribute.BlockNode<'all'>;
-    // Descendant: Attribute.BlockNode<'inline'>;
     Text: {
       type: 'text';
       text: string;
