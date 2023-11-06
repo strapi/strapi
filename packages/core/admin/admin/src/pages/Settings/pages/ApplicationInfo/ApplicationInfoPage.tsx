@@ -111,8 +111,7 @@ const ApplicationInfoPage = () => {
   }
 
   const isSaveDisabled =
-    logos.auth.custom?.url === serverLogos.auth.custom?.url &&
-    logos.menu.custom?.url === serverLogos.menu.custom?.url;
+    logos.auth.custom === serverLogos.auth.custom && logos.menu.custom === serverLogos.menu.custom;
 
   return (
     <Layout>

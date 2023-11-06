@@ -2,23 +2,33 @@ import { createContext } from '@radix-ui/react-context';
 import { AxiosError } from 'axios';
 import { UseMutateFunction } from 'react-query';
 
-import { GetProjectSettings, UpdateProjectSettings } from '../../../shared/contracts/admin';
+import { UpdateProjectSettings } from '../../../shared/contracts/admin';
 
 export interface UpdateProjectSettingsBody {
-  authLogo: (UpdateProjectSettings.Request['body']['authLogo'] & { rawFile?: File }) | null;
-  menuLogo: (UpdateProjectSettings.Request['body']['menuLogo'] & { rawFile?: File }) | null;
+  authLogo:
+    | ((UpdateProjectSettings.Request['body']['authLogo'] | ConfigurationLogo['custom']) & {
+        rawFile?: File;
+      })
+    | null;
+  menuLogo:
+    | ((UpdateProjectSettings.Request['body']['menuLogo'] | ConfigurationLogo['custom']) & {
+        rawFile?: File;
+      })
+    | null;
+}
+
+interface ConfigurationLogo {
+  custom?: {
+    name?: string;
+    url?: string;
+  };
+  default: string;
 }
 
 export interface ConfigurationContextValue {
   logos: {
-    auth: {
-      custom?: GetProjectSettings.Response['authLogo'];
-      default: string;
-    };
-    menu: {
-      custom?: GetProjectSettings.Response['menuLogo'];
-      default: string;
-    };
+    auth: ConfigurationLogo;
+    menu: ConfigurationLogo;
   };
   showTutorials: boolean;
   showReleaseNotification: boolean;

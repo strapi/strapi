@@ -35,8 +35,12 @@ describe('ConfigurationProvider', () => {
   it('should not crash', async () => {
     const { getByText, findByText } = render(
       <ConfigurationProvider
-        authLogo="strapi.jpg"
-        menuLogo="strapi.jpg"
+        authLogo={{
+          default: 'strapi.jpg',
+        }}
+        menuLogo={{
+          default: 'strapi.jpg',
+        }}
         showReleaseNotification={false}
         showTutorials={false}
       >
@@ -52,8 +56,12 @@ describe('ConfigurationProvider', () => {
   it('should use the default logo and update customMenuLogo with setCustomMenuLogo', async () => {
     const { user, getByRole, findByText, getByText } = render(
       <ConfigurationProvider
-        authLogo="strapi-auth.jpg"
-        menuLogo="strapi-menu.jpg"
+        authLogo={{
+          default: 'strapi.jpg',
+        }}
+        menuLogo={{
+          default: 'strapi.jpg',
+        }}
         showReleaseNotification={false}
         showTutorials={false}
       >
@@ -61,10 +69,12 @@ describe('ConfigurationProvider', () => {
       </ConfigurationProvider>
     );
 
-    expect(getByText('strapi-menu.jpg')).toBeInTheDocument();
+    expect(getByText('strapi.jpg')).toBeInTheDocument();
 
     await user.click(getByRole('button', { name: 'Change logo' }));
 
     await findByText('Saved');
+
+    expect(getByText('http://localhost:1337/uploads/michka.svg')).toBeInTheDocument();
   });
 });
