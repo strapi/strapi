@@ -66,9 +66,6 @@ function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions)
   Object.keys(contentTypes).forEach((key) => {
     tmpContentTypes.set(contentTypes[key].uid, createSchemaHandler(contentTypes[key]));
   });
-  Object.keys(contentTypes).forEach((key) => {
-    tmpContentTypes.set(contentTypes[key].uid, createSchemaHandler(contentTypes[key]));
-  });
 
   // init temporary components
   Object.keys(components).forEach((key) => {
