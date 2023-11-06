@@ -9,6 +9,8 @@ export type JSON = Attribute.OfType<'json'> &
   Attribute.VisibleOption &
   Attribute.DefaultOption<JsonValue>;
 
-export type JsonValue<T extends object = object> = T;
+export type ValidJson = object | Array<unknown> | string | number | true | false | null;
+
+export type JsonValue<T extends ValidJson = ValidJson> = T;
 
 export type GetJsonValue<T extends Attribute.Attribute> = T extends JSON ? JsonValue : never;
