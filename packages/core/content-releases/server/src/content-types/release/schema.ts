@@ -1,3 +1,5 @@
+import { RELEASE_ACTION_MODEL_UID } from '../../constants';
+
 export default {
   collectionName: 'strapi_releases',
   info: {
@@ -27,7 +29,7 @@ export default {
     actions: {
       type: 'relation',
       relation: 'oneToMany',
-      target: 'plugin::content-releases.release-action',
+      target: RELEASE_ACTION_MODEL_UID,
       mappedBy: 'release',
     },
   },
