@@ -1,15 +1,15 @@
 import * as React from 'react';
 
 import { useNotification } from '../features/Notifications';
-import { useRBACProvider, Permission } from '../features/RBAC';
-import { hasPermissions } from '../utils/hasPermissions';
+import { useRBACProvider } from '../features/RBAC';
+import { PermissionToCheckAgainst, hasPermissions } from '../utils/hasPermissions';
 
 // NOTE: this component is very similar to the CheckPagePermissions
 // except that it does not handle redirections nor loading state
 
 export interface CheckPermissionsProps {
   children: React.ReactNode;
-  permissions?: Permission[];
+  permissions?: PermissionToCheckAgainst[];
 }
 
 const CheckPermissions = ({ permissions = [], children }: CheckPermissionsProps) => {

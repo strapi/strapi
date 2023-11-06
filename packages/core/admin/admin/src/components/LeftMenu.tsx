@@ -23,7 +23,7 @@ import { useIntl } from 'react-intl';
 import { NavLink as RouterNavLink, useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { useConfiguration } from '../hooks/useConfiguration';
+import { useConfiguration } from '../contexts/configuration';
 import { Menu } from '../hooks/useMenu';
 
 const LinkUserWrapper = styled(Box)`

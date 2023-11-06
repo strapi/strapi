@@ -3,14 +3,14 @@ import * as React from 'react';
 import { Redirect } from 'react-router-dom';
 
 import { useNotification } from '../features/Notifications';
-import { Permission, useRBACProvider } from '../features/RBAC';
-import { hasPermissions } from '../utils/hasPermissions';
+import { useRBACProvider } from '../features/RBAC';
+import { PermissionToCheckAgainst, hasPermissions } from '../utils/hasPermissions';
 
 import { LoadingIndicatorPage } from './LoadingIndicatorPage';
 
 export interface CheckPagePermissionsProps {
   children: React.ReactNode;
-  permissions?: Permission[];
+  permissions?: PermissionToCheckAgainst[];
 }
 
 const CheckPagePermissions = ({

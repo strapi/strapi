@@ -81,7 +81,7 @@ interface EventWithoutProperties {
     | 'didEditNameOfContentType'
     | 'didGenerateGuidedTourApiTokens'
     | 'didGoToMarketplace'
-    | 'didLaunchGuidetour'
+    | 'didLaunchGuidedtour'
     | 'didMissMarketplacePlugin'
     | 'didNotCreateFirstAdmin'
     | 'didNotSaveComponent'

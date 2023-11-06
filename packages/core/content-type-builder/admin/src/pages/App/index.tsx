@@ -16,9 +16,7 @@ import { PERMISSIONS } from '../../constants';
 import { pluginId } from '../../pluginId';
 import { RecursivePath } from '../RecursivePath/RecursivePath';
 
-const ListView = lazy(
-  () => import(/* webpackChunkName: "content-type-builder-list-view" */ '../ListView/ListView')
-);
+const ListView = lazy(() => import('../ListView/ListView'));
 
 const App = () => {
   const { formatMessage } = useIntl();
