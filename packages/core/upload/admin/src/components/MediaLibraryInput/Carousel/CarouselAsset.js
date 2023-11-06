@@ -1,11 +1,13 @@
 import React from 'react';
-import styled from 'styled-components';
-import { File, FilePdf } from '@strapi/icons';
+
 import { Box, Flex } from '@strapi/design-system';
-import { AssetType, AssetDefinition } from '../../../constants';
-import { VideoPreview } from '../../AssetCard/VideoPreview';
-import { AudioPreview } from '../../AssetCard/AudioPreview';
+import { File, FilePdf } from '@strapi/icons';
+import styled from 'styled-components';
+
+import { AssetDefinition, AssetType } from '../../../constants';
 import { createAssetUrl } from '../../../utils';
+import { AudioPreview } from '../../AssetCard/AudioPreview';
+import { VideoPreview } from '../../AssetCard/VideoPreview';
 
 const DocAsset = styled(Flex)`
   background: linear-gradient(180deg, #ffffff 0%, #f6f6f9 121.48%);

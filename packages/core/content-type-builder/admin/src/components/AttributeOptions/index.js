@@ -5,21 +5,24 @@
  */
 
 import React from 'react';
-import { useIntl } from 'react-intl';
-import PropTypes from 'prop-types';
+
 import {
   Box,
   Divider,
-  ModalBody,
   Flex,
-  Typography,
-  Tabs,
+  ModalBody,
   Tab,
   TabGroup,
-  TabPanels,
   TabPanel,
+  TabPanels,
+  Tabs,
+  Typography,
 } from '@strapi/design-system';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+
 import { getTrad } from '../../utils';
+
 import AttributeList from './AttributeList';
 import CustomFieldsList from './CustomFieldsList';
 
@@ -33,7 +36,7 @@ const AttributeOptions = ({ attributes, forTarget, kind }) => {
   const titleId = getTrad(`modalForm.sub-header.chooseAttribute.${titleIdSuffix}`);
 
   return (
-    <ModalBody padding={6}>
+    <ModalBody padding={7}>
       <TabGroup
         label={formatMessage({
           id: getTrad('modalForm.tabs.label'),

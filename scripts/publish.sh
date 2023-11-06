@@ -14,7 +14,7 @@ read -r version
 ./node_modules/.bin/lerna publish --no-push --force-publish --dist-tag latest --exact "$version"
 
 # push main branch
-git push origin main
+git push origin HEAD
 
 # push tag
 git push origin v"$version"

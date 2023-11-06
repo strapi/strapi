@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+
 import { useCustomFields } from '@strapi/helper-plugin';
 
 const componentStore = new Map();
@@ -38,11 +39,15 @@ const useLazyComponents = (componentUids = []) => {
     if (newUids.length > 0) {
       setLoading(true);
 
-      const componentPromises = newUids.map((uid) => {
+      const componentPromises = newUids.reduce((arrayOfPromises, uid) => {
         const customField = customFieldsRegistry.get(uid);
 
-        return customField.components.Input();
-      });
+        if (customField) {
+          arrayOfPromises.push(customField.components.Input());
+        }
+
+        return arrayOfPromises;
+      }, []);
 
       if (componentPromises.length > 0) {
         lazyLoadComponents(newUids, componentPromises);

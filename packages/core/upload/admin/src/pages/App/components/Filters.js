@@ -1,8 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
+
 import { Button } from '@strapi/design-system';
 import { useQueryParams, useTracking } from '@strapi/helper-plugin';
 import { Filter } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+
 import FilterList from '../../../components/FilterList';
 import FilterPopover from '../../../components/FilterPopover';
 import displayedFilters from '../../../utils/displayedFilters';

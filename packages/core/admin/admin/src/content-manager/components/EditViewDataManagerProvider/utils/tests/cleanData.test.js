@@ -354,6 +354,12 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
             'basic.relation',
           ],
         },
+        createdBy: {
+          type: 'relation',
+        },
+        updatedBy: {
+          type: 'relation',
+        },
       },
     };
     const componentsSchema = {
@@ -1158,6 +1164,22 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
           disconnect: [],
         },
       });
+    });
+
+    test('given that the browserState has creator fields relationships, they should be ignored', () => {
+      const result = cleanData(
+        {
+          browserState: {
+            createdBy: { id: 1 },
+            updatedBy: { id: 1 },
+          },
+          serverState: {},
+        },
+        schema,
+        componentsSchema
+      );
+
+      expect(result).toStrictEqual({});
     });
   });
 });

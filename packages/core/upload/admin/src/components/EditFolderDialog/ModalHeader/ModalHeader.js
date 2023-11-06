@@ -1,7 +1,8 @@
-import { useIntl } from 'react-intl';
-import PropTypes from 'prop-types';
 import React from 'react';
+
 import { ModalHeader, Typography } from '@strapi/design-system';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../../utils';
 

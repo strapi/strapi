@@ -3,7 +3,7 @@
 const permissions = require('@strapi/permissions');
 const { providerFactory } = require('@strapi/utils');
 
-const DEFAULT_TRANSFER_ACTIONS = ['push'];
+const DEFAULT_TRANSFER_ACTIONS = ['push', 'pull'];
 
 const providers = {
   action: providerFactory(),

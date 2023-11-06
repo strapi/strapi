@@ -1,6 +1,6 @@
 import produce from 'immer';
-import { getData, getDataSucceeded } from '../actions';
 
+import { getData, getDataSucceeded } from '../actions';
 import reducer from '../reducer';
 
 describe('CONTENT MANAGER | CONTAINERS | ListView | reducer', () => {

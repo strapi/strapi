@@ -1,7 +1,8 @@
 'use strict';
 
+const path = require('path');
 const utils = require('@strapi/utils');
-const { has, toLower } = require('lodash/fp');
+const { isString, has, toLower } = require('lodash/fp');
 
 const { RateLimitError } = utils.errors;
 
@@ -24,11 +25,14 @@ module.exports =
       const rateLimit = require('koa2-ratelimit').RateLimit;
 
       const userEmail = toLower(ctx.request.body.email) || 'unknownEmail';
+      const requestPath = isString(ctx.request.path)
+        ? toLower(path.normalize(ctx.request.path)).replace(/\/$/, '')
+        : 'invalidPath';
 
       const loadConfig = {
         interval: { min: 5 },
         max: 5,
-        prefixKey: `${userEmail}:${ctx.request.path}:${ctx.request.ip}`,
+        prefixKey: `${userEmail}:${requestPath}:${ctx.request.ip}`,
         handler() {
           throw new RateLimitError();
         },

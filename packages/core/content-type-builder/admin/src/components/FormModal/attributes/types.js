@@ -1,16 +1,18 @@
+import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
 import uniq from 'lodash/uniq';
 import * as yup from 'yup';
-import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
-import getTrad from '../../../utils/getTrad';
+
 import getRelationType from '../../../utils/getRelationType';
+import getTrad from '../../../utils/getTrad';
 import toRegressedEnumValue from '../../../utils/toRegressedEnumValue';
+
 import {
   alreadyUsedAttributeNames,
   createTextShape,
   isMinSuperiorThanMax,
   isNameAllowed,
-  validators,
   NAME_REGEX,
+  validators,
 } from './validation/common';
 
 const types = {
@@ -297,6 +299,19 @@ const types = {
     return yup.object(shape);
   },
   richtext(usedAttributeNames, reservedNames) {
+    const shape = {
+      name: validators.name(usedAttributeNames, reservedNames),
+      type: validators.type(),
+      default: validators.default(),
+      unique: validators.unique(),
+      required: validators.required(),
+      maxLength: validators.maxLength(),
+      minLength: validators.minLength(),
+    };
+
+    return yup.object(shape);
+  },
+  blocks(usedAttributeNames, reservedNames) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),

@@ -1,5 +1,5 @@
-import { get } from 'lodash';
-import { getType, getOtherInfos } from '@strapi/helper-plugin';
+import { getOtherInfos, getType } from '@strapi/helper-plugin';
+import get from 'lodash/get';
 
 const removePasswordFieldsFromData = (data, contentTypeSchema, componentSchema) => {
   const recursiveCleanData = (data, schema) => {

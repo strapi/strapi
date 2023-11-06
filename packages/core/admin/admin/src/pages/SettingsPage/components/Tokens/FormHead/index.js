@@ -1,9 +1,11 @@
 import React from 'react';
-import { useIntl } from 'react-intl';
-import PropTypes from 'prop-types';
+
+import { Button, Flex, HeaderLayout } from '@strapi/design-system';
 import { Link } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
-import { Button, HeaderLayout, Flex } from '@strapi/design-system';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+
 import Regenerate from '../Regenerate';
 
 const FormHead = ({
@@ -15,6 +17,7 @@ const FormHead = ({
   isSubmitting,
   backUrl,
   regenerateUrl,
+  onErrorRegenerate,
 }) => {
   const { formatMessage } = useIntl();
   const handleRegenerate = (newKey) => {
@@ -35,6 +38,7 @@ const FormHead = ({
                 backUrl={regenerateUrl}
                 onRegenerate={handleRegenerate}
                 idToRegenerate={token?.id}
+                onError={onErrorRegenerate}
               />
             )}
             <Button
@@ -95,10 +99,12 @@ FormHead.propTypes = {
     label: PropTypes.string,
   }).isRequired,
   regenerateUrl: PropTypes.string.isRequired,
+  onErrorRegenerate: PropTypes.func,
 };
 
 FormHead.defaultProps = {
   token: undefined,
+  onErrorRegenerate: undefined,
 };
 
 export default FormHead;

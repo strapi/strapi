@@ -1,6 +1,6 @@
 /* eslint-disable prefer-template */
+import { getLanguage, highlight, highlightAuto } from 'highlight.js';
 import Markdown from 'markdown-it';
-import { getLanguage, highlightAuto, highlight } from 'highlight.js';
 import abbr from 'markdown-it-abbr';
 import container from 'markdown-it-container';
 import deflist from 'markdown-it-deflist';
@@ -12,7 +12,7 @@ import sub from 'markdown-it-sub';
 import sup from 'markdown-it-sup';
 
 const loadCss = async () => {
-  await import(/* webpackChunkName: "highlight.js" */ 'highlight.js/styles/solarized-dark.css');
+  await import('highlight.js/styles/solarized-dark.css');
 };
 
 loadCss();

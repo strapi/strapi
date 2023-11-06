@@ -1,0 +1,5 @@
+{
+  "extends": "tsconfig/base.json",
+  "include": ["src"],
+  "exclude": ["node_modules", "src/files", "src/templates"]
+}

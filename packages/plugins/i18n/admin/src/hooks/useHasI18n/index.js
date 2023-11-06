@@ -1,5 +1,5 @@
-import { useSelector } from 'react-redux';
 import get from 'lodash/get';
+import { useSelector } from 'react-redux';
 
 const selectContentManagerListViewPluginOptions = (state) =>
   state['content-manager_listView'].contentType.pluginOptions;

@@ -1,6 +1,7 @@
 import React from 'react';
+
+import { Box, Flex, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import { Flex, Box, Typography } from '@strapi/design-system';
 import styled from 'styled-components';
 
 const IconBox = styled(Box)`

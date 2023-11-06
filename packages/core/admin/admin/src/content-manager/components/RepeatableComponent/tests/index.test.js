@@ -1,16 +1,17 @@
 import * as React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { useCMEditViewDataManager, useNotification } from '@strapi/helper-plugin';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { IntlProvider } from 'react-intl';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-
-import { useCMEditViewDataManager, useNotification } from '@strapi/helper-plugin';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-
-import { layoutData } from './fixtures';
+import { IntlProvider } from 'react-intl';
+import { MemoryRouter } from 'react-router-dom';
 
 import RepeatableComponent from '../index';
+
+import { layoutData } from './fixtures';
 
 jest.mock('../../FieldComponent', () => () => "I'm a field component");
 jest.mock('../../Inputs', () => () => "I'm inputs");
@@ -62,7 +63,7 @@ jest.mock('../../../hooks', () => ({
 
 describe('RepeatableComponents', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   const defaultProps = {
@@ -70,17 +71,22 @@ describe('RepeatableComponents', () => {
     componentUid: 'test',
   };
 
-  const TestComponent = (props) => (
-    <ThemeProvider theme={lightTheme}>
-      <IntlProvider locale="en" messages={{}} defaultLocale="en">
-        <DndProvider backend={HTML5Backend}>
-          <RepeatableComponent {...defaultProps} {...props} />
-        </DndProvider>
-      </IntlProvider>
-    </ThemeProvider>
-  );
+  const TestComponent = (props) => <RepeatableComponent {...defaultProps} {...props} />;
 
-  const setup = (props) => render(<TestComponent {...props} />);
+  const setup = (props) =>
+    render(<TestComponent {...props} />, {
+      wrapper({ children }) {
+        return (
+          <ThemeProvider theme={lightTheme}>
+            <IntlProvider locale="en" messages={{}} defaultLocale="en">
+              <DndProvider backend={HTML5Backend}>
+                <MemoryRouter>{children}</MemoryRouter>
+              </DndProvider>
+            </IntlProvider>
+          </ThemeProvider>
+        );
+      },
+    });
 
   describe('rendering', () => {
     it('should render the component initializer when there are no components to render', () => {

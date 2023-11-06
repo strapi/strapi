@@ -1,0 +1,59 @@
+---
+title: useFilter
+description: API reference for the useFilter hook in Strapi
+tags:
+  - hooks
+  - helper-plugin
+  - i18n
+---
+
+Provides localized string search functionality that is useful for filtering or matching items in a list. Options can be
+provided to adjust the sensitivity to case, diacritics, and other parameters.
+
+Borrowed from [`react-aria`](https://github.com/adobe/react-spectrum/blob/main/packages/%40react-aria/i18n/src/useFilter.ts).
+
+## Usage
+
+```js
+import { useIntl } from 'react-intl';
+import { useFilter } from '@strapi/helper-plugin';
+
+const MyComponent = () => {
+  const { locale } = useIntl();
+
+  const fruits = ['orange', 'apple', 'kiwi', 'banana'];
+  const searchValue = 'an';
+
+  const { contains } = useFilter(locale, { sensitivity: 'base' });
+
+  /**
+   * This would render the list of fruits in the following order:
+   * orange
+   * banana
+   */
+  return (
+    <div>
+      {fruits
+        .filter((fruit) => includes(fruit, searchValue))
+        .map((fruit) => (
+          <h2 key={fruit}>{fruit}</h2>
+        ))}
+    </div>
+  );
+};
+```
+
+## Typescript
+
+```ts
+interface Filter {
+  /** Returns whether a string starts with a given substring. */
+  startsWith(string: string, substring: string): boolean;
+  /** Returns whether a string ends with a given substring. */
+  endsWith(string: string, substring: string): boolean;
+  /** Returns whether a string contains a given substring. */
+  includes(string: string, substring: string): boolean;
+}
+
+function useFilter(locale: string, options?: Intl.CollatorOptions): Filter;
+```

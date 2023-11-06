@@ -1,13 +1,15 @@
 import React from 'react';
+
+import { Flex, GridItem, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { Typography, Flex, GridItem } from '@strapi/design-system';
+
+import { useApiTokenPermissions } from '../../../../../../../contexts/apiTokenPermissions';
 import BoundRoute from '../BoundRoute';
-import { useApiTokenPermissionsContext } from '../../../../../../../contexts/ApiTokenPermissions';
 
 const ActionBoundRoutes = () => {
   const {
     value: { selectedAction, routes },
-  } = useApiTokenPermissionsContext();
+  } = useApiTokenPermissions();
   const { formatMessage } = useIntl();
   const actionSection = selectedAction?.split('.')[0];
 

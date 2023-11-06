@@ -1,25 +1,24 @@
 import React from 'react';
-import { Router, Route } from 'react-router-dom';
-import { StrapiAppProvider, AppInfosContext, TrackingProvider } from '@strapi/helper-plugin';
-import { render, screen, waitFor } from '@testing-library/react';
+
+import { darkTheme, lightTheme } from '@strapi/design-system';
+import { AppInfosContext, StrapiAppProvider, TrackingProvider } from '@strapi/helper-plugin';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
-import { lightTheme, darkTheme } from '@strapi/design-system';
-import Theme from '../../../components/Theme';
-import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
-import { SettingsPage } from '..';
-import { useSettingsMenu } from '../../../hooks';
+import { Route, Router } from 'react-router-dom';
 
-jest.mock('../../../hooks', () => ({
-  useSettingsMenu: jest.fn(() => ({ isLoading: false, menu: [] })),
-  useAppInfos: jest.fn(() => ({ shouldUpdateStrapi: false })),
-  useThemeToggle: jest.fn(() => ({ currentTheme: 'light', themes: { light: lightTheme } })),
-}));
+import { SettingsPage } from '..';
+import { Theme } from '../../../components/Theme';
+import { ThemeToggleProvider } from '../../../components/ThemeToggleProvider';
+import { useSettingsMenu } from '../../../hooks/useSettingsMenu';
+
+jest.mock('../../../hooks/useSettingsMenu');
 
 jest.mock('react-intl', () => ({
   FormattedMessage: ({ id }) => id,
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => id) }),
 }));
+
 jest.mock('../pages/ApplicationInfosPage', () => () => {
   return <h1>App infos</h1>;
 });
@@ -65,22 +64,16 @@ describe('ADMIN | pages | SettingsPage', () => {
       },
     });
     const route = '/settings/application-infos';
-    history.push(route);
+    act(() => history.push(route));
 
     const { container } = render(App);
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c11 {
-        padding-bottom: 56px;
-      }
-
-      .c0 {
-        display: grid;
-        grid-template-columns: auto 1fr;
-      }
-
-      .c12 {
-        overflow-x: hidden;
+      .c4 {
+        font-weight: 600;
+        font-size: 1.125rem;
+        line-height: 1.22;
+        color: #32324d;
       }
 
       .c2 {
@@ -103,11 +96,8 @@ describe('ADMIN | pages | SettingsPage', () => {
         padding-bottom: 16px;
       }
 
-      .c4 {
-        font-weight: 600;
-        font-size: 1.125rem;
-        line-height: 1.22;
-        color: #32324d;
+      .c11 {
+        padding-bottom: 56px;
       }
 
       .c3 {
@@ -150,6 +140,15 @@ describe('ADMIN | pages | SettingsPage', () => {
         -ms-flex-negative: 0;
         flex-shrink: 0;
         margin: 0;
+      }
+
+      .c0 {
+        display: grid;
+        grid-template-columns: auto 1fr;
+      }
+
+      .c12 {
+        overflow-x: hidden;
       }
 
       .c1 {
@@ -228,7 +227,7 @@ describe('ADMIN | pages | SettingsPage', () => {
       },
     });
     const route = '/settings';
-    history.push(route);
+    act(() => history.push(route));
 
     render(App);
 
@@ -311,7 +310,7 @@ describe('ADMIN | pages | SettingsPage', () => {
     });
     const route = '/settings/application-infos';
     const user = userEvent.setup();
-    history.push(route);
+    act(() => history.push(route));
 
     render(App);
 

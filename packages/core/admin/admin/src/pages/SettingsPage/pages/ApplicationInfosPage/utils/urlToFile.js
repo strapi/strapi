@@ -1,8 +1,9 @@
-import axios from 'axios';
+import { getFetchClient } from '@strapi/helper-plugin';
 
 const urlToFile = async (url) => {
   try {
-    const res = await axios.get(url, { responseType: 'blob', timeout: 8000 });
+    const { get } = getFetchClient();
+    const res = await get(url, { responseType: 'blob', timeout: 8000 });
     const loadedFile = new File([res.data], res.config.url, {
       type: res.headers['content-type'],
     });

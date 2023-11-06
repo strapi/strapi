@@ -1,8 +1,10 @@
 import React from 'react';
+
+import { pxToRem } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { pxToRem } from '@strapi/helper-plugin';
+
 import { getTrad } from '../../../utils';
 
 const statusMap = {

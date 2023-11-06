@@ -52,14 +52,15 @@ module.exports = ({ strapi }) => {
 
       args: getContentTypeArgs(contentType),
 
-      async resolve(parent, args) {
+      async resolve(parent, args, ctx) {
         const transformedArgs = transformArgs(args, { contentType });
 
         const queriesResolvers = getService('builders')
           .get('content-api')
           .buildQueriesResolvers({ contentType });
 
-        const value = queriesResolvers.find(parent, transformedArgs);
+        // queryResolvers will sanitize params
+        const value = queriesResolvers.find(parent, transformedArgs, ctx);
 
         return toEntityResponse(value, { args: transformedArgs, resourceUID: uid });
       },

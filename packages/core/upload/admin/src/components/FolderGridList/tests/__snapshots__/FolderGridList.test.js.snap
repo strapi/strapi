@@ -1,18 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FolderGridList renders and match snapshots 1`] = `
-.c0 {
-  padding-bottom: 8px;
-}
-
-.c1 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  font-weight: 500;
-  color: #32324d;
-}
-
 .c3 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
@@ -23,6 +11,18 @@ exports[`FolderGridList renders and match snapshots 1`] = `
   padding: 0;
   position: absolute;
   width: 1px;
+}
+
+.c1 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  font-weight: 500;
+  color: #32324d;
+}
+
+.c0 {
+  padding-bottom: 8px;
 }
 
 .c2 {

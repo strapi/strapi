@@ -1,5 +1,6 @@
 import produce from 'immer';
-import { getData, setContentTypeLinks, resetProps } from '../actions';
+
+import { getInitData, resetInitData, setInitData } from '../actions';
 import mainReducer from '../reducer';
 
 describe('Content Manager | App | reducer', () => {
@@ -12,6 +13,7 @@ describe('Content Manager | App | reducer', () => {
       models: [],
       collectionTypeLinks: [],
       singleTypeLinks: [],
+      fieldSizes: {},
     };
   });
 
@@ -19,18 +21,18 @@ describe('Content Manager | App | reducer', () => {
     expect(mainReducer(state, {})).toEqual(state);
   });
 
-  it('should handle the getData action correctly', () => {
+  it('should handle the getInitData action correctly', () => {
     state.status = 'resolved';
 
     const expected = produce(state, (draft) => {
       draft.status = 'loading';
     });
 
-    expect(mainReducer(state, getData())).toEqual(expected);
+    expect(mainReducer(state, getInitData())).toEqual(expected);
   });
 
-  it('should handle the getData action correctly', () => {
-    const collectionTypeLinks = [
+  it('should handle the setInitData action correctly', () => {
+    const authorizedCollectionTypeLinks = [
       {
         name: 'authorizedCt',
         isDisplayed: true,
@@ -40,7 +42,7 @@ describe('Content Manager | App | reducer', () => {
         isDisplayed: false,
       },
     ];
-    const singleTypeLinks = [
+    const authorizedSingleTypeLinks = [
       {
         name: 'authorizedSt',
         isDisplayed: false,
@@ -71,15 +73,21 @@ describe('Content Manager | App | reducer', () => {
     expect(
       mainReducer(
         state,
-        setContentTypeLinks(collectionTypeLinks, singleTypeLinks, ['test'], ['test'])
+        setInitData({
+          authorizedCollectionTypeLinks,
+          authorizedSingleTypeLinks,
+          contentTypeSchemas: ['test'],
+          components: ['test'],
+          fieldSizes: {},
+        })
       )
     ).toEqual(expected);
   });
 
-  it('should handle the resetProps action correctly', () => {
+  it('should handle the resetInitData action correctly', () => {
     state = 'test';
 
-    expect(mainReducer(state, resetProps())).toEqual({
+    expect(mainReducer(state, resetInitData())).toEqual({
       components: [],
       models: [],
       collectionTypeLinks: [],

@@ -104,3 +104,8 @@ AUTHORS text
 *.woff binary
 *.pyc binary
 *.pdf binary
+
+# yarn
+/.yarn/** linguist-vendored
+/.yarn/releases/* binary
+/.yarn/plugins/**/* binary

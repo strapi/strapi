@@ -1,0 +1,67 @@
+---
+title: useAdminUsers
+description: API reference for the useAdminUsers hook
+tags:
+  - admin
+  - hooks
+  - users
+---
+
+An abstraction around `react-query`'s `useQuery` hook. It can be used to fetch one ore more admin users.
+
+## Usage
+
+The hooks can receive two optional parameters:
+
+1. query params: an object containing the query params to be sent to the API. They are going to be
+   stringified by `qs`. All params are equal except `id`, which is used to fetch a single users, if
+   it is passed.
+2. options: an object containing the options to be passed to `useQuery`.
+
+It returns an object containing some of the react-query attributes.
+
+## Typescript
+
+```ts
+import { UseQueryOptions } from 'react-query'
+
+type User = object;
+
+useAdminUsers(queryParams: object, reactQueryOptions: UseQueryOptions): {
+    users: User[];
+    pagination: {
+        page: number,
+        pageSize: number,
+        total: number,
+    } | null;
+    isLoading: boolean;
+    isError: boolean;
+    refetch: () => Promise<void>;
+};
+```
+
+### Fetch all users
+
+```jsx
+import { useAdminUsers } from 'path/to/hooks';
+
+const MyComponent = ({ onMoveItem }) => {
+  const { users, isLoading, refetch } = useAdminUsers();
+
+  return /* ... */;
+};
+```
+
+### Fetch one user
+
+```jsx
+import { Box } from '@strapi/design-system';
+
+import { useAdminUsers } from 'path/to/hooks';
+
+const MyComponent = ({ onMoveItem }) => {
+  const { users: [user], isLoading, refetch } = useAdminUsers({ id: 1 });
+
+  return /* ... */;
+};
+```

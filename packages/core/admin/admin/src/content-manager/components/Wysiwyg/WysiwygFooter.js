@@ -1,15 +1,17 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
+
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { Expand } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+
 import { ExpandButton } from './WysiwygStyles';
 
 const WysiwygFooter = ({ onToggleExpand }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Box padding={2} background="neutral100" hasRadius>
+    <Box padding={2} background="neutral100" borderRadius={`0 0 ${4 / 16}rem ${4 / 16}rem`}>
       <Flex justifyContent="flex-end" alignItems="flex-end">
         <ExpandButton id="expand" onClick={onToggleExpand}>
           <Typography>

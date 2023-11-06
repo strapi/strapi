@@ -1,8 +1,9 @@
 import React from 'react';
+
+import { Box, Flex, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { Box, Flex, Typography } from '@strapi/design-system';
 
 const LabelAction = styled(Box)`
   svg path {

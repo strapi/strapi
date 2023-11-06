@@ -1,7 +1,9 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+
 import { Box } from '@strapi/design-system';
-import { useInjectionZone } from '../../../shared/hooks';
+import PropTypes from 'prop-types';
+
+import { useInjectionZone } from '../../../shared/hooks/useInjectionZone';
 
 const InjectionZoneList = ({ area, ...props }) => {
   const compos = useInjectionZone(area);

@@ -1,24 +1,30 @@
 import React from 'react';
-import { Switch, Route } from 'react-router-dom';
-import { CheckPagePermissions, NotFound } from '@strapi/helper-plugin';
-import pluginId from '../../pluginId';
-import pluginPermissions from '../../permissions';
-import ProtectedRolesListPage from './ProtectedListPage';
-import ProtectedRolesEditPage from './ProtectedEditPage';
-import ProtectedRolesCreatePage from './ProtectedCreatePage';
+
+import { AnErrorOccurred, CheckPagePermissions } from '@strapi/helper-plugin';
+import { Route, Switch } from 'react-router-dom';
+
+import { PERMISSIONS } from '../../constants';
+
+import { ProtectedRolesCreatePage } from './pages/CreatePage';
+import { ProtectedRolesEditPage } from './pages/EditPage';
+import { ProtectedRolesListPage } from './pages/ListPage';
 
 const Roles = () => {
   return (
-    <CheckPagePermissions permissions={pluginPermissions.accessRoles}>
+    <CheckPagePermissions permissions={PERMISSIONS.accessRoles}>
       <Switch>
         <Route
-          path={`/settings/${pluginId}/roles/new`}
+          path="/settings/users-permissions/roles/new"
           component={ProtectedRolesCreatePage}
           exact
         />
-        <Route path={`/settings/${pluginId}/roles/:id`} component={ProtectedRolesEditPage} exact />
-        <Route path={`/settings/${pluginId}/roles`} component={ProtectedRolesListPage} exact />
-        <Route path="" component={NotFound} />
+        <Route
+          path="/settings/users-permissions/roles/:id"
+          component={ProtectedRolesEditPage}
+          exact
+        />
+        <Route path="/settings/users-permissions/roles" component={ProtectedRolesListPage} exact />
+        <Route path="" component={AnErrorOccurred} />
       </Switch>
     </CheckPagePermissions>
   );

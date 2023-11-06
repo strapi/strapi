@@ -1,4 +1,8 @@
-import { merge, get, isEmpty, set } from 'lodash';
+import get from 'lodash/get';
+import isEmpty from 'lodash/isEmpty';
+import merge from 'lodash/merge';
+import set from 'lodash/set';
+
 import findMatchingPermission from './findMatchingPermissions';
 /**
  * Creates the default condition form: { [conditionId]: false }
@@ -172,7 +176,7 @@ const createDefaultCTFormFromLayout = (
 export default createDefaultCTFormFromLayout;
 export {
   createDefaultConditionsForm,
-  createDefaultPropertyForms,
   createDefaultPropertiesForm,
+  createDefaultPropertyForms,
   findLayouts,
 };

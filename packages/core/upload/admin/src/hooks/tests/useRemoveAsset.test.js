@@ -1,11 +1,12 @@
 import React from 'react';
-import { IntlProvider } from 'react-intl';
-import { QueryClientProvider, QueryClient, useQueryClient } from 'react-query';
-import { renderHook, act } from '@testing-library/react-hooks';
 
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { NotificationsProvider, useNotification } from '@strapi/helper-plugin';
-import { deleteRequest } from '../../utils/deleteRequest';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider, useQueryClient } from 'react-query';
 
+import { deleteRequest } from '../../utils/deleteRequest';
 import { useRemoveAsset } from '../useRemoveAsset';
 
 const ASSET_FIXTURE = {
@@ -45,11 +46,13 @@ const client = new QueryClient({
 function ComponentFixture({ children }) {
   return (
     <QueryClientProvider client={client}>
-      <NotificationsProvider toggleNotification={() => jest.fn()}>
-        <IntlProvider locale="en" messages={{}}>
-          {children}
-        </IntlProvider>
-      </NotificationsProvider>
+      <ThemeProvider theme={lightTheme}>
+        <NotificationsProvider>
+          <IntlProvider locale="en" messages={{}}>
+            {children}
+          </IntlProvider>
+        </NotificationsProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
@@ -70,7 +73,6 @@ describe('useRemoveAsset', () => {
   test('calls the proper endpoint', async () => {
     const {
       result: { current },
-      waitFor,
     } = await setup(jest.fn);
     const { removeAsset } = current;
 
@@ -85,7 +87,6 @@ describe('useRemoveAsset', () => {
     const toggleNotification = useNotification();
     const {
       result: { current },
-      waitFor,
     } = await setup(jest.fn);
     const { removeAsset } = current;
 
@@ -106,7 +107,6 @@ describe('useRemoveAsset', () => {
     const queryClient = useQueryClient();
     const {
       result: { current },
-      waitFor,
     } = await setup(jest.fn);
     const { removeAsset } = current;
 
@@ -130,7 +130,6 @@ describe('useRemoveAsset', () => {
     const toggleNotification = useNotification();
     const {
       result: { current },
-      waitFor,
     } = await setup();
     const { removeAsset } = current;
 

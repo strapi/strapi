@@ -1,28 +1,29 @@
-import { Formik } from 'formik';
 import React from 'react';
-import PropTypes from 'prop-types';
-import isEmpty from 'lodash/isEmpty';
-import { useIntl } from 'react-intl';
+
 import {
   Button,
+  FieldLabel,
+  Flex,
   Grid,
   GridItem,
-  Flex,
   Loader,
-  ModalLayout,
-  ModalHeader,
   ModalBody,
   ModalFooter,
-  FieldLabel,
+  ModalHeader,
+  ModalLayout,
   Typography,
 } from '@strapi/design-system';
 import { Form, normalizeAPIError } from '@strapi/helper-plugin';
+import { Formik } from 'formik';
+import isEmpty from 'lodash/isEmpty';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 
+import { AssetDefinition, FolderDefinition } from '../../constants';
 import { useBulkMove } from '../../hooks/useBulkMove';
+import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { getTrad } from '../../utils';
 import SelectTree from '../SelectTree';
-import { useFolderStructure } from '../../hooks/useFolderStructure';
-import { FolderDefinition, AssetDefinition } from '../../constants';
 
 export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
   const { formatMessage } = useIntl();

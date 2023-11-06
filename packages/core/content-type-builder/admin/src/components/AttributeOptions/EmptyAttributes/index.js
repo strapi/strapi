@@ -1,9 +1,11 @@
 import React from 'react';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
+
+import { Box, Flex, Icon, LinkButton, Typography } from '@strapi/design-system';
+import { EmptyDocuments, Plus } from '@strapi/icons';
 import qs from 'qs';
-import { Box, Flex, Typography, LinkButton, Icon } from '@strapi/design-system';
-import { Plus, EmptyStateDocument } from '@strapi/icons';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+
 import { getTrad } from '../../../utils';
 
 const EmptyCard = styled(Box)`
@@ -38,7 +40,7 @@ const EmptyAttributes = () => {
       <EmptyCardGrid />
       <Box position="absolute" top={6} width="100%">
         <Flex alignItems="center" justifyContent="center" direction="column">
-          <Icon as={EmptyStateDocument} color="" width="160px" height="88px" />
+          <Icon as={EmptyDocuments} color="" width="160px" height="88px" />
           <Box paddingTop={6} paddingBottom={4}>
             <Box textAlign="center">
               <Typography variant="delta" as="p" textColor="neutral600">

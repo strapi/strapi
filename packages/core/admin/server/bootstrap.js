@@ -10,6 +10,7 @@ const defaultAdminAuthSettings = {
   providers: {
     autoRegister: false,
     defaultRole: null,
+    ssoLockedRoles: null,
   },
 };
 
@@ -69,7 +70,7 @@ const syncAPITokensPermissions = async () => {
   }
 };
 
-module.exports = async () => {
+module.exports = async ({ strapi }) => {
   await registerAdminConditions();
   await registerPermissionActions();
   registerModelHooks();
@@ -85,13 +86,14 @@ module.exports = async () => {
   await roleService.resetSuperAdminPermissions();
   await roleService.displayWarningIfNoSuperAdmin();
 
-  await permissionService.ensureBoundPermissionsInDatabase();
   await permissionService.cleanPermissionsInDatabase();
 
   await userService.displayWarningIfUsersDontHaveRole();
 
   await syncAuthSettings();
   await syncAPITokensPermissions();
+
+  getService('metrics').startCron(strapi);
 
   apiTokenService.checkSaltIsDefined();
   transferService.token.checkSaltIsDefined();

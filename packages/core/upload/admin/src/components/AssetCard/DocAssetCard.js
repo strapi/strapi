@@ -1,9 +1,10 @@
 import React from 'react';
+
+import { Flex } from '@strapi/design-system';
+import { pxToRem } from '@strapi/helper-plugin';
+import { File, FilePdf } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Flex } from '@strapi/design-system';
-import { File, FilePdf } from '@strapi/icons';
-import { pxToRem } from '@strapi/helper-plugin';
 
 import { AssetCardBase } from './AssetCardBase';
 

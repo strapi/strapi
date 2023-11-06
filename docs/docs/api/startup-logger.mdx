@@ -1,0 +1,72 @@
+---
+title: Startup Logger
+slug: /api/StartupLogger
+tags:
+- module
+- private
+
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+import Type from '@site/docs/api/components/type';
+
+# API
+
+:::info
+
+Current state: **Stable**
+
+:::
+
+This module is a simple logger for starting up Strapi with some useful information.
+
+## Module: Startup Logger
+
+### `logStats()`
+
+This log will display information about the instance of Strapi. The time launched, how many times it took and important configuration information.
+
+```
+ Project information
+
+┌────────────────────┬──────────────────────────────────────────────────┐
+│ Time               │ Wed Jan 01 2000 00:00:01 GMT+0200 (Central Euro… │
+│ Launched in        │ 2000 ms                                          │
+│ Environment        │ development                                      │
+│ Process PID        │ 42                                               │
+│ Version            │ 4.9.0 (node v18.12.1)                            │
+│ Edition            │ Enterprise                                       │
+│ Database           │ postgres                                         │
+└────────────────────┴──────────────────────────────────────────────────┘
+```
+
+### `logFirstStartupMessage()`
+
+This log will display the first time Strapi project is launched. It will ask the user to create its first admin user in the admin panel.
+
+### `logDefaultStartupMessage()`
+
+Default message to display when the Strapi server is started.
+
+```
+ Actions available
+
+Welcome back!
+To manage your project 🚀, go to the administration panel at:
+http://localhost:1337/admin
+
+To access the server ⚡️, go to:
+http://localhost:1337
+```
+
+### `logStartupMessage({ isInitialized })`
+
+- `isInitialized`: <Type>Boolean</Type> Has the Strapi project already been initialized?
+
+Will display the correct start-up message according to the specified boolean.
+
+:::note
+
+Can be disabled by setting `STRAPI_HIDE_STARTUP_MESSAGE` to `true`.
+
+:::

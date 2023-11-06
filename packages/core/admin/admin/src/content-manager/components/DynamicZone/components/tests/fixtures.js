@@ -21,3 +21,31 @@ export const layoutData = {
     },
   },
 };
+
+export const dynamicComponentsByCategory = {
+  myComponents: [
+    {
+      componentUid: 'component1',
+      info: {
+        displayName: 'component1',
+        icon: undefined,
+      },
+    },
+    {
+      componentUid: 'component2',
+      info: {
+        displayName: 'component2',
+        icon: undefined,
+      },
+    },
+  ],
+  otherComponents: [
+    {
+      componentUid: 'component3',
+      info: {
+        displayName: 'component3',
+        icon: undefined,
+      },
+    },
+  ],
+};

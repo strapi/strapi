@@ -1,5 +1,5 @@
-import reducer, { initialState } from '../reducer';
 import { ADD_ATTRIBUTE } from '../constants';
+import reducer, { initialState } from '../reducer';
 
 describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () => {
   describe('Adding a common field that is not a relation', () => {

@@ -1,7 +1,7 @@
 import createDefaultCTFormFromLayout, {
   createDefaultConditionsForm,
-  createDefaultPropertyForms,
   createDefaultPropertiesForm,
+  createDefaultPropertyForms,
   findLayouts,
 } from '../createDefaultCTFormFromLayout';
 

@@ -4,6 +4,7 @@
  */
 
 import produce from 'immer';
+
 import { RESET_PROPS, SET_LAYOUT } from './constants';
 
 export const initialState = {
@@ -12,18 +13,18 @@ export const initialState = {
 
 const editViewManagerReducer = (state = initialState, action) =>
   // eslint-disable-next-line consistent-return
-  produce(state, (drafState) => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case RESET_PROPS: {
-        drafState.currentLayout = null;
+        draftState.currentLayout = null;
         break;
       }
       case SET_LAYOUT: {
-        drafState.currentLayout = action.layout;
+        draftState.currentLayout = action.layout;
         break;
       }
       default:
-        return drafState;
+        return draftState;
     }
   });
 

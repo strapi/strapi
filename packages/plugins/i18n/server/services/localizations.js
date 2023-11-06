@@ -31,7 +31,7 @@ const assignDefaultLocaleToEntries = async (data) => {
  * @param {Object} options.model corresponding model
  */
 const syncLocalizations = async (entry, { model }) => {
-  if (Array.isArray(entry.localizations)) {
+  if (Array.isArray(entry?.localizations)) {
     const newLocalizations = [entry.id, ...entry.localizations.map(prop('id'))];
 
     const updateLocalization = (id) => {
@@ -41,8 +41,9 @@ const syncLocalizations = async (entry, { model }) => {
     };
 
     // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
+    // TODO: use a transaction to avoid deadlocks
     await mapAsync(entry.localizations, (localization) => updateLocalization(localization.id), {
-      concurrency: isDialectMySQL() ? 1 : Infinity,
+      concurrency: isDialectMySQL() && !strapi.db.inTransaction() ? 1 : Infinity,
     });
   }
 };
@@ -56,7 +57,7 @@ const syncLocalizations = async (entry, { model }) => {
 const syncNonLocalizedAttributes = async (entry, { model }) => {
   const { copyNonLocalizedAttributes } = getService('content-types');
 
-  if (Array.isArray(entry.localizations)) {
+  if (Array.isArray(entry?.localizations)) {
     const nonLocalizedAttributes = copyNonLocalizedAttributes(model, entry);
 
     if (isEmpty(nonLocalizedAttributes)) {
@@ -68,8 +69,9 @@ const syncNonLocalizedAttributes = async (entry, { model }) => {
     };
 
     // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
+    // TODO: use a transaction to avoid deadlocks
     await mapAsync(entry.localizations, (localization) => updateLocalization(localization.id), {
-      concurrency: isDialectMySQL() ? 1 : Infinity,
+      concurrency: isDialectMySQL() && !strapi.db.inTransaction() ? 1 : Infinity,
     });
   }
 };

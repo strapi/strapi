@@ -1,23 +1,24 @@
-import React, { useState, useRef } from 'react';
-import PropTypes from 'prop-types';
-import { useTracking } from '@strapi/helper-plugin';
+import React, { useRef, useState } from 'react';
+
 import {
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Typography,
   Button,
   Flex,
   Grid,
   GridItem,
   KeyboardNavigable,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  Typography,
 } from '@strapi/design-system';
+import { useTracking } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
+import { AssetDefinition } from '../../../constants';
+import getTrad from '../../../utils/getTrad';
 import { AssetCard } from '../../AssetCard/AssetCard';
 import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
-import getTrad from '../../../utils/getTrad';
-import { AssetDefinition } from '../../../constants';
 
 const Status = {
   Idle: 'IDLE',

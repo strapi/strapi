@@ -99,7 +99,6 @@ node_modules
 # Tests
 ############################
 
-testApp
 /coverage/
 
 ############################
@@ -114,3 +113,5 @@ dist
 build
 documentation
 .strapi-updater.json
+types/generated
+.strapi

@@ -11,14 +11,28 @@ const utils = require('@strapi/utils');
 const { getService } = require('../utils');
 const { validateCreateUserBody, validateUpdateUserBody } = require('./validation/user');
 
-const { sanitize } = utils;
+const { sanitize, validate } = utils;
 const { ApplicationError, ValidationError, NotFoundError } = utils.errors;
 
-const sanitizeOutput = (user, ctx) => {
+const sanitizeOutput = async (user, ctx) => {
   const schema = strapi.getModel('plugin::users-permissions.user');
   const { auth } = ctx.state;
 
   return sanitize.contentAPI.output(user, schema, { auth });
+};
+
+const validateQuery = async (query, ctx) => {
+  const schema = strapi.getModel('plugin::users-permissions.user');
+  const { auth } = ctx.state;
+
+  return validate.contentAPI.query(query, schema, { auth });
+};
+
+const sanitizeQuery = async (query, ctx) => {
+  const schema = strapi.getModel('plugin::users-permissions.user');
+  const { auth } = ctx.state;
+
+  return sanitize.contentAPI.query(query, schema, { auth });
 };
 
 module.exports = {
@@ -136,7 +150,9 @@ module.exports = {
    * @return {Object|Array}
    */
   async find(ctx) {
-    const users = await getService('user').fetchAll(ctx.query);
+    await validateQuery(ctx.query, ctx);
+    const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
+    const users = await getService('user').fetchAll(sanitizedQuery);
 
     ctx.body = await Promise.all(users.map((user) => sanitizeOutput(user, ctx)));
   },
@@ -147,9 +163,10 @@ module.exports = {
    */
   async findOne(ctx) {
     const { id } = ctx.params;
-    const { query } = ctx;
+    await validateQuery(ctx.query, ctx);
+    const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
 
-    let data = await getService('user').fetch(id, query);
+    let data = await getService('user').fetch(id, sanitizedQuery);
 
     if (data) {
       data = await sanitizeOutput(data, ctx);
@@ -163,7 +180,10 @@ module.exports = {
    * @return {Number}
    */
   async count(ctx) {
-    ctx.body = await getService('user').count(ctx.query);
+    await validateQuery(ctx.query, ctx);
+    const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
+
+    ctx.body = await getService('user').count(sanitizedQuery);
   },
 
   /**
@@ -191,7 +211,9 @@ module.exports = {
       return ctx.unauthorized();
     }
 
-    const user = await getService('user').fetch(authUser.id, query);
+    await validateQuery(query, ctx);
+    const sanitizedQuery = await sanitizeQuery(query, ctx);
+    const user = await getService('user').fetch(authUser.id, sanitizedQuery);
 
     ctx.body = await sanitizeOutput(user, ctx);
   },

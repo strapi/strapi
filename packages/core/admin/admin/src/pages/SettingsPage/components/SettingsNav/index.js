@@ -1,23 +1,38 @@
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { useIntl } from 'react-intl';
-import PropTypes from 'prop-types';
-import { useTracking } from '@strapi/helper-plugin';
+
+import { Icon } from '@strapi/design-system';
 import {
   SubNav,
   SubNavHeader,
+  SubNavLink,
   SubNavSection,
   SubNavSections,
-  SubNavLink,
 } from '@strapi/design-system/v2';
-import { getSectionsToDisplay } from '../../utils';
+import { useTracking } from '@strapi/helper-plugin';
+import { Lock } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import { NavLink, useLocation } from 'react-router-dom';
+import styled from 'styled-components';
+
+/**
+ * TODO: refactor the SubNav entirely, we shouldn't have
+ * to do this hack to work a lock at the end. It's a bit hacky.
+ */
+
+const CustomIcon = styled(Icon)`
+  right: 15px;
+  position: absolute;
+`;
 
 const SettingsNav = ({ menu }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
 
-  const filteredMenu = getSectionsToDisplay(menu);
+  const filteredMenu = menu.filter(
+    (section) => !section.links.every((link) => link.isDisplayed === false)
+  );
 
   const sections = filteredMenu.map((section) => {
     return {
@@ -48,17 +63,22 @@ const SettingsNav = ({ menu }) => {
       <SubNavSections>
         {sections.map((section) => (
           <SubNavSection key={section.id} label={formatMessage(section.intlLabel)}>
-            {section.links.map((link) => (
-              <SubNavLink
-                as={NavLink}
-                withBullet={link.hasNotification}
-                to={link.to}
-                onClick={() => handleClickOnLink(link.to)}
-                key={link.id}
-              >
-                {formatMessage(link.intlLabel)}
-              </SubNavLink>
-            ))}
+            {section.links.map((link) => {
+              return (
+                <SubNavLink
+                  as={NavLink}
+                  withBullet={link.hasNotification}
+                  to={link.to}
+                  onClick={() => handleClickOnLink(link.to)}
+                  key={link.id}
+                >
+                  {formatMessage(link.intlLabel)}
+                  {link?.lockIcon && (
+                    <CustomIcon width={`${15 / 16}rem`} height={`${15 / 16}rem`} as={Lock} />
+                  )}
+                </SubNavLink>
+              );
+            })}
           </SubNavSection>
         ))}
       </SubNavSections>

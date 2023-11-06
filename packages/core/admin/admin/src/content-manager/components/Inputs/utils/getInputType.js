@@ -1,7 +1,9 @@
-import { toLower } from 'lodash';
+import toLower from 'lodash/toLower';
 
 const getInputType = (type = '') => {
   switch (toLower(type)) {
+    case 'blocks':
+      return 'blocks';
     case 'boolean':
       return 'bool';
     case 'biginteger':

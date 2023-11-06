@@ -4,71 +4,18 @@ const ts = require('typescript');
 const { factory } = require('typescript');
 
 const {
-  getAllStrapiSchemas,
   getDefinitionAttributesCount,
   getSchemaExtendsTypeName,
   getSchemaInterfaceName,
   getSchemaModelType,
   getTypeNode,
   toTypeLiteral,
-} = require('../../../generators/schemas/utils');
+} = require('../../../generators/common/models/utils');
 
 describe('Utils', () => {
-  describe('Get All Strapi Schemas', () => {
-    test('Get both components and content types', () => {
-      const strapi = {
-        contentTypes: {
-          ctA: {},
-          ctB: {},
-        },
-        components: {
-          comp1: {},
-          comp2: {},
-          comp3: {},
-        },
-      };
-
-      const schemas = getAllStrapiSchemas(strapi);
-
-      expect(schemas).toMatchObject({ ctA: {}, ctB: {}, comp1: {}, comp2: {}, comp3: {} });
-    });
-
-    test('Get only components if there is no content type', () => {
-      const strapi = {
-        contentTypes: {},
-
-        components: {
-          comp1: {},
-          comp2: {},
-          comp3: {},
-        },
-      };
-
-      const schemas = getAllStrapiSchemas(strapi);
-
-      expect(schemas).toMatchObject({ comp1: {}, comp2: {}, comp3: {} });
-    });
-
-    test('Get only content types if there is no component', () => {
-      const strapi = {
-        contentTypes: {
-          ctA: {},
-          ctB: {},
-        },
-
-        components: {},
-      };
-
-      const schemas = getAllStrapiSchemas(strapi);
-
-      expect(schemas).toMatchObject({ ctA: {}, ctB: {} });
-    });
-  });
-
   describe('Get Definition Attributes Count', () => {
     const createMainNode = (members = []) => {
       return factory.createInterfaceDeclaration(
-        undefined,
         undefined,
         factory.createIdentifier('Foo'),
         undefined,
@@ -79,7 +26,6 @@ describe('Utils', () => {
 
     const createPropertyDeclaration = (name, type) => {
       return factory.createPropertyDeclaration(
-        undefined,
         undefined,
         factory.createIdentifier(name),
         undefined,
@@ -174,10 +120,10 @@ describe('Utils', () => {
 
   describe('Get Schema Extends Type Name', () => {
     test.each([
-      [{ modelType: 'component', kind: null }, 'ComponentSchema'],
-      [{ modelType: 'contentType', kind: 'singleType' }, 'SingleTypeSchema'],
-      [{ modelType: 'contentType', kind: 'collectionType' }, 'CollectionTypeSchema'],
-      [{ modelType: 'invalidType', kind: 'foo' }, 'Schema'],
+      [{ modelType: 'component', kind: null }, 'Schema.Component'],
+      [{ modelType: 'contentType', kind: 'singleType' }, 'Schema.SingleType'],
+      [{ modelType: 'contentType', kind: 'collectionType' }, 'Schema.CollectionType'],
+      [{ modelType: 'invalidType', kind: 'foo' }, null],
     ])("Expect %p to generate %p as the base type for a schema's interface", (schema, expected) => {
       expect(getSchemaExtendsTypeName(schema)).toBe(expected);
     });

@@ -1,4 +1,7 @@
-import { has, get, omit } from 'lodash';
+import get from 'lodash/get';
+import has from 'lodash/has';
+import omit from 'lodash/omit';
+
 import LOCALIZED_FIELDS from './localizedFields';
 
 const localizedPath = ['pluginOptions', 'i18n', 'localized'];

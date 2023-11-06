@@ -15,7 +15,8 @@ const loopContentTypeNames = (api, callback) => {
   for (const contentTypeName of api.ctNames) {
     // Get the attributes found on the api's contentType
     const uid = `${api.getter}::${api.name}.${contentTypeName}`;
-    const { attributes, info: contentTypeInfo } = strapi.contentType(uid);
+
+    const { attributes, info: contentTypeInfo, kind } = strapi.contentType(uid);
 
     // Get the routes for the current api
     const routeInfo =
@@ -39,6 +40,7 @@ const loopContentTypeNames = (api, callback) => {
       attributes,
       uniqueName,
       contentTypeInfo,
+      kind,
     };
 
     result = {

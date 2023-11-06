@@ -1,6 +1,6 @@
-import { getRelationLink } from './getRelationLink';
-
 import { PUBLICATION_STATES } from '../constants';
+
+import { getRelationLink } from './getRelationLink';
 
 export const normalizeRelation = (relation, { shouldAddLink, mainFieldName, targetModel }) => {
   const nextRelation = { ...relation };

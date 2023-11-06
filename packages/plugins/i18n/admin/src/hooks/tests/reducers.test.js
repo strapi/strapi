@@ -1,5 +1,5 @@
+import { ADD_LOCALE, DELETE_LOCALE, RESOLVE_LOCALES, UPDATE_LOCALE } from '../constants';
 import reducers, { initialState } from '../reducers';
-import { RESOLVE_LOCALES, ADD_LOCALE, DELETE_LOCALE, UPDATE_LOCALE } from '../constants';
 
 describe('i18n reducer', () => {
   it('resolves the initial state when the action is not known', () => {

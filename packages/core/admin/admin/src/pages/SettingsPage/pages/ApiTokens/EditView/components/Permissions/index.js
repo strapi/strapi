@@ -1,14 +1,16 @@
 import React, { memo } from 'react';
+
+import { Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { Typography, Flex, Grid, GridItem } from '@strapi/design-system';
-import ContentTypesSection from '../ContenTypesSection';
+
+import { useApiTokenPermissions } from '../../../../../../../contexts/apiTokenPermissions';
 import ActionBoundRoutes from '../ActionBoundRoutes';
-import { useApiTokenPermissionsContext } from '../../../../../../../contexts/ApiTokenPermissions';
+import ContentTypesSection from '../ContenTypesSection';
 
 const Permissions = ({ ...props }) => {
   const {
     value: { data },
-  } = useApiTokenPermissionsContext();
+  } = useApiTokenPermissions();
   const { formatMessage } = useIntl();
 
   return (

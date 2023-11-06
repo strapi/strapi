@@ -5,10 +5,12 @@
  */
 /* eslint-disable import/no-cycle */
 import React from 'react';
+
 import get from 'lodash/get';
 import PropTypes from 'prop-types';
-import List from '../List';
+
 import useDataManager from '../../hooks/useDataManager';
+import List from '../List';
 import Tr from '../Tr';
 
 function ComponentList({

@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
-import { useSelector, shallowEqual } from 'react-redux';
-import axios from 'axios';
+
 import { useFetchClient } from '@strapi/helper-plugin';
-import formatLayouts from './utils/formatLayouts';
-import reducer, { initialState } from './reducer';
+import axios from 'axios';
+import { shallowEqual, useSelector } from 'react-redux';
+
 import { makeSelectModelAndComponentSchemas } from '../../pages/App/selectors';
-import { getRequestUrl } from '../../utils';
+
+import reducer, { initialState } from './reducer';
+import formatLayouts from './utils/formatLayouts';
 
 const useFetchContentTypeLayout = (contentTypeUID) => {
   const [{ error, isLoading, layout, layouts }, dispatch] = useReducer(reducer, initialState);
@@ -24,11 +26,11 @@ const useFetchContentTypeLayout = (contentTypeUID) => {
       dispatch({ type: 'GET_DATA' });
 
       try {
-        const endPoint = getRequestUrl(`content-types/${uid}/configuration`);
-
         const {
           data: { data },
-        } = await get(endPoint, { cancelToken: source.token });
+        } = await get(`/content-manager/content-types/${uid}/configuration`, {
+          cancelToken: source.token,
+        });
 
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
@@ -38,7 +40,6 @@ const useFetchContentTypeLayout = (contentTypeUID) => {
         if (axios.isCancel(error)) {
           return;
         }
-
         if (isMounted.current) {
           console.error(error);
         }

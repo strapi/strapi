@@ -1,83 +1,86 @@
-import React, { useEffect, useReducer, useRef } from 'react';
-import { Helmet } from 'react-helmet';
-import { useIntl } from 'react-intl';
+import React, { useReducer } from 'react';
+
+import {
+  Box,
+  Button,
+  ContentLayout,
+  Flex,
+  Grid,
+  GridItem,
+  HeaderLayout,
+  Layout,
+  Main,
+  ToggleInput,
+  Typography,
+} from '@strapi/design-system';
 import {
   CheckPagePermissions,
   LoadingIndicatorPage,
+  useFetchClient,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
-  useFetchClient,
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import {
-  Box,
-  Flex,
-  ToggleInput,
-  Typography,
-  Button,
-  Main,
-  Grid,
-  GridItem,
-  ContentLayout,
-  HeaderLayout,
-  Layout,
-} from '@strapi/design-system';
-import axios from 'axios';
 import isEqual from 'lodash/isEqual';
-import { getRequestUrl, getTrad } from '../../utils';
+import { Helmet } from 'react-helmet';
+import { useIntl } from 'react-intl';
+import { useMutation, useQuery } from 'react-query';
+
+import { PERMISSIONS } from '../../constants';
+import { getTrad } from '../../utils';
+
 import init from './init';
 import reducer, { initialState } from './reducer';
-import pluginPermissions from '../../permissions';
 
 export const SettingsPage = () => {
   const { formatMessage } = useIntl();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
   const { get, put } = useFetchClient();
+
   useFocusWhenNavigate();
 
-  const [{ initialData, isLoading, isSubmiting, modifiedData }, dispatch] = useReducer(
-    reducer,
-    initialState,
-    init
-  );
+  const [{ initialData, modifiedData }, dispatch] = useReducer(reducer, initialState, init);
 
-  const isMounted = useRef(true);
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ['upload', 'settings'],
+    async queryFn() {
+      const {
+        data: { data },
+      } = await get('/upload/settings');
 
-  useEffect(() => {
-    const CancelToken = axios.CancelToken;
-    const source = CancelToken.source();
+      return data;
+    },
+  });
 
-    const getData = async () => {
-      try {
-        const {
-          data: { data },
-        } = await get(getRequestUrl('settings'), {
-          cancelToken: source.token,
-        });
-
-        dispatch({
-          type: 'GET_DATA_SUCCEEDED',
-          data,
-        });
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    if (isMounted.current) {
-      getData();
+  React.useEffect(() => {
+    if (data) {
+      dispatch({
+        type: 'GET_DATA_SUCCEEDED',
+        data,
+      });
     }
-
-    return () => {
-      source.cancel('Operation canceled by the user.');
-      isMounted.current = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [data]);
 
   const isSaveButtonDisabled = isEqual(initialData, modifiedData);
+
+  const { mutateAsync, isLoading: isSubmiting } = useMutation({
+    async mutationFn(body) {
+      return put('/upload/settings', body);
+    },
+    onSuccess() {
+      refetch();
+
+      toggleNotification({
+        type: 'success',
+        message: { id: 'notification.form.success.fields' },
+      });
+    },
+    onError(err) {
+      console.error(err);
+    },
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -88,24 +91,7 @@ export const SettingsPage = () => {
 
     lockApp();
 
-    dispatch({ type: 'ON_SUBMIT' });
-
-    try {
-      await put(getRequestUrl('settings'), modifiedData);
-
-      dispatch({
-        type: 'SUBMIT_SUCCEEDED',
-      });
-
-      toggleNotification({
-        type: 'success',
-        message: { id: 'notification.form.success.fields' },
-      });
-    } catch (err) {
-      console.error(err);
-
-      dispatch({ type: 'ON_SUBMIT_ERROR' });
-    }
+    await mutateAsync(modifiedData);
 
     unlockApp();
   };
@@ -135,7 +121,6 @@ export const SettingsPage = () => {
           primaryAction={
             <Button
               disabled={isSaveButtonDisabled}
-              data-testid="save-button"
               loading={isSubmiting}
               type="submit"
               startIcon={<Check />}
@@ -172,7 +157,6 @@ export const SettingsPage = () => {
                       <GridItem col={6} s={12}>
                         <ToggleInput
                           aria-label="responsiveDimensions"
-                          data-testid="responsiveDimensions"
                           checked={modifiedData.responsiveDimensions}
                           hint={formatMessage({
                             id: getTrad('settings.form.responsiveDimensions.description'),
@@ -202,7 +186,6 @@ export const SettingsPage = () => {
                       <GridItem col={6} s={12}>
                         <ToggleInput
                           aria-label="sizeOptimization"
-                          data-testid="sizeOptimization"
                           checked={modifiedData.sizeOptimization}
                           hint={formatMessage({
                             id: getTrad('settings.form.sizeOptimization.description'),
@@ -232,7 +215,6 @@ export const SettingsPage = () => {
                       <GridItem col={6} s={12}>
                         <ToggleInput
                           aria-label="autoOrientation"
-                          data-testid="autoOrientation"
                           checked={modifiedData.autoOrientation}
                           hint={formatMessage({
                             id: getTrad('settings.form.autoOrientation.description'),
@@ -272,7 +254,7 @@ export const SettingsPage = () => {
 };
 
 const ProtectedSettingsPage = () => (
-  <CheckPagePermissions permissions={pluginPermissions.settings}>
+  <CheckPagePermissions permissions={PERMISSIONS.settings}>
     <SettingsPage />
   </CheckPagePermissions>
 );

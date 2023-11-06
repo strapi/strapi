@@ -1,4 +1,4 @@
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 
 const cleanPermissions = (permissions) =>
   Object.keys(permissions).reduce((acc, current) => {

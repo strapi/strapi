@@ -1,8 +1,9 @@
 import { WebSocket } from 'ws';
 import { TRANSFER_PATH } from '../../../remote/constants';
 import { CommandMessage } from '../../../../../types/remote/protocol/client';
-import { createDispatcher } from '../utils';
+import { createDispatcher } from '../../utils';
 
+jest.useFakeTimers();
 jest.mock('ws', () => ({
   WebSocket: jest.fn().mockImplementation(() => {
     return {

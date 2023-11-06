@@ -1,6 +1,6 @@
-import { stringify, parse } from 'qs';
 import get from 'lodash/get';
 import isObject from 'lodash/isObject';
+import { parse, stringify } from 'qs';
 
 /**
  * Updates the leafs of the first argument

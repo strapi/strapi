@@ -5,11 +5,12 @@
  */
 
 import React from 'react';
+
+import { Box, Grid, GridItem, Typography } from '@strapi/design-system';
+import { GenericInput } from '@strapi/helper-plugin';
+import get from 'lodash/get';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import get from 'lodash/get';
-import { GenericInput } from '@strapi/helper-plugin';
-import { Box, Grid, GridItem, Typography } from '@strapi/design-system';
 
 /* eslint-disable react/no-array-index-key */
 const TabForm = ({ form, formErrors, genericInputProps, modifiedData, onChange }) => {
@@ -34,7 +35,10 @@ const TabForm = ({ form, formErrors, genericInputProps, modifiedData, onChange }
           {section.items.map((input, i) => {
             const key = `${sectionIndex}.${i}`;
 
-            const value = get(modifiedData, input.name, '');
+            /**
+             * Use undefined as the default value because not every input wants a string e.g. Date pickers
+             */
+            const value = get(modifiedData, input.name, undefined);
 
             // When extending the yup schema of an existing field (like in https://github.com/strapi/strapi/blob/293ff3b8f9559236609d123a2774e3be05ce8274/packages/strapi-plugin-i18n/admin/src/index.js#L52)
             // and triggering a yup validation error in the UI (missing a required field for example)

@@ -48,7 +48,15 @@ module.exports = {
   async find(ctx) {
     const userService = getService('user');
 
-    const { results, pagination } = await userService.findPage(ctx.query);
+    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+      ability: ctx.state.userAbility,
+      model: 'admin::user',
+    });
+
+    await permissionsManager.validateQuery(ctx.query);
+    const sanitizedQuery = await permissionsManager.sanitizeQuery(ctx.query);
+
+    const { results, pagination } = await userService.findPage(sanitizedQuery);
 
     ctx.body = {
       data: {

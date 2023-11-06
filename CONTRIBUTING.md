@@ -46,17 +46,20 @@ The Strapi core team will review your pull request and either merge it, request 
 
 ## Contribution Prerequisites
 
-- You have [Node.js](https://nodejs.org/en/) at version >= v14 and <= v18 and [Yarn](https://yarnpkg.com/en/) at v1.2.0+ installed.
+- You have [Node.js](https://nodejs.org/en/) at version >= v18 and <= v20 and [Yarn](https://yarnpkg.com/en/) at v1.2.0+ installed.
 - You are familiar with [Git](https://git-scm.com).
 
 **Before submitting your pull request** make sure the following requirements are fulfilled:
 
 - Fork the repository and create your new branch from `main`.
+- Run `yarn install` in the root of the repository.
 - Run `yarn setup` in the root of the repository.
 - If you've fixed a bug or added code that should be tested, please make sure to add tests
 - Ensure the following test suites are passing:
   - `yarn test:unit`
   - `yarn test:front`
+  - `yarn test:e2e --setup --concurrency=1`
+    - you **_may_** need to install Playwright browsers first: `yarn playwright install`
 - Make sure your code lints by running `yarn lint`.
 - If your contribution fixes an existing issue, please make sure to link it in your pull request.
 
@@ -78,6 +81,7 @@ Go to the root of the repository and run the setup:
 
 ```bash
 cd strapi
+yarn install
 yarn setup
 
 ```
@@ -116,6 +120,7 @@ The administration panel should now be available at http://localhost:4000/admin.
 - `yarn test:unit` runs the back-end unit tests.
 - `yarn test:api` runs the api integration tests.
 - `yarn test:generate-app` generates a test application.
+- `yarn test:run-app` runs a test application.
 - `yarn test:start-app` starts the test application.
 
 ---
@@ -125,9 +130,9 @@ The administration panel should now be available at http://localhost:4000/admin.
 The API integration tests require a Strapi app to be able to run. You can generate a "test app" using `yarn test:generate-app <database>`:
 
 ```bash
-$ yarn test:generate-app sqlite
-$ yarn test:generate-app postgres
-$ yarn test:generate-app mysql
+$ yarn test:generate-app --db=sqlite
+$ yarn test:generate-app --db=postgres
+$ yarn test:generate-app --db=mysql
 ```
 
 A new app is required every time you run the API integration tests, otherwise the test suite will fail. A command is available to make this process easier: `yarn test:api`.
@@ -136,7 +141,7 @@ This command runs tests using jest behind the scenes. Options for jest can be pa
 
 ### Changing the database
 
-By default the script run by `test:api` an app that uses `sqlite` as a database. But you can run the test suites using different databases:
+By default the script run by `test:api` generates an app that uses `sqlite` as a database. But you can run the test suites using different databases:
 
 ```bash
 $ yarn test:api --db=sqlite
@@ -183,4 +188,4 @@ Before submitting an issue you need to make sure:
   - Make sure your application has a clean `node_modules` directory, meaning:
     - you didn't link any dependencies (e.g., by running `yarn link`)
     - you haven't made any inline changes to files in the `node_modules` directory
-    - you don't have any global dependency loops. If you aren't sure, the easiest way to double-check any of the above is to run: `$ rm -rf node_modules && yarn cache clean && yarn setup`.
+    - you don't have any global dependency loops. If you aren't sure, the easiest way to double-check any of the above is to run: `$ rm -rf node_modules && yarn cache clean && yarn install && yarn setup`.

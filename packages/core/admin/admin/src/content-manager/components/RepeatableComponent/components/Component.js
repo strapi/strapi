@@ -1,34 +1,32 @@
 /* eslint-disable import/no-cycle */
 import React, { memo, useEffect, useRef } from 'react';
-import PropTypes from 'prop-types';
-import { getEmptyImage } from 'react-dnd-html5-backend';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
-import toString from 'lodash/toString';
-import get from 'lodash/get';
 
-import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import {
   Accordion,
-  AccordionToggle,
   AccordionContent,
+  AccordionToggle,
+  Box,
+  Flex,
   Grid,
   GridItem,
-  Flex,
-  Box,
   IconButton,
 } from '@strapi/design-system';
-import { Trash, Drag } from '@strapi/icons';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
+import { Drag, Trash } from '@strapi/icons';
+import get from 'lodash/get';
+import toString from 'lodash/toString';
+import PropTypes from 'prop-types';
+import { getEmptyImage } from 'react-dnd-html5-backend';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 import { useDragAndDrop } from '../../../hooks/useDragAndDrop';
-
+import useLazyComponents from '../../../hooks/useLazyComponents';
 import { composeRefs, getTrad, ItemTypes } from '../../../utils';
-
-import Inputs from '../../Inputs';
 import FieldComponent from '../../FieldComponent';
+import Inputs from '../../Inputs';
 
 import Preview from './Preview';
-import useLazyComponents from '../../../hooks/useLazyComponents';
 
 const CustomIconButton = styled(IconButton)`
   background-color: transparent;
@@ -97,11 +95,17 @@ const DraggedItem = ({
   const accordionRef = useRef(null);
   const { formatMessage } = useIntl();
 
-  const [parentFieldName] = componentFieldName.split('.');
+  /**
+   * The last item in the fieldName array will be the index of this component.
+   * Drag and drop should be isolated to the parent component so nested repeatable
+   * components are not affected by the drag and drop of the parent component in
+   * their own re-ordering context.
+   */
+  const componentKey = componentFieldName.split('.').slice(0, -1).join('.');
 
   const [{ handlerId, isDragging, handleKeyDown }, boxRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop(!isReadOnly, {
-      type: `${ItemTypes.COMPONENT}_${parentFieldName}`,
+      type: `${ItemTypes.COMPONENT}_${componentKey}`,
       index,
       item: {
         displayedValue,

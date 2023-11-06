@@ -1,7 +1,9 @@
 import React from 'react';
+
+import { Box, Flex, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Typography, Box, Flex } from '@strapi/design-system';
+
 import { Wrapper } from './components';
 
 const CustomRadioGroup = ({ intlLabel, name, onChange, radios, value }) => {

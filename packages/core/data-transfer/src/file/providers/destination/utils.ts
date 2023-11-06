@@ -1,5 +1,5 @@
 import { Writable } from 'stream';
-import { join } from 'path';
+import { posix } from 'path';
 import tar from 'tar-stream';
 
 /**
@@ -9,7 +9,8 @@ import tar from 'tar-stream';
 export const createFilePathFactory =
   (type: string) =>
   (fileIndex = 0): string => {
-    return join(
+    // always write tar files with posix paths so we have a standard format for paths regardless of system
+    return posix.join(
       // "{type}" directory
       type,
       // "${type}_XXXXX.jsonl" file

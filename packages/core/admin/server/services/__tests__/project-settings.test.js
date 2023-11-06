@@ -73,7 +73,7 @@ global.strapi = {
 };
 
 describe('Project setting', () => {
-  beforeEach(jest.resetAllMocks);
+  beforeEach(jest.clearAllMocks);
 
   describe('parseFilesData', () => {
     it('Should parse valid files object', async () => {

@@ -1,23 +1,27 @@
+import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import * as yup from 'yup';
-import { prefixPluginTranslations } from '@strapi/helper-plugin';
+
 import pluginPkg from '../../package.json';
+
 import CheckboxConfirmation from './components/CheckboxConfirmation';
 import CMEditViewInjectedComponents from './components/CMEditViewInjectedComponents';
+import DeleteModalAdditionalInfos from './components/CMListViewInjectedComponents/DeleteModalAdditionalInfos';
+import PublishModalAdditionalInfos from './components/CMListViewInjectedComponents/PublishModalAdditionalInfos';
+import UnpublishModalAdditionalInfos from './components/CMListViewInjectedComponents/UnpublishModalAdditionalInfos';
 import Initializer from './components/Initializer';
 import LocalePicker from './components/LocalePicker';
-import middlewares from './middlewares';
-import pluginPermissions from './permissions';
-import pluginId from './pluginId';
-import { getTrad } from './utils';
-import mutateCTBContentTypeSchema from './utils/mutateCTBContentTypeSchema';
-import LOCALIZED_FIELDS from './utils/localizedFields';
-import i18nReducers from './hooks/reducers';
-import DeleteModalAdditionalInfos from './components/CMListViewInjectedComponents/DeleteModalAdditionalInfos';
+import { PERMISSIONS } from './constants';
+import addColumnToTableHook from './contentManagerHooks/addColumnToTable';
 import addLocaleToCollectionTypesLinksHook from './contentManagerHooks/addLocaleToCollectionTypesLinks';
 import addLocaleToSingleTypesLinksHook from './contentManagerHooks/addLocaleToSingleTypesLinks';
-import addColumnToTableHook from './contentManagerHooks/addColumnToTable';
 import mutateEditViewLayoutHook from './contentManagerHooks/mutateEditViewLayout';
+import i18nReducers from './hooks/reducers';
+import middlewares from './middlewares';
+import pluginId from './pluginId';
+import { getTrad } from './utils';
+import LOCALIZED_FIELDS from './utils/localizedFields';
+import mutateCTBContentTypeSchema from './utils/mutateCTBContentTypeSchema';
 
 const name = pluginPkg.strapi.name;
 
@@ -58,13 +62,11 @@ export default {
       to: '/settings/internationalization',
 
       async Component() {
-        const component = await import(
-          /* webpackChunkName: "i18n-settings-page" */ './pages/SettingsPage'
-        );
+        const component = await import('./pages/SettingsPage');
 
         return component;
       },
-      permissions: pluginPermissions.accessMain,
+      permissions: PERMISSIONS.accessMain,
     });
 
     app.injectContentManagerComponent('editView', 'informations', {
@@ -80,6 +82,16 @@ export default {
     app.injectContentManagerComponent('listView', 'deleteModalAdditionalInfos', {
       name: 'i18n-delete-bullets-in-modal',
       Component: DeleteModalAdditionalInfos,
+    });
+
+    app.injectContentManagerComponent('listView', 'publishModalAdditionalInfos', {
+      name: 'i18n-publish-bullets-in-modal',
+      Component: PublishModalAdditionalInfos,
+    });
+
+    app.injectContentManagerComponent('listView', 'unpublishModalAdditionalInfos', {
+      name: 'i18n-unpublish-bullets-in-modal',
+      Component: UnpublishModalAdditionalInfos,
     });
 
     const ctbPlugin = app.getPlugin('content-type-builder');
@@ -180,9 +192,7 @@ export default {
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
       locales.map((locale) => {
-        return import(
-          /* webpackChunkName: "i18n-translation-[request]" */ `./translations/${locale}.json`
-        )
+        return import(`./translations/${locale}.json`)
           .then(({ default: data }) => {
             return {
               data: prefixPluginTranslations(data, pluginId),

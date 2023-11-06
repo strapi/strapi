@@ -5,9 +5,11 @@
  */
 
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
 import Input from '../index';
 
 const messages = {};
@@ -34,6 +36,13 @@ describe('<Input />', () => {
     } = render(makeApp('test', 'text', 'test'));
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c1 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
       .c0 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
@@ -47,20 +56,6 @@ describe('<Input />', () => {
         -ms-flex-direction: column;
         flex-direction: column;
         gap: 4px;
-      }
-
-      .c2 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
       }
 
       .c3 {
@@ -81,11 +76,15 @@ describe('<Input />', () => {
         justify-content: space-between;
       }
 
-      .c1 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
+      .c2 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
       }
 
       .c5 {
@@ -157,14 +156,10 @@ describe('<Input />', () => {
             class="c0"
           >
             <label
-              class="c1"
-              for="1"
+              class="c1 c2"
+              for=":r0:"
             >
-              <div
-                class="c2"
-              >
-                Enabled
-              </div>
+              Enabled
             </label>
             <div
               class="c3 c4"
@@ -175,7 +170,7 @@ describe('<Input />', () => {
                 aria-label="test"
                 aria-required="false"
                 class="c5"
-                id="1"
+                id=":r0:"
                 name="test"
                 placeholder=""
                 type="text"
@@ -191,7 +186,9 @@ describe('<Input />', () => {
   it('should set the value correctly when the input\'s name is "noName"', () => {
     const { getByLabelText } = render(makeApp('noName', 'text', 'test'));
 
-    expect(getByLabelText('noName').value).toBe(`${strapi.backendURL}/api/connect/email/callback`);
+    expect(getByLabelText('noName').value).toBe(
+      `${window.strapi.backendURL}/api/connect/email/callback`
+    );
   });
 
   it('should display the toggleCheckbox correctly', () => {

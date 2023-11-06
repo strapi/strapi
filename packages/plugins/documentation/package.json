@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-documentation",
-  "version": "4.7.1",
+  "version": "4.15.1",
   "description": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
   "repository": {
     "type": "git",
@@ -20,51 +20,71 @@
       "url": "https://strapi.io"
     }
   ],
+  "exports": {
+    "./strapi-admin": {
+      "source": "./admin/src/index.js",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.js"
+    },
+    "./strapi-server": {
+      "source": "./strapi-server.js",
+      "require": "./strapi-server.js",
+      "default": "./strapi-server.js"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "build": "pack-up build",
+    "clean": "run -T rimraf dist",
+    "lint": "run -T eslint .",
+    "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
+    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
+    "test:unit": "jest --verbose",
+    "test:unit:watch": "run -T jest --watch",
+    "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/design-system": "1.6.5",
-    "@strapi/helper-plugin": "4.7.1",
-    "@strapi/icons": "1.6.5",
-    "@strapi/utils": "4.7.1",
+    "@strapi/design-system": "1.13.0",
+    "@strapi/helper-plugin": "4.15.1",
+    "@strapi/icons": "1.13.0",
+    "@strapi/utils": "4.15.1",
     "bcryptjs": "2.4.3",
     "cheerio": "^1.0.0-rc.12",
-    "formik": "2.2.9",
+    "formik": "2.4.0",
     "fs-extra": "10.0.0",
+    "immer": "9.0.19",
     "koa-static": "^5.0.0",
     "lodash": "4.17.21",
     "path-to-regexp": "6.2.1",
-    "pluralize": "8.0.0",
-    "react-copy-to-clipboard": "^5.1.0",
     "react-helmet": "^6.1.0",
-    "react-intl": "6.2.8",
-    "react-query": "3.24.3",
-    "react-redux": "8.0.5",
-    "redux": "^4.2.1",
-    "reselect": "^4.1.7",
-    "swagger-ui-dist": "4.15.5",
+    "react-intl": "6.4.1",
+    "react-query": "3.39.3",
+    "swagger-ui-dist": "4.19.0",
     "yaml": "1.10.2",
-    "yup": "^0.32.9"
+    "yup": "0.32.9"
   },
-  "peerDependencies": {
-    "@strapi/strapi": "^4.0.0",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
+  "devDependencies": {
+    "@apidevtools/swagger-parser": "^10.1.0",
+    "@strapi/pack-up": "workspace:*",
+    "@strapi/strapi": "4.15.1",
+    "@testing-library/react": "14.0.0",
+    "@testing-library/user-event": "14.4.3",
+    "msw": "1.3.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-router-dom": "5.3.4",
     "styled-components": "5.3.3"
   },
-  "devDependencies": {
-    "@testing-library/react": "12.1.4",
-    "history": "^4.9.0",
-    "msw": "1.0.1",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
+  "peerDependencies": {
+    "@strapi/strapi": "^4.0.0",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "5.3.4",
     "styled-components": "5.3.3"
   },
   "engines": {
-    "node": ">=14.19.1 <=18.x.x",
+    "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {

@@ -1,15 +1,16 @@
 import React from 'react';
-import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
-import { QueryClientProvider, QueryClient } from 'react-query';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
+
 import { PendingAssetStep } from '../PendingAssetStep';
 
 jest.mock('../../../../utils/getTrad', () => (x) => x);
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
 }));
 
 const queryClient = new QueryClient({

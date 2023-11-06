@@ -1,14 +1,16 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useRef, useState } from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { Box, Flex, Typography, ModalFooter, Button } from '@strapi/design-system';
+
+import { Box, Button, Flex, ModalFooter, Typography } from '@strapi/design-system';
 import { useTracking } from '@strapi/helper-plugin';
 import { PicturePlus } from '@strapi/icons';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+
+import { AssetSource } from '../../../constants';
 import getTrad from '../../../utils/getTrad';
 import { rawFileToAsset } from '../../../utils/rawFileToAsset';
-import { AssetSource } from '../../../constants';
 
 const Wrapper = styled(Flex)`
   flex-direction: column;

@@ -1,6 +1,8 @@
 /* eslint-disable consistent-return */
 import produce from 'immer';
-import { set, get, take } from 'lodash';
+import get from 'lodash/get';
+import set from 'lodash/set';
+import take from 'lodash/take';
 
 export const initialState = {
   initialData: {},

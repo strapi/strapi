@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
+
+import { Button } from '@strapi/design-system';
+import { ConfirmDialog } from '@strapi/helper-plugin';
+import { Refresh } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Button } from '@strapi/design-system';
-import { Refresh } from '@strapi/icons';
-import { ConfirmDialog } from '@strapi/helper-plugin';
-import { useRegenerate } from '../../../../../hooks';
 
-export const Regenerate = ({ onRegenerate, idToRegenerate, backUrl }) => {
+import { useRegenerate } from '../../../hooks/useRegenerate';
+
+export const Regenerate = ({ onRegenerate, idToRegenerate, backUrl, onError }) => {
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const { regenerateData, isLoadingConfirmation } = useRegenerate(
     backUrl,
     idToRegenerate,
-    onRegenerate
+    onRegenerate,
+    onError
   );
   const handleConfirmRegeneration = async () => {
     regenerateData();
@@ -62,12 +65,13 @@ export const Regenerate = ({ onRegenerate, idToRegenerate, backUrl }) => {
   );
 };
 
-Regenerate.defaultProps = { onRegenerate() {} };
+Regenerate.defaultProps = { onRegenerate() {}, onError: undefined };
 
 Regenerate.propTypes = {
   onRegenerate: PropTypes.func,
   idToRegenerate: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
   backUrl: PropTypes.string.isRequired,
+  onError: PropTypes.func,
 };
 
 export default Regenerate;

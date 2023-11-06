@@ -1,4 +1,7 @@
-import { cloneDeep, get, set } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import get from 'lodash/get';
+import set from 'lodash/set';
+
 import { mergeMetasWithSchema } from '../../../utils';
 
 const getRelationModel = (targetModel, models) => models.find((model) => model.uid === targetModel);
@@ -159,6 +162,6 @@ export default formatLayouts;
 export {
   formatLayoutWithMetas,
   formatListLayoutWithMetas,
-  shouldDisplayRelationLink,
   getDisplayedModels,
+  shouldDisplayRelationLink,
 };

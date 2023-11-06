@@ -1,7 +1,6 @@
 'use strict';
 
 const { entries, mapValues, omit } = require('lodash/fp');
-const { idArg, nonNull } = require('nexus');
 const {
   pagination: { withDefaultPagination },
   contentTypes: { hasDraftAndPublish },
@@ -38,7 +37,7 @@ module.exports = ({ strapi }) => {
       // Collection Types
       if (kind === 'collectionType') {
         if (!multiple) {
-          return { id: nonNull(idArg()) };
+          return { id: 'ID' };
         }
 
         const params = {

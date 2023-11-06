@@ -1,16 +1,17 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
 
-import CreateAction from '..';
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { fireEvent, render } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
+
+import { CreateActionCE } from '..';
 
 const onClickSpy = jest.fn();
 
 const ComponentFixture = (props) => (
   <ThemeProvider theme={lightTheme}>
     <IntlProvider locale="en" messages={{}}>
-      <CreateAction onClick={onClickSpy} {...props} />
+      <CreateActionCE onClick={onClickSpy} {...props} />
     </IntlProvider>
   </ThemeProvider>
 );

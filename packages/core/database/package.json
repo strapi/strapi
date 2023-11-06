@@ -1,6 +1,6 @@
 {
   "name": "@strapi/database",
-  "version": "4.7.1",
+  "version": "4.15.1",
   "description": "Strapi's database layer",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -23,24 +23,39 @@
       "url": "https://strapi.io"
     }
   ],
-  "main": "./lib/index.js",
-  "directories": {
-    "lib": "./lib"
-  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "./dist"
+  ],
   "scripts": {
-    "test:unit": "jest --verbose"
+    "build": "pack-up build",
+    "clean": "run -T rimraf ./dist",
+    "lint": "run -T tsc --noEmit && run -T eslint .",
+    "prepublishOnly": "yarn clean && yarn build",
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
+    "watch": "pack-up watch"
   },
   "dependencies": {
-    "date-fns": "2.29.3",
+    "@strapi/utils": "4.15.1",
+    "date-fns": "2.30.0",
     "debug": "4.3.4",
     "fs-extra": "10.0.0",
-    "knex": "2.4.0",
+    "knex": "2.5.0",
     "lodash": "4.17.21",
-    "semver": "7.3.8",
-    "umzug": "3.1.1"
+    "semver": "7.5.4",
+    "umzug": "3.2.1"
+  },
+  "devDependencies": {
+    "@strapi/pack-up": "workspace:*",
+    "eslint-config-custom": "4.15.1",
+    "tsconfig": "4.15.1"
   },
   "engines": {
-    "node": ">=14.19.1 <=18.x.x",
+    "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   }
 }

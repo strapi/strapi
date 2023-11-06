@@ -1,9 +1,11 @@
 import { useMemo } from 'react';
-import { get, take } from 'lodash';
-import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
-import { getFieldName } from '../../../utils';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
+import get from 'lodash/get';
+import take from 'lodash/take';
+
 import { useContentTypeLayout } from '../../../hooks';
+import { getFieldName } from '../../../utils';
 
 function useSelect({ isFromDynamicZone, name }) {
   const {

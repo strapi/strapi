@@ -1,20 +1,23 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+
 import {
-  ModalHeader,
-  Typography,
-  Divider,
   Box,
-  Tabs,
+  Divider,
+  ModalHeader,
   Tab,
   TabGroup,
-  TabPanels,
   TabPanel,
+  TabPanels,
+  Tabs,
+  Typography,
 } from '@strapi/design-system';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { FromUrlForm } from './FromUrlForm';
-import { FromComputerForm } from './FromComputerForm';
+
 import getTrad from '../../../utils/getTrad';
+
+import { FromComputerForm } from './FromComputerForm';
+import { FromUrlForm } from './FromUrlForm';
 
 export const AddAssetStep = ({ onClose, onAddAsset, trackedLocation }) => {
   const { formatMessage } = useIntl();

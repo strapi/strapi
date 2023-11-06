@@ -1,12 +1,12 @@
-import PropTypes from 'prop-types';
 import React from 'react';
-import { useIntl } from 'react-intl';
-import { components } from 'react-select';
-import styled from 'styled-components';
 
 import { Flex, Icon, Typography } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
-import { ChevronUp, ChevronDown } from '@strapi/icons';
+import { ChevronDown, ChevronUp } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import { components } from 'react-select';
+import styled from 'styled-components';
 
 const ToggleButton = styled(Flex)`
   align-self: flex-end;

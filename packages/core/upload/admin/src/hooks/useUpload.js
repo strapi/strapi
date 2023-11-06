@@ -1,11 +1,12 @@
-import axios from 'axios';
 import { useRef, useState } from 'react';
-import { useMutation, useQueryClient } from 'react-query';
-import { useIntl } from 'react-intl';
-import { useFetchClient } from '@strapi/helper-plugin';
 
-import { getTrad } from '../utils';
+import { useFetchClient } from '@strapi/helper-plugin';
+import axios from 'axios';
+import { useIntl } from 'react-intl';
+import { useMutation, useQueryClient } from 'react-query';
+
 import pluginId from '../pluginId';
+import { getTrad } from '../utils';
 
 const endpoint = `/${pluginId}`;
 

@@ -1,9 +1,9 @@
-const baseConfig = require('../../../jest.base-config.front');
-const pkg = require('./package.json');
-
 module.exports = {
-  ...baseConfig,
-  displayName: (pkg.strapi && pkg.strapi.name) || pkg.name,
-  roots: [__dirname],
-  collectCoverageFrom: ['<rootDir>/packages/core/helper-plugin/lib/src/**/*.js'],
+  preset: '../../../jest-preset.front.js',
+  collectCoverageFrom: ['<rootDir>/packages/core/helper-plugin/src/**/*.js'],
+  displayName: 'Helper plugin',
+  moduleNameMapper: {
+    '^@tests/(.*)$': '<rootDir>/tests/$1',
+  },
+  setupFilesAfterEnv: ['./tests/setup.ts'],
 };

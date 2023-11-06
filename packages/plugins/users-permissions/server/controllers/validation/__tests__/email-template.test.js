@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-disable no-template-curly-in-string */
+
 const { isValidEmailTemplate } = require('../email-template');
 
 describe('isValidEmailTemplate', () => {

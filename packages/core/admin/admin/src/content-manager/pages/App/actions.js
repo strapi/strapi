@@ -1,12 +1,24 @@
-import { GET_DATA, RESET_PROPS, SET_CONTENT_TYPE_LINKS } from './constants';
+import { GET_INIT_DATA, RESET_INIT_DATA, SET_INIT_DATA } from './constants';
 
-export const getData = () => ({
-  type: GET_DATA,
+export const getInitData = () => ({
+  type: GET_INIT_DATA,
 });
 
-export const resetProps = () => ({ type: RESET_PROPS });
+export const resetInitData = () => ({ type: RESET_INIT_DATA });
 
-export const setContentTypeLinks = (authorizedCtLinks, authorizedStLinks, models, components) => ({
-  type: SET_CONTENT_TYPE_LINKS,
-  data: { authorizedCtLinks, authorizedStLinks, components, contentTypeSchemas: models },
+export const setInitData = ({
+  authorizedCollectionTypeLinks,
+  authorizedSingleTypeLinks,
+  contentTypeSchemas,
+  components,
+  fieldSizes,
+}) => ({
+  type: SET_INIT_DATA,
+  data: {
+    authorizedCollectionTypeLinks,
+    authorizedSingleTypeLinks,
+    components,
+    contentTypeSchemas,
+    fieldSizes,
+  },
 });

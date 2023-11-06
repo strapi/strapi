@@ -5,9 +5,11 @@
 // Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
+import { Information } from '@strapi/icons';
+
 import pluginPkg from '../../package.json';
-import PluginIcon from './components/PluginIcon';
-import pluginPermissions from './permissions';
+
+import { PERMISSIONS } from './constants';
 import pluginId from './pluginId';
 
 const name = pluginPkg.strapi.name;
@@ -16,16 +18,14 @@ export default {
   register(app) {
     app.addMenuLink({
       to: `/plugins/${pluginId}`,
-      icon: PluginIcon,
+      icon: Information,
       intlLabel: {
         id: `${pluginId}.plugin.name`,
         defaultMessage: 'Documentation',
       },
-      permissions: pluginPermissions.main,
+      permissions: PERMISSIONS.main,
       async Component() {
-        const component = await import(
-          /* webpackChunkName: "documentation-page" */ './pages/PluginPage'
-        );
+        const component = await import('./pages/PluginPage');
 
         return component;
       },
@@ -45,21 +45,17 @@ export default {
       id: 'documentation',
       to: `/settings/${pluginId}`,
       async Component() {
-        const component = await import(
-          /* webpackChunkName: "documentation-settings" */ './pages/SettingsPage'
-        );
+        const component = await import('./pages/SettingsPage');
 
         return component;
       },
-      permissions: pluginPermissions.main,
+      permissions: PERMISSIONS.main,
     });
   },
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
       locales.map((locale) => {
-        return import(
-          /* webpackChunkName: "documentation-translation-[request]" */ `./translations/${locale}.json`
-        )
+        return import(`./translations/${locale}.json`)
           .then(({ default: data }) => {
             return {
               data: prefixPluginTranslations(data, pluginId),

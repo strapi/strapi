@@ -10,7 +10,15 @@ interface IState {
   step: Step | null;
 }
 
-export const createFlow = (flow: readonly Step[]) => {
+export interface TransferFlow {
+  has(step: Step): boolean;
+  can(step: Step): boolean;
+  cannot(step: Step): boolean;
+  set(step: Step): this;
+  get(): Step | null;
+}
+
+export const createFlow = (flow: readonly Step[]): TransferFlow => {
   const state: IState = { step: null };
 
   /**
@@ -74,5 +82,3 @@ export const createFlow = (flow: readonly Step[]) => {
     },
   };
 };
-
-export type TransferFlow = ReturnType<typeof createFlow>;

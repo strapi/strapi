@@ -17,14 +17,14 @@ const {
   sanitize,
   nameToSlug,
   contentTypes: contentTypesUtils,
-  webhook: webhookUtils,
   errors: { ApplicationError, NotFoundError },
   file: { bytesToKbytes },
 } = require('@strapi/utils');
 
-const { MEDIA_UPDATE, MEDIA_CREATE, MEDIA_DELETE } = webhookUtils.webhookEvents;
-
-const { FILE_MODEL_UID } = require('../constants');
+const {
+  FILE_MODEL_UID,
+  ALLOWED_WEBHOOK_EVENTS: { MEDIA_CREATE, MEDIA_UPDATE, MEDIA_DELETE },
+} = require('../constants');
 const { getService } = require('../utils');
 
 const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
@@ -187,7 +187,7 @@ module.exports = ({ strapi }) => ({
    * @param {*} fileData
    */
   async uploadImage(fileData) {
-    const { getDimensions, generateThumbnail, generateResponsiveFormats, isOptimizableImage } =
+    const { getDimensions, generateThumbnail, generateResponsiveFormats, isResizableImage } =
       getService('image-manipulation');
 
     // Store width and height of the original image
@@ -206,6 +206,7 @@ module.exports = ({ strapi }) => ({
       _.set(fileData, 'formats.thumbnail', thumbnailFile);
     };
 
+    // Generate thumbnail and responsive formats
     const uploadResponsiveFormat = async (format) => {
       const { key, file } = format;
       await getService('provider').upload(file);
@@ -218,7 +219,7 @@ module.exports = ({ strapi }) => ({
     uploadPromises.push(getService('provider').upload(fileData));
 
     // Generate & Upload thumbnail and responsive formats
-    if (await isOptimizableImage(fileData)) {
+    if (await isResizableImage(fileData)) {
       const thumbnailFile = await generateThumbnail(fileData);
       if (thumbnailFile) {
         uploadPromises.push(uploadThumbnail(thumbnailFile));

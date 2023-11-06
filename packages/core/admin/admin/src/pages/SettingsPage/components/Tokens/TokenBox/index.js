@@ -1,44 +1,47 @@
-import React, { useRef } from 'react';
-import { useIntl } from 'react-intl';
-import { ContentBox, useNotification, useTracking } from '@strapi/helper-plugin';
+import React from 'react';
+
 import { IconButton } from '@strapi/design-system';
+import { ContentBox, useClipboard, useNotification, useTracking } from '@strapi/helper-plugin';
 import { Duplicate, Key } from '@strapi/icons';
 import PropTypes from 'prop-types';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { useIntl } from 'react-intl';
 
 const TokenBox = ({ token, tokenType }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
-  const trackUsageRef = useRef(trackUsage);
+
+  const { copy } = useClipboard();
+
+  const handleClick = (token) => async () => {
+    const didCopy = await copy(token);
+
+    if (didCopy) {
+      trackUsage('didCopyTokenKey', {
+        tokenType,
+      });
+      toggleNotification({
+        type: 'success',
+        message: { id: 'Settings.tokens.notification.copied' },
+      });
+    }
+  };
 
   return (
     <ContentBox
       endAction={
         token && (
           <span style={{ alignSelf: 'start' }}>
-            <CopyToClipboard
-              onCopy={() => {
-                trackUsageRef.current('didCopyTokenKey', {
-                  tokenType,
-                });
-                toggleNotification({
-                  type: 'success',
-                  message: { id: 'Settings.tokens.notification.copied' },
-                });
-              }}
-              text={token}
-            >
-              <IconButton
-                label={formatMessage({
-                  id: 'app.component.CopyToClipboard.label',
-                  defaultMessage: 'Copy to clipboard',
-                })}
-                noBorder
-                icon={<Duplicate />}
-                style={{ padding: 0, height: '1rem' }}
-              />
-            </CopyToClipboard>
+            <IconButton
+              label={formatMessage({
+                id: 'app.component.CopyToClipboard.label',
+                defaultMessage: 'Copy to clipboard',
+              })}
+              onClick={handleClick(token)}
+              noBorder
+              icon={<Duplicate />}
+              style={{ padding: 0, height: '1rem' }}
+            />
           </span>
         )
       }

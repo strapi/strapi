@@ -1,7 +1,7 @@
 import updateValues from '../updateValues';
 
 describe('ADMIN | COMPONENTS | Permissions | utils | updateValues', () => {
-  it('should not the conditions values of given object', () => {
+  it('should not update the conditions values of given object', () => {
     const simpleObject = {
       properties: {
         enabled: true,
@@ -16,6 +16,31 @@ describe('ADMIN | COMPONENTS | Permissions | utils | updateValues', () => {
     };
 
     expect(updateValues(simpleObject, false)).toEqual(expected);
+  });
+
+  it('should update the conditions values if they are fields names', () => {
+    const simpleObject = {
+      conditions: 'test',
+      properties: {
+        fields: {
+          description: false,
+          restaurant: false,
+          conditions: false,
+        },
+      },
+    };
+    const expected = {
+      conditions: 'test',
+      properties: {
+        fields: {
+          description: true,
+          restaurant: true,
+          conditions: true,
+        },
+      },
+    };
+
+    expect(updateValues(simpleObject, true)).toEqual(expected);
   });
 
   it('set the leafs of an object with the second argument passed to the function', () => {

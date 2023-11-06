@@ -1,9 +1,9 @@
 /* eslint-disable react/prop-types */
 
 import React from 'react';
-// import { createStore, combineReducers } from 'redux';
+// import { configureStore, combineReducers } from '@reduxjs/toolkit';
 // import { Provider } from 'react-redux';
-import { request, useRBAC } from '@strapi/helper-plugin';
+// import { request, useRBAC } from '@strapi/helper-plugin';
 // import { fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 // import { ThemeProvider } from 'styled-components';
 // import { QueryClient, QueryClientProvider } from 'react-query';
@@ -17,7 +17,10 @@ import { request, useRBAC } from '@strapi/helper-plugin';
 //   const queryClient = new QueryClient();
 
 //   const rootReducer = combineReducers(i18nReducers);
-//   const store = createStore(rootReducer, { [`${pluginId}_locales`]: initialState });
+// const store = configureStore({
+//   reducer: rootReducer,
+//   preloadedState: { [`${pluginId}_locales`]: initialState },
+// });
 
 //   return (
 //     <Provider store={store}>
@@ -81,31 +84,30 @@ jest.mock('react-intl', () => ({
 
 describe('i18n settings page', () => {
   beforeEach(() => {
-    request.mockImplementation(() =>
-      Promise.resolve([
-        {
-          id: 1,
-          name: 'French',
-          code: 'fr-FR',
-          isDefault: false,
-        },
-        {
-          id: 2,
-          name: 'English',
-          code: 'en-US',
-          isDefault: true,
-        },
-      ])
-    );
-
-    useRBAC.mockImplementation(() => ({
-      isLoading: false,
-      allowedActions: { canRead: true, canUpdate: true, canCreate: true, canDelete: true },
-    }));
+    // request.mockImplementation(() =>
+    //   Promise.resolve([
+    //     {
+    //       id: 1,
+    //       name: 'French',
+    //       code: 'fr-FR',
+    //       isDefault: false,
+    //     },
+    //     {
+    //       id: 2,
+    //       name: 'English',
+    //       code: 'en-US',
+    //       isDefault: true,
+    //     },
+    //   ])
+    // );
+    // useRBAC.mockImplementation(() => ({
+    //   isLoading: false,
+    //   allowedActions: { canRead: true, canUpdate: true, canCreate: true, canDelete: true },
+    // }));
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('initial state', () => {
@@ -583,14 +585,14 @@ describe('i18n settings page', () => {
 
   describe('create', () => {
     beforeEach(() => {
-      request.mockImplementation((url) =>
-        url.includes('/i18n/locales')
-          ? Promise.resolve([])
-          : Promise.resolve([
-              { code: 'fr-FR', name: 'Francais' },
-              { code: 'en-EN', name: 'English' },
-            ])
-      );
+      // request.mockImplementation((url) =>
+      //   url.includes('/i18n/locales')
+      //     ? Promise.resolve([])
+      //     : Promise.resolve([
+      //         { code: 'fr-FR', name: 'Francais' },
+      //         { code: 'en-EN', name: 'English' },
+      //       ])
+      // );
     });
     test.todo('shows the default create modal layout');
     // it('shows the default create modal layout', async () => {

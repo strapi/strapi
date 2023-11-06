@@ -1,0 +1,279 @@
+{
+  "paths": {
+    "/upload": {
+      "post": {
+        "description": "Upload files",
+        "responses": {
+          "200": {
+            "description": "response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UploadFile"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Upload - File"
+        ],
+        "requestBody": {
+          "description": "Upload files",
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "files"
+                ],
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "description": "The folder where the file(s) will be uploaded to (only supported on strapi-provider-upload-aws-s3)."
+                  },
+                  "refId": {
+                    "type": "string",
+                    "description": "The ID of the entry which the file(s) will be linked to"
+                  },
+                  "ref": {
+                    "type": "string",
+                    "description": "The unique ID (uid) of the model which the file(s) will be linked to (api::restaurant.restaurant)."
+                  },
+                  "field": {
+                    "type": "string",
+                    "description": "The field of the entry which the file(s) will be precisely linked to."
+                  },
+                  "files": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upload?id={id}": {
+      "post": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "File id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "description": "Upload file information",
+        "responses": {
+          "200": {
+            "description": "response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UploadFile"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Upload - File"
+        ],
+        "requestBody": {
+          "description": "Upload files",
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fileInfo": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "alternativeText": {
+                        "type": "string"
+                      },
+                      "caption": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "files": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upload/files": {
+      "get": {
+        "tags": [
+          "Upload - File"
+        ],
+        "responses": {
+          "200": {
+            "description": "Get a list of files",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UploadFile"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upload/files/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "",
+            "deprecated": false,
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "tags": [
+          "Upload - File"
+        ],
+        "responses": {
+          "200": {
+            "description": "Get a specific file",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadFile"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "",
+            "deprecated": false,
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "tags": [
+          "Upload - File"
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete a file",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadFile"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UploadFile": {
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "alternativeText": {
+            "type": "string"
+          },
+          "caption": {
+            "type": "string"
+          },
+          "width": {
+            "type": "number",
+            "format": "integer"
+          },
+          "height": {
+            "type": "number",
+            "format": "integer"
+          },
+          "formats": {
+            "type": "number"
+          },
+          "hash": {
+            "type": "string"
+          },
+          "ext": {
+            "type": "string"
+          },
+          "mime": {
+            "type": "string"
+          },
+          "size": {
+            "type": "number",
+            "format": "double"
+          },
+          "url": {
+            "type": "string"
+          },
+          "previewUrl": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "provider_metadata": {
+            "type": "object"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}

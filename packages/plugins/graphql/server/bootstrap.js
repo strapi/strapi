@@ -1,8 +1,6 @@
 'use strict';
 
 const { isEmpty, mergeWith, isArray } = require('lodash/fp');
-const { execute, subscribe } = require('graphql');
-const { SubscriptionServer } = require('subscriptions-transport-ws');
 const { ApolloServer } = require('apollo-server-koa');
 const {
   ApolloServerPluginLandingPageDisabled,
@@ -80,24 +78,6 @@ module.exports = async ({ strapi }) => {
   };
 
   const serverConfig = merge(defaultServerConfig, config('apolloServer'));
-
-  // Handle subscriptions
-  if (config('subscriptions')) {
-    const subscriptionServer = SubscriptionServer.create(
-      { schema, execute, subscribe },
-      { server: strapi.server.httpServer, path }
-    );
-
-    serverConfig.plugins.push({
-      async serverWillStart() {
-        return {
-          async drainServer() {
-            subscriptionServer.close();
-          },
-        };
-      },
-    });
-  }
 
   // Create a new Apollo server
   const server = new ApolloServer(serverConfig);

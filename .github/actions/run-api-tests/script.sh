@@ -5,11 +5,11 @@ else
   export STRAPI_DISABLE_LICENSE_PING=true
 fi
 
-export ENV_PATH="$(pwd)/testApp/.env"
+export ENV_PATH="$(pwd)/test-apps/api/.env"
 export JWT_SECRET="aSecret"
 
 opts=($DB_OPTIONS)
+jestOptions=($JEST_OPTIONS)
 
-yarn run -s build:ts
-yarn run -s test:generate-app "${opts[@]}"
-yarn run -s test:api --no-generate-app
+yarn run test:generate-app:no-build --appPath=test-apps/api "${opts[@]}"
+yarn run test:api --no-generate-app "${jestOptions[@]}"

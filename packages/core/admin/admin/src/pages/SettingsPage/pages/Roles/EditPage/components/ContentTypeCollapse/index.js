@@ -1,6 +1,8 @@
-import PropTypes from 'prop-types';
 import React, { useCallback, useMemo } from 'react';
+
+import PropTypes from 'prop-types';
 import styled from 'styled-components';
+
 import Collapse from './Collapse';
 import CollapsePropertyMatrix from './CollapsePropertyMatrix';
 import { getAvailableActions } from './utils';

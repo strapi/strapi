@@ -24,6 +24,20 @@ const componentForm = {
           },
         ],
       },
+      {
+        sectionTitle: null,
+        items: [
+          {
+            name: `${prefix}icon`,
+            type: 'icon-picker',
+            size: 12,
+            intlLabel: {
+              id: getTrad('modalForm.components.icon.label'),
+              defaultMessage: 'Icon',
+            },
+          },
+        ],
+      },
     ];
 
     return sections;

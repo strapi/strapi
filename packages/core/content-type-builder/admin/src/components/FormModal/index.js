@@ -1,51 +1,55 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import {
-  getYupInnerErrors,
-  useTracking,
-  useNotification,
-  useStrapiApp,
-  useCustomFields,
-} from '@strapi/helper-plugin';
-import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
-import get from 'lodash/get';
-import has from 'lodash/has';
-import set from 'lodash/set';
-import toLower from 'lodash/toLower';
-import { useSelector, useDispatch, shallowEqual } from 'react-redux';
+
 import {
   Box,
   Button,
   Divider,
-  ModalLayout,
+  Flex,
   ModalBody,
   ModalFooter,
-  Tabs,
+  ModalLayout,
   Tab,
   TabGroup,
-  TabPanels,
   TabPanel,
-  Flex,
+  TabPanels,
+  Tabs,
 } from '@strapi/design-system';
-import { isEqual } from 'lodash';
-import pluginId from '../../pluginId';
+import {
+  getYupInnerErrors,
+  useCustomFields,
+  useNotification,
+  useStrapiApp,
+  useTracking,
+} from '@strapi/helper-plugin';
+import get from 'lodash/get';
+import has from 'lodash/has';
+import isEqual from 'lodash/isEqual';
+import set from 'lodash/set';
+import toLower from 'lodash/toLower';
+import { useIntl } from 'react-intl';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+
 import useDataManager from '../../hooks/useDataManager';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';
+import pluginId from '../../pluginId';
+import { getTrad, isAllowedContentTypesForRelations } from '../../utils';
+import findAttribute from '../../utils/findAttribute';
 // New compos
 import AllowedTypesSelect from '../AllowedTypesSelect';
 import AttributeOptions from '../AttributeOptions';
-import DraftAndPublishToggle from '../DraftAndPublishToggle';
-import FormModalHeader from '../FormModalHeader';
-import FormModalEndActions from '../FormModalEndActions';
-import FormModalSubHeader from '../FormModalSubHeader';
-
 import BooleanDefaultValueSelect from '../BooleanDefaultValueSelect';
 import BooleanRadioGroup from '../BooleanRadioGroup';
 import CheckboxWithNumberField from '../CheckboxWithNumberField';
-import CustomRadioGroup from '../CustomRadioGroup';
 import ContentTypeRadioGroup from '../ContentTypeRadioGroup';
-import Relation from '../Relation';
+import CustomRadioGroup from '../CustomRadioGroup';
+import DraftAndPublishToggle from '../DraftAndPublishToggle';
+import FormModalEndActions from '../FormModalEndActions';
+import FormModalHeader from '../FormModalHeader';
+import FormModalSubHeader from '../FormModalSubHeader';
+import IconPicker from '../IconPicker';
 import PluralName from '../PluralName';
+import Relation from '../Relation';
 import SelectCategory from '../SelectCategory';
 import SelectComponent from '../SelectComponent';
 import SelectComponents from '../SelectComponents';
@@ -54,29 +58,26 @@ import SelectNumber from '../SelectNumber';
 import SingularName from '../SingularName';
 import TabForm from '../TabForm';
 import TextareaEnum from '../TextareaEnum';
-import findAttribute from '../../utils/findAttribute';
-import { getTrad, isAllowedContentTypesForRelations } from '../../utils';
-import { canEditContentType, getAttributesToDisplay, getFormInputNames } from './utils';
-import forms from './forms';
-import { createComponentUid, createUid } from './utils/createUid';
 
-import makeSelectFormModal from './selectors';
 import {
-  SET_DATA_TO_EDIT,
-  SET_DYNAMIC_ZONE_DATA_SCHEMA,
+  ON_CHANGE,
+  RESET_PROPS,
+  RESET_PROPS_AND_SAVE_CURRENT_DATA,
+  RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO,
+  RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ,
   SET_ATTRIBUTE_DATA_SCHEMA,
   SET_CUSTOM_FIELD_DATA_SCHEMA,
+  SET_DATA_TO_EDIT,
+  SET_DYNAMIC_ZONE_DATA_SCHEMA,
   SET_ERRORS,
-  ON_CHANGE,
-  RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ,
-  RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO,
-  RESET_PROPS_AND_SAVE_CURRENT_DATA,
-  RESET_PROPS,
 } from './constants';
+import forms from './forms';
+import makeSelectFormModal from './selectors';
+import { canEditContentType, getAttributesToDisplay, getFormInputNames } from './utils';
+import { createComponentUid, createUid } from './utils/createUid';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
-
 const FormModal = () => {
   const {
     onCloseModal,
@@ -92,6 +93,7 @@ const FormModal = () => {
     forTarget,
     modalType,
     isOpen,
+    showBackLink,
     kind,
     step,
     targetUid,
@@ -197,16 +199,20 @@ const FormModal = () => {
 
       // Edit content type
       if (modalType === 'contentType' && actionType === 'edit') {
-        const { displayName, draftAndPublish, kind, pluginOptions, pluralName, singularName } = get(
-          allDataSchema,
-          [...pathToSchema, 'schema'],
-          {
-            displayName: null,
-            pluginOptions: {},
-            singularName: null,
-            pluralName: null,
-          }
-        );
+        const {
+          displayName,
+          draftAndPublish,
+          kind,
+          pluginOptions,
+          pluralName,
+          reviewWorkflows,
+          singularName,
+        } = get(allDataSchema, [...pathToSchema, 'schema'], {
+          displayName: null,
+          pluginOptions: {},
+          singularName: null,
+          pluralName: null,
+        });
 
         dispatch({
           type: SET_DATA_TO_EDIT,
@@ -218,6 +224,10 @@ const FormModal = () => {
             kind,
             pluginOptions,
             pluralName,
+            // because review-workflows is an EE feature the attribute does
+            // not always exist, but the component prop-types expect a boolean,
+            // so we have to ensure undefined is casted to false
+            reviewWorkflows: reviewWorkflows ?? false,
             singularName,
           },
         });
@@ -234,6 +244,7 @@ const FormModal = () => {
           data: {
             displayName: data.schema.displayName,
             category: data.category,
+            icon: data.schema.icon,
           },
         });
       }
@@ -678,7 +689,7 @@ const FormModal = () => {
           onCloseModal();
         }
 
-        // We don't need to end the loop here we want the reducer to be reinitialised
+        // We don't need to end the loop here we want the reducer to be reinitialized
 
         // Logic for creating a component without clicking on the link in
         // the left menu
@@ -905,6 +916,7 @@ const FormModal = () => {
       'allowed-types-select': AllowedTypesSelect,
       'boolean-radio-group': BooleanRadioGroup,
       'checkbox-with-number-field': CheckboxWithNumberField,
+      'icon-picker': IconPicker,
       'content-type-radio-group': ContentTypeRadioGroup,
       'radio-group': CustomRadioGroup,
       relation: Relation,
@@ -991,6 +1003,7 @@ const FormModal = () => {
         targetUid={targetUid}
         attributeType={attributeType}
         customFieldUid={customFieldUid}
+        showBackLink={showBackLink}
       />
       {isPickingAttribute && (
         <AttributeOptions

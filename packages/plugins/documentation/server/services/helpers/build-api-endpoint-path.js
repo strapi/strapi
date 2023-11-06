@@ -81,7 +81,7 @@ const getPathWithPrefix = (prefix, route) => {
  *
  * @returns {object}
  */
-const getPaths = ({ routeInfo, uniqueName, contentTypeInfo }) => {
+const getPaths = ({ routeInfo, uniqueName, contentTypeInfo, kind }) => {
   // Get the routes for the current content type
   const contentTypeRoutes = routeInfo.routes.filter((route) => {
     return (
@@ -98,10 +98,11 @@ const getPaths = ({ routeInfo, uniqueName, contentTypeInfo }) => {
     const hasPathParams = route.path.includes('/:');
     const pathWithPrefix = getPathWithPrefix(routeInfo.prefix, route);
     const routePath = hasPathParams ? parsePathWithVariables(pathWithPrefix) : pathWithPrefix;
+
     const { responses } = getApiResponses({
       uniqueName,
       route,
-      isListOfEntities,
+      isListOfEntities: kind !== 'singleType' && isListOfEntities,
       isLocalizationPath,
     });
 

@@ -1,9 +1,11 @@
 import React from 'react';
+
+import { Box, Grid, GridItem, Option, Select } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Grid, GridItem, Box, Select, Option } from '@strapi/design-system';
-import getTrad from '../../../../utils/getTrad';
+
 import { pageSizes, sortOptions } from '../../../../constants';
+import getTrad from '../../../../utils/getTrad';
 
 const Settings = ({ sort = '', pageSize = 10, onChange }) => {
   const { formatMessage } = useIntl();
@@ -32,11 +34,9 @@ const Settings = ({ sort = '', pageSize = 10, onChange }) => {
             onChange={(value) => onChange({ target: { name: 'pageSize', value } })}
             name="pageSize"
             value={pageSize}
-            test-pageSize={pageSize}
-            data-testid="pageSize-select"
           >
             {pageSizes.map((pageSize) => (
-              <Option data-testid={`pageSize-option-${pageSize}`} key={pageSize} value={pageSize}>
+              <Option key={pageSize} value={pageSize}>
                 {pageSize}
               </Option>
             ))}

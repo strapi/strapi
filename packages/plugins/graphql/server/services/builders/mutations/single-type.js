@@ -5,7 +5,7 @@ const { omit, isNil } = require('lodash/fp');
 
 const utils = require('@strapi/utils');
 
-const { sanitize } = utils;
+const { sanitize, validate } = utils;
 const { NotFoundError } = utils.errors;
 
 module.exports = ({ strapi }) => {
@@ -53,8 +53,22 @@ module.exports = ({ strapi }) => {
           .get('content-api')
           .buildMutationsResolvers({ contentType });
 
-        const findParams = omit(['data', 'files'], transformedArgs);
-        const entity = await strapi.entityService.findMany(uid, findParams);
+        // For single types, the validation and sanitization of args is done here instead of being
+        // delegated to the query builders since we're calling the entity service directly
+
+        await validate.contentAPI.query(omit(['data', 'files'], transformedArgs), contentType, {
+          auth,
+        });
+
+        const sanitizedQuery = await sanitize.contentAPI.query(
+          omit(['data', 'files'], transformedArgs),
+          contentType,
+          {
+            auth,
+          }
+        );
+
+        const entity = await strapi.entityService.findMany(uid, sanitizedQuery);
 
         // Create or update
         const value = isNil(entity)
@@ -77,14 +91,23 @@ module.exports = ({ strapi }) => {
 
       args: {},
 
-      async resolve(parent, args) {
+      async resolve(parent, args, ctx) {
         const transformedArgs = transformArgs(args, { contentType });
 
         const { delete: deleteResolver } = getService('builders')
           .get('content-api')
           .buildMutationsResolvers({ contentType });
 
-        const entity = await strapi.entityService.findMany(uid, transformedArgs);
+        // For single types, the validation and sanitization of args is done here instead of being
+        // delegated to the query builders since we're calling the entity service directly
+
+        await validate.contentAPI.query(transformedArgs, contentType, { auth: ctx?.state?.auth });
+
+        const sanitizedQuery = await sanitize.contentAPI.query(transformedArgs, contentType, {
+          auth: ctx?.state?.auth,
+        });
+
+        const entity = await strapi.entityService.findMany(uid, sanitizedQuery);
 
         if (!entity) {
           throw new NotFoundError('Entity not found');

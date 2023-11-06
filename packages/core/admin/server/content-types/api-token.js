@@ -47,6 +47,7 @@ module.exports = {
       minLength: 1,
       configurable: false,
       required: true,
+      searchable: false,
     },
     lastUsedAt: {
       type: 'datetime',
