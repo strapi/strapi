@@ -7,10 +7,12 @@ import cluster from 'node:cluster';
 import { getTimer } from './core/timer';
 import { checkRequiredDependencies } from './core/dependencies';
 import { createBuildContext } from './createBuildContext';
-import { watch as watchWebpack } from './webpack/watch';
+import { WebpackWatcher, watch as watchWebpack } from './webpack/watch';
+import { build as buildWebpack } from './webpack/build';
 
 import EE from '@strapi/strapi/dist/utils/ee';
 import { writeStaticClientFiles } from './staticFiles';
+import strapiFactory from '@strapi/strapi';
 
 interface DevelopOptions extends CLIContext {
   /**
@@ -19,6 +21,7 @@ interface DevelopOptions extends CLIContext {
   ignorePrompts?: boolean;
   polling?: boolean;
   open?: boolean;
+  watchAdmin?: boolean;
 }
 
 const develop = async ({
@@ -27,6 +30,7 @@ const develop = async ({
   logger,
   tsconfig,
   ignorePrompts,
+  watchAdmin,
   ...options
 }: DevelopOptions) => {
   const timer = getTimer();
@@ -41,6 +45,38 @@ const develop = async ({
 
     if (didInstall) {
       return;
+    }
+
+    /**
+     * IF we're not watching the admin we're going to build it, this makes
+     * sure that at least the admin is built for users & they can interact
+     * with the application.
+     */
+    if (!watchAdmin) {
+      timer.start('createBuildContext');
+      const contextSpinner = logger.spinner(`Building build context`).start();
+      console.log('');
+
+      const ctx = await createBuildContext({
+        cwd,
+        logger,
+        tsconfig,
+        options,
+      });
+      const contextDuration = timer.end('createBuildContext');
+      contextSpinner.text = `Building build context (${contextDuration}ms)`;
+      contextSpinner.succeed();
+
+      timer.start('creatingAdmin');
+      const adminSpinner = logger.spinner(`Creating admin`).start();
+
+      EE.init(cwd);
+      await writeStaticClientFiles(ctx);
+      await buildWebpack(ctx);
+
+      const adminDuration = timer.end('creatingAdmin');
+      adminSpinner.text = `Creating admin (${adminDuration}ms)`;
+      adminSpinner.succeed();
     }
 
     cluster.on('message', async (worker, message) => {
@@ -79,32 +115,48 @@ const develop = async ({
       compilingTsSpinner.succeed();
     }
 
-    timer.start('createBuildContext');
-    const contextSpinner = logger.spinner(`Building build context`).start();
-    console.log('');
-
-    const ctx = await createBuildContext({
-      cwd,
-      logger,
-      tsconfig,
-      options,
+    const strapi = strapiFactory({
+      appDir: cwd,
+      distDir: tsconfig?.config.options.outDir ?? '',
+      autoReload: true,
+      serveAdminPanel: !watchAdmin,
     });
-    const contextDuration = timer.end('createBuildContext');
-    contextSpinner.text = `Building build context (${contextDuration}ms)`;
-    contextSpinner.succeed();
 
-    timer.start('creatingAdmin');
-    const adminSpinner = logger.spinner(`Creating admin`).start();
+    let webpackWatcher: WebpackWatcher | undefined;
 
-    EE.init(cwd);
-    await writeStaticClientFiles(ctx);
-    const webpackWatcher = await watchWebpack(ctx);
+    /**
+     * If we're watching the admin panel then we're going to attach the watcher
+     * as a strapi middleware.
+     */
+    if (watchAdmin) {
+      timer.start('createBuildContext');
+      const contextSpinner = logger.spinner(`Building build context`).start();
+      console.log('');
 
-    const adminDuration = timer.end('creatingAdmin');
-    adminSpinner.text = `Creating admin (${adminDuration}ms)`;
-    adminSpinner.succeed();
+      const ctx = await createBuildContext({
+        cwd,
+        logger,
+        strapi,
+        tsconfig,
+        options,
+      });
+      const contextDuration = timer.end('createBuildContext');
+      contextSpinner.text = `Building build context (${contextDuration}ms)`;
+      contextSpinner.succeed();
 
-    const strapiInstance = await ctx.strapi.load();
+      timer.start('creatingAdmin');
+      const adminSpinner = logger.spinner(`Creating admin`).start();
+
+      EE.init(cwd);
+      await writeStaticClientFiles(ctx);
+      webpackWatcher = await watchWebpack(ctx);
+
+      const adminDuration = timer.end('creatingAdmin');
+      adminSpinner.text = `Creating admin (${adminDuration}ms)`;
+      adminSpinner.succeed();
+    }
+
+    const strapiInstance = await strapi.load();
 
     timer.start('generatingTS');
     const generatingTsSpinner = logger.spinner(`Generating types`).start();
@@ -177,8 +229,12 @@ const develop = async ({
             'child process has the kill message, destroying the strapi instance and sending the killed process message'
           );
           await watcher.close();
+
           await strapiInstance.destroy();
-          webpackWatcher.close();
+
+          if (webpackWatcher) {
+            webpackWatcher.close();
+          }
           process.send?.('killed');
           break;
         }

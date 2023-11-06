@@ -6,19 +6,19 @@ import webpackHotMiddleware from 'webpack-hot-middleware';
 import { webpack } from 'webpack';
 import type { BuildContext } from '../createBuildContext';
 import { mergeConfigWithUserConfig, resolveDevelopmentConfig } from './config';
-import { Common } from '@strapi/types';
+import { Common, Strapi } from '@strapi/types';
 
-interface Closer {
+interface WebpackWatcher {
   close(): Promise<void>;
 }
 
-const watch = async (ctx: BuildContext): Promise<Closer> => {
+const watch = async (ctx: BuildContext): Promise<WebpackWatcher> => {
   const config = await resolveDevelopmentConfig(ctx);
   const finalConfig = await mergeConfigWithUserConfig(config, ctx);
 
   ctx.logger.debug('Final webpack config:', os.EOL, finalConfig);
 
-  return new Promise<Closer>((res) => {
+  return new Promise<WebpackWatcher>((res) => {
     const compiler = webpack(finalConfig);
 
     const devMiddleware = webpackDevMiddleware(compiler);
@@ -110,3 +110,4 @@ const watch = async (ctx: BuildContext): Promise<Closer> => {
 };
 
 export { watch };
+export type { WebpackWatcher };
