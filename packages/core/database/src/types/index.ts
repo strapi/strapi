@@ -223,8 +223,4 @@ export interface Model {
   indexes?: Index[];
   foreignKeys?: ForeignKey[];
   lifecycles?: Partial<Record<Action, SubscriberFn>>;
-  // TODO: remove these once we add documentId outside the DB layer
-  options?: Record<string, unknown>;
-  modelName?: string;
-  modelType?: 'contentType' | 'component';
 }

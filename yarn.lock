@@ -7739,7 +7739,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/database@workspace:packages/core/database"
   dependencies:
-    "@paralleldrive/cuid2": "npm:2.2.2"
     "@strapi/pack-up": "workspace:*"
     "@strapi/utils": "npm:4.14.5"
     date-fns: "npm:2.30.0"
@@ -8470,6 +8469,7 @@ __metadata:
   dependencies:
     "@koa/cors": "npm:3.4.3"
     "@koa/router": "npm:10.1.1"
+    "@paralleldrive/cuid2": "npm:2.2.2"
     "@strapi/admin": "npm:4.14.5"
     "@strapi/data-transfer": "npm:4.14.5"
     "@strapi/database": "npm:4.14.5"
