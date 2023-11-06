@@ -1,7 +1,5 @@
 import {
   Button,
-  Grid,
-  GridItem,
   ModalBody,
   ModalFooter,
   ModalLayout,
@@ -57,21 +55,17 @@ export const AddReleaseDialog = ({ handleClose }: { handleClose: () => void }) =
         {({ values, errors, handleChange }) => (
           <Form>
             <ModalBody>
-              <Grid gap={4}>
-                <GridItem xs={12} col={12}>
-                  <TextInput
-                    label={formatMessage({
-                      id: 'content-releases.modal.form.input.label.release-name',
-                      defaultMessage: 'Name',
-                    })}
-                    name="name"
-                    value={values.name}
-                    error={errors.name}
-                    onChange={handleChange}
-                    required
-                  />
-                </GridItem>
-              </Grid>
+              <TextInput
+                label={formatMessage({
+                  id: 'content-releases.modal.form.input.label.release-name',
+                  defaultMessage: 'Name',
+                })}
+                name="name"
+                value={values.name}
+                error={errors.name}
+                onChange={handleChange}
+                required
+              />
             </ModalBody>
             <ModalFooter
               startActions={
