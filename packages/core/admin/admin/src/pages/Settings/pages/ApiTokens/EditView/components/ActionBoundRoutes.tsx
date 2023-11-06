@@ -1,12 +1,11 @@
-import React from 'react';
-
 import { Flex, GridItem, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { useApiTokenPermissions } from '../../../../../../../contexts/apiTokenPermissions';
-import BoundRoute from '../BoundRoute';
+import { useApiTokenPermissions } from '../../../../../../contexts/apiTokenPermissions';
 
-const ActionBoundRoutes = () => {
+import { BoundRoute } from './BoundRoute';
+
+export const ActionBoundRoutes = () => {
   const {
     value: { selectedAction, routes },
   } = useApiTokenPermissions();
@@ -25,12 +24,14 @@ const ActionBoundRoutes = () => {
     >
       {selectedAction ? (
         <Flex direction="column" alignItems="stretch" gap={2}>
-          {routes[actionSection]?.map((route) => {
-            return route.config.auth?.scope?.includes(selectedAction) ||
-              route.handler === selectedAction ? (
-              <BoundRoute key={route.handler} route={route} />
-            ) : null;
-          })}
+          {actionSection &&
+            actionSection in routes &&
+            routes[actionSection].map((route) => {
+              return route.config.auth?.scope?.includes(selectedAction) ||
+                route.handler === selectedAction ? (
+                <BoundRoute key={route.handler} route={route} />
+              ) : null;
+            })}
         </Flex>
       ) : (
         <Flex direction="column" alignItems="stretch" gap={2}>
@@ -52,5 +53,3 @@ const ActionBoundRoutes = () => {
     </GridItem>
   );
 };
-
-export default ActionBoundRoutes;

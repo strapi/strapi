@@ -10,9 +10,9 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 import { Route, MemoryRouter } from 'react-router-dom';
 
-import { Theme } from '../../../../../../components/Theme';
-import { ThemeToggleProvider } from '../../../../../../components/ThemeToggleProvider';
-import ListView from '../index';
+import { Theme } from '../../../../../components/Theme';
+import { ThemeToggleProvider } from '../../../../../components/ThemeToggleProvider';
+import { ListView } from '../ListView';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -46,8 +46,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   }),
 }));
 
-jest.spyOn(Date, 'now').mockImplementation(() => new Date('2015-10-01T08:00:00.000Z'));
-
 // TO BE REMOVED: we have added this mock to prevent errors in the snapshots caused by the Unicode space character
 // before AM/PM in the dates, after the introduction of node 18.13
 jest.mock('react-intl', () => {
@@ -65,8 +63,8 @@ jest.mock('react-intl', () => {
   };
 });
 
-const setup = ({ path, ...props } = {}) =>
-  render(() => <ListView {...props} />, {
+const setup = ({ path = '/settings/api-tokens', ...props } = {}) =>
+  render(<ListView {...props} />, {
     wrapper({ children }) {
       const client = new QueryClient({
         defaultOptions: {
@@ -90,7 +88,7 @@ const setup = ({ path, ...props } = {}) =>
               <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
                 <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
                   <Theme>
-                    <MemoryRouter initialEntries={[path || '/settings/api-tokens']}>
+                    <MemoryRouter initialEntries={[path]}>
                       <Route path="/settings/api-tokens">{children}</Route>
                     </MemoryRouter>
                   </Theme>
@@ -109,6 +107,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
   });
 
   it('should show a list of api tokens', async () => {
+    // @ts-expect-error this is fine
     useRBAC.mockReturnValue({
       allowedActions: {
         canCreate: true,
@@ -121,11 +120,14 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
 
     const { getByText } = setup({ path: '/settings/api-tokens' });
 
+    // eslint-disable-next-line testing-library/prefer-find-by
     await waitFor(() => expect(getByText('My super token')).toBeInTheDocument());
+    // eslint-disable-next-line testing-library/prefer-find-by
     await waitFor(() => expect(getByText('This describe my super token')).toBeInTheDocument());
   });
 
   it('should not show the create button when the user does not have the rights to create', async () => {
+    // @ts-expect-error this is fine
     useRBAC.mockReturnValue({
       allowedActions: {
         canCreate: false,
@@ -142,6 +144,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
   });
 
   it('should show the delete button when the user have the rights to delete', async () => {
+    // @ts-expect-error this is fine
     useRBAC.mockReturnValue({
       allowedActions: {
         canCreate: false,
@@ -152,14 +155,14 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       },
     });
 
-    const { container } = setup();
+    const { getByRole } = setup();
 
-    await waitFor(() =>
-      expect(container.querySelector('button[name="delete"]')).toBeInTheDocument()
-    );
+    // eslint-disable-next-line testing-library/prefer-find-by
+    await waitFor(() => expect(getByRole('button', { name: 'delete' })).toBeInTheDocument());
   });
 
   it('should show the read button when the user have the rights to read and not to update', async () => {
+    // @ts-expect-error this is fine
     useRBAC.mockReturnValue({
       allowedActions: {
         canCreate: false,
@@ -172,6 +175,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
 
     const { container } = setup();
 
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
     await waitFor(() => expect(container.querySelector('a[title*="Read"]')).toBeInTheDocument());
   });
 });

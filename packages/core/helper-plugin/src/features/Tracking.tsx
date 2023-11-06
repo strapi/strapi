@@ -209,8 +209,9 @@ interface WillNavigateEvent {
 
 interface DidAccessTokenListEvent {
   name: 'didAccessTokenList';
-  properties: TokenEvents['properties'] & {
-    number: string;
+  properties: {
+    tokenType: TokenEvents['properties']['tokenType'];
+    number: number;
   };
 }
 
@@ -224,14 +225,26 @@ interface LogoEvent {
 interface TokenEvents {
   name:
     | 'didCopyTokenKey'
+    | 'didAddTokenFromList'
+    | 'didEditTokenFromList'
     | 'willAccessTokenList'
     | 'willAddTokenFromList'
+    | 'willCreateToken'
     | 'willDeleteToken'
+    | 'willEditToken'
     | 'willEditTokenFromList';
   properties: {
-    tokenType: string;
+    tokenType: 'api-token' | 'transfer-token';
   };
 }
+
+type WillModifyTokenEvent = {
+  name: 'didCreateToken' | 'didEditToken';
+  properties: {
+    tokenType: TokenEvents['properties']['tokenType'];
+    type: 'custom' | 'full-access' | 'read-only';
+  };
+};
 
 type EventsWithProperties =
   | DidAccessTokenListEvent
@@ -245,6 +258,7 @@ type EventsWithProperties =
   | DidSubmitWithErrorsFirstAdminEvent
   | LogoEvent
   | TokenEvents
+  | WillModifyTokenEvent
   | WillNavigateEvent;
 
 export type TrackingEvent = EventWithoutProperties | EventsWithProperties;

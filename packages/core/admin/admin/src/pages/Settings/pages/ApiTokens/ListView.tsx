@@ -1,8 +1,7 @@
 import * as React from 'react';
 
-import { ContentLayout, HeaderLayout, Main } from '@strapi/design-system';
+import { ContentLayout, HeaderLayout, LinkButton, Main } from '@strapi/design-system';
 import {
-  LinkButton,
   NoContent,
   NoPermissions,
   SettingsPageTitle,
@@ -15,19 +14,68 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
+import { AxiosError } from 'axios';
 import qs from 'qs';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
-import { selectAdminPermissions } from '../../../../../selectors';
-import { API_TOKEN_TYPE } from '../../../components/Tokens/constants';
-import Table from '../../../components/Tokens/Table';
+import { selectAdminPermissions } from '../../../../selectors';
+import { API_TOKEN_TYPE } from '../../components/Tokens/constants';
+// @ts-expect-error not converted yet
+import Table from '../../components/Tokens/Table';
 
-import tableHeaders from './utils/tableHeaders';
+import type { List } from '../../../../../../shared/contracts/api-token';
 
-const ApiTokenListView = () => {
+const TABLE_HEADERS = [
+  {
+    name: 'name',
+    key: 'name',
+    metadatas: {
+      label: {
+        id: 'Settings.apiTokens.ListView.headers.name',
+        defaultMessage: 'Name',
+      },
+      sortable: true,
+    },
+  },
+  {
+    name: 'description',
+    key: 'description',
+    metadatas: {
+      label: {
+        id: 'Settings.apiTokens.ListView.headers.description',
+        defaultMessage: 'Description',
+      },
+      sortable: false,
+    },
+  },
+  {
+    name: 'createdAt',
+    key: 'createdAt',
+    metadatas: {
+      label: {
+        id: 'Settings.apiTokens.ListView.headers.createdAt',
+        defaultMessage: 'Created at',
+      },
+      sortable: false,
+    },
+  },
+  {
+    name: 'lastUsedAt',
+    key: 'lastUsedAt',
+    metadatas: {
+      label: {
+        id: 'Settings.apiTokens.ListView.headers.lastUsedAt',
+        defaultMessage: 'Last used',
+      },
+      sortable: false,
+    },
+  },
+];
+
+export const ListView = () => {
   useFocusWhenNavigate();
   const queryClient = useQueryClient();
   const { formatMessage } = useIntl();
@@ -35,6 +83,7 @@ const ApiTokenListView = () => {
   const permissions = useSelector(selectAdminPermissions);
   const {
     allowedActions: { canCreate, canDelete, canUpdate, canRead },
+    // @ts-expect-error we know permissions.settings is defined
   } = useRBAC(permissions.settings['api-tokens']);
   const { push } = useHistory();
   const { trackUsage } = useTracking();
@@ -53,7 +102,7 @@ const ApiTokenListView = () => {
     push({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) });
   }, [push]);
 
-  const headers = tableHeaders.map((header) => ({
+  const headers = TABLE_HEADERS.map((header) => ({
     ...header,
     metadatas: {
       ...header.metadatas,
@@ -70,7 +119,7 @@ const ApiTokenListView = () => {
 
       const {
         data: { data },
-      } = await get(`/admin/api-tokens`);
+      } = await get<List.Response>(`/admin/api-tokens`);
 
       trackUsage('didAccessTokenList', { number: data.length, tokenType: API_TOKEN_TYPE });
 
@@ -80,10 +129,12 @@ const ApiTokenListView = () => {
       cacheTime: 0,
       enabled: canRead,
       onError(error) {
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(error),
-        });
+        if (error instanceof AxiosError) {
+          toggleNotification({
+            type: 'warning',
+            message: formatAPIError(error),
+          });
+        }
       },
     }
   );
@@ -100,7 +151,9 @@ const ApiTokenListView = () => {
         trackUsage('didDeleteToken');
       },
       onError(error) {
-        toggleNotification({ type: 'warning', message: formatAPIError(error) });
+        if (error instanceof AxiosError) {
+          toggleNotification({ type: 'warning', message: formatAPIError(error) });
+        }
       },
     }
   );
@@ -150,6 +203,7 @@ const ApiTokenListView = () => {
             contentType="api-tokens"
             rows={apiTokens}
             isLoading={isLoading}
+            // @ts-expect-error not converted yet
             onConfirmDelete={(id) => deleteMutation.mutateAsync(id)}
             tokens={apiTokens}
             tokenType={API_TOKEN_TYPE}
@@ -183,5 +237,3 @@ const ApiTokenListView = () => {
     </Main>
   );
 };
-
-export default ApiTokenListView;
