@@ -33,12 +33,23 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
     module: {
       rules: [
         {
-          test: /\.(t|j)sx?$/,
+          test: /\.(ts|tsx)$/,
           loader: require.resolve('esbuild-loader'),
           options: {
             loader: 'tsx',
-            jsx: 'automatic',
             target,
+            jsx: 'automatic',
+          },
+        },
+        {
+          test: /\.(js|jsx|mjs)$/,
+          use: {
+            loader: require.resolve('esbuild-loader'),
+            options: {
+              loader: 'jsx',
+              target,
+              jsx: 'automatic',
+            },
           },
         },
         {
