@@ -28,17 +28,6 @@ const EditorDivider = styled(Divider)`
   background: ${({ theme }) => theme.colors.neutral200};
 `;
 
-const Wrapper = styled(Box)`
-  width: 100%;
-  overflow: auto;
-  padding: ${({ theme }) => `${theme.spaces[3]} ${theme.spaces[4]}`};
-  font-size: ${({ theme }) => theme.fontSizes[2]};
-  background-color: ${({ theme }) => theme.colors.neutral0};
-  color: ${({ theme }) => theme.colors.neutral800};
-  line-height: ${({ theme }) => theme.lineHeights[6]};
-  border-radius: ${({ theme }) => theme.borderRadius};
-`;
-
 /**
  * Images are void elements. They handle the rendering of their children instead of Slate.
  * See the Slate documentation for more information:
@@ -96,6 +85,11 @@ function useResetKey(value) {
   return { key, incrementSlateUpdatesCount: () => (slateUpdatesCount.current += 1) };
 }
 
+const pipe =
+  (...fns) =>
+  (value) =>
+    fns.reduce((prev, fn) => fn(prev), value);
+
 const BlocksEditor = React.forwardRef(
   (
     { intlLabel, labelAction, name, disabled, required, error, value, onChange, placeholder, hint },
@@ -103,7 +97,7 @@ const BlocksEditor = React.forwardRef(
   ) => {
     const { formatMessage } = useIntl();
     const [editor] = React.useState(() =>
-      withReact(withStrapiSchema(withLinks(withImages(withHistory(createEditor())))))
+      pipe(withHistory, withImages, withStrapiSchema, withReact, withLinks)(createEditor())
     );
 
     const label = intlLabel.id
@@ -164,9 +158,7 @@ const BlocksEditor = React.forwardRef(
             <InputWrapper direction="column" alignItems="flex-start" height="512px">
               <BlocksToolbar disabled={disabled} />
               <EditorDivider width="100%" />
-              <Wrapper grow={1}>
-                <BlocksInput disabled={disabled} placeholder={formattedPlaceholder} />
-              </Wrapper>
+              <BlocksInput disabled={disabled} placeholder={formattedPlaceholder} />
             </InputWrapper>
           </Slate>
           <Hint hint={hint} name={name} error={error} />

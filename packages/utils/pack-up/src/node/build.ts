@@ -4,7 +4,7 @@ import os from 'os';
 
 import { CommonCLIOptions } from '../types';
 
-import { loadConfig } from './core/config';
+import { loadConfig, type Config } from './core/config';
 import { isError } from './core/errors';
 import { getExportExtensionMap, validateExportsOrdering } from './core/exports';
 import { createLogger } from './core/logger';
@@ -13,14 +13,41 @@ import { createBuildContext } from './createBuildContext';
 import { BuildTask, createBuildTasks } from './createTasks';
 import { TaskHandler, taskHandlers } from './tasks';
 
-export interface BuildOptions extends CommonCLIOptions {
-  cwd?: string;
+interface BuildCLIOptions extends CommonCLIOptions {
   minify?: boolean;
   sourcemap?: boolean;
 }
 
-export const build = async (opts: BuildOptions = {}) => {
-  const { silent, debug, cwd = process.cwd(), ...configOptions } = opts;
+interface BuildWithConfigFile extends BuildCLIOptions {
+  configFile?: true;
+  config?: never;
+  cwd?: string;
+}
+
+interface BuildWithoutConfigFile extends BuildCLIOptions {
+  configFile: false;
+  config?: Config;
+  cwd?: string;
+}
+
+type BuildOptions = BuildWithConfigFile | BuildWithoutConfigFile;
+
+const build = async (opts: BuildOptions = {}) => {
+  /**
+   * We always want to run in production mode when building and some packages
+   * use NODE_ENV to determine which type of package to import (looking at your react).
+   * Therefore for building, unless it's specifically set by the user, we'll set it to production.
+   */
+  process.env.NODE_ENV = process.env.NODE_ENV || 'production';
+
+  const {
+    silent,
+    debug,
+    cwd = process.cwd(),
+    configFile = true,
+    config: providedConfig,
+    ...configOptions
+  } = opts;
 
   const logger = createLogger({ silent, debug });
 
@@ -67,12 +94,17 @@ export const build = async (opts: BuildOptions = {}) => {
   packageJsonLoader.succeed('Verified package.json');
 
   /**
+   * If configFile is true – which is the default, atempt to load the config
+   * otherwise if it's explicitly false then we suspect there might be a config passed
+   * in the options, so we'll use that instead.
+   */
+  const config = configFile ? await loadConfig({ cwd, logger }) : providedConfig;
+
+  /**
    * We create tasks based on the exports of the package.json
    * their handlers are then ran in the order of the exports map
    * and results are logged to see gradual progress.
    */
-  const config = await loadConfig({ cwd, logger });
-
   const buildContextLoader = ora(`Creating build context ${os.EOL}`).start();
 
   const extMap = getExportExtensionMap();
@@ -126,3 +158,6 @@ export const build = async (opts: BuildOptions = {}) => {
     });
   }
 };
+
+export { build };
+export type { BuildOptions, BuildCLIOptions, BuildWithConfigFile, BuildWithoutConfigFile };

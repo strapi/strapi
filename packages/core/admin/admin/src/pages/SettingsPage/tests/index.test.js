@@ -10,18 +10,15 @@ import { Route, Router } from 'react-router-dom';
 import { SettingsPage } from '..';
 import { Theme } from '../../../components/Theme';
 import { ThemeToggleProvider } from '../../../components/ThemeToggleProvider';
-import { useSettingsMenu } from '../../../hooks';
+import { useSettingsMenu } from '../../../hooks/useSettingsMenu';
 
-jest.mock('../../../hooks', () => ({
-  useSettingsMenu: jest.fn(() => ({ isLoading: false, menu: [] })),
-  useAppInfo: jest.fn(() => ({ shouldUpdateStrapi: false })),
-  useThemeToggle: jest.fn(() => ({ currentTheme: 'light', themes: { light: lightTheme } })),
-}));
+jest.mock('../../../hooks/useSettingsMenu');
 
 jest.mock('react-intl', () => ({
   FormattedMessage: ({ id }) => id,
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => id) }),
 }));
+
 jest.mock('../pages/ApplicationInfosPage', () => () => {
   return <h1>App infos</h1>;
 });

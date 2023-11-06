@@ -16,11 +16,11 @@ import {
 import { Plus } from '@strapi/icons';
 import qs from 'qs';
 import { useIntl } from 'react-intl';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { useMutation, useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
-import { selectAdminPermissions } from '../../../../App/selectors';
+import { selectAdminPermissions } from '../../../../../selectors';
 import { TRANSFER_TOKEN_TYPE } from '../../../components/Tokens/constants';
 import Table from '../../../components/Tokens/Table';
 
@@ -28,7 +28,6 @@ import tableHeaders from './utils/tableHeaders';
 
 const TransferTokenListView = () => {
   useFocusWhenNavigate();
-  const queryClient = useQueryClient();
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const permissions = useSelector(selectAdminPermissions);
@@ -64,6 +63,7 @@ const TransferTokenListView = () => {
     data: transferTokens,
     status,
     isFetching,
+    refetch,
   } = useQuery(
     ['transfer-tokens'],
     async () => {
@@ -81,8 +81,6 @@ const TransferTokenListView = () => {
     {
       enabled: canRead,
       onError(err) {
-        console.log('error', err);
-
         if (err?.response?.data?.error?.details?.code === 'INVALID_TOKEN_SALT') {
           toggleNotification({
             type: 'warning',
@@ -112,7 +110,7 @@ const TransferTokenListView = () => {
     },
     {
       async onSuccess() {
-        await queryClient.invalidateQueries(['transfer-tokens']);
+        await refetch(['transfer-tokens']);
       },
       onError(err) {
         if (err?.response?.data?.data) {

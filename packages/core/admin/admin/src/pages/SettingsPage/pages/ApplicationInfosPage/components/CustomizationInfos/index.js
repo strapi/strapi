@@ -5,7 +5,7 @@ import { useTracking } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { useConfigurations } from '../../../../../../hooks';
+import { useConfiguration } from '../../../../../../contexts/configuration';
 import { DIMENSION, SIZE } from '../../utils/constants';
 import LogoInput from '../LogoInput';
 
@@ -17,7 +17,7 @@ const CustomizationInfos = forwardRef(({ canUpdate, projectSettingsStored }, ref
   const { trackUsage } = useTracking();
   const {
     logos: { menu, auth },
-  } = useConfigurations();
+  } = useConfiguration();
   const [{ menuLogo, authLogo }, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, projectSettingsStored)
   );

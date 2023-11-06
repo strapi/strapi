@@ -17,7 +17,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { useApiTokenPermissionsContext } from '../../../../../../../contexts/ApiTokenPermissions';
+import { useApiTokenPermissions } from '../../../../../../../contexts/apiTokenPermissions';
 
 import CheckboxWrapper from './CheckBoxWrapper';
 
@@ -37,7 +37,7 @@ const CollapsableContentType = ({
 }) => {
   const {
     value: { onChangeSelectAll, onChange, selectedActions, setSelectedAction, selectedAction },
-  } = useApiTokenPermissionsContext();
+  } = useApiTokenPermissions();
   const [expanded, setExpanded] = useState(false);
   const { formatMessage } = useIntl();
 

@@ -27,6 +27,8 @@ watch();
 
 ```ts
 interface WatchOptions {
+  configFile: false;
+  config?: Config;
   cwd?: string;
   debug?: boolean;
   silent?: boolean;

@@ -2,7 +2,7 @@
 
 const { yup, validateYupSchema } = require('@strapi/utils');
 // eslint-disable-next-line node/no-extraneous-require
-const { features } = require('@strapi/strapi/dist/utils/ee').default;
+const { features } = require('@strapi/strapi/dist/utils/ee');
 
 const roleCreateSchema = yup
   .object()

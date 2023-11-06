@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
-import { Flex, Icon, Tooltip, Select, Option, Box, Typography } from '@strapi/design-system';
+import { Flex, Icon, Tooltip, SingleSelect, SingleSelectOption, Box } from '@strapi/design-system';
 import { pxToRem, prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
 import { Link } from '@strapi/icons';
 import PropTypes from 'prop-types';
@@ -38,6 +38,32 @@ const FlexButton = styled(Flex).attrs({ as: 'button' })`
     // Only apply hover styles if the button is enabled
     &:hover {
       background: ${({ theme }) => theme.colors.primary100};
+    }
+  }
+`;
+
+const SelectWrapper = styled(Box)`
+  // Styling changes to SingleSelect component don't work, so adding wrapper to target SingleSelect
+  div[role='combobox'] {
+    border: none;
+    cursor: pointer;
+    min-height: unset;
+    padding-top: 6px;
+    padding-bottom: 6px;
+
+    &[aria-disabled='false']:hover {
+      cursor: pointer;
+      background: ${({ theme }) => theme.colors.primary100};
+    }
+
+    &[aria-disabled] {
+      background: transparent;
+      cursor: inherit;
+
+      // Select text and icons should also have disabled color
+      span {
+        color: ${({ theme }) => theme.colors.neutral600};
+      }
     }
   }
 `;
@@ -97,49 +123,6 @@ ToolbarButton.propTypes = {
   handleClick: PropTypes.func.isRequired,
 };
 
-const ModifierButton = ({ icon, name, label, disabled }) => {
-  const editor = useSlate();
-
-  const isModifierActive = () => {
-    const modifiers = Editor.marks(editor);
-
-    if (!modifiers) return false;
-
-    return Boolean(modifiers[name]);
-  };
-
-  const isActive = isModifierActive();
-
-  const toggleModifier = () => {
-    if (isActive) {
-      Editor.removeMark(editor, name);
-    } else {
-      Editor.addMark(editor, name, true);
-    }
-  };
-
-  return (
-    <ToolbarButton
-      icon={icon}
-      name={name}
-      label={label}
-      isActive={isActive}
-      disabled={disabled}
-      handleClick={toggleModifier}
-    />
-  );
-};
-
-ModifierButton.propTypes = {
-  icon: PropTypes.elementType.isRequired,
-  name: PropTypes.string.isRequired,
-  label: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-  }).isRequired,
-  disabled: PropTypes.bool.isRequired,
-};
-
 const toggleBlock = (editor, value) => {
   const { type, level, format } = value;
 
@@ -151,18 +134,49 @@ const toggleBlock = (editor, value) => {
   };
 
   if (editor.selection) {
+    // If the selection is inside a list, split the list so that the modified block is outside of it
+    Transforms.unwrapNodes(editor, {
+      match: (node) => node.type === 'list',
+      split: true,
+    });
+
     // When there is a selection, update the existing block in the tree
     Transforms.setNodes(editor, blockProperties);
   } else {
-    // Otherwise, add a new block to the tree
-    Transforms.insertNodes(editor, { ...blockProperties, children: [{ type: 'text', text: '' }] });
+    /**
+     * When there is no selection, we want to insert a new block just after
+     * the last node inserted and prevent the code to add an empty paragraph
+     * between them.
+     */
+    const [, lastNodePath] = Editor.last(editor, []);
+    const [parentNode] = Editor.parent(editor, lastNodePath, {
+      // Makes sure we get a block node, not an inline node
+      match: (node) => node.type !== 'text',
+    });
+    Transforms.removeNodes(editor, {
+      void: true,
+      hanging: true,
+      at: {
+        anchor: { path: lastNodePath, offset: 0 },
+        focus: { path: lastNodePath, offset: 0 },
+      },
+    });
+    Transforms.insertNodes(
+      editor,
+      {
+        ...blockProperties,
+        children: parentNode.children,
+      },
+      {
+        at: [lastNodePath[0]],
+        select: true,
+      }
+    );
   }
 
   // When the select is clicked it blurs the editor, restore the focus to the editor
   ReactEditor.focus(editor);
 };
-
-const ALLOWED_MEDIA_TYPE = 'images';
 
 const IMAGE_SCHEMA_FIELDS = [
   'name',
@@ -199,10 +213,30 @@ const ImageDialog = ({ handleClose }) => {
   const MediaLibraryDialog = components['media-library'];
 
   const insertImages = (images) => {
-    images.forEach((img) => {
-      const image = { type: 'image', image: img, children: [{ type: 'text', text: '' }] };
-      Transforms.insertNodes(editor, image);
+    // If the selection is inside a list, split the list so that the modified block is outside of it
+    Transforms.unwrapNodes(editor, {
+      match: (node) => node.type === 'list',
+      split: true,
     });
+
+    // Save the path of the node that is being replaced by an image to insert the images there later
+    // It's the closest full block node above the selection
+    const [, pathToInsert] = Editor.above(editor, {
+      match(node) {
+        const isInlineNode = ['text', 'link'].includes(node.type);
+
+        return !isInlineNode;
+      },
+    });
+
+    // Remove the previous node that is being replaced by an image
+    Transforms.removeNodes(editor);
+
+    // Convert images to nodes and insert them
+    const nodesToInsert = images.map((image) => {
+      return { type: 'image', image, children: [{ type: 'text', text: '' }] };
+    });
+    Transforms.insertNodes(editor, nodesToInsert, { at: pathToInsert });
   };
 
   const handleSelectAssets = (images) => {
@@ -229,7 +263,7 @@ const ImageDialog = ({ handleClose }) => {
 
   return (
     <MediaLibraryDialog
-      allowedTypes={[ALLOWED_MEDIA_TYPE]}
+      allowedTypes={['images']}
       onClose={handleClose}
       onSelectAssets={handleSelectAssets}
     />
@@ -290,10 +324,7 @@ const BlocksDropdown = ({ disabled }) => {
    * @param {string} optionKey - key of the heading selected
    */
   const selectOption = (optionKey) => {
-    if (optionKey === 'image') {
-      // Image node created using select or existing selection node needs to be deleted before adding new image nodes
-      Transforms.removeNodes(editor);
-    } else if (['list-ordered', 'list-unordered'].includes(optionKey)) {
+    if (['list-ordered', 'list-unordered'].includes(optionKey)) {
       // retrieve the list format
       const listFormat = blocks[optionKey].value.format;
 
@@ -302,7 +333,7 @@ const BlocksDropdown = ({ disabled }) => {
 
       // toggle the list
       toggleList(editor, isActive, listFormat);
-    } else {
+    } else if (optionKey !== 'image') {
       toggleBlock(editor, blocks[optionKey].value);
     }
 
@@ -351,28 +382,30 @@ const BlocksDropdown = ({ disabled }) => {
 
   return (
     <>
-      <Select
-        startIcon={<Icon as={blocks[blockSelected].icon} />}
-        onChange={selectOption}
-        placeholder={blocks[blockSelected].label}
-        value={blockSelected}
-        onCloseAutoFocus={preventSelectFocus}
-        aria-label={formatMessage({
-          id: 'components.Blocks.blocks.selectBlock',
-          defaultMessage: 'Select a block',
-        })}
-        disabled={disabled}
-      >
-        {blockKeysToInclude.map((key) => (
-          <BlockOption
-            key={key}
-            value={key}
-            label={blocks[key].label}
-            icon={blocks[key].icon}
-            blockSelected={blockSelected}
-          />
-        ))}
-      </Select>
+      <SelectWrapper>
+        <SingleSelect
+          startIcon={<Icon as={blocks[blockSelected].icon} />}
+          onChange={selectOption}
+          placeholder={blocks[blockSelected].label}
+          value={blockSelected}
+          onCloseAutoFocus={preventSelectFocus}
+          aria-label={formatMessage({
+            id: 'components.Blocks.blocks.selectBlock',
+            defaultMessage: 'Select a block',
+          })}
+          disabled={disabled}
+        >
+          {blockKeysToInclude.map((key) => (
+            <BlockOption
+              key={key}
+              value={key}
+              label={blocks[key].label}
+              icon={blocks[key].icon}
+              blockSelected={blockSelected}
+            />
+          ))}
+        </SingleSelect>
+      </SelectWrapper>
       {isMediaLibraryVisible && <ImageDialog handleClose={() => setIsMediaLibraryVisible(false)} />}
     </>
   );
@@ -388,12 +421,12 @@ const BlockOption = ({ value, icon, label, blockSelected }) => {
   const isSelected = value === blockSelected;
 
   return (
-    <Option
+    <SingleSelectOption
       startIcon={<Icon as={icon} color={isSelected ? 'primary600' : 'neutral600'} />}
       value={value}
     >
       {formatMessage(label)}
-    </Option>
+    </SingleSelectOption>
   );
 };
 
@@ -432,21 +465,59 @@ const isListActive = (editor, matchNode) => {
 };
 
 const toggleList = (editor, isActive, format) => {
-  // Delete the parent list so that we're left with only the list items directly
-  Transforms.unwrapNodes(editor, {
-    match: (node) => isListNode(node) && ['ordered', 'unordered'].includes(node.format),
-    split: true,
-  });
+  // If we have selected a portion of content in the editor,
+  // we want to convert it to a list or if it is already a list,
+  // convert it back to a paragraph
+  if (editor.selection) {
+    Transforms.unwrapNodes(editor, {
+      match: (node) => isListNode(node) && ['ordered', 'unordered'].includes(node.format),
+      split: true,
+    });
 
-  // Change the type of the current selection
-  Transforms.setNodes(editor, {
-    type: isActive ? 'paragraph' : 'list-item',
-  });
+    Transforms.setNodes(editor, {
+      type: isActive ? 'paragraph' : 'list-item',
+    });
 
-  // If the selection is now a list item, wrap it inside a list
-  if (!isActive) {
-    const block = { type: 'list', format, children: [] };
-    Transforms.wrapNodes(editor, block);
+    if (!isActive) {
+      const block = { type: 'list', format, children: [] };
+      Transforms.wrapNodes(editor, block);
+    }
+  } else {
+    // There is no selection, convert the last inserted node to a list
+    // If it is already a list, convert it back to a paragraph
+    const [, lastNodePath] = Editor.last(editor, []);
+
+    const [parentNode] = Editor.parent(editor, lastNodePath, {
+      // Makes sure we get a block node, not an inline node
+      match: (node) => node.type !== 'text',
+    });
+
+    Transforms.removeNodes(editor, {
+      void: true,
+      hanging: true,
+      at: {
+        anchor: { path: lastNodePath, offset: 0 },
+        focus: { path: lastNodePath, offset: 0 },
+      },
+    });
+
+    Transforms.insertNodes(
+      editor,
+      {
+        type: isActive ? 'paragraph' : 'list-item',
+        children: [...parentNode.children],
+      },
+      {
+        at: [lastNodePath[0]],
+        select: true,
+      }
+    );
+
+    if (!isActive) {
+      // If the selection is now a list item, wrap it inside a list
+      const block = { type: 'list', format, children: [] };
+      Transforms.wrapNodes(editor, block);
+    }
   }
 };
 
@@ -507,6 +578,31 @@ const LinkButton = ({ disabled }) => {
     return Boolean(match);
   };
 
+  const isLinkDisabled = () => {
+    // Always disabled when the whole editor is disabled
+    if (disabled) {
+      return true;
+    }
+
+    // Always enabled when there's no selection
+    if (!editor.selection) {
+      return false;
+    }
+
+    // Get the block node closest to the anchor and focus
+    const anchorNodeEntry = Editor.above(editor, {
+      at: editor.selection.anchor,
+      match: (node) => node.type !== 'text',
+    });
+    const focusNodeEntry = Editor.above(editor, {
+      at: editor.selection.focus,
+      match: (node) => node.type !== 'text',
+    });
+
+    // Disabled if the anchor and focus are not in the same block
+    return anchorNodeEntry[0] !== focusNodeEntry[0];
+  };
+
   const addLink = () => {
     // We insert an empty anchor, so we split the DOM to have a element we can use as reference for the popover
     insertLink(editor, { url: '' });
@@ -522,7 +618,7 @@ const LinkButton = ({ disabled }) => {
       }}
       isActive={isLinkActive()}
       handleClick={addLink}
-      disabled={disabled}
+      disabled={isLinkDisabled()}
     />
   );
 };
@@ -531,26 +627,43 @@ LinkButton.propTypes = {
   disabled: PropTypes.bool.isRequired,
 };
 
-// TODO: Remove after the RTE Blocks Beta release
-const BetaTag = styled(Box)`
-  background-color: ${({ theme }) => theme.colors.secondary100};
-  border: ${({ theme }) => `1px solid ${theme.colors.secondary200}`};
-  border-radius: ${({ theme }) => theme.borderRadius};
-  font-size: ${({ theme }) => theme.fontSizes[0]};
-  padding: ${({ theme }) => `${2 / 16}rem ${theme.spaces[1]}`};
-`;
-
 const BlocksToolbar = ({ disabled }) => {
   const modifiers = useModifiersStore();
   const blocks = useBlocksStore();
+  const editor = useSlate();
+
+  /**
+   * The modifier buttons are disabled when an image is selected.
+   */
+
+  const checkButtonDisabled = () => {
+    // Always disabled when the whole editor is disabled
+    if (disabled) {
+      return true;
+    }
+
+    if (!editor.selection) {
+      return false;
+    }
+
+    const selectedNode = editor.children[editor.selection.anchor.path[0]];
+
+    if (['image', 'code'].includes(selectedNode.type)) {
+      return true;
+    }
+
+    return false;
+  };
+
+  const isButtonDisabled = checkButtonDisabled();
 
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
-      {/* Remove after the RTE Blocks Beta release (paddingRight and width) */}
-      <ToolbarWrapper gap={1} padding={2} paddingRight={4} width="100%">
+      <ToolbarWrapper gap={2} padding={2}>
         <BlocksDropdown disabled={disabled} />
+        <Separator />
         <Toolbar.ToggleGroup type="multiple" asChild>
-          <Flex gap={1} marginLeft={1}>
+          <Flex gap={1}>
             {Object.entries(modifiers).map(([name, modifier]) => (
               <ToolbarButton
                 key={name}
@@ -559,10 +672,10 @@ const BlocksToolbar = ({ disabled }) => {
                 label={modifier.label}
                 isActive={modifier.checkIsActive()}
                 handleClick={modifier.handleToggle}
-                disabled={disabled}
+                disabled={isButtonDisabled}
               />
             ))}
-            <LinkButton disabled={disabled} />
+            <LinkButton disabled={isButtonDisabled} />
           </Flex>
         </Toolbar.ToggleGroup>
         <Separator />
@@ -572,14 +685,6 @@ const BlocksToolbar = ({ disabled }) => {
             <ListButton block={blocks['list-ordered']} disabled={disabled} />
           </Flex>
         </Toolbar.ToggleGroup>
-        {/* TODO: Remove after the RTE Blocks Beta release */}
-        <Flex grow={1} justifyContent="flex-end">
-          <BetaTag>
-            <Typography textColor="secondary600" variant="sigma">
-              BETA
-            </Typography>
-          </BetaTag>
-        </Flex>
       </ToolbarWrapper>
     </Toolbar.Root>
   );

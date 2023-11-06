@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const rimraf = require('rimraf');
 const execa = require('execa');
-const generateNew = require('../../packages/generators/app/dist/generate-new').default;
+const generateNew = require('../../packages/generators/app/dist/generate-new');
 
 /**
  * Deletes a test app
@@ -48,8 +48,14 @@ const generateTestApp = async ({ appPath, database, template, link = false }) =>
       '@strapi/plugin-graphql',
       '@strapi/plugin-documentation',
       '@strapi/plugin-i18n',
+      '@strapi/plugin-cloud',
     ],
-    additionalsDependencies: {},
+    additionalsDependencies: {
+      react: '18.2.0',
+      'react-dom': '18.2.0',
+      'react-router-dom': '5.3.4',
+      'styled-components': '5.3.3',
+    },
     template: template ? path.resolve(template) : template,
   };
 

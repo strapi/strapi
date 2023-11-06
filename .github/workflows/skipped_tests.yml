@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [18]
+        node: [20]
     steps:
       - run: echo "Skipped"
 
@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [16, 18, 20]
+        node: [18, 20]
     steps:
       - run: echo "Skipped"
 
@@ -62,7 +62,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [16, 18, 20]
+        node: [18, 20]
     steps:
       - run: echo "Skipped"
 
@@ -72,7 +72,7 @@ jobs:
     name: '[CE] API Integration (postgres, node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [16, 18, 20]
+        node: [18, 20]
     steps:
       - run: echo "Skipped"
 
@@ -82,7 +82,7 @@ jobs:
     name: '[CE] API Integration (mysql, node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [16, 18, 20]
+        node: [18, 20]
     steps:
       - run: echo "Skipped"
 
@@ -92,7 +92,7 @@ jobs:
     name: '[CE] API Integration (mysql:5 , node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [16, 18, 20]
+        node: [18, 20]
     steps:
       - run: echo "Skipped"
 

@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { useConfigurations } from '../hooks/useConfigurations';
+import { useConfiguration } from '../contexts/configuration';
 
 const Img = styled.img`
   height: ${72 / 16}rem;
@@ -9,7 +9,7 @@ const Img = styled.img`
 const Logo = () => {
   const {
     logos: { auth },
-  } = useConfigurations();
+  } = useConfiguration();
 
   return <Img src={auth?.custom ?? auth.default} aria-hidden alt="" />;
 };

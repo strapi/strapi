@@ -1,8 +1,8 @@
-import { createContext } from 'react';
-
+import { createContext } from '@radix-ui/react-context';
 import { DefaultTheme } from 'styled-components';
 
-export type ThemeName = 'light' | 'dark';
+type ThemeName = 'light' | 'dark' | 'system';
+type NonSystemThemeName = Exclude<ThemeName, 'system'>;
 
 interface ThemeToggleContextContextValue {
   currentTheme?: ThemeName;
@@ -11,6 +11,13 @@ interface ThemeToggleContextContextValue {
     dark: DefaultTheme;
     light: DefaultTheme;
   };
+  systemTheme?: NonSystemThemeName;
 }
 
-export const ThemeToggleContext = createContext<ThemeToggleContextContextValue>({});
+const [ThemeToggleContextProvider, useThemeToggleContext] =
+  createContext<ThemeToggleContextContextValue>('ThemeToggleContext');
+
+const useThemeToggle = () => useThemeToggleContext('useThemeToggle');
+
+export { ThemeToggleContextProvider, useThemeToggle };
+export type { ThemeName, NonSystemThemeName, ThemeToggleContextContextValue };

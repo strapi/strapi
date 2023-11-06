@@ -1,38 +1,14 @@
-import strapiAdmin from '@strapi/admin';
-import { getConfigUrls, getAbsoluteServerUrl } from '@strapi/utils';
+import { watchAdmin } from '@strapi/admin';
+import { CLIContext } from '../../types';
 
-import { getEnabledPlugins } from '../../../core/loaders/plugins/get-enabled-plugins';
-import addSlash from '../../../utils/addSlash';
-import strapi from '../../../index';
+interface WatchAdminOptions extends CLIContext {
+  browser: boolean;
+}
 
-export default async ({ browser }: { browser: boolean }) => {
-  const appContext = await strapi.compile();
+export default async ({ browser, logger }: WatchAdminOptions) => {
+  logger.warn('[@strapi/strapi]: watch-admin is deprecated, please use strapi develop instead');
 
-  const strapiInstance = strapi({
-    ...appContext,
-    autoReload: true,
-    serveAdminPanel: false,
-  });
-
-  const plugins = await getEnabledPlugins(strapiInstance, { client: true });
-
-  const { adminPath } = getConfigUrls(strapiInstance.config, true);
-
-  const adminPort = strapiInstance.config.get('admin.port', 8000);
-  const adminHost = strapiInstance.config.get('admin.host', 'localhost');
-
-  const backendURL = getAbsoluteServerUrl(strapiInstance.config, true);
-
-  strapiAdmin.watchAdmin({
-    appDir: appContext.appDir,
-    buildDestDir: appContext.distDir,
-    plugins,
-    port: adminPort,
-    host: adminHost,
+  await watchAdmin({
     browser,
-    options: {
-      backend: backendURL,
-      adminPath: addSlash(adminPath),
-    },
   });
 };
