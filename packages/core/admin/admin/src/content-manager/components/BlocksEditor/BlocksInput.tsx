@@ -1,8 +1,14 @@
 import * as React from 'react';
 
 import { Box } from '@strapi/design-system';
-import { Editable, ReactEditor, RenderElementProps, RenderLeafProps, useSlate } from 'slate-react';
-import { DefaultTheme, useTheme } from 'styled-components';
+import {
+  type ReactEditor,
+  type RenderElementProps,
+  type RenderLeafProps,
+  Editable,
+  useSlate,
+} from 'slate-react';
+import { type DefaultTheme, useTheme } from 'styled-components';
 
 import { type BlocksStore, useBlocksStore } from './hooks/useBlocksStore';
 import { type ModifiersStore, useModifiersStore } from './hooks/useModifiersStore';

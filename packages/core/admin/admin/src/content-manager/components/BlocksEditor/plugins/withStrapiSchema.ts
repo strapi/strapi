@@ -4,8 +4,6 @@ import { isText } from '../utils/types';
 
 /**
  * This plugin is used to normalize the Slate document to match the Strapi schema.
- *
- * @param {import('slate').Editor} editor
  */
 const withStrapiSchema = (editor: Editor) => {
   const { normalizeNode } = editor;

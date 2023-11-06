@@ -4,9 +4,8 @@ import * as React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render, renderHook, screen } from '@testing-library/react';
-import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
-import { createEditor, Descendant } from 'slate';
+import { type Descendant, createEditor } from 'slate';
 import { Slate, withReact } from 'slate-react';
 
 import { useModifiersStore } from '../useModifiersStore';
@@ -30,10 +29,6 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
       </IntlProvider>
     </ThemeProvider>
   );
-};
-
-Wrapper.propTypes = {
-  children: PropTypes.node.isRequired,
 };
 
 describe('useModifiersStore', () => {

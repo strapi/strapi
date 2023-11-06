@@ -2,9 +2,9 @@ import * as React from 'react';
 
 import { Box, Flex, Typography, InputWrapper, Divider } from '@strapi/design-system';
 import { type Attribute } from '@strapi/types';
-import { MessageDescriptor, useIntl } from 'react-intl';
-import { BaseEditor, createEditor, Descendant, Editor } from 'slate';
-import { HistoryEditor, withHistory } from 'slate-history';
+import { type MessageDescriptor, useIntl } from 'react-intl';
+import { type BaseEditor, type Descendant, type Editor, createEditor } from 'slate';
+import { type HistoryEditor, withHistory } from 'slate-history';
 import { Slate, withReact, ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 

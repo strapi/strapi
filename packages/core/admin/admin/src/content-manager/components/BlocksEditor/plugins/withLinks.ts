@@ -1,4 +1,4 @@
-import { Path, Transforms, Range, Point, Editor, type BaseEditor } from 'slate';
+import { type BaseEditor, Path, Transforms, Range, Point, Editor } from 'slate';
 
 import { insertLink } from '../utils/links';
 

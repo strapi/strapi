@@ -1,6 +1,6 @@
-import { Text, Editor, type Element, type Node } from 'slate';
+import { type Text, type Element, type Node, Editor } from 'slate';
 
-import { SelectorBlockKey, selectorBlockKeys } from '../hooks/useBlocksStore';
+import { type SelectorBlockKey, selectorBlockKeys } from '../hooks/useBlocksStore';
 
 export type Block<T extends Element['type']> = Extract<Node, { type: T }>;
 

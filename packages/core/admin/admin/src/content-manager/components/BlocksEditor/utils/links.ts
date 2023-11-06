@@ -1,6 +1,6 @@
 import { Transforms, Editor, Element as SlateElement, Node, Range } from 'slate';
 
-import { Block } from './types';
+import { type Block } from './types';
 
 const addProtocol = (url: string, protocol = 'https://') => {
   const allowedProtocols = ['http://', 'https://', 'mailto:', 'tel:'];

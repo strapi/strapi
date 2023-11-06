@@ -5,9 +5,8 @@ import * as React from 'react';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
-import { createEditor, Descendant, Editor, Location, Transforms } from 'slate';
+import { type Descendant, type Editor, type Location, createEditor, Transforms } from 'slate';
 import { Slate, withReact, ReactEditor } from 'slate-react';
 
 import { BlocksToolbar } from '../Toolbar';
@@ -139,11 +138,6 @@ const Wrapper = ({
       </IntlProvider>
     </ThemeProvider>
   );
-};
-
-Wrapper.propTypes = {
-  children: PropTypes.node.isRequired,
-  initialValue: PropTypes.array.isRequired,
 };
 
 /**
