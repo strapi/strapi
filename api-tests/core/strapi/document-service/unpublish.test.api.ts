@@ -26,6 +26,42 @@ describe('Document Service', () => {
   });
 
   describe('Unpublish', () => {
-    it('unpublishes all locales of a document', async () => {});
+    it(
+      'unpublishes all locales of a document',
+      testInTransaction(async () => {
+        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+        const article = await strapi.documents(ARTICLE_UID).unpublish(articleDb.documentId);
+
+        const articles = await findArticlesDb({ documentId: articleDb.documentId });
+
+        expect(articles.length).toBeGreaterThan(0);
+        // Should not have any publishedAt
+        articles.forEach((article) => {
+          expect(article.publishedAt).toBeNull();
+        });
+      })
+    );
+
+    it(
+      'unpublishes single locale of document',
+      testInTransaction(async () => {
+        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+        const article = await strapi.documents(ARTICLE_UID).unpublish(articleDb.documentId, {
+          locales: ['en'],
+        });
+
+        const articles = await findArticlesDb({ documentId: articleDb.documentId });
+
+        expect(articles.length).toBeGreaterThan(0);
+        // Should not have any publishedAt
+        articles.forEach((article) => {
+          if (article.locale === 'en') {
+            expect(article.publishedAt).toBeNull();
+          } else {
+            expect(article.publishedAt).not.toBeNull();
+          }
+        });
+      })
+    );
   });
 });

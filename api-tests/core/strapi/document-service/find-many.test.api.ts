@@ -3,6 +3,7 @@ import './resources/types/components.d.ts';
 import './resources/types/contentTypes.d.ts';
 import resources from './resources/index';
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
+import { testInTransaction } from '../../../utils/index';
 
 const ARTICLE_UID = 'api::article.article';
 
@@ -28,15 +29,82 @@ describe('Document Service', () => {
   });
 
   describe('FindMany', () => {
-    it('find many selects by document name', async () => {
-      const articlesDb = await findArticlesDb({ title: 'Article1-Draft-EN' });
+    it(
+      'selects by document name and defaults',
+      testInTransaction(async () => {
+        const articlesDb = await findArticlesDb({ title: 'Article1-Draft-EN' });
 
-      const articles = await strapi.documents('api::article.article').findMany({
-        filters: { title: 'Article1-Draft-EN' },
-      });
+        const articles = await strapi.documents('api::article.article').findMany({
+          filters: { title: 'Article1-Draft-EN' },
+        });
 
-      expect(articles.length).toBe(1);
-      expect(articles).toMatchObject(articlesDb);
-    });
+        // Should return default language (en) and draft version
+        expect(articles.length).toBe(1);
+        expect(articles).toMatchObject(articlesDb);
+      })
+    );
+
+    it(
+      'selects by document name and locale',
+      testInTransaction(async () => {
+        // There should not be a fr article called Article1-Draft-EN
+        const articles = await strapi.documents('api::article.article').findMany({
+          filters: { title: 'Article1-Draft-EN', locale: 'fr' },
+        });
+
+        // Should return french locale and draft version
+        expect(articles.length).toBe(1);
+      })
+    );
+
+    it(
+      'find french articles',
+      testInTransaction(async () => {
+        const articlesDb = await findArticlesDb({ title: 'Article1-Draft-EN' });
+
+        const articles = await strapi.documents('api::article.article').findMany({
+          filters: { locale: 'fr' },
+        });
+
+        // Should return default language (en) and draft version
+        expect(articles.length).toBeGreaterThan(0);
+        // All articles should be in french
+        articles.forEach((article) => {
+          expect(article.locale).toBe('fr');
+        });
+      })
+    );
+
+    it(
+      'find published articles',
+      testInTransaction(async () => {
+        const articles = await strapi.documents('api::article.article').findMany({
+          filters: { status: 'published' },
+        });
+
+        // Should return default language (en) and draft version
+        expect(articles.length).toBeGreaterThan(0);
+        // All articles should be published
+        articles.forEach((article) => {
+          expect(article.publishedAt).not.toBe(null);
+        });
+      })
+    );
+
+    it(
+      'find draft articles',
+      testInTransaction(async () => {
+        const articles = await strapi.documents('api::article.article').findMany({
+          filters: { status: 'draft' },
+        });
+
+        // Should return default language (en) and draft version
+        expect(articles.length).toBeGreaterThan(0);
+        // All articles should be published
+        articles.forEach((article) => {
+          expect(article.publishedAt).toBe(null);
+        });
+      })
+    );
   });
 });

@@ -34,5 +34,14 @@
     "password": null,
     "private": "private",
     "locale": "it"
+  },
+  {
+    "id": 25,
+    "documentId": "Article2",
+    "title": "Article2-Published-EN",
+    "publishedAt": "2019-01-01T00:00:00.000Z",
+    "password": null,
+    "private": "private",
+    "locale": "en"
   }
 ]
