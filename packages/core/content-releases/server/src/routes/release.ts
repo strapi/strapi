@@ -12,7 +12,7 @@ export default {
     {
       method: 'GET',
       path: '/',
-      handler: 'release.find',
+      handler: 'release.findMany',
       config: {
         policies: ['admin::isAuthenticatedAdmin'],
       },

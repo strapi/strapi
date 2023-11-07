@@ -6,7 +6,7 @@ import { validateCreateRelease } from './validation/release';
 const { ApplicationError } = errors;
 
 const releaseController = {
-  async find(ctx: Koa.Context) {
+  async findMany(ctx: Koa.Context) {
     const { user } = ctx.state;
 
     // Releases can only be find by super admins until we figure out how to handle permissions
