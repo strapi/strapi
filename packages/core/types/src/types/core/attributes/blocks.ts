@@ -29,6 +29,7 @@ interface ListItemInlineNode extends BaseNode {
 type InlineNode = TextInlineNode | LinkInlineNode | ListItemInlineNode;
 
 type DefaultInlineNode = Exclude<InlineNode, ListItemInlineNode>;
+type NonTextInlineNode = Exclude<InlineNode, TextInlineNode>;
 
 interface ParagraphBlockNode extends BaseNode {
   type: 'paragraph';
@@ -89,5 +90,6 @@ export type BlocksValue = RootNode[];
 export type GetBlocksValue<T extends Attribute.Attribute> = T extends Blocks ? BlocksValue : never;
 
 // Type utils needed for the blocks renderer and the blocks editor
-export type BlocksNode = RootNode | Exclude<InlineNode, TextInlineNode>;
+export type BlocksNode = RootNode | NonTextInlineNode;
+export type BlocksInlineNode = NonTextInlineNode;
 export type BlocksTextNode = TextInlineNode;
