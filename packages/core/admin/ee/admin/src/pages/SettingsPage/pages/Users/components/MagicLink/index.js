@@ -15,7 +15,7 @@ export const MagicLinkEE = ({ registrationToken }) => {
       <MagicLinkWrapper
         target={`${
           window.location.origin
-        }${getBasename()}auth/register?registrationToken=${registrationToken}`}
+        }${getBasename()}/auth/register?registrationToken=${registrationToken}`}
       >
         {formatMessage({
           id: 'app.components.Users.MagicLink.connect',

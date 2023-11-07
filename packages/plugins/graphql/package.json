@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-graphql",
-  "version": "4.15.0",
+  "version": "4.15.1",
   "description": "Adds GraphQL endpoint with default API methods.",
   "repository": {
     "type": "git",
@@ -20,16 +20,33 @@
       "url": "https://strapi.io"
     }
   ],
+  "exports": {
+    "./strapi-admin": {
+      "source": "./admin/src/index.js",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.js"
+    },
+    "./strapi-server": {
+      "source": "./strapi-server.js",
+      "require": "./strapi-server.js",
+      "default": "./strapi-server.js"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
-    "lint": "run -T eslint ."
+    "build": "pack-up build",
+    "clean": "run -T rimraf dist",
+    "lint": "run -T eslint .",
+    "watch": "pack-up watch"
   },
   "dependencies": {
     "@graphql-tools/schema": "8.5.1",
     "@graphql-tools/utils": "^8.13.1",
     "@strapi/design-system": "1.13.0",
-    "@strapi/helper-plugin": "4.15.0",
+    "@strapi/helper-plugin": "4.15.1",
     "@strapi/icons": "1.13.0",
-    "@strapi/utils": "4.15.0",
+    "@strapi/utils": "4.15.1",
     "apollo-server-core": "3.12.1",
     "apollo-server-koa": "3.10.0",
     "graphql": "^15.5.1",
@@ -43,6 +60,8 @@
     "pluralize": "8.0.0"
   },
   "devDependencies": {
+    "@strapi/pack-up": "workspace:*",
+    "@strapi/strapi": "4.15.1",
     "cross-env": "^7.0.3",
     "koa": "2.13.4",
     "react": "^18.2.0",

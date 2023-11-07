@@ -52,11 +52,7 @@ export const SingleSignOn = () => {
     { formErrors, initialData, isLoading: isLoadingForm, modifiedData, showHeaderButtonLoader },
     ,
     { handleChange, handleSubmit },
-  ] = useSettingsForm(schema, () => {}, [
-    'autoRegister',
-    'defaultRole',
-    'ssoLockedRoles',
-  ]);
+  ] = useSettingsForm(schema, () => {}, ['autoRegister', 'defaultRole', 'ssoLockedRoles']);
 
   const { roles, isLoading: isLoadingRoles } = useAdminRoles(undefined, {
     enabled: canReadRoles,
