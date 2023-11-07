@@ -15,7 +15,7 @@ const admin: Plugin.Config.AdminInput = {
         icon: PaperPlane,
         intlLabel: {
           id: `${pluginId}.plugin.name`,
-          defaultMessage: 'Content Releases',
+          defaultMessage: 'Releases',
         },
         async Component() {
           const { Releases } = await import('./pages/App');

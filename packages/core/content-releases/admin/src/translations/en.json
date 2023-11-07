@@ -1,5 +1,5 @@
 {
-  "plugin.name": "Content Releases",
+  "plugin.name": "Releases",
   "pages.Releases.title": "Releases",
   "pages.Releases.header-subtitle": "{number, plural, =0 {No releases} one {# release} other {# releases}}",
   "header.actions.add-release": "New Release",
