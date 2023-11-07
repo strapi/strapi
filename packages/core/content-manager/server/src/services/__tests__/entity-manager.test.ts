@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import entityManagerLoader from '../entity-manager';
 import populateBuilder from '../populate-builder';
+import '@strapi/types';
 
 let entityManager: any;
 
@@ -76,6 +77,7 @@ describe('Content-Manager', () => {
         { id: 2, publishedAt: null },
       ];
 
+      // @ts-expect-error mocks do exist on global.strapi
       strapi.entityService.findMany.mockResolvedValueOnce([
         { id: 1, publishedAt: new Date() },
         { id: 2, publishedAt: new Date() },
@@ -95,6 +97,7 @@ describe('Content-Manager', () => {
         },
         populate: {},
       });
+      // @ts-expect-error mocks do exist on global.strapi
       expect(strapi.eventHub.emit.mock.calls).toEqual([
         [
           'entry.publish',
@@ -113,7 +116,7 @@ describe('Content-Manager', () => {
         { id: 1, publishedAt: new Date() },
         { id: 2, publishedAt: null },
       ];
-
+      // @ts-expect-error mocks do exist on global.strapi
       strapi.entityService.findMany.mockResolvedValueOnce([{ id: 2, publishedAt: new Date() }]);
 
       await entityManager.publishMany(entities, uid);
@@ -130,6 +133,7 @@ describe('Content-Manager', () => {
         },
         populate: {},
       });
+      // @ts-expect-error mocks do exist on global.strapi
       expect(strapi.eventHub.emit.mock.calls).toEqual([
         [
           'entry.publish',
@@ -200,6 +204,7 @@ describe('Content-Manager', () => {
         { id: 2, publishedAt: new Date() },
       ];
 
+      // @ts-expect-error mocks do exist on global.strapi
       strapi.entityService.findMany.mockResolvedValueOnce([
         { id: 1, publishedAt: null },
         { id: 2, publishedAt: null },
@@ -207,7 +212,7 @@ describe('Content-Manager', () => {
 
       await entityManager.unpublishMany(entities, uid);
 
-      expect(strapi.db.query().updateMany).toHaveBeenCalledWith({
+      expect(strapi.db.query(uid).updateMany).toHaveBeenCalledWith({
         where: {
           id: { $in: [1, 2] },
         },
@@ -219,6 +224,7 @@ describe('Content-Manager', () => {
         },
         populate: {},
       });
+      // @ts-expect-error mocks do exist on global.strapi
       expect(strapi.eventHub.emit.mock.calls).toEqual([
         ['entry.unpublish', { model: fakeModel.modelName, entry: { id: 1, publishedAt: null } }],
         ['entry.unpublish', { model: fakeModel.modelName, entry: { id: 2, publishedAt: null } }],
@@ -232,6 +238,7 @@ describe('Content-Manager', () => {
         { id: 2, publishedAt: null },
       ];
 
+      // @ts-expect-error mocks do exist on global.strapi
       strapi.entityService.findMany.mockResolvedValueOnce([{ id: 1, publishedAt: null }]);
 
       await entityManager.unpublishMany(entities, uid);
@@ -248,6 +255,7 @@ describe('Content-Manager', () => {
         },
         populate: {},
       });
+      // @ts-expect-error mocks do exist on global.strapi
       expect(strapi.eventHub.emit.mock.calls).toEqual([
         ['entry.unpublish', { model: fakeModel.modelName, entry: { id: 1, publishedAt: null } }],
       ]);

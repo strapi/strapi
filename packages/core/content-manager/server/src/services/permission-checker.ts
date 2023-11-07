@@ -68,8 +68,8 @@ const createPermissionChecker =
      */
     const sanitizedQuery = (query: any, action: any) => {
       return pipeAsync(
-        (q) => sanitizeQuery(q, action),
-        (q) => buildPermissionQuery(q, action)
+        (q: any) => sanitizeQuery(q, action),
+        (q: any) => buildPermissionQuery(q, action)
       )(query);
     };
 
