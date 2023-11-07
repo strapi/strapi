@@ -1,3 +1,5 @@
+import { Strapi } from '@strapi/types';
+
 interface EntityManager {
   mapEntity<T = any>(entity: T): T;
   mapEntitiesResponse<T = any>(entities: T[], uid: string): T[];
