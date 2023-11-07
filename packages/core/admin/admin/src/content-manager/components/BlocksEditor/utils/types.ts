@@ -15,6 +15,10 @@ export const isText = (node: Node | undefined): node is Text => {
   return !Editor.isEditor(node) && node?.type === 'text';
 };
 
+export const isBlockList = (element: Element): element is Block<'list'> => {
+  return element.type === 'list';
+};
+
 export const isSelectorBlockKey = (key: unknown): key is SelectorBlockKey => {
   return typeof key === 'string' && selectorBlockKeys.includes(key as SelectorBlockKey);
 };

@@ -39,7 +39,7 @@ import styled, { css } from 'styled-components';
 // @ts-expect-error TODO migrate this file
 import { composeRefs } from '../../../utils';
 import { editLink, removeLink } from '../utils/links';
-import { type Block, isText } from '../utils/types';
+import { type Block, isText, isBlockList } from '../utils/types';
 
 const StyledBaseLink = styled(BaseLink)`
   text-decoration: none;
@@ -124,7 +124,11 @@ const Unorderedlist = styled.ul`
 `;
 
 const List = ({ attributes, children, element }: RenderElementProps) => {
-  if ((element as Block<'list'>).format === 'ordered') {
+  if (!isBlockList(element)) {
+    return null;
+  }
+
+  if (element.format === 'ordered') {
     return <Orderedlist {...attributes}>{children}</Orderedlist>;
   }
 
@@ -208,7 +212,9 @@ const handleEnterKeyOnList = (editor: Editor) => {
     isText(currentListItem.children[0]) &&
     currentListItem.children[0].text === '';
   const isListItemEmpty =
-    currentListItem.children.length === 1 && (currentListItem.children[0] as Text).text === '';
+    currentListItem.children.length === 1 &&
+    isText(currentListItem.children[0]) &&
+    currentListItem.children[0].text === '';
 
   if (isListEmpty) {
     replaceListWithEmptyBlock(editor, currentListPath);
@@ -306,7 +312,7 @@ const Link = React.forwardRef<HTMLAnchorElement, RenderElementProps>(
     const elementAsLink = element as Block<'link'>;
 
     const [isEditing, setIsEditing] = React.useState(elementAsLink.url === '');
-    const linkRef = React.useRef(null!);
+    const linkRef = React.useRef<HTMLAnchorElement>(null!);
     const elementText = elementAsLink.children.map((child) => child.text).join('');
     const [linkText, setLinkText] = React.useState(elementText);
     const [linkUrl, setLinkUrl] = React.useState(elementAsLink.url);

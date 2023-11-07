@@ -27,7 +27,7 @@ const Separator = styled(Toolbar.Separator)`
   height: ${pxToRem(24)};
 `;
 
-const FlexButton = styled(Flex).attrs({ as: 'button' })`
+const FlexButton = styled(Flex)`
   // Inherit the not-allowed cursor from ToolbarWrapper when disabled
   &[aria-disabled] {
     cursor: inherit;
