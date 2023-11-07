@@ -34,6 +34,7 @@ const develop: StrapiCommand = ({ command, ctx }) => {
     .option('--silent', "Don't log anything", false)
     .option('--ignore-prompts', 'Ignore all prompts', false)
     .option('--polling', 'Watch for file changes in network directories', false)
+    .option('--watch-admin', 'Watch the admin panel for hot changes', false)
     .option(
       '--no-build',
       '[deprecated]: there is middleware for the server, it is no longer a separate process'
