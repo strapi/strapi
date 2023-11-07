@@ -10,48 +10,54 @@ interface TextInlineNode {
   code?: boolean;
 }
 
-interface LinkInlineNode {
+interface BaseNode {
+  type: string;
+  children: unknown[];
+}
+
+interface LinkInlineNode extends BaseNode {
   type: 'link';
   url: string;
   children: TextInlineNode[];
 }
 
-interface ListItemInlineNode {
+interface ListItemInlineNode extends BaseNode {
   type: 'list-item';
   children: DefaultInlineNode[];
 }
 
-type DefaultInlineNode = TextInlineNode | LinkInlineNode;
-type NonTextInlineNode = Exclude<DefaultInlineNode | ListItemInlineNode, TextInlineNode>;
+type InlineNode = TextInlineNode | LinkInlineNode | ListItemInlineNode;
 
-interface ParagraphBlockNode {
+type DefaultInlineNode = Exclude<InlineNode, ListItemInlineNode>;
+
+interface ParagraphBlockNode extends BaseNode {
   type: 'paragraph';
   children: DefaultInlineNode[];
 }
 
-interface QuoteBlockNode {
+interface QuoteBlockNode extends BaseNode {
   type: 'quote';
   children: DefaultInlineNode[];
 }
 
-interface CodeBlockNode {
+interface CodeBlockNode extends BaseNode {
   type: 'code';
   children: DefaultInlineNode[];
 }
 
-interface HeadingBlockNode {
+interface HeadingBlockNode extends BaseNode {
   type: 'heading';
   level: 1 | 2 | 3 | 4 | 5 | 6;
   children: DefaultInlineNode[];
 }
 
-interface ListBlockNode {
+interface ListBlockNode extends BaseNode {
   type: 'list';
   format: 'ordered' | 'unordered';
   children: (ListItemInlineNode | ListBlockNode)[];
 }
 
-interface ImageBlockNode {
+interface ImageBlockNode extends BaseNode {
   type: 'image';
   image: Attribute.GetValue<{
     type: 'media';
@@ -80,13 +86,8 @@ export type Blocks = Attribute.OfType<'blocks'> &
 
 export type BlocksValue = RootNode[];
 
-// Type utils needed for the blocks renderer and the blocks editor (useBlocksStore)
-export type BlockNode<NodeKind extends 'root' | 'inline' | 'all'> = NodeKind extends 'root'
-  ? RootNode
-  : NodeKind extends 'inline'
-  ? NonTextInlineNode
-  : NodeKind extends 'all'
-  ? RootNode | NonTextInlineNode
-  : never;
-
 export type GetBlocksValue<T extends Attribute.Attribute> = T extends Blocks ? BlocksValue : never;
+
+// Type utils needed for the blocks renderer and the blocks editor
+export type BlocksNode = RootNode | Exclude<InlineNode, TextInlineNode>;
+export type BlocksTextNode = TextInlineNode;
