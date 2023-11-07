@@ -7,7 +7,6 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { useNotification } from '@strapi/helper-plugin';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
@@ -20,21 +19,13 @@ const INITIAL_VALUES = {
   name: '',
 };
 
-export const AddReleaseDialog = ({ handleClose }: { handleClose: () => void }) => {
+interface AddReleaseDialogProps {
+  handleClose: () => void;
+  handleSubmit: () => void;
+}
+
+export const AddReleaseDialog = ({ handleClose, handleSubmit }: AddReleaseDialogProps) => {
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
-
-  const handleSubmit = () => {
-    handleClose();
-
-    toggleNotification({
-      type: 'success',
-      message: formatMessage({
-        id: 'content-releases.modal.release-created-notification-success',
-        defaultMessage: 'Release created.',
-      }),
-    });
-  };
 
   return (
     <ModalLayout onClose={handleClose} labelledBy="title">
