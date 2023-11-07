@@ -1,5 +1,6 @@
 import os from 'node:os';
 import path from 'node:path';
+import { env } from '@strapi/utils';
 import { getModule, PackageJson } from './dependencies';
 import { loadFile } from './files';
 import { BuildContext, CreateBuildContextArgs } from '../createBuildContext';
@@ -128,7 +129,7 @@ const loadUserPluginsFile = async (root: string): Promise<UserPluginConfigFile> 
       /**
        * Configs can be a function or they can be just an object!
        */
-      return typeof configFile === 'function' ? configFile() : configFile;
+      return typeof configFile === 'function' ? configFile({ env }) : configFile;
     }
   }
 

@@ -15,3 +15,23 @@ export declare namespace IsSSOLocked {
     error?: errors.ApplicationError;
   }
 }
+
+export interface Provider {
+  displayName: string;
+  icon?: string | null;
+  uid: string;
+}
+
+/**
+ * /providers
+ */
+export declare namespace GetProviders {
+  export interface Request {
+    body: {};
+    query: {};
+  }
+  /**
+   * TODO: this should follow the expected pattern of returning `data` as an object.
+   */
+  export type Response = Provider[];
+}
