@@ -19,7 +19,7 @@ const admin: Plugin.Config.AdminInput = {
         },
         async Component() {
           const { Releases } = await import(
-            /* webpackChunkName: "content-type-builder" */ './pages/Releases'
+            /* webpackChunkName: "content-type-builder" */ './pages/App'
           );
           return Releases;
         },

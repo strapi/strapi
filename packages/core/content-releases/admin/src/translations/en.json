@@ -1,3 +1,4 @@
 {
-  "plugin.name": "Releases"
+  "plugin.name": "Releases",
+  "pages.Details.header-subtitle": "{number, plural, =0 {No entries} one {# entry} other {# entries}}"
 }
