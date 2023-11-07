@@ -23,6 +23,7 @@ const getEditorStyle = (theme) => ({
 const DragItem = styled(Flex)`
   padding-left: ${({ theme }) => theme.spaces[2]};
 
+  // block styles
   & > *:nth-child(2) {
     width: 100%;
     opacity: inherit;

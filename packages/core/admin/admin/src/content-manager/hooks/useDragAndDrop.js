@@ -44,7 +44,7 @@ export const useDragAndDrop = (
     onCancel,
     onMoveItem,
     dropSensitivity = 'regular',
-    canDrop, // TODO: add in jsdoc
+    canDrop,
   }
 ) => {
   const objectRef = useRef(null);
