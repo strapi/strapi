@@ -217,10 +217,7 @@ export const server = setupServer(
           data: {
             attribute: 1,
 
-            features: [
-              { name: 'without-options' },
-              { name: 'with-options', options: { something: true } },
-            ],
+            features: [{ name: 'sso' }, { name: 'audit-logs', options: { retentionDays: 1 } }],
           },
         })
       );

@@ -12,7 +12,7 @@ import { createRoute } from '../../utils/createRoute';
 
 import { SettingsNav } from './components/SettingsNav';
 import { ROUTES_CE, Route as IRoute } from './constants';
-import { ApplicationInfosPage } from './pages/ApplicationInfo/ApplicationInfoPage';
+import { ApplicationInfoPage } from './pages/ApplicationInfo/ApplicationInfoPage';
 
 const SettingsPage = () => {
   const { settingId } = useParams<{ settingId: string }>();
@@ -63,7 +63,7 @@ const SettingsPage = () => {
       />
 
       <Switch>
-        <Route path="/settings/application-infos" component={ApplicationInfosPage} exact />
+        <Route path="/settings/application-infos" component={ApplicationInfoPage} exact />
         {adminRoutes}
         {pluginsRoutes}
       </Switch>

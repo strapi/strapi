@@ -3,70 +3,78 @@ import { render } from '@tests/utils';
 import { useConfiguration } from '../../contexts/configuration';
 import { ConfigurationProvider } from '../ConfigurationProvider';
 
+const TestComponent = () => {
+  const context = useConfiguration();
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() =>
+          context.updateProjectSettings({
+            menuLogo: {
+              name: 'michka.jpg',
+              width: 1,
+              height: 1,
+              ext: 'jpg',
+              size: 2,
+              url: 'michka.jpg',
+            },
+            authLogo: null,
+          })
+        }
+      >
+        Change logo
+      </button>
+      <div>{context.logos.menu.custom?.url ?? context.logos.menu.default}</div>
+    </div>
+  );
+};
+
 describe('ConfigurationProvider', () => {
-  it('should not crash', () => {
-    const { getByText } = render(
+  it('should not crash', async () => {
+    const { getByText, findByText } = render(
       <ConfigurationProvider
-        authLogo="strapi.jpg"
-        menuLogo="strapi.jpg"
+        authLogo={{
+          default: 'strapi.jpg',
+        }}
+        menuLogo={{
+          default: 'strapi.jpg',
+        }}
         showReleaseNotification={false}
         showTutorials={false}
       >
-        <div>Test</div>
+        <TestComponent />
       </ConfigurationProvider>
     );
 
-    expect(getByText('Test')).toBeInTheDocument();
+    expect(getByText('strapi.jpg')).toBeInTheDocument();
+
+    await findByText('http://localhost:1337/uploads/michka.svg');
   });
 
   it('should use the default logo and update customMenuLogo with setCustomMenuLogo', async () => {
-    const Test = () => {
-      const {
-        updateProjectSettings,
-        logos: { menu },
-      } = useConfiguration();
-
-      return (
-        <div>
-          <button
-            type="button"
-            onClick={() =>
-              updateProjectSettings({
-                menuLogo: {
-                  name: 'michka.jpg',
-                  width: 1,
-                  height: 1,
-                  ext: 'jpg',
-                  size: 2,
-                  url: 'michka.jpg',
-                },
-                authLogo: null,
-              })
-            }
-          >
-            Change logo
-          </button>
-          <div>{menu.custom?.url ?? menu.default}</div>
-        </div>
-      );
-    };
-
-    const { user, getByRole, queryByText, getByText } = render(
+    const { user, getByRole, findByText, getByText } = render(
       <ConfigurationProvider
-        authLogo="strapi-auth.jpg"
-        menuLogo="strapi-menu.jpg"
+        authLogo={{
+          default: 'strapi.jpg',
+        }}
+        menuLogo={{
+          default: 'strapi.jpg',
+        }}
         showReleaseNotification={false}
         showTutorials={false}
       >
-        <Test />
+        <TestComponent />
       </ConfigurationProvider>
     );
 
-    expect(getByText('strapi-menu.jpg')).toBeInTheDocument();
+    expect(getByText('strapi.jpg')).toBeInTheDocument();
 
     await user.click(getByRole('button', { name: 'Change logo' }));
 
-    expect(getByText('michka.jpg')).toBeInTheDocument();
-    expect(queryByText('strapi-menu.jpg')).not.toBeInTheDocument();
+    await findByText('Saved');
+
+    expect(getByText('http://localhost:1337/uploads/michka.svg')).toBeInTheDocument();
   });
 });

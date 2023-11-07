@@ -11,16 +11,23 @@ import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 
 import { GetProjectSettings, UpdateProjectSettings } from '../../../shared/contracts/admin';
-import { ConfigurationContextProvider, UpdateProjectSettingsBody } from '../contexts/configuration';
+import {
+  ConfigurationContextProvider,
+  ConfigurationContextValue,
+  UpdateProjectSettingsBody,
+} from '../contexts/configuration';
 
 import type { AxiosError } from 'axios';
 
-interface ConfigurationProviderProps {
+interface ConfigurationProviderProps extends Required<Logos> {
   children: React.ReactNode;
-  authLogo: string;
-  menuLogo: string;
   showReleaseNotification?: boolean;
   showTutorials?: boolean;
+}
+
+interface Logos {
+  menuLogo: ConfigurationContextValue['logos']['menu'];
+  authLogo: ConfigurationContextValue['logos']['auth'];
 }
 
 const ConfigurationProvider = ({
@@ -36,26 +43,48 @@ const ConfigurationProvider = ({
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
 
-  const { data, refetch } = useQuery(
+  const { data, refetch, isSuccess } = useQuery<
+    GetProjectSettings.Response,
+    GetProjectSettings.Response,
+    {
+      [K in keyof Logos]?: ConfigurationProviderProps['authLogo']['custom'];
+    }
+  >(
     ['project-settings'],
     async () => {
-      const { data } = await get<GetProjectSettings.Response>('/admin/project-settings');
+      const { data, status } = await get<GetProjectSettings.Response>('/admin/project-settings', {
+        /**
+         * needed because the interceptors of the fetchClient redirect to
+         * /login when receive a 401 and it would end up in an infinite
+         * loop when the user doesn't have a session.
+         */
+        validateStatus: (status) => status < 500,
+      });
+
+      /**
+       * However, we do need to know that the query failed. Because then
+       * we want to fallback to our defaults.
+       */
+      if (status === 401) {
+        throw new Error('Unauthenticated');
+      }
 
       return data;
     },
     {
+      retry: false,
       select(data) {
         return {
           authLogo: data.authLogo
             ? {
-                ...data.authLogo,
-                url: prefixFileUrlWithBackendUrl(data.authLogo.url)!,
+                name: data.authLogo.name,
+                url: prefixFileUrlWithBackendUrl(data.authLogo.url),
               }
             : undefined,
           menuLogo: data.menuLogo
             ? {
-                ...data.authLogo,
-                url: prefixFileUrlWithBackendUrl(data.menuLogo.url)!,
+                name: data.menuLogo.name,
+                url: prefixFileUrlWithBackendUrl(data.menuLogo.url),
               }
             : undefined,
         };
@@ -138,8 +167,14 @@ const ConfigurationProvider = ({
       showReleaseNotification={showReleaseNotification}
       showTutorials={showTutorials}
       logos={{
-        menu: { custom: data?.menuLogo, default: defaultMenuLogo },
-        auth: { custom: data?.authLogo, default: defaultAuthLogo },
+        menu: {
+          custom: isSuccess ? data?.menuLogo : defaultMenuLogo.custom,
+          default: defaultMenuLogo.default,
+        },
+        auth: {
+          custom: isSuccess ? data?.authLogo : defaultAuthLogo.custom,
+          default: defaultAuthLogo.default,
+        },
       }}
       updateProjectSettings={updateProjectSettings}
     >

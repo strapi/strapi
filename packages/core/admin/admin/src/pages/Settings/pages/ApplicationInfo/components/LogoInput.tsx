@@ -42,6 +42,7 @@ import axios, { AxiosError } from 'axios';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
+import { ConfigurationProviderProps } from '../../../../../components/ConfigurationProvider';
 import { ACCEPTED_FORMAT, DIMENSION, SIZE } from '../utils/constants';
 import { ImageAsset, ParsingFileError, parseFileMetadatas } from '../utils/files';
 
@@ -67,10 +68,7 @@ interface LogoInputProps
   extends Pick<PendingLogoDialogProps, 'onChangeLogo'>,
     Pick<CarouselInputProps, 'label' | 'hint'> {
   canUpdate: boolean;
-  customLogo?: {
-    url: string;
-    name: string;
-  };
+  customLogo?: ConfigurationProviderProps['authLogo']['custom'];
   defaultLogo: string;
 }
 

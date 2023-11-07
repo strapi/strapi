@@ -34,10 +34,10 @@ import { DIMENSION, SIZE } from './utils/constants';
 const AdminSeatInfoCE = () => null;
 
 /* -------------------------------------------------------------------------------------------------
- * ApplicationInfosPage
+ * ApplicationInfoPage
  * -----------------------------------------------------------------------------------------------*/
 
-const ApplicationInfosPage = () => {
+const ApplicationInfoPage = () => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const { logos: serverLogos, updateProjectSettings } = useConfiguration();
@@ -57,7 +57,7 @@ const ApplicationInfosPage = () => {
     async () =>
       (
         await import(
-          '../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfosPage/components/AdminSeatInfo'
+          '../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfoPage/components/AdminSeatInfo'
         )
       ).AdminSeatInfoEE
   );
@@ -111,8 +111,7 @@ const ApplicationInfosPage = () => {
   }
 
   const isSaveDisabled =
-    logos.auth.custom?.url === serverLogos.auth.custom?.url &&
-    logos.menu.custom?.url === serverLogos.menu.custom?.url;
+    logos.auth.custom === serverLogos.auth.custom && logos.menu.custom === serverLogos.menu.custom;
 
   return (
     <Layout>
@@ -294,4 +293,4 @@ const ApplicationInfosPage = () => {
   );
 };
 
-export { ApplicationInfosPage };
+export { ApplicationInfoPage };

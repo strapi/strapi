@@ -22,13 +22,9 @@ jest.mock('react-intl', () => ({
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => id) }),
 }));
 
-jest.mock(
-  '../pages/ApplicationInfosPage',
-  () =>
-    function () {
-      return <h1>App infos</h1>;
-    }
-);
+jest.mock('../pages/ApplicationInfo/ApplicationInfoPage', () => ({
+  ApplicationInfoPage: () => <h1>App infos</h1>,
+}));
 
 const makeApp = (history: History, settings: StrapiAppProviderProps['settings']) => (
   <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
