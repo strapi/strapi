@@ -3,7 +3,6 @@
   "overrides": [
     {
       "files": ["**/*"],
-      "excludedFiles": ["admin/**/*"],
       "extends": ["custom/back"]
     }
   ]

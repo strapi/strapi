@@ -41,8 +41,8 @@
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/utils": "4.15.1",
     "@strapi/types": "workspace:*",
+    "@strapi/utils": "4.15.1",
     "koa": "2.13.4",
     "koa-bodyparser": "4.4.1",
     "lodash": "4.17.21",

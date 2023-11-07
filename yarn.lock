@@ -7893,6 +7893,7 @@ __metadata:
   dependencies:
     "@sindresorhus/slugify": "npm:1.1.0"
     "@strapi/pack-up": "workspace:*"
+    "@strapi/types": "workspace:*"
     "@strapi/utils": "npm:4.15.1"
     "@types/jest": "npm:29.5.2"
     "@types/lodash": "npm:^4.14.191"
