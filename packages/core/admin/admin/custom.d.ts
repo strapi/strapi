@@ -1,5 +1,3 @@
-export {};
-
 import { StrapiTheme } from '@strapi/design-system';
 
 declare module 'styled-components' {
@@ -19,7 +17,9 @@ declare global {
         isEnabled: (featureName?: string) => boolean;
       };
       flags: {
+        promoteEE?: boolean;
         nps?: boolean;
+        promoteEE: boolean;
       };
       projectType: 'Community' | 'Enterprise';
       telemetryDisabled: boolean;

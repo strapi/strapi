@@ -5,7 +5,6 @@ import { AxiosError } from 'axios';
 import { useQueries } from 'react-query';
 
 import { Component, ContentType } from '../../../shared/schema';
-import { APIResponse } from '../types/adminAPI';
 
 export function useContentTypes() {
   const { get } = useFetchClient();
@@ -17,7 +16,7 @@ export function useContentTypes() {
       async queryFn() {
         const {
           data: { data },
-        } = await get<APIResponse<Component[]>>(`/content-manager/components`);
+        } = await get<{ data: Component[] }>(`/content-manager/components`);
 
         return data;
       },
@@ -36,7 +35,7 @@ export function useContentTypes() {
       async queryFn() {
         const {
           data: { data },
-        } = await get<APIResponse<ContentType[]>>(`/content-manager/content-types`);
+        } = await get<{ data: ContentType[] }>(`/content-manager/content-types`);
 
         return data;
       },

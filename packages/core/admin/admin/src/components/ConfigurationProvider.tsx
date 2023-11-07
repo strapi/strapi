@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { ConfigurationContext, ConfigurationContextValue } from '../contexts/configuration';
+import { ConfigurationContextProvider, ConfigurationContextValue } from '../contexts/configuration';
 
 interface ConfigurationProviderProps {
   children: React.ReactNode;
@@ -37,30 +37,18 @@ const ConfigurationProvider = ({
       [defaultAuthLogo, defaultMenuLogo]
     );
 
-  const configurationValue = React.useMemo(() => {
-    return {
-      logos: {
+  return (
+    <ConfigurationContextProvider
+      updateProjectSettings={updateProjectSettings}
+      showReleaseNotification={showReleaseNotification}
+      showTutorials={showTutorials}
+      logos={{
         menu: { custom: menuLogo, default: defaultMenuLogo },
         auth: { custom: authLogo, default: defaultAuthLogo },
-      },
-      updateProjectSettings,
-      showReleaseNotification,
-      showTutorials,
-    };
-  }, [
-    menuLogo,
-    defaultMenuLogo,
-    authLogo,
-    defaultAuthLogo,
-    updateProjectSettings,
-    showReleaseNotification,
-    showTutorials,
-  ]);
-
-  return (
-    <ConfigurationContext.Provider value={configurationValue}>
+      }}
+    >
       {children}
-    </ConfigurationContext.Provider>
+    </ConfigurationContextProvider>
   );
 };
 

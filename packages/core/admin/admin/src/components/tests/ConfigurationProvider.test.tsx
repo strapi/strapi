@@ -1,6 +1,6 @@
 import { render } from '@tests/utils';
 
-import { useConfiguration } from '../../hooks/useConfiguration';
+import { useConfiguration } from '../../contexts/configuration';
 import { ConfigurationProvider } from '../ConfigurationProvider';
 
 describe('ConfigurationProvider', () => {

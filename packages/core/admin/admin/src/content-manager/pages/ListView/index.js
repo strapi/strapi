@@ -47,7 +47,7 @@ import { HOOKS } from '../../../constants';
 import { useTypedSelector } from '../../../core/store/hooks';
 import { useAdminUsers } from '../../../hooks/useAdminUsers';
 import { useEnterprise } from '../../../hooks/useEnterprise';
-import { InjectionZone } from '../../../shared/components';
+import { InjectionZone } from '../../../shared/components/InjectionZone';
 import { Filter } from '../../components/Filter';
 import { AdminUsersFilter } from '../../components/Filter/CustomInputs/AdminUsersFilter';
 import { CREATOR_FIELDS } from '../../constants/attributes';
@@ -201,7 +201,7 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
     async () =>
       (
         await import(
-          '../../../../../ee/admin/content-manager/pages/ListView/ReviewWorkflowsColumn/constants'
+          '../../../../../ee/admin/src/content-manager/pages/ListView/ReviewWorkflowsColumn/constants'
         )
       ).REVIEW_WORKFLOW_COLUMNS_EE,
     {
@@ -212,7 +212,7 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
     REVIEW_WORKFLOW_COLUMNS_CELL_CE,
     async () => {
       const { ReviewWorkflowsStageEE, ReviewWorkflowsAssigneeEE } = await import(
-        '../../../../../ee/admin/content-manager/pages/ListView/ReviewWorkflowsColumn'
+        '../../../../../ee/admin/src/content-manager/pages/ListView/ReviewWorkflowsColumn'
       );
 
       return { ReviewWorkflowsStageEE, ReviewWorkflowsAssigneeEE };
@@ -227,7 +227,7 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
     async () =>
       (
         await import(
-          '../../../../../ee/admin/content-manager/components/Filter/CustomInputs/ReviewWorkflows/constants'
+          '../../../../../ee/admin/src/content-manager/components/Filter/CustomInputs/ReviewWorkflows/constants'
         )
       ).REVIEW_WORKFLOW_FILTERS,
     {

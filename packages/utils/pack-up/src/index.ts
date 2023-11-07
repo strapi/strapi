@@ -6,10 +6,12 @@ export * from './node/init';
 export { defineConfig } from './node/core/config';
 export type {
   Config,
-  ConfigBundle,
   ConfigOptions,
-  ConfigProperty,
+  ConfigBundle,
   ConfigPropertyResolver,
+  ConfigProperty,
+  PluginOption,
+  Runtime,
 } from './node/core/config';
 
 export { defineTemplate, definePackageFeature, definePackageOption } from './node/templates/create';

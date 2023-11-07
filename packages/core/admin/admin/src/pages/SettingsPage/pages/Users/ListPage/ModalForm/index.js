@@ -44,7 +44,7 @@ const ModalForm = ({ onSuccess, onToggle }) => {
     async () =>
       (
         await import(
-          '../../../../../../../../ee/admin/pages/SettingsPage/pages/Users/ListPage/ModalForm/constants'
+          '../../../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/ListPage/ModalForm/constants'
         )
       ).ROLE_LAYOUT,
     {
@@ -60,7 +60,7 @@ const ModalForm = ({ onSuccess, onToggle }) => {
     async () =>
       (
         await import(
-          '../../../../../../../../ee/admin/pages/SettingsPage/pages/Users/ListPage/ModalForm/constants'
+          '../../../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/ListPage/ModalForm/constants'
         )
       ).FORM_INITIAL_VALUES,
     {
@@ -79,7 +79,7 @@ const ModalForm = ({ onSuccess, onToggle }) => {
     async () =>
       (
         await import(
-          '../../../../../../../../ee/admin/pages/SettingsPage/pages/Users/components/MagicLink'
+          '../../../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/MagicLink'
         )
       ).MagicLinkEE
   );
