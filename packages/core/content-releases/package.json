@@ -41,7 +41,7 @@
     "strapi-server.js"
   ],
   "strapi": {
-    "name": "releases",
+    "name": "content-releases",
     "description": "Organize and release content",
     "kind": "plugin",
     "displayName": "Releases",
@@ -66,6 +66,8 @@
     "@strapi/design-system": "1.13.0",
     "@strapi/helper-plugin": "4.14.4",
     "@strapi/icons": "1.13.0",
+    "@strapi/types": "workspace:*",
+    "@strapi/utils": "4.15.0",
     "formik": "2.4.0",
     "react-intl": "6.4.1",
     "yup": "0.32.9"
@@ -75,7 +77,9 @@
     "@strapi/strapi": "4.15.0",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
+    "@types/koa": "2.13.4",
     "@types/styled-components": "5.1.26",
+    "koa": "2.13.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "5.3.4",
