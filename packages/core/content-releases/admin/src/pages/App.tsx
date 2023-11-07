@@ -3,7 +3,7 @@ import { Route, Switch } from 'react-router-dom';
 
 import { pluginId } from '../pluginId';
 
-import { ReleasesPage } from './Releases';
+import { ReleasesPage } from './ReleasesPage/Releases';
 
 export const Releases = () => {
   return (

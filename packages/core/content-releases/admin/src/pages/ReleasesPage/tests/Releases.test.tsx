@@ -21,7 +21,7 @@ describe('Releases home page', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the Releases title, subtitle, "New Releases" button and a dialog', async () => {
+  it('renders correctly the heading content', async () => {
     render();
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Releases');
     // if there are 0 releases
@@ -43,7 +43,7 @@ describe('Releases home page', () => {
     expect(dialogTitle).not.toBeInTheDocument();
   });
 
-  it('hides the dialog when clicking on the "Cancel" button', async () => {
+  it('hides the dialog', async () => {
     render();
     const newReleaseButton = screen.getByRole('button', { name: 'New release' });
     await user.click(newReleaseButton);
@@ -57,7 +57,7 @@ describe('Releases home page', () => {
     expect(dialogContainer).not.toBeInTheDocument();
   });
 
-  it("disables continue button when there's no release name", async () => {
+  it('enables the submit button when there is content in the input', async () => {
     render();
     const newReleaseButton = screen.getByRole('button', { name: 'New release' });
     await user.click(newReleaseButton);
