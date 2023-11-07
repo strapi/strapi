@@ -89,17 +89,12 @@ const pipe =
 
 declare module 'slate' {
   interface CustomTypes {
-    Editor: BaseEditor & ReactEditor & HistoryEditor & LinkEditor;
-    Element: Attribute.BlockNode<'all'>;
-    Text: {
-      type: 'text';
-      text: string;
-      bold?: boolean;
-      italic?: boolean;
-      underline?: boolean;
-      strikethrough?: boolean;
-      code?: boolean;
+    Editor: Omit<BaseEditor & ReactEditor & HistoryEditor & LinkEditor, 'children'> & {
+      children: Attribute.BlocksValue;
     };
+    Element: Attribute.BlocksNode;
+    Descendant: Attribute.BlocksInlineNode | Text;
+    Text: Attribute.BlocksTextNode;
   }
 }
 

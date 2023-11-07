@@ -76,10 +76,6 @@ const BlocksInput = ({ disabled, placeholder }: BlocksInputProps) => {
 
     // Get the selected node
     const selectedNode = editor.children[editor.selection.anchor.path[0]];
-    if (selectedNode.type === 'text') {
-      // Narrow the type from Descendant to Element
-      return;
-    }
 
     // Find the matching block
     const selectedBlock = Object.values(blocks).find((block) => block.matchNode(selectedNode));
@@ -102,10 +98,6 @@ const BlocksInput = ({ disabled, placeholder }: BlocksInputProps) => {
     }
 
     const selectedNode = editor.children[editor.selection.anchor.path[0]];
-    if (selectedNode.type === 'text') {
-      // Narrow the type from Descendant to Element
-      return;
-    }
     const selectedBlock = Object.values(blocks).find((block) => block.matchNode(selectedNode));
 
     if (!selectedBlock) {
