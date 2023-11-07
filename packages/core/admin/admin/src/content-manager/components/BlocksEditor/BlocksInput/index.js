@@ -21,7 +21,13 @@ const getEditorStyle = (theme) => ({
 });
 
 const DragItem = styled(Flex)`
-  opacity: ${({ isDragging }) => (isDragging ? 0.1 : 1)};
+  padding-left: ${({ theme }) => theme.spaces[2]};
+
+  & > *:nth-child(2) {
+    width: 100%;
+    opacity: inherit;
+  }
+
   &:hover {
     & > div {
       visibility: visible;
@@ -29,24 +35,21 @@ const DragItem = styled(Flex)`
     }
   }
 
-  & > *:nth-child(2) {
-    width: 100%;
-    opacity: inherit;
-    color: ${({ isDragging, theme }) => (isDragging ? theme.colors.neutral500 : 'initial')};
+  &:active {
+    opacity: 0.5;
   }
 `;
 
 const DragButton = styled(Flex)`
   cursor: pointer;
   visibility: hidden;
-  opacity: ${({ isDragging }) => (isDragging ? 0.1 : 1)};
+  display: ${({ isHidden }) => isHidden && 'none'};
 
   &:hover {
     background: ${({ theme }) => theme.colors.neutral200};
   }
 
   &:active {
-    // check :focus-within
     cursor: grabbing;
     background: ${({ theme }) => theme.colors.neutral200};
   }
@@ -62,13 +65,25 @@ const BlockPlaceholder = () => (
   />
 );
 
-const DragAndDropElement = ({ children, index, disabled, name, onMoveItem }) => {
+const DragAndDropElement = ({
+  children,
+  index,
+  disabled,
+  canDrag,
+  name,
+  onMoveItem,
+  blockType,
+}) => {
   const [{ handlerId, isDragging, handleKeyDown }, myRef, boxRef, dropRef, dragRef] =
-    useDragAndDrop(!disabled, {
+    useDragAndDrop(!disabled && canDrag, {
       type: `${ItemTypes.BLOCKS}._${name}`,
+      canDrop() {
+        return canDrag; // exclude listNode from drag and drop
+      },
       index,
       item: {
         displayedValue: children,
+        type: blockType,
       },
       onMoveItem,
     });
@@ -93,6 +108,7 @@ const DragAndDropElement = ({ children, index, disabled, name, onMoveItem }) => 
             hasRadius
             height={6}
             width={4}
+            display={canDrag ? 'flex' : 'none'}
           >
             <Icon width={3} height={3} as={Drag} color="neutral600" />
           </DragButton>
@@ -107,8 +123,10 @@ DragAndDropElement.propTypes = {
   children: PropTypes.node.isRequired,
   index: PropTypes.number.isRequired,
   disabled: PropTypes.bool.isRequired,
+  canDrag: PropTypes.bool.isRequired,
   name: PropTypes.string.isRequired,
   onMoveItem: PropTypes.func.isRequired,
+  blockType: PropTypes.string.isRequired,
 };
 
 const baseRenderElement = (props, blocks, editor, disabled, name, handleMoveItem) => {
@@ -118,14 +136,14 @@ const baseRenderElement = (props, blocks, editor, disabled, name, handleMoveItem
   const nodePath = ReactEditor.findPath(editor, props.element);
   const currElemIndex = parseInt(nodePath.join(''), 10);
 
-  if (block.value.type === 'list') return block.renderElement(props);
-
   return (
     <DragAndDropElement
       index={currElemIndex}
       disabled={disabled}
+      canDrag={block.value.type !== 'list'}
       name={name}
       onMoveItem={handleMoveItem}
+      blockType={block.value.type}
     >
       {block.renderElement(props)}
     </DragAndDropElement>
@@ -234,7 +252,6 @@ const BlocksInput = ({ disabled, placeholder, name, handleMoveItem }) => {
       color="neutral800"
       lineHeight={6}
       hasRadius
-      paddingLeft={2}
       paddingRight={4}
       marginTop={3}
       marginBottom={3}

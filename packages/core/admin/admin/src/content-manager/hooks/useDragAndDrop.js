@@ -13,7 +13,9 @@ import { useKeyboardDragAndDrop } from './useKeyboardDragAndDrop';
  *  item?: object,
  *  onStart?: () => void,
  *  onEnd?: () => void,
- *  dropSensitivity?: 'regular' | 'immediate'
+ *  dropSensitivity?: 'regular' | 'immediate',
+ *  canDrop: () => void,
+ *
  * } & import('./useKeyboardDragAndDrop').UseKeyboardDragAndDropCallbacks}
  */
 
@@ -42,12 +44,14 @@ export const useDragAndDrop = (
     onCancel,
     onMoveItem,
     dropSensitivity = 'regular',
+    canDrop, // TODO: add in jsdoc
   }
 ) => {
   const objectRef = useRef(null);
 
   const [{ handlerId }, dropRef] = useDrop({
     accept: type,
+    canDrop,
     collect(monitor) {
       return {
         handlerId: monitor.getHandlerId(),

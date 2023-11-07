@@ -1,6 +1,13 @@
 import * as React from 'react';
 
-import { Box, Flex, Typography, InputWrapper, Divider } from '@strapi/design-system';
+import {
+  Box,
+  Flex,
+  Typography,
+  InputWrapper,
+  Divider,
+  VisuallyHidden,
+} from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { createEditor, Transforms } from 'slate';
@@ -8,6 +15,7 @@ import { withHistory } from 'slate-history';
 import { Slate, withReact, ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
+import { getTrad } from '../../utils';
 import Hint from '../Hint';
 
 import BlocksInput from './BlocksInput';
@@ -94,6 +102,8 @@ const BlocksEditor = React.forwardRef(
     const [editor] = React.useState(() =>
       withReact(withStrapiSchema(withLinks(withImages(withHistory(createEditor())))))
     );
+    const [liveText, setLiveText] = React.useState('');
+    const ariaDescriptionId = `${name}-item-instructions`;
 
     const label = intlLabel.id
       ? formatMessage(
@@ -134,10 +144,25 @@ const BlocksEditor = React.forwardRef(
       }
     };
 
+    const getItemPos = (index) => `${index + 1} of ${value.length}`;
+
     const handleMoveItem = (newIndex, currentIndex) => {
       if (newIndex || newIndex === 0) {
         const newIndexArray = Array.from(String(newIndex), Number);
         const currentIndexArray = Array.from(String(currentIndex), Number);
+
+        setLiveText(
+          formatMessage(
+            {
+              id: getTrad('components.Blocks.dnd.reorder'),
+              defaultMessage: '{item}, moved. New position in the editor: {position}.',
+            },
+            {
+              item: `${name}.${currentIndexArray.join(',')}`,
+              position: getItemPos(newIndexArray.join(',')),
+            }
+          )
+        );
 
         Transforms.moveNodes(editor, {
           at: currentIndexArray,
@@ -162,6 +187,13 @@ const BlocksEditor = React.forwardRef(
             </Typography>
             {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
           </Flex>
+          <VisuallyHidden id={ariaDescriptionId}>
+            {formatMessage({
+              id: getTrad('dnd.instructions'),
+              defaultMessage: `Press spacebar to grab and re-order`,
+            })}
+          </VisuallyHidden>
+          <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
           <Slate
             editor={editor}
             initialValue={value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]}
