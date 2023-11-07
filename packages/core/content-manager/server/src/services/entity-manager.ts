@@ -1,7 +1,11 @@
 import { omit } from 'lodash/fp';
 import { mapAsync, errors, contentTypes, sanitize } from '@strapi/utils';
 import { getService } from '../utils';
-import { getDeepPopulate, getDeepPopulateDraftCount, isWebhooksPopulateRelationsEnabled } from './utils/populate';
+import {
+  getDeepPopulate,
+  getDeepPopulateDraftCount,
+  isWebhooksPopulateRelationsEnabled,
+} from './utils/populate';
 import { getDeepRelationsCount } from './utils/count';
 import { sumDraftCounts } from './utils/draft';
 import { ALLOWED_WEBHOOK_EVENTS } from '../constants';
@@ -47,7 +51,7 @@ export default ({ strapi }: any) => ({
    * @param {Object} entity
    * @returns
    */
-  mapEntity(entity: any) {
+  mapEntity<T = any>(entity: T): T {
     return entity;
   },
 
@@ -299,7 +303,7 @@ export default ({ strapi }: any) => ({
     return mappedEntity;
   },
 
-  async countDraftRelations(id: any, uid: any) {
+  async countDraftRelations(id: string, uid: string) {
     const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
     if (!hasRelations) {
@@ -311,7 +315,7 @@ export default ({ strapi }: any) => ({
     return sumDraftCounts(entity, uid);
   },
 
-  async countManyEntriesDraftRelations(ids: any, uid: any, locale = 'en') {
+  async countManyEntriesDraftRelations(ids: number[], uid: string, locale = 'en') {
     const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
     if (!hasRelations) {
