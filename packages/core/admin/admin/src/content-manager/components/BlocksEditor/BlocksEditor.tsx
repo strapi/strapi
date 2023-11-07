@@ -3,8 +3,8 @@ import * as React from 'react';
 import { Box, Flex, Typography, InputWrapper, Divider } from '@strapi/design-system';
 import { type Attribute } from '@strapi/types';
 import { type MessageDescriptor, useIntl } from 'react-intl';
-import { type BaseEditor, type Descendant, type Editor, createEditor } from 'slate';
-import { type HistoryEditor, withHistory } from 'slate-history';
+import { type Descendant, type Editor, createEditor } from 'slate';
+import { withHistory } from 'slate-history';
 import { Slate, withReact, ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { Hint } from '../Hint';
 
 import { BlocksInput } from './BlocksInput';
-import { withLinks, type LinkEditor } from './plugins/withLinks';
+import { withLinks } from './plugins/withLinks';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
 import { BlocksToolbar } from './Toolbar/Toolbar';
 
@@ -86,17 +86,6 @@ const pipe =
   (...fns: ((baseEditor: Editor) => Editor)[]) =>
   (value: Editor) =>
     fns.reduce<Editor>((prev, fn) => fn(prev), value);
-
-declare module 'slate' {
-  interface CustomTypes {
-    Editor: Omit<BaseEditor & ReactEditor & HistoryEditor & LinkEditor, 'children'> & {
-      children: Attribute.BlocksValue;
-    };
-    Element: Attribute.BlocksNode;
-    Descendant: Attribute.BlocksInlineNode | Text;
-    Text: Attribute.BlocksTextNode;
-  }
-}
 
 interface BlocksEditorProps {
   intlLabel: MessageDescriptor;
