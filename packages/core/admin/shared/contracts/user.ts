@@ -1,6 +1,6 @@
 import { errors } from '@strapi/utils';
 
-import type { AdminUserCreationPayload, SanitizedAdminUser } from './shared';
+import type { AdminUserCreationPayload, Pagination, SanitizedAdminUser } from './shared';
 import type { Entity, EntityService } from '@strapi/types';
 
 /**
@@ -31,12 +31,7 @@ export declare namespace FindAll {
   export interface Response {
     data: {
       results: SanitizedAdminUser[];
-      pagination: {
-        page: number;
-        pageSize: number;
-        pageCount: number;
-        total: number;
-      };
+      pagination: Pagination;
     };
     error?: errors.ApplicationError;
   }
