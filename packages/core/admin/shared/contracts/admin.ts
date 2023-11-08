@@ -10,6 +10,25 @@ interface Logo {
 }
 
 /**
+ * /init - Initialize the admin panel
+ */
+export declare namespace Init {
+  export interface Request {
+    body: {};
+    query: {};
+  }
+  export interface Response {
+    data: {
+      uuid: string | false;
+      hasAdmin: boolean;
+      menuLogo: string;
+      authLogo: string;
+    };
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
  * /project-settings - Get the project settings
  */
 export declare namespace GetProjectSettings {
@@ -63,6 +82,48 @@ export declare namespace Information {
       communityEdition: boolean;
       useYarn: boolean;
     };
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
+ * /telemetry-properties - get telemetry properties
+ */
+export declare namespace TelemetryProperties {
+  export interface Request {
+    body: {};
+    query: {};
+  }
+  export interface Response {
+    data: {
+      useTypescriptOnServer: boolean;
+      useTypescriptOnAdmin: boolean;
+      isHostedOnStrapiCloud: boolean;
+      numberOfAllContentTypes: number;
+      numberOfComponents: number;
+      numberOfDynamicZones: number;
+    };
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
+ * /plugins - get plugin information
+ */
+export declare namespace Plugins {
+  interface Plugin {
+    name: string;
+    displayName: string;
+    description: string;
+  }
+
+  export interface Request {
+    body: {};
+    query: {};
+  }
+
+  export interface Response {
+    plugins: Plugin[];
     error?: errors.ApplicationError;
   }
 }
