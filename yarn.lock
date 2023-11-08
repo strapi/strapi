@@ -8673,6 +8673,7 @@ __metadata:
     css-loader: "npm:^6.8.1"
     date-fns: "npm:2.30.0"
     dotenv: "npm:14.2.0"
+    esbuild: "npm:0.19.2"
     esbuild-loader: "npm:^2.21.0"
     esbuild-register: "npm:3.5.0"
     execa: "npm:5.1.1"
@@ -8751,6 +8752,10 @@ __metadata:
   peerDependencies:
     "@strapi/data-transfer": 4.15.1
     "@strapi/strapi": ^4.3.4
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+    react-router-dom: ^5.2.0
+    styled-components: ^5.2.1
   languageName: unknown
   linkType: soft
 
@@ -8962,8 +8967,8 @@ __metadata:
     "@strapi/icons": 1.13.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^5.3.4
-    styled-components: ^5.3.3
+    react-router-dom: ^5.2.0
+    styled-components: ^5.2.1
   languageName: unknown
   linkType: soft
 
@@ -9102,8 +9107,8 @@ __metadata:
     "@strapi/strapi": ^4.4.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: 5.3.4
-    styled-components: 5.3.3
+    react-router-dom: ^5.2.0
+    styled-components: ^5.2.1
   languageName: unknown
   linkType: soft
 
@@ -9150,8 +9155,8 @@ __metadata:
     "@strapi/strapi": ^4.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: 5.3.4
-    styled-components: 5.3.3
+    react-router-dom: ^5.2.0
+    styled-components: ^5.2.1
   languageName: unknown
   linkType: soft
 
@@ -9191,8 +9196,8 @@ __metadata:
     "@strapi/strapi": ^4.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: 5.3.4
-    styled-components: 5.3.3
+    react-router-dom: ^5.2.0
+    styled-components: ^5.2.1
   languageName: unknown
   linkType: soft
 
@@ -9225,8 +9230,8 @@ __metadata:
     koa: 2.13.4
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: 5.3.4
-    styled-components: 5.3.3
+    react-router-dom: ^5.2.0
+    styled-components: ^5.2.1
   languageName: unknown
   linkType: soft
 
@@ -9263,8 +9268,8 @@ __metadata:
     "@strapi/strapi": ^4.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: 5.3.4
-    styled-components: 5.3.3
+    react-router-dom: ^5.2.0
+    styled-components: ^5.2.1
   languageName: unknown
   linkType: soft
 
@@ -9298,8 +9303,8 @@ __metadata:
     "@strapi/strapi": ^4.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: 5.3.4
-    styled-components: 5.3.3
+    react-router-dom: ^5.2.0
+    styled-components: ^5.2.1
   languageName: unknown
   linkType: soft
 
@@ -9321,8 +9326,8 @@ __metadata:
     "@strapi/strapi": ^4.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: 5.3.4
-    styled-components: 5.3.3
+    react-router-dom: ^5.2.0
+    styled-components: ^5.2.1
   languageName: unknown
   linkType: soft
 
@@ -9370,8 +9375,8 @@ __metadata:
     "@strapi/strapi": ^4.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: 5.3.4
-    styled-components: 5.3.3
+    react-router-dom: ^5.2.0
+    styled-components: ^5.2.1
   languageName: unknown
   linkType: soft
 
@@ -9413,8 +9418,8 @@ __metadata:
     "@strapi/strapi": 4.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: 5.3.4
-    styled-components: 5.3.3
+    react-router-dom: ^5.2.0
+    styled-components: ^5.2.1
   languageName: unknown
   linkType: soft
 
