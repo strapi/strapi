@@ -86,9 +86,11 @@ export const useDragAndDrop = (
         }
       }
 
-      // Time to actually perform the action
-      onMoveItem(newInd, dragIndex);
-      item.index = newInd;
+      if (active) {
+        // Move item only if allowed to drop inside
+        onMoveItem(newInd, dragIndex);
+        item.index = newInd;
+      }
     },
   });
 

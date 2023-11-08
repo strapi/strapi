@@ -11,6 +11,8 @@ import { composeRefs, ItemTypes } from '../../../utils';
 import { useBlocksStore } from '../hooks/useBlocksStore';
 import { useModifiersStore } from '../hooks/useModifiersStore';
 
+const NOT_DRAGGABLE_ITEMS = ['list'];
+
 const getEditorStyle = (theme) => ({
   // The outline style is set on the wrapper with :focus-within
   outline: 'none',
@@ -79,7 +81,7 @@ const DragAndDropElement = ({
     useDragAndDrop(!disabled && canDrag, {
       type: `${ItemTypes.BLOCKS}._${name}`,
       canDrop() {
-        return canDrag; // exclude listNode from drag and drop
+        return canDrag;
       },
       index,
       item: {
@@ -133,7 +135,6 @@ DragAndDropElement.propTypes = {
 const baseRenderElement = (props, blocks, editor, disabled, name, handleMoveItem) => {
   const blockMatch = Object.values(blocks).find((block) => block.matchNode(props.element));
   const block = blockMatch || blocks.paragraph;
-
   const nodePath = ReactEditor.findPath(editor, props.element);
   const currElemIndex = parseInt(nodePath.join(''), 10);
 
@@ -141,7 +142,7 @@ const baseRenderElement = (props, blocks, editor, disabled, name, handleMoveItem
     <DragAndDropElement
       index={currElemIndex}
       disabled={disabled}
-      canDrag={block.value.type !== 'list'}
+      canDrag={!NOT_DRAGGABLE_ITEMS.includes(block.value.type)}
       name={name}
       onMoveItem={handleMoveItem}
       blockType={block.value.type}
