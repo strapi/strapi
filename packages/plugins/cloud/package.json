@@ -37,7 +37,7 @@
     "test:ts:front": "run -T tsc -p admin/tsconfig.json"
   },
   "dependencies": {
-    "@strapi/design-system": "1.13.0",
+    "@strapi/design-system": "1.13.1",
     "@strapi/helper-plugin": "4.15.1",
     "@strapi/icons": "1.13.0",
     "react-intl": "6.4.1"

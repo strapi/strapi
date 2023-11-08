@@ -1,8 +1,12 @@
-import { Path, Transforms, Range, Point, Editor } from 'slate';
+import { type BaseEditor, Path, Transforms, Range, Point, Editor } from 'slate';
 
 import { insertLink } from '../utils/links';
 
-const withLinks = (editor) => {
+interface LinkEditor extends BaseEditor {
+  lastInsertedLinkPath: Path | null;
+}
+
+const withLinks = (editor: Editor) => {
   const { isInline, apply, insertText, insertData } = editor;
 
   // Links are inline elements, so we need to override the isInline method for slate
@@ -17,13 +21,13 @@ const withLinks = (editor) => {
   // We intercept the apply method, so everytime we insert a new link, we save its path
   editor.apply = (operation) => {
     if (operation.type === 'insert_node') {
-      if (operation.node.type === 'link') {
+      if (!Editor.isEditor(operation.node) && operation.node.type === 'link') {
         editor.lastInsertedLinkPath = operation.path;
       }
     } else if (operation.type === 'move_node') {
       // We need to update the last inserted link path when link is moved
       // If link is the first word in the paragraph we dont need to update the path
-      if (Path.hasPrevious(operation.path)) {
+      if (Path.hasPrevious(operation.path) && editor.lastInsertedLinkPath) {
         editor.lastInsertedLinkPath = Path.transform(editor.lastInsertedLinkPath, operation);
       }
     }
@@ -33,9 +37,12 @@ const withLinks = (editor) => {
 
   editor.insertText = (text) => {
     // When selection is at the end of a link and user types a space, we want to break the link
-    if (Range.isCollapsed(editor.selection) && text === ' ') {
+    if (editor.selection && Range.isCollapsed(editor.selection) && text === ' ') {
       const linksInSelection = Array.from(
-        Editor.nodes(editor, { at: editor.selection, match: (node) => node.type === 'link' })
+        Editor.nodes(editor, {
+          at: editor.selection,
+          match: (node) => !Editor.isEditor(node) && node.type === 'link',
+        })
       );
 
       const selectionIsInLink = editor.selection && linksInSelection.length > 0;
@@ -79,4 +86,4 @@ const withLinks = (editor) => {
   return editor;
 };
 
-export { withLinks };
+export { withLinks, type LinkEditor };
