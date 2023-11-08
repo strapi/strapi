@@ -1,4 +1,4 @@
-import { type Text, type Element, Node, Editor } from 'slate';
+import { type Element, Node } from 'slate';
 
 export type Block<T extends Element['type']> = Extract<Node, { type: T }>;
 
@@ -8,7 +8,3 @@ export const getEntries = <T extends object>(object: T) =>
 
 // Wrap Object.keys to get the correct types
 export const getKeys = <T extends object>(object: T) => Object.keys(object) as (keyof T)[];
-
-export const isText = (node: unknown): node is Text => {
-  return Node.isNode(node) && !Editor.isEditor(node) && node.type === 'text';
-};

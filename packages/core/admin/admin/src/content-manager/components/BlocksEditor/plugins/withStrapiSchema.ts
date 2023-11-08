@@ -1,6 +1,8 @@
-import { type Editor, Element, Transforms } from 'slate';
+import { type Text, Node, Editor, Element, Transforms } from 'slate';
 
-import { isText } from '../utils/types';
+const isText = (node: unknown): node is Text => {
+  return Node.isNode(node) && !Editor.isEditor(node) && node.type === 'text';
+};
 
 /**
  * This plugin is used to normalize the Slate document to match the Strapi schema.

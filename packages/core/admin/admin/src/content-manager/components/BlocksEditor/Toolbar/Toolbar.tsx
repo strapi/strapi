@@ -6,7 +6,7 @@ import { pxToRem, prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper
 import { Link } from '@strapi/icons';
 import { Attribute } from '@strapi/types';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { Editor, Transforms, Element as SlateElement, Element, Node } from 'slate';
+import { type Text, Editor, Transforms, Element as SlateElement, Element, Node } from 'slate';
 import { ReactEditor, useSlate } from 'slate-react';
 import styled from 'styled-components';
 
@@ -18,7 +18,7 @@ import {
 } from '../hooks/useBlocksStore';
 import { useModifiersStore } from '../hooks/useModifiersStore';
 import { insertLink } from '../utils/links';
-import { Block, getEntries, getKeys, isText } from '../utils/types';
+import { type Block, getEntries, getKeys } from '../utils/types';
 
 const ToolbarWrapper = styled(Flex)`
   &[aria-disabled='true'] {
@@ -458,6 +458,10 @@ const BlockOption = ({ value, icon, label, blockSelected }: BlockOptionProps) =>
       {formatMessage(label)}
     </SingleSelectOption>
   );
+};
+
+const isText = (node: unknown): node is Text => {
+  return Node.isNode(node) && !Editor.isEditor(node) && node.type === 'text';
 };
 
 const isListNode = (node: unknown): node is Block<'list'> => {

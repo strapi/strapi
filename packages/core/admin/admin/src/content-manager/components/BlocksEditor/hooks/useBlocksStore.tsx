@@ -39,7 +39,7 @@ import styled, { css } from 'styled-components';
 // @ts-expect-error TODO migrate this file
 import { composeRefs } from '../../../utils';
 import { editLink, removeLink } from '../utils/links';
-import { type Block, isText } from '../utils/types';
+import { type Block } from '../utils/types';
 
 const StyledBaseLink = styled(BaseLink)`
   text-decoration: none;
@@ -123,12 +123,16 @@ const Unorderedlist = styled.ul`
   ${listStyle}
 `;
 
-const isBlockList = (node: unknown): node is Block<'list'> => {
+const isText = (node: unknown): node is Text => {
+  return Node.isNode(node) && !Editor.isEditor(node) && node.type === 'text';
+};
+
+const isListNode = (node: unknown): node is Block<'list'> => {
   return Node.isNode(node) && !Editor.isEditor(node) && node.type === 'list';
 };
 
 const List = ({ attributes, children, element }: RenderElementProps) => {
-  if (!isBlockList(element)) {
+  if (!isListNode(element)) {
     return null;
   }
 
