@@ -1,7 +1,11 @@
 import { Schema } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
-type Component = Schema.Component & { isDisplayed: boolean; info: Schema.Info; apiID: string };
+export type Component = Schema.Component & {
+  isDisplayed: boolean;
+  info: Schema.Info;
+  apiID: string;
+};
 
 type ComponentConfiguration = {
   uid: string;
