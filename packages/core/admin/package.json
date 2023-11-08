@@ -188,7 +188,7 @@
     "vite": "4.4.9"
   },
   "peerDependencies": {
-    "@strapi/data-transfer": "4.15.1",
+    "@strapi/data-transfer": "4.15.2",
     "@strapi/strapi": "^4.3.4",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
