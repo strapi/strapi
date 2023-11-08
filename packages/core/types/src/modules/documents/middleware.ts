@@ -1,12 +1,11 @@
 // Utility type to reuse Param definition in MiddlewareContext
 import { Common } from '../..';
 import { DocumentService } from './document-service';
-import type * as Params from './params';
+import type * as Params from './params/document-service';
 
 export type ParamsMap<TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType> = {
   findOne: Params.FindOne<TContentTypeUID>;
   findMany: Params.FindMany<TContentTypeUID>;
-  findPage: Params.FindPage<TContentTypeUID>;
   findFirst: Params.FindFirst<TContentTypeUID>;
   delete: Params.Delete<TContentTypeUID>;
   deleteMany: Params.DeleteMany<TContentTypeUID>;
