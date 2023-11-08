@@ -217,7 +217,7 @@ export declare namespace BulkDelete {
     data: {
       count: number;
     };
-    error?: errors.ApplicationError;
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
 
@@ -240,7 +240,7 @@ export declare namespace BulkPublish {
     data: {
       count: number;
     };
-    error?: errors.ApplicationError;
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
 
@@ -263,7 +263,7 @@ export declare namespace BulkUnpublish {
     data: {
       count: number;
     };
-    error?: errors.ApplicationError;
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
 
