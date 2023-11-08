@@ -7,4 +7,5 @@ module.exports = {
   },
   testMatch: ['<rootDir>/**/*.test.ts'],
   displayName: 'Core content-type-builder',
+  testEnvironment: 'jsdom',
 };
