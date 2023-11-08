@@ -43,7 +43,7 @@ const InlineCode = styled.code`
 
 type ModifierKey = Exclude<keyof Text, 'type' | 'text'>;
 
-export type ModifiersStore = {
+type ModifiersStore = {
   [K in ModifierKey]: {
     icon: React.ComponentType;
     isValidEventKey: (event: React.KeyboardEvent<HTMLElement>) => boolean;
@@ -57,7 +57,7 @@ export type ModifiersStore = {
 /**
  * Manages a store of all the available modifiers.
  */
-export function useModifiersStore(): ModifiersStore {
+function useModifiersStore(): ModifiersStore {
   const editor = useSlate();
   const modifiers = Editor.marks(editor);
 
@@ -131,3 +131,6 @@ export function useModifiersStore(): ModifiersStore {
     },
   };
 }
+
+export { useModifiersStore };
+export type { ModifiersStore };

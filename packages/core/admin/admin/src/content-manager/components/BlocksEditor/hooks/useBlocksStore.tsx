@@ -32,14 +32,14 @@ import {
   NumberList,
 } from '@strapi/icons';
 import { type MessageDescriptor, useIntl } from 'react-intl';
-import { type Element, type Text, Editor, Path, Transforms, Range } from 'slate';
+import { type Element, type Text, Node, Editor, Path, Transforms, Range } from 'slate';
 import { type RenderElementProps, useSlate, ReactEditor } from 'slate-react';
 import styled, { css } from 'styled-components';
 
 // @ts-expect-error TODO migrate this file
 import { composeRefs } from '../../../utils';
 import { editLink, removeLink } from '../utils/links';
-import { type Block, isText, isBlockList } from '../utils/types';
+import { type Block, isText } from '../utils/types';
 
 const StyledBaseLink = styled(BaseLink)`
   text-decoration: none;
@@ -122,6 +122,10 @@ const Unorderedlist = styled.ul`
   list-style-type: disc;
   ${listStyle}
 `;
+
+const isBlockList = (node: unknown): node is Block<'list'> => {
+  return Node.isNode(node) && !Editor.isEditor(node) && node.type === 'list';
+};
 
 const List = ({ attributes, children, element }: RenderElementProps) => {
   if (!isBlockList(element)) {
@@ -512,6 +516,10 @@ const selectorBlockKeys = [
 
 type SelectorBlockKey = (typeof selectorBlockKeys)[number];
 
+const isSelectorBlockKey = (key: unknown): key is SelectorBlockKey => {
+  return typeof key === 'string' && selectorBlockKeys.includes(key as SelectorBlockKey);
+};
+
 type BlocksStore = {
   [K in SelectorBlockKey]: SelectorBlock;
 } & {
@@ -831,5 +839,5 @@ function useBlocksStore(): BlocksStore {
   };
 }
 
-export { useBlocksStore, selectorBlockKeys };
+export { useBlocksStore, selectorBlockKeys, isSelectorBlockKey };
 export type { BlocksStore, SelectorBlockKey };

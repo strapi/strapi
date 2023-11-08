@@ -10,10 +10,15 @@ import { Editor, Transforms, Element as SlateElement, Element, Node } from 'slat
 import { ReactEditor, useSlate } from 'slate-react';
 import styled from 'styled-components';
 
-import { BlocksStore, SelectorBlockKey, useBlocksStore } from '../hooks/useBlocksStore';
+import {
+  type BlocksStore,
+  type SelectorBlockKey,
+  isSelectorBlockKey,
+  useBlocksStore,
+} from '../hooks/useBlocksStore';
 import { useModifiersStore } from '../hooks/useModifiersStore';
 import { insertLink } from '../utils/links';
-import { Block, getEntries, getKeys, isSelectorBlockKey, isText } from '../utils/types';
+import { Block, getEntries, getKeys, isText } from '../utils/types';
 
 const ToolbarWrapper = styled(Flex)`
   &[aria-disabled='true'] {
@@ -455,8 +460,8 @@ const BlockOption = ({ value, icon, label, blockSelected }: BlockOptionProps) =>
   );
 };
 
-const isListNode = (node: Node): node is Block<'list'> => {
-  return !Editor.isEditor(node) && SlateElement.isElement(node) && node.type === 'list';
+const isListNode = (node: unknown): node is Block<'list'> => {
+  return Node.isNode(node) && !Editor.isEditor(node) && node.type === 'list';
 };
 
 const isListActive = (editor: Editor, matchNode: (node: Node) => boolean) => {

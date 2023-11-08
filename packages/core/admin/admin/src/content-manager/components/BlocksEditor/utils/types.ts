@@ -1,6 +1,4 @@
-import { type Text, type Element, type Node, Editor } from 'slate';
-
-import { type SelectorBlockKey, selectorBlockKeys } from '../hooks/useBlocksStore';
+import { type Text, type Element, Node, Editor } from 'slate';
 
 export type Block<T extends Element['type']> = Extract<Node, { type: T }>;
 
@@ -11,14 +9,6 @@ export const getEntries = <T extends object>(object: T) =>
 // Wrap Object.keys to get the correct types
 export const getKeys = <T extends object>(object: T) => Object.keys(object) as (keyof T)[];
 
-export const isText = (node: Node | undefined): node is Text => {
-  return !Editor.isEditor(node) && node?.type === 'text';
-};
-
-export const isBlockList = (node: Node | undefined): node is Block<'list'> => {
-  return !Editor.isEditor(node) && node?.type === 'list';
-};
-
-export const isSelectorBlockKey = (key: unknown): key is SelectorBlockKey => {
-  return typeof key === 'string' && selectorBlockKeys.includes(key as SelectorBlockKey);
+export const isText = (node: unknown): node is Text => {
+  return Node.isNode(node) && !Editor.isEditor(node) && node.type === 'text';
 };
