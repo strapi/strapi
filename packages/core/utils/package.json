@@ -53,7 +53,7 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/pack-up": "workspace:*",
+    "@strapi/pack-up": "4.15.2",
     "@types/koa": "2.13.4",
     "@types/node": "18.18.4",
     "eslint-config-custom": "4.15.2",

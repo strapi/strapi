@@ -72,7 +72,7 @@
     "@strapi/admin-test-utils": "4.15.2",
     "@strapi/design-system": "1.13.0",
     "@strapi/icons": "1.13.0",
-    "@strapi/pack-up": "workspace:*",
+    "@strapi/pack-up": "4.15.2",
     "@strapi/types": "4.15.2",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",

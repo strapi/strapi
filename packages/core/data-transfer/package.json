@@ -61,7 +61,7 @@
     "ws": "8.13.0"
   },
   "devDependencies": {
-    "@strapi/pack-up": "workspace:*",
+    "@strapi/pack-up": "4.15.2",
     "@strapi/strapi": "4.15.1",
     "@types/fs-extra": "9.0.13",
     "@types/jest": "29.5.2",
