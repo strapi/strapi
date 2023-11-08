@@ -39,13 +39,6 @@ export const createDocumentRepository = (
         );
       },
 
-      async findPage(params = {} as any) {
-        return middlewareManager.run(
-          { action: 'findPage', uid, params, options: {} },
-          ({ params }) => documents.findPage(uid, params)
-        );
-      },
-
       async findFirst(params = {} as any) {
         return middlewareManager.run(
           { action: 'findFirst', uid, params, options: {} },

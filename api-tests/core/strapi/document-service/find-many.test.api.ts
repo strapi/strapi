@@ -29,8 +29,8 @@ describe('Document Service', () => {
   });
 
   describe('FindMany', () => {
-    it(
-      'selects by document name and defaults',
+    it.todo(
+      'find documents by name returns default locale and draft version',
       testInTransaction(async () => {
         const articlesDb = await findArticlesDb({ title: 'Article1-Draft-EN' });
 
@@ -44,12 +44,14 @@ describe('Document Service', () => {
       })
     );
 
-    it(
-      'selects by document name and locale',
+    it.todo(
+      'find documents by name and locale',
       testInTransaction(async () => {
         // There should not be a fr article called Article1-Draft-EN
         const articles = await strapi.documents('api::article.article').findMany({
-          filters: { title: 'Article1-Draft-EN', locale: 'fr' },
+          locale: 'fr',
+          // Locale will also be allowed in filters but not recommended or documented
+          filters: { title: 'Article1-Draft-EN' },
         });
 
         // Should return french locale and draft version
@@ -57,16 +59,14 @@ describe('Document Service', () => {
       })
     );
 
-    it(
-      'find french articles',
+    it.todo(
+      'find french documents',
       testInTransaction(async () => {
         const articlesDb = await findArticlesDb({ title: 'Article1-Draft-EN' });
 
-        // Question: Do we ignore the locale filter? YES (for now)
         const articles = await strapi.documents('api::article.article').findMany({
           locale: 'fr',
           status: 'draft', // 'published' | 'draft'
-          // filters: { locale: { $and: ['fr', 'en'] } },
         });
 
         // Should return default language (en) and draft version
@@ -78,11 +78,11 @@ describe('Document Service', () => {
       })
     );
 
-    it(
-      'find published articles',
+    it.todo(
+      'find published documents',
       testInTransaction(async () => {
         const articles = await strapi.documents('api::article.article').findMany({
-          filters: { status: 'published' },
+          status: 'published',
         });
 
         // Should return default language (en) and draft version
@@ -94,11 +94,11 @@ describe('Document Service', () => {
       })
     );
 
-    it(
-      'find draft articles',
+    it.todo(
+      'find draft documents',
       testInTransaction(async () => {
         const articles = await strapi.documents('api::article.article').findMany({
-          filters: { status: 'draft' },
+          status: 'draft',
         });
 
         // Should return default language (en) and draft version

@@ -29,15 +29,6 @@ const { transformParamsToQuery } = convertQueryParams;
  * TODO: i18n
  * TODO: Apply default parameters (status & locale)
  * TODO: Sanitization / validation built-in
- * TODO: Other methods
- *        Count
- *        FindPage
- *        Clone
- *        Load
- *        LoadPages
- *        DeleteMany
- * TODO: Create DocumentRepository to
- *       call documentService as strapi.document(uid, {}).method()
  * TODO: Webhooks
  * TODO: Audit logs
  * TODO: File upload
@@ -77,11 +68,6 @@ const createDocumentService = ({
     }
 
     return db.query(uid).findMany(query);
-  },
-
-  async findPage(uid, paginationParams) {
-    const query = transformParamsToQuery(uid, paginationParams || ({} as any));
-    return db.query(uid).findPage(query) as any;
   },
 
   async findFirst(uid, params) {

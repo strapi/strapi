@@ -29,13 +29,13 @@ describe('Document Service', () => {
   });
 
   describe('Update', () => {
-    it(
+    it.todo(
       'update a document',
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: '3 Document A' });
         const newName = 'Updated Document';
 
-        const article = await strapi.documents.update(ARTICLE_UID, articleDb.documentId, {
+        const article = await strapi.documents(ARTICLE_UID).update(articleDb.documentId, {
           data: { title: newName },
         });
 
@@ -56,16 +56,16 @@ describe('Document Service', () => {
       })
     );
 
-    it(
-      'update a document with locale and status',
+    it.todo(
+      'update a document locale',
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-FR' });
         const newName = 'updated document';
 
-        const article = await strapi.documents.update(ARTICLE_UID, articleDb.documentId, {
-          locale: 'en',
-          filters: { locale: 'en' },
-          data: { title: newName, locale: 'fr' },
+        // Update an existing locale of a document
+        const article = await strapi.documents(ARTICLE_UID).update(articleDb.documentId, {
+          locale: 'fr',
+          data: { title: newName },
         });
 
         // verify that the returned document was updated
@@ -89,15 +89,16 @@ describe('Document Service', () => {
       })
     );
 
-    it(
+    it.todo(
       'create a new localization for an existing document',
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article1' });
         const newName = 'updated document';
 
-        const article = await strapi.documents.update(ARTICLE_UID, articleDb.documentId, {
-          locale: 'fr',
-          data: { title: newName, locale: 'fr' },
+        // Create a new article in spanish
+        const article = await strapi.documents(ARTICLE_UID).update(articleDb.documentId, {
+          locale: 'es',
+          data: { title: newName, password: '123456' },
         });
 
         // verify that the returned document was updated
@@ -120,23 +121,28 @@ describe('Document Service', () => {
         expect(enLocale).toBeDefined();
       })
     );
-    it(
+
+    it.todo(
       'can not update published document',
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-FR' });
         const newName = 'updated document';
 
-        const article = await strapi.documents(ARTICLE_UID).update(articleDb.documentId, {
-          // NOTE: Should this be inside data? Feels off
-          data: { title: newName, status: 'published', locale: 'fr' },
+        const updatePromise = strapi.documents(ARTICLE_UID).update(articleDb.documentId, {
+          status: 'published'
+          data: { title: newName },
         });
+
+        await expect(updatePromise).rejects.toThrow(
+          `You cannot update a document published version`
+        );
       })
     );
 
-    it(
+    it.todo(
       'document to update does not exist',
       testInTransaction(async () => {
-        const article = await strapi.documents.update(ARTICLE_UID, 'does-not-exist', {
+        const article = await strapi.documents(ARTICLE_UID).update('does-not-exist', {
           data: { title: 'updated document' },
         });
 

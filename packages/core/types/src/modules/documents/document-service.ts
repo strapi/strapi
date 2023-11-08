@@ -33,17 +33,6 @@ export interface DocumentService {
     >
   >;
 
-  findPage<
-    TContentTypeUID extends Common.UID.ContentType,
-    TParams extends Params.FindPage<TContentTypeUID>
-  >(
-    uid: TContentTypeUID,
-    paginationParams?: Params.Pagination.PageNotation
-  ): Promise<{
-    results: [Common.UID.IsCollectionType<TContentTypeUID>, Result<TContentTypeUID, TParams>[]];
-    pagination: any; // TODO
-  }>;
-
   findFirst<
     TContentTypeUID extends Common.UID.ContentType,
     TParams extends Params.FindFirst<TContentTypeUID>

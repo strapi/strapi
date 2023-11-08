@@ -51,7 +51,7 @@ describe('Document Service', () => {
       'can create an article in french',
       testInTransaction(async () => {
         const article = await strapi.documents(ARTICLE_UID).create({
-          locale: 'fr', // TODO: Support both top level and inside data
+          locale: 'fr',
           status: 'published',
           data: { title: 'Article' },
         });
@@ -62,25 +62,25 @@ describe('Document Service', () => {
           locale: 'fr', // selected locale
           publishedAt: null, // should be a draft
         });
-
-        // Do we always create a default entry local?
       })
     );
 
     it.todo(
       'can not directly create a published document',
       testInTransaction(async () => {
-        const article = await strapi.documents(ARTICLE_UID).create({
-          data: { title: 'Article', locale: 'fr', status: 'published' },
+        const articlePromise = strapi.documents(ARTICLE_UID).create({
+          locale: 'fr',
+          status: 'published',
+          data: { title: 'Article' },
         });
 
-        // TODO: Should throw an error
+        await expect(articlePromise).rejects.toThrow('Cannot directly create a published document');
       })
     );
 
     // TODO: Make publishedAt not editable
     it.todo(
-      'publishedAt attribute is ignored',
+      'publishedAt attribute is ignored when creating document',
       testInTransaction(async () => {
         const article = await strapi.documents(ARTICLE_UID).create({
           data: { title: 'Article', publishedAt: new Date() },

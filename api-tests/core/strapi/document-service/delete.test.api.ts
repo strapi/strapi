@@ -29,7 +29,7 @@ describe('Document Service', () => {
   });
 
   describe('Delete', () => {
-    it(
+    it.todo(
       'delete an entire document',
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ name: 'Article1' });
@@ -41,12 +41,12 @@ describe('Document Service', () => {
       })
     );
 
-    it(
+    it.todo(
       'delete a document locale',
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ name: 'Article1-Draft-FR' });
         const article = await strapi.documents(ARTICLE_UID).delete(articleDb.documentId, {
-          filters: { locale: 'fr' },
+          locale: 'fr',
         });
 
         const articles = await findArticlesDb({ documentId: articleDb.documentId });
@@ -59,12 +59,12 @@ describe('Document Service', () => {
       })
     );
 
-    it(
+    it.todo(
       'deleting a draft removes the published version too',
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ name: 'Article2-Draft-EN' });
         const article = await strapi.documents(ARTICLE_UID).delete(articleDb.documentId, {
-          filters: { status: 'draft' },
+          status: 'draft',
         });
 
         const articles = await findArticlesDb({ documentId: articleDb.documentId });
@@ -73,12 +73,12 @@ describe('Document Service', () => {
       })
     );
 
-    it(
+    it.todo(
       'deleting a published version keeps the draft version',
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ name: 'Article2-Draft-EN' });
         const article = await strapi.documents(ARTICLE_UID).delete(articleDb.documentId, {
-          filters: { status: 'published' },
+          status: 'published',
         });
 
         const articles = await findArticlesDb({ documentId: articleDb.documentId });

@@ -8,7 +8,6 @@ export type RepositoryInstance<
 > = {
   findOne: (id: ID, params?: Params.FindOne<TContentTypeUID>) => any;
   findMany: (params?: Params.FindMany<TContentTypeUID>) => any;
-  findPage: (params?: Params.FindPage<TContentTypeUID>) => any;
   findFirst: (params?: Params.FindFirst<TContentTypeUID>) => any;
   delete: (documentId: ID, params: Params.Delete<TContentTypeUID>) => any;
   deleteMany: (params: Params.DeleteMany<TContentTypeUID>) => any;

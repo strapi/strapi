@@ -16,18 +16,6 @@ export type FindMany<TContentTypeUID extends Common.UID.ContentType> = Params.Pi
   | 'plugin'
 >;
 
-export type FindPage<TContentTypeUID extends Common.UID.ContentType> = Params.Pick<
-  TContentTypeUID,
-  | 'fields'
-  | 'filters'
-  | '_q'
-  | 'pagination:page'
-  | 'sort'
-  | 'populate'
-  | 'publicationState'
-  | 'plugin'
->;
-
 export type FindFirst<TContentTypeUID extends Common.UID.ContentType> = Params.Pick<
   TContentTypeUID,
   'fields' | 'filters' | '_q' | 'sort' | 'populate' | 'publicationState' | 'plugin'
