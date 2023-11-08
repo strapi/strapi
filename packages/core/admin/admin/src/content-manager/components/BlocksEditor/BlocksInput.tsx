@@ -1,14 +1,20 @@
 import * as React from 'react';
 
 import { Box } from '@strapi/design-system';
-import PropTypes from 'prop-types';
-import { Editable, useSlate } from 'slate-react';
-import { useTheme } from 'styled-components';
+import {
+  type ReactEditor,
+  type RenderElementProps,
+  type RenderLeafProps,
+  Editable,
+  useSlate,
+} from 'slate-react';
+import { type DefaultTheme, useTheme } from 'styled-components';
 
-import { useBlocksStore } from '../hooks/useBlocksStore';
-import { useModifiersStore } from '../hooks/useModifiersStore';
+import { type BlocksStore, useBlocksStore } from './hooks/useBlocksStore';
+import { type ModifiersStore, useModifiersStore } from './hooks/useModifiersStore';
+import { getEntries } from './utils/types';
 
-const getEditorStyle = (theme) => ({
+const getEditorStyle = (theme: DefaultTheme): React.CSSProperties => ({
   // The outline style is set on the wrapper with :focus-within
   outline: 'none',
   display: 'flex',
@@ -17,9 +23,9 @@ const getEditorStyle = (theme) => ({
   height: '100%',
 });
 
-const baseRenderLeaf = (props, modifiers) => {
+const baseRenderLeaf = (props: RenderLeafProps, modifiers: ModifiersStore) => {
   // Recursively wrap the children for each active modifier
-  const wrappedChildren = Object.entries(modifiers).reduce((currentChildren, modifierEntry) => {
+  const wrappedChildren = getEntries(modifiers).reduce((currentChildren, modifierEntry) => {
     const [name, modifier] = modifierEntry;
 
     if (props.leaf[name]) {
@@ -32,42 +38,71 @@ const baseRenderLeaf = (props, modifiers) => {
   return <span {...props.attributes}>{wrappedChildren}</span>;
 };
 
-const baseRenderElement = (props, blocks) => {
+const baseRenderElement = (props: RenderElementProps, blocks: BlocksStore) => {
   const blockMatch = Object.values(blocks).find((block) => block.matchNode(props.element));
   const block = blockMatch || blocks.paragraph;
 
   return block.renderElement(props);
 };
 
-const BlocksInput = ({ disabled, placeholder }) => {
+interface BlocksInputProps {
+  disabled: boolean;
+  placeholder?: string;
+}
+
+const BlocksInput = ({ disabled, placeholder }: BlocksInputProps) => {
   const theme = useTheme();
   const editor = useSlate();
-  const blocksRef = React.useRef();
+  const blocksRef = React.useRef<HTMLDivElement>(null);
 
   // Create renderLeaf function based on the modifiers store
   const modifiers = useModifiersStore();
-  const renderLeaf = React.useCallback((props) => baseRenderLeaf(props, modifiers), [modifiers]);
+  const renderLeaf = React.useCallback(
+    (props: RenderLeafProps) => baseRenderLeaf(props, modifiers),
+    [modifiers]
+  );
 
   // Create renderElement function base on the blocks store
   const blocks = useBlocksStore();
-  const renderElement = React.useCallback((props) => baseRenderElement(props, blocks), [blocks]);
+  const renderElement = React.useCallback(
+    (props: RenderElementProps) => baseRenderElement(props, blocks),
+    [blocks]
+  );
 
   const handleEnter = () => {
+    if (!editor.selection) {
+      return;
+    }
+
+    // Get the selected node
     const selectedNode = editor.children[editor.selection.anchor.path[0]];
+
+    // Find the matching block
     const selectedBlock = Object.values(blocks).find((block) => block.matchNode(selectedNode));
+    if (!selectedBlock) {
+      return;
+    }
 
     // Check if there's an enter handler for the selected block
     if (selectedBlock.handleEnterKey) {
       selectedBlock.handleEnterKey(editor);
     } else {
       // If not, insert a new paragraph
-      blocks.paragraph.handleEnterKey(editor);
+      blocks.paragraph.handleEnterKey!(editor);
     }
   };
 
-  const handleBackspaceEvent = (event) => {
+  const handleBackspaceEvent = (event: React.KeyboardEvent<HTMLElement>) => {
+    if (!editor.selection) {
+      return;
+    }
+
     const selectedNode = editor.children[editor.selection.anchor.path[0]];
     const selectedBlock = Object.values(blocks).find((block) => block.matchNode(selectedNode));
+
+    if (!selectedBlock) {
+      return;
+    }
 
     if (selectedBlock.handleBackspaceKey) {
       selectedBlock.handleBackspaceKey(editor, event);
@@ -77,7 +112,7 @@ const BlocksInput = ({ disabled, placeholder }) => {
   /**
    * Modifier keyboard shortcuts
    */
-  const handleKeyboardShortcuts = (event) => {
+  const handleKeyboardShortcuts = (event: React.KeyboardEvent<HTMLElement>) => {
     const isCtrlOrCmd = event.metaKey || event.ctrlKey;
 
     if (isCtrlOrCmd) {
@@ -89,7 +124,7 @@ const BlocksInput = ({ disabled, placeholder }) => {
     }
   };
 
-  const handleKeyDown = (event) => {
+  const handleKeyDown: React.KeyboardEventHandler<HTMLElement> = (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
       handleEnter();
@@ -106,9 +141,14 @@ const BlocksInput = ({ disabled, placeholder }) => {
    *  We are overriding it to check if the selection is not fully within the visible area of the editor,
    *  we use scrollBy one line to the bottom
    */
-  const handleScrollSelectionIntoView = (_, domRange) => {
+  const handleScrollSelectionIntoView = (_: ReactEditor, domRange: Range) => {
     const domRect = domRange.getBoundingClientRect();
     const blocksInput = blocksRef.current;
+
+    if (!blocksInput) {
+      return;
+    }
+
     const editorRect = blocksInput.getBoundingClientRect();
 
     // Check if the selection is not fully within the visible area of the editor
@@ -150,13 +190,4 @@ const BlocksInput = ({ disabled, placeholder }) => {
   );
 };
 
-BlocksInput.defaultProps = {
-  placeholder: null,
-};
-
-BlocksInput.propTypes = {
-  disabled: PropTypes.bool.isRequired,
-  placeholder: PropTypes.string,
-};
-
-export default BlocksInput;
+export { BlocksInput };

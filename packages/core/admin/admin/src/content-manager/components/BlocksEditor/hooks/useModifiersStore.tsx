@@ -1,8 +1,11 @@
+/* eslint-disable check-file/filename-naming-convention */
+
 import * as React from 'react';
 
 import { Typography } from '@strapi/design-system';
 import { Bold, Italic, Underline, StrikeThrough, Code } from '@strapi/icons';
-import { Editor, Transforms } from 'slate';
+import { type MessageDescriptor } from 'react-intl';
+import { Editor, Text, Transforms } from 'slate';
 import { useSlate } from 'slate-react';
 import styled, { css } from 'styled-components';
 
@@ -38,21 +41,23 @@ const InlineCode = styled.code`
   color: inherit;
 `;
 
+type ModifierKey = Exclude<keyof Text, 'type' | 'text'>;
+
+type ModifiersStore = {
+  [K in ModifierKey]: {
+    icon: React.ComponentType;
+    isValidEventKey: (event: React.KeyboardEvent<HTMLElement>) => boolean;
+    label: MessageDescriptor;
+    checkIsActive: () => boolean;
+    handleToggle: () => void;
+    renderLeaf: (children: React.JSX.Element | string) => React.JSX.Element;
+  };
+};
+
 /**
  * Manages a store of all the available modifiers.
- *
- * @returns {{
- *   [key: string]: {
- *     icon: IconComponent,
- *     isValidEventKey: (event: Event) => boolean,
- *     label: {id: string, defaultMessage: string},
- *     checkIsActive: () => boolean,
- *     handleToggle: () => void,
- *     renderLeaf: (children: JSX.Element) => JSX.Element,
- *   }
- * }} An object containing rendering functions and metadata for different text modifiers, indexed by name.
  */
-export function useModifiersStore() {
+function useModifiersStore(): ModifiersStore {
   const editor = useSlate();
   const modifiers = Editor.marks(editor);
 
@@ -61,7 +66,7 @@ export function useModifiersStore() {
    *
    * @param {string} name - The name of the modifier to check
    */
-  const baseCheckIsActive = (name) => {
+  const baseCheckIsActive = (name: ModifierKey) => {
     if (!modifiers) return false;
 
     return Boolean(modifiers[name]);
@@ -69,10 +74,8 @@ export function useModifiersStore() {
 
   /**
    * The default handler for toggling a modifier
-   *
-   * @param {string} name - The name of the modifier to toggle
    */
-  const baseHandleToggle = (name) => {
+  const baseHandleToggle = (name: ModifierKey) => {
     // If there is no selection, set selection to the end of line
     if (!editor.selection) {
       const endOfEditor = Editor.end(editor, []);
@@ -128,3 +131,6 @@ export function useModifiersStore() {
     },
   };
 }
+
+export { useModifiersStore };
+export type { ModifiersStore };

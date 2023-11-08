@@ -1,11 +1,13 @@
-import { Element, Transforms } from 'slate';
+import { type Text, Node, Editor, Element, Transforms } from 'slate';
+
+const isText = (node: unknown): node is Text => {
+  return Node.isNode(node) && !Editor.isEditor(node) && node.type === 'text';
+};
 
 /**
  * This plugin is used to normalize the Slate document to match the Strapi schema.
- *
- * @param {import('slate').Editor} editor
  */
-const withStrapiSchema = (editor) => {
+const withStrapiSchema = (editor: Editor) => {
   const { normalizeNode } = editor;
 
   /**
@@ -16,12 +18,10 @@ const withStrapiSchema = (editor) => {
   editor.normalizeNode = (entry) => {
     const [node, path] = entry;
 
-    if (!Element.isElement(node)) {
-      if (node.type !== 'text') {
-        Transforms.setNodes(editor, { type: 'text' }, { at: path });
+    if (!Element.isElement(node) && !isText(node)) {
+      Transforms.setNodes(editor, { type: 'text' }, { at: path });
 
-        return;
-      }
+      return;
     }
 
     normalizeNode(entry);

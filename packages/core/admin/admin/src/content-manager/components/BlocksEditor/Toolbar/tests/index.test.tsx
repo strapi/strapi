@@ -1,14 +1,16 @@
+/* eslint-disable testing-library/no-node-access */
+/* eslint-disable check-file/filename-naming-convention */
+
 import * as React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
-import { createEditor, Transforms } from 'slate';
+import { type Descendant, type Editor, type Location, createEditor, Transforms } from 'slate';
 import { Slate, withReact, ReactEditor } from 'slate-react';
 
-import { BlocksToolbar } from '..';
+import { BlocksToolbar } from '../Toolbar';
 
 const mockMediaLibraryTitle = 'dialog component';
 const mockMediaLibrarySubmitButton = 'upload images';
@@ -47,7 +49,11 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useLibrary: jest.fn().mockImplementation(() => ({
     components: {
-      'media-library': ({ onSelectAssets }) => (
+      'media-library': ({
+        onSelectAssets,
+      }: {
+        onSelectAssets: (images: (typeof mockMediaLibraryImage)[]) => void;
+      }) => (
         <div>
           <p>{mockMediaLibraryTitle}</p>
           <button type="button" onClick={() => onSelectAssets([mockMediaLibraryImage])}>
@@ -59,14 +65,14 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-const defaultInitialValue = [
+const defaultInitialValue: Descendant[] = [
   {
     type: 'paragraph',
     children: [{ type: 'text', text: 'A line of text in a paragraph.' }],
   },
 ];
 
-const mixedInitialValue = [
+const mixedInitialValue: Descendant[] = [
   {
     type: 'heading',
     level: 1,
@@ -86,10 +92,9 @@ const mixedInitialValue = [
   },
 ];
 
-const imageInitialValue = [
+const imageInitialValue: Descendant[] = [
   {
     type: 'image',
-    url: 'test.photos/200/300',
     children: [{ text: '', type: 'text' }],
     image: {
       name: 'test.jpg',
@@ -114,9 +119,15 @@ const imageInitialValue = [
 const user = userEvent.setup();
 
 // Create editor outside of the component to have direct access to it from the tests
-let baseEditor;
+let baseEditor: Editor;
 
-const Wrapper = ({ children, initialValue }) => {
+const Wrapper = ({
+  children,
+  initialValue,
+}: {
+  children: React.ReactNode;
+  initialValue: Descendant[];
+}) => {
   const [editor] = React.useState(() => withReact(baseEditor));
 
   return (
@@ -130,26 +141,19 @@ const Wrapper = ({ children, initialValue }) => {
   );
 };
 
-Wrapper.propTypes = {
-  children: PropTypes.node.isRequired,
-  initialValue: PropTypes.array.isRequired,
-};
-
 /**
  * Selects the given location without triggering warnings
  * act is required because we're making an update outside of React that React needs to sync with
  * And it only works if act is awaited
- * @param {import('slate').Location} selection
  */
-const select = async (location) => {
+const select = async (location: Location) => {
   await act(async () => Transforms.select(baseEditor, location));
 };
 
 /**
  * Render the toolbar inside the required context providers
- * @param {import('slate').Descendant[]} data
  */
-const setup = (data = defaultInitialValue) => {
+const setup = (data: Descendant[] = defaultInitialValue) => {
   // Create a fresh instance of a Slate editor
   // so that we have no side effects due to the previous selection or children
   baseEditor = createEditor();
@@ -649,7 +653,7 @@ describe('BlocksEditor toolbar', () => {
       focus: { path: [0, 1], offset: 2 },
     });
 
-    expect(linkButton).not.toBeDisabled();
+    expect(linkButton).toBeEnabled();
   });
 
   it('creates a new list with empty content when you click on the button with an empty editor', async () => {
