@@ -10,6 +10,7 @@ const CORE_PLUGINS = [
   '@strapi/plugin-content-type-builder',
   '@strapi/plugin-email',
   '@strapi/plugin-upload',
+  process.env.FEATURE_FLAG_CONTENT_RELEASES && '@strapi/content-releases',
 ];
 
 interface PluginMeta {
@@ -49,18 +50,20 @@ export const getEnabledPlugins = async ({
   logger.debug('Core plugins', os.EOL, CORE_PLUGINS);
 
   for (const plugin of CORE_PLUGINS) {
-    const pkg = await getModule(plugin, cwd);
-
-    if (pkg && validatePackageIsPlugin(pkg)) {
-      /**
-       * We know there's a name because these are our packages.
-       */
-      const name = (pkg.strapi.name || pkg.name)!;
-
-      plugins[name] = {
-        name,
-        pathToPlugin: plugin,
-      };
+    if (plugin) {
+      const pkg = await getModule(plugin, cwd);
+  
+      if (pkg && validatePackageIsPlugin(pkg)) {
+        /**
+         * We know there's a name because these are our packages.
+         */
+        const name = (pkg.strapi.name || pkg.name)!;
+  
+        plugins[name] = {
+          name,
+          pathToPlugin: plugin,
+        };
+      }
     }
   }
 
