@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-color-picker",
-  "version": "4.15.0",
+  "version": "4.15.1",
   "description": "Strapi maintained Custom Fields",
   "repository": {
     "type": "git",
@@ -44,10 +44,7 @@
   "scripts": {
     "build": "strapi plugin:build --force",
     "clean": "run -T rimraf ./dist",
-    "lint": "yarn lint:project && yarn lint:back && yarn lint:front",
-    "lint:back": "run -T eslint ./server -c ./server/.eslintrc.js",
-    "lint:front": "run -T eslint ./admin -c ./admin/.eslintrc.js",
-    "lint:project": "run -T eslint . -c ./.eslintrc.js",
+    "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
@@ -58,14 +55,14 @@
   },
   "dependencies": {
     "@strapi/design-system": "1.13.0",
-    "@strapi/helper-plugin": "4.15.0",
+    "@strapi/helper-plugin": "4.15.1",
     "@strapi/icons": "1.13.0",
     "prop-types": "^15.8.1",
     "react-colorful": "5.6.1",
     "react-intl": "6.4.1"
   },
   "devDependencies": {
-    "@strapi/strapi": "4.15.0",
+    "@strapi/strapi": "4.15.1",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
     "@types/styled-components": "5.1.26",

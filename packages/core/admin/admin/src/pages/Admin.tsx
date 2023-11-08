@@ -15,51 +15,46 @@ import { GuidedTourModal } from '../components/GuidedTour/Modal';
 import { LeftMenu } from '../components/LeftMenu';
 import { Onboarding } from '../components/Onboarding';
 import { ACTION_SET_APP_RUNTIME_STATUS } from '../constants';
+import { useConfiguration } from '../contexts/configuration';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
-import { useConfiguration } from '../hooks/useConfiguration';
 import { useMenu } from '../hooks/useMenu';
 import { AppLayout } from '../layouts/AppLayout';
 import { createRoute } from '../utils/createRoute';
 
 const CM = React.lazy(
   // @ts-expect-error – No types, yet.
-  () => import(/* webpackChunkName: "content-manager" */ '../content-manager/pages/App')
+  () => import('../content-manager/pages/App')
 );
 const HomePage = React.lazy(() =>
-  import(/* webpackChunkName: "Admin_homePage" */ './HomePage').then((mod) => ({
+  import('./HomePage').then((mod) => ({
     default: mod.HomePage,
   }))
 );
 const InstalledPluginsPage = React.lazy(() =>
-  import(/* webpackChunkName: "Admin_pluginsPage" */ './InstalledPluginsPage').then((mod) => ({
+  import('./InstalledPluginsPage').then((mod) => ({
     default: mod.ProtectedInstalledPluginsPage,
   }))
 );
 const MarketplacePage = React.lazy(() =>
-  import(/* webpackChunkName: "Admin_marketplace" */ './Marketplace/MarketplacePage').then(
-    (mod) => ({ default: mod.ProtectedMarketplacePage })
-  )
+  import('./Marketplace/MarketplacePage').then((mod) => ({ default: mod.ProtectedMarketplacePage }))
 );
 const NotFoundPage = React.lazy(() =>
-  import(/* webpackChunkName: "Admin_NotFoundPage" */ './NotFoundPage').then(
-    ({ NotFoundPage }) => ({ default: NotFoundPage })
-  )
+  import('./NotFoundPage').then(({ NotFoundPage }) => ({ default: NotFoundPage }))
 );
 const InternalErrorPage = React.lazy(() =>
-  import(/* webpackChunkName: "Admin_InternalErrorPage" */ './InternalErrorPage').then(
-    ({ InternalErrorPage }) => ({
-      default: InternalErrorPage,
-    })
-  )
+  import('./InternalErrorPage').then(({ InternalErrorPage }) => ({
+    default: InternalErrorPage,
+  }))
 );
 
-const ProfilePage = React.lazy(
-  // @ts-expect-error – No types, yet.
-  () => import(/* webpackChunkName: "Admin_profilePage" */ './ProfilePage')
+const ProfilePage = React.lazy(() =>
+  import('./ProfilePage').then((mod) => ({
+    default: mod.ProfilePage,
+  }))
 );
 const SettingsPage = React.lazy(() =>
   // @ts-expect-error – No types, yet.
-  import(/* webpackChunkName: "Admin_settingsPage" */ './SettingsPage').then((module) => ({
+  import('./SettingsPage').then((module) => ({
     default: module.SettingsPage,
   }))
 );

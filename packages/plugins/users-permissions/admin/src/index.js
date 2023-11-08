@@ -33,9 +33,7 @@ export default {
           id: 'roles',
           to: `/settings/users-permissions/roles`,
           async Component() {
-            const component = await import(
-              /* webpackChunkName: "users-roles-settings-page" */ './pages/Roles'
-            );
+            const component = await import('./pages/Roles');
 
             return component;
           },
@@ -49,9 +47,7 @@ export default {
           id: 'providers',
           to: `/settings/users-permissions/providers`,
           async Component() {
-            const component = await import(
-              /* webpackChunkName: "users-providers-settings-page" */ './pages/Providers'
-            );
+            const component = await import('./pages/Providers');
 
             return component;
           },
@@ -65,9 +61,7 @@ export default {
           id: 'email-templates',
           to: `/settings/users-permissions/email-templates`,
           async Component() {
-            const component = await import(
-              /* webpackChunkName: "users-email-settings-page" */ './pages/EmailTemplates'
-            );
+            const component = await import('./pages/EmailTemplates');
 
             return component;
           },
@@ -81,9 +75,7 @@ export default {
           id: 'advanced-settings',
           to: `/settings/users-permissions/advanced-settings`,
           async Component() {
-            const component = await import(
-              /* webpackChunkName: "users-advanced-settings-page" */ './pages/AdvancedSettings'
-            );
+            const component = await import('./pages/AdvancedSettings');
 
             return component;
           },
@@ -101,9 +93,7 @@ export default {
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
       locales.map((locale) => {
-        return import(
-          /* webpackChunkName: "users-permissions-translation-[request]" */ `./translations/${locale}.json`
-        )
+        return import(`./translations/${locale}.json`)
           .then(({ default: data }) => {
             return {
               data: prefixPluginTranslations(data, 'users-permissions'),

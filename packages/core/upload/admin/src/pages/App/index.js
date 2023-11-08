@@ -12,9 +12,7 @@ import { getTrad } from '../../utils';
 
 import { MediaLibrary } from './MediaLibrary';
 
-const ConfigureTheView = lazy(() =>
-  import(/* webpackChunkName: "Upload_ConfigureTheView" */ './ConfigureTheView')
-);
+const ConfigureTheView = lazy(() => import('./ConfigureTheView'));
 
 const Upload = () => {
   const {

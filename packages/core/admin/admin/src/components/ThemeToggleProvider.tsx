@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { DefaultTheme } from 'styled-components';
 
-import { ThemeToggleContext, ThemeName, NonSystemThemeName } from '../contexts/themeToggle';
+import { ThemeToggleContextProvider, ThemeName, NonSystemThemeName } from '../contexts/themeToggle';
 
 const THEME_KEY = 'STRAPI_THEME';
 
@@ -48,16 +48,16 @@ const ThemeToggleProvider = ({ children, themes }: ThemeToggleProviderProps) => 
     };
   }, []);
 
-  const themeValues = React.useMemo(() => {
-    return {
-      currentTheme,
-      onChangeTheme: handleChangeTheme,
-      themes,
-      systemTheme,
-    };
-  }, [currentTheme, handleChangeTheme, themes, systemTheme]);
-
-  return <ThemeToggleContext.Provider value={themeValues}>{children}</ThemeToggleContext.Provider>;
+  return (
+    <ThemeToggleContextProvider
+      currentTheme={currentTheme}
+      onChangeTheme={handleChangeTheme}
+      themes={themes}
+      systemTheme={systemTheme}
+    >
+      {children}
+    </ThemeToggleContextProvider>
+  );
 };
 
 export { ThemeToggleProvider };

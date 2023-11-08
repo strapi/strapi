@@ -3,8 +3,8 @@ import * as React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
 import { fixtures } from '@strapi/admin-test-utils';
-import { DesignSystemProvider } from '@strapi/design-system';
-import { NotificationsProvider, RBACContext } from '@strapi/helper-plugin';
+import { DesignSystemProvider, darkTheme, lightTheme } from '@strapi/design-system';
+import { NotificationsProvider, Permission, RBACContext } from '@strapi/helper-plugin';
 import {
   renderHook as renderHookRTL,
   render as renderRTL,
@@ -17,15 +17,16 @@ import {
 import userEvent from '@testing-library/user-event';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
 import { Provider } from 'react-redux';
 import { MemoryRouter, MemoryRouterProps } from 'react-router-dom';
 
+import { LanguageProvider } from '../src/components/LanguageProvider';
+import { ThemeToggleProvider } from '../src/components/ThemeToggleProvider';
 // @ts-expect-error – no types yet.
 import ModelsContext from '../src/content-manager/contexts/ModelsContext';
-import { AdminContext } from '../src/contexts/admin';
-import { ConfigurationContext } from '../src/contexts/configuration';
+import { AdminContextProvider } from '../src/contexts/admin';
+import { ConfigurationContextProvider } from '../src/contexts/configuration';
 
 import { server } from './server';
 import { initialState } from './store';
@@ -59,49 +60,60 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
   return (
     <Provider store={store}>
       <MemoryRouter initialEntries={initialEntries}>
-        <IntlProvider locale="en" textComponent="span">
+        <ThemeToggleProvider
+          themes={{
+            light: lightTheme,
+            dark: darkTheme,
+          }}
+        >
           <DesignSystemProvider locale="en">
             <QueryClientProvider client={queryClient}>
               <DndProvider backend={HTML5Backend}>
-                <NotificationsProvider>
-                  <RBACContext.Provider
-                    value={{
-                      refetchPermissions: jest.fn(),
-                      allPermissions: [
-                        ...fixtures.permissions.allPermissions,
-                        {
-                          id: 314,
-                          action: 'admin::users.read',
-                          subject: null,
-                          properties: {},
-                          conditions: [],
-                        },
-                      ],
-                    }}
-                  >
-                    <ModelsContext.Provider value={{ refetchData: jest.fn() }}>
-                      <AdminContext.Provider value={{ getAdminInjectedComponents: jest.fn() }}>
-                        <ConfigurationContext.Provider
-                          value={{
-                            showReleaseNotification: false,
-                            showTutorials: false,
-                            updateProjectSettings: jest.fn(),
-                            logos: {
+                <LanguageProvider
+                  localeNames={{
+                    en: 'english',
+                  }}
+                  messages={{}}
+                >
+                  <NotificationsProvider>
+                    <RBACContext.Provider
+                      value={{
+                        refetchPermissions: jest.fn(),
+                        allPermissions: [
+                          ...fixtures.permissions.allPermissions,
+                          {
+                            id: 314,
+                            action: 'admin::users.read',
+                            subject: null,
+                            properties: {},
+                            conditions: [],
+                            actionParameters: {},
+                          },
+                        ] as Permission[],
+                      }}
+                    >
+                      <ModelsContext.Provider value={{ refetchData: jest.fn() }}>
+                        <AdminContextProvider getAdminInjectedComponents={jest.fn()}>
+                          <ConfigurationContextProvider
+                            showReleaseNotification={false}
+                            showTutorials={false}
+                            updateProjectSettings={jest.fn()}
+                            logos={{
                               auth: { default: '' },
                               menu: { default: '' },
-                            },
-                          }}
-                        >
-                          {children}
-                        </ConfigurationContext.Provider>
-                      </AdminContext.Provider>
-                    </ModelsContext.Provider>
-                  </RBACContext.Provider>
-                </NotificationsProvider>
+                            }}
+                          >
+                            {children}
+                          </ConfigurationContextProvider>
+                        </AdminContextProvider>
+                      </ModelsContext.Provider>
+                    </RBACContext.Provider>
+                  </NotificationsProvider>
+                </LanguageProvider>
               </DndProvider>
             </QueryClientProvider>
           </DesignSystemProvider>
-        </IntlProvider>
+        </ThemeToggleProvider>
       </MemoryRouter>
     </Provider>
   );

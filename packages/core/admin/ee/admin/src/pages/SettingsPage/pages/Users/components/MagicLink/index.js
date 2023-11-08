@@ -3,7 +3,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { basename } from '../../../../../../../../../admin/src/core/utils/basename';
+import { getBasename } from '../../../../../../../../../admin/src/core/utils/basename';
 import MagicLinkWrapper from '../../../../../../../../../admin/src/pages/SettingsPage/pages/Users/components/MagicLink/MagicLinkWrapper';
 
 // FIXME replace with parts compo when ready
@@ -13,7 +13,9 @@ export const MagicLinkEE = ({ registrationToken }) => {
   if (registrationToken) {
     return (
       <MagicLinkWrapper
-        target={`${window.location.origin}${basename}auth/register?registrationToken=${registrationToken}`}
+        target={`${
+          window.location.origin
+        }${getBasename()}/auth/register?registrationToken=${registrationToken}`}
       >
         {formatMessage({
           id: 'app.components.Users.MagicLink.connect',
@@ -24,7 +26,7 @@ export const MagicLinkEE = ({ registrationToken }) => {
   }
 
   return (
-    <MagicLinkWrapper target={`${window.location.origin}${basename}auth/login`}>
+    <MagicLinkWrapper target={`${window.location.origin}${getBasename()}auth/login`}>
       {formatMessage({
         id: 'app.components.Users.MagicLink.connect.sso',
         defaultMessage:

@@ -3,9 +3,7 @@ export const ROUTES_EE = [
     ? [
         {
           async Component() {
-            const component = await import(
-              /* webpackChunkName: "audit-logs-settings-page" */ './pages/AuditLogs/ProtectedListPage'
-            );
+            const component = await import('./pages/AuditLogs/ProtectedListPage');
 
             return component;
           },
@@ -19,9 +17,7 @@ export const ROUTES_EE = [
     ? [
         {
           async Component() {
-            const component = await import(
-              /* webpackChunkName: "review-workflows-settings-list-view" */ './pages/ReviewWorkflows/pages/ListView'
-            );
+            const component = await import('./pages/ReviewWorkflows/pages/ListView');
 
             return component;
           },
@@ -31,9 +27,7 @@ export const ROUTES_EE = [
 
         {
           async Component() {
-            const component = await import(
-              /* webpackChunkName: "review-workflows-settings-create-view" */ './pages/ReviewWorkflows/pages/CreateView'
-            );
+            const component = await import('./pages/ReviewWorkflows/pages/CreateView');
 
             return component;
           },
@@ -43,9 +37,7 @@ export const ROUTES_EE = [
 
         {
           async Component() {
-            const component = await import(
-              /* webpackChunkName: "review-workflows-settings-edit-view" */ './pages/ReviewWorkflows/pages/EditView'
-            );
+            const component = await import('./pages/ReviewWorkflows/pages/EditView');
 
             return component;
           },
@@ -59,9 +51,7 @@ export const ROUTES_EE = [
     ? [
         {
           async Component() {
-            const component = await import(
-              /* webpackChunkName: "sso-settings-page" */ './pages/SingleSignOn'
-            );
+            const component = await import('./pages/SingleSignOn');
 
             return component;
           },

@@ -4,7 +4,7 @@ import { DesignSystemProvider } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { createGlobalStyle } from 'styled-components';
 
-import { useThemeToggle } from '../hooks/useThemeToggle';
+import { useThemeToggle } from '../contexts/themeToggle';
 
 interface ThemeProps {
   children: React.ReactNode;
