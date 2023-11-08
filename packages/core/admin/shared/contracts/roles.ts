@@ -46,7 +46,7 @@ export declare namespace UpdatePermissions {
 /**
  * GET /roles/:id - Find a role by ID
  */
-export declare namespace FindOne {
+export declare namespace FindRole {
   export interface Request {
     params: { id: Entity.ID };
     query: {};
@@ -62,7 +62,7 @@ export declare namespace FindOne {
 /**
  * GET /roles
  */
-export declare namespace FindAll {
+export declare namespace FindRoles {
   export interface Request {
     query: EntityService.Params.Pick<'admin::role', 'sort' | 'filters' | 'fields'>;
     body: {};

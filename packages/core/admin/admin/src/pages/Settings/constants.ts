@@ -47,20 +47,18 @@ export const ROUTES_CE: Route[] = [
   },
   {
     async Component() {
-      // @ts-expect-error – No types, yet.
-      const component = await import('./pages/Users/ProtectedListPage');
+      const { ProtectedListPage } = await import('./pages/Users/ListPage');
 
-      return component;
+      return ProtectedListPage;
     },
     to: '/settings/users',
     exact: true,
   },
   {
     async Component() {
-      // @ts-expect-error – No types, yet.
-      const component = await import('./pages/Users/ProtectedEditPage');
+      const { ProtectedEditPage } = await import('./pages/Users/EditPage');
 
-      return component;
+      return ProtectedEditPage;
     },
     to: '/settings/users/:id',
     exact: true,
