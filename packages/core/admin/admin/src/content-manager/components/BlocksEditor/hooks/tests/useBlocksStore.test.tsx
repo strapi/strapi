@@ -1,19 +1,21 @@
+/* eslint-disable testing-library/no-node-access */
 /* eslint-disable check-file/filename-naming-convention */
 
 import * as React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { type Attribute } from '@strapi/types';
 import { render, screen, renderHook, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
-import { type Descendant, createEditor, Editor, Transforms } from 'slate';
+import { createEditor, Editor, Transforms } from 'slate';
 import { Slate, withReact, ReactEditor } from 'slate-react';
 
 import { withLinks } from '../../plugins/withLinks';
 import { type Block } from '../../utils/types';
 import { useBlocksStore } from '../useBlocksStore';
 
-const initialValue: Descendant[] = [
+const initialValue: Attribute.BlocksValue = [
   {
     type: 'paragraph',
     children: [{ type: 'text', text: 'A line of text in a paragraph.' }],
@@ -47,7 +49,6 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
 describe('useBlocksStore', () => {
   beforeEach(() => {
     // ESLint thinks we're manipulating the dom, when we're actually manipulating the editor
-    // eslint-disable-next-line testing-library/no-node-access
     baseEditor.children = initialValue;
 
     /**
@@ -267,7 +268,6 @@ describe('useBlocksStore', () => {
     const { result } = renderHook(useBlocksStore, { wrapper: Wrapper });
 
     act(() => {
-      // eslint-disable-next-line testing-library/no-node-access
       baseEditor.children = [
         {
           type: 'paragraph',
@@ -506,7 +506,6 @@ describe('useBlocksStore', () => {
     // Wrapper cause issues about updates not wrapped in act()
     const { result } = renderHook(useBlocksStore);
 
-    // eslint-disable-next-line testing-library/no-node-access
     baseEditor.children = [
       {
         type: 'paragraph',
@@ -539,7 +538,6 @@ describe('useBlocksStore', () => {
     result.current.paragraph.handleEnterKey?.(baseEditor);
 
     // Should insert a new paragraph with the content after the cursor
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'paragraph',
@@ -572,7 +570,6 @@ describe('useBlocksStore', () => {
     // Wrapper cause issues about updates not wrapped in act()
     const { result } = renderHook(useBlocksStore);
 
-    // eslint-disable-next-line testing-library/no-node-access
     baseEditor.children = [
       {
         type: 'code',
@@ -595,7 +592,6 @@ describe('useBlocksStore', () => {
     result.current.code.handleEnterKey?.(baseEditor);
 
     // Should insert a newline within the code block (shoudn't exit the code block)
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'code',
@@ -614,7 +610,6 @@ describe('useBlocksStore', () => {
     // Wrapper cause issues about updates not wrapped in act()
     const { result } = renderHook(useBlocksStore);
 
-    // eslint-disable-next-line testing-library/no-node-access
     baseEditor.children = [
       {
         type: 'list',
@@ -643,7 +638,6 @@ describe('useBlocksStore', () => {
     result.current['list-unordered'].handleEnterKey?.(baseEditor);
 
     // Should insert a new list item
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'list',
@@ -675,7 +669,6 @@ describe('useBlocksStore', () => {
   it('handles enter key on a list item without text', () => {
     const { result } = renderHook(useBlocksStore);
 
-    // eslint-disable-next-line testing-library/no-node-access
     baseEditor.children = [
       {
         type: 'list',
@@ -713,7 +706,6 @@ describe('useBlocksStore', () => {
     result.current['list-unordered'].handleEnterKey?.(baseEditor);
 
     // Should remove the empty list item and create a paragraph after the list
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'list',
@@ -745,7 +737,6 @@ describe('useBlocksStore', () => {
   it('handles enter key on an empty list', () => {
     const { result } = renderHook(useBlocksStore);
 
-    // eslint-disable-next-line testing-library/no-node-access
     baseEditor.children = [
       {
         type: 'list',
@@ -774,7 +765,6 @@ describe('useBlocksStore', () => {
     result.current['list-ordered'].handleEnterKey?.(baseEditor);
 
     // Should remove the empty list and create a paragraph instead
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'paragraph',
@@ -791,7 +781,6 @@ describe('useBlocksStore', () => {
   it('handles the backspace key on a very first list with single empty list item', () => {
     const { result } = renderHook(useBlocksStore);
 
-    // eslint-disable-next-line testing-library/no-node-access
     baseEditor.children = [
       {
         type: 'list',
@@ -823,7 +812,6 @@ describe('useBlocksStore', () => {
     );
 
     // Should remove the empty list item and replace with empty paragraph
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'paragraph',
@@ -840,7 +828,6 @@ describe('useBlocksStore', () => {
   it('handles the backspace key on a list with single empty list item', () => {
     const { result } = renderHook(useBlocksStore);
 
-    // eslint-disable-next-line testing-library/no-node-access
     baseEditor.children = [
       {
         type: 'paragraph',
@@ -881,7 +868,6 @@ describe('useBlocksStore', () => {
     );
 
     // Should remove the empty list item
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'paragraph',
@@ -898,7 +884,6 @@ describe('useBlocksStore', () => {
   it('handles the backspace key on a list with two list items and converts the first into a paragraph', () => {
     const { result } = renderHook(useBlocksStore);
 
-    // eslint-disable-next-line testing-library/no-node-access
     baseEditor.children = [
       {
         type: 'list',
@@ -939,7 +924,6 @@ describe('useBlocksStore', () => {
     );
 
     // Should convert the first list item in a paragraph
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'paragraph',
@@ -971,7 +955,6 @@ describe('useBlocksStore', () => {
   it('handles the backspace key on a empty list with just one list item', () => {
     const { result } = renderHook(useBlocksStore);
 
-    // eslint-disable-next-line testing-library/no-node-access
     baseEditor.children = [
       {
         type: 'list',
@@ -1003,7 +986,6 @@ describe('useBlocksStore', () => {
     );
 
     // Should convert the first list item in a paragraph
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'paragraph',
@@ -1020,7 +1002,6 @@ describe('useBlocksStore', () => {
   it('handles the backspace key on a list with mixed content', () => {
     const { result } = renderHook(useBlocksStore);
 
-    // eslint-disable-next-line testing-library/no-node-access
     baseEditor.children = [
       {
         type: 'list',
@@ -1100,7 +1081,6 @@ describe('useBlocksStore', () => {
     );
 
     // Should convert the first list item in a paragraph
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'paragraph',
@@ -1180,7 +1160,6 @@ describe('useBlocksStore', () => {
     );
 
     // Should convert the first list item in a paragraph
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'paragraph',
@@ -1251,7 +1230,6 @@ describe('useBlocksStore', () => {
   it('handles enter key on a quote', () => {
     const { result } = renderHook(useBlocksStore);
 
-    // eslint-disable-next-line testing-library/no-node-access
     baseEditor.children = [
       {
         type: 'quote',
@@ -1272,7 +1250,6 @@ describe('useBlocksStore', () => {
     result.current.quote.handleEnterKey?.(baseEditor);
 
     // Should enter a line break within the quote
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'quote',
@@ -1293,7 +1270,6 @@ describe('useBlocksStore', () => {
     result.current.quote.handleEnterKey?.(baseEditor);
 
     // Should delete the line break and create a paragraph after the quote
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'quote',
@@ -1319,7 +1295,6 @@ describe('useBlocksStore', () => {
   it('handles enter key called twice on paragraph block', () => {
     const { result } = renderHook(useBlocksStore);
 
-    // eslint-disable-next-line testing-library/no-node-access
     baseEditor.children = [
       {
         type: 'paragraph',
@@ -1374,7 +1349,6 @@ describe('useBlocksStore', () => {
   it('disables modifiers when creating a new node with enter key in a paragraph', () => {
     const { result } = renderHook(useBlocksStore);
 
-    // eslint-disable-next-line testing-library/no-node-access
     baseEditor.children = [
       {
         type: 'paragraph',
@@ -1399,7 +1373,6 @@ describe('useBlocksStore', () => {
     result.current.paragraph.handleEnterKey?.(baseEditor);
 
     // Should insert a new paragraph without modifiers
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'paragraph',
@@ -1427,7 +1400,6 @@ describe('useBlocksStore', () => {
   it('disables modifiers when creating a new node with enter key in a list item', () => {
     const { result } = renderHook(useBlocksStore);
 
-    // eslint-disable-next-line testing-library/no-node-access
     baseEditor.children = [
       {
         type: 'list',
@@ -1458,7 +1430,6 @@ describe('useBlocksStore', () => {
     result.current['list-unordered'].handleEnterKey?.(baseEditor);
 
     // Should insert a new list item without modifiers
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'list',
@@ -1492,7 +1463,6 @@ describe('useBlocksStore', () => {
   it('keeps modifiers when creating a new line in the middle of a block with modifiers', () => {
     const { result } = renderHook(useBlocksStore);
 
-    // eslint-disable-next-line testing-library/no-node-access
     baseEditor.children = [
       {
         type: 'paragraph',
@@ -1518,7 +1488,6 @@ describe('useBlocksStore', () => {
     result.current.paragraph.handleEnterKey?.(baseEditor);
 
     // Should insert a new line with modifiers
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'paragraph',
@@ -1550,7 +1519,6 @@ describe('useBlocksStore', () => {
   it('disables modifiers when creating a new node with enter key at the end of a quote', () => {
     const { result } = renderHook(useBlocksStore);
 
-    // eslint-disable-next-line testing-library/no-node-access
     baseEditor.children = [
       {
         type: 'quote',

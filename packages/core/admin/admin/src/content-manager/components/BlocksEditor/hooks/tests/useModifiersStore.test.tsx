@@ -3,14 +3,15 @@
 import * as React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { type Attribute } from '@strapi/types';
 import { render, renderHook, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { type Descendant, createEditor } from 'slate';
+import { createEditor } from 'slate';
 import { Slate, withReact } from 'slate-react';
 
 import { useModifiersStore } from '../useModifiersStore';
 
-const initialValue: Descendant[] = [
+const initialValue: Attribute.BlocksValue = [
   {
     type: 'paragraph',
     children: [{ type: 'text', text: 'A line of text in a paragraph.' }],

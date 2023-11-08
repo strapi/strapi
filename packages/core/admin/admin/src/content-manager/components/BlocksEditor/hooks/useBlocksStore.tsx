@@ -156,7 +156,7 @@ const replaceListWithEmptyBlock = (editor: Editor, currentListPath: Path) => {
 /**
  * Common handler for the backspace event on ordered and unordered lists
  */
-const handleBackspaceKeyOnList = (editor: Editor, event: React.KeyboardEvent<HTMLDivElement>) => {
+const handleBackspaceKeyOnList = (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => {
   if (!editor.selection) return;
 
   const [currentListItem, currentListItemPath] = Editor.parent(editor, editor.selection.anchor);
@@ -484,7 +484,7 @@ interface NonSelectorBlock {
   matchNode: (node: Element) => boolean;
   isInBlocksSelector: false;
   handleEnterKey?: (editor: Editor) => void;
-  handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLDivElement>) => void;
+  handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => void;
 }
 
 type SelectorBlock = Omit<NonSelectorBlock, 'isInBlocksSelector'> & {
@@ -493,10 +493,9 @@ type SelectorBlock = Omit<NonSelectorBlock, 'isInBlocksSelector'> & {
   label: MessageDescriptor;
 };
 
-export const nonSelectorBlockKeys = ['list-item', 'link'] as const;
-export type NonSelectorBlockKey = (typeof nonSelectorBlockKeys)[number];
+type NonSelectorBlockKey = 'list-item' | 'link';
 
-export const selectorBlockKeys = [
+const selectorBlockKeys = [
   'paragraph',
   'heading-one',
   'heading-two',
@@ -511,9 +510,9 @@ export const selectorBlockKeys = [
   'code',
 ] as const;
 
-export type SelectorBlockKey = (typeof selectorBlockKeys)[number];
+type SelectorBlockKey = (typeof selectorBlockKeys)[number];
 
-export type BlocksStore = {
+type BlocksStore = {
   [K in SelectorBlockKey]: SelectorBlock;
 } & {
   [K in NonSelectorBlockKey]: NonSelectorBlock;
@@ -522,7 +521,7 @@ export type BlocksStore = {
 /**
  * Manages a store of all the available blocks.
  */
-export function useBlocksStore(): BlocksStore {
+function useBlocksStore(): BlocksStore {
   return {
     paragraph: {
       renderElement: (props) => (
@@ -831,3 +830,6 @@ export function useBlocksStore(): BlocksStore {
     },
   };
 }
+
+export { useBlocksStore, selectorBlockKeys };
+export type { BlocksStore, SelectorBlockKey };

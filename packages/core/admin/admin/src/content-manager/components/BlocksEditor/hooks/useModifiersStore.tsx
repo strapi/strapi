@@ -46,7 +46,7 @@ type ModifierKey = Exclude<keyof Text, 'type' | 'text'>;
 export type ModifiersStore = {
   [K in ModifierKey]: {
     icon: React.ComponentType;
-    isValidEventKey: (event: React.KeyboardEvent<HTMLDivElement>) => boolean;
+    isValidEventKey: (event: React.KeyboardEvent<HTMLElement>) => boolean;
     label: MessageDescriptor;
     checkIsActive: () => boolean;
     handleToggle: () => void;

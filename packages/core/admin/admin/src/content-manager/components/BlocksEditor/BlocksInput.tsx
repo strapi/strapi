@@ -88,11 +88,11 @@ const BlocksInput = ({ disabled, placeholder }: BlocksInputProps) => {
       selectedBlock.handleEnterKey(editor);
     } else {
       // If not, insert a new paragraph
-      blocks.paragraph.handleEnterKey?.(editor);
+      blocks.paragraph.handleEnterKey!(editor);
     }
   };
 
-  const handleBackspaceEvent = (event: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleBackspaceEvent = (event: React.KeyboardEvent<HTMLElement>) => {
     if (!editor.selection) {
       return;
     }
@@ -112,7 +112,7 @@ const BlocksInput = ({ disabled, placeholder }: BlocksInputProps) => {
   /**
    * Modifier keyboard shortcuts
    */
-  const handleKeyboardShortcuts = (event: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyboardShortcuts = (event: React.KeyboardEvent<HTMLElement>) => {
     const isCtrlOrCmd = event.metaKey || event.ctrlKey;
 
     if (isCtrlOrCmd) {
@@ -124,7 +124,7 @@ const BlocksInput = ({ disabled, placeholder }: BlocksInputProps) => {
     }
   };
 
-  const handleKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (event) => {
+  const handleKeyDown: React.KeyboardEventHandler<HTMLElement> = (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
       handleEnter();

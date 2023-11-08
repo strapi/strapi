@@ -177,7 +177,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
               direction="column"
               alignItems="flex-start"
               height="512px"
-              disabled={Boolean(disabled)}
+              disabled={disabled}
               hasError={Boolean(error)}
             >
               <BlocksToolbar disabled={disabled} />

@@ -1,3 +1,4 @@
+/* eslint-disable testing-library/no-node-access */
 /* eslint-disable check-file/filename-naming-convention */
 
 import * as React from 'react';
@@ -211,7 +212,6 @@ describe('BlocksEditor toolbar', () => {
     await user.click(italicButton);
 
     // The selection must have been isolated in its own child node
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'paragraph',
@@ -243,7 +243,6 @@ describe('BlocksEditor toolbar', () => {
     await user.click(italicButton);
 
     // The selection should be back a single node
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual(defaultInitialValue);
 
     // The bold and italic buttons should have the inactive state
@@ -274,7 +273,6 @@ describe('BlocksEditor toolbar', () => {
     expect(unorderedListButton).toHaveAttribute('data-state', 'off');
     expect(orderedListButton).toHaveAttribute('data-state', 'on');
 
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'list',
@@ -309,7 +307,6 @@ describe('BlocksEditor toolbar', () => {
     await user.click(blocksDropdown);
     await user.click(screen.getByRole('option', { name: 'Heading 1' }));
 
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'heading',
@@ -327,7 +324,6 @@ describe('BlocksEditor toolbar', () => {
     await user.click(blocksDropdown);
     await user.click(screen.getByRole('option', { name: 'Text' }));
 
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'paragraph',
@@ -356,7 +352,6 @@ describe('BlocksEditor toolbar', () => {
     await user.click(blocksDropdown);
     await user.click(screen.getByRole('option', { name: 'Numbered list' }));
 
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'list',
@@ -379,7 +374,6 @@ describe('BlocksEditor toolbar', () => {
     await user.click(blocksDropdown);
     await user.click(screen.getByRole('option', { name: 'Bulleted list' }));
 
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'list',
@@ -412,7 +406,6 @@ describe('BlocksEditor toolbar', () => {
     await user.click(blocksDropdown);
     await user.click(screen.getByRole('option', { name: 'Quote' }));
 
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'quote',
@@ -429,7 +422,6 @@ describe('BlocksEditor toolbar', () => {
     await user.click(blocksDropdown);
     await user.click(screen.getByRole('option', { name: 'Text' }));
 
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'paragraph',
@@ -474,7 +466,6 @@ describe('BlocksEditor toolbar', () => {
     await user.click(blocksDropdown);
     await user.click(screen.getByRole('option', { name: 'Code' }));
 
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'code',
@@ -562,7 +553,6 @@ describe('BlocksEditor toolbar', () => {
     await user.click(screen.getByRole('option', { name: 'Code' }));
 
     // The list should have been split in two
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'list',
@@ -619,7 +609,6 @@ describe('BlocksEditor toolbar', () => {
     await user.click(blocksDropdown);
     await user.click(screen.getByRole('option', { name: 'Code' }));
 
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'code',
@@ -680,7 +669,6 @@ describe('BlocksEditor toolbar', () => {
 
     // Convert selection to a unordered list
     await user.click(unorderedListButton);
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'list',
@@ -730,7 +718,6 @@ describe('BlocksEditor toolbar', () => {
 
     // Convert selection to a unordered list
     await user.click(unorderedListButton);
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'list',
@@ -771,7 +758,6 @@ describe('BlocksEditor toolbar', () => {
     await user.click(blocksDropdown);
     await user.click(screen.getByRole('option', { name: 'Numbered list' }));
 
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'heading',
@@ -872,7 +858,6 @@ describe('BlocksEditor toolbar', () => {
     await user.click(screen.getByText(mockMediaLibrarySubmitButton));
 
     // The list should have been split in two
-    // eslint-disable-next-line testing-library/no-node-access
     expect(baseEditor.children).toEqual([
       {
         type: 'list',

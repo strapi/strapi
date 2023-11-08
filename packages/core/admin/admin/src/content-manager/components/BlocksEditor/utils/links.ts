@@ -50,13 +50,6 @@ const insertLink = (editor: Editor, { url }: { url: string }) => {
   }
 };
 
-/**
- *
- * @param {import('slate').Editor} editor
- * @param {object} link
- * @param {string} link.url
- * @param {string} link.text
- */
 const editLink = (editor: Editor, link: { url: string; text: string }) => {
   const { url, text } = link;
 
