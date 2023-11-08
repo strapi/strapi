@@ -76,6 +76,7 @@ describe('CONTENT TYPE BUILDER | COMPONENTS | DataManagerProvider | utils | cre
       contentType: dataSchema,
       components: {
         'blog.dish': {
+          uid: 'blog.dish',
           schema: { attributes: [{ type: 'string', name: 'name' }] },
         },
       },
