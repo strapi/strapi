@@ -7549,20 +7549,27 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/content-releases@workspace:packages/core/content-releases"
   dependencies:
+    "@reduxjs/toolkit": "npm:1.9.7"
     "@strapi/design-system": "npm:1.13.0"
     "@strapi/helper-plugin": "npm:4.14.4"
     "@strapi/icons": "npm:1.13.0"
     "@strapi/pack-up": "workspace:*"
     "@strapi/strapi": "npm:4.15.0"
+    "@strapi/types": "workspace:*"
+    "@strapi/utils": "npm:4.15.0"
     "@testing-library/react": "npm:14.0.0"
     "@testing-library/user-event": "npm:14.4.3"
+    "@types/koa": "npm:2.13.4"
     "@types/styled-components": "npm:5.1.26"
+    formik: "npm:2.4.0"
+    koa: "npm:2.13.4"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
     react-intl: "npm:6.4.1"
     react-router-dom: "npm:5.3.4"
     styled-components: "npm:5.3.3"
     typescript: "npm:5.2.2"
+    yup: "npm:0.32.9"
   peerDependencies:
     "@strapi/strapi": ^4.15.0
     react: ^17.0.0 || ^18.0.0

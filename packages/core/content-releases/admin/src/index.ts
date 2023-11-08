@@ -18,9 +18,7 @@ const admin: Plugin.Config.AdminInput = {
           defaultMessage: 'Releases',
         },
         async Component() {
-          const { Releases } = await import(
-            /* webpackChunkName: "content-type-builder" */ './pages/App'
-          );
+          const { Releases } = await import('./pages/App');
           return Releases;
         },
         permissions: [],
@@ -33,7 +31,7 @@ const admin: Plugin.Config.AdminInput = {
         return import(`./translations/${locale}.json`)
           .then(({ default: data }) => {
             return {
-              data: prefixPluginTranslations(data, 'releases'),
+              data: prefixPluginTranslations(data, 'content-releases'),
               locale,
             };
           })
