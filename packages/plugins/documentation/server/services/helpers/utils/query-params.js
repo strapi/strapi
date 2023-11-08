@@ -68,7 +68,10 @@ module.exports = [
     deprecated: false,
     required: false,
     schema: {
-      type: 'string',
+      type: 'array',
+      items: {
+        type: 'string'
+      }
     },
   },
   {
