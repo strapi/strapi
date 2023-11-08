@@ -76,7 +76,7 @@
     "@radix-ui/react-toolbar": "1.0.4",
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/data-transfer": "4.15.2",
-    "@strapi/design-system": "1.13.0",
+    "@strapi/design-system": "1.13.1",
     "@strapi/helper-plugin": "4.15.2",
     "@strapi/icons": "1.13.0",
     "@strapi/permissions": "4.15.2",

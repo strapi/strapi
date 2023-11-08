@@ -8751,7 +8751,7 @@ __metadata:
     "@reduxjs/toolkit": "npm:1.9.7"
     "@strapi/admin-test-utils": "npm:4.15.2"
     "@strapi/data-transfer": "npm:4.15.2"
-    "@strapi/design-system": "npm:1.13.0"
+    "@strapi/design-system": "npm:1.13.1"
     "@strapi/helper-plugin": "npm:4.15.2"
     "@strapi/icons": "npm:1.13.0"
     "@strapi/pack-up": "npm:4.15.2"
@@ -8973,9 +8973,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/design-system@npm:1.14.0-typescript.0":
-  version: 1.14.0-typescript.0
-  resolution: "@strapi/design-system@npm:1.14.0-typescript.0"
+"@strapi/design-system@npm:1.14.0-typescript.1":
+  version: 1.14.0-typescript.1
+  resolution: "@strapi/design-system@npm:1.14.0-typescript.1"
   dependencies:
     "@codemirror/lang-json": "npm:^6.0.1"
     "@floating-ui/react-dom": "npm:^2.0.2"
@@ -8984,19 +8984,19 @@ __metadata:
     "@radix-ui/react-dismissable-layer": "npm:^1.0.5"
     "@radix-ui/react-dropdown-menu": "npm:^2.0.6"
     "@radix-ui/react-focus-scope": "npm:1.0.4"
-    "@strapi/ui-primitives": "npm:^1.14.0-typescript.0"
+    "@strapi/ui-primitives": "npm:^1.14.0-typescript.1"
     "@uiw/react-codemirror": "npm:^4.21.20"
     aria-hidden: "npm:^1.2.3"
     compute-scroll-into-view: "npm:^3.1.0"
     prop-types: "npm:^15.8.1"
     react-remove-scroll: "npm:^2.5.7"
   peerDependencies:
-    "@strapi/icons": 1.14.0-typescript.0
+    "@strapi/icons": 1.14.0-typescript.1
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^5.2.0
     styled-components: ^5.2.1
-  checksum: 308b0cf130e7cdb279cb1cef28ae9ce2ea9628d3651f729236f56b9d4313843af639be5f1c890b898eec10db8e2bf095d395632476889700bc250ca29bb49bef
+  checksum: a45656ce70e4706f6d6c07a11741a3753f79c484f48614eb4c458b8f666cd682c95a7bb5f63b45eb5e80f9c4257f500d33576216e094955635eb67b1bb71be63
   languageName: node
   linkType: hard
 
@@ -9142,7 +9142,7 @@ __metadata:
     "@storybook/builder-vite": "npm:7.4.0"
     "@storybook/react-vite": "npm:7.4.0"
     "@strapi/admin-test-utils": "npm:4.15.2"
-    "@strapi/design-system": "npm:1.13.0"
+    "@strapi/design-system": "npm:1.13.1"
     "@strapi/icons": "npm:1.13.0"
     "@strapi/pack-up": "npm:4.15.2"
     "@strapi/types": "npm:4.15.2"
@@ -9177,7 +9177,7 @@ __metadata:
     vite: "npm:4.4.9"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/design-system": 1.13.0
+    "@strapi/design-system": 1.13.1
     "@strapi/icons": 1.13.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
@@ -9327,7 +9327,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-cloud@workspace:packages/plugins/cloud"
   dependencies:
-    "@strapi/design-system": "npm:1.13.0"
+    "@strapi/design-system": "npm:1.13.1"
     "@strapi/helper-plugin": "npm:4.15.2"
     "@strapi/icons": "npm:1.13.0"
     "@strapi/strapi": "npm:4.15.2"
@@ -9356,7 +9356,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-color-picker@workspace:packages/plugins/color-picker"
   dependencies:
-    "@strapi/design-system": "npm:1.13.0"
+    "@strapi/design-system": "npm:1.13.1"
     "@strapi/helper-plugin": "npm:4.15.2"
     "@strapi/icons": "npm:1.13.0"
     "@strapi/strapi": "npm:4.15.2"
@@ -9437,7 +9437,7 @@ __metadata:
   resolution: "@strapi/plugin-content-type-builder@workspace:packages/core/content-type-builder"
   dependencies:
     "@sindresorhus/slugify": "npm:1.1.0"
-    "@strapi/design-system": "npm:1.13.0"
+    "@strapi/design-system": "npm:1.13.1"
     "@strapi/generators": "npm:4.15.2"
     "@strapi/helper-plugin": "npm:4.15.2"
     "@strapi/icons": "npm:1.13.0"
@@ -9474,7 +9474,7 @@ __metadata:
   resolution: "@strapi/plugin-documentation@workspace:packages/plugins/documentation"
   dependencies:
     "@apidevtools/swagger-parser": "npm:^10.1.0"
-    "@strapi/design-system": "npm:1.13.0"
+    "@strapi/design-system": "npm:1.13.1"
     "@strapi/helper-plugin": "npm:4.15.2"
     "@strapi/icons": "npm:1.13.0"
     "@strapi/pack-up": "npm:4.15.2"
@@ -9538,7 +9538,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-email@workspace:packages/core/email"
   dependencies:
-    "@strapi/design-system": "npm:1.13.0"
+    "@strapi/design-system": "npm:1.13.1"
     "@strapi/helper-plugin": "npm:4.15.2"
     "@strapi/icons": "npm:1.13.0"
     "@strapi/pack-up": "npm:4.15.2"
@@ -9574,15 +9574,18 @@ __metadata:
   dependencies:
     "@graphql-tools/schema": "npm:8.5.1"
     "@graphql-tools/utils": "npm:^8.13.1"
-    "@strapi/design-system": "npm:1.13.0"
+    "@strapi/design-system": "npm:1.13.1"
     "@strapi/helper-plugin": "npm:4.15.2"
     "@strapi/icons": "npm:1.13.0"
-    "@strapi/pack-up": "npm:4.15.2"
     "@strapi/strapi": "npm:4.15.2"
+    "@strapi/types": "npm:4.15.2"
     "@strapi/utils": "npm:4.15.2"
+    "@types/graphql-depth-limit": "npm:1.1.5"
+    "@types/graphql-upload": "npm:8.0.12"
     apollo-server-core: "npm:3.12.1"
     apollo-server-koa: "npm:3.10.0"
     cross-env: "npm:^7.0.3"
+    eslint-config-custom: "npm:4.15.2"
     graphql: "npm:^15.5.1"
     graphql-depth-limit: "npm:^1.1.0"
     graphql-playground-middleware-koa: "npm:^1.6.21"
@@ -9597,6 +9600,8 @@ __metadata:
     react-dom: "npm:^18.2.0"
     react-router-dom: "npm:5.3.4"
     styled-components: "npm:5.3.3"
+    tsconfig: "npm:4.15.2"
+    typescript: "npm:5.2.2"
   peerDependencies:
     "@strapi/strapi": ^4.0.0
     react: ^17.0.0 || ^18.0.0
@@ -9611,7 +9616,7 @@ __metadata:
   resolution: "@strapi/plugin-i18n@workspace:packages/plugins/i18n"
   dependencies:
     "@reduxjs/toolkit": "npm:1.9.7"
-    "@strapi/design-system": "npm:1.13.0"
+    "@strapi/design-system": "npm:1.13.1"
     "@strapi/helper-plugin": "npm:4.15.2"
     "@strapi/icons": "npm:1.13.0"
     "@strapi/pack-up": "npm:4.15.2"
@@ -9646,7 +9651,7 @@ __metadata:
   resolution: "@strapi/plugin-sentry@workspace:packages/plugins/sentry"
   dependencies:
     "@sentry/node": "npm:6.19.7"
-    "@strapi/design-system": "npm:1.13.0"
+    "@strapi/design-system": "npm:1.13.1"
     "@strapi/helper-plugin": "npm:4.15.2"
     "@strapi/icons": "npm:1.13.0"
     "@strapi/pack-up": "npm:4.15.2"
@@ -9707,7 +9712,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-upload@workspace:packages/core/upload"
   dependencies:
-    "@strapi/design-system": "npm:1.13.0"
+    "@strapi/design-system": "npm:1.13.1"
     "@strapi/helper-plugin": "npm:4.15.2"
     "@strapi/icons": "npm:1.13.0"
     "@strapi/pack-up": "npm:4.15.2"
@@ -9756,7 +9761,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-users-permissions@workspace:packages/plugins/users-permissions"
   dependencies:
-    "@strapi/design-system": "npm:1.13.0"
+    "@strapi/design-system": "npm:1.13.1"
     "@strapi/helper-plugin": "npm:4.15.2"
     "@strapi/icons": "npm:1.13.0"
     "@strapi/pack-up": "npm:4.15.2"
@@ -10174,9 +10179,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/ui-primitives@npm:^1.14.0-typescript.0":
-  version: 1.14.0-typescript.0
-  resolution: "@strapi/ui-primitives@npm:1.14.0-typescript.0"
+"@strapi/ui-primitives@npm:^1.14.0-typescript.1":
+  version: 1.14.0-typescript.1
+  resolution: "@strapi/ui-primitives@npm:1.14.0-typescript.1"
   dependencies:
     "@radix-ui/number": "npm:^1.0.1"
     "@radix-ui/primitive": "npm:^1.0.1"
@@ -10202,7 +10207,7 @@ __metadata:
   peerDependencies:
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-  checksum: adc91b8b9a3043ea4cec333fab5905dbac536be536f064131a7ece20660d3e0b98327362c4aabdbaa5e0d71abf65ebba42746cf3704ef78b690f7ef71ae8ed92
+  checksum: 840feb251583b09ad0a28d621a2424c4dbcf475f1fded9cabd9aab7995bafaff09958b7f3ef3cfe4b5808647565c7c85545b62ac053ec698ef3d24f5eafa4d6f
   languageName: node
   linkType: hard
 
@@ -10905,6 +10910,27 @@ __metadata:
   dependencies:
     "@types/node": "npm:*"
   checksum: d076bb61f45d0fc42dee496ef8b1c2f8742e15d5e47e90e20d0243386e426c04d4efd408a48875ab432f7960b4ce3414db20ed0fbbfc7bcc89d84e574f6e045a
+  languageName: node
+  linkType: hard
+
+"@types/graphql-depth-limit@npm:1.1.5":
+  version: 1.1.5
+  resolution: "@types/graphql-depth-limit@npm:1.1.5"
+  dependencies:
+    graphql: "npm:^14.5.3"
+  checksum: 05738783c6f935c6cc2aad4ae683ab1469657f474acc42b5aa16f68589d07c72667822750753a3752d863ab34b6a5385c0ccb28c9457048f00625cdfe493f6dc
+  languageName: node
+  linkType: hard
+
+"@types/graphql-upload@npm:8.0.12":
+  version: 8.0.12
+  resolution: "@types/graphql-upload@npm:8.0.12"
+  dependencies:
+    "@types/express": "npm:*"
+    "@types/koa": "npm:*"
+    fs-capacitor: "npm:^8.0.0"
+    graphql: "npm:0.13.1 - 16"
+  checksum: 394d5e05f4d5a205dc53f66670af28de73bc73b0910e68907e6d01348caeeb27478621cfdb238a71668f0cca7347ed362c2f1a68266da4b823707dc4daba92ee
   languageName: node
   linkType: hard
 
@@ -19048,6 +19074,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fs-capacitor@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "fs-capacitor@npm:8.0.0"
+  checksum: 836d3d662f2d057ce3697bb99feb0fa2eefbf953fef0a57977e609cc9b605b65f03bf7066ec943790a3dccf046c3b6a7630e41a4b7d60859ec618bbc20063597
+  languageName: node
+  linkType: hard
+
 "fs-constants@npm:^1.0.0":
   version: 1.0.0
   resolution: "fs-constants@npm:1.0.0"
@@ -19991,6 +20024,22 @@ __metadata:
   peerDependencies:
     graphql: 0.13.1 - 16
   checksum: 35c4c577fa25ad25aaf72655b4ebc45660489bee700e3548ca3097323f6f58c8cbcaa2f7603d215038fdcd99068623ffd5ef1f9e1280bd8cd9e99e7c9f1b979b
+  languageName: node
+  linkType: hard
+
+"graphql@npm:0.13.1 - 16":
+  version: 16.8.1
+  resolution: "graphql@npm:16.8.1"
+  checksum: 7a09d3ec5f75061afe2bd2421a2d53cf37273d2ecaad8f34febea1f1ac205dfec2834aec3419fa0a10fcc9fb345863b2f893562fb07ea825da2ae82f6392893c
+  languageName: node
+  linkType: hard
+
+"graphql@npm:^14.5.3":
+  version: 14.7.0
+  resolution: "graphql@npm:14.7.0"
+  dependencies:
+    iterall: "npm:^1.2.2"
+  checksum: 34d39240777b219a6927f92a55a80e63469bb7d733aaf5eb75d4ee564a3b918172bff7ce163ab0e869f42eca2c0dfbe6257a67f9cbf378b9a02c4db6b708dd54
   languageName: node
   linkType: hard
 
@@ -21792,7 +21841,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"iterall@npm:^1.3.0":
+"iterall@npm:^1.2.2, iterall@npm:^1.3.0":
   version: 1.3.0
   resolution: "iterall@npm:1.3.0"
   checksum: 700c3e9ae194a00b66dc8dcb449195f84add4e64afaf7ed624177e19565393f9bddd34d621ea70c8eceab87a8536fc0e45bb1c9d1ea7c710d41ed0c3d937b19f
