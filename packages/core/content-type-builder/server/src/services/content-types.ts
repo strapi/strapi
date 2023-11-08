@@ -134,6 +134,7 @@ export const generateAPI = ({
   pluralName,
   displayName,
 }: any) => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const strapiGenerators = require('@strapi/generators');
   return strapiGenerators.generate(
     'content-type',

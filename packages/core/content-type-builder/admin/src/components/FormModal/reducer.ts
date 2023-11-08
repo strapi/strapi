@@ -2,7 +2,6 @@ import produce from 'immer';
 import set from 'lodash/set';
 import snakeCase from 'lodash/snakeCase';
 import pluralize from 'pluralize';
-import { AnyAction } from 'redux';
 
 import { getRelationType } from '../../utils/getRelationType';
 import { nameToSlug } from '../../utils/nameToSlug';
@@ -11,6 +10,8 @@ import * as actions from './constants';
 import { createComponentUid } from './utils/createUid';
 import { customFieldDefaultOptionsReducer } from './utils/customFieldDefaultOptionsReducer';
 import { shouldPluralizeName, shouldPluralizeTargetAttribute } from './utils/relations';
+
+import type { AnyAction } from '@reduxjs/toolkit';
 
 const initialState: any = {
   formErrors: {},

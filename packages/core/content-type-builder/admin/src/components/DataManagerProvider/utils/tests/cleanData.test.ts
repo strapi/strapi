@@ -6,9 +6,8 @@ import {
   sortContentType,
 } from '../cleanData';
 
-import expectedData from './expectedFormattedData';
+import { expectedData } from './expectedFormattedData';
 import { data as rawData } from './rawData';
-
 
 describe('CleanData utils', () => {
   describe('FormatComponent', () => {

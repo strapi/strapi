@@ -7902,6 +7902,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-content-type-builder@workspace:packages/core/content-type-builder"
   dependencies:
+    "@reduxjs/toolkit": "npm:1.9.7"
     "@sindresorhus/slugify": "npm:1.1.0"
     "@strapi/admin": "npm:4.15.1"
     "@strapi/design-system": "npm:1.13.0"

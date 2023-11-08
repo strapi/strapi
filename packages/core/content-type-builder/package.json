@@ -59,6 +59,7 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "1.9.7",
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/design-system": "1.13.0",
     "@strapi/generators": "4.15.1",

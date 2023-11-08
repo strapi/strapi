@@ -1,4 +1,4 @@
-const expectedData = {
+export const expectedData = {
   contentTypeToCreate: {
     displayName: 'test content type',
     description: '',
@@ -376,5 +376,3 @@ const expectedData = {
     },
   },
 };
-
-export default expectedData;

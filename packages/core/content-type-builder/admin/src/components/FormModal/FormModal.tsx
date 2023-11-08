@@ -37,6 +37,7 @@ import { getTrad, isAllowedContentTypesForRelations } from '../../utils';
 import { findAttribute } from '../../utils/findAttribute';
 // New compos
 import { AllowedTypesSelect } from '../AllowedTypesSelect';
+import { IconByType } from '../AttributeIcon';
 import { AttributeOptions } from '../AttributeOptions/AttributeOptions';
 import { BooleanDefaultValueSelect } from '../BooleanDefaultValueSelect';
 import { BooleanRadioGroup } from '../BooleanRadioGroup';
@@ -45,6 +46,7 @@ import { ContentTypeRadioGroup } from '../ContentTypeRadioGroup';
 import { CustomRadioGroup } from '../CustomRadioGroup';
 import { DraftAndPublishToggle } from '../DraftAndPublishToggle';
 import { FormModalEndActions } from '../FormModalEndActions';
+import { FormModalHeader } from '../FormModalHeader';
 import { FormModalSubHeader } from '../FormModalSubHeader';
 import { IconPicker } from '../IconPicker/IconPicker';
 import { PluralName } from '../PluralName';
@@ -80,8 +82,6 @@ import { getFormInputNames } from './utils/getFormInputNames';
 import type { CustomFieldAttributeParams } from '../../contexts/DataManagerContext';
 import type { AttributeType } from '../../types';
 import type { Common } from '@strapi/types';
-import { FormModalHeader } from '../FormModalHeader';
-import { IconByType } from '../AttributeIcon';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
