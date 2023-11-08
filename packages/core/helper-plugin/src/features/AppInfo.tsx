@@ -9,10 +9,10 @@ type AppInfoContextValue = {
   dependencies?: Record<string, string>;
   latestStrapiReleaseTag?: string;
   nodeVersion?: string;
-  projectId?: string;
+  projectId?: string | null;
   setUserDisplayName: (name: string) => void;
   shouldUpdateStrapi: boolean;
-  strapiVersion?: string;
+  strapiVersion?: string | null;
   useYarn?: boolean;
   userDisplayName: string;
   userId?: string;

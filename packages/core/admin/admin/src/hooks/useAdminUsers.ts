@@ -1,15 +1,13 @@
 import * as React from 'react';
 
 import { useFetchClient } from '@strapi/helper-plugin';
-import { Entity } from '@strapi/types';
 import { useQuery } from 'react-query';
 
-import { UserEntity } from '../../../shared/entities';
-import { APIBaseParams, APIResponsePagination, APIResponseUsersLegacy } from '../types/adminAPI';
+import * as Users from '../../../shared/contracts/user';
 
-export interface APIUsersQueryParams extends APIBaseParams {
-  id?: null | Entity.ID;
-}
+export type APIUsersQueryParams =
+  | Users.FindOne.Params
+  | (Users.FindAll.Request['query'] & { id?: never });
 
 export function useAdminUsers(params: APIUsersQueryParams = {}, queryOptions = {}) {
   const { id = '', ...queryParams } = params;
@@ -21,11 +19,7 @@ export function useAdminUsers(params: APIUsersQueryParams = {}, queryOptions = {
     async () => {
       const {
         data: { data },
-      } = await get<
-        APIResponseUsersLegacy<
-          UserEntity | { pagination: APIResponsePagination; results: UserEntity[] }
-        >
-      >(`/admin/users/${id}`, {
+      } = await get<Users.FindAll.Response | Users.FindOne.Response>(`/admin/users/${id}`, {
         params: queryParams,
       });
 
@@ -39,7 +33,7 @@ export function useAdminUsers(params: APIUsersQueryParams = {}, queryOptions = {
   // value, which later on triggers infinite loops if used in the
   // dependency arrays of other hooks
   const users = React.useMemo(() => {
-    let users: UserEntity[] = [];
+    let users: Users.FindAll.Response['data']['results'] = [];
 
     if (data) {
       if ('results' in data) {

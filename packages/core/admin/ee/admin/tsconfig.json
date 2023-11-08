@@ -3,7 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@tests/*": ["./tests/*"]
+      "@tests/*": ["../../admin/tests/*"]
     }
   },
   "include": ["src", "tests", "custom.d.ts", "module.d.ts"],
