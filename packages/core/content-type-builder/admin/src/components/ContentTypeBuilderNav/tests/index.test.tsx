@@ -9,12 +9,14 @@ import { ContentTypeBuilderNav } from '../ContentTypeBuilderNav';
 
 import { mockData } from './mockData';
 
-jest.mock('../useContentTypeBuilderMenu.js', () => {
-  return jest.fn(() => ({
-    menu: mockData,
-    searchValue: '',
-    onSearchChange() {},
-  }));
+jest.mock('../useContentTypeBuilderMenu.ts', () => {
+  return {
+    useContentTypeBuilderMenu: jest.fn(() => ({
+      menu: mockData,
+      searchValue: '',
+      onSearchChange() {},
+    })),
+  };
 });
 
 const makeApp = () => {

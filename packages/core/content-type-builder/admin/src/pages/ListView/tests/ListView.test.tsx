@@ -14,14 +14,16 @@ import ListView from '../ListView';
 import mockData from './mockData';
 
 jest.mock('../../../hooks/useDataManager', () => {
-  return jest.fn(() => ({
-    initialData: mockData,
-    modifiedData: mockData,
-    isInDevelopmentMode: true,
-    isInContentTypeView: true,
-    submitData() {},
-    toggleModalCancel() {},
-  }));
+  return {
+    useDataManager: jest.fn(() => ({
+      initialData: mockData,
+      modifiedData: mockData,
+      isInDevelopmentMode: true,
+      isInContentTypeView: true,
+      submitData() {},
+      toggleModalCancel() {},
+    })),
+  };
 });
 
 jest.mock('@strapi/helper-plugin', () => ({
