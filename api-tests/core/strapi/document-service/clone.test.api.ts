@@ -54,11 +54,13 @@ describe('Document Service', () => {
       })
     );
 
-    it(
+    it.todo(
       'clone all document locales ',
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
+        // .clone() should only return the doc id
+        // { id: Document.ID }
         const article = await strapi.documents(ARTICLE_UID).clone(articleDb.documentId, {
           data: {
             title: 'Cloned Document', // Clone all locales

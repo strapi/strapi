@@ -62,8 +62,11 @@ describe('Document Service', () => {
       testInTransaction(async () => {
         const articlesDb = await findArticlesDb({ title: 'Article1-Draft-EN' });
 
+        // Question: Do we ignore the locale filter? YES (for now)
         const articles = await strapi.documents('api::article.article').findMany({
-          filters: { locale: 'fr' },
+          locale: 'fr',
+          status: 'draft', // 'published' | 'draft'
+          // filters: { locale: { $and: ['fr', 'en'] } },
         });
 
         // Should return default language (en) and draft version
