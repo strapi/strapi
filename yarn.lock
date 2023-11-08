@@ -8754,11 +8754,11 @@ __metadata:
     "@strapi/design-system": "npm:1.13.0"
     "@strapi/helper-plugin": "npm:4.15.2"
     "@strapi/icons": "npm:1.13.0"
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@strapi/permissions": "npm:4.15.2"
     "@strapi/provider-audit-logs-local": "npm:4.15.2"
     "@strapi/strapi": "npm:4.15.2"
-    "@strapi/types": "workspace:*"
+    "@strapi/types": "npm:4.15.2"
     "@strapi/typescript-utils": "npm:4.15.2"
     "@strapi/utils": "npm:4.15.2"
     "@testing-library/dom": "npm:9.2.0"
@@ -8901,7 +8901,7 @@ __metadata:
   resolution: "@strapi/data-transfer@workspace:packages/core/data-transfer"
   dependencies:
     "@strapi/logger": "npm:4.15.2"
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@strapi/strapi": "npm:4.15.1"
     "@strapi/types": "npm:4.15.2"
     "@strapi/utils": "npm:4.15.2"
@@ -8959,7 +8959,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/database@workspace:packages/core/database"
   dependencies:
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@strapi/utils": "npm:4.15.2"
     date-fns: "npm:2.30.0"
     debug: "npm:4.3.4"
@@ -9055,7 +9055,7 @@ __metadata:
   resolution: "@strapi/generate-new@workspace:packages/generators/app"
   dependencies:
     "@sentry/node": "npm:6.19.7"
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     chalk: "npm:^4.1.2"
     copyfiles: "npm:2.4.1"
     execa: "npm:5.1.1"
@@ -9092,7 +9092,7 @@ __metadata:
   resolution: "@strapi/generators@workspace:packages/generators/generators"
   dependencies:
     "@sindresorhus/slugify": "npm:1.1.0"
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@strapi/typescript-utils": "npm:4.15.2"
     "@strapi/utils": "npm:4.15.2"
     chalk: "npm:4.1.2"
@@ -9144,7 +9144,7 @@ __metadata:
     "@strapi/admin-test-utils": "npm:4.15.2"
     "@strapi/design-system": "npm:1.13.0"
     "@strapi/icons": "npm:1.13.0"
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@strapi/types": "npm:4.15.2"
     "@testing-library/react": "npm:14.0.0"
     "@testing-library/user-event": "npm:14.4.3"
@@ -9220,7 +9220,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/logger@workspace:packages/utils/logger"
   dependencies:
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     eslint-config-custom: "npm:4.15.2"
     lodash: "npm:4.17.21"
     tsconfig: "npm:4.15.2"
@@ -9259,11 +9259,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/pack-up@workspace:*, @strapi/pack-up@workspace:packages/utils/pack-up":
+"@strapi/pack-up@npm:4.15.2, @strapi/pack-up@workspace:*, @strapi/pack-up@workspace:packages/utils/pack-up":
   version: 0.0.0-use.local
   resolution: "@strapi/pack-up@workspace:packages/utils/pack-up"
   dependencies:
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@types/git-url-parse": "npm:9.0.1"
     "@types/ini": "npm:1.3.31"
     "@types/prompts": "npm:2.4.4"
@@ -9275,7 +9275,7 @@ __metadata:
     commander: "npm:8.3.0"
     esbuild: "npm:0.19.2"
     esbuild-register: "npm:3.5.0"
-    eslint-config-custom: "workspace:*"
+    eslint-config-custom: "npm:4.15.2"
     get-latest-version: "npm:5.1.0"
     git-url-parse: "npm:13.1.0"
     ini: "npm:4.1.1"
@@ -9313,7 +9313,7 @@ __metadata:
   resolution: "@strapi/permissions@workspace:packages/core/permissions"
   dependencies:
     "@casl/ability": "npm:6.5.0"
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@strapi/utils": "npm:4.15.2"
     eslint-config-custom: "npm:4.15.2"
     lodash: "npm:4.17.21"
@@ -9441,7 +9441,7 @@ __metadata:
     "@strapi/generators": "npm:4.15.2"
     "@strapi/helper-plugin": "npm:4.15.2"
     "@strapi/icons": "npm:1.13.0"
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@strapi/strapi": "npm:4.15.2"
     "@strapi/utils": "npm:4.15.2"
     "@testing-library/react": "npm:14.0.0"
@@ -9477,7 +9477,7 @@ __metadata:
     "@strapi/design-system": "npm:1.13.0"
     "@strapi/helper-plugin": "npm:4.15.2"
     "@strapi/icons": "npm:1.13.0"
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@strapi/strapi": "npm:4.15.2"
     "@strapi/utils": "npm:4.15.2"
     "@testing-library/react": "npm:14.0.0"
@@ -9541,9 +9541,9 @@ __metadata:
     "@strapi/design-system": "npm:1.13.0"
     "@strapi/helper-plugin": "npm:4.15.2"
     "@strapi/icons": "npm:1.13.0"
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@strapi/provider-email-sendmail": "npm:4.15.2"
-    "@strapi/types": "workspace:*"
+    "@strapi/types": "npm:4.15.2"
     "@strapi/utils": "npm:4.15.2"
     "@testing-library/react": "npm:14.0.0"
     "@types/koa": "npm:2.13.4"
@@ -9577,7 +9577,7 @@ __metadata:
     "@strapi/design-system": "npm:1.13.0"
     "@strapi/helper-plugin": "npm:4.15.2"
     "@strapi/icons": "npm:1.13.0"
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@strapi/strapi": "npm:4.15.2"
     "@strapi/utils": "npm:4.15.2"
     apollo-server-core: "npm:3.12.1"
@@ -9614,7 +9614,7 @@ __metadata:
     "@strapi/design-system": "npm:1.13.0"
     "@strapi/helper-plugin": "npm:4.15.2"
     "@strapi/icons": "npm:1.13.0"
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@strapi/strapi": "npm:4.15.2"
     "@strapi/utils": "npm:4.15.2"
     "@testing-library/react": "npm:14.0.0"
@@ -9649,7 +9649,7 @@ __metadata:
     "@strapi/design-system": "npm:1.13.0"
     "@strapi/helper-plugin": "npm:4.15.2"
     "@strapi/icons": "npm:1.13.0"
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@strapi/strapi": "npm:4.15.2"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
@@ -9710,7 +9710,7 @@ __metadata:
     "@strapi/design-system": "npm:1.13.0"
     "@strapi/helper-plugin": "npm:4.15.2"
     "@strapi/icons": "npm:1.13.0"
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@strapi/provider-upload-local": "npm:4.15.2"
     "@strapi/strapi": "npm:4.15.2"
     "@strapi/utils": "npm:4.15.2"
@@ -9759,7 +9759,7 @@ __metadata:
     "@strapi/design-system": "npm:1.13.0"
     "@strapi/helper-plugin": "npm:4.15.2"
     "@strapi/icons": "npm:1.13.0"
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@strapi/strapi": "npm:4.15.2"
     "@strapi/utils": "npm:4.15.2"
     "@testing-library/dom": "npm:9.2.0"
@@ -9806,7 +9806,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-audit-logs-local@workspace:packages/providers/audit-logs-local"
   dependencies:
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@strapi/types": "npm:4.15.2"
     eslint-config-custom: "npm:4.15.2"
     tsconfig: "npm:4.15.2"
@@ -9817,7 +9817,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-amazon-ses@workspace:packages/providers/email-amazon-ses"
   dependencies:
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@strapi/utils": "npm:4.15.2"
     eslint-config-custom: "npm:4.15.2"
     node-ses: "npm:^3.0.3"
@@ -9829,7 +9829,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-mailgun@workspace:packages/providers/email-mailgun"
   dependencies:
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@strapi/utils": "npm:4.15.2"
     eslint-config-custom: "npm:4.15.2"
     form-data: "npm:^4.0.0"
@@ -9842,7 +9842,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-nodemailer@workspace:packages/providers/email-nodemailer"
   dependencies:
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@types/nodemailer": "npm:6.4.7"
     eslint-config-custom: "npm:4.15.2"
     lodash: "npm:4.17.21"
@@ -9856,7 +9856,7 @@ __metadata:
   resolution: "@strapi/provider-email-sendgrid@workspace:packages/providers/email-sendgrid"
   dependencies:
     "@sendgrid/mail": "npm:7.7.0"
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@strapi/utils": "npm:4.15.2"
     eslint-config-custom: "npm:4.15.2"
     tsconfig: "npm:4.15.2"
@@ -9877,7 +9877,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-sendmail@workspace:packages/providers/email-sendmail"
   dependencies:
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@strapi/utils": "npm:4.15.2"
     "@types/sendmail": "npm:1.4.4"
     eslint-config-custom: "npm:4.15.2"
@@ -9894,7 +9894,7 @@ __metadata:
     "@aws-sdk/lib-storage": "npm:3.433.0"
     "@aws-sdk/s3-request-presigner": "npm:3.433.0"
     "@aws-sdk/types": "npm:3.433.0"
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@types/jest": "npm:29.5.2"
     eslint-config-custom: "npm:4.15.2"
     lodash: "npm:4.17.21"
@@ -9906,7 +9906,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-upload-cloudinary@workspace:packages/providers/upload-cloudinary"
   dependencies:
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@strapi/utils": "npm:4.15.2"
     cloudinary: "npm:^1.41.0"
     eslint-config-custom: "npm:4.15.2"
@@ -9929,7 +9929,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-upload-local@workspace:packages/providers/upload-local"
   dependencies:
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@strapi/utils": "npm:4.15.2"
     "@types/jest": "npm:29.5.2"
     eslint-config-custom: "npm:4.15.2"
@@ -10120,7 +10120,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/types@npm:4.15.2, @strapi/types@workspace:*, @strapi/types@workspace:packages/core/types":
+"@strapi/types@npm:4.15.2, @strapi/types@workspace:packages/core/types":
   version: 0.0.0-use.local
   resolution: "@strapi/types@workspace:packages/core/types"
   dependencies:
@@ -10128,7 +10128,7 @@ __metadata:
     "@koa/router": "npm:10.1.1"
     "@strapi/database": "npm:4.15.2"
     "@strapi/logger": "npm:4.15.2"
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@strapi/permissions": "npm:4.15.2"
     "@strapi/ts-zen": "npm:^0.2.0"
     "@strapi/utils": "npm:4.15.2"
@@ -10225,7 +10225,7 @@ __metadata:
   resolution: "@strapi/utils@workspace:packages/core/utils"
   dependencies:
     "@sindresorhus/slugify": "npm:1.1.0"
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     "@types/koa": "npm:2.13.4"
     "@types/node": "npm:18.18.4"
     date-fns: "npm:2.30.0"
@@ -15624,7 +15624,7 @@ __metadata:
   resolution: "create-strapi-app@workspace:packages/cli/create-strapi-app"
   dependencies:
     "@strapi/generate-new": "npm:4.15.2"
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     commander: "npm:8.3.0"
     eslint-config-custom: "npm:4.15.2"
     inquirer: "npm:8.2.5"
@@ -15639,7 +15639,7 @@ __metadata:
   resolution: "create-strapi-starter@workspace:packages/cli/create-strapi-starter"
   dependencies:
     "@strapi/generate-new": "npm:4.15.2"
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.15.2"
     chalk: "npm:4.1.2"
     ci-info: "npm:3.8.0"
     commander: "npm:8.3.0"
@@ -17551,7 +17551,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-custom@npm:4.15.2, eslint-config-custom@workspace:*, eslint-config-custom@workspace:packages/utils/eslint-config-custom":
+"eslint-config-custom@npm:4.15.2, eslint-config-custom@workspace:packages/utils/eslint-config-custom":
   version: 0.0.0-use.local
   resolution: "eslint-config-custom@workspace:packages/utils/eslint-config-custom"
   languageName: unknown
