@@ -1,4 +1,36 @@
+import { Schema } from '@strapi/types';
 import { errors } from '@strapi/utils';
+
+type Component = Schema.Component & { isDisplayed: boolean; info: Schema.Info; apiID: string };
+
+type ComponentConfiguration = {
+  uid: string;
+  category: string;
+  settings: {
+    bulkable: boolean;
+    filterable: boolean;
+    searchable: boolean;
+    pageSize: number;
+    mainField: string;
+    defaultSortBy: string;
+    defaultSortOrder: string;
+  };
+  metadatas: {
+    [key: string]: {
+      edit: {};
+      list: {
+        label: string;
+        searchable: boolean;
+        sortable: boolean;
+      };
+    };
+  };
+  layouts: {
+    list: string[];
+    edit: Record<string, string | number>[][];
+  };
+  isComponent: boolean;
+};
 
 /**
  * GET /components
@@ -9,7 +41,7 @@ export declare namespace FindComponents {
     query: {};
   }
   export interface Response {
-    data: {};
+    data: Component[];
     error?: errors.ApplicationError;
   }
 }
@@ -22,8 +54,17 @@ export declare namespace FindComponentConfiguration {
     body: {};
     query: {};
   }
+
+  export interface Params {
+    uid: string;
+  }
   export interface Response {
-    data: {};
+    data: {
+      data: {
+        component: ComponentConfiguration;
+        components: Record<string, ComponentConfiguration> | {};
+      };
+    };
     error?: errors.ApplicationError;
   }
 }
@@ -36,8 +77,13 @@ export declare namespace UpdateComponentConfiguration {
     body: {};
     query: {};
   }
+
+  export interface Params {
+    uid: string;
+  }
+
   export interface Response {
-    data: {};
-    error?: errors.ApplicationError;
+    data: { data: ComponentConfiguration };
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
