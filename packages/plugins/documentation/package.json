@@ -42,6 +42,7 @@
     "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:unit": "jest --verbose",
     "test:unit:watch": "run -T jest --watch",
+    "prepublishOnly": "yarn clean && yarn build",
     "watch": "pack-up watch"
   },
   "dependencies": {
