@@ -1,3 +1,10 @@
 {
-  "plugin.name": "Releases"
+  "plugin.name": "Releases",
+  "pages.Releases.title": "Releases",
+  "pages.Releases.header-subtitle": "{number, plural, =0 {No releases} one {# release} other {# releases}}",
+  "header.actions.add-release": "New Release",
+  "modal.release-created-notification-success": "Release created",
+  "modal.add-release-title": "New Release",
+  "modal.form.input.label.release-name": "Name",
+  "modal.form.button.submit": "Continue"
 }

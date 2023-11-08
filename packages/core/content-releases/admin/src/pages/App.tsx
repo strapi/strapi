@@ -3,15 +3,13 @@ import { Route, Switch } from 'react-router-dom';
 
 import { pluginId } from '../pluginId';
 
+import { ReleasesPage } from './ReleasesPage/Releases';
+
 export const Releases = () => {
   return (
     <Main>
       <Switch>
-        <Route
-          exact
-          path={`/plugins/${pluginId}`}
-          render={() => <div>TODO: This is the ListPage</div>}
-        />
+        <Route exact path={`/plugins/${pluginId}`} component={ReleasesPage} />
         <Route
           path={`/plugins/${pluginId}/:releaseId`}
           render={() => <div>TODO: This is the DetailsPage</div>}
