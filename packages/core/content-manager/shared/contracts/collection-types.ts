@@ -1,4 +1,12 @@
 import { errors } from '@strapi/utils';
+import { Schema, Common, EntityService } from '@strapi/types';
+
+// Admin entity response follows the same format as the entity service
+type Entity = EntityService.Result<Common.UID.Schema>;
+type PaginatedEntities = EntityService.PaginatedResult<Common.UID.Schema>;
+
+type PaginationQuery = EntityService.Params.Pagination.PageNotation;
+type SortQuery = EntityService.Params.Sort.StringNotation<Common.UID.Schema> & string;
 
 /**
  * GET /collection-types/:model
@@ -6,52 +14,27 @@ import { errors } from '@strapi/utils';
 export declare namespace Find {
   export interface Request {
     body: {};
-    query: {};
+    query: {
+      page: PaginationQuery['page'];
+      pageSize: PaginationQuery['pageSize'];
+      sort: SortQuery;
+    };
   }
-  export interface Response {
-    data: {};
-    error?: errors.ApplicationError;
-  }
-}
 
-/**
- * POST /collection-types/:model
- */
-export declare namespace Create {
-  export interface Request {
-    body: {};
-    query: {};
+  export interface Params {
+    model: string;
   }
-  export interface Response {
-    data: {};
-    error?: errors.ApplicationError;
-  }
-}
 
-/**
- * POST /collection-types/:model/clone/:sourceId
- */
-export declare namespace Create {
-  export interface Request {
-    body: {};
-    query: {};
-  }
   export interface Response {
-    data: {};
-    error?: errors.ApplicationError;
-  }
-}
-
-/**
- * POST /collection-types/:model/auto-clone/:sourceId
- */
-export declare namespace AutoClone {
-  export interface Request {
-    body: {};
-    query: {};
-  }
-  export interface Response {
-    data: {};
+    data: {
+      results: PaginatedEntities;
+      pagination: {
+        page: PaginationQuery['page'];
+        pageSize: PaginationQuery['pageSize'];
+        pageCount: number;
+        total: number;
+      };
+    };
     error?: errors.ApplicationError;
   }
 }
@@ -64,8 +47,73 @@ export declare namespace FindOne {
     body: {};
     query: {};
   }
+
+  export interface Params {
+    model: string;
+    id: number;
+  }
+
   export interface Response {
-    data: {};
+    data: Entity;
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
+ * POST /collection-types/:model
+ */
+export declare namespace Create {
+  export interface Request {
+    body: Schema.Attributes;
+    query: {};
+  }
+
+  export interface Params {
+    model: string;
+  }
+
+  export interface Response {
+    data: Entity;
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
+ * POST /collection-types/:model/auto-clone/:sourceId
+ */
+export declare namespace AutoClone {
+  export interface Request {
+    body: {};
+    query: {};
+  }
+
+  export interface Params {
+    model: string;
+    sourceId: number;
+  }
+
+  export interface Response {
+    data: Entity;
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
+ * POST /collection-types/:model/clone/:sourceId
+ */
+export declare namespace Clone {
+  export interface Request {
+    body: Schema.Attributes;
+    query: {};
+  }
+
+  export interface Params {
+    model: string;
+    sourceId: number;
+  }
+
+  export interface Response {
+    data: Entity;
     error?: errors.ApplicationError;
   }
 }
@@ -75,11 +123,17 @@ export declare namespace FindOne {
  */
 export declare namespace Update {
   export interface Request {
-    body: {};
+    body: Entity;
     query: {};
   }
+
+  export interface Params {
+    model: string;
+    id: number;
+  }
+
   export interface Response {
-    data: {};
+    data: Entity;
     error?: errors.ApplicationError;
   }
 }
@@ -92,8 +146,14 @@ export declare namespace Delete {
     body: {};
     query: {};
   }
+
+  export interface Params {
+    model: string;
+    id: number;
+  }
+
   export interface Response {
-    data: {};
+    data: Entity;
     error?: errors.ApplicationError;
   }
 }
@@ -106,8 +166,14 @@ export declare namespace Publish {
     body: {};
     query: {};
   }
+
+  export interface Params {
+    model: string;
+    id: number;
+  }
+
   export interface Response {
-    data: {};
+    data: Entity;
     error?: errors.ApplicationError;
   }
 }
@@ -120,8 +186,14 @@ export declare namespace Unpublish {
     body: {};
     query: {};
   }
+
+  export interface Params {
+    model: string;
+    id: number;
+  }
+
   export interface Response {
-    data: {};
+    data: Entity;
     error?: errors.ApplicationError;
   }
 }
@@ -131,11 +203,20 @@ export declare namespace Unpublish {
  */
 export declare namespace BulkDelete {
   export interface Request {
-    body: {};
+    body: {
+      ids: number[];
+    };
     query: {};
   }
+
+  export interface Params {
+    model: string;
+  }
+
   export interface Response {
-    data: {};
+    data: {
+      count: number;
+    };
     error?: errors.ApplicationError;
   }
 }
@@ -145,11 +226,20 @@ export declare namespace BulkDelete {
  */
 export declare namespace BulkPublish {
   export interface Request {
-    body: {};
+    body: {
+      ids: number[];
+    };
     query: {};
   }
+
+  export interface Params {
+    model: string;
+  }
+
   export interface Response {
-    data: {};
+    data: {
+      count: number;
+    };
     error?: errors.ApplicationError;
   }
 }
@@ -159,11 +249,20 @@ export declare namespace BulkPublish {
  */
 export declare namespace BulkUnpublish {
   export interface Request {
-    body: {};
+    body: {
+      ids: number[];
+    };
     query: {};
   }
+
+  export interface Params {
+    model: string;
+  }
+
   export interface Response {
-    data: {};
+    data: {
+      count: number;
+    };
     error?: errors.ApplicationError;
   }
 }
@@ -176,8 +275,15 @@ export declare namespace CountDraftRelations {
     body: {};
     query: {};
   }
+
+  export interface Params {
+    model: string;
+  }
+
   export interface Response {
-    data: {};
+    data: {
+      data: number;
+    };
     error?: errors.ApplicationError;
   }
 }
@@ -187,11 +293,20 @@ export declare namespace CountDraftRelations {
  */
 export declare namespace CountManyEntriesDraftRelations {
   export interface Request {
-    body: {};
+    body: {
+      ids: number[];
+    };
     query: {};
   }
+
+  export interface Params {
+    model: string;
+  }
+
   export interface Response {
-    data: {};
+    data: {
+      data: number;
+    };
     error?: errors.ApplicationError;
   }
 }
