@@ -1,8 +1,6 @@
 import { errors } from '@strapi/utils';
 import { Component } from './components';
-import { Schema } from '@strapi/types';
-
-type ContentType = Schema.ContentType & { isDisplayed: boolean; apiID: string };
+import { ContentType } from './content-types';
 
 /**
  * GET /init

@@ -1,4 +1,51 @@
+import { Schema } from '@strapi/types';
 import { errors } from '@strapi/utils';
+import { ComponentConfiguration } from './components';
+
+export type Settings = {
+  bulkable: boolean;
+  filterable: boolean;
+  searchable: boolean;
+  pageSize: number;
+  mainField: string;
+  defaultSortBy: string;
+  defaultSortOrder: string;
+};
+
+export type Metadatas = {
+  [key: string]: {
+    edit:
+      | {
+          label: string;
+          description: string;
+          placeholder: string;
+          visible: boolean;
+          editable: boolean;
+        }
+      | {};
+    list:
+      | {
+          label: string;
+          searchable: boolean;
+          sortable: boolean;
+        }
+      | {};
+  };
+};
+
+export type Layouts = {
+  list: string[];
+  edit: { name: string; size: number }[][];
+};
+
+export type Configuration = {
+  uid: string;
+  settings: Settings;
+  metadatas: Metadatas;
+  layouts: Layouts;
+};
+
+export type ContentType = Schema.ContentType & { isDisplayed: boolean; apiID: string };
 
 /**
  * GET /content-types
@@ -9,7 +56,9 @@ export declare namespace FindContentTypes {
     query: {};
   }
   export interface Response {
-    data: {};
+    data: {
+      data: ContentType[];
+    };
     error?: errors.ApplicationError;
   }
 }
@@ -23,7 +72,12 @@ export declare namespace FindContentTypesSettings {
     query: {};
   }
   export interface Response {
-    data: {};
+    data: {
+      data: {
+        uid: string;
+        settings: Settings;
+      };
+    };
     error?: errors.ApplicationError;
   }
 }
@@ -37,7 +91,9 @@ export declare namespace FindContentTypeConfiguration {
     query: {};
   }
   export interface Response {
-    data: {};
+    data: {
+      data: Configuration;
+    };
     error?: errors.ApplicationError;
   }
 }
@@ -47,11 +103,20 @@ export declare namespace FindContentTypeConfiguration {
  */
 export declare namespace UpdateContentTypeConfiguration {
   export interface Request {
-    body: {};
+    body: {
+      layouts: Layouts;
+      metadatas: Metadatas;
+      settings: Settings;
+    };
     query: {};
   }
   export interface Response {
-    data: {};
+    data: {
+      data: {
+        contentType: Configuration;
+        components: Record<string, ComponentConfiguration> | {};
+      };
+    };
     error?: errors.ApplicationError;
   }
 }

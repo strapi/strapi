@@ -1,5 +1,6 @@
 import { Schema } from '@strapi/types';
 import { errors } from '@strapi/utils';
+import { Configuration, Settings, Metadatas, Layouts } from './content-types';
 
 export type Component = Schema.Component & {
   isDisplayed: boolean;
@@ -7,32 +8,8 @@ export type Component = Schema.Component & {
   apiID: string;
 };
 
-type ComponentConfiguration = {
-  uid: string;
+export type ComponentConfiguration = Configuration & {
   category: string;
-  settings: {
-    bulkable: boolean;
-    filterable: boolean;
-    searchable: boolean;
-    pageSize: number;
-    mainField: string;
-    defaultSortBy: string;
-    defaultSortOrder: string;
-  };
-  metadatas: {
-    [key: string]: {
-      edit: {};
-      list: {
-        label: string;
-        searchable: boolean;
-        sortable: boolean;
-      };
-    };
-  };
-  layouts: {
-    list: string[];
-    edit: Record<string, string | number>[][];
-  };
   isComponent: boolean;
 };
 
@@ -78,7 +55,11 @@ export declare namespace FindComponentConfiguration {
  */
 export declare namespace UpdateComponentConfiguration {
   export interface Request {
-    body: {};
+    body: {
+      layouts: Layouts;
+      metadatas: Metadatas;
+      settings: Settings;
+    };
     query: {};
   }
 
