@@ -7904,7 +7904,6 @@ __metadata:
   dependencies:
     "@reduxjs/toolkit": "npm:1.9.7"
     "@sindresorhus/slugify": "npm:1.1.0"
-    "@strapi/admin": "npm:4.15.1"
     "@strapi/design-system": "npm:1.13.0"
     "@strapi/generators": "npm:4.15.1"
     "@strapi/helper-plugin": "npm:4.15.1"
