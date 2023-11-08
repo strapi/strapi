@@ -43,12 +43,10 @@
   ],
   "scripts": {
     "build": "pack-up build",
-    "build:legacy": "run -T tsc -p tsconfig.build.json",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "source": "./strapi-server.js",
     "require": "./strapi-server.js",
-    "default": "./strapi-server.js",
     "prepublishOnly": "yarn clean && yarn build",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
@@ -79,7 +77,6 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "4.15.1",
     "@strapi/pack-up": "workspace:*",
     "@strapi/strapi": "4.15.1",
     "@strapi/types": "4.15.1",
