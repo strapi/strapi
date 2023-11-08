@@ -64,7 +64,7 @@ module.exports = [
   {
     name: 'fields',
     in: 'query',
-    description: 'Fields to return (ex: title,author)',
+    description: 'Fields to return (ex: ["title","author"])',
     deprecated: false,
     required: false,
     schema: {
