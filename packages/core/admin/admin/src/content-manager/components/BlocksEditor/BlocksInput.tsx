@@ -87,7 +87,7 @@ const pipe =
   (value: Editor) =>
     fns.reduce<Editor>((prev, fn) => fn(prev), value);
 
-interface BlocksEditorProps {
+interface BlocksInputProps {
   intlLabel: MessageDescriptor;
   onChange: (event: { target: { name: string; value: Descendant[]; type: 'blocks' } }) => void;
   attribute: { type: string; [key: string]: unknown };
@@ -102,7 +102,7 @@ interface BlocksEditorProps {
   hint?: string | string[];
 }
 
-const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
+const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(
   (
     {
       intlLabel,
@@ -199,4 +199,4 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
   }
 );
 
-export { BlocksEditor };
+export { BlocksInput };
