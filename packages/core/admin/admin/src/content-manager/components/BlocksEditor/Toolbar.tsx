@@ -15,10 +15,10 @@ import {
   type SelectorBlockKey,
   isSelectorBlockKey,
   useBlocksStore,
-} from '../hooks/useBlocksStore';
-import { useModifiersStore } from '../hooks/useModifiersStore';
-import { insertLink } from '../utils/links';
-import { type Block, getEntries, getKeys } from '../utils/types';
+} from './hooks/useBlocksStore';
+import { useModifiersStore } from './hooks/useModifiersStore';
+import { insertLink } from './utils/links';
+import { type Block, getEntries, getKeys } from './utils/types';
 
 const ToolbarWrapper = styled(Flex)`
   &[aria-disabled='true'] {

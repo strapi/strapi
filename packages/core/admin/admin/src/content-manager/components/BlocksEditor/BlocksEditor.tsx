@@ -14,7 +14,7 @@ import { Hint } from '../Hint';
 import { BlocksInput } from './BlocksInput';
 import { withLinks } from './plugins/withLinks';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
-import { BlocksToolbar } from './Toolbar/Toolbar';
+import { BlocksToolbar } from './Toolbar';
 
 const TypographyAsterisk = styled(Typography)`
   line-height: 0;
