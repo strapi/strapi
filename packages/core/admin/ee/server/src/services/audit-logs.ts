@@ -183,7 +183,7 @@ const createAuditLogsService = (strapi: LoadedStrapi) => {
       return this;
     },
 
-    async findMany(query: any) {
+    async findMany(query: unknown) {
       const { results, pagination } = await state.provider.findMany(query);
 
       const sanitizedResults = results.map((result: any) => {
@@ -200,7 +200,7 @@ const createAuditLogsService = (strapi: LoadedStrapi) => {
       };
     },
 
-    async findOne(id: any) {
+    async findOne(id: unknown) {
       const result = await state.provider.findOne(id);
 
       if (!result) {

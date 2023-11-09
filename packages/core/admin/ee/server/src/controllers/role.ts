@@ -36,7 +36,7 @@ export default {
 
     const roles = await roleService.deleteByIds([id]);
 
-    const sanitizedRole = roles.map((role: any) => roleService.sanitizeRole(role))[0] || null;
+    const sanitizedRole = roles.map((role: unknown) => roleService.sanitizeRole(role))[0] || null;
 
     return ctx.deleted({
       data: sanitizedRole,

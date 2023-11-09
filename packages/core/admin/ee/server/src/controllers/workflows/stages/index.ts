@@ -16,13 +16,13 @@ import {
  * @param userAbility
  * @return { (Stage) => SanitizedStage }
  */
-function sanitizeStage({ strapi }: { strapi: Strapi }, userAbility: any) {
+function sanitizeStage({ strapi }: { strapi: Strapi }, userAbility: unknown) {
   const permissionChecker = strapi
     .plugin('content-manager')
     .service('permission-checker')
     .create({ userAbility, model: STAGE_MODEL_UID });
 
-  return (entity: any) => permissionChecker.sanitizeOutput(entity);
+  return (entity: unknown) => permissionChecker.sanitizeOutput(entity);
 }
 
 export default {

@@ -13,7 +13,7 @@ import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../../constants/workflows
  * @param userAbility
  * @return { PermissionChecker }
  */
-function getWorkflowsPermissionChecker({ strapi }: { strapi: Strapi }, userAbility: any) {
+function getWorkflowsPermissionChecker({ strapi }: { strapi: Strapi }, userAbility: unknown) {
   return strapi
     .plugin('content-manager')
     .service('permission-checker')

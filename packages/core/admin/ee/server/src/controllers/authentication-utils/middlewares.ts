@@ -96,7 +96,7 @@ export const redirectWithAuth: Common.MiddlewareHandler = (ctx) => {
     params: { provider },
   } = ctx;
   const redirectUrls = utils.getPrefixedRedirectUrls();
-  const domain = strapi.config.get('admin.auth.domain');
+  const domain: string | undefined = strapi.config.get('admin.auth.domain');
   const { user } = ctx.state;
 
   const jwt = getService('token').createJwtToken(user);

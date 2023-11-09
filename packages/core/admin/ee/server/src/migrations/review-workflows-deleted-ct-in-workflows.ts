@@ -12,7 +12,7 @@ async function migrateDeletedCTInWorkflows({ oldContentTypes, contentTypes }: an
   const deletedContentTypes = difference(keys(oldContentTypes), keys(contentTypes)) ?? [];
 
   if (deletedContentTypes.length) {
-    await mapAsync(deletedContentTypes, async (deletedContentTypeUID: any) => {
+    await mapAsync(deletedContentTypes, async (deletedContentTypeUID: unknown) => {
       const workflow = await strapi.query(WORKFLOW_MODEL_UID).findOne({
         select: ['id', 'contentTypes'],
         where: {
@@ -25,7 +25,7 @@ async function migrateDeletedCTInWorkflows({ oldContentTypes, contentTypes }: an
           where: { id: workflow.id },
           data: {
             contentTypes: workflow.contentTypes.filter(
-              (contentTypeUID: any) => contentTypeUID !== deletedContentTypeUID
+              (contentTypeUID: unknown) => contentTypeUID !== deletedContentTypeUID
             ),
           },
         });

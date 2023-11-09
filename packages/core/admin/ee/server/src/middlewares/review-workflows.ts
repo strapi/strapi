@@ -1,3 +1,4 @@
+import type { Context } from 'koa';
 import { Strapi } from '@strapi/types';
 import { set } from 'lodash/fp';
 
@@ -18,7 +19,7 @@ export function contentTypeMiddleware(strapi: Strapi) {
    *
    * @param {object} ctx - The Koa context object.
    */
-  const moveReviewWorkflowOption = (ctx: any) => {
+  const moveReviewWorkflowOption = (ctx: Context) => {
     // Move reviewWorkflows to options.reviewWorkflows
     const { reviewWorkflows, ...contentType } = ctx.request.body.contentType;
 
