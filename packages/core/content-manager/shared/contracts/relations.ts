@@ -1,4 +1,12 @@
+import { EntityService, Schema } from '@strapi/types';
 import { errors } from '@strapi/utils';
+
+type PaginationQuery = EntityService.Params.Pagination.PageNotation;
+
+type RelationResult = Schema.Attributes & {
+  id: number;
+  publishedAt: string | null;
+};
 
 /**
  * GET /relations/:model/:targetField
@@ -6,10 +14,27 @@ import { errors } from '@strapi/utils';
 export declare namespace FindAvailable {
   export interface Request {
     body: {};
-    query: {};
+    query: {
+      pageSize: PaginationQuery['pageSize'];
+      page: PaginationQuery['page'];
+    };
   }
+
+  export interface Params {
+    model: string;
+    targetField: string;
+  }
+
   export interface Response {
-    data: {};
+    data: {
+      results: RelationResult[];
+      pagination: {
+        page: PaginationQuery['page'];
+        pageSize: PaginationQuery['pageSize'];
+        pageCount: number;
+        total: number;
+      };
+    };
     error?: errors.ApplicationError;
   }
 }
@@ -22,8 +47,17 @@ export declare namespace FindExisting {
     body: {};
     query: {};
   }
+
+  export interface Params {
+    model: string;
+    targetField: string;
+    id: number;
+  }
+
   export interface Response {
-    data: {};
+    data: {
+      data: RelationResult;
+    };
     error?: errors.ApplicationError;
   }
 }
