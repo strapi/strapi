@@ -28,8 +28,7 @@ export default createPolicy({
     const { userAbility: ability } = ctx.state;
 
     const permissions = actions.map((action: any) =>
-      // @ts-expect-error
-      inputModifiers.find((modifier) => modifier.check(action)).transform(action)
+      inputModifiers.find((modifier) => modifier.check(action))?.transform(action)
     );
 
     const isAuthorized = permissions.every(({ action, subject }: any) =>

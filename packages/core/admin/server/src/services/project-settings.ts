@@ -42,7 +42,8 @@ const parseFilesData = async (files: SettingsFile) => {
       Object.assign(formatedFilesData[inputName], {
         stream: getStream(),
         tmpPath: file.path,
-        // @ts-expect-error
+        // TODO
+        // @ts-expect-error define the correct return type
         provider: strapi.config.get('plugin.upload').provider,
       });
     })
@@ -62,7 +63,7 @@ const getProjectSettings = async (): Promise<GetProjectSettings.Response> => {
 
   const projectSettings = {
     ...defaultProjectSettings,
-    // @ts-expect-error
+    // @ts-expect-error spread can be applied to return value
     ...(await store.get({ key: 'project-settings' })),
   };
 
@@ -116,7 +117,8 @@ const deleteOldFiles = async ({ previousSettings, newSettings }: any) => {
       }
 
       // Skip if the file was not uploaded with the current provider
-      // @ts-expect-error
+      // TODO
+      // @ts-expect-error define the correct return type
       if (strapi.config.get('plugin.upload').provider !== previousSettings[inputName].provider) {
         return;
       }

@@ -117,7 +117,7 @@ export default {
       return pipe(
         map('attributes'),
         flatMap(values),
-        // @ts-expect-error
+        // @ts-expect-error lodash types
         sumBy(propEq('type', 'dynamiczone'))
       )(strapi.contentTypes as any);
     };

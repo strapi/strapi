@@ -84,7 +84,7 @@ const fieldsPropertyValidation = (action: Action) =>
     .test(
       'fields-restriction',
       'The permission at ${path} must have fields set to null or undefined',
-      // @ts-expect-error
+      // @ts-expect-error yup types
       checkNilFields(action)
     );
 
@@ -107,7 +107,7 @@ export const permission = yup
       .string()
       .nullable()
       .test('subject-validity', 'Invalid subject submitted', function (subject) {
-        // @ts-expect-error
+        // @ts-expect-error yup types
         const action = getActionFromProvider(this.options.parent.action);
 
         if (!action) {
@@ -127,7 +127,7 @@ export const permission = yup
     properties: yup
       .object()
       .test('properties-structure', 'Invalid property set at ${path}', function (properties) {
-        // @ts-expect-error
+        // @ts-expect-error yup types
         const action = getActionFromProvider(this.options.parent.action) as any;
         const hasNoProperties = isEmpty(properties) || isNil(properties);
 
@@ -151,7 +151,7 @@ export const permission = yup
         'fields-property',
         'Invalid fields property at ${path}',
         async function (properties = {}) {
-          // @ts-expect-error
+          // @ts-expect-error yup types
           const action = getActionFromProvider(this.options.parent.action) as any;
 
           if (!action || !properties) {

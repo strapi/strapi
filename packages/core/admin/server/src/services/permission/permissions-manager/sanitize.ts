@@ -129,7 +129,7 @@ export default ({ action, ability, model }: any) => {
       // Remove fields hidden from the admin
       traverseEntity(omitHiddenFields, { schema }),
       // Remove unallowed fields from admin::user relations
-      // @ts-expect-error
+      // @ts-expect-error lodash types
       traverseEntity(pickAllowedAdminUserFields, { schema }),
       // Remove not allowed fields (RBAC)
       traverseEntity(removeDisallowedFields(permittedFields), { schema }),
@@ -147,7 +147,7 @@ export default ({ action, ability, model }: any) => {
       // Remove fields hidden from the admin
       traverseEntity(omitHiddenFields, { schema }),
       // Remove not allowed fields (RBAC)
-      // @ts-expect-error
+      // @ts-expect-error lodash types
       traverseEntity(removeDisallowedFields(permittedFields), { schema }),
       // Remove roles from createdBy & updateBy fields
       omitCreatorRoles
@@ -155,7 +155,8 @@ export default ({ action, ability, model }: any) => {
   };
 
   const wrapSanitize = (createSanitizeFunction: any) => {
-    // @ts-expect-error
+    // TODO
+    // @ts-expect-error define the correct return type
     const wrappedSanitize = async (data: any, options = {} as any) => {
       if (isArray(data)) {
         return Promise.all(data.map((entity: any) => wrappedSanitize(entity, options)));

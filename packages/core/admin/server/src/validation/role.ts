@@ -20,7 +20,7 @@ const rolesDeleteSchema = yup
         try {
           await strapi.admin.services.role.checkRolesIdForDeletion(ids);
         } catch (e) {
-          // @ts-expect-error
+          // @ts-expect-error yup types
           return this.createError({ path: 'ids', message: e.message });
         }
 
@@ -36,7 +36,7 @@ const roleDeleteSchema = yup
     try {
       await strapi.admin.services.role.checkRolesIdForDeletion([id]);
     } catch (e) {
-      // @ts-expect-error
+      // @ts-expect-error yup types
       return this.createError({ path: 'id', message: e.message });
     }
 

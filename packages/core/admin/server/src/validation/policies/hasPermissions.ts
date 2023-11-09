@@ -3,7 +3,7 @@ import { yup, validateYupSchema } from '@strapi/utils';
 
 const hasPermissionsSchema = yup.object({
   actions: yup.array().of(
-    // @ts-expect-error
+    // @ts-expect-error yup types
     yup.lazy((val) => {
       if (_.isArray(val)) {
         return yup.array().of(yup.string()).min(1).max(2);

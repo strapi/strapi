@@ -28,7 +28,7 @@ const ACTIONS = {
   publish: 'plugin::content-manager.explorer.publish',
 };
 
-// @ts-expect-error
+// @ts-expect-error lodash types
 const sanitizeRole: <T extends object>(obj: T) => Omit<T, 'users' | 'permissions'> = omit([
   'users',
   'permissions',

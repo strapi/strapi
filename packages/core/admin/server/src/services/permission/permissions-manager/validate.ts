@@ -108,7 +108,7 @@ export default ({ action, ability, model }: any) => {
       // Remove fields hidden from the admin
       traverseEntity(throwHiddenFields, { schema }),
       // Remove not allowed fields (RBAC)
-      // @ts-expect-error
+      // @ts-expect-error lodash types
       traverseEntity(throwDisallowedFields(permittedFields), { schema }),
       // Remove roles from createdBy & updatedBy fields
       omitCreatorRoles
@@ -116,7 +116,8 @@ export default ({ action, ability, model }: any) => {
   };
 
   const wrapValidate = (createValidateFunction: any) => {
-    // @ts-expect-error
+    // TODO
+    // @ts-expect-error define the correct return type
     const wrappedValidate = async (data, options = {}) => {
       if (isArray(data)) {
         return Promise.all(data.map((entity: any) => wrappedValidate(entity, options)));

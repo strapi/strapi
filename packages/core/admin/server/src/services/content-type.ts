@@ -185,7 +185,7 @@ const cleanPermissionFields = (
       existingFields: fields,
     });
 
-    // @ts-expect-error
+    // @ts-expect-error lodash types
     const badNestedFields = uniq([...intersection(fields, possibleFields), ...requiredFields]);
 
     const newFields = badNestedFields.filter(

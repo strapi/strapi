@@ -28,7 +28,7 @@ const webhookValidator = yup
 
       return yup
         .object(
-          // @ts-expect-error
+          // @ts-expect-error lodash types
           _.mapValues(data, () => {
             yup.string().min(1).required();
           })

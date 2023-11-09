@@ -25,7 +25,7 @@ const mapKey = (key: keyof typeof operatorsMap) => {
 };
 
 const buildCaslQuery = (ability: any, action: any, model: any) => {
-  // @ts-expect-error
+  // @ts-expect-error casl types
   return rulesToQuery(ability, action, model, (o) => o.conditions);
 };
 

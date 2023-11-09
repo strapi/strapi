@@ -75,7 +75,7 @@ export const authenticate = async (ctx: any) => {
  *
  *  @type {import('.').VerifyFunction}
  */
-export const verify = async (auth: any, config = {}) => {
+export const verify = async (auth: any, config: any = {}) => {
   const { credentials: transferToken, ability } = auth;
 
   if (!transferToken) {
@@ -96,7 +96,6 @@ export const verify = async (auth: any, config = {}) => {
     throw new ForbiddenError();
   }
 
-  // @ts-expect-error
   const scopes = castArray(config.scope ?? []);
 
   const isAllowed = scopes.every((scope) => ability.can(scope));

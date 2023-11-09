@@ -129,7 +129,8 @@ export default {
 
   async getLayout(ctx: Context) {
     const apiTokenService = getService('api-token');
-    // @ts-expect-error
+    // TODO
+    // @ts-expect-error remove this controller if not used
     const layout = await apiTokenService.getApiTokenLayout();
 
     ctx.send({ data: layout });

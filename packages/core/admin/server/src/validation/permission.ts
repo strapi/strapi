@@ -28,7 +28,7 @@ const checkPermissionsExist = function (permissions: any) {
 
   return failIndex === -1
     ? true
-    : // @ts-expect-error
+    : // @ts-expect-error yup types
       this.createError({
         path: 'permissions',
         message: `[${failIndex}] is not an existing permission action`,

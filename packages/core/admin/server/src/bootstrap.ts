@@ -56,7 +56,7 @@ const syncAPITokensPermissions = async () => {
   const validPermissions = strapi.contentAPI.permissions.providers.action.keys();
   const permissionsInDB = await pipeAsync(
     strapi.query('admin::api-token-permission').findMany,
-    // @ts-expect-error
+    // @ts-expect-error lodash types
     map('action')
   )();
 

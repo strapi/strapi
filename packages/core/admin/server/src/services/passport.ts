@@ -24,8 +24,8 @@ const registerAuthEvents = () => {
   const eventList = Object.entries(events).filter(keyIsValidEventName).filter(valueIsFunctionType);
 
   for (const [eventName, handler] of eventList) {
-    // @ts-expect-error
-    strapi.eventHub.on(authEventsMapper[eventName], handler);
+    // TODO - TS: ensure the handler is an EventHub.Listener
+    strapi.eventHub.on(authEventsMapper[eventName], handler as any);
   }
 };
 

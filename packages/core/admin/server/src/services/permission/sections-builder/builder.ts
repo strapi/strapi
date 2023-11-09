@@ -28,8 +28,7 @@ const createSectionBuilder = () => {
      * @param sectionName - The name of the section to delete
      */
     deleteSection(sectionName: string) {
-      // @ts-expect-error
-      state.sections.remove(sectionName);
+      state.sections.delete(sectionName);
 
       return this;
     },
