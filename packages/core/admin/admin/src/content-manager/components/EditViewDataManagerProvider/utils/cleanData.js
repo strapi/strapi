@@ -161,7 +161,7 @@ const cleanData = ({ browserState, serverState }, currentSchema, componentsSchem
           });
           break;
         default:
-          cleanedData = helperCleanData(value, 'id');
+          cleanedData = value;
       }
 
       acc[current] = cleanedData;
@@ -171,21 +171,6 @@ const cleanData = ({ browserState, serverState }, currentSchema, componentsSchem
   };
 
   return recursiveCleanData(browserState, serverState, currentSchema, '');
-};
-
-// TODO: check which parts are still needed: I suspect the
-// isArray part can go away, but I'm not sure what could send
-// an object; in case both can go away we might be able to get
-// rid of the whole helper
-export const helperCleanData = (value, key) => {
-  if (isArray(value)) {
-    return value.map((obj) => (obj[key] ? obj[key] : obj));
-  }
-  if (isObject(value)) {
-    return value[key];
-  }
-
-  return value;
 };
 
 export default cleanData;
