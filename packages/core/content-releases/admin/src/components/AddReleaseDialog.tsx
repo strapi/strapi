@@ -10,6 +10,7 @@ import {
 import { useNotification } from '@strapi/helper-plugin';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
+import { useHistory } from 'react-router-dom';
 import * as yup from 'yup';
 
 const releaseSchema = yup.object({
@@ -24,12 +25,18 @@ interface AddReleaseDialogProps {
   handleClose: () => void;
 }
 
+interface FormValues {
+  name: string;
+}
+
 export const AddReleaseDialog = ({ handleClose }: AddReleaseDialogProps) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
+  const { push } = useHistory();
 
-  const handleSubmit = () => {
-    handleClose();
+  const handleSubmit = async (values: FormValues) => {
+    // TODO: replace it with the correct slug
+    push(`/plugins/content-releases/${values.name}`);
 
     toggleNotification({
       type: 'success',

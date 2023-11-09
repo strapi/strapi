@@ -8771,6 +8771,7 @@ __metadata:
     "@types/koa": "npm:2.13.4"
     "@types/styled-components": "npm:5.1.26"
     formik: "npm:2.4.0"
+    history: "npm:^4.9.0"
     koa: "npm:2.13.4"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"

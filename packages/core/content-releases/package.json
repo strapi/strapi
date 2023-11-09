@@ -59,7 +59,7 @@
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "packup watch"
+    "watch": "pack-up watch"
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
@@ -79,6 +79,7 @@
     "@testing-library/user-event": "14.4.3",
     "@types/koa": "2.13.4",
     "@types/styled-components": "5.1.26",
+    "history": "^4.9.0",
     "koa": "2.13.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

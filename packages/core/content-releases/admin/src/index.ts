@@ -18,8 +18,8 @@ const admin: Plugin.Config.AdminInput = {
           defaultMessage: 'Releases',
         },
         async Component() {
-          const { Releases } = await import('./pages/App');
-          return Releases;
+          const { App } = await import('./pages/App');
+          return App;
         },
         permissions: [],
       });

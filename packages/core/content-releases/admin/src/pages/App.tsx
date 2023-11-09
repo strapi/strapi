@@ -3,15 +3,15 @@ import { Route, Switch } from 'react-router-dom';
 
 import { pluginId } from '../pluginId';
 
-import { Release } from './DetailsPage/Release';
+import { ReleasePage } from './DetailsPage/Release';
 import { ReleasesPage } from './ReleasesPage/Releases';
 
-export const Releases = () => {
+export const App = () => {
   return (
     <Main>
       <Switch>
         <Route exact path={`/plugins/${pluginId}`} component={ReleasesPage} />
-        <Route exact path={`/plugins/${pluginId}/:releaseId`} component={Release} />
+        <Route exact path={`/plugins/${pluginId}/:releaseId`} component={ReleasePage} />
       </Switch>
     </Main>
   );
