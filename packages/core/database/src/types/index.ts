@@ -1,7 +1,6 @@
 import type { Action, SubscriberFn } from '../lifecycles';
 import type { ForeignKey, Index } from '../schema/types';
 
-export type DocID = string;
 export type ID = string | number;
 
 export interface ColumnInfo {
