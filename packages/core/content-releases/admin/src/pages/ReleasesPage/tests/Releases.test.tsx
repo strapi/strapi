@@ -5,6 +5,13 @@ import { IntlProvider } from 'react-intl';
 
 import { ReleasesPage } from '../Releases';
 
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  // eslint-disable-next-line
+  CheckPermissions: ({ children }: { children: JSX.Element}) => <div>{children}</div>,
+  CheckPagePermissions: ({ children }: { children: JSX.Element }) => <div>{children}</div>,
+}));
+
 const user = userEvent.setup();
 
 const render = () =>
