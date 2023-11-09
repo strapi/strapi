@@ -173,7 +173,6 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<Configuration
       moduleIds: 'deterministic',
       runtimeChunk: true,
     },
-    // @ts-expect-error
     plugins: [
       ...baseConfig.plugins,
       new MiniCssExtractPlugin({
