@@ -45,7 +45,10 @@ export type Configuration = {
   layouts: Layouts;
 };
 
-export type ContentType = Schema.ContentType & { isDisplayed: boolean; apiID: string };
+export interface ContentType extends Schema.ContentType {
+  isDisplayed: boolean;
+  apiID: string;
+}
 
 /**
  * GET /content-types

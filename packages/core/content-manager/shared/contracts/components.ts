@@ -2,16 +2,16 @@ import { Schema } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { Configuration, Settings, Metadatas, Layouts } from './content-types';
 
-export type Component = Schema.Component & {
+export interface Component extends Schema.Component {
   isDisplayed: boolean;
   info: Schema.Info;
   apiID: string;
-};
+}
 
-export type ComponentConfiguration = Configuration & {
+export interface ComponentConfiguration extends Configuration {
   category: string;
   isComponent: boolean;
-};
+}
 
 /**
  * GET /components
