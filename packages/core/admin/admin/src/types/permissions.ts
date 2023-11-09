@@ -1,6 +1,6 @@
 import type { Permission } from '@strapi/helper-plugin';
 
-type SettingsPermissions = 'project-settings' | 'users' | 'webhooks';
+type SettingsPermissions = 'project-settings' | 'roles' | 'users' | 'webhooks';
 
 interface CRUDPermissions {
   main: Permission[];
