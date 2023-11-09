@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 
-import { ReleasePage } from '../Release';
+import { ReleaseDetailsPage } from '../Release';
 
 const user = userEvent.setup();
 
@@ -13,7 +13,7 @@ const render = () =>
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}} defaultLocale="en">
         <MemoryRouter>
-          <ReleasePage />
+          <ReleaseDetailsPage />
         </MemoryRouter>
       </IntlProvider>
     </ThemeProvider>

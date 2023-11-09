@@ -39,7 +39,7 @@ const ReleaseInfoWrapper = styled(Flex)`
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
-const ReleasePage = () => {
+const ReleaseDetailsPage = () => {
   const [isPopoverVisible, setIsPopoverVisible] = React.useState(false);
   const moreButtonRef = React.useRef<HTMLButtonElement>(null!);
   const { formatMessage } = useIntl();
@@ -185,4 +185,4 @@ const ReleasePage = () => {
   );
 };
 
-export { ReleasePage };
+export { ReleaseDetailsPage };
