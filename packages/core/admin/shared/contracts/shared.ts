@@ -55,3 +55,10 @@ export type SanitizedAdminRole = Omit<
   AdminRole,
   'users' | 'permissions' | 'createdAt' | 'updatedAt'
 >;
+
+export interface Pagination {
+  page: number;
+  pageSize: number;
+  pageCount: number;
+  total: number;
+}
