@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-const checkFieldsAreCorrectlyNested = (fields: any) => {
+const checkFieldsAreCorrectlyNested = (fields: unknown) => {
   if (_.isNil(fields)) {
     // Only check if the fields exist
     return true;

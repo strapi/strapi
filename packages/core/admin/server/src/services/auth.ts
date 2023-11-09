@@ -82,7 +82,7 @@ const forgotPassword = async ({ email } = {} as { email: string }) => {
         user: _.pick(user, ['email', 'firstname', 'lastname', 'username']),
       }
     )
-    .catch((err: any) => {
+    .catch((err: unknown) => {
       // log error server side but do not disclose it to the user to avoid leaking informations
       strapi.log.error(err);
     });

@@ -83,7 +83,7 @@ const create = async (attributes: Partial<AdminRole>): Promise<AdminRole> => {
  * @param params query params to find the role
  * @param populate
  */
-const findOne = (params = {}, populate?: any): Promise<AdminRole> => {
+const findOne = (params = {}, populate?: unknown): Promise<AdminRole> => {
   return strapi.query('admin::role').findOne({ where: params, populate });
 };
 
@@ -94,7 +94,7 @@ const findOne = (params = {}, populate?: any): Promise<AdminRole> => {
  */
 const findOneWithUsersCount = async (
   params = {},
-  populate?: any
+  populate?: unknown
 ): Promise<AdminRoleWithUsersCount> => {
   const role = await strapi.query('admin::role').findOne({ where: params, populate });
 
@@ -110,7 +110,7 @@ const findOneWithUsersCount = async (
  * @param params query params to find the roles
  * @param populate
  */
-const find = (params = {}, populate: any): Promise<AdminRole[]> => {
+const find = (params = {}, populate: unknown): Promise<AdminRole[]> => {
   return strapi.query('admin::role').findMany({ where: params, populate });
 };
 
@@ -162,7 +162,7 @@ const update = async (params: any, attributes: Partial<AdminRole>): Promise<Admi
  * Check if a role exists in database
  * @param params query params to find the role
  */
-const exists = async (params = {} as any): Promise<boolean> => {
+const exists = async (params = {} as unknown): Promise<boolean> => {
   const count = await strapi.query('admin::role').count({ where: params });
   return count > 0;
 };

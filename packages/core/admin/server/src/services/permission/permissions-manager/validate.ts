@@ -120,7 +120,7 @@ export default ({ action, ability, model }: any) => {
     // @ts-expect-error define the correct return type
     const wrappedValidate = async (data, options = {}) => {
       if (isArray(data)) {
-        return Promise.all(data.map((entity: any) => wrappedValidate(entity, options)));
+        return Promise.all(data.map((entity: unknown) => wrappedValidate(entity, options)));
       }
 
       const { subject, action: actionOverride } = getDefaultOptions(data, options);
@@ -152,7 +152,7 @@ export default ({ action, ability, model }: any) => {
     return wrappedValidate;
   };
 
-  const getDefaultOptions = (data: any, options: any) => {
+  const getDefaultOptions = (data: any, options: unknown) => {
     return defaults({ subject: asSubject(model, data), action }, options);
   };
 

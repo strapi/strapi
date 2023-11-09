@@ -1,3 +1,4 @@
+import type { Context } from 'koa';
 import { castArray, isNil } from 'lodash/fp';
 import { differenceInHours, parseISO } from 'date-fns';
 import { errors } from '@strapi/utils';
@@ -9,7 +10,7 @@ const { UnauthorizedError, ForbiddenError } = errors;
 
 const isReadScope = (scope: any) => scope.endsWith('find') || scope.endsWith('findOne');
 
-const extractToken = (ctx: any) => {
+const extractToken = (ctx: Context) => {
   if (ctx.request && ctx.request.header && ctx.request.header.authorization) {
     const parts = ctx.request.header.authorization.split(/\s+/);
 
@@ -26,7 +27,7 @@ const extractToken = (ctx: any) => {
 /**
  * Authenticate the validity of the token
  */
-export const authenticate = async (ctx: any) => {
+export const authenticate = async (ctx: Context) => {
   const apiTokenService = getService('api-token');
   const token = extractToken(ctx);
 

@@ -157,7 +157,7 @@ const isLastSuperAdminUser = async (userId: Entity.ID): Promise<boolean> => {
  * Check if a user with specific attributes exists in the database
  * @param attributes A partial user object
  */
-const exists = async (attributes = {} as any): Promise<boolean> => {
+const exists = async (attributes = {} as unknown): Promise<boolean> => {
   return (await strapi.query('admin::user').count({ where: attributes })) > 0;
 };
 
@@ -231,7 +231,7 @@ const findOneByEmail = async (email: string, populate = []) => {
  * @param query
  */
 // TODO: TS - type find Page. At the moment, 'admin::user'is not being resolved by the ES type registry
-const findPage = async (query = {}): Promise<any> => {
+const findPage = async (query = {}): Promise<unknown> => {
   const enrichedQuery = defaults({ populate: ['roles'] }, query);
   return strapi.entityService.findPage('admin::user', enrichedQuery);
 };

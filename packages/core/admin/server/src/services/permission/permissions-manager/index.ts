@@ -11,7 +11,7 @@ export default ({ ability, action, model }: any) => ({
   action,
   model,
 
-  get isAllowed(): any {
+  get isAllowed(): unknown {
     return this.ability.can(action, model);
   },
 
@@ -19,7 +19,7 @@ export default ({ ability, action, model }: any) => ({
     return asSubject(subjectType, target);
   },
 
-  pickPermittedFieldsOf(data: any, options = {}) {
+  pickPermittedFieldsOf(data: unknown, options = {}) {
     return this.sanitizeInput(data, options);
   },
 
@@ -32,7 +32,7 @@ export default ({ ability, action, model }: any) => ({
   },
 
   // eslint-disable-next-line @typescript-eslint/default-param-last
-  addPermissionsQueryTo(query = {} as any, action: any) {
+  addPermissionsQueryTo(query = {} as any, action: unknown) {
     const newQuery = cloneDeep(query);
     const permissionQuery = this.getQuery(action) ?? undefined;
 

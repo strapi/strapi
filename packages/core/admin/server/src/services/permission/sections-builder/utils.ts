@@ -1,13 +1,13 @@
 import { curry, matchesProperty, pick } from 'lodash/fp';
 
-const isOfKind = (kind: any) => matchesProperty('kind', kind);
+const isOfKind = (kind: unknown) => matchesProperty('kind', kind);
 
 const resolveContentType = (uid: any) => strapi.contentTypes[uid];
 
-const isNotInSubjects = (subjects: any) => (uid: any) =>
+const isNotInSubjects = (subjects: any) => (uid: unknown) =>
   !subjects.find((subject: any) => subject.uid === uid);
 
-const hasProperty = curry((property: any, subject: any) => {
+const hasProperty = curry((property: unknown, subject: any) => {
   return !!subject.properties.find((prop: any) => prop.value === property);
 });
 

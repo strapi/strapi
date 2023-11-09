@@ -1,7 +1,8 @@
+import type { Context } from 'koa';
 import { getService } from '../utils';
 
 /** @type {import('.').AuthenticateFunction} */
-export const authenticate = async (ctx: any) => {
+export const authenticate = async (ctx: Context) => {
   const { authorization } = ctx.request.header;
 
   if (!authorization) {

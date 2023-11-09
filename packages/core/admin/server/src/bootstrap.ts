@@ -1,4 +1,5 @@
 import { merge, map, difference, uniq } from 'lodash/fp';
+import { Strapi } from '@strapi/types';
 import { pipeAsync } from '@strapi/utils';
 import { getService } from './utils';
 import adminActions from './config/admin-actions';
@@ -69,7 +70,7 @@ const syncAPITokensPermissions = async () => {
   }
 };
 
-export default async ({ strapi }: any) => {
+export default async ({ strapi }: { strapi: Strapi }) => {
   await registerAdminConditions();
   await registerPermissionActions();
   registerModelHooks();

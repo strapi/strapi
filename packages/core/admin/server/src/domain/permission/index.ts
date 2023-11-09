@@ -23,7 +23,7 @@ export type Permission = {
   properties: {
     fields?: string[];
     locales?: string[];
-    [key: string]: any;
+    [key: string]: unknown;
   };
   conditions: string[]; // TODO: This should be a Condition interface
   role?: string; // TODO: This should be AdminRole

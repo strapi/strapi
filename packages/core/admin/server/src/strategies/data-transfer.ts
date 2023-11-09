@@ -1,3 +1,4 @@
+import type { Context } from 'koa';
 import { differenceInHours, parseISO } from 'date-fns';
 import { errors } from '@strapi/utils';
 import { castArray, isNil } from 'lodash/fp';
@@ -6,7 +7,7 @@ import { getService } from '../utils';
 
 const { UnauthorizedError, ForbiddenError } = errors;
 
-const extractToken = (ctx: any) => {
+const extractToken = (ctx: Context) => {
   if (ctx.request && ctx.request.header && ctx.request.header.authorization) {
     const parts = ctx.request.header.authorization.split(/\s+/);
 
@@ -25,7 +26,7 @@ const extractToken = (ctx: any) => {
  *
  *  @type {import('.').AuthenticateFunction}
  */
-export const authenticate = async (ctx: any) => {
+export const authenticate = async (ctx: Context) => {
   const { token: tokenService } = getService('transfer');
   const token = extractToken(ctx);
 

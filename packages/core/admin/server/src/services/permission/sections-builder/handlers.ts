@@ -126,7 +126,7 @@ const buildNode = (model: any, attributeName: string, attribute: any) => {
   return node;
 };
 
-const buildDeepAttributesCollection = (model: any): any => {
+const buildDeepAttributesCollection = (model: any): unknown => {
   return Object.entries(model.attributes)
     .map(([attributeName, attribute]) => buildNode(model, attributeName, attribute))
     .filter((node) => node !== null);

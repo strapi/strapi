@@ -66,11 +66,12 @@ export default {
     await permissionsManager.validateQuery(ctx.query);
     const sanitizedQuery = await permissionsManager.sanitizeQuery(ctx.query);
 
+    // @ts-expect-error update the service type
     const { results, pagination } = await userService.findPage(sanitizedQuery);
 
     ctx.body = {
       data: {
-        results: results.map((user: any) => userService.sanitizeUser(user)),
+        results: results.map((user: AdminUser) => userService.sanitizeUser(user)),
         pagination,
       },
     } satisfies Find.Response;

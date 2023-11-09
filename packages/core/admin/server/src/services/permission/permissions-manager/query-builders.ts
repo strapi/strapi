@@ -24,21 +24,21 @@ const mapKey = (key: keyof typeof operatorsMap) => {
   return key;
 };
 
-const buildCaslQuery = (ability: any, action: any, model: any) => {
+const buildCaslQuery = (ability: unknown, action: unknown, model: unknown) => {
   // @ts-expect-error casl types
   return rulesToQuery(ability, action, model, (o) => o.conditions);
 };
 
-const buildStrapiQuery = (caslQuery: any) => {
+const buildStrapiQuery = (caslQuery: unknown) => {
   return unwrapDeep(caslQuery);
 };
 
-const unwrapDeep = (obj: any): any => {
+const unwrapDeep = (obj: any): unknown => {
   if (!_.isPlainObject(obj) && !_.isArray(obj)) {
     return obj;
   }
   if (_.isArray(obj)) {
-    return obj.map((v: any) => unwrapDeep(v));
+    return obj.map((v: unknown) => unwrapDeep(v));
   }
 
   return _.reduce(

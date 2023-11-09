@@ -448,7 +448,7 @@ describe('User', () => {
 
     test('Fetch users with custom pagination', async () => {
       const pagination = { page: 2, pageSize: 15 };
-      const foundPage = await findPage(pagination);
+      const foundPage = (await findPage(pagination)) as any;
 
       expect(foundPage.results.length).toBe(15);
       expect(foundPage.results[0]).toBe(15);
@@ -456,7 +456,7 @@ describe('User', () => {
     });
 
     test('Fetch users with default pagination', async () => {
-      const foundPage = await findPage();
+      const foundPage = (await findPage()) as any;
 
       expect(foundPage.results.length).toBe(100);
       expect(foundPage.results[0]).toBe(0);
@@ -465,7 +465,7 @@ describe('User', () => {
 
     test('Fetch users with partial pagination', async () => {
       const pagination = { page: 2 };
-      const foundPage = await findPage(pagination);
+      const foundPage = (await findPage(pagination)) as any;
 
       expect(foundPage.results.length).toBe(100);
       expect(foundPage.results[0]).toBe(100);

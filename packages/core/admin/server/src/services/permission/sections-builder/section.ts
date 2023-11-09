@@ -3,9 +3,9 @@ import { hooks } from '@strapi/utils';
 import type { Action } from '../../../domain/action';
 
 export type SectionOptions = {
-  initialStateFactory?: (...args: any) => any; // A factory function that returns the default shape of the section
-  handlers?: ((...args: any) => any)[]; // An initial collection of handlers which will be registered in the handlers hook
-  matchers?: ((...args: any) => any)[]; // An initial collection of matchers which will be registered in the matchers hook
+  initialStateFactory?: (...args: any) => unknown; // A factory function that returns the default shape of the section
+  handlers?: ((...args: any) => unknown)[]; // An initial collection of handlers which will be registered in the handlers hook
+  matchers?: ((...args: any) => unknown)[]; // An initial collection of matchers which will be registered in the matchers hook
 };
 
 const emptyObjectFactory = () => ({});

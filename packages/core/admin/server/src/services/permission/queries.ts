@@ -60,7 +60,7 @@ export const createMany = async (permissions: CreatePermissionPayload[]): Promis
  * @param params
  * @param attributes
  */
-const update = async (params: any, attributes: Partial<Permission>) => {
+const update = async (params: unknown, attributes: Partial<Permission>) => {
   const updatedPermission = (await strapi
     .query('admin::permission')
     .update({ where: params, data: attributes })) as Permission;
