@@ -1,4 +1,8 @@
+import { EntityService, Common } from '@strapi/types';
+
 import { errors } from '@strapi/utils';
+
+type Entity = EntityService.Result<Common.UID.Schema>;
 
 /**
  * GET /single-types/:model
@@ -6,10 +10,17 @@ import { errors } from '@strapi/utils';
 export declare namespace Find {
   export interface Request {
     body: {};
-    query: {};
+    query: {
+      locale: string;
+    };
   }
+
+  export interface Params {
+    model: string;
+  }
+
   export interface Response {
-    data: {};
+    data: Entity;
     error?: errors.ApplicationError;
   }
 }
@@ -19,11 +30,18 @@ export declare namespace Find {
  */
 export declare namespace CreateOrUpdate {
   export interface Request {
-    body: {};
-    query: {};
+    body: Entity;
+    query: {
+      plugins: {
+        i18n: {
+          locale: string;
+        };
+      };
+    };
   }
+
   export interface Response {
-    data: {};
+    data: Entity;
     error?: errors.ApplicationError;
   }
 }
@@ -34,10 +52,13 @@ export declare namespace CreateOrUpdate {
 export declare namespace Delete {
   export interface Request {
     body: {};
-    query: {};
+    query: {
+      locale: string;
+    };
   }
+
   export interface Response {
-    data: {};
+    data: Entity;
     error?: errors.ApplicationError;
   }
 }
@@ -48,10 +69,13 @@ export declare namespace Delete {
 export declare namespace Publish {
   export interface Request {
     body: {};
-    query: {};
+    query: {
+      locale: string;
+    };
   }
+
   export interface Response {
-    data: {};
+    data: Entity;
     error?: errors.ApplicationError;
   }
 }
@@ -62,10 +86,12 @@ export declare namespace Publish {
 export declare namespace UnPublish {
   export interface Request {
     body: {};
-    query: {};
+    query: {
+      locale: string;
+    };
   }
   export interface Response {
-    data: {};
+    data: Entity;
     error?: errors.ApplicationError;
   }
 }
@@ -78,8 +104,11 @@ export declare namespace CountDraftRelations {
     body: {};
     query: {};
   }
+
   export interface Response {
-    data: {};
+    data: {
+      data: number;
+    };
     error?: errors.ApplicationError;
   }
 }
