@@ -1,24 +1,18 @@
-import './resources/types/components.d.ts';
-import './resources/types/contentTypes.d.ts';
-import resources from './resources/index';
+import { LoadedStrapi } from '@strapi/types';
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
 import { testInTransaction } from '../../../utils/index';
-
-const ARTICLE_UID = 'api::article.article';
-
-const findArticleDb = async (where: any) => {
-  return await strapi.query(ARTICLE_UID).findOne({ where });
-};
-
-const findArticlesDb = async (where: any) => {
-  return await strapi.query(ARTICLE_UID).findMany({ where });
-};
+import resources from './resources/index';
+import './resources/types/components.d.ts';
+import './resources/types/contentTypes.d.ts';
+import { ARTICLE_UID, findArticleDb, findArticlesDb } from './utils/index.js';
 
 describe('Document Service', () => {
   let testUtils;
+  let strapi: LoadedStrapi;
 
   beforeAll(async () => {
     testUtils = await createTestSetup(resources);
+    strapi = testUtils.strapi;
   });
 
   afterAll(async () => {
@@ -27,32 +21,52 @@ describe('Document Service', () => {
 
   describe('deleteMany', () => {
     it(
-      'delete many documents with where clause',
+      'delete an entire document',
       testInTransaction(async () => {
-        const articlesDb = await findArticlesDb({});
-        const count = await strapi.documents.deleteMany(ARTICLE_UID, {
-          filters: { documentId: { $in: articlesDb.map((document) => document.documentId) } },
+        const articleDb = await findArticleDb({ name: 'Article1' });
+        const article = await strapi
+          .documents(ARTICLE_UID)
+          .deleteMany({ filters: { id: { $eq: articleDb.documentId } } });
+
+        const articles = await findArticlesDb({
+          documentId: articleDb.documentId,
         });
 
-        const countDb = await findArticlesDb({});
-        expect(countDb).toBe(0);
-        expect(count).toHaveLength(0);
+        expect(articles).toHaveLength(0);
       })
     );
 
     it(
-      'delete many documents with array of ids',
+      'delete all documents of a locale',
       testInTransaction(async () => {
-        const articlesDb = await findArticlesDb({});
+        const articleDb = await findArticlesDb({ locale: 'fr' });
+        const deleted = await strapi.documents(ARTICLE_UID).deleteMany({ locale: 'fr' });
 
-        const count = await strapi.documents.deleteMany(
-          ARTICLE_UID,
-          articlesDb.map((document) => document.documentId)
-        );
+        expect(deleted).toEqual({ count: articleDb.length });
 
-        const countDb = await findArticlesDb({});
-        expect(countDb).toBe(0);
-        expect(count).toHaveLength(0);
+        const enArticles = await findArticlesDb({ locale: 'en' });
+        const frArticles = await findArticlesDb({ locale: 'fr' });
+
+        expect(frArticles).toBe(undefined);
+        expect(enArticles.length).toBeGreaterThan(0);
+      })
+    );
+
+    // Currently we expect .unpublish() to be used to delete a published version
+    // and add a .discard() method to delete a draft version and clone it from the published version
+    it(
+      'cannot delete with status parameter',
+      testInTransaction(async () => {
+        const articleDb = await findArticleDb({ name: 'Article2-Draft-EN' });
+        expect(async () => {
+          const article = await strapi
+            .documents(ARTICLE_UID)
+            .deleteMany({ filters: { id: { $eq: articleDb.documentId } }, status: 'draft' });
+        }).rejects.toThrow();
+
+        const articles = await findArticlesDb({ documentId: articleDb.documentId });
+
+        expect(articles.length).toBe(1);
       })
     );
   });
