@@ -30,6 +30,7 @@
   ],
   "scripts": {
     "build": "nx run-many --target=build --nx-ignore-cycles",
+    "build:size": "cd examples/getstarted && yarn build",
     "build:ts": "nx run-many --target=build:ts --nx-ignore-cycles",
     "clean": "nx run-many --target=clean --nx-ignore-cycles",
     "commit": "commit",
@@ -37,7 +38,6 @@
     "format": "yarn format:code && yarn format:other",
     "format:code": "yarn prettier:code --write",
     "format:other": "yarn prettier:other --write",
-    "generate": "plop --plopfile ./packages/generators/admin/plopfile.js",
     "lint": "nx run-many --target=lint --nx-ignore-cycles && yarn lint:other",
     "lint:fix": "nx run-many --target=lint --nx-ignore-cycles -- --fix",
     "lint:other": "npm run prettier:other -- --check",
@@ -70,7 +70,7 @@
     "watch": "nx run-many --target=watch --nx-ignore-cycles"
   },
   "resolutions": {
-    "@strapi/design-system": "1.14.0-typescript.0",
+    "@strapi/design-system": "1.14.0-typescript.1",
     "@types/koa": "2.13.4",
     "@types/react": "18.2.7"
   },
@@ -141,5 +141,6 @@
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
-  }
+  },
+  "isStrapiMonorepo": true
 }

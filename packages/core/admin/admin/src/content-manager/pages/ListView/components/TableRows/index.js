@@ -57,7 +57,7 @@ export const TableRows = ({
     async () =>
       (
         await import(
-          '../../../../../../../ee/admin/content-manager/pages/ListView/ReviewWorkflowsColumn'
+          '../../../../../../../ee/admin/src/content-manager/pages/ListView/ReviewWorkflowsColumn'
         )
       ).ReviewWorkflowsStageEE,
     {

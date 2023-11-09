@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-content-type-builder",
-  "version": "4.14.5",
+  "version": "4.15.1",
   "description": "Strapi plugin to create content type",
   "repository": {
     "type": "git",
@@ -19,22 +19,39 @@
       "url": "https://strapi.io"
     }
   ],
+  "exports": {
+    "./strapi-admin": {
+      "source": "./admin/src/index.js",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.js"
+    },
+    "./strapi-server": {
+      "source": "./strapi-server.js",
+      "require": "./strapi-server.js",
+      "default": "./strapi-server.js"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
+    "build": "pack-up build",
+    "clean": "run -T rimraf dist",
     "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
     "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
     "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch"
+    "test:unit:watch": "run -T jest --watch",
+    "watch": "pack-up watch"
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/design-system": "1.13.0",
-    "@strapi/generators": "4.14.5",
-    "@strapi/helper-plugin": "4.14.5",
+    "@strapi/design-system": "1.13.1",
+    "@strapi/generators": "4.15.1",
+    "@strapi/helper-plugin": "4.15.1",
     "@strapi/icons": "1.13.0",
-    "@strapi/utils": "4.14.5",
+    "@strapi/utils": "4.15.1",
     "fs-extra": "10.0.0",
     "immer": "9.0.19",
     "lodash": "4.17.21",
@@ -47,7 +64,8 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "4.14.5",
+    "@strapi/pack-up": "workspace:*",
+    "@strapi/strapi": "4.15.1",
     "@testing-library/react": "14.0.0",
     "history": "^4.9.0",
     "react": "^18.2.0",
@@ -56,6 +74,7 @@
     "styled-components": "5.3.3"
   },
   "peerDependencies": {
+    "@strapi/strapi": "^4.0.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "5.3.4",

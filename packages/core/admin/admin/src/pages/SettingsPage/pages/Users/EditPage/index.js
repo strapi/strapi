@@ -59,7 +59,7 @@ const EditPage = ({ canUpdate }) => {
     async () =>
       (
         await import(
-          '../../../../../../../ee/admin/pages/SettingsPage/pages/Users/components/MagicLink'
+          '../../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/MagicLink'
         )
       ).MagicLinkEE
   );

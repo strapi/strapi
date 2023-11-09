@@ -1,16 +1,14 @@
 import * as React from 'react';
 
 import { useCollator, useFetchClient } from '@strapi/helper-plugin';
-import { Entity } from '@strapi/types';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 
-import { RoleEntity } from '../../../shared/entities';
-import { APIBaseParams, APIResponse } from '../types/adminAPI';
+import type { FindAll, FindOne } from '../../../shared/contracts/roles';
 
-export interface APIRolesQueryParams extends APIBaseParams {
-  id?: null | Entity.ID;
-}
+export type APIRolesQueryParams =
+  | FindOne.Request['params']
+  | (FindAll.Request['query'] & { id?: never });
 
 export const useAdminRoles = (params: APIRolesQueryParams = {}, queryOptions = {}) => {
   const { id = '', ...queryParams } = params;
@@ -26,12 +24,9 @@ export const useAdminRoles = (params: APIRolesQueryParams = {}, queryOptions = {
       /**
        * TODO: can we infer if it's an array or not based on the appearance of `id`?
        */
-      const { data } = await get<APIResponse<RoleEntity | RoleEntity[]>>(
-        `/admin/roles/${id ?? ''}`,
-        {
-          params: queryParams,
-        }
-      );
+      const { data } = await get<FindOne.Response | FindAll.Response>(`/admin/roles/${id ?? ''}`, {
+        params: queryParams,
+      });
 
       return data;
     },
@@ -43,7 +38,7 @@ export const useAdminRoles = (params: APIRolesQueryParams = {}, queryOptions = {
   // value, which later on triggers infinite loops if used in the
   // dependency arrays of other hooks
   const roles = React.useMemo(() => {
-    let roles: RoleEntity[] = [];
+    let roles: FindAll.Response['data'] = [];
 
     if (data) {
       if (Array.isArray(data.data)) {
