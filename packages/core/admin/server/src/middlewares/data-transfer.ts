@@ -1,6 +1,8 @@
+import type { Context, Next } from 'koa';
+
 import { getService } from '../utils';
 
-export default () => async (ctx: any, next: any) => {
+export default () => async (ctx: Context, next: Next) => {
   const transferUtils = getService('transfer').utils;
 
   const { hasValidTokenSalt, isDataTransferEnabled, isDisabledFromEnv } = transferUtils;
@@ -12,6 +14,7 @@ export default () => async (ctx: any, next: any) => {
   if (!hasValidTokenSalt()) {
     return ctx.notImplemented(
       'The server configuration for data transfer is invalid. Please contact your server administrator.',
+      // @ts-expect-error have to pass multiple arguments to surface the error details
       {
         code: 'INVALID_TOKEN_SALT',
       }

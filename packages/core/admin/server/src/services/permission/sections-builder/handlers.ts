@@ -32,8 +32,8 @@ const settings = ({ action, section }: { action: Action; section: ActionArraySec
     displayName,
     category,
     subCategory,
-    // @ts-expect-error - action should be actionID, TODO: Investigate at which point the action property
-    // is transformed to actionId
+    // TODO: Investigate at which point the action property is transformed to actionId
+    // @ts-expect-error - action should be actionID
     action: actionId,
   });
 };

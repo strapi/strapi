@@ -1,3 +1,5 @@
+import type { Context } from 'koa';
+
 import { getService } from '../../../utils';
 import { validateUpdateAssigneeOnEntity } from '../../../validation/review-workflows';
 
@@ -15,7 +17,7 @@ export default {
    * @throws {ValidationError} If the `data` object in the request body fails to pass validation.
    * @returns {Promise<void>} A promise that resolves when the entity's assignee has been updated.
    */
-  async updateEntity(ctx: any) {
+  async updateEntity(ctx: Context) {
     const assigneeService = getService('assignees');
     const workflowService = getService('workflows');
 

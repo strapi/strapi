@@ -88,7 +88,7 @@ describe('Stages', () => {
           error.status = status;
           throw error;
         },
-      };
+      } as any;
 
       let error: any;
       try {
@@ -131,7 +131,7 @@ describe('Stages', () => {
           error.status = 403;
           throw error;
         },
-      };
+      } as any;
 
       let error: any;
       try {

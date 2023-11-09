@@ -1,4 +1,4 @@
-import { providerFactory, hooks } from '@strapi/utils';
+import { providerFactory, hooks, errors } from '@strapi/utils';
 import { validateRegisterProviderAction } from '../../validation/action-provider';
 
 import domain from './index';
@@ -6,6 +6,8 @@ import type { Action, CreateActionPayload } from './index';
 import type { Permission } from '../permission';
 
 type Options = Parameters<typeof providerFactory>['0'];
+
+const { ApplicationError } = errors;
 
 /**
  * Creates a new instance of an action provider
@@ -49,7 +51,7 @@ const createActionProvider = (options?: Options) => {
     async appliesToProperty(property: string, actionId: string, subject: Permission['subject']) {
       const action = provider.get(actionId) as Action | undefined;
       if (!action) {
-        return false;
+        throw new ApplicationError(`No action found with id "${actionId}"`);
       }
 
       const appliesToAction = domain.appliesToProperty(property, action);

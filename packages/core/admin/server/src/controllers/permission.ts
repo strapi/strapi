@@ -1,5 +1,4 @@
 import type { Context } from 'koa';
-import 'koa-bodyparser';
 import { validateCheckPermissionsInput } from '../validation/permission';
 import { getService } from '../utils';
 import { formatConditions } from './formatters';

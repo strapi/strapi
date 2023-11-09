@@ -23,8 +23,6 @@ const localStrategyMiddleware = async ([error, user, message]: any, done: any) =
 };
 
 const getPassportStrategies = () => {
-  const isEnabled = EE.features.isEnabled('sso');
-
   if (!EE.features.isEnabled('sso')) {
     return [createLocalStrategy(strapi)];
   }

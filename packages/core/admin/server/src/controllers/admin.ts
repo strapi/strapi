@@ -1,5 +1,4 @@
 import type { Context } from 'koa';
-import 'koa-bodyparser';
 
 import path from 'path';
 

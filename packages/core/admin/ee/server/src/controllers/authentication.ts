@@ -1,3 +1,5 @@
+import type { Context, Next } from 'koa';
+
 import { pick } from 'lodash/fp';
 import compose from 'koa-compose';
 import { errors } from '@strapi/utils';
@@ -15,13 +17,13 @@ const providerAuthenticationFlow = compose([
 ]);
 
 export default {
-  async getProviders(ctx: any) {
+  async getProviders(ctx: Context) {
     const { providerRegistry } = strapi.admin.services.passport;
 
     ctx.body = providerRegistry.getAll().map(toProviderDTO);
   },
 
-  async getProviderLoginOptions(ctx: any) {
+  async getProviderLoginOptions(ctx: Context) {
     const adminStore = await utils.getAdminStore();
     const { providers: providersOptions } = (await adminStore.get({ key: 'auth' })) as any;
 
@@ -30,7 +32,7 @@ export default {
     };
   },
 
-  async updateProviderLoginOptions(ctx: any) {
+  async updateProviderLoginOptions(ctx: Context) {
     const {
       request: { body },
     } = ctx;
@@ -47,7 +49,7 @@ export default {
     };
   },
 
-  providerLogin(ctx: any, next: any) {
+  providerLogin(ctx: Context, next: Next) {
     const {
       params: { provider: providerName },
     } = ctx;

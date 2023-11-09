@@ -1,3 +1,5 @@
+import 'koa-bodyparser';
+
 import admin from './admin';
 import apiToken from './api-token';
 import authenticatedUser from './authenticated-user';

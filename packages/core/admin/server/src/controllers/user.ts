@@ -1,5 +1,4 @@
 import type { Context } from 'koa';
-import 'koa-bodyparser';
 
 import _ = require('lodash');
 import { errors } from '@strapi/utils';

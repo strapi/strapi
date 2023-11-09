@@ -1,5 +1,4 @@
 import type { Context } from 'koa';
-import 'koa-bodyparser';
 
 import { stringEquals, errors } from '@strapi/utils';
 import { trim, has } from 'lodash/fp';

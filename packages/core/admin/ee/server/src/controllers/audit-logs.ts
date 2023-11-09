@@ -1,7 +1,9 @@
+import type { Context } from 'koa';
+
 import { validateFindMany } from '../validation/audit-logs';
 
 export default {
-  async findMany(ctx: any) {
+  async findMany(ctx: Context) {
     const { query } = ctx.request;
     await validateFindMany(query);
 
@@ -11,7 +13,7 @@ export default {
     ctx.body = body;
   },
 
-  async findOne(ctx: any) {
+  async findOne(ctx: Context) {
     const { id } = ctx.params;
 
     const auditLogs = strapi.container.get('audit-logs');

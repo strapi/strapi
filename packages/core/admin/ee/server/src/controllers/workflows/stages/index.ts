@@ -1,3 +1,5 @@
+import type { Context } from 'koa';
+
 import { Strapi } from '@strapi/types';
 import { mapAsync } from '@strapi/utils';
 import { getService } from '../../../utils';
@@ -28,7 +30,7 @@ export default {
    * List all stages
    * @param {import('koa').BaseContext} ctx - koa context
    */
-  async find(ctx: any) {
+  async find(ctx: Context) {
     const { workflow_id: workflowId } = ctx.params;
     const { populate } = ctx.query;
     const stagesService = getService('stages');
@@ -47,7 +49,7 @@ export default {
    * Get one stage
    * @param {import('koa').BaseContext} ctx - koa context
    */
-  async findById(ctx: any) {
+  async findById(ctx: Context) {
     const { id, workflow_id: workflowId } = ctx.params;
     const { populate } = ctx.query;
     const stagesService = getService('stages');
@@ -76,7 +78,7 @@ export default {
    * @throws {ValidationError} If the `data` object in the request body fails to pass validation.
    * @returns {Promise<void>} A promise that resolves when the entity's stage has been updated.
    */
-  async updateEntity(ctx: any) {
+  async updateEntity(ctx: Context) {
     const stagesService = getService('stages');
     const stagePermissions = getService('stage-permissions');
     const workflowService = getService('workflows');
@@ -130,7 +132,7 @@ export default {
    * @param {string} ctx.params.id - The ID of the entity.
    * @throws {ApplicationError} If review workflows is not activated on the specified model UID.
    */
-  async listAvailableStages(ctx: any) {
+  async listAvailableStages(ctx: Context) {
     const stagePermissions = getService('stage-permissions');
     const workflowService = getService('workflows');
 

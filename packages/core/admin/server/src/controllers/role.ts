@@ -1,5 +1,4 @@
 import type { Context } from 'koa';
-import 'koa-bodyparser';
 import { errors } from '@strapi/utils';
 import {
   validateRoleUpdateInput,

@@ -1,3 +1,5 @@
+import type { Context } from 'koa';
+
 import { Strapi } from '@strapi/types';
 import { update, map, property } from 'lodash/fp';
 import { mapAsync } from '@strapi/utils';
@@ -38,7 +40,7 @@ export default {
    * Create a new workflow
    * @param {import('koa').BaseContext} ctx - koa context
    */
-  async create(ctx: any) {
+  async create(ctx: Context) {
     const { body, query } = ctx.request;
     const { sanitizeCreateInput, sanitizeOutput, sanitizedQuery } = getWorkflowsPermissionChecker(
       { strapi },
@@ -65,7 +67,7 @@ export default {
    * Update a workflow
    * @param {import('koa').BaseContext} ctx - koa context
    */
-  async update(ctx: any) {
+  async update(ctx: Context) {
     const { id } = ctx.params;
     const { body, query } = ctx.request;
     const workflowService = getService('workflows');
@@ -104,7 +106,7 @@ export default {
    * Delete a workflow
    * @param {import('koa').BaseContext} ctx - koa context
    */
-  async delete(ctx: any) {
+  async delete(ctx: Context) {
     const { id } = ctx.params;
     const { query } = ctx.request;
     const workflowService = getService('workflows');
@@ -132,7 +134,7 @@ export default {
    * List all workflows
    * @param {import('koa').BaseContext} ctx - koa context
    */
-  async find(ctx: any) {
+  async find(ctx: Context) {
     const { query } = ctx.request;
     const workflowService = getService('workflows');
     const { sanitizeOutput, sanitizedQuery } = getWorkflowsPermissionChecker(
@@ -159,7 +161,7 @@ export default {
    * max workflow count is reached for the current plan
    * @param {import('koa').BaseContext} ctx - koa context
    */
-  async findById(ctx: any) {
+  async findById(ctx: Context) {
     const { id } = ctx.params;
     const { query } = ctx.request;
     const { sanitizeOutput, sanitizedQuery } = getWorkflowsPermissionChecker(

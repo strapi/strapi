@@ -182,11 +182,9 @@ describe('Admin API Token v2 CRUD (api)', () => {
       type: body.type,
       id: expect.any(Number),
       // @ts-expect-error - Add `expect.toBeISODate()` to jest types
-
       createdAt: expect.toBeISODate(),
       lastUsedAt: null,
       // @ts-expect-error - Add `expect.toBeISODate()` to jest types
-
       updatedAt: expect.toBeISODate(),
       expiresAt: null,
       lifespan: null,

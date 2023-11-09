@@ -1,3 +1,5 @@
+import type { Context } from 'koa';
+
 import {
   validateRoleCreateInput,
   validateRoleDeleteInput,
@@ -10,7 +12,7 @@ export default {
    * Create a new role
    * @param {KoaContext} ctx - koa context
    */
-  async create(ctx: any) {
+  async create(ctx: Context) {
     await validateRoleCreateInput(ctx.request.body);
 
     const roleService = getService('role');
@@ -25,7 +27,7 @@ export default {
    * Delete a role
    * @param {KoaContext} ctx - koa context
    */
-  async deleteOne(ctx: any) {
+  async deleteOne(ctx: Context) {
     const { id } = ctx.params;
 
     await validateRoleDeleteInput(id);
@@ -45,7 +47,7 @@ export default {
    * delete several roles
    * @param {KoaContext} ctx - koa context
    */
-  async deleteMany(ctx: any) {
+  async deleteMany(ctx: Context) {
     const { body } = ctx.request;
 
     await validateRolesDeleteInput(body);

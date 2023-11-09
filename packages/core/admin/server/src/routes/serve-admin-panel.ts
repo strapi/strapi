@@ -1,3 +1,4 @@
+import type { Context, Next } from 'koa';
 import { resolve, join, extname, basename } from 'path';
 import fse from 'fs-extra';
 import koaStatic from 'koa-static';
@@ -10,7 +11,7 @@ const registerAdminPanelRoute = ({ strapi }: { strapi: Strapi }) => {
     buildDir = resolve(__dirname, '../../build');
   }
 
-  const serveAdminMiddleware = async (ctx: any, next: any) => {
+  const serveAdminMiddleware = async (ctx: Context, next: Next) => {
     await next();
 
     if (ctx.method !== 'HEAD' && ctx.method !== 'GET') {
@@ -54,7 +55,7 @@ const registerAdminPanelRoute = ({ strapi }: { strapi: Strapi }) => {
 const serveStatic = (filesDir: any, koaStaticOptions = {}) => {
   const serve = koaStatic(filesDir, koaStaticOptions);
 
-  return async (ctx: any, next: any) => {
+  return async (ctx: Context, next: Next) => {
     const prev = ctx.path;
     const newPath = basename(ctx.path);
 

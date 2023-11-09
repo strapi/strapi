@@ -1,3 +1,5 @@
+import type { Context } from 'koa';
+
 import ee from '@strapi/strapi/dist/utils/ee';
 import _ from 'lodash';
 import { pick, isNil } from 'lodash/fp';
@@ -29,7 +31,7 @@ const hasAdminSeatsAvaialble = async () => {
 };
 
 export default {
-  async create(ctx: any) {
+  async create(ctx: Context) {
     if (!(await hasAdminSeatsAvaialble())) {
       throw new ForbiddenError('License seat limit reached. You cannot create a new user');
     }
@@ -62,7 +64,7 @@ export default {
     ctx.created({ data: userInfo });
   },
 
-  async update(ctx: any) {
+  async update(ctx: Context) {
     const { id } = ctx.params;
     const { body: input } = ctx.request;
 
@@ -96,7 +98,7 @@ export default {
     };
   },
 
-  async isSSOLocked(ctx: any) {
+  async isSSOLocked(ctx: Context) {
     const { user } = ctx.state;
     const isSSOLocked = await isSsoLocked(user);
 

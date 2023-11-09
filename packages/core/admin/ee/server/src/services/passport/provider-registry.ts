@@ -19,8 +19,7 @@ export default () => {
       });
     },
 
-    // @ts-expect-error
-    getAll() {
+    getAll(): unknown[] {
       // @ts-expect-error
       return Array.from(this.values());
     },

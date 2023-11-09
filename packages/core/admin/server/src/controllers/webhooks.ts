@@ -1,5 +1,4 @@
 import type { Context } from 'koa';
-import 'koa-bodyparser';
 
 import _ from 'lodash';
 import { yup, validateYupSchema } from '@strapi/utils';

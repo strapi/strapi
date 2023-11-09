@@ -29,10 +29,10 @@ export const sendDidEditAssignee = async (fromId: any, toId: any) => {
 };
 
 export const sendDidSendReviewWorkflowPropertiesOnceAWeek = async (
-  numberOfActiveWorkflows: any,
-  avgStagesCount: any,
-  maxStagesCount: any,
-  activatedContentTypes: any
+  numberOfActiveWorkflows: number,
+  avgStagesCount: number,
+  maxStagesCount: number,
+  activatedContentTypes: number
 ) => {
   strapi.telemetry.send('didSendReviewWorkflowPropertiesOnceAWeek', {
     groupProperties: {
