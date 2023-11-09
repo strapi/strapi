@@ -10,7 +10,7 @@ import { useIntl } from 'react-intl';
 
 import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
-import { BlocksInput } from '../BlocksEditor/BlocksInput';
+import { BlocksInput } from '../BlocksInput/BlocksInput';
 import { InputUID } from '../InputUID';
 import { RelationInputDataManager } from '../RelationInputDataManager';
 import Wysiwyg from '../Wysiwyg';
