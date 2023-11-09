@@ -1,13 +1,10 @@
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render as renderRTL, within, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
-import { Router } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 
 import { ReleasesPage } from '../Releases';
-
-const history = createMemoryHistory();
 
 const user = userEvent.setup();
 
@@ -15,9 +12,9 @@ const render = () =>
   renderRTL(
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}} defaultLocale="en">
-        <Router history={history}>
+        <MemoryRouter>
           <ReleasesPage />
-        </Router>
+        </MemoryRouter>
       </IntlProvider>
     </ThemeProvider>
   );
