@@ -62,9 +62,7 @@ export default {
       to: '/settings/internationalization',
 
       async Component() {
-        const component = await import(
-          /* webpackChunkName: "i18n-settings-page" */ './pages/SettingsPage'
-        );
+        const component = await import('./pages/SettingsPage');
 
         return component;
       },
@@ -194,9 +192,7 @@ export default {
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
       locales.map((locale) => {
-        return import(
-          /* webpackChunkName: "i18n-translation-[request]" */ `./translations/${locale}.json`
-        )
+        return import(`./translations/${locale}.json`)
           .then(({ default: data }) => {
             return {
               data: prefixPluginTranslations(data, pluginId),

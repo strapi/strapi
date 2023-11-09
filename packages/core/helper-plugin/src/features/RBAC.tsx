@@ -6,18 +6,18 @@ import type { QueryObserverBaseResult } from 'react-query';
 /**
  * This is duplicated from the `@strapi/admin` package.
  */
-type Permission = {
-  id?: Entity.ID;
+interface Permission {
+  id: Entity.ID;
   action: string;
-  subject: string | null;
-  actionParameters?: object;
-  properties?: {
+  actionParameters: object;
+  subject?: string | null;
+  properties: {
     fields?: string[];
     locales?: string[];
-    [key: string]: unknown;
+    [key: string]: any;
   };
-  conditions?: string[];
-};
+  conditions: string[];
+}
 
 /* -------------------------------------------------------------------------------------------------
  * Context

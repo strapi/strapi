@@ -1,7 +1,6 @@
 import type { StrapiCommand } from '../../types';
 import { runAction } from '../../utils/helpers';
 import action from './action';
-
 /**
  * `$ strapi watch-admin`
  */
@@ -12,5 +11,4 @@ const command: StrapiCommand = ({ command }) => {
     .description('Start the admin development server')
     .action(runAction('watch-admin', action));
 };
-
 export default command;

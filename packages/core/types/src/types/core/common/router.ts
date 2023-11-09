@@ -16,9 +16,9 @@ export type RouteConfig = {
 };
 
 export type Route = {
-  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'ALL' | 'OPTIONS' | 'HEAD';
   path: string;
-  handler: string | MiddlewareHandler;
+  handler: string | MiddlewareHandler | MiddlewareHandler[];
   info: RouteInfo;
   config?: RouteConfig;
 };

@@ -38,7 +38,7 @@ const WebhookForm = ({
     async () =>
       (
         await import(
-          '../../../../../../../../../ee/admin/pages/SettingsPage/pages/Webhooks/EditView/components/EventTable'
+          '../../../../../../../../../ee/admin/src/pages/SettingsPage/pages/Webhooks/EditView/components/EventTable'
         )
       ).EventTableEE
   );
