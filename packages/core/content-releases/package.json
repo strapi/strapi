@@ -59,7 +59,7 @@
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "packup watch"
+    "watch": "pack-up watch"
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",

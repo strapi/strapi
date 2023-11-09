@@ -6,7 +6,15 @@ export default {
       path: '/',
       handler: 'release.create',
       config: {
-        policies: ['admin::isAuthenticatedAdmin'],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::content-releases.create']
+            }
+          }
+        ],
       },
     },
     {
@@ -14,7 +22,15 @@ export default {
       path: '/',
       handler: 'release.findMany',
       config: {
-        policies: ['admin::isAuthenticatedAdmin'],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::content-releases.read']
+            }
+          }
+        ],
       },
     },
   ],
