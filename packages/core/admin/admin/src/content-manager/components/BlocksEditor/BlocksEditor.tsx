@@ -11,7 +11,7 @@ import styled from 'styled-components';
 // @ts-expect-error TODO convert to typescript
 import { Hint } from '../Hint';
 
-import { BlocksInput } from './BlocksInput';
+import { BlocksContent } from './BlocksContent';
 import { withLinks } from './plugins/withLinks';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
 import { BlocksToolbar } from './Toolbar';
@@ -182,7 +182,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
             >
               <BlocksToolbar disabled={disabled} />
               <EditorDivider width="100%" />
-              <BlocksInput disabled={disabled} placeholder={formattedPlaceholder} />
+              <BlocksContent disabled={disabled} placeholder={formattedPlaceholder} />
             </InputWrapper>
           </Slate>
           <Hint hint={hint} name={name} error={error} />

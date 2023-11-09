@@ -50,7 +50,7 @@ interface BlocksInputProps {
   placeholder?: string;
 }
 
-const BlocksInput = ({ disabled, placeholder }: BlocksInputProps) => {
+const BlocksContent = ({ disabled, placeholder }: BlocksInputProps) => {
   const theme = useTheme();
   const editor = useSlate();
   const blocksRef = React.useRef<HTMLDivElement>(null);
@@ -190,4 +190,4 @@ const BlocksInput = ({ disabled, placeholder }: BlocksInputProps) => {
   );
 };
 
-export { BlocksInput };
+export { BlocksContent };
