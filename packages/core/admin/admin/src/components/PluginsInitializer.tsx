@@ -8,8 +8,7 @@ import {
 import produce from 'immer';
 import set from 'lodash/set';
 
-// @ts-expect-error pages/Admin has not been converted yet.
-import Admin from '../pages/Admin';
+import { Admin } from '../pages/Admin';
 
 /**
  * TODO: this isn't great, and we really should focus on fixing this.

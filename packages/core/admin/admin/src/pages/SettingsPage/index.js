@@ -6,8 +6,8 @@ import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { Redirect, Route, Switch, useParams } from 'react-router-dom';
 
-import { useSettingsMenu } from '../../hooks';
 import { useEnterprise } from '../../hooks/useEnterprise';
+import { useSettingsMenu } from '../../hooks/useSettingsMenu';
 import { createRoute } from '../../utils/createRoute';
 
 import SettingsNav from './components/SettingsNav';
@@ -23,7 +23,7 @@ export function SettingsPage() {
   const { isLoading, menu } = useSettingsMenu();
   const routes = useEnterprise(
     ROUTES_CE,
-    async () => (await import('../../../../ee/admin/pages/SettingsPage/constants')).ROUTES_EE,
+    async () => (await import('../../../../ee/admin/src/pages/SettingsPage/constants')).ROUTES_EE,
     {
       combine(ceRoutes, eeRoutes) {
         return [...ceRoutes, ...eeRoutes];

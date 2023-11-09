@@ -223,7 +223,7 @@ const NpsSurvey = () => {
       rating: npsSurveyRating,
       comment: npsSurveyFeedback,
       environment: currentEnvironment,
-      version: strapiVersion,
+      version: strapiVersion ?? undefined,
       license: window.strapi.projectType,
     });
   };
