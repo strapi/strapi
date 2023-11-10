@@ -1,10 +1,10 @@
 import { setCreatorFields } from '@strapi/utils';
 import type { LoadedStrapi } from '@strapi/types';
 import { RELEASE_MODEL_UID } from '../constants';
-import type { ReleaseData, UserInfo } from '../types';
+import type { ReleaseCreateArgs, UserInfo } from '../types';
 
 const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
-  async create(releaseData: ReleaseData, { user }: { user: UserInfo }) {
+  async create(releaseData: ReleaseCreateArgs, { user }: { user: UserInfo }) {
     const releaseWithCreatorFields = await setCreatorFields({ user })(releaseData);
 
     const release = await strapi.entityService.create(RELEASE_MODEL_UID, {

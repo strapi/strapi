@@ -39,6 +39,7 @@ export default {
       relation: 'manyToOne',
       target: RELEASE_MODEL_UID,
       inversedBy: 'actions',
+      required: true,
     },
   },
 };

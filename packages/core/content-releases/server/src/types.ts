@@ -1,6 +1,8 @@
+import { Entity } from '@strapi/types';
+
 // @TODO: Probably user & role types should be imported from a common package
 interface RoleInfo {
-  id: number | string;
+  id: Entity.ID;
   name: string;
   code: string;
   description?: string;
@@ -8,7 +10,7 @@ interface RoleInfo {
 }
 
 export interface UserInfo {
-  id: number | string;
+  id: Entity.ID;
   firstname: string;
   lastname?: string;
   username?: null | string;
@@ -21,13 +23,29 @@ export interface UserInfo {
   updatedAt: string;
 }
 
-export interface ReleaseData {
-  name: string;
-  actions?: ReleaseActionData[];
+interface ReleaseActionEntry {
+  id: Entity.ID;
+  contentType: string;
 }
 
-interface ReleaseActionData {
+// TODO: Could we not have the types generated from the schema?
+interface ReleaseAction {
   type: 'publish' | 'unpublish';
-  entry: number | string;
+  entry: ReleaseActionEntry;
   contentType: string;
+  release: Release;
+}
+
+// TODO: Could we not have the types generated from the schema?
+export interface Release {
+  id: Entity.ID;
+  name: string;
+  releasedAt: Date;
+  actions: ReleaseAction[];
+}
+
+export type ReleaseCreateArgs = Pick<Release, 'name'>;
+
+export interface ReleaseActionCreateArgs extends Pick<ReleaseAction, 'type' | 'entry'> {
+  releaseId: number;
 }
