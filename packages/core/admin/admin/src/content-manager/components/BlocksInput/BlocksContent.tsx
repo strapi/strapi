@@ -7,21 +7,25 @@ import {
   type RenderLeafProps,
   Editable,
 } from 'slate-react';
-import { type DefaultTheme, useTheme } from 'styled-components';
+import styled from 'styled-components';
 
 import { useBlocksEditorContext } from './BlocksEditor';
 import { type BlocksStore, useBlocksStore } from './hooks/useBlocksStore';
 import { type ModifiersStore, useModifiersStore } from './hooks/useModifiersStore';
 import { getEntries } from './utils/types';
 
-const getEditorStyle = (theme: DefaultTheme): React.CSSProperties => ({
+const StyledEditable = styled(Editable)`
   // The outline style is set on the wrapper with :focus-within
-  outline: 'none',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spaces[2],
-  height: '100%',
-});
+  outline: none;
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spaces[2]};
+  height: 100%;
+
+  > *:last-child {
+    padding-bottom: ${({ theme }) => theme.spaces[3]};
+  }
+`;
 
 const baseRenderLeaf = (props: RenderLeafProps, modifiers: ModifiersStore) => {
   // Recursively wrap the children for each active modifier
@@ -50,7 +54,6 @@ interface BlocksInputProps {
 }
 
 const BlocksContent = ({ placeholder }: BlocksInputProps) => {
-  const theme = useTheme();
   const { editor, disabled } = useBlocksEditorContext('BlocksContent');
   const blocksRef = React.useRef<HTMLDivElement>(null);
 
@@ -170,16 +173,13 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
       background="neutral0"
       color="neutral800"
       lineHeight={6}
-      hasRadius
       paddingLeft={4}
       paddingRight={4}
-      marginTop={3}
-      marginBottom={3}
+      paddingTop={3}
     >
-      <Editable
+      <StyledEditable
         readOnly={disabled}
         placeholder={placeholder}
-        style={getEditorStyle(theme)}
         renderElement={renderElement}
         renderLeaf={renderLeaf}
         onKeyDown={handleKeyDown}

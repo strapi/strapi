@@ -169,6 +169,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
             height="512px"
             disabled={disabled}
             hasError={Boolean(error)}
+            style={{ overflow: 'hidden' }}
           >
             <BlocksToolbar />
             <EditorDivider width="100%" />
