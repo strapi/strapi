@@ -4,12 +4,12 @@ import { configureStore } from '@reduxjs/toolkit';
 import { fixtures } from '@strapi/admin-test-utils';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { useRBAC } from '@strapi/helper-plugin';
-import { fireEvent, getByLabelText, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 
-import { SingleSignOn } from '../index';
+import { SingleSignOnPage } from '../SingleSignOnPage';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -19,8 +19,8 @@ jest.mock('@strapi/helper-plugin', () => ({
   useFocusWhenNavigate: jest.fn(),
 }));
 
-const setup = (props) =>
-  render(<SingleSignOn {...props} />, {
+const setup = () =>
+  render(<SingleSignOnPage />, {
     wrapper({ children }) {
       const client = new QueryClient({
         defaultOptions: {
@@ -69,48 +69,47 @@ describe('Admin | ee | SettingsPage | SSO', () => {
   });
 
   it('renders and matches the snapshot', async () => {
+    // @ts-expect-error – mocking
     useRBAC.mockImplementation(() => ({
       isLoading: false,
       allowedActions: { canUpdate: true, canReadRoles: true },
     }));
+    const { queryByText } = setup();
 
-    const { getByText } = setup();
-
-    await waitFor(() =>
-      expect(getByText('Create new user on SSO login if no account exists')).toBeInTheDocument()
-    );
+    await waitFor(() => expect(queryByText(/Loading/)).not.toBeInTheDocument());
+    expect(
+      await screen.findByText('Create new user on SSO login if no account exists')
+    ).toBeInTheDocument();
   });
 
   it('should disable the form when there is no change', async () => {
+    // @ts-expect-error – mocking
     useRBAC.mockImplementation(() => ({
       isLoading: false,
       allowedActions: { canUpdate: true, canReadRoles: true },
     }));
+    const { queryByText } = setup();
 
-    const { getByTestId, getByText } = setup();
+    await waitFor(() => expect(queryByText(/Loading/)).not.toBeInTheDocument());
+    expect(
+      await screen.findByText('Create new user on SSO login if no account exists')
+    ).toBeInTheDocument();
 
-    await waitFor(() =>
-      expect(getByText('Create new user on SSO login if no account exists')).toBeInTheDocument()
-    );
-
-    expect(getByTestId('save-button')).toHaveAttribute('aria-disabled');
+    expect(screen.getByTestId('save-button')).toHaveAttribute('aria-disabled');
   });
 
   it('should not disable the form when there is a change', async () => {
+    // @ts-expect-error – mocking
     useRBAC.mockImplementation(() => ({
       isLoading: false,
       allowedActions: { canUpdate: true, canReadRoles: true },
     }));
 
-    const { container, getByTestId } = setup();
-    let el;
+    setup();
+    const el = await screen.findByTestId('autoRegister');
 
-    await waitFor(() => {
-      return (el = getByLabelText(container, 'autoRegister'));
-    });
+    if (el) fireEvent.click(el);
 
-    fireEvent.click(el);
-
-    expect(getByTestId('save-button')).not.toBeDisabled();
+    expect(await screen.findByTestId('save-button')).toBeEnabled();
   });
 });

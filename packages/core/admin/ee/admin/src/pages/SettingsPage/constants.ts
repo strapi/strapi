@@ -57,10 +57,9 @@ export const ROUTES_EE: Route[] = [
     ? [
         {
           async Component() {
-            // @ts-expect-error – No types, yet.
-            const component = await import('./pages/SingleSignOn');
+            const { ProtectedSSO } = await import('./pages/SingleSignOnPage');
 
-            return component;
+            return ProtectedSSO;
           },
           to: '/settings/single-sign-on',
           exact: true,
