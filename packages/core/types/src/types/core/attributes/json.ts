@@ -14,7 +14,7 @@ type JSONValue = string | number | boolean | null | JSONObject | JSONArray;
 type JSONArray = Array<JSONValue>;
 
 interface JSONObject {
-  [x: string]: JSONValue;
+  [key: string]: JSONValue;
 }
 
 export type JsonValue<T extends JSONValue = JSONValue> = T;
