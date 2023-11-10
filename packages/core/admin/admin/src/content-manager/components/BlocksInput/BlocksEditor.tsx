@@ -9,8 +9,16 @@ import { withHistory } from 'slate-history';
 import { Slate, withReact, ReactEditor, useSlate } from 'slate-react';
 import styled from 'styled-components';
 
+import { codeBlocks } from './blocks/Code';
+import { headingBlocks } from './blocks/Heading';
+import { imageBlocks } from './blocks/Image';
+import { linkBlocks } from './blocks/Link';
+import { listBlocks } from './blocks/List';
+import { paragraphBlocks } from './blocks/Paragraph';
+import { quoteBlocks } from './blocks/Quote';
 import { BlocksContent } from './BlocksContent';
 import { BlocksToolbar } from './BlocksToolbar';
+import { type BlocksStore } from './hooks/useBlocksStore';
 import { withLinks } from './plugins/withLinks';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
 
@@ -19,7 +27,7 @@ import { withStrapiSchema } from './plugins/withStrapiSchema';
  * -----------------------------------------------------------------------------------------------*/
 
 interface BlocksEditorContextValue {
-  // TODO: context data will go here
+  blocks: Partial<BlocksStore>;
 }
 
 const [BlocksEditorProvider, usePartialBlocksEditorContext] =
@@ -155,6 +163,16 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
       }
     };
 
+    const blocks: BlocksStore = {
+      ...paragraphBlocks,
+      ...headingBlocks,
+      ...listBlocks,
+      ...linkBlocks,
+      ...imageBlocks,
+      ...quoteBlocks,
+      ...codeBlocks,
+    };
+
     return (
       <Slate
         editor={editor}
@@ -162,7 +180,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
         onChange={handleSlateChange}
         key={key}
       >
-        <BlocksEditorProvider>
+        <BlocksEditorProvider blocks={blocks}>
           <InputWrapper
             direction="column"
             alignItems="flex-start"
