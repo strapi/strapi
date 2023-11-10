@@ -46,13 +46,12 @@ const baseRenderElement = (props: RenderElementProps, blocks: BlocksStore) => {
 };
 
 interface BlocksInputProps {
-  disabled: boolean;
   placeholder?: string;
 }
 
-const BlocksContent = ({ disabled, placeholder }: BlocksInputProps) => {
+const BlocksContent = ({ placeholder }: BlocksInputProps) => {
   const theme = useTheme();
-  const { editor } = useBlocksEditorContext('BlocksContent');
+  const { editor, disabled } = useBlocksEditorContext('BlocksContent');
   const blocksRef = React.useRef<HTMLDivElement>(null);
 
   // Create renderLeaf function based on the modifiers store

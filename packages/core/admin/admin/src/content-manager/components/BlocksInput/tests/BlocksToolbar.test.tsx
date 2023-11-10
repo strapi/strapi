@@ -135,7 +135,7 @@ const Wrapper = ({
     <ThemeProvider theme={lightTheme}>
       <IntlProvider messages={{}} locale="en">
         <Slate initialValue={initialValue} editor={editor}>
-          <BlocksEditorProvider>{children}</BlocksEditorProvider>
+          <BlocksEditorProvider disabled={false}>{children}</BlocksEditorProvider>
         </Slate>
       </IntlProvider>
     </ThemeProvider>
@@ -159,7 +159,7 @@ const setup = (data: Descendant[] = defaultInitialValue) => {
   // so that we have no side effects due to the previous selection or children
   baseEditor = createEditor();
 
-  render(<BlocksToolbar disabled={false} />, {
+  render(<BlocksToolbar />, {
     wrapper: ({ children }) => <Wrapper initialValue={data}>{children}</Wrapper>,
   });
 };
