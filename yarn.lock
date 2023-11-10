@@ -4394,6 +4394,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fastify/busboy@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@fastify/busboy@npm:2.0.0"
+  checksum: 6a2366d06b82aac1069b8323792f76f7a8fca02533cb3745fcd218d8f0f953dc4dbef057287237414658cd43f8dede0846ef33398999e3dbe54ddaeefec71c0a
+  languageName: node
+  linkType: hard
+
 "@floating-ui/core@npm:^1.0.1":
   version: 1.0.1
   resolution: "@floating-ui/core@npm:1.0.1"
@@ -9819,6 +9826,7 @@ __metadata:
     supertest: "npm:6.3.3"
     tsconfig: "npm:4.15.1"
     typescript: "npm:5.2.2"
+    undici: "npm:5.27.2"
     yup: "npm:0.32.9"
   bin:
     strapi: ./bin/strapi.js
@@ -9858,6 +9866,7 @@ __metadata:
     node-schedule: "npm:2.1.0"
     tsconfig: "npm:4.15.1"
     typescript: "npm:5.2.2"
+    undici: "npm:5.27.2"
   languageName: unknown
   linkType: soft
 
@@ -32143,6 +32152,15 @@ __metadata:
   version: 0.1.2
   resolution: "unc-path-regex@npm:0.1.2"
   checksum: a05fa2006bf4606051c10fc7968f08ce7b28fa646befafa282813aeb1ac1a56f65cb1b577ca7851af2726198d59475bb49b11776036257b843eaacee2860a4ec
+  languageName: node
+  linkType: hard
+
+"undici@npm:5.27.2":
+  version: 5.27.2
+  resolution: "undici@npm:5.27.2"
+  dependencies:
+    "@fastify/busboy": "npm:^2.0.0"
+  checksum: 2bf96b102fb84568fb235bdf6e1e352e5d2bf99566b243cd1b13b41578bf9dd5c7c3d3d82192b20a3fec61fe7a528f9d80cd5b4555ce65405c06c69b023013de
   languageName: node
   linkType: hard
 
