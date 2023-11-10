@@ -63,7 +63,7 @@ describe('Utils', () => {
         secretAccessKey,
       });
     });
-    test('Does not throw an error when crednetials are not present', () => {
+    test('Does not throw an error when credentials are not present', () => {
       const options: InitOptions = {
         s3Options: {
           ...defaultOptions,
