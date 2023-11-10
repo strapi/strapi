@@ -14,6 +14,7 @@ import type { BuildOptions } from './build';
 import { DevelopOptions } from './develop';
 import { getEnabledPlugins } from './core/plugins';
 import { Strapi } from '@strapi/types';
+import { AppFile, loadUserAppFile } from './core/admin-customisations';
 
 interface BuildContext {
   /**
@@ -25,6 +26,10 @@ interface BuildContext {
    * this path so all asset paths will be rewritten accordingly
    */
   basePath: string;
+  /**
+   * The customisations defined by the user in their app.js file
+   */
+  customisations?: AppFile;
   /**
    * The current working directory
    */
@@ -166,9 +171,12 @@ const createBuildContext = async ({
 
   const target = browserslist.loadConfig({ path: cwd }) ?? DEFAULT_BROWSERSLIST;
 
+  const customisations = await loadUserAppFile(strapiInstance.dirs.app.root);
+
   const buildContext = {
     appDir: strapiInstance.dirs.app.root,
     basePath: `${adminPath}/`,
+    customisations,
     cwd,
     distDir,
     distPath,
