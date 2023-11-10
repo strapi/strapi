@@ -1,5 +1,7 @@
-import { Common } from '../../..';
 import { Pick } from '.';
+import { Common } from '../../..';
+
+// TODO: add auth to params
 
 /**
  * Document Service specific method params
@@ -83,4 +85,20 @@ export type Publish<TContentTypeUID extends Common.UID.ContentType> = Pick<
 export type Unpublish<TContentTypeUID extends Common.UID.ContentType> = Pick<
   TContentTypeUID,
   'filters' | 'status' | 'locale'
+>;
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export type With<TContentTypeUID extends Common.UID.ContentType> = Pick<
+  TContentTypeUID,
+  | 'filters'
+  | 'status'
+  | 'locale'
+  | 'fields'
+  | '_q'
+  | 'pagination:offset'
+  | 'sort'
+  | 'populate'
+  | 'status'
+  | 'locale'
+  | 'plugin'
 >;

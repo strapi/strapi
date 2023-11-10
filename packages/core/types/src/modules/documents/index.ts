@@ -1,14 +1,14 @@
 import { Common } from '../..';
 import { ID, type DocumentService } from './document-service';
+import type * as Middleware from './middleware';
 import type * as Params from './params/document-service';
 import type * as Result from './result/document-service';
-import type * as Middleware from './middleware';
 
 export { ID, DocumentService as Service } from './document-service';
 export type * as Middleware from './middleware';
 export * as Params from './params';
-export * from './result';
 export * from './plugin';
+export * from './result';
 
 export type RepositoryInstance<
   TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType
@@ -28,7 +28,7 @@ export type RepositoryInstance<
 
   delete: <TParams extends Params.Delete<TContentTypeUID>>(
     documentId: ID,
-    params: TParams
+    params?: TParams
   ) => Result.Delete<TContentTypeUID, TParams>;
 
   deleteMany: <TParams extends Params.DeleteMany<TContentTypeUID>>(
@@ -49,16 +49,16 @@ export type RepositoryInstance<
     params: TParams
   ) => Result.Update<TContentTypeUID, TParams>;
 
-  count: <TParams extends Params.Count<TContentTypeUID>>(params: TParams) => Result.Count;
+  count: <TParams extends Params.Count<TContentTypeUID>>(params?: TParams) => Result.Count;
 
   publish: <TParams extends Params.Publish<TContentTypeUID>>(
     documentId: ID,
-    params: TParams
+    params?: TParams
   ) => Result.Publish;
 
   unpublish: <TParams extends Params.Unpublish<TContentTypeUID>>(
     documentId: ID,
-    params: TParams
+    params?: TParams
   ) => Result.Unpublish;
 
   /** Add a middleware for a specific uid
@@ -77,7 +77,7 @@ export type RepositoryInstance<
   ) => ThisType<RepositoryInstance<TContentTypeUID>>;
 
   /**
-   * `.with()` instantiates a new document service
+   * `.with()` instantiates a new document repository with default parameters
    * @example Add default values to your document service
    *  // with the given default values
    *  const enDocs = strapi.documents.with({ locales: ['en']})
@@ -89,7 +89,9 @@ export type RepositoryInstance<
    * @example Apply sanitization to your document service
    * const sanitizedDocs = strapi.documents.with({ auth })
    */
-  with(params: object): any;
+  with: <TParams extends Params.With<TContentTypeUID>>(
+    params?: TParams
+  ) => RepositoryInstance<TContentTypeUID>;
 };
 
 export type Repository = {
