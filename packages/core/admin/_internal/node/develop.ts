@@ -108,7 +108,9 @@ const develop = async ({
       timer.start('compilingTS');
       const compilingTsSpinner = logger.spinner(`Compiling TS`).start();
 
-      tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
+      // we need to compile twice, the first time to generate the types while expecting errors because they are missing
+      await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: true } });
+      await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
 
       const compilingDuration = timer.end('compilingTS');
       compilingTsSpinner.text = `Compiling TS (${compilingDuration}ms)`;
