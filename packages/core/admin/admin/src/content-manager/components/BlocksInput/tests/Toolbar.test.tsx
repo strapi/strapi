@@ -10,6 +10,7 @@ import { IntlProvider } from 'react-intl';
 import { type Descendant, type Editor, type Location, createEditor, Transforms } from 'slate';
 import { Slate, withReact, ReactEditor } from 'slate-react';
 
+import { BlocksEditorProvider } from '../BlocksEditor';
 import { BlocksToolbar } from '../Toolbar';
 
 const mockMediaLibraryTitle = 'dialog component';
@@ -134,7 +135,7 @@ const Wrapper = ({
     <ThemeProvider theme={lightTheme}>
       <IntlProvider messages={{}} locale="en">
         <Slate initialValue={initialValue} editor={editor}>
-          {children}
+          <BlocksEditorProvider>{children}</BlocksEditorProvider>
         </Slate>
       </IntlProvider>
     </ThemeProvider>

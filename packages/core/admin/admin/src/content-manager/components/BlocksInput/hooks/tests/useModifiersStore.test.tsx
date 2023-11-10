@@ -9,6 +9,7 @@ import { IntlProvider } from 'react-intl';
 import { createEditor } from 'slate';
 import { Slate, withReact } from 'slate-react';
 
+import { BlocksEditorProvider } from '../../BlocksEditor';
 import { useModifiersStore } from '../useModifiersStore';
 
 const initialValue: Attribute.BlocksValue = [
@@ -25,7 +26,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
     <ThemeProvider theme={lightTheme}>
       <IntlProvider messages={{}} locale="en">
         <Slate initialValue={initialValue} editor={editor}>
-          {children}
+          <BlocksEditorProvider>{children}</BlocksEditorProvider>
         </Slate>
       </IntlProvider>
     </ThemeProvider>

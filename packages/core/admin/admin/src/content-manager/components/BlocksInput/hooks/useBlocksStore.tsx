@@ -33,11 +33,12 @@ import {
 } from '@strapi/icons';
 import { type MessageDescriptor, useIntl } from 'react-intl';
 import { type Element, type Text, Node, Editor, Path, Transforms, Range } from 'slate';
-import { type RenderElementProps, useSlate, ReactEditor } from 'slate-react';
+import { type RenderElementProps, ReactEditor } from 'slate-react';
 import styled, { css } from 'styled-components';
 
 // @ts-expect-error TODO migrate this file
 import { composeRefs } from '../../../utils';
+import { useBlocksEditorContext } from '../BlocksEditor';
 import { editLink, removeLink } from '../utils/links';
 import { type Block } from '../utils/types';
 
@@ -311,7 +312,7 @@ const CustomButton = styled(Button)`
 const Link = React.forwardRef<HTMLAnchorElement, RenderElementProps>(
   ({ element, children, attributes }, forwardedRef) => {
     const { formatMessage } = useIntl();
-    const editor = useSlate();
+    const { editor } = useBlocksEditorContext('Link');
     const path = ReactEditor.findPath(editor, element);
     const [popoverOpen, setPopoverOpen] = React.useState(
       editor.lastInsertedLinkPath ? Path.equals(path, editor.lastInsertedLinkPath) : false

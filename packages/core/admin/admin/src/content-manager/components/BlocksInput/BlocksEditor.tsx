@@ -1,17 +1,45 @@
 import * as React from 'react';
 
+import { createContext } from '@radix-ui/react-context';
 import { InputWrapper, Divider } from '@strapi/design-system';
 import { type Attribute } from '@strapi/types';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { type Editor, type Descendant, createEditor } from 'slate';
 import { withHistory } from 'slate-history';
-import { Slate, withReact, ReactEditor } from 'slate-react';
+import { Slate, withReact, ReactEditor, useSlate } from 'slate-react';
 import styled from 'styled-components';
 
 import { BlocksContent } from './BlocksContent';
 import { withLinks } from './plugins/withLinks';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
 import { BlocksToolbar } from './Toolbar';
+
+/* -------------------------------------------------------------------------------------------------
+ * BlocksEditorProvider
+ * -----------------------------------------------------------------------------------------------*/
+
+interface BlocksEditorContextValue {
+  // TODO: context data will go here
+}
+
+const [BlocksEditorProvider, usePartialBlocksEditorContext] =
+  createContext<BlocksEditorContextValue>('BlocksEditor');
+
+function useBlocksEditorContext(
+  consumerName: string
+): BlocksEditorContextValue & { editor: Editor } {
+  const context = usePartialBlocksEditorContext(consumerName);
+  const editor = useSlate();
+
+  return {
+    ...context,
+    editor,
+  };
+}
+
+/* -------------------------------------------------------------------------------------------------
+ * BlocksEditor
+ * -----------------------------------------------------------------------------------------------*/
 
 const EditorDivider = styled(Divider)`
   background: ${({ theme }) => theme.colors.neutral200};
@@ -96,9 +124,10 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
       placeholder &&
       formatMessage({ id: placeholder.id, defaultMessage: placeholder.defaultMessage });
 
-    /** Editable is not able to hold the ref, https://github.com/ianstormtaylor/slate/issues/4082
-     *  so with "useImperativeHandle" we can use ReactEditor methods to expose to the parent above
-     *  also not passing forwarded ref here, gives console warning.
+    /**
+     * Editable is not able to hold the ref, https://github.com/ianstormtaylor/slate/issues/4082
+     * so with "useImperativeHandle" we can use ReactEditor methods to expose to the parent above
+     * also not passing forwarded ref here, gives console warning.
      */
     React.useImperativeHandle(
       forwardedRef,
@@ -133,20 +162,22 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
         onChange={handleSlateChange}
         key={key}
       >
-        <InputWrapper
-          direction="column"
-          alignItems="flex-start"
-          height="512px"
-          disabled={disabled}
-          hasError={Boolean(error)}
-        >
-          <BlocksToolbar disabled={disabled} />
-          <EditorDivider width="100%" />
-          <BlocksContent disabled={disabled} placeholder={formattedPlaceholder} />
-        </InputWrapper>
+        <BlocksEditorProvider>
+          <InputWrapper
+            direction="column"
+            alignItems="flex-start"
+            height="512px"
+            disabled={disabled}
+            hasError={Boolean(error)}
+          >
+            <BlocksToolbar disabled={disabled} />
+            <EditorDivider width="100%" />
+            <BlocksContent disabled={disabled} placeholder={formattedPlaceholder} />
+          </InputWrapper>
+        </BlocksEditorProvider>
       </Slate>
     );
   }
 );
 
-export { BlocksEditor };
+export { BlocksEditor, BlocksEditorProvider, useBlocksEditorContext };

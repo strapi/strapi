@@ -7,9 +7,10 @@ import { Link } from '@strapi/icons';
 import { Attribute } from '@strapi/types';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { type Text, Editor, Transforms, Element as SlateElement, Element, Node } from 'slate';
-import { ReactEditor, useSlate } from 'slate-react';
+import { ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
+import { useBlocksEditorContext } from './BlocksEditor';
 import {
   type BlocksStore,
   type SelectorBlockKey,
@@ -91,7 +92,7 @@ const ToolbarButton = ({
   disabled,
   handleClick,
 }: ToolbarButtonProps) => {
-  const editor = useSlate();
+  const { editor } = useBlocksEditorContext('ToolbarButton');
   const { formatMessage } = useIntl();
   const labelMessage = formatMessage(label);
 
@@ -213,7 +214,7 @@ const pick = <T extends object, K extends keyof T>(object: T, keys: K[]): Pick<T
 };
 
 const ImageDialog = ({ handleClose }: { handleClose: () => void }) => {
-  const editor = useSlate();
+  const { editor } = useBlocksEditorContext('ImageDialog');
   const { components } = useLibrary();
 
   if (!components) return null;
@@ -327,7 +328,7 @@ const insertEmptyBlockAtLast = (editor: Editor) => {
 };
 
 const BlocksDropdown = ({ disabled }: { disabled: boolean }) => {
-  const editor = useSlate();
+  const { editor } = useBlocksEditorContext('BlocksDropdown');
   const { formatMessage } = useIntl();
   const [isMediaLibraryVisible, setIsMediaLibraryVisible] = React.useState(false);
 
@@ -543,7 +544,7 @@ interface ListButtonProps {
 }
 
 const ListButton = ({ block, disabled }: ListButtonProps) => {
-  const editor = useSlate();
+  const { editor } = useBlocksEditorContext('ListButton');
 
   const { icon, matchNode, value, label } = block;
   const { format } = value as { format: Block<'list'>['format'] };
@@ -570,7 +571,7 @@ interface LinkButtonProps {
 }
 
 const LinkButton = ({ disabled }: LinkButtonProps) => {
-  const editor = useSlate();
+  const { editor } = useBlocksEditorContext('LinkButton');
 
   const isLinkActive = () => {
     const { selection } = editor;
@@ -643,7 +644,7 @@ interface BlocksToolbarProps {
 const BlocksToolbar = ({ disabled }: BlocksToolbarProps) => {
   const modifiers = useModifiersStore();
   const blocks = useBlocksStore();
-  const editor = useSlate();
+  const { editor } = useBlocksEditorContext('BlocksToolbar');
 
   /**
    * The modifier buttons are disabled when an image is selected.
