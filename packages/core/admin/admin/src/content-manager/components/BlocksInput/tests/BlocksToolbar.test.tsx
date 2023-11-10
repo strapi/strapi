@@ -11,7 +11,7 @@ import { type Descendant, type Editor, type Location, createEditor, Transforms }
 import { Slate, withReact, ReactEditor } from 'slate-react';
 
 import { BlocksEditorProvider } from '../BlocksEditor';
-import { BlocksToolbar } from '../Toolbar';
+import { BlocksToolbar } from '../BlocksToolbar';
 
 const mockMediaLibraryTitle = 'dialog component';
 const mockMediaLibrarySubmitButton = 'upload images';

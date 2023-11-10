@@ -10,9 +10,9 @@ import { Slate, withReact, ReactEditor, useSlate } from 'slate-react';
 import styled from 'styled-components';
 
 import { BlocksContent } from './BlocksContent';
+import { BlocksToolbar } from './BlocksToolbar';
 import { withLinks } from './plugins/withLinks';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
-import { BlocksToolbar } from './Toolbar';
 
 /* -------------------------------------------------------------------------------------------------
  * BlocksEditorProvider
