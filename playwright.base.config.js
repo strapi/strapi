@@ -74,7 +74,7 @@ const createConfig = ({ port, testDir, appDir }) => ({
   webServer: {
     command: `cd ${appDir} && yarn develop`,
     url: `http://127.0.0.1:${port}`,
-    timeout: 30 * 1000,
+    timeout: 60 * 1000,
     reuseExistingServer: true,
     stdout: 'pipe',
   },

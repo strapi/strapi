@@ -119,14 +119,6 @@ yargs
               const envFile = (await fs.readFile(pathToEnv)).toString();
               const envWithoutPort = envFile.replace('PORT=1337', '');
               await fs.writeFile(pathToEnv, envWithoutPort);
-              /**
-               * Always build! Just incase.
-               */
-              console.log(`building admin panel for test app at path: ${chalk.bold(appPath)}`);
-              await execa('yarn', ['strapi', 'build'], {
-                stdio: 'inherit',
-                cwd: appPath,
-              });
             })
           );
 

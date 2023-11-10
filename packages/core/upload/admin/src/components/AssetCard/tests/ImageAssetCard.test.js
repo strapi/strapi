@@ -29,6 +29,7 @@ describe('ImageAssetCard', () => {
           selected={false}
           onSelect={jest.fn()}
           onEdit={jest.fn()}
+          isUrlSigned={false}
         />
       </ThemeProvider>
     );

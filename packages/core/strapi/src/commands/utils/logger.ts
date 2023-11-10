@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import ora from 'ora';
 
 export interface LoggerOptions {
   silent?: boolean;
@@ -14,6 +15,7 @@ export interface Logger {
   warn: (...args: unknown[]) => void;
   error: (...args: unknown[]) => void;
   log: (...args: unknown[]) => void;
+  spinner: (text: string) => Pick<ora.Ora, 'succeed' | 'fail' | 'start' | 'text'>;
 }
 
 const createLogger = (options: LoggerOptions = {}): Logger => {
@@ -84,6 +86,26 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
         chalk.red(`[ERROR]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
         ...args
       );
+    },
+
+    // @ts-expect-error – returning a subpart of ora is fine because the types tell us what is what.
+    spinner(text: string) {
+      if (silent) {
+        return {
+          succeed() {
+            return this;
+          },
+          fail() {
+            return this;
+          },
+          start() {
+            return this;
+          },
+          text: '',
+        };
+      }
+
+      return ora(text);
     },
   };
 };

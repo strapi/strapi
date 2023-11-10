@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-graphql",
-  "version": "4.14.5",
+  "version": "4.15.1",
   "description": "Adds GraphQL endpoint with default API methods.",
   "repository": {
     "type": "git",
@@ -20,19 +20,43 @@
       "url": "https://strapi.io"
     }
   ],
+  "exports": {
+    "./strapi-admin": {
+      "types": "./dist/admin/index.d.ts",
+      "source": "./admin/src/index.ts",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.js"
+    },
+    "./strapi-server": {
+      "types": "./dist/server/index.d.ts",
+      "source": "./server/src/index.ts",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "./dist",
+    "strapi-server.js"
+  ],
   "scripts": {
-    "lint": "run -T eslint ."
+    "build": "strapi plugin:build --force",
+    "clean": "run -T rimraf ./dist",
+    "lint": "run -T eslint .",
+    "prepublishOnly": "yarn clean && yarn build",
+    "watch": "strapi plugin:watch"
   },
   "dependencies": {
     "@graphql-tools/schema": "8.5.1",
     "@graphql-tools/utils": "^8.13.1",
-    "@strapi/design-system": "1.13.0",
-    "@strapi/helper-plugin": "4.14.5",
+    "@strapi/design-system": "1.13.1",
+    "@strapi/helper-plugin": "4.15.1",
     "@strapi/icons": "1.13.0",
-    "@strapi/utils": "4.14.5",
+    "@strapi/utils": "4.15.1",
     "apollo-server-core": "3.12.1",
     "apollo-server-koa": "3.10.0",
-    "glob": "7.2.3",
     "graphql": "^15.5.1",
     "graphql-depth-limit": "^1.1.0",
     "graphql-playground-middleware-koa": "^1.6.21",
@@ -44,12 +68,19 @@
     "pluralize": "8.0.0"
   },
   "devDependencies": {
+    "@strapi/strapi": "4.15.1",
+    "@strapi/types": "4.15.1",
+    "@types/graphql-depth-limit": "1.1.5",
+    "@types/graphql-upload": "8.0.12",
     "cross-env": "^7.0.3",
+    "eslint-config-custom": "4.15.1",
     "koa": "2.13.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "5.3.4",
-    "styled-components": "5.3.3"
+    "styled-components": "5.3.3",
+    "tsconfig": "4.15.1",
+    "typescript": "5.2.2"
   },
   "peerDependencies": {
     "@strapi/strapi": "^4.0.0",

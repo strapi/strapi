@@ -20,7 +20,9 @@ const createHTTPServer = (strapi: Strapi, koaApp: Koa): Server => {
     return handler(req, res);
   };
 
-  const server: http.Server = http.createServer(listener);
+  const options = strapi.config.get<http.ServerOptions>('server.http.serverOptions', {});
+
+  const server: http.Server = http.createServer(options, listener);
 
   server.on('connection', (connection) => {
     connections.add(connection);
