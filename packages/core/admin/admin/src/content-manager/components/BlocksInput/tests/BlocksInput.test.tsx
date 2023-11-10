@@ -38,7 +38,7 @@ const setup = (props: Partial<BlocksEditorProps>) =>
     }
   );
 
-describe('BlocksEditor', () => {
+describe('BlocksInput', () => {
   it('should render blocks without error', async () => {
     setup({ value: undefined });
 

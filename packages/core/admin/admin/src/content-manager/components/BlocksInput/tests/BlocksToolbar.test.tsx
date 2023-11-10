@@ -164,7 +164,7 @@ const setup = (data: Descendant[] = defaultInitialValue) => {
   });
 };
 
-describe('BlocksEditor toolbar', () => {
+describe('BlocksToolbar', () => {
   beforeEach(() => {
     /**
      * TODO: Find a way to use the actual implementation
