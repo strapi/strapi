@@ -62,7 +62,7 @@ export declare namespace FindContentTypes {
     data: {
       data: ContentType[];
     };
-    error?: errors.ApplicationError;
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
 
@@ -120,6 +120,6 @@ export declare namespace UpdateContentTypeConfiguration {
         components: Record<string, ComponentConfiguration> | {};
       };
     };
-    error?: errors.ApplicationError;
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }

@@ -35,7 +35,7 @@ export declare namespace FindAvailable {
         total: number;
       };
     };
-    error?: errors.ApplicationError;
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
 
@@ -58,6 +58,6 @@ export declare namespace FindExisting {
     data: {
       data: RelationResult;
     };
-    error?: errors.ApplicationError;
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
