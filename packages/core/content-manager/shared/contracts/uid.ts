@@ -1,16 +1,26 @@
+import { EntityService, Common } from '@strapi/types';
+
 import { errors } from '@strapi/utils';
+
+type Entity = EntityService.Result<Common.UID.Schema>;
 
 /**
  * POST /uid/generate
  */
 export declare namespace GenerateUID {
   export interface Request {
-    body: {};
+    body: {
+      contentTypeUID: string;
+      data: Entity;
+      field: string;
+    };
     query: {};
   }
   export interface Response {
-    data: {};
-    error?: errors.ApplicationError;
+    data: {
+      data: string;
+    };
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
 
@@ -19,11 +29,18 @@ export declare namespace GenerateUID {
  */
 export declare namespace CheckUIDAvailability {
   export interface Request {
-    body: {};
+    body: {
+      contentTypeUID: string;
+      field: string;
+      value: string;
+    };
     query: {};
   }
   export interface Response {
-    data: {};
-    error?: errors.ApplicationError;
+    data: {
+      isAvailable: boolean;
+      suggestion: string | null;
+    };
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
