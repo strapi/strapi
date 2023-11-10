@@ -9,8 +9,14 @@ export type JSON = Attribute.OfType<'json'> &
   Attribute.VisibleOption &
   Attribute.DefaultOption<JsonValue>;
 
-export type ValidJson = object | Array<unknown> | string | number | true | false | null;
+type JSONValue = string | number | boolean | null | JSONObject | JSONArray;
 
-export type JsonValue<T extends ValidJson = ValidJson> = T;
+type JSONArray = Array<JSONValue>;
+
+interface JSONObject {
+  [x: string]: JSONValue;
+}
+
+export type JsonValue<T extends JSONValue = JSONValue> = T;
 
 export type GetJsonValue<T extends Attribute.Attribute> = T extends JSON ? JsonValue : never;
