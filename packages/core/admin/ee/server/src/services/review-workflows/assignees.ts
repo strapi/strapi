@@ -36,7 +36,7 @@ export default ({ strapi }: { strapi: Strapi }) => {
       metrics.sendDidEditAssignee(await this.findEntityAssigneeId(id, model), assigneeId);
 
       return strapi.entityService.update(model, id, {
-        // @ts-expect-error
+        // @ts-expect-error check entity service types
         data: { [ENTITY_ASSIGNEE_ATTRIBUTE]: assigneeId },
         populate: [ENTITY_ASSIGNEE_ATTRIBUTE],
         fields: [],
@@ -47,7 +47,7 @@ export default ({ strapi }: { strapi: Strapi }) => {
       metrics.sendDidEditAssignee(await this.findEntityAssigneeId(id, model), null);
 
       return strapi.entityService.update(model, id, {
-        // @ts-expect-error
+        // @ts-expect-error check entity service types
         data: { [ENTITY_ASSIGNEE_ATTRIBUTE]: null },
         populate: [ENTITY_ASSIGNEE_ATTRIBUTE],
         fields: [],

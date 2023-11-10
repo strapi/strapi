@@ -27,7 +27,7 @@ const validateUpdateStageOnEntitySchema = yup
   .required();
 
 const validateContentTypes = yup.array().of(
-  // @ts-expect-error
+  // @ts-expect-error yup types
   yup
     .string()
     .test({

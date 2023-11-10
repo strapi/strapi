@@ -33,7 +33,8 @@ const getPassportStrategies = () => {
     sso.syncProviderRegistryWithConfig();
   }
 
-  // @ts-expect-error
+  // TODO
+  // @ts-expect-error check map types
   const providers = sso.providerRegistry.getAll();
   const strategies = providers.map((provider: any) => provider.createStrategy(strapi));
 

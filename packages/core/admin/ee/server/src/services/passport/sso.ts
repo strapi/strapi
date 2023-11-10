@@ -21,7 +21,8 @@ export const syncProviderRegistryWithConfig = () => {
 
   const { providers = [] } = strapi.config.get('admin.auth', {}) as any;
 
-  // @ts-expect-error
+  // TODO
+  // @ts-expect-error check map types
   providerRegistry.registerMany(providers);
 };
 

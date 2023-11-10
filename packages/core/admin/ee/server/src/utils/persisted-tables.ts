@@ -52,7 +52,7 @@ async function addPersistTables(
     return;
   }
 
-  // @ts-expect-error
+  // @ts-expect-error lodash types
   tablesToPersist.push(...notPersistedTableNames);
   await strapi.store.set({
     type: 'core',
@@ -70,12 +70,11 @@ async function addPersistTables(
  */
 
 async function getPersistedTables({ strapi }: { strapi: LoadedStrapi }) {
-  const persistedTables = await strapi.store.get({
+  const persistedTables: any = await strapi.store.get({
     type: 'core',
     key: 'persisted_tables',
   });
 
-  // @ts-expect-error
   return (persistedTables || []).map(transformTableName);
 }
 

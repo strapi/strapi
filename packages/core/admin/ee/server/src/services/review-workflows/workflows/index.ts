@@ -182,7 +182,8 @@ export default ({ strapi }: { strapi: Strapi }) => {
      */
     async getAssignedWorkflow(uid: any, opts: any = {}) {
       const workflows = await this._getAssignedWorkflows(uid, opts);
-      // @ts-expect-error
+
+      // @ts-expect-error handle workflow null case
       return workflows.length > 0 ? workflows[0] : null;
     },
 

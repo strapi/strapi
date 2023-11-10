@@ -10,8 +10,7 @@ import { getService } from '../../utils';
  * @returns
  */
 const getDataWithStage = async (workflow: any, data: any) => {
-  // @ts-expect-error
-  if (!isNil(ENTITY_STAGE_ATTRIBUTE, data)) {
+  if (!isNil(ENTITY_STAGE_ATTRIBUTE)) {
     return { ...data, [ENTITY_STAGE_ATTRIBUTE]: workflow.stages[0].id };
   }
   return data;

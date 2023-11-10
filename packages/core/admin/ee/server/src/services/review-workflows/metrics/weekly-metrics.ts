@@ -48,13 +48,12 @@ export default ({ strapi }: { strapi: Strapi }) => {
       metrics.sendDidSendReviewWorkflowPropertiesOnceAWeek(computedMetrics);
 
       const metricsInfoStored = await getMetricsStoreValue();
-      // @ts-expect-error
+      // @ts-expect-error metricsInfoStored can use spread
       await setMetricsStoreValue({ ...metricsInfoStored, lastWeeklyUpdate: new Date().getTime() });
     },
 
     async ensureWeeklyStoredCronSchedule() {
-      const metricsInfoStored = await getMetricsStoreValue();
-      // @ts-expect-error
+      const metricsInfoStored: any = await getMetricsStoreValue();
       const { weeklySchedule: currentSchedule, lastWeeklyUpdate } = metricsInfoStored;
 
       const now = new Date();
@@ -62,7 +61,6 @@ export default ({ strapi }: { strapi: Strapi }) => {
 
       if (!currentSchedule || !lastWeeklyUpdate || lastWeeklyUpdate + ONE_WEEK < now.getTime()) {
         weeklySchedule = getWeeklyCronScheduleAt(add(now, { seconds: 10 }));
-        // @ts-expect-error
         await setMetricsStoreValue({ ...metricsInfoStored, weeklySchedule });
       }
 

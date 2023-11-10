@@ -37,7 +37,7 @@ const updateEEDisabledUsersList = async (id: string, input: any) => {
 
 const castNumberArray = pipe(castArray, map(toNumber));
 
-const removeFromEEDisabledUsersList = async (ids: any) => {
+const removeFromEEDisabledUsersList = async (ids: unknown) => {
   let idsToCheck: any;
   if (typeof ids === 'object') {
     idsToCheck = castNumberArray(ids);
@@ -122,7 +122,7 @@ const updateById = async (id: any, attributes: any) => {
  * @param id id of the user to delete
  * @returns {Promise<user>}
  */
-const deleteById = async (id: any) => {
+const deleteById = async (id: unknown) => {
   // Check at least one super admin remains
   const userToDelete = await strapi.query('admin::user').findOne({
     where: { id },
@@ -190,13 +190,13 @@ const deleteByIds = async (ids: any) => {
   return deletedUsers;
 };
 
-const sanitizeUserRoles = (role: any) => _.pick(role, ['id', 'name', 'description', 'code']);
+const sanitizeUserRoles = (role: unknown) => _.pick(role, ['id', 'name', 'description', 'code']);
 
 /**
  * Check if a user is the last super admin
  * @param {int|string} userId user's id to look for
  */
-const isLastSuperAdminUser = async (userId: any) => {
+const isLastSuperAdminUser = async (userId: unknown) => {
   const user = (await findOne(userId)) as any;
   const superAdminRole = await getService('role').getSuperAdminWithUsersCount();
 

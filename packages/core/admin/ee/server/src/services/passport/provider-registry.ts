@@ -4,23 +4,25 @@ export default () => {
   const registry = new Map();
 
   Object.assign(registry, {
-    register(provider: any) {
+    register(provider: unknown) {
       if (strapi.isLoaded) {
         throw new Error(`You can't register new provider after the bootstrap`);
       }
 
-      // @ts-expect-error
+      // TODO
+      // @ts-expect-error check map types
       this.set(provider.uid, provider);
     },
 
-    registerMany(providers: any[]) {
+    registerMany(providers: unknown[]) {
       providers.forEach((provider) => {
         this.register(provider);
       });
     },
 
     getAll(): unknown[] {
-      // @ts-expect-error
+      // TODO
+      // @ts-expect-error check map types
       return Array.from(this.values());
     },
   });
