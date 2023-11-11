@@ -5,7 +5,6 @@ import syncFs from 'node:fs';
 import camelCase from 'lodash/camelCase';
 import browserslist from 'browserslist';
 import strapiFactory, { CLIContext } from '@strapi/strapi';
-import type { Strapi } from '@strapi/types';
 import { getConfigUrls } from '@strapi/utils';
 
 import { getStrapiAdminEnvVars, loadEnv } from './core/env';
@@ -14,6 +13,7 @@ import { isError } from './core/errors';
 import type { BuildOptions } from './build';
 import { DevelopOptions } from './develop';
 import { getEnabledPlugins } from './core/plugins';
+import { Strapi } from '@strapi/types';
 
 interface BuildContext {
   /**
@@ -75,6 +75,7 @@ interface BuildContext {
 }
 
 interface CreateBuildContextArgs extends CLIContext {
+  strapi?: Strapi;
   options?: BuildContext['options'];
 }
 
@@ -89,16 +90,24 @@ const createBuildContext = async ({
   cwd,
   logger,
   tsconfig,
+  strapi,
   options = {},
 }: CreateBuildContextArgs) => {
-  const strapiInstance = strapiFactory({
-    // Directories
-    appDir: cwd,
-    distDir: tsconfig?.config.options.outDir ?? '',
-    // Options
-    autoReload: true,
-    serveAdminPanel: false,
-  });
+  /**
+   * If you make a new strapi instance when one already exists,
+   * you will overwrite the global and the app will _most likely_
+   * crash and die.
+   */
+  const strapiInstance =
+    strapi ??
+    strapiFactory({
+      // Directories
+      appDir: cwd,
+      distDir: tsconfig?.config.options.outDir ?? '',
+      // Options
+      autoReload: true,
+      serveAdminPanel: false,
+    });
 
   const { serverUrl, adminPath } = getConfigUrls(strapiInstance.config, true);
 

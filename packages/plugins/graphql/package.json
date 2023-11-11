@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-graphql",
-  "version": "4.15.1",
+  "version": "4.15.2",
   "description": "Adds GraphQL endpoint with default API methods.",
   "repository": {
     "type": "git",
@@ -52,9 +52,9 @@
     "@graphql-tools/schema": "8.5.1",
     "@graphql-tools/utils": "^8.13.1",
     "@strapi/design-system": "1.13.1",
-    "@strapi/helper-plugin": "4.15.1",
+    "@strapi/helper-plugin": "4.15.2",
     "@strapi/icons": "1.13.0",
-    "@strapi/utils": "4.15.1",
+    "@strapi/utils": "4.15.2",
     "apollo-server-core": "3.12.1",
     "apollo-server-koa": "3.10.0",
     "graphql": "^15.5.1",
@@ -68,26 +68,26 @@
     "pluralize": "8.0.0"
   },
   "devDependencies": {
-    "@strapi/strapi": "4.15.1",
-    "@strapi/types": "4.15.1",
+    "@strapi/strapi": "4.15.2",
+    "@strapi/types": "4.15.2",
     "@types/graphql-depth-limit": "1.1.5",
     "@types/graphql-upload": "8.0.12",
     "cross-env": "^7.0.3",
-    "eslint-config-custom": "4.15.1",
+    "eslint-config-custom": "4.15.2",
     "koa": "2.13.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "5.3.4",
     "styled-components": "5.3.3",
-    "tsconfig": "4.15.1",
+    "tsconfig": "4.15.2",
     "typescript": "5.2.2"
   },
   "peerDependencies": {
     "@strapi/strapi": "^4.0.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
-    "react-router-dom": "5.3.4",
-    "styled-components": "5.3.3"
+    "react-router-dom": "^5.2.0",
+    "styled-components": "^5.2.1"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

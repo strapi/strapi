@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-users-permissions",
-  "version": "4.15.1",
+  "version": "4.15.2",
   "description": "Protect your API with a full-authentication process based on JWT",
   "repository": {
     "type": "git",
@@ -43,13 +43,14 @@
     "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
+    "prepublishOnly": "yarn clean && yarn build",
     "watch": "pack-up watch"
   },
   "dependencies": {
     "@strapi/design-system": "1.13.1",
-    "@strapi/helper-plugin": "4.15.1",
+    "@strapi/helper-plugin": "4.15.2",
     "@strapi/icons": "1.13.0",
-    "@strapi/utils": "4.15.1",
+    "@strapi/utils": "4.15.2",
     "bcryptjs": "2.4.3",
     "formik": "2.4.0",
     "grant-koa": "5.4.8",
@@ -68,8 +69,8 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/pack-up": "workspace:*",
-    "@strapi/strapi": "4.15.1",
+    "@strapi/pack-up": "4.15.2",
+    "@strapi/strapi": "4.15.2",
     "@testing-library/dom": "9.2.0",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
@@ -83,8 +84,8 @@
     "@strapi/strapi": "4.0.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
-    "react-router-dom": "5.3.4",
-    "styled-components": "5.3.3"
+    "react-router-dom": "^5.2.0",
+    "styled-components": "^5.2.1"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
