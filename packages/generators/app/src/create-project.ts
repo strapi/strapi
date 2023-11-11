@@ -87,23 +87,27 @@ export default async function createProject(
         'tsconfig-server.json.js': '.',
       };
 
-      await Promise.all(Object.entries(filesMap).map(([fileName, path]) => {
-        const destPath = join(rootPath, path, 'tsconfig.json');
+      await Promise.all(
+        Object.entries(filesMap).map(([fileName, path]) => {
+          const destPath = join(rootPath, path, 'tsconfig.json');
 
-        if (fileName === 'tsconfig-admin.json.js') {
-          return fse.writeJSON(destPath, adminTsconfig(), { spaces: 2 });
-        }
-        if (fileName === 'tsconfig-server.json.js') {
-          return fse.writeJSON(destPath, serverTsconfig(), { spaces: 2 });
-        }
-      }));
+          if (fileName === 'tsconfig-admin.json.js') {
+            return fse.writeJSON(destPath, adminTsconfig(), { spaces: 2 });
+          }
+          if (fileName === 'tsconfig-server.json.js') {
+            return fse.writeJSON(destPath, serverTsconfig(), { spaces: 2 });
+          }
+        })
+      );
     } else {
       const filesMap = { 'jsconfig.json.js': '.' };
 
-      await Promise.all(Object.values(filesMap).map((path) => {
-        const destPath = join(rootPath, path, 'jsconfig.json');
-        return fse.writeJSON(destPath, jsconfig(), { spaces: 2 });
-      }));
+      await Promise.all(
+        Object.values(filesMap).map((path) => {
+          const destPath = join(rootPath, path, 'jsconfig.json');
+          return fse.writeJSON(destPath, jsconfig(), { spaces: 2 });
+        })
+      );
     }
 
     // ensure node_modules is created
