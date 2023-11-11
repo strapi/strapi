@@ -100,7 +100,7 @@ export default async function createProject(
     } else {
       const filesMap = { 'jsconfig.json.js': '.' };
 
-      await Promise.all(Object.entries(filesMap).map(([, path]) => {
+      await Promise.all(Object.values(filesMap).map((path) => {
         const destPath = join(rootPath, path, 'jsconfig.json');
         return fse.writeJSON(destPath, jsconfig(), { spaces: 2 });
       }));
