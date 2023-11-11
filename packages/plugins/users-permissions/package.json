@@ -37,13 +37,13 @@
     "build": "pack-up build",
     "clean": "run -T rimraf dist",
     "lint": "run -T eslint .",
+    "prepublishOnly": "yarn clean && yarn build",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
     "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "prepublishOnly": "yarn clean && yarn build",
     "watch": "pack-up watch"
   },
   "dependencies": {
@@ -81,7 +81,7 @@
     "styled-components": "5.3.3"
   },
   "peerDependencies": {
-    "@strapi/strapi": "4.0.0",
+    "@strapi/strapi": "^4.0.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^5.2.0",
