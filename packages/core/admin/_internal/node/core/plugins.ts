@@ -1,9 +1,12 @@
 import os from 'node:os';
 import path from 'node:path';
+import fs from 'node:fs';
+import camelCase from 'lodash/camelCase';
 import { env } from '@strapi/utils';
 import { getModule, PackageJson } from './dependencies';
 import { loadFile } from './files';
-import { BuildContext, CreateBuildContextArgs } from '../createBuildContext';
+import { BuildContext } from '../createBuildContext';
+import { isError } from './errors';
 
 interface PluginMeta {
   name: string;
@@ -32,11 +35,11 @@ const validatePackageHasStrapi = (
 const validatePackageIsPlugin = (pkg: PackageJson): pkg is StrapiPlugin =>
   validatePackageHasStrapi(pkg) && pkg.strapi.kind === 'plugin';
 
-export const getEnabledPlugins = async ({
+const getEnabledPlugins = async ({
   strapi,
   cwd,
   logger,
-}: Pick<BuildContext, 'cwd' | 'logger' | 'strapi'>) => {
+}: Pick<BuildContext, 'cwd' | 'logger' | 'strapi'>): Promise<Record<string, PluginMeta>> => {
   const plugins: Record<string, PluginMeta> = {};
 
   /**
@@ -110,3 +113,73 @@ const loadUserPluginsFile = async (root: string): Promise<UserPluginConfigFile> 
 
   return {};
 };
+
+const getMapOfPluginsWithAdmin = (
+  plugins: Record<string, PluginMeta>,
+  { runtimeDir }: { runtimeDir: string }
+) =>
+  Object.values(plugins)
+    .filter((plugin) => {
+      if (!plugin) {
+        return false;
+      }
+
+      /**
+       * There are two ways a plugin should be imported, either it's local to the strapi app,
+       * or it's an actual npm module that's installed and resolved via node_modules.
+       *
+       * We first check if the plugin is local to the strapi app, using a regular `resolve` because
+       * the pathToPlugin will be relative i.e. `/Users/my-name/strapi-app/src/plugins/my-plugin`.
+       *
+       * If the file doesn't exist well then it's probably a node_module, so instead we use `require.resolve`
+       * which will resolve the path to the module in node_modules. If it fails with the specific code `MODULE_NOT_FOUND`
+       * then it doesn't have an admin part to the package.
+       */
+      try {
+        const isLocalPluginWithLegacyAdminFile = fs.existsSync(
+          //@ts-ignore
+          path.resolve(`${plugin.pathToPlugin}/strapi-admin.js`)
+        );
+
+        if (!isLocalPluginWithLegacyAdminFile) {
+          //@ts-ignore
+          let pathToPlugin = plugin.pathToPlugin;
+
+          if (process.platform === 'win32') {
+            pathToPlugin = pathToPlugin.split(path.sep).join(path.posix.sep);
+          }
+
+          const isModuleWithFE = require.resolve(`${pathToPlugin}/strapi-admin`);
+
+          return isModuleWithFE;
+        }
+
+        return isLocalPluginWithLegacyAdminFile;
+      } catch (err) {
+        if (isError(err) && 'code' in err && err.code === 'MODULE_NOT_FOUND') {
+          /**
+           * the plugin does not contain FE code, so we
+           * don't want to import it anyway
+           */
+          return false;
+        }
+
+        throw err;
+      }
+    })
+    .map((plugin) => {
+      const systemPath = plugin.isLocal
+        ? path.relative(runtimeDir, plugin.pathToPlugin)
+        : undefined;
+      const modulePath = systemPath ? systemPath.split(path.sep).join('/') : undefined;
+
+      return {
+        path: !plugin.isLocal
+          ? `${plugin.pathToPlugin}/strapi-admin`
+          : `${modulePath}/strapi-admin`,
+        name: plugin.name,
+        importName: camelCase(plugin.name),
+      };
+    });
+
+export { getEnabledPlugins, getMapOfPluginsWithAdmin };
