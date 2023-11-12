@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/design-system": "1.13.0",
+    "@strapi/design-system": "1.13.1",
     "@strapi/generators": "4.15.4",
     "@strapi/helper-plugin": "4.15.4",
     "@strapi/icons": "1.13.0",

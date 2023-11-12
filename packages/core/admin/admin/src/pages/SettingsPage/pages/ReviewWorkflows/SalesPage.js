@@ -33,7 +33,7 @@ const SalesPage = () => {
               <LinkButton
                 variant="default"
                 endIcon={<ExternalLink />}
-                href="https://strp.cc/3tdNfJqe"
+                href="https://strp.cc/3tdNfJq"
                 isExternal
                 target="_blank"
               >

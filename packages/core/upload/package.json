@@ -43,7 +43,7 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/design-system": "1.13.0",
+    "@strapi/design-system": "1.13.1",
     "@strapi/helper-plugin": "4.15.4",
     "@strapi/icons": "1.13.0",
     "@strapi/provider-upload-local": "4.15.4",
