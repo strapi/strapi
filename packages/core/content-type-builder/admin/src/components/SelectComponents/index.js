@@ -54,7 +54,7 @@ const SelectComponents = ({ dynamicZoneTarget, intlLabel, name, onChange, value 
       defaultMessage:
         '{number, plural, =0 {# components} one {# component} other {# components}} selected',
     },
-    { number: value.length }
+    { number: value?.length }
   );
 
   return (
