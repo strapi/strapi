@@ -115,30 +115,27 @@ export const ROUTES_CE: Route[] = [
   },
   {
     async Component() {
-      // @ts-expect-error – No types, yet.
-      const component = await import('./pages/TransferTokens/ProtectedCreateView');
+      const { ProtectedTransferTokenCreateView } = await import('./pages/TransferTokens/ProtectedCreateView');
 
-      return component;
+      return ProtectedTransferTokenCreateView;
     },
     to: '/settings/transfer-tokens/create',
     exact: true,
   },
   {
     async Component() {
-      // @ts-expect-error – No types, yet.
-      const component = await import('./pages/TransferTokens/ProtectedListView');
+      const { ProtectedTransferTokenListView } = await import('./pages/TransferTokens/ProtectedListView');
 
-      return component;
+      return ProtectedTransferTokenListView;
     },
     to: '/settings/transfer-tokens',
     exact: true,
   },
   {
     async Component() {
-      // @ts-expect-error – No types, yet.
-      const component = await import('./pages/TransferTokens/ProtectedEditView');
+      const { ProtectedTransferTokenCreateView } = await import('./pages/TransferTokens/ProtectedEditView');
 
-      return component;
+      return ProtectedTransferTokenCreateView;
     },
     to: '/settings/transfer-tokens/:id',
     exact: true,
