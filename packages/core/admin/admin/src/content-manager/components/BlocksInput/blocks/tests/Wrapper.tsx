@@ -1,14 +1,12 @@
 import * as React from 'react';
 
 import { lightTheme } from '@strapi/design-system';
-import { type Attribute } from '@strapi/types';
 import { IntlProvider } from 'react-intl';
 import { createEditor } from 'slate';
 import { Slate, withReact } from 'slate-react';
 import { ThemeProvider } from 'styled-components';
 
-import { BlocksEditorProvider } from '../../BlocksEditor';
-import { type BlocksStore } from '../../hooks/useBlocksStore';
+import { type BlocksStore, BlocksEditorProvider } from '../../BlocksEditor';
 import { codeBlocks } from '../Code';
 import { headingBlocks } from '../Heading';
 import { imageBlocks } from '../Image';

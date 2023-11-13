@@ -1,11 +1,10 @@
-import { render, renderHook, screen } from '@testing-library/react';
+/* eslint-disable testing-library/no-node-access */
+import { render, screen } from '@testing-library/react';
+import { Editor, Transforms, createEditor } from 'slate';
 
 import { paragraphBlocks } from '../Paragraph';
 
 import { Wrapper } from './Wrapper';
-import { Attribute } from '@strapi/types';
-import { useBlocksEditorContext } from '../../BlocksEditor';
-import { Editor, Transforms, createEditor } from 'slate';
 
 describe('Paragraph', () => {
   it('renders a heading block properly', () => {

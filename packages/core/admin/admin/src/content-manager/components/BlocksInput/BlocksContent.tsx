@@ -9,8 +9,7 @@ import {
 } from 'slate-react';
 import { type DefaultTheme, useTheme } from 'styled-components';
 
-import { useBlocksEditorContext } from './BlocksEditor';
-import { type BlocksStore, useBlocksStore } from './hooks/useBlocksStore';
+import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { type ModifiersStore, useModifiersStore } from './hooks/useModifiersStore';
 import { getEntries } from './utils/types';
 
@@ -52,7 +51,7 @@ interface BlocksInputProps {
 
 const BlocksContent = ({ disabled, placeholder }: BlocksInputProps) => {
   const theme = useTheme();
-  const { editor } = useBlocksEditorContext('BlocksContent');
+  const { editor, blocks } = useBlocksEditorContext('BlocksContent');
   const blocksRef = React.useRef<HTMLDivElement>(null);
 
   // Create renderLeaf function based on the modifiers store
@@ -63,7 +62,6 @@ const BlocksContent = ({ disabled, placeholder }: BlocksInputProps) => {
   );
 
   // Create renderElement function base on the blocks store
-  const blocks = useBlocksStore();
   const renderElement = React.useCallback(
     (props: RenderElementProps) => baseRenderElement(props, blocks),
     [blocks]

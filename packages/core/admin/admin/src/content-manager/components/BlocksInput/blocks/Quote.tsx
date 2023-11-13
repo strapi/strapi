@@ -4,7 +4,7 @@ import { Quote } from '@strapi/icons';
 import { type Text, Editor, Node, Transforms } from 'slate';
 import styled from 'styled-components';
 
-import { type BlocksStore } from '../hooks/useBlocksStore';
+import { type BlocksStore } from '../BlocksEditor';
 
 const Blockquote = styled.blockquote.attrs({ role: 'blockquote' })`
   margin: ${({ theme }) => `${theme.spaces[4]} 0`};

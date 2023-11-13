@@ -1,9 +1,12 @@
+/* eslint-disable testing-library/no-node-access */
+import * as React from 'react';
+
 import { render, screen } from '@testing-library/react';
+import { Editor, Transforms, createEditor } from 'slate';
 
 import { listBlocks } from '../List';
 
 import { Wrapper } from './Wrapper';
-import { Editor, Transforms, createEditor } from 'slate';
 
 const mockEvent = {
   preventDefault: jest.fn(),

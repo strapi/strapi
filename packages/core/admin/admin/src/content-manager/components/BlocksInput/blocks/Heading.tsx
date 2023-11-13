@@ -11,7 +11,7 @@ import {
 } from '@strapi/icons';
 import styled from 'styled-components';
 
-import { type BlocksStore } from '../hooks/useBlocksStore';
+import { type BlocksStore } from '../BlocksEditor';
 
 const H1 = styled(Typography).attrs({ as: 'h1' })`
   font-size: ${42 / 16}rem;

@@ -6,7 +6,7 @@ import { type Text, Editor, Node, Transforms, Path } from 'slate';
 import { type RenderElementProps } from 'slate-react';
 import styled, { css } from 'styled-components';
 
-import { type BlocksStore } from '../hooks/useBlocksStore';
+import { type BlocksStore } from '../BlocksEditor';
 import { type Block } from '../utils/types';
 
 const listStyle = css`

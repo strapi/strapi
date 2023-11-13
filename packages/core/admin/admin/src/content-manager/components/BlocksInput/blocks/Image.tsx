@@ -6,7 +6,7 @@ import { type Element } from 'slate';
 import { type RenderElementProps } from 'slate-react';
 import styled from 'styled-components';
 
-import { type BlocksStore } from '../hooks/useBlocksStore';
+import { type BlocksStore } from '../BlocksEditor';
 import { type Block } from '../utils/types';
 
 // The max-height is decided with the design team, the 56px is the height of the toolbar

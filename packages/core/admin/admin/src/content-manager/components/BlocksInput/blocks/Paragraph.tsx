@@ -4,7 +4,7 @@ import { Typography } from '@strapi/design-system';
 import { Paragraph } from '@strapi/icons';
 import { type Text, Editor, Transforms } from 'slate';
 
-import { type BlocksStore } from '../hooks/useBlocksStore';
+import { type BlocksStore } from '../BlocksEditor';
 
 const paragraphBlocks: Pick<BlocksStore, 'paragraph'> = {
   paragraph: {

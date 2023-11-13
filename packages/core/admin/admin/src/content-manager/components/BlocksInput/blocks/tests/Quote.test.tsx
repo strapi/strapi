@@ -1,9 +1,10 @@
+/* eslint-disable testing-library/no-node-access */
 import { render, screen } from '@testing-library/react';
+import { Editor, Transforms, createEditor } from 'slate';
 
 import { quoteBlocks } from '../Quote';
 
 import { Wrapper } from './Wrapper';
-import { Editor, Transforms, createEditor } from 'slate';
 
 describe('Quote', () => {
   it('renders a quote block properly', () => {

@@ -4,7 +4,7 @@ import { Code } from '@strapi/icons';
 import { Transforms } from 'slate';
 import styled from 'styled-components';
 
-import { type BlocksStore } from '../hooks/useBlocksStore';
+import { type BlocksStore } from '../BlocksEditor';
 
 const CodeBlock = styled.pre.attrs({ role: 'code' })`
   border-radius: ${({ theme }) => theme.borderRadius};

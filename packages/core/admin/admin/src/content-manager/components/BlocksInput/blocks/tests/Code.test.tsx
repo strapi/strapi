@@ -1,11 +1,10 @@
+/* eslint-disable testing-library/no-node-access */
 import { render, screen, within } from '@testing-library/react';
+import { createEditor, Transforms, Editor } from 'slate';
 
 import { codeBlocks } from '../Code';
 
 import { Wrapper } from './Wrapper';
-import { createEditor } from 'slate';
-import { Transforms } from 'slate';
-import { Editor } from 'slate';
 
 describe('Code', () => {
   it('renders a code block properly', () => {

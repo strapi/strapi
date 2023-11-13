@@ -6,7 +6,7 @@ import { type Attribute } from '@strapi/types';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { type Editor, type Descendant, createEditor } from 'slate';
 import { withHistory } from 'slate-history';
-import { Slate, withReact, ReactEditor, useSlate } from 'slate-react';
+import { type RenderElementProps, Slate, withReact, ReactEditor, useSlate } from 'slate-react';
 import styled from 'styled-components';
 
 import { codeBlocks } from './blocks/Code';
@@ -18,7 +18,6 @@ import { paragraphBlocks } from './blocks/Paragraph';
 import { quoteBlocks } from './blocks/Quote';
 import { BlocksContent } from './BlocksContent';
 import { BlocksToolbar } from './BlocksToolbar';
-import { type BlocksStore } from './hooks/useBlocksStore';
 import { withLinks } from './plugins/withLinks';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
 
@@ -26,8 +25,52 @@ import { withStrapiSchema } from './plugins/withStrapiSchema';
  * BlocksEditorProvider
  * -----------------------------------------------------------------------------------------------*/
 
+interface NonSelectorBlock {
+  renderElement: (props: RenderElementProps) => React.JSX.Element;
+  value: object;
+  matchNode: (node: Attribute.BlocksNode) => boolean;
+  isInBlocksSelector: false;
+  handleEnterKey?: (editor: Editor) => void;
+  handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => void;
+}
+
+type SelectorBlock = Omit<NonSelectorBlock, 'isInBlocksSelector'> & {
+  isInBlocksSelector: true;
+  icon: React.ComponentType;
+  label: MessageDescriptor;
+};
+
+type NonSelectorBlockKey = 'list-item' | 'link';
+
+const selectorBlockKeys = [
+  'paragraph',
+  'heading-one',
+  'heading-two',
+  'heading-three',
+  'heading-four',
+  'heading-five',
+  'heading-six',
+  'list-ordered',
+  'list-unordered',
+  'image',
+  'quote',
+  'code',
+] as const;
+
+type SelectorBlockKey = (typeof selectorBlockKeys)[number];
+
+const isSelectorBlockKey = (key: unknown): key is SelectorBlockKey => {
+  return typeof key === 'string' && selectorBlockKeys.includes(key as SelectorBlockKey);
+};
+
+type BlocksStore = {
+  [K in SelectorBlockKey]: SelectorBlock;
+} & {
+  [K in NonSelectorBlockKey]: NonSelectorBlock;
+};
+
 interface BlocksEditorContextValue {
-  blocks: Partial<BlocksStore>;
+  blocks: BlocksStore;
 }
 
 const [BlocksEditorProvider, usePartialBlocksEditorContext] =
@@ -198,4 +241,11 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
   }
 );
 
-export { BlocksEditor, BlocksEditorProvider, useBlocksEditorContext };
+export {
+  type BlocksStore,
+  type SelectorBlockKey,
+  BlocksEditor,
+  BlocksEditorProvider,
+  useBlocksEditorContext,
+  isSelectorBlockKey,
+};
