@@ -33,7 +33,7 @@ import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
 import { useAdminRoles } from '../../../../../hooks/useAdminRoles';
-import { selectAdminPermissions } from '../../../../App/selectors';
+import { selectAdminPermissions } from '../../../../../selectors';
 
 import EmptyRole from './components/EmptyRole';
 import BaseRoleRow from './components/RoleRow';

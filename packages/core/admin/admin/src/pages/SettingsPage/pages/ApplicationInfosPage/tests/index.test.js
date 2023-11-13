@@ -6,24 +6,12 @@ import { render, waitFor } from '@tests/utils';
 
 import ApplicationInfosPage from '../index';
 
-const updateProjectSettingsSpy = jest.fn();
-
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   // eslint-disable-next-line
   CheckPermissions: ({ children }) => <div>{children}</div>,
   useAppInfo: jest.fn(() => ({ shouldUpdateStrapi: false, latestStrapiReleaseTag: 'v3.6.8' })),
   useRBAC: jest.fn(() => ({ allowedActions: { canRead: true, canUpdate: true } })),
-}));
-
-jest.mock('../../../../../hooks/useConfiguration', () => ({
-  useConfiguration: jest.fn(() => ({
-    logos: {
-      menu: { custom: 'customMenuLogo.png', default: 'defaultMenuLogo.png' },
-      auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
-    },
-    updateProjectSettings: updateProjectSettingsSpy,
-  })),
 }));
 
 describe('Application page', () => {
@@ -92,12 +80,12 @@ describe('Application page', () => {
   it('should update project settings on save', async () => {
     useRBAC.mockReturnValue({ allowedActions: { canRead: true, canUpdate: true } });
 
-    const { getByRole, queryByText } = render(<ApplicationInfosPage />);
+    const { getByRole, queryByText, getByText } = render(<ApplicationInfosPage />);
 
     await waitForElementToBeRemoved(() => queryByText('Loading'));
 
     fireEvent.click(getByRole('button', { name: 'Save' }));
 
-    await waitFor(() => expect(updateProjectSettingsSpy).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(getByText('Saved')).toBeInTheDocument());
   });
 });

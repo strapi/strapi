@@ -5,6 +5,12 @@ import { LinkProps } from 'react-router-dom';
 import { TranslationMessage } from '../types';
 
 import type { Permission } from './RBAC';
+
+type ComponentModule = () =>
+  | Promise<{ default?: React.ComponentType } | React.ComponentType>
+  | { default?: React.ComponentType }
+  | React.ComponentType;
+
 interface MenuItem extends Pick<LinkProps, 'to'> {
   to: string;
   icon: React.ElementType;
@@ -15,7 +21,8 @@ interface MenuItem extends Pick<LinkProps, 'to'> {
    */
   permissions: Permission[];
   notificationsCount?: number;
-  Component?: React.ComponentType;
+  Component?: ComponentModule;
+  exact?: boolean;
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -25,7 +32,10 @@ interface MenuItem extends Pick<LinkProps, 'to'> {
 // TODO: this should come from `core/admin/src/core/apis/Plugins`
 interface Plugin {
   apis: Record<string, unknown>;
-  injectionZones: Record<string, unknown>;
+  injectionZones: Record<
+    string,
+    Record<string, Array<{ name: string; Component: React.ComponentType }>>
+  >;
   initializer: React.ComponentType<{ setPlugin(pluginId: string): void }>;
   getInjectedComponents: (
     containerName: string,
@@ -130,4 +140,5 @@ export type {
   StrapiAppSetting,
   RunHookSeries,
   RunHookWaterfall,
+  ComponentModule,
 };

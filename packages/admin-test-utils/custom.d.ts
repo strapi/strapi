@@ -1,4 +1,4 @@
-export { };
+export {};
 
 declare global {
   interface Window {
@@ -12,9 +12,9 @@ declare global {
       projectType: string;
       telemetryDisabled: boolean;
       flags: {
-        nps: boolean,
-        promoteEE: boolean,
-      }
+        nps: boolean;
+        promoteEE: boolean;
+      };
     };
   }
 }

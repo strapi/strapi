@@ -1,4 +1,4 @@
-import { createContext } from 'react';
+import { createContext } from '@radix-ui/react-context';
 
 export interface ConfigurationContextValue {
   logos: {
@@ -10,16 +10,9 @@ export interface ConfigurationContextValue {
   updateProjectSettings: (settings: { authLogo?: string; menuLogo?: string }) => void;
 }
 
-const ConfigurationContext = createContext<ConfigurationContextValue>({
-  logos: {
-    auth: { default: '' },
-    menu: { default: '' },
-  },
-  showTutorials: false,
-  showReleaseNotification: false,
-  updateProjectSettings: () => {
-    throw new Error('updateProjectSettings was not implemented');
-  },
-});
+const [ConfigurationContextProvider, useConfigurationContext] =
+  createContext<ConfigurationContextValue>('ConfigurationContext');
 
-export { ConfigurationContext };
+const useConfiguration = () => useConfigurationContext('useConfiguration');
+
+export { ConfigurationContextProvider, useConfiguration };

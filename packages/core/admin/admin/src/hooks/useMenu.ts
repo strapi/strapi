@@ -12,8 +12,7 @@ import { Cog, Puzzle, ShoppingCart } from '@strapi/icons';
 import cloneDeep from 'lodash/cloneDeep';
 import { useSelector } from 'react-redux';
 
-// @ts-expect-error - no types, yet.
-import { selectAdminPermissions } from '../pages/App/selectors';
+import { selectAdminPermissions } from '../selectors';
 
 /* -------------------------------------------------------------------------------------------------
  * useMenu
