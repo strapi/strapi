@@ -3,8 +3,8 @@ import { Route, Switch } from 'react-router-dom';
 
 import { pluginId } from '../pluginId';
 
-import { ReleaseDetailsPage } from './ReleaseDetailsPage/Release';
-import { ReleasesPage } from './ReleasesPage/Releases';
+import { ReleaseDetailsPage } from './ReleaseDetailsPage';
+import { ReleasesPage } from './ReleasePage';
 
 export const App = () => {
   return (

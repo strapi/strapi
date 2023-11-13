@@ -4,7 +4,7 @@ import { Button, HeaderLayout } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { AddReleaseDialog } from '../../components/AddReleaseDialog';
+import { AddReleaseDialog } from '../components/AddReleaseDialog';
 
 const ReleasesPage = () => {
   const [addReleaseDialogIsShown, setAddReleaseDialogIsShown] = React.useState(false);
