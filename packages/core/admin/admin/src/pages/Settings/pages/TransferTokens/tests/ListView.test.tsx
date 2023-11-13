@@ -1,9 +1,7 @@
-import React from 'react';
-
 import { useRBAC } from '@strapi/helper-plugin';
 import { render, waitFor } from '@tests/utils';
 
-import ListView from '../index';
+import { TransferTokenListView } from '../ListView';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -23,6 +21,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
   });
 
   it('should show a list of transfer tokens', async () => {
+    // @ts-expect-error this is fine
     useRBAC.mockReturnValue({
       allowedActions: {
         canCreate: true,
@@ -33,13 +32,16 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
       },
     });
 
-    const { getByText } = render(<ListView />);
+    const { getByText } = render(<TransferTokenListView />);
 
+    // eslint-disable-next-line testing-library/prefer-find-by
     await waitFor(() => expect(getByText('My super token')).toBeInTheDocument());
+    // eslint-disable-next-line testing-library/prefer-find-by
     await waitFor(() => expect(getByText('This describe my super token')).toBeInTheDocument());
   });
 
   it('should not show the create button when the user does not have the rights to create', async () => {
+    // @ts-expect-error this is fine
     useRBAC.mockReturnValue({
       allowedActions: {
         canCreate: false,
@@ -50,7 +52,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
       },
     });
 
-    const { queryByTestId } = render(<ListView />);
+    const { queryByTestId } = render(<TransferTokenListView />);
 
     await waitFor(() =>
       expect(queryByTestId('create-transfer-token-button')).not.toBeInTheDocument()
@@ -58,6 +60,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
   });
 
   it('should show the delete button when the user have the rights to delete', async () => {
+    // @ts-expect-error this is fine
     useRBAC.mockReturnValue({
       allowedActions: {
         canCreate: false,
@@ -68,14 +71,16 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
       },
     });
 
-    const { container } = render(<ListView />);
+    const { container } = render(<TransferTokenListView />);
 
     await waitFor(() =>
+      // eslint-disable-next-line testing-library/no-container
       expect(container.querySelector('button[name="delete"]')).toBeInTheDocument()
     );
   });
 
   it('should show the read button when the user have the rights to read and not to update', async () => {
+    // @ts-expect-error this is fine
     useRBAC.mockReturnValue({
       allowedActions: {
         canCreate: false,
@@ -86,8 +91,9 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
       },
     });
 
-    const { container } = render(<ListView />);
+    const { container } = render(<TransferTokenListView />);
 
+    // eslint-disable-next-line testing-library/no-container
     await waitFor(() => expect(container.querySelector('a[title*="Read"]')).toBeInTheDocument());
   });
 });
