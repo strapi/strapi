@@ -9,13 +9,13 @@ import { IntlProvider } from 'react-intl';
 import { createEditor } from 'slate';
 import { Slate, withReact } from 'slate-react';
 
-import { codeBlocks } from '../../blocks/Code';
-import { headingBlocks } from '../../blocks/Heading';
-import { imageBlocks } from '../../blocks/Image';
-import { linkBlocks } from '../../blocks/Link';
-import { listBlocks } from '../../blocks/List';
-import { paragraphBlocks } from '../../blocks/Paragraph';
-import { quoteBlocks } from '../../blocks/Quote';
+import { codeBlocks } from '../../Blocks/Code';
+import { headingBlocks } from '../../Blocks/Heading';
+import { imageBlocks } from '../../Blocks/Image';
+import { linkBlocks } from '../../Blocks/Link';
+import { listBlocks } from '../../Blocks/List';
+import { paragraphBlocks } from '../../Blocks/Paragraph';
+import { quoteBlocks } from '../../Blocks/Quote';
 import { type BlocksStore, BlocksEditorProvider } from '../../BlocksEditor';
 import { useModifiersStore } from '../useModifiersStore';
 
