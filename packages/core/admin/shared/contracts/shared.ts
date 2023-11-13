@@ -32,17 +32,20 @@ export interface AdminUser extends Entity {
   preferedLanguage?: string;
 }
 
-export type AdminUserCreationPayload = Omit<AdminUser, 'roles' | 'id'> & {
+export type AdminUserCreationPayload = Omit<
+  AdminUser,
+  keyof Entity | 'roles' | 'isActive' | 'blocked'
+> & {
   roles: TEntity.ID[];
 };
 
-export type SanitizedAdminUser = Omit<
-  AdminUser,
-  'password' | 'resetPasswordToken' | 'registrationToken' | 'roles'
-> & {
-  roles: SanitizedAdminRole[];
+export type AdminUserUpdatePayload = Omit<AdminUser, keyof Entity | 'roles'> & {
+  roles: TEntity.ID[];
 };
 
+export type SanitizedAdminUser = Omit<AdminUser, 'password' | 'resetPasswordToken' | 'roles'> & {
+  roles: SanitizedAdminRole[];
+};
 export interface AdminRole extends Entity {
   name: string;
   code: string;

@@ -19,7 +19,7 @@ import {
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
-import Filters from '../../../../../../../../admin/src/pages/Settings/components/Filters';
+import { Filters } from '../../../../../../../../admin/src/pages/Settings/components/Filters';
 import { selectAdminPermissions } from '../../../../../../../../admin/src/selectors';
 
 import useAuditLogsData from './hooks/useAuditLogsData';
