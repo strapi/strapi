@@ -18,7 +18,7 @@ describe('Heading', () => {
         },
       }),
       {
-        wrapper: ({ children }) => <Wrapper>{children}</Wrapper>,
+        wrapper: Wrapper,
       }
     );
 

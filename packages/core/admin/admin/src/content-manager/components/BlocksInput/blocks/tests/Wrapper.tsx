@@ -20,11 +20,10 @@ import { quoteBlocks } from '../Quote';
 const baseEditor = createEditor();
 
 interface WrapperProps {
-  initialValue?: Attribute.BlocksValue;
   children: React.ReactNode;
 }
 
-const Wrapper = ({ children, initialValue = [] }: WrapperProps) => {
+const Wrapper = ({ children }: WrapperProps) => {
   const [editor] = React.useState(() => withReact(baseEditor));
 
   const blocks: BlocksStore = {
@@ -40,7 +39,7 @@ const Wrapper = ({ children, initialValue = [] }: WrapperProps) => {
   return (
     <ThemeProvider theme={lightTheme}>
       <IntlProvider messages={{}} locale="en">
-        <Slate initialValue={initialValue} editor={editor}>
+        <Slate initialValue={[]} editor={editor}>
           <BlocksEditorProvider blocks={blocks}>{children}</BlocksEditorProvider>
         </Slate>
       </IntlProvider>
