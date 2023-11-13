@@ -169,7 +169,7 @@ const getMapOfPluginsWithAdmin = (
     })
     .map((plugin) => {
       const systemPath = plugin.isLocal
-        ? path.relative(runtimeDir, plugin.pathToPlugin)
+        ? path.relative(runtimeDir, plugin.pathToPlugin.split('/').join(path.sep))
         : undefined;
       const modulePath = systemPath ? systemPath.split(path.sep).join('/') : undefined;
 
