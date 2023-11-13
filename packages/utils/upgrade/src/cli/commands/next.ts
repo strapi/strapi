@@ -26,8 +26,16 @@ export const next = async (options: CLIOptions) => {
     // TODO: Don't use the project version but look at the @strapi dependencies instead
     // ?: What strategy should we adopt if there are multiple @strapi dependencies with different versions?
     //     - Use latest?
-    //     - Use @strapi/strapi one?
-    const version = pkg.version as Version.SemVer;
+    //     - Use @strapi/strapi one? <- Seems like the best choice for the moment
+    const dependencies = pkg['dependencies'] ?? {};
+    const version = dependencies['@strapi/strapi'] as Version.SemVer | undefined;
+
+    if (version === undefined) {
+      logger.error(
+        `No version of "@strapi/strapi" were found in the project's package.json. Are you in a valid Strapi project?`
+      );
+      process.exit(1);
+    }
 
     // TODO: Allow to load the app codemods directory
     // const codemodsDir = path.join(cwd, 'codemods');
