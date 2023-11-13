@@ -218,8 +218,19 @@ const mergeConfigWithUserConfig = async (config: Configuration, ctx: BuildContex
   const userConfig = await getUserConfig(ctx);
 
   if (userConfig) {
-    const webpack = await import('webpack');
-    return userConfig(config, webpack);
+    if (typeof userConfig === 'function') {
+      const webpack = await import('webpack');
+      return userConfig(config, webpack);
+    } else {
+      ctx.logger.warn(
+        `You've exported something other than a function from ${path.join(
+          ctx.appDir,
+          'src',
+          'admin',
+          'webpack.config'
+        )}, this will ignored.`
+      );
+    }
   }
 
   return config;
