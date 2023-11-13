@@ -24,7 +24,7 @@ const getEntryModule = (ctx: BuildContext): string => {
          */
         ${pluginsImport}
         import { renderAdmin } from "@strapi/strapi/admin"
-        
+
         ${
           ctx.customisations?.path
             ? `import customisations from '${path.relative(
@@ -33,7 +33,7 @@ const getEntryModule = (ctx: BuildContext): string => {
               )}'`
             : ''
         }
-        
+
         renderAdmin(
           document.getElementById("strapi"),
           {

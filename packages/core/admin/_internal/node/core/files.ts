@@ -18,7 +18,11 @@ const pathExists = async (path: string) => {
  */
 const loadFile = async (path: string): Promise<undefined | any> => {
   if (await pathExists(path)) {
-    const esbuildOptions = { extensions: ['.js', '.mjs', '.ts'] };
+    const esbuildOptions: Parameters<typeof register>[0] = {
+      extensions: ['.js', '.mjs', '.ts', '.jsx', '.tsx'],
+      jsx: 'automatic',
+      loader: 'jsx',
+    };
 
     const { unregister } = register(esbuildOptions);
 
