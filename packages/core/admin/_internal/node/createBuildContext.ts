@@ -1,14 +1,11 @@
 import os from 'node:os';
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import syncFs from 'node:fs';
-import camelCase from 'lodash/camelCase';
 import browserslist from 'browserslist';
 import strapiFactory, { CLIContext } from '@strapi/strapi';
 import { getConfigUrls } from '@strapi/utils';
 
 import { getStrapiAdminEnvVars, loadEnv } from './core/env';
-import { isError } from './core/errors';
 
 import type { BuildOptions } from './build';
 import { DevelopOptions } from './develop';
