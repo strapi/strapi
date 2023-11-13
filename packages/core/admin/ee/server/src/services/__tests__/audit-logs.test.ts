@@ -2,7 +2,7 @@ import EE from '@strapi/strapi/dist/utils/ee';
 import auditLogs from '@strapi/provider-audit-logs-local';
 import { scheduleJob } from 'node-schedule';
 import createAuditLogsService from '../audit-logs';
-import createEventHub from '@strapi/strapi/dist/services/event-hub';
+import createEventHub from '../../../../../../strapi/dist/services/event-hub';
 import '@strapi/types';
 import { LoadedStrapi } from '@strapi/types';
 
