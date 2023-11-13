@@ -151,3 +151,5 @@ export interface Component extends Schema {
 
   category: string;
 }
+
+export type Any = SingleType | CollectionType | Component;

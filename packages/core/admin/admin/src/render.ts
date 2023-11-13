@@ -5,10 +5,14 @@ import { createRoot } from 'react-dom/client';
 import { StrapiApp, StrapiAppConstructorArgs } from './StrapiApp';
 
 interface RenderAdminArgs {
+  customisations: StrapiAppConstructorArgs['adminConfig'];
   plugins: StrapiAppConstructorArgs['appPlugins'];
 }
 
-const renderAdmin = async (mountNode: HTMLElement | null, { plugins }: RenderAdminArgs) => {
+const renderAdmin = async (
+  mountNode: HTMLElement | null,
+  { plugins, customisations }: RenderAdminArgs
+) => {
   if (!mountNode) {
     throw new Error('[@strapi/admin]: Could not find the root element to mount the admin app');
   }
@@ -73,7 +77,7 @@ const renderAdmin = async (mountNode: HTMLElement | null, { plugins }: RenderAdm
   }
 
   const app = new StrapiApp({
-    adminConfig: {},
+    adminConfig: customisations,
     appPlugins: plugins,
   });
 
