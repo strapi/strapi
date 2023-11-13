@@ -1,6 +1,6 @@
 {
   "name": "@strapi/strapi",
-  "version": "4.15.1",
+  "version": "4.15.4",
   "description": "An open source headless CMS solution to create and manage your own API. It provides a powerful dashboard and features to make your life easier. Databases supported: MySQL, MariaDB, PostgreSQL, SQLite",
   "keywords": [
     "strapi",
@@ -64,6 +64,30 @@
       "url": "https://strapi.io"
     }
   ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "source": "./src/index.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./dist/utils/ee": {
+      "types": "./dist/utils/ee.d.ts",
+      "source": "./src/utils/ee.ts",
+      "import": "./dist/utils/ee.mjs",
+      "require": "./dist/utils/ee.js",
+      "default": "./dist/utils/ee.js"
+    },
+    "./admin": {
+      "types": "./dist/admin.d.ts",
+      "source": "./src/admin.ts",
+      "import": "./dist/admin.mjs",
+      "require": "./dist/admin.js",
+      "default": "./dist/admin.js"
+    },
+    "./package.json": "./package.json"
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "source": "./src/index.ts",
@@ -90,21 +114,21 @@
   "dependencies": {
     "@koa/cors": "3.4.3",
     "@koa/router": "10.1.1",
-    "@strapi/admin": "4.15.1",
-    "@strapi/data-transfer": "4.15.1",
-    "@strapi/database": "4.15.1",
-    "@strapi/generate-new": "4.15.1",
-    "@strapi/generators": "4.15.1",
-    "@strapi/logger": "4.15.1",
-    "@strapi/pack-up": "4.15.1",
-    "@strapi/permissions": "4.15.1",
-    "@strapi/plugin-content-manager": "4.15.1",
-    "@strapi/plugin-content-type-builder": "4.15.1",
-    "@strapi/plugin-email": "4.15.1",
-    "@strapi/plugin-upload": "4.15.1",
-    "@strapi/types": "4.15.1",
-    "@strapi/typescript-utils": "4.15.1",
-    "@strapi/utils": "4.15.1",
+    "@strapi/admin": "4.15.4",
+    "@strapi/data-transfer": "4.15.4",
+    "@strapi/database": "4.15.4",
+    "@strapi/generate-new": "4.15.4",
+    "@strapi/generators": "4.15.4",
+    "@strapi/logger": "4.15.4",
+    "@strapi/pack-up": "4.15.4",
+    "@strapi/permissions": "4.15.4",
+    "@strapi/plugin-content-manager": "4.15.4",
+    "@strapi/plugin-content-type-builder": "4.15.4",
+    "@strapi/plugin-email": "4.15.4",
+    "@strapi/plugin-upload": "4.15.4",
+    "@strapi/types": "4.15.4",
+    "@strapi/typescript-utils": "4.15.4",
+    "@strapi/utils": "4.15.4",
     "bcryptjs": "2.4.3",
     "boxen": "5.1.2",
     "chalk": "4.1.2",
@@ -164,9 +188,9 @@
     "@types/node": "18.18.4",
     "@types/node-schedule": "2.1.0",
     "@types/statuses": "2.0.1",
-    "eslint-config-custom": "4.15.1",
+    "eslint-config-custom": "4.15.4",
     "supertest": "6.3.3",
-    "tsconfig": "4.15.1"
+    "tsconfig": "4.15.4"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

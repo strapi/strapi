@@ -9,6 +9,7 @@ const build: StrapiCommand = ({ command, ctx }) => {
   command
     .command('build')
     .option('-d, --debug', 'Enable debugging mode with verbose logs', false)
+    .option('--ignore-prompts', 'Ignore all prompts', false)
     .option('--minify', 'Minify the output', true)
     .option('--no-optimization', '[deprecated]: use minify instead')
     .option('--silent', "Don't log anything", false)
@@ -31,7 +32,9 @@ const develop: StrapiCommand = ({ command, ctx }) => {
     .alias('dev')
     .option('-d, --debug', 'Enable debugging mode with verbose logs', false)
     .option('--silent', "Don't log anything", false)
+    .option('--ignore-prompts', 'Ignore all prompts', false)
     .option('--polling', 'Watch for file changes in network directories', false)
+    .option('--watch-admin', 'Watch the admin panel for hot changes', false)
     .option(
       '--no-build',
       '[deprecated]: there is middleware for the server, it is no longer a separate process'
