@@ -30,8 +30,6 @@ const registerAdminPanelRoute = ({ strapi }: { strapi: Strapi }) => {
     {
       method: 'GET',
       path: `${strapi.config.admin.path}/:path*`,
-      // TODO
-      // @ts-expect-error veryify the type defined for handler
       handler: [
         serveAdminMiddleware,
         serveStatic(buildDir, {
