@@ -155,10 +155,12 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       },
     });
 
-    const { getByRole } = setup();
+    const { container } = setup();
 
-    // eslint-disable-next-line testing-library/prefer-find-by
-    await waitFor(() => expect(getByRole('button', { name: 'delete' })).toBeInTheDocument());
+    await waitFor(() =>
+      // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+      expect(container.querySelector('button[name="delete"]')).toBeInTheDocument()
+    );
   });
 
   it('should show the read button when the user have the rights to read and not to update', async () => {

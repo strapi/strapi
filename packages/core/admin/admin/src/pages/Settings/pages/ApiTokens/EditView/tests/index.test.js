@@ -11,7 +11,7 @@ import { Route, MemoryRouter } from 'react-router-dom';
 
 import { Theme } from '../../../../../../components/Theme';
 import { ThemeToggleProvider } from '../../../../../../components/ThemeToggleProvider';
-import EditView from '../index';
+import { EditView } from '../EditViewPage';
 import { data } from '../utils/tests/dataMock';
 
 jest.mock('@strapi/helper-plugin', () => ({

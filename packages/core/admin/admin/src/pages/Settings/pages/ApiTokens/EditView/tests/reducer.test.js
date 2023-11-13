@@ -1,9 +1,23 @@
-import init from '../init';
-import reducer from '../reducer';
-import { data } from '../utils/tests/dataMock';
+import { reducer } from '../reducer';
 
 describe('ADMIN | Pages | API TOKENS | EditView | reducer', () => {
-  const initialState = init({}, data.data);
+  const initialState = {
+    selectedAction: null,
+    routes: [],
+    selectedActions: [],
+    data: {
+      'api::address': {
+        controllers: {
+          address: ['find', 'findOne'],
+        },
+      },
+      'api::category': {
+        controllers: {
+          category: ['find', 'findOne', 'create', 'update', 'delete', 'createLocalization'],
+        },
+      },
+    },
+  };
 
   it('should return the initialState when the type is undefined', () => {
     const action = { type: undefined };

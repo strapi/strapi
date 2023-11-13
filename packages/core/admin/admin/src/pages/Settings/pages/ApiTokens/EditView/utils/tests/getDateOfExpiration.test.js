@@ -1,4 +1,4 @@
-import getDateOfExpiration from '../getDateOfExpiration';
+import { getDateOfExpiration } from '../getDateOfExpiration';
 
 const createdAt = '2022-07-05T12:16:56.821Z';
 const duration = 604800000;
