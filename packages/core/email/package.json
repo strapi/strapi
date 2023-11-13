@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-email",
-  "version": "4.15.1",
+  "version": "4.15.2",
   "description": "Easily configure your Strapi application to send emails.",
   "repository": {
     "type": "git",
@@ -53,11 +53,11 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/design-system": "1.13.0",
-    "@strapi/helper-plugin": "4.15.1",
+    "@strapi/design-system": "1.13.1",
+    "@strapi/helper-plugin": "4.15.2",
     "@strapi/icons": "1.13.0",
-    "@strapi/provider-email-sendmail": "4.15.1",
-    "@strapi/utils": "4.15.1",
+    "@strapi/provider-email-sendmail": "4.15.2",
+    "@strapi/utils": "4.15.2",
     "lodash": "4.17.21",
     "prop-types": "^15.8.1",
     "react-intl": "6.4.1",
@@ -65,8 +65,8 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/pack-up": "workspace:*",
-    "@strapi/types": "workspace:*",
+    "@strapi/pack-up": "4.15.2",
+    "@strapi/types": "4.15.2",
     "@testing-library/react": "14.0.0",
     "@types/koa": "2.13.4",
     "@types/lodash": "^4.14.191",
@@ -81,8 +81,8 @@
     "koa": "2.13.4",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
-    "react-router-dom": "5.3.4",
-    "styled-components": "5.3.3"
+    "react-router-dom": "^5.2.0",
+    "styled-components": "^5.2.1"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

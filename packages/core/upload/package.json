@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-upload",
-  "version": "4.15.1",
+  "version": "4.15.2",
   "description": "Makes it easy to upload images and files to your Strapi Application.",
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -33,6 +33,7 @@
     "build": "pack-up build",
     "clean": "run -T rimraf dist",
     "lint": "run -T eslint .",
+    "prepublishOnly": "yarn clean && yarn build",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
     "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
@@ -42,11 +43,11 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/design-system": "1.13.0",
-    "@strapi/helper-plugin": "4.15.1",
+    "@strapi/design-system": "1.13.1",
+    "@strapi/helper-plugin": "4.15.2",
     "@strapi/icons": "1.13.0",
-    "@strapi/provider-upload-local": "4.15.1",
-    "@strapi/utils": "4.15.1",
+    "@strapi/provider-upload-local": "4.15.2",
+    "@strapi/utils": "4.15.2",
     "axios": "1.5.0",
     "byte-size": "7.0.1",
     "cropperjs": "1.6.0",
@@ -70,8 +71,8 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/pack-up": "workspace:*",
-    "@strapi/strapi": "4.15.1",
+    "@strapi/pack-up": "4.15.2",
+    "@strapi/strapi": "4.15.2",
     "@testing-library/dom": "9.2.0",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
@@ -85,8 +86,8 @@
     "@strapi/strapi": "^4.0.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
-    "react-router-dom": "5.3.4",
-    "styled-components": "5.3.3"
+    "react-router-dom": "^5.2.0",
+    "styled-components": "^5.2.1"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
