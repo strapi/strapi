@@ -1,7 +1,7 @@
+import chalk from 'chalk';
 import { readdirSync, statSync } from 'node:fs';
 import * as path from 'node:path';
 import * as semver from 'semver';
-import chalk from 'chalk';
 
 import { Logger } from './logger';
 
@@ -58,14 +58,14 @@ export const createCodemodsLoader = (options: CreateLoaderOptions) => {
   const fRange = chalk.bold(chalk.green(semverRange.raw));
   const fVersions = chalk.italic(chalk.yellow(versions.join(', ')));
 
-  logger.debug(`Found ${fNbFound} upgrades matching ${fRange} (${fVersions})`);
+  logger.info(`Found ${fNbFound} upgrades matching ${fRange} (${fVersions})`);
 
   // Note: We're casting the result as a string since we know there is at least one item in the `versions` array
   const latest = versions.at(-1) as string;
 
   const fLatest = chalk.italic(chalk.yellow(latest));
 
-  logger.debug(`Latest upgrade is ${fLatest}`);
+  logger.info(`Latest upgrade is ${fLatest}`);
 
   /**
    * Verifies that the given version matches the available ones

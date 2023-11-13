@@ -1,11 +1,10 @@
-import * as path from 'node:path';
 import chalk from 'chalk';
 
-import { handleError } from '../errors';
-import { loadPkg } from '../../core/pkg';
+import { VersionRange, createCodemodsLoader } from '../../core/codemods';
 import { createLogger } from '../../core/logger';
-import { createVersionParser, nextMajor } from '../../core/version';
-import { createCodemodsLoader, VersionRange } from '../../core/codemods';
+import { loadPkg } from '../../core/pkg';
+import { createVersionParser } from '../../core/version';
+import { handleError } from '../errors';
 
 import type { CLIOptions, Version } from '../../types';
 
@@ -27,7 +26,7 @@ export const next = async (options: CLIOptions) => {
     // ?: What strategy should we adopt if there are multiple @strapi dependencies with different versions?
     //     - Use latest?
     //     - Use @strapi/strapi one? <- Seems like the best choice for the moment
-    const dependencies = pkg['dependencies'] ?? {};
+    const dependencies = pkg.dependencies ?? {};
     const version = dependencies['@strapi/strapi'] as Version.SemVer | undefined;
 
     if (version === undefined) {
@@ -42,7 +41,7 @@ export const next = async (options: CLIOptions) => {
 
     const fCurrentVersion = chalk.italic(chalk.yellow(version));
 
-    logger.debug(`Found current version ${fCurrentVersion}`);
+    logger.info(`Found current version ${fCurrentVersion}`);
 
     const range: VersionRange = { from: version, to: 'latest' };
 
@@ -52,7 +51,7 @@ export const next = async (options: CLIOptions) => {
 
     const fNextMajor = chalk.underline(chalk.italic(chalk.yellow(target)));
 
-    logger.debug(chalk.bold(chalk.green(`Next major upgrade is ${fNextMajor}`)));
+    logger.info(chalk.bold(chalk.green(`Next major upgrade is ${fNextMajor}`)));
 
     if (target) {
       const loaded = codemodsLoader.load(target);
@@ -61,12 +60,12 @@ export const next = async (options: CLIOptions) => {
       const fNbLoaded = chalk.bold(chalk.underline(loaded.length));
       const fLoaded = loaded.map(({ path }) => chalk.cyan(path)).join(', ');
 
-      logger.debug(`Found ${fNbLoaded} code mod(s) for ${fTarget} (${fLoaded})`);
-      logger.debug(
+      logger.info(`Found ${fNbLoaded} code mod(s) for ${fTarget} (${fLoaded})`);
+      logger.info(
         chalk.bold(chalk.green(`About to upgrade from ${fCurrentVersion} to ${fTarget}`))
       );
     } else {
-      logger.debug('Seems like the current version is the latest major');
+      logger.info('Seems like the current version is the latest major');
     }
   } catch (err) {
     console.log(err);
