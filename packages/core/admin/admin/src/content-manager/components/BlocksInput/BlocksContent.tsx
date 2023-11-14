@@ -6,10 +6,10 @@ import {
   type RenderElementProps,
   type RenderLeafProps,
   Editable,
-  useSlate,
 } from 'slate-react';
 import { type DefaultTheme, useTheme } from 'styled-components';
 
+import { useBlocksEditorContext } from './BlocksEditor';
 import { type BlocksStore, useBlocksStore } from './hooks/useBlocksStore';
 import { type ModifiersStore, useModifiersStore } from './hooks/useModifiersStore';
 import { getEntries } from './utils/types';
@@ -50,9 +50,9 @@ interface BlocksInputProps {
   placeholder?: string;
 }
 
-const BlocksInput = ({ disabled, placeholder }: BlocksInputProps) => {
+const BlocksContent = ({ disabled, placeholder }: BlocksInputProps) => {
   const theme = useTheme();
-  const editor = useSlate();
+  const { editor } = useBlocksEditorContext('BlocksContent');
   const blocksRef = React.useRef<HTMLDivElement>(null);
 
   // Create renderLeaf function based on the modifiers store
@@ -190,4 +190,4 @@ const BlocksInput = ({ disabled, placeholder }: BlocksInputProps) => {
   );
 };
 
-export { BlocksInput };
+export { BlocksContent };

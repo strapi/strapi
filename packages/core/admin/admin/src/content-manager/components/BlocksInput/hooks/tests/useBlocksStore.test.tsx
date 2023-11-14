@@ -11,6 +11,7 @@ import { IntlProvider } from 'react-intl';
 import { createEditor, Editor, Transforms } from 'slate';
 import { Slate, withReact, ReactEditor } from 'slate-react';
 
+import { BlocksEditorProvider } from '../../BlocksEditor';
 import { withLinks } from '../../plugins/withLinks';
 import { type Block } from '../../utils/types';
 import { useBlocksStore } from '../useBlocksStore';
@@ -39,7 +40,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
     <ThemeProvider theme={lightTheme}>
       <IntlProvider messages={{}} locale="en">
         <Slate initialValue={initialValue} editor={editor}>
-          {children}
+          <BlocksEditorProvider>{children}</BlocksEditorProvider>
         </Slate>
       </IntlProvider>
     </ThemeProvider>

@@ -10,7 +10,8 @@ import { IntlProvider } from 'react-intl';
 import { type Descendant, type Editor, type Location, createEditor, Transforms } from 'slate';
 import { Slate, withReact, ReactEditor } from 'slate-react';
 
-import { BlocksToolbar } from '../Toolbar';
+import { BlocksEditorProvider } from '../BlocksEditor';
+import { BlocksToolbar } from '../BlocksToolbar';
 
 const mockMediaLibraryTitle = 'dialog component';
 const mockMediaLibrarySubmitButton = 'upload images';
@@ -134,7 +135,7 @@ const Wrapper = ({
     <ThemeProvider theme={lightTheme}>
       <IntlProvider messages={{}} locale="en">
         <Slate initialValue={initialValue} editor={editor}>
-          {children}
+          <BlocksEditorProvider>{children}</BlocksEditorProvider>
         </Slate>
       </IntlProvider>
     </ThemeProvider>
@@ -163,7 +164,7 @@ const setup = (data: Descendant[] = defaultInitialValue) => {
   });
 };
 
-describe('BlocksEditor toolbar', () => {
+describe('BlocksToolbar', () => {
   beforeEach(() => {
     /**
      * TODO: Find a way to use the actual implementation
