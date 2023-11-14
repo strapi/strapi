@@ -169,40 +169,6 @@ const develop = async ({
       autoReload: true,
       serveAdminPanel: !watchAdmin,
     });
-
-    const strapiInstance = await strapi.load();
-
-    const loadStrapiDuration = timer.end('loadStrapi');
-    loadStrapiSpinner.text = `Loading Strapi (${prettyTime(loadStrapiDuration)})`;
-    loadStrapiSpinner.succeed();
-
-    timer.start('generatingTS');
-    const generatingTsSpinner = logger.spinner(`Generating types`).start();
-
-    await tsUtils.generators.generate({
-      strapi: strapiInstance,
-      pwd: cwd,
-      rootDir: undefined,
-      logger: { silent: true, debug: false },
-      artifacts: { contentTypes: true, components: true },
-    });
-
-    const generatingDuration = timer.end('generatingTS');
-    generatingTsSpinner.text = `Generating types (${prettyTime(generatingDuration)})`;
-    generatingTsSpinner.succeed();
-
-    if (tsconfig?.config) {
-      timer.start('compilingTS');
-      const compilingTsSpinner = logger.spinner(`Compiling TS`).start();
-
-      await cleanupDistDirectory({ tsconfig, logger, timer });
-      await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
-
-      const compilingDuration = timer.end('compilingTS');
-      compilingTsSpinner.text = `Compiling TS (${prettyTime(compilingDuration)})`;
-      compilingTsSpinner.succeed();
-    }
-
     let webpackWatcher: WebpackWatcher | undefined;
 
     /**
@@ -235,6 +201,39 @@ const develop = async ({
       const adminDuration = timer.end('creatingAdmin');
       adminSpinner.text = `Creating admin (${prettyTime(adminDuration)})`;
       adminSpinner.succeed();
+    }
+
+    const strapiInstance = await strapi.load();
+
+    const loadStrapiDuration = timer.end('loadStrapi');
+    loadStrapiSpinner.text = `Loading Strapi (${prettyTime(loadStrapiDuration)})`;
+    loadStrapiSpinner.succeed();
+
+    timer.start('generatingTS');
+    const generatingTsSpinner = logger.spinner(`Generating types`).start();
+
+    await tsUtils.generators.generate({
+      strapi: strapiInstance,
+      pwd: cwd,
+      rootDir: undefined,
+      logger: { silent: true, debug: false },
+      artifacts: { contentTypes: true, components: true },
+    });
+
+    const generatingDuration = timer.end('generatingTS');
+    generatingTsSpinner.text = `Generating types (${prettyTime(generatingDuration)})`;
+    generatingTsSpinner.succeed();
+
+    if (tsconfig?.config) {
+      timer.start('compilingTS');
+      const compilingTsSpinner = logger.spinner(`Compiling TS`).start();
+
+      await cleanupDistDirectory({ tsconfig, logger, timer });
+      await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
+
+      const compilingDuration = timer.end('compilingTS');
+      compilingTsSpinner.text = `Compiling TS (${prettyTime(compilingDuration)})`;
+      compilingTsSpinner.succeed();
     }
 
     const restart = async () => {
