@@ -153,6 +153,9 @@ const develop = async ({
   }
 
   if (cluster.isWorker) {
+    timer.start('loadStrapi');
+    const loadStrapiSpinner = logger.spinner(`Loading Strapi`).start();
+
     const strapi = strapiFactory({
       appDir: cwd,
       distDir: tsconfig?.config.options.outDir ?? '',
@@ -161,6 +164,10 @@ const develop = async ({
     });
 
     const strapiInstance = await strapi.load();
+
+    const loadStrapiDuration = timer.end('loadStrapi');
+    loadStrapiSpinner.text = `Loaded Strapi (${prettyTime(loadStrapiDuration)})`;
+    loadStrapiSpinner.succeed();
 
     timer.start('generatingTS');
     const generatingTsSpinner = logger.spinner(`Generating types`).start();
