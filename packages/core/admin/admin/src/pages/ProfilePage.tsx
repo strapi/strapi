@@ -120,7 +120,7 @@ const ProfilePage = () => {
 
   const isLoading = isLoadingUser || isLoadingSSO;
 
-  type UpdateUsersMeBody = Omit<UpdateMe.Request['body'], 'currentPassword'> & {
+  type UpdateUsersMeBody = UpdateMe.Request['body'] & {
     confirmPassword: string;
     currentTheme: ThemeName;
   };
@@ -131,7 +131,26 @@ const ProfilePage = () => {
     UpdateUsersMeBody
   >(
     async (body) => {
-      const { confirmPassword: _confirmPassword, currentTheme, ...dataToSend } = body;
+      const { confirmPassword: _confirmPassword, currentTheme, ...bodyRest } = body;
+      let dataToSend = bodyRest;
+
+      const isPasswordRequestBody = (
+        data: UpdateMe.Request['body']
+      ): data is UpdateMe.PasswordRequestBody => {
+        return 'password' in data;
+      };
+
+      // The password fields are optional. If the user didn't touch them, don't send any password
+      // to the API, because an empty string would throw a validation error
+      if (isPasswordRequestBody(dataToSend) && dataToSend.password === '') {
+        const {
+          password: _password,
+          currentPassword: _currentPassword,
+          ...passwordRequestBodyRest
+        } = dataToSend;
+        dataToSend = passwordRequestBodyRest;
+      }
+
       const { data } = await put<UpdateMe.Response>('/admin/users/me', dataToSend);
 
       return { ...data.data, currentTheme };
@@ -254,8 +273,7 @@ const ProfilePage = () => {
             username,
             preferedLanguage,
             currentTheme,
-            password,
-            confirmPassword,
+            ...passwordValues
           },
           handleChange,
           isSubmitting,
@@ -293,7 +311,7 @@ const ProfilePage = () => {
                       <PasswordSection
                         errors={errors}
                         onChange={handleChange}
-                        values={{ password, confirmPassword }}
+                        values={passwordValues}
                       />
                     )}
                     <PreferencesSection
@@ -321,9 +339,10 @@ const ProfilePage = () => {
  * -----------------------------------------------------------------------------------------------*/
 
 interface PasswordSectionProps {
-  errors: { password?: string; confirmPassword?: string };
+  errors: { currentPassword?: string; password?: string; confirmPassword?: string };
   onChange: React.ChangeEventHandler<HTMLInputElement>;
   values: {
+    currentPassword?: string;
     password?: string;
     confirmPassword?: string;
   };
@@ -331,6 +350,7 @@ interface PasswordSectionProps {
 
 const PasswordSection = ({ errors, onChange, values }: PasswordSectionProps) => {
   const { formatMessage } = useIntl();
+  const [currentPasswordShown, setCurrentPasswordShown] = React.useState(false);
   const [passwordShown, setPasswordShown] = React.useState(false);
   const [passwordConfirmShown, setPasswordConfirmShown] = React.useState(false);
 
@@ -351,6 +371,49 @@ const PasswordSection = ({ errors, onChange, values }: PasswordSectionProps) => 
             defaultMessage: 'Change password',
           })}
         </Typography>
+        <Grid gap={5}>
+          <GridItem s={12} col={6}>
+            <TextInput
+              error={
+                errors.currentPassword
+                  ? formatMessage({
+                      id: errors.currentPassword,
+                      defaultMessage: errors.currentPassword,
+                    })
+                  : ''
+              }
+              onChange={onChange}
+              value={values.currentPassword}
+              label={formatMessage({
+                id: 'Auth.form.currentPassword.label',
+                defaultMessage: 'Current Password',
+              })}
+              name="currentPassword"
+              type={currentPasswordShown ? 'text' : 'password'}
+              endAction={
+                <FieldActionWrapper
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentPasswordShown((prev) => !prev);
+                  }}
+                  label={formatMessage(
+                    currentPasswordShown
+                      ? {
+                          id: 'Auth.form.password.show-password',
+                          defaultMessage: 'Show password',
+                        }
+                      : {
+                          id: 'Auth.form.password.hide-password',
+                          defaultMessage: 'Hide password',
+                        }
+                  )}
+                >
+                  {currentPasswordShown ? <Eye /> : <EyeStriked />}
+                </FieldActionWrapper>
+              }
+            />
+          </GridItem>
+        </Grid>
         <Grid gap={5}>
           <GridItem s={12} col={6}>
             <PasswordInput
@@ -408,7 +471,7 @@ const PasswordSection = ({ errors, onChange, values }: PasswordSectionProps) => 
               value={values.confirmPassword}
               label={formatMessage({
                 id: 'Auth.form.confirmPassword.label',
-                defaultMessage: 'Password confirmation',
+                defaultMessage: 'Confirm Password',
               })}
               name="confirmPassword"
               type={passwordConfirmShown ? 'text' : 'password'}
