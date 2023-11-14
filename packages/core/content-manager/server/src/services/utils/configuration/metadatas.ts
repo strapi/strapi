@@ -59,10 +59,12 @@ function createDefaultMetadata(schema: any, name: any) {
   );
 
   const list = {
-    // TODO is this error correct and properties will always be overwritten
-    // label: name,
-    // searchable: isSearchable(schema, name),
-    // sortable: isSortable(schema, name),
+    // @ts-expect-error we need to specify these properties
+    label: name,
+    // @ts-expect-error we need to specify these properties
+    searchable: isSearchable(schema, name),
+    // @ts-expect-error we need to specify these properties
+    sortable: isSortable(schema, name),
     ..._.pick(_.get(schema, ['config', 'metadatas', name, 'list'], {}), [
       'label',
       'searchable',
