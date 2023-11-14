@@ -2,10 +2,9 @@ import type { CLIContext } from '@strapi/strapi';
 import EE from '@strapi/strapi/dist/utils/ee';
 import * as tsUtils from '@strapi/typescript-utils';
 import { checkRequiredDependencies } from './core/dependencies';
-import { getTimer } from './core/timer';
+import { getTimer, prettyTime } from './core/timer';
 import { createBuildContext } from './createBuildContext';
 import { writeStaticClientFiles } from './staticFiles';
-import { prettyTime } from './utils';
 import { build as buildWebpack } from './webpack/build';
 
 interface BuildOptions extends CLIContext {

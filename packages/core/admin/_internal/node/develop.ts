@@ -8,7 +8,7 @@ import path from 'node:path';
 import cluster from 'node:cluster';
 
 import { checkRequiredDependencies } from './core/dependencies';
-import { getTimer, type TimeMeasurer } from './core/timer';
+import { getTimer, prettyTime, type TimeMeasurer } from './core/timer';
 import { createBuildContext } from './createBuildContext';
 import { build as buildWebpack } from './webpack/build';
 import { watch as watchWebpack, WebpackWatcher } from './webpack/watch';
@@ -16,7 +16,6 @@ import { watch as watchWebpack, WebpackWatcher } from './webpack/watch';
 import strapiFactory from '@strapi/strapi';
 import EE from '@strapi/strapi/dist/utils/ee';
 import { writeStaticClientFiles } from './staticFiles';
-import { prettyTime } from './utils';
 
 interface DevelopOptions extends CLIContext {
   /**
