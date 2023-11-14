@@ -1,19 +1,24 @@
 import os from 'node:os';
 import path from 'node:path';
+import { promisify } from 'node:util';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import { webpack } from 'webpack';
 import type { BuildContext } from '../createBuildContext';
 import { mergeConfigWithUserConfig, resolveDevelopmentConfig } from './config';
-import { Common } from '@strapi/types';
+import { Common, Strapi } from '@strapi/types';
 
-const watch = async (ctx: BuildContext) => {
+interface WebpackWatcher {
+  close(): Promise<void>;
+}
+
+const watch = async (ctx: BuildContext): Promise<WebpackWatcher> => {
   const config = await resolveDevelopmentConfig(ctx);
   const finalConfig = await mergeConfigWithUserConfig(config, ctx);
 
   ctx.logger.debug('Final webpack config:', os.EOL, finalConfig);
 
-  return new Promise((res) => {
+  return new Promise<WebpackWatcher>((res) => {
     const compiler = webpack(finalConfig);
 
     const devMiddleware = webpackDevMiddleware(compiler);
@@ -91,9 +96,18 @@ const watch = async (ctx: BuildContext) => {
     ]);
 
     devMiddleware.waitUntilValid(() => {
-      res(true);
+      res({
+        async close() {
+          await Promise.all([
+            promisify(devMiddleware.close.bind(devMiddleware))(),
+            hotMiddleware.close(),
+            promisify(compiler.close.bind(compiler))(),
+          ]);
+        },
+      });
     });
   });
 };
 
 export { watch };
+export type { WebpackWatcher };

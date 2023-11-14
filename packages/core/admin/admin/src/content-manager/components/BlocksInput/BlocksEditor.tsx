@@ -71,6 +71,7 @@ type BlocksStore = {
 
 interface BlocksEditorContextValue {
   blocks: BlocksStore;
+  disabled: boolean;
 }
 
 const [BlocksEditorProvider, usePartialBlocksEditorContext] =
@@ -223,17 +224,18 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
         onChange={handleSlateChange}
         key={key}
       >
-        <BlocksEditorProvider blocks={blocks}>
+        <BlocksEditorProvider blocks={blocks} disabled={disabled}>
           <InputWrapper
             direction="column"
             alignItems="flex-start"
             height="512px"
             disabled={disabled}
             hasError={Boolean(error)}
+            style={{ overflow: 'hidden' }}
           >
-            <BlocksToolbar disabled={disabled} />
+            <BlocksToolbar />
             <EditorDivider width="100%" />
-            <BlocksContent disabled={disabled} placeholder={formattedPlaceholder} />
+            <BlocksContent placeholder={formattedPlaceholder} />
           </InputWrapper>
         </BlocksEditorProvider>
       </Slate>

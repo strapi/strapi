@@ -43,7 +43,9 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
     <ThemeProvider theme={lightTheme}>
       <IntlProvider messages={{}} locale="en">
         <Slate initialValue={initialValue} editor={editor}>
-          <BlocksEditorProvider blocks={blocks}>{children}</BlocksEditorProvider>
+          <BlocksEditorProvider blocks={blocks} disabled={false}>
+            {children}
+          </BlocksEditorProvider>
         </Slate>
       </IntlProvider>
     </ThemeProvider>

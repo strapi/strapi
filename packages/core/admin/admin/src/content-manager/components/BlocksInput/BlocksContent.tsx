@@ -7,20 +7,24 @@ import {
   type RenderLeafProps,
   Editable,
 } from 'slate-react';
-import { type DefaultTheme, useTheme } from 'styled-components';
+import styled from 'styled-components';
 
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { type ModifiersStore, useModifiersStore } from './hooks/useModifiersStore';
 import { getEntries } from './utils/types';
 
-const getEditorStyle = (theme: DefaultTheme): React.CSSProperties => ({
+const StyledEditable = styled(Editable)`
   // The outline style is set on the wrapper with :focus-within
-  outline: 'none',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spaces[2],
-  height: '100%',
-});
+  outline: none;
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spaces[2]};
+  height: 100%;
+
+  > *:last-child {
+    padding-bottom: ${({ theme }) => theme.spaces[3]};
+  }
+`;
 
 const baseRenderLeaf = (props: RenderLeafProps, modifiers: ModifiersStore) => {
   // Recursively wrap the children for each active modifier
@@ -45,13 +49,11 @@ const baseRenderElement = (props: RenderElementProps, blocks: BlocksStore) => {
 };
 
 interface BlocksInputProps {
-  disabled: boolean;
   placeholder?: string;
 }
 
-const BlocksContent = ({ disabled, placeholder }: BlocksInputProps) => {
-  const theme = useTheme();
-  const { editor, blocks } = useBlocksEditorContext('BlocksContent');
+const BlocksContent = ({ placeholder }: BlocksInputProps) => {
+  const { editor, disabled, blocks } = useBlocksEditorContext('BlocksContent');
   const blocksRef = React.useRef<HTMLDivElement>(null);
 
   // Create renderLeaf function based on the modifiers store
@@ -169,16 +171,13 @@ const BlocksContent = ({ disabled, placeholder }: BlocksInputProps) => {
       background="neutral0"
       color="neutral800"
       lineHeight={6}
-      hasRadius
       paddingLeft={4}
       paddingRight={4}
-      marginTop={3}
-      marginBottom={3}
+      paddingTop={3}
     >
-      <Editable
+      <StyledEditable
         readOnly={disabled}
         placeholder={placeholder}
-        style={getEditorStyle(theme)}
         renderElement={renderElement}
         renderLeaf={renderLeaf}
         onKeyDown={handleKeyDown}

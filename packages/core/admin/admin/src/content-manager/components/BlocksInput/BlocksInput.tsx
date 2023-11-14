@@ -9,17 +9,13 @@ import { Hint } from '../Hint';
 
 import { BlocksEditor } from './BlocksEditor';
 
-const TypographyAsterisk = styled(Typography)`
-  line-height: 0;
-`;
-
 const LabelAction = styled(Box)`
   svg path {
     fill: ${({ theme }) => theme.colors.neutral500};
   }
 `;
 
-interface BlocksInputProps extends Omit<React.ComponentProps<typeof BlocksEditor>, 'ref'> {
+interface BlocksInputProps extends React.ComponentPropsWithoutRef<typeof BlocksEditor> {
   intlLabel: MessageDescriptor;
   attribute: { type: string; [key: string]: unknown };
   description?: MessageDescriptor;
@@ -43,7 +39,11 @@ const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(
           <Flex gap={1}>
             <Typography variant="pi" fontWeight="bold" textColor="neutral800">
               {label}
-              {required && <TypographyAsterisk textColor="danger600">*</TypographyAsterisk>}
+              {required && (
+                <Typography textColor="danger600" lineHeight="0px">
+                  *
+                </Typography>
+              )}
             </Typography>
             {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
           </Flex>

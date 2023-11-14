@@ -45,6 +45,10 @@ interface BuildContext {
    */
   basePath: string;
   /**
+   * The customisations defined by the user in their app.js file
+   */
+  customisations?: AppFile;
+  /**
    * The current working directory
    */
   cwd: string;
@@ -64,9 +68,9 @@ interface BuildContext {
    * The environment variables to be included in the JS bundle
    */
   env: Record<string, string>;
-  logger: Logger;
+  logger: CLIContext['logger'];
   /**
-   * The build or develop options
+   * The build options
    */
   options: Pick<BuildOptions, 'minify' | 'sourcemaps' | 'stats'> & Pick<DevelopOptions, 'open'>;
   /**
@@ -90,7 +94,7 @@ interface BuildContext {
    * The browserslist target either loaded from the user's workspace or falling back to the default
    */
   target: string[];
-  tsconfig?: TSConfig;
+  tsconfig?: CLIContext['tsconfig'];
 }
 ```
 

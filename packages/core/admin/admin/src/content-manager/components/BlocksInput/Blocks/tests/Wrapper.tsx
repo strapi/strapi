@@ -38,7 +38,9 @@ const Wrapper = ({ children }: WrapperProps) => {
     <ThemeProvider theme={lightTheme}>
       <IntlProvider messages={{}} locale="en">
         <Slate initialValue={[]} editor={editor}>
-          <BlocksEditorProvider blocks={blocks}>{children}</BlocksEditorProvider>
+          <BlocksEditorProvider blocks={blocks} disabled={false}>
+            {children}
+          </BlocksEditorProvider>
         </Slate>
       </IntlProvider>
     </ThemeProvider>

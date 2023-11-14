@@ -17,7 +17,7 @@ import { linkBlocks } from '../Blocks/Link';
 import { listBlocks } from '../Blocks/List';
 import { paragraphBlocks } from '../Blocks/Paragraph';
 import { quoteBlocks } from '../Blocks/Quote';
-import { BlocksEditorProvider, type BlocksStore } from '../BlocksEditor';
+import { type BlocksStore, BlocksEditorProvider } from '../BlocksEditor';
 import { BlocksToolbar } from '../BlocksToolbar';
 
 const mockMediaLibraryTitle = 'dialog component';
@@ -152,7 +152,9 @@ const Wrapper = ({
     <ThemeProvider theme={lightTheme}>
       <IntlProvider messages={{}} locale="en">
         <Slate initialValue={initialValue} editor={editor}>
-          <BlocksEditorProvider blocks={blocks}>{children}</BlocksEditorProvider>
+          <BlocksEditorProvider blocks={blocks} disabled={false}>
+            {children}
+          </BlocksEditorProvider>
         </Slate>
       </IntlProvider>
     </ThemeProvider>
@@ -176,7 +178,7 @@ const setup = (data: Descendant[] = defaultInitialValue) => {
   // so that we have no side effects due to the previous selection or children
   baseEditor = createEditor();
 
-  render(<BlocksToolbar disabled={false} />, {
+  render(<BlocksToolbar />, {
     wrapper: ({ children }) => <Wrapper initialValue={data}>{children}</Wrapper>,
   });
 };
