@@ -24,7 +24,7 @@ Start your Strapi application in development mode
 Options:
   --polling         Watch for file changes (default: false) – Whether to use fs.watchFile (backed by polling), or fs.watch, this is passed directly to chokidar
   --no-build        [deprecated]: there is middleware for the server, it is no longer a separate process
-  --watch-admin     [deprecated]: there is now middleware for watching, it is no longer a separate process
+  --watch-admin     Watch the admin for changes (default: false)
   --browser <name>  [deprecated]: use open instead
   --open            Open the admin in your browser (default: true)
   -h, --help        Display help for command
@@ -66,6 +66,10 @@ interface DevelopOptions extends CLIContext {
    * The tsconfig to use for the build. If undefined, this is not a TS project.
    */
   tsconfig?: TsConfig;
+  /**
+   * Watch the admin for changes
+   */
+  watchAdmin?: boolean;
 }
 
 interface Logger {

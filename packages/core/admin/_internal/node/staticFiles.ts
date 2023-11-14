@@ -8,16 +8,12 @@ import { DefaultDocument as Document } from '../../admin/src/components/DefaultD
 
 import type { BuildContext } from './createBuildContext';
 
-interface EntryModuleArgs {
-  plugins: BuildContext['plugins'];
-}
-
-const getEntryModule = ({ plugins }: EntryModuleArgs): string => {
-  const pluginsObject = plugins
+const getEntryModule = (ctx: BuildContext): string => {
+  const pluginsObject = ctx.plugins
     .map(({ name, importName }) => `'${name}': ${importName}`)
     .join(',\n');
 
-  const pluginsImport = plugins
+  const pluginsImport = ctx.plugins
     .map(({ importName, path }) => `import ${importName} from '${path}';`)
     .join('\n');
 
@@ -28,10 +24,20 @@ const getEntryModule = ({ plugins }: EntryModuleArgs): string => {
          */
         ${pluginsImport}
         import { renderAdmin } from "@strapi/strapi/admin"
-        
+
+        ${
+          ctx.customisations?.path
+            ? `import customisations from '${path.relative(
+                ctx.runtimeDir,
+                ctx.customisations.path
+              )}'`
+            : ''
+        }
+
         renderAdmin(
           document.getElementById("strapi"),
           {
+            ${ctx.customisations?.path ? 'customisations,' : ''}
             plugins: {
         ${pluginsObject}
             }
@@ -88,7 +94,7 @@ const writeStaticClientFiles = async (ctx: BuildContext) => {
   ctx.logger.debug('Wrote the index.html file');
   await fs.writeFile(
     path.join(ctx.runtimeDir, 'app.js'),
-    format(getEntryModule({ plugins: ctx.plugins }), {
+    format(getEntryModule(ctx), {
       parser: 'babel',
     })
   );
