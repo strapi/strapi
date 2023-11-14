@@ -11,6 +11,10 @@ import type { CLIContext } from '@strapi/strapi';
 
 interface BuildOptions extends CLIContext {
   /**
+   * @default false
+   */
+  ignorePrompts?: boolean;
+  /**
    * Minify the output
    *
    * @default true
@@ -31,13 +35,15 @@ interface BuildOptions extends CLIContext {
  *
  * @description Builds the admin panel of the strapi application.
  */
-const build = async ({ logger, cwd, tsconfig, ...options }: BuildOptions) => {
+const build = async ({ logger, cwd, tsconfig, ignorePrompts, ...options }: BuildOptions) => {
   const timer = getTimer();
 
-  const { didInstall } = await checkRequiredDependencies({ cwd, logger }).catch((err) => {
-    logger.error(err.message);
-    process.exit(1);
-  });
+  const { didInstall } = await checkRequiredDependencies({ cwd, logger, ignorePrompts }).catch(
+    (err) => {
+      logger.error(err.message);
+      process.exit(1);
+    }
+  );
 
   if (didInstall) {
     return;
