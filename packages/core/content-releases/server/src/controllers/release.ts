@@ -28,18 +28,18 @@ const releaseController = {
 
   async create(ctx: Koa.Context) {
     const user: UserInfo = ctx.state.user;
-    const releaseCreateArgs: ReleaseCreateArgs = ctx.request.body;
+    const releaseArgs: ReleaseCreateArgs = ctx.request.body;
 
     // Releases can only be created by super admins until we figure out how to handle permissions
     if (!strapi.admin.services.role.hasSuperAdminRole(user)) {
       throw new ApplicationError('Content Releases is a superadmin only feature');
     }
 
-    await validateCreateRelease(releaseCreateArgs);
+    await validateCreateRelease(releaseArgs);
 
     const releaseService = strapi.plugin('content-releases').service('release');
 
-    const release = await releaseService.create(releaseCreateArgs, { user });
+    const release = await releaseService.create(releaseArgs, { user });
 
     const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
       ability: ctx.state.userAbility,

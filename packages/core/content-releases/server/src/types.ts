@@ -1,4 +1,4 @@
-import { Entity } from '@strapi/types';
+import type { Entity, Common } from '@strapi/types';
 
 // @TODO: Probably user & role types should be imported from a common package
 interface RoleInfo {
@@ -25,14 +25,14 @@ export interface UserInfo {
 
 interface ReleaseActionEntry {
   id: Entity.ID;
-  contentType: string;
+  contentType: Common.UID.ContentType;
 }
 
 // TODO: Could we not have the types generated from the schema?
 interface ReleaseAction {
   type: 'publish' | 'unpublish';
   entry: ReleaseActionEntry;
-  contentType: string;
+  contentType: Common.UID.ContentType;
   release: Release;
 }
 
