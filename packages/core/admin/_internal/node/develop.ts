@@ -41,12 +41,20 @@ const cleanupDistDirectory = async ({
   timer.start(timerName);
   const cleaningSpinner = logger.spinner(`Cleaning dist dir ${distDir}`).start();
 
-  const dirContent = await fs.readdir(distDir);
-  const validFilenames = dirContent
-    // Ignore the admin build folder
-    .filter((filename) => filename !== 'build');
-  for (const filename of validFilenames) {
-    await fs.remove(path.resolve(distDir, filename));
+  try {
+    const dirContent = await fs.readdir(distDir);
+    const validFilenames = dirContent
+      // Ignore the admin build folder
+      .filter((filename) => filename !== 'build');
+    for (const filename of validFilenames) {
+      await fs.remove(path.resolve(distDir, filename));
+    }
+    throw new Error('asdf');
+  } catch (err: unknown) {
+    const generatingDuration = timer.end(timerName);
+    cleaningSpinner.text = `Error cleaning dist dir: ${err} (${prettyTime(generatingDuration)})`;
+    cleaningSpinner?.fail();
+    return;
   }
 
   const generatingDuration = timer.end(timerName);
@@ -65,8 +73,6 @@ const develop = async ({
 }: DevelopOptions) => {
   const timer = getTimer();
 
-  const distDir = tsconfig?.config?.options?.outDir;
-
   if (cluster.isPrimary) {
     const { didInstall } = await checkRequiredDependencies({ cwd, logger, ignorePrompts }).catch(
       (err) => {
@@ -80,7 +86,7 @@ const develop = async ({
     }
 
     // Build without diagnostics in case schemas have changed
-    if (distDir) {
+    if (tsconfig) {
       await cleanupDistDirectory({ tsconfig, logger, timer });
       await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: true } });
     }
@@ -120,7 +126,7 @@ const develop = async ({
     cluster.on('message', async (worker, message) => {
       switch (message) {
         case 'reload': {
-          if (distDir) {
+          if (tsconfig) {
             // Build without diagnostics in case schemas have changed
             await cleanupDistDirectory({ tsconfig, logger, timer });
             await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: true } });
@@ -175,7 +181,7 @@ const develop = async ({
       timer.start('compilingTS');
       const compilingTsSpinner = logger.spinner(`Compiling TS`).start();
 
-      if (distDir) {
+      if (tsconfig) {
         await cleanupDistDirectory({ tsconfig, logger, timer });
         await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
       }
