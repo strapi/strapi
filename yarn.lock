@@ -9282,7 +9282,6 @@ __metadata:
     esbuild: "npm:0.19.2"
     esbuild-register: "npm:3.5.0"
     eslint-config-custom: "npm:4.15.4"
-    fs-extra: "npm:10.0.0"
     get-latest-version: "npm:5.1.0"
     git-url-parse: "npm:13.1.0"
     ini: "npm:4.1.1"
