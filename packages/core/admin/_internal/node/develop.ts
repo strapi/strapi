@@ -85,7 +85,7 @@ const develop = async ({
       return;
     }
 
-    if (tsconfig) {
+    if (tsconfig?.config) {
       // Build without diagnostics in case schemas have changed
       await cleanupDistDirectory({ tsconfig, logger, timer });
       await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: true } });
@@ -126,7 +126,7 @@ const develop = async ({
     cluster.on('message', async (worker, message) => {
       switch (message) {
         case 'reload': {
-          if (tsconfig) {
+          if (tsconfig?.config) {
             // Build without diagnostics in case schemas have changed
             await cleanupDistDirectory({ tsconfig, logger, timer });
             await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: true } });
