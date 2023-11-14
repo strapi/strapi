@@ -84,8 +84,8 @@ const develop = async ({
       return;
     }
 
-    // Build without diagnostics in case schemas have changed
     if (tsconfig) {
+      // Build without diagnostics in case schemas have changed
       await cleanupDistDirectory({ tsconfig, logger, timer });
       await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: true } });
     }
