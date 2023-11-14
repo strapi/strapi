@@ -33,9 +33,11 @@ export async function validateUniqueEntryInRelease(releaseActionArgs: ReleaseAct
     throw new errors.ApplicationError(`No release found for id ${releaseActionArgs.releaseId}`);
   }
 
-  const releaseEntryIds = release.actions.map((action) => action.entry.id);
+  const isEntryInRelease = release.actions.some(
+    (action) => action.entry.id === releaseActionArgs.entry.id
+  );
 
-  if (releaseEntryIds.includes(releaseActionArgs.entry.id)) {
+  if (isEntryInRelease) {
     throw new errors.ApplicationError(
       `Entry with id ${releaseActionArgs.entry.id} already exists in release with id ${releaseActionArgs.releaseId}`
     );

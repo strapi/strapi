@@ -10,7 +10,7 @@ describe('Release Action controllers', () => {
           },
         },
         contentType: jest.fn(),
-        // @ts-expect-error ignore missing properties
+        // @ts-expect-error Ignore missing properties
         admin: {
           services: {
             role: {
@@ -38,7 +38,7 @@ describe('Release Action controllers', () => {
         },
       };
 
-      // @ts-expect-error partial context
+      // @ts-expect-error Ignore missing properties
       expect(() => releaseActionController.create(ctx)).rejects.toThrow(
         'Content Releases is a superadmin only feature'
       );
@@ -64,7 +64,7 @@ describe('Release Action controllers', () => {
         },
       };
 
-      // @ts-expect-error partial context
+      // @ts-expect-error Ignore missing properties
       expect(() => releaseActionController.create(ctx)).rejects.toThrow('type is a required field');
     });
 
@@ -87,7 +87,7 @@ describe('Release Action controllers', () => {
         },
       };
 
-      // @ts-expect-error partial context
+      // @ts-expect-error Ignore missing properties
       expect(() => releaseActionController.create(ctx)).rejects.toThrow(
         'No content type found for uid api::plop.plop'
       );
@@ -117,7 +117,7 @@ describe('Release Action controllers', () => {
         },
       };
 
-      // @ts-expect-error partial context
+      // @ts-expect-error Ignore missing properties
       expect(() => releaseActionController.create(ctx)).rejects.toThrow(
         'Content type with uid api::category.category does not have draftAndPublish enabled'
       );
@@ -132,7 +132,7 @@ describe('Release Action controllers', () => {
           draftAndPublish: true,
         },
       });
-      // @ts-expect-error Partial entity service properties to Mock release
+      // @ts-expect-error Ignore missing properties
       global.strapi.entityService = {
         findOne: jest.fn().mockReturnValue(null),
       };
@@ -168,7 +168,7 @@ describe('Release Action controllers', () => {
           draftAndPublish: true,
         },
       });
-      // @ts-expect-error Partial entity service properties to Mock release
+      // @ts-expect-error Ignore missing properties
       global.strapi.entityService = {
         findOne: jest.fn().mockReturnValue({
           actions: [
@@ -212,7 +212,7 @@ describe('Release Action controllers', () => {
           draftAndPublish: true,
         },
       });
-      // @ts-expect-error Partial entity service properties to Mock entity service Release return value
+      // @ts-expect-error Ignore missing properties
       global.strapi.entityService = {
         findOne: jest.fn().mockReturnValue({
           actions: [],
@@ -243,8 +243,7 @@ describe('Release Action controllers', () => {
         },
         body: {},
       };
-
-      // @ts-expect-error partial context
+      // @ts-expect-error Ignore missing properties
       await releaseActionController.create(ctx);
 
       expect(ctx.body).toEqual({
