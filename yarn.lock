@@ -8879,7 +8879,7 @@ __metadata:
     "@types/js-cookie": "npm:3.0.5"
     "@types/pluralize": "npm:0.0.32"
     "@types/prettier": "npm:2.7.3"
-    "@types/webpack-bundle-analyzer": "npm:4.6.3"
+    "@types/webpack-bundle-analyzer": "npm:4.6.2"
     "@types/webpack-hot-middleware": "npm:2.25.8"
     axios: "npm:1.6.0"
     bcryptjs: "npm:2.4.3"
@@ -8965,7 +8965,7 @@ __metadata:
     typescript: "npm:5.2.2"
     vite: "npm:4.4.9"
     webpack: "npm:^5.88.1"
-    webpack-bundle-analyzer: "npm:4.10.0"
+    webpack-bundle-analyzer: "npm:^4.9.0"
     webpack-dev-middleware: "npm:6.1.1"
     webpack-hot-middleware: "npm:2.25.4"
     yup: "npm:0.32.9"
@@ -11468,14 +11468,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/webpack-bundle-analyzer@npm:4.6.3":
-  version: 4.6.3
-  resolution: "@types/webpack-bundle-analyzer@npm:4.6.3"
+"@types/webpack-bundle-analyzer@npm:4.6.2":
+  version: 4.6.2
+  resolution: "@types/webpack-bundle-analyzer@npm:4.6.2"
   dependencies:
     "@types/node": "npm:*"
     tapable: "npm:^2.2.0"
     webpack: "npm:^5"
-  checksum: 646b78aa5e06094b9558d49826fcecff6d7c67ab5e02120b9567a4cec904aaebb820ffac5f57963aada98a0603ae56c8aebfd9b54e8bb0597540e6687da063ac
+  checksum: ac92adc2b1b128119fd867f31bbadf0a0f5f159a2c551665def34bbb8265ecd46bfa28c39683d043eac6e7e8499182e25eb5f57690b9772e5f42aa76948ebc37
   languageName: node
   linkType: hard
 
@@ -32944,7 +32944,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-bundle-analyzer@npm:4.10.0":
+"webpack-bundle-analyzer@npm:^4.9.0":
   version: 4.10.0
   resolution: "webpack-bundle-analyzer@npm:4.10.0"
   dependencies:
