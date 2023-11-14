@@ -1,15 +1,25 @@
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { render as renderRTL, within, screen } from '@testing-library/react';
+import { within, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 
+import { renderWithProviders } from '../../utils/test-utils';
 import { ReleasesPage } from '../ReleasePage';
 
 const user = userEvent.setup();
 
+jest.mock('../../../store/hooks', () => ({
+  ...jest.requireActual('../../../store/hooks'),
+  useTypedSelector: jest.fn().mockReturnValue({
+    loading: false,
+    error: undefined,
+    releases: [],
+  }),
+}));
+
 const render = () =>
-  renderRTL(
+  renderWithProviders(
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}} defaultLocale="en">
         <MemoryRouter>

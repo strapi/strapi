@@ -8776,6 +8776,7 @@ __metadata:
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
     react-intl: "npm:6.4.1"
+    react-redux: "npm:8.1.1"
     react-router-dom: "npm:5.3.4"
     styled-components: "npm:5.3.3"
     typescript: "npm:5.2.2"

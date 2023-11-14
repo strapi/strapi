@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import {
   Button,
   ModalBody,
@@ -12,6 +14,9 @@ import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import * as yup from 'yup';
+
+import { createRelease, releaseSelector } from '../../modules/releaseSlice';
+import { useTypedDispatch, useTypedSelector } from '../../store/hooks';
 
 const releaseSchema = yup.object({
   name: yup.string().required(),
@@ -33,18 +38,32 @@ export const AddReleaseDialog = ({ handleClose }: AddReleaseDialogProps) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { push } = useHistory();
+  const dispatch = useTypedDispatch();
+  const newRelease = useTypedSelector(releaseSelector);
 
   const handleSubmit = async (values: FormValues) => {
-    // TODO: replace it with the correct slug
-    push(`/plugins/content-releases/${values.name}`);
+    const release = await dispatch(
+      createRelease({
+        name: values.name,
+      })
+    );
 
-    toggleNotification({
-      type: 'success',
-      message: formatMessage({
-        id: 'content-releases.modal.release-created-notification-success',
-        defaultMessage: 'Release created.',
-      }),
-    });
+    if (!release.error) {
+      toggleNotification({
+        type: 'success',
+        message: formatMessage({
+          id: 'content-releases.modal.release-created-notification-success',
+          defaultMessage: 'Release created.',
+        }),
+      });
+
+      push(`/plugins/content-releases/${release.payload.id}`);
+    } else {
+      toggleNotification({
+        type: 'warning',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+      });
+    }
   };
 
   return (
@@ -85,7 +104,12 @@ export const AddReleaseDialog = ({ handleClose }: AddReleaseDialogProps) => {
                 </Button>
               }
               endActions={
-                <Button name="submit" disabled={!values.name} type="submit">
+                <Button
+                  name="submit"
+                  loading={newRelease.loading}
+                  disabled={!values.name}
+                  type="submit"
+                >
                   {formatMessage({
                     id: 'content-releases.modal.form.button.submit',
                     defaultMessage: 'Continue',
