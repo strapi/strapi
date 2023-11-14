@@ -6,8 +6,9 @@ import { Typography } from '@strapi/design-system';
 import { Bold, Italic, Underline, StrikeThrough, Code } from '@strapi/icons';
 import { type MessageDescriptor } from 'react-intl';
 import { Editor, Text, Transforms } from 'slate';
-import { useSlate } from 'slate-react';
 import styled, { css } from 'styled-components';
+
+import { useBlocksEditorContext } from '../BlocksEditor';
 
 const stylesToInherit = css`
   font-size: inherit;
@@ -58,7 +59,7 @@ type ModifiersStore = {
  * Manages a store of all the available modifiers.
  */
 function useModifiersStore(): ModifiersStore {
-  const editor = useSlate();
+  const { editor } = useBlocksEditorContext('useModifiersStore');
   const modifiers = Editor.marks(editor);
 
   /**
