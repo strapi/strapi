@@ -21,7 +21,6 @@ const { transformParamsToQuery } = convertQueryParams;
 
 /**
  * TODO: TESTS - In progress
- * TODO: Components - In progress
  * TODO: Entity Validation
  * TODO: Lifecycles - In progress
  *        Plugin extensions
@@ -80,10 +79,6 @@ const createDocumentService = ({
     return db.query(uid).findOne({ ...query, where: { ...query.where, documentId } });
   },
 
-  // NOTE: What happens if user doesn't provide specific publications state and locale to delete?
-  // By default delete will remove all versions of the document
-  // You need to specify the locale and publication state to delete a specific version
-  // Should forbid deleting a draft version without deleting the published version
   async delete(uid, documentId, params) {
     const query = transformParamsToQuery(uid, params || ({} as any));
 
@@ -210,7 +205,6 @@ const createDocumentService = ({
 
   // TODO: Handle relations so they target the published version
   async publish(uid, documentId, params) {
-    // @ts-expect-error - TODO: Add typings
     const { filters } = params || {};
 
     // Clone every draft version to be published
@@ -229,7 +223,6 @@ const createDocumentService = ({
   },
 
   async unpublish(uid, documentId, params) {
-    // @ts-expect-error - TODO: Add typings
     const { filters } = params || {};
 
     this.delete(uid, documentId, {

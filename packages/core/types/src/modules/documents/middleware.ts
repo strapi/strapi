@@ -28,6 +28,14 @@ export interface Context<
   trx?: any;
 }
 
+/**
+ * Define options for a middleware:
+ * - Priority: the higher the priority, the earlier the middleware will be executed
+ */
+export interface Options {
+  priority?: number;
+}
+
 export type Middleware<TAction extends keyof DocumentService> = (
   ctx: Context,
   next: (ctx: Context) => ReturnType<DocumentService[TAction]>
@@ -43,11 +51,31 @@ export interface Manager {
    *
    * Each uid has a list of middlewares for each action
    * (findMany, findOne, create, update, delete, ...)
+   *
+   * This ways provides a handy way to index middlewares by its uid and action, and
+   * to run middlewares with a given priority.
+   *
+   * The higher the priority, the earlier the middleware will be executed.
+   *
+   * TODO: Clean this up, this data structure is super confusing
+   *       Done it like this to make it work first.
    */
   middlewares: Record<
+    // Specify uid or 'all' to apply to all uid's
     Common.UID.ContentType | 'allUIDs',
-    Record<string | 'allActions', Middleware<any>[]>
+    // Specify action or 'all' to apply to all actions (e.g. findMany, create, ...)
+    Record<string | 'allActions', { priority: number; middleware: Middleware<any> }[]>
   >;
+
+  /**
+   * Priority map to define middleware priority,
+   * handy to define a middleware that should be executed first or last
+   */
+  priority: {
+    LAST: number;
+    FIRST: number;
+    DEFAULT: number;
+  };
 
   /**
    * Get list of middlewares for a specific uid and action
@@ -60,7 +88,8 @@ export interface Manager {
   add(
     uid: Common.UID.ContentType | 'allUIDs',
     action: string | 'allActions',
-    middleware: Middleware<any>
+    middleware: Middleware<any>,
+    opts?: Options
   ): ThisType<Manager>;
 
   /**

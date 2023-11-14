@@ -50,4 +50,35 @@ describe('Document Service', () => {
       expect(articles).toHaveLength(1);
     });
   });
+
+  describe('Middleware priority', () => {
+    it('Add middlewares with different priority', async () => {
+      const ARTICLE_1 = 'Article1-Draft-EN';
+      const ARTICLE_2 = 'Article2-Draft-EN';
+
+      strapi.documents(ARTICLE_UID).use(
+        'findMany',
+        (ctx, next) => {
+          ctx.params.filters = { title: ARTICLE_1 };
+          return next(ctx);
+        },
+        { priority: strapi.documents.middlewares.priority.LAST }
+      );
+
+      strapi.documents(ARTICLE_UID).use(
+        'findMany',
+        (ctx, next) => {
+          ctx.params.filters = { title: ARTICLE_2 };
+          return next(ctx);
+        },
+        { priority: strapi.documents.middlewares.priority.FIRST }
+      );
+
+      // Higher priority middleware should be called first, even if it's added after
+      const articles = await strapi.documents(ARTICLE_UID).findMany({});
+
+      expect(articles).toHaveLength(1);
+      expect(articles[0].title).toEqual(ARTICLE_1);
+    });
+  });
 });

@@ -73,7 +73,8 @@ export type RepositoryInstance<
     action: TAction,
     // QUESTION: How do we type the result type of next?
     //           Should we send params + document id attribute?
-    cb: Middleware.Middleware<TAction>
+    cb: Middleware.Middleware<TAction>,
+    opts?: Middleware.Options
   ) => ThisType<RepositoryInstance<TContentTypeUID>>;
 
   /**
@@ -110,6 +111,9 @@ export type Repository = {
     action: TAction,
     // QUESTION: How do we type the result type of next?
     //           Should we send params + document id attribute?
-    cb: Middleware.Middleware<TAction>
+    cb: Middleware.Middleware<TAction>,
+    opts?: Middleware.Options
   ) => Repository;
+
+  middlewares: Middleware.Manager;
 } & DocumentService;

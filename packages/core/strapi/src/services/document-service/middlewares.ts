@@ -1,7 +1,15 @@
 import { Documents } from '@strapi/types';
 
+export const priority = {
+  LAST: 1,
+  DEFAULT: 100,
+  FIRST: 1000,
+} as const;
+
 const createMiddlewareManager = (): Documents.Middleware.Manager => {
   return {
+    priority,
+
     middlewares: {
       allUIDs: {
         allActions: [],
@@ -9,15 +17,20 @@ const createMiddlewareManager = (): Documents.Middleware.Manager => {
     },
 
     get(uid, action) {
-      return [
-        ...this.middlewares.allUIDs.allActions,
-        ...(this.middlewares[uid]?.allActions || []),
-        ...(this.middlewares.allUIDs[action] || []),
-        ...(this.middlewares[uid]?.[action] || []),
-      ];
+      return (
+        [
+          ...this.middlewares.allUIDs.allActions,
+          ...(this.middlewares[uid]?.allActions || []),
+          ...(this.middlewares.allUIDs[action] || []),
+          ...(this.middlewares[uid]?.[action] || []),
+        ]
+          // Sort by priority - the higher the priority, the earlier the middleware will be executed
+          .sort((a, b) => b.priority - a.priority)
+          .map(({ middleware }) => middleware)
+      );
     },
 
-    add(uid, action, middleware) {
+    add(uid, action, middleware, opts) {
       if (!this.middlewares[uid]) {
         this.middlewares[uid] = {};
       }
@@ -26,7 +39,10 @@ const createMiddlewareManager = (): Documents.Middleware.Manager => {
         this.middlewares[uid][action] = [];
       }
 
-      this.middlewares[uid][action].push(middleware);
+      this.middlewares[uid][action].push({
+        middleware,
+        priority: opts?.priority ?? priority.DEFAULT,
+      });
 
       return this;
     },
@@ -39,7 +55,7 @@ const createMiddlewareManager = (): Documents.Middleware.Manager => {
 
       return runMiddlewares(ctx);
     },
-  };
+  } satisfies Documents.Middleware.Manager;
 };
 
 export default createMiddlewareManager;
