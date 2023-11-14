@@ -3,7 +3,7 @@ import * as tsUtils from '@strapi/typescript-utils';
 import { joinBy } from '@strapi/utils';
 import chokidar from 'chokidar';
 import * as fs from 'fs-extra';
-import path from 'path';
+import path from 'node:path';
 
 import cluster from 'node:cluster';
 

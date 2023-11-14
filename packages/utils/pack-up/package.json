@@ -69,6 +69,7 @@
     "commander": "8.3.0",
     "esbuild": "0.19.2",
     "esbuild-register": "3.5.0",
+    "fs-extra": "10.0.0",
     "get-latest-version": "5.1.0",
     "git-url-parse": "13.1.0",
     "ini": "4.1.1",
