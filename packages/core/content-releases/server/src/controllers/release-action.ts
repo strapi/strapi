@@ -1,6 +1,7 @@
 import type Koa from 'koa';
 import { errors } from '@strapi/utils';
 import {
+  validateEntryContentType,
   validateReleaseActionCreateSchema,
   validateUniqueEntryInRelease,
 } from './validation/release-action';
@@ -17,6 +18,7 @@ const releaseActionController = {
     }
 
     await validateReleaseActionCreateSchema(releaseActionArgs);
+    await validateEntryContentType(releaseActionArgs);
     await validateUniqueEntryInRelease(releaseActionArgs);
 
     const releaseActionService = strapi.plugin('content-releases').service('release-action');

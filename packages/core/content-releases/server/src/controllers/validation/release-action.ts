@@ -41,3 +41,19 @@ export async function validateUniqueEntryInRelease(releaseActionArgs: ReleaseAct
     );
   }
 }
+
+export async function validateEntryContentType(releaseActionArgs: ReleaseActionCreateArgs) {
+  const contentType = strapi.contentType(releaseActionArgs.entry.contentType);
+
+  if (!contentType) {
+    throw new errors.ApplicationError(
+      `No content type found for uid ${releaseActionArgs.entry.contentType}`
+    );
+  }
+
+  if (!contentType.options?.draftAndPublish) {
+    throw new errors.ApplicationError(
+      `Content type with uid ${releaseActionArgs.entry.contentType} does not have draftAndPublish enabled`
+    );
+  }
+}
