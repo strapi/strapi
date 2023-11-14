@@ -1,6 +1,6 @@
 import releaseActionController from '../release-action';
 
-describe('Release Action controllers', () => {
+describe('Release Action controller', () => {
   describe('create', () => {
     beforeEach(() => {
       global.strapi = {
