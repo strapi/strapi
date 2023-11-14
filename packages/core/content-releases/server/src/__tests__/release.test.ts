@@ -1,6 +1,6 @@
 import releaseController from "../controllers/release";
 
-describe('Release controllers', () => {
+describe('Release controller', () => {
   describe('create', () => {
     it('throws an error given bad request arguments', () => {
       const ctx = {
@@ -11,7 +11,7 @@ describe('Release controllers', () => {
         request: {
           body: {}
         }
-      }
+      };
 
       // @ts-expect-error partial context
       expect(() => releaseController.create(ctx)).rejects.toThrow('name is a required field');

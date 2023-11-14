@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+import type { LoadedStrapi } from '@strapi/types';
+import { ACTIONS } from './constants';
 
 const { features } = require('@strapi/strapi/dist/utils/ee');
 
-export const register = () => {
+export const register = async ({ strapi }: { strapi: LoadedStrapi }) => {
   if (features.isEnabled('cms-content-releases')) {
-    // EE Code would be here
-    console.log('cms-content-releases is enabled');
+    await strapi.admin.services.permission.actionProvider.registerMany(ACTIONS);
   }
 };
