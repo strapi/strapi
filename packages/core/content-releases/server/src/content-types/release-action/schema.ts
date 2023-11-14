@@ -27,7 +27,6 @@ export default {
     entry: {
       type: 'relation',
       relation: 'morphToOne',
-      required: true,
       configurable: false,
     },
     contentType: {
@@ -39,7 +38,6 @@ export default {
       relation: 'manyToOne',
       target: RELEASE_MODEL_UID,
       inversedBy: 'actions',
-      required: true,
     },
   },
 };
