@@ -2,7 +2,7 @@ import type { CLIContext } from '@strapi/strapi';
 import * as tsUtils from '@strapi/typescript-utils';
 import { joinBy } from '@strapi/utils';
 import chokidar from 'chokidar';
-import * as fs from 'fs-extra';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import cluster from 'node:cluster';
@@ -35,9 +35,16 @@ const cleanupDistDirectory = async ({
 }: Pick<DevelopOptions, 'tsconfig' | 'logger'> & { timer: TimeMeasurer }) => {
   const distDir = tsconfig?.config?.options?.outDir;
 
-  if (!distDir || !(await fs.pathExists(distDir))) {
+  if (
+    !distDir || // we don't have a dist dir
+    (await fs
+      .access(distDir)
+      .then(() => false)
+      .catch(() => true)) // it doesn't exist -- if it does but no access, that will be caught later
+  ) {
     return;
   }
+
   const timerName = 'cleaningDist' + Date.now();
   timer.start(timerName);
   const cleaningSpinner = logger.spinner(`Cleaning dist dir ${distDir}`).start();
@@ -48,7 +55,7 @@ const cleanupDistDirectory = async ({
       // Ignore the admin build folder
       .filter((filename) => filename !== 'build');
     for (const filename of validFilenames) {
-      await fs.remove(path.resolve(distDir, filename));
+      await fs.rm(path.resolve(distDir, filename), { recursive: true });
     }
   } catch (err: unknown) {
     const generatingDuration = timer.end(timerName);
