@@ -165,7 +165,7 @@ const develop = async ({
     const strapiInstance = await strapi.load();
 
     const loadStrapiDuration = timer.end('loadStrapi');
-    loadStrapiSpinner.text = `Loaded Strapi (${prettyTime(loadStrapiDuration)})`;
+    loadStrapiSpinner.text = `Loading Strapi (${prettyTime(loadStrapiDuration)})`;
     loadStrapiSpinner.succeed();
 
     timer.start('generatingTS');
