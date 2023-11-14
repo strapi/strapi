@@ -10,7 +10,7 @@ export default defineConfig({
       require: './dist/cli.js',
     },
   ],
-  externals: ['node:module', 'node:path', 'fs-extra'],
+  externals: ['node:module'],
   runtime: 'node',
   minify: false,
   sourcemap: true,
