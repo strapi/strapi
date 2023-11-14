@@ -131,10 +131,24 @@ const ProfilePage = () => {
     UpdateUsersMeBody
   >(
     async (body) => {
-      const { confirmPassword: _confirmPassword, currentTheme, ...dataToSend } = body;
+      const { confirmPassword: _confirmPassword, currentTheme, ...bodyRest } = body;
+      let dataToSend = bodyRest;
 
-      if (dataToSend.password === '') {
-        delete dataToSend.password;
+      const isPasswordRequestBody = (
+        data: UpdateMe.Request['body']
+      ): data is UpdateMe.PasswordRequestBody => {
+        return 'password' in data;
+      };
+
+      // The password fields are optional. If the user didn't touch them, don't send any password
+      // to the API, because an empty string would throw a validation error
+      if (isPasswordRequestBody(dataToSend) && dataToSend.password === '') {
+        const {
+          password: _password,
+          currentPassword: _currentPassword,
+          ...passwordRequestBodyRest
+        } = dataToSend;
+        dataToSend = passwordRequestBodyRest;
       }
 
       const { data } = await put<UpdateMe.Response>('/admin/users/me', dataToSend);
@@ -259,8 +273,7 @@ const ProfilePage = () => {
             username,
             preferedLanguage,
             currentTheme,
-            password,
-            confirmPassword,
+            ...passwordValues
           },
           handleChange,
           isSubmitting,
@@ -298,7 +311,7 @@ const ProfilePage = () => {
                       <PasswordSection
                         errors={errors}
                         onChange={handleChange}
-                        values={{ password, confirmPassword }}
+                        values={passwordValues}
                       />
                     )}
                     <PreferencesSection
