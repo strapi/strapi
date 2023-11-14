@@ -49,7 +49,6 @@ const cleanupDistDirectory = async ({
     for (const filename of validFilenames) {
       await fs.remove(path.resolve(distDir, filename));
     }
-    throw new Error('asdf');
   } catch (err: unknown) {
     const generatingDuration = timer.end(timerName);
     cleaningSpinner.text = `Error cleaning dist dir: ${err} (${prettyTime(generatingDuration)})`;
@@ -188,10 +187,8 @@ const develop = async ({
       timer.start('compilingTS');
       const compilingTsSpinner = logger.spinner(`Compiling TS`).start();
 
-      if (tsconfig) {
-        await cleanupDistDirectory({ tsconfig, logger, timer });
-        await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
-      }
+      await cleanupDistDirectory({ tsconfig, logger, timer });
+      await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
 
       const compilingDuration = timer.end('compilingTS');
       compilingTsSpinner.text = `Compiling TS (${prettyTime(compilingDuration)})`;
