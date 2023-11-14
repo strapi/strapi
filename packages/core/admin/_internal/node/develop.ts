@@ -27,6 +27,7 @@ interface DevelopOptions extends CLIContext {
   watchAdmin?: boolean;
 }
 
+// This method removes all non-admin build files from the dist directory
 const cleanupDistDirectory = async ({
   tsconfig,
   logger,
