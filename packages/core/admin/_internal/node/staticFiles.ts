@@ -26,12 +26,7 @@ const getEntryModule = (ctx: BuildContext): string => {
         import { renderAdmin } from "@strapi/strapi/admin"
 
         ${
-          ctx.customisations?.path
-            ? `import customisations from '${path.relative(
-                ctx.runtimeDir,
-                ctx.customisations.path
-              )}'`
-            : ''
+          ctx.customisations?.path ? `import customisations from '${ctx.customisations.path}';` : ''
         }
 
         renderAdmin(
