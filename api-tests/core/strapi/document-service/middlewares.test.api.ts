@@ -30,6 +30,7 @@ describe('Document Service', () => {
   describe('Middlewares', () => {
     it('Add filters', async () => {
       strapi.documents.use('findMany', (ctx, next) => {
+        // @ts-expect-error - this is using a generic ContentType.UID , so article attributes are not typed
         ctx.params.filters = { title: 'Article1-Draft-EN' };
         return next(ctx);
       });

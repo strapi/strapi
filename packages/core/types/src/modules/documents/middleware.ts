@@ -19,10 +19,11 @@ export type ParamsMap<TContentTypeUID extends Common.UID.ContentType = Common.UI
 
 export interface Context<
   TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType,
-  TAction extends keyof ParamsMap<TContentTypeUID> = keyof ParamsMap<TContentTypeUID>
+  TAction extends keyof DocumentService = keyof DocumentService
 > {
   uid: TContentTypeUID;
   action: TAction;
+  // @ts-expect-error - TODO: Fix this with a proper type from the DocumentService
   params: ParamsMap<TContentTypeUID>[TAction];
   options: object;
   trx?: any;
@@ -36,9 +37,12 @@ export interface Options {
   priority?: number;
 }
 
-export type Middleware<TAction extends keyof DocumentService> = (
-  ctx: Context,
-  next: (ctx: Context) => ReturnType<DocumentService[TAction]>
+export type Middleware<
+  TContentTypeUID extends Common.UID.ContentType,
+  TAction extends keyof DocumentService
+> = (
+  ctx: Context<TContentTypeUID, TAction>,
+  next: (ctx: Context<TContentTypeUID, TAction>) => ReturnType<DocumentService[TAction]>
 ) => ReturnType<DocumentService[TAction]>;
 
 /**
@@ -64,7 +68,7 @@ export interface Manager {
     // Specify uid or 'all' to apply to all uid's
     Common.UID.ContentType | 'allUIDs',
     // Specify action or 'all' to apply to all actions (e.g. findMany, create, ...)
-    Record<string | 'allActions', { priority: number; middleware: Middleware<any> }[]>
+    Record<string | 'allActions', { priority: number; middleware: Middleware<any, any> }[]>
   >;
 
   /**
@@ -80,7 +84,7 @@ export interface Manager {
   /**
    * Get list of middlewares for a specific uid and action
    */
-  get(uid: Common.UID.ContentType, action: string): Middleware<any>[];
+  get(uid: Common.UID.ContentType, action: string): Middleware<any, any>[];
 
   /**
    * Add a middleware for a specific uid and action
@@ -88,7 +92,7 @@ export interface Manager {
   add(
     uid: Common.UID.ContentType | 'allUIDs',
     action: string | 'allActions',
-    middleware: Middleware<any>,
+    middleware: Middleware<any, any>,
     opts?: Options
   ): ThisType<Manager>;
 
