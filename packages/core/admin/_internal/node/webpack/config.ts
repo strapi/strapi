@@ -196,8 +196,8 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<Configuration
         chunkFilename: '[name].[chunkhash].chunkhash.css',
         ignoreOrder: true,
       }),
-      ctx.options.stats && new BundleAnalyzerPlugin(),
-    ].filter(Boolean) as WebpackPluginInstance[], // TODO: find out if this is an actual issue or just a ts bug
+      ctx.options.stats && (new BundleAnalyzerPlugin() as unknown as WebpackPluginInstance), // TODO: find out if this is an actual issue or just a ts bug
+    ].filter(Boolean),
   };
 };
 
