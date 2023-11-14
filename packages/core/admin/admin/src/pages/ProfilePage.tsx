@@ -458,7 +458,7 @@ const PasswordSection = ({ errors, onChange, values }: PasswordSectionProps) => 
               value={values.confirmPassword}
               label={formatMessage({
                 id: 'Auth.form.confirmPassword.label',
-                defaultMessage: 'Password confirmation',
+                defaultMessage: 'Confirm Password',
               })}
               name="confirmPassword"
               type={passwordConfirmShown ? 'text' : 'password'}
