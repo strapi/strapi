@@ -89,7 +89,7 @@ function getBucketFromAwsUrl(fileUrl: string): BucketInfo {
 }
 
 // TODO Remove this in V5 since we will only support the new config structure
-export const extractCredentials = (options: InitOptions): AwsCredentialIdentity => {
+export const extractCredentials = (options: InitOptions): AwsCredentialIdentity | null => {
   // legacy
   if (options.accessKeyId && options.secretAccessKey) {
     return {
@@ -114,5 +114,5 @@ export const extractCredentials = (options: InitOptions): AwsCredentialIdentity 
       secretAccessKey: options.s3Options.credentials.secretAccessKey,
     };
   }
-  return {};
+  return null;
 };

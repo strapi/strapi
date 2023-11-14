@@ -80,7 +80,7 @@ const getConfig = ({ baseUrl, rootPath, s3Options, ...legacyS3Options }: InitOpt
   const config = {
     ...s3Options,
     ...legacyS3Options,
-    ...[credentials ? { credentials } : {}],
+    ...(credentials ? { credentials } : {}),
   };
 
   config.params.ACL = getOr(ObjectCannedACL.public_read, ['params', 'ACL'], config);
