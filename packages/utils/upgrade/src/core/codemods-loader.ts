@@ -1,16 +1,12 @@
-import { readdirSync, statSync } from 'node:fs';
-import * as path from 'node:path';
-import * as semver from 'semver';
 import chalk from 'chalk';
+import * as semver from 'semver';
+import * as path from 'node:path';
+import { readdirSync, statSync } from 'node:fs';
 
-import { Logger } from './logger';
+import * as f from './format';
 
-import type { Version } from '../types';
-
-export interface VersionRange {
-  from: Version.SemVer;
-  to: Version.Any;
-}
+import type { Logger } from './logger';
+import type { CodemodPath, Version, VersionRange } from '../types';
 
 export interface CreateLoaderOptions {
   dir?: string;
@@ -27,7 +23,7 @@ const createSemverRange = (range: VersionRange): semver.Range => {
 
   // Add the upper boundary if range.to is different from 'latest'
   if (range.to !== 'latest') {
-    semverRange += ` <${range.to}`;
+    semverRange += ` <=${range.to}`;
   }
 
   return new semver.Range(semverRange);
@@ -54,18 +50,16 @@ export const createCodemodsLoader = (options: CreateLoaderOptions) => {
     throw new Error(`Invalid codemods directory provided "${dir}"`);
   }
 
-  const fNbFound = chalk.bold(chalk.underline(versions.length));
-  const fRange = chalk.bold(chalk.green(semverRange.raw));
-  const fVersions = chalk.italic(chalk.yellow(versions.join(', ')));
+  const fNbFound = f.highlight(versions.length.toString());
+  const fRange = f.versionRange(semverRange.raw);
+  const fVersions = versions.map(f.version).join(', ');
 
   logger.debug(`Found ${fNbFound} upgrades matching ${fRange} (${fVersions})`);
 
-  // Note: We're casting the result as a string since we know there is at least one item in the `versions` array
-  const latest = versions.at(-1) as string;
+  // Note: We're casting the result as a SemVer since we know there is at least one item in the `versions` array
+  const latest = versions.at(-1) as Version.SemVer;
 
   const fLatest = chalk.italic(chalk.yellow(latest));
-
-  logger.debug(`Latest upgrade is ${fLatest}`);
 
   /**
    * Verifies that the given version matches the available ones
@@ -75,10 +69,11 @@ export const createCodemodsLoader = (options: CreateLoaderOptions) => {
   };
 
   /**
-   * Load code mods paths for a given version
-   * Throws an error if the version can't be found or is invalid
+   * Load code mods paths for a given version.
+   *
+   * Throws an error if the version can't be found or is invalid.
    */
-  const load = (version: Version.Any) => {
+  const load = (version: Version.Any): CodemodPath[] => {
     if (!isValid(version)) {
       // TODO: Use custom upgrade errors
       throw new Error(`Invalid version provided. Valid versions are ${versions.join(', ')}`);
@@ -91,10 +86,48 @@ export const createCodemodsLoader = (options: CreateLoaderOptions) => {
     // TODO: Update depending on what's needed to execute codemods
     // NOTE: We will probably have to modify this if we want to handle sub-groups (admin, etc...)
     //       In this case, we would instead load each groups separately
-    return readdirSync(path.join(dir, target))
+    const codemodsPath = readdirSync(path.join(dir, target))
       .filter((filePath) => statSync(fullPath(filePath)).isFile())
       .filter((filePath) => filePath.endsWith(`${CODEMOD_SUFFIX}${CODEMOD_EXT}`))
-      .map((filePath) => ({ path: filePath, fullPath: fullPath(filePath), version }));
+      .map((filePath) => ({
+        path: filePath,
+        fullPath: fullPath(filePath),
+        formatted: pathToHumanReadableName(filePath),
+        version: target,
+      }));
+
+    const fTarget = f.version(target);
+    const fNbLoaded = f.highlight(codemodsPath.length.toString());
+    const fLoaded = codemodsPath.map((p) => f.codemod(p.path)).join(', ');
+
+    let debugMessage = `Found ${fNbLoaded} codemods for ${fTarget}`;
+
+    if (codemodsPath.length > 0) {
+      debugMessage += ` (${fLoaded})`;
+    }
+
+    logger.debug(debugMessage);
+
+    return codemodsPath;
+  };
+
+  const loadRange = (range: VersionRange): CodemodPath[] => {
+    const paths: CodemodPath[] = [];
+
+    const semverRange = createSemverRange(range);
+
+    logger.debug(`Loading codemods matching ${f.versionRange(semverRange.raw)}`);
+
+    for (const version of versions) {
+      const isInRange = semverRange.test(version);
+
+      if (isInRange) {
+        const versionCodemods = load(version);
+        paths.push(...versionCodemods);
+      }
+    }
+
+    return paths;
   };
 
   return {
@@ -108,5 +141,10 @@ export const createCodemodsLoader = (options: CreateLoaderOptions) => {
 
     isValid,
     load,
+    loadRange,
   };
+};
+
+const pathToHumanReadableName = (path: string) => {
+  return path.replace('.codemod.ts', '').replaceAll('-', ' ');
 };
