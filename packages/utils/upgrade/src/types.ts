@@ -1,16 +1,4 @@
-import { Logger } from './core/logger';
-
-export namespace Version {
-  export type SemVer = `${number}.${number}.${number}`;
-  export type Latest = 'latest';
-
-  export type Any = SemVer | Latest;
-}
-
-export interface VersionRange {
-  from: Version.SemVer;
-  to: Version.Any;
-}
+import type { Logger, SemVer } from './core';
 
 export interface CLIOptions {
   // TODO: Add back the version option when we handle targeting specific versions
@@ -31,7 +19,7 @@ export interface CodemodPath {
   path: string;
   formatted: string;
   fullPath: string;
-  version: Version.SemVer;
+  version: SemVer;
 }
 
 export interface RunReport {

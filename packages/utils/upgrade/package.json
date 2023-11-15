@@ -58,6 +58,7 @@
     "chalk": "4.1.2",
     "cli-table3": "0.6.2",
     "commander": "8.3.0",
+    "glob": "7.2.3",
     "jscodeshift": "0.15.1",
     "ora": "5.4.1",
     "pkg-up": "3.1.0",

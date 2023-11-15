@@ -9998,6 +9998,7 @@ __metadata:
     cli-table3: "npm:0.6.2"
     commander: "npm:8.3.0"
     eslint-config-custom: "workspace:*"
+    glob: "npm:7.2.3"
     jscodeshift: "npm:0.15.1"
     ora: "npm:5.4.1"
     pkg-up: "npm:3.1.0"

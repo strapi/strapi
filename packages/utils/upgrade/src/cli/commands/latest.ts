@@ -1,4 +1,6 @@
 import { handleError } from '../errors';
+import { tasks } from '../..';
+import { createLogger } from '../../core';
 
 import type { CLIOptions } from '../../types';
 
@@ -9,7 +11,9 @@ export const latest = async (options: CLIOptions) => {
   //   next
   //   fix-current
   try {
-    console.log('not implemented, upgrade to the latest version');
+    const logger = createLogger({ silent: options.silent, debug: options.debug });
+
+    await tasks.latest({ logger, dryRun: options.dryRun });
   } catch (err) {
     handleError(err);
   }

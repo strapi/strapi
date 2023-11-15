@@ -11,7 +11,7 @@ export const next = async (options: CLIOptions) => {
     const logger = createLogger({ silent: options.silent, debug: options.debug });
 
     logger.warn(
-      "Please make sure you've created a backup of your codebase and files before running the upgrade tool"
+      "Please make sure you've created a backup of your codebase and files before upgrading"
     );
 
     await tasks.next({ logger, confirm, dryRun: options.dryRun });

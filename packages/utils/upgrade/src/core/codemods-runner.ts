@@ -51,7 +51,7 @@ export const createCodemodsRunner = (paths: string[], options: RunnerOptions): C
 
       await options.onRunFinish?.(codemod, runIndex, report);
 
-      runIndex++;
+      runIndex += 1;
     }
 
     return reports;
