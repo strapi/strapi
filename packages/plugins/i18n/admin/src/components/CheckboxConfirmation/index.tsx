@@ -13,7 +13,7 @@ import { ExclamationMarkCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { getTranslation } from '../../utils';
+import { getTranslation } from '../../utils/getTranslation';
 
 const TextAlignTypography = styled(Typography)`
   text-align: center;

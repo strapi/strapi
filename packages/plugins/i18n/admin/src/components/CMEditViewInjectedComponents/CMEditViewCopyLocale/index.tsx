@@ -17,7 +17,7 @@ import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { getTranslation } from '../../../utils';
+import { getTranslation } from '../../../utils/getTranslation';
 
 import { cleanData, generateOptions } from './utils';
 

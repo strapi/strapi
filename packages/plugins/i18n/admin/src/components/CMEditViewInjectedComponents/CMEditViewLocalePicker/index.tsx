@@ -6,7 +6,7 @@ import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 
-import { getTranslation } from '../../../utils';
+import { getTranslation } from '../../../utils/getTranslation';
 import CMEditViewCopyLocale from '../CMEditViewCopyLocale';
 
 import Bullet from './Bullet';

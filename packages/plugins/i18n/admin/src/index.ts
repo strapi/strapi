@@ -17,7 +17,7 @@ import mutateEditViewLayoutHook from './contentManagerHooks/mutateEditViewLayout
 import middlewares from './middlewares';
 import { pluginId } from './pluginId';
 import { reducers } from './store/reducers';
-import { getTranslation } from './utils';
+import { getTranslation } from './utils/getTranslation';
 import LOCALIZED_FIELDS from './utils/localizedFields';
 import mutateCTBContentTypeSchema from './utils/mutateCTBContentTypeSchema';
 

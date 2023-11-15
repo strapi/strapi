@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Earth as I18N, EarthStriked as StrikedWorld } from '@strapi/icons';
 
 import LabelAction from '../../components/LabelAction';
-import { getTranslation } from '../../utils';
+import { getTranslation } from '../../utils/getTranslation';
 import mutateEditViewLayout, {
   enhanceComponentsLayout,
   enhanceEditLayout,

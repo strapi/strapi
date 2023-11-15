@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 
 import { CreateLocale } from '../../../shared/contracts/locales';
 import { ADD_LOCALE } from '../store/constants';
-import { getTranslation } from '../utils';
+import { getTranslation } from '../utils/getTranslation';
 
 const useAddLocale = () => {
   const [isLoading, setLoading] = React.useState(false);

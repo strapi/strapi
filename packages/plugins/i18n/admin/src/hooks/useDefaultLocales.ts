@@ -3,7 +3,7 @@ import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 
-import { getTranslation } from '../utils';
+import { getTranslation } from '../utils/getTranslation';
 
 import type { GetISOLocales } from '../../../shared/contracts/iso-locales';
 

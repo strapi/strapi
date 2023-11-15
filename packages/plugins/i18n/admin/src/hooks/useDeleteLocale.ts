@@ -5,7 +5,7 @@ import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import { DeleteLocale } from '../../../shared/contracts/locales';
 import { DELETE_LOCALE } from '../store/constants';
 import { useTypedDispatch } from '../store/hooks';
-import { getTranslation } from '../utils';
+import { getTranslation } from '../utils/getTranslation';
 
 const useDeleteLocale = () => {
   const [isLoading, setLoading] = useState(false);

@@ -11,7 +11,7 @@ import useContentTypePermissions from '../../hooks/useContentTypePermissions';
 import useHasI18n from '../../hooks/useHasI18n';
 import selectI18NLocales from '../../selectors/selectI18nLocales';
 import getInitialLocale from '../../utils/getInitialLocale';
-import getTranslation from '../../utils/getTranslation';
+import { getTranslation } from '../../utils/getTranslation';
 
 const LocalePicker = () => {
   const { formatMessage } = useIntl();

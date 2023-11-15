@@ -17,7 +17,7 @@ import { LocaleTable, LocaleTableProps } from '../components/LocaleTable';
 import { PERMISSIONS } from '../constants';
 import { useLocales } from '../hooks/useLocales';
 import { Locale } from '../store/reducers';
-import { getTranslation } from '../utils';
+import { getTranslation } from '../utils/getTranslation';
 
 const SettingsPage = () => {
   const [isOpenedCreateModal, setIsOpenedCreateModal] = React.useState(false);

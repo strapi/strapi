@@ -15,7 +15,7 @@ import { Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { Locale } from '../store/reducers';
-import { getTranslation } from '../utils';
+import { getTranslation } from '../utils/getTranslation';
 
 type LocaleTableProps = {
   locales?: Locale[];

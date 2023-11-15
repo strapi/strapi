@@ -4,7 +4,7 @@ import { Earth as I18N, EarthStriked as StrikedWorld } from '@strapi/icons';
 import get from 'lodash/get';
 
 import LabelAction from '../components/LabelAction';
-import { getTranslation } from '../utils';
+import { getTranslation } from '../utils/getTranslation';
 
 const getRelationFieldQueryInfos = (field: any, currentLocale: any) => ({
   queryInfos: {

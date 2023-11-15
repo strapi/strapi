@@ -4,7 +4,7 @@ import { Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import useHasI18n from '../../../hooks/useHasI18n';
-import { getTranslation } from '../../../utils';
+import { getTranslation } from '../../../utils/getTranslation';
 
 const Emphasis = (chunks: React.ReactNode) => {
   return (

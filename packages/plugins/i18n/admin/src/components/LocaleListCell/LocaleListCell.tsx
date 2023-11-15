@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import selectI18NLocales from '../../selectors/selectI18nLocales';
-import { getTranslation } from '../../utils';
+import { getTranslation } from '../../utils/getTranslation';
 
 const Button = styled.button`
   svg {

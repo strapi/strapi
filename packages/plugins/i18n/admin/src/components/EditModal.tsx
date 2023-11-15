@@ -29,7 +29,7 @@ import { CreateLocale } from '../../../shared/contracts/locales';
 import { useDefaultLocales } from '../hooks/useDefaultLocales';
 import { useEditLocale } from '../hooks/useEditLocale';
 import { Locale } from '../store/reducers';
-import { getTranslation } from '../utils';
+import { getTranslation } from '../utils/getTranslation';
 
 import { AdvancedForm, LOCALE_SCHEMA } from './CreateModal';
 

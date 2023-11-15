@@ -6,7 +6,7 @@ import { AxiosResponse } from 'axios';
 import { UpdateLocale } from '../../../shared/contracts/locales';
 import { UPDATE_LOCALE } from '../store/constants';
 import { useTypedDispatch } from '../store/hooks';
-import { getTranslation } from '../utils';
+import { getTranslation } from '../utils/getTranslation';
 
 const useEditLocale = () => {
   const [isLoading, setLoading] = useState(false);

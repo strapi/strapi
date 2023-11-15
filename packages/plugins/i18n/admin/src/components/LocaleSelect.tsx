@@ -4,7 +4,7 @@ import { useIntl } from 'react-intl';
 import { ISOLocale } from '../../../shared/contracts/iso-locales';
 import { useDefaultLocales } from '../hooks/useDefaultLocales';
 import { useLocales } from '../hooks/useLocales';
-import { getTranslation } from '../utils';
+import { getTranslation } from '../utils/getTranslation';
 
 interface LocaleSelectProps extends Pick<ComboboxProps, 'onClear' | 'error' | 'value'> {
   onLocaleChange: (locale: ISOLocale) => void;

@@ -26,7 +26,7 @@ import * as yup from 'yup';
 
 import { CreateLocale } from '../../../shared/contracts/locales';
 import { useAddLocale } from '../hooks/useAddLocale';
-import { getTranslation } from '../utils';
+import { getTranslation } from '../utils/getTranslation';
 
 import { LocaleSelect, LocaleSelectProps } from './LocaleSelect';
 

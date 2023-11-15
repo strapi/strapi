@@ -4,7 +4,7 @@ import { pxToRem } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { getTranslation } from '../../../utils';
+import { getTranslation } from '../../../utils/getTranslation';
 
 const statusMap = {
   'did-not-create-locale': {
