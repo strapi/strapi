@@ -1,10 +1,12 @@
 import * as React from 'react';
 
 import { Button, HeaderLayout } from '@strapi/design-system';
+import { CheckPermissions, CheckPagePermissions } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { AddReleaseDialog } from '../../components/AddReleaseDialog';
+import { AddReleaseDialog } from '../components/AddReleaseDialog';
+import { PERMISSIONS } from '../constants';
 
 const ReleasesPage = () => {
   const [addReleaseDialogIsShown, setAddReleaseDialogIsShown] = React.useState(false);
@@ -31,12 +33,14 @@ const ReleasesPage = () => {
           { number: total }
         )}
         primaryAction={
-          <Button startIcon={<Plus />} onClick={toggleAddReleaseDialog}>
-            {formatMessage({
-              id: 'content-releases.header.actions.add-release',
-              defaultMessage: 'New release',
-            })}
-          </Button>
+          <CheckPermissions permissions={PERMISSIONS.create}>
+            <Button startIcon={<Plus />} onClick={toggleAddReleaseDialog}>
+              {formatMessage({
+                id: 'content-releases.header.actions.add-release',
+                defaultMessage: 'New release',
+              })}
+            </Button>
+          </CheckPermissions>
         }
       />
       {addReleaseDialogIsShown && <AddReleaseDialog handleClose={toggleAddReleaseDialog} />}
@@ -44,4 +48,10 @@ const ReleasesPage = () => {
   );
 };
 
-export { ReleasesPage };
+const ProtectedReleasesPage = () => (
+  <CheckPermissions permissions={PERMISSIONS.main}>
+    <ReleasesPage />
+  </CheckPermissions>
+);
+
+export { ReleasesPage, ProtectedReleasesPage };

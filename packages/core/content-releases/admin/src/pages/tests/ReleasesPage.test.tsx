@@ -3,9 +3,15 @@ import { render as renderRTL, within, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 
-import { ReleasesPage } from '../Releases';
+import { ReleasesPage } from '../ReleasesPage';
 
 const user = userEvent.setup();
+
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  // eslint-disable-next-line
+  CheckPermissions: ({ children }: { children: JSX.Element}) => <div>{children}</div>
+}));
 
 const render = () =>
   renderRTL(
@@ -23,7 +29,8 @@ describe('Releases home page', () => {
 
   it('renders correctly the heading content', async () => {
     render();
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Releases');
+
+    () => expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Releases');
     // if there are 0 releases
     expect(screen.getByText('No releases')).toBeInTheDocument();
 
