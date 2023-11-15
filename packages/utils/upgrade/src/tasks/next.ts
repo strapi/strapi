@@ -16,10 +16,9 @@ import {
 import type { Report, RunReports, TaskOptions, VersionRange } from '../types';
 
 export const next = async (options: TaskOptions) => {
-  const { logger, dryRun = false } = options;
+  const { logger, dryRun = false, cwd = process.cwd() } = options;
 
   const timer = createTimer();
-  const cwd = process.cwd();
 
   const projectLoader = createProjectLoader({ cwd, logger });
   const project = await projectLoader.load();
