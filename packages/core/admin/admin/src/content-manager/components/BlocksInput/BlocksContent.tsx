@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { Box } from '@strapi/design-system';
+import { Editor } from 'slate';
 import {
   type ReactEditor,
   type RenderElementProps,
@@ -68,6 +69,36 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
     (props: RenderElementProps) => baseRenderElement(props, blocks),
     [blocks]
   );
+
+  const checkSnippet = () => {
+    // Get current text block
+    if (!editor.selection) {
+      return;
+    }
+
+    const [textNode, textNodePath] = Editor.node(editor, editor.selection.anchor.path);
+
+    // Narrow the type to a text node
+    if (Editor.isEditor(textNode) || textNode.type !== 'text') {
+      return;
+    }
+
+    // Don't check for snippets if we're not at the start of a block
+    if (textNodePath.at(-1) !== 0) {
+      return;
+    }
+
+    // Check if the text node starts with a known snippet
+    const blockMatchingSnippet = Object.values(blocks).find((block) => {
+      if (!block.snippet) {
+        return false;
+      }
+
+      return textNode.text.startsWith(block.snippet);
+    });
+
+    // TODO: convert into matching block
+  };
 
   const handleEnter = () => {
     if (!editor.selection) {
@@ -181,6 +212,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
         renderElement={renderElement}
         renderLeaf={renderLeaf}
         onKeyDown={handleKeyDown}
+        onKeyUp={checkSnippet}
         scrollSelectionIntoView={handleScrollSelectionIntoView}
       />
     </Box>

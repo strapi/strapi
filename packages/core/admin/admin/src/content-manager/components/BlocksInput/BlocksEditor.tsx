@@ -32,6 +32,7 @@ interface NonSelectorBlock {
   isInBlocksSelector: false;
   handleEnterKey?: (editor: Editor) => void;
   handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => void;
+  snippet?: string;
 }
 
 type SelectorBlock = Omit<NonSelectorBlock, 'isInBlocksSelector'> & {

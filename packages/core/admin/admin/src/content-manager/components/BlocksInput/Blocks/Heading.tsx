@@ -60,6 +60,7 @@ const headingBlocks: Pick<
     },
     matchNode: (node) => node.type === 'heading' && node.level === 1,
     isInBlocksSelector: true,
+    snippet: '# ',
   },
   'heading-two': {
     renderElement: (props) => <H2 {...props.attributes}>{props.children}</H2>,
