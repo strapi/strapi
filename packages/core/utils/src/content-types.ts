@@ -14,6 +14,8 @@ const SINGLE_TYPE = 'singleType';
 const COLLECTION_TYPE = 'collectionType';
 
 const ID_ATTRIBUTE = 'id';
+const DOC_ID_ATTRIBUTE = 'documentId';
+
 const PUBLISHED_AT_ATTRIBUTE = 'publishedAt';
 const CREATED_BY_ATTRIBUTE = 'createdBy';
 const UPDATED_BY_ATTRIBUTE = 'updatedBy';
@@ -27,6 +29,7 @@ const DP_PUB_STATES = [DP_PUB_STATE_LIVE, DP_PUB_STATE_PREVIEW];
 
 const constants = {
   ID_ATTRIBUTE,
+  DOC_ID_ATTRIBUTE,
   PUBLISHED_AT_ATTRIBUTE,
   CREATED_BY_ATTRIBUTE,
   UPDATED_BY_ATTRIBUTE,
@@ -76,7 +79,12 @@ const getNonWritableAttributes = (model: Model) => {
     [] as string[]
   );
 
-  return _.uniq([ID_ATTRIBUTE, ...getTimestamps(model), ...nonWritableAttributes]);
+  return _.uniq([
+    ID_ATTRIBUTE,
+    DOC_ID_ATTRIBUTE,
+    ...getTimestamps(model),
+    ...nonWritableAttributes,
+  ]);
 };
 
 const getWritableAttributes = (model: Model) => {
@@ -96,7 +104,7 @@ const getNonVisibleAttributes = (model: Model) => {
     [] as string[]
   );
 
-  return _.uniq([ID_ATTRIBUTE, ...getTimestamps(model), ...nonVisibleAttributes]);
+  return _.uniq([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, ...getTimestamps(model), ...nonVisibleAttributes]);
 };
 
 const getVisibleAttributes = (model: Model) => {

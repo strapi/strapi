@@ -10,8 +10,6 @@ import { createConnection } from './connection';
 import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
 
-// TODO: move back into strapi
-import { transformContentTypes } from './utils/content-types';
 import { validateDatabase } from './validations';
 import { Model } from './types';
 
@@ -45,8 +43,6 @@ class Database {
   lifecycles: LifecycleProvider;
 
   entityManager: EntityManager;
-
-  static transformContentTypes = transformContentTypes;
 
   static async init(config: DatabaseConfig) {
     const db = new Database(config);

@@ -32,6 +32,7 @@ const {
 } = contentTypes;
 const {
   ID_ATTRIBUTE,
+  DOC_ID_ATTRIBUTE,
   CREATED_AT_ATTRIBUTE,
   UPDATED_AT_ATTRIBUTE,
   PUBLISHED_AT_ATTRIBUTE,
@@ -40,7 +41,7 @@ const {
 } = constants;
 
 const COMPONENT_FIELDS = ['__component'];
-const STATIC_FIELDS = [ID_ATTRIBUTE];
+const STATIC_FIELDS = [ID_ATTRIBUTE, DOC_ID_ATTRIBUTE];
 
 module.exports = ({ action, ability, model }) => {
   const schema = strapi.getModel(model);

@@ -1,18 +1,23 @@
+import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import browserslistToEsbuild from 'browserslist-to-esbuild';
 import { ESBuildMinifyPlugin } from 'esbuild-loader';
+import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin';
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import crypto from 'node:crypto';
 import path from 'node:path';
-import { Configuration, DefinePlugin, HotModuleReplacementPlugin } from 'webpack';
-import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
+import {
+  Configuration,
+  DefinePlugin,
+  HotModuleReplacementPlugin,
+  WebpackPluginInstance,
+} from 'webpack';
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 
-import { getAliases } from './aliases';
+import { loadFile } from '../core/files';
 import { loadStrapiMonorepo } from '../core/monorepo';
 import type { BuildContext } from '../createBuildContext';
-import { loadFile } from '../core/files';
+import { getAliases } from './aliases';
 
 const resolveBaseConfig = async (ctx: BuildContext) => {
   const monorepo = await loadStrapiMonorepo(ctx.cwd);
@@ -33,12 +38,23 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
     module: {
       rules: [
         {
-          test: /\.(t|j)sx?$/,
+          test: /\.(ts|tsx)$/,
           loader: require.resolve('esbuild-loader'),
           options: {
             loader: 'tsx',
-            jsx: 'automatic',
             target,
+            jsx: 'automatic',
+          },
+        },
+        {
+          test: /\.(js|jsx|mjs)$/,
+          use: {
+            loader: require.resolve('esbuild-loader'),
+            options: {
+              loader: 'jsx',
+              target,
+              jsx: 'automatic',
+            },
           },
         },
         {
@@ -173,7 +189,6 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<Configuration
       moduleIds: 'deterministic',
       runtimeChunk: true,
     },
-    // @ts-expect-error
     plugins: [
       ...baseConfig.plugins,
       new MiniCssExtractPlugin({
@@ -181,7 +196,7 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<Configuration
         chunkFilename: '[name].[chunkhash].chunkhash.css',
         ignoreOrder: true,
       }),
-      ctx.options.stats && new BundleAnalyzerPlugin(),
+      ctx.options.stats && (new BundleAnalyzerPlugin() as unknown as WebpackPluginInstance), // TODO: find out if this is an actual issue or just a ts bug
     ].filter(Boolean),
   };
 };
@@ -207,11 +222,22 @@ const mergeConfigWithUserConfig = async (config: Configuration, ctx: BuildContex
   const userConfig = await getUserConfig(ctx);
 
   if (userConfig) {
-    const webpack = await import('webpack');
-    return userConfig(config, webpack);
+    if (typeof userConfig === 'function') {
+      const webpack = await import('webpack');
+      return userConfig(config, webpack);
+    } else {
+      ctx.logger.warn(
+        `You've exported something other than a function from ${path.join(
+          ctx.appDir,
+          'src',
+          'admin',
+          'webpack.config'
+        )}, this will ignored.`
+      );
+    }
   }
 
   return config;
 };
 
-export { resolveProductionConfig, resolveDevelopmentConfig, mergeConfigWithUserConfig };
+export { mergeConfigWithUserConfig, resolveDevelopmentConfig, resolveProductionConfig };

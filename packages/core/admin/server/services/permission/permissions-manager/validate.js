@@ -33,6 +33,7 @@ const { constants, isScalarAttribute, getNonVisibleAttributes, getWritableAttrib
   contentTypes;
 const {
   ID_ATTRIBUTE,
+  DOC_ID_ATTRIBUTE,
   CREATED_AT_ATTRIBUTE,
   UPDATED_AT_ATTRIBUTE,
   PUBLISHED_AT_ATTRIBUTE,
@@ -42,7 +43,7 @@ const {
 
 const COMPONENT_FIELDS = ['__component'];
 
-const STATIC_FIELDS = [ID_ATTRIBUTE];
+const STATIC_FIELDS = [ID_ATTRIBUTE, DOC_ID_ATTRIBUTE];
 
 const throwInvalidParam = ({ key }) => {
   throw new ValidationError(`Invalid parameter ${key}`);
