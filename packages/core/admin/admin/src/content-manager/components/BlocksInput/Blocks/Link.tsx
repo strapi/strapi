@@ -14,7 +14,7 @@ import {
 } from '@strapi/design-system';
 import { Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { Editor, Path, Range, Transforms } from 'slate';
+import { type Element, Editor, Path, Range, Transforms } from 'slate';
 import { type RenderElementProps, ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
@@ -40,22 +40,23 @@ const CustomButton = styled(Button)`
   }
 `;
 
-const Link = React.forwardRef<HTMLAnchorElement, RenderElementProps>(
-  ({ element, children, attributes }, forwardedRef) => {
+interface LinkContentProps extends RenderElementProps {
+  link: Block<'link'>;
+}
+
+const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
+  ({ link, children, attributes }, forwardedRef) => {
     const { formatMessage } = useIntl();
     const { editor } = useBlocksEditorContext('Link');
-    const path = ReactEditor.findPath(editor, element);
+    const path = ReactEditor.findPath(editor, link);
     const [popoverOpen, setPopoverOpen] = React.useState(
       editor.lastInsertedLinkPath ? Path.equals(path, editor.lastInsertedLinkPath) : false
     );
-
-    const elementAsLink = element as Block<'link'>;
-
-    const [isEditing, setIsEditing] = React.useState(elementAsLink.url === '');
+    const [isEditing, setIsEditing] = React.useState(link.url === '');
     const linkRef = React.useRef<HTMLAnchorElement>(null!);
-    const elementText = elementAsLink.children.map((child) => child.text).join('');
+    const elementText = link.children.map((child) => child.text).join('');
     const [linkText, setLinkText] = React.useState(elementText);
-    const [linkUrl, setLinkUrl] = React.useState(elementAsLink.url);
+    const [linkUrl, setLinkUrl] = React.useState(link.url);
 
     const handleOpenEditPopover: React.MouseEventHandler<HTMLAnchorElement> = (e) => {
       e.preventDefault();
@@ -78,7 +79,7 @@ const Link = React.forwardRef<HTMLAnchorElement, RenderElementProps>(
     const handleCancel = () => {
       setIsEditing(false);
 
-      if (elementAsLink.url === '') {
+      if (link.url === '') {
         removeLink(editor);
       }
     };
@@ -86,7 +87,7 @@ const Link = React.forwardRef<HTMLAnchorElement, RenderElementProps>(
     const handleDismiss = () => {
       setPopoverOpen(false);
 
-      if (elementAsLink.url === '') {
+      if (link.url === '') {
         removeLink(editor);
       }
 
@@ -100,7 +101,7 @@ const Link = React.forwardRef<HTMLAnchorElement, RenderElementProps>(
         <StyledBaseLink
           {...attributes}
           ref={composedRefs}
-          href={elementAsLink.url}
+          href={link.url}
           onClick={handleOpenEditPopover}
           color="primary600"
         >
@@ -160,8 +161,8 @@ const Link = React.forwardRef<HTMLAnchorElement, RenderElementProps>(
               <Flex direction="column" gap={4} alignItems="start" width="400px">
                 <Typography>{elementText}</Typography>
                 <Typography>
-                  <StyledBaseLink href={elementAsLink.url} target="_blank" color="primary600">
-                    {elementAsLink.url}
+                  <StyledBaseLink href={link.url} target="_blank" color="primary600">
+                    {link.url}
                   </StyledBaseLink>
                 </Typography>
                 <Flex justifyContent="end" width="100%" gap={2}>
@@ -217,6 +218,21 @@ const Link = React.forwardRef<HTMLAnchorElement, RenderElementProps>(
     );
   }
 );
+
+const isLink = (element: Element): element is Block<'link'> => {
+  return element.type === 'link';
+};
+
+const Link = React.forwardRef<HTMLAnchorElement, RenderElementProps>((props, forwardedRef) => {
+  if (!isLink(props.element)) {
+    return null;
+  }
+
+  // LinkContent uses React hooks that rely on props.element being a link. If the type guard above
+  // doesn't pass, those hooks would be called conditionnally, which is not allowed.
+  // Hence the need for a separate component.
+  return <LinkContent {...props} link={props.element} ref={forwardedRef} />;
+});
 
 const linkBlocks: Pick<BlocksStore, 'link'> = {
   link: {
