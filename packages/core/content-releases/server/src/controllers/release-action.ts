@@ -17,9 +17,11 @@ const releaseActionController = {
       throw new errors.ApplicationError('Content Releases is a superadmin only feature');
     }
 
-    await validateReleaseActionCreateSchema(releaseActionArgs);
-    await validateEntryContentType(releaseActionArgs);
-    await validateUniqueEntryInRelease(releaseActionArgs);
+    await Promise.all([
+      validateReleaseActionCreateSchema(releaseActionArgs),
+      validateEntryContentType(releaseActionArgs),
+      validateUniqueEntryInRelease(releaseActionArgs),
+    ]);
 
     const releaseActionService = strapi.plugin('content-releases').service('release-action');
     // TODO: releaseAction is of type any when the create service return is of type Promise<GetValues<"plugin::content-releases.release-action", string>> ...?

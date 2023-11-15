@@ -28,7 +28,6 @@ interface ReleaseActionEntry {
   contentType: Common.UID.ContentType;
 }
 
-// TODO: Could we not have the types generated from the schema?
 interface ReleaseAction {
   type: 'publish' | 'unpublish';
   entry: ReleaseActionEntry;
@@ -36,7 +35,6 @@ interface ReleaseAction {
   release: Release;
 }
 
-// TODO: Could we not have the types generated from the schema?
 export interface Release {
   id: Entity.ID;
   name: string;

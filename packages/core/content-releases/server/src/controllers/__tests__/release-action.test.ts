@@ -21,7 +21,7 @@ describe('Release Action controller', () => {
       };
     });
 
-    it('throws an error if the user does not have the correct permissions', async () => {
+    it('throws an error if the user does not have the correct permissions', () => {
       const ctx = {
         state: {
           user: {},
@@ -44,9 +44,28 @@ describe('Release Action controller', () => {
       );
     });
 
-    it('throws an error given bad request arguments', async () => {
+    it('throws an error given bad request arguments', () => {
       // Mock permitted user
       global.strapi.admin.services.role.hasSuperAdminRole.mockReturnValue(true);
+      // Mock content type
+      global.strapi.contentType = jest.fn().mockReturnValue({
+        options: {
+          draftAndPublish: true,
+        },
+      });
+      // @ts-expect-error Ignore missing properties
+      global.strapi.entityService = {
+        findOne: jest.fn().mockReturnValue({
+          actions: [
+            {
+              contentType: 'api::category.category',
+              entry: {
+                id: 2,
+              },
+            },
+          ],
+        }),
+      };
 
       const ctx = {
         state: {
@@ -68,7 +87,7 @@ describe('Release Action controller', () => {
       expect(() => releaseActionController.create(ctx)).rejects.toThrow('type is a required field');
     });
 
-    it('throws an error if the content type does not exist', async () => {
+    it('throws an error if the content type does not exist', () => {
       // Mock permitted user
       global.strapi.admin.services.role.hasSuperAdminRole.mockReturnValue(true);
       const ctx = {
@@ -93,7 +112,7 @@ describe('Release Action controller', () => {
       );
     });
 
-    it('throws an error if the content type does not have draftAndPublish enabled', async () => {
+    it('throws an error if the content type does not have draftAndPublish enabled', () => {
       // Mock permitted user
       global.strapi.admin.services.role.hasSuperAdminRole.mockReturnValue(true);
       // Mock content type
@@ -123,7 +142,7 @@ describe('Release Action controller', () => {
       );
     });
 
-    it('throws an error if the release does not exist', async () => {
+    it('throws an error if the release does not exist', () => {
       // Mock permitted user
       global.strapi.admin.services.role.hasSuperAdminRole.mockReturnValue(true);
       // Mock content type
@@ -159,7 +178,7 @@ describe('Release Action controller', () => {
       );
     });
 
-    it('throws an error if the entry already exists in the release', async () => {
+    it('throws an error if a contentType entry already exists in the release', () => {
       // Mock permitted user
       global.strapi.admin.services.role.hasSuperAdminRole.mockReturnValue(true);
       // Mock content type
@@ -173,6 +192,7 @@ describe('Release Action controller', () => {
         findOne: jest.fn().mockReturnValue({
           actions: [
             {
+              contentType: 'api::category.category',
               entry: {
                 id: 1,
               },
@@ -199,7 +219,7 @@ describe('Release Action controller', () => {
 
       // @ts-expect-error partial context
       expect(() => releaseActionController.create(ctx)).rejects.toThrow(
-        'Entry with id 1 already exists in release with id 1'
+        'Entry with id 1 and contentType api::category.category already exists in release with id 1'
       );
     });
 

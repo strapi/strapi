@@ -34,12 +34,14 @@ export async function validateUniqueEntryInRelease(releaseActionArgs: ReleaseAct
   }
 
   const isEntryInRelease = release.actions.some(
-    (action) => action.entry.id === releaseActionArgs.entry.id
+    (action) =>
+      action.entry.id === releaseActionArgs.entry.id &&
+      action.contentType === releaseActionArgs.entry.contentType
   );
 
   if (isEntryInRelease) {
     throw new errors.ApplicationError(
-      `Entry with id ${releaseActionArgs.entry.id} already exists in release with id ${releaseActionArgs.releaseId}`
+      `Entry with id ${releaseActionArgs.entry.id} and contentType ${releaseActionArgs.entry.contentType} already exists in release with id ${releaseActionArgs.releaseId}`
     );
   }
 }
