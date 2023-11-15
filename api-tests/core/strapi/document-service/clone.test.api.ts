@@ -1,3 +1,4 @@
+import { LoadedStrapi } from '@strapi/types';
 import './resources/types/components.d.ts';
 import './resources/types/contentTypes.d.ts';
 import resources from './resources/index';
@@ -16,9 +17,11 @@ const findArticlesDb = async (where: any) => {
 
 describe('Document Service', () => {
   let testUtils;
+  let strapi: LoadedStrapi;
 
   beforeAll(async () => {
     testUtils = await createTestSetup(resources);
+    strapi = testUtils.strapi;
   });
 
   afterAll(async () => {
@@ -27,20 +30,54 @@ describe('Document Service', () => {
 
   describe('clone', () => {
     it(
-      'clone a document',
+      'clone a document locale',
       testInTransaction(async () => {
-        const articleDb = await findArticleDb({ name: '3 Document A' });
+        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
-        const article = await strapi.documents.clone(ARTICLE_UID, articleDb.documentId, {
+        const article = await strapi.documents(ARTICLE_UID).clone(articleDb.documentId, {
           data: {
             title: 'Cloned Document',
+            locale: 'en', // should only clone the english locale
           },
         });
 
-        const clonedArticleDb = await findArticleDb({ name: 'Cloned Document' });
+        const clonedArticlesDb = await findArticlesDb({ id: article.documentId });
 
-        expect(clonedArticleDb).toBeDefined();
-        expect(clonedArticleDb).toMatchObject({ name: 'Cloned Document' });
+        // all articles should be in draft, and only one should be english
+        expect(clonedArticlesDb.length).toBe(1);
+        expect(clonedArticlesDb[0]).toMatchObject({
+          ...articleDb,
+          title: 'Cloned Document',
+          locale: 'en',
+          publishedAt: null,
+        });
+      })
+    );
+
+    it.todo(
+      'clone all document locales ',
+      testInTransaction(async () => {
+        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+
+        // .clone() should only return the doc id
+        // { id: Document.ID }
+        const article = await strapi.documents(ARTICLE_UID).clone(articleDb.documentId, {
+          data: {
+            title: 'Cloned Document', // Clone all locales
+          },
+        });
+
+        const clonedArticlesDb = await findArticlesDb({ id: article.documentId });
+
+        // all articles should be in draft
+        expect(clonedArticlesDb.length).toBeGreaterThan(1);
+        clonedArticlesDb.forEach((article) => {
+          expect(article).toMatchObject({
+            ...articleDb,
+            title: 'Cloned Document',
+            publishedAt: null,
+          });
+        });
       })
     );
   });

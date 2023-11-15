@@ -1,5 +1,5 @@
 import type { Common, Strapi, Schema, Shared, Documents } from '@strapi/types';
-import { convertQueryParams } from '@strapi/utils';
+import { convertQueryParams, mapAsync } from '@strapi/utils';
 import type { Database } from '@strapi/database';
 
 import { isArray } from 'lodash/fp';
@@ -21,7 +21,6 @@ const { transformParamsToQuery } = convertQueryParams;
 
 /**
  * TODO: TESTS - In progress
- * TODO: Components - In progress
  * TODO: Entity Validation
  * TODO: Lifecycles - In progress
  *        Plugin extensions
@@ -29,15 +28,6 @@ const { transformParamsToQuery } = convertQueryParams;
  * TODO: i18n
  * TODO: Apply default parameters (status & locale)
  * TODO: Sanitization / validation built-in
- * TODO: Other methods
- *        Count
- *        FindPage
- *        Clone
- *        Load
- *        LoadPages
- *        DeleteMany
- * TODO: Create DocumentRepository to
- *       call documentService as strapi.document(uid, {}).method()
  * TODO: Webhooks
  * TODO: Audit logs
  * TODO: File upload
@@ -71,6 +61,7 @@ const createDocumentService = ({
     const { kind } = strapi.getModel(uid);
 
     const query = transformParamsToQuery(uid, params || ({} as any));
+    query.where = { ...params?.lookup, ...query.where };
 
     if (kind === 'singleType') {
       return db.query(uid).findOne(query);
@@ -79,51 +70,51 @@ const createDocumentService = ({
     return db.query(uid).findMany(query);
   },
 
-  async findPage(uid, paginationParams) {
-    const query = transformParamsToQuery(uid, paginationParams || ({} as any));
-    return db.query(uid).findPage(query) as any;
-  },
-
   async findFirst(uid, params) {
     const query = transformParamsToQuery(uid, params || ({} as any));
-    return db.query(uid).findOne(query);
+
+    return db.query(uid).findOne({ ...query, where: { ...params?.lookup, ...query.where } });
   },
 
   async findOne(uid, documentId, params) {
     const query = transformParamsToQuery(uid, params || ({} as any));
-    return db.query(uid).findOne({ ...query, where: { ...query.where, documentId } });
+    return db
+      .query(uid)
+      .findOne({ ...query, where: { ...params?.lookup, ...query.where, documentId } });
   },
 
-  // NOTE: What happens if user doesn't provide specific publications state and locale to delete?
-  // By default delete will remove all versions of the document
-  // You need to specify the locale and publication state to delete a specific version
-  // Should forbid deleting a draft version without deleting the published version
-  async delete(uid, documentId, params) {
-    const query = transformParamsToQuery(uid, params || ({} as any));
+  async delete(uid, documentId, params = {} as any) {
+    const query = transformParamsToQuery(uid, params as any);
 
-    // Find entry to delete
-    const entryToDelete = await db
-      .query(uid)
-      .findOne({ ...query, where: { documentId, ...query?.where } });
-
-    if (!entryToDelete) {
-      return null;
+    if (params.status === 'draft') {
+      throw new Error('Cannot delete a draft document');
     }
 
-    // Delete entry & components
-    const componentsToDelete = await getComponents(uid, entryToDelete);
+    const entriesToDelete = await db.query(uid).findMany({
+      ...query,
+      where: {
+        ...params.lookup,
+        ...query?.where,
+        documentId,
+      },
+    });
 
-    await db.query(uid).delete({ where: { id: entryToDelete.id } });
-    await deleteComponents(uid, componentsToDelete as any, { loadComponents: false });
+    // Delete all matched entries and its components
+    await mapAsync(entriesToDelete, async (entryToDelete: any) => {
+      const componentsToDelete = await getComponents(uid, entryToDelete);
+      await db.query(uid).delete({ where: { id: entryToDelete.id } });
+      await deleteComponents(uid, componentsToDelete as any, { loadComponents: false });
+    });
 
-    return entryToDelete;
+    // TODO: Change return value to actual count
+    return entriesToDelete.at(0);
   },
 
   // TODO: should we provide two separate methods?
   async deleteMany(uid, paramsOrIds) {
     let queryParams;
     if (isArray(paramsOrIds)) {
-      queryParams = { filter: { where: { documentID: { $in: paramsOrIds } } } };
+      queryParams = { filter: { documentID: { $in: paramsOrIds } } };
     } else {
       queryParams = paramsOrIds;
     }
@@ -134,11 +125,15 @@ const createDocumentService = ({
   },
 
   async create(uid, params) {
+    // TODO: Entity validator.
     // TODO: File upload - Probably in the lifecycles?
     const { data } = params;
 
-    // TODO: Prevent creating a published document
-    // TODO: Entity validator.
+    if (params.status === 'published') {
+      throw new Error(
+        'Cannot directly create a published document. Use the publish method instead.'
+      );
+    }
 
     if (!data) {
       throw new Error('Create requires data attribute');
@@ -163,16 +158,40 @@ const createDocumentService = ({
     // TODO: Entity validator.
     // TODO: File upload
     const { data } = params || {};
-    const model = strapi.getModel(uid);
+    const model = strapi.getModel(uid) as Shared.ContentTypes[Common.UID.ContentType];
+
+    if (params?.status === 'published') {
+      throw new Error('Cannot update a published document. Use the publish method instead.');
+    }
 
     const query = transformParamsToQuery(uid, pickSelectionParams(params || {}));
 
-    const entryToUpdate = await db
+    // Find all locales of the document
+    const entries = await db
       .query(uid)
-      .findOne({ ...query, where: { documentId, ...query?.where } });
+      .findMany({ ...query, where: { ...params?.lookup, ...query?.where, documentId } });
 
-    if (!entryToUpdate) {
+    // Document does not exist
+    if (!entries.length) {
       return null;
+    }
+
+    // TODO: How do we do this from i18n package?
+    const entryToUpdate = entries.find((entry) => entry.locale === params?.locale);
+
+    // Upsert new locale
+    if (!entryToUpdate) {
+      // @ts-expect-error - fix type
+      const componentData = await createComponents(uid, data);
+      const entryData = createPipeline(
+        // @ts-expect-error - fix type
+        Object.assign(omitComponentData(model, data), componentData),
+        { contentType: model }
+      );
+
+      entryData.documentId = documentId;
+
+      return db.query(uid).create({ ...query, data: entryData });
     }
 
     const componentData = await updateComponents(uid, entryToUpdate, data!);
@@ -224,7 +243,6 @@ const createDocumentService = ({
 
   // TODO: Handle relations so they target the published version
   async publish(uid, documentId, params) {
-    // @ts-expect-error - TODO: Add typings
     const { filters } = params || {};
 
     // Clone every draft version to be published
@@ -243,11 +261,11 @@ const createDocumentService = ({
   },
 
   async unpublish(uid, documentId, params) {
-    // @ts-expect-error - TODO: Add typings
     const { filters } = params || {};
 
     this.delete(uid, documentId, {
       ...(params || {}),
+      // @ts-expect-error - publishedAt attribute is not part of the generic type
       filters: {
         ...filters,
         publishedAt: { $ne: null },

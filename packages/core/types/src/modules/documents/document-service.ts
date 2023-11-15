@@ -1,8 +1,6 @@
-import type { Common, Utils } from '../../types';
-import type { Result } from './result';
-import type * as Params from './params';
-
-export type CountResult = { count: number };
+import type { Common } from '../../types';
+import type * as Params from './params/document-service';
+import type * as Result from './result/document-service';
 
 export type ID = string;
 
@@ -15,34 +13,13 @@ export type UploadFile = (
 export interface DocumentService {
   uploadFiles: UploadFile;
 
-  // TODO: Split in 2 different signatures for both single types & collection types
   findMany<
     TContentTypeUID extends Common.UID.ContentType,
     TParams extends Params.FindMany<TContentTypeUID>
   >(
     uid: TContentTypeUID,
     params?: TParams
-  ): Promise<
-    Utils.Expression.MatchFirst<
-      [
-        [Common.UID.IsCollectionType<TContentTypeUID>, Result<TContentTypeUID, TParams>[]],
-        // Is this true for documents?
-        [Common.UID.IsSingleType<TContentTypeUID>, Result<TContentTypeUID, TParams> | null]
-      ],
-      (Result<TContentTypeUID, TParams> | null) | Result<TContentTypeUID, TParams>[]
-    >
-  >;
-
-  findPage<
-    TContentTypeUID extends Common.UID.ContentType,
-    TParams extends Params.FindPage<TContentTypeUID>
-  >(
-    uid: TContentTypeUID,
-    paginationParams?: Params.Pagination.PageNotation
-  ): Promise<{
-    results: [Common.UID.IsCollectionType<TContentTypeUID>, Result<TContentTypeUID, TParams>[]];
-    pagination: any; // TODO
-  }>;
+  ): Result.FindMany<TContentTypeUID, TParams>;
 
   findFirst<
     TContentTypeUID extends Common.UID.ContentType,
@@ -50,7 +27,7 @@ export interface DocumentService {
   >(
     uid: TContentTypeUID,
     params?: TParams
-  ): Promise<Result<TContentTypeUID, TParams> | null>;
+  ): Result.FindFirst<TContentTypeUID, TParams>;
 
   findOne<
     TContentTypeUID extends Common.UID.ContentType,
@@ -59,7 +36,7 @@ export interface DocumentService {
     uid: TContentTypeUID,
     documentId: ID,
     params?: TParams
-  ): Promise<Result<TContentTypeUID, TParams> | null>;
+  ): Result.FindOne<TContentTypeUID, TParams>;
 
   delete<
     TContentTypeUID extends Common.UID.ContentType,
@@ -68,7 +45,7 @@ export interface DocumentService {
     uid: TContentTypeUID,
     documentId: ID,
     params?: TParams
-  ): Promise<Result<TContentTypeUID, TParams> | null>;
+  ): Result.Delete<TContentTypeUID, TParams>;
 
   deleteMany<
     TContentTypeUID extends Common.UID.ContentType,
@@ -76,16 +53,15 @@ export interface DocumentService {
   >(
     uid: TContentTypeUID,
     params?: TParams
-  ): Promise<CountResult | null>;
+  ): Result.DeleteMany;
 
-  // TODO: Make data param required
   create<
     TContentTypeUID extends Common.UID.ContentType,
     TParams extends Params.Create<TContentTypeUID>
   >(
     uid: TContentTypeUID,
     params: TParams
-  ): Promise<Result<TContentTypeUID, TParams>>;
+  ): Result.Create<TContentTypeUID, TParams>;
 
   clone<
     TContentTypeUID extends Common.UID.ContentType,
@@ -94,7 +70,7 @@ export interface DocumentService {
     uid: TContentTypeUID,
     documentId: ID,
     params?: TParams
-  ): Promise<Result<TContentTypeUID, TParams>>;
+  ): Result.Clone<TContentTypeUID, TParams>;
 
   update<
     TContentTypeUID extends Common.UID.ContentType,
@@ -103,7 +79,7 @@ export interface DocumentService {
     uid: TContentTypeUID,
     documentId: ID,
     params?: TParams
-  ): Promise<Result<TContentTypeUID, TParams> | null>;
+  ): Result.Update<TContentTypeUID, TParams>;
 
   count<
     TContentTypeUID extends Common.UID.ContentType,
@@ -111,7 +87,7 @@ export interface DocumentService {
   >(
     uid: TContentTypeUID,
     params?: TParams
-  ): Promise<number | null>;
+  ): Result.Count;
 
   publish<
     TContentTypeUID extends Common.UID.ContentType,
@@ -120,7 +96,7 @@ export interface DocumentService {
     uid: TContentTypeUID,
     documentId: ID,
     params?: TParams
-  ): Promise<number | null>;
+  ): Result.Publish;
 
   unpublish<
     TContentTypeUID extends Common.UID.ContentType,
@@ -129,5 +105,5 @@ export interface DocumentService {
     uid: TContentTypeUID,
     documentId: ID,
     params?: TParams
-  ): Promise<number | null>;
+  ): Result.Unpublish;
 }

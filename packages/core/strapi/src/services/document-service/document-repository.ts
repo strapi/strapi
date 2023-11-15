@@ -1,6 +1,7 @@
 import { Strapi, Common, Documents } from '@strapi/types';
 import createDocumentService from '.';
 import createMiddlewareManager from './middlewares';
+import { loadDefaultMiddlewares } from './middlewares/defaults';
 
 /**
  * TODO:
@@ -26,7 +27,9 @@ export const createDocumentRepository = (
   { defaults = {} }: { defaults?: any } = {}
 ): Documents.Repository => {
   const documents = createDocumentService({ strapi, db: strapi.db! });
+
   const middlewareManager = createMiddlewareManager();
+  loadDefaultMiddlewares(middlewareManager);
 
   function create<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID
@@ -36,13 +39,6 @@ export const createDocumentRepository = (
         return middlewareManager.run(
           { action: 'findMany', uid, params, options: {} },
           ({ params }) => documents.findMany(uid, params)
-        );
-      },
-
-      async findPage(params = {} as any) {
-        return middlewareManager.run(
-          { action: 'findPage', uid, params, options: {} },
-          ({ params }) => documents.findPage(uid, params)
         );
       },
 
@@ -114,24 +110,26 @@ export const createDocumentRepository = (
         );
       },
 
+      // @ts-expect-error - TODO: Fix this
       with(params: object) {
         return createDocumentRepository(strapi, {
           defaults: { ...defaults, ...params },
         })(uid);
       },
 
-      use(action, cb) {
-        middlewareManager.add(uid, action, cb);
+      use(action, cb, opts) {
+        middlewareManager.add(uid, action, cb, opts);
         return this;
       },
     };
   }
 
   Object.assign(create, {
-    use(action: any, cb: any) {
-      middlewareManager.add('allUIDs', action, cb);
+    use(action: any, cb: any, opts?: any) {
+      middlewareManager.add('allUIDs', action, cb, opts);
       return create;
     },
+    middlewares: middlewareManager,
     // NOTE : We should do this in a different way, where lifecycles are executed for the different methods
     ...documents,
   });

@@ -1,89 +1,87 @@
-import { Common } from '../../..';
-import * as Params from '../../entity-service/params';
+import { Common, Utils } from '../../..';
+import type { GetPluginParams } from '..';
 
-// Export params list
-export * from '../../entity-service/params';
+// Params
+import type * as Sort from './sort';
+import type * as Pagination from './pagination';
+import type * as Fields from './fields';
+import type * as Filters from './filters';
+import type * as Populate from './populate';
+import type * as PublicationState from './status';
+import type * as Data from './data';
+import type * as Search from './search';
 
-export type FindMany<TContentTypeUID extends Common.UID.ContentType> = Params.Pick<
-  TContentTypeUID,
-  | 'fields'
-  | 'filters'
-  | '_q'
-  | 'pagination:offset'
-  | 'sort'
-  | 'populate'
-  | 'publicationState'
-  | 'plugin'
+// Utils
+import type * as Attribute from './attributes';
+
+export type Pick<
+  TSchemaUID extends Common.UID.Schema,
+  TKind extends Kind
+> = Utils.Expression.MatchAllIntersect<
+  [
+    // Sort
+    [HasMember<TKind, 'sort'>, { sort?: Sort.Any<TSchemaUID> }],
+    [HasMember<TKind, 'sort:string'>, { sort?: Sort.StringNotation<TSchemaUID> }],
+    [HasMember<TKind, 'sort:array'>, { sort?: Sort.ArrayNotation<TSchemaUID> }],
+    [HasMember<TKind, 'sort:object'>, { sort?: Sort.ObjectNotation<TSchemaUID> }],
+    // Fields
+    [HasMember<TKind, 'fields'>, { fields?: Fields.Any<TSchemaUID> }],
+    [HasMember<TKind, 'fields:string'>, { fields?: Fields.StringNotation<TSchemaUID> }],
+    [HasMember<TKind, 'fields:array'>, { fields?: Fields.ArrayNotation<TSchemaUID> }],
+    // Filters
+    [HasMember<TKind, 'filters'>, { filters?: Filters.Any<TSchemaUID> }],
+    // Populate
+    [HasMember<TKind, 'populate'>, { populate?: Populate.Any<TSchemaUID> }],
+    [HasMember<TKind, 'populate:string'>, { populate?: Populate.StringNotation<TSchemaUID> }],
+    [HasMember<TKind, 'populate:array'>, { populate?: Populate.ArrayNotation<TSchemaUID> }],
+    [HasMember<TKind, 'populate:object'>, { populate?: Populate.ObjectNotation<TSchemaUID> }],
+    // Pagination
+    [HasMember<TKind, 'pagination'>, Pagination.Any],
+    [HasMember<TKind, 'pagination:offset'>, Pagination.OffsetNotation],
+    [HasMember<TKind, 'pagination:page'>, Pagination.PageNotation],
+    // Publication State
+    [HasMember<TKind, 'status'>, PublicationState.Param],
+    // Locale
+    [HasMember<TKind, 'locale'>, { locale?: string }],
+    // Plugin
+    [HasMember<TKind, 'plugin'>, GetPluginParams<TSchemaUID>],
+    // Data
+    [HasMember<TKind, 'data'>, { data?: Data.Input<TSchemaUID> }],
+    [HasMember<TKind, 'data:partial'>, { data?: Partial<Data.Input<TSchemaUID>> }],
+    // Files
+    [HasMember<TKind, 'files'>, { files?: Record<string, unknown> }], // TODO
+    // Search
+    [HasMember<TKind, '_q'>, { _q?: Search.Q }],
+    // Look Up - For internal use only
+    [HasMember<TKind, 'lookup'>, { lookup?: Record<string, unknown> }]
+  ]
 >;
 
-export type FindPage<TContentTypeUID extends Common.UID.ContentType> = Params.Pick<
-  TContentTypeUID,
+export type Kind =
+  | 'sort'
+  | 'sort:string'
+  | 'sort:array'
+  | 'sort:object'
   | 'fields'
+  | 'fields:string'
+  | 'fields:array'
   | 'filters'
-  | '_q'
+  | 'populate'
+  | 'populate:string'
+  | 'populate:array'
+  | 'populate:object'
+  | 'pagination'
+  | 'pagination:offset'
   | 'pagination:page'
-  | 'sort'
-  | 'populate'
-  | 'publicationState'
+  | 'status'
+  | 'locale'
   | 'plugin'
->;
-
-export type FindFirst<TContentTypeUID extends Common.UID.ContentType> = Params.Pick<
-  TContentTypeUID,
-  'fields' | 'filters' | '_q' | 'sort' | 'populate' | 'publicationState' | 'plugin'
->;
-
-export type FindOne<TContentTypeUID extends Common.UID.ContentType> = Params.Pick<
-  TContentTypeUID,
-  'fields' | 'populate' | 'filters' | 'sort'
->;
-
-export type Delete<TContentTypeUID extends Common.UID.ContentType> = Params.Pick<
-  TContentTypeUID,
-  'fields' | 'populate' | 'filters'
->;
-
-export type DeleteMany<TContentTypeUID extends Common.UID.ContentType> = Params.Pick<
-  TContentTypeUID,
-  | 'fields'
-  | 'filters'
+  | 'data'
+  | 'data:partial'
+  | 'files'
   | '_q'
-  | 'pagination:offset'
-  | 'sort'
-  | 'populate'
-  | 'publicationState'
-  | 'plugin'
->;
+  | 'lookup';
 
-export type Create<TContentTypeUID extends Common.UID.ContentType> = Params.Pick<
-  TContentTypeUID,
-  'data' | 'files' | 'fields' | 'populate'
->;
+type HasMember<TValue extends Kind, TTest extends Kind> = Utils.Expression.Extends<TTest, TValue>;
 
-export type Clone<TContentTypeUID extends Common.UID.ContentType> = Params.Pick<
-  TContentTypeUID,
-  'data' | 'files' | 'fields' | 'populate'
->;
-
-export type Update<TContentTypeUID extends Common.UID.ContentType> = Params.Pick<
-  TContentTypeUID,
-  'data:partial' | 'files' | 'fields' | 'populate'
->;
-
-export type Count<TContentTypeUID extends Common.UID.ContentType> = Params.Pick<
-  TContentTypeUID,
-  | 'fields'
-  | 'filters'
-  | '_q'
-  | 'pagination:offset'
-  | 'sort'
-  | 'populate'
-  | 'publicationState'
-  | 'plugin'
->;
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export type Publish<TContentTypeUID extends Common.UID.ContentType> = Record<string, any>;
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export type Unpublish<TContentTypeUID extends Common.UID.ContentType> = Record<string, any>;
+export type { Sort, Pagination, Fields, Filters, Populate, PublicationState, Data, Attribute };

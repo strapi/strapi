@@ -28,25 +28,29 @@ describe('Document Service', () => {
     await destroyTestSetup(testUtils);
   });
 
-  describe('FindOne', () => {
+  describe('FindFirst', () => {
     it(
-      'find one document returns defaults',
+      'find first document with defaults',
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
-        const article = await strapi.documents(ARTICLE_UID).findOne(articleDb.documentId, {});
+        const article = await strapi.documents(ARTICLE_UID).findFirst({});
 
+        expect(article).not.toBeNull();
         expect(article).toMatchObject(articleDb);
       })
     );
 
     it(
-      'find one document in english',
+      'find first document in french',
       testInTransaction(async () => {
-        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+        const articleDb = await findArticleDb({ title: 'Article1-Draft-FR' });
 
-        const article = await strapi.documents(ARTICLE_UID).findOne(articleDb.documentId, {
-          locale: 'en',
+        const article = await strapi.documents(ARTICLE_UID).findFirst({
+          locale: 'fr',
+          filters: {
+            title: { $startsWith: 'Article1' },
+          },
         });
 
         expect(article).toMatchObject(articleDb);
@@ -56,26 +60,26 @@ describe('Document Service', () => {
     it(
       'find one published document',
       testInTransaction(async () => {
-        const articleDb = await findArticleDb({ title: 'Article2-Published-EN' });
-
-        const article = await strapi.documents(ARTICLE_UID).findOne(articleDb.documentId, {
+        const article = await strapi.documents(ARTICLE_UID).findFirst({
           status: 'published',
         });
 
-        expect(article).toMatchObject(articleDb);
+        expect(article).toMatchObject({
+          publishedAt: expect.any(String),
+        });
       })
     );
 
     it(
-      'find one draft document',
+      'find first draft document',
       testInTransaction(async () => {
-        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
-
-        const article = await strapi.documents(ARTICLE_UID).findOne(articleDb.documentId, {
+        const article = await strapi.documents(ARTICLE_UID).findFirst({
           status: 'draft',
         });
 
-        expect(article).toMatchObject(articleDb);
+        expect(article).toMatchObject({
+          publishedAt: null,
+        });
       })
     );
   });

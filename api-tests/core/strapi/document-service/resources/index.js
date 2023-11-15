@@ -6,5 +6,6 @@ module.exports = {
   locales: [
     { name: 'fr', code: 'fr' },
     { name: 'it', code: 'it' },
+    { name: 'es', code: 'es' },
   ],
 };
