@@ -40,7 +40,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
     <ThemeProvider theme={lightTheme}>
       <IntlProvider messages={{}} locale="en">
         <Slate initialValue={initialValue} editor={editor}>
-          <BlocksEditorProvider>{children}</BlocksEditorProvider>
+          <BlocksEditorProvider disabled={false}>{children}</BlocksEditorProvider>
         </Slate>
       </IntlProvider>
     </ThemeProvider>

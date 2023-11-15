@@ -19,7 +19,7 @@ import { withStrapiSchema } from './plugins/withStrapiSchema';
  * -----------------------------------------------------------------------------------------------*/
 
 interface BlocksEditorContextValue {
-  // TODO: context data will go here
+  disabled: boolean;
 }
 
 const [BlocksEditorProvider, usePartialBlocksEditorContext] =
@@ -162,17 +162,18 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
         onChange={handleSlateChange}
         key={key}
       >
-        <BlocksEditorProvider>
+        <BlocksEditorProvider disabled={disabled}>
           <InputWrapper
             direction="column"
             alignItems="flex-start"
             height="512px"
             disabled={disabled}
             hasError={Boolean(error)}
+            style={{ overflow: 'hidden' }}
           >
-            <BlocksToolbar disabled={disabled} />
+            <BlocksToolbar />
             <EditorDivider width="100%" />
-            <BlocksContent disabled={disabled} placeholder={formattedPlaceholder} />
+            <BlocksContent placeholder={formattedPlaceholder} />
           </InputWrapper>
         </BlocksEditorProvider>
       </Slate>
