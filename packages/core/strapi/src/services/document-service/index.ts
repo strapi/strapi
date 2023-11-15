@@ -20,21 +20,17 @@ import { applyTransforms } from '../entity-service/attributes';
 const { transformParamsToQuery } = convertQueryParams;
 
 /**
- * TODO: TESTS - In progress
  * TODO: Entity Validation
- * TODO: Lifecycles - In progress
- *        Plugin extensions
- * TODO: D&P
- * TODO: i18n
- * TODO: Apply default parameters (status & locale)
  * TODO: Sanitization / validation built-in
+ * TODO: i18n - Move logic to i18n package
  * TODO: Webhooks
  * TODO: Audit logs
  * TODO: File upload
  * TODO: Transactions?
- *
  * TODO: replace 'any'
- * CountVersions?
+ * TODO: countVersions()
+ * TODO: availableLocales
+ *
  */
 type Context = {
   contentType: Schema.ContentType;
