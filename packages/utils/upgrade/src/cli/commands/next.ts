@@ -14,7 +14,7 @@ export const next = async (options: CLIOptions) => {
       "Please make sure you've created a backup of your codebase and files before running the upgrade tool"
     );
 
-    await tasks.next({ logger, confirm, dryRun: options.dryRun });
+    await tasks.next({ logger, confirm, dryRun: options.dryRun, cwd: options.projectPath });
   } catch (err) {
     handleError(err);
   }
