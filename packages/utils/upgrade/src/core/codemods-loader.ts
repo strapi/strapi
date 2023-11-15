@@ -1,12 +1,14 @@
-import chalk from 'chalk';
+import * as semver from 'semver';
+import * as path from 'node:path';
 import { readdirSync, statSync } from 'node:fs';
 import * as path from 'node:path';
 import * as semver from 'semver';
 
+import { createSemverRange } from './version';
 import * as f from './format';
 
-import type { Logger } from './logger';
-import type { CodemodPath, Version, VersionRange } from '../types';
+import type { Logger, AnyVersion, VersionRange, SemVer } from '.';
+import type { CodemodPath } from '../types';
 
 export interface CreateLoaderOptions {
   dir?: string;
@@ -18,17 +20,6 @@ const INTERNAL_CODEMODS_DIR = path.join(__dirname, '..', '..', 'resources', 'cod
 const CODEMOD_SUFFIX = '.codemod';
 const CODEMOD_EXT = '.ts';
 
-const createSemverRange = (range: VersionRange): semver.Range => {
-  let semverRange = `>${range.from}`;
-
-  // Add the upper boundary if range.to is different from 'latest'
-  if (range.to !== 'latest') {
-    semverRange += ` <=${range.to}`;
-  }
-
-  return new semver.Range(semverRange);
-};
-
 export const createCodemodsLoader = (options: CreateLoaderOptions) => {
   const { dir = INTERNAL_CODEMODS_DIR, range, logger } = options;
 
@@ -39,11 +30,11 @@ export const createCodemodsLoader = (options: CreateLoaderOptions) => {
     // Only keep root directories
     .filter((filePath) => statSync(path.join(dir, filePath)).isDirectory())
     // Paths should be valid semver
-    .filter((filePath): filePath is Version.SemVer => semver.valid(filePath) !== null)
+    .filter((filePath): filePath is SemVer => semver.valid(filePath) !== null)
     // Should satisfy the given range
     .filter((filePath) => semverRange.test(filePath))
     // Sort versions in ascending order
-    .sort(semver.compare) as Version.SemVer[];
+    .sort(semver.compare) as SemVer[];
 
   if (versions.length === 0) {
     // TODO: Use custom upgrade errors
@@ -57,16 +48,14 @@ export const createCodemodsLoader = (options: CreateLoaderOptions) => {
   logger.info(`Found ${fNbFound} upgrades matching ${fRange} (${fVersions})`);
 
   // Note: We're casting the result as a SemVer since we know there is at least one item in the `versions` array
-  const latest = versions.at(-1) as Version.SemVer;
-
-  const fLatest = chalk.italic(chalk.yellow(latest));
+  const latest = versions.at(-1) as SemVer;
 
   logger.info(`Latest upgrade is ${fLatest}`);
 
   /**
    * Verifies that the given version matches the available ones
    */
-  const isValid = (version: Version.Any) => {
+  const isValid = (version: AnyVersion) => {
     return version === 'latest' || versions.includes(version);
   };
 
@@ -75,7 +64,7 @@ export const createCodemodsLoader = (options: CreateLoaderOptions) => {
    *
    * Throws an error if the version can't be found or is invalid.
    */
-  const load = (version: Version.Any): CodemodPath[] => {
+  const load = (version: AnyVersion): CodemodPath[] => {
     if (!isValid(version)) {
       // TODO: Use custom upgrade errors
       throw new Error(`Invalid version provided. Valid versions are ${versions.join(', ')}`);

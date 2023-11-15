@@ -3,11 +3,12 @@ import chalk from 'chalk';
 
 import { ONE_HOUR_MS, ONE_MINUTE_MS, ONE_SECOND_MS } from './time';
 
-import type { RunReports, Version } from '../types';
+import type { SemVer } from '.';
+import type { RunReports } from '../types';
 
 export const path = (path: string) => chalk.blue(path);
 
-export const version = (version: Version.SemVer) => chalk.italic(chalk.yellow(version));
+export const version = (version: SemVer) => chalk.italic(chalk.yellow(version));
 
 export const versionRange = (range: string) => chalk.bold(chalk.green(range));
 
@@ -59,17 +60,17 @@ export const duration = (elapsedMs: number) => {
 
   if (restMs >= ONE_HOUR_MS) {
     concat(Math.floor(restMs / ONE_HOUR_MS), 'h');
-    restMs = restMs % ONE_HOUR_MS;
+    restMs %= ONE_HOUR_MS;
   }
 
   if (restMs >= ONE_MINUTE_MS) {
     concat(Math.floor(restMs / ONE_MINUTE_MS), 'm');
-    restMs = restMs % ONE_MINUTE_MS;
+    restMs %= ONE_MINUTE_MS;
   }
 
   if (restMs >= ONE_SECOND_MS) {
     concat(Math.floor(restMs / ONE_SECOND_MS), 's');
-    restMs = restMs % ONE_SECOND_MS;
+    restMs %= ONE_SECOND_MS;
   }
 
   concat(restMs, 'ms');
