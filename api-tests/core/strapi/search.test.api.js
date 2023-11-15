@@ -54,7 +54,7 @@ const bedModel = {
 
 const bedFixtures = [
   {
-    // will have id=1
+    documentId: 'fixture-a',
     name: 'Sleepy Bed',
     weight: 12.4,
     shortDescription: 'Is a good bed to sleep in.',
@@ -67,7 +67,7 @@ const bedFixtures = [
     fabricThickness: 1.14157,
   },
   {
-    // will have id=2
+    documentId: 'fixture-b',
     name: 'Tired Bed',
     weight: 11.1,
     shortDescription: 'You will never wake up again.',
@@ -80,7 +80,7 @@ const bedFixtures = [
     fabricThickness: 1.0001,
   },
   {
-    // will have id=3
+    documentId: 'fixture-3',
     // other beds don't contain any 3 in order to find only Zombie Bed when searching 3
     name: 'Zombie Bed',
     weight: null,
@@ -94,7 +94,7 @@ const bedFixtures = [
     fabricThickness: null,
   },
   {
-    // will have id=4
+    documentId: 'fixture-d',
     name: 'a*b_c%d\\e+f',
     weight: null,
     shortDescription: null,
@@ -107,7 +107,7 @@ const bedFixtures = [
     fabricThickness: null,
   },
   {
-    // will have id=5
+    documentId: 'fixture-e',
     name: 'Tired Bed',
     weight: null,
     shortDescription: null,
@@ -137,12 +137,12 @@ describe('Search query', () => {
   });
 
   describe('Without filters', () => {
-    test('search for "id"', async () => {
+    test('search for "documentId"', async () => {
       const res = await rq({
         method: 'GET',
         url: '/beds',
         qs: {
-          _q: data.bed[2].id,
+          _q: data.bed[2].documentId,
         },
       });
 

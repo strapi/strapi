@@ -1,10 +1,5 @@
 {
-  "extends": "tsconfig/base.json",
-  "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "noEmit": true
-  },
+  "extends": "tsconfig/client.json",
   "include": ["_internal", "packup.config.ts"],
   "exclude": ["node_modules"]
 }
