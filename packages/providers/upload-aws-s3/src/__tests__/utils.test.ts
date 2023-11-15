@@ -71,7 +71,7 @@ describe('Utils', () => {
       };
       const credentials = extractCredentials(options);
 
-      expect(credentials).toEqual({});
+      expect(credentials).toEqual(null);
     });
   });
 });
