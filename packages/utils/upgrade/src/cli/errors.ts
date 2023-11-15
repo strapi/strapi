@@ -1,12 +1,9 @@
 import chalk from 'chalk';
-import os from 'node:os';
 
 export const handleError = (err: unknown) => {
   console.error(
-    chalk.red(
-      `[ERROR] `,
-      'There seems to be an unexpected error, try again with --debug for more information',
-      os.EOL
-    )
+    chalk.red(`[ERROR]\t[${new Date().toISOString()}]`),
+    err instanceof Error ? err.message : err
   );
+  process.exit(1);
 };

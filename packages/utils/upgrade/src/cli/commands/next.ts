@@ -4,7 +4,7 @@ import { handleError } from '../errors';
 import * as tasks from '../../tasks';
 
 import type { CLIOptions } from '../../types';
-import { createLogger } from '../../core/logger';
+import { createLogger } from '../../core';
 
 export const next = async (options: CLIOptions) => {
   try {
