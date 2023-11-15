@@ -6,6 +6,9 @@ export interface LoggerOptions {
 }
 
 export interface Logger {
+  isSilent: boolean;
+  isDebug: boolean;
+
   get warnings(): number;
   get errors(): number;
 
@@ -13,6 +16,8 @@ export interface Logger {
   info(...args: unknown[]): void;
   warn(...args: unknown[]): void;
   error(...args: unknown[]): void;
+
+  raw(...args: unknown[]): void;
 }
 
 export const createLogger = (options: Partial<LoggerOptions> = {}): Logger => {
@@ -21,12 +26,23 @@ export const createLogger = (options: Partial<LoggerOptions> = {}): Logger => {
   const state = { errors: 0, warning: 0 };
 
   return {
+    isSilent: silent,
+    isDebug: debug,
+
     get warnings() {
       return state.warning;
     },
 
     get errors() {
       return state.errors;
+    },
+
+    raw(...args) {
+      if (silent) {
+        return;
+      }
+
+      console.log(...args);
     },
 
     debug(...args) {
