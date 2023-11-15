@@ -1,12 +1,12 @@
 import * as React from 'react';
 
 import { Button, HeaderLayout } from '@strapi/design-system';
-import { CheckPagePermissions, CheckPermissions } from '@strapi/helper-plugin';
+import { CheckPermissions, CheckPagePermissions } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { AddReleaseDialog } from '../../components/AddReleaseDialog';
-import { PERMISSIONS } from '../../constants';
+import { AddReleaseDialog } from '../components/AddReleaseDialog';
+import { PERMISSIONS } from '../constants';
 
 const ReleasesPage = () => {
   const [addReleaseDialogIsShown, setAddReleaseDialogIsShown] = React.useState(false);
@@ -19,7 +19,7 @@ const ReleasesPage = () => {
   };
 
   return (
-    <CheckPagePermissions permissions={PERMISSIONS.main}>
+    <>
       <HeaderLayout
         title={formatMessage({
           id: 'content-releases.pages.Releases.title',
@@ -44,8 +44,14 @@ const ReleasesPage = () => {
         }
       />
       {addReleaseDialogIsShown && <AddReleaseDialog handleClose={toggleAddReleaseDialog} />}
-    </CheckPagePermissions>
+    </>
   );
 };
 
-export { ReleasesPage };
+const ProtectedReleasesPage = () => (
+  <CheckPermissions permissions={PERMISSIONS.main}>
+    <ReleasesPage />
+  </CheckPermissions>
+);
+
+export { ReleasesPage, ProtectedReleasesPage };
