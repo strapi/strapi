@@ -13,6 +13,10 @@ export default async ({ force, ...opts }: ActionOptions) => {
   const logger = createLogger({ debug: opts.debug, silent: opts.silent, timestamp: false });
   try {
     /**
+     * ALWAYS set production for using plugin build CLI.
+     */
+    process.env.NODE_ENV = 'production';
+    /**
      * Notify users this is an experimental command and get them to approve first
      * this can be opted out by setting the argument --yes
      */
