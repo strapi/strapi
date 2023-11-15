@@ -112,6 +112,7 @@
   "dependencies": {
     "@koa/cors": "3.4.3",
     "@koa/router": "10.1.1",
+    "@paralleldrive/cuid2": "2.2.2",
     "@strapi/admin": "4.15.4",
     "@strapi/data-transfer": "4.15.4",
     "@strapi/database": "4.15.4",

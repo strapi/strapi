@@ -6,6 +6,8 @@ module.exports = () => ({
       models: ['boolean', 'date', 'date-time', 'dateTime', 'time', 'upload'],
       attributes: [
         'id',
+        'documentId',
+        'document_id',
         'created_at',
         'createdAt',
         'updated_at',

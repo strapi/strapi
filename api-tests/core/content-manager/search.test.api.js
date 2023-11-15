@@ -60,6 +60,7 @@ const bedModel = {
 
 const bedFixtures = [
   {
+    documentId: 'fixture-a',
     name: 'Sleepy Bed',
     weight: 12.4,
     shortDescription: 'Is a good bed to sleep in.',
@@ -72,6 +73,7 @@ const bedFixtures = [
     fabricThickness: 1.14157,
   },
   {
+    documentId: 'fixture-b',
     name: 'Tired Bed',
     weight: 11.1,
     shortDescription: 'You will never wake up again.',
@@ -84,6 +86,7 @@ const bedFixtures = [
     fabricThickness: 1.0001,
   },
   {
+    documentId: 'fixture-c',
     name: 'Zombie Bed',
     weight: null,
     shortDescription: null,
@@ -96,6 +99,7 @@ const bedFixtures = [
     fabricThickness: null,
   },
   {
+    documentId: 'fixture-d',
     name: 'a*b_c%d\\e+f',
     weight: null,
     shortDescription: null,
@@ -108,6 +112,7 @@ const bedFixtures = [
     fabricThickness: null,
   },
   {
+    documentId: 'fixture-e',
     name: 'Tired Bed',
     weight: null,
     shortDescription: null,
@@ -137,12 +142,12 @@ describe('Search query', () => {
   });
 
   describe('Without filters', () => {
-    test('search for "id"', async () => {
+    test('search for "documentId"', async () => {
       const res = await rq({
         method: 'GET',
         url: '/content-manager/collection-types/api::bed.bed',
         qs: {
-          _q: data.beds[2].id,
+          _q: data.beds[2].documentId,
         },
       });
 

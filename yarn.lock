@@ -5528,6 +5528,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@noble/hashes@npm:^1.1.5":
+  version: 1.3.2
+  resolution: "@noble/hashes@npm:1.3.2"
+  checksum: 685f59d2d44d88e738114b71011d343a9f7dce9dfb0a121f1489132f9247baa60bc985e5ec6f3213d114fbd1e1168e7294644e46cbd0ce2eba37994f28eeb51b
+  languageName: node
+  linkType: hard
+
 "@nodelib/fs.scandir@npm:2.1.5":
   version: 2.1.5
   resolution: "@nodelib/fs.scandir@npm:2.1.5"
@@ -6200,6 +6207,15 @@ __metadata:
   version: 1.0.3
   resolution: "@open-draft/until@npm:1.0.3"
   checksum: 323e92ebef0150ed0f8caedc7d219b68cdc50784fa4eba0377eef93533d3f46514eb2400ced83dda8c51bddc3d2c7b8e9cf95e5ec85ab7f62dfc015d174f62f2
+  languageName: node
+  linkType: hard
+
+"@paralleldrive/cuid2@npm:2.2.2":
+  version: 2.2.2
+  resolution: "@paralleldrive/cuid2@npm:2.2.2"
+  dependencies:
+    "@noble/hashes": "npm:^1.1.5"
+  checksum: 40ee269d6e47b4fed7706a2e4da7c27c3c668ebc969110d6d112277b6b16a67cce0503b53b9943f2c55035a72d225f77ea5541e03396d6429eec9252137a53b7
   languageName: node
   linkType: hard
 
@@ -8862,6 +8878,7 @@ __metadata:
     "@types/invariant": "npm:2.2.36"
     "@types/js-cookie": "npm:3.0.5"
     "@types/pluralize": "npm:0.0.32"
+    "@types/prettier": "npm:2.7.3"
     "@types/webpack-bundle-analyzer": "npm:4.6.2"
     "@types/webpack-hot-middleware": "npm:2.25.8"
     axios: "npm:1.6.0"
@@ -9214,6 +9231,7 @@ __metadata:
     "@strapi/pack-up": "npm:4.15.4"
     "@types/git-url-parse": "npm:9.0.1"
     "@types/ini": "npm:1.3.31"
+    "@types/prettier": "npm:2.7.3"
     "@types/prompts": "npm:2.4.4"
     "@vitejs/plugin-react": "npm:4.1.0"
     boxen: "npm:5.1.2"
@@ -9753,6 +9771,7 @@ __metadata:
   dependencies:
     "@koa/cors": "npm:3.4.3"
     "@koa/router": "npm:10.1.1"
+    "@paralleldrive/cuid2": "npm:2.2.2"
     "@strapi/admin": "npm:4.15.4"
     "@strapi/data-transfer": "npm:4.15.4"
     "@strapi/database": "npm:4.15.4"
@@ -11119,6 +11138,13 @@ __metadata:
   version: 0.0.32
   resolution: "@types/pluralize@npm:0.0.32"
   checksum: 788aa2ad144a0e7b318d03bddfeefecd65e97793e0faad748c458538abd8d680bcc096fe1219567a7c19d41d23b74e45868d7d43a06a44135798eb8da09a1655
+  languageName: node
+  linkType: hard
+
+"@types/prettier@npm:2.7.3":
+  version: 2.7.3
+  resolution: "@types/prettier@npm:2.7.3"
+  checksum: cda84c19acc3bf327545b1ce71114a7d08efbd67b5030b9e8277b347fa57b05178045f70debe1d363ff7efdae62f237260713aafc2d7217e06fc99b048a88497
   languageName: node
   linkType: hard
 
