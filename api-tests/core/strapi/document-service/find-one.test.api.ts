@@ -29,10 +29,10 @@ describe('Document Service', () => {
   });
 
   describe('FindOne', () => {
-    it.todo(
+    it(
       'find one document returns defaults',
       testInTransaction(async () => {
-        const articleDb = await findArticleDb({ name: 'Article1-Draft-EN' });
+        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
         const article = await strapi.documents(ARTICLE_UID).findOne(articleDb.documentId, {});
 
@@ -40,10 +40,10 @@ describe('Document Service', () => {
       })
     );
 
-    it.todo(
+    it(
       'find one document in english',
       testInTransaction(async () => {
-        const articleDb = await findArticleDb({ name: 'Article1-Draft-EN' });
+        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
         const article = await strapi.documents(ARTICLE_UID).findOne(articleDb.documentId, {
           locale: 'en',
@@ -53,10 +53,10 @@ describe('Document Service', () => {
       })
     );
 
-    it.todo(
+    it(
       'find one published document',
       testInTransaction(async () => {
-        const articleDb = await findArticleDb({ name: 'Article1-Published-EN' });
+        const articleDb = await findArticleDb({ title: 'Article2-Published-EN' });
 
         const article = await strapi.documents(ARTICLE_UID).findOne(articleDb.documentId, {
           status: 'published',
@@ -66,10 +66,10 @@ describe('Document Service', () => {
       })
     );
 
-    it.todo(
+    it(
       'find one draft document',
       testInTransaction(async () => {
-        const articleDb = await findArticleDb({ name: 'Article1-Draft-EN' });
+        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
         const article = await strapi.documents(ARTICLE_UID).findOne(articleDb.documentId, {
           status: 'draft',
