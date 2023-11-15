@@ -62,7 +62,7 @@ export const next = async (options: TaskOptions) => {
 
     assert(
       codemods.length > 0,
-      `A new version seems to exist (${fTarget}), but no transform script was found, exiting...`
+      `A new version seems to exist (${fTarget}), but no task was found, exiting...`
     );
 
     if (options.confirm && !dryRun) {
