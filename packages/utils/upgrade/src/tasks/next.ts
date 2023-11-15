@@ -1,6 +1,5 @@
 import ora from 'ora';
 import chalk from 'chalk';
-import CliTable3 from 'cli-table3';
 import assert from 'node:assert';
 
 import {
