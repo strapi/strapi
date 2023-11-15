@@ -1,5 +1,5 @@
 import glob from 'glob';
-import pkgUp from 'pkg-up';
+import path from 'node:path';
 import assert from 'node:assert';
 import fs from 'node:fs/promises';
 
@@ -27,6 +27,7 @@ export interface ProjectComponents {
   strapiVersion: SemVer;
 }
 
+const PROJECT_PACKAGE_JSON = 'package.json';
 const PROJECT_DEFAULT_ALLOWED_ROOT_PATHS = ['src', 'config', 'public'];
 const PROJECT_DEFAULT_ALLOWED_EXTENSIONS = ['js', 'ts', 'json'];
 const STRAPI_DEPENDENCY_NAME = '@strapi/strapi';
@@ -51,10 +52,12 @@ export const createProjectLoader = (options: ProjectLoaderOptions): ProjectLoade
 const loadPackageJSON = async (options: ProjectLoaderOptions): Promise<any> => {
   const { cwd, logger } = options;
 
-  const packagePath = await pkgUp({ cwd });
+  const packagePath = path.join(cwd, PROJECT_PACKAGE_JSON);
 
-  if (!packagePath) {
-    throw new Error('Could not find a package.json file in the current directory');
+  try {
+    await fs.access(packagePath);
+  } catch {
+    throw new Error(`Could not find a ${f.highlight(PROJECT_PACKAGE_JSON)} file in ${f.path(cwd)}`);
   }
 
   const buffer = await fs.readFile(packagePath);
