@@ -63,7 +63,7 @@ describe('Document Service', () => {
           ctx.params.filters = { title: ARTICLE_1 };
           return next(ctx);
         },
-        { priority: strapi.documents.middlewares.priority.LAST }
+        { priority: strapi.documents.middlewares.priority.LOW }
       );
 
       strapi.documents(ARTICLE_UID).use(
@@ -72,7 +72,7 @@ describe('Document Service', () => {
           ctx.params.filters = { title: ARTICLE_2 };
           return next(ctx);
         },
-        { priority: strapi.documents.middlewares.priority.FIRST }
+        { priority: strapi.documents.middlewares.priority.HIGH }
       );
 
       // Higher priority middleware should be called first, even if it's added after

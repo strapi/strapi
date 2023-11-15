@@ -76,9 +76,11 @@ export interface Manager {
    * handy to define a middleware that should be executed first or last
    */
   priority: {
-    LAST: number;
-    FIRST: number;
+    LOWEST: number;
+    LOW: number;
     DEFAULT: number;
+    HIGH: number;
+    HIGHEST: number;
   };
 
   /**

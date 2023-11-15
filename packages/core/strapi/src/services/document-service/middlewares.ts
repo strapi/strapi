@@ -1,9 +1,11 @@
 import { Documents } from '@strapi/types';
 
 export const priority = {
-  LAST: 1,
+  LOWEST: 1,
+  LOW: 10,
   DEFAULT: 100,
-  FIRST: 1000,
+  HIGH: 1_000,
+  HIGHEST: 10_000,
 } as const;
 
 const createMiddlewareManager = (): Documents.Middleware.Manager => {
