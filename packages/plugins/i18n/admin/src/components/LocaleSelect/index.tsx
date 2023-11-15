@@ -5,7 +5,7 @@ import { useIntl } from 'react-intl';
 
 import useDefaultLocales from '../../hooks/useDefaultLocales';
 import useLocales from '../../hooks/useLocales';
-import { getTrad } from '../../utils';
+import { getTranslation } from '../../utils';
 
 type LocaleSelectProps = {
   error?: string;
@@ -47,7 +47,7 @@ const LocaleSelect = ({
       aria-busy={isLoading}
       error={error}
       label={formatMessage({
-        id: getTrad('Settings.locales.modal.locales.label'),
+        id: getTranslation('Settings.locales.modal.locales.label'),
         defaultMessage: 'Locales',
       })}
       value={computedValue}

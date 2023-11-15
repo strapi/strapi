@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import { useDispatch } from 'react-redux';
 
-import { getTrad } from '../../utils';
+import { getTranslation } from '../../utils';
 import { UPDATE_LOCALE } from '../constants';
 
 const useEditLocale = () => {
@@ -20,7 +20,7 @@ const useEditLocale = () => {
 
       toggleNotification({
         type: 'success',
-        message: { id: getTrad('Settings.locales.modal.edit.success') },
+        message: { id: getTranslation('Settings.locales.modal.edit.success') },
       });
 
       dispatch({ type: UPDATE_LOCALE, editedLocale: data });

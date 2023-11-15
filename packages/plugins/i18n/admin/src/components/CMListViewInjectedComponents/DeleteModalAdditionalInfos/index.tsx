@@ -4,7 +4,7 @@ import { Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import useHasI18n from '../../../hooks/useHasI18n';
-import { getTrad } from '../../../utils';
+import { getTranslation } from '../../../utils';
 
 const Emphasis = (chunks: React.ReactNode) => {
   return (
@@ -26,7 +26,7 @@ const DeleteModalAdditionalInfos = () => {
     <Typography textColor="danger500">
       {formatMessage(
         {
-          id: getTrad('Settings.list.actions.deleteAdditionalInfos'),
+          id: getTranslation('Settings.list.actions.deleteAdditionalInfos'),
           defaultMessage:
             'This will delete the active locale versions <em>(from Internationalization)</em>',
         },

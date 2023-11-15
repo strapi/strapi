@@ -4,7 +4,7 @@ import { Grid, GridItem, TextInput } from '@strapi/design-system';
 import { useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
 
-import { getTrad } from '../../utils';
+import { getTranslation } from '../../utils';
 import LocaleSelect from '../LocaleSelect';
 
 const BaseForm = () => {
@@ -52,17 +52,17 @@ const BaseForm = () => {
         <TextInput
           name="displayName"
           label={formatMessage({
-            id: getTrad('Settings.locales.modal.locales.displayName'),
+            id: getTranslation('Settings.locales.modal.locales.displayName'),
             defaultMessage: 'Locale display name',
           })}
           hint={formatMessage({
-            id: getTrad('Settings.locales.modal.locales.displayName.description'),
+            id: getTranslation('Settings.locales.modal.locales.displayName.description'),
             defaultMessage: 'Locale will be displayed under that name in the administration panel',
           })}
           error={
             errors.displayName
               ? formatMessage({
-                  id: getTrad('Settings.locales.modal.locales.displayName.error'),
+                  id: getTranslation('Settings.locales.modal.locales.displayName.error'),
                   defaultMessage: 'The locale display name can only be less than 50 characters.',
                 })
               : undefined

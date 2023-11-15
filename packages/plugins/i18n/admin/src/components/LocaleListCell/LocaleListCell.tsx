@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import selectI18NLocales from '../../selectors/selectI18nLocales';
-import { getTrad } from '../../utils';
+import { getTranslation } from '../../utils';
 
 const Button = styled.button`
   svg {
@@ -112,7 +112,7 @@ const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }: Locale
     <Flex {...stopPropagation}>
       <Tooltip
         label={formatMessage({
-          id: getTrad('CMListView.popover.display-locales.label'),
+          id: getTranslation('CMListView.popover.display-locales.label'),
           defaultMessage: 'Display translated locales',
         })}
       >

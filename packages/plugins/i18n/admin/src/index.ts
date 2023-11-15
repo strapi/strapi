@@ -17,7 +17,7 @@ import mutateEditViewLayoutHook from './contentManagerHooks/mutateEditViewLayout
 import i18nReducers from './hooks/reducers';
 import middlewares from './middlewares';
 import { pluginId } from './pluginId';
-import { getTrad } from './utils';
+import { getTranslation } from './utils';
 import LOCALIZED_FIELDS from './utils/localizedFields';
 import mutateCTBContentTypeSchema from './utils/mutateCTBContentTypeSchema';
 
@@ -51,7 +51,7 @@ export default {
     // Add the settings link
     app.addSettingsLink('global', {
       intlLabel: {
-        id: getTrad('plugin.name'),
+        id: getTranslation('plugin.name'),
         defaultMessage: 'Internationalization',
       },
       id: 'internationalization',
@@ -109,12 +109,12 @@ export default {
               {
                 name: 'pluginOptions.i18n.localized',
                 description: {
-                  id: getTrad('plugin.schema.i18n.localized.description-content-type'),
+                  id: getTranslation('plugin.schema.i18n.localized.description-content-type'),
                   defaultMessage: 'Allows translating an entry into different languages',
                 },
                 type: 'checkboxConfirmation',
                 intlLabel: {
-                  id: getTrad('plugin.schema.i18n.localized.label-content-type'),
+                  id: getTranslation('plugin.schema.i18n.localized.label-content-type'),
                   defaultMessage: 'Localization',
                 },
               },
@@ -128,7 +128,7 @@ export default {
           i18n: yup.object().shape({
             localized: yup.bool().test({
               name: 'ensure-unique-localization',
-              message: getTrad('plugin.schema.i18n.ensure-unique-localization'),
+              message: getTranslation('plugin.schema.i18n.ensure-unique-localization'),
               test(value) {
                 if (value === undefined || value) {
                   return true;
@@ -170,12 +170,12 @@ export default {
               {
                 name: 'pluginOptions.i18n.localized',
                 description: {
-                  id: getTrad('plugin.schema.i18n.localized.description-field'),
+                  id: getTranslation('plugin.schema.i18n.localized.description-field'),
                   defaultMessage: 'The field can have different values in each locale',
                 },
                 type: 'checkbox',
                 intlLabel: {
-                  id: getTrad('plugin.schema.i18n.localized.label-field'),
+                  id: getTranslation('plugin.schema.i18n.localized.label-field'),
                   defaultMessage: 'Enable localization for this field',
                 },
               },

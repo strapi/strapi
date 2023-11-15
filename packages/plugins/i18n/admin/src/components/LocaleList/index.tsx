@@ -6,7 +6,7 @@ import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import useLocales from '../../hooks/useLocales';
-import { getTrad } from '../../utils';
+import { getTranslation } from '../../utils';
 import ModalCreate from '../ModalCreate';
 import ModalDelete from '../ModalDelete';
 import ModalEdit from '../ModalEdit';
@@ -48,11 +48,11 @@ const LocaleList = ({
       <HeaderLayout
         primaryAction={
           <Button startIcon={<Plus />} onClick={onToggleCreateModal} size="S">
-            {formatMessage({ id: getTrad('Settings.list.actions.add') })}
+            {formatMessage({ id: getTranslation('Settings.list.actions.add') })}
           </Button>
         }
-        title={formatMessage({ id: getTrad('plugin.name') })}
-        subtitle={formatMessage({ id: getTrad('Settings.list.description') })}
+        title={formatMessage({ id: getTranslation('plugin.name') })}
+        subtitle={formatMessage({ id: getTranslation('Settings.list.description') })}
       />
       <ContentLayout>
         {locales?.length > 0 ? (
@@ -64,11 +64,11 @@ const LocaleList = ({
         ) : (
           <EmptyStateLayout
             icon={<EmptyDocuments width={undefined} height={undefined} />}
-            content={formatMessage({ id: getTrad('Settings.list.empty.title') })}
+            content={formatMessage({ id: getTranslation('Settings.list.empty.title') })}
             action={
               onToggleCreateModal ? (
                 <Button variant="secondary" startIcon={<Plus />} onClick={onToggleCreateModal}>
-                  {formatMessage({ id: getTrad('Settings.list.actions.add') })}
+                  {formatMessage({ id: getTranslation('Settings.list.actions.add') })}
                 </Button>
               ) : null
             }

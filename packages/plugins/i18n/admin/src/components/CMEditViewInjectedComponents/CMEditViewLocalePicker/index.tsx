@@ -6,7 +6,7 @@ import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 
-import { getTrad } from '../../../utils';
+import { getTranslation } from '../../../utils';
 import CMEditViewCopyLocale from '../CMEditViewCopyLocale';
 
 import Bullet from './Bullet';
@@ -119,13 +119,16 @@ const CMEditViewLocalePicker = ({
   return (
     <Box paddingTop={6}>
       <Typography variant="sigma" textColor="neutral600">
-        {formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Internationalization' })}
+        {formatMessage({
+          id: getTranslation('plugin.name'),
+          defaultMessage: 'Internationalization',
+        })}
       </Typography>
       <Divider unsetMargin={false} marginTop={2} marginBottom={6} />
       <Flex direction="column" alignItems="stretch" gap={2}>
         <Select
           label={formatMessage({
-            id: getTrad('Settings.locales.modal.locales.label'),
+            id: getTranslation('Settings.locales.modal.locales.label'),
           })}
           onChange={handleChange}
           value={value?.value}

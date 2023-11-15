@@ -4,7 +4,7 @@ import { Earth as I18N, EarthStriked as StrikedWorld } from '@strapi/icons';
 import get from 'lodash/get';
 
 import LabelAction from '../components/LabelAction';
-import { getTrad } from '../utils';
+import { getTranslation } from '../utils';
 
 const getRelationFieldQueryInfos = (field: any, currentLocale: any) => ({
   queryInfos: {
@@ -26,7 +26,9 @@ const enhanceEditLayout = (layout: any, currentLocale: any) =>
         field?.fieldSchema?.pluginOptions?.i18n?.localized ?? ['uid', 'relation'].includes(type);
       const labelActionProps = {
         title: {
-          id: hasI18nEnabled ? getTrad('Field.localized') : getTrad('Field.not-localized'),
+          id: hasI18nEnabled
+            ? getTranslation('Field.localized')
+            : getTranslation('Field.not-localized'),
           defaultMessage: hasI18nEnabled
             ? 'This value is unique for the selected locale'
             : 'This value is common to all locales',

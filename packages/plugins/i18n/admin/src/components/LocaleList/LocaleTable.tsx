@@ -16,7 +16,7 @@ import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import { Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { getTrad } from '../../utils';
+import { getTranslation } from '../../utils';
 
 type LocaleTableProps = {
   locales?: {
@@ -37,17 +37,17 @@ const LocaleTable = ({ locales = [], onDeleteLocale, onEditLocale }: LocaleTable
         <Tr>
           <Th>
             <Typography variant="sigma" textColor="neutral600">
-              {formatMessage({ id: getTrad('Settings.locales.row.id') })}
+              {formatMessage({ id: getTranslation('Settings.locales.row.id') })}
             </Typography>
           </Th>
           <Th>
             <Typography variant="sigma" textColor="neutral600">
-              {formatMessage({ id: getTrad('Settings.locales.row.displayName') })}
+              {formatMessage({ id: getTranslation('Settings.locales.row.displayName') })}
             </Typography>
           </Th>
           <Th>
             <Typography variant="sigma" textColor="neutral600">
-              {formatMessage({ id: getTrad('Settings.locales.row.default-locale') })}
+              {formatMessage({ id: getTranslation('Settings.locales.row.default-locale') })}
             </Typography>
           </Th>
           <Th>
@@ -73,7 +73,7 @@ const LocaleTable = ({ locales = [], onDeleteLocale, onEditLocale }: LocaleTable
             <Td>
               <Typography textColor="neutral800">
                 {locale.isDefault
-                  ? formatMessage({ id: getTrad('Settings.locales.default') })
+                  ? formatMessage({ id: getTranslation('Settings.locales.default') })
                   : null}
               </Typography>
             </Td>
@@ -82,7 +82,7 @@ const LocaleTable = ({ locales = [], onDeleteLocale, onEditLocale }: LocaleTable
                 {onEditLocale && (
                   <IconButton
                     onClick={() => onEditLocale(locale)}
-                    label={formatMessage({ id: getTrad('Settings.list.actions.edit') })}
+                    label={formatMessage({ id: getTranslation('Settings.list.actions.edit') })}
                     icon={<Pencil />}
                     noBorder
                   />
@@ -90,7 +90,7 @@ const LocaleTable = ({ locales = [], onDeleteLocale, onEditLocale }: LocaleTable
                 {onDeleteLocale && !locale.isDefault && (
                   <IconButton
                     onClick={() => onDeleteLocale(locale)}
-                    label={formatMessage({ id: getTrad('Settings.list.actions.delete') })}
+                    label={formatMessage({ id: getTranslation('Settings.list.actions.delete') })}
                     icon={<Trash />}
                     noBorder
                   />

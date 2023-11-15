@@ -4,7 +4,7 @@ import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import { useDispatch } from 'react-redux';
 
-import { getTrad } from '../../utils';
+import { getTranslation } from '../../utils';
 import { ADD_LOCALE } from '../constants';
 
 const useAddLocale = () => {
@@ -21,7 +21,7 @@ const useAddLocale = () => {
 
       toggleNotification({
         type: 'success',
-        message: { id: getTrad('Settings.locales.modal.create.success') },
+        message: { id: getTranslation('Settings.locales.modal.create.success') },
       });
 
       dispatch({ type: ADD_LOCALE, newLocale: data });
@@ -31,7 +31,7 @@ const useAddLocale = () => {
       if (message && message.includes('already exists')) {
         toggleNotification({
           type: 'warning',
-          message: { id: getTrad('Settings.locales.modal.create.alreadyExist') },
+          message: { id: getTranslation('Settings.locales.modal.create.alreadyExist') },
         });
       } else {
         toggleNotification({

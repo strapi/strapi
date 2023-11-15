@@ -5,7 +5,7 @@ import { useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
 
 import useDefaultLocales from '../../hooks/useDefaultLocales';
-import { getTrad } from '../../utils';
+import { getTranslation } from '../../utils';
 
 type BaseFormProps = {
   locale: {
@@ -31,7 +31,7 @@ const BaseForm = ({ locale }: BaseFormProps) => {
       <GridItem col={6}>
         <Select
           label={formatMessage({
-            id: getTrad('Settings.locales.modal.locales.label'),
+            id: getTranslation('Settings.locales.modal.locales.label'),
             defaultMessage: 'Locales',
           })}
           value={localeDetails?.code || locale.code}
@@ -47,17 +47,17 @@ const BaseForm = ({ locale }: BaseFormProps) => {
         <TextInput
           name="displayName"
           label={formatMessage({
-            id: getTrad('Settings.locales.modal.locales.displayName'),
+            id: getTranslation('Settings.locales.modal.locales.displayName'),
             defaultMessage: 'Locale display name',
           })}
           hint={formatMessage({
-            id: getTrad('Settings.locales.modal.locales.displayName.description'),
+            id: getTranslation('Settings.locales.modal.locales.displayName.description'),
             defaultMessage: 'Locale will be displayed under that name in the administration panel',
           })}
           error={
             errors.displayName
               ? formatMessage({
-                  id: getTrad('Settings.locales.modal.locales.displayName.error'),
+                  id: getTranslation('Settings.locales.modal.locales.displayName.error'),
                   defaultMessage: 'The locale display name can only be less than 50 characters.',
                 })
               : undefined

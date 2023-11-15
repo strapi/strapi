@@ -4,7 +4,7 @@ import { Checkbox } from '@strapi/design-system';
 import { useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
 
-import { getTrad } from '../../utils';
+import { getTranslation } from '../../utils';
 
 type AdvancedFormProps = {
   isDefaultLocale: boolean;
@@ -20,7 +20,7 @@ const AdvancedForm = ({ isDefaultLocale }: AdvancedFormProps) => {
     <Checkbox
       name="isDefault"
       hint={formatMessage({
-        id: getTrad('Settings.locales.modal.advanced.setAsDefault.hint'),
+        id: getTranslation('Settings.locales.modal.advanced.setAsDefault.hint'),
         defaultMessage: 'One default locale is required, change it by selecting another one',
       })}
       onChange={() => setFieldValue('isDefault', !values.isDefault)}
@@ -28,7 +28,7 @@ const AdvancedForm = ({ isDefaultLocale }: AdvancedFormProps) => {
       disabled={isDefaultLocale}
     >
       {formatMessage({
-        id: getTrad('Settings.locales.modal.advanced.setAsDefault'),
+        id: getTranslation('Settings.locales.modal.advanced.setAsDefault'),
         defaultMessage: 'Set as default locale',
       })}
     </Checkbox>

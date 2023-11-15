@@ -74,7 +74,7 @@ jest.mock('@strapi/helper-plugin', () => {
 });
 
 jest.mock('../../../utils', () => ({
-  getTrad: (x: string) => x,
+  getTranslation: (x: string) => x,
 }));
 
 jest.mock('react-intl', () => ({

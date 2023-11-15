@@ -3,7 +3,7 @@ import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 
-import { getTrad } from '../../utils';
+import { getTranslation } from '../../utils';
 
 const useDefaultLocales = () => {
   const { formatMessage } = useIntl();
@@ -16,7 +16,7 @@ const useDefaultLocales = () => {
 
       notifyStatus(
         formatMessage({
-          id: getTrad('Settings.locales.modal.locales.loaded'),
+          id: getTranslation('Settings.locales.modal.locales.loaded'),
           defaultMessage: 'The locales have been successfully loaded.',
         })
       );

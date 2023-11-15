@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import { useDispatch } from 'react-redux';
 
-import { getTrad } from '../../utils';
+import { getTranslation } from '../../utils';
 import { DELETE_LOCALE } from '../constants';
 
 const useDeleteLocale = () => {
@@ -21,7 +21,7 @@ const useDeleteLocale = () => {
 
       toggleNotification({
         type: 'success',
-        message: { id: getTrad('Settings.locales.modal.delete.success') },
+        message: { id: getTranslation('Settings.locales.modal.delete.success') },
       });
 
       dispatch({ type: DELETE_LOCALE, id });

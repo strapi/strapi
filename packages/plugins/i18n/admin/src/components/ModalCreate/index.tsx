@@ -23,7 +23,7 @@ import { useIntl } from 'react-intl';
 
 import useAddLocale from '../../hooks/useAddLocale';
 import localeFormSchema from '../../schemas';
-import { getTrad } from '../../utils';
+import { getTranslation } from '../../utils';
 
 import AdvancedForm from './AdvancedForm';
 import BaseForm from './BaseForm';
@@ -74,7 +74,7 @@ const ModalCreate = ({ onClose }: ModalCreateProps) => {
           <ModalHeader>
             <Typography fontWeight="bold" textColor="neutral800" as="h2" id="add-locale-title">
               {formatMessage({
-                id: getTrad('Settings.list.actions.add'),
+                id: getTranslation('Settings.list.actions.add'),
                 defaultMessage: 'Add new locale',
               })}
             </Typography>
@@ -82,7 +82,7 @@ const ModalCreate = ({ onClose }: ModalCreateProps) => {
           <ModalBody>
             <TabGroup
               label={formatMessage({
-                id: getTrad('Settings.locales.modal.title'),
+                id: getTranslation('Settings.locales.modal.title'),
                 defaultMessage: 'Configurations',
               })}
               id="tabs"
@@ -91,20 +91,20 @@ const ModalCreate = ({ onClose }: ModalCreateProps) => {
               <Flex justifyContent="space-between">
                 <Typography as="h2" variant="beta">
                   {formatMessage({
-                    id: getTrad('Settings.locales.modal.title'),
+                    id: getTranslation('Settings.locales.modal.title'),
                     defaultMessage: 'Configurations',
                   })}
                 </Typography>
                 <Tabs>
                   <Tab>
                     {formatMessage({
-                      id: getTrad('Settings.locales.modal.base'),
+                      id: getTranslation('Settings.locales.modal.base'),
                       defaultMessage: 'Basic settings',
                     })}
                   </Tab>
                   <Tab>
                     {formatMessage({
-                      id: getTrad('Settings.locales.modal.advanced'),
+                      id: getTranslation('Settings.locales.modal.advanced'),
                       defaultMessage: 'Advanced settings',
                     })}
                   </Tab>
