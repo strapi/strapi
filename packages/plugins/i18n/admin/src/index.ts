@@ -14,18 +14,22 @@ import addColumnToTableHook from './contentManagerHooks/addColumnToTable';
 import addLocaleToCollectionTypesLinksHook from './contentManagerHooks/addLocaleToCollectionTypesLinks';
 import addLocaleToSingleTypesLinksHook from './contentManagerHooks/addLocaleToSingleTypesLinks';
 import mutateEditViewLayoutHook from './contentManagerHooks/mutateEditViewLayout';
-import i18nReducers from './hooks/reducers';
 import middlewares from './middlewares';
 import { pluginId } from './pluginId';
+import { reducers } from './store/reducers';
 import { getTranslation } from './utils';
 import LOCALIZED_FIELDS from './utils/localizedFields';
 import mutateCTBContentTypeSchema from './utils/mutateCTBContentTypeSchema';
 
+// eslint-disable-next-line import/no-default-export
 export default {
   register(app: any) {
     app.addMiddlewares(middlewares);
 
-    app.addReducers(i18nReducers);
+    /**
+     * TODO: this should use the `useInjectReducer` hook when it's exported from the `@strapi/admin` package.
+     */
+    app.addReducers(reducers);
 
     app.registerPlugin({
       id: pluginId,
@@ -58,9 +62,9 @@ export default {
       to: '/settings/internationalization',
 
       async Component() {
-        const component = await import('./pages/SettingsPage');
+        const { ProtectedSettingsPage } = await import('./pages/SettingsPage');
 
-        return component;
+        return ProtectedSettingsPage;
       },
       permissions: PERMISSIONS.accessMain,
     });

@@ -6,7 +6,7 @@
 
 import { useEffect, useRef } from 'react';
 
-import useLocales from '../../hooks/useLocales';
+import { useLocales } from '../../hooks/useLocales';
 import { pluginId } from '../../pluginId';
 
 type InitializerProps = {
