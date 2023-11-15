@@ -10,7 +10,14 @@ import { IntlProvider } from 'react-intl';
 import { type Descendant, type Editor, type Location, createEditor, Transforms } from 'slate';
 import { Slate, withReact, ReactEditor } from 'slate-react';
 
-import { BlocksEditorProvider } from '../BlocksEditor';
+import { codeBlocks } from '../Blocks/Code';
+import { headingBlocks } from '../Blocks/Heading';
+import { imageBlocks } from '../Blocks/Image';
+import { linkBlocks } from '../Blocks/Link';
+import { listBlocks } from '../Blocks/List';
+import { paragraphBlocks } from '../Blocks/Paragraph';
+import { quoteBlocks } from '../Blocks/Quote';
+import { type BlocksStore, BlocksEditorProvider } from '../BlocksEditor';
 import { BlocksToolbar } from '../BlocksToolbar';
 
 const mockMediaLibraryTitle = 'dialog component';
@@ -119,6 +126,16 @@ const imageInitialValue: Descendant[] = [
 
 const user = userEvent.setup();
 
+const blocks: BlocksStore = {
+  ...paragraphBlocks,
+  ...headingBlocks,
+  ...listBlocks,
+  ...linkBlocks,
+  ...imageBlocks,
+  ...quoteBlocks,
+  ...codeBlocks,
+};
+
 // Create editor outside of the component to have direct access to it from the tests
 let baseEditor: Editor;
 
@@ -135,7 +152,9 @@ const Wrapper = ({
     <ThemeProvider theme={lightTheme}>
       <IntlProvider messages={{}} locale="en">
         <Slate initialValue={initialValue} editor={editor}>
-          <BlocksEditorProvider disabled={false}>{children}</BlocksEditorProvider>
+          <BlocksEditorProvider blocks={blocks} disabled={false}>
+            {children}
+          </BlocksEditorProvider>
         </Slate>
       </IntlProvider>
     </ThemeProvider>
