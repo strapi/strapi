@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 import { Earth as I18N, EarthStriked as StrikedWorld } from '@strapi/icons';
 
