@@ -58,10 +58,10 @@
     "test:unit:watch": "run -T jest --watch"
   },
   "dependencies": {
-    "boxen": "5.1.2",
     "chalk": "4.1.2",
-    "chokidar": "3.5.3",
+    "cli-table3": "0.6.2",
     "commander": "8.3.0",
+    "jscodeshift": "0.15.1",
     "ora": "5.4.1",
     "pkg-up": "3.1.0",
     "prompts": "2.4.2",
@@ -69,6 +69,7 @@
   },
   "devDependencies": {
     "@strapi/pack-up": "workspace:*",
+    "@types/jscodeshift": "0.11.10",
     "eslint-config-custom": "workspace:*",
     "rimraf": "3.0.2"
   },

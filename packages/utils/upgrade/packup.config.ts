@@ -1,6 +1,3 @@
-/**
- * Can this be imported from the package...?
- */
 import { defineConfig } from '@strapi/pack-up';
 
 export default defineConfig({
@@ -10,7 +7,6 @@ export default defineConfig({
       require: './dist/cli.js',
     },
   ],
-  externals: [], // not sure if we should update this?
   runtime: 'node',
   minify: false,
   sourcemap: true,
