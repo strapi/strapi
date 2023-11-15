@@ -9201,7 +9201,6 @@ __metadata:
     eslint-config-custom: "workspace:*"
     jscodeshift: "npm:0.15.1"
     ora: "npm:5.4.1"
-    pkg-up: "npm:3.1.0"
     prompts: "npm:2.4.2"
     rimraf: "npm:3.0.2"
     semver: "npm:7.5.4"
