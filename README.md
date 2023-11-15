@@ -1,3 +1,5 @@
+DO NOT MERGE, PLEASE IGNORE
+
 <p align="center">
   <a href="https://strapi.io/#gh-light-mode-only">
     <img src="https://strapi.io/assets/strapi-logo-dark.svg" width="318px" alt="Strapi logo" />
@@ -93,7 +95,7 @@ Complete installation requirements can be found in the documentation under <a hr
 Strapi only supports maintenance and LTS versions of Node.js. Please refer to the <a href="https://nodejs.org/en/about/releases/">Node.js release schedule</a> for more information. NPM versions installed by default with Node.js are supported. Generally it's recommended to use yarn over npm where possible.
 
 | Strapi Version  | Recommended | Minimum |
-| --------------- | ----------- | ------- |
+|-----------------|-------------|---------|
 | 4.14.5 and up   | 20.x        | 18.x    |
 | 4.11.0 and up   | 18.x        | 16.x    |
 | 4.3.9 to 4.10.x | 18.x        | 14.x    |
@@ -102,7 +104,7 @@ Strapi only supports maintenance and LTS versions of Node.js. Please refer to th
 **Database:**
 
 | Database   | Recommended | Minimum |
-| ---------- | ----------- | ------- |
+|------------|-------------|---------|
 | MySQL      | 8.0         | 5.7.8   |
 | MariaDB    | 10.6        | 10.3    |
 | PostgreSQL | 14.0        | 11.0    |
