@@ -2,7 +2,8 @@ import type Koa from 'koa';
 import { errors } from '@strapi/utils';
 import { RELEASE_MODEL_UID } from '../constants';
 import { validateCreateRelease } from './validation/release';
-import { ReleaseCreateArgs, UserInfo } from '../types';
+import { ReleaseCreateArgs, UserInfo } from '../../../shared/types';
+import { getService } from '../utils';
 
 const { ApplicationError } = errors;
 
@@ -23,7 +24,7 @@ const releaseController = {
     await permissionsManager.validateQuery(ctx.query);
     const query = await permissionsManager.sanitizeQuery(ctx.query);
 
-    ctx.body = await strapi.plugin('content-releases').service('release').findMany(query);
+    ctx.body = await getService('release', { strapi }).findMany(query);
   },
 
   async create(ctx: Koa.Context) {
@@ -37,8 +38,7 @@ const releaseController = {
 
     await validateCreateRelease(releaseArgs);
 
-    const releaseService = strapi.plugin('content-releases').service('release');
-
+    const releaseService = getService('release', { strapi });
     const release = await releaseService.create(releaseArgs, { user });
 
     const permissionsManager = strapi.admin.services.permission.createPermissionsManager({

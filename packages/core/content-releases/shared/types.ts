@@ -25,10 +25,10 @@ export interface UserInfo {
 
 interface ReleaseActionEntry {
   id: Entity.ID;
-  contentType: Common.UID.ContentType;
+  [key: string]: unknown;
 }
 
-interface ReleaseAction {
+export interface ReleaseAction {
   type: 'publish' | 'unpublish';
   entry: ReleaseActionEntry;
   contentType: Common.UID.ContentType;
@@ -44,6 +44,10 @@ export interface Release {
 
 export type ReleaseCreateArgs = Pick<Release, 'name'>;
 
-export interface ReleaseActionCreateArgs extends Pick<ReleaseAction, 'type' | 'entry'> {
-  releaseId: number;
+export interface ReleaseActionCreateArgs extends Pick<ReleaseAction, 'type'> {
+  releaseId: Entity.ID;
+  entry: {
+    id: Entity.ID;
+    contentType: Common.UID.ContentType;
+  };
 }

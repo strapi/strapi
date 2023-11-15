@@ -1,4 +1,4 @@
 import release from './release';
-import releaseAction from './release-action';
+import releaseValidation from './validation';
 
-export const services = { release, 'release-action': releaseAction };
+export const services = { release, 'release-validation': releaseValidation };

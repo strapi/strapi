@@ -1,11 +1,8 @@
 import type Koa from 'koa';
 import { errors } from '@strapi/utils';
-import {
-  validateEntryContentType,
-  validateReleaseActionCreateSchema,
-  validateUniqueEntryInRelease,
-} from './validation/release-action';
-import { ReleaseActionCreateArgs, UserInfo } from '../types';
+import { validateReleaseActionCreateSchema } from './validation/release-action';
+import { ReleaseActionCreateArgs, UserInfo } from '../../../shared/types';
+import { getService } from '../utils';
 
 const releaseActionController = {
   async create(ctx: Koa.Context) {
@@ -17,15 +14,11 @@ const releaseActionController = {
       throw new errors.ApplicationError('Content Releases is a superadmin only feature');
     }
 
-    await Promise.all([
-      validateReleaseActionCreateSchema(releaseActionArgs),
-      validateEntryContentType(releaseActionArgs),
-      validateUniqueEntryInRelease(releaseActionArgs),
-    ]);
+    await validateReleaseActionCreateSchema(releaseActionArgs);
 
-    const releaseActionService = strapi.plugin('content-releases').service('release-action');
-    // TODO: releaseAction is of type any when the create service return is of type Promise<GetValues<"plugin::content-releases.release-action", string>> ...?
-    const releaseAction = await releaseActionService.create(releaseActionArgs);
+    const releaseService = getService('release', { strapi });
+    const { releaseId, ...action } = releaseActionArgs;
+    const releaseAction = await releaseService.createAction(releaseId, action);
 
     ctx.body = {
       data: releaseAction,
