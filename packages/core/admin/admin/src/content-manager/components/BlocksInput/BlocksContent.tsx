@@ -10,7 +10,7 @@ import {
 import styled from 'styled-components';
 
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
-import { type ModifiersStore, useModifiersStore } from './hooks/useModifiersStore';
+import { type ModifiersStore } from './hooks/useModifiersStore';
 import { getEntries } from './utils/types';
 
 const StyledEditable = styled(Editable)`
@@ -53,11 +53,10 @@ interface BlocksInputProps {
 }
 
 const BlocksContent = ({ placeholder }: BlocksInputProps) => {
-  const { editor, disabled, blocks } = useBlocksEditorContext('BlocksContent');
+  const { editor, disabled, blocks, modifiers } = useBlocksEditorContext('BlocksContent');
   const blocksRef = React.useRef<HTMLDivElement>(null);
 
   // Create renderLeaf function based on the modifiers store
-  const modifiers = useModifiersStore();
   const renderLeaf = React.useCallback(
     (props: RenderLeafProps) => baseRenderLeaf(props, modifiers),
     [modifiers]

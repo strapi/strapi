@@ -18,6 +18,7 @@ import { paragraphBlocks } from './Blocks/Paragraph';
 import { quoteBlocks } from './Blocks/Quote';
 import { BlocksContent } from './BlocksContent';
 import { BlocksToolbar } from './BlocksToolbar';
+import { type ModifiersStore, useModifiersStore } from './hooks/useModifiersStore';
 import { withLinks } from './plugins/withLinks';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
 
@@ -79,12 +80,14 @@ const [BlocksEditorProvider, usePartialBlocksEditorContext] =
 
 function useBlocksEditorContext(
   consumerName: string
-): BlocksEditorContextValue & { editor: Editor } {
+): BlocksEditorContextValue & { editor: Editor; modifiers: ModifiersStore } {
   const context = usePartialBlocksEditorContext(consumerName);
+  const modifiers = useModifiersStore();
   const editor = useSlate();
 
   return {
     ...context,
+    modifiers,
     editor,
   };
 }

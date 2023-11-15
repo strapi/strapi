@@ -16,7 +16,6 @@ import {
   isSelectorBlockKey,
   useBlocksEditorContext,
 } from './BlocksEditor';
-import { useModifiersStore } from './hooks/useModifiersStore';
 import { insertLink } from './utils/links';
 import { type Block, getEntries, getKeys } from './utils/types';
 
@@ -630,8 +629,7 @@ const LinkButton = ({ disabled }: { disabled: boolean }) => {
 };
 
 const BlocksToolbar = () => {
-  const modifiers = useModifiersStore();
-  const { editor, blocks, disabled } = useBlocksEditorContext('BlocksToolbar');
+  const { editor, blocks, modifiers, disabled } = useBlocksEditorContext('BlocksToolbar');
 
   /**
    * The modifier buttons are disabled when an image is selected.
