@@ -10,8 +10,6 @@ export * as Params from './params';
 export * from './plugin';
 export * from './result';
 
-type A = Middleware.Middleware<'findMany'>;
-
 export type RepositoryInstance<
   TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType
 > = {
@@ -75,7 +73,9 @@ export type RepositoryInstance<
     action: TAction,
     // QUESTION: How do we type the result type of next?
     //           Should we send params + document id attribute?
-    cb: Middleware.Middleware<TContentTypeUID, TAction>,
+    cb:
+      | Middleware.Middleware<Common.UID.ContentType, TAction>
+      | Middleware.Middleware<Common.UID.ContentType, TAction>[],
     opts?: Middleware.Options
   ) => ThisType<RepositoryInstance<TContentTypeUID>>;
 
@@ -111,7 +111,9 @@ export type Repository = {
    */
   use: <TAction extends keyof DocumentService>(
     action: TAction,
-    cb: Middleware.Middleware<Common.UID.ContentType, TAction>,
+    cb:
+      | Middleware.Middleware<Common.UID.ContentType, TAction>
+      | Middleware.Middleware<Common.UID.ContentType, TAction>[],
     opts?: Middleware.Options
   ) => Repository;
 

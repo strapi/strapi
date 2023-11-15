@@ -94,7 +94,7 @@ export interface Manager {
   add(
     uid: Common.UID.ContentType | 'allUIDs',
     action: string | 'allActions',
-    middleware: Middleware<any, any>,
+    middleware: Middleware<any, any> | Middleware<any, any>[],
     opts?: Options
   ): ThisType<Manager>;
 

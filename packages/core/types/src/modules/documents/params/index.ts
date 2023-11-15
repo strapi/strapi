@@ -51,7 +51,9 @@ export type Pick<
     // Files
     [HasMember<TKind, 'files'>, { files?: Record<string, unknown> }], // TODO
     // Search
-    [HasMember<TKind, '_q'>, { _q?: Search.Q }]
+    [HasMember<TKind, '_q'>, { _q?: Search.Q }],
+    // Look Up - For internal use only
+    [HasMember<TKind, 'lookup'>, { lookup?: Record<string, unknown> }]
   ]
 >;
 
@@ -77,7 +79,8 @@ export type Kind =
   | 'data'
   | 'data:partial'
   | 'files'
-  | '_q';
+  | '_q'
+  | 'lookup';
 
 type HasMember<TValue extends Kind, TTest extends Kind> = Utils.Expression.Extends<TTest, TValue>;
 

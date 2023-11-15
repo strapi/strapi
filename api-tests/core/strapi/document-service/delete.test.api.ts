@@ -29,11 +29,11 @@ describe('Document Service', () => {
   });
 
   describe('Delete', () => {
-    it.todo(
+    it(
       'delete an entire document',
       testInTransaction(async () => {
-        const articleDb = await findArticleDb({ name: 'Article1' });
-        const article = await strapi.documents(ARTICLE_UID).delete(articleDb.documentId);
+        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+        await strapi.documents(ARTICLE_UID).delete(articleDb.documentId);
 
         const articles = await findArticlesDb({ documentId: articleDb.documentId });
 
@@ -41,11 +41,11 @@ describe('Document Service', () => {
       })
     );
 
-    it.todo(
+    it(
       'delete a document locale',
       testInTransaction(async () => {
-        const articleDb = await findArticleDb({ name: 'Article1-Draft-FR' });
-        const article = await strapi.documents(ARTICLE_UID).delete(articleDb.documentId, {
+        const articleDb = await findArticleDb({ title: 'Article1-Draft-FR' });
+        await strapi.documents(ARTICLE_UID).delete(articleDb.documentId, {
           locale: 'fr',
         });
 
@@ -59,25 +59,23 @@ describe('Document Service', () => {
       })
     );
 
-    it.todo(
-      'deleting a draft removes the published version too',
+    it(
+      'cannot delete a draft directly',
       testInTransaction(async () => {
-        const articleDb = await findArticleDb({ name: 'Article2-Draft-EN' });
-        const article = await strapi.documents(ARTICLE_UID).delete(articleDb.documentId, {
+        const articleDb = await findArticleDb({ title: 'Article2-Draft-EN' });
+        const articlePromise = strapi.documents(ARTICLE_UID).delete(articleDb.documentId, {
           status: 'draft',
         });
 
-        const articles = await findArticlesDb({ documentId: articleDb.documentId });
-
-        expect(articles.length).toBe(0);
+        await expect(articlePromise).rejects.toThrow('Cannot delete a draft document');
       })
     );
 
-    it.todo(
+    it(
       'deleting a published version keeps the draft version',
       testInTransaction(async () => {
-        const articleDb = await findArticleDb({ name: 'Article2-Draft-EN' });
-        const article = await strapi.documents(ARTICLE_UID).delete(articleDb.documentId, {
+        const articleDb = await findArticleDb({ title: 'Article2-Draft-EN' });
+        await strapi.documents(ARTICLE_UID).delete(articleDb.documentId, {
           status: 'published',
         });
 

@@ -1,8 +1,8 @@
 import { LoadedStrapi } from '@strapi/types';
-import './resources/types/components.js';
-import './resources/types/contentTypes.js';
+import './resources/types/components.d.ts';
+import './resources/types/contentTypes.d.ts';
 import resources from './resources/index';
-import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper.js';
+import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
 import { testInTransaction } from '../../../utils/index';
 
 const ARTICLE_UID = 'api::article.article';
@@ -29,7 +29,7 @@ describe('Document Service', () => {
   });
 
   describe('Creates', () => {
-    it.todo(
+    it(
       'can create a document',
       testInTransaction(async () => {
         const article = await strapi.documents(ARTICLE_UID).create({
@@ -43,16 +43,18 @@ describe('Document Service', () => {
           publishedAt: null, // should be a draft
         });
 
-        // TODO: Check a published document was not created
+        // @ts-expect-error - TODO: doc service entry type should contain documentId
+        const articles = await findArticlesDb({ documentId: article.documentId });
+        // Only one article should have been created
+        expect(articles).toHaveLength(1);
       })
     );
 
-    it.todo(
+    it(
       'can create an article in french',
       testInTransaction(async () => {
         const article = await strapi.documents(ARTICLE_UID).create({
           locale: 'fr',
-          status: 'published',
           data: { title: 'Article' },
         });
 
@@ -65,7 +67,7 @@ describe('Document Service', () => {
       })
     );
 
-    it.todo(
+    it(
       'can not directly create a published document',
       testInTransaction(async () => {
         const articlePromise = strapi.documents(ARTICLE_UID).create({
@@ -79,7 +81,7 @@ describe('Document Service', () => {
     );
 
     // TODO: Make publishedAt not editable
-    it.todo(
+    it(
       'publishedAt attribute is ignored when creating document',
       testInTransaction(async () => {
         const article = await strapi.documents(ARTICLE_UID).create({

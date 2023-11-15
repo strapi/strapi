@@ -41,9 +41,12 @@ const createMiddlewareManager = (): Documents.Middleware.Manager => {
         this.middlewares[uid][action] = [];
       }
 
-      this.middlewares[uid][action].push({
-        middleware,
-        priority: opts?.priority ?? priority.DEFAULT,
+      const middlewareList = Array.isArray(middleware) ? middleware : [middleware];
+      middlewareList.forEach((middleware) => {
+        this.middlewares[uid][action].push({
+          middleware,
+          priority: opts?.priority ?? priority.DEFAULT,
+        });
       });
 
       return this;

@@ -1,6 +1,7 @@
 import { Strapi, Common, Documents } from '@strapi/types';
 import createDocumentService from '.';
 import createMiddlewareManager from './middlewares';
+import { loadDefaultMiddlewares } from './middlewares/defaults';
 
 /**
  * TODO:
@@ -26,7 +27,9 @@ export const createDocumentRepository = (
   { defaults = {} }: { defaults?: any } = {}
 ): Documents.Repository => {
   const documents = createDocumentService({ strapi, db: strapi.db! });
+
   const middlewareManager = createMiddlewareManager();
+  loadDefaultMiddlewares(middlewareManager);
 
   function create<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID
