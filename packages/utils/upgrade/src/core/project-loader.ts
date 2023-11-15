@@ -6,7 +6,7 @@ import fs from 'node:fs/promises';
 import * as f from './format';
 
 import type { Logger } from './logger';
-import type { Version } from '../types';
+import type { SemVer } from '.';
 
 export interface ProjectLoaderOptions {
   cwd: string;
@@ -24,7 +24,7 @@ export interface ProjectComponents {
   cwd: string;
   packageJSON: any;
   files: string[];
-  strapiVersion: Version.SemVer;
+  strapiVersion: SemVer;
 }
 
 const PROJECT_PACKAGE_JSON = 'package.json';
@@ -124,11 +124,11 @@ const formatGlobCollectionPattern = (collection: string[]): string => {
 // ?: What strategy should we adopt if there are multiple @strapi dependencies with different versions?
 //     - Use latest?
 //     - Use @strapi/strapi one? <- Seems like the best choice for the moment
-const parseStrapiVersion = (packageJSON: any, options: ProjectLoaderOptions): Version.SemVer => {
+const parseStrapiVersion = (packageJSON: any, options: ProjectLoaderOptions): SemVer => {
   const { cwd, logger } = options;
 
-  const dependencies = packageJSON['dependencies'] ?? {};
-  const strapiVersion = dependencies[STRAPI_DEPENDENCY_NAME] as Version.SemVer | undefined;
+  const dependencies = packageJSON.dependencies ?? {};
+  const strapiVersion = dependencies[STRAPI_DEPENDENCY_NAME] as SemVer | undefined;
 
   if (strapiVersion === undefined) {
     throw new Error(

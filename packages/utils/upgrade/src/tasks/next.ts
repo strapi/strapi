@@ -12,7 +12,8 @@ import {
   createTimer,
 } from '../core';
 
-import type { Report, RunReports, TaskOptions, VersionRange } from '../types';
+import type { VersionRange } from '../core';
+import type { Report, RunReports, TaskOptions } from '../types';
 
 export const next = async (options: TaskOptions) => {
   const { logger, dryRun = false, cwd = process.cwd() } = options;
@@ -44,7 +45,10 @@ export const next = async (options: TaskOptions) => {
     logger.info(`The next major version is ${f.version(nextMajorVersion)}`);
 
     // The upgrade range should contain all the upgrades between the current version and the next major
-    const upgradeRange: VersionRange = { from: project.strapiVersion, to: nextMajorVersion };
+    const upgradeRange: VersionRange = {
+      from: project.strapiVersion,
+      to: nextMajorVersion,
+    };
     const codemods = codemodsLoader.loadRange(upgradeRange);
 
     const impactedVersions = Array.from(new Set(codemods.map((p) => p.version)));

@@ -6,5 +6,5 @@ export const latest = async (options: TaskOptions) => {
   // loop until no next major is found
   //   next
   //   fix-current
-  console.log('not implemented, upgrade to the latest version');
+  console.log('not implemented, upgrade to the latest version', options);
 };
