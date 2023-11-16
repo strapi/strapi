@@ -1,4 +1,4 @@
-import releaseController from "../controllers/release";
+import releaseController from '../controllers/release';
 
 describe('Release controller', () => {
   describe('create', () => {
@@ -9,8 +9,8 @@ describe('Release controller', () => {
         },
         // Mock missing name on request
         request: {
-          body: {}
-        }
+          body: {},
+        },
       };
 
       // @ts-expect-error partial context

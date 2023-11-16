@@ -11,9 +11,9 @@ export default {
           {
             name: 'admin::hasPermissions',
             config: {
-              actions: ['plugin::content-releases.create']
-            }
-          }
+              actions: ['plugin::content-releases.create'],
+            },
+          },
         ],
       },
     },
@@ -27,9 +27,9 @@ export default {
           {
             name: 'admin::hasPermissions',
             config: {
-              actions: ['plugin::content-releases.read']
-            }
-          }
+              actions: ['plugin::content-releases.read'],
+            },
+          },
         ],
       },
     },

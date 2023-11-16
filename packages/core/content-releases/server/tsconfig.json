@@ -1,6 +1,6 @@
 {
   "extends": "tsconfig/base.json",
-  "include": ["src"],
+  "include": ["src", "../shared/types.ts"],
   "exclude": ["node_modules"],
   "compilerOptions": {
     "esModuleInterop": true

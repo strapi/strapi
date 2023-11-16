@@ -18,8 +18,8 @@ const getEntryModule = (ctx: BuildContext): string => {
     .join('\n');
 
   const flags = {
-    contentReleases: process.env.FEATURE_FLAG_CONTENT_RELEASES
-  }
+    contentReleases: process.env.FEATURE_FLAG_CONTENT_RELEASES,
+  };
 
   return outdent`
         /**
