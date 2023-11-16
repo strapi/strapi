@@ -2,6 +2,8 @@ import _ from 'lodash/fp';
 import qs from 'qs';
 import { Ability } from '@casl/ability';
 import { providerFactory } from '@strapi/utils';
+// eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-import
+import { Permissions as PermissionsTypes } from '@strapi/types';
 
 import {
   createEngineHooks,
@@ -28,9 +30,9 @@ export interface Engine {
   on(hook: HookName, handler: (...args: any[]) => any): Engine;
   generateAbility(permissions: Permission[], options?: object): Promise<Ability>;
   createRegisterFunction(
-    can: (permission: abilities.PermissionRule) => unknown,
+    can: (permission: PermissionsTypes.PermissionRule) => unknown,
     options: Record<string, unknown>
-  ): (permission: abilities.PermissionRule) => Promise<unknown>;
+  ): (permission: PermissionsTypes.PermissionRule) => Promise<unknown>;
 }
 
 export interface EngineParams {
@@ -40,7 +42,7 @@ export interface EngineParams {
 
 interface EvaluateParams {
   options: Record<string, unknown>;
-  register: (permission: abilities.PermissionRule) => Promise<unknown>;
+  register: (permission: PermissionsTypes.PermissionRule) => Promise<unknown>;
   permission: Permission;
 }
 
@@ -177,7 +179,7 @@ const newEngine = (params: EngineParams): Engine => {
      * used to register a permission in the ability builder
      */
     createRegisterFunction(can, options: Record<string, unknown>) {
-      return async (permission: abilities.PermissionRule) => {
+      return async (permission: PermissionsTypes.PermissionRule) => {
         const hookContext = createWillRegisterContext({ options, permission });
 
         await state.hooks['before-register.permission'].call(hookContext);

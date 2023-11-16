@@ -19,16 +19,39 @@
       "url": "https://strapi.io"
     }
   ],
+  "exports": {
+    "./strapi-server": {
+      "types": "./dist/server/src/index.d.ts",
+      "source": "./server/src/index.ts",
+      "require": "./strapi-server.js",
+      "default": "./strapi-server.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "./dist",
+    "strapi-server.js"
+  ],
   "scripts": {
     "lint": "run -T eslint .",
     "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch"
+    "test:unit:watch": "run -T jest --watch",
+    "test:ts:back": "run -T tsc --noEmit -p server/tsconfig.json",
+    "build": "pack-up build"
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
+    "@strapi/types": "workspace:*",
     "@strapi/utils": "4.15.4",
+    "koa": "2.13.4",
+    "koa-bodyparser": "4.4.1",
     "lodash": "4.17.21",
     "qs": "6.11.1"
+  },
+  "devDependencies": {
+    "@strapi/pack-up": "workspace:*",
+    "@types/jest": "29.5.2",
+    "@types/lodash": "^4.14.191"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

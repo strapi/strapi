@@ -1,17 +1,17 @@
-import React from 'react';
+import * as React from 'react';
 
 import { Earth as I18N, EarthStriked as StrikedWorld } from '@strapi/icons';
 
 import LabelAction from '../../components/LabelAction';
-import { getTrad } from '../../utils';
+import { getTranslation } from '../../utils/getTranslation';
 import mutateEditViewLayout, {
   enhanceComponentsLayout,
   enhanceEditLayout,
 } from '../mutateEditViewLayout';
 
-const localizedTrad = getTrad('Field.localized');
+const localizedTrad = getTranslation('Field.localized');
 const localizedTradDefaultMessage = 'This value is unique for the selected locale';
-const notLocalizedTrad = getTrad('Field.not-localized');
+const notLocalizedTrad = getTranslation('Field.not-localized');
 const notLocalizedTradDefaultMessage = 'This value is common to all locales';
 
 describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {

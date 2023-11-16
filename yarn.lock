@@ -8657,7 +8657,12 @@ __metadata:
     "@testing-library/user-event": "npm:14.4.3"
     "@types/find-root": "npm:1.1.3"
     "@types/invariant": "npm:2.2.36"
+    "@types/jest": "npm:29.5.2"
     "@types/js-cookie": "npm:3.0.5"
+    "@types/jsonwebtoken": "npm:9.0.3"
+    "@types/koa-passport": "npm:6.0.1"
+    "@types/lodash": "npm:^4.14.191"
+    "@types/passport-local": "npm:1.0.36"
     "@types/pluralize": "npm:0.0.32"
     "@types/webpack-bundle-analyzer": "npm:4.6.2"
     "@types/webpack-hot-middleware": "npm:2.25.8"
@@ -8691,6 +8696,8 @@ __metadata:
     invariant: "npm:^2.2.4"
     js-cookie: "npm:2.2.1"
     jsonwebtoken: "npm:9.0.0"
+    koa: "npm:2.13.4"
+    koa-bodyparser: "npm:4.4.1"
     koa-compose: "npm:4.1.0"
     koa-passport: "npm:5.0.0"
     koa-static: "npm:5.0.0"
@@ -8934,11 +8941,6 @@ __metadata:
     "@strapi/types": "npm:4.15.4"
     "@testing-library/react": "npm:14.0.0"
     "@testing-library/user-event": "npm:14.4.3"
-    "@types/react": "npm:18.2.7"
-    "@types/react-dom": "npm:18.2.7"
-    "@types/react-helmet": "npm:6.1.6"
-    "@types/react-router-dom": "npm:5.3.3"
-    "@types/styled-components": "npm:5.1.26"
     axios: "npm:1.6.0"
     cross-env: "npm:^7.0.3"
     date-fns: "npm:2.30.0"
@@ -9117,7 +9119,13 @@ __metadata:
   resolution: "@strapi/plugin-content-manager@workspace:packages/core/content-manager"
   dependencies:
     "@sindresorhus/slugify": "npm:1.1.0"
+    "@strapi/pack-up": "workspace:*"
+    "@strapi/types": "workspace:*"
     "@strapi/utils": "npm:4.15.4"
+    "@types/jest": "npm:29.5.2"
+    "@types/lodash": "npm:^4.14.191"
+    koa: "npm:2.13.4"
+    koa-bodyparser: "npm:4.4.1"
     lodash: "npm:4.17.21"
     qs: "npm:6.11.1"
   languageName: unknown
@@ -9290,13 +9298,16 @@ __metadata:
   resolution: "@strapi/plugin-i18n@workspace:packages/plugins/i18n"
   dependencies:
     "@reduxjs/toolkit": "npm:1.9.7"
+    "@strapi/admin-test-utils": "npm:4.15.4"
     "@strapi/design-system": "npm:1.13.1"
     "@strapi/helper-plugin": "npm:4.15.4"
     "@strapi/icons": "npm:1.13.0"
-    "@strapi/pack-up": "npm:4.15.4"
     "@strapi/strapi": "npm:4.15.4"
+    "@strapi/types": "npm:4.15.4"
     "@strapi/utils": "npm:4.15.4"
     "@testing-library/react": "npm:14.0.0"
+    "@testing-library/user-event": "npm:14.4.3"
+    axios: "npm:1.6.0"
     formik: "npm:2.4.0"
     immer: "npm:9.0.19"
     lodash: "npm:4.17.21"
@@ -9646,10 +9657,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/types@npm:4.15.4, @strapi/types@workspace:packages/core/types":
+"@strapi/types@npm:4.15.4, @strapi/types@workspace:*, @strapi/types@workspace:packages/core/types":
   version: 0.0.0-use.local
   resolution: "@strapi/types@workspace:packages/core/types"
   dependencies:
+    "@casl/ability": "npm:6.5.0"
     "@koa/cors": "npm:3.4.3"
     "@koa/router": "npm:10.1.1"
     "@strapi/database": "npm:4.15.4"
@@ -10632,6 +10644,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/jsonwebtoken@npm:9.0.3":
+  version: 9.0.3
+  resolution: "@types/jsonwebtoken@npm:9.0.3"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 62599dea2c16e3043135620780e88785e81f9cebe5e4fd155ab30030eaefba4b04b0ea5e49ab08feab6838021b2e9a289f7e733966ce288e2d70813631c228bb
+  languageName: node
+  linkType: hard
+
 "@types/keygrip@npm:*":
   version: 1.0.2
   resolution: "@types/keygrip@npm:1.0.2"
@@ -10673,6 +10694,16 @@ __metadata:
     "@types/koa": "npm:*"
     "@types/node": "npm:*"
   checksum: 6f09e4ad8160204fbee9d0a452b83ba62fec503a2eec60cf41fc67a032971027b6858e0b90c6e05bf1ad3b006f7c7a2d02922db4d159d223ab8d33eeeb108757
+  languageName: node
+  linkType: hard
+
+"@types/koa-passport@npm:6.0.1":
+  version: 6.0.1
+  resolution: "@types/koa-passport@npm:6.0.1"
+  dependencies:
+    "@types/koa": "npm:*"
+    "@types/passport": "npm:*"
+  checksum: b2f58c9018d0f4e1cfeb2c59f7b0bad580f5cda20bfe9e93d9bf858abbae1142f4fb6d9005da5d329c531be2cd1ec6df7d5c75096ea79e005f722ab658a62fdf
   languageName: node
   linkType: hard
 
@@ -10913,6 +10944,36 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/passport-local@npm:1.0.36":
+  version: 1.0.36
+  resolution: "@types/passport-local@npm:1.0.36"
+  dependencies:
+    "@types/express": "npm:*"
+    "@types/passport": "npm:*"
+    "@types/passport-strategy": "npm:*"
+  checksum: 32c9259053e659088527298c364ba2f05eac202412df89246506ad847d755107c08fe8452e50ebaca079cecedbb25acfd71fbb4565f109acc0557d1bf0db8386
+  languageName: node
+  linkType: hard
+
+"@types/passport-strategy@npm:*":
+  version: 0.2.37
+  resolution: "@types/passport-strategy@npm:0.2.37"
+  dependencies:
+    "@types/express": "npm:*"
+    "@types/passport": "npm:*"
+  checksum: ca85308b0bba74e299dde4c31a26fb11559d62c87daa9a2321edc0f99930efdf45913acf0bf54162623a98ad0559a277b2ad95c4b26b518db1e93a02ede89e28
+  languageName: node
+  linkType: hard
+
+"@types/passport@npm:*":
+  version: 1.0.14
+  resolution: "@types/passport@npm:1.0.14"
+  dependencies:
+    "@types/express": "npm:*"
+  checksum: 5cffe5bc3d279fdf0fb30a1389526ba862ff418fbdb8cbbcadccd147d2e6231567a2fb6efec49267043b95244e75615932d018bff3dc13de718800a4f0e1460e
+  languageName: node
+  linkType: hard
+
 "@types/pluralize@npm:0.0.30":
   version: 0.0.30
   resolution: "@types/pluralize@npm:0.0.30"
@@ -10924,6 +10985,13 @@ __metadata:
   version: 0.0.32
   resolution: "@types/pluralize@npm:0.0.32"
   checksum: 788aa2ad144a0e7b318d03bddfeefecd65e97793e0faad748c458538abd8d680bcc096fe1219567a7c19d41d23b74e45868d7d43a06a44135798eb8da09a1655
+  languageName: node
+  linkType: hard
+
+"@types/prettier@npm:2.7.3":
+  version: 2.7.3
+  resolution: "@types/prettier@npm:2.7.3"
+  checksum: cda84c19acc3bf327545b1ce71114a7d08efbd67b5030b9e8277b347fa57b05178045f70debe1d363ff7efdae62f237260713aafc2d7217e06fc99b048a88497
   languageName: node
   linkType: hard
 
@@ -10981,15 +11049,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:18.2.7":
-  version: 18.2.7
-  resolution: "@types/react-dom@npm:18.2.7"
-  dependencies:
-    "@types/react": "npm:*"
-  checksum: 9b70ef66cbe2d2898ea37eb79ee3697e0e4ad3d950e769a601f79be94097d43b8ef45b98a0b29528203c7d731c81666f637b2b7032deeced99214b4bc0662614
-  languageName: node
-  linkType: hard
-
 "@types/react-dom@npm:^18.0.0":
   version: 18.0.11
   resolution: "@types/react-dom@npm:18.0.11"
@@ -10999,16 +11058,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-helmet@npm:6.1.6":
-  version: 6.1.6
-  resolution: "@types/react-helmet@npm:6.1.6"
+"@types/react-helmet@npm:6.1.8":
+  version: 6.1.8
+  resolution: "@types/react-helmet@npm:6.1.8"
   dependencies:
     "@types/react": "npm:*"
-  checksum: 81560c56bfe854b6a43aee31360862588ac875d1177b975da5ce049ac9aa2f7c98dcde65d4397bfaa04e468f40cf3ab2975a2ef966a69d64a60493422898698d
+  checksum: 380d6aa2760a43dab59d46f291caf9498abfda813e343aeaea8b814fe21a69b27e9ad97962b5541ad75179eb9b7875027e4fcc7009187b2f68251ac9f0923a2c
   languageName: node
   linkType: hard
 
-"@types/react-router-dom@npm:5.3.3, @types/react-router-dom@npm:^5.3.3":
+"@types/react-router-dom@npm:^5.3.3":
   version: 5.3.3
   resolution: "@types/react-router-dom@npm:5.3.3"
   dependencies:
@@ -30358,6 +30417,12 @@ __metadata:
     "@swc/core": "npm:1.3.58"
     "@swc/helpers": "npm:0.5.1"
     "@swc/jest": "npm:0.2.26"
+    "@types/prettier": "npm:2.7.3"
+    "@types/react": "npm:18.2.7"
+    "@types/react-dom": "npm:18.2.12"
+    "@types/react-helmet": "npm:6.1.8"
+    "@types/react-router-dom": "npm:^5.3.3"
+    "@types/styled-components": "npm:5.1.26"
     "@typescript-eslint/eslint-plugin": "npm:6.7.3"
     "@typescript-eslint/parser": "npm:6.7.3"
     babel-eslint: "npm:10.1.0"
