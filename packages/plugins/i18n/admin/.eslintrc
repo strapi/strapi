@@ -5,5 +5,19 @@
     "check-file/filename-naming-convention": "off",
     "check-file/no-index": "off",
     "import/no-default-export": "off"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["./tests/*", "**/*.test.*"],
+      "env": {
+        "jest": true
+      },
+      "rules": {
+        /**
+         * So we can do `import { render } from '@tests/utils'`
+         */
+        "import/no-unresolved": "off"
+      }
+    }
+  ]
 }

@@ -1,5 +1,12 @@
 {
   "extends": "tsconfig/client.json",
-  "include": ["./src"],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "rootDir": "../",
+    "paths": {
+      "@tests/*": ["./tests/*"]
+    }
+  },
+  "include": ["src", "../shared", "tests"],
   "exclude": ["node_modules"]
 }
