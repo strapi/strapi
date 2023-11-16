@@ -1,4 +1,4 @@
-import glob from 'glob';
+import { glob } from 'glob';
 import path from 'node:path';
 import assert from 'node:assert';
 import fs from 'node:fs/promises';
@@ -30,6 +30,7 @@ export interface ProjectComponents {
 const PROJECT_PACKAGE_JSON = 'package.json';
 const PROJECT_DEFAULT_ALLOWED_ROOT_PATHS = ['src', 'config', 'public'];
 const PROJECT_DEFAULT_ALLOWED_EXTENSIONS = ['js', 'ts', 'json'];
+const PROJECT_DEFAULT_PATTERNS = ['package.json'];
 const STRAPI_DEPENDENCY_NAME = '@strapi/strapi';
 
 export const createProjectLoader = (options: ProjectLoaderOptions): ProjectLoader => {
@@ -81,19 +82,19 @@ const loadProjectFiles = async (options: ProjectLoaderOptions): Promise<string[]
     options.allowedExtensions ?? PROJECT_DEFAULT_ALLOWED_EXTENSIONS
   );
 
-  const pattern = `./${allowedRootPaths}/**/*.${allowedExtensions}`;
+  const projectFilesPattern = `./${allowedRootPaths}/**/*.${allowedExtensions}`;
+  const patterns = [projectFilesPattern, ...PROJECT_DEFAULT_PATTERNS];
 
-  const files = await new Promise<string[]>((resolve, reject) => {
-    glob(pattern, { cwd }, (err, matches) => (err ? reject(err) : resolve(matches)));
-  });
+  const files = await glob(patterns, { cwd });
 
   const fFilesLength = f.highlight(files.length.toString());
-  const fPattern = f.highlight(pattern);
+  const fPattern = f.highlight(patterns.map((p) => `"${p}"`).join(', '));
   const fPath = f.path(cwd);
 
-  logger.debug(`Found ${fFilesLength} files matching "${fPattern}" in ${fPath}`);
+  logger.debug(`Found ${fFilesLength} files matching ${fPattern} in ${fPath}`);
 
-  return files;
+  // Resolve the full paths for every file
+  return files.map((file) => path.join(cwd, file));
 };
 
 /**

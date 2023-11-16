@@ -17,7 +17,10 @@ export interface TaskOptions {
   logger: Logger;
 }
 
-export interface CodemodPath {
+export type TransformFileKind = 'code' | 'json';
+
+export interface TransformFile {
+  kind: TransformFileKind;
   path: string;
   formatted: string;
   fullPath: string;
@@ -25,7 +28,7 @@ export interface CodemodPath {
 }
 
 export interface RunReport {
-  codemod: CodemodPath;
+  transform: TransformFile;
   report: Report;
 }
 
