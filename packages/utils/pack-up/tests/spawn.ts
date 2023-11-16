@@ -57,33 +57,27 @@ export class ExecError extends Error {
   }
 }
 
-const runExec =
-  (cwd: string) =>
-  async (
-    cmd: string,
-    { env: providedEnv, ...execOpts }: Omit<child_process.ExecOptions, 'cwd'> = {}
-  ) => {
-    try {
-      const env = {
-        ...process.env,
-        PATH: `${process.env.PATH}:${path.resolve(__dirname, '../../bin')}`,
-        ...providedEnv,
-      };
+const runExec = (cwd: string) => async (cmd: string) => {
+  try {
+    const env = {
+      ...process.env,
+      PATH: `${process.env.PATH}:${path.resolve(__dirname, '../../bin')}`,
+    };
 
-      const res = await exec(cmd, { cwd, env, ...execOpts });
+    const res = await exec(cmd, { cwd, env });
 
-      return res;
-    } catch (execErr) {
-      if (execErr instanceof ExecError) {
-        console.log(execErr.stdout);
-        console.error(execErr.stderr);
+    return res;
+  } catch (execErr) {
+    if (execErr instanceof ExecError) {
+      console.log(execErr.stdout);
+      console.error(execErr.stderr);
 
-        return execErr;
-      }
-
-      throw execErr;
+      return execErr;
     }
-  };
+
+    throw execErr;
+  }
+};
 
 interface Project {
   cwd: string;
@@ -106,12 +100,7 @@ const spawn = async (projectName: string): Promise<Project> => {
 
   return {
     cwd: tmpPath,
-    install: () =>
-      execute('yarn install', {
-        env: {
-          YARN_ENABLE_IMMUTABLE_INSTALLS: 'false',
-        },
-      }),
+    install: () => execute('yarn install'),
     remove: tmpRemove,
     run: (cmd: string) => execute(`yarn run ${cmd}`),
   };
