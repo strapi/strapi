@@ -8759,6 +8759,7 @@ __metadata:
   resolution: "@strapi/content-releases@workspace:packages/core/content-releases"
   dependencies:
     "@reduxjs/toolkit": "npm:1.9.7"
+    "@strapi/admin-test-utils": "npm:4.15.1"
     "@strapi/design-system": "npm:1.13.0"
     "@strapi/helper-plugin": "npm:4.15.1"
     "@strapi/icons": "npm:1.13.0"
@@ -8772,8 +8773,8 @@ __metadata:
     "@types/styled-components": "npm:5.1.26"
     axios: "npm:1.5.0"
     formik: "npm:2.4.0"
-    history: "npm:^4.9.0"
     koa: "npm:2.13.4"
+    msw: "npm:1.3.0"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
     react-intl: "npm:6.4.1"

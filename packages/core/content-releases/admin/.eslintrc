@@ -1,0 +1,18 @@
+{
+  "root": true,
+  "extends": ["custom/front/typescript"],
+  "overrides": [
+    {
+      "files": ["./tests/*", "**/*.test.*"],
+      "env": {
+        "jest": true
+      },
+      "rules": {
+        /**
+         * So we can do `import { render } from '@tests/utils'`
+         */
+        "import/no-unresolved": "off"
+      }
+    }
+  ]
+}
