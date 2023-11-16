@@ -1,7 +1,7 @@
 {
   "extends": "./admin/tsconfig.json",
-  "include": ["./admin/src", "./admin/custom.d.ts", "./shared", "./admin/module.d.ts"],
-  "exclude": ["tests", "**/*.test.*"],
+  "include": ["./admin/src/*", "./admin/custom.d.ts", "./shared/*", "./admin/module.d.ts"],
+  "exclude": ["tests/*", "**/*.test.*"],
   "compilerOptions": {
     "rootDir": ".",
     "outDir": "./dist"

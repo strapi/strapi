@@ -7,40 +7,36 @@ export interface Route
 export const ROUTES_CE: Route[] = [
   {
     async Component() {
-      // @ts-expect-error – No types, yet.
-      const component = await import('./pages/Roles/ProtectedListPage');
+      const { ProtectedListPage } = await import('./pages/Roles/ListPage');
 
-      return component;
+      return ProtectedListPage;
     },
     to: '/settings/roles',
     exact: true,
   },
   {
     async Component() {
-      // @ts-expect-error – No types, yet.
-      const component = await import('./pages/Roles/CreatePage');
+      const { ProtectedCreatePage } = await import('./pages/Roles/CreatePage');
 
-      return component;
+      return ProtectedCreatePage;
     },
     to: '/settings/roles/duplicate/:id',
     exact: true,
   },
   {
     async Component() {
-      // @ts-expect-error – No types, yet.
-      const component = await import('./pages/Roles/CreatePage');
+      const { ProtectedCreatePage } = await import('./pages/Roles/CreatePage');
 
-      return component;
+      return ProtectedCreatePage;
     },
     to: '/settings/roles/new',
     exact: true,
   },
   {
     async Component() {
-      // @ts-expect-error – No types, yet.
-      const component = await import('./pages/Roles/ProtectedEditPage');
+      const { ProtectedEditPage } = await import('./pages/Roles/EditPage');
 
-      return component;
+      return ProtectedEditPage;
     },
     to: '/settings/roles/:id',
     exact: true,

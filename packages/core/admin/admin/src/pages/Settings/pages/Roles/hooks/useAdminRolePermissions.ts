@@ -1,6 +1,6 @@
 import { useFetchClient } from '@strapi/helper-plugin';
 import { Entity } from '@strapi/types';
-import { useQuery } from 'react-query';
+import { UseQueryOptions, useQuery } from 'react-query';
 
 import { GetOwnPermissions } from '../../../../../../../shared/contracts/users';
 
@@ -10,7 +10,10 @@ export interface APIRolePermissionsQueryParams {
 
 export const useAdminRolePermissions = (
   params: APIRolePermissionsQueryParams = { id: null },
-  queryOptions = {}
+  queryOptions: Omit<
+    UseQueryOptions<GetOwnPermissions.Response['data']>,
+    'queryKey' | 'queryFn'
+  > = {}
 ) => {
   const { id, ...queryParams } = params;
 

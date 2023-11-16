@@ -30,7 +30,7 @@ export declare namespace UpdatePermissions {
     params: { id: string };
     query: {};
     body: {
-      permissions: Permission[];
+      permissions: Omit<Permission, 'id' | 'createdAt' | 'updatedAt' | 'actionParameters'>[];
     };
   }
 

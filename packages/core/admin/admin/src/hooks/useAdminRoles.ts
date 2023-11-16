@@ -10,6 +10,8 @@ export type APIRolesQueryParams =
   | FindRole.Request['params']
   | (FindRoles.Request['query'] & { id?: never });
 
+export type AdminRole = FindRoles.Response['data'][number];
+
 export const useAdminRoles = (params: APIRolesQueryParams = {}, queryOptions = {}) => {
   const { id = '', ...queryParams } = params;
 
