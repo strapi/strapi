@@ -1,5 +1,5 @@
 import path from 'node:path';
-import type { JSONTransform } from '@strapi/upgrade';
+import type { JSONTransform } from '../../../src';
 
 /**
  * Note: This transform file is only for development purposes and should be deleted before releasing

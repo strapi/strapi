@@ -19,8 +19,8 @@ const transform: Transform = (file, api) => {
   });
 
   consoleLogCalls.forEach((p) => {
-    // @ts-ignore - In the future, we should do assertions on the node to make sure it's an object and has a property
-    p.node.callee.property.name = 'warn';
+    // @ts-expect-error - In the future, we should do assertions on the node to make sure it's an object and has a property
+    p.node.callee.property.name = 'info';
   });
 
   return root.toSource();
