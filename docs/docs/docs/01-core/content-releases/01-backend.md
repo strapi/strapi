@@ -56,6 +56,11 @@ packages/core/content-releases/server/src/routes/release.ts
   }
   ```
 
+**Get a single release**
+
+- method: `GET`
+- endpoint: `/content-releases/:id`
+
 **Create a release**:
 
 - method: `POST`
@@ -72,11 +77,10 @@ packages/core/content-releases/server/src/routes/release.ts
 **Create a release action**
 
 - method: `POST`
-- endpoint: `/content-releases/release-actions/`
+- endpoint: `/content-releases/:releaseId/actions`
 - body:
   ```ts
   {
-    releaseId: number,
     entry: {
       id: number,
       contentType: string

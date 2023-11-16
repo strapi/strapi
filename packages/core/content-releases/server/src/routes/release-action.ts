@@ -3,7 +3,7 @@ export default {
   routes: [
     {
       method: 'POST',
-      path: '/release-actions',
+      path: '/:releaseId/actions',
       handler: 'release-action.create',
       config: {
         policies: [
