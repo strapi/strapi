@@ -35,7 +35,10 @@ export declare namespace UpdateMe {
 
   export interface Response {
     data: SanitizedAdminUser;
-    error?: errors.ApplicationError | errors.ValidationError | errors.YupValidationError;
+    error?:
+      | errors.ApplicationError
+      | errors.ValidationError<'ValidationError', { currentPassword: ['Invalid credentials'] }>
+      | errors.YupValidationError;
   }
 }
 

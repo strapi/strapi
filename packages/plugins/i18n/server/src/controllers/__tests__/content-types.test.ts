@@ -15,7 +15,9 @@ describe('i18n - Controller - content-types', () => {
         contentType,
         getModel,
         plugins: { i18n: { services: { 'content-types': ctService } } },
-        admin: { services: { constants: { READ_ACTION: 'read', CREATE_ACTION: 'create' } } },
+        admin: {
+          services: { constants: { default: { READ_ACTION: 'read', CREATE_ACTION: 'create' } } },
+        },
       } as any;
     });
 
