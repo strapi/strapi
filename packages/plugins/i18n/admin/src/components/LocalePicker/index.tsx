@@ -4,19 +4,19 @@ import { Option, Select } from '@strapi/design-system';
 import { useQueryParams } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useRouteMatch } from 'react-router-dom';
 
-import useContentTypePermissions from '../../hooks/useContentTypePermissions';
+import { useContentTypePermissions } from '../../hooks/useContentTypePermissions';
 import useHasI18n from '../../hooks/useHasI18n';
-import selectI18NLocales from '../../selectors/selectI18nLocales';
+import { useTypedSelector } from '../../store/hooks';
 import getInitialLocale from '../../utils/getInitialLocale';
 import { getTranslation } from '../../utils/getTranslation';
 
 const LocalePicker = () => {
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
-  const locales = useSelector(selectI18NLocales);
+  const locales = useTypedSelector((state) => state.i18n_locales.locales);
   const [{ query }, setQuery] = useQueryParams<any>();
   const {
     params: { slug },
@@ -81,7 +81,7 @@ const LocalePicker = () => {
       value={selected}
       onChange={handleClick as any}
     >
-      {displayedLocales.map((locale: { id: string; name: string; code: string }) => (
+      {displayedLocales.map((locale) => (
         <Option key={locale.id} id={`menu-item${locale.name || locale.code}`} value={locale.code}>
           {locale.name}
         </Option>

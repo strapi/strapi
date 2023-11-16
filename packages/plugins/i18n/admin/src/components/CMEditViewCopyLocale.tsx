@@ -7,74 +7,93 @@ import {
   DialogBody,
   DialogFooter,
   Flex,
-  Option,
-  Select,
+  SingleSelect,
+  SingleSelectOption,
   Typography,
 } from '@strapi/design-system';
-import { useCMEditViewDataManager, useFetchClient, useNotification } from '@strapi/helper-plugin';
+import {
+  Permission,
+  useCMEditViewDataManager,
+  useFetchClient,
+  useNotification,
+} from '@strapi/helper-plugin';
 import { Duplicate, ExclamationMarkCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { getTranslation } from '../../../utils/getTranslation';
+import { useTypedDispatch } from '../store/hooks';
+import { Locale } from '../store/reducers';
+import { Localization, cleanData } from '../utils/data';
+import { getTranslation } from '../utils/getTranslation';
 
-import { cleanData, generateOptions } from './utils';
+/* -------------------------------------------------------------------------------------------------
+ * CMEditViewCopyLocale
+ * -----------------------------------------------------------------------------------------------*/
 
-const StyledTypography = styled(Typography)`
-  svg {
-    margin-right: ${({ theme }) => theme.spaces[2]};
-    fill: none;
-    > g,
-    path {
-      fill: ${({ theme }) => theme.colors.primary600};
-    }
-  }
-`;
-
-const CenteredTypography = styled(Typography)`
-  text-align: center;
-`;
-
-type ContentProps = {
-  appLocales: Array<{
-    code: string;
-    name: string;
-  }>;
+interface CMEditViewCopyLocaleProps {
+  appLocales: Locale[];
   currentLocale: string;
-  localizations: Array<{
-    id: number;
-    locale: string;
-  }>;
-  readPermissions: Array<{
-    properties: {
-      locales: Array<string>;
-    };
-  }>;
-};
+  localizations: Localization[];
+  readPermissions: Permission[];
+}
 
-type CMEditViewCopyLocaleProps = ContentProps;
-
-const CMEditViewCopyLocale = (props: CMEditViewCopyLocaleProps) => {
-  if (!props.localizations.length) {
-    return null;
-  }
-
-  return <Content {...props} />;
-};
-
-const Content = ({ appLocales, currentLocale, localizations, readPermissions }: ContentProps) => {
-  const options = generateOptions(appLocales, currentLocale, localizations, readPermissions);
+const CMEditViewCopyLocale = ({
+  appLocales = [],
+  currentLocale,
+  localizations = [],
+  readPermissions = [],
+}: CMEditViewCopyLocaleProps) => {
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [isOpen, setIsOpen] = React.useState(false);
 
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
-  const dispatch = useDispatch();
+  const dispatch = useTypedDispatch();
   const { allLayoutData, initialData, slug } = useCMEditViewDataManager();
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [isOpen, setIsOpen] = React.useState(false);
-  const [value, setValue] = React.useState(options[0]?.value || '');
   const { get } = useFetchClient();
 
+  const options = React.useMemo(
+    () =>
+      appLocales
+        .filter(({ code }) => {
+          return (
+            code !== currentLocale &&
+            localizations.findIndex(({ locale }) => locale === code) !== -1
+          );
+        })
+        .filter(({ code }) => {
+          return readPermissions.some(({ properties }) =>
+            (properties?.locales ?? []).includes(code)
+          );
+        })
+        .map((locale) => {
+          /**
+           * We will only ever have localisations that have been activated by the
+           * user, so we can safely assume that the locale will be in the list.
+           */
+          const localization = localizations.find((loc) => locale.code === loc.locale)!;
+
+          /**
+           * @note we use the value of the localization here because we're accessing the
+           * content's entities not the entry of the locale itself
+           */
+          return {
+            label: locale.name,
+            value: localization.id,
+          };
+        }),
+    [appLocales, currentLocale, localizations, readPermissions]
+  );
+
+  const [value, setValue] = React.useState(options[0]?.value || '');
+
+  if (localizations.length === 0) {
+    return null;
+  }
+
+  /**
+   * TODO: move this to an actual mutation
+   */
   const handleConfirmCopyLocale = async () => {
     if (!value) {
       handleToggle();
@@ -82,12 +101,11 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }: 
       return;
     }
 
-    const requestURL = `/content-manager/collection-types/${slug}/${value}`;
-
     setIsLoading(true);
     try {
-      const { data: response } = await get(requestURL);
+      const { data: response } = await get(`/content-manager/collection-types/${slug}/${value}`);
 
+      // @ts-expect-error – there will always be allLayoutData.contentType. TODO: fix in V5 helper-plugin.
       const cleanedData = cleanData(response, allLayoutData, localizations);
       ['createdBy', 'updatedBy', 'publishedAt', 'id', 'createdAt'].forEach((key) => {
         if (!initialData[key]) return;
@@ -95,6 +113,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }: 
       });
 
       dispatch({
+        // @ts-expect-error – we've not added the CRUD reducer the redux store types yet.
         type: 'ContentManager/CrudReducer/GET_DATA_SUCCEEDED',
         data: cleanedData,
         setModifiedDataOnly: true,
@@ -123,10 +142,6 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }: 
     }
   };
 
-  const handleChange = (value: any) => {
-    setValue(value);
-  };
-
   const handleToggle = () => {
     setIsOpen((prev) => !prev);
   };
@@ -153,30 +168,31 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }: 
           <DialogBody icon={<ExclamationMarkCircle />}>
             <Flex direction="column" alignItems="stretch" gap={2}>
               <Flex justifyContent="center">
-                <CenteredTypography id="confirm-description">
+                <Typography textAlign="center" id="confirm-description">
                   {formatMessage({
                     id: getTranslation('CMEditViewCopyLocale.ModalConfirm.content'),
                     defaultMessage:
                       'Your current content will be erased and filled by the content of the selected locale:',
                   })}
-                </CenteredTypography>
+                </Typography>
               </Flex>
               <Box>
-                <Select
+                <SingleSelect
                   label={formatMessage({
                     id: getTranslation('Settings.locales.modal.locales.label'),
+                    defaultMessage: 'Locales',
                   })}
-                  onChange={handleChange}
+                  onChange={setValue}
                   value={value}
                 >
                   {options.map(({ label, value }) => {
                     return (
-                      <Option key={value} value={value}>
+                      <SingleSelectOption key={value} value={value}>
                         {label}
-                      </Option>
+                      </SingleSelectOption>
                     );
                   })}
-                </Select>
+                </SingleSelect>
               </Box>
             </Flex>
           </DialogBody>
@@ -204,4 +220,15 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }: 
   );
 };
 
-export default CMEditViewCopyLocale;
+const StyledTypography = styled(Typography)`
+  svg {
+    margin-right: ${({ theme }) => theme.spaces[2]};
+    fill: none;
+    > g,
+    path {
+      fill: ${({ theme }) => theme.colors.primary600};
+    }
+  }
+`;
+
+export { CMEditViewCopyLocale };

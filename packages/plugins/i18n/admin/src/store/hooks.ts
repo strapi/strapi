@@ -8,7 +8,9 @@ type AppDispatch = Dispatch<Action>;
 const useTypedDispatch: () => AppDispatch = useDispatch;
 const useTypedSelector: TypedUseSelectorHook<RootState> = useSelector;
 
-const createTypedSelector = <TResult>(selector: Selector<RootState, TResult>) =>
-  createSelector((state: RootState) => state, selector);
+const createTypedSelector = <TResult, TSelector extends Selector<RootState, TResult>>(
+  selector: TSelector
+  // @ts-expect-error – TODO: this is needed to avoid TS2742. But it's not quite right.
+): ReturnType<TSelector> => createSelector((state: RootState) => state, selector);
 
 export { useTypedSelector, createTypedSelector, useTypedDispatch };

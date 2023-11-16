@@ -1,11 +1,5 @@
-import { Entity as StrapiEntity } from '@strapi/types';
 import { errors } from '@strapi/utils';
-
-interface Entity {
-  id: StrapiEntity.ID;
-  createdAt: string;
-  updatedAt: string;
-}
+import { Entity } from './shared';
 
 export interface Locale extends Entity {
   code: string;
