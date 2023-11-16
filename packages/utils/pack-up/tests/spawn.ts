@@ -100,7 +100,7 @@ const spawn = async (projectName: string): Promise<Project> => {
 
   return {
     cwd: tmpPath,
-    install: () => execute('yarn install --no-immutable'),
+    install: () => execute('YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn install --no-immutable'),
     remove: tmpRemove,
     run: (cmd: string) => execute(`yarn run ${cmd}`),
   };
