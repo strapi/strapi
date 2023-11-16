@@ -19,8 +19,12 @@ import {
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 
+import {
+  LimitsModal,
+  Body,
+  Title,
+} from '../../../../../../pages/SettingsPage/pages/ReviewWorkflows/components/LimitsModal';
 import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
-import * as LimitsModal from '../../../../../pages/SettingsPage/pages/ReviewWorkflows/components/LimitsModal';
 import {
   CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME,
   CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME,
@@ -213,43 +217,37 @@ export function StageSelect() {
         </Flex>
       </Field>
 
-      <LimitsModal.Root
-        isOpen={showLimitModal === 'workflow'}
-        onClose={() => setShowLimitModal(false)}
-      >
-        <LimitsModal.Title>
+      <LimitsModal isOpen={showLimitModal === 'workflow'} onClose={() => setShowLimitModal(false)}>
+        <Title>
           {formatMessage({
             id: 'content-manager.reviewWorkflows.workflows.limit.title',
             defaultMessage: 'You’ve reached the limit of workflows in your plan',
           })}
-        </LimitsModal.Title>
+        </Title>
 
-        <LimitsModal.Body>
+        <Body>
           {formatMessage({
             id: 'content-manager.reviewWorkflows.workflows.limit.body',
             defaultMessage: 'Delete a workflow or contact Sales to enable more workflows.',
           })}
-        </LimitsModal.Body>
-      </LimitsModal.Root>
+        </Body>
+      </LimitsModal>
 
-      <LimitsModal.Root
-        isOpen={showLimitModal === 'stage'}
-        onClose={() => setShowLimitModal(false)}
-      >
-        <LimitsModal.Title>
+      <LimitsModal isOpen={showLimitModal === 'stage'} onClose={() => setShowLimitModal(false)}>
+        <Title>
           {formatMessage({
             id: 'content-manager.reviewWorkflows.stages.limit.title',
             defaultMessage: 'You have reached the limit of stages for this workflow in your plan',
           })}
-        </LimitsModal.Title>
+        </Title>
 
-        <LimitsModal.Body>
+        <Body>
           {formatMessage({
             id: 'content-manager.reviewWorkflows.stages.limit.body',
             defaultMessage: 'Try deleting some stages or contact Sales to enable more stages.',
           })}
-        </LimitsModal.Body>
-      </LimitsModal.Root>
+        </Body>
+      </LimitsModal>
     </>
   );
 }
