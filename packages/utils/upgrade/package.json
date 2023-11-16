@@ -45,7 +45,8 @@
   "bin": "./bin/upgrade.js",
   "files": [
     "bin",
-    "dist"
+    "dist",
+    "resources"
   ],
   "scripts": {
     "build": "pack-up build",
