@@ -76,11 +76,11 @@ const getConfig = ({ baseUrl, rootPath, s3Options, ...legacyS3Options }: InitOpt
       "S3 configuration options passed at root level of the plugin's providerOptions is deprecated and will be removed in a future release. Please wrap them inside the 's3Options:{}' property."
     );
   }
-
+  const credentials = extractCredentials({ s3Options, ...legacyS3Options });
   const config = {
     ...s3Options,
     ...legacyS3Options,
-    credentials: extractCredentials({ s3Options, ...legacyS3Options }),
+    ...(credentials ? { credentials } : {}),
   };
 
   config.params.ACL = getOr(ObjectCannedACL.public_read, ['params', 'ACL'], config);
