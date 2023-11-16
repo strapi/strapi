@@ -44,7 +44,7 @@ export const TabForm = ({
                 /**
                  * Use undefined as the default value because not every input wants a string e.g. Date pickers
                  */
-                const value = get(modifiedData, input.name, '');
+                const value = get(modifiedData, input.name, undefined);
 
                 // When extending the yup schema of an existing field (like in https://github.com/strapi/strapi/blob/293ff3b8f9559236609d123a2774e3be05ce8274/packages/strapi-plugin-i18n/admin/src/index.js#L52)
                 // and triggering a yup validation error in the UI (missing a required field for example)

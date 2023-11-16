@@ -70,7 +70,7 @@ export const SelectComponents = ({
       defaultMessage:
         '{number, plural, =0 {# components} one {# component} other {# components}} selected',
     },
-    { number: value.length }
+    { number: value?.length ?? 0 }
   );
 
   return (
