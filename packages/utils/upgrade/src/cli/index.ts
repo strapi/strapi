@@ -13,7 +13,8 @@ const command = (name: string, description: string): Command => {
     .description(description)
     .option('--dry-run', "Run the upgrade, but don't update the files", false)
     .option('-d, --debug', 'Get more logs in debug mode', false)
-    .option('-s, --silent', "Don't log anything", false);
+    .option('-s, --silent', "Don't log anything", false)
+    .option('-p, --project-path <project-path>', 'Path to the Strapi project');
 };
 
 // Register commands
