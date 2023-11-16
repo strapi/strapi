@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+
 import fse from 'fs-extra';
 import assert from 'node:assert';
 
