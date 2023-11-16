@@ -55,10 +55,11 @@
     "prepublishOnly": "yarn clean && yarn build"
   },
   "dependencies": {
+    "@babel/register": "7.22.15",
     "chalk": "4.1.2",
     "cli-table3": "0.6.2",
     "commander": "8.3.0",
-    "glob": "7.2.3",
+    "glob": "10.3.10",
     "jscodeshift": "0.15.1",
     "ora": "5.4.1",
     "prompts": "2.4.2",
