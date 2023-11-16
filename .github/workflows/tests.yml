@@ -93,8 +93,6 @@ jobs:
     name: 'unit_back (node: ${{ matrix.node }})'
     needs: [changes, build]
     runs-on: ubuntu-latest
-    env:
-      YARN_ENABLE_IMMUTABLE_INSTALLS: false
     strategy:
       matrix:
         node: [18, 20]
