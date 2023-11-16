@@ -3,5 +3,8 @@
   "extends": ["custom/back/typescript"],
   "parserOptions": {
     "project": ["./server/tsconfig.eslint.json"]
+  },
+  "rules": {
+    "import/extensions:": "off"
   }
 }

@@ -5,7 +5,7 @@ import {
   ApolloServerPluginLandingPageGraphQLPlayground,
 } from 'apollo-server-core';
 import depthLimit from 'graphql-depth-limit';
-import { graphqlUploadKoa } from 'graphql-upload';
+import graphqlUploadKoa from 'graphql-upload/graphqlUploadKoa.js';
 import type { Config } from 'apollo-server-core';
 import type { Strapi } from '@strapi/types';
 
