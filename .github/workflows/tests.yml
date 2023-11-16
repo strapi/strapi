@@ -93,6 +93,8 @@ jobs:
     name: 'unit_back (node: ${{ matrix.node }})'
     needs: [changes, build]
     runs-on: ubuntu-latest
+    env:
+      YARN_ENABLE_IMMUTABLE_INSTALLS: false
     strategy:
       matrix:
         node: [18, 20]
@@ -131,7 +133,7 @@ jobs:
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - name: Run test
-        run: yarn nx affected --target=test:front --nx-ignore-cycles
+        run: yarn nx affected --target=test:front --nx-ignore-cycles -- --runInBand
 
   e2e:
     timeout-minutes: 60

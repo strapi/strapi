@@ -1,0 +1,9 @@
+{
+  "root": true,
+  "extends": ["custom/front/typescript"],
+  "rules": {
+    "check-file/filename-naming-convention": "off",
+    "check-file/no-index": "off",
+    "import/no-default-export": "off"
+  }
+}
