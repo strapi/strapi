@@ -1,7 +1,7 @@
 import CliTable3 from 'cli-table3';
 import chalk from 'chalk';
 
-import { ONE_HOUR_MS, ONE_MINUTE_MS, ONE_SECOND_MS } from './time';
+import { ONE_SECOND_MS } from './time';
 
 import type { SemVer } from '.';
 import type { RunReports } from '../types';
