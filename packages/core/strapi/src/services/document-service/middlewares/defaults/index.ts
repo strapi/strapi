@@ -54,5 +54,5 @@ export const loadDefaultMiddlewares = (manager: Documents.Middleware.Manager) =>
   manager.add('allUIDs', 'publish', [localeToLookup], {});
 
   // Unpublish
-  manager.add('allUIDs', 'unpublish', defaultToDraft, {});
+  manager.add('allUIDs', 'unpublish', [localeToLookup], {});
 };

@@ -231,7 +231,7 @@ const createDocumentService = ({
 
     const newDocumentId = createDocumentId();
 
-    await mapAsync(entries, async (entryToClone: any) => {
+    const result = await mapAsync(entries, async (entryToClone: any) => {
       const componentData = await cloneComponents(uid, entryToClone, data);
       const entityData = createPipeline(
         Object.assign(omitComponentData(model, data), componentData),
@@ -239,14 +239,15 @@ const createDocumentService = ({
       );
 
       // TODO: Transform params to query
-      return db.query(uid).clone(entryToClone.id, {
+      const clonedEntry = await db.query(uid).clone(entryToClone.id, {
         ...query,
         // Allows entityData to override the documentId (e.g. when publishing)
         data: { documentId: newDocumentId, ...entityData },
       });
+      return clonedEntry;
     });
 
-    return { documentId: newDocumentId };
+    return { documentId: newDocumentId, result };
   },
 
   // TODO: Handle relations so they target the published version
@@ -273,15 +274,15 @@ const createDocumentService = ({
   },
 
   async unpublish(uid, documentId, params) {
-    const { filters } = params || {};
+    if (params?.status === 'draft') {
+      throw new Error('Cannot unpublish a document that is already a draft');
+    }
 
-    this.delete(uid, documentId, {
-      ...(params || {}),
-      // @ts-expect-error - publishedAt attribute is not part of the generic type
-      filters: {
-        ...filters,
-        publishedAt: { $ne: null },
-      },
+    // TODO: Discard draft
+    // Delete all published versions
+    await this.delete(uid, documentId, {
+      ...params,
+      lookup: { ...params?.lookup, publishedAt: { $ne: null } },
     });
 
     // TODO: Return actual count
