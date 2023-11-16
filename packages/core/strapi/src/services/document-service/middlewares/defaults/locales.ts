@@ -17,7 +17,7 @@ export const defaultLocale: Middleware = async (ctx, next) => {
 /**
  * Add locale lookup query to the params
  */
-export const lookUpDocumentLocale: Middleware = async (ctx, next) => {
+export const localeToLookup: Middleware = async (ctx, next) => {
   if (!ctx.params) ctx.params = {};
 
   const lookup = ctx.params.lookup || {};

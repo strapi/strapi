@@ -42,7 +42,7 @@ export type RepositoryInstance<
   clone: <TParams extends Params.Clone<TContentTypeUID>>(
     documentId: ID,
     params: TParams
-  ) => Result.Clone<TContentTypeUID, TParams>;
+  ) => Result.Clone;
 
   update: <TParams extends Params.Update<TContentTypeUID>>(
     documentId: ID,

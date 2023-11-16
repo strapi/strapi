@@ -1,13 +1,13 @@
 import { Documents } from '@strapi/types';
-import { defaultToDraft, lookUpDocumentStatus, statusToData } from './draft-and-publish';
-import { defaultLocale, lookUpDocumentLocale, localeToData } from './locales';
+import { defaultToDraft, statusToLookup, statusToData } from './draft-and-publish';
+import { defaultLocale, localeToLookup, localeToData } from './locales';
 
 export const loadDefaultMiddlewares = (manager: Documents.Middleware.Manager) => {
   // Find Many
   manager.add(
     'allUIDs',
     'findMany',
-    [defaultToDraft, lookUpDocumentStatus, defaultLocale, lookUpDocumentLocale],
+    [defaultToDraft, statusToLookup, defaultLocale, localeToLookup],
     {}
   );
 
@@ -15,7 +15,7 @@ export const loadDefaultMiddlewares = (manager: Documents.Middleware.Manager) =>
   manager.add(
     'allUIDs',
     'findOne',
-    [defaultToDraft, lookUpDocumentStatus, defaultLocale, lookUpDocumentLocale],
+    [defaultToDraft, statusToLookup, defaultLocale, localeToLookup],
     {}
   );
 
@@ -23,12 +23,12 @@ export const loadDefaultMiddlewares = (manager: Documents.Middleware.Manager) =>
   manager.add(
     'allUIDs',
     'findFirst',
-    [defaultToDraft, lookUpDocumentStatus, defaultLocale, lookUpDocumentLocale],
+    [defaultToDraft, statusToLookup, defaultLocale, localeToLookup],
     {}
   );
 
   // Delete
-  manager.add('allUIDs', 'delete', [lookUpDocumentStatus, lookUpDocumentLocale], {});
+  manager.add('allUIDs', 'delete', [statusToLookup, localeToLookup], {});
 
   // Delete Many - TODO
   // manager.add('allUIDs', 'deleteMany', [], {});
@@ -40,14 +40,7 @@ export const loadDefaultMiddlewares = (manager: Documents.Middleware.Manager) =>
   manager.add(
     'allUIDs',
     'update',
-    [
-      defaultToDraft,
-      lookUpDocumentStatus,
-      statusToData,
-      defaultLocale,
-      // lookUpDocumentLocale,
-      localeToData,
-    ],
+    [defaultToDraft, statusToLookup, statusToData, defaultLocale, localeToData],
     {}
   );
 
@@ -55,7 +48,7 @@ export const loadDefaultMiddlewares = (manager: Documents.Middleware.Manager) =>
   manager.add('allUIDs', 'count', [defaultToDraft, defaultLocale], {});
 
   // Clone
-  manager.add('allUIDs', 'clone', defaultToDraft, {});
+  manager.add('allUIDs', 'clone', [localeToLookup], {});
 
   // Publish
   manager.add('allUIDs', 'publish', defaultToDraft, {});

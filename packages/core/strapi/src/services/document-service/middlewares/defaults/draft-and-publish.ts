@@ -19,7 +19,7 @@ export const defaultToDraft: Middleware = async (ctx, next) => {
 /**
  * Add status lookup query to the params
  */
-export const lookUpDocumentStatus: Middleware = async (ctx, next) => {
+export const statusToLookup: Middleware = async (ctx, next) => {
   if (!ctx.params) ctx.params = {};
 
   const lookup = ctx.params.lookup || {};

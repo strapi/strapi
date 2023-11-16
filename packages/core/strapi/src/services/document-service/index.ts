@@ -16,6 +16,7 @@ import {
 
 import { pickSelectionParams } from './params';
 import { applyTransforms } from '../entity-service/attributes';
+import { createDocumentId } from '../../utils/transform-content-types-to-models';
 
 const { transformParamsToQuery } = convertQueryParams;
 
@@ -208,33 +209,45 @@ const createDocumentService = ({
   async clone(uid, documentId, params) {
     // TODO: File upload
     // TODO: Entity validator.
-    const { data } = params!;
+    const { data = {} as any } = params!;
 
-    if (!data) {
-      throw new Error('Create requires data attribute');
+    if (params?.status === 'published') {
+      throw new Error('Cannot directly clone a published document');
     }
 
     const model = strapi.getModel(uid);
+    const query = transformParamsToQuery(uid, pickSelectionParams(params));
 
-    // TODO: Pick locale and publications state params
-    const entryToClone = await db.query(uid).findOne({ where: { id: documentId } });
+    // Find all locales of the document
+    const entries = await db.query(uid).findMany({
+      ...query,
+      where: { ...params?.lookup, ...query.where, documentId, publishedAt: null },
+    });
 
-    if (!entryToClone) {
+    // Document does not exist
+    if (!entries.length) {
       return null;
     }
 
-    const query = transformParamsToQuery(uid, pickSelectionParams(params));
-    const componentData = await cloneComponents(uid, entryToClone, data);
-    const entityData = createPipeline(
-      Object.assign(omitComponentData(model, data), componentData),
-      { contentType: model }
-    );
+    const newDocumentId = createDocumentId();
 
-    // TODO: Transform params to query
-    return db.query(uid).clone(documentId, {
-      ...query,
-      data: entityData,
+    await mapAsync(entries, async (entryToClone: any) => {
+      const componentData = await cloneComponents(uid, entryToClone, data);
+      const entityData = createPipeline(
+        Object.assign(omitComponentData(model, data), componentData),
+        { contentType: model }
+      );
+
+      entityData.documentId = newDocumentId;
+
+      // TODO: Transform params to query
+      return db.query(uid).clone(entryToClone.id, {
+        ...query,
+        data: entityData,
+      });
     });
+
+    return { documentId: newDocumentId };
   },
 
   // TODO: Handle relations so they target the published version
