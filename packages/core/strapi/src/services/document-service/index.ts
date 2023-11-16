@@ -242,7 +242,7 @@ const createDocumentService = ({
       const clonedEntry = await db.query(uid).clone(entryToClone.id, {
         ...query,
         // Allows entityData to override the documentId (e.g. when publishing)
-        data: { documentId: newDocumentId, ...entityData },
+        data: { documentId: newDocumentId, ...entityData, locale: entryToClone.locale },
       });
       return clonedEntry;
     });

@@ -47,7 +47,7 @@ describe('Document Service', () => {
       })
     );
 
-    it.only(
+    it(
       'unpublish single locale of document',
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
