@@ -76,6 +76,7 @@ interface EventWithoutProperties {
     | 'didDuplicateRole'
     | 'didEditEditSettings'
     | 'didEditEmailTemplates'
+    | 'didEditFieldNameOnContentType'
     | 'didEditListSettings'
     | 'didEditMediaLibraryConfig'
     | 'didEditNameOfContentType'
