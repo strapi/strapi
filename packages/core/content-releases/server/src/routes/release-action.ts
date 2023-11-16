@@ -6,7 +6,15 @@ export default {
       path: '/release-actions',
       handler: 'release-action.create',
       config: {
-        policies: ['admin::isAuthenticatedAdmin'],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::content-releases.create-action'],
+            },
+          },
+        ],
       },
     },
   ],
