@@ -51,7 +51,7 @@ export const loadDefaultMiddlewares = (manager: Documents.Middleware.Manager) =>
   manager.add('allUIDs', 'clone', [localeToLookup], {});
 
   // Publish
-  manager.add('allUIDs', 'publish', defaultToDraft, {});
+  manager.add('allUIDs', 'publish', [localeToLookup], {});
 
   // Unpublish
   manager.add('allUIDs', 'unpublish', defaultToDraft, {});

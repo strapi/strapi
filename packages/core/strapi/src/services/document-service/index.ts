@@ -238,12 +238,11 @@ const createDocumentService = ({
         { contentType: model }
       );
 
-      entityData.documentId = newDocumentId;
-
       // TODO: Transform params to query
       return db.query(uid).clone(entryToClone.id, {
         ...query,
-        data: entityData,
+        // Allows entityData to override the documentId (e.g. when publishing)
+        data: { documentId: newDocumentId, ...entityData },
       });
     });
 
@@ -252,17 +251,21 @@ const createDocumentService = ({
 
   // TODO: Handle relations so they target the published version
   async publish(uid, documentId, params) {
-    const { filters } = params || {};
+    if (params?.status === 'published') {
+      throw new Error('Cannot publish a document that is already published');
+    }
+
+    // Delete already published versions that match the locales to be published
+    await this.delete(uid, documentId, {
+      ...params,
+      lookup: { ...params?.lookup, publishedAt: { $ne: null } },
+    });
 
     // Clone every draft version to be published
-    this.clone(uid, documentId, {
+    await this.clone(uid, documentId, {
       ...(params || {}),
-      filters: {
-        ...filters,
-        publishedAt: { $ne: null },
-      },
       // @ts-expect-error - Generic type does not have publishedAt attribute by default
-      data: { publishedAt: new Date() },
+      data: { documentId, publishedAt: new Date() },
     });
 
     // TODO: Return actual count
