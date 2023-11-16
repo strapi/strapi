@@ -23,7 +23,7 @@ const TRANSFORM_JSON_SUFFIX = 'json';
 const TRANSFORM_ALLOWED_KIND = [TRANSFORM_CODEMOD_SUFFIX, TRANSFORM_JSON_SUFFIX];
 const TRANSFORM_EXT = 'ts';
 const TRANSFORM_FILE_REGEXP = new RegExp(
-  `^.+\.(${TRANSFORM_ALLOWED_KIND.join('|')})\.${TRANSFORM_EXT}$`
+  `^.+[.](${TRANSFORM_ALLOWED_KIND.join('|')})[.]${TRANSFORM_EXT}$`
 );
 
 export const createTransformsLoader = (options: CreateTransformsLoaderOptions) => {
