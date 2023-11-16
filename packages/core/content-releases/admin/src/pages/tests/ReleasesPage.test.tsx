@@ -1,7 +1,7 @@
 import { within, screen } from '@testing-library/react';
 import { render } from '@tests/utils';
 
-import { ReleasesPage } from '../ReleasePage';
+import { ReleasesPage } from '../ReleasesPage';
 
 describe('Releases home page', () => {
   it('renders correctly the heading content', async () => {
