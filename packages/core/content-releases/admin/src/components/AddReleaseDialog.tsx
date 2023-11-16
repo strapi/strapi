@@ -9,46 +9,45 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { useNotification } from '@strapi/helper-plugin';
+import { useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import * as yup from 'yup';
 
-import { createRelease, releaseSelector } from '../../modules/releaseSlice';
-import { useTypedDispatch, useTypedSelector } from '../../store/hooks';
+import { useCreateReleaseMutation } from '../modules/releaseSlice';
+import { isErrorAxiosError } from '../utils/errors';
 
-const releaseSchema = yup.object({
+const RELEASE_SCHEMA = yup.object({
   name: yup.string().required(),
 });
 
+interface FormValues {
+  name: string;
+}
+
 const INITIAL_VALUES = {
   name: '',
-};
+} satisfies FormValues;
 
 interface AddReleaseDialogProps {
   handleClose: () => void;
-}
-
-interface FormValues {
-  name: string;
 }
 
 export const AddReleaseDialog = ({ handleClose }: AddReleaseDialogProps) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { push } = useHistory();
-  const dispatch = useTypedDispatch();
-  const newRelease = useTypedSelector(releaseSelector);
+  const { formatAPIError } = useAPIErrorHandler();
+
+  const [createRelease, { isLoading }] = useCreateReleaseMutation();
 
   const handleSubmit = async (values: FormValues) => {
-    const release = await dispatch(
-      createRelease({
-        name: values.name,
-      })
-    );
+    const release = await createRelease({
+      name: values.name,
+    });
 
-    if (!release.error) {
+    if ('data' in release) {
       toggleNotification({
         type: 'success',
         message: formatMessage({
@@ -56,8 +55,12 @@ export const AddReleaseDialog = ({ handleClose }: AddReleaseDialogProps) => {
           defaultMessage: 'Release created.',
         }),
       });
-
-      push(`/plugins/content-releases/${release.payload.id}`);
+      push(`/plugins/content-releases/${release.data.data.id}`);
+    } else if (isErrorAxiosError(release.error)) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(release.error),
+      });
     } else {
       toggleNotification({
         type: 'warning',
@@ -80,7 +83,7 @@ export const AddReleaseDialog = ({ handleClose }: AddReleaseDialogProps) => {
         validateOnChange={false}
         onSubmit={handleSubmit}
         initialValues={INITIAL_VALUES}
-        validationSchema={releaseSchema}
+        validationSchema={RELEASE_SCHEMA}
       >
         {({ values, errors, handleChange }) => (
           <Form>
@@ -104,12 +107,7 @@ export const AddReleaseDialog = ({ handleClose }: AddReleaseDialogProps) => {
                 </Button>
               }
               endActions={
-                <Button
-                  name="submit"
-                  loading={newRelease.loading}
-                  disabled={!values.name}
-                  type="submit"
-                >
+                <Button name="submit" loading={isLoading} disabled={!values.name} type="submit">
                   {formatMessage({
                     id: 'content-releases.modal.form.button.submit',
                     defaultMessage: 'Continue',

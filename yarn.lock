@@ -8770,6 +8770,7 @@ __metadata:
     "@testing-library/user-event": "npm:14.4.3"
     "@types/koa": "npm:2.13.4"
     "@types/styled-components": "npm:5.1.26"
+    axios: "npm:1.5.0"
     formik: "npm:2.4.0"
     history: "npm:^4.9.0"
     koa: "npm:2.13.4"

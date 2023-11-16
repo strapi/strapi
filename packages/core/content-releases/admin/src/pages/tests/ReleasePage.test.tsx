@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 
-import { renderWithProviders } from '../../utils/test-utils';
+import { renderWithProviders } from '../../../tests/utils';
 import { ReleasesPage } from '../ReleasePage';
 
 const user = userEvent.setup();

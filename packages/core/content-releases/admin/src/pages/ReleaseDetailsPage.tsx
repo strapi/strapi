@@ -24,6 +24,7 @@ const PencilIcon = styled(Pencil)`
   height: 16px;
   path {
     fill: ${({ theme }) => theme.colors.neutral600};
+  }
 `;
 
 const TrashIcon = styled(Trash)`
@@ -31,6 +32,7 @@ const TrashIcon = styled(Trash)`
   height: 16px;
   path {
     fill: ${({ theme }) => theme.colors.danger600};
+  }
 `;
 
 const ReleaseInfoWrapper = styled(Flex)`
