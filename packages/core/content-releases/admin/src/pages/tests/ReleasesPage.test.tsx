@@ -5,7 +5,7 @@ import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 
 import { renderWithProviders } from '../../../tests/utils';
-import { ReleasesPage } from '../ReleasePage';
+import { ReleasesPage } from '../ReleasesPage';
 
 const user = userEvent.setup();
 

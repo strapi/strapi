@@ -4,7 +4,7 @@ import { Route, Switch } from 'react-router-dom';
 import { pluginId } from '../pluginId';
 
 import { ReleaseDetailsPage } from './ReleaseDetailsPage';
-import { ReleasesPage } from './ReleasePage';
+import { ReleasesPage } from './ReleasesPage';
 
 export const App = () => {
   return (
