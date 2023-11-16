@@ -13,7 +13,7 @@ import { ExclamationMarkCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { getTrad } from '../../utils';
+import { getTranslation } from '../../utils/getTranslation';
 
 const TextAlignTypography = styled(Typography)`
   text-align: center;
@@ -99,7 +99,7 @@ const CheckboxConfirmation = ({
               <Flex justifyContent="center">
                 <TextAlignTypography id="confirm-description">
                   {formatMessage({
-                    id: getTrad('CheckboxConfirmation.Modal.content'),
+                    id: getTranslation('CheckboxConfirmation.Modal.content'),
                     defaultMessage:
                       'Disabling localization will engender the deletion of all your content but the one associated to your default locale (if existing).',
                   })}
@@ -108,7 +108,7 @@ const CheckboxConfirmation = ({
               <Flex justifyContent="center">
                 <Typography fontWeight="semiBold" id="confirm-description">
                   {formatMessage({
-                    id: getTrad('CheckboxConfirmation.Modal.body'),
+                    id: getTranslation('CheckboxConfirmation.Modal.body'),
                     defaultMessage: 'Do you want to disable it?',
                   })}
                 </Typography>
@@ -127,7 +127,7 @@ const CheckboxConfirmation = ({
             endAction={
               <Button variant="danger-light" onClick={handleConfirm}>
                 {formatMessage({
-                  id: getTrad('CheckboxConfirmation.Modal.button-confirm'),
+                  id: getTranslation('CheckboxConfirmation.Modal.button-confirm'),
                   defaultMessage: 'Yes, disable',
                 })}
               </Button>

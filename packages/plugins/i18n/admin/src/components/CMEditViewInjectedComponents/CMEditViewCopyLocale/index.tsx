@@ -17,7 +17,7 @@ import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { getTrad } from '../../../utils';
+import { getTranslation } from '../../../utils/getTranslation';
 
 import { cleanData, generateOptions } from './utils';
 
@@ -103,7 +103,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }: 
       toggleNotification({
         type: 'success',
         message: {
-          id: getTrad('CMEditViewCopyLocale.copy-success'),
+          id: getTranslation('CMEditViewCopyLocale.copy-success'),
           defaultMessage: 'Locale copied!',
         },
       });
@@ -113,7 +113,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }: 
       toggleNotification({
         type: 'warning',
         message: {
-          id: getTrad('CMEditViewCopyLocale.copy-failure'),
+          id: getTranslation('CMEditViewCopyLocale.copy-failure'),
           defaultMessage: 'Failed to copy locale',
         },
       });
@@ -143,7 +143,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }: 
         <Flex>
           <Duplicate width="12px" height="12px" />
           {formatMessage({
-            id: getTrad('CMEditViewCopyLocale.copy-text'),
+            id: getTranslation('CMEditViewCopyLocale.copy-text'),
             defaultMessage: 'Fill in from another locale',
           })}
         </Flex>
@@ -155,7 +155,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }: 
               <Flex justifyContent="center">
                 <CenteredTypography id="confirm-description">
                   {formatMessage({
-                    id: getTrad('CMEditViewCopyLocale.ModalConfirm.content'),
+                    id: getTranslation('CMEditViewCopyLocale.ModalConfirm.content'),
                     defaultMessage:
                       'Your current content will be erased and filled by the content of the selected locale:',
                   })}
@@ -164,7 +164,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }: 
               <Box>
                 <Select
                   label={formatMessage({
-                    id: getTrad('Settings.locales.modal.locales.label'),
+                    id: getTranslation('Settings.locales.modal.locales.label'),
                   })}
                   onChange={handleChange}
                   value={value}
@@ -192,7 +192,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }: 
             endAction={
               <Button variant="success" onClick={handleConfirmCopyLocale} loading={isLoading}>
                 {formatMessage({
-                  id: getTrad('CMEditViewCopyLocale.submit-text'),
+                  id: getTranslation('CMEditViewCopyLocale.submit-text'),
                   defaultMessage: 'Yes, fill in',
                 })}
               </Button>

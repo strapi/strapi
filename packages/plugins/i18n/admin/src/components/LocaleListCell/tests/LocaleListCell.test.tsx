@@ -84,7 +84,7 @@ describe('LocaleListCell', () => {
       },
     ];
 
-    useSelector.mockImplementation(() => locales);
+    jest.mocked(useSelector).mockImplementation(() => locales);
 
     const locale = 'en';
     const localizations = [{ locale: 'ar' }];
@@ -92,7 +92,7 @@ describe('LocaleListCell', () => {
     render(
       <IntlProvider messages={{}} locale="en">
         <ThemeProvider theme={lightTheme}>
-          <LocaleListCell id={12} locales={locales} locale={locale} localizations={localizations} />
+          <LocaleListCell id={12} locale={locale} localizations={localizations} />
         </ThemeProvider>
       </IntlProvider>
     );
@@ -135,7 +135,7 @@ describe('LocaleListCell', () => {
     render(
       <IntlProvider messages={{}} locale="en">
         <ThemeProvider theme={lightTheme}>
-          <LocaleListCell id={12} locales={locales} locale={locale} localizations={localizations} />
+          <LocaleListCell id={12} locale={locale} localizations={localizations} />
         </ThemeProvider>
       </IntlProvider>
     );

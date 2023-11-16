@@ -9300,6 +9300,7 @@ __metadata:
     "@strapi/utils": "npm:4.15.4"
     "@testing-library/react": "npm:14.0.0"
     "@testing-library/user-event": "npm:14.4.3"
+    axios: "npm:1.6.0"
     formik: "npm:2.4.0"
     immer: "npm:9.0.19"
     lodash: "npm:4.17.21"
