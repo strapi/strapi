@@ -4,7 +4,7 @@ import { pxToRem } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { getTrad } from '../../../utils';
+import { getTranslation } from '../../../utils/getTranslation';
 
 const statusMap = {
   'did-not-create-locale': {
@@ -22,7 +22,7 @@ const statusMap = {
 const statusToTitleMap = {
   draft: 'content-manager.components.Select.draft-info-title',
   published: 'content-manager.components.Select.publish-info-title',
-  'did-not-create-locale': getTrad('components.Select.locales.not-available'),
+  'did-not-create-locale': getTranslation('components.Select.locales.not-available'),
 };
 
 const StyledBullet = styled.div<{ status: keyof typeof statusMap }>`

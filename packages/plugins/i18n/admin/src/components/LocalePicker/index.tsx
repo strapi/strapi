@@ -11,7 +11,7 @@ import useContentTypePermissions from '../../hooks/useContentTypePermissions';
 import useHasI18n from '../../hooks/useHasI18n';
 import selectI18NLocales from '../../selectors/selectI18nLocales';
 import getInitialLocale from '../../utils/getInitialLocale';
-import getTrad from '../../utils/getTrad';
+import { getTranslation } from '../../utils/getTranslation';
 
 const LocalePicker = () => {
   const { formatMessage } = useIntl();
@@ -74,7 +74,10 @@ const LocalePicker = () => {
   return (
     <Select
       size="S"
-      aria-label={formatMessage({ id: getTrad('actions.select-locale'), defaultMessage: '' })}
+      aria-label={formatMessage({
+        id: getTranslation('actions.select-locale'),
+        defaultMessage: '',
+      })}
       value={selected}
       onChange={handleClick as any}
     >
