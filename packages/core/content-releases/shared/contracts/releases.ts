@@ -25,7 +25,7 @@ export declare namespace CreateRelease {
     /**
      * TODO: check if we also could recieve errors.YupValidationError
      */
-    error?: errors.ApplicationError;
+    error?: errors.ApplicationError | errors.YupValidationError | errors.UnauthorizedError;
   }
 }
 

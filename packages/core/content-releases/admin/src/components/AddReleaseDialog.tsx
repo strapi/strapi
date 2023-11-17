@@ -41,11 +41,11 @@ export const AddReleaseDialog = ({ handleClose }: AddReleaseDialogProps) => {
   const [createRelease, { isLoading }] = useCreateReleaseMutation();
 
   const handleSubmit = async (values: FormValues) => {
-    const release = await createRelease({
+    const response = await createRelease({
       name: values.name,
     });
 
-    if ('data' in release) {
+    if ('data' in response) {
       toggleNotification({
         type: 'success',
         message: formatMessage({
@@ -53,11 +53,11 @@ export const AddReleaseDialog = ({ handleClose }: AddReleaseDialogProps) => {
           defaultMessage: 'Release created.',
         }),
       });
-      push(`/plugins/content-releases/${release.data.data.id}`);
-    } else if (isErrorAxiosError(release.error)) {
+      push(`/plugins/content-releases/${response.data.data.id}`);
+    } else if (isErrorAxiosError(response.error)) {
       toggleNotification({
         type: 'warning',
-        message: formatAPIError(release.error),
+        message: formatAPIError(response.error),
       });
     } else {
       toggleNotification({
