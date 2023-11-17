@@ -27,7 +27,6 @@ export default {
     entry: {
       type: 'relation',
       relation: 'morphToOne',
-      required: true,
       configurable: false,
     },
     contentType: {

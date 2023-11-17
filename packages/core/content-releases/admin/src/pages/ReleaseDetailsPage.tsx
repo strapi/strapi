@@ -11,9 +11,12 @@ import {
   Popover,
   Typography,
 } from '@strapi/design-system';
+import { CheckPermissions } from '@strapi/helper-plugin';
 import { ArrowLeft, EmptyDocuments, More, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
+
+import { PERMISSIONS } from '../constants';
 
 const PopoverButton = styled(Flex)`
   align-self: stretch;
@@ -187,4 +190,10 @@ const ReleaseDetailsPage = () => {
   );
 };
 
-export { ReleaseDetailsPage };
+const ProtectedReleaseDetailsPage = () => (
+  <CheckPermissions permissions={PERMISSIONS.main}>
+    <ReleaseDetailsPage />
+  </CheckPermissions>
+);
+
+export { ReleaseDetailsPage, ProtectedReleaseDetailsPage };

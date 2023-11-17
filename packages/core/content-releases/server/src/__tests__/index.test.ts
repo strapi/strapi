@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable node/no-missing-require */
 
+import { ACTIONS } from '../constants';
+
 const { features } = require('@strapi/strapi/dist/utils/ee');
 const { register } = require('../register');
 
@@ -10,21 +12,33 @@ jest.mock('@strapi/strapi/dist/utils/ee', () => ({
   },
 }));
 describe('register', () => {
-  jest.spyOn(console, 'log').mockImplementation(() => {});
+  const strapi = {
+    admin: {
+      services: {
+        permission: {
+          actionProvider: {
+            registerMany: jest.fn(),
+          },
+        },
+      },
+    },
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should log "cms-content-releases is enabled" if cms-content-releases feature is enabled', () => {
+  it('should register permissions if cms-content-releases feature is enabled', () => {
     features.isEnabled.mockReturnValue(true);
-    register();
-    expect(console.log).toHaveBeenCalledWith('cms-content-releases is enabled');
+    register({ strapi });
+    expect(strapi.admin.services.permission.actionProvider.registerMany).toHaveBeenCalledWith(
+      ACTIONS
+    );
   });
 
-  it('should not log "cms-content-releases is enabled" if cms-content-releases feature is disabled', () => {
+  it('should not register permissions if cms-content-releases feature is disabled', () => {
     features.isEnabled.mockReturnValue(false);
-    register();
-    expect(console.log).not.toHaveBeenCalled();
+    register({ strapi });
+    expect(strapi.admin.services.permission.actionProvider.registerMany).not.toHaveBeenCalled();
   });
 });
