@@ -241,8 +241,8 @@ const linkBlocks: Pick<BlocksStore, 'link'> = {
         {props.children}
       </Link>
     ),
-    value: {
-      type: 'link',
+    handleConvert() {
+      // No-op, links are created via the link button in the toolbar
     },
     matchNode: (node) => node.type === 'link',
     isInBlocksSelector: false,

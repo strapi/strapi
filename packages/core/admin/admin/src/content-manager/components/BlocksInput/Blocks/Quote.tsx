@@ -5,6 +5,7 @@ import { type Text, Editor, Node, Transforms } from 'slate';
 import styled from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
+import { prepareHandleConvert } from '../utils/conversions';
 
 const Blockquote = styled.blockquote.attrs({ role: 'blockquote' })`
   margin: ${({ theme }) => `${theme.spaces[4]} 0`};
@@ -26,11 +27,30 @@ const quoteBlocks: Pick<BlocksStore, 'quote'> = {
       id: 'components.Blocks.blocks.quote',
       defaultMessage: 'Quote',
     },
-    value: {
-      type: 'quote',
-    },
     matchNode: (node) => node.type === 'quote',
     isInBlocksSelector: true,
+    handleConvert(editor) {
+      // Get the element to convert
+      const entry = prepareHandleConvert(editor);
+      if (!entry) return;
+      const [element, elementPath] = entry;
+
+      // Explicitly set non-needed attributes to null so that Slate deletes them
+      const { type: _type, children: _children, ...extra } = element;
+      const attributesToClear: Record<string, null> = {};
+      Object.keys(extra).forEach((key) => {
+        attributesToClear[key] = null;
+      });
+
+      Transforms.setNodes(
+        editor,
+        {
+          ...attributesToClear,
+          type: 'quote',
+        },
+        { at: elementPath }
+      );
+    },
     handleEnterKey(editor) {
       /**
        * To determine if we should break out of the quote node, check 2 things:

@@ -27,9 +27,9 @@ import { withStrapiSchema } from './plugins/withStrapiSchema';
 
 interface NonSelectorBlock {
   renderElement: (props: RenderElementProps) => React.JSX.Element;
-  value: object;
   matchNode: (node: Attribute.BlocksNode) => boolean;
   isInBlocksSelector: false;
+  handleConvert: (editor: Editor) => void | (() => React.JSX.Element);
   handleEnterKey?: (editor: Editor) => void;
   handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => void;
 }

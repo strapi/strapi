@@ -758,4 +758,103 @@ describe('List', () => {
       },
     ]);
   });
+
+  // TODO: test list conversion.
+  // check out the commented code in BlocksToolbar to see what we're missing
+  it('converts a paragraph to a list', () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [
+      {
+        type: 'heading',
+        level: 1,
+        children: [
+          {
+            type: 'text',
+            text: 'Heading link',
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor on the heading
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
+    });
+
+    listBlocks['list-ordered'].handleConvert(baseEditor);
+
+    // console.log(JSON.stringify(baseEditor.children, null, 2));
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'Heading link',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('converts a heading with a link to a list', () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [
+      {
+        type: 'heading',
+        level: 1,
+        children: [
+          {
+            type: 'link',
+            url: 'https://strapi.io',
+            children: [
+              {
+                type: 'text',
+                text: 'Heading link',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor on the heading
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0, 0], offset: 0 },
+      focus: { path: [0, 0, 0], offset: 0 },
+    });
+
+    listBlocks['list-ordered'].handleConvert(baseEditor);
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'link',
+                url: 'https://strapi.io',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'Heading link',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
 });

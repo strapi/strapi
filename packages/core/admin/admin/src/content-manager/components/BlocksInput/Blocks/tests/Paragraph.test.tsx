@@ -247,4 +247,81 @@ describe('Paragraph', () => {
       },
     ]);
   });
+
+  it('converts a list to a paragraph', () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'List item 1',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0, 0], offset: 0 },
+      focus: { path: [0, 0, 0], offset: 0 },
+    });
+
+    paragraphBlocks.paragraph.handleConvert(baseEditor);
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'List item 1',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('converts a heading to a paragraph', () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [
+      {
+        type: 'heading',
+        level: 1,
+        children: [
+          {
+            type: 'text',
+            italic: true,
+            text: 'Heading 1',
+          },
+        ],
+      },
+    ];
+
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
+    });
+
+    paragraphBlocks.paragraph.handleConvert(baseEditor);
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            italic: true,
+            text: 'Heading 1',
+          },
+        ],
+      },
+    ]);
+  });
 });

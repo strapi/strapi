@@ -5,6 +5,11 @@ import { Transforms } from 'slate';
 import styled from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
+import {
+  insertEmptyBlockAtLast,
+  isLastBlockType,
+  prepareHandleConvert,
+} from '../utils/conversions';
 
 const CodeBlock = styled.pre.attrs({ role: 'code' })`
   border-radius: ${({ theme }) => theme.borderRadius};
@@ -34,11 +39,34 @@ const codeBlocks: Pick<BlocksStore, 'code'> = {
       id: 'components.Blocks.blocks.code',
       defaultMessage: 'Code',
     },
-    value: {
-      type: 'code',
-    },
     matchNode: (node) => node.type === 'code',
     isInBlocksSelector: true,
+    handleConvert(editor) {
+      // Get the element to convert
+      const entry = prepareHandleConvert(editor);
+      if (!entry) return;
+      const [element, elementPath] = entry;
+
+      // Explicitly set non-needed attributes to null so that Slate deletes them
+      const { type: _type, children: _children, ...extra } = element;
+      const attributesToClear: Record<string, null> = {};
+      Object.keys(extra).forEach((key) => {
+        attributesToClear[key] = null;
+      });
+
+      Transforms.setNodes(
+        editor,
+        {
+          ...attributesToClear,
+          type: 'code',
+        },
+        { at: elementPath }
+      );
+
+      if (isLastBlockType(editor, 'code')) {
+        insertEmptyBlockAtLast(editor);
+      }
+    },
     handleEnterKey(editor) {
       // Insert a new line within the block
       Transforms.insertText(editor, '\n');

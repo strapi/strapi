@@ -7,6 +7,7 @@ import { type RenderElementProps } from 'slate-react';
 import styled, { css } from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
+import { prepareHandleConvert } from '../utils/conversions';
 import { type Block } from '../utils/types';
 
 const listStyle = css`
@@ -177,6 +178,34 @@ const handleEnterKeyOnList = (editor: Editor) => {
   }
 };
 
+/**
+ * Common handler for converting a node to a list
+ */
+const handleConvertToList = (editor: Editor, format: Block<'list'>['format']) => {
+  // Get the element to convert
+  const entry = prepareHandleConvert(editor);
+  if (!entry) return;
+  const [element, elementPath] = entry;
+
+  // Explicitly set non-needed attributes to null so that Slate deletes them
+  const { type: _type, children: _children, ...extra } = element;
+  const attributesToClear: Record<string, null> = {};
+  Object.keys(extra).forEach((key) => {
+    attributesToClear[key] = null;
+  });
+
+  Transforms.setNodes(
+    editor,
+    {
+      ...attributesToClear,
+      type: 'list-item',
+    },
+    { at: elementPath }
+  );
+
+  Transforms.wrapNodes(editor, { type: 'list', format, children: [] }, { at: elementPath });
+};
+
 const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-item'> = {
   'list-ordered': {
     renderElement: (props) => <List {...props} />,
@@ -184,13 +213,10 @@ const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-it
       id: 'components.Blocks.blocks.orderedList',
       defaultMessage: 'Numbered list',
     },
-    value: {
-      type: 'list',
-      format: 'ordered',
-    },
     icon: NumberList,
     matchNode: (node) => node.type === 'list' && node.format === 'ordered',
     isInBlocksSelector: true,
+    handleConvert: (editor) => handleConvertToList(editor, 'ordered'),
     handleEnterKey: handleEnterKeyOnList,
     handleBackspaceKey: handleBackspaceKeyOnList,
   },
@@ -200,13 +226,10 @@ const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-it
       id: 'components.Blocks.blocks.unorderedList',
       defaultMessage: 'Bulleted list',
     },
-    value: {
-      type: 'list',
-      format: 'unordered',
-    },
     icon: BulletList,
     matchNode: (node) => node.type === 'list' && node.format === 'unordered',
     isInBlocksSelector: true,
+    handleConvert: (editor) => handleConvertToList(editor, 'unordered'),
     handleEnterKey: handleEnterKeyOnList,
     handleBackspaceKey: handleBackspaceKeyOnList,
   },
@@ -216,8 +239,8 @@ const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-it
         {props.children}
       </Typography>
     ),
-    value: {
-      type: 'list-item',
+    handleConvert() {
+      // No-op because list items are created via list blocks, never directly
     },
     matchNode: (node) => node.type === 'list-item',
     isInBlocksSelector: false,

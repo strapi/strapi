@@ -5,6 +5,7 @@ import { Paragraph } from '@strapi/icons';
 import { type Text, Editor, Transforms } from 'slate';
 
 import { type BlocksStore } from '../BlocksEditor';
+import { prepareHandleConvert } from '../utils/conversions';
 
 const paragraphBlocks: Pick<BlocksStore, 'paragraph'> = {
   paragraph: {
@@ -18,11 +19,30 @@ const paragraphBlocks: Pick<BlocksStore, 'paragraph'> = {
       id: 'components.Blocks.blocks.text',
       defaultMessage: 'Text',
     },
-    value: {
-      type: 'paragraph',
-    },
     matchNode: (node) => node.type === 'paragraph',
     isInBlocksSelector: true,
+    handleConvert(editor) {
+      // Get the element to convert
+      const entry = prepareHandleConvert(editor);
+      if (!entry) return;
+      const [element, elementPath] = entry;
+
+      // Explicitly set non-needed attributes to null so that Slate deletes them
+      const { type: _type, children: _children, ...extra } = element;
+      const attributesToClear: Record<string, null> = {};
+      Object.keys(extra).forEach((key) => {
+        attributesToClear[key] = null;
+      });
+
+      Transforms.setNodes(
+        editor,
+        {
+          ...attributesToClear,
+          type: 'paragraph',
+        },
+        { at: elementPath }
+      );
+    },
     handleEnterKey(editor) {
       if (!editor.selection) {
         return;

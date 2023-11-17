@@ -125,4 +125,41 @@ describe('Quote', () => {
     // Once on the new line, bold and italic should be disabled
     expect(Editor.marks(baseEditor)).toEqual({ type: 'text' });
   });
+
+  it('converts a heading to a quote', () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [
+      {
+        type: 'heading',
+        level: 1,
+        children: [
+          {
+            type: 'text',
+            italic: true,
+            text: 'Heading 1',
+          },
+        ],
+      },
+    ];
+
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
+    });
+
+    quoteBlocks.quote.handleConvert(baseEditor);
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'quote',
+        children: [
+          {
+            type: 'text',
+            italic: true,
+            text: 'Heading 1',
+          },
+        ],
+      },
+    ]);
+  });
 });
