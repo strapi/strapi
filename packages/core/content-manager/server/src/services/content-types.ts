@@ -39,7 +39,6 @@ const service = ({ strapi }: any) => ({
       return this.findAllContentTypes();
     }
 
-    // @ts-expect-error TODO when adding types
     return this.findAllContentTypes().filter(contentTypesUtils.isKind(kind));
   },
 
