@@ -28,7 +28,6 @@ const { transformParamsToQuery } = convertQueryParams;
  * TODO: Audit logs
  * TODO: Entity Validation - Uniqueness across same locale and publication status
  * TODO: File upload
- * TODO: Transactions?
  * TODO: replace 'any'
  * TODO: countVersions()
  * TODO: availableLocales

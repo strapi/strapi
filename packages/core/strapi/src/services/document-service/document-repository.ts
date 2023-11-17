@@ -4,9 +4,6 @@ import createMiddlewareManager from './middlewares';
 import { loadDefaultMiddlewares } from './middlewares/defaults';
 
 /**
- * TODO:
- *  - Transactions
- *
  * Repository to :
  * - Access documents via actions (findMany, findOne, create, update, delete, ...)
  * - Execute middlewares on document actions
@@ -36,77 +33,91 @@ export const createDocumentRepository = (
   ): Documents.RepositoryInstance<TContentTypeUID> {
     return {
       async findMany(params = {} as any) {
-        return middlewareManager.run(
-          { action: 'findMany', uid, params, options: {} },
-          ({ params }) => documents.findMany(uid, params)
+        return strapi.db?.transaction?.(async () =>
+          middlewareManager.run({ action: 'findMany', uid, params, options: {} }, ({ params }) =>
+            documents.findMany(uid, params)
+          )
         );
       },
 
       async findFirst(params = {} as any) {
-        return middlewareManager.run(
-          { action: 'findFirst', uid, params, options: {} },
-          ({ params }) => documents.findFirst(uid, params)
+        return strapi.db?.transaction?.(async () =>
+          middlewareManager.run({ action: 'findFirst', uid, params, options: {} }, ({ params }) =>
+            documents.findFirst(uid, params)
+          )
         );
       },
 
       async findOne(id: string, params = {} as any) {
-        return middlewareManager.run(
-          { action: 'findOne', uid, params, options: { id } },
-          ({ params }) => documents.findOne(uid, id, params)
+        return strapi.db?.transaction?.(async () =>
+          middlewareManager.run({ action: 'findOne', uid, params, options: { id } }, ({ params }) =>
+            documents.findOne(uid, id, params)
+          )
         );
       },
 
       async delete(id: string, params = {} as any) {
-        return middlewareManager.run(
-          { action: 'delete', uid, params, options: { id } },
-          ({ params }) => documents.delete(uid, id, params)
+        return strapi.db?.transaction?.(async () =>
+          middlewareManager.run({ action: 'delete', uid, params, options: { id } }, ({ params }) =>
+            documents.delete(uid, id, params)
+          )
         );
       },
 
       async deleteMany(params = {} as any) {
-        return middlewareManager.run(
-          { action: 'deleteMany', uid, params, options: {} },
-          ({ params }) => documents.deleteMany(uid, params)
+        return strapi.db?.transaction?.(async () =>
+          middlewareManager.run({ action: 'deleteMany', uid, params, options: {} }, ({ params }) =>
+            documents.deleteMany(uid, params)
+          )
         );
       },
 
       async create(params = {} as any) {
-        return middlewareManager.run({ action: 'create', uid, params, options: {} }, ({ params }) =>
-          documents.create(uid, params)
+        return strapi.db?.transaction?.(async () =>
+          middlewareManager.run({ action: 'create', uid, params, options: {} }, ({ params }) =>
+            documents.create(uid, params)
+          )
         );
       },
 
       async clone(id: string, params = {} as any) {
-        return middlewareManager.run(
-          { action: 'clone', uid, params, options: { id } },
-          ({ params }) => documents.clone(uid, id, params)
+        return strapi.db?.transaction?.(async () =>
+          middlewareManager.run({ action: 'clone', uid, params, options: { id } }, ({ params }) =>
+            documents.clone(uid, id, params)
+          )
         );
       },
 
       async update(id: string, params = {} as any) {
-        return middlewareManager.run(
-          { action: 'update', uid, params, options: { id } },
-          ({ params }) => documents.update(uid, id, params)
+        return strapi.db?.transaction?.(async () =>
+          middlewareManager.run({ action: 'update', uid, params, options: { id } }, ({ params }) =>
+            documents.update(uid, id, params)
+          )
         );
       },
 
       async count(params = {} as any) {
-        return middlewareManager.run({ action: 'count', uid, params, options: {} }, ({ params }) =>
-          documents.count(uid, params)
+        return strapi.db?.transaction?.(async () =>
+          middlewareManager.run({ action: 'count', uid, params, options: {} }, ({ params }) =>
+            documents.count(uid, params)
+          )
         );
       },
 
       async publish(id: string, params = {} as any) {
-        return middlewareManager.run(
-          { action: 'publish', uid, params, options: { id } },
-          ({ params }) => documents.publish(uid, id, params)
+        return strapi.db?.transaction?.(async () =>
+          middlewareManager.run({ action: 'publish', uid, params, options: { id } }, ({ params }) =>
+            documents.publish(uid, id, params)
+          )
         );
       },
 
       async unpublish(id: string, params = {} as any) {
-        return middlewareManager.run(
-          { action: 'unpublish', uid, params, options: { id } },
-          ({ params }) => documents.unpublish(uid, id, params)
+        return strapi.db?.transaction?.(async () =>
+          middlewareManager.run(
+            { action: 'unpublish', uid, params, options: { id } },
+            ({ params }) => documents.unpublish(uid, id, params)
+          )
         );
       },
 
