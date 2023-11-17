@@ -65,11 +65,16 @@ export const upgrade = async (options: TaskOptions) => {
       to: matchedVersion,
     };
 
-    if (isVersionRelease(target)) {
-      isLatestVersion(target)
-        ? logger.info(`The ${fTarget} upgrade available is ${fMatchedVersion}`)
-        : logger.info(`Latest ${fTarget} upgrade is ${fMatchedVersion}`);
-    } else {
+    // Latest
+    if (isLatestVersion(target)) {
+      logger.info(`The ${fTarget} upgrade available is ${fMatchedVersion}`);
+    }
+    // Major, Minor, Patch
+    else if (isVersionRelease(target)) {
+      logger.info(`Latest ${fTarget} upgrade is ${fMatchedVersion}`);
+    }
+    // X.X.X
+    else {
       const rawVersionRange = { from: project.strapiVersion, to: target };
       const fRawVersionRange = f.versionRange(createSemverRange(rawVersionRange).raw);
       logger.info(`Latest available upgrade for ${fRawVersionRange} is ${fMatchedVersion}`);
