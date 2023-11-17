@@ -1,4 +1,5 @@
 import * as semver from 'semver';
+import assert from 'node:assert';
 
 export type SemVer = `${number}.${number}.${number}`;
 
@@ -40,7 +41,13 @@ export const createSemverRange = (range: VersionRange): semver.Range => {
   let semverRange = `>${range.from}`;
 
   // Add the upper boundary if range.to is different from 'latest'
-  if (range.to !== 'latest') {
+  if (!isLatestVersion(range.to)) {
+    // Make sure range.from > range.to
+    assert(
+      semver.compare(range.from, range.to) === -1,
+      `Upper boundary (${range.to}) must be greater than lower boundary (${range.from})`
+    );
+
     semverRange += ` <=${range.to}`;
   }
 
