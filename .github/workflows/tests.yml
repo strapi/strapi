@@ -34,6 +34,22 @@ jobs:
         with:
           filters: .github/filters.yaml
 
+  pretty:
+    name: 'pretty (node: 20)'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - uses: nrwl/nx-set-shas@v3
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Run lint
+        run: yarn prettier:check
+
   lint:
     name: 'lint (node: 20)'
     needs: [build]
