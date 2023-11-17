@@ -133,6 +133,26 @@ export declare namespace Plugins {
 }
 
 /**
+ * /providers/options - Single Sign On setting options
+ */
+export declare namespace ProvidersOptions {
+  interface SSOProviderOptions {
+    autoRegister: boolean;
+    defaultRole: string | null;
+    ssoLockedRoles: string[] | null;
+  }
+  export interface Request {
+    body: SSOProviderOptions;
+    query: {};
+  }
+
+  export interface Response {
+    data: SSOProviderOptions;
+    error?: errors.ApplicationError | errors.ValidationError | errors.YupValidationError;
+  }
+}
+
+/**
  * /license-limit-information – get license limit information
  */
 
