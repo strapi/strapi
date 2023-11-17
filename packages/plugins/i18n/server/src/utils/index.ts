@@ -1,21 +1,21 @@
-import locales from '../services/locales';
-import permissions from '../services/permissions';
-import contentTypes from '../services/content-types';
-import metrics from '../services/metrics';
-import entityServiceDecorator from '../services/entity-service-decorator';
-import coreAPI from '../services/core-api';
-import ISOLocales from '../services/iso-locales';
-import localizations from '../services/localizations';
+import type { LocaleService } from '../services/locales';
+import type { PermissionsService } from '../services/permissions';
+import type { ContentTypesService } from '../services/content-types';
+import type { MetricsService } from '../services/metrics';
+import type { EntityServiceDecoratorService } from '../services/entity-service-decorator';
+import type { CoreApiService } from '../services/core-api';
+import type { ISOLocalesService } from '../services/iso-locales';
+import type { LocalizationsService } from '../services/localizations';
 
 type S = {
-  permissions: typeof permissions;
-  metrics: typeof metrics;
-  locales: typeof locales;
-  localizations: typeof localizations;
-  ['iso-locales']: typeof ISOLocales;
-  ['content-types']: typeof contentTypes;
-  ['entity-service-decorator']: typeof entityServiceDecorator;
-  ['core-api']: typeof coreAPI;
+  permissions: PermissionsService;
+  metrics: MetricsService;
+  locales: LocaleService;
+  localizations: LocalizationsService;
+  ['iso-locales']: ISOLocalesService;
+  ['content-types']: ContentTypesService;
+  ['entity-service-decorator']: EntityServiceDecoratorService;
+  ['core-api']: CoreApiService;
 };
 
 const getCoreStore = () => {
