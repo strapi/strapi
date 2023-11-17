@@ -131,7 +131,7 @@ jobs:
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - name: Run test
-        run: yarn nx affected --target=test:front --nx-ignore-cycles
+        run: yarn nx affected --target=test:front --nx-ignore-cycles -- --runInBand
 
   e2e:
     timeout-minutes: 60
