@@ -9,6 +9,12 @@ import { ReleasesPage } from '../ReleasesPage';
 
 const user = userEvent.setup();
 
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  // eslint-disable-next-line
+  CheckPermissions: ({ children }: { children: JSX.Element}) => <div>{children}</div>
+}));
+
 jest.mock('../../../store/hooks', () => ({
   ...jest.requireActual('../../../store/hooks'),
   useTypedSelector: jest.fn().mockReturnValue({

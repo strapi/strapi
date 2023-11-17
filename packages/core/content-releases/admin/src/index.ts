@@ -1,6 +1,7 @@
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import { PaperPlane } from '@strapi/icons';
 
+import { PERMISSIONS } from './constants';
 import { releaseApi } from './modules/releaseSlice';
 import { pluginId } from './pluginId';
 
@@ -22,7 +23,7 @@ const admin: Plugin.Config.AdminInput = {
           const { App } = await import('./pages/App');
           return App;
         },
-        permissions: [],
+        permissions: PERMISSIONS.main,
       });
 
       /**
