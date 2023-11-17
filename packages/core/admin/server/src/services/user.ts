@@ -10,6 +10,7 @@ import type {
   AdminUserCreationPayload,
   SanitizedAdminUser,
   SanitizedAdminRole,
+  AdminUserUpdatePayload,
   // eslint-disable-next-line node/no-unpublished-import
 } from '../../../shared/contracts/shared';
 import { password as passwordValidator } from '../validation/common-validators';
@@ -37,7 +38,10 @@ const sanitizeUser = (user: AdminUser): SanitizedAdminUser => {
  * Create and save a user in database
  * @param attributes A partial user object
  */
-const create = async (attributes: Partial<AdminUserCreationPayload>): Promise<AdminUser> => {
+const create = async (
+  // isActive is added in the controller, it's not sent by the API.
+  attributes: Partial<AdminUserCreationPayload> & { isActive?: true }
+): Promise<AdminUser> => {
   const userInfo = {
     registrationToken: getService('token').createToken(),
     ...attributes,
@@ -65,7 +69,7 @@ const create = async (attributes: Partial<AdminUserCreationPayload>): Promise<Ad
  */
 const updateById = async (
   id: Entity.ID,
-  attributes: Partial<AdminUserCreationPayload>
+  attributes: Partial<AdminUserUpdatePayload>
 ): Promise<AdminUser> => {
   // Check at least one super admin remains
   if (_.has(attributes, 'roles')) {

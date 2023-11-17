@@ -1,6 +1,7 @@
 import { errors } from '@strapi/utils';
+import type { File } from 'formidable';
 
-interface Logo {
+export interface Logo {
   name: string;
   url: string;
   width: number;
@@ -21,8 +22,8 @@ export declare namespace Init {
     data: {
       uuid: string | false;
       hasAdmin: boolean;
-      menuLogo: string;
-      authLogo: string;
+      menuLogo: string | null;
+      authLogo: string | null;
     };
     error?: errors.ApplicationError;
   }
@@ -54,11 +55,14 @@ export declare namespace UpdateProjectSettings {
       authLogo: Logo | null;
     };
     query: {};
-    files: Logo[];
+    files: {
+      menuLogo?: File | null;
+      authLogo?: File | null;
+    };
   }
   export interface Response {
-    menuLogo: Logo;
-    authLogo: Logo;
+    menuLogo: Partial<Logo>;
+    authLogo: Partial<Logo>;
     error?: errors.ApplicationError | errors.YupValidationError;
   }
 }

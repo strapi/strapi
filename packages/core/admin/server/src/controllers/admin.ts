@@ -93,7 +93,7 @@ export default {
     await validateUpdateProjectSettingsImagesDimensions(formatedFiles);
 
     return projectSettingsService.updateProjectSettings({
-      ...(body as object),
+      ...body,
       ...formatedFiles,
     }) satisfies Promise<UpdateProjectSettings.Response>;
   },

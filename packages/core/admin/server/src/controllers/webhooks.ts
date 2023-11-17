@@ -9,9 +9,9 @@ import {
   DeleteWebhook,
   DeleteWebhooks,
   GetWebhook,
-  ListWebhooks,
   UpdateWebhook,
   TriggerWebhook,
+  GetWebhooks,
 } from '../../../shared/contracts/webhooks';
 
 const urlRegex =
@@ -46,7 +46,7 @@ const updateWebhookValidator = webhookValidator.shape({
 export default {
   async listWebhooks(ctx: Context) {
     const webhooks = await strapi.webhookStore.findWebhooks();
-    ctx.send({ data: webhooks } satisfies ListWebhooks.Response);
+    ctx.send({ data: webhooks } satisfies GetWebhooks.Response);
   },
 
   async getWebhook(ctx: Context) {

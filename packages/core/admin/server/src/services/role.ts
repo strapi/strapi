@@ -320,7 +320,10 @@ const displayWarningIfNoSuperAdmin = async () => {
  * @param roleId - role ID
  * @param {Array<Permission{action,subject,fields,conditions}>} permissions - permissions to assign to the role
  */
-const assignPermissions = async (roleId: Entity.ID, permissions = [] as Permission[]) => {
+const assignPermissions = async (
+  roleId: Entity.ID,
+  permissions: Array<Pick<Permission, 'action' | 'subject' | 'conditions'>> = []
+) => {
   await validatePermissionsExist(permissions);
 
   // Internal actions are not handled by the role service, so any permission
