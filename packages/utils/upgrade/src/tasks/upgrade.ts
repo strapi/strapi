@@ -1,25 +1,31 @@
 import ora from 'ora';
 import chalk from 'chalk';
-import CliTable3 from 'cli-table3';
+import semver from 'semver';
 import assert from 'node:assert';
 
+import type { RunnerConfiguration, VersionRange } from '../core';
 import {
-  f,
   createProjectLoader,
+  createSemverRange,
+  createTimer,
+  createTransformsLoader,
   createTransformsRunner,
   createVersionParser,
-  createTransformsLoader,
-  createTimer,
-  RunnerConfiguration,
+  f,
+  isLatestVersion,
+  isSemVer,
+  isVersionRelease,
+  VersionRelease,
 } from '../core';
-
-import type { VersionRange } from '../core';
 import type { Report, RunReports, TaskOptions } from '../types';
 
-export const next = async (options: TaskOptions) => {
-  const { logger, dryRun = false, cwd = process.cwd() } = options;
+export const upgrade = async (options: TaskOptions) => {
+  const { logger, dryRun = false, cwd = process.cwd(), target = VersionRelease.Minor } = options;
 
   const timer = createTimer();
+  const fTarget = f.version(target);
+
+  logger.debug(`Setting the targeted version to: ${fTarget}`);
 
   const projectLoader = createProjectLoader({ cwd, logger });
   const project = await projectLoader.load();
@@ -28,8 +34,16 @@ export const next = async (options: TaskOptions) => {
 
   logger.info(`The current project's Strapi version is ${fCurrentVersion}`);
 
+  // If the given target is older than the current Strapi version, then abort
+  if (isSemVer(target)) {
+    assert(
+      semver.compare(project.strapiVersion, target) === -1,
+      `The target (${fTarget}) should be greater than the current project version (${fCurrentVersion}).`
+    );
+  }
+
   // Create a version range for ">{current}"
-  const range: VersionRange = { from: project.strapiVersion, to: 'latest' };
+  const range: VersionRange = { from: project.strapiVersion, to: VersionRelease.Latest };
 
   // TODO: In the future, we should allow loading transforms from the user app (custom transforms)
   //       e.g: const userTransformsDir = path.join(cwd, 'transforms');
@@ -39,17 +53,28 @@ export const next = async (options: TaskOptions) => {
     // Indicates the available versions to the parser
     .setAvailable(transformsLoader.availableVersions);
 
-  // Find the next available major version for the current project
-  const nextMajorVersion = versionParser.nextMajor();
+  // Find the next version matching the given target
+  const matchedVersion = versionParser.search(target);
 
-  if (nextMajorVersion) {
-    logger.info(`The next major version is ${f.version(nextMajorVersion)}`);
+  if (matchedVersion) {
+    const fMatchedVersion = f.version(matchedVersion);
 
-    // The upgrade range should contain all the upgrades between the current version and the next major
+    // The upgrade range should contain all the upgrades between the current version and the matched one
     const upgradeRange: VersionRange = {
       from: project.strapiVersion,
-      to: nextMajorVersion,
+      to: matchedVersion,
     };
+
+    if (isVersionRelease(target)) {
+      isLatestVersion(target)
+        ? logger.info(`The ${fTarget} upgrade available is ${fMatchedVersion}`)
+        : logger.info(`Latest ${fTarget} upgrade is ${fMatchedVersion}`);
+    } else {
+      const rawVersionRange = { from: project.strapiVersion, to: target };
+      const fRawVersionRange = f.versionRange(createSemverRange(rawVersionRange).raw);
+      logger.info(`Latest available upgrade for ${fRawVersionRange} is ${fMatchedVersion}`);
+    }
+
     const transformFiles = transformsLoader.loadRange(upgradeRange);
 
     const impactedVersions = Array.from(new Set(transformFiles.map((p) => p.version)));
@@ -58,16 +83,14 @@ export const next = async (options: TaskOptions) => {
       .map((v) => f.version(v))
       .join(' -> ');
 
-    const fTarget = f.version(nextMajorVersion);
-
     logger.debug(
-      `Upgrading from ${fCurrentVersion} to ${fTarget} with the following plan: ${fUpgradePlan}`
+      `Upgrading from ${fCurrentVersion} to ${fMatchedVersion} with the following plan: ${fUpgradePlan}`
     );
     logger.info(`Preparing the upgrade (${fUpgradePlan})`);
 
     assert(
       transformFiles.length > 0,
-      `A new version seems to exist (${fTarget}), but no task was found, exiting...`
+      `A new version seems to exist (${fMatchedVersion}), but no task was found, exiting...`
     );
 
     if (options.confirm && !dryRun) {
@@ -127,5 +150,5 @@ export const next = async (options: TaskOptions) => {
 
   timer.stop();
 
-  logger.info(`Completed in ${f.duration(timer.elapsed)}`);
+  logger.info(`Completed in ${f.durationMs(timer.elapsed)}`);
 };
