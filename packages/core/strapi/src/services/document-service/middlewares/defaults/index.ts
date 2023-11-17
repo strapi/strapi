@@ -40,9 +40,31 @@ export const loadDefaultMiddlewares = (manager: Documents.Middleware.Manager) =>
   manager.add(
     'allUIDs',
     'update',
-    [defaultToDraft, statusToLookup, statusToData, defaultLocale, localeToData],
+    [defaultToDraft, statusToLookup, statusToData, defaultLocale, localeToLookup, localeToData],
     {}
   );
+
+  // Upsert locale
+  manager.add('allUIDs', 'update', async (ctx, next) => {
+    // Try to update
+    const res = await next(ctx);
+
+    // @ts-expect-error - TODO: Fix typings
+    const docId: string = ctx.options.id;
+
+    // If result is null, no locale has been found, so create it
+    if (!res && docId) {
+      const documentExists = await strapi.documents(ctx.uid).findOne(docId);
+      if (documentExists) {
+        return strapi.documents(ctx.uid).create({
+          ...ctx.params,
+          data: { ...ctx.params.data, documentId: docId },
+        });
+      }
+    }
+
+    return res;
+  });
 
   // Count
   manager.add('allUIDs', 'count', [defaultToDraft, defaultLocale], {});

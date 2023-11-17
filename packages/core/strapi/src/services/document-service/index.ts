@@ -169,36 +169,13 @@ const createDocumentService = ({
     const query = transformParamsToQuery(uid, pickSelectionParams(params || {}));
 
     // Find all locales of the document
-    const entries = await db
+    const entryToUpdate = await db
       .query(uid)
-      .findMany({ ...query, where: { ...params?.lookup, ...query?.where, documentId } });
+      .findOne({ ...query, where: { ...params?.lookup, ...query?.where, documentId } });
 
     // Document does not exist
-    if (!entries.length) {
-      return null;
-    }
-
-    // TODO: How do we do this from i18n package?
-    const entryToUpdate = entries.find((entry) => entry.locale === params?.locale);
-
-    // Upsert new locale
     if (!entryToUpdate) {
-      const validData = await entityValidator.validateEntityCreation(
-        model,
-        data as any,
-        { isDraft: true } // Always create the draft version
-      );
-
-      // @ts-expect-error - fix type
-      const componentData = await createComponents(uid, validData);
-      const entryData = createPipeline(
-        Object.assign(omitComponentData(model, validData), componentData),
-        { contentType: model }
-      );
-
-      entryData.documentId = documentId;
-
-      return db.query(uid).create({ ...query, data: entryData });
+      return null;
     }
 
     const validData = await entityValidator.validateEntityUpdate(
