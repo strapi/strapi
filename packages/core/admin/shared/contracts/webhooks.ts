@@ -17,7 +17,7 @@ export declare namespace GetWebhooks {
 }
 
 /**
- * /webhooks/:id - GET a webhook
+ * GET /webhooks/:id - Get a webhook
  */
 export declare namespace GetWebhook {
   export interface Request {
@@ -36,7 +36,7 @@ export declare namespace GetWebhook {
 }
 
 /**
- * /webhooks - Create (POST) a webhook
+ * POST /webhooks - Create a webhook
  */
 export declare namespace CreateWebhook {
   export interface Request {
@@ -51,7 +51,7 @@ export declare namespace CreateWebhook {
 }
 
 /**
- * /webhoooks/:id - PUT (update) a webhook
+ * PUT /webhooks/:id - Update a webhook
  */
 export declare namespace UpdateWebhook {
   export interface Request {
@@ -70,7 +70,7 @@ export declare namespace UpdateWebhook {
 }
 
 /**
- * /webhooks/:id - Delete a webhook
+ * DELETE /webhooks/:id - Delete a webhook
  */
 export declare namespace DeleteWebhook {
   export interface Request {
@@ -89,7 +89,7 @@ export declare namespace DeleteWebhook {
 }
 
 /**
- * /webhooks/batch-delete - Delete multiple webhooks
+ * POST /webhooks/batch-delete' - Delete multiple webhooks
  */
 export declare namespace DeleteWebhooks {
   export interface Request {
@@ -106,7 +106,7 @@ export declare namespace DeleteWebhooks {
 }
 
 /**
- * /triggerWebhook - Trigger a webhook
+ * POST /webhooks/:id/trigger - Trigger a webhook
  */
 export declare namespace TriggerWebhook {
   export interface Request {

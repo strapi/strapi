@@ -4,7 +4,6 @@ import type {
   SanitizedTransferToken,
   TransferToken,
   TokenUpdatePayload,
-  // @ts-expect-error – No types, yet.
 } from '../../server/src/services/transfer/token';
 
 /**

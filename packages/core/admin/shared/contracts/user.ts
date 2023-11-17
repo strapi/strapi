@@ -60,7 +60,6 @@ export declare namespace FindOne {
     error?: errors.ApplicationError;
   }
 }
-
 /**
  * /update - Update an admin user
  */

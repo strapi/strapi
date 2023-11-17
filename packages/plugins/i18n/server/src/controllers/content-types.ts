@@ -25,7 +25,10 @@ const controller = {
       isLocalizedContentType,
       getNestedPopulateOfNonLocalizedAttributes,
     } = getService('content-types');
-    const { READ_ACTION, CREATE_ACTION } = strapi.admin.services.constants;
+
+    const {
+      default: { READ_ACTION, CREATE_ACTION },
+    } = strapi.admin.services.constants;
 
     const modelDef = strapi.contentType(model);
     const attributesToPopulate = getNestedPopulateOfNonLocalizedAttributes(model);

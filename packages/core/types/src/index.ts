@@ -33,9 +33,9 @@ export {
   Server,
   EventHub,
   CronService,
+  Webhook,
   WebhookRunner,
   WebhookStore,
-  Webhook,
   CoreStore,
   EntityValidator,
   EntityService,
@@ -50,9 +50,11 @@ export {
 };
 
 declare global {
+  // @ts-expect-error - global strapi variable is also defined in the index.d.ts file
   var strapi: LoadedStrapi;
   namespace NodeJS {
     interface Global {
+      // @ts-expect-error - global strapi variable is also defined in the index.d.ts file
       strapi: LoadedStrapi;
     }
   }

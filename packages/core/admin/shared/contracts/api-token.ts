@@ -1,8 +1,6 @@
 import { errors } from '@strapi/utils';
-import { ValidationError as YupValidationError } from 'yup';
 
-// @ts-expect-error - No types for this yet
-import type { ApiToken } from '../../server/services/api-token';
+import type { ApiToken } from '../../server/src/services/api-token';
 
 type ApiTokenBody = Pick<ApiToken, 'lifespan' | 'description' | 'type' | 'name' | 'permissions'>;
 type ApiTokenResponse = Omit<ApiToken, 'accessKey'>;
@@ -18,7 +16,7 @@ export declare namespace Create {
 
   export interface Response {
     data: ApiToken;
-    error?: errors.ApplicationError | YupValidationError;
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
 
@@ -90,6 +88,6 @@ export declare namespace Update {
 
   export interface Response {
     data: ApiTokenResponse;
-    error?: errors.ApplicationError | YupValidationError;
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }

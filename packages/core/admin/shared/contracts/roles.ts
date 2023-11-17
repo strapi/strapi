@@ -1,8 +1,7 @@
-import type { Entity, EntityService } from '@strapi/types';
+import { EntityService } from '@strapi/types';
 import type { errors } from '@strapi/utils';
-// @ts-expect-error – No types, yet.
-import type { SanitizedPermission } from '../../server/src/domain/permission';
 import { AdminRole, Permission, SanitizedAdminRole } from './shared';
+import type { SanitizedPermission } from '../../server/src/domain/permission';
 
 type SanitizedAdminRoleWithUsersCount = SanitizedAdminRole & { usersCount?: number };
 
@@ -48,7 +47,7 @@ export declare namespace UpdatePermissions {
  */
 export declare namespace FindRole {
   export interface Request {
-    params: { id: Entity.ID };
+    params: { id: string };
     query: {};
     body: {};
   }

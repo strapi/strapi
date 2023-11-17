@@ -1,0 +1,8 @@
+{
+  "extends": "./server/tsconfig",
+  "compilerOptions": {
+    "outDir": "dist"
+  },
+  "include": ["src"],
+  "exclude": ["*.test.*"]
+}
