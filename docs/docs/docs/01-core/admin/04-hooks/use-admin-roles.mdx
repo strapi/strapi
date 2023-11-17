@@ -56,7 +56,11 @@ import { Box } from '@strapi/design-system';
 import { useAdminRoles } from 'path/to/hooks';
 
 const MyComponent = ({ onMoveItem }) => {
-  const { users: [user], isLoading, refetch } = useAdminRoles({ id: 1 });
+  const {
+    users: [user],
+    isLoading,
+    refetch,
+  } = useAdminRoles({ id: 1 });
 
   return /* ... */;
 };
