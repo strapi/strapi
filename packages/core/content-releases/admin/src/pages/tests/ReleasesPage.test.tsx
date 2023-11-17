@@ -42,7 +42,8 @@ describe('Releases home page', () => {
 
   it('renders correctly the heading content', async () => {
     render();
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Releases');
+
+    () => expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Releases');
     // if there are 0 releases
     expect(screen.getByText('No releases')).toBeInTheDocument();
 
