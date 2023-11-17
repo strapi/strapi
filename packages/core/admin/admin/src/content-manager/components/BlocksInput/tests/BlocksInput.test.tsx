@@ -4,7 +4,7 @@ import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
-import { BlocksEditor } from '../BlocksEditor';
+import { BlocksInput } from '../BlocksInput';
 
 import { blocksData } from './mock-schema';
 
@@ -13,11 +13,11 @@ jest.mock('@strapi/helper-plugin', () => ({
   useLibrary: () => ({ components: { 'media-library': jest.fn() } }),
 }));
 
-type BlocksEditorProps = React.ComponentProps<typeof BlocksEditor>;
+type BlocksEditorProps = React.ComponentProps<typeof BlocksInput>;
 
 const setup = (props: Partial<BlocksEditorProps>) =>
   render(
-    <BlocksEditor
+    <BlocksInput
       attribute={{ type: 'blocks' }}
       intlLabel={{ id: 'blocks', defaultMessage: 'blocks type' }}
       name="blocks-editor"
@@ -38,7 +38,7 @@ const setup = (props: Partial<BlocksEditorProps>) =>
     }
   );
 
-describe('BlocksEditor', () => {
+describe('BlocksInput', () => {
   it('should render blocks without error', async () => {
     setup({ value: undefined });
 
