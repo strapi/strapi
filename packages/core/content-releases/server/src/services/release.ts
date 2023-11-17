@@ -1,7 +1,7 @@
-import { setCreatorFields } from '@strapi/utils';
+import { setCreatorFields, errors } from '@strapi/utils';
 import type { LoadedStrapi } from '@strapi/types';
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
-import type { ReleaseCreateArgs, UserInfo, ReleaseActionCreateArgs } from '../../../shared/types';
+import type { ReleaseCreateArgs, ReleaseUpdateArgs, UserInfo, ReleaseActionCreateArgs } from '../../../shared/types';
 import { getService } from '../utils';
 
 const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
@@ -29,6 +29,18 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       data: results,
       pagination,
     };
+  },
+  async update(id: number, releaseData: ReleaseUpdateArgs, { user }: { user: UserInfo }) {
+    const updatedRelease = await setCreatorFields({ user, isEdition: true })(releaseData);
+
+    // @ts-expect-error Type 'ReleaseUpdateArgs' has no properties in common with type 'Partial<Input<"plugin::content-releases.release">>'
+    const release = await strapi.entityService.update(RELEASE_MODEL_UID, id, { data: updatedRelease });
+
+    if (!release) {
+      throw new errors.NotFoundError(`No release found for id ${id}`);
+    }
+
+    return release;
   },
   async createAction(
     releaseId: ReleaseActionCreateArgs['releaseId'],

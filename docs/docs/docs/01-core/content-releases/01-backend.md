@@ -67,6 +67,17 @@ packages/core/content-releases/server/src/routes/release.ts
   }
   ```
 
+**Update a release**:
+
+- method: `PUT`
+- endpoint: `/content-releases/:id`
+- body:
+  ```ts
+  {
+    name: string;
+  }
+  ```
+
 ### Release Action
 
 **Create a release action**

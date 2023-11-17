@@ -43,6 +43,7 @@ export interface Release {
 }
 
 export type ReleaseCreateArgs = Pick<Release, 'name'>;
+export type ReleaseUpdateArgs = Partial<Pick<Release, 'name'>>;
 
 export interface ReleaseActionCreateArgs extends Pick<ReleaseAction, 'type'> {
   releaseId: Entity.ID;
