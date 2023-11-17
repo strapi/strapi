@@ -3,6 +3,12 @@ import { render } from '@tests/utils';
 
 import { ReleasesPage } from '../ReleasesPage';
 
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  // eslint-disable-next-line
+  CheckPermissions: ({ children }: { children: JSX.Element}) => <div>{children}</div>
+}));
+
 describe('Releases home page', () => {
   it('renders correctly the heading content', async () => {
     const { user } = render(<ReleasesPage />);
