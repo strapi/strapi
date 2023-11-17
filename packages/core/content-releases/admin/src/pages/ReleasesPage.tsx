@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Button, HeaderLayout } from '@strapi/design-system';
-import { CheckPermissions, CheckPagePermissions } from '@strapi/helper-plugin';
+import { CheckPermissions } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 

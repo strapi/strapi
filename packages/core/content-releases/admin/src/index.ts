@@ -2,6 +2,7 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import { PaperPlane } from '@strapi/icons';
 
 import { PERMISSIONS } from './constants';
+import { releaseApi } from './modules/releaseSlice';
 import { pluginId } from './pluginId';
 
 import type { Plugin } from '@strapi/types';
@@ -19,10 +20,20 @@ const admin: Plugin.Config.AdminInput = {
           defaultMessage: 'Releases',
         },
         async Component() {
-          const { Releases } = await import('./pages/App');
-          return Releases;
+          const { App } = await import('./pages/App');
+          return App;
         },
         permissions: PERMISSIONS.main,
+      });
+
+      /**
+       * For some reason every middleware you pass has to a function
+       * that returns the actual middleware. It's annoying but no one knows why....
+       */
+      app.addMiddlewares([() => releaseApi.middleware]);
+
+      app.addReducers({
+        [releaseApi.reducerPath]: releaseApi.reducer,
       });
     }
   },

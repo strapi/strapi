@@ -7,6 +7,7 @@ export default defineConfig({
       import: './dist/admin/index.mjs',
       require: './dist/admin/index.js',
       types: './dist/admin/src/index.d.ts',
+      tsconfig: './admin/tsconfig.build.json',
       runtime: 'web',
     },
     {
@@ -14,6 +15,7 @@ export default defineConfig({
       import: './dist/server/index.mjs',
       require: './dist/server/index.js',
       types: './dist/server/src/index.d.ts',
+      tsconfig: './server/tsconfig.build.json',
       runtime: 'node',
     },
   ],
