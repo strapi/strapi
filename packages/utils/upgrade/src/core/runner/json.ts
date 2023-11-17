@@ -102,7 +102,8 @@ export const transformJSON = async (
       const out = await transform(file, params);
 
       // If the json object has modifications
-      if (!_.isEqual(json, out)) {
+      // TODO: Should we improve the diff strategy to compare objects rather than string versions?
+      if (source !== out) {
         if (!dry) {
           fse.writeFileSync(path, JSON.stringify(out, null, 2));
         }
@@ -112,7 +113,7 @@ export const transformJSON = async (
       else {
         report.nochange += 1;
       }
-    } catch {
+    } catch (e) {
       report.error += 1;
     }
   }
