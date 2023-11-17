@@ -13,6 +13,7 @@ import { Editor, Transforms } from 'slate';
 import styled from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
+import { prepareHandleConvert } from '../utils/conversions';
 import { type Block } from '../utils/types';
 
 const H1 = styled(Typography).attrs({ as: 'h1' })`
@@ -49,13 +50,9 @@ const H6 = styled(Typography).attrs({ as: 'h6' })`
  * Common handler for converting a node to a heading
  */
 const handleConvertToHeading = (editor: Editor, level: Block<'heading'>['level']) => {
-  const entry = Editor.above(editor, {
-    match: (node) => !Editor.isEditor(node) && node.type !== 'text',
-  });
-
-  if (!entry || Editor.isEditor(entry[0])) {
-    return;
-  }
+  // Get the element to convert
+  const entry = prepareHandleConvert(editor);
+  if (!entry) return;
 
   const { type: _type, children: _children, ...extra } = entry[0];
 

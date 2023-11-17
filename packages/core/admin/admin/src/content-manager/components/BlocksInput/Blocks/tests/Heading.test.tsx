@@ -47,4 +47,63 @@ describe('Heading', () => {
 
     headingBlocks['heading-six'].handleConvert(baseEditor);
   });
+
+  it('splits a list when converting a list item to a heading', () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [{ type: 'text', text: 'List item 1' }],
+          },
+          {
+            type: 'list-item',
+            children: [{ type: 'text', text: 'List item 2' }],
+          },
+          {
+            type: 'list-item',
+            children: [{ type: 'text', text: 'List item 3' }],
+          },
+        ],
+      },
+    ];
+
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 1, 0], offset: 0 },
+      focus: { path: [0, 1, 0], offset: 0 },
+    });
+
+    headingBlocks['heading-one'].handleConvert(baseEditor);
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [{ type: 'text', text: 'List item 1' }],
+          },
+        ],
+      },
+      {
+        type: 'heading',
+        level: 1,
+        children: [{ type: 'text', text: 'List item 2' }],
+      },
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [{ type: 'text', text: 'List item 3' }],
+          },
+        ],
+      },
+    ]);
+  });
 });
