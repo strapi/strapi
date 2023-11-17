@@ -19,7 +19,7 @@ program
         return target;
       })
   )
-  .option('--dry-run', "Run the upgrade, but don't update the files", false)
+  .option('--dry-run', "Simulate the upgrade without updating any files", false)
   .option('-d, --debug', 'Get more logs in debug mode', false)
   .option('-s, --silent', "Don't log anything", false)
   .option('-p, --project-path <project-path>', 'Path to the Strapi project')
