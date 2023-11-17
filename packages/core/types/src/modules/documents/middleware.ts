@@ -66,9 +66,9 @@ export interface Manager {
    */
   middlewares: Record<
     // Specify uid or 'all' to apply to all uid's
-    Common.UID.ContentType | 'allUIDs',
+    Common.UID.ContentType | '_all',
     // Specify action or 'all' to apply to all actions (e.g. findMany, create, ...)
-    Record<string | 'allActions', { priority: number; middleware: Middleware<any, any> }[]>
+    Record<string | '_all', { priority: number; middleware: Middleware<any, any> }[]>
   >;
 
   /**
@@ -92,8 +92,8 @@ export interface Manager {
    * Add a middleware for a specific uid and action
    */
   add(
-    uid: Common.UID.ContentType | 'allUIDs',
-    action: string | 'allActions',
+    uid: Common.UID.ContentType | '_all',
+    action: string | '_all',
     middleware: Middleware<any, any> | Middleware<any, any>[],
     opts?: Options
   ): ThisType<Manager>;

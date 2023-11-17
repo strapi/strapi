@@ -13,17 +13,23 @@ const createMiddlewareManager = (): Documents.Middleware.Manager => {
     priority,
 
     middlewares: {
-      allUIDs: {
-        allActions: [],
+      // All uid's
+      _all: {
+        // All actions on all uid's
+        _all: [],
       },
     },
 
     get(uid, action) {
       return (
         [
-          ...this.middlewares.allUIDs.allActions,
-          ...(this.middlewares[uid]?.allActions || []),
-          ...(this.middlewares.allUIDs[action] || []),
+          // All actions on all uid's
+          ...this.middlewares._all._all,
+          // All actions on a specific uid
+          ...(this.middlewares[uid]?._all || []),
+          // A specific action on all uid's
+          ...(this.middlewares._all[action] || []),
+          // A specific action on a specific uid
           ...(this.middlewares[uid]?.[action] || []),
         ]
           // Sort by priority - the higher the priority, the earlier the middleware will be executed

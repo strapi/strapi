@@ -5,7 +5,7 @@ import { defaultLocale, localeToLookup, localeToData } from './locales';
 export const loadDefaultMiddlewares = (manager: Documents.Middleware.Manager) => {
   // Find Many
   manager.add(
-    'allUIDs',
+    '_all',
     'findMany',
     [defaultToDraft, statusToLookup, defaultLocale, localeToLookup],
     {}
@@ -13,7 +13,7 @@ export const loadDefaultMiddlewares = (manager: Documents.Middleware.Manager) =>
 
   // Find One
   manager.add(
-    'allUIDs',
+    '_all',
     'findOne',
     [defaultToDraft, statusToLookup, defaultLocale, localeToLookup],
     {}
@@ -21,31 +21,31 @@ export const loadDefaultMiddlewares = (manager: Documents.Middleware.Manager) =>
 
   // Find First
   manager.add(
-    'allUIDs',
+    '_all',
     'findFirst',
     [defaultToDraft, statusToLookup, defaultLocale, localeToLookup],
     {}
   );
 
   // Delete
-  manager.add('allUIDs', 'delete', [statusToLookup, localeToLookup], {});
+  manager.add('_all', 'delete', [statusToLookup, localeToLookup], {});
 
   // Delete Many - TODO
-  // manager.add('allUIDs', 'deleteMany', [], {});
+  // manager.add('_all', 'deleteMany', [], {});
 
   // Create
-  manager.add('allUIDs', 'create', [defaultToDraft, statusToData, defaultLocale, localeToData], {});
+  manager.add('_all', 'create', [defaultToDraft, statusToData, defaultLocale, localeToData], {});
 
   // Update
   manager.add(
-    'allUIDs',
+    '_all',
     'update',
     [defaultToDraft, statusToLookup, statusToData, defaultLocale, localeToLookup, localeToData],
     {}
   );
 
   // Upsert locale
-  manager.add('allUIDs', 'update', async (ctx, next) => {
+  manager.add('_all', 'update', async (ctx, next) => {
     // Try to update
     const res = await next(ctx);
 
@@ -67,14 +67,14 @@ export const loadDefaultMiddlewares = (manager: Documents.Middleware.Manager) =>
   });
 
   // Count
-  manager.add('allUIDs', 'count', [defaultToDraft, defaultLocale], {});
+  manager.add('_all', 'count', [defaultToDraft, defaultLocale], {});
 
   // Clone
-  manager.add('allUIDs', 'clone', [localeToLookup], {});
+  manager.add('_all', 'clone', [localeToLookup], {});
 
   // Publish
-  manager.add('allUIDs', 'publish', [localeToLookup], {});
+  manager.add('_all', 'publish', [localeToLookup], {});
 
   // Unpublish
-  manager.add('allUIDs', 'unpublish', [localeToLookup], {});
+  manager.add('_all', 'unpublish', [localeToLookup], {});
 };

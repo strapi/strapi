@@ -137,7 +137,7 @@ export const createDocumentRepository = (
 
   Object.assign(create, {
     use(action: any, cb: any, opts?: any) {
-      middlewareManager.add('allUIDs', action, cb, opts);
+      middlewareManager.add('_all', action, cb, opts);
       return create;
     },
     middlewares: middlewareManager,
