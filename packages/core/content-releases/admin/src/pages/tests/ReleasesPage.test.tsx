@@ -1,13 +1,7 @@
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { within, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { IntlProvider } from 'react-intl';
-import { MemoryRouter } from 'react-router-dom';
+import { render } from '@tests/utils';
 
-import { renderWithProviders } from '../../../tests/utils';
 import { ReleasesPage } from '../ReleasesPage';
-
-const user = userEvent.setup();
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -15,35 +9,10 @@ jest.mock('@strapi/helper-plugin', () => ({
   CheckPermissions: ({ children }: { children: JSX.Element}) => <div>{children}</div>
 }));
 
-jest.mock('../../../store/hooks', () => ({
-  ...jest.requireActual('../../../store/hooks'),
-  useTypedSelector: jest.fn().mockReturnValue({
-    loading: false,
-    error: undefined,
-    releases: [],
-  }),
-}));
-
-const render = () =>
-  renderWithProviders(
-    <ThemeProvider theme={lightTheme}>
-      <IntlProvider locale="en" messages={{}} defaultLocale="en">
-        <MemoryRouter>
-          <ReleasesPage />
-        </MemoryRouter>
-      </IntlProvider>
-    </ThemeProvider>
-  );
-
 describe('Releases home page', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   it('renders correctly the heading content', async () => {
-    render();
-
-    () => expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Releases');
+    const { user } = render(<ReleasesPage />);
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Releases');
     // if there are 0 releases
     expect(screen.getByText('No releases')).toBeInTheDocument();
 
@@ -64,7 +33,7 @@ describe('Releases home page', () => {
   });
 
   it('hides the dialog', async () => {
-    render();
+    const { user } = render(<ReleasesPage />);
     const newReleaseButton = screen.getByRole('button', { name: 'New release' });
     await user.click(newReleaseButton);
 
@@ -78,7 +47,7 @@ describe('Releases home page', () => {
   });
 
   it('enables the submit button when there is content in the input', async () => {
-    render();
+    const { user } = render(<ReleasesPage />);
     const newReleaseButton = screen.getByRole('button', { name: 'New release' });
     await user.click(newReleaseButton);
 
