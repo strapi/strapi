@@ -1,13 +1,16 @@
 import * as React from 'react';
 
 import { createContext } from '@radix-ui/react-context';
-import { InputWrapper, Divider } from '@strapi/design-system';
+import { InputWrapper, Divider, VisuallyHidden } from '@strapi/design-system';
 import { type Attribute } from '@strapi/types';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { type Editor, type Descendant, createEditor } from 'slate';
+import { type Editor, type Descendant, createEditor, Transforms } from 'slate';
 import { withHistory } from 'slate-history';
 import { type RenderElementProps, Slate, withReact, ReactEditor, useSlate } from 'slate-react';
 import styled from 'styled-components';
+
+// @ts-expect-error TODO convert to ts
+import { getTrad } from '../../utils';
 
 import { codeBlocks } from './Blocks/Code';
 import { headingBlocks } from './Blocks/Heading';
@@ -27,7 +30,10 @@ import { withStrapiSchema } from './plugins/withStrapiSchema';
 
 interface NonSelectorBlock {
   renderElement: (props: RenderElementProps) => React.JSX.Element;
-  value: object;
+  value: object & {
+    type: string;
+    level: number;
+  };
   matchNode: (node: Attribute.BlocksNode) => boolean;
   isInBlocksSelector: false;
   handleEnterKey?: (editor: Editor) => void;
@@ -172,6 +178,11 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
     const [editor] = React.useState(() =>
       pipe(withHistory, withImages, withStrapiSchema, withReact, withLinks)(createEditor())
     );
+    const [liveText, setLiveText] = React.useState('');
+    const ariaDescriptionId = `${name}-item-instructions`;
+
+    const getItemPosition = (index: number) => `${index + 1} of ${value.length}`;
+
     const formattedPlaceholder =
       placeholder &&
       formatMessage({ id: placeholder.id, defaultMessage: placeholder.defaultMessage });
@@ -207,6 +218,34 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
       }
     };
 
+    const handleMoveItem = React.useCallback(
+      (newIndex: Array<number>, currentIndex: Array<number>) => {
+        Transforms.moveNodes(editor, {
+          at: currentIndex,
+          to: newIndex,
+        });
+
+        // TODO: fix selection to new index
+        Transforms.select(editor, {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 0 },
+        });
+        /* setLiveText(
+            formatMessage(
+              {
+                id: getTrad('components.Blocks.dnd.reorder'),
+                defaultMessage: '{item}, moved. New position in the editor: {position}.',
+              },
+              {
+                item: `${name}.${currentIndexArray.join(',')}`,
+                position: getItemPosition(parseInt(newIndexArray.join(','), 10)),
+              }
+            )
+          ); */
+      },
+      [editor]
+    );
+
     const blocks: BlocksStore = {
       ...paragraphBlocks,
       ...headingBlocks,
@@ -218,27 +257,40 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
     };
 
     return (
-      <Slate
-        editor={editor}
-        initialValue={value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]}
-        onChange={handleSlateChange}
-        key={key}
-      >
-        <BlocksEditorProvider blocks={blocks} disabled={disabled}>
-          <InputWrapper
-            direction="column"
-            alignItems="flex-start"
-            height="512px"
-            disabled={disabled}
-            hasError={Boolean(error)}
-            style={{ overflow: 'hidden' }}
-          >
-            <BlocksToolbar />
-            <EditorDivider width="100%" />
-            <BlocksContent placeholder={formattedPlaceholder} />
-          </InputWrapper>
-        </BlocksEditorProvider>
-      </Slate>
+      <>
+        <VisuallyHidden id={ariaDescriptionId}>
+          {formatMessage({
+            id: getTrad('dnd.instructions'),
+            defaultMessage: `Press spacebar to grab and re-order`,
+          })}
+        </VisuallyHidden>
+        <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
+        <Slate
+          editor={editor}
+          initialValue={value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]}
+          onChange={handleSlateChange}
+          key={key}
+        >
+          <BlocksEditorProvider blocks={blocks} disabled={disabled}>
+            <InputWrapper
+              direction="column"
+              alignItems="flex-start"
+              height="512px"
+              disabled={disabled}
+              hasError={Boolean(error)}
+              style={{ overflow: 'hidden' }}
+            >
+              <BlocksToolbar />
+              <EditorDivider width="100%" />
+              <BlocksContent
+                placeholder={formattedPlaceholder}
+                name={name}
+                handleMoveItem={handleMoveItem}
+              />
+            </InputWrapper>
+          </BlocksEditorProvider>
+        </Slate>
+      </>
     );
   }
 );

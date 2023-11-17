@@ -9,11 +9,12 @@ import { useKeyboardDragAndDrop } from './useKeyboardDragAndDrop';
  *
  * @type {{
  *  type?: string,
- *  index: number,
+ *  index: number | Array<number>,
  *  item?: object,
  *  onStart?: () => void,
  *  onEnd?: () => void,
- *  dropSensitivity?: 'regular' | 'immediate'
+ *  dropSensitivity?: 'regular' | 'immediate',
+ *  canDropHandler?: () => void,
  * } & import('./useKeyboardDragAndDrop').UseKeyboardDragAndDropCallbacks}
  */
 
@@ -42,49 +43,102 @@ export const useDragAndDrop = (
     onCancel,
     onMoveItem,
     dropSensitivity = 'regular',
+    canDropHandler,
   }
 ) => {
   const objectRef = useRef(null);
 
-  const [{ handlerId }, dropRef] = useDrop({
+  const [{ handlerId, canDrop }, dropRef] = useDrop({
     accept: type,
+    canDrop: canDropHandler, // to skip some items from droppable target
     collect(monitor) {
       return {
         handlerId: monitor.getHandlerId(),
+        canDrop: monitor.canDrop(),
       };
     },
     hover(item, monitor) {
       if (!objectRef.current) {
         return;
       }
-      const dragIndex = item.index;
-      const newInd = index;
 
-      // Don't replace items with themselves
-      if (dragIndex === newInd) {
+      // Don't move item if not allowed to drop at new index
+      if (!canDrop) {
         return;
       }
+      const dragIndex = item.index;
+      const newIndex = index;
 
-      if (dropSensitivity === 'regular') {
-        const hoverBoundingRect = objectRef.current.getBoundingClientRect();
-        const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-        const clientOffset = monitor.getClientOffset();
-        const hoverClientY = clientOffset.y - hoverBoundingRect.top;
-
-        // Dragging downwards
-        if (dragIndex < newInd && hoverClientY < hoverMiddleY) {
+      if (typeof index === 'number') {
+        if (dragIndex === newIndex) {
+          // Don't replace items with themselves
           return;
         }
 
-        // Dragging upwards
-        if (dragIndex > newInd && hoverClientY > hoverMiddleY) {
-          return;
+        if (dropSensitivity === 'regular') {
+          const hoverBoundingRect = objectRef.current.getBoundingClientRect();
+          const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+          const clientOffset = monitor.getClientOffset();
+          const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+
+          // Dragging downwards
+          if (dragIndex < newIndex && hoverClientY < hoverMiddleY) {
+            return;
+          }
+
+          // Dragging upwards
+          if (dragIndex > newIndex && hoverClientY > hoverMiddleY) {
+            return;
+          }
         }
+
+        // Time to actually perform the action
+        onMoveItem(newIndex, dragIndex);
+        item.index = newIndex;
+      } else {
+        // Using numbers as indices don't work for heirarchy of nodes
+        // For moving blocks, index would be a path as Array<number>
+        if (dropSensitivity === 'regular') {
+          const hoverBoundingRect = objectRef.current.getBoundingClientRect();
+          const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+          const clientOffset = monitor.getClientOffset();
+          const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+
+          // Indices comparison to find elments position in a heirarchy of nodes
+          const minLength = Math.min(dragIndex.length, newIndex.length);
+          let areEqual = true;
+          let isLessThan = false;
+          let isGreaterThan = false;
+
+          for (let i = 0; i < minLength; i++) {
+            if (dragIndex[i] < newIndex[i]) {
+              isLessThan = true;
+              areEqual = false;
+              break;
+            } else if (dragIndex[i] > newIndex[i]) {
+              isGreaterThan = true;
+              areEqual = false;
+              break;
+            }
+          }
+
+          // Don't replace items with themselves
+          if (areEqual && dragIndex.length === newIndex.length) {
+            return;
+          }
+          // Dragging downwards
+          if (isLessThan && !isGreaterThan && hoverClientY < hoverMiddleY) {
+            return;
+          }
+
+          // Dragging upwards
+          if (isGreaterThan && !isLessThan && hoverClientY > hoverMiddleY) {
+            return;
+          }
+        }
+        onMoveItem(newIndex, dragIndex);
+        item.index = newIndex;
       }
-
-      // Time to actually perform the action
-      onMoveItem(newInd, dragIndex);
-      item.index = newInd;
     },
   });
 

@@ -1,15 +1,17 @@
 import * as React from 'react';
 
-import { Box } from '@strapi/design-system';
-import {
-  type ReactEditor,
-  type RenderElementProps,
-  type RenderLeafProps,
-  Editable,
-} from 'slate-react';
+import { Box, Flex, Icon } from '@strapi/design-system';
+import { Drag } from '@strapi/icons';
+import { type Editor } from 'slate';
+import { ReactEditor, type RenderElementProps, type RenderLeafProps, Editable } from 'slate-react';
 import styled from 'styled-components';
 
-import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
+// @ts-expect-error TODO convert to ts
+import { useDragAndDrop } from '../../hooks/useDragAndDrop';
+// @ts-expect-error TODO convert to ts
+import { composeRefs, ItemTypes } from '../../utils';
+
+import { BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { type ModifiersStore, useModifiersStore } from './hooks/useModifiersStore';
 import { getEntries } from './utils/types';
 
@@ -26,6 +28,113 @@ const StyledEditable = styled(Editable)`
   }
 `;
 
+const DragItem = styled(Flex)`
+  // block styles
+  & > *:nth-child(2) {
+    width: 100%;
+    opacity: inherit;
+  }
+  &:hover {
+    & > div {
+      visibility: visible;
+      opacity: inherit;
+    }
+  }
+  &:active {
+    opacity: 0.5;
+  }
+`;
+
+const DragButton = styled(Flex)`
+  cursor: pointer;
+  visibility: hidden;
+  &:hover {
+    background: ${({ theme }) => theme.colors.neutral200};
+  }
+  &:active {
+    cursor: grabbing;
+    background: ${({ theme }) => theme.colors.neutral200};
+  }
+`;
+
+const NOT_DRAGGABLE_ITEMS = ['list'];
+const NOT_DROPPABLE_ITEMS = ['list'];
+
+type DragAndDropElementProps = {
+  children: RenderElementProps['children'];
+  index: number | Array<number>;
+  disabled: boolean;
+  canDrag: boolean;
+  canDrop: boolean;
+  name: string;
+  onMoveItem: (newIndex: Array<number>, currentIndex: Array<number>) => void;
+};
+
+const DragAndDropElement = ({
+  children,
+  index,
+  disabled,
+  canDrag,
+  canDrop,
+  name,
+  onMoveItem,
+}: DragAndDropElementProps) => {
+  const [{ handlerId, isDragging, handleKeyDown }, myRef, boxRef, dropRef, dragRef] =
+    useDragAndDrop(!disabled && canDrag, {
+      type: `${ItemTypes.BLOCKS}._${name}`,
+      canDropHandler() {
+        return canDrop;
+      },
+      index,
+      item: {
+        displayedValue: children,
+      },
+      onMoveItem,
+    });
+
+  const composedRefs = composeRefs(myRef, dragRef);
+  const composedBoxRefs = composeRefs(boxRef, dropRef);
+
+  return (
+    <Box ref={composedBoxRefs}>
+      {isDragging ? (
+        <Box
+          borderStyle="solid"
+          borderColor="secondary200"
+          borderWidth="2px"
+          width="calc(100% - 24px)"
+          marginLeft="auto"
+        />
+      ) : (
+        <DragItem
+          ref={composedRefs}
+          data-handler-id={handlerId}
+          gap={2}
+          isDragging={isDragging}
+          paddingLeft={2}
+        >
+          <DragButton
+            role="button"
+            tabIndex={0}
+            aria-label="Drag"
+            onKeyDown={handleKeyDown}
+            color="neutral600"
+            alignItems="center"
+            justifyContent="center"
+            hasRadius
+            height={6}
+            width={4}
+            display={canDrag ? 'flex' : 'none'}
+          >
+            <Icon width={3} height={3} as={Drag} color="neutral600" />
+          </DragButton>
+          {children}
+        </DragItem>
+      )}
+    </Box>
+  );
+};
+
 const baseRenderLeaf = (props: RenderLeafProps, modifiers: ModifiersStore) => {
   // Recursively wrap the children for each active modifier
   const wrappedChildren = getEntries(modifiers).reduce((currentChildren, modifierEntry) => {
@@ -41,18 +150,49 @@ const baseRenderLeaf = (props: RenderLeafProps, modifiers: ModifiersStore) => {
   return <span {...props.attributes}>{wrappedChildren}</span>;
 };
 
-const baseRenderElement = (props: RenderElementProps, blocks: BlocksStore) => {
+type baseRenderElementProps = {
+  props: RenderElementProps['children'];
+  blocks: BlocksStore;
+  name: string;
+  disabled: boolean;
+  editor: Editor;
+  handleMoveItem: (newIndex: Array<number>, currentIndex: Array<number>) => void;
+};
+
+const baseRenderElement = ({
+  props,
+  blocks,
+  name,
+  editor,
+  disabled,
+  handleMoveItem,
+}: baseRenderElementProps) => {
   const blockMatch = Object.values(blocks).find((block) => block.matchNode(props.element));
   const block = blockMatch || blocks.paragraph;
+  const nodePath = ReactEditor.findPath(editor, props.element);
+  const currElemIndex = parseInt(nodePath.join(''), 10);
 
-  return block.renderElement(props);
+  return (
+    <DragAndDropElement
+      index={nodePath}
+      disabled={disabled}
+      canDrag={!NOT_DRAGGABLE_ITEMS.includes(block.value.type)}
+      canDrop={!NOT_DROPPABLE_ITEMS.includes(block.value.type)}
+      name={name}
+      onMoveItem={handleMoveItem}
+    >
+      {block.renderElement(props)}
+    </DragAndDropElement>
+  );
 };
 
 interface BlocksInputProps {
   placeholder?: string;
+  name: string;
+  handleMoveItem: (newIndex: Array<number>, currentIndex: Array<number>) => void;
 }
 
-const BlocksContent = ({ placeholder }: BlocksInputProps) => {
+const BlocksContent = ({ placeholder, name, handleMoveItem }: BlocksInputProps) => {
   const { editor, disabled, blocks } = useBlocksEditorContext('BlocksContent');
   const blocksRef = React.useRef<HTMLDivElement>(null);
 
@@ -65,8 +205,9 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
 
   // Create renderElement function base on the blocks store
   const renderElement = React.useCallback(
-    (props: RenderElementProps) => baseRenderElement(props, blocks),
-    [blocks]
+    (props: RenderElementProps) =>
+      baseRenderElement({ props, blocks, editor, disabled, name, handleMoveItem }),
+    [blocks, editor, disabled, name, handleMoveItem]
   );
 
   const handleEnter = () => {
@@ -74,20 +215,15 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
       return;
     }
 
-    // Get the selected node
     const selectedNode = editor.children[editor.selection.anchor.path[0]];
-
-    // Find the matching block
     const selectedBlock = Object.values(blocks).find((block) => block.matchNode(selectedNode));
     if (!selectedBlock) {
       return;
     }
 
-    // Check if there's an enter handler for the selected block
     if (selectedBlock.handleEnterKey) {
       selectedBlock.handleEnterKey(editor);
     } else {
-      // If not, insert a new paragraph
       blocks.paragraph.handleEnterKey!(editor);
     }
   };
@@ -161,6 +297,13 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
     }
   };
 
+  const onDrop = () => {
+    // As we have our own handler to drag and drop the elements
+    // returing true will skip slate's own event handler
+
+    return true;
+  };
+
   return (
     <Box
       ref={blocksRef}
@@ -171,7 +314,6 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
       background="neutral0"
       color="neutral800"
       lineHeight={6}
-      paddingLeft={4}
       paddingRight={4}
       paddingTop={3}
     >
@@ -182,6 +324,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
         renderLeaf={renderLeaf}
         onKeyDown={handleKeyDown}
         scrollSelectionIntoView={handleScrollSelectionIntoView}
+        onDrop={onDrop}
       />
     </Box>
   );
