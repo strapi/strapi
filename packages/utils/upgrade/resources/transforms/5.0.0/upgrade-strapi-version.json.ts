@@ -1,5 +1,6 @@
 import path from 'node:path';
-import type { JSONTransform } from '../../../src';
+
+import type { JSONTransform } from '../../..';
 
 /**
  * Note: This transform file is only for development purposes and should be deleted before releasing
