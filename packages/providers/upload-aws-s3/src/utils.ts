@@ -89,7 +89,7 @@ function getBucketFromAwsUrl(fileUrl: string): BucketInfo {
 }
 
 // TODO Remove this in V5 since we will only support the new config structure
-export const extractCredentials = (options: InitOptions): AwsCredentialIdentity => {
+export const extractCredentials = (options: InitOptions): AwsCredentialIdentity | null => {
   // legacy
   if (options.accessKeyId && options.secretAccessKey) {
     return {
@@ -115,5 +115,5 @@ export const extractCredentials = (options: InitOptions): AwsCredentialIdentity 
     };
   }
 
-  throw new Error("Couldn't find AWS credentials.");
+  return null;
 };
