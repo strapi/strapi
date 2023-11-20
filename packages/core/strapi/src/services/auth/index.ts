@@ -117,6 +117,10 @@ const createAuthentication = (): Authentication => {
         }
       }
 
+      if (config?.optional === true) {
+        return next();
+      }
+
       return ctx.unauthorized('Missing or invalid credentials');
     },
 
@@ -126,6 +130,9 @@ const createAuthentication = (): Authentication => {
       }
 
       if (!auth) {
+        if (config?.optional === true) {
+          return;
+        }
         throw new errors.UnauthorizedError();
       }
 
