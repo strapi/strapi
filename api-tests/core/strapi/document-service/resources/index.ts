@@ -1,5 +1,5 @@
-import './resources/types/components.d.ts';
-import './resources/types/contentTypes.d.ts';
+import './types/components.d.ts';
+import './types/contentTypes.d.ts';
 
 export default {
   schemas: require('./schemas'),
