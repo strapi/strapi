@@ -16,7 +16,7 @@ type Pagination = {
   total: number;
 };
 
-interface ReleaseDataResponse extends Omit<Release, 'actions'> {
+export interface ReleaseDataResponse extends Omit<Release, 'actions'> {
   actions: { meta: { count: number } };
 }
 
@@ -79,11 +79,6 @@ export declare namespace CreateRelease {
   }
 
   export type Response =
-    | {
-        data: ReleaseDataResponse;
-      }
-    | {
-        data: null;
-        error: errors.ApplicationError | errors.ValidationError;
-      };
+    | { data: ReleaseDataResponse }
+    | { data: null; error: errors.ApplicationError | errors.ValidationError };
 }

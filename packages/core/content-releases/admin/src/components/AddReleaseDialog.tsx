@@ -46,6 +46,7 @@ export const AddReleaseDialog = ({ handleClose }: AddReleaseDialogProps) => {
     });
 
     if ('data' in response) {
+      // When the response returns an object with 'data', handle success
       toggleNotification({
         type: 'success',
         message: formatMessage({
@@ -53,13 +54,16 @@ export const AddReleaseDialog = ({ handleClose }: AddReleaseDialogProps) => {
           defaultMessage: 'Release created.',
         }),
       });
+
       push(`/plugins/content-releases/${response.data.data.id}`);
     } else if (isErrorAxiosError(response.error)) {
+      // When the response returns an object with 'error', handle axios error
       toggleNotification({
         type: 'warning',
         message: formatAPIError(response.error),
       });
     } else {
+      // Otherwise, the response returns an object with 'error', handle a generic error
       toggleNotification({
         type: 'warning',
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),

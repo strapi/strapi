@@ -20,22 +20,22 @@ const axiosBaseQuery = async <TData = any, TSend = any>({
 
     if (method === 'POST') {
       const res = await post<TData, AxiosResponse<TData>, TSend>(url, data, config);
-      return res;
+      return { data: res.data };
     }
     if (method === 'DELETE') {
       const res = await del<TData, AxiosResponse<TData>, TSend>(url, config);
-      return res;
+      return { data: res.data };
     }
     if (method === 'PUT') {
       const res = await put<TData, AxiosResponse<TData>, TSend>(url, data, config);
-      return res;
+      return { data: res.data };
     }
 
     /**
      * Default is GET.
      */
     const res = await get<TData, AxiosResponse<TData>, TSend>(url, config);
-    return res;
+    return { data: res.data };
   } catch (error) {
     const err = error as AxiosError;
 

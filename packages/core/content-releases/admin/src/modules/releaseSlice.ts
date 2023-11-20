@@ -3,7 +3,11 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 import { pluginId } from '../pluginId';
 import { axiosBaseQuery } from '../utils/data';
 
-import type { CreateRelease, GetReleases } from '../../../shared/contracts/releases';
+import type {
+  CreateRelease,
+  GetReleases,
+  ReleaseDataResponse,
+} from '../../../shared/contracts/releases';
 
 const releaseApi = createApi({
   reducerPath: pluginId,
@@ -20,7 +24,7 @@ const releaseApi = createApi({
         },
         providesTags: ['Releases'],
       }),
-      createRelease: build.mutation<CreateRelease.Response, CreateRelease.Request['body']>({
+      createRelease: build.mutation<{ data: ReleaseDataResponse }, CreateRelease.Request['body']>({
         query(data) {
           return {
             url: '/content-releases',
