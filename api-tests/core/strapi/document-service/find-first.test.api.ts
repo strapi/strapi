@@ -1,6 +1,5 @@
 import { LoadedStrapi } from '@strapi/types';
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
-import { testInTransaction } from '../../../utils/index';
 import resources from './resources/index';
 import { ARTICLE_UID, findArticleDb } from './utils';
 
@@ -18,58 +17,46 @@ describe('Document Service', () => {
   });
 
   describe('FindFirst', () => {
-    it(
-      'find first document with defaults',
-      testInTransaction(async () => {
-        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+    it('find first document with defaults', async () => {
+      const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
-        const article = await strapi.documents(ARTICLE_UID).findFirst({});
+      const article = await strapi.documents(ARTICLE_UID).findFirst({});
 
-        expect(article).not.toBeNull();
-        expect(article).toMatchObject(articleDb);
-      })
-    );
+      expect(article).not.toBeNull();
+      expect(article).toMatchObject(articleDb);
+    });
 
-    it(
-      'find first document in french',
-      testInTransaction(async () => {
-        const articleDb = await findArticleDb({ title: 'Article1-Draft-FR' });
+    it('find first document in french', async () => {
+      const articleDb = await findArticleDb({ title: 'Article1-Draft-FR' });
 
-        const article = await strapi.documents(ARTICLE_UID).findFirst({
-          locale: 'fr',
-          filters: {
-            title: { $startsWith: 'Article1' },
-          },
-        });
+      const article = await strapi.documents(ARTICLE_UID).findFirst({
+        locale: 'fr',
+        filters: {
+          title: { $startsWith: 'Article1' },
+        },
+      });
 
-        expect(article).toMatchObject(articleDb);
-      })
-    );
+      expect(article).toMatchObject(articleDb);
+    });
 
-    it(
-      'find one published document',
-      testInTransaction(async () => {
-        const article = await strapi.documents(ARTICLE_UID).findFirst({
-          status: 'published',
-        });
+    it('find one published document', async () => {
+      const article = await strapi.documents(ARTICLE_UID).findFirst({
+        status: 'published',
+      });
 
-        expect(article).toMatchObject({
-          publishedAt: expect.any(String),
-        });
-      })
-    );
+      expect(article).toMatchObject({
+        publishedAt: expect.any(String),
+      });
+    });
 
-    it(
-      'find first draft document',
-      testInTransaction(async () => {
-        const article = await strapi.documents(ARTICLE_UID).findFirst({
-          status: 'draft',
-        });
+    it('find first draft document', async () => {
+      const article = await strapi.documents(ARTICLE_UID).findFirst({
+        status: 'draft',
+      });
 
-        expect(article).toMatchObject({
-          publishedAt: null,
-        });
-      })
-    );
+      expect(article).toMatchObject({
+        publishedAt: null,
+      });
+    });
   });
 });
