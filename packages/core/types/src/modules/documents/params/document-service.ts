@@ -20,6 +20,8 @@ export type FindMany<TContentTypeUID extends Common.UID.ContentType> = Pick<
   | 'lookup'
 >;
 
+export type Count<TContentTypeUID extends Common.UID.ContentType> = FindMany<TContentTypeUID>;
+
 export type FindFirst<TContentTypeUID extends Common.UID.ContentType> = Pick<
   TContentTypeUID,
   'fields' | 'filters' | '_q' | 'sort' | 'populate' | 'status' | 'locale' | 'plugin' | 'lookup'
@@ -62,20 +64,6 @@ export type Clone<TContentTypeUID extends Common.UID.ContentType> = Pick<
 export type Update<TContentTypeUID extends Common.UID.ContentType> = Pick<
   TContentTypeUID,
   'data:partial' | 'files' | 'fields' | 'populate' | 'status' | 'locale' | 'lookup'
->;
-
-export type Count<TContentTypeUID extends Common.UID.ContentType> = Pick<
-  TContentTypeUID,
-  | 'fields'
-  | 'filters'
-  | '_q'
-  | 'pagination:offset'
-  | 'sort'
-  | 'populate'
-  | 'status'
-  | 'locale'
-  | 'plugin'
-  | 'lookup'
 >;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
