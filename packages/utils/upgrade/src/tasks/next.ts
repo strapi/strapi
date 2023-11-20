@@ -5,11 +5,11 @@ import assert from 'node:assert';
 import {
   f,
   createProjectLoader,
-  createCodemodsRunner,
+  createTransformsRunner,
   createVersionParser,
-  createCodemodsLoader,
-  CodeShiftConfig,
+  createTransformsLoader,
   createTimer,
+  RunnerConfiguration,
 } from '../core';
 
 import type { VersionRange } from '../core';
@@ -30,13 +30,13 @@ export const next = async (options: TaskOptions) => {
   // Create a version range for ">{current}"
   const range: VersionRange = { from: project.strapiVersion, to: 'latest' };
 
-  // TODO: In the future, we should allow to load codemods from the user app (custom codemods)
-  //       e.g: const userCodemodsDir = path.join(cwd, 'codemods');
-  const codemodsLoader = createCodemodsLoader({ logger, range });
+  // TODO: In the future, we should allow loading transforms from the user app (custom transforms)
+  //       e.g: const userTransformsDir = path.join(cwd, 'transforms');
+  const transformsLoader = createTransformsLoader({ logger, range });
 
   const versionParser = createVersionParser(project.strapiVersion)
     // Indicates the available versions to the parser
-    .setAvailable(codemodsLoader.availableVersions);
+    .setAvailable(transformsLoader.availableVersions);
 
   // Find the next available major version for the current project
   const nextMajorVersion = versionParser.nextMajor();
@@ -49,9 +49,9 @@ export const next = async (options: TaskOptions) => {
       from: project.strapiVersion,
       to: nextMajorVersion,
     };
-    const codemods = codemodsLoader.loadRange(upgradeRange);
+    const transformFiles = transformsLoader.loadRange(upgradeRange);
 
-    const impactedVersions = Array.from(new Set(codemods.map((p) => p.version)));
+    const impactedVersions = Array.from(new Set(transformFiles.map((p) => p.version)));
     const fUpgradePlan = [project.strapiVersion]
       .concat(impactedVersions)
       .map((v) => f.version(v))
@@ -65,45 +65,48 @@ export const next = async (options: TaskOptions) => {
     logger.info(`Preparing the upgrade (${fUpgradePlan})`);
 
     assert(
-      codemods.length > 0,
+      transformFiles.length > 0,
       `A new version seems to exist (${fTarget}), but no task was found, exiting...`
     );
 
     if (options.confirm && !dryRun) {
       const shouldProceed = await options.confirm?.(
-        `About to apply ${codemods.length} transformations on ${project.files.length} files, do you wish to continue?`
+        `About to apply ${transformFiles.length} transformations on ${project.files.length} files, do you wish to continue?`
       );
 
       assert(shouldProceed, 'Aborted');
     }
 
-    const runnerConfig: CodeShiftConfig = {
-      dry: dryRun,
-      print: false,
-      silent: true,
-      extensions: 'js,ts',
-      runInBand: true,
-      verbose: 0,
-      babel: true,
+    const runnerConfig: RunnerConfiguration = {
+      code: {
+        dry: dryRun,
+        print: false,
+        silent: true,
+        extensions: 'js,ts',
+        runInBand: true,
+        verbose: 0,
+        babel: true,
+      },
+      json: { cwd, dry: dryRun, logger },
     };
 
-    const runner = createCodemodsRunner(project.files, { logger, config: runnerConfig });
-
+    const runner = createTransformsRunner(project.files, { config: runnerConfig, logger });
     const reports: RunReports = [];
 
     const spinner = ora({
       color: 'green',
       spinner: 'moon',
       isSilent: logger.isSilent,
-    }).start(`(0/${codemods.length}) Initializing the codemod runner`);
+      prefixText: `(0/${transformFiles.length})`,
+    }).start(`Initializing the transforms runner`);
 
-    await runner.runAll(codemods, {
-      onRunStart(codemod, runIndex) {
-        spinner.prefixText = `(${`${runIndex + 1}/${codemods.length}`})`;
-        spinner.text = `(${f.version(codemod.version)}) ${f.path(codemod.formatted)}`;
+    await runner.runAll(transformFiles, {
+      onRunStart(transformFile, runIndex) {
+        spinner.prefixText = `(${`${runIndex + 1}/${transformFiles.length}`})`;
+        spinner.text = `(${f.version(transformFile.version)}) ${f.path(transformFile.formatted)}`;
       },
-      onRunFinish(codemod, runIndex, report: Report) {
-        reports.push({ codemod, report });
+      onRunFinish(transformFile, runIndex, report: Report) {
+        reports.push({ transform: transformFile, report });
       },
     });
 
