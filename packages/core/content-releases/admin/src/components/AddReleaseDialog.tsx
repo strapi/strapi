@@ -7,18 +7,26 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { useNotification } from '@strapi/helper-plugin';
+import { useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
+import { useHistory } from 'react-router-dom';
 import * as yup from 'yup';
 
-const releaseSchema = yup.object({
+import { useCreateReleaseMutation } from '../modules/releaseSlice';
+import { isErrorAxiosError } from '../utils/errors';
+
+const RELEASE_SCHEMA = yup.object({
   name: yup.string().required(),
 });
 
+interface FormValues {
+  name: string;
+}
+
 const INITIAL_VALUES = {
   name: '',
-};
+} satisfies FormValues;
 
 interface AddReleaseDialogProps {
   handleClose: () => void;
@@ -27,17 +35,36 @@ interface AddReleaseDialogProps {
 export const AddReleaseDialog = ({ handleClose }: AddReleaseDialogProps) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
+  const { push } = useHistory();
+  const { formatAPIError } = useAPIErrorHandler();
 
-  const handleSubmit = () => {
-    handleClose();
+  const [createRelease, { isLoading }] = useCreateReleaseMutation();
 
-    toggleNotification({
-      type: 'success',
-      message: formatMessage({
-        id: 'content-releases.modal.release-created-notification-success',
-        defaultMessage: 'Release created.',
-      }),
+  const handleSubmit = async (values: FormValues) => {
+    const response = await createRelease({
+      name: values.name,
     });
+
+    if ('data' in response) {
+      toggleNotification({
+        type: 'success',
+        message: formatMessage({
+          id: 'content-releases.modal.release-created-notification-success',
+          defaultMessage: 'Release created.',
+        }),
+      });
+      push(`/plugins/content-releases/${response.data.data.id}`);
+    } else if (isErrorAxiosError(response.error)) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(response.error),
+      });
+    } else {
+      toggleNotification({
+        type: 'warning',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+      });
+    }
   };
 
   return (
@@ -54,7 +81,7 @@ export const AddReleaseDialog = ({ handleClose }: AddReleaseDialogProps) => {
         validateOnChange={false}
         onSubmit={handleSubmit}
         initialValues={INITIAL_VALUES}
-        validationSchema={releaseSchema}
+        validationSchema={RELEASE_SCHEMA}
       >
         {({ values, errors, handleChange }) => (
           <Form>
@@ -78,7 +105,7 @@ export const AddReleaseDialog = ({ handleClose }: AddReleaseDialogProps) => {
                 </Button>
               }
               endActions={
-                <Button name="submit" disabled={!values.name} type="submit">
+                <Button name="submit" loading={isLoading} disabled={!values.name} type="submit">
                   {formatMessage({
                     id: 'content-releases.modal.form.button.submit',
                     defaultMessage: 'Continue',

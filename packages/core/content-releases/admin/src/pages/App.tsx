@@ -3,16 +3,18 @@ import { Route, Switch } from 'react-router-dom';
 
 import { pluginId } from '../pluginId';
 
+import { ProtectedReleaseDetailsPage } from './ReleaseDetailsPage';
 import { ProtectedReleasesPage } from './ReleasesPage';
 
-export const Releases = () => {
+export const App = () => {
   return (
     <Main>
       <Switch>
         <Route exact path={`/plugins/${pluginId}`} component={ProtectedReleasesPage} />
         <Route
+          exact
           path={`/plugins/${pluginId}/:releaseId`}
-          render={() => <div>TODO: This is the DetailsPage</div>}
+          component={ProtectedReleaseDetailsPage}
         />
       </Switch>
     </Main>
