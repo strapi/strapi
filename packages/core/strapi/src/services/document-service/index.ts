@@ -1,23 +1,23 @@
-import type { Common, Strapi, Schema, Shared, Documents } from '@strapi/types';
-import { contentTypes as contentTypesUtils, convertQueryParams, mapAsync } from '@strapi/utils';
 import type { Database } from '@strapi/database';
+import type { Common, Documents, Schema, Shared, Strapi } from '@strapi/types';
+import { contentTypes as contentTypesUtils, convertQueryParams, mapAsync } from '@strapi/utils';
 
 import { isArray, omit } from 'lodash/fp';
 import uploadFiles from '../utils/upload-files';
 
 import {
-  omitComponentData,
-  getComponents,
-  createComponents,
-  updateComponents,
-  deleteComponents,
   cloneComponents,
+  createComponents,
+  deleteComponents,
+  getComponents,
+  omitComponentData,
+  updateComponents,
 } from '../entity-service/components';
 
-import { pickSelectionParams } from './params';
-import { applyTransforms } from '../entity-service/attributes';
 import { createDocumentId } from '../../utils/transform-content-types-to-models';
+import { applyTransforms } from '../entity-service/attributes';
 import entityValidator from '../entity-validator';
+import { pickSelectionParams } from './params';
 
 const { transformParamsToQuery } = convertQueryParams;
 
@@ -195,9 +195,10 @@ const createDocumentService = ({
   },
 
   async count(uid, params = undefined) {
-    const query = transformParamsToQuery(uid, pickSelectionParams(params || {}));
+    const query = transformParamsToQuery(uid, params || ({} as any));
+    query.where = { ...params?.lookup, ...query.where };
 
-    return db.query(uid).count(query) as any;
+    return db.query(uid).count(query);
   },
 
   async clone(uid, documentId, params) {
