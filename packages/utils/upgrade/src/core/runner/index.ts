@@ -64,7 +64,7 @@ export const createTransformsRunner = (
     throw new Error('Invalid transform file submitted, exiting...');
   };
 
-  const runAll = async (transformFiles: TransformFile[], options: RunAllOptions) => {
+  const runAll = async (transformFiles: TransformFile[], options: RunAllOptions = {}) => {
     const reports: Report[] = [];
 
     let runIndex = 0;
