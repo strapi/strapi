@@ -5,11 +5,15 @@ import { notifyExperimentalCommand } from '../../../utils/helpers';
 import { Export, loadPkg, validatePkg } from '../../../utils/pkg';
 import { CLIContext } from '../../../types';
 
-interface ActionOptions extends BuildCLIOptions, CLIContext {
+interface ActionOptions extends BuildCLIOptions {
   force?: boolean;
 }
 
-export default async ({ cwd, logger, force, ...opts }: ActionOptions) => {
+export default async (
+  { force, ...opts }: ActionOptions,
+  _cmd: unknown,
+  { logger, cwd }: CLIContext
+) => {
   try {
     /**
      * ALWAYS set production for using plugin build CLI.

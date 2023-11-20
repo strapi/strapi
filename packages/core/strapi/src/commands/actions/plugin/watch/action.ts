@@ -5,9 +5,9 @@ import { notifyExperimentalCommand } from '../../../utils/helpers';
 import { Export, loadPkg, validatePkg } from '../../../utils/pkg';
 import { CLIContext } from '../../../types';
 
-interface ActionOptions extends WatchCLIOptions, CLIContext {}
+interface ActionOptions extends WatchCLIOptions {}
 
-export default async ({ logger, cwd, ...opts }: ActionOptions) => {
+export default async (opts: ActionOptions, _cmd: unknown, { cwd, logger }: CLIContext) => {
   try {
     /**
      * Notify users this is an experimental command.
