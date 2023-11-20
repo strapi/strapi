@@ -1,6 +1,7 @@
-'use strict';
+import './resources/types/components.d.ts';
+import './resources/types/contentTypes.d.ts';
 
-module.exports = {
+export default {
   schemas: require('./schemas'),
   fixtures: require('./fixtures'),
   locales: [
