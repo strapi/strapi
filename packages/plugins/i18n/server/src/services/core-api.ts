@@ -277,9 +277,14 @@ const addGraphqlLocalizationAction = (contentType: any) => {
   });
 };
 
-export default () => ({
+const coreApi = () => ({
   addCreateLocalizationAction,
   addGraphqlLocalizationAction,
   createSanitizer,
   createCreateLocalizationHandler,
 });
+
+type CoreApiService = typeof coreApi;
+
+export default coreApi;
+export { CoreApiService };

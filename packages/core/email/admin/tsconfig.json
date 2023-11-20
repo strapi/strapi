@@ -1,8 +1,7 @@
 {
-    "extends": "tsconfig/client.json",
-    "include": ["./src", "../shared/types.ts"],
-    "compilerOptions": {
-        "rootDir": "../",
-    }
+  "extends": "tsconfig/client.json",
+  "include": ["./src", "../shared/types.ts"],
+  "compilerOptions": {
+    "rootDir": "../"
+  }
 }
-  

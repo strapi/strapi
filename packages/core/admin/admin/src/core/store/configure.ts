@@ -6,7 +6,7 @@ import {
   combineReducers,
 } from '@reduxjs/toolkit';
 
-import { RBACReducer } from '../../components/RBACProvider';
+import { RBACReducer, RBACState } from '../../components/RBACProvider';
 // @ts-expect-error no types, yet.
 import rbacManagerReducer from '../../content-manager/hooks/useSyncRbac/reducer';
 // @ts-expect-error no types, yet.
@@ -17,7 +17,7 @@ import editViewLayoutManagerReducer from '../../content-manager/pages/EditViewLa
 import listViewReducer from '../../content-manager/pages/ListView/reducer';
 // @ts-expect-error no types, yet.
 import editViewCrudReducer from '../../content-manager/sharedReducers/crudReducer/reducer';
-import { reducer as appReducer } from '../../reducer';
+import { reducer as appReducer, AppState } from '../../reducer';
 
 /**
  * @description Static reducers are ones we know, they live in the admin package.
@@ -87,4 +87,4 @@ type Store = ReturnType<typeof configureStoreImpl> & {
 type RootState = ReturnType<Store['getState']>;
 
 export { configureStoreImpl as configureStore };
-export type { RootState, Store };
+export type { RootState, AppState, RBACState, Store };

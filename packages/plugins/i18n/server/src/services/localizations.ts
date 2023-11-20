@@ -82,8 +82,13 @@ const syncNonLocalizedAttributes = async (entry: any, { model }: any) => {
   }
 };
 
-export default () => ({
+const localizations = () => ({
   assignDefaultLocaleToEntries,
   syncLocalizations,
   syncNonLocalizedAttributes,
 });
+
+type LocalizationsService = typeof localizations;
+
+export default localizations;
+export type { LocalizationsService };

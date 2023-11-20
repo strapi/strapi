@@ -196,7 +196,12 @@ const decorator = (service: any) => ({
   },
 });
 
-export default () => ({
+const entityServiceDecorator = () => ({
   decorator,
   wrapParams,
 });
+
+type EntityServiceDecoratorService = typeof entityServiceDecorator;
+
+export default entityServiceDecorator;
+export type { EntityServiceDecoratorService };

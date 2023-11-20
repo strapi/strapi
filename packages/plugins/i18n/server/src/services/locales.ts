@@ -79,7 +79,7 @@ const deleteAllLocalizedEntriesFor = async ({ locale }: any) => {
   }
 };
 
-export default () => ({
+const locales = () => ({
   find,
   findById,
   findByCode,
@@ -92,3 +92,8 @@ export default () => ({
   delete: deleteFn,
   initDefaultLocale,
 });
+
+type LocaleService = typeof locales;
+
+export default locales;
+export type { LocaleService };

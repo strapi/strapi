@@ -36,13 +36,7 @@
       "pluginOptions": {}
     },
     "priceRange": {
-      "enum": [
-        "very_cheap",
-        "cheap",
-        "average",
-        "expensive",
-        "very_expensive"
-      ],
+      "enum": ["very_cheap", "cheap", "average", "expensive", "very_expensive"],
       "type": "enumeration",
       "pluginOptions": {
         "i18n": {
