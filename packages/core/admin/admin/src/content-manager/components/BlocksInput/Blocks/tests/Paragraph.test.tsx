@@ -60,7 +60,7 @@ describe('Paragraph', () => {
     });
 
     // Simulate the enter key
-    paragraphBlocks.paragraph.handleEnterKey?.(baseEditor);
+    paragraphBlocks.paragraph.handleEnterKey!(baseEditor);
 
     // Should insert a new paragraph with the content after the cursor
     expect(baseEditor.children).toEqual([
@@ -121,7 +121,7 @@ describe('Paragraph', () => {
 
     const cursorInitialPosition = baseEditor.selection.anchor.path;
     // Simulate the enter key
-    paragraphBlocks.paragraph.handleEnterKey?.(baseEditor);
+    paragraphBlocks.paragraph.handleEnterKey!(baseEditor);
 
     const cursorPositionAfterFirstEnter = baseEditor.selection.anchor.path;
 
@@ -135,7 +135,7 @@ describe('Paragraph', () => {
     });
 
     // Simulate another the enter key
-    paragraphBlocks.paragraph.handleEnterKey?.(baseEditor);
+    paragraphBlocks.paragraph.handleEnterKey!(baseEditor);
 
     const cursorPositionAfterSecondEnter = baseEditor.selection.anchor.path;
 
@@ -166,7 +166,7 @@ describe('Paragraph', () => {
     });
 
     // Simulate the enter key
-    paragraphBlocks.paragraph.handleEnterKey?.(baseEditor);
+    paragraphBlocks.paragraph.handleEnterKey!(baseEditor);
 
     // Should insert a new paragraph without modifiers
     expect(baseEditor.children).toEqual([
@@ -217,7 +217,7 @@ describe('Paragraph', () => {
     });
 
     // Simulate the enter key
-    paragraphBlocks.paragraph.handleEnterKey?.(baseEditor);
+    paragraphBlocks.paragraph.handleEnterKey!(baseEditor);
 
     // Should insert a new line with modifiers
     expect(baseEditor.children).toEqual([
