@@ -4,11 +4,13 @@ import * as yup from 'yup';
 
 import CheckboxConfirmation from './components/CheckboxConfirmation';
 import { CMEditViewInjectedComponents } from './components/CMEditViewInjectedComponents';
-import DeleteModalAdditionalInfos from './components/CMListViewInjectedComponents/DeleteModalAdditionalInfos';
-import PublishModalAdditionalInfos from './components/CMListViewInjectedComponents/PublishModalAdditionalInfos';
-import UnpublishModalAdditionalInfos from './components/CMListViewInjectedComponents/UnpublishModalAdditionalInfos';
+import {
+  DeleteModalAdditionalInfo,
+  PublishModalAdditionalInfo,
+  UnpublishModalAdditionalInfo,
+} from './components/CMListViewModalsAdditionalInformation';
 import Initializer from './components/Initializer';
-import LocalePicker from './components/LocalePicker';
+import { LocalePicker } from './components/LocalePicker';
 import { PERMISSIONS } from './constants';
 import addColumnToTableHook from './contentManagerHooks/addColumnToTable';
 import addLocaleToCollectionTypesLinksHook from './contentManagerHooks/addLocaleToCollectionTypesLinks';
@@ -81,17 +83,17 @@ export default {
 
     app.injectContentManagerComponent('listView', 'deleteModalAdditionalInfos', {
       name: 'i18n-delete-bullets-in-modal',
-      Component: DeleteModalAdditionalInfos,
+      Component: DeleteModalAdditionalInfo,
     });
 
     app.injectContentManagerComponent('listView', 'publishModalAdditionalInfos', {
       name: 'i18n-publish-bullets-in-modal',
-      Component: PublishModalAdditionalInfos,
+      Component: PublishModalAdditionalInfo,
     });
 
     app.injectContentManagerComponent('listView', 'unpublishModalAdditionalInfos', {
       name: 'i18n-unpublish-bullets-in-modal',
-      Component: UnpublishModalAdditionalInfos,
+      Component: UnpublishModalAdditionalInfo,
     });
 
     const ctbPlugin = app.getPlugin('content-type-builder');
