@@ -1,5 +1,4 @@
 import { LoadedStrapi } from '@strapi/types';
-import { FindMany } from '@strapi/types/dist/modules/documents/params/document-service';
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
 import resources from './resources/index';
 import { findArticlesDb } from './utils';
@@ -111,7 +110,7 @@ describe('Document Service', () => {
     it('find draft documents', async () => {
       const params = {
         status: 'draft',
-      } satisfies FindMany<'api::article.article'>;
+      };
 
       const articles = await strapi.documents('api::article.article').findMany(params);
 
