@@ -47,6 +47,11 @@ export interface Schema {
    * Custom table name for the schema
    */
   collectionName?: string;
+
+  /**
+   * Information about schema naming and display
+   */
+  info: Info;
 }
 
 /**
@@ -105,7 +110,7 @@ export interface ContentType extends Schema {
   kind: ContentTypeKind;
 
   /**
-   * Informations about schema naming and display
+   * Information about schema naming and display
    */
   info: ContentTypeInfo;
 }

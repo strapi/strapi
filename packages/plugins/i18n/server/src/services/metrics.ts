@@ -21,7 +21,12 @@ const sendDidUpdateI18nLocalesEvent = async () => {
   });
 };
 
-export default () => ({
+const metrics = () => ({
   sendDidInitializeEvent,
   sendDidUpdateI18nLocalesEvent,
 });
+
+type MetricsService = typeof metrics;
+
+export default metrics;
+export type { MetricsService };

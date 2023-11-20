@@ -3,7 +3,7 @@ import produce from 'immer';
 import { ACTION_SET_APP_RUNTIME_STATUS, ACTION_SET_ADMIN_PERMISSIONS } from './constants';
 import { PermissionMap } from './types/permissions';
 
-interface State {
+interface AppState {
   status: 'init' | 'runtime';
   permissions: Partial<PermissionMap>;
 }
@@ -11,7 +11,7 @@ interface State {
 const initialState = {
   permissions: {},
   status: 'init',
-} satisfies State;
+} satisfies AppState;
 
 interface SetAppRuntimeStatusAction {
   type: typeof ACTION_SET_APP_RUNTIME_STATUS;
@@ -24,7 +24,7 @@ interface SetAdminPermissionsAction {
 
 type Action = SetAppRuntimeStatusAction | SetAdminPermissionsAction;
 
-const reducer = (state: State = initialState, action: Action) =>
+const reducer = (state: AppState = initialState, action: Action) =>
   /* eslint-disable-next-line consistent-return */
   produce(state, (draftState) => {
     switch (action.type) {
@@ -44,4 +44,4 @@ const reducer = (state: State = initialState, action: Action) =>
   });
 
 export { reducer, initialState };
-export type { State, Action, SetAppRuntimeStatusAction, SetAdminPermissionsAction };
+export type { AppState, Action, SetAppRuntimeStatusAction, SetAdminPermissionsAction };

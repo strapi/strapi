@@ -6,8 +6,9 @@ import { pluginId } from '../pluginId';
 import { ADD_LOCALE, DELETE_LOCALE, RESOLVE_LOCALES, UPDATE_LOCALE } from './constants';
 
 import type { Locale } from '../../../shared/contracts/locales';
+import type { Store } from '@strapi/strapi/admin';
 
-interface LocalesState {
+export interface LocalesState {
   isLoading: boolean;
   locales: Locale[];
 }
@@ -90,9 +91,9 @@ const reducers = {
   [`${pluginId}_locales`]: localeReducer,
 };
 
-interface RootState {
+type RootState = ReturnType<Store['getState']> & {
   i18n_locales: LocalesState;
-}
+};
 
 export { reducers };
 export type { RootState, Locale, Action };
