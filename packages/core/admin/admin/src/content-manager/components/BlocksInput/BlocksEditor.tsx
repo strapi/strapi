@@ -4,7 +4,7 @@ import { createContext } from '@radix-ui/react-context';
 import { InputWrapper, Divider, VisuallyHidden } from '@strapi/design-system';
 import { type Attribute } from '@strapi/types';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { type Editor, type Descendant, createEditor, Transforms } from 'slate';
+import { Editor, type Descendant, createEditor } from 'slate';
 import { withHistory } from 'slate-history';
 import { type RenderElementProps, Slate, withReact, ReactEditor, useSlate } from 'slate-react';
 import styled from 'styled-components';
@@ -181,8 +181,6 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
     const [liveText, setLiveText] = React.useState('');
     const ariaDescriptionId = `${name}-item-instructions`;
 
-    const getItemPosition = (index: number) => `${index + 1} of ${value.length}`;
-
     const formattedPlaceholder =
       placeholder &&
       formatMessage({ id: placeholder.id, defaultMessage: placeholder.defaultMessage });
@@ -218,34 +216,6 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
       }
     };
 
-    const handleMoveItem = React.useCallback(
-      (newIndex: Array<number>, currentIndex: Array<number>) => {
-        Transforms.moveNodes(editor, {
-          at: currentIndex,
-          to: newIndex,
-        });
-
-        // TODO: fix selection to new index
-        Transforms.select(editor, {
-          anchor: { path: [0, 0], offset: 0 },
-          focus: { path: [0, 0], offset: 0 },
-        });
-        /* setLiveText(
-            formatMessage(
-              {
-                id: getTrad('components.Blocks.dnd.reorder'),
-                defaultMessage: '{item}, moved. New position in the editor: {position}.',
-              },
-              {
-                item: `${name}.${currentIndexArray.join(',')}`,
-                position: getItemPosition(parseInt(newIndexArray.join(','), 10)),
-              }
-            )
-          ); */
-      },
-      [editor]
-    );
-
     const blocks: BlocksStore = {
       ...paragraphBlocks,
       ...headingBlocks,
@@ -260,8 +230,8 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
       <>
         <VisuallyHidden id={ariaDescriptionId}>
           {formatMessage({
-            id: getTrad('dnd.instructions'),
-            defaultMessage: `Press spacebar to grab and re-order`,
+            id: getTrad('components.Blocks.dnd.instruction'),
+            defaultMessage: `To reorder blocks, press Command or Control along with Shift and the Up or Down arrow keys`,
           })}
         </VisuallyHidden>
         <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
@@ -285,7 +255,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
               <BlocksContent
                 placeholder={formattedPlaceholder}
                 name={name}
-                handleMoveItem={handleMoveItem}
+                setLiveText={setLiveText}
               />
             </InputWrapper>
           </BlocksEditorProvider>

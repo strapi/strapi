@@ -2,14 +2,15 @@ import * as React from 'react';
 
 import { Box, Flex, Icon } from '@strapi/design-system';
 import { Drag } from '@strapi/icons';
-import { type Editor } from 'slate';
+import { useIntl } from 'react-intl';
+import { Editor, Range, Transforms } from 'slate';
 import { ReactEditor, type RenderElementProps, type RenderLeafProps, Editable } from 'slate-react';
 import styled from 'styled-components';
 
 // @ts-expect-error TODO convert to ts
 import { useDragAndDrop } from '../../hooks/useDragAndDrop';
 // @ts-expect-error TODO convert to ts
-import { composeRefs, ItemTypes } from '../../utils';
+import { composeRefs, ItemTypes, getTrad } from '../../utils';
 
 import { BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { type ModifiersStore, useModifiersStore } from './hooks/useModifiersStore';
@@ -67,7 +68,7 @@ type DragAndDropElementProps = {
   canDrag: boolean;
   canDrop: boolean;
   name: string;
-  onMoveItem: (newIndex: Array<number>, currentIndex: Array<number>) => void;
+  setLiveText: (text: string) => void;
 };
 
 const DragAndDropElement = ({
@@ -77,8 +78,63 @@ const DragAndDropElement = ({
   canDrag,
   canDrop,
   name,
-  onMoveItem,
+  setLiveText,
 }: DragAndDropElementProps) => {
+  const { editor } = useBlocksEditorContext('drag-and-drop');
+  const { formatMessage } = useIntl();
+
+  const handleMoveBlock = React.useCallback(
+    (newIndex: Array<number>, currentIndex: Array<number>) => {
+      const [newNode] = Editor.node(editor, newIndex);
+      const [draggedNode] = Editor.node(editor, currentIndex);
+
+      Transforms.moveNodes(editor, {
+        at: currentIndex,
+        to: newIndex,
+      });
+
+      // Add 1 to the index for the live text message
+      const currentIndexPosition = [currentIndex[0] + 1, ...currentIndex.slice(1)];
+      const newIndexPosition = [newIndex[0] + 1, ...newIndex.slice(1)];
+
+      setLiveText(
+        formatMessage(
+          {
+            id: getTrad('components.Blocks.dnd.reorder'),
+            defaultMessage: '{item}, moved. New position in the editor: {position}.',
+          },
+          {
+            item: `${name}.${currentIndexPosition.join(',')}`,
+            position: `${newIndexPosition.join(',')} of ${editor.children.length}`,
+          }
+        )
+      );
+
+      // If a node is dragged out of the list block then convert it to a paragraph
+      if (newNode?.type !== 'list-item' && draggedNode?.type === 'list-item') {
+        Transforms.setNodes(editor, { type: 'paragraph' }, { at: newIndex });
+      }
+
+      // If a node is dragged into the list block then convert it to a list-item
+      if (newNode?.type === 'list-item' && draggedNode?.type !== 'list-item') {
+        Transforms.setNodes(editor, { type: 'list-item' }, { at: newIndex });
+      }
+
+      // TODO: fix selection to new index
+      Transforms.select(editor, {
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [0, 0], offset: 0 },
+      });
+
+      /*  const selectionRange = Editor.range(editor, newIndex);
+        Transforms.select(editor, {
+          anchor: { path: selectionRange.anchor.path, offset: 0 },
+          focus: { path: selectionRange.focus.path, offset: 0 },
+        }); */
+    },
+    [editor, formatMessage, name, setLiveText]
+  );
+
   const [{ handlerId, isDragging, handleKeyDown }, myRef, boxRef, dropRef, dragRef] =
     useDragAndDrop(!disabled && canDrag, {
       type: `${ItemTypes.BLOCKS}._${name}`,
@@ -89,7 +145,7 @@ const DragAndDropElement = ({
       item: {
         displayedValue: children,
       },
-      onMoveItem,
+      onMoveItem: handleMoveBlock,
     });
 
   const composedRefs = composeRefs(myRef, dragRef);
@@ -106,13 +162,7 @@ const DragAndDropElement = ({
           marginLeft="auto"
         />
       ) : (
-        <DragItem
-          ref={composedRefs}
-          data-handler-id={handlerId}
-          gap={2}
-          isDragging={isDragging}
-          paddingLeft={2}
-        >
+        <DragItem ref={composedRefs} data-handler-id={handlerId} gap={2} paddingLeft={2}>
           <DragButton
             role="button"
             tabIndex={0}
@@ -156,7 +206,7 @@ type baseRenderElementProps = {
   name: string;
   disabled: boolean;
   editor: Editor;
-  handleMoveItem: (newIndex: Array<number>, currentIndex: Array<number>) => void;
+  setLiveText: (text: string) => void;
 };
 
 const baseRenderElement = ({
@@ -165,12 +215,11 @@ const baseRenderElement = ({
   name,
   editor,
   disabled,
-  handleMoveItem,
+  setLiveText,
 }: baseRenderElementProps) => {
   const blockMatch = Object.values(blocks).find((block) => block.matchNode(props.element));
   const block = blockMatch || blocks.paragraph;
   const nodePath = ReactEditor.findPath(editor, props.element);
-  const currElemIndex = parseInt(nodePath.join(''), 10);
 
   return (
     <DragAndDropElement
@@ -179,7 +228,7 @@ const baseRenderElement = ({
       canDrag={!NOT_DRAGGABLE_ITEMS.includes(block.value.type)}
       canDrop={!NOT_DROPPABLE_ITEMS.includes(block.value.type)}
       name={name}
-      onMoveItem={handleMoveItem}
+      setLiveText={setLiveText}
     >
       {block.renderElement(props)}
     </DragAndDropElement>
@@ -189,12 +238,13 @@ const baseRenderElement = ({
 interface BlocksInputProps {
   placeholder?: string;
   name: string;
-  handleMoveItem: (newIndex: Array<number>, currentIndex: Array<number>) => void;
+  setLiveText: (text: string) => void;
 }
 
-const BlocksContent = ({ placeholder, name, handleMoveItem }: BlocksInputProps) => {
+const BlocksContent = ({ placeholder, name, setLiveText }: BlocksInputProps) => {
   const { editor, disabled, blocks } = useBlocksEditorContext('BlocksContent');
   const blocksRef = React.useRef<HTMLDivElement>(null);
+  const { formatMessage } = useIntl();
 
   // Create renderLeaf function based on the modifiers store
   const modifiers = useModifiersStore();
@@ -203,11 +253,50 @@ const BlocksContent = ({ placeholder, name, handleMoveItem }: BlocksInputProps) 
     [modifiers]
   );
 
+  const handleMoveBlocks = (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => {
+    if (editor.selection) {
+      const start = Range.start(editor.selection);
+      const currentIndex = [start.path[0]];
+      let newIndexPosition = null;
+
+      if (event.key === 'ArrowUp') {
+        newIndexPosition = currentIndex[0] > 0 ? currentIndex[0] - 1 : currentIndex[0];
+      } else {
+        newIndexPosition =
+          currentIndex[0] < editor.children.length - 1 ? currentIndex[0] + 1 : currentIndex[0];
+      }
+
+      const newIndex = [newIndexPosition];
+
+      if (newIndexPosition !== currentIndex[0]) {
+        Transforms.moveNodes(editor, {
+          at: currentIndex,
+          to: newIndex,
+        });
+
+        setLiveText(
+          formatMessage(
+            {
+              id: getTrad('components.Blocks.dnd.reorder'),
+              defaultMessage: '{item}, moved. New position in the editor: {position}.',
+            },
+            {
+              item: `${name}.${currentIndex[0] + 1}`,
+              position: `${newIndex[0] + 1} of ${editor.children.length}`,
+            }
+          )
+        );
+
+        event.preventDefault();
+      }
+    }
+  };
+
   // Create renderElement function base on the blocks store
   const renderElement = React.useCallback(
     (props: RenderElementProps) =>
-      baseRenderElement({ props, blocks, editor, disabled, name, handleMoveItem }),
-    [blocks, editor, disabled, name, handleMoveItem]
+      baseRenderElement({ props, blocks, editor, disabled, name, setLiveText }),
+    [blocks, editor, disabled, name, setLiveText]
   );
 
   const handleEnter = () => {
@@ -255,8 +344,12 @@ const BlocksContent = ({ placeholder, name, handleMoveItem }: BlocksInputProps) 
       Object.values(modifiers).forEach((value) => {
         if (value.isValidEventKey(event)) {
           value.handleToggle();
+          return;
         }
       });
+      if (event.shiftKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+        handleMoveBlocks(editor, event);
+      }
     }
   };
 
