@@ -2,23 +2,17 @@ import boxen from 'boxen';
 import chalk from 'chalk';
 import { ConfigBundle, WatchCLIOptions, watch } from '@strapi/pack-up';
 import { notifyExperimentalCommand } from '../../../utils/helpers';
-import { createLogger } from '../../../utils/logger';
 import { Export, loadPkg, validatePkg } from '../../../utils/pkg';
+import { CLIContext } from '../../../types';
 
-interface ActionOptions extends WatchCLIOptions {
-  force?: boolean;
-}
+interface ActionOptions extends WatchCLIOptions, CLIContext {}
 
-export default async ({ force, ...opts }: ActionOptions) => {
-  const logger = createLogger({ debug: opts.debug, silent: opts.silent, timestamp: false });
+export default async ({ logger, cwd, ...opts }: ActionOptions) => {
   try {
     /**
-     * Notify users this is an experimental command and get them to approve first
-     * this can be opted out by setting the argument --yes
+     * Notify users this is an experimental command.
      */
-    await notifyExperimentalCommand('plugin:watch', { force });
-
-    const cwd = process.cwd();
+    await notifyExperimentalCommand('plugin:watch', { force: true });
 
     const pkg = await loadPkg({ cwd, logger });
     const pkgJson = await validatePkg({ pkg });

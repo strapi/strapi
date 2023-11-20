@@ -3,7 +3,7 @@ import { runAction } from '../../../utils/helpers';
 import action from './action';
 
 /**
- * `$ strapi plugin:build`
+ * `$ strapi plugin:watch`
  */
 const command: StrapiCommand = ({ command }) => {
   command

@@ -2,15 +2,14 @@ import boxen from 'boxen';
 import chalk from 'chalk';
 import { BuildCLIOptions, ConfigBundle, build } from '@strapi/pack-up';
 import { notifyExperimentalCommand } from '../../../utils/helpers';
-import { createLogger } from '../../../utils/logger';
 import { Export, loadPkg, validatePkg } from '../../../utils/pkg';
+import { CLIContext } from '../../../types';
 
-interface ActionOptions extends BuildCLIOptions {
+interface ActionOptions extends BuildCLIOptions, CLIContext {
   force?: boolean;
 }
 
-export default async ({ force, ...opts }: ActionOptions) => {
-  const logger = createLogger({ debug: opts.debug, silent: opts.silent, timestamp: false });
+export default async ({ cwd, logger, force, ...opts }: ActionOptions) => {
   try {
     /**
      * ALWAYS set production for using plugin build CLI.
@@ -18,11 +17,9 @@ export default async ({ force, ...opts }: ActionOptions) => {
     process.env.NODE_ENV = 'production';
     /**
      * Notify users this is an experimental command and get them to approve first
-     * this can be opted out by setting the argument --yes
+     * this can be opted out by setting the argument --force
      */
     await notifyExperimentalCommand('plugin:build', { force });
-
-    const cwd = process.cwd();
 
     const pkg = await loadPkg({ cwd, logger });
     const pkgJson = await validatePkg({ pkg });
