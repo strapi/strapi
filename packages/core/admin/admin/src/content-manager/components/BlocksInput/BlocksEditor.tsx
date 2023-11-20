@@ -25,20 +25,23 @@ import { withStrapiSchema } from './plugins/withStrapiSchema';
  * BlocksEditorProvider
  * -----------------------------------------------------------------------------------------------*/
 
-interface NonSelectorBlock {
+interface BaseBlock {
   renderElement: (props: RenderElementProps) => React.JSX.Element;
   value: object;
   matchNode: (node: Attribute.BlocksNode) => boolean;
-  isInBlocksSelector: false;
   handleEnterKey?: (editor: Editor) => void;
   handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => void;
 }
 
-type SelectorBlock = Omit<NonSelectorBlock, 'isInBlocksSelector'> & {
+interface NonSelectorBlock extends BaseBlock {
+  isInBlocksSelector: false;
+}
+
+interface SelectorBlock extends BaseBlock {
   isInBlocksSelector: true;
   icon: React.ComponentType;
   label: MessageDescriptor;
-};
+}
 
 type NonSelectorBlockKey = 'list-item' | 'link';
 
