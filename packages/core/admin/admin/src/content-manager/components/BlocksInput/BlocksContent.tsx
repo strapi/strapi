@@ -117,6 +117,10 @@ const DragAndDropElement = ({
 
       // If a node is dragged into the list block then convert it to a list-item
       if (newNode?.type === 'list-item' && draggedNode?.type !== 'list-item') {
+        if (newIndex[0] > currentIndex[0]) {
+          // Node is dragged downwards inside list
+          newIndex[0] -= 1;
+        }
         Transforms.setNodes(editor, { type: 'list-item' }, { at: newIndex });
       }
 
@@ -125,12 +129,6 @@ const DragAndDropElement = ({
         anchor: { path: [0, 0], offset: 0 },
         focus: { path: [0, 0], offset: 0 },
       });
-
-      /*  const selectionRange = Editor.range(editor, newIndex);
-        Transforms.select(editor, {
-          anchor: { path: selectionRange.anchor.path, offset: 0 },
-          focus: { path: selectionRange.focus.path, offset: 0 },
-        }); */
     },
     [editor, formatMessage, name, setLiveText]
   );
