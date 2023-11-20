@@ -63,7 +63,7 @@ const NOT_DROPPABLE_ITEMS = ['list'];
 
 type DragAndDropElementProps = {
   children: RenderElementProps['children'];
-  index: number | Array<number>;
+  index: Array<number>;
   disabled: boolean;
   canDrag: boolean;
   canDrop: boolean;
