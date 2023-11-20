@@ -1,18 +1,7 @@
 import { LoadedStrapi } from '@strapi/types';
-import './resources/types/components.d.ts';
-import './resources/types/contentTypes.d.ts';
-import resources from './resources/index';
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
-
-const ARTICLE_UID = 'api::article.article';
-
-const findArticleDb = async (where: any) => {
-  return await strapi.query(ARTICLE_UID).findOne({ where });
-};
-
-const findArticlesDb = async (where: any) => {
-  return await strapi.query(ARTICLE_UID).findMany({ where });
-};
+import resources from './resources/index';
+import { ARTICLE_UID } from './utils';
 
 describe('Document Service', () => {
   let testUtils;

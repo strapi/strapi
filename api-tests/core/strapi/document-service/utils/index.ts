@@ -10,3 +10,7 @@ export const findArticleDb = async (where: any) => {
 export const findArticlesDb = async (where: any) => {
   return (await strapi.query(ARTICLE_UID).findMany({ where })) as Article[];
 };
+
+export const findPublishedArticlesDb = async (documentId) => {
+  return findArticlesDb({ documentId, publishedAt: { $notNull: true } });
+};
