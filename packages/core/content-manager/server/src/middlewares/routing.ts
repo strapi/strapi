@@ -31,7 +31,7 @@ export default async (ctx: Context, next: Next) => {
   const [, action] = route.handler.split('.');
 
   const configPath =
-    !ct.plugin || ct.plugin === 'admin'
+    ct.plugin === 'admin'
       ? ['admin.layout', ct.modelName, 'actions', action]
       : ['plugin', ct.plugin, 'layout', ct.modelName, 'actions', action];
 
