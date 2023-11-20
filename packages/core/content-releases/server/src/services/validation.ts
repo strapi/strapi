@@ -1,7 +1,7 @@
 import { errors } from '@strapi/utils';
 import { LoadedStrapi } from '@strapi/types';
-import type { Release } from '../../../shared/contracts/release';
-import type { CreateReleaseAction } from '../../../shared/contracts/release-action';
+import type { Release } from '../../../shared/contracts/releases';
+import type { CreateReleaseAction } from '../../../shared/contracts/release-actions';
 import { RELEASE_MODEL_UID } from '../constants';
 
 const createReleaseValidationService = ({ strapi }: { strapi: LoadedStrapi }) => ({

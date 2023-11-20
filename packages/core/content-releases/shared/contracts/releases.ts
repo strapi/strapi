@@ -1,48 +1,89 @@
-import { Entity as StrapiEntity } from '@strapi/types';
+import type { Entity } from '../types';
+import type { ReleaseAction } from './release-actions';
+import type { UserInfo } from '../types';
 import { errors } from '@strapi/utils';
-
-export interface Entity {
-  id: StrapiEntity.ID;
-  createdAt: string;
-  updatedAt: string;
-}
 
 export interface Release extends Entity {
   name: string;
+  releasedAt: string;
+  actions: ReleaseAction[];
+}
+
+type Pagination = {
+  page: number;
+  pageSize: number;
+  pageCount: number;
+  total: number;
+};
+
+interface ReleaseDataResponse extends Omit<Release, 'actions'> {
+  actions: { meta: { count: number } };
 }
 
 /**
- * POST /content-releases - Create a single release
+ * GET /content-releases/ - Get all releases
+ */
+export declare namespace GetReleases {
+  export interface Request {
+    state: {
+      userAbility: {};
+    };
+    query?: Partial<Pick<Pagination, 'page' | 'pageSize'>>;
+  }
+
+  export type Response =
+    | {
+        data: ReleaseDataResponse[];
+        pagination: Pagination;
+      }
+    | {
+        data: null;
+        error: errors.ApplicationError;
+      };
+}
+
+/**
+ * GET /content-releases/:id - Get a single release
+ */
+export declare namespace GetRelease {
+  export interface Request {
+    state: {
+      userAbility: {};
+    };
+    params: {
+      id: Release['id'];
+    };
+  }
+
+  export type Response =
+    | {
+        data: ReleaseDataResponse;
+      }
+    | {
+        data: null;
+        error: errors.ApplicationError | errors.NotFoundError;
+      };
+}
+
+/**
+ * POST /content-releases/ - Create a release
  */
 export declare namespace CreateRelease {
   export interface Request {
-    query: {};
-    body: Omit<Release, keyof Entity>;
+    state: {
+      user: UserInfo;
+    };
+    body: {
+      name: string;
+    };
   }
 
-  export interface Response {
-    data: Release;
-    /**
-     * TODO: check if we also could recieve errors.YupValidationError
-     */
-    error?: errors.ApplicationError | errors.YupValidationError | errors.UnauthorizedError;
-  }
-}
-
-/**
- * GET /content-releases - Get all the release
- */
-export declare namespace GetAllReleases {
-  export interface Request {
-    query: {};
-    body: {};
-  }
-
-  /**
-   * TODO: Validate this with BE
-   */
-  export interface Response {
-    data: Release[];
-    error?: errors.ApplicationError;
-  }
+  export type Response =
+    | {
+        data: ReleaseDataResponse;
+      }
+    | {
+        data: null;
+        error: errors.ApplicationError | errors.ValidationError;
+      };
 }

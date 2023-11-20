@@ -1,5 +1,5 @@
 import { Attribute, Common } from '@strapi/types';
-import type { Release } from './release';
+import type { Release } from './releases';
 import type { Entity } from '../types';
 
 import type { errors } from '@strapi/utils';

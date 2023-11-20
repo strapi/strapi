@@ -2,7 +2,7 @@ import type Koa from 'koa';
 import { errors } from '@strapi/utils';
 import { RELEASE_MODEL_UID } from '../constants';
 import { validateCreateRelease } from './validation/release';
-import type { CreateRelease, GetRelease, Release } from '../../../shared/contracts/release';
+import type { CreateRelease, GetRelease, Release } from '../../../shared/contracts/releases';
 import type { UserInfo } from '../../../shared/types';
 import { getService } from '../utils';
 

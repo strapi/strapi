@@ -3,7 +3,7 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 import { pluginId } from '../pluginId';
 import { axiosBaseQuery } from '../utils/data';
 
-import type { CreateRelease, GetAllReleases } from '../../../shared/contracts/releases';
+import type { CreateRelease, GetReleases } from '../../../shared/contracts/releases';
 
 const releaseApi = createApi({
   reducerPath: pluginId,
@@ -11,7 +11,7 @@ const releaseApi = createApi({
   tagTypes: ['Releases'],
   endpoints: (build) => {
     return {
-      getRelease: build.query<GetAllReleases.Response, undefined>({
+      getRelease: build.query<GetReleases.Response, undefined>({
         query() {
           return {
             url: '/content-releases',

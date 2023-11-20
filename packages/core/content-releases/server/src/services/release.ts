@@ -1,8 +1,8 @@
 import { setCreatorFields } from '@strapi/utils';
 import type { LoadedStrapi } from '@strapi/types';
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
-import type { GetReleases, CreateRelease, GetRelease } from '../../../shared/contracts/release';
-import type { CreateReleaseAction } from '../../../shared/contracts/release-action';
+import type { GetReleases, CreateRelease, GetRelease } from '../../../shared/contracts/releases';
+import type { CreateReleaseAction } from '../../../shared/contracts/release-actions';
 import type { UserInfo } from '../../../shared/types';
 import { getService } from '../utils';
 

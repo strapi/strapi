@@ -1,4 +1,4 @@
-import type { CreateReleaseAction } from '../../../../shared/contracts/release-action';
+import type { CreateReleaseAction } from '../../../../shared/contracts/release-actions';
 import createReleaseValidationService from '../validation';
 
 const baseStrapiMock = {
