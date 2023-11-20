@@ -12,10 +12,10 @@ import {
 import Initializer from './components/Initializer';
 import { LocalePicker } from './components/LocalePicker';
 import { PERMISSIONS } from './constants';
-import addColumnToTableHook from './contentManagerHooks/addColumnToTable';
 import addLocaleToCollectionTypesLinksHook from './contentManagerHooks/addLocaleToCollectionTypesLinks';
 import addLocaleToSingleTypesLinksHook from './contentManagerHooks/addLocaleToSingleTypesLinks';
 import { mutateEditViewLayoutHook } from './contentManagerHooks/editView';
+import { addColumnToTableHook } from './contentManagerHooks/listView';
 import middlewares from './middlewares';
 import { pluginId } from './pluginId';
 import { reducers } from './store/reducers';
