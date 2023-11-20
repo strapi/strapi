@@ -15,12 +15,12 @@ import { PERMISSIONS } from './constants';
 import addColumnToTableHook from './contentManagerHooks/addColumnToTable';
 import addLocaleToCollectionTypesLinksHook from './contentManagerHooks/addLocaleToCollectionTypesLinks';
 import addLocaleToSingleTypesLinksHook from './contentManagerHooks/addLocaleToSingleTypesLinks';
-import mutateEditViewLayoutHook from './contentManagerHooks/mutateEditViewLayout';
+import { mutateEditViewLayoutHook } from './contentManagerHooks/editView';
 import middlewares from './middlewares';
 import { pluginId } from './pluginId';
 import { reducers } from './store/reducers';
+import { LOCALIZED_FIELDS } from './utils/fields';
 import { getTranslation } from './utils/getTranslation';
-import LOCALIZED_FIELDS from './utils/localizedFields';
 import mutateCTBContentTypeSchema from './utils/mutateCTBContentTypeSchema';
 
 // eslint-disable-next-line import/no-default-export

@@ -2,7 +2,7 @@ import get from 'lodash/get';
 import has from 'lodash/has';
 import omit from 'lodash/omit';
 
-import LOCALIZED_FIELDS from './localizedFields';
+import { LOCALIZED_FIELDS } from './fields';
 
 const localizedPath = ['pluginOptions', 'i18n', 'localized'];
 
