@@ -697,7 +697,7 @@ describe('List', () => {
     ]);
   });
 
-  it('disables modifiers when creating a new node with enter key in a list item', () => {
+  it('has no modifiers applied when pressing enter at the end of a list item', () => {
     const baseEditor = createEditor();
     baseEditor.children = [
       {

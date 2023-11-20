@@ -95,7 +95,7 @@ describe('Quote', () => {
     ]);
   });
 
-  it('disables modifiers when creating a new node with enter key at the end of a quote', () => {
+  it('has no modofiers applied when pressing enter key at the end of a quote', () => {
     const baseEditor = createEditor();
     baseEditor.children = [
       {

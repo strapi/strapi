@@ -143,7 +143,7 @@ describe('Paragraph', () => {
     expect(cursorPositionAfterSecondEnter[0]).toEqual(cursorInitialPosition[0] + 1);
   });
 
-  it('disables modifiers when creating a new node with enter key in a paragraph', () => {
+  it('has no modifiers enabled when pressing enter key at the end of a paragraph', () => {
     const baseEditor = createEditor();
     baseEditor.children = [
       {
