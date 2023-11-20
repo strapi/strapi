@@ -170,7 +170,7 @@ const BlocksDropdown = () => {
     }
 
     // Let the block handle the Slate conversion logic
-    const maybeRenderModal = blocks[optionKey].handleConvert(editor);
+    const maybeRenderModal = blocks[optionKey].handleConvert?.(editor);
 
     // Some blocks, like Image, require a modal. Check if there's one returned
     if (maybeRenderModal) {

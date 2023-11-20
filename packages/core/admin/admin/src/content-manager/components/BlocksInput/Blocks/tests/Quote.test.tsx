@@ -147,7 +147,7 @@ describe('Quote', () => {
       focus: { path: [0, 0], offset: 0 },
     });
 
-    quoteBlocks.quote.handleConvert(baseEditor);
+    quoteBlocks.quote.handleConvert!(baseEditor);
 
     expect(baseEditor.children).toEqual([
       {

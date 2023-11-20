@@ -88,7 +88,7 @@ describe('Code', () => {
       focus: { path: [0, 0], offset: 0 },
     });
 
-    codeBlocks.code.handleConvert(baseEditor);
+    codeBlocks.code.handleConvert!(baseEditor);
 
     expect(baseEditor.children).toEqual([
       {
@@ -136,7 +136,7 @@ describe('Code', () => {
       focus: { path: [0, 0], offset: 0 },
     });
 
-    codeBlocks.code.handleConvert(baseEditor);
+    codeBlocks.code.handleConvert!(baseEditor);
 
     expect(baseEditor.children).toEqual([
       {

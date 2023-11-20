@@ -782,9 +782,8 @@ describe('List', () => {
       focus: { path: [0, 0], offset: 0 },
     });
 
-    listBlocks['list-ordered'].handleConvert(baseEditor);
+    listBlocks['list-ordered'].handleConvert!(baseEditor);
 
-    // console.log(JSON.stringify(baseEditor.children, null, 2));
     expect(baseEditor.children).toEqual([
       {
         type: 'list',
@@ -831,7 +830,7 @@ describe('List', () => {
       focus: { path: [0, 0, 0], offset: 0 },
     });
 
-    listBlocks['list-ordered'].handleConvert(baseEditor);
+    listBlocks['list-ordered'].handleConvert!(baseEditor);
 
     expect(baseEditor.children).toEqual([
       {

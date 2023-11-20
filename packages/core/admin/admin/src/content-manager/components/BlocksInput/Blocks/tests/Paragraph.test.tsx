@@ -273,7 +273,7 @@ describe('Paragraph', () => {
       focus: { path: [0, 0, 0], offset: 0 },
     });
 
-    paragraphBlocks.paragraph.handleConvert(baseEditor);
+    paragraphBlocks.paragraph.handleConvert!(baseEditor);
 
     expect(baseEditor.children).toEqual([
       {
@@ -309,7 +309,7 @@ describe('Paragraph', () => {
       focus: { path: [0, 0], offset: 0 },
     });
 
-    paragraphBlocks.paragraph.handleConvert(baseEditor);
+    paragraphBlocks.paragraph.handleConvert!(baseEditor);
 
     expect(baseEditor.children).toEqual([
       {

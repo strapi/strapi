@@ -239,9 +239,7 @@ const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-it
         {props.children}
       </Typography>
     ),
-    handleConvert() {
-      // No-op because list items are created via list blocks, never directly
-    },
+    // No handleConvert, list items are created when converting to the parent list
     matchNode: (node) => node.type === 'list-item',
     isInBlocksSelector: false,
   },

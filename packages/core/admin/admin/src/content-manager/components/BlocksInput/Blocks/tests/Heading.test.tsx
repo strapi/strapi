@@ -45,7 +45,7 @@ describe('Heading', () => {
       focus: { path: [0, 0], offset: 0 },
     });
 
-    headingBlocks['heading-six'].handleConvert(baseEditor);
+    headingBlocks['heading-six'].handleConvert!(baseEditor);
   });
 
   it('splits a list when converting a list item to a heading', () => {
@@ -76,7 +76,7 @@ describe('Heading', () => {
       focus: { path: [0, 1, 0], offset: 0 },
     });
 
-    headingBlocks['heading-one'].handleConvert(baseEditor);
+    headingBlocks['heading-one'].handleConvert!(baseEditor);
 
     expect(baseEditor.children).toEqual([
       {

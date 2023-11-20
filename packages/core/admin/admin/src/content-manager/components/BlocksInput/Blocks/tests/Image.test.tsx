@@ -102,7 +102,7 @@ describe('Image', () => {
     );
 
     // Display the media library modal via handleConvert
-    const modalComponent = imageBlocks.image.handleConvert(baseEditor);
+    const modalComponent = imageBlocks.image.handleConvert!(baseEditor);
     expect(modalComponent).toBeDefined();
     const modalUi = modalComponent!();
     render(modalUi, {
@@ -154,7 +154,7 @@ describe('Image', () => {
     );
 
     // Display the media library modal via handleConvert
-    const modalComponent = imageBlocks.image.handleConvert(baseEditor);
+    const modalComponent = imageBlocks.image.handleConvert!(baseEditor);
     expect(modalComponent).toBeDefined();
     const modalUi = modalComponent!();
     render(modalUi, {
