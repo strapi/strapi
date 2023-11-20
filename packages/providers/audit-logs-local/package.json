@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-audit-logs-local",
-  "version": "4.14.5",
+  "version": "4.15.4",
   "description": "Local provider for strapi audit logs",
   "keywords": [
     "audit-logs",
@@ -42,10 +42,10 @@
     "watch": "pack-up watch"
   },
   "devDependencies": {
-    "@strapi/pack-up": "workspace:*",
-    "@strapi/types": "4.14.5",
-    "eslint-config-custom": "4.14.5",
-    "tsconfig": "4.14.5"
+    "@strapi/pack-up": "4.15.4",
+    "@strapi/types": "4.15.4",
+    "eslint-config-custom": "4.15.4",
+    "tsconfig": "4.15.4"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

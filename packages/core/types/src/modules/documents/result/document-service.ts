@@ -40,10 +40,7 @@ export type Create<
   TParams extends Params.Create<TContentTypeUID>
 > = Promise<Result<TContentTypeUID, TParams>>;
 
-export type Clone<
-  TContentTypeUID extends Common.UID.ContentType,
-  TParams extends Params.Clone<TContentTypeUID>
-> = Promise<Result<TContentTypeUID, TParams>>;
+export type Clone = Promise<{ documentId: string } | null>;
 
 export type Update<
   TContentTypeUID extends Common.UID.ContentType,

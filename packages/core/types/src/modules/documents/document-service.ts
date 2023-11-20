@@ -70,7 +70,7 @@ export interface DocumentService {
     uid: TContentTypeUID,
     documentId: ID,
     params?: TParams
-  ): Result.Clone<TContentTypeUID, TParams>;
+  ): Result.Clone;
 
   update<
     TContentTypeUID extends Common.UID.ContentType,

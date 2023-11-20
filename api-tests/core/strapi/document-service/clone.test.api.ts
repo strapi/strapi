@@ -34,51 +34,79 @@ describe('Document Service', () => {
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
-        const article = await strapi.documents(ARTICLE_UID).clone(articleDb.documentId, {
+        const result = await strapi.documents(ARTICLE_UID).clone(articleDb.documentId, {
+          locale: 'en', // should only clone the english locale
           data: {
             title: 'Cloned Document',
-            locale: 'en', // should only clone the english locale
           },
         });
 
-        const clonedArticlesDb = await findArticlesDb({ id: article.documentId });
+        expect(result).not.toBeNull();
+
+        const clonedArticlesDb = await findArticlesDb({ documentId: result.documentId });
 
         // all articles should be in draft, and only one should be english
         expect(clonedArticlesDb.length).toBe(1);
         expect(clonedArticlesDb[0]).toMatchObject({
-          ...articleDb,
+          password: articleDb.password,
           title: 'Cloned Document',
           locale: 'en',
           publishedAt: null,
         });
+
+        // Original article should not be modified
+        const originalArticleDb = await findArticleDb({ documentId: articleDb.documentId });
+        expect(originalArticleDb).toMatchObject(articleDb);
       })
     );
 
-    it.todo(
+    it(
       'clone all document locales ',
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
-        // .clone() should only return the doc id
-        // { id: Document.ID }
-        const article = await strapi.documents(ARTICLE_UID).clone(articleDb.documentId, {
+        const result = await strapi.documents(ARTICLE_UID).clone(articleDb.documentId, {
           data: {
             title: 'Cloned Document', // Clone all locales
           },
         });
 
-        const clonedArticlesDb = await findArticlesDb({ id: article.documentId });
+        expect(result).not.toBeNull();
 
-        // all articles should be in draft
-        expect(clonedArticlesDb.length).toBeGreaterThan(1);
+        const originalArticlesDb = await findArticlesDb({
+          documentId: articleDb.documentId,
+          publishedAt: null,
+        });
+        const clonedArticlesDb = await findArticlesDb({ documentId: result.documentId });
+
+        // all articles should be in draft, and all locales should be cloned
+        expect(clonedArticlesDb.length).toBe(originalArticlesDb.length);
         clonedArticlesDb.forEach((article) => {
           expect(article).toMatchObject({
-            ...articleDb,
             title: 'Cloned Document',
             publishedAt: null,
           });
         });
       })
     );
+
+    it('can not clone published documents', () => {
+      const resultPromise = strapi.documents(ARTICLE_UID).clone('1234', {
+        status: 'published',
+      });
+
+      expect(resultPromise).rejects.toThrowError('Cannot directly clone a published document');
+    });
+
+    it('clone non existing document', () => {
+      const resultPromise = strapi.documents(ARTICLE_UID).clone('1234', {
+        data: {
+          title: 'Cloned Document',
+        },
+      });
+
+      expect(resultPromise).resolves.toBeNull();
+    });
+    // TODO: Validate cloning components, media, relations, etc.
   });
 });

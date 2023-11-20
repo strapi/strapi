@@ -26,6 +26,7 @@ describe('useAdminRolePermissions', () => {
   });
 
   test('forwards all query params except `id`', async () => {
+    // @ts-expect-error - test purposes
     const { result } = setup({ id: 1, filters: 'param' });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));

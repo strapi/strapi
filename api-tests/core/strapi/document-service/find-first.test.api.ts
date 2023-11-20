@@ -1,8 +1,8 @@
 import { LoadedStrapi } from '@strapi/types';
-import './resources/types/components.js';
-import './resources/types/contentTypes.js';
+import './resources/types/components.d.ts';
+import './resources/types/contentTypes.d.ts';
 import resources from './resources/index';
-import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper.js';
+import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
 import { testInTransaction } from '../../../utils/index';
 
 const ARTICLE_UID = 'api::article.article';
@@ -29,10 +29,10 @@ describe('Document Service', () => {
   });
 
   describe('FindFirst', () => {
-    it.todo(
+    it(
       'find first document with defaults',
       testInTransaction(async () => {
-        const articleDb = await findArticleDb({ name: 'Article1-Draft-EN' });
+        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
         const article = await strapi.documents(ARTICLE_UID).findFirst({});
 
@@ -41,13 +41,13 @@ describe('Document Service', () => {
       })
     );
 
-    it.todo(
+    it(
       'find first document in french',
       testInTransaction(async () => {
-        const articleDb = await findArticleDb({ name: 'Article1-Draft-FR' });
+        const articleDb = await findArticleDb({ title: 'Article1-Draft-FR' });
 
         const article = await strapi.documents(ARTICLE_UID).findFirst({
-          locale: 'fr'
+          locale: 'fr',
           filters: {
             title: { $startsWith: 'Article1' },
           },
@@ -57,27 +57,23 @@ describe('Document Service', () => {
       })
     );
 
-    it.todo(
+    it(
       'find one published document',
       testInTransaction(async () => {
-        const articleDb = await findArticleDb({ name: 'Article1-Published-EN' });
-
-        const article = await strapi.documents(ARTICLE_UID).findOne({
+        const article = await strapi.documents(ARTICLE_UID).findFirst({
           status: 'published',
         });
 
         expect(article).toMatchObject({
-          publishedAt: expect.any(Date),
+          publishedAt: expect.any(String),
         });
       })
     );
 
-    it.todo(
+    it(
       'find first draft document',
       testInTransaction(async () => {
-        const articleDb = await findArticleDb({ name: 'Article1-Draft-EN' });
-
-        const article = await strapi.documents(ARTICLE_UID).findOne({
+        const article = await strapi.documents(ARTICLE_UID).findFirst({
           status: 'draft',
         });
 

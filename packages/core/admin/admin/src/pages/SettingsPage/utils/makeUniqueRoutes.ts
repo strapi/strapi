@@ -1,10 +1,9 @@
-import { TModule } from '../../../utils/createRoute';
+import { MenuItem } from '@strapi/helper-plugin';
 
-interface UniqueRouteProps {
+interface UniqueRouteProps
+  extends Pick<MenuItem, 'to' | 'exact'>,
+    Required<Pick<MenuItem, 'Component'>> {
   key: string;
-  Component: TModule;
-  to: string;
-  exact?: boolean;
 }
 
 export function makeUniqueRoutes(routes: UniqueRouteProps[]) {

@@ -7,8 +7,8 @@ import isEmpty from 'lodash/isEmpty';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
+import { PermissionsDataManagerProvider } from '../../hooks/usePermissionsDataManager';
 import ContentTypes from '../ContentTypes';
-import PermissionsDataManagerProvider from '../PermissionsDataManagerProvider';
 import PluginsAndSettings from '../PluginsAndSettings';
 
 import init from './init';
@@ -102,16 +102,13 @@ const Permissions = forwardRef(({ layout, isFormDisabled, permissions }, ref) =>
 
   return (
     <PermissionsDataManagerProvider
-      value={{
-        availableConditions: layout.conditions,
-        modifiedData,
-        onChangeConditions: handleChangeConditions,
-        onChangeSimpleCheckbox: handleChangeSimpleCheckbox,
-        onChangeParentCheckbox: handleChangeParentCheckbox,
-        onChangeCollectionTypeLeftActionRowCheckbox:
-          handleChangeCollectionTypeLeftActionRowCheckbox,
-        onChangeCollectionTypeGlobalActionCheckbox: handleChangeCollectionTypeGlobalActionCheckbox,
-      }}
+      availableConditions={layout.conditions}
+      modifiedData={modifiedData}
+      onChangeConditions={handleChangeConditions}
+      onChangeSimpleCheckbox={handleChangeSimpleCheckbox}
+      onChangeParentCheckbox={handleChangeParentCheckbox}
+      onChangeCollectionTypeLeftActionRowCheckbox={handleChangeCollectionTypeLeftActionRowCheckbox}
+      onChangeCollectionTypeGlobalActionCheckbox={handleChangeCollectionTypeGlobalActionCheckbox}
     >
       <TabGroup
         id="tabs"
