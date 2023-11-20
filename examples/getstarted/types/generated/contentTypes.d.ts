@@ -303,6 +303,68 @@ export interface AdminTransferTokenPermission extends Schema.CollectionType {
   };
 }
 
+export interface AdminWorkflow extends Schema.CollectionType {
+  collectionName: 'strapi_workflows';
+  info: {
+    name: 'Workflow';
+    description: '';
+    singularName: 'workflow';
+    pluralName: 'workflows';
+    displayName: 'Workflow';
+  };
+  pluginOptions: {
+    'content-manager': {
+      visible: false;
+    };
+    'content-type-builder': {
+      visible: false;
+    };
+  };
+  attributes: {
+    name: Attribute.String & Attribute.Required & Attribute.Unique;
+    stages: Attribute.Relation<'admin::workflow', 'oneToMany', 'admin::workflow-stage'>;
+    contentTypes: Attribute.JSON & Attribute.Required & Attribute.DefaultTo<[]>;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<'admin::workflow', 'oneToOne', 'admin::user'> & Attribute.Private;
+    updatedBy: Attribute.Relation<'admin::workflow', 'oneToOne', 'admin::user'> & Attribute.Private;
+  };
+}
+
+export interface AdminWorkflowStage extends Schema.CollectionType {
+  collectionName: 'strapi_workflows_stages';
+  info: {
+    name: 'Workflow Stage';
+    description: '';
+    singularName: 'workflow-stage';
+    pluralName: 'workflow-stages';
+    displayName: 'Stages';
+  };
+  options: {
+    version: '1.1.0';
+  };
+  pluginOptions: {
+    'content-manager': {
+      visible: false;
+    };
+    'content-type-builder': {
+      visible: false;
+    };
+  };
+  attributes: {
+    name: Attribute.String;
+    color: Attribute.String & Attribute.DefaultTo<'#4945FF'>;
+    workflow: Attribute.Relation<'admin::workflow-stage', 'manyToOne', 'admin::workflow'>;
+    permissions: Attribute.Relation<'admin::workflow-stage', 'manyToMany', 'admin::permission'>;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<'admin::workflow-stage', 'oneToOne', 'admin::user'> &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<'admin::workflow-stage', 'oneToOne', 'admin::user'> &
+      Attribute.Private;
+  };
+}
+
 export interface PluginUploadFile extends Schema.CollectionType {
   collectionName: 'files';
   info: {
@@ -416,57 +478,6 @@ export interface PluginMypluginTest extends Schema.CollectionType {
           localized: true;
         };
       }>;
-    bool: Attribute.Boolean &
-      Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }>;
-    bool2: Attribute.Boolean &
-      Attribute.Required &
-      Attribute.Private &
-      Attribute.SetPluginOptions<{
-        i18n: {
-          localized: false;
-        };
-      }> &
-      Attribute.DefaultTo<true>;
-    json: Attribute.JSON &
-      Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }>;
-    int: Attribute.Integer &
-      Attribute.Unique &
-      Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Attribute.SetMinMax<{
-        min: 5;
-        max: 20;
-      }> &
-      Attribute.DefaultTo<10>;
-    bigint: Attribute.BigInteger &
-      Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Attribute.SetMinMax<{
-        min: '01000';
-      }>;
-    pass: Attribute.Password &
-      Attribute.SetPluginOptions<{
-        i18n: {
-          localized: false;
-        };
-      }> &
-      Attribute.SetMinMaxLength<{
-        minLength: 5;
-      }>;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<'plugin::myplugin.test', 'oneToOne', 'admin::user'> &
@@ -479,6 +490,8 @@ export interface PluginMypluginTest extends Schema.CollectionType {
       'plugin::myplugin.test'
     >;
     locale: Attribute.String;
+    strapi_stage: Attribute.Relation<'plugin::myplugin.test', 'oneToOne', 'admin::workflow-stage'>;
+    strapi_assignee: Attribute.Relation<'plugin::myplugin.test', 'oneToOne', 'admin::user'>;
   };
 }
 
@@ -649,6 +662,16 @@ export interface PluginUsersPermissionsUser extends Schema.CollectionType {
       Attribute.Private;
     updatedBy: Attribute.Relation<'plugin::users-permissions.user', 'oneToOne', 'admin::user'> &
       Attribute.Private;
+    strapi_stage: Attribute.Relation<
+      'plugin::users-permissions.user',
+      'oneToOne',
+      'admin::workflow-stage'
+    >;
+    strapi_assignee: Attribute.Relation<
+      'plugin::users-permissions.user',
+      'oneToOne',
+      'admin::user'
+    >;
   };
 }
 
@@ -662,6 +685,7 @@ export interface ApiAddressAddress extends Schema.CollectionType {
     name: 'Address';
   };
   options: {
+    reviewWorkflows: true;
     draftAndPublish: false;
   };
   attributes: {
@@ -685,16 +709,14 @@ export interface ApiAddressAddress extends Schema.CollectionType {
       Attribute.SetMinMax<{
         min: 2;
       }>;
-    text: Attribute.String;
-    color: Attribute.String & Attribute.CustomField<'plugin::color-picker.color'>;
-    bigInteger: Attribute.BigInteger & Attribute.CustomField<'plugin::myplugin.customBiginteger'>;
-    ctbexisting: Attribute.Component<'basic.simple', true> & Attribute.Required;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<'api::address.address', 'oneToOne', 'admin::user'> &
       Attribute.Private;
     updatedBy: Attribute.Relation<'api::address.address', 'oneToOne', 'admin::user'> &
       Attribute.Private;
+    strapi_stage: Attribute.Relation<'api::address.address', 'oneToOne', 'admin::workflow-stage'>;
+    strapi_assignee: Attribute.Relation<'api::address.address', 'oneToOne', 'admin::user'>;
   };
 }
 
@@ -724,6 +746,7 @@ export interface ApiCategoryCategory extends Schema.CollectionType {
         };
       }>;
     addresses: Attribute.Relation<'api::category.category', 'manyToMany', 'api::address.address'>;
+    temps: Attribute.Relation<'api::category.category', 'manyToMany', 'api::temp.temp'>;
     datetime: Attribute.DateTime &
       Attribute.SetPluginOptions<{
         i18n: {
@@ -754,28 +777,8 @@ export interface ApiCategoryCategory extends Schema.CollectionType {
       'api::category.category'
     >;
     locale: Attribute.String;
-  };
-}
-
-export interface ApiContactContact extends Schema.SingleType {
-  collectionName: 'contacts';
-  info: {
-    singularName: 'contact';
-    pluralName: 'contacts';
-    displayName: 'Contact';
-  };
-  options: {
-    draftAndPublish: true;
-    comment: '';
-  };
-  attributes: {
-    createdAt: Attribute.DateTime;
-    updatedAt: Attribute.DateTime;
-    publishedAt: Attribute.DateTime;
-    createdBy: Attribute.Relation<'api::contact.contact', 'oneToOne', 'admin::user'> &
-      Attribute.Private;
-    updatedBy: Attribute.Relation<'api::contact.contact', 'oneToOne', 'admin::user'> &
-      Attribute.Private;
+    strapi_stage: Attribute.Relation<'api::category.category', 'oneToOne', 'admin::workflow-stage'>;
+    strapi_assignee: Attribute.Relation<'api::category.category', 'oneToOne', 'admin::user'>;
   };
 }
 
@@ -827,6 +830,8 @@ export interface ApiCountryCountry extends Schema.CollectionType {
       Attribute.Private;
     localizations: Attribute.Relation<'api::country.country', 'oneToMany', 'api::country.country'>;
     locale: Attribute.String;
+    strapi_stage: Attribute.Relation<'api::country.country', 'oneToOne', 'admin::workflow-stage'>;
+    strapi_assignee: Attribute.Relation<'api::country.country', 'oneToOne', 'admin::user'>;
   };
 }
 
@@ -875,6 +880,8 @@ export interface ApiHomepageHomepage extends Schema.SingleType {
       'api::homepage.homepage'
     >;
     locale: Attribute.String;
+    strapi_stage: Attribute.Relation<'api::homepage.homepage', 'oneToOne', 'admin::workflow-stage'>;
+    strapi_assignee: Attribute.Relation<'api::homepage.homepage', 'oneToOne', 'admin::user'>;
   };
 }
 
@@ -945,6 +952,12 @@ export interface ApiKitchensinkKitchensink extends Schema.CollectionType {
       Attribute.Private;
     updatedBy: Attribute.Relation<'api::kitchensink.kitchensink', 'oneToOne', 'admin::user'> &
       Attribute.Private;
+    strapi_stage: Attribute.Relation<
+      'api::kitchensink.kitchensink',
+      'oneToOne',
+      'admin::workflow-stage'
+    >;
+    strapi_assignee: Attribute.Relation<'api::kitchensink.kitchensink', 'oneToOne', 'admin::user'>;
   };
 }
 
@@ -967,6 +980,8 @@ export interface ApiLikeLike extends Schema.CollectionType {
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<'api::like.like', 'oneToOne', 'admin::user'> & Attribute.Private;
     updatedBy: Attribute.Relation<'api::like.like', 'oneToOne', 'admin::user'> & Attribute.Private;
+    strapi_stage: Attribute.Relation<'api::like.like', 'oneToOne', 'admin::workflow-stage'>;
+    strapi_assignee: Attribute.Relation<'api::like.like', 'oneToOne', 'admin::user'>;
   };
 }
 
@@ -990,6 +1005,8 @@ export interface ApiMenuMenu extends Schema.CollectionType {
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<'api::menu.menu', 'oneToOne', 'admin::user'> & Attribute.Private;
     updatedBy: Attribute.Relation<'api::menu.menu', 'oneToOne', 'admin::user'> & Attribute.Private;
+    strapi_stage: Attribute.Relation<'api::menu.menu', 'oneToOne', 'admin::workflow-stage'>;
+    strapi_assignee: Attribute.Relation<'api::menu.menu', 'oneToOne', 'admin::user'>;
   };
 }
 
@@ -1019,6 +1036,12 @@ export interface ApiMenusectionMenusection extends Schema.CollectionType {
       Attribute.Private;
     updatedBy: Attribute.Relation<'api::menusection.menusection', 'oneToOne', 'admin::user'> &
       Attribute.Private;
+    strapi_stage: Attribute.Relation<
+      'api::menusection.menusection',
+      'oneToOne',
+      'admin::workflow-stage'
+    >;
+    strapi_assignee: Attribute.Relation<'api::menusection.menusection', 'oneToOne', 'admin::user'>;
   };
 }
 
@@ -1096,6 +1119,16 @@ export interface ApiRelationLocaleRelationLocale extends Schema.CollectionType {
       'api::relation-locale.relation-locale'
     >;
     locale: Attribute.String;
+    strapi_stage: Attribute.Relation<
+      'api::relation-locale.relation-locale',
+      'oneToOne',
+      'admin::workflow-stage'
+    >;
+    strapi_assignee: Attribute.Relation<
+      'api::relation-locale.relation-locale',
+      'oneToOne',
+      'admin::user'
+    >;
   };
 }
 
@@ -1253,6 +1286,12 @@ export interface ApiRestaurantRestaurant extends Schema.CollectionType {
       'api::restaurant.restaurant'
     >;
     locale: Attribute.String;
+    strapi_stage: Attribute.Relation<
+      'api::restaurant.restaurant',
+      'oneToOne',
+      'admin::workflow-stage'
+    >;
+    strapi_assignee: Attribute.Relation<'api::restaurant.restaurant', 'oneToOne', 'admin::user'>;
   };
 }
 
@@ -1285,6 +1324,8 @@ export interface ApiReviewReview extends Schema.CollectionType {
       Attribute.Private;
     updatedBy: Attribute.Relation<'api::review.review', 'oneToOne', 'admin::user'> &
       Attribute.Private;
+    strapi_stage: Attribute.Relation<'api::review.review', 'oneToOne', 'admin::workflow-stage'>;
+    strapi_assignee: Attribute.Relation<'api::review.review', 'oneToOne', 'admin::user'>;
   };
 }
 
@@ -1326,47 +1367,66 @@ export interface ApiTagTag extends Schema.CollectionType {
     publishedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<'api::tag.tag', 'oneToOne', 'admin::user'> & Attribute.Private;
     updatedBy: Attribute.Relation<'api::tag.tag', 'oneToOne', 'admin::user'> & Attribute.Private;
+    strapi_stage: Attribute.Relation<'api::tag.tag', 'oneToOne', 'admin::workflow-stage'>;
+    strapi_assignee: Attribute.Relation<'api::tag.tag', 'oneToOne', 'admin::user'>;
   };
 }
 
-export interface ApiTestCtbTestCtb extends Schema.CollectionType {
-  collectionName: 'test_ctbs';
+export interface ApiTempTemp extends Schema.CollectionType {
+  collectionName: 'temps';
   info: {
-    singularName: 'test-ctb';
-    pluralName: 'test-ctbs';
-    displayName: 'TestCTB';
+    singularName: 'temp';
+    pluralName: 'temps';
+    displayName: 'temp';
+    name: 'temp';
     description: '';
   };
   options: {
     draftAndPublish: true;
   };
   attributes: {
-    email: Attribute.Email;
-    email2: Attribute.Email & Attribute.Required & Attribute.DefaultTo<'test@strapi.io'>;
-    date: Attribute.Date & Attribute.Required & Attribute.DefaultTo<'2023-11-15'>;
-    pass: Attribute.Password &
-      Attribute.SetMinMaxLength<{
-        minLength: 5;
-      }>;
-    mmedia: Attribute.Media & Attribute.Required;
-    smedia: Attribute.Media;
-    enum: Attribute.Enumeration<['one', 'two', 'three']> &
-      Attribute.Required &
-      Attribute.DefaultTo<'one'>;
-    countries: Attribute.Relation<'api::test-ctb.test-ctb', 'oneToMany', 'api::country.country'>;
-    text: Attribute.String;
-    uid: Attribute.UID<'api::test-ctb.test-ctb', 'text'> & Attribute.Required;
-    uid2: Attribute.UID & Attribute.DefaultTo<'hello'>;
-    md: Attribute.RichText & Attribute.Required & Attribute.DefaultTo<'aaaa'>;
-    testctb: Attribute.Component<'basic.simple', true> & Attribute.Required;
-    dzctb: Attribute.DynamicZone<['basic.relation', 'basic.simple', 'blog.test-como']>;
-    custombool: Attribute.Boolean & Attribute.CustomField<'plugin::myplugin.customBoolean'>;
+    name: Attribute.String;
+    category: Attribute.Relation<'api::temp.temp', 'oneToOne', 'api::category.category'>;
+    categories: Attribute.Relation<'api::temp.temp', 'manyToMany', 'api::category.category'>;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;
-    createdBy: Attribute.Relation<'api::test-ctb.test-ctb', 'oneToOne', 'admin::user'> &
+    createdBy: Attribute.Relation<'api::temp.temp', 'oneToOne', 'admin::user'> & Attribute.Private;
+    updatedBy: Attribute.Relation<'api::temp.temp', 'oneToOne', 'admin::user'> & Attribute.Private;
+    strapi_stage: Attribute.Relation<'api::temp.temp', 'oneToOne', 'admin::workflow-stage'>;
+    strapi_assignee: Attribute.Relation<'api::temp.temp', 'oneToOne', 'admin::user'>;
+  };
+}
+
+export interface AdminAuditLog extends Schema.CollectionType {
+  collectionName: 'strapi_audit_logs';
+  info: {
+    singularName: 'audit-log';
+    pluralName: 'audit-logs';
+    displayName: 'Audit Log';
+  };
+  options: {
+    draftAndPublish: false;
+    timestamps: false;
+  };
+  pluginOptions: {
+    'content-manager': {
+      visible: false;
+    };
+    'content-type-builder': {
+      visible: false;
+    };
+  };
+  attributes: {
+    action: Attribute.String & Attribute.Required;
+    date: Attribute.DateTime & Attribute.Required;
+    user: Attribute.Relation<'admin::audit-log', 'oneToOne', 'admin::user'>;
+    payload: Attribute.JSON;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<'admin::audit-log', 'oneToOne', 'admin::user'> &
       Attribute.Private;
-    updatedBy: Attribute.Relation<'api::test-ctb.test-ctb', 'oneToOne', 'admin::user'> &
+    updatedBy: Attribute.Relation<'admin::audit-log', 'oneToOne', 'admin::user'> &
       Attribute.Private;
   };
 }
@@ -1381,6 +1441,8 @@ declare module '@strapi/types' {
       'admin::api-token-permission': AdminApiTokenPermission;
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
+      'admin::workflow': AdminWorkflow;
+      'admin::workflow-stage': AdminWorkflowStage;
       'plugin::upload.file': PluginUploadFile;
       'plugin::upload.folder': PluginUploadFolder;
       'plugin::myplugin.test': PluginMypluginTest;
@@ -1390,7 +1452,6 @@ declare module '@strapi/types' {
       'plugin::users-permissions.user': PluginUsersPermissionsUser;
       'api::address.address': ApiAddressAddress;
       'api::category.category': ApiCategoryCategory;
-      'api::contact.contact': ApiContactContact;
       'api::country.country': ApiCountryCountry;
       'api::homepage.homepage': ApiHomepageHomepage;
       'api::kitchensink.kitchensink': ApiKitchensinkKitchensink;
@@ -1401,7 +1462,8 @@ declare module '@strapi/types' {
       'api::restaurant.restaurant': ApiRestaurantRestaurant;
       'api::review.review': ApiReviewReview;
       'api::tag.tag': ApiTagTag;
-      'api::test-ctb.test-ctb': ApiTestCtbTestCtb;
+      'api::temp.temp': ApiTempTemp;
+      'admin::audit-log': AdminAuditLog;
     }
   }
 }

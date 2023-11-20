@@ -21,6 +21,30 @@ const initialState = {
         conditions: [],
       },
     ],
+    collectionTypesRelatedPermissions: {
+      foo: {
+        'plugin::content-manager.explorer.read': [
+          {
+            action: 'plugin::content-manager.explorer.read',
+            subject: 'foo',
+            properties: {
+              fields: ['f1'],
+            },
+            conditions: [],
+          },
+        ],
+        'plugin::content-manager.explorer.create': [
+          {
+            action: 'plugin::content-manager.explorer.create',
+            subject: 'foo',
+            properties: {
+              fields: ['f2'],
+            },
+            conditions: [],
+          },
+        ],
+      },
+    },
   },
 };
 

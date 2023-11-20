@@ -1,6 +1,6 @@
-import cleanData from '../cleanData';
+import { cleanData } from '../data';
 
-describe('i18n | Components | CMEditViewCopyLocale | utils', () => {
+describe('data', () => {
   describe('cleanData', () => {
     it('should change the localization key with the one passed in the argument', () => {
       const data = {
@@ -52,7 +52,7 @@ describe('i18n | Components | CMEditViewCopyLocale | utils', () => {
           common: { pluginOptions: { i18n: { localized: true } }, type: 'text' },
           createdAt: { type: 'timestamp' },
           id: { type: 'integer' },
-          name: { pluginOptions: { i18n: { localized: true } } },
+          name: { pluginOptions: { i18n: { localized: true } }, type: 'text' },
           updatedAt: { type: 'timestamp' },
         },
       };
@@ -77,6 +77,7 @@ describe('i18n | Components | CMEditViewCopyLocale | utils', () => {
         name: 'name',
       };
 
+      // @ts-expect-error – TODO: fix this.
       expect(cleanData(data, { contentType, components: {} }, initLocalizations)).toEqual(expected);
     });
   });

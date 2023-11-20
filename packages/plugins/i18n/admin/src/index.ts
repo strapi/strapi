@@ -3,7 +3,7 @@ import get from 'lodash/get';
 import * as yup from 'yup';
 
 import CheckboxConfirmation from './components/CheckboxConfirmation';
-import CMEditViewInjectedComponents from './components/CMEditViewInjectedComponents';
+import { CMEditViewInjectedComponents } from './components/CMEditViewInjectedComponents';
 import DeleteModalAdditionalInfos from './components/CMListViewInjectedComponents/DeleteModalAdditionalInfos';
 import PublishModalAdditionalInfos from './components/CMListViewInjectedComponents/PublishModalAdditionalInfos';
 import UnpublishModalAdditionalInfos from './components/CMListViewInjectedComponents/UnpublishModalAdditionalInfos';
