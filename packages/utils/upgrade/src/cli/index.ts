@@ -7,7 +7,7 @@ import { isVersion, VersionRelease } from '../core';
 import type { CLIOptions } from '../types';
 
 const ALLOWED_TARGETS =
-  'Allowed choices are "<number>.<number>.<number>", major, minor, patch, latest.';
+  'Allowed choices are major, minor, patch, latest, or a specific version number in the form "x.x.x"';
 
 program
   .description('Upgrade to the desired version')
