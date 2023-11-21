@@ -1,6 +1,51 @@
 import type { errors } from '@strapi/utils';
 import { Permission } from './shared';
 
+export interface Action {
+  actionId: string;
+  applyToProperties: string[];
+  label: string;
+  subjects: string[];
+}
+
+export interface SubjectProperty {
+  children?: SubjectProperty[];
+  label: string;
+  required?: boolean;
+  value: string;
+}
+
+export interface Subject {
+  label: string;
+  properties: SubjectProperty[];
+  uid: string;
+}
+
+export interface ContentPermission {
+  actions: Action[];
+  subjects: Subject[];
+}
+
+export interface SettingPermission {
+  action: string;
+  displayName: string;
+  category: string;
+  subCategory: string;
+}
+
+export interface PluginPermission {
+  action: string;
+  displayName: string;
+  plugin: string;
+  subCategory: string;
+}
+
+export interface Condition {
+  id: string;
+  displayName: string;
+  category: string;
+}
+
 /**
  * GET /permission - List all permissions
  */
@@ -12,12 +57,13 @@ export declare namespace GetAll {
 
   export interface Response {
     data: {
-      conditions: {
-        id: string;
-        displayName: string;
-        category: string;
+      conditions: Condition[];
+      sections: {
+        collectionTypes: ContentPermission;
+        plugins: PluginPermission[];
+        settings: SettingPermission[];
+        singleTypes: ContentPermission;
       };
-      sections: Record<string, unknown>;
     };
     error?: errors.ApplicationError;
   }

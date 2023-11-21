@@ -1,7 +1,7 @@
 import { errors } from '@strapi/utils';
+import type { File } from 'formidable';
 
-// TODO replace SettingsFile with type from the upload plugin ?
-interface Logo {
+export interface Logo {
   name: string;
   url: string;
   width: number;
@@ -9,8 +9,6 @@ interface Logo {
   ext: string;
   size: number;
 }
-
-export type SettingsFile = any;
 
 /**
  * /init - Initialize the admin panel
@@ -24,8 +22,8 @@ export declare namespace Init {
     data: {
       uuid: string | false;
       hasAdmin: boolean;
-      menuLogo: string;
-      authLogo: string;
+      menuLogo: string | null;
+      authLogo: string | null;
     };
     error?: errors.ApplicationError;
   }
@@ -41,8 +39,8 @@ export declare namespace GetProjectSettings {
   }
 
   export interface Response {
-    menuLogo: SettingsFile;
-    authLogo: SettingsFile;
+    menuLogo: Logo;
+    authLogo: Logo;
     error?: errors.ApplicationError;
   }
 }
@@ -53,15 +51,18 @@ export declare namespace GetProjectSettings {
 export declare namespace UpdateProjectSettings {
   export interface Request {
     body: {
-      menuLogo: SettingsFile;
-      authLogo: SettingsFile;
+      menuLogo: Logo | null;
+      authLogo: Logo | null;
     };
     query: {};
-    files: SettingsFile[];
+    files: {
+      menuLogo?: File | null;
+      authLogo?: File | null;
+    };
   }
   export interface Response {
-    menuLogo: SettingsFile;
-    authLogo: SettingsFile;
+    menuLogo: Partial<Logo>;
+    authLogo: Partial<Logo>;
     error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
@@ -127,6 +128,69 @@ export declare namespace Plugins {
 
   export interface Response {
     plugins: Plugin[];
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
+ * /providers/options - Single Sign On setting options
+ */
+export declare namespace ProvidersOptions {
+  interface SSOProviderOptions {
+    autoRegister: boolean;
+    defaultRole: string | null;
+    ssoLockedRoles: string[] | null;
+  }
+  export interface Request {
+    body: SSOProviderOptions;
+    query: {};
+  }
+
+  export interface Response {
+    data: SSOProviderOptions;
+    error?: errors.ApplicationError | errors.ValidationError | errors.YupValidationError;
+  }
+}
+
+/**
+ * /license-limit-information – get license limit information
+ */
+
+export interface SSOFeature {
+  name: 'sso';
+}
+
+export interface AuditLogsFeature {
+  name: 'audit-logs';
+  options: {
+    retentionDays: number | null;
+  };
+}
+
+export interface ReviewWorkflowsFeature {
+  name: 'review-workflows';
+}
+
+/**
+ * TODO: this response needs refactoring because we're mixing the admin seat limit info with
+ * regular EE feature info.
+ */
+export declare namespace GetLicenseLimitInformation {
+  export interface Request {
+    body: {};
+    query: {};
+  }
+  export interface Response {
+    data: {
+      currentActiveUserCount: number;
+      enforcementUserCount: number;
+      features: (SSOFeature | AuditLogsFeature | ReviewWorkflowsFeature)[];
+      isHostedOnStrapiCloud: boolean;
+      licenseLimitStatus: unknown;
+      permittedSeats: number;
+      shouldNotify: boolean;
+      shouldStopCreate: boolean;
+    };
     error?: errors.ApplicationError;
   }
 }

@@ -545,7 +545,6 @@ class StrapiApp {
 
     return (
       <Providers
-        authLogo={this.configurations.authLogo}
         components={components}
         fields={fields}
         customFields={this.customFields}
@@ -554,7 +553,6 @@ class StrapiApp {
         getPlugin={this.getPlugin}
         messages={this.configurations.translations}
         menu={this.menu}
-        menuLogo={this.configurations.menuLogo}
         plugins={this.plugins}
         runHookParallel={this.runHookParallel}
         runHookWaterfall={(name, initialValue, async = false) => {
@@ -563,15 +561,18 @@ class StrapiApp {
         runHookSeries={this.runHookSeries}
         themes={this.configurations.themes}
         settings={this.settings}
-        showTutorials={this.configurations.tutorials}
-        showReleaseNotification={this.configurations.notifications.releases}
         store={store}
       >
         <Helmet
           htmlAttributes={{ lang: localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) || 'en' }}
         />
         <BrowserRouter basename={getBasename()}>
-          <App />
+          <App
+            authLogo={this.configurations.authLogo}
+            menuLogo={this.configurations.menuLogo}
+            showTutorials={this.configurations.tutorials}
+            showReleaseNotification={this.configurations.notifications.releases}
+          />
         </BrowserRouter>
       </Providers>
     );
