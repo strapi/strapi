@@ -1,11 +1,12 @@
-import type { TransformFile } from '../../types';
-
 jest.mock('../../core/runner/json', () => ({ transformJSON: jest.fn() }));
 jest.mock('../../core/runner/code', () => ({ transformCode: jest.fn() }));
 
-import { transformJSON, transformCode } from '../../core';
+import { transformJSON, transformCode, RunnerOptions } from '../../core';
 
-import { createTransformsRunner, RunnerConfiguration } from '../../core';
+import { createTransformsRunner } from '../../core';
+
+import type { TransformFile } from '../../types';
+import type { Logger, RunnerConfiguration } from '../../core';
 
 const transforms = {
   json: [
@@ -40,12 +41,12 @@ const transforms = {
       version: '5.0.0',
     },
   ],
-} as const satisfies Record<string, TransformFile[]>;
+} satisfies Record<string, TransformFile[]>;
 
 const files = {
   json: ['a.json', 'b.json', 'c.json'],
   code: ['a.js', 'b.ts', 'c.js'],
-} as const;
+};
 
 const config: RunnerConfiguration = { code: { dry: true }, json: { cwd: '/', dry: true } };
 
@@ -54,9 +55,22 @@ describe('Runner', () => {
     jest.resetAllMocks();
   });
 
+  const logger = {
+    isSilent: true,
+    isDebug: false,
+    raw: jest.fn(),
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn(),
+    errors: 0,
+    warnings: 0,
+  } as Logger;
+  const options: RunnerOptions = { config, logger };
+
   describe('Run', () => {
     test('Code runner only runs on code files', async () => {
-      const runner = createTransformsRunner([...files.json, ...files.code], { config });
+      const runner = createTransformsRunner([...files.json, ...files.code], options);
       const transformFile = transforms.code.at(0);
 
       await runner.run(transformFile);
@@ -66,7 +80,7 @@ describe('Runner', () => {
     });
 
     test('JSON runner only runs on json files', async () => {
-      const runner = createTransformsRunner([...files.json, ...files.code], { config });
+      const runner = createTransformsRunner([...files.json, ...files.code], options);
       const transformFile = transforms.json.at(0);
 
       await runner.run(transformFile);
@@ -78,7 +92,7 @@ describe('Runner', () => {
 
   describe('RunAll', () => {
     test('Appropriate runners are called depending on the transform files', async () => {
-      const runner = createTransformsRunner([...files.json, ...files.code], { config });
+      const runner = createTransformsRunner([...files.json, ...files.code], options);
       const transformFiles = [...transforms.json, ...transforms.code];
 
       await runner.runAll(transformFiles);
@@ -103,7 +117,7 @@ describe('Runner', () => {
     });
 
     test('Event callbacks are called', async () => {
-      const runner = createTransformsRunner([...files.json, ...files.code], { config });
+      const runner = createTransformsRunner([...files.json, ...files.code], options);
       const transformFiles = [...transforms.json, ...transforms.code];
 
       const onRunStart = jest.fn();

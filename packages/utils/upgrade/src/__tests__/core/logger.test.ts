@@ -1,7 +1,8 @@
+import chalk from 'chalk';
+
 import { createLogger } from '../../core';
 
 import type { Logger } from '../../core';
-import chalk from 'chalk';
 
 const noop = () => {};
 
