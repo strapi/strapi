@@ -1,7 +1,6 @@
 import { yup, validateYupSchema } from '@strapi/utils';
 
 const releaseActionCreateSchema = yup.object().shape({
-  releaseId: yup.number().required(),
   entry: yup
     .object()
     .shape({

@@ -34,6 +34,22 @@ export default {
       },
     },
     {
+      method: 'GET',
+      path: '/:id',
+      handler: 'release.findOne',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::content-releases.read'],
+            },
+          },
+        ],
+      },
+    },
+    {
       method: 'PUT',
       path: '/:id',
       handler: 'release.update',
@@ -44,10 +60,10 @@ export default {
             name: 'admin::hasPermissions',
             config: {
               actions: ['plugin::content-releases.update'],
-            }
-          }
-        ]
-      }
-    }
+            },
+          },
+        ],
+      },
+    },
   ],
 };

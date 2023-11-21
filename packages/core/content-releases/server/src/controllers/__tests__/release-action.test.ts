@@ -1,6 +1,6 @@
 import releaseActionController from '../release-action';
 
-describe('release-action controller', () => {
+describe('Release Action controller', () => {
   describe('create', () => {
     beforeEach(() => {
       global.strapi = {
@@ -48,10 +48,12 @@ describe('release-action controller', () => {
         state: {
           user: {},
         },
+        params: {
+          id: 1,
+        },
         request: {
           // Mock missing type property
           body: {
-            releaseId: 1,
             entry: {
               id: 1,
               contentType: 'api::category.category',
