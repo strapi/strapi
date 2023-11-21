@@ -1,3 +1,5 @@
+/* eslint-disable import/first */
+
 // Prevent fs-extra from writing on the file system during tests
 jest.mock('fs-extra', () => ({ writeFileSync: jest.fn() }));
 
@@ -13,14 +15,13 @@ const JSON_MODULES_MOCKS = {
 const TRANSFORM_FILE_NAME = 'fake.transform.json.ts';
 
 const transformFileContent: JSONTransform = (file, api) => {
-  const content = api.parse(file.source);
+  const j = api.json(file.json);
 
-  if ('foo' in content) {
-    content.foo = 'baz';
-    return api.toSource(content);
+  if (j.has('foo')) {
+    j.set('foo', 'baz');
   }
 
-  return file.source;
+  return j.root();
 };
 
 describe('JSON Transform Runner', () => {

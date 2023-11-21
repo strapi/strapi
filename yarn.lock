@@ -9994,6 +9994,7 @@ __metadata:
   dependencies:
     "@babel/register": "npm:7.22.15"
     "@strapi/pack-up": "workspace:*"
+    "@strapi/types": "npm:4.15.4"
     "@types/jscodeshift": "npm:0.11.10"
     chalk: "npm:4.1.2"
     cli-table3: "npm:0.6.2"

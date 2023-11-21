@@ -4,8 +4,10 @@ import _ from 'lodash';
 import fse from 'fs-extra';
 import assert from 'node:assert';
 
+import type { Utils } from '@strapi/types';
+
 import type { Logger } from '../logger';
-import type { JSONObject, JSONValue, Report } from '../../types';
+import type { Report } from '../../types';
 
 export interface JSONRunnerConfig {
   cwd: string;
@@ -15,23 +17,26 @@ export interface JSONRunnerConfig {
 
 export interface JSONSourceFile {
   path: string;
-  json: JSONObject;
+  json: Utils.JSON.Object;
 }
 
 export interface JSONTransformParams {
   cwd: string;
-  json: (object: JSONObject) => JSONTransformAPI;
+  json: (object: Utils.JSON.Object) => JSONTransformAPI;
 }
 
 export interface JSONTransformAPI {
-  get<T extends JSONValue>(path?: string, defaultValue?: T): T | undefined;
+  get<T extends Utils.JSON.Value>(path?: string, defaultValue?: T): T | undefined;
   has(path: string): boolean;
-  set(path: string, value: JSONValue): this;
-  merge(other: JSONObject): this;
-  root(): JSONObject;
+  set(path: string, value: Utils.JSON.Value): this;
+  merge(other: Utils.JSON.Object): this;
+  root(): Utils.JSON.Object;
 }
 
-export type JSONTransform = (file: JSONSourceFile, params: JSONTransformParams) => JSONObject;
+export type JSONTransform = (
+  file: JSONSourceFile,
+  params: JSONTransformParams
+) => Utils.JSON.Object;
 
 // TODO: What's the actual impact of having this line here instead of inside the runner
 //       - Does it impact the whole process or just the stuff in this file?
@@ -43,11 +48,14 @@ require('@babel/register')({
   extensions: ['.js', '.ts'],
 });
 
-function jsonAPI<T extends JSONObject>(object: T): JSONTransformAPI {
-  let json = _.cloneDeep(object) as object;
+function jsonAPI<T extends Utils.JSON.Object>(object: T): JSONTransformAPI {
+  const json = _.cloneDeep(object) as object;
 
   return {
-    get<TReturn extends JSONValue>(path?: string, defaultValue?: TReturn): TReturn | undefined {
+    get<TReturn extends Utils.JSON.Value>(
+      path?: string,
+      defaultValue?: TReturn
+    ): TReturn | undefined {
       return (path ? _.get(json, path, defaultValue) : json) as TReturn;
     },
 
@@ -66,7 +74,7 @@ function jsonAPI<T extends JSONObject>(object: T): JSONTransformAPI {
     },
 
     root() {
-      return json as JSONObject;
+      return json as Utils.JSON.Object;
     },
   };
 }
