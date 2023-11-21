@@ -1,15 +1,25 @@
 import * as React from 'react';
 
 import { useFetchClient } from '@strapi/helper-plugin';
-import { useQuery } from 'react-query';
+import { AxiosError } from 'axios';
+import { UseQueryOptions, useQuery } from 'react-query';
 
 import * as Users from '../../../shared/contracts/user';
 
 export type APIUsersQueryParams =
   | Users.FindOne.Params
-  | (Users.Find.Request['query'] & { id?: never });
+  | (Users.FindAll.Request['query'] & { id?: never });
 
-export function useAdminUsers(params: APIUsersQueryParams = {}, queryOptions = {}) {
+export function useAdminUsers(
+  params: APIUsersQueryParams = {},
+  queryOptions: Omit<
+    UseQueryOptions<
+      Users.FindAll.Response['data'] | Users.FindOne.Response['data'],
+      AxiosError<Required<Pick<Users.FindAll.Response | Users.FindOne.Response, 'error'>>>
+    >,
+    'queryKey' | 'queryFn'
+  > = {}
+) {
   const { id = '', ...queryParams } = params;
 
   const { get } = useFetchClient();
@@ -19,7 +29,7 @@ export function useAdminUsers(params: APIUsersQueryParams = {}, queryOptions = {
     async () => {
       const {
         data: { data },
-      } = await get<Users.Find.Response | Users.FindOne.Response>(`/admin/users/${id}`, {
+      } = await get<Users.FindAll.Response | Users.FindOne.Response>(`/admin/users/${id}`, {
         params: queryParams,
       });
 
@@ -33,7 +43,7 @@ export function useAdminUsers(params: APIUsersQueryParams = {}, queryOptions = {
   // value, which later on triggers infinite loops if used in the
   // dependency arrays of other hooks
   const users = React.useMemo(() => {
-    let users: Users.Find.Response['data']['results'] = [];
+    let users: Users.FindAll.Response['data']['results'] = [];
 
     if (data) {
       if ('results' in data) {
@@ -50,7 +60,10 @@ export function useAdminUsers(params: APIUsersQueryParams = {}, queryOptions = {
 
   return {
     users,
-    pagination: React.useMemo(() => (data && 'pagination' in data) ?? null, [data]),
+    pagination: React.useMemo(
+      () => (data && 'pagination' in data ? data.pagination ?? null : null),
+      [data]
+    ),
     isLoading,
     isError,
     refetch,

@@ -21,7 +21,7 @@ export const useEnterprise = <
   TCEData,
   TEEData = TCEData,
   TCombinedValue = TEEData,
-  TDefaultValue = TCEData | null
+  TDefaultValue = TCEData
 >(
   ceData: TCEData,
   eeCallback: () => Promise<TEEData>,

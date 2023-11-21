@@ -18,11 +18,12 @@ export const server = setupServer(
             {
               id: 1,
               code: 'strapi-editor',
+              name: 'Editor',
             },
-
             {
               id: 2,
               code: 'strapi-author',
+              name: 'Author',
             },
           ],
         })
@@ -73,8 +74,8 @@ export const server = setupServer(
         ctx.json({
           data: {
             results: [
-              { id: 1, firstname: 'John', lastname: 'Doe' },
-              { id: 2, firstname: 'Kai', lastname: 'Doe' },
+              { id: 1, firstname: 'John', lastname: 'Doe', roles: [] },
+              { id: 2, firstname: 'Kai', lastname: 'Doe', roles: [] },
             ],
             pagination: {
               page: 1,
@@ -90,6 +91,11 @@ export const server = setupServer(
             id: 1,
             firstname: 'John',
             lastname: 'Doe',
+            emai: 'test@testing.com',
+            roles: [
+              { id: 1, code: 'strapi-editor', name: 'Editor' },
+              { id: 2, code: 'strapi-super-admin', name: 'Super Admin' },
+            ],
             params: {
               some: req.url.searchParams.get('some'),
             },
@@ -217,10 +223,7 @@ export const server = setupServer(
           data: {
             attribute: 1,
 
-            features: [
-              { name: 'without-options' },
-              { name: 'with-options', options: { something: true } },
-            ],
+            features: [{ name: 'sso' }, { name: 'audit-logs', options: { retentionDays: 1 } }],
           },
         })
       );

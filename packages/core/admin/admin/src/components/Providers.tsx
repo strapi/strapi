@@ -16,7 +16,6 @@ import { Provider } from 'react-redux';
 
 import { AdminContextProvider, AdminContextValue } from '../contexts/admin';
 
-import { ConfigurationProvider, ConfigurationProviderProps } from './ConfigurationProvider';
 import { GuidedTourProvider } from './GuidedTour/Provider';
 import { LanguageProvider, LanguageProviderProps } from './LanguageProvider';
 import { Theme } from './Theme';
@@ -35,10 +34,6 @@ const queryClient = new QueryClient({
 interface ProvidersProps
   extends Pick<ThemeToggleProviderProps, 'themes'>,
     Pick<LanguageProviderProps, 'messages' | 'localeNames'>,
-    Pick<
-      ConfigurationProviderProps,
-      'authLogo' | 'menuLogo' | 'showReleaseNotification' | 'showTutorials'
-    >,
     Pick<AdminContextValue, 'getAdminInjectedComponents'>,
     Pick<CustomFieldsProviderProps, 'customFields'>,
     Pick<LibraryProviderProps, 'components' | 'fields'>,
@@ -57,7 +52,6 @@ interface ProvidersProps
 }
 
 const Providers = ({
-  authLogo,
   children,
   components,
   customFields,
@@ -66,15 +60,12 @@ const Providers = ({
   getPlugin,
   localeNames,
   menu,
-  menuLogo,
   messages,
   plugins,
   runHookParallel,
   runHookSeries,
   runHookWaterfall,
   settings,
-  showReleaseNotification,
-  showTutorials,
   store,
   themes,
 }: ProvidersProps) => {
@@ -85,34 +76,27 @@ const Providers = ({
           <QueryClientProvider client={queryClient}>
             <Provider store={store}>
               <AdminContextProvider getAdminInjectedComponents={getAdminInjectedComponents}>
-                <ConfigurationProvider
-                  authLogo={authLogo}
-                  menuLogo={menuLogo}
-                  showReleaseNotification={showReleaseNotification}
-                  showTutorials={showTutorials}
+                <StrapiAppProvider
+                  getPlugin={getPlugin}
+                  menu={menu}
+                  plugins={plugins}
+                  runHookParallel={runHookParallel}
+                  runHookWaterfall={runHookWaterfall}
+                  runHookSeries={runHookSeries}
+                  settings={settings}
                 >
-                  <StrapiAppProvider
-                    getPlugin={getPlugin}
-                    menu={menu}
-                    plugins={plugins}
-                    runHookParallel={runHookParallel}
-                    runHookWaterfall={runHookWaterfall}
-                    runHookSeries={runHookSeries}
-                    settings={settings}
-                  >
-                    <LibraryProvider components={components} fields={fields}>
-                      <CustomFieldsProvider customFields={customFields}>
-                        <AutoReloadOverlayBlockerProvider>
-                          <OverlayBlockerProvider>
-                            <GuidedTourProvider>
-                              <NotificationsProvider>{children}</NotificationsProvider>
-                            </GuidedTourProvider>
-                          </OverlayBlockerProvider>
-                        </AutoReloadOverlayBlockerProvider>
-                      </CustomFieldsProvider>
-                    </LibraryProvider>
-                  </StrapiAppProvider>
-                </ConfigurationProvider>
+                  <LibraryProvider components={components} fields={fields}>
+                    <CustomFieldsProvider customFields={customFields}>
+                      <AutoReloadOverlayBlockerProvider>
+                        <OverlayBlockerProvider>
+                          <GuidedTourProvider>
+                            <NotificationsProvider>{children}</NotificationsProvider>
+                          </GuidedTourProvider>
+                        </OverlayBlockerProvider>
+                      </AutoReloadOverlayBlockerProvider>
+                    </CustomFieldsProvider>
+                  </LibraryProvider>
+                </StrapiAppProvider>
               </AdminContextProvider>
             </Provider>
           </QueryClientProvider>
