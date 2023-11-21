@@ -1,13 +1,12 @@
-import React, { memo } from 'react';
-
 import { Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { useApiTokenPermissions } from '../../../../../../../contexts/apiTokenPermissions';
-import ActionBoundRoutes from '../ActionBoundRoutes';
-import ContentTypesSection from '../ContenTypesSection';
+import { useApiTokenPermissions } from '../../../../../../contexts/apiTokenPermissions';
 
-const Permissions = ({ ...props }) => {
+import { ActionBoundRoutes } from './ActionBoundRoutes';
+import { ContentTypesSection } from './ContentTypesSection';
+
+export const Permissions = ({ ...props }) => {
   const {
     value: { data },
   } = useApiTokenPermissions();
@@ -36,5 +35,3 @@ const Permissions = ({ ...props }) => {
     </Grid>
   );
 };
-
-export default memo(Permissions);

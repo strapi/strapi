@@ -88,30 +88,27 @@ export const ROUTES_CE: Route[] = [
   },
   {
     async Component() {
-      // @ts-expect-error – No types, yet.
-      const component = await import('./pages/ApiTokens/ProtectedListView');
+      const { ProtectedListView } = await import('./pages/ApiTokens/ListView');
 
-      return component;
+      return ProtectedListView;
     },
     to: '/settings/api-tokens',
     exact: true,
   },
   {
     async Component() {
-      // @ts-expect-error – No types, yet.
-      const component = await import('./pages/ApiTokens/ProtectedCreateView');
+      const { ProtectedCreateView } = await import('./pages/ApiTokens/CreateView');
 
-      return component;
+      return ProtectedCreateView;
     },
     to: '/settings/api-tokens/create',
     exact: true,
   },
   {
     async Component() {
-      // @ts-expect-error – No types, yet.
-      const component = await import('./pages/ApiTokens/ProtectedEditView');
+      const { ProtectedEditView } = await import('./pages/ApiTokens/EditView/EditViewPage');
 
-      return component;
+      return ProtectedEditView;
     },
     to: '/settings/api-tokens/:id',
     exact: true,
