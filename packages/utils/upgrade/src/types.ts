@@ -44,12 +44,10 @@ export interface Report {
   skip: number;
 }
 
-type JSONValue = string | number | boolean | null | JSONObject | JSONArray;
+export type JSONValue = string | number | boolean | null | JSONObject | JSONArray;
 
-type JSONArray = Array<JSONValue>;
+export type JSONArray = Array<JSONValue>;
 
-interface JSONObject {
+export interface JSONObject {
   [key: string]: JSONValue;
 }
-
-export type JsonValue<T extends JSONValue = JSONValue> = T;

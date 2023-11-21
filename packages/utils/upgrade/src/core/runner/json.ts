@@ -5,7 +5,7 @@ import fse from 'fs-extra';
 import assert from 'node:assert';
 
 import type { Logger } from '../logger';
-import type { JsonValue, Report } from '../../types';
+import type { JSONObject, JSONValue, Report } from '../../types';
 
 export interface JSONRunnerConfig {
   cwd: string;
@@ -15,23 +15,23 @@ export interface JSONRunnerConfig {
 
 export interface JSONSourceFile {
   path: string;
-  source: JsonValue;
+  json: JSONObject;
 }
 
 export interface JSONTransformParams {
   cwd: string;
-  json: (object: JsonValue) => JSONTransformAPI;
+  json: (object: JSONObject) => JSONTransformAPI;
 }
 
 export interface JSONTransformAPI {
-  get<T extends JsonValue>(path?: string, defaultValue?: T): T | undefined;
+  get<T extends JSONValue>(path?: string, defaultValue?: T): T | undefined;
   has(path: string): boolean;
-  set(path: string, value: JsonValue): this;
-  merge(other: JsonValue): this;
-  root(): JsonValue;
+  set(path: string, value: JSONValue): this;
+  merge(other: JSONObject): this;
+  root(): JSONObject;
 }
 
-export type JSONTransform = (file: JSONSourceFile, params: JSONTransformParams) => JsonValue;
+export type JSONTransform = (file: JSONSourceFile, params: JSONTransformParams) => JSONObject;
 
 // TODO: What's the actual impact of having this line here instead of inside the runner
 //       - Does it impact the whole process or just the stuff in this file?
@@ -43,11 +43,11 @@ require('@babel/register')({
   extensions: ['.js', '.ts'],
 });
 
-function jsonAPI<T extends JsonValue>(object: T): JSONTransformAPI {
+function jsonAPI<T extends JSONObject>(object: T): JSONTransformAPI {
   let json = _.cloneDeep(object) as object;
 
   return {
-    get<TReturn extends JsonValue>(path?: string, defaultValue?: TReturn): TReturn | undefined {
+    get<TReturn extends JSONValue>(path?: string, defaultValue?: TReturn): TReturn | undefined {
       return (path ? _.get(json, path, defaultValue) : json) as TReturn;
     },
 
@@ -66,7 +66,7 @@ function jsonAPI<T extends JsonValue>(object: T): JSONTransformAPI {
     },
 
     root() {
-      return json as JsonValue;
+      return json as JSONObject;
     },
   };
 }
@@ -81,7 +81,7 @@ export const transformJSON = async (
 
   const report: Report = { ok: 0, nochange: 0, skip: 0, error: 0, timeElapsed: '', stats: {} };
 
-  const module = require(transformFile); /* ? */
+  const module = require(transformFile);
   const transform = typeof module.default === 'function' ? module.default : module;
 
   assert(
@@ -91,9 +91,9 @@ export const transformJSON = async (
 
   for (const path of paths) {
     try {
-      const source = require(path);
+      const json = require(path);
       // TODO: Optimize the API to limit parse/stringify operations
-      const file: JSONSourceFile = { path, source };
+      const file: JSONSourceFile = { path, json };
       const params: JSONTransformParams = {
         cwd: config.cwd,
         json: jsonAPI,
@@ -102,7 +102,7 @@ export const transformJSON = async (
       const out = await transform(file, params);
 
       // If the json object has modifications
-      if (!_.isEqual(source, out)) {
+      if (!_.isEqual(json, out)) {
         if (!dry) {
           fse.writeFileSync(path, JSON.stringify(out, null, 2));
         }
