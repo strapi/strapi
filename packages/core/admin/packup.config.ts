@@ -30,7 +30,7 @@ const config: Config = defineConfig({
       import: './dist/ee/server/index.mjs',
       require: './dist/ee/server/index.js',
       runtime: 'node',
-    }
+    },
   ],
   dist: './dist',
   /**

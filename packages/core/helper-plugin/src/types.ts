@@ -65,6 +65,7 @@ export interface FilterData<TOptions extends any[] = string[]> {
     | {
         options?: string[];
         type: Exclude<Attribute.Kind, 'relation'>;
+        mainField?: never;
       }
     | {
         type: 'relation';

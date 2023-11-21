@@ -53,9 +53,8 @@ const ProfilePage = React.lazy(() =>
   }))
 );
 const SettingsPage = React.lazy(() =>
-  // @ts-expect-error – No types, yet.
-  import('./SettingsPage').then((module) => ({
-    default: module.SettingsPage,
+  import('./Settings/SettingsPage').then((mod) => ({
+    default: mod.SettingsPage,
   }))
 );
 

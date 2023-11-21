@@ -82,3 +82,5 @@ function formatAPIError(
 
   return formatMessage(normalizedError);
 }
+
+export type { ApiError };
