@@ -104,7 +104,7 @@ const createDocumentService = ({
     });
 
     // TODO: Change return value to actual count
-    return entriesToDelete.at(0);
+    return { documents: entriesToDelete };
   },
 
   // TODO: should we provide two separate methods?
@@ -226,7 +226,7 @@ const createDocumentService = ({
 
     const newDocumentId = createDocumentId();
 
-    const result = await mapAsync(entries, async (entryToClone: any) => {
+    const documents = await mapAsync(entries, async (entryToClone: any) => {
       const isDraft = contentTypesUtils.isDraft(data);
       // Todo: Merge data with entry to clone
       const validData = await entityValidator.validateEntityUpdate(
@@ -244,15 +244,14 @@ const createDocumentService = ({
       );
 
       // TODO: Transform params to query
-      const clonedEntry = await db.query(uid).clone(entryToClone.id, {
+      return db.query(uid).clone(entryToClone.id, {
         ...query,
         // Allows entityData to override the documentId (e.g. when publishing)
         data: { documentId: newDocumentId, ...entityData, locale: entryToClone.locale },
       });
-      return clonedEntry;
     });
 
-    return { documentId: newDocumentId, result };
+    return { id: newDocumentId, documents };
   },
 
   // TODO: Handle relations so they target the published version
@@ -268,14 +267,14 @@ const createDocumentService = ({
     });
 
     // Clone every draft version to be published
-    await this.clone(uid, documentId, {
+    const clonedDocuments = (await this.clone(uid, documentId, {
       ...(params || {}),
       // @ts-expect-error - Generic type does not have publishedAt attribute by default
       data: { documentId, publishedAt: new Date() },
-    });
+    })) as any;
 
     // TODO: Return actual count
-    return 0;
+    return { documents: clonedDocuments?.documents || [] };
   },
 
   async unpublish(uid, documentId, params) {
@@ -285,13 +284,10 @@ const createDocumentService = ({
 
     // TODO: Discard draft
     // Delete all published versions
-    await this.delete(uid, documentId, {
+    return this.delete(uid, documentId, {
       ...params,
       lookup: { ...params?.lookup, publishedAt: { $ne: null } },
-    });
-
-    // TODO: Return actual count
-    return 0;
+    }) as any;
   },
 });
 

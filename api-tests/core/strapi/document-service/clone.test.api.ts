@@ -32,7 +32,7 @@ describe('Document Service', () => {
 
         expect(result).not.toBeNull();
 
-        const clonedArticlesDb = await findArticlesDb({ documentId: result.documentId });
+        const clonedArticlesDb = await findArticlesDb({ documentId: result.id });
 
         // all articles should be in draft, and only one should be english
         expect(clonedArticlesDb.length).toBe(1);
@@ -66,7 +66,7 @@ describe('Document Service', () => {
           documentId: articleDb.documentId,
           publishedAt: null,
         });
-        const clonedArticlesDb = await findArticlesDb({ documentId: result.documentId });
+        const clonedArticlesDb = await findArticlesDb({ documentId: result.id });
 
         // all articles should be in draft, and all locales should be cloned
         expect(clonedArticlesDb.length).toBe(originalArticlesDb.length);
