@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { omit, difference, isNil, isEmpty, map, isArray, uniq } from 'lodash/fp';
 import { errors } from '@strapi/utils';
-import type { Update } from '../../../shared/contracts/api-token';
+import type { Update, ApiToken, ApiTokenBody } from '../../../shared/contracts/api-token';
 import constants from './constants';
 
 const { ValidationError, NotFoundError } = errors;
@@ -9,22 +9,12 @@ const { ValidationError, NotFoundError } = errors;
 type ApiTokenPermission = {
   id: number | `${number}`;
   action: string;
-  token: ApiToken | number;
+  token: DBApiToken | number;
 };
 
-export type ApiToken = {
-  id?: number | `${number}`;
-  name: string;
-  description: string;
-  accessKey: string;
-  lastUsedAt: number;
-  lifespan: number | null;
-  expiresAt: number;
-  type: 'read-only' | 'full-access' | 'custom';
+type DBApiToken = ApiToken & {
   permissions: (number | ApiTokenPermission)[];
 };
-
-export type CreateActionPayload = Omit<ApiToken, 'id' | 'accessKey' | 'expiresAt' | 'lastUsedAt'>;
 
 const SELECT_FIELDS = [
   'id',
@@ -45,23 +35,24 @@ const POPULATE_FIELDS = ['permissions'];
 /**
  * Assert that a token's permissions attribute is valid for its type
  */
-const assertCustomTokenPermissionsValidity = (attributes: CreateActionPayload) => {
+const assertCustomTokenPermissionsValidity = (
+  type: ApiTokenBody['type'],
+  permissions: ApiTokenBody['permissions']
+) => {
   // Ensure non-custom tokens doesn't have permissions
-  if (attributes.type !== constants.API_TOKEN_TYPE.CUSTOM && !isEmpty(attributes.permissions)) {
+  if (type !== constants.API_TOKEN_TYPE.CUSTOM && !isEmpty(permissions)) {
     throw new ValidationError('Non-custom tokens should not reference permissions');
   }
 
   // Custom type tokens should always have permissions attached to them
-  if (attributes.type === constants.API_TOKEN_TYPE.CUSTOM && !isArray(attributes.permissions)) {
+  if (type === constants.API_TOKEN_TYPE.CUSTOM && !isArray(permissions)) {
     throw new ValidationError('Missing permissions attribute for custom token');
   }
 
   // Permissions provided for a custom type token should be valid/registered permissions UID
-  if (attributes.type === constants.API_TOKEN_TYPE.CUSTOM) {
+  if (type === constants.API_TOKEN_TYPE.CUSTOM) {
     const validPermissions = strapi.contentAPI.permissions.providers.action.keys();
-    // TODO difference requires that the 2 arguments are of the same type
-    // @ts-expect-error - Handle type miss match between string[] and number[]
-    const invalidPermissions = difference(attributes.permissions, validPermissions) as string[];
+    const invalidPermissions = difference(permissions, validPermissions) as string[];
 
     if (!isEmpty(invalidPermissions)) {
       throw new ValidationError(`Unknown permissions provided: ${invalidPermissions.join(', ')}`);
@@ -72,12 +63,12 @@ const assertCustomTokenPermissionsValidity = (attributes: CreateActionPayload) =
 /**
  * Assert that a token's lifespan is valid
  */
-const assertValidLifespan = ({ lifespan }: CreateActionPayload) => {
+const assertValidLifespan = (lifespan: ApiTokenBody['lifespan']) => {
   if (isNil(lifespan)) {
     return;
   }
 
-  if (!Object.values(constants.API_TOKEN_LIFESPANS).includes(lifespan)) {
+  if (!Object.values(constants.API_TOKEN_LIFESPANS).includes(lifespan as number)) {
     throw new ValidationError(
       `lifespan must be one of the following values: 
       ${Object.values(constants.API_TOKEN_LIFESPANS).join(', ')}`
@@ -88,7 +79,7 @@ const assertValidLifespan = ({ lifespan }: CreateActionPayload) => {
 /**
  * Flatten a token's database permissions objects to an array of strings
  */
-const flattenTokenPermissions = (token: ApiToken): ApiToken => {
+const flattenTokenPermissions = (token: DBApiToken): ApiToken => {
   if (!token) {
     return token;
   }
@@ -110,9 +101,7 @@ type WhereParams = {
 /**
  *  Get a token
  */
-const getBy = async (
-  whereParams: WhereParams = {}
-): Promise<Omit<ApiToken, 'accessKey'> | null> => {
+const getBy = async (whereParams: WhereParams = {}): Promise<ApiToken | null> => {
   if (Object.keys(whereParams).length === 0) {
     return null;
   }
@@ -147,7 +136,7 @@ const hash = (accessKey: string) => {
     .digest('hex');
 };
 
-const getExpirationFields = (lifespan: number | null) => {
+const getExpirationFields = (lifespan: ApiTokenBody['lifespan']) => {
   // it must be nil or a finite number >= 0
   const isValidNumber = Number.isFinite(lifespan) && (lifespan as number) > 0;
   if (!isValidNumber && !isNil(lifespan)) {
@@ -156,18 +145,18 @@ const getExpirationFields = (lifespan: number | null) => {
 
   return {
     lifespan: lifespan || null,
-    expiresAt: lifespan ? Date.now() + lifespan : null,
+    expiresAt: lifespan ? Date.now() + (lifespan as number) : null,
   };
 };
 
 /**
  * Create a token and its permissions
  */
-const create = async (attributes: CreateActionPayload): Promise<ApiToken> => {
+const create = async (attributes: ApiTokenBody): Promise<ApiToken> => {
   const accessKey = crypto.randomBytes(128).toString('hex');
 
-  assertCustomTokenPermissionsValidity(attributes);
-  assertValidLifespan(attributes);
+  assertCustomTokenPermissionsValidity(attributes.type, attributes.permissions);
+  assertValidLifespan(attributes.lifespan);
 
   // Create the token
   const apiToken: ApiToken = await strapi.query('admin::api-token').create({
@@ -252,8 +241,8 @@ For security reasons, prefer storing the secret in an environment variable and r
 /**
  * Return a list of all tokens and their permissions
  */
-const list = async (): Promise<Array<Omit<ApiToken, 'accessKey'>>> => {
-  const tokens: Array<ApiToken> = await strapi.query('admin::api-token').findMany({
+const list = async (): Promise<Array<ApiToken>> => {
+  const tokens: Array<DBApiToken> = await strapi.query('admin::api-token').findMany({
     select: SELECT_FIELDS,
     populate: POPULATE_FIELDS,
     orderBy: { name: 'ASC' },
@@ -269,7 +258,7 @@ const list = async (): Promise<Array<Omit<ApiToken, 'accessKey'>>> => {
 /**
  * Revoke (delete) a token
  */
-const revoke = async (id: string | number): Promise<Omit<ApiToken, 'accessKey'>> => {
+const revoke = async (id: string | number): Promise<ApiToken> => {
   return strapi
     .query('admin::api-token')
     .delete({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: { id } });
@@ -295,9 +284,11 @@ const getByName = async (name: string) => {
 const update = async (
   id: string | number,
   attributes: Update.Request['body']
-): Promise<Omit<ApiToken, 'accessKey'>> => {
+): Promise<ApiToken> => {
   // retrieve token without permissions
-  const originalToken: ApiToken = await strapi.query('admin::api-token').findOne({ where: { id } });
+  const originalToken: DBApiToken = await strapi
+    .query('admin::api-token')
+    .findOne({ where: { id } });
 
   if (!originalToken) {
     throw new NotFoundError('Token not found');
@@ -310,14 +301,13 @@ const update = async (
   // if we're updating the permissions on any token type, or changing from non-custom to custom, ensure they're still valid
   // if neither type nor permissions are changing, we don't need to validate again or else we can't allow partial update
   if (attributes.permissions || changingTypeToCustom) {
-    assertCustomTokenPermissionsValidity({
-      ...originalToken,
-      ...attributes,
-      type: attributes.type || originalToken.type,
-    });
+    assertCustomTokenPermissionsValidity(
+      attributes.type || originalToken.type,
+      attributes.permissions || originalToken.permissions
+    );
   }
 
-  assertValidLifespan(attributes);
+  assertValidLifespan(attributes.lifespan);
 
   const updatedToken: ApiToken = await strapi.query('admin::api-token').update({
     select: SELECT_FIELDS,

@@ -15,8 +15,8 @@ export type ApiToken = {
   updatedAt: string;
 };
 
-interface ApiTokenBody extends Pick<ApiToken, 'description' | 'name'> {
-  lifespan?: ApiToken['lifespan'] | number | null;
+export interface ApiTokenBody extends Pick<ApiToken, 'description' | 'name'> {
+  lifespan?: ApiToken['lifespan'] | null;
   permissions?: ApiToken['permissions'] | null;
   type: ApiToken['type'] | undefined;
 }
