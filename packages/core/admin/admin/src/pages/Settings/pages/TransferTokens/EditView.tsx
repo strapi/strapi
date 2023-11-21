@@ -282,8 +282,8 @@ export const TransferTokenCreateView = () => {
   );
 
   const handleSubmit = async (
-    body: Pick<TransferToken, 'description' | 'name' | 'lifespan' | 'permissions'> & {
-      permissions: keyof TransferToken['permissions'];
+    body: Pick<TransferToken, 'description' | 'name' | 'lifespan'> & {
+      permissions: 'push' | 'pull' | 'push-pull';
     },
     actions: FormikHelpers<Pick<TransferToken, 'description' | 'name' | 'lifespan' | 'permissions'>>
   ) => {
@@ -295,85 +295,99 @@ export const TransferTokenCreateView = () => {
 
     const permissions = body.permissions.split('-');
 
-    try {
-      const {
-        data: { data: response },
-      } = isCreating
-        ? await post<Create.Response, AxiosResponse<Create.Response>, Create.Request['body']>(
-            `/admin/transfer/tokens`,
-            {
-              ...body,
-              permissions,
-            }
-          )
-        : await put<Update.Response, AxiosResponse<Update.Response>, Update.Request['body']>(
-            `/admin/transfer/tokens/${id}`,
-            {
-              name: body.name,
-              description: body.description,
-              permissions,
-            }
-          );
-
-      // @ts-expect-error context assertation
-      unlockApp();
-
-      if (isCreating) {
-        history.replace(`/settings/transfer-tokens/${response.id}`, { transferToken: response });
-        setCurrentStep('transferTokens.success');
+    const isPermissionsTransferPermission = (
+      permission: string[]
+    ): permission is Array<'push' | 'pull'> => {
+      if (permission.length === 1) {
+        return permission[0] === 'push' || permission[0] === 'pull';
       }
 
-      setTransferToken({
-        ...response,
-      });
+      return permission[0] === 'push' && permission[1] === 'pull';
+    };
 
-      toggleNotification({
-        type: 'success',
-        message: isCreating
-          ? formatMessage({
-              id: 'notification.success.transfertokencreated',
-              defaultMessage: 'Transfer Token successfully created',
-            })
-          : formatMessage({
-              id: 'notification.success.transfertokenedited',
-              defaultMessage: 'Transfer Token successfully edited',
-            }),
-      });
+    // this type-guard is necessary to satisfy the type for `permissions` in the request body,
+    // because String.split returns stringp[]
+    if (isPermissionsTransferPermission(permissions)) {
+      try {
+        const {
+          data: { data: response },
+        } = isCreating
+          ? await post<Create.Response, AxiosResponse<Create.Response>, Create.Request['body']>(
+              `/admin/transfer/tokens`,
+              {
+                ...body,
+                permissions,
+              }
+            )
+          : await put<Update.Response, AxiosResponse<Update.Response>, Update.Request['body']>(
+              `/admin/transfer/tokens/${id}`,
+              {
+                name: body.name,
+                description: body.description,
+                permissions,
+              }
+            );
 
-      trackUsageRef.current(isCreating ? 'didCreateToken' : 'didEditToken', {
-        type: transferToken?.permissions,
-        tokenType: TRANSFER_TOKEN_TYPE,
-      });
-    } catch (err) {
-      if (err instanceof AxiosError) {
-        // @ts-expect-error this is fine
-        const errors = formatAPIErrors(err.response.data);
-        actions.setErrors(errors);
+        // @ts-expect-error context assertation
+        unlockApp();
 
-        if (err?.response?.data?.error?.message === MSG_ERROR_NAME_TAKEN) {
-          toggleNotification({
-            type: 'warning',
-            message: err.response.data.message || 'notification.error.tokennamenotunique',
-          });
-        } else if (err?.response?.data?.error?.details?.code === 'INVALID_TOKEN_SALT') {
-          toggleNotification({
-            type: 'warning',
-            message: {
-              id: 'notification.error.invalid.configuration',
-              defaultMessage:
-                'You have an invalid configuration, check your server log for more information.',
-            },
-          });
-        } else {
-          toggleNotification({
-            type: 'warning',
-            message: err?.response?.data?.message || 'notification.error',
-          });
+        if (isCreating) {
+          history.replace(`/settings/transfer-tokens/${response.id}`, { transferToken: response });
+          setCurrentStep('transferTokens.success');
         }
-      }
 
-      // @ts-expect-error context assertation
-      unlockApp();
+        setTransferToken({
+          ...response,
+        });
+
+        toggleNotification({
+          type: 'success',
+          message: isCreating
+            ? formatMessage({
+                id: 'notification.success.transfertokencreated',
+                defaultMessage: 'Transfer Token successfully created',
+              })
+            : formatMessage({
+                id: 'notification.success.transfertokenedited',
+                defaultMessage: 'Transfer Token successfully edited',
+              }),
+        });
+
+        trackUsageRef.current(isCreating ? 'didCreateToken' : 'didEditToken', {
+          type: transferToken?.permissions,
+          tokenType: TRANSFER_TOKEN_TYPE,
+        });
+      } catch (err) {
+        if (err instanceof AxiosError) {
+          // @ts-expect-error this is fine
+          const errors = formatAPIErrors(err.response.data);
+          actions.setErrors(errors);
+
+          if (err?.response?.data?.error?.message === MSG_ERROR_NAME_TAKEN) {
+            toggleNotification({
+              type: 'warning',
+              message: err.response.data.message || 'notification.error.tokennamenotunique',
+            });
+          } else if (err?.response?.data?.error?.details?.code === 'INVALID_TOKEN_SALT') {
+            toggleNotification({
+              type: 'warning',
+              message: {
+                id: 'notification.error.invalid.configuration',
+                defaultMessage:
+                  'You have an invalid configuration, check your server log for more information.',
+              },
+            });
+          } else {
+            toggleNotification({
+              type: 'warning',
+              message: err?.response?.data?.message || 'notification.error',
+            });
+          }
+        }
+
+        // @ts-expect-error context assertation
+        unlockApp();
+      }
     }
   };
 
