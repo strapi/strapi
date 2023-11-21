@@ -47,7 +47,6 @@ const DragItem = styled(Flex)`
 `;
 
 const DragButton = styled(Flex)`
-  cursor: pointer;
   visibility: hidden;
   &:hover {
     background: ${({ theme }) => theme.colors.neutral200};
@@ -82,6 +81,7 @@ const DragAndDropElement = ({
 }: DragAndDropElementProps) => {
   const { editor } = useBlocksEditorContext('drag-and-drop');
   const { formatMessage } = useIntl();
+  const blockRef = React.useRef(null);
 
   const handleMoveBlock = React.useCallback(
     (newIndex: Array<number>, currentIndex: Array<number>) => {
@@ -133,8 +133,9 @@ const DragAndDropElement = ({
     [editor, formatMessage, name, setLiveText]
   );
 
-  const [{ handlerId, isDragging, handleKeyDown }, myRef, boxRef, dropRef, dragRef] =
-    useDragAndDrop(!disabled && canDrag, {
+  const [{ handlerId, isDragging, handleKeyDown }, boxRef, dropRef, dragRef] = useDragAndDrop(
+    !disabled && canDrag,
+    {
       type: `${ItemTypes.BLOCKS}._${name}`,
       canDropHandler() {
         return canDrop;
@@ -144,9 +145,10 @@ const DragAndDropElement = ({
         displayedValue: children,
       },
       onMoveItem: handleMoveBlock,
-    });
+    }
+  );
 
-  const composedRefs = composeRefs(myRef, dragRef);
+  const composedRefs = composeRefs(blockRef, dragRef);
   const composedBoxRefs = composeRefs(boxRef, dropRef);
 
   return (
@@ -158,6 +160,8 @@ const DragAndDropElement = ({
           borderWidth="2px"
           width="calc(100% - 24px)"
           marginLeft="auto"
+          marginTop={2}
+          marginBottom={2}
         />
       ) : (
         <DragItem ref={composedRefs} data-handler-id={handlerId} gap={2} paddingLeft={2}>
