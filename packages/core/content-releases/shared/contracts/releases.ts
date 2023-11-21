@@ -82,3 +82,24 @@ export declare namespace CreateRelease {
     | { data: ReleaseDataResponse }
     | { data: null; error: errors.ApplicationError | errors.ValidationError };
 }
+
+/**
+ * PUT /content-releases/:id - Update a release
+ */
+export declare namespace UpdateRelease {
+  export interface Request {
+    state: {
+      user: UserInfo;
+    };
+    params: {
+      id: Release['id'];
+    };
+    body: {
+      name: string;
+    };
+  }
+
+  export type Response =
+    | { data: ReleaseDataResponse }
+    | { data: null; error: errors.ApplicationError | errors.ValidationError };
+}

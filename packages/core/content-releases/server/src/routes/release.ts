@@ -49,5 +49,21 @@ export default {
         ],
       },
     },
+    {
+      method: 'PUT',
+      path: '/:id',
+      handler: 'release.update',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::content-releases.update'],
+            },
+          },
+        ],
+      },
+    },
   ],
 };
