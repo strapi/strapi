@@ -1,5 +1,10 @@
 import { type Element, Editor, Transforms } from 'slate';
 
+/**
+ * Extracts some logic that is common to most blocks' handleConvert functions.
+ * It breaks out of the parent list if the selection is inside a list.
+ * And returns a NodeEntry of the selected block.
+ */
 const prepareHandleConvert = (editor: Editor) => {
   // If the selection is inside a list, split the list so that the modified block is outside of it
   Transforms.unwrapNodes(editor, {
@@ -7,6 +12,7 @@ const prepareHandleConvert = (editor: Editor) => {
     split: true,
   });
 
+  // Make sure we get a block node, not an inline node
   const entry = Editor.above(editor, {
     match: (node) => !Editor.isEditor(node) && node.type !== 'text' && node.type !== 'link',
   });
@@ -19,6 +25,9 @@ const prepareHandleConvert = (editor: Editor) => {
   return [entry[0], entry[1]] as const;
 };
 
+/**
+ * Checks if the last block in the editor is of the given type.
+ */
 const isLastBlockType = (editor: Editor, type: Element['type']) => {
   const { selection } = editor;
 
@@ -40,6 +49,9 @@ const isLastBlockType = (editor: Editor, type: Element['type']) => {
   return false;
 };
 
+/**
+ * Inserts an empty paragraph at the end of the editor.
+ */
 const insertEmptyBlockAtLast = (editor: Editor) => {
   Transforms.insertNodes(
     editor,
