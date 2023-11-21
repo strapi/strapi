@@ -1,6 +1,9 @@
+import chalk from 'chalk';
+
 import * as f from '../../core/format';
 
 import type { RunReports } from '../../types';
+import type { Version } from '../../core';
 
 describe('Format', () => {
   test('Path', () => {
@@ -11,27 +14,27 @@ describe('Format', () => {
   test.each(['4.15.0', '5.0.0', '11.11.11', 'latest', 'major', 'minor', 'patch'])(
     'Version (%s)',
     (version) => {
-      const formatted = f.version(version);
-      expect(formatted).toStrictEqual(formatted);
+      const formatted = f.version(version as Version);
+      expect(formatted).toStrictEqual(chalk.italic.yellow(version));
     }
   );
 
   test.each(['>4.0.0 <=5.0.0', '>4.5.2 <7.1.4'])('Version Range (%s)', (range) => {
     const formatted = f.versionRange(range);
-    expect(formatted).toStrictEqual(formatted);
+    expect(formatted).toStrictEqual(chalk.bold.green(range));
   });
 
   test.each(['console.log-to-console.info', 'update-json-file', 'transform'])(
     'Transform File Path (%s)',
     (transformFilePath) => {
       const formatted = f.transform(transformFilePath);
-      expect(formatted).toStrictEqual(formatted);
+      expect(formatted).toStrictEqual(chalk.cyan(transformFilePath));
     }
   );
 
   test.each(['foo', 'bar', 'baz'])('Highlight (%s)', (text) => {
-    const formatted = f.version(text);
-    expect(formatted).toStrictEqual(formatted);
+    const formatted = f.highlight(text);
+    expect(formatted).toStrictEqual(chalk.bold.underline(text));
   });
 
   test('Reports', () => {
@@ -44,7 +47,7 @@ describe('Format', () => {
           formatted: 'transform',
           kind: 'code',
         },
-        report: { error: 0, skip: 1, nochange: 2, ok: 3, timeElapsed: '0.400' },
+        report: { error: 0, skip: 1, nochange: 2, ok: 3, timeElapsed: '0.400', stats: {} },
       },
       {
         transform: {
@@ -54,13 +57,14 @@ describe('Format', () => {
           formatted: 'update deps',
           kind: 'json',
         },
-        report: { error: 5, skip: 0, nochange: 90, ok: 40, timeElapsed: '0.030' },
+        report: { error: 5, skip: 0, nochange: 90, ok: 40, timeElapsed: '0.030', stats: {} },
       },
     ];
 
     const formatted = f.reports(reports);
 
     // Note: Check the jest terminal output (human-readable) in case the snapshot has changed
+    // Run the following to update the snapshot: jest packages/utils/upgrade/src/__tests__/core/format.test.ts -u
     expect(formatted).toMatchInlineSnapshot(`
       "[90m┌────[39m[90m┬─────────[39m[90m┬──────[39m[90m┬─────────────[39m[90m┬──────────[39m[90m┬───────────[39m[90m┬─────────────────────┐[39m
       [90m│[39m[31m [1m[90mN°[31m[22m [39m[90m│[39m[31m [1m[35mVersion[31m[22m [39m[90m│[39m[31m [1m[33mKind[31m[22m [39m[90m│[39m[31m [1m[36mName[31m[22m        [39m[90m│[39m[31m [1m[32mAffected[31m[22m [39m[90m│[39m[31m [1m[31mUnchanged[31m[22m [39m[90m│[39m[31m [1m[34mDuration[31m[22m            [39m[90m│[39m
