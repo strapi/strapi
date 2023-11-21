@@ -2,7 +2,7 @@ import type Koa from 'koa';
 import { errors } from '@strapi/utils';
 import { RELEASE_MODEL_UID } from '../constants';
 import { validateRelease } from './validation/release';
-import type { CreateRelease, GetRelease, Release } from '../../../shared/contracts/releases';
+import type { CreateRelease, UpdateRelease, GetRelease, Release } from '../../../shared/contracts/releases';
 import type { UserInfo } from '../../../shared/types';
 import { getService } from '../utils';
 
@@ -84,7 +84,7 @@ const releaseController = {
 
   async update(ctx: Koa.Context) {
     const user: UserInfo = ctx.state.user;
-    const releaseArgs: ReleaseUpdateArgs = ctx.request.body;
+    const releaseArgs: UpdateRelease.Request['body'] = ctx.request.body;
     const id: number = ctx.params.id;
 
     await validateRelease(releaseArgs);

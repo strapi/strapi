@@ -1,4 +1,4 @@
-import releaseController from '../controllers/release';
+import releaseController from '../release';
 
 describe('Release controller', () => {
   describe('create', () => {
