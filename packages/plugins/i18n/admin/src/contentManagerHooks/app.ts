@@ -11,24 +11,27 @@ import type { Schema } from '@strapi/types';
 /* -------------------------------------------------------------------------------------------------
  * addLocaleToLinksHook
  * -----------------------------------------------------------------------------------------------*/
-interface AddLocaleToCTLinksArgs {
+export interface AddLocaleToCTLinksArgs {
   // TODO: this should come from the CM.
   ctLinks: Array<StrapiAppSettingLink & { search?: string }>;
   models: Schema.ContentType[];
 }
 
-interface AddLocaleToSTLinksArgs {
+export interface AddLocaleToSTLinksArgs {
   // TODO: this should come from the CM.
   stLinks: Array<StrapiAppSettingLink & { search?: string }>;
   models: Schema.ContentType[];
 }
 
-type AddLocalToLinksHookArgs<TType extends 'collectionType' | 'singleType'> =
+export type AddLocalToLinksHookArgs<TType extends 'collectionType' | 'singleType'> =
   TType extends 'collectionType' ? AddLocaleToCTLinksArgs : AddLocaleToSTLinksArgs;
 
 const addLocaleToLinksHook =
   <TType extends 'collectionType' | 'singleType'>(type: TType) =>
-  (args: AddLocalToLinksHookArgs<TType>, store: Store) => {
+  (
+    args: AddLocalToLinksHookArgs<TType>,
+    store: Store
+  ): AddLocaleToCTLinksArgs | AddLocaleToSTLinksArgs => {
     const links =
       type === 'collectionType'
         ? (args as AddLocaleToCTLinksArgs).ctLinks
@@ -51,11 +54,9 @@ const addLocaleToLinksHook =
       collectionTypesRelatedPermissions
     );
 
-    if (type === 'collectionType') {
-      return { ctLinks: mutatedLinks, models: args.models };
-    } else {
-      return { stLinks: mutatedLinks, models: args.models };
-    }
+    return type === 'collectionType'
+      ? { ctLinks: mutatedLinks, models: args.models }
+      : { stLinks: mutatedLinks, models: args.models };
   };
 
 /* -------------------------------------------------------------------------------------------------
@@ -67,7 +68,7 @@ const addLocaleToLinksSearch = (
   contentTypeSchemas: Schema.ContentType[],
   locales: Locale[],
   permissions: Record<string, Record<string, Permission[]>>
-) => {
+): Array<StrapiAppSettingLink & { search?: string }> => {
   return links.map((link) => {
     const contentTypeUID = link.to.split(`/${kind}/`)[1];
 
