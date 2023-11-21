@@ -3,6 +3,10 @@ import { doesPluginOptionsHaveI18nLocalized } from '../utils/fields';
 
 import type { CMAdminConfiguration } from '../types';
 
+/* -------------------------------------------------------------------------------------------------
+ * addColumnToTableHook
+ * -----------------------------------------------------------------------------------------------*/
+
 interface AddColumnToTableHookArgs {
   layout: {
     components: Record<string, CMAdminConfiguration>;

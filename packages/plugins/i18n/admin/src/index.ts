@@ -12,8 +12,7 @@ import {
 import Initializer from './components/Initializer';
 import { LocalePicker } from './components/LocalePicker';
 import { PERMISSIONS } from './constants';
-import addLocaleToCollectionTypesLinksHook from './contentManagerHooks/addLocaleToCollectionTypesLinks';
-import addLocaleToSingleTypesLinksHook from './contentManagerHooks/addLocaleToSingleTypesLinks';
+import { addLocaleToLinksHook } from './contentManagerHooks/app';
 import { mutateEditViewLayoutHook } from './contentManagerHooks/editView';
 import { addColumnToTableHook } from './contentManagerHooks/listView';
 import middlewares from './middlewares';
@@ -44,11 +43,11 @@ export default {
     // Hooks that mutate the collection types links in order to add the locale filter
     app.registerHook(
       'Admin/CM/pages/App/mutate-collection-types-links',
-      addLocaleToCollectionTypesLinksHook
+      addLocaleToLinksHook('collectionType')
     );
     app.registerHook(
       'Admin/CM/pages/App/mutate-single-types-links',
-      addLocaleToSingleTypesLinksHook
+      addLocaleToLinksHook('singleType')
     );
     // Hook that adds a column into the CM's LV table
     app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
