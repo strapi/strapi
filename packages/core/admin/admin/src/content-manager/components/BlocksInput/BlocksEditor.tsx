@@ -32,7 +32,7 @@ interface NonSelectorBlock {
   renderElement: (props: RenderElementProps) => React.JSX.Element;
   value: {
     type: string;
-    level: number;
+    level?: number;
   };
   matchNode: (node: Attribute.BlocksNode) => boolean;
   isInBlocksSelector: false;
