@@ -12,7 +12,7 @@ import { useDragAndDrop } from '../../hooks/useDragAndDrop';
 // @ts-expect-error TODO convert to ts
 import { composeRefs, ItemTypes, getTrad } from '../../utils';
 
-import { BlocksStore, useBlocksEditorContext } from './BlocksEditor';
+import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { type ModifiersStore, useModifiersStore } from './hooks/useModifiersStore';
 import { getEntries } from './utils/types';
 
@@ -36,6 +36,7 @@ const DragItem = styled(Flex)`
     opacity: inherit;
   }
   &:hover {
+    // Set visibility of drag button
     & > div {
       visibility: visible;
       opacity: inherit;
@@ -63,25 +64,13 @@ const NOT_DROPPABLE_ITEMS = ['list'];
 type DragAndDropElementProps = {
   children: RenderElementProps['children'];
   index: Array<number>;
-  disabled: boolean;
   canDrag: boolean;
   canDrop: boolean;
-  name: string;
-  setLiveText: (text: string) => void;
 };
 
-const DragAndDropElement = ({
-  children,
-  index,
-  disabled,
-  canDrag,
-  canDrop,
-  name,
-  setLiveText,
-}: DragAndDropElementProps) => {
-  const { editor } = useBlocksEditorContext('drag-and-drop');
+const DragAndDropElement = ({ children, index, canDrag, canDrop }: DragAndDropElementProps) => {
+  const { editor, disabled, name, setLiveText } = useBlocksEditorContext('drag-and-drop');
   const { formatMessage } = useIntl();
-  const blockRef = React.useRef(null);
 
   const handleMoveBlock = React.useCallback(
     (newIndex: Array<number>, currentIndex: Array<number>) => {
@@ -121,7 +110,14 @@ const DragAndDropElement = ({
           // Node is dragged downwards inside list
           newIndex[0] -= 1;
         }
-        Transforms.setNodes(editor, { type: 'list-item' }, { at: newIndex });
+
+        const { type: _type, children: _children, ...extra } = draggedNode;
+        const attributesToClear: Record<string, null> = {};
+        Object.keys(extra).forEach((key) => {
+          attributesToClear[key] = null;
+        });
+
+        Transforms.setNodes(editor, { ...attributesToClear, type: 'list-item' }, { at: newIndex });
       }
 
       // TODO: fix selection to new index
@@ -133,7 +129,7 @@ const DragAndDropElement = ({
     [editor, formatMessage, name, setLiveText]
   );
 
-  const [{ handlerId, isDragging, handleKeyDown }, boxRef, dropRef, dragRef] = useDragAndDrop(
+  const [{ handlerId, isDragging, handleKeyDown }, blockRef, dropRef, dragRef] = useDragAndDrop(
     !disabled && canDrag,
     {
       type: `${ItemTypes.BLOCKS}._${name}`,
@@ -148,8 +144,7 @@ const DragAndDropElement = ({
     }
   );
 
-  const composedRefs = composeRefs(blockRef, dragRef);
-  const composedBoxRefs = composeRefs(boxRef, dropRef);
+  const composedBoxRefs = composeRefs(blockRef, dropRef);
 
   return (
     <Box ref={composedBoxRefs}>
@@ -164,7 +159,7 @@ const DragAndDropElement = ({
           marginBottom={2}
         />
       ) : (
-        <DragItem ref={composedRefs} data-handler-id={handlerId} gap={2} paddingLeft={2}>
+        <DragItem ref={dragRef} data-handler-id={handlerId} gap={2} paddingLeft={2}>
           <DragButton
             role="button"
             tabIndex={0}
@@ -202,23 +197,13 @@ const baseRenderLeaf = (props: RenderLeafProps, modifiers: ModifiersStore) => {
   return <span {...props.attributes}>{wrappedChildren}</span>;
 };
 
-type baseRenderElementProps = {
+type BaseRenderElementProps = {
   props: RenderElementProps['children'];
   blocks: BlocksStore;
-  name: string;
-  disabled: boolean;
   editor: Editor;
-  setLiveText: (text: string) => void;
 };
 
-const baseRenderElement = ({
-  props,
-  blocks,
-  name,
-  editor,
-  disabled,
-  setLiveText,
-}: baseRenderElementProps) => {
+const baseRenderElement = ({ props, blocks, editor }: BaseRenderElementProps) => {
   const blockMatch = Object.values(blocks).find((block) => block.matchNode(props.element));
   const block = blockMatch || blocks.paragraph;
   const nodePath = ReactEditor.findPath(editor, props.element);
@@ -226,11 +211,8 @@ const baseRenderElement = ({
   return (
     <DragAndDropElement
       index={nodePath}
-      disabled={disabled}
       canDrag={!NOT_DRAGGABLE_ITEMS.includes(block.value.type)}
       canDrop={!NOT_DROPPABLE_ITEMS.includes(block.value.type)}
-      name={name}
-      setLiveText={setLiveText}
     >
       {block.renderElement(props)}
     </DragAndDropElement>
@@ -239,12 +221,10 @@ const baseRenderElement = ({
 
 interface BlocksInputProps {
   placeholder?: string;
-  name: string;
-  setLiveText: (text: string) => void;
 }
 
-const BlocksContent = ({ placeholder, name, setLiveText }: BlocksInputProps) => {
-  const { editor, disabled, blocks } = useBlocksEditorContext('BlocksContent');
+const BlocksContent = ({ placeholder }: BlocksInputProps) => {
+  const { editor, disabled, blocks, setLiveText } = useBlocksEditorContext('BlocksContent');
   const blocksRef = React.useRef<HTMLDivElement>(null);
   const { formatMessage } = useIntl();
 
@@ -256,49 +236,48 @@ const BlocksContent = ({ placeholder, name, setLiveText }: BlocksInputProps) => 
   );
 
   const handleMoveBlocks = (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => {
-    if (editor.selection) {
-      const start = Range.start(editor.selection);
-      const currentIndex = [start.path[0]];
-      let newIndexPosition = null;
+    if (!editor.selection) return;
 
-      if (event.key === 'ArrowUp') {
-        newIndexPosition = currentIndex[0] > 0 ? currentIndex[0] - 1 : currentIndex[0];
-      } else {
-        newIndexPosition =
-          currentIndex[0] < editor.children.length - 1 ? currentIndex[0] + 1 : currentIndex[0];
-      }
+    const start = Range.start(editor.selection);
+    const currentIndex = [start.path[0]];
+    let newIndexPosition = null;
 
-      const newIndex = [newIndexPosition];
+    if (event.key === 'ArrowUp') {
+      newIndexPosition = currentIndex[0] > 0 ? currentIndex[0] - 1 : currentIndex[0];
+    } else {
+      newIndexPosition =
+        currentIndex[0] < editor.children.length - 1 ? currentIndex[0] + 1 : currentIndex[0];
+    }
 
-      if (newIndexPosition !== currentIndex[0]) {
-        Transforms.moveNodes(editor, {
-          at: currentIndex,
-          to: newIndex,
-        });
+    const newIndex = [newIndexPosition];
 
-        setLiveText(
-          formatMessage(
-            {
-              id: getTrad('components.Blocks.dnd.reorder'),
-              defaultMessage: '{item}, moved. New position in the editor: {position}.',
-            },
-            {
-              item: `${name}.${currentIndex[0] + 1}`,
-              position: `${newIndex[0] + 1} of ${editor.children.length}`,
-            }
-          )
-        );
+    if (newIndexPosition !== currentIndex[0]) {
+      Transforms.moveNodes(editor, {
+        at: currentIndex,
+        to: newIndex,
+      });
 
-        event.preventDefault();
-      }
+      setLiveText(
+        formatMessage(
+          {
+            id: getTrad('components.Blocks.dnd.reorder'),
+            defaultMessage: '{item}, moved. New position in the editor: {position}.',
+          },
+          {
+            item: `${name}.${currentIndex[0] + 1}`,
+            position: `${newIndex[0] + 1} of ${editor.children.length}`,
+          }
+        )
+      );
+
+      event.preventDefault();
     }
   };
 
   // Create renderElement function base on the blocks store
   const renderElement = React.useCallback(
-    (props: RenderElementProps) =>
-      baseRenderElement({ props, blocks, editor, disabled, name, setLiveText }),
-    [blocks, editor, disabled, name, setLiveText]
+    (props: RenderElementProps) => baseRenderElement({ props, blocks, editor }),
+    [blocks, editor]
   );
 
   const handleEnter = () => {
@@ -349,7 +328,7 @@ const BlocksContent = ({ placeholder, name, setLiveText }: BlocksInputProps) => 
           return;
         }
       });
-      if (event.shiftKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+      if (event.shiftKey && ['ArrowUp', 'ArrowDown'].includes(event.key)) {
         handleMoveBlocks(editor, event);
       }
     }

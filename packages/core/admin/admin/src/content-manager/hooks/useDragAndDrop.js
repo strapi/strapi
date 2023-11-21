@@ -69,6 +69,11 @@ export const useDragAndDrop = (
       const dragIndex = item.index;
       const newIndex = index;
 
+      const hoverBoundingRect = objectRef.current.getBoundingClientRect();
+      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      const clientOffset = monitor.getClientOffset();
+      const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+
       if (typeof index === 'number') {
         if (dragIndex === newIndex) {
           // Don't replace items with themselves
@@ -76,11 +81,6 @@ export const useDragAndDrop = (
         }
 
         if (dropSensitivity === 'regular') {
-          const hoverBoundingRect = objectRef.current.getBoundingClientRect();
-          const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-          const clientOffset = monitor.getClientOffset();
-          const hoverClientY = clientOffset.y - hoverBoundingRect.top;
-
           // Dragging downwards
           if (dragIndex < newIndex && hoverClientY < hoverMiddleY) {
             return;
@@ -96,15 +96,9 @@ export const useDragAndDrop = (
         onMoveItem(newIndex, dragIndex);
         item.index = newIndex;
       } else {
-        // Using numbers as indices don't work for heirarchy of nodes
-        // For moving blocks, index would be a path as Array<number>
+        // Using numbers as indices doesn't work for nested list items with path like [1, 1, 0]
         if (dropSensitivity === 'regular') {
-          const hoverBoundingRect = objectRef.current.getBoundingClientRect();
-          const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-          const clientOffset = monitor.getClientOffset();
-          const hoverClientY = clientOffset.y - hoverBoundingRect.top;
-
-          // Indices comparison to find elments position in a heirarchy of nodes
+          // Indices comparison to find item position in nested list
           const minLength = Math.min(dragIndex.length, newIndex.length);
           let areEqual = true;
           let isLessThan = false;

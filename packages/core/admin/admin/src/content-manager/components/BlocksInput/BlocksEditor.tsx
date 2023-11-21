@@ -30,7 +30,7 @@ import { withStrapiSchema } from './plugins/withStrapiSchema';
 
 interface NonSelectorBlock {
   renderElement: (props: RenderElementProps) => React.JSX.Element;
-  value: object & {
+  value: {
     type: string;
     level: number;
   };
@@ -78,6 +78,8 @@ type BlocksStore = {
 interface BlocksEditorContextValue {
   blocks: BlocksStore;
   disabled: boolean;
+  name: string;
+  setLiveText: (text: string) => void;
 }
 
 const [BlocksEditorProvider, usePartialBlocksEditorContext] =
@@ -241,7 +243,12 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
           onChange={handleSlateChange}
           key={key}
         >
-          <BlocksEditorProvider blocks={blocks} disabled={disabled}>
+          <BlocksEditorProvider
+            blocks={blocks}
+            disabled={disabled}
+            name={name}
+            setLiveText={setLiveText}
+          >
             <InputWrapper
               direction="column"
               alignItems="flex-start"
@@ -252,11 +259,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
             >
               <BlocksToolbar />
               <EditorDivider width="100%" />
-              <BlocksContent
-                placeholder={formattedPlaceholder}
-                name={name}
-                setLiveText={setLiveText}
-              />
+              <BlocksContent placeholder={formattedPlaceholder} />
             </InputWrapper>
           </BlocksEditorProvider>
         </Slate>
