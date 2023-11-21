@@ -206,6 +206,9 @@ const Login = ({ children }: LoginProps) => {
               </Form>
             )}
           </Formik>
+          <Button fullWidth>
+                    HOLA
+          </Button>
           {children}
         </LayoutContent>
         <Flex justifyContent="center">
