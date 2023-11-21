@@ -10,10 +10,10 @@ import type { Schema } from '@strapi/strapi';
 
 const mutateCTBContentTypeSchema = (
   nextSchema: Schema.ContentType,
-  prevSchema: {
-    apiID: string;
-    schema: Schema.ContentType;
-    uid: string;
+  prevSchema?: {
+    apiID?: string;
+    schema?: Schema.ContentType;
+    uid?: string;
   }
 ) => {
   // Don't perform mutations components
@@ -22,8 +22,10 @@ const mutateCTBContentTypeSchema = (
   }
 
   const isNextSchemaLocalized = nextSchema.pluginOptions.i18n.localized;
-  const isPrevSchemaLocalized = doesPluginOptionsHaveI18nLocalized(prevSchema.schema.pluginOptions)
-    ? prevSchema.schema.pluginOptions.i18n.localized
+  const isPrevSchemaLocalized = doesPluginOptionsHaveI18nLocalized(
+    prevSchema?.schema?.pluginOptions
+  )
+    ? prevSchema?.schema?.pluginOptions.i18n.localized
     : false;
 
   // No need to perform modification on the schema, if the i18n feature was not changed
