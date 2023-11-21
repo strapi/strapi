@@ -66,7 +66,7 @@ describe('Populate', () => {
     test('with empty model', async () => {
       const uid = 'empty';
 
-      const result = getDeepPopulate(uid);
+      const result = getDeepPopulate(uid as any);
 
       expect(result).toEqual({});
     });
@@ -74,7 +74,7 @@ describe('Populate', () => {
     test('with component model', async () => {
       const uid = 'component';
 
-      const result = getDeepPopulate(uid);
+      const result = getDeepPopulate(uid as any);
 
       expect(result).toEqual({
         componentAttrName: { populate: {} },
@@ -84,7 +84,7 @@ describe('Populate', () => {
     test('with dynamic zone model', async () => {
       const uid = 'dynZone';
 
-      const result = getDeepPopulate(uid);
+      const result = getDeepPopulate(uid as any);
 
       expect(result).toEqual({
         dynZoneAttrName: {
@@ -107,7 +107,7 @@ describe('Populate', () => {
     test('with relation model - oneToMany', async () => {
       const uid = 'relationOTM';
 
-      const result = getDeepPopulate(uid);
+      const result = getDeepPopulate(uid as any);
 
       expect(result).toEqual({
         relationAttrName: true,
@@ -117,7 +117,7 @@ describe('Populate', () => {
     test('with relation model - oneToMany - with countMany', async () => {
       const uid = 'relationOTM';
 
-      const result = getDeepPopulate(uid, { countMany: true });
+      const result = getDeepPopulate(uid as any, { countMany: true });
 
       expect(result).toEqual({
         relationAttrName: { count: true },
@@ -127,7 +127,7 @@ describe('Populate', () => {
     test('with relation model - oneToOne', async () => {
       const uid = 'relationOTO';
 
-      const result = getDeepPopulate(uid);
+      const result = getDeepPopulate(uid as any);
 
       expect(result).toEqual({
         relationAttrName: true,
@@ -137,7 +137,7 @@ describe('Populate', () => {
     test('with relation model - oneToOne - with countOne', async () => {
       const uid = 'relationOTO';
 
-      const result = getDeepPopulate(uid, { countOne: true });
+      const result = getDeepPopulate(uid as any, { countOne: true });
 
       expect(result).toEqual({
         relationAttrName: { count: true },
@@ -147,7 +147,7 @@ describe('Populate', () => {
     test('with media model', async () => {
       const uid = 'media';
 
-      const result = getDeepPopulate(uid);
+      const result = getDeepPopulate(uid as any);
 
       expect(result).toEqual({
         mediaAttrName: { populate: 'folder' },
