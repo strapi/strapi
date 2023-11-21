@@ -5,6 +5,6 @@
   "compilerOptions": {
     "types": ["lodash", "jest"],
     "esModuleInterop": true,
-    "allowJs": true,
-  },
+    "allowJs": true
+  }
 }

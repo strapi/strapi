@@ -1,15 +1,30 @@
 import fs from 'fs';
 import { pick } from 'lodash';
-import {
-  GetProjectSettings,
-  SettingsFile,
-  UpdateProjectSettings,
-} from '../../../shared/contracts/admin';
+import { GetProjectSettings, UpdateProjectSettings } from '../../../shared/contracts/admin';
 
 const PROJECT_SETTINGS_FILE_INPUTS = ['menuLogo', 'authLogo'] as const;
 
-const parseFilesData = async (files: SettingsFile) => {
-  const formatedFilesData = {} as any;
+interface UploadFile {
+  name: string;
+  path: string;
+  type: string;
+  size: number;
+  stream: fs.ReadStream;
+  tmpPath: string;
+  hash: string;
+  url: string;
+  width: number;
+  height: number;
+  ext: string;
+  provider: unknown;
+}
+
+type FormattedFiles = Partial<
+  Record<keyof UpdateProjectSettings.Request['files'], Partial<UploadFile>>
+>;
+
+const parseFilesData = async (files: UpdateProjectSettings.Request['files']) => {
+  const formatedFilesData: FormattedFiles = {};
 
   await Promise.all(
     PROJECT_SETTINGS_FILE_INPUTS.map(async (inputName) => {
@@ -34,12 +49,12 @@ const parseFilesData = async (files: SettingsFile) => {
 
       // Add image dimensions
       Object.assign(
-        formatedFilesData[inputName],
+        formatedFilesData[inputName]!,
         await strapi.plugin('upload').service('image-manipulation').getDimensions({ getStream })
       );
 
       // Add file path, and stream
-      Object.assign(formatedFilesData[inputName], {
+      Object.assign(formatedFilesData[inputName]!, {
         stream: getStream(),
         tmpPath: file.path,
         // TODO
@@ -86,11 +101,11 @@ const getProjectSettings = async (): Promise<GetProjectSettings.Response> => {
   return projectSettings;
 };
 
-const uploadFiles = async (files = {} as Record<string, UpdateProjectSettings.Response>) => {
+const uploadFiles = async (files: LogoFiles = {}) => {
   // Call the provider upload function for each file
   return Promise.all(
     Object.values(files)
-      .filter((file: SettingsFile) => file.stream instanceof fs.ReadStream)
+      .filter((file) => file?.stream instanceof fs.ReadStream)
       .map((file) => strapi.plugin('upload').provider.uploadStream(file))
   );
 };
@@ -130,7 +145,11 @@ const deleteOldFiles = async ({ previousSettings, newSettings }: any) => {
   );
 };
 
-const updateProjectSettings = async (newSettings: UpdateProjectSettings.Response) => {
+type LogoFiles = { [K in keyof FormattedFiles]: FormattedFiles[K] | null };
+
+const updateProjectSettings = async (
+  newSettings: Omit<UpdateProjectSettings.Request['body'], 'menuLogo' | 'authLogo'> & LogoFiles
+) => {
   const store = strapi.store({ type: 'core', name: 'admin' });
   const previousSettings = (await store.get({ key: 'project-settings' })) as any;
   const files = pick(newSettings, PROJECT_SETTINGS_FILE_INPUTS);

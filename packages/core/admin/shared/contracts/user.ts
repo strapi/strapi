@@ -1,7 +1,12 @@
 import { errors } from '@strapi/utils';
 
-import type { SanitizedAdminUser, AdminUserCreationPayload } from './shared';
-import { Entity } from '@strapi/types';
+import type {
+  AdminUserCreationPayload,
+  AdminUserUpdatePayload,
+  Pagination,
+  SanitizedAdminUser,
+} from './shared';
+import type { Entity } from '@strapi/types';
 
 /**
  * /create - Create an admin user
@@ -21,8 +26,8 @@ export declare namespace Create {
 /**
  * /find - Find admin users
  */
-// TODO: Rename to FindAll
-export declare namespace Find {
+
+export declare namespace FindAll {
   // TODO make the types for this
   export interface Request {
     body: {};
@@ -32,12 +37,7 @@ export declare namespace Find {
   export interface Response {
     data: {
       results: SanitizedAdminUser[];
-      pagination: {
-        page: number;
-        pageSize: number;
-        pageCount: number;
-        total: number;
-      };
+      pagination: Pagination;
     };
     error?: errors.ApplicationError;
   }
@@ -65,7 +65,7 @@ export declare namespace FindOne {
  */
 export declare namespace Update {
   export interface Request {
-    body: AdminUserCreationPayload;
+    body: AdminUserUpdatePayload;
     query: {};
   }
 
@@ -99,7 +99,7 @@ export declare namespace DeleteOne {
 }
 
 /**
- * /deleteMany - Delete admin users
+ * /users/batch-delete - Delete admin users
  */
 export declare namespace DeleteMany {
   export interface Request {

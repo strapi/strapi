@@ -29,7 +29,7 @@ export declare namespace UpdatePermissions {
     params: { id: string };
     query: {};
     body: {
-      permissions: Permission[];
+      permissions: Omit<Permission, 'id' | 'createdAt' | 'updatedAt' | 'actionParameters'>[];
     };
   }
 
@@ -45,7 +45,7 @@ export declare namespace UpdatePermissions {
 /**
  * GET /roles/:id - Find a role by ID
  */
-export declare namespace FindOne {
+export declare namespace FindRole {
   export interface Request {
     params: { id: string };
     query: {};
@@ -61,7 +61,7 @@ export declare namespace FindOne {
 /**
  * GET /roles
  */
-export declare namespace FindAll {
+export declare namespace FindRoles {
   export interface Request {
     query: EntityService.Params.Pick<'admin::role', 'sort' | 'filters' | 'fields'>;
     body: {};

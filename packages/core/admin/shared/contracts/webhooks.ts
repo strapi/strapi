@@ -2,9 +2,9 @@ import { errors } from '@strapi/utils';
 import type { Webhook } from '@strapi/types';
 
 /**
- * GET /webhooks - List all webhooks
+ * /webhooks - GET all webhooks
  */
-export declare namespace ListWebhooks {
+export declare namespace GetWebhooks {
   export interface Request {
     body: {};
     query: {};
