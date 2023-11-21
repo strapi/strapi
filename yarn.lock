@@ -10002,6 +10002,7 @@ __metadata:
     fs-extra: "npm:10.0.0"
     glob: "npm:10.3.10"
     jscodeshift: "npm:0.15.1"
+    lodash: "npm:4.17.21"
     ora: "npm:5.4.1"
     prompts: "npm:2.4.2"
     rimraf: "npm:3.0.2"
