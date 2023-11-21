@@ -191,6 +191,12 @@
           "localized": true
         }
       }
+    },
+    "resturants": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::address.address",
+      "inversedBy": "restaurants"
     }
   }
 }
