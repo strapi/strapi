@@ -85,7 +85,7 @@ const releaseController = {
   async update(ctx: Koa.Context) {
     const user: UserInfo = ctx.state.user;
     const releaseArgs: UpdateRelease.Request['body'] = ctx.request.body;
-    const id: number = ctx.params.id;
+    const id: UpdateRelease.Request['params']['id'] = ctx.params.id;
 
     await validateRelease(releaseArgs);
 
