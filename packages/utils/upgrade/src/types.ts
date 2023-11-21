@@ -43,3 +43,13 @@ export interface Report {
   nochange: number;
   skip: number;
 }
+
+type JSONValue = string | number | boolean | null | JSONObject | JSONArray;
+
+type JSONArray = Array<JSONValue>;
+
+interface JSONObject {
+  [key: string]: JSONValue;
+}
+
+export type JsonValue<T extends JSONValue = JSONValue> = T;
