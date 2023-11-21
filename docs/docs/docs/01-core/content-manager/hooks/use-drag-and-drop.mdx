@@ -129,7 +129,7 @@ import { Identifier } from 'dnd-core';
 import { ConnectDropTarget, ConnectDragSource, ConnectDragPreview } from 'react-dnd';
 
 interface UseDragAndDropOptions {
-  index: number;
+  index: number | Array<number>;
   onMoveItem: (newIndex: number, currentIndex: number) => void;
   /**
    * @default "regular"
@@ -147,6 +147,7 @@ interface UseDragAndDropOptions {
   onEnd?: () => void;
   onGrabItem?: (index: number) => void;
   onStart?: () => void;
+  canDropHandler?: () => void;
 }
 
 type UseDragAndDropReturn = [
