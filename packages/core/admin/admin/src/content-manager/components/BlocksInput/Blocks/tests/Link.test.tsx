@@ -42,7 +42,7 @@ describe('Link', () => {
     expect(link).toHaveAttribute('href', 'https://example.com');
   });
 
-  it('renders a popover for each link and its opened when users click the link', async () => {
+  it('toggles the popover when clicking on a link', async () => {
     render(
       linkBlocks.link.renderElement({
         children: 'Some link',
@@ -75,7 +75,7 @@ describe('Link', () => {
     expect(screen.getByRole('button', { name: /Edit/i })).toBeInTheDocument();
   });
 
-  it('renders a popover for each link and its opened when users click the link', async () => {
+  it('only enables save button in popover when content has changed', async () => {
     render(
       linkBlocks.link.renderElement({
         children: 'Some link',

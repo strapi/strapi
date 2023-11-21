@@ -112,7 +112,7 @@ describe('List', () => {
     });
 
     // Simulate the enter key
-    listBlocks['list-unordered'].handleEnterKey?.(baseEditor);
+    listBlocks['list-unordered'].handleEnterKey!(baseEditor);
 
     // Should insert a new list item
     expect(baseEditor.children).toEqual([
@@ -179,7 +179,7 @@ describe('List', () => {
     });
 
     // Simulate the enter key
-    listBlocks['list-unordered'].handleEnterKey?.(baseEditor);
+    listBlocks['list-unordered'].handleEnterKey!(baseEditor);
 
     // Should remove the empty list item and create a paragraph after the list
     expect(baseEditor.children).toEqual([
@@ -237,7 +237,7 @@ describe('List', () => {
     });
 
     // Simulate the enter key
-    listBlocks['list-ordered'].handleEnterKey?.(baseEditor);
+    listBlocks['list-ordered'].handleEnterKey!(baseEditor);
 
     // Should remove the empty list and create a paragraph instead
     expect(baseEditor.children).toEqual([
@@ -697,7 +697,7 @@ describe('List', () => {
     ]);
   });
 
-  it('disables modifiers when creating a new node with enter key in a list item', () => {
+  it('has no modifiers applied when pressing enter at the end of a list item', () => {
     const baseEditor = createEditor();
     baseEditor.children = [
       {
@@ -726,7 +726,7 @@ describe('List', () => {
     });
 
     // Simulate the enter key
-    listBlocks['list-unordered'].handleEnterKey?.(baseEditor);
+    listBlocks['list-unordered'].handleEnterKey!(baseEditor);
 
     // Should insert a new list item without modifiers
     expect(baseEditor.children).toEqual([
