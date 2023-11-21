@@ -13,10 +13,10 @@ const transform: JSONTransform = (file, params) => {
   // Note: We could also find every file named package.json and update the dependencies for all of them
   const rootPackageJsonPath = path.join(cwd, 'package.json');
   if (file.path !== rootPackageJsonPath) {
-    return file.source;
+    return file.json;
   }
 
-  const j = json(file.source);
+  const j = json(file.json);
   const strapiDepAddress = 'dependencies.@strapi/strapi';
 
   if (j.has(strapiDepAddress)) {
