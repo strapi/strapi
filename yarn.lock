@@ -9994,6 +9994,7 @@ __metadata:
   dependencies:
     "@babel/register": "npm:7.22.15"
     "@strapi/pack-up": "workspace:*"
+    "@strapi/types": "npm:4.15.4"
     "@types/jscodeshift": "npm:0.11.10"
     chalk: "npm:4.1.2"
     cli-table3: "npm:0.6.2"
@@ -10002,6 +10003,7 @@ __metadata:
     fs-extra: "npm:10.0.0"
     glob: "npm:10.3.10"
     jscodeshift: "npm:0.15.1"
+    lodash: "npm:4.17.21"
     ora: "npm:5.4.1"
     prompts: "npm:2.4.2"
     rimraf: "npm:3.0.2"

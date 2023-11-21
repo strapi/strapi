@@ -1,6 +1,6 @@
 {
   "name": "@strapi/upgrade",
-  "version": "4.15.1",
+  "version": "4.15.4",
   "description": "CLI to upgrade Strapi applications effortless",
   "keywords": [
     "strapi",
@@ -66,12 +66,14 @@
     "fs-extra": "10.0.0",
     "glob": "10.3.10",
     "jscodeshift": "0.15.1",
+    "lodash": "4.17.21",
     "ora": "5.4.1",
     "prompts": "2.4.2",
     "semver": "7.5.4"
   },
   "devDependencies": {
     "@strapi/pack-up": "workspace:*",
+    "@strapi/types": "4.15.4",
     "@types/jscodeshift": "0.11.10",
     "eslint-config-custom": "workspace:*",
     "rimraf": "3.0.2"

@@ -1,3 +1,5 @@
+/* eslint-disable import/first, import/no-duplicates */
+
 jest.mock('../../core/runner/json', () => ({ transformJSON: jest.fn() }));
 jest.mock('../../core/runner/code', () => ({ transformCode: jest.fn() }));
 

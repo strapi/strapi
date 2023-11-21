@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
+import _ from 'lodash';
 import fse from 'fs-extra';
 import assert from 'node:assert';
+
+import type { Utils } from '@strapi/types';
 
 import type { Logger } from '../logger';
 import type { Report } from '../../types';
@@ -14,16 +17,26 @@ export interface JSONRunnerConfig {
 
 export interface JSONSourceFile {
   path: string;
-  source: string;
+  json: Utils.JSON.Object;
+}
+
+export interface JSONTransformParams {
+  cwd: string;
+  json: (object: Utils.JSON.Object) => JSONTransformAPI;
 }
 
 export interface JSONTransformAPI {
-  cwd: string;
-  parse(source: string): any;
-  toSource(object: any): string;
+  get<T extends Utils.JSON.Value>(path?: string, defaultValue?: T): T | undefined;
+  has(path: string): boolean;
+  set(path: string, value: Utils.JSON.Value): this;
+  merge(other: Utils.JSON.Object): this;
+  root(): Utils.JSON.Object;
 }
 
-export type JSONTransform = (file: JSONSourceFile, api: JSONTransformAPI) => string;
+export type JSONTransform = (
+  file: JSONSourceFile,
+  params: JSONTransformParams
+) => Utils.JSON.Object;
 
 // TODO: What's the actual impact of having this line here instead of inside the runner
 //       - Does it impact the whole process or just the stuff in this file?
@@ -34,6 +47,37 @@ require('@babel/register')({
   plugins: [],
   extensions: ['.js', '.ts'],
 });
+
+function jsonAPI<T extends Utils.JSON.Object>(object: T): JSONTransformAPI {
+  const json = _.cloneDeep(object) as object;
+
+  return {
+    get<TReturn extends Utils.JSON.Value>(
+      path?: string,
+      defaultValue?: TReturn
+    ): TReturn | undefined {
+      return (path ? _.get(json, path, defaultValue) : json) as TReturn;
+    },
+
+    has(path) {
+      return _.has(json, path);
+    },
+
+    set(path, value) {
+      _.set(json, path, value);
+      return this;
+    },
+
+    merge(other) {
+      _.merge(json, other);
+      return this;
+    },
+
+    root() {
+      return json as Utils.JSON.Object;
+    },
+  };
+}
 
 export const transformJSON = async (
   transformFile: string,
@@ -48,30 +92,27 @@ export const transformJSON = async (
   const module = require(transformFile);
   const transform = typeof module.default === 'function' ? module.default : module;
 
-  assert(typeof transform === 'function');
+  assert(
+    typeof transform === 'function',
+    `Transform must be a function. Found ${typeof transform}`
+  );
 
   for (const path of paths) {
     try {
       const json = require(path);
       // TODO: Optimize the API to limit parse/stringify operations
-      const source = JSON.stringify(json);
-      const file: JSONSourceFile = { path, source };
-      const api: JSONTransformAPI = {
+      const file: JSONSourceFile = { path, json };
+      const params: JSONTransformParams = {
         cwd: config.cwd,
-        parse: (source: string) => JSON.parse(source),
-        // TODO: We could add prettier formatting to the stringify op (based on prettier config file if it exists)
-        toSource: (object: any) => JSON.stringify(object, null, 2),
+        json: jsonAPI,
       };
 
-      const out = await transform(file, api);
-
-      assert(typeof out === 'string');
+      const out = await transform(file, params);
 
       // If the json object has modifications
-      // TODO: Should we improve the diff strategy to compare objects rather than string versions?
-      if (source !== out) {
+      if (!_.isEqual(json, out)) {
         if (!dry) {
-          fse.writeFileSync(path, out);
+          fse.writeFileSync(path, JSON.stringify(out, null, 2));
         }
         report.ok += 1;
       }
@@ -79,7 +120,7 @@ export const transformJSON = async (
       else {
         report.nochange += 1;
       }
-    } catch (e) {
+    } catch {
       report.error += 1;
     }
   }

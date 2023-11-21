@@ -6,22 +6,24 @@ import type { JSONTransform } from '../../..';
  * Note: This transform file is only for development purposes and should be deleted before releasing
  */
 
-const transform: JSONTransform = (file, api) => {
-  const packageJsonPath = path.join(api.cwd, 'package.json');
+const transform: JSONTransform = (file, params) => {
+  const { cwd, json } = params;
 
   // Ignore files that are not the root package.json
   // Note: We could also find every file named package.json and update the dependencies for all of them
-  if (file.path !== packageJsonPath) {
-    return file.source;
+  const rootPackageJsonPath = path.join(cwd, 'package.json');
+  if (file.path !== rootPackageJsonPath) {
+    return file.json;
   }
 
-  const content = api.parse(file.source);
+  const j = json(file.json);
+  const strapiDepAddress = 'dependencies.@strapi/strapi';
 
-  if ('@strapi/strapi' in content.dependencies) {
-    content.dependencies['@strapi/strapi'] = '5.0.0';
+  if (j.has(strapiDepAddress)) {
+    j.set(strapiDepAddress, '5.0.0');
   }
 
-  return api.toSource(content);
+  return j.root();
 };
 
 export default transform;
