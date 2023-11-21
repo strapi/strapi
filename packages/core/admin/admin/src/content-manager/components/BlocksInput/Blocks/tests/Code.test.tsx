@@ -53,7 +53,7 @@ describe('Code', () => {
     });
 
     // Simulate the enter key
-    codeBlocks.code.handleEnterKey?.(baseEditor);
+    codeBlocks.code.handleEnterKey!(baseEditor);
 
     // Should insert a newline within the code block (shoudn't exit the code block)
     expect(baseEditor.children).toEqual([

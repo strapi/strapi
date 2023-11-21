@@ -1,7 +1,7 @@
 import get from 'lodash/get';
 import { parse, stringify } from 'qs';
 
-import getDefaultLocale from '../../utils/getDefaultLocale';
+import { getDefaultLocale } from '../../utils/locales';
 
 const addLocaleToLinksSearch = (
   links: any[],

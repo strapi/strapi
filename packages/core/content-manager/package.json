@@ -33,11 +33,11 @@
     "strapi-server.js"
   ],
   "scripts": {
+    "build": "pack-up build",
     "lint": "run -T eslint .",
-    "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch",
     "test:ts:back": "run -T tsc --noEmit -p server/tsconfig.json",
-    "build": "pack-up build"
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch"
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",

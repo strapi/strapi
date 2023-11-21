@@ -4,11 +4,10 @@ import { Box, Flex, Popover, Tooltip, Typography } from '@strapi/design-system';
 import { SortIcon, stopPropagation } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import selectI18NLocales from '../../selectors/selectI18nLocales';
-import { getTrad } from '../../utils';
+import { useTypedSelector } from '../../store/hooks';
+import { getTranslation } from '../../utils/getTranslation';
 
 const Button = styled.button`
   svg {
@@ -67,13 +66,11 @@ type LocaleListCellProps = {
 };
 
 const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }: LocaleListCellProps) => {
-  const locales = useSelector(selectI18NLocales);
+  const locales = useTypedSelector((state) => state.i18n_locales.locales);
   const allLocalizations = [{ locale: currentLocaleCode }, ...localizations];
   const localizationNames = allLocalizations.map((locale) => locale.locale);
-  const defaultLocale = locales.find(
-    (locale: { code: string; name: string; isDefault: boolean }) => locale.isDefault
-  );
-  const hasDefaultLocale = localizationNames.includes(defaultLocale.code);
+  const defaultLocale = locales.find((locale) => locale.isDefault);
+  const hasDefaultLocale = defaultLocale ? localizationNames.includes(defaultLocale.code) : false;
   const [visible, setVisible] = React.useState(false);
   const buttonRef = React.useRef<HTMLButtonElement>(null);
   const { formatMessage } = useIntl();
@@ -82,7 +79,7 @@ const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }: Locale
 
   if (hasDefaultLocale) {
     const ctLocalesWithoutDefault = localizationNames.filter(
-      (locale) => locale !== defaultLocale.code
+      (locale) => locale !== defaultLocale?.code
     );
     const ctLocalesNamesWithoutDefault = ctLocalesWithoutDefault.map((locale) =>
       mapToLocaleName(locales, locale)
@@ -91,7 +88,7 @@ const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }: Locale
     ctLocalesNamesWithoutDefault.sort();
 
     const ctLocalesNamesWithDefault = [
-      `${defaultLocale.name} (default)`,
+      `${defaultLocale?.name} (default)`,
       ...ctLocalesNamesWithoutDefault,
     ];
 
@@ -112,7 +109,7 @@ const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }: Locale
     <Flex {...stopPropagation}>
       <Tooltip
         label={formatMessage({
-          id: getTrad('CMListView.popover.display-locales.label'),
+          id: getTranslation('CMListView.popover.display-locales.label'),
           defaultMessage: 'Display translated locales',
         })}
       >

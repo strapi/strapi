@@ -1,6 +1,7 @@
-import type { Entity, EntityService } from '@strapi/types';
+import { EntityService } from '@strapi/types';
 import type { errors } from '@strapi/utils';
-import { Permission, SanitizedAdminRole } from './shared';
+import { AdminRole, Permission, SanitizedAdminRole } from './shared';
+import type { SanitizedPermission } from '../../server/src/domain/permission';
 
 type SanitizedAdminRoleWithUsersCount = SanitizedAdminRole & { usersCount?: number };
 
@@ -21,11 +22,32 @@ export declare namespace GetPermissions {
 }
 
 /**
+ * PUT /roles/:id/permissions - Update the permissions of a role
+ */
+export declare namespace UpdatePermissions {
+  export interface Request {
+    params: { id: string };
+    query: {};
+    body: {
+      permissions: Omit<Permission, 'id' | 'createdAt' | 'updatedAt' | 'actionParameters'>[];
+    };
+  }
+
+  export interface Response {
+    data: SanitizedPermission[];
+    error?:
+      | errors.ApplicationError
+      | errors.NotFoundError // One of the permissions not found
+      | errors.YupValidationError;
+  }
+}
+
+/**
  * GET /roles/:id - Find a role by ID
  */
-export declare namespace FindOne {
+export declare namespace FindRole {
   export interface Request {
-    params: { id: Entity.ID };
+    params: { id: string };
     query: {};
     body: {};
   }
@@ -39,7 +61,7 @@ export declare namespace FindOne {
 /**
  * GET /roles
  */
-export declare namespace FindAll {
+export declare namespace FindRoles {
   export interface Request {
     query: EntityService.Params.Pick<'admin::role', 'sort' | 'filters' | 'fields'>;
     body: {};
@@ -48,5 +70,75 @@ export declare namespace FindAll {
   export interface Response {
     data: SanitizedAdminRoleWithUsersCount[];
     error?: errors.ApplicationError | errors.ValidationError;
+  }
+}
+
+/**
+ * POST /roles - Create a role
+ */
+export declare namespace Create {
+  export interface Request {
+    query: {};
+    body: {
+      name: string;
+      description?: string;
+    };
+  }
+
+  export interface Response {
+    data: SanitizedAdminRole;
+    error?: errors.ApplicationError | errors.YupValidationError;
+  }
+}
+
+/**
+ * PUT /roles/:id - Update a role
+ */
+export declare namespace Update {
+  export interface Request {
+    params: { id: string };
+    query: {};
+    body: {
+      name?: string;
+      description?: string;
+    };
+  }
+
+  export interface Response {
+    data: SanitizedAdminRole;
+    error?: errors.ApplicationError | errors.NotFoundError;
+  }
+}
+
+/**
+ * DELETE /roles/:id - Delete a role
+ */
+export declare namespace Delete {
+  export interface Request {
+    params: { id: string };
+    query: {};
+    body: {};
+  }
+
+  export interface Response {
+    data: Omit<AdminRole, 'users' | 'permissions'> | null;
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
+ * POST /roles/batch-delete - Delete multiple roles
+ */
+export declare namespace BatchDelete {
+  export interface Request {
+    query: {};
+    body: {
+      ids: string[]; // Min length: 1
+    };
+  }
+
+  export interface Response {
+    data: (Omit<AdminRole, 'users' | 'permissions'> | null)[];
+    error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
