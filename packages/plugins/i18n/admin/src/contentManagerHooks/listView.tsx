@@ -1,3 +1,4 @@
+/* eslint-disable check-file/filename-naming-convention */
 import { LocaleListCell } from '../components/LocaleListCell';
 import { doesPluginOptionsHaveI18nLocalized } from '../utils/fields';
 

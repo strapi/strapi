@@ -2,30 +2,38 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import * as yup from 'yup';
 
-import CheckboxConfirmation from './components/CheckboxConfirmation';
+import { CheckboxConfirmation } from './components/CheckboxConfirmation';
 import { CMEditViewInjectedComponents } from './components/CMEditViewInjectedComponents';
 import {
   DeleteModalAdditionalInfo,
   PublishModalAdditionalInfo,
   UnpublishModalAdditionalInfo,
 } from './components/CMListViewModalsAdditionalInformation';
-import Initializer from './components/Initializer';
+import { Initializer } from './components/Initializer';
 import { LocalePicker } from './components/LocalePicker';
 import { PERMISSIONS } from './constants';
 import { addLocaleToLinksHook } from './contentManagerHooks/app';
 import { mutateEditViewLayoutHook } from './contentManagerHooks/editView';
 import { addColumnToTableHook } from './contentManagerHooks/listView';
-import middlewares from './middlewares';
+import { addCommonFieldsToInitialDataMiddleware } from './middlewares/addCommonFieldsToInitialData';
+import { extendCTBAttributeInitialDataMiddleware } from './middlewares/extendCTBAttributeInitialData';
+import { extendCTBInitialDataMiddleware } from './middlewares/extendCTBInitialData';
+import { localePermissionMiddleware } from './middlewares/localePermission';
 import { pluginId } from './pluginId';
 import { reducers } from './store/reducers';
 import { LOCALIZED_FIELDS } from './utils/fields';
 import { getTranslation } from './utils/getTranslation';
-import mutateCTBContentTypeSchema from './utils/mutateCTBContentTypeSchema';
+import { mutateCTBContentTypeSchema } from './utils/schemas';
 
 // eslint-disable-next-line import/no-default-export
 export default {
   register(app: any) {
-    app.addMiddlewares(middlewares);
+    app.addMiddlewares([
+      addCommonFieldsToInitialDataMiddleware,
+      extendCTBAttributeInitialDataMiddleware,
+      extendCTBInitialDataMiddleware,
+      localePermissionMiddleware,
+    ]);
 
     /**
      * TODO: this should use the `useInjectReducer` hook when it's exported from the `@strapi/admin` package.

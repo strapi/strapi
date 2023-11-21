@@ -1,14 +1,12 @@
-import mutateSchema, {
-  addLocalisationToFields,
-  disableAttributesLocalisation,
-} from '../mutateCTBContentTypeSchema';
+import { mutateCTBContentTypeSchema } from '../schemas';
 
-describe('i18n | utils ', () => {
+describe('schemas ', () => {
   describe('mutateCTBContentTypeSchema', () => {
     it('should forward the data the pluginOptions.i18n.localized key does not exist in the content type', () => {
       const data = { pluginOptions: { test: true } };
 
-      expect(mutateSchema(data, null)).toEqual(data);
+      // @ts-expect-error – Test purposes
+      expect(mutateCTBContentTypeSchema(data, null)).toEqual(data);
     });
 
     it('should remove the pluginOptions.i18n key from the content type schema', () => {
@@ -58,7 +56,8 @@ describe('i18n | utils ', () => {
         },
       };
 
-      expect(mutateSchema(ctSchema, {})).toEqual(expected);
+      // @ts-expect-error – Test purposes
+      expect(mutateCTBContentTypeSchema(ctSchema, {})).toEqual(expected);
     });
 
     it('should return the data if the initial schema already has i18n enabled', () => {
@@ -88,7 +87,8 @@ describe('i18n | utils ', () => {
       };
 
       expect(
-        mutateSchema(ctSchema, {
+        // @ts-expect-error – Test purposes
+        mutateCTBContentTypeSchema(ctSchema, {
           schema: {
             pluginOptions: {
               pluginA: { foo: 'bar' },
@@ -132,74 +132,8 @@ describe('i18n | utils ', () => {
         },
       };
 
-      expect(mutateSchema(nextSchema, {})).toEqual(expected);
-    });
-  });
-
-  describe('i18n addLocalisationToFields', () => {
-    it('should forward the data if the attribute type is not correct', () => {
-      const attributes = {
-        foo: { type: 'relation' },
-        bar: { type: 'custom' },
-      };
-
-      expect(addLocalisationToFields(attributes)).toEqual(attributes);
-    });
-
-    it('should keep the pluginOptions for each attribute and enable the i18n.localized value', () => {
-      const attributes = {
-        foo: { type: 'text', pluginOptions: { pluginA: { ok: true } }, required: true },
-        bar: { type: 'text', pluginOptions: { i18n: { localized: false } } },
-      };
-
-      const expected = {
-        foo: {
-          type: 'text',
-          pluginOptions: { pluginA: { ok: true }, i18n: { localized: true } },
-          required: true,
-        },
-        bar: { type: 'text', pluginOptions: { i18n: { localized: true } } },
-      };
-
-      expect(addLocalisationToFields(attributes)).toEqual(expected);
-    });
-
-    it('should enable the pluginOptions.i18n.localized value for each attribute', () => {
-      const attributes = {
-        foo: { type: 'text', required: true },
-        bar: { type: 'text' },
-      };
-
-      const expected = {
-        foo: {
-          type: 'text',
-          pluginOptions: { i18n: { localized: true } },
-          required: true,
-        },
-        bar: { type: 'text', pluginOptions: { i18n: { localized: true } } },
-      };
-
-      expect(addLocalisationToFields(attributes)).toEqual(expected);
-    });
-  });
-
-  describe('disableAttributesLocalisation', () => {
-    it('should remove the pluginOptions.i18n for all attributes', () => {
-      const attributes = {
-        foo: {
-          type: 'text',
-          pluginOptions: { pluginA: { ok: true }, i18n: { localized: true } },
-          required: true,
-        },
-        bar: { type: 'text', pluginOptions: { i18n: { localized: true } } },
-      };
-
-      const expected = {
-        foo: { type: 'text', required: true, pluginOptions: { pluginA: { ok: true } } },
-        bar: { type: 'text', pluginOptions: {} },
-      };
-
-      expect(disableAttributesLocalisation(attributes)).toEqual(expected);
+      // @ts-expect-error – Test purposes
+      expect(mutateCTBContentTypeSchema(nextSchema, {})).toEqual(expected);
     });
   });
 });

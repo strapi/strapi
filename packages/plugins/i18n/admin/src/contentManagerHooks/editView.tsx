@@ -1,3 +1,4 @@
+/* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
 import { Flex, Tooltip, VisuallyHidden } from '@strapi/design-system';

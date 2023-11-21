@@ -1,4 +1,4 @@
-import localePermissionMiddleware from '../localePermissionMiddleware';
+import { localePermissionMiddleware } from '../localePermission';
 
 describe('localePermissionMiddleware', () => {
   it('does not modify the action when the type is not "ContentManager/RBACManager/SET_PERMISSIONS"', () => {

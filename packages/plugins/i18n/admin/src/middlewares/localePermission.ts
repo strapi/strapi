@@ -36,4 +36,4 @@ const localePermissionMiddleware = () => () => (next: any) => (action: any) => {
   return next({ ...action, permissions: nextPermissions });
 };
 
-export default localePermissionMiddleware;
+export { localePermissionMiddleware };
