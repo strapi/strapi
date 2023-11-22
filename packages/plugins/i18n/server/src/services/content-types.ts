@@ -219,7 +219,7 @@ const getNestedPopulateOfNonLocalizedAttributes = (modelUID: any) => {
   return attributesToPopulate;
 };
 
-export default () => ({
+const contentTypes = () => ({
   isLocalizedContentType,
   getValidLocale,
   getNewLocalizationsFrom,
@@ -230,3 +230,8 @@ export default () => ({
   fillNonLocalizedAttributes,
   getNestedPopulateOfNonLocalizedAttributes,
 });
+
+type ContentTypesService = typeof contentTypes;
+
+export default contentTypes;
+export { ContentTypesService };

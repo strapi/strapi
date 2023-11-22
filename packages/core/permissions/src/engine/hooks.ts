@@ -1,9 +1,10 @@
 import { cloneDeep, has, isArray } from 'lodash/fp';
 import { hooks } from '@strapi/utils';
+// eslint-disable-next-line node/no-extraneous-import
+import type { Permissions as PermissionsTypes } from '@strapi/types';
 
 import * as domain from '../domain';
 import type { Permission } from '../domain/permission';
-import type { PermissionRule } from './abilities';
 
 export interface PermissionEngineHooks {
   'before-format::validate.permission': ReturnType<typeof hooks.createAsyncBailHook>;
@@ -51,7 +52,7 @@ const createBeforeEvaluateContext = (permission: Permission) => ({
 });
 
 interface WillRegisterContextParams {
-  permission: PermissionRule;
+  permission: PermissionsTypes.PermissionRule;
   options: Record<string, unknown>;
 }
 
