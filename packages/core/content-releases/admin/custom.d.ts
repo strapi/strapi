@@ -11,6 +11,9 @@ declare global {
         REVIEW_WORKFLOWS: 'review-workflows';
         isEnabled: (featureName?: string) => boolean;
       };
+      future: {
+        isEnabled: (name: string) => boolean;
+      };
       flags: {
         nps?: boolean;
       };

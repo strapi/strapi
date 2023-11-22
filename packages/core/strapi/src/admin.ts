@@ -7,10 +7,7 @@ import upload from '@strapi/plugin-upload/strapi-admin';
 // @ts-expect-error – No types, yet.
 import contentReleases from '@strapi/content-releases/strapi-admin';
 
-const render = (
-  mountNode: HTMLElement | null,
-  { plugins, flags, ...restArgs }: RenderAdminArgs
-) => {
+const render = (mountNode: HTMLElement | null, { plugins, ...restArgs }: RenderAdminArgs) => {
   return renderAdmin(mountNode, {
     ...restArgs,
     plugins: {
@@ -18,7 +15,7 @@ const render = (
       // @ts-expect-error – TODO: fix this
       email,
       upload,
-      ...(flags.contentReleases ? { 'content-releases': contentReleases } : {}),
+      contentReleases,
       ...plugins,
     },
   });

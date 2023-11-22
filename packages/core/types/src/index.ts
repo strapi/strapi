@@ -107,6 +107,9 @@ export interface Strapi {
   db?: Database;
   app: any;
   EE?: boolean;
+  future: {
+    isEnabled: (feature: string) => boolean;
+  };
   components: Shared.Components;
   reload: Reloader;
   config: ConfigProvider;

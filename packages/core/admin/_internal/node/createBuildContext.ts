@@ -13,6 +13,8 @@ import { getEnabledPlugins, getMapOfPluginsWithAdmin } from './core/plugins';
 import { Strapi } from '@strapi/types';
 import { AppFile, loadUserAppFile } from './core/admin-customisations';
 
+import type { StrapiFeaturesConfig } from '../../shared/admin';
+
 interface BuildContext {
   /**
    * The absolute path to the app directory defined by the Strapi instance
@@ -47,6 +49,10 @@ interface BuildContext {
    * The environment variables to be included in the JS bundle
    */
   env: Record<string, string>;
+  /**
+   * Features object with future flags
+   */
+  features?: StrapiFeaturesConfig;
   logger: CLIContext['logger'];
   /**
    * The build options
@@ -162,6 +168,8 @@ const createBuildContext = async ({
 
   const customisations = await loadUserAppFile(strapiInstance.dirs.app.root);
 
+  const features = strapiInstance.config.get('features', undefined);
+
   const buildContext = {
     appDir: strapiInstance.dirs.app.root,
     basePath: `${adminPath}/`,
@@ -178,6 +186,7 @@ const createBuildContext = async ({
     strapi: strapiInstance,
     target,
     tsconfig,
+    features,
   } satisfies BuildContext;
 
   return buildContext;

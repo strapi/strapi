@@ -189,6 +189,12 @@ class Strapi implements StrapiI {
 
   reload: Reloader;
 
+  future = {
+    isEnabled: (name: string) => {
+      return this.config.get('features').future[name];
+    },
+  };
+
   constructor(opts: StrapiOptions = {}) {
     destroyOnSignal(this);
 
