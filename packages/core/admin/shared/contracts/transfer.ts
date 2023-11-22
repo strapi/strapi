@@ -1,12 +1,12 @@
 import { errors } from '@strapi/utils';
 
-export type TransferTokenPermission = {
+export interface TransferTokenPermission {
   id: number | string;
   action: string;
   token: TransferToken | number;
-};
+}
 
-export type TransferToken = {
+export interface TransferToken {
   id: number | string;
   name: string;
   description: string;
@@ -15,7 +15,7 @@ export type TransferToken = {
   lifespan: number;
   expiresAt: number;
   permissions: string[] | TransferTokenPermission[];
-};
+}
 
 export type SanitizedTransferToken = Omit<TransferToken, 'accessKey'>;
 
