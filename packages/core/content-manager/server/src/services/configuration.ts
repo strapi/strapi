@@ -5,8 +5,7 @@ import type { Configuration } from '../../../shared/contracts/content-types';
 import { createDefaultConfiguration, syncConfiguration } from './utils/configuration';
 
 export type ConfigurationUpdate = Omit<Configuration, 'uid'> & {
-  // TODO: add options type
-  options?: any;
+  options?: Record<string, unknown>;
 };
 
 export default ({
