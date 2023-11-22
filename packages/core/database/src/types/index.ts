@@ -2,6 +2,7 @@ import type { Action, SubscriberFn } from '../lifecycles';
 import type { ForeignKey, Index } from '../schema/types';
 
 export type ID = string | number;
+
 export interface ColumnInfo {
   unsigned?: boolean;
   defaultTo?: unknown;

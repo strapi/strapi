@@ -1,0 +1,5 @@
+{
+  "extends": "tsconfig/client.json",
+  "include": ["_internal", "packup.config.ts"],
+  "exclude": ["node_modules"]
+}

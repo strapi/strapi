@@ -33,6 +33,13 @@ interface BuildWithoutConfigFile extends BuildCLIOptions {
 type BuildOptions = BuildWithConfigFile | BuildWithoutConfigFile;
 
 const build = async (opts: BuildOptions = {}) => {
+  /**
+   * We always want to run in production mode when building and some packages
+   * use NODE_ENV to determine which type of package to import (looking at your react).
+   * Therefore for building, unless it's specifically set by the user, we'll set it to production.
+   */
+  process.env.NODE_ENV = process.env.NODE_ENV || 'production';
+
   const {
     silent,
     debug,

@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 
+import { createContext } from '@radix-ui/react-context';
 import { Entity } from '@strapi/types';
 
 interface PseudoEvent {
@@ -29,36 +30,19 @@ interface ApiTokenPermissionsContextProviderProps extends ApiTokenPermissionsCon
   children: React.ReactNode[];
 }
 
-const ApiTokenPermissionsContext = React.createContext<ApiTokenPermissionsContextValue>({
-  selectedAction: null,
-  routes: [],
-  selectedActions: [],
-  data: {
-    allActionsIds: [],
-    permissions: [],
-  },
-  onChange: () => {},
-  onChangeSelectAll: () => {},
-  setSelectedAction: () => {},
-});
+const [ApiTokenPermissionsContextProvider, useApiTokenPermissionsContext] =
+  createContext<ApiTokenPermissionsContextValue>('ApiTokenPermissionsContext');
 
-const ApiTokenPermissionsContextProvider = ({
+const ApiTokenPermissionsProvider = ({
   children,
   ...rest
 }: ApiTokenPermissionsContextProviderProps) => {
   return (
-    <ApiTokenPermissionsContext.Provider value={rest}>
-      {children}
-    </ApiTokenPermissionsContext.Provider>
+    <ApiTokenPermissionsContextProvider {...rest}>{children}</ApiTokenPermissionsContextProvider>
   );
 };
 
-const useApiTokenPermissionsContext = () => React.useContext(ApiTokenPermissionsContext);
+const useApiTokenPermissions = () => useApiTokenPermissionsContext('useApiTokenPermissions');
 
-export {
-  ApiTokenPermissionsContext,
-  ApiTokenPermissionsContextProvider,
-  useApiTokenPermissionsContext,
-};
-
+export { ApiTokenPermissionsProvider, useApiTokenPermissions };
 export type { ApiTokenPermissionsContextValue, ApiTokenPermissionsContextProviderProps };

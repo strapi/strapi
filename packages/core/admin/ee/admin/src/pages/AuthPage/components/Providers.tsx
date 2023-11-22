@@ -1,0 +1,104 @@
+import { Box, Button, Divider, Flex, Loader, Main, Typography } from '@strapi/design-system';
+import { Link } from '@strapi/design-system/v2';
+import { useFetchClient } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
+import { useQuery } from 'react-query';
+import { NavLink, Redirect, useHistory } from 'react-router-dom';
+import styled from 'styled-components';
+
+import { Logo } from '../../../../../../admin/src/components/UnauthenticatedLogo';
+import {
+  Column,
+  LayoutContent,
+  UnauthenticatedLayout,
+} from '../../../../../../admin/src/layouts/UnauthenticatedLayout';
+import { GetProviders } from '../../../../../../shared/contracts/providers';
+
+import { SSOProviders } from './SSOProviders';
+
+const Providers = () => {
+  const { push } = useHistory();
+  const { formatMessage } = useIntl();
+  const { get } = useFetchClient();
+  const { isLoading, data: providers = [] } = useQuery(
+    ['ee', 'providers'],
+    async () => {
+      const { data } = await get<GetProviders.Response>('/admin/providers');
+
+      return data;
+    },
+    {
+      enabled: window.strapi.features.isEnabled(window.strapi.features.SSO),
+    }
+  );
+
+  const handleClick = () => {
+    push('/auth/login');
+  };
+
+  if (
+    !window.strapi.features.isEnabled(window.strapi.features.SSO) ||
+    (!isLoading && providers.length === 0)
+  ) {
+    return <Redirect to="/auth/login" />;
+  }
+
+  return (
+    <UnauthenticatedLayout>
+      <Main>
+        <LayoutContent>
+          <Column>
+            <Logo />
+            <Box paddingTop={6} paddingBottom={1}>
+              <Typography as="h1" variant="alpha">
+                {formatMessage({ id: 'Auth.form.welcome.title' })}
+              </Typography>
+            </Box>
+            <Box paddingBottom={7}>
+              <Typography variant="epsilon" textColor="neutral600">
+                {formatMessage({ id: 'Auth.login.sso.subtitle' })}
+              </Typography>
+            </Box>
+          </Column>
+          <Flex direction="column" alignItems="stretch" gap={7}>
+            {isLoading ? (
+              <Flex justifyContent="center">
+                <Loader>{formatMessage({ id: 'Auth.login.sso.loading' })}</Loader>
+              </Flex>
+            ) : (
+              <SSOProviders providers={providers} />
+            )}
+            <Flex>
+              <DividerFull />
+              <Box paddingLeft={3} paddingRight={3}>
+                <Typography variant="sigma" textColor="neutral600">
+                  {formatMessage({ id: 'or' })}
+                </Typography>
+              </Box>
+              <DividerFull />
+            </Flex>
+            <Button fullWidth size="L" onClick={handleClick}>
+              {formatMessage({ id: 'Auth.form.button.login.strapi' })}
+            </Button>
+          </Flex>
+        </LayoutContent>
+        <Flex justifyContent="center">
+          <Box paddingTop={4}>
+            {/* @ts-expect-error – error with inferring the props from the as component */}
+            <Link as={NavLink} to="/auth/forgot-password">
+              <Typography variant="pi">
+                {formatMessage({ id: 'Auth.link.forgot-password' })}
+              </Typography>
+            </Link>
+          </Box>
+        </Flex>
+      </Main>
+    </UnauthenticatedLayout>
+  );
+};
+
+const DividerFull = styled(Divider)`
+  flex: 1;
+`;
+
+export { Providers };

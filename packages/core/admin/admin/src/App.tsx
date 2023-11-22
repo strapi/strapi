@@ -10,6 +10,7 @@ import { SkipToContent } from '@strapi/design-system';
 import {
   auth,
   LoadingIndicatorPage,
+  MenuItem,
   prefixFileUrlWithBackendUrl,
   TrackingProvider,
   useAppInfo,
@@ -23,32 +24,25 @@ import { Route, Switch } from 'react-router-dom';
 
 import { PrivateRoute } from './components/PrivateRoute';
 import { ADMIN_PERMISSIONS_CE, ACTION_SET_ADMIN_PERMISSIONS } from './constants';
-import { useConfiguration } from './hooks/useConfiguration';
+import { useConfiguration } from './contexts/configuration';
 import { useEnterprise } from './hooks/useEnterprise';
-// @ts-expect-error not converted yet
-import AuthPage from './pages/AuthPage';
+import { AuthPage } from './pages/Auth/AuthPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { UseCasePage } from './pages/UseCasePage';
-import { createRoute, TModule } from './utils/createRoute';
+import { createRoute } from './utils/createRoute';
 
-interface TRoute {
-  Component: TModule;
-  to: string;
-  exact?: boolean;
-}
+type StrapiRoute = Pick<MenuItem, 'exact' | 'to'> & Required<Pick<MenuItem, 'Component'>>;
 
-const ROUTES_CE: TRoute[] | null = null;
+const ROUTES_CE: StrapiRoute[] | null = null;
 
 const AuthenticatedApp = React.lazy(() =>
-  import(/* webpackChunkName: "Admin-authenticatedApp" */ './components/AuthenticatedApp').then(
-    ({ AuthenticatedApp }) => ({ default: AuthenticatedApp })
-  )
+  import('./components/AuthenticatedApp').then((mod) => ({ default: mod.AuthenticatedApp }))
 );
 
 export const App = () => {
   const adminPermissions = useEnterprise(
     ADMIN_PERMISSIONS_CE,
-    async () => (await import('../../ee/admin/constants')).ADMIN_PERMISSIONS_EE,
+    async () => (await import('../../ee/admin/src/constants')).ADMIN_PERMISSIONS_EE,
     {
       combine(cePermissions, eePermissions) {
         // the `settings` NS e.g. are deep nested objects, that need a deep merge
@@ -58,9 +52,9 @@ export const App = () => {
       defaultValue: ADMIN_PERMISSIONS_CE,
     }
   );
-  const routes = useEnterprise<TRoute[] | null, TRoute[], TRoute[]>(
+  const routes = useEnterprise(
     ROUTES_CE,
-    async () => (await import('../../ee/admin/constants')).ROUTES_EE,
+    async () => (await import('../../ee/admin/src/constants')).ROUTES_EE,
     {
       defaultValue: [],
     }
@@ -176,8 +170,6 @@ export const App = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toggleNotification, updateProjectSettings]);
 
-  const setHasAdmin = (hasAdmin: boolean) => setState((prev) => ({ ...prev, hasAdmin }));
-
   const trackingInfo = React.useMemo(
     () => ({
       uuid,
@@ -201,9 +193,7 @@ export const App = () => {
           {authRoutes}
           <Route
             path="/auth/:authType"
-            render={(routerProps) => (
-              <AuthPage {...routerProps} setHasAdmin={setHasAdmin} hasAdmin={hasAdmin} />
-            )}
+            render={(routerProps) => <AuthPage {...routerProps} hasAdmin={hasAdmin} />}
             exact
           />
           <PrivateRoute path="/usecase" component={UseCasePage} />
