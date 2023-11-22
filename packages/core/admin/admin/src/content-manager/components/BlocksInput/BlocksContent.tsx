@@ -142,19 +142,20 @@ const DragAndDropElement = ({ children, index, canDrag, canDrop }: DragAndDropEl
   return (
     <Box ref={composedBoxRefs}>
       {isDragging ? (
-        <Box
-          borderStyle="solid"
-          borderColor="secondary200"
-          borderWidth="2px"
-          width="calc(100% - 24px)"
-          marginLeft="auto"
-          marginTop={2}
-          marginBottom={2}
-        >
+        <>
+          <Box
+            borderStyle="solid"
+            borderColor="secondary200"
+            borderWidth="2px"
+            width="calc(100% - 24px)"
+            marginLeft="auto"
+            marginTop={2}
+            marginBottom={2}
+          />
           {/* Rendering the block is necessary for Slate to locate the node, 
               however while dragging, we hide the rendered block */}
           <VisuallyHidden aria-hidden>{children}</VisuallyHidden>
-        </Box>
+        </>
       ) : (
         <DragItem
           ref={dragRef}
