@@ -5,7 +5,7 @@ import { ProxyAgent } from 'undici';
 
 // Create a wrapper for Node's Fetch API that applies a global proxy
 export function createStrapiFetch(strapi: Strapi): Fetch {
-  function strapiFetch(url: RequestInfo | URL, options?: RequestInit | undefined) {
+  function strapiFetch(url: RequestInfo | URL, options?: RequestInit) {
     const fetchOptions = {
       ...(strapiFetch.dispatcher ? { dispatcher: strapiFetch.dispatcher } : {}),
       ...options,
