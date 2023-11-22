@@ -1,16 +1,20 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 
 import { Button } from '@strapi/design-system';
 import { ConfirmDialog } from '@strapi/helper-plugin';
 import { Refresh } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { useRegenerate } from '../../../../../hooks/useRegenerate';
+import { useRegenerate } from '../../../../hooks/useRegenerate';
 
-export const Regenerate = ({ onRegenerate, idToRegenerate }) => {
+interface RegenerateProps {
+  onRegenerate?: () => void;
+  idToRegenerate: string | number;
+}
+
+export const Regenerate = ({ onRegenerate = () => {}, idToRegenerate }: RegenerateProps) => {
   const { formatMessage } = useIntl();
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
   const { regenerateData, isLoadingConfirmation } = useRegenerate(
     '/admin/api-tokens/',
     idToRegenerate,
@@ -63,12 +67,3 @@ export const Regenerate = ({ onRegenerate, idToRegenerate }) => {
     </>
   );
 };
-
-Regenerate.defaultProps = { onRegenerate() {} };
-
-Regenerate.propTypes = {
-  onRegenerate: PropTypes.func,
-  idToRegenerate: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
-};
-
-export default Regenerate;

@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Button, ContentLayout, HeaderLayout, Main } from '@strapi/design-system';
 import {
   LoadingIndicatorPage,
@@ -7,10 +5,13 @@ import {
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-const LoadingView = ({ apiTokenName }) => {
+interface LoadingViewProps {
+  apiTokenName?: string | null;
+}
+
+export const LoadingView = ({ apiTokenName = null }: LoadingViewProps) => {
   const { formatMessage } = useIntl();
   useFocusWhenNavigate();
 
@@ -37,13 +38,3 @@ const LoadingView = ({ apiTokenName }) => {
     </Main>
   );
 };
-
-LoadingView.defaultProps = {
-  apiTokenName: null,
-};
-
-LoadingView.propTypes = {
-  apiTokenName: PropTypes.string,
-};
-
-export default LoadingView;

@@ -3,18 +3,77 @@ import React from 'react';
 import { Box, Flex, Typography } from '@strapi/design-system';
 import map from 'lodash/map';
 import tail from 'lodash/tail';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import styled, { DefaultTheme } from 'styled-components';
 
-import getMethodColor from './getMethodColor';
+type HttpVerb = 'POST' | 'GET' | 'PUT' | 'DELETE';
+
+type MethodColor = {
+  text: keyof DefaultTheme['colors'];
+  border: keyof DefaultTheme['colors'];
+  background: keyof DefaultTheme['colors'];
+};
+
+const getMethodColor = (verb: HttpVerb): MethodColor => {
+  switch (verb) {
+    case 'POST': {
+      return {
+        text: 'success600',
+        border: 'success200',
+        background: 'success100',
+      };
+    }
+    case 'GET': {
+      return {
+        text: 'secondary600',
+        border: 'secondary200',
+        background: 'secondary100',
+      };
+    }
+    case 'PUT': {
+      return {
+        text: 'warning600',
+        border: 'warning200',
+        background: 'warning100',
+      };
+    }
+    case 'DELETE': {
+      return {
+        text: 'danger600',
+        border: 'danger200',
+        background: 'danger100',
+      };
+    }
+    default: {
+      return {
+        text: 'neutral600',
+        border: 'neutral200',
+        background: 'neutral100',
+      };
+    }
+  }
+};
 
 const MethodBox = styled(Box)`
   margin: -1px;
   border-radius: ${({ theme }) => theme.spaces[1]} 0 0 ${({ theme }) => theme.spaces[1]};
 `;
 
-function BoundRoute({ route }) {
+interface BoundRouteProps {
+  route: {
+    handler: string;
+    method: HttpVerb;
+    path: string;
+  };
+}
+
+export const BoundRoute = ({
+  route = {
+    handler: 'Nocontroller.error',
+    method: 'GET',
+    path: '/there-is-no-path',
+  },
+}: BoundRouteProps) => {
   const { formatMessage } = useIntl();
 
   const { method, handler: title, path } = route;
@@ -51,22 +110,4 @@ function BoundRoute({ route }) {
       </Flex>
     </Flex>
   );
-}
-
-BoundRoute.defaultProps = {
-  route: {
-    handler: 'Nocontroller.error',
-    method: 'GET',
-    path: '/there-is-no-path',
-  },
 };
-
-BoundRoute.propTypes = {
-  route: PropTypes.shape({
-    handler: PropTypes.string,
-    method: PropTypes.string,
-    path: PropTypes.string,
-  }),
-};
-
-export default BoundRoute;
