@@ -10,6 +10,7 @@ import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { I18nBaseQuery } from '../types';
 import { Localization } from '../utils/data';
 import { getTranslation } from '../utils/getTranslation';
 
@@ -40,16 +41,7 @@ const CMEditViewLocalePicker = ({
   const { formatMessage } = useIntl();
   const { hasDraftAndPublish, isSingleType, slug } = useCMEditViewDataManager();
 
-  interface Query {
-    plugins: {
-      i18n: {
-        locale: string;
-        relatedEntityId?: Entity.ID;
-      };
-    };
-  }
-
-  const [{ query }, setQuery] = useQueryParams<Query>({
+  const [{ query }, setQuery] = useQueryParams<I18nBaseQuery>({
     plugins: { i18n: { locale: currentLocale } },
   });
 
@@ -73,7 +65,7 @@ const CMEditViewLocalePicker = ({
     const defaultParams = {
       plugins: {
         ...query.plugins,
-        i18n: { ...query.plugins.i18n, locale: value },
+        i18n: { ...query.plugins?.i18n, locale: value },
       },
     };
 

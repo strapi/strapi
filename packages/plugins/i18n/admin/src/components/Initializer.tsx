@@ -1,13 +1,7 @@
-/**
- *
- * Initializer
- *
- */
+import * as React from 'react';
 
-import { useEffect, useRef } from 'react';
-
-import { useLocales } from '../../hooks/useLocales';
-import { pluginId } from '../../pluginId';
+import { useLocales } from '../hooks/useLocales';
+import { pluginId } from '../pluginId';
 
 type InitializerProps = {
   setPlugin: (plugin: string) => void;
@@ -15,11 +9,11 @@ type InitializerProps = {
 
 const Initializer = ({ setPlugin }: InitializerProps) => {
   const { isLoading, locales } = useLocales();
-  const ref = useRef<InitializerProps['setPlugin']>();
+  const ref = React.useRef<InitializerProps['setPlugin']>();
 
   ref.current = setPlugin;
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!isLoading && locales.length > 0) {
       ref.current!(pluginId);
     }
@@ -28,4 +22,4 @@ const Initializer = ({ setPlugin }: InitializerProps) => {
   return null;
 };
 
-export default Initializer;
+export { Initializer };
