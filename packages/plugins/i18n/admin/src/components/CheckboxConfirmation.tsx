@@ -10,34 +10,30 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { ExclamationMarkCircle } from '@strapi/icons';
-import { useIntl } from 'react-intl';
+import { MessageDescriptor, useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { getTranslation } from '../../utils/getTranslation';
+import { getTranslation } from '../utils/getTranslation';
 
 const TextAlignTypography = styled(Typography)`
   text-align: center;
 `;
 
-type CheckboxConfirmationProps = {
-  description: {
-    id: string;
-    defaultMessage: string;
-    values: object;
-  } | null;
-  intlLabel: {
-    id: string;
-    defaultMessage: string;
-    values: object;
-  };
+interface IntlMessage extends MessageDescriptor {
+  values: object;
+}
+
+interface CheckboxConfirmationProps {
+  description: IntlMessage;
+  intlLabel: IntlMessage;
   isCreating?: boolean;
   name: string;
-  onChange: (params: any) => void;
+  onChange: (event: { target: { name: string; value: boolean; type: string } }) => void;
   value: boolean;
-};
+}
 
 const CheckboxConfirmation = ({
-  description = null,
+  description,
   isCreating = false,
   intlLabel,
   name,
@@ -47,7 +43,7 @@ const CheckboxConfirmation = ({
   const { formatMessage } = useIntl();
   const [isOpen, setIsOpen] = React.useState(false);
 
-  const handleChange = (value: any) => {
+  const handleChange = (value: boolean) => {
     if (isCreating || value) {
       return onChange({ target: { name, value, type: 'checkbox' } });
     }
@@ -139,4 +135,4 @@ const CheckboxConfirmation = ({
   );
 };
 
-export default CheckboxConfirmation;
+export { CheckboxConfirmation };

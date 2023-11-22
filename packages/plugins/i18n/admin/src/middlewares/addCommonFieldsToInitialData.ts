@@ -86,4 +86,4 @@ const addCommonFieldsToInitialDataMiddleware =
     return getData();
   };
 
-export default addCommonFieldsToInitialDataMiddleware;
+export { addCommonFieldsToInitialDataMiddleware };

@@ -12,12 +12,14 @@ import { getTranslation } from '../utils/getTranslation';
 import { CMEditViewCopyLocale } from './CMEditViewCopyLocale';
 import { CMEditViewLocalePicker } from './CMEditViewLocalePicker';
 
+import type { I18nBaseQuery } from '../types';
+
 const CMEditViewInjectedComponents = () => {
   const { layout, modifiedData, slug } = useCMEditViewDataManager();
   const { createPermissions, readPermissions } = useContentTypePermissions(slug!);
   const locales = useTypedSelector((state) => state.i18n_locales.locales);
   const params = useParams<{ id: string }>();
-  const [{ query }] = useQueryParams();
+  const [{ query }] = useQueryParams<I18nBaseQuery>();
   const { formatMessage } = useIntl();
 
   const currentEntityId = params.id ?? null;

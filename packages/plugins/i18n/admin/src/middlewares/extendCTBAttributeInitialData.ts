@@ -73,4 +73,4 @@ const extendCTBAttributeInitialDataMiddleware = () => {
     };
 };
 
-export default extendCTBAttributeInitialDataMiddleware;
+export { extendCTBAttributeInitialDataMiddleware };

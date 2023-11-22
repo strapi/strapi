@@ -1,4 +1,4 @@
-import extendCTBAttributeInitialDataMiddleware from '../extendCTBAttributeInitialDataMiddleware';
+import { extendCTBAttributeInitialDataMiddleware } from '../extendCTBAttributeInitialData';
 
 describe('i18n | middlewares | extendCTBAttributeInitialDataMiddleware', () => {
   it('should forward the action if the type is undefined', () => {
