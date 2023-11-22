@@ -32,7 +32,7 @@ export type Delete<
   TContentTypeUID extends Common.UID.ContentType,
   TParams extends Params.Delete<TContentTypeUID>
 > = Promise<{
-  documents: Result<TContentTypeUID, TParams>[];
+  versions: Result<TContentTypeUID, TParams>[];
 } | null>;
 
 export type DeleteMany = Promise<CountResult | null>;
@@ -47,7 +47,7 @@ export type Clone<
   TParams extends Params.Clone<TContentTypeUID>
 > = Promise<{
   id: string;
-  documents: Result<TContentTypeUID, TParams>[];
+  versions: Result<TContentTypeUID, TParams>[];
 } | null>;
 
 export type Update<
@@ -61,12 +61,19 @@ export type Publish<
   TContentTypeUID extends Common.UID.ContentType,
   TParams extends Params.Publish<TContentTypeUID>
 > = Promise<{
-  documents: Result<TContentTypeUID, TParams>[];
+  versions: Result<TContentTypeUID, TParams>[];
 }>;
 
 export type Unpublish<
   TContentTypeUID extends Common.UID.ContentType,
   TParams extends Params.Unpublish<TContentTypeUID>
 > = Promise<{
-  documents: Result<TContentTypeUID, TParams>[];
+  versions: Result<TContentTypeUID, TParams>[];
+}>;
+
+export type DiscardDraft<
+  TContentTypeUID extends Common.UID.ContentType,
+  TParams extends Params.DiscardDraft<TContentTypeUID>
+> = Promise<{
+  versions: Result<TContentTypeUID, TParams>[];
 }>;

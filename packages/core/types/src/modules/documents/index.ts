@@ -61,6 +61,11 @@ export type RepositoryInstance<
     params?: TParams
   ) => Result.Unpublish<TContentTypeUID, TParams>;
 
+  discardDraft: <TParams extends Params.DiscardDraft<TContentTypeUID>>(
+    documentId: ID,
+    params?: TParams
+  ) => Result.DiscardDraft<TContentTypeUID, TParams>;
+
   /** Add a middleware for a specific uid
    *  @example
    *  strapi.documents('api::article.article').use('findMany', async (ctx, next) => {

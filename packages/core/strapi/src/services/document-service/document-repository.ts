@@ -121,6 +121,15 @@ export const createDocumentRepository = (
         );
       },
 
+      async discardDraft(id: string, params = {} as any) {
+        return strapi.db?.transaction?.(async () =>
+          middlewareManager.run(
+            { action: 'discardDraft', uid, params, options: { id } },
+            ({ params }) => documents.discardDraft(uid, id, params)
+          )
+        );
+      },
+
       // @ts-expect-error - TODO: Fix this
       with(params: object) {
         return createDocumentRepository(strapi, {

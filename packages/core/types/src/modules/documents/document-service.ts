@@ -106,4 +106,13 @@ export interface DocumentService {
     documentId: ID,
     params?: TParams
   ): Result.Unpublish<TContentTypeUID, TParams>;
+
+  discardDraft<
+    TContentTypeUID extends Common.UID.ContentType,
+    TParams extends Params.DiscardDraft<TContentTypeUID>
+  >(
+    uid: TContentTypeUID,
+    documentId: ID,
+    params?: TParams
+  ): Result.DiscardDraft<TContentTypeUID, TParams>;
 }
