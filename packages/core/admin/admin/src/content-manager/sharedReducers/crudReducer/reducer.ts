@@ -1,11 +1,6 @@
-/* eslint-disable consistent-return */
+import { Attribute } from '@strapi/types';
 import produce from 'immer';
 
-// NOTE: instead of creating a shared reducer here, we could also create a hook
-// that returns the dispatch and the state, however it will mess with the linter
-// and force us to either disable the linter for the hooks dependencies array rule or
-// require us to add the dispatch to the array which is not wanted. This refacto does not require us to
-// to do any of this.
 import {
   CLEAR_SET_MODIFIED_DATA_ONLY,
   GET_DATA,
@@ -17,16 +12,31 @@ import {
   SUBMIT_SUCCEEDED,
 } from './constants';
 
-const crudInitialState = {
+import type { Action } from './actions';
+
+interface EntityData {
+  [key: string]: Attribute.GetValue<Attribute.Any>;
+}
+
+interface CrudState {
+  componentsDataStructure: EntityData;
+  contentTypeDataStructure: EntityData;
+  isLoading: boolean;
+  data: EntityData | null;
+  status: string;
+  setModifiedDataOnly: boolean;
+}
+
+const initialState = {
   componentsDataStructure: {},
   contentTypeDataStructure: {},
   isLoading: true,
   data: null,
   status: 'resolved',
   setModifiedDataOnly: false,
-};
+} satisfies CrudState;
 
-const crudReducer = (state = crudInitialState, action) =>
+const reducer = (state: CrudState = initialState, action: Action) =>
   produce(state, (draftState) => {
     switch (action.type) {
       case GET_DATA: {
@@ -53,7 +63,7 @@ const crudReducer = (state = crudInitialState, action) =>
         break;
       }
       case RESET_PROPS: {
-        return crudInitialState;
+        return initialState;
       }
       case SET_DATA_STRUCTURES: {
         draftState.componentsDataStructure = action.componentsDataStructure;
@@ -77,5 +87,5 @@ const crudReducer = (state = crudInitialState, action) =>
     }
   });
 
-export default crudReducer;
-export { crudInitialState };
+export { reducer, initialState };
+export type { CrudState, EntityData };
