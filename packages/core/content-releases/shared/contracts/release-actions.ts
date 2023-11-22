@@ -1,5 +1,5 @@
 import { Attribute, Common } from '@strapi/types';
-import type { Release } from './releases';
+import type { Release, Pagination } from './releases';
 import type { Entity } from '../types';
 
 import type { errors } from '@strapi/utils';
@@ -40,5 +40,26 @@ export declare namespace CreateReleaseAction {
           data: null;
           error: errors.ApplicationError | errors.ValidationError | errors.NotFoundError;
         };
+  }
+}
+
+/**
+ * GET /content-releases/:id/actions - Get all release actions
+ */
+export declare namespace GetReleaseActions {
+  export interface Request {
+    params: {
+      releaseId: Release['id']
+    };
+    query?: Partial<Pick<Pagination, 'page' | 'pageSize'>>;
+  }
+
+  export interface Response {
+    data: 
+      | ReleaseAction[]
+      | {
+        data: null;
+        error: errors.ApplicationError | errors.NotFoundError;
+      }
   }
 }

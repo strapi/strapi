@@ -2,7 +2,7 @@ import { setCreatorFields, errors } from '@strapi/utils';
 import type { LoadedStrapi } from '@strapi/types';
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
 import type { GetReleases, CreateRelease, UpdateRelease, GetRelease } from '../../../shared/contracts/releases';
-import type { CreateReleaseAction } from '../../../shared/contracts/release-actions';
+import type { CreateReleaseAction, GetReleaseActions } from '../../../shared/contracts/release-actions';
 import type { UserInfo } from '../../../shared/types';
 import { getService } from '../utils';
 
@@ -76,6 +76,18 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       populate: { release: { fields: ['id'] }, entry: { fields: ['id'] } },
     });
   },
+  findActions(
+    releaseId: GetReleaseActions.Request['params']['releaseId'], 
+    query?: GetReleaseActions.Request['query'] 
+  ) {
+    return strapi.entityService.findPage(RELEASE_ACTION_MODEL_UID, {
+      filters: {
+        release: releaseId
+      },
+      populate: ['entry'],
+      query
+    });
+  }
 });
 
 export default createReleaseService;

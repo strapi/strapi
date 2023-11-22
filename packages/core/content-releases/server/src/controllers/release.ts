@@ -48,14 +48,14 @@ const releaseController = {
       throw new errors.NotFoundError(`Release not found for id: ${id}`);
     }
 
-    const { actions, ...release } = result;
+    const { actions: actionsMeta, ...release } = result;
 
     // Format the data object
     const data = {
       ...release,
       actions: {
         meta: {
-          count: actions.count,
+          count: actionsMeta.count,
         },
       },
     };

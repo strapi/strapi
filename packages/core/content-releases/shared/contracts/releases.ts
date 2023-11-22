@@ -9,7 +9,7 @@ export interface Release extends Entity {
   actions: ReleaseAction[];
 }
 
-type Pagination = {
+export type Pagination = {
   page: number;
   pageSize: number;
   pageCount: number;

@@ -17,5 +17,21 @@ export default {
         ],
       },
     },
+    {
+      method: 'GET',
+      path: '/:releaseId/actions',
+      handler: 'release-action.findMany',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::content-releases.read']
+            }
+          }
+        ]
+      }
+    }
   ],
 };
