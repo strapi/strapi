@@ -13,7 +13,7 @@ import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import * as yup from 'yup';
 
-import { isErrorAxiosError } from '../services/axios';
+import { isAxiosError } from '../services/axios';
 import { useCreateReleaseMutation } from '../services/release';
 
 const RELEASE_SCHEMA = yup.object({
@@ -56,7 +56,7 @@ export const AddReleaseDialog = ({ handleClose }: AddReleaseDialogProps) => {
       });
 
       push(`/plugins/content-releases/${response.data.data.id}`);
-    } else if (isErrorAxiosError(response.error)) {
+    } else if (isAxiosError(response.error)) {
       // When the response returns an object with 'error', handle axios error
       toggleNotification({
         type: 'warning',

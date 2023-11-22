@@ -42,29 +42,25 @@ const axiosBaseQuery = async <TData = any, TSend = any>({
     const result = await get<TData, AxiosResponse<TData>, TSend>(url, config);
     return { data: result.data };
   } catch (error) {
-    if (isErrorAxiosError(error)) {
-      /**
-       * Handle error of type AxiosError
-       *
-       * This format mimics what we want from an AxiosError which is what the
-       * rest of the app works with, except this format is "serializable" since
-       * it goes into the redux store.
-       *
-       * NOTE – passing the whole response will highlight this "serializability" issue.
-       */
-      return {
-        error: {
-          status: error.response?.status,
-          code: error.code,
-          response: {
-            data: error.response?.data,
-          },
+    const err = error as AxiosError;
+    /**
+     * Handle error of type AxiosError
+     *
+     * This format mimics what we want from an AxiosError which is what the
+     * rest of the app works with, except this format is "serializable" since
+     * it goes into the redux store.
+     *
+     * NOTE – passing the whole response will highlight this "serializability" issue.
+     */
+    return {
+      error: {
+        status: err.response?.status,
+        code: err.code,
+        response: {
+          data: err.response?.data,
         },
-      };
-    } else {
-      // Handle error of type unknown
-      throw new Error('An error occured');
-    }
+      },
+    };
   }
 };
 
@@ -77,7 +73,7 @@ const axiosBaseQuery = async <TData = any, TSend = any>({
  * axios errors so we can pass them to our utility functions
  * to correctly render error messages.
  */
-const isErrorAxiosError = (err: unknown): err is AxiosError<{ error: any }> => {
+const isAxiosError = (err: unknown): err is AxiosError<{ error: any }> => {
   return (
     typeof err === 'object' &&
     err !== null &&
@@ -88,4 +84,4 @@ const isErrorAxiosError = (err: unknown): err is AxiosError<{ error: any }> => {
   );
 };
 
-export { isErrorAxiosError, axiosBaseQuery };
+export { isAxiosError, axiosBaseQuery };
