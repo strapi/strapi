@@ -21,6 +21,7 @@ export type Metadatas = {
           placeholder: string;
           visible: boolean;
           editable: boolean;
+          mainField?: string;
         }
       | {};
     list:

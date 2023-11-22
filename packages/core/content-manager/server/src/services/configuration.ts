@@ -1,10 +1,13 @@
 import { intersection, difference } from 'lodash';
 
-import type { Configuration } from '../../../shared/contracts/content-types';
+import type { Settings, Metadatas, Layouts } from '../../../shared/contracts/content-types';
 
 import { createDefaultConfiguration, syncConfiguration } from './utils/configuration';
 
-export type ConfigurationUpdate = Omit<Configuration, 'uid'> & {
+export type ConfigurationUpdate = {
+  settings: Settings;
+  metadatas: Metadatas;
+  layouts: Layouts;
   options?: Record<string, unknown>;
 };
 
