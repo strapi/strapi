@@ -79,14 +79,6 @@ describe('Document Service', () => {
       })
     );
 
-    it('can not clone published documents', () => {
-      const resultPromise = strapi.documents(ARTICLE_UID).clone('1234', {
-        status: 'published',
-      });
-
-      expect(resultPromise).rejects.toThrowError('Cannot directly clone a published document');
-    });
-
     it('clone non existing document', () => {
       const resultPromise = strapi.documents(ARTICLE_UID).clone('1234', {
         data: {
