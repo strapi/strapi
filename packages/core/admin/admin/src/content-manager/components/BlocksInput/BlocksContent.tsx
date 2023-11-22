@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Flex, Icon } from '@strapi/design-system';
+import { Box, Flex, Icon, VisuallyHidden } from '@strapi/design-system';
 import { Drag } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Editor, Range, Transforms } from 'slate';
@@ -153,7 +153,7 @@ const DragAndDropElement = ({ children, index, canDrag, canDrop }: DragAndDropEl
         >
           {/* Rendering the block is necessary for Slate to locate the node, 
               however while dragging, we hide the rendered block */}
-          <Box display="none">{children}</Box>
+          <VisuallyHidden aria-hidden>{children}</VisuallyHidden>
         </Box>
       ) : (
         <DragItem
