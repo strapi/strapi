@@ -12,7 +12,7 @@ import {
   Create,
   DeleteMany,
   DeleteOne,
-  Find,
+  FindAll,
   FindOne,
   Update,
 } from '../../../shared/contracts/user';
@@ -74,7 +74,7 @@ export default {
         results: results.map((user: AdminUser) => userService.sanitizeUser(user)),
         pagination,
       },
-    } satisfies Find.Response;
+    } satisfies FindAll.Response;
   },
 
   async findOne(ctx: Context) {

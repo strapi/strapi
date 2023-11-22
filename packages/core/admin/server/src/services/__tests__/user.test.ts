@@ -155,6 +155,7 @@ describe('User', () => {
         registrationToken: 'another-token',
       };
       const expected = _.clone(input);
+      // @ts-expect-error - test purpose
       const result = await create(input);
 
       expect(result).toMatchObject(expected);

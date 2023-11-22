@@ -117,7 +117,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
         title={menuTitle}
         icon={
           <img
-            src={menu.custom || menu.default}
+            src={menu.custom?.url || menu.default}
             alt={formatMessage({
               id: 'app.components.LeftMenu.logo.alt',
               defaultMessage: 'Application logo',

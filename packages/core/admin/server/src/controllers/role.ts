@@ -11,8 +11,8 @@ import constants from '../services/constants';
 import { getService } from '../utils';
 import type {
   Create,
-  FindAll,
-  FindOne,
+  FindRoles,
+  FindRole,
   Update,
   GetPermissions,
   UpdatePermissions,
@@ -46,7 +46,7 @@ export default {
    * @param {KoaContext} ctx - koa context
    */
   async findOne(ctx: Context) {
-    const { id } = ctx.params as FindOne.Request['params'];
+    const { id } = ctx.params as FindRole.Request['params'];
     const role = await getService('role').findOneWithUsersCount({ id });
 
     if (!role) {
@@ -55,7 +55,7 @@ export default {
 
     ctx.body = {
       data: role,
-    } satisfies FindOne.Response;
+    } satisfies FindRole.Response;
   },
 
   /**
@@ -63,7 +63,7 @@ export default {
    * @param {KoaContext} ctx - koa context
    */
   async findAll(ctx: Context) {
-    const { query } = ctx.request as FindAll.Request;
+    const { query } = ctx.request as FindRoles.Request;
 
     const permissionsManager = getService('permission').createPermissionsManager({
       ability: ctx.state.userAbility,
@@ -77,7 +77,7 @@ export default {
 
     ctx.body = {
       data: roles,
-    } satisfies FindAll.Response;
+    } satisfies FindRoles.Response;
   },
 
   /**

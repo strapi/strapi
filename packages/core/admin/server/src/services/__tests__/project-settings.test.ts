@@ -121,6 +121,7 @@ describe('Project setting', () => {
         },
       };
 
+      // @ts-expect-error - test purpose
       const parsedFiles = await parseFilesData(files);
 
       expect(parsedFiles).toEqual(expectedOutput);
@@ -331,6 +332,7 @@ describe('Project setting', () => {
         },
       };
 
+      // @ts-expect-error - test purpose
       await updateProjectSettings({ ...body, ...files });
 
       expect(storeSet).toBeCalledTimes(1);
@@ -349,6 +351,7 @@ describe('Project setting', () => {
         authLogo: null,
       };
 
+      // @ts-expect-error - test purpose
       await updateProjectSettings({ ...body, ...files });
 
       expect(storeSet).toBeCalledTimes(1);

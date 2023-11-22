@@ -1,7 +1,7 @@
 import get from 'lodash/get';
 import isArray from 'lodash/isArray';
-import isObject from 'lodash/isObject';
 
+import { isObject } from '../../../../utils/objects';
 import { CREATOR_FIELDS } from '../../../constants/attributes';
 import { getInitialDataPathUsingTempKeys } from '../../../utils/paths';
 

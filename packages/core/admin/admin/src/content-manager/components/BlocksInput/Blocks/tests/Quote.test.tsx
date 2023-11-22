@@ -50,7 +50,7 @@ describe('Quote', () => {
       anchor: Editor.end(baseEditor, []),
       focus: Editor.end(baseEditor, []),
     });
-    quoteBlocks.quote.handleEnterKey?.(baseEditor);
+    quoteBlocks.quote.handleEnterKey!(baseEditor);
 
     // Should enter a line break within the quote
     expect(baseEditor.children).toEqual([
@@ -70,7 +70,7 @@ describe('Quote', () => {
       anchor: Editor.end(baseEditor, []),
       focus: Editor.end(baseEditor, []),
     });
-    quoteBlocks.quote.handleEnterKey?.(baseEditor);
+    quoteBlocks.quote.handleEnterKey!(baseEditor);
 
     // Should delete the line break and create a paragraph after the quote
     expect(baseEditor.children).toEqual([
@@ -95,7 +95,7 @@ describe('Quote', () => {
     ]);
   });
 
-  it('disables modifiers when creating a new node with enter key at the end of a quote', () => {
+  it('has no modofiers applied when pressing enter key at the end of a quote', () => {
     const baseEditor = createEditor();
     baseEditor.children = [
       {
@@ -120,7 +120,7 @@ describe('Quote', () => {
     expect(Editor.marks(baseEditor)).toEqual({ bold: true, italic: true, type: 'text' });
 
     // Simulate the enter key then user typing
-    quoteBlocks.quote.handleEnterKey?.(baseEditor);
+    quoteBlocks.quote.handleEnterKey!(baseEditor);
 
     // Once on the new line, bold and italic should be disabled
     expect(Editor.marks(baseEditor)).toEqual({ type: 'text' });

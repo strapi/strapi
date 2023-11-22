@@ -50,8 +50,9 @@ interface StrapiAppSettingLink {
   id: string;
   to: string;
   intlLabel: TranslationMessage;
-  Component: React.ComponentType;
+  Component: ComponentModule;
   permissions: Permission[];
+  exact?: boolean;
 }
 
 interface StrapiAppSetting {

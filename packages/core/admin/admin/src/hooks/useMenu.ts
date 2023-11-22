@@ -40,8 +40,7 @@ const useMenu = () => {
           defaultMessage: 'Plugins',
         },
         to: '/list-plugins',
-        // @ts-expect-error - we need the permissions type from the plugin
-        permissions: permissions.marketplace.main,
+        permissions: permissions.marketplace?.main ?? [],
       },
       {
         icon: ShoppingCart,
@@ -50,8 +49,7 @@ const useMenu = () => {
           defaultMessage: 'Marketplace',
         },
         to: '/marketplace',
-        // @ts-expect-error - we need the permissions type from the plugin
-        permissions: permissions.marketplace.main,
+        permissions: permissions.marketplace?.main ?? [],
       },
       {
         icon: Cog,
