@@ -72,6 +72,7 @@ const loadPackageJSON = async (options: ProjectLoaderOptions): Promise<any> => {
     throw new Error(`Could not find a ${F_PROJECT_PACKAGE_JSON} file in ${fPath}`);
   }
 
+  /* eslint-disable-next-line @typescript-eslint/no-var-requires */
   const packageJSON = require(packagePath);
 
   logger.debug(
