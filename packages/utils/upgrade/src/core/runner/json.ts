@@ -3,6 +3,7 @@
 import _ from 'lodash';
 import fse from 'fs-extra';
 import assert from 'node:assert';
+import { register } from 'esbuild-register/dist/node';
 
 import type { Utils } from '@strapi/types';
 
@@ -34,16 +35,6 @@ export interface JSONTransformAPI {
 }
 
 export type JSONTransform = (file: JSONSourceFile, params: JSONTransformParams) => Utils.JSONObject;
-
-// TODO: What's the actual impact of having this line here instead of inside the runner
-//       - Does it impact the whole process or just the stuff in this file?
-//       - If yes, is it needed to execute everything in a dedicated worker?
-require('@babel/register')({
-  configFile: false,
-  babelrc: false,
-  plugins: [],
-  extensions: ['.js', '.ts'],
-});
 
 function jsonAPI<T extends Utils.JSONObject>(object: T): JSONTransformAPI {
   const json = _.cloneDeep(object) as object;
@@ -86,7 +77,13 @@ export const transformJSON = async (
 
   const report: Report = { ok: 0, nochange: 0, skip: 0, error: 0, timeElapsed: '', stats: {} };
 
+  const esbuildOptions = { extensions: ['.js', '.mjs', '.ts'] };
+  const { unregister } = register(esbuildOptions);
+
   const module = require(transformFile);
+
+  unregister();
+
   const transform = typeof module.default === 'function' ? module.default : module;
 
   assert(

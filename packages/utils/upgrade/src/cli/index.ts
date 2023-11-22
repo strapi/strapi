@@ -13,13 +13,13 @@ program
   .description('Upgrade to the desired version')
   .addOption(
     new Option('-t, --target <target>', `Specify which version to upgrade to. ${ALLOWED_TARGETS}`)
-      .default(VersionRelease.Minor)
+      .default(VersionRelease.Patch)
       .argParser((target) => {
         assert(isVersion(target), new InvalidOptionArgumentError(ALLOWED_TARGETS));
         return target;
       })
   )
-  .option('--dry-run', "Simulate the upgrade without updating any files", false)
+  .option('-n, --dry-run', 'Simulate the upgrade without updating any files', false)
   .option('-d, --debug', 'Get more logs in debug mode', false)
   .option('-s, --silent', "Don't log anything", false)
   .option('-p, --project-path <project-path>', 'Path to the Strapi project')
