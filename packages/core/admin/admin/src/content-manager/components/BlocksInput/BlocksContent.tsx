@@ -10,7 +10,7 @@ import {
 import styled from 'styled-components';
 
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
-import { type ModifiersStore } from './hooks/useModifiersStore';
+import { type ModifiersStore } from './Modifiers';
 import { getEntries } from './utils/types';
 
 const StyledEditable = styled(Editable)`
@@ -117,7 +117,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
     if (isCtrlOrCmd) {
       Object.values(modifiers).forEach((value) => {
         if (value.isValidEventKey(event)) {
-          value.handleToggle();
+          value.handleToggle(editor);
         }
       });
     }

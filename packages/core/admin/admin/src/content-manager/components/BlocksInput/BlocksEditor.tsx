@@ -18,7 +18,7 @@ import { paragraphBlocks } from './Blocks/Paragraph';
 import { quoteBlocks } from './Blocks/Quote';
 import { BlocksContent } from './BlocksContent';
 import { BlocksToolbar } from './BlocksToolbar';
-import { type ModifiersStore, useModifiersStore } from './hooks/useModifiersStore';
+import { type ModifiersStore, modifiers } from './Modifiers';
 import { withLinks } from './plugins/withLinks';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
 
@@ -72,6 +72,7 @@ type BlocksStore = {
 
 interface BlocksEditorContextValue {
   blocks: BlocksStore;
+  modifiers: ModifiersStore;
   disabled: boolean;
 }
 
@@ -80,14 +81,12 @@ const [BlocksEditorProvider, usePartialBlocksEditorContext] =
 
 function useBlocksEditorContext(
   consumerName: string
-): BlocksEditorContextValue & { editor: Editor; modifiers: ModifiersStore } {
+): BlocksEditorContextValue & { editor: Editor } {
   const context = usePartialBlocksEditorContext(consumerName);
-  const modifiers = useModifiersStore();
   const editor = useSlate();
 
   return {
     ...context,
-    modifiers,
     editor,
   };
 }
@@ -227,7 +226,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
         onChange={handleSlateChange}
         key={key}
       >
-        <BlocksEditorProvider blocks={blocks} disabled={disabled}>
+        <BlocksEditorProvider blocks={blocks} modifiers={modifiers} disabled={disabled}>
           <InputWrapper
             direction="column"
             alignItems="flex-start"
