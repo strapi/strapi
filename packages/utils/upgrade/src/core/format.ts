@@ -3,12 +3,12 @@ import chalk from 'chalk';
 
 import { ONE_SECOND_MS } from './time';
 
-import type { SemVer } from '.';
+import type { Version } from '.';
 import type { RunReports } from '../types';
 
 export const path = (path: string) => chalk.blue(path);
 
-export const version = (version: SemVer) => chalk.italic.yellow(version);
+export const version = (version: Version) => chalk.italic.yellow(version);
 
 export const versionRange = (range: string) => chalk.bold.green(range);
 
@@ -50,7 +50,7 @@ export const reports = (reports: RunReports) => {
   return table.toString();
 };
 
-export const duration = (elapsedMs: number) => {
+export const durationMs = (elapsedMs: number) => {
   const elapsedSeconds = (elapsedMs / ONE_SECOND_MS).toFixed(3);
 
   return `${elapsedSeconds}s`;

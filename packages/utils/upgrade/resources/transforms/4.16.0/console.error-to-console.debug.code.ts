@@ -13,7 +13,7 @@ const transform: Transform = (file, api) => {
   root
     // Find console.log calls expressions
     .find(j.CallExpression, {
-      callee: { object: { name: 'console' }, property: { name: 'log' } },
+      callee: { object: { name: 'console' }, property: { name: 'error' } },
     })
     // For each call expression
     .forEach((path) => {
@@ -26,7 +26,7 @@ const transform: Transform = (file, api) => {
         j.Identifier.check(callee.property)
       ) {
         // Update the property's identifier name
-        callee.property.name = 'info';
+        callee.property.name = 'debug';
       }
     });
 
