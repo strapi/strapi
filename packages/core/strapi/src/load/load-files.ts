@@ -1,10 +1,10 @@
 import path from 'node:path';
 import _ from 'lodash';
 import fse from 'fs-extra';
+import { glob } from 'glob';
 
 import { importDefault } from '@strapi/utils';
 import filePathToPath from './filepath-to-prop-path';
-import { glob } from 'glob';
 
 /**
  * Returns an Object build from a list of files matching a glob pattern in a directory

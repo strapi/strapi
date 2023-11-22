@@ -3,10 +3,11 @@ import prompts from 'prompts';
 import { handleError } from '../errors';
 import * as tasks from '../../tasks';
 
-import type { CLIOptions } from '../../types';
 import { createLogger } from '../../core';
 
-export const next = async (options: CLIOptions) => {
+import type { CLIOptions } from '../../types';
+
+export const upgrade = async (options: CLIOptions) => {
   try {
     const logger = createLogger({ silent: options.silent, debug: options.debug });
 
@@ -14,7 +15,13 @@ export const next = async (options: CLIOptions) => {
       "Please make sure you've created a backup of your codebase and files before upgrading"
     );
 
-    await tasks.next({ logger, confirm, dryRun: options.dryRun, cwd: options.projectPath });
+    await tasks.upgrade({
+      logger,
+      confirm,
+      dryRun: options.dryRun,
+      cwd: options.projectPath,
+      target: options.target,
+    });
   } catch (err) {
     handleError(err);
   }

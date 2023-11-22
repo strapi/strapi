@@ -1,9 +1,9 @@
-import type { Logger, SemVer } from './core';
+import type { Logger, SemVer, Version } from './core';
 
 export interface CLIOptions {
   // TODO: Add back the version option when we handle targeting specific versions
   // NOTE: For now we can only accept major upgrades & allow minors and patches in future releases
-  // version?: Version.Latest | Version.Major;
+  target?: Version;
   projectPath?: string;
   dryRun: boolean;
   silent: boolean;
@@ -14,6 +14,7 @@ export interface TaskOptions {
   confirm?: (message: string) => Promise<boolean> | Promise<undefined> | boolean | undefined;
   cwd?: string;
   dryRun?: boolean;
+  target?: Version;
   logger: Logger;
 }
 
