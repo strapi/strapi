@@ -1,7 +1,7 @@
-export type Value = string | number | boolean | null | Object | List;
+export type JSONValue = string | number | boolean | null | JSONObject | JSONArray;
 
-export type List = Array<Value>;
+export type JSONArray = Array<JSONValue>;
 
-export interface Object {
-  [key: string]: Value;
+export interface JSONObject {
+  [key: string]: JSONValue;
 }
