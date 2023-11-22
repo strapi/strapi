@@ -15,6 +15,7 @@ export type ParamsMap<TContentTypeUID extends Common.UID.ContentType = Common.UI
   count: Params.Count<TContentTypeUID>;
   publish: Params.Publish<TContentTypeUID>;
   unpublish: Params.Unpublish<TContentTypeUID>;
+  discardDraft: Params.DiscardDraft<TContentTypeUID>;
 };
 
 export interface Context<

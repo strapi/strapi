@@ -32,7 +32,7 @@ describe('Document Service', () => {
 
         expect(result).not.toBeNull();
 
-        const clonedArticlesDb = await findArticlesDb({ documentId: result.documentId });
+        const clonedArticlesDb = await findArticlesDb({ documentId: result.id });
 
         // all articles should be in draft, and only one should be english
         expect(clonedArticlesDb.length).toBe(1);
@@ -66,7 +66,7 @@ describe('Document Service', () => {
           documentId: articleDb.documentId,
           publishedAt: null,
         });
-        const clonedArticlesDb = await findArticlesDb({ documentId: result.documentId });
+        const clonedArticlesDb = await findArticlesDb({ documentId: result.id });
 
         // all articles should be in draft, and all locales should be cloned
         expect(clonedArticlesDb.length).toBe(originalArticlesDb.length);
@@ -78,14 +78,6 @@ describe('Document Service', () => {
         });
       })
     );
-
-    it('can not clone published documents', () => {
-      const resultPromise = strapi.documents(ARTICLE_UID).clone('1234', {
-        status: 'published',
-      });
-
-      expect(resultPromise).rejects.toThrowError('Cannot directly clone a published document');
-    });
 
     it('clone non existing document', () => {
       const resultPromise = strapi.documents(ARTICLE_UID).clone('1234', {

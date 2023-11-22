@@ -53,7 +53,7 @@ export type DeleteMany<TContentTypeUID extends Common.UID.ContentType> = Pick<
 
 export type Create<TContentTypeUID extends Common.UID.ContentType> = Pick<
   TContentTypeUID,
-  'data' | 'files' | 'fields' | 'populate' | 'status' | 'locale' | 'lookup'
+  'data' | 'files' | 'fields' | 'populate' | 'locale' | 'lookup'
 >;
 
 export type Clone<TContentTypeUID extends Common.UID.ContentType> = Pick<
@@ -63,22 +63,24 @@ export type Clone<TContentTypeUID extends Common.UID.ContentType> = Pick<
 
 export type Update<TContentTypeUID extends Common.UID.ContentType> = Pick<
   TContentTypeUID,
-  'data:partial' | 'files' | 'fields' | 'populate' | 'status' | 'locale' | 'lookup'
+  'data:partial' | 'files' | 'fields' | 'populate' | 'locale' | 'lookup'
 >;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type Publish<TContentTypeUID extends Common.UID.ContentType> = Pick<
   TContentTypeUID,
-  'filters' | 'status' | 'locale' | 'lookup'
+  'filters' | 'locale' | 'lookup'
 >;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type Unpublish<TContentTypeUID extends Common.UID.ContentType> = Pick<
   TContentTypeUID,
-  'filters' | 'status' | 'locale' | 'lookup'
+  'filters' | 'locale' | 'lookup'
 >;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export type DiscardDraft<TContentTypeUID extends Common.UID.ContentType> = Pick<
+  TContentTypeUID,
+  'filters' | 'locale' | 'lookup'
+>;
+
 export type With<TContentTypeUID extends Common.UID.ContentType> = Pick<
   TContentTypeUID,
   | 'filters'

@@ -42,7 +42,7 @@ export type RepositoryInstance<
   clone: <TParams extends Params.Clone<TContentTypeUID>>(
     documentId: ID,
     params: TParams
-  ) => Result.Clone;
+  ) => Result.Clone<TContentTypeUID, TParams>;
 
   update: <TParams extends Params.Update<TContentTypeUID>>(
     documentId: ID,
@@ -54,12 +54,17 @@ export type RepositoryInstance<
   publish: <TParams extends Params.Publish<TContentTypeUID>>(
     documentId: ID,
     params?: TParams
-  ) => Result.Publish;
+  ) => Result.Publish<TContentTypeUID, TParams>;
 
   unpublish: <TParams extends Params.Unpublish<TContentTypeUID>>(
     documentId: ID,
     params?: TParams
-  ) => Result.Unpublish;
+  ) => Result.Unpublish<TContentTypeUID, TParams>;
+
+  discardDraft: <TParams extends Params.DiscardDraft<TContentTypeUID>>(
+    documentId: ID,
+    params?: TParams
+  ) => Result.DiscardDraft<TContentTypeUID, TParams>;
 
   /** Add a middleware for a specific uid
    *  @example

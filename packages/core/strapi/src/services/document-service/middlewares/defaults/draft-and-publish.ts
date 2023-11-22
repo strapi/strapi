@@ -3,6 +3,17 @@ import { Documents } from '@strapi/types';
 type Middleware = Documents.Middleware.Middleware<any, any>;
 
 /**
+ * Sets status to draft only
+ */
+export const setStatusToDraft: Middleware = async (ctx, next) => {
+  if (!ctx.params) ctx.params = {};
+
+  ctx.params.status = 'draft';
+
+  return next(ctx);
+};
+
+/**
  * Adds a default status of `draft` to the params
  */
 export const defaultToDraft: Middleware = async (ctx, next) => {
@@ -63,4 +74,11 @@ export const statusToData: Middleware = async (ctx, next) => {
   ctx.params.data = data;
 
   return next(ctx);
+};
+
+export default {
+  setStatusToDraft,
+  defaultToDraft,
+  statusToLookup,
+  statusToData,
 };

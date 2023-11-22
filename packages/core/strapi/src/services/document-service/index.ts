@@ -104,7 +104,7 @@ const createDocumentService = ({
     });
 
     // TODO: Change return value to actual count
-    return entriesToDelete.at(0);
+    return { versions: entriesToDelete };
   },
 
   // TODO: should we provide two separate methods?
@@ -125,12 +125,6 @@ const createDocumentService = ({
     // TODO: Entity validator.
     // TODO: File upload - Probably in the lifecycles?
     const { data } = params;
-
-    if (params.status === 'published') {
-      throw new Error(
-        'Cannot directly create a published document. Use the publish method instead.'
-      );
-    }
 
     if (!data) {
       throw new Error('Create requires data attribute');
@@ -161,10 +155,6 @@ const createDocumentService = ({
     // TODO: File upload
     const { data } = params || {};
     const model = strapi.getModel(uid) as Shared.ContentTypes[Common.UID.ContentType];
-
-    if (params?.status === 'published') {
-      throw new Error('Cannot update a published document. Use the publish method instead.');
-    }
 
     const query = transformParamsToQuery(uid, pickSelectionParams(params || {}));
 
@@ -206,17 +196,13 @@ const createDocumentService = ({
     // TODO: Entity validator.
     const { data = {} as any } = params!;
 
-    if (params?.status === 'published') {
-      throw new Error('Cannot directly clone a published document');
-    }
-
     const model = strapi.getModel(uid);
     const query = transformParamsToQuery(uid, pickSelectionParams(params));
 
     // Find all locales of the document
     const entries = await db.query(uid).findMany({
       ...query,
-      where: { ...params?.lookup, ...query.where, documentId, publishedAt: null },
+      where: { ...params?.lookup, ...query.where, documentId },
     });
 
     // Document does not exist
@@ -226,7 +212,7 @@ const createDocumentService = ({
 
     const newDocumentId = createDocumentId();
 
-    const result = await mapAsync(entries, async (entryToClone: any) => {
+    const versions = await mapAsync(entries, async (entryToClone: any) => {
       const isDraft = contentTypesUtils.isDraft(data);
       // Todo: Merge data with entry to clone
       const validData = await entityValidator.validateEntityUpdate(
@@ -244,23 +230,18 @@ const createDocumentService = ({
       );
 
       // TODO: Transform params to query
-      const clonedEntry = await db.query(uid).clone(entryToClone.id, {
+      return db.query(uid).clone(entryToClone.id, {
         ...query,
         // Allows entityData to override the documentId (e.g. when publishing)
         data: { documentId: newDocumentId, ...entityData, locale: entryToClone.locale },
       });
-      return clonedEntry;
     });
 
-    return { documentId: newDocumentId, result };
+    return { id: newDocumentId, versions };
   },
 
   // TODO: Handle relations so they target the published version
   async publish(uid, documentId, params) {
-    if (params?.status === 'published') {
-      throw new Error('Cannot publish a document that is already published');
-    }
-
     // Delete already published versions that match the locales to be published
     await this.delete(uid, documentId, {
       ...params,
@@ -268,30 +249,47 @@ const createDocumentService = ({
     });
 
     // Clone every draft version to be published
-    await this.clone(uid, documentId, {
+    const clonedDocuments = (await this.clone(uid, documentId, {
       ...(params || {}),
       // @ts-expect-error - Generic type does not have publishedAt attribute by default
       data: { documentId, publishedAt: new Date() },
-    });
+    })) as any;
 
     // TODO: Return actual count
-    return 0;
+    return { versions: clonedDocuments?.versions || [] };
   },
 
   async unpublish(uid, documentId, params) {
-    if (params?.status === 'draft') {
-      throw new Error('Cannot unpublish a document that is already a draft');
-    }
-
-    // TODO: Discard draft
     // Delete all published versions
-    await this.delete(uid, documentId, {
+    return this.delete(uid, documentId, {
       ...params,
       lookup: { ...params?.lookup, publishedAt: { $ne: null } },
+    }) as any;
+  },
+
+  /**
+   * Steps:
+   * - Delete the matching draft versions (publishedAt = null)
+   * - Clone the matching published versions into draft versions
+   */
+  async discardDraft(uid, documentId, params) {
+    // Delete draft versions, clone published versions into draft versions
+    await this.delete(uid, documentId, {
+      ...params,
+      // Delete all drafts that match query
+      lookup: { ...params?.lookup, publishedAt: null },
     });
 
-    // TODO: Return actual count
-    return 0;
+    // Clone published versions into draft versions
+    const clonedDocuments = (await this.clone(uid, documentId, {
+      ...(params || {}),
+      // Clone only published versions
+      lookup: { ...params?.lookup, publishedAt: { $ne: null } },
+      // @ts-expect-error - Generic type does not have publishedAt attribute by default
+      data: { documentId, publishedAt: null },
+    })) as any;
+
+    return { versions: clonedDocuments?.versions || [] };
   },
 });
 
