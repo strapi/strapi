@@ -30,25 +30,24 @@ const StyledEditable = styled(Editable)`
 `;
 
 const DragItem = styled(Flex)`
-  // block styles
+  // Style each block rendered using renderElement()
   & > *:nth-child(2) {
     width: 100%;
     opacity: inherit;
   }
   &:hover {
-    // Set visibility of drag button
+    // Set the visibility of drag button
     & > div {
       visibility: visible;
       opacity: inherit;
     }
   }
-  &:active {
-    opacity: 0.5;
-  }
 `;
 
 const DragButton = styled(Flex)`
   visibility: hidden;
+  cursor: grab;
+
   &:hover {
     background: ${({ theme }) => theme.colors.neutral200};
   }
@@ -119,12 +118,6 @@ const DragAndDropElement = ({ children, index, canDrag, canDrop }: DragAndDropEl
 
         Transforms.setNodes(editor, { ...attributesToClear, type: 'list-item' }, { at: newIndex });
       }
-
-      // TODO: fix selection to new index
-      Transforms.select(editor, {
-        anchor: { path: [0, 0], offset: 0 },
-        focus: { path: [0, 0], offset: 0 },
-      });
     },
     [editor, formatMessage, name, setLiveText]
   );
@@ -157,9 +150,26 @@ const DragAndDropElement = ({ children, index, canDrag, canDrop }: DragAndDropEl
           marginLeft="auto"
           marginTop={2}
           marginBottom={2}
-        />
+        >
+          {/* Rendering the block is necessary for Slate to locate the node, 
+              however while dragging, we hide the rendered block */}
+          <Box display="none">{children}</Box>
+        </Box>
       ) : (
-        <DragItem ref={dragRef} data-handler-id={handlerId} gap={2} paddingLeft={2}>
+        <DragItem
+          ref={dragRef}
+          data-handler-id={handlerId}
+          gap={2}
+          paddingLeft={2}
+          onDragStart={(event) => {
+            const target = event.target as HTMLElement;
+            target.style.opacity = '0.5';
+          }}
+          onDragEnd={(event) => {
+            const target = event.target as HTMLElement;
+            target.style.opacity = '1';
+          }}
+        >
           <DragButton
             role="button"
             tabIndex={0}
