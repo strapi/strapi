@@ -1,0 +1,80 @@
+{
+  "name": "@strapi/upgrade",
+  "version": "4.15.1",
+  "description": "CLI to upgrade Strapi applications effortless",
+  "keywords": [
+    "strapi",
+    "package",
+    "tool",
+    "upgrade",
+    "migrate",
+    "version"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/utils/upgrade"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "source": "./src/index.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "bin": "./bin/upgrade.js",
+  "files": [
+    "bin",
+    "dist",
+    "resources"
+  ],
+  "scripts": {
+    "build": "pack-up build",
+    "watch": "pack-up watch",
+    "clean": "run -T rimraf ./dist",
+    "lint": "run -T eslint .",
+    "prepublishOnly": "yarn clean && yarn build"
+  },
+  "dependencies": {
+    "@babel/register": "7.22.15",
+    "chalk": "4.1.2",
+    "cli-table3": "0.6.2",
+    "commander": "8.3.0",
+    "fs-extra": "10.0.0",
+    "glob": "10.3.10",
+    "jscodeshift": "0.15.1",
+    "ora": "5.4.1",
+    "prompts": "2.4.2",
+    "semver": "7.5.4"
+  },
+  "devDependencies": {
+    "@strapi/pack-up": "workspace:*",
+    "@types/jscodeshift": "0.11.10",
+    "eslint-config-custom": "workspace:*",
+    "rimraf": "3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0 <=20.x.x",
+    "npm": ">=6.0.0"
+  }
+}
