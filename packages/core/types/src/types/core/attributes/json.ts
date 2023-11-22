@@ -10,6 +10,6 @@ export type JSON = Attribute.OfType<'json'> &
   Attribute.VisibleOption &
   Attribute.DefaultOption<JsonValue>;
 
-export type JsonValue<T extends Utils.JSON.Value = Utils.JSON.Value> = T;
+export type JsonValue<T extends Utils.JSONValue = Utils.JSONValue> = T;
 
 export type GetJsonValue<T extends Attribute.Attribute> = T extends JSON ? JsonValue : never;

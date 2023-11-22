@@ -18,32 +18,29 @@ export interface JSONRunnerConfig {
 
 export interface JSONSourceFile {
   path: string;
-  json: Utils.JSON.Object;
+  json: Utils.JSONObject;
 }
 
 export interface JSONTransformParams {
   cwd: string;
-  json: (object: Utils.JSON.Object) => JSONTransformAPI;
+  json: (object: Utils.JSONObject) => JSONTransformAPI;
 }
 
 export interface JSONTransformAPI {
-  get<T extends Utils.JSON.Value>(path?: string, defaultValue?: T): T | undefined;
+  get<T extends Utils.JSONValue>(path?: string, defaultValue?: T): T | undefined;
   has(path: string): boolean;
-  set(path: string, value: Utils.JSON.Value): this;
-  merge(other: Utils.JSON.Object): this;
-  root(): Utils.JSON.Object;
+  set(path: string, value: Utils.JSONValue): this;
+  merge(other: Utils.JSONObject): this;
+  root(): Utils.JSONObject;
 }
 
-export type JSONTransform = (
-  file: JSONSourceFile,
-  params: JSONTransformParams
-) => Utils.JSON.Object;
+export type JSONTransform = (file: JSONSourceFile, params: JSONTransformParams) => Utils.JSONObject;
 
-function jsonAPI<T extends Utils.JSON.Object>(object: T): JSONTransformAPI {
+function jsonAPI<T extends Utils.JSONObject>(object: T): JSONTransformAPI {
   const json = _.cloneDeep(object) as object;
 
   return {
-    get<TReturn extends Utils.JSON.Value>(
+    get<TReturn extends Utils.JSONValue>(
       path?: string,
       defaultValue?: TReturn
     ): TReturn | undefined {
@@ -65,7 +62,7 @@ function jsonAPI<T extends Utils.JSON.Object>(object: T): JSONTransformAPI {
     },
 
     root() {
-      return json as Utils.JSON.Object;
+      return json as Utils.JSONObject;
     },
   };
 }
