@@ -5,32 +5,24 @@ import type { Transform } from 'jscodeshift';
  */
 
 const transform: Transform = (file, api) => {
-  // Extract the jscodeshift API
-  const { j } = api;
-  // Parse the file content
+  const j = api.jscodeshift;
   const root = j(file.source);
+  const consoleLogCalls = root.find(j.CallExpression, {
+    callee: {
+      object: {
+        name: 'console',
+      },
+      property: {
+        name: 'log',
+      },
+    },
+  });
 
-  root
-    // Find console.log calls expressions
-    .find(j.CallExpression, {
-      callee: { object: { name: 'console' }, property: { name: 'log' } },
-    })
-    // For each call expression
-    .forEach((path) => {
-      const { callee } = path.node;
+  consoleLogCalls.forEach((p) => {
+    // @ts-expect-error - In the future, we should do assertions on the node to make sure it's an object and has a property
+    p.node.callee.property.name = 'info';
+  });
 
-      if (
-        // Make sure the callee is a member expression (object/property)
-        j.MemberExpression.check(callee) &&
-        // Make sure the property is an actual identifier (contains a name property)
-        j.Identifier.check(callee.property)
-      ) {
-        // Update the property's identifier name
-        callee.property.name = 'info';
-      }
-    });
-
-  // Return the updated file content
   return root.toSource();
 };
 

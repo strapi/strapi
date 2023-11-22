@@ -2,13 +2,11 @@ import * as semver from 'semver';
 import * as path from 'node:path';
 import assert from 'node:assert';
 import { readdirSync, statSync } from 'node:fs';
-import * as path from 'node:path';
-import * as semver from 'semver';
 
-import { createSemverRange, isVersionRelease } from './version';
+import { createSemverRange } from './version';
 import * as f from './format';
 
-import type { Logger, Version, VersionRange, SemVer } from '.';
+import type { Logger, AnyVersion, VersionRange, SemVer } from '.';
 import type { TransformFile, TransformFileKind } from '../types';
 
 export interface CreateTransformsLoaderOptions {
@@ -51,18 +49,16 @@ export const createTransformsLoader = (options: CreateTransformsLoaderOptions) =
   const fRange = f.versionRange(semverRange.raw);
   const fVersions = versions.map(f.version).join(', ');
 
-  logger.info(`Found ${fNbFound} upgrades matching ${fRange} (${fVersions})`);
+  logger.debug(`Found ${fNbFound} upgrades matching ${fRange} (${fVersions})`);
 
   // Note: We're casting the result as a SemVer since we know there is at least one item in the `versions` array
   const latest = versions.at(-1) as SemVer;
 
-  logger.info(`Latest upgrade is ${fLatest}`);
-
   /**
    * Verifies that the given version matches the available ones
    */
-  const isValid = (version: Version) => {
-    return isVersionRelease(version) || versions.includes(version);
+  const isValid = (version: AnyVersion) => {
+    return version === 'latest' || versions.includes(version);
   };
 
   /**
@@ -70,15 +66,17 @@ export const createTransformsLoader = (options: CreateTransformsLoaderOptions) =
    *
    * Throws an error if the version can't be found or is invalid.
    */
-  const load = (version: SemVer): TransformFile[] => {
+  const load = (version: AnyVersion): TransformFile[] => {
     if (!isValid(version)) {
       // TODO: Use custom upgrade errors
       throw new Error(`Invalid version provided. Valid versions are ${versions.join(', ')}`);
     }
 
+    const target = version === 'latest' ? latest : version;
+
     const fullPath = (filePath: string) => path.join(dir, version, filePath);
 
-    const transformsPath = readdirSync(path.join(dir, version))
+    const transformsPath = readdirSync(path.join(dir, target))
       .filter((filePath) => statSync(fullPath(filePath)).isFile())
       .filter((filePath) => TRANSFORM_FILE_REGEXP.test(filePath))
       .map<TransformFile>((filePath) => ({
@@ -86,10 +84,10 @@ export const createTransformsLoader = (options: CreateTransformsLoaderOptions) =
         path: filePath,
         fullPath: fullPath(filePath),
         formatted: pathToHumanReadableName(filePath),
-        version,
+        version: target,
       }));
 
-    const fTarget = f.version(version);
+    const fTarget = f.version(target);
     const fNbLoaded = f.highlight(transformsPath.length.toString());
     const fLoaded = transformsPath.map((p) => f.transform(p.path)).join(', ');
 
