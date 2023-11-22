@@ -7,7 +7,7 @@ import { useState } from 'react';
  *  onCancel?: (index: number) => void,
  *  onDropItem?: (index: number) => void,
  *  onGrabItem?: (index: number) => void,
- *  onMoveItem: (newIndex: number, currentIndex: number) => void,
+ *  onMoveItem: (newIndex: number| Array<number>, currentIndex: number| Array<number>) => void,
  * }}
  */
 
