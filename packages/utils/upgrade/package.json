@@ -59,10 +59,10 @@
     "test:unit:watch": "run -T jest --watch"
   },
   "dependencies": {
-    "@babel/register": "7.22.15",
     "chalk": "4.1.2",
     "cli-table3": "0.6.2",
     "commander": "8.3.0",
+    "esbuild-register": "3.5.0",
     "fs-extra": "10.0.0",
     "glob": "10.3.10",
     "jscodeshift": "0.15.1",
