@@ -213,7 +213,7 @@ const findLocallyInstalledStrapiVersion = (
     assert(typeof strapiPackageJSON === 'object');
   } catch {
     throw new Error(
-      `Cannot find a "${F_STRAPI_DEPENDENCY_NAME}" dependency with a valid "package.json" file installed for ${cwd}`
+      `Cannot find a valid "package.json" file with a "${F_STRAPI_DEPENDENCY_NAME}" dependency installed for ${cwd}`
     );
   }
 
