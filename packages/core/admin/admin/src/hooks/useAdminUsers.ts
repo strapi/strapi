@@ -7,7 +7,7 @@ import * as Users from '../../../shared/contracts/user';
 
 export type APIUsersQueryParams =
   | Users.FindOne.Params
-  | (Users.FindAll.Request['query'] & { id?: never });
+  | (Users.Find.Request['query'] & { id?: never });
 
 export function useAdminUsers(params: APIUsersQueryParams = {}, queryOptions = {}) {
   const { id = '', ...queryParams } = params;
@@ -19,7 +19,7 @@ export function useAdminUsers(params: APIUsersQueryParams = {}, queryOptions = {
     async () => {
       const {
         data: { data },
-      } = await get<Users.FindAll.Response | Users.FindOne.Response>(`/admin/users/${id}`, {
+      } = await get<Users.Find.Response | Users.FindOne.Response>(`/admin/users/${id}`, {
         params: queryParams,
       });
 
@@ -33,7 +33,7 @@ export function useAdminUsers(params: APIUsersQueryParams = {}, queryOptions = {
   // value, which later on triggers infinite loops if used in the
   // dependency arrays of other hooks
   const users = React.useMemo(() => {
-    let users: Users.FindAll.Response['data']['results'] = [];
+    let users: Users.Find.Response['data']['results'] = [];
 
     if (data) {
       if ('results' in data) {

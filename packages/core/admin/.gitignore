@@ -11,3 +11,4 @@ npm-debug.log
 .env
 admin/src/plugins-dev.js
 admin/src/plugins.js
+*.tgz
