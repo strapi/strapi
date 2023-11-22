@@ -1,6 +1,5 @@
 import os from 'os';
 import _ from 'lodash';
-import fetch from 'node-fetch';
 import sentry, { Severity } from '@sentry/node';
 import { Scope, StderrError, isStderrError } from '../types';
 
@@ -91,7 +90,7 @@ function trackEvent(event: string, payload: Record<string, unknown>) {
         event,
         ...payload,
       }),
-      timeout: 1000,
+      signal: AbortSignal.timeout(1000),
       headers: {
         'Content-Type': 'application/json',
         'X-Strapi-Event': event,

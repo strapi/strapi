@@ -1,7 +1,6 @@
 import { resolve } from 'path';
 import fse from 'fs-extra';
 import chalk from 'chalk';
-import fetch from 'node-fetch';
 import machineID from '../../../../utils/machine-id';
 
 const readPackageJSON = async (path: string) => {
