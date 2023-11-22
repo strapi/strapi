@@ -1,10 +1,10 @@
 import { rest } from 'msw';
-import { setupServer } from 'msw/node';
+import { SetupServer, setupServer } from 'msw/node';
 import * as qs from 'qs';
 
 import { MockData, mockData } from './mockData';
 
-export const server = setupServer(
+export const server: SetupServer = setupServer(
   ...[
     /**
      *

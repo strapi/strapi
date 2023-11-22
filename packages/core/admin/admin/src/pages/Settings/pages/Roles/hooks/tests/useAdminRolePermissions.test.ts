@@ -1,9 +1,10 @@
 import { renderHook, waitFor } from '@tests/utils';
-import { UseQueryOptions } from 'react-query';
 
-import { useAdminRolePermissions, APIRolePermissionsQueryParams } from '../useAdminRolePermissions';
+import { useAdminRolePermissions } from '../useAdminRolePermissions';
 
-const setup = (params?: APIRolePermissionsQueryParams, options?: UseQueryOptions) =>
+type HookArguments = Parameters<typeof useAdminRolePermissions>;
+
+const setup = (params?: HookArguments[0], options?: HookArguments[1]) =>
   renderHook(() => useAdminRolePermissions(params, options));
 
 describe('useAdminRolePermissions', () => {

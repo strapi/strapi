@@ -1,10 +1,28 @@
 import { errors } from '@strapi/utils';
 
-import type {
-  SanitizedTransferToken,
+export type TransferTokenPermission = {
+  id: number | string;
+  action: string;
+  token: TransferToken | number;
+};
+
+export type TransferToken = {
+  id: number | string;
+  name: string;
+  description: string;
+  accessKey: string;
+  lastUsedAt?: number;
+  lifespan: number;
+  expiresAt: number;
+  permissions: string[] | TransferTokenPermission[];
+};
+
+export type SanitizedTransferToken = Omit<TransferToken, 'accessKey'>;
+
+export type TokenUpdatePayload = Pick<
   TransferToken,
-  TokenUpdatePayload,
-} from '../../server/src/services/transfer/token';
+  'name' | 'description' | 'lastUsedAt' | 'permissions' | 'lifespan'
+> & { accessKey?: string };
 
 /**
  * GET /transfer/runner/push

@@ -1,8 +1,10 @@
 {
-  "extends": "./server/tsconfig.json",
+  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "dist"
+    "rootDir": "../",
+    "baseUrl": ".",
+    "outDir": "./dist"
   },
-  "include": ["src"],
+  "include": ["src", "../shared"],
   "exclude": ["*.test.*"]
 }

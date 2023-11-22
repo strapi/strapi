@@ -4,8 +4,8 @@ import { getService } from '../utils';
 import { formatConditions } from './formatters';
 import type { Action } from '../domain/action';
 import type { GetAll, Check } from '../../../shared/contracts/permissions';
-import { Permission } from '../domain/permission';
 import { Condition } from '../domain/condition';
+import { Permission } from '../../../shared/contracts/shared';
 
 export default {
   /**

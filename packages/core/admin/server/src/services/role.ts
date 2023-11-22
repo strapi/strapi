@@ -7,8 +7,8 @@ import deepEqual from 'fast-deep-equal';
 import { generateTimestampCode, stringIncludes, hooks as hooksUtils, errors } from '@strapi/utils';
 import { Entity } from '@strapi/types';
 
-import permissionDomain, { type Permission } from '../domain/permission';
-import type { AdminUser, AdminRole } from '../../../shared/contracts/shared';
+import permissionDomain from '../domain/permission';
+import type { AdminUser, AdminRole, Permission } from '../../../shared/contracts/shared';
 import type { Action } from '../domain/action';
 
 import { validatePermissionsExist } from '../validation/permission';
