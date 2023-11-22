@@ -31,7 +31,7 @@ import { Formik, FormikErrors, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
-import { useHistory, useRouteMatch } from 'react-router-dom';
+import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { selectAdminPermissions } from '../../../../selectors';
@@ -212,12 +212,11 @@ export const TransferTokenCreateView = () => {
   const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
   const history = useHistory();
+  const { state: locationState } = useLocation<{ transferToken: TransferToken }>();
   const [transferToken, setTransferToken] = React.useState(
-    // @ts-expect-error this is fine
-    history.location.state?.transferToken.accessKey
+    locationState?.transferToken.accessKey
       ? {
-          // @ts-expect-error this is fine
-          ...history.location.state.transferToken,
+          ...locationState.transferToken,
         }
       : null
   );
@@ -283,7 +282,7 @@ export const TransferTokenCreateView = () => {
 
   const handleSubmit = async (
     body: Pick<TransferToken, 'description' | 'name' | 'lifespan'> & {
-      permissions: 'push' | 'pull' | 'push-pull';
+      permissions: TransferToken['permissions'][number];
     },
     actions: FormikHelpers<Pick<TransferToken, 'description' | 'name' | 'lifespan' | 'permissions'>>
   ) => {
@@ -412,7 +411,6 @@ export const TransferTokenCreateView = () => {
     } else {
       toggleNotification({
         type: 'warning',
-        // @ts-expect-error this is fine
         message: formatAPIError(err),
       });
     }
