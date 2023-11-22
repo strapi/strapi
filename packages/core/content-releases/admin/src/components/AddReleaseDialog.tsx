@@ -13,8 +13,8 @@ import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import * as yup from 'yup';
 
-import { useCreateReleaseMutation } from '../modules/releaseSlice';
-import { isErrorAxiosError } from '../utils/errors';
+import { useCreateReleaseMutation } from '../services/release';
+import { isErrorAxiosError } from '../services/utils';
 
 const RELEASE_SCHEMA = yup.object({
   name: yup.string().required(),

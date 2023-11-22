@@ -2,6 +2,9 @@ import { getFetchClient } from '@strapi/helper-plugin';
 
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 
+/* -------------------------------------------------------------------------------------------------
+ * Axios data
+ * -----------------------------------------------------------------------------------------------*/
 export interface QueryArguments<TSend> {
   url: string;
   method: 'PUT' | 'GET' | 'POST' | 'DELETE';
@@ -58,4 +61,24 @@ const axiosBaseQuery = async <TData = any, TSend = any>({
   }
 };
 
-export { axiosBaseQuery };
+/* -------------------------------------------------------------------------------------------------
+ * Axios error
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * This asserts the errors from redux-toolkit-query are
+ * axios errors so we can pass them to our utility functions
+ * to correctly render error messages.
+ */
+const isErrorAxiosError = (err: unknown): err is AxiosError<{ error: any }> => {
+  return (
+    typeof err === 'object' &&
+    err !== null &&
+    'response' in err &&
+    typeof err.response === 'object' &&
+    err.response !== null &&
+    'data' in err.response
+  );
+};
+
+export { isErrorAxiosError, axiosBaseQuery };

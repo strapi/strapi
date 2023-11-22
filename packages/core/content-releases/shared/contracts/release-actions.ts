@@ -34,11 +34,7 @@ export declare namespace CreateReleaseAction {
   }
 
   export interface Response {
-    data:
-      | ReleaseAction
-      | {
-          data: null;
-          error: errors.ApplicationError | errors.ValidationError | errors.NotFoundError;
-        };
+    data: ReleaseAction;
+    error?: errors.ApplicationError | errors.ValidationError | errors.NotFoundError;
   }
 }

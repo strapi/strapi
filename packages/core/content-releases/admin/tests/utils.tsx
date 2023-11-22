@@ -19,7 +19,7 @@ import { IntlProvider } from 'react-intl';
 import { Provider } from 'react-redux';
 import { MemoryRouter, MemoryRouterProps } from 'react-router-dom';
 
-import { releaseApi } from '../src/modules/releaseSlice';
+import { releaseApi } from '../src/services/release';
 
 import { server } from './server';
 import { initialState } from './store';

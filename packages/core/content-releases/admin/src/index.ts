@@ -2,8 +2,8 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import { PaperPlane } from '@strapi/icons';
 
 import { PERMISSIONS } from './constants';
-import { releaseApi } from './modules/releaseSlice';
 import { pluginId } from './pluginId';
+import { releaseApi } from './services/release';
 
 import type { Plugin } from '@strapi/types';
 
