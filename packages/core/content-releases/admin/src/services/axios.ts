@@ -22,42 +22,49 @@ const axiosBaseQuery = async <TData = any, TSend = any>({
     const { get, post, del, put } = getFetchClient();
 
     if (method === 'POST') {
-      const res = await post<TData, AxiosResponse<TData>, TSend>(url, data, config);
-      return { data: res.data };
+      const result = await post<TData, AxiosResponse<TData>, TSend>(url, data, config);
+      return { data: result.data };
     }
+
     if (method === 'DELETE') {
-      const res = await del<TData, AxiosResponse<TData>, TSend>(url, config);
-      return { data: res.data };
+      const result = await del<TData, AxiosResponse<TData>, TSend>(url, config);
+      return { data: result.data };
     }
+
     if (method === 'PUT') {
-      const res = await put<TData, AxiosResponse<TData>, TSend>(url, data, config);
-      return { data: res.data };
+      const result = await put<TData, AxiosResponse<TData>, TSend>(url, data, config);
+      return { data: result.data };
     }
 
     /**
      * Default is GET.
      */
-    const res = await get<TData, AxiosResponse<TData>, TSend>(url, config);
-    return { data: res.data };
+    const result = await get<TData, AxiosResponse<TData>, TSend>(url, config);
+    return { data: result.data };
   } catch (error) {
-    const err = error as AxiosError;
-
-    /**
-     * This format mimics what we want from an AxiosError which is what the
-     * rest of the app works with, except this format is "serializable" since
-     * it goes into the redux store.
-     *
-     * NOTE – passing the whole response will highlight this "serializability" issue.
-     */
-    return {
-      error: {
-        status: err.response?.status,
-        code: err.code,
-        response: {
-          data: err.response?.data,
+    if (isErrorAxiosError(error)) {
+      /**
+       * Handle error of type AxiosError
+       *
+       * This format mimics what we want from an AxiosError which is what the
+       * rest of the app works with, except this format is "serializable" since
+       * it goes into the redux store.
+       *
+       * NOTE – passing the whole response will highlight this "serializability" issue.
+       */
+      return {
+        error: {
+          status: error.response?.status,
+          code: error.code,
+          response: {
+            data: error.response?.data,
+          },
         },
-      },
-    };
+      };
+    } else {
+      // Handle error of type unknown
+      throw new Error('An error occured');
+    }
   }
 };
 

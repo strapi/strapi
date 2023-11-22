@@ -51,10 +51,10 @@ export declare namespace GetRelease {
     };
   }
 
-  export type Response = {
+  export interface Response {
     data: ReleaseDataResponse;
     error?: errors.ApplicationError | errors.NotFoundError;
-  };
+  }
 }
 
 /**

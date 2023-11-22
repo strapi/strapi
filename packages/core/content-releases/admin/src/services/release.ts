@@ -2,7 +2,7 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 
 import { pluginId } from '../pluginId';
 
-import { axiosBaseQuery } from './utils';
+import { axiosBaseQuery } from './axios';
 
 import type { CreateRelease, GetReleases } from '../../../shared/contracts/releases';
 
