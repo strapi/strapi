@@ -98,13 +98,8 @@ const DragAndDropElement = ({ children, index, canDrag, canDrop }: DragAndDropEl
         )
       );
 
-      // If a node is dragged out of the list block then convert it to a paragraph
-      if (newNode?.type !== 'list-item' && draggedNode?.type === 'list-item') {
-        Transforms.setNodes(editor, { type: 'paragraph' }, { at: newIndex });
-      }
-
       // If a node is dragged into the list block then convert it to a list-item
-      if (newNode?.type === 'list-item' && draggedNode?.type !== 'list-item') {
+      if (newNode.type === 'list-item' && draggedNode.type !== 'list-item') {
         if (newIndex[0] > currentIndex[0]) {
           // Node is dragged downwards inside list
           newIndex[0] -= 1;
@@ -118,24 +113,49 @@ const DragAndDropElement = ({ children, index, canDrag, canDrop }: DragAndDropEl
 
         Transforms.setNodes(editor, { ...attributesToClear, type: 'list-item' }, { at: newIndex });
       }
+
+      // If a node is dragged out of the list block then convert it to a paragraph
+      if (newNode.type !== 'list-item' && draggedNode.type === 'list-item') {
+        Transforms.setNodes(editor, { type: 'paragraph' }, { at: newIndex });
+
+        if (newIndex[0] < currentIndex[0]) {
+          // Node is dragged upwards out of list block
+          currentIndex[0] += 1;
+        }
+      }
+
+      // If a dragged node is the only list-item then delete list block
+      if (draggedNode.type === 'list-item') {
+        const [listNode, listNodePath] = Editor.parent(editor, currentIndex);
+
+        const isListEmpty =
+          listNode.children?.length === 1 &&
+          listNode.children?.[0].type === 'text' &&
+          listNode.children?.[0].text === '';
+        if (isListEmpty) {
+          Transforms.removeNodes(editor, { at: listNodePath });
+        }
+      }
     },
     [editor, formatMessage, name, setLiveText]
   );
 
-  const [{ handlerId, isDragging, handleKeyDown }, blockRef, dropRef, dragRef] = useDragAndDrop(
-    !disabled && canDrag,
-    {
-      type: `${ItemTypes.BLOCKS}._${name}`,
-      canDropHandler() {
-        return canDrop;
-      },
-      index,
-      item: {
-        displayedValue: children,
-      },
-      onMoveItem: handleMoveBlock,
-    }
-  );
+  const [
+    { handlerId, isDragging, handleKeyDown: handleDragHandleKeyDown },
+    blockRef,
+    dropRef,
+    dragRef,
+  ] = useDragAndDrop(!disabled && canDrag, {
+    type: `${ItemTypes.BLOCKS}._${name}`,
+    canDropHandler() {
+      return canDrop;
+    },
+    index,
+    item: {
+      displayedValue: children,
+    },
+    onMoveItem: handleMoveBlock,
+  });
 
   const composedBoxRefs = composeRefs(blockRef, dropRef);
 
@@ -162,6 +182,7 @@ const DragAndDropElement = ({ children, index, canDrag, canDrop }: DragAndDropEl
           data-handler-id={handlerId}
           gap={2}
           paddingLeft={2}
+          alignItems="start"
           onDragStart={(event) => {
             const target = event.target as HTMLElement;
             target.style.opacity = '0.5';
@@ -175,7 +196,7 @@ const DragAndDropElement = ({ children, index, canDrag, canDrop }: DragAndDropEl
             role="button"
             tabIndex={0}
             aria-label="Drag"
-            onKeyDown={handleKeyDown}
+            onKeyDown={handleDragHandleKeyDown}
             color="neutral600"
             alignItems="center"
             justifyContent="center"
