@@ -9,6 +9,7 @@ import {
   insertEmptyBlockAtLast,
   isLastBlockType,
   prepareHandleConvert,
+  getAttributesToClear,
 } from '../utils/conversions';
 
 const CodeBlock = styled.pre.attrs({ role: 'code' })`
@@ -47,17 +48,10 @@ const codeBlocks: Pick<BlocksStore, 'code'> = {
       if (!entry) return;
       const [element, elementPath] = entry;
 
-      // Explicitly set non-needed attributes to null so that Slate deletes them
-      const { type: _type, children: _children, ...extra } = element;
-      const attributesToClear: Record<string, null> = {};
-      Object.keys(extra).forEach((key) => {
-        attributesToClear[key] = null;
-      });
-
       Transforms.setNodes(
         editor,
         {
-          ...attributesToClear,
+          ...getAttributesToClear(element),
           type: 'code',
         },
         { at: elementPath }

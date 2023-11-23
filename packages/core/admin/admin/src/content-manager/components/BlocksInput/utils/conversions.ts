@@ -26,6 +26,20 @@ const prepareHandleConvert = (editor: Editor) => {
 };
 
 /**
+ * Set all attributes except type and children to null so that Slate deletes them
+ */
+const getAttributesToClear = (element: Element) => {
+  const { children: _children, type: _type, ...extra } = element;
+
+  const attributesToClear = Object.keys(extra).reduce(
+    (currentAttributes, key) => ({ ...currentAttributes, [key]: null }),
+    {}
+  );
+
+  return attributesToClear as Record<string, null>;
+};
+
+/**
  * Checks if the last block in the editor is of the given type.
  */
 const isLastBlockType = (editor: Editor, type: Element['type']) => {
@@ -63,4 +77,4 @@ const insertEmptyBlockAtLast = (editor: Editor) => {
   );
 };
 
-export { prepareHandleConvert, isLastBlockType, insertEmptyBlockAtLast };
+export { prepareHandleConvert, getAttributesToClear, isLastBlockType, insertEmptyBlockAtLast };

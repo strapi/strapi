@@ -7,7 +7,7 @@ import { type RenderElementProps } from 'slate-react';
 import styled, { css } from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
-import { prepareHandleConvert } from '../utils/conversions';
+import { prepareHandleConvert, getAttributesToClear } from '../utils/conversions';
 import { type Block } from '../utils/types';
 
 const listStyle = css`
@@ -187,17 +187,10 @@ const handleConvertToList = (editor: Editor, format: Block<'list'>['format']) =>
   if (!entry) return;
   const [element, elementPath] = entry;
 
-  // Explicitly set non-needed attributes to null so that Slate deletes them
-  const { type: _type, children: _children, ...extra } = element;
-  const attributesToClear: Record<string, null> = {};
-  Object.keys(extra).forEach((key) => {
-    attributesToClear[key] = null;
-  });
-
   Transforms.setNodes(
     editor,
     {
-      ...attributesToClear,
+      ...getAttributesToClear(element),
       type: 'list-item',
     },
     { at: elementPath }

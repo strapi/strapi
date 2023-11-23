@@ -5,7 +5,7 @@ import { type Text, Editor, Node, Transforms } from 'slate';
 import styled from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
-import { prepareHandleConvert } from '../utils/conversions';
+import { prepareHandleConvert, getAttributesToClear } from '../utils/conversions';
 
 const Blockquote = styled.blockquote.attrs({ role: 'blockquote' })`
   margin: ${({ theme }) => `${theme.spaces[4]} 0`};
@@ -35,17 +35,10 @@ const quoteBlocks: Pick<BlocksStore, 'quote'> = {
       if (!entry) return;
       const [element, elementPath] = entry;
 
-      // Explicitly set non-needed attributes to null so that Slate deletes them
-      const { type: _type, children: _children, ...extra } = element;
-      const attributesToClear: Record<string, null> = {};
-      Object.keys(extra).forEach((key) => {
-        attributesToClear[key] = null;
-      });
-
       Transforms.setNodes(
         editor,
         {
-          ...attributesToClear,
+          ...getAttributesToClear(element),
           type: 'quote',
         },
         { at: elementPath }

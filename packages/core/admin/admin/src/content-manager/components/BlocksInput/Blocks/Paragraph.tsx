@@ -5,7 +5,7 @@ import { Paragraph } from '@strapi/icons';
 import { type Text, Editor, Transforms } from 'slate';
 
 import { type BlocksStore } from '../BlocksEditor';
-import { prepareHandleConvert } from '../utils/conversions';
+import { prepareHandleConvert, getAttributesToClear } from '../utils/conversions';
 
 const paragraphBlocks: Pick<BlocksStore, 'paragraph'> = {
   paragraph: {
@@ -27,17 +27,10 @@ const paragraphBlocks: Pick<BlocksStore, 'paragraph'> = {
       if (!entry) return;
       const [element, elementPath] = entry;
 
-      // Explicitly set non-needed attributes to null so that Slate deletes them
-      const { type: _type, children: _children, ...extra } = element;
-      const attributesToClear: Record<string, null> = {};
-      Object.keys(extra).forEach((key) => {
-        attributesToClear[key] = null;
-      });
-
       Transforms.setNodes(
         editor,
         {
-          ...attributesToClear,
+          ...getAttributesToClear(element),
           type: 'paragraph',
         },
         { at: elementPath }

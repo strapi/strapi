@@ -13,7 +13,7 @@ import { Editor, Transforms } from 'slate';
 import styled from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
-import { prepareHandleConvert } from '../utils/conversions';
+import { prepareHandleConvert, getAttributesToClear } from '../utils/conversions';
 import { type Block } from '../utils/types';
 
 const H1 = styled(Typography).attrs({ as: 'h1' })`
@@ -53,21 +53,17 @@ const handleConvertToHeading = (editor: Editor, level: Block<'heading'>['level']
   // Get the element to convert
   const entry = prepareHandleConvert(editor);
   if (!entry) return;
+  const [element, elementPath] = entry;
 
-  const { type: _type, children: _children, ...extra } = entry[0];
-
-  // Explicitly setting non-needed attributes to null so that Slate deletes them.
-  // For example, from heading to paragraph, remove the `leve` attribute.
-  const attributesToClear: Record<string, null> = {};
-  Object.keys(extra).forEach((key) => {
-    attributesToClear[key] = null;
-  });
-
-  Transforms.setNodes(editor, {
-    ...attributesToClear,
-    type: 'heading',
-    level,
-  });
+  Transforms.setNodes(
+    editor,
+    {
+      ...getAttributesToClear(element),
+      type: 'heading',
+      level,
+    },
+    { at: elementPath }
+  );
 };
 
 const headingBlocks: Pick<
