@@ -1,10 +1,10 @@
 import * as React from 'react';
 
 import { Code } from '@strapi/icons';
-import { Transforms } from 'slate';
 import styled from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
+import { pressEnterTwiceToExit } from '../utils/enterKey';
 
 const CodeBlock = styled.pre.attrs({ role: 'code' })`
   border-radius: ${({ theme }) => theme.borderRadius};
@@ -40,8 +40,7 @@ const codeBlocks: Pick<BlocksStore, 'code'> = {
     matchNode: (node) => node.type === 'code',
     isInBlocksSelector: true,
     handleEnterKey(editor) {
-      // Insert a new line within the block
-      Transforms.insertText(editor, '\n');
+      pressEnterTwiceToExit(editor);
     },
   },
 };
