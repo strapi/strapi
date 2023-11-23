@@ -1,10 +1,10 @@
 import { curry, isArray, isEmpty, difference } from 'lodash/fp';
 import permissions, { type engine } from '@strapi/permissions';
 import type { Ability } from '@casl/ability';
-import permissionDomain, { type Permission } from '../../domain/permission';
+import permissionDomain from '../../domain/permission';
 import { getService } from '../../utils';
 import { Action } from '../../domain/action';
-import type { AdminUser } from '../../../../shared/contracts/shared';
+import type { AdminUser, Permission } from '../../../../shared/contracts/shared';
 
 export default (params: { providers: engine.EngineParams['providers'] }) => {
   const { providers } = params;

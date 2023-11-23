@@ -5,35 +5,17 @@ import { errors } from '@strapi/utils';
 import '@strapi/types';
 import constants from '../constants';
 import { getService } from '../../utils';
+import {
+  SanitizedTransferToken,
+  TokenUpdatePayload,
+  TransferToken,
+  TransferTokenPermission,
+} from '../../../../shared/contracts/transfer';
 
 const { ValidationError, NotFoundError } = errors;
 
 const TRANSFER_TOKEN_UID = 'admin::transfer-token';
 const TRANSFER_TOKEN_PERMISSION_UID = 'admin::transfer-token-permission';
-
-export type TransferTokenPermission = {
-  id: number | string;
-  action: string;
-  token: TransferToken | number;
-};
-
-export type TransferToken = {
-  id: number | string;
-  name: string;
-  description: string;
-  accessKey: string;
-  lastUsedAt?: number;
-  lifespan: number;
-  expiresAt: number;
-  permissions: string[] | TransferTokenPermission[];
-};
-
-export type SanitizedTransferToken = Omit<TransferToken, 'accessKey'>;
-
-export type TokenUpdatePayload = Pick<
-  TransferToken,
-  'name' | 'description' | 'lastUsedAt' | 'permissions' | 'lifespan'
-> & { accessKey?: string };
 
 const SELECT_FIELDS = [
   'id',
