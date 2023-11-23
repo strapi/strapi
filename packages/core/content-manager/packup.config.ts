@@ -3,6 +3,14 @@ import { Config, defineConfig } from '@strapi/pack-up';
 const config: Config = defineConfig({
   bundles: [
     {
+      types: './dist/shared/index.d.ts',
+      source: './shared/index.ts',
+      import: './dist/shared/index.mjs',
+      require: './dist/shared/index.js',
+      tsconfig: './server/tsconfig.build.json',
+      runtime: 'node',
+    },
+    {
       source: './server/src/index.ts',
       import: './dist/server/index.mjs',
       require: './dist/server/index.js',
