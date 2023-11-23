@@ -33,8 +33,10 @@ export declare namespace GetReleases {
 
   export interface Response {
     data: ReleaseDataResponse[];
+    meta: {
+      pagination: Pagination;
+    };
     error?: errors.ApplicationError;
-    pagination: Pagination;
   }
 }
 

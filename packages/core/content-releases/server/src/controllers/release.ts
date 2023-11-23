@@ -2,7 +2,12 @@ import type Koa from 'koa';
 import { errors } from '@strapi/utils';
 import { RELEASE_MODEL_UID } from '../constants';
 import { validateRelease } from './validation/release';
-import type { CreateRelease, UpdateRelease, GetRelease, Release } from '../../../shared/contracts/releases';
+import type {
+  CreateRelease,
+  UpdateRelease,
+  GetRelease,
+  Release,
+} from '../../../shared/contracts/releases';
 import type { UserInfo } from '../../../shared/types';
 import { getService } from '../utils';
 
@@ -34,7 +39,7 @@ const releaseController = {
       };
     });
 
-    ctx.body = { data, pagination };
+    ctx.body = { data, meta: { pagination } };
   },
 
   async findOne(ctx: Koa.Context) {
@@ -100,7 +105,7 @@ const releaseController = {
     ctx.body = {
       data: await permissionsManager.sanitizeOutput(release),
     };
-  }
+  },
 };
 
 export default releaseController;
