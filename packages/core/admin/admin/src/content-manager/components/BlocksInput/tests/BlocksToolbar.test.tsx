@@ -19,6 +19,7 @@ import { paragraphBlocks } from '../Blocks/Paragraph';
 import { quoteBlocks } from '../Blocks/Quote';
 import { type BlocksStore, BlocksEditorProvider } from '../BlocksEditor';
 import { BlocksToolbar } from '../BlocksToolbar';
+import { modifiers } from '../Modifiers';
 
 const defaultInitialValue: Descendant[] = [
   {
@@ -99,7 +100,7 @@ const Wrapper = ({
     <ThemeProvider theme={lightTheme}>
       <IntlProvider messages={{}} locale="en">
         <Slate initialValue={initialValue} editor={editor}>
-          <BlocksEditorProvider blocks={blocks} disabled={false}>
+          <BlocksEditorProvider blocks={blocks} modifiers={modifiers} disabled={false}>
             {children}
           </BlocksEditorProvider>
         </Slate>

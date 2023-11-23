@@ -15,7 +15,6 @@ import {
   isSelectorBlockKey,
   useBlocksEditorContext,
 } from './BlocksEditor';
-import { useModifiersStore } from './hooks/useModifiersStore';
 import { insertLink } from './utils/links';
 import { type Block, getEntries, getKeys } from './utils/types';
 
@@ -104,6 +103,7 @@ const ToolbarButton = ({
         onMouseDown={(e) => {
           e.preventDefault();
           handleClick();
+          ReactEditor.focus(editor);
         }}
         aria-disabled={disabled}
         disabled={disabled}
@@ -112,19 +112,12 @@ const ToolbarButton = ({
       >
         <FlexButton
           as="button"
-          disabled={disabled}
           background={isActive ? 'primary100' : ''}
           alignItems="center"
           justifyContent="center"
           width={7}
           height={7}
           hasRadius
-          onMouseDown={() => {
-            handleClick();
-            // When a button is clicked it blurs the editor, restore the focus to the editor
-            ReactEditor.focus(editor);
-          }}
-          aria-label={labelMessage}
         >
           <Icon width={3} height={3} as={icon} color={disabled ? 'neutral300' : enabledColor} />
         </FlexButton>
@@ -436,8 +429,7 @@ const LinkButton = ({ disabled }: { disabled: boolean }) => {
 };
 
 const BlocksToolbar = () => {
-  const modifiers = useModifiersStore();
-  const { editor, blocks, disabled } = useBlocksEditorContext('BlocksToolbar');
+  const { editor, blocks, modifiers, disabled } = useBlocksEditorContext('BlocksToolbar');
 
   /**
    * The modifier buttons are disabled when an image is selected.
@@ -476,8 +468,8 @@ const BlocksToolbar = () => {
                 name={name}
                 icon={modifier.icon}
                 label={modifier.label}
-                isActive={modifier.checkIsActive()}
-                handleClick={modifier.handleToggle}
+                isActive={modifier.checkIsActive(editor)}
+                handleClick={() => modifier.handleToggle(editor)}
                 disabled={isButtonDisabled}
               />
             ))}

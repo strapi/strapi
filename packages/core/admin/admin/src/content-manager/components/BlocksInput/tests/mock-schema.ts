@@ -8,6 +8,8 @@ export const blocksData: Attribute.BlocksValue = [
     children: [
       { type: 'text', text: 'This is editable ' },
       { type: 'text', text: 'This is bold text', bold: true },
+      { type: 'text', text: 'This is italic text', italic: true },
+      { type: 'text', text: 'This is underlined text', underline: true },
       { type: 'text', text: 'This is deleted text', strikethrough: true },
       { type: 'text', text: '<textarea>\n', code: true },
       { type: 'text', text: 'It is me', italic: true },
