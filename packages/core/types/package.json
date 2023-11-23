@@ -51,9 +51,7 @@
     "@strapi/permissions": "4.15.4",
     "@strapi/utils": "4.15.4",
     "commander": "8.3.0",
-    "https-proxy-agent": "5.0.1",
     "koa": "2.13.4",
-    "node-fetch": "2.7.0",
     "node-schedule": "2.1.0"
   },
   "devDependencies": {
@@ -65,7 +63,8 @@
     "@types/node-schedule": "2.1.0",
     "eslint-config-custom": "4.15.4",
     "tsconfig": "4.15.4",
-    "typescript": "5.2.2"
+    "typescript": "5.2.2",
+    "undici": "5.27.2"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

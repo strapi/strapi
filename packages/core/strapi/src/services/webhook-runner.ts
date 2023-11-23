@@ -125,7 +125,7 @@ class WebhookRunner {
         'X-Strapi-Event': event,
         'Content-Type': 'application/json',
       },
-      timeout: 10000,
+      signal: AbortSignal.timeout(10000),
     })
       .then(async (res) => {
         if (res.ok) {

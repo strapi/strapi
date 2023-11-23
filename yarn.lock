@@ -4394,6 +4394,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fastify/busboy@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@fastify/busboy@npm:2.0.0"
+  checksum: 6a2366d06b82aac1069b8323792f76f7a8fca02533cb3745fcd218d8f0f953dc4dbef057287237414658cd43f8dede0846ef33398999e3dbe54ddaeefec71c0a
+  languageName: node
+  linkType: hard
+
 "@floating-ui/core@npm:^1.0.1":
   version: 1.0.1
   resolution: "@floating-ui/core@npm:1.0.1"
@@ -9110,7 +9117,6 @@ __metadata:
     fs-extra: "npm:10.0.0"
     inquirer: "npm:8.2.5"
     lodash: "npm:4.17.21"
-    node-fetch: "npm:2.7.0"
     node-machine-id: "npm:^1.1.10"
     ora: "npm:^5.4.1"
     semver: "npm:7.5.4"
@@ -9818,7 +9824,6 @@ __metadata:
     fs-extra: "npm:10.0.0"
     glob: "npm:7.2.3"
     http-errors: "npm:1.8.1"
-    https-proxy-agent: "npm:5.0.1"
     inquirer: "npm:8.2.5"
     is-docker: "npm:2.2.1"
     koa: "npm:2.13.4"
@@ -9832,7 +9837,6 @@ __metadata:
     koa-static: "npm:5.0.0"
     lodash: "npm:4.17.21"
     mime-types: "npm:2.1.35"
-    node-fetch: "npm:2.7.0"
     node-machine-id: "npm:1.1.12"
     node-schedule: "npm:2.1.0"
     open: "npm:8.4.0"
@@ -9845,6 +9849,7 @@ __metadata:
     supertest: "npm:6.3.3"
     tsconfig: "npm:4.15.4"
     typescript: "npm:5.2.2"
+    undici: "npm:5.27.2"
     yup: "npm:0.32.9"
   bin:
     strapi: ./bin/strapi.js
@@ -9879,12 +9884,11 @@ __metadata:
     "@types/node-schedule": "npm:2.1.0"
     commander: "npm:8.3.0"
     eslint-config-custom: "npm:4.15.4"
-    https-proxy-agent: "npm:5.0.1"
     koa: "npm:2.13.4"
-    node-fetch: "npm:2.7.0"
     node-schedule: "npm:2.1.0"
     tsconfig: "npm:4.15.4"
     typescript: "npm:5.2.2"
+    undici: "npm:5.27.2"
   languageName: unknown
   linkType: soft
 
@@ -20369,16 +20373,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"https-proxy-agent@npm:5.0.1, https-proxy-agent@npm:^5.0.0, https-proxy-agent@npm:^5.0.1":
-  version: 5.0.1
-  resolution: "https-proxy-agent@npm:5.0.1"
-  dependencies:
-    agent-base: "npm:6"
-    debug: "npm:4"
-  checksum: f0dce7bdcac5e8eaa0be3c7368bb8836ed010fb5b6349ffb412b172a203efe8f807d9a6681319105ea1b6901e1972c7b5ea899672a7b9aad58309f766dcbe0df
-  languageName: node
-  linkType: hard
-
 "https-proxy-agent@npm:^4.0.0":
   version: 4.0.0
   resolution: "https-proxy-agent@npm:4.0.0"
@@ -20386,6 +20380,16 @@ __metadata:
     agent-base: "npm:5"
     debug: "npm:4"
   checksum: e90ca77ec10ef9987ad464853dfee744fb13fb02ad72f31c770ba09fb55675206a1de3c8b7e74d809fc00ed3baa7e01a48c569a419a675bfa3ef1ee975822b70
+  languageName: node
+  linkType: hard
+
+"https-proxy-agent@npm:^5.0.0, https-proxy-agent@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "https-proxy-agent@npm:5.0.1"
+  dependencies:
+    agent-base: "npm:6"
+    debug: "npm:4"
+  checksum: f0dce7bdcac5e8eaa0be3c7368bb8836ed010fb5b6349ffb412b172a203efe8f807d9a6681319105ea1b6901e1972c7b5ea899672a7b9aad58309f766dcbe0df
   languageName: node
   linkType: hard
 
@@ -25443,20 +25447,6 @@ __metadata:
     encoding:
       optional: true
   checksum: 4bc9245383db92c35601a798c9a992fdf38d99920ceac11e0e6512ef3014d188b3807ccb060bc6c4bdb57a145030c73f5b5fd6730f665979f9264bc43ca3afea
-  languageName: node
-  linkType: hard
-
-"node-fetch@npm:2.7.0":
-  version: 2.7.0
-  resolution: "node-fetch@npm:2.7.0"
-  dependencies:
-    whatwg-url: "npm:^5.0.0"
-  peerDependencies:
-    encoding: ^0.1.0
-  peerDependenciesMeta:
-    encoding:
-      optional: true
-  checksum: b24f8a3dc937f388192e59bcf9d0857d7b6940a2496f328381641cb616efccc9866e89ec43f2ec956bbd6c3d3ee05524ce77fe7b29ccd34692b3a16f237d6676
   languageName: node
   linkType: hard
 
@@ -32191,6 +32181,15 @@ __metadata:
   version: 0.1.2
   resolution: "unc-path-regex@npm:0.1.2"
   checksum: a05fa2006bf4606051c10fc7968f08ce7b28fa646befafa282813aeb1ac1a56f65cb1b577ca7851af2726198d59475bb49b11776036257b843eaacee2860a4ec
+  languageName: node
+  linkType: hard
+
+"undici@npm:5.27.2":
+  version: 5.27.2
+  resolution: "undici@npm:5.27.2"
+  dependencies:
+    "@fastify/busboy": "npm:^2.0.0"
+  checksum: 2bf96b102fb84568fb235bdf6e1e352e5d2bf99566b243cd1b13b41578bf9dd5c7c3d3d82192b20a3fec61fe7a528f9d80cd5b4555ce65405c06c69b023013de
   languageName: node
   linkType: hard
 

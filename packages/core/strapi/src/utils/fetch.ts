@@ -1,28 +1,25 @@
-import nodeFetch, { RequestInit, Response } from 'node-fetch';
-import { HttpsProxyAgent, HttpsProxyAgentOptions } from 'https-proxy-agent';
+import type { Fetch, Strapi } from '@strapi/types';
+import { ProxyAgent } from 'undici';
 
-import type { Strapi } from '@strapi/types';
+// TODO: once core Node exposes a stable way to create a ProxyAgent we will use that instead of undici
 
-export interface Fetch {
-  (url: string, options: RequestInit): Promise<Response>;
-  agent?: HttpsProxyAgent;
-}
-
+// Create a wrapper for Node's Fetch API that applies a global proxy
 export function createStrapiFetch(strapi: Strapi): Fetch {
-  function fetch(url: string, options: RequestInit) {
-    return nodeFetch(url, {
-      ...(fetch.agent ? { agent: fetch.agent } : {}),
+  function strapiFetch(url: RequestInfo | URL, options?: RequestInit) {
+    const fetchOptions = {
+      ...(strapiFetch.dispatcher ? { dispatcher: strapiFetch.dispatcher } : {}),
       ...options,
-    });
+    };
+    strapi.log.debug(`Making request for ${url}`);
+    return fetch(url, fetchOptions);
   }
 
-  const { globalProxy: proxy } = strapi.config.get<{
-    globalProxy: HttpsProxyAgentOptions;
-  }>('server');
+  const globalProxy =
+    strapi.config.get<ConstructorParameters<typeof ProxyAgent>[0]>('server.globalProxy');
 
-  if (proxy) {
-    fetch.agent = new HttpsProxyAgent(proxy);
+  if (globalProxy) {
+    strapiFetch.dispatcher = new ProxyAgent(globalProxy);
   }
 
-  return fetch;
+  return strapiFetch;
 }

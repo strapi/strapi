@@ -1,62 +1,70 @@
 import { join } from 'path';
-import https from 'https';
-import http from 'http';
 import { Duplex, PassThrough, Readable } from 'stream';
+import * as webStream from 'stream/web';
 import { stat, createReadStream, ReadStream } from 'fs-extra';
 import type { LoadedStrapi } from '@strapi/types';
 
 import type { IAsset } from '../../../../types';
 
-const protocolForPath = (filepath: string) => {
-  return filepath?.startsWith('https') ? https : http;
-};
-
-function getFileStream(filepath: string, isLocal = false): PassThrough | ReadStream {
+function getFileStream(
+  filepath: string,
+  strapi: LoadedStrapi,
+  isLocal = false
+): PassThrough | ReadStream {
   if (isLocal) {
     return createReadStream(filepath);
   }
 
   const readableStream = new PassThrough();
 
-  protocolForPath(filepath)
-    .get(filepath, (res) => {
-      if (res.statusCode !== 200) {
-        readableStream.emit(
-          'error',
-          new Error(`Request failed with status code ${res.statusCode}`)
-        );
+  // fetch the image from remote url and stream it
+  strapi
+    .fetch(filepath)
+    .then((res: Response) => {
+      if (res.status !== 200) {
+        readableStream.emit('error', new Error(`Request failed with status code ${res.status}`));
         return;
       }
 
-      res.pipe(readableStream);
+      if (res.body) {
+        // pipe the image data
+        Readable.fromWeb(new webStream.ReadableStream(res.body)).pipe(readableStream);
+      } else {
+        readableStream.emit('error', new Error('Empty data found for file'));
+      }
     })
-    .on('error', (error) => {
+    .catch((error: unknown) => {
       readableStream.emit('error', error);
     });
 
   return readableStream;
 }
 
-function getFileStats(filepath: string, isLocal = false): Promise<{ size: number }> {
+function getFileStats(
+  filepath: string,
+  strapi: LoadedStrapi,
+  isLocal = false
+): Promise<{ size: number }> {
   if (isLocal) {
     return stat(filepath);
   }
   return new Promise((resolve, reject) => {
-    protocolForPath(filepath)
-      .get(filepath, (res) => {
-        if (res.statusCode !== 200) {
-          reject(new Error(`Request failed with status code ${res.statusCode}`));
+    strapi
+      .fetch(filepath)
+      .then((res: Response) => {
+        if (res.status !== 200) {
+          reject(new Error(`Request failed with status code ${res.status}`));
           return;
         }
 
-        const contentLength = res.headers['content-length'];
+        const contentLength = res.headers.get('content-length');
         const stats = {
           size: contentLength ? parseInt(contentLength, 10) : 0,
         };
 
         resolve(stats);
       })
-      .on('error', (error) => {
+      .catch((error: unknown) => {
         reject(error);
       });
   });
@@ -77,8 +85,8 @@ export const createAssetsStream = (strapi: LoadedStrapi): Duplex => {
     for await (const file of stream) {
       const isLocalProvider = file.provider === 'local';
       const filepath = isLocalProvider ? join(strapi.dirs.static.public, file.url) : file.url;
-      const stats = await getFileStats(filepath, isLocalProvider);
-      const stream = getFileStream(filepath, isLocalProvider);
+      const stats = await getFileStats(filepath, strapi, isLocalProvider);
+      const stream = getFileStream(filepath, strapi, isLocalProvider);
 
       yield {
         metadata: file,
@@ -95,8 +103,8 @@ export const createAssetsStream = (strapi: LoadedStrapi): Duplex => {
             ? join(strapi.dirs.static.public, fileFormat.url)
             : fileFormat.url;
 
-          const fileFormatStats = await getFileStats(fileFormatFilepath, isLocalProvider);
-          const fileFormatStream = getFileStream(fileFormatFilepath, isLocalProvider);
+          const fileFormatStats = await getFileStats(fileFormatFilepath, strapi, isLocalProvider);
+          const fileFormatStream = getFileStream(fileFormatFilepath, strapi, isLocalProvider);
           const metadata = { ...fileFormat, type: format, mainHash: file.hash };
           yield {
             metadata,

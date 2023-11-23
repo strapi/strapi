@@ -7,18 +7,19 @@ import { Link } from '@strapi/icons';
 import { Attribute } from '@strapi/types';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { type Text, Editor, Transforms, Element as SlateElement, Element, Node } from 'slate';
-import { ReactEditor, useSlate } from 'slate-react';
+import { ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
+import { useBlocksEditorContext } from './BlocksEditor';
 import {
   type BlocksStore,
   type SelectorBlockKey,
   isSelectorBlockKey,
   useBlocksStore,
-} from '../hooks/useBlocksStore';
-import { useModifiersStore } from '../hooks/useModifiersStore';
-import { insertLink } from '../utils/links';
-import { type Block, getEntries, getKeys } from '../utils/types';
+} from './hooks/useBlocksStore';
+import { useModifiersStore } from './hooks/useModifiersStore';
+import { insertLink } from './utils/links';
+import { type Block, getEntries, getKeys } from './utils/types';
 
 const ToolbarWrapper = styled(Flex)`
   &[aria-disabled='true'] {
@@ -91,7 +92,7 @@ const ToolbarButton = ({
   disabled,
   handleClick,
 }: ToolbarButtonProps) => {
-  const editor = useSlate();
+  const { editor } = useBlocksEditorContext('ToolbarButton');
   const { formatMessage } = useIntl();
   const labelMessage = formatMessage(label);
 
@@ -112,7 +113,7 @@ const ToolbarButton = ({
         asChild
       >
         <FlexButton
-          as="button" // needed for typescript
+          as="button"
           disabled={disabled}
           background={isActive ? 'primary100' : ''}
           alignItems="center"
@@ -213,7 +214,7 @@ const pick = <T extends object, K extends keyof T>(object: T, keys: K[]): Pick<T
 };
 
 const ImageDialog = ({ handleClose }: { handleClose: () => void }) => {
-  const editor = useSlate();
+  const { editor } = useBlocksEditorContext('ImageDialog');
   const { components } = useLibrary();
 
   if (!components) return null;
@@ -326,8 +327,8 @@ const insertEmptyBlockAtLast = (editor: Editor) => {
   );
 };
 
-const BlocksDropdown = ({ disabled }: { disabled: boolean }) => {
-  const editor = useSlate();
+const BlocksDropdown = () => {
+  const { editor, disabled } = useBlocksEditorContext('BlocksDropdown');
   const { formatMessage } = useIntl();
   const [isMediaLibraryVisible, setIsMediaLibraryVisible] = React.useState(false);
 
@@ -539,11 +540,10 @@ const toggleList = (editor: Editor, isActive: boolean, format: Block<'list'>['fo
 
 interface ListButtonProps {
   block: BlocksStore['list-ordered'] | BlocksStore['list-unordered'];
-  disabled: boolean;
 }
 
-const ListButton = ({ block, disabled }: ListButtonProps) => {
-  const editor = useSlate();
+const ListButton = ({ block }: ListButtonProps) => {
+  const { editor, disabled } = useBlocksEditorContext('ListButton');
 
   const { icon, matchNode, value, label } = block;
   const { format } = value as { format: Block<'list'>['format'] };
@@ -565,12 +565,8 @@ const ListButton = ({ block, disabled }: ListButtonProps) => {
   );
 };
 
-interface LinkButtonProps {
-  disabled: boolean;
-}
-
-const LinkButton = ({ disabled }: LinkButtonProps) => {
-  const editor = useSlate();
+const LinkButton = ({ disabled }: { disabled: boolean }) => {
+  const { editor } = useBlocksEditorContext('LinkButton');
 
   const isLinkActive = () => {
     const { selection } = editor;
@@ -636,19 +632,14 @@ const LinkButton = ({ disabled }: LinkButtonProps) => {
   );
 };
 
-interface BlocksToolbarProps {
-  disabled: boolean;
-}
-
-const BlocksToolbar = ({ disabled }: BlocksToolbarProps) => {
+const BlocksToolbar = () => {
   const modifiers = useModifiersStore();
   const blocks = useBlocksStore();
-  const editor = useSlate();
+  const { editor, disabled } = useBlocksEditorContext('BlocksToolbar');
 
   /**
    * The modifier buttons are disabled when an image is selected.
    */
-
   const checkButtonDisabled = () => {
     // Always disabled when the whole editor is disabled
     if (disabled) {
@@ -673,7 +664,7 @@ const BlocksToolbar = ({ disabled }: BlocksToolbarProps) => {
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
       <ToolbarWrapper gap={2} padding={2}>
-        <BlocksDropdown disabled={disabled} />
+        <BlocksDropdown />
         <Separator />
         <Toolbar.ToggleGroup type="multiple" asChild>
           <Flex gap={1}>
@@ -694,8 +685,8 @@ const BlocksToolbar = ({ disabled }: BlocksToolbarProps) => {
         <Separator />
         <Toolbar.ToggleGroup type="single" asChild>
           <Flex gap={1}>
-            <ListButton block={blocks['list-unordered']} disabled={disabled} />
-            <ListButton block={blocks['list-ordered']} disabled={disabled} />
+            <ListButton block={blocks['list-unordered']} />
+            <ListButton block={blocks['list-ordered']} />
           </Flex>
         </Toolbar.ToggleGroup>
       </ToolbarWrapper>

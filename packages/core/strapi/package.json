@@ -143,7 +143,6 @@
     "fs-extra": "10.0.0",
     "glob": "7.2.3",
     "http-errors": "1.8.1",
-    "https-proxy-agent": "5.0.1",
     "inquirer": "8.2.5",
     "is-docker": "2.2.1",
     "koa": "2.13.4",
@@ -157,7 +156,6 @@
     "koa-static": "5.0.0",
     "lodash": "4.17.21",
     "mime-types": "2.1.35",
-    "node-fetch": "2.7.0",
     "node-machine-id": "1.1.12",
     "node-schedule": "2.1.0",
     "open": "8.4.0",
@@ -168,6 +166,7 @@
     "semver": "7.5.4",
     "statuses": "2.0.1",
     "typescript": "5.2.2",
+    "undici": "5.27.2",
     "yup": "0.32.9"
   },
   "devDependencies": {
