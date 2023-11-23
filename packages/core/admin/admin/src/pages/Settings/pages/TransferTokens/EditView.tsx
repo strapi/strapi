@@ -222,7 +222,6 @@ export const EditView = () => {
       : null
   );
   const { trackUsage } = useTracking();
-  const trackUsageRef = React.useRef(trackUsage);
   const { setCurrentStep } = useGuidedTour();
   const permissions = useSelector(selectAdminPermissions);
   const {
@@ -238,10 +237,10 @@ export const EditView = () => {
   const { formatAPIError } = useAPIErrorHandler();
 
   React.useEffect(() => {
-    trackUsageRef.current(isCreating ? 'didAddTokenFromList' : 'didEditTokenFromList', {
+    trackUsage(isCreating ? 'didAddTokenFromList' : 'didEditTokenFromList', {
       tokenType: TRANSFER_TOKEN_TYPE,
     });
-  }, [isCreating]);
+  }, [isCreating, trackUsage]);
 
   const { status } = useQuery(
     ['transfer-token', id],
@@ -287,7 +286,7 @@ export const EditView = () => {
     },
     actions: FormikHelpers<Pick<TransferToken, 'description' | 'name' | 'lifespan' | 'permissions'>>
   ) => {
-    trackUsageRef.current(isCreating ? 'willCreateToken' : 'willEditToken', {
+    trackUsage(isCreating ? 'willCreateToken' : 'willEditToken', {
       tokenType: TRANSFER_TOKEN_TYPE,
     });
     // @ts-expect-error context assertation
@@ -353,7 +352,7 @@ export const EditView = () => {
               }),
         });
 
-        trackUsageRef.current(isCreating ? 'didCreateToken' : 'didEditToken', {
+        trackUsage(isCreating ? 'didCreateToken' : 'didEditToken', {
           type: transferToken?.permissions,
           tokenType: TRANSFER_TOKEN_TYPE,
         });
