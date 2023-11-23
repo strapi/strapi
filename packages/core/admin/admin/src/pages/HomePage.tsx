@@ -516,8 +516,7 @@ const SOCIAL_LINKS = [
  * -----------------------------------------------------------------------------------------------*/
 
 const HomePage = () => {
-  type CompFn = () => React.JSX.Element;
-  const Page = useEnterprise<CompFn, CompFn, CompFn>(
+  const Page = useEnterprise(
     HomePageCE,
     // eslint-disable-next-line import/no-cycle
     async () => (await import('../../../ee/admin/src/pages/HomePage')).HomePageEE

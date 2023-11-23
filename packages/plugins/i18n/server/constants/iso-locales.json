@@ -428,6 +428,10 @@
     "name":"Duala (Cameroon) (dua-CM)"
   },
   {
+    "code":"dv",
+    "name":"Dhivehi (Maldives)"
+  },
+  {
     "code":"nl",
     "name":"Dutch (nl)"
   },
@@ -714,6 +718,10 @@
   {
     "code":"en-MP",
     "name":"English (Northern Mariana Islands) (en-MP)"
+  },
+    {
+    "code":"en-NO",
+    "name":"English (Norway) (en-NO)"
   },
   {
     "code":"en-PA",
