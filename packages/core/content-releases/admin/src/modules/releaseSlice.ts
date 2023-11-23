@@ -7,11 +7,10 @@ import type {
   CreateRelease,
   GetReleases,
   ReleaseDataResponse,
+  Pagination,
 } from '../../../shared/contracts/releases';
 
-interface GetAllReleasesQueryParams {
-  page?: number;
-  pageSize?: number;
+export interface GetAllReleasesQueryParams extends Pick<Pagination, 'page' | 'pageSize'> {
   filters?: {
     $and?: Array<{
       releasedAt?: {

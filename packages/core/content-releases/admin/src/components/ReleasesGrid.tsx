@@ -15,7 +15,7 @@ import { useHistory } from 'react-router-dom';
 import { Release } from '../../../shared/contracts/releases';
 
 interface ReleasesGridProps {
-  status: 'loading' | 'error' | 'success';
+  status: 'error' | 'success';
   sectionTitle: 'pending' | 'done';
   releases?: Array<Release>;
 }
@@ -28,14 +28,6 @@ const ReleasesGrid = ({ status, sectionTitle, releases }: ReleasesGridProps) => 
     return (
       <Flex paddingTop={8}>
         <AnErrorOccurred />
-      </Flex>
-    );
-  }
-
-  if (status === 'loading') {
-    return (
-      <Flex justifyContent="center" paddingTop={8}>
-        <Loader>Loading content...</Loader>
       </Flex>
     );
   }

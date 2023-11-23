@@ -26,25 +26,13 @@ import { useIntl } from 'react-intl';
 import { AddReleaseDialog } from '../components/AddReleaseDialog';
 import { ReleasesGrid } from '../components/ReleasesGrid';
 import { PERMISSIONS } from '../constants';
-import { useGetReleasesQuery } from '../modules/releaseSlice';
-
-interface ReleasesPageQuery {
-  page?: number;
-  pageSize?: number;
-  filters?: {
-    $and?: Array<{
-      releasedAt?: {
-        $notNull?: boolean;
-      };
-    }>;
-  };
-}
+import { useGetReleasesQuery, GetAllReleasesQueryParams } from '../modules/releaseSlice';
 
 const ReleasesPage = () => {
   const [addReleaseDialogIsShown, setAddReleaseDialogIsShown] = React.useState(false);
   const [tabSelected, setTabSelected] = React.useState<'pending' | 'done'>('pending');
   const { formatMessage } = useIntl();
-  const [{ query }, setQuery] = useQueryParams<ReleasesPageQuery>();
+  const [{ query }, setQuery] = useQueryParams<GetAllReleasesQueryParams>();
   const response = useGetReleasesQuery(query);
 
   const { isLoading, isSuccess, isFetching, isError } = response;
@@ -53,11 +41,33 @@ const ReleasesPage = () => {
     setAddReleaseDialogIsShown((prev) => !prev);
   };
 
-  let totalEntries = 0;
-
-  if (isSuccess && !isFetching && response.currentData?.pagination) {
-    totalEntries = response.currentData?.pagination?.total;
+  if (isLoading || isFetching) {
+    return (
+      <Main aria-busy={isLoading}>
+        <HeaderLayout
+          title={formatMessage({
+            id: 'content-releases.pages.Releases.title',
+            defaultMessage: 'Releases',
+          })}
+          primaryAction={
+            <CheckPermissions permissions={PERMISSIONS.create}>
+              <Button startIcon={<Plus />} onClick={toggleAddReleaseDialog}>
+                {formatMessage({
+                  id: 'content-releases.header.actions.add-release',
+                  defaultMessage: 'New release',
+                })}
+              </Button>
+            </CheckPermissions>
+          }
+        />
+        <ContentLayout>
+          <LoadingIndicatorPage />
+        </ContentLayout>
+      </Main>
+    );
   }
+
+  const totalEntries = (isSuccess && response.currentData?.pagination?.total) || 0;
 
   const handleTabChange = (index: number) => {
     if (index === 0) {
@@ -95,10 +105,10 @@ const ReleasesPage = () => {
     }
   };
 
-  const status = isLoading || isFetching ? 'loading' : isError ? 'error' : 'success';
+  const status = isError ? 'error' : 'success';
 
   return (
-    <Main aria-busy={isLoading}>
+    <Main>
       <HeaderLayout
         title={formatMessage({
           id: 'content-releases.pages.Releases.title',
@@ -123,65 +133,61 @@ const ReleasesPage = () => {
         }
       />
       <ContentLayout>
-        {isLoading || isFetching ? (
-          <LoadingIndicatorPage />
-        ) : (
-          <>
-            <TabGroup
-              label={formatMessage({
-                id: 'content-releases.pages.Releases.tab-group.label',
-                defaultMessage: 'Releases list',
-              })}
-              variant="simple"
-              initialSelectedTabIndex={['pending', 'done'].indexOf(tabSelected)}
-              onTabChange={handleTabChange}
-            >
-              <Tabs>
-                <Tab>
-                  {formatMessage({
-                    id: 'content-releases.pages.Releases.tab.pending',
-                    defaultMessage: 'Pending',
-                  })}
-                </Tab>
-                <Tab>
-                  {formatMessage({
-                    id: 'content-releases.pages.Releases.tab.done',
-                    defaultMessage: 'Done',
-                  })}
-                </Tab>
-              </Tabs>
-              <TabPanels>
-                {/* Pending releases */}
-                <TabPanel>
-                  <ReleasesGrid
-                    status={status}
-                    sectionTitle="pending"
-                    releases={response?.currentData?.data}
-                  />
-                </TabPanel>
-                {/* Done releases */}
-                <TabPanel>
-                  <ReleasesGrid
-                    status={status}
-                    sectionTitle="done"
-                    releases={response?.currentData?.data}
-                  />
-                </TabPanel>
-              </TabPanels>
-            </TabGroup>
-            {response?.currentData?.pagination && (
-              <Box paddingTop={4}>
-                <Flex alignItems="flex-end" justifyContent="space-between">
-                  <PageSizeURLQuery
-                    options={['8', '16', '32', '64']}
-                    defaultValue={response.currentData.pagination.pageSize.toString()}
-                  />
-                  <PaginationURLQuery pagination={response?.currentData?.pagination} />
-                </Flex>
-              </Box>
-            )}
-          </>
-        )}
+        <>
+          <TabGroup
+            label={formatMessage({
+              id: 'content-releases.pages.Releases.tab-group.label',
+              defaultMessage: 'Releases list',
+            })}
+            variant="simple"
+            initialSelectedTabIndex={['pending', 'done'].indexOf(tabSelected)}
+            onTabChange={handleTabChange}
+          >
+            <Tabs>
+              <Tab>
+                {formatMessage({
+                  id: 'content-releases.pages.Releases.tab.pending',
+                  defaultMessage: 'Pending',
+                })}
+              </Tab>
+              <Tab>
+                {formatMessage({
+                  id: 'content-releases.pages.Releases.tab.done',
+                  defaultMessage: 'Done',
+                })}
+              </Tab>
+            </Tabs>
+            <TabPanels>
+              {/* Pending releases */}
+              <TabPanel>
+                <ReleasesGrid
+                  status={status}
+                  sectionTitle="pending"
+                  releases={response?.currentData?.data}
+                />
+              </TabPanel>
+              {/* Done releases */}
+              <TabPanel>
+                <ReleasesGrid
+                  status={status}
+                  sectionTitle="done"
+                  releases={response?.currentData?.data}
+                />
+              </TabPanel>
+            </TabPanels>
+          </TabGroup>
+          {response?.currentData?.pagination && (
+            <Box paddingTop={4}>
+              <Flex alignItems="flex-end" justifyContent="space-between">
+                <PageSizeURLQuery
+                  options={['8', '16', '32', '64']}
+                  defaultValue={response.currentData.pagination.pageSize.toString()}
+                />
+                <PaginationURLQuery pagination={response?.currentData?.pagination} />
+              </Flex>
+            </Box>
+          )}
+        </>
       </ContentLayout>
       {addReleaseDialogIsShown && <AddReleaseDialog handleClose={toggleAddReleaseDialog} />}
     </Main>
