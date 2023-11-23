@@ -115,7 +115,9 @@ export const ROUTES_CE: Route[] = [
   },
   {
     async Component() {
-      const { ProtectedTransferTokenCreateView } = await import('./pages/TransferTokens/ProtectedCreateView');
+      const { ProtectedTransferTokenCreateView } = await import(
+        './pages/TransferTokens/ProtectedCreateView'
+      );
 
       return ProtectedTransferTokenCreateView;
     },
@@ -124,7 +126,9 @@ export const ROUTES_CE: Route[] = [
   },
   {
     async Component() {
-      const { ProtectedTransferTokenListView } = await import('./pages/TransferTokens/ProtectedListView');
+      const { ProtectedTransferTokenListView } = await import(
+        './pages/TransferTokens/ProtectedListView'
+      );
 
       return ProtectedTransferTokenListView;
     },
@@ -133,7 +137,9 @@ export const ROUTES_CE: Route[] = [
   },
   {
     async Component() {
-      const { ProtectedTransferTokenCreateView } = await import('./pages/TransferTokens/ProtectedEditView');
+      const { ProtectedTransferTokenCreateView } = await import(
+        './pages/TransferTokens/ProtectedEditView'
+      );
 
       return ProtectedTransferTokenCreateView;
     },
