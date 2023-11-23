@@ -28,4 +28,4 @@ const extendCTBInitialDataMiddleware = () => {
   };
 };
 
-export default extendCTBInitialDataMiddleware;
+export { extendCTBInitialDataMiddleware };

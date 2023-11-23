@@ -26,7 +26,7 @@ import {
   TableHeader,
 } from '@strapi/helper-plugin';
 import { AxiosError, AxiosResponse } from 'axios';
-import qs from 'qs';
+import * as qs from 'qs';
 import { IntlShape, MessageDescriptor, useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
 import { useSelector } from 'react-redux';

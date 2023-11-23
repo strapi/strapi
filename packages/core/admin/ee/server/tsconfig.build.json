@@ -1,7 +1,9 @@
 {
-  "extends": "./ee/server/tsconfig",
+  "extends": "./tsconfig",
   "compilerOptions": {
-    "outDir": "dist"
+    "rootDir": "../../",
+    "baseUrl": ".",
+    "outDir": "./dist"
   },
   "include": ["src"],
   "exclude": ["*.test.*"]

@@ -1,5 +1,6 @@
 import { merge, isEmpty, set, propEq } from 'lodash/fp';
 import strapiUtils from '@strapi/utils';
+import { Common, Attribute, EntityService } from '@strapi/types';
 
 const { hasDraftAndPublish, isVisibleAttribute } = strapiUtils.contentTypes;
 const { isAnyToMany } = strapiUtils.relations;
@@ -12,22 +13,30 @@ const isRelation = propEq('type', 'relation');
 const isComponent = propEq('type', 'component');
 const isDynamicZone = propEq('type', 'dynamiczone');
 
+// TODO: Import from @strapi/types when it's available there
+type Model = Parameters<typeof isVisibleAttribute>[0];
+export type Populate = EntityService.Params.Populate.Any<Common.UID.Schema>;
+
+type PopulateOptions = {
+  initialPopulate?: Populate;
+  countMany?: boolean;
+  countOne?: boolean;
+  maxLevel?: number;
+};
+
 /**
  * Populate the model for relation
- * @param {Object} attribute - Attribute containing a relation
- * @param {String} attribute.relation - type of relation
+ * @param attribute - Attribute containing a relation
+ * @param attribute.relation - type of relation
  * @param model - Model of the populated entity
  * @param attributeName
- * @param {Object} options - Options to apply while populating
- * @param {Boolean} options.countMany
- * @param {Boolean} options.countOne
- * @returns {true|{count: true}}
+ * @param options - Options to apply while populating
  */
 function getPopulateForRelation(
-  attribute: any,
-  model: any,
-  attributeName: any,
-  { countMany, countOne, initialPopulate }: any
+  attribute: Attribute.Any,
+  model: Model,
+  attributeName: string,
+  { countMany, countOne, initialPopulate }: PopulateOptions
 ) {
   const isManyRelation = isAnyToMany(attribute);
 
@@ -49,19 +58,18 @@ function getPopulateForRelation(
 
 /**
  * Populate the model for Dynamic Zone components
- * @param {Object} attribute - Attribute containing the components
- * @param {String[]} attribute.components - IDs of components
- * @param {Object} options - Options to apply while populating
- * @param {Boolean} options.countMany
- * @param {Boolean} options.countOne
- * @param {Number} options.maxLevel
- * @param {Number} level
- * @returns {{populate: Object}}
+ * @param attribute - Attribute containing the components
+ * @param attribute.components - IDs of components
+ * @param options - Options to apply while populating
  */
-function getPopulateForDZ(attribute: any, options: any, level: any) {
+function getPopulateForDZ(
+  attribute: Attribute.DynamicZone,
+  options: PopulateOptions,
+  level: number
+) {
   // Use fragments to populate the dynamic zone components
   const populatedComponents = (attribute.components || []).reduce(
-    (acc: any, componentUID: any) => ({
+    (acc: any, componentUID: Common.UID.Component) => ({
       ...acc,
       [componentUID]: {
         populate: getDeepPopulate(componentUID, options, level + 1),
@@ -75,21 +83,26 @@ function getPopulateForDZ(attribute: any, options: any, level: any) {
 
 /**
  * Get the populated value based on the type of the attribute
- * @param {String} attributeName - Name of the attribute
- * @param {Object} model - Model of the populated entity
- * @param {Object} model.attributes
- * @param {Object} options - Options to apply while populating
- * @param {Boolean} options.countMany
- * @param {Boolean} options.countOne
- * @param {Number} options.maxLevel
- * @param {Number} level
- * @returns {Object}
+ * @param attributeName - Name of the attribute
+ * @param model - Model of the populated entity
+ * @param model.attributes
+ * @param options - Options to apply while populating
+ * @param options.countMany
+ * @param options.countOne
+ * @param options.maxLevel
+ * @param level
  */
-function getPopulateFor(attributeName: any, model: any, options: any, level: any): any {
+function getPopulateFor(
+  attributeName: string,
+  model: any,
+  options: PopulateOptions,
+  level: number
+): { [key: string]: boolean | object } {
   const attribute = model.attributes[attributeName];
 
   switch (attribute.type) {
     case 'relation':
+      // @ts-expect-error - TODO: support populate count typing
       return {
         [attributeName]: getPopulateForRelation(attribute, model, attributeName, options),
       };
@@ -114,17 +127,18 @@ function getPopulateFor(attributeName: any, model: any, options: any, level: any
 
 /**
  * Deeply populate a model based on UID
- * @param {String} uid - Unique identifier of the model
- * @param {Object} [options] - Options to apply while populating
- * @param {Boolean} [options.countMany=false]
- * @param {Boolean} [options.countOne=false]
- * @param {Number} [options.maxLevel=Infinity]
- * @param {Number} [level=1] - Current level of nested call
- * @returns {Object}
+ * @param uid - Unique identifier of the model
+ * @param options - Options to apply while populating
+ * @param level - Current level of nested call
  */
 const getDeepPopulate = (
-  uid: any,
-  { initialPopulate = {}, countMany = false, countOne = false, maxLevel = Infinity }: any = {},
+  uid: Common.UID.Schema,
+  {
+    initialPopulate = {} as any,
+    countMany = false,
+    countOne = false,
+    maxLevel = Infinity,
+  }: PopulateOptions = {},
   level = 1
 ) => {
   if (level > maxLevel) {
@@ -134,13 +148,19 @@ const getDeepPopulate = (
   const model = strapi.getModel(uid);
 
   return Object.keys(model.attributes).reduce(
-    (populateAcc, attributeName) =>
+    (populateAcc, attributeName: string) =>
       merge(
         populateAcc,
         getPopulateFor(
           attributeName,
           model,
-          { initialPopulate: initialPopulate?.[attributeName], countMany, countOne, maxLevel },
+          {
+            // @ts-expect-error - improve types
+            initialPopulate: initialPopulate?.[attributeName],
+            countMany,
+            countOne,
+            maxLevel,
+          },
           level
         )
       ),
@@ -152,12 +172,12 @@ const getDeepPopulate = (
  * getDeepPopulateDraftCount works recursively on the attributes of a model
  * creating a populated object to count all the unpublished relations within the model
  * These relations can be direct to this content type or contained within components/dynamic zones
- * @param {String} uid of the model
- * @returns {Object} result
- * @returns {Object} result.populate
- * @returns {Boolean} result.hasRelations
+ * @param  uid of the model
+ * @returns result
+ * @returns result.populate
+ * @returns result.hasRelations
  */
-const getDeepPopulateDraftCount = (uid: any) => {
+const getDeepPopulateDraftCount = (uid: Common.UID.Schema) => {
   const model = strapi.getModel(uid);
   let hasRelations = false;
 
@@ -213,13 +233,9 @@ const getDeepPopulateDraftCount = (uid: any) => {
 
 /**
  *  Create a Strapi populate object which populates all attribute fields of a Strapi query.
- *
- * @param {string} uid
- * @param {Object} query
- * @returns {Object} populate object
  */
-const getQueryPopulate = async (uid: any, query: any): Promise<any> => {
-  let populateQuery = {};
+const getQueryPopulate = async (uid: Common.UID.Schema, query: object): Promise<Populate> => {
+  let populateQuery: Populate = {};
 
   await strapiUtils.traverse.traverseQueryFilters(
     /**
@@ -239,6 +255,7 @@ const getQueryPopulate = async (uid: any, query: any): Promise<any> => {
       // Populate all relations, components and media
       if (isRelation(attribute) || isMedia(attribute) || isComponent(attribute)) {
         const populatePath = path.attribute.replace(/\./g, '.populate.');
+        // @ts-expect-error - lodash doesn't resolve the Populate type correctly
         populateQuery = set(populatePath, {}, populateQuery);
       }
     },

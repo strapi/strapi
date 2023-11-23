@@ -12,14 +12,17 @@ import { useTypedSelector } from '../store/hooks';
 import { getTranslation } from '../utils/getTranslation';
 import { getInitialLocale } from '../utils/locales';
 
+import type { I18nBaseQuery } from '../types';
+
 const LocalePicker = () => {
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
   const locales = useTypedSelector((state) => state.i18n_locales.locales);
-  const [{ query }, setQuery] = useQueryParams<{
-    page: number;
-    plugins: { i18n: { locale: string } };
-  }>();
+  interface Query extends I18nBaseQuery {
+    page?: number;
+  }
+
+  const [{ query }, setQuery] = useQueryParams<Query>();
   const match = useRouteMatch<{ slug: string }>('/content-manager/collectionType/:slug');
   const isContentTypeLocalized = useContentTypeHasI18n();
   const { createPermissions, readPermissions } = useContentTypePermissions(match?.params.slug);

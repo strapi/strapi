@@ -3,7 +3,8 @@
   "include": ["./src"],
   "exclude": ["node_modules", "**/__tests__/**"],
   "compilerOptions": {
-    "rootDir": "./src",
-    "outDir": "./dist/server"
+    "rootDir": "../",
+    "baseUrl": ".",
+    "outDir": "./dist"
   }
 }
