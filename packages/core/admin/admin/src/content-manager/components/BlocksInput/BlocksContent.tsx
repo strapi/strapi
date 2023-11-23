@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { Box } from '@strapi/design-system';
+import { Transforms } from 'slate';
 import {
   type ReactEditor,
   type RenderElementProps,
@@ -69,7 +70,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
     [blocks]
   );
 
-  const handleEnter = () => {
+  const handleEnter = (event: React.KeyboardEvent<HTMLElement>) => {
     if (!editor.selection) {
       return;
     }
@@ -80,6 +81,12 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
     // Find the matching block
     const selectedBlock = Object.values(blocks).find((block) => block.matchNode(selectedNode));
     if (!selectedBlock) {
+      return;
+    }
+
+    // Allow forced line breaks when shift is pressed
+    if (event.shiftKey && selectedNode.type !== 'image') {
+      Transforms.insertText(editor, '\n');
       return;
     }
 
@@ -127,7 +134,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
   const handleKeyDown: React.KeyboardEventHandler<HTMLElement> = (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
-      handleEnter();
+      handleEnter(event);
     }
     if (event.key === 'Backspace') {
       handleBackspaceEvent(event);
