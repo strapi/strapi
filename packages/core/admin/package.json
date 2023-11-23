@@ -40,7 +40,6 @@
       "default": "./strapi-server.js"
     },
     "./cli": {
-      "types": "./dist/cli/index.d.ts",
       "source": "./_internal/index.ts",
       "import": "./dist/cli.mjs",
       "require": "./dist/cli.js",

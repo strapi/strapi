@@ -3,7 +3,7 @@ import { validateRegisterProviderAction } from '../../validation/action-provider
 
 import domain from './index';
 import type { Action, CreateActionPayload } from './index';
-import type { Permission } from '../permission';
+import type { Permission } from '../../../../shared/contracts/shared';
 
 type Options = Parameters<typeof providerFactory>['0'];
 
