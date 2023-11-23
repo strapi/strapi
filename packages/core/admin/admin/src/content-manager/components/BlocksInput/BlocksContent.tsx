@@ -57,8 +57,8 @@ const DragButton = styled(Flex)`
   }
 `;
 
-const NOT_DRAGGABLE_ITEMS = ['list', 'link'];
-const NOT_DROPPABLE_ITEMS = ['list', 'link'];
+const NOT_DRAGGABLE_ITEMS = ['list'];
+const NOT_DROPPABLE_ITEMS = ['list'];
 
 type DragAndDropElementProps = {
   children: RenderElementProps['children'];
@@ -239,6 +239,9 @@ const baseRenderElement = ({ props, blocks, editor }: BaseRenderElementProps) =>
   const blockMatch = Object.values(blocks).find((block) => block.matchNode(props.element));
   const block = blockMatch || blocks.paragraph;
   const nodePath = ReactEditor.findPath(editor, props.element);
+
+  // Link is inline block
+  if (block.value.type === 'link') return block.renderElement(props);
 
   return (
     <DragAndDropElement
