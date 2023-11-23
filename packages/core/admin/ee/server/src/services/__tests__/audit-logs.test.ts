@@ -1,4 +1,3 @@
-import EE from '@strapi/strapi/dist/utils/ee';
 import auditLogs from '@strapi/provider-audit-logs-local';
 import { scheduleJob } from 'node-schedule';
 import createAuditLogsService from '../audit-logs';
@@ -6,28 +5,28 @@ import createEventHub from '../../../../../../strapi/dist/services/event-hub';
 import '@strapi/types';
 import { LoadedStrapi } from '@strapi/types';
 
-const { register } = auditLogs;
-
 jest.mock('../../../../../server/src/register');
 
 jest.mock('../../utils', () => ({
   getService: jest.fn().mockReturnValue({}),
 }));
 
-jest.mock('@strapi/strapi/dist/utils/ee', () => ({
-  features: {
-    isEnabled: jest.fn(),
-    get: jest.fn(),
-  },
-}));
-
 jest.mock('@strapi/provider-audit-logs-local', () => ({
-  register: jest.fn(),
+  register: jest.fn(() => {
+    return {
+      saveEvent: jest.fn(),
+      findOne: jest.fn(),
+      findMany: jest.fn(),
+      deleteExpiredEvents: jest.fn(),
+    };
+  }),
 }));
 
 jest.mock('node-schedule', () => ({
   scheduleJob: jest.fn(),
 }));
+
+const { register } = auditLogs;
 
 // import eeAdminRegister from '../../register';
 
@@ -41,16 +40,17 @@ describe('Audit logs service', () => {
   });
 
   describe('Init with audit logs disabled', () => {
-    beforeAll(() => {
-      // @ts-expect-error - isEnabled is a mock
-      EE.features.isEnabled.mockReturnValue(false);
-    });
-
     it('should not register the audit logs service when is disabled by the user', async () => {
       const eeAdminRegister = require('../../register').default;
       const mockAdd = jest.fn();
 
       const strapi = {
+        ee: {
+          features: {
+            isEnabled: jest.fn().mockReturnValue(false),
+            get: jest.fn(),
+          },
+        },
         add: mockAdd,
         config: {
           get: () => false,
@@ -66,6 +66,12 @@ describe('Audit logs service', () => {
       const mockSubscribe = jest.fn();
 
       const strapi = {
+        ee: {
+          features: {
+            isEnabled: jest.fn().mockReturnValue(false),
+            get: jest.fn(),
+          },
+        },
         add: jest.fn(),
         config: {
           get(key: any) {
@@ -94,15 +100,13 @@ describe('Audit logs service', () => {
       expect(mockSubscribe).not.toHaveBeenCalled();
 
       // Should subscribe to events when license gets enabled
-      // @ts-expect-error - isEnabled is a mock
-      EE.features.isEnabled.mockImplementationOnce(() => true);
+      jest.mocked(strapi.ee.features.isEnabled).mockImplementationOnce(() => true);
       await strapi.eventHub.emit('ee.enable');
       expect(mockSubscribe).toHaveBeenCalled();
 
       // Should unsubscribe to events when license gets disabled
       mockSubscribe.mockClear();
-      // @ts-expect-error - isEnabled is a mock
-      EE.features.isEnabled.mockImplementationOnce(() => false);
+      jest.mocked(strapi.ee.features.isEnabled).mockImplementationOnce(() => false);
       await strapi.eventHub.emit('ee.disable');
       expect(mockSubscribe).not.toHaveBeenCalled();
 
@@ -128,8 +132,6 @@ describe('Audit logs service', () => {
     let strapi = {} as LoadedStrapi;
 
     beforeAll(() => {
-      // @ts-expect-error - isEnabled is a mock
-      EE.features.isEnabled.mockReturnValue(true);
       // @ts-expect-error - register is a mock
       register.mockReturnValue({
         saveEvent: mockSaveEvent,
@@ -141,6 +143,17 @@ describe('Audit logs service', () => {
       scheduleJob.mockImplementation(mockScheduleJob);
 
       strapi = {
+        ee: {
+          features: {
+            isEnabled(name: string) {
+              if (name === 'audit-logs') {
+                return true;
+              }
+              return false;
+            },
+            get: jest.fn(),
+          },
+        },
         admin: {
           services: {
             permission: {

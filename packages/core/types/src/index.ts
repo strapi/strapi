@@ -109,6 +109,15 @@ export interface Strapi extends Container {
   db?: Database;
   app: any;
   EE?: boolean;
+  ee: {
+    seats: number | null | undefined;
+    isEE: boolean;
+    features: {
+      isEnabled: (feature: string) => boolean;
+      list: () => { name: string; [key: string]: any }[];
+      get: (feature: string) => { name: string; [key: string]: any };
+    };
+  };
   components: Shared.Components;
   reload: Reloader;
   config: ConfigProvider;

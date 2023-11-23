@@ -3,16 +3,6 @@ import { isSsoLocked } from '../sso-lock';
 // allow toggling the feature within tests
 let ssoEnabled = true;
 
-jest.mock('@strapi/strapi/dist/utils/ee', () => {
-  return {
-    features: {
-      isEnabled() {
-        return ssoEnabled;
-      },
-    },
-  };
-});
-
 describe('isSsoLocked', () => {
   const lockedRoles = ['1', '2'];
 
@@ -53,6 +43,13 @@ describe('isSsoLocked', () => {
         }),
       };
     }),
+    ee: {
+      features: {
+        isEnabled() {
+          return ssoEnabled;
+        },
+      },
+    },
   } as any;
 
   afterEach(() => {
