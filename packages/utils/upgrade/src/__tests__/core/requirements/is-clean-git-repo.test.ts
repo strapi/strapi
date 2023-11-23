@@ -9,6 +9,7 @@ const noop = () => {};
 const mockSimpleGit = {
   checkIsRepo: jest.fn(),
   status: jest.fn(),
+  version: jest.fn(),
 };
 
 describe('Is Clean Git Repo', () => {
@@ -27,12 +28,34 @@ describe('Is Clean Git Repo', () => {
 
   beforeEach(() => {
     jest.spyOn(console, 'warn').mockImplementation(noop);
+    mockSimpleGit.version.mockResolvedValue('git version 2.24.3 (Apple Git-128)');
     mockSimpleGit.checkIsRepo.mockReset();
     mockSimpleGit.status.mockReset();
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  test('Git is not installed', async () => {
+    mockSimpleGit.version.mockRejectedValue(new Error('Git is not installed'));
+
+    const confirm = jest.fn().mockResolvedValue(false);
+    const params = { cwd: '/path/to/repo', logger, confirm, force: false };
+
+    await expect(isCleanGitRepo(params)).rejects.toThrow('Aborted');
+    expect(mockSimpleGit.version).toHaveBeenCalled();
+    expect(mockSimpleGit.version).rejects.toThrow('Git is not installed');
+    // expect(mockSimpleGit.checkIsRepo).not.toHaveBeenCalled();
+    // expect(mockSimpleGit.status).not.toHaveBeenCalled();
+    expect(console.warn).toHaveBeenCalledWith(
+      chalk.yellow(`[WARN]\t[${isoString}]`),
+      'Unable to proceed with the upgrade:'
+    );
+    expect(console.warn).toHaveBeenCalledWith(
+      chalk.yellow(`[WARN]\t[${isoString}]`),
+      '- Git is not installed.'
+    );
   });
 
   test('Repo exists and is clean', async () => {

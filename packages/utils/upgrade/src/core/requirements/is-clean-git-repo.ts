@@ -12,20 +12,34 @@ export const isCleanGitRepo = async ({ cwd, logger, force, confirm }: Params) =>
   const repoStatus = {
     isRepo: true,
     isClean: true,
+    isGitInstalled: true,
   };
 
-  // Check if the path is under version control
-  repoStatus.isRepo = await git.checkIsRepo();
+  try {
+    // Check if Git is installed
+    await git.version();
+    // Check if the path is under version control
+    repoStatus.isRepo = await git.checkIsRepo();
 
-  // Check if the git tree is clean
-  if (repoStatus.isRepo) {
-    const status = await git.status();
-    repoStatus.isClean = status.isClean();
+    // Check if the git tree is clean
+    if (repoStatus.isRepo) {
+      const status = await git.status();
+      repoStatus.isClean = status.isClean();
+    }
+  } catch (err) {
+    repoStatus.isGitInstalled = false;
   }
 
   // Ask the user if they want to continue with the process
-  if (!force && confirm && (!repoStatus.isRepo || !repoStatus.isClean)) {
+  if (
+    !force &&
+    confirm &&
+    (!repoStatus.isRepo || !repoStatus.isClean || !repoStatus.isGitInstalled)
+  ) {
     logger.warn(`Unable to proceed with the upgrade:`);
+    if (!repoStatus.isGitInstalled) {
+      logger.warn('- Git is not installed.');
+    }
     if (!repoStatus.isRepo) {
       logger.warn('- The codebase is not under version control.');
     }
