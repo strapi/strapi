@@ -30,6 +30,51 @@ describe('Document Service', () => {
       })
     );
 
+    it('delete a document with a component', async () => {
+      const componentData = {
+        comp: {
+          text: 'comp-1',
+        },
+        dz: [
+          {
+            __component: 'article.dz-comp',
+            name: 'dz-comp-1',
+          },
+        ],
+      } as const;
+
+      const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+      // update article
+      const updatedArticle = await strapi.documents(ARTICLE_UID).update(articleDb.documentId, {
+        locale: 'en',
+        data: {
+          comp: componentData.comp,
+          dz: [...componentData.dz],
+        },
+        populate: ['comp', 'dz'],
+      });
+
+      // delete article
+      await strapi.documents(ARTICLE_UID).delete(articleDb.documentId, { locale: 'en' });
+
+      // Components should not be in the database anymore
+      const compTable = strapi.db.metadata.get('article.comp').tableName;
+      const dzTable = strapi.db.metadata.get('article.dz-comp').tableName;
+
+      // const comp = await strapi.db.connection().findOne(updatedArticle.comp.id as any);
+      const comp = await strapi.db
+        .getConnection(compTable)
+        .where({ id: updatedArticle.comp.id })
+        .first();
+      const dz = await strapi.db
+        .getConnection(dzTable)
+        .where({ id: updatedArticle.dz.at(0)!.id })
+        .first();
+
+      expect(comp).toBeUndefined();
+      expect(dz).toBeUndefined();
+    });
+
     it(
       'delete a document locale',
       testInTransaction(async () => {

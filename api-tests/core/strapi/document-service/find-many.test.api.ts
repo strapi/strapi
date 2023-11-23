@@ -18,8 +18,9 @@ describe('Document Service', () => {
 
   describe('FindMany and Count', () => {
     it('find many documents should only return drafts by default', async () => {
-      const params = {};
+      const params = { populate: '*' } as const;
       const articles = await strapi.documents('api::article.article').findMany(params);
+
       articles.forEach((article) => {
         expect(article.publishedAt).toBe(null);
       });
@@ -32,7 +33,8 @@ describe('Document Service', () => {
     it('find documents by name returns default locale and draft version', async () => {
       const params = {
         filters: { title: 'Article1-Draft-EN' },
-      };
+        populate: '*',
+      } as const;
 
       const articlesDb = await findArticlesDb(params.filters);
 
@@ -51,7 +53,8 @@ describe('Document Service', () => {
       const params = {
         locale: 'fr',
         filters: { title: 'Article1-Draft-FR' },
-      };
+        populate: '*',
+      } as const;
 
       // There should not be a fr article called Article1-Draft-EN
       const articles = await strapi.documents('api::article.article').findMany(params);

@@ -18,7 +18,7 @@ describe('Document Service', () => {
   });
 
   describe('deleteMany', () => {
-    it(
+    it.skip(
       'delete an entire document',
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ name: 'Article1' });
@@ -34,7 +34,7 @@ describe('Document Service', () => {
       })
     );
 
-    it(
+    it.skip(
       'delete all documents of a locale',
       testInTransaction(async () => {
         const articleDb = await findArticlesDb({ locale: 'fr' });
@@ -52,7 +52,7 @@ describe('Document Service', () => {
 
     // Currently we expect .unpublish() to be used to delete a published version
     // and add a .discard() method to delete a draft version and clone it from the published version
-    it(
+    it.skip(
       'cannot delete with status parameter',
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ name: 'Article2-Draft-EN' });

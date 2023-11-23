@@ -3,6 +3,7 @@ import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper
 import { testInTransaction } from '../../../utils/index';
 import resources from './resources/index';
 import { ARTICLE_UID, findArticleDb, findArticlesDb } from './utils';
+import { clone } from 'lodash';
 
 describe('Document Service', () => {
   let testUtils;
@@ -76,6 +77,43 @@ describe('Document Service', () => {
             publishedAt: null,
           });
         });
+      })
+    );
+
+    it(
+      'clone a document with components',
+      testInTransaction(async () => {
+        const articlesDb = await findArticlesDb({ documentId: 'Article1' });
+        const documentId = articlesDb.at(0)!.documentId;
+
+        const componentData = {
+          comp: {
+            text: 'comp-1',
+          },
+          dz: [
+            {
+              __component: 'article.dz-comp',
+              name: 'dz-comp-1',
+            },
+          ],
+        } as const;
+
+        // update article
+        const clonedArticle = await strapi.documents(ARTICLE_UID).clone(documentId, {
+          locale: 'en',
+          data: {
+            comp: componentData.comp,
+            dz: [...componentData.dz],
+          },
+          populate: ['comp', 'dz'],
+        });
+
+        expect(clonedArticle.versions.length).toBe(1);
+        expect(clonedArticle.versions[0]).toMatchObject({
+          ...componentData,
+          publishedAt: null,
+        });
+        // Published articles should have the components
       })
     );
 

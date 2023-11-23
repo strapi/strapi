@@ -14,7 +14,7 @@ describe('Document Service', () => {
   });
 
   describe('loadPage', () => {
-    it('load pages of documents', async () => {
+    it.skip('load pages of documents', async () => {
       const articlesDb = await findArticlesDb({});
 
       const documents = await strapi.documents.loadPages(

@@ -40,6 +40,41 @@ describe('Document Service', () => {
     );
 
     it(
+      'can create document with components',
+      testInTransaction(async () => {
+        const article = await strapi.documents(ARTICLE_UID).create({
+          data: {
+            title: 'Article',
+            comp: {
+              text: 'comp-1',
+            },
+            dz: [
+              {
+                __component: 'article.dz-comp',
+                name: 'dz-comp-1',
+              },
+            ],
+          },
+          populate: ['comp', 'dz'],
+        });
+
+        // verify that the returned document was updated
+        expect(article).toMatchObject({
+          title: 'Article',
+          comp: {
+            text: 'comp-1',
+          },
+          dz: [
+            {
+              __component: 'article.dz-comp',
+              name: 'dz-comp-1',
+            },
+          ],
+        });
+      })
+    );
+
+    it(
       'can create an article in french',
       testInTransaction(async () => {
         const article = await strapi.documents(ARTICLE_UID).create({

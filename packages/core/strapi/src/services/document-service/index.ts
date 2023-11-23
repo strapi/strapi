@@ -29,7 +29,6 @@ const { transformParamsToQuery } = convertQueryParams;
  * TODO: Entity Validation - Uniqueness across same locale and publication status
  * TODO: File upload
  * TODO: replace 'any'
- * TODO: countVersions()
  * TODO: availableLocales
  *
  */

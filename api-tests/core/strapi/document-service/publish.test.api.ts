@@ -19,7 +19,7 @@ describe('Document Service', () => {
 
   describe('Publish', () => {
     it(
-      'publish all locales of a document',
+      'publish an entire document',
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 

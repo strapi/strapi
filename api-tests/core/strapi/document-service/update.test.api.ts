@@ -46,6 +46,39 @@ describe('Document Service', () => {
     );
 
     it(
+      'update document component',
+      testInTransaction(async () => {
+        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+        const dataToUpdate = {
+          comp: {
+            text: 'comp-1',
+          },
+          dz: [
+            {
+              __component: 'article.dz-comp',
+              name: 'dz-comp-1',
+            },
+          ],
+        } as const;
+
+        const article = await strapi.documents(ARTICLE_UID).update(articleDb.documentId, {
+          data: {
+            comp: dataToUpdate.comp,
+            dz: [...dataToUpdate.dz],
+          },
+          populate: ['comp', 'dz'],
+        });
+
+        // verify that the returned document was updated
+        expect(article).toMatchObject({
+          ...articleDb,
+          ...dataToUpdate,
+          updatedAt: article.updatedAt,
+        });
+      })
+    );
+
+    it(
       'update a document locale',
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-FR' });
