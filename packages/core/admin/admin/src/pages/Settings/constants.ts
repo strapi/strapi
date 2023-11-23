@@ -115,33 +115,27 @@ export const ROUTES_CE: Route[] = [
   },
   {
     async Component() {
-      const { ProtectedTransferTokenCreateView } = await import(
-        './pages/TransferTokens/ProtectedCreateView'
-      );
+      const { ProtectedCreateView } = await import('./pages/TransferTokens/CreateView');
 
-      return ProtectedTransferTokenCreateView;
+      return ProtectedCreateView;
     },
     to: '/settings/transfer-tokens/create',
     exact: true,
   },
   {
     async Component() {
-      const { ProtectedTransferTokenListView } = await import(
-        './pages/TransferTokens/ProtectedListView'
-      );
+      const { ProtectedListView } = await import('./pages/TransferTokens/ListView');
 
-      return ProtectedTransferTokenListView;
+      return ProtectedListView;
     },
     to: '/settings/transfer-tokens',
     exact: true,
   },
   {
     async Component() {
-      const { ProtectedTransferTokenCreateView } = await import(
-        './pages/TransferTokens/ProtectedEditView'
-      );
+      const { ProtectedEditView } = await import('./pages/TransferTokens/EditView');
 
-      return ProtectedTransferTokenCreateView;
+      return ProtectedEditView;
     },
     to: '/settings/transfer-tokens/:id',
     exact: true,

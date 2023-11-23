@@ -12,6 +12,7 @@ import {
   Typography,
 } from '@strapi/design-system';
 import {
+  CheckPagePermissions,
   Form,
   LoadingIndicatorPage,
   SettingsPageTitle,
@@ -66,11 +67,11 @@ const schema = yup.object().shape({
 
 const MSG_ERROR_NAME_TAKEN = 'Name already taken';
 
-interface LoadingViewProps {
+interface EditViewProps {
   transferTokenName?: string | null;
 }
 
-export const LoadingView = ({ transferTokenName = null }: LoadingViewProps) => {
+export const EditView = ({ transferTokenName = null }: EditViewProps) => {
   const { formatMessage } = useIntl();
   useFocusWhenNavigate();
 
@@ -206,7 +207,7 @@ const FormTransferTokenContainer = ({
   );
 };
 
-export const TransferTokenCreateView = () => {
+export const CreateView = () => {
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const { lockApp, unlockApp } = useOverlayBlocker();
@@ -470,5 +471,15 @@ export const TransferTokenCreateView = () => {
         }}
       </Formik>
     </Main>
+  );
+};
+
+export const ProtectedEditView = () => {
+  const permissions = useSelector(selectAdminPermissions);
+
+  return (
+    <CheckPagePermissions permissions={permissions.settings?.['transfer-tokens'].read}>
+      <EditView />
+    </CheckPagePermissions>
   );
 };

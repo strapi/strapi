@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { ContentLayout, HeaderLayout, LinkButton, Main } from '@strapi/design-system';
 import {
+  CheckPagePermissions,
   NoContent,
   NoPermissions,
   SettingsPageTitle,
@@ -72,7 +73,7 @@ const tableHeaders = [
   },
 ] as const;
 
-export const TransferTokenListView = () => {
+export const ListView = () => {
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
@@ -268,5 +269,15 @@ export const TransferTokenListView = () => {
         )}
       </ContentLayout>
     </Main>
+  );
+};
+
+export const ProtectedListView = () => {
+  const permissions = useSelector(selectAdminPermissions);
+
+  return (
+    <CheckPagePermissions permissions={permissions.settings?.['transfer-tokens'].main}>
+      <ListView />
+    </CheckPagePermissions>
   );
 };
