@@ -18,6 +18,7 @@ import {
 
 import type { RunnerConfiguration } from '../core';
 import type { Report, RunReports, TaskOptions } from '../types';
+import { isCleanGitRepo } from '../core/requirements/is-clean-git-repo';
 
 export const upgrade = async (options: TaskOptions) => {
   const timer = createTimer();
@@ -57,9 +58,12 @@ export const upgrade = async (options: TaskOptions) => {
     );
   }
 
-  const transformsRange = isExactModeActivated
-    ? createSemverRange(`=${target}`)
-    : createSemverRange(`>=${project.strapiVersion}`);
+  // check if the repo is clean
+  // TODO change force default to false when we add the force option to the CLI
+  await isCleanGitRepo({ cwd, logger, force: false, confirm: options.confirm });
+
+  // Create a version range for ">{current}"
+  const range: VersionRange = { from: project.strapiVersion, to: VersionRelease.Latest };
 
   // TODO: In the future, we should allow loading transforms from the user app (custom transforms)
   //       e.g: const userTransformsDir = path.join(cwd, 'transforms');
