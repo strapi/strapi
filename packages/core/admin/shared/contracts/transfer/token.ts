@@ -1,7 +1,6 @@
 import { Entity } from "@strapi/types";
 
 export interface TransferToken {
-  accessKey: unknown;
   createdAt: string;
   description: string;
   expiresAt: null | string;
@@ -13,6 +12,10 @@ export interface TransferToken {
 }
 
 type UpdatePayload = Partial<Pick<TransferToken, 'description' | 'lifespan' | 'name' | 'permissions'>>;
+
+type CreateResponsePayload = TransferToken & {
+    accessKey: string;
+}
 
 /**
  * GET /tokens/tokens/:id - Get single token
@@ -38,7 +41,7 @@ export declare namespace Create {
     }
 
     export interface Response {
-        data: TransferToken;
+        data: CreateResponsePayload;
     }
 }
 

@@ -103,9 +103,9 @@ interface FormTransferTokenContainerProps {
   errors: FormikErrors<Pick<TransferToken, 'description' | 'name' | 'lifespan' | 'permissions'>>;
   onChange: ({ target: { name, value } }: { target: { name: string; value: string } }) => void;
   canEditInputs: boolean;
-  values: Partial<TransferToken>;
+  values: Partial<TransferToken | Create.Response['data']> | null;
   isCreating: boolean;
-  transferToken: Partial<TransferToken>;
+  transferToken: Partial<TransferToken | Create.Response['data']> | null;
 }
 
 const FormTransferTokenContainer = ({
@@ -214,8 +214,10 @@ export const EditView = () => {
   const toggleNotification = useNotification();
   const history = useHistory();
   const { state: locationState } = useLocation<{ transferToken: TransferToken }>();
-  const [transferToken, setTransferToken] = React.useState(
-    locationState?.transferToken.accessKey
+  const [transferToken, setTransferToken] = React.useState<
+    TransferToken | Create.Response['data'] | null
+  >(
+    'accessKey' in locationState?.transferToken
       ? {
           ...locationState.transferToken,
         }
@@ -452,9 +454,11 @@ export const EditView = () => {
               />
               <ContentLayout>
                 <Flex direction="column" alignItems="stretch" gap={6}>
-                  {Boolean(transferToken?.name) && (
-                    <TokenBox token={transferToken?.accessKey} tokenType={TRANSFER_TOKEN_TYPE} />
-                  )}
+                  {transferToken &&
+                    Boolean(transferToken?.name) &&
+                    'accessKey' in transferToken && (
+                      <TokenBox token={transferToken.accessKey} tokenType={TRANSFER_TOKEN_TYPE} />
+                    )}
                   <FormTransferTokenContainer
                     errors={errors}
                     onChange={handleChange}
