@@ -521,12 +521,7 @@ class StrapiApp {
   runHookSeries = (name: string, asynchronous = false) =>
     asynchronous ? this.hooksDict[name].runSeriesAsync() : this.hooksDict[name].runSeries();
 
-  runHookWaterfall = (
-    name: string,
-    initialValue: unknown,
-    asynchronous = false,
-    store?: unknown
-  ) => {
+  runHookWaterfall = (name: string, initialValue: unknown, asynchronous = false, store?: Store) => {
     return asynchronous
       ? this.hooksDict[name].runWaterfallAsync(initialValue, store)
       : this.hooksDict[name].runWaterfall(initialValue, store);

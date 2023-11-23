@@ -61,14 +61,25 @@ interface StrapiAppSetting {
   links: StrapiAppSettingLink[];
 }
 
-type RunHookSeries = (hookName: string, async?: boolean) => unknown | Promise<unknown>;
+interface RunHookSeries {
+  (hookName: string, async: true): Promise<unknown>;
+  (hookName: string, async?: false): unknown;
+}
 
-type RunHookWaterfall = <InitialValue, Store>(
-  hookName: string,
-  initialValue: InitialValue,
-  asynchronous: false | undefined,
-  store: Store
-) => unknown | Promise<unknown>;
+interface RunHookWaterfall {
+  <InitialValue, Store>(
+    hookName: string,
+    initialValue: InitialValue,
+    asynchronous: true,
+    store?: Store
+  ): Promise<InitialValue>;
+  <InitialValue, Store>(
+    hookName: string,
+    initialValue: InitialValue,
+    asynchronous?: false,
+    store?: Store
+  ): InitialValue;
+}
 
 interface StrapiAppContextValue {
   menu: MenuItem[];

@@ -8,7 +8,7 @@ import { useFetchClient } from './useFetchClient';
 
 import type { AxiosResponse } from 'axios';
 
-type AllowedActions = Record<string, boolean>;
+export type AllowedActions = Record<string, boolean>;
 
 export const useRBAC = (
   permissionsToCheck: Record<string, Permission[]> = {},

@@ -1,16 +1,13 @@
-import { useCallback, useEffect, useState } from 'react';
+import { ComponentType, useCallback, useEffect, useState } from 'react';
 
-import { useCustomFields } from '@strapi/helper-plugin';
+import { CustomField, CustomFieldUID, useCustomFields } from '@strapi/helper-plugin';
 
-const componentStore = new Map();
+const componentStore = new Map<CustomFieldUID, ComponentType | undefined>();
 
 /**
- * @description
- * A hook to lazy load custom field components
- * @param {Array.<string>} componentUids - The uids to look up components
- * @returns object
+ * @description A hook to lazy load custom field components
  */
-const useLazyComponents = (componentUids = []) => {
+const useLazyComponents = (componentUids: CustomFieldUID[] = []) => {
   const [lazyComponentStore, setLazyComponentStore] = useState(Object.fromEntries(componentStore));
   /**
    * Start loading only if there are any components passed in
@@ -21,12 +18,15 @@ const useLazyComponents = (componentUids = []) => {
   const customFieldsRegistry = useCustomFields();
 
   useEffect(() => {
-    const setStore = (store) => {
+    const setStore = (store: Record<string, ComponentType | undefined>) => {
       setLazyComponentStore(store);
       setLoading(false);
     };
 
-    const lazyLoadComponents = async (uids, components) => {
+    const lazyLoadComponents = async (
+      uids: CustomFieldUID[],
+      components: Array<ReturnType<CustomField['components']['Input']>>
+    ) => {
       const modules = await Promise.all(components);
 
       uids.forEach((uid, index) => {
@@ -39,7 +39,9 @@ const useLazyComponents = (componentUids = []) => {
     if (newUids.length > 0) {
       setLoading(true);
 
-      const componentPromises = newUids.reduce((arrayOfPromises, uid) => {
+      const componentPromises = newUids.reduce<
+        Array<ReturnType<CustomField['components']['Input']>>
+      >((arrayOfPromises, uid) => {
         const customField = customFieldsRegistry.get(uid);
 
         if (customField) {
@@ -67,4 +69,4 @@ const useLazyComponents = (componentUids = []) => {
   return { isLazyLoading: loading, lazyComponentStore, cleanup };
 };
 
-export default useLazyComponents;
+export { useLazyComponents };

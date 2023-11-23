@@ -10,7 +10,7 @@ import { ContentTypeLayoutContext } from '../../contexts';
 import { useFetchContentTypeLayout } from '../../hooks';
 import { formatLayoutToApi } from '../../utils';
 import EditSettingsView from '../EditSettingsView';
-import EditViewLayoutManager from '../EditViewLayoutManager';
+import { EditViewLayoutManager } from '../EditViewLayoutManager';
 
 const SingleTypeRecursivePath = ({
   match: {

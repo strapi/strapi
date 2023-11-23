@@ -7,13 +7,17 @@ import {
   LoadingIndicatorPage,
   useNotification,
   useTracking,
+  useRBAC,
+  Permission,
+  AllowedActions,
 } from '@strapi/helper-plugin';
 import { Layer, Pencil } from '@strapi/icons';
-import PropTypes from 'prop-types';
+import { Entity } from '@strapi/types';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import { RouteComponentProps, useLocation } from 'react-router-dom';
 
+import { useTypedSelector } from '../../../core/store/hooks';
 import { useEnterprise } from '../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../selectors';
 import { InjectionZone } from '../../../shared/components/InjectionZone';
@@ -21,8 +25,9 @@ import CollectionTypeFormWrapper from '../../components/CollectionTypeFormWrappe
 import { DynamicZone } from '../../components/DynamicZone';
 import EditViewDataManagerProvider from '../../components/EditViewDataManagerProvider';
 import SingleTypeFormWrapper from '../../components/SingleTypeFormWrapper';
-import useLazyComponents from '../../hooks/useLazyComponents';
+import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { getTrad } from '../../utils';
+import { generatePermissionsObject } from '../../utils/permissions';
 
 import DeleteLink from './DeleteLink';
 import DraftAndPublishBadge from './DraftAndPublishBadge';
@@ -36,12 +41,29 @@ import { getFieldsActionMatchingPermissions } from './utils';
 // TODO: this seems suspicious
 const CTB_PERMISSIONS = [{ action: 'plugin::content-type-builder.read', subject: null }];
 
-/* eslint-disable  react/no-array-index-key */
-const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, userPermissions }) => {
+interface EditViewPageProps {
+  allowedActions: AllowedActions;
+  goBack: RouteComponentProps['history']['goBack'];
+  id: Entity.ID;
+  isSingleType?: boolean;
+  origin?: string;
+  slug: string;
+  userPermissions?: Permission[];
+}
+
+const EditViewPage = ({
+  allowedActions,
+  isSingleType = false,
+  goBack,
+  slug,
+  id,
+  origin,
+  userPermissions = [],
+}: EditViewPageProps) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const permissions = useSelector(selectAdminPermissions);
-  const location = useLocation();
+  const location = useLocation<{ error?: string }>();
   const toggleNotification = useNotification();
   const Information = useEnterprise(
     InformationBoxCE,
@@ -65,7 +87,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
     }
   });
 
-  const { layout, formattedContentTypeLayout, customFieldUids } = useSelector((state) => ({
+  const { layout, formattedContentTypeLayout, customFieldUids } = useTypedSelector((state) => ({
     layout: selectCurrentLayout(state),
     formattedContentTypeLayout: selectAttributesLayout(state),
     customFieldUids: selectCustomFieldUids(state),
@@ -272,26 +294,37 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
   );
 };
 
-EditView.defaultProps = {
-  id: null,
-  isSingleType: false,
-  origin: null,
-  userPermissions: [],
+/* -------------------------------------------------------------------------------------------------
+ * ProtectedEditViewPage
+ * -----------------------------------------------------------------------------------------------*/
+
+interface ProtectedEditViewPageProps extends Omit<EditViewPageProps, 'allowedActions'> {}
+
+const ProtectedEditViewPage = ({
+  slug,
+  userPermissions = [],
+  ...restProps
+}: ProtectedEditViewPageProps) => {
+  const viewPermissions = React.useMemo(() => generatePermissionsObject(slug), [slug]);
+  const { isLoading, allowedActions } = useRBAC(
+    viewPermissions,
+    // TODO: just make usePermissions undefined by default in the reducer?
+    userPermissions
+  );
+
+  if (isLoading) {
+    return <LoadingIndicatorPage />;
+  }
+
+  return (
+    <EditViewPage
+      {...restProps}
+      allowedActions={allowedActions}
+      slug={slug}
+      userPermissions={userPermissions}
+    />
+  );
 };
 
-EditView.propTypes = {
-  allowedActions: PropTypes.shape({
-    canRead: PropTypes.bool.isRequired,
-    canUpdate: PropTypes.bool.isRequired,
-    canCreate: PropTypes.bool.isRequired,
-    canDelete: PropTypes.bool.isRequired,
-  }).isRequired,
-  id: PropTypes.string,
-  isSingleType: PropTypes.bool,
-  goBack: PropTypes.func.isRequired,
-  origin: PropTypes.string,
-  slug: PropTypes.string.isRequired,
-  userPermissions: PropTypes.array,
-};
-
-export default EditView;
+export { EditViewPage, ProtectedEditViewPage };
+export type { EditViewPageProps, ProtectedEditViewPageProps };

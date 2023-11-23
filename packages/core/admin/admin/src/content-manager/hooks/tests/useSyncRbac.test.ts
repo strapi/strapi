@@ -1,11 +1,12 @@
-import { resetPermissions, setPermissions } from '../actions';
-import reducer, { initialState } from '../reducer';
+import { SyncRbacState, reducer } from '../useSyncRbac';
 
 describe('CONTENT MANAGER | CONTAINERS | RBACMANAGER | reducer', () => {
-  let state;
+  let state: SyncRbacState;
 
   beforeEach(() => {
-    state = initialState;
+    state = {
+      permissions: null,
+    };
   });
 
   describe('SET_PERMISSIONS', () => {
@@ -14,7 +15,12 @@ describe('CONTENT MANAGER | CONTAINERS | RBACMANAGER | reducer', () => {
         permissions: [],
       };
 
-      expect(reducer(state, setPermissions({}))).toEqual(expected);
+      expect(
+        reducer(state, {
+          type: 'ContentManager/RBACManager/SET_PERMISSIONS',
+          permissions: {},
+        })
+      ).toEqual(expected);
     });
 
     it('should set the permissions correctly when the permissions are not empty', () => {
@@ -23,24 +29,20 @@ describe('CONTENT MANAGER | CONTAINERS | RBACMANAGER | reducer', () => {
           {
             action: 'create',
             subject: 'article',
-            properties: 'test',
           },
           {
             action: 'create',
             subject: 'article',
-            properties: 'test1',
           },
         ],
         read: [
           {
             action: 'read',
             subject: 'article',
-            properties: 'test',
           },
           {
             action: 'read',
             subject: 'article',
-            properties: 'test1',
           },
         ],
       };
@@ -49,27 +51,28 @@ describe('CONTENT MANAGER | CONTAINERS | RBACMANAGER | reducer', () => {
           {
             action: 'create',
             subject: 'article',
-            properties: 'test',
           },
           {
             action: 'create',
             subject: 'article',
-            properties: 'test1',
           },
           {
             action: 'read',
             subject: 'article',
-            properties: 'test',
           },
           {
             action: 'read',
             subject: 'article',
-            properties: 'test1',
           },
         ],
       };
 
-      expect(reducer(state, setPermissions(permissions))).toEqual(expected);
+      expect(
+        reducer(state, {
+          type: 'ContentManager/RBACManager/SET_PERMISSIONS',
+          permissions,
+        })
+      ).toEqual(expected);
     });
   });
 
@@ -77,7 +80,11 @@ describe('CONTENT MANAGER | CONTAINERS | RBACMANAGER | reducer', () => {
     it('should set the permissions to null', () => {
       state.permissions = [];
 
-      expect(reducer(state, resetPermissions())).toEqual({ permissions: null });
+      expect(
+        reducer(state, {
+          type: 'ContentManager/RBACManager/RESET_PERMISSIONS',
+        })
+      ).toEqual({ permissions: null });
     });
   });
 });

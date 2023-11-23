@@ -7513,6 +7513,7 @@ __metadata:
     "@strapi/icons": "npm:1.13.2"
     "@strapi/pack-up": "npm:4.15.5"
     "@strapi/permissions": "npm:4.15.5"
+    "@strapi/plugin-content-manager": "npm:4.15.5"
     "@strapi/provider-audit-logs-local": "npm:4.15.5"
     "@strapi/strapi": "npm:4.15.5"
     "@strapi/types": "npm:4.15.5"
