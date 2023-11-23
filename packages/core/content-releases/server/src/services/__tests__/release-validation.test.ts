@@ -1,4 +1,4 @@
-import { ReleaseActionCreateArgs } from '../../../../shared/types';
+import type { CreateReleaseAction } from '../../../../shared/contracts/release-actions';
 import createReleaseValidationService from '../validation';
 
 const baseStrapiMock = {
@@ -10,22 +10,13 @@ const baseStrapiMock = {
   contentType: jest.fn(),
 };
 
-describe('releaseValidation service', () => {
+describe('Release Validation service', () => {
   describe('validateEntryContentType', () => {
     it('throws an error if the content type does not exist', () => {
       // @ts-expect-error Ignore missing properties
       const releaseValidationService = createReleaseValidationService({ strapi: baseStrapiMock });
 
-      const mockReleaseAction: ReleaseActionCreateArgs = {
-        releaseId: 1,
-        entry: {
-          id: 1,
-          contentType: 'api::plop.plop',
-        },
-        type: 'publish',
-      };
-
-      expect(() => releaseValidationService.validateEntryContentType(mockReleaseAction)).toThrow(
+      expect(() => releaseValidationService.validateEntryContentType('api::plop.plop')).toThrow(
         'No content type found for uid api::plop.plop'
       );
     });
@@ -40,16 +31,9 @@ describe('releaseValidation service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
 
-      const mockReleaseAction: ReleaseActionCreateArgs = {
-        releaseId: 1,
-        entry: {
-          id: 1,
-          contentType: 'api::category.category',
-        },
-        type: 'publish',
-      };
-
-      expect(() => releaseValidationService.validateEntryContentType(mockReleaseAction)).toThrow(
+      expect(() =>
+        releaseValidationService.validateEntryContentType('api::category.category')
+      ).toThrow(
         'Content type with uid api::category.category does not have draftAndPublish enabled'
       );
     });
@@ -71,8 +55,7 @@ describe('releaseValidation service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
 
-      const mockReleaseAction: ReleaseActionCreateArgs = {
-        releaseId: 1,
+      const mockReleaseAction: CreateReleaseAction.Request['body'] = {
         entry: {
           id: 1,
           contentType: 'api::category.category',
@@ -80,9 +63,9 @@ describe('releaseValidation service', () => {
         type: 'publish',
       };
 
-      expect(() => releaseValidationService.validateUniqueEntry(mockReleaseAction)).rejects.toThrow(
-        'No release found for id 1'
-      );
+      expect(() =>
+        releaseValidationService.validateUniqueEntry(1, mockReleaseAction)
+      ).rejects.toThrow('No release found for id 1');
     });
 
     it('throws an error if a contentType entry already exists in the release', () => {
@@ -109,8 +92,7 @@ describe('releaseValidation service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
 
-      const mockReleaseAction: ReleaseActionCreateArgs = {
-        releaseId: 1,
+      const mockReleaseAction: CreateReleaseAction.Request['body'] = {
         entry: {
           id: 1,
           contentType: 'api::category.category',
@@ -118,7 +100,9 @@ describe('releaseValidation service', () => {
         type: 'publish',
       };
 
-      expect(() => releaseValidationService.validateUniqueEntry(mockReleaseAction)).rejects.toThrow(
+      expect(() =>
+        releaseValidationService.validateUniqueEntry(1, mockReleaseAction)
+      ).rejects.toThrow(
         'Entry with id 1 and contentType api::category.category already exists in release with id 1'
       );
     });

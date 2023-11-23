@@ -3,7 +3,11 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 import { pluginId } from '../pluginId';
 import { axiosBaseQuery } from '../utils/data';
 
-import type { CreateRelease, GetAllReleases } from '../../../shared/contracts/releases';
+import type {
+  CreateRelease,
+  GetReleases,
+  ReleaseDataResponse,
+} from '../../../shared/contracts/releases';
 
 interface GetAllReleasesQueryParams {
   page?: number;
@@ -23,10 +27,10 @@ const releaseApi = createApi({
   tagTypes: ['Releases'],
   endpoints: (build) => {
     return {
-      getReleases: build.query<GetAllReleases.Response, GetAllReleasesQueryParams | void>({
+      getReleases: build.query<GetReleases.Response, GetAllReleasesQueryParams | void>({
         query({ page, pageSize, filters } = { page: 1, pageSize: 16, filters: undefined }) {
           return {
-            url: `/content-releases`,
+            url: '/content-releases',
             method: 'GET',
             config: {
               params: {
@@ -39,7 +43,7 @@ const releaseApi = createApi({
         },
         providesTags: ['Releases'],
       }),
-      createRelease: build.mutation<CreateRelease.Response, CreateRelease.Request['body']>({
+      createRelease: build.mutation<{ data: ReleaseDataResponse }, CreateRelease.Request['body']>({
         query(data) {
           return {
             url: '/content-releases',
