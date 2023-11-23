@@ -1,7 +1,7 @@
 import { useRBAC } from '@strapi/helper-plugin';
 import { render, waitFor } from '@tests/utils';
 
-import { TransferTokenListView } from '../ListView';
+import { ListView } from '../ListView';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -32,7 +32,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
       },
     });
 
-    const { getByText } = render(<TransferTokenListView />);
+    const { getByText } = render(<ListView />);
 
     // eslint-disable-next-line testing-library/prefer-find-by
     await waitFor(() => expect(getByText('My super token')).toBeInTheDocument());
@@ -52,7 +52,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
       },
     });
 
-    const { queryByTestId } = render(<TransferTokenListView />);
+    const { queryByTestId } = render(<ListView />);
 
     await waitFor(() =>
       expect(queryByTestId('create-transfer-token-button')).not.toBeInTheDocument()
@@ -71,7 +71,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
       },
     });
 
-    const { container } = render(<TransferTokenListView />);
+    const { container } = render(<ListView />);
 
     await waitFor(() =>
       // eslint-disable-next-line testing-library/no-container
@@ -91,7 +91,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
       },
     });
 
-    const { container } = render(<TransferTokenListView />);
+    const { container } = render(<ListView />);
 
     // eslint-disable-next-line testing-library/no-container
     await waitFor(() => expect(container.querySelector('a[title*="Read"]')).toBeInTheDocument());
