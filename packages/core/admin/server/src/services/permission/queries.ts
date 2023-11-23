@@ -2,8 +2,8 @@ import { isNil, isArray, prop, xor, eq, map, differenceWith } from 'lodash/fp';
 import { Entity } from '@strapi/types';
 import pmap from 'p-map';
 import { getService } from '../../utils';
-import permissionDomain, { Permission, CreatePermissionPayload } from '../../domain/permission';
-import type { AdminUser } from '../../../../shared/contracts/shared';
+import permissionDomain, { CreatePermissionPayload } from '../../domain/permission';
+import type { AdminUser, Permission } from '../../../../shared/contracts/shared';
 import { Action } from '../../domain/action';
 
 type ID = Entity.ID;

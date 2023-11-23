@@ -1,5 +1,5 @@
 import { providerFactory } from '@strapi/utils';
-import { Utils, Entity } from '@strapi/types';
+import { Utils } from '@strapi/types';
 import {
   pipe,
   set,
@@ -14,24 +14,12 @@ import {
   curry,
   merge,
 } from 'lodash/fp';
-
-export type Permission = {
-  id: Entity.ID;
-  action: string;
-  actionParameters: object;
-  subject?: string | null;
-  properties: {
-    fields?: string[];
-    locales?: string[];
-    [key: string]: unknown;
-  };
-  conditions: string[]; // TODO: This should be a Condition interface
-  role?: string; // TODO: This should be AdminRole
-};
+import { Permission } from '../../../../shared/contracts/shared';
+import { SanitizedPermission } from '../../../../shared/contracts/roles';
 
 export type CreatePermissionPayload = Utils.Object.PartialBy<
   Permission,
-  'actionParameters' | 'conditions' | 'properties' | 'subject' | 'id'
+  'actionParameters' | 'conditions' | 'properties' | 'subject' | 'id' | 'createdAt' | 'updatedAt'
 >;
 
 type Provider = ReturnType<typeof providerFactory>;
@@ -53,8 +41,6 @@ export const sanitizedPermissionFields = [
   'properties',
   'conditions',
 ] as const;
-
-export type SanitizedPermission = Pick<Permission, (typeof sanitizedPermissionFields)[number]>;
 
 export const sanitizePermissionFields: (p: Permission) => SanitizedPermission =
   pick(sanitizedPermissionFields);

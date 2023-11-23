@@ -1,7 +1,8 @@
 {
   "extends": "tsconfig/client.json",
-  "include": ["./src", "../shared/types.ts"],
+  "include": ["./src", "../shared"],
   "compilerOptions": {
-    "rootDir": "../"
+    "rootDir": "../",
+    "baseUrl": "."
   }
 }

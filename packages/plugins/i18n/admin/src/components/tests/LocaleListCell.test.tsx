@@ -5,7 +5,7 @@ import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { useSelector } from 'react-redux';
 
-import LocaleListCell from '../LocaleListCell';
+import { LocaleListCell } from '../LocaleListCell';
 
 jest.mock('react-redux', () => ({
   useSelector: jest.fn(() => []),

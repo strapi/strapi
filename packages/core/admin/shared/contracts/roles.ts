@@ -1,7 +1,11 @@
 import { EntityService } from '@strapi/types';
 import type { errors } from '@strapi/utils';
 import { AdminRole, Permission, SanitizedAdminRole } from './shared';
-import type { SanitizedPermission } from '../../server/src/domain/permission';
+
+export type SanitizedPermission = Pick<
+  Permission,
+  'id' | 'action' | 'actionParameters' | 'subject' | 'properties' | 'conditions'
+>;
 
 type SanitizedAdminRoleWithUsersCount = SanitizedAdminRole & { usersCount?: number };
 

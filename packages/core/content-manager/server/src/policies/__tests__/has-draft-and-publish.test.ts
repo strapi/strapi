@@ -26,28 +26,28 @@ describe('hasDraftAndPublish policy', () => {
   });
 
   test('It should succeed when the model has draft & publish enabled', () => {
-    const ctx = { params: { model: 'foo' } };
+    const ctx = { params: { model: 'foo' } } as any;
     const res = hasDraftAndPublish(ctx, {}, { strapi: global.strapi });
 
     expect(res).toBe(true);
   });
 
   test(`It should fail when the model has draft & publish disabled`, () => {
-    const ctx = { params: { model: 'bar' } };
+    const ctx = { params: { model: 'bar' } } as any;
 
     const res = hasDraftAndPublish(ctx, {}, { strapi: global.strapi });
     expect(res).toBe(false);
   });
 
   test(`It should fail when the model doesn't exists`, () => {
-    const ctx = { params: { model: 'foobar' } };
+    const ctx = { params: { model: 'foobar' } } as any;
 
     const res = hasDraftAndPublish(ctx, {}, { strapi: global.strapi });
     expect(res).toBe(false);
   });
 
   test(`It should fail when params.model isn't provided`, () => {
-    const ctx = { params: {} };
+    const ctx = { params: {} } as any;
 
     const res = hasDraftAndPublish(ctx, {}, { strapi: global.strapi });
     expect(res).toBe(false);
