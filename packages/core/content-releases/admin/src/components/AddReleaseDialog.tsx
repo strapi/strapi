@@ -11,14 +11,10 @@ import { useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
-import * as yup from 'yup';
 
+import { RELEASE_SCHEMA } from '../../../shared/validation-schemas';
 import { isAxiosError } from '../services/axios';
 import { useCreateReleaseMutation } from '../services/release';
-
-const RELEASE_SCHEMA = yup.object({
-  name: yup.string().required(),
-});
 
 interface FormValues {
   name: string;
@@ -35,8 +31,8 @@ interface AddReleaseDialogProps {
 export const AddReleaseDialog = ({ handleClose }: AddReleaseDialogProps) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
-  const { push } = useHistory();
   const { formatAPIError } = useAPIErrorHandler();
+  const { push } = useHistory();
 
   const [createRelease, { isLoading }] = useCreateReleaseMutation();
 

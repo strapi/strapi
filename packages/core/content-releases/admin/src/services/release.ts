@@ -1,5 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 
+import { CreateReleaseAction } from '../../../shared/contracts/release-actions';
 import { pluginId } from '../pluginId';
 
 import { axiosBaseQuery } from './axios';
@@ -72,10 +73,34 @@ const releaseApi = createApi({
         },
         invalidatesTags: ['Releases'],
       }),
+      createReleaseAction: build.mutation<
+        CreateReleaseAction.Response,
+        CreateReleaseAction.Request
+      >({
+        query({ body, params }) {
+          return {
+            url: `/content-releases/${params.releaseId}/actions`,
+            method: 'POST',
+            data: body,
+          };
+        },
+      }),
     };
   },
 });
 
+<<<<<<< HEAD
 const { useGetReleasesQuery, useCreateReleaseMutation } = releaseApi;
 
 export { useGetReleasesQuery, useCreateReleaseMutation, releaseApi };
+=======
+const { useGetReleasesQuery, useCreateReleaseMutation, useCreateReleaseActionMutation } =
+  releaseApi;
+
+export {
+  useGetReleasesQuery,
+  useCreateReleaseMutation,
+  useCreateReleaseActionMutation,
+  releaseApi,
+};
+>>>>>>> 44277bfbee (feat(content-releases): add create release action to cm edit view)
