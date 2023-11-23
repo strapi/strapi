@@ -18,6 +18,7 @@ import {
   VersionRelease,
 } from '../core';
 import type { Report, RunReports, TaskOptions } from '../types';
+import { isCleanGitRepo } from '../core/requirements/is-clean-git-repo';
 
 export const upgrade = async (options: TaskOptions) => {
   const { logger, dryRun = false, cwd = process.cwd(), target = VersionRelease.Minor } = options;
@@ -41,6 +42,10 @@ export const upgrade = async (options: TaskOptions) => {
       `The target (${fTarget}) should be greater than the current project version (${fCurrentVersion}).`
     );
   }
+
+  // check if the repo is clean
+  // TODO change force default to false when we add the force option to the CLI
+  await isCleanGitRepo({ cwd, logger, force: false, confirm: options.confirm });
 
   // Create a version range for ">{current}"
   const range: VersionRange = { from: project.strapiVersion, to: VersionRelease.Latest };

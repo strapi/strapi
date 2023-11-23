@@ -62,7 +62,6 @@
     "chalk": "4.1.2",
     "cli-table3": "0.6.2",
     "commander": "8.3.0",
-    "execa": "5.1.1",
     "esbuild-register": "3.5.0",
     "fs-extra": "10.0.0",
     "glob": "10.3.10",
@@ -70,7 +69,8 @@
     "lodash": "4.17.21",
     "ora": "5.4.1",
     "prompts": "2.4.2",
-    "semver": "7.5.4"
+    "semver": "7.5.4",
+    "simple-git": "3.21.0"
   },
   "devDependencies": {
     "@strapi/pack-up": "workspace:*",
