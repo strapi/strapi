@@ -43,6 +43,12 @@ export declare namespace GetAllReleases {
    */
   export interface Response {
     data: Release[];
+    pagination: {
+      page: number;
+      pageSize: number;
+      pageCount: number;
+      total: number;
+    };
     error?: errors.ApplicationError;
   }
 }
