@@ -7,7 +7,7 @@ import { type RenderElementProps } from 'slate-react';
 import styled, { css } from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
-import { prepareHandleConvert, getAttributesToClear } from '../utils/conversions';
+import { baseHandleConvert } from '../utils/conversions';
 import { type Block } from '../utils/types';
 
 const listStyle = css`
@@ -182,21 +182,11 @@ const handleEnterKeyOnList = (editor: Editor) => {
  * Common handler for converting a node to a list
  */
 const handleConvertToList = (editor: Editor, format: Block<'list'>['format']) => {
-  // Get the element to convert
-  const entry = prepareHandleConvert(editor);
-  if (!entry) return;
-  const [element, elementPath] = entry;
+  const convertedPath = baseHandleConvert<Block<'list-item'>>(editor, { type: 'list-item' });
 
-  Transforms.setNodes(
-    editor,
-    {
-      ...getAttributesToClear(element),
-      type: 'list-item',
-    },
-    { at: elementPath }
-  );
+  if (!convertedPath) return;
 
-  Transforms.wrapNodes(editor, { type: 'list', format, children: [] }, { at: elementPath });
+  Transforms.wrapNodes(editor, { type: 'list', format, children: [] }, { at: convertedPath });
 };
 
 const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-item'> = {

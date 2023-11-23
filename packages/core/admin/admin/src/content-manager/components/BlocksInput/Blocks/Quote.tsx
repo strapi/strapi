@@ -5,7 +5,8 @@ import { type Text, Editor, Node, Transforms } from 'slate';
 import styled from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
-import { prepareHandleConvert, getAttributesToClear } from '../utils/conversions';
+import { baseHandleConvert } from '../utils/conversions';
+import { type Block } from '../utils/types';
 
 const Blockquote = styled.blockquote.attrs({ role: 'blockquote' })`
   margin: ${({ theme }) => `${theme.spaces[4]} 0`};
@@ -30,19 +31,7 @@ const quoteBlocks: Pick<BlocksStore, 'quote'> = {
     matchNode: (node) => node.type === 'quote',
     isInBlocksSelector: true,
     handleConvert(editor) {
-      // Get the element to convert
-      const entry = prepareHandleConvert(editor);
-      if (!entry) return;
-      const [element, elementPath] = entry;
-
-      Transforms.setNodes(
-        editor,
-        {
-          ...getAttributesToClear(element),
-          type: 'quote',
-        },
-        { at: elementPath }
-      );
+      baseHandleConvert<Block<'quote'>>(editor, { type: 'quote' });
     },
     handleEnterKey(editor) {
       /**

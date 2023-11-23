@@ -5,7 +5,8 @@ import { Paragraph } from '@strapi/icons';
 import { type Text, Editor, Transforms } from 'slate';
 
 import { type BlocksStore } from '../BlocksEditor';
-import { prepareHandleConvert, getAttributesToClear } from '../utils/conversions';
+import { baseHandleConvert } from '../utils/conversions';
+import { type Block } from '../utils/types';
 
 const paragraphBlocks: Pick<BlocksStore, 'paragraph'> = {
   paragraph: {
@@ -22,19 +23,7 @@ const paragraphBlocks: Pick<BlocksStore, 'paragraph'> = {
     matchNode: (node) => node.type === 'paragraph',
     isInBlocksSelector: true,
     handleConvert(editor) {
-      // Get the element to convert
-      const entry = prepareHandleConvert(editor);
-      if (!entry) return;
-      const [element, elementPath] = entry;
-
-      Transforms.setNodes(
-        editor,
-        {
-          ...getAttributesToClear(element),
-          type: 'paragraph',
-        },
-        { at: elementPath }
-      );
+      baseHandleConvert<Block<'paragraph'>>(editor, { type: 'paragraph' });
     },
     handleEnterKey(editor) {
       if (!editor.selection) {

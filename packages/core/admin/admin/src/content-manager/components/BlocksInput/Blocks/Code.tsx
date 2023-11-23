@@ -5,12 +5,8 @@ import { Transforms } from 'slate';
 import styled from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
-import {
-  insertEmptyBlockAtLast,
-  isLastBlockType,
-  prepareHandleConvert,
-  getAttributesToClear,
-} from '../utils/conversions';
+import { insertEmptyBlockAtLast, isLastBlockType, baseHandleConvert } from '../utils/conversions';
+import { type Block } from '../utils/types';
 
 const CodeBlock = styled.pre.attrs({ role: 'code' })`
   border-radius: ${({ theme }) => theme.borderRadius};
@@ -43,19 +39,7 @@ const codeBlocks: Pick<BlocksStore, 'code'> = {
     matchNode: (node) => node.type === 'code',
     isInBlocksSelector: true,
     handleConvert(editor) {
-      // Get the element to convert
-      const entry = prepareHandleConvert(editor);
-      if (!entry) return;
-      const [element, elementPath] = entry;
-
-      Transforms.setNodes(
-        editor,
-        {
-          ...getAttributesToClear(element),
-          type: 'code',
-        },
-        { at: elementPath }
-      );
+      baseHandleConvert<Block<'code'>>(editor, { type: 'code' });
 
       if (isLastBlockType(editor, 'code')) {
         insertEmptyBlockAtLast(editor);

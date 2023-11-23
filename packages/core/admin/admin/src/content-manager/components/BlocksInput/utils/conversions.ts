@@ -1,11 +1,13 @@
-import { type Element, Editor, Transforms } from 'slate';
+import { type Element, type Path, Editor, Transforms } from 'slate';
 
 /**
  * Extracts some logic that is common to most blocks' handleConvert functions.
- * It breaks out of the parent list if the selection is inside a list.
- * And returns a NodeEntry of the selected block.
+ * @returns The path of the converted block
  */
-const prepareHandleConvert = (editor: Editor) => {
+const baseHandleConvert = <T extends Element>(
+  editor: Editor,
+  attributesToSet: Partial<T> & { type: T['type'] }
+): void | Path => {
   // If the selection is inside a list, split the list so that the modified block is outside of it
   Transforms.unwrapNodes(editor, {
     match: (node) => !Editor.isEditor(node) && node.type === 'list',
@@ -21,8 +23,18 @@ const prepareHandleConvert = (editor: Editor) => {
     return;
   }
 
-  // Can't return entry directly because TS isn't smart enough to understand it can't be an editor
-  return [entry[0], entry[1]] as const;
+  const [element, elementPath] = entry;
+
+  Transforms.setNodes(
+    editor,
+    {
+      ...getAttributesToClear(element),
+      ...attributesToSet,
+    } as Partial<Element>,
+    { at: elementPath }
+  );
+
+  return elementPath;
 };
 
 /**
@@ -77,4 +89,4 @@ const insertEmptyBlockAtLast = (editor: Editor) => {
   );
 };
 
-export { prepareHandleConvert, getAttributesToClear, isLastBlockType, insertEmptyBlockAtLast };
+export { baseHandleConvert, getAttributesToClear, isLastBlockType, insertEmptyBlockAtLast };

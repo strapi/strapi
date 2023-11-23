@@ -9,11 +9,11 @@ import {
   HeadingThree,
   HeadingTwo,
 } from '@strapi/icons';
-import { Editor, Transforms } from 'slate';
+import { Editor } from 'slate';
 import styled from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
-import { prepareHandleConvert, getAttributesToClear } from '../utils/conversions';
+import { baseHandleConvert } from '../utils/conversions';
 import { type Block } from '../utils/types';
 
 const H1 = styled(Typography).attrs({ as: 'h1' })`
@@ -50,20 +50,7 @@ const H6 = styled(Typography).attrs({ as: 'h6' })`
  * Common handler for converting a node to a heading
  */
 const handleConvertToHeading = (editor: Editor, level: Block<'heading'>['level']) => {
-  // Get the element to convert
-  const entry = prepareHandleConvert(editor);
-  if (!entry) return;
-  const [element, elementPath] = entry;
-
-  Transforms.setNodes(
-    editor,
-    {
-      ...getAttributesToClear(element),
-      type: 'heading',
-      level,
-    },
-    { at: elementPath }
-  );
+  baseHandleConvert<Block<'heading'>>(editor, { type: 'heading', level });
 };
 
 const headingBlocks: Pick<
