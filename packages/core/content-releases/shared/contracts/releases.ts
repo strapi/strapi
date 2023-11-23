@@ -31,15 +31,13 @@ export declare namespace GetReleases {
     query?: Partial<Pick<Pagination, 'page' | 'pageSize'>>;
   }
 
-  export type Response =
-    | {
-        data: ReleaseDataResponse[];
-        pagination: Pagination;
-      }
-    | {
-        data: null;
-        error: errors.ApplicationError;
-      };
+  export interface Response {
+    data: ReleaseDataResponse[];
+    meta: {
+      pagination: Pagination;
+    };
+    error?: errors.ApplicationError;
+  }
 }
 
 /**
@@ -55,14 +53,10 @@ export declare namespace GetRelease {
     };
   }
 
-  export type Response =
-    | {
-        data: ReleaseDataResponse;
-      }
-    | {
-        data: null;
-        error: errors.ApplicationError | errors.NotFoundError;
-      };
+  export interface Response {
+    data: ReleaseDataResponse;
+    error?: errors.ApplicationError | errors.NotFoundError;
+  }
 }
 
 /**
@@ -78,9 +72,10 @@ export declare namespace CreateRelease {
     };
   }
 
-  export type Response =
-    | { data: ReleaseDataResponse }
-    | { data: null; error: errors.ApplicationError | errors.ValidationError };
+  export interface Response {
+    data: ReleaseDataResponse;
+    error?: errors.ApplicationError | errors.ValidationError;
+  }
 }
 
 /**
@@ -99,7 +94,8 @@ export declare namespace UpdateRelease {
     };
   }
 
-  export type Response =
-    | { data: ReleaseDataResponse }
-    | { data: null; error: errors.ApplicationError | errors.ValidationError };
+  export interface Response {
+    data: ReleaseDataResponse;
+    error?: errors.ApplicationError | errors.ValidationError;
+  }
 }
