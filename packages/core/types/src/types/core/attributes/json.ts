@@ -13,7 +13,7 @@ type JSONValue = string | number | boolean | null | JSONObject | JSONArray;
 
 type JSONArray = Array<JSONValue>;
 
-interface JSONObject {
+export interface JSONObject {
   [key: string]: JSONValue;
 }
 
