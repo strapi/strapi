@@ -1,6 +1,7 @@
 import { Entity } from "@strapi/types";
 
 export interface TransferToken {
+  accessKey: unknown;
   createdAt: string;
   description: string;
   expiresAt: null | string;

@@ -67,11 +67,11 @@ const schema = yup.object().shape({
 
 const MSG_ERROR_NAME_TAKEN = 'Name already taken';
 
-interface EditViewProps {
+interface LoadingViewProps {
   transferTokenName?: string | null;
 }
 
-export const EditView = ({ transferTokenName = null }: EditViewProps) => {
+export const LoadingView = ({ transferTokenName = null }: LoadingViewProps) => {
   const { formatMessage } = useIntl();
   useFocusWhenNavigate();
 
@@ -207,7 +207,7 @@ const FormTransferTokenContainer = ({
   );
 };
 
-export const CreateView = () => {
+export const EditView = () => {
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const { lockApp, unlockApp } = useOverlayBlocker();
