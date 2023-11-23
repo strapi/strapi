@@ -9,8 +9,7 @@ import {
 } from 'slate-react';
 import styled from 'styled-components';
 
-import { useBlocksEditorContext } from './BlocksEditor';
-import { type BlocksStore, useBlocksStore } from './hooks/useBlocksStore';
+import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { type ModifiersStore, useModifiersStore } from './hooks/useModifiersStore';
 import { getEntries } from './utils/types';
 
@@ -54,7 +53,7 @@ interface BlocksInputProps {
 }
 
 const BlocksContent = ({ placeholder }: BlocksInputProps) => {
-  const { editor, disabled } = useBlocksEditorContext('BlocksContent');
+  const { editor, disabled, blocks } = useBlocksEditorContext('BlocksContent');
   const blocksRef = React.useRef<HTMLDivElement>(null);
 
   // Create renderLeaf function based on the modifiers store
@@ -65,7 +64,6 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
   );
 
   // Create renderElement function base on the blocks store
-  const blocks = useBlocksStore();
   const renderElement = React.useCallback(
     (props: RenderElementProps) => baseRenderElement(props, blocks),
     [blocks]
