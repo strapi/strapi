@@ -1,14 +1,10 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 
 import { pluginId } from '../pluginId';
-import { axiosBaseQuery } from '../utils/data';
 
-import type {
-  CreateRelease,
-  GetReleases,
-  ReleaseDataResponse,
-  Pagination,
-} from '../../../shared/contracts/releases';
+import { axiosBaseQuery } from './axios';
+
+import type { CreateRelease, GetReleases, Pagination } from '../../../shared/contracts/releases';
 
 export interface GetAllReleasesQueryParams extends Pick<Pagination, 'page' | 'pageSize'> {
   filters?: {
@@ -42,7 +38,7 @@ const releaseApi = createApi({
         },
         providesTags: ['Releases'],
       }),
-      createRelease: build.mutation<{ data: ReleaseDataResponse }, CreateRelease.Request['body']>({
+      createRelease: build.mutation<CreateRelease.Response, CreateRelease.Request['body']>({
         query(data) {
           return {
             url: '/content-releases',

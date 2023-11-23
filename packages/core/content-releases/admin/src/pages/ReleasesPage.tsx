@@ -26,7 +26,7 @@ import { useIntl } from 'react-intl';
 import { AddReleaseDialog } from '../components/AddReleaseDialog';
 import { ReleasesGrid } from '../components/ReleasesGrid';
 import { PERMISSIONS } from '../constants';
-import { useGetReleasesQuery, GetAllReleasesQueryParams } from '../modules/releaseSlice';
+import { useGetReleasesQuery, GetAllReleasesQueryParams } from '../services/release';
 
 const ReleasesPage = () => {
   const [addReleaseDialogIsShown, setAddReleaseDialogIsShown] = React.useState(false);
