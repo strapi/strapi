@@ -484,7 +484,7 @@ describe('BlocksToolbar', () => {
     // Convert selection to a code block
     const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
     await user.click(blocksDropdown);
-    await user.click(screen.getByRole('option', { name: 'Code' }));
+    await user.click(screen.getByRole('option', { name: 'Code block' }));
 
     expect(baseEditor.children).toEqual([
       {
@@ -570,7 +570,7 @@ describe('BlocksToolbar', () => {
     // Convert it to a code block
     const selectDropdown = screen.getByRole('combobox', { name: /Select a block/i });
     await user.click(selectDropdown);
-    await user.click(screen.getByRole('option', { name: 'Code' }));
+    await user.click(screen.getByRole('option', { name: 'Code block' }));
 
     // The list should have been split in two
     expect(baseEditor.children).toEqual([
@@ -627,7 +627,7 @@ describe('BlocksToolbar', () => {
     // Convert selection to a code block
     const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
     await user.click(blocksDropdown);
-    await user.click(screen.getByRole('option', { name: 'Code' }));
+    await user.click(screen.getByRole('option', { name: 'Code block' }));
 
     expect(baseEditor.children).toEqual([
       {

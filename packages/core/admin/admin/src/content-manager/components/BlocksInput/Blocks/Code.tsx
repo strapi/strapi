@@ -32,7 +32,7 @@ const codeBlocks: Pick<BlocksStore, 'code'> = {
     icon: Code,
     label: {
       id: 'components.Blocks.blocks.code',
-      defaultMessage: 'Code',
+      defaultMessage: 'Code block',
     },
     value: {
       type: 'code',
