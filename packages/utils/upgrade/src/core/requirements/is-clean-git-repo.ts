@@ -41,7 +41,7 @@ export const isCleanGitRepo = async ({ cwd, logger, force, confirm }: Params) =>
       logger.warn('- Git is not installed.');
     }
     if (!repoStatus.isRepo) {
-      logger.warn('- The codebase is not under version control.');
+      logger.warn('- No git repository was detected in the directory.');
     }
     if (!repoStatus.isClean) {
       logger.warn('- The Git tree is not clean (uncommitted changes found).');
