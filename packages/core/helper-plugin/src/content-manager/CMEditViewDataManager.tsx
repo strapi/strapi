@@ -10,7 +10,7 @@ import type { Attribute, Schema } from '@strapi/types';
  * TODO: All these types could be accurately inferred from
  * their usage in the content-manager when we move it back.
  */
-interface CMEditViewDataManagerContext {
+interface CMEditViewDataManagerContextValue {
   addComponentToDynamicZone?: (
     keys: string[],
     componentLayoutData: Record<string, unknown>,
@@ -32,7 +32,7 @@ interface CMEditViewDataManagerContext {
   ) => void;
   allLayoutData: {
     components: Record<string, Schema.Component>;
-    contentType?: Schema.CollectionType | Schema.SingleType;
+    contentType?: Schema.ContentType;
   };
   createActionAllowedFields: string[];
   formErrors: Record<string, MessageDescriptor>;
@@ -42,7 +42,7 @@ interface CMEditViewDataManagerContext {
   isSingleType: boolean;
   layout?: Schema.CollectionType | Schema.SingleType;
   // TODO: define the tree, can it be inferred?
-  modifiedData: Record<string, unknown>;
+  modifiedData: Record<string, Attribute.GetValue<Attribute.Any>>;
   moveComponentDown?: (dynamicZoneName: string, currentIndex: number) => void;
   moveComponentField?: (payload: { name: string; newIndex: number; currentIndex: number }) => void;
   moveComponentUp?: (dynamicZoneName: string, currentIndex: number) => void;
@@ -81,21 +81,26 @@ interface CMEditViewDataManagerContext {
   upateActionAllowedFields: string[];
 }
 
-const ContentManagerEditViewDataManagerContext = React.createContext<CMEditViewDataManagerContext>({
-  allLayoutData: {
-    components: {},
-  },
-  createActionAllowedFields: [],
-  formErrors: {},
-  initialData: {},
-  isCreatingEntry: false,
-  isSingleType: false,
-  modifiedData: {},
-  readActionAllowedFields: [],
-  slug: undefined,
-  upateActionAllowedFields: [],
-});
+const ContentManagerEditViewDataManagerContext =
+  React.createContext<CMEditViewDataManagerContextValue>({
+    allLayoutData: {
+      components: {},
+    },
+    createActionAllowedFields: [],
+    formErrors: {},
+    initialData: {},
+    isCreatingEntry: false,
+    isSingleType: false,
+    modifiedData: {},
+    readActionAllowedFields: [],
+    slug: undefined,
+    upateActionAllowedFields: [],
+  });
 
 const useCMEditViewDataManager = () => React.useContext(ContentManagerEditViewDataManagerContext);
 
-export { useCMEditViewDataManager, ContentManagerEditViewDataManagerContext };
+export {
+  useCMEditViewDataManager,
+  ContentManagerEditViewDataManagerContext,
+  CMEditViewDataManagerContextValue,
+};

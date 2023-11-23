@@ -3,31 +3,35 @@
 import * as React from 'react';
 
 import { createContext } from '@radix-ui/react-context';
-import { Entity } from '@strapi/types';
 
-interface PseudoEvent {
+import { List as ListContentApiPermissions } from '../../../shared/contracts/content-api/permissions';
+import { List as ListContentApiRoutes } from '../../../shared/contracts/content-api/routes';
+
+export interface PseudoEvent {
   target: { value: string };
 }
 
 interface ApiTokenPermissionsContextValue {
-  selectedAction: string[] | null;
-  routes: string[];
-  selectedActions: string[];
-  data: {
-    allActionsIds: Entity.ID[];
-    permissions: {
-      apiId: string;
-      label: string;
-      controllers: { controller: string; actions: { actionId: string; action: string } }[];
-    }[];
+  value: {
+    selectedAction: string | null;
+    routes: ListContentApiRoutes.Response['data'];
+    selectedActions: string[];
+    data: {
+      allActionsIds: string[];
+      permissions: ListContentApiPermissions.Response['data'][];
+    };
+    onChange: ({ target: { value } }: PseudoEvent) => void;
+    onChangeSelectAll: ({
+      target: { value },
+    }: {
+      target: { value: { action: string; actionId: string }[] };
+    }) => void;
+    setSelectedAction: ({ target: { value } }: PseudoEvent) => void;
   };
-  onChange: ({ target: { value } }: PseudoEvent) => void;
-  onChangeSelectAll: ({ target: { value } }: PseudoEvent) => void;
-  setSelectedAction: ({ target: { value } }: PseudoEvent) => void;
 }
 
 interface ApiTokenPermissionsContextProviderProps extends ApiTokenPermissionsContextValue {
-  children: React.ReactNode[];
+  children: React.ReactNode | React.ReactNode[];
 }
 
 const [ApiTokenPermissionsContextProvider, useApiTokenPermissionsContext] =

@@ -124,8 +124,8 @@ export const HOOKS = {
 export const ACTION_SET_APP_RUNTIME_STATUS = 'StrapiAdmin/APP/SET_APP_RUNTIME_STATUS';
 export const ACTION_SET_ADMIN_PERMISSIONS = 'StrapiAdmin/App/SET_ADMIN_PERMISSIONS';
 
-export interface SettingsMenuLink extends Omit<StrapiAppSettingLink, 'Component' | 'permissions'> {
-  Component?: never;
+export interface SettingsMenuLink
+  extends Omit<StrapiAppSettingLink, 'Component' | 'permissions' | 'lockIcon'> {
   lockIcon?: boolean;
 }
 

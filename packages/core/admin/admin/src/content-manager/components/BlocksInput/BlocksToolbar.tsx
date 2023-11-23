@@ -10,13 +10,12 @@ import { type Text, Editor, Transforms, Element as SlateElement, Element, Node }
 import { ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
-import { useBlocksEditorContext } from './BlocksEditor';
 import {
   type BlocksStore,
   type SelectorBlockKey,
   isSelectorBlockKey,
-  useBlocksStore,
-} from './hooks/useBlocksStore';
+  useBlocksEditorContext,
+} from './BlocksEditor';
 import { useModifiersStore } from './hooks/useModifiersStore';
 import { insertLink } from './utils/links';
 import { type Block, getEntries, getKeys } from './utils/types';
@@ -328,11 +327,9 @@ const insertEmptyBlockAtLast = (editor: Editor) => {
 };
 
 const BlocksDropdown = () => {
-  const { editor, disabled } = useBlocksEditorContext('BlocksDropdown');
+  const { editor, blocks, disabled } = useBlocksEditorContext('BlocksDropdown');
   const { formatMessage } = useIntl();
   const [isMediaLibraryVisible, setIsMediaLibraryVisible] = React.useState(false);
-
-  const blocks = useBlocksStore();
 
   const blockKeysToInclude: SelectorBlockKey[] = getEntries(blocks).reduce<
     ReturnType<typeof getEntries>
@@ -634,8 +631,7 @@ const LinkButton = ({ disabled }: { disabled: boolean }) => {
 
 const BlocksToolbar = () => {
   const modifiers = useModifiersStore();
-  const blocks = useBlocksStore();
-  const { editor, disabled } = useBlocksEditorContext('BlocksToolbar');
+  const { editor, blocks, disabled } = useBlocksEditorContext('BlocksToolbar');
 
   /**
    * The modifier buttons are disabled when an image is selected.

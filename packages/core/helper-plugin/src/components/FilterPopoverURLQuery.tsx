@@ -111,7 +111,10 @@ export const FilterPopoverURLQuery = ({
 
         let filterToAdd: Filter;
 
-        if (foundAttribute.fieldSchema.type === 'relation') {
+        if (
+          foundAttribute.fieldSchema.type === 'relation' &&
+          foundAttribute.fieldSchema.mainField
+        ) {
           filterToAdd = {
             [modifiedData.name]: {
               [foundAttribute.fieldSchema.mainField.name]: {
@@ -339,7 +342,7 @@ const DefaultInputs = ({
 const getFilterList = (filterSchema: FilterData['fieldSchema']): Operator[] => {
   let type = filterSchema.type;
 
-  if (filterSchema.type === 'relation') {
+  if (filterSchema.type === 'relation' && filterSchema.mainField) {
     type = filterSchema.mainField.schema.type;
   }
 

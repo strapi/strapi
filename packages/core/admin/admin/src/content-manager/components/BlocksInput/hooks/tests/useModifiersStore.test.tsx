@@ -9,7 +9,14 @@ import { IntlProvider } from 'react-intl';
 import { createEditor } from 'slate';
 import { Slate, withReact } from 'slate-react';
 
-import { BlocksEditorProvider } from '../../BlocksEditor';
+import { codeBlocks } from '../../Blocks/Code';
+import { headingBlocks } from '../../Blocks/Heading';
+import { imageBlocks } from '../../Blocks/Image';
+import { linkBlocks } from '../../Blocks/Link';
+import { listBlocks } from '../../Blocks/List';
+import { paragraphBlocks } from '../../Blocks/Paragraph';
+import { quoteBlocks } from '../../Blocks/Quote';
+import { type BlocksStore, BlocksEditorProvider } from '../../BlocksEditor';
 import { useModifiersStore } from '../useModifiersStore';
 
 const initialValue: Attribute.BlocksValue = [
@@ -19,6 +26,16 @@ const initialValue: Attribute.BlocksValue = [
   },
 ];
 
+const blocks: BlocksStore = {
+  ...paragraphBlocks,
+  ...headingBlocks,
+  ...listBlocks,
+  ...linkBlocks,
+  ...imageBlocks,
+  ...quoteBlocks,
+  ...codeBlocks,
+};
+
 const Wrapper = ({ children }: { children: React.ReactNode }) => {
   const editor = React.useMemo(() => withReact(createEditor()), []);
 
@@ -26,7 +43,9 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
     <ThemeProvider theme={lightTheme}>
       <IntlProvider messages={{}} locale="en">
         <Slate initialValue={initialValue} editor={editor}>
-          <BlocksEditorProvider disabled={false}>{children}</BlocksEditorProvider>
+          <BlocksEditorProvider blocks={blocks} disabled={false}>
+            {children}
+          </BlocksEditorProvider>
         </Slate>
       </IntlProvider>
     </ThemeProvider>

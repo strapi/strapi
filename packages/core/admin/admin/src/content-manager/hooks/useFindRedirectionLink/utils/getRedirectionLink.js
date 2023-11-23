@@ -1,6 +1,7 @@
 import get from 'lodash/get';
-import isObject from 'lodash/isObject';
 import { parse, stringify } from 'qs';
+
+import { isObject } from '../../../../utils/objects';
 
 /**
  * Updates the leafs of the first argument

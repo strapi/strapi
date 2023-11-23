@@ -76,6 +76,7 @@ interface EventWithoutProperties {
     | 'didDuplicateRole'
     | 'didEditEditSettings'
     | 'didEditEmailTemplates'
+    | 'didEditFieldNameOnContentType'
     | 'didEditListSettings'
     | 'didEditMediaLibraryConfig'
     | 'didEditNameOfContentType'
@@ -128,7 +129,8 @@ interface EventWithoutProperties {
     | 'willInstallPlugin'
     | 'willSaveComponent'
     | 'willSaveContentType'
-    | 'willSaveContentTypeLayout';
+    | 'willSaveContentTypeLayout'
+    | 'didEditFieldNameOnContentType';
   properties?: never;
 }
 
@@ -182,7 +184,7 @@ interface MediaEvents {
 interface DidSelectContentTypeFieldTypeEvent {
   name: 'didSelectContentTypeFieldType';
   properties: {
-    type: string;
+    type?: string;
   };
 }
 
@@ -209,11 +211,11 @@ interface WillNavigateEvent {
 
 interface DidAccessTokenListEvent {
   name: 'didAccessTokenList';
-  properties: TokenEvents['properties'] & {
-    number: string;
+  properties: {
+    tokenType: TokenEvents['properties']['tokenType'];
+    number: number;
   };
 }
-
 interface LogoEvent {
   name: 'didChangeLogo' | 'didClickResetLogo';
   properties: {
@@ -224,14 +226,26 @@ interface LogoEvent {
 interface TokenEvents {
   name:
     | 'didCopyTokenKey'
+    | 'didAddTokenFromList'
+    | 'didEditTokenFromList'
     | 'willAccessTokenList'
     | 'willAddTokenFromList'
+    | 'willCreateToken'
     | 'willDeleteToken'
+    | 'willEditToken'
     | 'willEditTokenFromList';
   properties: {
-    tokenType: string;
+    tokenType: 'api-token' | 'transfer-token';
   };
 }
+
+type WillModifyTokenEvent = {
+  name: 'didCreateToken' | 'didEditToken';
+  properties: {
+    tokenType: TokenEvents['properties']['tokenType'];
+    type: 'custom' | 'full-access' | 'read-only';
+  };
+};
 
 type EventsWithProperties =
   | DidAccessTokenListEvent
@@ -245,7 +259,9 @@ type EventsWithProperties =
   | DidSubmitWithErrorsFirstAdminEvent
   | LogoEvent
   | TokenEvents
-  | WillNavigateEvent;
+  | WillModifyTokenEvent
+  | WillNavigateEvent
+  | DidSelectContentTypeFieldTypeEvent;
 
 export type TrackingEvent = EventWithoutProperties | EventsWithProperties;
 export interface UseTrackingReturn {

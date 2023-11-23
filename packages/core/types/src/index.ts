@@ -9,7 +9,7 @@ import type { Server } from './modules/server';
 import type { EventHub } from './modules/event-hub';
 import type { CronService } from './modules/cron';
 import type { WebhookRunner } from './modules/webhook-runner';
-import type { WebhookStore } from './modules/webhook-store';
+import type { WebhookStore, Webhook } from './modules/webhook-store';
 import type { CoreStore } from './modules/core-store';
 import type { EntityValidator } from './modules/entity-validator';
 import type * as EntityService from './modules/entity-service';
@@ -34,6 +34,7 @@ export {
   Server,
   EventHub,
   CronService,
+  Webhook,
   WebhookRunner,
   WebhookStore,
   CoreStore,
@@ -51,9 +52,11 @@ export {
 };
 
 declare global {
+  // @ts-expect-error - global strapi variable is also defined in the index.d.ts file
   var strapi: LoadedStrapi;
   namespace NodeJS {
     interface Global {
+      // @ts-expect-error - global strapi variable is also defined in the index.d.ts file
       strapi: LoadedStrapi;
     }
   }
