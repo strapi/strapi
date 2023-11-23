@@ -57,8 +57,8 @@ const DragButton = styled(Flex)`
   }
 `;
 
-const NOT_DRAGGABLE_ITEMS = ['list'];
-const NOT_DROPPABLE_ITEMS = ['list'];
+const NOT_DRAGGABLE_ITEMS = ['list', 'link'];
+const NOT_DROPPABLE_ITEMS = ['list', 'link'];
 
 type DragAndDropElementProps = {
   children: RenderElementProps['children'];
@@ -251,7 +251,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
 
     const start = Range.start(editor.selection);
     const currentIndex = [start.path[0]];
-    let newIndexPosition = null;
+    let newIndexPosition = 0;
 
     if (event.key === 'ArrowUp') {
       newIndexPosition = currentIndex[0] > 0 ? currentIndex[0] - 1 : currentIndex[0];
