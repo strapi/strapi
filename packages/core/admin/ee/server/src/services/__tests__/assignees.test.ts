@@ -1,20 +1,3 @@
-jest.mock('@strapi/strapi/dist/utils/ee', () => {
-  const eeModule = () => true;
-
-  Object.assign(eeModule, {
-    features: {
-      isEnabled() {
-        return true;
-      },
-      getEnabled() {
-        return ['review-workflows'];
-      },
-    },
-  });
-
-  return eeModule;
-});
-
 import { ENTITY_ASSIGNEE_ATTRIBUTE } from '../../constants/workflows';
 import assigneeFactory from '../review-workflows/assignees';
 
@@ -44,6 +27,17 @@ const strapiMock = {
   service: jest.fn((serviceName) => {
     return servicesMock[serviceName];
   }),
+  EE: true,
+  ee: {
+    features: {
+      isEnabled() {
+        return true;
+      },
+      getEnabled() {
+        return ['review-workflows'];
+      },
+    },
+  },
 };
 
 // @ts-expect-error - use strapi mock

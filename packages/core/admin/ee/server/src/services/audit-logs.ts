@@ -1,7 +1,6 @@
 import { LoadedStrapi } from '@strapi/types';
 import localProvider from '@strapi/provider-audit-logs-local';
 import { scheduleJob } from 'node-schedule';
-import EE from '@strapi/strapi/dist/utils/ee';
 
 const DEFAULT_RETENTION_DAYS = 90;
 
@@ -63,8 +62,7 @@ const getEventMap = (defaultEvents: any) => {
 };
 
 const getRetentionDays = (strapi: LoadedStrapi) => {
-  // @ts-expect-error - options is not typed into features
-  const licenseRetentionDays = EE.features.get('audit-logs')?.options.retentionDays;
+  const licenseRetentionDays = strapi.ee.features.get('audit-logs')?.options.retentionDays;
   const userRetentionDays = strapi.config.get('admin.auditLogs.retentionDays');
 
   // For enterprise plans, use 90 days by default, but allow users to override it
@@ -166,7 +164,7 @@ const createAuditLogsService = (strapi: LoadedStrapi) => {
       state.provider = await localProvider.register({ strapi });
 
       // Check current state of license
-      if (!EE.features.isEnabled('audit-logs')) {
+      if (!strapi.ee.features.isEnabled('audit-logs')) {
         return this;
       }
 

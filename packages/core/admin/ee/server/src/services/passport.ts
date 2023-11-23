@@ -1,5 +1,3 @@
-import EE from '@strapi/strapi/dist/utils/ee';
-
 import { errors } from '@strapi/utils';
 import createLocalStrategy from '../../../../server/src/services/passport/local-strategy';
 import sso from './passport/sso';
@@ -23,7 +21,7 @@ const localStrategyMiddleware = async ([error, user, message]: any, done: any) =
 };
 
 const getPassportStrategies = () => {
-  if (!EE.features.isEnabled('sso')) {
+  if (!strapi.ee.features.isEnabled('sso')) {
     return [createLocalStrategy(strapi)];
   }
 

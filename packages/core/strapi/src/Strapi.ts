@@ -228,6 +228,11 @@ class Strapi extends Container implements StrapiI {
       },
       configurable: false,
     });
+
+    Object.defineProperty<Strapi>(this, 'ee', {
+      get: () => ee,
+      configurable: false,
+    });
   }
 
   get config() {

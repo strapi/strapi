@@ -1,20 +1,3 @@
-jest.mock('@strapi/strapi/dist/utils/ee', () => {
-  const eeModule = () => true;
-
-  Object.assign(eeModule, {
-    features: {
-      isEnabled() {
-        return true;
-      },
-      getEnabled() {
-        return ['review-workflows'];
-      },
-    },
-  });
-
-  return eeModule;
-});
-
 import { LoadedStrapi } from '@strapi/types';
 import { cloneDeep } from 'lodash/fp';
 import stageFactory from '../review-workflows/stages';
@@ -87,6 +70,17 @@ const servicesMock: Record<string, any> = {
 const queryUpdateMock = jest.fn(() => Promise.resolve());
 
 const strapiMock = {
+  EE: true,
+  ee: {
+    features: {
+      isEnabled() {
+        return true;
+      },
+      getEnabled() {
+        return ['review-workflows'];
+      },
+    },
+  },
   query: jest.fn(() => ({
     findOne: jest.fn(() => workflowMock),
   })),

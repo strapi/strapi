@@ -10,7 +10,6 @@ import { createBuildContext } from './createBuildContext';
 import { WebpackWatcher, watch as watchWebpack } from './webpack/watch';
 import { build as buildWebpack } from './webpack/build';
 
-import EE from '@strapi/strapi/dist/utils/ee';
 import { writeStaticClientFiles } from './staticFiles';
 import strapiFactory from '@strapi/strapi';
 
@@ -70,7 +69,6 @@ const develop = async ({
       timer.start('creatingAdmin');
       const adminSpinner = logger.spinner(`Creating admin`).start();
 
-      EE.init(cwd);
       await writeStaticClientFiles(ctx);
       await buildWebpack(ctx);
 
@@ -147,7 +145,6 @@ const develop = async ({
       timer.start('creatingAdmin');
       const adminSpinner = logger.spinner(`Creating admin`).start();
 
-      EE.init(cwd);
       await writeStaticClientFiles(ctx);
       webpackWatcher = await watchWebpack(ctx);
 

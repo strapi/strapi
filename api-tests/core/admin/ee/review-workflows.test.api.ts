@@ -99,11 +99,12 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
   beforeAll(async () => {
     await builder.addContentTypes([model]).build();
-    // eslint-disable-next-line node/no-extraneous-require
-    hasRW = require('@strapi/strapi/dist/utils/ee').features.isEnabled('review-workflows');
 
     // @ts-expect-error - We don't have the type for this
     strapi = await createStrapiInstance({ bypassAuth: false });
+
+    hasRW = strapi.ee.features.isEnabled('review-workflows');
+
     requests.admin = await createAuthRequest({ strapi });
     // @ts-expect-error - We don't have the type for this
     requests.public = createRequest({ strapi }).setToken(await getFullAccessToken());
