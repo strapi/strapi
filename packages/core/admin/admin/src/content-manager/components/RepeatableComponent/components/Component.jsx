@@ -22,7 +22,8 @@ import styled from 'styled-components';
 
 import { useDragAndDrop } from '../../../hooks/useDragAndDrop';
 import useLazyComponents from '../../../hooks/useLazyComponents';
-import { composeRefs, getTrad, ItemTypes } from '../../../utils';
+import { composeRefs, ItemTypes } from '../../../utils';
+import { getTranslation } from '../../../utils/translations';
 import FieldComponent from '../../FieldComponent';
 import Inputs from '../../Inputs';
 
@@ -151,7 +152,7 @@ const DraggedItem = ({
                       toggleCollapses();
                     }}
                     label={formatMessage({
-                      id: getTrad('containers.Edit.delete'),
+                      id: getTranslation('containers.Edit.delete'),
                       defaultMessage: 'Delete',
                     })}
                     icon={<Trash />}
@@ -166,7 +167,7 @@ const DraggedItem = ({
                     onClick={(e) => e.stopPropagation()}
                     data-handler-id={handlerId}
                     label={formatMessage({
-                      id: getTrad('components.DragHandle-label'),
+                      id: getTranslation('components.DragHandle-label'),
                       defaultMessage: 'Drag',
                     })}
                     onKeyDown={handleKeyDown}

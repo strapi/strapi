@@ -5,7 +5,8 @@ import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { getTrad, getDisplayName } from '../../../utils';
+import { getDisplayName } from '../../../utils';
+import { getTranslation } from '../../../utils/translations';
 
 import getUnits from './utils/getUnits';
 
@@ -16,7 +17,7 @@ const Title = () => {
     <Flex direction="column" alignItems="stretch" gap={2}>
       <Typography variant="sigma" textColor="neutral600" id="additional-information">
         {formatMessage({
-          id: getTrad('containers.Edit.information'),
+          id: getTranslation('containers.Edit.information'),
           defaultMessage: 'Information',
         })}
       </Typography>
@@ -77,7 +78,7 @@ const Body = () => {
       <Flex direction="column" alignItems="stretch" gap={2} as="dl">
         <KeyValuePair
           label={formatMessage({
-            id: getTrad('containers.Edit.information.created'),
+            id: getTranslation('containers.Edit.information.created'),
             defaultMessage: 'Created',
           })}
           value={created.at}
@@ -85,7 +86,7 @@ const Body = () => {
 
         <KeyValuePair
           label={formatMessage({
-            id: getTrad('containers.Edit.information.by'),
+            id: getTranslation('containers.Edit.information.by'),
             defaultMessage: 'By',
           })}
           value={created.by}
@@ -95,7 +96,7 @@ const Body = () => {
       <Flex direction="column" alignItems="stretch" gap={2} as="dl">
         <KeyValuePair
           label={formatMessage({
-            id: getTrad('containers.Edit.information.lastUpdate'),
+            id: getTranslation('containers.Edit.information.lastUpdate'),
             defaultMessage: 'Last update',
           })}
           value={updated.at}
@@ -103,7 +104,7 @@ const Body = () => {
 
         <KeyValuePair
           label={formatMessage({
-            id: getTrad('containers.Edit.information.by'),
+            id: getTranslation('containers.Edit.information.by'),
             defaultMessage: 'By',
           })}
           value={updated.by}

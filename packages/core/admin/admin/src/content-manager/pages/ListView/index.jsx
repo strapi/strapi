@@ -52,7 +52,8 @@ import { Filter } from '../../components/Filter';
 import { AdminUsersFilter } from '../../components/Filter/CustomInputs/AdminUsersFilter';
 import { CREATOR_FIELDS } from '../../constants/attributes';
 import { useAllowedAttributes } from '../../hooks/useAllowedAttributes';
-import { getTrad, getDisplayName } from '../../utils';
+import { getDisplayName } from '../../utils';
+import { getTranslation } from '../../utils/translations';
 
 import * as Actions from './actions';
 import { Body } from './components/Body';
@@ -94,7 +95,7 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
   const trackUsageRef = React.useRef(trackUsage);
   const fetchPermissionsRef = React.useRef(refetchPermissions);
   const { notifyStatus } = useNotifyAT();
-  const { formatAPIError } = useAPIErrorHandler(getTrad);
+  const { formatAPIError } = useAPIErrorHandler(getTranslation);
   const allowedAttributes = useAllowedAttributes(contentType, slug);
   const [{ query }] = useQueryParams();
   const { pathname } = useLocation();
@@ -345,7 +346,7 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
         notifyStatus(
           formatMessage(
             {
-              id: getTrad('utils.data-loaded'),
+              id: getTranslation('utils.data-loaded'),
               defaultMessage:
                 '{number, plural, =1 {# entry has} other {# entries have}} successfully been loaded',
             },
@@ -367,7 +368,7 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
 
           toggleNotification({
             type: 'info',
-            message: { id: getTrad('permissions.not-allowed.update') },
+            message: { id: getTranslation('permissions.not-allowed.update') },
           });
 
           push('/');
@@ -377,7 +378,7 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
 
         toggleNotification({
           type: 'warning',
-          message: { id: getTrad('error.model.fetch') },
+          message: { id: getTranslation('error.model.fetch') },
         });
       }
     },
@@ -424,7 +425,7 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
 
         toggleNotification({
           type: 'success',
-          message: { id: getTrad('success.record.delete') },
+          message: { id: getTranslation('success.record.delete') },
         });
       } catch (err) {
         toggleNotification({
@@ -459,7 +460,7 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
   }, [canRead, getData, slug, params, getDataSucceeded, fetchData]);
 
   const defaultHeaderLayoutTitle = formatMessage({
-    id: getTrad('header.name'),
+    id: getTranslation('header.name'),
     defaultMessage: 'Content',
   });
   const headerLayoutTitle = formatMessage({
@@ -487,7 +488,7 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
           metadatas: {
             ...metadatas,
             label: formatMessage({
-              id: getTrad(`containers.ListPage.table-headers.${header.name}`),
+              id: getTranslation(`containers.ListPage.table-headers.${header.name}`),
               defaultMessage: metadatas.label,
             }),
           },
@@ -500,7 +501,7 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
         metadatas: {
           ...metadatas,
           label: formatMessage({
-            id: getTrad(`containers.ListPage.table-headers.${header.name}`),
+            id: getTranslation(`containers.ListPage.table-headers.${header.name}`),
             defaultMessage: metadatas.label,
           }),
         },
@@ -516,7 +517,7 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
         },
         metadatas: {
           label: formatMessage({
-            id: getTrad(`containers.ListPage.table-headers.publishedAt`),
+            id: getTranslation(`containers.ListPage.table-headers.publishedAt`),
             defaultMessage: 'publishedAt',
           }),
           searchable: false,
@@ -551,7 +552,7 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
   const subtitle = canRead
     ? formatMessage(
         {
-          id: getTrad('pages.ListView.header-subtitle'),
+          id: getTranslation('pages.ListView.header-subtitle'),
           defaultMessage: '{number, plural, =0 {# entries} one {# entry} other {# entries}} found',
         },
         { number: total }
@@ -576,7 +577,7 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
         style={{ textDecoration: 'none' }}
       >
         {formatMessage({
-          id: getTrad('HeaderLayout.button.label-add-entry'),
+          id: getTranslation('HeaderLayout.button.label-add-entry'),
           defaultMessage: 'Create new entry',
         })}
       </Button>
@@ -754,7 +755,7 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
                                     }700`}
                                   >
                                     {formatMessage({
-                                      id: getTrad(
+                                      id: getTranslation(
                                         `containers.List.${
                                           rowData.publishedAt ? 'published' : 'draft'
                                         }`

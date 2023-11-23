@@ -31,7 +31,7 @@ import { useMutation } from 'react-query';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
-import { getTrad } from '../../utils';
+import { getTranslation } from '../../utils/translations';
 import { selectFieldSizes } from '../App/selectors';
 
 import DisplayedFields from './components/DisplayedFields';
@@ -240,13 +240,15 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
           <HeaderLayout
             title={formatMessage(
               {
-                id: getTrad('components.SettingsViewWrapper.pluginHeader.title'),
+                id: getTranslation('components.SettingsViewWrapper.pluginHeader.title'),
                 defaultMessage: `Configure the view - ${upperFirst(modelName)}`,
               },
               { name: upperFirst(modelName) }
             )}
             subtitle={formatMessage({
-              id: getTrad('components.SettingsViewWrapper.pluginHeader.description.edit-settings'),
+              id: getTranslation(
+                'components.SettingsViewWrapper.pluginHeader.description.edit-settings'
+              ),
               defaultMessage: 'Customize how the edit view will look like.',
             })}
             navigationAction={
@@ -287,7 +289,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
               <Flex direction="column" alignItems="stretch" gap={4}>
                 <Typography variant="delta" as="h2">
                   {formatMessage({
-                    id: getTrad('containers.SettingPage.settings'),
+                    id: getTranslation('containers.SettingPage.settings'),
                     defaultMessage: 'Settings',
                   })}
                 </Typography>
@@ -295,11 +297,13 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
                   <GridItem col={6} s={12}>
                     <Select
                       label={formatMessage({
-                        id: getTrad('containers.SettingPage.editSettings.entry.title'),
+                        id: getTranslation('containers.SettingPage.editSettings.entry.title'),
                         defaultMessage: 'Entry title',
                       })}
                       hint={formatMessage({
-                        id: getTrad('containers.SettingPage.editSettings.entry.title.description'),
+                        id: getTranslation(
+                          'containers.SettingPage.editSettings.entry.title.description'
+                        ),
                         defaultMessage: 'Set the display field of your entry',
                       })}
                       onChange={(value) => {
@@ -325,7 +329,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
                 </Box>
                 <Typography variant="delta" as="h3">
                   {formatMessage({
-                    id: getTrad('containers.SettingPage.view'),
+                    id: getTranslation('containers.SettingPage.view'),
                     defaultMessage: 'View',
                   })}
                 </Typography>
@@ -354,7 +358,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
           </ContentLayout>
           <ConfirmDialog
             bodyText={{
-              id: getTrad('popUpWarning.warning.updateAllSettings'),
+              id: getTranslation('popUpWarning.warning.updateAllSettings'),
               defaultMessage: 'This will modify all your settings',
             }}
             iconRightButton={<Check />}

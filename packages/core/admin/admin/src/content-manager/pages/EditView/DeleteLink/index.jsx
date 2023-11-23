@@ -7,7 +7,7 @@ import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { getTrad } from '../../../utils';
+import { getTranslation } from '../../../utils/translations';
 
 import { connect, select } from './utils';
 
@@ -15,7 +15,7 @@ const DeleteLink = ({ onDelete, trackerProperty }) => {
   const [displayDeleteConfirmation, setDisplayDeleteConfirmation] = useState(false);
   const [isModalConfirmButtonLoading, setIsModalConfirmButtonLoading] = useState(false);
   const { formatMessage } = useIntl();
-  const { formatAPIError } = useAPIErrorHandler(getTrad);
+  const { formatAPIError } = useAPIErrorHandler(getTranslation);
   const toggleNotification = useNotification();
 
   const toggleWarningDelete = () => setDisplayDeleteConfirmation((prevState) => !prevState);
@@ -44,7 +44,7 @@ const DeleteLink = ({ onDelete, trackerProperty }) => {
     <>
       <Button onClick={toggleWarningDelete} size="S" startIcon={<Trash />} variant="danger-light">
         {formatMessage({
-          id: getTrad('containers.Edit.delete-entry'),
+          id: getTranslation('containers.Edit.delete-entry'),
           defaultMessage: 'Delete this entry',
         })}
       </Button>

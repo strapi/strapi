@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { useContentTypeLayout } from '../../hooks';
-import { getTrad } from '../../utils';
+import { getTranslation } from '../../utils/translations';
 import ComponentInitializer from '../ComponentInitializer';
 import NonRepeatableComponent from '../NonRepeatableComponent';
 import RepeatableComponent from '../RepeatableComponent';
@@ -82,7 +82,7 @@ const FieldComponent = ({
         {showResetComponent && (
           <IconButton
             label={formatMessage({
-              id: getTrad('components.reset-entry'),
+              id: getTranslation('components.reset-entry'),
               defaultMessage: 'Reset Entry',
             })}
             icon={<Trash />}

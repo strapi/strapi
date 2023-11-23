@@ -26,8 +26,8 @@ import { DynamicZone } from '../../components/DynamicZone';
 import EditViewDataManagerProvider from '../../components/EditViewDataManagerProvider';
 import SingleTypeFormWrapper from '../../components/SingleTypeFormWrapper';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
-import { getTrad } from '../../utils';
 import { generatePermissionsObject } from '../../utils/permissions';
+import { getTranslation } from '../../utils/translations';
 
 import DeleteLink from './DeleteLink';
 import DraftAndPublishBadge from './DraftAndPublishBadge';
@@ -255,7 +255,7 @@ const EditViewPage = ({
                                 variant="secondary"
                               >
                                 {formatMessage({
-                                  id: getTrad('link-to-ctb'),
+                                  id: getTranslation('link-to-ctb'),
                                   defaultMessage: 'Edit the model',
                                 })}
                               </LinkButton>

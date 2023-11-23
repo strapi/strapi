@@ -33,7 +33,8 @@ import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { formatAPIErrors } from '../../../../../../utils/formatAPIErrors';
-import { getTrad, createYupSchema } from '../../../../../utils';
+import { createYupSchema } from '../../../../../utils';
+import { getTranslation } from '../../../../../utils/translations';
 import { listViewDomain } from '../../../selectors';
 import { Body } from '../../Body';
 import { ConfirmDialogPublishAll } from '../ConfirmBulkActionDialog';
@@ -321,7 +322,7 @@ const SelectedEntriesModalContent = ({
     if (publishedCount) {
       return formatMessage(
         {
-          id: getTrad('containers.ListPage.selectedEntriesModal.publishedCount'),
+          id: getTranslation('containers.ListPage.selectedEntriesModal.publishedCount'),
           defaultMessage:
             '<b>{publishedCount}</b> {publishedCount, plural, =0 {entries} one {entry} other {entries}} published. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.',
         },
@@ -335,7 +336,7 @@ const SelectedEntriesModalContent = ({
 
     return formatMessage(
       {
-        id: getTrad('containers.ListPage.selectedEntriesModal.selectedCount'),
+        id: getTranslation('containers.ListPage.selectedEntriesModal.selectedCount'),
         defaultMessage:
           '<b>{alreadyPublishedCount}</b> {alreadyPublishedCount, plural, =0 {entries} one {entry} other {entries}} already published. <b>{readyToPublishCount}</b> {readyToPublishCount, plural, =0 {entries} one {entry} other {entries}} ready to publish. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.',
       },
@@ -361,7 +362,7 @@ const SelectedEntriesModalContent = ({
       <ModalHeader>
         <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
           {formatMessage({
-            id: getTrad('containers.ListPage.selectedEntriesModal.title'),
+            id: getTranslation('containers.ListPage.selectedEntriesModal.title'),
             defaultMessage: 'Publish entries',
           })}
         </Typography>

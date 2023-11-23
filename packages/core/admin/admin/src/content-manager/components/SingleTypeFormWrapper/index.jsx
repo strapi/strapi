@@ -26,7 +26,8 @@ import {
   setStatus,
   submitSucceeded,
 } from '../../sharedReducers/crudReducer/actions';
-import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
+import { createDefaultForm, removePasswordFieldsFromData } from '../../utils';
+import { getTranslation } from '../../utils/translations';
 
 // This container is used to handle the CRUD
 const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
@@ -40,7 +41,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   const params = useMemo(() => buildValidGetParams(query), [query]);
   const toggleNotification = useNotification();
   const dispatch = useDispatch();
-  const { formatAPIError } = useAPIErrorHandler(getTrad);
+  const { formatAPIError } = useAPIErrorHandler(getTranslation);
   const fetchClient = useFetchClient();
   const { post, put, del } = fetchClient;
 
@@ -130,7 +131,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         if (responseStatus === 403) {
           toggleNotification({
             type: 'info',
-            message: { id: getTrad('permissions.not-allowed.update') },
+            message: { id: getTranslation('permissions.not-allowed.update') },
           });
 
           push('/');
@@ -161,7 +162,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
         toggleNotification({
           type: 'success',
-          message: { id: getTrad('success.record.delete') },
+          message: { id: getTranslation('success.record.delete') },
         });
 
         trackUsageRef.current('didDeleteEntry', trackerProperty);
@@ -193,7 +194,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         trackUsageRef.current('didCreateEntry', trackerProperty);
         toggleNotification({
           type: 'success',
-          message: { id: getTrad('success.record.save') },
+          message: { id: getTranslation('success.record.save') },
         });
 
         setCurrentStep('contentManager.success');
@@ -269,7 +270,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       trackUsageRef.current('didPublishEntry');
       toggleNotification({
         type: 'success',
-        message: { id: getTrad('success.record.publish') },
+        message: { id: getTranslation('success.record.publish') },
       });
 
       dispatch(submitSucceeded(cleanReceivedData(data)));
@@ -299,7 +300,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
         toggleNotification({
           type: 'success',
-          message: { id: getTrad('success.record.save') },
+          message: { id: getTranslation('success.record.save') },
         });
 
         trackUsageRef.current('didEditEntry', { trackerProperty });
@@ -345,7 +346,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       trackUsageRef.current('didUnpublishEntry');
       toggleNotification({
         type: 'success',
-        message: { id: getTrad('success.record.unpublish') },
+        message: { id: getTranslation('success.record.unpublish') },
       });
 
       dispatch(submitSucceeded(cleanReceivedData(data)));

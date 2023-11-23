@@ -10,7 +10,8 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import { useContentTypeLayout } from '../../hooks';
-import { getMaxTempKey, getTrad } from '../../utils';
+import { getMaxTempKey } from '../../utils';
+import { getTranslation } from '../../utils/translations';
 import ComponentInitializer from '../ComponentInitializer';
 
 import * as Accordion from './components/Accordion';
@@ -103,7 +104,7 @@ const RepeatableComponent = ({
       } else if (componentValueLength >= max) {
         toggleNotification({
           type: 'info',
-          message: { id: getTrad('components.notification.info.maximum-requirement') },
+          message: { id: getTranslation('components.notification.info.maximum-requirement') },
         });
       }
     }
@@ -113,7 +114,7 @@ const RepeatableComponent = ({
     setLiveText(
       formatMessage(
         {
-          id: getTrad('dnd.reorder'),
+          id: getTranslation('dnd.reorder'),
           defaultMessage: '{item}, moved. New position in list: {position}.',
         },
         {
@@ -151,7 +152,7 @@ const RepeatableComponent = ({
     setLiveText(
       formatMessage(
         {
-          id: getTrad('dnd.cancel-item'),
+          id: getTranslation('dnd.cancel-item'),
           defaultMessage: '{item}, dropped. Re-order cancelled.',
         },
         {
@@ -165,7 +166,7 @@ const RepeatableComponent = ({
     setLiveText(
       formatMessage(
         {
-          id: getTrad('dnd.grab-item'),
+          id: getTranslation('dnd.grab-item'),
           defaultMessage: `{item}, grabbed. Current position in list: {position}. Press up and down arrow to change position, Spacebar to drop, Escape to cancel.`,
         },
         {
@@ -180,7 +181,7 @@ const RepeatableComponent = ({
     setLiveText(
       formatMessage(
         {
-          id: getTrad('dnd.drop-item'),
+          id: getTranslation('dnd.drop-item'),
           defaultMessage: `{item}, dropped. Final position in list: {position}.`,
         },
         {
@@ -195,14 +196,14 @@ const RepeatableComponent = ({
 
   if (hasMinError) {
     errorMessage = {
-      id: getTrad('components.DynamicZone.missing-components'),
+      id: getTranslation('components.DynamicZone.missing-components'),
       defaultMessage:
         'There {number, plural, =0 {are # missing components} one {is # missing component} other {are # missing components}}',
       values: { number: missingComponentsValue },
     };
   } else if (componentErrorKeys.some((error) => error.split('.').length > 1) && !hasMinError) {
     errorMessage = {
-      id: getTrad('components.RepeatableComponent.error-message'),
+      id: getTranslation('components.RepeatableComponent.error-message'),
       defaultMessage: 'The component(s) contain error(s)',
     };
   }
@@ -219,7 +220,7 @@ const RepeatableComponent = ({
     <Box hasRadius>
       <VisuallyHidden id={ariaDescriptionId}>
         {formatMessage({
-          id: getTrad('dnd.instructions'),
+          id: getTranslation('dnd.instructions'),
           defaultMessage: `Press spacebar to grab and re-order`,
         })}
       </VisuallyHidden>
@@ -249,7 +250,7 @@ const RepeatableComponent = ({
           <Flex justifyContent="center" height="48px" background="neutral0">
             <TextButtonCustom disabled={isReadOnly} onClick={handleClick} startIcon={<Plus />}>
               {formatMessage({
-                id: getTrad('containers.EditView.add.new-entry'),
+                id: getTranslation('containers.EditView.add.new-entry'),
                 defaultMessage: 'Add an entry',
               })}
             </TextButtonCustom>

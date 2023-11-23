@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { getTrad } from '../../../utils';
+import { getTranslation } from '../../../utils/translations';
 
 const StyledBullet = styled.div`
   flex-shrink: 0;
@@ -25,11 +25,11 @@ export const Option = ({ publicationState, mainField, id }) => {
   if (publicationState) {
     const isDraft = publicationState === 'draft';
     const draftMessage = {
-      id: getTrad('components.Select.draft-info-title'),
+      id: getTranslation('components.Select.draft-info-title'),
       defaultMessage: 'State: Draft',
     };
     const publishedMessage = {
-      id: getTrad('components.Select.publish-info-title'),
+      id: getTranslation('components.Select.publish-info-title'),
       defaultMessage: 'State: Published',
     };
     const title = isDraft ? formatMessage(draftMessage) : formatMessage(publishedMessage);

@@ -19,7 +19,8 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import { useContentTypeLayout, useDragAndDrop } from '../../../hooks';
-import { composeRefs, getTrad, ItemTypes } from '../../../utils';
+import { composeRefs, ItemTypes } from '../../../utils';
+import { getTranslation } from '../../../utils/translations';
 import { ComponentIcon } from '../../ComponentIcon';
 import FieldComponent from '../../FieldComponent';
 
@@ -73,7 +74,7 @@ export const DynamicComponent = ({
 
   if (fieldsErrors.length > 0) {
     errorMessage = formatMessage({
-      id: getTrad('components.DynamicZone.error-message'),
+      id: getTranslation('components.DynamicZone.error-message'),
       defaultMessage: 'The component contains error(s)',
     });
   }
@@ -108,7 +109,7 @@ export const DynamicComponent = ({
         noBorder
         label={formatMessage(
           {
-            id: getTrad('components.DynamicZone.delete-label'),
+            id: getTranslation('components.DynamicZone.delete-label'),
             defaultMessage: 'Delete {name}',
           },
           { name: friendlyName }
@@ -126,7 +127,7 @@ export const DynamicComponent = ({
         data-handler-id={handlerId}
         ref={dragRef}
         label={formatMessage({
-          id: getTrad('components.DragHandle-label'),
+          id: getTranslation('components.DragHandle-label'),
           defaultMessage: 'Drag',
         })}
         onKeyDown={handleKeyDown}
@@ -138,7 +139,7 @@ export const DynamicComponent = ({
           <More aria-hidden focusable={false} />
           <VisuallyHidden as="span">
             {formatMessage({
-              id: getTrad('components.DynamicZone.more-actions'),
+              id: getTranslation('components.DynamicZone.more-actions'),
               defaultMessage: 'More actions',
             })}
           </VisuallyHidden>
@@ -147,7 +148,7 @@ export const DynamicComponent = ({
           <Menu.SubRoot>
             <Menu.SubTrigger>
               {formatMessage({
-                id: getTrad('components.DynamicZone.add-item-above'),
+                id: getTranslation('components.DynamicZone.add-item-above'),
                 defaultMessage: 'Add component above',
               })}
             </Menu.SubTrigger>
@@ -170,7 +171,7 @@ export const DynamicComponent = ({
           <Menu.SubRoot>
             <Menu.SubTrigger>
               {formatMessage({
-                id: getTrad('components.DynamicZone.add-item-below'),
+                id: getTranslation('components.DynamicZone.add-item-below'),
                 defaultMessage: 'Add component below',
               })}
             </Menu.SubTrigger>

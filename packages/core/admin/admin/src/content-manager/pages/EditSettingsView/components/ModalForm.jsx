@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { shallowEqual, useSelector } from 'react-redux';
 
-import getTrad from '../../../utils/getTrad';
+import { getTranslation } from '../../../utils/translations';
 import { makeSelectModelAndComponentSchemas, selectFieldSizes } from '../../App/selectors';
 import { useLayoutDnd } from '../hooks/useLayoutDnd';
 import { createPossibleMainFieldsForModelsAndComponents, getInputProps } from '../utils';
@@ -85,7 +85,9 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
           hint={
             meta === 'mainField'
               ? formatMessage({
-                  id: getTrad('containers.SettingPage.editSettings.relation-field.description'),
+                  id: getTranslation(
+                    'containers.SettingPage.editSettings.relation-field.description'
+                  ),
                 })
               : ''
           }
@@ -117,7 +119,7 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
               onSizeChange({ name: selectedField, value });
             }}
             label={formatMessage({
-              id: getTrad('containers.SettingPage.editSettings.size.label'),
+              id: getTranslation('containers.SettingPage.editSettings.size.label'),
               defaultMessage: 'Size',
             })}
           >

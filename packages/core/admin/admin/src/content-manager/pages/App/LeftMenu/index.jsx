@@ -18,7 +18,7 @@ import { useIntl } from 'react-intl';
 import { shallowEqual, useSelector } from 'react-redux';
 import { NavLink } from 'react-router-dom';
 
-import getTrad from '../../../utils/getTrad';
+import { getTranslation } from '../../../utils/translations';
 import { makeSelectModelLinks } from '../selectors';
 
 const LeftMenu = () => {
@@ -44,7 +44,7 @@ const LeftMenu = () => {
         {
           id: 'collectionTypes',
           title: {
-            id: getTrad('components.LeftMenu.collection-types'),
+            id: getTranslation('components.LeftMenu.collection-types'),
             defaultMessage: 'Collection Types',
           },
           searchable: true,
@@ -53,7 +53,7 @@ const LeftMenu = () => {
         {
           id: 'singleTypes',
           title: {
-            id: getTrad('components.LeftMenu.single-types'),
+            id: getTranslation('components.LeftMenu.single-types'),
             defaultMessage: 'Single Types',
           },
           searchable: true,
@@ -92,7 +92,7 @@ const LeftMenu = () => {
   };
 
   const label = formatMessage({
-    id: getTrad('header.name'),
+    id: getTranslation('header.name'),
     defaultMessage: 'Content',
   });
 

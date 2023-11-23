@@ -21,7 +21,7 @@ import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { getTrad } from '../../../utils';
+import { getTranslation } from '../../../utils/translations';
 
 import { connect, select } from './utils';
 
@@ -54,7 +54,7 @@ const Header = ({
     !isEqual(initialData, modifiedData) || (isCreatingEntry && !isEmpty(modifiedData));
 
   const createEntryIntlTitle = formatMessage({
-    id: getTrad('containers.Edit.pluginHeader.title.new'),
+    id: getTranslation('containers.Edit.pluginHeader.title.new'),
     defaultMessage: 'Create an entry',
   });
 
@@ -80,7 +80,7 @@ const Header = ({
         )}
         <Button disabled={!didChangeData} loading={status === 'submit-pending'} type="submit">
           {formatMessage({
-            id: getTrad('containers.Edit.submit'),
+            id: getTranslation('containers.Edit.submit'),
             defaultMessage: 'Save',
           })}
         </Button>
@@ -116,7 +116,7 @@ const Header = ({
         <Box paddingLeft={shouldShowPublishButton ? 2 : 0}>
           <Button disabled={!didChangeData} loading={status === 'submit-pending'} type="submit">
             {formatMessage({
-              id: getTrad('containers.Edit.submit'),
+              id: getTranslation('containers.Edit.submit'),
               defaultMessage: 'Save',
             })}
           </Button>
@@ -133,7 +133,7 @@ const Header = ({
   };
 
   const subtitle = `${formatMessage({
-    id: getTrad('api.id'),
+    id: getTranslation('api.id'),
     defaultMessage: 'API ID ',
   })} : ${layout.apiID}`;
 
@@ -175,7 +175,7 @@ const Header = ({
               <Typography id="confirm-description">
                 {formatMessage(
                   {
-                    id: getTrad('popUpWarning.warning.unpublish'),
+                    id: getTranslation('popUpWarning.warning.unpublish'),
                     defaultMessage:
                       'Unpublish this content will automatically change it to a draft.',
                   },
@@ -188,7 +188,7 @@ const Header = ({
             <Flex justifyContent="center" style={{ textAlign: 'center' }}>
               <Typography id="confirm-description">
                 {formatMessage({
-                  id: getTrad('popUpWarning.warning.unpublish-question'),
+                  id: getTranslation('popUpWarning.warning.unpublish-question'),
                   defaultMessage: 'Are you sure you want to unpublish it?',
                 })}
               </Typography>
@@ -217,7 +217,7 @@ const Header = ({
       <Dialog
         onClose={onPublishPromptDismissal}
         title={formatMessage({
-          id: getTrad(`popUpWarning.warning.has-draft-relations.title`),
+          id: getTranslation(`popUpWarning.warning.has-draft-relations.title`),
           defaultMessage: 'Confirmation',
         })}
         labelledBy="confirmation"
@@ -231,7 +231,7 @@ const Header = ({
                 {draftCount}
                 {formatMessage(
                   {
-                    id: getTrad(`popUpwarning.warning.has-draft-relations.message`),
+                    id: getTranslation(`popUpwarning.warning.has-draft-relations.message`),
                     defaultMessage:
                       '<b>{count, plural, one { relation is} other { relations are}}</b> not published yet and might lead to unexpected behavior.',
                   },
@@ -245,7 +245,7 @@ const Header = ({
             <FlexTextAlign justifyContent="center">
               <Typography id="confirm-description">
                 {formatMessage({
-                  id: getTrad('popUpWarning.warning.publish-question'),
+                  id: getTranslation('popUpWarning.warning.publish-question'),
                   defaultMessage: 'Do you still want to publish?',
                 })}
               </Typography>
@@ -264,7 +264,7 @@ const Header = ({
           endAction={
             <Button variant="success" onClick={onPublish}>
               {formatMessage({
-                id: getTrad('popUpwarning.warning.has-draft-relations.button-confirm'),
+                id: getTranslation('popUpwarning.warning.has-draft-relations.button-confirm'),
                 defaultMessage: 'Publish',
               })}
             </Button>

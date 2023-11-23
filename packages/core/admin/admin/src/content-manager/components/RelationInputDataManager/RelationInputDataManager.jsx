@@ -8,8 +8,8 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { useRelation } from '../../hooks/useRelation';
-import { getTrad } from '../../utils';
 import { getInitialDataPathUsingTempKeys } from '../../utils/paths';
+import { getTranslation } from '../../utils/translations';
 import { RelationInput } from '../RelationInput';
 
 import { PUBLICATION_STATES, RELATIONS_TO_DISPLAY, SEARCH_RESULTS_TO_DISPLAY } from './constants';
@@ -175,7 +175,7 @@ export const RelationInputDataManager = ({
     setLiveText(
       formatMessage(
         {
-          id: getTrad('dnd.reorder'),
+          id: getTranslation('dnd.reorder'),
           defaultMessage: '{item}, moved. New position in list: {position}.',
         },
         {
@@ -203,7 +203,7 @@ export const RelationInputDataManager = ({
     setLiveText(
       formatMessage(
         {
-          id: getTrad('dnd.grab-item'),
+          id: getTranslation('dnd.grab-item'),
           defaultMessage: `{item}, grabbed. Current position in list: {position}. Press up and down arrow to change position, Spacebar to drop, Escape to cancel.`,
         },
         {
@@ -225,7 +225,7 @@ export const RelationInputDataManager = ({
     setLiveText(
       formatMessage(
         {
-          id: getTrad('dnd.drop-item'),
+          id: getTranslation('dnd.drop-item'),
           defaultMessage: `{item}, dropped. Final position in list: {position}.`,
         },
         {
@@ -247,7 +247,7 @@ export const RelationInputDataManager = ({
     setLiveText(
       formatMessage(
         {
-          id: getTrad('dnd.cancel-item'),
+          id: getTranslation('dnd.cancel-item'),
           defaultMessage: '{item}, dropped. Re-order cancelled.',
         },
         {
@@ -293,7 +293,7 @@ export const RelationInputDataManager = ({
       description={description}
       disabled={isDisabled}
       iconButtonAriaLabel={formatMessage({
-        id: getTrad('components.RelationInput.icon-button-aria-label'),
+        id: getTranslation('components.RelationInput.icon-button-aria-label'),
         defaultMessage: 'Drag',
       })}
       id={name}
@@ -305,28 +305,28 @@ export const RelationInputDataManager = ({
       labelLoadMore={
         !isCreatingEntry || isCloningEntry
           ? formatMessage({
-              id: getTrad('relation.loadMore'),
+              id: getTranslation('relation.loadMore'),
               defaultMessage: 'Load More',
             })
           : null
       }
       labelDisconnectRelation={formatMessage({
-        id: getTrad('relation.disconnect'),
+        id: getTranslation('relation.disconnect'),
         defaultMessage: 'Remove',
       })}
       listAriaDescription={formatMessage({
-        id: getTrad('dnd.instructions'),
+        id: getTranslation('dnd.instructions'),
         defaultMessage: `Press spacebar to grab and re-order`,
       })}
       listHeight={320}
       liveText={liveText}
       loadingMessage={formatMessage({
-        id: getTrad('relation.isLoading'),
+        id: getTranslation('relation.isLoading'),
         defaultMessage: 'Relations are loading',
       })}
       name={name}
       noRelationsMessage={formatMessage({
-        id: getTrad('relation.notAvailable'),
+        id: getTranslation('relation.notAvailable'),
         defaultMessage: 'No relations available',
       })}
       numberOfRelationsToDisplay={RELATIONS_TO_DISPLAY}
@@ -341,18 +341,18 @@ export const RelationInputDataManager = ({
       onSearchNextPage={() => handleSearchMore()}
       placeholder={formatMessage(
         placeholder || {
-          id: getTrad('relation.add'),
+          id: getTranslation('relation.add'),
           defaultMessage: 'Add relation',
         }
       )}
       publicationStateTranslations={{
         [PUBLICATION_STATES.DRAFT]: formatMessage({
-          id: getTrad('relation.publicationState.draft'),
+          id: getTranslation('relation.publicationState.draft'),
           defaultMessage: 'Draft',
         }),
 
         [PUBLICATION_STATES.PUBLISHED]: formatMessage({
-          id: getTrad('relation.publicationState.published'),
+          id: getTranslation('relation.publicationState.published'),
           defaultMessage: 'Published',
         }),
       }}

@@ -11,7 +11,7 @@ import { Pencil } from '@strapi/icons';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 
-import getTrad from '../../../utils/getTrad';
+import { getTranslation } from '../../../utils/translations';
 import { useLayoutDnd } from '../hooks/useLayoutDnd';
 
 const permissions = [{ action: 'plugin::content-type-builder.read', subject: null }];
@@ -48,7 +48,7 @@ const LinkToCTB = () => {
         variant="secondary"
       >
         {formatMessage({
-          id: getTrad(`edit-settings-view.link-to-ctb.${type}`),
+          id: getTranslation(`edit-settings-view.link-to-ctb.${type}`),
           defaultMessage: 'Edit the content type',
         })}
       </LinkButton>

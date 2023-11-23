@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { getTrad } from '../../../utils';
+import { getTranslation } from '../../../utils/translations';
 
 import { connect, select } from './utils';
 
@@ -61,7 +61,7 @@ const DraftAndPublishBadge = ({ hasDraftAndPublish, isPublished }) => {
         <Box paddingLeft={3}>
           <Typography textColor={colorProps.textColor}>
             {formatMessage({
-              id: getTrad('containers.Edit.information.editing'),
+              id: getTranslation('containers.Edit.information.editing'),
               defaultMessage: 'Editing',
             })}
             &nbsp;
@@ -69,12 +69,12 @@ const DraftAndPublishBadge = ({ hasDraftAndPublish, isPublished }) => {
           <Typography fontWeight="bold" textColor={colorProps.textColor}>
             {isPublished &&
               formatMessage({
-                id: getTrad('containers.Edit.information.publishedVersion'),
+                id: getTranslation('containers.Edit.information.publishedVersion'),
                 defaultMessage: 'published version',
               })}
             {!isPublished &&
               formatMessage({
-                id: getTrad('containers.Edit.information.draftVersion'),
+                id: getTranslation('containers.Edit.information.draftVersion'),
                 defaultMessage: 'draft version',
               })}
           </Typography>

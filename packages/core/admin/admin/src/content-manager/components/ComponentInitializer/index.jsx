@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { getTrad } from '../../utils';
+import { getTranslation } from '../../utils/translations';
 
 const IconWrapper = styled.span`
   > svg {
@@ -47,7 +47,7 @@ const ComponentInitializer = ({ error, isReadOnly, onClick }) => {
           <Flex justifyContent="center">
             <Typography textColor="primary600" variant="pi" fontWeight="bold">
               {formatMessage({
-                id: getTrad('components.empty-repeatable'),
+                id: getTranslation('components.empty-repeatable'),
                 defaultMessage: 'No entry yet. Click on the button below to add one.',
               })}
             </Typography>

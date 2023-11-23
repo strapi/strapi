@@ -27,7 +27,8 @@ import {
   setStatus,
   submitSucceeded,
 } from '../../sharedReducers/crudReducer/actions';
-import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
+import { createDefaultForm, removePasswordFieldsFromData } from '../../utils';
+import { getTranslation } from '../../utils/translations';
 
 // This container is used to handle the CRUD
 const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }) => {
@@ -41,7 +42,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
   const { componentsDataStructure, contentTypeDataStructure, data, isLoading, status } =
     useSelector((state) => state['content-manager_editViewCrudReducer']);
   const redirectionLink = useFindRedirectionLink(slug);
-  const { formatAPIError } = useAPIErrorHandler(getTrad);
+  const { formatAPIError } = useAPIErrorHandler(getTranslation);
 
   const isMounted = useRef(true);
   const trackUsageRef = useRef(trackUsage);
@@ -134,7 +135,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         if (resStatus === 403) {
           toggleNotification({
             type: 'info',
-            message: { id: getTrad('permissions.not-allowed.update') },
+            message: { id: getTranslation('permissions.not-allowed.update') },
           });
 
           push(redirectionLink);
@@ -188,7 +189,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
         toggleNotification({
           type: 'success',
-          message: { id: getTrad('success.record.delete') },
+          message: { id: getTranslation('success.record.delete') },
         });
 
         trackUsageRef.current('didDeleteEntry', trackerProperty);
@@ -229,7 +230,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         trackUsageRef.current('didCreateEntry', trackerProperty);
         toggleNotification({
           type: 'success',
-          message: { id: getTrad('success.record.save') },
+          message: { id: getTranslation('success.record.save') },
         });
 
         setCurrentStep('contentManager.success');
@@ -306,7 +307,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
       toggleNotification({
         type: 'success',
-        message: { id: getTrad('success.record.publish') },
+        message: { id: getTranslation('success.record.publish') },
       });
 
       return Promise.resolve(data);
@@ -332,7 +333,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         trackUsageRef.current('didEditEntry', { trackerProperty });
         toggleNotification({
           type: 'success',
-          message: { id: getTrad('success.record.save') },
+          message: { id: getTranslation('success.record.save') },
         });
 
         // TODO: need to find a better place, or a better abstraction
@@ -368,7 +369,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       trackUsageRef.current('didUnpublishEntry');
       toggleNotification({
         type: 'success',
-        message: { id: getTrad('success.record.unpublish') },
+        message: { id: getTranslation('success.record.unpublish') },
       });
 
       dispatch(submitSucceeded(cleanReceivedData(data)));

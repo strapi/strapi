@@ -24,7 +24,8 @@ import { Prompt, Redirect } from 'react-router-dom';
 
 import { usePrev } from '../../hooks';
 import { clearSetModifiedDataOnly } from '../../sharedReducers/crudReducer/actions';
-import { createYupSchema, getTrad } from '../../utils';
+import { createYupSchema } from '../../utils';
+import { getTranslation } from '../../utils/translations';
 
 import reducer, { initialState } from './reducer';
 import { cleanData } from './utils';
@@ -141,7 +142,7 @@ const EditViewDataManagerProvider = ({
     if (shouldRedirectToHomepageWhenEditingEntry) {
       toggleNotification({
         type: 'info',
-        message: { id: getTrad('permissions.not-allowed.update') },
+        message: { id: getTranslation('permissions.not-allowed.update') },
       });
     }
   }, [shouldRedirectToHomepageWhenEditingEntry, toggleNotification]);
@@ -404,7 +405,7 @@ const EditViewDataManagerProvider = ({
         setIsSaving(false);
         errors = {
           ...errors,
-          ...getAPIInnerErrors(err, { getTrad }),
+          ...getAPIInnerErrors(err, { getTranslation }),
         };
       }
 
@@ -473,7 +474,7 @@ const EditViewDataManagerProvider = ({
       setIsSaving(false);
       errors = {
         ...errors,
-        ...getAPIInnerErrors(err, { getTrad }),
+        ...getAPIInnerErrors(err, { getTranslation }),
       };
     }
 

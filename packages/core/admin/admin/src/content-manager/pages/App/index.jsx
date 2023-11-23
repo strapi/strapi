@@ -16,8 +16,8 @@ import { Redirect, Route, Switch, useLocation, useRouteMatch } from 'react-route
 import { DragLayer } from '../../../components/DragLayer';
 import { selectAdminPermissions } from '../../../selectors';
 import ModelsContext from '../../contexts/ModelsContext';
-import getTrad from '../../utils/getTrad';
 import ItemTypes from '../../utils/ItemTypes';
+import { getTranslation } from '../../utils/translations';
 import CollectionTypeRecursivePath from '../CollectionTypeRecursivePath';
 import ComponentSettingsView from '../ComponentSetttingsView';
 import NoContentType from '../NoContentType';
@@ -85,7 +85,7 @@ const App = () => {
       <Main aria-busy="true">
         <HeaderLayout
           title={formatMessage({
-            id: getTrad('header.name'),
+            id: getTranslation('header.name'),
             defaultMessage: 'Content',
           })}
         />
@@ -158,7 +158,10 @@ export default function () {
   return (
     <>
       <Helmet
-        title={formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Content Manager' })}
+        title={formatMessage({
+          id: getTranslation('plugin.name'),
+          defaultMessage: 'Content Manager',
+        })}
       />
       <App />
     </>

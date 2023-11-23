@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { useContentTypeLayout } from '../../hooks';
-import { getTrad } from '../../utils';
+import { getTranslation } from '../../utils/translations';
 
 import { AddComponentButton } from './components/AddComponentButton';
 import { ComponentPicker } from './components/ComponentPicker';
@@ -108,7 +108,7 @@ const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }) => {
     } else {
       toggleNotification({
         type: 'info',
-        message: { id: getTrad('components.notification.info.maximum-requirement') },
+        message: { id: getTranslation('components.notification.info.maximum-requirement') },
       });
     }
   };
@@ -117,7 +117,7 @@ const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }) => {
     setLiveText(
       formatMessage(
         {
-          id: getTrad('dnd.reorder'),
+          id: getTranslation('dnd.reorder'),
           defaultMessage: '{item}, moved. New position in list: {position}.',
         },
         {
@@ -145,7 +145,7 @@ const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }) => {
     setLiveText(
       formatMessage(
         {
-          id: getTrad('dnd.cancel-item'),
+          id: getTranslation('dnd.cancel-item'),
           defaultMessage: '{item}, dropped. Re-order cancelled.',
         },
         {
@@ -159,7 +159,7 @@ const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }) => {
     setLiveText(
       formatMessage(
         {
-          id: getTrad('dnd.grab-item'),
+          id: getTranslation('dnd.grab-item'),
           defaultMessage: `{item}, grabbed. Current position in list: {position}. Press up and down arrow to change position, Spacebar to drop, Escape to cancel.`,
         },
         {
@@ -174,7 +174,7 @@ const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }) => {
     setLiveText(
       formatMessage(
         {
-          id: getTrad('dnd.drop-item'),
+          id: getTranslation('dnd.drop-item'),
           defaultMessage: `{item}, dropped. Final position in list: {position}.`,
         },
         {
@@ -204,7 +204,7 @@ const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }) => {
     if (hasError && dynamicZoneError.id.includes('min')) {
       return formatMessage(
         {
-          id: getTrad(`components.DynamicZone.missing-components`),
+          id: getTranslation(`components.DynamicZone.missing-components`),
           defaultMessage:
             'There {number, plural, =0 {are # missing components} one {is # missing component} other {are # missing components}}',
         },
@@ -214,7 +214,7 @@ const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }) => {
 
     return formatMessage(
       {
-        id: getTrad('components.DynamicZone.add-component'),
+        id: getTranslation('components.DynamicZone.add-component'),
         defaultMessage: 'Add a component to {componentName}',
       },
       { componentName: metadatas.label || name }
@@ -248,7 +248,7 @@ const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }) => {
           />
           <VisuallyHidden id={ariaDescriptionId}>
             {formatMessage({
-              id: getTrad('dnd.instructions'),
+              id: getTranslation('dnd.instructions'),
               defaultMessage: `Press spacebar to grab and re-order`,
             })}
           </VisuallyHidden>

@@ -11,19 +11,19 @@ import {
   FlexWrapper,
 } from '../../../components/RelationInput/components/RelationItem';
 import { PUBLICATION_STATES } from '../../../components/RelationInputDataManager/constants';
-import { getTrad } from '../../../utils';
+import { getTranslation } from '../../../utils/translations';
 
 export const RelationDragPreview = ({ status, displayedValue, width }) => {
   const { formatMessage } = useIntl();
 
   const stateMessage = {
     [PUBLICATION_STATES.DRAFT]: formatMessage({
-      id: getTrad('relation.publicationState.draft'),
+      id: getTranslation('relation.publicationState.draft'),
       defaultMessage: 'Draft',
     }),
 
     [PUBLICATION_STATES.PUBLISHED]: formatMessage({
-      id: getTrad('relation.publicationState.published'),
+      id: getTranslation('relation.publicationState.published'),
       defaultMessage: 'Published',
     }),
   };

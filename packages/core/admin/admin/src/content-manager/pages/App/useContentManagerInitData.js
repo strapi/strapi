@@ -12,7 +12,7 @@ import { useIntl } from 'react-intl';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { HOOKS } from '../../../constants';
-import { getTrad } from '../../utils';
+import { getTranslation } from '../../utils/translations';
 
 import { getInitData, resetInitData, setInitData } from './actions';
 import { selectAppDomain } from './selectors';
@@ -44,7 +44,7 @@ const useContentManagerInitData = () => {
       } = await get('/content-manager/init', { cancelToken: source.token });
       notifyStatus(
         formatMessage({
-          id: getTrad('App.schemas.data-loaded'),
+          id: getTranslation('App.schemas.data-loaded'),
           defaultMessage: 'The schemas have been successfully loaded.',
         })
       );

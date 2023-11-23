@@ -4,7 +4,7 @@ import { Box, Flex, KeyboardNavigable, Typography } from '@strapi/design-system'
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { getTrad } from '../../../utils';
+import { getTranslation } from '../../../utils/translations';
 
 import { ComponentCategory } from './ComponentCategory';
 
@@ -51,7 +51,7 @@ export const ComponentPicker = ({ dynamicComponentsByCategory, isOpen, onClickAd
       <Flex justifyContent="center">
         <Typography fontWeight="bold" textColor="neutral600">
           {formatMessage({
-            id: getTrad('components.DynamicZone.ComponentPicker-label'),
+            id: getTranslation('components.DynamicZone.ComponentPicker-label'),
             defaultMessage: 'Pick one component',
           })}
         </Typography>
