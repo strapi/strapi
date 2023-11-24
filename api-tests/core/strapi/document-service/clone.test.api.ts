@@ -3,7 +3,6 @@ import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper
 import { testInTransaction } from '../../../utils/index';
 import resources from './resources/index';
 import { ARTICLE_UID, findArticleDb, findArticlesDb } from './utils';
-import { clone } from 'lodash';
 
 describe('Document Service', () => {
   let testUtils;
@@ -117,15 +116,17 @@ describe('Document Service', () => {
       })
     );
 
-    it('clone non existing document', () => {
-      const resultPromise = strapi.documents(ARTICLE_UID).clone('1234', {
+    it.todo('clone a document with media');
+    it.todo('clone a document with relations');
+
+    it('clone non existing document', async () => {
+      const resultPromise = await strapi.documents(ARTICLE_UID).clone('1234', {
         data: {
           title: 'Cloned Document',
         },
       });
 
-      expect(resultPromise).resolves.toBeNull();
+      expect(resultPromise).toBeNull();
     });
-    // TODO: Validate cloning components, media, relations, etc.
   });
 });
