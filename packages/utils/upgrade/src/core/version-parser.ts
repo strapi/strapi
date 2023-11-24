@@ -94,35 +94,39 @@ export const createVersionParser: CreateVersionParser = (current) => {
           /**
            * Only accept the same version as the current one
            */
-          case VersionRelease.Current:
+          case VersionRelease.Current: {
             range = createSemverRange(`=${currentAsString}`); // take exactly this version
             break;
+          }
           /**
            * Accept any version greater than the current one
            */
           case VersionRelease.Latest:
-          case VersionRelease.Next:
+          case VersionRelease.Next: {
             range = createSemverRange(`>${currentAsString}`);
             break;
+          }
           /**
            * Accept any version where
            * - The overall version is greater than the current one
            * - The major version is the same or +1
            */
-          case VersionRelease.Major:
+          case VersionRelease.Major: {
             const nextMajor = formatSemVer(current.inc('major'), 'x');
             range = createSemverRange(`>${currentAsString} <=${nextMajor}`);
             break;
+          }
           /**
            * Accept any version where
            * - The overall version is greater than the current one
            * - The major version is the same
            * - The minor version is either the same or +1
            */
-          case VersionRelease.Minor:
+          case VersionRelease.Minor: {
             const nextMinor = formatSemVer(current.inc('minor'), 'x.x');
             range = createSemverRange(`>${currentAsString} <=${nextMinor}`);
             break;
+          }
           /**
            * Accept any version where
            * - The overall version is greater than the current one
@@ -130,10 +134,11 @@ export const createVersionParser: CreateVersionParser = (current) => {
            * - The minor version is the same
            * - The patch version is the same + 1
            */
-          case VersionRelease.Patch:
+          case VersionRelease.Patch: {
             const nextPatch = formatSemVer(current.inc('patch'), 'x.x.x');
             range = createSemverRange(`>${currentAsString} <=${nextPatch}`);
             break;
+          }
           default:
             throw new Error(`Internal error: Invalid version release found: ${version}`);
         }
