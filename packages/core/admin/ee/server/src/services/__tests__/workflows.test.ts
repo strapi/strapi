@@ -1,20 +1,3 @@
-jest.mock('@strapi/strapi/dist/utils/ee', () => {
-  const eeModule = () => true;
-
-  Object.assign(eeModule, {
-    features: {
-      isEnabled() {
-        return true;
-      },
-      getEnabled() {
-        return ['review-workflows'];
-      },
-    },
-  });
-
-  return eeModule;
-});
-
 jest.mock('../review-workflows/workflows/content-types', () => {
   return jest.fn(() => ({
     migrate: jest.fn(),
@@ -79,6 +62,17 @@ const servicesMock: Record<string, any> = {
 };
 
 const strapiMock = {
+  EE: true,
+  ee: {
+    features: {
+      isEnabled() {
+        return true;
+      },
+      getEnabled() {
+        return ['review-workflows'];
+      },
+    },
+  },
   entityService: entityServiceMock,
   plugin: jest.fn((name) => pluginsMock[name]),
   service: jest.fn((serviceName) => servicesMock[serviceName]),

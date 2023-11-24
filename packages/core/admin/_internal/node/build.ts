@@ -4,7 +4,6 @@ import { writeStaticClientFiles } from './staticFiles';
 import { build as buildWebpack } from './webpack/build';
 import { createBuildContext } from './createBuildContext';
 
-import EE from '@strapi/strapi/dist/utils/ee';
 import { getTimer } from './core/timer';
 
 import type { CLIContext } from '@strapi/strapi';
@@ -79,8 +78,6 @@ const build = async ({ logger, cwd, tsconfig, ignorePrompts, ...options }: Build
   console.log('');
 
   try {
-    EE.init(cwd);
-
     await writeStaticClientFiles(ctx);
     await buildWebpack(ctx);
 

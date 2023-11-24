@@ -9,7 +9,6 @@ import {
   validateKind,
 } from './validation/content-type';
 
-
 export default {
   async getContentTypes(ctx: Context) {
     const { kind } = ctx.query;

@@ -1,26 +1,19 @@
 import adminController from '../admin';
 
-jest.mock('@strapi/strapi/dist/utils/ee', () => {
-  const eeModule = () => false;
-
-  Object.assign(eeModule, {
-    features: {
-      isEnabled() {
-        return false;
-      },
-      list() {
-        return [];
-      },
-    },
-  });
-
-  return eeModule;
-});
-
 describe('Admin Controller', () => {
   describe('init', () => {
     beforeAll(() => {
       global.strapi = {
+        ee: {
+          features: {
+            isEnabled() {
+              return false;
+            },
+            list() {
+              return [];
+            },
+          },
+        },
         config: {
           get: jest.fn(() => 'foo'),
         },

@@ -53,8 +53,7 @@ describeOnCondition(edition === 'EE')('SSO Provider Options', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance();
     utils = createUtils(strapi);
-    // eslint-disable-next-line node/no-extraneous-require
-    hasSSO = require('@strapi/strapi/dist/utils/ee').features.isEnabled('sso');
+    hasSSO = strapi.ee.features.isEnabled('sso');
 
     await createFixtures();
 

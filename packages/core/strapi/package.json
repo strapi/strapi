@@ -72,13 +72,6 @@
       "require": "./dist/index.js",
       "default": "./dist/index.js"
     },
-    "./dist/utils/ee": {
-      "types": "./dist/utils/ee.d.ts",
-      "source": "./src/utils/ee.ts",
-      "import": "./dist/utils/ee.mjs",
-      "require": "./dist/utils/ee.js",
-      "default": "./dist/utils/ee.js"
-    },
     "./admin": {
       "types": "./dist/admin.d.ts",
       "source": "./src/admin.ts",
