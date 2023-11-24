@@ -240,7 +240,7 @@ const baseRenderElement = ({ props, blocks, editor }: BaseRenderElementProps) =>
   const block = blockMatch || blocks.paragraph;
   const nodePath = ReactEditor.findPath(editor, props.element);
 
-  // Link is inline block
+  // Link is inline block so it cannot be dragged
   if (block.value.type === 'link') return block.renderElement(props);
 
   return (
