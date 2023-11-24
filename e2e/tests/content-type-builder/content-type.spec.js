@@ -16,6 +16,10 @@ const types = ['collection type', 'single type'];
 const type = types[0];
 
 test.describe(`Content Type Builder | Content-Type | ${type}`, () => {
+  test.beforeAll(async () => {
+    test.slow();
+  });
+
   test.beforeEach(async ({ page }) => {
     // Accept the confirmation dialog that is displayed when
     // clicking delete
