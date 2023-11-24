@@ -210,6 +210,10 @@ export async function addDefaultField({
           .first()
           .click();
 
+        // button to go to next step
+        await page.getByRole('button', { name: 'Select a component' }).click();
+
+        // open select
         await page.getByLabel('Select a component').click();
         // TODO: can we make this work using a filter without category?
         await page.getByLabel(`${existingComponentCategory} - ${existingComponentName}`).click();
