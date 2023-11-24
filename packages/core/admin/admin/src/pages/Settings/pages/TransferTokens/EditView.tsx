@@ -99,11 +99,15 @@ export const LoadingView = ({ transferTokenName = null }: LoadingViewProps) => {
   );
 };
 
+interface FormValues extends Pick<TransferToken, 'description' | 'name' | 'lifespan'> {
+  permissions: TransferToken['permissions'][number];
+}
+
 interface FormTransferTokenContainerProps {
-  errors: FormikErrors<Pick<TransferToken, 'description' | 'name' | 'lifespan' | 'permissions'>>;
+  errors: FormikErrors<FormValues>;
   onChange: ({ target: { name, value } }: { target: { name: string; value: string } }) => void;
   canEditInputs: boolean;
-  values: Partial<TransferToken | Create.Response['data']> | null;
+  values: FormValues;
   isCreating: boolean;
   transferToken: Partial<TransferToken | Create.Response['data']> | null;
 }
@@ -282,13 +286,7 @@ export const EditView = () => {
     }
   );
 
-  const handleSubmit = async (
-    body: Pick<TransferToken, 'description' | 'name'> & {
-      lifespan: TransferToken['lifespan'] | null | undefined;
-      permissions: TransferToken['permissions'][number] | null | undefined;
-    },
-    actions: FormikHelpers<Pick<TransferToken, 'description' | 'name' | 'lifespan' | 'permissions'>>
-  ) => {
+  const handleSubmit = async (body: FormValues, actions: FormikHelpers<FormValues>) => {
     trackUsage(isCreating ? 'willCreateToken' : 'willEditToken', {
       tokenType: TRANSFER_TOKEN_TYPE,
     });
@@ -394,28 +392,29 @@ export const EditView = () => {
   };
 
   const canEditInputs = (canUpdate && !isCreating) || (canCreate && isCreating);
-  const isLoading = !isCreating && !transferToken && status !== 'success';
+  const isLoading = !isCreating && status !== 'success';
 
   if (isLoading) {
     return <LoadingView transferTokenName={transferToken?.name} />;
   }
 
-  const handleErrorRegenerate = (err: AxiosError) => {
-    // @ts-expect-error this is fine
-    if (err?.response?.data?.error?.details?.code === 'INVALID_TOKEN_SALT') {
-      toggleNotification({
-        type: 'warning',
-        message: {
-          id: 'notification.error.invalid.configuration',
-          defaultMessage:
-            'You have an invalid configuration, check your server log for more information.',
-        },
-      });
-    } else {
-      toggleNotification({
-        type: 'warning',
-        message: formatAPIError(err),
-      });
+  const handleErrorRegenerate = (err: unknown) => {
+    if (err instanceof AxiosError) {
+      if (err?.response?.data?.error?.details?.code === 'INVALID_TOKEN_SALT') {
+        toggleNotification({
+          type: 'warning',
+          message: {
+            id: 'notification.error.invalid.configuration',
+            defaultMessage:
+              'You have an invalid configuration, check your server log for more information.',
+          },
+        });
+      } else {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(err),
+        });
+      }
     }
   };
 
@@ -425,14 +424,21 @@ export const EditView = () => {
       <Formik
         validationSchema={schema}
         validateOnChange={false}
-        initialValues={{
-          name: transferToken?.name || '',
-          description: transferToken?.description || '',
-          lifespan: transferToken?.lifespan
-            ? transferToken.lifespan.toString()
-            : transferToken?.lifespan,
-          permissions: transferToken?.permissions.join('-'),
-        }}
+        initialValues={
+          {
+            name: transferToken?.name || '',
+            description: transferToken?.description || '',
+            lifespan: transferToken?.lifespan
+              ? transferToken.lifespan.toString()
+              : transferToken?.lifespan ?? null,
+            /**
+             * We need to cast the permissions to satisfy the type for `permissions`
+             * in the request body incase we don't have a transferToken and instead
+             * use an empty string.
+             */
+            permissions: (transferToken?.permissions.join('-') ?? '') as FormValues['permissions'],
+          } satisfies FormValues
+        }
         enableReinitialize
         onSubmit={(body, actions) => handleSubmit(body, actions)}
       >
