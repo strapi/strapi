@@ -128,7 +128,7 @@ describe('Is Clean Git Repo', () => {
 
     expect(console.warn).toHaveBeenCalledWith(
       chalk.yellow(`[WARN]\t[${isoString}]`),
-      '- The codebase is not under version control.'
+      '- No git repository was detected in the directory.'
     );
   });
 
