@@ -21,6 +21,7 @@ import { paragraphBlocks } from './Blocks/Paragraph';
 import { quoteBlocks } from './Blocks/Quote';
 import { BlocksContent } from './BlocksContent';
 import { BlocksToolbar } from './BlocksToolbar';
+import { type ModifiersStore, modifiers } from './Modifiers';
 import { withImages } from './plugins/withImages';
 import { withLinks } from './plugins/withLinks';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
@@ -81,6 +82,7 @@ type BlocksStore = {
 
 interface BlocksEditorContextValue {
   blocks: BlocksStore;
+  modifiers: ModifiersStore;
   disabled: boolean;
   name: string;
   setLiveText: (text: string) => void;
@@ -233,6 +235,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
         >
           <BlocksEditorProvider
             blocks={blocks}
+            modifiers={modifiers}
             disabled={disabled}
             name={name}
             setLiveText={setLiveText}

@@ -19,6 +19,7 @@ import { paragraphBlocks } from '../Blocks/Paragraph';
 import { quoteBlocks } from '../Blocks/Quote';
 import { type BlocksStore, BlocksEditorProvider } from '../BlocksEditor';
 import { BlocksToolbar } from '../BlocksToolbar';
+import { modifiers } from '../Modifiers';
 
 const mockMediaLibraryTitle = 'dialog component';
 const mockMediaLibrarySubmitButton = 'upload images';
@@ -154,6 +155,7 @@ const Wrapper = ({
         <Slate initialValue={initialValue} editor={editor}>
           <BlocksEditorProvider
             blocks={blocks}
+            modifiers={modifiers}
             disabled={false}
             name="blocks"
             setLiveText={jest.fn()}

@@ -13,7 +13,7 @@ import { useDragAndDrop } from '../../hooks/useDragAndDrop';
 import { composeRefs, ItemTypes, getTrad } from '../../utils';
 
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
-import { type ModifiersStore, useModifiersStore } from './hooks/useModifiersStore';
+import { type ModifiersStore } from './Modifiers';
 import { getEntries } from './utils/types';
 
 const StyledEditable = styled(Editable)`
@@ -259,12 +259,12 @@ interface BlocksInputProps {
 }
 
 const BlocksContent = ({ placeholder }: BlocksInputProps) => {
-  const { editor, disabled, blocks, setLiveText } = useBlocksEditorContext('BlocksContent');
+  const { editor, disabled, blocks, modifiers, setLiveText } =
+    useBlocksEditorContext('BlocksContent');
   const blocksRef = React.useRef<HTMLDivElement>(null);
   const { formatMessage } = useIntl();
 
   // Create renderLeaf function based on the modifiers store
-  const modifiers = useModifiersStore();
   const renderLeaf = React.useCallback(
     (props: RenderLeafProps) => baseRenderLeaf(props, modifiers),
     [modifiers]
@@ -359,7 +359,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
     if (isCtrlOrCmd) {
       Object.values(modifiers).forEach((value) => {
         if (value.isValidEventKey(event)) {
-          value.handleToggle();
+          value.handleToggle(editor);
           return;
         }
       });

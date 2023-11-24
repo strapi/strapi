@@ -1,3 +1,4 @@
+/* eslint-disable testing-library/no-node-access */
 import * as React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
@@ -59,20 +60,28 @@ describe('BlocksInput', () => {
   it('should render blocks with data', () => {
     setup({ value: blocksData });
 
-    // eslint-disable-next-line testing-library/no-node-access
     expect(screen.getByText('This is bold text').parentElement).toHaveStyle({
       'font-weight': 600,
     });
 
-    // eslint-disable-next-line testing-library/no-node-access
+    expect(screen.getByText('This is italic text').parentElement).toHaveStyle({
+      'font-style': 'italic',
+    });
+
+    expect(screen.getByText('This is underlined text').parentElement).toHaveStyle({
+      'text-decoration': 'underline',
+    });
+
     expect(screen.getByText('This is deleted text').parentElement).toHaveStyle({
       'text-decoration': 'line-through',
     });
 
-    // eslint-disable-next-line testing-library/no-node-access
     expect(screen.getByText('click me').parentElement).toHaveStyle({
       'font-style': 'italic',
     });
+
+    const codeText = screen.getByText('<textarea>').parentElement as HTMLElement;
+    expect(window.getComputedStyle(codeText).fontFamily).toMatch(/\bmonospace\b/i);
 
     const linkElement = screen.getByRole('link', { name: /click me/ });
     expect(linkElement).toHaveAttribute('href', 'https://example.com');
