@@ -7,6 +7,7 @@ import { Slate, withReact } from 'slate-react';
 import { ThemeProvider } from 'styled-components';
 
 import { type BlocksStore, BlocksEditorProvider } from '../../BlocksEditor';
+import { modifiers } from '../../Modifiers';
 import { codeBlocks } from '../Code';
 import { headingBlocks } from '../Heading';
 import { imageBlocks } from '../Image';
@@ -38,7 +39,7 @@ const Wrapper = ({ children }: WrapperProps) => {
     <ThemeProvider theme={lightTheme}>
       <IntlProvider messages={{}} locale="en">
         <Slate initialValue={[]} editor={editor}>
-          <BlocksEditorProvider blocks={blocks} disabled={false}>
+          <BlocksEditorProvider modifiers={modifiers} blocks={blocks} disabled={false}>
             {children}
           </BlocksEditorProvider>
         </Slate>
