@@ -1,3 +1,5 @@
+import semver from 'semver';
+
 import {
   isVersionRelease,
   isLatestVersion,
@@ -6,7 +8,6 @@ import {
   createSemverRange,
   formatSemVer,
 } from '../../core';
-import semver from 'semver';
 
 describe('Version', () => {
   test.each([
