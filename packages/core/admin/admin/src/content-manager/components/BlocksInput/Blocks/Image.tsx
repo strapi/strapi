@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Box, Flex } from '@strapi/design-system';
 import { Picture } from '@strapi/icons';
-import { type Element } from 'slate';
+import { Transforms, type Element } from 'slate';
 import { type RenderElementProps } from 'slate-react';
 import styled from 'styled-components';
 
@@ -48,6 +48,12 @@ const imageBlocks: Pick<BlocksStore, 'image'> = {
     },
     value: {
       type: 'image',
+    },
+    handleEnterKey(editor) {
+      Transforms.insertNodes(editor, {
+        type: 'paragraph',
+        children: [{ type: 'text', text: '' }],
+      });
     },
     matchNode: (node) => node.type === 'image',
     isInBlocksSelector: true,
