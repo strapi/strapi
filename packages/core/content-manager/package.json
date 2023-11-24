@@ -44,7 +44,8 @@
     "lint": "run -T eslint .",
     "test:ts:back": "run -T tsc --noEmit -p server/tsconfig.json",
     "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch"
+    "test:unit:watch": "run -T jest --watch",
+    "watch": "pack-up watch"
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",

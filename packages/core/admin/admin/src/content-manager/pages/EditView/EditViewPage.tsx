@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { createSelector } from '@reduxjs/toolkit';
 import { Main, ContentLayout, Grid, GridItem, Flex, Box } from '@strapi/design-system';
 import {
   CheckPermissions,
@@ -12,7 +13,7 @@ import {
   AllowedActions,
 } from '@strapi/helper-plugin';
 import { Layer, Pencil } from '@strapi/icons';
-import { Entity } from '@strapi/types';
+import { Attribute, Entity } from '@strapi/types';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 import { RouteComponentProps, useLocation } from 'react-router-dom';
@@ -21,25 +22,34 @@ import { useTypedSelector } from '../../../core/store/hooks';
 import { useEnterprise } from '../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../selectors';
 import { InjectionZone } from '../../../shared/components/InjectionZone';
-import CollectionTypeFormWrapper from '../../components/CollectionTypeFormWrapper';
-import { DynamicZone } from '../../components/DynamicZone';
-import EditViewDataManagerProvider from '../../components/EditViewDataManagerProvider';
-import SingleTypeFormWrapper from '../../components/SingleTypeFormWrapper';
+import { CollectionTypeFormWrapper } from '../../components/CollectionTypeFormWrapper';
+import { DynamicZone } from '../../components/DynamicZone/Field';
+import { EditViewDataManagerProvider } from '../../components/EditViewDataManagerProvider/Provider';
+import { FieldComponent } from '../../components/FieldComponent';
+import { Inputs } from '../../components/Inputs';
+import { SingleTypeFormWrapper } from '../../components/SingleTypeFormWrapper';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
-import { generatePermissionsObject } from '../../utils/permissions';
+import {
+  generatePermissionsObject,
+  getFieldsActionMatchingPermissions,
+} from '../../utils/permissions';
 import { getTranslation } from '../../utils/translations';
 
-import DeleteLink from './DeleteLink';
-import DraftAndPublishBadge from './DraftAndPublishBadge';
-import GridRow from './GridRow';
-import Header from './Header';
+import { DeleteLink } from './components/DeleteLink';
+import { DraftAndPublishBadge } from './components/DraftAndPublishBadge';
+import { Header } from './components/Header';
+import { InformationBoxCE } from './components/InformationBoxCE';
 import { useOnce } from './hooks/useOnce';
-import { InformationBoxCE } from './InformationBox';
-import { selectCurrentLayout, selectAttributesLayout, selectCustomFieldUids } from './selectors';
-import { getFieldsActionMatchingPermissions } from './utils';
+
+import type { RootState } from '../../../core/store/configure';
+import type { EditLayoutRow, FormattedLayouts } from '../../utils/layouts';
 
 // TODO: this seems suspicious
 const CTB_PERMISSIONS = [{ action: 'plugin::content-type-builder.read', subject: null }];
+
+/* -------------------------------------------------------------------------------------------------
+ * EditViewPage
+ * -----------------------------------------------------------------------------------------------*/
 
 interface EditViewPageProps {
   allowedActions: AllowedActions;
@@ -68,8 +78,11 @@ const EditViewPage = ({
   const Information = useEnterprise(
     InformationBoxCE,
     async () =>
-      (await import('../../../../../ee/admin/src/content-manager/pages/EditView/InformationBox'))
-        .InformationBoxEE
+      (
+        await import(
+          '../../../../../ee/admin/src/content-manager/pages/EditView/components/InformationBoxEE'
+        )
+      ).InformationBoxEE
   );
 
   useOnce(() => {
@@ -87,20 +100,18 @@ const EditViewPage = ({
     }
   });
 
-  const { layout, formattedContentTypeLayout, customFieldUids } = useTypedSelector((state) => ({
-    layout: selectCurrentLayout(state),
-    formattedContentTypeLayout: selectAttributesLayout(state),
-    customFieldUids: selectCustomFieldUids(state),
-  }));
+  const formattedContentTypeLayout = useTypedSelector(selectAttributesLayout);
+  const customFieldUids = useTypedSelector(selectCustomFieldUids);
 
   const { isLazyLoading, lazyComponentStore } = useLazyComponents(customFieldUids);
 
   const { createActionAllowedFields, readActionAllowedFields, updateActionAllowedFields } =
     getFieldsActionMatchingPermissions(userPermissions, slug);
 
-  const configurationPermissions = isSingleType
-    ? permissions.contentManager.singleTypesConfigurations
-    : permissions.contentManager.collectionTypesConfigurations;
+  const configurationPermissions =
+    (isSingleType
+      ? permissions.contentManager?.singleTypesConfigurations
+      : permissions.contentManager?.collectionTypesConfigurations) ?? [];
 
   // // FIXME when changing the routing
   const configurationsURL = `/content-manager/${
@@ -110,7 +121,13 @@ const EditViewPage = ({
   const DataManagementWrapper = isSingleType ? SingleTypeFormWrapper : CollectionTypeFormWrapper;
 
   // Check if a block is a dynamic zone
-  const isDynamicZone = (block) => {
+  const isDynamicZone = (
+    block: EditLayoutRow[][]
+  ): block is Array<
+    Omit<EditLayoutRow, 'fieldSchema'> & {
+      fieldSchema: Attribute.DynamicZone;
+    }
+  >[] => {
     return block.every((subBlock) => {
       return subBlock.every((obj) => obj.fieldSchema.type === 'dynamiczone');
     });
@@ -126,7 +143,7 @@ const EditViewPage = ({
   }
 
   return (
-    <DataManagementWrapper allLayoutData={layout} slug={slug} id={id} origin={origin}>
+    <DataManagementWrapper slug={slug} id={id} origin={origin}>
       {({
         componentsDataStructure,
         contentTypeDataStructure,
@@ -145,7 +162,6 @@ const EditViewPage = ({
         return (
           <EditViewDataManagerProvider
             allowedActions={allowedActions}
-            allLayoutData={layout}
             createActionAllowedFields={createActionAllowedFields}
             componentsDataStructure={componentsDataStructure}
             contentTypeDataStructure={contentTypeDataStructure}
@@ -173,11 +189,7 @@ const EditViewPage = ({
                     <Flex direction="column" alignItems="stretch" gap={6}>
                       {formattedContentTypeLayout.map((row, index) => {
                         if (isDynamicZone(row)) {
-                          const {
-                            0: {
-                              0: { name, fieldSchema, metadatas, labelAction },
-                            },
-                          } = row;
+                          const [[{ name, fieldSchema, metadatas, ...restProps }]] = row;
 
                           return (
                             <Box key={index}>
@@ -186,8 +198,8 @@ const EditViewPage = ({
                                   <DynamicZone
                                     name={name}
                                     fieldSchema={fieldSchema}
-                                    labelAction={labelAction}
                                     metadatas={metadatas}
+                                    {...restProps}
                                   />
                                 </GridItem>
                               </Grid>
@@ -208,12 +220,63 @@ const EditViewPage = ({
                             borderColor="neutral150"
                           >
                             <Flex direction="column" alignItems="stretch" gap={6}>
-                              {row.map((grid, gridRowIndex) => (
-                                <GridRow
-                                  columns={grid}
-                                  customFieldInputs={lazyComponentStore}
-                                  key={gridRowIndex}
-                                />
+                              {row.map((columns, gridRowIndex) => (
+                                <Grid key={gridRowIndex} gap={4}>
+                                  {columns.map(
+                                    ({
+                                      fieldSchema,
+                                      metadatas,
+                                      name,
+                                      size,
+                                      queryInfos,
+                                      ...restProps
+                                    }) => {
+                                      const isComponent = fieldSchema.type === 'component';
+
+                                      if (isComponent) {
+                                        const {
+                                          component,
+                                          max,
+                                          min,
+                                          repeatable = false,
+                                          required = false,
+                                        } = fieldSchema;
+
+                                        return (
+                                          <GridItem col={size} s={12} xs={12} key={component}>
+                                            <FieldComponent
+                                              componentUid={component}
+                                              isRepeatable={repeatable}
+                                              intlLabel={{
+                                                id: metadatas.label,
+                                                defaultMessage: metadatas.label,
+                                              }}
+                                              max={max}
+                                              min={min}
+                                              name={name}
+                                              required={required}
+                                              {...restProps}
+                                            />
+                                          </GridItem>
+                                        );
+                                      }
+
+                                      return (
+                                        <GridItem col={size} key={name} s={12} xs={12}>
+                                          <Inputs
+                                            size={size}
+                                            fieldSchema={fieldSchema}
+                                            keys={name}
+                                            metadatas={metadatas}
+                                            queryInfos={queryInfos}
+                                            customFieldInputs={lazyComponentStore}
+                                            {...restProps}
+                                          />
+                                        </GridItem>
+                                      );
+                                    }
+                                  )}
+                                </Grid>
                               ))}
                             </Flex>
                           </Box>
@@ -251,6 +314,7 @@ const EditViewPage = ({
                                 size="S"
                                 startIcon={<Pencil />}
                                 style={{ width: '100%' }}
+                                // @ts-expect-error – Remove deprecated component
                                 to={`/plugins/content-type-builder/content-types/${slug}`}
                                 variant="secondary"
                               >
@@ -267,6 +331,7 @@ const EditViewPage = ({
                               size="S"
                               startIcon={<Layer />}
                               style={{ width: '100%' }}
+                              // @ts-expect-error – Remove deprecated component
                               to={configurationsURL}
                               variant="secondary"
                             >
@@ -293,6 +358,78 @@ const EditViewPage = ({
     </DataManagementWrapper>
   );
 };
+
+/* -------------------------------------------------------------------------------------------------
+ * Selectors
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * The layout has no concept of UI panes, it only knows what should be on separate rows, therefore
+ * we manually split the layout into panes based on the presence of dynamic zones. where we then
+ * use the original layout. Hence why, ITS ANOTHER ARRAY!
+ */
+const selectAttributesLayout = createSelector(
+  (state: RootState) => state['content-manager_editViewLayoutManager'].currentLayout,
+  (layout) => {
+    const currentContentTypeLayoutData = layout?.contentType;
+
+    if (!currentContentTypeLayoutData) {
+      return [];
+    }
+
+    const currentLayout = currentContentTypeLayoutData.layouts.edit;
+
+    let currentRowIndex = 0;
+    const newLayout: Array<FormattedLayouts['contentType']['layouts']['edit']> = [];
+
+    currentLayout.forEach((row) => {
+      const hasDynamicZone = row.some(
+        ({ name }) => currentContentTypeLayoutData.attributes[name]['type'] === 'dynamiczone'
+      );
+
+      if (!newLayout[currentRowIndex]) {
+        newLayout[currentRowIndex] = [];
+      }
+
+      if (hasDynamicZone) {
+        currentRowIndex =
+          currentRowIndex === 0 && newLayout[0].length === 0 ? 0 : currentRowIndex + 1;
+
+        if (!newLayout[currentRowIndex]) {
+          newLayout[currentRowIndex] = [];
+        }
+        newLayout[currentRowIndex].push(row);
+
+        currentRowIndex += 1;
+      } else {
+        newLayout[currentRowIndex].push(row);
+      }
+    });
+
+    return newLayout.filter((arr) => arr.length > 0);
+  }
+);
+
+const selectCustomFieldUids = createSelector(
+  (state: RootState) => state['content-manager_editViewLayoutManager'].currentLayout,
+  (layout) => {
+    if (!layout.contentType) return [];
+    // Get all the fields on the content-type and its components
+    const allFields = [
+      ...layout.contentType.layouts.edit,
+      ...Object.values(layout.components).flatMap((component) => component.layouts.edit),
+    ].flat();
+
+    // Filter that down to custom fields and map the uids
+    const customFieldUids = allFields
+      .filter((field) => field.fieldSchema.customField)
+      .map((customField) => customField.fieldSchema.customField!);
+    // Make sure the list is unique
+    const uniqueCustomFieldUids = [...new Set(customFieldUids)];
+
+    return uniqueCustomFieldUids;
+  }
+);
 
 /* -------------------------------------------------------------------------------------------------
  * ProtectedEditViewPage

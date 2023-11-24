@@ -7,7 +7,7 @@ import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import styled from 'styled-components';
 
-import { ItemTypes } from '../../../utils';
+import { ItemTypes } from '../../../utils/dragAndDrop';
 import { useLayoutDnd } from '../hooks/useLayoutDnd';
 
 import FieldButtonContent from './FieldButtonContent';

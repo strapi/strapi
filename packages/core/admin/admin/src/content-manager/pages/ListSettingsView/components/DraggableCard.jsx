@@ -8,7 +8,7 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { ItemTypes } from '../../../utils';
+import { ItemTypes } from '../../../utils/dragAndDrop';
 import { getTranslation } from '../../../utils/translations';
 import { CardDragPreview } from '../../App/components/CardDragPreview';
 

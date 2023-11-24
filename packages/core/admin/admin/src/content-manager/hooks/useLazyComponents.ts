@@ -1,13 +1,21 @@
 import { ComponentType, useCallback, useEffect, useState } from 'react';
 
-import { CustomField, CustomFieldUID, useCustomFields } from '@strapi/helper-plugin';
+import { CustomField, useCustomFields } from '@strapi/helper-plugin';
 
-const componentStore = new Map<CustomFieldUID, ComponentType | undefined>();
+const componentStore = new Map<string, ComponentType | undefined>();
+
+type LazyComponentStore = Record<string, ComponentType | undefined>;
+
+interface UseLazyComponentsReturn {
+  isLazyLoading: boolean;
+  lazyComponentStore: LazyComponentStore;
+  cleanup: () => void;
+}
 
 /**
  * @description A hook to lazy load custom field components
  */
-const useLazyComponents = (componentUids: CustomFieldUID[] = []) => {
+const useLazyComponents = (componentUids: string[] = []): UseLazyComponentsReturn => {
   const [lazyComponentStore, setLazyComponentStore] = useState(Object.fromEntries(componentStore));
   /**
    * Start loading only if there are any components passed in
@@ -24,7 +32,7 @@ const useLazyComponents = (componentUids: CustomFieldUID[] = []) => {
     };
 
     const lazyLoadComponents = async (
-      uids: CustomFieldUID[],
+      uids: string[],
       components: Array<ReturnType<CustomField['components']['Input']>>
     ) => {
       const modules = await Promise.all(components);
@@ -70,3 +78,4 @@ const useLazyComponents = (componentUids: CustomFieldUID[] = []) => {
 };
 
 export { useLazyComponents };
+export type { UseLazyComponentsReturn, LazyComponentStore };

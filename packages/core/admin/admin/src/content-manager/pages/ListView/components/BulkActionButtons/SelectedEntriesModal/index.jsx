@@ -33,8 +33,8 @@ import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { formatAPIErrors } from '../../../../../../utils/formatAPIErrors';
-import { createYupSchema } from '../../../../../utils';
 import { getTranslation } from '../../../../../utils/translations';
+import { createYupSchema } from '../../../../../utils/validation';
 import { listViewDomain } from '../../../selectors';
 import { Body } from '../../Body';
 import { ConfirmDialogPublishAll } from '../ConfirmBulkActionDialog';

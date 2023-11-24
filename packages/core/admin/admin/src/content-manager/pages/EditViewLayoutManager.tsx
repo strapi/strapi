@@ -9,72 +9,18 @@ import { useSyncRbac } from '../hooks/useSyncRbac';
 
 import { ProtectedEditViewPage, ProtectedEditViewPageProps } from './EditView/EditViewPage';
 
-import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
-import type { Attribute, Schema } from '@strapi/types';
+import type { FormattedLayouts } from '../utils/layouts';
 
 const { MUTATE_EDIT_VIEW_LAYOUT } = HOOKS;
 
 /* -------------------------------------------------------------------------------------------------
  * EditViewLayoutManager
  * -----------------------------------------------------------------------------------------------*/
-
-type Configuration = Contracts.ContentTypes.Configuration;
-
-type NonRelationLayout = Contracts.ContentTypes.Layouts['edit'][number][number] & {
-  fieldSchema: Pick<Exclude<Attribute.Any, { type: 'relation' }>, 'pluginOptions' | 'type'>;
-  /**
-   * why is this trying to beplural? You don't pluralize metadata.
-   *
-   * TODO: does this object come from somewhere else in the codebase?
-   */
-  metadatas: {
-    description: string;
-    editable: boolean;
-    label: string;
-    placeholder: string;
-    visible: boolean;
-  };
-};
-
-interface RelationLayout extends Omit<NonRelationLayout, 'fieldSchema'> {
-  fieldSchema: Pick<
-    Extract<Attribute.Any, { type: 'relation' }>,
-    'pluginOptions' | 'relation' | 'type'
-  > & {
-    mappedBy: string;
-    relationType: string;
-    target: string;
-    targetModel: string;
-  };
-  queryInfos: {
-    shouldDisplayRelationLink: boolean;
-    defaultParams: {
-      locale?: string;
-      [key: string]: string | undefined;
-    };
-  };
-  targetModelPluginOptions: object;
+interface EditViewLayoutManagerProps extends ProtectedEditViewPageProps {
+  layout: FormattedLayouts;
 }
 
-interface CMAdminConfiguration
-  extends Omit<Configuration, 'layouts'>,
-    Omit<Schema.ContentType, 'uid' | 'collectionName' | 'globalId' | 'modelName'> {
-  apiID: string;
-  isDisplayed: boolean;
-  layouts: {
-    list: null;
-    edit: Array<RelationLayout | NonRelationLayout>[];
-  };
-}
-
-interface EditViewLayoutManager extends ProtectedEditViewPageProps {
-  layout: {
-    components: Record<string, CMAdminConfiguration>;
-    contentType: CMAdminConfiguration;
-  };
-}
-
-const EditViewLayoutManager = ({ layout, ...rest }: EditViewLayoutManager) => {
+const EditViewLayoutManager = ({ layout, ...rest }: EditViewLayoutManagerProps) => {
   const currentLayout = useTypedSelector(
     (state) => state['content-manager_editViewLayoutManager'].currentLayout
   );
@@ -98,7 +44,7 @@ const EditViewLayoutManager = ({ layout, ...rest }: EditViewLayoutManager) => {
     return <LoadingIndicatorPage />;
   }
 
-  return <ProtectedEditViewPage {...rest} userPermissions={permissions} />;
+  return <ProtectedEditViewPage {...rest} userPermissions={permissions ?? []} />;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -117,7 +63,7 @@ const SET_LAYOUT = 'ContentManager/EditViewLayoutManager/SET_LAYOUT';
 
 interface SetLayoutAction {
   type: typeof SET_LAYOUT;
-  layout: EditViewLayoutManager['layout'] | null;
+  layout: EditViewLayoutManagerProps['layout'];
   query: object;
 }
 
@@ -129,11 +75,17 @@ const setLayout = (layout: SetLayoutAction['layout'], query: SetLayoutAction['qu
   } satisfies SetLayoutAction);
 
 interface EditViewState {
-  currentLayout: unknown | null;
+  currentLayout: {
+    components: EditViewLayoutManagerProps['layout']['components'];
+    contentType: EditViewLayoutManagerProps['layout']['contentType'] | null;
+  };
 }
 
 const initialState = {
-  currentLayout: null,
+  currentLayout: {
+    components: {},
+    contentType: null,
+  },
 } satisfies EditViewState;
 
 type Action = ResetPropsAction | SetLayoutAction;
@@ -142,7 +94,7 @@ const reducer = (state: EditViewState = initialState, action: Action) =>
   produce(state, (draftState) => {
     switch (action.type) {
       case RESET_PROPS: {
-        draftState.currentLayout = null;
+        draftState.currentLayout = initialState.currentLayout;
         break;
       }
       case SET_LAYOUT: {
@@ -155,3 +107,4 @@ const reducer = (state: EditViewState = initialState, action: Action) =>
   });
 
 export { EditViewLayoutManager, reducer };
+export type { EditViewLayoutManagerProps, EditViewState };

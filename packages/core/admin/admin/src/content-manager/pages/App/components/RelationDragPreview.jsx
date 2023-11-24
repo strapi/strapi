@@ -5,12 +5,13 @@ import { Cross, Drag } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { DisconnectButton, LinkEllipsis } from '../../../components/RelationInput';
 import {
+  DisconnectButton,
+  LinkEllipsis,
   ChildrenWrapper,
   FlexWrapper,
-} from '../../../components/RelationInput/components/RelationItem';
-import { PUBLICATION_STATES } from '../../../components/RelationInputDataManager/constants';
+} from '../../../components/Relations/RelationInput';
+import { PUBLICATION_STATES } from '../../../components/Relations/RelationInputDataManager';
 import { getTranslation } from '../../../utils/translations';
 
 export const RelationDragPreview = ({ status, displayedValue, width }) => {

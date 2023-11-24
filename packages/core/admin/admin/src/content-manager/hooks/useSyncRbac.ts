@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 
+import { Permission } from '@strapi/helper-plugin';
 import produce from 'immer';
 
 import { useTypedDispatch, useTypedSelector } from '../../core/store/hooks';
@@ -14,13 +15,17 @@ const useSyncRbac = (
   query: { plugins?: object },
   collectionTypeUID: string,
   containerName = 'listView'
-) => {
+): {
+  isValid: boolean;
+  permissions: Permission[];
+} => {
   const dispatch = useTypedDispatch();
 
   const collectionTypesRelatedPermissions = useTypedSelector(
     (state) => state.rbacProvider.collectionTypesRelatedPermissions
   );
-  const permissions = useTypedSelector((state) => state['content-manager_rbacManager'].permissions);
+  const permissions =
+    useTypedSelector((state) => state['content-manager_rbacManager'].permissions) ?? [];
 
   const relatedPermissions = collectionTypesRelatedPermissions[collectionTypeUID];
 
@@ -57,7 +62,7 @@ const useSyncRbac = (
  * Reducer
  * -----------------------------------------------------------------------------------------------*/
 
-export interface SyncRbacState {
+interface SyncRbacState {
   permissions: RBACState['collectionTypesRelatedPermissions'][string][string] | null;
 }
 
@@ -105,3 +110,4 @@ const reducer = (state: SyncRbacState = initialState, action: Action) =>
   });
 
 export { useSyncRbac, reducer };
+export type { SyncRbacState, RBACState };

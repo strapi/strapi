@@ -8,12 +8,11 @@ import {
 
 import { RBACReducer, RBACState } from '../../components/RBACProvider';
 import { reducer as rbacManagerReducer } from '../../content-manager/hooks/useSyncRbac';
-// @ts-expect-error no types, yet.
-import cmAppReducer from '../../content-manager/pages/App/reducer';
+import { reducer as cmAppReducer } from '../../content-manager/pages/App/reducer';
 import { reducer as editViewReducer } from '../../content-manager/pages/EditViewLayoutManager';
 // @ts-expect-error no types, yet.
 import listViewReducer from '../../content-manager/pages/ListView/reducer';
-import { reducer as crudReducer } from '../../content-manager/sharedReducers/crudReducer/reducer';
+import { reducer as crudReducer } from '../../content-manager/sharedReducers/crud/reducer';
 import { reducer as appReducer, AppState } from '../../reducer';
 
 /**

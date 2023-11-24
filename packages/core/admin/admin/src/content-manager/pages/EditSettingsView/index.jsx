@@ -32,7 +32,7 @@ import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
 import { getTranslation } from '../../utils/translations';
-import { selectFieldSizes } from '../App/selectors';
+import { selectFieldSizes } from '../App/reducer';
 
 import DisplayedFields from './components/DisplayedFields';
 import ModalForm from './components/FormModal';

@@ -52,8 +52,9 @@ import { Filter } from '../../components/Filter';
 import { AdminUsersFilter } from '../../components/Filter/CustomInputs/AdminUsersFilter';
 import { CREATOR_FIELDS } from '../../constants/attributes';
 import { useAllowedAttributes } from '../../hooks/useAllowedAttributes';
-import { getDisplayName } from '../../utils';
+import { buildValidGetParams } from '../../utils/api';
 import { getTranslation } from '../../utils/translations';
+import { getDisplayName } from '../../utils/users';
 
 import * as Actions from './actions';
 import { Body } from './components/Body';
@@ -61,7 +62,6 @@ import BulkActionButtons from './components/BulkActionButtons';
 import CellContent from './components/CellContent';
 import { ViewSettingsMenu } from './components/ViewSettingsMenu';
 import makeSelectListView, { selectDisplayedHeaders } from './selectors';
-import { buildValidGetParams } from './utils';
 
 const { INJECT_COLUMN_IN_TABLE } = HOOKS;
 const REVIEW_WORKFLOW_COLUMNS_CE = null;

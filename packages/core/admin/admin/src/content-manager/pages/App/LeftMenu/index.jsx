@@ -19,13 +19,12 @@ import { shallowEqual, useSelector } from 'react-redux';
 import { NavLink } from 'react-router-dom';
 
 import { getTranslation } from '../../../utils/translations';
-import { makeSelectModelLinks } from '../selectors';
+import { selectModelLinks } from '../reducer';
 
 const LeftMenu = () => {
   const [search, setSearch] = useState('');
   const { formatMessage, locale } = useIntl();
-  const modelLinksSelector = useMemo(makeSelectModelLinks, []);
-  const { collectionTypeLinks, singleTypeLinks } = useSelector(modelLinksSelector, shallowEqual);
+  const { collectionTypeLinks, singleTypeLinks } = useSelector(selectModelLinks, shallowEqual);
 
   const { startsWith } = useFilter(locale, {
     sensitivity: 'base',

@@ -92,7 +92,7 @@ type CustomFieldUID = `plugin::${string}.${string}` | `global::${string}`;
  * -----------------------------------------------------------------------------------------------*/
 
 interface CustomFieldsContextValue {
-  get: (uid: CustomFieldUID) => CustomField | undefined;
+  get: (uid: string) => CustomField | undefined;
   getAll: () => Record<string, CustomField>;
 }
 

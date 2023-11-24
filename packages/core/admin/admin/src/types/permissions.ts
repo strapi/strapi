@@ -19,6 +19,7 @@ interface CRUDPermissions {
 }
 
 interface PermissionMap {
+  contentManager: CRUDPermissions;
   marketplace: CRUDPermissions;
   settings: Record<SettingsPermissions, CRUDPermissions>;
 }

@@ -4,10 +4,10 @@ import { GridItem, Option, Select } from '@strapi/design-system';
 import get from 'lodash/get';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { shallowEqual, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import { getTranslation } from '../../../utils/translations';
-import { makeSelectModelAndComponentSchemas, selectFieldSizes } from '../../App/selectors';
+import { selectModelAndComponentSchemas, selectFieldSizes } from '../../App/reducer';
 import { useLayoutDnd } from '../hooks/useLayoutDnd';
 import { createPossibleMainFieldsForModelsAndComponents, getInputProps } from '../utils';
 
@@ -23,8 +23,7 @@ const FIELD_SIZES = [
 const ModalForm = ({ onMetaChange, onSizeChange }) => {
   const { formatMessage } = useIntl();
   const { modifiedData, selectedField, attributes, fieldForm } = useLayoutDnd();
-  const schemasSelector = useMemo(makeSelectModelAndComponentSchemas, []);
-  const { schemas } = useSelector((state) => schemasSelector(state), shallowEqual);
+  const { schemas } = useSelector(selectModelAndComponentSchemas);
   const fieldSizes = useSelector(selectFieldSizes);
 
   const formToDisplay = useMemo(() => {

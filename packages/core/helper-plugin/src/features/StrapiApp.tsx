@@ -62,8 +62,8 @@ interface StrapiAppSetting {
 }
 
 interface RunHookSeries {
-  (hookName: string, async: true): Promise<unknown>;
-  (hookName: string, async?: false): unknown;
+  (hookName: string, async: true): Promise<any[]>;
+  (hookName: string, async?: false): any[];
 }
 
 interface RunHookWaterfall {
@@ -99,6 +99,7 @@ const StrapiAppContext = React.createContext<StrapiAppContextValue>({
   // These functions are required but should not resolve to undefined as they do here
   runHookParallel: () => Promise.resolve(),
   runHookWaterfall: () => Promise.resolve(),
+  // @ts-expect-error – TODO: fix this.
   runHookSeries: () => Promise.resolve(),
 });
 

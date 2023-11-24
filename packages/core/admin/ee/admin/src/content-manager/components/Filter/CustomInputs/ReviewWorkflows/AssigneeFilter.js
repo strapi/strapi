@@ -4,7 +4,7 @@ import { Combobox, ComboboxOption } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { getDisplayName } from '../../../../../../../../admin/src/content-manager/utils/getDisplayName';
+import { getDisplayName } from '../../../../../../../../admin/src/content-manager/utils/users';
 import { useAdminUsers } from '../../../../../../../../admin/src/hooks/useAdminUsers';
 
 export const AssigneeFilter = ({ value, onChange }) => {

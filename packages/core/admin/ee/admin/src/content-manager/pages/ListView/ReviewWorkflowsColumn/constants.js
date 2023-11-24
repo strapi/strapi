@@ -1,8 +1,5 @@
 import { getTranslation } from '../../../../../../../admin/src/content-manager/utils/translations';
-import {
-  ASSIGNEE_ATTRIBUTE_NAME,
-  STAGE_ATTRIBUTE_NAME,
-} from '../../EditView/InformationBox/constants';
+import { ASSIGNEE_ATTRIBUTE_NAME, STAGE_ATTRIBUTE_NAME } from '../../EditView/components/constants';
 
 export const REVIEW_WORKFLOW_COLUMNS_EE = [
   {

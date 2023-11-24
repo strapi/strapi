@@ -16,7 +16,7 @@ import { Redirect, Route, Switch, useLocation, useRouteMatch } from 'react-route
 import { DragLayer } from '../../../components/DragLayer';
 import { selectAdminPermissions } from '../../../selectors';
 import ModelsContext from '../../contexts/ModelsContext';
-import ItemTypes from '../../utils/ItemTypes';
+import { ItemTypes } from '../../utils/dragAndDrop';
 import { getTranslation } from '../../utils/translations';
 import CollectionTypeRecursivePath from '../CollectionTypeRecursivePath';
 import ComponentSettingsView from '../ComponentSetttingsView';

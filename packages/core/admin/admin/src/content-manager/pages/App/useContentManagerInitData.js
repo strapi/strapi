@@ -9,13 +9,13 @@ import {
 } from '@strapi/helper-plugin';
 import axios from 'axios';
 import { useIntl } from 'react-intl';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { HOOKS } from '../../../constants';
+import { useTypedSelector } from '../../../core/store/hooks';
 import { getTranslation } from '../../utils/translations';
 
-import { getInitData, resetInitData, setInitData } from './actions';
-import { selectAppDomain } from './selectors';
+import { getInitData, resetInitData, setInitData } from './reducer';
 import getContentTypeLinks from './utils/getContentTypeLinks';
 
 const { MUTATE_COLLECTION_TYPES_LINKS, MUTATE_SINGLE_TYPES_LINKS } = HOOKS;
@@ -23,7 +23,7 @@ const { MUTATE_COLLECTION_TYPES_LINKS, MUTATE_SINGLE_TYPES_LINKS } = HOOKS;
 const useContentManagerInitData = () => {
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
-  const state = useSelector(selectAppDomain());
+  const state = useTypedSelector((state) => state['content-manager_app']);
   const fetchDataRef = useRef();
   const { allPermissions } = useRBACProvider();
   const { runHookWaterfall } = useStrapiApp();

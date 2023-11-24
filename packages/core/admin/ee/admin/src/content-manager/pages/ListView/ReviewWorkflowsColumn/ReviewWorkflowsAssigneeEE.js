@@ -4,7 +4,7 @@ import { Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { getDisplayName } from '../../../../../../../admin/src/content-manager/utils';
+import { getDisplayName } from '../../../../../../../admin/src/content-manager/utils/users';
 
 export function ReviewWorkflowsAssigneeEE({ user }) {
   const { formatMessage } = useIntl();

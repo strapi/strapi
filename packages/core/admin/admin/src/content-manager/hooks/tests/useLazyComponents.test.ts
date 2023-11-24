@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 
-import useLazyComponents from '../index';
+import { useLazyComponents } from '../useLazyComponents';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -79,6 +79,7 @@ describe('useLazyComponents', () => {
 
   test('if the argument for component uids change and it contains new ones, these should be added to the store', async () => {
     const { result: initialResult, rerender } = renderHook(
+      // @ts-expect-error – this is fine.
       (components) => useLazyComponents(components),
       {
         initialProps: ['plugin::test.color'],
