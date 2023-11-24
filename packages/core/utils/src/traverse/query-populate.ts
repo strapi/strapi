@@ -55,7 +55,7 @@ const populate = traverseFactory()
       // Only keep the attributes key
       .reduce((acc, [key]) => ({ ...acc, [key]: true }), {});
 
-    return recurse(visitor, options, { ...parsedPopulate });
+    return recurse(visitor, options, parsedPopulate);
   })
   // Parse string values
   .parse(isString, () => {
