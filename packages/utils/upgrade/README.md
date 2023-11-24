@@ -19,7 +19,7 @@ The upgrade tool provides two types of transforms:
 
 Codemods are a scripted way to refactor code. Here we are providing and running these scripts for users for any changes necessary in user code between Strapi versions.
 
-For example, if we need to rename a package used by Strapi projects, instead of instructing users to change the package, we provide a script that searches through the user's project and does the replacement for them.
+For example, if we need to rename a package used by Strapi projects, instead of instructing users to change the import, we provide a script that searches through the user's project and does the replacement for them.
 
 ### Data Migrations
 
