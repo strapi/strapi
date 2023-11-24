@@ -212,7 +212,7 @@ class Strapi extends Container implements StrapiI {
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
     this.startupLogger = createStartupLogger(this);
-    this.log = createLogger(this.config.get('logger', {}));
+    this.log = createLogger(this.config.get('logger', { level: 'info' }));
     this.cron = createCronService();
     this.telemetry = createTelemetry(this);
     this.requestContext = requestContext;
