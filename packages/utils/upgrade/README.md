@@ -45,6 +45,8 @@ To begin your code transform script, create a file `upgrade/resources/transforms
 
 For example, all breaking changes for the initial release of Strapi v5 will go in upgrade/resources/transforms/5.0.0
 
+Note that "short-description-of-action" will be converted to text displayed to the user with hyphens converted to spaces, for example: "short description of action"
+
 ### 'json' transforms
 
 Your transform will be called for every json file in a user's project, and you must return the json object (modified or not) at the end to be passed to the next transform.
@@ -54,11 +56,10 @@ Here is an example JSON Transform script:
 ```typescript
 import path from 'node:path';
 
-// See
-
 import type { JSONTransform } from '../../..';
 
 const transform: JSONTransform = (file, params) => {
+  // Extract the json api and the cwd so we can target specific files
   const { cwd, json } = params;
 
   // To target only a root level package.json file:
@@ -107,22 +108,18 @@ export type JSONTransform = (file: JSONSourceFile, params: JSONTransformParams) 
 
 The methods available from `json()` are wrappers for the lodash methods of the same name:
 
-- get(path, default): get path or default if not found
-- set(path, value): set path (such as 'engines.node', 'dependencies', 'author.name') to value
-- has(path): checks if path exists
-- merge(obj): merges two json objects
-- root(): returns the whole json object
+- **get(path, default)**: get path or default if not found
+- **set(path, value)**: set path (such as 'engines.node', 'dependencies', 'author.name') to value
+- **has(path)**: checks if path exists
+- **merge(obj)**: merges two json objects
+- **root()**: returns the whole json object
 
-### 'code' codemods
+### 'code' codemod transforms
 
-TODO
+Codemod transforms use the [`jscodeshift`](https://github.com/facebook/jscodeshift) library to modify code passed in. Please see their documentation for advanced details.
 
 ```typescript
 import type { Transform } from 'jscodeshift';
-
-/**
- * Note: This codemod is only for development purposes and should be deleted before releasing
- */
 
 const transform: Transform = (file, api) => {
   // Extract the jscodeshift API
@@ -155,4 +152,28 @@ const transform: Transform = (file, api) => {
 };
 
 export default transform;
+```
+
+For reference, these are the types for the relevant objects, which can be found in `packages/utils/upgrade/src/core/runner/code.ts`:
+
+```typescript
+export interface CodeRunnerConfig {
+  dry?: boolean;
+  print?: boolean;
+  verbose?: number;
+  extensions?: string;
+  silent?: boolean;
+  runInBand?: boolean;
+  parser?: 'js' | 'ts';
+  babel?: boolean;
+  // ...
+}
+
+export const transformCode = (
+  transformFile: string,
+  codeFiles: string[],
+  config?: CodeRunnerConfig
+) => {
+  return jscodeshift(transformFile, codeFiles, config);
+};
 ```
