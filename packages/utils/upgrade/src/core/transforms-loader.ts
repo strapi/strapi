@@ -1,17 +1,17 @@
 import * as semver from 'semver';
 import * as path from 'node:path';
 import assert from 'node:assert';
-import { readdirSync, statSync } from 'node:fs';
+import { readdirSync, statSync, existsSync } from 'node:fs';
 
-import { createSemverRange } from './version';
+import { isVersionRelease } from './version';
 import * as f from './format';
 
-import type { Logger, AnyVersion, VersionRange, SemVer } from '.';
+import type { Logger, Version, SemVer } from '.';
 import type { TransformFile, TransformFileKind } from '../types';
 
 export interface CreateTransformsLoaderOptions {
   dir?: string;
-  range: VersionRange;
+  range: semver.Range;
   logger: Logger;
 }
 
@@ -27,7 +27,7 @@ const TRANSFORM_FILE_REGEXP = new RegExp(
 export const createTransformsLoader = (options: CreateTransformsLoaderOptions) => {
   const { dir = INTERNAL_TRANSFORMS_DIR, range, logger } = options;
 
-  const semverRange = createSemverRange(range);
+  assert(existsSync(dir), `Invalid transforms directory provided "${dir}"`);
 
   // TODO: Maybe add some more logs regarding what folders are accepted/discarded
   const versions = readdirSync(dir)
@@ -36,18 +36,17 @@ export const createTransformsLoader = (options: CreateTransformsLoaderOptions) =
     // Paths should be valid semver
     .filter((filePath): filePath is SemVer => semver.valid(filePath) !== null)
     // Should satisfy the given range
-    .filter((filePath) => semverRange.test(filePath))
+    .filter((filePath) => range.test(filePath))
     // Sort versions in ascending order
     .sort(semver.compare) as SemVer[];
 
-  if (versions.length === 0) {
-    // TODO: Use custom upgrade errors
-    throw new Error(`Invalid transforms directory provided "${dir}"`);
-  }
-
   const fNbFound = f.highlight(versions.length.toString());
-  const fRange = f.versionRange(semverRange.raw);
+  const fRange = f.versionRange(range.raw);
   const fVersions = versions.map(f.version).join(', ');
+
+  if (versions.length === 0) {
+    throw new Error(`Could not find any upgrade matching the given range (${fRange})`);
+  }
 
   logger.debug(`Found ${fNbFound} upgrades matching ${fRange} (${fVersions})`);
 
@@ -102,15 +101,13 @@ export const createTransformsLoader = (options: CreateTransformsLoaderOptions) =
     return transformsPath;
   };
 
-  const loadRange = (range: VersionRange): TransformFile[] => {
+  const loadRange = (range: semver.Range): TransformFile[] => {
     const paths: TransformFile[] = [];
 
-    const semverRange = createSemverRange(range);
-
-    logger.debug(`Loading transforms matching ${f.versionRange(semverRange.raw)}`);
+    logger.debug(`Loading transforms matching ${f.versionRange(range.raw)}`);
 
     for (const version of versions) {
-      const isInRange = semverRange.test(version);
+      const isInRange = range.test(version);
 
       if (isInRange) {
         const transformsForVersion = load(version);

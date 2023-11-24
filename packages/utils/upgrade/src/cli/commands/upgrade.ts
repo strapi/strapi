@@ -24,6 +24,7 @@ export const upgrade = async (options: CLIOptions) => {
       dryRun: options.dryRun,
       cwd: options.projectPath,
       target: options.target,
+      exact: options.exact,
     });
   } catch (err) {
     handleError(err);

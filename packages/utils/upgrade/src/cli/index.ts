@@ -17,42 +17,30 @@ const command = (name: string, description: string): Command => {
     .option('-p, --project-path <project-path>', 'Path to the Strapi project');
 };
 
-// Register commands
-
-command('next', 'Upgrade your Strapi application to the next major version').action(
-  async (options) => {
-    const { next } = await import('./commands/next.js');
-
-    return next(options);
-  }
-);
-
-command('latest', 'Upgrade your Strapi application to the latest version').action(
-  async (options) => {
-    const { latest } = await import('./commands/latest.js');
-
-    return latest(options);
-  }
-);
-
-command('fix-current', 'Run missing upgrades for the current major version').action(
-  async (path, options) => {
-    const { fixCurrent } = await import('./commands/fix-current.js');
-
-    return fixCurrent({ path, ...options });
-  }
-);
-
-// Miscellaneous
+const RELEASES_CHOICES = Object.values(VersionRelease).join(', ');
+const ALLOWED_TARGETS = `Allowed choices are ${RELEASES_CHOICES} or a specific version number in the form "x.x.x"`;
 
 program
-  .usage('<command> [options]')
-  .on('command:*', ([invalidCmd]) => {
-    console.error(
-      chalk.red(
-        `[ERROR] Invalid command: ${invalidCmd}.${os.EOL} See --help for a list of available commands.`
-      )
-    );
+  .description('Upgrade to the desired version')
+  .option('-p, --project-path <project-path>', 'Path to the Strapi project')
+  .addOption(
+    new Option('-t, --target <target>', `Specify which version to upgrade to ${ALLOWED_TARGETS}`)
+      .default(VersionRelease.Next)
+      .argParser((target) => {
+        assert(isVersion(target), new InvalidOptionArgumentError(ALLOWED_TARGETS));
+        return target;
+      })
+  )
+  .option(
+    '-e --exact',
+    'If <target> is in the form "x.x.x", only run the upgrade for this version',
+    false
+  )
+  .option('-n, --dry-run', 'Simulate the upgrade without updating any files', false)
+  .option('-d, --debug', 'Get more logs in debug mode', false)
+  .option('-s, --silent', "Don't log anything", false)
+  .action(async () => {
+    const options = program.opts<CLIOptions>();
 
     process.exit(1);
   })
