@@ -83,9 +83,11 @@ export const upgrade = async (options: TaskOptions) => {
     const fMatchedVersion = f.version(matchedVersion);
     const fUpgradeRange = f.versionRange(upgradeRange.raw);
 
-    isTargetValidSemVer
-      ? logger.info(`Targeting ${fMatchedVersion} using ${fUpgradeRange}`)
-      : logger.info(`Targeting ${fMatchedVersion} (${fTarget}) using ${fUpgradeRange}`);
+    if (isTargetValidSemVer) {
+      logger.info(`Targeting ${fMatchedVersion} using ${fUpgradeRange}`);
+    } else {
+      logger.info(`Targeting ${fMatchedVersion} (${fTarget}) using ${fUpgradeRange}`);
+    }
 
     const transformFiles = transformsLoader.loadRange(upgradeRange);
 
