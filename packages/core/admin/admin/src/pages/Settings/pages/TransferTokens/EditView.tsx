@@ -283,8 +283,9 @@ export const EditView = () => {
   );
 
   const handleSubmit = async (
-    body: Pick<TransferToken, 'description' | 'name' | 'lifespan'> & {
-      permissions: TransferToken['permissions'][number];
+    body: Pick<TransferToken, 'description' | 'name'> & {
+      lifespan: TransferToken['lifespan'] | null | undefined;
+      permissions: TransferToken['permissions'][number] | null | undefined;
     },
     actions: FormikHelpers<Pick<TransferToken, 'description' | 'name' | 'lifespan' | 'permissions'>>
   ) => {
