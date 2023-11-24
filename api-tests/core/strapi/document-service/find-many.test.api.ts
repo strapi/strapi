@@ -71,7 +71,7 @@ describe('Document Service', () => {
       const params = {
         locale: 'fr',
         status: 'draft', // 'published' | 'draft'
-      };
+      } as const;
 
       // TODO: compare this with results from findMany
       const articlesDb = await findArticlesDb({ title: 'Article1-Draft-EN' });
@@ -94,7 +94,7 @@ describe('Document Service', () => {
     it('find published documents', async () => {
       const params = {
         status: 'published',
-      };
+      } as const;
 
       const articles = await strapi.documents('api::article.article').findMany(params);
 
@@ -113,7 +113,7 @@ describe('Document Service', () => {
     it('find draft documents', async () => {
       const params = {
         status: 'draft',
-      };
+      } as const;
 
       const articles = await strapi.documents('api::article.article').findMany(params);
 
@@ -128,5 +128,7 @@ describe('Document Service', () => {
       const count = await strapi.documents('api::article.article').count(params);
       expect(count).toBe(articles.length);
     });
+
+    it.todo('pagination');
   });
 });
