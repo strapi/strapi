@@ -1,7 +1,0 @@
-{
-  "extends": "tsconfig/client.json",
-  "include": ["_internal", "packup.config.ts"],
-  "compilerOptions": {
-    "outDir": "./dist/cli"
-  }
-}
