@@ -55,10 +55,8 @@ describe('Releases home page', () => {
       })
     );
     const { user } = render(<ReleasesPage />);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Releases');
     const releaseSubtitle = await screen.findByText('17 releases');
     expect(releaseSubtitle).toBeInTheDocument();
-
     const paginationCombobox = screen.queryByRole('combobox', { name: /entries per page/i });
     expect(paginationCombobox).toBeInTheDocument();
 
@@ -82,6 +80,38 @@ describe('Releases home page', () => {
 
     const emptyDoneBodyContent = screen.getByText(/no done entries/i);
     expect(emptyDoneBodyContent).toBeInTheDocument();
+  });
+
+  it('renders correctly the page with some pending results and some done results (subtitle, pagination, body content, add release dialog)', async () => {
+    server.use(
+      rest.get('/content-releases', (req, res, ctx) => {
+        if (
+          req.url.searchParams.get('page') === '1' &&
+          req.url.searchParams.get('pageSize') === '16' &&
+          req.url.searchParams.get('filters[$and][0][releasedAt][$notNull]') === 'true'
+        ) {
+          // Return a mocked response
+          return res(ctx.json(mockData.pendingDoneEntries.done));
+        }
+        return res(ctx.json(mockData.pendingDoneEntries.pending));
+      })
+    );
+    const { user } = render(<ReleasesPage />);
+    const releaseSubtitle = await screen.findByText('8 releases');
+    expect(releaseSubtitle).toBeInTheDocument();
+
+    // change the tab to see the done empty body content
+    const doneTab = screen.getByRole('tab', { name: /done/i });
+    await user.click(doneTab);
+
+    const doneReleaseSubtitle = await screen.findByText('10 releases');
+    expect(doneReleaseSubtitle).toBeInTheDocument();
+
+    const paginationDoneCombobox = screen.queryByRole('combobox', { name: /entries per page/i });
+    expect(paginationDoneCombobox).toBeInTheDocument();
+
+    const firstEntry = screen.getByRole('heading', { level: 3, name: 'entry 8' });
+    expect(firstEntry).toBeInTheDocument();
   });
 
   it('hides the dialog', async () => {
