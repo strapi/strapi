@@ -1,8 +1,10 @@
 import type Koa from 'koa';
+import type { UID } from '@strapi/types';
 import { validateReleaseActionCreateSchema } from './validation/release-action';
-import type { CreateReleaseAction, GetReleaseActions } from '../../../shared/contracts/release-actions';
-import { getService } from '../utils';
-import { RELEASE_ACTION_MODEL_UID } from '../constants';
+import type { CreateReleaseAction, GetReleaseActions, ReleaseAction } from '../../../shared/contracts/release-actions';
+import { getAllowedContentTypes, getService } from '../utils';
+
+const CONTENT_MANAGER_READ_ACTION = 'plugin::content-manager.explorer.read';
 
 const releaseActionController = {
   async create(ctx: Koa.Context) {
@@ -20,56 +22,58 @@ const releaseActionController = {
   },
   async findMany(ctx: Koa.Context) {
     const releaseId: GetReleaseActions.Request['params']['releaseId'] = ctx.params.releaseId;
-    const { query } = ctx.request;
 
-    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
-      ability: ctx.state.userAbility,
-      model: RELEASE_ACTION_MODEL_UID,
-    });
-
-    const sanitizedQuery = await permissionsManager.sanitizeQuery(query);
-    const permissionsQuery = await permissionsManager.addPermissionsQueryTo(sanitizedQuery, 'plugin::content-manager.explorer.read');
-
-    console.log(permissionsQuery)
-    return 0
+    const allowedContentTypes = getAllowedContentTypes({ strapi, userAbility: ctx.state.userAbility });
     
+    const morphSanitizedPopulate = await allowedContentTypes.reduce(async (promiseAccumulator, contentTypeUid) => {
+      const accumulator = await promiseAccumulator;
+
+      const permissionsManager = await strapi.admin.services.permission.createPermissionsManager({
+        ability: ctx.state.userAbility,
+        model: contentTypeUid
+      });
+
+      // We create this to filter populated entries based on custom conditions on permissions
+      accumulator[contentTypeUid] = {
+        filters: permissionsManager.getQuery(CONTENT_MANAGER_READ_ACTION)
+      };
+
+      return accumulator;
+    }, Promise.resolve({} as Record<UID.ContentType, { filters: object }>));
+
 
     const releaseService = getService('release', { strapi });
-    const { results, pagination } = await releaseService.findActions(releaseId, query);
-
-    const contentTypeService = strapi.plugin('content-manager').service('content-types');
-
-    const contentTypes = {};
-    const sanitizeFunctions = {};
-
-    const releaseActions = await Promise.all(results.map(async (releaseAction) => {
-      if (!contentTypes[releaseAction.contentType]) {
-        // We get the configuration for each content type only once
-        // Then, we can use it to get mainFields and create the sanitizeOutput fn
-        const configuration = await contentTypeService.findConfiguration({ uid: releaseAction.contentType });
-
-        const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
-          ability: ctx.state.userAbility,
-          model: releaseAction.contentType
-        });
-
-        sanitizeFunctions[releaseAction.contentType] = permissionsManager.sanitizeOutput;
-        contentTypes[releaseAction.contentType] = { mainField: configuration.settings.mainField, };
+    const { results, pagination } = await releaseService.findActions(releaseId, allowedContentTypes, { 
+      populate: {
+        entry: {
+          on: morphSanitizedPopulate
+        }
       }
+    });
 
-      // We return the action and we make sure to sanitize the entry
+    // Because this is a morphTo relation, we need to sanitize each entry separately based on its contentType
+    const sanitizedResult = await Promise.all(results.map(async (action: ReleaseAction) => {
+      const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+        ability: ctx.state.userAbility,
+        model: action.contentType
+      });
+
       return {
-        ...releaseAction,
-        entry: await sanitizeFunctions[releaseAction.contentType](releaseAction.entry),
+        ...action,
+        entry: action.entry && await permissionsManager.sanitizeOutput(
+          action.entry, 
+          { 
+            action: CONTENT_MANAGER_READ_ACTION, 
+            subject: permissionsManager.toSubject(action.entry, action.contentType) 
+          })
       };
     }));
 
     ctx.body = {
-      data: releaseActions,
+      data: sanitizedResult,
       meta: {
-        contentTypes
-      },
-      pagination,
+        pagination
+      }
     };
   }
 };

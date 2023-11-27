@@ -1,5 +1,5 @@
 import { setCreatorFields, errors } from '@strapi/utils';
-import type { LoadedStrapi } from '@strapi/types';
+import type { LoadedStrapi, Common } from '@strapi/types';
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
 import type { GetReleases, CreateRelease, UpdateRelease, GetRelease } from '../../../shared/contracts/releases';
 import type { CreateReleaseAction, GetReleaseActions } from '../../../shared/contracts/release-actions';
@@ -25,15 +25,8 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       },
     });
   },
-  findOne(id: GetRelease.Request['params']['id']) {
-    return strapi.entityService.findOne(RELEASE_MODEL_UID, id, {
-      populate: {
-        actions: {
-          // @ts-expect-error TS error on populate, is not considering count
-          count: true,
-        },
-      },
-    });
+  findOne(id: GetRelease.Request['params']['id'], query = {}) {
+    return strapi.entityService.findOne(RELEASE_MODEL_UID, id, query);
   },
   async update(id: number, releaseData: UpdateRelease.Request['body'], { user }: { user: UserInfo }) {
     const updatedRelease = await setCreatorFields({ user, isEdition: true })(releaseData);
@@ -76,16 +69,25 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       populate: { release: { fields: ['id'] }, entry: { fields: ['id'] } },
     });
   },
-  findActions(
-    releaseId: GetReleaseActions.Request['params']['releaseId'], 
+  async findActions(
+    releaseId: GetReleaseActions.Request['params']['releaseId'],
+    contentTypes: Common.UID.ContentType[],
     query?: GetReleaseActions.Request['query'] 
   ) {
+    const result = await strapi.entityService.findOne(RELEASE_MODEL_UID, releaseId);
+
+    if (!result) {
+      throw new errors.NotFoundError(`No release found for id ${releaseId}`);
+    }
+
     return strapi.entityService.findPage(RELEASE_ACTION_MODEL_UID, {
+      ...query,
       filters: {
-        release: releaseId
+        release: releaseId,
+        contentType: {
+          $in: contentTypes,
+        }
       },
-      populate: ['entry'],
-      query
     });
   }
 });

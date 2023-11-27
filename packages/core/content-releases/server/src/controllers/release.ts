@@ -1,10 +1,11 @@
 import type Koa from 'koa';
+import type { UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { RELEASE_MODEL_UID } from '../constants';
 import { validateRelease } from './validation/release';
 import type { CreateRelease, UpdateRelease, GetRelease, Release } from '../../../shared/contracts/releases';
 import type { UserInfo } from '../../../shared/types';
-import { getService } from '../utils';
+import { getAllowedContentTypes, getService } from '../utils';
 
 type ReleaseWithPopulatedActions = Release & { actions: { count: number } };
 
@@ -40,24 +41,65 @@ const releaseController = {
   async findOne(ctx: Koa.Context) {
     const id: GetRelease.Request['params']['id'] = ctx.params.id;
 
-    const result = (await getService('release', { strapi }).findOne(
-      Number(id)
+    const allowedContentTypes = getAllowedContentTypes({ strapi, userAbility: ctx.state.userAbility });
+
+    const contentManagerContentTypeService = strapi
+      .plugin('content-manager')
+      .service('content-types');
+
+    const contentTypesMeta = await allowedContentTypes.reduce(async (accumulatorPromise, contentTypeUid) => {
+      const acc = await accumulatorPromise;
+
+      const contentTypeConfig = await contentManagerContentTypeService.findConfiguration({ uid: contentTypeUid });
+
+      if (contentTypeConfig) {
+        acc[contentTypeUid] = {
+          mainField: contentTypeConfig.settings.mainField,
+        };
+      }
+
+      return acc;
+    }, Promise.resolve({} as Record<UID.ContentType, { mainField: string }>));
+
+    const releaseWithCountAllActions = (await getService('release', { strapi }).findOne(
+      Number(id), { populate: { actions: { count: true } } }
     )) as ReleaseWithPopulatedActions | null;
 
-    if (!result) {
+    const releaseWithCountHiddenActions = (await getService('release', { strapi }).findOne(
+      Number(id),
+      {
+        populate: {
+          actions: {
+            count: true,
+            filters: {
+              contentType: {
+                $notIn: allowedContentTypes
+              }
+            }
+          }
+        }
+      }
+    )) as ReleaseWithPopulatedActions | null;
+
+    if (!releaseWithCountAllActions || !releaseWithCountHiddenActions) {
       throw new errors.NotFoundError(`Release not found for id: ${id}`);
     }
 
-    const { actions: actionsMeta, ...release } = result;
+    const { actions: releaseWithAllActionsMeta, ...release } = releaseWithCountAllActions;
+    const { actions: releaseWithHiddenActionsMeta } = releaseWithCountHiddenActions;
 
     // Format the data object
     const data = {
       ...release,
       actions: {
         meta: {
-          count: actionsMeta.count,
+          total: releaseWithAllActionsMeta.count,
+          totalHidden: releaseWithHiddenActionsMeta.count,
         },
       },
+      meta: {
+        contentTypes: contentTypesMeta,
+      }
     };
 
     ctx.body = { data };
