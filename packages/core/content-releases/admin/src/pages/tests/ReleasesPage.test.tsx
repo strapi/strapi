@@ -43,6 +43,14 @@ describe('Releases home page', () => {
   it('renders correctly the page with only pending results (subtitle, pagination, body content, add release dialog)', async () => {
     server.use(
       rest.get('/content-releases', (req, res, ctx) => {
+        if (
+          req.url.searchParams.get('page') === '1' &&
+          req.url.searchParams.get('pageSize') === '16' &&
+          req.url.searchParams.get('filters[$and][0][releasedAt][$notNull]') === 'true'
+        ) {
+          // Return a mocked response
+          return res(ctx.json(mockData.emptyEntries));
+        }
         return res(ctx.json(mockData.pendingEntries));
       })
     );
@@ -65,7 +73,15 @@ describe('Releases home page', () => {
     // change the tab to see the done empty body content
     const doneTab = screen.getByRole('tab', { name: /done/i });
     await user.click(doneTab);
-    /* TODO: add the check of the done body page test */
+
+    const doneReleaseSubtitle = await screen.findByText('No releases');
+    expect(doneReleaseSubtitle).toBeInTheDocument();
+
+    const paginationDoneCombobox = screen.queryByRole('combobox', { name: /entries per page/i });
+    expect(paginationDoneCombobox).not.toBeInTheDocument();
+
+    const emptyDoneBodyContent = screen.getByText(/no done entries/i);
+    expect(emptyDoneBodyContent).toBeInTheDocument();
   });
 
   it('hides the dialog', async () => {
