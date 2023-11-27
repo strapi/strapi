@@ -136,7 +136,7 @@ const AddActionToReleaseModal = ({ handleClose }: AddActionToReleaseModalProps) 
         <Typography id="title" fontWeight="bold" textColor="neutral800">
           {formatMessage({
             id: 'content-releases.content-manager-edit-view.add-to-release',
-            defaultMessage: 'Add to Release',
+            defaultMessage: 'Add to release',
           })}
         </Typography>
       </ModalHeader>
@@ -150,31 +150,34 @@ const AddActionToReleaseModal = ({ handleClose }: AddActionToReleaseModalProps) 
             <Form>
               <ModalBody>
                 <Flex direction="column" alignItems="stretch" gap={2}>
-                  <SingleSelect
-                    required
-                    label={formatMessage({
-                      id: 'content-releases.content-manager-edit-view.add-to-release.select-label',
-                      defaultMessage: 'Select a releases',
-                    })}
-                    placeholder={formatMessage({
-                      id: 'content-releases.content-manager-edit-view.add-to-release.select-placeholder',
-                      defaultMessage: 'Select',
-                    })}
-                    onChange={(value) => setFieldValue('releaseId', value)}
-                    value={values.releaseId}
-                  >
-                    {releases?.map((release) => (
-                      <SingleSelectOption key={release.id} value={release.id}>
-                        {release.name}
-                      </SingleSelectOption>
-                    ))}
-                  </SingleSelect>
+                  <Box paddingBottom={6}>
+                    <SingleSelect
+                      required
+                      label={formatMessage({
+                        id: 'content-releases.content-manager-edit-view.add-to-release.select-label',
+                        defaultMessage: 'Select a release',
+                      })}
+                      placeholder={formatMessage({
+                        id: 'content-releases.content-manager-edit-view.add-to-release.select-placeholder',
+                        defaultMessage: 'Select',
+                      })}
+                      onChange={(value) => setFieldValue('releaseId', value)}
+                      value={values.releaseId}
+                    >
+                      {releases?.map((release) => (
+                        <SingleSelectOption key={release.id} value={release.id}>
+                          {release.name}
+                        </SingleSelectOption>
+                      ))}
+                    </SingleSelect>
+                  </Box>
                   <FieldLabel>
                     {formatMessage({
                       id: 'content-releases.content-manager-edit-view.add-to-release.action-type-label',
                       defaultMessage: 'What do you want to do with this entry?',
                     })}
                   </FieldLabel>
+
                   <Flex>
                     <ReleaseActionOptions
                       selected={values.type}
@@ -226,10 +229,13 @@ export const CMReleasesInectionZone = () => {
   }
 
   return (
-    <CheckPermissions permissions={PERMISSIONS.createAction}>
+    <CheckPermissions permissions={PERMISSIONS.main}>
       <Box
         as="aside"
-        aria-labelledby="additional-information"
+        aria-label={formatMessage({
+          id: 'content-releases.plugin.name',
+          defaultMessage: 'Releases',
+        })}
         background="neutral0"
         borderColor="neutral150"
         hasRadius
@@ -239,24 +245,26 @@ export const CMReleasesInectionZone = () => {
         <Flex direction="column" alignItems="stretch" gap={4}>
           <Typography variant="sigma" textColor="neutral600">
             {formatMessage({
-              id: 'content-releases.content-manager-edit-view.add-to-release',
-              defaultMessage: 'Add to release',
-            })}
+              id: 'content-releases.plugin.name',
+              defaultMessage: 'RELEASES',
+            }).toUpperCase()}
           </Typography>
-          <Button
-            justifyContent="center"
-            paddingLeft={4}
-            paddingRight={4}
-            color="neutral700"
-            variant="tertiary"
-            startIcon={<Plus />}
-            onClick={toggleAddActionToReleaseModal}
-          >
-            {formatMessage({
-              id: 'content-releases.content-manager-edit-view.add-to-release',
-              defaultMessage: 'Add to release',
-            })}
-          </Button>
+          <CheckPermissions permissions={PERMISSIONS.createAction}>
+            <Button
+              justifyContent="center"
+              paddingLeft={4}
+              paddingRight={4}
+              color="neutral700"
+              variant="tertiary"
+              startIcon={<Plus />}
+              onClick={toggleAddActionToReleaseModal}
+            >
+              {formatMessage({
+                id: 'content-releases.content-manager-edit-view.add-to-release',
+                defaultMessage: 'Add to release',
+              })}
+            </Button>
+          </CheckPermissions>
         </Flex>
         {showModal && <AddActionToReleaseModal handleClose={toggleAddActionToReleaseModal} />}
       </Box>
