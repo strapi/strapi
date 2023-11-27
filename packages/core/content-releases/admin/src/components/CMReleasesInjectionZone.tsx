@@ -219,12 +219,19 @@ const AddActionToReleaseModal = ({ handleClose }: AddActionToReleaseModalProps) 
 export const CMReleasesInectionZone = () => {
   const [showModal, setShowModal] = React.useState(false);
   const { formatMessage } = useIntl();
-  const { isCreatingEntry } = useCMEditViewDataManager();
+  const {
+    isCreatingEntry,
+    allLayoutData: { contentType },
+  } = useCMEditViewDataManager();
 
   const toggleAddActionToReleaseModal = () => setShowModal((prev) => !prev);
 
-  // Impossible to add an entry to a release before the entry exists
-  if (isCreatingEntry) {
+  /**
+   * - Impossible to add entry to release before it exists
+   * - Content type's without draft and publish cannot add entries to release
+   * TODO v5: All contentTypes will have draft and publish enabled
+   */
+  if (isCreatingEntry || !contentType?.options?.draftAndPublish) {
     return null;
   }
 
