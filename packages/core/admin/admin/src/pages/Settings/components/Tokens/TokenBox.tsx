@@ -1,29 +1,33 @@
-import React from 'react';
-
 import { IconButton } from '@strapi/design-system';
 import { ContentBox, useClipboard, useNotification, useTracking } from '@strapi/helper-plugin';
 import { Duplicate, Key } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-const TokenBox = ({ token, tokenType }) => {
+interface TokenBoxProps {
+  token?: string;
+  tokenType: 'transfer-token' | 'api-token';
+}
+
+export const TokenBox = ({ token, tokenType }: TokenBoxProps) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
 
   const { copy } = useClipboard();
 
-  const handleClick = (token) => async () => {
-    const didCopy = await copy(token);
+  const handleClick = (token: TokenBoxProps['token']) => async () => {
+    if (token) {
+      const didCopy = await copy(token);
 
-    if (didCopy) {
-      trackUsage('didCopyTokenKey', {
-        tokenType,
-      });
-      toggleNotification({
-        type: 'success',
-        message: { id: 'Settings.tokens.notification.copied' },
-      });
+      if (didCopy) {
+        trackUsage('didCopyTokenKey', {
+          tokenType,
+        });
+        toggleNotification({
+          type: 'success',
+          message: { id: 'Settings.tokens.notification.copied' },
+        });
+      }
     }
   };
 
@@ -38,7 +42,7 @@ const TokenBox = ({ token, tokenType }) => {
                 defaultMessage: 'Copy to clipboard',
               })}
               onClick={handleClick(token)}
-              noBorder
+              borderWidth={0}
               icon={<Duplicate />}
               style={{ padding: 0, height: '1rem' }}
             />
@@ -68,14 +72,3 @@ const TokenBox = ({ token, tokenType }) => {
     />
   );
 };
-
-TokenBox.defaultProps = {
-  token: null,
-};
-
-TokenBox.propTypes = {
-  token: PropTypes.string,
-  tokenType: PropTypes.string.isRequired,
-};
-
-export default TokenBox;
