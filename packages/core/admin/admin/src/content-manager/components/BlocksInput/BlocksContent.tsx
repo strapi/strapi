@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Flex, Icon, VisuallyHidden } from '@strapi/design-system';
+import { Box, Flex, IconButton, IconButtonProps, VisuallyHidden } from '@strapi/design-system';
 import { Drag } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Editor, Range, Transforms, Element } from 'slate';
@@ -14,6 +14,7 @@ import { composeRefs, ItemTypes, getTrad } from '../../utils';
 
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { type ModifiersStore } from './Modifiers';
+import { getAttributesToClear } from './utils/conversions';
 import { getEntries, Block } from './utils/types';
 
 const StyledEditable = styled(Editable)`
@@ -31,13 +32,13 @@ const StyledEditable = styled(Editable)`
 
 const DragItem = styled(Flex)`
   // Style each block rendered using renderElement()
-  & > *:nth-child(2) {
+  & > [data-slate-node='element'] {
     width: 100%;
     opacity: inherit;
   }
   &:hover {
     // Set the visibility of drag button
-    & > div {
+    & > span > [role='button'] {
       visibility: visible;
       opacity: inherit;
     }
@@ -47,20 +48,33 @@ const DragItem = styled(Flex)`
   }
 `;
 
-const DragButton = styled(Flex)`
+const DragIconButton = styled(IconButton)<IconButtonProps>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius:${({ theme }) => theme.borderRadius};
+  width: ${({ theme }) => theme.spaces[4]};
+  height: ${({ theme }) => theme.spaces[6]};
   visibility: hidden;
   cursor: grab;
+  opacity: inherit;
 
   &:hover {
     background: ${({ theme }) => theme.colors.neutral200};
   }
   &:active {
     cursor: grabbing;
-    background: ${({ theme }) => theme.colors.neutral200};
   }
   &[aria-disabled='true'] {
     cursor: not-allowed;
     background: transparent;
+  }
+  svg {
+    height: auto;
+    width: ${({ theme }) => theme.spaces[3]}};
+    path {
+      fill: ${({ theme }) => theme.colors.neutral700};
+    }
   }
 `;
 
@@ -113,15 +127,9 @@ const DragAndDropElement = ({ children, index, canDrag, canDrop }: DragAndDropEl
             newIndex[0] -= 1;
           }
 
-          const { type: _type, children: _children, ...extra } = draggedNode;
-          const attributesToClear: Record<string, null> = {};
-          Object.keys(extra).forEach((key) => {
-            attributesToClear[key] = null;
-          });
-
           Transforms.setNodes(
             editor,
-            { ...attributesToClear, type: 'list-item' },
+            { ...getAttributesToClear(draggedNode), type: 'list-item' },
             { at: newIndex }
           );
         }
@@ -195,7 +203,6 @@ const DragAndDropElement = ({ children, index, canDrag, canDrop }: DragAndDropEl
           data-handler-id={handlerId}
           gap={2}
           paddingLeft={2}
-          alignItems="start"
           onDragStart={(event) => {
             const target = event.target as HTMLElement;
             target.style.opacity = '0.5';
@@ -206,22 +213,22 @@ const DragAndDropElement = ({ children, index, canDrag, canDrop }: DragAndDropEl
           }}
           aria-disabled={disabled}
         >
-          <DragButton
-            role="button"
-            tabIndex={0}
-            aria-label="Drag"
-            onKeyDown={handleDragHandleKeyDown}
-            color="neutral600"
-            alignItems="center"
-            justifyContent="center"
-            hasRadius
-            height={6}
-            width={4}
-            display={canDrag ? 'flex' : 'none'}
-            aria-disabled={disabled}
-          >
-            <Icon width={3} height={3} as={Drag} color="neutral600" />
-          </DragButton>
+          {canDrag && (
+            <DragIconButton
+              forwardedAs="div"
+              role="button"
+              tabIndex={0}
+              label={formatMessage({
+                id: getTrad('components.DragHandle-label'),
+                defaultMessage: 'Drag',
+              })}
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={handleDragHandleKeyDown}
+              aria-disabled={disabled}
+            >
+              <Drag color="neutral600" />
+            </DragIconButton>
+          )}
           {children}
         </DragItem>
       )}
