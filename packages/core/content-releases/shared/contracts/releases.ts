@@ -35,7 +35,7 @@ export declare namespace GetReleases {
     data: ReleaseDataResponse[];
     meta: {
       pagination: Pagination;
-      activeTab?: 'pending' | 'done';
+      activeTab?: string;
     };
     error?: errors.ApplicationError;
   }
