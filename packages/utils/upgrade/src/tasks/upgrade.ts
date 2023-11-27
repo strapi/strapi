@@ -2,8 +2,8 @@ import ora from 'ora';
 import chalk from 'chalk';
 import semver from 'semver';
 import assert from 'node:assert';
+import path from 'node:path';
 
-import type { RunnerConfiguration, VersionRange } from '../core';
 import {
   createProjectLoader,
   createSemverRange,
@@ -11,19 +11,35 @@ import {
   createTransformsLoader,
   createTransformsRunner,
   createVersionParser,
-  f,
-  isLatestVersion,
   isSemVer,
-  isVersionRelease,
+  f,
   VersionRelease,
 } from '../core';
+
+import type { RunnerConfiguration } from '../core';
 import type { Report, RunReports, TaskOptions } from '../types';
+import { isCleanGitRepo } from '../core/requirements/is-clean-git-repo';
 
 export const upgrade = async (options: TaskOptions) => {
-  const { logger, dryRun = false, cwd = process.cwd(), target = VersionRelease.Minor } = options;
-
   const timer = createTimer();
+
+  const { logger, dryRun = false, exact = false, target = VersionRelease.Minor } = options;
+
+  // Make sure we're resolving the correct working directory based on the given input
+  const cwd = path.resolve(options.cwd ?? process.cwd());
+
+  const isTargetValidSemVer = isSemVer(target);
+  const isExactModeActivated = exact && isTargetValidSemVer;
+
   const fTarget = f.version(target);
+
+  if (exact && !isExactModeActivated) {
+    logger.warn(`Exact mode is enabled but the target is not a SemVer (${fTarget}), ignoring...`);
+  }
+
+  if (isExactModeActivated) {
+    logger.debug(`Exact mode is activated for ${fTarget}`);
+  }
 
   logger.debug(`Setting the targeted version to: ${fTarget}`);
 
@@ -34,20 +50,24 @@ export const upgrade = async (options: TaskOptions) => {
 
   logger.info(`The current project's Strapi version is ${fCurrentVersion}`);
 
-  // If the given target is older than the current Strapi version, then abort
-  if (isSemVer(target)) {
+  // If exact mode is disabled and the given target is older than the current Strapi version, then abort
+  if (isTargetValidSemVer && !isExactModeActivated) {
     assert(
-      semver.compare(project.strapiVersion, target) === -1,
-      `The target (${fTarget}) should be greater than the current project version (${fCurrentVersion}).`
+      semver.gte(target, project.strapiVersion),
+      `When targeting a version lower than the current one (${fTarget} < ${fCurrentVersion}), "exact" mode should be enabled.`
     );
   }
 
-  // Create a version range for ">{current}"
-  const range: VersionRange = { from: project.strapiVersion, to: VersionRelease.Latest };
+  const transformsRange = isExactModeActivated
+    ? createSemverRange(`=${target}`)
+    : createSemverRange(`>=${project.strapiVersion}`);
+  // check if the repo is clean
+  // TODO change force default to false when we add the force option to the CLI
+  await isCleanGitRepo({ cwd, logger, force: false, confirm: options.confirm });
 
   // TODO: In the future, we should allow loading transforms from the user app (custom transforms)
   //       e.g: const userTransformsDir = path.join(cwd, 'transforms');
-  const transformsLoader = createTransformsLoader({ logger, range });
+  const transformsLoader = createTransformsLoader({ logger, range: transformsRange });
 
   const versionParser = createVersionParser(project.strapiVersion)
     // Indicates the available versions to the parser
@@ -57,27 +77,20 @@ export const upgrade = async (options: TaskOptions) => {
   const matchedVersion = versionParser.search(target);
 
   if (matchedVersion) {
+    const isTargetingCurrent = matchedVersion === project.strapiVersion;
+
+    const upgradeRange =
+      isExactModeActivated || isTargetingCurrent
+        ? createSemverRange(`=${matchedVersion}`)
+        : createSemverRange(`>${project.strapiVersion} <=${matchedVersion}`);
+
     const fMatchedVersion = f.version(matchedVersion);
+    const fUpgradeRange = f.versionRange(upgradeRange.raw);
 
-    // The upgrade range should contain all the upgrades between the current version and the matched one
-    const upgradeRange: VersionRange = {
-      from: project.strapiVersion,
-      to: matchedVersion,
-    };
-
-    // Latest
-    if (isLatestVersion(target)) {
-      logger.info(`The ${fTarget} upgrade available is ${fMatchedVersion}`);
-    }
-    // Major, Minor, Patch
-    else if (isVersionRelease(target)) {
-      logger.info(`Latest ${fTarget} upgrade is ${fMatchedVersion}`);
-    }
-    // X.X.X
-    else {
-      const rawVersionRange = { from: project.strapiVersion, to: target };
-      const fRawVersionRange = f.versionRange(createSemverRange(rawVersionRange).raw);
-      logger.info(`Latest available upgrade for ${fRawVersionRange} is ${fMatchedVersion}`);
+    if (isTargetValidSemVer) {
+      logger.info(`Targeting ${fMatchedVersion} using ${fUpgradeRange}`);
+    } else {
+      logger.info(`Targeting ${fMatchedVersion} (${fTarget}) using ${fUpgradeRange}`);
     }
 
     const transformFiles = transformsLoader.loadRange(upgradeRange);
@@ -88,10 +101,15 @@ export const upgrade = async (options: TaskOptions) => {
       .map((v) => f.version(v))
       .join(' -> ');
 
-    logger.debug(
-      `Upgrading from ${fCurrentVersion} to ${fMatchedVersion} with the following plan: ${fUpgradePlan}`
-    );
-    logger.info(`Preparing the upgrade (${fUpgradePlan})`);
+    if (isExactModeActivated) {
+      logger.debug(`Running the ${fMatchedVersion} upgrade ("exact" mode enabled)`);
+      logger.info(`Preparing the ${fMatchedVersion} upgrade...`);
+    } else {
+      logger.debug(
+        `Upgrading from ${fCurrentVersion} to ${fMatchedVersion} with the following plan: ${fUpgradePlan}`
+      );
+      logger.info(`Preparing the ${fMatchedVersion} upgrade: ${fUpgradePlan}`);
+    }
 
     assert(
       transformFiles.length > 0,
@@ -143,9 +161,7 @@ export const upgrade = async (options: TaskOptions) => {
 
     logger.raw(f.reports(reports));
   } else {
-    logger.debug(
-      `It seems like the current version (${fCurrentVersion}) is the latest major upgrade available`
-    );
+    logger.debug(`The current version (${fCurrentVersion}) is the latest upgrade (${fTarget})`);
     logger.info(chalk.bold('Already up-to-date'));
   }
 

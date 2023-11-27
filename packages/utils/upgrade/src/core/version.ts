@@ -1,9 +1,11 @@
 import * as semver from 'semver';
-import assert from 'node:assert';
 
 export type SemVer = `${number}.${number}.${number}`;
+export type LooseSemVer = `${number}` | `${number}.${number}` | `${number}.${number}.${number}`;
 
 export enum VersionRelease {
+  Current = 'current',
+  Next = 'next',
   Latest = 'latest',
   Major = 'major',
   Minor = 'minor',
@@ -12,10 +14,16 @@ export enum VersionRelease {
 
 export type Version = SemVer | VersionRelease;
 
-export interface VersionRange {
-  from: SemVer;
-  to: Version;
-}
+type GtOp = '>' | '>=';
+type LtOp = '<' | '<=';
+type EqOp = '=';
+
+export type VersionRangeAsString =
+  | LooseSemVer
+  | `${GtOp}${LooseSemVer}`
+  | `${LtOp}${LooseSemVer}`
+  | `${EqOp}${LooseSemVer}`
+  | `${GtOp}${LooseSemVer} ${LtOp}${LooseSemVer}`;
 
 export const isVersionRelease = (version: string): version is VersionRelease => {
   return Object.values<string>(VersionRelease).includes(version);
@@ -25,8 +33,29 @@ export const isLatestVersion = (str: string): str is VersionRelease.Latest => {
   return str === VersionRelease.Latest;
 };
 
+export const isNextVersion = (str: string): str is VersionRelease.Next => {
+  return str === VersionRelease.Next;
+};
+
+export const isCurrentVersion = (str: string): str is VersionRelease.Current => {
+  return str === VersionRelease.Current;
+};
+
 export const isVersion = (str: string): str is Version => {
   return isVersionRelease(str) || isSemVer(str);
+};
+
+export const formatSemVer = (
+  version: semver.SemVer,
+  format: 'x' | 'x.x' | 'x.x.x'
+): LooseSemVer => {
+  const { major, minor, patch } = version;
+  const tokens = [major, minor, patch];
+
+  return format
+    .split('.')
+    .map((_, i) => tokens[i])
+    .join('.') as LooseSemVer;
 };
 
 export const isSemVer = (str: string): str is SemVer => {
@@ -37,19 +66,6 @@ export const isSemVer = (str: string): str is SemVer => {
   );
 };
 
-export const createSemverRange = (range: VersionRange): semver.Range => {
-  let semverRange = `>${range.from}`;
-
-  // Add the upper boundary if range.to is different from 'latest'
-  if (!isLatestVersion(range.to)) {
-    // Make sure range.from > range.to
-    assert(
-      semver.compare(range.from, range.to) === -1,
-      `Upper boundary (${range.to}) must be greater than lower boundary (${range.from})`
-    );
-
-    semverRange += ` <=${range.to}`;
-  }
-
-  return new semver.Range(semverRange);
+export const createSemverRange = (range: VersionRangeAsString): semver.Range => {
+  return new semver.Range(range);
 };
