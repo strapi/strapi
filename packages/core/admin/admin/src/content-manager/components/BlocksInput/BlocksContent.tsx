@@ -14,7 +14,7 @@ import { composeRefs, ItemTypes, getTrad } from '../../utils';
 
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { type ModifiersStore } from './Modifiers';
-import { getEntries } from './utils/types';
+import { getEntries, Block } from './utils/types';
 
 const StyledEditable = styled(Editable)`
   // The outline style is set on the wrapper with :focus-within
@@ -250,19 +250,23 @@ type BaseRenderElementProps = {
   editor: Editor;
 };
 
+const isLink = (element: Element): element is Block<'link'> => {
+  return element.type === 'link';
+};
+
 const baseRenderElement = ({ props, blocks, editor }: BaseRenderElementProps) => {
   const blockMatch = Object.values(blocks).find((block) => block.matchNode(props.element));
   const block = blockMatch || blocks.paragraph;
   const nodePath = ReactEditor.findPath(editor, props.element);
 
   // Link is inline block so it cannot be dragged
-  if (block.value.type === 'link') return block.renderElement(props);
+  if (isLink(props.element)) return block.renderElement(props);
 
   return (
     <DragAndDropElement
       index={nodePath}
-      canDrag={!NOT_DRAGGABLE_ITEMS.includes(block.value.type)}
-      canDrop={!NOT_DROPPABLE_ITEMS.includes(block.value.type)}
+      canDrag={!NOT_DRAGGABLE_ITEMS.includes(props.element.type)}
+      canDrop={!NOT_DROPPABLE_ITEMS.includes(props.element.type)}
     >
       {block.renderElement(props)}
     </DragAndDropElement>

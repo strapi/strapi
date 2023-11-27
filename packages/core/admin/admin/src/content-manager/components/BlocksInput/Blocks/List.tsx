@@ -7,6 +7,7 @@ import { type RenderElementProps } from 'slate-react';
 import styled, { css } from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
+import { baseHandleConvert } from '../utils/conversions';
 import { type Block } from '../utils/types';
 
 const listStyle = css`
@@ -181,6 +182,17 @@ const handleEnterKeyOnList = (editor: Editor) => {
   }
 };
 
+/**
+ * Common handler for converting a node to a list
+ */
+const handleConvertToList = (editor: Editor, format: Block<'list'>['format']) => {
+  const convertedPath = baseHandleConvert<Block<'list-item'>>(editor, { type: 'list-item' });
+
+  if (!convertedPath) return;
+
+  Transforms.wrapNodes(editor, { type: 'list', format, children: [] }, { at: convertedPath });
+};
+
 const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-item'> = {
   'list-ordered': {
     renderElement: (props) => <List {...props} />,
@@ -188,13 +200,10 @@ const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-it
       id: 'components.Blocks.blocks.orderedList',
       defaultMessage: 'Numbered list',
     },
-    value: {
-      type: 'list',
-      format: 'ordered',
-    },
     icon: NumberList,
     matchNode: (node) => node.type === 'list' && node.format === 'ordered',
     isInBlocksSelector: true,
+    handleConvert: (editor) => handleConvertToList(editor, 'ordered'),
     handleEnterKey: handleEnterKeyOnList,
     handleBackspaceKey: handleBackspaceKeyOnList,
   },
@@ -204,13 +213,10 @@ const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-it
       id: 'components.Blocks.blocks.unorderedList',
       defaultMessage: 'Bulleted list',
     },
-    value: {
-      type: 'list',
-      format: 'unordered',
-    },
     icon: BulletList,
     matchNode: (node) => node.type === 'list' && node.format === 'unordered',
     isInBlocksSelector: true,
+    handleConvert: (editor) => handleConvertToList(editor, 'unordered'),
     handleEnterKey: handleEnterKeyOnList,
     handleBackspaceKey: handleBackspaceKeyOnList,
   },
@@ -220,9 +226,7 @@ const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-it
         {props.children}
       </Typography>
     ),
-    value: {
-      type: 'list-item',
-    },
+    // No handleConvert, list items are created when converting to the parent list
     matchNode: (node) => node.type === 'list-item',
     isInBlocksSelector: false,
   },

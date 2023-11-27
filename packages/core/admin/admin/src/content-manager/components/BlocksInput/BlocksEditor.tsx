@@ -4,7 +4,7 @@ import { createContext } from '@radix-ui/react-context';
 import { InputWrapper, Divider, VisuallyHidden } from '@strapi/design-system';
 import { type Attribute } from '@strapi/types';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { Editor, type Descendant, createEditor, type Element } from 'slate';
+import { Editor, type Descendant, createEditor } from 'slate';
 import { withHistory } from 'slate-history';
 import { type RenderElementProps, Slate, withReact, ReactEditor, useSlate } from 'slate-react';
 import styled from 'styled-components';
@@ -25,7 +25,6 @@ import { type ModifiersStore, modifiers } from './Modifiers';
 import { withImages } from './plugins/withImages';
 import { withLinks } from './plugins/withLinks';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
-import { type Block } from './utils/types';
 
 /* -------------------------------------------------------------------------------------------------
  * BlocksEditorProvider
@@ -33,12 +32,8 @@ import { type Block } from './utils/types';
 
 interface BaseBlock {
   renderElement: (props: RenderElementProps) => React.JSX.Element;
-  value: {
-    type: Element['type'];
-    level?: Block<'heading'>['level'];
-    format?: Block<'list'>['format'];
-  };
   matchNode: (node: Attribute.BlocksNode) => boolean;
+  handleConvert?: (editor: Editor) => void | (() => React.JSX.Element);
   handleEnterKey?: (editor: Editor) => void;
   handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => void;
 }
