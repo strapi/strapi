@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Box, Flex, Icon, VisuallyHidden } from '@strapi/design-system';
 import { Drag } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { Editor, Range, Transforms } from 'slate';
+import { Editor, Range, Transforms, Element } from 'slate';
 import { ReactEditor, type RenderElementProps, type RenderLeafProps, Editable } from 'slate-react';
 import styled from 'styled-components';
 
@@ -42,6 +42,9 @@ const DragItem = styled(Flex)`
       opacity: inherit;
     }
   }
+  &[aria-disabled='true'] {
+    user-drag: none;
+  }
 `;
 
 const DragButton = styled(Flex)`
@@ -54,6 +57,10 @@ const DragButton = styled(Flex)`
   &:active {
     cursor: grabbing;
     background: ${({ theme }) => theme.colors.neutral200};
+  }
+  &[aria-disabled='true'] {
+    cursor: not-allowed;
+    background: transparent;
   }
 `;
 
@@ -98,42 +105,48 @@ const DragAndDropElement = ({ children, index, canDrag, canDrop }: DragAndDropEl
         )
       );
 
-      // If a node is dragged into the list block then convert it to a list-item
-      if (newNode.type === 'list-item' && draggedNode.type !== 'list-item') {
-        if (newIndex[0] > currentIndex[0]) {
-          // Node is dragged downwards inside list
-          newIndex[0] -= 1;
+      if (Element.isElement(newNode) && Element.isElement(draggedNode)) {
+        // If a node is dragged into the list block then convert it to a list-item
+        if (newNode.type === 'list-item' && draggedNode.type !== 'list-item') {
+          if (newIndex[0] > currentIndex[0]) {
+            // Node is dragged downwards inside list
+            newIndex[0] -= 1;
+          }
+
+          const { type: _type, children: _children, ...extra } = draggedNode;
+          const attributesToClear: Record<string, null> = {};
+          Object.keys(extra).forEach((key) => {
+            attributesToClear[key] = null;
+          });
+
+          Transforms.setNodes(
+            editor,
+            { ...attributesToClear, type: 'list-item' },
+            { at: newIndex }
+          );
         }
 
-        const { type: _type, children: _children, ...extra } = draggedNode;
-        const attributesToClear: Record<string, null> = {};
-        Object.keys(extra).forEach((key) => {
-          attributesToClear[key] = null;
-        });
+        // If a node is dragged out of the list block then convert it to a paragraph
+        if (newNode.type !== 'list-item' && draggedNode.type === 'list-item') {
+          Transforms.setNodes(editor, { type: 'paragraph' }, { at: newIndex });
 
-        Transforms.setNodes(editor, { ...attributesToClear, type: 'list-item' }, { at: newIndex });
-      }
-
-      // If a node is dragged out of the list block then convert it to a paragraph
-      if (newNode.type !== 'list-item' && draggedNode.type === 'list-item') {
-        Transforms.setNodes(editor, { type: 'paragraph' }, { at: newIndex });
-
-        if (newIndex[0] < currentIndex[0]) {
-          // Node is dragged upwards out of list block
-          currentIndex[0] += 1;
+          if (newIndex[0] < currentIndex[0]) {
+            // Node is dragged upwards out of list block
+            currentIndex[0] += 1;
+          }
         }
-      }
 
-      // If a dragged node is the only list-item then delete list block
-      if (draggedNode.type === 'list-item') {
-        const [listNode, listNodePath] = Editor.parent(editor, currentIndex);
+        // If a dragged node is the only list-item then delete list block
+        if (draggedNode.type === 'list-item') {
+          const [listNode, listNodePath] = Editor.parent(editor, currentIndex);
 
-        const isListEmpty =
-          listNode.children?.length === 1 &&
-          listNode.children?.[0].type === 'text' &&
-          listNode.children?.[0].text === '';
-        if (isListEmpty) {
-          Transforms.removeNodes(editor, { at: listNodePath });
+          const isListEmpty =
+            listNode.children?.length === 1 &&
+            listNode.children?.[0].type === 'text' &&
+            listNode.children?.[0].text === '';
+          if (isListEmpty) {
+            Transforms.removeNodes(editor, { at: listNodePath });
+          }
         }
       }
     },
@@ -191,6 +204,7 @@ const DragAndDropElement = ({ children, index, canDrag, canDrop }: DragAndDropEl
             const target = event.target as HTMLElement;
             target.style.opacity = '1';
           }}
+          aria-disabled={disabled}
         >
           <DragButton
             role="button"
@@ -204,6 +218,7 @@ const DragAndDropElement = ({ children, index, canDrag, canDrop }: DragAndDropEl
             height={6}
             width={4}
             display={canDrag ? 'flex' : 'none'}
+            aria-disabled={disabled}
           >
             <Icon width={3} height={3} as={Drag} color="neutral600" />
           </DragButton>
@@ -386,7 +401,9 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
    *  We are overriding it to check if the selection is not fully within the visible area of the editor,
    *  we use scrollBy one line to the bottom
    */
-  const handleScrollSelectionIntoView = (_: ReactEditor, domRange: Range) => {
+  const handleScrollSelectionIntoView = () => {
+    if (!editor.selection) return;
+    const domRange = ReactEditor.toDOMRange(editor, editor.selection);
     const domRect = domRange.getBoundingClientRect();
     const blocksInput = blocksRef.current;
 
