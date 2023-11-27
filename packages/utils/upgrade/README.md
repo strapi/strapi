@@ -12,8 +12,8 @@ From now on, all breaking changes, and ideally also deprecations, must have an a
 
 The upgrade tool provides two types of transforms:
 
-- `json`: for updating a project's json files, primarily intended for the `package.json`
-- `code`: codemods; for updating a project's [js, jsx, ts, tsx] files
+- `json`: for updating a project's .json files, primarily intended for the `package.json`
+- `code`: codemods; for updating a project's .js and .ts files
 
 ### What's a codemod?
 
@@ -37,7 +37,7 @@ This package is not yet released, so currently it can be run on a project in the
 
 Run the command with the `--help` option to see all the available options.
 
-[Coming Soon] The Strapi Upgrade tool will be available using `npx strapi-upgrade`
+[Coming Soon] The Strapi Upgrade tool will be available using `npx @strapi/upgrade` and an alias for that within a project using `strapi upgrade`
 
 ## Writing a code transforms
 
@@ -118,6 +118,8 @@ The methods available from `json()` are wrappers for the lodash methods of the s
 
 Codemod transforms use the [`jscodeshift`](https://github.com/facebook/jscodeshift) library to modify code passed in. Please see their documentation for advanced details.
 
+The `file` and `api` parameters come directly from the [jsoncodeshift arguments of the same name](https://github.com/facebook/jscodeshift#arguments).
+
 ```typescript
 import type { Transform } from 'jscodeshift';
 
@@ -152,28 +154,4 @@ const transform: Transform = (file, api) => {
 };
 
 export default transform;
-```
-
-For reference, these are the types for the relevant objects, which can be found in `packages/utils/upgrade/src/core/runner/code.ts`:
-
-```typescript
-export interface CodeRunnerConfig {
-  dry?: boolean;
-  print?: boolean;
-  verbose?: number;
-  extensions?: string;
-  silent?: boolean;
-  runInBand?: boolean;
-  parser?: 'js' | 'ts';
-  babel?: boolean;
-  // ...
-}
-
-export const transformCode = (
-  transformFile: string,
-  codeFiles: string[],
-  config?: CodeRunnerConfig
-) => {
-  return jscodeshift(transformFile, codeFiles, config);
-};
 ```
