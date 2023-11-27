@@ -38,7 +38,7 @@ const releaseApi = createApi({
             },
           };
         },
-        transformResponse(response: GetReleases.Response, meta, arg) {
+        transformResponse(response: Promise<GetReleases.Response>, meta, arg) {
           const releasedAtValue = arg?.filters?.$and?.[0]?.releasedAt?.$notNull;
           const isActiveDoneTab = releasedAtValue === 'true';
           const newResponse = {
