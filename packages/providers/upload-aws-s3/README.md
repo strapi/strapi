@@ -209,7 +209,7 @@ In the recent update of the `@strapi/provider-upload-aws-s3` plugin, we have tra
 
 ### Understanding the New URL Format
 
-AWS SDK V3 adopts the virtual-hosted–style URI format for S3 URLs. This format is recommended by AWS and is likely to become the standard in the near future, as the path-style URI is being deprecated. More details on this format can be found in the [AWS User Guide](https://docs.aws.amazon.com/AmazonS3/latest/userguide/VirtualHosting.html#virtual-hosted-style-access).
+AWS SDK V3 adopts the virtual-hosted–style URI format for S3 URLs. This format is recommended by AWS and is likely to become required in the near future, as the path-style URI is being deprecated. More details on this format can be found in the [AWS User Guide](https://docs.aws.amazon.com/AmazonS3/latest/userguide/VirtualHosting.html#virtual-hosted-style-access).
 
 ### Why the Change?
 
