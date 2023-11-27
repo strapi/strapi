@@ -65,7 +65,7 @@ describe('Releases home page', () => {
     // change the tab to see the done empty body content
     const doneTab = screen.getByRole('tab', { name: /done/i });
     await user.click(doneTab);
-    /* TODO: add this test */
+    /* TODO: add the check of the done body page test */
   });
 
   it('hides the dialog', async () => {
