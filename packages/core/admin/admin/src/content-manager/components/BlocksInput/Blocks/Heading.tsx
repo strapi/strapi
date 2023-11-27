@@ -9,9 +9,12 @@ import {
   HeadingThree,
   HeadingTwo,
 } from '@strapi/icons';
+import { Editor } from 'slate';
 import styled from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
+import { baseHandleConvert } from '../utils/conversions';
+import { type Block } from '../utils/types';
 
 const H1 = styled(Typography).attrs({ as: 'h1' })`
   font-size: ${42 / 16}rem;
@@ -43,6 +46,13 @@ const H6 = styled(Typography).attrs({ as: 'h6' })`
   line-height: ${({ theme }) => theme.lineHeights[1]};
 `;
 
+/**
+ * Common handler for converting a node to a heading
+ */
+const handleConvertToHeading = (editor: Editor, level: Block<'heading'>['level']) => {
+  baseHandleConvert<Block<'heading'>>(editor, { type: 'heading', level });
+};
+
 const headingBlocks: Pick<
   BlocksStore,
   'heading-one' | 'heading-two' | 'heading-three' | 'heading-four' | 'heading-five' | 'heading-six'
@@ -54,10 +64,7 @@ const headingBlocks: Pick<
       id: 'components.Blocks.blocks.heading1',
       defaultMessage: 'Heading 1',
     },
-    value: {
-      type: 'heading',
-      level: 1,
-    },
+    handleConvert: (editor) => handleConvertToHeading(editor, 1),
     matchNode: (node) => node.type === 'heading' && node.level === 1,
     isInBlocksSelector: true,
   },
@@ -68,10 +75,7 @@ const headingBlocks: Pick<
       id: 'components.Blocks.blocks.heading2',
       defaultMessage: 'Heading 2',
     },
-    value: {
-      type: 'heading',
-      level: 2,
-    },
+    handleConvert: (editor) => handleConvertToHeading(editor, 2),
     matchNode: (node) => node.type === 'heading' && node.level === 2,
     isInBlocksSelector: true,
   },
@@ -82,10 +86,7 @@ const headingBlocks: Pick<
       id: 'components.Blocks.blocks.heading3',
       defaultMessage: 'Heading 3',
     },
-    value: {
-      type: 'heading',
-      level: 3,
-    },
+    handleConvert: (editor) => handleConvertToHeading(editor, 3),
     matchNode: (node) => node.type === 'heading' && node.level === 3,
     isInBlocksSelector: true,
   },
@@ -96,10 +97,7 @@ const headingBlocks: Pick<
       id: 'components.Blocks.blocks.heading4',
       defaultMessage: 'Heading 4',
     },
-    value: {
-      type: 'heading',
-      level: 4,
-    },
+    handleConvert: (editor) => handleConvertToHeading(editor, 4),
     matchNode: (node) => node.type === 'heading' && node.level === 4,
     isInBlocksSelector: true,
   },
@@ -110,10 +108,7 @@ const headingBlocks: Pick<
       id: 'components.Blocks.blocks.heading5',
       defaultMessage: 'Heading 5',
     },
-    value: {
-      type: 'heading',
-      level: 5,
-    },
+    handleConvert: (editor) => handleConvertToHeading(editor, 5),
     matchNode: (node) => node.type === 'heading' && node.level === 5,
     isInBlocksSelector: true,
   },
@@ -124,10 +119,7 @@ const headingBlocks: Pick<
       id: 'components.Blocks.blocks.heading6',
       defaultMessage: 'Heading 6',
     },
-    value: {
-      type: 'heading',
-      level: 6,
-    },
+    handleConvert: (editor) => handleConvertToHeading(editor, 6),
     matchNode: (node) => node.type === 'heading' && node.level === 6,
     isInBlocksSelector: true,
   },
