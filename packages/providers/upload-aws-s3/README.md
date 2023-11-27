@@ -227,7 +227,7 @@ upload: {
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_ACCESS_SECRET,
       region: process.env.AWS_REGION,
-      baseUrl: `https://s3.${region}.amazonaws.com/${bucket}`, // CRITICAL LINE
+      baseUrl: `https://s3.${region}.amazonaws.com/${bucket}`, // This line sets the custom url format
       params: {
         ACL: process.env.AWS_ACL || 'public-read',
         signedUrlExpires: process.env.AWS_SIGNED_URL_EXPIRES || 15 * 60,
