@@ -9,7 +9,7 @@ export interface Release extends Entity {
   actions: ReleaseAction[];
 }
 
-export type Pagination = {
+type Pagination = {
   page: number;
   pageSize: number;
   pageCount: number;
@@ -35,6 +35,7 @@ export declare namespace GetReleases {
     data: ReleaseDataResponse[];
     meta: {
       pagination: Pagination;
+      activeTab?: 'pending' | 'done';
     };
     error?: errors.ApplicationError;
   }

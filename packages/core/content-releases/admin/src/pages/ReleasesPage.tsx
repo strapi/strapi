@@ -14,6 +14,7 @@ import {
   Tabs,
 } from '@strapi/design-system';
 import {
+  AnErrorOccurred,
   CheckPermissions,
   LoadingIndicatorPage,
   PageSizeURLQuery,
@@ -30,18 +31,17 @@ import { useGetReleasesQuery, GetAllReleasesQueryParams } from '../services/rele
 
 const ReleasesPage = () => {
   const [addReleaseDialogIsShown, setAddReleaseDialogIsShown] = React.useState(false);
-  const [tabSelected, setTabSelected] = React.useState<'pending' | 'done'>('pending');
   const { formatMessage } = useIntl();
   const [{ query }, setQuery] = useQueryParams<GetAllReleasesQueryParams>();
   const response = useGetReleasesQuery(query);
 
-  const { isLoading, isSuccess, isFetching, isError } = response;
+  const { isLoading, isSuccess, isError } = response;
 
   const toggleAddReleaseDialog = () => {
     setAddReleaseDialogIsShown((prev) => !prev);
   };
 
-  if (isLoading || isFetching) {
+  if (isLoading) {
     return (
       <Main aria-busy={isLoading}>
         <HeaderLayout
@@ -67,15 +67,14 @@ const ReleasesPage = () => {
     );
   }
 
-  const totalEntries = (isSuccess && response.currentData?.pagination?.total) || 0;
+  const totalEntries = (isSuccess && response.currentData?.meta?.pagination?.total) || 0;
 
   const handleTabChange = (index: number) => {
     if (index === 0) {
-      setTabSelected('pending');
       setQuery({
         ...query,
         page: 1,
-        pageSize: response?.currentData?.pagination?.pageSize || 16,
+        pageSize: response?.currentData?.meta?.pagination?.pageSize || 16,
         filters: {
           $and: [
             {
@@ -87,11 +86,10 @@ const ReleasesPage = () => {
         },
       });
     } else {
-      setTabSelected('done');
       setQuery({
         ...query,
         page: 1,
-        pageSize: response?.currentData?.pagination?.pageSize || 16,
+        pageSize: response?.currentData?.meta?.pagination?.pageSize || 16,
         filters: {
           $and: [
             {
@@ -105,7 +103,7 @@ const ReleasesPage = () => {
     }
   };
 
-  const status = isError ? 'error' : 'success';
+  const activeTab = response?.currentData?.meta?.activeTab || 'pending';
 
   return (
     <Main>
@@ -140,7 +138,7 @@ const ReleasesPage = () => {
               defaultMessage: 'Releases list',
             })}
             variant="simple"
-            initialSelectedTabIndex={['pending', 'done'].indexOf(tabSelected)}
+            initialSelectedTabIndex={['pending', 'done'].indexOf(activeTab)}
             onTabChange={handleTabChange}
           >
             <Tabs>
@@ -160,30 +158,38 @@ const ReleasesPage = () => {
             <TabPanels>
               {/* Pending releases */}
               <TabPanel>
-                <ReleasesGrid
-                  status={status}
-                  sectionTitle="pending"
-                  releases={response?.currentData?.data}
-                />
+                {isError ? (
+                  <Flex paddingTop={8}>
+                    <AnErrorOccurred />
+                  </Flex>
+                ) : (
+                  <ReleasesGrid sectionTitle="pending" releases={response?.currentData?.data} />
+                )}
               </TabPanel>
               {/* Done releases */}
               <TabPanel>
-                <ReleasesGrid
-                  status={status}
-                  sectionTitle="done"
-                  releases={response?.currentData?.data}
-                />
+                {isError ? (
+                  <Flex paddingTop={8}>
+                    <AnErrorOccurred />
+                  </Flex>
+                ) : (
+                  <ReleasesGrid sectionTitle="done" releases={response?.currentData?.data} />
+                )}
               </TabPanel>
             </TabPanels>
           </TabGroup>
-          {response?.currentData?.pagination && (
+          {totalEntries > 0 && (
             <Box paddingTop={4}>
               <Flex alignItems="flex-end" justifyContent="space-between">
                 <PageSizeURLQuery
                   options={['8', '16', '32', '64']}
-                  defaultValue={response.currentData.pagination.pageSize.toString()}
+                  defaultValue={response?.currentData?.meta?.pagination?.pageSize.toString()}
                 />
-                <PaginationURLQuery pagination={response?.currentData?.pagination} />
+                <PaginationURLQuery
+                  pagination={{
+                    pageCount: response?.currentData?.meta?.pagination?.pageCount || 0,
+                  }}
+                />
               </Flex>
             </Box>
           )}

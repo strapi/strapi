@@ -4,13 +4,15 @@ import { pluginId } from '../pluginId';
 
 import { axiosBaseQuery } from './axios';
 
-import type { CreateRelease, GetReleases, Pagination } from '../../../shared/contracts/releases';
+import type { CreateRelease, GetReleases } from '../../../shared/contracts/releases';
 
-export interface GetAllReleasesQueryParams extends Pick<Pagination, 'page' | 'pageSize'> {
+export interface GetAllReleasesQueryParams {
+  page?: number;
+  pageSize?: number;
   filters?: {
     $and?: Array<{
       releasedAt?: {
-        $notNull?: boolean;
+        $notNull?: boolean | 'true' | 'false';
       };
     }>;
   };
@@ -35,6 +37,19 @@ const releaseApi = createApi({
               },
             },
           };
+        },
+        transformResponse(response: GetReleases.Response, meta, arg) {
+          const releasedAtValue = arg?.filters?.$and?.[0]?.releasedAt?.$notNull;
+          const isActiveDoneTab = releasedAtValue === 'true';
+          const newResponse = {
+            ...response,
+            meta: {
+              ...response.meta,
+              activeTab: isActiveDoneTab ? 'done' : 'pending',
+            },
+          };
+
+          return newResponse;
         },
         providesTags: ['Releases'],
       }),
