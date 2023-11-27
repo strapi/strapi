@@ -1,4 +1,4 @@
-import middleware from '../extendCTBInitialDataMiddleware';
+import { extendCTBInitialDataMiddleware as middleware } from '../extendCTBInitialData';
 
 describe('i18n | middlewares | extendCTBInitialDataMiddleware', () => {
   describe('the action type matches "ContentTypeBuilder/FormModal/SET_DATA_TO_EDIT"', () => {

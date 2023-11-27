@@ -11,7 +11,7 @@ const Logo = () => {
     logos: { auth },
   } = useConfiguration();
 
-  return <Img src={auth?.custom ?? auth.default} aria-hidden alt="" />;
+  return <Img src={auth?.custom?.url ?? auth.default} aria-hidden alt="" />;
 };
 
 export { Logo };

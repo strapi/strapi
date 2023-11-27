@@ -18,6 +18,8 @@ import { paragraphBlocks } from './Blocks/Paragraph';
 import { quoteBlocks } from './Blocks/Quote';
 import { BlocksContent } from './BlocksContent';
 import { BlocksToolbar } from './BlocksToolbar';
+import { type ModifiersStore, modifiers } from './Modifiers';
+import { withImages } from './plugins/withImages';
 import { withLinks } from './plugins/withLinks';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
 
@@ -25,21 +27,24 @@ import { withStrapiSchema } from './plugins/withStrapiSchema';
  * BlocksEditorProvider
  * -----------------------------------------------------------------------------------------------*/
 
-interface NonSelectorBlock {
+interface BaseBlock {
   renderElement: (props: RenderElementProps) => React.JSX.Element;
-  value: object;
   matchNode: (node: Attribute.BlocksNode) => boolean;
-  isInBlocksSelector: false;
+  handleConvert?: (editor: Editor) => void | (() => React.JSX.Element);
   handleEnterKey?: (editor: Editor) => void;
   handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => void;
   snippet?: string;
 }
 
-type SelectorBlock = Omit<NonSelectorBlock, 'isInBlocksSelector'> & {
+interface NonSelectorBlock extends BaseBlock {
+  isInBlocksSelector: false;
+}
+
+interface SelectorBlock extends BaseBlock {
   isInBlocksSelector: true;
   icon: React.ComponentType;
   label: MessageDescriptor;
-};
+}
 
 type NonSelectorBlockKey = 'list-item' | 'link';
 
@@ -72,6 +77,7 @@ type BlocksStore = {
 
 interface BlocksEditorContextValue {
   blocks: BlocksStore;
+  modifiers: ModifiersStore;
   disabled: boolean;
 }
 
@@ -133,22 +139,6 @@ function useResetKey(value?: Attribute.BlocksValue): {
 
   return { key, incrementSlateUpdatesCount: () => (slateUpdatesCount.current += 1) };
 }
-
-/**
- * Images are void elements. They handle the rendering of their children instead of Slate.
- * See the Slate documentation for more information:
- * - https://docs.slatejs.org/api/nodes/element#void-vs-not-void
- * - https://docs.slatejs.org/api/nodes/element#rendering-void-elements
- */
-const withImages = (editor: Editor) => {
-  const { isVoid } = editor;
-
-  editor.isVoid = (element) => {
-    return element.type === 'image' ? true : isVoid(element);
-  };
-
-  return editor;
-};
 
 const pipe =
   (...fns: ((baseEditor: Editor) => Editor)[]) =>
@@ -225,7 +215,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
         onChange={handleSlateChange}
         key={key}
       >
-        <BlocksEditorProvider blocks={blocks} disabled={disabled}>
+        <BlocksEditorProvider blocks={blocks} modifiers={modifiers} disabled={disabled}>
           <InputWrapper
             direction="column"
             alignItems="flex-start"

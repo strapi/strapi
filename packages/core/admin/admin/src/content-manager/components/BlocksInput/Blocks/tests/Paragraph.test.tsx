@@ -60,7 +60,7 @@ describe('Paragraph', () => {
     });
 
     // Simulate the enter key
-    paragraphBlocks.paragraph.handleEnterKey?.(baseEditor);
+    paragraphBlocks.paragraph.handleEnterKey!(baseEditor);
 
     // Should insert a new paragraph with the content after the cursor
     expect(baseEditor.children).toEqual([
@@ -121,7 +121,7 @@ describe('Paragraph', () => {
 
     const cursorInitialPosition = baseEditor.selection.anchor.path;
     // Simulate the enter key
-    paragraphBlocks.paragraph.handleEnterKey?.(baseEditor);
+    paragraphBlocks.paragraph.handleEnterKey!(baseEditor);
 
     const cursorPositionAfterFirstEnter = baseEditor.selection.anchor.path;
 
@@ -135,7 +135,7 @@ describe('Paragraph', () => {
     });
 
     // Simulate another the enter key
-    paragraphBlocks.paragraph.handleEnterKey?.(baseEditor);
+    paragraphBlocks.paragraph.handleEnterKey!(baseEditor);
 
     const cursorPositionAfterSecondEnter = baseEditor.selection.anchor.path;
 
@@ -143,7 +143,7 @@ describe('Paragraph', () => {
     expect(cursorPositionAfterSecondEnter[0]).toEqual(cursorInitialPosition[0] + 1);
   });
 
-  it('disables modifiers when creating a new node with enter key in a paragraph', () => {
+  it('has no modifiers enabled when pressing enter key at the end of a paragraph', () => {
     const baseEditor = createEditor();
     baseEditor.children = [
       {
@@ -166,7 +166,7 @@ describe('Paragraph', () => {
     });
 
     // Simulate the enter key
-    paragraphBlocks.paragraph.handleEnterKey?.(baseEditor);
+    paragraphBlocks.paragraph.handleEnterKey!(baseEditor);
 
     // Should insert a new paragraph without modifiers
     expect(baseEditor.children).toEqual([
@@ -217,7 +217,7 @@ describe('Paragraph', () => {
     });
 
     // Simulate the enter key
-    paragraphBlocks.paragraph.handleEnterKey?.(baseEditor);
+    paragraphBlocks.paragraph.handleEnterKey!(baseEditor);
 
     // Should insert a new line with modifiers
     expect(baseEditor.children).toEqual([
@@ -242,6 +242,83 @@ describe('Paragraph', () => {
             bold: true,
             code: true,
             italic: true,
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('converts a list to a paragraph', () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'List item 1',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0, 0], offset: 0 },
+      focus: { path: [0, 0, 0], offset: 0 },
+    });
+
+    paragraphBlocks.paragraph.handleConvert!(baseEditor);
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: 'List item 1',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('converts a heading to a paragraph', () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [
+      {
+        type: 'heading',
+        level: 1,
+        children: [
+          {
+            type: 'text',
+            italic: true,
+            text: 'Heading 1',
+          },
+        ],
+      },
+    ];
+
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
+    });
+
+    paragraphBlocks.paragraph.handleConvert!(baseEditor);
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            italic: true,
+            text: 'Heading 1',
           },
         ],
       },

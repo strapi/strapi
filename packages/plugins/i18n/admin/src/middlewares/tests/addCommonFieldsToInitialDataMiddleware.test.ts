@@ -1,6 +1,6 @@
 import { fixtures } from '@strapi/admin-test-utils';
 
-import addCommonFieldsToInitialDataMiddleware from '../addCommonFieldsToInitialDataMiddleware';
+import { addCommonFieldsToInitialDataMiddleware } from '../addCommonFieldsToInitialData';
 
 jest.mock('@strapi/helper-plugin', () => ({
   request: () => ({

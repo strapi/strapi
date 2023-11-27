@@ -1,18 +1,21 @@
 import { isNil } from 'lodash/fp';
-import { getDeepPopulate, getQueryPopulate } from './utils/populate';
+import type { Common } from '@strapi/types';
+import { type Populate, getDeepPopulate, getQueryPopulate } from './utils/populate';
 
 /**
  * Builder to create a Strapi populate object.
  *
- * @param {string} uid - Content type UID
+ * @param uid - Content type UID
  *
  * @example
  * const populate = await populateBuilder('api::article.article').countRelations().build();
  * // populate = { article: { populate: { count: true } } }
  *
  */
-const populateBuilder = (uid: string) => {
-  let getInitialPopulate = async () => {};
+const populateBuilder = (uid: Common.UID.Schema) => {
+  let getInitialPopulate = async (): Promise<undefined | Populate> => {
+    return undefined;
+  };
   const deepPopulateOptions = {
     countMany: false,
     countOne: false,
@@ -22,22 +25,20 @@ const populateBuilder = (uid: string) => {
   const builder = {
     /**
      * Populates all attribute fields present in a query.
-     * @param {Object} query - Query object
-     * @returns {typeof builder} - Builder
+     * @param query - Strapi query object
      */
-    populateFromQuery(query: any) {
+    populateFromQuery(query: object) {
       getInitialPopulate = async () => getQueryPopulate(uid, query);
       return builder;
     },
     /**
      * Populate relations as count if condition is true.
-     * @param {Boolean} condition
-     * @param {Object} [options]
-     * @param {Boolean} [options.toMany] - Populate XtoMany relations as count if true.
-     * @param {Boolean} [options.toOne] - Populate XtoOne relations as count if true.
-     * @returns {typeof builder} - Builder
+     * @param condition
+     * @param [options]
+     * @param [options.toMany] - Populate XtoMany relations as count if true.
+     * @param [options.toOne] - Populate XtoOne relations as count if true.
      */
-    countRelationsIf(condition: any, { toMany, toOne } = { toMany: true, toOne: true }) {
+    countRelationsIf(condition: boolean, { toMany, toOne } = { toMany: true, toOne: true }) {
       if (condition) {
         return this.countRelations({ toMany, toOne });
       }
@@ -45,10 +46,9 @@ const populateBuilder = (uid: string) => {
     },
     /**
      * Populate relations as count.
-     * @param {Object} [options]
-     * @param {Boolean } [options.toMany] - Populate XtoMany relations as count if true.
-     * @param {Boolean} [options.toOne] - Populate XtoOne relations as count if true.
-     * @returns {typeof builder} - Builder
+     * @param [options]
+     * @param [options.toMany] - Populate XtoMany relations as count if true.
+     * @param [options.toOne] - Populate XtoOne relations as count if true.
      */
     countRelations({ toMany, toOne } = { toMany: true, toOne: true }) {
       if (!isNil(toMany)) {
@@ -61,8 +61,7 @@ const populateBuilder = (uid: string) => {
     },
     /**
      * Populate relations deeply, up to a certain level.
-     * @param {Number} [level=Infinity] - Max level of nested populate.
-     * @returns {typeof builder} - Builder
+     * @param [level=Infinity] - Max level of nested populate.
      */
     populateDeep(level = Infinity) {
       deepPopulateOptions.maxLevel = level;
@@ -70,7 +69,7 @@ const populateBuilder = (uid: string) => {
     },
     /**
      * Construct the populate object based on the builder options.
-     * @returns {Object} - Populate object
+     * @returns Populate object
      */
     async build() {
       const initialPopulate = await getInitialPopulate();

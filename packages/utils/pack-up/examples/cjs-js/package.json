@@ -11,6 +11,6 @@
     "build": "pack-up build && pack-up check"
   },
   "dependencies": {
-    "@strapi/pack-up": "../../../"
+    "@strapi/pack-up": "file:../../../"
   }
 }

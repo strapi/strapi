@@ -39,6 +39,7 @@ export * from './components/Status';
 export {
   useCMEditViewDataManager,
   ContentManagerEditViewDataManagerContext,
+  type CMEditViewDataManagerContextValue,
 } from './content-manager/CMEditViewDataManager';
 export * from './content-manager/utils/getAttributeInfos';
 

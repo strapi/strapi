@@ -112,7 +112,7 @@ describe('List', () => {
     });
 
     // Simulate the enter key
-    listBlocks['list-unordered'].handleEnterKey?.(baseEditor);
+    listBlocks['list-unordered'].handleEnterKey!(baseEditor);
 
     // Should insert a new list item
     expect(baseEditor.children).toEqual([
@@ -179,7 +179,7 @@ describe('List', () => {
     });
 
     // Simulate the enter key
-    listBlocks['list-unordered'].handleEnterKey?.(baseEditor);
+    listBlocks['list-unordered'].handleEnterKey!(baseEditor);
 
     // Should remove the empty list item and create a paragraph after the list
     expect(baseEditor.children).toEqual([
@@ -237,7 +237,7 @@ describe('List', () => {
     });
 
     // Simulate the enter key
-    listBlocks['list-ordered'].handleEnterKey?.(baseEditor);
+    listBlocks['list-ordered'].handleEnterKey!(baseEditor);
 
     // Should remove the empty list and create a paragraph instead
     expect(baseEditor.children).toEqual([
@@ -697,7 +697,7 @@ describe('List', () => {
     ]);
   });
 
-  it('disables modifiers when creating a new node with enter key in a list item', () => {
+  it('has no modifiers applied when pressing enter at the end of a list item', () => {
     const baseEditor = createEditor();
     baseEditor.children = [
       {
@@ -726,7 +726,7 @@ describe('List', () => {
     });
 
     // Simulate the enter key
-    listBlocks['list-unordered'].handleEnterKey?.(baseEditor);
+    listBlocks['list-unordered'].handleEnterKey!(baseEditor);
 
     // Should insert a new list item without modifiers
     expect(baseEditor.children).toEqual([
@@ -751,6 +751,104 @@ describe('List', () => {
               {
                 type: 'text',
                 text: '',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  // TODO: test list conversion.
+  // check out the commented code in BlocksToolbar to see what we're missing
+  it('converts a paragraph to a list', () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [
+      {
+        type: 'heading',
+        level: 1,
+        children: [
+          {
+            type: 'text',
+            text: 'Heading link',
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor on the heading
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
+    });
+
+    listBlocks['list-ordered'].handleConvert!(baseEditor);
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'Heading link',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('converts a heading with a link to a list', () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [
+      {
+        type: 'heading',
+        level: 1,
+        children: [
+          {
+            type: 'link',
+            url: 'https://strapi.io',
+            children: [
+              {
+                type: 'text',
+                text: 'Heading link',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor on the heading
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0, 0], offset: 0 },
+      focus: { path: [0, 0, 0], offset: 0 },
+    });
+
+    listBlocks['list-ordered'].handleConvert!(baseEditor);
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'link',
+                url: 'https://strapi.io',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'Heading link',
+                  },
+                ],
               },
             ],
           },
