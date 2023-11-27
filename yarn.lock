@@ -8736,7 +8736,122 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/admin@npm:4.15.4, @strapi/admin@workspace:packages/core/admin":
+"@strapi/admin@npm:4.15.4":
+  version: 4.15.4
+  resolution: "@strapi/admin@npm:4.15.4"
+  dependencies:
+    "@casl/ability": "npm:6.5.0"
+    "@pmmmwh/react-refresh-webpack-plugin": "npm:0.5.10"
+    "@radix-ui/react-context": "npm:1.0.1"
+    "@radix-ui/react-toolbar": "npm:1.0.4"
+    "@reduxjs/toolkit": "npm:1.9.7"
+    "@strapi/data-transfer": "npm:4.15.4"
+    "@strapi/design-system": "npm:1.13.0"
+    "@strapi/helper-plugin": "npm:4.15.4"
+    "@strapi/icons": "npm:1.13.0"
+    "@strapi/permissions": "npm:4.15.4"
+    "@strapi/provider-audit-logs-local": "npm:4.15.4"
+    "@strapi/types": "npm:4.15.4"
+    "@strapi/typescript-utils": "npm:4.15.4"
+    "@strapi/utils": "npm:4.15.4"
+    axios: "npm:1.5.0"
+    bcryptjs: "npm:2.4.3"
+    boxen: "npm:5.1.2"
+    browserslist: "npm:^4.22.1"
+    browserslist-to-esbuild: "npm:1.2.0"
+    chalk: "npm:^4.1.2"
+    chokidar: "npm:3.5.3"
+    codemirror5: "npm:codemirror@^5.65.11"
+    cross-env: "npm:^7.0.3"
+    css-loader: "npm:^6.8.1"
+    date-fns: "npm:2.30.0"
+    dotenv: "npm:14.2.0"
+    esbuild: "npm:0.19.2"
+    esbuild-loader: "npm:^2.21.0"
+    esbuild-register: "npm:3.5.0"
+    execa: "npm:5.1.1"
+    fast-deep-equal: "npm:3.1.3"
+    find-root: "npm:1.1.0"
+    fork-ts-checker-webpack-plugin: "npm:8.0.0"
+    formik: "npm:2.4.0"
+    fractional-indexing: "npm:3.2.0"
+    fs-extra: "npm:10.0.0"
+    highlight.js: "npm:^10.4.1"
+    history: "npm:^4.9.0"
+    html-webpack-plugin: "npm:5.5.0"
+    immer: "npm:9.0.19"
+    inquirer: "npm:8.2.5"
+    invariant: "npm:^2.2.4"
+    js-cookie: "npm:2.2.1"
+    jsonwebtoken: "npm:9.0.0"
+    koa-compose: "npm:4.1.0"
+    koa-passport: "npm:5.0.0"
+    koa-static: "npm:5.0.0"
+    koa2-ratelimit: "npm:^1.1.2"
+    lodash: "npm:4.17.21"
+    markdown-it: "npm:^12.3.2"
+    markdown-it-abbr: "npm:^1.0.4"
+    markdown-it-container: "npm:^3.0.0"
+    markdown-it-deflist: "npm:^2.1.0"
+    markdown-it-emoji: "npm:^2.0.0"
+    markdown-it-footnote: "npm:^3.0.3"
+    markdown-it-ins: "npm:^3.0.1"
+    markdown-it-mark: "npm:^3.0.1"
+    markdown-it-sub: "npm:^1.0.0"
+    markdown-it-sup: "npm:1.0.0"
+    mini-css-extract-plugin: "npm:2.7.6"
+    node-schedule: "npm:2.1.0"
+    ora: "npm:5.4.1"
+    outdent: "npm:0.8.0"
+    p-map: "npm:4.0.0"
+    passport-local: "npm:1.0.0"
+    pluralize: "npm:8.0.0"
+    prettier: "npm:2.8.4"
+    prop-types: "npm:^15.8.1"
+    qs: "npm:6.11.1"
+    react: "npm:^18.2.0"
+    react-dnd: "npm:15.1.2"
+    react-dnd-html5-backend: "npm:15.1.3"
+    react-dom: "npm:^18.2.0"
+    react-error-boundary: "npm:3.1.4"
+    react-helmet: "npm:^6.1.0"
+    react-intl: "npm:6.4.1"
+    react-is: "npm:^18.2.0"
+    react-query: "npm:3.39.3"
+    react-redux: "npm:8.1.1"
+    react-refresh: "npm:0.14.0"
+    react-router-dom: "npm:5.3.4"
+    react-select: "npm:5.7.0"
+    react-window: "npm:1.8.8"
+    read-pkg-up: "npm:7.0.1"
+    resolve-from: "npm:5.0.0"
+    rimraf: "npm:3.0.2"
+    sanitize-html: "npm:2.11.0"
+    semver: "npm:7.5.4"
+    sift: "npm:16.0.1"
+    slate: "npm:0.94.1"
+    slate-history: "npm:0.93.0"
+    slate-react: "npm:0.98.3"
+    style-loader: "npm:3.3.1"
+    styled-components: "npm:5.3.3"
+    typescript: "npm:5.2.2"
+    webpack: "npm:^5.88.1"
+    webpack-bundle-analyzer: "npm:^4.9.0"
+    webpack-dev-middleware: "npm:6.1.1"
+    webpack-hot-middleware: "npm:2.25.4"
+    yup: "npm:0.32.9"
+  peerDependencies:
+    "@strapi/data-transfer": 4.15.2
+    "@strapi/strapi": ^4.3.4
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+    react-router-dom: ^5.2.0
+    styled-components: ^5.2.1
+  checksum: 09ea7407863f1dcfbe1a2dea6a6899c03729be4b5b1f0bb582ead571fcd022a465bf8f4a3502c6a7e66e6005137927793b9d9b6aa93c4f93aaafacae4a5aae30
+  languageName: node
+  linkType: hard
+
+"@strapi/admin@workspace:packages/core/admin":
   version: 0.0.0-use.local
   resolution: "@strapi/admin@workspace:packages/core/admin"
   dependencies:
@@ -13187,6 +13302,17 @@ __metadata:
   version: 4.6.3
   resolution: "axe-core@npm:4.6.3"
   checksum: 280f6a7067129875380f733ae84093ce29c4b8cfe36e1a8ff46bd5d2bcd57d093f11b00223ddf5fef98ca147e0e6568ddd0ada9415cf8ae15d379224bf3cbb51
+  languageName: node
+  linkType: hard
+
+"axios@npm:1.5.0":
+  version: 1.5.0
+  resolution: "axios@npm:1.5.0"
+  dependencies:
+    follow-redirects: "npm:^1.15.0"
+    form-data: "npm:^4.0.0"
+    proxy-from-env: "npm:^1.1.0"
+  checksum: 128433020b1fe9a460121735016f377adc6109a1f62b61795b1a80704de0a70affb0d580c8abd057e28af5f343cb4fb9a17a0b2512ea7f314578bbe492851a23
   languageName: node
   linkType: hard
 

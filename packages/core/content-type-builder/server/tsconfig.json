@@ -1,7 +1,7 @@
 {
   "extends": "tsconfig/base.json",
-  "include": ["src"],
-  "exclude": ["node_modules"],
+  // "include": ["src"],
+  "exclude": ["src", "node_modules"],
   "compilerOptions": {
     "types": ["lodash", "jest"],
     "esModuleInterop": true

@@ -14,7 +14,8 @@ export type AuthType =
   | 'reset-password'
   | 'forgot-password-success'
   | 'oops'
-  | 'providers';
+  | 'providers'
+  | 'set-session';
 
 export type FormDictionary = Record<AuthType, ComponentType | ComponentType<RegisterProps>>;
 
@@ -29,4 +30,5 @@ export const FORMS = {
   'register-admin': Register,
   'reset-password': ResetPassword,
   providers: () => null,
+  'set-session': () => null,
 } satisfies FormDictionary;

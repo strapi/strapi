@@ -52,20 +52,6 @@ const AuthPage = ({ hasAdmin }: AuthPageProps) => {
     return <Redirect to="/" />;
   }
 
-  // Redirect the user to the register-admin if it is the first user
-  if (!hasAdmin && authType !== 'register-admin') {
-    return (
-      <Redirect
-        to={{
-          pathname: '/auth/register-admin',
-          // Forward the `?redirectTo` from /auth/login
-          // /abc => /auth/login?redirectTo=%2Fabc => /auth/register-admin?redirectTo=%2Fabc
-          search,
-        }}
-      />
-    );
-  }
-
   if (Login && authType === 'login') {
     // Assign the component to render for the login form
     return <Login />;

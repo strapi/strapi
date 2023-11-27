@@ -32,7 +32,7 @@ export const formatAttributes = (model: any) => {
 /**
  * Formats a component attribute
  */
-export const formatAttribute = (attribute: Attribute.Any & Record<string, any>) => {
+export const formatAttribute = (attribute: any & Record<string, any>) => {
   const { configurable, required, autoPopulate, pluginOptions } = attribute;
 
   if (attribute.type === 'media') {
