@@ -2,11 +2,10 @@ import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
 import { Flex, Icon, Tooltip, SingleSelect, SingleSelectOption, Box } from '@strapi/design-system';
-import { pxToRem, prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
+import { pxToRem } from '@strapi/helper-plugin';
 import { Link } from '@strapi/icons';
-import { Attribute } from '@strapi/types';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { type Text, Editor, Transforms, Element as SlateElement, Element, Node } from 'slate';
+import { Editor, Transforms, Element as SlateElement, Node } from 'slate';
 import { ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
@@ -127,202 +126,10 @@ const ToolbarButton = ({
   );
 };
 
-const toggleBlock = (editor: Editor, value: Partial<Element>) => {
-  if (!value.type) {
-    throw new Error('The block type is required');
-  }
-
-  // Set the selected block properties received from the useBlockStore
-  const blockProperties = {
-    type: value.type,
-    level: (value as Block<'heading'>).level || null,
-    format: (value as Block<'list'>).format || null,
-  };
-
-  if (editor.selection) {
-    // If the selection is inside a list, split the list so that the modified block is outside of it
-    Transforms.unwrapNodes(editor, {
-      match: (node) => !Editor.isEditor(node) && node.type === 'list',
-      split: true,
-    });
-
-    // When there is a selection, update the existing block in the tree
-    Transforms.setNodes(editor, blockProperties);
-  } else {
-    /**
-     * When there is no selection, we want to insert a new block just after
-     * the last node inserted and prevent the code to add an empty paragraph
-     * between them.
-     */
-    const [, lastNodePath] = Editor.last(editor, []);
-    const [parentNode] = Editor.parent(editor, lastNodePath);
-    Transforms.removeNodes(editor, {
-      voids: true,
-      hanging: true,
-      at: {
-        anchor: { path: lastNodePath, offset: 0 },
-        focus: { path: lastNodePath, offset: 0 },
-      },
-    });
-    Transforms.insertNodes(
-      editor,
-      {
-        ...blockProperties,
-        children: parentNode.children,
-      } as Node,
-      {
-        at: [lastNodePath[0]],
-        select: true,
-      }
-    );
-  }
-
-  // When the select is clicked it blurs the editor, restore the focus to the editor
-  ReactEditor.focus(editor);
-};
-
-const IMAGE_SCHEMA_FIELDS = [
-  'name',
-  'alternativeText',
-  'url',
-  'caption',
-  'width',
-  'height',
-  'formats',
-  'hash',
-  'ext',
-  'mime',
-  'size',
-  'previewUrl',
-  'provider',
-  'provider_metadata',
-  'createdAt',
-  'updatedAt',
-];
-
-const pick = <T extends object, K extends keyof T>(object: T, keys: K[]): Pick<T, K> => {
-  const entries = keys.map((key) => [key, object[key]]);
-  return Object.fromEntries(entries);
-};
-
-const ImageDialog = ({ handleClose }: { handleClose: () => void }) => {
-  const { editor } = useBlocksEditorContext('ImageDialog');
-  const { components } = useLibrary();
-
-  if (!components) return null;
-
-  const MediaLibraryDialog = components['media-library'] as React.ComponentType<{
-    allowedTypes: Attribute.MediaKind[];
-    onClose: () => void;
-    onSelectAssets: (_images: Attribute.MediaValue<true>) => void;
-  }>;
-
-  const insertImages = (images: Block<'image'>['image'][]) => {
-    // If the selection is inside a list, split the list so that the modified block is outside of it
-    Transforms.unwrapNodes(editor, {
-      match: (node) => !Editor.isEditor(node) && node.type === 'list',
-      split: true,
-    });
-
-    // Save the path of the node that is being replaced by an image to insert the images there later
-    // It's the closest full block node above the selection
-    const nodeEntryBeingReplaced = Editor.above(editor, {
-      match(node) {
-        if (Editor.isEditor(node)) return false;
-
-        const isInlineNode = ['text', 'link'].includes(node.type);
-
-        return !isInlineNode;
-      },
-    });
-
-    if (!nodeEntryBeingReplaced) return;
-    const [, pathToInsert] = nodeEntryBeingReplaced;
-
-    // Remove the previous node that is being replaced by an image
-    Transforms.removeNodes(editor);
-
-    // Convert images to nodes and insert them
-    const nodesToInsert = images.map((image) => {
-      const imageNode: Block<'image'> = {
-        type: 'image',
-        image,
-        children: [{ type: 'text', text: '' }],
-      };
-      return imageNode;
-    });
-    Transforms.insertNodes(editor, nodesToInsert, { at: pathToInsert });
-  };
-
-  const handleSelectAssets = (images: Attribute.MediaValue<true>) => {
-    const formattedImages = images.map((image) => {
-      // Create an object with imageSchema defined and exclude unnecessary props coming from media library config
-      const expectedImage = pick(image, IMAGE_SCHEMA_FIELDS);
-
-      const nodeImage: Block<'image'>['image'] = {
-        ...expectedImage,
-        alternativeText: expectedImage.alternativeText || expectedImage.name,
-        url: prefixFileUrlWithBackendUrl(image.url),
-      };
-
-      return nodeImage;
-    });
-
-    insertImages(formattedImages);
-
-    if (isLastBlockType(editor, 'image')) {
-      // Insert blank line to add new blocks below image block
-      insertEmptyBlockAtLast(editor);
-    }
-
-    handleClose();
-  };
-
-  return (
-    <MediaLibraryDialog
-      allowedTypes={['images']}
-      onClose={handleClose}
-      onSelectAssets={handleSelectAssets}
-    />
-  );
-};
-
-const isLastBlockType = (editor: Editor, type: Element['type']) => {
-  const { selection } = editor;
-
-  if (!selection) return false;
-
-  const [currentBlock] = Editor.nodes(editor, {
-    at: selection,
-    match: (node) => !Editor.isEditor(node) && node.type === type,
-  });
-
-  if (currentBlock) {
-    const [, currentNodePath] = currentBlock;
-
-    const isNodeAfter = Boolean(Editor.after(editor, currentNodePath));
-
-    return !isNodeAfter;
-  }
-
-  return false;
-};
-
-const insertEmptyBlockAtLast = (editor: Editor) => {
-  Transforms.insertNodes(
-    editor,
-    {
-      type: 'paragraph',
-      children: [{ type: 'text', text: '' }],
-    },
-    { at: [editor.children.length] }
-  );
-};
-
 const BlocksDropdown = () => {
   const { editor, blocks, disabled } = useBlocksEditorContext('BlocksDropdown');
   const { formatMessage } = useIntl();
-  const [isMediaLibraryVisible, setIsMediaLibraryVisible] = React.useState(false);
+  const [modalComponent, setModalComponent] = React.useState<React.JSX.Element | null>(null);
 
   const blockKeysToInclude: SelectorBlockKey[] = getEntries(blocks).reduce<
     ReturnType<typeof getEntries>
@@ -339,32 +146,35 @@ const BlocksDropdown = () => {
       return;
     }
 
-    if (['list-ordered', 'list-unordered'].includes(optionKey)) {
-      // retrieve the list format
-      const listFormat = (blocks[optionKey].value as { format: Block<'list'>['format'] })?.format;
-
-      // check if the list is already active
-      const isActive = isListActive(
+    if (!editor.selection) {
+      // When there is no selection, create an empty block at the end of the editor
+      // so that it can be converted to the selected block
+      Transforms.insertNodes(
         editor,
-        (node) => !Editor.isEditor(node) && !isText(node) && blocks[optionKey].matchNode(node)
+        {
+          type: 'quote',
+          children: [{ type: 'text', text: '' }],
+        },
+        {
+          select: true,
+          // Since there's no selection, Slate will automatically insert the node at the end
+        }
       );
-
-      // toggle the list
-      toggleList(editor, isActive, listFormat);
-    } else if (optionKey !== 'image') {
-      toggleBlock(editor, blocks[optionKey].value);
     }
 
-    setBlockSelected(optionKey as SelectorBlockKey);
+    // Let the block handle the Slate conversion logic
+    const maybeRenderModal = blocks[optionKey].handleConvert?.(editor);
 
-    if (optionKey === 'code' && isLastBlockType(editor, 'code')) {
-      // Insert blank line to add new blocks below code block
-      insertEmptyBlockAtLast(editor);
+    // Some blocks, like Image, require a modal. Check if there's one returned
+    if (maybeRenderModal) {
+      // Use cloneElement to apply a key because to create a new instance of the component
+      // Without the new key, the state is kept from previous times that option was picked
+      setModalComponent(React.cloneElement(maybeRenderModal(), { key: Date.now() }));
     }
 
-    if (optionKey === 'image') {
-      setIsMediaLibraryVisible(true);
-    }
+    setBlockSelected(optionKey);
+
+    ReactEditor.focus(editor);
   };
 
   /**
@@ -424,7 +234,7 @@ const BlocksDropdown = () => {
           ))}
         </SingleSelect>
       </SelectWrapper>
-      {isMediaLibraryVisible && <ImageDialog handleClose={() => setIsMediaLibraryVisible(false)} />}
+      {modalComponent}
     </>
   );
 };
@@ -449,10 +259,6 @@ const BlockOption = ({ value, icon, label, blockSelected }: BlockOptionProps) =>
       {formatMessage(label)}
     </SingleSelectOption>
   );
-};
-
-const isText = (node: unknown): node is Text => {
-  return Node.isNode(node) && !Editor.isEditor(node) && node.type === 'text';
 };
 
 const isListNode = (node: unknown): node is Block<'list'> => {
@@ -530,13 +336,13 @@ const toggleList = (editor: Editor, isActive: boolean, format: Block<'list'>['fo
 
 interface ListButtonProps {
   block: BlocksStore['list-ordered'] | BlocksStore['list-unordered'];
+  format: Block<'list'>['format'];
 }
 
-const ListButton = ({ block }: ListButtonProps) => {
+const ListButton = ({ block, format }: ListButtonProps) => {
   const { editor, disabled } = useBlocksEditorContext('ListButton');
 
-  const { icon, matchNode, value, label } = block;
-  const { format } = value as { format: Block<'list'>['format'] };
+  const { icon, matchNode, label } = block;
 
   const isActive = isListActive(
     editor,
@@ -673,8 +479,8 @@ const BlocksToolbar = () => {
         <Separator />
         <Toolbar.ToggleGroup type="single" asChild>
           <Flex gap={1}>
-            <ListButton block={blocks['list-unordered']} />
-            <ListButton block={blocks['list-ordered']} />
+            <ListButton block={blocks['list-unordered']} format="unordered" />
+            <ListButton block={blocks['list-ordered']} format="ordered" />
           </Flex>
         </Toolbar.ToggleGroup>
       </ToolbarWrapper>

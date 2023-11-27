@@ -5,6 +5,8 @@ import { type Text, Editor, Node, Transforms } from 'slate';
 import styled from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
+import { baseHandleConvert } from '../utils/conversions';
+import { type Block } from '../utils/types';
 
 const Blockquote = styled.blockquote.attrs({ role: 'blockquote' })`
   margin: ${({ theme }) => `${theme.spaces[4]} 0`};
@@ -26,11 +28,11 @@ const quoteBlocks: Pick<BlocksStore, 'quote'> = {
       id: 'components.Blocks.blocks.quote',
       defaultMessage: 'Quote',
     },
-    value: {
-      type: 'quote',
-    },
     matchNode: (node) => node.type === 'quote',
     isInBlocksSelector: true,
+    handleConvert(editor) {
+      baseHandleConvert<Block<'quote'>>(editor, { type: 'quote' });
+    },
     handleEnterKey(editor) {
       /**
        * To determine if we should break out of the quote node, check 2 things:
