@@ -30,7 +30,7 @@ import { CreateReleaseAction } from '../../../shared/contracts/release-actions';
 import { PERMISSIONS } from '../constants';
 import { useCreateReleaseActionMutation, useGetReleasesQuery } from '../services/release';
 
-import { ReleaseActionOptions } from './ReleaseActionOption';
+import { ReleaseActionOptions } from './ReleaseActionOptions';
 
 const RELEASE_ACTION_FORM_SCHEMA = yup.object().shape({
   type: yup.string().oneOf(['publish', 'unpublish']).required(),
