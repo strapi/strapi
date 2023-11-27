@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-email",
-  "version": "4.15.5-alpha.4",
+  "version": "4.15.5-alpha.5",
   "description": "Easily configure your Strapi application to send emails.",
   "repository": {
     "type": "git",
@@ -54,10 +54,10 @@
   },
   "dependencies": {
     "@strapi/design-system": "1.13.0",
-    "@strapi/helper-plugin": "4.15.5-alpha.4",
+    "@strapi/helper-plugin": "4.15.5-alpha.5",
     "@strapi/icons": "1.13.0",
-    "@strapi/provider-email-sendmail": "4.15.5-alpha.4",
-    "@strapi/utils": "4.15.5-alpha.4",
+    "@strapi/provider-email-sendmail": "4.15.5-alpha.5",
+    "@strapi/utils": "4.15.5-alpha.5",
     "lodash": "4.17.21",
     "prop-types": "^15.8.1",
     "react-intl": "6.4.1",
@@ -65,8 +65,8 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/pack-up": "4.15.5-alpha.4",
-    "@strapi/types": "4.15.5-alpha.4",
+    "@strapi/pack-up": "4.15.5-alpha.5",
+    "@strapi/types": "4.15.5-alpha.5",
     "@testing-library/react": "14.0.0",
     "@types/koa": "2.13.4",
     "@types/lodash": "^4.14.191",
