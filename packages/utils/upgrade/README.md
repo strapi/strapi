@@ -4,7 +4,7 @@
 
 The Strapi Upgrade Tool is the CLI for facilitating upgrades between Strapi versions.
 
-When run, the command will "step" from your current version of Strapi to the next version that includes code tranforms for breaking changes.
+The exact details of what level of upgrade will be run (patch, minor, major) based on the current version and what cli options will be available are still in discussion and this document will be updated once they are finalized.
 
 From now on, all breaking changes, and ideally also deprecations, must have an accompanying code transform written to be accepted.
 
