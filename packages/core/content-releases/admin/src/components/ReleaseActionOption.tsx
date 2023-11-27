@@ -48,9 +48,7 @@ interface ActionOptionProps {
 }
 
 interface OptionProps extends ActionOptionProps {
-  selected: 'publish' | 'unpublish';
   actionType: 'publish' | 'unpublish';
-  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const ActionOption = ({ selected, actionType, handleChange }: OptionProps) => {
