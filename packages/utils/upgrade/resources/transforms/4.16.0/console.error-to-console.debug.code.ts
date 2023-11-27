@@ -7,6 +7,7 @@ import type { Transform } from 'jscodeshift';
 const transform: Transform = (file, api) => {
   // Extract the jscodeshift API
   const { j } = api;
+
   // Parse the file content
   const root = j(file.source);
 
