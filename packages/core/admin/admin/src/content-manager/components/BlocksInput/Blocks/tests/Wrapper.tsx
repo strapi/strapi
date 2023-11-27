@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
-import { createEditor } from 'slate';
+import { type Editor, createEditor } from 'slate';
 import { Slate, withReact } from 'slate-react';
 import { ThemeProvider } from 'styled-components';
 
@@ -16,13 +16,14 @@ import { listBlocks } from '../List';
 import { paragraphBlocks } from '../Paragraph';
 import { quoteBlocks } from '../Quote';
 
-const baseEditor = createEditor();
+const defaultBaseEditor = createEditor();
 
 interface WrapperProps {
   children: React.ReactNode;
+  baseEditor?: Editor;
 }
 
-const Wrapper = ({ children }: WrapperProps) => {
+const Wrapper = ({ children, baseEditor = defaultBaseEditor }: WrapperProps) => {
   const [editor] = React.useState(() => withReact(baseEditor));
 
   const blocks: BlocksStore = {
@@ -38,8 +39,8 @@ const Wrapper = ({ children }: WrapperProps) => {
   return (
     <ThemeProvider theme={lightTheme}>
       <IntlProvider messages={{}} locale="en">
-        <Slate initialValue={[]} editor={editor}>
-          <BlocksEditorProvider modifiers={modifiers} blocks={blocks} disabled={false}>
+        <Slate initialValue={baseEditor.children} editor={editor}>
+          <BlocksEditorProvider blocks={blocks} modifiers={modifiers} disabled={false}>
             {children}
           </BlocksEditorProvider>
         </Slate>

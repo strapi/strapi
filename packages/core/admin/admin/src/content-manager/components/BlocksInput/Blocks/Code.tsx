@@ -4,7 +4,9 @@ import { Code } from '@strapi/icons';
 import styled from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
+import { insertEmptyBlockAtLast, isLastBlockType, baseHandleConvert } from '../utils/conversions';
 import { pressEnterTwiceToExit } from '../utils/enterKey';
+import { type Block } from '../utils/types';
 
 const CodeBlock = styled.pre.attrs({ role: 'code' })`
   border-radius: ${({ theme }) => theme.borderRadius};
@@ -34,11 +36,15 @@ const codeBlocks: Pick<BlocksStore, 'code'> = {
       id: 'components.Blocks.blocks.code',
       defaultMessage: 'Code block',
     },
-    value: {
-      type: 'code',
-    },
     matchNode: (node) => node.type === 'code',
     isInBlocksSelector: true,
+    handleConvert(editor) {
+      baseHandleConvert<Block<'code'>>(editor, { type: 'code' });
+
+      if (isLastBlockType(editor, 'code')) {
+        insertEmptyBlockAtLast(editor);
+      }
+    },
     handleEnterKey(editor) {
       pressEnterTwiceToExit(editor);
     },

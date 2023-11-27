@@ -4,7 +4,9 @@ import { Quote } from '@strapi/icons';
 import styled from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
+import { baseHandleConvert } from '../utils/conversions';
 import { pressEnterTwiceToExit } from '../utils/enterKey';
+import { type Block } from '../utils/types';
 
 const Blockquote = styled.blockquote.attrs({ role: 'blockquote' })`
   margin: ${({ theme }) => `${theme.spaces[4]} 0`};
@@ -22,11 +24,11 @@ const quoteBlocks: Pick<BlocksStore, 'quote'> = {
       id: 'components.Blocks.blocks.quote',
       defaultMessage: 'Quote',
     },
-    value: {
-      type: 'quote',
-    },
     matchNode: (node) => node.type === 'quote',
     isInBlocksSelector: true,
+    handleConvert(editor) {
+      baseHandleConvert<Block<'quote'>>(editor, { type: 'quote' });
+    },
     handleEnterKey(editor) {
       pressEnterTwiceToExit(editor);
     },

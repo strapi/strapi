@@ -1,8 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import * as React from 'react';
 
-import { ContentLayout, HeaderLayout, Main } from '@strapi/design-system';
+import { ContentLayout, HeaderLayout, LinkButton, Main } from '@strapi/design-system';
 import {
-  LinkButton,
+  CheckPagePermissions,
   NoContent,
   NoPermissions,
   SettingsPageTitle,
@@ -14,40 +14,88 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
+import { AxiosError } from 'axios';
 import qs from 'qs';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
-import { selectAdminPermissions } from '../../../../../selectors';
-import { TRANSFER_TOKEN_TYPE } from '../../../components/Tokens/constants';
-import Table from '../../../components/Tokens/Table';
+import { selectAdminPermissions } from '../../../../selectors';
+import { TRANSFER_TOKEN_TYPE } from '../../components/Tokens/constants';
+// @ts-expect-error not converted yet
+import Table from '../../components/Tokens/Table';
 
-import tableHeaders from './utils/tableHeaders';
+const tableHeaders = [
+  {
+    name: 'name',
+    key: 'name',
+    metadatas: {
+      label: {
+        id: 'Settings.tokens.ListView.headers.name',
+        defaultMessage: 'Name',
+      },
+      sortable: true,
+    },
+  },
+  {
+    name: 'description',
+    key: 'description',
+    metadatas: {
+      label: {
+        id: 'Settings.tokens.ListView.headers.description',
+        defaultMessage: 'Description',
+      },
+      sortable: false,
+    },
+  },
+  {
+    name: 'createdAt',
+    key: 'createdAt',
+    metadatas: {
+      label: {
+        id: 'Settings.tokens.ListView.headers.createdAt',
+        defaultMessage: 'Created at',
+      },
+      sortable: false,
+    },
+  },
+  {
+    name: 'lastUsedAt',
+    key: 'lastUsedAt',
+    metadatas: {
+      label: {
+        id: 'Settings.tokens.ListView.headers.lastUsedAt',
+        defaultMessage: 'Last used',
+      },
+      sortable: false,
+    },
+  },
+] as const;
 
-const TransferTokenListView = () => {
+export const ListView = () => {
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const permissions = useSelector(selectAdminPermissions);
   const {
     allowedActions: { canCreate, canDelete, canUpdate, canRead },
+    // @ts-expect-error this is fine
   } = useRBAC(permissions.settings['transfer-tokens']);
   const { push } = useHistory();
   const { trackUsage } = useTracking();
 
   const { startSection } = useGuidedTour();
-  const startSectionRef = useRef(startSection);
+  const startSectionRef = React.useRef(startSection);
   const { get, del } = useFetchClient();
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (startSectionRef.current) {
       startSectionRef.current('transferTokens');
     }
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     push({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) });
   }, [push]);
 
@@ -81,20 +129,22 @@ const TransferTokenListView = () => {
     {
       enabled: canRead,
       onError(err) {
-        if (err?.response?.data?.error?.details?.code === 'INVALID_TOKEN_SALT') {
-          toggleNotification({
-            type: 'warning',
-            message: {
-              id: 'notification.error.invalid.configuration',
-              defaultMessage:
-                'You have an invalid configuration, check your server log for more information.',
-            },
-          });
-        } else {
-          toggleNotification({
-            type: 'warning',
-            message: { id: 'notification.error', defaultMessage: 'An error occured' },
-          });
+        if (err instanceof AxiosError) {
+          if (err?.response?.data?.error?.details?.code === 'INVALID_TOKEN_SALT') {
+            toggleNotification({
+              type: 'warning',
+              message: {
+                id: 'notification.error.invalid.configuration',
+                defaultMessage:
+                  'You have an invalid configuration, check your server log for more information.',
+              },
+            });
+          } else {
+            toggleNotification({
+              type: 'warning',
+              message: { id: 'notification.error', defaultMessage: 'An error occured' },
+            });
+          }
         }
       },
     }
@@ -105,30 +155,33 @@ const TransferTokenListView = () => {
     ((status !== 'success' && status !== 'error') || (status === 'success' && isFetching));
 
   const deleteMutation = useMutation(
-    async (id) => {
+    async (id: string) => {
       await del(`/admin/transfer/tokens/${id}`);
     },
     {
       async onSuccess() {
+        // @ts-expect-error this is fine
         await refetch(['transfer-tokens']);
       },
       onError(err) {
-        if (err?.response?.data?.data) {
-          toggleNotification({ type: 'warning', message: err.response.data.data });
-        } else if (err?.response?.data?.error?.details?.code === 'INVALID_TOKEN_SALT') {
-          toggleNotification({
-            type: 'warning',
-            message: {
-              id: 'notification.error.invalid.configuration',
-              defaultMessage:
-                'You have an invalid configuration, check your server log for more information.',
-            },
-          });
-        } else {
-          toggleNotification({
-            type: 'warning',
-            message: { id: 'notification.error', defaultMessage: 'An error occured' },
-          });
+        if (err instanceof AxiosError) {
+          if (err?.response?.data?.data) {
+            toggleNotification({ type: 'warning', message: err.response.data.data });
+          } else if (err?.response?.data?.error?.details?.code === 'INVALID_TOKEN_SALT') {
+            toggleNotification({
+              type: 'warning',
+              message: {
+                id: 'notification.error.invalid.configuration',
+                defaultMessage:
+                  'You have an invalid configuration, check your server log for more information.',
+              },
+            });
+          } else {
+            toggleNotification({
+              type: 'warning',
+              message: { id: 'notification.error', defaultMessage: 'An error occured' },
+            });
+          }
         }
       },
     }
@@ -181,7 +234,7 @@ const TransferTokenListView = () => {
             contentType="trasfer-tokens"
             rows={transferTokens}
             isLoading={isLoading}
-            onConfirmDelete={(id) => deleteMutation.mutateAsync(id)}
+            onConfirmDelete={(id: string) => deleteMutation.mutateAsync(id)}
             tokens={transferTokens}
             tokenType={TRANSFER_TOKEN_TYPE}
           />
@@ -219,4 +272,12 @@ const TransferTokenListView = () => {
   );
 };
 
-export default TransferTokenListView;
+export const ProtectedListView = () => {
+  const permissions = useSelector(selectAdminPermissions);
+
+  return (
+    <CheckPagePermissions permissions={permissions.settings?.['transfer-tokens'].main}>
+      <ListView />
+    </CheckPagePermissions>
+  );
+};
