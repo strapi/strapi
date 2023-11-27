@@ -5,7 +5,7 @@ import { type Attribute } from '@strapi/types';
 const mockImage = {
   url: 'https://via.placeholder.com/300/09f/fff.png',
   name: 'Screenshot 2023-08-22 at 10.33.50.png',
-  alternativeText: null,
+  alternativeText: 'My image alt text',
   caption: null,
   width: 300,
   height: 300,
