@@ -1,17 +1,24 @@
 import semver from 'semver';
-import assert from 'node:assert';
 
-import { isLatestVersion, isSemVer, isVersionRelease, VersionRelease } from './version';
+import {
+  createSemverRange,
+  formatSemVer,
+  isNextVersion,
+  isSemVer,
+  isVersionRelease,
+  VersionRelease,
+} from './version';
 
 import type { SemVer, Version } from './version';
 
 export interface VersionParser {
-  current: string;
   setAvailable(versions: SemVer[] | null): VersionParser;
   nextMajor(): SemVer | undefined;
   nextMinor(): SemVer | undefined;
   nextPatch(): SemVer | undefined;
   latest(): SemVer | undefined;
+  current(): SemVer | undefined;
+  next(): SemVer | undefined;
   exact(version: SemVer): SemVer | undefined;
   search(version: Version): SemVer | undefined;
 }
@@ -30,10 +37,6 @@ export const createVersionParser: CreateVersionParser = (current) => {
   };
 
   return {
-    get current(): string {
-      return state.current.raw;
-    },
-
     setAvailable(versions: SemVer[] | null) {
       state.available = versions !== null ? versions.map((v) => new semver.SemVer(v)) : null;
 
@@ -56,61 +59,107 @@ export const createVersionParser: CreateVersionParser = (current) => {
       return this.search(VersionRelease.Latest);
     },
 
+    next() {
+      return this.search(VersionRelease.Next);
+    },
+
+    current() {
+      return this.search(VersionRelease.Current);
+    },
+
     exact(version: SemVer) {
       return this.search(version);
     },
 
     search(version: Version) {
-      if (!state.available) {
+      const { current, available } = state;
+      const currentAsString = current.raw as SemVer;
+
+      if (!available) {
         return undefined;
       }
 
-      let versionFilter: (v: semver.SemVer) => boolean = () => false;
+      let range: semver.Range;
 
       if (isSemVer(version)) {
-        assert(
-          state.current.compare(version) === -1,
-          `The given version should be greater than the current one (${state.current.raw}>${version})`
-        );
-        // {current} > {v} AND {v} <= {version}
-        versionFilter = (v) => v.compare(state.current) === 1 && v.compare(version) <= 0;
+        range = semver.gt(version, current)
+          ? // If target > current, return a range
+            createSemverRange(`>${currentAsString} <=${version}`)
+          : // Else, return an exact match
+            createSemverRange(`=${version}`);
       }
 
       if (isVersionRelease(version)) {
-        versionFilter = (v) => {
-          switch (version) {
-            case VersionRelease.Latest:
-              // match any version that is greater than the current one
-              return v.compare(state.current) === 1;
-            case VersionRelease.Major:
-              // match any version which major release is greater than the current one
-              return v.major > state.current.major;
-            case VersionRelease.Minor:
-              // match any version which minor release is greater than the current one
-              return v.minor > state.current.minor;
-            case VersionRelease.Patch:
-              // match any version which patch release is greater than the current one
-              return v.patch > state.current.patch;
-            default:
-              throw new Error(`Internal error: Invalid version release found: ${version}`);
+        switch (version) {
+          /**
+           * Only accept the same version as the current one
+           */
+          case VersionRelease.Current: {
+            range = createSemverRange(`=${currentAsString}`); // take exactly this version
+            break;
           }
-        };
+          /**
+           * Accept any version greater than the current one
+           */
+          case VersionRelease.Latest:
+          case VersionRelease.Next: {
+            range = createSemverRange(`>${currentAsString}`);
+            break;
+          }
+          /**
+           * Accept any version where
+           * - The overall version is greater than the current one
+           * - The major version is the same or +1
+           */
+          case VersionRelease.Major: {
+            const nextMajor = formatSemVer(current.inc('major'), 'x');
+            range = createSemverRange(`>${currentAsString} <=${nextMajor}`);
+            break;
+          }
+          /**
+           * Accept any version where
+           * - The overall version is greater than the current one
+           * - The major version is the same
+           * - The minor version is either the same or +1
+           */
+          case VersionRelease.Minor: {
+            const nextMinor = formatSemVer(current.inc('minor'), 'x.x');
+            range = createSemverRange(`>${currentAsString} <=${nextMinor}`);
+            break;
+          }
+          /**
+           * Accept any version where
+           * - The overall version is greater than the current one
+           * - The major version is the same
+           * - The minor version is the same
+           * - The patch version is the same + 1
+           */
+          case VersionRelease.Patch: {
+            const nextPatch = formatSemVer(current.inc('patch'), 'x.x.x');
+            range = createSemverRange(`>${currentAsString} <=${nextPatch}`);
+            break;
+          }
+          default:
+            throw new Error(`Internal error: Invalid version release found: ${version}`);
+        }
       }
 
-      const matches = state.available
+      const matches = available
         // Removes invalid versions
-        .filter(versionFilter)
+        .filter((semVer) => range.test(semVer))
         // Sort from the oldest to the newest
         .sort(semver.compare);
 
       const nearest = matches.at(0);
       const latest = matches.at(-1);
 
-      // TODO: In the following scenario: target=major, current=4.15.4, available=[4.16.0, 5.0.0, 5.2.0, 6.3.0]
-      //       We might want to target 5.2.0 (currently, it'll return 5.0.0)
-      const target = isSemVer(version) || isLatestVersion(version) ? latest : nearest;
+      if (!nearest || !latest) {
+        return undefined;
+      }
 
-      return target?.raw as SemVer | undefined;
+      const match = isNextVersion(version) ? nearest : latest;
+
+      return match?.raw as SemVer;
     },
   };
 };
