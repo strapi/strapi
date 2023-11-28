@@ -13,22 +13,27 @@ interface FieldWrapperProps extends FieldProps {
   actionType: 'publish' | 'unpublish';
 }
 
+const getBorderLeftRadiusValue = (actionType: FieldWrapperProps['actionType']) => {
+  return actionType === 'publish' ? 1 : 0;
+};
+
+const getBorderRightRadiusValue = (actionType: FieldWrapperProps['actionType']) => {
+  return actionType === 'publish' ? 0 : 1;
+};
+
 const FieldWrapper = styled(Field)<FieldWrapperProps>`
   border-top-left-radius: ${({ actionType, theme }) =>
-    actionType === 'publish' ? theme.spaces[1] : theme.spaces[0]};
-  border-top-right-radius: ${({ actionType, theme }) =>
-    actionType === 'publish' ? theme.spaces[0] : theme.spaces[1]};
+    theme.spaces[getBorderLeftRadiusValue(actionType)]};
   border-bottom-left-radius: ${({ actionType, theme }) =>
-    actionType === 'publish' ? theme.spaces[1] : theme.spaces[0]};
+    theme.spaces[getBorderLeftRadiusValue(actionType)]};
+  border-top-right-radius: ${({ actionType, theme }) =>
+    theme.spaces[getBorderRightRadiusValue(actionType)]};
   border-bottom-right-radius: ${({ actionType, theme }) =>
-    actionType === 'publish' ? theme.spaces[0] : theme.spaces[1]};
+    theme.spaces[getBorderRightRadiusValue(actionType)]};
 
   > label {
     color: inherit;
-    padding-top: ${({ theme }) => theme.spaces[2]};
-    padding-bottom: ${({ theme }) => theme.spaces[2]};
-    padding-left: ${({ theme }) => theme.spaces[3]};
-    padding-right: ${({ theme }) => theme.spaces[3]};
+    padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[3]}`};
     text-align: center;
     vertical-align: middle;
     text-transform: capitalize;

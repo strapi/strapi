@@ -42,7 +42,7 @@ describe('CMReleasesInjectionZone', () => {
     expect(informationBox).not.toBeInTheDocument();
   });
 
-  it('should should not render the injection zone without draft and publish enabled', async () => {
+  it('should not render the injection zone without draft and publish enabled', async () => {
     // @ts-expect-error - Ignore error
     useCMEditViewDataManager.mockReturnValueOnce({
       isCreatingEntry: false,
