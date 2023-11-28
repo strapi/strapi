@@ -11,8 +11,8 @@ import {
 import styled from 'styled-components';
 
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
+import { useConversionModal } from './BlocksToolbar';
 import { type ModifiersStore } from './Modifiers';
-import { useConversionModal } from './utils/conversions';
 import { getEntries } from './utils/types';
 
 const StyledEditable = styled(Editable)`
@@ -57,7 +57,7 @@ interface BlocksInputProps {
 const BlocksContent = ({ placeholder }: BlocksInputProps) => {
   const { editor, disabled, blocks, modifiers } = useBlocksEditorContext('BlocksContent');
   const blocksRef = React.useRef<HTMLDivElement>(null);
-  const { modalComponent, handleConversionResult } = useConversionModal();
+  const { modalElement, handleConversionResult } = useConversionModal();
 
   // Create renderLeaf function based on the modifiers store
   const renderLeaf = React.useCallback(
@@ -231,7 +231,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
         onKeyDown={handleKeyDown}
         scrollSelectionIntoView={handleScrollSelectionIntoView}
       />
-      {modalComponent}
+      {modalElement}
     </Box>
   );
 };
