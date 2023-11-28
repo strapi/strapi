@@ -18,6 +18,8 @@ const transformAttribute = (attribute: Attribute.Any) => {
   }
 };
 
+export const createDocumentId = createId;
+
 export const transformContentTypesToModels = (
   contentTypes: Pick<
     Schema.ContentType,
@@ -30,7 +32,7 @@ export const transformContentTypesToModels = (
     // as it is not documented
     const documentIdAttribute: Record<string, Attribute.Any> =
       contentType.modelType === 'contentType'
-        ? { documentId: { type: 'string', default: createId } }
+        ? { documentId: { type: 'string', default: createDocumentId } }
         : {};
 
     // Prevent user from creating a documentId attribute

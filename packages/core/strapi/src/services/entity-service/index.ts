@@ -257,7 +257,7 @@ const createDefaultImplementation = ({
       return null;
     }
 
-    const isDraft = contentTypesUtils.isDraft(entityToUpdate, model);
+    const isDraft = contentTypesUtils.isDraft(entityToUpdate);
 
     const validData = await entityValidator.validateEntityUpdate(
       model,
@@ -342,7 +342,7 @@ const createDefaultImplementation = ({
     if (!entityToClone) {
       return null;
     }
-    const isDraft = contentTypesUtils.isDraft(entityToClone, model);
+    const isDraft = contentTypesUtils.isDraft(entityToClone);
 
     const validData = await entityValidator.validateEntityUpdate(
       model,
@@ -351,6 +351,7 @@ const createDefaultImplementation = ({
       { isDraft },
       entityToClone
     );
+
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
     // TODO: wrap into transaction
