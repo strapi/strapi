@@ -147,7 +147,7 @@ For security reasons, prefer storing the secret in an environment variable and r
 
     if (!process.env.JWT_SECRET) {
       const envPath = process.env.ENV_PATH || '.env';
-      strapi.fs.appendFile(envPath, `JWT_SECRET=${jwtSecret}\n`);
+      strapi.get('fs').appendFile(envPath, `JWT_SECRET=${jwtSecret}\n`);
       strapi.log.info(
         `The Users & Permissions plugin automatically generated a jwt secret and stored it in ${envPath} under the name JWT_SECRET.`
       );

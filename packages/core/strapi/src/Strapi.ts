@@ -21,7 +21,6 @@ import type {
   RequestContext,
   CustomFields,
   Fetch,
-  StrapiFS,
   StrapiDirectories,
   Reloader,
   EntityValidator,
@@ -133,8 +132,6 @@ class Strapi extends Container implements StrapiI {
 
   log: Logger;
 
-  fs: StrapiFS;
-
   eventHub: EventHub;
 
   startupLogger: StartupLogger;
@@ -201,7 +198,8 @@ class Strapi extends Container implements StrapiI {
       .add('sanitizers', registries.sanitizers())
       .add('validators', registries.validators())
       .add('content-api', createContentAPI(this))
-      .add('auth', createAuth());
+      .add('auth', createAuth())
+      .add('fs', createStrapiFs(this));
 
     // Create a mapping of every useful directory (for the app, dist and static directories)
     this.dirs = utils.getDirs(rootDirs, { strapi: this });
@@ -214,7 +212,6 @@ class Strapi extends Container implements StrapiI {
     this.server = createServer(this);
 
     // Strapi utils instantiation
-    this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
     this.startupLogger = createStartupLogger(this);
     this.log = createLogger(this.config.get('logger', { level: 'info' }));

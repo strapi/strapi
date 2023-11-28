@@ -75,13 +75,6 @@ export interface StartupLogger {
   logStartupMessage({ isInitialized }: { isInitialized: boolean }): void;
 }
 
-export interface StrapiFS {
-  writeAppFile(optPath: string | string[], data: string): Promise<void>;
-  writePluginFile(plugin: string, optPath: string | string[], data: string): Promise<void>;
-  removeAppFile(optPath: string | string[]): Promise<void>;
-  appendFile(optPath: string | string[], data: string): void;
-}
-
 export interface ConfigProvider {
   get<T = unknown>(key: string, defaultVal?: T): T;
   set(path: string, val: unknown): this;
@@ -92,7 +85,6 @@ export interface ConfigProvider {
 export interface Strapi extends Container {
   server: Server;
   log: Logger;
-  fs: StrapiFS;
   eventHub: EventHub;
   startupLogger: StartupLogger;
   cron: CronService;
