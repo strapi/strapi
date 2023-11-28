@@ -33,7 +33,7 @@ interface BaseBlock {
   handleConvert?: (editor: Editor) => void | (() => React.JSX.Element);
   handleEnterKey?: (editor: Editor) => void;
   handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => void;
-  snippet?: string;
+  snippets?: string[];
 }
 
 interface NonSelectorBlock extends BaseBlock {

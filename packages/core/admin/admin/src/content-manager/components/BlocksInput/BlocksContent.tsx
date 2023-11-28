@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Box } from '@strapi/design-system';
-import { Editor, Path, Transforms } from 'slate';
+import { Editor, Transforms } from 'slate';
 import {
   type ReactEditor,
   type RenderElementProps,
@@ -89,14 +89,14 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
 
     // Check if the text node starts with a known snippet
     const blockMatchingSnippet = Object.values(blocks).find((block) => {
-      return Boolean(block.snippet) && textNode.text === block.snippet;
+      return block.snippets?.includes(textNode.text);
     });
 
     if (blockMatchingSnippet?.handleConvert) {
       // Prevent the space from being created and delete the snippet
       event.preventDefault();
       Transforms.delete(editor, {
-        distance: blockMatchingSnippet.snippet?.length,
+        distance: textNode.text.length,
         unit: 'character',
         reverse: true,
       });
