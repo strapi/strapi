@@ -90,8 +90,24 @@ module.exports = {
   blocks() {
     return [withAttributeNamespace('Blocks')];
   },
-  media() {
-    return [withAttributeNamespace('Media')];
+  media({ attribute }) {
+    const params = [];
+
+    if (attribute.allowedTypes) {
+      params.push(
+        factory.createTupleTypeNode(
+          attribute.allowedTypes.map((type) => factory.createStringLiteral(type, true))
+        )
+      );
+    } else {
+      params.push(factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword));
+    }
+
+    if (attribute.multiple) {
+      params.push(factory.createTrue());
+    }
+
+    return [withAttributeNamespace('Media'), params];
   },
   relation({ uid, attribute }) {
     const { relation, target } = attribute;
