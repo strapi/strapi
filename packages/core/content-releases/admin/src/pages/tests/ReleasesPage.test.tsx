@@ -13,7 +13,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 
 describe('Releases home page', () => {
-  it('renders correctly the page with no results (subtitle, no pagination, body content, add release dialog)', async () => {
+  it('renders the page correctly when there are no releases', async () => {
     server.use(
       rest.get('/content-releases', (req, res, ctx) =>
         res(ctx.json(mockReleasesPageData.emptyEntries))
@@ -32,7 +32,11 @@ describe('Releases home page', () => {
 
     const newReleaseButton = screen.getByRole('button', { name: 'New release' });
     expect(newReleaseButton).toBeInTheDocument();
+
     await user.click(newReleaseButton);
+    const dialogContainer = screen.getByRole('dialog');
+    const dialogTitle = within(dialogContainer).getByText(/new release/i);
+    expect(dialogTitle).toBeInTheDocument();
 
     const pendingTabPanel = screen.getByRole('tabpanel', { name: /pending/i });
     const emptyPendingBodyContent = within(pendingTabPanel).getByText(/no releases/i);
@@ -42,14 +46,12 @@ describe('Releases home page', () => {
     // change the tab to see the done empty body content
     const doneTab = screen.getByRole('tab', { name: /done/i });
     await user.click(doneTab);
-
     const doneTabpanel = screen.getByRole('tabpanel', { name: /done/i });
-
     const emptyDoneBodyContent = within(doneTabpanel).getByText(/no releases/i);
     expect(emptyDoneBodyContent).toBeInTheDocument();
   });
 
-  it('renders correctly the page with only pending results (subtitle, pagination, body content, add release dialog)', async () => {
+  it('renders the page correctly when at least one tab has content', async () => {
     server.use(
       rest.get('/content-releases', (req, res, ctx) => {
         if (
@@ -84,7 +86,6 @@ describe('Releases home page', () => {
     // change the tab to see the done empty body content
     const doneTab = screen.getByRole('tab', { name: /done/i });
     await user.click(doneTab);
-
     const doneReleaseSubtitle = await screen.findAllByText('No releases');
     expect(doneReleaseSubtitle[0]).toBeInTheDocument();
 
@@ -97,7 +98,7 @@ describe('Releases home page', () => {
     expect(emptyDoneBodyContent).toBeInTheDocument();
   });
 
-  it('renders correctly the page with some pending results and some done results (subtitle, pagination, body content, add release dialog)', async () => {
+  it('renders the page correctly when both tabs have content', async () => {
     server.use(
       rest.get('/content-releases', (req, res, ctx) => {
         if (
@@ -120,7 +121,6 @@ describe('Releases home page', () => {
     // change the tab to see the done empty body content
     const doneTab = screen.getByRole('tab', { name: /done/i });
     await user.click(doneTab);
-
     const doneReleaseSubtitle = await screen.findByText('10 releases');
     expect(doneReleaseSubtitle).toBeInTheDocument();
 

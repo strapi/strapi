@@ -2,14 +2,22 @@ import * as React from 'react';
 
 import {
   Box,
+  Button,
   ContentLayout,
+  EmptyStateLayout,
   Flex,
+  Grid,
+  GridItem,
+  HeaderLayout,
+  Main,
   Tab,
   TabGroup,
   TabPanel,
   TabPanels,
   Tabs,
+  Typography,
 } from '@strapi/design-system';
+import { Link } from '@strapi/design-system/v2';
 import {
   AnErrorOccurred,
   CheckPermissions,
@@ -18,14 +26,137 @@ import {
   PaginationURLQuery,
   useQueryParams,
 } from '@strapi/helper-plugin';
+import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
+import { GetReleases } from '../../../shared/contracts/releases';
 import { AddReleaseDialog } from '../components/AddReleaseDialog';
-import { ReleasesGrid } from '../components/ReleasesGrid';
-import { ReleasesLayout } from '../components/ReleasesLayout';
 import { PERMISSIONS } from '../constants';
 import { useGetReleasesQuery, GetAllReleasesQueryParams } from '../services/release';
 
+/**----------------------------------------------------------------- *
+ *  ReleasesLayout
+ **------------------------------------------------------------------*/
+interface ReleasesLayoutProps {
+  isLoading?: boolean;
+  totalEntries?: number;
+  onClickAddRelease: () => void;
+  children: React.ReactNode;
+}
+
+export const ReleasesLayout = ({
+  isLoading,
+  totalEntries,
+  onClickAddRelease,
+  children,
+}: ReleasesLayoutProps) => {
+  const { formatMessage } = useIntl();
+  return (
+    <Main aria-busy={isLoading}>
+      <HeaderLayout
+        title={formatMessage({
+          id: 'content-releases.pages.Releases.title',
+          defaultMessage: 'Releases',
+        })}
+        subtitle={
+          !isLoading &&
+          formatMessage(
+            {
+              id: 'content-releases.pages.Releases.header-subtitle',
+              defaultMessage:
+                '{number, plural, =0 {No releases} one {# release} other {# releases}}',
+            },
+            { number: totalEntries }
+          )
+        }
+        primaryAction={
+          <CheckPermissions permissions={PERMISSIONS.create}>
+            <Button startIcon={<Plus />} onClick={onClickAddRelease}>
+              {formatMessage({
+                id: 'content-releases.header.actions.add-release',
+                defaultMessage: 'New release',
+              })}
+            </Button>
+          </CheckPermissions>
+        }
+      />
+      {children}
+    </Main>
+  );
+};
+
+/**----------------------------------------------------------------- *
+ *  ReleasesGrid
+ **------------------------------------------------------------------*/
+interface ReleasesGridProps {
+  sectionTitle: 'pending' | 'done';
+  releases?: GetReleases.Response['data'];
+  isError?: boolean;
+}
+
+const LinkCard = styled(Link)`
+  display: block;
+`;
+
+const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: ReleasesGridProps) => {
+  const { formatMessage } = useIntl();
+
+  if (isError) {
+    return (
+      <Flex paddingTop={8}>
+        <AnErrorOccurred />
+      </Flex>
+    );
+  }
+
+  if (releases?.length === 0) {
+    return (
+      <EmptyStateLayout
+        content={formatMessage(
+          {
+            id: 'content-releases.page.Releases.tab.emptyEntries',
+            defaultMessage: 'No releases',
+          },
+          {
+            target: sectionTitle,
+          }
+        )}
+        icon={<EmptyDocuments width="10rem" />}
+      />
+    );
+  }
+
+  return (
+    <Grid gap={4}>
+      {releases.map(({ id, name }) => (
+        <GridItem col={3} s={6} xs={12} key={id}>
+          <LinkCard href={`content-releases/${id}`} isExternal={false}>
+            <Flex
+              direction="column"
+              justifyContent="space-between"
+              padding={4}
+              hasRadius
+              background="neutral0"
+              shadow="tableShadow"
+              height="100%"
+              width="100%"
+              alignItems="start"
+            >
+              <Typography as="h3" variant="delta" fontWeight="bold">
+                {name}
+              </Typography>
+            </Flex>
+          </LinkCard>
+        </GridItem>
+      ))}
+    </Grid>
+  );
+};
+
+/**----------------------------------------------------------------- *
+ *  ReleasesPage
+ **------------------------------------------------------------------*/
 const ReleasesPage = () => {
   const [addReleaseDialogIsShown, setAddReleaseDialogIsShown] = React.useState(false);
   const { formatMessage } = useIntl();
@@ -102,23 +233,19 @@ const ReleasesPage = () => {
             <TabPanels>
               {/* Pending releases */}
               <TabPanel>
-                {isError ? (
-                  <Flex paddingTop={8}>
-                    <AnErrorOccurred />
-                  </Flex>
-                ) : (
-                  <ReleasesGrid sectionTitle="pending" releases={response?.currentData?.data} />
-                )}
+                <ReleasesGrid
+                  sectionTitle="pending"
+                  releases={response?.currentData?.data}
+                  isError={isError}
+                />
               </TabPanel>
               {/* Done releases */}
               <TabPanel>
-                {isError ? (
-                  <Flex paddingTop={8}>
-                    <AnErrorOccurred />
-                  </Flex>
-                ) : (
-                  <ReleasesGrid sectionTitle="done" releases={response?.currentData?.data} />
-                )}
+                <ReleasesGrid
+                  sectionTitle="done"
+                  releases={response?.currentData?.data}
+                  isError={isError}
+                />
               </TabPanel>
             </TabPanels>
           </TabGroup>
