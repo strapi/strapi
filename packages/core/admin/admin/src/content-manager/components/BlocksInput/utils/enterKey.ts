@@ -32,16 +32,17 @@ const pressEnterTwiceToExit = (editor: Editor) => {
       type: 'paragraph',
       children: [{ type: 'text', text: '' }],
     });
-  } else {
-    // Otherwise insert a new line within the node
-    Transforms.insertText(editor, '\n');
+    return;
+  }
 
-    // If there's nothing after the cursor, disable modifiers
-    if (isNodeEnd) {
-      for (const modifier of ['bold', 'italic', 'underline', 'strikethrough', 'code']) {
-        Editor.removeMark(editor, modifier);
-      }
-    }
+  // Otherwise insert a new line within the node
+  Transforms.insertText(editor, '\n');
+
+  // If there's nothing after the cursor, disable modifiers
+  if (isNodeEnd) {
+    ['bold', 'italic', 'underline', 'strikethrough', 'code'].forEach((modifier) => {
+      Editor.removeMark(editor, modifier);
+    });
   }
 };
 
