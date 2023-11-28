@@ -202,7 +202,7 @@ const cleanSchemaAttributes = (
             properties: {
               data: {
                 type: 'array',
-                items: componentSchemaRefName.length ? { $ref: componentSchemaRefName } : {},
+                items: componentSchemaRefName.length ? { $ref: `${componentSchemaRefName}ListResponseDataItemLocalized`} : {},
               },
             },
           };
