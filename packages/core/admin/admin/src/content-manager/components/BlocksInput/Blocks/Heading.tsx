@@ -67,7 +67,7 @@ const headingBlocks: Pick<
     handleConvert: (editor) => handleConvertToHeading(editor, 1),
     matchNode: (node) => node.type === 'heading' && node.level === 1,
     isInBlocksSelector: true,
-    snippet: '# ',
+    snippet: '#',
   },
   'heading-two': {
     renderElement: (props) => <H2 {...props.attributes}>{props.children}</H2>,
@@ -79,6 +79,7 @@ const headingBlocks: Pick<
     handleConvert: (editor) => handleConvertToHeading(editor, 2),
     matchNode: (node) => node.type === 'heading' && node.level === 2,
     isInBlocksSelector: true,
+    snippet: '##',
   },
   'heading-three': {
     renderElement: (props) => <H3 {...props.attributes}>{props.children}</H3>,
@@ -90,6 +91,7 @@ const headingBlocks: Pick<
     handleConvert: (editor) => handleConvertToHeading(editor, 3),
     matchNode: (node) => node.type === 'heading' && node.level === 3,
     isInBlocksSelector: true,
+    snippet: '###',
   },
   'heading-four': {
     renderElement: (props) => <H4 {...props.attributes}>{props.children}</H4>,
@@ -101,6 +103,7 @@ const headingBlocks: Pick<
     handleConvert: (editor) => handleConvertToHeading(editor, 4),
     matchNode: (node) => node.type === 'heading' && node.level === 4,
     isInBlocksSelector: true,
+    snippet: '####',
   },
   'heading-five': {
     renderElement: (props) => <H5 {...props.attributes}>{props.children}</H5>,
@@ -112,6 +115,7 @@ const headingBlocks: Pick<
     handleConvert: (editor) => handleConvertToHeading(editor, 5),
     matchNode: (node) => node.type === 'heading' && node.level === 5,
     isInBlocksSelector: true,
+    snippet: '#####',
   },
   'heading-six': {
     renderElement: (props) => <H6 {...props.attributes}>{props.children}</H6>,
@@ -123,6 +127,7 @@ const headingBlocks: Pick<
     handleConvert: (editor) => handleConvertToHeading(editor, 6),
     matchNode: (node) => node.type === 'heading' && node.level === 6,
     isInBlocksSelector: true,
+    snippet: '######',
   },
 };
 

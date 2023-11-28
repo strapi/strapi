@@ -69,6 +69,7 @@ const quoteBlocks: Pick<BlocksStore, 'quote'> = {
         }
       }
     },
+    snippet: '>',
   },
 };
 

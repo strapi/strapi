@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Box } from '@strapi/design-system';
-import { Editor } from 'slate';
+import { Editor, Path, Transforms } from 'slate';
 import {
   type ReactEditor,
   type RenderElementProps,
@@ -69,7 +69,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
     [blocks]
   );
 
-  const checkSnippet = () => {
+  const checkSnippet = (event: React.KeyboardEvent<HTMLElement>) => {
     // Get current text block
     if (!editor.selection) {
       return;
@@ -89,14 +89,21 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
 
     // Check if the text node starts with a known snippet
     const blockMatchingSnippet = Object.values(blocks).find((block) => {
-      if (!block.snippet) {
-        return false;
-      }
-
-      return textNode.text.startsWith(block.snippet);
+      return Boolean(block.snippet) && textNode.text === block.snippet;
     });
 
-    // TODO: convert into matching block
+    if (blockMatchingSnippet?.handleConvert) {
+      // Prevent the space from being created and delete the snippet
+      event.preventDefault();
+      Transforms.delete(editor, {
+        distance: blockMatchingSnippet.snippet?.length,
+        unit: 'character',
+        reverse: true,
+      });
+
+      // Convert the selected block
+      blockMatchingSnippet.handleConvert(editor);
+    }
   };
 
   const handleEnter = () => {
@@ -142,7 +149,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
   /**
    * Modifier keyboard shortcuts
    */
-  const handleKeyboardShortcuts = (event: React.KeyboardEvent<HTMLElement>) => {
+  const handleModifierShortcuts = (event: React.KeyboardEvent<HTMLElement>) => {
     const isCtrlOrCmd = event.metaKey || event.ctrlKey;
 
     if (isCtrlOrCmd) {
@@ -155,14 +162,22 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
   };
 
   const handleKeyDown: React.KeyboardEventHandler<HTMLElement> = (event) => {
+    // Find the right block-specific handlers for enter and backspace key presses
     if (event.key === 'Enter') {
       event.preventDefault();
-      handleEnter();
+      return handleEnter();
     }
     if (event.key === 'Backspace') {
-      handleBackspaceEvent(event);
+      return handleBackspaceEvent(event);
     }
-    handleKeyboardShortcuts(event);
+
+    // Check if there's a modifier to toggle
+    handleModifierShortcuts(event);
+
+    // Check if a snippet was triggered
+    if (event.key === ' ') {
+      checkSnippet(event);
+    }
   };
 
   /**
@@ -211,7 +226,6 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
         renderElement={renderElement}
         renderLeaf={renderLeaf}
         onKeyDown={handleKeyDown}
-        onKeyUp={checkSnippet}
         scrollSelectionIntoView={handleScrollSelectionIntoView}
       />
     </Box>
