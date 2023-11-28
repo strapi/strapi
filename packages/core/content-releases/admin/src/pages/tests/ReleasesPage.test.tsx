@@ -4,7 +4,7 @@ import { rest } from 'msw';
 
 import { ReleasesPage } from '../ReleasesPage';
 
-import { mockData } from './mockData';
+import { mockReleasesPageData } from './mockReleasesPageData';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -15,12 +15,17 @@ jest.mock('@strapi/helper-plugin', () => ({
 describe('Releases home page', () => {
   it('renders correctly the page with no results (subtitle, no pagination, body content, add release dialog)', async () => {
     server.use(
-      rest.get('/content-releases', (req, res, ctx) => res(ctx.json(mockData.emptyEntries)))
+      rest.get('/content-releases', (req, res, ctx) =>
+        res(ctx.json(mockReleasesPageData.emptyEntries))
+      )
     );
+
     const { user } = render(<ReleasesPage />);
+
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Releases');
-    const releaseSubtitle = await screen.findByText('No releases');
-    expect(releaseSubtitle).toBeInTheDocument();
+
+    const releaseSubtitle = await screen.findAllByText('No releases');
+    expect(releaseSubtitle[0]).toBeInTheDocument();
 
     const paginationCombobox = screen.queryByRole('combobox', { name: /entries per page/i });
     expect(paginationCombobox).not.toBeInTheDocument();
@@ -29,14 +34,18 @@ describe('Releases home page', () => {
     expect(newReleaseButton).toBeInTheDocument();
     await user.click(newReleaseButton);
 
-    const emptyPendingBodyContent = screen.getByText(/no pending entries/i);
+    const pendingTabPanel = screen.getByRole('tabpanel', { name: /pending/i });
+    const emptyPendingBodyContent = within(pendingTabPanel).getByText(/no releases/i);
+
     expect(emptyPendingBodyContent).toBeInTheDocument();
 
     // change the tab to see the done empty body content
     const doneTab = screen.getByRole('tab', { name: /done/i });
     await user.click(doneTab);
 
-    const emptyDoneBodyContent = screen.getByText(/no done entries/i);
+    const doneTabpanel = screen.getByRole('tabpanel', { name: /done/i });
+
+    const emptyDoneBodyContent = within(doneTabpanel).getByText(/no releases/i);
     expect(emptyDoneBodyContent).toBeInTheDocument();
   });
 
@@ -49,14 +58,17 @@ describe('Releases home page', () => {
           req.url.searchParams.get('filters[$and][0][releasedAt][$notNull]') === 'true'
         ) {
           // Return a mocked response
-          return res(ctx.json(mockData.emptyEntries));
+          return res(ctx.json(mockReleasesPageData.emptyEntries));
         }
-        return res(ctx.json(mockData.pendingEntries));
+        return res(ctx.json(mockReleasesPageData.pendingEntries));
       })
     );
+
     const { user } = render(<ReleasesPage />);
+
     const releaseSubtitle = await screen.findByText('17 releases');
     expect(releaseSubtitle).toBeInTheDocument();
+
     const paginationCombobox = screen.queryByRole('combobox', { name: /entries per page/i });
     expect(paginationCombobox).toBeInTheDocument();
 
@@ -65,6 +77,7 @@ describe('Releases home page', () => {
 
     const nextPageButton = screen.getByRole('link', { name: /go to next page/i });
     await user.click(nextPageButton);
+
     const lastEntry = screen.getByRole('heading', { level: 3, name: 'entry 17' });
     expect(lastEntry).toBeInTheDocument();
 
@@ -72,13 +85,15 @@ describe('Releases home page', () => {
     const doneTab = screen.getByRole('tab', { name: /done/i });
     await user.click(doneTab);
 
-    const doneReleaseSubtitle = await screen.findByText('No releases');
-    expect(doneReleaseSubtitle).toBeInTheDocument();
+    const doneReleaseSubtitle = await screen.findAllByText('No releases');
+    expect(doneReleaseSubtitle[0]).toBeInTheDocument();
 
     const paginationDoneCombobox = screen.queryByRole('combobox', { name: /entries per page/i });
     expect(paginationDoneCombobox).not.toBeInTheDocument();
 
-    const emptyDoneBodyContent = screen.getByText(/no done entries/i);
+    const doneTabpanel = screen.getByRole('tabpanel', { name: /done/i });
+
+    const emptyDoneBodyContent = within(doneTabpanel).getByText(/no releases/i);
     expect(emptyDoneBodyContent).toBeInTheDocument();
   });
 
@@ -91,12 +106,14 @@ describe('Releases home page', () => {
           req.url.searchParams.get('filters[$and][0][releasedAt][$notNull]') === 'true'
         ) {
           // Return a mocked response
-          return res(ctx.json(mockData.pendingDoneEntries.done));
+          return res(ctx.json(mockReleasesPageData.pendingDoneEntries.done));
         }
-        return res(ctx.json(mockData.pendingDoneEntries.pending));
+        return res(ctx.json(mockReleasesPageData.pendingDoneEntries.pending));
       })
     );
+
     const { user } = render(<ReleasesPage />);
+
     const releaseSubtitle = await screen.findByText('8 releases');
     expect(releaseSubtitle).toBeInTheDocument();
 
@@ -116,6 +133,7 @@ describe('Releases home page', () => {
 
   it('hides the dialog', async () => {
     const { user } = render(<ReleasesPage />);
+
     const newReleaseButton = screen.getByRole('button', { name: 'New release' });
     await user.click(newReleaseButton);
 
@@ -130,6 +148,7 @@ describe('Releases home page', () => {
 
   it('enables the submit button when there is content in the input', async () => {
     const { user } = render(<ReleasesPage />);
+
     const newReleaseButton = screen.getByRole('button', { name: 'New release' });
     await user.click(newReleaseButton);
 

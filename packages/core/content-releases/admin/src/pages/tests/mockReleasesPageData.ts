@@ -470,13 +470,13 @@ const PENDING_DONE_RELEASES_MOCK_DATA = {
   },
 };
 
-const mockData = {
+const mockReleasesPageData = {
   emptyEntries: EMPTY_MOCK_DATA,
   pendingEntries: PENDING_RELEASES_MOCK_DATA,
   pendingDoneEntries: PENDING_DONE_RELEASES_MOCK_DATA,
 } as const;
 
-type MockData = typeof mockData;
+type MockReleasesPageData = typeof mockReleasesPageData;
 
-export { mockData };
-export type { MockData };
+export { mockReleasesPageData };
+export type { MockReleasesPageData };
