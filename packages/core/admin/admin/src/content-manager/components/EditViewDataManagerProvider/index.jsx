@@ -24,7 +24,6 @@ import { Prompt, Redirect } from 'react-router-dom';
 
 import { usePrev } from '../../hooks';
 import { clearSetModifiedDataOnly } from '../../sharedReducers/crudReducer/actions';
-import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
 import { createYupSchema, getTrad } from '../../utils';
 
 import reducer, { initialState } from './reducer';
@@ -69,7 +68,9 @@ const EditViewDataManagerProvider = ({
     publishConfirmation,
   } = reducerState;
 
-  const { setModifiedDataOnly } = useSelector(selectCrudReducer);
+  const { setModifiedDataOnly } = useSelector(
+    (state) => state['content-manager_editViewCrudReducer']
+  );
   const reduxDispatch = useDispatch();
 
   const toggleNotification = useNotification();
