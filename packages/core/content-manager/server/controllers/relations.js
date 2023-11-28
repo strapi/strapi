@@ -55,6 +55,14 @@ module.exports = {
 
     await validateFindAvailable(ctx.request.query);
 
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
+
+    if (permissionChecker.cannot.read()) {
+      return ctx.forbidden();
+    }
+
+    const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.request.query);
+
     // idsToOmit: used to exclude relations that the front already added but that were not saved yet
     // idsToInclude: used to include relations that the front removed but not saved yes
     const { entityId, idsToOmit, idsToInclude, _q, ...query } = ctx.request.query;
@@ -133,6 +141,8 @@ module.exports = {
       fields: fieldsToSelect, // cannot select other fields as the user may not have the permissions
       filters: {}, // cannot filter for RBAC reasons
     };
+
+    Object.assign(queryParams, permissionQuery)
 
     if (!isEmpty(idsToOmit)) {
       addFiltersClause(queryParams, { id: { $notIn: idsToOmit } });
