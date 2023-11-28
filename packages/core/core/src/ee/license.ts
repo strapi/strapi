@@ -3,7 +3,7 @@ import { join, resolve } from 'path';
 import crypto from 'crypto';
 import type { Strapi } from '@strapi/types';
 
-import machineId from '../utils/machine-id';
+import { machineID } from '@strapi/utils';
 
 interface LicenseInfo {
   type: 'bronze' | 'silver' | 'gold';
@@ -85,7 +85,7 @@ const fetchLicense = async ({ strapi }: { strapi: Strapi }, key: string, project
     .fetch(`https://license.strapi.io/api/licenses/validate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key, projectId, deviceId: machineId() }),
+      body: JSON.stringify({ key, projectId, deviceId: machineID() }),
     })
     .catch(throwError);
 

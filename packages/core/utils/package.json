@@ -49,6 +49,7 @@
     "date-fns": "2.30.0",
     "http-errors": "1.8.1",
     "lodash": "4.17.21",
+    "node-machine-id": "1.1.12",
     "p-map": "4.0.0",
     "yup": "0.32.9"
   },
