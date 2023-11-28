@@ -11,6 +11,7 @@
   "header.actions.created": "Created",
   "header.actions.created.description": "{number, plural, =0 {# days} one {# day} other {# days}} ago by {user}",
   "modal.release-created-notification-success": "Release created",
+  "modal.release-updated-notification-success": "Release updated",
   "modal.add-release-title": "New Release",
   "modal.form.input.label.release-name": "Name",
   "modal.form.button.submit": "Continue",

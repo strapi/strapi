@@ -4,7 +4,7 @@ import { pluginId } from '../pluginId';
 
 import { axiosBaseQuery } from './axios';
 
-import type { CreateRelease, GetReleases } from '../../../shared/contracts/releases';
+import type { CreateRelease, GetReleases, UpdateRelease } from '../../../shared/contracts/releases';
 
 const releaseApi = createApi({
   reducerPath: pluginId,
@@ -31,10 +31,23 @@ const releaseApi = createApi({
         },
         invalidatesTags: ['Releases'],
       }),
+      updateRelease: build.mutation<
+        void,
+        UpdateRelease.Request['params'] & UpdateRelease.Request['body']
+      >({
+        query({ id, ...data }) {
+          return {
+            url: `/content-releases/${id}`,
+            method: 'PUT',
+            data,
+          };
+        },
+        invalidatesTags: ['Releases'],
+      }),
     };
   },
 });
 
-const { useGetReleaseQuery, useCreateReleaseMutation } = releaseApi;
+const { useGetReleaseQuery, useCreateReleaseMutation, useUpdateReleaseMutation } = releaseApi;
 
-export { useGetReleaseQuery, useCreateReleaseMutation, releaseApi };
+export { useGetReleaseQuery, useCreateReleaseMutation, useUpdateReleaseMutation, releaseApi };

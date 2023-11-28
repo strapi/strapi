@@ -11,12 +11,16 @@ import {
   Popover,
   Typography,
 } from '@strapi/design-system';
-import { CheckPermissions } from '@strapi/helper-plugin';
+import { CheckPermissions, useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
 import { ArrowLeft, EmptyDocuments, More, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { AddEditReleaseDialog, FormValues } from '../components/AddEditReleaseDialog';
 import { PERMISSIONS } from '../constants';
+import { isAxiosError } from '../services/axios';
+import { useUpdateReleaseMutation } from '../services/release';
 
 const PopoverButton = styled(Flex)`
   align-self: stretch;
@@ -45,10 +49,14 @@ const ReleaseInfoWrapper = styled(Flex)`
 `;
 
 const ReleaseDetailsPage = () => {
+  const { releaseId } = useParams<{ releaseId: string }>();
+  const [editReleaseDialogIsShown, setEditReleaseDialogIsShown] = React.useState(false);
   const [isPopoverVisible, setIsPopoverVisible] = React.useState(false);
   const moreButtonRef = React.useRef<HTMLButtonElement>(null!);
   const { formatMessage } = useIntl();
-  // TODO: get the title from the API
+  const toggleNotification = useNotification();
+  const { formatAPIError } = useAPIErrorHandler();
+  // TODO: get title from the API
   const title = 'Release title';
 
   const totalEntries = 0; // TODO: replace it with the total number of entries
@@ -57,6 +65,47 @@ const ReleaseDetailsPage = () => {
 
   const handleTogglePopover = () => {
     setIsPopoverVisible((prev) => !prev);
+  };
+
+  const toggleEditReleaseDialog = () => {
+    setEditReleaseDialogIsShown((prev) => !prev);
+  };
+
+  const openAddEditReleaseDialog = () => {
+    toggleEditReleaseDialog();
+    handleTogglePopover();
+  };
+
+  const [updateRelease, { isLoading }] = useUpdateReleaseMutation();
+
+  const handleEditRelease = async (values: FormValues) => {
+    const response = await updateRelease({
+      id: releaseId,
+      name: values.name,
+    });
+    if ('data' in response) {
+      // When the response returns an object with 'data', handle success
+      toggleNotification({
+        type: 'success',
+        message: formatMessage({
+          id: 'content-releases.modal.release-updated-notification-success',
+          defaultMessage: 'Release updated.',
+        }),
+      });
+    } else if (isAxiosError(response.error)) {
+      // When the response returns an object with 'error', handle axios error
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(response.error),
+      });
+    } else {
+      // Otherwise, the response returns an object with 'error', handle a generic error
+      toggleNotification({
+        type: 'warning',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+      });
+    }
+    toggleEditReleaseDialog();
   };
 
   return (
@@ -108,6 +157,7 @@ const ReleaseDetailsPage = () => {
                     gap={2}
                     as="button"
                     borderRadius="4px"
+                    onClick={openAddEditReleaseDialog}
                   >
                     <PencilIcon />
                     <Typography ellipsis>
@@ -186,6 +236,14 @@ const ReleaseDetailsPage = () => {
           icon={<EmptyDocuments width="10rem" />}
         />
       </ContentLayout>
+      {editReleaseDialogIsShown && (
+        <AddEditReleaseDialog
+          handleClose={toggleEditReleaseDialog}
+          handleSubmit={handleEditRelease}
+          isLoading={isLoading}
+          initialValues={{ name: title }}
+        />
+      )}
     </>
   );
 };
