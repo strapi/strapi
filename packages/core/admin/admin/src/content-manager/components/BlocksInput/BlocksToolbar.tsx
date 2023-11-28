@@ -15,6 +15,7 @@ import {
   isSelectorBlockKey,
   useBlocksEditorContext,
 } from './BlocksEditor';
+import { useConversionModal } from './utils/conversions';
 import { insertLink } from './utils/links';
 import { type Block, getEntries, getKeys } from './utils/types';
 
@@ -129,7 +130,7 @@ const ToolbarButton = ({
 const BlocksDropdown = () => {
   const { editor, blocks, disabled } = useBlocksEditorContext('BlocksDropdown');
   const { formatMessage } = useIntl();
-  const [modalComponent, setModalComponent] = React.useState<React.JSX.Element | null>(null);
+  const { modalComponent, handleConversionResult } = useConversionModal();
 
   const blockKeysToInclude: SelectorBlockKey[] = getEntries(blocks).reduce<
     ReturnType<typeof getEntries>
@@ -164,13 +165,7 @@ const BlocksDropdown = () => {
 
     // Let the block handle the Slate conversion logic
     const maybeRenderModal = blocks[optionKey].handleConvert?.(editor);
-
-    // Some blocks, like Image, require a modal. Check if there's one returned
-    if (maybeRenderModal) {
-      // Use cloneElement to apply a key because to create a new instance of the component
-      // Without the new key, the state is kept from previous times that option was picked
-      setModalComponent(React.cloneElement(maybeRenderModal(), { key: Date.now() }));
-    }
+    handleConversionResult(maybeRenderModal);
 
     setBlockSelected(optionKey);
 

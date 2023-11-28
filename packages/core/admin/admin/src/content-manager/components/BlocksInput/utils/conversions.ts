@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { type Element, type Path, Editor, Transforms } from 'slate';
 
 /**
@@ -89,4 +91,27 @@ const insertEmptyBlockAtLast = (editor: Editor) => {
   );
 };
 
-export { baseHandleConvert, getAttributesToClear, isLastBlockType, insertEmptyBlockAtLast };
+function useConversionModal() {
+  const [modalComponent, setModalComponent] = React.useState<React.JSX.Element | null>(null);
+
+  const handleConversionResult = (
+    maybeRenderModal: void | (() => React.JSX.Element) | undefined
+  ) => {
+    // Not all blocks return a modal
+    if (maybeRenderModal) {
+      // Use cloneElement to apply a key because to create a new instance of the component
+      // Without the new key, the state is kept from previous times that option was picked
+      setModalComponent(React.cloneElement(maybeRenderModal(), { key: Date.now() }));
+    }
+  };
+
+  return { modalComponent, handleConversionResult };
+}
+
+export {
+  baseHandleConvert,
+  getAttributesToClear,
+  isLastBlockType,
+  insertEmptyBlockAtLast,
+  useConversionModal,
+};
