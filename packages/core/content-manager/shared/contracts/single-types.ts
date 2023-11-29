@@ -2,8 +2,6 @@ import { Documents, Common } from '@strapi/types';
 
 import { errors } from '@strapi/utils';
 
-type PublicationState = Documents.Params.PublicationState.Kind;
-
 type Document = Documents.Result<Common.UID.Schema>;
 type DocumentMetadata = {
   // All status of the returned locale
