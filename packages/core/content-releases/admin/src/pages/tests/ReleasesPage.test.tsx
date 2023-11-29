@@ -1,5 +1,5 @@
-import { within, screen } from '@testing-library/react';
-import { render, server } from '@tests/utils';
+import { within } from '@testing-library/react';
+import { render, server, screen } from '@tests/utils';
 import { rest } from 'msw';
 
 import { ReleasesPage } from '../ReleasesPage';
