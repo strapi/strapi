@@ -9120,7 +9120,7 @@ __metadata:
     "@types/ws": "npm:^8.5.4"
     chalk: "npm:4.1.2"
     cli-table3: "npm:0.6.2"
-    commander: "npm:8.3.0"
+    commander: "npm:11.1.0"
     fs-extra: "npm:10.0.0"
     inquirer: "npm:8.2.5"
     knex: "npm:2.5.0"
@@ -9351,7 +9351,7 @@ __metadata:
     browserslist-to-esbuild: "npm:1.2.0"
     chalk: "npm:4.1.2"
     chokidar: "npm:3.5.3"
-    commander: "npm:8.3.0"
+    commander: "npm:11.1.0"
     esbuild: "npm:0.19.2"
     esbuild-register: "npm:3.5.0"
     eslint-config-custom: "npm:4.15.4"
@@ -9936,7 +9936,7 @@ __metadata:
     chalk: "npm:4.1.2"
     ci-info: "npm:3.8.0"
     cli-table3: "npm:0.6.2"
-    commander: "npm:8.3.0"
+    commander: "npm:11.1.0"
     configstore: "npm:5.0.1"
     copyfiles: "npm:2.4.1"
     debug: "npm:4.3.4"
@@ -10006,7 +10006,7 @@ __metadata:
     "@types/koa": "npm:2.13.4"
     "@types/koa__router": "npm:12.0.0"
     "@types/node-schedule": "npm:2.1.0"
-    commander: "npm:8.3.0"
+    commander: "npm:11.1.0"
     eslint-config-custom: "npm:4.15.4"
     koa: "npm:2.13.4"
     node-schedule: "npm:2.1.0"
@@ -15070,10 +15070,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:8.3.0, commander@npm:^8.3.0":
-  version: 8.3.0
-  resolution: "commander@npm:8.3.0"
-  checksum: 6b7b5d334483ce24bd73c5dac2eab901a7dbb25fd983ea24a1eeac6e7166bb1967f641546e8abf1920afbde86a45fbfe5812fbc69d0dc451bb45ca416a12a3a3
+"commander@npm:11.1.0":
+  version: 11.1.0
+  resolution: "commander@npm:11.1.0"
+  checksum: 66bd2d8a0547f6cb1d34022efb25f348e433b0e04ad76a65279b1b09da108f59a4d3001ca539c60a7a46ea38bcf399fc17d91adad76a8cf43845d8dcbaf5cda1
   languageName: node
   linkType: hard
 
@@ -15102,6 +15102,13 @@ __metadata:
   version: 7.2.0
   resolution: "commander@npm:7.2.0"
   checksum: 9973af10727ad4b44f26703bf3e9fdc323528660a7590efe3aa9ad5042b4584c0deed84ba443f61c9d6f02dade54a5a5d3c95e306a1e1630f8374ae6db16c06d
+  languageName: node
+  linkType: hard
+
+"commander@npm:^8.3.0":
+  version: 8.3.0
+  resolution: "commander@npm:8.3.0"
+  checksum: 6b7b5d334483ce24bd73c5dac2eab901a7dbb25fd983ea24a1eeac6e7166bb1967f641546e8abf1920afbde86a45fbfe5812fbc69d0dc451bb45ca416a12a3a3
   languageName: node
   linkType: hard
 
@@ -15651,7 +15658,7 @@ __metadata:
   dependencies:
     "@strapi/generate-new": "npm:4.15.4"
     "@strapi/pack-up": "npm:4.15.4"
-    commander: "npm:8.3.0"
+    commander: "npm:11.1.0"
     eslint-config-custom: "npm:4.15.4"
     inquirer: "npm:8.2.5"
     tsconfig: "npm:4.15.4"
@@ -15668,7 +15675,7 @@ __metadata:
     "@strapi/pack-up": "npm:4.15.4"
     chalk: "npm:4.1.2"
     ci-info: "npm:3.8.0"
-    commander: "npm:8.3.0"
+    commander: "npm:11.1.0"
     eslint-config-custom: "npm:4.15.4"
     execa: "npm:5.1.1"
     fs-extra: "npm:10.0.0"

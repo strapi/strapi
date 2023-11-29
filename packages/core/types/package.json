@@ -51,11 +51,11 @@
     "@strapi/logger": "4.15.4",
     "@strapi/permissions": "4.15.4",
     "@strapi/utils": "4.15.4",
-    "commander": "8.3.0",
     "koa": "2.13.4",
     "node-schedule": "2.1.0"
   },
   "devDependencies": {
+    "@types/commander": "2.20.0",
     "@strapi/pack-up": "4.15.4",
     "@strapi/ts-zen": "^0.2.0",
     "@types/jest": "29.5.2",
