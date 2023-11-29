@@ -4,13 +4,14 @@ import { Schema, Common, Documents } from '@strapi/types';
 type PaginatedDocuments = Documents.PaginatedResult<Common.UID.Schema>;
 type PaginationQuery = Documents.Params.Pagination.PageNotation;
 type SortQuery = Documents.Params.Sort.StringNotation<Common.UID.Schema> & string;
-type PublicationState = Documents.Params.PublicationState.Kind;
 
 // Admin document response follows the same format as the document service
 type Document = Documents.Result<Common.UID.Schema>;
 type DocumentMetadata = {
-  availableStatus: PublicationState[];
-  availableLocales: string[];
+  // All status of the returned locale
+  availableStatus: Document[];
+  // Available locales within the same status of the returned document
+  availableLocales: Document[];
 };
 
 /**

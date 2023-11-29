@@ -6,8 +6,10 @@ type PublicationState = Documents.Params.PublicationState.Kind;
 
 type Document = Documents.Result<Common.UID.Schema>;
 type DocumentMetadata = {
-  availableStatus: PublicationState[];
-  availableLocales: string[];
+  // All status of the returned locale
+  availableStatus: Document[];
+  // Available locales within the same status of the returned document
+  availableLocales: Document[];
 };
 
 /**
