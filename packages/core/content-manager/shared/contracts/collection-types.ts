@@ -1,12 +1,14 @@
 import { errors } from '@strapi/utils';
-import { Schema, Common, EntityService } from '@strapi/types';
+import { Schema, Common, EntityService, Documents } from '@strapi/types';
 
 // Admin entity response follows the same format as the entity service
-type Entity = EntityService.Result<Common.UID.Schema>;
-type PaginatedEntities = EntityService.PaginatedResult<Common.UID.Schema>;
+type Document = Documents.Result<Common.UID.Schema>;
+type PaginatedDocuments = Documents.PaginatedResult<Common.UID.Schema>;
 
-type PaginationQuery = EntityService.Params.Pagination.PageNotation;
-type SortQuery = EntityService.Params.Sort.StringNotation<Common.UID.Schema> & string;
+type PaginationQuery = Documents.Params.Pagination.PageNotation;
+type SortQuery = Documents.Params.Sort.StringNotation<Common.UID.Schema> & string;
+
+type PublicationState = Documents.Params.PublicationState.Kind;
 
 /**
  * GET /collection-types/:model
@@ -27,7 +29,7 @@ export declare namespace Find {
 
   export interface Response {
     data: {
-      results: PaginatedEntities;
+      results: PaginatedDocuments;
       pagination: {
         page: PaginationQuery['page'];
         pageSize: PaginationQuery['pageSize'];
@@ -54,7 +56,11 @@ export declare namespace FindOne {
   }
 
   export interface Response {
-    data: Entity;
+    data: Document;
+    meta: {
+      availableStatus: PublicationState[];
+      availableLocales: string[];
+    };
     error?: errors.ApplicationError;
   }
 }
@@ -73,7 +79,11 @@ export declare namespace Create {
   }
 
   export interface Response {
-    data: Entity;
+    data: Document;
+    meta: {
+      availableStatus: PublicationState[];
+      availableLocales: string[];
+    };
     error?: errors.ApplicationError;
   }
 }
@@ -93,7 +103,11 @@ export declare namespace AutoClone {
   }
 
   export interface Response {
-    data: Entity;
+    data: Document;
+    meta: {
+      availableStatus: PublicationState[];
+      availableLocales: string[];
+    };
     error?: errors.ApplicationError;
   }
 }
@@ -113,7 +127,11 @@ export declare namespace Clone {
   }
 
   export interface Response {
-    data: Entity;
+    data: Document;
+    meta: {
+      availableStatus: PublicationState[];
+      availableLocales: string[];
+    };
     error?: errors.ApplicationError;
   }
 }
@@ -123,7 +141,7 @@ export declare namespace Clone {
  */
 export declare namespace Update {
   export interface Request {
-    body: Entity;
+    body: Document;
     query: {};
   }
 
@@ -133,7 +151,11 @@ export declare namespace Update {
   }
 
   export interface Response {
-    data: Entity;
+    data: Document;
+    meta: {
+      availableStatus: PublicationState[];
+      availableLocales: string[];
+    };
     error?: errors.ApplicationError;
   }
 }
@@ -153,7 +175,11 @@ export declare namespace Delete {
   }
 
   export interface Response {
-    data: Entity;
+    data: Document;
+    meta: {
+      availableStatus: PublicationState[];
+      availableLocales: string[];
+    };
     error?: errors.ApplicationError;
   }
 }
@@ -173,7 +199,11 @@ export declare namespace Publish {
   }
 
   export interface Response {
-    data: Entity;
+    data: Document;
+    meta: {
+      availableStatus: PublicationState[];
+      availableLocales: string[];
+    };
     error?: errors.ApplicationError;
   }
 }
@@ -193,7 +223,11 @@ export declare namespace Unpublish {
   }
 
   export interface Response {
-    data: Entity;
+    data: Document;
+    meta: {
+      availableStatus: PublicationState[];
+      availableLocales: string[];
+    };
     error?: errors.ApplicationError;
   }
 }
