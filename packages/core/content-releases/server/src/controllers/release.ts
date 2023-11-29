@@ -47,54 +47,46 @@ const releaseController = {
       .plugin('content-manager')
       .service('content-types');
 
-    const contentTypesMeta = await allowedContentTypes.reduce(async (accumulatorPromise, contentTypeUid) => {
-      const acc = await accumulatorPromise;
-
+    // From allowed content types, we get the mainField for each of them
+    const contentTypesMeta: Record<UID.ContentType, { mainField: string }> = {};
+    for (const contentTypeUid of allowedContentTypes) {
       const contentTypeConfig = await contentManagerContentTypeService.findConfiguration({ uid: contentTypeUid });
 
       if (contentTypeConfig) {
-        acc[contentTypeUid] = {
+        contentTypesMeta[contentTypeUid] = {
           mainField: contentTypeConfig.settings.mainField,
         };
       }
-
-      return acc;
-    }, Promise.resolve({} as Record<UID.ContentType, { mainField: string }>));
-
-    const releaseWithCountAllActions = (await getService('release', { strapi }).findOne(
-      Number(id), { populate: { actions: { count: true } } }
-    )) as ReleaseWithPopulatedActions | null;
-
-    const releaseWithCountHiddenActions = (await getService('release', { strapi }).findOne(
-      Number(id),
-      {
-        populate: {
-          actions: {
-            count: true,
-            filters: {
-              contentType: {
-                $notIn: allowedContentTypes
-              }
-            }
-          }
-        }
-      }
-    )) as ReleaseWithPopulatedActions | null;
-
-    if (!releaseWithCountAllActions || !releaseWithCountHiddenActions) {
-      throw new errors.NotFoundError(`Release not found for id: ${id}`);
     }
 
-    const { actions: releaseWithAllActionsMeta, ...release } = releaseWithCountAllActions;
-    const { actions: releaseWithHiddenActionsMeta } = releaseWithCountHiddenActions;
+    const releaseService = getService('release', { strapi });
+
+    const release = await releaseService.findOne(id);
+    const total = await releaseService.countActions({
+      filters: {
+        release: id
+      }
+    });
+    const totalHidden = await releaseService.countActions({
+      filters: {
+        release: id,
+        contentType: {
+          $notIn: allowedContentTypes
+        }
+      }
+    });
+
+    if (!release) {
+      throw new errors.NotFoundError(`Release not found for id: ${id}`);
+    }
 
     // Format the data object
     const data = {
       ...release,
       actions: {
         meta: {
-          total: releaseWithAllActionsMeta.count,
-          totalHidden: releaseWithHiddenActionsMeta.count,
+          total,
+          totalHidden,
         },
       },
       meta: {

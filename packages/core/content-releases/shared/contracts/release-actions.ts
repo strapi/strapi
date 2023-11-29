@@ -9,7 +9,7 @@ type ReleaseActionEntry = Entity & {
   [key: string]: Attribute.Any;
 };
 
-export interface ReleaseAction {
+export interface ReleaseAction extends Entity {
   type: 'publish' | 'unpublish';
   entry: ReleaseActionEntry;
   contentType: Common.UID.ContentType;

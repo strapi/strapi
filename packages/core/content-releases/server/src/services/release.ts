@@ -1,7 +1,7 @@
 import { setCreatorFields, errors } from '@strapi/utils';
-import type { LoadedStrapi, Common } from '@strapi/types';
+import type { LoadedStrapi, Common, EntityService } from '@strapi/types';
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
-import type { GetReleases, CreateRelease, UpdateRelease, GetRelease } from '../../../shared/contracts/releases';
+import type { GetReleases, CreateRelease, UpdateRelease, GetRelease,  } from '../../../shared/contracts/releases';
 import type { CreateReleaseAction, GetReleaseActions } from '../../../shared/contracts/release-actions';
 import type { UserInfo } from '../../../shared/types';
 import { getService } from '../utils';
@@ -89,6 +89,9 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
         }
       },
     });
+  },
+  async countActions(query: EntityService.Params.Pick<typeof RELEASE_ACTION_MODEL_UID, 'filters'>) {
+    return strapi.entityService.count(RELEASE_ACTION_MODEL_UID, query);
   }
 });
 

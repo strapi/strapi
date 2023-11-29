@@ -1,10 +1,11 @@
 import releaseController from '../release';
 
-const mockFindOne = jest.fn();
+const mockCountActions = jest.fn();
 
 jest.mock('../../utils', () => ({
   getService: jest.fn(() => ({
-    findOne: mockFindOne
+    findOne: jest.fn(() => ({ id: 1 })),
+    countActions: mockCountActions,
   })),
   getAllowedContentTypes: jest.fn(() => ['contentTypeA', 'contentTypeB']),
 }));
@@ -103,9 +104,11 @@ describe('Release controller', () => {
         data: {
           actions: {
             meta: {
-              count: 0
+              total: 0,
+              totalHidden: 0
             }
-          }
+          },
+          meta: {}
         }
       }
     };
@@ -117,23 +120,15 @@ describe('Release controller', () => {
 
     it('return the right meta object', async () => {
       // We mock the count all actions
-      mockFindOne.mockResolvedValueOnce({
-        actions: {
-          count: 2
-        }
-      });
+      mockCountActions.mockResolvedValueOnce(2);
 
       // We mock the count hidden actions
-      mockFindOne.mockResolvedValueOnce({
-        actions: {
-          count: 1
-        }
-      });
+      mockCountActions.mockResolvedValueOnce(1);
 
 
       // @ts-expect-error partial context
       await releaseController.findOne(ctx);
-      expect(ctx.body.data.actions.meta).toEqual({
+      expect(ctx.body.data.meta).toEqual({
         contentTypes: {
           contentTypeA: {
             mainField: 'name'
@@ -142,6 +137,8 @@ describe('Release controller', () => {
             mainField: 'name'
           }
         },
+      });
+      expect(ctx.body.data.actions.meta).toEqual({
         total: 2,
         totalHidden: 1,
       });
