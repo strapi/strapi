@@ -90,6 +90,7 @@ packages/core/content-releases/server/src/routes/release.ts
 - method: `POST`
 - endpoint: `/content-releases/:releaseId/actions`
 - body:
+
   ```ts
   {
     entry: {
@@ -110,6 +111,11 @@ packages/core/content-releases/server/src/routes/release.ts
     type: 'publish' | 'unpublish';
   }
   ```
+
+**Delete a release action**
+
+- method: `DELETE`
+- endpoint: `/content-releases/:releaseId/actions/:actionId`
 
 ## Controllers
 

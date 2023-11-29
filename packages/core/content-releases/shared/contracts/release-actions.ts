@@ -18,7 +18,7 @@ export interface ReleaseAction extends Entity {
 }
 
 /**
- * POST /content-releases/:id/actions - Create a release action
+ * POST /content-releases/:releaseId/actions - Create a release action
  */
 export declare namespace CreateReleaseAction {
   export interface Request {
@@ -56,6 +56,22 @@ export declare namespace GetReleaseActions {
     meta: {
       pagination: Pagination;
     };
+  }
+}
+
+/*
+ * DELETE /content-releases/:releaseId/actions/:actionId - Delete a release action
+ */
+export declare namespace DeleteReleaseAction {
+  export interface Request {
+    params: {
+      actionId: ReleaseAction['id'];
+      releaseId: Release['id'];
+    };
+  }
+
+  export interface Response {
+    data: ReleaseAction;
     error?: errors.ApplicationError | errors.NotFoundError;
   }
 }
