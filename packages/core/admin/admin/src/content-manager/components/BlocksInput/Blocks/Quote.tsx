@@ -18,7 +18,13 @@ const Blockquote = styled.blockquote.attrs({ role: 'blockquote' })`
 
 const quoteBlocks: Pick<BlocksStore, 'quote'> = {
   quote: {
-    renderElement: (props) => <Blockquote {...props.attributes}>{props.children}</Blockquote>,
+    renderElement: (props) => (
+      // The div is needed to make sure the padding bottom from BlocksContent is applied properly
+      // when the quote is the last block in the editor
+      <div>
+        <Blockquote {...props.attributes}>{props.children}</Blockquote>
+      </div>
+    ),
     icon: Quote,
     label: {
       id: 'components.Blocks.blocks.quote',

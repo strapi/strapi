@@ -228,6 +228,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
       paddingLeft={4}
       paddingRight={4}
       paddingTop={3}
+      paddingBottom={3}
     >
       <StyledEditable
         readOnly={disabled}
