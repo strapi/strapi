@@ -147,7 +147,6 @@ interface UseDragAndDropOptions {
   onEnd?: () => void;
   onGrabItem?: (index: number) => void;
   onStart?: () => void;
-  canDropHandler?: () => void;
 }
 
 type UseDragAndDropReturn = [
@@ -155,7 +154,7 @@ type UseDragAndDropReturn = [
     handlerId: Identifier;
     isDragging: boolean;
     handleKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => void;
-    isActive: boolean;
+    isOverDropTarget: boolean;
   },
   objectRef: React.RefObject<HTMLElement>,
   dropRef: ConnectDropTarget,
