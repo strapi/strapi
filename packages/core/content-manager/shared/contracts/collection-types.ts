@@ -1,7 +1,7 @@
 import { errors } from '@strapi/utils';
-import { Schema, Common, EntityService, Documents } from '@strapi/types';
+import { Schema, Common, Documents } from '@strapi/types';
 
-// Admin entity response follows the same format as the entity service
+// Admin document response follows the same format as the document service
 type Document = Documents.Result<Common.UID.Schema>;
 type PaginatedDocuments = Documents.PaginatedResult<Common.UID.Schema>;
 
@@ -9,6 +9,11 @@ type PaginationQuery = Documents.Params.Pagination.PageNotation;
 type SortQuery = Documents.Params.Sort.StringNotation<Common.UID.Schema> & string;
 
 type PublicationState = Documents.Params.PublicationState.Kind;
+
+type DocumentMetadata = {
+  availableStatus: PublicationState[];
+  availableLocales: string[];
+};
 
 /**
  * GET /collection-types/:model
@@ -57,10 +62,7 @@ export declare namespace FindOne {
 
   export interface Response {
     data: Document;
-    meta: {
-      availableStatus: PublicationState[];
-      availableLocales: string[];
-    };
+    meta: DocumentMetadata;
     error?: errors.ApplicationError;
   }
 }
@@ -80,10 +82,7 @@ export declare namespace Create {
 
   export interface Response {
     data: Document;
-    meta: {
-      availableStatus: PublicationState[];
-      availableLocales: string[];
-    };
+    meta: DocumentMetadata;
     error?: errors.ApplicationError;
   }
 }
@@ -104,10 +103,7 @@ export declare namespace AutoClone {
 
   export interface Response {
     data: Document;
-    meta: {
-      availableStatus: PublicationState[];
-      availableLocales: string[];
-    };
+    meta: DocumentMetadata;
     error?: errors.ApplicationError;
   }
 }
@@ -128,10 +124,7 @@ export declare namespace Clone {
 
   export interface Response {
     data: Document;
-    meta: {
-      availableStatus: PublicationState[];
-      availableLocales: string[];
-    };
+    meta: DocumentMetadata;
     error?: errors.ApplicationError;
   }
 }
@@ -152,10 +145,7 @@ export declare namespace Update {
 
   export interface Response {
     data: Document;
-    meta: {
-      availableStatus: PublicationState[];
-      availableLocales: string[];
-    };
+    meta: DocumentMetadata;
     error?: errors.ApplicationError;
   }
 }
@@ -176,10 +166,7 @@ export declare namespace Delete {
 
   export interface Response {
     data: Document;
-    meta: {
-      availableStatus: PublicationState[];
-      availableLocales: string[];
-    };
+    meta: DocumentMetadata;
     error?: errors.ApplicationError;
   }
 }
@@ -200,10 +187,7 @@ export declare namespace Publish {
 
   export interface Response {
     data: Document;
-    meta: {
-      availableStatus: PublicationState[];
-      availableLocales: string[];
-    };
+    meta: DocumentMetadata;
     error?: errors.ApplicationError;
   }
 }
@@ -224,10 +208,7 @@ export declare namespace Unpublish {
 
   export interface Response {
     data: Document;
-    meta: {
-      availableStatus: PublicationState[];
-      availableLocales: string[];
-    };
+    meta: DocumentMetadata;
     error?: errors.ApplicationError;
   }
 }
