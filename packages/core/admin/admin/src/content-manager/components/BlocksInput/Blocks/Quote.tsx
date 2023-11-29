@@ -9,10 +9,10 @@ import { baseHandleConvert } from '../utils/conversions';
 import { type Block } from '../utils/types';
 
 const Blockquote = styled.blockquote.attrs({ role: 'blockquote' })`
-  margin: ${({ theme }) => `${theme.spaces[4]} 0`};
+  margin: ${({ theme }) => `${theme.spaces[2]} 0`};
   font-weight: ${({ theme }) => theme.fontWeights.regular};
   border-left: ${({ theme }) => `${theme.spaces[1]} solid ${theme.colors.neutral200}`};
-  padding: ${({ theme }) => theme.spaces[2]} ${({ theme }) => theme.spaces[5]};
+  padding: ${({ theme }) => theme.spaces[2]} ${({ theme }) => theme.spaces[4]};
   color: ${({ theme }) => theme.colors.neutral600};
 `;
 
