@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Flex, inputFocusStyle } from '@strapi/design-system';
+import { Box, Flex } from '@strapi/design-system';
 import { prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
 import { Picture } from '@strapi/icons';
 import { type Attribute } from '@strapi/types';
@@ -9,21 +9,13 @@ import { useFocused, type RenderElementProps, useSelected } from 'slate-react';
 import styled, { css } from 'styled-components';
 
 import { useBlocksEditorContext, type BlocksStore } from '../BlocksEditor';
-import { insertEmptyBlockAtLast, isLastBlockType } from '../utils/conversions';
 import { type Block } from '../utils/types';
-
-// The max-height is decided with the design team, the 56px is the height of the toolbar
-const Img = styled.img`
-  max-height: calc(512px - 56px);
-  max-width: 100%;
-  object-fit: contain;
-`;
 
 interface ImageWrapperProps extends React.ComponentProps<typeof Box> {
   isFocused: boolean;
 }
 
-const ImageWrapper = styled(Box)<ImageWrapperProps>`
+const ImageWrapper = styled(Flex)<ImageWrapperProps>`
   transition-property: box-shadow;
   transition-duration: 0.2s;
   ${(props) =>
@@ -31,6 +23,13 @@ const ImageWrapper = styled(Box)<ImageWrapperProps>`
     css`
       box-shadow: ${props.theme.colors.primary600} 0px 0px 0px 3px;
     `}
+
+  & > img {
+    // The max-height is decided with the design team, the 56px is the height of the toolbar
+    max-height: calc(512px - 56px);
+    max-width: 100%;
+    object-fit: contain;
+  }
 `;
 
 const IMAGE_SCHEMA_FIELDS = [
@@ -73,12 +72,18 @@ const Image = ({ attributes, children, element }: RenderElementProps) => {
   const { url, alternativeText, width, height } = element.image;
 
   return (
-    <ImageWrapper hasRadius isFocused={editorIsFocused && imageIsSelected} {...attributes}>
+    <Box {...attributes}>
       {children}
-      <Flex background="neutral100" contentEditable={false} justifyContent="center" hasRadius>
-        <Img src={url} alt={alternativeText} width={width} height={height} />
-      </Flex>
-    </ImageWrapper>
+      <ImageWrapper
+        background="neutral100"
+        contentEditable={false}
+        justifyContent="center"
+        isFocused={editorIsFocused && imageIsSelected}
+        hasRadius
+      >
+        <img src={url} alt={alternativeText} width={width} height={height} />
+      </ImageWrapper>
+    </Box>
   );
 };
 
@@ -150,12 +155,6 @@ const ImageDialog = () => {
     });
 
     insertImages(formattedImages);
-
-    if (isLastBlockType(editor, 'image')) {
-      // Insert blank line to add new blocks below image block
-      insertEmptyBlockAtLast(editor);
-    }
-
     setIsOpen(false);
   };
 

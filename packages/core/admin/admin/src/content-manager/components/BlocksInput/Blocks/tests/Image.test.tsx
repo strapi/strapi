@@ -126,11 +126,6 @@ describe('Image', () => {
         image: mockImage,
         children: [{ type: 'text', text: '' }],
       },
-      // An empty paragraph should have been created below the image since it was the last block
-      {
-        type: 'paragraph',
-        children: [{ type: 'text', text: '' }],
-      },
     ]);
   });
 
