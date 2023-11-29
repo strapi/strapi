@@ -51,42 +51,4 @@ const getAttributesToClear = (element: Element) => {
   return attributesToClear as Record<string, null>;
 };
 
-/**
- * Checks if the last block in the editor is of the given type.
- */
-const isLastBlockType = (editor: Editor, type: Element['type']) => {
-  const { selection } = editor;
-
-  if (!selection) return false;
-
-  const [currentBlock] = Editor.nodes(editor, {
-    at: selection,
-    match: (node) => !Editor.isEditor(node) && node.type === type,
-  });
-
-  if (currentBlock) {
-    const [, currentNodePath] = currentBlock;
-
-    const isNodeAfter = Boolean(Editor.after(editor, currentNodePath));
-
-    return !isNodeAfter;
-  }
-
-  return false;
-};
-
-/**
- * Inserts an empty paragraph at the end of the editor.
- */
-const insertEmptyBlockAtLast = (editor: Editor) => {
-  Transforms.insertNodes(
-    editor,
-    {
-      type: 'paragraph',
-      children: [{ type: 'text', text: '' }],
-    },
-    { at: [editor.children.length] }
-  );
-};
-
-export { baseHandleConvert, getAttributesToClear, isLastBlockType, insertEmptyBlockAtLast };
+export { baseHandleConvert, getAttributesToClear };
