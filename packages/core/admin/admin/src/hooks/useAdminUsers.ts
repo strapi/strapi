@@ -50,7 +50,7 @@ export function useAdminUsers(params: APIUsersQueryParams = {}, queryOptions = {
 
   return {
     users,
-    pagination: React.useMemo(() => (data && 'pagination' in data) ?? null, [data]),
+    pagination: React.useMemo(() => (data && data.pagination) ?? null, [data]),
     isLoading,
     isError,
     refetch,
