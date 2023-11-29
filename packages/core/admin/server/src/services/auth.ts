@@ -12,7 +12,7 @@ const { ApplicationError } = errors;
  * @param password - password to hash
  * @returns hashed password
  */
-const hashPassword = (password: string) => bcrypt.hash(password, 10);
+const hashPassword = (password: string) => bcrypt.hash(password, 11);
 
 /**
  * Validate a password
