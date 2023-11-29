@@ -25,6 +25,7 @@ const ImageWrapper = styled(Flex)<ImageWrapperProps>`
     `}
 
   & > img {
+    height: auto;
     // The max-height is decided with the design team, the 56px is the height of the toolbar
     max-height: calc(512px - 56px);
     max-width: 100%;
