@@ -49,6 +49,7 @@ const codeBlocks: Pick<BlocksStore, 'code'> = {
       // Insert a new line within the block
       Transforms.insertText(editor, '\n');
     },
+    snippets: ['```'],
   },
 };
 
