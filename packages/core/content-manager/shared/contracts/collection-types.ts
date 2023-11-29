@@ -1,15 +1,13 @@
 import { errors } from '@strapi/utils';
 import { Schema, Common, Documents } from '@strapi/types';
 
-// Admin document response follows the same format as the document service
-type Document = Documents.Result<Common.UID.Schema>;
 type PaginatedDocuments = Documents.PaginatedResult<Common.UID.Schema>;
-
 type PaginationQuery = Documents.Params.Pagination.PageNotation;
 type SortQuery = Documents.Params.Sort.StringNotation<Common.UID.Schema> & string;
-
 type PublicationState = Documents.Params.PublicationState.Kind;
 
+// Admin document response follows the same format as the document service
+type Document = Documents.Result<Common.UID.Schema>;
 type DocumentMetadata = {
   availableStatus: PublicationState[];
   availableLocales: string[];
