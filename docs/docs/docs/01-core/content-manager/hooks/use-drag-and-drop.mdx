@@ -130,7 +130,7 @@ import { ConnectDropTarget, ConnectDragSource, ConnectDragPreview } from 'react-
 
 interface UseDragAndDropOptions {
   index: number | Array<number>;
-  onMoveItem: (newIndex: number, currentIndex: number) => void;
+  onMoveItem?: (newIndex: number | Array<number>, currentIndex: number | Array<number>) => void;
   /**
    * @default "regular"
    * Defines whether the change in index should be immediately over another
@@ -143,7 +143,7 @@ interface UseDragAndDropOptions {
    */
   type?: string;
   onCancel?: (index: number) => void;
-  onDropItem?: (index: number) => void;
+  onDropItem?: (currentIndex: number | Array<number>, newIndex: number | Array<number>) => void;
   onEnd?: () => void;
   onGrabItem?: (index: number) => void;
   onStart?: () => void;
@@ -155,6 +155,7 @@ type UseDragAndDropReturn = [
     handlerId: Identifier;
     isDragging: boolean;
     handleKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => void;
+    isActive: boolean;
   },
   objectRef: React.RefObject<HTMLElement>,
   dropRef: ConnectDropTarget,

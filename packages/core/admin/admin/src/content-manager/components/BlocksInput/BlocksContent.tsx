@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Flex, IconButton, IconButtonProps, VisuallyHidden } from '@strapi/design-system';
+import { Box, Flex, IconButton, IconButtonProps } from '@strapi/design-system';
 import { Drag } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Editor, Range, Transforms, Element } from 'slate';
@@ -15,7 +15,7 @@ import { composeRefs, ItemTypes, getTrad } from '../../utils';
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { type ModifiersStore } from './Modifiers';
 import { getAttributesToClear } from './utils/conversions';
-import { getEntries, Block } from './utils/types';
+import { getEntries, type Block } from './utils/types';
 
 const StyledEditable = styled(Editable)`
   // The outline style is set on the wrapper with :focus-within
@@ -30,7 +30,10 @@ const StyledEditable = styled(Editable)`
   }
 `;
 
-const DragItem = styled(Flex)`
+const DragItem = styled(Flex)<{ isActive: boolean }>`
+  border: 2px solid transparent;
+  border-color: ${({ isActive, theme }) => (isActive ? theme.colors.secondary200 : 'transparent')};
+
   // Style each block rendered using renderElement()
   & > [data-slate-node='element'] {
     width: 100%;
@@ -162,7 +165,7 @@ const DragAndDropElement = ({ children, index, canDrag, canDrop }: DragAndDropEl
   );
 
   const [
-    { handlerId, isDragging, handleKeyDown: handleDragHandleKeyDown },
+    { handlerId, isDragging, handleKeyDown: handleDragHandleKeyDown, isActive },
     blockRef,
     dropRef,
     dragRef,
@@ -175,28 +178,37 @@ const DragAndDropElement = ({ children, index, canDrag, canDrop }: DragAndDropEl
     item: {
       displayedValue: children,
     },
-    onMoveItem: handleMoveBlock,
+    onDropItem(currentIndex: Array<number>, newIndex: Array<number>) {
+      handleMoveBlock(newIndex, currentIndex);
+    },
   });
 
   const composedBoxRefs = composeRefs(blockRef, dropRef);
 
+  // To prevent applying opacity to the original item being dragged, display a cloned element without opacity.
+  const ClonedDraggedItem = () => (
+    <DragItem gap={2} paddingLeft={2} isActive={false}>
+      {canDrag && (
+        <DragIconButton
+          forwardedAs="div"
+          role="button"
+          tabIndex={0}
+          label={formatMessage({
+            id: getTrad('components.DragHandle-label'),
+            defaultMessage: 'Drag',
+          })}
+        >
+          <Drag color="neutral600" />
+        </DragIconButton>
+      )}
+      {children}
+    </DragItem>
+  );
+
   return (
     <Box ref={composedBoxRefs}>
       {isDragging ? (
-        <>
-          <Box
-            borderStyle="solid"
-            borderColor="secondary200"
-            borderWidth="2px"
-            width="calc(100% - 24px)"
-            marginLeft="auto"
-            marginTop={2}
-            marginBottom={2}
-          />
-          {/* Rendering the block is necessary for Slate to locate the node, 
-              however while dragging, we hide the rendered block */}
-          <VisuallyHidden aria-hidden>{children}</VisuallyHidden>
-        </>
+        <ClonedDraggedItem />
       ) : (
         <DragItem
           ref={dragRef}
@@ -212,6 +224,7 @@ const DragAndDropElement = ({ children, index, canDrag, canDrop }: DragAndDropEl
             target.style.opacity = '1';
           }}
           aria-disabled={disabled}
+          isActive={isActive}
         >
           {canDrag && (
             <DragIconButton
@@ -225,6 +238,7 @@ const DragAndDropElement = ({ children, index, canDrag, canDrop }: DragAndDropEl
               onClick={(e) => e.stopPropagation()}
               onKeyDown={handleDragHandleKeyDown}
               aria-disabled={disabled}
+              disabled={disabled}
             >
               <Drag color="neutral600" />
             </DragIconButton>
@@ -452,7 +466,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
       color="neutral800"
       lineHeight={6}
       paddingRight={4}
-      paddingTop={3}
+      paddingTop={6}
     >
       <StyledEditable
         readOnly={disabled}

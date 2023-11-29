@@ -5,9 +5,9 @@ import { useState } from 'react';
  *
  * @type {{
  *  onCancel?: (index: number) => void,
- *  onDropItem?: (index: number) => void,
+ *  onDropItem?: (currentIndex: number| Array<number>, newIndex: number| Array<number>) => void,
  *  onGrabItem?: (index: number) => void,
- *  onMoveItem: (newIndex: number| Array<number>, currentIndex: number| Array<number>) => void,
+ *  onMoveItem?: (newIndex: number| Array<number>, currentIndex: number| Array<number>) => void,
  * }}
  */
 

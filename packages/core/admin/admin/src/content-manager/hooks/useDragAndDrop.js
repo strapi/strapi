@@ -21,7 +21,7 @@ import { useKeyboardDragAndDrop } from './useKeyboardDragAndDrop';
 /**
  * @typedef UseDragAndDropReturn
  *
- * @type {[props: {handlerId: import('dnd-core').Identifier, isDragging: boolean, handleKeyDown: (event: import('react').KeyboardEvent<HTMLButtonElement>) => void}, objectRef: React.RefObject<HTMLElement>, dropRef: import('react-dnd').ConnectDropTarget, dragRef: import('react-dnd').ConnectDragSource, dragPreviewRef: import('react-dnd').ConnectDragPreview]}
+ * @type {[props: {handlerId: import('dnd-core').Identifier, isDragging: boolean, handleKeyDown: (event: import('react').KeyboardEvent<HTMLButtonElement>) => void, isActive: boolean}, objectRef: React.RefObject<HTMLElement>, dropRef: import('react-dnd').ConnectDropTarget, dragRef: import('react-dnd').ConnectDragSource, dragPreviewRef: import('react-dnd').ConnectDragPreview]}
  */
 
 /**
@@ -48,17 +48,26 @@ export const useDragAndDrop = (
 ) => {
   const objectRef = useRef(null);
 
-  const [{ handlerId, canDrop }, dropRef] = useDrop({
+  const [{ handlerId, canDrop, isOver }, dropRef] = useDrop({
     accept: type,
     canDrop: canDropHandler, // to skip some items from droppable target
     collect(monitor) {
       return {
         handlerId: monitor.getHandlerId(),
         canDrop: monitor.canDrop(),
+        isOver: monitor.isOver(),
       };
     },
+    drop(item) {
+      const draggedItem = item.index;
+      const newIndex = index;
+
+      if (canDrop && isOver) {
+        onDropItem(draggedItem, newIndex);
+      }
+    },
     hover(item, monitor) {
-      if (!objectRef.current) {
+      if (!objectRef.current || !onMoveItem) {
         return;
       }
 
@@ -179,5 +188,13 @@ export const useDragAndDrop = (
     onMoveItem,
   });
 
-  return [{ handlerId, isDragging, handleKeyDown }, objectRef, dropRef, dragRef, dragPreviewRef];
+  const isActive = canDrop && isOver;
+
+  return [
+    { handlerId, isDragging, handleKeyDown, isActive },
+    objectRef,
+    dropRef,
+    dragRef,
+    dragPreviewRef,
+  ];
 };
