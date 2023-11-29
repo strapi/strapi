@@ -1,11 +1,11 @@
 import * as React from 'react';
 
 import { Code } from '@strapi/icons';
-import { Transforms } from 'slate';
 import styled from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
-import { insertEmptyBlockAtLast, isLastBlockType, baseHandleConvert } from '../utils/conversions';
+import { baseHandleConvert } from '../utils/conversions';
+import { pressEnterTwiceToExit } from '../utils/enterKey';
 import { type Block } from '../utils/types';
 
 const CodeBlock = styled.pre.attrs({ role: 'code' })`
@@ -34,20 +34,15 @@ const codeBlocks: Pick<BlocksStore, 'code'> = {
     icon: Code,
     label: {
       id: 'components.Blocks.blocks.code',
-      defaultMessage: 'Code',
+      defaultMessage: 'Code block',
     },
     matchNode: (node) => node.type === 'code',
     isInBlocksSelector: true,
     handleConvert(editor) {
       baseHandleConvert<Block<'code'>>(editor, { type: 'code' });
-
-      if (isLastBlockType(editor, 'code')) {
-        insertEmptyBlockAtLast(editor);
-      }
     },
     handleEnterKey(editor) {
-      // Insert a new line within the block
-      Transforms.insertText(editor, '\n');
+      pressEnterTwiceToExit(editor);
     },
     snippets: ['```'],
   },

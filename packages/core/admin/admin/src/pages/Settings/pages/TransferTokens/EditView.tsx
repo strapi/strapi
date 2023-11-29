@@ -38,25 +38,20 @@ import * as yup from 'yup';
 import { selectAdminPermissions } from '../../../../selectors';
 import { formatAPIErrors } from '../../../../utils/formatAPIErrors';
 import { TRANSFER_TOKEN_TYPE } from '../../components/Tokens/constants';
-// @ts-expect-error not converted yet
-import FormHead from '../../components/Tokens/FormHead';
-// @ts-expect-error not converted yet
-import LifeSpanInput from '../../components/Tokens/LifeSpanInput';
-// @ts-expect-error not converted yet
-import TokenBox from '../../components/Tokens/TokenBox';
-// @ts-expect-error not converted yet
-import TokenDescription from '../../components/Tokens/TokenDescription';
-// @ts-expect-error not converted yet
-import TokenName from '../../components/Tokens/TokenName';
-// @ts-expect-error not converted yet
-import TokenTypeSelect from '../../components/Tokens/TokenTypeSelect';
+import { FormHead } from '../../components/Tokens/FormHead';
+import { LifeSpanInput } from '../../components/Tokens/LifeSpanInput';
+import { TokenBox } from '../../components/Tokens/TokenBox';
+import { TokenDescription } from '../../components/Tokens/TokenDescription';
+import { TokenName } from '../../components/Tokens/TokenName';
+import { TokenTypeSelect } from '../../components/Tokens/TokenTypeSelect';
 
 import type {
-  Create,
-  Get,
+  TokenCreate,
+  TokenGetById,
   TransferToken,
-  Update,
-} from '../../../../../../shared/contracts/transfer/token';
+  TokenUpdate,
+  SanitizedTransferToken,
+} from '../../../../../../shared/contracts/transfer';
 
 const schema = yup.object().shape({
   name: yup.string().max(100).required(translatedErrors.required),
@@ -67,151 +62,11 @@ const schema = yup.object().shape({
 
 const MSG_ERROR_NAME_TAKEN = 'Name already taken';
 
-interface LoadingViewProps {
-  transferTokenName?: string | null;
-}
+/* -------------------------------------------------------------------------------------------------
+ * EditView
+ * -----------------------------------------------------------------------------------------------*/
 
-export const LoadingView = ({ transferTokenName = null }: LoadingViewProps) => {
-  const { formatMessage } = useIntl();
-  useFocusWhenNavigate();
-
-  return (
-    <Main aria-busy="true">
-      <SettingsPageTitle name="Transfer Tokens" />
-      <HeaderLayout
-        primaryAction={
-          <Button disabled startIcon={<Check />} type="button" size="L">
-            {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
-          </Button>
-        }
-        title={
-          transferTokenName ||
-          formatMessage({
-            id: 'Settings.transferTokens.createPage.title',
-            defaultMessage: 'Create Transfer Token',
-          })
-        }
-      />
-      <ContentLayout>
-        <LoadingIndicatorPage />
-      </ContentLayout>
-    </Main>
-  );
-};
-
-interface FormValues extends Pick<TransferToken, 'description' | 'name' | 'lifespan'> {
-  permissions: TransferToken['permissions'][number];
-}
-
-interface FormTransferTokenContainerProps {
-  errors: FormikErrors<FormValues>;
-  onChange: ({ target: { name, value } }: { target: { name: string; value: string } }) => void;
-  canEditInputs: boolean;
-  values: FormValues;
-  isCreating: boolean;
-  transferToken: Partial<TransferToken | Create.Response['data']> | null;
-}
-
-const FormTransferTokenContainer = ({
-  errors = {},
-  onChange,
-  canEditInputs,
-  isCreating,
-  values,
-  transferToken = {},
-}: FormTransferTokenContainerProps) => {
-  const { formatMessage } = useIntl();
-
-  const typeOptions = [
-    {
-      value: 'push',
-      label: {
-        id: 'Settings.transferTokens.types.push',
-        defaultMessage: 'Push',
-      },
-    },
-    {
-      value: 'pull',
-      label: {
-        id: 'Settings.transferTokens.types.pull',
-        defaultMessage: 'Pull',
-      },
-    },
-    {
-      value: 'push-pull',
-      label: {
-        id: 'Settings.transferTokens.types.push-pull',
-        defaultMessage: 'Full Access',
-      },
-    },
-  ];
-
-  return (
-    <Box
-      background="neutral0"
-      hasRadius
-      shadow="filterShadow"
-      paddingTop={6}
-      paddingBottom={6}
-      paddingLeft={7}
-      paddingRight={7}
-    >
-      <Flex direction="column" alignItems="stretch" gap={4}>
-        <Typography variant="delta" as="h2">
-          {formatMessage({
-            id: 'global.details',
-            defaultMessage: 'Details',
-          })}
-        </Typography>
-        <Grid gap={5}>
-          <GridItem key="name" col={6} xs={12}>
-            <TokenName
-              errors={errors}
-              values={values}
-              canEditInputs={canEditInputs}
-              onChange={onChange}
-            />
-          </GridItem>
-          <GridItem key="description" col={6} xs={12}>
-            <TokenDescription
-              errors={errors}
-              values={values}
-              canEditInputs={canEditInputs}
-              onChange={onChange}
-            />
-          </GridItem>
-          <GridItem key="lifespan" col={6} xs={12}>
-            <LifeSpanInput
-              isCreating={isCreating}
-              errors={errors}
-              values={values}
-              onChange={onChange}
-              token={transferToken}
-            />
-          </GridItem>
-          <GridItem key="permissions" col={6} xs={12}>
-            <TokenTypeSelect
-              name="permissions"
-              values={values}
-              errors={errors}
-              label={{
-                id: 'Settings.tokens.form.type',
-                defaultMessage: 'Token type',
-              }}
-              onChange={(value: string) => {
-                onChange({ target: { name: 'permissions', value } });
-              }}
-              options={typeOptions}
-              canEditInputs={canEditInputs}
-            />
-          </GridItem>
-        </Grid>
-      </Flex>
-    </Box>
-  );
-};
-
-export const EditView = () => {
+const EditView = () => {
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const { lockApp, unlockApp } = useOverlayBlocker();
@@ -219,9 +74,9 @@ export const EditView = () => {
   const history = useHistory();
   const { state: locationState } = useLocation<{ transferToken: TransferToken }>();
   const [transferToken, setTransferToken] = React.useState<
-    TransferToken | Create.Response['data'] | null
+    TransferToken | SanitizedTransferToken | null
   >(
-    'accessKey' in locationState?.transferToken
+    locationState && 'accessKey' in locationState.transferToken
       ? {
           ...locationState.transferToken,
         }
@@ -248,12 +103,12 @@ export const EditView = () => {
     });
   }, [isCreating, trackUsage]);
 
-  const { status } = useQuery(
+  useQuery(
     ['transfer-token', id],
     async () => {
       const {
         data: { data },
-      } = await get<Get.Response>(`/admin/transfer/tokens/${id}`);
+      } = await get<TokenGetById.Response>(`/admin/transfer/tokens/${id}`);
 
       setTransferToken({
         ...data,
@@ -309,24 +164,32 @@ export const EditView = () => {
     // because String.split returns stringp[]
     if (isPermissionsTransferPermission(permissions)) {
       try {
-        const {
-          data: { data: response },
-        } = isCreating
-          ? await post<Create.Response, AxiosResponse<Create.Response>, Create.Request['body']>(
-              `/admin/transfer/tokens`,
-              {
-                ...body,
-                permissions,
-              }
-            )
-          : await put<Update.Response, AxiosResponse<Update.Response>, Update.Request['body']>(
-              `/admin/transfer/tokens/${id}`,
-              {
-                name: body.name,
-                description: body.description,
-                permissions,
-              }
-            );
+        let response: TransferToken | SanitizedTransferToken;
+
+        if (isCreating) {
+          const { data } = await post<
+            TokenCreate.Response,
+            AxiosResponse<TokenCreate.Response>,
+            TokenCreate.Request['body']
+          >(`/admin/transfer/tokens`, {
+            ...body,
+            permissions,
+          });
+
+          response = data.data;
+        } else {
+          const { data } = await put<
+            TokenUpdate.Response,
+            AxiosResponse<TokenUpdate.Response>,
+            TokenUpdate.Request['body']
+          >(`/admin/transfer/tokens/${id}`, {
+            name: body.name,
+            description: body.description,
+            permissions,
+          });
+
+          response = data.data;
+        }
 
         // @ts-expect-error context assertation
         unlockApp();
@@ -392,10 +255,10 @@ export const EditView = () => {
   };
 
   const canEditInputs = (canUpdate && !isCreating) || (canCreate && isCreating);
-  const isLoading = !isCreating && status !== 'success';
+  const isLoading = !isCreating && !transferToken;
 
   if (isLoading) {
-    return <LoadingView transferTokenName={transferToken?.name} />;
+    return <LoadingView />;
   }
 
   const handleErrorRegenerate = (err: unknown) => {
@@ -428,9 +291,7 @@ export const EditView = () => {
           {
             name: transferToken?.name || '',
             description: transferToken?.description || '',
-            lifespan: transferToken?.lifespan
-              ? transferToken.lifespan.toString()
-              : transferToken?.lifespan ?? null,
+            lifespan: transferToken?.lifespan ?? null,
             /**
              * We need to cast the permissions to satisfy the type for `permissions`
              * in the request body incase we don't have a transferToken and instead
@@ -449,7 +310,7 @@ export const EditView = () => {
                 backUrl="/settings/transfer-tokens"
                 title={{
                   id: 'Settings.transferTokens.createPage.title',
-                  defaultMessage: 'Create Transfer Token',
+                  defaultMessage: 'TokenCreate Transfer Token',
                 }}
                 token={transferToken}
                 setToken={setTransferToken}
@@ -484,7 +345,11 @@ export const EditView = () => {
   );
 };
 
-export const ProtectedEditView = () => {
+/* -------------------------------------------------------------------------------------------------
+ * ProtectedEditView
+ * -----------------------------------------------------------------------------------------------*/
+
+const ProtectedEditView = () => {
   const permissions = useSelector(selectAdminPermissions);
 
   return (
@@ -493,3 +358,157 @@ export const ProtectedEditView = () => {
     </CheckPagePermissions>
   );
 };
+
+/* -------------------------------------------------------------------------------------------------
+ * FormTransferTokenContainer
+ * -----------------------------------------------------------------------------------------------*/
+
+interface FormValues extends Pick<TransferToken, 'description' | 'name' | 'lifespan'> {
+  permissions: Extract<TransferToken['permissions'][number], string>;
+}
+
+interface FormTransferTokenContainerProps {
+  errors: FormikErrors<FormValues>;
+  onChange: ({ target: { name, value } }: { target: { name: string; value: string } }) => void;
+  canEditInputs: boolean;
+  values: FormValues;
+  isCreating: boolean;
+  transferToken: Partial<TransferToken> | null;
+}
+
+const FormTransferTokenContainer = ({
+  errors = {},
+  onChange,
+  canEditInputs,
+  isCreating,
+  values,
+  transferToken = {},
+}: FormTransferTokenContainerProps) => {
+  const { formatMessage } = useIntl();
+
+  const typeOptions = [
+    {
+      value: 'push',
+      label: {
+        id: 'Settings.transferTokens.types.push',
+        defaultMessage: 'Push',
+      },
+    },
+    {
+      value: 'pull',
+      label: {
+        id: 'Settings.transferTokens.types.pull',
+        defaultMessage: 'Pull',
+      },
+    },
+    {
+      value: 'push-pull',
+      label: {
+        id: 'Settings.transferTokens.types.push-pull',
+        defaultMessage: 'Full Access',
+      },
+    },
+  ];
+
+  return (
+    <Box
+      background="neutral0"
+      hasRadius
+      shadow="filterShadow"
+      paddingTop={6}
+      paddingBottom={6}
+      paddingLeft={7}
+      paddingRight={7}
+    >
+      <Flex direction="column" alignItems="stretch" gap={4}>
+        <Typography variant="delta" as="h2">
+          {formatMessage({
+            id: 'global.details',
+            defaultMessage: 'Details',
+          })}
+        </Typography>
+        <Grid gap={5}>
+          <GridItem key="name" col={6} xs={12}>
+            <TokenName
+              error={errors['name']}
+              value={values['name']}
+              canEditInputs={canEditInputs}
+              onChange={onChange}
+            />
+          </GridItem>
+          <GridItem key="description" col={6} xs={12}>
+            <TokenDescription
+              error={errors['description']}
+              value={values['description']}
+              canEditInputs={canEditInputs}
+              onChange={onChange}
+            />
+          </GridItem>
+          <GridItem key="lifespan" col={6} xs={12}>
+            <LifeSpanInput
+              isCreating={isCreating}
+              error={errors['lifespan']}
+              value={values['lifespan']}
+              onChange={onChange}
+              token={transferToken}
+            />
+          </GridItem>
+          <GridItem key="permissions" col={6} xs={12}>
+            <TokenTypeSelect
+              name="permissions"
+              value={values['permissions']}
+              error={errors['permissions']}
+              label={{
+                id: 'Settings.tokens.form.type',
+                defaultMessage: 'Token type',
+              }}
+              // @ts-expect-error – DS Select passes number | string, will be fixed in V2
+              onChange={(value: string) => {
+                onChange({ target: { name: 'permissions', value } });
+              }}
+              options={typeOptions}
+              canEditInputs={canEditInputs}
+            />
+          </GridItem>
+        </Grid>
+      </Flex>
+    </Box>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * LoadingView
+ * -----------------------------------------------------------------------------------------------*/
+interface LoadingViewProps {
+  transferTokenName?: string;
+}
+
+export const LoadingView = ({ transferTokenName }: LoadingViewProps) => {
+  const { formatMessage } = useIntl();
+  useFocusWhenNavigate();
+
+  return (
+    <Main aria-busy="true">
+      <SettingsPageTitle name="Transfer Tokens" />
+      <HeaderLayout
+        primaryAction={
+          <Button disabled startIcon={<Check />} type="button" size="L">
+            {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
+          </Button>
+        }
+        title={
+          transferTokenName ||
+          formatMessage({
+            id: 'Settings.transferTokens.createPage.title',
+            defaultMessage: 'Create Transfer Token',
+          })
+        }
+      />
+      <ContentLayout>
+        <LoadingIndicatorPage />
+      </ContentLayout>
+    </Main>
+  );
+};
+
+export { EditView, ProtectedEditView };

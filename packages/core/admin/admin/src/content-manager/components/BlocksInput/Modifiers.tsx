@@ -117,7 +117,7 @@ const modifiers: ModifiersStore = {
   code: {
     icon: Code,
     isValidEventKey: (event) => event.key === 'e',
-    label: { id: 'components.Blocks.modifiers.code', defaultMessage: 'Code' },
+    label: { id: 'components.Blocks.modifiers.code', defaultMessage: 'Inline code' },
     checkIsActive: (editor) => baseCheckIsActive(editor, 'code'),
     handleToggle: (editor) => baseHandleToggle(editor, 'code'),
     renderLeaf: (children) => <InlineCode>{children}</InlineCode>,
