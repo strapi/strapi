@@ -65,6 +65,7 @@
     "@strapi/strapi": "4.15.4",
     "@types/fs-extra": "9.0.13",
     "@types/jest": "29.5.2",
+    "@types/knex": "0.16.1",
     "@types/koa": "2.13.4",
     "@types/lodash": "^4.14.191",
     "@types/node": "18.18.4",
@@ -74,7 +75,6 @@
     "@types/tar": "6.1.4",
     "@types/tar-stream": "2.2.2",
     "@types/ws": "^8.5.4",
-    "knex": "2.5.0",
     "koa": "2.13.4",
     "rimraf": "3.0.2",
     "typescript": "5.2.2"
