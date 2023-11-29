@@ -34,6 +34,7 @@ const ImageWrapper = styled(Flex)<ImageWrapperProps>`
 `;
 
 const IMAGE_SCHEMA_FIELDS = [
+  'id',
   'name',
   'alternativeText',
   'url',

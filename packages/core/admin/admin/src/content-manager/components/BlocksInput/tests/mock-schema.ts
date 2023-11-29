@@ -3,6 +3,7 @@
 import { type Attribute } from '@strapi/types';
 
 const mockImage = {
+  id: 1,
   url: 'https://via.placeholder.com/300/09f/fff.png',
   name: 'Screenshot 2023-08-22 at 10.33.50.png',
   alternativeText: 'My image alt text',
