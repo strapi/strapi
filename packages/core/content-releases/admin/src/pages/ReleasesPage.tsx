@@ -35,9 +35,9 @@ import { AddReleaseDialog } from '../components/AddReleaseDialog';
 import { PERMISSIONS } from '../constants';
 import { useGetReleasesQuery, GetAllReleasesQueryParams } from '../services/release';
 
-/**----------------------------------------------------------------- *
- *  ReleasesLayout
- **------------------------------------------------------------------*/
+/* -------------------------------------------------------------------------------------------------
+ * ReleasesLayout
+ * -----------------------------------------------------------------------------------------------*/
 interface ReleasesLayoutProps {
   isLoading?: boolean;
   totalEntries?: number;
@@ -86,9 +86,9 @@ export const ReleasesLayout = ({
   );
 };
 
-/**----------------------------------------------------------------- *
- *  ReleasesGrid
- **------------------------------------------------------------------*/
+/* -------------------------------------------------------------------------------------------------
+ * ReleasesGrid
+ * -----------------------------------------------------------------------------------------------*/
 interface ReleasesGridProps {
   sectionTitle: 'pending' | 'done';
   releases?: GetReleases.Response['data'];
@@ -154,9 +154,9 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
   );
 };
 
-/**----------------------------------------------------------------- *
- *  ReleasesPage
- **------------------------------------------------------------------*/
+/* -------------------------------------------------------------------------------------------------
+ * ReleasesPage
+ * -----------------------------------------------------------------------------------------------*/
 const ReleasesPage = () => {
   const [addReleaseDialogIsShown, setAddReleaseDialogIsShown] = React.useState(false);
   const { formatMessage } = useIntl();
