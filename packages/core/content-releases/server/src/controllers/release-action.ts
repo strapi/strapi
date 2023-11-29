@@ -1,11 +1,12 @@
 import type Koa from 'koa';
 import { UID } from '@strapi/types';
 import { mapAsync } from '@strapi/utils';
-import { validateReleaseAction } from './validation/release-action';
+import { validateReleaseAction, validateReleaseActionUpdateSchema } from './validation/release-action';
 import type {
   CreateReleaseAction,
   GetReleaseActions,
   ReleaseAction,
+  UpdateReleaseAction
 } from '../../../shared/contracts/release-actions';
 import { getAllowedContentTypes, getService, getPermissionsChecker } from '../utils';
 
@@ -95,6 +96,19 @@ const releaseActionController = {
       meta: {
         pagination,
       },
+    };
+  },
+  async update(ctx: Koa.Context) {
+    const actionId: UpdateReleaseAction.Request['params']['actionId'] = ctx.params.actionId;
+    const releaseActionUpdateArgs: UpdateReleaseAction.Request['body'] = ctx.request.body;
+
+    await validateReleaseActionUpdateSchema(releaseActionUpdateArgs);
+
+    const releaseService = getService('release', { strapi });
+    const updatedAction = await releaseService.updateAction(actionId, releaseActionUpdateArgs);
+
+    ctx.body = {
+      data: updatedAction,
     };
   },
 };

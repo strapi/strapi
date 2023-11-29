@@ -11,6 +11,7 @@ import type {
 import type {
   CreateReleaseAction,
   GetReleaseActions,
+  UpdateReleaseAction,
 } from '../../../shared/contracts/release-actions';
 import type { UserInfo } from '../../../shared/types';
 import { getService } from '../utils';
@@ -159,6 +160,25 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     }
 
     return contentTypesMeta;
+  },
+  async updateAction(
+    id: UpdateReleaseAction.Request['params']['actionId'],
+    update: UpdateReleaseAction.Request['body']
+  ) {
+    const updatedAction = await strapi.entityService.update(RELEASE_ACTION_MODEL_UID, id, {
+      /**
+       * Type 'ReleaseUpdateArgs' has no properties in common with type 'Partial<Input<"plugin::content-releases.release">>'
+       * The Partial type from the entity service does not seem to be returning the value since ReleaseUpdateArgs satisfies that type
+       */
+      // @ts-expect-error see above
+      data: update,
+    });
+
+    if (!updatedAction) {
+      throw new errors.NotFoundError(`No action found for action id ${id}`);
+    }
+
+    return updatedAction;
   },
 });
 

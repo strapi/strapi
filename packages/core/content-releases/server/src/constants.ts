@@ -28,14 +28,20 @@ export const ACTIONS = [
   },
   {
     section: 'plugins',
-    displayName: 'Add entry to release',
+    displayName: 'Publish',
+    uid: 'publish',
+    pluginName: 'content-releases',
+  },
+  {
+    section: 'plugins',
+    displayName: 'Add an action to a release',
     uid: 'create-action',
     pluginName: 'content-releases',
   },
   {
     section: 'plugins',
-    displayName: 'Publish',
-    uid: 'publish',
+    displayName: 'Update an action in a release',
+    uid: 'update-action',
     pluginName: 'content-releases',
   },
 ];

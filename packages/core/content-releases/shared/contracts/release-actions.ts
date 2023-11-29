@@ -3,6 +3,7 @@ import type { Release, Pagination } from './releases';
 import type { Entity } from '../types';
 
 import type { errors } from '@strapi/utils';
+import { UserInfo } from '@strapi/helper-plugin';
 
 type ReleaseActionEntry = Entity & {
   // Entity attributes
@@ -56,5 +57,24 @@ export declare namespace GetReleaseActions {
       pagination: Pagination;
     };
     error?: errors.ApplicationError | errors.NotFoundError;
+  }
+}
+
+/*
+ * PUT /content-releases/:releaseId/actions/:actionId - Update a release action
+ */
+export declare namespace UpdateReleaseAction {
+  export interface Request {
+    params: {
+      actionId: ReleaseAction['id'];
+    };
+    body: {
+      type: ReleaseAction['type'];
+    };
+  }
+
+  export interface Response {
+    data: ReleaseAction;
+    error?: errors.ApplicationError | errors.ValidationError | errors.NotFoundError;
   }
 }
