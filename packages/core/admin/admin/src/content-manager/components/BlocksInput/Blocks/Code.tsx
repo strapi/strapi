@@ -4,7 +4,7 @@ import { Code } from '@strapi/icons';
 import styled from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
-import { insertEmptyBlockAtLast, isLastBlockType, baseHandleConvert } from '../utils/conversions';
+import { baseHandleConvert } from '../utils/conversions';
 import { pressEnterTwiceToExit } from '../utils/enterKey';
 import { type Block } from '../utils/types';
 
@@ -40,10 +40,6 @@ const codeBlocks: Pick<BlocksStore, 'code'> = {
     isInBlocksSelector: true,
     handleConvert(editor) {
       baseHandleConvert<Block<'code'>>(editor, { type: 'code' });
-
-      if (isLastBlockType(editor, 'code')) {
-        insertEmptyBlockAtLast(editor);
-      }
     },
     handleEnterKey(editor) {
       pressEnterTwiceToExit(editor);

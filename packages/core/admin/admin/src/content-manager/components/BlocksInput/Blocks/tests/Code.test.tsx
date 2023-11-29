@@ -128,64 +128,6 @@ describe('Code', () => {
           },
         ],
       },
-      // Should insert a new paragraph as it was the last block
-      {
-        type: 'paragraph',
-        children: [{ type: 'text', text: '' }],
-      },
-    ]);
-  });
-
-  it('should not insert an empty block below if the converted block is not the last one', () => {
-    const baseEditor = createEditor();
-    baseEditor.children = [
-      {
-        type: 'quote',
-        children: [
-          {
-            type: 'text',
-            text: 'Some quote',
-          },
-        ],
-      },
-      {
-        type: 'paragraph',
-        children: [
-          {
-            type: 'text',
-            text: 'Some paragraph',
-          },
-        ],
-      },
-    ];
-
-    Transforms.select(baseEditor, {
-      anchor: { path: [0, 0], offset: 0 },
-      focus: { path: [0, 0], offset: 0 },
-    });
-
-    codeBlocks.code.handleConvert!(baseEditor);
-
-    expect(baseEditor.children).toEqual([
-      {
-        type: 'code',
-        children: [
-          {
-            type: 'text',
-            text: 'Some quote',
-          },
-        ],
-      },
-      {
-        type: 'paragraph',
-        children: [
-          {
-            type: 'text',
-            text: 'Some paragraph',
-          },
-        ],
-      },
-      // Nothing should be inserted here
     ]);
   });
 });
