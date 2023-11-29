@@ -10,11 +10,9 @@ export interface GetAllReleasesQueryParams {
   page?: number;
   pageSize?: number;
   filters?: {
-    $and?: Array<{
-      releasedAt?: {
-        $notNull?: boolean | 'true' | 'false';
-      };
-    }>;
+    releasedAt?: {
+      $notNull?: boolean | 'true' | 'false';
+    };
   };
 }
 
@@ -25,7 +23,17 @@ const releaseApi = createApi({
   endpoints: (build) => {
     return {
       getReleases: build.query<GetReleases.Response, GetAllReleasesQueryParams | void>({
-        query({ page, pageSize, filters } = { page: 1, pageSize: 16, filters: undefined }) {
+        query(
+          { page, pageSize, filters } = {
+            page: 1,
+            pageSize: 16,
+            filters: {
+              releasedAt: {
+                $notNull: false,
+              },
+            },
+          }
+        ) {
           return {
             url: '/content-releases',
             method: 'GET',
@@ -39,7 +47,7 @@ const releaseApi = createApi({
           };
         },
         transformResponse(response: GetReleases.Response, meta, arg) {
-          const releasedAtValue = arg?.filters?.$and?.[0]?.releasedAt?.$notNull;
+          const releasedAtValue = arg?.filters?.releasedAt?.$notNull;
           const isActiveDoneTab = releasedAtValue === 'true';
           const newResponse = {
             ...response,

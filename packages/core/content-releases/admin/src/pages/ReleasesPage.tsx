@@ -40,14 +40,14 @@ import { useGetReleasesQuery, GetAllReleasesQueryParams } from '../services/rele
  * -----------------------------------------------------------------------------------------------*/
 interface ReleasesLayoutProps {
   isLoading?: boolean;
-  totalEntries?: number;
+  totalReleases?: number;
   onClickAddRelease: () => void;
   children: React.ReactNode;
 }
 
 export const ReleasesLayout = ({
   isLoading,
-  totalEntries,
+  totalReleases,
   onClickAddRelease,
   children,
 }: ReleasesLayoutProps) => {
@@ -67,7 +67,7 @@ export const ReleasesLayout = ({
               defaultMessage:
                 '{number, plural, =0 {No releases} one {# release} other {# releases}}',
             },
-            { number: totalEntries }
+            { number: totalReleases }
           )
         }
         primaryAction={
@@ -103,11 +103,7 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
   const { formatMessage } = useIntl();
 
   if (isError) {
-    return (
-      <Flex paddingTop={8}>
-        <AnErrorOccurred />
-      </Flex>
-    );
+    return <AnErrorOccurred />;
   }
 
   if (releases?.length === 0) {
@@ -129,7 +125,7 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
 
   return (
     <Grid gap={4}>
-      {releases.map(({ id, name }) => (
+      {releases.map(({ id, name, actions }) => (
         <GridItem col={3} s={6} xs={12} key={id}>
           <LinkCard href={`content-releases/${id}`} isExternal={false}>
             <Flex
@@ -142,9 +138,20 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
               height="100%"
               width="100%"
               alignItems="start"
+              gap={2}
             >
               <Typography as="h3" variant="delta" fontWeight="bold">
                 {name}
+              </Typography>
+              <Typography variant="pi">
+                {formatMessage(
+                  {
+                    id: 'content-releases.page.Releases.release-item.entries',
+                    defaultMessage:
+                      '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
+                  },
+                  { number: actions.meta.count }
+                )}
               </Typography>
             </Flex>
           </LinkCard>
@@ -179,7 +186,7 @@ const ReleasesPage = () => {
     );
   }
 
-  const totalEntries = (isSuccess && response.currentData?.meta?.pagination?.total) || 0;
+  const totalReleases = (isSuccess && response.currentData?.meta?.pagination?.total) || 0;
 
   const handleTabChange = (index: number) => {
     setQuery({
@@ -187,13 +194,9 @@ const ReleasesPage = () => {
       page: 1,
       pageSize: response?.currentData?.meta?.pagination?.pageSize || 16,
       filters: {
-        $and: [
-          {
-            releasedAt: {
-              $notNull: index === 0 ? false : true,
-            },
-          },
-        ],
+        releasedAt: {
+          $notNull: index === 0 ? false : true,
+        },
       },
     });
   };
@@ -201,7 +204,7 @@ const ReleasesPage = () => {
   const activeTab = response?.currentData?.meta?.activeTab || 'pending';
 
   return (
-    <ReleasesLayout onClickAddRelease={toggleAddReleaseDialog} totalEntries={totalEntries}>
+    <ReleasesLayout onClickAddRelease={toggleAddReleaseDialog} totalReleases={totalReleases}>
       <ContentLayout>
         <>
           <TabGroup
@@ -213,7 +216,7 @@ const ReleasesPage = () => {
             initialSelectedTabIndex={['pending', 'done'].indexOf(activeTab)}
             onTabChange={handleTabChange}
           >
-            <Box paddingBottom={9}>
+            <Box paddingBottom={8}>
               <Tabs>
                 <Tab>
                   {formatMessage({
@@ -249,7 +252,7 @@ const ReleasesPage = () => {
               </TabPanel>
             </TabPanels>
           </TabGroup>
-          {totalEntries > 0 && (
+          {totalReleases > 0 && (
             <Flex paddingTop={4} alignItems="flex-end" justifyContent="space-between">
               <PageSizeURLQuery
                 options={['8', '16', '32', '64']}

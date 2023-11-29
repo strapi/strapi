@@ -18,5 +18,6 @@
   "pages.Releases.tab-group.label": "Releases list",
   "pages.Releases.tab.pending": "Pending",
   "pages.Releases.tab.done": "Done",
-  "page.Releases.tab.emptyEntries": "No releases"
+  "page.Releases.tab.emptyEntries": "No releases",
+  "page.Releases.release-item.entries": "{number, plural, =0 {No entries} one {# entry} other {# entries}}"
 }
