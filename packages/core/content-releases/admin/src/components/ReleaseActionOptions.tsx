@@ -40,7 +40,7 @@ const FieldWrapper = styled(Field)<FieldWrapperProps>`
   }
 
   &:active,
-  &.selected {
+  &[data-checked='true'] {
     color: ${({ theme }) => theme.colors.primary700};
     background-color: ${({ theme }) => theme.colors.primary100};
     border-color: ${({ theme }) => theme.colors.primary700};
@@ -60,12 +60,12 @@ const ActionOption = ({ selected, actionType, handleChange }: OptionProps) => {
   return (
     <FieldWrapper
       actionType={actionType}
-      className={selected === actionType ? 'selected' : undefined}
       background="primary0"
       borderColor="neutral200"
       color={selected === actionType ? 'primary600' : 'neutral600'}
       position="relative"
       cursor="pointer"
+      data-checked={selected === actionType}
     >
       <FieldLabel htmlFor={`release-action-${actionType}`}>
         <VisuallyHidden>

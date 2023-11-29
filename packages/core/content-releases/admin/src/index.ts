@@ -1,7 +1,7 @@
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import { PaperPlane } from '@strapi/icons';
 
-import { CMReleasesInectionZone } from './components/CMReleasesInjectionZone';
+import { CMReleasesContainer } from './components/CMReleasesContainer';
 import { PERMISSIONS } from './constants';
 import { pluginId } from './pluginId';
 import { releaseApi } from './services/release';
@@ -40,7 +40,7 @@ const admin: Plugin.Config.AdminInput = {
       // Insert the Releases container in the 'right-links' zone of the Content Manager's edit view
       app.injectContentManagerComponent('editView', 'right-links', {
         name: `${pluginId}-link`,
-        Component: CMReleasesInectionZone,
+        Component: CMReleasesContainer,
       });
     }
   },

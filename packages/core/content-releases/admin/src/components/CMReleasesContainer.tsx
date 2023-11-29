@@ -60,7 +60,7 @@ const AddActionToReleaseModal = ({ handleClose }: AddActionToReleaseModalProps) 
     allLayoutData: { contentType },
   } = useCMEditViewDataManager();
   // Get all 'pending' releases
-  const { data } = useGetReleasesQuery({
+  const response = useGetReleasesQuery({
     filters: {
       $and: [
         {
@@ -71,7 +71,7 @@ const AddActionToReleaseModal = ({ handleClose }: AddActionToReleaseModalProps) 
       ],
     },
   });
-  const releases = data?.data;
+  const releases = response.data?.data;
   const [createReleaseAction, { isLoading }] = useCreateReleaseActionMutation();
 
   const handleSubmit = async (values: FormValues) => {
@@ -101,7 +101,6 @@ const AddActionToReleaseModal = ({ handleClose }: AddActionToReleaseModalProps) 
       params: { releaseId: values.releaseId },
     });
 
-    // When 'data' is in the response
     if ('data' in response) {
       // Handle success
       toggleNotification({
@@ -111,8 +110,10 @@ const AddActionToReleaseModal = ({ handleClose }: AddActionToReleaseModalProps) 
           defaultMessage: 'Entry added to release',
         }),
       });
+
+      return;
     }
-    // When 'error' is in the response
+
     if ('error' in response) {
       if (isAxiosError(response.error)) {
         // Handle axios error
@@ -177,7 +178,6 @@ const AddActionToReleaseModal = ({ handleClose }: AddActionToReleaseModalProps) 
                       defaultMessage: 'What do you want to do with this entry?',
                     })}
                   </FieldLabel>
-
                   <Flex>
                     <ReleaseActionOptions
                       selected={values.type}
@@ -216,7 +216,7 @@ const AddActionToReleaseModal = ({ handleClose }: AddActionToReleaseModalProps) 
   );
 };
 
-export const CMReleasesInectionZone = () => {
+export const CMReleasesContainer = () => {
   const [showModal, setShowModal] = React.useState(false);
   const { formatMessage } = useIntl();
   const {
@@ -228,7 +228,7 @@ export const CMReleasesInectionZone = () => {
 
   /**
    * - Impossible to add entry to release before it exists
-   * - Content type's without draft and publish cannot add entries to release
+   * - Content types without draft and publish cannot add entries to release
    * TODO v5: All contentTypes will have draft and publish enabled
    */
   if (isCreatingEntry || !contentType?.options?.draftAndPublish) {
@@ -250,11 +250,11 @@ export const CMReleasesInectionZone = () => {
         shadow="tableShadow"
       >
         <Flex direction="column" alignItems="stretch" gap={4}>
-          <Typography variant="sigma" textColor="neutral600">
+          <Typography variant="sigma" textColor="neutral600" textTransform="uppercase">
             {formatMessage({
               id: 'content-releases.plugin.name',
               defaultMessage: 'RELEASES',
-            }).toUpperCase()}
+            })}
           </Typography>
           <CheckPermissions permissions={PERMISSIONS.createAction}>
             <Button

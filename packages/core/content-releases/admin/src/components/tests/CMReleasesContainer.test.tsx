@@ -3,7 +3,7 @@ import { screen } from '@testing-library/react';
 import { render, server } from '@tests/utils';
 import { rest } from 'msw';
 
-import { CMReleasesInectionZone } from '../CMReleasesInjectionZone';
+import { CMReleasesContainer } from '../CMReleasesContainer';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -23,7 +23,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 
 describe('CMReleasesInjectionZone', () => {
-  it('should not render the injection zone when creating an entry', async () => {
+  it('should not render the injection zone when creating an entry', () => {
     // @ts-expect-error - Ignore error
     useCMEditViewDataManager.mockReturnValueOnce({
       isCreatingEntry: true,
@@ -36,13 +36,13 @@ describe('CMReleasesInjectionZone', () => {
       },
     });
 
-    render(<CMReleasesInectionZone />);
-    const informationBox = screen.queryByRole('complementary', { name: 'Releases' });
+    render(<CMReleasesContainer />);
 
+    const informationBox = screen.queryByRole('complementary', { name: 'Releases' });
     expect(informationBox).not.toBeInTheDocument();
   });
 
-  it('should not render the injection zone without draft and publish enabled', async () => {
+  it('should not render the injection zone without draft and publish enabled', () => {
     // @ts-expect-error - Ignore error
     useCMEditViewDataManager.mockReturnValueOnce({
       isCreatingEntry: false,
@@ -55,32 +55,30 @@ describe('CMReleasesInjectionZone', () => {
       },
     });
 
-    render(<CMReleasesInectionZone />);
-    const informationBox = screen.queryByRole('complementary', { name: 'Releases' });
+    render(<CMReleasesContainer />);
 
+    const informationBox = screen.queryByRole('complementary', { name: 'Releases' });
     expect(informationBox).not.toBeInTheDocument();
   });
 
   it('should render the injection zone', () => {
-    render(<CMReleasesInectionZone />);
+    render(<CMReleasesContainer />);
 
     const addToReleaseButton = screen.getByRole('button', { name: 'Add to release' });
     const informationBox = screen.getByRole('complementary', { name: 'Releases' });
-
     expect(informationBox).toBeInTheDocument();
     expect(addToReleaseButton).toBeInTheDocument();
   });
 
   it('should open and close the add to release modal', async () => {
-    const { user } = render(<CMReleasesInectionZone />);
+    const { user } = render(<CMReleasesContainer />);
 
     const addToReleaseButton = screen.getByRole('button', { name: 'Add to release' });
     await user.click(addToReleaseButton);
-
     const modalDialog = screen.getByRole('dialog', { name: 'Add to release' });
-    const closeButton = screen.getByRole('button', { name: 'Close the modal' });
-
     expect(modalDialog).toBeVisible();
+
+    const closeButton = screen.getByRole('button', { name: 'Close the modal' });
     await user.click(closeButton);
     expect(modalDialog).not.toBeVisible();
   });
@@ -97,7 +95,7 @@ describe('CMReleasesInjectionZone', () => {
       })
     );
 
-    const { user } = render(<CMReleasesInectionZone />);
+    const { user } = render(<CMReleasesContainer />);
 
     const addToReleaseButton = screen.getByRole('button', { name: 'Add to release' });
     await user.click(addToReleaseButton);
