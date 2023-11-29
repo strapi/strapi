@@ -22,7 +22,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   }),
 }));
 
-describe('CMReleasesInjectionZone', () => {
+describe('CMReleasesContainer', () => {
   it('should not render the injection zone when creating an entry', () => {
     // @ts-expect-error - Ignore error
     useCMEditViewDataManager.mockReturnValueOnce({

@@ -49,8 +49,8 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
 
     const release = await strapi.entityService.update(RELEASE_MODEL_UID, id, {
       /*
-       * The type returned from the enttiy service: Partial<Input<"plugin::content-releases.release">>
-       * is not compatible with the type the type we are passing here: UpdateRelease.Request['body']
+       * The type returned from the entity service: Partial<Input<"plugin::content-releases.release">>
+       * is not compatible with the type we are passing here: UpdateRelease.Request['body']
        */
       // @ts-expect-error see above
       data: updatedRelease,
