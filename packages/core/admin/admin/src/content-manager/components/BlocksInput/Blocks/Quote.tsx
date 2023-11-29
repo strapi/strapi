@@ -32,6 +32,7 @@ const quoteBlocks: Pick<BlocksStore, 'quote'> = {
     handleEnterKey(editor) {
       pressEnterTwiceToExit(editor);
     },
+    snippets: ['>'],
   },
 };
 

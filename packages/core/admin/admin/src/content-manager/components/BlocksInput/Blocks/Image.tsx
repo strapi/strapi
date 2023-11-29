@@ -168,6 +168,7 @@ const imageBlocks: Pick<BlocksStore, 'image'> = {
       // and if he closes the modal, then no changes are made to the editor
       return () => <ImageDialog />;
     },
+    snippets: ['!['],
   },
 };
 
