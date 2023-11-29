@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { Box } from '@strapi/design-system';
+import { Editor, Transforms } from 'slate';
 import {
   type ReactEditor,
   type RenderElementProps,
@@ -10,6 +11,7 @@ import {
 import styled from 'styled-components';
 
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
+import { useConversionModal } from './BlocksToolbar';
 import { type ModifiersStore } from './Modifiers';
 import { getEntries } from './utils/types';
 
@@ -55,6 +57,7 @@ interface BlocksInputProps {
 const BlocksContent = ({ placeholder }: BlocksInputProps) => {
   const { editor, disabled, blocks, modifiers } = useBlocksEditorContext('BlocksContent');
   const blocksRef = React.useRef<HTMLDivElement>(null);
+  const { modalElement, handleConversionResult } = useConversionModal();
 
   // Create renderLeaf function based on the modifiers store
   const renderLeaf = React.useCallback(
@@ -68,7 +71,45 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
     [blocks]
   );
 
-  const handleEnter = () => {
+  const checkSnippet = (event: React.KeyboardEvent<HTMLElement>) => {
+    // Get current text block
+    if (!editor.selection) {
+      return;
+    }
+
+    const [textNode, textNodePath] = Editor.node(editor, editor.selection.anchor.path);
+
+    // Narrow the type to a text node
+    if (Editor.isEditor(textNode) || textNode.type !== 'text') {
+      return;
+    }
+
+    // Don't check for snippets if we're not at the start of a block
+    if (textNodePath.at(-1) !== 0) {
+      return;
+    }
+
+    // Check if the text node starts with a known snippet
+    const blockMatchingSnippet = Object.values(blocks).find((block) => {
+      return block.snippets?.includes(textNode.text);
+    });
+
+    if (blockMatchingSnippet?.handleConvert) {
+      // Prevent the space from being created and delete the snippet
+      event.preventDefault();
+      Transforms.delete(editor, {
+        distance: textNode.text.length,
+        unit: 'character',
+        reverse: true,
+      });
+
+      // Convert the selected block
+      const maybeRenderModal = blockMatchingSnippet.handleConvert(editor);
+      handleConversionResult(maybeRenderModal);
+    }
+  };
+
+  const handleEnter = (event: React.KeyboardEvent<HTMLElement>) => {
     if (!editor.selection) {
       return;
     }
@@ -79,6 +120,12 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
     // Find the matching block
     const selectedBlock = Object.values(blocks).find((block) => block.matchNode(selectedNode));
     if (!selectedBlock) {
+      return;
+    }
+
+    // Allow forced line breaks when shift is pressed
+    if (event.shiftKey && selectedNode.type !== 'image') {
+      Transforms.insertText(editor, '\n');
       return;
     }
 
@@ -111,7 +158,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
   /**
    * Modifier keyboard shortcuts
    */
-  const handleKeyboardShortcuts = (event: React.KeyboardEvent<HTMLElement>) => {
+  const handleModifierShortcuts = (event: React.KeyboardEvent<HTMLElement>) => {
     const isCtrlOrCmd = event.metaKey || event.ctrlKey;
 
     if (isCtrlOrCmd) {
@@ -124,14 +171,22 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
   };
 
   const handleKeyDown: React.KeyboardEventHandler<HTMLElement> = (event) => {
+    // Find the right block-specific handlers for enter and backspace key presses
     if (event.key === 'Enter') {
       event.preventDefault();
-      handleEnter();
+      return handleEnter(event);
     }
     if (event.key === 'Backspace') {
-      handleBackspaceEvent(event);
+      return handleBackspaceEvent(event);
     }
-    handleKeyboardShortcuts(event);
+
+    // Check if there's a modifier to toggle
+    handleModifierShortcuts(event);
+
+    // Check if a snippet was triggered
+    if (event.key === ' ') {
+      checkSnippet(event);
+    }
   };
 
   /**
@@ -173,6 +228,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
       paddingLeft={4}
       paddingRight={4}
       paddingTop={3}
+      paddingBottom={3}
     >
       <StyledEditable
         readOnly={disabled}
@@ -182,6 +238,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
         onKeyDown={handleKeyDown}
         scrollSelectionIntoView={handleScrollSelectionIntoView}
       />
+      {modalElement}
     </Box>
   );
 };
