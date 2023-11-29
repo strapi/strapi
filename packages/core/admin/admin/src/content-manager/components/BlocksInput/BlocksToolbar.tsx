@@ -72,6 +72,24 @@ const SelectWrapper = styled(Box)`
   }
 `;
 
+/**
+ * Handles the modal component that may be returned by a block when converting it
+ */
+function useConversionModal() {
+  const [modalElement, setModalComponent] = React.useState<React.JSX.Element | null>(null);
+
+  const handleConversionResult = (renderModal: void | (() => React.JSX.Element) | undefined) => {
+    // Not all blocks return a modal
+    if (renderModal) {
+      // Use cloneElement to apply a key because to create a new instance of the component
+      // Without the new key, the state is kept from previous times that option was picked
+      setModalComponent(React.cloneElement(renderModal(), { key: Date.now() }));
+    }
+  };
+
+  return { modalElement, handleConversionResult };
+}
+
 interface ToolbarButtonProps {
   icon: React.ComponentType;
   name: string;
@@ -129,7 +147,7 @@ const ToolbarButton = ({
 const BlocksDropdown = () => {
   const { editor, blocks, disabled } = useBlocksEditorContext('BlocksDropdown');
   const { formatMessage } = useIntl();
-  const [modalComponent, setModalComponent] = React.useState<React.JSX.Element | null>(null);
+  const { modalElement, handleConversionResult } = useConversionModal();
 
   const blockKeysToInclude: SelectorBlockKey[] = getEntries(blocks).reduce<
     ReturnType<typeof getEntries>
@@ -164,13 +182,7 @@ const BlocksDropdown = () => {
 
     // Let the block handle the Slate conversion logic
     const maybeRenderModal = blocks[optionKey].handleConvert?.(editor);
-
-    // Some blocks, like Image, require a modal. Check if there's one returned
-    if (maybeRenderModal) {
-      // Use cloneElement to apply a key because to create a new instance of the component
-      // Without the new key, the state is kept from previous times that option was picked
-      setModalComponent(React.cloneElement(maybeRenderModal(), { key: Date.now() }));
-    }
+    handleConversionResult(maybeRenderModal);
 
     setBlockSelected(optionKey);
 
@@ -234,7 +246,7 @@ const BlocksDropdown = () => {
           ))}
         </SingleSelect>
       </SelectWrapper>
-      {modalComponent}
+      {modalElement}
     </>
   );
 };
@@ -488,4 +500,4 @@ const BlocksToolbar = () => {
   );
 };
 
-export { BlocksToolbar };
+export { BlocksToolbar, useConversionModal };

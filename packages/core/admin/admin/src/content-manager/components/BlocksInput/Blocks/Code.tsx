@@ -44,6 +44,7 @@ const codeBlocks: Pick<BlocksStore, 'code'> = {
     handleEnterKey(editor) {
       pressEnterTwiceToExit(editor);
     },
+    snippets: ['```'],
   },
 };
 

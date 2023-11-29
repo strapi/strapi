@@ -202,6 +202,7 @@ const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-it
     handleConvert: (editor) => handleConvertToList(editor, 'ordered'),
     handleEnterKey: handleEnterKeyOnList,
     handleBackspaceKey: handleBackspaceKeyOnList,
+    snippets: ['1.'],
   },
   'list-unordered': {
     renderElement: (props) => <List {...props} />,
@@ -215,6 +216,7 @@ const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-it
     handleConvert: (editor) => handleConvertToList(editor, 'unordered'),
     handleEnterKey: handleEnterKeyOnList,
     handleBackspaceKey: handleBackspaceKeyOnList,
+    snippets: ['-', '*', '+'],
   },
   'list-item': {
     renderElement: (props) => (
