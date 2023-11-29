@@ -55,7 +55,15 @@ export default ({ strapi }: { strapi: Strapi }) => ({
    * @param {Object} entity
    * @returns
    */
-  mapEntity<T = unknown>(entity: T): T {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  mapEntity<T = any>(entity: any, uid?: Common.UID.ContentType): T {
+    // Map documentId to id
+    // TODO: remove this when we change documentId to id in database
+    if (entity.documentId) {
+      entity.entryId = entity.id;
+      entity.id = entity.documentId;
+      delete entity.documentId;
+    }
     return entity;
   },
 
@@ -68,13 +76,11 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   async mapEntitiesResponse(entities: any, uid: Common.UID.ContentType) {
     if (entities?.results) {
       const mappedResults = await mapAsync(entities.results, (entity: Entity) =>
-        // @ts-expect-error mapEntity can be extended
         this.mapEntity(entity, uid)
       );
       return { ...entities, results: mappedResults };
     }
     // if entity is single type
-    // @ts-expect-error mapEntity can be extended
     return this.mapEntity(entities, uid);
   },
 
@@ -83,22 +89,42 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     uid: Common.UID.ContentType
   ) {
     const params = { ...opts, populate: getDeepPopulate(uid) } as typeof opts;
-    const entities = await strapi.entityService.findMany(uid, params);
+    const entities = await strapi.documents(uid).findMany(params);
     return this.mapEntitiesResponse(entities, uid);
   },
 
   async findPage(
-    opts: Parameters<typeof strapi.entityService.findPage>[1],
+    opts: Parameters<typeof strapi.documents.findMany>[1],
     uid: Common.UID.ContentType
   ) {
-    const entities = await strapi.entityService.findPage(uid, opts);
-    return this.mapEntitiesResponse(entities, uid);
+    // Pagination
+    const page = Number(opts?.page) || 1;
+    const pageSize = Number(opts?.pageSize) || 10;
+
+    // const entities = await strapi.entityService.findPage(uid, opts);
+    const [documents, total = 0] = await Promise.all([
+      strapi.documents(uid).findMany(opts),
+      strapi.documents(uid).count(opts),
+    ]);
+
+    const result = {
+      results: documents,
+      pagination: {
+        page,
+        pageSize,
+        pageCount: Math.ceil(total! / pageSize),
+        total,
+      },
+    };
+
+    return this.mapEntitiesResponse(result, uid);
   },
 
-  async findOne(id: Entity['id'], uid: Common.UID.ContentType, opts = {}) {
+  async findOne(id: string, uid: Common.UID.ContentType, opts = {}) {
     return (
-      strapi.entityService
-        .findOne(uid, id, opts)
+      strapi
+        .documents(uid)
+        .findOne(id, opts)
         // @ts-expect-error mapEntity can be extended
         .then((entity: Entity) => this.mapEntity(entity, uid))
     );
@@ -112,9 +138,9 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 
     const params = { data: publishData, populate };
 
-    const entity = await strapi.entityService
-      .create(uid, params)
-      // @ts-expect-error mapEntity can be extended
+    const entity = await strapi
+      .documents(uid)
+      .create(params)
       .then((entity: Entity) => this.mapEntity(entity, uid));
 
     if (isWebhooksPopulateRelationsEnabled()) {
@@ -124,34 +150,44 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     return entity;
   },
 
-  async update(entity: Entity, body: Partial<Body>, uid: Common.UID.ContentType) {
+  async update(document: Entity, body: Partial<Body>, uid: Common.UID.ContentType) {
     const publishData = omitPublishedAtField(body);
     const populate = await buildDeepPopulate(uid);
+
+    // TODO: Remove this once we change documentId to id in database
+    delete publishData.id;
     const params = { data: publishData, populate };
 
-    const updatedEntity = await strapi.entityService
-      .update(uid, entity.id, params)
+    const updatedDocument = await strapi
+      .documents(uid)
+      // @ts-expect-error - change entity to document
+      .update(document.id, params)
       // @ts-expect-error mapEntity can be extended
-      .then((entity: Entity) => this.mapEntity(entity, uid));
+      .then((document: Entity) => this.mapEntity(document, uid));
 
     if (isWebhooksPopulateRelationsEnabled()) {
-      return getDeepRelationsCount(updatedEntity, uid);
+      return getDeepRelationsCount(updatedDocument, uid);
     }
 
-    return updatedEntity;
+    return updatedDocument;
   },
-  async clone(entity: Entity, body: Partial<Body>, uid: Common.UID.ContentType) {
+
+  async clone(document: Entity, body: Partial<Body>, uid: Common.UID.ContentType) {
     const populate = await buildDeepPopulate(uid);
     const publishData = { ...body };
 
     publishData[PUBLISHED_AT_ATTRIBUTE] = null;
+
+    // TODO: Remove this once we change documentId to id in database
+    delete publishData.id;
 
     const params = {
       data: publishData,
       populate,
     };
 
-    const clonedEntity = await strapi.entityService.clone(uid, entity.id, params);
+    // @ts-expect-error - change entity to document
+    const clonedEntity = await strapi.documents(uid).clone(document.id, params);
 
     // If relations were populated, relations count will be returned instead of the array of relations.
     if (isWebhooksPopulateRelationsEnabled()) {
@@ -160,9 +196,12 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 
     return clonedEntity;
   },
-  async delete(entity: Entity, uid: Common.UID.ContentType) {
+
+  async delete(document: Entity, uid: Common.UID.ContentType) {
     const populate = await buildDeepPopulate(uid);
-    const deletedEntity = await strapi.entityService.delete(uid, entity.id, { populate });
+
+    // @ts-expect-error - change entity to document
+    const deletedEntity = await strapi.documents(uid).delete(document.id, { populate });
 
     // If relations were populated, relations count will be returned instead of the array of relations.
     if (isWebhooksPopulateRelationsEnabled()) {
@@ -180,32 +219,19 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     return strapi.entityService.deleteMany(uid, opts);
   },
 
-  async publish(entity: Entity, uid: Common.UID.ContentType, body = {}) {
-    if (entity[PUBLISHED_AT_ATTRIBUTE]) {
-      throw new ApplicationError('already.published');
-    }
-
-    // validate the entity is valid for publication
-    await strapi.entityValidator.validateEntityCreation(
-      strapi.getModel(uid),
-      entity,
-      undefined,
-      // @ts-expect-error - FIXME: entity here is unnecessary
-      entity
-    );
-
-    const data = { ...body, [PUBLISHED_AT_ATTRIBUTE]: new Date() };
+  async publish(document: Entity, uid: Common.UID.ContentType) {
     const populate = await buildDeepPopulate(uid);
+    const params = { populate };
 
-    const params = { data, populate };
+    const { versions: publishedDocuments } = await strapi
+      .documents(uid)
+      // @ts-expect-error - Change entity to document
+      .publish(document.id, params);
 
-    const updatedEntity = await strapi.entityService.update(uid, entity.id, params);
+    const publishedDocument = publishedDocuments.at(0);
+    const mappedEntity = await this.mapEntity(publishedDocument, uid);
 
-    await emitEvent(uid, ENTRY_PUBLISH, updatedEntity!);
-
-    // @ts-expect-error mapEntity can be extended
-    const mappedEntity = await this.mapEntity(updatedEntity, uid);
-
+    console.log(mappedEntity, publishedDocuments);
     // If relations were populated, relations count will be returned instead of the array of relations.
     if (isWebhooksPopulateRelationsEnabled()) {
       return getDeepRelationsCount(mappedEntity, uid);
@@ -301,7 +327,6 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 
     await emitEvent(uid, ENTRY_UNPUBLISH, updatedEntity!);
 
-    // @ts-expect-error mapEntity can be extended
     const mappedEntity = await this.mapEntity(updatedEntity, uid);
 
     // If relations were populated, relations count will be returned instead of the array of relations.
@@ -312,16 +337,14 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     return mappedEntity;
   },
 
-  async countDraftRelations(id: Entity['id'], uid: Common.UID.ContentType) {
+  async countDraftRelations(id: string, uid: Common.UID.ContentType) {
     const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
     if (!hasRelations) {
       return 0;
     }
-
-    const entity = await strapi.entityService.findOne(uid, id, { populate });
-
-    return sumDraftCounts(entity, uid);
+    const document = await strapi.documents(uid).findOne(id, { populate });
+    return sumDraftCounts(document, uid);
   },
 
   async countManyEntriesDraftRelations(
