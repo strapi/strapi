@@ -42,6 +42,7 @@ describe('release service', () => {
       );
     });
   });
+  
   describe('findActions', () => {
     it('throws an error if the release does not exist', () => {
       const strapiMock = {

@@ -12,10 +12,14 @@ export const getService = (
  */
 export const getAllowedContentTypes = ({ strapi, userAbility }: { strapi: LoadedStrapi, userAbility: any }) => {
   const { contentTypes } = strapi;
-  const contentTypesWithDraftAndPublish = (Object.keys(contentTypes) as UID.ContentType[]).filter((contentTypeUid) => contentTypes[contentTypeUid].options?.draftAndPublish);
-  const allowedContentTypes = contentTypesWithDraftAndPublish.filter((contentTypeUid) => {
-    return userAbility.can('plugin::content-manager.explorer.read', contentTypeUid);
-  });
+  const contentTypesWithDraftAndPublish = (Object.keys(contentTypes) as UID.ContentType[]).filter(
+    (contentTypeUid) => contentTypes[contentTypeUid].options?.draftAndPublish
+  );
+  const allowedContentTypes = contentTypesWithDraftAndPublish.filter(
+    (contentTypeUid) => {
+      return userAbility.can('plugin::content-manager.explorer.read', contentTypeUid);
+    }
+  );
 
   return allowedContentTypes;
 };
