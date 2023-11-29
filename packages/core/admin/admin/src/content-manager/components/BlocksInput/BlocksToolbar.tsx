@@ -164,7 +164,10 @@ const BlocksDropdown = () => {
       return;
     }
 
-    if (!editor.selection) {
+    const editorIsEmpty =
+      editor.children.length === 1 && Editor.isEmpty(editor, editor.children[0]);
+
+    if (!editor.selection && !editorIsEmpty) {
       // When there is no selection, create an empty block at the end of the editor
       // so that it can be converted to the selected block
       Transforms.insertNodes(
@@ -178,6 +181,10 @@ const BlocksDropdown = () => {
           // Since there's no selection, Slate will automatically insert the node at the end
         }
       );
+    } else if (!editor.selection && editorIsEmpty) {
+      // When there is no selection and the editor is empty,
+      // select the empty paragraph from Slate's initialValue so it gets converted
+      Transforms.select(editor, Editor.start(editor, [0, 0]));
     }
 
     // Let the block handle the Slate conversion logic

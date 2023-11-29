@@ -199,4 +199,66 @@ describe('Image', () => {
       },
     ]);
   });
+
+  it('deletes image when backspace is pressed', () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: 'Some paragraph' }],
+      },
+      {
+        type: 'image',
+        image: mockImage,
+        children: [{ type: 'text', text: '' }],
+      },
+    ];
+
+    Transforms.select(baseEditor, {
+      anchor: { path: [1, 0], offset: 0 },
+      focus: { path: [1, 0], offset: 0 },
+    });
+
+    // @ts-expect-error we don't need a full event object
+    imageBlocks.image.handleBackspaceKey!(baseEditor, {
+      preventDefault: jest.fn(),
+    });
+
+    // Should delete the image
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: 'Some paragraph' }],
+      },
+    ]);
+  });
+
+  it('deletes an image when it is the only block in the editor', () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [
+      {
+        type: 'image',
+        image: mockImage,
+        children: [{ type: 'text', text: '' }],
+      },
+    ];
+
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
+    });
+
+    // @ts-expect-error we don't need a full event object
+    imageBlocks.image.handleBackspaceKey!(baseEditor, {
+      preventDefault: jest.fn(),
+    });
+
+    // Should have an empty paragraph as it's the default value
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: '' }],
+      },
+    ]);
+  });
 });

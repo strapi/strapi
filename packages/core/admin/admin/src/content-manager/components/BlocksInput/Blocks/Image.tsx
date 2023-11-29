@@ -177,6 +177,19 @@ const imageBlocks: Pick<BlocksStore, 'image'> = {
     },
     matchNode: (node) => node.type === 'image',
     isInBlocksSelector: true,
+    handleBackspaceKey(editor) {
+      // Prevent issue where the image remains when it's the only block in the document
+      if (editor.children.length === 1) {
+        Transforms.setNodes(editor, {
+          type: 'paragraph',
+          // @ts-expect-error we're only setting image as null so that Slate deletes it
+          image: null,
+          children: [{ type: 'text', text: '' }],
+        });
+      } else {
+        Transforms.removeNodes(editor);
+      }
+    },
     handleEnterKey(editor) {
       Transforms.insertNodes(editor, {
         type: 'paragraph',
