@@ -208,11 +208,14 @@ const DragAndDropElement = ({ children, index }: DragAndDropElementProps) => {
           paddingLeft={2}
           onDragStart={(event) => {
             const target = event.target as HTMLElement;
-            target.style.opacity = '0.5';
+            const currentTarget = event.currentTarget as HTMLElement;
+            if (target.getAttribute('role') !== 'button') {
+              event.preventDefault();
+            } else currentTarget.style.opacity = '0.5';
           }}
           onDragEnd={(event) => {
-            const target = event.target as HTMLElement;
-            target.style.opacity = '1';
+            const currentTarget = event.currentTarget as HTMLElement;
+            currentTarget.style.opacity = '1';
           }}
           aria-disabled={disabled}
           isOverDropTarget={isOverDropTarget}
@@ -229,6 +232,7 @@ const DragAndDropElement = ({ children, index }: DragAndDropElementProps) => {
             onKeyDown={handleDragHandleKeyDown}
             aria-disabled={disabled}
             disabled={disabled}
+            draggable="true"
           >
             <Drag color="neutral600" />
           </DragIconButton>
