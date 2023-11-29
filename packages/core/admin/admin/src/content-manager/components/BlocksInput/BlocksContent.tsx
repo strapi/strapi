@@ -22,7 +22,7 @@ const StyledEditable = styled(Editable)`
   outline: none;
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spaces[2]};
+  gap: ${({ theme }) => theme.spaces[1]};
   height: 100%;
 
   > *:last-child {
@@ -30,9 +30,10 @@ const StyledEditable = styled(Editable)`
   }
 `;
 
-const DragItem = styled(Flex)<{ isActive: boolean }>`
+const DragItem = styled(Flex)<{ isOverDropTarget: boolean }>`
   border: 2px solid transparent;
-  border-color: ${({ isActive, theme }) => (isActive ? theme.colors.secondary200 : 'transparent')};
+  border-color: ${({ isOverDropTarget, theme }) =>
+    isOverDropTarget ? theme.colors.secondary200 : 'transparent'};
 
   // Style each block rendered using renderElement()
   & > [data-slate-node='element'] {
@@ -81,17 +82,12 @@ const DragIconButton = styled(IconButton)<IconButtonProps>`
   }
 `;
 
-const NOT_DRAGGABLE_ITEMS = ['list'];
-const NOT_DROPPABLE_ITEMS = ['list'];
-
 type DragAndDropElementProps = {
   children: RenderElementProps['children'];
   index: Array<number>;
-  canDrag: boolean;
-  canDrop: boolean;
 };
 
-const DragAndDropElement = ({ children, index, canDrag, canDrop }: DragAndDropElementProps) => {
+const DragAndDropElement = ({ children, index }: DragAndDropElementProps) => {
   const { editor, disabled, name, setLiveText } = useBlocksEditorContext('drag-and-drop');
   const { formatMessage } = useIntl();
 
@@ -165,15 +161,12 @@ const DragAndDropElement = ({ children, index, canDrag, canDrop }: DragAndDropEl
   );
 
   const [
-    { handlerId, isDragging, handleKeyDown: handleDragHandleKeyDown, isActive },
+    { handlerId, isDragging, handleKeyDown: handleDragHandleKeyDown, isOverDropTarget },
     blockRef,
     dropRef,
     dragRef,
-  ] = useDragAndDrop(!disabled && canDrag, {
+  ] = useDragAndDrop(!disabled, {
     type: `${ItemTypes.BLOCKS}._${name}`,
-    canDropHandler() {
-      return canDrop;
-    },
     index,
     item: {
       displayedValue: children,
@@ -187,20 +180,18 @@ const DragAndDropElement = ({ children, index, canDrag, canDrop }: DragAndDropEl
 
   // To prevent applying opacity to the original item being dragged, display a cloned element without opacity.
   const ClonedDraggedItem = () => (
-    <DragItem gap={2} paddingLeft={2} isActive={false}>
-      {canDrag && (
-        <DragIconButton
-          forwardedAs="div"
-          role="button"
-          tabIndex={0}
-          label={formatMessage({
-            id: getTrad('components.DragHandle-label'),
-            defaultMessage: 'Drag',
-          })}
-        >
-          <Drag color="neutral600" />
-        </DragIconButton>
-      )}
+    <DragItem gap={2} paddingLeft={2} isOverDropTarget={false}>
+      <DragIconButton
+        forwardedAs="div"
+        role="button"
+        tabIndex={0}
+        label={formatMessage({
+          id: getTrad('components.DragHandle-label'),
+          defaultMessage: 'Drag',
+        })}
+      >
+        <Drag color="neutral600" />
+      </DragIconButton>
       {children}
     </DragItem>
   );
@@ -224,25 +215,23 @@ const DragAndDropElement = ({ children, index, canDrag, canDrop }: DragAndDropEl
             target.style.opacity = '1';
           }}
           aria-disabled={disabled}
-          isActive={isActive}
+          isOverDropTarget={isOverDropTarget}
         >
-          {canDrag && (
-            <DragIconButton
-              forwardedAs="div"
-              role="button"
-              tabIndex={0}
-              label={formatMessage({
-                id: getTrad('components.DragHandle-label'),
-                defaultMessage: 'Drag',
-              })}
-              onClick={(e) => e.stopPropagation()}
-              onKeyDown={handleDragHandleKeyDown}
-              aria-disabled={disabled}
-              disabled={disabled}
-            >
-              <Drag color="neutral600" />
-            </DragIconButton>
-          )}
+          <DragIconButton
+            forwardedAs="div"
+            role="button"
+            tabIndex={0}
+            label={formatMessage({
+              id: getTrad('components.DragHandle-label'),
+              defaultMessage: 'Drag',
+            })}
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={handleDragHandleKeyDown}
+            aria-disabled={disabled}
+            disabled={disabled}
+          >
+            <Drag color="neutral600" />
+          </DragIconButton>
           {children}
         </DragItem>
       )}
@@ -275,23 +264,20 @@ const isLink = (element: Element): element is Block<'link'> => {
   return element.type === 'link';
 };
 
+const isList = (element: Element): element is Block<'list'> => {
+  return element.type === 'list';
+};
+
 const baseRenderElement = ({ props, blocks, editor }: BaseRenderElementProps) => {
   const blockMatch = Object.values(blocks).find((block) => block.matchNode(props.element));
   const block = blockMatch || blocks.paragraph;
   const nodePath = ReactEditor.findPath(editor, props.element);
 
   // Link is inline block so it cannot be dragged
-  if (isLink(props.element)) return block.renderElement(props);
+  // List is skipped from dragged items
+  if (isLink(props.element) || isList(props.element)) return block.renderElement(props);
 
-  return (
-    <DragAndDropElement
-      index={nodePath}
-      canDrag={!NOT_DRAGGABLE_ITEMS.includes(props.element.type)}
-      canDrop={!NOT_DROPPABLE_ITEMS.includes(props.element.type)}
-    >
-      {block.renderElement(props)}
-    </DragAndDropElement>
-  );
+  return <DragAndDropElement index={nodePath}>{block.renderElement(props)}</DragAndDropElement>;
 };
 
 interface BlocksInputProps {

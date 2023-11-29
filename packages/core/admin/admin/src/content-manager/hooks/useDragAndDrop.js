@@ -14,7 +14,6 @@ import { useKeyboardDragAndDrop } from './useKeyboardDragAndDrop';
  *  onStart?: () => void,
  *  onEnd?: () => void,
  *  dropSensitivity?: 'regular' | 'immediate',
- *  canDropHandler?: () => void,
  * } & import('./useKeyboardDragAndDrop').UseKeyboardDragAndDropCallbacks}
  */
 
@@ -43,18 +42,15 @@ export const useDragAndDrop = (
     onCancel,
     onMoveItem,
     dropSensitivity = 'regular',
-    canDropHandler,
   }
 ) => {
   const objectRef = useRef(null);
 
-  const [{ handlerId, canDrop, isOver }, dropRef] = useDrop({
+  const [{ handlerId, isOver }, dropRef] = useDrop({
     accept: type,
-    canDrop: canDropHandler, // to skip some items from droppable target
     collect(monitor) {
       return {
         handlerId: monitor.getHandlerId(),
-        canDrop: monitor.canDrop(),
         isOver: monitor.isOver(),
       };
     },
@@ -62,7 +58,7 @@ export const useDragAndDrop = (
       const draggedItem = item.index;
       const newIndex = index;
 
-      if (canDrop && isOver) {
+      if (isOver) {
         onDropItem(draggedItem, newIndex);
       }
     },
@@ -71,10 +67,6 @@ export const useDragAndDrop = (
         return;
       }
 
-      // Don't move item if not allowed to drop at new index
-      if (!canDrop) {
-        return;
-      }
       const dragIndex = item.index;
       const newIndex = index;
 
@@ -188,10 +180,8 @@ export const useDragAndDrop = (
     onMoveItem,
   });
 
-  const isActive = canDrop && isOver;
-
   return [
-    { handlerId, isDragging, handleKeyDown, isActive },
+    { handlerId, isDragging, handleKeyDown, isOverDropTarget: isOver },
     objectRef,
     dropRef,
     dragRef,
