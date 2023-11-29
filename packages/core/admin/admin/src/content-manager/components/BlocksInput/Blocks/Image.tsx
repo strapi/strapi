@@ -1,12 +1,12 @@
 import * as React from 'react';
 
-import { Box, Flex } from '@strapi/design-system';
+import { Box, Flex, inputFocusStyle } from '@strapi/design-system';
 import { prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
 import { Picture } from '@strapi/icons';
 import { type Attribute } from '@strapi/types';
 import { type Element, Transforms, Editor } from 'slate';
-import { type RenderElementProps } from 'slate-react';
-import styled from 'styled-components';
+import { useFocused, type RenderElementProps, useSelected } from 'slate-react';
+import styled, { css } from 'styled-components';
 
 import { useBlocksEditorContext, type BlocksStore } from '../BlocksEditor';
 import { insertEmptyBlockAtLast, isLastBlockType } from '../utils/conversions';
@@ -17,6 +17,20 @@ const Img = styled.img`
   max-height: calc(512px - 56px);
   max-width: 100%;
   object-fit: contain;
+`;
+
+interface ImageWrapperProps extends React.ComponentProps<typeof Box> {
+  isFocused: boolean;
+}
+
+const ImageWrapper = styled(Box)<ImageWrapperProps>`
+  transition-property: box-shadow;
+  transition-duration: 0.2s;
+  ${(props) =>
+    props.isFocused &&
+    css`
+      box-shadow: ${props.theme.colors.primary600} 0px 0px 0px 3px;
+    `}
 `;
 
 const IMAGE_SCHEMA_FIELDS = [
@@ -50,18 +64,21 @@ const isImage = (element: Element): element is Block<'image'> => {
 
 // Added a background color to the image wrapper to make it easier to recognize the image block
 const Image = ({ attributes, children, element }: RenderElementProps) => {
+  const editorIsFocused = useFocused();
+  const imageIsSelected = useSelected();
+
   if (!isImage(element)) {
     return null;
   }
   const { url, alternativeText, width, height } = element.image;
 
   return (
-    <Box {...attributes}>
+    <ImageWrapper hasRadius isFocused={editorIsFocused && imageIsSelected} {...attributes}>
       {children}
-      <Flex background="neutral100" contentEditable={false} justifyContent="center">
+      <Flex background="neutral100" contentEditable={false} justifyContent="center" hasRadius>
         <Img src={url} alt={alternativeText} width={width} height={height} />
       </Flex>
-    </Box>
+    </ImageWrapper>
   );
 };
 
