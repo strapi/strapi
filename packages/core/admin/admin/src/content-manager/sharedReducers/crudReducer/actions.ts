@@ -105,7 +105,7 @@ export {
   clearSetModifiedDataOnly,
 };
 
-type Action =
+type CrudAction =
   | GetDataAction
   | GetDataSucceededAction
   | InitFormAction
@@ -124,5 +124,5 @@ export type {
   SetStatusAction,
   SubmitSucceededAction,
   ClearSetModifiedDataOnlyAction,
-  Action,
+  CrudAction,
 };
