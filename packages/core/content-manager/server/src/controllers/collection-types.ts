@@ -47,6 +47,7 @@ export default {
     const { model, id } = ctx.params;
 
     const entityManager = getService('entity-manager');
+    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.read()) {
@@ -73,8 +74,15 @@ export default {
     }
 
     // TODO: Count populated relations by permissions
-
     ctx.body = await permissionChecker.sanitizeOutput(entity);
+
+    // TODO: Return { data, meta } format when UI is ready
+    // TODO: Sanitize output
+    if (ctx.body)
+      ctx.body.__meta__ = await documentMetadata.getMetadata(entity.id, model, {
+        locale: entity.locale,
+        status: 'draft',
+      });
   },
 
   async create(ctx: any) {
@@ -112,6 +120,14 @@ export default {
         eventProperties: { model },
       });
     }
+
+    // TODO: Return { data, meta } format when UI is ready
+    if (ctx.body)
+      // Document was just created, so there are no other locales or statuses
+      ctx.body.__meta__ = {
+        availableLocales: [],
+        availableStatus: [],
+      };
   },
 
   async update(ctx: any) {
@@ -120,6 +136,7 @@ export default {
     const { body } = ctx.request;
 
     const entityManager = getService('entity-manager');
+    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.update()) {
@@ -150,6 +167,14 @@ export default {
     const updatedEntity = await entityManager.update(entity, sanitizedBody, model);
 
     ctx.body = await permissionChecker.sanitizeOutput(updatedEntity);
+
+    // TODO: Return { data, meta } format when UI is ready
+    // TODO: Sanitize output
+    if (ctx.body)
+      ctx.body.__meta__ = await documentMetadata.getMetadata(entity.id, model, {
+        locale: entity.locale,
+        status: 'draft',
+      });
   },
 
   async clone(ctx: any) {
@@ -187,6 +212,15 @@ export default {
     const clonedEntity = await entityManager.clone(entity, sanitizedBody, model);
 
     ctx.body = await permissionChecker.sanitizeOutput(clonedEntity);
+
+    // TODO: Return { data, meta } format when UI is ready
+    // TODO: Sanitize output
+    if (ctx.body)
+      // Document version was just cloned, so there are no other locales or statuses
+      ctx.body.__meta__ = {
+        availableLocales: [],
+        availableStatus: [],
+      };
   },
 
   async autoClone(ctx: any) {
@@ -240,6 +274,7 @@ export default {
     const { id, model } = ctx.params;
 
     const entityManager = getService('entity-manager');
+    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.publish()) {
@@ -271,6 +306,14 @@ export default {
     );
 
     ctx.body = await permissionChecker.sanitizeOutput(result);
+
+    // TODO: Return { data, meta } format when UI is ready
+    // TODO: Sanitize output
+    if (ctx.body)
+      ctx.body.__meta__ = await documentMetadata.getMetadata(entity.id, model, {
+        locale: entity.locale,
+        status: 'draft',
+      });
   },
 
   async bulkPublish(ctx: any) {
@@ -356,6 +399,7 @@ export default {
     const { id, model } = ctx.params;
 
     const entityManager = getService('entity-manager');
+    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.unpublish()) {
@@ -385,6 +429,14 @@ export default {
     );
 
     ctx.body = await permissionChecker.sanitizeOutput(result);
+
+    // TODO: Return { data, meta } format when UI is ready
+    // TODO: Sanitize output
+    if (ctx.body)
+      ctx.body.__meta__ = await documentMetadata.getMetadata(entity.id, model, {
+        locale: entity.locale,
+        status: 'draft',
+      });
   },
 
   async bulkDelete(ctx: any) {
