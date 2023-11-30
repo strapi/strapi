@@ -8,6 +8,7 @@ import {
   HeaderLayout,
   IconButton,
   Link,
+  Main,
   Popover,
   Typography,
 } from '@strapi/design-system';
@@ -60,7 +61,7 @@ const ReleaseDetailsPage = () => {
   };
 
   return (
-    <>
+    <Main>
       <HeaderLayout
         title={title}
         subtitle={formatMessage(
@@ -186,7 +187,7 @@ const ReleaseDetailsPage = () => {
           icon={<EmptyDocuments width="10rem" />}
         />
       </ContentLayout>
-    </>
+    </Main>
   );
 };
 
