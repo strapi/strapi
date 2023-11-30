@@ -46,7 +46,6 @@
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/types": "4.15.4",
     "date-fns": "2.30.0",
     "http-errors": "1.8.1",
     "lodash": "4.17.21",
@@ -55,6 +54,7 @@
   },
   "devDependencies": {
     "@strapi/pack-up": "4.15.4",
+    "@strapi/types": "4.15.4",
     "@types/koa": "2.13.4",
     "@types/node": "18.18.4",
     "eslint-config-custom": "4.15.4",
