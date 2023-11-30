@@ -6,7 +6,9 @@ import '@strapi/types';
 import constants from '../constants';
 import { getService } from '../../utils';
 import {
+  DatabaseTransferToken,
   SanitizedTransferToken,
+  TokenCreatePayload,
   TokenUpdatePayload,
   TransferToken,
   TransferTokenPermission,
@@ -34,7 +36,7 @@ const POPULATE_FIELDS = ['permissions'] as const;
  * Return a list of all tokens and their permissions
  */
 const list = async (): Promise<SanitizedTransferToken[]> => {
-  const tokens: TransferToken[] = await strapi.query(TRANSFER_TOKEN_UID).findMany({
+  const tokens: DatabaseTransferToken[] = await strapi.query(TRANSFER_TOKEN_UID).findMany({
     select: SELECT_FIELDS,
     populate: POPULATE_FIELDS,
     orderBy: { name: 'ASC' },
@@ -68,7 +70,7 @@ export const hasAccessKey = <T extends { accessKey?: string }>(
 /**
  * Create a token and its permissions
  */
-const create = async (attributes: TokenUpdatePayload): Promise<TransferToken> => {
+const create = async (attributes: TokenCreatePayload): Promise<TransferToken> => {
   const accessKey = hasAccessKey(attributes)
     ? validateAccessKey(attributes.accessKey)
     : generateRandomAccessKey();
@@ -91,7 +93,6 @@ const create = async (attributes: TokenUpdatePayload): Promise<TransferToken> =>
     });
 
     await Promise.all(
-      // @ts-expect-error lodash types
       uniq(attributes.permissions).map((action) =>
         strapi
           .query(TRANSFER_TOKEN_PERMISSION_UID)
@@ -149,7 +150,6 @@ const update = async (
       );
 
       const currentPermissions = map('action', currentPermissionsResult || []);
-      // @ts-expect-error lodash types
       const newPermissions = uniq(attributes.permissions);
 
       const actionsToDelete = difference(currentPermissions, newPermissions);
@@ -282,10 +282,10 @@ const regenerate = async (id: string | number): Promise<TransferToken> => {
 };
 
 const getExpirationFields = (
-  lifespan: number
+  lifespan: number | null
 ): { lifespan: null | number; expiresAt: null | number } => {
   // it must be nil or a finite number >= 0
-  const isValidNumber = Number.isFinite(lifespan) && lifespan > 0;
+  const isValidNumber = Number.isFinite(lifespan) && lifespan !== null && lifespan > 0;
   if (!isValidNumber && !isNil(lifespan)) {
     throw new ValidationError('lifespan must be a positive number or null');
   }
@@ -332,7 +332,7 @@ For security reasons, prefer storing the secret in an environment variable and r
 /**
  * Flatten a token's database permissions objects to an array of strings
  */
-const flattenTokenPermissions = (token: TransferToken): TransferToken => {
+const flattenTokenPermissions = (token: DatabaseTransferToken): TransferToken => {
   if (!token) {
     return token;
   }
@@ -351,11 +351,9 @@ const flattenTokenPermissions = (token: TransferToken): TransferToken => {
 const assertTokenPermissionsValidity = (attributes: TokenUpdatePayload) => {
   const permissionService = strapi.admin.services.transfer.permission;
   const validPermissions = permissionService.providers.action.keys();
-  // @ts-expect-error lodash types
   const invalidPermissions = difference(attributes.permissions, validPermissions);
 
   if (!isEmpty(invalidPermissions)) {
-    // @ts-expect-error lodash types
     throw new ValidationError(`Unknown permissions provided: ${invalidPermissions.join(', ')}`);
   }
 };
@@ -363,7 +361,7 @@ const assertTokenPermissionsValidity = (attributes: TokenUpdatePayload) => {
 /**
  * Assert that a token's lifespan is valid
  */
-const assertValidLifespan = ({ lifespan }: { lifespan: TransferToken['lifespan'] }) => {
+const assertValidLifespan = ({ lifespan }: { lifespan?: TransferToken['lifespan'] }) => {
   if (isNil(lifespan)) {
     return;
   }

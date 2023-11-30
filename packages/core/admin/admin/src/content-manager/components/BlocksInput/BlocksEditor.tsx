@@ -18,6 +18,7 @@ import { paragraphBlocks } from './Blocks/Paragraph';
 import { quoteBlocks } from './Blocks/Quote';
 import { BlocksContent } from './BlocksContent';
 import { BlocksToolbar } from './BlocksToolbar';
+import { type ModifiersStore, modifiers } from './Modifiers';
 import { withImages } from './plugins/withImages';
 import { withLinks } from './plugins/withLinks';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
@@ -28,10 +29,11 @@ import { withStrapiSchema } from './plugins/withStrapiSchema';
 
 interface BaseBlock {
   renderElement: (props: RenderElementProps) => React.JSX.Element;
-  value: object;
   matchNode: (node: Attribute.BlocksNode) => boolean;
+  handleConvert?: (editor: Editor) => void | (() => React.JSX.Element);
   handleEnterKey?: (editor: Editor) => void;
   handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => void;
+  snippets?: string[];
 }
 
 interface NonSelectorBlock extends BaseBlock {
@@ -75,6 +77,7 @@ type BlocksStore = {
 
 interface BlocksEditorContextValue {
   blocks: BlocksStore;
+  modifiers: ModifiersStore;
   disabled: boolean;
 }
 
@@ -212,7 +215,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
         onChange={handleSlateChange}
         key={key}
       >
-        <BlocksEditorProvider blocks={blocks} disabled={disabled}>
+        <BlocksEditorProvider blocks={blocks} modifiers={modifiers} disabled={disabled}>
           <InputWrapper
             direction="column"
             alignItems="flex-start"

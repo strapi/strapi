@@ -26,7 +26,6 @@ import {
   setStatus,
   submitSucceeded,
 } from '../../sharedReducers/crudReducer/actions';
-import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
 import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
 
 // This container is used to handle the CRUD
@@ -46,7 +45,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   const { post, put, del } = fetchClient;
 
   const { componentsDataStructure, contentTypeDataStructure, data, isLoading, status } =
-    useSelector(selectCrudReducer);
+    useSelector((state) => state['content-manager_editViewCrudReducer']);
 
   const cleanReceivedData = useCallback(
     (data) => {

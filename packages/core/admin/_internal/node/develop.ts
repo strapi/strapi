@@ -2,16 +2,19 @@ import type { CLIContext } from '@strapi/strapi';
 import * as tsUtils from '@strapi/typescript-utils';
 import { joinBy } from '@strapi/utils';
 import chokidar from 'chokidar';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+
 import cluster from 'node:cluster';
 
-import { getTimer } from './core/timer';
 import { checkRequiredDependencies } from './core/dependencies';
+import { getTimer, prettyTime, type TimeMeasurer } from './core/timer';
 import { createBuildContext } from './createBuildContext';
-import { WebpackWatcher, watch as watchWebpack } from './webpack/watch';
 import { build as buildWebpack } from './webpack/build';
+import { watch as watchWebpack, WebpackWatcher } from './webpack/watch';
 
-import { writeStaticClientFiles } from './staticFiles';
 import strapiFactory from '@strapi/strapi';
+import { writeStaticClientFiles } from './staticFiles';
 
 interface DevelopOptions extends CLIContext {
   /**
@@ -22,6 +25,48 @@ interface DevelopOptions extends CLIContext {
   open?: boolean;
   watchAdmin?: boolean;
 }
+
+// This method removes all non-admin build files from the dist directory
+const cleanupDistDirectory = async ({
+  tsconfig,
+  logger,
+  timer,
+}: Pick<DevelopOptions, 'tsconfig' | 'logger'> & { timer: TimeMeasurer }) => {
+  const distDir = tsconfig?.config?.options?.outDir;
+
+  if (
+    !distDir || // we don't have a dist dir
+    (await fs
+      .access(distDir)
+      .then(() => false)
+      .catch(() => true)) // it doesn't exist -- if it does but no access, that will be caught later
+  ) {
+    return;
+  }
+
+  const timerName = 'cleaningDist' + Date.now();
+  timer.start(timerName);
+  const cleaningSpinner = logger.spinner(`Cleaning dist dir ${distDir}`).start();
+
+  try {
+    const dirContent = await fs.readdir(distDir);
+    const validFilenames = dirContent
+      // Ignore the admin build folder
+      .filter((filename) => filename !== 'build');
+    for (const filename of validFilenames) {
+      await fs.rm(path.resolve(distDir, filename), { recursive: true });
+    }
+  } catch (err: unknown) {
+    const generatingDuration = timer.end(timerName);
+    cleaningSpinner.text = `Error cleaning dist dir: ${err} (${prettyTime(generatingDuration)})`;
+    cleaningSpinner?.fail();
+    return;
+  }
+
+  const generatingDuration = timer.end(timerName);
+  cleaningSpinner.text = `Cleaning dist dir (${prettyTime(generatingDuration)})`;
+  cleaningSpinner?.succeed();
+};
 
 const develop = async ({
   cwd,
@@ -46,6 +91,12 @@ const develop = async ({
       return;
     }
 
+    if (tsconfig?.config) {
+      // Build without diagnostics in case schemas have changed
+      await cleanupDistDirectory({ tsconfig, logger, timer });
+      await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: true } });
+    }
+
     /**
      * IF we're not watching the admin we're going to build it, this makes
      * sure that at least the admin is built for users & they can interact
@@ -63,7 +114,7 @@ const develop = async ({
         options,
       });
       const contextDuration = timer.end('createBuildContext');
-      contextSpinner.text = `Building build context (${contextDuration}ms)`;
+      contextSpinner.text = `Building build context (${prettyTime(contextDuration)})`;
       contextSpinner.succeed();
 
       timer.start('creatingAdmin');
@@ -73,13 +124,18 @@ const develop = async ({
       await buildWebpack(ctx);
 
       const adminDuration = timer.end('creatingAdmin');
-      adminSpinner.text = `Creating admin (${adminDuration}ms)`;
+      adminSpinner.text = `Creating admin (${prettyTime(adminDuration)})`;
       adminSpinner.succeed();
     }
 
     cluster.on('message', async (worker, message) => {
       switch (message) {
         case 'reload': {
+          if (tsconfig?.config) {
+            // Build without diagnostics in case schemas have changed
+            await cleanupDistDirectory({ tsconfig, logger, timer });
+            await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: true } });
+          }
           logger.debug('cluster has the reload message, sending the worker kill message');
           worker.send('kill');
           break;
@@ -102,16 +158,8 @@ const develop = async ({
   }
 
   if (cluster.isWorker) {
-    if (tsconfig?.config) {
-      timer.start('compilingTS');
-      const compilingTsSpinner = logger.spinner(`Compiling TS`).start();
-
-      tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
-
-      const compilingDuration = timer.end('compilingTS');
-      compilingTsSpinner.text = `Compiling TS (${compilingDuration}ms)`;
-      compilingTsSpinner.succeed();
-    }
+    timer.start('loadStrapi');
+    const loadStrapiSpinner = logger.spinner(`Loading Strapi`).start();
 
     const strapi = strapiFactory({
       appDir: cwd,
@@ -119,7 +167,6 @@ const develop = async ({
       autoReload: true,
       serveAdminPanel: !watchAdmin,
     });
-
     let webpackWatcher: WebpackWatcher | undefined;
 
     /**
@@ -139,7 +186,7 @@ const develop = async ({
         options,
       });
       const contextDuration = timer.end('createBuildContext');
-      contextSpinner.text = `Building build context (${contextDuration}ms)`;
+      contextSpinner.text = `Building build context (${prettyTime(contextDuration)})`;
       contextSpinner.succeed();
 
       timer.start('creatingAdmin');
@@ -149,11 +196,15 @@ const develop = async ({
       webpackWatcher = await watchWebpack(ctx);
 
       const adminDuration = timer.end('creatingAdmin');
-      adminSpinner.text = `Creating admin (${adminDuration}ms)`;
+      adminSpinner.text = `Creating admin (${prettyTime(adminDuration)})`;
       adminSpinner.succeed();
     }
 
     const strapiInstance = await strapi.load();
+
+    const loadStrapiDuration = timer.end('loadStrapi');
+    loadStrapiSpinner.text = `Loading Strapi (${prettyTime(loadStrapiDuration)})`;
+    loadStrapiSpinner.succeed();
 
     timer.start('generatingTS');
     const generatingTsSpinner = logger.spinner(`Generating types`).start();
@@ -167,8 +218,20 @@ const develop = async ({
     });
 
     const generatingDuration = timer.end('generatingTS');
-    generatingTsSpinner.text = `Generating types (${generatingDuration}ms)`;
+    generatingTsSpinner.text = `Generating types (${prettyTime(generatingDuration)})`;
     generatingTsSpinner.succeed();
+
+    if (tsconfig?.config) {
+      timer.start('compilingTS');
+      const compilingTsSpinner = logger.spinner(`Compiling TS`).start();
+
+      await cleanupDistDirectory({ tsconfig, logger, timer });
+      await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
+
+      const compilingDuration = timer.end('compilingTS');
+      compilingTsSpinner.text = `Compiling TS (${prettyTime(compilingDuration)})`;
+      compilingTsSpinner.succeed();
+    }
 
     const restart = async () => {
       if (strapiInstance.reload.isWatching && !strapiInstance.reload.isReloading) {
