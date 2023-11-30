@@ -51,11 +51,10 @@ export declare namespace GetReleaseActions {
   }
 
   export interface Response {
-    data: 
-      | ReleaseAction[]
-      | {
-        data: null;
-        error: errors.ApplicationError | errors.NotFoundError;
-      }
+    data: ReleaseAction[],
+    meta: {
+      pagination: Pagination;
+    }
+    error?: errors.ApplicationError | errors.NotFoundError;
   }
 }
