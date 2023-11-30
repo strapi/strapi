@@ -8644,7 +8644,7 @@ __metadata:
     "@strapi/data-transfer": "npm:4.15.5"
     "@strapi/design-system": "npm:1.13.1"
     "@strapi/helper-plugin": "npm:4.15.5"
-    "@strapi/icons": "npm:1.13.1"
+    "@strapi/icons": "npm:1.13.0"
     "@strapi/pack-up": "npm:4.15.5"
     "@strapi/permissions": "npm:4.15.5"
     "@strapi/provider-audit-logs-local": "npm:4.15.5"
@@ -8989,16 +8989,6 @@ __metadata:
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
   checksum: 5edda4a3804d2a5ff3ca95e0beb52a81f2a7499c5527e23c96465f2c1f8d0a47e052ba8b307a8f6969c431f8cb27e161324cab6fed8a7589f01a54cfed84d561
-  languageName: node
-  linkType: hard
-
-"@strapi/icons@npm:1.13.1":
-  version: 1.13.1
-  resolution: "@strapi/icons@npm:1.13.1"
-  peerDependencies:
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
-  checksum: 9dba0968a874d975f4aff086a76a1e07efb4ac9a6c5c8144fd89579554e18953e2359d5616c323dd2bc0189eb47b5a9a16280c1477ef37297a8072cdeb0bfd37
   languageName: node
   linkType: hard
 
@@ -9352,7 +9342,7 @@ __metadata:
   dependencies:
     "@strapi/design-system": "npm:1.13.1"
     "@strapi/helper-plugin": "npm:4.15.5"
-    "@strapi/icons": "npm:1.13.1"
+    "@strapi/icons": "npm:1.13.0"
     "@strapi/pack-up": "npm:4.15.5"
     "@strapi/provider-upload-local": "npm:4.15.5"
     "@strapi/strapi": "npm:4.15.5"
