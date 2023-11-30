@@ -59,7 +59,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   mapEntity<T = any>(entity: any, uid?: Common.UID.ContentType): T {
     // Map documentId to id
     // TODO: remove this when we change documentId to id in database
-    if (entity.documentId) {
+    if (entity?.documentId) {
       entity.entryId = entity.id;
       entity.id = entity.documentId;
       delete entity.documentId;
