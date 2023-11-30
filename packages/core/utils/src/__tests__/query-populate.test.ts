@@ -31,7 +31,7 @@ describe('traverseQueryPopulate', () => {
       }),
       db: {
         metadata: {
-          get: jest.fn((uid) => ({
+          get: jest.fn(() => ({
             columnToAttribute: {
               address: 'address',
               some: 'some',
@@ -81,7 +81,7 @@ describe('traverseQueryPopulate', () => {
       }),
       db: {
         metadata: {
-          get: jest.fn((uid) => ({
+          get: jest.fn(() => ({
             columnToAttribute: {
               address: 'address',
             },
@@ -130,7 +130,7 @@ describe('traverseQueryPopulate', () => {
       }),
       db: {
         metadata: {
-          get: jest.fn((uid) => ({
+          get: jest.fn(() => ({
             columnToAttribute: {
               address: 'address',
             },
@@ -217,7 +217,7 @@ describe('traverseQueryPopulate', () => {
       }),
       db: {
         metadata: {
-          get: jest.fn((uid) => ({
+          get: jest.fn(() => ({
             columnToAttribute: {
               address: 'address',
             },
