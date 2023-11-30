@@ -14,5 +14,10 @@
   "modal.add-release-title": "New Release",
   "modal.form.input.label.release-name": "Name",
   "modal.form.button.submit": "Continue",
-  "pages.Details.header-subtitle": "{number, plural, =0 {No entries} one {# entry} other {# entries}}"
+  "pages.Details.header-subtitle": "{number, plural, =0 {No entries} one {# entry} other {# entries}}",
+  "pages.Releases.tab-group.label": "Releases list",
+  "pages.Releases.tab.pending": "Pending",
+  "pages.Releases.tab.done": "Done",
+  "page.Releases.tab.emptyEntries": "No releases",
+  "page.Releases.release-item.entries": "{number, plural, =0 {No entries} one {# entry} other {# entries}}"
 }
