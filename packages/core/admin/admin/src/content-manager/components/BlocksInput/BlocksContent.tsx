@@ -40,8 +40,8 @@ const DropPlacholder = styled(Box)<{
 }>`
   position: absolute;
   // Show drop placeholder 2px above or below the drop target
-  top: ${(props) => props.dragDirection === 'upwards' && `calc(0px - 2px)`};
-  bottom: ${(props) => props.dragDirection === 'downwards' && `calc(0px - 2px)`};
+  top: ${(props) => props.dragDirection === 'upwards' && `-2px`};
+  bottom: ${(props) => props.dragDirection === 'downwards' && `-2px`};
   right: 0;
 `;
 

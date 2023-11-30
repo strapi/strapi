@@ -70,10 +70,10 @@ const MyComponent = ({ onMoveItem }) => {
 };
 ```
 
-### Basic usage - Move items on Dropping over drop zone
+### Basic usage - Move items on dropping over drop zone
 
-Below is a basic example usage where we move items immediately and we're not interested in rendering custom previews in the DragLayer. However, we do replace
-the current item with a placeholder.
+Below is a basic example usage where we move items immediately without custom previews in the DragLayer. We do not replace
+the current item until its dropped and show a drop placeholder instead next to drop target using drag direction.
 
 ```jsx
 import { Box, Flex, IconButton } from '@strapi/design-system';
@@ -85,20 +85,18 @@ import { composeRefs } from 'path/to/utils';
 import { Placeholder } from './Placeholder';
 
 const MyComponent = ({ onDropItem }) => {
-  const [{ handlerId, handleKeyDown, isOverDropTarget }, myRef, dropRef, dragRef] = useDragAndDrop(
-    true,
-    {
+  const [{ handlerId, handleKeyDown, isOverDropTarget, direction }, myRef, dropRef, dragRef] =
+    useDragAndDrop(true, {
       type: 'my-type',
       index,
       onDropItem,
-    }
-  );
+    });
 
   const composedRefs = composeRefs(myRef, dragRef);
 
   return (
     <Box ref={dropRef} cursor={'all-scroll'}>
-      {isOverDropTarget && <Placeholder />}
+      {isOverDropTarget && <Placeholder direction={direction} />}
       <Flex ref={composedRefs} data-handler-id={handlerId}>
         <IconButton
           forwardedAs="div"
@@ -205,6 +203,7 @@ type UseDragAndDropReturn = [
     isDragging: boolean;
     handleKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => void;
     isOverDropTarget: boolean;
+    direction: string;
   },
   objectRef: React.RefObject<HTMLElement>,
   dropRef: ConnectDropTarget,
