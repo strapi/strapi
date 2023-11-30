@@ -58,7 +58,7 @@ export const useDragAndDrop = (
       const draggedItem = item.index;
       const newIndex = index;
 
-      if (isOver) {
+      if (isOver && onDropItem) {
         onDropItem(draggedItem, newIndex);
       }
     },
