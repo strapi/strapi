@@ -6,12 +6,13 @@ type PaginationQuery = Documents.Params.Pagination.PageNotation;
 type SortQuery = Documents.Params.Sort.StringNotation<Common.UID.Schema> & string;
 
 // Admin document response follows the same format as the document service
-type Document = Documents.Result<Common.UID.Schema>;
+type Document = Documents.Document<any>;
+type AT_FIELDS = 'updatedAt' | 'createdAt' | 'publishedAt';
 type DocumentMetadata = {
   // All status of the returned locale
-  availableStatus: Document[];
+  availableStatus: Pick<Document, 'id' | AT_FIELDS | 'status'>[];
   // Available locales within the same status of the returned document
-  availableLocales: Document[];
+  availableLocales: Pick<Document, 'id' | 'locale' | AT_FIELDS | 'status'>[];
 };
 
 /**

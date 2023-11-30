@@ -2,12 +2,13 @@ import { Documents, Common } from '@strapi/types';
 
 import { errors } from '@strapi/utils';
 
-type Document = Documents.Result<Common.UID.Schema>;
+type Document = Documents.Document<any>;
+type AT_FIELDS = 'updatedAt' | 'createdAt' | 'publishedAt';
 type DocumentMetadata = {
   // All status of the returned locale
-  availableStatus: Document[];
+  availableStatus: Pick<Document, 'id' | 'status' | AT_FIELDS>[];
   // Available locales within the same status of the returned document
-  availableLocales: Document[];
+  availableLocales: Pick<Document, 'id' | 'locale' | 'status' | AT_FIELDS>[];
 };
 
 /**
