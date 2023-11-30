@@ -231,7 +231,7 @@ module.exports = {
         return ctx.badRequest('Please provide a password');
       }
 
-      config.password = await bcrypt.hash(password, 10);
+      config.password = await bcrypt.hash(password, 11);
     }
 
     await pluginStore.set({ key: 'config', value: config });

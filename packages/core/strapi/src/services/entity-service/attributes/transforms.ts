@@ -21,7 +21,7 @@ const transforms: Transforms = {
       return value;
     }
 
-    const rounds = toNumber(getOr(10, 'encryption.rounds', attribute));
+    const rounds = toNumber(getOr(11, 'encryption.rounds', attribute));
 
     return bcrypt.hashSync(value.toString(), rounds);
   },
