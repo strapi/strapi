@@ -1,9 +1,12 @@
+import { Middleware } from '@reduxjs/toolkit';
 import get from 'lodash/get';
 
-const extendCTBAttributeInitialDataMiddleware = () => {
-  return ({ getState }: any) =>
-    (next: any) =>
-    (action: any) => {
+import { RootState } from '../store/reducers';
+
+const extendCTBAttributeInitialDataMiddleware: () => Middleware<object, RootState> = () => {
+  return ({ getState }) =>
+    (next) =>
+    (action) => {
       const enhanceAction = () => {
         // the block here is to catch the error when trying to access the state
         // of the ctb when the plugin is not mounted

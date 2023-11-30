@@ -1,5 +1,9 @@
-const extendCTBInitialDataMiddleware = () => {
-  return () => (next: any) => (action: any) => {
+import { Middleware } from '@reduxjs/toolkit';
+
+import { RootState } from '../store/reducers';
+
+const extendCTBInitialDataMiddleware: () => Middleware<object, RootState> = () => {
+  return () => (next) => (action) => {
     if (
       action.type === 'ContentTypeBuilder/FormModal/SET_DATA_TO_EDIT' &&
       action.modalType === 'contentType'

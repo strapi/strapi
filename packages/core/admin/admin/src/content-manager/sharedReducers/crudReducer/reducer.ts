@@ -12,7 +12,7 @@ import {
   SUBMIT_SUCCEEDED,
 } from './constants';
 
-import type { Action } from './actions';
+import type { CrudAction } from './actions';
 
 interface EntityData {
   [key: string]: Attribute.GetValue<Attribute.Any>;
@@ -36,7 +36,7 @@ const initialState = {
   setModifiedDataOnly: false,
 } satisfies CrudState;
 
-const reducer = (state: CrudState = initialState, action: Action) =>
+const reducer = (state: CrudState = initialState, action: CrudAction) =>
   produce(state, (draftState) => {
     switch (action.type) {
       case GET_DATA: {
@@ -88,4 +88,4 @@ const reducer = (state: CrudState = initialState, action: Action) =>
   });
 
 export { reducer, initialState };
-export type { CrudState, EntityData };
+export type { CrudState, EntityData, CrudAction };
