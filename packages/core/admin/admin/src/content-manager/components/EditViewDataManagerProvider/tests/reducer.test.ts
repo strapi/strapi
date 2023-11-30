@@ -1,3 +1,4 @@
+import { FormattedComponentLayout, FormattedContentTypeLayout } from '../../../utils/layouts';
 import { reducer, initialState } from '../reducer';
 
 describe('EditViewDataManagerProvider | reducer', () => {
@@ -15,7 +16,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
             },
           },
         },
-      };
+      } as unknown as Record<string, FormattedComponentLayout>;
 
       const state = {
         ...initialState,
@@ -45,7 +46,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD',
+        type: 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD' as const,
         componentLayoutData: components['blog.simple'],
         allComponents: components,
         keys: ['component_field', 'sub_component'],
@@ -64,7 +65,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
             },
           },
         },
-      };
+      } as unknown as Record<string, FormattedComponentLayout>;
 
       const state = {
         ...initialState,
@@ -90,7 +91,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD',
+        type: 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD' as const,
         componentLayoutData: components['blog.simple'],
         allComponents: components,
         keys: ['component_field', 'sub_component'],
@@ -119,7 +120,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
             },
           },
         },
-      };
+      } as unknown as Record<string, FormattedComponentLayout>;
 
       const state = {
         ...initialState,
@@ -143,7 +144,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD',
+        type: 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD' as const,
         componentLayoutData: components['basic.repeatable-repeatble-relation'],
         allComponents: components,
         keys: ['component_field', 'sub_component'],
@@ -167,7 +168,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
             },
           },
         },
-      };
+      } as unknown as Record<string, FormattedComponentLayout>;
 
       const state = {
         ...initialState,
@@ -200,7 +201,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD',
+        type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD' as const,
         componentLayoutData: {
           uid: 'blog.simple',
           attributes: {
@@ -211,7 +212,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
               type: 'string',
             },
           },
-        },
+        } as unknown as FormattedComponentLayout,
         allComponents: components,
         keys: ['component_field'],
         shouldCheckErrors: false,
@@ -233,7 +234,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
             },
           },
         },
-      };
+      } as unknown as Record<string, FormattedComponentLayout>;
 
       const state = {
         ...initialState,
@@ -270,7 +271,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD',
+        type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD' as const,
         componentLayoutData: {
           uid: 'blog.simple',
           attributes: {
@@ -281,7 +282,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
               type: 'string',
             },
           },
-        },
+        } as unknown as FormattedComponentLayout,
         allComponents: components,
         keys: ['component_field'],
         shouldCheckErrors: true,
@@ -303,7 +304,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
             },
           },
         },
-      };
+      } as unknown as Record<string, FormattedComponentLayout>;
 
       const state = {
         ...initialState,
@@ -333,7 +334,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD',
+        type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD' as const,
         componentLayoutData: {
           uid: 'blog.simple',
           attributes: {
@@ -344,7 +345,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
               type: 'string',
             },
           },
-        },
+        } as unknown as FormattedComponentLayout,
         allComponents: components,
         keys: ['component_field'],
         shouldCheckErrors: false,
@@ -366,7 +367,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
             },
           },
         },
-      };
+      } as unknown as Record<string, FormattedComponentLayout>;
 
       const state = {
         ...initialState,
@@ -393,7 +394,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD',
+        type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD' as const,
         componentLayoutData: {
           uid: 'blog.simple',
           attributes: {
@@ -404,7 +405,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
               type: 'relation',
             },
           },
-        },
+        } as unknown as FormattedComponentLayout,
         allComponents: components,
         keys: ['component_field'],
         shouldCheckErrors: false,
@@ -442,7 +443,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
             },
           },
         },
-      };
+      } as unknown as Record<string, FormattedComponentLayout>;
 
       const state = {
         ...initialState,
@@ -457,7 +458,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const stateAfterAddingRepeatable1 = reducer(state, {
-        type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD',
+        type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD' as const,
         keys: ['repeatable_repeatable_nested_component'],
         componentLayoutData: {
           uid: 'basic.repeatable-repeatble-relation',
@@ -471,7 +472,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
               component: 'basic.simple',
             },
           },
-        },
+        } as unknown as FormattedComponentLayout,
         allComponents: components,
         shouldCheckErrors: false,
       });
@@ -489,7 +490,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       });
 
       const stateAfterAddingRepeatable2 = reducer(stateAfterAddingRepeatable1, {
-        type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD',
+        type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD' as const,
         keys: ['repeatable_repeatable_nested_component', '0', 'repeatable_simple'],
         componentLayoutData: {
           uid: 'basic.simple',
@@ -504,7 +505,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
               type: 'string',
             },
           },
-        },
+        } as unknown as FormattedComponentLayout,
         allComponents: components,
         shouldCheckErrors: false,
       });
@@ -578,7 +579,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD',
+        type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD' as const,
         keys: ['outer_single_compo', 'level_one_repeatable'],
         componentLayoutData: {
           uid: 'basic.level_one_repeatable',
@@ -592,7 +593,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
               component: 'basic.level_two_single_component',
             },
           },
-        },
+        } as unknown as FormattedComponentLayout,
         allComponents: {
           'basic.outer_single_compo': {
             uid: 'basic.outer_single_compo',
@@ -650,7 +651,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
               },
             },
           },
-        },
+        } as unknown as Record<string, FormattedComponentLayout>,
         shouldCheckErrors: false,
       };
 
@@ -672,7 +673,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
             },
           },
         },
-      };
+      } as unknown as Record<string, FormattedComponentLayout>;
 
       const state = {
         ...initialState,
@@ -703,7 +704,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE',
+        type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE' as const,
         componentLayoutData: {
           uid: 'blog.simple',
           attributes: {
@@ -714,7 +715,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
               type: 'string',
             },
           },
-        },
+        } as unknown as FormattedComponentLayout,
         allComponents: components,
         keys: ['dz'],
         shouldCheckErrors: false,
@@ -736,7 +737,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
             },
           },
         },
-      };
+      } as unknown as Record<string, FormattedComponentLayout>;
 
       const state = {
         ...initialState,
@@ -774,7 +775,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE',
+        type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE' as const,
         componentLayoutData: {
           uid: 'blog.simple',
           attributes: {
@@ -785,7 +786,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
               type: 'string',
             },
           },
-        },
+        } as unknown as FormattedComponentLayout,
         allComponents: components,
         keys: ['dz'],
         shouldCheckErrors: true,
@@ -807,7 +808,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
             },
           },
         },
-      };
+      } as unknown as Record<string, FormattedComponentLayout>;
 
       const state = {
         ...initialState,
@@ -832,7 +833,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE',
+        type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE' as const,
         componentLayoutData: {
           uid: 'blog.relation',
           attributes: {
@@ -843,7 +844,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
               type: 'relation',
             },
           },
-        },
+        } as unknown as FormattedComponentLayout,
         allComponents: components,
         keys: ['dz'],
         shouldCheckErrors: false,
@@ -865,7 +866,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
             },
           },
         },
-      };
+      } as unknown as Record<string, FormattedComponentLayout>;
 
       const state = {
         ...initialState,
@@ -903,7 +904,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE',
+        type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE' as const,
         componentLayoutData: {
           uid: 'blog.simple',
           attributes: {
@@ -914,7 +915,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
               type: 'string',
             },
           },
-        },
+        } as unknown as FormattedComponentLayout,
         allComponents: components,
         keys: ['dz'],
         shouldCheckErrors: true,
@@ -946,7 +947,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'CONNECT_RELATION',
+        type: 'CONNECT_RELATION' as const,
         keys: ['relation'],
         value: { id: 1 },
       };
@@ -973,7 +974,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const nextState = reducer(state, {
-        type: 'CONNECT_RELATION',
+        type: 'CONNECT_RELATION' as const,
         keys: ['relation'],
         value: { id: 3 },
       });
@@ -998,7 +999,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
 
       expect(
         reducer(nextState, {
-          type: 'CONNECT_RELATION',
+          type: 'CONNECT_RELATION' as const,
           keys: ['relation'],
           value: { id: 4 },
         })
@@ -1033,7 +1034,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'CONNECT_RELATION',
+        type: 'CONNECT_RELATION' as const,
         keys: ['relation'],
         value: { id: 1 },
         toOneRelation: true,
@@ -1051,7 +1052,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       });
 
       nextState = reducer(nextState, {
-        type: 'CONNECT_RELATION',
+        type: 'CONNECT_RELATION' as const,
         keys: ['relation'],
         value: { id: 2 },
         toOneRelation: true,
@@ -1083,7 +1084,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       const initialDataPath = ['initialData', 'relation'];
       const modifiedDataPath = ['modifiedData', 'relation'];
 
-      let nextState = reducer(state, {
+      const nextState = reducer(state, {
         type: 'LOAD_RELATION',
         initialDataPath,
         modifiedDataPath,
@@ -1138,7 +1139,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       const initialDataPath = ['initialData', 'relation'];
       const modifiedDataPath = ['modifiedData', 'relation'];
 
-      let nextState = reducer(state, {
+      const nextState = reducer(state, {
         type: 'LOAD_RELATION',
         initialDataPath,
         modifiedDataPath,
@@ -1187,7 +1188,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       const initialDataPath = ['initialData', 'relation'];
       const modifiedDataPath = ['modifiedData', 'relation'];
 
-      let nextState = reducer(state, {
+      const nextState = reducer(state, {
         type: 'LOAD_RELATION',
         initialDataPath,
         modifiedDataPath,
@@ -1231,7 +1232,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       const initialDataPath = ['initialData', 'relation'];
       const modifiedDataPath = ['modifiedData', 'relation'];
 
-      let nextState = reducer(state, {
+      const nextState = reducer(state, {
         type: 'LOAD_RELATION',
         initialDataPath,
         modifiedDataPath,
@@ -1287,7 +1288,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'DISCONNECT_RELATION',
+        type: 'DISCONNECT_RELATION' as const,
         keys: ['relation'],
         id: 1,
       };
@@ -1300,10 +1301,10 @@ describe('EditViewDataManagerProvider | reducer', () => {
     it('should set the state correctly', () => {
       const state = {
         ...initialState,
-        formErrors: true,
-        initialData: true,
-        modifiedData: true,
-        modifiedDZName: true,
+        formErrors: {},
+        initialData: {},
+        modifiedData: {},
+        modifiedDZName: '',
         shouldCheckErrors: true,
       };
       const expected = {
@@ -1316,8 +1317,10 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'INIT_FORM',
+        type: 'INIT_FORM' as const,
         initialValues: { ok: true },
+        components: {},
+        attributes: {},
       };
 
       expect(reducer(state, action)).toEqual(expected);
@@ -1327,16 +1330,17 @@ describe('EditViewDataManagerProvider | reducer', () => {
       it('should create an array per relational field passed as the initialValues', () => {
         const state = {
           ...initialState,
-          formErrors: true,
+          formErrors: {},
           initialData: {},
           modifiedData: {},
-          modifiedDZName: true,
+          modifiedDZName: '',
           shouldCheckErrors: true,
         };
 
         const action = {
-          type: 'INIT_FORM',
+          type: 'INIT_FORM' as const,
           initialValues: { ok: true, relation: { count: 10 } },
+          components: {},
           attributes: {
             okay: {
               type: 'boolean',
@@ -1352,6 +1356,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
           },
         };
 
+        // @ts-expect-error – relation schema is slightly wrong.
         expect(reducer(state, action)).toMatchInlineSnapshot(`
           {
             "componentsDataStructure": {},
@@ -1378,15 +1383,15 @@ describe('EditViewDataManagerProvider | reducer', () => {
       it('should create an array per relational field even when the relationalFieldPaths path is nested', () => {
         const state = {
           ...initialState,
-          formErrors: true,
+          formErrors: {},
           initialData: {},
           modifiedData: {},
-          modifiedDZName: true,
+          modifiedDZName: '',
           shouldCheckErrors: true,
         };
 
         const action = {
-          type: 'INIT_FORM',
+          type: 'INIT_FORM' as const,
           initialValues: {
             ok: true,
             relation: { count: 10 },
@@ -1426,6 +1431,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
           },
         };
 
+        // @ts-expect-error – relation schema is slightly wrong.
         expect(reducer(state, action)).toMatchInlineSnapshot(`
           {
             "componentsDataStructure": {},
@@ -1460,15 +1466,15 @@ describe('EditViewDataManagerProvider | reducer', () => {
       it('should create an array per relational field even when the relationalFieldPaths path is nested', () => {
         const state = {
           ...initialState,
-          formErrors: true,
+          formErrors: {},
           initialData: {},
           modifiedData: {},
-          modifiedDZName: true,
+          modifiedDZName: '',
           shouldCheckErrors: true,
         };
 
         const action = {
-          type: 'INIT_FORM',
+          type: 'INIT_FORM' as const,
           initialValues: {
             ok: true,
             relation: { count: 10 },
@@ -1523,6 +1529,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
           },
         };
 
+        // @ts-expect-error – relation schema is slightly wrong.
         expect(reducer(state, action)).toMatchInlineSnapshot(`
           {
             "componentsDataStructure": {},
@@ -1563,15 +1570,15 @@ describe('EditViewDataManagerProvider | reducer', () => {
       it('should keep the creator fields relations without replace them with arrays', () => {
         const state = {
           ...initialState,
-          formErrors: true,
+          formErrors: {},
           initialData: {},
           modifiedData: {},
-          modifiedDZName: true,
+          modifiedDZName: '',
           shouldCheckErrors: true,
         };
 
         const action = {
-          type: 'INIT_FORM',
+          type: 'INIT_FORM' as const,
           initialValues: {
             ok: true,
             createdBy: { username: 'johnDoe' },
@@ -1596,6 +1603,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
           },
         };
 
+        // @ts-expect-error – relation schema is slightly wrong.
         expect(reducer(state, action)).toMatchInlineSnapshot(`
           {
             "componentsDataStructure": {},
@@ -1648,15 +1656,15 @@ describe('EditViewDataManagerProvider | reducer', () => {
 
         const state = {
           ...initialState,
-          formErrors: true,
+          formErrors: {},
           initialData: {},
           modifiedData: {},
-          modifiedDZName: true,
+          modifiedDZName: '',
           shouldCheckErrors: true,
         };
 
         const action = {
-          type: 'INIT_FORM',
+          type: 'INIT_FORM' as const,
           initialValues,
           components: {
             test: {
@@ -1687,6 +1695,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
           },
         };
 
+        // @ts-expect-error – component schema is slightly wrong.
         expect(reducer(state, action)).toMatchInlineSnapshot(`
           {
             "componentsDataStructure": {},
@@ -1744,15 +1753,15 @@ describe('EditViewDataManagerProvider | reducer', () => {
 
         const state = {
           ...initialState,
-          formErrors: true,
+          formErrors: {},
           initialData: {},
           modifiedData: {},
-          modifiedDZName: true,
+          modifiedDZName: '',
           shouldCheckErrors: true,
         };
 
         const action = {
-          type: 'INIT_FORM',
+          type: 'INIT_FORM' as const,
           initialValues,
           components: {
             test: {
@@ -1792,6 +1801,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
           },
         };
 
+        // @ts-expect-error – component schema is slightly wrong.
         expect(reducer(state, action)).toMatchInlineSnapshot(`
           {
             "componentsDataStructure": {},
@@ -1860,15 +1870,15 @@ describe('EditViewDataManagerProvider | reducer', () => {
 
         const state = {
           ...initialState,
-          formErrors: true,
+          formErrors: {},
           initialData: {},
           modifiedData: {},
-          modifiedDZName: true,
+          modifiedDZName: '',
           shouldCheckErrors: true,
         };
 
         const action = {
-          type: 'INIT_FORM',
+          type: 'INIT_FORM' as const,
           initialValues,
           components: {
             test: {
@@ -1908,6 +1918,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
           },
         };
 
+        // @ts-expect-error – component schema is slightly wrong.
         expect(reducer(state, action)).toMatchInlineSnapshot(`
           {
             "componentsDataStructure": {},
@@ -1978,15 +1989,15 @@ describe('EditViewDataManagerProvider | reducer', () => {
 
         const state = {
           ...initialState,
-          formErrors: true,
+          formErrors: {},
           initialData: {},
           modifiedData: {},
-          modifiedDZName: true,
+          modifiedDZName: '',
           shouldCheckErrors: true,
         };
 
         const action = {
-          type: 'INIT_FORM',
+          type: 'INIT_FORM' as const,
           initialValues,
           components: {
             test: {
@@ -2026,6 +2037,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
           },
         };
 
+        // @ts-expect-error – component schema is slightly wrong.
         expect(reducer(state, action)).toMatchInlineSnapshot(`
           {
             "componentsDataStructure": {},
@@ -2076,15 +2088,15 @@ describe('EditViewDataManagerProvider | reducer', () => {
       it('should create an array for a relational field', () => {
         const state = {
           ...initialState,
-          formErrors: true,
+          formErrors: {},
           initialData: {},
           modifiedData: {},
-          modifiedDZName: true,
+          modifiedDZName: '',
           shouldCheckErrors: true,
         };
 
         const action = {
-          type: 'INIT_FORM',
+          type: 'INIT_FORM' as const,
           initialValues: {
             ok: true,
             dynamic_relations: [
@@ -2126,6 +2138,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
           },
         };
 
+        // @ts-expect-error – component schema is slightly wrong.
         expect(reducer(state, action)).toMatchInlineSnapshot(`
           {
             "componentsDataStructure": {},
@@ -2168,14 +2181,14 @@ describe('EditViewDataManagerProvider | reducer', () => {
       it('should create an array for a relational field inside a nested component', () => {
         const state = {
           ...initialState,
-          formErrors: true,
+          formErrors: {},
           initialData: {},
           modifiedData: {},
-          modifiedDZName: true,
+          modifiedDZName: '',
           shouldCheckErrors: true,
         };
         const action = {
-          type: 'INIT_FORM',
+          type: 'INIT_FORM' as const,
           initialValues: {
             ok: true,
             dynamic_relations: [
@@ -2228,6 +2241,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
           },
         };
 
+        // @ts-expect-error – component schema is slightly wrong.
         expect(reducer(state, action)).toMatchInlineSnapshot(`
           {
             "componentsDataStructure": {},
@@ -2278,15 +2292,15 @@ describe('EditViewDataManagerProvider | reducer', () => {
       it('should create an array for a relational field inside a repeatable field', () => {
         const state = {
           ...initialState,
-          formErrors: true,
+          formErrors: {},
           initialData: {},
           modifiedData: {},
-          modifiedDZName: true,
+          modifiedDZName: '',
           shouldCheckErrors: true,
         };
 
         const action = {
-          type: 'INIT_FORM',
+          type: 'INIT_FORM' as const,
           initialValues: {
             ok: true,
             dynamic_relations: [
@@ -2352,6 +2366,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
           },
         };
 
+        // @ts-expect-error – component schema is slightly wrong.
         expect(reducer(state, action)).toMatchInlineSnapshot(`
           {
             "componentsDataStructure": {},
@@ -2418,14 +2433,14 @@ describe('EditViewDataManagerProvider | reducer', () => {
       it('should assign __temp_key__ to components when not in initialData', () => {
         const state = {
           ...initialState,
-          formErrors: true,
+          formErrors: {},
           initialData: {},
           modifiedData: {},
-          modifiedDZName: true,
+          modifiedDZName: '',
           shouldCheckErrors: true,
         };
         const action = {
-          type: 'INIT_FORM',
+          type: 'INIT_FORM' as const,
           initialValues: {
             ok: true,
             dynamic_relations: [
@@ -2503,6 +2518,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
           },
         };
 
+        // @ts-expect-error – component schema is slightly wrong.
         expect(reducer(state, action)).toMatchInlineSnapshot(`
           {
             "componentsDataStructure": {},
@@ -2600,7 +2616,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
     it('should merge modifiedData with relation containing fields if the modifiedData exists', () => {
       const state = {
         ...initialState,
-        formErrors: true,
+        formErrors: {},
         initialData: {},
         modifiedData: {
           relation: [
@@ -2619,12 +2635,12 @@ describe('EditViewDataManagerProvider | reducer', () => {
             ],
           },
         },
-        modifiedDZName: true,
+        modifiedDZName: '',
         shouldCheckErrors: true,
       };
 
       const action = {
-        type: 'INIT_FORM',
+        type: 'INIT_FORM' as const,
         initialValues: {
           ok: true,
           relation: { count: 10 },
@@ -2661,6 +2677,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
         },
       };
 
+      // @ts-expect-error – component schema is slightly wrong.
       const newState = reducer(state, action);
 
       expect(newState.modifiedData.relation[0]).toEqual({
@@ -2716,7 +2733,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'MOVE_COMPONENT_FIELD',
+        type: 'MOVE_COMPONENT_FIELD' as const,
         newIndex: 1,
         oldIndex: 3,
         keys: ['test', 'component_field'],
@@ -2751,7 +2768,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'MOVE_COMPONENT_UP',
+        type: 'MOVE_COMPONENT_UP' as const,
         currentIndex: 1,
         dynamicZoneName: 'dz',
         shouldCheckErrors: false,
@@ -2776,7 +2793,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'MOVE_COMPONENT_UP',
+        type: 'MOVE_COMPONENT_UP' as const,
         currentIndex: 1,
         dynamicZoneName: 'dz',
         shouldCheckErrors: true,
@@ -2804,7 +2821,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'MOVE_COMPONENT_DOWN',
+        type: 'MOVE_COMPONENT_DOWN' as const,
         currentIndex: 1,
         dynamicZoneName: 'dz',
         shouldCheckErrors: false,
@@ -2829,7 +2846,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'MOVE_COMPONENT_DOWN',
+        type: 'MOVE_COMPONENT_DOWN' as const,
         currentIndex: 1,
         dynamicZoneName: 'dz',
         shouldCheckErrors: true,
@@ -2860,7 +2877,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'MOVE_FIELD',
+        type: 'MOVE_FIELD' as const,
         dragIndex: 1,
         keys: ['test', 'relationB'],
         overIndex: 3,
@@ -2890,7 +2907,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       const action = {
         keys: ['name'],
         shouldSetInitialValue: false,
-        type: 'ON_CHANGE',
+        type: 'ON_CHANGE' as const,
         value: 'soup',
       };
 
@@ -2912,7 +2929,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       const action = {
         keys: ['compo', 'name'],
         shouldSetInitialValue: false,
-        type: 'ON_CHANGE',
+        type: 'ON_CHANGE' as const,
         value: 'soup',
       };
 
@@ -2934,7 +2951,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       const action = {
         keys: ['name'],
         shouldSetInitialValue: true,
-        type: 'ON_CHANGE',
+        type: 'ON_CHANGE' as const,
         value: 'soup',
       };
 
@@ -2959,7 +2976,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE',
+        type: 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE' as const,
         dynamicZoneName: 'dz',
         index: 1,
         shouldCheckErrors: false,
@@ -2986,7 +3003,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE',
+        type: 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE' as const,
         dynamicZoneName: 'dz',
         index: 1,
         shouldCheckErrors: true,
@@ -3017,7 +3034,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'REMOVE_COMPONENT_FROM_FIELD',
+        type: 'REMOVE_COMPONENT_FROM_FIELD' as const,
         keys: ['compo', 'subCompo'],
       };
 
@@ -3047,7 +3064,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'REMOVE_PASSWORD_FIELD',
+        type: 'REMOVE_PASSWORD_FIELD' as const,
         keys: ['compo', 'subCompo', 'pwd'],
       };
 
@@ -3078,7 +3095,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'REMOVE_REPEATABLE_FIELD',
+        type: 'REMOVE_REPEATABLE_FIELD' as const,
         keys: ['compo', 'subCompo', '1'],
       };
 
@@ -3111,7 +3128,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'REMOVE_REPEATABLE_FIELD',
+        type: 'REMOVE_REPEATABLE_FIELD' as const,
         keys: ['compo', 'subCompo', '1'],
       };
 
@@ -3150,7 +3167,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'REORDER_RELATION',
+        type: 'REORDER_RELATION' as const,
         newIndex: 1,
         oldIndex: 3,
         keys: ['field1', 'field2', 'relation'],
@@ -3189,14 +3206,14 @@ describe('EditViewDataManagerProvider | reducer', () => {
         },
       };
 
-      const generateAction = (newIndex, oldIndex) => ({
-        type: 'REORDER_RELATION',
+      const generateAction = (newIndex: number, oldIndex: number) => ({
+        type: 'REORDER_RELATION' as const,
         newIndex,
         oldIndex,
         keys: ['relation'],
       });
 
-      const generateExpected = (relation = []) => ({
+      const generateExpected = (relation: Array<{ name: string; __temp_key__: string }> = []) => ({
         ...initialState,
         modifiedData: {
           relation,
@@ -3264,14 +3281,14 @@ describe('EditViewDataManagerProvider | reducer', () => {
     it('should set the componentsDataStructure and the contentTypeDataStructure correctly', () => {
       const state = {
         ...initialState,
-        componentsDataStructure: null,
-        contentTypeDataStructure: null,
+        componentsDataStructure: {},
+        contentTypeDataStructure: {},
       };
 
       const action = {
-        type: 'SET_DEFAULT_DATA_STRUCTURES',
-        componentsDataStructure: { ok: true },
-        contentTypeDataStructure: { ok: false },
+        type: 'SET_DEFAULT_DATA_STRUCTURES' as const,
+        componentsDataStructure: { ok: true } as unknown as FormattedComponentLayout,
+        contentTypeDataStructure: { ok: false } as unknown as FormattedContentTypeLayout,
       };
 
       const expected = {
@@ -3293,7 +3310,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'SET_FORM_ERRORS',
+        type: 'SET_FORM_ERRORS' as const,
         errors: { ok: true },
       };
 
@@ -3314,7 +3331,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'SET_PUBLISH_CONFIRMATION',
+        type: 'SET_PUBLISH_CONFIRMATION' as const,
         publishConfirmation: {
           show: true,
           draftCount: 100,
@@ -3341,7 +3358,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'RESET_PUBLISH_CONFIRMATION',
+        type: 'RESET_PUBLISH_CONFIRMATION' as const,
       };
 
       const expected = {
@@ -3365,7 +3382,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'TRIGGER_FORM_VALIDATION',
+        type: 'TRIGGER_FORM_VALIDATION' as const,
       };
 
       const expected = {
@@ -3385,7 +3402,7 @@ describe('EditViewDataManagerProvider | reducer', () => {
       };
 
       const action = {
-        type: 'TRIGGER_FORM_VALIDATION',
+        type: 'TRIGGER_FORM_VALIDATION' as const,
       };
 
       const expected = {

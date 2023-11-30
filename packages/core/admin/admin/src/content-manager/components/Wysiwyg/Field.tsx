@@ -198,3 +198,4 @@ const TypographyAsterisk = styled(Typography)`
 `;
 
 export { Wysiwyg };
+export type { WysiwygProps };

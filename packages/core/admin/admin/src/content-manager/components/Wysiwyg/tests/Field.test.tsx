@@ -1,11 +1,9 @@
-import * as React from 'react';
-
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render as renderRTL } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 
-import Wysiwyg from '../Field';
+import { Wysiwyg, WysiwygProps } from '../Field';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -18,6 +16,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 document.createRange = () => {
   const range = new Range();
   range.getBoundingClientRect = jest.fn();
+  // @ts-expect-error – mocking.
   range.getClientRects = jest.fn(() => ({
     item: () => null,
     length: 0,
@@ -28,7 +27,7 @@ document.createRange = () => {
 
 window.focus = jest.fn();
 
-const render = ({ onChange = jest.fn(), ...restProps } = {}) => ({
+const render = ({ onChange = jest.fn(), ...restProps }: Partial<WysiwygProps> = {}) => ({
   user: userEvent.setup(),
   ...renderRTL(
     <Wysiwyg
@@ -96,9 +95,13 @@ describe('Wysiwyg render and actions buttons', () => {
     await user.click(getByRole('button', { name: 'Underline' }));
 
     const hasUnderlineMarkdown = getByText((content, node) => {
-      const hasText = (node) => node.textContent === '<u>Underline</u>';
+      const hasText = (node: Element | null) =>
+        node ? node.textContent === '<u>Underline</u>' : false;
       const nodeHasText = hasText(node);
-      const childrenDontHaveText = Array.from(node.children).every((child) => !hasText(child));
+      // eslint-disable-next-line testing-library/no-node-access
+      const childrenDontHaveText = Array.from(node?.children ?? []).every(
+        (child) => !hasText(child)
+      );
 
       return nodeHasText && childrenDontHaveText;
     });
@@ -293,9 +296,9 @@ Code
 // FIXME
 describe.skip('Wysiwyg expand mode', () => {
   it('should open wysiwyg expand portal when clicking on expand button', async () => {
-    const { getByTestId } = render();
+    const { queryByTestId, getByTestId } = render();
 
-    expect(getByTestId('wysiwyg-expand')).not.toBeInTheDocument();
+    expect(queryByTestId('wysiwyg-expand')).not.toBeInTheDocument();
 
     // await user.click(container.querySelector('#expand'));
 
@@ -303,12 +306,12 @@ describe.skip('Wysiwyg expand mode', () => {
   });
 
   it('should close wysiwyg expand portal when clicking on collapse button', async () => {
-    const { getByTestId } = render();
+    const { queryByTestId } = render();
 
     // fireEvent.click(container.querySelector('#expand'));
     // fireEvent.click(getByText('Collapse'));
 
-    expect(getByTestId('wysiwyg-expand')).not.toBeInTheDocument();
+    expect(queryByTestId('wysiwyg-expand')).not.toBeInTheDocument();
   });
 });
 

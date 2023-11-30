@@ -56,6 +56,7 @@ describe('DynamicZone', () => {
 
   const defaultProps = {
     fieldSchema: {
+      type: 'dynamiczone',
       components: ['component1', 'component2', 'component3'],
     },
     metadatas: {
@@ -63,7 +64,7 @@ describe('DynamicZone', () => {
       description: 'dynamic description',
     },
     name: 'DynamicZoneComponent',
-  };
+  } as unknown as DynamicZoneProps;
 
   const TestComponent = (props?: Partial<DynamicZoneProps>) => (
     <DynamicZone {...defaultProps} {...props} />
@@ -242,6 +243,7 @@ describe('DynamicZone', () => {
 
       const { user, getByRole } = render({
         fieldSchema: {
+          // @ts-expect-error – strings should be string.string
           components: ['component1', 'component2', 'component3'],
           max: 3,
         },

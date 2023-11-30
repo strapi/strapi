@@ -32,13 +32,12 @@ describe('ComponentCategory', () => {
       isOpen: true,
       components: [
         {
-          componentUid: 'test',
+          componentUid: 'test.test',
           info: {
-            singularName: 'myComponent',
-            pluralName: 'myComponents',
             displayName: 'myComponent',
             icon: 'test',
           },
+          attributes: {},
         },
       ],
     });
@@ -72,13 +71,12 @@ describe('ComponentCategory', () => {
       onAddComponent,
       components: [
         {
-          componentUid: 'test',
+          componentUid: 'test.test',
           info: {
-            singularName: 'myComponent',
-            pluralName: 'myComponents',
             displayName: 'myComponent',
             icon: 'test',
           },
+          attributes: {},
         },
       ],
     });

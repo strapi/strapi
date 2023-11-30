@@ -1,3 +1,6 @@
+import { FormattedComponentLayout } from '../../../utils/layouts';
+import { ComponentPickerProps } from '../ComponentPicker';
+
 export const layoutData = {
   component1: {
     category: 'myComponents',
@@ -50,7 +53,7 @@ export const layoutData = {
     kind: 'singleType',
     attributes: {},
   },
-};
+} as unknown as Record<string, FormattedComponentLayout>;
 
 export const dynamicComponentsByCategory = {
   myComponents: [
@@ -84,4 +87,4 @@ export const dynamicComponentsByCategory = {
       },
     },
   ],
-};
+} as unknown as ComponentPickerProps['dynamicComponentsByCategory'];

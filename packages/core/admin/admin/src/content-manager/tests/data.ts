@@ -1,5 +1,7 @@
 import { Permission } from '@strapi/helper-plugin';
 
+import { FormattedComponentLayout, FormattedContentTypeLayout } from '../utils/layouts';
+
 const testData = {
   contentType: {
     uid: 'api::test.test',
@@ -18,7 +20,7 @@ const testData = {
       repeatable: { type: 'component', repeatable: true, component: 'compos.test-compo' },
       updatedAt: { type: 'timestamp' },
     },
-  },
+  } as unknown as FormattedContentTypeLayout,
   components: {
     'compos.sub-compo': {
       uid: 'compos.sub-compo',
@@ -48,7 +50,7 @@ const testData = {
         },
       },
     },
-  },
+  } as unknown as Record<string, FormattedComponentLayout>,
   modifiedData: {
     createdAt: '2020-04-28T13:22:13.033Z',
     dz: [

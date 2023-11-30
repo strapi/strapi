@@ -1,4 +1,5 @@
-import cleanData from '../cleanData';
+import { FormattedComponentLayout, FormattedContentTypeLayout } from '../../../../utils/layouts';
+import { cleanData } from '../cleanData';
 
 describe('CM || components || EditViewDataManagerProvider || utils || cleanData', () => {
   describe('single values', () => {
@@ -14,7 +15,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
               type: 'json',
             },
           },
-        },
+        } as unknown as FormattedContentTypeLayout,
         {}
       );
 
@@ -39,7 +40,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
               type: 'time',
             },
           },
-        },
+        } as unknown as FormattedContentTypeLayout,
         {}
       );
 
@@ -85,7 +86,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
               multiple: true,
             },
           },
-        },
+        } as unknown as FormattedContentTypeLayout,
         {}
       );
 
@@ -136,7 +137,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
               component: 'basic.rep',
             },
           },
-        },
+        } as unknown as FormattedContentTypeLayout,
         {
           'basic.rep': {
             attributes: {
@@ -148,7 +149,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
               },
             },
           },
-        }
+        } as unknown as Record<string, FormattedComponentLayout>
       );
 
       const expected = {
@@ -184,7 +185,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
               component: 'basic.relation',
             },
           },
-        },
+        } as unknown as FormattedContentTypeLayout,
         {
           'basic.relation': {
             attributes: {
@@ -193,7 +194,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
               },
             },
           },
-        }
+        } as unknown as Record<string, FormattedComponentLayout>
       );
       expect(result).toEqual({
         component: {
@@ -231,7 +232,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
               component: 'basic.nested',
             },
           },
-        },
+        } as unknown as FormattedContentTypeLayout,
         {
           'basic.relation': {
             attributes: {
@@ -248,7 +249,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
               },
             },
           },
-        }
+        } as unknown as Record<string, FormattedComponentLayout>
       );
       expect(result).toEqual({
         component: {
@@ -291,7 +292,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
               components: ['basic.rep'],
             },
           },
-        },
+        } as unknown as FormattedContentTypeLayout,
         {
           'basic.rep': {
             attributes: {
@@ -300,7 +301,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
               },
             },
           },
-        }
+        } as unknown as Record<string, FormattedComponentLayout>
       );
 
       const expected = { dynamicZoneTest: [{ __component: 'basic.rep', time: '00:02:00' }] };
@@ -361,7 +362,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
           type: 'relation',
         },
       },
-    };
+    } as unknown as FormattedContentTypeLayout;
     const componentsSchema = {
       'basic.relation': {
         uid: 'basic.relation',
@@ -407,7 +408,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
           },
         },
       },
-    };
+    } as unknown as Record<string, FormattedComponentLayout>;
 
     test('given that the browserState for relation is completely different to the serverState for relation the return value should disconnect and connect', () => {
       const result = cleanData(

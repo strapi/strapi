@@ -1,5 +1,8 @@
 import { findAllAndReplace } from '../findAllAndReplace';
 
+import type { FormattedComponentLayout } from '../../../../utils/layouts';
+import type { Schema } from '@strapi/types';
+
 describe('findAllAndReplace', () => {
   describe('supplying initial data', () => {
     it('should replace the first level of relations', () => {
@@ -29,6 +32,7 @@ describe('findAllAndReplace', () => {
         'replaced'
       )(initialValues, schema);
 
+      // @ts-expect-error - ts inference is needed
       data.repeatable_relations.forEach((datum) => expect(datum.categories).toEqual('replaced'));
     });
 
@@ -39,9 +43,11 @@ describe('findAllAndReplace', () => {
         'replaced'
       )(initialValues, schema);
 
+      // @ts-expect-error - ts inference is needed
       data.repeatable_repeatable_relations.forEach((item) => {
         expect(item.categories).toEqual('hello');
 
+        // @ts-expect-error - ts inference is needed
         item.repeatable_relations.forEach((itum) => expect(itum.categories).toEqual('replaced'));
       });
     });
@@ -338,7 +344,7 @@ const components = {
       },
     },
   },
-};
+} as unknown as Record<string, FormattedComponentLayout>;
 
 const schema = {
   id: {
@@ -405,7 +411,7 @@ const schema = {
   updatedAt: {
     type: 'datetime',
   },
-};
+} as unknown as Schema.Attributes;
 
 const initialValues = {
   id: 5,
