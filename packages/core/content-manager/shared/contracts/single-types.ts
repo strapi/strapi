@@ -1,8 +1,15 @@
-import { EntityService, Common } from '@strapi/types';
+import { Documents, Common } from '@strapi/types';
 
 import { errors } from '@strapi/utils';
 
-type Entity = EntityService.Result<Common.UID.Schema>;
+type Document = Documents.Document<any>;
+type AT_FIELDS = 'updatedAt' | 'createdAt' | 'publishedAt';
+type DocumentMetadata = {
+  // All status of the returned locale
+  availableStatus: Pick<Document, 'id' | 'status' | AT_FIELDS>[];
+  // Available locales within the same status of the returned document
+  availableLocales: Pick<Document, 'id' | 'locale' | 'status' | AT_FIELDS>[];
+};
 
 /**
  * GET /single-types/:model
@@ -20,7 +27,8 @@ export declare namespace Find {
   }
 
   export interface Response {
-    data: Entity;
+    data: Document;
+    meta: DocumentMetadata;
     error?: errors.ApplicationError;
   }
 }
@@ -30,7 +38,7 @@ export declare namespace Find {
  */
 export declare namespace CreateOrUpdate {
   export interface Request {
-    body: Entity;
+    body: Document;
     query: {
       plugins: {
         i18n: {
@@ -41,7 +49,8 @@ export declare namespace CreateOrUpdate {
   }
 
   export interface Response {
-    data: Entity;
+    data: Document;
+    meta: DocumentMetadata;
     error?: errors.ApplicationError;
   }
 }
@@ -58,7 +67,8 @@ export declare namespace Delete {
   }
 
   export interface Response {
-    data: Entity;
+    data: Document;
+    meta: DocumentMetadata;
     error?: errors.ApplicationError;
   }
 }
@@ -75,7 +85,8 @@ export declare namespace Publish {
   }
 
   export interface Response {
-    data: Entity;
+    data: Document;
+    meta: DocumentMetadata;
     error?: errors.ApplicationError;
   }
 }
@@ -91,7 +102,8 @@ export declare namespace UnPublish {
     };
   }
   export interface Response {
-    data: Entity;
+    data: Document;
+    meta: DocumentMetadata;
     error?: errors.ApplicationError;
   }
 }
