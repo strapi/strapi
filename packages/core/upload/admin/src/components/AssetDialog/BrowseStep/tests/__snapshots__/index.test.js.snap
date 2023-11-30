@@ -94,6 +94,15 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   color: #32324d;
 }
 
+.c0 {
+  margin-left: -250px;
+  position: fixed;
+  left: 50%;
+  top: 2.875rem;
+  z-index: 10;
+  width: 31.25rem;
+}
+
 .c2 {
   padding-bottom: 16px;
 }
@@ -217,6 +226,21 @@ exports[`BrowseStep renders and match snapshot 1`] = `
 
 .c66 {
   padding-left: 8px;
+}
+
+.c1 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .c3 {
@@ -647,30 +671,6 @@ exports[`BrowseStep renders and match snapshot 1`] = `
 
 .c27[aria-disabled='true'] svg path {
   fill: #666687;
-}
-
-.c0 {
-  margin-left: -250px;
-  position: fixed;
-  left: 50%;
-  top: 2.875rem;
-  z-index: 10;
-  width: 31.25rem;
-}
-
-.c1 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  gap: 8px;
 }
 
 .c31:first-child {
