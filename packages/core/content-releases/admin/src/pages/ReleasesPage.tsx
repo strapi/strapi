@@ -232,7 +232,6 @@ const ReleasesPage = () => {
                 </Tab>
               </Tabs>
             </Box>
-
             <TabPanels>
               {/* Pending releases */}
               <TabPanel>
