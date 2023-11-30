@@ -7,6 +7,7 @@ describe('i18n | middlewares | extendCTBInitialDataMiddleware', () => {
       const next = jest.fn();
       const action = {};
 
+      // @ts-expect-error – mocked store
       extendCTBInitialDataMiddleware()(next)(action);
 
       expect(next).toBeCalledWith(action);
@@ -21,6 +22,7 @@ describe('i18n | middlewares | extendCTBInitialDataMiddleware', () => {
         actionType: undefined,
       };
 
+      // @ts-expect-error – mocked store
       extendCTBInitialDataMiddleware()(next)(action);
 
       expect(next).toBeCalledWith(action);
@@ -36,6 +38,7 @@ describe('i18n | middlewares | extendCTBInitialDataMiddleware', () => {
         data: { pluginOptions: { i18n: { localized: false } } },
       };
 
+      // @ts-expect-error – mocked store
       extendCTBInitialDataMiddleware()(next)(action);
 
       expect(next).toBeCalledWith(action);
@@ -51,6 +54,7 @@ describe('i18n | middlewares | extendCTBInitialDataMiddleware', () => {
         data: {},
       };
 
+      // @ts-expect-error – mocked store
       extendCTBInitialDataMiddleware()(next)(action);
 
       expect(next).toBeCalledWith({
@@ -77,6 +81,7 @@ describe('i18n | middlewares | extendCTBInitialDataMiddleware', () => {
         },
       };
 
+      // @ts-expect-error – mocked store
       extendCTBInitialDataMiddleware()(next)(action);
 
       expect(next).toBeCalledWith({

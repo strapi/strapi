@@ -51,7 +51,10 @@ const addCommonFieldsToInitialDataMiddleware: () => Middleware<object, RootState
     };
 
     const getData = async () => {
-      if (!isParsedParamNullOrString(relatedEntityId) || !isParsedParamNullOrString(locale)) {
+      if (
+        !isParsedParamUndefinedOrString(relatedEntityId) ||
+        !isParsedParamUndefinedOrString(locale)
+      ) {
         return;
       }
 
@@ -69,10 +72,6 @@ const addCommonFieldsToInitialDataMiddleware: () => Middleware<object, RootState
           id: relatedEntityId,
           locale,
         });
-
-        if ('error' in data) {
-          throw new Error(data.error.message);
-        }
 
         const { nonLocalizedFields, localizations } = data;
 
@@ -110,7 +109,7 @@ const addCommonFieldsToInitialDataMiddleware: () => Middleware<object, RootState
     return getData();
   };
 
-const isParsedParamNullOrString = (param: ParsedQs[string]): param is undefined | string =>
-  typeof param === 'string' || param === null;
+const isParsedParamUndefinedOrString = (param: ParsedQs[string]): param is undefined | string =>
+  typeof param === 'string' || param === undefined;
 
 export { addCommonFieldsToInitialDataMiddleware };

@@ -7,6 +7,7 @@ describe('localePermissionMiddleware', () => {
       type: 'UNKNOWN_TYPE',
     };
 
+    // @ts-expect-error – mocked store
     const nextAction = localePermissionMiddleware()()(nextFn)(action);
 
     expect(nextAction).toBe(action);
@@ -19,6 +20,7 @@ describe('localePermissionMiddleware', () => {
       __meta__: undefined,
     };
 
+    // @ts-expect-error – mocked store
     const nextAction = localePermissionMiddleware()()(nextFn)(action);
 
     expect(nextAction).toBe(action);
@@ -31,6 +33,7 @@ describe('localePermissionMiddleware', () => {
       __meta__: { containerName: undefined },
     };
 
+    // @ts-expect-error – mocked store
     const nextAction = localePermissionMiddleware()()(nextFn)(action);
 
     expect(nextAction).toBe(action);
@@ -43,6 +46,7 @@ describe('localePermissionMiddleware', () => {
       __meta__: { containerName: 'listView' },
     };
 
+    // @ts-expect-error – mocked store
     const nextAction = localePermissionMiddleware()()(nextFn)(action);
 
     expect(nextAction).toBe(action);
@@ -58,6 +62,7 @@ describe('localePermissionMiddleware', () => {
       },
     };
 
+    // @ts-expect-error – mocked store
     const nextAction = localePermissionMiddleware()()(nextFn)(action);
 
     expect(nextAction).toBe(action);
@@ -78,6 +83,7 @@ describe('localePermissionMiddleware', () => {
       permissions: {},
     };
 
+    // @ts-expect-error – mocked store
     const nextAction = localePermissionMiddleware()()(nextFn)(action);
 
     expect(nextAction).toEqual({
@@ -125,6 +131,7 @@ describe('localePermissionMiddleware', () => {
       },
     };
 
+    // @ts-expect-error – mocked store
     const nextAction = localePermissionMiddleware()()(nextFn)(action);
 
     expect(nextAction).toEqual({
