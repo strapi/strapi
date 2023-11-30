@@ -11,6 +11,7 @@ export interface GetAllReleasesQueryParams {
   pageSize?: number;
   filters?: {
     releasedAt?: {
+      // TODO: this should be a boolean, find a way to avoid strings
       $notNull?: boolean | 'true' | 'false';
     };
   };
