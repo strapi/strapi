@@ -5,6 +5,7 @@ type SettingsPermissions =
   | 'project-settings'
   | 'roles'
   | 'sso'
+  | 'transfer-tokens'
   | 'users'
   | 'webhooks';
 

@@ -7,13 +7,13 @@ import { useParams } from 'react-router-dom';
 
 import { selectAdminPermissions } from '../../../selectors';
 import { getData, getDataSucceeded } from '../../sharedReducers/crudReducer/actions';
-import crudReducer, { crudInitialState } from '../../sharedReducers/crudReducer/reducer';
+import { reducer, initialState } from '../../sharedReducers/crudReducer/reducer';
 import { mergeMetasWithSchema } from '../../utils';
 import { makeSelectModelAndComponentSchemas } from '../App/selectors';
 import EditSettingsView from '../EditSettingsView';
 
 const ComponentSettingsView = () => {
-  const [{ isLoading, data: layout }, dispatch] = useReducer(crudReducer, crudInitialState);
+  const [{ isLoading, data: layout }, dispatch] = useReducer(reducer, initialState);
   const schemasSelector = useMemo(makeSelectModelAndComponentSchemas, []);
   const { schemas } = useSelector((state) => schemasSelector(state), shallowEqual);
   const permissions = useSelector(selectAdminPermissions);

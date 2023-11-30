@@ -136,7 +136,7 @@ describe('Transfer Token', () => {
         name: 'transfer-token_tests-name',
         description: 'transfer-token_tests-description',
         lifespan: constants.TRANSFER_TOKEN_LIFESPANS.DAYS_90,
-        permissions: ['push'],
+        permissions: ['push' as const],
       };
 
       const expectedExpires = Date.now() + attributes.lifespan;

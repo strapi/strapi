@@ -27,7 +27,6 @@ import {
   setStatus,
   submitSucceeded,
 } from '../../sharedReducers/crudReducer/actions';
-import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
 import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
 
 // This container is used to handle the CRUD
@@ -40,7 +39,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
   const [{ query, rawQuery }] = useQueryParams();
   const dispatch = useDispatch();
   const { componentsDataStructure, contentTypeDataStructure, data, isLoading, status } =
-    useSelector(selectCrudReducer);
+    useSelector((state) => state['content-manager_editViewCrudReducer']);
   const redirectionLink = useFindRedirectionLink(slug);
   const { formatAPIError } = useAPIErrorHandler(getTrad);
 
