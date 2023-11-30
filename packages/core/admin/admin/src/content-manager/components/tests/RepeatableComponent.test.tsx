@@ -29,8 +29,12 @@ const LAYOUT_DATA = {
   },
 };
 
-jest.mock('../FieldComponent', () => () => "I'm a field component");
-jest.mock('../Inputs', () => () => "I'm inputs");
+jest.mock('../FieldComponent', () => ({
+  FieldComponent: () => "I'm a field component",
+}));
+jest.mock('../Inputs', () => ({
+  Inputs: () => "I'm inputs",
+}));
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),

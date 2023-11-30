@@ -35,7 +35,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   NotAllowedInput: () => 'This field is not allowed',
 }));
 
-jest.mock('../../hooks/useContentTypeLayout', () => ({
+jest.mock('../../../hooks/useContentTypeLayout', () => ({
   useContentTypeLayout: jest.fn().mockReturnValue({
     components: {},
     getComponentLayout: jest.fn().mockImplementation((componentUid) => layoutData[componentUid]),
@@ -47,7 +47,9 @@ jest.mock('../../hooks/useContentTypeLayout', () => ({
  * harnessing then is necessary and it's not worth it for these
  * tests when really we're focussing on dynamic zone behaviour.
  */
-jest.mock('../../FieldComponent', () => () => "I'm a field component");
+jest.mock('../../FieldComponent', () => ({
+  FieldComponent: () => "I'm a field component",
+}));
 
 describe('DynamicZone', () => {
   afterEach(() => {
@@ -179,13 +181,31 @@ describe('DynamicZone', () => {
 
       await user.click(componentPickerButton);
 
-      expect(addComponentToDynamicZone).toHaveBeenCalledWith(
-        'DynamicZoneComponent',
-        { category: 'myComponents', info: { displayName: 'component1', icon: undefined } },
-        expect.any(Object),
-        false,
-        undefined
-      );
+      expect(addComponentToDynamicZone.mock.calls[0]).toMatchInlineSnapshot(`
+        [
+          "DynamicZoneComponent",
+          {
+            "apiID": "",
+            "attributes": {},
+            "category": "myComponents",
+            "info": {
+              "displayName": "component1",
+              "icon": undefined,
+              "pluralName": "component1",
+              "singularName": "component1",
+            },
+            "isDisplayed": false,
+            "kind": "singleType",
+            "layouts": {
+              "edit": [],
+            },
+            "modelType": "contentType",
+          },
+          {},
+          false,
+          undefined,
+        ]
+      `);
     });
 
     it('should call the removeComponentFromDynamicZone callback when the RemoveButton is clicked', async () => {

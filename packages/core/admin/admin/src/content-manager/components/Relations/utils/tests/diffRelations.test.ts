@@ -27,7 +27,12 @@ describe('diffRelations', () => {
       },
     ];
 
-    expect(diffRelations(browserState, serverState)).toStrictEqual([[], []]);
+    expect(diffRelations(browserState, serverState)).toMatchInlineSnapshot(`
+      [
+        [],
+        [],
+      ]
+    `);
   });
 
   test('given that the browserState is missing an ID that is in the serverState I should have that ID in the disconnect array', () => {
@@ -51,7 +56,14 @@ describe('diffRelations', () => {
       },
     ];
 
-    expect(diffRelations(browserState, serverState)).toStrictEqual([[], [2]]);
+    expect(diffRelations(browserState, serverState)).toMatchInlineSnapshot(`
+      [
+        [],
+        [
+          "2",
+        ],
+      ]
+    `);
   });
 
   test('given that the browserState has one ID more than the serverState I should have that ID in the connect array', () => {
@@ -75,7 +87,14 @@ describe('diffRelations', () => {
       },
     ];
 
-    expect(diffRelations(browserState, serverState)).toStrictEqual([[2], []]);
+    expect(diffRelations(browserState, serverState)).toMatchInlineSnapshot(`
+      [
+        [
+          "2",
+        ],
+        [],
+      ]
+    `);
   });
 
   test('given that the browserState is completely different to the serverState the return value should reflect this', () => {
@@ -104,9 +123,17 @@ describe('diffRelations', () => {
       },
     ];
 
-    expect(diffRelations(browserState, serverState)).toStrictEqual([
-      [1, 2],
-      [3, 4],
-    ]);
+    expect(diffRelations(browserState, serverState)).toMatchInlineSnapshot(`
+      [
+        [
+          "1",
+          "2",
+        ],
+        [
+          "3",
+          "4",
+        ],
+      ]
+    `);
   });
 });

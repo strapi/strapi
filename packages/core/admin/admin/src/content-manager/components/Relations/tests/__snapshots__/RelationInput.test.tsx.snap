@@ -583,18 +583,10 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   color: #328048;
 }
 
-.c25 {
-  width: 100%;
-  min-width: 0;
-}
-
-.c25 > div[role='button'] {
-  cursor: all-scroll;
-}
-
-.c30 {
-  width: 100%;
-  min-width: 0;
+.c4 {
+  -webkit-align-self: flex-start;
+  -ms-flex-item-align: start;
+  align-self: flex-start;
 }
 
 .c19 {
@@ -631,6 +623,15 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   transition: opacity 0.2s ease-in-out;
 }
 
+.c39 svg path {
+  fill: #8e8ea9;
+}
+
+.c39:hover svg path,
+.c39:focus svg path {
+  fill: #666687;
+}
+
 .c33 {
   display: block;
 }
@@ -642,19 +643,18 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   display: block;
 }
 
-.c39 svg path {
-  fill: #8e8ea9;
+.c25 {
+  width: 100%;
+  min-width: 0;
 }
 
-.c39:hover svg path,
-.c39:focus svg path {
-  fill: #666687;
+.c25 > div[role='button'] {
+  cursor: all-scroll;
 }
 
-.c4 {
-  -webkit-align-self: flex-start;
-  -ms-flex-item-align: start;
-  align-self: flex-start;
+.c30 {
+  width: 100%;
+  min-width: 0;
 }
 
 <div>

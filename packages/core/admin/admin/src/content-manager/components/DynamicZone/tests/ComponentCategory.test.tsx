@@ -83,6 +83,6 @@ describe('ComponentCategory', () => {
 
     await user.click(getByRole('button', { name: /myComponent/ }));
 
-    expect(onAddComponent).toHaveBeenCalledWith('test');
+    expect(onAddComponent).toHaveBeenCalledWith('test.test');
   });
 });

@@ -26,7 +26,7 @@ interface UseRelationArgs {
   };
 }
 
-const useRelation = (cacheKey: any[], { relation, search }: UseRelationArgs) => {
+const useRelation = (cacheKey: any[] = [], { relation, search }: UseRelationArgs) => {
   const [searchParams, setSearchParams] = useState({});
   const [currentPage, setCurrentPage] = useState(0);
   const { get } = useFetchClient();

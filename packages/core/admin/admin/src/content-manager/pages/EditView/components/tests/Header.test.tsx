@@ -96,7 +96,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         min-width: 0;
       }
 
-      .c10 {
+      .c9 {
         background: #4945ff;
         padding: 8px;
         padding-right: 16px;
@@ -139,7 +139,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         flex-direction: row;
       }
 
-      .c9 {
+      .c10 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -360,30 +360,34 @@ describe('CONTENT MANAGER | EditView | Header', () => {
               <h1
                 class="c3 c8"
               >
-                Create an entry
+                NOT FOUND
               </h1>
             </div>
             <div
-              class="c9"
+              class="c7"
             >
-              <button
-                aria-disabled="true"
-                class="c10 c9 c11 c12"
-                disabled=""
-                type="submit"
+              <div
+                class=""
               >
-                <span
-                  class="c3 c13"
+                <button
+                  aria-disabled="true"
+                  class="c9 c10 c11 c12"
+                  disabled=""
+                  type="submit"
                 >
-                  Save
-                </span>
-              </button>
+                  <span
+                    class="c3 c13"
+                  >
+                    Save
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
           <p
             class="c3 c14"
           >
-            API ID  : restaurant
+            API ID  : undefined
           </p>
         </div>
       </div>

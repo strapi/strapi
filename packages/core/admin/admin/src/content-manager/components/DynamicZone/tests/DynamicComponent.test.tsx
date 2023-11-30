@@ -25,7 +25,9 @@ jest.mock('@strapi/helper-plugin', () => ({
  * harnessing then is necessary and it's not worth it for these
  * tests when really we're focussing on dynamic zone behaviour.
  */
-jest.mock('../../FieldComponent', () => () => "I'm a field component");
+jest.mock('../../FieldComponent', () => ({
+  FieldComponent: () => "I'm a field component",
+}));
 
 describe('DynamicComponent', () => {
   afterEach(() => {
@@ -33,6 +35,7 @@ describe('DynamicComponent', () => {
   });
 
   const defaultProps = {
+    isFieldAllowed: true,
     componentUid: 'component1',
     name: 'dynamiczone',
     onMoveComponent: jest.fn(),

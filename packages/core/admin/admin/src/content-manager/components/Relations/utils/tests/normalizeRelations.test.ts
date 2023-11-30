@@ -35,12 +35,37 @@ describe('RelationInputDataManager || normalizeRelations', () => {
   });
 
   test('add publicationState attribute to each relation', () => {
-    // @ts-expect-error – wants args
-    expect(normalizeRelations(FIXTURE_RELATIONS)).toStrictEqual([
-      expect.objectContaining({ publicationState: 'published' }),
-      expect.objectContaining({ publicationState: 'draft' }),
-      expect.objectContaining({ publicationState: false }),
-    ]);
+    expect(
+      normalizeRelations(FIXTURE_RELATIONS, {
+        shouldAddLink: false,
+        targetModel: '',
+        mainFieldName: '',
+      })
+    ).toMatchInlineSnapshot(`
+      [
+        {
+          "id": 3,
+          "mainField": undefined,
+          "name": "Relation 3",
+          "publicationState": "published",
+          "publishedAt": "2022-08-24T09:29:11.38",
+        },
+        {
+          "id": 2,
+          "mainField": undefined,
+          "name": "Relation 2",
+          "publicationState": "draft",
+          "publishedAt": "",
+        },
+        {
+          "id": 1,
+          "mainField": undefined,
+          "name": "Relation 1",
+          "publicationState": "draft",
+          "publishedAt": null,
+        },
+      ]
+    `);
   });
 
   test('add mainField attribute to each relation', () => {

@@ -4,7 +4,7 @@ import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { render, waitFor, server } from '@tests/utils';
 import { rest } from 'msw';
 
-import { ASSIGNEE_ATTRIBUTE_NAME } from '../../../constants';
+import { ASSIGNEE_ATTRIBUTE_NAME } from '../../constants';
 import { AssigneeSelect } from '../AssigneeSelect';
 
 jest.mock('@strapi/helper-plugin', () => ({

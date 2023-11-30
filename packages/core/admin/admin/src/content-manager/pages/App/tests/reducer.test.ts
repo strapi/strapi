@@ -1,10 +1,15 @@
 import produce from 'immer';
 
-import { getInitData, resetInitData, setInitData } from '../actions';
-import mainReducer from '../reducer';
+import {
+  ContentManagerAppState,
+  reducer as mainReducer,
+  getInitData,
+  resetInitData,
+  setInitData,
+} from '../reducer';
 
 describe('Content Manager | App | reducer', () => {
-  let state;
+  let state: ContentManagerAppState;
 
   beforeEach(() => {
     state = {
@@ -14,10 +19,11 @@ describe('Content Manager | App | reducer', () => {
       collectionTypeLinks: [],
       singleTypeLinks: [],
       fieldSizes: {},
-    };
+    } satisfies ContentManagerAppState;
   });
 
   it('should handle the default action correctly', () => {
+    // @ts-expect-error – testing default case
     expect(mainReducer(state, {})).toEqual(state);
   });
 
@@ -54,7 +60,9 @@ describe('Content Manager | App | reducer', () => {
     ];
     const expected = produce(state, (draft) => {
       draft.status = 'resolved';
+      // @ts-expect-error – fix this?
       draft.components = ['test'];
+      // @ts-expect-error – fix this?
       draft.models = ['test'];
       draft.collectionTypeLinks = [
         {
@@ -76,7 +84,9 @@ describe('Content Manager | App | reducer', () => {
         setInitData({
           authorizedCollectionTypeLinks,
           authorizedSingleTypeLinks,
+          // @ts-expect-error – fix this?
           contentTypeSchemas: ['test'],
+          // @ts-expect-error – fix this?
           components: ['test'],
           fieldSizes: {},
         })
@@ -85,11 +95,13 @@ describe('Content Manager | App | reducer', () => {
   });
 
   it('should handle the resetInitData action correctly', () => {
+    // @ts-expect-error – fix this?
     state = 'test';
 
     expect(mainReducer(state, resetInitData())).toEqual({
       components: [],
       models: [],
+      fieldSizes: {},
       collectionTypeLinks: [],
       singleTypeLinks: [],
       status: 'loading',
