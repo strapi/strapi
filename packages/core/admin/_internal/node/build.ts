@@ -1,13 +1,11 @@
+import type { CLIContext } from '@strapi/strapi';
+import EE from '@strapi/strapi/dist/utils/ee';
 import * as tsUtils from '@strapi/typescript-utils';
 import { checkRequiredDependencies } from './core/dependencies';
+import { getTimer, prettyTime } from './core/timer';
+import { createBuildContext } from './createBuildContext';
 import { writeStaticClientFiles } from './staticFiles';
 import { build as buildWebpack } from './webpack/build';
-import { createBuildContext } from './createBuildContext';
-
-import EE from '@strapi/strapi/dist/utils/ee';
-import { getTimer } from './core/timer';
-
-import type { CLIContext } from '@strapi/strapi';
 
 interface BuildOptions extends CLIContext {
   /**
@@ -56,7 +54,7 @@ const build = async ({ logger, cwd, tsconfig, ignorePrompts, ...options }: Build
     tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
 
     const compilingDuration = timer.end('compilingTS');
-    compilingTsSpinner.text = `Compiling TS (${compilingDuration}ms)`;
+    compilingTsSpinner.text = `Compiling TS (${prettyTime(compilingDuration)})`;
     compilingTsSpinner.succeed();
   }
 
@@ -71,7 +69,7 @@ const build = async ({ logger, cwd, tsconfig, ignorePrompts, ...options }: Build
     options,
   });
   const contextDuration = timer.end('createBuildContext');
-  contextSpinner.text = `Building build context (${contextDuration}ms)`;
+  contextSpinner.text = `Building build context (${prettyTime(contextDuration)})`;
   contextSpinner.succeed();
 
   timer.start('buildAdmin');
@@ -85,7 +83,7 @@ const build = async ({ logger, cwd, tsconfig, ignorePrompts, ...options }: Build
     await buildWebpack(ctx);
 
     const buildDuration = timer.end('buildAdmin');
-    buildingSpinner.text = `Building admin panel (${buildDuration}ms)`;
+    buildingSpinner.text = `Building admin panel (${prettyTime(buildDuration)})`;
     buildingSpinner.succeed();
   } catch (err) {
     buildingSpinner.fail();
