@@ -5,7 +5,10 @@ import { ACTIONS } from './constants';
 const { features } = require('@strapi/strapi/dist/utils/ee');
 
 export const register = async ({ strapi }: { strapi: LoadedStrapi }) => {
-  if (features.isEnabled('cms-content-releases') && strapi.future.isEnabled('contentReleases')) {
+  if (
+    features.isEnabled('cms-content-releases') &&
+    strapi.features.future.isEnabled('contentReleases')
+  ) {
     await strapi.admin.services.permission.actionProvider.registerMany(ACTIONS);
   }
 };

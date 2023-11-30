@@ -20,7 +20,6 @@ const renderAdmin = async (
     throw new Error('[@strapi/admin]: Could not find the root element to mount the admin app');
   }
 
-  // @ts-expect-error – there's pollution from the global scope of Node.
   window.strapi = {
     /**
      * This ENV variable is passed from the strapi instance, by default no url is set
@@ -36,6 +35,7 @@ const renderAdmin = async (
         return features?.future?.[name as keyof StrapiFeaturesConfig['future']] === true;
       },
     },
+    // @ts-expect-error – there's pollution from the global scope of Node.
     features: {
       SSO: 'sso',
       AUDIT_LOGS: 'audit-logs',
