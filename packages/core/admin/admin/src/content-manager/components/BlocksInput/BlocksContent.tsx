@@ -13,6 +13,7 @@ import { useDragAndDrop } from '../../hooks/useDragAndDrop';
 import { composeRefs, ItemTypes, getTrad } from '../../utils';
 
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
+import { useConversionModal } from './BlocksToolbar';
 import { type ModifiersStore } from './Modifiers';
 import { getAttributesToClear } from './utils/conversions';
 import { getEntries, type Block } from './utils/types';
@@ -208,7 +209,7 @@ const DragAndDropElement = ({
 
   // To prevent applying opacity to the original item being dragged, display a cloned element without opacity.
   const CloneDragItem = () => (
-    <DragItem gap={2} paddingLeft={2} isOverDropTarget={false}>
+    <DragItem gap={2} paddingLeft={2}>
       <DragIconButton
         forwardedAs="div"
         role="button"
@@ -341,6 +342,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
   const blocksRef = React.useRef<HTMLDivElement>(null);
   const { formatMessage } = useIntl();
   const [dragDirection, setDirection] = React.useState<DragDirection>('upwards');
+  const { modalElement, handleConversionResult } = useConversionModal();
 
   // Create renderLeaf function based on the modifiers store
   const renderLeaf = React.useCallback(
@@ -394,7 +396,45 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
     [blocks, editor, dragDirection, setDirection]
   );
 
-  const handleEnter = () => {
+  const checkSnippet = (event: React.KeyboardEvent<HTMLElement>) => {
+    // Get current text block
+    if (!editor.selection) {
+      return;
+    }
+
+    const [textNode, textNodePath] = Editor.node(editor, editor.selection.anchor.path);
+
+    // Narrow the type to a text node
+    if (Editor.isEditor(textNode) || textNode.type !== 'text') {
+      return;
+    }
+
+    // Don't check for snippets if we're not at the start of a block
+    if (textNodePath.at(-1) !== 0) {
+      return;
+    }
+
+    // Check if the text node starts with a known snippet
+    const blockMatchingSnippet = Object.values(blocks).find((block) => {
+      return block.snippets?.includes(textNode.text);
+    });
+
+    if (blockMatchingSnippet?.handleConvert) {
+      // Prevent the space from being created and delete the snippet
+      event.preventDefault();
+      Transforms.delete(editor, {
+        distance: textNode.text.length,
+        unit: 'character',
+        reverse: true,
+      });
+
+      // Convert the selected block
+      const maybeRenderModal = blockMatchingSnippet.handleConvert(editor);
+      handleConversionResult(maybeRenderModal);
+    }
+  };
+
+  const handleEnter = (event: React.KeyboardEvent<HTMLElement>) => {
     if (!editor.selection) {
       return;
     }
@@ -405,6 +445,13 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
       return;
     }
 
+    // Allow forced line breaks when shift is pressed
+    if (event.shiftKey && selectedNode.type !== 'image') {
+      Transforms.insertText(editor, '\n');
+      return;
+    }
+
+    // Check if there's an enter handler for the selected block
     if (selectedBlock.handleEnterKey) {
       selectedBlock.handleEnterKey(editor);
     } else {
@@ -432,7 +479,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
   /**
    * Modifier keyboard shortcuts
    */
-  const handleKeyboardShortcuts = (event: React.KeyboardEvent<HTMLElement>) => {
+  const handleModifierShortcuts = (event: React.KeyboardEvent<HTMLElement>) => {
     const isCtrlOrCmd = event.metaKey || event.ctrlKey;
 
     if (isCtrlOrCmd) {
@@ -449,14 +496,22 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
   };
 
   const handleKeyDown: React.KeyboardEventHandler<HTMLElement> = (event) => {
+    // Find the right block-specific handlers for enter and backspace key presses
     if (event.key === 'Enter') {
       event.preventDefault();
-      handleEnter();
+      return handleEnter(event);
     }
     if (event.key === 'Backspace') {
-      handleBackspaceEvent(event);
+      return handleBackspaceEvent(event);
     }
-    handleKeyboardShortcuts(event);
+
+    // Check if there's a modifier to toggle
+    handleModifierShortcuts(event);
+
+    // Check if a snippet was triggered
+    if (event.key === ' ') {
+      checkSnippet(event);
+    }
   };
 
   /**
@@ -506,6 +561,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
       lineHeight={6}
       paddingRight={4}
       paddingTop={6}
+      paddingBottom={3}
     >
       <StyledEditable
         readOnly={disabled}
@@ -516,6 +572,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
         scrollSelectionIntoView={handleScrollSelectionIntoView}
         onDrop={onDrop}
       />
+      {modalElement}
     </Box>
   );
 };

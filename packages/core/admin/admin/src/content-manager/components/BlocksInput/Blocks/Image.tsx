@@ -4,20 +4,33 @@ import { Box, Flex } from '@strapi/design-system';
 import { prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
 import { Picture } from '@strapi/icons';
 import { type Attribute } from '@strapi/types';
-import { Transforms, type Element } from 'slate';
-import { Editor } from 'slate';
-import { type RenderElementProps } from 'slate-react';
-import styled from 'styled-components';
+import { type Element, Transforms, Editor } from 'slate';
+import { useFocused, type RenderElementProps, useSelected } from 'slate-react';
+import styled, { css } from 'styled-components';
 
 import { useBlocksEditorContext, type BlocksStore } from '../BlocksEditor';
-import { insertEmptyBlockAtLast, isLastBlockType } from '../utils/conversions';
 import { type Block } from '../utils/types';
 
-// The max-height is decided with the design team, the 56px is the height of the toolbar
-const Img = styled.img`
-  max-height: calc(512px - 56px);
-  max-width: 100%;
-  object-fit: contain;
+interface ImageWrapperProps extends React.ComponentProps<typeof Box> {
+  isFocused: boolean;
+}
+
+const ImageWrapper = styled(Flex)<ImageWrapperProps>`
+  transition-property: box-shadow;
+  transition-duration: 0.2s;
+  ${(props) =>
+    props.isFocused &&
+    css`
+      box-shadow: ${props.theme.colors.primary600} 0px 0px 0px 3px;
+    `}
+
+  & > img {
+    height: auto;
+    // The max-height is decided with the design team, the 56px is the height of the toolbar
+    max-height: calc(512px - 56px);
+    max-width: 100%;
+    object-fit: contain;
+  }
 `;
 
 const IMAGE_SCHEMA_FIELDS = [
@@ -51,6 +64,9 @@ const isImage = (element: Element): element is Block<'image'> => {
 
 // Added a background color to the image wrapper to make it easier to recognize the image block
 const Image = ({ attributes, children, element }: RenderElementProps) => {
+  const editorIsFocused = useFocused();
+  const imageIsSelected = useSelected();
+
   if (!isImage(element)) {
     return null;
   }
@@ -59,9 +75,15 @@ const Image = ({ attributes, children, element }: RenderElementProps) => {
   return (
     <Box {...attributes}>
       {children}
-      <Flex background="neutral100" contentEditable={false} justifyContent="center">
-        <Img src={url} alt={alternativeText} width={width} height={height} />
-      </Flex>
+      <ImageWrapper
+        background="neutral100"
+        contentEditable={false}
+        justifyContent="center"
+        isFocused={editorIsFocused && imageIsSelected}
+        hasRadius
+      >
+        <img src={url} alt={alternativeText} width={width} height={height} />
+      </ImageWrapper>
     </Box>
   );
 };
@@ -134,12 +156,6 @@ const ImageDialog = () => {
     });
 
     insertImages(formattedImages);
-
-    if (isLastBlockType(editor, 'image')) {
-      // Insert blank line to add new blocks below image block
-      insertEmptyBlockAtLast(editor);
-    }
-
     setIsOpen(false);
   };
 
@@ -162,12 +178,32 @@ const imageBlocks: Pick<BlocksStore, 'image'> = {
     },
     matchNode: (node) => node.type === 'image',
     isInBlocksSelector: true,
+    handleBackspaceKey(editor) {
+      // Prevent issue where the image remains when it's the only block in the document
+      if (editor.children.length === 1) {
+        Transforms.setNodes(editor, {
+          type: 'paragraph',
+          // @ts-expect-error we're only setting image as null so that Slate deletes it
+          image: null,
+          children: [{ type: 'text', text: '' }],
+        });
+      } else {
+        Transforms.removeNodes(editor);
+      }
+    },
+    handleEnterKey(editor) {
+      Transforms.insertNodes(editor, {
+        type: 'paragraph',
+        children: [{ type: 'text', text: '' }],
+      });
+    },
     handleConvert: () => {
       // All the logic is managed inside the ImageDialog component,
       // because the blocks are only created when the user selects images in the modal and submits
       // and if he closes the modal, then no changes are made to the editor
       return () => <ImageDialog />;
     },
+    snippets: ['!['],
   },
 };
 

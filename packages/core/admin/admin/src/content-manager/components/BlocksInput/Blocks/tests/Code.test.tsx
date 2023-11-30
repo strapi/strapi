@@ -32,37 +32,65 @@ describe('Code', () => {
     expect(code).toBeInTheDocument();
   });
 
-  it('handles enter key on code block', () => {
+  it('handles enter key on a code block', () => {
     const baseEditor = createEditor();
+
     baseEditor.children = [
       {
         type: 'code',
         children: [
           {
             type: 'text',
-            text: 'Line of code',
+            text: 'Some code',
           },
         ],
       },
     ];
 
-    // Set the cursor at the end of the fast list item
+    // Simulate enter key press at the end of the code
     Transforms.select(baseEditor, {
       anchor: Editor.end(baseEditor, []),
       focus: Editor.end(baseEditor, []),
     });
-
-    // Simulate the enter key
     codeBlocks.code.handleEnterKey!(baseEditor);
 
-    // Should insert a newline within the code block (shoudn't exit the code block)
+    // Should enter a line break within the code
     expect(baseEditor.children).toEqual([
       {
         type: 'code',
         children: [
           {
             type: 'text',
-            text: 'Line of code\n',
+            text: 'Some code\n',
+          },
+        ],
+      },
+    ]);
+
+    // Simulate enter key press at the end of the code again
+    Transforms.select(baseEditor, {
+      anchor: Editor.end(baseEditor, []),
+      focus: Editor.end(baseEditor, []),
+    });
+    codeBlocks.code.handleEnterKey!(baseEditor);
+
+    // Should delete the line break and create a paragraph after the code
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'code',
+        children: [
+          {
+            type: 'text',
+            text: 'Some code',
+          },
+        ],
+      },
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: '',
           },
         ],
       },
@@ -100,64 +128,6 @@ describe('Code', () => {
           },
         ],
       },
-      // Should insert a new paragraph as it was the last block
-      {
-        type: 'paragraph',
-        children: [{ type: 'text', text: '' }],
-      },
-    ]);
-  });
-
-  it('should not insert an empty block below if the converted block is not the last one', () => {
-    const baseEditor = createEditor();
-    baseEditor.children = [
-      {
-        type: 'quote',
-        children: [
-          {
-            type: 'text',
-            text: 'Some quote',
-          },
-        ],
-      },
-      {
-        type: 'paragraph',
-        children: [
-          {
-            type: 'text',
-            text: 'Some paragraph',
-          },
-        ],
-      },
-    ];
-
-    Transforms.select(baseEditor, {
-      anchor: { path: [0, 0], offset: 0 },
-      focus: { path: [0, 0], offset: 0 },
-    });
-
-    codeBlocks.code.handleConvert!(baseEditor);
-
-    expect(baseEditor.children).toEqual([
-      {
-        type: 'code',
-        children: [
-          {
-            type: 'text',
-            text: 'Some quote',
-          },
-        ],
-      },
-      {
-        type: 'paragraph',
-        children: [
-          {
-            type: 'text',
-            text: 'Some paragraph',
-          },
-        ],
-      },
-      // Nothing should be inserted here
     ]);
   });
 });

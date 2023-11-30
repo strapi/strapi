@@ -1,3 +1,4 @@
+import { Middleware } from '@reduxjs/toolkit';
 import {
   contentManagementUtilRemoveFieldsFromData,
   formatContentTypeData,
@@ -6,15 +7,20 @@ import {
 import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import merge from 'lodash/merge';
-import { parse } from 'qs';
+import { ParsedQs, parse } from 'qs';
 
 import { pluginId } from '../pluginId';
+import { RootState } from '../store/reducers';
 
-const addCommonFieldsToInitialDataMiddleware =
+import type { GetNonLocalizedFields } from '../../../shared/contracts/content-manager';
+import type { Schema } from '@strapi/types';
+import type { AxiosResponse } from 'axios';
+
+const addCommonFieldsToInitialDataMiddleware: () => Middleware<object, RootState> =
   () =>
-  ({ getState, dispatch }: any) =>
-  (next: any) =>
-  (action: any) => {
+  ({ getState, dispatch }) =>
+  (next) =>
+  (action) => {
     if (action.type !== 'ContentManager/CrudReducer/INIT_FORM') {
       return next(action);
     }
@@ -25,8 +31,8 @@ const addCommonFieldsToInitialDataMiddleware =
 
     const search = action.rawQuery.substring(1);
     const query = parse(search);
-    const relatedEntityId = get(query, 'plugins.i18n.relatedEntityId', null);
-    const locale = get(query, 'plugins.i18n.locale', null);
+    const relatedEntityId = get(query, 'plugins.i18n.relatedEntityId', undefined);
+    const locale = get(query, 'plugins.i18n.locale', undefined);
     const isSingleType = action.isSingleType;
 
     if (!relatedEntityId && !isSingleType) {
@@ -37,18 +43,35 @@ const addCommonFieldsToInitialDataMiddleware =
     const cmDataStore = store['content-manager_editViewCrudReducer'];
     const cmLayoutStore = store['content-manager_editViewLayoutManager'];
     const { contentTypeDataStructure } = cmDataStore;
-    const { currentLayout } = cmLayoutStore;
+    const { currentLayout } = cmLayoutStore as {
+      currentLayout: {
+        contentType: Schema.ContentType;
+        components: Record<string, Schema.Component>;
+      };
+    };
 
     const getData = async () => {
+      if (
+        !isParsedParamUndefinedOrString(relatedEntityId) ||
+        !isParsedParamUndefinedOrString(locale)
+      ) {
+        return;
+      }
+
       // Show a loader
       dispatch({ type: 'ContentManager/CrudReducer/GET_DATA' });
       const defaultDataStructure = cloneDeep(contentTypeDataStructure);
 
       try {
-        const { data } = await getFetchClient().post(
-          `/${pluginId}/content-manager/actions/get-non-localized-fields`,
-          { model: currentLayout.contentType.uid, id: relatedEntityId, locale }
-        );
+        const { data } = await getFetchClient().post<
+          GetNonLocalizedFields.Response,
+          AxiosResponse<GetNonLocalizedFields.Response>,
+          GetNonLocalizedFields.Request['body']
+        >(`/${pluginId}/content-manager/actions/get-non-localized-fields`, {
+          model: currentLayout.contentType.uid,
+          id: relatedEntityId,
+          locale,
+        });
 
         const { nonLocalizedFields, localizations } = data;
 
@@ -85,5 +108,8 @@ const addCommonFieldsToInitialDataMiddleware =
 
     return getData();
   };
+
+const isParsedParamUndefinedOrString = (param: ParsedQs[string]): param is undefined | string =>
+  typeof param === 'string' || param === undefined;
 
 export { addCommonFieldsToInitialDataMiddleware };

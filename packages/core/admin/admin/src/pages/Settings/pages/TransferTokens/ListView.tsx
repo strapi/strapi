@@ -14,6 +14,7 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
+import { Entity } from '@strapi/types';
 import { AxiosError } from 'axios';
 import qs from 'qs';
 import { useIntl } from 'react-intl';
@@ -23,8 +24,7 @@ import { useHistory } from 'react-router-dom';
 
 import { selectAdminPermissions } from '../../../../selectors';
 import { TRANSFER_TOKEN_TYPE } from '../../components/Tokens/constants';
-// @ts-expect-error not converted yet
-import Table from '../../components/Tokens/Table';
+import { Table } from '../../components/Tokens/Table';
 
 const tableHeaders = [
   {
@@ -73,7 +73,11 @@ const tableHeaders = [
   },
 ] as const;
 
-export const ListView = () => {
+/* -------------------------------------------------------------------------------------------------
+ * ListView
+ * -----------------------------------------------------------------------------------------------*/
+
+const ListView = () => {
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
@@ -155,7 +159,7 @@ export const ListView = () => {
     ((status !== 'success' && status !== 'error') || (status === 'success' && isFetching));
 
   const deleteMutation = useMutation(
-    async (id: string) => {
+    async (id: Entity.ID) => {
       await del(`/admin/transfer/tokens/${id}`);
     },
     {
@@ -232,9 +236,8 @@ export const ListView = () => {
             permissions={{ canRead, canDelete, canUpdate }}
             headers={headers}
             contentType="trasfer-tokens"
-            rows={transferTokens}
             isLoading={isLoading}
-            onConfirmDelete={(id: string) => deleteMutation.mutateAsync(id)}
+            onConfirmDelete={(id) => deleteMutation.mutateAsync(id)}
             tokens={transferTokens}
             tokenType={TRANSFER_TOKEN_TYPE}
           />
@@ -272,7 +275,11 @@ export const ListView = () => {
   );
 };
 
-export const ProtectedListView = () => {
+/* -------------------------------------------------------------------------------------------------
+ * ProtectedListView
+ * -----------------------------------------------------------------------------------------------*/
+
+const ProtectedListView = () => {
   const permissions = useSelector(selectAdminPermissions);
 
   return (
@@ -281,3 +288,5 @@ export const ProtectedListView = () => {
     </CheckPagePermissions>
   );
 };
+
+export { ListView, ProtectedListView };

@@ -72,6 +72,24 @@ const SelectWrapper = styled(Box)`
   }
 `;
 
+/**
+ * Handles the modal component that may be returned by a block when converting it
+ */
+function useConversionModal() {
+  const [modalElement, setModalComponent] = React.useState<React.JSX.Element | null>(null);
+
+  const handleConversionResult = (renderModal: void | (() => React.JSX.Element) | undefined) => {
+    // Not all blocks return a modal
+    if (renderModal) {
+      // Use cloneElement to apply a key because to create a new instance of the component
+      // Without the new key, the state is kept from previous times that option was picked
+      setModalComponent(React.cloneElement(renderModal(), { key: Date.now() }));
+    }
+  };
+
+  return { modalElement, handleConversionResult };
+}
+
 interface ToolbarButtonProps {
   icon: React.ComponentType;
   name: string;
@@ -129,7 +147,7 @@ const ToolbarButton = ({
 const BlocksDropdown = () => {
   const { editor, blocks, disabled } = useBlocksEditorContext('BlocksDropdown');
   const { formatMessage } = useIntl();
-  const [modalComponent, setModalComponent] = React.useState<React.JSX.Element | null>(null);
+  const { modalElement, handleConversionResult } = useConversionModal();
 
   const blockKeysToInclude: SelectorBlockKey[] = getEntries(blocks).reduce<
     ReturnType<typeof getEntries>
@@ -146,7 +164,10 @@ const BlocksDropdown = () => {
       return;
     }
 
-    if (!editor.selection) {
+    const editorIsEmpty =
+      editor.children.length === 1 && Editor.isEmpty(editor, editor.children[0]);
+
+    if (!editor.selection && !editorIsEmpty) {
       // When there is no selection, create an empty block at the end of the editor
       // so that it can be converted to the selected block
       Transforms.insertNodes(
@@ -160,17 +181,15 @@ const BlocksDropdown = () => {
           // Since there's no selection, Slate will automatically insert the node at the end
         }
       );
+    } else if (!editor.selection && editorIsEmpty) {
+      // When there is no selection and the editor is empty,
+      // select the empty paragraph from Slate's initialValue so it gets converted
+      Transforms.select(editor, Editor.start(editor, [0, 0]));
     }
 
     // Let the block handle the Slate conversion logic
     const maybeRenderModal = blocks[optionKey].handleConvert?.(editor);
-
-    // Some blocks, like Image, require a modal. Check if there's one returned
-    if (maybeRenderModal) {
-      // Use cloneElement to apply a key because to create a new instance of the component
-      // Without the new key, the state is kept from previous times that option was picked
-      setModalComponent(React.cloneElement(maybeRenderModal(), { key: Date.now() }));
-    }
+    handleConversionResult(maybeRenderModal);
 
     setBlockSelected(optionKey);
 
@@ -234,7 +253,7 @@ const BlocksDropdown = () => {
           ))}
         </SingleSelect>
       </SelectWrapper>
-      {modalComponent}
+      {modalElement}
     </>
   );
 };
@@ -488,4 +507,4 @@ const BlocksToolbar = () => {
   );
 };
 
-export { BlocksToolbar };
+export { BlocksToolbar, useConversionModal };

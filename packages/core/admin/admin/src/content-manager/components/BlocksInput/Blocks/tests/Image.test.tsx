@@ -1,47 +1,18 @@
 /* eslint-disable testing-library/no-node-access */
 
-import React from 'react';
+import * as React from 'react';
 
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Transforms, createEditor } from 'slate';
 
+import { mockImage } from '../../tests/mock-schema';
 import { imageBlocks } from '../Image';
 
 import { Wrapper } from './Wrapper';
 
 const mockMediaLibraryTitle = 'dialog component';
 const mockMediaLibrarySubmitButton = 'upload images';
-const mockMediaLibraryImage = {
-  name: 'Screenshot 2023-10-18 at 15.03.11.png',
-  alternativeText: 'Screenshot 2023-10-18 at 15.03.11.png',
-  caption: null,
-  width: 437,
-  height: 420,
-  formats: {
-    thumbnail: {
-      name: 'thumbnail_Screenshot 2023-10-18 at 15.03.11.png',
-      hash: 'thumbnail_Screenshot_2023_10_18_at_15_03_11_c6d21f899b',
-      ext: '.png',
-      mime: 'image/png',
-      path: null,
-      width: 162,
-      height: 156,
-      size: 45.75,
-      url: '/uploads/thumbnail_Screenshot_2023_10_18_at_15_03_11_c6d21f899b.png',
-    },
-  },
-  hash: 'Screenshot_2023_10_18_at_15_03_11_c6d21f899b',
-  ext: '.png',
-  mime: 'image/png',
-  size: 47.67,
-  url: 'http://localhost:1337/uploads/Screenshot_2023_10_18_at_15_03_11_c6d21f899b.png',
-  previewUrl: null,
-  provider: 'local',
-  provider_metadata: null,
-  createdAt: '2023-10-18T15:54:33.504Z',
-  updatedAt: '2023-10-18T15:54:33.504Z',
-};
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -50,11 +21,11 @@ jest.mock('@strapi/helper-plugin', () => ({
       'media-library': ({
         onSelectAssets,
       }: {
-        onSelectAssets: (images: (typeof mockMediaLibraryImage)[]) => void;
+        onSelectAssets: (images: (typeof mockImage)[]) => void;
       }) => (
         <div>
           <p>{mockMediaLibraryTitle}</p>
-          <button type="button" onClick={() => onSelectAssets([mockMediaLibraryImage])}>
+          <button type="button" onClick={() => onSelectAssets([mockImage])}>
             {mockMediaLibrarySubmitButton}
           </button>
         </div>
@@ -90,6 +61,37 @@ describe('Image', () => {
     expect(image).toHaveAttribute('src', 'https://example.com/image.png');
   });
 
+  it('handles enter key on an image', () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [
+      {
+        type: 'image',
+        image: mockImage,
+        children: [{ type: 'text', text: '' }],
+      },
+    ];
+
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
+    });
+
+    imageBlocks.image.handleEnterKey!(baseEditor);
+
+    // Should insert a paragraph after the image
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'image',
+        image: mockImage,
+        children: [{ type: 'text', text: '' }],
+      },
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: '' }],
+      },
+    ]);
+  });
+
   it('converts a paragraph block to an image', async () => {
     const baseEditor = createEditor();
     baseEditor.children = [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }];
@@ -121,12 +123,7 @@ describe('Image', () => {
     expect(baseEditor.children).toEqual([
       {
         type: 'image',
-        image: mockMediaLibraryImage,
-        children: [{ type: 'text', text: '' }],
-      },
-      // An empty paragraph should have been created below the image since it was the last block
-      {
-        type: 'paragraph',
+        image: mockImage,
         children: [{ type: 'text', text: '' }],
       },
     ]);
@@ -182,7 +179,7 @@ describe('Image', () => {
       },
       {
         type: 'image',
-        image: mockMediaLibraryImage,
+        image: mockImage,
         children: [{ type: 'text', text: '' }],
       },
       {
@@ -199,6 +196,68 @@ describe('Image', () => {
             ],
           },
         ],
+      },
+    ]);
+  });
+
+  it('deletes image when backspace is pressed', () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: 'Some paragraph' }],
+      },
+      {
+        type: 'image',
+        image: mockImage,
+        children: [{ type: 'text', text: '' }],
+      },
+    ];
+
+    Transforms.select(baseEditor, {
+      anchor: { path: [1, 0], offset: 0 },
+      focus: { path: [1, 0], offset: 0 },
+    });
+
+    // @ts-expect-error we don't need a full event object
+    imageBlocks.image.handleBackspaceKey!(baseEditor, {
+      preventDefault: jest.fn(),
+    });
+
+    // Should delete the image
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: 'Some paragraph' }],
+      },
+    ]);
+  });
+
+  it('deletes an image when it is the only block in the editor', () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [
+      {
+        type: 'image',
+        image: mockImage,
+        children: [{ type: 'text', text: '' }],
+      },
+    ];
+
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
+    });
+
+    // @ts-expect-error we don't need a full event object
+    imageBlocks.image.handleBackspaceKey!(baseEditor, {
+      preventDefault: jest.fn(),
+    });
+
+    // Should have an empty paragraph as it's the default value
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: '' }],
       },
     ]);
   });
