@@ -8,6 +8,7 @@ import {
   HeaderLayout,
   IconButton,
   Link,
+  Main,
   Popover,
   Typography,
 } from '@strapi/design-system';
@@ -109,7 +110,7 @@ const ReleaseDetailsPage = () => {
   };
 
   return (
-    <>
+    <Main>
       <HeaderLayout
         title={title}
         subtitle={formatMessage(
@@ -206,7 +207,7 @@ const ReleaseDetailsPage = () => {
                         defaultMessage:
                           '{number, plural, =0 {# days} one {# day} other {# days}} ago by {createdBy}',
                       },
-                      { number: days, createdBy }
+                      { number: days, user: createdBy }
                     )}
                   </Typography>
                 </ReleaseInfoWrapper>
@@ -244,7 +245,7 @@ const ReleaseDetailsPage = () => {
           initialValues={{ name: title }}
         />
       )}
-    </>
+    </Main>
   );
 };
 

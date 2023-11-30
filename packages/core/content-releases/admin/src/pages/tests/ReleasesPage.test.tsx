@@ -1,7 +1,10 @@
-import { within, screen } from '@testing-library/react';
-import { render } from '@tests/utils';
+import { within } from '@testing-library/react';
+import { render, server, screen } from '@tests/utils';
+import { rest } from 'msw';
 
 import { ReleasesPage } from '../ReleasesPage';
+
+import { mockReleasesPageData } from './mockReleasesPageData';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -10,56 +13,46 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 
 describe('Releases home page', () => {
-  it('renders correctly the heading content', async () => {
-    const { user } = render(<ReleasesPage />);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Releases');
-    // if there are 0 releases
-    expect(screen.getByText('No releases')).toBeInTheDocument();
+  it('renders the tab content correctly when there are no releases', async () => {
+    server.use(
+      rest.get('/content-releases', (req, res, ctx) =>
+        res(ctx.json(mockReleasesPageData.emptyEntries))
+      )
+    );
 
-    const newReleaseButton = screen.getByRole('button', { name: 'New release' });
-    expect(newReleaseButton).toBeInTheDocument();
-    await user.click(newReleaseButton);
+    render(<ReleasesPage />);
 
-    const dialogContainer = screen.getByRole('dialog');
-    const dialogTitle = within(dialogContainer).getByText(/new release/i);
-    expect(dialogTitle).toBeInTheDocument();
+    const releaseSubtitle = await screen.findAllByText('No releases');
+    expect(releaseSubtitle[0]).toBeInTheDocument();
 
-    const dialogCloseButton = within(dialogContainer).getByRole('button', {
-      name: /close the modal/i,
-    });
-    expect(dialogCloseButton).toBeInTheDocument();
-    await user.click(dialogCloseButton);
-    expect(dialogTitle).not.toBeInTheDocument();
+    const paginationCombobox = screen.queryByRole('combobox', { name: /entries per page/i });
+    expect(paginationCombobox).not.toBeInTheDocument();
+
+    const pendingTabPanel = screen.getByRole('tabpanel', { name: /pending/i });
+    const emptyPendingBodyContent = within(pendingTabPanel).getByText(/no releases/i);
+
+    expect(emptyPendingBodyContent).toBeInTheDocument();
   });
 
-  it('hides the dialog', async () => {
+  it('renders the tab content correctly when there are releases', async () => {
+    server.use(
+      rest.get('/content-releases', (req, res, ctx) =>
+        res(ctx.json(mockReleasesPageData.pendingEntries))
+      )
+    );
+
     const { user } = render(<ReleasesPage />);
-    const newReleaseButton = screen.getByRole('button', { name: 'New release' });
-    await user.click(newReleaseButton);
 
-    const dialogContainer = screen.getByRole('dialog');
-    const dialogCancelButton = within(dialogContainer).getByRole('button', {
-      name: /cancel/i,
-    });
-    expect(dialogCancelButton).toBeInTheDocument();
-    await user.click(dialogCancelButton);
-    expect(dialogContainer).not.toBeInTheDocument();
-  });
+    const releaseSubtitle = await screen.findByText('17 releases');
+    expect(releaseSubtitle).toBeInTheDocument();
 
-  it('enables the submit button when there is content in the input', async () => {
-    const { user } = render(<ReleasesPage />);
-    const newReleaseButton = screen.getByRole('button', { name: 'New release' });
-    await user.click(newReleaseButton);
+    const firstEntry = screen.getByRole('heading', { level: 3, name: 'entry 1' });
+    expect(firstEntry).toBeInTheDocument();
 
-    const dialogContainer = screen.getByRole('dialog');
-    const dialogContinueButton = within(dialogContainer).getByRole('button', {
-      name: /continue/i,
-    });
-    expect(dialogContinueButton).toBeInTheDocument();
-    expect(dialogContinueButton).toBeDisabled();
+    const nextPageButton = screen.getByRole('link', { name: /go to next page/i });
+    await user.click(nextPageButton);
 
-    const inputElement = within(dialogContainer).getByRole('textbox', { name: /name/i });
-    await user.type(inputElement, 'new release');
-    expect(dialogContinueButton).toBeEnabled();
+    const lastEntry = screen.getByRole('heading', { level: 3, name: 'entry 17' });
+    expect(lastEntry).toBeInTheDocument();
   });
 });

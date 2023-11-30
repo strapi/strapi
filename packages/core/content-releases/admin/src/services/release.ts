@@ -6,18 +6,59 @@ import { axiosBaseQuery } from './axios';
 
 import type { CreateRelease, GetReleases, UpdateRelease } from '../../../shared/contracts/releases';
 
+export interface GetAllReleasesQueryParams {
+  page?: number;
+  pageSize?: number;
+  filters?: {
+    releasedAt?: {
+      // TODO: this should be a boolean, find a way to avoid strings
+      $notNull?: boolean | 'true' | 'false';
+    };
+  };
+}
+
 const releaseApi = createApi({
   reducerPath: pluginId,
   baseQuery: axiosBaseQuery,
   tagTypes: ['Releases'],
   endpoints: (build) => {
     return {
-      getRelease: build.query<GetReleases.Response, undefined>({
-        query() {
+      getReleases: build.query<GetReleases.Response, GetAllReleasesQueryParams | void>({
+        query(
+          { page, pageSize, filters } = {
+            page: 1,
+            pageSize: 16,
+            filters: {
+              releasedAt: {
+                $notNull: false,
+              },
+            },
+          }
+        ) {
           return {
             url: '/content-releases',
             method: 'GET',
+            config: {
+              params: {
+                page,
+                pageSize,
+                filters,
+              },
+            },
           };
+        },
+        transformResponse(response: GetReleases.Response, meta, arg) {
+          const releasedAtValue = arg?.filters?.releasedAt?.$notNull;
+          const isActiveDoneTab = releasedAtValue === 'true';
+          const newResponse = {
+            ...response,
+            meta: {
+              ...response.meta,
+              activeTab: isActiveDoneTab ? 'done' : 'pending',
+            },
+          };
+
+          return newResponse;
         },
         providesTags: ['Releases'],
       }),
@@ -48,6 +89,6 @@ const releaseApi = createApi({
   },
 });
 
-const { useGetReleaseQuery, useCreateReleaseMutation, useUpdateReleaseMutation } = releaseApi;
+const { useGetReleasesQuery, useCreateReleaseMutation, useUpdateReleaseMutation } = releaseApi;
 
-export { useGetReleaseQuery, useCreateReleaseMutation, useUpdateReleaseMutation, releaseApi };
+export { useGetReleasesQuery, useCreateReleaseMutation, useUpdateReleaseMutation, releaseApi };
