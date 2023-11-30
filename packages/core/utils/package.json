@@ -46,6 +46,7 @@
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
+    "@strapi/types": "4.15.4",
     "date-fns": "2.30.0",
     "http-errors": "1.8.1",
     "lodash": "4.17.21",
