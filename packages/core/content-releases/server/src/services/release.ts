@@ -19,8 +19,19 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       data: releaseWithCreatorFields,
     });
   },
-  findMany(query?: GetReleases.Request['query']) {
+  findPage(query?: GetReleases.Request['query']) {
     return strapi.entityService.findPage(RELEASE_MODEL_UID, {
+      ...query,
+      populate: {
+        actions: {
+          // @ts-expect-error TS error on populate, is not considering count
+          count: true,
+        },
+      },
+    });
+  },
+  findMany(query?: GetReleases.Request['query']) {
+    return strapi.entityService.findMany(RELEASE_MODEL_UID, {
       ...query,
       populate: {
         actions: {

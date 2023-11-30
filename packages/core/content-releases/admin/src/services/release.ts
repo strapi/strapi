@@ -7,7 +7,7 @@ import { axiosBaseQuery } from './axios';
 
 import type { CreateRelease, GetReleases } from '../../../shared/contracts/releases';
 
-export interface GetAllReleasesQueryParams {
+interface GetReleasesQueryParams {
   page?: number;
   pageSize?: number;
   filters?: {
@@ -18,13 +18,44 @@ export interface GetAllReleasesQueryParams {
   };
 }
 
+type GetReleasesTabResponse = GetReleases.Response & {
+  meta: {
+    activeTab: 'pending' | 'done';
+  };
+};
+
 const releaseApi = createApi({
   reducerPath: pluginId,
   baseQuery: axiosBaseQuery,
   tagTypes: ['Releases'],
   endpoints: (build) => {
     return {
-      getReleases: build.query<GetReleases.Response, GetAllReleasesQueryParams | void>({
+      /**
+       * TODO: This will need to evolve to handle queries for:
+       * - Get all releases where the entry is attached
+       * - Get all releases where the entry is not attached
+       *
+       *  We need to explore the best way to filter on polymorphic relations in another PR
+       */
+      getReleasesForEntry: build.query<GetReleases.Response, GetReleasesQueryParams | void>({
+        query() {
+          return {
+            url: '/content-releases',
+            method: 'GET',
+            config: {
+              params: {
+                filters: {
+                  releasedAt: {
+                    $notNull: false,
+                  },
+                },
+              },
+            },
+          };
+        },
+        providesTags: ['Releases'],
+      }),
+      getReleases: build.query<GetReleasesTabResponse, GetReleasesQueryParams | void>({
         query(
           { page, pageSize, filters } = {
             page: 1,
@@ -48,10 +79,10 @@ const releaseApi = createApi({
             },
           };
         },
-        transformResponse(response: GetReleases.Response, meta, arg) {
+        transformResponse(response: GetReleasesTabResponse, meta, arg) {
           const releasedAtValue = arg?.filters?.releasedAt?.$notNull;
           const isActiveDoneTab = releasedAtValue === 'true';
-          const newResponse = {
+          const newResponse: GetReleasesTabResponse = {
             ...response,
             meta: {
               ...response.meta,
@@ -84,23 +115,25 @@ const releaseApi = createApi({
             data: body,
           };
         },
+        invalidatesTags: ['Releases'],
       }),
     };
   },
 });
 
-<<<<<<< HEAD
-const { useGetReleasesQuery, useCreateReleaseMutation } = releaseApi;
-
-export { useGetReleasesQuery, useCreateReleaseMutation, releaseApi };
-=======
-const { useGetReleasesQuery, useCreateReleaseMutation, useCreateReleaseActionMutation } =
-  releaseApi;
+const {
+  useGetReleasesQuery,
+  useGetReleasesForEntryQuery,
+  useCreateReleaseMutation,
+  useCreateReleaseActionMutation,
+} = releaseApi;
 
 export {
   useGetReleasesQuery,
+  useGetReleasesForEntryQuery,
   useCreateReleaseMutation,
   useCreateReleaseActionMutation,
   releaseApi,
 };
->>>>>>> 44277bfbee (feat(content-releases): add create release action to cm edit view)
+
+export type { GetReleasesQueryParams };

@@ -28,7 +28,7 @@ import * as yup from 'yup';
 
 import { CreateReleaseAction } from '../../../shared/contracts/release-actions';
 import { PERMISSIONS } from '../constants';
-import { useCreateReleaseActionMutation, useGetReleasesQuery } from '../services/release';
+import { useCreateReleaseActionMutation, useGetReleasesForEntryQuery } from '../services/release';
 
 import { ReleaseActionOptions } from './ReleaseActionOptions';
 
@@ -60,17 +60,8 @@ const AddActionToReleaseModal = ({ handleClose }: AddActionToReleaseModalProps) 
     allLayoutData: { contentType },
   } = useCMEditViewDataManager();
   // Get all 'pending' releases
-  const response = useGetReleasesQuery({
-    filters: {
-      $and: [
-        {
-          releasedAt: {
-            $null: true,
-          },
-        },
-      ],
-    },
-  });
+  const response = useGetReleasesForEntryQuery();
+
   const releases = response.data?.data;
   const [createReleaseAction, { isLoading }] = useCreateReleaseActionMutation();
 
@@ -111,6 +102,7 @@ const AddActionToReleaseModal = ({ handleClose }: AddActionToReleaseModalProps) 
         }),
       });
 
+      handleClose();
       return;
     }
 
