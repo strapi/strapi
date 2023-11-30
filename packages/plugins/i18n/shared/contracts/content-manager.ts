@@ -2,7 +2,7 @@ import { Entity } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
 /**
- * POST /i18n/content-manager/actions/actions/get-non-localized-fields - Get the localized fields
+ * POST /i18n/content-manager/actions/get-non-localized-fields - Get the localized fields
  */
 export declare namespace GetNonLocalizedFields {
   export interface Request {
@@ -17,13 +17,9 @@ export declare namespace GetNonLocalizedFields {
   /**
    * TODO: this should follow the usual `data/error` pattern.
    */
-  export type Response =
-    | {
-        nonLocalizedFields: object;
-        localizations: Array<{ id: Entity.ID; locale: string; publishedAt: string | null }>;
-      }
-    | {
-        data: null;
-        error: errors.ApplicationError;
-      };
+  export interface Response {
+    nonLocalizedFields: object;
+    localizations: Array<{ id: Entity.ID; locale: string; publishedAt: string | null }>;
+    error?: errors.ApplicationError;
+  }
 }
