@@ -11,4 +11,10 @@ export const PERMISSIONS = {
       subject: null,
     },
   ],
+  update: [
+    {
+      action: 'plugin::content-releases.update',
+      subject: null,
+    },
+  ],
 };

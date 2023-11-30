@@ -149,25 +149,28 @@ const ReleaseDetailsPage = () => {
                 minWidth="242px"
               >
                 <Flex alignItems="center" justifyContent="center" direction="column" padding={1}>
-                  <PopoverButton
-                    paddingTop={2}
-                    paddingBottom={2}
-                    paddingLeft={4}
-                    paddingRight={4}
-                    alignItems="center"
-                    gap={2}
-                    as="button"
-                    borderRadius="4px"
-                    onClick={openAddEditReleaseDialog}
-                  >
-                    <PencilIcon />
-                    <Typography ellipsis>
-                      {formatMessage({
-                        id: 'content-releases.header.actions.edit',
-                        defaultMessage: 'Edit',
-                      })}
-                    </Typography>
-                  </PopoverButton>
+                  <CheckPermissions permissions={PERMISSIONS.update}>
+                    <PopoverButton
+                      paddingTop={2}
+                      paddingBottom={2}
+                      paddingLeft={4}
+                      paddingRight={4}
+                      alignItems="center"
+                      gap={2}
+                      as="button"
+                      borderRadius="4px"
+                      onClick={openAddEditReleaseDialog}
+                    >
+                      <PencilIcon />
+                      <Typography ellipsis>
+                        {formatMessage({
+                          id: 'content-releases.header.actions.edit',
+                          defaultMessage: 'Edit',
+                        })}
+                      </Typography>
+                    </PopoverButton>
+                  </CheckPermissions>
+
                   <PopoverButton
                     paddingTop={2}
                     paddingBottom={2}
