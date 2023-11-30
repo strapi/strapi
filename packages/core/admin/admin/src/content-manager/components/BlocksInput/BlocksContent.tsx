@@ -30,11 +30,21 @@ const StyledEditable = styled(Editable)`
   }
 `;
 
-const DragItem = styled(Flex)<{ isOverDropTarget: boolean }>`
-  border: 2px solid transparent;
-  border-color: ${({ isOverDropTarget, theme }) =>
-    isOverDropTarget ? theme.colors.secondary200 : 'transparent'};
+const Wrapper = styled(Box)<{ isOverDropTarget: boolean }>`
+  position: ${({ isOverDropTarget }) => isOverDropTarget && 'relative'};
+`;
 
+const DropPlacholder = styled(Box)<{
+  dragDirection: 'upwards' | 'downwards';
+}>`
+  position: absolute;
+  // Show drop placeholder 2px above or below the drop target
+  top: ${(props) => props.dragDirection === 'upwards' && `calc(0px - 2px)`};
+  bottom: ${(props) => props.dragDirection === 'downwards' && `calc(0px - 2px)`};
+  right: 0;
+`;
+
+const DragItem = styled(Flex)`
   // Style each block rendered using renderElement()
   & > [data-slate-node='element'] {
     width: 100%;
@@ -82,12 +92,24 @@ const DragIconButton = styled(IconButton)<IconButtonProps>`
   }
 `;
 
-type DragAndDropElementProps = {
+type DragDirection = 'upwards' | 'downwards';
+
+type Direction = {
+  setDirection: (direction: DragDirection) => void;
+  dragDirection: DragDirection;
+};
+
+type DragAndDropElementProps = Direction & {
   children: RenderElementProps['children'];
   index: Array<number>;
 };
 
-const DragAndDropElement = ({ children, index }: DragAndDropElementProps) => {
+const DragAndDropElement = ({
+  children,
+  index,
+  setDirection,
+  dragDirection,
+}: DragAndDropElementProps) => {
   const { editor, disabled, name, setLiveText } = useBlocksEditorContext('drag-and-drop');
   const { formatMessage } = useIntl();
 
@@ -161,7 +183,7 @@ const DragAndDropElement = ({ children, index }: DragAndDropElementProps) => {
   );
 
   const [
-    { handlerId, isDragging, handleKeyDown: handleDragHandleKeyDown, isOverDropTarget },
+    { handlerId, isDragging, handleKeyDown: handleDragHandleKeyDown, isOverDropTarget, direction },
     blockRef,
     dropRef,
     dragRef,
@@ -178,8 +200,14 @@ const DragAndDropElement = ({ children, index }: DragAndDropElementProps) => {
 
   const composedBoxRefs = composeRefs(blockRef, dropRef);
 
+  React.useEffect(() => {
+    if (direction === 'upwards' || direction === 'downwards') {
+      setDirection(direction);
+    }
+  }, [direction, setDirection]);
+
   // To prevent applying opacity to the original item being dragged, display a cloned element without opacity.
-  const ClonedDraggedItem = () => (
+  const CloneDragItem = () => (
     <DragItem gap={2} paddingLeft={2} isOverDropTarget={false}>
       <DragIconButton
         forwardedAs="div"
@@ -197,9 +225,19 @@ const DragAndDropElement = ({ children, index }: DragAndDropElementProps) => {
   );
 
   return (
-    <Box ref={composedBoxRefs}>
+    <Wrapper ref={composedBoxRefs} isOverDropTarget={isOverDropTarget}>
+      {isOverDropTarget && (
+        <DropPlacholder
+          borderStyle="solid"
+          borderColor="secondary200"
+          borderWidth="2px"
+          width="calc(100% - 24px)"
+          marginLeft="auto"
+          dragDirection={dragDirection}
+        />
+      )}
       {isDragging ? (
-        <ClonedDraggedItem />
+        <CloneDragItem />
       ) : (
         <DragItem
           ref={dragRef}
@@ -218,7 +256,6 @@ const DragAndDropElement = ({ children, index }: DragAndDropElementProps) => {
             currentTarget.style.opacity = '1';
           }}
           aria-disabled={disabled}
-          isOverDropTarget={isOverDropTarget}
         >
           <DragIconButton
             forwardedAs="div"
@@ -239,7 +276,7 @@ const DragAndDropElement = ({ children, index }: DragAndDropElementProps) => {
           {children}
         </DragItem>
       )}
-    </Box>
+    </Wrapper>
   );
 };
 
@@ -258,7 +295,7 @@ const baseRenderLeaf = (props: RenderLeafProps, modifiers: ModifiersStore) => {
   return <span {...props.attributes}>{wrappedChildren}</span>;
 };
 
-type BaseRenderElementProps = {
+type BaseRenderElementProps = Direction & {
   props: RenderElementProps['children'];
   blocks: BlocksStore;
   editor: Editor;
@@ -272,7 +309,13 @@ const isList = (element: Element): element is Block<'list'> => {
   return element.type === 'list';
 };
 
-const baseRenderElement = ({ props, blocks, editor }: BaseRenderElementProps) => {
+const baseRenderElement = ({
+  props,
+  blocks,
+  editor,
+  setDirection,
+  dragDirection,
+}: BaseRenderElementProps) => {
   const blockMatch = Object.values(blocks).find((block) => block.matchNode(props.element));
   const block = blockMatch || blocks.paragraph;
   const nodePath = ReactEditor.findPath(editor, props.element);
@@ -281,7 +324,11 @@ const baseRenderElement = ({ props, blocks, editor }: BaseRenderElementProps) =>
   // List is skipped from dragged items
   if (isLink(props.element) || isList(props.element)) return block.renderElement(props);
 
-  return <DragAndDropElement index={nodePath}>{block.renderElement(props)}</DragAndDropElement>;
+  return (
+    <DragAndDropElement index={nodePath} setDirection={setDirection} dragDirection={dragDirection}>
+      {block.renderElement(props)}
+    </DragAndDropElement>
+  );
 };
 
 interface BlocksInputProps {
@@ -293,6 +340,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
     useBlocksEditorContext('BlocksContent');
   const blocksRef = React.useRef<HTMLDivElement>(null);
   const { formatMessage } = useIntl();
+  const [dragDirection, setDirection] = React.useState<DragDirection>('upwards');
 
   // Create renderLeaf function based on the modifiers store
   const renderLeaf = React.useCallback(
@@ -341,8 +389,9 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
 
   // Create renderElement function base on the blocks store
   const renderElement = React.useCallback(
-    (props: RenderElementProps) => baseRenderElement({ props, blocks, editor }),
-    [blocks, editor]
+    (props: RenderElementProps) =>
+      baseRenderElement({ props, blocks, editor, dragDirection, setDirection }),
+    [blocks, editor, dragDirection, setDirection]
   );
 
   const handleEnter = () => {

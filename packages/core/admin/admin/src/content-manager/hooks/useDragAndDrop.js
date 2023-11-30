@@ -137,7 +137,21 @@ export const useDragAndDrop = (
     },
   });
 
-  const [{ isDragging }, dragRef, dragPreviewRef] = useDrag({
+  const getDragDirection = (monitor) => {
+    if (monitor.isDragging() && !monitor.didDrop()) {
+      const deltaY = monitor.getInitialClientOffset().y - monitor.getClientOffset().y;
+
+      if (deltaY > 0) return 'upwards';
+
+      if (deltaY < 0) return 'downwards';
+
+      return 'no movement';
+    }
+
+    return 'no dragging';
+  };
+
+  const [{ isDragging, direction }, dragRef, dragPreviewRef] = useDrag({
     type,
     item() {
       if (onStart) {
@@ -170,6 +184,9 @@ export const useDragAndDrop = (
       : undefined,
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
+      initialOffset: monitor.getInitialClientOffset(),
+      currentOffset: monitor.getClientOffset(),
+      direction: getDragDirection(monitor),
     }),
   });
 
@@ -181,7 +198,7 @@ export const useDragAndDrop = (
   });
 
   return [
-    { handlerId, isDragging, handleKeyDown, isOverDropTarget: isOver },
+    { handlerId, isDragging, handleKeyDown, isOverDropTarget: isOver, direction },
     objectRef,
     dropRef,
     dragRef,
