@@ -40,7 +40,7 @@ const EditViewLayoutManager = ({ layout, ...rest }: EditViewLayoutManagerProps) 
     };
   }, [layout, dispatch, query, runHookWaterfall]);
 
-  if (!currentLayout || !isValidPermissions) {
+  if (!currentLayout.contentType || !isValidPermissions) {
     return <LoadingIndicatorPage />;
   }
 
