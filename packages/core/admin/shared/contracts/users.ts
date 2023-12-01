@@ -20,17 +20,22 @@ export declare namespace GetMe {
  * PUT /users/me - Update the current admin user
  */
 export declare namespace UpdateMe {
+  export interface BaseRequestBody {
+    email?: string;
+    firstname?: string;
+    lastname?: string;
+    username?: string;
+    preferedLanguage?: string;
+  }
+
+  export interface PasswordRequestBody extends BaseRequestBody {
+    currentPassword: string;
+    password: string;
+  }
+
   export interface Request {
     query: {};
-    body: {
-      email?: string;
-      firstname?: string;
-      lastname?: string;
-      username?: string;
-      password?: string;
-      currentPassword?: string;
-      preferedLanguage?: string;
-    };
+    body: BaseRequestBody | PasswordRequestBody;
   }
 
   export interface Response {
