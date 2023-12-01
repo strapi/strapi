@@ -1,10 +1,14 @@
 import releaseController from '../release';
 
+const mockFindPage = jest.fn();
+const mockFindMany = jest.fn();
 const mockCountActions = jest.fn();
 
 jest.mock('../../utils', () => ({
   getService: jest.fn(() => ({
     findOne: jest.fn(() => ({ id: 1 })),
+    findPage: mockFindPage,
+    findMany: mockFindMany,
     countActions: mockCountActions,
     findReleaseContentTypesMainFields: jest.fn(),
   })),
@@ -14,8 +18,8 @@ jest.mock('../../utils', () => ({
 describe('Release controller', () => {
   describe('findMany', () => {
     it('should call findPage', async () => {
-      const findPage = jest.fn().mockResolvedValue({ results: [], pagination: {} });
-      const findMany = jest.fn().mockResolvedValue([]);
+      mockFindPage.mockResolvedValue({ results: [], pagination: {} });
+      mockFindMany.mockResolvedValue([]);
       const userAbility = {
         can: jest.fn(),
       };
@@ -41,28 +45,17 @@ describe('Release controller', () => {
             },
           },
         },
-        plugins: {
-          // @ts-expect-error Ignore missing properties
-          'content-releases': {
-            services: {
-              release: {
-                findPage,
-                findMany,
-              },
-            },
-          },
-        },
       };
 
       // @ts-expect-error partial context
       await releaseController.findMany(ctx);
 
-      expect(findPage).toHaveBeenCalled();
+      expect(mockFindPage).toHaveBeenCalled();
     });
 
     it('should call findMany', async () => {
-      const findPage = jest.fn().mockResolvedValue({ results: [], pagination: {} });
-      const findMany = jest.fn().mockResolvedValue([]);
+      mockFindPage.mockResolvedValue({ results: [], pagination: {} });
+      mockFindMany.mockResolvedValue([]);
       const userAbility = {
         can: jest.fn(),
       };
@@ -85,23 +78,12 @@ describe('Release controller', () => {
             },
           },
         },
-        plugins: {
-          // @ts-expect-error Ignore missing properties
-          'content-releases': {
-            services: {
-              release: {
-                findPage,
-                findMany,
-              },
-            },
-          },
-        },
       };
 
       // @ts-expect-error partial context
       await releaseController.findMany(ctx);
 
-      expect(findMany).toHaveBeenCalled();
+      expect(mockFindMany).toHaveBeenCalled();
     });
   });
   describe('create', () => {
