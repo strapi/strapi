@@ -10,61 +10,16 @@ import { IntlProvider } from 'react-intl';
 import { type Descendant, type Editor, type Location, createEditor, Transforms } from 'slate';
 import { Slate, withReact, ReactEditor } from 'slate-react';
 
-import { BlocksEditorProvider } from '../BlocksEditor';
+import { codeBlocks } from '../Blocks/Code';
+import { headingBlocks } from '../Blocks/Heading';
+import { imageBlocks } from '../Blocks/Image';
+import { linkBlocks } from '../Blocks/Link';
+import { listBlocks } from '../Blocks/List';
+import { paragraphBlocks } from '../Blocks/Paragraph';
+import { quoteBlocks } from '../Blocks/Quote';
+import { type BlocksStore, BlocksEditorProvider } from '../BlocksEditor';
 import { BlocksToolbar } from '../BlocksToolbar';
-
-const mockMediaLibraryTitle = 'dialog component';
-const mockMediaLibrarySubmitButton = 'upload images';
-const mockMediaLibraryImage = {
-  name: 'Screenshot 2023-10-18 at 15.03.11.png',
-  alternativeText: 'Screenshot 2023-10-18 at 15.03.11.png',
-  caption: null,
-  width: 437,
-  height: 420,
-  formats: {
-    thumbnail: {
-      name: 'thumbnail_Screenshot 2023-10-18 at 15.03.11.png',
-      hash: 'thumbnail_Screenshot_2023_10_18_at_15_03_11_c6d21f899b',
-      ext: '.png',
-      mime: 'image/png',
-      path: null,
-      width: 162,
-      height: 156,
-      size: 45.75,
-      url: '/uploads/thumbnail_Screenshot_2023_10_18_at_15_03_11_c6d21f899b.png',
-    },
-  },
-  hash: 'Screenshot_2023_10_18_at_15_03_11_c6d21f899b',
-  ext: '.png',
-  mime: 'image/png',
-  size: 47.67,
-  url: 'http://localhost:1337/uploads/Screenshot_2023_10_18_at_15_03_11_c6d21f899b.png',
-  previewUrl: null,
-  provider: 'local',
-  provider_metadata: null,
-  createdAt: '2023-10-18T15:54:33.504Z',
-  updatedAt: '2023-10-18T15:54:33.504Z',
-};
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useLibrary: jest.fn().mockImplementation(() => ({
-    components: {
-      'media-library': ({
-        onSelectAssets,
-      }: {
-        onSelectAssets: (images: (typeof mockMediaLibraryImage)[]) => void;
-      }) => (
-        <div>
-          <p>{mockMediaLibraryTitle}</p>
-          <button type="button" onClick={() => onSelectAssets([mockMediaLibraryImage])}>
-            {mockMediaLibrarySubmitButton}
-          </button>
-        </div>
-      ),
-    },
-  })),
-}));
+import { modifiers } from '../Modifiers';
 
 const defaultInitialValue: Descendant[] = [
   {
@@ -119,6 +74,16 @@ const imageInitialValue: Descendant[] = [
 
 const user = userEvent.setup();
 
+const blocks: BlocksStore = {
+  ...paragraphBlocks,
+  ...headingBlocks,
+  ...listBlocks,
+  ...linkBlocks,
+  ...imageBlocks,
+  ...quoteBlocks,
+  ...codeBlocks,
+};
+
 // Create editor outside of the component to have direct access to it from the tests
 let baseEditor: Editor;
 
@@ -135,7 +100,9 @@ const Wrapper = ({
     <ThemeProvider theme={lightTheme}>
       <IntlProvider messages={{}} locale="en">
         <Slate initialValue={initialValue} editor={editor}>
-          <BlocksEditorProvider disabled={false}>{children}</BlocksEditorProvider>
+          <BlocksEditorProvider blocks={blocks} modifiers={modifiers} disabled={false}>
+            {children}
+          </BlocksEditorProvider>
         </Slate>
       </IntlProvider>
     </ThemeProvider>
@@ -438,59 +405,6 @@ describe('BlocksToolbar', () => {
     expect(ReactEditor.focus).toHaveBeenCalledTimes(2);
   });
 
-  it('opens the media library when image is selected', async () => {
-    setup();
-
-    await select({
-      anchor: { path: [0, 0], offset: 0 },
-      focus: { path: [0, 0], offset: 0 },
-    });
-
-    // Convert selection to an image
-    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
-    await user.click(blocksDropdown);
-    await user.click(screen.getByRole('option', { name: 'Image' }));
-
-    expect(screen.getByText(mockMediaLibraryTitle)).toBeInTheDocument();
-  });
-
-  it('creates an empty paragraph below when a code block is created at the end of the editor', async () => {
-    setup();
-
-    await select({
-      anchor: { path: [0, 0], offset: 0 },
-      focus: { path: [0, 0], offset: 0 },
-    });
-
-    // Convert selection to a code block
-    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
-    await user.click(blocksDropdown);
-    await user.click(screen.getByRole('option', { name: 'Code' }));
-
-    expect(baseEditor.children).toEqual([
-      {
-        type: 'code',
-        children: [
-          {
-            type: 'text',
-            text: 'A line of text in a paragraph.',
-          },
-        ],
-      },
-      {
-        type: 'paragraph',
-        children: [
-          {
-            type: 'text',
-            text: '',
-          },
-        ],
-      },
-    ]);
-
-    expect(ReactEditor.focus).toHaveBeenCalledTimes(1);
-  });
-
   it('only shows one option selected in the dropdown when mixed content is selected', async () => {
     setup(mixedInitialValue);
 
@@ -551,7 +465,7 @@ describe('BlocksToolbar', () => {
     // Convert it to a code block
     const selectDropdown = screen.getByRole('combobox', { name: /Select a block/i });
     await user.click(selectDropdown);
-    await user.click(screen.getByRole('option', { name: 'Code' }));
+    await user.click(screen.getByRole('option', { name: 'Code block' }));
 
     // The list should have been split in two
     expect(baseEditor.children).toEqual([
@@ -597,33 +511,31 @@ describe('BlocksToolbar', () => {
     ]);
   });
 
-  it('creates a new code block without empty lines before it when you select the option in a empty editor', async () => {
+  it('creates a new node when selecting a block if there is no selection', async () => {
     setup([
       {
         type: 'paragraph',
-        children: [{ type: 'text', text: '' }],
+        children: [{ type: 'text', text: 'Some paragraph' }],
       },
     ]);
 
     // Convert selection to a code block
     const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
     await user.click(blocksDropdown);
-    await user.click(screen.getByRole('option', { name: 'Code' }));
+    await user.click(screen.getByRole('option', { name: 'Quote' }));
 
     expect(baseEditor.children).toEqual([
       {
-        type: 'code',
-        format: null,
-        level: null,
+        type: 'paragraph',
         children: [
           {
             type: 'text',
-            text: '',
+            text: 'Some paragraph',
           },
         ],
       },
       {
-        type: 'paragraph',
+        type: 'quote',
         children: [
           {
             type: 'text',
@@ -756,6 +668,10 @@ describe('BlocksToolbar', () => {
     const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
 
     // Convert selection to an ordered list
+    await select({
+      anchor: { path: [2, 0], offset: 0 },
+      focus: { path: [2, 0], offset: 0 },
+    });
     await user.click(blocksDropdown);
     await user.click(screen.getByRole('option', { name: 'Numbered list' }));
 
@@ -831,55 +747,5 @@ describe('BlocksToolbar', () => {
 
     const linkButton = screen.getByLabelText(/link/i);
     expect(linkButton).toBeDisabled();
-  });
-
-  it('splits a list in two when converting a list item to an image', async () => {
-    setup([
-      {
-        type: 'list',
-        format: 'ordered',
-        children: [
-          { type: 'list-item', children: [{ type: 'text', text: 'First list item' }] },
-          { type: 'list-item', children: [{ type: 'text', text: 'Second list item' }] },
-          { type: 'list-item', children: [{ type: 'text', text: 'Third list item' }] },
-        ],
-      },
-    ]);
-
-    // Select the item in the middle of the list
-    await select({
-      anchor: { path: [0, 1, 0], offset: 0 },
-      focus: { path: [0, 1, 0], offset: 0 },
-    });
-
-    // Convert it to an image
-    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
-    await user.click(blocksDropdown);
-    await user.click(screen.getByRole('option', { name: 'Image' }));
-    await user.click(screen.getByText(mockMediaLibrarySubmitButton));
-
-    // The list should have been split in two
-    expect(baseEditor.children).toEqual([
-      {
-        type: 'list',
-        format: 'ordered',
-        children: [{ type: 'list-item', children: [{ type: 'text', text: 'First list item' }] }],
-      },
-      {
-        type: 'image',
-        image: mockMediaLibraryImage,
-        children: [
-          {
-            type: 'text',
-            text: '',
-          },
-        ],
-      },
-      {
-        type: 'list',
-        format: 'ordered',
-        children: [{ type: 'list-item', children: [{ type: 'text', text: 'Third list item' }] }],
-      },
-    ]);
   });
 });

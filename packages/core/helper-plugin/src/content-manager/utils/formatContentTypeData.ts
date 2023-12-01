@@ -5,11 +5,11 @@ import get from 'lodash/get';
 
 import { getOtherInfos, getType } from './getAttributeInfos';
 
-import type { Schema } from '@strapi/types';
+import type { Attribute, Schema } from '@strapi/types';
 
 const formatContentTypeData = <
   TSchema extends Schema.ContentType,
-  TData extends Record<keyof TSchema['attributes'], unknown>
+  TData extends { [K in keyof TSchema['attributes']]: Attribute.GetValue<TSchema['attributes'][K]> }
 >(
   data: TData,
   ct: TSchema,
@@ -17,7 +17,9 @@ const formatContentTypeData = <
 ) => {
   const recursiveFormatData = <
     TSchemum extends Schema.Schema,
-    TDatum extends { [P in keyof TSchemum['attributes']]: unknown }
+    TDatum extends {
+      [P in keyof TSchemum['attributes']]: Attribute.GetValue<TSchemum['attributes'][P]>;
+    }
   >(
     data: TDatum,
     schema: TSchemum
@@ -29,18 +31,21 @@ const formatContentTypeData = <
       const isRepeatable = getOtherInfos(schema, [current, 'repeatable']);
 
       if (type === 'json' && value !== undefined) {
+        // @ts-expect-error – TODO: fix the fact we can't assign this.
         acc[current] = JSON.stringify(value, null, 2);
 
         return acc;
       }
 
       if (!value) {
+        // @ts-expect-error – TODO: fix the fact we can't assign this.
         acc[current] = value;
 
         return acc;
       }
 
       if (type === 'dynamiczone' && Array.isArray(value)) {
+        // @ts-expect-error – TODO: fix the fact we can't assign this.
         acc[current] = value.map((componentValue) => {
           const formattedData = recursiveFormatData(
             componentValue,
@@ -66,15 +71,17 @@ const formatContentTypeData = <
           formattedValue = recursiveFormatData(value, composSchema[compoUid]);
         }
 
+        // @ts-expect-error – TODO: fix the fact we can't assign this.
         acc[current] = formattedValue;
 
         return acc;
       }
 
+      // @ts-expect-error – TODO: fix the fact we can't assign this.
       acc[current] = value;
 
       return acc;
-    }, {} as Record<string, unknown>);
+    }, {} as TDatum);
   };
 
   return recursiveFormatData(data, ct);

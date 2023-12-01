@@ -6,6 +6,9 @@ import type { errors } from '@strapi/utils';
  */
 export declare namespace Login {
   export interface Request {
+    query: {
+      user: Pick<AdminUser, 'email' | 'password'>;
+    };
     body: Pick<AdminUser, 'email' | 'password'>;
   }
 
@@ -32,7 +35,7 @@ export declare namespace RenewToken {
     data: {
       token: string;
     };
-    errors?: errors.ApplicationError | errors.ValidationError;
+    errors?: errors.ApplicationError | errors.ValidationError<'Invalid token'>;
   }
 }
 
@@ -52,7 +55,7 @@ export declare namespace RegistrationInfo {
       firstname?: string;
       lastname?: string;
     };
-    errors?: errors.ApplicationError | errors.ValidationError;
+    errors?: errors.ApplicationError | errors.ValidationError<'Invalid registrationToken'>;
   }
 }
 
