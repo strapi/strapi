@@ -1,12 +1,10 @@
 import { type StrapiTheme } from '@strapi/design-system';
-import { type Attribute } from '@strapi/types';
+import { type Attribute, type FeaturesService } from '@strapi/types';
 import { type BaseEditor } from 'slate';
 import { type HistoryEditor } from 'slate-history';
 import { type ReactEditor } from 'slate-react';
 
 import { type LinkEditor } from './src/content-manager/components/BlocksInput/plugins/withLinks';
-
-import type { StrapiFeaturesConfig } from '../shared/admin';
 
 declare module 'styled-components' {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -28,7 +26,7 @@ interface BrowserStrapi {
   backendURL: string;
   isEE: boolean;
   future: {
-    isEnabled: (name: keyof StrapiFeaturesConfig['future']) => boolean;
+    isEnabled: (name: keyof FeaturesService['config']) => boolean;
   };
   features: {
     SSO: 'sso';
@@ -39,7 +37,6 @@ interface BrowserStrapi {
   flags: {
     promoteEE?: boolean;
     nps?: boolean;
-    promoteEE: boolean;
   };
   projectType: 'Community' | 'Enterprise';
   telemetryDisabled: boolean;

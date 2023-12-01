@@ -10,10 +10,8 @@ import { getStrapiAdminEnvVars, loadEnv } from './core/env';
 import type { BuildOptions } from './build';
 import { DevelopOptions } from './develop';
 import { getEnabledPlugins, getMapOfPluginsWithAdmin } from './core/plugins';
-import { Strapi } from '@strapi/types';
+import type { Strapi, FeaturesService } from '@strapi/types';
 import { AppFile, loadUserAppFile } from './core/admin-customisations';
-
-import type { StrapiFeaturesConfig } from '../../shared/admin';
 
 interface BuildContext {
   /**
@@ -52,7 +50,7 @@ interface BuildContext {
   /**
    * Features object with future flags
    */
-  features?: StrapiFeaturesConfig;
+  features?: FeaturesService['config'];
   logger: CLIContext['logger'];
   /**
    * The build options

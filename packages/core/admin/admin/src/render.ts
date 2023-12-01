@@ -4,12 +4,12 @@ import { createRoot } from 'react-dom/client';
 
 import { StrapiApp, StrapiAppConstructorArgs } from './StrapiApp';
 
-import type { StrapiFeaturesConfig } from '../../shared/admin';
+import type { FeaturesService } from '@strapi/types';
 
 interface RenderAdminArgs {
   customisations: StrapiAppConstructorArgs['adminConfig'];
   plugins: StrapiAppConstructorArgs['appPlugins'];
-  features?: StrapiFeaturesConfig;
+  features?: FeaturesService['config'];
 }
 
 const renderAdmin = async (
@@ -31,8 +31,8 @@ const renderAdmin = async (
     isEE: false,
     telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true' ? true : false,
     future: {
-      isEnabled: (name: string) => {
-        return features?.future?.[name as keyof StrapiFeaturesConfig['future']] === true;
+      isEnabled: (name: keyof FeaturesService['config']) => {
+        return features?.future?.[name] === true;
       },
     },
     // @ts-expect-error – there's pollution from the global scope of Node.
