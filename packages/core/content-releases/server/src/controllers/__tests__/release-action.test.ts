@@ -2,19 +2,29 @@ import releaseActionController from '../release-action';
 
 const mockSanitizedQueryRead = jest.fn().mockResolvedValue({});
 const mockFindActions = jest.fn().mockResolvedValue({ results: [], pagination: {} });
-const mockSanitizeOutput = jest.fn((entry: { id: number, name: string }) => ({ id: entry.id }));
+const mockSanitizeOutput = jest.fn((entry: { id: number; name: string }) => ({ id: entry.id }));
 
 jest.mock('../../utils', () => ({
   getService: jest.fn(() => ({
     create: jest.fn(),
     findActions: mockFindActions,
+    findReleaseContentTypesMainFields: jest.fn(() => ({
+      'api::contentTypeA.contentTypeA': {
+        mainField: 'name',
+      },
+      'api::contentTypeB.contentTypeB': {
+        mainField: 'name',
+      },
+    })),
   })),
-  getAllowedContentTypes: jest.fn().mockReturnValue(['api::contentTypeA.contentTypeA', 'api::contentTypeB.contentTypeB']),
+  getAllowedContentTypes: jest
+    .fn()
+    .mockReturnValue(['api::contentTypeA.contentTypeA', 'api::contentTypeB.contentTypeB']),
   getPermissionsChecker: jest.fn(() => ({
     sanitizedQuery: {
       read: mockSanitizedQueryRead,
     },
-    sanitizeOutput: mockSanitizeOutput
+    sanitizeOutput: mockSanitizeOutput,
   })),
 }));
 
@@ -90,6 +100,7 @@ describe('Release Action controller', () => {
       state: {
         userAbility: {
           can: jest.fn(),
+          cannot: jest.fn(),
         },
       },
       params: {
@@ -108,61 +119,20 @@ describe('Release Action controller', () => {
       // @ts-expect-error Ignore missing properties
       await releaseActionController.findMany(ctx);
 
-      expect(mockFindActions).toHaveBeenCalledWith(1, ['api::contentTypeA.contentTypeA', 'api::contentTypeB.contentTypeB'], {
-        populate: {
-          entry: {
-            on: {
-              'api::contentTypeA.contentTypeA': {},
-              'api::contentTypeB.contentTypeB': {},
-            },
-          },
-        },
-      });
-    });
-
-    it('should sanitize each entry separately based on its contentType', async () => {
-      mockFindActions.mockResolvedValueOnce({
-        results: [
-          {
-            contentType: 'api::contentTypeA.contentTypeA',
-            entry: {
-              id: 1,
-              name: 'Test 1'
-            },
-          },
-          {
-            contentType: 'api::contentTypeB.contentTypeB',
-            entry: {
-              id: 2,
-              name: 'Test 2'
-            },
-          },
-        ],
-        pagination: {},
-      });
-
-      // @ts-expect-error Ignore missing properties
-      await releaseActionController.findMany(ctx);
-
-      expect(mockSanitizeOutput).toHaveBeenCalledTimes(2);
-      expect(mockSanitizeOutput).toHaveBeenCalledWith({ id: 1, name: 'Test 1' });
-      expect(mockSanitizeOutput).toHaveBeenCalledWith({ id: 2, name: 'Test 2' });
-      // @ts-expect-error Ignore missing properties
-      expect(ctx.body.data).toEqual([
+      expect(mockFindActions).toHaveBeenCalledWith(
+        1,
+        ['api::contentTypeA.contentTypeA', 'api::contentTypeB.contentTypeB'],
         {
-          contentType: 'api::contentTypeA.contentTypeA',
-          entry: {
-            id: 1,
-          },
-        },
-        {
-          contentType: 'api::contentTypeB.contentTypeB',
-          entry: {
-            id: 2,
+          populate: {
+            entry: {
+              on: {
+                'api::contentTypeA.contentTypeA': {},
+                'api::contentTypeB.contentTypeB': {},
+              },
+            },
           },
         }
-      ]);
+      );
     });
-
   });
 });

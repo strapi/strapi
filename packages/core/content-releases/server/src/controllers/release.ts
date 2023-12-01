@@ -1,5 +1,4 @@
 import type Koa from 'koa';
-import type { UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { RELEASE_MODEL_UID } from '../constants';
 import { validateRelease } from './validation/release';
@@ -46,39 +45,26 @@ const releaseController = {
   async findOne(ctx: Koa.Context) {
     const id: GetRelease.Request['params']['id'] = ctx.params.id;
 
-    const allowedContentTypes = getAllowedContentTypes({ strapi, userAbility: ctx.state.userAbility });
-
-    const contentManagerContentTypeService = strapi
-      .plugin('content-manager')
-      .service('content-types');
-
-    // From allowed content types, we get the mainField for each of them
-    const contentTypesMeta: Record<UID.ContentType, { mainField: string }> = {};
-    for (const contentTypeUid of allowedContentTypes) {
-      const contentTypeConfig = await contentManagerContentTypeService.findConfiguration({ uid: contentTypeUid });
-
-      if (contentTypeConfig) {
-        contentTypesMeta[contentTypeUid] = {
-          mainField: contentTypeConfig.settings.mainField,
-        };
-      }
-    }
-
     const releaseService = getService('release', { strapi });
+
+    const allowedContentTypes = getAllowedContentTypes({
+      strapi,
+      userAbility: ctx.state.userAbility,
+    });
 
     const release = await releaseService.findOne(id);
     const total = await releaseService.countActions({
       filters: {
-        release: id
-      }
+        release: id,
+      },
     });
     const totalHidden = await releaseService.countActions({
       filters: {
         release: id,
         contentType: {
-          $notIn: allowedContentTypes
-        }
-      }
+          $notIn: allowedContentTypes,
+        },
+      },
     });
 
     if (!release) {
@@ -94,9 +80,6 @@ const releaseController = {
           totalHidden,
         },
       },
-      meta: {
-        contentTypes: contentTypesMeta,
-      }
     };
 
     ctx.body = { data };

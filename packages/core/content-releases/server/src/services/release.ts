@@ -1,8 +1,17 @@
 import { setCreatorFields, errors } from '@strapi/utils';
-import type { LoadedStrapi, Common, EntityService } from '@strapi/types';
+import type { LoadedStrapi, Common, EntityService, UID } from '@strapi/types';
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
-import type { GetReleases, CreateRelease, UpdateRelease, GetRelease,  } from '../../../shared/contracts/releases';
-import type { CreateReleaseAction, GetReleaseActions } from '../../../shared/contracts/release-actions';
+import type {
+  GetReleases,
+  CreateRelease,
+  UpdateRelease,
+  GetRelease,
+  Release,
+} from '../../../shared/contracts/releases';
+import type {
+  CreateReleaseAction,
+  GetReleaseActions,
+} from '../../../shared/contracts/release-actions';
 import type { UserInfo } from '../../../shared/types';
 import { getService } from '../utils';
 
@@ -28,11 +37,17 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
   findOne(id: GetRelease.Request['params']['id'], query = {}) {
     return strapi.entityService.findOne(RELEASE_MODEL_UID, id, query);
   },
-  async update(id: number, releaseData: UpdateRelease.Request['body'], { user }: { user: UserInfo }) {
+  async update(
+    id: number,
+    releaseData: UpdateRelease.Request['body'],
+    { user }: { user: UserInfo }
+  ) {
     const updatedRelease = await setCreatorFields({ user, isEdition: true })(releaseData);
 
     // @ts-expect-error Type 'ReleaseUpdateArgs' has no properties in common with type 'Partial<Input<"plugin::content-releases.release">>'
-    const release = await strapi.entityService.update(RELEASE_MODEL_UID, id, { data: updatedRelease });
+    const release = await strapi.entityService.update(RELEASE_MODEL_UID, id, {
+      data: updatedRelease,
+    });
 
     if (!release) {
       throw new errors.NotFoundError(`No release found for id ${id}`);
@@ -72,7 +87,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
   async findActions(
     releaseId: GetReleaseActions.Request['params']['releaseId'],
     contentTypes: Common.UID.ContentType[],
-    query?: GetReleaseActions.Request['query'] 
+    query?: GetReleaseActions.Request['query']
   ) {
     const result = await strapi.entityService.findOne(RELEASE_MODEL_UID, releaseId);
 
@@ -86,13 +101,51 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
         release: releaseId,
         contentType: {
           $in: contentTypes,
-        }
+        },
       },
     });
   },
   async countActions(query: EntityService.Params.Pick<typeof RELEASE_ACTION_MODEL_UID, 'filters'>) {
     return strapi.entityService.count(RELEASE_ACTION_MODEL_UID, query);
-  }
+  },
+  async findReleaseContentTypesMainFields(releaseId: Release['id']) {
+    const contentTypesFromReleaseActions: { contentType: UID.ContentType }[] =
+      await strapi.db.entityManager
+        .createQueryBuilder(RELEASE_ACTION_MODEL_UID)
+        .select('content_type')
+        .where({
+          $and: [
+            {
+              release: releaseId,
+            },
+          ],
+        })
+        .groupBy('content_type')
+        .execute();
+
+    const contentTypesUids = contentTypesFromReleaseActions.map(
+      ({ contentType: contentTypeUid }) => contentTypeUid
+    );
+
+    const contentManagerContentTypeService = strapi
+      .plugin('content-manager')
+      .service('content-types');
+    const contentTypesMeta: Record<UID.ContentType, { mainField: string }> = {};
+
+    for (const contentTypeUid of contentTypesUids) {
+      const contentTypeConfig = await contentManagerContentTypeService.findConfiguration({
+        uid: contentTypeUid,
+      });
+
+      if (contentTypeConfig) {
+        contentTypesMeta[contentTypeUid] = {
+          mainField: contentTypeConfig.settings.mainField,
+        };
+      }
+    }
+
+    return contentTypesMeta;
+  },
 });
 
 export default createReleaseService;

@@ -5,8 +5,8 @@ import type { Entity } from '../types';
 import type { errors } from '@strapi/utils';
 
 type ReleaseActionEntry = Entity & {
-  // Entity attributes
-  [key: string]: Attribute.Any;
+  mainField: Attribute.Any;
+  locale: string;
 };
 
 export interface ReleaseAction extends Entity {
@@ -45,16 +45,16 @@ export declare namespace CreateReleaseAction {
 export declare namespace GetReleaseActions {
   export interface Request {
     params: {
-      releaseId: Release['id']
+      releaseId: Release['id'];
     };
     query?: Partial<Pick<Pagination, 'page' | 'pageSize'>>;
   }
 
   export interface Response {
-    data: ReleaseAction[],
+    data: ReleaseAction[];
     meta: {
       pagination: Pagination;
-    }
+    };
     error?: errors.ApplicationError | errors.NotFoundError;
   }
 }

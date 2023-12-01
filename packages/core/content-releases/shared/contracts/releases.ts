@@ -19,7 +19,6 @@ export type Pagination = {
 
 export interface ReleaseDataResponse extends Omit<Release, 'actions'> {
   actions: { meta: { count: number } };
-  meta: Record<UID.ContentType, { mainField: string }>;
 }
 
 /**

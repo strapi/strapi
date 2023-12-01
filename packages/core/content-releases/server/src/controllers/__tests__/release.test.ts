@@ -6,6 +6,7 @@ jest.mock('../../utils', () => ({
   getService: jest.fn(() => ({
     findOne: jest.fn(() => ({ id: 1 })),
     countActions: mockCountActions,
+    findReleaseContentTypesMainFields: jest.fn(),
   })),
   getAllowedContentTypes: jest.fn(() => ['contentTypeA', 'contentTypeB']),
 }));
@@ -27,7 +28,7 @@ describe('Release controller', () => {
       expect(() => releaseController.create(ctx)).rejects.toThrow('name is a required field');
     });
   });
-  
+
   describe('update', () => {
     it('throws an error given bad request arguments', () => {
       const ctx = {
@@ -37,18 +38,18 @@ describe('Release controller', () => {
         // Mock missing name on request
         request: {
           body: {
-            name: ''
+            name: '',
           },
         },
         params: {
-          id: 1
+          id: 1,
         },
       };
-  
+
       // @ts-expect-error partial context
       expect(() => releaseController.update(ctx)).rejects.toThrow('name is a required field');
     });
-    
+
     it('throws an error given unknown request arguments', () => {
       const ctx = {
         state: {
@@ -58,16 +59,18 @@ describe('Release controller', () => {
         request: {
           body: {
             name: 'Test',
-            unknown: ''
+            unknown: '',
           },
         },
         params: {
-          id: 1
+          id: 1,
         },
       };
-  
+
       // @ts-expect-error partial context
-      expect(() => releaseController.update(ctx)).rejects.toThrow('this field has unspecified keys: unknown');
+      expect(() => releaseController.update(ctx)).rejects.toThrow(
+        'this field has unspecified keys: unknown'
+      );
     });
   });
 
@@ -81,23 +84,23 @@ describe('Release controller', () => {
             'content-types': {
               findConfiguration: () => ({
                 settings: {
-                  mainField: 'name'
-                }
-              })
-            }
-          }
+                  mainField: 'name',
+                },
+              }),
+            },
+          },
         },
-      }
+      },
     };
 
     const ctx = {
       state: {
         userAbility: {
-          can: jest.fn(() => true)
-        }
+          can: jest.fn(() => true),
+        },
       },
       params: {
-        id: 1
+        id: 1,
       },
       user: {},
       body: {
@@ -105,12 +108,12 @@ describe('Release controller', () => {
           actions: {
             meta: {
               total: 0,
-              totalHidden: 0
-            }
+              totalHidden: 0,
+            },
           },
-          meta: {}
-        }
-      }
+          meta: {},
+        },
+      },
     };
 
     it('throws an error if the release does not exists', async () => {
@@ -125,19 +128,8 @@ describe('Release controller', () => {
       // We mock the count hidden actions
       mockCountActions.mockResolvedValueOnce(1);
 
-
       // @ts-expect-error partial context
       await releaseController.findOne(ctx);
-      expect(ctx.body.data.meta).toEqual({
-        contentTypes: {
-          contentTypeA: {
-            mainField: 'name'
-          },
-          contentTypeB: {
-            mainField: 'name'
-          }
-        },
-      });
       expect(ctx.body.data.actions.meta).toEqual({
         total: 2,
         totalHidden: 1,
