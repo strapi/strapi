@@ -124,19 +124,18 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     return strapi.entityService.count(RELEASE_ACTION_MODEL_UID, query);
   },
   async findReleaseContentTypesMainFields(releaseId: Release['id']) {
-    const contentTypesFromReleaseActions: { contentType: UID.ContentType }[] =
-      await strapi.db.entityManager
-        .createQueryBuilder(RELEASE_ACTION_MODEL_UID)
-        .select('content_type')
-        .where({
-          $and: [
-            {
-              release: releaseId,
-            },
-          ],
-        })
-        .groupBy('content_type')
-        .execute();
+    const contentTypesFromReleaseActions: { contentType: UID.ContentType }[] = await strapi.db
+      .queryBuilder(RELEASE_ACTION_MODEL_UID)
+      .select('content_type')
+      .where({
+        $and: [
+          {
+            release: releaseId,
+          },
+        ],
+      })
+      .groupBy('content_type')
+      .execute();
 
     const contentTypesUids = contentTypesFromReleaseActions.map(
       ({ contentType: contentTypeUid }) => contentTypeUid
