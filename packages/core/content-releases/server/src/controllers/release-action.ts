@@ -1,5 +1,6 @@
 import type Koa from 'koa';
 import { UID } from '@strapi/types';
+import { mapAsync } from '@strapi/utils';
 import { validateReleaseAction } from './validation/release-action';
 import type {
   CreateReleaseAction,
@@ -76,20 +77,18 @@ const releaseActionController = {
     }
 
     // Because this is a morphTo relation, we need to sanitize each entry separately based on its contentType
-    const sanitizedResults = await Promise.all(
-      results.map(async (action: ReleaseAction) => {
-        const mainField = contentTypesMainFields[action.contentType].mainField;
+    const sanitizedResults = await mapAsync(results, async (action: ReleaseAction) => {
+      const mainField = contentTypesMainFields[action.contentType].mainField;
 
-        return {
-          ...action,
-          entry: action.entry && {
-            id: action.entry.id,
-            mainField: mainField ? action.entry[mainField] : null,
-            locale: action.entry.locale,
-          },
-        };
-      })
-    );
+      return {
+        ...action,
+        entry: action.entry && {
+          id: action.entry.id,
+          mainField: mainField ? action.entry[mainField] : null,
+          locale: action.entry.locale,
+        },
+      };
+    });
 
     ctx.body = {
       data: sanitizedResults,
