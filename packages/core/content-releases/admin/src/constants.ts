@@ -6,6 +6,7 @@ interface PermissionMap {
   read: Permission[];
   update: Permission[];
   delete: Permission[];
+  createAction: Permission[];
 }
 
 export const PERMISSIONS: PermissionMap = {
