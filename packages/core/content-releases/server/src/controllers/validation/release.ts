@@ -1,11 +1,4 @@
-import { yup, validateYupSchema } from '@strapi/utils';
+import { validateYupSchema } from '@strapi/utils';
+import { RELEASE_SCHEMA } from '../../../../shared/validation-schemas';
 
-const validateReleaseSchema = yup
-  .object()
-  .shape({
-    name: yup.string().trim().required(),
-  })
-  .required()
-  .noUnknown();
-
-export const validateRelease = validateYupSchema(validateReleaseSchema);
+export const validateRelease = validateYupSchema(RELEASE_SCHEMA);

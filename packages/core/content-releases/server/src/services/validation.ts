@@ -23,7 +23,7 @@ const createReleaseValidationService = ({ strapi }: { strapi: LoadedStrapi }) =>
 
     const isEntryInRelease = release.actions.some(
       (action) =>
-        action.entry.id === releaseActionArgs.entry.id &&
+        Number(action.entry.id) === Number(releaseActionArgs.entry.id) &&
         action.contentType === releaseActionArgs.entry.contentType
     );
 

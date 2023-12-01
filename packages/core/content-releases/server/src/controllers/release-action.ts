@@ -1,5 +1,5 @@
 import type Koa from 'koa';
-import { validateReleaseActionCreateSchema } from './validation/release-action';
+import { validateReleaseAction } from './validation/release-action';
 import type { CreateReleaseAction } from '../../../shared/contracts/release-actions';
 import { getService } from '../utils';
 
@@ -8,7 +8,7 @@ const releaseActionController = {
     const releaseId: CreateReleaseAction.Request['params']['releaseId'] = ctx.params.releaseId;
     const releaseActionArgs: CreateReleaseAction.Request['body'] = ctx.request.body;
 
-    await validateReleaseActionCreateSchema(releaseActionArgs);
+    await validateReleaseAction(releaseActionArgs);
 
     const releaseService = getService('release', { strapi });
     const releaseAction = await releaseService.createAction(releaseId, releaseActionArgs);
