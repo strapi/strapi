@@ -7,7 +7,7 @@ import { axiosBaseQuery } from './axios';
 
 import type { CreateRelease, GetReleases, UpdateRelease } from '../../../shared/contracts/releases';
 
-interface GetReleasesQueryParams {
+export interface GetReleasesQueryParams {
   page?: number;
   pageSize?: number;
   filters?: {
