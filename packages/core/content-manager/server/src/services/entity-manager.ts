@@ -1,6 +1,6 @@
 import { omit } from 'lodash/fp';
 import { mapAsync, errors, contentTypes, sanitize } from '@strapi/utils';
-import type { LoadedStrapi as Strapi, Common, EntityService } from '@strapi/types';
+import type { LoadedStrapi as Strapi, Common, EntityService, Documents } from '@strapi/types';
 import { getService } from '../utils';
 import {
   getDeepPopulate,
@@ -130,13 +130,12 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     );
   },
 
-  async create(body: Body, uid: Common.UID.ContentType) {
-    const publishData = { ...body } as any;
+  async create(
+    uid: Common.UID.ContentType,
+    opts: Parameters<Documents.RepositoryInstance['create']>[0] = {} as any
+  ) {
     const populate = await buildDeepPopulate(uid);
-
-    publishData[PUBLISHED_AT_ATTRIBUTE] = null;
-
-    const params = { data: publishData, populate };
+    const params = { ...opts, status: 'draft', populate };
 
     const entity = await strapi
       .documents(uid)
@@ -150,13 +149,17 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     return entity;
   },
 
-  async update(document: Entity, body: Partial<Body>, uid: Common.UID.ContentType) {
-    const publishData = omitPublishedAtField(body);
+  async update(
+    document: Entity,
+    uid: Common.UID.ContentType,
+    opts: Parameters<Documents.RepositoryInstance['update']>[1] = {} as any
+  ) {
+    const publishData = omitPublishedAtField(opts.data || {});
     const populate = await buildDeepPopulate(uid);
 
     // TODO: Remove this once we change documentId to id in database
     delete publishData.id;
-    const params = { data: publishData, populate };
+    const params = { ...opts, data: publishData, populate, status: 'draft' };
 
     const updatedDocument = await strapi
       .documents(uid)
@@ -197,18 +200,31 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     return clonedEntity;
   },
 
-  async delete(document: Entity, uid: Common.UID.ContentType) {
+  /**
+   *  Check if a document exists
+   */
+  async exists(id: string, uid: Common.UID.ContentType) {
+    const count = await strapi.db.query(uid).count({ where: { documentId: id } });
+    return count > 0;
+  },
+
+  async delete(
+    document: Entity,
+    uid: Common.UID.ContentType,
+    opts: Parameters<Documents.RepositoryInstance['delete']>[1] = {} as any
+  ) {
     const populate = await buildDeepPopulate(uid);
 
     // @ts-expect-error - change entity to document
-    const deletedEntity = await strapi.documents(uid).delete(document.id, { populate });
+    await strapi.documents(uid).delete(document.id, { ...opts, populate });
 
     // If relations were populated, relations count will be returned instead of the array of relations.
-    if (isWebhooksPopulateRelationsEnabled()) {
-      return getDeepRelationsCount(deletedEntity, uid);
-    }
+    // if (isWebhooksPopulateRelationsEnabled()) {
+    //   return getDeepRelationsCount(deletedEntity, uid);
+    // }
 
-    return deletedEntity;
+    // TODO: Return all deleted versions?
+    return {};
   },
 
   // FIXME: handle relations
@@ -219,19 +235,23 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     return strapi.entityService.deleteMany(uid, opts);
   },
 
-  async publish(document: Entity, uid: Common.UID.ContentType) {
+  async publish(
+    document: Entity,
+    uid: Common.UID.ContentType,
+    opts: Parameters<Documents.RepositoryInstance['publish']>[1] = {} as any
+  ) {
     const populate = await buildDeepPopulate(uid);
-    const params = { populate };
+    const params = { ...opts, populate };
 
     const { versions: publishedDocuments } = await strapi
       .documents(uid)
       // @ts-expect-error - Change entity to document
       .publish(document.id, params);
 
+    // TODO: What if we publish many versions at once?
     const publishedDocument = publishedDocuments.at(0);
     const mappedEntity = await this.mapEntity(publishedDocument, uid);
 
-    console.log(mappedEntity, publishedDocuments);
     // If relations were populated, relations count will be returned instead of the array of relations.
     if (isWebhooksPopulateRelationsEnabled()) {
       return getDeepRelationsCount(mappedEntity, uid);
@@ -313,21 +333,22 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     return unpublishedEntitiesCount;
   },
 
-  async unpublish(entity: Entity, uid: Common.UID.ContentType, body = {}) {
-    if (!entity[PUBLISHED_AT_ATTRIBUTE]) {
-      throw new ApplicationError('already.draft');
-    }
-
-    const data = { ...body, [PUBLISHED_AT_ATTRIBUTE]: null };
+  async unpublish(
+    document: Entity,
+    uid: Common.UID.ContentType,
+    opts: Parameters<Documents.RepositoryInstance['unpublish']>[1] = {} as any
+  ) {
     const populate = await buildDeepPopulate(uid);
+    const params = { ...opts, populate };
 
-    const params = { data, populate };
+    const { versions: unpublishedDocuments } = await strapi
+      .documents(uid)
+      // @ts-expect-error - Change entity to document
+      .unpublish(document.id, params);
 
-    const updatedEntity = await strapi.entityService.update(uid, entity.id, params);
-
-    await emitEvent(uid, ENTRY_UNPUBLISH, updatedEntity!);
-
-    const mappedEntity = await this.mapEntity(updatedEntity, uid);
+    // TODO: What if we publish many versions at once?
+    const unpublishedDocument = unpublishedDocuments.at(0);
+    const mappedEntity = await this.mapEntity(unpublishedDocument, uid);
 
     // If relations were populated, relations count will be returned instead of the array of relations.
     if (isWebhooksPopulateRelationsEnabled()) {
