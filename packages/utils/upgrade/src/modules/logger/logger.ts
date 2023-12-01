@@ -2,7 +2,7 @@ import chalk from 'chalk';
 
 import type { Logger as LoggerInterface, LoggerOptions } from './types';
 
-class Logger implements LoggerInterface {
+export class Logger implements LoggerInterface {
   public isDebug: boolean;
   public isSilent: boolean;
 

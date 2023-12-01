@@ -1,6 +1,6 @@
 import type { Timer as TimerInterface, TimeInterval } from './types';
 
-class Timer implements TimerInterface {
+export class Timer implements TimerInterface {
   private interval!: TimeInterval;
 
   constructor() {

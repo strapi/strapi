@@ -10,7 +10,7 @@ type CreateCodemodPayload = Pick<
   'kind' | 'version' | 'baseDirectory' | 'filename'
 >;
 
-class Codemod implements CodemodInterface {
+export class Codemod implements CodemodInterface {
   kind: Kind;
   version: Version.SemVer;
   baseDirectory: string;

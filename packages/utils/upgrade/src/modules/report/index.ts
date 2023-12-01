@@ -1,3 +1,3 @@
 export type * as Report from './types';
 
-export * from './report';
+export { codemodReportFactory, reportFactory } from './report';

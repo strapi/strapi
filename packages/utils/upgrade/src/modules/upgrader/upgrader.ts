@@ -1,8 +1,5 @@
 import assert from 'node:assert';
-import path from 'node:path';
 
-import { codeRunnerFactory } from '../runner/code';
-import { jsonRunnerFactory } from '../runner/json';
 import {
   codemodRepositoryFactory,
   constants as codemodRepositoryConstants,
@@ -18,7 +15,7 @@ import type { NPM } from '../npm';
 import type { Project } from '../project';
 import { unknownToError } from '../error';
 
-class Upgrader implements UpgraderInterface {
+export class Upgrader implements UpgraderInterface {
   private project: Project;
   private npmPackage: NPM.Package;
   private target: Version.SemVer;

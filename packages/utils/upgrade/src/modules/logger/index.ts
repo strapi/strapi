@@ -1,3 +1,3 @@
 export type * from './types';
 
-export * from './logger';
+export { loggerFactory } from './logger';

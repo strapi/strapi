@@ -1,4 +1,4 @@
 export type * from './types';
 
-export * from './project';
+export { projectFactory } from './project';
 export * as constants from './constants';

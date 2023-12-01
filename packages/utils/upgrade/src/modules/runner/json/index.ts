@@ -1,3 +1,3 @@
 export type * from './types';
 
-export * from './json';
+export { jsonRunnerFactory } from './json';

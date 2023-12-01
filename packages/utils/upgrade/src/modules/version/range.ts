@@ -1,7 +1,7 @@
 import semver from 'semver';
 
 import * as Version from './types';
-import { isSemVer, isSemVerReleaseType, semVerFactory } from './semver';
+import { isSemVer, isSemVerReleaseType } from './semver';
 
 export const rangeFactory = (range: string): Version.Range => {
   return new semver.Range(range);

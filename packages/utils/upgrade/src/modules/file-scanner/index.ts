@@ -1,3 +1,3 @@
 export type * from './types';
 
-export * from './scanner';
+export { fileScannerFactory } from './scanner';

@@ -2,7 +2,7 @@ import { cloneDeep, get, has, set, merge } from 'lodash/fp';
 
 import type { JSONObject, JSONTransformAPI as JSONTransformAPIInterface, JSONValue } from './types';
 
-class JSONTransformAPI implements JSONTransformAPIInterface {
+export class JSONTransformAPI implements JSONTransformAPIInterface {
   private json: JSONObject;
 
   constructor(json: JSONObject) {

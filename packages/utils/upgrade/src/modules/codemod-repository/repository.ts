@@ -11,7 +11,7 @@ import type { Version } from '../version';
 
 import type { CodemodRepository as CodemodRepositoryInterface } from './types';
 
-class CodemodRepository implements CodemodRepositoryInterface {
+export class CodemodRepository implements CodemodRepositoryInterface {
   private groups: Record<Version.LiteralSemVer, Codemod.Codemod[]>;
   private versions: Version.SemVer[];
 
@@ -109,7 +109,7 @@ class CodemodRepository implements CodemodRepositoryInterface {
   }
 }
 
-const parseCodemodKindFromFilename = (filename: string): Codemod.Kind => {
+export const parseCodemodKindFromFilename = (filename: string): Codemod.Kind => {
   const kind = filename.split('.').at(-2) as Codemod.Kind | undefined;
 
   assert(kind !== undefined);

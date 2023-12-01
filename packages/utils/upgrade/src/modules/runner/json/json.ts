@@ -5,7 +5,7 @@ import { transformJSON } from './transform';
 import type { Codemod } from '../../codemod';
 import type { JSONRunnerConfiguration } from './types';
 
-class JSONRunner extends AbstractRunner<JSONRunnerConfiguration> {
+export class JSONRunner extends AbstractRunner<JSONRunnerConfiguration> {
   runner = transformJSON;
 
   constructor(paths: string[], configuration: JSONRunnerConfiguration) {

@@ -5,7 +5,7 @@ import type {
   TestResult,
 } from './types';
 
-class Requirement implements RequirementInterface {
+export class Requirement implements RequirementInterface {
   readonly isRequired: boolean;
   readonly name: string;
   readonly description: string;

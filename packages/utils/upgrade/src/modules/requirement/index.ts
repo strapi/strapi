@@ -1,3 +1,3 @@
 export type * as Requirement from './types';
 
-export * from './requirement';
+export { requirementFactory } from './requirement';

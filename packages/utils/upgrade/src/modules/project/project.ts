@@ -19,7 +19,7 @@ import type {
   RunCodemodsOptions,
 } from './types';
 
-class Project implements ProjectInterface {
+export class Project implements ProjectInterface {
   public cwd: string;
 
   // The following properties are assigned during the .refresh() call in the constructor.

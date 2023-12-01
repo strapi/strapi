@@ -3,7 +3,7 @@ import { glob } from 'glob';
 
 import type { FileScanner as FileScannerInterface } from './types';
 
-class FileScanner implements FileScannerInterface {
+export class FileScanner implements FileScannerInterface {
   public cwd: string;
 
   constructor(cwd: string) {

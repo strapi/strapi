@@ -5,7 +5,7 @@ import { AbstractRunner } from '../runner';
 import type { Codemod } from '../../codemod';
 import type { CodeRunnerConfiguration } from './types';
 
-class CodeRunner extends AbstractRunner<CodeRunnerConfiguration> {
+export class CodeRunner extends AbstractRunner<CodeRunnerConfiguration> {
   runner = jscodeshift;
 
   constructor(paths: string[], configuration: CodeRunnerConfiguration) {

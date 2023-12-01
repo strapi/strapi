@@ -6,7 +6,7 @@ import { isLiteralSemVer } from '../version';
 
 import type { Package as PackageInterface, NPMPackage } from './types';
 import type { Version } from '../version';
-class Package implements PackageInterface {
+export class Package implements PackageInterface {
   name: string;
   packageURL: string;
 

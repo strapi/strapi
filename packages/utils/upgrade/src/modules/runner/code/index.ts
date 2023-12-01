@@ -1,3 +1,3 @@
 export type * from './types';
 
-export * from './code';
+export { codeRunnerFactory } from './code';
