@@ -205,7 +205,7 @@ const FieldComponent = ({
         )}
         {isRepeatable && (
           <RepeatableComponent
-            componentValue={componentValue}
+            componentValue={componentValue ?? undefined}
             componentValueLength={componentValueLength}
             componentUid={componentUid}
             isReadOnly={isReadOnly}

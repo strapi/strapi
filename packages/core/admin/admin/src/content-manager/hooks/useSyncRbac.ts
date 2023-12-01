@@ -17,15 +17,14 @@ const useSyncRbac = (
   containerName = 'listView'
 ): {
   isValid: boolean;
-  permissions: Permission[];
+  permissions: Permission[] | null;
 } => {
   const dispatch = useTypedDispatch();
 
   const collectionTypesRelatedPermissions = useTypedSelector(
     (state) => state.rbacProvider.collectionTypesRelatedPermissions
   );
-  const permissions =
-    useTypedSelector((state) => state['content-manager_rbacManager'].permissions) ?? [];
+  const permissions = useTypedSelector((state) => state['content-manager_rbacManager'].permissions);
 
   const relatedPermissions = collectionTypesRelatedPermissions[collectionTypeUID];
 
@@ -53,7 +52,7 @@ const useSyncRbac = (
     permissions?.some((permission) => permission.subject !== collectionTypeUID) ?? true;
 
   return {
-    isValid: permissions && !isPermissionMismatch,
+    isValid: Boolean(permissions) && !isPermissionMismatch,
     permissions,
   };
 };
