@@ -11,6 +11,7 @@ import {
   join,
   first,
   omit,
+  merge,
 } from 'lodash/fp';
 
 import traverseFactory from './factory';
@@ -42,7 +43,6 @@ const populate = traverseFactory()
   // Transform wildcard populate to an exhaustive list of attributes to populate.
   .intercept(isWildCardConstant, (visitor, options, _data, { recurse }) => {
     const attributes = options.schema?.attributes;
-
     // This should never happen, but adding the check in
     // case this method is called with wrong parameters
     if (!attributes) {
@@ -124,7 +124,6 @@ const populate = traverseFactory()
     isKeyword('populate'),
     async ({ key, visitor, path, value, schema }, { set, recurse }) => {
       const newValue = await recurse(visitor, { schema, path }, value);
-
       set(key, newValue);
     }
   )
@@ -189,9 +188,7 @@ const populate = traverseFactory()
     }
 
     const targetSchema = strapi.getModel(attribute.component);
-
     const newValue = await recurse(visitor, { schema: targetSchema, path }, value);
-
     set(key, newValue);
   })
   // Handle populate on dynamic zones
@@ -202,7 +199,6 @@ const populate = traverseFactory()
 
     if (isObject(value)) {
       const { components } = attribute;
-
       const newValue = {};
 
       // Handle legacy DZ params
@@ -210,7 +206,8 @@ const populate = traverseFactory()
 
       for (const componentUID of components) {
         const componentSchema = strapi.getModel(componentUID);
-        newProperties = await recurse(visitor, { schema: componentSchema, path }, newProperties);
+        const properties = await recurse(visitor, { schema: componentSchema, path }, value);
+        newProperties = merge(newProperties, properties);
       }
 
       Object.assign(newValue, newProperties);
