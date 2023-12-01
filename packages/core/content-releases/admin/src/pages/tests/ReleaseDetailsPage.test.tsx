@@ -1,12 +1,11 @@
 import { render, screen, server } from '@tests/utils';
 import { rest } from 'msw';
-import Router from 'react-router';
 
 import { ReleaseDetailsPage } from '../ReleaseDetailsPage';
 
-jest.mock('react-router', () => ({
-  ...jest.requireActual('react-router'),
-  useParams: jest.fn(),
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: jest.fn().mockImplementation(() => ({ id: '1' })),
 }));
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -32,7 +31,6 @@ describe('Release details page', () => {
         )
       )
     );
-    jest.spyOn(Router, 'useParams').mockReturnValue({ id: '1' });
     const { user } = render(<ReleaseDetailsPage />);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Release title');
     // if there are 0 entries
