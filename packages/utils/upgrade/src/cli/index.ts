@@ -1,43 +1,56 @@
-import { program, Option, InvalidOptionArgumentError } from 'commander';
-import assert from 'node:assert';
+import os from 'os';
+import chalk from 'chalk';
+import { program } from 'commander';
 
-import { version } from '../../package.json';
-import { isVersion, VersionRelease } from '../core';
+import { version as packageJSONVersion } from '../../package.json';
+import { Version } from '../modules/version';
 
-import type { CLIOptions } from '../types';
+import type { CLIOptions } from './types';
 
-const RELEASES_CHOICES = Object.values(VersionRelease).join(', ');
-const ALLOWED_TARGETS = `Allowed choices are ${RELEASES_CHOICES} or a specific version number in the form "x.x.x"`;
+const addReleaseUpgradeCommand = (releaseType: Version.ReleaseType, description: string) => {
+  program
+    .command(releaseType)
+    .description(description)
+    .option('-p, --project-path <project-path>', 'Path to the Strapi project')
+    .option('-n, --dry', 'Simulate the upgrade without updating any files', false)
+    .option('-d, --debug', 'Get more logs in debug mode', false)
+    .option('-s, --silent', "Don't log anything", false)
+    .action(async (options: CLIOptions) => {
+      const { upgrade } = await import('./commands/upgrade.js');
+
+      return upgrade({ ...options, target: releaseType });
+    });
+};
+
+addReleaseUpgradeCommand(
+  Version.ReleaseType.Major,
+  'Upgrade to the next available major version of Strapi'
+);
+
+// TODO: Add back the command when adding the support for minor upgrades
+// addReleaseUpgradeCommand(
+//   Version.ReleaseType.Minor,
+//   'Upgrade to the latest minor/patch version of Strapi for the current major'
+// );
+
+// TODO: Add back the command when adding the support for patch upgrades
+// addReleaseUpgradeCommand(
+//   Version.ReleaseType.Patch,
+//   'Upgrade to latest patch version of Strapi for the current major and minor'
+// );
 
 program
-  .description('Upgrade to the desired version')
-  .option('-p, --project-path <project-path>', 'Path to the Strapi project')
-  .addOption(
-    new Option('-t, --target <target>', `Specify which version to upgrade to ${ALLOWED_TARGETS}`)
-      .default(VersionRelease.Next)
-      .argParser((target) => {
-        assert(isVersion(target), new InvalidOptionArgumentError(ALLOWED_TARGETS));
-        return target;
-      })
-  )
-  .option(
-    '-e --exact',
-    'If <target> is in the form "x.x.x", only run the upgrade for this version',
-    false
-  )
-  .option('-n, --dry-run', 'Simulate the upgrade without updating any files', false)
-  .option('-d, --debug', 'Get more logs in debug mode', false)
-  .option('-s, --silent', "Don't log anything", false)
-  .action(async () => {
-    const options = program.opts<CLIOptions>();
+  .usage('<command> [options]')
+  .on('command:*', ([invalidCmd]) => {
+    console.error(
+      chalk.red(
+        `[ERROR] Invalid command: ${invalidCmd}.${os.EOL} See --help for a list of available commands.`
+      )
+    );
 
-    const { upgrade } = await import('./commands/upgrade.js');
-
-    return upgrade(options);
-  });
-
-program
-  .usage('[options]')
+    process.exit(1);
+  })
   .helpOption('-h, --help', 'Print command line options')
-  .version(version)
+  .addHelpCommand('help [command]', 'Print options for a specific command')
+  .version(packageJSONVersion)
   .parse(process.argv);

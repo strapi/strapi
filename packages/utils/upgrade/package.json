@@ -42,7 +42,7 @@
   "module": "./dist/index.mjs",
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
-  "bin": "./bin/upgrade.js",
+  "bin": "./bin/codemods.js",
   "files": [
     "bin",
     "dist",
@@ -69,7 +69,8 @@
     "lodash": "4.17.21",
     "ora": "5.4.1",
     "prompts": "2.4.2",
-    "semver": "7.5.4"
+    "semver": "7.5.4",
+    "simple-git": "3.21.0"
   },
   "devDependencies": {
     "@strapi/pack-up": "workspace:*",

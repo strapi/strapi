@@ -1,15 +1,14 @@
 import prompts from 'prompts';
 
+import { loggerFactory } from '../../modules/logger';
 import { handleError } from '../errors';
 import * as tasks from '../../tasks';
 
-import { createLogger } from '../../core';
+import type { Command } from '../types';
 
-import type { CLIOptions } from '../../types';
-
-export const upgrade = async (options: CLIOptions) => {
+export const upgrade: Command = async (options) => {
   try {
-    const logger = createLogger({ silent: options.silent, debug: options.debug });
+    const logger = loggerFactory({ silent: options.silent, debug: options.debug });
 
     logger.warn(
       "Please make sure you've created a backup of your codebase and files before upgrading"
@@ -18,10 +17,9 @@ export const upgrade = async (options: CLIOptions) => {
     await tasks.upgrade({
       logger,
       confirm,
-      dryRun: options.dryRun,
+      dry: options.dry,
       cwd: options.projectPath,
       target: options.target,
-      exact: options.exact,
     });
   } catch (err) {
     handleError(err);

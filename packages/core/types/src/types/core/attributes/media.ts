@@ -25,9 +25,12 @@ export type Media<
   Attribute.WritableOption &
   Attribute.VisibleOption;
 
-// TODO: Introduce a real type for the media values
 export type MediaValue<TMultiple extends Utils.Expression.BooleanValue = Utils.Expression.False> =
-  Utils.Expression.If<TMultiple, any[], any>;
+  Utils.Expression.If<
+    TMultiple,
+    Attribute.GetValues<MediaTarget>[],
+    Attribute.GetValues<MediaTarget>
+  >;
 
 export type GetMediaValue<TAttribute extends Attribute.Attribute> = TAttribute extends Media<
   // Unused as long as the media value is any
