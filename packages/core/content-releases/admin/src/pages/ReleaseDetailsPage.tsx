@@ -210,7 +210,7 @@ const ReleaseDetailsPage = () => {
                         defaultMessage:
                           '{number, plural, =0 {# days} one {# day} other {# days}} ago by {createdBy}',
                       },
-                      { number: days, user: createdBy }
+                      { number: days, createdBy }
                     )}
                   </Typography>
                 </ReleaseInfoWrapper>
