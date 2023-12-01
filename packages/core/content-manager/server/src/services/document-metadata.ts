@@ -1,6 +1,25 @@
 import type { LoadedStrapi as Strapi, Common } from '@strapi/types';
 
+interface DocumentMetadata {
+  availableLocales: {
+    id: string;
+    locale: string;
+    updatedAt: string;
+    createdAt: string;
+    publishedAt: string;
+  }[];
+  availableStatus: {
+    id: string;
+    updatedAt: string;
+    createdAt: string;
+    publishedAt: string;
+  }[];
+}
+
 export default ({ strapi }: { strapi: Strapi }) => ({
+  /**
+   * Returns available locales of a document for the current status
+   */
   async getAvailableLocales(
     id: string,
     uid: Common.UID.ContentType,
@@ -19,7 +38,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         publishedAt: opts.status === 'published' ? { $ne: null } : null,
       },
       select: ['id', 'locale', 'updatedAt', 'createdAt', 'publishedAt'],
-    });
+    }) as unknown as DocumentMetadata['availableLocales'];
   },
 
   async getAvailableStatus(
@@ -36,7 +55,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       locale: opts.locale,
       status: otherStatus,
       fields: ['id', 'updatedAt', 'createdAt', 'publishedAt'],
-    });
+    }) as unknown as DocumentMetadata['availableStatus'][0] | null;
   },
 
   /**
