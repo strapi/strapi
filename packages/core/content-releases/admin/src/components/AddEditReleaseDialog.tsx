@@ -9,11 +9,8 @@ import {
 } from '@strapi/design-system';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
-import * as yup from 'yup';
 
-const RELEASE_SCHEMA = yup.object({
-  name: yup.string().required(),
-});
+import { RELEASE_SCHEMA } from '../../../shared/validation-schemas';
 
 export interface FormValues {
   name: string;

@@ -39,7 +39,7 @@ import { PERMISSIONS } from '../constants';
 import { isAxiosError } from '../services/axios';
 import {
   useGetReleasesQuery,
-  GetAllReleasesQueryParams,
+  GetReleasesQueryParams,
   useCreateReleaseMutation,
 } from '../services/release';
 
@@ -182,7 +182,7 @@ const ReleasesPage = () => {
   const { formatMessage } = useIntl();
   const { push } = useHistory();
   const { formatAPIError } = useAPIErrorHandler();
-  const [{ query }, setQuery] = useQueryParams<GetAllReleasesQueryParams>();
+  const [{ query }, setQuery] = useQueryParams<GetReleasesQueryParams>();
   const response = useGetReleasesQuery(query);
   const [createRelease, { isLoading: isSubmittingForm }] = useCreateReleaseMutation();
 

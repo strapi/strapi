@@ -39,4 +39,10 @@ export const PERMISSIONS: PermissionMap = {
       subject: null,
     },
   ],
+  createAction: [
+    {
+      action: 'plugin::content-releases.create-action',
+      subject: null,
+    },
+  ],
 };

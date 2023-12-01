@@ -1,7 +1,12 @@
 import { setCreatorFields, errors } from '@strapi/utils';
 import type { LoadedStrapi } from '@strapi/types';
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
-import type { GetReleases, CreateRelease, UpdateRelease, GetRelease } from '../../../shared/contracts/releases';
+import type {
+  GetReleases,
+  CreateRelease,
+  UpdateRelease,
+  GetRelease,
+} from '../../../shared/contracts/releases';
 import type { CreateReleaseAction } from '../../../shared/contracts/release-actions';
 import type { UserInfo } from '../../../shared/types';
 import { getService } from '../utils';
@@ -14,8 +19,19 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       data: releaseWithCreatorFields,
     });
   },
-  findMany(query?: GetReleases.Request['query']) {
+  findPage(query?: GetReleases.Request['query']) {
     return strapi.entityService.findPage(RELEASE_MODEL_UID, {
+      ...query,
+      populate: {
+        actions: {
+          // @ts-expect-error TS error on populate, is not considering count
+          count: true,
+        },
+      },
+    });
+  },
+  findMany(query?: GetReleases.Request['query']) {
+    return strapi.entityService.findMany(RELEASE_MODEL_UID, {
       ...query,
       populate: {
         actions: {
@@ -35,11 +51,21 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       },
     });
   },
-  async update(id: number, releaseData: UpdateRelease.Request['body'], { user }: { user: UserInfo }) {
+  async update(
+    id: number,
+    releaseData: UpdateRelease.Request['body'],
+    { user }: { user: UserInfo }
+  ) {
     const updatedRelease = await setCreatorFields({ user, isEdition: true })(releaseData);
 
-    // @ts-expect-error Type 'ReleaseUpdateArgs' has no properties in common with type 'Partial<Input<"plugin::content-releases.release">>'
-    const release = await strapi.entityService.update(RELEASE_MODEL_UID, id, { data: updatedRelease });
+    const release = await strapi.entityService.update(RELEASE_MODEL_UID, id, {
+      /*
+       * The type returned from the entity service: Partial<Input<"plugin::content-releases.release">>
+       * is not compatible with the type we are passing here: UpdateRelease.Request['body']
+       */
+      // @ts-expect-error see above
+      data: updatedRelease,
+    });
 
     if (!release) {
       throw new errors.NotFoundError(`No release found for id ${id}`);
