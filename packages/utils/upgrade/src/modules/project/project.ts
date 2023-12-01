@@ -23,8 +23,11 @@ export class Project implements ProjectInterface {
   public cwd: string;
 
   // The following properties are assigned during the .refresh() call in the constructor.
+
   public files!: string[];
+
   public packageJSON!: MinimalPackageJSON;
+
   public strapiVersion!: Version.SemVer;
 
   constructor(cwd: string) {

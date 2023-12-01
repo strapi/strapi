@@ -1,3 +1,3 @@
-export { upgrade } from './upgrade';
+export type { Upgrade } from './upgrade';
 
-export type * from './upgrade';
+export { upgrade } from './upgrade';

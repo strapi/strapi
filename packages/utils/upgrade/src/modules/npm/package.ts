@@ -6,8 +6,10 @@ import { isLiteralSemVer } from '../version';
 
 import type { Package as PackageInterface, NPMPackage } from './types';
 import type { Version } from '../version';
+
 export class Package implements PackageInterface {
   name: string;
+
   packageURL: string;
 
   private npmPackage: NPMPackage | null;

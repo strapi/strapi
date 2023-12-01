@@ -1,5 +1,3 @@
-import path from 'node:path';
-
 export const CODEMOD_CODE_SUFFIX = 'code';
 
 export const CODEMOD_JSON_SUFFIX = 'json';

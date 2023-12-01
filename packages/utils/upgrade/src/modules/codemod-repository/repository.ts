@@ -13,6 +13,7 @@ import type { CodemodRepository as CodemodRepositoryInterface } from './types';
 
 export class CodemodRepository implements CodemodRepositoryInterface {
   private groups: Record<Version.LiteralSemVer, Codemod.Codemod[]>;
+
   private versions: Version.SemVer[];
 
   public cwd: string;

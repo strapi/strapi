@@ -8,10 +8,6 @@ import type { JSONRunnerConfiguration } from './types';
 export class JSONRunner extends AbstractRunner<JSONRunnerConfiguration> {
   runner = transformJSON;
 
-  constructor(paths: string[], configuration: JSONRunnerConfiguration) {
-    super(paths, configuration);
-  }
-
   valid(codemod: Codemod.Codemod): boolean {
     return codemod.kind === 'json';
   }

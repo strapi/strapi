@@ -17,12 +17,17 @@ import { unknownToError } from '../error';
 
 export class Upgrader implements UpgraderInterface {
   private project: Project;
+
   private npmPackage: NPM.Package;
+
   private target: Version.SemVer;
 
   private isDry: boolean;
+
   private logger: Logger | null;
+
   private requirements: Requirement.Requirement[];
+
   private confirmationCallback: ConfirmationCallback | null;
 
   constructor(project: Project, target: Version.SemVer, npmPackage: NPM.Package) {
@@ -173,5 +178,5 @@ export const upgraderFactory = (
   return new Upgrader(project, semverTarget, npmPackage);
 };
 
-const successReport = (): UpgradeReport => ({ success: true });
+const successReport = (): UpgradeReport => ({ success: true, error: null });
 const erroredReport = (error: Error): UpgradeReport => ({ success: false, error });

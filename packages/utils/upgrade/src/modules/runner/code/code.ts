@@ -8,10 +8,6 @@ import type { CodeRunnerConfiguration } from './types';
 export class CodeRunner extends AbstractRunner<CodeRunnerConfiguration> {
   runner = jscodeshift;
 
-  constructor(paths: string[], configuration: CodeRunnerConfiguration) {
-    super(paths, configuration);
-  }
-
   valid(codemod: Codemod.Codemod): boolean {
     return codemod.kind === 'code';
   }

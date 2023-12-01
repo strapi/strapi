@@ -3,10 +3,12 @@ import chalk from 'chalk';
 import type { Logger as LoggerInterface, LoggerOptions } from './types';
 
 export class Logger implements LoggerInterface {
-  public isDebug: boolean;
-  public isSilent: boolean;
+  isDebug: boolean;
+
+  isSilent: boolean;
 
   private nbErrorsCalls: number;
+
   private nbWarningsCalls: number;
 
   constructor(options: LoggerOptions = {}) {

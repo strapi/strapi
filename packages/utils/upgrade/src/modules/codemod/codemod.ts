@@ -12,9 +12,13 @@ type CreateCodemodPayload = Pick<
 
 export class Codemod implements CodemodInterface {
   kind: Kind;
+
   version: Version.SemVer;
+
   baseDirectory: string;
+
   filename: string;
+
   path: string;
 
   constructor(options: CreateCodemodPayload) {

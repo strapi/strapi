@@ -1,4 +1,4 @@
-import { Utils } from '@strapi/types';
+import type { Utils } from '@strapi/types';
 
 export interface JSONRunnerConfiguration {
   dry?: boolean;

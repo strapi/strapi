@@ -8,9 +8,10 @@ export abstract class AbstractRunner<TConfig extends RunnerConfiguration>
   abstract runner: RunnerFunction<TConfig>;
 
   paths: string[];
+
   configuration: TConfig;
 
-  protected constructor(paths: string[], configuration: TConfig) {
+  constructor(paths: string[], configuration: TConfig) {
     this.paths = paths;
     this.configuration = configuration;
   }

@@ -2,7 +2,6 @@ import type { Version } from '../version';
 import type { Requirement } from '../requirement';
 import type { Logger } from '../logger';
 import type { MaybePromise } from '../../types';
-import type { NPM } from '../npm';
 
 export interface Upgrader {
   setTarget(target: Version.ReleaseType | Version.SemVer): this;
@@ -17,9 +16,11 @@ export interface Upgrader {
   upgrade(): Promise<UpgradeReport>;
 }
 
-export interface UpgradeReport {
-  success: boolean;
-  error?: Error;
-}
+export type UpgradeReport =
+  | {
+      success: true;
+      error: null;
+    }
+  | { success: false; error: Error };
 
 export type ConfirmationCallback = (message: string) => MaybePromise<boolean>;

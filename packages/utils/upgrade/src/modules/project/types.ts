@@ -1,7 +1,6 @@
 import type { Version } from '../version';
 import type { Codemod } from '../codemod';
 import type { Report } from '../report';
-import type { MaybePromise } from '../../types';
 
 export type FileExtension = `.${string}`;
 

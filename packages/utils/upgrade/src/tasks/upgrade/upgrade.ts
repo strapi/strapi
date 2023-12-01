@@ -2,17 +2,12 @@ import path from 'node:path';
 
 import * as requirements from './requirements';
 import { timerFactory } from '../../modules/timer';
-import { upgraderFactory } from '../../modules/upgrader';
+import { upgraderFactory, constants as upgraderConstants } from '../../modules/upgrader';
 import { npmPackageFactory } from '../../modules/npm';
 import { projectFactory } from '../../modules/project';
 import { Version } from '../../modules/version';
-import { constants as upgraderConstants } from '../../modules/upgrader';
-import { constants as npmConstants } from '../../modules/npm';
-import * as f from '../../modules/format';
 
 import type { UpgradeOptions } from './types';
-
-const fStrapiPackageName = f.highlight(upgraderConstants.STRAPI_PACKAGE_NAME);
 
 export const upgrade = async (options: UpgradeOptions) => {
   const timer = timerFactory();

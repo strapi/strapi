@@ -7,9 +7,13 @@ import type {
 
 export class Requirement implements RequirementInterface {
   readonly isRequired: boolean;
+
   readonly name: string;
+
   readonly description: string;
+
   readonly testCallback: RequirementTestCallback | null;
+
   children: RequirementInterface[];
 
   constructor(
