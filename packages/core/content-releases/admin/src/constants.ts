@@ -11,4 +11,10 @@ export const PERMISSIONS = {
       subject: null,
     },
   ],
+  createAction: [
+    {
+      action: 'plugin::content-releases.create-action',
+      subject: null,
+    },
+  ],
 };

@@ -5,8 +5,8 @@ import type { Entity } from '../types';
 import type { errors } from '@strapi/utils';
 
 type ReleaseActionEntry = Entity & {
-  mainField: Attribute.Any;
-  locale: string;
+  // Entity attributes
+  [key: string]: Attribute.Any;
 };
 
 export interface ReleaseAction extends Entity {

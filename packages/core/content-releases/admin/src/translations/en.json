@@ -1,4 +1,12 @@
 {
+  "content-manager-edit-view.add-to-release.select-label": "Select a release",
+  "content-manager-edit-view.add-to-release.select-placeholder": "Select",
+  "content-manager-edit-view.add-to-release.action-type-label": "What do you want to do with this entry?",
+  "content-manager-edit-view.add-to-release.cancel-button": "Cancel",
+  "content-manager-edit-view.add-to-release.continue-button": "Continue",
+  "content-manager-edit-view.add-to-release": "Add to release",
+  "content-manager-edit-view.add-to-release.notification.success": "Entry added to release",
+  "content-manager.notification.entry-error": "Failed to get entry data",
   "plugin.name": "Releases",
   "pages.Releases.title": "Releases",
   "pages.Releases.header-subtitle": "{number, plural, =0 {No releases} one {# release} other {# releases}}",

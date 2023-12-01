@@ -33,7 +33,7 @@ import styled from 'styled-components';
 import { GetReleases } from '../../../shared/contracts/releases';
 import { AddReleaseDialog } from '../components/AddReleaseDialog';
 import { PERMISSIONS } from '../constants';
-import { useGetReleasesQuery, GetAllReleasesQueryParams } from '../services/release';
+import { useGetReleasesQuery, GetReleasesQueryParams } from '../services/release';
 
 /* -------------------------------------------------------------------------------------------------
  * ReleasesLayout
@@ -167,7 +167,7 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
 const ReleasesPage = () => {
   const [addReleaseDialogIsShown, setAddReleaseDialogIsShown] = React.useState(false);
   const { formatMessage } = useIntl();
-  const [{ query }, setQuery] = useQueryParams<GetAllReleasesQueryParams>();
+  const [{ query }, setQuery] = useQueryParams<GetReleasesQueryParams>();
   const response = useGetReleasesQuery(query);
 
   const { isLoading, isSuccess, isError } = response;

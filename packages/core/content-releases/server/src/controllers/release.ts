@@ -13,6 +13,21 @@ import { getAllowedContentTypes, getService } from '../utils';
 
 type ReleaseWithPopulatedActions = Release & { actions: { count: number } };
 
+const formatDataObject = (releases: ReleaseWithPopulatedActions[]) => {
+  return releases.map((release) => {
+    const { actions, ...releaseData } = release;
+
+    return {
+      ...releaseData,
+      actions: {
+        meta: {
+          count: actions.count,
+        },
+      },
+    };
+  });
+};
+
 const releaseController = {
   async findMany(ctx: Koa.Context) {
     const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
@@ -23,23 +38,19 @@ const releaseController = {
     await permissionsManager.validateQuery(ctx.query);
     const query = await permissionsManager.sanitizeQuery(ctx.query);
 
-    const { results, pagination } = await getService('release', { strapi }).findMany(query);
+    const isPaginatedRequest =
+      query && Object.keys(query).some((key) => ['page', 'pageSize'].includes(key));
 
-    // Format the data object
-    const data = results.map((release: ReleaseWithPopulatedActions) => {
-      const { actions, ...releaseData } = release;
+    if (isPaginatedRequest) {
+      const { results, pagination } = await getService('release', { strapi }).findPage(query);
+      // Format the data object
+      const data = formatDataObject(results);
 
-      return {
-        ...releaseData,
-        actions: {
-          meta: {
-            count: actions.count,
-          },
-        },
-      };
-    });
-
-    ctx.body = { data, meta: { pagination } };
+      ctx.body = { data, meta: { pagination } };
+    } else {
+      const results = await getService('release', { strapi }).findMany(query);
+      ctx.body = { data: formatDataObject(results) };
+    }
   },
 
   async findOne(ctx: Koa.Context) {

@@ -1,6 +1,6 @@
 import type Koa from 'koa';
 import { UID } from '@strapi/types';
-import { validateReleaseActionCreateSchema } from './validation/release-action';
+import { validateReleaseAction } from './validation/release-action';
 import type {
   CreateReleaseAction,
   GetReleaseActions,
@@ -13,7 +13,7 @@ const releaseActionController = {
     const releaseId: CreateReleaseAction.Request['params']['releaseId'] = ctx.params.releaseId;
     const releaseActionArgs: CreateReleaseAction.Request['body'] = ctx.request.body;
 
-    await validateReleaseActionCreateSchema(releaseActionArgs);
+    await validateReleaseAction(releaseActionArgs);
 
     const releaseService = getService('release', { strapi });
     const releaseAction = await releaseService.createAction(releaseId, releaseActionArgs);
@@ -62,7 +62,7 @@ const releaseActionController = {
       releaseId
     );
     // We loop over all the contentTypes mainfields to sanitize each mainField
-    // By default, if user doesn't have permission to read the field, we return the id as fallback
+    // By default, if user doesn't have permission to read the field, we return null as fallback
     for (const contentTypeUid of Object.keys(contentTypesMainFields)) {
       if (
         ctx.state.userAbility.cannot(
@@ -71,18 +71,20 @@ const releaseActionController = {
           contentTypesMainFields[contentTypeUid].mainField
         )
       ) {
-        contentTypesMainFields[contentTypeUid].mainField = 'id';
+        contentTypesMainFields[contentTypeUid].mainField = null;
       }
     }
 
     // Because this is a morphTo relation, we need to sanitize each entry separately based on its contentType
     const sanitizedResults = await Promise.all(
       results.map(async (action: ReleaseAction) => {
+        const mainField = contentTypesMainFields[action.contentType].mainField;
+
         return {
           ...action,
           entry: action.entry && {
             id: action.entry.id,
-            mainField: action.entry[contentTypesMainFields[action.contentType].mainField],
+            mainField: mainField ? action.entry[mainField] : null,
             locale: action.entry.locale,
           },
         };

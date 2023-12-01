@@ -23,7 +23,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       data: releaseWithCreatorFields,
     });
   },
-  findMany(query?: GetReleases.Request['query']) {
+  findPage(query?: GetReleases.Request['query']) {
     return strapi.entityService.findPage(RELEASE_MODEL_UID, {
       ...query,
       populate: {
@@ -37,6 +37,17 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
   findOne(id: GetRelease.Request['params']['id'], query = {}) {
     return strapi.entityService.findOne(RELEASE_MODEL_UID, id, query);
   },
+  findMany(query?: GetReleases.Request['query']) {
+    return strapi.entityService.findMany(RELEASE_MODEL_UID, {
+      ...query,
+      populate: {
+        actions: {
+          // @ts-expect-error TS error on populate, is not considering count
+          count: true,
+        },
+      },
+    });
+  },
   async update(
     id: number,
     releaseData: UpdateRelease.Request['body'],
@@ -44,8 +55,12 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
   ) {
     const updatedRelease = await setCreatorFields({ user, isEdition: true })(releaseData);
 
-    // @ts-expect-error Type 'ReleaseUpdateArgs' has no properties in common with type 'Partial<Input<"plugin::content-releases.release">>'
     const release = await strapi.entityService.update(RELEASE_MODEL_UID, id, {
+      /*
+       * The type returned from the entity service: Partial<Input<"plugin::content-releases.release">>
+       * is not compatible with the type we are passing here: UpdateRelease.Request['body']
+       */
+      // @ts-expect-error see above
       data: updatedRelease,
     });
 
