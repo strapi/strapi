@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import styled from 'styled-components';
 
-import { useDragAndDrop } from '../../../hooks/useDragAndDrop';
+import { useDragAndDrop, DROP_SENSITIVITY } from '../../../hooks/useDragAndDrop';
 import { composeRefs, ItemTypes } from '../../../utils';
 import { RELATION_GUTTER } from '../constants';
 
@@ -58,7 +58,7 @@ export const RelationItem = ({
       onDropItem,
       onCancel,
       onMoveItem: updatePositionOfRelation,
-      dropSensitivity: 'immediate',
+      dropSensitivity: DROP_SENSITIVITY.IMMEDIATE,
     });
 
   const composedRefs = composeRefs(relationRef, dragRef);

@@ -7,8 +7,7 @@ import { Editor, Range, Transforms, Element } from 'slate';
 import { ReactEditor, type RenderElementProps, type RenderLeafProps, Editable } from 'slate-react';
 import styled from 'styled-components';
 
-// @ts-expect-error TODO convert to ts
-import { useDragAndDrop } from '../../hooks/useDragAndDrop';
+import { useDragAndDrop, DIRECTIONS } from '../../hooks/useDragAndDrop';
 // @ts-expect-error TODO convert to ts
 import { composeRefs, ItemTypes, getTrad } from '../../utils';
 
@@ -23,7 +22,7 @@ const StyledEditable = styled(Editable)`
   outline: none;
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spaces[1]};
+  gap: ${({ theme }) => theme.spaces[3]};
   height: 100%;
 
   > *:last-child {
@@ -35,14 +34,19 @@ const Wrapper = styled(Box)<{ isOverDropTarget: boolean }>`
   position: ${({ isOverDropTarget }) => isOverDropTarget && 'relative'};
 `;
 
-const DropPlacholder = styled(Box)<{
-  dragDirection: 'upwards' | 'downwards';
+type DragDirection = (typeof DIRECTIONS)[keyof typeof DIRECTIONS];
+
+const DropPlaceholder = styled(Box)<{
+  dragDirection: DragDirection | null;
 }>`
   position: absolute;
-  // Show drop placeholder 2px above or below the drop target
-  top: ${(props) => props.dragDirection === 'upwards' && `-2px`};
-  bottom: ${(props) => props.dragDirection === 'downwards' && `-2px`};
   right: 0;
+
+  // Show drop placeholder 8px above or below the drop target
+  ${({ dragDirection, theme }) => `
+  top: ${dragDirection === DIRECTIONS.UPWARD && `-${theme.spaces[2]}`};
+  bottom: ${dragDirection === DIRECTIONS.DOWNWARD && `-${theme.spaces[2]}`};
+`}
 `;
 
 const DragItem = styled(Flex)`
@@ -93,11 +97,9 @@ const DragIconButton = styled(IconButton)<IconButtonProps>`
   }
 `;
 
-type DragDirection = 'upwards' | 'downwards';
-
 type Direction = {
-  setDirection: (direction: DragDirection) => void;
-  dragDirection: DragDirection;
+  setDragDirection: (direction: DragDirection) => void;
+  dragDirection: DragDirection | null;
 };
 
 type DragAndDropElementProps = Direction & {
@@ -108,7 +110,7 @@ type DragAndDropElementProps = Direction & {
 const DragAndDropElement = ({
   children,
   index,
-  setDirection,
+  setDragDirection,
   dragDirection,
 }: DragAndDropElementProps) => {
   const { editor, disabled, name, setLiveText } = useBlocksEditorContext('drag-and-drop');
@@ -189,23 +191,24 @@ const DragAndDropElement = ({
     dropRef,
     dragRef,
   ] = useDragAndDrop(!disabled, {
-    type: `${ItemTypes.BLOCKS}._${name}`,
+    type: `${ItemTypes.BLOCKS}_${name}`,
     index,
     item: {
       displayedValue: children,
     },
-    onDropItem(currentIndex: Array<number>, newIndex: Array<number>) {
-      handleMoveBlock(newIndex, currentIndex);
+    onDropItem(currentIndex: number | Array<number>, newIndex?: number | Array<number>) {
+      if (Array.isArray(currentIndex) && newIndex && Array.isArray(newIndex))
+        handleMoveBlock(newIndex, currentIndex);
     },
   });
 
   const composedBoxRefs = composeRefs(blockRef, dropRef);
 
   React.useEffect(() => {
-    if (direction === 'upwards' || direction === 'downwards') {
-      setDirection(direction);
+    if (direction) {
+      setDragDirection(direction);
     }
-  }, [direction, setDirection]);
+  }, [direction, setDragDirection]);
 
   // To prevent applying opacity to the original item being dragged, display a cloned element without opacity.
   const CloneDragItem = () => (
@@ -213,7 +216,7 @@ const DragAndDropElement = ({
       <DragIconButton
         forwardedAs="div"
         role="button"
-        tabIndex={0}
+        alignItems="start"
         label={formatMessage({
           id: getTrad('components.DragHandle-label'),
           defaultMessage: 'Drag',
@@ -228,7 +231,7 @@ const DragAndDropElement = ({
   return (
     <Wrapper ref={composedBoxRefs} isOverDropTarget={isOverDropTarget}>
       {isOverDropTarget && (
-        <DropPlacholder
+        <DropPlaceholder
           borderStyle="solid"
           borderColor="secondary200"
           borderWidth="2px"
@@ -245,9 +248,11 @@ const DragAndDropElement = ({
           data-handler-id={handlerId}
           gap={2}
           paddingLeft={2}
+          alignItems="start"
           onDragStart={(event) => {
             const target = event.target as HTMLElement;
             const currentTarget = event.currentTarget as HTMLElement;
+            // Dragging action should only trigger drag event when the button is dragged
             if (target.getAttribute('role') !== 'button') {
               event.preventDefault();
             } else currentTarget.style.opacity = '0.5';
@@ -270,7 +275,7 @@ const DragAndDropElement = ({
             onKeyDown={handleDragHandleKeyDown}
             aria-disabled={disabled}
             disabled={disabled}
-            draggable="true"
+            draggable
           >
             <Drag color="neutral600" />
           </DragIconButton>
@@ -314,7 +319,7 @@ const baseRenderElement = ({
   props,
   blocks,
   editor,
-  setDirection,
+  setDragDirection,
   dragDirection,
 }: BaseRenderElementProps) => {
   const blockMatch = Object.values(blocks).find((block) => block.matchNode(props.element));
@@ -326,7 +331,11 @@ const baseRenderElement = ({
   if (isLink(props.element) || isList(props.element)) return block.renderElement(props);
 
   return (
-    <DragAndDropElement index={nodePath} setDirection={setDirection} dragDirection={dragDirection}>
+    <DragAndDropElement
+      index={nodePath}
+      setDragDirection={setDragDirection}
+      dragDirection={dragDirection}
+    >
       {block.renderElement(props)}
     </DragAndDropElement>
   );
@@ -341,7 +350,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
     useBlocksEditorContext('BlocksContent');
   const blocksRef = React.useRef<HTMLDivElement>(null);
   const { formatMessage } = useIntl();
-  const [dragDirection, setDirection] = React.useState<DragDirection>('upwards');
+  const [dragDirection, setDragDirection] = React.useState<DragDirection | null>(null);
   const { modalElement, handleConversionResult } = useConversionModal();
 
   // Create renderLeaf function based on the modifiers store
@@ -392,8 +401,8 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
   // Create renderElement function base on the blocks store
   const renderElement = React.useCallback(
     (props: RenderElementProps) =>
-      baseRenderElement({ props, blocks, editor, dragDirection, setDirection }),
-    [blocks, editor, dragDirection, setDirection]
+      baseRenderElement({ props, blocks, editor, dragDirection, setDragDirection }),
+    [blocks, editor, dragDirection, setDragDirection]
   );
 
   const checkSnippet = (event: React.KeyboardEvent<HTMLElement>) => {
@@ -476,13 +485,11 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
     }
   };
 
-  /**
-   * Modifier keyboard shortcuts
-   */
-  const handleModifierShortcuts = (event: React.KeyboardEvent<HTMLElement>) => {
+  const handleKeyboardShortcuts = (event: React.KeyboardEvent<HTMLElement>) => {
     const isCtrlOrCmd = event.metaKey || event.ctrlKey;
 
     if (isCtrlOrCmd) {
+      // Check if there's a modifier to toggle
       Object.values(modifiers).forEach((value) => {
         if (value.isValidEventKey(event)) {
           value.handleToggle(editor);
@@ -505,8 +512,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
       return handleBackspaceEvent(event);
     }
 
-    // Check if there's a modifier to toggle
-    handleModifierShortcuts(event);
+    handleKeyboardShortcuts(event);
 
     // Check if a snippet was triggered
     if (event.key === ' ') {

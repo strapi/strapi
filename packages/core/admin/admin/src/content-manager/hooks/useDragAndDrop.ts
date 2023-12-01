@@ -1,45 +1,64 @@
-import { useRef } from 'react';
+import * as React from 'react';
 
-import { useDrag, useDrop } from 'react-dnd';
+import {
+  useDrag,
+  useDrop,
+  type HandlerManager,
+  type ConnectDragSource,
+  type ConnectDropTarget,
+  type ConnectDragPreview,
+} from 'react-dnd';
 
-import { useKeyboardDragAndDrop } from './useKeyboardDragAndDrop';
+import {
+  useKeyboardDragAndDrop,
+  type UseKeyboardDragAndDropCallbacks,
+} from './useKeyboardDragAndDrop';
 
 const DIRECTIONS = {
   UPWARD: 'upward',
   DOWNWARD: 'downward',
-};
+} as const;
 
 const DROP_SENSITIVITY = {
   REGULAR: 'regular',
   IMMEDIATE: 'immediate',
+} as const;
+
+type UseDragAndDropOptions = UseKeyboardDragAndDropCallbacks & {
+  type?: string;
+  index: number | Array<number>;
+  item?: object;
+  onStart?: () => void;
+  onEnd?: () => void;
+  dropSensitivity?: (typeof DROP_SENSITIVITY)[keyof typeof DROP_SENSITIVITY];
 };
 
-/**
- * @typedef UseDragAndDropOptions
- *
- * @type {{
- *  type?: string,
- *  index: number | Array<number>,
- *  item?: object,
- *  onStart?: () => void,
- *  onEnd?: () => void,
- *  dropSensitivity?: 'regular' | 'immediate',
- * } & import('./useKeyboardDragAndDrop').UseKeyboardDragAndDropCallbacks}
- */
+type Identifier = NonNullable<ReturnType<HandlerManager['getHandlerId']>>;
 
-/**
- * @typedef UseDragAndDropReturn
- *
- * @type {[props: {handlerId: import('dnd-core').Identifier, isDragging: boolean, handleKeyDown: (event: import('react').KeyboardEvent<HTMLButtonElement>) => void, isActive: boolean}, objectRef: React.RefObject<HTMLElement>, dropRef: import('react-dnd').ConnectDropTarget, dragRef: import('react-dnd').ConnectDragSource, dragPreviewRef: import('react-dnd').ConnectDragPreview]}
- */
+type UseDragAndDropReturn = [
+  {
+    handlerId: Identifier;
+    isDragging: boolean;
+    handleKeyDown: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
+    isOverDropTarget: boolean;
+    direction: (typeof DIRECTIONS)[keyof typeof DIRECTIONS] | null;
+  },
+  objectRef: React.RefObject<HTMLElement>,
+  dropRef: ConnectDropTarget,
+  dragRef: ConnectDragSource,
+  dragPreviewRef: ConnectDragPreview
+];
+
+type UseDragAndDropFunction = (
+  active: boolean,
+  options: UseDragAndDropOptions
+) => UseDragAndDropReturn;
 
 /**
  * A utility hook abstracting the general drag and drop hooks from react-dnd.
  * Centralising the same behaviours and by default offering keyboard support.
- *
- * @type {(active: boolean, options: UseDragAndDropOptions) => UseDragAndDropReturn}
  */
-const useDragAndDrop = (
+const useDragAndDrop: UseDragAndDropFunction = (
   active,
   {
     type = 'STRAPI_DND',
@@ -54,7 +73,7 @@ const useDragAndDrop = (
     dropSensitivity = DROP_SENSITIVITY.REGULAR,
   }
 ) => {
-  const objectRef = useRef(null);
+  const objectRef = React.useRef(null);
 
   const [{ handlerId, isOver }, dropRef] = useDrop({
     accept: type,

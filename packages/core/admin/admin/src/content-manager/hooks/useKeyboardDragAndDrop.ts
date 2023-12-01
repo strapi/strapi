@@ -1,43 +1,42 @@
-import { useState } from 'react';
+import * as React from 'react';
 
-/**
- * @typedef UseKeyboardDragAndDropCallbacks
- *
- * @type {{
- *  onCancel?: (index: number) => void,
- *  onDropItem?: (currentIndex: number| Array<number>, newIndex: number| Array<number>) => void,
- *  onGrabItem?: (index: number) => void,
- *  onMoveItem?: (newIndex: number| Array<number>, currentIndex: number| Array<number>) => void,
- * }}
- */
+export type UseKeyboardDragAndDropCallbacks = {
+  onCancel?: (index: number | Array<number>) => void;
+  onDropItem?: (currentIndex: number | Array<number>, newIndex?: number | Array<number>) => void;
+  onGrabItem?: (index: number | Array<number>) => void;
+  onMoveItem?: (newIndex: number | Array<number>, currentIndex: number | Array<number>) => void;
+};
+
+type UseKeyboardDragAndDropFunction = (
+  active: boolean,
+  index: number | Array<number>,
+  callbacks: UseKeyboardDragAndDropCallbacks
+) => (event: React.KeyboardEvent<HTMLButtonElement>) => void;
 
 /**
  * Utility hook designed to implement keyboard accessibile drag and drop by
  * returning an onKeyDown handler to be passed to the drag icon button.
  *
  * @internal - You should use `useDragAndDrop` instead.
- *
- * @type {(active: boolean, index: number, callbacks: UseKeyboardDragAndDropCallbacks) => (event: React.KeyboardEvent<HTMLButtonElement>) => void}
- */
-export const useKeyboardDragAndDrop = (
+ * */
+
+export const useKeyboardDragAndDrop: UseKeyboardDragAndDropFunction = (
   active,
   index,
   { onCancel, onDropItem, onGrabItem, onMoveItem }
 ) => {
-  const [isSelected, setIsSelected] = useState(false);
-  /**
-   * @type {(movement: 'UP' | 'DOWN') => void})}
-   */
-  const handleMove = (movement) => {
+  const [isSelected, setIsSelected] = React.useState(false);
+
+  const handleMove = (movement: 'UP' | 'DOWN') => {
     if (!isSelected) {
       return;
     }
-
-    if (movement === 'UP') {
-      onMoveItem(index - 1, index);
-    } else if (movement === 'DOWN') {
-      onMoveItem(index + 1, index);
-    }
+    if (typeof index === 'number' && onMoveItem)
+      if (movement === 'UP') {
+        onMoveItem(index - 1, index);
+      } else if (movement === 'DOWN') {
+        onMoveItem(index + 1, index);
+      }
   };
 
   const handleDragClick = () => {
@@ -64,10 +63,7 @@ export const useKeyboardDragAndDrop = (
     }
   };
 
-  /**
-   * @type {React.KeyboardEventHandler<HTMLButtonElement>}
-   */
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
     if (!active) {
       return;
     }

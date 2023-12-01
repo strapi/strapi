@@ -11,11 +11,12 @@ import { baseHandleConvert } from '../utils/conversions';
 import { type Block } from '../utils/types';
 
 const listStyle = css`
-  margin-block-start: ${({ theme }) => theme.spaces[4]};
-  margin-block-end: ${({ theme }) => theme.spaces[4]};
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spaces[1]};
   margin-inline-start: ${({ theme }) => theme.spaces[0]};
   margin-inline-end: ${({ theme }) => theme.spaces[0]};
-  padding-inline-start: ${({ theme }) => theme.spaces[4]};
+  padding-inline-start: ${({ theme }) => theme.spaces[2]};
 
   ol,
   ul {
