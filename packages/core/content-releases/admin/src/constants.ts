@@ -1,4 +1,14 @@
-export const PERMISSIONS = {
+import { Permission } from '@strapi/helper-plugin';
+
+interface PermissionMap {
+  main: Permission[];
+  create: Permission[];
+  read: Permission[];
+  update: Permission[];
+  delete: Permission[];
+}
+
+export const PERMISSIONS: PermissionMap = {
   main: [
     {
       action: 'plugin::content-releases.read',
@@ -14,6 +24,18 @@ export const PERMISSIONS = {
   update: [
     {
       action: 'plugin::content-releases.update',
+      subject: null,
+    },
+  ],
+  read: [
+    {
+      action: 'plugin::content-releases.read',
+      subject: null,
+    },
+  ],
+  delete: [
+    {
+      action: 'plugin::content-releases.delete',
       subject: null,
     },
   ],
