@@ -11,7 +11,6 @@ import { getDeepRelationsCount } from './utils/count';
 import { sumDraftCounts } from './utils/draft';
 import { ALLOWED_WEBHOOK_EVENTS } from '../constants';
 
-const { ApplicationError } = errors;
 const { ENTRY_PUBLISH, ENTRY_UNPUBLISH } = ALLOWED_WEBHOOK_EVENTS;
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;

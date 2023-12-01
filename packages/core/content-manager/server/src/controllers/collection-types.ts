@@ -5,6 +5,9 @@ import { hasProhibitedCloningFields, excludeNotCreatableFields } from './utils/c
 
 const { ApplicationError } = errors;
 
+/**
+ * From a request object, validates and returns the locale and status of the document
+ */
 const getDocumentDimensions = (request: any) => {
   const { locale, status, ...rest } = request || {};
   // Sanitize locale and status
