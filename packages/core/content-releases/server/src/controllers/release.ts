@@ -8,6 +8,8 @@ import type {
   PublishRelease,
   GetRelease,
   Release,
+  GetContentTypeEntryReleases,
+  GetReleases,
 } from '../../../shared/contracts/releases';
 import type { UserInfo } from '../../../shared/types';
 import { getAllowedContentTypes, getService } from '../utils';
@@ -37,20 +39,31 @@ const releaseController = {
     });
 
     await permissionsManager.validateQuery(ctx.query);
-    const query = await permissionsManager.sanitizeQuery(ctx.query);
 
-    const isPaginatedRequest =
-      query && Object.keys(query).some((key) => ['page', 'pageSize'].includes(key));
+    const releaseService = getService('release', { strapi });
 
-    if (isPaginatedRequest) {
-      const { results, pagination } = await getService('release', { strapi }).findPage(query);
-      // Format the data object
-      const data = formatDataObject(results);
+    // Handle requests for releases filtered by content type entry
+    const isFindManyForContentTypeEntry = Boolean(ctx.query?.contentTypeUid && ctx.query?.entryId);
+    if (isFindManyForContentTypeEntry) {
+      const query: GetContentTypeEntryReleases.Request['query'] =
+        await permissionsManager.sanitizeQuery(ctx.query);
 
-      ctx.body = { data, meta: { pagination } };
-    } else {
-      const results = await getService('release', { strapi }).findMany(query);
+      const contentTypeUid = query.contentTypeUid;
+      const entryId = query.entryId;
+      // Parse the string value or fallback to a default
+      const hasEntryAttached: GetContentTypeEntryReleases.Request['query']['hasEntryAttached'] =
+        typeof query.hasEntryAttached === 'string' ? JSON.parse(query.hasEntryAttached) : true;
+
+      const results = await releaseService.findManyForContentTypeEntry(contentTypeUid, entryId, {
+        hasEntryAttached,
+      });
+
       ctx.body = { data: formatDataObject(results) };
+    } else {
+      const query: GetReleases.Request['query'] = await permissionsManager.sanitizeQuery(ctx.query);
+      const { results, pagination } = await releaseService.findPage(query);
+
+      ctx.body = { data: formatDataObject(results), meta: { pagination } };
     }
   },
 

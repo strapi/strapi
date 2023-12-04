@@ -42,6 +42,27 @@ export declare namespace GetReleases {
 }
 
 /**
+ * GET /content-releases/ - Get all releases for a given entry
+ */
+export declare namespace GetContentTypeEntryReleases {
+  export interface Request {
+    state: {
+      userAbility: {};
+    };
+    query: {
+      contentTypeUid: ReleaseAction['contentType'];
+      entryId: ReleaseAction['entry']['id'];
+      hasEntryAttached?: boolean;
+    };
+  }
+
+  export interface Response {
+    data: ReleaseDataResponse[];
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
  * GET /content-releases/:id - Get a single release
  */
 export declare namespace GetRelease {
