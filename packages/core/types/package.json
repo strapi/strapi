@@ -64,7 +64,7 @@
     "commander": "11.1.0",
     "eslint-config-custom": "4.15.5",
     "tsconfig": "4.15.5",
-    "typescript": "5.2.2",
+    "typescript": "5.3.2",
     "undici": "5.27.2"
   },
   "engines": {

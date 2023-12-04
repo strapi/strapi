@@ -8686,7 +8686,7 @@ __metadata:
     slate-react: "npm:0.98.3"
     style-loader: "npm:3.3.1"
     styled-components: "npm:5.3.3"
-    typescript: "npm:5.2.2"
+    typescript: "npm:5.3.2"
     vite: "npm:4.4.9"
     webpack: "npm:^5.88.1"
     webpack-bundle-analyzer: "npm:^4.9.0"
@@ -8739,7 +8739,7 @@ __metadata:
     stream-json: "npm:1.8.0"
     tar: "npm:6.1.13"
     tar-stream: "npm:2.2.0"
-    typescript: "npm:5.2.2"
+    typescript: "npm:5.3.2"
     ws: "npm:8.13.0"
   peerDependencies:
     "@strapi/strapi": ^4.14.4
@@ -8897,7 +8897,7 @@ __metadata:
     rimraf: "npm:3.0.2"
     storybook: "npm:7.5.3"
     styled-components: "npm:5.3.3"
-    typescript: "npm:5.2.2"
+    typescript: "npm:5.3.2"
     vite: "npm:4.4.9"
     yup: "npm:0.32.9"
   peerDependencies:
@@ -8961,7 +8961,7 @@ __metadata:
     prompts: "npm:2.4.2"
     rimraf: "npm:3.0.2"
     rxjs: "npm:7.8.1"
-    typescript: "npm:5.2.2"
+    typescript: "npm:5.3.2"
     vite: "npm:4.4.9"
     yup: "npm:0.32.9"
   bin:
@@ -9031,7 +9031,7 @@ __metadata:
     react-intl: "npm:6.4.1"
     react-router-dom: "npm:5.3.4"
     styled-components: "npm:5.3.3"
-    typescript: "npm:5.2.2"
+    typescript: "npm:5.3.2"
   peerDependencies:
     "@strapi/strapi": ^4.4.0
     react: ^17.0.0 || ^18.0.0
@@ -9210,7 +9210,7 @@ __metadata:
     react-router-dom: "npm:5.3.4"
     styled-components: "npm:5.3.3"
     tsconfig: "npm:4.15.5"
-    typescript: "npm:5.2.2"
+    typescript: "npm:5.3.2"
   peerDependencies:
     "@strapi/strapi": ^4.0.0
     react: ^17.0.0 || ^18.0.0
@@ -9566,7 +9566,7 @@ __metadata:
     statuses: "npm:2.0.1"
     supertest: "npm:6.3.3"
     tsconfig: "npm:4.15.5"
-    typescript: "npm:5.2.2"
+    typescript: "npm:5.3.2"
     undici: "npm:5.27.2"
     yup: "npm:0.32.9"
   bin:
@@ -9606,7 +9606,7 @@ __metadata:
     koa: "npm:2.13.4"
     node-schedule: "npm:2.1.0"
     tsconfig: "npm:4.15.5"
-    typescript: "npm:5.2.2"
+    typescript: "npm:5.3.2"
     undici: "npm:5.27.2"
   languageName: unknown
   linkType: soft
@@ -9620,7 +9620,7 @@ __metadata:
     fs-extra: "npm:10.0.0"
     lodash: "npm:4.17.21"
     prettier: "npm:2.8.4"
-    typescript: "npm:5.2.2"
+    typescript: "npm:5.3.2"
   languageName: unknown
   linkType: soft
 
@@ -29549,7 +29549,7 @@ __metadata:
     rimraf: "npm:3.0.2"
     supertest: "npm:6.3.3"
     ts-jest: "npm:29.1.0"
-    typescript: "npm:5.2.2"
+    typescript: "npm:5.3.2"
     yargs: "npm:17.7.2"
   languageName: unknown
   linkType: soft
@@ -31011,6 +31011,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"typescript@npm:5.3.2":
+  version: 5.3.2
+  resolution: "typescript@npm:5.3.2"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 415e5fb6611f5713e460bad48039f00bcfdbde53a2f911727862d5aa9c5d5edd250059a419df382d8f031709e15a169c41eb62b6a401da5eec7ac0f4e359d6ac
+  languageName: node
+  linkType: hard
+
 "typescript@npm:^3 || ^4":
   version: 4.9.5
   resolution: "typescript@npm:4.9.5"
@@ -31028,6 +31038,16 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: f79cc2ba802c94c2b78dbb00d767a10adb67368ae764709737dc277273ec148aa4558033a03ce901406b35fddf4eac46dabc94a1e1d12d2587e2b9cfe5707b4a
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@npm%3A5.3.2#optional!builtin<compat/typescript>":
+  version: 5.3.2
+  resolution: "typescript@patch:typescript@npm%3A5.3.2#optional!builtin<compat/typescript>::version=5.3.2&hash=29ae49"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 43c3346528a1b410b9ee7f218d709ce8d1336eb8e47b0f8bb43954f98ed43fd11e35de398c9a5f4a085b6889c89782362789b00db7aac862bd09d083058a01a2
   languageName: node
   linkType: hard
 

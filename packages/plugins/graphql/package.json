@@ -80,7 +80,7 @@
     "react-router-dom": "5.3.4",
     "styled-components": "5.3.3",
     "tsconfig": "4.15.5",
-    "typescript": "5.2.2"
+    "typescript": "5.3.2"
   },
   "peerDependencies": {
     "@strapi/strapi": "^4.0.0",
