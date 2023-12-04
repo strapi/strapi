@@ -1,5 +1,5 @@
 import { omit } from 'lodash/fp';
-import { mapAsync, errors, contentTypes, sanitize } from '@strapi/utils';
+import { mapAsync, contentTypes, sanitize } from '@strapi/utils';
 import type { LoadedStrapi as Strapi, Common, EntityService, Documents } from '@strapi/types';
 import { getService } from '../utils';
 import {
@@ -136,16 +136,16 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     const populate = await buildDeepPopulate(uid);
     const params = { ...opts, status: 'draft', populate };
 
-    const entity = await strapi
+    const document = await strapi
       .documents(uid)
       .create(params)
       .then((entity: Entity) => this.mapEntity(entity, uid));
 
     if (isWebhooksPopulateRelationsEnabled()) {
-      return getDeepRelationsCount(entity, uid);
+      return getDeepRelationsCount(document, uid);
     }
 
-    return entity;
+    return document;
   },
 
   async update(
@@ -202,8 +202,15 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   /**
    *  Check if a document exists
    */
-  async exists(id: string, uid: Common.UID.ContentType) {
-    const count = await strapi.db.query(uid).count({ where: { documentId: id } });
+  async exists(uid: Common.UID.ContentType, id?: string) {
+    // Collection type
+    if (id) {
+      const count = await strapi.db.query(uid).count({ where: { documentId: id } });
+      return count > 0;
+    }
+
+    // Single type
+    const count = await strapi.db.query(uid).count();
     return count > 0;
   },
 

@@ -178,7 +178,7 @@ export default {
         locale,
         status: 'draft',
       }),
-      entityManager.exists(id, model),
+      entityManager.exists(model, id),
     ]);
 
     if (!documentExists) {
