@@ -38,10 +38,4 @@ export const ACTIONS = [
     uid: 'create-action',
     pluginName: 'content-releases',
   },
-  {
-    section: 'plugins',
-    displayName: 'Update an action in a release',
-    uid: 'update-action',
-    pluginName: 'content-releases',
-  },
 ];

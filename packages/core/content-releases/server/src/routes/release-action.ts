@@ -43,7 +43,7 @@ export default {
           {
             name: 'admin::hasPermissions',
             config: {
-              actions: ['plugin::content-releases.update-action'],
+              actions: ['plugin::content-releases.update'],
             },
           },
         ],
