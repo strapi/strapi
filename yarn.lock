@@ -8728,7 +8728,7 @@ __metadata:
     commander: "npm:8.3.0"
     fs-extra: "npm:10.0.0"
     inquirer: "npm:8.2.5"
-    knex: "npm:2.5.0"
+    knex: "npm:3.0.1"
     koa: "npm:2.13.4"
     lodash: "npm:4.17.21"
     ora: "npm:5.4.1"
@@ -8756,7 +8756,7 @@ __metadata:
     debug: "npm:4.3.4"
     eslint-config-custom: "npm:4.15.5"
     fs-extra: "npm:10.0.0"
-    knex: "npm:2.5.0"
+    knex: "npm:3.0.1"
     lodash: "npm:4.17.21"
     semver: "npm:7.5.4"
     tsconfig: "npm:4.15.5"
@@ -22081,9 +22081,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"knex@npm:2.5.0":
-  version: 2.5.0
-  resolution: "knex@npm:2.5.0"
+"knex@npm:3.0.1":
+  version: 3.0.1
+  resolution: "knex@npm:3.0.1"
   dependencies:
     colorette: "npm:2.0.19"
     commander: "npm:^10.0.0"
@@ -22116,7 +22116,7 @@ __metadata:
       optional: true
   bin:
     knex: bin/cli.js
-  checksum: 94b83d8dfda7cc2e98fc9b6b7636fe4df880f9edf6fa768f4de841a15e9e815bf156566772c2bf798ceb3295ff5d41a483f31ea46c02e8a581c035927b6912c3
+  checksum: 732dea594cf2108d98091dde319476140538235a4ef57c98b1e827c2f97adb50898ab873e2399b3b6a26275e8318a80294fdd2c9a2d4d13cd262453ee8e7f482
   languageName: node
   linkType: hard
 
