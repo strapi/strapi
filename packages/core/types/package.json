@@ -1,6 +1,6 @@
 {
   "name": "@strapi/types",
-  "version": "4.15.4",
+  "version": "4.15.5",
   "description": "Shared typescript types for Strapi internal use",
   "keywords": [
     "strapi"
@@ -47,23 +47,23 @@
     "@casl/ability": "6.5.0",
     "@koa/cors": "3.4.3",
     "@koa/router": "10.1.1",
-    "@strapi/database": "4.15.4",
-    "@strapi/logger": "4.15.4",
-    "@strapi/permissions": "4.15.4",
-    "@strapi/utils": "4.15.4",
+    "@strapi/database": "4.15.5",
+    "@strapi/logger": "4.15.5",
+    "@strapi/permissions": "4.15.5",
+    "@strapi/utils": "4.15.5",
     "commander": "8.3.0",
     "koa": "2.13.4",
     "node-schedule": "2.1.0"
   },
   "devDependencies": {
-    "@strapi/pack-up": "4.15.4",
+    "@strapi/pack-up": "4.15.5",
     "@strapi/ts-zen": "^0.2.0",
     "@types/jest": "29.5.2",
     "@types/koa": "2.13.4",
     "@types/koa__router": "12.0.0",
     "@types/node-schedule": "2.1.0",
-    "eslint-config-custom": "4.15.4",
-    "tsconfig": "4.15.4",
+    "eslint-config-custom": "4.15.5",
+    "tsconfig": "4.15.5",
     "typescript": "5.3.2",
     "undici": "5.27.2"
   },

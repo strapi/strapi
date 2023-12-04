@@ -28,7 +28,7 @@ describe('Profile page', () => {
     jest.clearAllMocks();
   });
 
-  it('renders and show the Interface Language section', async () => {
+  it('renders and shows the Interface Language section', async () => {
     const { getByText } = render(<ProfilePage />);
     await waitFor(() => {
       expect(getByText('Interface language')).toBeInTheDocument();
@@ -54,10 +54,9 @@ describe('Profile page', () => {
         name: 'Change password',
       })
     ).toBeInTheDocument();
-
-    expect(getByLabelText('Password')).toBeInTheDocument();
-
-    expect(getByLabelText('Password confirmation')).toBeInTheDocument();
+    expect(getByLabelText(/current password/i)).toBeInTheDocument();
+    expect(getByLabelText(/^password$/i)).toBeInTheDocument();
+    expect(getByLabelText(/confirm password/i)).toBeInTheDocument();
   });
 
   it('should not display the change password section and all the fields if the user role is Locked', async () => {
@@ -84,9 +83,8 @@ describe('Profile page', () => {
     });
 
     expect(changePasswordHeading).not.toBeInTheDocument();
-
-    expect(queryByLabelText('Password')).not.toBeInTheDocument();
-
-    expect(queryByLabelText('Password confirmation')).not.toBeInTheDocument();
+    expect(queryByLabelText(/current password/i)).not.toBeInTheDocument();
+    expect(queryByLabelText(/^password$/)).not.toBeInTheDocument();
+    expect(queryByLabelText(/confirm password/i)).not.toBeInTheDocument();
   });
 });
