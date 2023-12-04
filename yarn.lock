@@ -8739,7 +8739,7 @@ __metadata:
     stream-json: "npm:1.8.0"
     tar: "npm:6.1.13"
     tar-stream: "npm:2.2.0"
-    typescript: "npm:5.2.2"
+    typescript: "npm:5.3.2"
     ws: "npm:8.13.0"
   peerDependencies:
     "@strapi/strapi": ^4.14.4
@@ -9031,7 +9031,7 @@ __metadata:
     react-intl: "npm:6.4.1"
     react-router-dom: "npm:5.3.4"
     styled-components: "npm:5.3.3"
-    typescript: "npm:5.2.2"
+    typescript: "npm:5.3.2"
   peerDependencies:
     "@strapi/strapi": ^4.4.0
     react: ^17.0.0 || ^18.0.0
@@ -9210,7 +9210,7 @@ __metadata:
     react-router-dom: "npm:5.3.4"
     styled-components: "npm:5.3.3"
     tsconfig: "npm:4.15.5"
-    typescript: "npm:5.2.2"
+    typescript: "npm:5.3.2"
   peerDependencies:
     "@strapi/strapi": ^4.0.0
     react: ^17.0.0 || ^18.0.0
@@ -9620,7 +9620,7 @@ __metadata:
     fs-extra: "npm:10.0.0"
     lodash: "npm:4.17.21"
     prettier: "npm:2.8.4"
-    typescript: "npm:5.2.2"
+    typescript: "npm:5.3.2"
   languageName: unknown
   linkType: soft
 
