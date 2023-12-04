@@ -17,7 +17,7 @@
   "header.actions.edit": "Edit",
   "header.actions.delete": "Delete",
   "header.actions.created": "Created",
-  "header.actions.created.description": "{number, plural, =0 {# days} one {# day} other {# days}} ago by {user}",
+  "header.actions.created.description": "{number, plural, =0 {# days} one {# day} other {# days}} ago by {createdBy}",
   "modal.release-created-notification-success": "Release created",
   "modal.release-updated-notification-success": "Release updated",
   "modal.add-release-title": "New Release",

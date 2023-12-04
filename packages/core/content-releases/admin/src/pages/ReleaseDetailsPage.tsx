@@ -18,7 +18,7 @@ import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { AddEditReleaseDialog, FormValues } from '../components/AddEditReleaseDialog';
+import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
 import { isAxiosError } from '../services/axios';
 import { useUpdateReleaseMutation } from '../services/release';
@@ -68,12 +68,12 @@ const ReleaseDetailsPage = () => {
     setIsPopoverVisible((prev) => !prev);
   };
 
-  const toggleEditReleaseDialog = () => {
+  const toggleEditReleaseModal = () => {
     setEditReleaseDialogIsShown((prev) => !prev);
   };
 
-  const openAddEditReleaseDialog = () => {
-    toggleEditReleaseDialog();
+  const openReleaseModal = () => {
+    toggleEditReleaseModal();
     handleTogglePopover();
   };
 
@@ -106,7 +106,7 @@ const ReleaseDetailsPage = () => {
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
-    toggleEditReleaseDialog();
+    toggleEditReleaseModal();
   };
 
   return (
@@ -158,8 +158,8 @@ const ReleaseDetailsPage = () => {
                       alignItems="center"
                       gap={2}
                       as="button"
-                      borderRadius="4px"
-                      onClick={openAddEditReleaseDialog}
+                      hasRadius
+                      onClick={openReleaseModal}
                     >
                       <PencilIcon />
                       <Typography ellipsis>
@@ -179,7 +179,7 @@ const ReleaseDetailsPage = () => {
                     alignItems="center"
                     gap={2}
                     as="button"
-                    borderRadius="4px"
+                    hasRadius
                   >
                     <TrashIcon />
                     <Typography ellipsis textColor="danger600">
@@ -241,8 +241,8 @@ const ReleaseDetailsPage = () => {
         />
       </ContentLayout>
       {editReleaseDialogIsShown && (
-        <AddEditReleaseDialog
-          handleClose={toggleEditReleaseDialog}
+        <ReleaseModal
+          handleClose={toggleEditReleaseModal}
           handleSubmit={handleEditRelease}
           isLoading={isLoading}
           initialValues={{ name: title }}

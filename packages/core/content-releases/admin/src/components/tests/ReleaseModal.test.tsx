@@ -1,13 +1,13 @@
 import { within } from '@testing-library/react';
 import { render, screen } from '@tests/utils';
 
-import { AddEditReleaseDialog } from '../AddEditReleaseDialog';
+import { ReleaseModal } from '../ReleaseModal';
 
-describe('AddEditReleaseDialog', () => {
+describe('ReleaseModal', () => {
   it('renders correctly the dialog content on create', async () => {
     const handleCloseMocked = jest.fn();
     const { user } = render(
-      <AddEditReleaseDialog
+      <ReleaseModal
         handleClose={handleCloseMocked}
         handleSubmit={jest.fn()}
         initialValues={{ name: '' }}
@@ -36,7 +36,7 @@ describe('AddEditReleaseDialog', () => {
   it('renders correctly the dialog content on update', async () => {
     const handleCloseMocked = jest.fn();
     render(
-      <AddEditReleaseDialog
+      <ReleaseModal
         handleClose={handleCloseMocked}
         handleSubmit={jest.fn()}
         initialValues={{ name: 'title' }}

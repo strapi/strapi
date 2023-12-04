@@ -34,7 +34,7 @@ import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { GetReleases } from '../../../shared/contracts/releases';
-import { AddEditReleaseDialog, FormValues } from '../components/AddEditReleaseDialog';
+import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
 import { isAxiosError } from '../services/axios';
 import {
@@ -188,13 +188,13 @@ const ReleasesPage = () => {
 
   const { isLoading, isSuccess, isError } = response;
 
-  const toggleAddReleaseDialog = () => {
+  const toggleAddReleaseModal = () => {
     setAddReleaseDialogIsShown((prev) => !prev);
   };
 
   if (isLoading) {
     return (
-      <ReleasesLayout onClickAddRelease={toggleAddReleaseDialog} isLoading>
+      <ReleasesLayout onClickAddRelease={toggleAddReleaseModal} isLoading>
         <ContentLayout>
           <LoadingIndicatorPage />
         </ContentLayout>
@@ -250,7 +250,7 @@ const ReleasesPage = () => {
   };
 
   return (
-    <ReleasesLayout onClickAddRelease={toggleAddReleaseDialog} totalReleases={totalReleases}>
+    <ReleasesLayout onClickAddRelease={toggleAddReleaseModal} totalReleases={totalReleases}>
       <ContentLayout>
         <>
           <TabGroup
@@ -313,8 +313,8 @@ const ReleasesPage = () => {
         </>
       </ContentLayout>
       {addReleaseDialogIsShown && (
-        <AddEditReleaseDialog
-          handleClose={toggleAddReleaseDialog}
+        <ReleaseModal
+          handleClose={toggleAddReleaseModal}
           handleSubmit={handleAddRelease}
           isLoading={isSubmittingForm}
           initialValues={INITIAL_FORM_VALUES}

@@ -16,19 +16,19 @@ export interface FormValues {
   name: string;
 }
 
-interface AddEditReleaseDialogProps {
+interface ReleaseModalProps {
   handleClose: () => void;
   handleSubmit: (values: FormValues) => void;
   isLoading?: boolean;
   initialValues: FormValues;
 }
 
-export const AddEditReleaseDialog = ({
+export const ReleaseModal = ({
   handleClose,
   handleSubmit,
   initialValues,
   isLoading = false,
-}: AddEditReleaseDialogProps) => {
+}: ReleaseModalProps) => {
   const { formatMessage } = useIntl();
 
   return (
