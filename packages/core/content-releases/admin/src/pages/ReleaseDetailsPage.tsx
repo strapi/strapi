@@ -51,7 +51,7 @@ const ReleaseInfoWrapper = styled(Flex)`
 
 const ReleaseDetailsPage = () => {
   const { releaseId } = useParams<{ releaseId: string }>();
-  const [releaseDialogShown, setReleaseDialogShown] = React.useState(false);
+  const [releaseModalShown, setReleaseModalShown] = React.useState(false);
   const [isPopoverVisible, setIsPopoverVisible] = React.useState(false);
   const moreButtonRef = React.useRef<HTMLButtonElement>(null!);
   const { formatMessage } = useIntl();
@@ -69,7 +69,7 @@ const ReleaseDetailsPage = () => {
   };
 
   const toggleEditReleaseModal = () => {
-    setReleaseDialogShown((prev) => !prev);
+    setReleaseModalShown((prev) => !prev);
   };
 
   const openReleaseModal = () => {
@@ -240,7 +240,7 @@ const ReleaseDetailsPage = () => {
           icon={<EmptyDocuments width="10rem" />}
         />
       </ContentLayout>
-      {releaseDialogShown && (
+      {releaseModalShown && (
         <ReleaseModal
           handleClose={toggleEditReleaseModal}
           handleSubmit={handleEditRelease}
