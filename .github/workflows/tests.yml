@@ -135,7 +135,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [18]
+        node: [20]
     steps:
       - uses: actions/checkout@v4
         with:
