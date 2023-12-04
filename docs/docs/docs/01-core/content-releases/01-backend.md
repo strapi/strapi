@@ -100,6 +100,17 @@ packages/core/content-releases/server/src/routes/release.ts
   }
   ```
 
+**Update a release action**
+
+- method: `PUT`
+- endpoint: `/content-releases/:releaseId/actions/:actionId`
+- body:
+  ```ts
+  {
+    type: 'publish' | 'unpublish';
+  }
+  ```
+
 ## Controllers
 
 ### Release
