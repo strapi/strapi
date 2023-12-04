@@ -5,7 +5,7 @@ import { Drag } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Editor, Range, Transforms, Element } from 'slate';
 import { ReactEditor, type RenderElementProps, type RenderLeafProps, Editable } from 'slate-react';
-import styled from 'styled-components';
+import styled, { CSSProperties } from 'styled-components';
 
 import { useDragAndDrop, DIRECTIONS } from '../../hooks/useDragAndDrop';
 // @ts-expect-error TODO convert to ts
@@ -49,18 +49,17 @@ const DropPlaceholder = styled(Box)<{
 `}
 `;
 
-const DragItem = styled(Flex)`
+const DragItem = styled(Flex)<{ dragVisibility: CSSProperties['visibility'] }>`
   // Style each block rendered using renderElement()
   & > [data-slate-node='element'] {
     width: 100%;
     opacity: inherit;
   }
-  &:hover {
-    // Set the visibility of drag button
-    [role='button'] {
-      visibility: visible;
-      opacity: inherit;
-    }
+
+  // Set the visibility of drag button
+  [role='button'] {
+    visibility: ${(props) => props.dragVisibility};
+    opacity: inherit;
   }
   &[aria-disabled='true'] {
     user-drag: none;
@@ -115,6 +114,7 @@ const DragAndDropElement = ({
 }: DragAndDropElementProps) => {
   const { editor, disabled, name, setLiveText } = useBlocksEditorContext('drag-and-drop');
   const { formatMessage } = useIntl();
+  const [dragVisibility, setDragVisibility] = React.useState<CSSProperties['visibility']>('hidden');
 
   const handleMoveBlock = React.useCallback(
     (newIndex: Array<number>, currentIndex: Array<number>) => {
@@ -185,38 +185,39 @@ const DragAndDropElement = ({
     [editor, formatMessage, name, setLiveText]
   );
 
-  const [
-    { handlerId, isDragging, handleKeyDown: handleDragHandleKeyDown, isOverDropTarget, direction },
-    blockRef,
-    dropRef,
-    dragRef,
-  ] = useDragAndDrop(!disabled, {
-    type: `${ItemTypes.BLOCKS}_${name}`,
-    index,
-    item: {
-      displayedValue: children,
-    },
-    onDropItem(currentIndex: number | Array<number>, newIndex?: number | Array<number>) {
-      if (Array.isArray(currentIndex) && newIndex && Array.isArray(newIndex))
-        handleMoveBlock(newIndex, currentIndex);
-    },
-  });
+  const [{ handlerId, isDragging, isOverDropTarget, direction }, blockRef, dropRef, dragRef] =
+    useDragAndDrop(!disabled, {
+      type: `${ItemTypes.BLOCKS}_${name}`,
+      index,
+      item: {
+        displayedValue: children,
+      },
+      onDropItem(currentIndex: number | Array<number>, newIndex?: number | Array<number>) {
+        if (Array.isArray(currentIndex) && newIndex && Array.isArray(newIndex))
+          handleMoveBlock(newIndex, currentIndex);
+      },
+    });
 
   const composedBoxRefs = composeRefs(blockRef, dropRef);
 
+  // Set Drag direction before loosing state while dragging
   React.useEffect(() => {
     if (direction) {
       setDragDirection(direction);
     }
   }, [direction, setDragDirection]);
 
+  // On selection change hide drag handle
+  React.useEffect(() => {
+    setDragVisibility('hidden');
+  }, [editor.selection]);
+
   // To prevent applying opacity to the original item being dragged, display a cloned element without opacity.
   const CloneDragItem = () => (
-    <DragItem gap={2} paddingLeft={2}>
+    <DragItem gap={2} paddingLeft={2} alignItems="start" dragVisibility={dragVisibility}>
       <DragIconButton
         forwardedAs="div"
         role="button"
-        alignItems="start"
         aria-label={formatMessage({
           id: getTrad('components.DragHandle-label'),
           defaultMessage: 'Drag',
@@ -261,7 +262,11 @@ const DragAndDropElement = ({
             const currentTarget = event.currentTarget as HTMLElement;
             currentTarget.style.opacity = '1';
           }}
+          onMouseMove={() => setDragVisibility('visible')}
+          onSelect={() => setDragVisibility('visible')}
+          onMouseLeave={() => setDragVisibility('hidden')}
           aria-disabled={disabled}
+          dragVisibility={dragVisibility}
         >
           <DragIconButton
             forwardedAs="div"
