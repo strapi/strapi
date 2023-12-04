@@ -24,7 +24,7 @@ const strapi = {
       },
     })),
   })),
-};
+} as any;
 
 describe('field sizes service', () => {
   it('should return the correct field sizes', () => {
@@ -71,7 +71,7 @@ describe('field sizes service', () => {
     const fieldSizes = getAllFieldSizes();
 
     expect(fieldSizes).not.toHaveProperty('plugin::mycustomfields.color');
-    expect(fieldSizes['plugin::mycustomfields.smallColor'].default).toBe(4);
-    expect(fieldSizes['plugin::mycustomfields.smallColor'].isResizable).toBe(false);
+    expect(fieldSizes['plugin::mycustomfields.smallColor']?.default).toBe(4);
+    expect(fieldSizes['plugin::mycustomfields.smallColor']?.isResizable).toBe(false);
   });
 });

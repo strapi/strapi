@@ -15,8 +15,7 @@ import cmAppReducer from '../../content-manager/pages/App/reducer';
 import editViewLayoutManagerReducer from '../../content-manager/pages/EditViewLayoutManager/reducer';
 // @ts-expect-error no types, yet.
 import listViewReducer from '../../content-manager/pages/ListView/reducer';
-// @ts-expect-error no types, yet.
-import editViewCrudReducer from '../../content-manager/sharedReducers/crudReducer/reducer';
+import { reducer as crudReducer } from '../../content-manager/sharedReducers/crudReducer/reducer';
 import { reducer as appReducer, AppState } from '../../reducer';
 
 /**
@@ -29,7 +28,7 @@ const staticReducers = {
   'content-manager_listView': listViewReducer,
   'content-manager_rbacManager': rbacManagerReducer,
   'content-manager_editViewLayoutManager': editViewLayoutManagerReducer,
-  'content-manager_editViewCrudReducer': editViewCrudReducer,
+  'content-manager_editViewCrudReducer': crudReducer,
 } as const;
 
 const injectReducerStoreEnhancer: (appReducers: Record<string, Reducer>) => StoreEnhancer =

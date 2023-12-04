@@ -1,23 +1,26 @@
 import { errors } from '@strapi/utils';
+import { LoadedStrapi as Strapi, CustomFields } from '@strapi/types';
 
 const { ApplicationError } = errors;
 
-const needsFullSize = {
+type FieldSize = CustomFields.CustomFieldServerOptions['inputSize'];
+
+const needsFullSize: FieldSize = {
   default: 12,
   isResizable: false,
 };
 
-const smallSize = {
+const smallSize: FieldSize = {
   default: 4,
   isResizable: true,
 };
 
-const defaultSize = {
+const defaultSize: FieldSize = {
   default: 6,
   isResizable: true,
 };
 
-const fieldSizes: any = {
+const fieldSizes: Record<string, FieldSize> = {
   // Full row and not resizable
   dynamiczone: needsFullSize,
   component: needsFullSize,
@@ -47,17 +50,17 @@ const fieldSizes: any = {
   uid: defaultSize,
 };
 
-const createFieldSizesService = ({ strapi }: any) => {
+const createFieldSizesService = ({ strapi }: { strapi: Strapi }) => {
   const fieldSizesService = {
     getAllFieldSizes() {
       return fieldSizes;
     },
 
-    hasFieldSize(type: any) {
+    hasFieldSize(type: string) {
       return !!fieldSizes[type];
     },
 
-    getFieldSize(type?: any) {
+    getFieldSize(type?: string) {
       if (!type) {
         throw new ApplicationError('The type is required');
       }
@@ -70,7 +73,7 @@ const createFieldSizesService = ({ strapi }: any) => {
       return fieldSize;
     },
 
-    setFieldSize(type: any, size: any) {
+    setFieldSize(type: string, size: FieldSize) {
       if (!type) {
         throw new ApplicationError('The type is required');
       }
@@ -87,7 +90,8 @@ const createFieldSizesService = ({ strapi }: any) => {
       const customFields = strapi.get('custom-fields').getAll();
 
       // If they have a custom field size, register it
-      Object.entries(customFields).forEach(([uid, customField]: any) => {
+      // TODO types can be inferred when customFields is typed
+      Object.entries(customFields).forEach(([uid, customField]: [string, any]) => {
         if (customField.inputSize) {
           fieldSizesService.setFieldSize(uid, customField.inputSize);
         }

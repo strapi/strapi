@@ -8,6 +8,7 @@ describe('i18n | middlewares | extendCTBAttributeInitialDataMiddleware', () => {
 
     const next = jest.fn();
 
+    // @ts-expect-error – mocked store
     middleware({ getState })(next)(action);
 
     expect(next).toBeCalledWith(action);
@@ -20,6 +21,7 @@ describe('i18n | middlewares | extendCTBAttributeInitialDataMiddleware', () => {
 
     const next = jest.fn();
 
+    // @ts-expect-error – mocked store
     middleware({ getState })(next)(action);
 
     expect(next).toBeCalledWith(action);
@@ -36,6 +38,7 @@ describe('i18n | middlewares | extendCTBAttributeInitialDataMiddleware', () => {
 
       const next = jest.fn();
 
+      // @ts-expect-error – mocked store
       middleware({ getState })(next)(action);
 
       expect(next).toBeCalledWith(action);
@@ -58,6 +61,7 @@ describe('i18n | middlewares | extendCTBAttributeInitialDataMiddleware', () => {
 
       const next = jest.fn();
 
+      // @ts-expect-error – mocked store
       middleware({ getState })(next)(action);
 
       expect(next).toBeCalledWith(action);
@@ -76,6 +80,7 @@ describe('i18n | middlewares | extendCTBAttributeInitialDataMiddleware', () => {
 
       const next = jest.fn();
 
+      // @ts-expect-error – mocked store
       middleware({ getState })(next)(action);
 
       expect(next).toBeCalledWith(action);
@@ -100,6 +105,7 @@ describe('i18n | middlewares | extendCTBAttributeInitialDataMiddleware', () => {
 
     const next = jest.fn();
 
+    // @ts-expect-error – mocked store
     middleware({ getState })(next)(action);
 
     expect(next).toBeCalledWith({
@@ -126,6 +132,7 @@ describe('i18n | middlewares | extendCTBAttributeInitialDataMiddleware', () => {
 
     const next = jest.fn();
 
+    // @ts-expect-error – mocked store
     middleware({ getState })(next)(action);
 
     expect(next).toBeCalledWith({
