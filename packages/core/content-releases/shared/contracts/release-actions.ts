@@ -66,7 +66,8 @@ export declare namespace GetReleaseActions {
 export declare namespace UpdateReleaseAction {
   export interface Request {
     params: {
-      actionId: ReleaseAction['id'];
+      actionId: ReleaseAction['id']
+      releaseId: ReleaseAction['id'];
     };
     body: {
       type: ReleaseAction['type'];

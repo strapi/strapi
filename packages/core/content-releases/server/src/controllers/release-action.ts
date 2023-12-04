@@ -100,12 +100,13 @@ const releaseActionController = {
   },
   async update(ctx: Koa.Context) {
     const actionId: UpdateReleaseAction.Request['params']['actionId'] = ctx.params.actionId;
+    const releaseId: UpdateReleaseAction.Request['params']['releaseId'] = ctx.params.releaseId;
     const releaseActionUpdateArgs: UpdateReleaseAction.Request['body'] = ctx.request.body;
 
     await validateReleaseActionUpdateSchema(releaseActionUpdateArgs);
 
     const releaseService = getService('release', { strapi });
-    const updatedAction = await releaseService.updateAction(actionId, releaseActionUpdateArgs);
+    const updatedAction = await releaseService.updateAction(actionId, releaseId, releaseActionUpdateArgs);
 
     ctx.body = {
       data: updatedAction,
