@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Flex, IconButton, IconButtonProps } from '@strapi/design-system';
+import { Box, Flex, IconButton } from '@strapi/design-system';
 import { Drag } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Editor, Range, Transforms, Element } from 'slate';
@@ -57,7 +57,7 @@ const DragItem = styled(Flex)`
   }
   &:hover {
     // Set the visibility of drag button
-    & > span > [role='button'] {
+    [role='button'] {
       visibility: visible;
       opacity: inherit;
     }
@@ -67,7 +67,7 @@ const DragItem = styled(Flex)`
   }
 `;
 
-const DragIconButton = styled(IconButton)<IconButtonProps>`
+const DragIconButton = styled(IconButton)`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -217,7 +217,7 @@ const DragAndDropElement = ({
         forwardedAs="div"
         role="button"
         alignItems="start"
-        label={formatMessage({
+        aria-label={formatMessage({
           id: getTrad('components.DragHandle-label'),
           defaultMessage: 'Drag',
         })}
@@ -267,12 +267,11 @@ const DragAndDropElement = ({
             forwardedAs="div"
             role="button"
             tabIndex={0}
-            label={formatMessage({
+            aria-label={formatMessage({
               id: getTrad('components.DragHandle-label'),
               defaultMessage: 'Drag',
             })}
             onClick={(e) => e.stopPropagation()}
-            onKeyDown={handleDragHandleKeyDown}
             aria-disabled={disabled}
             disabled={disabled}
             draggable

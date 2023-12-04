@@ -7,6 +7,8 @@ import {
   type ConnectDragSource,
   type ConnectDropTarget,
   type ConnectDragPreview,
+  type DragSourceMonitor,
+  type DropTargetMonitor,
 } from 'react-dnd';
 
 import {
@@ -24,16 +26,25 @@ const DROP_SENSITIVITY = {
   IMMEDIATE: 'immediate',
 } as const;
 
+type Item = {
+  [key: string]: unknown;
+};
+
+type DragObject = Item & {
+  index: number | Array<number>;
+  width: number | undefined;
+};
+
 type UseDragAndDropOptions = UseKeyboardDragAndDropCallbacks & {
   type?: string;
   index: number | Array<number>;
-  item?: object;
+  item: Item;
   onStart?: () => void;
   onEnd?: () => void;
   dropSensitivity?: (typeof DROP_SENSITIVITY)[keyof typeof DROP_SENSITIVITY];
 };
 
-type Identifier = NonNullable<ReturnType<HandlerManager['getHandlerId']>>;
+type Identifier = ReturnType<HandlerManager['getHandlerId']>;
 
 type UseDragAndDropReturn = [
   {
@@ -54,6 +65,15 @@ type UseDragAndDropFunction = (
   options: UseDragAndDropOptions
 ) => UseDragAndDropReturn;
 
+type DropCollectedProps = {
+  handlerId: Identifier;
+  isOver: boolean;
+};
+
+// Type definition Monitor<DragObject, DragResult>, where DragResult is void as we are not returning anything on drop()
+type DropTargetMonitorType = DropTargetMonitor<DragObject, void>;
+type DragSourceMonitorType = DragSourceMonitor<DragObject, void>;
+
 /**
  * A utility hook abstracting the general drag and drop hooks from react-dnd.
  * Centralising the same behaviours and by default offering keyboard support.
@@ -63,7 +83,7 @@ const useDragAndDrop: UseDragAndDropFunction = (
   {
     type = 'STRAPI_DND',
     index,
-    item = {},
+    item,
     onStart,
     onEnd,
     onGrabItem,
@@ -73,25 +93,25 @@ const useDragAndDrop: UseDragAndDropFunction = (
     dropSensitivity = DROP_SENSITIVITY.REGULAR,
   }
 ) => {
-  const objectRef = React.useRef(null);
+  const objectRef = React.useRef<HTMLElement | null>(null);
 
-  const [{ handlerId, isOver }, dropRef] = useDrop({
+  const [{ handlerId, isOver }, dropRef] = useDrop<DragObject, void, DropCollectedProps>({
     accept: type,
-    collect(monitor) {
+    collect(monitor: DropTargetMonitorType) {
       return {
         handlerId: monitor.getHandlerId(),
-        isOver: monitor.isOver(),
+        isOver: monitor.isOver({ shallow: true }),
       };
     },
-    drop(item) {
-      const draggedItem = item.index;
+    drop(item: DragObject) {
+      const draggedIndex = item.index;
       const newIndex = index;
 
       if (isOver && onDropItem) {
-        onDropItem(draggedItem, newIndex);
+        onDropItem(draggedIndex, newIndex);
       }
     },
-    hover(item, monitor) {
+    hover(item: DragObject, monitor: DropTargetMonitorType) {
       if (!objectRef.current || !onMoveItem) {
         return;
       }
@@ -99,12 +119,13 @@ const useDragAndDrop: UseDragAndDropFunction = (
       const dragIndex = item.index;
       const newIndex = index;
 
-      const hoverBoundingRect = objectRef.current.getBoundingClientRect();
+      const hoverBoundingRect = objectRef.current?.getBoundingClientRect();
       const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
       const clientOffset = monitor.getClientOffset();
-      const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+      if (!clientOffset) return;
 
-      if (typeof index === 'number') {
+      const hoverClientY = clientOffset && clientOffset.y - hoverBoundingRect.top;
+      if (typeof dragIndex === 'number' && typeof newIndex === 'number') {
         if (dragIndex === newIndex) {
           // Don't replace items with themselves
           return;
@@ -127,48 +148,55 @@ const useDragAndDrop: UseDragAndDropFunction = (
         item.index = newIndex;
       } else {
         // Using numbers as indices doesn't work for nested list items with path like [1, 1, 0]
-        if (dropSensitivity === DROP_SENSITIVITY.REGULAR) {
-          // Indices comparison to find item position in nested list
-          const minLength = Math.min(dragIndex.length, newIndex.length);
-          let areEqual = true;
-          let isLessThan = false;
-          let isGreaterThan = false;
+        if (Array.isArray(dragIndex) && Array.isArray(newIndex))
+          if (dropSensitivity === DROP_SENSITIVITY.REGULAR) {
+            // Indices comparison to find item position in nested list
+            const minLength = Math.min(dragIndex.length, newIndex.length);
+            let areEqual = true;
+            let isLessThan = false;
+            let isGreaterThan = false;
 
-          for (let i = 0; i < minLength; i++) {
-            if (dragIndex[i] < newIndex[i]) {
-              isLessThan = true;
-              areEqual = false;
-              break;
-            } else if (dragIndex[i] > newIndex[i]) {
-              isGreaterThan = true;
-              areEqual = false;
-              break;
+            for (let i = 0; i < minLength; i++) {
+              if (dragIndex[i] < newIndex[i]) {
+                isLessThan = true;
+                areEqual = false;
+                break;
+              } else if (dragIndex[i] > newIndex[i]) {
+                isGreaterThan = true;
+                areEqual = false;
+                break;
+              }
+            }
+
+            // Don't replace items with themselves
+            if (areEqual && dragIndex.length === newIndex.length) {
+              return;
+            }
+            // Dragging downwards
+            if (isLessThan && !isGreaterThan && hoverClientY < hoverMiddleY) {
+              return;
+            }
+
+            // Dragging upwards
+            if (isGreaterThan && !isLessThan && hoverClientY > hoverMiddleY) {
+              return;
             }
           }
-
-          // Don't replace items with themselves
-          if (areEqual && dragIndex.length === newIndex.length) {
-            return;
-          }
-          // Dragging downwards
-          if (isLessThan && !isGreaterThan && hoverClientY < hoverMiddleY) {
-            return;
-          }
-
-          // Dragging upwards
-          if (isGreaterThan && !isLessThan && hoverClientY > hoverMiddleY) {
-            return;
-          }
-        }
         onMoveItem(newIndex, dragIndex);
         item.index = newIndex;
       }
     },
   });
 
-  const getDragDirection = (monitor) => {
-    if (monitor.isDragging() && !monitor.didDrop()) {
-      const deltaY = monitor.getInitialClientOffset().y - monitor.getClientOffset().y;
+  const getDragDirection = (monitor: DragSourceMonitorType) => {
+    if (
+      monitor &&
+      monitor.isDragging() &&
+      !monitor.didDrop() &&
+      monitor.getInitialClientOffset() &&
+      monitor.getClientOffset()
+    ) {
+      const deltaY = monitor.getInitialClientOffset()!.y - monitor.getClientOffset()!.y;
 
       if (deltaY > 0) return DIRECTIONS.UPWARD;
 
@@ -202,16 +230,16 @@ const useDragAndDrop: UseDragAndDropFunction = (
     },
     canDrag: active,
     /**
-     * This is for useful when the item is in a virtualized list.
+     * This is useful when the item is in a virtualized list.
      * However, if we don't have an ID then we want the libraries
      * defaults to take care of this.
      */
     isDragging: item.id
-      ? (monitor) => {
+      ? (monitor: DragSourceMonitorType) => {
           return item.id === monitor.getItem().id;
         }
       : undefined,
-    collect: (monitor) => ({
+    collect: (monitor: DragSourceMonitorType) => ({
       isDragging: monitor.isDragging(),
       initialOffset: monitor.getInitialClientOffset(),
       currentOffset: monitor.getClientOffset(),
