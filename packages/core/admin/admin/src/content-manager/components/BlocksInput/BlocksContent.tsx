@@ -146,15 +146,13 @@ const DragAndDropElement = ({
       if (Element.isElement(newNode) && Element.isElement(draggedNode)) {
         // If a node is dragged into the list block then convert it to a list-item
         if (newNode.type === 'list-item' && draggedNode.type !== 'list-item') {
-          if (newIndex[0] > currentIndex[0]) {
-            // Node is dragged downwards inside list
-            newIndex[0] -= 1;
-          }
-
           Transforms.setNodes(
             editor,
             { ...getAttributesToClear(draggedNode), type: 'list-item' },
-            { at: newIndex }
+            {
+              at:
+                newIndex[0] > currentIndex[0] ? [newIndex[0] - 1, ...newIndex.slice(1)] : newIndex,
+            }
           );
         }
 
