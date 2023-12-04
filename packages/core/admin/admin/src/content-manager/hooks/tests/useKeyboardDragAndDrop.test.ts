@@ -1,12 +1,15 @@
+import * as React from 'react';
+
 import { act, renderHook } from '@testing-library/react';
 
 import { useKeyboardDragAndDrop } from '../useKeyboardDragAndDrop';
 
 describe('useKeyboardDragAndDrop', () => {
-  const event = (key) => ({
-    preventDefault: jest.fn(),
-    key,
-  });
+  const event = (key: string) =>
+    ({
+      preventDefault: jest.fn(),
+      key,
+    } as unknown as React.KeyboardEvent<HTMLButtonElement>);
 
   describe('onGrabItem', () => {
     it('should be called when the event is the enter key', () => {
