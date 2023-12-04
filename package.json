@@ -72,9 +72,8 @@
     "watch": "nx run-many --target=watch --nx-ignore-cycles"
   },
   "resolutions": {
-    "@strapi/design-system": "1.14.0-typescript.1",
-    "@types/koa": "2.13.4",
-    "@types/react": "18.2.7"
+    "@strapi/design-system": "1.14.0-typescript.2",
+    "@types/koa": "2.13.4"
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",
@@ -91,11 +90,11 @@
     "@swc/helpers": "0.5.1",
     "@swc/jest": "0.2.26",
     "@types/prettier": "2.7.3",
-    "@types/react": "18.2.7",
-    "@types/react-dom": "18.2.12",
+    "@types/react": "18.2.39",
+    "@types/react-dom": "18.2.17",
     "@types/react-helmet": "6.1.8",
     "@types/react-router-dom": "^5.3.3",
-    "@types/styled-components": "5.1.26",
+    "@types/styled-components": "5.1.32",
     "@typescript-eslint/eslint-plugin": "6.7.3",
     "@typescript-eslint/parser": "6.7.3",
     "babel-eslint": "10.1.0",

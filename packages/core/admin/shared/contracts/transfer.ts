@@ -2,24 +2,28 @@ import { errors } from '@strapi/utils';
 
 export interface TransferTokenPermission {
   id: number | string;
-  action: string;
+  action: 'push' | 'pull' | 'push-pull';
   token: TransferToken | number;
 }
 
-export interface TransferToken {
+export interface DatabaseTransferToken {
   id: number | string;
   name: string;
   description: string;
   accessKey: string;
   lastUsedAt?: number;
-  lifespan: number;
+  lifespan: number | null;
   expiresAt: number;
-  permissions: string[] | TransferTokenPermission[];
+  permissions: TransferTokenPermission[];
+}
+
+export interface TransferToken extends Omit<DatabaseTransferToken, 'permissions'> {
+  permissions: Array<TransferTokenPermission['action']>;
 }
 
 export type SanitizedTransferToken = Omit<TransferToken, 'accessKey'>;
 
-export type TokenUpdatePayload = Pick<
+export type TokenCreatePayload = Pick<
   TransferToken,
   'name' | 'description' | 'lastUsedAt' | 'permissions' | 'lifespan'
 > & { accessKey?: string };
@@ -92,7 +96,7 @@ export declare namespace TokenGetById {
  */
 export declare namespace TokenCreate {
   export interface Request {
-    body: TokenUpdatePayload;
+    body: TokenCreatePayload;
     query: {};
   }
 
@@ -101,6 +105,10 @@ export declare namespace TokenCreate {
     error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
+
+export interface TokenUpdatePayload
+  extends Pick<TokenCreatePayload, 'name' | 'description'>,
+    Partial<Omit<TokenCreatePayload, 'name' | 'description'>> {}
 
 /**
  * PUT /transfer/tokens/:id - Update a token by ID
