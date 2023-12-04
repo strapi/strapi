@@ -1,5 +1,33 @@
 import releaseActionController from '../release-action';
 
+const mockSanitizedQueryRead = jest.fn().mockResolvedValue({});
+const mockFindActions = jest.fn().mockResolvedValue({ results: [], pagination: {} });
+const mockSanitizeOutput = jest.fn((entry: { id: number; name: string }) => ({ id: entry.id }));
+
+jest.mock('../../utils', () => ({
+  getService: jest.fn(() => ({
+    create: jest.fn(),
+    findActions: mockFindActions,
+    findReleaseContentTypesMainFields: jest.fn(() => ({
+      'api::contentTypeA.contentTypeA': {
+        mainField: 'name',
+      },
+      'api::contentTypeB.contentTypeB': {
+        mainField: 'name',
+      },
+    })),
+  })),
+  getAllowedContentTypes: jest
+    .fn()
+    .mockReturnValue(['api::contentTypeA.contentTypeA', 'api::contentTypeB.contentTypeB']),
+  getPermissionsChecker: jest.fn(() => ({
+    sanitizedQuery: {
+      read: mockSanitizedQueryRead,
+    },
+    sanitizeOutput: mockSanitizeOutput,
+  })),
+}));
+
 describe('Release Action controller', () => {
   describe('create', () => {
     beforeEach(() => {
@@ -64,6 +92,47 @@ describe('Release Action controller', () => {
 
       // @ts-expect-error Ignore missing properties
       expect(() => releaseActionController.create(ctx)).rejects.toThrow('type is a required field');
+    });
+  });
+
+  describe('findMany', () => {
+    const ctx = {
+      state: {
+        userAbility: {
+          can: jest.fn(),
+          cannot: jest.fn(),
+        },
+      },
+      params: {
+        releaseId: 1,
+      },
+    };
+
+    it('should call sanitizedQueryRead once for each contentType', async () => {
+      // @ts-expect-error Ignore missing properties
+      await releaseActionController.findMany(ctx);
+
+      expect(mockSanitizedQueryRead).toHaveBeenCalledTimes(2);
+    });
+
+    it('should call findActions with the right params', async () => {
+      // @ts-expect-error Ignore missing properties
+      await releaseActionController.findMany(ctx);
+
+      expect(mockFindActions).toHaveBeenCalledWith(
+        1,
+        ['api::contentTypeA.contentTypeA', 'api::contentTypeB.contentTypeB'],
+        {
+          populate: {
+            entry: {
+              on: {
+                'api::contentTypeA.contentTypeA': {},
+                'api::contentTypeB.contentTypeB': {},
+              },
+            },
+          },
+        }
+      );
     });
   });
 });

@@ -9,7 +9,7 @@ import type {
   Release,
 } from '../../../shared/contracts/releases';
 import type { UserInfo } from '../../../shared/types';
-import { getService } from '../utils';
+import { getAllowedContentTypes, getService } from '../utils';
 
 type ReleaseWithPopulatedActions = Release & { actions: { count: number } };
 
@@ -56,22 +56,39 @@ const releaseController = {
   async findOne(ctx: Koa.Context) {
     const id: GetRelease.Request['params']['id'] = ctx.params.id;
 
-    const result = (await getService('release', { strapi }).findOne(
-      Number(id)
-    )) as ReleaseWithPopulatedActions | null;
+    const releaseService = getService('release', { strapi });
 
-    if (!result) {
+    const allowedContentTypes = getAllowedContentTypes({
+      strapi,
+      userAbility: ctx.state.userAbility,
+    });
+
+    const release = await releaseService.findOne(id);
+    const total = await releaseService.countActions({
+      filters: {
+        release: id,
+      },
+    });
+    const totalHidden = await releaseService.countActions({
+      filters: {
+        release: id,
+        contentType: {
+          $notIn: allowedContentTypes,
+        },
+      },
+    });
+
+    if (!release) {
       throw new errors.NotFoundError(`Release not found for id: ${id}`);
     }
-
-    const { actions, ...release } = result;
 
     // Format the data object
     const data = {
       ...release,
       actions: {
         meta: {
-          count: actions.count,
+          total,
+          totalHidden,
         },
       },
     };

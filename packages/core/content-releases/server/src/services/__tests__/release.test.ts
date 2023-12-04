@@ -42,4 +42,20 @@ describe('release service', () => {
       );
     });
   });
+  
+  describe('findActions', () => {
+    it('throws an error if the release does not exist', () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: { 
+          findOne: jest.fn().mockReturnValue(null),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      expect(() => releaseService.findActions(1, ['api::contentType.contentType'], {})).rejects.toThrow('No release found for id 1');
+    });
+  });
 });

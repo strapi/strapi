@@ -1,13 +1,17 @@
 import { setCreatorFields, errors } from '@strapi/utils';
-import type { LoadedStrapi } from '@strapi/types';
+import type { LoadedStrapi, Common, EntityService, UID } from '@strapi/types';
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
 import type {
   GetReleases,
   CreateRelease,
   UpdateRelease,
   GetRelease,
+  Release,
 } from '../../../shared/contracts/releases';
-import type { CreateReleaseAction } from '../../../shared/contracts/release-actions';
+import type {
+  CreateReleaseAction,
+  GetReleaseActions,
+} from '../../../shared/contracts/release-actions';
 import type { UserInfo } from '../../../shared/types';
 import { getService } from '../utils';
 
@@ -30,19 +34,12 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       },
     });
   },
+  findOne(id: GetRelease.Request['params']['id'], query = {}) {
+    return strapi.entityService.findOne(RELEASE_MODEL_UID, id, query);
+  },
   findMany(query?: GetReleases.Request['query']) {
     return strapi.entityService.findMany(RELEASE_MODEL_UID, {
       ...query,
-      populate: {
-        actions: {
-          // @ts-expect-error TS error on populate, is not considering count
-          count: true,
-        },
-      },
-    });
-  },
-  findOne(id: GetRelease.Request['params']['id']) {
-    return strapi.entityService.findOne(RELEASE_MODEL_UID, id, {
       populate: {
         actions: {
           // @ts-expect-error TS error on populate, is not considering count
@@ -101,6 +98,67 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       },
       populate: { release: { fields: ['id'] }, entry: { fields: ['id'] } },
     });
+  },
+  async findActions(
+    releaseId: GetReleaseActions.Request['params']['releaseId'],
+    contentTypes: Common.UID.ContentType[],
+    query?: GetReleaseActions.Request['query']
+  ) {
+    const result = await strapi.entityService.findOne(RELEASE_MODEL_UID, releaseId);
+
+    if (!result) {
+      throw new errors.NotFoundError(`No release found for id ${releaseId}`);
+    }
+
+    return strapi.entityService.findPage(RELEASE_ACTION_MODEL_UID, {
+      ...query,
+      filters: {
+        release: releaseId,
+        contentType: {
+          $in: contentTypes,
+        },
+      },
+    });
+  },
+  async countActions(query: EntityService.Params.Pick<typeof RELEASE_ACTION_MODEL_UID, 'filters'>) {
+    return strapi.entityService.count(RELEASE_ACTION_MODEL_UID, query);
+  },
+  async findReleaseContentTypesMainFields(releaseId: Release['id']) {
+    const contentTypesFromReleaseActions: { contentType: UID.ContentType }[] = await strapi.db
+      .queryBuilder(RELEASE_ACTION_MODEL_UID)
+      .select('content_type')
+      .where({
+        $and: [
+          {
+            release: releaseId,
+          },
+        ],
+      })
+      .groupBy('content_type')
+      .execute();
+
+    const contentTypesUids = contentTypesFromReleaseActions.map(
+      ({ contentType: contentTypeUid }) => contentTypeUid
+    );
+
+    const contentManagerContentTypeService = strapi
+      .plugin('content-manager')
+      .service('content-types');
+    const contentTypesMeta: Record<UID.ContentType, { mainField: string }> = {};
+
+    for (const contentTypeUid of contentTypesUids) {
+      const contentTypeConfig = await contentManagerContentTypeService.findConfiguration({
+        uid: contentTypeUid,
+      });
+
+      if (contentTypeConfig) {
+        contentTypesMeta[contentTypeUid] = {
+          mainField: contentTypeConfig.settings.mainField,
+        };
+      }
+    }
+
+    return contentTypesMeta;
   },
 });
 

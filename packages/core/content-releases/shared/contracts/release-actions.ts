@@ -1,5 +1,5 @@
 import { Attribute, Common } from '@strapi/types';
-import type { Release } from './releases';
+import type { Release, Pagination } from './releases';
 import type { Entity } from '../types';
 
 import type { errors } from '@strapi/utils';
@@ -9,7 +9,7 @@ type ReleaseActionEntry = Entity & {
   [key: string]: Attribute.Any;
 };
 
-export interface ReleaseAction {
+export interface ReleaseAction extends Entity {
   type: 'publish' | 'unpublish';
   entry: ReleaseActionEntry;
   contentType: Common.UID.ContentType;
@@ -36,5 +36,25 @@ export declare namespace CreateReleaseAction {
   export interface Response {
     data: ReleaseAction;
     error?: errors.ApplicationError | errors.ValidationError | errors.NotFoundError;
+  }
+}
+
+/**
+ * GET /content-releases/:id/actions - Get all release actions
+ */
+export declare namespace GetReleaseActions {
+  export interface Request {
+    params: {
+      releaseId: Release['id'];
+    };
+    query?: Partial<Pick<Pagination, 'page' | 'pageSize'>>;
+  }
+
+  export interface Response {
+    data: ReleaseAction[];
+    meta: {
+      pagination: Pagination;
+    };
+    error?: errors.ApplicationError | errors.NotFoundError;
   }
 }

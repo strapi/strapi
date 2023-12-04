@@ -1,10 +1,25 @@
 import releaseController from '../release';
 
+const mockFindPage = jest.fn();
+const mockFindMany = jest.fn();
+const mockCountActions = jest.fn();
+
+jest.mock('../../utils', () => ({
+  getService: jest.fn(() => ({
+    findOne: jest.fn(() => ({ id: 1 })),
+    findPage: mockFindPage,
+    findMany: mockFindMany,
+    countActions: mockCountActions,
+    findReleaseContentTypesMainFields: jest.fn(),
+  })),
+  getAllowedContentTypes: jest.fn(() => ['contentTypeA', 'contentTypeB']),
+}));
+
 describe('Release controller', () => {
   describe('findMany', () => {
     it('should call findPage', async () => {
-      const findPage = jest.fn().mockResolvedValue({ results: [], pagination: {} });
-      const findMany = jest.fn().mockResolvedValue([]);
+      mockFindPage.mockResolvedValue({ results: [], pagination: {} });
+      mockFindMany.mockResolvedValue([]);
       const userAbility = {
         can: jest.fn(),
       };
@@ -30,28 +45,17 @@ describe('Release controller', () => {
             },
           },
         },
-        plugins: {
-          // @ts-expect-error Ignore missing properties
-          'content-releases': {
-            services: {
-              release: {
-                findPage,
-                findMany,
-              },
-            },
-          },
-        },
       };
 
       // @ts-expect-error partial context
       await releaseController.findMany(ctx);
 
-      expect(findPage).toHaveBeenCalled();
+      expect(mockFindPage).toHaveBeenCalled();
     });
 
     it('should call findMany', async () => {
-      const findPage = jest.fn().mockResolvedValue({ results: [], pagination: {} });
-      const findMany = jest.fn().mockResolvedValue([]);
+      mockFindPage.mockResolvedValue({ results: [], pagination: {} });
+      mockFindMany.mockResolvedValue([]);
       const userAbility = {
         can: jest.fn(),
       };
@@ -74,23 +78,12 @@ describe('Release controller', () => {
             },
           },
         },
-        plugins: {
-          // @ts-expect-error Ignore missing properties
-          'content-releases': {
-            services: {
-              release: {
-                findPage,
-                findMany,
-              },
-            },
-          },
-        },
       };
 
       // @ts-expect-error partial context
       await releaseController.findMany(ctx);
 
-      expect(findMany).toHaveBeenCalled();
+      expect(mockFindMany).toHaveBeenCalled();
     });
   });
   describe('create', () => {
@@ -152,6 +145,69 @@ describe('Release controller', () => {
       expect(() => releaseController.update(ctx)).rejects.toThrow(
         'this field has unspecified keys: unknown'
       );
+    });
+  });
+
+  describe('findOne', () => {
+    global.strapi = {
+      ...global.strapi,
+      plugins: {
+        // @ts-expect-error incomplete plugin
+        'content-manager': {
+          services: {
+            'content-types': {
+              findConfiguration: () => ({
+                settings: {
+                  mainField: 'name',
+                },
+              }),
+            },
+          },
+        },
+      },
+    };
+
+    const ctx = {
+      state: {
+        userAbility: {
+          can: jest.fn(() => true),
+        },
+      },
+      params: {
+        id: 1,
+      },
+      user: {},
+      body: {
+        data: {
+          actions: {
+            meta: {
+              total: 0,
+              totalHidden: 0,
+            },
+          },
+          meta: {},
+        },
+      },
+    };
+
+    it('throws an error if the release does not exists', async () => {
+      // @ts-expect-error partial context
+      expect(() => releaseController.findOne(ctx).rejects.toThrow('Release not found for id: 1'));
+    });
+
+    it('return the right meta object', async () => {
+      // We mock the count all actions
+      mockCountActions.mockResolvedValueOnce(2);
+
+      // We mock the count hidden actions
+      mockCountActions.mockResolvedValueOnce(1);
+
+      // @ts-expect-error partial context
+      await releaseController.findOne(ctx);
+      expect(ctx.body.data.actions.meta).toEqual({
+        total: 2,
+        totalHidden: 1,
+      });
     });
   });
 });
