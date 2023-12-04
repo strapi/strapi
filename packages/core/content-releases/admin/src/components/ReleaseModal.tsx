@@ -7,65 +7,29 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
 
 import { RELEASE_SCHEMA } from '../../../shared/validation-schemas';
-import { isAxiosError } from '../services/axios';
-import { useCreateReleaseMutation } from '../services/release';
 
-interface FormValues {
+export interface FormValues {
   name: string;
 }
 
-const INITIAL_VALUES = {
-  name: '',
-} satisfies FormValues;
-
-interface AddReleaseDialogProps {
+interface ReleaseModalProps {
   handleClose: () => void;
+  handleSubmit: (values: FormValues) => void;
+  isLoading?: boolean;
+  initialValues: FormValues;
 }
 
-export const AddReleaseDialog = ({ handleClose }: AddReleaseDialogProps) => {
+export const ReleaseModal = ({
+  handleClose,
+  handleSubmit,
+  initialValues,
+  isLoading = false,
+}: ReleaseModalProps) => {
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
-  const { formatAPIError } = useAPIErrorHandler();
-  const { push } = useHistory();
-
-  const [createRelease, { isLoading }] = useCreateReleaseMutation();
-
-  const handleSubmit = async (values: FormValues) => {
-    const response = await createRelease({
-      name: values.name,
-    });
-
-    if ('data' in response) {
-      // When the response returns an object with 'data', handle success
-      toggleNotification({
-        type: 'success',
-        message: formatMessage({
-          id: 'content-releases.modal.release-created-notification-success',
-          defaultMessage: 'Release created.',
-        }),
-      });
-
-      push(`/plugins/content-releases/${response.data.data.id}`);
-    } else if (isAxiosError(response.error)) {
-      // When the response returns an object with 'error', handle axios error
-      toggleNotification({
-        type: 'warning',
-        message: formatAPIError(response.error),
-      });
-    } else {
-      // Otherwise, the response returns an object with 'error', handle a generic error
-      toggleNotification({
-        type: 'warning',
-        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
-      });
-    }
-  };
 
   return (
     <ModalLayout onClose={handleClose} labelledBy="title">
@@ -80,7 +44,7 @@ export const AddReleaseDialog = ({ handleClose }: AddReleaseDialogProps) => {
       <Formik
         validateOnChange={false}
         onSubmit={handleSubmit}
-        initialValues={INITIAL_VALUES}
+        initialValues={initialValues}
         validationSchema={RELEASE_SCHEMA}
       >
         {({ values, errors, handleChange }) => (

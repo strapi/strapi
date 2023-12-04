@@ -5,9 +5,9 @@ import { pluginId } from '../pluginId';
 
 import { axiosBaseQuery } from './axios';
 
-import type { CreateRelease, GetReleases } from '../../../shared/contracts/releases';
+import type { CreateRelease, GetReleases, UpdateRelease } from '../../../shared/contracts/releases';
 
-interface GetReleasesQueryParams {
+export interface GetReleasesQueryParams {
   page?: number;
   pageSize?: number;
   filters?: {
@@ -104,6 +104,19 @@ const releaseApi = createApi({
         },
         invalidatesTags: ['Releases'],
       }),
+      updateRelease: build.mutation<
+        void,
+        UpdateRelease.Request['params'] & UpdateRelease.Request['body']
+      >({
+        query({ id, ...data }) {
+          return {
+            url: `/content-releases/${id}`,
+            method: 'PUT',
+            data,
+          };
+        },
+        invalidatesTags: ['Releases'],
+      }),
       createReleaseAction: build.mutation<
         CreateReleaseAction.Response,
         CreateReleaseAction.Request
@@ -126,6 +139,7 @@ const {
   useGetReleasesForEntryQuery,
   useCreateReleaseMutation,
   useCreateReleaseActionMutation,
+  useUpdateReleaseMutation,
 } = releaseApi;
 
 export {
@@ -133,7 +147,6 @@ export {
   useGetReleasesForEntryQuery,
   useCreateReleaseMutation,
   useCreateReleaseActionMutation,
+  useUpdateReleaseMutation,
   releaseApi,
 };
-
-export type { GetReleasesQueryParams };
