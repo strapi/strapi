@@ -176,7 +176,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
 
     if (!updatedAction) {
       throw new errors.NotFoundError(
-        `Action with id ${actionId} not found in releas with id ${releaseId}`
+        `Action with id ${actionId} not found in release with id ${releaseId}`
       );
     }
 
