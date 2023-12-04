@@ -27,11 +27,27 @@ export default {
           {
             name: 'admin::hasPermissions',
             config: {
-              actions: ['plugin::content-releases.read']
-            }
-          }
-        ]
-      }
-    }
+              actions: ['plugin::content-releases.read'],
+            },
+          },
+        ],
+      },
+    },
+    {
+      method: 'PUT',
+      path: '/:releaseId/actions/:actionId',
+      handler: 'release-action.update',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::content-releases.update'],
+            },
+          },
+        ],
+      },
+    },
   ],
 };

@@ -13,6 +13,7 @@ import type {
   CreateReleaseAction,
   GetReleaseActions,
   ReleaseAction,
+  UpdateReleaseAction,
 } from '../../../shared/contracts/release-actions';
 import type { UserInfo } from '../../../shared/types';
 import { getService } from '../utils';
@@ -237,6 +238,27 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     });
 
     return release;
+  },
+  async updateAction(
+    actionId: UpdateReleaseAction.Request['params']['actionId'],
+    releaseId: UpdateReleaseAction.Request['params']['releaseId'],
+    update: UpdateReleaseAction.Request['body']
+  ) {
+    const updatedAction = await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
+      where: {
+        id: actionId,
+        release: releaseId,
+      },
+      data: update,
+    });
+
+    if (!updatedAction) {
+      throw new errors.NotFoundError(
+        `Action with id ${actionId} not found in release with id ${releaseId}`
+      );
+    }
+
+    return updatedAction;
   },
 });
 

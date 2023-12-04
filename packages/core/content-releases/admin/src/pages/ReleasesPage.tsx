@@ -25,15 +25,23 @@ import {
   PageSizeURLQuery,
   PaginationURLQuery,
   useQueryParams,
+  useAPIErrorHandler,
+  useNotification,
 } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { GetReleases } from '../../../shared/contracts/releases';
-import { AddReleaseDialog } from '../components/AddReleaseDialog';
+import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
-import { useGetReleasesQuery, GetReleasesQueryParams } from '../services/release';
+import { isAxiosError } from '../services/axios';
+import {
+  useGetReleasesQuery,
+  GetReleasesQueryParams,
+  useCreateReleaseMutation,
+} from '../services/release';
 
 /* -------------------------------------------------------------------------------------------------
  * ReleasesLayout
@@ -164,21 +172,29 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
 /* -------------------------------------------------------------------------------------------------
  * ReleasesPage
  * -----------------------------------------------------------------------------------------------*/
+const INITIAL_FORM_VALUES = {
+  name: '',
+} satisfies FormValues;
+
 const ReleasesPage = () => {
-  const [addReleaseDialogIsShown, setAddReleaseDialogIsShown] = React.useState(false);
+  const [releaseModalShown, setReleaseModalShown] = React.useState(false);
+  const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
+  const { push } = useHistory();
+  const { formatAPIError } = useAPIErrorHandler();
   const [{ query }, setQuery] = useQueryParams<GetReleasesQueryParams>();
   const response = useGetReleasesQuery(query);
+  const [createRelease, { isLoading: isSubmittingForm }] = useCreateReleaseMutation();
 
   const { isLoading, isSuccess, isError } = response;
 
-  const toggleAddReleaseDialog = () => {
-    setAddReleaseDialogIsShown((prev) => !prev);
+  const toggleAddReleaseModal = () => {
+    setReleaseModalShown((prev) => !prev);
   };
 
   if (isLoading) {
     return (
-      <ReleasesLayout onClickAddRelease={toggleAddReleaseDialog} isLoading>
+      <ReleasesLayout onClickAddRelease={toggleAddReleaseModal} isLoading>
         <ContentLayout>
           <LoadingIndicatorPage />
         </ContentLayout>
@@ -203,8 +219,38 @@ const ReleasesPage = () => {
 
   const activeTab = response?.currentData?.meta?.activeTab || 'pending';
 
+  const handleAddRelease = async (values: FormValues) => {
+    const response = await createRelease({
+      name: values.name,
+    });
+    if ('data' in response) {
+      // When the response returns an object with 'data', handle success
+      toggleNotification({
+        type: 'success',
+        message: formatMessage({
+          id: 'content-releases.modal.release-created-notification-success',
+          defaultMessage: 'Release created.',
+        }),
+      });
+
+      push(`/plugins/content-releases/${response.data.data.id}`);
+    } else if (isAxiosError(response.error)) {
+      // When the response returns an object with 'error', handle axios error
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(response.error),
+      });
+    } else {
+      // Otherwise, the response returns an object with 'error', handle a generic error
+      toggleNotification({
+        type: 'warning',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+      });
+    }
+  };
+
   return (
-    <ReleasesLayout onClickAddRelease={toggleAddReleaseDialog} totalReleases={totalReleases}>
+    <ReleasesLayout onClickAddRelease={toggleAddReleaseModal} totalReleases={totalReleases}>
       <ContentLayout>
         <>
           <TabGroup
@@ -266,7 +312,14 @@ const ReleasesPage = () => {
           )}
         </>
       </ContentLayout>
-      {addReleaseDialogIsShown && <AddReleaseDialog handleClose={toggleAddReleaseDialog} />}
+      {releaseModalShown && (
+        <ReleaseModal
+          handleClose={toggleAddReleaseModal}
+          handleSubmit={handleAddRelease}
+          isLoading={isSubmittingForm}
+          initialValues={INITIAL_FORM_VALUES}
+        />
+      )}
     </ReleasesLayout>
   );
 };
