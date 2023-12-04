@@ -177,7 +177,7 @@ const INITIAL_FORM_VALUES = {
 } satisfies FormValues;
 
 const ReleasesPage = () => {
-  const [addReleaseDialogIsShown, setAddReleaseDialogIsShown] = React.useState(false);
+  const [releaseDialogShown, setReleaseDialogShown] = React.useState(false);
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const { push } = useHistory();
@@ -189,7 +189,7 @@ const ReleasesPage = () => {
   const { isLoading, isSuccess, isError } = response;
 
   const toggleAddReleaseModal = () => {
-    setAddReleaseDialogIsShown((prev) => !prev);
+    setReleaseDialogShown((prev) => !prev);
   };
 
   if (isLoading) {
@@ -312,7 +312,7 @@ const ReleasesPage = () => {
           )}
         </>
       </ContentLayout>
-      {addReleaseDialogIsShown && (
+      {releaseDialogShown && (
         <ReleaseModal
           handleClose={toggleAddReleaseModal}
           handleSubmit={handleAddRelease}
