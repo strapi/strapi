@@ -1,61 +1,81 @@
 import type { LoadedStrapi as Strapi, Common } from '@strapi/types';
+import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
 
-interface DocumentMetadata {
-  availableLocales: {
-    id: string;
-    locale: string;
-    updatedAt: string;
-    createdAt: string;
-    publishedAt: string;
-  }[];
-  availableStatus: {
-    id: string;
-    updatedAt: string;
-    createdAt: string;
-    publishedAt: string;
-  }[];
+export interface Document {
+  id: string;
+  locale: string;
+  status: string;
+  publishedAt: string;
+}
+
+/**
+ * Controls the metadata properties to be returned
+ *
+ * If `availableLocales` is set to `true` (default), the returned metadata will include
+ * the available locales of the document for its current status.
+ *
+ * If `availableStatus` is set to `true` (default), the returned metadata will include
+ * the available status of the document for its current locale.
+ */
+export interface GetMetadataOptions {
+  availableLocales?: boolean;
+  availableStatus?: boolean;
 }
 
 export default ({ strapi }: { strapi: Strapi }) => ({
   /**
    * Returns available locales of a document for the current status
    */
-  async getAvailableLocales(
-    id: string,
-    uid: Common.UID.ContentType,
-    opts: { locale: string; status: string }
-  ) {
-    if (!opts.locale) return [];
+  async getAvailableLocales(uid: Common.UID.ContentType, document: Document) {
+    if (!document.locale) return [];
 
     // TODO: Use document service instead of query engine
     // Find other locales of the document in the same status
     return strapi.db.query(uid).findMany({
       where: {
-        documentId: id,
+        documentId: document.id,
         // Omit current one
-        locale: { $ne: opts.locale },
+        locale: { $ne: document.locale },
         // Find locales of the same status
-        publishedAt: opts.status === 'published' ? { $ne: null } : null,
+        publishedAt: document.status === 'published' ? { $ne: null } : null,
       },
       select: ['id', 'locale', 'updatedAt', 'createdAt', 'publishedAt'],
     }) as unknown as DocumentMetadata['availableLocales'];
   },
 
-  async getAvailableStatus(
-    id: string,
-    uid: Common.UID.ContentType,
-    opts: { locale: string; status: string }
-  ) {
-    if (!opts.locale) return null;
+  async getAvailableStatus(uid: Common.UID.ContentType, document: Document) {
+    if (!document.locale) return null;
 
     // Find if the other status of the document is available
-    const otherStatus = opts.status === 'published' ? 'draft' : 'published';
+    const otherStatus = document.status === 'published' ? 'draft' : 'published';
 
-    return strapi.documents(uid).findOne(id, {
-      locale: opts.locale,
+    return strapi.documents(uid).findOne(document.id, {
+      locale: document.locale,
       status: otherStatus,
       fields: ['id', 'updatedAt', 'createdAt', 'publishedAt'],
     }) as unknown as DocumentMetadata['availableStatus'][0] | null;
+  },
+
+  // TODO: Modified status
+  async getStatus(uid: Common.UID.ContentType, document: Document) {
+    if (document.publishedAt) return 'published';
+    return 'draft';
+  },
+
+  async getMetadata(
+    uid: Common.UID.ContentType,
+    document: Document,
+    { availableLocales = true, availableStatus = true }: GetMetadataOptions = {}
+  ) {
+    const [availableLocalesResult, availableStatusResult] = await Promise.all([
+      availableLocales ? this.getAvailableLocales(uid, document) : [],
+      availableStatus ? this.getAvailableStatus(uid, document) : null,
+    ]);
+
+    return {
+      availableLocales: availableLocalesResult,
+      availableStatus: availableStatusResult ? [availableStatusResult] : [],
+    };
   },
 
   /**
@@ -63,19 +83,22 @@ export default ({ strapi }: { strapi: Strapi }) => ({
    * - Available locales of the document for the current status
    * - Available status of the document for the current locale
    */
-  async getMetadata(
-    id: string,
+  async formatDocumentWithMetadata(
     uid: Common.UID.ContentType,
-    opts: { locale: string; status: string }
+    document: Document,
+    opts: GetMetadataOptions = {}
   ) {
-    const [availableLocales, availableStatus] = await Promise.all([
-      this.getAvailableLocales(id, uid, opts),
-      this.getAvailableStatus(id, uid, opts),
-    ]);
+    if (!document) return document;
 
-    return {
-      availableLocales,
-      availableStatus: availableStatus ? [availableStatus] : [],
-    };
+    const documentWithMetadata = {
+      ...document,
+      status: await this.getStatus(uid, document),
+    } as any;
+
+    // TODO: Return { data, meta } format when UI is ready
+    // TODO: Sanitize output of metadata
+    documentWithMetadata.__meta__ = await this.getMetadata(uid, documentWithMetadata, opts);
+
+    return documentWithMetadata;
   },
 });

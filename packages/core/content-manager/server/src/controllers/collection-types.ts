@@ -1,4 +1,4 @@
-import { setCreatorFields, pipeAsync, errors } from '@strapi/utils';
+import { setCreatorFields, mapAsync, pipeAsync, errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateBulkActionInput } from './validation';
 import { hasProhibitedCloningFields, excludeNotCreatableFields } from './utils/clone';
@@ -30,6 +30,7 @@ export default {
     const { query } = ctx.request;
 
     const entityManager = getService('entity-manager');
+    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.read()) {
@@ -52,9 +53,11 @@ export default {
       model
     );
 
-    const sanitizedResults = await Promise.all(
-      results.map((result: any) => permissionChecker.sanitizeOutput(result))
-    );
+    const sanitizedResults = await mapAsync(results, async (result: any) => {
+      const sanitizedResult = await permissionChecker.sanitizeOutput(result);
+      sanitizedResult.status = await documentMetadata.getStatus(model, result);
+      return sanitizedResult;
+    });
 
     ctx.body = {
       results: sanitizedResults,
@@ -100,15 +103,8 @@ export default {
     }
 
     // TODO: Count populated relations by permissions
-    ctx.body = await permissionChecker.sanitizeOutput(document);
-
-    // TODO: Return { data, meta } format when UI is ready
-    // TODO: Sanitize output
-    if (ctx.body)
-      ctx.body.__meta__ = await documentMetadata.getMetadata(document.id, model, {
-        locale: document.locale,
-        status: 'draft',
-      });
+    const sanitizedDocument = await permissionChecker.sanitizeOutput(document);
+    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument);
   },
 
   async create(ctx: any) {
@@ -119,6 +115,7 @@ export default {
     const totalEntries = await strapi.query(model).count();
 
     const entityManager = getService('entity-manager');
+    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.create()) {
@@ -138,21 +135,18 @@ export default {
     //   return ctx.forbidden();
     // }
 
-    ctx.body = await permissionChecker.sanitizeOutput(document);
+    const sanitizedDocument = await permissionChecker.sanitizeOutput(document);
+    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument, {
+      // Empty metadata as it's not relevant for a new document
+      availableLocales: false,
+      availableStatus: false,
+    });
 
     if (totalEntries === 0) {
       strapi.telemetry.send('didCreateFirstContentTypeEntry', {
         eventProperties: { model },
       });
     }
-
-    // TODO: Return { data, meta } format when UI is ready
-    if (ctx.body)
-      // Document was just created, so there are no other locales or statuses
-      ctx.body.__meta__ = {
-        availableLocales: [],
-        availableStatus: [],
-      };
   },
 
   async update(ctx: any) {
@@ -213,15 +207,8 @@ export default {
       locale,
     });
 
-    ctx.body = await permissionChecker.sanitizeOutput(updatedVersion);
-
-    // TODO: Return { data, meta } format when UI is ready
-    // TODO: Sanitize output
-    if (ctx.body)
-      ctx.body.__meta__ = await documentMetadata.getMetadata(id, model, {
-        locale,
-        status: 'draft',
-      });
+    const sanitizedVersion = await permissionChecker.sanitizeOutput(updatedVersion);
+    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedVersion);
   },
 
   async clone(ctx: any) {
@@ -230,6 +217,7 @@ export default {
     const { body } = ctx.request;
 
     const entityManager = getService('entity-manager');
+    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.create()) {
@@ -256,23 +244,17 @@ export default {
     const pickPermittedFields = permissionChecker.sanitizeCreateInput;
     const setCreator = setCreatorFields({ user });
     const excludeNotCreatable = excludeNotCreatableFields(model, permissionChecker);
-
     const sanitizeFn = pipeAsync(pickPermittedFields, setCreator as any, excludeNotCreatable);
-
     const sanitizedBody = await sanitizeFn(body);
 
     const clonedDocument = await entityManager.clone(document, sanitizedBody, model);
 
-    ctx.body = await permissionChecker.sanitizeOutput(clonedDocument);
-
-    // TODO: Return { data, meta } format when UI is ready
-    // TODO: Sanitize output
-    if (ctx.body)
-      // Document version was just cloned, so there are no other locales or statuses
-      ctx.body.__meta__ = {
-        availableLocales: [],
-        availableStatus: [],
-      };
+    const sanitizedDocument = await permissionChecker.sanitizeOutput(clonedDocument);
+    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument, {
+      // Empty metadata as it's not relevant for a new document
+      availableLocales: false,
+      availableStatus: false,
+    });
   },
 
   async autoClone(ctx: any) {
@@ -344,30 +326,23 @@ export default {
 
     // TODO: Publish many locales
     const { locale = 'en' } = getDocumentDimensions(ctx.request.body);
-    const entity = await entityManager.findOne(id, model, { populate, locale });
+    const document = await entityManager.findOne(id, model, { populate, locale });
 
-    if (!entity) {
+    if (!document) {
       return ctx.notFound();
     }
 
-    if (permissionChecker.cannot.publish(entity)) {
+    if (permissionChecker.cannot.publish(document)) {
       return ctx.forbidden();
     }
 
-    const result = await entityManager.publish(entity, model, {
+    const publishedDocument = await entityManager.publish(document, model, {
       locale,
       data: setCreatorFields({ user, isEdition: true })({}),
     });
 
-    ctx.body = await permissionChecker.sanitizeOutput(result);
-
-    // TODO: Return { data, meta } format when UI is ready
-    // TODO: Sanitize output
-    if (ctx.body)
-      ctx.body.__meta__ = await documentMetadata.getMetadata(entity.id, model, {
-        locale: entity.locale,
-        status: 'draft',
-      });
+    const sanitizedDocument = await permissionChecker.sanitizeOutput(publishedDocument);
+    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument);
   },
 
   async bulkPublish(ctx: any) {
@@ -468,31 +443,24 @@ export default {
 
     // TODO: Unpublish many locales
     const { locale = 'en' } = getDocumentDimensions(ctx.request.body);
-    const entity = await entityManager.findOne(id, model, {
+    const document = await entityManager.findOne(id, model, {
       populate,
       locale,
       status: 'published',
     });
 
-    if (!entity) {
+    if (!document) {
       return ctx.notFound();
     }
 
-    if (permissionChecker.cannot.unpublish(entity)) {
+    if (permissionChecker.cannot.unpublish(document)) {
       return ctx.forbidden();
     }
 
-    const result = await entityManager.unpublish(entity, model, { locale });
+    const unpublishedDocument = await entityManager.unpublish(document, model, { locale });
 
-    ctx.body = await permissionChecker.sanitizeOutput(result);
-
-    // TODO: Return { data, meta } format when UI is ready
-    // TODO: Sanitize output
-    if (ctx.body)
-      ctx.body.__meta__ = await documentMetadata.getMetadata(entity.id, model, {
-        locale: entity.locale,
-        status: 'published',
-      });
+    const sanitizedDocument = await permissionChecker.sanitizeOutput(unpublishedDocument);
+    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument);
   },
 
   async bulkDelete(ctx: any) {
