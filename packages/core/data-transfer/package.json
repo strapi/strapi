@@ -77,7 +77,7 @@
     "knex": "3.0.1",
     "koa": "2.13.4",
     "rimraf": "3.0.2",
-    "typescript": "5.2.2"
+    "typescript": "5.3.2"
   },
   "peerDependencies": {
     "@strapi/strapi": "^4.14.4"
