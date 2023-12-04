@@ -8714,7 +8714,6 @@ __metadata:
     "@strapi/utils": "npm:4.15.5"
     "@types/fs-extra": "npm:9.0.13"
     "@types/jest": "npm:29.5.2"
-    "@types/knex": "npm:0.16.1"
     "@types/koa": "npm:2.13.4"
     "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:18.18.4"
@@ -8729,6 +8728,7 @@ __metadata:
     commander: "npm:8.3.0"
     fs-extra: "npm:10.0.0"
     inquirer: "npm:8.2.5"
+    knex: "npm:3.0.1"
     koa: "npm:2.13.4"
     lodash: "npm:4.17.21"
     ora: "npm:5.4.1"
@@ -10580,15 +10580,6 @@ __metadata:
   dependencies:
     "@types/node": "npm:*"
   checksum: e009a2bfb50e90ca9b7c6e8f648f8464067271fd99116f881073fa6fa76dc8d0133181dd65e6614d5fb1220d671d67b0124aef7d97dc02d7e342ab143a47779d
-  languageName: node
-  linkType: hard
-
-"@types/knex@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@types/knex@npm:0.16.1"
-  dependencies:
-    knex: "npm:*"
-  checksum: daf16bef279e68a11c74ad5d351237c6667ea9921ebe73e613d24b26acc25ba86b40fdc9d8adddfe1a0d234f20336adde6e4a2d062ae7ebe74a2c288ac6ccdc5
   languageName: node
   linkType: hard
 
@@ -22090,7 +22081,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"knex@npm:*, knex@npm:3.0.1":
+"knex@npm:3.0.1":
   version: 3.0.1
   resolution: "knex@npm:3.0.1"
   dependencies:
