@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { useAdminUsers } from '../../../../hooks/useAdminUsers';
-import { getDisplayName } from '../../../utils';
+import { getDisplayName } from '../../../utils/users';
 
 export const AdminUsersFilter = ({ value, onChange }) => {
   const { formatMessage } = useIntl();

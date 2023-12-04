@@ -22,22 +22,6 @@ export type ApiError =
   | errors.ValidationError
   | errors.YupValidationError;
 
-export type InputType =
-  | 'json'
-  | 'bool'
-  | 'checkbox'
-  | 'datetime'
-  | 'date'
-  | 'number'
-  | 'email'
-  | 'timestamp'
-  | 'text'
-  | 'string'
-  | 'password'
-  | 'select'
-  | 'textarea'
-  | 'time';
-
 export type AttributeFilter = Record<
   string,
   Record<EntityService.Params.Filters.Operator.Where, string | null>

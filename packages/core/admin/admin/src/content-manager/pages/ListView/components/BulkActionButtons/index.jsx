@@ -8,7 +8,7 @@ import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
 import InjectionZoneList from '../../../../components/InjectionZoneList';
-import { getTrad } from '../../../../utils';
+import { getTranslation } from '../../../../utils/translations';
 import { listViewDomain } from '../../selectors';
 
 import { ConfirmBulkActionDialog, confirmDialogsPropTypes } from './ConfirmBulkActionDialog';
@@ -34,7 +34,7 @@ const ConfirmDialogUnpublishAll = ({
         <>
           <Typography id="confirm-description" textAlign="center">
             {formatMessage({
-              id: getTrad('popUpWarning.bodyMessage.contentType.unpublish.all'),
+              id: getTranslation('popUpWarning.bodyMessage.contentType.unpublish.all'),
               defaultMessage: 'Are you sure you want to unpublish these entries?',
             })}
           </Typography>
@@ -75,7 +75,7 @@ const ConfirmDialogDeleteAll = ({ isOpen, onToggleDialog, isConfirmButtonLoading
         <>
           <Typography id="confirm-description" textAlign="center">
             {formatMessage({
-              id: getTrad('popUpWarning.bodyMessage.contentType.delete.all'),
+              id: getTranslation('popUpWarning.bodyMessage.contentType.delete.all'),
               defaultMessage: 'Are you sure you want to delete these entries?',
             })}
           </Typography>

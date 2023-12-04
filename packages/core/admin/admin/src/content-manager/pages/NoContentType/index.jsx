@@ -5,7 +5,7 @@ import { LinkButton, useFocusWhenNavigate } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { getTrad } from '../../utils';
+import { getTranslation } from '../../utils/translations';
 
 const NoContentType = () => {
   const { formatMessage } = useIntl();
@@ -15,7 +15,7 @@ const NoContentType = () => {
     <Main>
       <HeaderLayout
         title={formatMessage({
-          id: getTrad('header.name'),
+          id: getTranslation('header.name'),
           defaultMessage: 'Content',
         })}
       />

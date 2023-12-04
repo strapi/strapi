@@ -6,7 +6,7 @@ import { Plus } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { getTrad } from '../../../utils';
+import { getTranslation } from '../../../utils/translations';
 
 import LinkToCTB from './LinkToCTB';
 import RowsLayout from './RowsLayout';
@@ -21,7 +21,7 @@ const DisplayedFields = ({ editLayout, fields, onRemoveField, onAddField }) => {
           <Box>
             <Typography fontWeight="bold">
               {formatMessage({
-                id: getTrad('containers.ListPage.displayedFields'),
+                id: getTranslation('containers.ListPage.displayedFields'),
                 defaultMessage: 'Displayed fields',
               })}
             </Typography>
@@ -51,7 +51,7 @@ const DisplayedFields = ({ editLayout, fields, onRemoveField, onAddField }) => {
               variant="secondary"
             >
               {formatMessage({
-                id: getTrad('containers.SettingPage.add.field'),
+                id: getTranslation('containers.SettingPage.add.field'),
                 defaultMessage: 'Insert another field',
               })}
             </Menu.Trigger>

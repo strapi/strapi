@@ -8,10 +8,10 @@ import { Route, Switch } from 'react-router-dom';
 
 import { selectAdminPermissions } from '../../../selectors';
 import { ContentTypeLayoutContext } from '../../contexts';
-import { useFetchContentTypeLayout } from '../../hooks';
+import { useFetchContentTypeLayout } from '../../hooks/useFetchContentTypeLayout';
 import { formatLayoutToApi } from '../../utils';
 import EditSettingsView from '../EditSettingsView';
-import EditViewLayoutManager from '../EditViewLayoutManager';
+import { EditViewLayoutManager } from '../EditViewLayoutManager';
 import { ListSettingsView } from '../ListSettingsView';
 import ListViewLayout from '../ListViewLayoutManager';
 
@@ -30,11 +30,11 @@ const CollectionTypeRecursivePath = ({
     let rawContentTypeLayout = {};
     let rawComponentsLayouts = {};
 
-    if (layout.contentType) {
+    if (layout?.contentType) {
       rawContentTypeLayout = formatLayoutToApi(layout.contentType);
     }
 
-    if (layout.components) {
+    if (layout?.components) {
       rawComponentsLayouts = Object.keys(layout.components).reduce((acc, current) => {
         acc[current] = formatLayoutToApi(layout.components[current]);
 

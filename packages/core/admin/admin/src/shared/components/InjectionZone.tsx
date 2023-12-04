@@ -68,10 +68,21 @@ type InjectionZoneBlock = InjectionZoneArea extends `${string}.${string}.${infer
   ? Word
   : never;
 
-const InjectionZone = ({ area, ...props }: { area: InjectionZoneArea }) => {
+/**
+ * You can't know what this component props will be because it's generic and used everywhere
+ * e.g. content-manager edit view, we just send the slug but we might not in the listView,
+ * therefore, people should type it themselves on the components they render.
+ */
+const InjectionZone = ({ area, ...props }: { area: InjectionZoneArea; [key: string]: unknown }) => {
   const components = useInjectionZone(area);
 
-  return components.map((component) => <component.Component key={component.name} {...props} />);
+  return (
+    <>
+      {components.map((component) => (
+        <component.Component key={component.name} {...props} />
+      ))}
+    </>
+  );
 };
 
 export { InjectionZone, INJECTION_ZONES };

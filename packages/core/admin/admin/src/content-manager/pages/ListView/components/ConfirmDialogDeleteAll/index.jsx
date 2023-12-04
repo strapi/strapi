@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import InjectionZoneList from '../../../../components/InjectionZoneList';
-import { getTrad } from '../../../../utils';
+import { getTranslation } from '../../../../utils/translations';
 
 export const ConfirmDialogDeleteAll = ({
   isConfirmButtonLoading,
@@ -32,7 +32,7 @@ export const ConfirmDialogDeleteAll = ({
           <Flex justifyContent="center">
             <Typography id="confirm-description">
               {formatMessage({
-                id: getTrad('popUpWarning.bodyMessage.contentType.delete.all'),
+                id: getTranslation('popUpWarning.bodyMessage.contentType.delete.all'),
                 defaultMessage: 'Are you sure you want to delete these entries?',
               })}
             </Typography>
