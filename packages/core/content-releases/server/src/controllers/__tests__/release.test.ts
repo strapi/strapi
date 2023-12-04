@@ -210,4 +210,32 @@ describe('Release controller', () => {
       });
     });
   });
+
+  describe('publish', () => {
+    it('throws an error if user is not super admin', async () => {
+      const ctx = {
+        state: {
+          userAbility: {
+            can: jest.fn(() => false),
+          },
+        },
+        params: {
+          id: 1,
+        },
+        user: {
+          roles: [
+            {
+              id: 1,
+              code: 'strapi-editor',
+            },
+          ],
+        },
+      };
+
+      expect(() =>
+        // @ts-expect-error partial context
+        releaseController.publish(ctx).rejects.toThrow('Only superadmins can publish a release')
+      );
+    });
+  });
 });
