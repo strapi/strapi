@@ -6,5 +6,5 @@
     "sourceMap": true
   },
   "include": ["src"],
-  "exclude": ["tests", "**/__tests__/**", "**/cli/**", "./src/types.ts"]
+  "exclude": ["**/__tests__/**", "**/cli/**", "./src/types.ts", "dist"]
 }

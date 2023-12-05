@@ -1,6 +1,6 @@
 {
   "name": "@strapi/upgrade",
-  "version": "4.15.4",
+  "version": "4.15.5",
   "description": "CLI to upgrade Strapi applications effortless",
   "keywords": [
     "strapi",
@@ -75,7 +75,7 @@
   },
   "devDependencies": {
     "@strapi/pack-up": "workspace:*",
-    "@strapi/types": "4.15.4",
+    "@strapi/types": "4.15.5",
     "@types/jscodeshift": "0.11.10",
     "eslint-config-custom": "workspace:*",
     "rimraf": "3.0.2"

@@ -9248,7 +9248,7 @@ __metadata:
   resolution: "@strapi/upgrade@workspace:packages/utils/upgrade"
   dependencies:
     "@strapi/pack-up": "workspace:*"
-    "@strapi/types": "npm:4.15.4"
+    "@strapi/types": "npm:4.15.5"
     "@types/jscodeshift": "npm:0.11.10"
     chalk: "npm:4.1.2"
     cli-table3: "npm:0.6.2"
@@ -28987,7 +28987,7 @@ __metadata:
     find-up: "npm:5.0.0"
     fs-extra: "npm:10.1.0"
     get-port: "npm:5.1.1"
-    glob: "npm:7.2.3"
+    glob: "npm:10.3.10"
     husky: "npm:8.0.2"
     inquirer: "npm:8.2.5"
     jest: "npm:29.6.0"
