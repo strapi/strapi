@@ -1,4 +1,4 @@
-import { getTrad } from '../../../../../../../../admin/src/content-manager/utils';
+import { getTranslation } from '../../../../../../../../admin/src/content-manager/utils/translations';
 
 import { AssigneeFilter } from './AssigneeFilter';
 import { StageFilter } from './StageFilter';
@@ -20,7 +20,7 @@ export const REVIEW_WORKFLOW_FILTERS = [
       customInput: StageFilter,
 
       label: {
-        id: getTrad(`containers.ListPage.table-headers.reviewWorkflows.stage`),
+        id: getTranslation(`containers.ListPage.table-headers.reviewWorkflows.stage`),
         defaultMessage: 'Review stage',
       },
     },
@@ -61,7 +61,7 @@ export const REVIEW_WORKFLOW_FILTERS = [
       ],
 
       label: {
-        id: getTrad(`containers.ListPage.table-headers.reviewWorkflows.assignee.label`),
+        id: getTranslation(`containers.ListPage.table-headers.reviewWorkflows.assignee.label`),
         defaultMessage: 'Assignee',
       },
     },

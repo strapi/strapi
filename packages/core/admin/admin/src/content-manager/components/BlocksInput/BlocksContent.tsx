@@ -8,8 +8,9 @@ import { ReactEditor, type RenderElementProps, type RenderLeafProps, Editable } 
 import styled, { CSSProperties } from 'styled-components';
 
 import { useDragAndDrop, DIRECTIONS } from '../../hooks/useDragAndDrop';
-// @ts-expect-error TODO convert to ts
-import { composeRefs, ItemTypes, getTrad } from '../../utils';
+import { ItemTypes } from '../../utils/dragAndDrop';
+import { composeRefs } from '../../utils/refs';
+import { getTranslation } from '../../utils/translations';
 
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { useConversionModal } from './BlocksToolbar';
@@ -133,7 +134,7 @@ const DragAndDropElement = ({
       setLiveText(
         formatMessage(
           {
-            id: getTrad('components.Blocks.dnd.reorder'),
+            id: getTranslation('components.Blocks.dnd.reorder'),
             defaultMessage: '{item}, moved. New position in the editor: {position}.',
           },
           {
@@ -196,6 +197,7 @@ const DragAndDropElement = ({
       type: `${ItemTypes.BLOCKS}_${name}`,
       index,
       item: {
+        index,
         displayedValue: children,
       },
       onDropItem(currentIndex: number | Array<number>, newIndex?: number | Array<number>) {
@@ -225,7 +227,7 @@ const DragAndDropElement = ({
         forwardedAs="div"
         role="button"
         aria-label={formatMessage({
-          id: getTrad('components.DragHandle-label'),
+          id: getTranslation('components.DragHandle-label'),
           defaultMessage: 'Drag',
         })}
       >
@@ -236,7 +238,7 @@ const DragAndDropElement = ({
   );
 
   return (
-    <Wrapper ref={composedBoxRefs} isOverDropTarget={isOverDropTarget}>
+    <Wrapper ref={(ref) => composedBoxRefs(ref!)} isOverDropTarget={isOverDropTarget}>
       {isOverDropTarget && (
         <DropPlaceholder
           borderStyle="solid"
@@ -279,7 +281,7 @@ const DragAndDropElement = ({
             role="button"
             tabIndex={0}
             aria-label={formatMessage({
-              id: getTrad('components.DragHandle-label'),
+              id: getTranslation('components.DragHandle-label'),
               defaultMessage: 'Drag',
             })}
             onClick={(e) => e.stopPropagation()}
@@ -394,7 +396,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
       setLiveText(
         formatMessage(
           {
-            id: getTrad('components.Blocks.dnd.reorder'),
+            id: getTranslation('components.Blocks.dnd.reorder'),
             defaultMessage: '{item}, moved. New position in the editor: {position}.',
           },
           {

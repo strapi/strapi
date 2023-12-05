@@ -4,7 +4,7 @@ import { ContentLayout, HeaderLayout, Main } from '@strapi/design-system';
 import { NoPermissions as NoPermissionsCompo, useFocusWhenNavigate } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
-import { getTrad } from '../../utils';
+import { getTranslation } from '../../utils/translations';
 
 const NoPermissions = () => {
   const { formatMessage } = useIntl();
@@ -14,7 +14,7 @@ const NoPermissions = () => {
     <Main>
       <HeaderLayout
         title={formatMessage({
-          id: getTrad('header.name'),
+          id: getTranslation('header.name'),
           defaultMessage: 'Content',
         })}
       />

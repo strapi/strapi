@@ -5,25 +5,26 @@ import { Cross, Drag } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { DisconnectButton, LinkEllipsis } from '../../../components/RelationInput';
 import {
+  DisconnectButton,
+  LinkEllipsis,
   ChildrenWrapper,
   FlexWrapper,
-} from '../../../components/RelationInput/components/RelationItem';
-import { PUBLICATION_STATES } from '../../../components/RelationInputDataManager/constants';
-import { getTrad } from '../../../utils';
+} from '../../../components/Relations/RelationInput';
+import { PUBLICATION_STATES } from '../../../components/Relations/RelationInputDataManager';
+import { getTranslation } from '../../../utils/translations';
 
 export const RelationDragPreview = ({ status, displayedValue, width }) => {
   const { formatMessage } = useIntl();
 
   const stateMessage = {
     [PUBLICATION_STATES.DRAFT]: formatMessage({
-      id: getTrad('relation.publicationState.draft'),
+      id: getTranslation('relation.publicationState.draft'),
       defaultMessage: 'Draft',
     }),
 
     [PUBLICATION_STATES.PUBLISHED]: formatMessage({
-      id: getTrad('relation.publicationState.published'),
+      id: getTranslation('relation.publicationState.published'),
       defaultMessage: 'Published',
     }),
   };

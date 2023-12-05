@@ -9,8 +9,7 @@ import { withHistory } from 'slate-history';
 import { type RenderElementProps, Slate, withReact, ReactEditor, useSlate } from 'slate-react';
 import styled from 'styled-components';
 
-// @ts-expect-error TODO convert to ts
-import { getTrad } from '../../utils';
+import { getTranslation } from '../../utils/translations';
 
 import { codeBlocks } from './Blocks/Code';
 import { headingBlocks } from './Blocks/Heading';
@@ -220,7 +219,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
       <>
         <VisuallyHidden id={ariaDescriptionId}>
           {formatMessage({
-            id: getTrad('components.Blocks.dnd.instruction'),
+            id: getTranslation('components.Blocks.dnd.instruction'),
             defaultMessage: `To reorder blocks, press Command or Control along with Shift and the Up or Down arrow keys`,
           })}
         </VisuallyHidden>

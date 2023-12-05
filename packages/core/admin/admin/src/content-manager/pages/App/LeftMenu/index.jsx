@@ -18,14 +18,13 @@ import { useIntl } from 'react-intl';
 import { shallowEqual, useSelector } from 'react-redux';
 import { NavLink } from 'react-router-dom';
 
-import getTrad from '../../../utils/getTrad';
-import { makeSelectModelLinks } from '../selectors';
+import { getTranslation } from '../../../utils/translations';
+import { selectModelLinks } from '../reducer';
 
 const LeftMenu = () => {
   const [search, setSearch] = useState('');
   const { formatMessage, locale } = useIntl();
-  const modelLinksSelector = useMemo(makeSelectModelLinks, []);
-  const { collectionTypeLinks, singleTypeLinks } = useSelector(modelLinksSelector, shallowEqual);
+  const { collectionTypeLinks, singleTypeLinks } = useSelector(selectModelLinks, shallowEqual);
 
   const { startsWith } = useFilter(locale, {
     sensitivity: 'base',
@@ -44,7 +43,7 @@ const LeftMenu = () => {
         {
           id: 'collectionTypes',
           title: {
-            id: getTrad('components.LeftMenu.collection-types'),
+            id: getTranslation('components.LeftMenu.collection-types'),
             defaultMessage: 'Collection Types',
           },
           searchable: true,
@@ -53,7 +52,7 @@ const LeftMenu = () => {
         {
           id: 'singleTypes',
           title: {
-            id: getTrad('components.LeftMenu.single-types'),
+            id: getTranslation('components.LeftMenu.single-types'),
             defaultMessage: 'Single Types',
           },
           searchable: true,
@@ -92,7 +91,7 @@ const LeftMenu = () => {
   };
 
   const label = formatMessage({
-    id: getTrad('header.name'),
+    id: getTranslation('header.name'),
     defaultMessage: 'Content',
   });
 

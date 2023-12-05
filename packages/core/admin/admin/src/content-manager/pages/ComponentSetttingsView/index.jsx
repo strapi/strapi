@@ -1,22 +1,22 @@
-import React, { memo, useEffect, useMemo, useReducer } from 'react';
+import React, { memo, useEffect, useReducer } from 'react';
 
 import { CheckPagePermissions, LoadingIndicatorPage, useFetchClient } from '@strapi/helper-plugin';
 import axios from 'axios';
-import { shallowEqual, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
+import { useTypedSelector } from '../../../core/store/hooks';
 import { selectAdminPermissions } from '../../../selectors';
-import { getData, getDataSucceeded } from '../../sharedReducers/crudReducer/actions';
-import { reducer, initialState } from '../../sharedReducers/crudReducer/reducer';
-import { mergeMetasWithSchema } from '../../utils';
-import { makeSelectModelAndComponentSchemas } from '../App/selectors';
+import { getData, getDataSucceeded } from '../../sharedReducers/crud/actions';
+import { reducer, initialState } from '../../sharedReducers/crud/reducer';
+import { mergeMetasWithSchema } from '../../utils/schemas';
+import { selectModelAndComponentSchemas } from '../App/reducer';
 import EditSettingsView from '../EditSettingsView';
 
 const ComponentSettingsView = () => {
+  console.log(reducer);
   const [{ isLoading, data: layout }, dispatch] = useReducer(reducer, initialState);
-  const schemasSelector = useMemo(makeSelectModelAndComponentSchemas, []);
-  const { schemas } = useSelector((state) => schemasSelector(state), shallowEqual);
-  const permissions = useSelector(selectAdminPermissions);
+  const { schemas } = useTypedSelector(selectModelAndComponentSchemas);
+  const permissions = useTypedSelector(selectAdminPermissions);
   const { uid } = useParams();
   const { get } = useFetchClient();
 

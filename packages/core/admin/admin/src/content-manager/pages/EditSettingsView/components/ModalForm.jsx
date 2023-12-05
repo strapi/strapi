@@ -4,10 +4,10 @@ import { GridItem, Option, Select } from '@strapi/design-system';
 import get from 'lodash/get';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { shallowEqual, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
-import getTrad from '../../../utils/getTrad';
-import { makeSelectModelAndComponentSchemas, selectFieldSizes } from '../../App/selectors';
+import { getTranslation } from '../../../utils/translations';
+import { selectModelAndComponentSchemas, selectFieldSizes } from '../../App/reducer';
 import { useLayoutDnd } from '../hooks/useLayoutDnd';
 import { createPossibleMainFieldsForModelsAndComponents, getInputProps } from '../utils';
 
@@ -23,8 +23,7 @@ const FIELD_SIZES = [
 const ModalForm = ({ onMetaChange, onSizeChange }) => {
   const { formatMessage } = useIntl();
   const { modifiedData, selectedField, attributes, fieldForm } = useLayoutDnd();
-  const schemasSelector = useMemo(makeSelectModelAndComponentSchemas, []);
-  const { schemas } = useSelector((state) => schemasSelector(state), shallowEqual);
+  const { schemas } = useSelector(selectModelAndComponentSchemas);
   const fieldSizes = useSelector(selectFieldSizes);
 
   const formToDisplay = useMemo(() => {
@@ -85,7 +84,9 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
           hint={
             meta === 'mainField'
               ? formatMessage({
-                  id: getTrad('containers.SettingPage.editSettings.relation-field.description'),
+                  id: getTranslation(
+                    'containers.SettingPage.editSettings.relation-field.description'
+                  ),
                 })
               : ''
           }
@@ -117,7 +118,7 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
               onSizeChange({ name: selectedField, value });
             }}
             label={formatMessage({
-              id: getTrad('containers.SettingPage.editSettings.size.label'),
+              id: getTranslation('containers.SettingPage.editSettings.size.label'),
               defaultMessage: 'Size',
             })}
           >

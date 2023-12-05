@@ -41,7 +41,7 @@ const ALLOWED_ROOT_LEVEL_OPTIONS = [
 ] as const;
 
 export class CustomFields {
-  customFields: Record<CustomFieldUID, CustomField>;
+  customFields: Record<string, CustomField>;
 
   constructor() {
     this.customFields = {};
@@ -105,7 +105,7 @@ export class CustomFields {
     return this.customFields;
   }
 
-  get(uid: CustomFieldUID): CustomField | undefined {
+  get(uid: string): CustomField | undefined {
     return this.customFields[uid];
   }
 }

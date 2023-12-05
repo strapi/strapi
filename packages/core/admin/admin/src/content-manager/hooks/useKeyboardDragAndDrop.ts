@@ -7,23 +7,16 @@ export type UseKeyboardDragAndDropCallbacks = {
   onMoveItem?: (newIndex: number | Array<number>, currentIndex: number | Array<number>) => void;
 };
 
-type UseKeyboardDragAndDropFunction = (
-  active: boolean,
-  index: number | Array<number>,
-  callbacks: UseKeyboardDragAndDropCallbacks
-) => (event: React.KeyboardEvent<HTMLButtonElement>) => void;
-
 /**
  * Utility hook designed to implement keyboard accessibile drag and drop by
  * returning an onKeyDown handler to be passed to the drag icon button.
  *
  * @internal - You should use `useDragAndDrop` instead.
- * */
-
-export const useKeyboardDragAndDrop: UseKeyboardDragAndDropFunction = (
-  active,
-  index,
-  { onCancel, onDropItem, onGrabItem, onMoveItem }
+ */
+export const useKeyboardDragAndDrop = (
+  active: boolean,
+  index: number | Array<number>,
+  { onCancel, onDropItem, onGrabItem, onMoveItem }: UseKeyboardDragAndDropCallbacks
 ) => {
   const [isSelected, setIsSelected] = React.useState(false);
 
@@ -63,7 +56,7 @@ export const useKeyboardDragAndDrop: UseKeyboardDragAndDropFunction = (
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+  const handleKeyDown: React.KeyboardEventHandler<HTMLButtonElement> = (e) => {
     if (!active) {
       return;
     }

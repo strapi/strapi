@@ -20,7 +20,8 @@ import { useMutation } from 'react-query';
 
 import ModelsContext from '../../contexts/ModelsContext';
 import { usePluginsQueryParams } from '../../hooks';
-import { checkIfAttributeIsDisplayable, getTrad } from '../../utils';
+import { checkIfAttributeIsDisplayable } from '../../utils';
+import { getTranslation } from '../../utils/translations';
 
 import { EditFieldForm } from './components/EditFieldForm';
 import { Settings } from './components/Settings';
@@ -106,7 +107,7 @@ export const ListSettingsView = ({ layout, slug }) => {
     if (displayedFields.length === 1) {
       toggleNotification({
         type: 'info',
-        message: { id: getTrad('notification.info.minimumFields') },
+        message: { id: getTranslation('notification.info.minimumFields') },
       });
     } else {
       dispatch({
@@ -203,12 +204,14 @@ export const ListSettingsView = ({ layout, slug }) => {
               </Button>
             }
             subtitle={formatMessage({
-              id: getTrad('components.SettingsViewWrapper.pluginHeader.description.list-settings'),
+              id: getTranslation(
+                'components.SettingsViewWrapper.pluginHeader.description.list-settings'
+              ),
               defaultMessage: 'Define the settings of the list view.',
             })}
             title={formatMessage(
               {
-                id: getTrad('components.SettingsViewWrapper.pluginHeader.title'),
+                id: getTranslation('components.SettingsViewWrapper.pluginHeader.title'),
                 defaultMessage: 'Configure the view - {name}',
               },
               { name: upperFirst(modifiedData.info.displayName) }

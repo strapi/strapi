@@ -33,8 +33,8 @@ import { useIntl } from 'react-intl';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { useDragAndDrop } from '../../../../../../../../../../admin/src/content-manager/hooks';
-import { composeRefs } from '../../../../../../../../../../admin/src/content-manager/utils';
+import { useDragAndDrop } from '../../../../../../../../../../admin/src/content-manager/hooks/useDragAndDrop';
+import { composeRefs } from '../../../../../../../../../../admin/src/content-manager/utils/refs';
 import {
   cloneStage,
   deleteStage,

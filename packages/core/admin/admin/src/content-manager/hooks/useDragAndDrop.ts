@@ -8,13 +8,14 @@ import {
   type ConnectDropTarget,
   type ConnectDragPreview,
   type DragSourceMonitor,
-  type DropTargetMonitor,
 } from 'react-dnd';
 
 import {
   useKeyboardDragAndDrop,
   type UseKeyboardDragAndDropCallbacks,
 } from './useKeyboardDragAndDrop';
+
+import type { Entity } from '@strapi/types';
 
 const DIRECTIONS = {
   UPWARD: 'upward',
@@ -26,28 +27,21 @@ const DROP_SENSITIVITY = {
   IMMEDIATE: 'immediate',
 } as const;
 
-type Item = {
-  [key: string]: unknown;
-};
-
-type DragObject = Item & {
-  index: number | Array<number>;
-  width: number | undefined;
-};
-
-type UseDragAndDropOptions = UseKeyboardDragAndDropCallbacks & {
+interface UseDragAndDropOptions<
+  TItem extends { index: number | Array<number> } = { index: number | Array<number> }
+> extends UseKeyboardDragAndDropCallbacks {
   type?: string;
   index: number | Array<number>;
-  item: Item;
+  item?: TItem;
   onStart?: () => void;
   onEnd?: () => void;
   dropSensitivity?: (typeof DROP_SENSITIVITY)[keyof typeof DROP_SENSITIVITY];
-};
+}
 
 type Identifier = ReturnType<HandlerManager['getHandlerId']>;
 
 type UseDragAndDropReturn = [
-  {
+  props: {
     handlerId: Identifier;
     isDragging: boolean;
     handleKeyDown: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
@@ -60,26 +54,19 @@ type UseDragAndDropReturn = [
   dragPreviewRef: ConnectDragPreview
 ];
 
-type UseDragAndDropFunction = (
-  active: boolean,
-  options: UseDragAndDropOptions
-) => UseDragAndDropReturn;
-
 type DropCollectedProps = {
   handlerId: Identifier;
   isOver: boolean;
 };
 
-// Type definition Monitor<DragObject, DragResult>, where DragResult is void as we are not returning anything on drop()
-type DropTargetMonitorType = DropTargetMonitor<DragObject, void>;
-type DragSourceMonitorType = DragSourceMonitor<DragObject, void>;
-
 /**
  * A utility hook abstracting the general drag and drop hooks from react-dnd.
  * Centralising the same behaviours and by default offering keyboard support.
  */
-const useDragAndDrop: UseDragAndDropFunction = (
-  active,
+const useDragAndDrop = <
+  TItem extends { index: number | Array<number>; id?: Entity.ID; [key: string]: unknown }
+>(
+  active: boolean,
   {
     type = 'STRAPI_DND',
     index,
@@ -91,19 +78,19 @@ const useDragAndDrop: UseDragAndDropFunction = (
     onCancel,
     onMoveItem,
     dropSensitivity = DROP_SENSITIVITY.REGULAR,
-  }
-) => {
-  const objectRef = React.useRef<HTMLElement | null>(null);
+  }: UseDragAndDropOptions<TItem>
+): UseDragAndDropReturn => {
+  const objectRef = React.useRef<HTMLElement>(null);
 
-  const [{ handlerId, isOver }, dropRef] = useDrop<DragObject, void, DropCollectedProps>({
+  const [{ handlerId, isOver }, dropRef] = useDrop<TItem, void, DropCollectedProps>({
     accept: type,
-    collect(monitor: DropTargetMonitorType) {
+    collect(monitor) {
       return {
         handlerId: monitor.getHandlerId(),
         isOver: monitor.isOver({ shallow: true }),
       };
     },
-    drop(item: DragObject) {
+    drop(item) {
       const draggedIndex = item.index;
       const newIndex = index;
 
@@ -111,7 +98,7 @@ const useDragAndDrop: UseDragAndDropFunction = (
         onDropItem(draggedIndex, newIndex);
       }
     },
-    hover(item: DragObject, monitor: DropTargetMonitorType) {
+    hover(item, monitor) {
       if (!objectRef.current || !onMoveItem) {
         return;
       }
@@ -188,7 +175,7 @@ const useDragAndDrop: UseDragAndDropFunction = (
     },
   });
 
-  const getDragDirection = (monitor: DragSourceMonitorType) => {
+  const getDragDirection = (monitor: DragSourceMonitor<TItem, void>) => {
     if (
       monitor &&
       monitor.isDragging() &&
@@ -234,12 +221,12 @@ const useDragAndDrop: UseDragAndDropFunction = (
      * However, if we don't have an ID then we want the libraries
      * defaults to take care of this.
      */
-    isDragging: item.id
-      ? (monitor: DragSourceMonitorType) => {
+    isDragging: item?.id
+      ? (monitor) => {
           return item.id === monitor.getItem().id;
         }
       : undefined,
-    collect: (monitor: DragSourceMonitorType) => ({
+    collect: (monitor) => ({
       isDragging: monitor.isDragging(),
       initialOffset: monitor.getInitialClientOffset(),
       currentOffset: monitor.getClientOffset(),
@@ -263,4 +250,10 @@ const useDragAndDrop: UseDragAndDropFunction = (
   ];
 };
 
-export { useDragAndDrop, DIRECTIONS, DROP_SENSITIVITY };
+export {
+  useDragAndDrop,
+  UseDragAndDropReturn,
+  UseDragAndDropOptions,
+  DIRECTIONS,
+  DROP_SENSITIVITY,
+};

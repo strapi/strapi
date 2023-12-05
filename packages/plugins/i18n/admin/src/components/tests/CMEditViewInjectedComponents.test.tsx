@@ -70,7 +70,7 @@ const render = (
             isSingleType: false,
             modifiedData: {},
             readActionAllowedFields: [],
-            upateActionAllowedFields: [],
+            updateActionAllowedFields: [],
             slug: 'foo',
           }),
           []
