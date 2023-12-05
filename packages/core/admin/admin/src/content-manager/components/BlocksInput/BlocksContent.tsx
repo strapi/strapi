@@ -39,14 +39,15 @@ type DragDirection = (typeof DIRECTIONS)[keyof typeof DIRECTIONS];
 
 const DropPlaceholder = styled(Box)<{
   dragDirection: DragDirection | null;
+  placeholderMargin: 1 | 2;
 }>`
   position: absolute;
   right: 0;
 
   // Show drop placeholder 8px above or below the drop target
-  ${({ dragDirection, theme }) => `
-  top: ${dragDirection === DIRECTIONS.UPWARD && `-${theme.spaces[2]}`};
-  bottom: ${dragDirection === DIRECTIONS.DOWNWARD && `-${theme.spaces[2]}`};
+  ${({ dragDirection, theme, placeholderMargin }) => `
+  top: ${dragDirection === DIRECTIONS.UPWARD && `-${theme.spaces[placeholderMargin]}`};
+  bottom: ${dragDirection === DIRECTIONS.DOWNWARD && `-${theme.spaces[placeholderMargin]}`};
 `}
 `;
 
@@ -247,6 +248,8 @@ const DragAndDropElement = ({
           width="calc(100% - 24px)"
           marginLeft="auto"
           dragDirection={dragDirection}
+          // For list items placeholder reduce the margin around
+          placeholderMargin={children.props.as && children.props.as === 'li' ? 1 : 2}
         />
       )}
       {isDragging ? (
