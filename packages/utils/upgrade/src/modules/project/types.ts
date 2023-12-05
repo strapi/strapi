@@ -1,6 +1,6 @@
-import type { Version } from '../version';
 import type { Codemod } from '../codemod';
 import type { Report } from '../report';
+import type { Version } from '../version';
 
 export type FileExtension = `.${string}`;
 

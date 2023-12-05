@@ -10496,31 +10496,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/upgrade-old@workspace:packages/utils/upgrade-old":
-  version: 0.0.0-use.local
-  resolution: "@strapi/upgrade-old@workspace:packages/utils/upgrade-old"
-  dependencies:
-    "@strapi/pack-up": "workspace:*"
-    "@strapi/types": "npm:4.15.4"
-    "@types/jscodeshift": "npm:0.11.10"
-    chalk: "npm:4.1.2"
-    cli-table3: "npm:0.6.2"
-    commander: "npm:8.3.0"
-    esbuild-register: "npm:3.5.0"
-    eslint-config-custom: "workspace:*"
-    fs-extra: "npm:10.0.0"
-    glob: "npm:10.3.10"
-    jscodeshift: "npm:0.15.1"
-    lodash: "npm:4.17.21"
-    ora: "npm:5.4.1"
-    prompts: "npm:2.4.2"
-    rimraf: "npm:3.0.2"
-    semver: "npm:7.5.4"
-  bin:
-    upgrade-old: ./bin/upgrade.js
-  languageName: unknown
-  linkType: soft
-
 "@strapi/upgrade@workspace:packages/utils/upgrade":
   version: 0.0.0-use.local
   resolution: "@strapi/upgrade@workspace:packages/utils/upgrade"

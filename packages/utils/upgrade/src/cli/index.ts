@@ -1,6 +1,6 @@
-import os from 'os';
 import chalk from 'chalk';
 import { program } from 'commander';
+import os from 'os';
 
 import { version as packageJSONVersion } from '../../package.json';
 import { Version } from '../modules/version';

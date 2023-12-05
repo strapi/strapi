@@ -1,19 +1,22 @@
 import assert from 'node:assert';
-
+import path from 'node:path';
 import {
-  codemodRepositoryFactory,
   constants as codemodRepositoryConstants,
+  codemodRepositoryFactory,
 } from '../codemod-repository';
-import { isLiteralSemVer, isSemVer, rangeFromVersions, semVerFactory } from '../version';
 import * as f from '../format';
+import { isLiteralSemVer, isSemVer, rangeFromVersions, semVerFactory } from '../version';
 
-import type { ConfirmationCallback, Upgrader as UpgraderInterface, UpgradeReport } from './types';
-import type { Version } from '../version';
+import { unknownToError } from '../error';
 import type { Logger } from '../logger';
-import type { Requirement } from '../requirement';
 import type { NPM } from '../npm';
 import type { Project } from '../project';
-import { unknownToError } from '../error';
+import type { Requirement } from '../requirement';
+import { JSONObject } from '../runner/json';
+import { replaceJson } from '../runner/json/export';
+import { createJSONTransformAPI } from '../runner/json/transform-api';
+import type { Version } from '../version';
+import type { ConfirmationCallback, UpgradeReport, Upgrader as UpgraderInterface } from './types';
 
 export class Upgrader implements UpgraderInterface {
   private project: Project;
@@ -73,6 +76,42 @@ export class Upgrader implements UpgraderInterface {
     return this;
   }
 
+  async upgradePackageJson() {
+    this.logger?.info('Upgrading package.json');
+
+    // Load the package.json file
+    const packageJsonPath = path.resolve(this.project.cwd, 'package.json');
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const json = require(packageJsonPath);
+    const jsonTransform = createJSONTransformAPI(json);
+
+    // find all @strapi packages that match the current Strapi version
+    const deps = jsonTransform.get('dependencies') as JSONObject;
+    const prefix = '@strapi/';
+    const strapiDeps = Object.keys(deps).filter((key) => {
+      this.logger?.info(`key: ${key}, value: ${deps[key]}`);
+      return key.startsWith(prefix) && deps[key] === this.project.strapiVersion.raw;
+    });
+
+    if (!strapiDeps || strapiDeps === null) {
+      this.logger?.info("Nothing to upgrade in package.json, it's already up to date");
+    }
+
+    // update the version of all @strapi packages to the target version
+    strapiDeps.forEach((key) => {
+      this.logger?.info(
+        `Setting dependencies.${key} ${this.project.strapiVersion.raw} → ${this.target.raw}`
+      );
+      jsonTransform.set(`dependencies.${key}`, this.target.raw);
+    });
+    const updatedJson = jsonTransform.root();
+
+    if (!this.isDry) {
+      await replaceJson(packageJsonPath, updatedJson);
+      this.logger?.info('Wrote updated packages to package.json');
+    }
+  }
+
   async upgrade(): Promise<UpgradeReport> {
     const range = rangeFromVersions(this.project.strapiVersion, this.target);
     const npmVersionsMatches = this.npmPackage?.findVersionsInRange(range) ?? [];
@@ -84,7 +123,8 @@ export class Upgrader implements UpgraderInterface {
         target: this.target,
       });
 
-      // todo: upgrade package json
+      await this.upgradePackageJson();
+
       // todo: install dependencies
 
       await this.runCodemods(range);

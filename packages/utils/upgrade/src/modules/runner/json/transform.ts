@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-import assert from 'node:assert';
-import fse from 'fs-extra';
-import { isEqual } from 'lodash/fp';
 import { register } from 'esbuild-register/dist/node';
+import { isEqual } from 'lodash/fp';
+import assert from 'node:assert';
 
 import { createJSONTransformAPI } from './transform-api';
 
 import type { Report } from '../../report';
 
+import { replaceJson } from './export';
 import type { JSONRunnerConfiguration, JSONSourceFile, JSONTransformParams } from './types';
 
 export const transformJSON = async (
@@ -51,7 +51,7 @@ export const transformJSON = async (
       // If the json object has modifications
       if (!isEqual(json, out)) {
         if (!dry) {
-          fse.writeFileSync(path, JSON.stringify(out, null, 2));
+          await replaceJson(path, out);
         }
         report.ok += 1;
       }
