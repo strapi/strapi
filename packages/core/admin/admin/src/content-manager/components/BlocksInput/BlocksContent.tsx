@@ -154,6 +154,14 @@ const DragAndDropElement = ({
                 newIndex[0] > currentIndex[0] ? [newIndex[0] - 1, ...newIndex.slice(1)] : newIndex,
             }
           );
+
+          // When a node is dragged downward into the list, the items shift upward by one index
+          if (newIndex[0] > currentIndex[0]) {
+            Transforms.moveNodes(editor, {
+              at: [newIndex[0] - 1, ...newIndex.slice(1)],
+              to: [newIndex[0] - 1, newIndex[1] + 1, ...newIndex.slice(2)],
+            });
+          }
         }
 
         // If a node is dragged out of the list block then convert it to a paragraph
