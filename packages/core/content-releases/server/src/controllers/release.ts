@@ -140,12 +140,6 @@ const releaseController = {
     const user: UserInfo = ctx.state.user;
     const id: PublishRelease.Request['params']['id'] = ctx.params.id;
 
-    const isSuperAdmin = strapi.admin.services.role.hasSuperAdminRole(user);
-
-    if (!isSuperAdmin) {
-      throw new errors.ForbiddenError('Only superadmins can publish a release');
-    }
-
     const releaseService = getService('release', { strapi });
     const release = await releaseService.publish(id, { user });
 
