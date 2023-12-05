@@ -166,25 +166,29 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
   },
   async publish(releaseId: PublishRelease.Request['params']['id']) {
     // We need to pass the type because entityService.findOne is not returning the correct type
-    const releaseWithEntries = (await strapi.entityService.findOne(RELEASE_MODEL_UID, releaseId, {
-      populate: {
-        actions: {
-          populate: {
-            entry: true,
+    const releaseWithPopulatedActionEntries = (await strapi.entityService.findOne(
+      RELEASE_MODEL_UID,
+      releaseId,
+      {
+        populate: {
+          actions: {
+            populate: {
+              entry: true,
+            },
           },
         },
-      },
-    })) as unknown as Release;
+      }
+    )) as unknown as Release;
 
-    if (!releaseWithEntries) {
+    if (!releaseWithPopulatedActionEntries) {
       throw new errors.NotFoundError(`No release found for id ${releaseId}`);
     }
 
-    if (releaseWithEntries.releasedAt) {
+    if (releaseWithPopulatedActionEntries.releasedAt) {
       throw new errors.ValidationError('Release already published');
     }
 
-    if (releaseWithEntries.actions.length === 0) {
+    if (releaseWithPopulatedActionEntries.actions.length === 0) {
       throw new errors.ValidationError('No entries to publish');
     }
 
@@ -197,7 +201,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
         unpublish: ReleaseAction['entry'][];
       };
     } = {};
-    for (const action of releaseWithEntries.actions) {
+    for (const action of releaseWithPopulatedActionEntries.actions) {
       const contentTypeUid = action.contentType;
 
       if (!actions[contentTypeUid]) {
@@ -216,6 +220,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
 
     const entityManagerService = strapi.plugin('content-manager').service('entity-manager');
 
+    // Only publish the release if all action updates are applied successfully to their entry, otherwise leave everything as is
     await strapi.db.transaction(async () => {
       for (const contentTypeUid of Object.keys(actions)) {
         const { publish, unpublish } = actions[contentTypeUid as UID.ContentType];
@@ -232,7 +237,10 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
 
     const release = await strapi.entityService.update(RELEASE_MODEL_UID, releaseId, {
       data: {
-        // @ts-expect-error aaa
+        /*
+         * The type returned from the entity service: Partial<Input<"plugin::content-releases.release">> looks like it's wrong
+         */
+        // @ts-expect-error see above
         releasedAt: new Date(),
       },
     });

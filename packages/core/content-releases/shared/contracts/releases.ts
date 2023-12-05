@@ -102,7 +102,7 @@ export declare namespace UpdateRelease {
 }
 
 /**
- * POST /content-releases/:id/publish - Publish a release
+ * POST /content-releases/:releaseId/publish - Publish a release
  */
 export declare namespace PublishRelease {
   export interface Request {

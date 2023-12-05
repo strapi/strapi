@@ -137,7 +137,7 @@ const releaseController = {
   },
 
   async publish(ctx: Koa.Context) {
-    const user: UserInfo = ctx.state.user;
+    const user: PublishRelease.Request['state']['user'] = ctx.state.user;
     const id: PublishRelease.Request['params']['id'] = ctx.params.id;
 
     const releaseService = getService('release', { strapi });
