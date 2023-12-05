@@ -8,9 +8,9 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
+import { CardDragPreview } from '../../../components/DragPreviews/CardDragPreview';
 import { ItemTypes } from '../../../utils/dragAndDrop';
 import { getTranslation } from '../../../utils/translations';
-import { CardDragPreview } from '../../App/components/CardDragPreview';
 
 const ActionButton = styled.button`
   display: flex;
@@ -178,7 +178,7 @@ const DraggableCard = ({
 
   return (
     <FieldWrapper ref={refs ? refs.dropRef : null}>
-      {isDragging && <CardDragPreview transparent labelField={labelField} />}
+      {isDragging && <CardDragPreview labelField={labelField} />}
       {!isDragging && isDraggingSibling && <CardDragPreview isSibling labelField={labelField} />}
 
       {!isDragging && !isDraggingSibling && (

@@ -1,11 +1,11 @@
-import React from 'react';
-
 import { ContentLayout, EmptyStateLayout, HeaderLayout, Main } from '@strapi/design-system';
-import { LinkButton, useFocusWhenNavigate } from '@strapi/helper-plugin';
+import { LinkButton } from '@strapi/design-system/v2';
+import { useFocusWhenNavigate } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import { NavLink } from 'react-router-dom';
 
-import { getTranslation } from '../../utils/translations';
+import { getTranslation } from '../utils/translations';
 
 const NoContentType = () => {
   const { formatMessage } = useIntl();
@@ -23,8 +23,10 @@ const NoContentType = () => {
         <EmptyStateLayout
           action={
             <LinkButton
+              as={NavLink}
               variant="secondary"
               startIcon={<Plus />}
+              // @ts-expect-error – DS inference does not work with the `as` prop.
               to="/plugins/content-type-builder/content-types/create-content-type"
             >
               {formatMessage({
@@ -47,4 +49,4 @@ const NoContentType = () => {
   );
 };
 
-export default NoContentType;
+export { NoContentType };

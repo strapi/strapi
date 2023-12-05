@@ -6,8 +6,9 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
+import { useTypedSelector } from '../../../../core/store/hooks';
 import { getTranslation } from '../../../utils/translations';
-import { selectModelAndComponentSchemas, selectFieldSizes } from '../../App/reducer';
+import { selectSchemas } from '../../App';
 import { useLayoutDnd } from '../hooks/useLayoutDnd';
 import { createPossibleMainFieldsForModelsAndComponents, getInputProps } from '../utils';
 
@@ -23,8 +24,8 @@ const FIELD_SIZES = [
 const ModalForm = ({ onMetaChange, onSizeChange }) => {
   const { formatMessage } = useIntl();
   const { modifiedData, selectedField, attributes, fieldForm } = useLayoutDnd();
-  const { schemas } = useSelector(selectModelAndComponentSchemas);
-  const fieldSizes = useSelector(selectFieldSizes);
+  const schemas = useSelector(selectSchemas);
+  const fieldSizes = useTypedSelector((state) => state['content-manager_app'].fieldSizes);
 
   const formToDisplay = useMemo(() => {
     if (!selectedField) {

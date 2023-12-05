@@ -1,10 +1,11 @@
-import React from 'react';
-
 import { ContentLayout, HeaderLayout, Main } from '@strapi/design-system';
-import { NoPermissions as NoPermissionsCompo, useFocusWhenNavigate } from '@strapi/helper-plugin';
+import {
+  NoPermissions as NoPermissionsComponent,
+  useFocusWhenNavigate,
+} from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
-import { getTranslation } from '../../utils/translations';
+import { getTranslation } from '../utils/translations';
 
 const NoPermissions = () => {
   const { formatMessage } = useIntl();
@@ -19,10 +20,10 @@ const NoPermissions = () => {
         })}
       />
       <ContentLayout>
-        <NoPermissionsCompo />
+        <NoPermissionsComponent />
       </ContentLayout>
     </Main>
   );
 };
 
-export default NoPermissions;
+export { NoPermissions };

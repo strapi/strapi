@@ -6,7 +6,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
 import { useTypedSelector } from '../../core/store/hooks';
-import { useFetchContentTypeLayout } from '../hooks/useFetchContentTypeLayout';
+import { useContentTypeLayout } from '../hooks/useLayouts';
 import {
   SettingsViewComponentLayout,
   SettingsViewContentTypeLayout,
@@ -30,7 +30,7 @@ const CollectionTypeRecursivePath = ({
   },
 }: CollectionTypeRecursivePathProps) => {
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
-  const { isLoading, layout, updateLayout } = useFetchContentTypeLayout(slug);
+  const { isLoading, layout, updateLayout } = useContentTypeLayout(slug);
 
   const { rawContentTypeLayout, rawComponentsLayouts } = React.useMemo(() => {
     let rawContentTypeLayout: SettingsViewContentTypeLayout | null = null;

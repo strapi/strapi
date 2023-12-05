@@ -28,11 +28,10 @@ import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
-import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
+import { useTypedSelector } from '../../../core/store/hooks';
 import { getTranslation } from '../../utils/translations';
-import { selectFieldSizes } from '../App/reducer';
 
 import DisplayedFields from './components/DisplayedFields';
 import ModalForm from './components/FormModal';
@@ -55,7 +54,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
   const { formatMessage } = useIntl();
   const modelName = mainLayout.info.displayName;
   const attributes = modifiedData?.attributes ?? {};
-  const fieldSizes = useSelector(selectFieldSizes);
+  const fieldSizes = useTypedSelector((state) => state['content-manager_app'].fieldSizes);
   const { put } = useFetchClient();
 
   const entryTitleOptions = Object.keys(attributes).filter((attr) => {

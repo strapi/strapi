@@ -1,29 +1,29 @@
-import React, { memo, useEffect, useReducer } from 'react';
+import * as React from 'react';
 
 import { CheckPagePermissions, LoadingIndicatorPage, useFetchClient } from '@strapi/helper-plugin';
-import axios from 'axios';
+import axios, { CancelTokenSource } from 'axios';
 import { useParams } from 'react-router-dom';
 
-import { useTypedSelector } from '../../../core/store/hooks';
-import { selectAdminPermissions } from '../../../selectors';
-import { getData, getDataSucceeded } from '../../sharedReducers/crud/actions';
-import { reducer, initialState } from '../../sharedReducers/crud/reducer';
-import { mergeMetasWithSchema } from '../../utils/schemas';
-import { selectModelAndComponentSchemas } from '../App/reducer';
-import EditSettingsView from '../EditSettingsView';
+import { useTypedSelector } from '../../core/store/hooks';
+import { getData, getDataSucceeded } from '../sharedReducers/crud/actions';
+import { reducer, initialState } from '../sharedReducers/crud/reducer';
+import { mergeMetasWithSchema } from '../utils/schemas';
+
+import { selectSchemas } from './App';
+// @ts-expect-error – This will be done in CONTENT-1952
+import EditSettingsView from './EditSettingsView';
 
 const ComponentSettingsView = () => {
-  console.log(reducer);
-  const [{ isLoading, data: layout }, dispatch] = useReducer(reducer, initialState);
-  const { schemas } = useTypedSelector(selectModelAndComponentSchemas);
-  const permissions = useTypedSelector(selectAdminPermissions);
-  const { uid } = useParams();
+  const [{ isLoading, data: layout }, dispatch] = React.useReducer(reducer, initialState);
+  const schemas = useTypedSelector(selectSchemas);
+  const permissions = useTypedSelector((state) => state.admin_app.permissions);
+  const { uid } = useParams<{ uid: string }>();
   const { get } = useFetchClient();
 
-  useEffect(() => {
+  React.useEffect(() => {
     const CancelToken = axios.CancelToken;
     const source = CancelToken.source();
-    const fetchData = async (source) => {
+    const fetchData = async (source: CancelTokenSource) => {
       try {
         dispatch(getData());
 
@@ -48,15 +48,15 @@ const ComponentSettingsView = () => {
     };
   }, [uid, schemas, get]);
 
-  if (isLoading) {
+  if (isLoading || !layout) {
     return <LoadingIndicatorPage />;
   }
 
   return (
-    <CheckPagePermissions permissions={permissions.contentManager.componentsConfigurations}>
+    <CheckPagePermissions permissions={permissions.contentManager?.componentsConfigurations}>
       <EditSettingsView components={layout.components} mainLayout={layout.component} slug={uid} />
     </CheckPagePermissions>
   );
 };
 
-export default memo(ComponentSettingsView);
+export { ComponentSettingsView };
