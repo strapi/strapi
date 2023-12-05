@@ -37,10 +37,9 @@
   "module": "./dist/index.mjs",
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
-  "bin": "./bin/strapi.js",
   "files": [
-    "./dist",
-    "./resources"
+    "dist/",
+    "resources/"
   ],
   "scripts": {
     "build": "run pack-up build && run copy-files",

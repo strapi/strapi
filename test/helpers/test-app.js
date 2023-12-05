@@ -72,11 +72,6 @@ const linkPackages = async (scope) => {
     cwd: scope.rootPath,
     stdio: 'inherit',
   });
-
-  await execa('yarn', ['install'], {
-    cwd: scope.rootPath,
-    stdio: 'inherit',
-  });
 };
 
 /**

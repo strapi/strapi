@@ -87,9 +87,9 @@
   "types": "./dist/index.d.ts",
   "bin": "./bin/strapi.js",
   "files": [
-    "./dist",
-    "./bin",
-    "./resources",
+    "dist/",
+    "bin/",
+    "resources/",
     "index.js"
   ],
   "scripts": {

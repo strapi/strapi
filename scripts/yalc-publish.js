@@ -18,8 +18,9 @@ async function run() {
 
   await Promise.all(
     packagesDirs.map(async (dir) => {
-      await execa('npx', ['yalc', 'publish', '--no-scripts', dir], {
+      await execa('npx', ['yalc', 'push', '--no-scripts', dir], {
         stdio: 'inherit',
+        cwd: join(__dirname, '..'),
       });
     })
   );

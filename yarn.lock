@@ -8782,8 +8782,6 @@ __metadata:
     typescript: "npm:5.2.2"
     undici: "npm:5.27.2"
     yup: "npm:0.32.9"
-  bin:
-    core: ./bin/strapi.js
   languageName: unknown
   linkType: soft
 

@@ -38,7 +38,7 @@
   },
   "types": "./dist/index.d.ts",
   "files": [
-    "./dist",
+    "dist/",
     "strapi-server.js"
   ],
   "scripts": {
