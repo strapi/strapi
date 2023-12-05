@@ -18,11 +18,11 @@ import { selectAdminPermissions } from '../../../selectors';
 import ModelsContext from '../../contexts/ModelsContext';
 import { ItemTypes } from '../../utils/dragAndDrop';
 import { getTranslation } from '../../utils/translations';
-import CollectionTypeRecursivePath from '../CollectionTypeRecursivePath';
+import { CollectionTypeRecursivePath } from '../CollectionTypeRecursivePath';
 import ComponentSettingsView from '../ComponentSetttingsView';
 import NoContentType from '../NoContentType';
 import NoPermissions from '../NoPermissions';
-import SingleTypeRecursivePath from '../SingleTypeRecursivePath';
+import { SingleTypeRecursivePath } from '../SingleTypeRecursivePath';
 
 import { CardDragPreview } from './components/CardDragPreview';
 import { ComponentDragPreview } from './components/ComponentDragPreview';

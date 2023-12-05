@@ -54,7 +54,7 @@ const CTB_PERMISSIONS = [{ action: 'plugin::content-type-builder.read', subject:
 interface EditViewPageProps {
   allowedActions: AllowedActions;
   goBack: RouteComponentProps['history']['goBack'];
-  id: Entity.ID;
+  id?: Entity.ID;
   isSingleType?: boolean;
   origin?: string;
   slug: string;
