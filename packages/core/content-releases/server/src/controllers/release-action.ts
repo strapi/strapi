@@ -1,12 +1,16 @@
 import type Koa from 'koa';
 import { UID } from '@strapi/types';
 import { mapAsync } from '@strapi/utils';
-import { validateReleaseAction, validateReleaseActionUpdateSchema } from './validation/release-action';
+import {
+  validateReleaseAction,
+  validateReleaseActionUpdateSchema,
+} from './validation/release-action';
 import type {
   CreateReleaseAction,
   GetReleaseActions,
   ReleaseAction,
-  UpdateReleaseAction
+  UpdateReleaseAction,
+  DeleteReleaseAction,
 } from '../../../shared/contracts/release-actions';
 import { getAllowedContentTypes, getService, getPermissionsChecker } from '../utils';
 
@@ -106,10 +110,27 @@ const releaseActionController = {
     await validateReleaseActionUpdateSchema(releaseActionUpdateArgs);
 
     const releaseService = getService('release', { strapi });
-    const updatedAction = await releaseService.updateAction(actionId, releaseId, releaseActionUpdateArgs);
+    const updatedAction = await releaseService.updateAction(
+      actionId,
+      releaseId,
+      releaseActionUpdateArgs
+    );
 
     ctx.body = {
       data: updatedAction,
+    };
+  },
+  async delete(ctx: Koa.Context) {
+    const actionId: DeleteReleaseAction.Request['params']['actionId'] = ctx.params.actionId;
+    const releaseId: DeleteReleaseAction.Request['params']['releaseId'] = ctx.params.releaseId;
+
+    const deletedReleaseAction = await getService('release', { strapi }).deleteAction(
+      actionId,
+      releaseId
+    );
+
+    ctx.body = {
+      data: deletedReleaseAction,
     };
   },
 };

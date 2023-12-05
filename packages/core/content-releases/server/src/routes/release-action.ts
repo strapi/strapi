@@ -49,5 +49,21 @@ export default {
         ],
       },
     },
+    {
+      method: 'DELETE',
+      path: '/:releaseId/actions/:actionId',
+      handler: 'release-action.delete',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::content-releases.delete-action'],
+            },
+          },
+        ],
+      },
+    },
   ],
 };
