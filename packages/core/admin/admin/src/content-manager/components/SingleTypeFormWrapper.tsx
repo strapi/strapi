@@ -82,7 +82,10 @@ const SingleTypeFormWrapper = ({ children, slug }: SingleTypeFormWrapperProps) =
   const { setCurrentStep } = useGuidedTour();
   const [isCreatingEntry, setIsCreatingEntry] = React.useState(true);
   const [{ query, rawQuery }] = useQueryParams();
-  const params = buildValidGetParams(query);
+  /**
+   * If you don't memoize this, the entire form dies in recursion.
+   */
+  const params = React.useMemo(() => buildValidGetParams(query), [query]);
   const toggleNotification = useNotification();
   const dispatch = useTypedDispatch();
   const { formatAPIError } = useAPIErrorHandler(getTranslation);
