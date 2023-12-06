@@ -10,20 +10,12 @@ export class Requirement implements RequirementInterface {
 
   readonly name: string;
 
-  readonly description: string;
-
   readonly testCallback: RequirementTestCallback | null;
 
   children: RequirementInterface[];
 
-  constructor(
-    name: string,
-    description: string,
-    testCallback: RequirementTestCallback | null,
-    isRequired?: boolean
-  ) {
+  constructor(name: string, testCallback: RequirementTestCallback | null, isRequired?: boolean) {
     this.name = name;
-    this.description = description;
     this.testCallback = testCallback;
     this.isRequired = isRequired ?? true;
     this.children = [];
@@ -39,22 +31,23 @@ export class Requirement implements RequirementInterface {
     return this;
   }
 
-  optional() {
-    return requirementFactory(this.name, this.description, this.testCallback, false).setChildren(
-      this.children
-    );
+  asOptional() {
+    const newInstance = requirementFactory(this.name, this.testCallback, false);
+
+    newInstance.setChildren(this.children);
+
+    return newInstance;
   }
 
-  required() {
-    return requirementFactory(this.name, this.description, this.testCallback, true).setChildren(
-      this.children
-    );
+  asRequired() {
+    const newInstance = requirementFactory(this.name, this.testCallback, true);
+
+    newInstance.setChildren(this.children);
+
+    return newInstance;
   }
 
   async test(context: TestContext) {
-    const ok = (): TestResult => ({ pass: true, error: null });
-    const errored = (error: Error): TestResult => ({ pass: false, error });
-
     try {
       await this.testCallback?.(context);
       return ok();
@@ -72,9 +65,12 @@ export class Requirement implements RequirementInterface {
   }
 }
 
+const ok = (): TestResult => ({ pass: true, error: null });
+
+const errored = (error: Error): TestResult => ({ pass: false, error });
+
 export const requirementFactory = (
   name: string,
-  description: string,
   testCallback: RequirementTestCallback | null,
   isRequired?: boolean
-) => new Requirement(name, description, testCallback, isRequired);
+) => new Requirement(name, testCallback, isRequired);
