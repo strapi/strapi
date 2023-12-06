@@ -95,6 +95,7 @@ export class Upgrader implements UpgraderInterface {
 
     if (!strapiDeps || strapiDeps === null) {
       this.logger?.info("Nothing to upgrade in package.json, it's already up to date");
+      return;
     }
 
     // update the version of all @strapi packages to the target version
