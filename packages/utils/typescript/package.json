@@ -42,6 +42,9 @@
     "prettier": "2.8.4",
     "typescript": "5.2.2"
   },
+  "devDependencies": {
+    "@types/prettier": "2.7.3"
+  },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
