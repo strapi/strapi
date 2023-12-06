@@ -121,7 +121,7 @@
     "eslint-plugin-testing-library": "6.0.2",
     "execa": "5.1.1",
     "find-up": "5.0.0",
-    "fs-extra": "10.0.0",
+    "fs-extra": "10.1.0",
     "get-port": "5.1.1",
     "glob": "7.2.3",
     "husky": "8.0.2",
