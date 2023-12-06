@@ -1,7 +1,9 @@
 import { execSync } from 'child_process';
 import execa from 'execa';
-import logger from './logger';
 import type { Options } from '../types';
+import logger from './logger';
+
+// TODO: refactor to use the methods available in @strapi/utils
 
 export function runInstall(path: string, { useYarn }: Options = {}) {
   return execa(useYarn ? 'yarn' : 'npm', ['install'], {

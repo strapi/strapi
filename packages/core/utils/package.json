@@ -47,6 +47,7 @@
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
     "date-fns": "2.30.0",
+    "execa": "5.1.1",
     "http-errors": "1.8.1",
     "lodash": "4.17.21",
     "p-map": "4.0.0",

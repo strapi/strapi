@@ -9294,6 +9294,7 @@ __metadata:
     "@types/node": "npm:18.18.4"
     date-fns: "npm:2.30.0"
     eslint-config-custom: "npm:4.15.5"
+    execa: "npm:5.1.1"
     http-errors: "npm:1.8.1"
     koa: "npm:2.13.4"
     koa-body: "npm:4.2.0"

@@ -1,3 +1,4 @@
+import { packageManager } from '@strapi/utils';
 import assert from 'node:assert';
 import path from 'node:path';
 import {
@@ -112,6 +113,11 @@ export class Upgrader implements UpgraderInterface {
     }
   }
 
+  async runPackageInstaller() {
+    this.logger?.info('Running package installer');
+    await packageManager.runInstall(this.project.cwd);
+  }
+
   async upgrade(): Promise<UpgradeReport> {
     const range = rangeFromVersions(this.project.strapiVersion, this.target);
     const npmVersionsMatches = this.npmPackage?.findVersionsInRange(range) ?? [];
@@ -125,7 +131,7 @@ export class Upgrader implements UpgraderInterface {
 
       await this.upgradePackageJson();
 
-      // todo: install dependencies
+      await this.runPackageInstaller();
 
       await this.runCodemods(range);
     } catch (e) {
