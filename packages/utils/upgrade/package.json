@@ -42,7 +42,7 @@
   "module": "./dist/index.mjs",
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
-  "bin": "./bin/codemods.js",
+  "bin": "./bin/upgrade.js",
   "files": [
     "bin",
     "dist",
