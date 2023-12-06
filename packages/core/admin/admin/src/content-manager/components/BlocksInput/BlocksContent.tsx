@@ -174,6 +174,14 @@ const DragAndDropElement = ({
             // Node is dragged upwards out of list block
             currentIndex[0] += 1;
           }
+
+          // Node is dragged downwards out of list block, as items are not shifting by 1 we move the item below the dragged index
+          if (newIndex[0] > currentIndex[0]) {
+            Transforms.moveNodes(editor, {
+              at: newIndex,
+              to: [newIndex[0] + 1],
+            });
+          }
         }
 
         // If a dragged node is the only list-item then delete list block
