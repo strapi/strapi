@@ -143,25 +143,44 @@ export class Upgrader implements UpgraderInterface {
       const { pass, error } = await requirement.test(context);
 
       if (pass) {
-        await this.checkRequirements(requirement.children, context);
+        await this.onSuccessfulRequirement(requirement, context);
       } else {
-        const msg = `Requirement failed (${requirement.name}): ${error.message}`;
-
-        if (requirement.isRequired) {
-          throw new Error(msg);
-        } else {
-          const response = await this.confirmationCallback?.(
-            `"${requirement.name}" failed, do you want to continue anyway?`
-          );
-
-          if (response === false) {
-            throw new Error(msg);
-          }
-
-          this.logger?.warn(msg);
-        }
+        await this.onFailedRequirement(requirement, error);
       }
     }
+  }
+
+  private async onSuccessfulRequirement(
+    requirement: Requirement.Requirement,
+    context: Requirement.TestContext
+  ): Promise<void> {
+    const hasChildren = requirement.children.length > 0;
+
+    if (hasChildren) {
+      await this.checkRequirements(requirement.children, context);
+    }
+  }
+
+  private async onFailedRequirement(
+    requirement: Requirement.Requirement,
+    originalError: Error
+  ): Promise<void> {
+    const errorMessage = `Upgrade requirement "${requirement.name}" failed: ${originalError.message}`;
+    const confirmationMessage = `Optional requirement "${requirement.name}" failed with "${originalError.message}", do you want to proceed anyway?`;
+
+    const error = new Error(errorMessage);
+
+    if (requirement.isRequired) {
+      throw error;
+    }
+
+    const response = await this.confirmationCallback?.(confirmationMessage);
+
+    if (!response) {
+      throw error;
+    }
+
+    this.logger?.warn(errorMessage);
   }
 
   private async runCodemods(range: Version.Range) {

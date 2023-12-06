@@ -2,7 +2,6 @@ import { requirementFactory } from '../../../modules/requirement';
 
 export const REQUIRE_AVAILABLE_NEXT_MAJOR = requirementFactory(
   'REQUIRE_AVAILABLE_NEXT_MAJOR',
-  'Requires a new major version (current + 1) to be available',
   (context) => {
     const { project, target } = context;
 
@@ -17,7 +16,6 @@ export const REQUIRE_AVAILABLE_NEXT_MAJOR = requirementFactory(
 
 export const REQUIRE_LATEST_FOR_CURRENT_MAJOR = requirementFactory(
   'REQUIRE_LATEST_FOR_CURRENT_MAJOR',
-  'Requires to be on the latest minor and patch version for the current major',
   (context) => {
     const { project, target, npmVersionsMatches } = context;
 

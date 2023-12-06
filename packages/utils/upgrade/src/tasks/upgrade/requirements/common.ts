@@ -4,48 +4,45 @@ import { requirementFactory } from '../../../modules/requirement';
 
 export const REQUIRE_GIT_CLEAN_REPOSITORY = requirementFactory(
   'REQUIRE_GIT_CLEAN_REPOSITORY',
-  '',
   async (context) => {
-    const { project } = context;
-    const git = simpleGit({ baseDir: project.cwd });
+    const git = simpleGit({ baseDir: context.project.cwd });
 
     const status = await git.status();
-    const isClean = status.isClean();
 
-    if (!isClean) {
-      throw new Error('The repository is not clean');
+    if (!status.isClean()) {
+      throw new Error(
+        'Repository is not clean. Please commit or stash any changes before upgrading'
+      );
     }
   }
 );
 
 export const REQUIRE_GIT_REPOSITORY = requirementFactory(
   'REQUIRE_GIT_REPOSITORY',
-  '',
   async (context) => {
-    const { project } = context;
-    const git = simpleGit({ baseDir: project.cwd });
+    const git = simpleGit({ baseDir: context.project.cwd });
+
     const isRepo = await git.checkIsRepo();
+
     if (!isRepo) {
-      throw new Error('This directory is not a Git repository');
+      throw new Error('Not a git repository (or any of the parent directories)');
     }
   }
-).addChild(REQUIRE_GIT_CLEAN_REPOSITORY.optional());
+).addChild(REQUIRE_GIT_CLEAN_REPOSITORY.asOptional());
 
 export const REQUIRE_GIT_INSTALLED = requirementFactory(
   'REQUIRE_GIT_INSTALLED',
-  '',
   async (context) => {
-    const { project } = context;
-    const git = simpleGit({ baseDir: project.cwd });
+    const git = simpleGit({ baseDir: context.project.cwd });
+
     try {
-      // Check if Git is installed
       await git.version();
-    } catch (err) {
+    } catch {
       throw new Error('Git is not installed');
     }
   }
-).addChild(REQUIRE_GIT_REPOSITORY.optional());
+).addChild(REQUIRE_GIT_REPOSITORY.asOptional());
 
-export const REQUIRE_GIT = requirementFactory('REQUIRE_MAYBE_GIT', '', null).addChild(
-  REQUIRE_GIT_INSTALLED.optional()
+export const REQUIRE_GIT = requirementFactory('REQUIRE_GIT', null).addChild(
+  REQUIRE_GIT_INSTALLED.asOptional()
 );
