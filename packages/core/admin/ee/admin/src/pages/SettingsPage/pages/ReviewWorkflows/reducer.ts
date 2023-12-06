@@ -33,7 +33,7 @@ export type CurrentWorkflow = Partial<
 
 export type PartialWorkflow = Omit<CurrentWorkflow, 'stages'> & { stages?: Partial<Stage>[] };
 
-interface ServerState {
+export interface ServerState {
   contentTypes?: {
     collectionTypes: Schema.CollectionType[];
     singleTypes: Schema.SingleType[];
@@ -46,7 +46,7 @@ interface ServerState {
 // This isn't something we should do.
 // TODO: Revamp the way we are handling this temp key for delete or create
 export type StageWithTempKey = Stage & { __temp_key__?: number };
-interface ClientState {
+export interface ClientState {
   currentWorkflow: {
     data: Partial<Omit<CurrentWorkflow, 'stages'> & { stages: StageWithTempKey[] }>;
   };
