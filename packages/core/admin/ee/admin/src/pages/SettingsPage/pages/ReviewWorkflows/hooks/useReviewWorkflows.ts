@@ -10,22 +10,22 @@ export type APIReviewWorkflowsQueryParams = Get.Params | (GetAll.Request['query'
 export function useReviewWorkflows(params: APIReviewWorkflowsQueryParams = {}) {
   const { get } = useFetchClient();
 
-  const { ...queryParams } = params;
+  const { id = '', ...queryParams } = params;
   const defaultQueryParams = {
     populate: 'stages',
   };
 
   const { data, isLoading, status, refetch } = useQuery(
-    ['review-workflows', 'workflows', params.id],
+    ['review-workflows', 'workflows', id],
     async () => {
-      const res = await get<GetAll.Response | Get.Response>(
-        `/admin/review-workflows/workflows/${params.id}`,
+      const { data } = await get<GetAll.Response | Get.Response>(
+        `/admin/review-workflows/workflows/${id}`,
         {
           params: { ...defaultQueryParams, ...queryParams },
         }
       );
 
-      return res.data;
+      return data;
     }
   );
 
@@ -36,7 +36,7 @@ export function useReviewWorkflows(params: APIReviewWorkflowsQueryParams = {}) {
   const workflows = React.useMemo(() => {
     let workflows: GetAll.Response['data'] = [];
 
-    if (data) {
+    if (data?.data) {
       if (Array.isArray(data.data)) {
         workflows = data.data;
       } else {
@@ -50,11 +50,8 @@ export function useReviewWorkflows(params: APIReviewWorkflowsQueryParams = {}) {
   const meta = React.useMemo(() => {
     let meta: GetAll.Response['meta'];
 
-    if (data) {
-      if (Array.isArray(data.data)) {
-        // @ts-expect-error - data.meta doesn't exist in type Get.Response
-        meta = data?.meta;
-      }
+    if (data && 'meta' in data) {
+      meta = data.meta;
     }
 
     return meta;
