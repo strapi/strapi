@@ -51,6 +51,7 @@
     "http-errors": "1.8.1",
     "lodash": "4.17.21",
     "p-map": "4.0.0",
+    "preferred-pm": "3.1.2",
     "yup": "0.32.9"
   },
   "devDependencies": {

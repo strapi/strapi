@@ -114,7 +114,8 @@ export class Upgrader implements UpgraderInterface {
   }
 
   async runPackageInstaller() {
-    this.logger?.info('Running package installer');
+    this.logger?.info(`Running package installer at ${this.project.cwd}`);
+    // TODO: this takes a very long time, we should show a spinner
     await packageManager.runInstall(this.project.cwd);
   }
 
@@ -131,7 +132,13 @@ export class Upgrader implements UpgraderInterface {
 
       await this.upgradePackageJson();
 
-      await this.runPackageInstaller();
+      try {
+        await this.runPackageInstaller();
+      } catch (e) {
+        const errorMessage = (e as Error)?.message ?? e?.toString();
+        this.logger?.error(`Package installer failed: ${errorMessage}`);
+        this.logger?.error(`You will need to install your packages manually.`);
+      }
 
       await this.runCodemods(range);
     } catch (e) {
