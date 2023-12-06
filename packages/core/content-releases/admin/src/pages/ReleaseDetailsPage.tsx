@@ -11,8 +11,20 @@ import {
   Main,
   Popover,
   Typography,
+  Tr,
+  Td,
 } from '@strapi/design-system';
-import { CheckPermissions, useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
+import {
+  AnErrorOccurred,
+  CheckPermissions,
+  LoadingIndicatorPage,
+  PageSizeURLQuery,
+  PaginationURLQuery,
+  Table,
+  useAPIErrorHandler,
+  useNotification,
+  useQueryParams,
+} from '@strapi/helper-plugin';
 import { ArrowLeft, EmptyDocuments, More, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
@@ -21,7 +33,24 @@ import styled from 'styled-components';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
 import { isAxiosError } from '../services/axios';
-import { useUpdateReleaseMutation } from '../services/release';
+import {
+  GetReleaseActionsQueryParams,
+  useUpdateReleaseMutation,
+  useGetReleaseQuery,
+  useGetReleaseActionsQuery,
+} from '../services/release';
+import { countDays } from '../utils/countDays';
+
+import type { Entity } from '@strapi/types';
+
+/* -------------------------------------------------------------------------------------------------
+ * ReleaseDetailsLayout
+ * -----------------------------------------------------------------------------------------------*/
+const ReleaseInfoWrapper = styled(Flex)`
+  align-self: stretch;
+  border-radius: 0 0 4px 4px;
+  border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
+`;
 
 const PopoverButton = styled(Flex)`
   align-self: stretch;
@@ -43,76 +72,38 @@ const TrashIcon = styled(Trash)`
   }
 `;
 
-const ReleaseInfoWrapper = styled(Flex)`
-  align-self: stretch;
-  border-radius: 0 0 4px 4px;
-  border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
-`;
+interface ReleaseDetailsLayoutProps {
+  toggleEditReleaseModal: () => void;
+  children: React.ReactNode;
+}
 
-const ReleaseDetailsPage = () => {
-  const { releaseId } = useParams<{ releaseId: string }>();
-  const [releaseModalShown, setReleaseModalShown] = React.useState(false);
+export const ReleaseDetailsLayout = ({
+  toggleEditReleaseModal,
+  children,
+}: ReleaseDetailsLayoutProps) => {
+  const { formatMessage } = useIntl();
   const [isPopoverVisible, setIsPopoverVisible] = React.useState(false);
   const moreButtonRef = React.useRef<HTMLButtonElement>(null!);
-  const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
-  const { formatAPIError } = useAPIErrorHandler();
-  // TODO: get title from the API
-  const title = 'Release title';
-
-  const totalEntries = 0; // TODO: replace it with the total number of entries
-  const days = 0; // TODO: replace it with the number of days since the release was created
-  const createdBy = 'John Doe'; // TODO: replace it with the name of the user who created the release
-
+  const { releaseId } = useParams<{ releaseId: string }>();
+  const { data, isLoading } = useGetReleaseQuery({ id: releaseId });
   const handleTogglePopover = () => {
     setIsPopoverVisible((prev) => !prev);
-  };
-
-  const toggleEditReleaseModal = () => {
-    setReleaseModalShown((prev) => !prev);
   };
 
   const openReleaseModal = () => {
     toggleEditReleaseModal();
     handleTogglePopover();
   };
+  const title = data?.data?.name;
+  const createdAt = data?.data?.createdAt;
 
-  const [updateRelease, { isLoading }] = useUpdateReleaseMutation();
-
-  const handleEditRelease = async (values: FormValues) => {
-    const response = await updateRelease({
-      id: releaseId,
-      name: values.name,
-    });
-    if ('data' in response) {
-      // When the response returns an object with 'data', handle success
-      toggleNotification({
-        type: 'success',
-        message: formatMessage({
-          id: 'content-releases.modal.release-updated-notification-success',
-          defaultMessage: 'Release updated.',
-        }),
-      });
-    } else if (isAxiosError(response.error)) {
-      // When the response returns an object with 'error', handle axios error
-      toggleNotification({
-        type: 'warning',
-        message: formatAPIError(response.error),
-      });
-    } else {
-      // Otherwise, the response returns an object with 'error', handle a generic error
-      toggleNotification({
-        type: 'warning',
-        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
-      });
-    }
-    toggleEditReleaseModal();
-  };
-
+  const totalEntries = data?.data?.actions?.meta?.total || 0;
+  const daysPassed = createdAt ? countDays(createdAt) : 0;
+  const createdBy = 'John Doe'; // TODO: replace it with the name of the user who created the release
   return (
-    <Main>
+    <Main aria-busy={isLoading}>
       <HeaderLayout
-        title={title}
+        title={!isLoading && title ? title : undefined}
         subtitle={formatMessage(
           {
             id: 'content-releases.pages.Details.header-subtitle',
@@ -170,7 +161,6 @@ const ReleaseDetailsPage = () => {
                       </Typography>
                     </PopoverButton>
                   </CheckPermissions>
-
                   <PopoverButton
                     paddingTop={2}
                     paddingBottom={2}
@@ -210,7 +200,7 @@ const ReleaseDetailsPage = () => {
                         defaultMessage:
                           '{number, plural, =0 {# days} one {# day} other {# days}} ago by {createdBy}',
                       },
-                      { number: days, createdBy }
+                      { number: daysPassed, createdBy }
                     )}
                   </Typography>
                 </ReleaseInfoWrapper>
@@ -231,6 +221,34 @@ const ReleaseDetailsPage = () => {
           </Flex>
         }
       />
+      {children}
+    </Main>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * ReleaseDetailsBody
+ * -----------------------------------------------------------------------------------------------*/
+const ReleaseDetailsBody = ({ releaseId }: { releaseId: Entity.ID }) => {
+  const { formatMessage } = useIntl();
+  const [{ query }] = useQueryParams<GetReleaseActionsQueryParams>();
+  const { isLoading, isError, data } = useGetReleaseActionsQuery({ ...query, releaseId });
+  if (isLoading) {
+    return (
+      <ContentLayout>
+        <LoadingIndicatorPage />
+      </ContentLayout>
+    );
+  }
+  if (isError) {
+    return (
+      <ContentLayout>
+        <AnErrorOccurred />
+      </ContentLayout>
+    );
+  }
+  if (data?.data.length === 0) {
+    return (
       <ContentLayout>
         <EmptyStateLayout
           content={formatMessage({
@@ -240,15 +258,119 @@ const ReleaseDetailsPage = () => {
           icon={<EmptyDocuments width="10rem" />}
         />
       </ContentLayout>
+    );
+  }
+  return (
+    <ContentLayout>
+      <Flex gap={4} direction="column" alignItems="stretch">
+        <Table.Root rows={data?.data} colCount={data?.data.length} isLoading={isLoading}>
+          <Table.Content>
+            <Table.Head>
+              <Table.HeaderCell fieldSchemaType="string" label="name" name="name" />
+              <Table.HeaderCell fieldSchemaType="string" label="locale" name="locale" />
+              <Table.HeaderCell fieldSchemaType="string" label="content-type" name="content-type" />
+            </Table.Head>
+            <Table.LoadingBody />
+            <Table.Body>
+              {data?.data.map(({ contentType, entry }) => (
+                <Tr key={entry.id}>
+                  <Td>
+                    <Typography>{entry.mainField}</Typography>
+                  </Td>
+                  <Td>
+                    <Typography>{entry.locale}</Typography>
+                  </Td>
+                  <Td>
+                    <Typography>{contentType}</Typography>
+                  </Td>
+                </Tr>
+              ))}
+            </Table.Body>
+          </Table.Content>
+        </Table.Root>
+        <Flex paddingTop={4} alignItems="flex-end" justifyContent="space-between">
+          <PageSizeURLQuery defaultValue={data?.meta?.pagination?.pageSize.toString()} />
+          <PaginationURLQuery
+            pagination={{
+              pageCount: data?.meta?.pagination?.pageCount || 0,
+            }}
+          />
+        </Flex>
+      </Flex>
+    </ContentLayout>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * ReleaseDetailsPage
+ * -----------------------------------------------------------------------------------------------*/
+const ReleaseDetailsPage = () => {
+  const { formatMessage } = useIntl();
+  const { releaseId } = useParams<{ releaseId: Entity.ID }>();
+  const [releaseModalShown, setReleaseModalShown] = React.useState(false);
+  const toggleNotification = useNotification();
+  const { formatAPIError } = useAPIErrorHandler();
+  const { isLoading: isLoadingDetails, data } = useGetReleaseQuery({ id: releaseId });
+  const title = data?.data?.name;
+
+  const toggleEditReleaseModal = () => {
+    setReleaseModalShown((prev) => !prev);
+  };
+
+  const [updateRelease, { isLoading: isSubmittingForm }] = useUpdateReleaseMutation();
+
+  if (isLoadingDetails) {
+    return (
+      <ReleaseDetailsLayout toggleEditReleaseModal={toggleEditReleaseModal}>
+        <ContentLayout>
+          <LoadingIndicatorPage />
+        </ContentLayout>
+      </ReleaseDetailsLayout>
+    );
+  }
+
+  const handleEditRelease = async (values: FormValues) => {
+    const response = await updateRelease({
+      id: releaseId,
+      name: values.name,
+    });
+    if ('data' in response) {
+      // When the response returns an object with 'data', handle success
+      toggleNotification({
+        type: 'success',
+        message: formatMessage({
+          id: 'content-releases.modal.release-updated-notification-success',
+          defaultMessage: 'Release updated.',
+        }),
+      });
+    } else if (isAxiosError(response.error)) {
+      // When the response returns an object with 'error', handle axios error
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(response.error),
+      });
+    } else {
+      // Otherwise, the response returns an object with 'error', handle a generic error
+      toggleNotification({
+        type: 'warning',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+      });
+    }
+    toggleEditReleaseModal();
+  };
+
+  return (
+    <ReleaseDetailsLayout toggleEditReleaseModal={toggleEditReleaseModal}>
+      <ReleaseDetailsBody releaseId={releaseId} />
       {releaseModalShown && (
         <ReleaseModal
           handleClose={toggleEditReleaseModal}
           handleSubmit={handleEditRelease}
-          isLoading={isLoading}
-          initialValues={{ name: title }}
+          isLoading={isLoadingDetails || isSubmittingForm}
+          initialValues={{ name: title || '' }}
         />
       )}
-    </Main>
+    </ReleaseDetailsLayout>
   );
 };
 

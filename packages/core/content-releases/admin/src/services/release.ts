@@ -5,7 +5,13 @@ import { pluginId } from '../pluginId';
 
 import { axiosBaseQuery } from './axios';
 
-import type { CreateRelease, GetReleases, UpdateRelease } from '../../../shared/contracts/releases';
+import type { GetReleaseActions } from '../../../shared/contracts/release-actions';
+import type {
+  CreateRelease,
+  GetReleases,
+  UpdateRelease,
+  GetRelease,
+} from '../../../shared/contracts/releases';
 
 export interface GetReleasesQueryParams {
   page?: number;
@@ -18,6 +24,11 @@ export interface GetReleasesQueryParams {
   };
 }
 
+export interface GetReleaseActionsQueryParams {
+  page?: number;
+  pageSize?: number;
+}
+
 type GetReleasesTabResponse = GetReleases.Response & {
   meta: {
     activeTab: 'pending' | 'done';
@@ -27,7 +38,7 @@ type GetReleasesTabResponse = GetReleases.Response & {
 const releaseApi = createApi({
   reducerPath: pluginId,
   baseQuery: axiosBaseQuery,
-  tagTypes: ['Releases'],
+  tagTypes: ['Releases', 'Release', 'ReleaseActions', 'ReleasesForEntry'],
   endpoints: (build) => {
     return {
       /**
@@ -53,7 +64,7 @@ const releaseApi = createApi({
             },
           };
         },
-        providesTags: ['Releases'],
+        providesTags: ['ReleasesForEntry'],
       }),
       getReleases: build.query<GetReleasesTabResponse, GetReleasesQueryParams | void>({
         query(
@@ -94,6 +105,33 @@ const releaseApi = createApi({
         },
         providesTags: ['Releases'],
       }),
+      getRelease: build.query<GetRelease.Response, GetRelease.Request['params']>({
+        query({ id }) {
+          return {
+            url: `/content-releases/${id}`,
+            method: 'GET',
+          };
+        },
+        providesTags: ['Release'],
+      }),
+      getReleaseActions: build.query<
+        GetReleaseActions.Response,
+        GetReleaseActions.Request['params'] & GetReleaseActions.Request['query']
+      >({
+        query({ releaseId, page, pageSize }) {
+          return {
+            url: `/content-releases/${releaseId}/actions`,
+            method: 'GET',
+            config: {
+              params: {
+                page,
+                pageSize,
+              },
+            },
+          };
+        },
+        providesTags: ['ReleaseActions'],
+      }),
       createRelease: build.mutation<CreateRelease.Response, CreateRelease.Request['body']>({
         query(data) {
           return {
@@ -102,7 +140,7 @@ const releaseApi = createApi({
             data,
           };
         },
-        invalidatesTags: ['Releases'],
+        invalidatesTags: ['Releases', 'Release'],
       }),
       updateRelease: build.mutation<
         void,
@@ -115,7 +153,7 @@ const releaseApi = createApi({
             data,
           };
         },
-        invalidatesTags: ['Releases'],
+        invalidatesTags: ['Releases', 'Release'],
       }),
       createReleaseAction: build.mutation<
         CreateReleaseAction.Response,
@@ -128,7 +166,7 @@ const releaseApi = createApi({
             data: body,
           };
         },
-        invalidatesTags: ['Releases'],
+        invalidatesTags: ['ReleaseActions', 'Release', 'Releases'],
       }),
     };
   },
@@ -137,6 +175,8 @@ const releaseApi = createApi({
 const {
   useGetReleasesQuery,
   useGetReleasesForEntryQuery,
+  useGetReleaseQuery,
+  useGetReleaseActionsQuery,
   useCreateReleaseMutation,
   useCreateReleaseActionMutation,
   useUpdateReleaseMutation,
@@ -145,6 +185,8 @@ const {
 export {
   useGetReleasesQuery,
   useGetReleasesForEntryQuery,
+  useGetReleaseQuery,
+  useGetReleaseActionsQuery,
   useCreateReleaseMutation,
   useCreateReleaseActionMutation,
   useUpdateReleaseMutation,

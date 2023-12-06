@@ -5,7 +5,7 @@ import { ReleaseDetailsPage } from '../ReleaseDetailsPage';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useParams: jest.fn().mockImplementation(() => ({ id: '1' })),
+  useParams: jest.fn().mockImplementation(() => ({ releaseId: '1' })),
 }));
 
 jest.mock('@strapi/helper-plugin', () => ({
