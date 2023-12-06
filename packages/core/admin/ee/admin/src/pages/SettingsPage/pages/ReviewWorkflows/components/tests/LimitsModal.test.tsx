@@ -5,14 +5,14 @@ import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 
-import { Body, LimitsModal, LimitsModalProps, Title } from '../LimitsModal';
+import { LimitsModal, LimitsModalProps } from '../LimitsModal';
 
 const setup = (props?: Partial<LimitsModalProps>) => ({
   ...render(
-    <LimitsModal isOpen onClose={() => {}} {...props}>
-      <Title>Title</Title>
-      <Body>Body</Body>
-    </LimitsModal>,
+    <LimitsModal.Root isOpen onClose={() => {}} {...props}>
+      <LimitsModal.Title>Title</LimitsModal.Title>
+      <LimitsModal.Body>Body</LimitsModal.Body>
+    </LimitsModal.Root>,
     {
       wrapper({ children }) {
         return (

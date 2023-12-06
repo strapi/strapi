@@ -214,6 +214,7 @@ export const Stage = ({
     useDragAndDrop(canReorder, {
       index,
       item: {
+        index,
         name: nameField.value,
       },
       onGrabItem: handleGrabStage,
@@ -225,7 +226,7 @@ export const Stage = ({
 
   const composedRef = composeRefs(stageRef, dropRef);
 
-  const colorOptions = AVAILABLE_COLORS.map(({ hex, name }: { hex: string; name: string }) => ({
+  const colorOptions = AVAILABLE_COLORS.map(({ hex, name }) => ({
     value: hex,
     label: formatMessage(
       {
@@ -242,14 +243,14 @@ export const Stage = ({
   const filteredRoles = roles
     // Super admins always have permissions to do everything and therefore
     // there is no point for this role to show up in the role combobox
-    .filter((role) => role.code !== 'strapi-super-admin');
+    ?.filter((role) => role.code !== 'strapi-super-admin');
 
   React.useEffect(() => {
     dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
   }, [dragPreviewRef, index]);
 
   return (
-    <Box ref={composedRef}>
+    <Box ref={(ref) => composedRef(ref!)}>
       {liveText && <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>}
 
       {isDragging ? (
@@ -315,6 +316,7 @@ export const Stage = ({
                   {canUpdate && (
                     <DragIconButton
                       background="transparent"
+                      // @ts-expect-error - forwardedAs needs to be defined as string in the IconButton props
                       forwardedAs="div"
                       hasRadius
                       role="button"
@@ -384,39 +386,37 @@ export const Stage = ({
                     />
                   }
                 >
-                  {colorOptions.map(
-                    ({ value, label, color }: { value: string; label: string; color: string }) => {
-                      const { themeColorName } = getStageColorByHex(color) || {};
+                  {colorOptions.map(({ value, label, color }) => {
+                    const { themeColorName } = getStageColorByHex(color) || {};
 
-                      return (
-                        <SingleSelectOption
-                          value={value}
-                          key={value}
-                          startIcon={
-                            <Flex
-                              as="span"
-                              height={2}
-                              background={color}
-                              // @ts-expect-error - transparent doesn't exist in theme.colors
-                              borderColor={
-                                themeColorName === 'neutral0' ? 'neutral150' : 'transparent'
-                              }
-                              hasRadius
-                              shrink={0}
-                              width={2}
-                            />
-                          }
-                        >
-                          {label}
-                        </SingleSelectOption>
-                      );
-                    }
-                  )}
+                    return (
+                      <SingleSelectOption
+                        value={value}
+                        key={value}
+                        startIcon={
+                          <Flex
+                            as="span"
+                            height={2}
+                            background={color}
+                            // @ts-expect-error - transparent doesn't exist in theme.colors
+                            borderColor={
+                              themeColorName === 'neutral0' ? 'neutral150' : 'transparent'
+                            }
+                            hasRadius
+                            shrink={0}
+                            width={2}
+                          />
+                        }
+                      >
+                        {label}
+                      </SingleSelectOption>
+                    );
+                  })}
                 </SingleSelect>
               </GridItem>
 
               <GridItem col={6}>
-                {filteredRoles.length === 0 ? (
+                {filteredRoles?.length === 0 ? (
                   <NotAllowedInput
                     description={{
                       id: 'Settings.review-workflows.stage.permissions.noPermissions.description',
@@ -468,9 +468,9 @@ export const Stage = ({
                             id: 'Settings.review-workflows.stage.permissions.allRoles.label',
                             defaultMessage: 'All roles',
                           })}
-                          values={filteredRoles.map((r) => `${r.id}`)}
+                          values={filteredRoles?.map((r) => `${r.id}`)}
                         >
-                          {filteredRoles.map((role) => {
+                          {filteredRoles?.map((role) => {
                             return (
                               <NestedOption key={role.id} value={`${role.id}`}>
                                 {role.name}

@@ -22,7 +22,7 @@ import { useAdminRoles } from '../../../../../../../admin/src/hooks/useAdminRole
 import { useContentTypes } from '../../../../../../../admin/src/hooks/useContentTypes';
 import { useInjectReducer } from '../../../../../../../admin/src/hooks/useInjectReducer';
 import { selectAdminPermissions } from '../../../../../../../admin/src/selectors';
-import { Stage, Update } from '../../../../../../../shared/contracts/review-workflows';
+import { Stage, Update, Workflow } from '../../../../../../../shared/contracts/review-workflows';
 import { useLicenseLimits } from '../../../../hooks/useLicenseLimits';
 
 import {
@@ -34,7 +34,7 @@ import {
   setWorkflows,
 } from './actions';
 import * as Layout from './components/Layout';
-import { LimitsModal, Body, Title } from './components/LimitsModal';
+import { LimitsModal } from './components/LimitsModal';
 import { Stages } from './components/Stages';
 import { WorkflowAttributes } from './components/WorkflowAttributes';
 import {
@@ -89,9 +89,9 @@ export const ReviewWorkflowsEditPage = () => {
     ?.filter((workflow) => workflow.id !== parseInt(workflowId, 10))
     .flatMap((workflow) => workflow.contentTypes);
 
-  const limits = getFeature('review-workflows');
-  const numberOfWorkflows = limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] as string;
-  const stagesPerWorkflow = limits?.[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME] as string;
+  const limits = getFeature<string>('review-workflows');
+  const numberOfWorkflows = limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME];
+  const stagesPerWorkflow = limits?.[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME];
 
   const { mutateAsync, isLoading: isLoadingMutation } = useMutation<
     Update.Response['data'],
@@ -117,7 +117,7 @@ export const ReviewWorkflowsEditPage = () => {
     }
   );
 
-  const updateWorkflow = async (workflow: CurrentWorkflow) => {
+  const updateWorkflow = async (workflow: Partial<Workflow>) => {
     // reset the error messages
     setInitialErrors(undefined);
 
@@ -131,16 +131,16 @@ export const ReviewWorkflowsEditPage = () => {
           // permissions to see roles
           stages: workflow.stages?.map((stage) => {
             let hasUpdatedPermissions = true;
-            const serverStage = serverState.workflow?.stages.find(
+            const serverStage = serverState.workflow?.stages?.find(
               (serverStage) => serverStage.id === stage?.id
             );
 
             if (serverStage) {
               hasUpdatedPermissions =
                 serverStage.permissions?.length !== stage.permissions?.length ||
-                !serverStage.permissions.every(
+                !serverStage.permissions?.every(
                   (serverPermission) =>
-                    !!stage.permissions.find(
+                    !!stage.permissions?.find(
                       (permission) => permission.role === serverPermission.role
                     )
                 );
@@ -149,7 +149,7 @@ export const ReviewWorkflowsEditPage = () => {
             return {
               ...stage,
               permissions: hasUpdatedPermissions ? stage.permissions : undefined,
-            } as Stage;
+            } satisfies Stage;
           }),
         },
       });
@@ -296,10 +296,11 @@ export const ReviewWorkflowsEditPage = () => {
 
   React.useEffect(() => {
     if (!isLoadingWorkflow && !isLicenseLoading) {
-      if (meta && meta?.workflowCount > parseInt(numberOfWorkflows, 10)) {
+      if (meta && numberOfWorkflows && meta?.workflowCount > parseInt(numberOfWorkflows, 10)) {
         setShowLimitModal('workflow');
       } else if (
         currentWorkflow.stages &&
+        stagesPerWorkflow &&
         currentWorkflow.stages.length > parseInt(stagesPerWorkflow, 10)
       ) {
         setShowLimitModal('stage');
@@ -316,7 +317,7 @@ export const ReviewWorkflowsEditPage = () => {
   ]);
 
   React.useEffect(() => {
-    if (!isLoading && roles.length === 0) {
+    if (!isLoading && roles?.length === 0) {
       toggleNotification({
         blockTransition: true,
         type: 'warning',
@@ -438,37 +439,40 @@ export const ReviewWorkflowsEditPage = () => {
         </ConfirmDialog.Body>
       </ConfirmDialog.Root>
 
-      <LimitsModal isOpen={showLimitModal === 'workflow'} onClose={() => setShowLimitModal(null)}>
-        <Title>
+      <LimitsModal.Root
+        isOpen={showLimitModal === 'workflow'}
+        onClose={() => setShowLimitModal(null)}
+      >
+        <LimitsModal.Title>
           {formatMessage({
             id: 'Settings.review-workflows.edit.page.workflows.limit.title',
             defaultMessage: 'You’ve reached the limit of workflows in your plan',
           })}
-        </Title>
+        </LimitsModal.Title>
 
-        <Body>
+        <LimitsModal.Body>
           {formatMessage({
             id: 'Settings.review-workflows.edit.page.workflows.limit.body',
             defaultMessage: 'Delete a workflow or contact Sales to enable more workflows.',
           })}
-        </Body>
-      </LimitsModal>
+        </LimitsModal.Body>
+      </LimitsModal.Root>
 
-      <LimitsModal isOpen={showLimitModal === 'stage'} onClose={() => setShowLimitModal(null)}>
-        <Title>
+      <LimitsModal.Root isOpen={showLimitModal === 'stage'} onClose={() => setShowLimitModal(null)}>
+        <LimitsModal.Title>
           {formatMessage({
             id: 'Settings.review-workflows.edit.page.stages.limit.title',
             defaultMessage: 'You have reached the limit of stages for this workflow in your plan',
           })}
-        </Title>
+        </LimitsModal.Title>
 
-        <Body>
+        <LimitsModal.Body>
           {formatMessage({
             id: 'Settings.review-workflows.edit.page.stages.limit.body',
             defaultMessage: 'Try deleting some stages or contact Sales to enable more stages.',
           })}
-        </Body>
-      </LimitsModal>
+        </LimitsModal.Body>
+      </LimitsModal.Root>
     </>
   );
 };

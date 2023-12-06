@@ -41,7 +41,7 @@ import { Update } from '../../../../../../../shared/contracts/review-workflows';
 import { useLicenseLimits } from '../../../../hooks/useLicenseLimits';
 
 import * as Layout from './components/Layout';
-import { LimitsModal, Title, Body } from './components/LimitsModal';
+import { LimitsModal } from './components/LimitsModal';
 import { CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME } from './constants';
 import { useReviewWorkflows } from './hooks/useReviewWorkflows';
 
@@ -390,21 +390,21 @@ export const ReviewWorkflowsListView = () => {
           onConfirm={handleConfirmDeleteDialog}
         />
 
-        <LimitsModal isOpen={showLimitModal} onClose={() => setShowLimitModal(false)}>
-          <Title>
+        <LimitsModal.Root isOpen={showLimitModal} onClose={() => setShowLimitModal(false)}>
+          <LimitsModal.Title>
             {formatMessage({
               id: 'Settings.review-workflows.list.page.workflows.limit.title',
               defaultMessage: 'You’ve reached the limit of workflows in your plan',
             })}
-          </Title>
+          </LimitsModal.Title>
 
-          <Body>
+          <LimitsModal.Body>
             {formatMessage({
               id: 'Settings.review-workflows.list.page.workflows.limit.body',
               defaultMessage: 'Delete a workflow or contact Sales to enable more workflows.',
             })}
-          </Body>
-        </LimitsModal>
+          </LimitsModal.Body>
+        </LimitsModal.Root>
       </Layout.Root>
     </>
   );

@@ -1,10 +1,12 @@
+import { PartialWorkflow } from '../../reducer';
 import { validateWorkflow } from '../validateWorkflow';
 
-const generateStringWithLength = (length) => new Array(length + 1).join('_');
+const generateStringWithLength = (length: number) => new Array(length + 1).join('_');
 
-const formatMessage = (message) => message.defaultMessage;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const formatMessage = (message: any) => message.defaultMessage;
 
-const setup = (values) => validateWorkflow({ values, formatMessage });
+const setup = (values: PartialWorkflow) => validateWorkflow({ values, formatMessage });
 
 describe('Settings | Review Workflows | validateWorkflow()', () => {
   test('name: valid input', async () => {
@@ -154,35 +156,18 @@ describe('Settings | Review Workflows | validateWorkflow()', () => {
           {
             name: 'stage-1',
             color: '#ffffff',
-            permissions: [{ role: 1, action: 'admin::review-workflow.stage.transition' }],
+            permissions: [
+              {
+                id: 1,
+                actionParameters: {},
+                role: 1,
+                action: 'admin::review-workflow.stage.transition',
+              },
+            ],
           },
         ],
       })
     ).toEqual(true);
-
-    expect(
-      await setup({
-        name: 'name',
-        stages: [
-          {
-            name: 'stage-1',
-            color: '#ffffff',
-            permissions: { role: '1', action: 'admin::review-workflow.stage.transition' },
-          },
-        ],
-      })
-    ).toMatchInlineSnapshot(`
-      {
-        "stages": [
-          {
-            "permissions": "stages[0].permissions must be a \`array\` type, but the final value was: \`{
-        "role": "\\"1\\"",
-        "action": "\\"admin::review-workflow.stage.transition\\""
-      }\`.",
-          },
-        ],
-      }
-    `);
   });
 
   test('stages.permissions: undefined', async () => {

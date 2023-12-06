@@ -1,4 +1,5 @@
 import { lightTheme } from '@strapi/design-system';
+import { DefaultTheme } from 'styled-components';
 
 import { STAGE_COLORS } from '../constants';
 
@@ -34,7 +35,7 @@ export function getStageColorByHex(hex: string) {
 
 export function getAvailableStageColors() {
   return Object.entries(STAGE_COLORS).map(([themeColorName, name]) => ({
-    hex: lightTheme.colors[themeColorName as keyof typeof lightTheme.colors].toUpperCase(),
+    hex: lightTheme.colors[themeColorName as keyof DefaultTheme['colors']].toUpperCase(),
     name,
   }));
 }

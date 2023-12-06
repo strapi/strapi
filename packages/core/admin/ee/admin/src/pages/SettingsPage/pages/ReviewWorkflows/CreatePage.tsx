@@ -32,7 +32,7 @@ import {
   setWorkflows,
 } from './actions';
 import * as Layout from './components/Layout';
-import { LimitsModal, Body, Title } from './components/LimitsModal';
+import { LimitsModal } from './components/LimitsModal';
 import { Stages } from './components/Stages';
 import { WorkflowAttributes } from './components/WorkflowAttributes';
 import {
@@ -71,9 +71,9 @@ export const ReviewWorkflowsCreatePage = () => {
   const [initialErrors, setInitialErrors] = React.useState<FormikErrors<CurrentWorkflow>>();
   const [savePrompts, setSavePrompts] = React.useState<{ hasReassignedContentTypes?: boolean }>({});
 
-  const limits = getFeature('review-workflows');
-  const numberOfWorkflows = limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] as string;
-  const stagesPerWorkflow = limits?.[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME] as string;
+  const limits = getFeature<string>('review-workflows');
+  const numberOfWorkflows = limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME];
+  const stagesPerWorkflow = limits?.[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME];
   const contentTypesFromOtherWorkflows = workflows?.flatMap((workflow) => workflow.contentTypes);
 
   const { mutateAsync } = useMutation<
@@ -165,7 +165,7 @@ export const ReviewWorkflowsCreatePage = () => {
        * update, because it would throw an API error.
        */
 
-      if (meta && meta?.workflowCount >= parseInt(numberOfWorkflows, 10)) {
+      if (meta && numberOfWorkflows && meta?.workflowCount >= parseInt(numberOfWorkflows, 10)) {
         setShowLimitModal('workflow');
 
         /**
@@ -175,6 +175,7 @@ export const ReviewWorkflowsCreatePage = () => {
          */
       } else if (
         currentWorkflow.stages &&
+        stagesPerWorkflow &&
         currentWorkflow.stages.length >= parseInt(stagesPerWorkflow, 10)
       ) {
         setShowLimitModal('stage');
@@ -242,6 +243,7 @@ export const ReviewWorkflowsCreatePage = () => {
       if (
         currentWorkflow.stages &&
         limits?.[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME] &&
+        stagesPerWorkflow &&
         currentWorkflow.stages.length >= parseInt(stagesPerWorkflow, 10)
       ) {
         setShowLimitModal('stage');
@@ -250,7 +252,7 @@ export const ReviewWorkflowsCreatePage = () => {
   }, [isLicenseLoading, isLoadingWorkflow, limits, currentWorkflow.stages, stagesPerWorkflow]);
 
   React.useEffect(() => {
-    if (!isLoading && roles.length === 0) {
+    if (!isLoading && roles?.length === 0) {
       toggleNotification({
         blockTransition: true,
         type: 'warning',
@@ -349,37 +351,40 @@ export const ReviewWorkflowsCreatePage = () => {
         </ConfirmDialog.Body>
       </ConfirmDialog.Root>
 
-      <LimitsModal isOpen={showLimitModal === 'workflow'} onClose={() => setShowLimitModal(null)}>
-        <Title>
+      <LimitsModal.Root
+        isOpen={showLimitModal === 'workflow'}
+        onClose={() => setShowLimitModal(null)}
+      >
+        <LimitsModal.Title>
           {formatMessage({
             id: 'Settings.review-workflows.create.page.workflows.limit.title',
             defaultMessage: 'You’ve reached the limit of workflows in your plan',
           })}
-        </Title>
+        </LimitsModal.Title>
 
-        <Body>
+        <LimitsModal.Body>
           {formatMessage({
             id: 'Settings.review-workflows.create.page.workflows.limit.body',
             defaultMessage: 'Delete a workflow or contact Sales to enable more workflows.',
           })}
-        </Body>
-      </LimitsModal>
+        </LimitsModal.Body>
+      </LimitsModal.Root>
 
-      <LimitsModal isOpen={showLimitModal === 'stage'} onClose={() => setShowLimitModal(null)}>
-        <Title>
+      <LimitsModal.Root isOpen={showLimitModal === 'stage'} onClose={() => setShowLimitModal(null)}>
+        <LimitsModal.Title>
           {formatMessage({
             id: 'Settings.review-workflows.create.page.stages.limit.title',
             defaultMessage: 'You have reached the limit of stages for this workflow in your plan',
           })}
-        </Title>
+        </LimitsModal.Title>
 
-        <Body>
+        <LimitsModal.Body>
           {formatMessage({
             id: 'Settings.review-workflows.create.page.stages.limit.body',
             defaultMessage: 'Try deleting some stages or contact Sales to enable more stages.',
           })}
-        </Body>
-      </LimitsModal>
+        </LimitsModal.Body>
+      </LimitsModal.Root>
     </>
   );
 };

@@ -31,7 +31,7 @@ function useLicenseLimits({ enabled }: UseLicenseLimitsArgs = { enabled: true })
 
   type FeatureNames = GetLicenseLimitInformation.Response['data']['features'][number]['name'];
 
-  type GetFeatureType = (name: FeatureNames) => Record<string, unknown> | undefined;
+  type GetFeatureType = <T>(name: FeatureNames) => Record<string, T> | undefined;
 
   const getFeature = React.useCallback<GetFeatureType>(
     (name) => {

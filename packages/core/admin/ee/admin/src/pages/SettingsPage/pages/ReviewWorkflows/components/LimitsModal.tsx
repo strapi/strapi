@@ -13,7 +13,7 @@ const TITLE_ID = 'limits-title';
 const CTA_LEARN_MORE_HREF = 'https://strapi.io/pricing-cloud';
 const CTA_SALES_HREF = 'https://strapi.io/contact-sales';
 
-export const Title: React.FC<React.PropsWithChildren> = ({ children }) => {
+const Title: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
     <Typography variant="alpha" id={TITLE_ID}>
       {children}
@@ -21,7 +21,7 @@ export const Title: React.FC<React.PropsWithChildren> = ({ children }) => {
   );
 };
 
-export const Body: React.FC<React.PropsWithChildren> = ({ children }) => {
+const Body: React.FC<React.PropsWithChildren> = ({ children }) => {
   return <Typography variant="omega">{children}</Typography>;
 };
 
@@ -59,7 +59,7 @@ export type LimitsModalProps = {
   onClose: () => void;
 };
 
-export const LimitsModal: React.FC<React.PropsWithChildren<LimitsModalProps>> = ({
+const Root: React.FC<React.PropsWithChildren<LimitsModalProps>> = ({
   children,
   isOpen = false,
   onClose,
@@ -99,3 +99,11 @@ export const LimitsModal: React.FC<React.PropsWithChildren<LimitsModalProps>> = 
     </ModalLayout>
   );
 };
+
+const LimitsModal = {
+  Title,
+  Body,
+  Root,
+};
+
+export { LimitsModal };

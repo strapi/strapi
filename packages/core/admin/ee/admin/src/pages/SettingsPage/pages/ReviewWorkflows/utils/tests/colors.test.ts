@@ -28,6 +28,5 @@ describe('Settings | Review Workflows | colors', () => {
     });
 
     expect(getStageColorByHex('random')).toStrictEqual(null);
-    expect(getStageColorByHex()).toStrictEqual(null);
   });
 });

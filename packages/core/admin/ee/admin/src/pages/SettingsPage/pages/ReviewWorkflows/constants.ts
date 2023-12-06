@@ -1,6 +1,6 @@
 import { lightTheme } from '@strapi/design-system';
 
-export const REDUX_NAMESPACE: string = 'settings_review-workflows';
+export const REDUX_NAMESPACE = 'settings_review-workflows';
 
 export const ACTION_RESET_WORKFLOW = `Settings/Review_Workflows/RESET_WORKFLOW`;
 export const ACTION_SET_CONTENT_TYPES = `Settings/Review_Workflows/SET_CONTENT_TYPES`;

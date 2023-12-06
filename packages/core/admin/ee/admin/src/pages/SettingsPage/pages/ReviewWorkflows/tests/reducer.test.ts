@@ -12,9 +12,9 @@ import {
   ACTION_UPDATE_STAGE_POSITION,
   ACTION_UPDATE_WORKFLOW,
 } from '../constants';
-import { PartialWorkflow, State, initialState, reducer } from '../reducer';
+import { State, initialState, reducer } from '../reducer';
 
-const WORKFLOW_FIXTURE: PartialWorkflow = {
+const WORKFLOW_FIXTURE = {
   id: 1,
   name: 'Workflow fixture',
   stages: [
@@ -22,11 +22,15 @@ const WORKFLOW_FIXTURE: PartialWorkflow = {
       id: 1,
       color: '#4945FF',
       name: 'stage-1',
+      createdAt: '',
+      updatedAt: '',
     },
     {
       id: 2,
       color: '#4945FF',
       name: 'stage-2',
+      createdAt: '',
+      updatedAt: '',
     },
   ],
 };
@@ -237,9 +241,12 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
             stages: [
               ...(WORKFLOW_FIXTURE.stages || []),
               {
+                id: 4,
                 __temp_key__: 4,
                 color: '#4945FF',
                 name: 'stage-temp',
+                createdAt: '',
+                updatedAt: '',
               },
             ],
           },
@@ -313,11 +320,17 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
         {
           id: 1,
           name: 'stage-1',
+          color: '#4945FF',
+          createdAt: '',
+          updatedAt: '',
         },
 
         {
           id: 3,
           name: 'stage-2',
+          color: '#4945FF',
+          createdAt: '',
+          updatedAt: '',
         },
       ],
     };
@@ -378,6 +391,8 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
                   id: 1,
                   color: '#4945FF',
                   name: 'stage-1-modified',
+                  createdAt: '',
+                  updatedAt: '',
                 },
               ]),
             }),

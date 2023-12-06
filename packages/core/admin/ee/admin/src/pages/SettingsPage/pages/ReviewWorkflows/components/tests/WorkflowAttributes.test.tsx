@@ -112,6 +112,7 @@ const setup = ({
       const store = configureStore({
         reducer,
         preloadedState: {
+          // @ts-expect-error - Since we are passing the local ReviewWorkflow reducer, REDUX_NAMESPACE can't be set as part of the preloadedState
           [REDUX_NAMESPACE]: {
             serverState: {
               contentTypes: {

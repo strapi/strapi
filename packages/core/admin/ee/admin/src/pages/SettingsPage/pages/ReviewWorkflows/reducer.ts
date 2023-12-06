@@ -1,5 +1,5 @@
-import { Entity, Schema } from '@strapi/types';
-import { produce } from 'immer';
+import { Schema } from '@strapi/types';
+import { createDraft, produce } from 'immer';
 
 import {
   Stage,
@@ -44,11 +44,11 @@ interface ServerState {
 }
 
 // This isn't something we should do.
-// TODO: Revamp the way we are
-type StageWithTempKey = Partial<Stage & { __temp_key__?: number }>;
+// TODO: Revamp the way we are handling this temp key for delete or create
+export type StageWithTempKey = Stage & { __temp_key__?: number };
 interface ClientState {
   currentWorkflow: {
-    data: Partial<Omit<CurrentWorkflow, 'stages'> & { stages?: StageWithTempKey[] }>;
+    data: Partial<Omit<CurrentWorkflow, 'stages'> & { stages: StageWithTempKey[] }>;
   };
   isLoading?: boolean;
 }
@@ -127,7 +127,7 @@ export function reducer(state: State = initialState, action: { type: string; pay
 
       case ACTION_RESET_WORKFLOW: {
         draft.clientState = initialState.clientState;
-        draft.serverState = initialState.serverState;
+        draft.serverState = createDraft(initialState.serverState);
         break;
       }
 
@@ -175,6 +175,7 @@ export function reducer(state: State = initialState, action: { type: string; pay
 
           draft.clientState.currentWorkflow.data.stages?.splice(sourceStageIndex + 1, 0, {
             ...sourceStage,
+            // @ts-expect-error - We are handling temporary (unsaved) duplicated stages with temporary keys and undefined ids. It should be revamp imo
             id: undefined,
             __temp_key__: getMaxTempKey(draft.clientState.currentWorkflow.data.stages),
           });

@@ -33,7 +33,7 @@ export type WorkflowAttributesProps = {
 export const WorkflowAttributes = ({ canUpdate = true }: WorkflowAttributesProps) => {
   const { formatMessage, locale } = useIntl();
   const dispatch = useDispatch();
-  const { collectionTypes, singleTypes } = useSelector(selectContentTypes);
+  const contentTypes = useSelector(selectContentTypes);
   const currentWorkflow = useSelector(selectCurrentWorkflow);
   const workflows = useSelector(selectWorkflows);
   const [nameField, nameMeta, nameHelper] = useField('name');
@@ -62,119 +62,121 @@ export const WorkflowAttributes = ({ canUpdate = true }: WorkflowAttributesProps
         />
       </GridItem>
 
-      <GridItem col={6}>
-        <MultiSelect
-          {...contentTypesField}
-          customizeContent={(value) =>
-            formatMessage(
-              {
-                id: 'Settings.review-workflows.workflow.contentTypes.displayValue',
-                defaultMessage:
-                  '{count} {count, plural, one {content type} other {content types}} selected',
-              },
-              { count: value?.length }
-            )
-          }
-          disabled={!canUpdate}
-          error={contentTypesMeta.error ?? false}
-          id={contentTypesField.name}
-          label={formatMessage({
-            id: 'Settings.review-workflows.workflow.contentTypes.label',
-            defaultMessage: 'Associated to',
-          })}
-          onChange={(values) => {
-            dispatch(updateWorkflow({ contentTypes: values }));
-            contentTypesHelper.setValue(values);
-          }}
-          placeholder={formatMessage({
-            id: 'Settings.review-workflows.workflow.contentTypes.placeholder',
-            defaultMessage: 'Select',
-          })}
-        >
-          {[
-            ...(collectionTypes.length > 0
-              ? [
-                  {
-                    label: formatMessage({
-                      id: 'Settings.review-workflows.workflow.contentTypes.collectionTypes.label',
-                      defaultMessage: 'Collection Types',
-                    }),
-                    children: [...collectionTypes]
-                      .sort((a, b) => formatter.compare(a.info.displayName, b.info.displayName))
-                      .map((contentType) => ({
+      {contentTypes && (
+        <GridItem col={6}>
+          <MultiSelect
+            {...contentTypesField}
+            customizeContent={(value) =>
+              formatMessage(
+                {
+                  id: 'Settings.review-workflows.workflow.contentTypes.displayValue',
+                  defaultMessage:
+                    '{count} {count, plural, one {content type} other {content types}} selected',
+                },
+                { count: value?.length }
+              )
+            }
+            disabled={!canUpdate}
+            error={contentTypesMeta.error ?? false}
+            id={contentTypesField.name}
+            label={formatMessage({
+              id: 'Settings.review-workflows.workflow.contentTypes.label',
+              defaultMessage: 'Associated to',
+            })}
+            onChange={(values) => {
+              dispatch(updateWorkflow({ contentTypes: values }));
+              contentTypesHelper.setValue(values);
+            }}
+            placeholder={formatMessage({
+              id: 'Settings.review-workflows.workflow.contentTypes.placeholder',
+              defaultMessage: 'Select',
+            })}
+          >
+            {[
+              ...(contentTypes.collectionTypes.length > 0
+                ? [
+                    {
+                      label: formatMessage({
+                        id: 'Settings.review-workflows.workflow.contentTypes.collectionTypes.label',
+                        defaultMessage: 'Collection Types',
+                      }),
+                      children: [...contentTypes.collectionTypes]
+                        .sort((a, b) => formatter.compare(a.info.displayName, b.info.displayName))
+                        .map((contentType) => ({
+                          label: contentType.info.displayName,
+                          value: contentType.uid,
+                        })),
+                    },
+                  ]
+                : []),
+
+              ...(contentTypes.singleTypes.length > 0
+                ? [
+                    {
+                      label: formatMessage({
+                        id: 'Settings.review-workflows.workflow.contentTypes.singleTypes.label',
+                        defaultMessage: 'Single Types',
+                      }),
+                      children: [...contentTypes.singleTypes].map((contentType) => ({
                         label: contentType.info.displayName,
                         value: contentType.uid,
                       })),
-                  },
-                ]
-              : []),
+                    },
+                  ]
+                : []),
+            ].map((opt) => {
+              if ('children' in opt) {
+                return (
+                  <MultiSelectGroup
+                    key={opt.label}
+                    label={opt.label}
+                    values={opt.children.map((child) => child.value.toString())}
+                  >
+                    {opt.children.map((child) => {
+                      const { name: assignedWorkflowName } =
+                        workflows?.find(
+                          (workflow) =>
+                            ((currentWorkflow && workflow.id !== currentWorkflow.id) ||
+                              !currentWorkflow) &&
+                            workflow.contentTypes.includes(child.value)
+                        ) ?? {};
 
-            ...(singleTypes.length > 0
-              ? [
-                  {
-                    label: formatMessage({
-                      id: 'Settings.review-workflows.workflow.contentTypes.singleTypes.label',
-                      defaultMessage: 'Single Types',
-                    }),
-                    children: [...singleTypes].map((contentType) => ({
-                      label: contentType.info.displayName,
-                      value: contentType.uid,
-                    })),
-                  },
-                ]
-              : []),
-          ].map((opt) => {
-            if ('children' in opt) {
-              return (
-                <MultiSelectGroup
-                  key={opt.label}
-                  label={opt.label}
-                  values={opt.children.map((child) => child.value.toString())}
-                >
-                  {opt.children.map((child) => {
-                    const { name: assignedWorkflowName } =
-                      workflows.find(
-                        (workflow) =>
-                          ((currentWorkflow && workflow.id !== currentWorkflow.id) ||
-                            !currentWorkflow) &&
-                          workflow.contentTypes.includes(child.value)
-                      ) ?? {};
-
-                    return (
-                      <NestedOption key={child.value} value={child.value}>
-                        <Typography>
-                          {
-                            // @ts-expect-error - formatMessage options doesn't expect to be a React component but that's what we need actually for the <i> and <em> components
-                            formatMessage(
-                              {
-                                id: 'Settings.review-workflows.workflow.contentTypes.assigned.notice',
-                                defaultMessage:
-                                  '{label} {name, select, undefined {} other {<i>(assigned to <em>{name}</em> workflow)</i>}}',
-                              },
-                              {
-                                label: child.label,
-                                name: assignedWorkflowName,
-                                em: (...children) => (
-                                  <Typography as="em" fontWeight="bold">
-                                    {children}
-                                  </Typography>
-                                ),
-                                i: (...children) => (
-                                  <ContentTypeTakeNotice>{children}</ContentTypeTakeNotice>
-                                ),
-                              }
-                            )
-                          }
-                        </Typography>
-                      </NestedOption>
-                    );
-                  })}
-                </MultiSelectGroup>
-              );
-            }
-          })}
-        </MultiSelect>
-      </GridItem>
+                      return (
+                        <NestedOption key={child.value} value={child.value}>
+                          <Typography>
+                            {
+                              // @ts-expect-error - formatMessage options doesn't expect to be a React component but that's what we need actually for the <i> and <em> components
+                              formatMessage(
+                                {
+                                  id: 'Settings.review-workflows.workflow.contentTypes.assigned.notice',
+                                  defaultMessage:
+                                    '{label} {name, select, undefined {} other {<i>(assigned to <em>{name}</em> workflow)</i>}}',
+                                },
+                                {
+                                  label: child.label,
+                                  name: assignedWorkflowName,
+                                  em: (...children) => (
+                                    <Typography as="em" fontWeight="bold">
+                                      {children}
+                                    </Typography>
+                                  ),
+                                  i: (...children) => (
+                                    <ContentTypeTakeNotice>{children}</ContentTypeTakeNotice>
+                                  ),
+                                }
+                              )
+                            }
+                          </Typography>
+                        </NestedOption>
+                      );
+                    })}
+                  </MultiSelectGroup>
+                );
+              }
+            })}
+          </MultiSelect>
+        </GridItem>
+      )}
     </Grid>
   );
 };

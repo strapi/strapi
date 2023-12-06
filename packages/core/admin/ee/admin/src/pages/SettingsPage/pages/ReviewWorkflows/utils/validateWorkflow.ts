@@ -1,15 +1,14 @@
-// eslint-disable-next-line no-restricted-imports
 import set from 'lodash/set';
 import { IntlFormatters } from 'react-intl';
 import * as yup from 'yup';
 
 import { Stage } from '../../../../../../../../shared/contracts/review-workflows';
-import { CurrentWorkflow } from '../reducer';
+import { PartialWorkflow } from '../reducer';
 
 export async function validateWorkflow({
   values,
   formatMessage,
-}: { values: CurrentWorkflow } & Pick<IntlFormatters, 'formatMessage'>) {
+}: { values: PartialWorkflow } & Pick<IntlFormatters, 'formatMessage'>) {
   const schema = yup.object({
     contentTypes: yup.array().of(yup.string()),
     name: yup

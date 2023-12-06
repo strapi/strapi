@@ -1,14 +1,15 @@
 import { createSelector } from '@reduxjs/toolkit';
 import isEqual from 'lodash/isEqual';
 
+import { RootState } from '../../../../../../../admin/src/core/store/configure';
 import { Stage } from '../../../../../../../shared/contracts/review-workflows';
 
 import { REDUX_NAMESPACE } from './constants';
 import { State, initialState } from './reducer';
 
-type Store = {
+interface Store extends RootState {
   [REDUX_NAMESPACE]: State;
-};
+}
 
 export const selectNamespace = (state: Store) => state[REDUX_NAMESPACE] ?? initialState;
 
@@ -39,7 +40,7 @@ export const selectHasDeletedServerStages = createSelector(
   selectNamespace,
   ({ serverState, clientState: { currentWorkflow } }) =>
     !(serverState.workflow?.stages ?? []).every(
-      (stage: Stage) => !!currentWorkflow.data.stages?.find(({ id }) => id === stage.id)
+      (stage: Partial<Stage>) => !!currentWorkflow.data.stages?.find(({ id }) => id === stage.id)
     )
 );
 
