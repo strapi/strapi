@@ -221,23 +221,6 @@ const DragAndDropElement = ({
     setDragVisibility('hidden');
   }, [editor.selection]);
 
-  // To prevent applying opacity to the original item being dragged, display a cloned element without opacity.
-  const CloneDragItem = () => (
-    <DragItem gap={2} paddingLeft={2} alignItems="start" dragVisibility={dragVisibility}>
-      <DragIconButton
-        forwardedAs="div"
-        role="button"
-        aria-label={formatMessage({
-          id: getTranslation('components.DragHandle-label'),
-          defaultMessage: 'Drag',
-        })}
-      >
-        <Drag color="neutral600" />
-      </DragIconButton>
-      {children}
-    </DragItem>
-  );
-
   return (
     <Wrapper ref={(ref) => composedBoxRefs(ref!)} isOverDropTarget={isOverDropTarget}>
       {isOverDropTarget && (
@@ -253,7 +236,7 @@ const DragAndDropElement = ({
         />
       )}
       {isDragging ? (
-        <CloneDragItem />
+        <CloneDragItem>{children}</CloneDragItem>
       ) : (
         <DragItem
           ref={dragRef}
@@ -298,6 +281,27 @@ const DragAndDropElement = ({
         </DragItem>
       )}
     </Wrapper>
+  );
+};
+
+// To prevent applying opacity to the original item being dragged, display a cloned element without opacity.
+const CloneDragItem = ({ children }: { children: React.ReactNode }) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <DragItem gap={2} paddingLeft={2} alignItems="start" dragVisibility="visible">
+      <DragIconButton
+        forwardedAs="div"
+        role="button"
+        aria-label={formatMessage({
+          id: getTranslation('components.DragHandle-label'),
+          defaultMessage: 'Drag',
+        })}
+      >
+        <Drag color="neutral600" />
+      </DragIconButton>
+      {children}
+    </DragItem>
   );
 };
 
