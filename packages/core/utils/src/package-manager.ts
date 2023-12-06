@@ -1,6 +1,7 @@
 import execa from 'execa';
 import preferredPM from 'preferred-pm';
 
+// Note: in theory, we should be able to support pnpm, bun, etc. as long as they
 const supportedPackageManagers = ['npm', 'yarn'];
 
 export type Options = {
