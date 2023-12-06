@@ -8,7 +8,7 @@ import {
 
 import { RBACReducer, RBACState } from '../../components/RBACProvider';
 import { reducer as rbacManagerReducer } from '../../content-manager/hooks/useSyncRbac';
-import { reducer as cmAppReducer } from '../../content-manager/pages/App/reducer';
+import { reducer as cmAppReducer } from '../../content-manager/pages/App';
 import { reducer as editViewReducer } from '../../content-manager/pages/EditViewLayoutManager';
 // @ts-expect-error no types, yet.
 import listViewReducer from '../../content-manager/pages/ListView/reducer';

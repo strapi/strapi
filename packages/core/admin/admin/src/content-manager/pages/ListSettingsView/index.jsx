@@ -18,7 +18,7 @@ import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 
-import ModelsContext from '../../contexts/ModelsContext';
+import { ModelsContext } from '../../contexts/models';
 import { usePluginsQueryParams } from '../../hooks';
 import { checkIfAttributeIsDisplayable } from '../../utils';
 import { getTranslation } from '../../utils/translations';

@@ -1,20 +1,23 @@
-import * as React from 'react';
-
 import { Box, Flex, Icon, IconButton, Status, Typography } from '@strapi/design-system';
 import { Cross, Drag } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
+import { getTranslation } from '../../utils/translations';
 import {
   DisconnectButton,
   LinkEllipsis,
   ChildrenWrapper,
   FlexWrapper,
-} from '../../../components/Relations/RelationInput';
-import { PUBLICATION_STATES } from '../../../components/Relations/RelationInputDataManager';
-import { getTranslation } from '../../../utils/translations';
+} from '../Relations/RelationInput';
+import { PUBLICATION_STATES } from '../Relations/RelationInputDataManager';
 
-export const RelationDragPreview = ({ status, displayedValue, width }) => {
+interface RelationDragPreviewProps {
+  status: typeof PUBLICATION_STATES.DRAFT | typeof PUBLICATION_STATES.PUBLISHED;
+  displayedValue: string;
+  width: number;
+}
+
+const RelationDragPreview = ({ status, displayedValue, width }: RelationDragPreviewProps) => {
   const { formatMessage } = useIntl();
 
   const stateMessage = {
@@ -39,18 +42,18 @@ export const RelationDragPreview = ({ status, displayedValue, width }) => {
         paddingLeft={2}
         paddingRight={4}
         hasRadius
-        borderSize={1}
+        borderWidth={1}
         background="neutral0"
         borderColor="neutral200"
         justifyContent="space-between"
       >
         <FlexWrapper gap={1}>
-          <IconButton noBorder>
+          <IconButton aria-label="" borderWidth={0}>
             <Drag />
           </IconButton>
           <ChildrenWrapper maxWidth="100%" justifyContent="space-between">
             <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
-              <LinkEllipsis>
+              <LinkEllipsis href="">
                 <Typography textColor="primary600" ellipsis>
                   {displayedValue}
                 </Typography>
@@ -75,8 +78,5 @@ export const RelationDragPreview = ({ status, displayedValue, width }) => {
   );
 };
 
-RelationDragPreview.propTypes = {
-  status: PropTypes.string.isRequired,
-  displayedValue: PropTypes.string.isRequired,
-  width: PropTypes.number.isRequired,
-};
+export { RelationDragPreview };
+export type { RelationDragPreviewProps };

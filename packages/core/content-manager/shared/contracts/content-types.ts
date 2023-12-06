@@ -55,9 +55,7 @@ export declare namespace FindContentTypes {
     query: {};
   }
   export interface Response {
-    data: {
-      data: ContentType[];
-    };
+    data: ContentType[];
     error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
@@ -71,12 +69,10 @@ export declare namespace FindContentTypesSettings {
     query: {};
   }
   export interface Response {
-    data: {
-      data: {
-        uid: string;
-        settings: Settings;
-      };
-    };
+    data: Array<{
+      uid: string;
+      settings: Settings;
+    }>;
     error?: errors.ApplicationError;
   }
 }
