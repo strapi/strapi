@@ -473,26 +473,10 @@ const Component = ({
         // Update the errors
         triggerFormValidation();
       },
-      onMoveItem(newIndex: number | Array<number>, currentIndex: number | Array<number>) {
-        if (typeof newIndex === 'number' && typeof currentIndex === 'number') {
-          moveComponentField(newIndex, currentIndex);
-        }
-      },
-      onDropItem(index: number | Array<number>) {
-        if (typeof index === 'number' && onDropItem) {
-          onDropItem(index);
-        }
-      },
-      onGrabItem(index: number | Array<number>) {
-        if (typeof index === 'number' && onGrabItem) {
-          onGrabItem(index);
-        }
-      },
-      onCancel(index: number | Array<number>) {
-        if (typeof index === 'number' && onCancel) {
-          onCancel(index);
-        }
-      },
+      onMoveItem: moveComponentField,
+      onDropItem,
+      onGrabItem,
+      onCancel,
     });
 
   React.useEffect(() => {

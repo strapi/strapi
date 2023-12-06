@@ -28,10 +28,11 @@ const DROP_SENSITIVITY = {
 } as const;
 
 interface UseDragAndDropOptions<
-  TItem extends { index: number | Array<number> } = { index: number | Array<number> }
-> extends UseKeyboardDragAndDropCallbacks {
+  TIndex extends number | Array<number> = number | Array<number>,
+  TItem extends { index: TIndex } = { index: TIndex }
+> extends UseKeyboardDragAndDropCallbacks<TIndex> {
   type?: string;
-  index: number | Array<number>;
+  index: TIndex;
   item?: TItem;
   onStart?: () => void;
   onEnd?: () => void;
@@ -64,7 +65,8 @@ type DropCollectedProps = {
  * Centralising the same behaviours and by default offering keyboard support.
  */
 const useDragAndDrop = <
-  TItem extends { index: number | Array<number>; id?: Entity.ID; [key: string]: unknown }
+  TIndex extends number | Array<number>,
+  TItem extends { index: TIndex; id?: Entity.ID; [key: string]: unknown }
 >(
   active: boolean,
   {
@@ -78,7 +80,7 @@ const useDragAndDrop = <
     onCancel,
     onMoveItem,
     dropSensitivity = DROP_SENSITIVITY.REGULAR,
-  }: UseDragAndDropOptions<TItem>
+  }: UseDragAndDropOptions<TIndex, TItem>
 ): UseDragAndDropReturn => {
   const objectRef = React.useRef<HTMLElement>(null);
 

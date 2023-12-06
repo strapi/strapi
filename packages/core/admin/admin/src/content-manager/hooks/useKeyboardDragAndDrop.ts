@@ -1,10 +1,10 @@
 import * as React from 'react';
 
-export type UseKeyboardDragAndDropCallbacks = {
-  onCancel?: (index: number | Array<number>) => void;
-  onDropItem?: (currentIndex: number | Array<number>, newIndex?: number | Array<number>) => void;
-  onGrabItem?: (index: number | Array<number>) => void;
-  onMoveItem?: (newIndex: number | Array<number>, currentIndex: number | Array<number>) => void;
+export type UseKeyboardDragAndDropCallbacks<TIndex extends number | Array<number> = number> = {
+  onCancel?: (index: TIndex) => void;
+  onDropItem?: (currentIndex: TIndex, newIndex?: TIndex) => void;
+  onGrabItem?: (index: TIndex) => void;
+  onMoveItem?: (newIndex: TIndex, currentIndex: TIndex) => void;
 };
 
 /**
@@ -13,10 +13,10 @@ export type UseKeyboardDragAndDropCallbacks = {
  *
  * @internal - You should use `useDragAndDrop` instead.
  */
-export const useKeyboardDragAndDrop = (
+export const useKeyboardDragAndDrop = <TIndex extends number | Array<number> = number>(
   active: boolean,
-  index: number | Array<number>,
-  { onCancel, onDropItem, onGrabItem, onMoveItem }: UseKeyboardDragAndDropCallbacks
+  index: TIndex,
+  { onCancel, onDropItem, onGrabItem, onMoveItem }: UseKeyboardDragAndDropCallbacks<TIndex>
 ) => {
   const [isSelected, setIsSelected] = React.useState(false);
 
@@ -24,12 +24,13 @@ export const useKeyboardDragAndDrop = (
     if (!isSelected) {
       return;
     }
-    if (typeof index === 'number' && onMoveItem)
+    if (typeof index === 'number' && onMoveItem) {
       if (movement === 'UP') {
-        onMoveItem(index - 1, index);
+        onMoveItem((index - 1) as TIndex, index);
       } else if (movement === 'DOWN') {
-        onMoveItem(index + 1, index);
+        onMoveItem((index + 1) as TIndex, index);
       }
+    }
   };
 
   const handleDragClick = () => {
