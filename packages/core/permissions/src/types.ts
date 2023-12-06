@@ -3,7 +3,7 @@
  * it becomes a circular dependency. This is the source of truth,
  * they're re-exported from `@strapi/types` for convenience.
  */
-import { Subject } from '@casl/ability';
+import type { Subject } from '@casl/ability';
 
 export interface ParametrizedAction {
   name: string;

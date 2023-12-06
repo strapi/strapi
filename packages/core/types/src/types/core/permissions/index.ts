@@ -1,4 +1,4 @@
-import { engine } from '@strapi/permissions';
+import type { engine } from '@strapi/permissions';
 
 type PermissionRule = Parameters<engine.abilities.CustomAbilityBuilder['can']>[0];
 type ParametrizedAction = Parameters<
