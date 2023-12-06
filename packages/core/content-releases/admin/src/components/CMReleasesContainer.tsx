@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { skipToken } from '@reduxjs/toolkit/query';
 import {
   Box,
   Button,
@@ -208,13 +209,24 @@ export const CMReleasesContainer = () => {
   } = useCMEditViewDataManager();
   const params = useParams<{ id?: string }>();
 
-  const toggleAddActionToReleaseModal = () => setShowModal((prev) => !prev);
+  const canFetch = Boolean(params.id && contentType?.uid);
+  const fetchParams = canFetch
+    ? {
+        // TypeScript still thinks contentType could be undefined, assert that it is defined
+        contentTypeUid: contentType!.uid,
+        entryId: params.id,
+        hasEntryAttached: true,
+      }
+    : skipToken;
+  // Get all 'pending' releases that have the entry attached
+  const response = useGetReleasesForEntryQuery(fetchParams);
+  const releases = response.data?.data;
 
   /**
-   * If we don't have a contentType.uid or params.id no use showing the injection zone
+   * If we don't have a contentType.uid or params.id then the data was never fetched
    * TODO: Should we handle this with an error message in the UI or just not show the container?
    */
-  if (!contentType?.uid || !params.id) {
+  if (!canFetch) {
     return null;
   }
 
@@ -223,9 +235,19 @@ export const CMReleasesContainer = () => {
    * - Content types without draft and publish cannot add entries to release
    * TODO v5: All contentTypes will have draft and publish enabled
    */
-  if (isCreatingEntry || !contentType.options?.draftAndPublish) {
+  if (isCreatingEntry || !contentType?.options?.draftAndPublish) {
     return null;
   }
+
+  const toggleAddActionToReleaseModal = () => setShowModal((prev) => !prev);
+
+  const getReleaseColorVariant = (actionType: 'publish' | 'unpublish') => {
+    if (actionType === 'unpublish') {
+      return 'secondary';
+    }
+
+    return 'success';
+  };
 
   return (
     <CheckPermissions permissions={PERMISSIONS.main}>
@@ -241,13 +263,55 @@ export const CMReleasesContainer = () => {
         padding={4}
         shadow="tableShadow"
       >
-        <Flex direction="column" alignItems="stretch" gap={4}>
+        <Flex direction="column" alignItems="stretch" gap={3}>
           <Typography variant="sigma" textColor="neutral600" textTransform="uppercase">
             {formatMessage({
               id: 'content-releases.plugin.name',
               defaultMessage: 'RELEASES',
             })}
           </Typography>
+          {releases?.map((release) => {
+            return (
+              <Flex
+                key={release.id}
+                direction="column"
+                alignItems="start"
+                borderWidth="1px"
+                borderStyle="solid"
+                borderColor={`${getReleaseColorVariant(release.action.type)}200`}
+                hasRadius
+              >
+                <Box
+                  paddingTop={3}
+                  paddingBottom={3}
+                  paddingLeft={4}
+                  paddingRight={4}
+                  background={`${getReleaseColorVariant(release.action.type)}100`}
+                  width="100%"
+                >
+                  <Typography
+                    fontSize={1}
+                    variant="pi"
+                    textColor={`${getReleaseColorVariant(release.action.type)}600`}
+                  >
+                    {formatMessage(
+                      {
+                        id: 'content-releases.content-manager-edit-view.list-releases.title',
+                        defaultMessage:
+                          '{isPublish, select, true {Will be published in} other {Will be unpublished in}}',
+                      },
+                      { isPublish: release.action.type === 'publish' }
+                    )}
+                  </Typography>
+                </Box>
+                <Box padding={4}>
+                  <Typography fontSize={2} fontWeight="bold" variant="omega" textColor="neutral700">
+                    {release.name}
+                  </Typography>
+                </Box>
+              </Flex>
+            );
+          })}
           <CheckPermissions permissions={PERMISSIONS.createAction}>
             <Button
               justifyContent="center"
@@ -268,8 +332,10 @@ export const CMReleasesContainer = () => {
         {showModal && (
           <AddActionToReleaseModal
             handleClose={toggleAddActionToReleaseModal}
-            contentTypeUid={contentType.uid}
-            entryId={params.id}
+            // Assert contentType.uid is defined when canFetch is true
+            contentTypeUid={contentType.uid!}
+            // Assert params.id is defined when canFetch is true
+            entryId={params.id!}
           />
         )}
       </Box>

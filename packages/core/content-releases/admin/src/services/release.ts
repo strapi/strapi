@@ -37,7 +37,7 @@ const releaseApi = createApi({
     return {
       getReleasesForEntry: build.query<
         GetContentTypeEntryReleases.Response,
-        GetContentTypeEntryReleases.Request['query']
+        Partial<GetContentTypeEntryReleases.Request['query']>
       >({
         query(params) {
           return {
