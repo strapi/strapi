@@ -18,8 +18,7 @@ import EditSettingsView from './EditSettingsView';
 import { EditViewLayoutManager } from './EditViewLayoutManager';
 // @ts-expect-error – This will be done in CONTENT-1953
 import { ListSettingsView } from './ListSettingsView';
-// @ts-expect-error – This will be done in CONTENT-1945
-import ListViewLayout from './ListViewLayoutManager';
+import { ListViewLayoutManager } from './ListViewLayoutManager';
 
 interface CollectionTypeRecursivePathProps extends RouteComponentProps<{ slug: string }> {}
 
@@ -125,9 +124,7 @@ const CollectionTypeRecursivePath = ({
         />
         <Route
           path={`${url}`}
-          render={({ location: { state }, history: { goBack } }) => (
-            <ListViewLayout slug={slug} layout={layout} state={state} goBack={goBack} />
-          )}
+          render={() => <ListViewLayoutManager slug={slug} layout={layout} />}
         />
       </Switch>
     </ErrorBoundary>

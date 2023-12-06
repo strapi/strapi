@@ -205,8 +205,9 @@ export const FilterPopoverURLQuery = ({
           {operator !== '$null' && operator !== '$notNull' && (
             <Box>
               <Inputs
-                {...appliedFilter.metadatas}
-                {...appliedFilter.fieldSchema}
+                label={appliedFilter.metadatas.label}
+                type={appliedFilter.fieldSchema.type}
+                options={appliedFilter.fieldSchema.options}
                 value={modifiedData.value}
                 onChange={(value) => setModifiedData((prev) => ({ ...prev, value }))}
               />
@@ -342,7 +343,7 @@ const DefaultInputs = ({
 const getFilterList = (filterSchema: FilterData['fieldSchema']): Operator[] => {
   let type = filterSchema.type;
 
-  if (filterSchema.type === 'relation' && filterSchema.mainField) {
+  if (filterSchema.type === 'relation' && filterSchema?.mainField?.schema?.type) {
     type = filterSchema.mainField.schema.type;
   }
 
