@@ -52,7 +52,7 @@ const releaseController = {
       const entryId = query.entryId;
       // Parse the string value or fallback to a default
       const hasEntryAttached: GetContentTypeEntryReleases.Request['query']['hasEntryAttached'] =
-        typeof query.hasEntryAttached === 'string' ? JSON.parse(query.hasEntryAttached) : true;
+        typeof query.hasEntryAttached === 'string' ? JSON.parse(query.hasEntryAttached) : false;
 
       const results = await releaseService.findManyForContentTypeEntry(contentTypeUid, entryId, {
         hasEntryAttached,

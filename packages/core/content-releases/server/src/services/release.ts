@@ -48,7 +48,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     {
       hasEntryAttached,
     }: { hasEntryAttached?: GetContentTypeEntryReleases.Request['query']['hasEntryAttached'] } = {
-      hasEntryAttached: true,
+      hasEntryAttached: false,
     }
   ) {
     const whereActions = hasEntryAttached
