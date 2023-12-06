@@ -139,6 +139,10 @@ export class Upgrader implements UpgraderInterface {
         const errorMessage = (e as Error)?.message ?? e?.toString();
         this.logger?.error(`Package installer failed: ${errorMessage}`);
         this.logger?.error(`You will need to install your packages manually.`);
+        const confirmationMessage = `Do you want to proceed anyway?`;
+        if (!(await this.confirmationCallback?.(confirmationMessage))) {
+          throw new Error("Package installer failed, and you didn't confirm to proceed anyway.");
+        }
       }
 
       await this.runCodemods(range);
