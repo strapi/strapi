@@ -19,18 +19,6 @@ export const rangeFromReleaseType = (current: Version.SemVer, identifier: Versio
       const nextMajor = semver.inc(current, 'major') as Version.LiteralSemVer;
       return fromCurrentTo(nextMajor);
     }
-    // case Version.ReleaseType.Minor: {
-    //   // semver.inc(_, 'major') will target <major + 1>.0.0 which is what we want
-    //   // e.g. for 4.15.4, it'll return 5.0.0
-    //   const nextMinor = semver.inc(current, 'minor') as Version.LiteralSemVer;
-    //   return fromCurrentTo(nextMinor);
-    // }
-    // case Version.ReleaseType.Patch: {
-    //   // semver.inc(_, 'major') will target <major + 1>.0.0 which is what we want
-    //   // e.g. for 4.15.4, it'll return 5.0.0
-    //   const nextPatch = semver.inc(current, 'patch') as Version.LiteralSemVer;
-    //   return fromCurrentTo(nextPatch);
-    // }
     default: {
       throw new Error('Not implemented');
     }
