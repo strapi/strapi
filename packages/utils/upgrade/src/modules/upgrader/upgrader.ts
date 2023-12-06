@@ -5,6 +5,7 @@ import {
   constants as codemodRepositoryConstants,
 } from '../codemod-repository';
 import { isLiteralSemVer, isSemVer, rangeFromVersions, semVerFactory } from '../version';
+import { unknownToError } from '../error';
 import * as f from '../format';
 
 import type { ConfirmationCallback, Upgrader as UpgraderInterface, UpgradeReport } from './types';
@@ -13,7 +14,6 @@ import type { Logger } from '../logger';
 import type { Requirement } from '../requirement';
 import type { NPM } from '../npm';
 import type { Project } from '../project';
-import { unknownToError } from '../error';
 
 export class Upgrader implements UpgraderInterface {
   private project: Project;

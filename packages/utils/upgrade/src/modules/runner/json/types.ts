@@ -23,6 +23,8 @@ export interface JSONTransformParams {
   json: (object: Utils.JSONObject) => JSONTransformAPI;
 }
 
+export type JSONTransform = (file: JSONSourceFile, params: JSONTransformParams) => Utils.JSONObject;
+
 export interface JSONTransformAPI {
   get<T extends Utils.JSONValue>(path?: string, defaultValue?: T): T | undefined;
   has(path: string): boolean;

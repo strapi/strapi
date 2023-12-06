@@ -1,12 +1,12 @@
 import path from 'node:path';
 
-import type { JSONTransform } from '../../..';
+import type { modules } from '../../..';
 
 /**
  * Note: This transform file is only for development purposes and should be deleted before releasing
  */
 
-const transform: JSONTransform = (file, params) => {
+const transform: modules.runner.json.JSONTransform = (file, params) => {
   const { cwd, json } = params;
 
   // Ignore files that are not the root package.json
