@@ -42,7 +42,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       },
     });
   },
-  findManyForContentTypeEntry(
+  async findManyForContentTypeEntry(
     contentTypeUid: GetContentTypeEntryReleases.Request['query']['contentTypeUid'],
     entryId: GetContentTypeEntryReleases.Request['query']['entryId'],
     {
@@ -75,8 +75,19 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
             },
           ],
         };
+    const populateAttachedAction = hasEntryAttached
+      ? {
+          // Filter the action to get only the content type entry
+          actions: {
+            where: {
+              target_type: contentTypeUid,
+              target_id: entryId,
+            },
+          },
+        }
+      : {};
 
-    return strapi.db.query(RELEASE_MODEL_UID).findMany({
+    const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
       where: {
         ...whereActions,
         releasedAt: {
@@ -84,10 +95,26 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
         },
       },
       populate: {
-        actions: {
-          count: true,
-        },
+        ...populateAttachedAction,
       },
+    });
+
+    return releases.map((release) => {
+      if (release.actions?.length) {
+        const [actionForEntry] = release.actions;
+
+        // Remove the actions key to replace it with an action key
+        delete release.actions;
+
+        return {
+          ...release,
+          action: {
+            type: actionForEntry.type,
+          },
+        };
+      }
+
+      return release;
     });
   },
   async update(

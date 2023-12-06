@@ -16,21 +16,6 @@ import { getAllowedContentTypes, getService } from '../utils';
 
 type ReleaseWithPopulatedActions = Release & { actions: { count: number } };
 
-const formatDataObject = (releases: ReleaseWithPopulatedActions[]) => {
-  return releases.map((release) => {
-    const { actions, ...releaseData } = release;
-
-    return {
-      ...releaseData,
-      actions: {
-        meta: {
-          count: actions.count,
-        },
-      },
-    };
-  });
-};
-
 const releaseController = {
   async findMany(ctx: Koa.Context) {
     const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
@@ -54,16 +39,29 @@ const releaseController = {
       const hasEntryAttached: GetContentTypeEntryReleases.Request['query']['hasEntryAttached'] =
         typeof query.hasEntryAttached === 'string' ? JSON.parse(query.hasEntryAttached) : false;
 
-      const results = await releaseService.findManyForContentTypeEntry(contentTypeUid, entryId, {
+      const data = await releaseService.findManyForContentTypeEntry(contentTypeUid, entryId, {
         hasEntryAttached,
       });
 
-      ctx.body = { data: formatDataObject(results) };
+      ctx.body = { data };
     } else {
       const query: GetReleases.Request['query'] = await permissionsManager.sanitizeQuery(ctx.query);
       const { results, pagination } = await releaseService.findPage(query);
 
-      ctx.body = { data: formatDataObject(results), meta: { pagination } };
+      const data = results.map((release: ReleaseWithPopulatedActions) => {
+        const { actions, ...releaseData } = release;
+
+        return {
+          ...releaseData,
+          actions: {
+            meta: {
+              count: actions.count,
+            },
+          },
+        };
+      });
+
+      ctx.body = { data, meta: { pagination } };
     }
   },
 
