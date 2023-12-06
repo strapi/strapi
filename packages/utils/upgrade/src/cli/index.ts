@@ -28,16 +28,16 @@ addReleaseUpgradeCommand(
 );
 
 // TODO: Add back the command when adding the support for minor upgrades
-addReleaseUpgradeCommand(
-  Version.ReleaseType.Minor,
-  'Upgrade to the latest minor/patch version of Strapi for the current major'
-);
+// addReleaseUpgradeCommand(
+//   Version.ReleaseType.Minor,
+//   'Upgrade to the latest minor/patch version of Strapi for the current major'
+// );
 
 // TODO: Add back the command when adding the support for patch upgrades
-addReleaseUpgradeCommand(
-  Version.ReleaseType.Patch,
-  'Upgrade to latest patch version of Strapi for the current major and minor'
-);
+// addReleaseUpgradeCommand(
+//   Version.ReleaseType.Patch,
+//   'Upgrade to latest patch version of Strapi for the current major and minor'
+// );
 
 program
   .usage('<command> [options]')
