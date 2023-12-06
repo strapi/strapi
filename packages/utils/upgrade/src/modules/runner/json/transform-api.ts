@@ -11,7 +11,7 @@ export class JSONTransformAPI implements JSONTransformAPIInterface {
 
   get<T extends JSONValue>(path?: string, defaultValue?: T): T | undefined {
     if (!path) {
-      return cloneDeep(this.json) as T;
+      return this.root() as T;
     }
 
     return cloneDeep(get(path, this.json) ?? defaultValue) as T;

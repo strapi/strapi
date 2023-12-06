@@ -4,10 +4,10 @@ import {
   constants as codemodRepositoryConstants,
   codemodRepositoryFactory,
 } from '../codemod-repository';
+import { unknownToError } from '../error';
 import * as f from '../format';
 import { isLiteralSemVer, isSemVer, rangeFromVersions, semVerFactory } from '../version';
 
-import { unknownToError } from '../error';
 import type { Logger } from '../logger';
 import type { NPM } from '../npm';
 import type { Project } from '../project';

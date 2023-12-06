@@ -31,6 +31,10 @@ export class Project implements ProjectInterface {
   public strapiVersion!: Version.SemVer;
 
   constructor(cwd: string) {
+    if (!fse.pathExistsSync(cwd)) {
+      throw new Error(`ENOENT: no such file or directory, access '${cwd}'`);
+    }
+
     this.cwd = cwd;
 
     this.refresh();
@@ -83,7 +87,7 @@ export class Project implements ProjectInterface {
     });
     const jsonRunner = jsonRunnerFactory(jsonFiles, { dry, cwd: this.cwd });
 
-    return [codeRunner, jsonRunner];
+    return [codeRunner, jsonRunner] as const;
   }
 
   private refreshPackageJSON(): void {
@@ -95,8 +99,9 @@ export class Project implements ProjectInterface {
       throw new Error(`Could not find a ${constants.PROJECT_PACKAGE_JSON} file in ${this.cwd}`);
     }
 
-    /* eslint-disable-next-line @typescript-eslint/no-var-requires */
-    this.packageJSON = require(packagePath);
+    const packageJSONBuffer = fse.readFileSync(packagePath);
+
+    this.packageJSON = JSON.parse(packageJSONBuffer.toString());
   }
 
   private refreshProjectFiles(): void {
@@ -125,10 +130,6 @@ export class Project implements ProjectInterface {
   }
 
   private findStrapiVersionFromProjectPackageJSON(): Version.SemVer | undefined {
-    if (this.packageJSON === undefined) {
-      this.refreshPackageJSON();
-    }
-
     const projectName = this.packageJSON.name;
     const version = this.packageJSON.dependencies?.[constants.STRAPI_DEPENDENCY_NAME];
 
@@ -157,7 +158,7 @@ export class Project implements ProjectInterface {
       assert(typeof strapiPackageJSON === 'object');
     } catch {
       throw new Error(
-        `Cannot find a valid "package.json" file with a "${constants.STRAPI_DEPENDENCY_NAME}" dependency installed for ${this.cwd}`
+        `Cannot resolve module "${constants.STRAPI_DEPENDENCY_NAME}" from paths [${this.cwd}]`
       );
     }
 

@@ -48,8 +48,11 @@ export const transformJSON = async (
 
       const out = await codemod(file, params);
 
+      if (out === undefined) {
+        report.error += 1;
+      }
       // If the json object has modifications
-      if (!isEqual(json, out)) {
+      else if (!isEqual(json, out)) {
         if (!dry) {
           await replaceJson(path, out);
         }
