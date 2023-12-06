@@ -50,7 +50,6 @@
     "default": {
       "runner": "nx/tasks-runners/default",
       "options": {
-        "useDaemonProcess": false,
         "cacheableOperations": ["build", "build:ts", "lint", "test:unit", "test:front"]
       }
     }
