@@ -22,22 +22,6 @@ export type ApiError =
   | errors.ValidationError
   | errors.YupValidationError;
 
-export type InputType =
-  | 'json'
-  | 'bool'
-  | 'checkbox'
-  | 'datetime'
-  | 'date'
-  | 'number'
-  | 'email'
-  | 'timestamp'
-  | 'text'
-  | 'string'
-  | 'password'
-  | 'select'
-  | 'textarea'
-  | 'time';
-
 export type AttributeFilter = Record<
   string,
   Record<EntityService.Params.Filters.Operator.Where, string | null>
@@ -65,6 +49,7 @@ export interface FilterData<TOptions extends any[] = string[]> {
     | {
         options?: string[];
         type: Exclude<Attribute.Kind, 'relation'>;
+        mainField?: never;
       }
     | {
         type: 'relation';

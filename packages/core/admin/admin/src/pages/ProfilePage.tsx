@@ -23,6 +23,7 @@ import {
   GenericInputProps,
   LoadingIndicatorPage,
   pxToRem,
+  translatedErrors,
   useAppInfo,
   useFetchClient,
   useFocusWhenNavigate,
@@ -44,13 +45,23 @@ import { useLocales } from '../components/LanguageProvider';
 import { useThemeToggle, ThemeName, ThemeToggleContextContextValue } from '../contexts/themeToggle';
 import { getFullName } from '../utils/getFullName';
 
-// @ts-expect-error – no types available
-import { profileValidation } from './SettingsPage/pages/Users/utils/validations/users';
+import { COMMON_USER_SCHEMA } from './Settings/pages/Users/utils/validation';
 
 import type { IsSSOLocked } from '../../../shared/contracts/providers';
 import type { GetMe, UpdateMe } from '../../../shared/contracts/users';
 
-const schema = yup.object().shape(profileValidation);
+const PROFILE_VALIDTION_SCHEMA = yup.object().shape({
+  ...COMMON_USER_SCHEMA,
+  currentPassword: yup
+    .string()
+    // @ts-expect-error – no idea why this is failing.
+    .when(['password', 'confirmPassword'], (password, confirmPassword, passSchema) => {
+      return password || confirmPassword
+        ? passSchema.required(translatedErrors.required)
+        : passSchema;
+    }),
+  preferedLanguage: yup.string().nullable(),
+});
 
 /* -------------------------------------------------------------------------------------------------
  * ProfilePage
@@ -261,7 +272,7 @@ const ProfilePage = () => {
         // @ts-expect-error – currentTheme could be undefined because we don't have context assertion yet.
         initialValues={initialData}
         validateOnChange={false}
-        validationSchema={schema}
+        validationSchema={PROFILE_VALIDTION_SCHEMA}
         enableReinitialize
       >
         {({

@@ -50,8 +50,9 @@ interface StrapiAppSettingLink {
   id: string;
   to: string;
   intlLabel: TranslationMessage;
-  Component: React.ComponentType;
+  Component: ComponentModule;
   permissions: Permission[];
+  exact?: boolean;
 }
 
 interface StrapiAppSetting {
@@ -60,14 +61,25 @@ interface StrapiAppSetting {
   links: StrapiAppSettingLink[];
 }
 
-type RunHookSeries = (hookName: string, async?: boolean) => unknown | Promise<unknown>;
+interface RunHookSeries {
+  (hookName: string, async: true): Promise<any[]>;
+  (hookName: string, async?: false): any[];
+}
 
-type RunHookWaterfall = <InitialValue, Store>(
-  hookName: string,
-  initialValue: InitialValue,
-  asynchronous: false | undefined,
-  store: Store
-) => unknown | Promise<unknown>;
+interface RunHookWaterfall {
+  <InitialValue, Store>(
+    hookName: string,
+    initialValue: InitialValue,
+    asynchronous: true,
+    store?: Store
+  ): Promise<InitialValue>;
+  <InitialValue, Store>(
+    hookName: string,
+    initialValue: InitialValue,
+    asynchronous?: false,
+    store?: Store
+  ): InitialValue;
+}
 
 interface StrapiAppContextValue {
   menu: MenuItem[];
@@ -87,6 +99,7 @@ const StrapiAppContext = React.createContext<StrapiAppContextValue>({
   // These functions are required but should not resolve to undefined as they do here
   runHookParallel: () => Promise.resolve(),
   runHookWaterfall: () => Promise.resolve(),
+  // @ts-expect-error – TODO: fix this.
   runHookSeries: () => Promise.resolve(),
 });
 

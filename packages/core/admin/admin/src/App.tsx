@@ -11,7 +11,6 @@ import {
   auth,
   LoadingIndicatorPage,
   MenuItem,
-  prefixFileUrlWithBackendUrl,
   TrackingProvider,
   useAppInfo,
   useFetchClient,
@@ -22,9 +21,12 @@ import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 
+import {
+  ConfigurationProvider,
+  ConfigurationProviderProps,
+} from './components/ConfigurationProvider';
 import { PrivateRoute } from './components/PrivateRoute';
 import { ADMIN_PERMISSIONS_CE, ACTION_SET_ADMIN_PERMISSIONS } from './constants';
-import { useConfiguration } from './contexts/configuration';
 import { useEnterprise } from './hooks/useEnterprise';
 import { AuthPage } from './pages/Auth/AuthPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -39,7 +41,12 @@ const AuthenticatedApp = React.lazy(() =>
   import('./components/AuthenticatedApp').then((mod) => ({ default: mod.AuthenticatedApp }))
 );
 
-export const App = () => {
+interface AppProps extends Omit<ConfigurationProviderProps, 'children' | 'authLogo' | 'menuLogo'> {
+  authLogo: string;
+  menuLogo: string;
+}
+
+export const App = ({ authLogo, menuLogo, showReleaseNotification, showTutorials }: AppProps) => {
   const adminPermissions = useEnterprise(
     ADMIN_PERMISSIONS_CE,
     async () => (await import('../../ee/admin/src/constants')).ADMIN_PERMISSIONS_EE,
@@ -60,9 +67,18 @@ export const App = () => {
     }
   );
   const toggleNotification = useNotification();
-  const { updateProjectSettings } = useConfiguration();
   const { formatMessage } = useIntl();
-  const [{ isLoading, hasAdmin, uuid, deviceId }, setState] = React.useState({
+  const [
+    { isLoading, hasAdmin, uuid, deviceId, authLogo: customAuthLogo, menuLogo: customMenuLogo },
+    setState,
+  ] = React.useState<{
+    isLoading: boolean;
+    hasAdmin: boolean;
+    uuid: string | false;
+    deviceId: string | undefined;
+    authLogo?: string;
+    menuLogo?: string;
+  }>({
     isLoading: true,
     deviceId: undefined,
     hasAdmin: false,
@@ -114,14 +130,9 @@ export const App = () => {
       try {
         const {
           data: {
-            data: { hasAdmin, uuid, menuLogo, authLogo },
+            data: { hasAdmin, uuid, authLogo, menuLogo },
           },
         } = await get(`/admin/init`);
-
-        updateProjectSettings({
-          menuLogo: prefixFileUrlWithBackendUrl(menuLogo),
-          authLogo: prefixFileUrlWithBackendUrl(authLogo),
-        });
 
         if (uuid) {
           const {
@@ -135,7 +146,7 @@ export const App = () => {
 
           try {
             const event = 'didInitializeAdministration';
-            await post(
+            post(
               'https://analytics.strapi.io/api/v2/track',
               {
                 // This event is anonymous
@@ -157,7 +168,7 @@ export const App = () => {
           }
         }
 
-        setState({ isLoading: false, hasAdmin, uuid, deviceId });
+        setState({ isLoading: false, hasAdmin, uuid, deviceId, authLogo, menuLogo });
       } catch (err) {
         toggleNotification({
           type: 'warning',
@@ -168,7 +179,7 @@ export const App = () => {
 
     getData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [toggleNotification, updateProjectSettings]);
+  }, [toggleNotification]);
 
   const trackingInfo = React.useMemo(
     () => ({
@@ -188,19 +199,36 @@ export const App = () => {
       <SkipToContent>
         {formatMessage({ id: 'skipToContent', defaultMessage: 'Skip to content' })}
       </SkipToContent>
-      <TrackingProvider value={trackingInfo}>
-        <Switch>
-          {authRoutes}
-          <Route
-            path="/auth/:authType"
-            render={(routerProps) => <AuthPage {...routerProps} hasAdmin={hasAdmin} />}
-            exact
-          />
-          <PrivateRoute path="/usecase" component={UseCasePage} />
-          <PrivateRoute path="/" component={AuthenticatedApp} />
-          <Route path="" component={NotFoundPage} />
-        </Switch>
-      </TrackingProvider>
+      <ConfigurationProvider
+        authLogo={{
+          default: authLogo,
+          custom: {
+            url: customAuthLogo,
+          },
+        }}
+        menuLogo={{
+          default: menuLogo,
+          custom: {
+            url: customMenuLogo,
+          },
+        }}
+        showReleaseNotification={showReleaseNotification}
+        showTutorials={showTutorials}
+      >
+        <TrackingProvider value={trackingInfo}>
+          <Switch>
+            {authRoutes}
+            <Route
+              path="/auth/:authType"
+              render={(routerProps) => <AuthPage {...routerProps} hasAdmin={hasAdmin} />}
+              exact
+            />
+            <PrivateRoute path="/usecase" component={UseCasePage} />
+            <PrivateRoute path="/" component={AuthenticatedApp} />
+            <Route path="" component={NotFoundPage} />
+          </Switch>
+        </TrackingProvider>
+      </ConfigurationProvider>
     </React.Suspense>
   );
 };

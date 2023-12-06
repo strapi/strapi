@@ -55,8 +55,11 @@ const TrackingProvider = ({ value = { uuid: false }, children }: TrackingProvide
  */
 interface EventWithoutProperties {
   name:
+    | 'changeComponentsOrder'
     | 'didAccessAuthenticatedAdministration'
+    | 'didAddComponentToDynamicZone'
     | 'didChangeDisplayedFields'
+    | 'didCheckDraftRelations'
     | 'didClickGuidedTourHomepageApiTokens'
     | 'didClickGuidedTourHomepageContentManager'
     | 'didClickGuidedTourHomepageContentTypeBuilder'
@@ -76,6 +79,7 @@ interface EventWithoutProperties {
     | 'didDuplicateRole'
     | 'didEditEditSettings'
     | 'didEditEmailTemplates'
+    | 'didEditFieldNameOnContentType'
     | 'didEditListSettings'
     | 'didEditMediaLibraryConfig'
     | 'didEditNameOfContentType'
@@ -86,6 +90,8 @@ interface EventWithoutProperties {
     | 'didNotCreateFirstAdmin'
     | 'didNotSaveComponent'
     | 'didPluginLearnMore'
+    | 'didPublishEntry'
+    | 'didUnpublishEntry'
     | 'didSaveComponent'
     | 'didSaveContentType'
     | 'didSearch'
@@ -98,9 +104,11 @@ interface EventWithoutProperties {
     | 'didSelectContentTypeSettings'
     | 'didEditAuthenticationProvider'
     | 'hasClickedCTBAddFieldBanner'
+    | 'removeComponentFromDynamicZone'
     | 'willAddMoreFieldToContentType'
     | 'willBulkDeleteEntries'
     | 'willBulkUnpublishEntries'
+    | 'willCheckDraftRelations'
     | 'willCreateComponent'
     | 'willCreateComponentFromAttributesModal'
     | 'willCreateContentType'
@@ -126,9 +134,12 @@ interface EventWithoutProperties {
     | 'willEditStage'
     | 'willFilterEntries'
     | 'willInstallPlugin'
+    | 'willPublishEntry'
+    | 'willUnpublishEntry'
     | 'willSaveComponent'
     | 'willSaveContentType'
-    | 'willSaveContentTypeLayout';
+    | 'willSaveContentTypeLayout'
+    | 'didEditFieldNameOnContentType';
   properties?: never;
 }
 
@@ -182,7 +193,7 @@ interface MediaEvents {
 interface DidSelectContentTypeFieldTypeEvent {
   name: 'didSelectContentTypeFieldType';
   properties: {
-    type: string;
+    type?: string;
   };
 }
 
@@ -209,11 +220,11 @@ interface WillNavigateEvent {
 
 interface DidAccessTokenListEvent {
   name: 'didAccessTokenList';
-  properties: TokenEvents['properties'] & {
-    number: string;
+  properties: {
+    tokenType: TokenEvents['properties']['tokenType'];
+    number: number;
   };
 }
-
 interface LogoEvent {
   name: 'didChangeLogo' | 'didClickResetLogo';
   properties: {
@@ -224,19 +235,57 @@ interface LogoEvent {
 interface TokenEvents {
   name:
     | 'didCopyTokenKey'
+    | 'didAddTokenFromList'
+    | 'didEditTokenFromList'
     | 'willAccessTokenList'
     | 'willAddTokenFromList'
+    | 'willCreateToken'
     | 'willDeleteToken'
+    | 'willEditToken'
     | 'willEditTokenFromList';
   properties: {
-    tokenType: string;
+    tokenType: 'api-token' | 'transfer-token';
+  };
+}
+
+interface WillModifyTokenEvent {
+  name: 'didCreateToken' | 'didEditToken';
+  properties: {
+    tokenType: TokenEvents['properties']['tokenType'];
+    type: 'custom' | 'full-access' | 'read-only' | Array<'push' | 'pull' | 'push-pull'>;
+  };
+}
+
+interface DeleteEntryEvents {
+  name: 'willDeleteEntry' | 'didDeleteEntry' | 'didNotDeleteEntry';
+  properties: {
+    status?: string;
+    error?: unknown;
+  };
+}
+
+interface CreateEntryEvents {
+  name: 'didCreateEntry' | 'didNotCreateEntry';
+  properties: {
+    status?: string;
+    error?: unknown;
+  };
+}
+
+interface UpdateEntryEvents {
+  name: 'willEditEntry' | 'didEditEntry' | 'didNotEditEntry';
+  properties: {
+    status?: string;
+    error?: unknown;
   };
 }
 
 type EventsWithProperties =
+  | CreateEntryEvents
   | DidAccessTokenListEvent
   | DidChangeModeEvent
   | DidCropFileEvent
+  | DeleteEntryEvents
   | DidEditMediaLibraryElementsEvent
   | DidFilterMediaLibraryElementsEvent
   | DidSelectContentTypeFieldTypeEvent
@@ -245,6 +294,8 @@ type EventsWithProperties =
   | DidSubmitWithErrorsFirstAdminEvent
   | LogoEvent
   | TokenEvents
+  | UpdateEntryEvents
+  | WillModifyTokenEvent
   | WillNavigateEvent;
 
 export type TrackingEvent = EventWithoutProperties | EventsWithProperties;

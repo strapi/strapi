@@ -6,6 +6,7 @@ import { fixtures } from '@strapi/admin-test-utils';
 import { DesignSystemProvider, darkTheme, lightTheme } from '@strapi/design-system';
 import { NotificationsProvider, Permission, RBACContext } from '@strapi/helper-plugin';
 import {
+  fireEvent,
   renderHook as renderHookRTL,
   render as renderRTL,
   waitFor,
@@ -160,4 +161,4 @@ const renderHook: typeof renderHookRTL = (hook, options) => {
   });
 };
 
-export { render, renderHook, waitFor, server, act, screen };
+export { render, renderHook, waitFor, server, act, screen, fireEvent };

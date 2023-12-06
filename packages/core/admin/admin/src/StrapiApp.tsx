@@ -521,12 +521,7 @@ class StrapiApp {
   runHookSeries = (name: string, asynchronous = false) =>
     asynchronous ? this.hooksDict[name].runSeriesAsync() : this.hooksDict[name].runSeries();
 
-  runHookWaterfall = (
-    name: string,
-    initialValue: unknown,
-    asynchronous = false,
-    store?: unknown
-  ) => {
+  runHookWaterfall = <T,>(name: string, initialValue: T, asynchronous = false, store?: Store) => {
     return asynchronous
       ? this.hooksDict[name].runWaterfallAsync(initialValue, store)
       : this.hooksDict[name].runWaterfall(initialValue, store);
@@ -545,7 +540,6 @@ class StrapiApp {
 
     return (
       <Providers
-        authLogo={this.configurations.authLogo}
         components={components}
         fields={fields}
         customFields={this.customFields}
@@ -554,24 +548,27 @@ class StrapiApp {
         getPlugin={this.getPlugin}
         messages={this.configurations.translations}
         menu={this.menu}
-        menuLogo={this.configurations.menuLogo}
         plugins={this.plugins}
         runHookParallel={this.runHookParallel}
         runHookWaterfall={(name, initialValue, async = false) => {
           return this.runHookWaterfall(name, initialValue, async, store);
         }}
+        // @ts-expect-error – context issue. TODO: fix this.
         runHookSeries={this.runHookSeries}
         themes={this.configurations.themes}
         settings={this.settings}
-        showTutorials={this.configurations.tutorials}
-        showReleaseNotification={this.configurations.notifications.releases}
         store={store}
       >
         <Helmet
           htmlAttributes={{ lang: localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) || 'en' }}
         />
         <BrowserRouter basename={getBasename()}>
-          <App />
+          <App
+            authLogo={this.configurations.authLogo}
+            menuLogo={this.configurations.menuLogo}
+            showTutorials={this.configurations.tutorials}
+            showReleaseNotification={this.configurations.notifications.releases}
+          />
         </BrowserRouter>
       </Providers>
     );
