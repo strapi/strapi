@@ -109,26 +109,10 @@ const DynamicComponent = ({
         displayedValue: `${friendlyName}${mainValue}`,
         icon,
       },
-      onMoveItem(newIndex: number | Array<number>, currentIndex: number | Array<number>) {
-        if (typeof newIndex === 'number' && typeof currentIndex === 'number') {
-          onMoveComponent(newIndex, currentIndex);
-        }
-      },
-      onDropItem(currentIndex: number | Array<number>) {
-        if (typeof currentIndex === 'number' && onDropItem) {
-          onDropItem(currentIndex);
-        }
-      },
-      onGrabItem(index: number | Array<number>) {
-        if (typeof index === 'number' && onGrabItem) {
-          onGrabItem(index);
-        }
-      },
-      onCancel(index: number | Array<number>) {
-        if (typeof index === 'number' && onCancel) {
-          onCancel(index);
-        }
-      },
+      onMoveItem: onMoveComponent,
+      onDropItem,
+      onGrabItem,
+      onCancel,
     });
 
   React.useEffect(() => {

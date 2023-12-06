@@ -614,22 +614,9 @@ const RelationItem = ({
         index,
       },
       onMoveItem: updatePositionOfRelation,
-      onDropItem(currentIndex: number | Array<number>) {
-        if (typeof currentIndex === 'number' && onDropItem) {
-          onDropItem(currentIndex);
-        }
-      },
-      onGrabItem(index: number | Array<number>) {
-        if (typeof index === 'number' && onGrabItem) {
-          onGrabItem(index);
-        }
-      },
-      onCancel(index: number | Array<number>) {
-        if (typeof index === 'number' && onCancel) {
-          onCancel(index);
-        }
-      },
-
+      onDropItem,
+      onGrabItem,
+      onCancel,
       dropSensitivity: DROP_SENSITIVITY.IMMEDIATE,
     });
 

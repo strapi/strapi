@@ -5,7 +5,7 @@ import { Drag } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Editor, Range, Transforms, Element } from 'slate';
 import { ReactEditor, type RenderElementProps, type RenderLeafProps, Editable } from 'slate-react';
-import styled, { CSSProperties } from 'styled-components';
+import styled, { CSSProperties, css } from 'styled-components';
 
 import { useDragAndDrop, DIRECTIONS } from '../../hooks/useDragAndDrop';
 import { ItemTypes } from '../../utils/dragAndDrop';
@@ -45,10 +45,10 @@ const DropPlaceholder = styled(Box)<{
   right: 0;
 
   // Show drop placeholder 8px above or below the drop target
-  ${({ dragDirection, theme, placeholderMargin }) => `
-  top: ${dragDirection === DIRECTIONS.UPWARD && `-${theme.spaces[placeholderMargin]}`};
-  bottom: ${dragDirection === DIRECTIONS.DOWNWARD && `-${theme.spaces[placeholderMargin]}`};
-`}
+  ${({ dragDirection, theme, placeholderMargin }) => css`
+    top: ${dragDirection === DIRECTIONS.UPWARD && `-${theme.spaces[placeholderMargin]}`};
+    bottom: ${dragDirection === DIRECTIONS.DOWNWARD && `-${theme.spaces[placeholderMargin]}`};
+  `}
 `;
 
 const DragItem = styled(Flex)<{ dragVisibility: CSSProperties['visibility'] }>`
@@ -72,7 +72,7 @@ const DragIconButton = styled(IconButton)`
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius:${({ theme }) => theme.borderRadius};
+  border-radius: ${({ theme }) => theme.borderRadius};
   width: ${({ theme }) => theme.spaces[4]};
   height: ${({ theme }) => theme.spaces[6]};
   visibility: hidden;
@@ -91,7 +91,8 @@ const DragIconButton = styled(IconButton)`
   }
   svg {
     height: auto;
-    width: ${({ theme }) => theme.spaces[3]}};
+    width: ${({ theme }) => theme.spaces[3]};
+
     path {
       fill: ${({ theme }) => theme.colors.neutral700};
     }
@@ -209,9 +210,8 @@ const DragAndDropElement = ({
         index,
         displayedValue: children,
       },
-      onDropItem(currentIndex: number | Array<number>, newIndex?: number | Array<number>) {
-        if (Array.isArray(currentIndex) && newIndex && Array.isArray(newIndex))
-          handleMoveBlock(newIndex, currentIndex);
+      onDropItem(currentIndex, newIndex) {
+        if (newIndex) handleMoveBlock(newIndex, currentIndex);
       },
     });
 
