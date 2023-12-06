@@ -8,7 +8,7 @@ permissions: read-all
 
 jobs:
   check-ownership:
-    name: "Check if PR was created by a Strapi Team Member"
+    name: 'Check if PR was created by a Strapi Team Member'
     runs-on: ubuntu-latest
     outputs:
       isTeamMember: ${{ steps.get-user-teams-membership.outputs.isTeamMember }}
@@ -20,7 +20,7 @@ jobs:
           team: team
           username: ${{ github.actor }}
   send-response:
-    name: "Alert user to change freeze"
+    name: 'Alert user to change freeze'
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
