@@ -1,13 +1,12 @@
 import type { Project } from '../project';
 import type { MaybePromise } from '../../types';
 import type { Version } from '../version';
-import { NPMPackageVersion } from '../npm/types';
+import type { NPMPackageVersion } from '../npm/types';
 
 export type TestResult = { pass: true; error: null } | { pass: false; error: Error };
 
 export interface Requirement {
   name: string;
-  description: string;
   isRequired: boolean;
   testCallback: RequirementTestCallback | null;
   children: Requirement[];
@@ -15,8 +14,8 @@ export interface Requirement {
   setChildren(children: Requirement[]): this;
   addChild(child: Requirement): this;
 
-  required(): Requirement;
-  optional(): Requirement;
+  asRequired(): Requirement;
+  asOptional(): Requirement;
 
   test(context: TestContext): Promise<TestResult>;
 }
