@@ -15,7 +15,10 @@ export async function getPreferredPackageManager(path: string) {
     return pm.name;
   }
 
-  throw new Error('Could not find a supported package manager');
+  process.emitWarning(
+    `We detected your packager manager (${pm?.name}) is not supported, using 'npm' instead.`
+  );
+  return 'npm';
 }
 
 export async function runInstall(path: string, { packageManager }: Options = {}) {
