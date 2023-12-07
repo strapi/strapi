@@ -1,5 +1,5 @@
 import { setCreatorFields, errors } from '@strapi/utils';
-import type { LoadedStrapi, Common, EntityService, UID } from '@strapi/types';
+import type { LoadedStrapi, EntityService, UID } from '@strapi/types';
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
 import type {
   GetReleases,
@@ -29,19 +29,27 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       data: releaseWithCreatorFields,
     });
   },
-  findOne(id: GetRelease.Request['params']['id'], query = {}) {
-    return strapi.entityService.findOne(RELEASE_MODEL_UID, id, query);
+
+  async findOne(id: GetRelease.Request['params']['id'], query = {}) {
+    const release = await strapi.entityService.findOne(RELEASE_MODEL_UID, id, {
+      ...query,
+    });
+
+    return release;
   },
+
   findPage(query?: GetReleases.Request['query']) {
     return strapi.entityService.findPage(RELEASE_MODEL_UID, {
       ...query,
       populate: {
         actions: {
+          // @ts-expect-error Ignore missing properties
           count: true,
         },
       },
     });
   },
+
   async findManyForContentTypeEntry(
     contentTypeUid: GetContentTypeEntryReleases.Request['query']['contentTypeUid'],
     entryId: GetContentTypeEntryReleases.Request['query']['entryId'],
@@ -117,6 +125,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       return release;
     });
   },
+
   async update(
     id: number,
     releaseData: UpdateRelease.Request['body'],
@@ -139,6 +148,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
 
     return release;
   },
+
   async createAction(
     releaseId: CreateReleaseAction.Request['params']['releaseId'],
     action: Pick<CreateReleaseAction.Request['body'], 'type' | 'entry'>
@@ -168,9 +178,9 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       populate: { release: { fields: ['id'] }, entry: { fields: ['id'] } },
     });
   },
+
   async findActions(
     releaseId: GetReleaseActions.Request['params']['releaseId'],
-    contentTypes: Common.UID.ContentType[],
     query?: GetReleaseActions.Request['query']
   ) {
     const result = await strapi.entityService.findOne(RELEASE_MODEL_UID, releaseId);
@@ -181,18 +191,20 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
 
     return strapi.entityService.findPage(RELEASE_ACTION_MODEL_UID, {
       ...query,
+      populate: {
+        entry: true,
+      },
       filters: {
         release: releaseId,
-        contentType: {
-          $in: contentTypes,
-        },
       },
     });
   },
+
   async countActions(query: EntityService.Params.Pick<typeof RELEASE_ACTION_MODEL_UID, 'filters'>) {
     return strapi.entityService.count(RELEASE_ACTION_MODEL_UID, query);
   },
-  async findReleaseContentTypes(releaseId: Release['id']) {
+
+  async getAllContentTypeUids(releaseId: Release['id']) {
     const contentTypesFromReleaseActions: { contentType: UID.ContentType }[] = await strapi.db
       .queryBuilder(RELEASE_ACTION_MODEL_UID)
       .select('content_type')
@@ -208,28 +220,32 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
 
     return contentTypesFromReleaseActions.map(({ contentType: contentTypeUid }) => contentTypeUid);
   },
-  async findReleaseContentTypesMainFields(releaseId: Release['id']) {
-    const contentTypesUids = await this.findReleaseContentTypes(releaseId);
+
+  async getContentTypesMetaFromActions(releaseId: Release['id']) {
+    const contentTypesUids = await this.getAllContentTypeUids(releaseId);
 
     const contentManagerContentTypeService = strapi
       .plugin('content-manager')
       .service('content-types');
-    const contentTypesMeta: Record<UID.ContentType, { mainField: string }> = {};
 
+    const contentTypesMetaData: Record<
+      UID.ContentType,
+      { mainField: string; displayName: string }
+    > = {};
     for (const contentTypeUid of contentTypesUids) {
       const contentTypeConfig = await contentManagerContentTypeService.findConfiguration({
         uid: contentTypeUid,
       });
 
-      if (contentTypeConfig) {
-        contentTypesMeta[contentTypeUid] = {
-          mainField: contentTypeConfig.settings.mainField,
-        };
-      }
+      contentTypesMetaData[contentTypeUid] = {
+        mainField: contentTypeConfig.settings.mainField,
+        displayName: strapi.getModel(contentTypeUid).info.displayName,
+      };
     }
 
-    return contentTypesMeta;
+    return contentTypesMetaData;
   },
+
   async delete(releaseId: DeleteRelease.Request['params']['id']) {
     const release = (await strapi.entityService.findOne(RELEASE_MODEL_UID, releaseId, {
       populate: {
@@ -262,6 +278,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
 
     return release;
   },
+
   async publish(releaseId: PublishRelease.Request['params']['id']) {
     // We need to pass the type because entityService.findOne is not returning the correct type
     const releaseWithPopulatedActionEntries = (await strapi.entityService.findOne(
@@ -346,6 +363,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
 
     return release;
   },
+
   async updateAction(
     actionId: UpdateReleaseAction.Request['params']['actionId'],
     releaseId: UpdateReleaseAction.Request['params']['releaseId'],
@@ -367,6 +385,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
 
     return updatedAction;
   },
+
   async deleteAction(
     actionId: DeleteReleaseAction.Request['params']['actionId'],
     releaseId: DeleteReleaseAction.Request['params']['releaseId']

@@ -1,6 +1,6 @@
 import type Koa from 'koa';
-import { UID } from '@strapi/types';
-import { mapAsync } from '@strapi/utils';
+import { Entity } from '../../../shared/types';
+
 import {
   validateReleaseAction,
   validateReleaseActionUpdateSchema,
@@ -12,7 +12,17 @@ import type {
   UpdateReleaseAction,
   DeleteReleaseAction,
 } from '../../../shared/contracts/release-actions';
-import { getAllowedContentTypes, getService, getPermissionsChecker } from '../utils';
+import { getService } from '../utils';
+import { RELEASE_ACTION_MODEL_UID } from '../constants';
+
+interface Locale extends Entity {
+  name: string;
+  code: string;
+}
+
+type LocaleDictionary = {
+  [key: Locale['code']]: Pick<Locale, 'name' | 'code'>;
+};
 
 const releaseActionController = {
   async create(ctx: Koa.Context) {
@@ -30,78 +40,51 @@ const releaseActionController = {
   },
   async findMany(ctx: Koa.Context) {
     const releaseId: GetReleaseActions.Request['params']['releaseId'] = ctx.params.releaseId;
-    const allowedContentTypes = getAllowedContentTypes({
-      strapi,
-      userAbility: ctx.state.userAbility,
+    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+      ability: ctx.state.userAbility,
+      model: RELEASE_ACTION_MODEL_UID,
     });
-
-    // We create an object with the permissionsChecker for each contentType, then we can reuse it for sanitization
-    const permissionsChecker: Record<UID.ContentType, any> = {};
-    // We create a populate object for polymorphic relations, so we considered custom conditions on permissions
-    const morphSanitizedPopulate: Record<UID.ContentType, any> = {};
-
-    for (const contentTypeUid of allowedContentTypes) {
-      const permissionChecker = await getPermissionsChecker({
-        strapi,
-        userAbility: ctx.state.userAbility,
-        model: contentTypeUid,
-      });
-      permissionsChecker[contentTypeUid] = permissionChecker;
-      morphSanitizedPopulate[contentTypeUid] = await permissionChecker.sanitizedQuery.read({});
-    }
+    const query = await permissionsManager.sanitizeQuery(ctx.query);
 
     const releaseService = getService('release', { strapi });
-
-    const { results, pagination } = await releaseService.findActions(
-      releaseId,
-      allowedContentTypes,
-      {
-        populate: {
-          entry: {
-            on: morphSanitizedPopulate,
-          },
-        },
-      }
-    );
-
-    const contentTypesMainFields = await releaseService.findReleaseContentTypesMainFields(
+    const { results, pagination } = await releaseService.findActions(releaseId, query);
+    const allReleaseContentTypesDictionary = await releaseService.getContentTypesMetaFromActions(
       releaseId
     );
-    // We loop over all the contentTypes mainfields to sanitize each mainField
-    // By default, if user doesn't have permission to read the field, we return null as fallback
-    for (const contentTypeUid of Object.keys(contentTypesMainFields)) {
-      if (
-        ctx.state.userAbility.cannot(
-          'plugin::content-manager.explorer.read',
-          contentTypeUid,
-          contentTypesMainFields[contentTypeUid].mainField
-        )
-      ) {
-        contentTypesMainFields[contentTypeUid].mainField = null;
-      }
-    }
 
-    // Because this is a morphTo relation, we need to sanitize each entry separately based on its contentType
-    const sanitizedResults = await mapAsync(results, async (action: ReleaseAction) => {
-      const mainField = contentTypesMainFields[action.contentType].mainField;
+    const allLocales: Locale[] = await strapi.plugin('i18n').service('locales').find();
+    const allLocalesDictionary = allLocales.reduce<LocaleDictionary>((acc, locale) => {
+      acc[locale.code] = { name: locale.name, code: locale.code };
+
+      return acc;
+    }, {});
+
+    const data = results.map((action: ReleaseAction) => {
+      const { mainField, displayName } = allReleaseContentTypesDictionary[action.contentType];
 
       return {
         ...action,
-        entry: action.entry && {
+        entry: {
           id: action.entry.id,
-          mainField: mainField ? action.entry[mainField] : null,
-          locale: action.entry.locale,
+          meta: {
+            contentType: {
+              displayName,
+              mainFieldValue: action.entry[mainField],
+            },
+            locale: allLocalesDictionary[action.entry.locale],
+          },
         },
       };
     });
 
     ctx.body = {
-      data: sanitizedResults,
+      data,
       meta: {
         pagination,
       },
     };
   },
+
   async update(ctx: Koa.Context) {
     const actionId: UpdateReleaseAction.Request['params']['actionId'] = ctx.params.actionId;
     const releaseId: UpdateReleaseAction.Request['params']['releaseId'] = ctx.params.releaseId;
@@ -120,6 +103,7 @@ const releaseActionController = {
       data: updatedAction,
     };
   },
+
   async delete(ctx: Koa.Context) {
     const actionId: DeleteReleaseAction.Request['params']['actionId'] = ctx.params.actionId;
     const releaseId: DeleteReleaseAction.Request['params']['releaseId'] = ctx.params.releaseId;

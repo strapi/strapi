@@ -10,7 +10,7 @@ jest.mock('../../utils', () => ({
     findPage: mockFindPage,
     findManyForContentTypeEntry: mockFindManyForContentTypeEntry,
     countActions: mockCountActions,
-    findReleaseContentTypesMainFields: jest.fn(),
+    getContentTypesMetaFromActions: jest.fn(),
   })),
   getAllowedContentTypes: jest.fn(() => ['contentTypeA', 'contentTypeB']),
 }));
@@ -152,53 +152,70 @@ describe('Release controller', () => {
   });
 
   describe('findOne', () => {
-    global.strapi = {
-      ...global.strapi,
-      plugins: {
-        // @ts-expect-error incomplete plugin
-        'content-manager': {
+    beforeAll(() => {
+      global.strapi = {
+        ...global.strapi,
+        // @ts-expect-error Ignore missing properties
+        admin: {
           services: {
-            'content-types': {
-              findConfiguration: () => ({
-                settings: {
-                  mainField: 'name',
-                },
-              }),
+            permission: {
+              createPermissionsManager: jest.fn(() => ({
+                sanitizeOutput: jest.fn(),
+              })),
             },
           },
         },
-      },
-    };
-
-    const ctx = {
-      state: {
-        userAbility: {
-          can: jest.fn(() => true),
-        },
-      },
-      params: {
-        id: 1,
-      },
-      user: {},
-      body: {
-        data: {
-          actions: {
-            meta: {
-              total: 0,
-              totalHidden: 0,
-            },
-          },
-          meta: {},
-        },
-      },
-    };
+      };
+    });
 
     it('throws an error if the release does not exists', async () => {
+      const ctx = {
+        state: {
+          userAbility: {
+            can: jest.fn(() => true),
+          },
+        },
+        params: {
+          id: 1,
+        },
+        user: {},
+        body: {
+          data: {
+            actions: {
+              meta: {
+                count: 0,
+              },
+            },
+            meta: {},
+          },
+        },
+      };
       // @ts-expect-error partial context
       expect(() => releaseController.findOne(ctx).rejects.toThrow('Release not found for id: 1'));
     });
 
-    it('return the right meta object', async () => {
+    it('returns the right meta object', async () => {
+      const ctx = {
+        state: {
+          userAbility: {
+            can: jest.fn(() => true),
+          },
+        },
+        params: {
+          id: 1,
+        },
+        user: {},
+        body: {
+          data: {
+            actions: {
+              meta: {
+                count: 0,
+              },
+            },
+            meta: {},
+          },
+        },
+      };
       // We mock the count all actions
       mockCountActions.mockResolvedValueOnce(2);
 
@@ -208,8 +225,7 @@ describe('Release controller', () => {
       // @ts-expect-error partial context
       await releaseController.findOne(ctx);
       expect(ctx.body.data.actions.meta).toEqual({
-        total: 2,
-        totalHidden: 1,
+        count: 2,
       });
     });
   });
