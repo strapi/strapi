@@ -148,4 +148,34 @@ describe('release service', () => {
       expect(mockUnpublishMany).toHaveBeenCalledWith([{ id: 2 }], 'contentType');
     });
   });
+
+  describe('delete', () => {
+    it('throws an error if the release does not exist', () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: {
+          findOne: jest.fn().mockReturnValue(null),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      expect(() => releaseService.delete(1)).rejects.toThrow('No release found for id 1');
+    });
+
+    it('throws an error if the release is already published', () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: {
+          findOne: jest.fn().mockReturnValue({ releasedAt: new Date() }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      expect(() => releaseService.delete(1)).rejects.toThrow('Release already published');
+    });
+  });
 });

@@ -8,6 +8,7 @@ import type {
   PublishRelease,
   GetRelease,
   Release,
+  DeleteRelease,
 } from '../../../shared/contracts/releases';
 import type { UserInfo } from '../../../shared/types';
 import { getAllowedContentTypes, getService } from '../utils';
@@ -133,6 +134,17 @@ const releaseController = {
 
     ctx.body = {
       data: await permissionsManager.sanitizeOutput(release),
+    };
+  },
+
+  async delete(ctx: Koa.Context) {
+    const id: DeleteRelease.Request['params']['id'] = ctx.params.id;
+
+    const releaseService = getService('release', { strapi });
+    const release = await releaseService.delete(id);
+
+    ctx.body = {
+      data: release,
     };
   },
 

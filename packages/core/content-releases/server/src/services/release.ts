@@ -8,6 +8,7 @@ import type {
   PublishRelease,
   GetRelease,
   Release,
+  DeleteRelease,
 } from '../../../shared/contracts/releases';
 import type {
   CreateReleaseAction,
@@ -165,6 +166,21 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
 
     return contentTypesMeta;
   },
+  async delete(releaseId: DeleteRelease.Request['params']['id']) {
+    const release = await strapi.entityService.findOne(RELEASE_MODEL_UID, releaseId);
+
+    if (!release) {
+      throw new errors.NotFoundError(`No release found for id ${releaseId}`);
+    }
+
+    if (release.releasedAt) {
+      throw new errors.ValidationError('Release already published');
+    }
+
+    const deletedRelease = await strapi.entityService.delete(RELEASE_MODEL_UID, releaseId);
+
+    return deletedRelease;
+  },
   async publish(releaseId: PublishRelease.Request['params']['id']) {
     // We need to pass the type because entityService.findOne is not returning the correct type
     const releaseWithPopulatedActionEntries = (await strapi.entityService.findOne(
@@ -236,7 +252,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       }
     });
 
-		// When the transaction fails it throws an error, when it is successful proceed to updating the release
+    // When the transaction fails it throws an error, when it is successful proceed to updating the release
     const release = await strapi.entityService.update(RELEASE_MODEL_UID, releaseId, {
       data: {
         /*
