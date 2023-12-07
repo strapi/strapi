@@ -232,7 +232,13 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     return contentTypesMeta;
   },
   async delete(releaseId: DeleteRelease.Request['params']['id']) {
-    const release = await strapi.entityService.findOne(RELEASE_MODEL_UID, releaseId);
+    const release = (await strapi.entityService.findOne(RELEASE_MODEL_UID, releaseId, {
+      populate: {
+        actions: {
+          fields: ['id'],
+        },
+      },
+    })) as unknown as Release;
 
     if (!release) {
       throw new errors.NotFoundError(`No release found for id ${releaseId}`);
@@ -242,22 +248,20 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       throw new errors.ValidationError('Release already published');
     }
 
-    const deletedRelease = (await strapi.entityService.delete(RELEASE_MODEL_UID, releaseId, {
-      populate: { actions: { fields: ['id'] } },
-    })) as unknown as Release;
-
-    // We delete each action related to the release
-    if (deletedRelease.actions) {
+    // Only delete the release and its actions is you in fact can delete all the actions and the release
+    // Otherwise, if the transaction fails it throws an error
+    await strapi.db.transaction(async () => {
       await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
         where: {
           id: {
-            $in: deletedRelease.actions.map(({ id }) => id),
+            $in: release.actions.map((action) => action.id),
           },
         },
       });
-    }
+      await strapi.entityService.delete(RELEASE_MODEL_UID, releaseId);
+    });
 
-    return deletedRelease;
+    return release;
   },
   async publish(releaseId: PublishRelease.Request['params']['id']) {
     // We need to pass the type because entityService.findOne is not returning the correct type
