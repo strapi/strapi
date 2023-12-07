@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import assert from 'node:assert';
-import fse from 'fs-extra';
 import { isEqual } from 'lodash/fp';
 import { register } from 'esbuild-register/dist/node';
 
-import { createJSONTransformAPI } from './transform-api';
+import { createJSONTransformAPI, readJSON, saveJSON } from '../../json';
 
 import type { Report } from '../../report';
 
@@ -41,7 +40,11 @@ export const transformJSON = async (
 
   for (const path of paths) {
     try {
-      const json = require(path);
+      const json = await readJSON(path);
+
+      // Make sure the JSON value is a JSON object
+      assert(typeof json === 'object' && !Array.isArray(json) && json !== null);
+
       // TODO: Optimize the API to limit parse/stringify operations
       const file: JSONSourceFile = { path, json };
       const params: JSONTransformParams = { cwd: config.cwd, json: createJSONTransformAPI };
@@ -54,7 +57,7 @@ export const transformJSON = async (
       // If the json object has modifications
       else if (!isEqual(json, out)) {
         if (!dry) {
-          fse.writeFileSync(path, JSON.stringify(out, null, 2));
+          await saveJSON(path, out);
         }
         report.ok += 1;
       }

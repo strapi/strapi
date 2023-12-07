@@ -4,6 +4,8 @@ import {
   codemodRepositoryFactory,
   constants as codemodRepositoryConstants,
 } from '../codemod-repository';
+import { createJSONTransformAPI, saveJSON } from '../json';
+import { constants as projectConstants } from '../project';
 import { isLiteralSemVer, isSemVer, rangeFromVersions, semVerFactory } from '../version';
 import { unknownToError } from '../error';
 import * as f from '../format';
@@ -14,6 +16,8 @@ import type { Logger } from '../logger';
 import type { Requirement } from '../requirement';
 import type { NPM } from '../npm';
 import type { Project } from '../project';
+
+type DependenciesEntries = Array<[name: string, version: Version.LiteralSemVer]>;
 
 export class Upgrader implements UpgraderInterface {
   private project: Project;
@@ -84,8 +88,7 @@ export class Upgrader implements UpgraderInterface {
         target: this.target,
       });
 
-      // todo: upgrade package json
-      // todo: install dependencies
+      await this.updateDependencies();
 
       await this.runCodemods(range);
     } catch (e) {
@@ -141,6 +144,45 @@ export class Upgrader implements UpgraderInterface {
     }
 
     this.logger?.warn(errorMessage);
+  }
+
+  private async updateDependencies(): Promise<void> {
+    const { packageJSON, packageJSONPath } = this.project;
+
+    const json = createJSONTransformAPI(packageJSON);
+
+    const dependencies = json.get<Record<string, string>>('dependencies', {});
+    const strapiDependencies = this.getScopedStrapiDependencies(dependencies);
+
+    if (strapiDependencies.length === 0) {
+      return;
+    }
+
+    strapiDependencies.forEach(([name]) => json.set(`dependencies.${name}`, this.target.raw));
+
+    const updatedPackageJSON = json.root();
+
+    if (!this.isDry) {
+      await saveJSON(packageJSONPath, updatedPackageJSON);
+    }
+  }
+
+  private getScopedStrapiDependencies(dependencies: Record<string, string>): DependenciesEntries {
+    const { strapiVersion } = this.project;
+
+    const strapiDependencies: DependenciesEntries = [];
+
+    // Find all @strapi/* packages matching the current Strapi version
+    for (const [name, version] of Object.entries(dependencies)) {
+      const isScopedStrapiPackage = name.startsWith(projectConstants.SCOPED_STRAPI_PACKAGE_PREFIX);
+      const isOnCurrentStrapiVersion = isLiteralSemVer(version) && version === strapiVersion.raw;
+
+      if (isScopedStrapiPackage && isOnCurrentStrapiVersion) {
+        strapiDependencies.push([name, version]);
+      }
+    }
+
+    return strapiDependencies;
   }
 
   private async runCodemods(range: Version.Range) {
