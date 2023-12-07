@@ -68,7 +68,7 @@ const DragItem = styled(Flex)<{ dragVisibility: CSSProperties['visibility'] }>`
   }
 `;
 
-const DragIconButton = styled(IconButton)`
+const DragIconButton = styled(IconButton)<{ dragHandleTopMargin?: CSSProperties['marginTop'] }>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -78,6 +78,7 @@ const DragIconButton = styled(IconButton)`
   visibility: hidden;
   cursor: grab;
   opacity: inherit;
+  margin-top: ${(props) => props.dragHandleTopMargin ?? 0};
 
   &:hover {
     background: ${({ theme }) => theme.colors.neutral200};
@@ -107,6 +108,7 @@ type Direction = {
 type DragAndDropElementProps = Direction & {
   children: RenderElementProps['children'];
   index: Array<number>;
+  dragHandleTopMargin?: CSSProperties['marginTop'];
 };
 
 const DragAndDropElement = ({
@@ -114,6 +116,7 @@ const DragAndDropElement = ({
   index,
   setDragDirection,
   dragDirection,
+  dragHandleTopMargin,
 }: DragAndDropElementProps) => {
   const { editor, disabled, name, setLiveText } = useBlocksEditorContext('drag-and-drop');
   const { formatMessage } = useIntl();
@@ -244,7 +247,7 @@ const DragAndDropElement = ({
         />
       )}
       {isDragging ? (
-        <CloneDragItem>{children}</CloneDragItem>
+        <CloneDragItem dragHandleTopMargin={dragHandleTopMargin}>{children}</CloneDragItem>
       ) : (
         <DragItem
           ref={dragRef}
@@ -286,6 +289,8 @@ const DragAndDropElement = ({
             aria-disabled={disabled}
             disabled={disabled}
             draggable
+            // For some headings top margin added to drag handle to align at the text level
+            dragHandleTopMargin={dragHandleTopMargin}
           >
             <Drag color="neutral600" />
           </DragIconButton>
@@ -296,8 +301,13 @@ const DragAndDropElement = ({
   );
 };
 
+interface CloneDragItemProps {
+  children: RenderElementProps['children'];
+  dragHandleTopMargin?: CSSProperties['marginTop'];
+}
+
 // To prevent applying opacity to the original item being dragged, display a cloned element without opacity.
-const CloneDragItem = ({ children }: { children: React.ReactNode }) => {
+const CloneDragItem = ({ children, dragHandleTopMargin }: CloneDragItemProps) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -309,6 +319,7 @@ const CloneDragItem = ({ children }: { children: React.ReactNode }) => {
           id: getTranslation('components.DragHandle-label'),
           defaultMessage: 'Drag',
         })}
+        dragHandleTopMargin={dragHandleTopMargin}
       >
         <Drag color="neutral600" />
       </DragIconButton>
@@ -358,6 +369,7 @@ const baseRenderElement = ({
       index={nodePath}
       setDragDirection={setDragDirection}
       dragDirection={dragDirection}
+      dragHandleTopMargin={block.dragHandleTopMargin}
     >
       {block.renderElement(props)}
     </DragAndDropElement>
