@@ -1,6 +1,10 @@
 import { isNil, mapValues } from 'lodash/fp';
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 
+import { LoadedStrapi as Strapi, UID, Schema } from '@strapi/types';
+
+import type { ConfigurationUpdate } from './configuration';
+
 import { getService } from '../utils';
 import storeUtils from './utils/store';
 import createConfigurationService from './configuration';
@@ -15,14 +19,14 @@ const configurationService = createConfigurationService({
   },
 });
 
-const service = ({ strapi }: any) => ({
+const service = ({ strapi }: { strapi: Strapi }) => ({
   findAllContentTypes() {
     const { toContentManagerModel } = getService('data-mapper');
 
     return Object.values(strapi.contentTypes).map(toContentManagerModel);
   },
 
-  findContentType(uid: any) {
+  findContentType(uid: UID.ContentType) {
     const { toContentManagerModel } = getService('data-mapper');
 
     const contentType = strapi.contentTypes[uid];
@@ -31,10 +35,14 @@ const service = ({ strapi }: any) => ({
   },
 
   findDisplayedContentTypes() {
-    return this.findAllContentTypes().filter(({ isDisplayed }: any) => isDisplayed === true);
+    return this.findAllContentTypes().filter(
+      // TODO
+      // @ts-expect-error should be resolved from data-mapper types
+      ({ isDisplayed }: { isDisplayed: boolean }) => isDisplayed === true
+    );
   },
 
-  findContentTypesByKind(kind: any) {
+  findContentTypesByKind(kind: { kind: Schema.ContentTypeKind | undefined }) {
     if (!kind) {
       return this.findAllContentTypes();
     }
@@ -43,9 +51,7 @@ const service = ({ strapi }: any) => ({
     return this.findAllContentTypes().filter(contentTypesUtils.isKind(kind));
   },
 
-  // configuration
-
-  async findConfiguration(contentType: any) {
+  async findConfiguration(contentType: Schema.ContentType) {
     const configuration = await configurationService.getConfiguration(contentType.uid);
 
     return {
@@ -54,12 +60,16 @@ const service = ({ strapi }: any) => ({
     };
   },
 
-  async updateConfiguration(contentType: any, newConfiguration: any) {
+  async updateConfiguration(
+    contentType: Schema.ContentType,
+    newConfiguration: ConfigurationUpdate
+  ) {
     await configurationService.setConfiguration(contentType.uid, newConfiguration);
+
     return this.findConfiguration(contentType);
   },
 
-  findComponentsConfigurations(contentType: any) {
+  findComponentsConfigurations(contentType: Schema.ContentType) {
     // delegate to componentService
     return getService('components').findComponentsConfigurations(contentType);
   },
